@@ -5,6 +5,7 @@
 - https://github.com/EpicGames/UnrealEngine
 - https://github.com/Unity-Technologies/UnityCsReference [C# reference]
 - https://github.com/cocos2d/cocos2d-x
+- https://github.com/CRYTEK/CRYENGINE
 - https://github.com/adriengivry/Overload
 - https://github.com/flwmxd/MapleEngine
 - https://github.com/inanevin/LinaEngine
