@@ -34,6 +34,10 @@
 - https://github.com/dsasmblr/hacking-online-games
 - https://www.unknowncheats.me
 
+> Debugging
+- https://github.com/cheat-engine/cheat-engine
+- https://github.com/Air14/HyperHide 
+
 > RPM
 - https://github.com/waryas/EUPMAccess
 - https://github.com/waryas/UMPMLib
@@ -50,6 +54,9 @@
 > Triggerbot
 - https://github.com/changeofpace/MouHidInputHook
 
+> HWID
+- https://github.com/dword64/Ow-Anti-Flag
+
 > Game:CSGO
 - https://github.com/s3pt3mb3r/Dainsleif
 - https://github.com/lagcomp/csgo_sdk
@@ -58,6 +65,9 @@
 - https://github.com/EternityX/DEADCELL-CSGO
 - https://github.com/nbqofficial/kernel-csgo
 - https://github.com/HeathHowren/CSGO-Cheats
+
+> Game:Apex Legends
+- https://github.com/dword64/Apex-Legends-SDK-Remaster
 
 
 ## Anti Cheat
