@@ -64,5 +64,9 @@
 > Open Source Anti Cheat System
 - https://github.com/mq1n/NoMercy
 
+> Dection
+- https://github.com/KANKOSHEV/Detect-KeAttachProcess
+- https://github.com/KANKOSHEV/Detect-MouseClassServiceCallback
+- https://github.com/KANKOSHEV/Detect-HiddenThread-via-KPRCB
 
 
