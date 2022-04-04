@@ -2,12 +2,15 @@
 # `awesome-game-security`
 
 ## Cheat
->Guide
+> Guide
 - https://github.com/dsasmblr/game-hacking
 - https://github.com/dsasmblr/hacking-online-games
 - https://www.unknowncheats.me
 
->CSGO
+> RPM
+- https://www.unknowncheats.me/forum/anti-cheat-bypass/487047-remapping-process.html
+
+> Game:CSGO
 - https://github.com/s3pt3mb3r/Dainsleif
 - https://github.com/lagcomp/csgo_sdk
 - https://github.com/Speedi13/ROP-COMPILER
@@ -18,8 +21,8 @@
 
 
 ## Anti Cheat
->Guide
+> Guide
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/481731-tutorial-ring3-anticheat-project.html
 
->Stress Testing
+> Stress Testing
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework
