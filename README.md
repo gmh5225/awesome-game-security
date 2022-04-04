@@ -36,6 +36,7 @@
 
 > Debugging
 - https://github.com/cheat-engine/cheat-engine
+- https://github.com/isabellaflores/ceserver-pcileech
 - https://github.com/Air14/HyperHide 
 
 > RPM
