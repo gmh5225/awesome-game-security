@@ -10,7 +10,7 @@
 - https://github.com/dsasmblr/hacking-online-games
 - https://www.unknowncheats.me
 
-> RPM
+> Memory(RPM)
 - https://github.com/waryas/EUPMAccess
 - https://github.com/waryas/UMPMLib
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/487047-remapping-process.html
