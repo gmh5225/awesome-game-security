@@ -43,6 +43,9 @@
 > Hide
 - https://github.com/JKornev/hidden
 
+> Triggerbot
+- https://github.com/changeofpace/MouHidInputHook
+
 > Game:CSGO
 - https://github.com/s3pt3mb3r/Dainsleif
 - https://github.com/lagcomp/csgo_sdk
@@ -69,6 +72,7 @@
 
 > Dection:Triggerbot
 - https://github.com/KANKOSHEV/Detect-MouseClassServiceCallback
+- https://github.com/changeofpace/MouHidInputHook
 
 > Dection:Hide
 - https://github.com/KANKOSHEV/Detect-HiddenThread-via-KPRCB
