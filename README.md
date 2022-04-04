@@ -81,6 +81,7 @@
 - https://github.com/EternityX/DEADCELL-CSGO
 - https://github.com/nbqofficial/kernel-csgo
 - https://github.com/HeathHowren/CSGO-Cheats
+- https://github.com/Kruziikrel1/CSGO-FindMDL [Model Changer]
 
 > Game:Apex Legends
 - https://github.com/dword64/Apex-Legends-SDK-Remaster
