@@ -50,6 +50,7 @@
 
 ## Anti Cheat
 > Guide
+- https://technology.riotgames.com/news/riots-approach-anti-cheat
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/481731-tutorial-ring3-anticheat-project.html
 
 > Stress Testing
