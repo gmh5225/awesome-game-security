@@ -67,6 +67,9 @@
 - https://github.com/Theordernarkoz/Hwid-Spoofer
 - https://github.com/SarnaxLii/Apex-ClearTrace
 
+> AntiCheat System:VAC
+- https://github.com/danielkrupinski/VAC-Bypass-Loader
+
 > Game:CSGO
 - https://github.com/s3pt3mb3r/Dainsleif
 - https://github.com/lagcomp/csgo_sdk
@@ -90,6 +93,7 @@
 
 > Open Source Anti Cheat System
 - https://github.com/mq1n/NoMercy
+- https://github.com/danielkrupinski/VAC [Reversed VAC]
 
 > Detection:Attach
 - https://github.com/KANKOSHEV/Detect-KeAttachProcess
