@@ -33,7 +33,12 @@
 > RPM
 - https://github.com/waryas/EUPMAccess
 - https://github.com/waryas/UMPMLib
-- https://www.unknowncheats.me/forum/anti-cheat-bypass/487047-remapping-process.html
+- https://github.com/EBalloon/Remap
+- https://www.unknowncheats.me/forum/anti-cheat-bypass/489305-read-write-process-attach.html
+- https://www.unknowncheats.me/forum/anti-cheat-bypass/444289-read-process-physical-memory-attach.html
+
+> Driver Communication
+- https://github.com/EBalloon/Common-Registry
 
 > Hide
 - https://github.com/JKornev/hidden
