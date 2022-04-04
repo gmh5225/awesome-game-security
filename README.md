@@ -56,6 +56,8 @@
 
 > HWID
 - https://github.com/dword64/Ow-Anti-Flag
+- https://github.com/lil-skies/btbd-modified
+- 
 
 > Game:CSGO
 - https://github.com/s3pt3mb3r/Dainsleif
@@ -81,14 +83,16 @@
 > Open Source Anti Cheat System
 - https://github.com/mq1n/NoMercy
 
-> Dection:Attach
+> Detection:Attach
 - https://github.com/KANKOSHEV/Detect-KeAttachProcess
 
-> Dection:Triggerbot
+> Detection:Triggerbot
 - https://github.com/KANKOSHEV/Detect-MouseClassServiceCallback
 - https://github.com/changeofpace/MouHidInputHook
 
-> Dection:Hide
+> Detection:Hide
 - https://github.com/KANKOSHEV/Detect-HiddenThread-via-KPRCB
 
+> Detection:HWID
+- https://github.com/medievalghoul/hwid-checker-mg
 
