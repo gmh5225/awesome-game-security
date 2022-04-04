@@ -7,6 +7,14 @@
 - https://github.com/dsasmblr/hacking-online-games
 - https://www.unknowncheats.me
 
+>CSGO
+- https://github.com/s3pt3mb3r/Dainsleif
+- https://github.com/lagcomp/csgo_sdk
+- https://github.com/Speedi13/ROP-COMPILER
+- https://github.com/AimTuxOfficial/AimTux [linux]
+- https://github.com/EternityX/DEADCELL-CSGO
+- https://github.com/nbqofficial/kernel-csgo
+- https://github.com/HeathHowren/CSGO-Cheats
 
 
 ## Anti Cheat
