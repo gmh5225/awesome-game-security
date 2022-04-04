@@ -67,8 +67,11 @@
 - https://github.com/Theordernarkoz/Hwid-Spoofer
 - https://github.com/SarnaxLii/Apex-ClearTrace
 
-> AntiCheat System:VAC
+> Bypass AntiCheat System:VAC
 - https://github.com/danielkrupinski/VAC-Bypass-Loader
+
+> Bypass AntiCheat System:EAC
+- https://github.com/thesecretclub/CVEAC-2020 [Integrity Checks]
 
 > Game:CSGO
 - https://github.com/s3pt3mb3r/Dainsleif
