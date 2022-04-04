@@ -57,7 +57,12 @@
 > HWID
 - https://github.com/dword64/Ow-Anti-Flag
 - https://github.com/lil-skies/btbd-modified
-- 
+- https://github.com/xEnething/Permanent-HWID-Spoofer
+- https://github.com/Theordernarkoz/Hwid-Spoofer-EAC-BE
+- https://github.com/semihcevik/hwidspoofer
+- https://github.com/Theordernarkoz/Hwid--Spoofer
+- https://github.com/Theordernarkoz/Hwid-Spoofer
+- https://github.com/SarnaxLii/Apex-ClearTrace
 
 > Game:CSGO
 - https://github.com/s3pt3mb3r/Dainsleif
