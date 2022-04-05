@@ -124,6 +124,7 @@
 
 > Game Engine Protection:UE
 - https://github.com/zompi2/Static-Variables-Obfuscator-UE4
+- https://github.com/BrUnOXaVIeRLeiTE/SCUE4-Plugin
 
 > Open Source Anti Cheat System
 - https://github.com/mq1n/NoMercy
