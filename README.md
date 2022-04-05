@@ -42,6 +42,7 @@
 > Guide
 - https://github.com/dsasmblr/game-hacking
 - https://github.com/dsasmblr/hacking-online-games
+- https://secret.club
 - https://vollragm.github.io
 - https://www.unknowncheats.me
 - https://forum.ragezone.com
@@ -198,8 +199,11 @@
 
 
 ## Some Tricks
-> Windows Driver
+> Windows Ring0
 - https://www.unknowncheats.me/forum/general-programming-and-reversing/495279-messagebox-kernel-mode.html [Msgbox]
+
+> Windows Ring3
+> https://secret.club/2021/01/04/thread-stuff.html [Anti Debug]
 
 
 
