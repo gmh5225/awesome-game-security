@@ -15,12 +15,13 @@
 - https://github.com/ScriptedSnark/reGS
 - https://github.com/nem0/LumixEngine
 - https://github.com/urho3d/Urho3D
-- https://github.com/KorokEngine/Korok [golang]
+- https://github.com/KorokEngine/Korok [Golang]
 - https://github.com/BoomingTech/Pilot
 - https://github.com/Sirkles/JoshoEngine-Native
 - https://github.com/nillerusr/source-engine
 - https://github.com/ExplosionEngine/Explosion
 - https://github.com/danhuynh0803/Campfire
+- https://github.com/lowenware/dotrix [Rust]
 
 
 ## Game Network
