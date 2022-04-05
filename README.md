@@ -100,6 +100,9 @@
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework
 - https://github.com/DanielRTeixeira/injectAllTheThings [Injection Testing]
 
+> Code Protection
+- https://github.com/changeofpace/Self-Remapping-Code
+
 > Open Source Anti Cheat System
 - https://github.com/mq1n/NoMercy
 - https://github.com/danielkrupinski/VAC [Reversed VAC]
