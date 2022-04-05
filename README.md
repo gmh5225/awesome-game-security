@@ -111,10 +111,8 @@
 - https://github.com/thesecretclub/CVEAC-2020 [Integrity Checks]
 
 > Bypass AntiCheat System:BE
-- TODO
+- https://github.com/unreaIuser/BE-Emulator
 
-> Bypass AntiCheat System:Vangaurd
-> TODO
 
 > Game:CSGO
 - https://github.com/s3pt3mb3r/Dainsleif
