@@ -43,6 +43,7 @@
 - https://github.com/dsasmblr/game-hacking
 - https://github.com/dsasmblr/hacking-online-games
 - https://secret.club
+- https://back.engineering
 - https://vollragm.github.io
 - https://www.unknowncheats.me
 - https://forum.ragezone.com
