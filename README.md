@@ -42,6 +42,7 @@
 - https://github.com/isabellaflores/ceserver-pcileech
 - https://github.com/mrexodia/TitanHide
 - https://github.com/Air14/HyperHide 
+- https://github.com/changeofpace/Force-Page-Protection [Bypass Remap Memory]
 
 > RPM
 - https://github.com/waryas/EUPMAccess
@@ -129,4 +130,8 @@
 
 > Detection:HWID
 - https://github.com/medievalghoul/hwid-checker-mg
+
+> Detection:Injection
+- https://github.com/mq1n/DLLThreadInjectionDetector
+
 
