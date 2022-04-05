@@ -42,9 +42,10 @@
 > Guide
 - https://github.com/dsasmblr/game-hacking
 - https://github.com/dsasmblr/hacking-online-games
-- https://github.com/imadr/Unity-game-hacking
 - https://www.unknowncheats.me
 - https://forum.ragezone.com
+- https://github.com/imadr/Unity-game-hacking [Unity]
+- https://vollragm.github.io/posts/unity-reversing [Unity]
 
 > Debugging
 - https://github.com/cheat-engine/cheat-engine
