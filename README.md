@@ -44,6 +44,7 @@
 - https://github.com/dsasmblr/hacking-online-games
 - https://github.com/imadr/Unity-game-hacking
 - https://www.unknowncheats.me
+- https://forum.ragezone.com
 
 > Debugging
 - https://github.com/cheat-engine/cheat-engine
