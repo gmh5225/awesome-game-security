@@ -98,7 +98,8 @@
 - https://github.com/Perfare/Zygisk-Il2CppDumper [Il2Cpp Dump for Android Platform]
 - https://github.com/djkaty/Il2CppInspector [Il2Cpp Dump]
 - https://github.com/sinai-dev/UnityExplorer
-- https://github.com/4ch12dy/il2cpp [Il2Cpp Source Code]
+- https://github.com/4ch12dy/il2cpp [Il2Cpp Version]
+- https://github.com/nneonneo/Il2CppVersions [Il2Cpp Version]
 - https://github.com/sneakyevilSK/IL2CPP_Resolver
 
 > Bypass AntiCheat System:VAC
