@@ -136,6 +136,7 @@
 - https://github.com/apekros/valorant_offsets [Offset]
 - https://github.com/10HEAD/ValorantOffsets [Offset]
 - https://github.com/ofDataa/offsets [Offset]
+- https://github.com/pebu1337/valorant-externals [Offset]
 
 > Game:Apex Legends
 - https://github.com/dhanax26/Apex-Legends-Offset-Dumper [Offset]
@@ -144,6 +145,8 @@
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
+- https://github.com/masterpastaa/AutoOffsets [Offset]
+- https://github.com/OfficialDyn/Fortnite-Offsets [Offset]
 - https://github.com/Makk5/FortConsole
 
 ## Anti Cheat
