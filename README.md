@@ -124,6 +124,9 @@
 > Bypass AntiCheat System:BE
 - https://github.com/unreaIuser/BE-Emulator
 
+> Bypass AntiCheat System:EQU8
+- https://back.engineering/12/08/2021
+
 > Game:MapleStory
 - https://github.com/icelemon1314/mapleLemon [Private Server-CMS-027]
 - https://forum.ragezone.com/f428/maplestory-private-server-v83-741739 [Private Server-GMS-083]
