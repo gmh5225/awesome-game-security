@@ -23,6 +23,10 @@
 - https://github.com/danhuynh0803/Campfire
 
 
+## Game Network
+- https://github.com/MFatihMAR/Game-Networking-Resources
+
+
 ## Game Source
 - https://github.com/PiMoNFeeD/csgo-src [Leaked CSGO]
 - https://github.com/SwagSoftware/Kisak-Strike [Open Source CSGO]
@@ -95,6 +99,7 @@
 - https://github.com/djkaty/Il2CppInspector [Il2Cpp Dump]
 - https://github.com/sinai-dev/UnityExplorer
 - https://github.com/4ch12dy/il2cpp [Il2Cpp Source Code]
+- https://github.com/sneakyevilSK/IL2CPP_Resolver
 
 > Bypass AntiCheat System:VAC
 - https://github.com/danielkrupinski/VAC-Bypass-Loader
