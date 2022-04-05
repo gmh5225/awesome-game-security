@@ -124,7 +124,7 @@
 
 > Game:MapleStory
 - https://github.com/icelemon1314/mapleLemon [Private Server-CMS-027]
-- https://forum.ragezone.com/f428/maplestory-private-server-v83-741739/ [Private Server-GMS083]
+- https://forum.ragezone.com/f428/maplestory-private-server-v83-741739 [Private Server-GMS083]
 - https://github.com/Z41N/v83MaplestoryCPP [Private Server-GMS083]
 
 > Game:CSGO
