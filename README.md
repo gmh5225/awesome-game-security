@@ -86,6 +86,8 @@
 > Game:Apex Legends
 - https://github.com/dword64/Apex-Legends-SDK-Remaster
 
+> Game:Fortnite
+- https://github.com/Makk5/FortConsole
 
 ## Anti Cheat
 > Guide
