@@ -59,6 +59,7 @@
 - https://github.com/changeofpace/Force-Page-Protection [Bypass Remap Memory]
 - https://github.com/icsharpcode/ILSpy [For Unity]
 - https://github.com/dnSpy/dnSpy [For Unity]
+- https://github.com/mandiant/dncil [For Unity]
 
 > RPM
 - https://github.com/waryas/EUPMAccess
