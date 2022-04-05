@@ -110,6 +110,12 @@
 > Bypass AntiCheat System:EAC
 - https://github.com/thesecretclub/CVEAC-2020 [Integrity Checks]
 
+> Bypass AntiCheat System:BE
+- TODO
+
+> Bypass AntiCheat System:Vangaurd
+> TODO
+
 > Game:CSGO
 - https://github.com/s3pt3mb3r/Dainsleif
 - https://github.com/lagcomp/csgo_sdk
