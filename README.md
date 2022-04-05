@@ -120,6 +120,8 @@
 
 
 > Game:CSGO
+- https://github.com/KittenPopo/csgo-offsets [Offset]
+- https://github.com/dretax/GarHal_CSGO
 - https://github.com/s3pt3mb3r/Dainsleif
 - https://github.com/lagcomp/csgo_sdk
 - https://github.com/Speedi13/ROP-COMPILER
@@ -129,7 +131,11 @@
 - https://github.com/HeathHowren/CSGO-Cheats
 - https://github.com/Kruziikrel1/CSGO-FindMDL [Model Changer]
 
+> Game:Valorant
+- https://github.com/apekros/valorant_offsets [Offset]
+
 > Game:Apex Legends
+- https://github.com/dhanax26/Apex-Legends-Offset-Dumper [Offset]
 - https://github.com/dword64/Apex-Legends-SDK-Remaster
 
 > Game:Fortnite
