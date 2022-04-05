@@ -19,6 +19,8 @@
 - https://github.com/BoomingTech/Pilot
 - https://github.com/Sirkles/JoshoEngine-Native
 - https://github.com/nillerusr/source-engine
+- https://github.com/ExplosionEngine/Explosion
+- https://github.com/danhuynh0803/Campfire
 
 
 ## Game Source
