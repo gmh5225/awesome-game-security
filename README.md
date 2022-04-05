@@ -86,7 +86,7 @@
 - https://github.com/Theordernarkoz/Hwid-Spoofer
 - https://github.com/SarnaxLii/Apex-ClearTrace
 
-> Game Engine Explorer:UE
+> Game Engine Explorer:Unreal
 - https://github.com/Shhoya/Shh0yaUEDumper [SDK Dump]
 - https://github.com/guttir14/UnrealDumper-4.25 [SDK Dump]
 - https://github.com/CorrM/Unreal-Finder-Tool [SDK View]
@@ -138,7 +138,7 @@
 > Code Protection
 - https://github.com/changeofpace/Self-Remapping-Code
 
-> Game Engine Protection:UE
+> Game Engine Protection:Unreal
 - https://github.com/zompi2/Static-Variables-Obfuscator-UE4
 - https://github.com/BrUnOXaVIeRLeiTE/SCUE4-Plugin
 
