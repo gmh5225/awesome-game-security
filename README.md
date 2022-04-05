@@ -119,6 +119,8 @@
 > Bypass AntiCheat System:BE
 - https://github.com/unreaIuser/BE-Emulator
 
+> Game:MapleStory
+- https://forum.ragezone.com/f428/maplestory-private-server-v83-741739/ [Private Server]
 
 > Game:CSGO
 - https://github.com/KittenPopo/csgo-offsets [Offset]
