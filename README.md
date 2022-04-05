@@ -22,6 +22,8 @@
 - https://github.com/ExplosionEngine/Explosion
 - https://github.com/danhuynh0803/Campfire
 - https://github.com/lowenware/dotrix [Rust]
+- https://github.com/bevyengine/bevy [Rust]
+- https://github.com/FyroxEngine/Fyrox [Rust]
 
 
 ## Game Network
