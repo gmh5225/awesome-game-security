@@ -203,7 +203,7 @@
 - https://www.unknowncheats.me/forum/general-programming-and-reversing/495279-messagebox-kernel-mode.html [Msgbox]
 
 > Windows Ring3
-> https://secret.club/2021/01/04/thread-stuff.html [Anti Debug]
+- https://secret.club/2021/01/04/thread-stuff.html [Anti Debug]
 
 
 
