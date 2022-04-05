@@ -197,3 +197,11 @@
 - https://github.com/mq1n/DLLThreadInjectionDetector
 
 
+## Some tricks
+> Windows Driver
+- https://www.unknowncheats.me/forum/general-programming-and-reversing/495279-messagebox-kernel-mode.html [Msgbox]
+
+
+
+
+
