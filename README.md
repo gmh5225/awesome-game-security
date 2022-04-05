@@ -101,6 +101,7 @@
 > Open Source Anti Cheat System
 - https://github.com/mq1n/NoMercy
 - https://github.com/danielkrupinski/VAC [Reversed VAC]
+- https://github.com/codetronik/AndroidAntiCheat [Android Platform]
 
 > Detection:Attach
 - https://github.com/KANKOSHEV/Detect-KeAttachProcess
