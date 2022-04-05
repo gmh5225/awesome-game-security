@@ -42,6 +42,7 @@
 > Guide
 - https://github.com/dsasmblr/game-hacking
 - https://github.com/dsasmblr/hacking-online-games
+- https://vollragm.github.io
 - https://www.unknowncheats.me
 - https://forum.ragezone.com
 - https://github.com/imadr/Unity-game-hacking [Unity]
