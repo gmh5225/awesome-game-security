@@ -69,12 +69,14 @@
 
 > Driver Communication
 - https://github.com/EBalloon/Common-Registry
+- https://github.com/adspro15/km-um-communication
 
 > Hide
 - https://github.com/JKornev/hidden
 
 > Triggerbot
 - https://github.com/changeofpace/MouHidInputHook
+- https://github.com/adspro15/DirectInput
 
 > WallHack
 - https://github.com/DrNseven/D3D11-Wallhack
