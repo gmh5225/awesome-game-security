@@ -51,6 +51,12 @@
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/489305-read-write-process-attach.html
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/444289-read-process-physical-memory-attach.html
 
+> W2S
+- https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
+
+> Overlay
+- https://github.com/coltonon/D2DOverlay
+
 > Driver Communication
 - https://github.com/EBalloon/Common-Registry
 
@@ -59,6 +65,9 @@
 
 > Triggerbot
 - https://github.com/changeofpace/MouHidInputHook
+
+> WallHack
+- https://github.com/DrNseven/D3D11-Wallhack
 
 > HWID
 - https://github.com/dword64/Ow-Anti-Flag
@@ -70,10 +79,12 @@
 - https://github.com/Theordernarkoz/Hwid-Spoofer
 - https://github.com/SarnaxLii/Apex-ClearTrace
 
-> Game Engine Explorer
+> Game Engine Explorer:UE
 - https://github.com/Shhoya/Shh0yaUEDumper [SDK Dump]
 - https://github.com/guttir14/UnrealDumper-4.25 [SDK Dump]
-- https://github.com/CorrM/Unreal-Finder-Tool [SDK Dump]
+- https://github.com/CorrM/Unreal-Finder-Tool [SDK View]
+- https://github.com/spudgy/UnrealEngine4-SwissKnife [SDK View]
+- https://github.com/cursey/ue4genny [SDK Generator]
 - https://github.com/Zebratic/UE4Injector [Inject]
 - https://github.com/N-T33/UE4-Silent-Aim [Aimbot]
 
@@ -110,6 +121,9 @@
 
 > Code Protection
 - https://github.com/changeofpace/Self-Remapping-Code
+
+> Game Engine Protection:UE
+- https://github.com/zompi2/Static-Variables-Obfuscator-UE4
 
 > Open Source Anti Cheat System
 - https://github.com/mq1n/NoMercy
