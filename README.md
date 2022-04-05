@@ -209,6 +209,9 @@
 ## Some Tricks
 > Windows Ring0
 - https://www.unknowncheats.me/forum/general-programming-and-reversing/495279-messagebox-kernel-mode.html [Msgbox]
+- https://back.engineering/01/12/2020/ [Page Table Manipulation]
+- https://back.engineering/29/03/2021 [Hide Address]
+
 
 > Windows Ring3
 - https://secret.club/2021/01/04/thread-stuff.html [Anti Debug]
