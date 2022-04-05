@@ -69,6 +69,13 @@
 - https://github.com/Theordernarkoz/Hwid-Spoofer
 - https://github.com/SarnaxLii/Apex-ClearTrace
 
+> Game Engine Explorer
+- https://github.com/Shhoya/Shh0yaUEDumper [SDK Dump]
+- https://github.com/guttir14/UnrealDumper-4.25 [SDK Dump]
+- https://github.com/CorrM/Unreal-Finder-Tool [SDK Dump]
+- https://github.com/Zebratic/UE4Injector [Inject]
+- https://github.com/N-T33/UE4-Silent-Aim [Aimbot]
+
 > Bypass AntiCheat System:VAC
 - https://github.com/danielkrupinski/VAC-Bypass-Loader
 
