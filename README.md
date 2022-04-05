@@ -35,6 +35,7 @@
 > Guide
 - https://github.com/dsasmblr/game-hacking
 - https://github.com/dsasmblr/hacking-online-games
+- https://github.com/imadr/Unity-game-hacking
 - https://www.unknowncheats.me
 
 > Debugging
@@ -88,6 +89,13 @@
 - https://github.com/Zebratic/UE4Injector [Inject]
 - https://github.com/N-T33/UE4-Silent-Aim [Aimbot]
 
+> Game Engine Explorer:Unity
+- https://github.com/Perfare/Il2CppDumper [Il2Cpp Dump]
+- https://github.com/Perfare/Zygisk-Il2CppDumper [Il2Cpp Dump for Android Platform]
+- https://github.com/djkaty/Il2CppInspector [Il2Cpp Dump]
+- https://github.com/sinai-dev/UnityExplorer
+- https://github.com/4ch12dy/il2cpp [Il2Cpp Source Code]
+
 > Bypass AntiCheat System:VAC
 - https://github.com/danielkrupinski/VAC-Bypass-Loader
 
@@ -125,6 +133,9 @@
 > Game Engine Protection:UE
 - https://github.com/zompi2/Static-Variables-Obfuscator-UE4
 - https://github.com/BrUnOXaVIeRLeiTE/SCUE4-Plugin
+
+> Game Engine Protection:Unity
+- https://github.com/ls9512/USecurity
 
 > Open Source Anti Cheat System
 - https://github.com/mq1n/NoMercy
