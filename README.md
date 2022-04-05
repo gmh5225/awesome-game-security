@@ -182,6 +182,7 @@
 - https://github.com/chztbby/RebirthGuard
 - https://github.com/GravitLauncher/Avanguard
 - https://github.com/danielkrupinski/VAC [Reversed VAC]
+- https://github.com/ch4ncellor/EAC-Reversal [[Reversed EAC]
 - https://github.com/codetronik/AndroidAntiCheat [Android Platform]
 
 > Detection:Attach
