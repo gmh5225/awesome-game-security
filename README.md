@@ -54,6 +54,8 @@
 > Debugging
 - https://github.com/cheat-engine/cheat-engine
 - https://github.com/x64dbg/x64dbg
+- https://github.com/imugee/xdv
+- https://github.com/eteran/edb-debugger [For Linux]
 - https://github.com/isabellaflores/ceserver-pcileech
 - https://github.com/mrexodia/TitanHide
 - https://github.com/Air14/HyperHide 
