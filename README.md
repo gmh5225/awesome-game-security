@@ -184,6 +184,7 @@
 - https://github.com/masterpastaa/AutoOffsets [Offset]
 - https://github.com/OfficialDyn/Fortnite-Offsets [Offset]
 - https://github.com/Makk5/FortConsole
+- https://github.com/skidseal/FortniteLeak5
 
 ## Anti Cheat
 > Guide
