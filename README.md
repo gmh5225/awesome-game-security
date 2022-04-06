@@ -67,6 +67,15 @@
 - https://github.com/dnSpy/dnSpy [For Unity]
 - https://github.com/mandiant/dncil [For Unity]
 
+> Decompiler
+- IDA Pro
+- Binary Ninja
+- https://github.com/NationalSecurityAgency/ghidra
+- https://github.com/avast/retdec
+- https://github.com/Col-E/Recaf [Java]
+- https://github.com/Konloch/bytecode-viewer [Java]
+- https://github.com/java-deobfuscator/deobfuscator [Java]
+
 > Injection
 - https://github.com/btbd/smap [Manual Map]
 
