@@ -176,6 +176,7 @@
 - https://github.com/dhanax26/Apex-Legends-Offset-Dumper [Offset]
 - https://github.com/ofDataa/offsets [Offset]
 - https://github.com/dword64/Apex-Legends-SDK-Remaster
+- https://github.com/hooksteroid/ApexD3D_External
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
