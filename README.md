@@ -65,6 +65,9 @@
 - https://github.com/dnSpy/dnSpy [For Unity]
 - https://github.com/mandiant/dncil [For Unity]
 
+> Injection
+- https://github.com/btbd/smap [Manual Map]
+
 > RPM
 - https://github.com/waryas/EUPMAccess
 - https://github.com/waryas/UMPMLib
