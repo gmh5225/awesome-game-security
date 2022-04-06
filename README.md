@@ -79,6 +79,7 @@
 
 > Injection
 - https://github.com/btbd/smap [Manual Map]
+- https://github.com/wbenny/injdrv [APC]
 
 > RPM
 - https://github.com/waryas/EUPMAccess
@@ -196,6 +197,7 @@
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework
 - https://github.com/DanielRTeixeira/injectAllTheThings [Injection Testing]
 - https://github.com/btbd/smap [Dll Manual Map Testing]
+- https://github.com/wbenny/injdrv [Dll APC Injection Testing]
 
 > Anti Debugging
 - https://github.com/LordNoteworthy/al-khaser
