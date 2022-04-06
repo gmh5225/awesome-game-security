@@ -66,6 +66,7 @@
 - https://github.com/icsharpcode/ILSpy [For Unity]
 - https://github.com/dnSpy/dnSpy [For Unity]
 - https://github.com/mandiant/dncil [For Unity]
+- https://github.com/hugsy/CFB [Monitor IRP]
 
 > Decompiler
 - IDA Pro
