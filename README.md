@@ -176,6 +176,7 @@
 > Stress Testing
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework
 - https://github.com/DanielRTeixeira/injectAllTheThings [Injection Testing]
+- https://github.com/btbd/smap [Manual Map Testing]
 
 > Code Protection
 - https://github.com/changeofpace/Self-Remapping-Code
