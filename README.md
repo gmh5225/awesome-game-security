@@ -48,6 +48,7 @@
 - https://vollragm.github.io
 - https://www.unknowncheats.me
 - https://forum.ragezone.com
+- https://guidedhacking.com
 - https://github.com/imadr/Unity-game-hacking [Unity]
 - https://vollragm.github.io/posts/unity-reversing [Unity]
 
