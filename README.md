@@ -176,6 +176,7 @@
 > Guide
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/481731-tutorial-ring3-anticheat-project.html
+- https://github.com/dhondta/awesome-executable-packing [Executable File Packing]
 
 > Stress Testing
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework
