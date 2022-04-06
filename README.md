@@ -194,6 +194,10 @@
 - https://github.com/DanielRTeixeira/injectAllTheThings [Injection Testing]
 - https://github.com/btbd/smap [Dll Manual Map Testing]
 
+> Anti Debugging
+- https://github.com/LordNoteworthy/al-khaser
+- https://github.com/AdvDebug/AntiCrack-DotNet [CSharp]
+
 > Code Protection
 - https://github.com/changeofpace/Self-Remapping-Code
 
