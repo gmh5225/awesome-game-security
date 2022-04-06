@@ -24,6 +24,7 @@
 - https://github.com/lowenware/dotrix [Rust]
 - https://github.com/bevyengine/bevy [Rust]
 - https://github.com/FyroxEngine/Fyrox [Rust]
+- https://github.com/AbyssEngine/AbyssEngine [ARPG]
 
 
 ## Game Network
