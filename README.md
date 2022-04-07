@@ -112,10 +112,15 @@
 - https://github.com/btbd/access/blob/noseh/DLL/syscall.c [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/weak1337/EvCommunication [NtTokenManagerCreateFlipObjectReturnTokenHandle]
 
+> EFI Driver
+- https://github.com/ekknod/sumap [EFI Manual Map]
+- https://github.com/ekknod/KiSystemStartupMeme [Custom KiSystemStartup]
+
 > Hide
 - https://github.com/JKornev/hidden
 - https://github.com/armvirus/SinMapper [Manual Map In Signed Driver]
 - https://github.com/0xf1a/DSMM [Discarded Driver Section Manual Map]
+- https://github.com/ekknod/sumap [EFI Manual Map]
 
 > Triggerbot
 - https://github.com/changeofpace/MouHidInputHook
@@ -180,12 +185,15 @@
 - https://github.com/dretax/GarHal_CSGO
 - https://github.com/s3pt3mb3r/Dainsleif
 - https://github.com/lagcomp/csgo_sdk
+- https://github.com/ekknod/csf_w [Win SDK]
+- https://github.com/ekknod/csf [Linux SDK]
 - https://github.com/Speedi13/ROP-COMPILER
-- https://github.com/AimTuxOfficial/AimTux [linux]
+- https://github.com/AimTuxOfficial/AimTux [Linux]
 - https://github.com/EternityX/DEADCELL-CSGO
 - https://github.com/nbqofficial/kernel-csgo
 - https://github.com/HeathHowren/CSGO-Cheats
 - https://github.com/Kruziikrel1/CSGO-FindMDL [Model Changer]
+- https://github.com/ekknod/nv_v2 [Sound ESP]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
