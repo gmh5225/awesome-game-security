@@ -91,6 +91,7 @@
 - https://github.com/mactec0/Kernelmode-manual-mapping-through-IAT [IAT Manual Map]
 - https://github.com/charliewolfe/Stealthy-Kernelmode-Injector [PTE/VAD Manipulation Manual Map]
 - https://github.com/wbenny/injdrv [APC]
+- https://github.com/andrew9382/manual_mapping_dll_injector [Manual Map]
 
 > RPM
 - https://github.com/waryas/EUPMAccess
