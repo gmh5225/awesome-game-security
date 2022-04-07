@@ -183,6 +183,9 @@
 - https://forum.ragezone.com/f428/maplestory-private-server-v83-741739 [Private Server-GMS-083]
 - https://github.com/Z41N/v83MaplestoryCPP [Private Server-GMS-083]
 
+> Game:Sword With Sauce
+- https://github.com/1hAck-0/UE4-Cheat-Source-Code
+
 > Game:CSGO
 - https://github.com/KittenPopo/csgo-offsets [Offset]
 - https://github.com/ofDataa/offsets [Offset]
