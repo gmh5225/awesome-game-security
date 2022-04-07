@@ -40,10 +40,13 @@
 - https://github.com/QianMo/UE4-FPS-Game [UE4 Game]
 - https://github.com/QianMo/UE4-Tank-Game [UE4 Game]
 - https://github.com/Unity-Technologies/FPSSample [Unity Game]
-- https://github.com/ZehMatt/SnakeRoyal [Mini Game]
+- https://github.com/ZehMatt/SnakeRoyal [Mini Game With Server]
+- https://github.com/MKXJun/Super-Fighter [DX11 Mini Game]
+- https://github.com/MKXJun/Rubik-Cube [DX9/11 Mini Game]
 
 ## DirectX
 - https://github.com/jpvanoosten/LearningDirectX12 [DX12]
+- https://github.com/MKXJun/DirectX11-With-Windows-SDK [DX11 zh]
 
 ## Cheat
 > Guide
