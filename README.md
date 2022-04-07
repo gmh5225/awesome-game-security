@@ -112,7 +112,7 @@
 > Hide
 - https://github.com/JKornev/hidden
 - https://github.com/armvirus/SinMapper [Manual Map In Signed Driver]
-- https://github.com/0xf1a/DSMM [Discarded Section Manual Map]
+- https://github.com/0xf1a/DSMM [Discarded Driver Section Manual Map]
 
 > Triggerbot
 - https://github.com/changeofpace/MouHidInputHook
