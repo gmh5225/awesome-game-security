@@ -274,6 +274,8 @@
 > Detection:ESP
 - https://github.com/weak1337/PresentHookDetection
 
+> Information System
+- https://github.com/Enum0x539/Qvoid-Token-Grabber
 
 ## Some Tricks
 > Windows Ring0
