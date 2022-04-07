@@ -226,6 +226,9 @@
 > Game:PUBG
 - https://github.com/Skengdoo/pubg-external-cheat
 
+> Game:R6
+- https://github.com/NMan1/Rainbow-Six-Cheat
+
 ## Anti Cheat
 > Guide
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
