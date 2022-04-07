@@ -183,6 +183,7 @@
 - https://github.com/ofDataa/offsets [Offset]
 - https://github.com/dword64/Apex-Legends-SDK-Remaster
 - https://github.com/hooksteroid/ApexD3D_External
+- https://github.com/NMan1/apex-legends-cheat
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
