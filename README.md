@@ -267,6 +267,9 @@
 - https://github.com/KANKOSHEV/Detect-HiddenThread-via-KPRCB
 - https://github.com/weak1337/SystemThreadFinder
 
+> Detection:Hypervisor
+- https://github.com/helloobaby/Nmi-Callback [NMI Callback]
+
 > Detection:HWID
 - https://github.com/medievalghoul/hwid-checker-mg
 - https://github.com/weak1337/NvidiaApi
