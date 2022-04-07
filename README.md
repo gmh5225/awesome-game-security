@@ -81,7 +81,11 @@
 - https://github.com/java-deobfuscator/deobfuscator [Java]
 
 > Injection
-- https://github.com/btbd/smap [Manual Map]
+- https://github.com/btbd/smap [Scatter Manual Map]
+- https://github.com/btbd/modmap [Extend Manual Map]
+- https://github.com/KGB-1337/memmap [Extend Manual Map]
+- https://github.com/mactec0/Kernelmode-manual-mapping-through-IAT [IAT Manual Map]
+- https://github.com/charliewolfe/Stealthy-Kernelmode-Injector [PTE/VAD Manipulation Manual Map]
 - https://github.com/wbenny/injdrv [APC]
 
 > RPM
