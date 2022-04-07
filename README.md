@@ -85,6 +85,7 @@
 - https://github.com/btbd/smap [Scatter Manual Map]
 - https://github.com/btbd/modmap [Extend Manual Map]
 - https://github.com/KGB-1337/memmap [Extend Manual Map]
+- https://github.com/weak1337/ModExMap [Extend Manual Map]
 - https://github.com/mactec0/Kernelmode-manual-mapping-through-IAT [IAT Manual Map]
 - https://github.com/charliewolfe/Stealthy-Kernelmode-Injector [PTE/VAD Manipulation Manual Map]
 - https://github.com/wbenny/injdrv [APC]
@@ -106,6 +107,7 @@
 - https://github.com/EBalloon/Common-Registry
 - https://github.com/adspro15/km-um-communication
 - https://github.com/btbd/access/blob/noseh/DLL/syscall.c [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
+- https://github.com/weak1337/EvCommunication [NtTokenManagerCreateFlipObjectReturnTokenHandle]
 
 > Hide
 - https://github.com/JKornev/hidden
@@ -215,9 +217,11 @@
 > Anti Debugging
 - https://github.com/LordNoteworthy/al-khaser
 - https://github.com/AdvDebug/AntiCrack-DotNet [CSharp]
+- https://github.com/weak1337/CEDetector [CE]
 
 > Code Protection
 - https://github.com/changeofpace/Self-Remapping-Code
+- https://github.com/weak1337/NO_ACCESS_Protection
 
 > Game Engine Protection:Unreal
 - https://github.com/zompi2/Static-Variables-Obfuscator-UE4
@@ -243,6 +247,7 @@
 
 > Detection:Hide
 - https://github.com/KANKOSHEV/Detect-HiddenThread-via-KPRCB
+- https://github.com/weak1337/SystemThreadFinder
 
 > Detection:HWID
 - https://github.com/medievalghoul/hwid-checker-mg
