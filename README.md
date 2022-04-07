@@ -35,7 +35,7 @@
 ## Game Source
 - https://github.com/PiMoNFeeD/csgo-src [Leaked CSGO]
 - https://github.com/SwagSoftware/Kisak-Strike [Open Source CSGO]
-- https://github.com/thomaseichhorn/cs16-client [CS1.6]
+- https://github.com/thomaseichhorn/cs16-client [Rewrote CS1.6]
 - https://github.com/td512/re3 [Reversed GTA III, Vice City]
 - https://github.com/QianMo/UE4-FPS-Game [UE4 Game]
 - https://github.com/QianMo/UE4-Tank-Game [UE4 Game]
