@@ -40,6 +40,7 @@
 - https://github.com/QianMo/UE4-FPS-Game [UE4 Game]
 - https://github.com/QianMo/UE4-Tank-Game [UE4 Game]
 - https://github.com/Unity-Technologies/FPSSample [Unity Game]
+- https://github.com/ZehMatt/SnakeRoyal [Mini Game]
 
 ## DirectX
 - https://github.com/jpvanoosten/LearningDirectX12 [DX12]
