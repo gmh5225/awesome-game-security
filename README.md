@@ -143,6 +143,7 @@
 - https://github.com/Theordernarkoz/Hwid-Spoofer
 - https://github.com/SarnaxLii/Apex-ClearTrace
 - https://github.com/lil-skies/btbd-modified
+- https://github.com/InstinctTheDevil/EclipsedSpoofer-EAC-BE
 
 > Game Engine Explorer:Unreal
 - https://github.com/Shhoya/Shh0yaUEDumper [SDK Dump]
