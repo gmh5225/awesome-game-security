@@ -260,6 +260,9 @@
 > Detection:Injection
 - https://github.com/mq1n/DLLThreadInjectionDetector
 
+> Detection:ESP
+- https://github.com/weak1337/PresentHookDetection
+
 
 ## Some Tricks
 > Windows Ring0
