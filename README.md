@@ -215,6 +215,7 @@
 - https://github.com/dword64/Apex-Legends-SDK-Remaster
 - https://github.com/hooksteroid/ApexD3D_External
 - https://github.com/NMan1/apex-legends-cheat
+- https://github.com/rakuza2/SIMPLE-AIMBOT-GLOW-APEX
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
@@ -222,6 +223,7 @@
 - https://github.com/OfficialDyn/Fortnite-Offsets [Offset]
 - https://github.com/Makk5/FortConsole
 - https://github.com/skidseal/FortniteLeak5
+- https://github.com/Zetolac/FortniteExternalW2S
 
 > Game:PUBG
 - https://github.com/Skengdoo/pubg-external-cheat
