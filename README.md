@@ -246,6 +246,7 @@
 
 > Detection:HWID
 - https://github.com/medievalghoul/hwid-checker-mg
+- https://github.com/weak1337/NvidiaApi
 
 > Detection:Injection
 - https://github.com/mq1n/DLLThreadInjectionDetector
