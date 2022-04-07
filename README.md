@@ -231,6 +231,9 @@
 > Game:R6
 - https://github.com/NMan1/Rainbow-Six-Cheat
 
+> Game:Rust
+- https://github.com/NMan1/OverflowRust
+
 ## Anti Cheat
 > Guide
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
