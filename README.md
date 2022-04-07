@@ -100,6 +100,7 @@
 > Driver Communication
 - https://github.com/EBalloon/Common-Registry
 - https://github.com/adspro15/km-um-communication
+- https://github.com/btbd/access/blob/noseh/DLL/syscall.c [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 
 > Hide
 - https://github.com/JKornev/hidden
@@ -190,6 +191,9 @@
 - https://github.com/Makk5/FortConsole
 - https://github.com/skidseal/FortniteLeak5
 
+> Game:PUBG
+- https://github.com/Skengdoo/pubg-external-cheat
+
 ## Anti Cheat
 > Guide
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
@@ -199,8 +203,6 @@
 > Stress Testing
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework
 - https://github.com/DanielRTeixeira/injectAllTheThings [Injection Testing]
-- https://github.com/btbd/smap [Dll Manual Map Testing]
-- https://github.com/wbenny/injdrv [Dll APC Injection Testing]
 
 > Anti Debugging
 - https://github.com/LordNoteworthy/al-khaser
