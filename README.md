@@ -230,6 +230,12 @@
 
 > Game:R6
 - https://github.com/NMan1/Rainbow-Six-Cheat
+- https://github.com/NMan1/OverflowR6V2
+- https://github.com/NMan1/Internal-Rainbow-Six-Cheat-V3
+
+> Game:Warzone
+- https://github.com/NMan1/external-warzone-cheat
+- https://github.com/NMan1/warzone-internal
 
 > Game:Rust
 - https://github.com/NMan1/OverflowRust
