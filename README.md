@@ -151,17 +151,20 @@
 - https://github.com/nneonneo/Il2CppVersions [Il2Cpp Version]
 - https://github.com/sneakyevilSK/IL2CPP_Resolver
 
-> Bypass AntiCheat System:VAC
+> Explore AntiCheat System:VAC
 - https://github.com/danielkrupinski/VAC-Bypass-Loader
 
-> Bypass AntiCheat System:EAC
+> Explore AntiCheat System:EAC
 - https://github.com/thesecretclub/CVEAC-2020 [Integrity Checks]
 
-> Bypass AntiCheat System:BE
+> Explore AntiCheat System:BE
 - https://github.com/unreaIuser/BE-Emulator
 
-> Bypass AntiCheat System:EQU8
+> Explore AntiCheat System:EQU8
 - https://back.engineering/12/08/2021
+
+> Explore AntiCheat System:ricochet
+- https://github.com/weak1337/ricochet_deobfuscator
 
 > Game:MapleStory
 - https://github.com/icelemon1314/mapleLemon [Private Server-CMS-027]
