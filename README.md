@@ -280,6 +280,9 @@
 - https://github.com/changeofpace/Self-Remapping-Code
 - https://github.com/weak1337/NO_ACCESS_Protection
 
+> Screenshot
+- https://github.com/bavulapati/DXGICaptureApplication [Capture Desktop]
+
 > Game Engine Protection:Unreal
 - https://github.com/zompi2/Static-Variables-Obfuscator-UE4
 - https://github.com/BrUnOXaVIeRLeiTE/SCUE4-Plugin
