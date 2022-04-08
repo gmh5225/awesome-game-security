@@ -99,6 +99,8 @@
 
 > RPM
 - https://github.com/btbd/access
+- https://github.com/DarthTon/Blackbone
+- https://github.com/HoShiMin/Kernel-Bridge
 - https://github.com/waryas/EUPMAccess
 - https://github.com/waryas/UMPMLib
 - https://github.com/EBalloon/Remap
