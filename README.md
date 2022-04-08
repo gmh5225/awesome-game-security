@@ -261,6 +261,9 @@
 - https://github.com/NMan1/OverflowR6V2
 - https://github.com/NMan1/Internal-Rainbow-Six-Cheat-V3
 
+> Game:Overwatch 
+- https://github.com/blackhades00/PareidoliaTriggerbot [Triggerbot]
+
 > Game:Warzone
 - https://github.com/NMan1/external-warzone-cheat
 - https://github.com/NMan1/warzone-internal
