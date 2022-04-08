@@ -114,6 +114,7 @@
 
 > Vulnerable Driver 
 - https://github.com/kkent030315/gdrv-loader/tree/1909_mitigation
+- http://rexw3wrz5pldtadf3hy4vqnuzokhco4l32kyntj36fcgpjuy3nvxidid.onion/_xeroxz/VDM [gdrv enhance]
 - https://github.com/TheCruZ/kdmapper
 
 > Driver Communication
