@@ -111,6 +111,7 @@
 
 > Overlay
 - https://github.com/coltonon/D2DOverlay
+- https://github.com/Unkn0wnH4ck3r/GameOverlayUIHook [Steam]
 
 > Vulnerable Driver 
 - https://github.com/namazso/physmem_drivers [Vulnerable Driver List]
@@ -241,6 +242,9 @@
 - https://github.com/Makk5/FortConsole
 - https://github.com/skidseal/FortniteLeak5
 - https://github.com/Zetolac/FortniteExternalW2S
+
+> Game:Super People
+- https://github.com/EBalloon/Super-People-sdk
 
 > Game:PUBG
 - https://github.com/Skengdoo/pubg-external-cheat
