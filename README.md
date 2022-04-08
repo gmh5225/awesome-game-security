@@ -188,6 +188,7 @@
 
 > Explore AntiCheat System:EQU8
 - https://back.engineering/12/08/2021
+- https://github.com/kkent030315/EQU8-PoC
 
 > Explore AntiCheat System:Ricochet
 - https://github.com/weak1337/ricochet_deobfuscator
