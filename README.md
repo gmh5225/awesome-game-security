@@ -134,6 +134,9 @@
 - https://github.com/ekknod/KiSystemStartupMeme [Custom KiSystemStartup]
 - https://github.com/TheCruZ/EFI_Driver_Access [RPM]
 
+> KVM Cheat
+- https://github.com/MisterY52/apex_dma_kvm_pub
+
 > Anti Screenshot
 - https://github.com/KANKOSHEV/NoScreen [Hide Window]
 - https://github.com/gmh5225/dwmhook [DWM]
