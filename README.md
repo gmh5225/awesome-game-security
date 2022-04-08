@@ -124,6 +124,7 @@
 
 > Hide
 - https://github.com/JKornev/hidden
+- https://github.com/KANKOSHEV/NoScreen [Hide Window]
 - https://github.com/armvirus/SinMapper [Manual Map In Signed Driver]
 - https://github.com/0xf1a/DSMM [Discarded Driver Section Manual Map]
 - https://github.com/ekknod/sumap [EFI Manual Map]
