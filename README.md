@@ -112,6 +112,7 @@
 > Overlay
 - https://github.com/coltonon/D2DOverlay
 - https://github.com/Unkn0wnH4ck3r/GameOverlayUIHook [Steam]
+- https://github.com/gmh5225/dwmhook [DWM]
 
 > Vulnerable Driver 
 - https://github.com/namazso/physmem_drivers [Vulnerable Driver List]
@@ -132,6 +133,10 @@
 - https://github.com/ekknod/sumap [EFI Manual Map]
 - https://github.com/ekknod/KiSystemStartupMeme [Custom KiSystemStartup]
 - https://github.com/TheCruZ/EFI_Driver_Access [RPM]
+
+> Anti Screenshot
+- https://github.com/KANKOSHEV/NoScreen [Hide Window]
+- https://github.com/gmh5225/dwmhook [DWM]
 
 > Hide
 - https://github.com/JKornev/hidden
@@ -282,6 +287,7 @@
 
 > Screenshot
 - https://github.com/bavulapati/DXGICaptureApplication [Capture Desktop]
+- https://github.com/Rick-laboratory/Windows-Screenshotcapture-DirectX/blob/master/main.cpp [DX9]
 
 > Game Engine Protection:Unreal
 - https://github.com/zompi2/Static-Variables-Obfuscator-UE4
