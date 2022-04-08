@@ -148,6 +148,7 @@
 
 > Triggerbot
 - https://github.com/changeofpace/MouHidInputHook
+- https://github.com/blackhades00/PareidoliaTriggerbot
 - https://github.com/adspro15/DirectInput
 - https://github.com/lucylow/b00m-h3adsh0t [Neural Network]
 
