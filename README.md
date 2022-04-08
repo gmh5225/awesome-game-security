@@ -133,6 +133,7 @@
 - https://github.com/ekknod/sumap [EFI Manual Map]
 - https://github.com/ekknod/KiSystemStartupMeme [Custom KiSystemStartup]
 - https://github.com/TheCruZ/EFI_Driver_Access [RPM]
+- https://github.com/SecIdiot/bootkit
 
 > KVM Cheat
 - https://github.com/MisterY52/apex_dma_kvm_pub
