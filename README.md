@@ -111,6 +111,10 @@
 > Overlay
 - https://github.com/coltonon/D2DOverlay
 
+> Vulnerable Driver 
+- https://github.com/kkent030315/gdrv-loader/tree/1909_mitigation
+- https://github.com/TheCruZ/kdmapper
+
 > Driver Communication
 - https://github.com/EBalloon/Common-Registry
 - https://github.com/adspro15/km-um-communication
