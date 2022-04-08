@@ -114,10 +114,11 @@
 
 > Vulnerable Driver 
 - https://github.com/namazso/physmem_drivers [Vulnerable Driver List]
-- https://github.com/kkent030315/gdrv-loader/tree/1909_mitigation
+- https://github.com/kkent030315/gdrv-loader/tree/1909_mitigation [gdrv.sys]
 - http://rexw3wrz5pldtadf3hy4vqnuzokhco4l32kyntj36fcgpjuy3nvxidid.onion/_xeroxz/VDM [gdrv enhance]
-- https://github.com/TheCruZ/kdmapper
-- https://github.com/kkent030315/MsIoExploit
+- https://github.com/TheCruZ/kdmapper [iqvw64e.sys]
+- https://github.com/kkent030315/MsIoExploit [MsIo64.sys]
+- https://github.com/kkent030315/evil-mhyprot-cli [Mhyprot2.sys]
 
 > Driver Communication
 - https://github.com/EBalloon/Common-Registry
