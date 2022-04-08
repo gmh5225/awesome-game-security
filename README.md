@@ -116,6 +116,7 @@
 - https://github.com/adspro15/km-um-communication
 - https://github.com/btbd/access/blob/noseh/DLL/syscall.c [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/weak1337/EvCommunication [NtTokenManagerCreateFlipObjectReturnTokenHandle]
+- https://github.com/UCFoxi/Shared-FlushFileBuffers-Communication [FlushFileBuffers]
 
 > EFI Driver
 - https://github.com/ekknod/sumap [EFI Manual Map]
