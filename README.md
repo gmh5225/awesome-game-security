@@ -283,6 +283,7 @@
 > Stress Testing
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework
 - https://github.com/DanielRTeixeira/injectAllTheThings [Injection Testing]
+- https://github.com/notscimmy/libelevate [Elevating Handle]
 
 > Anti Debugging
 - https://github.com/LordNoteworthy/al-khaser
