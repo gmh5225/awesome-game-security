@@ -189,8 +189,9 @@
 > Explore AntiCheat System:EQU8
 - https://back.engineering/12/08/2021
 
-> Explore AntiCheat System:ricochet
+> Explore AntiCheat System:Ricochet
 - https://github.com/weak1337/ricochet_deobfuscator
+- https://github.com/kkent030315/AurumRE
 
 > Game:MapleStory
 - https://github.com/icelemon1314/mapleLemon [Private Server-CMS-027]
