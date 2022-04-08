@@ -137,6 +137,7 @@
 > Anti Screenshot
 - https://github.com/KANKOSHEV/NoScreen [Hide Window]
 - https://github.com/gmh5225/dwmhook [DWM]
+- https://github.com/wongfei/wda_monitor_trick
 
 > Hide
 - https://github.com/JKornev/hidden
