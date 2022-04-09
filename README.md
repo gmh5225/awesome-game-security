@@ -237,6 +237,16 @@
 > Game:Remnant
 - https://github.com/shalzuth/RemnantESP
 
+> Game:LostArk
+- https://github.com/shalzuth/LostArkLogger
+
+> Game:Battlerite
+- https://github.com/shalzuth/BattleriteBot
+
+> Game:LOL
+- https://github.com/shalzuth/LeagueSharp
+- https://github.com/shalzuth/LoLClient
+
 > Game:CSGO
 - https://github.com/KittenPopo/csgo-offsets [Offset]
 - https://github.com/ofDataa/offsets [Offset]
