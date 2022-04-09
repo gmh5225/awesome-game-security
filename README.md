@@ -186,6 +186,7 @@
 - https://github.com/guttir14/UnrealDumper-4.25 [SDK Dump]
 - https://github.com/CorrM/Unreal-Finder-Tool [SDK View]
 - https://github.com/spudgy/UnrealEngine4-SwissKnife [SDK View]
+- https://github.com/shalzuth/UnrealSharp [SDK View]
 - https://fearlessrevolution.com/viewtopic.php?f=23&t=14414 [UE4 CE Table]
 - https://github.com/cursey/ue4genny [SDK Generator]
 - https://github.com/Zebratic/UE4Injector [Inject]
