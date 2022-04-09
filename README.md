@@ -201,6 +201,7 @@
 - https://github.com/4ch12dy/il2cpp [Il2Cpp Version]
 - https://github.com/nneonneo/Il2CppVersions [Il2Cpp Version]
 - https://github.com/sneakyevilSK/IL2CPP_Resolver
+- https://github.com/knah/Il2CppAssemblyUnhollower
 
 > Explore AntiCheat System:VAC
 - https://github.com/danielkrupinski/VAC-Bypass-Loader
