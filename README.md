@@ -231,6 +231,9 @@
 > Game:Gunfire Reborn
 - https://github.com/shalzuth/AutoGunfireReborn
 
+> Game:Fall Guys
+- https://github.com/shalzuth/FallGuysSharp
+
 > Game:CSGO
 - https://github.com/KittenPopo/csgo-offsets [Offset]
 - https://github.com/ofDataa/offsets [Offset]
