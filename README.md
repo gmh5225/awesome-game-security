@@ -69,6 +69,7 @@
 - https://guidedhacking.com
 - https://github.com/imadr/Unity-game-hacking [Unity]
 - https://vollragm.github.io/posts/unity-reversing [Unity]
+- https://github.com/shalzuth/NativeNetSharp [Injecting C# code]
 
 > Debugging
 - https://github.com/cheat-engine/cheat-engine
