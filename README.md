@@ -194,6 +194,7 @@
 
 > Game Engine Explorer:Unity
 - https://github.com/Perfare/Il2CppDumper [Il2Cpp Dump]
+- https://github.com/shalzuth/Il2CppRuntimeDumper [Il2Cpp Dump Runtime]
 - https://github.com/Perfare/Zygisk-Il2CppDumper [Il2Cpp Dump for Android Platform]
 - https://github.com/djkaty/Il2CppInspector [Il2Cpp Dump]
 - https://github.com/sinai-dev/UnityExplorer
@@ -225,6 +226,9 @@
 
 > Game:Sword With Sauce
 - https://github.com/1hAck-0/UE4-Cheat-Source-Code
+
+> Game:Gunfire Reborn
+- https://github.com/shalzuth/AutoGunfireReborn
 
 > Game:CSGO
 - https://github.com/KittenPopo/csgo-offsets [Offset]
