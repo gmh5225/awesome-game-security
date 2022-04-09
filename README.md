@@ -323,6 +323,7 @@
 - https://github.com/Mattiwatti/EfiGuard [PG Testing]
 - https://github.com/9176324/Shark [PG Testing]
 - https://github.com/gmh5225/HideDriverTesting [Hide Driver Testing]
+- https://github.com/gmh5225/disable-threat-tracing [ETW Testing]
 
 > Anti Debugging
 - https://github.com/LordNoteworthy/al-khaser
