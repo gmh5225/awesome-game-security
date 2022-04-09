@@ -2,6 +2,10 @@
 # `awesome-game-security`
 
 ## Game Engine
+> Guide
+- https://forums.unrealengine.com/
+
+> Source
 - https://github.com/EpicGames/UnrealEngine
 - https://github.com/Unity-Technologies/UnityCsReference [C# reference]
 - https://github.com/cocos2d/cocos2d-x
