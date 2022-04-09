@@ -353,6 +353,7 @@
 - https://github.com/ch4ncellor/EAC-Reversal [Reversed EAC]
 - https://github.com/weak1337/BE-Shellcode [Reversed BE Shellcode]
 - https://github.com/codetronik/AndroidAntiCheat [Android Platform]
+- https://github.com/MrDiamond64/Scythe-AntiCheat [Minecraft]
 
 > Detection:Attach
 - https://github.com/KANKOSHEV/Detect-KeAttachProcess
