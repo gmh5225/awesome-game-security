@@ -25,6 +25,7 @@
 - https://github.com/bevyengine/bevy [Rust]
 - https://github.com/FyroxEngine/Fyrox [Rust]
 - https://github.com/AbyssEngine/AbyssEngine [ARPG]
+- https://github.com/skylicht-lab/skylicht-engine
 
 
 ## Game Network
