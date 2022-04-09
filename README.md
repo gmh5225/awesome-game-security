@@ -53,6 +53,8 @@
 > Guide
 - https://github.com/dsasmblr/game-hacking
 - https://github.com/dsasmblr/hacking-online-games
+- https://github.com/mytechnotalent/Reverse-Engineering
+- https://github.com/mytechnotalent/Hacking-Windows
 - https://secret.club
 - https://back.engineering
 - https://vollragm.github.io
