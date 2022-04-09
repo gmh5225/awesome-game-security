@@ -320,6 +320,7 @@
 - https://github.com/notscimmy/libelevate [Elevating Handle]
 - https://github.com/Mattiwatti/EfiGuard [PG Testing]
 - https://github.com/9176324/Shark [PG Testing]
+- https://github.com/gmh5225/HideDriverTesting [Hide Driver Testing]
 
 > Anti Debugging
 - https://github.com/LordNoteworthy/al-khaser
