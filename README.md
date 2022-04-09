@@ -234,6 +234,9 @@
 > Game:Fall Guys
 - https://github.com/shalzuth/FallGuysSharp
 
+> Game:Remnant
+- https://github.com/shalzuth/RemnantESP
+
 > Game:CSGO
 - https://github.com/KittenPopo/csgo-offsets [Offset]
 - https://github.com/ofDataa/offsets [Offset]
