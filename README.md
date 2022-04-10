@@ -140,6 +140,7 @@
 - https://github.com/btbd/access/blob/noseh/DLL/syscall.c [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/weak1337/EvCommunication [NtTokenManagerCreateFlipObjectReturnTokenHandle]
 - https://github.com/UCFoxi/Shared-FlushFileBuffers-Communication [FlushFileBuffers]
+- https://github.com/gmh5225/AfdIrpCallDispatch [.data Pointer hook in Afd.sys]
 
 > EFI Driver
 - https://github.com/ekknod/sumap [EFI Manual Map]
