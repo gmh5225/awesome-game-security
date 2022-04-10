@@ -214,6 +214,7 @@
 
 > Explore AntiCheat System:BE
 - https://github.com/unreaIuser/BE-Emulator
+- https://github.com/masterpastaa/BattlEye-Handler-BYPASS
 
 > Explore AntiCheat System:EQU8
 - https://back.engineering/12/08/2021
