@@ -140,7 +140,8 @@
 - https://github.com/adspro15/km-um-communication
 - https://github.com/Spuckwaffel/Kernel-Thread-Driver [Thread]
 - https://github.com/Astronaut00/DoubleDataPointer [Double Data Pointer]
-- https://github.com/btbd/access/blob/noseh/DLL/syscall.c [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
+- https://github.com/btbd/access [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
+- https://github.com/paradoxwastaken/Poseidon [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/weak1337/EvCommunication [NtTokenManagerCreateFlipObjectReturnTokenHandle]
 - https://github.com/UCFoxi/Shared-FlushFileBuffers-Communication [FlushFileBuffers]
 - https://github.com/gmh5225/AfdIrpCallDispatch [.data Pointer hook in Afd.sys]
