@@ -255,9 +255,13 @@
 
 > Game:MapleStory
 - https://forum.ragezone.com/f922/getting-packet-structures-opcodes-using-792436 [Packet]
+- https://github.com/Bratah123/SpiritIDAPlugin [IDA-Plugin]
 - https://github.com/icelemon1314/mapleLemon [Private Server-CMS-027]
 - https://forum.ragezone.com/f428/maplestory-private-server-v83-741739 [Private Server-GMS-083]
-- https://github.com/Z41N/v83MaplestoryCPP [Private Server-GMS-083]
+- https://github.com/Z41N/v83MaplestoryCPP [Private Server-GMS-083 C++]
+- https://github.com/Fraysa/Destiny [Private Server-GMS-083 C#]
+- https://github.com/Bratah123/ElectronMS [Private Server-KMS-316]
+- https://github.com/Bratah123/BattleAnalysis176 [Battle Analysis]
 
 > Game:Sword With Sauce
 - https://github.com/1hAck-0/UE4-Cheat-Source-Code
