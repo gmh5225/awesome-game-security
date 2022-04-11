@@ -204,6 +204,7 @@
 - https://github.com/lil-skies/btbd-modified
 - https://github.com/InstinctTheDevil/EclipsedSpoofer-EAC-BE
 - https://github.com/SamuelTulach/rainbow [EFI]
+- https://github.com/btbd/wpp [Intercepting DeviceControl via WPP]
 
 > Bypass Page Protection
 - https://github.com/illegal-instruction-co/CountHook [WorkingSet]
