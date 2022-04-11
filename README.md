@@ -134,6 +134,9 @@
 - https://github.com/Unkn0wnH4ck3r/GameOverlayUIHook [Steam]
 - https://github.com/gmh5225/dwmhook [DWM]
 
+> Render/Draw
+- https://github.com/vmcall/dxgkrnl_hook
+
 > Vulnerable Driver 
 - https://github.com/gmh5225/Exploit-vulnerable-physmem_drivers [Vulnerable Driver List]
 - https://github.com/kkent030315/gdrv-loader/tree/1909_mitigation [gdrv.sys]
