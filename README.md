@@ -163,6 +163,7 @@
 - https://github.com/armvirus/SinMapper [Manual Map In Signed Driver]
 - https://github.com/0xf1a/DSMM [Discarded Driver Section Manual Map]
 - https://github.com/ekknod/sumap [EFI Manual Map]
+- https://github.com/VollRagm/lpmapper [Manual Map To Large Page Driver]
 
 > Triggerbot
 - https://github.com/changeofpace/MouHidInputHook
