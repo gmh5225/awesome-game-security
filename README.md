@@ -151,6 +151,7 @@
 - https://github.com/paradoxwastaken/Poseidon [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/weak1337/EvCommunication [NtTokenManagerCreateFlipObjectReturnTokenHandle]
 - https://github.com/UCFoxi/Shared-FlushFileBuffers-Communication [FlushFileBuffers]
+- https://github.com/Sinclairq/DataCommunication [NtCompareSigningLevels]
 - https://github.com/gmh5225/AfdIrpCallDispatch [.data Pointer hook in Afd.sys]
 
 > EFI Driver
