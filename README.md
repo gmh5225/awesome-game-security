@@ -349,6 +349,7 @@
 > Stress Testing
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework
 - https://github.com/DanielRTeixeira/injectAllTheThings [Injection Testing]
+- https://github.com/gmh5225/DLL-inject-Injectors [Injection Testing]
 - https://github.com/guided-hacking/GuidedHacking-Injector [Injection Testing]
 - https://github.com/notscimmy/libelevate [Elevating Handle]
 - https://github.com/Mattiwatti/EfiGuard [PG Testing]
