@@ -188,6 +188,9 @@
 - https://github.com/lil-skies/btbd-modified
 - https://github.com/InstinctTheDevil/EclipsedSpoofer-EAC-BE
 
+> Bypass Page Protection
+- https://github.com/illegal-instruction-co/CountHook [WorkingSet]
+
 > Game Engine Explorer:Unreal
 - https://github.com/Shhoya/Shh0yaUEDumper [SDK Dump]
 - https://github.com/guttir14/UnrealDumper-4.25 [SDK Dump]
