@@ -138,6 +138,8 @@
 > Driver Communication
 - https://github.com/EBalloon/Common-Registry
 - https://github.com/adspro15/km-um-communication
+- https://github.com/Spuckwaffel/Kernel-Thread-Driver [Thread]
+- https://github.com/Astronaut00/DoubleDataPointer [Double Data Pointer]
 - https://github.com/btbd/access/blob/noseh/DLL/syscall.c [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/weak1337/EvCommunication [NtTokenManagerCreateFlipObjectReturnTokenHandle]
 - https://github.com/UCFoxi/Shared-FlushFileBuffers-Communication [FlushFileBuffers]
