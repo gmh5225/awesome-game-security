@@ -361,6 +361,9 @@
 - https://github.com/codetronik/AndroidAntiCheat [Android Platform]
 - https://github.com/MrDiamond64/Scythe-AntiCheat [Minecraft]
 
+> Detection:Hook
+- https://github.com/mike1k/HookHunter
+
 > Detection:Attach
 - https://github.com/KANKOSHEV/Detect-KeAttachProcess
 
