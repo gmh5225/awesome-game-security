@@ -158,6 +158,7 @@
 - https://github.com/ekknod/KiSystemStartupMeme [Custom KiSystemStartup]
 - https://github.com/TheCruZ/EFI_Driver_Access [RPM]
 - https://github.com/SecIdiot/bootkit
+- https://github.com/SamuelTulach/rainbow [HWID]
 
 > KVM Cheat
 - https://github.com/MisterY52/apex_dma_kvm_pub
@@ -170,6 +171,7 @@
 > Hide
 - https://github.com/JKornev/hidden
 - https://github.com/KANKOSHEV/NoScreen [Hide Window]
+- https://github.com/nlepleux/MappedCallback [Hide Callback]
 - https://github.com/armvirus/SinMapper [Manual Map In Signed Driver]
 - https://github.com/0xf1a/DSMM [Discarded Driver Section Manual Map]
 - https://github.com/ekknod/sumap [EFI Manual Map]
@@ -196,6 +198,7 @@
 - https://github.com/SarnaxLii/Apex-ClearTrace
 - https://github.com/lil-skies/btbd-modified
 - https://github.com/InstinctTheDevil/EclipsedSpoofer-EAC-BE
+- https://github.com/SamuelTulach/rainbow [EFI]
 
 > Bypass Page Protection
 - https://github.com/illegal-instruction-co/CountHook [WorkingSet]
