@@ -285,6 +285,7 @@
 - https://github.com/NMan1/apex-legends-cheat
 - https://github.com/rakuza2/SIMPLE-AIMBOT-GLOW-APEX
 - https://github.com/TheCruZ/Direct-EFI-Apex-Cheat
+- https://github.com/Astronaut00/apex-external
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
