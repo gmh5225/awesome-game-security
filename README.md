@@ -31,6 +31,7 @@
 - https://github.com/FyroxEngine/Fyrox [Rust]
 - https://github.com/AbyssEngine/AbyssEngine [ARPG]
 - https://github.com/skylicht-lab/skylicht-engine
+- https://github.com/ValveSoftware/halflife [Half-Life 1]
 
 
 ## Game Network
@@ -42,9 +43,11 @@
 
 ## Game Source
 - https://github.com/PiMoNFeeD/csgo-src [Leaked CSGO]
+- https://github.com/SmileyAG/cstrike15_src-CI [Leaked CSGO With CI]
 - https://github.com/SwagSoftware/Kisak-Strike [Open Source CSGO]
 - https://github.com/thomaseichhorn/cs16-client [Rewrote CS1.6]
 - https://github.com/td512/re3 [Reversed GTA III, Vice City]
+- https://github.com/gmh5225/Reverse-Game-ReCZDS [Reversed CZeror]
 - https://github.com/QianMo/UE4-FPS-Game [UE4 FPS Game]
 - https://github.com/QianMo/UE4-Tank-Game [UE4 Game]
 - https://github.com/gmh5225/UE-UE5-FPS-wlaster [UE5 FPS Game]
