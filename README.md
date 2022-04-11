@@ -53,9 +53,15 @@
 - https://github.com/MKXJun/Super-Fighter [DX11 Mini Game]
 - https://github.com/MKXJun/Rubik-Cube [DX9/11 Mini Game]
 
+
 ## DirectX
+> Guide
 - https://github.com/jpvanoosten/LearningDirectX12 [DX12]
 - https://github.com/MKXJun/DirectX11-With-Windows-SDK [DX11 zh]
+
+> Hook
+- https://github.com/DrNseven/D3D12-Hook-ImGui [DX12]
+
 
 ## Cheat
 > Guide
@@ -168,6 +174,7 @@
 - https://github.com/0xf1a/DSMM [Discarded Driver Section Manual Map]
 - https://github.com/ekknod/sumap [EFI Manual Map]
 - https://github.com/VollRagm/lpmapper [Manual Map To Large Page Driver]
+- https://github.com/armvirus/CosMapper [Signed Driver Map]
 
 > Triggerbot
 - https://github.com/changeofpace/MouHidInputHook
@@ -291,6 +298,7 @@
 - https://github.com/rakuza2/SIMPLE-AIMBOT-GLOW-APEX
 - https://github.com/TheCruZ/Direct-EFI-Apex-Cheat
 - https://github.com/Astronaut00/apex-external
+- https://github.com/CasualX/apexbot [Rust Language]
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
