@@ -342,7 +342,7 @@
 - https://github.com/AdvDebug/AntiCrack-DotNet [CSharp]
 - https://github.com/weak1337/CEDetector [CE]
 
-> Code Protection
+> Page Protection
 - https://github.com/changeofpace/Self-Remapping-Code
 - https://github.com/weak1337/NO_ACCESS_Protection
 
