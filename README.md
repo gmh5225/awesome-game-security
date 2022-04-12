@@ -37,6 +37,8 @@
 - https://github.com/nothings/stb
 - https://github.com/libjpeg-turbo/libjpeg-turbo
 
+## Wavefront Obj
+- https://github.com/tinyobjloader/tinyobjloader
 
 ## Game Network
 - https://github.com/MFatihMAR/Game-Networking-Resources
