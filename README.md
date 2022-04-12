@@ -336,6 +336,7 @@
 - https://github.com/Makk5/FortConsole
 - https://github.com/skidseal/FortniteLeak5
 - https://github.com/Zetolac/FortniteExternalW2S
+- https://github.com/gmh5225/Fortnite-Internal-Cheat-Fixed-and-Updated
 
 > Game:Super People
 - https://github.com/EBalloon/Super-People-sdk
