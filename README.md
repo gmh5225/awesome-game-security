@@ -10,6 +10,7 @@
 - https://github.com/EpicGames/UnrealEngine
 - https://github.com/Unity-Technologies/UnityCsReference [C# reference]
 - https://github.com/cocos2d/cocos2d-x
+- https://github.com/cocos/cocos-engine
 - https://github.com/CRYTEK/CRYENGINE
 - https://github.com/adriengivry/Overload
 - https://github.com/flwmxd/MapleEngine
@@ -32,6 +33,12 @@
 - https://github.com/AbyssEngine/AbyssEngine [ARPG]
 - https://github.com/skylicht-lab/skylicht-engine
 - https://github.com/ValveSoftware/halflife [Half-Life 1]
+- https://github.com/MonoGame/MonoGame [.NET]
+- https://github.com/nCine/nCine [2D]
+- https://github.com/gameplay3d/gameplay [2D/3D]
+- https://github.com/turbulenz/turbulenz_engine [HTML5]
+- https://github.com/TorqueGameEngines/Torque2D [2D]
+- https://github.com/TorqueGameEngines/Torque3D [3D]
 
 ## Mathematics
 - https://github.com/Groovounet/glm
