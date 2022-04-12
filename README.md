@@ -177,6 +177,7 @@
 - https://github.com/TheCruZ/EFI_Driver_Access [RPM]
 - https://github.com/SecIdiot/bootkit
 - https://github.com/SamuelTulach/rainbow [HWID]
+- https://github.com/gmh5225/Fortnite-EFI-External [Fortnite]
 
 > KVM Cheat
 - https://github.com/MisterY52/apex_dma_kvm_pub
@@ -337,6 +338,7 @@
 - https://github.com/skidseal/FortniteLeak5
 - https://github.com/Zetolac/FortniteExternalW2S
 - https://github.com/gmh5225/Fortnite-Internal-Cheat-Fixed-and-Updated
+- https://github.com/gmh5225/Fortnite-EFI-External [EFI]
 
 > Game:Super People
 - https://github.com/EBalloon/Super-People-sdk
