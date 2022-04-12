@@ -339,6 +339,7 @@
 - https://github.com/Zetolac/FortniteExternalW2S
 - https://github.com/gmh5225/Fortnite-Internal-Cheat-Fixed-and-Updated
 - https://github.com/gmh5225/Fortnite-EFI-External [EFI]
+- https://github.com/gmh5225/Fortnite-External-Cheat-WinSense-Leak
 
 > Game:Super People
 - https://github.com/EBalloon/Super-People-sdk
