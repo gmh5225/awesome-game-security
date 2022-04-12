@@ -352,6 +352,9 @@
 > Game:Rust
 - https://github.com/NMan1/OverflowRust
 
+> Game:Genshin Impact
+- https://github.com/khang06/mhynot2
+
 ## Anti Cheat
 > Guide
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
