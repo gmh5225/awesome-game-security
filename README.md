@@ -89,6 +89,7 @@
 - https://github.com/dsasmblr/hacking-online-games
 - https://github.com/mytechnotalent/Reverse-Engineering
 - https://github.com/mytechnotalent/Hacking-Windows
+- https://blog.can.ac/author/can1357
 - https://secret.club
 - https://back.engineering
 - https://vollragm.github.io
