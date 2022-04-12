@@ -33,6 +33,10 @@
 - https://github.com/skylicht-lab/skylicht-engine
 - https://github.com/ValveSoftware/halflife [Half-Life 1]
 
+## Mathematics
+- https://github.com/Groovounet/glm
+- https://github.com/Kazade/kazmath
+
 ## Image Codec
 - https://github.com/nothings/stb
 - https://github.com/libjpeg-turbo/libjpeg-turbo
