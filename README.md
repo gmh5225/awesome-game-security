@@ -304,6 +304,7 @@
 > Game:LOL
 - https://github.com/shalzuth/LeagueSharp
 - https://github.com/shalzuth/LoLClient
+- https://github.com/R3nzTheCodeGOD/R3nzSkin [Skin]
 
 > Game:CSGO
 - https://github.com/KittenPopo/csgo-offsets [Offset]
