@@ -178,6 +178,7 @@
 - https://github.com/UCFoxi/Shared-FlushFileBuffers-Communication [FlushFileBuffers]
 - https://github.com/Sinclairq/DataCommunication [NtCompareSigningLevels]
 - https://github.com/gmh5225/AfdIrpCallDispatch [.data Pointer hook in Afd.sys]
+- https://www.unknowncheats.me/forum/anti-cheat-bypass/483093-vtable-kernel-function-hook-communication.html [NtUserMessageCall]
 
 > EFI Driver
 - https://github.com/ekknod/sumap [EFI Manual Map]
