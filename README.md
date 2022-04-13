@@ -325,6 +325,7 @@
 - https://github.com/10HEAD/ValorantOffsets [Offset]
 - https://github.com/ofDataa/offsets [Offset]
 - https://github.com/pebu1337/valorant-externals [Offset]
+- https://github.com/Pinguu-dev/PINGUU-VAL
 
 > Game:Apex Legends
 - https://github.com/dhanax26/Apex-Legends-Offset-Dumper [Offset]
