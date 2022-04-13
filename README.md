@@ -450,6 +450,9 @@
 > Detection:ESP
 - https://github.com/weak1337/PresentHookDetection
 
+> Detection:Virtual Environments 
+- https://github.com/a0rtega/pafish
+
 > Information System
 - https://github.com/Enum0x539/Qvoid-Token-Grabber
 
