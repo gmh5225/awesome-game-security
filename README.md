@@ -393,6 +393,7 @@
 - https://github.com/9176324/Shark [PG Testing]
 - https://github.com/gmh5225/HideDriverTesting [Hide Driver Testing]
 - https://github.com/gmh5225/disable-threat-tracing [ETW Testing]
+- https://github.com/daswareinfach/Battleye-VAC-EAC-Kernel-Bypass [FsFilter Testing]
 
 > Anti Debugging
 - https://github.com/LordNoteworthy/al-khaser
