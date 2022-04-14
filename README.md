@@ -452,7 +452,7 @@
 
 > Detection:Virtual Environments 
 - https://github.com/a0rtega/pafish
-- https://github.com/gmh5225/Detection-Hyper-v
+- https://github.com/gmh5225/Detection-Hyper-v [Hyper-v]
 
 > Detection:HWID
 - https://github.com/medievalghoul/hwid-checker-mg
