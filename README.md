@@ -43,6 +43,7 @@
 ## Mathematics
 - https://github.com/Groovounet/glm
 - https://github.com/Kazade/kazmath
+- https://github.com/gmh5225/math-int_fastdiv
 
 ## Image Codec
 - https://github.com/nothings/stb
