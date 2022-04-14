@@ -447,8 +447,12 @@
 - https://github.com/KANKOSHEV/Detect-HiddenThread-via-KPRCB
 - https://github.com/weak1337/SystemThreadFinder
 
-> Detection:Hypervisor
+> Detection: Hacked Hypervisor
 - https://github.com/helloobaby/Nmi-Callback [NMI Callback]
+
+> Detection:Virtual Environments 
+- https://github.com/a0rtega/pafish
+- https://github.com/gmh5225/Detection-Hyper-v
 
 > Detection:HWID
 - https://github.com/medievalghoul/hwid-checker-mg
@@ -459,10 +463,6 @@
 
 > Detection:ESP
 - https://github.com/weak1337/PresentHookDetection
-
-> Detection:Virtual Environments 
-- https://github.com/a0rtega/pafish
-- https://github.com/gmh5225/Detection-Hyper-v
 
 > Information System
 - https://github.com/Enum0x539/Qvoid-Token-Grabber
