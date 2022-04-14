@@ -405,6 +405,9 @@
 - https://github.com/changeofpace/Self-Remapping-Code
 - https://github.com/weak1337/NO_ACCESS_Protection
 
+> Obfuscation Engine
+- https://github.com/mike1k/perses
+
 > Screenshot
 - https://github.com/bavulapati/DXGICaptureApplication [Capture Desktop]
 - https://github.com/Rick-laboratory/Windows-Screenshotcapture-DirectX/blob/master/main.cpp [DX9]
