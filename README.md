@@ -117,6 +117,7 @@
 - https://github.com/dnSpy/dnSpy [For Unity]
 - https://github.com/mandiant/dncil [For Unity]
 - https://github.com/hugsy/CFB [Monitor IRP]
+- https://ioninja.com/downloads.html [Protocol Analyzer]
 
 > Decompiler
 - IDA Pro
