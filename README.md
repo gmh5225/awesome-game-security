@@ -196,6 +196,7 @@
 
 > KVM Cheat
 - https://github.com/MisterY52/apex_dma_kvm_pub
+- https://github.com/SamuelTulach/BetterTiming [Bypass CPU Timing]
 
 > Anti Screenshot
 - https://github.com/KANKOSHEV/NoScreen [Hide Window]
