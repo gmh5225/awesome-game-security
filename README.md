@@ -13,6 +13,7 @@
 - https://github.com/cocos/cocos-engine
 - https://github.com/CRYTEK/CRYENGINE
 - https://github.com/ValveSoftware/source-sdk-2013
+- https://github.com/nillerusr/source-engine
 - https://github.com/adriengivry/Overload
 - https://github.com/flwmxd/MapleEngine
 - https://github.com/inanevin/LinaEngine
@@ -25,7 +26,6 @@
 - https://github.com/KorokEngine/Korok [Golang]
 - https://github.com/BoomingTech/Pilot
 - https://github.com/Sirkles/JoshoEngine-Native
-- https://github.com/nillerusr/source-engine
 - https://github.com/ExplosionEngine/Explosion
 - https://github.com/danhuynh0803/Campfire
 - https://github.com/lowenware/dotrix [Rust]
