@@ -409,6 +409,9 @@
 - https://github.com/changeofpace/Self-Remapping-Code
 - https://github.com/weak1337/NO_ACCESS_Protection
 
+> Binary Packer
+- https://github.com/dhondta/awesome-executable-packing
+
 > Obfuscation Engine
 - https://github.com/mike1k/perses
 
