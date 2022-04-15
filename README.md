@@ -149,6 +149,7 @@
 - https://github.com/waryas/UMPMLib
 - https://github.com/EBalloon/Remap
 - https://github.com/TheCruZ/EFI_Driver_Access [EFI RPM]
+- https://github.com/SamuelTulach/efi-memory [EFI RPM]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/489305-read-write-process-attach.html
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/444289-read-process-physical-memory-attach.html
 
@@ -187,6 +188,7 @@
 > EFI Driver
 - https://github.com/ekknod/sumap [EFI Manual Map]
 - https://github.com/ekknod/KiSystemStartupMeme [Custom KiSystemStartup]
+- https://github.com/SamuelTulach/efi-memory [RPM]
 - https://github.com/TheCruZ/EFI_Driver_Access [RPM]
 - https://github.com/SecIdiot/bootkit
 - https://github.com/SamuelTulach/rainbow [HWID]
