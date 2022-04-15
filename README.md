@@ -139,6 +139,7 @@
 - https://github.com/wbenny/injdrv [APC]
 - https://github.com/andrew9382/manual_mapping_dll_injector [Manual Map]
 - https://github.com/can1357/ThePerfectInjector [PTE.User]
+- https://github.com/gmh5225/Driver-HVCI-KernelForge [Hijack ROP]
 
 > RPM
 - https://github.com/btbd/access
