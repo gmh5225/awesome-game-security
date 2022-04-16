@@ -86,6 +86,7 @@
 > Hook
 - https://github.com/gmh5225/D3D12-Hook-ImGui [DX12]
 - https://github.com/gmh5225/D3D11-Discord-Overlay-Hook [DX11]
+- https://github.com/ocornut/imgui/commit/923bd2fd217c1dc1e75fa92b0284d3817904988b [DX11/12 ResizeBuffers]
 
 
 ## Cheat
