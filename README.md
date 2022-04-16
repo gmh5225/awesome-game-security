@@ -259,6 +259,7 @@
 - https://github.com/cursey/ue4genny [SDK Generator]
 - https://github.com/Zebratic/UE4Injector [Inject]
 - https://github.com/N-T33/UE4-Silent-Aim [Aimbot]
+- https://github.com/gmh5225/UE-ue4_base [SDK Template]
 
 > Game Engine Explorer:Unity
 - https://github.com/Perfare/Il2CppDumper [Il2Cpp Dump]
