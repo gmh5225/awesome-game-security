@@ -13,6 +13,8 @@
 - https://github.com/cocos/cocos-engine
 - https://github.com/CRYTEK/CRYENGINE
 - https://github.com/ValveSoftware/source-sdk-2013
+- https://github.com/gmh5225/GameEngine-source-engine.2003
+- https://github.com/gmh5225/GameEngine-SourceEngine2007
 - https://github.com/nillerusr/source-engine
 - https://github.com/adriengivry/Overload
 - https://github.com/flwmxd/MapleEngine
