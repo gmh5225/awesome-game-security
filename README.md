@@ -349,6 +349,9 @@
 - https://github.com/pebu1337/valorant-externals [Offset]
 - https://github.com/Pinguu-dev/PINGUU-VAL
 
+> Game:COD Warzone
+- https://github.com/gmh5225/COD-Warzone-MW-HACK-ESP-AIMBOT
+
 > Game:Apex Legends
 - https://github.com/dhanax26/Apex-Legends-Offset-Dumper [Offset]
 - https://github.com/ofDataa/offsets [Offset]
