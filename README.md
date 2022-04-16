@@ -322,6 +322,9 @@
 - https://github.com/shalzuth/LoLClient
 - https://github.com/R3nzTheCodeGOD/R3nzSkin [Skin]
 
+> Game:CS1.6
+- https://github.com/gmh5225/CS16-hpp-hack
+
 > Game:CSGO
 - https://github.com/KittenPopo/csgo-offsets [Offset]
 - https://github.com/ofDataa/offsets [Offset]
