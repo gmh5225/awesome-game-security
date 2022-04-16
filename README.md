@@ -127,6 +127,9 @@
 - https://github.com/hugsy/CFB [Monitor IRP]
 - https://ioninja.com/downloads.html [Protocol Analyzer]
 
+> Windows Kernel Explorer
+- https://github.com/BlackINT3/OpenArk
+
 > Decompiler
 - IDA Pro
 - Binary Ninja
