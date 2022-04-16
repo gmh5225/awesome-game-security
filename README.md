@@ -358,6 +358,7 @@
 - https://github.com/rakuza2/SIMPLE-AIMBOT-GLOW-APEX
 - https://github.com/TheCruZ/Direct-EFI-Apex-Cheat
 - https://github.com/Astronaut00/apex-external
+- https://github.com/gmh5225/Valorant-Phoenix-Cheat
 - https://github.com/CasualX/apexbot [Rust Language]
 
 > Game:Fortnite
