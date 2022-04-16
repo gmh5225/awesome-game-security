@@ -48,6 +48,9 @@
 - https://github.com/Kazade/kazmath
 - https://github.com/gmh5225/math-int_fastdiv
 
+## AI
+- https://github.com/ls361664056/GameAI-paper-list [zh]
+
 ## Image Codec
 - https://github.com/nothings/stb
 - https://github.com/libjpeg-turbo/libjpeg-turbo
