@@ -352,6 +352,7 @@
 - https://github.com/ofDataa/offsets [Offset]
 - https://github.com/pebu1337/valorant-externals [Offset]
 - https://github.com/Pinguu-dev/PINGUU-VAL
+- https://github.com/gmh5225/valorant-gui-imgui-remake [GUI]
 
 > Game:COD Warzone
 - https://github.com/gmh5225/COD-Warzone-MW-HACK-ESP-AIMBOT
