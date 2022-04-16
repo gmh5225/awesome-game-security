@@ -84,7 +84,7 @@
 - https://github.com/MKXJun/DirectX11-With-Windows-SDK [DX11 zh]
 
 > Hook
-- https://github.com/DrNseven/D3D12-Hook-ImGui [DX12]
+- https://github.com/gmh5225/D3D12-Hook-ImGui [DX12]
 - https://github.com/gmh5225/D3D11-Discord-Overlay-Hook [DX11]
 
 
