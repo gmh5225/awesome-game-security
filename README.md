@@ -85,6 +85,7 @@
 
 > Hook
 - https://github.com/DrNseven/D3D12-Hook-ImGui [DX12]
+- https://github.com/gmh5225/D3D11-Discord-Overlay-Hook [DX11]
 
 
 ## Cheat
