@@ -167,6 +167,7 @@
 - https://github.com/coltonon/D2DOverlay
 - https://github.com/Unkn0wnH4ck3r/GameOverlayUIHook [Steam]
 - https://github.com/gmh5225/dwmhook [DWM]
+- https://github.com/gmh5225/overlay-nvidia-overlay-hijack [Hijack Nvidia]
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
