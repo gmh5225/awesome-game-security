@@ -357,6 +357,9 @@
 - https://github.com/Pinguu-dev/PINGUU-VAL
 - https://github.com/gmh5225/valorant-gui-imgui-remake [GUI]
 
+> Game:COD1
+- https://github.com/gmh5225/CoD_Hacks
+
 > Game:COD Warzone
 - https://github.com/gmh5225/COD-Warzone-MW-HACK-ESP-AIMBOT
 
