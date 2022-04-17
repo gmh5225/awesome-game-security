@@ -139,6 +139,10 @@
 - https://github.com/Konloch/bytecode-viewer [Java]
 - https://github.com/java-deobfuscator/deobfuscator [Java]
 
+> IDA Plugins
+- https://github.com/giladreich/ida_migrator [Migrate Database]
+- https://github.com/can1357/NtRays [Windows Kernel Enhance]
+
 > Injection
 - https://github.com/btbd/smap [Scatter Manual Map]
 - https://github.com/btbd/modmap [Extend Manual Map]
