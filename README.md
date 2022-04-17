@@ -292,6 +292,7 @@
 
 > Explore AntiCheat System:EAC
 - https://github.com/thesecretclub/CVEAC-2020 [Integrity Checks]
+- https://github.com/Schnocker/EAC_dbp [Debug]
 
 > Explore AntiCheat System:BE
 - https://github.com/unreaIuser/BE-Emulator
