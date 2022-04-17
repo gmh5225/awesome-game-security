@@ -376,6 +376,7 @@
 - https://github.com/masterpastaa/AutoOffsets [Offset]
 - https://github.com/OfficialDyn/Fortnite-Offsets [Offset]
 - https://github.com/Zetolac/FortniteOffsetsAndSigs [Offset]
+- https://github.com/Android1337/Fortnite-Offsets [Offset]
 - https://github.com/Makk5/FortConsole
 - https://github.com/skidseal/FortniteLeak5
 - https://github.com/Zetolac/FortniteExternalW2S
