@@ -142,6 +142,10 @@
 > IDA Plugins
 - https://github.com/giladreich/ida_migrator [Migrate Database]
 - https://github.com/can1357/NtRays [Windows Kernel Enhance]
+- https://github.com/JustasMasiulis/ida_bitfields [Windows Kernel Enhance]
+
+> Binary Ninja Plugins
+- https://github.com/EliseZeroTwo/SEH-Helper [SEH Helper]
 
 > Injection
 - https://github.com/btbd/smap [Scatter Manual Map]
