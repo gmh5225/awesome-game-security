@@ -438,6 +438,7 @@
 - https://github.com/Ahora57/MAJESTY-technologies
 - https://github.com/AdvDebug/AntiCrack-DotNet [CSharp]
 - https://github.com/weak1337/CEDetector [CE]
+- https://github.com/Ahora57/MAJESTY-technologies
 
 > Page Protection
 - https://github.com/changeofpace/Self-Remapping-Code
@@ -491,6 +492,7 @@
 > Detection:Virtual Environments 
 - https://github.com/a0rtega/pafish
 - https://github.com/gmh5225/Detection-Hyper-v [Hyper-v]
+- https://github.com/Ahora57/MAJESTY-technologies
 
 > Detection:HWID
 - https://github.com/medievalghoul/hwid-checker-mg
