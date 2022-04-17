@@ -386,6 +386,7 @@
 - https://github.com/gmh5225/fortnite-cheat-source-internal
 - https://github.com/gmh5225/Fortnite-Hack-Esp-Exploits-With-Menu
 - https://github.com/gmh5225/Fortnite-nigusFN
+- https://github.com/gmh5225/Fortnite-Source-External-EAC-BE-undetected
 
 > Game:Super People
 - https://github.com/EBalloon/Super-People-sdk
