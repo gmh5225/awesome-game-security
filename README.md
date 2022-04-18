@@ -79,6 +79,7 @@
 - https://github.com/ZehMatt/SnakeRoyal [Mini Game With Server]
 - https://github.com/MKXJun/Super-Fighter [DX11 Mini Game]
 - https://github.com/MKXJun/Rubik-Cube [DX9/11 Mini Game]
+- https://github.com/Suprcode/mir2 [MIR2]
 
 
 ## DirectX
