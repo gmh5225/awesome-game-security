@@ -386,6 +386,7 @@
 - https://github.com/Astronaut00/apex-external
 - https://github.com/gmh5225/Valorant-Phoenix-Cheat
 - https://github.com/CasualX/apexbot [Rust Language]
+- https://github.com/gmh5225/APEX-ESP_AIMBOT
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
