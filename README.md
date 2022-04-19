@@ -410,6 +410,8 @@
 
 > Game:PUBG
 - https://github.com/Skengdoo/pubg-external-cheat
+- https://github.com/gmh5225/pubg-pubg_internal
+- https://github.com/gmh5225/pubg-internal
 
 > Game:R6
 - https://github.com/NMan1/Rainbow-Six-Cheat
