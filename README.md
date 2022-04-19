@@ -364,6 +364,8 @@
 - https://github.com/Kruziikrel1/CSGO-FindMDL [Model Changer]
 - https://github.com/ekknod/nv_v2 [Sound ESP]
 - https://github.com/gmh5225/CSGO-Improved-CSGO_Simple
+- https://github.com/gmh5225/CSGO-SpyExternal1337hax [External]
+- https://github.com/gmh5225/CSGO-Seaside [Internal]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
