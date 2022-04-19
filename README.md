@@ -45,6 +45,9 @@
 - https://github.com/TorqueGameEngines/Torque2D [2D]
 - https://github.com/TorqueGameEngines/Torque3D [3D]
 
+> Game Engine Detector
+- https://github.com/walzer/game-engine-detector [Mobile Game]
+
 ## Mathematics
 - https://github.com/Groovounet/glm
 - https://github.com/Kazade/kazmath
