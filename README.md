@@ -146,6 +146,7 @@
 - https://github.com/giladreich/ida_migrator [Migrate Database]
 - https://github.com/can1357/NtRays [Windows Kernel Enhance]
 - https://github.com/JustasMasiulis/ida_bitfields [Windows Kernel Enhance]
+- https://github.com/gmh5225/IDA2Obj [COFF Relink]
 
 > Binary Ninja Plugins
 - https://github.com/EliseZeroTwo/SEH-Helper [SEH Helper]
