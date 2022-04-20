@@ -124,12 +124,13 @@
 
 > Debugging
 - https://github.com/cheat-engine/cheat-engine
-- https://github.com/gmh5225/CheatEngineMonoHelper [Mono]
+- https://github.com/gmh5225/CheatEngineMonoHelper [CE Mono Helper]
+- https://github.com/gmh5225/frida-ceserver [CE Server]
+- https://github.com/isabellaflores/ceserver-pcileech [CE Server]
 - https://github.com/x64dbg/x64dbg
 - https://github.com/x64dbg/DotX64Dbg
 - https://github.com/imugee/xdv
 - https://github.com/eteran/edb-debugger [For Linux]
-- https://github.com/isabellaflores/ceserver-pcileech
 - https://github.com/mrexodia/TitanHide
 - https://github.com/Air14/HyperHide 
 - https://github.com/HyperDbg/HyperDbg
