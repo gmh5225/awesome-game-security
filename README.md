@@ -124,6 +124,7 @@
 
 > Debugging
 - https://github.com/cheat-engine/cheat-engine
+- https://github.com/gmh5225/CheatEngineMonoHelper [Mono]
 - https://github.com/x64dbg/x64dbg
 - https://github.com/x64dbg/DotX64Dbg
 - https://github.com/imugee/xdv
