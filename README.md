@@ -161,6 +161,7 @@
 - https://github.com/JustasMasiulis/ida_bitfields [Windows Kernel Enhance]
 - https://github.com/gmh5225/IDA2Obj [COFF Relink]
 - https://github.com/gmh5225/IDA-Plugin-dotNIET [Import .NET Symbol]
+- https://github.com/aliyunav/Finger [Recognizing Function By Cloud]
 
 > Binary Ninja Plugins
 - https://github.com/EliseZeroTwo/SEH-Helper [SEH Helper]
