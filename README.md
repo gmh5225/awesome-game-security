@@ -89,6 +89,7 @@
 
 ## Game Testing
 - https://github.com/AirtestProject/Airtest [UI Automation Framework]
+- https://github.com/dendibakh/perf-ninja [Performance Analysis]
 
 
 ## DirectX
