@@ -452,6 +452,10 @@
 - https://github.com/khang06/mhynot2
 - https://github.com/gmh5225/genshinjumpfixer2 [Decode CFG]
 
+> Game:EldenRing
+- https://github.com/techiew/EldenRingMods [Mod]
+
+
 ## Anti Cheat
 > Guide
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
