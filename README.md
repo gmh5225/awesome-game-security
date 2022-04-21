@@ -386,6 +386,7 @@
 - https://github.com/pebu1337/valorant-externals [Offset]
 - https://github.com/Pinguu-dev/PINGUU-VAL
 - https://github.com/gmh5225/valorant-gui-imgui-remake [GUI]
+- https://github.com/gmh5225/valorant-internal
 
 > Game:COD1
 - https://github.com/gmh5225/CoD_Hacks
