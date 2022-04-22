@@ -250,6 +250,9 @@
 - https://github.com/gmh5225/dwmhook [DWM]
 - https://github.com/wongfei/wda_monitor_trick
 
+> Spoof Stack
+- https://github.com/gmh5225/ThreadStackSpoofer
+
 > Hide
 - https://github.com/JKornev/hidden
 - https://github.com/KANKOSHEV/NoScreen [Hide Window]
