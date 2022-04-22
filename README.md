@@ -498,6 +498,7 @@
 > Obfuscation Engine
 - https://github.com/mike1k/perses
 - https://github.com/jnastarot/furikuri
+- https://github.com/nickcano/RelocBonus [Attack Reloc]
 
 > Screenshot
 - https://github.com/bavulapati/DXGICaptureApplication [Capture Desktop]
