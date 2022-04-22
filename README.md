@@ -363,6 +363,7 @@
 - https://github.com/shalzuth/LeagueSharp
 - https://github.com/shalzuth/LoLClient
 - https://github.com/R3nzTheCodeGOD/R3nzSkin [Skin]
+- https://github.com/gmh5225/hh-lol-prophet
 
 > Game:CS1.6
 - https://github.com/gmh5225/CS16-hpp-hack
