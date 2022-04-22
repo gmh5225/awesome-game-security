@@ -489,6 +489,7 @@
 
 > Page Protection
 - https://github.com/changeofpace/Self-Remapping-Code
+- https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-addsecurememorycachecallback
 - https://github.com/weak1337/NO_ACCESS_Protection
 
 > Binary Packer
