@@ -497,6 +497,7 @@
 
 > Obfuscation Engine
 - https://github.com/mike1k/perses
+- https://github.com/jnastarot/furikuri
 
 > Screenshot
 - https://github.com/bavulapati/DXGICaptureApplication [Capture Desktop]
