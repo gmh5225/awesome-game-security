@@ -493,6 +493,7 @@
 
 > Binary Packer
 - https://github.com/dhondta/awesome-executable-packing
+- https://github.com/iArtorias/debug_remover [Strip Debug Info]
 
 > Obfuscation Engine
 - https://github.com/mike1k/perses
