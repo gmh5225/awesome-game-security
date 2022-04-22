@@ -146,6 +146,9 @@
 - https://github.com/hugsy/CFB [Monitor IRP]
 - https://ioninja.com/downloads.html [Protocol Analyzer]
 
+> Bypass PatchGuard
+- https://github.com/gmh5225/PG-EasyAntiPatchGuard
+
 > Windows Kernel Explorer
 - https://github.com/Arquivotheca/WinNT5_src_20201004 [Leaked Windows XP Source]
 - https://github.com/BlackINT3/OpenArk
