@@ -158,6 +158,9 @@
 - https://github.com/Arquivotheca/WinNT5_src_20201004 [Leaked Windows XP Source]
 - https://github.com/BlackINT3/OpenArk
 
+> Virtual Environments
+- https://github.com/gmh5225/Android-BlackBox [Android]
+
 > Decompiler
 - IDA Pro
 - Binary Ninja
