@@ -197,6 +197,7 @@
 
 > RPM
 - https://github.com/btbd/access
+- https://github.com/gmh5225/readwrite-kernel-stable
 - https://github.com/DarthTon/Blackbone
 - https://github.com/HoShiMin/Kernel-Bridge
 - https://github.com/waryas/EUPMAccess
