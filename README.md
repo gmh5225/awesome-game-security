@@ -328,6 +328,7 @@
 - https://github.com/nneonneo/Il2CppVersions [Il2Cpp Version]
 - https://github.com/sneakyevilSK/IL2CPP_Resolver
 - https://github.com/knah/Il2CppAssemblyUnhollower
+- https://github.com/gmh5225/mono-external-lib [External Mono Example]
 
 > Explore AntiCheat System:VAC
 - https://github.com/danielkrupinski/VAC-Bypass-Loader
