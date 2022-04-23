@@ -372,6 +372,10 @@
 - https://github.com/R3nzTheCodeGOD/R3nzSkin [Skin]
 - https://github.com/gmh5225/hh-lol-prophet
 
+> Game:Dota2
+- https://github.com/skrixx68/Dota2-Overlay-2.0
+- https://github.com/skrixx68/Dota2-Overlay-OffsetUpdater
+
 > Game:CS1.6
 - https://github.com/gmh5225/CS16-hpp-hack
 
