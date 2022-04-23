@@ -532,6 +532,7 @@
 
 > Open Source Anti Cheat System
 - https://github.com/mq1n/NoMercy
+- https://github.com/gmh5225/Anticheat-BetaShield
 - https://github.com/chztbby/RebirthGuard
 - https://github.com/GravitLauncher/Avanguard
 - https://github.com/Rycooop/Bloom-Anticheat
