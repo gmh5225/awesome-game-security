@@ -469,6 +469,7 @@
 
 > Game:Rust
 - https://github.com/NMan1/OverflowRust
+- https://github.com/gmh5225/simple-rust-hack
 
 > Game:Genshin Impact
 - https://github.com/khang06/mhynot2
