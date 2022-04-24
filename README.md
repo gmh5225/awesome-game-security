@@ -593,6 +593,10 @@
 > Information System
 - https://github.com/Enum0x539/Qvoid-Token-Grabber
 
+> Dynamic Script
+- https://github.com/FastVM/minivm
+- https://github.com/jnz/q3vm
+
 ## Some Tricks
 > Windows Ring0
 - https://www.unknowncheats.me/forum/general-programming-and-reversing/495279-messagebox-kernel-mode.html [Msgbox]
