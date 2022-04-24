@@ -196,6 +196,9 @@
 - https://github.com/can1357/ThePerfectInjector [PTE.User]
 - https://github.com/gmh5225/Driver-HVCI-KernelForge [Hijack ROP]
 
+> Rop Finder
+- https://github.com/gmh5225/ROP-rp
+
 > RPM
 - https://github.com/btbd/access
 - https://github.com/gmh5225/readwrite-kernel-stable
@@ -525,12 +528,14 @@
 > Binary Packer
 - https://github.com/dhondta/awesome-executable-packing
 - https://github.com/iArtorias/debug_remover [Strip Debug Info]
+- https://github.com/gmh5225/packer-pe32-password
 
 > Obfuscation Engine
 - https://github.com/mike1k/perses
 - https://github.com/jnastarot/furikuri
 - https://github.com/nickcano/RelocBonus [Attack Reloc]
 - https://github.com/gmh5225/packer-nmmp [Dex]
+- https://github.com/d35ha/CallObfuscator [Call Obfuscation]
 
 > Screenshot
 - https://github.com/bavulapati/DXGICaptureApplication [Capture Desktop]
