@@ -594,6 +594,7 @@
 - https://github.com/Enum0x539/Qvoid-Token-Grabber
 
 > Dynamic Script
+- https://github.com/can1357/NtLua
 - https://github.com/FastVM/minivm
 - https://github.com/jnz/q3vm
 
