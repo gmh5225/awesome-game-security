@@ -530,6 +530,7 @@
 - https://github.com/mike1k/perses
 - https://github.com/jnastarot/furikuri
 - https://github.com/nickcano/RelocBonus [Attack Reloc]
+- https://github.com/gmh5225/packer-nmmp [Dex]
 
 > Screenshot
 - https://github.com/bavulapati/DXGICaptureApplication [Capture Desktop]
