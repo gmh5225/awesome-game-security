@@ -196,6 +196,14 @@
 - https://github.com/can1357/ThePerfectInjector [PTE.User]
 - https://github.com/gmh5225/Driver-HVCI-KernelForge [Hijack ROP]
 
+> Hook
+- https://github.com/microsoft/Detours
+- https://github.com/wbenny/DetoursNT
+- https://github.com/stevemk14ebr/PolyHook
+- https://github.com/stevemk14ebr/PolyHook_2_0
+- https://github.com/WopsS/RenHook
+- https://github.com/gmh5225/Android-hook-PyAsmPatch
+
 > Rop Finder
 - https://github.com/gmh5225/ROP-rp
 
@@ -529,6 +537,7 @@
 - https://github.com/dhondta/awesome-executable-packing
 - https://github.com/iArtorias/debug_remover [Strip Debug Info]
 - https://github.com/gmh5225/packer-pe32-password
+- https://github.com/gmh5225/Android-obf-Obfuscapk [Android]
 
 > Obfuscation Engine
 - https://github.com/mike1k/perses
