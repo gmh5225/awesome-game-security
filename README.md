@@ -358,6 +358,7 @@
 > Explore AntiCheat System:EQU8
 - https://back.engineering/12/08/2021
 - https://github.com/kkent030315/EQU8-PoC
+- https://github.com/gmh5225/equ8_bypass
 
 > Explore AntiCheat System:Ricochet
 - https://github.com/weak1337/ricochet_deobfuscator
@@ -532,6 +533,7 @@
 - https://github.com/changeofpace/Self-Remapping-Code
 - https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-addsecurememorycachecallback
 - https://github.com/weak1337/NO_ACCESS_Protection
+- https://github.com/gmh5225/page_no_access
 
 > Binary Packer
 - https://github.com/dhondta/awesome-executable-packing
