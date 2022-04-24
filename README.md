@@ -8,6 +8,7 @@
 - https://github.com/lettier/3d-game-shaders-for-beginners [Shader]
 - https://github.com/PardCode/OpenGL-3D-Game-Tutorial-Series [OpenGL]
 - https://github.com/PardCode/CPP-3D-Game-Tutorial-Series [DirectX]
+- https://github.com/ssloy/tinyrenderer [Render]
 
 > Source
 - https://github.com/EpicGames/UnrealEngine
