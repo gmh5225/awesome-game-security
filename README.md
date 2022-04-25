@@ -48,6 +48,7 @@
 - https://github.com/turbulenz/turbulenz_engine [HTML5]
 - https://github.com/TorqueGameEngines/Torque2D [2D]
 - https://github.com/TorqueGameEngines/Torque3D [3D]
+- https://github.com/PardCode/CX3D [3D]
 
 > Game Engine Detector
 - https://github.com/walzer/game-engine-detector [Mobile Game]
