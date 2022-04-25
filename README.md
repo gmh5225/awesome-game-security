@@ -402,8 +402,11 @@
 - https://github.com/shalzuth/BattleriteBot
 
 > Game:LOL
+- https://github.com/LeagueSharp
 - https://github.com/shalzuth/LeagueSharp
 - https://github.com/shalzuth/LoLClient
+- https://github.com/gmh5225/L-Assemblies
+- https://github.com/gmh5225/LeagueSharp.Loader
 - https://github.com/R3nzTheCodeGOD/R3nzSkin [Skin]
 - https://github.com/gmh5225/hh-lol-prophet
 
@@ -598,6 +601,7 @@
 > Detection:Hide
 - https://github.com/KANKOSHEV/Detect-HiddenThread-via-KPRCB
 - https://github.com/weak1337/SystemThreadFinder
+- https://github.com/gmh5225/HiddenModuleDetector
 
 > Detection: Hacked Hypervisor
 - https://github.com/helloobaby/Nmi-Callback [NMI Callback]
