@@ -296,6 +296,8 @@
 - https://github.com/ekknod/sumap [EFI Manual Map]
 - https://github.com/VollRagm/lpmapper [Manual Map To Large Page Driver]
 - https://github.com/armvirus/CosMapper [Signed Driver Map]
+- https://github.com/gmh5225/HideDriverTesting [Hide Driver]
+- https://github.com/gmh5225/TraceCleaner [Hide Driver]
 
 > Triggerbot
 - https://github.com/changeofpace/MouHidInputHook
@@ -526,6 +528,7 @@
 - https://github.com/Mattiwatti/EfiGuard [PG Testing]
 - https://github.com/9176324/Shark [PG Testing]
 - https://github.com/gmh5225/HideDriverTesting [Hide Driver Testing]
+- https://github.com/gmh5225/TraceCleaner [Hide Driver Testing]
 - https://github.com/gmh5225/disable-threat-tracing [ETW Testing]
 - https://github.com/daswareinfach/Battleye-VAC-EAC-Kernel-Bypass [FsFilter Testing]
 
