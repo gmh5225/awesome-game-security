@@ -236,6 +236,7 @@
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
+- https://github.com/gmh5225/KernelGDIDraw
 
 > Vulnerable Driver 
 - https://github.com/gmh5225/Exploit-vulnerable-physmem_drivers [Vulnerable Driver List]
