@@ -469,6 +469,7 @@
 - https://github.com/gmh5225/Valorant-Phoenix-Cheat
 - https://github.com/CasualX/apexbot [Rust Language]
 - https://github.com/gmh5225/APEX-ESP_AIMBOT
+- https://github.com/gmh5225/Apex-Legends_Driver_Cheat
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
