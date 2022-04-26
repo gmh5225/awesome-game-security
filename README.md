@@ -304,6 +304,7 @@
 - https://github.com/armvirus/CosMapper [Signed Driver Map]
 - https://github.com/gmh5225/HideDriverTesting [Hide Driver]
 - https://github.com/gmh5225/TraceCleaner [Hide Driver]
+- https://github.com/KelvinMsft/NoTruth [Hide Memory By VT]
 
 > Triggerbot
 - https://github.com/changeofpace/MouHidInputHook
@@ -604,11 +605,13 @@
 > Detection:Triggerbot
 - https://github.com/KANKOSHEV/Detect-MouseClassServiceCallback
 - https://github.com/changeofpace/MouHidInputHook
+- https://github.com/KelvinMsft/UsbMon
 
 > Detection:Hide
 - https://github.com/KANKOSHEV/Detect-HiddenThread-via-KPRCB
 - https://github.com/weak1337/SystemThreadFinder
 - https://github.com/gmh5225/HiddenModuleDetector
+- https://github.com/KelvinMsft/ThreadSpy
 
 > Detection: Hacked Hypervisor
 - https://github.com/helloobaby/Nmi-Callback [NMI Callback]
