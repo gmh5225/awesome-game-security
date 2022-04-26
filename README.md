@@ -184,6 +184,7 @@
 - https://github.com/giladreich/ida_migrator [Migrate Database]
 - https://github.com/can1357/NtRays [Windows Kernel Enhance]
 - https://github.com/JustasMasiulis/ida_bitfields [Windows Kernel Enhance]
+- https://github.com/VoidSec/DriverBuddyReloaded [Windows Kernel Analysis]
 - https://github.com/gmh5225/IDA2Obj [COFF Relink]
 - https://github.com/gmh5225/IDA-Plugin-dotNIET [Import .NET Symbol]
 - https://github.com/aliyunav/Finger [Recognizing Function By Cloud]
