@@ -256,6 +256,8 @@
 - https://github.com/kkent030315/MsIoExploit [MsIo64.sys]
 - https://github.com/kkent030315/evil-mhyprot-cli [Mhyprot2.sys]
 - https://github.com/gmh5225/AvastHV [Avast]
+- https://github.com/gmh5225/KasperskyHook [Kaspersky]
+
 
 > Driver Communication
 - https://github.com/EBalloon/Common-Registry
