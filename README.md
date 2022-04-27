@@ -540,6 +540,9 @@
 > Game:EldenRing
 - https://github.com/techiew/EldenRingMods [Mod]
 
+> Game:Dark Souls
+- https://github.com/igromanru/Dark-Souls-III-Cheat-Engine-Guide
+
 
 ## Anti Cheat
 > Guide
