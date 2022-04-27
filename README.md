@@ -52,8 +52,12 @@
 - https://github.com/TrinityCore/TrinityCore [MMORPG]
 - https://github.com/solenum/exengine [C99 3D]
 
+> Game Engine Plugins
+- https://github.com/gmh5225/UE4-plugin-RiderSourceCodeAccess [Unreal]
+
 > Game Engine Detector
 - https://github.com/walzer/game-engine-detector [Mobile Game]
+
 
 ## Mathematics
 - https://github.com/Groovounet/glm
