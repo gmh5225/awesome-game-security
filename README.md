@@ -193,6 +193,9 @@
 > Binary Ninja Plugins
 - https://github.com/EliseZeroTwo/SEH-Helper [SEH Helper]
 
+> Windbg Plugins
+- https://github.com/gmh5225/windbg-SwishDbgExt
+
 > Injection
 - https://github.com/btbd/smap [Scatter Manual Map]
 - https://github.com/btbd/modmap [Extend Manual Map]
