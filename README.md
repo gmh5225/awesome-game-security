@@ -635,7 +635,7 @@
 > Detection:Virtual Environments 
 - https://github.com/a0rtega/pafish
 - https://github.com/gmh5225/Detection-Hyper-v [Hyper-v]
-- https://github.com/Ahora57/MAJESTY-technologies
+- https://github.com/gmh5225/AntiDbg-MAJESTY-technologies
 
 > Detection:HWID
 - https://github.com/medievalghoul/hwid-checker-mg
