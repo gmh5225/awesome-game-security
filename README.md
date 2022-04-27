@@ -100,6 +100,7 @@
 ## Game Testing
 - https://github.com/AirtestProject/Airtest [UI Automation Framework]
 - https://github.com/dendibakh/perf-ninja [Performance Analysis]
+- https://github.com/gmh5225/UptimeFaker [Detecting High PC Uptime]
 
 
 ## DirectX
