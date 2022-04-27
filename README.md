@@ -638,6 +638,7 @@
 
 > Information System
 - https://github.com/Enum0x539/Qvoid-Token-Grabber
+- https://github.com/gmh5225/dfirtriage
 
 > Dynamic Script
 - https://github.com/can1357/NtLua
