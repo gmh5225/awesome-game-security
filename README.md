@@ -601,6 +601,7 @@
 
 > Detection:Memory Integrity
 - https://github.com/gmh5225/integrity
+- https://github.com/gmh5225/Detect-QueryWorkingSetExample
 
 > Detection:Attach
 - https://github.com/KANKOSHEV/Detect-KeAttachProcess
