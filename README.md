@@ -624,6 +624,7 @@
 
 > Detection: Hacked Hypervisor
 - https://github.com/helloobaby/Nmi-Callback [NMI Callback]
+- https://github.com/momo5502/ept-hook-detection [Detect EPT]
 
 > Detection:Virtual Environments 
 - https://github.com/a0rtega/pafish
