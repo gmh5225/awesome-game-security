@@ -553,6 +553,7 @@
 
 > Anti Debugging
 - https://github.com/LordNoteworthy/al-khaser
+- https://github.com/gmh5225/ScyllaHideDetector2 
 - https://github.com/Ahora57/MAJESTY-technologies
 - https://github.com/AdvDebug/AntiCrack-DotNet [CSharp]
 - https://github.com/weak1337/CEDetector [CE]
