@@ -649,7 +649,7 @@
 - https://github.com/FastVM/minivm
 - https://github.com/jnz/q3vm
 
-> Ring3 Callback
+> Windows Ring3 Callback
 - https://github.com/gmh5225/Callback-AlternativeShellcodeExec
 
 > Winows Kernel Dump Analysis
