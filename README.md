@@ -255,6 +255,7 @@
 - https://github.com/gmh5225/Driver-kdmapper-1909 [iqvw64e.sys]
 - https://github.com/kkent030315/MsIoExploit [MsIo64.sys]
 - https://github.com/kkent030315/evil-mhyprot-cli [Mhyprot2.sys]
+- https://github.com/gmh5225/AvastHV [Avast]
 
 > Driver Communication
 - https://github.com/EBalloon/Common-Registry
