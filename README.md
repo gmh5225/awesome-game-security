@@ -649,6 +649,9 @@
 - https://github.com/FastVM/minivm
 - https://github.com/jnz/q3vm
 
+> Ring3 Callback
+- https://github.com/gmh5225/Callback-AlternativeShellcodeExec
+
 > Winows Kernel Dump Analysis
 - https://github.com/gmh5225/Tool-DIYSystemMemoryDump [DIY Dump Type]
 
