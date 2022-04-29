@@ -521,6 +521,9 @@
 - https://github.com/gmh5225/pubg-pubg_internal
 - https://github.com/gmh5225/pubg-internal
 
+> Game:PUBGM
+- https://github.com/Mood-Coding/pubgm_shitty_source
+
 > Game:R6
 - https://github.com/NMan1/Rainbow-Six-Cheat
 - https://github.com/NMan1/OverflowR6V2
