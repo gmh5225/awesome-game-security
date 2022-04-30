@@ -51,6 +51,7 @@
 - https://github.com/PardCode/CX3D [3D]
 - https://github.com/TrinityCore/TrinityCore [MMORPG]
 - https://github.com/solenum/exengine [C99 3D]
+- https://github.com/TheCherno/Hazel
 
 > Game Engine Plugins
 - https://github.com/gmh5225/UE4-plugin-RiderSourceCodeAccess [Unreal]
