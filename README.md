@@ -189,6 +189,7 @@
 - https://github.com/java-deobfuscator/deobfuscator [Java]
 
 > IDA Plugins
+- https://github.com/vmallet/ida-plugins [List of IDA Plugins]
 - https://github.com/giladreich/ida_migrator [Migrate Database]
 - https://github.com/can1357/NtRays [Windows Kernel Enhance]
 - https://github.com/JustasMasiulis/ida_bitfields [Windows Kernel Enhance]
