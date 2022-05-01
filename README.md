@@ -559,6 +559,9 @@
 > Game:Dark Souls
 - https://github.com/igromanru/Dark-Souls-III-Cheat-Engine-Guide
 
+> Game: GTA5
+- https://github.com/Luksiuss/GTA-5-SIGS-1.59 [Offset]
+
 
 ## Anti Cheat
 > Guide
