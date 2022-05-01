@@ -521,6 +521,7 @@
 - https://github.com/gmh5225/Fortnite
 - https://github.com/gmh5225/Fortnite-Basic-Cheat-Source-Internal
 - https://github.com/gmh5225/Fortnite-UD-External
+- https://github.com/gmh5225/Fortnite-Gloomy.cc
 
 > Game:Super People
 - https://github.com/EBalloon/Super-People-sdk
