@@ -523,6 +523,9 @@
 - https://github.com/gmh5225/Fortnite-UD-External
 - https://github.com/gmh5225/Fortnite-Gloomy.cc
 
+> Game:Bloodhunt
+- https://github.com/gmh5225/HackExternal--bloodhunt
+
 > Game:Super People
 - https://github.com/EBalloon/Super-People-sdk
 
