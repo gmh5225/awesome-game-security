@@ -167,6 +167,9 @@
 - https://github.com/hugsy/CFB [Monitor IRP]
 - https://ioninja.com/downloads.html [Protocol Analyzer]
 
+> Dynamic Instrumentation
+- https://github.com/googleprojectzero/TinyInst
+
 > Bypass PatchGuard
 - https://github.com/gmh5225/PG-EasyAntiPatchGuard
 
