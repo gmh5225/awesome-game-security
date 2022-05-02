@@ -103,6 +103,10 @@
 - https://github.com/WolfireGames/overgrowth [Overgrowth]
 - https://github.com/gmh5225/Game-hl-mods [Modification For Half-Life]
 
+## Game Hot Patch
+- https://github.com/Tencent/xLua
+
+
 ## Game Testing
 - https://github.com/AirtestProject/Airtest [UI Automation Framework]
 - https://github.com/dendibakh/perf-ninja [Performance Analysis]
