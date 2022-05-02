@@ -338,6 +338,7 @@
 - https://github.com/KelvinMsft/NoTruth [Hide Memory By VT]
 - https://github.com/gmh5225/Driver-MapPage [Self Map Driver]
 - https://github.com/gmh5225/HideDriver [Hide Driver By Modify Flink/Blink]
+- https://github.com/gmh5225/HideDriver-MiProcessLoaderEntry [Hide Driver By MiProcessLoaderEntryk]
 
 > Triggerbot
 - https://github.com/changeofpace/MouHidInputHook
@@ -592,6 +593,7 @@
 - https://github.com/9176324/Shark [PG Testing]
 - https://github.com/gmh5225/HideDriverTesting [Hide Driver Testing]
 - https://github.com/gmh5225/HideDriver [Hide Driver Testing]
+- https://github.com/gmh5225/HideDriver-MiProcessLoaderEntry [Hide Driver Testing]
 - https://github.com/gmh5225/TraceCleaner [Hide Driver Testing]
 - https://github.com/gmh5225/disable-threat-tracing [ETW Testing]
 - https://github.com/daswareinfach/Battleye-VAC-EAC-Kernel-Bypass [FsFilter Testing]
