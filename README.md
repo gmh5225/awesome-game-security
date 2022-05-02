@@ -546,6 +546,9 @@
 > Game:PUBGM
 - https://github.com/Mood-Coding/pubgm_shitty_source
 
+> Game:EFT
+- https://github.com/gmh5225/EFT-StreamedCheat
+
 > Game:R6
 - https://github.com/NMan1/Rainbow-Six-Cheat
 - https://github.com/NMan1/OverflowR6V2
