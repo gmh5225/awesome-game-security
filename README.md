@@ -280,6 +280,7 @@
 - https://github.com/gmh5225/AvastHV [Avast]
 - https://github.com/gmh5225/KasperskyHook [Kaspersky]
 - https://github.com/gmh5225/CVE-2021-21551 [dbutil_2_3.sys]
+- https://github.com/gmh5225/Driver-imxyviMapper [AsUpIO.sys]
 
 
 > Driver Communication
