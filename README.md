@@ -340,7 +340,7 @@
 - https://github.com/gmh5225/HideDriver-flink-blink [Hide Driver By Modify Flink/Blink]
 - https://github.com/gmh5225/HideDriver-MiProcessLoaderEntry [Hide Driver By MiProcessLoaderEntryk]
 
-> Triggerbot
+> Triggerbot & Aimbot
 - https://github.com/changeofpace/MouHidInputHook
 - https://github.com/blackhades00/PareidoliaTriggerbot
 - https://github.com/adspro15/DirectInput
@@ -660,10 +660,11 @@
 > Detection:Attach
 - https://github.com/KANKOSHEV/Detect-KeAttachProcess
 
-> Detection:Triggerbot
+> Detection:Triggerbot & Aimbot
 - https://github.com/KANKOSHEV/Detect-MouseClassServiceCallback
 - https://github.com/changeofpace/MouHidInputHook
 - https://github.com/KelvinMsft/UsbMon
+- https://github.com/gmh5225/AntiCheat-DeepAimDetector [Deep Learning]
 
 > Detection:Hide
 - https://github.com/KANKOSHEV/Detect-HiddenThread-via-KPRCB
