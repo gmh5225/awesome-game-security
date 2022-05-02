@@ -578,6 +578,8 @@
 ## Anti Cheat
 > Guide
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
+- https://github.com/gmh5225/AntiCheat-WeirdAntiCheatIdeas
+- https://github.com/gmh5225/AntiCheat-chrysalis
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/481731-tutorial-ring3-anticheat-project.html
 - https://github.com/dhondta/awesome-executable-packing [Executable File Packing]
 
