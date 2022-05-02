@@ -530,6 +530,7 @@
 
 > Game:Bloodhunt
 - https://github.com/gmh5225/HackExternal--bloodhunt
+- https://github.com/gmh5225/BloodHunt-v1.1
 
 > Game:Super People
 - https://github.com/EBalloon/Super-People-sdk
