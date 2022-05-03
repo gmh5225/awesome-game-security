@@ -363,6 +363,7 @@
 - https://github.com/InstinctTheDevil/EclipsedSpoofer-EAC-BE
 - https://github.com/SamuelTulach/rainbow [EFI]
 - https://github.com/btbd/wpp [Intercepting DeviceControl via WPP]
+- https://github.com/gmh5225/Driver-owned_alignment [Abusing Alignment]
 
 > Bypass Page Protection
 - https://github.com/illegal-instruction-co/CountHook [WorkingSet]
