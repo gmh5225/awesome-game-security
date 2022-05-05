@@ -713,6 +713,7 @@
 
 > Windows Ring3 Callback
 - https://github.com/gmh5225/Callback-AlternativeShellcodeExec
+- https://github.com/Deputation/instrumentation_callbacks [Instrumentation Callback]
 
 > Winows Kernel Dump Analysis
 - https://github.com/gmh5225/Tool-DIYSystemMemoryDump [DIY Dump Type]
