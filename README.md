@@ -719,6 +719,10 @@
 > Winows Kernel Dump Analysis
 - https://github.com/gmh5225/Tool-DIYSystemMemoryDump [DIY Dump Type]
 
+> Sign Tools
+- https://github.com/gmh5225/signtool-osslsigncode
+
+
 ## Some Tricks
 > Windows Ring0
 - https://www.unknowncheats.me/forum/general-programming-and-reversing/495279-messagebox-kernel-mode.html [Msgbox]
