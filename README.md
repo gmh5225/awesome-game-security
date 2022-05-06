@@ -628,6 +628,10 @@
 - https://github.com/gmh5225/packer-pe32-password
 - https://github.com/gmh5225/Android-obf-Obfuscapk [Android]
 
+> Encrypt Variable
+- https://github.com/gmh5225/encrypt-encrypted_value [C++]
+- https://github.com/gmh5225/encrypt-e3 [C++]
+
 > Obfuscation Engine
 - https://github.com/mike1k/perses
 - https://github.com/jnastarot/furikuri
