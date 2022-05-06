@@ -734,7 +734,8 @@
 - https://secret.club/2021/01/04/thread-stuff.html [Anti Debug]
 - https://github.com/gmh5225/signtool-PastDSE [Sign Leaked Cert]
 
-
+## Windows Security Features
+- https://github.com/yardenshafir/cet-research
 
 
 
