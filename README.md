@@ -735,7 +735,7 @@
 - https://github.com/gmh5225/signtool-PastDSE [Sign Leaked Cert]
 
 ## Windows Security Features
-- https://github.com/yardenshafir/cet-research
+- https://github.com/yardenshafir/cet-research [CET]
 
 
 
