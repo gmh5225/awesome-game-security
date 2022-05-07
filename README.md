@@ -545,6 +545,7 @@
 - https://github.com/Skengdoo/pubg-external-cheat
 - https://github.com/gmh5225/pubg-pubg_internal
 - https://github.com/gmh5225/pubg-internal
+- https://github.com/gmh5225/pubg-public
 
 > Game:PUBGM
 - https://github.com/Mood-Coding/pubgm_shitty_source
