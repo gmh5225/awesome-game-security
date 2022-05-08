@@ -629,6 +629,8 @@
 - https://github.com/dhondta/awesome-executable-packing
 - https://github.com/iArtorias/debug_remover [Strip Debug Info]
 - https://github.com/gmh5225/packer-pe32-password
+- https://github.com/gmh5225/packer-Huan
+- https://github.com/gmh5225/packer-HintInject [Hint/Name Table]
 - https://github.com/gmh5225/Android-obf-Obfuscapk [Android]
 
 > Sample Unpacker
