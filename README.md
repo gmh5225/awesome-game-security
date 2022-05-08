@@ -577,6 +577,7 @@
 > Game:Genshin Impact
 - https://github.com/khang06/mhynot2
 - https://github.com/gmh5225/genshinjumpfixer2 [Decode CFG]
+- https://github.com/gmh5225/genshin-cheat
 
 > Game:EldenRing
 - https://github.com/techiew/EldenRingMods [Mod]
