@@ -667,6 +667,7 @@
 - https://github.com/chztbby/RebirthGuard
 - https://github.com/GravitLauncher/Avanguard
 - https://github.com/Rycooop/Bloom-Anticheat
+- https://github.com/gmh5225/AntiMalware-Stresser [Anti Virus in fact but also Anti Cheat]
 - https://github.com/danielkrupinski/VAC [Reversed VAC]
 - https://github.com/ch4ncellor/EAC-Reversal [Reversed EAC]
 - https://github.com/weak1337/BE-Shellcode [Reversed BE Shellcode]
