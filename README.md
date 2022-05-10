@@ -735,6 +735,9 @@
 - https://github.com/gmh5225/Callback-AlternativeShellcodeExec
 - https://github.com/Deputation/instrumentation_callbacks [Instrumentation Callback]
 
+> Windows Ring0 Callback
+- https://github.com/gmh5225/Driver-RtlWalkFrameChain-PsImageNotifyRoutineSpamFilter [ImageNotify Callback With RtlWalkFrameChain]
+
 > Winows Kernel Dump Analysis
 - https://github.com/gmh5225/Tool-DIYSystemMemoryDump [DIY Dump Type]
 
