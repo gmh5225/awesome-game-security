@@ -284,6 +284,7 @@
 - https://github.com/gmh5225/Exploit-vulnerable-physmem_drivers [Vulnerable Driver List]
 - https://github.com/kkent030315/gdrv-loader/tree/1909_mitigation [gdrv.sys]
 - http://rexw3wrz5pldtadf3hy4vqnuzokhco4l32kyntj36fcgpjuy3nvxidid.onion/_xeroxz/VDM [gdrv enhance]
+- https://github.com/gmh5225/eac-mapper [gdrv.sys]
 - https://github.com/TheCruZ/kdmapper [iqvw64e.sys]
 - https://github.com/gmh5225/Driver-kdmapper-1909 [iqvw64e.sys]
 - https://github.com/kkent030315/MsIoExploit [MsIo64.sys]
@@ -308,6 +309,7 @@
 - https://github.com/gmh5225/AfdIrpCallDispatch [.data Pointer hook in Afd.sys]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/483093-vtable-kernel-function-hook-communication.html [NtUserMessageCall]
 - https://github.com/gmh5225/Driver-MapPage [NtUserGetObjectInformation]
+- https://github.com/gmh5225/eac-mapper [NtMapVisualRelativePoints]
 
 > EFI Driver
 - https://github.com/ekknod/sumap [EFI Manual Map]
@@ -349,6 +351,7 @@
 - https://github.com/gmh5225/TraceCleaner [Hide Driver]
 - https://github.com/KelvinMsft/NoTruth [Hide Memory By VT]
 - https://github.com/gmh5225/Driver-MapPage [Self Map Driver]
+- https://github.com/gmh5225/eac-mapper [Self Map Driver]
 - https://github.com/gmh5225/HideDriver-flink-blink [Hide Driver By Modify Flink/Blink]
 - https://github.com/gmh5225/HideDriver-MiProcessLoaderEntry [Hide Driver By MiProcessLoaderEntryk]
 
@@ -413,6 +416,7 @@
 > Explore AntiCheat System:EAC
 - https://github.com/thesecretclub/CVEAC-2020 [Integrity Checks]
 - https://github.com/Schnocker/EAC_dbp [Debug]
+- https://github.com/gmh5225/eac-mapper [Eac Mapper]
 
 > Explore AntiCheat System:BE
 - https://github.com/unreaIuser/BE-Emulator
