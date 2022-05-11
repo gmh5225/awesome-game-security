@@ -237,6 +237,7 @@
 - https://github.com/andrew9382/manual_mapping_dll_injector [Manual Map]
 - https://github.com/can1357/ThePerfectInjector [PTE.User]
 - https://github.com/gmh5225/Driver-HVCI-KernelForge [Hijack ROP]
+- https://github.com/gmh5225/be-injector [Attack COW]
 
 > Hook
 - https://github.com/microsoft/Detours
@@ -423,6 +424,7 @@
 - https://github.com/masterpastaa/BattlEye-Handler-BYPASS
 - https://github.com/gmh5225/battleye-decryption
 - https://github.com/gmh5225/BE-bedaisy-reversal
+- https://github.com/gmh5225/be-injector [Attack COW]
 
 > Explore AntiCheat System:EQU8
 - https://back.engineering/12/08/2021
@@ -768,6 +770,8 @@
 - https://www.unknowncheats.me/forum/general-programming-and-reversing/495279-messagebox-kernel-mode.html [Msgbox]
 - https://back.engineering/01/12/2020/ [Page Table Manipulation]
 - https://back.engineering/29/03/2021 [Hide Address]
+- https://github.com/gmh5225/be-injector [Attack COW]
+- https://github.com/gmh5225/eac-mapper [Vulnerable MmCopyMemory]
 
 
 > Windows Ring3
