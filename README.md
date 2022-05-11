@@ -773,6 +773,7 @@
 - https://back.engineering/29/03/2021 [Hide Address]
 - https://github.com/gmh5225/be-injector [Attack COW]
 - https://github.com/gmh5225/eac-mapper [Vulnerable MmCopyMemory]
+- https://github.com/gmh5225/be-injector [Attack COW]
 
 
 > Windows Ring3
