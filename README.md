@@ -702,6 +702,7 @@
 
 > Detection:Hook
 - https://github.com/mike1k/HookHunter
+- https://github.com/gmh5225/Detect-hook-buster
 
 > Detection:Memory Integrity
 - https://github.com/gmh5225/integrity
