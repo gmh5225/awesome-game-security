@@ -701,6 +701,7 @@
 - https://github.com/MrDiamond64/Scythe-AntiCheat [Minecraft]
 
 > Detection:Hook
+- https://github.com/hasherezade/pe-sieve
 - https://github.com/mike1k/HookHunter
 - https://github.com/gmh5225/Detect-hook-buster
 
