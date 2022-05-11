@@ -76,6 +76,7 @@
 
 ## Wavefront Obj
 - https://github.com/tinyobjloader/tinyobjloader
+- https://github.com/Twinklebear/tobj [Rust]
 
 ## Game Network
 - https://github.com/MFatihMAR/Game-Networking-Resources
