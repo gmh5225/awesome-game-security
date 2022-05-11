@@ -218,6 +218,7 @@
 - https://github.com/gmh5225/IDA-Plugin-dotNIET [Import .NET Symbol]
 - https://github.com/aliyunav/Finger [Recognizing Function By Cloud]
 - https://github.com/gmh5225/IDA-plugin-FindFunc [Recognizing Function By Pattern]
+- https://github.com/kweatherman/sigmakerex [Signature Maker]
 
 > Binary Ninja Plugins
 - https://github.com/EliseZeroTwo/SEH-Helper [SEH Helper]
