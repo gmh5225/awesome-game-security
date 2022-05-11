@@ -190,6 +190,7 @@
 - https://github.com/0xcpu/WinAltSyscallHandler [AltSystemCallHandlers]
 - https://github.com/everdox/InfinityHook [ETW Hook]
 - https://github.com/FiYHer/InfinityHookPro [ETW Hook Ex]
+- https://github.com/KelvinMsft/ThreadSpy
 
 > Virtual Environments
 - https://github.com/gmh5225/Android-BlackBox [Android]
