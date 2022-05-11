@@ -154,6 +154,7 @@
 - https://vollragm.github.io/posts/unity-reversing [Unity]
 - https://github.com/shalzuth/NativeNetSharp [Injecting C# code]
 - https://github.com/januwA/game-reversed-study [CE Guide zh]
+- https://github.com/gmh5225/CSGO-master-guide [CSGO Guide]
 
 > Debugging
 - https://github.com/cheat-engine/cheat-engine
@@ -467,6 +468,7 @@
 - https://github.com/gmh5225/CS16-hpp-hack
 
 > Game:CSGO
+- https://github.com/gmh5225/CSGO-master-guide [Guide]
 - https://github.com/KittenPopo/csgo-offsets [Offset]
 - https://github.com/ofDataa/offsets [Offset]
 - https://github.com/dretax/GarHal_CSGO
