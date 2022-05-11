@@ -424,6 +424,9 @@
 - https://github.com/weak1337/ricochet_deobfuscator
 - https://github.com/kkent030315/AurumRE
 
+> Explore AntiCheat System:RIOT
+- https://github.com/gmh5225/DecryptionDumper [Dump]
+
 > Game:MapleStory
 - https://forum.ragezone.com/f922/getting-packet-structures-opcodes-using-792436 [Packet]
 - https://github.com/Bratah123/SpiritIDAPlugin [IDA-Plugin]
@@ -460,6 +463,7 @@
 - https://github.com/gmh5225/LeagueSharp.Loader
 - https://github.com/R3nzTheCodeGOD/R3nzSkin [Skin]
 - https://github.com/gmh5225/hh-lol-prophet
+- https://github.com/gmh5225/DecryptionDumper [Dump]
 
 > Game:Dota2
 - https://github.com/skrixx68/Dota2-Overlay-2.0
