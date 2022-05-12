@@ -769,6 +769,9 @@
 > Sign Tools
 - https://github.com/gmh5225/signtool-osslsigncode
 
+> Backup File
+- https://github.com/gmh5225/Driver-minivers [Generates Backup Copies]
+
 
 ## Some Tricks
 > Windows Ring0
