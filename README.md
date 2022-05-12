@@ -505,6 +505,7 @@
 - https://github.com/gmh5225/CSGO-Improved-CSGO_Simple
 - https://github.com/gmh5225/CSGO-SpyExternal1337hax [External]
 - https://github.com/gmh5225/CSGO-Seaside [Internal]
+- https://github.com/gmh5225/CSGO-Lumina-Cheat [Internal]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
