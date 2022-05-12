@@ -597,6 +597,9 @@
 - https://github.com/gmh5225/simple-rust-hack
 - https://github.com/gmh5225/rust-internal
 
+> Game:Smite [UE3]
+- https://github.com/gmh5225/Smite-ESPAimbot 
+
 > Game:Genshin Impact
 - https://github.com/khang06/mhynot2
 - https://github.com/gmh5225/genshinjumpfixer2 [Decode CFG]
