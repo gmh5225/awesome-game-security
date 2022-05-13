@@ -778,6 +778,8 @@
 > Backup File
 - https://github.com/gmh5225/Driver-minivers [Generates Backup Copies]
 
+> Black Signature
+- https://github.com/gmh5225/BlackSignatureDriver
 
 ## Some Tricks
 > Windows Ring0
