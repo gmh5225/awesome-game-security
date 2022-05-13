@@ -475,6 +475,7 @@
 - https://github.com/gmh5225/L-Assemblies
 - https://github.com/gmh5225/LeagueSharp.Loader
 - https://github.com/R3nzTheCodeGOD/R3nzSkin [Skin]
+- https://github.com/gmh5225/LOL-LeagueSkinChanger [Skin]
 - https://github.com/gmh5225/hh-lol-prophet
 - https://github.com/gmh5225/DecryptionDumper [Dump]
 - https://github.com/LeaguePrank/LeagueTeamBoost
