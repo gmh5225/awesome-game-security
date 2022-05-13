@@ -426,6 +426,7 @@
 - https://github.com/masterpastaa/BattlEye-Handler-BYPASS
 - https://github.com/gmh5225/battleye-decryption
 - https://github.com/gmh5225/BE-bedaisy-reversal
+- https://github.com/gmh5225/battleye-shellcode
 - https://github.com/gmh5225/be-injector [Attack COW]
 
 > Explore AntiCheat System:EQU8
