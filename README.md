@@ -765,6 +765,7 @@
 - https://github.com/Deputation/instrumentation_callbacks [Instrumentation Callback]
 
 > Windows Ring0 Callback
+- [Enumerate Callback](https://github.com/hfiref0x/WinObjEx64/blob/7284d711b2eeebfd965713fc79353b9b76e23083/Source/WinObjEx64/extras/extrasCallbacks.c#L117)
 - https://github.com/gmh5225/Driver-RtlWalkFrameChain-PsImageNotifyRoutineSpamFilter [ImageNotify Callback With RtlWalkFrameChain]
 
 > Winows Kernel Dump Analysis
