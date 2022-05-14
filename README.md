@@ -528,6 +528,10 @@
 - https://github.com/NMan1/external-warzone-cheat
 - https://github.com/NMan1/warzone-internal
 
+> Game:Battlefield 1
+- https://github.com/gmh5225/BF1-ESP-AND-AIMBOT
+- https://github.com/gmh5225/BattleField-1-Internal
+
 > Game:Apex Legends
 - https://github.com/dhanax26/Apex-Legends-Offset-Dumper [Offset]
 - https://github.com/ofDataa/offsets [Offset]
