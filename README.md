@@ -675,6 +675,7 @@
 > Encrypt Variable
 - https://github.com/gmh5225/encrypt-encrypted_value [C++]
 - https://github.com/gmh5225/encrypt-e3 [C++]
+- https://github.com/gmh5225/xor-float [C++]
 
 > Obfuscation Engine
 - https://github.com/mike1k/perses
