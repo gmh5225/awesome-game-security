@@ -297,6 +297,7 @@
 - https://github.com/gmh5225/CVE-2021-21551 [dbutil_2_3.sys]
 - https://github.com/gmh5225/Driver-imxyviMapper [AsUpIO.sys]
 - https://github.com/gmh5225/vdk [Speedfan.sys]
+- https://github.com/gmh5225/SpeedFan-Exploit [Speedfan.sys]
 
 
 > Driver Communication
