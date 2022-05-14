@@ -643,6 +643,7 @@
 - https://github.com/gmh5225/Driver-kinject [Injection Testing]
 - https://github.com/gmh5225/Inject-Jektor [Injection/Shellcode Testing]
 - https://github.com/notscimmy/libelevate [Elevating Handle]
+- https://github.com/gmh5225/NoBastian_v2 [Elevating Handle Testing]
 - https://github.com/Mattiwatti/EfiGuard [PG Testing]
 - https://github.com/9176324/Shark [PG Testing]
 - https://github.com/gmh5225/HideDriverTesting [Hide Driver Testing]
