@@ -599,6 +599,7 @@
 - https://github.com/NMan1/Internal-Rainbow-Six-Cheat-V3
 - https://github.com/gmh5225/Rainbow-epic-r6-v9
 - https://github.com/gmh5225/Rainbow-R6Updater
+- https://github.com/gmh5225/Rainbow-R6Table_Internal
 
 > Game:Overwatch 
 - https://github.com/blackhades00/PareidoliaTriggerbot [Triggerbot]
