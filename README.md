@@ -363,6 +363,7 @@
 - https://github.com/changeofpace/MouHidInputHook
 - https://github.com/blackhades00/PareidoliaTriggerbot
 - https://github.com/adspro15/DirectInput
+- https://github.com/gmh5225/CSGO-norsefire
 - https://github.com/lucylow/b00m-h3adsh0t [Neural Network]
 
 > WallHack
@@ -509,6 +510,7 @@
 - https://github.com/gmh5225/CSGO-SpyExternal1337hax [External]
 - https://github.com/gmh5225/CSGO-Seaside [Internal]
 - https://github.com/gmh5225/CSGO-Lumina-Cheat [Internal]
+- https://github.com/gmh5225/CSGO-norsefire [Driver + Mouse Emulation]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
