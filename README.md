@@ -301,6 +301,7 @@
 
 > Driver Communication
 - https://github.com/EBalloon/Common-Registry
+- https://github.com/gmh5225/BOOM [Hijack Beep.sys]
 - https://github.com/gmh5225/Driver-read_write [Hijack IRP]
 - https://github.com/adspro15/km-um-communication
 - https://github.com/Spuckwaffel/Kernel-Thread-Driver [Thread]
