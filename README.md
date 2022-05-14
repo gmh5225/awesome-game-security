@@ -524,6 +524,9 @@
 
 > Game:COD Warzone
 - https://github.com/gmh5225/COD-Warzone-MW-HACK-ESP-AIMBOT
+- https://github.com/gmh5225/COD-Warzone-mwclap
+- https://github.com/NMan1/external-warzone-cheat
+- https://github.com/NMan1/warzone-internal
 
 > Game:Apex Legends
 - https://github.com/dhanax26/Apex-Legends-Offset-Dumper [Offset]
@@ -591,10 +594,6 @@
 
 > Game:Overwatch 
 - https://github.com/blackhades00/PareidoliaTriggerbot [Triggerbot]
-
-> Game:Warzone
-- https://github.com/NMan1/external-warzone-cheat
-- https://github.com/NMan1/warzone-internal
 
 > Game:Rust
 - https://github.com/NMan1/OverflowRust
