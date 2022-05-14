@@ -375,6 +375,7 @@
 - https://github.com/adspro15/DirectInput
 - https://github.com/gmh5225/CSGO-norsefire
 - https://github.com/lucylow/b00m-h3adsh0t [Neural Network]
+- https://github.com/univrsal/input-overlay [Keyboard Mapper]
 
 > WallHack
 - https://github.com/DrNseven/D3D11-Wallhack
