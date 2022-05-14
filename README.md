@@ -87,7 +87,11 @@
 - https://github.com/rathena/rathena [MMORPG]
 
 
-## Game Source
+## Game Develop
+> Guide
+- https://github.com/Calinou/awesome-gamedev
+
+> Source
 - https://github.com/PiMoNFeeD/csgo-src [Leaked CSGO]
 - https://github.com/SmileyAG/cstrike15_src-CI [Leaked CSGO With CI]
 - https://github.com/SwagSoftware/Kisak-Strike [Open Source CSGO]
