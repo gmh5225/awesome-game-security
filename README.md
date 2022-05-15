@@ -300,6 +300,7 @@
 - https://github.com/gmh5225/Driver-kdmapper-1909 [iqvw64e.sys]
 - https://github.com/kkent030315/MsIoExploit [MsIo64.sys]
 - https://github.com/kkent030315/evil-mhyprot-cli [Mhyprot2.sys]
+- https://github.com/gmh5225/evil-mhyprot-cli [Mhyprot2.sys]
 - https://github.com/gmh5225/AvastHV [Avast]
 - https://github.com/gmh5225/KasperskyHook [Kaspersky]
 - https://github.com/gmh5225/CVE-2021-21551 [dbutil_2_3.sys]
