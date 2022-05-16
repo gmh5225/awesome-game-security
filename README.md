@@ -198,6 +198,7 @@
 - https://github.com/gmh5225/PG-EasyAntiPatchGuard
 
 > Windows Kernel Explorer
+- https://github.com/NullArray/WinKernel-Resources [Guide]
 - https://github.com/Arquivotheca/WinNT5_src_20201004 [Leaked Windows XP Source]
 - https://github.com/BlackINT3/OpenArk
 - https://github.com/0xcpu/ExecutiveCallbackObjects [Callback]
