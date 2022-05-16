@@ -237,6 +237,10 @@
 > Windbg Plugins
 - https://github.com/gmh5225/windbg-SwishDbgExt
 
+> X64DBG Plugins
+- https://github.com/horsicq/x64dbg-Plugin-Manager
+- https://github.com/m417z/Multiline-Ultimate-Assembler
+
 > Injection
 - https://github.com/btbd/smap [Scatter Manual Map]
 - https://github.com/btbd/modmap [Extend Manual Map]
