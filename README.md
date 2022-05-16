@@ -659,6 +659,7 @@
 - https://github.com/DanielRTeixeira/injectAllTheThings [Injection Testing]
 - https://github.com/gmh5225/DLL-inject-Injectors [Injection Testing]
 - https://github.com/guided-hacking/GuidedHacking-Injector [Injection Testing]
+- https://github.com/gmh5225/rust-dll-crab [Injection Testing]
 - https://github.com/odzhan/injection [Injection Testing]
 - https://github.com/gmh5225/Driver-kinject [Injection Testing]
 - https://github.com/gmh5225/Inject-Jektor [Injection/Shellcode Testing]
