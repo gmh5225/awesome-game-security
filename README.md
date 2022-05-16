@@ -120,6 +120,7 @@
 
 ## Game Hot Patch
 - https://github.com/Tencent/xLua
+- https://github.com/Tencent/InjectFix
 
 
 ## Game Testing
