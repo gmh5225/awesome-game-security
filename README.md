@@ -3,6 +3,7 @@
 
 ## Game Engine
 > Guide
+- https://github.com/QianMo/Game-Programmer-Study-Notes
 - https://forums.unrealengine.com [Unreal]
 - https://docs.unrealengine.com [Unreal]
 - https://www.unrealengine.com/resources [Unreal]
