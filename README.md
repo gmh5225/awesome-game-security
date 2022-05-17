@@ -442,6 +442,7 @@
 - https://github.com/thesecretclub/CVEAC-2020 [Integrity Checks]
 - https://github.com/Schnocker/EAC_dbp [Debug]
 - https://github.com/gmh5225/eac-mapper [Eac Mapper]
+- https://github.com/gmh5225/EAC-MmCopyMemory-EAC [Bypass MmCopyMemory]
 
 > Explore AntiCheat System:BE
 - https://github.com/unreaIuser/BE-Emulator
@@ -823,6 +824,7 @@
 - https://back.engineering/29/03/2021 [Hide Address]
 - https://github.com/gmh5225/be-injector [Attack COW]
 - https://github.com/gmh5225/eac-mapper [Vulnerable MmCopyMemory]
+- https://github.com/gmh5225/EAC-MmCopyMemory-EAC [Bypass MmCopyMemory]
 - https://github.com/gmh5225/be-injector [Attack COW]
 
 
