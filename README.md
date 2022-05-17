@@ -14,6 +14,7 @@
 - https://github.com/PardCode/CPP-3D-Game-Tutorial-Series [DirectX]
 - https://github.com/ssloy/tinyrenderer [Render]
 - https://github.com/gmh5225/Unity-GameDev [Unity]
+- https://github.com/QianMo/Unity-Design-Pattern [Unity Design]
 
 > Source
 - https://github.com/EpicGames/UnrealEngine
@@ -95,6 +96,7 @@
 > Guide
 - https://github.com/Calinou/awesome-gamedev
 - https://github.com/gmh5225/Unity-GameDev [Unity]
+- https://github.com/QianMo/Unity-Design-Pattern [Unity Design]
 
 > Source
 - https://github.com/PiMoNFeeD/csgo-src [Leaked CSGO]
