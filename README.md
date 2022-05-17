@@ -538,6 +538,7 @@
 - https://github.com/gmh5225/CSGO-Seaside [Internal]
 - https://github.com/gmh5225/CSGO-Lumina-Cheat [Internal]
 - https://github.com/gmh5225/CSGO-norsefire [Driver + Mouse Emulation]
+- https://github.com/gmh5225/CSGO-boltobserv [Radar]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
