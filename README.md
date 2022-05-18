@@ -532,6 +532,9 @@
 - https://github.com/KittenPopo/csgo-offsets [Offset]
 - https://github.com/ofDataa/offsets [Offset]
 - https://github.com/dretax/GarHal_CSGO
+- https://github.com/danielkrupinski/Osiris
+- https://github.com/danielkrupinski/GOESP [Cross-platform]
+- https://github.com/gmh5225/CSGO-Anubis
 - https://github.com/s3pt3mb3r/Dainsleif
 - https://github.com/lagcomp/csgo_sdk
 - https://github.com/ekknod/csf_w [Win SDK]
