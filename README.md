@@ -811,6 +811,9 @@
 - https://github.com/gmh5225/AntiCheat-CornerCulling
 - https://github.com/gmh5225/AntiCheat-CornerCullingSourceEngine
 
+> Signature Scanning
+- https://github.com/gmh5225/sig-binlex
+
 > Information System
 - https://github.com/Enum0x539/Qvoid-Token-Grabber
 - https://github.com/gmh5225/dfirtriage
