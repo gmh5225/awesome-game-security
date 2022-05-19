@@ -563,6 +563,7 @@
 - https://github.com/Pinguu-dev/PINGUU-VAL
 - https://github.com/gmh5225/valorant-gui-imgui-remake [GUI]
 - https://github.com/gmh5225/valorant-internal
+- https://github.com/gmh5225/ValoAutoDecryption [Decryption]
 
 > Game:COD1
 - https://github.com/gmh5225/CoD_Hacks
