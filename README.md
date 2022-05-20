@@ -704,6 +704,7 @@
 - https://github.com/gmh5225/TraceCleaner [Hide Driver Testing]
 - https://github.com/gmh5225/disable-threat-tracing [ETW Testing]
 - https://github.com/daswareinfach/Battleye-VAC-EAC-Kernel-Bypass [FsFilter Testing]
+- https://github.com/gmh5225/Injection-MMFCodeInjection [User APC + File Mapping Testing]
 
 > Anti Debugging
 - https://github.com/LordNoteworthy/al-khaser
