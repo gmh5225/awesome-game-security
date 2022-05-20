@@ -214,7 +214,8 @@
 - https://github.com/0xcpu/WinAltSyscallHandler [AltSystemCallHandlers]
 - https://github.com/everdox/InfinityHook [ETW Hook]
 - https://github.com/FiYHer/InfinityHookPro [ETW Hook Ex]
-- https://github.com/KelvinMsft/ThreadSpy
+- https://github.com/KelvinMsft/ThreadSpy [PMI Callback]
+- https://github.com/gmh5225/Driver-WindowsIntelPT [Intel PT]
 - https://github.com/gmh5225/Driver-Ark [Tool]
 - https://github.com/gmh5225/ntoskrnl_file_collection [Ntoskrnl Version]
 - https://github.com/gmh5225/win32k_file_collection [Win32k Version]
