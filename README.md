@@ -313,6 +313,7 @@
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
 - https://github.com/gmh5225/KernelGDIDraw
+- https://github.com/gmh5225/Driver-DoubleCallBack [DWM In Kernel]
 
 > UI Interface
 - https://github.com/adamhlt/ImGui-Standalone
