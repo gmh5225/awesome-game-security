@@ -641,6 +641,7 @@
 > Game:EFT
 - https://github.com/gmh5225/EFT-StreamedCheat
 - https://github.com/gmh5225/EFT-Escape-From-Tarkov-External-Esp-Aimbot-eft-Hack-Cheat-Injector-Spoofer
+- https://github.com/gmh5225/EFT-pKernelInterface-EFT
 
 > Game:R6
 - https://github.com/NMan1/Rainbow-Six-Cheat
