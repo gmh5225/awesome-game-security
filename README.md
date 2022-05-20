@@ -223,6 +223,7 @@
 - https://github.com/gmh5225/MSSymbolsCollection [Kernel Symbols]
 
 > Android Kernel Explorer
+- https://github.com/gmh5225/Android-Analysis-Cheat-Use-Kernel-op7t [DIY Kernel]
 - https://github.com/gmh5225/android-simpleperf_demo [Perf]
 
 > Virtual Environments
