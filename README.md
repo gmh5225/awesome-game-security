@@ -222,6 +222,9 @@
 - https://github.com/gmh5225/win32k_file_collection2 [Win32k Version]
 - https://github.com/gmh5225/MSSymbolsCollection [Kernel Symbols]
 
+> Android Kernel Explorer
+- https://github.com/gmh5225/android-simpleperf_demo [Perf]
+
 > Virtual Environments
 - https://github.com/gmh5225/Android-BlackBox [Android]
 
