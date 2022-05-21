@@ -664,6 +664,10 @@
 > Game:Overwatch 
 - https://github.com/blackhades00/PareidoliaTriggerbot [Triggerbot]
 
+> Game:Paladins
+- https://github.com/gmh5225/Paladins-Internal-Esp-Aimbot-Hack-Cheat-Hack
+
+
 > Game:Rust
 - https://github.com/NMan1/OverflowRust
 - https://github.com/gmh5225/simple-rust-hack
