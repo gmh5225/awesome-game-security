@@ -430,6 +430,7 @@
 - https://github.com/btbd/wpp [Intercepting DeviceControl via WPP]
 - https://github.com/gmh5225/Driver-owned_alignment [Abusing Alignment]
 - https://github.com/gmh5225/Hwid-Spoofer-Valorant-Eac-Be-Vanguard-Permanted-Temporary-Spoofer
+- https://github.com/gmh5225/Hwid-Spoofer-Game-Anticheat-Cleaners-Unban-Any-Games-Drivers
 
 > Bypass Page Protection
 - https://github.com/illegal-instruction-co/CountHook [WorkingSet]
