@@ -574,6 +574,8 @@
 - https://github.com/gmh5225/valorant-gui-imgui-remake [GUI]
 - https://github.com/gmh5225/valorant-internal
 - https://github.com/gmh5225/ValoAutoDecryption [Decryption]
+- https://github.com/gmh5225/Zenti-Valorant-Cheat-Hack-Internal-Spoofer-Driver-Injector-Protector-Auth
+- https://github.com/gmh5225/Valorant-Hack-Esp-Aimbot-Driver-Injector-With-Spoofer-Temporary
 
 > Game:COD1
 - https://github.com/gmh5225/CoD_Hacks
@@ -642,6 +644,8 @@
 
 > Game:PUBGM
 - https://github.com/Mood-Coding/pubgm_shitty_source
+- https://github.com/gmh5225/Pubg-Mobile-Extermal-Esp-Aimbot-Magic-Injector-Spoofer
+- https://github.com/gmh5225/Pubg-Mobile-Esp-Aimbot-Magic-Injector-Spoofer
 
 > Game:EFT
 - https://github.com/gmh5225/EFT-StreamedCheat
@@ -664,6 +668,8 @@
 - https://github.com/NMan1/OverflowRust
 - https://github.com/gmh5225/simple-rust-hack
 - https://github.com/gmh5225/rust-internal
+- https://github.com/gmh5225/Rust-Internal-Esp-Aimbot-Spoofer-Hack-Cheat-Injector-Driver
+- https://github.com/gmh5225/Rust-External-Esp-Aimbot-Spoofer-Hack-Cheat-Injector-Driver
 
 > Game:Smite [UE3]
 - https://github.com/gmh5225/Smite-ESPAimbot 
