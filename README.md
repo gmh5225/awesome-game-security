@@ -429,6 +429,7 @@
 - https://github.com/SamuelTulach/rainbow [EFI]
 - https://github.com/btbd/wpp [Intercepting DeviceControl via WPP]
 - https://github.com/gmh5225/Driver-owned_alignment [Abusing Alignment]
+- https://github.com/gmh5225/Hwid-Spoofer-Valorant-Eac-Be-Vanguard-Permanted-Temporary-Spoofer
 
 > Bypass Page Protection
 - https://github.com/illegal-instruction-co/CountHook [WorkingSet]
@@ -641,6 +642,7 @@
 - https://github.com/gmh5225/pubg-pubg_internal
 - https://github.com/gmh5225/pubg-internal
 - https://github.com/gmh5225/pubg-public
+- https://github.com/gmh5225/PlayerUnknown-s-Battlegrounds-Pubg-Steam-Hack-Esp-Aimbot
 
 > Game:PUBGM
 - https://github.com/Mood-Coding/pubgm_shitty_source
@@ -663,6 +665,7 @@
 
 > Game:Overwatch 
 - https://github.com/blackhades00/PareidoliaTriggerbot [Triggerbot]
+- https://github.com/ReynmenRcs/Overwatch-External-Esp-Aimbot-Hack-Cheat
 
 > Game:Paladins
 - https://github.com/gmh5225/Paladins-Internal-Esp-Aimbot-Hack-Cheat-Hack
