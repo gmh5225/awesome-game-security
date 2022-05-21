@@ -587,6 +587,7 @@
 - https://github.com/gmh5225/COD-Warzone-mwclap
 - https://github.com/NMan1/external-warzone-cheat
 - https://github.com/NMan1/warzone-internal
+- https://github.com/gmh5225/Call-Of-Duty-Warzone-Hack-Esp-Slient-Aimbot-Internal-Unlock-ALL
 
 > Game:Battlefield 1
 - https://github.com/gmh5225/BF1-ESP-AND-AIMBOT
@@ -630,6 +631,7 @@
 - https://github.com/gmh5225/Fortnite-Basic-Cheat-Source-Internal
 - https://github.com/gmh5225/Fortnite-UD-External
 - https://github.com/gmh5225/Fortnite-Gloomy.cc
+- https://github.com/gmh5225/Fortnite-Esp-Aimbot-Exploits-Hwid-Spoofer-Cleaner-Hack-Cheat
 
 > Game:Bloodhunt
 - https://github.com/gmh5225/HackExternal--bloodhunt
