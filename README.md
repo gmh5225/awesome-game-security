@@ -588,6 +588,7 @@
 - https://github.com/NMan1/external-warzone-cheat
 - https://github.com/NMan1/warzone-internal
 - https://github.com/gmh5225/Call-Of-Duty-Warzone-Hack-Esp-Slient-Aimbot-Internal-Unlock-ALL
+- https://github.com/gmh5225/Call-Of-Duty-Vanguard-Hack-Esp-AImbot-Unlock-All
 
 > Game:Battlefield 1
 - https://github.com/gmh5225/BF1-ESP-AND-AIMBOT
@@ -673,6 +674,11 @@
 > Game:Paladins
 - https://github.com/gmh5225/Paladins-Internal-Esp-Aimbot-Hack-Cheat-Hack
 
+> Game:DayZ
+- https://github.com/gmh5225/DayZ-External-Esp-Aimbot-Spoofer-Hack-Cheat
+
+> Game:Squad
+- https://github.com/gmh5225/Squad-External-Esp-Aimbot-Cheat-Hack
 
 > Game:Rust
 - https://github.com/NMan1/OverflowRust
