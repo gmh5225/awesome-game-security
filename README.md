@@ -543,6 +543,7 @@
 
 > Game:CSGO
 - https://github.com/gmh5225/CSGO-master-guide [Guide]
+- https://github.com/frk1/hazedumper [Offset]
 - https://github.com/KittenPopo/csgo-offsets [Offset]
 - https://github.com/ofDataa/offsets [Offset]
 - https://github.com/dretax/GarHal_CSGO
@@ -566,6 +567,7 @@
 - https://github.com/gmh5225/CSGO-Lumina-Cheat [Internal]
 - https://github.com/gmh5225/CSGO-norsefire [Driver + Mouse Emulation]
 - https://github.com/gmh5225/CSGO-boltobserv [Radar]
+- https://github.com/gmh5225/CSGO-external_ahk_hack [External]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
