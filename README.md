@@ -260,6 +260,7 @@
 
 > Windbg Plugins
 - https://github.com/gmh5225/windbg-SwishDbgExt
+- https://github.com/gmh5225/WinDbg-comon [Trace COM]
 
 > X64DBG Plugins
 - https://github.com/horsicq/x64dbg-Plugin-Manager
