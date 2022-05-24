@@ -261,6 +261,7 @@
 > X64DBG Plugins
 - https://github.com/horsicq/x64dbg-Plugin-Manager
 - https://github.com/m417z/Multiline-Ultimate-Assembler
+- https://github.com/gmh5225/x64dbg-Classroom
 
 > Injection
 - https://github.com/btbd/smap [Scatter Manual Map]
