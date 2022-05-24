@@ -763,6 +763,7 @@
 - https://github.com/gmh5225/packer-HintInject [Hint/Name Table]
 - https://github.com/gmh5225/Android-obf-Obfuscapk [Android]
 - https://github.com/gmh5225/Packer-Embuche [ELF]
+- https://github.com/gmh5225/packer-amber
 
 > Sample Unpacker
 - https://github.com/hasherezade/mal_unpack_drv
