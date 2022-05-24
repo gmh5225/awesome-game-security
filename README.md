@@ -773,6 +773,7 @@
 - https://github.com/gmh5225/packer-woody_woodpacker [ELF]
 - https://github.com/gmh5225/packer-m0dern_p4cker [ELF]
 - https://github.com/gmh5225/packer-peinjector
+- https://github.com/gmh5225/packer-AresFramework
 
 > Sample Unpacker
 - https://github.com/hasherezade/mal_unpack_drv
