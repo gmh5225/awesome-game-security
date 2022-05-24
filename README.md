@@ -778,6 +778,9 @@
 > Sample Unpacker
 - https://github.com/hasherezade/mal_unpack_drv
 
+> Dump Fix
+- https://github.com/gmh5225/dump-unmapper
+
 > Encrypt Variable
 - https://github.com/gmh5225/encrypt-encrypted_value [C++]
 - https://github.com/gmh5225/encrypt-e3 [C++]
