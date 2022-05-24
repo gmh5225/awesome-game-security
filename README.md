@@ -768,6 +768,7 @@
 - https://github.com/gmh5225/packer-amber
 - https://github.com/gmh5225/packer-PePacker
 - https://github.com/gmh5225/Packer-wrappe [Rust]
+- https://github.com/gmh5225/packer-woody_woodpacker [ELF]
 
 > Sample Unpacker
 - https://github.com/hasherezade/mal_unpack_drv
