@@ -405,6 +405,7 @@
 - https://github.com/gmh5225/HideDriver-flink-blink [Hide Driver By Modify Flink/Blink]
 - https://github.com/gmh5225/HideDriver-MiProcessLoaderEntry [Hide Driver By MiProcessLoaderEntryk]
 - https://github.com/gmh5225/Driver-HideKernelThread-IoCancelIrp [Hide Kernel Thread]
+- https://github.com/gmh5225/Hide-Driver-Thread-blanket [Hide Kernel Thread]
 
 > Triggerbot & Aimbot
 - https://github.com/changeofpace/MouHidInputHook
