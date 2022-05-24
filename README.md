@@ -202,6 +202,7 @@
 
 > Dynamic Instrumentation
 - https://github.com/googleprojectzero/TinyInst
+- https://github.com/gmh5225/veh-cpp-veh-dbi
 
 > Bypass PatchGuard
 - https://github.com/gmh5225/PG-EasyAntiPatchGuard
