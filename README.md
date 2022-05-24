@@ -758,7 +758,7 @@
 > Binary Packer
 - https://github.com/dhondta/awesome-executable-packing
 - https://github.com/phra/PEzor
-- https://github.com/gmh5225/Packer-PE-Packer
+- https://github.com/gmh5225/Packer-PE-Packer [X86]
 - https://github.com/gmh5225/pe-protector [X86]
 - https://github.com/iArtorias/debug_remover [Strip Debug Info]
 - https://github.com/gmh5225/packer-pe32-password
