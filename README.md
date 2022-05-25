@@ -201,10 +201,11 @@
 - https://github.com/hugsy/CFB [Monitor IRP]
 - https://ioninja.com/downloads.html [Protocol Analyzer]
 
-> Dynamic Instrumentation
+> Dynamic Binary Instrumentation
 - https://github.com/googleprojectzero/TinyInst
 - https://github.com/gmh5225/veh-cpp-veh-dbi
 - https://github.com/gmh5225/binary-translator-river
+- https://github.com/gmh5225/DBI-mambo [ARM]
 
 > Bypass PatchGuard
 - https://github.com/gmh5225/PG-EasyAntiPatchGuard
