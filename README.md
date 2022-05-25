@@ -657,6 +657,7 @@
 - https://github.com/EBalloon/Super-People-sdk
 
 > Game:PUBG
+- https://github.com/gmh5225/pubg-dumper [Dump]
 - https://github.com/Skengdoo/pubg-external-cheat
 - https://github.com/gmh5225/pubg-pubg_internal
 - https://github.com/gmh5225/pubg-internal
