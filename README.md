@@ -202,6 +202,7 @@
 - https://ioninja.com/downloads.html [Protocol Analyzer]
 
 > Dynamic Binary Instrumentation
+- https://github.com/hzqst/unicorn_pe
 - https://github.com/googleprojectzero/TinyInst
 - https://github.com/gmh5225/veh-cpp-veh-dbi
 - https://github.com/gmh5225/binary-translator-river
