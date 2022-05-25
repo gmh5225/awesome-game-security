@@ -469,6 +469,9 @@
 - https://github.com/gmh5225/mono-external-lib [External Mono Example]
 - https://github.com/gmh5225/external-il2cpp [Il2Cpp]
 
+> Game Engine Explorer:Source
+- https://github.com/gmh5225/Source2Dumps [Dump]
+
 > Explore AntiCheat System:VAC
 - https://github.com/danielkrupinski/VAC-Bypass-Loader
 - https://github.com/gmh5225/vac-hooks
@@ -574,6 +577,7 @@
 - https://github.com/gmh5225/CSGO-norsefire [Driver + Mouse Emulation]
 - https://github.com/gmh5225/CSGO-boltobserv [Radar]
 - https://github.com/gmh5225/CSGO-external_ahk_hack [External]
+- https://github.com/gmh5225/CSGO-P2C-Dumper [Dump]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
