@@ -255,6 +255,9 @@
 - https://github.com/kweatherman/sigmakerex [Signature Maker]
 - https://github.com/Mixaill/FakePDB [PDB Generation From IDA]
 
+> IDA Signature Database
+- https://github.com/gmh5225/IDA-sig-database
+
 > Binary Ninja Plugins
 - https://github.com/EliseZeroTwo/SEH-Helper [SEH Helper]
 
