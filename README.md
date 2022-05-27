@@ -272,7 +272,7 @@
 - https://github.com/m417z/Multiline-Ultimate-Assembler
 - https://github.com/gmh5225/x64dbg-Classroom
 
-> Injection
+> Injection:Windows
 - https://github.com/btbd/smap [Scatter Manual Map]
 - https://github.com/btbd/modmap [Extend Manual Map]
 - https://github.com/KGB-1337/memmap [Extend Manual Map]
@@ -287,6 +287,10 @@
 - https://github.com/gmh5225/Driver-HVCI-KernelForge [Hijack ROP]
 - https://github.com/gmh5225/be-injector [Attack COW]
 - https://github.com/gmh5225/dll-hot-reload [Hot Reload]
+
+> Injection:Linux
+- https://github.com/gmh5225/elf-injector-mandibule
+
 
 > Hook
 - https://github.com/microsoft/Detours
