@@ -593,6 +593,7 @@
 - https://github.com/gmh5225/CSGO-boltobserv [Radar]
 - https://github.com/gmh5225/CSGO-external_ahk_hack [External]
 - https://github.com/gmh5225/CSGO-P2C-Dumper [Dump]
+- https://github.com/gmh5225/CSGO-2k17-club
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
