@@ -109,6 +109,7 @@
 - https://github.com/PiMoNFeeD/csgo-src [Leaked CSGO]
 - https://github.com/SmileyAG/cstrike15_src-CI [Leaked CSGO With CI]
 - https://github.com/SwagSoftware/Kisak-Strike [Open Source CSGO]
+- https://github.com/gmh5225/csso-src [CSGO Mod]
 - https://github.com/thomaseichhorn/cs16-client [Rewrote CS1.6]
 - https://github.com/td512/re3 [Reversed GTA III, Vice City]
 - https://github.com/gmh5225/Reverse-Game-ReCZDS [Reversed CZeror]
