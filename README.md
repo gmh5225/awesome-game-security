@@ -374,6 +374,7 @@
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/483093-vtable-kernel-function-hook-communication.html [NtUserMessageCall]
 - https://github.com/gmh5225/Driver-MapPage [NtUserGetObjectInformation]
 - https://github.com/gmh5225/eac-mapper [NtMapVisualRelativePoints]
+- https://git.back.engineering/_xeroxz/NtWin32k [NtUserGetThreadState]
 
 > EFI Driver
 - https://github.com/ekknod/sumap [EFI Manual Map]
