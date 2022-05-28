@@ -842,6 +842,7 @@
 - https://github.com/weak1337/BE-Shellcode [Reversed BE Shellcode]
 - https://github.com/codetronik/AndroidAntiCheat [Android Platform]
 - https://github.com/MrDiamond64/Scythe-AntiCheat [Minecraft]
+- https://github.com/gmh5225/AntiCheat
 
 > Detection:Hook
 - https://github.com/hasherezade/pe-sieve
