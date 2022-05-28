@@ -790,6 +790,7 @@
 - https://github.com/weak1337/CEDetector [CE]
 - https://github.com/Ahora57/MAJESTY-technologies
 - https://github.com/gmh5225/AntiDbg-AmogusPlugin
+- https://github.com/gmh5225/Android-AntiDebugandMemoryDump [Android]
 
 > Page Protection
 - https://github.com/changeofpace/Self-Remapping-Code
