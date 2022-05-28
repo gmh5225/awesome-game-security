@@ -534,6 +534,12 @@
 - https://github.com/gmh5225/Maplestory-V179-Cheat-Engine [V179 CT]
 - https://github.com/gmh5225/MapleStory-HeavenClient [Heaven Client]
 - https://github.com/gmh5225/TWMS-Hacking-Data [TMS CT]
+- https://github.com/gmh5225/MapleStory-MSDoggy [TMS Old Hack]
+- https://github.com/gmh5225/MapleStory-MSB [GMS Old Hack 128-140]
+- https://github.com/gmh5225/MapleStory-MSC [GMS Bot]
+- https://github.com/gmh5225/MapleStory-Rebirth [Private Server-GMS-095 C#]
+- https://github.com/gmh5225/MapleStory-mnwvs196 [Private Server-TMS-196]
+- https://github.com/gmh5225/MapleStory-MapleResearch [GMS-095 Client Analysis]
 
 > Game:Sword With Sauce
 - https://github.com/1hAck-0/UE4-Cheat-Source-Code
