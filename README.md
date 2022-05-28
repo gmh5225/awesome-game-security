@@ -499,6 +499,7 @@
 - https://github.com/gmh5225/EAC-MmCopyMemory-EAC [Bypass MmCopyMemory]
 
 > Explore AntiCheat System:BE
+- https://github.com/gmh5225/BE-NoEye
 - https://github.com/unreaIuser/BE-Emulator
 - https://github.com/masterpastaa/BattlEye-Handler-BYPASS
 - https://github.com/gmh5225/battleye-decryption
