@@ -68,6 +68,7 @@
 - https://github.com/gmh5225/UE-Plugin-NetworkTimeSync [Unreal]
 - https://github.com/gmh5225/Unity-MarkdownViewer [Unity]
 - https://github.com/gmh5225/UE-BUIValidator [Unreal]
+- https://github.com/nxrighthere/UnrealCLR [Unreal]
 
 > Game Engine Detector
 - https://github.com/walzer/game-engine-detector [Mobile Game]
