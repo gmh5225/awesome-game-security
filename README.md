@@ -429,6 +429,7 @@
 - https://github.com/gmh5225/Driver-HideKernelThread-IoCancelIrp [Hide Kernel Thread]
 - https://github.com/gmh5225/Hide-Driver-Thread-blanket [Hide Kernel Thread]
 - https://github.com/gmh5225/hide-herpaderping [Hide Process/File]
+- https://github.com/gmh5225/hide-thread-address-KaynStrike [Spoofs Thread Start Address]
 
 > Triggerbot & Aimbot
 - https://github.com/changeofpace/MouHidInputHook
