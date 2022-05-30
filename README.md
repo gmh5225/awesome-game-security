@@ -543,6 +543,7 @@
 - https://github.com/gmh5225/MapleStory-Rebirth [Private Server-GMS-095 C#]
 - https://github.com/gmh5225/MapleStory-mnwvs196 [Private Server-TMS-196]
 - https://github.com/gmh5225/MapleStory-MapleResearch [GMS-095 Client Analysis]
+- https://github.com/gmh5225/Maplestory-RustMS [Private Server-Rust]
 
 > Game:Sword With Sauce
 - https://github.com/1hAck-0/UE4-Cheat-Source-Code
