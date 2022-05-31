@@ -207,6 +207,9 @@
 - https://github.com/hugsy/CFB [Monitor IRP]
 - https://ioninja.com/downloads.html [Protocol Analyzer]
 
+> Fix VMP
+- https://github.com/gmh5225/VMP-NoVmpy
+
 > Dynamic Binary Instrumentation
 - https://github.com/hzqst/unicorn_pe
 - https://github.com/googleprojectzero/TinyInst
