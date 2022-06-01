@@ -567,6 +567,9 @@
 > Game:Battlerite
 - https://github.com/shalzuth/BattleriteBot
 
+> Game:CrossFire
+- https://github.com/gmh5225/CF-titancf
+
 > Game:LOL
 - https://github.com/LeagueSharp
 - https://github.com/shalzuth/LeagueSharp
