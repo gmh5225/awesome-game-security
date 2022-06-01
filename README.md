@@ -691,6 +691,9 @@
 > Game:Super People
 - https://github.com/EBalloon/Super-People-sdk
 
+> Game:Splitgate
+- https://github.com/gmh5225/Splitgate-Internal
+
 > Game:PUBG
 - https://github.com/gmh5225/pubg-dumper [Dump]
 - https://github.com/Skengdoo/pubg-external-cheat
