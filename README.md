@@ -768,6 +768,7 @@
 - https://github.com/gmh5225/AntiCheat-chrysalis
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/481731-tutorial-ring3-anticheat-project.html
 - https://github.com/dhondta/awesome-executable-packing [Executable File Packing]
+- https://anti-debug.checkpoint.com [Anti Debug]
 
 > Stress Testing
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework
