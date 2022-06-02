@@ -207,6 +207,9 @@
 - https://github.com/hugsy/CFB [Monitor IRP]
 - https://ioninja.com/downloads.html [Protocol Analyzer]
 
+> RE Tools
+- https://github.com/stevemk14ebr/RETools
+
 > Fix VMP
 - https://github.com/gmh5225/VMP-NoVmpy
 
