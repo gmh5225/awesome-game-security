@@ -341,6 +341,7 @@
 - https://github.com/gmh5225/overlay-nvidia-overlay-hijack [Hijack Nvidia]
 - https://github.com/gmh5225/D3DOverlay-Nvidia-Hijack [Hijack Nvidia]
 - https://github.com/gmh5225/overlay-SetWindowsHookEx [SetWindowsHookEx]
+- https://github.com/gmh5225/OBS-graphics-hook32-Hook [OBS Hook]
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
