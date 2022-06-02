@@ -945,6 +945,7 @@
 > Windows Ring3 Callback
 - https://github.com/gmh5225/Callback-AlternativeShellcodeExec
 - https://github.com/Deputation/instrumentation_callbacks [Instrumentation Callback]
+- https://github.com/gmh5225/Hooking-via-InstrumentationCallback [Instrumentation Callback]
 - [Register VEH by hooking RtlpCallVectoredHandlers](https://github.com/gmh5225/custom-VEH)
 - [ATPMiniDump Callback](https://github.com/gmh5225/Callback-ATPMiniDump)
 
