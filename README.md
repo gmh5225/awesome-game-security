@@ -763,6 +763,9 @@
 > Game:Arma3
 - https://github.com/gmh5225/arma3-external-variable-manager
 
+> Game:Mordhau
+- https://github.com/gmh5225/mordhau-simple-auto-block-cheat
+
 > Game:Smite [UE3]
 - https://github.com/gmh5225/Smite-ESPAimbot 
 
