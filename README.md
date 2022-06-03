@@ -269,6 +269,7 @@
 - https://github.com/kweatherman/sigmakerex [Signature Maker]
 - https://github.com/Mixaill/FakePDB [PDB Generation From IDA]
 - https://github.com/gmh5225/IDA-Ponce [Symbolic Execution]
+- https://github.com/airbus-cert/ttddbg [Time Travel Debugging]
 
 > IDA Signature Database
 - https://github.com/gmh5225/IDA-sig-database
