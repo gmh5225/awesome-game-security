@@ -93,6 +93,9 @@
 - https://github.com/tinyobjloader/tinyobjloader
 - https://github.com/Twinklebear/tobj [Rust]
 
+## Task Scheduler
+- https://github.com/gmh5225/scheduler-TaskScheduler
+
 ## Game Network
 - https://github.com/MFatihMAR/Game-Networking-Resources
 - https://github.com/ValveSoftware/GameNetworkingSockets
