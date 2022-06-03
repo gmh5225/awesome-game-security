@@ -540,6 +540,10 @@
 > Explore AntiCheat System:RIOT
 - https://github.com/gmh5225/DecryptionDumper [Dump]
 
+> Explore AntiCheat System:XignCode
+- https://github.com/gmh5225/XignCode-Dump
+
+
 > Game:MapleStory
 - https://forum.ragezone.com/f922/getting-packet-structures-opcodes-using-792436 [Packet]
 - https://github.com/Bratah123/SpiritIDAPlugin [IDA-Plugin]
