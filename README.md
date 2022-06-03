@@ -794,6 +794,7 @@
 - https://github.com/gmh5225/rust-dll-crab [Injection Testing]
 - https://github.com/odzhan/injection [Injection Testing]
 - https://github.com/gmh5225/Driver-kinject [Injection Testing]
+- https://github.com/gmh5225/simple-SetWindowsHookExW-injector [Injection Testing:SetWindowsHookExW]
 - https://github.com/gmh5225/Inject-Jektor [Injection/Shellcode Testing]
 - https://github.com/notscimmy/libelevate [Elevating Handle]
 - https://github.com/gmh5225/NoBastian_v2 [Elevating Handle By LSASS]
