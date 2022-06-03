@@ -659,6 +659,9 @@
 - https://github.com/gmh5225/BF1-ESP-AND-AIMBOT
 - https://github.com/gmh5225/BattleField-1-Internal
 
+> Game:Battlefield 2042
+- https://github.com/gmh5225/battlefield-2042-internal-sdk
+
 > Game:Apex Legends
 - https://github.com/dhanax26/Apex-Legends-Offset-Dumper [Offset]
 - https://github.com/ofDataa/offsets [Offset]
