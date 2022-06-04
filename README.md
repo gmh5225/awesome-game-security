@@ -242,6 +242,7 @@
 - https://github.com/gmh5225/win32k_file_collection [Win32k Version]
 - https://github.com/gmh5225/win32k_file_collection2 [Win32k Version]
 - https://github.com/gmh5225/MSSymbolsCollection [Kernel Symbols]
+- https://github.com/gmh5225/vad-wkpe [Enumerate VAD]
 
 > Android Kernel Explorer
 - https://github.com/gmh5225/Android-Analysis-Cheat-Use-Kernel-op7t [DIY Kernel]
