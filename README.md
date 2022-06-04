@@ -477,6 +477,9 @@
 > Bypass Page Protection
 - https://github.com/illegal-instruction-co/CountHook [WorkingSet]
 
+> SDK CodeGen
+- https://github.com/gmh5225/codegen-sdkgenny
+
 > Game Engine Explorer:Unreal
 - https://github.com/gmh5225/UE4-shootergame-Hack [ShooterGame Demo]
 - https://github.com/Shhoya/Shh0yaUEDumper [SDK Dump]
