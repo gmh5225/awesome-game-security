@@ -950,6 +950,9 @@
 - https://github.com/gmh5225/AntiCheat-CornerCulling
 - https://github.com/gmh5225/AntiCheat-CornerCullingSourceEngine
 
+> Detection:Obfuscation
+- https://github.com/mrphrazer/obfuscation_detection
+
 > Signature Scanning
 - https://github.com/gmh5225/sig-binlex
 
