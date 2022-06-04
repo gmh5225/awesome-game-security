@@ -686,7 +686,6 @@
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
 - https://github.com/masterpastaa/AutoOffsets [Offset]
-- https://github.com/OfficialDyn/Fortnite-Offsets [Offset]
 - https://github.com/Zetolac/FortniteOffsetsAndSigs [Offset]
 - https://github.com/Android1337/Fortnite-Offsets [Offset]
 - https://github.com/TayzDev/W2S-offset-Fortnite [Offset]
