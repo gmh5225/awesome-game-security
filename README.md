@@ -1008,6 +1008,7 @@
 > Windows Ring3
 - https://secret.club/2021/01/04/thread-stuff.html [Anti Debug]
 - https://github.com/gmh5225/signtool-PastDSE [Sign Leaked Cert]
+- https://github.com/gmh5225/MiniDumpWriteDumpPoC [Dump Memory]
 
 ## Windows Security Features
 - https://github.com/yardenshafir/cet-research [CET]
