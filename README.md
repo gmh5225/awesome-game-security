@@ -382,6 +382,7 @@
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
 - https://github.com/EBalloon/Common-Registry [Registry Callback]
+- https://github.com/gmh5225/Common-Registry-Jmp-RCX [Registry Callback]
 - https://github.com/gmh5225/BOOM [Hijack Beep.sys]
 - https://github.com/gmh5225/Driver-read_write [Hijack IRP]
 - https://github.com/adspro15/km-um-communication
