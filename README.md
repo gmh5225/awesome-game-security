@@ -653,6 +653,8 @@
 - https://github.com/gmh5225/ValoAutoDecryption [Decryption]
 - https://github.com/gmh5225/Zenti-Valorant-Cheat-Hack-Internal-Spoofer-Driver-Injector-Protector-Auth
 - https://github.com/gmh5225/Valorant-Hack-Esp-Aimbot-Driver-Injector-With-Spoofer-Temporary
+- https://github.com/gmh5225/valorant-dumper [Dump]
+- https://github.com/gmh5225/Valorant-Dumper-Tool [Dump]
 
 > Game:COD1
 - https://github.com/gmh5225/CoD_Hacks
