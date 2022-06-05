@@ -843,6 +843,9 @@
 - https://github.com/gmh5225/AntiDbg-AmogusPlugin
 - https://github.com/gmh5225/Android-AntiDebugandMemoryDump [Android]
 
+> Virtual Environments
+- https://github.com/gmh5225/flare-vm
+
 > Page Protection
 - https://github.com/changeofpace/Self-Remapping-Code
 - https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-addsecurememorycachecallback
