@@ -227,6 +227,7 @@
 
 > Bypass PatchGuard
 - https://github.com/gmh5225/PG-EasyAntiPatchGuard
+- https://github.com/gmh5225/UPGDSED [File]
 
 > Windows Kernel Explorer
 - https://github.com/NullArray/WinKernel-Resources [Guide]
