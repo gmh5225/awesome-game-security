@@ -1027,6 +1027,7 @@
 ## Windows Security Features
 - https://github.com/yardenshafir/cet-research [CET]
 - https://github.com/gmh5225/CET-win10 [CET]
+- [HyperGuard](https://windows-internals.com/hyperguard-secure-kernel-patch-guard-part-1-skpg-initialization)
 
 
 
