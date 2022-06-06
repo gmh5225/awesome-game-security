@@ -941,6 +941,7 @@
 - https://github.com/KelvinMsft/ThreadSpy
 
 > Detection: Hacked Hypervisor
+- https://secret.club/2020/04/13/how-anti-cheats-detect-system-emulation.html
 - https://github.com/helloobaby/Nmi-Callback [NMI Callback]
 - https://github.com/momo5502/ept-hook-detection [Detect EPT]
 
