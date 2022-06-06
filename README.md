@@ -228,6 +228,7 @@
 > Bypass PatchGuard
 - https://github.com/gmh5225/PG-EasyAntiPatchGuard
 - https://github.com/gmh5225/UPGDSED [File]
+- https://github.com/Mattiwatti/EfiGuard [EFI]
 
 > Windows Kernel Explorer
 - https://github.com/NullArray/WinKernel-Resources [Guide]
