@@ -773,6 +773,7 @@
 - https://github.com/gmh5225/Rust-Internal-Esp-Aimbot-Spoofer-Hack-Cheat-Injector-Driver
 - https://github.com/gmh5225/Rust-External-Esp-Aimbot-Spoofer-Hack-Cheat-Injector-Driver
 - https://github.com/gmh5225/Rust-External
+- https://github.com/gmh5225/Rico-Cheat-rust-external
 
 > Game:Arma3
 - https://github.com/gmh5225/arma3-external-variable-manager
