@@ -69,6 +69,7 @@
 - https://github.com/gmh5225/Unity-MarkdownViewer [Unity]
 - https://github.com/gmh5225/UE-BUIValidator [Unreal]
 - https://github.com/nxrighthere/UnrealCLR [Unreal]
+- https://github.com/gmh5225/HoudiniEngineForUnreal [Unreal]
 
 > Game Engine Detector
 - https://github.com/walzer/game-engine-detector [Mobile Game]
