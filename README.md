@@ -818,6 +818,9 @@
 > Game:Geometry Dash
 - https://github.com/gmh5225/gd-internal
 
+> Game:8ball pool
+- https://github.com/gmh5225/Alaa-8ball-pool-source-exposed
+
 ## Anti Cheat
 > Guide
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
