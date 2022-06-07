@@ -551,6 +551,7 @@
 - https://github.com/gmh5225/BE-bedaisy-reversal
 - https://github.com/gmh5225/battleye-shellcode
 - https://github.com/gmh5225/be-injector [Attack COW]
+- https://github.com/gmh5225/BE-BEDaisy
 
 > Explore AntiCheat System:EQU8
 - https://back.engineering/12/08/2021
