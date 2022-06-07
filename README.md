@@ -213,6 +213,10 @@
 - https://github.com/hugsy/CFB [Monitor IRP]
 - https://ioninja.com/downloads.html [Protocol Analyzer]
 
+> Packet Filter
+- https://github.com/gmh5225/packet-win-shaper
+- https://github.com/gmh5225/Packet-ndisapi
+
 > RE Tools
 - https://github.com/stevemk14ebr/RETools
 
