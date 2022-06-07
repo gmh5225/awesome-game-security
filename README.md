@@ -105,6 +105,10 @@
 - https://github.com/TLeonardUK/ds3os [Dark Souls 3]
 - https://github.com/rathena/rathena [MMORPG]
 
+## NVIDIA PhysX SDK
+- https://github.com/NVIDIAGameWorks/PhysX
+- https://github.com/NVIDIAGameWorks/PhysX-3.4
+
 
 ## Game Develop
 > Guide
