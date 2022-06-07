@@ -856,6 +856,7 @@
 - https://github.com/Ahora57/MAJESTY-technologies
 - https://github.com/AdvDebug/AntiCrack-DotNet [CSharp]
 - https://github.com/weak1337/CEDetector [CE]
+- https://github.com/gmh5225/Detection-CheatEngine [CE]
 - https://github.com/Ahora57/MAJESTY-technologies
 - https://github.com/gmh5225/AntiDbg-AmogusPlugin
 - https://github.com/gmh5225/Android-AntiDebugandMemoryDump [Android]
