@@ -346,6 +346,7 @@
 > Overlay
 - https://github.com/coltonon/D2DOverlay
 - https://github.com/Unkn0wnH4ck3r/GameOverlayUIHook [Steam]
+- https://github.com/gmh5225/Steam-Hook-Render-PoC [Steam]
 - https://github.com/gmh5225/dwmhook [DWM]
 - https://github.com/gmh5225/overlay-nvidia-overlay-hijack [Hijack Nvidia]
 - https://github.com/gmh5225/D3DOverlay-Nvidia-Hijack [Hijack Nvidia]
