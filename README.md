@@ -874,6 +874,8 @@
 - https://github.com/Ahora57/MAJESTY-technologies
 - https://github.com/gmh5225/AntiDbg-AmogusPlugin
 - https://github.com/gmh5225/Android-AntiDebugandMemoryDump [Android]
+- [Sample anti-debug with detect ScyllaHide/HyperHide and TitanHide](https://github.com/gmh5225/antidbg-Baka)
+- [Linux anti-debugging techniques](https://github.com/gmh5225/linux-antidbg-adbg)
 
 > Virtual Environments
 - https://github.com/gmh5225/flare-vm
