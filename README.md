@@ -143,6 +143,7 @@
 - https://github.com/gmh5225/Fortnite-1 [Fortnite]
 - https://github.com/gmh5225/doomretro [DOOM]
 - https://github.com/gmh5225/Game-Super-Mario-Bros-game [Remake of Super Mario]
+- https://github.com/gmh5225/Game-2048.cpp [2048]
 
 ## Game Hot Patch
 - https://github.com/Tencent/xLua
