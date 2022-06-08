@@ -477,6 +477,7 @@
 - https://github.com/DrNseven/D3D11-Wallhack
 
 > HWID
+- [All methods of retrieving unique identifiers(HWIDs) on your PC](https://www.unknowncheats.me/forum/anti-cheat-bypass/333662-methods-retrieving-unique-identifiers-hwids-pc.html)
 - https://github.com/dword64/Ow-Anti-Flag
 - https://github.com/gmh5225/hwid
 - https://github.com/lil-skies/btbd-modified
