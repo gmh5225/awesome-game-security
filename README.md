@@ -909,6 +909,9 @@
 - https://github.com/gmh5225/packer-peinjector
 - https://github.com/gmh5225/packer-AresFramework
 
+> Anti Disassembly
+- https://github.com/gmh5225/Anti-Disassembly-blackhat2012
+
 > Sample Unpacker
 - https://github.com/hasherezade/mal_unpack_drv
 
