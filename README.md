@@ -144,6 +144,7 @@
 - https://github.com/gmh5225/doomretro [DOOM]
 - https://github.com/gmh5225/Game-Super-Mario-Bros-game [Remake of Super Mario]
 - https://github.com/gmh5225/Game-2048.cpp [2048]
+- [An open source re-implementation of RollerCoaster Tycoon 2](https://github.com/gmh5225/Game-OpenRCT2)
 
 ## Game Hot Patch
 - https://github.com/Tencent/xLua
