@@ -662,6 +662,7 @@
 - https://github.com/gmh5225/CSGO-P2C-Dumper [Dump]
 - https://github.com/gmh5225/CSGO-2k17-club
 - https://github.com/gmh5225/csgo-xenforo-loader
+- https://github.com/gmh5225/CSGO-ezfrags
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
