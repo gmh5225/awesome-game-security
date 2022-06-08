@@ -478,6 +478,7 @@
 
 > HWID
 - https://github.com/dword64/Ow-Anti-Flag
+- https://github.com/gmh5225/hwid
 - https://github.com/lil-skies/btbd-modified
 - https://github.com/xEnething/Permanent-HWID-Spoofer
 - https://github.com/Theordernarkoz/Hwid-Spoofer-EAC-BE
