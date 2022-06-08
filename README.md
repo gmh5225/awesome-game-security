@@ -1015,6 +1015,7 @@
 > Information System
 - https://github.com/Enum0x539/Qvoid-Token-Grabber
 - https://github.com/gmh5225/dfirtriage
+- https://github.com/gmh5225/info-LaZagne
 
 > Dynamic Script
 - https://github.com/can1357/NtLua
