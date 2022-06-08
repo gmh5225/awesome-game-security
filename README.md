@@ -939,6 +939,7 @@
 - https://github.com/MrDiamond64/Scythe-AntiCheat [Minecraft]
 - https://github.com/gmh5225/AntiCheat
 - https://github.com/gmh5225/EDR-whids [EDR]
+- https://github.com/gmh5225/UltimateAntiCheat
 
 > Detection:Hook
 - https://github.com/hasherezade/pe-sieve
