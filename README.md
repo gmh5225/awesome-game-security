@@ -241,6 +241,7 @@
 - https://github.com/gmh5225/PG-EasyAntiPatchGuard
 - https://github.com/gmh5225/UPGDSED [File]
 - https://github.com/Mattiwatti/EfiGuard [EFI]
+- https://github.com/gmh5225/PG1903 [Demo NX]
 
 > Windows Kernel Explorer
 - https://github.com/NullArray/WinKernel-Resources [Guide]
