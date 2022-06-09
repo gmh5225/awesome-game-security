@@ -1072,7 +1072,7 @@
 - https://github.com/gmh5225/CET-win10 [CET]
 - [HyperGuard](https://windows-internals.com/hyperguard-secure-kernel-patch-guard-part-1-skpg-initialization)
 
-## WSA
+## Windows Subsystem for Android
 - https://github.com/gmh5225/win11_apk_installer
 - https://github.com/LSPosed/MagiskOnWSA
 - https://github.com/gmh5225/wsa_pacman
