@@ -1076,5 +1076,6 @@
 - https://github.com/gmh5225/win11_apk_installer
 - https://github.com/LSPosed/MagiskOnWSA
 - https://github.com/gmh5225/wsa_pacman
+- https://github.com/gmh5225/WSA-Linux-Kernel
 
 
