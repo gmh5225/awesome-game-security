@@ -684,6 +684,9 @@
 - https://github.com/gmh5225/valorant-dumper [Dump]
 - https://github.com/gmh5225/Valorant-Dumper-Tool [Dump]
 
+> Game:VEILED EXPERTS
+- https://github.com/gmh5225/VEILED-EXPERTS-SDK
+
 > Game:COD1
 - https://github.com/gmh5225/CoD_Hacks
 
