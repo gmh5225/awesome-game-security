@@ -1077,5 +1077,6 @@
 - https://github.com/LSPosed/MagiskOnWSA
 - https://github.com/gmh5225/wsa_pacman
 - https://github.com/gmh5225/WSA-Linux-Kernel
+- https://github.com/gmh5225/BuildWSA
 
 
