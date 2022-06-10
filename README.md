@@ -685,6 +685,7 @@
 - https://github.com/gmh5225/Valorant-Hack-Esp-Aimbot-Driver-Injector-With-Spoofer-Temporary
 - https://github.com/gmh5225/valorant-dumper [Dump]
 - https://github.com/gmh5225/Valorant-Dumper-Tool [Dump]
+- https://github.com/gmh5225/Valorant-Esp-Aimbot-Hack
 
 > Game:VEILED EXPERTS
 - https://github.com/gmh5225/VEILED-EXPERTS-SDK
