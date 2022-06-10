@@ -726,6 +726,7 @@
 - https://github.com/CasualX/apexbot
 - https://github.com/gmh5225/APEX-ESP_AIMBOT
 - https://github.com/gmh5225/Apex-Legends_Driver_Cheat
+- https://github.com/Keyzp1337/Fortnite
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
@@ -751,6 +752,7 @@
 - https://github.com/gmh5225/Fortnite-UD-External
 - https://github.com/gmh5225/Fortnite-Gloomy.cc
 - https://github.com/gmh5225/Fortnite-Esp-Aimbot-Exploits-Hwid-Spoofer-Cleaner-Hack-Cheat
+- https://github.com/gmh5225/Fortnite-Cheat-LEAK
 
 > Game:Bloodhunt
 - https://github.com/gmh5225/HackExternal--bloodhunt
@@ -813,6 +815,7 @@
 - https://github.com/gmh5225/Rust-External-Esp-Aimbot-Spoofer-Hack-Cheat-Injector-Driver
 - https://github.com/gmh5225/Rust-External
 - https://github.com/gmh5225/Rico-Cheat-rust-external
+- https://github.com/gmh5225/rust-a-pasted-rust-script
 
 > Game:Arma3
 - https://github.com/gmh5225/arma3-external-variable-manager
