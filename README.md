@@ -687,6 +687,7 @@
 > Game:VEILED EXPERTS
 - https://github.com/gmh5225/VEILED-EXPERTS-SDK
 - https://github.com/gmh5225/ProjectD-Win64-Shipping
+- https://github.com/gmh5225/VeiledExpertsSDK
 
 > Game:COD1
 - https://github.com/gmh5225/CoD_Hacks
