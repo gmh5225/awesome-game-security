@@ -559,6 +559,7 @@
 - https://github.com/gmh5225/battleye-shellcode
 - https://github.com/gmh5225/be-injector [Attack COW]
 - https://github.com/gmh5225/BE-BEDaisy
+- https://github.com/gmh5225/BadEye
 
 > Explore AntiCheat System:EQU8
 - https://back.engineering/12/08/2021
