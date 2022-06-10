@@ -832,6 +832,8 @@
 
 > Game:GTA5
 - https://github.com/Luksiuss/GTA-5-SIGS-1.59 [Offset]
+- [About
+Adds drag- to- resize functionality to the main GTA V window](https://github.com/gmh5225/GTAV_DragResize)
 
 > Game:Geometry Dash
 - https://github.com/gmh5225/gd-internal
