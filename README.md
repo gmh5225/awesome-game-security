@@ -577,6 +577,8 @@
 > Explore AntiCheat System:XignCode
 - https://github.com/gmh5225/XignCode-Dump
 
+> Explore AntiCheat System:ACE
+- https://github.com/gmh5225/sguard_limit
 
 > Game:MapleStory
 - https://forum.ragezone.com/f922/getting-packet-structures-opcodes-using-792436 [Packet]
