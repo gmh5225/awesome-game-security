@@ -790,6 +790,7 @@
 - https://github.com/gmh5225/EFT-EscapeFromTarkov-Trainer
 - https://github.com/gmh5225/eft-tiny_eft
 - https://github.com/gmh5225/eft-Nathans-Tarkov-Radar-Public [Vmread + Radar]
+- https://github.com/gmh5225/eft-external
 
 > Game:R6
 - https://github.com/NMan1/Rainbow-Six-Cheat
