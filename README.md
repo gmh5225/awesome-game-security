@@ -910,6 +910,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [Linux anti-debugging techniques](https://github.com/gmh5225/linux-antidbg-adbg)
 - https://github.com/gmh5225/AntiDBG
 - https://github.com/gmh5225/linux-anti-debug-LADD [Linux]
+- https://github.com/gmh5225/AntiKernelDebug-POC [Windows Kernel]
 
 > Virtual Environments
 - https://github.com/gmh5225/flare-vm
