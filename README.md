@@ -856,6 +856,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Game:8ball pool
 - https://github.com/gmh5225/Alaa-8ball-pool-source-exposed
 
+> Game:Wizard101
+- https://github.com/gmh5225/wizard101-spoofer [HWID]
+
 ## Anti Cheat
 > Guide
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
