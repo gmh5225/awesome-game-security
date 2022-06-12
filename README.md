@@ -432,10 +432,11 @@
 - https://github.com/SamuelTulach/rainbow [HWID]
 - https://github.com/gmh5225/Fortnite-EFI-External [Fortnite]
 
-> KVM Cheat
+> QEMU/KVM Cheat
 - https://github.com/memflow/memflow-kvm
 - https://github.com/MisterY52/apex_dma_kvm_pub
 - https://github.com/SamuelTulach/BetterTiming [Bypass CPU Timing]
+- https://github.com/gmh5225/qemu-hide-Hardened-qemu [Hidden QEMU]
 
 > Anti Screenshot
 - https://github.com/KANKOSHEV/NoScreen [Hide Window]
