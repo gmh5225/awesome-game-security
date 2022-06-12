@@ -985,6 +985,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/AntiCheat
 - https://github.com/gmh5225/EDR-whids [EDR]
 - https://github.com/gmh5225/UltimateAntiCheat
+- https://github.com/gmh5225/Anti-Cheat-Quack
 
 > Detection:Hook
 - https://github.com/hasherezade/pe-sieve
