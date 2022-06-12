@@ -900,6 +900,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Android-AntiDebugandMemoryDump [Android]
 - [Sample anti-debug with detect ScyllaHide/HyperHide and TitanHide](https://github.com/gmh5225/antidbg-Baka)
 - [Linux anti-debugging techniques](https://github.com/gmh5225/linux-antidbg-adbg)
+- https://github.com/gmh5225/AntiDBG
 
 > Virtual Environments
 - https://github.com/gmh5225/flare-vm
