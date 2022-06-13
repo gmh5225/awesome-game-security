@@ -322,6 +322,7 @@
 - https://github.com/andrew9382/manual_mapping_dll_injector [Manual Map]
 - https://github.com/can1357/ThePerfectInjector [PTE.User]
 - https://github.com/gmh5225/Driver-executor [PTE.User]
+- https://github.com/gmh5225/inject-PresentInjector [PTE.User]
 - https://github.com/gmh5225/Driver-HVCI-KernelForge [Hijack ROP]
 - https://github.com/gmh5225/be-injector [Attack COW]
 - https://github.com/gmh5225/dll-hot-reload [Hot Reload]
