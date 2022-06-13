@@ -337,6 +337,7 @@
 - https://github.com/stevemk14ebr/PolyHook_2_0
 - https://github.com/WopsS/RenHook
 - https://github.com/gmh5225/Android-hook-PyAsmPatch
+- https://github.com/gmh5225/Driver-KDtour [Easy Kernel Detour]
 
 > Rop Finder
 - https://github.com/gmh5225/ROP-rp
