@@ -554,6 +554,7 @@
 > Explore AntiCheat System:VAC
 - https://github.com/danielkrupinski/VAC-Bypass-Loader
 - https://github.com/gmh5225/vac-hooks
+- https://github.com/gmh5225/VAC-Shtreeba [Injector]
 
 > Explore AntiCheat System:EAC
 - https://github.com/thesecretclub/CVEAC-2020 [Integrity Checks]
