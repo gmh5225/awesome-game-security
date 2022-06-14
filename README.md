@@ -476,6 +476,7 @@
 - https://github.com/gmh5225/Hide-Driver-Thread-blanket [Hide Kernel Thread]
 - https://github.com/gmh5225/hide-herpaderping [Hide Process/File]
 - https://github.com/gmh5225/hide-thread-address-KaynStrike [Spoofs Thread Start Address]
+- [Using .reloc section to replace the typical allocation calls](https://github.com/gmh5225/memory-relocalloc)
 
 > Triggerbot & Aimbot
 - https://github.com/changeofpace/MouHidInputHook
