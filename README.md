@@ -651,6 +651,9 @@
 - https://github.com/skrixx68/Dota2-Overlay-2.0
 - https://github.com/skrixx68/Dota2-Overlay-OffsetUpdater
 
+> Game:WOW
+- https://github.com/gmh5225/wow-IAT-fix
+
 > Game:CS1.6
 - https://github.com/gmh5225/CS16-hpp-hack
 
