@@ -770,6 +770,8 @@
 - https://github.com/gmh5225/Fortnite-Fltokens-and-offsets
 - https://github.com/gmh5225/VOLTO-EXTERNAL-SPOWAR-UD-EAC-BE-FORTNITE-EXTERNAL-CHEAT
 - https://github.com/gmh5225/Serenity.gg-FN-and-Loader
+- https://github.com/gmh5225/Fortnite-External-Cheat-Leak
+- https://github.com/gmh5225/fortnite-Spoofer [HWID]
 
 > Game:Bloodhunt
 - https://github.com/gmh5225/HackExternal--bloodhunt
