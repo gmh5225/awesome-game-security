@@ -736,6 +736,7 @@
 - https://github.com/gmh5225/APEX-ESP_AIMBOT
 - https://github.com/gmh5225/Apex-Legends_Driver_Cheat
 - https://github.com/Keyzp1337/Fortnite
+- https://github.com/gmh5225/Apex-AI-NuremX [AI]
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
