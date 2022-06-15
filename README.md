@@ -431,6 +431,7 @@
 - https://git.back.engineering/_xeroxz/NtWin32k [NtUserGetThreadState]
 - https://github.com/gmh5225/Common-boundcallback [KeRegisterBoundCallback]
 - https://github.com/gmh5225/DataPtrSwap-driver [NtSetCompositionSurfaceAnalogExclusive]
+- https://github.com/gmh5225/Driver-ReadWriteDriver [NtUserSetSysColors]
 
 > EFI Driver
 - https://github.com/ekknod/sumap [EFI Manual Map]
