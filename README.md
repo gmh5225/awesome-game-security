@@ -344,6 +344,9 @@
 > Rop Finder
 - https://github.com/gmh5225/ROP-rp
 
+> Anti Signature Scanning
+- https://github.com/gmh5225/AV-BYPASS-TEST-avdebugger
+
 > RPM
 - https://github.com/btbd/access
 - https://github.com/gmh5225/readwrite-kernel-stable
