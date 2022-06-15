@@ -263,6 +263,7 @@
 - https://github.com/gmh5225/MSSymbolsCollection [Kernel Symbols]
 - https://github.com/gmh5225/vad-wkpe [Enumerate VAD]
 - https://github.com/gmh5225/Tool-Driver-DriverDllFInder [Find Driver Useless Memory]
+- https://github.com/gmh5225/Driver-APICallProxy [Windows API Call Obfuscation]
 
 > Android Kernel Explorer
 - https://github.com/gmh5225/Android-Analysis-Cheat-Use-Kernel-op7t [DIY Kernel]
@@ -327,6 +328,7 @@
 - https://github.com/gmh5225/Driver-HVCI-KernelForge [Hijack ROP]
 - https://github.com/gmh5225/be-injector [Attack COW]
 - https://github.com/gmh5225/dll-hot-reload [Hot Reload]
+
 
 > Injection:Linux
 - https://github.com/gmh5225/elf-injector-mandibule
