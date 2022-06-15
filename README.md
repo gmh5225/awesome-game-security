@@ -146,6 +146,10 @@
 - https://github.com/gmh5225/Game-2048.cpp [2048]
 - [An open source re-implementation of RollerCoaster Tycoon 2](https://github.com/gmh5225/Game-OpenRCT2)
 
+
+## Game Assets
+- https://github.com/gmh5225/Game-assets-Retro3DGraphicsCollection
+
 ## Game Hot Patch
 - https://github.com/Tencent/xLua
 - https://github.com/Tencent/InjectFix
