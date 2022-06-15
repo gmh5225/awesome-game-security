@@ -574,6 +574,7 @@
 - https://github.com/Schnocker/EAC_dbp [Debug]
 - https://github.com/gmh5225/eac-mapper [Eac Mapper]
 - https://github.com/gmh5225/EAC-MmCopyMemory-EAC [Bypass MmCopyMemory]
+- https://github.com/gmh5225/EAC-Kernel-Packet-Fucker [Packet Fucker]
 
 > Explore AntiCheat System:BE
 - https://github.com/gmh5225/BE-NoEye
