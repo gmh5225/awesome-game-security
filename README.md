@@ -1065,6 +1065,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Signature Scanning
 - https://github.com/gmh5225/sig-binlex
+- https://github.com/gmh5225/sig-aho-corasick
 
 > Information System
 - https://github.com/Enum0x539/Qvoid-Token-Grabber
