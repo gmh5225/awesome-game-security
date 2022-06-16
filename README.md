@@ -809,6 +809,7 @@
 - https://github.com/gmh5225/pubg-public
 - https://github.com/gmh5225/PlayerUnknown-s-Battlegrounds-Pubg-Steam-Hack-Esp-Aimbot
 - https://github.com/gmh5225/pubg-lilypublic
+- https://github.com/gmh5225/PUBG_Internal
 
 > Game:PUBGM
 - https://github.com/Mood-Coding/pubgm_shitty_source
