@@ -448,6 +448,7 @@
 - https://github.com/TheCruZ/EFI_Driver_Access [RPM]
 - https://github.com/SecIdiot/bootkit
 - https://github.com/SamuelTulach/rainbow [HWID]
+- https://github.com/gmh5225/-Rainbow---EFI [HWID]
 - https://github.com/gmh5225/Fortnite-EFI-External [Fortnite]
 
 > QEMU/KVM Cheat
@@ -519,6 +520,7 @@
 - https://github.com/InstinctTheDevil/EclipsedSpoofer-EAC-BE
 - https://github.com/gmh5225/HWID-SpooferEAC
 - https://github.com/SamuelTulach/rainbow [EFI]
+- https://github.com/gmh5225/-Rainbow---EFI [EFI]
 - https://github.com/btbd/wpp [Intercepting DeviceControl via WPP]
 - https://github.com/gmh5225/Driver-owned_alignment [Abusing Alignment]
 - https://github.com/gmh5225/Hwid-Spoofer-Valorant-Eac-Be-Vanguard-Permanted-Temporary-Spoofer
