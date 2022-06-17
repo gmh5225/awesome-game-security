@@ -725,6 +725,7 @@
 - https://github.com/gmh5225/Valorant-Dumper-Tool [Dump]
 - https://github.com/gmh5225/Valorant-Esp-Aimbot-Hack
 - https://github.com/gmh5225/Valorant-external-UE4-c- [External]
+- https://github.com/gmh5225/Valorant-Cheat-External [External]
 
 > Game:VEILED EXPERTS
 - https://github.com/gmh5225/VEILED-EXPERTS-SDK
