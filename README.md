@@ -638,6 +638,9 @@
 - https://github.com/gmh5225/MapleStory-MapleResearch [GMS-095 Client Analysis]
 - https://github.com/gmh5225/Maplestory-RustMS [Private Server-Rust]
 
+> Game:Minecraft
+- [A minecraft server backend written in c++](https://github.com/gmh5225/minecpp)
+
 > Game:Sword With Sauce
 - https://github.com/1hAck-0/UE4-Cheat-Source-Code
 
