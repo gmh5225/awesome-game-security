@@ -215,6 +215,7 @@
 - https://github.com/gmh5225/debug-veh [CE Plugin For Manualmap VEH Dll]
 - https://github.com/x64dbg/x64dbg
 - https://github.com/ajkhoury/ReClassEx
+- https://github.com/gmh5225/ReClass.NET
 - https://github.com/x64dbg/DotX64Dbg
 - https://github.com/imugee/xdv
 - https://github.com/eteran/edb-debugger [For Linux]
