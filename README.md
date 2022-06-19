@@ -503,6 +503,7 @@
 - https://github.com/lucylow/b00m-h3adsh0t [Neural Network]
 - https://github.com/univrsal/input-overlay [Keyboard Mapper]
 - https://github.com/Miffyli/gan-aimbots [Machine Learning]
+- https://github.com/gmh5225/camera-triggerbot [Camera Triggerbot]
 
 > WallHack
 - https://github.com/DrNseven/D3D11-Wallhack
