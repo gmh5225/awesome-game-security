@@ -79,6 +79,7 @@
 - https://github.com/Groovounet/glm
 - https://github.com/Kazade/kazmath
 - https://github.com/gmh5225/math-int_fastdiv
+- https://github.com/gmh5225/Math-fdlibm
 
 ## Renderer
 - https://github.com/gmh5225/Renderer-SoftGLRender
