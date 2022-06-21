@@ -318,6 +318,7 @@
 
 > Binary Ninja Plugins
 - https://github.com/EliseZeroTwo/SEH-Helper [SEH Helper]
+- https://github.com/Vector35/tanto [Slices Functions]
 
 > Windbg Plugins
 - https://github.com/gmh5225/windbg-SwishDbgExt
