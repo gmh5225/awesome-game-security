@@ -733,6 +733,7 @@
 - https://github.com/gmh5225/CSGO-2k17-club
 - https://github.com/gmh5225/csgo-xenforo-loader
 - https://github.com/gmh5225/CSGO-ezfrags
+- https://github.com/gmh5225/CSGO-MAIN-INTERNAL
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
