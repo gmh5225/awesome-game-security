@@ -239,6 +239,9 @@
 - https://github.com/gmh5225/packet-win-shaper
 - https://github.com/gmh5225/Packet-ndisapi
 
+> SpeedHack
+- https://github.com/gmh5225/CE-Speedhack
+
 > RE Tools
 - https://github.com/stevemk14ebr/RETools
 
