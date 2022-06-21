@@ -1043,6 +1043,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Game Engine Protection:Unity
 - https://github.com/ls9512/USecurity
 
+> Game Engine Protection:Source
+- [Source Engine serverside anti-cheat plugin. (CS:S, CS:GO, CS:P, TF2)](https://github.com/gmh5225/AntiCheat-NoCheatZ-3)
+
 > Open Source Anti Cheat System
 - https://github.com/mq1n/NoMercy
 - https://github.com/gmh5225/Anticheat-BetaShield
@@ -1059,6 +1062,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/EDR-whids [EDR]
 - https://github.com/gmh5225/UltimateAntiCheat
 - https://github.com/gmh5225/Anti-Cheat-Quack
+- [Source Engine serverside anti-cheat plugin. (CS:S, CS:GO, CS:P, TF2)](https://github.com/gmh5225/AntiCheat-NoCheatZ-3)
 
 > Detection:Hook
 - https://github.com/hasherezade/pe-sieve
