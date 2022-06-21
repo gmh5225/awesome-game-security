@@ -241,6 +241,7 @@
 
 > SpeedHack
 - https://github.com/gmh5225/CE-Speedhack
+- https://github.com/gmh5225/Speed-Hack
 
 > RE Tools
 - https://github.com/stevemk14ebr/RETools
