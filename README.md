@@ -1075,6 +1075,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/UltimateAntiCheat
 - https://github.com/gmh5225/Anti-Cheat-Quack
 - [Source Engine serverside anti-cheat plugin. (CS:S, CS:GO, CS:P, TF2)](https://github.com/gmh5225/AntiCheat-NoCheatZ-3)
+- [This is the Anti Cheat System for Knight Online Gamesoft vversion](https://github.com/gmh5225/AntiCheat-GamesoftACS)
 
 > Detection:Hook
 - https://github.com/hasherezade/pe-sieve
