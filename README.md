@@ -197,6 +197,7 @@
 > Guide
 - https://github.com/dsasmblr/game-hacking
 - https://github.com/dsasmblr/hacking-online-games
+- https://github.com/kovidomi/game-reversing
 - https://github.com/mytechnotalent/Reverse-Engineering
 - https://github.com/wtsxDev/reverse-engineering
 - https://github.com/mytechnotalent/Hacking-Windows
