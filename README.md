@@ -925,6 +925,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Game:Wizard101
 - https://github.com/gmh5225/wizard101-spoofer [HWID]
 
+> Game:QQTang
+- https://github.com/gmh5225/QQTangCheatEngine
+
 ## Anti Cheat
 > Guide
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
