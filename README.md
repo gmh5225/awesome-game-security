@@ -830,6 +830,7 @@
 
 > Game:Super People
 - https://github.com/EBalloon/Super-People-sdk
+- https://github.com/gmh5225/Super-People-Esp-Aimbot-Magic-Hack
 
 > Game:Splitgate
 - https://github.com/gmh5225/Splitgate-Internal
