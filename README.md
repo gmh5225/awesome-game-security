@@ -647,6 +647,10 @@
 > Explore AntiCheat System:G-Presto
 - https://github.com/gmh5225/G-Presto-Anti-Cheat-Reverse-Engineered/blob/main/Main.cpp
 
+> Explore AntiCheat System:NeacSafe
+- https://github.com/gmh5225/NeacSafe-Analysis
+
+
 > Game:MapleStory
 - https://forum.ragezone.com/f922/getting-packet-structures-opcodes-using-792436 [Packet]
 - https://github.com/Bratah123/SpiritIDAPlugin [IDA-Plugin]
