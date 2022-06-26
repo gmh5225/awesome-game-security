@@ -754,6 +754,7 @@
 - https://github.com/gmh5225/csgo-xenforo-loader
 - https://github.com/gmh5225/CSGO-ezfrags
 - https://github.com/gmh5225/CSGO-MAIN-INTERNAL
+- https://github.com/gmh5225/csgo-digital-sdk
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
