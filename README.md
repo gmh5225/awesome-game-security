@@ -89,6 +89,7 @@
 ## Renderer
 - https://github.com/gmh5225/Renderer-SoftGLRender
 - https://github.com/gmh5225/Render-VolumetricReSTIRRelease
+- https://github.com/gmh5225/Render-NonEuclidean
 
 ## AI
 - https://github.com/ls361664056/GameAI-paper-list [zh]
