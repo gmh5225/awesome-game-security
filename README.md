@@ -1201,6 +1201,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/MiniDumpWriteDumpPoC [Dump Memory]
 - [A x64 Write-What-Where exploit+shellcode execution vulnerability](https://www.unknowncheats.me/forum/anti-cheat-bypass/503519-wwwaryasinject-x64-write-exploit-shellcode-execution-vulnerability.html)
 - [Dll injection through code page id modification in registry](https://github.com/gmh5225/injection-NlsCodeInjectionThroughRegistry)
+- https://github.com/gmh5225/Etw-Syscall [ETW Syscall]
 
 
 ## Windows Security Features
