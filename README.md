@@ -225,6 +225,7 @@
 - https://github.com/isabellaflores/ceserver-pcileech [CE Server For Pcileech]
 - https://github.com/gmh5225/debug-veh [CE Plugin For Manualmap VEH Dll]
 - https://github.com/x64dbg/x64dbg
+- https://github.com/marakew/syser
 - https://github.com/ajkhoury/ReClassEx
 - https://github.com/gmh5225/ReClass.NET
 - https://github.com/x64dbg/DotX64Dbg
