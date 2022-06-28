@@ -850,6 +850,7 @@
 - https://github.com/gmh5225/Fortnite-External-Cheat-Leak
 - https://github.com/gmh5225/fortnite-Spoofer [HWID]
 - https://github.com/gmh5225/ritz-amazing-fortnite-internal
+- https://github.com/gmh5225/Fortnite-External
 
 > Game:Bloodhunt
 - https://github.com/gmh5225/HackExternal--bloodhunt
