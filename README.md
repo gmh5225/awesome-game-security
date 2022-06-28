@@ -1166,6 +1166,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/FastVM/minivm
 - https://github.com/jnz/q3vm
 
+> Kernel Mode Winsock
+- https://github.com/gmh5225/libwsk [Kernel-Mode Winsock library]
+
 > Windows Ring3 Callback
 - https://github.com/gmh5225/Callback-AlternativeShellcodeExec
 - https://github.com/Deputation/instrumentation_callbacks [Instrumentation Callback]
