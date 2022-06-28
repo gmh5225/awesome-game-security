@@ -563,6 +563,7 @@
 - https://github.com/gmh5225/HWID-mutante
 - https://github.com/gmh5225/HWID-ImGui-Spoofer-Leaked
 - https://github.com/gmh5225/HWID-Spoofer-for-Fortnite-and-Valorant
+- https://github.com/gmh5225/HWID-Full-Hwid-Spoofer-V6
 
 > Bypass Page Protection
 - https://github.com/illegal-instruction-co/CountHook [WorkingSet]
