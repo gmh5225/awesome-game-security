@@ -111,6 +111,7 @@
 - https://github.com/gmh5225/skynet
 - https://github.com/chronoxor/CppServer
 - https://github.com/Qihoo360/evpp
+- https://github.com/gmh5225/kcp-cpp [KCP]
 - https://github.com/TLeonardUK/ds3os [Dark Souls 3]
 - https://github.com/rathena/rathena [MMORPG]
 
