@@ -182,6 +182,7 @@
 - https://github.com/MKXJun/DirectX11-With-Windows-SDK [DX11 zh]
 
 > Hook
+- https://github.com/gmh5225/D3D11Hook [DX11 Imgui]
 - https://github.com/gmh5225/DX11-BaseHook [DX11 Imgui]
 - https://github.com/gmh5225/D3D12-Hook-ImGui [DX12 Imgui]
 - https://github.com/gmh5225/DirectX11Hook [DX11 Imgui]
