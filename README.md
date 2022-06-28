@@ -712,6 +712,8 @@
 - https://github.com/gmh5225/DecryptionDumper [Dump]
 - https://github.com/LeaguePrank/LeagueTeamBoost
 - https://github.com/gmh5225/League-of-Legends-Bot-Orbwalker-Lasthit-Laneclear-Skin-Changer-Vanguard-Spoofer
+- https://github.com/LeagueSandbox
+
 
 > Game:Dota2
 - https://github.com/skrixx68/Dota2-Overlay-2.0
