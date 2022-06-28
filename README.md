@@ -295,6 +295,8 @@
 
 > Virtual Environments
 - https://github.com/gmh5225/Android-BlackBox [Android]
+- https://github.com/gmh5225/flare-vm
+- https://github.com/hzqst/VmwareHardenedLoader
 
 > Decompiler
 - IDA Pro
@@ -1005,9 +1007,6 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/AntiDBG
 - https://github.com/gmh5225/linux-anti-debug-LADD [Linux]
 - https://github.com/gmh5225/AntiKernelDebug-POC [Windows Kernel]
-
-> Virtual Environments
-- https://github.com/gmh5225/flare-vm
 
 > Page Protection
 - https://github.com/changeofpace/Self-Remapping-Code
