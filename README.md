@@ -885,6 +885,7 @@
 - https://github.com/Mood-Coding/pubgm_shitty_source
 - https://github.com/gmh5225/Pubg-Mobile-Extermal-Esp-Aimbot-Magic-Injector-Spoofer
 - https://github.com/gmh5225/Pubg-Mobile-Esp-Aimbot-Magic-Injector-Spoofer
+- https://github.com/gmh5225/PUBGM-PUBGPatcher
 
 > Game:EFT
 - https://github.com/gmh5225/EFT-StreamedCheat
