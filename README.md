@@ -979,6 +979,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Game:BLOCKPOST
 - https://github.com/gmh5225/BLOCKPOST-Cheat
 
+> Game:Witch It
+- https://github.com/gmh5225/CheatIt
+
 ## Anti Cheat
 > Guide
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
