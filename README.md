@@ -933,6 +933,9 @@
 > Game:Arma3
 - https://github.com/gmh5225/arma3-external-variable-manager
 
+> Game:AVA
+- https://github.com/gmh5225/AVA-Hack
+
 > Game:Mordhau
 - https://github.com/gmh5225/mordhau-simple-auto-block-cheat
 
