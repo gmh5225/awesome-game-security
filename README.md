@@ -325,6 +325,8 @@
 - https://github.com/Mixaill/FakePDB [PDB Generation From IDA]
 - https://github.com/gmh5225/IDA-Ponce [Symbolic Execution]
 - https://github.com/airbus-cert/ttddbg [Time Travel Debugging]
+- https://github.com/gmh5225/IDA-LazyIDA [LazyIDA]
+- https://github.com/gmh5225/IDA-qsynthesis [Greybox Synthesizer geared for deobfuscation of assembly instructions]
 
 > IDA Signature Database
 - https://github.com/gmh5225/IDA-sig-database
