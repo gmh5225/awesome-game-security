@@ -684,6 +684,8 @@
 - https://github.com/gmh5225/MapleStory-mnwvs196 [Private Server-TMS-196]
 - https://github.com/gmh5225/MapleStory-MapleResearch [GMS-095 Client Analysis]
 - https://github.com/gmh5225/Maplestory-RustMS [Private Server-Rust]
+- https://github.com/gmh5225/Maplestory-WzComparerR2 [Maplestory online Extractor]
+- [Generate machine learning object detection samples from Maplestory in different formats](https://github.com/gmh5225/MapleStory-DetectionSampleGenerator)
 
 > Game:Minecraft
 - [A minecraft server backend written in c++](https://github.com/gmh5225/minecpp)
