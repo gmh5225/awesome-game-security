@@ -627,6 +627,7 @@
 - https://github.com/gmh5225/EAC-Kernel-Packet-Fucker [Packet Fucker]
 - https://github.com/gmh5225/EAC-HydraHook [Packet Fucker]
 - https://github.com/gmh5225/EAC-EazyAntiCheatSRC [Reversed Source]
+- https://github.com/gmh5225/eac-leak [EAC sdk's memory leak]
 
 > Explore AntiCheat System:BE
 - https://github.com/gmh5225/BE-NoEye
