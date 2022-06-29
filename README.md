@@ -1162,6 +1162,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Detection:Obfuscation
 - https://github.com/mrphrazer/obfuscation_detection
 
+> Detection:Magisk
+- https://github.com/gmh5225/-Magisk-MagiskDetector
+
 > Signature Scanning
 - https://github.com/gmh5225/sig-binlex
 - https://github.com/gmh5225/sig-aho-corasick
