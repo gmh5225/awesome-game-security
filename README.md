@@ -114,6 +114,7 @@
 - https://github.com/gmh5225/kcp-cpp [KCP]
 - https://github.com/TLeonardUK/ds3os [Dark Souls 3]
 - https://github.com/rathena/rathena [MMORPG]
+- https://github.com/gmh5225/uWebSockets [WebSockets]
 
 ## NVIDIA PhysX SDK
 - https://github.com/NVIDIAGameWorks/PhysX
