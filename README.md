@@ -264,6 +264,9 @@
 - https://github.com/gmh5225/binary-translator-river
 - https://github.com/gmh5225/DBI-mambo [ARM]
 
+> Launcher Abuser
+- https://github.com/gmh5225/launcher-abuser
+
 > Bypass PatchGuard
 - https://github.com/gmh5225/PG-EasyAntiPatchGuard
 - https://github.com/gmh5225/UPGDSED [File]
@@ -1005,6 +1008,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/face-injector-v2 [Injection/ Testing]
 - https://github.com/notscimmy/libelevate [Elevating Handle]
 - https://github.com/gmh5225/NoBastian_v2 [Elevating Handle By LSASS]
+- https://github.com/gmh5225/launcher-abuser [Elevating Handle]
 - https://github.com/gmh5225/LSASS-Usermode-Bypass [Elevating Handle By LSASS]
 - https://github.com/Mattiwatti/EfiGuard [PG Testing]
 - https://github.com/9176324/Shark [PG Testing]
