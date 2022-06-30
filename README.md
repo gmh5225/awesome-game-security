@@ -1130,6 +1130,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [This is the Anti Cheat System for Knight Online Gamesoft vversion](https://github.com/gmh5225/AntiCheat-GamesoftACS)
 - [User-mode C++ Anti-Cheat written for German Roleplay Server GVMP.de](https://github.com/gmh5225/gvmp-anticheat)
 
+> Analysis Framework
+- https://github.com/pandora-analysis/pandora
+
 > Detection:Hook
 - https://github.com/hasherezade/pe-sieve
 - https://github.com/mike1k/HookHunter
