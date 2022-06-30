@@ -514,6 +514,7 @@
 - https://github.com/gmh5225/return-address-spoofing
 - https://github.com/gmh5225/Exception-Ret-Spoofing
 - https://github.com/gmh5225/Ret-Spoofing
+- https://github.com/gmh5225/CallStackSpoofer
 
 > Hide
 - https://github.com/JKornev/hidden
