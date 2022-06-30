@@ -847,7 +847,10 @@
 - https://github.com/TayzDev/W2S-offset-Fortnite [Offset]
 - https://github.com/Luksiuss/FortniteSigsUpdatedEveryUpdate [Offset]
 - https://github.com/Android1337/FortniteSigsUpdatedEveryUpdate [Offset]
+- https://github.com/plu1337/fortnite-offsets [Offset]
+- https://github.com/plu1337/fortnite-virtual-offsets [Virtual Table Offsets]
 - https://github.com/plu1337/fortnite-sigs [Signature]
+- https://github.com/plu1337/fortnite-exploits [Exploits]
 - https://github.com/Makk5/FortConsole
 - https://github.com/skidseal/FortniteLeak5
 - https://github.com/Zetolac/FortniteExternalW2S
@@ -873,6 +876,7 @@
 - https://github.com/gmh5225/fortnite-Spoofer [HWID]
 - https://github.com/gmh5225/ritz-amazing-fortnite-internal
 - https://github.com/gmh5225/Fortnite-External
+- https://github.com/gmh5225/Fortnite-Masterpasta-ihack-Source-Leak
 
 > Game:Bloodhunt
 - https://github.com/gmh5225/HackExternal--bloodhunt
