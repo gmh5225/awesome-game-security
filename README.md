@@ -236,6 +236,7 @@
 - https://github.com/mrexodia/TitanHide
 - https://github.com/Air14/HyperHide 
 - https://github.com/HyperDbg/HyperDbg
+- https://github.com/gmh5225/vt-debuger
 - https://github.com/changeofpace/Force-Page-Protection [Bypass Remap Memory]
 - https://github.com/icsharpcode/ILSpy [For Unity]
 - https://github.com/dnSpy/dnSpy [For Unity]
