@@ -847,6 +847,7 @@
 - https://github.com/TayzDev/W2S-offset-Fortnite [Offset]
 - https://github.com/Luksiuss/FortniteSigsUpdatedEveryUpdate [Offset]
 - https://github.com/Android1337/FortniteSigsUpdatedEveryUpdate [Offset]
+- https://github.com/plu1337/fortnite-sigs [Signature]
 - https://github.com/Makk5/FortConsole
 - https://github.com/skidseal/FortniteLeak5
 - https://github.com/Zetolac/FortniteExternalW2S
