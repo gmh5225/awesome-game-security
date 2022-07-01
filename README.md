@@ -946,6 +946,7 @@
 - https://github.com/gmh5225/Rust-External
 - https://github.com/gmh5225/Rico-Cheat-rust-external
 - https://github.com/gmh5225/rust-a-pasted-rust-script
+- https://github.com/gmh5225/Rust-External-Cheat
 
 > Game:Arma3
 - https://github.com/gmh5225/arma3-external-variable-manager
