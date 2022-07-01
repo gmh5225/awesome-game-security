@@ -783,6 +783,7 @@
 - https://github.com/gmh5225/CSGO-ezfrags
 - https://github.com/gmh5225/CSGO-MAIN-INTERNAL
 - https://github.com/gmh5225/csgo-digital-sdk
+- https://github.com/gmh5225/CSGO_BacktrackPatch [Backtrack Patch]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
