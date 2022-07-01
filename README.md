@@ -317,6 +317,7 @@
 - https://github.com/Col-E/Recaf [Java]
 - https://github.com/Konloch/bytecode-viewer [Java]
 - https://github.com/java-deobfuscator/deobfuscator [Java]
+- https://github.com/gmh5225/IDA-binsync [Sync]
 
 > IDA Plugins
 - https://github.com/vmallet/ida-plugins [List of IDA Plugins]
