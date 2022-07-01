@@ -1104,6 +1104,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/jnastarot/furikuri
 - https://github.com/nickcano/RelocBonus [Attack Reloc]
 - https://github.com/gmh5225/packer-nmmp [Dex]
+- https://github.com/gmh5225/Android-dex-BlackObfuscator [Dex]
 - https://github.com/d35ha/CallObfuscator [Call Obfuscation]
 - https://github.com/gmh5225/mutation-Milfuscator
 
