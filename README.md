@@ -609,6 +609,7 @@
 
 > Game Engine Explorer:Unity
 - https://github.com/Perfare/Il2CppDumper [Il2Cpp Dump]
+- https://github.com/T5ive/Il2CppDumper-GUI [Il2Cpp Dump GUI]
 - https://github.com/shalzuth/Il2CppRuntimeDumper [Il2Cpp Dump Runtime]
 - https://github.com/Perfare/Zygisk-Il2CppDumper [Il2Cpp Dump for Android Platform]
 - https://github.com/djkaty/Il2CppInspector [Il2Cpp Dump]
