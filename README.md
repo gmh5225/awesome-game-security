@@ -843,6 +843,7 @@
 - https://github.com/Keyzp1337/Fortnite
 - https://github.com/gmh5225/Apex-AI-NuremX [AI]
 - https://github.com/gmh5225/apex_full_cheat
+- https://github.com/gmh5225/Apex-ApexCheeseTest
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
