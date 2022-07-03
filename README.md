@@ -264,6 +264,7 @@
 - https://github.com/gmh5225/veh-cpp-veh-dbi
 - https://github.com/gmh5225/binary-translator-river
 - https://github.com/gmh5225/DBI-mambo [ARM]
+- https://github.com/DynamoRIO/drmemory
 
 > Launcher Abuser
 - https://github.com/gmh5225/launcher-abuser
