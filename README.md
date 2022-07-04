@@ -1101,6 +1101,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/packer-AresFramework
 - https://github.com/gmh5225/packer--exe_packer
 
+> CLR Protection
+- https://github.com/gmh5225/ClrGuard
+
 > Anti Disassembly
 - https://github.com/gmh5225/Anti-Disassembly-blackhat2012
 
