@@ -336,6 +336,7 @@
 - https://github.com/airbus-cert/ttddbg [Time Travel Debugging]
 - https://github.com/gmh5225/IDA-LazyIDA [LazyIDA]
 - https://github.com/gmh5225/IDA-qsynthesis [Greybox Synthesizer geared for deobfuscation of assembly instructions]
+- https://github.com/gmh5225/ida-medigate [RTTI]
 
 > IDA Signature Database
 - https://github.com/gmh5225/IDA-sig-database
