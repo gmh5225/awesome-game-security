@@ -896,6 +896,7 @@
 - https://github.com/gmh5225/Fortnite-Masterpasta-ihack-Source-Leak
 - https://github.com/gmh5225/Fortnite-Evo.cc-Source-External-Cheat
 - https://github.com/gmh5225/Fortnite-External-1
+- https://github.com/gmh5225/Apple-Lite-Fortnite-Cheat
 
 > Game:Bloodhunt
 - https://github.com/gmh5225/HackExternal--bloodhunt
