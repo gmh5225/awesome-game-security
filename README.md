@@ -487,6 +487,7 @@
 - https://github.com/gmh5225/DataPtrSwap-driver [NtSetCompositionSurfaceAnalogExclusive]
 - https://github.com/gmh5225/Driver-ReadWriteDriver [NtUserSetSysColors]
 - https://github.com/gmh5225/NtUserUpdateWindowTrackingInfo [NtUserUpdateWindowTrackingInfo]
+- https://github.com/gmh5225/comm-windows-software-policy [clip]
 
 > EFI Driver
 - https://github.com/ekknod/sumap [EFI Manual Map]
