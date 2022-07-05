@@ -1129,6 +1129,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Android-dex-BlackObfuscator [Dex]
 - https://github.com/d35ha/CallObfuscator [Call Obfuscation]
 - https://github.com/gmh5225/mutation-Milfuscator
+- https://github.com/gmh5225/the-poor-mans-obfuscator [elf/macho]
 
 > Screenshot
 - https://github.com/bavulapati/DXGICaptureApplication [Capture Desktop]
