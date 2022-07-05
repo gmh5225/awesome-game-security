@@ -689,6 +689,9 @@
 > Explore AntiCheat System:NeacSafe
 - https://github.com/gmh5225/NeacSafe-Analysis
 
+> Explore AntiCheat System:BadlionAnticheat
+- https://github.com/gmh5225/BadlionLogger
+
 
 > Game:MapleStory
 - https://forum.ragezone.com/f922/getting-packet-structures-opcodes-using-792436 [Packet]
