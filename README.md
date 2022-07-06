@@ -622,6 +622,7 @@
 - https://github.com/T5ive/Il2CppDumper-GUI [Il2Cpp Dump GUI]
 - https://github.com/shalzuth/Il2CppRuntimeDumper [Il2Cpp Dump Runtime]
 - https://github.com/Perfare/Zygisk-Il2CppDumper [Il2Cpp Dump for Android Platform]
+- https://github.com/gmh5225/Android-Il2cppSpy [Unity IL2CPP Disassembler (for apk)]
 - https://github.com/djkaty/Il2CppInspector [Il2Cpp Dump]
 - https://github.com/sinai-dev/UnityExplorer
 - https://github.com/4ch12dy/il2cpp [Il2Cpp Version]
