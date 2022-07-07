@@ -760,6 +760,7 @@
 - https://github.com/gmh5225/League-of-Legends-Bot-Orbwalker-Lasthit-Laneclear-Skin-Changer-Vanguard-Spoofer
 - https://github.com/LeagueSandbox
 - https://github.com/gmh5225/lol-unpackman
+- [A bran-new League of Legends assistant software, a replacement for WeGame](https://github.com/gmh5225/LOL-frank)
 
 
 > Game:Dota2
