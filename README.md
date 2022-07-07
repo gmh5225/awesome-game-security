@@ -866,6 +866,7 @@
 - https://github.com/gmh5225/apex_full_cheat
 - https://github.com/gmh5225/Apex-ApexCheeseTest
 - https://github.com/gmh5225/Apex-Legends-Esp
+- https://github.com/gmh5225/Apex-ApexCheat
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
