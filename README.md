@@ -982,6 +982,7 @@
 - https://github.com/gmh5225/rust-a-pasted-rust-script
 - https://github.com/gmh5225/Rust-External-Cheat
 - https://github.com/gmh5225/rust-Kors_lol [Internal]
+- https://github.com/gmh5225/Rust-Internal-1 [Internal]
 
 > Game:Arma3
 - https://github.com/gmh5225/arma3-external-variable-manager
