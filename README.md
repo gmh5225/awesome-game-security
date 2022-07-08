@@ -116,6 +116,7 @@
 - https://github.com/TLeonardUK/ds3os [Dark Souls 3]
 - https://github.com/rathena/rathena [MMORPG]
 - https://github.com/gmh5225/uWebSockets [WebSockets]
+- https://github.com/socketio/socket.io [Nodejs]
 
 ## NVIDIA PhysX SDK
 - https://github.com/NVIDIAGameWorks/PhysX
