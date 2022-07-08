@@ -496,6 +496,7 @@
 - https://github.com/gmh5225/NtUserUpdateWindowTrackingInfo [NtUserUpdateWindowTrackingInfo]
 - https://github.com/gmh5225/comm-windows-software-policy [clip]
 - https://github.com/gmh5225/Interep-Driver-Leak [NtGdiPolyPolyDraw]
+- https://github.com/gmh5225/Comm-NullHook [NtDxgkGetTrackedWorkloadStatistics]
 
 > EFI Driver
 - https://github.com/ekknod/sumap [EFI Manual Map]
