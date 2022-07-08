@@ -5,6 +5,7 @@
 > Guide
 - https://github.com/QianMo/Game-Programmer-Study-Notes
 - https://github.com/ThisisGame/cpp-game-engine-book
+- https://github.com/gmh5225/GameEngine-GameEngineFromScratch
 - https://forums.unrealengine.com [Unreal]
 - https://docs.unrealengine.com [Unreal]
 - https://www.unrealengine.com/resources [Unreal]
