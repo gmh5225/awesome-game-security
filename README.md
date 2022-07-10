@@ -367,6 +367,7 @@
 - https://github.com/gmh5225/x64dbg-xMalHunter [Detect malicious materials]
 - https://github.com/gmh5225/x64dbg-xFindOut
 - https://github.com/gmh5225/x64dbg-chaiScriptPlugin
+- https://github.com/gmh5225/X64DBG-ViewDllNotification
 
 > Injection:Windows
 - https://github.com/btbd/smap [Scatter Manual Map]
