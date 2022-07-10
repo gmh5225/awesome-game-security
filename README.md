@@ -358,6 +358,7 @@
 - https://github.com/gmh5225/WinDbg-comon [Trace COM]
 
 > X64DBG Plugins
+- https://github.com/x64dbg/x64dbg/wiki/Plugins
 - https://github.com/horsicq/x64dbg-Plugin-Manager
 - https://github.com/m417z/Multiline-Ultimate-Assembler
 - https://github.com/gmh5225/x64dbg-Classroom
