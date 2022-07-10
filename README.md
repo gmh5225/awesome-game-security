@@ -365,6 +365,7 @@
 - https://github.com/gmh5225/x64dbg-Themidie
 - https://github.com/gmh5225/x64dbgScript
 - https://github.com/gmh5225/x64dbg-xMalHunter [Detect malicious materials]
+- https://github.com/gmh5225/x64dbg-xFindOut
 
 > Injection:Windows
 - https://github.com/btbd/smap [Scatter Manual Map]
