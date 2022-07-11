@@ -648,6 +648,7 @@
 - https://github.com/gmh5225/external-il2cpp [Il2Cpp]
 - https://github.com/gmh5225/Il2CppSDKGenerator [Il2Cpp SDK generator for Android]
 - https://github.com/gmh5225/UnityDecompiled [An unofficial repo of decompiled Unity dll files]
+- https://github.com/gmh5225/Il2CppAssemblyUnhollower [Managed->IL2CPP proxy assemblies]
 
 > Game Engine Explorer:Source
 - https://github.com/gmh5225/Source2Dumps [Dump]
