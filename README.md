@@ -218,6 +218,7 @@
 - https://guidedhacking.com
 - https://github.com/imadr/Unity-game-hacking [Unity]
 - https://vollragm.github.io/posts/unity-reversing [Unity]
+- https://wiki.cheatengine.org/index.php?title=Mono [CE Mono]
 - https://github.com/shalzuth/NativeNetSharp [Injecting C# code]
 - https://github.com/januwA/game-reversed-study [CE Guide zh]
 - https://github.com/gmh5225/CSGO-master-guide [CSGO Guide]
