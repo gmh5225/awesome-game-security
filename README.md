@@ -758,6 +758,7 @@
 
 > Game:Fall Guys
 - https://github.com/shalzuth/FallGuysSharp
+- https://github.com/gmh5225/FallGuys
 
 > Game:Remnant
 - https://github.com/shalzuth/RemnantESP
