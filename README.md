@@ -352,6 +352,7 @@
 - https://github.com/Vector35/tanto [Slices Functions]
 - https://github.com/gmh5225/Binary-Ninja-triton-bn [Triton]
 - https://github.com/gmh5225/BinDiff-binexport [BinDiff]
+- https://github.com/gmh5225/Binary-Ninja-BinaryNinjaPlugins
 
 > Windbg Plugins
 - https://github.com/gmh5225/windbg-SwishDbgExt
