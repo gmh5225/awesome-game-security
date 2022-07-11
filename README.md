@@ -446,6 +446,7 @@
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
 - https://github.com/gmh5225/KernelGDIDraw
+- https://github.com/gmh5225/Driver-KernelDrawing [Drawing from kernelmode without any hooks]
 - https://github.com/gmh5225/Driver-DoubleCallBack [DWM In Kernel]
 - https://github.com/gmh5225/imgui-android-PolarImGui [Imgui On Android]
 - https://github.com/gmh5225/Android-Mod-Menu [Floating mod menu for Android]
