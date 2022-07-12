@@ -508,6 +508,7 @@
 - https://github.com/gmh5225/Interep-Driver-Leak [NtGdiPolyPolyDraw]
 - https://github.com/gmh5225/Comm-NullHook [NtDxgkGetTrackedWorkloadStatistics]
 - https://github.com/gmh5225/Comm-Data-Pointer-Swap [NtDCompositionSetChildRootVisual]
+- https://github.com/gmh5225/Comm-NekoSwap [Win32kApiSetTable]
 
 > EFI Driver
 - https://github.com/gmh5225/EFI-EasyUefi [Visual Studio template for GNU-EFI]
