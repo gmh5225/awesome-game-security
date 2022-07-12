@@ -1036,6 +1036,9 @@
 - https://github.com/gmh5225/genshin-cheat
 - https://github.com/gmh5225/Grasscutter [Private Server]
 
+- Game:Honkai Impact
+- https://github.com/gmh5225/BH3-BetterHI3Launcher
+
 > Game:EldenRing
 - https://github.com/techiew/EldenRingMods [Mod]
 
