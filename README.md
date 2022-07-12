@@ -170,6 +170,7 @@
 ## Game Hot Patch
 - https://github.com/Tencent/xLua
 - https://github.com/Tencent/InjectFix
+- https://github.com/gmh5225/Unity-hotfix-hybridclr
 
 
 ## Game Testing
