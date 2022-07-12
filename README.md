@@ -347,6 +347,7 @@
 - https://github.com/gmh5225/IDA-LazyIDA [LazyIDA]
 - https://github.com/gmh5225/IDA-qsynthesis [Greybox Synthesizer geared for deobfuscation of assembly instructions]
 - https://github.com/gmh5225/ida-medigate [RTTI]
+- https://github.com/gmh5225/findyara-ida [Yara]
 
 > IDA Signature Database
 - https://github.com/gmh5225/IDA-sig-database
