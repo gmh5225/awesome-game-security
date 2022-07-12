@@ -1083,6 +1083,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Stress Testing
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework
+- https://github.com/stuxnet147/Known-Driver-Mappers [Known Driver Mappers]
 - https://github.com/DanielRTeixeira/injectAllTheThings [Injection Testing]
 - https://github.com/gmh5225/DLL-inject-Injectors [Injection Testing]
 - https://github.com/guided-hacking/GuidedHacking-Injector [Injection Testing]
