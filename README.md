@@ -510,6 +510,7 @@
 - https://github.com/gmh5225/Comm-Data-Pointer-Swap [NtDCompositionSetChildRootVisual]
 
 > EFI Driver
+- https://github.com/gmh5225/EFI-EasyUefi [Visual Studio template for GNU-EFI]
 - https://github.com/ekknod/sumap [EFI Manual Map]
 - https://github.com/ekknod/KiSystemStartupMeme [Custom KiSystemStartup]
 - https://github.com/SamuelTulach/efi-memory [RPM]
@@ -519,6 +520,7 @@
 - https://github.com/gmh5225/-Rainbow---EFI [HWID]
 - https://github.com/gmh5225/Fortnite-EFI-External [Fortnite]
 - https://github.com/gmh5225/UEFI-Bootkit
+- https://github.com/gmh5225/EFI-HWID-negativespoofer [HWID]
 
 > QEMU/KVM Cheat
 - https://github.com/memflow/memflow-kvm
@@ -607,6 +609,7 @@
 - https://github.com/gmh5225/HWID-Spoofer-for-Fortnite-and-Valorant
 - https://github.com/gmh5225/HWID-Full-Hwid-Spoofer-V6
 - https://github.com/gmh5225/HWID-SteamSpywareTerminator [Steam]
+- https://github.com/gmh5225/EFI-HWID-negativespoofer [EFI]
 
 > Bypass Page Protection
 - https://github.com/illegal-instruction-co/CountHook [WorkingSet]
