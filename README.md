@@ -214,6 +214,7 @@
 - https://secret.club
 - https://back.engineering
 - https://vollragm.github.io
+- https://www.triplefault.io
 - https://www.unknowncheats.me
 - https://forum.ragezone.com
 - https://guidedhacking.com
