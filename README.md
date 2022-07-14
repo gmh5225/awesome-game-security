@@ -1237,6 +1237,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/mike1k/HookHunter
 - https://github.com/gmh5225/Detect-hook-buster
 - https://github.com/gmh5225/Driver-Detect-nullshit
+- https://github.com/gmh5225/InstrumentationCallback-EtwTi-Syscall-Hook [Instrumentation Callback]
 
 > Detection:Memory Integrity
 - https://github.com/gmh5225/integrity
@@ -1311,6 +1312,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Callback-AlternativeShellcodeExec
 - https://github.com/Deputation/instrumentation_callbacks [Instrumentation Callback]
 - https://github.com/gmh5225/Hooking-via-InstrumentationCallback [Instrumentation Callback]
+- https://github.com/gmh5225/InstrumentationCallback-EtwTi-Syscall-Hook [Instrumentation Callback]
 - [Register VEH by hooking RtlpCallVectoredHandlers](https://github.com/gmh5225/custom-VEH)
 - [ATPMiniDump Callback](https://github.com/gmh5225/Callback-ATPMiniDump)
 - https://github.com/gmh5225/readdirectorychanges [ReadDirectoryChangesW]
