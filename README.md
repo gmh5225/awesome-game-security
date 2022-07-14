@@ -986,6 +986,7 @@
 - https://github.com/gmh5225/eft-Nathans-Tarkov-Radar-Public [Vmread + Radar]
 - https://github.com/gmh5225/eft-external
 - https://github.com/gmh5225/eft
+- https://github.com/gmh5225/eft-internal
 
 > Game:R6
 - https://github.com/NMan1/Rainbow-Six-Cheat
