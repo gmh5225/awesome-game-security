@@ -988,6 +988,7 @@
 - https://github.com/gmh5225/eft-external
 - https://github.com/gmh5225/eft
 - https://github.com/gmh5225/eft-internal
+- https://github.com/gmh5225/EFT-Veil-EFT
 
 > Game:R6
 - https://github.com/NMan1/Rainbow-Six-Cheat
