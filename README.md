@@ -350,6 +350,8 @@
 - https://github.com/gmh5225/IDA-qsynthesis [Greybox Synthesizer geared for deobfuscation of assembly instructions]
 - https://github.com/gmh5225/ida-medigate [RTTI]
 - https://github.com/gmh5225/findyara-ida [Yara]
+- https://github.com/gmh5225/ida-vmware_windows_gdb [IDA+VMWARE+GDB]
+- https://github.com/gmh5225/ida-bochs_windows [IDA+BOCHS]
 
 > IDA Signature Database
 - https://github.com/gmh5225/IDA-sig-database
