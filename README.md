@@ -187,6 +187,7 @@
 - https://github.com/gmh5225/Direct3D-hw3d [C++ 3D DirectX Tutorial]
 - https://github.com/jpvanoosten/LearningDirectX12 [DX12]
 - https://github.com/MKXJun/DirectX11-With-Windows-SDK [DX11 zh]
+- https://github.com/gmh5225/D3D-d3d12book [DX12]
 
 > Hook
 - https://github.com/gmh5225/D3D11Hook [DX11 Imgui]
