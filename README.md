@@ -787,6 +787,9 @@
 > Game:CrossFire
 - https://github.com/gmh5225/CF-titancf
 
+> Game:TGame
+- https://github.com/gmh5225/nz-d3d-Perspective [D3D9]
+
 > Game:LOL
 - https://github.com/LeagueSharp
 - https://github.com/shalzuth/LeagueSharp
