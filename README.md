@@ -1057,6 +1057,7 @@
 
 > Game:EldenRing
 - https://github.com/techiew/EldenRingMods [Mod]
+- https://github.com/gmh5225/EldenRing-Launcher [Launcher]
 
 > Game:Dark Souls
 - https://github.com/igromanru/Dark-Souls-III-Cheat-Engine-Guide
