@@ -818,6 +818,7 @@
 
 > Game:WOW
 - https://github.com/gmh5225/wow-IAT-fix
+- https://github.com/gmh5225/wow-dumpwow
 
 > Game:CS1.6
 - https://github.com/gmh5225/CS16-hpp-hack
