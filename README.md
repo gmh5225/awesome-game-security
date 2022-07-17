@@ -580,6 +580,7 @@
 - https://github.com/gmh5225/hide-herpaderping [Hide Process/File]
 - https://github.com/gmh5225/hide-thread-address-KaynStrike [Spoofs Thread Start Address]
 - [Using .reloc section to replace the typical allocation calls](https://github.com/gmh5225/memory-relocalloc)
+- https://github.com/gmh5225/android-hideroot [Magisk]
 
 > Triggerbot & Aimbot
 - https://github.com/changeofpace/MouHidInputHook
