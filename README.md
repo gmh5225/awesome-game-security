@@ -111,7 +111,8 @@
 
 ## Game Network
 - https://github.com/MFatihMAR/Game-Networking-Resources
-- https://github.com/ValveSoftware/GameNetworkingSockets
+- https://github.com/ValveSoftware/GameNetworkingSockets [Steam]
+- https://partner.steamgames.com/doc/api/ISteamNetworkingMessages#functions_sendrecv [Steam]
 - https://github.com/gmh5225/skynet
 - https://github.com/chronoxor/CppServer
 - https://github.com/Qihoo360/evpp
