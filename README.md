@@ -356,6 +356,7 @@
 - https://github.com/gmh5225/findyara-ida [Yara]
 - https://github.com/gmh5225/ida-vmware_windows_gdb [IDA+VMWARE+GDB]
 - https://github.com/gmh5225/ida-bochs_windows [IDA+BOCHS]
+- [An integration for IDA and VS Code which connects both to easily execute and debug IDAPython scripts](https://github.com/gmh5225/IDA-idacode)
 
 > IDA Signature Database
 - https://github.com/gmh5225/IDA-sig-database
