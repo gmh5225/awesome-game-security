@@ -876,6 +876,7 @@
 - https://github.com/gmh5225/Valorant-external-UE4-c- [External]
 - https://github.com/gmh5225/Valorant-Cheat-External [External]
 - https://github.com/gmh5225/Valorant-Cheat
+- [Iterate And Decrypt FNamePool->Entries On Valorant](https://github.com/gmh5225/VALORANT-FNamePool)
 
 > Game:VEILED EXPERTS
 - https://github.com/gmh5225/VEILED-EXPERTS-SDK
