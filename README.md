@@ -1213,6 +1213,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/bavulapati/DXGICaptureApplication [Capture Desktop]
 - https://github.com/Rick-laboratory/Windows-Screenshotcapture-DirectX/blob/master/main.cpp [DX9]
 - https://github.com/gmh5225/dwm-screen-shot [DWM]
+- https://github.com/gmh5225/D3D-screencapture [DX11]
 
 > Game Engine Protection:Unreal
 - https://github.com/zompi2/Static-Variables-Obfuscator-UE4
