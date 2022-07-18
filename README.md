@@ -262,6 +262,7 @@
 - https://github.com/mandiant/dncil [For Unity]
 - https://github.com/hugsy/CFB [Monitor IRP]
 - https://ioninja.com/downloads.html [Protocol Analyzer]
+- https://github.com/gmh5225/Anti-SteamAntiAntiDebug [Steam]
 
 > Packet Sniffer&Filter
 - https://github.com/gmh5225/packet-win-shaper
@@ -1156,6 +1157,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/linux-anti-debug-LADD [Linux]
 - https://github.com/gmh5225/AntiKernelDebug-POC [Windows Kernel]
 - https://github.com/gmh5225/antidbg-cpp-anti-debug
+- https://github.com/gmh5225/Anti-Debug
 
 > Page Protection
 - https://github.com/changeofpace/Self-Remapping-Code
