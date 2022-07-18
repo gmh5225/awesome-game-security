@@ -288,6 +288,7 @@
 - https://github.com/gmh5225/UPGDSED [File]
 - https://github.com/Mattiwatti/EfiGuard [EFI]
 - https://github.com/gmh5225/PG1903 [Demo NX]
+- https://gist.github.com/gmh5225/0a0c8e3a2d718e2d6f9b6a07d5e0f80a [PG CTX]
 
 > Windows Kernel Explorer
 - https://github.com/NullArray/WinKernel-Resources [Guide]
