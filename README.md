@@ -552,6 +552,7 @@
 - https://github.com/gmh5225/qemu-hide-Hardened-qemu [Hidden QEMU]
 - https://github.com/gmh5225/QEMU-Nyx [Intel-PT]
 - https://github.com/gmh5225/KVM-Tools/blob/master/Virtualization/kvm-qemu.sh [QEMU Script]
+- https://github.com/gmh5225/QEMU-Malware-Behavior-Analyzer-MBA [QEMU Malware Behavior Analyzer]
 
 > Wine
 - https://github.com/gmh5225/wine-Proton [Steam]
