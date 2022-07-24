@@ -1161,6 +1161,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/antidbg-cpp-anti-debug
 - https://github.com/gmh5225/Anti-Debug
 - https://github.com/gmh5225/antidbg-RaceCondition
+- https://github.com/gmh5225/AntiCrack-DotNet [DotNet]
 
 > Page Protection
 - https://github.com/changeofpace/Self-Remapping-Code
