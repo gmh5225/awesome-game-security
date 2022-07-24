@@ -286,6 +286,7 @@
 - https://github.com/gmh5225/binary-translator-river
 - https://github.com/gmh5225/DBI-mambo [ARM]
 - https://github.com/DynamoRIO/drmemory
+- https://github.com/gmh5225/Dynamic-Recompliers-dynre-x86
 
 > Launcher Abuser
 - https://github.com/gmh5225/launcher-abuser
