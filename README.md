@@ -912,6 +912,9 @@
 - https://github.com/gmh5225/BF1-ESP-AND-AIMBOT
 - https://github.com/gmh5225/BattleField-1-Internal
 
+> Game:Battlefield 4
+- https://github.com/gmh5225/BF4-Internal-overlay
+
 > Game:Battlefield 2042
 - https://github.com/gmh5225/battlefield-2042-internal-sdk
 
@@ -999,6 +1002,9 @@
 - https://github.com/gmh5225/PlayerUnknown-s-Battlegrounds-Pubg-Steam-Hack-Esp-Aimbot
 - https://github.com/gmh5225/pubg-lilypublic
 - https://github.com/gmh5225/PUBG_Internal
+
+> Game:PUBG Lite
+- https://github.com/gmh5225/Pubg-Lite-ESP
 
 > Game:PUBGM
 - https://github.com/gmh5225/pubgm_sdk_and_offsets [Offset]
