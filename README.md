@@ -1398,6 +1398,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://secret.club/2021/01/04/thread-stuff.html [Anti Debug]
 - https://github.com/gmh5225/signtool-PastDSE [Sign Leaked Cert]
 - https://github.com/gmh5225/StealingSignatures [Stealing signatures from pe files]
+- https://github.com/gmh5225/ci-sign-fake-LazySign [Fake Cert]
 - https://github.com/gmh5225/MiniDumpWriteDumpPoC [Dump Memory]
 - [A x64 Write-What-Where exploit+shellcode execution vulnerability](https://www.unknowncheats.me/forum/anti-cheat-bypass/503519-wwwaryasinject-x64-write-exploit-shellcode-execution-vulnerability.html)
 - [Dll injection through code page id modification in registry](https://github.com/gmh5225/injection-NlsCodeInjectionThroughRegistry)
