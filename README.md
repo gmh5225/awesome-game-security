@@ -1354,6 +1354,10 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Kernel Mode Winsock
 - https://github.com/gmh5225/libwsk [Kernel-Mode Winsock library]
 
+> Fuzzer
+- https://github.com/gmh5225/fuzzer-wtf
+- https://null2root.github.io/blog/2022/07/21/When-Hypervisor-Met-Snapshot-Fuzzing.html
+
 > Windows Ring3 Callback
 - https://github.com/gmh5225/Callback-AlternativeShellcodeExec
 - https://github.com/Deputation/instrumentation_callbacks [Instrumentation Callback]
