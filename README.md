@@ -711,6 +711,8 @@
 - https://github.com/gmh5225/eac-leak [EAC sdk's memory leak]
 - https://github.com/gmh5225/Eac-Bypass
 - https://github.com/gmh5225/EasyAntiCheat-SRC
+- https://www.unknowncheats.me/forum/anti-cheat-bypass/458928-eacs-maskable-interrupt-callback.html [NMI]
+- https://www.unknowncheats.me/forum/anti-cheat-bypass/464943-eac-nmi-bypass-callbacks.html [NMI Bypass]
 
 > Explore AntiCheat System:BE
 - https://github.com/gmh5225/BE-NoEye
