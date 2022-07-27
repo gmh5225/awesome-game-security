@@ -1301,6 +1301,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Detection:Hide
 - https://github.com/KANKOSHEV/Detect-HiddenThread-via-KPRCB
+- https://github.com/gmh5225/Detect-HiddenThreads [KPRCB+PTE]
 - https://github.com/weak1337/SystemThreadFinder
 - https://github.com/gmh5225/HiddenModuleDetector
 - https://github.com/KelvinMsft/ThreadSpy
