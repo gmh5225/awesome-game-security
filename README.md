@@ -525,6 +525,7 @@
 - https://git.back.engineering/_xeroxz/NtWin32k [NtUserGetThreadState]
 - https://github.com/gmh5225/Common-boundcallback [KeRegisterBoundCallback]
 - https://github.com/gmh5225/DataPtrSwap-driver [NtSetCompositionSurfaceAnalogExclusive]
+- https://github.com/gmh5225/.data-ptr-swap [NtSetCompositionSurfaceAnalogExclusive]
 - https://github.com/gmh5225/Driver-ReadWriteDriver [NtUserSetSysColors]
 - https://github.com/gmh5225/NtUserUpdateWindowTrackingInfo [NtUserUpdateWindowTrackingInfo]
 - https://github.com/gmh5225/comm-windows-software-policy [clip]
