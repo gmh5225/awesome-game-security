@@ -637,6 +637,7 @@
 - https://github.com/gmh5225/HWID-Full-Hwid-Spoofer-V6
 - https://github.com/gmh5225/HWID-SteamSpywareTerminator [Steam]
 - https://github.com/gmh5225/EFI-HWID-negativespoofer [EFI]
+- https://github.com/gmh5225/wmi-static-spoofer
 
 > Bypass Page Protection
 - https://github.com/illegal-instruction-co/CountHook [WorkingSet]
