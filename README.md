@@ -324,6 +324,8 @@
 > Android Memory Explorer
 - https://github.com/gmh5225/procmap
 - https://github.com/gmh5225/Android-MemDumper [Dump]
+- https://github.com/gmh5225/Android-Mem-Edit
+- https://github.com/gmh5225/Android-writemem
 
 > Android Kernel Explorer
 - https://github.com/gmh5225/Android-Analysis-Cheat-Use-Kernel-op7t [DIY Kernel]
