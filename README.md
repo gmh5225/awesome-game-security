@@ -807,6 +807,7 @@
 
 > Game:LostArk
 - https://github.com/shalzuth/LostArkLogger
+- https://github.com/gmh5225/LOST-ARK-SDK
 
 > Game:Battlerite
 - https://github.com/shalzuth/BattleriteBot
