@@ -280,6 +280,9 @@
 > Fix VMP
 - https://github.com/gmh5225/VMP-NoVmpy
 
+> Fix OLLVM
+- https://bbs.pediy.com/thread-272414.htm
+
 > Dynamic Binary Instrumentation
 - https://github.com/hzqst/unicorn_pe
 - https://github.com/googleprojectzero/TinyInst
