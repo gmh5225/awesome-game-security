@@ -1320,6 +1320,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://secret.club/2020/04/13/how-anti-cheats-detect-system-emulation.html
 - https://github.com/helloobaby/Nmi-Callback [NMI Callback]
 - https://github.com/momo5502/ept-hook-detection [Detect EPT]
+- https://github.com/gmh5225/Detect-Hypervisor_detect_ring_0
 
 > Detection:Virtual Environments 
 - https://github.com/a0rtega/pafish
