@@ -173,6 +173,7 @@
 - [This is the old Paradise SPRX BO2 soruce code](https://github.com/gmh5225/Game-ParadiseBO2)
 - https://github.com/gmh5225/rehlds [Reverse-engineered HLDS]
 - https://github.com/gmh5225/Android-ModLoader [Android Mod Loader]
+- https://github.com/gmh5225/Game-PythonPlantsVsZombies [PlantsVsZombies]
 
 
 ## Game Assets
