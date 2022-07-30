@@ -1429,6 +1429,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [Dll injection through code page id modification in registry](https://github.com/gmh5225/injection-NlsCodeInjectionThroughRegistry)
 - https://github.com/gmh5225/Etw-Syscall [ETW Syscall]
 
+> Android
+- https://github.com/gmh5225/Android-bypassHiddenApiRestriction [Bypass hidden api restriction]
+
 
 ## Windows Security Features
 - https://github.com/yardenshafir/cet-research [CET]
