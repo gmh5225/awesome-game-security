@@ -1077,6 +1077,7 @@
 
 > Game:Arma3
 - https://github.com/gmh5225/arma3-external-variable-manager
+- https://github.com/gmh5225/arma3-3den-Enhanced [Mod Editor]
 
 > Game:AVA
 - https://github.com/gmh5225/AVA-Hack
