@@ -473,6 +473,7 @@
 - https://github.com/gmh5225/steam-overlay-x64 [Steam]
 - https://github.com/gmh5225/dwmhook [DWM]
 - https://github.com/gmh5225/dwm-overlay [DWM]
+- https://github.com/gmh5225/dwmhook-vft [DWM VFTable]
 - https://github.com/gmh5225/overlay-nvidia-overlay-hijack [Hijack Nvidia]
 - https://github.com/gmh5225/D3DOverlay-Nvidia-Hijack [Hijack Nvidia]
 - https://github.com/gmh5225/overlay-SetWindowsHookEx [SetWindowsHookEx]
