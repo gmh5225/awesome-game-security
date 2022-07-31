@@ -840,6 +840,7 @@
 - https://github.com/LeagueSandbox
 - https://github.com/gmh5225/lol-unpackman
 - [A bran-new League of Legends assistant software, a replacement for WeGame](https://github.com/gmh5225/LOL-frank)
+- https://github.com/gmh5225/LOL-LViewLoL [Python based scripting platform]
 
 
 > Game:Dota2
