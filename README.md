@@ -378,6 +378,7 @@
 - [An integration for IDA and VS Code which connects both to easily execute and debug IDAPython scripts](https://github.com/gmh5225/IDA-idacode)
 - https://github.com/gmh5225/IDA-efiXplorer [UEFI firmware]
 - https://github.com/gmh5225/IDA-protobuf-finder [Protobuf]
+- https://github.com/gmh5225/IDA-golang_loader_assist [GO Reversed]
 
 > IDA Signature Database
 - https://github.com/gmh5225/IDA-sig-database
