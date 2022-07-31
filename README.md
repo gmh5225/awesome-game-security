@@ -844,6 +844,9 @@
 - [A bran-new League of Legends assistant software, a replacement for WeGame](https://github.com/gmh5225/LOL-frank)
 - https://github.com/gmh5225/LOL-LViewLoL [Python based scripting platform]
 
+> Game:NARAKA
+- https://www.unknowncheats.me/forum/other-fps-games/490052-naraka-bladepoint-reversal-structs-offsets.html
+- https://github.com/gmh5225/DummyDlls_NARAKA_1_9_21 [Dump]
 
 > Game:Dota2
 - https://github.com/skrixx68/Dota2-Overlay-2.0
