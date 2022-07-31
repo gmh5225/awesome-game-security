@@ -1145,8 +1145,12 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Game:Witch It
 - https://github.com/gmh5225/CheatIt
 
-> Game: RO
+> Game:RO
 - https://github.com/gmh5225/RO-rAthenaCN
+
+> Game:PokemonGo
+- https://github.com/gmh5225/PokemonGoDumper
+
 
 ## Anti Cheat
 > Guide
