@@ -284,6 +284,7 @@
 
 > Fix VMP
 - https://github.com/gmh5225/VMP-NoVmpy
+- https://github.com/gmh5225/VMP-Vmp3_64bit_disasm-prerelease-
 
 > Fix OLLVM
 - https://bbs.pediy.com/thread-272414.htm
