@@ -849,6 +849,9 @@
 - https://www.unknowncheats.me/forum/other-fps-games/490052-naraka-bladepoint-reversal-structs-offsets.html
 - https://github.com/gmh5225/DummyDlls_NARAKA_1_9_21 [Dump]
 
+> Game:Thetan
+- https://github.com/gmh5225/Thetan_ArenaSDK
+
 > Game:Dota2
 - https://github.com/skrixx68/Dota2-Overlay-2.0
 - https://github.com/skrixx68/Dota2-Overlay-OffsetUpdater
