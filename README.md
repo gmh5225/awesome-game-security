@@ -429,6 +429,7 @@
 - https://github.com/gmh5225/dll-hot-reload [Hot Reload]
 - https://github.com/gmh5225/KeUserModeCallBack [KeUserModeCallBack]
 - [KeUserModeCallBack Win10](https://github.com/gmh5225/eft/blob/834064aacaab7353173e36acc15933a3cf9289b3/eft/usercallback.h#L50)
+- https://github.com/gmh5225/Kernelmode-DLL-Injector [Manual Map]
 
 
 > Injection:Linux
