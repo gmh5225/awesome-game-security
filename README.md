@@ -444,6 +444,7 @@
 - https://github.com/WopsS/RenHook
 - https://github.com/gmh5225/Android-hook-PyAsmPatch
 - https://github.com/gmh5225/Driver-KDtour [Easy Kernel Detour]
+- https://github.com/gmh5225/PAGE_GUARD-PGHooker [Page Guard]
 
 > Rop Finder
 - https://github.com/gmh5225/ROP-rp
