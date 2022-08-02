@@ -1317,6 +1317,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/MrDiamond64/Scythe-AntiCheat [Minecraft]
 - https://github.com/gmh5225/AntiCheat
 - https://github.com/gmh5225/EDR-whids [EDR]
+- https://github.com/gmh5225/EDR-Raccine [EDR]
 - https://github.com/gmh5225/UltimateAntiCheat
 - https://github.com/gmh5225/Anti-Cheat-Quack
 - [Source Engine serverside anti-cheat plugin. (CS:S, CS:GO, CS:P, TF2)](https://github.com/gmh5225/AntiCheat-NoCheatZ-3)
