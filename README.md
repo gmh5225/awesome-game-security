@@ -530,6 +530,7 @@
 - https://github.com/gmh5225/Common-Registry-Jmp-RCX [Registry Callback]
 - https://github.com/gmh5225/BOOM [Hijack Beep.sys]
 - https://github.com/gmh5225/Driver-read_write [Hijack IRP]
+- https://github.com/gmh5225/Comm-Swap-control-ioctl [Hijack IRP SpeedFan.sys]
 - https://github.com/adspro15/km-um-communication
 - https://github.com/Spuckwaffel/Kernel-Thread-Driver [Thread]
 - https://github.com/Astronaut00/DoubleDataPointer [Double Data Pointer]
