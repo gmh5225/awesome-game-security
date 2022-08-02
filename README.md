@@ -593,6 +593,7 @@
 - https://github.com/gmh5225/Exception-Ret-Spoofing
 - https://github.com/gmh5225/Ret-Spoofing
 - https://github.com/gmh5225/CallStackSpoofer
+- https://github.com/gmh5225/spoof-CallStack-Spoofer
 
 > Hide
 - https://github.com/JKornev/hidden
