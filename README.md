@@ -1467,6 +1467,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Android
 - https://github.com/gmh5225/Android-bypassHiddenApiRestriction [Bypass hidden api restriction]
 - https://github.com/gmh5225/Android-HiddenApiBypass [Bypass hidden api restriction]
+- https://github.com/gmh5225/Android-apk-ASCTool [Apk Signature Crack Tool]
 
 
 ## Windows Security Features
