@@ -438,6 +438,9 @@
 - https://github.com/gmh5225/elf-injector-mandibule
 
 
+> DLL Hijack
+- https://github.com/gmh5225/DLL-Hijack-DLLirant [Hijacking researches]
+
 > Hook
 - https://github.com/microsoft/Detours
 - https://github.com/wbenny/DetoursNT
