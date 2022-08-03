@@ -178,7 +178,8 @@
 - https://github.com/gmh5225/rehlds [Reverse-engineered HLDS]
 - https://github.com/gmh5225/Android-ModLoader [Android Mod Loader]
 - https://github.com/gmh5225/Game-PythonPlantsVsZombies [PlantsVsZombies]
-
+- https://github.com/gmh5225/Counter-Strike-DS-Unity-Project [Unity CS]
+- https://github.com/gmh5225/Counter-Strike-Nintendo-DS [Nintendo CS]
 
 ## Game Assets
 - https://github.com/gmh5225/Game-assets-Retro3DGraphicsCollection
