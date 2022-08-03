@@ -1405,6 +1405,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/forensics-volatility
 - https://github.com/gmh5225/forensics-volatility3
 - [Decrypt and export browser password, including Chromium,Edge and Firefox](https://github.com/gmh5225/info-BrowserPasswordExportor)
+- https://github.com/gmh5225/Info-VolatileDataCollector
 
 > Dynamic Script
 - https://github.com/can1357/NtLua
