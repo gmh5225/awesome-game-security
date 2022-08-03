@@ -1124,6 +1124,7 @@
 - https://github.com/gmh5225/genshin-cheat
 - https://github.com/gmh5225/Grasscutter [Private Server]
 - https://github.com/gmh5225/Genshin-Akebi-GC [Cheat]
+- https://github.com/Razmoth/GenshinStudio [Asset]
 
 > Game:Honkai Impact
 - https://github.com/gmh5225/BH3-BetterHI3Launcher
