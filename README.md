@@ -718,6 +718,7 @@
 - https://github.com/gmh5225/UABE [Extracting assets]
 - https://devxdevelopment.com/Unpacker [Extracting assets]
 - https://github.com/gmh5225/AssetRipper [Extracting assets]
+- https://github.com/gmh5225/Unity-AssetStudio [Extracting assets]
 
 > Game Engine Explorer:Source
 - https://github.com/gmh5225/Source2Dumps [Dump]
