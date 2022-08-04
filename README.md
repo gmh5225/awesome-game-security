@@ -183,6 +183,7 @@
 
 ## Game Assets
 - https://github.com/gmh5225/Game-assets-Retro3DGraphicsCollection
+- https://github.com/gmh5225/Game-asset-GOWTool [God of War 2018]
 
 ## Game Hot Patch
 - https://github.com/Tencent/xLua
