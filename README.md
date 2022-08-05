@@ -797,6 +797,8 @@
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/505486-byfron-tech-anti-cheat-released.html
 - https://gist.github.com/gmh5225/cbe40345a9400b01329e025478ffb826 [hash]
 
+> Explore AntiCheat System:NGS
+- https://github.com/gmh5225/NGS-NexonGameSecurity-bypass
 
 > Game:MapleStory
 - https://forum.ragezone.com/f922/getting-packet-structures-opcodes-using-792436 [Packet]
