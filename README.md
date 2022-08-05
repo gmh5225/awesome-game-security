@@ -444,6 +444,7 @@
 
 > DLL Hijack
 - https://github.com/gmh5225/DLL-Hijack-DLLirant [Hijacking researches]
+- https://github.com/gmh5225/DLLHijack-ImpulsiveDLLHijack [Hijacking researches]
 
 > Hook
 - https://github.com/microsoft/Detours
