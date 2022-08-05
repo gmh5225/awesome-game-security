@@ -868,6 +868,7 @@
 - https://github.com/gmh5225/lol-unpackman
 - [A bran-new League of Legends assistant software, a replacement for WeGame](https://github.com/gmh5225/LOL-frank)
 - https://github.com/gmh5225/LOL-LViewLoL [Python based scripting platform]
+- https://github.com/gmh5225/LOL-KBotExt [LCU]
 
 > Game:NARAKA
 - https://www.unknowncheats.me/forum/other-fps-games/490052-naraka-bladepoint-reversal-structs-offsets.html
