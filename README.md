@@ -1080,6 +1080,7 @@
 - https://github.com/gmh5225/Rainbow-epic-r6-v9
 - https://github.com/gmh5225/Rainbow-R6Updater
 - https://github.com/gmh5225/Rainbow-R6Table_Internal
+- https://github.com/gmh5225/rainbow-r6-internal
 
 > Game:Overwatch 
 - https://github.com/blackhades00/PareidoliaTriggerbot [Triggerbot]
