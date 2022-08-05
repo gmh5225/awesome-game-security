@@ -531,6 +531,7 @@
 - https://github.com/gmh5225/SpeedFan-Exploit [Speedfan.sys]
 - https://github.com/gmh5225/Exploit-Vulnerable-CapcomLib [Capcom.sys]
 - https://github.com/gmh5225/CVE-2015-2291 [IQVW64.sys]
+- https://github.com/gmh5225/Exploit-AsIO-Exploit [AsIO3.sys]
 
 
 > Driver Communication
