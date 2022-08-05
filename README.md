@@ -704,6 +704,8 @@
 
 > Game Engine Explorer:Unity
 - https://github.com/mono/mono [mono]
+- https://github.com/gmh5225/Unity-dnSpy-Unity-mono [mono]
+- https://github.com/gmh5225/Mono.Debugger.Soft [Mono Debugger]
 - https://github.com/Perfare/Il2CppDumper [Il2Cpp Dump]
 - https://github.com/gmh5225/Il2CppDumper-YuanShen [Il2Cpp Dump for Genshin Impact]
 - https://github.com/T5ive/Il2CppDumper-GUI [Il2Cpp Dump GUI]
