@@ -415,6 +415,7 @@
 - https://github.com/gmh5225/x64dbg-chaiScriptPlugin
 - https://github.com/gmh5225/X64DBG-ViewDllNotification
 - https://github.com/gmh5225/X64DBG-AutoAttach
+- https://github.com/gmh5225/X64DBG-idenLib [Generate signatures]
 
 > Injection:Windows
 - https://github.com/btbd/smap [Scatter Manual Map]
