@@ -1214,6 +1214,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Injection-MMFCodeInjection [User APC + File Mapping Testing]
 - https://github.com/gmh5225/AntiDbg-TtdAntiDebugging [Debug Testing]
 - https://github.com/gmh5225/cheat-attack-thread-slemu [Hearbeat Testing]
+- https://github.com/gmh5225/MmCopyVirtualMemory-cheat-driver [MmCopyVirtualMemory Testing]
 
 > Anti Debugging
 - https://github.com/LordNoteworthy/al-khaser
