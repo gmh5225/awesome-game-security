@@ -456,6 +456,7 @@
 - https://github.com/gmh5225/Android-hook-PyAsmPatch
 - https://github.com/gmh5225/Driver-KDtour [Easy Kernel Detour]
 - https://github.com/gmh5225/PAGE_GUARD-PGHooker [Page Guard]
+- https://github.com/gmh5225/HOOK-SkipHook [Skip Hook]
 
 > Rop Finder
 - https://github.com/gmh5225/ROP-rp
@@ -1491,6 +1492,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [A x64 Write-What-Where exploit+shellcode execution vulnerability](https://www.unknowncheats.me/forum/anti-cheat-bypass/503519-wwwaryasinject-x64-write-exploit-shellcode-execution-vulnerability.html)
 - [Dll injection through code page id modification in registry](https://github.com/gmh5225/injection-NlsCodeInjectionThroughRegistry)
 - https://github.com/gmh5225/Etw-Syscall [ETW Syscall]
+- https://github.com/gmh5225/HOOK-SkipHook [Skip Hook]
 
 > Android
 - https://github.com/gmh5225/Android-bypassHiddenApiRestriction [Bypass hidden api restriction]
