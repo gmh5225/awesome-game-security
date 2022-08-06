@@ -399,6 +399,9 @@
 - https://github.com/gmh5225/BinDiff-binexport [BinDiff]
 - https://github.com/gmh5225/Binary-Ninja-BinaryNinjaPlugins
 
+> Ghidra Plugins
+- https://github.com/gmh5225/ghidra-frida-hook-gen
+
 > Windbg Plugins
 - https://github.com/gmh5225/windbg-SwishDbgExt
 - https://github.com/gmh5225/WinDbg-comon [Trace COM]
