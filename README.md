@@ -334,6 +334,7 @@
 - https://github.com/gmh5225/Driver-WindowsIntelPT [Intel PT]
 - https://github.com/gmh5225/Driver-intel-pt-ingsoc [Intel PT]
 - https://github.com/gmh5225/Driver-pt-detector [Intel PT]
+- https://github.com/intelpt/winafl-intelpt [Intel PT Fuzzer]
 - https://github.com/gmh5225/Driver-winipt [ipt.sys]
 - https://github.com/gmh5225/pt-decode-processor-trace [Intel PT Decoder]
 - https://github.com/gmh5225/Driver-intel-PEBs-LoopHPCs [Intel PEBs]
