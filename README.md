@@ -66,6 +66,8 @@
 - https://github.com/gmh5225/GameEngine-Castle-Engine [DX11]
 - https://github.com/gmh5225/GameEngine-ioquake3-engine [quake3]
 - https://github.com/gmh5225/GameEngine-rbfx [C# support and WYSIWYG editor]
+- https://github.com/gmh5225/osu
+- https://github.com/gmh5225/osu-framework
 
 > Game Engine Plugins:Unreal
 - [Plugin for UE4 to user Rider for Unreal Engine as code editor](https://github.com/gmh5225/UE4-plugin-RiderSourceCodeAccess)
