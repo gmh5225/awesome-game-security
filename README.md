@@ -909,6 +909,7 @@
 > Game:WOW
 - https://github.com/gmh5225/wow-IAT-fix
 - https://github.com/gmh5225/wow-dumpwow
+- https://github.com/gmh5225/wow-x14.08-coverstory-blizzard
 
 > Game:CS1.6
 - https://github.com/gmh5225/CS16-hpp-hack
