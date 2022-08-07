@@ -330,6 +330,7 @@
 - https://github.com/everdox/InfinityHook [ETW Hook]
 - https://github.com/FiYHer/InfinityHookPro [ETW Hook Ex]
 - https://github.com/KelvinMsft/ThreadSpy [PMI Callback]
+- https://github.com/gmh5225/Driver-PerfMon [PMI Callback]
 - https://github.com/gmh5225/Driver-WindowsIntelPT [Intel PT]
 - https://github.com/gmh5225/Driver-intel-pt-ingsoc [Intel PT]
 - https://github.com/gmh5225/Driver-intel-PEBs-LoopHPCs [Intel PEBs]
