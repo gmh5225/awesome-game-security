@@ -346,6 +346,7 @@
 - https://github.com/gmh5225/vad-wkpe [Enumerate VAD]
 - https://github.com/gmh5225/Tool-Driver-DriverDllFInder [Find Driver Useless Memory]
 - https://github.com/gmh5225/Driver-APICallProxy [Windows API Call Obfuscation]
+- https://github.com/gmh5225/Driver-MmcopyMemory-Hook [Hook MmcopyMemory]
 
 > Android Memory Explorer
 - https://github.com/gmh5225/procmap
