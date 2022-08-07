@@ -348,6 +348,9 @@
 - https://github.com/gmh5225/Driver-APICallProxy [Windows API Call Obfuscation]
 - https://github.com/gmh5225/Driver-MmcopyMemory-Hook [Hook MmcopyMemory]
 
+> Magisk
+- https://github.com/gmh5225/Android-Zygisk-MagiskHide
+
 > Android Memory Explorer
 - https://github.com/gmh5225/procmap
 - https://github.com/gmh5225/Android-MemDumper [Dump]
