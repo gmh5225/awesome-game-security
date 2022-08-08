@@ -353,6 +353,7 @@
 
 > Magisk
 - https://github.com/gmh5225/Android-Zygisk-MagiskHide
+- https://github.com/gmh5225/android-hideroot
 
 > Android Memory Explorer
 - https://github.com/gmh5225/procmap
@@ -651,6 +652,7 @@
 - https://github.com/gmh5225/hide-thread-address-KaynStrike [Spoofs Thread Start Address]
 - [Using .reloc section to replace the typical allocation calls](https://github.com/gmh5225/memory-relocalloc)
 - https://github.com/gmh5225/android-hideroot [Magisk]
+- https://github.com/gmh5225/hide-system-thread-Diglett [Hide Kernel Thread]
 
 > Triggerbot & Aimbot
 - https://github.com/changeofpace/MouHidInputHook
