@@ -78,6 +78,7 @@
 - [Unreal Engine .NET 6 integration](https://github.com/nxrighthere/UnrealCLR)
 - [Houdini Engine Plugin for Unreal Engine](https://github.com/gmh5225/HoudiniEngineForUnreal)
 - [A small tutorial repository on capturing images with semantic annotation from UnrealEngine to disk](https://github.com/gmh5225/UE-UnrealImageCapture)
+- [UE4 plugin for live2d model](https://github.com/gmh5225/UE-Plugin-UnrealLive2D)
 
 > Game Engine Plugins:Unity
 - [A markdown viewer for unity](https://github.com/gmh5225/Unity-MarkdownViewer)
