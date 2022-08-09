@@ -189,6 +189,7 @@
 - https://github.com/gmh5225/osu-framework [osu]
 - https://github.com/gmh5225/wow-LegionCore-7.3.5 [wow]
 - https://github.com/gmh5225/wow-5.4.7-Wow-source [wow]
+- https://github.com/gmh5225/wow-MopCore547 [wow]
 
 ## Game Assets
 - https://github.com/gmh5225/Game-assets-Retro3DGraphicsCollection
