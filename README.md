@@ -1148,6 +1148,7 @@
 - https://github.com/gmh5225/rust-Kors_lol [Internal]
 - https://github.com/gmh5225/Rust-Internal-1 [Internal]
 - https://github.com/gmh5225/Rust-CRC32
+- https://github.com/gmh5225/Rust-Cheat-External
 
 > Game:Arma3
 - https://github.com/gmh5225/arma3-external-variable-manager
