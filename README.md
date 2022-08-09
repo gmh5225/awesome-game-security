@@ -1427,6 +1427,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [All methods of retrieving unique identifiers(HWIDs) on your PC](https://www.unknowncheats.me/forum/anti-cheat-bypass/333662-methods-retrieving-unique-identifiers-hwids-pc.html)
 - https://github.com/medievalghoul/hwid-checker-mg
 - https://github.com/weak1337/NvidiaApi
+- https://github.com/gmh5225/HWID-WindowsHardwareInfo
 
 > Detection:Injection
 - https://github.com/mq1n/DLLThreadInjectionDetector
