@@ -1422,7 +1422,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/weak1337/SystemThreadFinder
 - https://github.com/gmh5225/HiddenModuleDetector
 - https://github.com/KelvinMsft/ThreadSpy
-- https://github.com/gmh5225/Detect-mapped-driver-Nomad [Mapped driver]
+- https://github.com/gmh5225/Detect-mapped-driver-Nomad [Mapped Driver]
+- https://github.com/gmh5225/detect-mapped-dll-ModFinder [Mapped Dll]
 
 > Detection:Vulnerable Driver
 - https://github.com/gmh5225/Driver-scan-hygieia
@@ -1448,6 +1449,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Detection:Injection
 - https://github.com/mq1n/DLLThreadInjectionDetector
+- https://github.com/gmh5225/detect-mapped-dll-ModFinder [Mapped Dll]
 
 > Detection:ESP
 - https://github.com/weak1337/PresentHookDetection
