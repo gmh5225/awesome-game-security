@@ -594,6 +594,7 @@
 - https://github.com/gmh5225/Comm-NullHook [NtDxgkGetTrackedWorkloadStatistics]
 - https://github.com/gmh5225/Comm-Data-Pointer-Swap [NtDCompositionSetChildRootVisual]
 - https://github.com/gmh5225/Comm-NekoSwap [Win32kApiSetTable]
+- https://github.com/gmh5225/Comm-kernel_payload_comms [Shared Memory]
 
 > EFI Driver
 - https://github.com/gmh5225/EFI-EasyUefi [Visual Studio template for GNU-EFI]
