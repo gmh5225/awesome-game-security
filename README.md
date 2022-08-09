@@ -1137,6 +1137,7 @@
 
 > Game:DayZ
 - https://github.com/gmh5225/DayZ-External-Esp-Aimbot-Spoofer-Hack-Cheat
+- https://github.com/gmh5225/DayZ-DayZzz
 
 > Game:Squad
 - https://github.com/gmh5225/Squad-External-Esp-Aimbot-Cheat-Hack
