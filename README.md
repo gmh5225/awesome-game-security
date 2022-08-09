@@ -1424,6 +1424,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/KelvinMsft/ThreadSpy
 - https://github.com/gmh5225/Detect-mapped-driver-Nomad [Mapped driver]
 
+> Detection:Vulnerable Driver
+- https://github.com/gmh5225/Driver-scan-hygieia
+
 > Detection: Hacked Hypervisor
 - https://secret.club/2020/04/13/how-anti-cheats-detect-system-emulation.html
 - https://github.com/helloobaby/Nmi-Callback [NMI Callback]
