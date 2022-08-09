@@ -834,6 +834,9 @@
 > Explore AntiCheat System:NGS
 - https://github.com/gmh5225/NGS-NexonGameSecurity-bypass
 
+> Explore AntiCheat System:FACEIT
+- https://github.com/gmh5225/cve-faceit-EC_PRO-LAN
+
 > Game:MapleStory
 - https://forum.ragezone.com/f922/getting-packet-structures-opcodes-using-792436 [Packet]
 - https://github.com/Bratah123/SpiritIDAPlugin [IDA-Plugin]
