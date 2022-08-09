@@ -1162,6 +1162,7 @@
 - https://github.com/gmh5225/Rust-CRC32
 - https://github.com/gmh5225/Rust-Cheat-External
 - https://github.com/gmh5225/rust-Simple-Rust-Base
+- https://github.com/gmh5225/rust-internal-sapphire
 
 > Game:Arma3
 - https://github.com/gmh5225/arma3-external-variable-manager
