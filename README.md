@@ -82,6 +82,7 @@
 
 > Game Engine Plugins:Unity
 - [A markdown viewer for unity](https://github.com/gmh5225/Unity-MarkdownViewer)
+- [An integrated solution for authoring / importing / simulating / rendering strand-based hair in Unity](https://github.com/gmh5225/unity-com.unity.demoteam.hair)
 
 
 > Game Engine Detector
