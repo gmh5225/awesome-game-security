@@ -1137,6 +1137,7 @@
 - https://github.com/gmh5225/Squad-External-Esp-Aimbot-Cheat-Hack
 
 > Game:Rust
+- https://github.com/gmh5225/rust-auto-dumper [Auto Dump]
 - https://github.com/NMan1/OverflowRust
 - https://github.com/gmh5225/simple-rust-hack
 - https://github.com/gmh5225/rust-internal
