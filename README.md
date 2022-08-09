@@ -1127,6 +1127,7 @@
 - https://github.com/gmh5225/Rainbow-R6Updater
 - https://github.com/gmh5225/Rainbow-R6Table_Internal
 - https://github.com/gmh5225/rainbow-r6-internal
+- https://github.com/gmh5225/R6-External-R6S-Cheat
 
 > Game:Overwatch 
 - https://github.com/blackhades00/PareidoliaTriggerbot [Triggerbot]
