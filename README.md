@@ -1028,6 +1028,7 @@
 - https://github.com/gmh5225/Apex-Legends-Esp
 - https://github.com/gmh5225/Apex-ApexCheat
 - https://github.com/gmh5225/Apex_ESP_Old_Project
+- https://github.com/gmh5225/apex-cheating
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
