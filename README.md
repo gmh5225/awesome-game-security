@@ -512,6 +512,7 @@
 - https://github.com/Unkn0wnH4ck3r/GameOverlayUIHook [Steam]
 - https://github.com/gmh5225/Steam-Hook-Render-PoC [Steam]
 - https://github.com/gmh5225/steam-overlay-x64 [Steam]
+- https://github.com/gmh5225/KGDI-steamoverlay-StrongSteam [GDI + Steam]
 - https://github.com/gmh5225/dwmhook [DWM]
 - https://github.com/gmh5225/dwm-overlay [DWM]
 - https://github.com/gmh5225/dwmhook-vft [DWM VFTable]
@@ -524,6 +525,7 @@
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
 - https://github.com/gmh5225/KernelGDIDraw
+- https://github.com/gmh5225/KGDI-steamoverlay-StrongSteam [GDI + Steam]
 - https://github.com/gmh5225/Driver-KernelDrawing [Drawing from kernelmode without any hooks]
 - https://github.com/gmh5225/Driver-DoubleCallBack [DWM In Kernel]
 - https://github.com/gmh5225/imgui-android-PolarImGui [Imgui On Android]
