@@ -209,6 +209,8 @@
 - https://github.com/gatling/gatling [Server Testing]
 - https://github.com/gmh5225/performance-btop [Performance Monitor]
 
+## Game Tools
+- [Play your favorite games in a borderless window; no more time consuming alt-tabs](https://github.com/gmh5225/Borderless-Gaming)
 
 ## DirectX
 > Guide
