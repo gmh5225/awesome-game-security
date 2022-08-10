@@ -939,6 +939,7 @@
 - https://github.com/frk1/hazedumper [Offset]
 - https://github.com/KittenPopo/csgo-offsets [Offset]
 - https://github.com/ofDataa/offsets [Offset]
+- https://github.com/gmh5225/csgo-auto_dumper [Auto Dump]
 - https://github.com/dretax/GarHal_CSGO
 - https://github.com/danielkrupinski/Osiris
 - https://github.com/danielkrupinski/GOESP [Cross-platform]
