@@ -458,6 +458,7 @@
 
 > Cheat Engine Plugins
 - https://github.com/gmh5225/CE-Extensions [Lua Extensions]
+- https://github.com/gmh5225/CE-Mydev-Cheat-Engine-Tables [CT]
 
 > Injection:Windows
 - https://github.com/btbd/smap [Scatter Manual Map]
