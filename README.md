@@ -228,6 +228,9 @@
 - https://github.com/gmh5225/D3D11-Discord-Overlay-Hook [DX11]
 - https://github.com/ocornut/imgui/commit/923bd2fd217c1dc1e75fa92b0284d3817904988b [DX11/12 ResizeBuffers]
 
+> Tools
+- https://github.com/gmh5225/DX-DX11-3d9 [Fixing broken stereoscopic effects in DX11 games]
+
 > Emulation 
 - https://github.com/code-tom-code/Software_D3D9 [DX9]
 
