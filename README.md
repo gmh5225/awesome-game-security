@@ -533,6 +533,7 @@
 - https://github.com/gmh5225/overlay-SetWindowsHookEx [SetWindowsHookEx]
 - https://github.com/gmh5225/OBS-graphics-hook32-Hook [OBS Hook]
 - https://github.com/gmh5225/OBS-Hook [OBS Hook]
+- https://github.com/gmh5225/overlay-gdi-NotAnOverlay [GDI Overlay]
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
