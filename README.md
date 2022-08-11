@@ -545,6 +545,7 @@
 - https://github.com/gmh5225/imgui-android-PolarImGui [Imgui On Android]
 - https://github.com/gmh5225/Android-Mod-Menu [Floating mod menu for Android]
 - https://github.com/gmh5225/imgui-Unity-With-Layout [Imgui For Unity]
+- https://github.com/gmh5225/IL2CPP-GUI-BepInEx-IL2CPPBase [IL2CPP Menu]
 
 > UI Interface
 - https://github.com/adamhlt/ImGui-Standalone
