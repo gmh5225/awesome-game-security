@@ -260,6 +260,7 @@
 - https://github.com/imadr/Unity-game-hacking [Unity]
 - https://vollragm.github.io/posts/unity-reversing [Unity]
 - https://wiki.cheatengine.org/index.php?title=Mono [CE Mono]
+- https://github.com/krampus-nuggets/ce-tutorial [CE]
 - https://il2cppdumper.com [IL2CPP]
 - https://www.unknowncheats.me/forum/unity/465283-il2cppruntimedumper.html [IL2CPP]
 - https://github.com/shalzuth/NativeNetSharp [Injecting C# code]
