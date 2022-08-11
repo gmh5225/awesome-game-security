@@ -1246,6 +1246,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Game:PokemonGo
 - https://github.com/gmh5225/PokemonGoDumper
 
+> Game:L4D2
+- https://github.com/gmh5225/L4D2-Cheat [Linux]
 
 ## Anti Cheat
 > Guide
