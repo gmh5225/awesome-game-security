@@ -647,6 +647,7 @@
 - https://github.com/gmh5225/CallStackSpoofer
 - https://github.com/gmh5225/spoof-CallStack-Spoofer
 - https://github.com/gmh5225/spoof-NimicStack
+- https://github.com/gmh5225/spoof-callout-poc
 
 > Hide
 - https://github.com/JKornev/hidden
