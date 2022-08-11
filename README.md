@@ -282,6 +282,7 @@
 - https://github.com/x64dbg/DotX64Dbg
 - https://github.com/imugee/xdv
 - https://github.com/eteran/edb-debugger [For Linux]
+- https://github.com/korcankaraokcu/PINCE [For Linux]
 - https://github.com/mrexodia/TitanHide
 - https://github.com/Air14/HyperHide 
 - https://github.com/HyperDbg/HyperDbg
