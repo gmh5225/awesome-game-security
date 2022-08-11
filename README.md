@@ -416,6 +416,7 @@
 - https://github.com/gmh5225/IDA-efiXplorer [UEFI firmware]
 - https://github.com/gmh5225/IDA-protobuf-finder [Protobuf]
 - https://github.com/gmh5225/IDA-golang_loader_assist [GO Reversed]
+- https://github.com/gmh5225/IDA-X64DBG-GhidraDec [Ghidra Decompiler]
 
 > IDA Signature Database
 - https://github.com/gmh5225/IDA-sig-database
@@ -447,6 +448,7 @@
 - https://github.com/gmh5225/X64DBG-ViewDllNotification
 - https://github.com/gmh5225/X64DBG-AutoAttach
 - https://github.com/gmh5225/X64DBG-idenLib [Generate signatures]
+- https://github.com/gmh5225/IDA-X64DBG-GhidraDec [Ghidra Decompiler]
 
 > Injection:Windows
 - https://github.com/btbd/smap [Scatter Manual Map]
