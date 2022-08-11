@@ -536,6 +536,7 @@
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
+- https://github.com/gmh5225/Driver-krnl-gdi-render [Dxgkrnl + GDI]
 - https://github.com/gmh5225/KernelGDIDraw
 - https://github.com/gmh5225/KGDI-steamoverlay-StrongSteam [GDI + Steam]
 - https://github.com/gmh5225/Driver-KernelDrawing [Drawing from kernelmode without any hooks]
