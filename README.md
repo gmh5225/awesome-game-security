@@ -453,6 +453,9 @@
 - https://github.com/gmh5225/X64DBG-idenLib [Generate signatures]
 - https://github.com/gmh5225/IDA-X64DBG-GhidraDec [Ghidra Decompiler]
 
+> Cheat Engine Plugins
+- https://github.com/gmh5225/CE-Extensions [Lua Extensions]
+
 > Injection:Windows
 - https://github.com/btbd/smap [Scatter Manual Map]
 - https://github.com/btbd/modmap [Extend Manual Map]
