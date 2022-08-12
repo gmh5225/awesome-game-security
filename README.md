@@ -308,6 +308,7 @@
 > RE Tools
 - https://dogbolt.org
 - https://github.com/stevemk14ebr/RETools
+- https://github.com/gmh5225/CSharp-patch-ACEPatcher [.NET Patcher]
 
 > Fix VMP
 - https://github.com/gmh5225/VMP-NoVmpy
@@ -789,6 +790,7 @@
 - https://github.com/gmh5225/AssetRipper [Extracting assets]
 - https://github.com/gmh5225/Unity-AssetStudio [Extracting assets]
 - https://github.com/gmh5225/Il2Cpp-HookScripts [Il2Cpp Hook Scripts]
+- https://github.com/gmh5225/CSharp-patch-ACEPatcher [.NET Patcher]
 
 > Game Engine Explorer:Source
 - https://github.com/gmh5225/Source2Dumps [Dump]
