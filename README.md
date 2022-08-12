@@ -570,6 +570,7 @@
 - https://github.com/kkent030315/gdrv-loader/tree/1909_mitigation [gdrv.sys]
 - http://rexw3wrz5pldtadf3hy4vqnuzokhco4l32kyntj36fcgpjuy3nvxidid.onion/_xeroxz/VDM [gdrv enhance]
 - https://github.com/gmh5225/eac-mapper [gdrv.sys]
+- https://github.com/gmh5225/kdmapper [iqvw64e.sys]
 - https://github.com/TheCruZ/kdmapper [iqvw64e.sys]
 - https://github.com/gmh5225/Driver-kdmapper-1909 [iqvw64e.sys]
 - https://github.com/kkent030315/MsIoExploit [MsIo64.sys]
