@@ -425,6 +425,7 @@
 - https://github.com/gmh5225/IDA-protobuf-finder [Protobuf]
 - https://github.com/gmh5225/IDA-golang_loader_assist [GO Reversed]
 - https://github.com/gmh5225/IDA-X64DBG-GhidraDec [Ghidra Decompiler]
+- https://github.com/gmh5225/IDA-EasyRe [Trace Execution]
 
 > IDA Signature Database
 - https://github.com/gmh5225/IDA-sig-database
