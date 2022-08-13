@@ -437,6 +437,7 @@
 - https://github.com/gmh5225/Binary-Ninja-triton-bn [Triton]
 - https://github.com/gmh5225/BinDiff-binexport [BinDiff]
 - https://github.com/gmh5225/Binary-Ninja-BinaryNinjaPlugins
+- https://github.com/gmh5225/binary-ninja-seninja [Symbolic Execution]
 
 > Ghidra Plugins
 - https://github.com/gmh5225/ghidra-frida-hook-gen
