@@ -1251,6 +1251,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Game:Chess
 - https://github.com/gmh5225/lc0 [Chess Engine]
+- https://github.com/gmh5225/chess-Stockfish [Chess Engine]
 
 > Game:BLOCKPOST
 - https://github.com/gmh5225/BLOCKPOST-Cheat
