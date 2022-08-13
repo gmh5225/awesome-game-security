@@ -998,6 +998,7 @@
 - https://github.com/gmh5225/CSGO_BacktrackPatch [Backtrack Patch]
 - https://github.com/gmh5225/CSGO-NullBase [External]
 - https://github.com/gmh5225/CSGO-AqHax-CSGO
+- https://github.com/gmh5225/csgo-dma-overlay [DMA]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
