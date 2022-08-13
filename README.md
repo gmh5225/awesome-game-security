@@ -939,6 +939,7 @@
 - https://github.com/gmh5225/LOL-LViewLoL [Python based scripting platform]
 - https://github.com/gmh5225/LOL-KBotExt [LCU]
 - https://github.com/gmh5225/LOL-ayaya-league-external [Nodejs based scripting platform]
+- https://github.com/gmh5225/LOL-TFT-OCR-BOT [TFT]
 
 > Game:NARAKA
 - https://www.unknowncheats.me/forum/other-fps-games/490052-naraka-bladepoint-reversal-structs-offsets.html
