@@ -835,6 +835,7 @@
 - https://github.com/gmh5225/BadEye
 - https://github.com/gmh5225/BE-BlindEye [Packet Fucker]
 - https://github.com/gmh5225/goodeye
+- https://github.com/gmh5225/BE-BEClient
 
 > Explore AntiCheat System:EQU8
 - https://back.engineering/12/08/2021
