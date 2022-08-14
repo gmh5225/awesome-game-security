@@ -1611,6 +1611,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/wsa_pacman
 - https://github.com/gmh5225/WSA-Linux-Kernel
 - https://github.com/gmh5225/BuildWSA
+- https://github.com/gmh5225/MagiskOnWSALocal
 
 ## Android Emulator
 - https://github.com/Genymobile
