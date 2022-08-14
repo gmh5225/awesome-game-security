@@ -607,6 +607,7 @@
 - https://github.com/weak1337/EvCommunication [NtTokenManagerCreateFlipObjectReturnTokenHandle]
 - https://github.com/UCFoxi/Shared-FlushFileBuffers-Communication [FlushFileBuffers]
 - https://github.com/Sinclairq/DataCommunication [NtCompareSigningLevels]
+- https://github.com/gmh5225/NtCompareSigningLevel-hook [NtCompareSigningLevels]
 - https://github.com/gmh5225/AfdIrpCallDispatch [.data Pointer hook in Afd.sys]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/483093-vtable-kernel-function-hook-communication.html [NtUserMessageCall]
 - https://github.com/gmh5225/Driver-MapPage [NtUserGetObjectInformation]
