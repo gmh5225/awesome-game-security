@@ -480,6 +480,7 @@
 - https://github.com/wbenny/injdrv [APC]
 - https://github.com/w1u0u1/kinject [Map + APC]
 - https://github.com/andrew9382/manual_mapping_dll_injector [Manual Map]
+- https://github.com/gmh5225/Inject-MemJect [Manual Map]
 - https://github.com/can1357/ThePerfectInjector [PTE.User]
 - https://github.com/gmh5225/Driver-executor [PTE.User]
 - https://github.com/gmh5225/inject-PresentInjector [PTE.User]
