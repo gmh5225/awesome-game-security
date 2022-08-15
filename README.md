@@ -672,6 +672,7 @@
 - https://github.com/gmh5225/spoof-CallStack-Spoofer
 - https://github.com/gmh5225/spoof-NimicStack
 - https://github.com/gmh5225/spoof-callout-poc
+- https://github.com/gmh5225/Return-address-spoofer
 
 > Hide
 - https://github.com/JKornev/hidden
