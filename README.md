@@ -502,6 +502,7 @@
 > DLL Hijack
 - https://github.com/gmh5225/DLL-Hijack-DLLirant [Hijacking researches]
 - https://github.com/gmh5225/DLLHijack-ImpulsiveDLLHijack [Hijacking researches]
+- https://github.com/gmh5225/HijackLibs [Project for tracking publicly disclosed DLL Hijacking opportunities]
 
 > Hook
 - https://github.com/microsoft/Detours
