@@ -241,6 +241,7 @@
 
 > Compatibility
 - https://github.com/CnCNet/cnc-ddraw [Old Game]
+- https://github.com/microsoft/D3D9On12 [The Direct3D9-On-12 mapping layer]
 
 ## Cheat
 > Guide
