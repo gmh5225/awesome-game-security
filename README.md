@@ -243,6 +243,9 @@
 - https://github.com/CnCNet/cnc-ddraw [Old Game]
 - https://github.com/microsoft/D3D9On12 [The Direct3D9-On-12 mapping layer]
 
+> Overlay
+- https://github.com/gmh5225/Direct3D9-Overlay
+
 ## Cheat
 > Guide
 - https://github.com/dsasmblr/game-hacking
@@ -543,6 +546,7 @@
 
 > Overlay
 - https://github.com/coltonon/D2DOverlay
+- https://github.com/gmh5225/Direct3D9-Overlay [DX9]
 - https://github.com/Unkn0wnH4ck3r/GameOverlayUIHook [Steam]
 - https://github.com/gmh5225/Steam-Hook-Render-PoC [Steam]
 - https://github.com/gmh5225/steam-overlay-x64 [Steam]
