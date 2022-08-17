@@ -712,6 +712,7 @@
 - https://github.com/univrsal/input-overlay [Keyboard Mapper]
 - https://github.com/Miffyli/gan-aimbots [Machine Learning]
 - https://github.com/gmh5225/camera-triggerbot [Camera Triggerbot]
+- https://github.com/gmh5225/Driver-KernelMoveMouse [gptCursorAsync]
 
 > WallHack
 - https://github.com/DrNseven/D3D11-Wallhack
