@@ -856,6 +856,7 @@
 - https://github.com/gmh5225/goodeye
 - https://github.com/gmh5225/BE-BEClient
 - https://github.com/gmh5225/Battleye-Shellcode-Dumper [BEClient2.dll Dumper]
+- https://github.com/gmh5225/be-shellcode-tester [BattlEye shellcodes tester]
 
 > Explore AntiCheat System:EQU8
 - https://back.engineering/12/08/2021
