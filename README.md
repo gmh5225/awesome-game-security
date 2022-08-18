@@ -522,6 +522,7 @@
 - https://github.com/gmh5225/Driver-KDtour [Easy Kernel Detour]
 - https://github.com/gmh5225/PAGE_GUARD-PGHooker [Page Guard]
 - https://github.com/gmh5225/HOOK-SkipHook [Skip Hook]
+- https://github.com/gmh5225/gdi32-data-hook-edgegdi_hook [gdi32 .data swap]
 
 > Rop Finder
 - https://github.com/gmh5225/ROP-rp
