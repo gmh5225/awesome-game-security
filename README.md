@@ -561,6 +561,7 @@
 - https://github.com/gmh5225/dwmhook-vft [DWM VFTable]
 - https://github.com/gmh5225/overlay-nvidia-overlay-hijack [Hijack Nvidia]
 - https://github.com/gmh5225/D3DOverlay-Nvidia-Hijack [Hijack Nvidia]
+- https://github.com/gmh5225/nvidia-overlay-renderer [Nvidia]
 - https://github.com/gmh5225/overlay-SetWindowsHookEx [SetWindowsHookEx]
 - https://github.com/gmh5225/OBS-graphics-hook32-Hook [OBS Hook]
 - https://github.com/gmh5225/OBS-Hook [OBS Hook]
@@ -605,6 +606,7 @@
 - https://github.com/gmh5225/vdk [Speedfan.sys]
 - https://github.com/gmh5225/SpeedFan-Exploit [Speedfan.sys]
 - https://github.com/gmh5225/Exploit-Vulnerable-CapcomLib [Capcom.sys]
+- https://github.com/gmh5225/capcom-dolboeb-executor [Capcom.sys]
 - https://github.com/gmh5225/CVE-2015-2291 [IQVW64.sys]
 - https://github.com/gmh5225/Exploit-AsIO-Exploit [AsIO3.sys]
 
