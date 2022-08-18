@@ -1466,6 +1466,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Detect-hook-buster
 - https://github.com/gmh5225/Driver-Detect-nullshit
 - https://github.com/gmh5225/InstrumentationCallback-EtwTi-Syscall-Hook [Instrumentation Callback]
+- https://github.com/gmh5225/detect-scan-device-control-hooks-scanner [device-control-hooks-scanner]
 
 > Detection:Memory Integrity
 - https://github.com/gmh5225/integrity
