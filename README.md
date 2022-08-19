@@ -647,6 +647,7 @@
 - https://github.com/gmh5225/Comm-Data-Pointer-Swap [NtDCompositionSetChildRootVisual]
 - https://github.com/gmh5225/Comm-NekoSwap [Win32kApiSetTable]
 - https://github.com/gmh5225/Comm-kernel_payload_comms [Shared Memory]
+- https://github.com/gmh5225/Valorant-UCMiraka-ValorantExternal [NtUserGetPointerProprietaryId]
 
 > EFI Driver
 - https://github.com/gmh5225/EFI-EasyUefi [Visual Studio template for GNU-EFI]
@@ -1051,6 +1052,7 @@
 - https://github.com/gmh5225/Valorant-Cheat
 - [Iterate And Decrypt FNamePool->Entries On Valorant](https://github.com/gmh5225/VALORANT-FNamePool)
 - https://github.com/gmh5225/Valorant-External
+- https://github.com/gmh5225/Valorant-UCMiraka-ValorantExternal [NtUserGetPointerProprietaryId]
 
 > Game:VEILED EXPERTS
 - https://github.com/gmh5225/VEILED-EXPERTS-SDK
