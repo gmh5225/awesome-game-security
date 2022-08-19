@@ -648,6 +648,7 @@
 
 > EFI Driver
 - https://github.com/gmh5225/EFI-EasyUefi [Visual Studio template for GNU-EFI]
+- https://github.com/btbd/umap [EFI Manual Map]
 - https://github.com/ekknod/sumap [EFI Manual Map]
 - https://github.com/ekknod/KiSystemStartupMeme [Custom KiSystemStartup]
 - https://github.com/SamuelTulach/efi-memory [RPM]
