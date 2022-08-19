@@ -473,6 +473,7 @@
 - https://github.com/gmh5225/X64DBG-AutoAttach
 - https://github.com/gmh5225/X64DBG-idenLib [Generate signatures]
 - https://github.com/gmh5225/IDA-X64DBG-GhidraDec [Ghidra Decompiler]
+- https://github.com/gmh5225/x64dbgbinja [Binary Ninja]
 
 > Cheat Engine Plugins
 - https://github.com/gmh5225/CE-Extensions [Lua Extensions]
