@@ -1053,6 +1053,7 @@
 - [Iterate And Decrypt FNamePool->Entries On Valorant](https://github.com/gmh5225/VALORANT-FNamePool)
 - https://github.com/gmh5225/Valorant-External
 - https://github.com/gmh5225/Valorant-UCMiraka-ValorantExternal [NtUserGetPointerProprietaryId]
+- https://github.com/gmh5225/Valorant-CheatExternal
 
 > Game:VEILED EXPERTS
 - https://github.com/gmh5225/VEILED-EXPERTS-SDK
