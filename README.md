@@ -904,6 +904,7 @@
 - https://forum.ragezone.com/f922/getting-packet-structures-opcodes-using-792436 [Packet]
 - https://github.com/Bratah123/SpiritIDAPlugin [IDA-Plugin]
 - https://github.com/icelemon1314/mapleLemon [Private Server-CMS-027]
+- https://github.com/gmh5225/MS-079-Server-MapleStory [Private Server-CMS-079]
 - https://forum.ragezone.com/f428/maplestory-private-server-v83-741739 [Private Server-GMS-083]
 - https://github.com/Z41N/v83MaplestoryCPP [Private Server-GMS-083 C++]
 - https://github.com/Fraysa/Destiny [Private Server-GMS-083 C#]
