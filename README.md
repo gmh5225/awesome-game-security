@@ -844,6 +844,7 @@
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/464943-eac-nmi-bypass-callbacks.html [NMI Bypass]
 - https://github.com/gmh5225/EAC-EasyAntiCheat-Reversing
 - https://github.com/gmh5225/EAC-hiearchy-eac [Integrity Checks]
+- https://github.com/gmh5225/EAC_Emu [Simple EasyAntiCheat x64 emulator]
 
 > Explore AntiCheat System:BE
 - https://github.com/gmh5225/BE-NoEye
