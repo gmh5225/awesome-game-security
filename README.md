@@ -195,6 +195,7 @@
 - https://github.com/gmh5225/wow-LegionCore-7.3.5 [wow]
 - https://github.com/gmh5225/wow-5.4.7-Wow-source [wow]
 - https://github.com/gmh5225/wow-MopCore547 [wow]
+- https://github.com/gmh5225/Non-Newtonian-New-York [Spider-Man Remastered Mod]
 
 ## Game Assets
 - https://github.com/gmh5225/Game-assets-Retro3DGraphicsCollection
