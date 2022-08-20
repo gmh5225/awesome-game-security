@@ -67,6 +67,7 @@
 - https://github.com/gmh5225/GameEngine-ioquake3-engine [quake3]
 - https://github.com/gmh5225/GameEngine-rbfx [C# support and WYSIWYG editor]
 - https://github.com/gmh5225/GameEngine-Esoterica
+- https://github.com/gmh5225/gameengine-gzdoom [Doom]
 
 
 > Game Engine Plugins:Unreal
