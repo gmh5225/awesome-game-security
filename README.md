@@ -66,6 +66,7 @@
 - https://github.com/gmh5225/GameEngine-Castle-Engine [DX11]
 - https://github.com/gmh5225/GameEngine-ioquake3-engine [quake3]
 - https://github.com/gmh5225/GameEngine-rbfx [C# support and WYSIWYG editor]
+- https://github.com/gmh5225/GameEngine-Esoterica
 
 
 > Game Engine Plugins:Unreal
