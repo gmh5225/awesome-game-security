@@ -197,6 +197,8 @@
 - https://github.com/gmh5225/wow-MopCore547 [wow]
 - https://github.com/gmh5225/Non-Newtonian-New-York [Spider-Man Remastered Mod]
 - https://github.com/gmh5225/game-cpp-android-basic-samples [Sample games using the Google Play Games C++ SDK]
+- https://github.com/gmh5225/UE-KawaiiPhysics [Simple fake Physics for UnrealEngine4 & 5]
+- https://github.com/gmh5225/UE4-VTuberWithUE4 [UE4 VTuber]
 
 ## Game Assets
 - https://github.com/gmh5225/Game-assets-Retro3DGraphicsCollection
