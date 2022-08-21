@@ -775,6 +775,7 @@
 
 > SDK CodeGen
 - https://github.com/gmh5225/codegen-sdkgenny
+- https://github.com/gmh5225/sdk-gen-luagenny
 
 > Game Engine Explorer:Unreal
 - https://github.com/gmh5225/UE4-shootergame-Hack [ShooterGame Demo]
