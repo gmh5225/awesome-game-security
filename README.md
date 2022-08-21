@@ -264,6 +264,7 @@
 - https://github.com/wtsxDev/reverse-engineering
 - https://github.com/mytechnotalent/Hacking-Windows
 - https://blog.can.ac/author/can1357
+- https://github.com/SinaKarvandi/Hypervisor-From-Scratch [Hypervisor]
 - https://secret.club
 - https://back.engineering
 - https://vollragm.github.io
@@ -288,6 +289,7 @@
 
 > Debugging
 - https://github.com/cheat-engine/cheat-engine
+- https://github.com/SinaKarvandi/Hypervisor-From-Scratch [Hypervisor]
 - https://github.com/gmh5225/CheatEngineMonoHelper [CE Mono Helper]
 - https://github.com/gmh5225/frida-ceserver [CE Server For IOS]
 - https://github.com/isabellaflores/ceserver-pcileech [CE Server For Pcileech]
