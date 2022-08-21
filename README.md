@@ -740,6 +740,9 @@
 - https://github.com/Miffyli/gan-aimbots [Machine Learning]
 - https://github.com/gmh5225/camera-triggerbot [Camera Triggerbot]
 - https://github.com/gmh5225/Driver-KernelMoveMouse [gptCursorAsync]
+- https://github.com/gmh5225/mouse-input-injection [NtUserInjectMouseInput]
+- https://github.com/gmh5225/Overwatch-1-cheat-source [NtUserInjectMouseInput]
+- https://github.com/gmh5225/NtUserInjectMouseInput-syscall [NtUserInjectMouseInput SYSCALL]
 
 > WallHack
 - https://github.com/DrNseven/D3D11-Wallhack
@@ -1220,6 +1223,7 @@
 > Game:Overwatch 
 - https://github.com/blackhades00/PareidoliaTriggerbot [Triggerbot]
 - https://github.com/ReynmenRcs/Overwatch-External-Esp-Aimbot-Hack-Cheat
+- https://github.com/gmh5225/Overwatch-1-cheat-source
 
 > Game:Paladins
 - https://github.com/gmh5225/Paladins-Internal-Esp-Aimbot-Hack-Cheat-Hack
