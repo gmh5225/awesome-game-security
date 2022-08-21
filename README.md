@@ -201,6 +201,7 @@
 - https://github.com/gmh5225/game-cpp-android-basic-samples [Sample games using the Google Play Games C++ SDK]
 - https://github.com/gmh5225/UE-KawaiiPhysics [Simple fake Physics for UnrealEngine4 & 5]
 - https://github.com/gmh5225/UE4-VTuberWithUE4 [UE4 VTuber]
+- https://github.com/gmh5225/Game-YugimonTheSpire [Slay The Spire Remastered Mod]
 
 ## Game Assets
 - https://github.com/gmh5225/Game-assets-Retro3DGraphicsCollection
