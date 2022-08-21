@@ -547,6 +547,9 @@
 > Injection:Linux
 - https://github.com/ixty/mandibule
 
+> Injection:Android
+- https://github.com/SsageParuders/ModGamesByInjectZygote 
+
 
 > DLL Hijack
 - https://github.com/Sh0ckFR/DLLirant [Hijacking researches]
