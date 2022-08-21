@@ -393,6 +393,7 @@
 > Magisk
 - https://github.com/gmh5225/Android-Zygisk-MagiskHide
 - https://github.com/gmh5225/android-hideroot
+- https://github.com/gmh5225/Magisk-Riru-MomoHider
 
 > Android File Explorer
 - https://github.com/gmh5225/android-dex2jar
