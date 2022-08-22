@@ -1112,6 +1112,9 @@
 > Game:COD1
 - https://github.com/attilathedud/CoD_Hacks
 
+> Game:COD7
+- https://github.com/nice-sprite/COD7-Tools
+
 > Game:COD Warzone
 - https://github.com/YMY1666527646/Call-of-Duty-Warzone-MW-HACK-ESP-AIMBOT
 - https://github.com/serjam/mwclap
