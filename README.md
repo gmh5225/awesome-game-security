@@ -231,6 +231,8 @@
 ## Game Assets
 - https://github.com/Miziziziz/Retro3DGraphicsCollection
 - https://github.com/HitmanHimself/GOWTool [God of War 2018]
+- https://github.com/KhronosGroup/glTF [Runtime 3D Asset Delivery]
+- https://github.com/syoyo/tinygltf [Header only C++11 tiny glTF 2.0 library]
 
 ## Game Hot Patch
 - https://github.com/Tencent/xLua
