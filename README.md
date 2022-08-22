@@ -737,6 +737,7 @@
 - https://github.com/frkngksl/NimicStack
 - https://github.com/thesecretclub/callout-poc
 - https://github.com/veryboreddd/Return-address-spoofer
+- https://www.unknowncheats.me/forum/anti-cheat-bypass/512002-x64-return-address-spoofing.html
 
 > Hide
 - https://github.com/JKornev/hidden
