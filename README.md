@@ -531,6 +531,7 @@
 - https://github.com/charliewolfe/Stealthy-Kernelmode-Injector [PTE/VAD Manipulation Manual Map]
 - https://github.com/wbenny/injdrv [APC]
 - https://github.com/w1u0u1/kinject [Map + APC]
+- https://github.com/TheCruZ/Simple-Manual-Map-Injector [Manual Map]
 - https://github.com/andrew9382/manual_mapping_dll_injector [Manual Map]
 - https://github.com/danielkrupinski/MemJect [Manual Map]
 - https://github.com/can1357/ThePerfectInjector [PTE.User]
