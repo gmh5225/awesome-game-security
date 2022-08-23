@@ -842,6 +842,7 @@
 - [Intercept ProcessEvent calls on any game object (Unreal Engine 4)](https://github.com/Skengdo/ue4-processevent-intercept)
 - [UE4 Cheat Source Code](https://github.com/1hAck-0/UE4-Cheat-Source-Code)
 - https://github.com/bbgsm/ue4_cheat_engine [UE4 Cheat For Android]
+- [unpack, pack, list, check and mount Unreal Engine 4 .pak archives](https://github.com/panzi/rust-u4pak)
 
 > Game Engine Explorer:Unity
 - https://github.com/mono/mono [mono]
