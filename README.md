@@ -720,6 +720,7 @@
 - https://github.com/Kiaoee/Fortnite-EFI-External [Fortnite]
 - https://github.com/ajkhoury/UEFI-Bootkit
 - https://github.com/SamuelTulach/negativespoofer [HWID]
+- https://github.com/SamuelTulach/EfiDump [Dump]
 
 > QEMU/KVM Cheat
 - https://github.com/memflow/memflow-kvm
