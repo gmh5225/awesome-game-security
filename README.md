@@ -343,6 +343,7 @@
 - https://github.com/hugsy/CFB [Monitor IRP]
 - https://ioninja.com/downloads.html [Protocol Analyzer]
 - https://github.com/wilszdev/SteamAntiAntiDebug [Steam]
+- https://github.com/H5GG/H5GG [IOS cheat engine]
 
 > Packet Sniffer&Filter
 - https://github.com/WPO-Foundation/win-shaper
