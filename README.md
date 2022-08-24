@@ -1204,7 +1204,7 @@
 - https://github.com/plu1337/Fortnite-Masterpasta-ihack-Source-Leak
 - https://github.com/Giteob/Fortnite-Evo.cc-Source-External-Cheat
 - https://github.com/KeyzpOnTheFluxxx/Fortnite-External
-- https://github.com/Giteob/Apple-Lite-Fortnite-Cheat
+- https://github.com/gmh5225/Apple-Lite-Fortnite-Cheat
 - https://github.com/Luksiuss/Fortnite-External-Cheat-Source-Code
 - https://github.com/0dayatday0/BattleFN-cheat-analysis
 
