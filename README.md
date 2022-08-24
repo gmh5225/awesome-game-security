@@ -940,6 +940,8 @@
 
 > Explore AntiCheat System:RIOT
 - https://github.com/Nuxar1/DecryptionDumper [Dump]
+- https://github.com/lil-skies/val-exception-handler [ZwRaiseException Dump]
+- https://github.com/gmh5225/Dump-val-exception-handler [RtlpCallVectoredHandlers Dump]
 
 > Explore AntiCheat System:XignCode
 - https://github.com/Skengdo/XignCode-Dump
@@ -1112,6 +1114,7 @@
 - https://github.com/gmh5225/Valorant-Hack-Esp-Aimbot-Driver-Injector-With-Spoofer-Temporary
 - https://github.com/xehn1337/valorant-dumper [Dump]
 - https://github.com/Chase1803/Valorant-Dumper-Tool [Dump]
+- https://github.com/lil-skies/val-exception-handler [ZwRaiseException Dump]
 - https://github.com/kerememrerer/Eduty-Valorant-Esp-Aimbot-Hack
 - https://github.com/frankelitoc/UE4-c- [External]
 - https://github.com/AryuInka/Valorant-Cheat-External [External]
