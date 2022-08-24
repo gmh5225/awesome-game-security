@@ -577,6 +577,7 @@
 - https://github.com/nelfo/PGHooker [Page Guard]
 - https://github.com/weak1337/SkipHook [Skip Hook]
 - https://github.com/0mdi/edgegdi_hook [gdi32 .data swap]
+- https://github.com/noobpk/frida-android-hook [frida hook for android]
 
 > Rop Finder
 - https://github.com/0vercl0k/rp
