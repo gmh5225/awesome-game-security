@@ -1032,6 +1032,8 @@
 - https://github.com/B3akers/LeagueSkinChanger [Skin]
 - https://github.com/real-web-world/hh-lol-prophet
 - https://github.com/Nuxar1/DecryptionDumper [Dump]
+- https://github.com/tarekwiz/LeagueDumper [Dump]
+- https://github.com/tarekwiz/League-Unpacker [Dump]
 - https://github.com/LeaguePrank/LeagueTeamBoost
 - https://github.com/newworld7777/League-of-Legends-Bot-Orbwalker-Lasthit-Laneclear-Skin-Changer-Vanguard-Spoofer
 - https://github.com/LeagueSandbox
