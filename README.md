@@ -632,7 +632,10 @@
 - https://github.com/LGLTeam/Android-Mod-Menu [Floating mod menu for Android]
 - https://github.com/springmusk026/ImGui-Unity-With-Layout [Imgui For Unity]
 - https://github.com/springmusk026/Imgui-Unity [Imgui For Unity]
+- https://github.com/gmh5225/Android-Mod-Menu-ImGui [Imgui For Unity]
+- https://github.com/Octowolve/Unity-ImGUI-Android [Imgui For Unity]
 - https://github.com/VerityIncorporated/BepInEx-IL2CPPBase [IL2CPP Menu]
+- https://github.com/springmusk026/Android-Mod-Menu-Kotlin [IL2CPP Menu]
 - https://github.com/gmh5225/Android-OpenGL-ES-Chams [Chams]
 
 > UI Interface
