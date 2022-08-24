@@ -883,6 +883,7 @@
 - https://github.com/axhlzy/Il2CppHookScripts [Il2Cpp Hook Scripts]
 - https://github.com/BataBo/ACEPatcher [.NET Patcher]
 - [A tool translate a apk file to common android project and support so hook include il2cpp c++ scaffolding](https://github.com/Efaker/FakerAndroid)
+- https://github.com/xxzzddxzd/unitySpeedTools [IOS Speed Tools]
 
 > Game Engine Explorer:Source
 - https://github.com/anarh1st47/Source2Dumps [Dump]
