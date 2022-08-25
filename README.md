@@ -465,6 +465,7 @@
 > IDA Plugins
 - https://github.com/vmallet/ida-plugins [List of IDA Plugins]
 - https://github.com/zyantific/IDASkins [Skins]
+- https://github.com/endofunky/ida-nord-theme [Skins]
 - https://github.com/giladreich/ida_migrator [Migrate Database]
 - https://github.com/can1357/NtRays [Windows Kernel Enhance]
 - https://github.com/JustasMasiulis/ida_bitfields [Windows Kernel Enhance]
