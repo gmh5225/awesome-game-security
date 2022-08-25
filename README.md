@@ -725,6 +725,7 @@
 - https://github.com/SamuelTulach/EfiDump [Dump]
 
 > QEMU/KVM Cheat
+- https://github.com/Qemu-Gang
 - https://github.com/memflow/memflow-kvm
 - https://github.com/MisterY52/apex_dma_kvm_pub
 - https://github.com/SamuelTulach/BetterTiming [Bypass CPU Timing]
