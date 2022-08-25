@@ -1722,6 +1722,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [Dll injection through code page id modification in registry](https://github.com/NtQuerySystemInformation/NlsCodeInjectionThroughRegistry)
 - https://github.com/huoji120/Etw-Syscall [ETW Syscall]
 - https://github.com/weak1337/SkipHook [Skip Hook]
+- https://github.com/ekknod/SetWindowHookEx [Using SetWindowHookEx for preinjected DLL's]
 
 > Android
 - https://github.com/WindySha/bypassHiddenApiRestriction [Bypass hidden api restriction]
