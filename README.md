@@ -733,6 +733,7 @@
 - https://github.com/doomedraven/Tools/blob/master/Virtualization/kvm-qemu.sh [QEMU Script]
 - https://github.com/GlacierW/MBA [QEMU Malware Behavior Analyzer]
 - https://github.com/Qemu-Gang/Escape-from-TuxKov [EFT]
+- https://github.com/LWSS/Ape-ex-Abominations [Apex]
 
 > Wine
 - https://github.com/ValveSoftware/Proton [Steam]
@@ -1180,6 +1181,7 @@
 - https://github.com/DeplayBack/ApexCheat
 - https://github.com/Zakaria-Master/Apex_ESP_Old_Project
 - https://github.com/cheatingwitdacode/apex-cheating
+- https://github.com/LWSS/Ape-ex-Abominations [QEMU]
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
