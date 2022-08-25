@@ -92,6 +92,7 @@
 - https://github.com/rbfx/rbfx [C# support and WYSIWYG editor]
 - https://github.com/BobbyAnguelov/Esoterica
 - https://github.com/ZDoom/gzdoom [Doom]
+- https://github.com/L-Spiro/L.-Spiro-Engine-2022
 
 
 > Game Engine Plugins:Unreal
