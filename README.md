@@ -732,6 +732,7 @@
 - https://github.com/nyx-fuzz/QEMU-Nyx [Intel-PT]
 - https://github.com/doomedraven/Tools/blob/master/Virtualization/kvm-qemu.sh [QEMU Script]
 - https://github.com/GlacierW/MBA [QEMU Malware Behavior Analyzer]
+- https://github.com/Qemu-Gang/Escape-from-TuxKov [EFT]
 
 > Wine
 - https://github.com/ValveSoftware/Proton [Steam]
@@ -1270,6 +1271,7 @@
 - https://github.com/Splitx12/eft
 - https://github.com/TupleDev/eft-internal
 - https://github.com/TupleDev/Veil-EFT
+- https://github.com/Qemu-Gang/Escape-from-TuxKov [QEMU]
 
 > Game:R6
 - https://github.com/NMan1/Rainbow-Six-Cheat
