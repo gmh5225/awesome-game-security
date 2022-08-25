@@ -1034,6 +1034,7 @@
 
 > Game:LOL
 - https://github.com/LeagueSharp
+- https://github.com/ensoulsharp-io
 - https://github.com/shalzuth/LeagueSharp
 - https://github.com/shalzuth/LoLClient
 - https://github.com/RyukOP/L-Assemblies
