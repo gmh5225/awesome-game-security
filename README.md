@@ -531,6 +531,8 @@
 - https://github.com/Skyrimfus/CE-lua-extensions [Lua Extensions]
 - https://github.com/bbfox0703/Mydev-Cheat-Engine-Tables [CT]
 - https://github.com/inuNorii/Elden-Ring-CT-TGA [Elden Ring]
+- https://github.com/vmmcall/remap-plugin [Remap]
+- https://github.com/gmh5225/overwatch-iat-fixer [Overwatch IAT Fixer]
 
 > Injection:Windows
 - https://github.com/btbd/smap [Scatter Manual Map]
@@ -1296,6 +1298,7 @@
 - https://github.com/blackhades00/PareidoliaTriggerbot [Triggerbot]
 - https://github.com/ReynmenRcs/Overwatch-External-Esp-Aimbot-Hack-Cheat
 - https://github.com/OSNSON/Overwatch-1-cheat-source-.
+- https://github.com/gmh5225/overwatch-iat-fixer [Overwatch IAT Fixer]
 
 > Game:Paladins
 - https://github.com/gmh5225/Paladins-Internal-Esp-Aimbot-Hack-Cheat-Hack
