@@ -315,6 +315,7 @@
 - [different-ways-hooking](https://www.unknowncheats.me/forum/general-programming-and-reversing/154643-different-ways-hooking.html) [Hook Guide]
 - http://pwnadventure.com [Hackable Game]
 - https://github.com/GameCrashProject/UE4-Hacking-Guideline [Unreal]
+- https://github.com/TimMisiak/WinDbgCookbook [WinDbg]
 
 > Debugging
 - https://github.com/cheat-engine/cheat-engine
