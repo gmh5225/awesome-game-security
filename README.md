@@ -714,6 +714,8 @@
 - https://github.com/Chase1803/UCMiraka-ValorantExternal [NtUserGetPointerProprietaryId]
 
 > EFI Driver
+- https://github.com/mrexodia/EfiCMake
+- https://github.com/tandasat/MiniVisorPkg
 - https://github.com/SamuelTulach/EasyUefi [Visual Studio template for GNU-EFI]
 - https://github.com/btbd/umap [EFI Manual Map]
 - https://github.com/ekknod/sumap [EFI Manual Map]
