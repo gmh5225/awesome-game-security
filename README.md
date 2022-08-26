@@ -189,6 +189,7 @@
 - https://github.com/thomaseichhorn/cs16-client [Rewrote CS1.6]
 - https://github.com/td512/re3 [Reversed GTA III, Vice City]
 - https://github.com/SmileyAG/ReCZDS [Reversed CZeror]
+- https://github.com/Harrison1/unrealcpp [UE4 C++ examples]
 - https://github.com/QianMo/UE4-FPS-Game [UE4 FPS Game]
 - https://github.com/KitchenGun/UE4_FPS [UE4 FPS Demo]
 - https://github.com/tomlooman/SimpleFPSTemplate [UE4 FPS Demo]
