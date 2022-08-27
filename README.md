@@ -793,6 +793,7 @@
 - [Using .reloc section to replace the typical allocation calls](https://github.com/gmh5225/memory-relocalloc)
 - https://github.com/longpoxin/hideroot [Magisk]
 - https://github.com/Rwkeith/Diglett [Hide Kernel Thread]
+- https://github.com/gmh5225/Driver-SessionMapper [Session Driver]
 
 > Triggerbot & Aimbot
 - https://github.com/changeofpace/MouHidInputHook
