@@ -231,6 +231,7 @@
 - https://github.com/pafuhana1213/VTuberWithUE4 [UE4 VTuber]
 - https://github.com/Bratah123/GojoTheSpire [Slay The Spire Remastered Mod]
 - https://github.com/snesrev/zelda3 [A reimplementation of Zelda 3]
+- https://github.com/kantam5/DeadByDaylight [Dead By Daylight Copy]
 
 ## Game Assets
 - https://github.com/Miziziziz/Retro3DGraphicsCollection
