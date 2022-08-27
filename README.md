@@ -800,6 +800,7 @@
 - https://github.com/blackhades00/PareidoliaTriggerbot
 - https://github.com/adspro15/DirectInput
 - https://github.com/nbqofficial/norsefire
+- https://github.com/petercunha/Pine [Neural Network]
 - https://github.com/lucylow/b00m-h3adsh0t [Neural Network]
 - https://github.com/univrsal/input-overlay [Keyboard Mapper]
 - https://github.com/Miffyli/gan-aimbots [Machine Learning]
@@ -1123,6 +1124,7 @@
 - https://github.com/krxdev-kaan/AqHax-CSGO
 - https://github.com/slack69/csgo-dma-overlay [DMA]
 - https://github.com/rrpvm/csgo-external-cheat
+- https://github.com/petercunha/Pine [Neural Network]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
