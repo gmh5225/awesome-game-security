@@ -676,6 +676,7 @@
 - https://github.com/es3n1n/dolboeb-executor [Capcom.sys]
 - https://github.com/Exploitables/CVE-2015-2291 [IQVW64.sys]
 - https://github.com/KiFilterFiberContext/AsIO-Exploit [AsIO3.sys]
+- https://github.com/IamM47Z/OpenHardwareMonitor-PoC [OpenHardwareMonitorLib.sys]
 
 
 > Driver Communication
