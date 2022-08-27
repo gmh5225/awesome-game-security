@@ -467,6 +467,7 @@
 
 > IDA Plugins
 - https://github.com/vmallet/ida-plugins [List of IDA Plugins]
+- https://github.com/onethawt/idaplugins-list [List of IDA Plugins]
 - https://github.com/zyantific/IDASkins [Skins]
 - https://github.com/endofunky/ida-nord-theme [Skins]
 - https://github.com/giladreich/ida_migrator [Migrate Database]
