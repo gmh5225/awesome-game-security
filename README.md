@@ -368,6 +368,7 @@
 - https://github.com/BataBo/ACEPatcher [.NET Patcher]
 - https://github.com/waryas/KACE [Emulate Drivers in RING3 with self context mapping or unicorn]
 - https://github.com/VollRagm/PTView [Browse Page Tables on Windows]
+- https://github.com/iBotPeaches/Apktool [Apk]
 
 > Fix VMP
 - https://github.com/wallds/NoVmpy
@@ -436,6 +437,7 @@
 - https://github.com/canyie/Riru-MomoHider
 
 > Android File Explorer
+- https://github.com/iBotPeaches/Apktool
 - https://github.com/pxb1988/dex2jar
 
 > Android Memory Explorer
