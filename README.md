@@ -1364,6 +1364,7 @@
 - https://github.com/Grasscutters/Grasscutter [Private Server]
 - https://github.com/Akebi-Group/Akebi-GC [Cheat]
 - https://github.com/Razmoth/GenshinStudio [Asset]
+- https://github.com/Dimbreath/GenshinData [Game Data]
 
 > Game:Honkai Impact
 - https://github.com/BuIlDaLiBlE/BetterHI3Launcher
