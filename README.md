@@ -1083,6 +1083,8 @@
 - https://github.com/helloobaby/wow-IAT-fix
 - https://github.com/namreeb/dumpwow
 - https://github.com/xakepru/x14.08-coverstory-blizzard
+- https://github.com/fail46/OHack [An open-source hack for World of Warcraft]
+- https://github.com/adde88/SkyEngine [Wow Lua Unlocker]
 
 > Game:CS1.6
 - https://github.com/k4ne1337/hpp-hack
@@ -1410,6 +1412,10 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Game:L4D2
 - https://github.com/Fox-Cult/L4D2-Cheat [Linux]
+
+> Game:mhxy
+- https://github.com/gmh5225/mhxy_kernel
+- https://github.com/gmh5225/mhxy
 
 ## Anti Cheat
 > Guide
