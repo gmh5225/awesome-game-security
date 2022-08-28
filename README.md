@@ -497,6 +497,7 @@
 - https://github.com/strazzere/golang_loader_assist [GO Reversed]
 - https://github.com/GregoryMorse/GhidraDec [Ghidra Decompiler]
 - https://github.com/AntoineBlaud/EasyRe [Trace Execution]
+- https://github.com/flatz/ida_ps5_elf_plugin [PS5 elf loader]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
