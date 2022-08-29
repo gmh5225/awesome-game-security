@@ -908,6 +908,7 @@
 - https://github.com/AssetRipper/AssetRipper [Extracting assets]
 - https://github.com/Perfare/AssetStudio [Extracting assets]
 - https://github.com/axhlzy/Il2CppHookScripts [Il2Cpp Hook Scripts]
+- https://github.com/gmh5225/Il2Cpp-HookScripts [Il2Cpp/Mono Hook Scripts]
 - https://github.com/BataBo/ACEPatcher [.NET Patcher]
 - [A tool translate a apk file to common android project and support so hook include il2cpp c++ scaffolding](https://github.com/Efaker/FakerAndroid)
 - https://github.com/xxzzddxzd/unitySpeedTools [IOS Speed Tools]
