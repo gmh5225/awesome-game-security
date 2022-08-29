@@ -168,6 +168,8 @@
 - https://github.com/socketio/socket.io [Nodejs]
 - https://github.com/mqttjs/MQTT.js [mqtt nodejs]
 - https://github.com/eclipse/paho.mqtt.cpp [mqtt cpp]
+- https://github.com/topfreegames/pitaya [Server framework]
+- https://github.com/azerothcore/azerothcore-wotlk [Server for WOW]
 
 ## NVIDIA PhysX SDK
 - https://github.com/NVIDIAGameWorks/PhysX
