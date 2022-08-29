@@ -354,6 +354,7 @@
 - https://github.com/WPO-Foundation/win-shaper
 - https://github.com/wiresock/ndisapi
 - https://github.com/Akebi-Group/Akebi-PacketSniffer
+- https://github.com/basil00/Divert [Packet Divert]
 
 > Packet Capture&Parse
 - https://github.com/seladb/PcapPlusPlus [Pcap]
