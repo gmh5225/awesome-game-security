@@ -1366,6 +1366,7 @@
 > Game:Genshin Impact
 - https://github.com/khang06/mhynot2
 - https://github.com/khang06/genshinjumpfixer2 [Decode CFG]
+- https://github.com/khang06/misc/tree/master/reversing/genshin [Decode CFG]
 - https://github.com/GoChanZ/genshin-cheat
 - https://github.com/Grasscutters/Grasscutter [Private Server]
 - https://github.com/Akebi-Group/Akebi-GC [Cheat]
