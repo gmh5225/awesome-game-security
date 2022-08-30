@@ -536,6 +536,7 @@
 - https://github.com/secrary/idenLib [Generate signatures]
 - https://github.com/GregoryMorse/GhidraDec [Ghidra Decompiler]
 - https://github.com/x64dbg/x64dbgbinja [Binary Ninja]
+- https://github.com/DNLINYJ/Anti_miHoYo_Jcc_Obfuscate
 
 > Cheat Engine Plugins
 - https://github.com/FreeER/CE-Extensions [Lua Extensions]
@@ -1367,6 +1368,7 @@
 - https://github.com/khang06/mhynot2
 - https://github.com/khang06/genshinjumpfixer2 [Decode CFG]
 - https://github.com/khang06/misc/tree/master/reversing/genshin [Decode CFG]
+- https://github.com/DNLINYJ/Anti_miHoYo_Jcc_Obfuscate [Decode CFG By X64DBG]
 - https://github.com/GoChanZ/genshin-cheat
 - https://github.com/Grasscutters/Grasscutter [Private Server]
 - https://github.com/Akebi-Group/Akebi-GC [Cheat]
