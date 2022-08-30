@@ -925,6 +925,7 @@
 - https://github.com/danielkrupinski/VAC-Bypass-Loader
 - https://github.com/danielkrupinski/vac-hooks
 - https://github.com/mdilai/Shtreeba [Injector]
+- https://github.com/zyhp/vac3_inhibitor
 
 > Explore AntiCheat System:EAC
 - https://github.com/thesecretclub/CVEAC-2020 [Integrity Checks]
