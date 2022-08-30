@@ -1261,6 +1261,7 @@
 - https://github.com/gmh5225/Apple-Lite-Fortnite-Cheat
 - https://github.com/Luksiuss/Fortnite-External-Cheat-Source-Code
 - https://github.com/0dayatday0/BattleFN-cheat-analysis
+- https://github.com/aqaylore/fortnite-internal-updated-ritz [Internal]
 
 > Game:Bloodhunt
 - https://github.com/ZZZ-Monster/bloodhunt_External
