@@ -93,6 +93,7 @@
 - https://github.com/BobbyAnguelov/Esoterica
 - https://github.com/ZDoom/gzdoom [Doom]
 - https://github.com/L-Spiro/L.-Spiro-Engine-2022
+- https://github.com/MohitSethi99/ArcEngine
 
 
 > Game Engine Plugins:Unreal
