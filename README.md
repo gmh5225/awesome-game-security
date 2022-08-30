@@ -1036,6 +1036,8 @@
 > Game:Fall Guys
 - https://github.com/shalzuth/FallGuysSharp
 - https://github.com/ioncodes/FallGuys
+- https://github.com/aci1337/Flying-Guys-fully-modified
+- https://github.com/FarmEquipment69/FlyingGuys
 
 > Game:Remnant
 - https://github.com/shalzuth/RemnantESP
