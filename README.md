@@ -1139,6 +1139,8 @@
 - https://github.com/slack69/csgo-dma-overlay [DMA]
 - https://github.com/rrpvm/csgo-external-cheat
 - https://github.com/petercunha/Pine [Neural Network]
+- https://github.com/Bartis1313/csgo 
+- https://github.com/NullHooks/NullHooks [Internal]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
