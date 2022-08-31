@@ -1536,6 +1536,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/JonDoNym/peinjector
 - https://github.com/craids/AresFramework
 - https://github.com/andrew9382/exe_packer
+- https://github.com/dr4k0nia/Origami [Compressing .net assemblies]
 
 > CLR Protection
 - https://github.com/endgameinc/ClrGuard
