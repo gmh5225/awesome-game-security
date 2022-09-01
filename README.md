@@ -731,6 +731,7 @@
 - https://github.com/Deputation/kernel_payload_comms [Shared Memory]
 - https://github.com/Chase1803/UCMiraka-ValorantExternal [NtUserGetPointerProprietaryId]
 - https://github.com/gmh5225/Comm-ImMiraclela [NtDxgkGetTrackedWorkloadStatistics/NtDxgkGetAvailableTrackedWorkLoadIndex]
+- https://www.unknowncheats.me/forum/2976731-post45.html [IsWin32KSyscallFiltered]
 
 > EFI Driver
 - https://github.com/mrexodia/EfiCMake
