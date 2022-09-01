@@ -420,6 +420,7 @@
 - https://github.com/FiYHer/InfinityHookPro [ETW Hook Ex]
 - https://github.com/KelvinMsft/ThreadSpy [PMI Callback]
 - https://github.com/KelvinMsft/PerfMon [PMI Callback]
+- https://github.com/gmh5225/PMI-hpc [PMI]
 - https://github.com/intelpt/WindowsIntelPT [Intel PT]
 - https://github.com/CristiNacu/ingsoc [Intel PT]
 - https://github.com/DProvinciani/pt-detector [Intel PT]
