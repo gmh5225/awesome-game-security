@@ -1319,6 +1319,7 @@
 - https://github.com/TupleDev/eft-internal
 - https://github.com/TupleDev/Veil-EFT
 - https://github.com/Qemu-Gang/Escape-from-TuxKov [QEMU]
+- https://github.com/gmh5225/Comm-ImMiraclela
 
 > Game:R6
 - https://github.com/NMan1/Rainbow-Six-Cheat
