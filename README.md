@@ -1486,6 +1486,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Anti Debugging
 - https://github.com/LordNoteworthy/al-khaser
 - https://github.com/samshine/ScyllaHideDetector2 
+- https://github.com/revsic/AntiDebugging
 - https://github.com/Ahora57/MAJESTY-technologies
 - https://github.com/AdvDebug/AntiCrack-DotNet [CSharp]
 - https://github.com/weak1337/CEDetector [CE]
