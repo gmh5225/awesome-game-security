@@ -326,6 +326,7 @@
 - http://pwnadventure.com [Hackable Game]
 - https://github.com/GameCrashProject/UE4-Hacking-Guideline [Unreal]
 - https://github.com/TimMisiak/WinDbgCookbook [WinDbg]
+- https://github.com/anhkgg/awesome-windbg-extensions [WinDbg]
 - [Undetected Cheat Engine](https://www.unknowncheats.me/forum/anti-cheat-bypass/504191-undetected-cheat-engine-driver-2022-bypass-anticheats-eac.html)
 
 > Debugging
