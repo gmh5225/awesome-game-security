@@ -553,6 +553,7 @@
 - https://github.com/inuNorii/Elden-Ring-CT-TGA [Elden Ring]
 - https://github.com/vmmcall/remap-plugin [Remap]
 - https://github.com/vmmcall/overwatch-iat-fixer [Overwatch IAT Fixer]
+- https://github.com/FreeER/CE-Examples [Some Examples]
 
 > Injection:Windows
 - https://github.com/btbd/smap [Scatter Manual Map]
