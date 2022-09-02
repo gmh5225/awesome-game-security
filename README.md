@@ -407,6 +407,7 @@
 - https://gist.github.com/gmh5225/0a0c8e3a2d718e2d6f9b6a07d5e0f80a [PG CTX]
 - https://github.com/gmh5225/QuickPGTrigger [Stress Testing]
 - https://github.com/tandasat/Sushi [Monitoring PG]
+- https://github.com/gmh5225/Disabling-Hyper-V [Disable Hyper-V]
 
 > Windows Kernel Explorer
 - https://github.com/NullArray/WinKernel-Resources [Guide]
