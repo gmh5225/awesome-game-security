@@ -610,6 +610,7 @@
 - https://github.com/weak1337/SkipHook [Skip Hook]
 - https://github.com/0mdi/edgegdi_hook [gdi32 .data swap]
 - https://github.com/noobpk/frida-android-hook [frida hook for android]
+- https://github.com/SamuelTulach/LightHook [cross-platform hook library]
 
 > Rop Finder
 - https://github.com/0vercl0k/rp
