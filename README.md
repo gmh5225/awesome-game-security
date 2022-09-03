@@ -512,6 +512,7 @@
 - https://github.com/GregoryMorse/GhidraDec [Ghidra Decompiler]
 - https://github.com/AntoineBlaud/EasyRe [Trace Execution]
 - https://github.com/flatz/ida_ps5_elf_plugin [PS5 elf loader]
+- https://github.com/gaasedelen/tenet [Execution Traces]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
