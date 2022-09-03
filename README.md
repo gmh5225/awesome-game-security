@@ -548,6 +548,7 @@
 - https://github.com/GregoryMorse/GhidraDec [Ghidra Decompiler]
 - https://github.com/x64dbg/x64dbgbinja [Binary Ninja]
 - https://github.com/DNLINYJ/Anti_miHoYo_Jcc_Obfuscate
+- https://github.com/mrexodia/DisableParallelLoader [Disable parallel loading of dependencies]
 
 > Cheat Engine Plugins
 - https://github.com/FreeER/CE-Extensions [Lua Extensions]
