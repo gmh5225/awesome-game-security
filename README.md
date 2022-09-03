@@ -1581,6 +1581,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/nelfo/Milfuscator
 - https://github.com/romainthomas/the-poor-mans-obfuscator [elf/macho]
 - https://github.com/Guardsquare/proguard [Java]
+- https://github.com/xiaoweime/WProtect
+- https://github.com/DeDf/WProtect
+- https://github.com/jokerNi/WProtectSDK
 
 > Screenshot
 - https://github.com/bavulapati/DXGICaptureApplication [Capture Desktop]
