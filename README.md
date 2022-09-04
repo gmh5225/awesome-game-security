@@ -938,6 +938,7 @@
 > Game Engine Explorer:Source
 - https://github.com/anarh1st47/Source2Dumps [Dump]
 - https://github.com/CallumCVM/ValveGen [SDK Generator]
+- https://github.com/praydog/Source2Gen [SDK Generator]
 
 > Explore UWP
 - https://github.com/Wunkolo/UWPDumper
