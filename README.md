@@ -653,7 +653,7 @@
 - https://github.com/muturikaranja/overlay [SetWindowsHookEx]
 - https://github.com/gmh5225/OBS-graphics-hook32-Hook [OBS Hook]
 - https://github.com/plu1337/OBS-Hook [OBS Hook]
-- https://github.com/PierreCiholas/NotAnOverlay [GDI Overlay]
+- https://github.com/PierreCiholas/NotAnOverlay [Duplicating with GDI]
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
