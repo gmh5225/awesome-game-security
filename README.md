@@ -1402,6 +1402,7 @@
 - https://github.com/Akebi-Group/Akebi-GC [Cheat]
 - https://github.com/Razmoth/GenshinStudio [Asset]
 - https://github.com/Dimbreath/GenshinData [Game Data]
+- https://github.com/HolographicHat/YaeAchievement
 
 > Game:Honkai Impact
 - https://github.com/BuIlDaLiBlE/BetterHI3Launcher
