@@ -1163,6 +1163,7 @@
 - https://github.com/petercunha/Pine [Neural Network]
 - https://github.com/Bartis1313/csgo 
 - https://github.com/NullHooks/NullHooks [Internal]
+- https://github.com/Skarbo/CSGOCrosshair [Crosshair Generator]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
@@ -1186,6 +1187,7 @@
 - https://github.com/SarnaxLii/Valorant-External
 - https://github.com/Chase1803/UCMiraka-ValorantExternal [NtUserGetPointerProprietaryId]
 - https://github.com/Chase1803/ValorantCheatExternal
+- https://github.com/weedeej/ValorantCC [Crosshair Setting]
 
 > Game:VEILED EXPERTS
 - https://github.com/EBalloon/VEILED-EXPERTS-SDK
