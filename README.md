@@ -514,6 +514,8 @@
 - https://github.com/AntoineBlaud/EasyRe [Trace Execution]
 - https://github.com/flatz/ida_ps5_elf_plugin [PS5 elf loader]
 - https://github.com/gaasedelen/tenet [Execution Traces]
+- https://github.com/polymorf/findcrypt-yara [Find crypto constants]
+- https://github.com/anatolikalysch/VMAttack [VMAttack PlugIn for IDA Pro]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
