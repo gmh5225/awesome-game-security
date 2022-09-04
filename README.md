@@ -242,6 +242,8 @@
 - https://github.com/snesrev/zelda3 [A reimplementation of Zelda 3]
 - https://github.com/kantam5/DeadByDaylight [Dead By Daylight Copy]
 - https://github.com/Phobos-developers/Phobos [Red Alert 2: Yuri's Revenge engine extension]
+- https://github.com/praydog/AutomataMP [NieR]
+
 
 ## Game Assets
 - https://github.com/Miziziziz/Retro3DGraphicsCollection
