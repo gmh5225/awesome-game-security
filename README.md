@@ -1201,6 +1201,7 @@
 - https://github.com/Chase1803/UCMiraka-ValorantExternal [NtUserGetPointerProprietaryId]
 - https://github.com/Chase1803/ValorantCheatExternal
 - https://github.com/weedeej/ValorantCC [Crosshair Setting]
+- https://github.com/gmh5225/Internal-Valorant-Cheat
 
 > Game:VEILED EXPERTS
 - https://github.com/EBalloon/VEILED-EXPERTS-SDK
@@ -1220,6 +1221,7 @@
 - https://github.com/NMan1/warzone-internal
 - https://github.com/KoobiR76/Call-Of-Duty-Warzone-Hack-Esp-Slient-Aimbot-Internal-Unlock-ALL
 - https://github.com/KoobiR76/Call-Of-Duty-Vanguard-Hack-Esp-AImbot-Unlock-All
+- https://github.com/gmh5225/Warzone-internal-Cheat
 
 > Game:Battlefield 1
 - https://github.com/Zakaria-Master/BF1-ESP-AND-AIMBOT
@@ -1253,6 +1255,7 @@
 - https://github.com/Zakaria-Master/Apex_ESP_Old_Project
 - https://github.com/cheatingwitdacode/apex-cheating
 - https://github.com/LWSS/Ape-ex-Abominations [QEMU]
+- https://github.com/gmh5225/Apex-CHEAT-FIXED
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
@@ -1368,6 +1371,7 @@
 
 > Game:Paladins
 - https://github.com/gmh5225/Paladins-Internal-Esp-Aimbot-Hack-Cheat-Hack
+- https://github.com/gmh5225/Paladins-internal-Cheat
 
 > Game:DayZ
 - https://github.com/sanntoomirai/DayZ-External-Esp-Aimbot-Spoofer-Hack-Cheat
