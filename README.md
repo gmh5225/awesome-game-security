@@ -452,6 +452,7 @@
 - https://github.com/Spuckwaffel/Simple-MmcopyMemory-Hook [Hook MmcopyMemory]
 - https://github.com/VollRagm/PTView [Browse Page Tables on Windows]
 - https://github.com/IcEy-999/Ntoskrnl_Viewer [Ntoskrnl Viewer]
+- https://github.com/ekknod/Nmi [Blocking NMI interrupts]
 
 > Magisk
 - https://github.com/PShocker/Zygisk-MagiskHide
