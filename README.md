@@ -602,6 +602,7 @@
 - https://github.com/knight0x07/ImpulsiveDLLHijack [Hijacking researches]
 - https://github.com/wietze/HijackLibs [Project for tracking publicly disclosed DLL Hijacking opportunities]
 - https://github.com/gmh5225/DLL-Hijack-ExportDumper [Dump the export table of PE files]
+- https://github.com/cyberark/DLLSpy [DLL Hijacking Detection Tool]
 
 > Hook
 - https://github.com/microsoft/Detours
