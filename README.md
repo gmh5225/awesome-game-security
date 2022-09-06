@@ -1352,6 +1352,7 @@
 - https://github.com/hooksteroid/R6Table_Internal
 - https://github.com/JGonz1337/r6-internal
 - https://github.com/SurgeGotTappedAgain/External-R6S-Cheat
+- https://github.com/vctr74/R6-Internal-V3
 
 > Game:Overwatch 
 - https://github.com/blackhades00/PareidoliaTriggerbot [Triggerbot]
