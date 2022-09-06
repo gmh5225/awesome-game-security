@@ -1816,6 +1816,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ekknod/SetWindowHookEx [Using SetWindowHookEx for preinjected DLL's]
 - [A tool for patching authenticode signed PE files (exe, dll, sys ..etc) without invalidating or breaking the existing signature](https://github.com/med0x2e/SigFlip)
 - [Simple program to stream offsets for your game cheat](https://github.com/gmh5225/OffsetStreaming)
+- https://github.com/jnastarot/HIGU_ntcall [Direct System Calls]
 
 > Android
 - https://github.com/WindySha/bypassHiddenApiRestriction [Bypass hidden api restriction]
