@@ -1180,6 +1180,7 @@
 - https://github.com/Bartis1313/csgo 
 - https://github.com/NullHooks/NullHooks [Internal]
 - https://github.com/Skarbo/CSGOCrosshair [Crosshair Generator]
+- https://github.com/ekknod/G37OBS [obs-studio plugin for csgo]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
