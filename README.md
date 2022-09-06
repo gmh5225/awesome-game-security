@@ -266,6 +266,7 @@
 - https://github.com/aristocratos/btop [Performance Monitor]
 - https://github.com/Celtoys/Remotery [A realtime CPU/GPU profiler]
 - https://github.com/Volkanite/Push [Monitor GPU/CPU/RAM performance]
+- https://github.com/wolfpld/tracy [C++ frame profiler]
 
 ## Game Tools
 - [Play your favorite games in a borderless window; no more time consuming alt-tabs](https://github.com/Codeusa/Borderless-Gaming)
