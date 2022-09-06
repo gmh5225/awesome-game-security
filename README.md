@@ -1706,6 +1706,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/paradoxwastaken/WindowsHardwareInfo
 - https://github.com/lavoiesl/osx-cpu-temp [CPU temperature for OSX]
 - https://github.com/openhardwaremonitor/openhardwaremonitor
+- https://github.com/lfreist/hwinfo
 
 > Detection:Injection
 - https://github.com/mq1n/DLLThreadInjectionDetector
