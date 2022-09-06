@@ -1392,6 +1392,7 @@
 - https://github.com/vmwrite/sapphire
 - https://github.com/Disline1337/Rust-Cheat-External-main
 - https://github.com/gmh5225/Rust-RustInternal [Internal]
+- https://github.com/0xfaer/rust-external [External]
 
 > Game:Arma3
 - https://github.com/Skengdo/arma3-external-variable-manager
