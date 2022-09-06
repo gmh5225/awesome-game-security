@@ -1817,6 +1817,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/wbenny/KSOCKET [Kernel Berkeley socket]
 - https://github.com/StephanvanSchaik/windows-kernel-rs [Writing Windows kernel drivers in Rust]
 - https://github.com/ekknod/smm [Smm cheat]
+- https://github.com/rbmm/KPDB [Parsing PDB in Driver]
 
 
 > Windows Ring3
