@@ -337,6 +337,7 @@
 - [Undetected Cheat Engine](https://www.unknowncheats.me/forum/anti-cheat-bypass/504191-undetected-cheat-engine-driver-2022-bypass-anticheats-eac.html)
 
 > Debugging
+- https://github.com/stars/gmh5225/lists/debugger [List]
 - https://github.com/cheat-engine/cheat-engine
 - https://github.com/SinaKarvandi/Hypervisor-From-Scratch [Hypervisor]
 - https://github.com/JasonGoemaat/CheatEngineMonoHelper [CE Mono Helper]
