@@ -1702,6 +1702,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/therealdreg/anticuckoo [Cuckoo]
 - https://github.com/strazzere/anti-emulator [Android Anti-Emulator]
 - https://github.com/LloydLabs/wsb-detect [Windows Sandbox ("WSB")]
+- https://github.com/DevDaveid/AntiDebug-AntiVM [Vbox]
 
 > Detection:HWID
 - [All methods of retrieving unique identifiers(HWIDs) on your PC](https://www.unknowncheats.me/forum/anti-cheat-bypass/333662-methods-retrieving-unique-identifiers-hwids-pc.html)
