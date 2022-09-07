@@ -1524,6 +1524,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/nkga/cheat-driver [MmCopyVirtualMemory Testing]
 - https://github.com/zxd1994/vt-debuuger [Hacked Hypervisor Testing]
 - https://github.com/3526779568/vt-debuger [Hacked Hypervisor Testing]
+- https://github.com/rbmm/LockFile-Poc [Lock File]
 
 > Anti Debugging
 - https://github.com/LordNoteworthy/al-khaser
@@ -1838,6 +1839,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [A tool for patching authenticode signed PE files (exe, dll, sys ..etc) without invalidating or breaking the existing signature](https://github.com/med0x2e/SigFlip)
 - [Simple program to stream offsets for your game cheat](https://github.com/gmh5225/OffsetStreaming)
 - https://github.com/jnastarot/HIGU_ntcall [Direct System Calls]
+- https://github.com/rbmm/LockFile-Poc [Lock File]
 
 > Android
 - https://github.com/WindySha/bypassHiddenApiRestriction [Bypass hidden api restriction]
