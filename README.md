@@ -470,6 +470,7 @@
 - https://github.com/mrcang09/Android-Mem-Edit
 - https://github.com/ExploitTheLoop/writemem
 - https://github.com/abcz316/rwProcMem33 [Linux read & write process memory module]
+- https://github.com/IAIK/armageddon [Cache attacks on ARM]
 
 > Android Kernel Explorer
 - https://github.com/yhnu/op7t [DIY Kernel]
@@ -524,6 +525,7 @@
 - https://github.com/gaasedelen/tenet [Execution Traces]
 - https://github.com/polymorf/findcrypt-yara [Find crypto constants]
 - https://github.com/anatolikalysch/VMAttack [VMAttack PlugIn for IDA Pro]
+- https://github.com/cseagle/sk3wldbg [Unicorn]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
