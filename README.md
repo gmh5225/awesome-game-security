@@ -460,6 +460,7 @@
 - https://github.com/canyie/Riru-MomoHider
 
 > Android File Explorer
+- https://github.com/nzcv/note [Guide-zh]
 - https://github.com/iBotPeaches/Apktool
 - https://github.com/pxb1988/dex2jar
 
