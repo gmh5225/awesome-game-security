@@ -1452,6 +1452,7 @@
 - https://github.com/Luksiuss/GTA-5-SIGS-1.59 [Offset]
 - [About
 Adds drag- to- resize functionality to the main GTA V window](https://github.com/CamxxCore/GTAV_DragResize)
+- [Open-source cheat software for Grand Theft Auto V (PC)](https://github.com/HatchesPls/GrandTheftAutoV-Cheat)
 
 > Game:Geometry Dash
 - https://github.com/reservedcloud/gd-internal
