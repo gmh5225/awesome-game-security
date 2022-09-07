@@ -243,6 +243,7 @@
 - https://github.com/kantam5/DeadByDaylight [Dead By Daylight Copy]
 - https://github.com/Phobos-developers/Phobos [Red Alert 2: Yuri's Revenge engine extension]
 - https://github.com/praydog/AutomataMP [NieR]
+- https://github.com/xinyu-evolutruster/3D-Racing-Game [A racing game based on OpenGL]
 
 
 ## Game Assets
