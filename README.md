@@ -1263,6 +1263,7 @@
 - https://github.com/cheatingwitdacode/apex-cheating
 - https://github.com/LWSS/Ape-ex-Abominations [QEMU]
 - https://github.com/gmh5225/Apex-CHEAT-FIXED
+- https://github.com/cyberpw/apex_legends_sdk
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
