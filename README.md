@@ -118,6 +118,9 @@
 - [A markdown viewer for unity](https://github.com/gwaredd/UnityMarkdownViewer)
 - [An integrated solution for authoring / importing / simulating / rendering strand-based hair in Unity](https://github.com/Unity-Technologies/com.unity.demoteam.hair)
 
+> Game Engine Plugins:Lumix
+- https://github.com/nem0/lumixengine_maps [Map downloader]
+
 
 > Game Engine Detector
 - https://github.com/walzer/game-engine-detector [Mobile Game]
