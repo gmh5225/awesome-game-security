@@ -124,7 +124,9 @@
 
 
 ## Mathematics
+- https://github.com/nfrechette/rtm
 - https://github.com/Groovounet/glm
+- https://github.com/microsoft/DirectXMath
 - https://github.com/Kazade/kazmath
 - https://github.com/milakov/int_fastdiv
 - https://github.com/freemint/fdlibm
