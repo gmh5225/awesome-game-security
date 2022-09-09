@@ -1776,6 +1776,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Dynamic Script
 - https://github.com/can1357/NtLua
+- https://github.com/mrexodia/NtPhp
 - https://github.com/FastVM/minivm
 - https://github.com/jnz/q3vm
 
