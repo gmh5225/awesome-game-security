@@ -1200,6 +1200,7 @@
 - https://github.com/NullHooks/NullHooks [Internal]
 - https://github.com/Skarbo/CSGOCrosshair [Crosshair Generator]
 - https://github.com/ekknod/G37OBS [obs-studio plugin for csgo]
+- https://github.com/Sentient111/Csgo-Full-kernel [Running from kernelmode]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
