@@ -1152,6 +1152,7 @@
 
 > Game:CSGO
 - https://github.com/csgohacks/master-guide [Guide]
+- https://github.com/Akandesh/blazedumper [Offset]
 - https://github.com/frk1/hazedumper [Offset]
 - https://github.com/KittenPopo/csgo-offsets [Offset]
 - https://github.com/ofDataa/offsets [Offset]
