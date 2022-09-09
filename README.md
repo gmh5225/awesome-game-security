@@ -1400,6 +1400,8 @@
 > Game:DayZ
 - https://github.com/sanntoomirai/DayZ-External-Esp-Aimbot-Spoofer-Hack-Cheat
 - https://github.com/zhitkur/DayZzz
+- https://github.com/SurgeGotTappedAgain/External-Dayz-Cheat
+- https://github.com/ForAnow/DayZ-Cheat
 
 > Game:Squad
 - https://github.com/TheLoneHaxor/Squad-External-Esp-Aimbot-Cheat-Hack
