@@ -328,6 +328,7 @@
 - https://www.unknowncheats.me
 - https://forum.ragezone.com
 - https://guidedhacking.com
+- https://github.com/guided-hacking
 - https://github.com/imadr/Unity-game-hacking [Unity]
 - https://vollragm.github.io/posts/unity-reversing [Unity]
 - https://wiki.cheatengine.org/index.php?title=Mono [CE Mono]
