@@ -396,6 +396,8 @@
 - https://github.com/waryas/KACE [Emulate Drivers in RING3 with self context mapping or unicorn]
 - https://github.com/VollRagm/PTView [Browse Page Tables on Windows]
 - https://github.com/iBotPeaches/Apktool [Apk]
+- https://github.com/guided-hacking/GH-Offset-Dumper [Scans for signatures and netvars and dumps their relative offsets]
+- https://github.com/guided-hacking/GH-Entity-List-Finder [Scans game processes for most likely entity list addresses]
 
 > Fix VMP
 - https://github.com/wallds/NoVmpy
