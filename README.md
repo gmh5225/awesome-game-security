@@ -794,6 +794,7 @@
 - https://github.com/SamuelTulach/EfiDump [Dump]
 - https://github.com/ekknod/Nmi [Blocking NMI interrupts]
 - https://github.com/ekknod/smm [Smm cheat]
+- https://github.com/sa413x/UEFI-Bootloader [Simple mmapper which using UEFI runtime driver]
 
 > QEMU/KVM Cheat
 - https://github.com/Qemu-Gang
