@@ -908,6 +908,7 @@
 > SDK CodeGen
 - https://github.com/cursey/sdkgenny
 - https://github.com/praydog/luagenny
+- https://github.com/ssyuqixe/obfCoder
 
 > Game Engine Explorer:Unreal
 - https://github.com/asjbdkabs/shootergame-Hack [ShooterGame Demo]
