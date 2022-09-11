@@ -683,6 +683,7 @@
 - https://github.com/gmh5225/OBS-graphics-hook32-Hook [OBS Hook]
 - https://github.com/plu1337/OBS-Hook [OBS Hook]
 - https://github.com/PierreCiholas/NotAnOverlay [Duplicating with GDI]
+- https://github.com/SsageParuders/Android_Native_Surface [Android Native Overlay]
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
