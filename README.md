@@ -1686,6 +1686,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [User-mode C++ Anti-Cheat written for German Roleplay Server GVMP.de](https://github.com/divodeuxsevres/gvmp-anticheat)
 - [Cheat developer platform](https://github.com/c4kef/UAC)
 - https://github.com/ekknod/Anti-Cheat-TestBench [TestBench]
+- https://github.com/hominsu/bugu [Malicious code detection and obfuscation]
 
 > Analysis Framework
 - https://github.com/pandora-analysis/pandora
