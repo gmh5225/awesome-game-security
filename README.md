@@ -901,6 +901,7 @@
 - https://github.com/Lyut/SteamSpywareTerminator [Steam]
 - https://github.com/SamuelTulach/negativespoofer [EFI]
 - https://github.com/Alex3434/wmi-static-spoofer
+- https://github.com/ReFo0/hwid-spoofer
 
 > Bypass Page Protection
 - https://github.com/illegal-instruction-co/CountHook [WorkingSet]
