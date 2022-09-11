@@ -1203,6 +1203,7 @@
 - https://github.com/Skarbo/CSGOCrosshair [Crosshair Generator]
 - https://github.com/ekknod/G37OBS [obs-studio plugin for csgo]
 - https://github.com/Sentient111/Csgo-Full-kernel [Running from kernelmode]
+- https://github.com/razixNew/CompiledProtection [Cheat Compiler]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
