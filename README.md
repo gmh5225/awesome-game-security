@@ -1107,6 +1107,7 @@
 
 > Game:CrossFire
 - https://github.com/crvvdev/titancf
+- https://github.com/serjam/cfclap
 
 > Game:TGame
 - https://github.com/3tnet/nzPerspective [D3D9]
