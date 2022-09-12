@@ -1518,6 +1518,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/mhxy_kernel
 - https://github.com/gmh5225/mhxy
 
+> Game:Ironsight
+- https://github.com/oluan/Lazysight
+
 ## Anti Cheat
 > Guide
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
