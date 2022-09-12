@@ -687,6 +687,7 @@
 - https://github.com/plu1337/OBS-Hook [OBS Hook]
 - https://github.com/PierreCiholas/NotAnOverlay [Duplicating with GDI]
 - https://github.com/SsageParuders/Android_Native_Surface [Android Native Overlay]
+- https://github.com/xBrunoMedeiros/eac-overlay [EAC Overlay]
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
@@ -1004,6 +1005,7 @@
 - https://github.com/CheeZeDark/EasyAntiCheat-Reversing
 - https://github.com/Sinclairq/hiearchy-eac [Integrity Checks]
 - https://github.com/Rat431/EAC_Emu [Simple EasyAntiCheat x64 emulator]
+- https://github.com/xBrunoMedeiros/eac-overlay [EAC Overlay]
 
 > Explore AntiCheat System:BE
 - https://github.com/Schnocker/NoEye
