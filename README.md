@@ -881,14 +881,13 @@
 > HWID
 - https://github.com/dword64/Ow-Anti-Flag
 - https://github.com/btbd/hwid
-- https://github.com/lil-skies/btbd-modified
+- https://github.com/gmh5225/Driver-HWID-btbd-modified
 - https://github.com/xEnething/Permanent-HWID-Spoofer
 - https://github.com/Theordernarkoz/Hwid-Spoofer-EAC-BE
 - https://github.com/semihcevik/hwidspoofer
 - https://github.com/Theordernarkoz/Hwid--Spoofer
 - https://github.com/Theordernarkoz/Hwid-Spoofer
 - https://github.com/SarnaxLii/Apex-ClearTrace
-- https://github.com/lil-skies/btbd-modified
 - https://github.com/InstinctTheDevil/EclipsedSpoofer-EAC-BE
 - https://github.com/BuzzerFelix/HWIDSpooferEAC
 - https://github.com/SamuelTulach/rainbow [EFI]
