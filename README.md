@@ -688,6 +688,7 @@
 - https://github.com/Splitx12/StrongSteam [GDI + Steam]
 - https://github.com/gmh5225/dwmhook [DWM]
 - https://github.com/LoxTus/dwm-overlay [DWM]
+- https://github.com/rlybasic/DWM_Hook [DWM]
 - https://github.com/mfxiaosheng/dwmhook [DWM VFTable]
 - https://github.com/iraizo/nvidia-overlay-hijack [Hijack Nvidia]
 - https://github.com/Brattlof/D3DOverlay-Nvidia-Hijack [Hijack Nvidia]
@@ -1250,6 +1251,7 @@
 - https://github.com/Chase1803/ValorantCheatExternal
 - https://github.com/weedeej/ValorantCC [Crosshair Setting]
 - https://github.com/gmh5225/Internal-Valorant-Cheat
+- https://github.com/gmh5225/VALORANT-HACK-ESP-AIMBOT-SKINCHANGER
 
 > Game:VEILED EXPERTS
 - https://github.com/EBalloon/VEILED-EXPERTS-SDK
@@ -1412,6 +1414,7 @@
 - https://github.com/SurgeGotTappedAgain/External-R6S-Cheat
 - https://github.com/vctr74/R6-Internal-V3
 - https://github.com/UnamDeve/R6S-internal-Cheat
+- https://github.com/gmh5225/Rainbow-Six-Siege-Rs6-External-Esp-Aimbot-Hack-Cheat
 
 > Game:Overwatch 
 - https://github.com/blackhades00/PareidoliaTriggerbot [Triggerbot]
