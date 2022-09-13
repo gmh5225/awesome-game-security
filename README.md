@@ -553,6 +553,7 @@
 - https://github.com/anatolikalysch/VMAttack [VMAttack PlugIn for IDA Pro]
 - https://github.com/cseagle/sk3wldbg [Unicorn]
 - https://github.com/RicBent/Classy [Manage classes]
+- https://github.com/archercreat/ida_names [Renames pseudocode windows with the current function name]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
