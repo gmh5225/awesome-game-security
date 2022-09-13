@@ -405,6 +405,7 @@
 - https://github.com/iBotPeaches/Apktool [Apk]
 - https://github.com/guided-hacking/GH-Offset-Dumper [Scans for signatures and netvars and dumps their relative offsets]
 - https://github.com/guided-hacking/GH-Entity-List-Finder [Scans game processes for most likely entity list addresses]
+- https://github.com/rednaga/APKiD [PEiD for Android]
 
 > Fix VMP
 - https://github.com/wallds/NoVmpy
@@ -485,6 +486,7 @@
 - https://github.com/iBotPeaches/Apktool
 - https://github.com/pxb1988/dex2jar
 - https://github.com/LuckyPray/DexKit-Android [dex deobfuscator]
+- https://github.com/rednaga/APKiD [PEiD for Android]
 
 > Android Memory Explorer
 - https://github.com/joaomlneto/procmap
