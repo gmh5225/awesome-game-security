@@ -17,6 +17,7 @@
 - [Game Hot Patch](#Game-Hot-Patch)
 - [Game Testing](#Game-Testing)
 - [Game Tools](#Game-Tools)
+- [Game Manager](#Game-Manager)
 - [DirectX](#DirectX)
 - [Cheat](#Cheat)
 - [Anti Cheat](#Anti-Cheat)
@@ -279,6 +280,9 @@
 ## Game Tools
 - [Play your favorite games in a borderless window; no more time consuming alt-tabs](https://github.com/Codeusa/Borderless-Gaming)
 - https://github.com/Genymobile/scrcpy [Display and control your Android device]
+
+## Game Manager
+- https://github.com/JosefNemec/Playnite
 
 ## DirectX
 > Guide
