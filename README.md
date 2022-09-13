@@ -1620,6 +1620,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/czs108/PE-Packer [X86]
 - https://github.com/longqun/Packer [X86]
 - https://github.com/ATsahikian/pe-protector [X86]
+- https://github.com/mkaring/ConfuserEx [.NET]
 - https://github.com/iArtorias/debug_remover [Strip Debug Info]
 - https://github.com/ytk2128/pe32-password
 - https://github.com/frkngksl/Huan
@@ -1637,6 +1638,18 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/dr4k0nia/Origami [Compressing .net assemblies]
 - https://github.com/mix64/ELFpacker [ELF]
 - https://github.com/jnastarot/shibari [Linking multiple PE\PE + files to one]
+- [Simple ELF runtime packer for creating stealthy droppers](https://github.com/ex0dus-0x/ward)
+- [A simple packer working with all PE files which cipher your exe with a XOR implementation](https://github.com/nqntmqmqmb/xorPacker)
+- https://github.com/r0ngwe1/petoy [PE]
+- [An ELF / PE packer written in pure C](https://github.com/SilentVoid13/Silent_Packer)
+- https://github.com/droberson/ELFcrypt [ELF RC4]
+- https://github.com/timhsutw/elfuck [ELF]
+- https://github.com/Eronana/packer [PE]
+- https://github.com/akuafif/hXOR-Packer [PE XOR]
+- https://github.com/arisada/midgetpack [ELF]
+- https://github.com/friedkiwi/netcrypt [.NET]
+- https://github.com/89luca89/pakkero [ELF]
+- https://github.com/dimkr/papaw [LZMA]
 
 > CLR Protection
 - https://github.com/endgameinc/ClrGuard
