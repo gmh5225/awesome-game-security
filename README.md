@@ -823,6 +823,7 @@
 - https://github.com/Qemu-Gang/Escape-from-TuxKov [EFT]
 - https://github.com/LWSS/Ape-ex-Abominations [Apex]
 - https://github.com/Qemu-Gang/QemuUnrealDumper-4.25 [UE SDK Dump By QEMU]
+- https://github.com/panda-re/panda [Platform for Architecture-Neutral Dynamic Analysis]
 
 > Wine
 - https://github.com/ValveSoftware/Proton [Steam]
