@@ -548,6 +548,7 @@
 - https://github.com/polymorf/findcrypt-yara [Find crypto constants]
 - https://github.com/anatolikalysch/VMAttack [VMAttack PlugIn for IDA Pro]
 - https://github.com/cseagle/sk3wldbg [Unicorn]
+- https://github.com/RicBent/Classy [Manage classes]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
