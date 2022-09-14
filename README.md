@@ -45,6 +45,7 @@
 - https://github.com/PardCode/CPP-3D-Game-Tutorial-Series [DirectX]
 - https://github.com/ssloy/tinyrenderer [Render]
 - https://github.com/crazyshader/GameDev [Unity]
+- https://github.com/RyanNielson/awesome-unity [Unity]
 - https://github.com/shadirvan/Unity-Cheat-Sheet [Unity]
 - https://github.com/QianMo/Unity-Design-Pattern [Unity Design]
 - https://github.com/whx-prog/The-Seed-Link-Future [Unity VR]
@@ -200,6 +201,7 @@
 - https://github.com/raizam/gamedev_libraries [A collection of open source c/c++ libraries for gamedev]
 - https://github.com/gheja/game-design-documents [Game design documents]
 - https://github.com/crazyshader/GameDev [Unity]
+- https://github.com/RyanNielson/awesome-unity [Unity]
 - https://github.com/QianMo/Unity-Design-Pattern [Unity Design]
 
 > Source
