@@ -282,6 +282,7 @@
 - [Play your favorite games in a borderless window; no more time consuming alt-tabs](https://github.com/Codeusa/Borderless-Gaming)
 - https://github.com/Genymobile/scrcpy [Display and control your Android device]
 - https://github.com/ryanjon2040/Unreal-Binary-Builder [Build UE Source]
+- https://github.com/ryanjon2040/UnrealNetworkProfiler [Network Profiler for UE]
 
 ## Game Manager
 - https://github.com/JosefNemec/Playnite
