@@ -273,6 +273,8 @@
 
 
 ## Game Testing
+- https://github.com/UnityTech/GamesTestAutomationExample [The collecting ideas on how to do Test Automation in Games]
+- https://github.com/nowsprinting/UnityAutomatedQAExamples [Unity Automated QA Guidebook]
 - https://github.com/AirtestProject/Airtest [UI Automation Framework]
 - https://github.com/dendibakh/perf-ninja [Performance Analysis]
 - https://github.com/CookiePLMonster/UptimeFaker [Detecting High PC Uptime]
@@ -282,6 +284,8 @@
 - https://github.com/Celtoys/Remotery [A realtime CPU/GPU profiler]
 - https://github.com/Volkanite/Push [Monitor GPU/CPU/RAM performance]
 - https://github.com/wolfpld/tracy [C++ frame profiler]
+- https://github.com/RomanceTheHeart/Automation_Examples [Automating certain tasks in the Unreal editor]
+- https://github.com/DaedalicEntertainment/ue4-test-automation [Facilitates setting up integration test suits with Unreal Engine 4 Gauntlet]
 
 ## Game Tools
 - [Play your favorite games in a borderless window; no more time consuming alt-tabs](https://github.com/Codeusa/Borderless-Gaming)
