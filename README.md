@@ -18,6 +18,7 @@
 - [Game Testing](#Game-Testing)
 - [Game Tools](#Game-Tools)
 - [Game Manager](#Game-Manager)
+- [Game CI](#Game-CI)
 - [DirectX](#DirectX)
 - [Cheat](#Cheat)
 - [Anti Cheat](#Anti-Cheat)
@@ -283,6 +284,10 @@
 
 ## Game Manager
 - https://github.com/JosefNemec/Playnite
+
+## Game CI
+- https://github.com/game-ci
+- https://github.com/nikaera/Unity-GameCI-Sample [Unity]
 
 ## DirectX
 > Guide
