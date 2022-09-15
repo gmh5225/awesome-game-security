@@ -581,6 +581,7 @@
 - https://github.com/google/binexport [BinDiff]
 - https://github.com/Pusty/BinaryNinjaPlugins
 - https://github.com/borzacchiello/seninja [Symbolic Execution]
+- https://github.com/yellowbyte/opaque-predicates-detective
 
 > Ghidra Plugins
 - https://github.com/CENSUS/ghidra-frida-hook-gen
