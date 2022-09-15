@@ -582,6 +582,7 @@
 - https://github.com/Pusty/BinaryNinjaPlugins
 - https://github.com/borzacchiello/seninja [Symbolic Execution]
 - https://github.com/yellowbyte/opaque-predicates-detective
+- https://github.com/ex0dus-0x/fuzzable [Fuzzer]
 
 > Ghidra Plugins
 - https://github.com/CENSUS/ghidra-frida-hook-gen
