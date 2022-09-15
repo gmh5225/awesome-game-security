@@ -1054,6 +1054,7 @@
 - https://github.com/lguilhermee/Battleye-Shellcode-Dumper [BEClient2.dll Dumper]
 - https://github.com/es3n1n/be-shellcode-tester [BattlEye shellcodes tester]
 - https://github.com/steffalon/battleye-rust [BattlEye RCON UDP connection]
+- https://github.com/Hypercall/FakeEye [Emulator]
 
 > Explore AntiCheat System:EQU8
 - https://back.engineering/12/08/2021
