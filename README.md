@@ -1281,6 +1281,9 @@
 > Game:COD7
 - https://github.com/nice-sprite/COD7-Tools
 
+> Game:COD Black Ops 3
+- https://github.com/momo5502/boiii [Reverse engineering and analysis]
+
 > Game:COD Warzone
 - https://github.com/YMY1666527646/Call-of-Duty-Warzone-MW-HACK-ESP-AIMBOT
 - https://github.com/serjam/mwclap
