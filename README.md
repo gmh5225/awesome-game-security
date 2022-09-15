@@ -583,6 +583,7 @@
 - https://github.com/borzacchiello/seninja [Symbolic Execution]
 - https://github.com/yellowbyte/opaque-predicates-detective
 - https://github.com/ex0dus-0x/fuzzable [Fuzzer]
+- https://github.com/jmprdi/binja-division-deoptimization [Division and Modulo Deoptimizer]
 
 > Ghidra Plugins
 - https://github.com/CENSUS/ghidra-frida-hook-gen
