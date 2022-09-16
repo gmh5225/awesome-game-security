@@ -493,6 +493,7 @@
 - https://github.com/EquiFox/KsDumper [Dumping processes using the power of kernel space]
 - https://github.com/not-matthias/Nemesis [Dumping processes using the power of kernel space]
 - https://github.com/allogic/KDBG [Tool]
+- https://github.com/gmh5225/Voyager [A Hyper-V Hacking Framework For Windows 10 x64 (AMD & Intel)]
 
 > Magisk
 - https://github.com/PShocker/Zygisk-MagiskHide
