@@ -1418,6 +1418,7 @@
 
 
 > Game:EFT
+- https://github.com/patrickcjk/TOG [Offsets Generator]
 - https://github.com/fcancelog/EftStreamedCheat
 - https://github.com/sanntoomirai/Escape-From-Tarkov-External-Esp-Aimbot-eft-Hack-Cheat-Injector-Spoofer
 - https://github.com/Nou4r/pKernelInterface-EFT
