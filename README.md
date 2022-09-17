@@ -587,6 +587,7 @@
 - https://github.com/jmprdi/binja-division-deoptimization [Division and Modulo Deoptimizer]
 - https://github.com/Vector35/OpaquePredicatePatcher [Opaque Predicate Patcher]
 - https://github.com/jmprdi/binja-division-deoptimization [Division and Modulo Deoptimizer]
+- https://github.com/mrphrazer/obfuscation_detection [Collection of scripts to pinpoint obfuscated code]
 
 > Ghidra Plugins
 - https://github.com/CENSUS/ghidra-frida-hook-gen
