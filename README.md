@@ -1581,6 +1581,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/481731-tutorial-ring3-anticheat-project.html
 - https://github.com/dhondta/awesome-executable-packing [Executable File Packing]
 - https://anti-debug.checkpoint.com [Anti Debug]
+- https://github.com/DenuvoSoftwareSolutions/DVRT [DVRT]
 
 > Stress Testing
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework
