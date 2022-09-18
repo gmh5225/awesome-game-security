@@ -19,6 +19,7 @@
 - [Game Tools](#Game-Tools)
 - [Game Manager](#Game-Manager)
 - [Game CI](#Game-CI)
+- [Web3 Game](#Web3-Game)
 - [DirectX](#DirectX)
 - [Cheat](#Cheat)
 - [Anti Cheat](#Anti-Cheat)
@@ -301,6 +302,9 @@
 ## Game CI
 - https://github.com/game-ci
 - https://github.com/nikaera/Unity-GameCI-Sample [Unity]
+
+## Web3 Game
+- https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
 
 ## DirectX
 > Guide
