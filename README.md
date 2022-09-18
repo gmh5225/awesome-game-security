@@ -573,6 +573,7 @@
 - https://github.com/cseagle/sk3wldbg [Unicorn]
 - https://github.com/RicBent/Classy [Manage classes]
 - https://github.com/archercreat/ida_names [Renames pseudocode windows with the current function name]
+- https://github.com/helpsystems/turbodiff [diff]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
@@ -685,6 +686,7 @@
 > ROP Finder
 - https://github.com/0vercl0k/rp
 - https://github.com/JonathanSalwan/ROPgadget
+- https://github.com/helpsystems/Agafi
 
 > Anti Signature Scanning
 - https://github.com/scrt/avdebugger
