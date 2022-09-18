@@ -682,8 +682,9 @@
 - https://github.com/noobpk/frida-android-hook [frida hook for android]
 - https://github.com/SamuelTulach/LightHook [cross-platform hook library]
 
-> Rop Finder
+> ROP Finder
 - https://github.com/0vercl0k/rp
+- https://github.com/JonathanSalwan/ROPgadget
 
 > Anti Signature Scanning
 - https://github.com/scrt/avdebugger
