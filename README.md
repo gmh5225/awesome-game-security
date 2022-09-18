@@ -179,6 +179,7 @@
 - https://github.com/skywind3000/kcp [KCP]
 - https://github.com/Unit-X/kcp-cpp [KCP]
 - https://github.com/TLeonardUK/ds3os [Dark Souls 3]
+- https://github.com/TLeonardUK/ds2os [Dark Souls 2]
 - https://github.com/rathena/rathena [MMORPG]
 - https://github.com/uNetworking/uWebSockets [WebSockets]
 - https://github.com/socketio/socket.io [Nodejs]
