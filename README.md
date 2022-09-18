@@ -1276,7 +1276,7 @@
 - https://github.com/AryuInka/Valorant-Cheat-External [External]
 - https://github.com/xEnething/Valorant-Cheat
 - [Iterate And Decrypt FNamePool->Entries On Valorant](https://github.com/percpopper/VALORANT-FNamePool)
-- https://github.com/SarnaxLii/Valorant-External
+- https://github.com/gmh5225/Valorant-External-1
 - https://github.com/Chase1803/UCMiraka-ValorantExternal [NtUserGetPointerProprietaryId]
 - https://github.com/Chase1803/ValorantCheatExternal
 - https://github.com/weedeej/ValorantCC [Crosshair Setting]
