@@ -521,6 +521,7 @@
 - https://github.com/ExploitTheLoop/writemem
 - https://github.com/abcz316/rwProcMem33 [Linux read & write process memory module]
 - https://github.com/IAIK/armageddon [Cache attacks on ARM]
+- https://github.com/tamirzb/CVE-2021-1961 [CVE RW]
 
 > Android Kernel Explorer
 - https://github.com/yhnu/op7t [DIY Kernel]
