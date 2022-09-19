@@ -1779,6 +1779,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ekknod/Anti-Cheat-TestBench [TestBench]
 - https://github.com/hominsu/bugu [Malicious code detection and obfuscation]
 - [Kernel Security driver used to block past, current and future process injection techniques on Windows Operating System](https://github.com/PI-Defender/pi-defender)
+- https://github.com/DoranekoSystems/cheap-engine [Sample implementation of anti-cheat in android]
 
 > Analysis Framework
 - https://github.com/pandora-analysis/pandora
@@ -1845,6 +1846,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/openhardwaremonitor/openhardwaremonitor
 - https://github.com/LibreHardwareMonitor/LibreHardwareMonitor
 - https://github.com/lfreist/hwinfo
+
+> Detection:SpeedHack
+- https://github.com/DoranekoSystems/cheap-engine [Android]
 
 > Detection:Injection
 - https://github.com/mq1n/DLLThreadInjectionDetector
