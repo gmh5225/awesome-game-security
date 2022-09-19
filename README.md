@@ -429,6 +429,7 @@
 - https://github.com/guided-hacking/GH-Offset-Dumper [Scans for signatures and netvars and dumps their relative offsets]
 - https://github.com/guided-hacking/GH-Entity-List-Finder [Scans game processes for most likely entity list addresses]
 - https://github.com/rednaga/APKiD [PEiD for Android]
+- https://github.com/Col-E/Recaf [Java]
 
 > Fix VMP
 - https://github.com/wallds/NoVmpy
