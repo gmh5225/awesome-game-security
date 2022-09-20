@@ -421,6 +421,7 @@
 
 > RE Tools
 - https://dogbolt.org
+- https://github.com/mentebinaria/retoolkit [Reverse Engineer's Toolkit]
 - https://github.com/stevemk14ebr/RETools
 - https://github.com/BataBo/ACEPatcher [.NET Patcher]
 - https://github.com/waryas/KACE [Emulate Drivers in RING3 with self context mapping or unicorn]
