@@ -1527,6 +1527,7 @@
 - https://github.com/Razmoth/GenshinStudio [Asset]
 - https://github.com/Dimbreath/GenshinData [Game Data]
 - https://github.com/HolographicHat/YaeAchievement
+- https://github.com/phonowell/genshin-impact-script [A sweet genshin impact script]
 
 > Game:Honkai Impact
 - https://github.com/BuIlDaLiBlE/BetterHI3Launcher
