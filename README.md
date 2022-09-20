@@ -1539,6 +1539,7 @@
 > Game:EldenRing
 - https://github.com/techiew/EldenRingMods [Mod]
 - https://github.com/v-maxson/EldenRingLauncher [Launcher]
+- https://github.com/Nordgaren/Elden-Ring-Debug-Tool [Debug tool for Elden Ring modding]
 
 > Game:Dark Souls
 - https://github.com/igromanru/Dark-Souls-III-Cheat-Engine-Guide
