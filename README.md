@@ -50,6 +50,7 @@
 - https://github.com/shadirvan/Unity-Cheat-Sheet [Unity]
 - https://github.com/QianMo/Unity-Design-Pattern [Unity Design]
 - https://github.com/whx-prog/The-Seed-Link-Future [Unity VR]
+- https://github.com/twohyjr/Metal-Game-Engine-Tutorial [Apple's Metal Api]
 
 > Source
 - https://github.com/EpicGames/UnrealEngine
