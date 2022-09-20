@@ -586,6 +586,7 @@
 - https://github.com/archercreat/ida_names [Renames pseudocode windows with the current function name]
 - https://github.com/helpsystems/turbodiff [diff]
 - [An IDAPython module for way more convienent way to Reverse Engineering iOS kernelcaches](https://github.com/cellebrite-labs/ida_kcpp)
+- https://gitlab.com/eshard/d810 [Deobfuscate code at decompilation time by modifying IDA Pro microcode]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
