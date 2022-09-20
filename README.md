@@ -702,6 +702,9 @@
 - https://github.com/JonathanSalwan/ROPgadget
 - https://github.com/helpsystems/Agafi
 
+> ROP Generation
+- https://github.com/d4em0n/exrop
+
 > Anti Signature Scanning
 - https://github.com/scrt/avdebugger
 
