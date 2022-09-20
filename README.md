@@ -402,6 +402,7 @@
 - https://github.com/HoLLy-HaCKeR/dnSpy.Extension.HoLLy [For Unity]
 - https://github.com/mandiant/dncil [For Unity]
 - https://github.com/hugsy/CFB [Monitor IRP]
+- https://github.com/Kharos102/IOCTLDump [Monitor IRP]
 - https://ioninja.com/downloads.html [Protocol Analyzer]
 - https://github.com/wilszdev/SteamAntiAntiDebug [Steam]
 - https://github.com/H5GG/H5GG [IOS cheat engine]
