@@ -610,6 +610,7 @@
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
 - https://github.com/lowleveldesign/comon [Trace COM]
+- https://github.com/bruce30262/TWindbg [PEDA-like debugger UI for WinDbg]
 
 > X64DBG Plugins
 - https://github.com/x64dbg/x64dbg/wiki/Plugins
