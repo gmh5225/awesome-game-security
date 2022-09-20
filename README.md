@@ -1077,6 +1077,7 @@
 - https://github.com/es3n1n/be-shellcode-tester [BattlEye shellcodes tester]
 - https://github.com/steffalon/battleye-rust [BattlEye RCON UDP connection]
 - https://github.com/Hypercall/FakeEye [Emulator]
+- https://github.com/tr1xxx/battleye-region-walking
 
 > Explore AntiCheat System:EQU8
 - https://back.engineering/12/08/2021
