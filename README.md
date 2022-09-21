@@ -1279,6 +1279,7 @@
 - https://github.com/Sentient111/Csgo-Full-kernel [Running from kernelmode]
 - https://github.com/razixNew/CompiledProtection [Cheat Compiler]
 - https://github.com/ekknod/EC
+- https://github.com/soyware/heck_csgo_external [External]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
