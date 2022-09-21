@@ -1099,7 +1099,7 @@
 
 > Explore AntiCheat System:Ricochet
 - https://github.com/weak1337/ricochet_deobfuscator
-- https://github.com/kkent030315/AurumRE
+- https://github.com/gmh5225/AurumRE
 
 > Explore AntiCheat System:RIOT
 - https://github.com/Nuxar1/DecryptionDumper [Dump]
