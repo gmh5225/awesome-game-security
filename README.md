@@ -31,6 +31,7 @@
 ## Game Engine
 > Guide
 - https://github.com/QianMo/Game-Programmer-Study-Notes
+- https://github.com/Gforcex/OpenGraphic [Graphic Engine & Game Engine lists]
 - https://github.com/ThisisGame/cpp-game-engine-book
 - https://github.com/netwarm007/GameEngineFromScratch
 - https://forums.unrealengine.com [Unreal]
