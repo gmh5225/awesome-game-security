@@ -771,6 +771,7 @@
 - https://github.com/VerityIncorporated/BepInEx-IL2CPPBase [IL2CPP Menu]
 - https://github.com/springmusk026/Android-Mod-Menu-Kotlin [IL2CPP Menu]
 - https://github.com/gmh5225/Android-OpenGL-ES-Chams [Chams]
+- https://github.com/RequestFX/ImGUI-Advanced-Cheat-Menu [Imgui Menu]
 
 > UI Interface
 - https://github.com/adamhlt/ImGui-Standalone
