@@ -511,6 +511,7 @@
 - https://github.com/allogic/KDBG [Tool]
 - https://github.com/gmh5225/Voyager [A Hyper-V Hacking Framework For Windows 10 x64 (AMD & Intel)]
 - https://github.com/repnz/apc-research [APC Internals Research Code]
+- https://github.com/intel/pcm [Processor Counter Monitor]
 
 > Magisk
 - https://github.com/PShocker/Zygisk-MagiskHide
