@@ -1075,6 +1075,7 @@
 - https://github.com/Rat431/EAC_Emu [Simple EasyAntiCheat x64 emulator]
 - https://github.com/xBrunoMedeiros/eac-overlay [EAC Overlay]
 - https://github.com/Imabot115/ce-EasyAntiCheat-Bypass [UD CE]
+- https://github.com/ioncodes/pooldump [Extract the DLL that EACs manualmaps into the game process]
 
 > Explore AntiCheat System:BE
 - https://github.com/Schnocker/NoEye
