@@ -303,6 +303,7 @@
 - https://github.com/Genymobile/scrcpy [Display and control your Android device]
 - https://github.com/ryanjon2040/Unreal-Binary-Builder [Build UE Source]
 - https://github.com/ryanjon2040/UnrealNetworkProfiler [Network Profiler for UE]
+- [Command line tool for getting the download URL for the latest or specific version of Unity](https://github.com/neogeek/get-unity)
 
 ## Game Manager
 - https://github.com/JosefNemec/Playnite
