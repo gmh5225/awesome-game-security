@@ -810,6 +810,7 @@
 - https://github.com/Exploitables/CVE-2015-2291 [IQVW64.sys]
 - https://github.com/KiFilterFiberContext/AsIO-Exploit [AsIO3.sys]
 - https://github.com/IamM47Z/OpenHardwareMonitor-PoC [OpenHardwareMonitorLib.sys]
+- https://github.com/RedCursorSecurityConsulting/PPLKiller [RTCore64.sys]
 
 
 > Driver Communication
