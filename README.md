@@ -370,6 +370,7 @@
 - https://github.com/guided-hacking
 - https://gamehacking.academy
 - https://github.com/GameHackingAcademy
+- https://areweanticheatyet.com [A list of games using anti-cheats]
 - https://github.com/imadr/Unity-game-hacking [Unity]
 - https://vollragm.github.io/posts/unity-reversing [Unity]
 - https://wiki.cheatengine.org/index.php?title=Mono [CE Mono]
@@ -1626,6 +1627,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/dhondta/awesome-executable-packing [Executable File Packing]
 - https://anti-debug.checkpoint.com [Anti Debug]
 - https://github.com/DenuvoSoftwareSolutions/DVRT [DVRT]
+- https://areweanticheatyet.com [A list of games using anti-cheats]
 
 > Stress Testing
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework
