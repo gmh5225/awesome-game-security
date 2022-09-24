@@ -1015,6 +1015,7 @@
 - https://github.com/bbgsm/ue4_cheat_engine [UE4 Cheat For Android]
 - [unpack, pack, list, check and mount Unreal Engine 4 .pak archives](https://github.com/panzi/rust-u4pak)
 - https://github.com/Qemu-Gang/QemuUnrealDumper-4.25 [SDK Dump By QEMU]
+- https://github.com/kenn-notation/UnrealEngineSDK [Universal Cheat development kit]
 
 > Game Engine Explorer:Unity
 - https://github.com/mono/mono [mono]
