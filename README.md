@@ -11,7 +11,7 @@
 - [Wavefront Obj](#Wavefront-Obj)
 - [Task Scheduler](#Task-Scheduler)
 - [Game Network](#Game-Network)
-- [NVIDIA PhysX SDK](#NVIDIA-PhysX-SDK)
+- [PhysX SDK](#PhysX-SDK)
 - [Game Develop](#Game-Develop)
 - [Game Assets](#Game-Assets)
 - [Game Hot Patch](#Game-Hot-Patch)
@@ -196,9 +196,10 @@
 - https://github.com/azerothcore/azerothcore-wotlk [Server for WOW]
 - https://github.com/2601677867/One-Click-Run_Source_Server [Server for Source Engine]
 
-## NVIDIA PhysX SDK
+## PhysX SDK
 - https://github.com/NVIDIAGameWorks/PhysX
 - https://github.com/NVIDIAGameWorks/PhysX-3.4
+- https://github.com/bulletphysics/bullet3
 
 
 ## Game Develop
