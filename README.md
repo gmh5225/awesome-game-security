@@ -684,6 +684,7 @@
 - https://github.com/YouNeverKnow00/Kernelmode-DLL-Injector [Manual Map]
 - [windows kernelmode driver to inject dll into each and every process and perform systemwide function hooking](https://github.com/sum-catnip/kptnhook)
 - https://github.com/Broihon/GH-Injector-Library [inject library and tool]
+- https://github.com/5paceman/nightshade [inject tool]
 
 > Injection:Linux
 - https://github.com/ixty/mandibule
