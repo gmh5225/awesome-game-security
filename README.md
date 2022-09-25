@@ -1839,6 +1839,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Detection:Memory Integrity
 - https://github.com/afulsamet/integrity
 - https://github.com/Midi12/QueryWorkingSetExample
+- https://github.com/Deputation/integrity_experiments [header only]
 
 > Detection:Attach
 - https://github.com/KANKOSHEV/Detect-KeAttachProcess
