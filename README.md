@@ -316,7 +316,11 @@
 - https://github.com/nikaera/Unity-GameCI-Sample [Unity]
 
 ## Web3 Game
+> Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
+
+> Security
+- https://github.com/SunWeb3Sec [Let's make Web3 more secure]
 
 ## DirectX
 > Guide
