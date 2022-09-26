@@ -2021,6 +2021,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/rbmm/LockFile-Poc [Lock File]
 - [A kernel exploit leveraging NtUserHardErrorControl to elevate a thread to KernelMode and achieve arbitrary kernel R/W & more](https://github.com/SecIdiot/ANGRYORCHARD)
 - https://github.com/gmh5225/dll-encryptor [Able to stream a dll without touching your disk]
+- [Running Shellcode Through EnumDisplayMonitors](https://marcoramilli.com/2022/06/15/running-shellcode-through-windows-callbacks/?utm_source=twitter&utm_medium=social&utm_campaign=ReviveOldPost)
 
 > Android
 - https://github.com/WindySha/bypassHiddenApiRestriction [Bypass hidden api restriction]
