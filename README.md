@@ -108,6 +108,7 @@
 - https://github.com/MohitSethi99/ArcEngine
 - https://github.com/gscept/nebula
 - https://github.com/irisengine/iris [cross-platform C++]
+- https://github.com/WistfulHopes/NightSkyEngine [A fighting game engine written in Unreal Engine 5]
 
 
 > Game Engine Plugins:Unreal
