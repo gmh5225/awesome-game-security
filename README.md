@@ -1751,6 +1751,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/dimkr/papaw [LZMA]
 - https://github.com/akawashiro/sloader [ELF loader which aims to replace ld-linux.so of glibc]
 - https://github.com/MahmoudZohdy/IAT-Obfuscation [IAT Obfuscation]
+- https://github.com/ORCx41/EntropyFix [Reducing entropy]
 
 > CLR Protection
 - https://github.com/endgameinc/ClrGuard
