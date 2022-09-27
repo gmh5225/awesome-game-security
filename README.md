@@ -1843,6 +1843,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/TupleDev/nullshit
 - https://github.com/paranoidninja/EtwTi-Syscall-Hook [Instrumentation Callback]
 - https://github.com/Luchinkin/device-control-hooks-scanner [device-control-hooks-scanner]
+- https://github.com/ORCx41/KnownDllUnhook [Replace the .txt section of the current loaded modules from \KnownDlls\]
 
 > Detection:Memory Integrity
 - https://github.com/afulsamet/integrity
