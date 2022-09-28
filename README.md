@@ -1477,6 +1477,7 @@
 - https://github.com/sanntoomirai/Pubg-Mobile-Esp-Aimbot-Magic-Injector-Spoofer
 - https://github.com/kp7742/PUBGPatcher
 - https://github.com/Zakaria-Master/PUBGM1.6-DeadGame
+- https://github.com/mut1234/BYPASS-PUBG-MOBILE-IMGUI
 
 
 > Game:EFT
