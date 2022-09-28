@@ -340,6 +340,7 @@
 - https://github.com/ocornut/imgui/commit/923bd2fd217c1dc1e75fa92b0284d3817904988b [DX11/12 ResizeBuffers]
 - https://github.com/marlkiller/d3dhook_imgui [d3d opengl hook imgui x86/x64]
 - [Universal graphical hook for a D3D9-D3D12, OpenGL and Vulkan based games](https://github.com/Rebzzel/kiero)
+- https://github.com/jmpews/Dobby [a lightweight, multi-platform, multi-architecture hook framework]
 
 > Tools
 - https://github.com/visotw/3d9 [Fixing broken stereoscopic effects in DX11 games]
