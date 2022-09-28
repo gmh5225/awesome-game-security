@@ -1040,6 +1040,7 @@
 - https://github.com/Perfare/Il2CppDumper [Il2Cpp Dump]
 - https://github.com/khang06/Il2CppDumper-YuanShen [Il2Cpp Dump for Genshin Impact]
 - https://github.com/Perfare/Il2CppDumper [Il2Cpp Dump GUI]
+- https://github.com/Poko-Apps/Il2cppDumpDroidGUI [Il2Cpp Dump GUI]
 - https://github.com/shalzuth/Il2CppRuntimeDumper [Il2Cpp Dump Runtime]
 - https://github.com/Perfare/Zygisk-Il2CppDumper [Il2Cpp Dump for Android Platform]
 - https://github.com/kp7742/IL2CPPDumper [Il2Cpp Dump for Android Platform]
