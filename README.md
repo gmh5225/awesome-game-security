@@ -1658,6 +1658,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework
 - https://github.com/stuxnet147/Known-Driver-Mappers [Known Driver Mappers]
 - https://github.com/DanielRTeixeira/injectAllTheThings [Injection Testing]
+- https://github.com/MahmoudZohdy/Process-Injection-Techniques [Injection Testing]
 - https://github.com/zoand/Injectors [Injection Testing]
 - https://github.com/guided-hacking/GuidedHacking-Injector [Injection Testing]
 - https://github.com/aiocat/dll-crab [Injection Testing]
