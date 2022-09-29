@@ -399,6 +399,7 @@
 - https://github.com/TimMisiak/WinDbgCookbook [WinDbg]
 - https://github.com/anhkgg/awesome-windbg-extensions [WinDbg]
 - [Undetected Cheat Engine](https://www.unknowncheats.me/forum/anti-cheat-bypass/504191-undetected-cheat-engine-driver-2022-bypass-anticheats-eac.html)
+- https://github.com/konstantin89/windows-kernel-debugging-guide [Remote Windows kernel debugging]
 
 > Debugging
 - https://github.com/stars/gmh5225/lists/debugger [List]
