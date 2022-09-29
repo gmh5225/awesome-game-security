@@ -272,6 +272,7 @@
 - https://github.com/xinyu-evolutruster/3D-Racing-Game [A racing game based on OpenGL]
 - https://github.com/ProjectBorealis/PBCharacterMovement [HL2-style, classic FPS movement for UE4 implemented in C++]
 - https://github.com/Merisho/tx-holdem [Texas Holdem Poker made by JS]
+- https://github.com/raysan5/raylib [A simple and easy-to-use library to enjoy videogames programming]
 
 
 ## Game Assets
