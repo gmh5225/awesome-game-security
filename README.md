@@ -1017,6 +1017,7 @@
 
 > Game Engine Explorer:Unreal
 - https://github.com/asjbdkabs/shootergame-Hack [ShooterGame Demo]
+- https://github.com/CorrM/CleanCheat [Game cheat base]
 - https://github.com/Shhoya/Shh0yaUEDumper [SDK Dump]
 - https://github.com/guttir14/UnrealDumper-4.25 [SDK Dump]
 - https://github.com/EZFNDEV/UEDumper [SDK Dump]
