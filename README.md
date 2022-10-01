@@ -662,6 +662,7 @@
 - https://github.com/DNLINYJ/Anti_miHoYo_Jcc_Obfuscate
 - https://github.com/mrexodia/DisableParallelLoader [Disable parallel loading of dependencies]
 - https://github.com/ElvisBlue/x64dbgpython [Running python3 script]
+- https://github.com/secrary/idenLibX [Library Function Identification]
 
 > Cheat Engine Plugins
 - https://github.com/FreeER/CE-Extensions [Lua Extensions]
