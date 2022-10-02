@@ -1237,6 +1237,7 @@
 - https://github.com/RyukOP/L-Assemblies
 - https://github.com/korllan/LeagueSharp.Loader
 - https://github.com/R3nzTheCodeGOD/R3nzSkin [Skin]
+- https://github.com/R3nzTheCodeGOD/R3nzSkinTFT [Skin]
 - https://github.com/B3akers/LeagueSkinChanger [Skin]
 - https://github.com/real-web-world/hh-lol-prophet
 - https://github.com/Nuxar1/DecryptionDumper [Dump]
