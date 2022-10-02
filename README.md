@@ -196,6 +196,7 @@
 - https://github.com/eclipse/paho.mqtt.cpp [mqtt cpp]
 - https://github.com/topfreegames/pitaya [Server framework]
 - https://github.com/azerothcore/azerothcore-wotlk [Server for WOW]
+- https://github.com/arlyon/azerust [Rust Server for WOW]
 - https://github.com/2601677867/One-Click-Run_Source_Server [Server for Source Engine]
 
 ## PhysX SDK
