@@ -643,6 +643,7 @@
 - https://github.com/lowleveldesign/comon [Trace COM]
 - https://github.com/bruce30262/TWindbg [PEDA-like debugger UI for WinDbg]
 - https://github.com/JKornev/cfgdump [Analyze Control Flow Guard map]
+- https://github.com/yardenshafir/WinDbg_Scripts [WinDbg scripts]
 
 > X64DBG Plugins
 - https://github.com/x64dbg/x64dbg/wiki/Plugins
