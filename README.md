@@ -1650,6 +1650,10 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Game:Ironsight
 - https://github.com/oluan/Lazysight
 
+> Game:Devour
+- https://github.com/ALittlePatate/DevourClient
+
+
 ## Anti Cheat
 > Guide
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
