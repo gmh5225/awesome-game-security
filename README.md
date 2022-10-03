@@ -1353,6 +1353,8 @@
 - https://github.com/weedeej/ValorantCC [Crosshair Setting]
 - https://github.com/gmh5225/Internal-Valorant-Cheat
 - https://github.com/gmh5225/VALORANT-HACK-ESP-AIMBOT-SKINCHANGER
+- https://github.com/MauhTon/valorant-esp-hack-with-driver
+- https://github.com/MauhTon/Valorant-Aimbot-Bypass
 
 > Game:VEILED EXPERTS
 - https://github.com/EBalloon/VEILED-EXPERTS-SDK
