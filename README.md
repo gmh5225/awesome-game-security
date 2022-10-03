@@ -615,6 +615,7 @@
 - https://github.com/helpsystems/turbodiff [diff]
 - [An IDAPython module for way more convienent way to Reverse Engineering iOS kernelcaches](https://github.com/cellebrite-labs/ida_kcpp)
 - https://gitlab.com/eshard/d810 [Deobfuscate code at decompilation time by modifying IDA Pro microcode]
+- https://github.com/airbus-seclab/AutoResolv [Resolves functions imported from external libraries]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
