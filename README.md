@@ -2015,6 +2015,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Sign Tools
 - https://github.com/mtrojnar/osslsigncode
+- https://github.com/gmh5225/chainoffools [CVE]
 
 > Backup File
 - https://github.com/guidoreina/minivers [Generates Backup Copies]
@@ -2050,6 +2051,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/secretsquirrel/SigThief [Stealing signatures from pe files]
 - https://github.com/jfmaes/LazySign [Fake Cert]
 - https://github.com/Tylous/Limelighter [Fake Cert]
+- https://github.com/gmh5225/chainoffools [Fake Cert]
 - https://github.com/Adepts-Of-0xCC/MiniDumpWriteDumpPoC [Dump Memory]
 - [A x64 Write-What-Where exploit+shellcode execution vulnerability](https://www.unknowncheats.me/forum/anti-cheat-bypass/503519-wwwaryasinject-x64-write-exploit-shellcode-execution-vulnerability.html)
 - [Dll injection through code page id modification in registry](https://github.com/NtQuerySystemInformation/NlsCodeInjectionThroughRegistry)
