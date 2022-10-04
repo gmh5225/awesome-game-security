@@ -534,6 +534,7 @@
 - https://github.com/intel/pcm [Processor Counter Monitor]
 - https://github.com/ChengChengCC/Ark-tools [Some kernel research]
 - https://github.com/alal4465/KernelMon [Monitoring Windows Kernel Drivers]
+- https://github.com/gmh5225/Practical-Reverse-Engineering-Solutions [DPC+APC]
 
 > Magisk
 - https://github.com/PShocker/Zygisk-MagiskHide
