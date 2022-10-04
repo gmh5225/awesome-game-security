@@ -533,6 +533,7 @@
 - https://github.com/repnz/apc-research [APC Internals Research Code]
 - https://github.com/intel/pcm [Processor Counter Monitor]
 - https://github.com/ChengChengCC/Ark-tools [Some kernel research]
+- https://github.com/alal4465/KernelMon [Monitoring Windows Kernel Drivers]
 
 > Magisk
 - https://github.com/PShocker/Zygisk-MagiskHide
