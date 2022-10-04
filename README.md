@@ -1850,6 +1850,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Rycooop/Bloom-Anticheat
 - https://github.com/AvivShabtay/Stresser [Anti Virus in fact but also Anti Cheat]
 - https://github.com/gmh5225/antivirus [Anti Virus in fact but also Anti Cheat]
+- https://github.com/D4stiny/PeaceMaker [Anti Virus in fact but also Anti Cheat]
 - https://github.com/danielkrupinski/VAC [Reversed VAC]
 - https://github.com/ApexLegendsUC/anti-cheat-emulator
 - https://github.com/ch4ncellor/EAC-Reversal [Reversed EAC]
