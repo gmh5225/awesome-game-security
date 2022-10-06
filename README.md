@@ -165,6 +165,7 @@
 ## Image Codec
 - https://github.com/nothings/stb
 - https://github.com/libjpeg-turbo/libjpeg-turbo
+- https://github.com/erkkah/tigr
 
 ## Wavefront Obj
 - https://github.com/tinyobjloader/tinyobjloader
