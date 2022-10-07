@@ -786,6 +786,7 @@
 - https://github.com/PierreCiholas/NotAnOverlay [Duplicating with GDI]
 - https://github.com/SsageParuders/Android_Native_Surface [Android Native Overlay]
 - https://github.com/xBrunoMedeiros/eac-overlay [EAC Overlay]
+- https://github.com/3r4y/imgui-external-overlay [imgui overlay]
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
