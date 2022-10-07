@@ -2026,6 +2026,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Sign Tools
 - https://github.com/mtrojnar/osslsigncode
 - https://github.com/gmh5225/chainoffools [CVE]
+- https://github.com/mattifestation/WDACTools [Decrypt p7b]
 
 > Backup File
 - https://github.com/guidoreina/minivers [Generates Backup Copies]
