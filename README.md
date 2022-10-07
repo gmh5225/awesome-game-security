@@ -2078,6 +2078,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/dll-encryptor [Able to stream a dll without touching your disk]
 - [Running Shellcode Through EnumDisplayMonitors](https://marcoramilli.com/2022/06/15/running-shellcode-through-windows-callbacks/?utm_source=twitter&utm_medium=social&utm_campaign=ReviveOldPost)
 - [open-source windows defender manager can disable windows defender permanently](https://github.com/qtkite/defender-control)
+- [Read Memory without ReadProcessMemory for Current Process](https://github.com/gmh5225/CReadMemory)
 
 > Android
 - https://github.com/WindySha/bypassHiddenApiRestriction [Bypass hidden api restriction]
