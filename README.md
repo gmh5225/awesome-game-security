@@ -679,6 +679,7 @@
 - https://github.com/vmmcall/remap-plugin [Remap]
 - https://github.com/vmmcall/overwatch-iat-fixer [Overwatch IAT Fixer]
 - https://github.com/FreeER/CE-Examples [Some Examples]
+- [Porting ce's monodatacollector to android/ios](https://github.com/DoranekoSystems/frida-il2cpp-datacollector)
 
 > Injection:Windows
 - https://github.com/btbd/smap [Scatter Manual Map]
@@ -1085,6 +1086,7 @@
 - [A tool translate a apk file to common android project and support so hook include il2cpp c++ scaffolding](https://github.com/Efaker/FakerAndroid)
 - https://github.com/xxzzddxzd/unitySpeedTools [IOS Speed Tools]
 - https://github.com/interception-team/il2cpp-finder [Il2Cpp Finder]
+- https://github.com/DoranekoSystems/frida-il2cpp-datacollector [Il2Cpp datacollector for Android/IOS]
 
 > Game Engine Explorer:Source
 - https://github.com/anarh1st47/Source2Dumps [Dump]
