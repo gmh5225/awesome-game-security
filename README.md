@@ -1264,6 +1264,7 @@
 - https://github.com/KebsCS/KBotExt [LCU]
 - https://github.com/botkalista/ayaya-league-external [Nodejs based scripting platform]
 - https://github.com/jfd02/TFT-OCR-BOT [TFT]
+- https://github.com/sooqua/VanderLeague [Hypervisor-assisted]
 
 > Game:NARAKA
 - https://www.unknowncheats.me/forum/other-fps-games/490052-naraka-bladepoint-reversal-structs-offsets.html
@@ -1682,7 +1683,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://areweanticheatyet.com [A list of games using anti-cheats]
 
 > Stress Testing
-- https://github.com/niemand-sec/AntiCheat-Testing-Framework
+- https://github.com/niemand-sec/AntiCheat-Testing-Framework [Testing Framework]
+- https://github.com/gmh5225/MemWars [Testing Framework]
 - https://github.com/stuxnet147/Known-Driver-Mappers [Known Driver Mappers]
 - https://github.com/DanielRTeixeira/injectAllTheThings [Injection Testing]
 - https://github.com/MahmoudZohdy/Process-Injection-Techniques [Injection Testing]
