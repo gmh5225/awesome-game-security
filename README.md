@@ -1018,6 +1018,7 @@
 - https://github.com/ReFo0/hwid-spoofer
 - https://github.com/namazso/hdd_serial_spoofer
 - https://github.com/gmh5225/EASY-HWID-SPOOFER
+- https://github.com/gmh5225/HWID-Pasted-Hwid-Spoofer
 
 > Bypass Page Protection
 - https://github.com/illegal-instruction-co/CountHook [WorkingSet]
