@@ -26,6 +26,7 @@
 - [Anti Cheat](#Anti-Cheat)
 - [Some Tricks](#Some-Tricks)
 - [Windows Security Features](#Windows-Security-Features)
+- [Windows Subsystem for Linux](#Windows-Subsystem-for-Linux)
 - [Windows Subsystem for Android](#Windows-Subsystem-for-Android)
 - [Android Emulator](#Android-Emulator)
 
@@ -2100,6 +2101,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/CET-win10 [CET]
 - [HyperGuard](https://windows-internals.com/hyperguard-secure-kernel-patch-guard-part-1-skpg-initialization)
 - https://github.com/gmh5225/QueryShadowStack [Shadow Stack]
+
+## Windows Subsystem for Linux
+- https://github.com/sxlmnwb/windows-subsystem-linux
 
 ## Windows Subsystem for Android
 - https://github.com/sergiovillaverde/win11_apk_installer
