@@ -1444,6 +1444,7 @@
 - https://github.com/Luksiuss/FortniteSigsUpdatedEveryUpdate [Offset]
 - https://github.com/Android1337/FortniteSigsUpdatedEveryUpdate [Offset]
 - https://github.com/plu1337/fortnite-offsets [Offset]
+- https://github.com/panzehirr/Fortnite-Offset-dumper [Offset & Dump]
 - https://github.com/plu1337/fortnite-virtual-offsets [Virtual Table Offsets]
 - https://github.com/plu1337/fortnite-sigs [Signature]
 - https://github.com/plu1337/fortnite-exploits [Exploits]
