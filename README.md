@@ -336,7 +336,6 @@
 - https://github.com/d3dcoder/d3d12book [DX12]
 
 > Hook
-- https://github.com/xo1337/D3D11Hook [DX11 Imgui]
 - https://github.com/rdbo/DX11-BaseHook [DX11 Imgui]
 - https://github.com/DrNseven/D3D12-Hook-ImGui [DX12 Imgui]
 - https://github.com/niemand-sec/DirectX11Hook [DX11 Imgui]
@@ -863,6 +862,7 @@
 - https://github.com/btbd/access [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/paradoxwastaken/Poseidon [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/weak1337/EvCommunication [NtTokenManagerCreateFlipObjectReturnTokenHandle]
+- https://github.com/stephenasuncionDEV/kaldereta [NtTokenManagerGetAnalogExclusiveTokenEvent]
 - https://github.com/UCFoxi/Shared-FlushFileBuffers-Communication [FlushFileBuffers]
 - https://github.com/Sinclairq/DataCommunication [NtCompareSigningLevels]
 - https://github.com/ExpLife0011/NtCompareSigningLevel-hook [NtCompareSigningLevels]
