@@ -825,6 +825,8 @@
 - https://github.com/fengjixuchui/gdrv-loader/tree/1909_mitigation [gdrv.sys]
 - http://rexw3wrz5pldtadf3hy4vqnuzokhco4l32kyntj36fcgpjuy3nvxidid.onion/_xeroxz/VDM [gdrv enhance]
 - https://github.com/Compiled-Code/eac-mapper [gdrv.sys]
+- https://github.com/gmh5225/CVE-2018-19320-LPE [gdrv.sys]
+- https://github.com/gmh5225/CVE-2018-19320 [gdrv.sys]
 - https://github.com/eddeeh/kdmapper [iqvw64e.sys]
 - https://github.com/TheCruZ/kdmapper [iqvw64e.sys]
 - https://github.com/Brattlof/kdmapper-1909 [iqvw64e.sys]
