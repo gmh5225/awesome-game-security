@@ -1315,6 +1315,7 @@
 - https://github.com/ekknod/csf [Linux SDK]
 - https://github.com/Speedi13/ROP-COMPILER
 - https://github.com/AimTuxOfficial/AimTux [Linux]
+- https://github.com/seksea/gamesneeze [Linux]
 - https://github.com/EternityX/DEADCELL-CSGO
 - https://github.com/nbqofficial/kernel-csgo
 - https://github.com/HeathHowren/CSGO-Cheats
