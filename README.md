@@ -1297,6 +1297,7 @@
 
 > Game:CS1.6
 - https://github.com/k4ne1337/hpp-hack
+- https://github.com/BloodSharp/CSHackCreator-2-Demo
 
 > Game:CSGO
 - https://github.com/csgohacks/master-guide [Guide]
