@@ -553,6 +553,7 @@
 - https://github.com/rednaga/APKiD [PEiD for Android]
 
 > Android Memory Explorer
+- https://github.com/misc0110/PTEditor [PT]
 - https://github.com/joaomlneto/procmap
 - https://github.com/kp7742/MemDumper [Dump]
 - https://github.com/mrcang09/Android-Mem-Edit
@@ -563,6 +564,7 @@
 - https://github.com/MJx0/KittyMemory [Runtime code patching]
 
 > Android Kernel Explorer
+- https://docs.kernel.org [Linux Kernel documentation]
 - https://github.com/yhnu/op7t [DIY Kernel]
 - https://github.com/yabinc/simpleperf_demo [Perf]
 - https://github.com/feicong/android_ebpf [EBPF]
