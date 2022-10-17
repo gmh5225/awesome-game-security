@@ -528,6 +528,7 @@
 - https://github.com/MahmoudZohdy/APICallProxy [Windows API Call Obfuscation]
 - https://github.com/Spuckwaffel/Simple-MmcopyMemory-Hook [Hook MmcopyMemory]
 - https://github.com/VollRagm/PTView [Browse Page Tables on Windows]
+- https://github.com/misc0110/PTEditor [PT Editor]
 - https://github.com/IcEy-999/Ntoskrnl_Viewer [Ntoskrnl Viewer]
 - https://github.com/ekknod/Nmi [Blocking NMI interrupts]
 - https://github.com/EquiFox/KsDumper [Dumping processes using the power of kernel space]
@@ -553,7 +554,7 @@
 - https://github.com/rednaga/APKiD [PEiD for Android]
 
 > Android Memory Explorer
-- https://github.com/misc0110/PTEditor [PT]
+- https://github.com/misc0110/PTEditor [PT Editor]
 - https://github.com/joaomlneto/procmap
 - https://github.com/kp7742/MemDumper [Dump]
 - https://github.com/mrcang09/Android-Mem-Edit
