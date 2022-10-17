@@ -147,6 +147,7 @@
 - https://github.com/Kazade/kazmath
 - https://github.com/milakov/int_fastdiv
 - https://github.com/freemint/fdlibm
+- https://github.com/Jaysmito101/cgl
 
 ## Renderer
 - https://github.com/keith2018/SoftGLRender
