@@ -1563,6 +1563,7 @@
 - https://github.com/OSNSON/Overwatch-1-cheat-source-.
 - https://github.com/vmmcall/overwatch-iat-fixer [Overwatch IAT Fixer]
 - https://github.com/Midi12/ow_unpack
+- https://github.com/gmh5225/OW-Aeternum
 
 > Game:Overwatch2
 - https://github.com/gmh5225/Overwatch2-colorbot-Cheats
