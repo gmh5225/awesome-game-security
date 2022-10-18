@@ -566,6 +566,7 @@
 
 > Android Kernel Explorer
 - https://docs.kernel.org [Linux Kernel documentation]
+- https://armv8-ref.codingbelief.com/en [ARM Architecture Reference Manual for ARMv8-A]
 - https://github.com/yhnu/op7t [DIY Kernel]
 - https://github.com/yabinc/simpleperf_demo [Perf]
 - https://github.com/feicong/android_ebpf [EBPF]
