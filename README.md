@@ -1382,6 +1382,7 @@
 - https://github.com/gmh5225/VALORANT-HACK-ESP-AIMBOT-SKINCHANGER
 - https://github.com/MauhTon/valorant-esp-hack-with-driver
 - https://github.com/MauhTon/Valorant-Aimbot-Bypass
+- https://github.com/zeroday-z/CyberAntLoader
 
 > Game:VEILED EXPERTS
 - https://github.com/EBalloon/VEILED-EXPERTS-SDK
