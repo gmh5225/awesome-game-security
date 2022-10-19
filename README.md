@@ -1837,6 +1837,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Dump Fix
 - https://github.com/t3ssellate/unmapper
 - https://github.com/d35ha/DumpPE
+- https://github.com/pr701/fix-arxan
 
 > Encrypt Variable
 - https://github.com/serge-14/encrypted_value [C++]
