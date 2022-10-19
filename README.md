@@ -1448,6 +1448,8 @@
 - https://github.com/cyberpw/apex_legends_sdk
 - https://github.com/ekknod/apex_linux [linux]
 - https://github.com/XRadius/project-tanya [linux]
+- https://github.com/KaylinOwO/Project-Branthium
+- https://github.com/gmh5225/Apex-Legends-External-Esp-Aimbot-Skinchanger
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
