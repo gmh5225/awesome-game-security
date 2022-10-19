@@ -333,6 +333,7 @@
 > Guide
 - https://github.com/planetchili/hw3d [C++ 3D DirectX Tutorial]
 - https://github.com/jpvanoosten/LearningDirectX12 [DX12]
+- https://github.com/PAMinerva/LearnDirectX [DX12]
 - https://github.com/MKXJun/DirectX11-With-Windows-SDK [DX11 zh]
 - https://github.com/d3dcoder/d3d12book [DX12]
 
