@@ -1620,8 +1620,11 @@
 > Game:Mordhau
 - https://github.com/Skengdo/mordhau-simple-auto-block-cheat
 
-> Game:Smite [UE3]
+> Game:Smite  [UE3]
 - https://github.com/JackBro/SmiteESPAimbot 
+
+> Game:POLYGON [UE5]
+- https://github.com/NeScub2/POLYGON_UE5
 
 > Game:Genshin Impact
 - https://github.com/khang06/mhynot2
