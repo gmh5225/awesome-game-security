@@ -723,6 +723,7 @@
 
 > DLL Hijack
 - https://github.com/Sh0ckFR/DLLirant [Hijacking researches]
+- https://github.com/redteamsocietegenerale/DLLirant [Hijacking researches Tool]
 - https://github.com/knight0x07/ImpulsiveDLLHijack [Hijacking researches]
 - https://github.com/wietze/HijackLibs [Project for tracking publicly disclosed DLL Hijacking opportunities]
 - https://github.com/gmh5225/DLL-Hijack-ExportDumper [Dump the export table of PE files]
