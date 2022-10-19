@@ -1653,6 +1653,8 @@
 - [About
 Adds drag- to- resize functionality to the main GTA V window](https://github.com/CamxxCore/GTAV_DragResize)
 - [Open-source cheat software for Grand Theft Auto V (PC)](https://github.com/HatchesPls/GrandTheftAutoV-Cheat)
+- https://github.com/Pocakking/BigBaseV2
+- https://github.com/YimMenu/YimMenu
 
 > Game:Geometry Dash
 - https://github.com/reservedcloud/gd-internal
