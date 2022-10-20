@@ -720,7 +720,10 @@
 - https://github.com/ixty/mandibule
 
 > Injection:Android
-- https://github.com/SsageParuders/ModGamesByInjectZygote 
+- https://github.com/SsageParuders/ModGamesByInjectZygote
+- https://github.com/gmh5225/Android-DLL-Injector
+- https://github.com/reveny/Android-Ptrace-Injector
+- https://github.com/reveny/Android-LD-Preload-Injector
 
 
 > DLL Hijack
