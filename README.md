@@ -983,6 +983,7 @@
 - https://github.com/longpoxin/hideroot [Magisk]
 - https://github.com/Rwkeith/Diglett [Hide Kernel Thread]
 - https://github.com/gmh5225/Driver-SessionMapper [Session Driver]
+- https://github.com/gmh5225/Driver-DriverNoImage [Hijack Driver]
 
 > Triggerbot & Aimbot
 - https://github.com/changeofpace/MouHidInputHook
