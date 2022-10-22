@@ -1309,6 +1309,7 @@
 - https://github.com/xakepru/x14.08-coverstory-blizzard
 - https://github.com/fail46/OHack [An open-source hack for World of Warcraft]
 - https://github.com/adde88/SkyEngine [Wow Lua Unlocker]
+- https://github.com/gmh5225/WOW-WowAutoFishing [Auto Fishing]
 
 > Game:CS1.6
 - https://github.com/k4ne1337/hpp-hack
