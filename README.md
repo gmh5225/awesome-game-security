@@ -861,6 +861,7 @@
 - https://github.com/KiFilterFiberContext/AsIO-Exploit [AsIO3.sys]
 - https://github.com/IamM47Z/OpenHardwareMonitor-PoC [OpenHardwareMonitorLib.sys]
 - https://github.com/RedCursorSecurityConsulting/PPLKiller [RTCore64.sys]
+- https://github.com/ReCryptLLC/CVE-2022-42045 [amsdk.sys]
 
 
 > Driver Communication
