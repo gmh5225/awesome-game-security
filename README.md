@@ -851,6 +851,7 @@
 - https://github.com/tanduRE/AvastHV [Avast]
 - https://github.com/iPower/KasperskyHook [Kaspersky]
 - https://github.com/mathisvickie/CVE-2021-21551 [dbutil_2_3.sys]
+- https://github.com/SpikySabra/Kernel-Cactus [dbutil_2_3.sys]
 - https://github.com/Splitx12/imxyviMapper [AsUpIO.sys]
 - https://github.com/archercreat/vdk [Speedfan.sys]
 - https://github.com/SamLarenN/SpeedFan-Exploit [Speedfan.sys]
