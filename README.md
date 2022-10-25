@@ -1,5 +1,7 @@
-![Gitee license](https://img.shields.io/badge/license-MIT-blue.svg)
+
 # `awesome-game-security`
+
+[![GitHub license](https://img.shields.io/github/license/gmh5225/awesome-game-security)](https://github.com/gmh5225/awesome-game-security/blob/main/LICENSE)
 
 ## Contents
 - [Game Engine](#Game-Engine)
