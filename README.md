@@ -418,6 +418,7 @@
 - https://github.com/user23333/veh [CE Plugin For Manualmap VEH Dll]
 - https://github.com/x64dbg/x64dbg
 - https://github.com/marakew/syser
+- https://github.com/noword/GDB-Windows-Binaries [GDB]
 - https://github.com/ajkhoury/ReClassEx
 - https://github.com/ReClassNET/ReClass.NET
 - https://github.com/x64dbg/DotX64Dbg
