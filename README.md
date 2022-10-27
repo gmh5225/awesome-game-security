@@ -965,6 +965,7 @@
 
 > Hide
 - https://github.com/JKornev/hidden
+- https://github.com/sina85/hide-file [Hide File]
 - https://github.com/KANKOSHEV/NoScreen [Hide Window]
 - https://github.com/nlepleux/MappedCallback [Hide Callback]
 - https://github.com/rogerxiii/kernel-codecave-poc [Find Codecave]
