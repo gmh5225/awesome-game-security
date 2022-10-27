@@ -1400,6 +1400,7 @@
 - https://github.com/MauhTon/valorant-esp-hack-with-driver
 - https://github.com/MauhTon/Valorant-Aimbot-Bypass
 - https://github.com/zeroday-z/CyberAntLoader
+- https://github.com/Fnoberz/Valorant.External
 
 > Game:VEILED EXPERTS
 - https://github.com/EBalloon/VEILED-EXPERTS-SDK
@@ -1626,6 +1627,7 @@
 - https://github.com/Disline1337/Rust-Cheat-External-main
 - https://github.com/gmh5225/Rust-RustInternal [Internal]
 - https://github.com/gmh5225/rust-external-1 [External]
+- https://github.com/Fnoberz/Rust-External
 
 > Game:Arma3
 - https://github.com/Skengdo/arma3-external-variable-manager
