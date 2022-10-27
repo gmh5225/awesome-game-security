@@ -2028,6 +2028,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Detection:Magisk
 - https://github.com/vvb2060/MagiskDetector
 - https://github.com/canyie/MagiskKiller
+- https://github.com/Dr-TSNG/ApplistDetector
 
 > Signature Scanning
 - https://github.com/c3rb3ru5d3d53c/binlex
