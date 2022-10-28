@@ -681,6 +681,7 @@
 - https://github.com/mrexodia/DisableParallelLoader [Disable parallel loading of dependencies]
 - https://github.com/ElvisBlue/x64dbgpython [Running python3 script]
 - https://github.com/secrary/idenLibX [Library Function Identification]
+- https://github.com/x64dbg/SlothBP [Collaborative Breakpoint Manager]
 
 > Cheat Engine Plugins
 - https://github.com/FreeER/CE-Extensions [Lua Extensions]
