@@ -1320,6 +1320,10 @@
 - https://github.com/adde88/SkyEngine [Wow Lua Unlocker]
 - https://github.com/gmh5225/WOW-WowAutoFishing [Auto Fishing]
 
+> Game:Half-Life 2
+- https://github.com/codereversing/hl2aimbot
+- https://github.com/codereversing/hl2esp
+
 > Game:CS1.6
 - https://github.com/k4ne1337/hpp-hack
 - https://github.com/BloodSharp/CSHackCreator-2-Demo
