@@ -1135,6 +1135,7 @@
 - https://github.com/zyhp/vac3_inhibitor
 - https://github.com/krispybyte/Vook [VAC hook]
 - https://github.com/ioncodes/vacation3-emu [VAC3 module emulator]
+- https://github.com/altoid29/VACDumper [Dump]
 
 > Explore AntiCheat System:EAC
 - https://github.com/thesecretclub/CVEAC-2020 [Integrity Checks]
