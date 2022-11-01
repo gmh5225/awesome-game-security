@@ -576,6 +576,9 @@
 - https://github.com/yabinc/simpleperf_demo [Perf]
 - https://github.com/feicong/android_ebpf [EBPF]
 
+> IOS jailbreak
+- https://github.com/jjolano/shadow
+
 > Virtual Environments
 - https://github.com/FBlackBox/BlackBox [Android]
 - https://github.com/mandiant/flare-vm
