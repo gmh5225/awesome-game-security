@@ -593,6 +593,7 @@
 - https://github.com/Konloch/bytecode-viewer [Java]
 - https://github.com/java-deobfuscator/deobfuscator [Java]
 - https://github.com/angr/binsync [Sync]
+- https://github.com/crytic/ethersplay [EVM dissassembler]
 
 > IDA Plugins
 - https://github.com/vmallet/ida-plugins [List of IDA Plugins]
