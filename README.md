@@ -330,6 +330,7 @@
 
 > Security
 - https://github.com/SunWeb3Sec [Let's make Web3 more secure]
+- https://github.com/crytic [Blockchain Security, by @trailofbits]
 
 ## DirectX
 > Guide
