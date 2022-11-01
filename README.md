@@ -332,6 +332,7 @@
 - https://github.com/SunWeb3Sec [Let's make Web3 more secure]
 - https://github.com/crytic [Blockchain Security, by @trailofbits]
 - https://github.com/crytic/building-secure-contracts [Guidelines and training material to write secure smart contracts]
+- https://github.com/crytic/etheno [Ethereum security analysis and testing]
 
 ## DirectX
 > Guide
