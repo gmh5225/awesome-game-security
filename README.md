@@ -579,6 +579,7 @@
 - https://github.com/yhnu/op7t [DIY Kernel]
 - https://github.com/yabinc/simpleperf_demo [Perf]
 - https://github.com/feicong/android_ebpf [EBPF]
+- https://github.com/cloudfuzz/android-kernel-exploitation [Android Kernel Exploitation]
 
 > IOS jailbreak
 - https://github.com/jjolano/shadow
