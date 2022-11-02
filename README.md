@@ -816,6 +816,7 @@
 - https://github.com/SsageParuders/Android_Native_Surface [Android Native Overlay]
 - https://github.com/xBrunoMedeiros/eac-overlay [EAC Overlay]
 - https://github.com/3r4y/imgui-external-overlay [imgui overlay]
+- https://github.com/J0xna/Kernel-Overlay-Hider [Kernel Overlay Hider]
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
