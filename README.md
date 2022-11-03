@@ -309,6 +309,7 @@
 - https://github.com/RomanceTheHeart/Automation_Examples [Automating certain tasks in the Unreal editor]
 - https://github.com/DaedalicEntertainment/ue4-test-automation [Facilitates setting up integration test suits with Unreal Engine 4 Gauntlet]
 - https://github.com/DenuvoSoftwareSolutions/Onlooker [Tool to collect and visualize memory usage of a process tree]
+- https://github.com/milostosic/rprof [CPU scope based profiling library]
 
 ## Game Tools
 - [Play your favorite games in a borderless window; no more time consuming alt-tabs](https://github.com/Codeusa/Borderless-Gaming)
@@ -662,6 +663,7 @@
 - https://github.com/jmprdi/binja-division-deoptimization [Division and Modulo Deoptimizer]
 - https://github.com/mrphrazer/obfuscation_detection [Collection of scripts to pinpoint obfuscated code]
 - [Package Binary Code as a Python class using Binary Ninja and Unicorn Engine](https://github.com/pbiernat/ripr)
+- https://github.com/seeinglogic/ariadne [Graph Analysis]
 
 > Ghidra Plugins
 - https://github.com/CENSUS/ghidra-frida-hook-gen
