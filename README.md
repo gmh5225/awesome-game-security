@@ -550,6 +550,7 @@
 - https://github.com/alal4465/KernelMon [Monitoring Windows Kernel Drivers]
 - https://github.com/gmh5225/Practical-Reverse-Engineering-Solutions [DPC+APC]
 - https://github.com/br-sn/CheekyBlinder [Enumerating and removing kernel callbacks using signed vulnerable drivers]
+- https://github.com/GetRektBoy724/DCMB [Removing kernel callbacks]
 
 > Magisk
 - https://github.com/PShocker/Zygisk-MagiskHide
