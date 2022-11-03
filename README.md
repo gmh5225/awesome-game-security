@@ -1313,6 +1313,7 @@
 - https://github.com/botkalista/ayaya-league-external [Nodejs based scripting platform]
 - https://github.com/jfd02/TFT-OCR-BOT [TFT]
 - https://github.com/sooqua/VanderLeague [Hypervisor-assisted]
+- https://github.com/KebsCS/League-DirectX11-Internal [Internal]
 
 > Game:NARAKA
 - https://www.unknowncheats.me/forum/other-fps-games/490052-naraka-bladepoint-reversal-structs-offsets.html
