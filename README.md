@@ -113,6 +113,7 @@
 - https://github.com/irisengine/iris [cross-platform C++]
 - https://github.com/WistfulHopes/NightSkyEngine [A fighting game engine written in Unreal Engine 5]
 - https://github.com/ObEngine/ObEngine [2D+Lua]
+- https://github.com/harukumo/HorizonEngine [3D rendering engine]
 
 
 > Game Engine Plugins:Unreal
@@ -160,6 +161,7 @@
 - https://github.com/paroj/gltut [OpenGL Render]
 - https://github.com/ashawkey/raytracing [RayTracer]
 - https://github.com/crosire/reshade [A generic post-processing injector for games and video software]
+- https://github.com/harukumo/HorizonEngine [3D rendering engine]
 
 ## 3D Graphics
 - https://github.com/Mesa3D/mesa
