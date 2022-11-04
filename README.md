@@ -112,6 +112,7 @@
 - https://github.com/gscept/nebula
 - https://github.com/irisengine/iris [cross-platform C++]
 - https://github.com/WistfulHopes/NightSkyEngine [A fighting game engine written in Unreal Engine 5]
+- https://github.com/ObEngine/ObEngine [2D+Lua]
 
 
 > Game Engine Plugins:Unreal
