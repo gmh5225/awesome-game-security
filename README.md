@@ -1342,6 +1342,9 @@
 - https://github.com/adde88/SkyEngine [Wow Lua Unlocker]
 - https://github.com/gmh5225/WOW-WowAutoFishing [Auto Fishing]
 
+> Game:Warcraft III
+- https://github.com/stijnherfst/HiveWE [editor]
+
 > Game:Half-Life 2
 - https://github.com/codereversing/hl2aimbot
 - https://github.com/codereversing/hl2esp
