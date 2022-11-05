@@ -559,6 +559,7 @@
 - https://github.com/PShocker/Zygisk-MagiskHide
 - https://github.com/longpoxin/hideroot
 - https://github.com/canyie/Riru-MomoHider
+- https://github.com/newbit1/rootAVD [root AVD]
 
 > Android File Explorer
 - https://github.com/nzcv/note [Guide-zh]
@@ -589,6 +590,7 @@
 > IOS jailbreak
 - https://github.com/jjolano/shadow
 - https://github.com/gmh5225/IOS-jailbreak--Fugu15
+- https://github.com/Kc57/iHide
 
 > Virtual Environments
 - https://github.com/FBlackBox/BlackBox [Android]
