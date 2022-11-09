@@ -320,6 +320,7 @@
 - https://github.com/ryanjon2040/Unreal-Binary-Builder [Build UE Source]
 - https://github.com/ryanjon2040/UnrealNetworkProfiler [Network Profiler for UE]
 - [Command line tool for getting the download URL for the latest or specific version of Unity](https://github.com/neogeek/get-unity)
+- https://github.com/recastnavigation/recastnavigation [Navigation-mesh Toolset for Games]
 
 ## Game Manager
 - https://github.com/JosefNemec/Playnite
