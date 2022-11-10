@@ -1215,6 +1215,8 @@
 
 > Explore AntiCheat System:XignCode
 - https://github.com/Skengdo/XignCode-Dump
+- https://github.com/st4ckh0und/XignCode3-bypass-alternative
+- https://github.com/st4ckh0und/XignCode3-bypass
 
 > Explore AntiCheat System:ACE
 - https://github.com/H3d9/sguard_limit
@@ -1235,6 +1237,8 @@
 
 > Explore AntiCheat System:NGS
 - https://github.com/st4ckh0und/NexonGameSecurity-bypass
+- https://github.com/st4ckh0und/NexonGameSecurity-bypass-alternative
+- https://github.com/st4ckh0und/NexonGameSecurity-bypass-wow64
 
 > Explore AntiCheat System:FACEIT
 - https://github.com/ekknod/EC_PRO-LAN
