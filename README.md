@@ -561,6 +561,7 @@
 - https://github.com/longpoxin/hideroot
 - https://github.com/canyie/Riru-MomoHider
 - https://github.com/newbit1/rootAVD [root AVD]
+- https://github.com/Fox2Code/FoxMagiskModuleManager [A module manager for Magisk]
 
 > Android File Explorer
 - https://github.com/nzcv/note [Guide-zh]
