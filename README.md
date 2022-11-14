@@ -339,6 +339,7 @@
 - https://github.com/crytic [Blockchain Security, by @trailofbits]
 - https://github.com/crytic/building-secure-contracts [Guidelines and training material to write secure smart contracts]
 - https://github.com/crytic/etheno [Ethereum security analysis and testing]
+- https://github.com/crytic/echidna [Ethereum smart contract fuzzer]
 
 ## DirectX
 > Guide
