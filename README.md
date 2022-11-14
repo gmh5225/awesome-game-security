@@ -308,6 +308,7 @@
 - https://github.com/aristocratos/btop [Performance Monitor]
 - https://github.com/Celtoys/Remotery [A realtime CPU/GPU profiler]
 - https://github.com/Volkanite/Push [Monitor GPU/CPU/RAM performance]
+- https://github.com/google/orbit [C/C++ Performance Profiler]
 - https://github.com/wolfpld/tracy [C++ frame profiler]
 - https://github.com/RomanceTheHeart/Automation_Examples [Automating certain tasks in the Unreal editor]
 - https://github.com/DaedalicEntertainment/ue4-test-automation [Facilitates setting up integration test suits with Unreal Engine 4 Gauntlet]
