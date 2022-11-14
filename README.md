@@ -475,6 +475,7 @@
 - https://github.com/rednaga/APKiD [PEiD for Android]
 - https://github.com/Col-E/Recaf [Java]
 - https://github.com/tomvita/SE-tools [Nintendo Switch]
+- https://github.com/StudentBlake/XCI-Explorer [XCI Explorer]
 
 > Fix VMP
 - https://github.com/wallds/NoVmpy
