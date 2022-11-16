@@ -596,6 +596,7 @@
 - https://github.com/jjolano/shadow
 - https://github.com/gmh5225/IOS-jailbreak--Fugu15
 - https://github.com/Kc57/iHide
+- https://github.com/palera1n/palera1n
 
 > Virtual Environments
 - https://github.com/FBlackBox/BlackBox [Android]
