@@ -2068,6 +2068,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Detection:Injection
 - https://github.com/mq1n/DLLThreadInjectionDetector
 - https://github.com/Nou4r/ModFinder [Mapped Dll]
+- https://github.com/gmh5225/Driver-WatchOwl [ImageNotify+Stack Trace]
 
 > Detection:ESP
 - https://github.com/weak1337/PresentHookDetection
