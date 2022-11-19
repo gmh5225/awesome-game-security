@@ -2175,7 +2175,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/FakeEnclave [A poc that abuses Enclave]
 - https://github.com/gmh5225/LetMeGG [A POC about how to prevent windbg break]
 - https://github.com/UCFoxi/NotifyRoutineHijackThread [Hijack PspCreateThreadNotifyRoutine]
-- https://www.unknowncheats.me/forum/anti-cheat-bypass/517022-getwindowname-kernel-mode.html [GetWindowName In Kernel Mode]
+- [GetWindowName In Kernel Mode](https://www.unknowncheats.me/forum/anti-cheat-bypass/517022-getwindowname-kernel-mode.html)
+- [GetWindowInfo In Kernel Mode](https://www.unknowncheats.me/forum/anti-cheat-bypass/519261-getwindowinfo.html)
 
 
 > Windows Ring3
