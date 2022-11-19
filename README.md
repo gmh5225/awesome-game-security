@@ -1574,7 +1574,7 @@
 
 > Game:Super People
 - https://github.com/EBalloon/Super-People-sdk
-- https://github.com/archie2adolphe/Super-People-Esp-Aimbot-Magic-Hack
+- https://github.com/jeradwtf/Super-People-Esp-Aimbot-Magic-Hack
 
 > Game:Splitgate
 - https://github.com/percpopper/Splitgate-Internal
