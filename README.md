@@ -1451,6 +1451,7 @@
 - https://github.com/MauhTon/Valorant-Aimbot-Bypass
 - https://github.com/zeroday-z/CyberAntLoader
 - https://github.com/Fnoberz/Valorant.External
+- https://github.com/R7flex/valorant-internal-base [Internal]
 
 > Game:VEILED EXPERTS
 - https://github.com/EBalloon/VEILED-EXPERTS-SDK
