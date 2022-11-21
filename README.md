@@ -290,6 +290,7 @@
 - https://github.com/HitmanHimself/GOWTool [God of War 2018]
 - https://github.com/KhronosGroup/glTF [Runtime 3D Asset Delivery]
 - https://github.com/syoyo/tinygltf [Header only C++11 tiny glTF 2.0 library]
+- https://github.com/atenfyr/UAssetGUI [Viewing and modifying UE4 game assets]
 
 ## Game Hot Patch
 - https://github.com/Tencent/xLua
@@ -1115,6 +1116,7 @@
 - [unpack, pack, list, check and mount Unreal Engine 4 .pak archives](https://github.com/panzi/rust-u4pak)
 - https://github.com/Qemu-Gang/QemuUnrealDumper-4.25 [SDK Dump By QEMU]
 - https://github.com/kenn-notation/UnrealEngineSDK [Universal Cheat development kit]
+- https://github.com/atenfyr/UAssetGUI [Viewing and modifying UE4 game assets]
 
 > Game Engine Explorer:Unity
 - https://github.com/mono/mono [mono]
