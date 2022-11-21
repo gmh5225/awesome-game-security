@@ -999,6 +999,7 @@
 - https://github.com/thesecretclub/callout-poc
 - https://github.com/veryboreddd/Return-address-spoofer
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/512002-x64-return-address-spoofing.html
+- https://github.com/Kudaes/Unwinder [Another approach to thread stack spoofing]
 
 > Hide
 - https://github.com/JKornev/hidden
