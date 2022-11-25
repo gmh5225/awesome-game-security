@@ -482,6 +482,7 @@
 - https://github.com/Col-E/Recaf [Java]
 - https://github.com/tomvita/SE-tools [Nintendo Switch]
 - https://github.com/StudentBlake/XCI-Explorer [XCI Explorer]
+- https://github.com/Anonym0ose/JitDumper [A CIL method body dumper]
 
 > Fix VMP
 - https://github.com/wallds/NoVmpy
