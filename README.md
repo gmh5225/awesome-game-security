@@ -2047,6 +2047,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/helloobaby/Nmi-Callback [NMI Callback]
 - https://github.com/momo5502/ept-hook-detection [Detect EPT]
 - https://github.com/Ahora57/Hypervisor_detect_ring_0
+- https://github.com/jonomango/nohv
 
 > Detection:Virtual Environments 
 - https://github.com/a0rtega/pafish
