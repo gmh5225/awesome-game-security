@@ -1778,6 +1778,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Game:Devour
 - https://github.com/ALittlePatate/DevourClient
+- https://github.com/BitCrackers/DevourMenu [Menu]
 
 
 ## Anti Cheat
