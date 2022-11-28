@@ -1624,6 +1624,10 @@
 - https://github.com/Qemu-Gang/Escape-from-TuxKov [QEMU]
 - https://github.com/gmh5225/Comm-ImMiraclela
 - https://github.com/krispybyte/Simple-EFT-Base
+- https://github.com/bytemyass/EFTLeecher [DMA]
+- https://github.com/gmh5225/eft-dma-radar-1 [DMA Radar]
+- https://github.com/dwabdasdna/MonoEFT
+- https://github.com/ZhaoKunqi/simple-eft-superman-training-bot
 
 > Game:R6
 - https://github.com/NMan1/Rainbow-Six-Cheat
