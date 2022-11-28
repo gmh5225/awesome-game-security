@@ -390,6 +390,7 @@
 - https://github.com/mytechnotalent/Reverse-Engineering
 - https://github.com/wtsxDev/reverse-engineering
 - https://github.com/mytechnotalent/Hacking-Windows
+- https://github.com/kotae4/intro-to-gamehacking
 - https://blog.can.ac/author/can1357
 - https://github.com/SinaKarvandi/Hypervisor-From-Scratch [Hypervisor]
 - https://secret.club
