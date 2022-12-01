@@ -2243,6 +2243,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/WSA-Community/WSA-Linux-Kernel
 - https://github.com/Paxxs/BuildWSA
 - https://github.com/LSPosed/MagiskOnWSALocal
+- https://github.com/cinit/WSAPatch [Make WSA run on Windows 10]
 
 ## Android Emulator
 - https://github.com/Genymobile
