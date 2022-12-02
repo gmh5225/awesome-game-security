@@ -685,6 +685,7 @@
 
 > Ghidra Plugins
 - https://github.com/CENSUS/ghidra-frida-hook-gen
+- https://github.com/Gekkio/GhidraBoy [Sharp SM83 / Game Boy extension for Ghidra]
 
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
