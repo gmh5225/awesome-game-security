@@ -1576,6 +1576,7 @@
 - https://github.com/0dayatday0/BattleFN-cheat-analysis
 - https://github.com/aqaylore/fortnite-internal-updated-ritz [Internal]
 - https://github.com/JeanToBinks/Fortnite-Cheato-UD-EAC-BE
+- https://github.com/gmh5225/BE-Forcer-Fortnite [BE forcer for fortnite]
 
 > Game:Bloodhunt
 - https://github.com/ZZZ-Monster/bloodhunt_External
