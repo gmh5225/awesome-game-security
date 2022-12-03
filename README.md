@@ -1230,6 +1230,7 @@
 - https://github.com/Nuxar1/DecryptionDumper [Dump]
 - https://github.com/lil-skies/val-exception-handler [ZwRaiseException Dump]
 - https://github.com/gmh5225/Dump-val-exception-handler [RtlpCallVectoredHandlers Dump]
+- https://github.com/AdvancedVectorExtensions/VanguardImportResolver [Resolve vgk's protected imports]
 
 > Explore AntiCheat System:XignCode
 - https://github.com/Skengdo/XignCode-Dump
