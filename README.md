@@ -682,6 +682,7 @@
 - https://github.com/mrphrazer/obfuscation_detection [Collection of scripts to pinpoint obfuscated code]
 - [Package Binary Code as a Python class using Binary Ninja and Unicorn Engine](https://github.com/pbiernat/ripr)
 - https://github.com/seeinglogic/ariadne [Graph Analysis]
+- https://github.com/skr0x1c0/binja_kc [Plugin for loading MachO kernelcache and dSYM files]
 
 > Ghidra Plugins
 - https://github.com/CENSUS/ghidra-frida-hook-gen
