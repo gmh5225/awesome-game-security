@@ -661,6 +661,7 @@
 - https://gitlab.com/eshard/d810 [Deobfuscate code at decompilation time by modifying IDA Pro microcode]
 - https://github.com/airbus-seclab/AutoResolv [Resolves functions imported from external libraries]
 - https://github.com/snare/ida-efiutils [EFI binaries]
+- https://github.com/JusticeRage/Gepetto [ChatGPT]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
