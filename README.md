@@ -1614,6 +1614,7 @@
 - https://github.com/kp7742/PUBGPatcher
 - https://github.com/Zakaria-Master/PUBGM1.6-DeadGame
 - https://github.com/mut1234/BYPASS-PUBG-MOBILE-IMGUI
+- https://github.com/busmanl30/LastIslandOfSurvival-iOSCheat-Source
 
 
 > Game:EFT
