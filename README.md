@@ -663,6 +663,7 @@
 - https://github.com/snare/ida-efiutils [EFI binaries]
 - https://github.com/JusticeRage/Gepetto [ChatGPT]
 - https://github.com/MayerDaniel/ida_gpt [ChatGPT]
+- https://github.com/mahaloz/DAILA [ChatGPT]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
