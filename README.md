@@ -530,6 +530,7 @@
 - https://github.com/everdox/InfinityHook [ETW Hook]
 - https://github.com/FiYHer/InfinityHookPro [ETW Hook Ex]
 - https://github.com/gmh5225/ETWHOOK-InfinityHookClass [ETW Hook Ex]
+- https://github.com/DearXiaoGui/InfinityHookPro-main [ETW Hook WIN11]
 - https://github.com/KelvinMsft/ThreadSpy [PMI Callback]
 - https://github.com/KelvinMsft/PerfMon [PMI Callback]
 - https://github.com/gmh5225/PMI-hpc [PMI]
