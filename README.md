@@ -2112,6 +2112,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/vvb2060/MagiskDetector
 - https://github.com/canyie/MagiskKiller
 - https://github.com/Dr-TSNG/ApplistDetector
+- https://github.com/apkunpacker/MagiskDetection
 
 > Detection:Frida
 - https://github.com/darvincisec/DetectFrida
