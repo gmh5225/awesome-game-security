@@ -1821,6 +1821,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/odzhan/injection [Injection Testing]
 - https://github.com/w1u0u1/kinject [Injection Testing]
 - https://github.com/D4stiny/ThreadJect [Injection Testing]
+- https://github.com/deepinstinct/Dirty-Vanity [Injection Testing:RtlCreateProcessReflection]
 - https://github.com/NullTerminatorr/ThreadHijackingInjector [Injection Testing]
 - https://github.com/Skengdo/simple-SetWindowsHookExW-injector [Injection Testing:SetWindowsHookExW]
 - https://github.com/gmh5225/SetWindowsHookEx-Injector [Injection Testing:SetWindowsHookExW]
