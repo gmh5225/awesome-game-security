@@ -1057,6 +1057,7 @@
 - https://github.com/OSNSON/Overwatch-1-cheat-source-. [NtUserInjectMouseInput]
 - https://github.com/gmh5225/NtUserInjectMouseInput-syscall [NtUserInjectMouseInput SYSCALL]
 - https://github.com/327135569/ClickPic [OpenCV + Triggerbot]
+- https://github.com/gmh5225/OpenCV-SmartAimBot [OpenCV + Triggerbot]
 - https://github.com/Lexikos/AutoHotkey_L
 
 > WallHack
