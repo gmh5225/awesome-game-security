@@ -1702,7 +1702,8 @@
 - https://github.com/Disline1337/Rust-Cheat-External-main
 - https://github.com/gmh5225/Rust-RustInternal [Internal]
 - https://github.com/gmh5225/rust-external-1 [External]
-- https://github.com/Fnoberz/Rust-External
+- https://github.com/Fnoberz/Rust-External [External]
+- https://github.com/gmh5225/Rust-ExternaL-and-Driver-AlienCheats [External]
 
 > Game:Arma3
 - https://github.com/Skengdo/arma3-external-variable-manager
