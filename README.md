@@ -221,6 +221,7 @@
 - https://github.com/yrgo/awesome-educational-games
 - https://github.com/raizam/gamedev_libraries [A collection of open source c/c++ libraries for gamedev]
 - https://github.com/gheja/game-design-documents [Game design documents]
+- https://github.com/Kavex/GameDev-Resources [Game Development resources]
 - https://github.com/crazyshader/GameDev [Unity]
 - https://github.com/RyanNielson/awesome-unity [Unity]
 - https://github.com/QianMo/Unity-Design-Pattern [Unity Design]
