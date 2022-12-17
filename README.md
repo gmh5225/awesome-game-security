@@ -1687,8 +1687,6 @@
 - https://github.com/NMan1/OverflowRust
 - https://github.com/ReFo0/simple-rust-hack
 - https://github.com/Facepunch-bot/rust-internal
-- https://github.com/gmh5225/Rust-Internal-Esp-Aimbot-Spoofer-Hack-Cheat-Injector-Driver
-- https://github.com/gmh5225/Rust-External-Esp-Aimbot-Spoofer-Hack-Cheat-Injector-Driver
 - https://github.com/Facepunch-bot/Rust-External
 - https://github.com/Facepunch-bot/Rico-Cheat-rust-external
 - https://github.com/spyder1g/a-pasted-rust-script
