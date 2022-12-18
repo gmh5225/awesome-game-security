@@ -2185,6 +2185,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Black Signature
 - https://github.com/gmh5225/BlackSignatureDriver
+- https://github.com/Harvester57/CodeIntegrity-DriverBlocklist
 
 ## Some Tricks
 > Windows Ring0
