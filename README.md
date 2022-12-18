@@ -364,6 +364,7 @@
 - https://github.com/marlkiller/d3dhook_imgui [d3d opengl hook imgui x86/x64]
 - [Universal graphical hook for a D3D9-D3D12, OpenGL and Vulkan based games](https://github.com/Rebzzel/kiero)
 - https://github.com/jmpews/Dobby [a lightweight, multi-platform, multi-architecture hook framework]
+- https://github.com/Sh0ckFR/Universal-Dear-ImGui-Hook [An universal Dear ImGui Hook]
 
 > Tools
 - https://github.com/visotw/3d9 [Fixing broken stereoscopic effects in DX11 games]
