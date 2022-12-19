@@ -1541,6 +1541,7 @@
 - https://github.com/XRadius/project-tanya [linux]
 - https://github.com/KaylinOwO/Project-Branthium
 - https://github.com/gmh5225/Apex-Legends-External-Esp-Aimbot-Skinchanger
+- https://github.com/Neurosisccc/Apex-ItemGlow [Item glow]
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
