@@ -1171,6 +1171,7 @@
 - https://github.com/xxzzddxzd/unitySpeedTools [IOS Speed Tools]
 - https://github.com/interception-team/il2cpp-finder [Il2Cpp Finder]
 - https://github.com/gmh5225/frida-il2cpp-datacollector [Il2Cpp datacollector for Android/IOS]
+- https://github.com/BepInEx/BepInEx [plugin/modding framework]
 
 > Game Engine Explorer:Source
 - https://github.com/anarh1st47/Source2Dumps [Dump]
