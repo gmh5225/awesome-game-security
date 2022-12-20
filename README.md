@@ -347,6 +347,7 @@
 - https://github.com/crytic/etheno [Ethereum security analysis and testing]
 - https://github.com/crytic/echidna [Ethereum smart contract fuzzer]
 - https://github.com/secureum/DeFi-Security-Summit-Stanford [DEFI Focus Smart Contract Security Capture the Flag]
+- https://github.com/go-outside-labs/blockchain-hacking [hacking]
 
 ## DirectX
 > Guide
