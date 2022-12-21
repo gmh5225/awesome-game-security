@@ -1213,7 +1213,7 @@
 - https://github.com/Imabot115/ce-EasyAntiCheat-Bypass [UD CE]
 - https://github.com/ioncodes/pooldump [Extract the DLL that EACs manualmaps into the game process]
 - https://github.com/SlowyZX/VmCheck.asm [Virtual machine checking]
-- [https://www.unknowncheats.me/forum/anti-cheat-bypass/561479-eacs-instrumentation-callback-bypass.html](Instrumentation Callback Bypass)
+- https://www.unknowncheats.me/forum/anti-cheat-bypass/561479-eacs-instrumentation-callback-bypass.html
 
 > Explore AntiCheat System:BE
 - https://github.com/Schnocker/NoEye
