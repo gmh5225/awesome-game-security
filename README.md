@@ -1446,6 +1446,7 @@
 - https://github.com/ekknod/EC
 - https://github.com/soyware/heck_csgo_external [External]
 - https://github.com/martinjanas/Sensum [Internal]
+- https://github.com/cazzwastaken/kakhack [Internal]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
