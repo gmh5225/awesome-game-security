@@ -582,6 +582,7 @@
 - https://github.com/nzcv/note [Guide-zh]
 - https://github.com/iBotPeaches/Apktool
 - https://github.com/pxb1988/dex2jar
+- https://github.com/skylot/jadx [Dex to Java decompiler]
 - https://github.com/LuckyPray/DexKit-Android [dex deobfuscator]
 - https://github.com/rednaga/APKiD [PEiD for Android]
 
