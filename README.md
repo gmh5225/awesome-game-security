@@ -65,6 +65,7 @@
 - https://github.com/CRYTEK/CRYENGINE
 - https://github.com/panda3d/panda3d
 - https://github.com/ValveSoftware/source-sdk-2013
+- https://github.com/gmh5225/source-sdk-orangebox
 - https://github.com/UTINKA/source-engine.2003
 - https://github.com/VSES/SourceEngine2007
 - https://github.com/nillerusr/source-engine
