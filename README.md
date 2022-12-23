@@ -163,6 +163,7 @@
 - https://github.com/ashawkey/raytracing [RayTracer]
 - https://github.com/crosire/reshade [A generic post-processing injector for games and video software]
 - https://github.com/harukumo/HorizonEngine [3D rendering engine]
+- https://github.com/Patryk27/strolle [Real-time rendering engine]
 
 ## 3D Graphics
 - https://github.com/Mesa3D/mesa
