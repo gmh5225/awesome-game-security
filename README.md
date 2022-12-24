@@ -1452,6 +1452,7 @@
 - https://github.com/soyware/heck_csgo_external [External]
 - https://github.com/martinjanas/Sensum [Internal]
 - https://github.com/cazzwastaken/kakhack [Internal]
+- https://github.com/binkynz/cstrike-hack
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
