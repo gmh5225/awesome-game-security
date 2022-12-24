@@ -808,6 +808,7 @@
 - https://github.com/0vercl0k/rp
 - https://github.com/JonathanSalwan/ROPgadget
 - https://github.com/helpsystems/Agafi
+- https://github.com/hugsy/ropgadget-rs
 
 > ROP Generation
 - https://github.com/d4em0n/exrop
