@@ -922,6 +922,7 @@
 - https://github.com/RedCursorSecurityConsulting/PPLKiller [RTCore64.sys]
 - https://github.com/ReCryptLLC/CVE-2022-42045 [amsdk.sys]
 - https://github.com/gmh5225/CVE-2022-3699 [LenovoDiagnosticsDriver.sys]
+- https://github.com/kkent030315/CVE-2022-42046 [wfshbr64.sys]
 
 
 > Driver Communication
