@@ -1330,6 +1330,7 @@
 - https://github.com/shalzuth/RemnantESP
 
 > Game:LostArk
+- https://github.com/shalzuth/LostArkDumper
 - https://github.com/shalzuth/LostArkLogger
 - https://github.com/realrespecter/LOST-ARK-SDK
 
