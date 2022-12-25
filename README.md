@@ -1375,6 +1375,7 @@
 > Game:NARAKA
 - https://www.unknowncheats.me/forum/other-fps-games/490052-naraka-bladepoint-reversal-structs-offsets.html
 - https://github.com/xkp95175333/DummyDlls_NARAKA_1_9_21 [Dump]
+- https://github.com/Rythorndoran/Naraka-Hack
 
 > Game:Thetan
 - https://github.com/xkp95175333/Thetan_ArenaSDK
