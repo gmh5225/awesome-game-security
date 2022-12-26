@@ -552,7 +552,7 @@
 - https://github.com/googleprojectzero/winafl [Intel PT Fuzzer]
 - https://github.com/intelpt/winipt [ipt.sys]
 - https://github.com/intelpt/processor-trace [Intel PT Decoder]
-- https://github.com/spomile/LoopHPCs [Intel PEBs]
+- https://github.com/gmh5225/Driver-intel-PEBs-LoopHPCs [Intel PEBs]
 - https://github.com/ilovecsad/Ark [Tool]
 - https://github.com/gmh5225/ntoskrnl_file_collection [Ntoskrnl Version]
 - https://github.com/gmh5225/win32k_file_collection [Win32k Version]
