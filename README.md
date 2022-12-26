@@ -338,6 +338,9 @@
 - https://github.com/nikaera/Unity-GameCI-Sample [Unity]
 
 ## Web3 Game
+> Blockchain Guide
+- https://github.com/unbalancedparentheses/practical_cryptography_and_distributed_ledgers
+
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
 
