@@ -719,6 +719,7 @@
 - https://github.com/JKornev/cfgdump [Analyze Control Flow Guard map]
 - https://github.com/yardenshafir/WinDbg_Scripts [WinDbg scripts]
 - https://github.com/long123king/dk [Refactored version of tokenext]
+- https://github.com/ch3rn0byl/WinDbg-Extensions [Callback Extension]
 
 > X64DBG Plugins
 - https://github.com/x64dbg/x64dbg/wiki/Plugins
