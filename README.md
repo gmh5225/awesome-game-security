@@ -2195,6 +2195,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/LdrRegisterDllNotification-modify-testing [DllNotification]
 
 > Windows Ring0 Callback
+- https://github.com/gmh5225/kernel-callback-functions-list [Callback List]
 - [Enumerate Callback](https://github.com/hfiref0x/WinObjEx64/blob/7284d711b2eeebfd965713fc79353b9b76e23083/Source/WinObjEx64/extras/extrasCallbacks.c#L117)
 - [ImageNotify Callback With RtlWalkFrameChain](https://github.com/Staatsgeheim/PsImageNotifyRoutineSpamFilter)
 - [SymlinkCallback](https://github.com/yardenshafir/SymlinkCallback)
