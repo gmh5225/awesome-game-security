@@ -1038,6 +1038,7 @@
 > Hide
 - https://github.com/JKornev/hidden
 - https://github.com/sina85/hide-file [Hide File]
+- https://github.com/ch3rn0byl/ANTfs [Delete File]
 - https://github.com/KANKOSHEV/NoScreen [Hide Window]
 - https://github.com/nlepleux/MappedCallback [Hide Callback]
 - https://github.com/rogerxiii/kernel-codecave-poc [Find Codecave]
@@ -2171,6 +2172,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/mubix/netview
 - https://github.com/rbmm/USN
 - https://github.com/rbmm/SearchEx
+- https://github.com/ch3rn0byl/ANTfs
 
 > Dynamic Script
 - https://github.com/can1357/NtLua
