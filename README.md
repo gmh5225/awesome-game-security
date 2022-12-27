@@ -706,6 +706,7 @@
 - https://github.com/CENSUS/ghidra-frida-hook-gen
 - https://github.com/Gekkio/GhidraBoy [Sharp SM83 / Game Boy extension for Ghidra]
 - https://github.com/fmagin/ghidra-openai [ChatGPT]
+- https://github.com/securityjoes/ThreatResearch [ChatGPT]
 - https://github.com/pudii/gba-ghidra-loader [GameBoy]
 
 > Windbg Plugins
