@@ -2203,6 +2203,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [ImageNotify Callback With RtlWalkFrameChain](https://github.com/Staatsgeheim/PsImageNotifyRoutineSpamFilter)
 - [SymlinkCallback](https://github.com/yardenshafir/SymlinkCallback)
 
+> Winows User Dump Analysis
+- https://github.com/0vercl0k/udmp-parser
+
 > Winows Kernel Dump Analysis
 - https://github.com/gmh5225/Tool-DIYSystemMemoryDump [DIY Dump Type]
 - https://github.com/0vercl0k/kdmp-parser [Python 3 bindings]
