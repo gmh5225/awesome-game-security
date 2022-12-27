@@ -3,6 +3,9 @@
 
 [![GitHub license](https://img.shields.io/github/license/gmh5225/awesome-game-security)](https://github.com/gmh5225/awesome-game-security/blob/main/LICENSE)
 
+## How to contribute?
+- https://docs.github.com/en/get-started/quickstart/contributing-to-projects
+
 ## Contents
 - [Game Engine](#Game-Engine)
 - [Mathematics](#Mathematics)
