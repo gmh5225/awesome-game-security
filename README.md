@@ -2211,6 +2211,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Tool-DIYSystemMemoryDump [DIY Dump Type]
 - https://github.com/0vercl0k/kdmp-parser [Python 3 bindings]
 - https://github.com/mrexodia/dumpulator [Emulating code in minidump files]
+- https://github.com/0vercl0k/symbolizer [Execution trace symbolizer]
 
 > Sign Tools
 - https://github.com/mtrojnar/osslsigncode
