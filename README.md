@@ -98,6 +98,7 @@
 - https://github.com/nCine/nCine [2D]
 - https://github.com/gameplay3d/gameplay [2D/3D]
 - https://github.com/turbulenz/turbulenz_engine [HTML5]
+- https://github.com/egret-labs/egret-core [HTML5]
 - https://github.com/TorqueGameEngines/Torque2D [2D]
 - https://github.com/TorqueGameEngines/Torque3D [3D]
 - https://github.com/PardCode/CX3D [3D]
