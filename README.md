@@ -1469,6 +1469,7 @@
 - https://github.com/martinjanas/Sensum [Internal]
 - https://github.com/cazzwastaken/kakhack [Internal]
 - https://github.com/binkynz/cstrike-hack
+- https://github.com/R4YVEN/raybot-zero [Kernel-mode]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
