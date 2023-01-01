@@ -711,6 +711,8 @@
 - https://github.com/Gekkio/GhidraBoy [Sharp SM83 / Game Boy extension for Ghidra]
 - https://github.com/fmagin/ghidra-openai [ChatGPT]
 - https://github.com/securityjoes/ThreatResearch [ChatGPT]
+- https://github.com/evyatar9/GptHidra [ChatGPT]
+- https://github.com/moyix/gpt-wpre [ChatGPT]
 - https://github.com/pudii/gba-ghidra-loader [GameBoy]
 
 > Windbg Plugins
