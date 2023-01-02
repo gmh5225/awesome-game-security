@@ -1781,6 +1781,9 @@
 > Game:Dark Souls
 - https://github.com/igromanru/Dark-Souls-III-Cheat-Engine-Guide
 
+> Game:Sea Of Thieves
+- https://github.com/ToxSylph/SeaOfChoros
+
 > Game:GTA III - Definitive Edition
 - https://github.com/gmh5225/GTAIII-DE-GoldHook
 
