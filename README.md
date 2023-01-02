@@ -979,6 +979,7 @@
 - https://github.com/gmh5225/Comm-ImMiraclela [NtDxgkGetTrackedWorkloadStatistics/NtDxgkGetAvailableTrackedWorkLoadIndex]
 - https://www.unknowncheats.me/forum/2976731-post45.html [IsWin32KSyscallFiltered]
 - https://github.com/J0xna/Kernel-Overlay-Hider [NtMITPostWindowEventMessage]
+- https://github.com/gmh5225/Eac-Injector-Driver [NtQueryIntervalProfile]
 
 > EFI Driver
 - https://github.com/mrexodia/EfiCMake
@@ -1235,6 +1236,7 @@
 - https://github.com/ioncodes/pooldump [Extract the DLL that EACs manualmaps into the game process]
 - https://github.com/SlowyZX/VmCheck.asm [Virtual machine checking]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/561479-eacs-instrumentation-callback-bypass.html
+- https://github.com/gmh5225/Eac-Injector-Driver [Injector]
 
 > Explore AntiCheat System:BE
 - https://github.com/Schnocker/NoEye
