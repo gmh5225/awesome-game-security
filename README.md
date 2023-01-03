@@ -1236,7 +1236,7 @@
 - https://github.com/xBrunoMedeiros/eac-overlay [EAC Overlay]
 - https://github.com/Imabot115/ce-EasyAntiCheat-Bypass [UD CE]
 - https://github.com/ioncodes/pooldump [Extract the DLL that EACs manualmaps into the game process]
-- https://github.com/SlowyZX/VmCheck.asm [Virtual machine checking]
+- https://github.com/gmh5225/EAC-VmCheck.asm [Virtual machine checking]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/561479-eacs-instrumentation-callback-bypass.html
 - https://github.com/gmh5225/Eac-Injector-Driver [Injector]
 
