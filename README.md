@@ -683,6 +683,7 @@
 - https://github.com/JusticeRage/Gepetto [ChatGPT]
 - https://github.com/MayerDaniel/ida_gpt [ChatGPT]
 - https://github.com/mahaloz/DAILA [ChatGPT]
+- https://github.com/ke0z/VulChatGPT [ChatGPT]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
