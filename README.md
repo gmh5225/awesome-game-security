@@ -2264,6 +2264,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/StephanvanSchaik/windows-kernel-rs [Writing Windows kernel drivers in Rust]
 - https://github.com/ekknod/smm [Smm cheat]
 - https://github.com/rbmm/KPDB [Parsing PDB in Driver]
+- https://github.com/GetRektBoy724/KPDB [Parsing PDB in Driver]
 - https://github.com/gmh5225/FakeEnclave [A poc that abuses Enclave]
 - https://github.com/gmh5225/LetMeGG [A POC about how to prevent windbg break]
 - https://github.com/UCFoxi/NotifyRoutineHijackThread [Hijack PspCreateThreadNotifyRoutine]
