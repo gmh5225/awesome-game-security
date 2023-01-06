@@ -1512,6 +1512,7 @@ Or you can send an issue for me.
 - https://github.com/zeroday-z/CyberAntLoader
 - https://github.com/Fnoberz/Valorant.External
 - https://github.com/R7flex/valorant-internal-base [Internal]
+- https://github.com/gmh5225/VALORANT-HACK-ESP-AIMBOT-SKINCHANGER-SOURCE [Internal]
 
 > Game:VEILED EXPERTS
 - https://github.com/EBalloon/VEILED-EXPERTS-SDK
