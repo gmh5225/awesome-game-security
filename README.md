@@ -1077,6 +1077,9 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Driver-SessionMapper [Session Driver]
 - https://github.com/gmh5225/Driver-DriverNoImage [Hijack Driver]
 
+> Anti Forensics
+- https://github.com/PaulNorman01/Forensia
+
 > Triggerbot & Aimbot
 - https://github.com/changeofpace/MouHidInputHook
 - https://github.com/ekknod/MouseClassServiceCallbackTrick
