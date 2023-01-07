@@ -2333,3 +2333,4 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Genymobile
 - https://github.com/Genymobile/genymotion-kernel
 - https://github.com/jwmcglynn/android-emulator
+- https://github.com/google/android-emulator-hypervisor-driver
