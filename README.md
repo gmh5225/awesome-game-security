@@ -720,6 +720,7 @@ Or you can send an issue for me.
 - https://github.com/evyatar9/GptHidra [ChatGPT]
 - https://github.com/moyix/gpt-wpre [ChatGPT]
 - https://github.com/pudii/gba-ghidra-loader [GameBoy]
+- https://github.com/MEhrn00/Ghidra_COFFParser [COFF]
 
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
