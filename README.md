@@ -505,6 +505,7 @@ Or you can send an issue for me.
 - https://github.com/tomvita/SE-tools [Nintendo Switch]
 - https://github.com/StudentBlake/XCI-Explorer [XCI Explorer]
 - https://github.com/Anonym0ose/JitDumper [A CIL method body dumper]
+- https://github.com/cfig/Android_boot_image_editor [A tool for reverse engineering Android ROM images]
 
 > Fix VMP
 - https://github.com/wallds/NoVmpy
