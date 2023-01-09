@@ -506,6 +506,8 @@ Or you can send an issue for me.
 - https://github.com/StudentBlake/XCI-Explorer [XCI Explorer]
 - https://github.com/Anonym0ose/JitDumper [A CIL method body dumper]
 - https://github.com/cfig/Android_boot_image_editor [A tool for reverse engineering Android ROM images]
+- https://github.com/hasherezade/pe-bear [PE Viewer]
+- https://github.com/zodiacon/TotalPE2 [PE Viewer]
 
 > Fix VMP
 - https://github.com/wallds/NoVmpy
