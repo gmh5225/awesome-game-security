@@ -1494,6 +1494,8 @@ Or you can send an issue for me.
 - https://github.com/cazzwastaken/kakhack [Internal]
 - https://github.com/binkynz/cstrike-hack
 - https://github.com/R4YVEN/raybot-zero [Kernel-mode]
+- https://github.com/gmh5225/CSGO-Loader [Loader]
+- https://github.com/gmh5225/CSGO-NIXWARE-CSGO [Nixware]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
