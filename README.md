@@ -1228,6 +1228,7 @@ Or you can send an issue for me.
 - https://github.com/krispybyte/Vook [VAC hook]
 - https://github.com/ioncodes/vacation3-emu [VAC3 module emulator]
 - https://github.com/altoid29/VACDumper [Dump]
+- https://github.com/Jackbail4/VAC-Bypass
 
 > Explore AntiCheat System:EAC
 - https://github.com/thesecretclub/CVEAC-2020 [Integrity Checks]
