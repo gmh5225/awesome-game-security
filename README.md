@@ -2321,6 +2321,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/LSPosed/AndroidHiddenApiBypass [Bypass hidden api restriction]
 - https://github.com/stars-one/ASCTool [Apk Signature Crack Tool]
 - https://github.com/ekknod/usbsn [USB serial number changer (root only)]
+- https://github.com/gmh5225/Android-privilege-CVE-2022-20452-LeakValue [Privilege Escalation]
 
 
 ## Windows Security Features
