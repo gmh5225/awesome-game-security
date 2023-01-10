@@ -253,6 +253,7 @@ Or you can send an issue for me.
 - https://github.com/tomlooman/EpicSurvivalGame [UE4 FPS Game]
 - https://github.com/QianMo/UE4-Tank-Game [UE4 Game]
 - https://github.com/gmh5225/UE-UE5-FPS-wlaster [UE5 FPS Game]
+- https://github.com/gmh5225/UE5-FPS-CryptRaider [UE5 FPS Game]
 - https://github.com/tomlooman/ActionRoguelike [UE Roguelike Game]
 - https://github.com/Unity-Technologies/FPSSample [Unity Game]
 - https://github.com/OguzKaira/FPS-Movement [Unity FPS]
