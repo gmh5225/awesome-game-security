@@ -1382,8 +1382,10 @@ Or you can send an issue for me.
 
 > Game:LOL
 - https://github.com/LeagueSharp
+- https://github.com/SwipeDan/LeagueSharp
 - https://github.com/ensoulsharp-io
 - https://ferrisbot.com/ferrisaio
+- https://github.com/SwipeDan/EloBuddy-Addons
 - https://github.com/shalzuth/LeagueSharp
 - https://github.com/shalzuth/LoLClient
 - https://github.com/RyukOP/L-Assemblies
