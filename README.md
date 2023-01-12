@@ -935,6 +935,7 @@ Or you can send an issue for me.
 - https://github.com/leeza007/evil-mhyprot-cli [Mhyprot2.sys]
 - https://github.com/keowu/mhyprot2 [Mhyprot2.sys]
 - https://github.com/kagurazakasanae/Mhyprot2DrvControl [Mhyprot2.sys]
+- https://github.com/Live-Hack-CVE/CVE-2020-36603 [Mhyprot2.sys]
 - https://github.com/tanduRE/AvastHV [Avast]
 - https://github.com/iPower/KasperskyHook [Kaspersky]
 - https://github.com/mathisvickie/CVE-2021-21551 [dbutil_2_3.sys]
