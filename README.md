@@ -759,6 +759,7 @@ Or you can send an issue for me.
 - https://github.com/ElvisBlue/x64dbgpython [Running python3 script]
 - https://github.com/secrary/idenLibX [Library Function Identification]
 - https://github.com/x64dbg/SlothBP [Collaborative Breakpoint Manager]
+- https://github.com/Kwansy98/ApiBreakpoint [Api Breakpoint]
 
 > Cheat Engine Plugins
 - https://github.com/FreeER/CE-Extensions [Lua Extensions]
