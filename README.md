@@ -697,6 +697,7 @@ Or you can send an issue for me.
 - https://github.com/MayerDaniel/ida_gpt [ChatGPT]
 - https://github.com/mahaloz/DAILA [ChatGPT]
 - https://github.com/ke0z/VulChatGPT [ChatGPT]
+- https://github.com/deadeert/EWS [Emulation]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
