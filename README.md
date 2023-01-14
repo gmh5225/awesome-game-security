@@ -142,6 +142,7 @@ Or you can send an issue for me.
 - [Unreal Engine 4 Plugin for Lua APIs implementation](https://github.com/rdeioris/LuaMachine)
 - [Debug Menu for UnrealEngine4](https://github.com/000-aki-000/GameDebugMenu)
 - ['Dear Imgui' remote access library and application](https://github.com/sammyfreg/netImgui)
+- [Customizable performance metric charts and STAT commands control panel](https://github.com/DarknessFX/DFoundryFX)
 
 > Game Engine Plugins:Unity
 - [A markdown viewer for unity](https://github.com/gwaredd/UnityMarkdownViewer)
