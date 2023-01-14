@@ -338,6 +338,7 @@ Or you can send an issue for me.
 - https://github.com/DaedalicEntertainment/ue4-test-automation [Facilitates setting up integration test suits with Unreal Engine 4 Gauntlet]
 - https://github.com/DenuvoSoftwareSolutions/Onlooker [Tool to collect and visualize memory usage of a process tree]
 - https://github.com/milostosic/rprof [CPU scope based profiling library]
+- https://github.com/DarknessFX/DFoundryFX [UE Performance]
 
 ## Game Tools
 - [Play your favorite games in a borderless window; no more time consuming alt-tabs](https://github.com/Codeusa/Borderless-Gaming)
