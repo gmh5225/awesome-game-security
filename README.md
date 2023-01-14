@@ -1181,6 +1181,7 @@ Or you can send an issue for me.
 - https://github.com/Qemu-Gang/QemuUnrealDumper-4.25 [SDK Dump By QEMU]
 - https://github.com/kenn-notation/UnrealEngineSDK [Universal Cheat development kit]
 - https://github.com/atenfyr/UAssetGUI [Viewing and modifying UE4 game assets]
+- https://github.com/UE4SS-RE/RE-UE4SS [Re-Host of Unreal Engine 4/5 Scripting System]
 
 > Game Engine Explorer:Unity
 - https://github.com/mono/mono [mono]
