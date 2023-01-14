@@ -516,6 +516,7 @@ Or you can send an issue for me.
 - https://github.com/cfig/Android_boot_image_editor [A tool for reverse engineering Android ROM images]
 - https://github.com/hasherezade/pe-bear [PE Viewer]
 - https://github.com/zodiacon/TotalPE2 [PE Viewer]
+- https://github.com/APKLab/APKLab [Android Reverse-Engineering Workbench for VS Code]
 
 > Fix VMP
 - https://github.com/wallds/NoVmpy
@@ -612,6 +613,7 @@ Or you can send an issue for me.
 - https://github.com/skylot/jadx [Dex to Java decompiler]
 - https://github.com/LuckyPray/DexKit-Android [dex deobfuscator]
 - https://github.com/rednaga/APKiD [PEiD for Android]
+- https://github.com/APKLab/APKLab [Android Reverse-Engineering Workbench for VS Code]
 
 > Android Memory Explorer
 - https://github.com/misc0110/PTEditor [PT Editor]
