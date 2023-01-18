@@ -1948,6 +1948,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [Linux anti-debugging techniques](https://github.com/hiatus/adbg)
 - https://github.com/HackOvert/AntiDBG
 - https://github.com/BarakAharoni/LADD [Linux]
+- https://github.com/0xor0ne/debugoff [Linux]
 - https://github.com/gmh5225/AntiKernelDebug-POC [Windows Kernel]
 - https://github.com/BaumFX/cpp-anti-debug
 - https://github.com/Metick/Anti-Debug
