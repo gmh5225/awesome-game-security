@@ -1008,6 +1008,7 @@ Or you can send an issue for me.
 - https://www.unknowncheats.me/forum/2976731-post45.html [IsWin32KSyscallFiltered]
 - https://github.com/J0xna/Kernel-Overlay-Hider [NtMITPostWindowEventMessage]
 - https://github.com/gmh5225/Eac-Injector-Driver [NtQueryIntervalProfile]
+- https://github.com/gmh5225/job_communication [NtQueryInformationJobObject]
 
 > EFI Driver
 - https://github.com/mrexodia/EfiCMake
