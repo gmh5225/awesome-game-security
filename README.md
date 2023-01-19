@@ -306,6 +306,7 @@ Or you can send an issue for me.
 - https://github.com/raysan5/raylib [A simple and easy-to-use library to enjoy videogames programming]
 - https://github.com/NotYetGames/WarriOrb [a Dark-Souls like action platformer using UE4]
 - https://github.com/pjasicek/OpenClaw [Reimplementation of Captain Claw (1997) platformer]
+- https://github.com/galaxyhaxz/devilution [Reversed Devilution]
 
 
 ## Game Assets
