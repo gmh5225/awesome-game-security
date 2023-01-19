@@ -833,6 +833,7 @@ Or you can send an issue for me.
 - https://github.com/stevemk14ebr/PolyHook
 - https://github.com/stevemk14ebr/PolyHook_2_0
 - https://github.com/WopsS/RenHook
+- https://github.com/Zeex/subhook
 - https://github.com/axhlzy/PyAsmPatch
 - https://github.com/TupleDev/KDtour [Easy Kernel Detour]
 - https://github.com/nelfo/PGHooker [Page Guard]
