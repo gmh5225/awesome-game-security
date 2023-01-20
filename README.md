@@ -1549,6 +1549,7 @@ Or you can send an issue for me.
 - https://github.com/R7flex/valorant-internal-base [Internal]
 - https://github.com/gmh5225/VALORANT-HACK-ESP-AIMBOT-SKINCHANGER-SOURCE [Internal]
 - https://github.com/gmh5225/Valorant-External-Source [External]
+- https://github.com/Smelo97/Valorant-cheat-internal [Internal]
 
 > Game:VEILED EXPERTS
 - https://github.com/EBalloon/VEILED-EXPERTS-SDK
