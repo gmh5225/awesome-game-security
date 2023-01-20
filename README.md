@@ -1632,6 +1632,7 @@ Or you can send an issue for me.
 - https://github.com/panzehirr/Fortnite-Offset-dumper [Offset & Dump]
 - https://github.com/plu1337/fortnite-virtual-offsets [Virtual Table Offsets]
 - https://github.com/plu1337/fortnite-sigs [Signature]
+- https://github.com/F0NDO/fortnite-sigs [Signature]
 - https://github.com/plu1337/fortnite-exploits [Exploits]
 - https://github.com/ReallReaper/Fortnite-Offsets-Sigs-and-more [Offset]
 - https://github.com/Makk5/FortConsole
