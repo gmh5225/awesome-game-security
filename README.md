@@ -1787,6 +1787,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/rust-external-1 [External]
 - https://github.com/Fnoberz/Rust-External [External]
 - https://github.com/gmh5225/Rust-ExternaL-and-Driver-AlienCheats [External]
+- https://github.com/Rogue619Z/Rust-External-Source [External]
 
 > Game:Arma3
 - https://github.com/Skengdo/arma3-external-variable-manager
