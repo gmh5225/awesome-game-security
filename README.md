@@ -9,6 +9,7 @@ Or you can send an issue for me.
 ```
 
 ## How to contribute?
+- https://github.com/HyunCafe/contribute-practice
 - https://docs.github.com/en/get-started/quickstart/contributing-to-projects
 
 ## Contents
