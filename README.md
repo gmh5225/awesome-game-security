@@ -1671,6 +1671,8 @@ Or you can send an issue for me.
 - https://github.com/JeanToBinks/Fortnite-Cheato-UD-EAC-BE
 - https://github.com/gmh5225/BE-Forcer-Fortnite [BE forcer for fortnite]
 - https://github.com/DX9Paster/Fortnite-External [External]
+- https://github.com/percpopper/Fortnite-CameraCachePOV
+- https://github.com/percpopper/Fortnite-FNameEntry
 
 > Game:Bloodhunt
 - https://github.com/ZZZ-Monster/bloodhunt_External
