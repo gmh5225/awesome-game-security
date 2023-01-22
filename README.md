@@ -640,6 +640,9 @@ Or you can send an issue for me.
 - https://github.com/feicong/android_ebpf [EBPF]
 - https://github.com/cloudfuzz/android-kernel-exploitation [Android Kernel Exploitation]
 
+> Android Network Explorer
+- https://github.com/emanuele-f/PCAPdroid
+
 > IOS jailbreak
 - https://github.com/jjolano/shadow
 - https://github.com/gmh5225/IOS-jailbreak--Fugu15
