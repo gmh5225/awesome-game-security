@@ -1102,6 +1102,7 @@ Or you can send an issue for me.
 - https://github.com/Rwkeith/Diglett [Hide Kernel Thread]
 - https://github.com/gmh5225/Driver-SessionMapper [Session Driver]
 - https://github.com/gmh5225/Driver-DriverNoImage [Hijack Driver]
+- https://github.com/gmh5225/Driver-Systemthread-from-PspCidTable-src [Hide Process/Thread/Handle]
 
 > Anti Forensics
 - https://github.com/PaulNorman01/Forensia
