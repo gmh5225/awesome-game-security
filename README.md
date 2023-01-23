@@ -907,6 +907,7 @@ Or you can send an issue for me.
 - https://github.com/xBrunoMedeiros/eac-overlay [EAC Overlay]
 - https://github.com/3r4y/imgui-external-overlay [imgui overlay]
 - https://github.com/J0xna/Kernel-Overlay-Hider [Kernel Overlay Hider]
+- https://github.com/geeksonsecurity/android-overlay-malware-example [Android]
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
@@ -2229,6 +2230,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Detection:Frida
 - https://github.com/darvincisec/DetectFrida
+
+> Detection:Overlay
+- https://github.com/geeksonsecurity/android-overlay-protection [Android]
 
 > Signature Scanning
 - https://github.com/c3rb3ru5d3d53c/binlex
