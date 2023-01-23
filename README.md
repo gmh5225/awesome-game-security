@@ -523,6 +523,7 @@ Or you can send an issue for me.
 - https://github.com/hasherezade/pe-bear [PE Viewer]
 - https://github.com/zodiacon/TotalPE2 [PE Viewer]
 - https://github.com/APKLab/APKLab [Android Reverse-Engineering Workbench for VS Code]
+- https://github.com/evild3ad/MemProcFS-Analyzer [Windows Forensic Analysis]
 
 > Fix VMP
 - https://github.com/wallds/NoVmpy
