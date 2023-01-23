@@ -103,6 +103,7 @@ Or you can send an issue for me.
 - https://github.com/MonoGame/MonoGame [.NET]
 - https://github.com/nCine/nCine [2D]
 - https://github.com/gameplay3d/gameplay [2D/3D]
+- https://github.com/u3d-community/U3D [C++ 2D/3D]
 - https://github.com/turbulenz/turbulenz_engine [HTML5]
 - https://github.com/egret-labs/egret-core [HTML5]
 - https://github.com/TorqueGameEngines/Torque2D [2D]
