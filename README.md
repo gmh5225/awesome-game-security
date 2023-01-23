@@ -1809,6 +1809,7 @@ Or you can send an issue for me.
 > Game:Arma3
 - https://github.com/Skengdo/arma3-external-variable-manager
 - https://github.com/R3voA3/3den-Enhanced [Mod Editor]
+- https://github.com/tym32167/arma3beclient [BattlEye Tool]
 
 > Game:AVA
 - https://github.com/boylin0/AVA-Hack
