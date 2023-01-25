@@ -1769,6 +1769,7 @@ Or you can send an issue for me.
 - https://github.com/vmmcall/overwatch-iat-fixer [Overwatch IAT Fixer]
 - https://github.com/Midi12/ow_unpack
 - https://github.com/gmh5225/OW-Aeternum
+- https://github.com/dword64/Ow-FOV [FOV]
 
 > Game:Overwatch2
 - https://github.com/gmh5225/Overwatch2-colorbot-Cheats
