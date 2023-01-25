@@ -241,6 +241,7 @@ Or you can send an issue for me.
 - https://github.com/crazyshader/GameDev [Unity]
 - https://github.com/RyanNielson/awesome-unity [Unity]
 - https://github.com/QianMo/Unity-Design-Pattern [Unity Design]
+- https://github.com/michal-z/zig-gamedev [Building game development ecosystem for ziglang]
 
 > Source
 - https://github.com/PiMoNFeeD/csgo-src [Leaked CSGO]
