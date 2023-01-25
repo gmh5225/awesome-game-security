@@ -717,6 +717,7 @@ Or you can send an issue for me.
 - https://github.com/deadeert/EWS [Emulation]
 - https://github.com/patois/genmc [Display Hex-Rays Microcode]
 - https://github.com/RolfRolles/HexRaysDeob [Hex-Rays Microcode]
+- https://github.com/HexRaysSA/goomba [Simplify MBA]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
