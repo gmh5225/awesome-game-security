@@ -127,6 +127,7 @@ Or you can send an issue for me.
 - https://github.com/ObEngine/ObEngine [2D+Lua]
 - https://github.com/harukumo/HorizonEngine [3D rendering engine]
 - https://github.com/benjinx/Toon [C++]
+- https://github.com/chrismaltby/gb-studio [GameBoy]
 
 
 > Game Engine Plugins:Unreal
