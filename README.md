@@ -1923,6 +1923,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ALittlePatate/DevourClient
 - https://github.com/BitCrackers/DevourMenu [Menu]
 
+> Game:Goose Goose Duck
+- https://github.com/Liuhaixv/Goose_Goose_Duck_Hack
 
 ## Anti Cheat
 > Guide
