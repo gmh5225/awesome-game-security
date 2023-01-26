@@ -364,6 +364,7 @@ Or you can send an issue for me.
 ## Web3 Game
 > Blockchain Guide
 - https://github.com/unbalancedparentheses/practical_cryptography_and_distributed_ledgers
+- https://github.com/mektigboy/evm-chad [EVM]
 
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
