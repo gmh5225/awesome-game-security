@@ -723,6 +723,7 @@ Or you can send an issue for me.
 - https://github.com/patois/genmc [Display Hex-Rays Microcode]
 - https://github.com/RolfRolles/HexRaysDeob [Hex-Rays Microcode]
 - https://github.com/HexRaysSA/goomba [Simplify MBA]
+- https://github.com/es3n1n/ida-wakatime-py [WakaTime integration for IDA Pro]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
