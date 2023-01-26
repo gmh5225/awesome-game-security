@@ -1868,6 +1868,8 @@ Or you can send an issue for me.
 - https://github.com/HolographicHat/YaeAchievement
 - https://github.com/phonowell/genshin-impact-script [A sweet genshin impact script]
 - https://github.com/KnsGoyoLV/GenshinImpact-Base
+- https://github.com/360NENZ/Taiga74164-Akebi-GC
+- https://github.com/Ev3nt/EasyPeasy-GC
 
 > Game:Honkai Impact
 - https://github.com/BuIlDaLiBlE/BetterHI3Launcher
