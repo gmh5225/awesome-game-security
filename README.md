@@ -1544,6 +1544,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/CSGO-NIXWARE-CSGO [Nixware]
 - https://github.com/designer1337/csgo-cheat-base [Internal]
 - https://github.com/yourmnbbn/tiny-csgo-client [Tiny csgo client for connecting dedicated server]
+- https://github.com/click4dylan/CSGO_AnimationCode_Reversed [CSGO animation code]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
