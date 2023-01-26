@@ -1546,6 +1546,7 @@ Or you can send an issue for me.
 - https://github.com/designer1337/csgo-cheat-base [Internal]
 - https://github.com/yourmnbbn/tiny-csgo-client [Tiny csgo client for connecting dedicated server]
 - https://github.com/click4dylan/CSGO_AnimationCode_Reversed [CSGO animation code]
+- https://github.com/spirthack/CSGOSimple [Internal]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
