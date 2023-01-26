@@ -1761,6 +1761,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/eft-dma-radar-1 [DMA Radar]
 - https://github.com/dwabdasdna/MonoEFT
 - https://github.com/ZhaoKunqi/simple-eft-superman-training-bot
+- https://github.com/gmh5225/EFT-NewTarkovCheatProject
 
 > Game:R6
 - https://github.com/NMan1/Rainbow-Six-Cheat
