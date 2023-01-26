@@ -1927,6 +1927,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Game:Goose Goose Duck
 - https://github.com/Liuhaixv/Goose_Goose_Duck_Hack
 
+> Game:Team Fortress 2
+- https://github.com/gmh5225/teamfortress2_internal
+
 ## Anti Cheat
 > Guide
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
