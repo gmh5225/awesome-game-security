@@ -1661,6 +1661,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Apex-Legends-External-Esp-Aimbot-Skinchanger
 - https://github.com/Neurosisccc/Apex-ItemGlow [Item glow]
 - https://github.com/BaconToaster/UC-Apex-Remastered
+- https://github.com/NekoRem/apex-external [External]
 
 > Game:Fortnite
 - https://github.com/ofDataa/offsets [Offset]
