@@ -1469,6 +1469,7 @@ Or you can send an issue for me.
 - https://github.com/skrixx68/Dota2-Overlay-OffsetUpdater
 - https://github.com/interception-team/dota-cheat
 - https://github.com/LWSS/McDota [linux]
+- https://github.com/ExistedGit/Dota2Cheat
 
 > Game:WOW
 - https://github.com/helloobaby/wow-IAT-fix
