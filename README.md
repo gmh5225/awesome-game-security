@@ -1412,6 +1412,7 @@ Or you can send an issue for me.
 - https://github.com/shalzuth/LostArkDumper
 - https://github.com/shalzuth/LostArkLogger
 - https://github.com/realrespecter/LOST-ARK-SDK
+- https://github.com/cpz/Lost-Ark-SDK
 
 > Game:Battlerite
 - https://github.com/shalzuth/BattleriteBot
