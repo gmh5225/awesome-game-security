@@ -748,6 +748,7 @@ Or you can send an issue for me.
 - https://github.com/seeinglogic/ariadne [Graph Analysis]
 - https://github.com/skr0x1c0/binja_kc [Plugin for loading MachO kernelcache and dSYM files]
 - https://github.com/Vector35/workflow_objc [Objective-C]
+- https://github.com/apekros/binja_sigmaker [Create and find signatures]
 
 > Ghidra Plugins
 - https://github.com/CENSUS/ghidra-frida-hook-gen
