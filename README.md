@@ -2379,6 +2379,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [Read Memory without ReadProcessMemory for Current Process](https://github.com/gmh5225/CReadMemory)
 - [get process token whose integrity level is system and manipulate it to get privilege escalation](https://github.com/gmh5225/manipulating_token)
 - [A library that meant to perform evasive communication using stolen browser socket](https://github.com/Idov31/Venom)
+- https://github.com/cpz/trinity [Fully disables & removes Windows Defender]
 
 > Android
 - https://github.com/WindySha/bypassHiddenApiRestriction [Bypass hidden api restriction]
