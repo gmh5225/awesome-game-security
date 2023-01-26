@@ -1551,6 +1551,11 @@ Or you can send an issue for me.
 - https://github.com/click4dylan/CSGO_AnimationCode_Reversed [CSGO animation code]
 - https://github.com/spirthack/CSGOSimple [Internal]
 - https://github.com/ViddeBoiiii/CSGO-Ormbunke-x86 [Imgui Menu]
+- https://github.com/MavenCoding157/legit-csgo-cheat-menu [Menu]
+- https://github.com/skep1337/autismware [HvH]
+- https://github.com/emilyinure/solace-csgo [Internal]
+- https://github.com/bruhmoment21/csgo-sdk-improved [Internal]
+- https://github.com/IVBecy/cartmanv2 [Internal]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
