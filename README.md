@@ -100,6 +100,7 @@ Or you can send an issue for me.
 - https://github.com/skylicht-lab/skylicht-engine
 - https://github.com/ValveSoftware/halflife [Half-Life 1]
 - https://github.com/SamVanheer/halflife-unified-sdk [Half-Life SDK]
+- https://github.com/alliedmodders/hl2sdk [Half-Life SDK]
 - https://github.com/MonoGame/MonoGame [.NET]
 - https://github.com/nCine/nCine [2D]
 - https://github.com/gameplay3d/gameplay [2D/3D]
