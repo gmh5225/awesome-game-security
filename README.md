@@ -2212,6 +2212,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Rwkeith/Nomad [Mapped Driver]
 - https://github.com/Nou4r/ModFinder [Mapped Dll]
 - https://github.com/1401199262/NMIStackWalk [Mapped Driver by NMI Callback]
+- https://github.com/jafarlihi/modreveal [Find hidden Linux kernel modules]
 
 > Detection:Vulnerable Driver
 - https://github.com/Deputation/hygieia
