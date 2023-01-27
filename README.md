@@ -384,6 +384,7 @@ Or you can send an issue for me.
 - https://github.com/secureum/DeFi-Security-Summit-Stanford [DEFI Focus Smart Contract Security Capture the Flag]
 - https://github.com/go-outside-labs/blockchain-hacking [hacking]
 - https://github.com/Decurity/abi-decompiler [Recover ABI of EVM smart contracts]
+- https://github.com/pcaversaccio/reentrancy-attacks [Historical Collection of Reentrancy Attacks]
 
 ## DirectX
 > Guide
