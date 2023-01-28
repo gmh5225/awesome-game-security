@@ -1594,6 +1594,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Valorant-External-Source [External]
 - https://github.com/Smelo97/Valorant-cheat-internal [Internal]
 - https://github.com/BaraX0/Valorant-Esp-Aimbot-Cheat-Hack [External]
+- https://github.com/94q/Valorant-Internal [Internal]
 
 > Game:VEILED EXPERTS
 - https://github.com/EBalloon/VEILED-EXPERTS-SDK
