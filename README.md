@@ -253,6 +253,7 @@ Or you can send an issue for me.
 - https://github.com/thomaseichhorn/cs16-client [Rewrote CS1.6]
 - https://github.com/s1lentq/ReGameDLL_CS [Reversed CS1.6]
 - https://github.com/td512/re3 [Reversed GTA III, Vice City]
+- https://github.com/WastedHymn/Grand-Theft-Auto-Modding-Source [Code snippets for Vice City]
 - https://github.com/SmileyAG/ReCZDS [Reversed CZeror]
 - https://github.com/Harrison1/unrealcpp [UE4 C++ examples]
 - https://github.com/QianMo/UE4-FPS-Game [UE4 FPS Game]
@@ -1898,6 +1899,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [Open-source cheat software for Grand Theft Auto V (PC)](https://github.com/HatchesPls/GrandTheftAutoV-Cheat)
 - https://github.com/Pocakking/BigBaseV2
 - https://github.com/YimMenu/YimMenu
+- https://github.com/Seanghost117/SpookiMystic-GTA-Leak [Menu]
+- https://github.com/Rimmuru/gta-source
+- https://github.com/SyDevTeam/gta5view [Viewer/Editor]
 
 > Game:Geometry Dash
 - https://github.com/reservedcloud/gd-internal
