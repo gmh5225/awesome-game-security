@@ -1724,6 +1724,7 @@ Or you can send an issue for me.
 - https://github.com/percpopper/Fortnite-CameraCachePOV
 - https://github.com/percpopper/Fortnite-FNameEntry
 - https://github.com/ritz-1337/fortnite-external-evo.gj [External]
+- https://github.com/simply-codes/Fortnite-External-P2C [External]
 
 > Game:Bloodhunt
 - https://github.com/ZZZ-Monster/bloodhunt_External
