@@ -625,6 +625,7 @@ Or you can send an issue for me.
 - https://github.com/canyie/Riru-MomoHider
 - https://github.com/newbit1/rootAVD [root AVD]
 - https://github.com/Fox2Code/FoxMagiskModuleManager [A module manager for Magisk]
+- https://github.com/Dr-TSNG/ZygiskOnKernelSU [Run Zygisk on KernelSU]
 
 > Android File Explorer
 - https://github.com/nzcv/note [Guide-zh]
@@ -2429,6 +2430,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ekknod/usbsn [USB serial number changer (root only)]
 - https://github.com/gmh5225/Android-privilege-CVE-2022-20452-LeakValue [Privilege Escalation]
 - https://github.com/tiann/KernelSU [A Kernel based root solution for Android GKI]
+- https://github.com/Dr-TSNG/ZygiskOnKernelSU [Run Zygisk on KernelSU]
 
 
 ## Windows Security Features
