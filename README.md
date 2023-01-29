@@ -1607,6 +1607,9 @@ Or you can send an issue for me.
 > Game:COD7
 - https://github.com/nice-sprite/COD7-Tools
 
+> Game:COD Black Ops 2
+- https://github.com/momo5502/t7-linker [100% accurate Black Ops 2 FastFile linker]
+
 > Game:COD Black Ops 3
 - https://github.com/momo5502/boiii [Reverse engineering and analysis]
 
