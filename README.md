@@ -2422,6 +2422,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [A library that meant to perform evasive communication using stolen browser socket](https://github.com/Idov31/Venom)
 - https://github.com/cpz/trinity [Fully disables & removes Windows Defender]
 - https://github.com/gabriellandau/ShadowStackWalk [Finding Truth in the Shadows]
+- https://github.com/gmh5225/r0ak [r0ak]
 
 > Android
 - https://github.com/WindySha/bypassHiddenApiRestriction [Bypass hidden api restriction]
