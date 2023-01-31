@@ -997,6 +997,7 @@ Or you can send an issue for me.
 - https://github.com/ReCryptLLC/CVE-2022-42045 [amsdk.sys]
 - https://github.com/gmh5225/CVE-2022-3699 [LenovoDiagnosticsDriver.sys]
 - https://github.com/estimated1337/lenovo_mapper [LenovoDiagnosticsDriver.sys]
+- https://github.com/estimated1337/lenovo_exec [LenovoDiagnosticsDriver.sys]
 - https://github.com/kkent030315/CVE-2022-42046 [wfshbr64.sys]
 - https://github.com/tijme/amd-ryzen-master-driver-v17-exploit [AMD's Ryzen Master Driver]
 - https://github.com/OmriBaso/RToolZ [ProcExp152.sys]
