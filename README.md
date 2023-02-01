@@ -153,6 +153,7 @@ Or you can send an issue for me.
 > Game Engine Plugins:Unity
 - [A markdown viewer for unity](https://github.com/gwaredd/UnityMarkdownViewer)
 - [An integrated solution for authoring / importing / simulating / rendering strand-based hair in Unity](https://github.com/Unity-Technologies/com.unity.demoteam.hair)
+- [A maintained collection of useful & free unity scripts / library's / plugins and extensions](https://github.com/michidk/Unity-Script-Collection)
 
 > Game Engine Plugins:Lumix
 - https://github.com/nem0/lumixengine_maps [Map downloader]
