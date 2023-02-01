@@ -757,6 +757,7 @@ Or you can send an issue for me.
 - https://github.com/skr0x1c0/binja_kc [Plugin for loading MachO kernelcache and dSYM files]
 - https://github.com/Vector35/workflow_objc [Objective-C]
 - https://github.com/apekros/binja_sigmaker [Create and find signatures]
+- https://github.com/dayzerosec/AMD-SP-Loader [AMD-SP or PSP firmware]
 
 > Ghidra Plugins
 - https://github.com/CENSUS/ghidra-frida-hook-gen
