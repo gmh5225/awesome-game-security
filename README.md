@@ -129,6 +129,7 @@ Or you can send an issue for me.
 - https://github.com/harukumo/HorizonEngine [3D rendering engine]
 - https://github.com/benjinx/Toon [C++]
 - https://github.com/chrismaltby/gb-studio [GameBoy]
+- https://github.com/orx/orx [C++]
 
 
 > Game Engine Plugins:Unreal
