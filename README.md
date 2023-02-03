@@ -805,6 +805,7 @@ Or you can send an issue for me.
 - https://github.com/x64dbg/SlothBP [Collaborative Breakpoint Manager]
 - https://github.com/Kwansy98/ApiBreakpoint [Api Breakpoint]
 - https://github.com/0ffffffffh/yummyPaste [paste string formatted byte data block into x64dbg easy]
+- https://github.com/horsicq/x64dbg-Plugin-Manager [Plugin manager for x64dbg]
 
 > Cheat Engine Plugins
 - https://github.com/FreeER/CE-Extensions [Lua Extensions]
