@@ -414,6 +414,7 @@ Or you can send an issue for me.
 - [Universal graphical hook for a D3D9-D3D12, OpenGL and Vulkan based games](https://github.com/Rebzzel/kiero)
 - https://github.com/jmpews/Dobby [a lightweight, multi-platform, multi-architecture hook framework]
 - https://github.com/Sh0ckFR/Universal-Dear-ImGui-Hook [An universal Dear ImGui Hook]
+- https://github.com/bruhmoment21/UniversalHookX [DX/OpenGL/Vulkan]
 
 > Tools
 - https://github.com/visotw/3d9 [Fixing broken stereoscopic effects in DX11 games]
@@ -431,6 +432,9 @@ Or you can send an issue for me.
 ## OpenGL
 > Guide
 - https://github.com/JoeyDeVries/LearnOpenGL
+
+> Hook
+- https://github.com/bruhmoment21/UniversalHookX
 
 ## Cheat
 > Guide
