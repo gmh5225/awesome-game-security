@@ -2409,6 +2409,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/UCFoxi/NotifyRoutineHijackThread [Hijack PspCreateThreadNotifyRoutine]
 - [GetWindowName In Kernel Mode](https://www.unknowncheats.me/forum/anti-cheat-bypass/517022-getwindowname-kernel-mode.html)
 - [GetWindowInfo In Kernel Mode](https://www.unknowncheats.me/forum/anti-cheat-bypass/519261-getwindowinfo.html)
+- https://github.com/gmh5225/Hook-KdTrap [Hook KdTrap]
 
 
 > Windows Ring3
