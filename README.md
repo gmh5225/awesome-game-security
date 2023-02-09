@@ -1828,6 +1828,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Overwatch2-colorbot-Cheats
 - https://github.com/gmh5225/Overwatch-2-Cheat-Aimbot-Esp
 - https://github.com/nismo1337/meowsense
+- https://github.com/gmh5225/Ow-Outlines [Shows Players through walls]
 
 > Game:Paladins
 - https://github.com/gmh5225/Paladins-Internal-Esp-Aimbot-Hack-Cheat-Hack
