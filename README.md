@@ -393,6 +393,10 @@ Or you can send an issue for me.
 - https://github.com/go-outside-labs/blockchain-hacking [hacking]
 - https://github.com/Decurity/abi-decompiler [Recover ABI of EVM smart contracts]
 - https://github.com/pcaversaccio/reentrancy-attacks [Historical Collection of Reentrancy Attacks]
+- https://mythx.io [Static Analyzer]
+- https://github.com/crytic/slither [Static Analyzer]
+- https://github.com/ConsenSys/mythril [Static Analyzer]
+- https://github.com/Picodes/4naly3er [Static Analyzer]
 
 ## DirectX
 > Guide
