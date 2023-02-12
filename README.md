@@ -1329,6 +1329,7 @@ Or you can send an issue for me.
 
 > Explore AntiCheat System:BE
 - https://github.com/Schnocker/NoEye
+- https://github.com/haram/splendid_implanter
 - https://github.com/unreaIuser/BE-Emulator
 - https://github.com/masterpastaa/BattlEye-Handler-BYPASS
 - https://github.com/dllcrt0/battleye-decryption
