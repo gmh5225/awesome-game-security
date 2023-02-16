@@ -1091,6 +1091,7 @@ Or you can send an issue for me.
 - https://github.com/memflow/memflow-kvm
 - https://github.com/MisterY52/apex_dma_kvm_pub
 - https://github.com/SamuelTulach/BetterTiming [Bypass CPU Timing]
+- https://github.com/WCharacter/RDTSC-KVM-Handler [Bypass RDTSC]
 - https://github.com/batusan/Hardened-qemu [Hidden QEMU]
 - https://github.com/zhaodice/qemu-anti-detection [Hidden QEMU]
 - https://github.com/nyx-fuzz/QEMU-Nyx [Intel-PT]
