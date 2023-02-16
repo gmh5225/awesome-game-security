@@ -987,6 +987,7 @@ Or you can send an issue for me.
 - https://github.com/Compiled-Code/eac-mapper [gdrv.sys]
 - https://github.com/gmh5225/CVE-2018-19320-LPE [gdrv.sys]
 - https://github.com/gmh5225/CVE-2018-19320 [gdrv.sys]
+- https://github.com/gmh5225/gdriver-lib [gdrv.sys]
 - https://github.com/1337kenzo/gdrv-loader-updated [gdrv.sys Win11]
 - https://github.com/eddeeh/kdmapper [iqvw64e.sys]
 - https://github.com/TheCruZ/kdmapper [iqvw64e.sys]
