@@ -1249,6 +1249,7 @@ Or you can send an issue for me.
 - https://github.com/kenn-notation/UnrealEngineSDK [Universal Cheat development kit]
 - https://github.com/atenfyr/UAssetGUI [Viewing and modifying UE4 game assets]
 - https://github.com/UE4SS-RE/RE-UE4SS [Re-Host of Unreal Engine 4/5 Scripting System]
+- https://github.com/SerseDioRe/Unreal-Engine-5-PDB [UE5 PDB]
 
 > Game Engine Explorer:Unity
 - https://github.com/mono/mono [mono]
