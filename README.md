@@ -1696,6 +1696,7 @@ Or you can send an issue for me.
 - https://github.com/NekoRem/apex-external [External]
 
 > Game:Fortnite
+- https://github.com/kem0x/FortKit [Dump]
 - https://github.com/ofDataa/offsets [Offset]
 - https://github.com/masterpastaa/AutoOffsets [Offset]
 - https://github.com/Zetolac/FortniteOffsetsAndSigs [Offset]
