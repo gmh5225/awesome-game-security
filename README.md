@@ -2474,6 +2474,11 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/CET-win10 [CET]
 - [HyperGuard](https://windows-internals.com/hyperguard-secure-kernel-patch-guard-part-1-skpg-initialization)
 - https://github.com/gmh5225/QueryShadowStack [Shadow Stack]
+- https://namazso.github.io/x86/html/INCSSPD_INCSSPQ.html [CET]
+- https://techcommunity.microsoft.com/t5/windows-os-platform-blog/understanding-hardware-enforced-stack-protection/ba-p/1247815 [CET]
+- https://reviews.llvm.org/rG21b25a1fb32ecd2e1f336123c2715f8ef1a49f97 [CET]
+- https://www.osronline.com/article.cfm%5earticle=469.htm [SEH]
+
 
 ## Windows Subsystem for Linux
 - https://github.com/sxlmnwb/windows-subsystem-linux
