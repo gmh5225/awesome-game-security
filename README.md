@@ -628,6 +628,7 @@ Or you can send an issue for me.
 - https://github.com/not-matthias/Nemesis [Dumping processes using the power of kernel space]
 - https://github.com/allogic/KDBG [Tool]
 - https://github.com/gmh5225/Voyager [A Hyper-V Hacking Framework For Windows 10 x64 (AMD & Intel)]
+- https://github.com/NurdAlert/modded-voyager
 - https://github.com/repnz/apc-research [APC Internals Research Code]
 - https://github.com/intel/pcm [Processor Counter Monitor]
 - https://github.com/ChengChengCC/Ark-tools [Some kernel research]
