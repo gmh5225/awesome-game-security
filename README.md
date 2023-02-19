@@ -1589,6 +1589,7 @@ Or you can send an issue for me.
 - https://github.com/emilyinure/solace-csgo [Internal]
 - https://github.com/bruhmoment21/csgo-sdk-improved [Internal]
 - https://github.com/IVBecy/cartmanv2 [Internal]
+- https://github.com/gmh5225/CSGO-aw-v5.1.13 [aw-v5.1.13]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
