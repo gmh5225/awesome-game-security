@@ -1041,6 +1041,7 @@ Or you can send an issue for me.
 - https://github.com/weak1337/EvCommunication [NtTokenManagerCreateFlipObjectReturnTokenHandle]
 - https://github.com/stephenasuncionDEV/kaldereta [NtTokenManagerGetAnalogExclusiveTokenEvent]
 - https://github.com/UCFoxi/Shared-FlushFileBuffers-Communication [FlushFileBuffers]
+- https://github.com/derutakabu/UCFoxi-Shared-FlushFileBuffers-Communication-Update [FlushFileBuffers]
 - https://github.com/Sinclairq/DataCommunication [NtCompareSigningLevels]
 - https://github.com/ExpLife0011/NtCompareSigningLevel-hook [NtCompareSigningLevels]
 - https://github.com/muturikaranja/AfdIrpCallDispatch [.data Pointer hook in Afd.sys]
