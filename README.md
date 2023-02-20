@@ -857,6 +857,7 @@ Or you can send an issue for me.
 - https://github.com/Broihon/GH-Injector-Library [inject library and tool]
 - https://github.com/5paceman/nightshade [inject tool]
 - https://github.com/deepinstinct/Dirty-Vanity [RtlCreateProcessReflection]
+- https://github.com/LloydLabs/ntqueueapcthreadex-ntdll-gadget-injection [NtQueueApcThreadEx + gadget]
 
 > Injection:Linux
 - https://github.com/ixty/mandibule
