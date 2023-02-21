@@ -795,6 +795,7 @@ Or you can send an issue for me.
 - https://github.com/yardenshafir/WinDbg_Scripts [WinDbg scripts]
 - https://github.com/long123king/dk [Refactored version of tokenext]
 - https://github.com/ch3rn0byl/WinDbg-Extensions [Callback Extension]
+- https://github.com/KasperskyLab/WinDbg-JS-Scripts [JS Scripts]
 
 > X64DBG Plugins
 - https://github.com/x64dbg/x64dbg/wiki/Plugins
