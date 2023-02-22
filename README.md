@@ -672,6 +672,7 @@ Or you can send an issue for me.
 - https://github.com/yabinc/simpleperf_demo [Perf]
 - https://github.com/feicong/android_ebpf [EBPF]
 - https://github.com/cloudfuzz/android-kernel-exploitation [Android Kernel Exploitation]
+- https://github.com/Snoopy-Sec/Localroot-ALL-CVE [Root CVE]
 
 > Android Network Explorer
 - https://github.com/emanuele-f/PCAPdroid
