@@ -644,6 +644,7 @@ Or you can send an issue for me.
 - https://github.com/newbit1/rootAVD [root AVD]
 - https://github.com/Fox2Code/FoxMagiskModuleManager [A module manager for Magisk]
 - https://github.com/Dr-TSNG/ZygiskOnKernelSU [Run Zygisk on KernelSU]
+- https://github.com/svoboda18/magiskboot [Boot Image Modification Tool]
 
 > Android File Explorer
 - https://github.com/nzcv/note [Guide-zh]
