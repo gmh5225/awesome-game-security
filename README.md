@@ -788,6 +788,7 @@ Or you can send an issue for me.
 - https://github.com/pudii/gba-ghidra-loader [GameBoy]
 - https://github.com/MEhrn00/Ghidra_COFFParser [COFF]
 - https://github.com/ghidragolf/ghidra_scripts [Scripts]
+- https://github.com/PAGalaxyLab/ghidra_scripts [Scripts]
 
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
