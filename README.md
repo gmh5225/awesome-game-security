@@ -789,6 +789,7 @@ Or you can send an issue for me.
 - https://github.com/MEhrn00/Ghidra_COFFParser [COFF]
 - https://github.com/ghidragolf/ghidra_scripts [Scripts]
 - https://github.com/PAGalaxyLab/ghidra_scripts [Scripts]
+- https://github.com/danbrodsky/GFred [Command Palette]
 
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
