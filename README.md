@@ -2012,6 +2012,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/DenuvoSoftwareSolutions/DVRT [DVRT]
 - https://areweanticheatyet.com [A list of games using anti-cheats]
 - https://github.com/MyHwu9508/alt-V-Anticheat-Guide [GTA5 MP servers]
+- https://github.com/frank2/packer-tutorial [Packer]
 
 > Stress Testing
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework [Testing Framework]
