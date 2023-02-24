@@ -179,6 +179,7 @@ Or you can send an issue for me.
 - [A graphics engine designed to run on a single thread on CPU](https://github.com/FHowington/CPUEngine) 
 - https://github.com/paroj/gltut [OpenGL Render]
 - https://github.com/ashawkey/raytracing [RayTracer]
+- https://github.com/sultim-t/xash-rt [Xash3D FWGS with a real-time path tracing]
 - https://github.com/crosire/reshade [A generic post-processing injector for games and video software]
 - https://github.com/harukumo/HorizonEngine [3D rendering engine]
 - https://github.com/Patryk27/strolle [Real-time rendering engine]
