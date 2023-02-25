@@ -96,6 +96,7 @@ Or you can send an issue for me.
 - https://github.com/lowenware/dotrix [Rust]
 - https://github.com/bevyengine/bevy [Rust]
 - https://github.com/FyroxEngine/Fyrox [Rust]
+- https://github.com/AmbientRun/Ambient [Rust]
 - https://github.com/AbyssEngine/AbyssEngine [ARPG]
 - https://github.com/skylicht-lab/skylicht-engine
 - https://github.com/ValveSoftware/halflife [Half-Life 1]
