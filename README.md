@@ -2141,6 +2141,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Lima-X/Win32.Nebula [PE X64]
 - https://github.com/TheAenema/hm-pe-packer [PE X64]
 - https://github.com/frkngksl/Shoggoth [Polymorphic Encryptor]
+- https://github.com/GunshipPenguin/kiteshield [ELF X64]
 
 > CLR Protection
 - https://github.com/endgameinc/ClrGuard
