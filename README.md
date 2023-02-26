@@ -1098,6 +1098,7 @@ Or you can send an issue for me.
 - https://github.com/ekknod/Nmi [Blocking NMI interrupts]
 - https://github.com/ekknod/smm [Smm cheat]
 - https://github.com/sa413x/UEFI-Bootloader [Simple mmapper which using UEFI runtime driver]
+- https://github.com/realoriginal/bootlicker [Generic UEFI bootkit used to achieve initial usermode execution]
 
 > QEMU/KVM Cheat
 - https://github.com/Qemu-Gang
