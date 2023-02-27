@@ -524,6 +524,7 @@ Or you can send an issue for me.
 - https://github.com/Akebi-Group/Akebi-PacketSniffer
 - https://github.com/basil00/Divert [Packet Divert]
 - https://github.com/fksvs/inject
+- https://github.com/hercul3s/Packet-Sniffer [Packet Logger/Decryptor]
 
 > Packet Capture&Parse
 - https://github.com/seladb/PcapPlusPlus [Pcap]
