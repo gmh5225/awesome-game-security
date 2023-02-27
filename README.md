@@ -1039,6 +1039,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Driver-Communication-List
 - https://github.com/EBalloon/Common-Registry [Registry Callback]
 - https://github.com/gmh5225/Common-Registry-Jmp-RCX [Registry Callback]
+- https://github.com/0xGREG/registry-callbacks [Registry Callback]
 - https://github.com/adrianyy/rw_socket_driver [Socket]
 - https://github.com/zoand/BOOM [Hijack Beep.sys]
 - https://github.com/hrt/read_write [Hijack IRP]
