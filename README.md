@@ -756,6 +756,7 @@ Or you can send an issue for me.
 - https://github.com/HexRaysSA/goomba [Simplify MBA]
 - https://github.com/es3n1n/ida-wakatime-py [WakaTime integration for IDA Pro]
 - https://github.com/senator715/IDA-Fusion [Fast Signature scanner & creator]
+- https://github.com/cellebrite-labs/PPLorer [Resolves PPL calls to the actual underlying PPL function]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
