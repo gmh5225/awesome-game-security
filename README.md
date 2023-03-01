@@ -758,6 +758,7 @@ Or you can send an issue for me.
 - https://github.com/senator715/IDA-Fusion [Fast Signature scanner & creator]
 - https://github.com/cellebrite-labs/PPLorer [Resolves PPL calls to the actual underlying PPL function]
 - https://github.com/kweatherman/ida_missinglink [Fills in missing indirect CALL & JMP target information]
+- https://github.com/yubie-re/ida-jm-xorstr-decrypt-plugin [Attempts to decrypt JM Xorstr in some x64 binaries]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
