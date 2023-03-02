@@ -2079,6 +2079,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/weak1337/CEDetector [CE]
 - https://github.com/gmh5225/Detection-CheatEngine [CE]
 - https://github.com/Ahora57/AmogusPlugin
+- https://gtoad.github.io/2017/06/25/Android-Anti-Debug [Android]
 - https://github.com/polaryy/AntiDebugandMemoryDump [Android]
 - [Sample anti-debug with detect ScyllaHide/HyperHide and TitanHide](https://github.com/Ahora57/Baka)
 - [Linux anti-debugging techniques](https://github.com/hiatus/adbg)
