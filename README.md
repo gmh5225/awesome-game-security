@@ -1146,6 +1146,7 @@ Or you can send an issue for me.
 - https://github.com/Kudaes/Unwinder [Another approach to thread stack spoofing]
 - https://github.com/klezVirus/SilentMoonwalk [a TRUE call stack spoofer]
 - https://github.com/altoid29/SafeCall [header only]
+- https://github.com/fortra/hw-call-stack [HWBP]
 
 > Hide
 - https://github.com/JKornev/hidden
