@@ -131,6 +131,7 @@ Or you can send an issue for me.
 - https://github.com/benjinx/Toon [C++]
 - https://github.com/chrismaltby/gb-studio [GameBoy]
 - https://github.com/orx/orx [C++]
+- https://github.com/turanszkij/WickedEngine [C++ 3D]
 
 
 > Game Engine Plugins:Unreal
