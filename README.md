@@ -1111,6 +1111,7 @@ Or you can send an issue for me.
 > QEMU/KVM Cheat
 - https://github.com/Qemu-Gang
 - https://github.com/memflow/memflow-kvm
+- https://github.com/IntroVirt/IntroVirt [Guest introspection library]
 - https://github.com/MisterY52/apex_dma_kvm_pub
 - https://github.com/SamuelTulach/BetterTiming [Bypass CPU Timing]
 - https://github.com/WCharacter/RDTSC-KVM-Handler [Bypass RDTSC]
