@@ -451,8 +451,9 @@ Or you can send an issue for me.
 - https://github.com/googlesamples/android-vulkan-tutorials
 
 > Hook
-- https://github.com/Rebzzel/kiero
-- https://github.com/bruhmoment21/UniversalHookX
+- https://github.com/Rebzzel/kiero [X86/64 Windows]
+- https://github.com/bruhmoment21/UniversalHookX [X86/64 Windows]
+- https://github.com/DrNseven/Vulkan-Hook [X86/64 Windows]
 
 ## Cheat
 > Guide
