@@ -152,6 +152,7 @@ Or you can send an issue for me.
 - ['Dear Imgui' remote access library and application](https://github.com/sammyfreg/netImgui)
 - [Customizable performance metric charts and STAT commands control panel](https://github.com/DarknessFX/DFoundryFX)
 - [Unreal Engine plugin providing a set of Hermes endpoints](https://github.com/cdpred/RedTalaria)
+- [Unreal Engine 4 Plugin for Lua APIs implementation](https://github.com/rdeioris/LuaMachine)
 
 > Game Engine Plugins:Unity
 - [A markdown viewer for unity](https://github.com/gwaredd/UnityMarkdownViewer)
