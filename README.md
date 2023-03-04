@@ -1212,6 +1212,7 @@ Or you can send an issue for me.
 - https://github.com/327135569/ClickPic [OpenCV + Triggerbot]
 - https://github.com/gmh5225/OpenCV-SmartAimBot [OpenCV + Triggerbot]
 - https://github.com/Lexikos/AutoHotkey_L
+- https://github.com/tgillam/HumanMouseMovement
 
 > WallHack
 - https://github.com/DrNseven/D3D11-Wallhack
