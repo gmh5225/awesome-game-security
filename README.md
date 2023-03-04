@@ -33,6 +33,7 @@ Or you can send an issue for me.
 - [Web3 Game](#Web3-Game)
 - [DirectX](#DirectX)
 - [OpenGL](#OpenGL)
+- [Vulkan](#Vulkan)
 - [Cheat](#Cheat)
 - [Anti Cheat](#Anti-Cheat)
 - [Some Tricks](#Some-Tricks)
@@ -443,6 +444,14 @@ Or you can send an issue for me.
 - https://github.com/JoeyDeVries/LearnOpenGL
 
 > Hook
+- https://github.com/bruhmoment21/UniversalHookX
+
+## Vulkan
+> Guide
+- https://github.com/googlesamples/android-vulkan-tutorials
+
+> Hook
+- https://github.com/Rebzzel/kiero
 - https://github.com/bruhmoment21/UniversalHookX
 
 ## Cheat
