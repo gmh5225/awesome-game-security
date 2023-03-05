@@ -1663,6 +1663,7 @@ Or you can send an issue for me.
 - https://github.com/Smelo97/Valorant-cheat-internal [Internal]
 - https://github.com/BaraX0/Valorant-Esp-Aimbot-Cheat-Hack [External]
 - https://github.com/94q/Valorant-Internal [Internal]
+- https://github.com/DX9Paster/Valorant-External-P2C-Leaked [External]
 
 > Game:VEILED EXPERTS
 - https://github.com/EBalloon/VEILED-EXPERTS-SDK
