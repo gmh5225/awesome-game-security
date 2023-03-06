@@ -2086,6 +2086,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/3526779568/vt-debuger [Hacked Hypervisor Testing]
 - https://github.com/rbmm/LockFile-Poc [Lock File]
 - https://github.com/gmh5225/UltraDriver-Game-Cheat [Cheat Driver]
+- https://github.com/gmh5225/Kernel-Special-APC-ReadProcessMemory [RPM]
 
 > Driver Unit Test Framework
 - https://github.com/wpdk/wdutf
@@ -2482,6 +2483,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [GetWindowInfo In Kernel Mode](https://www.unknowncheats.me/forum/anti-cheat-bypass/519261-getwindowinfo.html)
 - https://github.com/gmh5225/Hook-KdTrap [Hook KdTrap]
 - https://github.com/gmh5225/Driver-SoulExtraction [Extracting cert information]
+- https://github.com/gmh5225/Kernel-Special-APC-ReadProcessMemory [Kernel APC RPM]
 
 
 > Windows Ring3
