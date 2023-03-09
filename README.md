@@ -2426,6 +2426,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Deputation/instrumentation_callbacks [Instrumentation Callback]
 - https://github.com/secrary/Hooking-via-InstrumentationCallback [Instrumentation Callback]
 - https://github.com/paranoidninja/EtwTi-Syscall-Hook [Instrumentation Callback]
+- https://github.com/jackullrich/syscall-detect [Instrumentation Callback]
 - [Register VEH by hooking RtlpCallVectoredHandlers](https://github.com/AmJayden/custom-VEH)
 - [ATPMiniDump Callback](https://github.com/b4rtik/ATPMiniDump)
 - https://github.com/jimbeveridge/readdirectorychanges [ReadDirectoryChangesW]
