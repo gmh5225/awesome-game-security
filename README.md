@@ -2221,6 +2221,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/cerberus [VM]
 - https://github.com/CalebFenton/simplify [Java]
 - https://github.com/open-obfuscator/dProtect [Java/Kotlin]
+- https://github.com/Maldev-Academy/EntropyReducer [Reduce Entropy]
 
 > Screenshot
 - https://github.com/bavulapati/DXGICaptureApplication [Capture Desktop]
