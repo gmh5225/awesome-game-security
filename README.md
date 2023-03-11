@@ -1055,6 +1055,7 @@ Or you can send an issue for me.
 - https://github.com/kkent030315/CVE-2022-42046 [wfshbr64.sys]
 - https://github.com/tijme/amd-ryzen-master-driver-v17-exploit [AMD's Ryzen Master Driver]
 - https://github.com/OmriBaso/RToolZ [ProcExp152.sys]
+- https://github.com/SamuelTulach/nullmap [Afd.sys]
 
 
 > Driver Communication
