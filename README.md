@@ -668,6 +668,9 @@ Or you can send an issue for me.
 - https://github.com/svoboda18/magiskboot [Boot Image Modification Tool]
 - https://github.com/xiaoxindada/magiskboot_ndk_on_linux
 
+> Frida
+- https://github.com/CrackerCat/strongR-frida-android
+
 > Android File Explorer
 - https://github.com/nzcv/note [Guide-zh]
 - https://github.com/iBotPeaches/Apktool
