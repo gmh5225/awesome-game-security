@@ -1399,6 +1399,7 @@ Or you can send an issue for me.
 - https://github.com/steffalon/battleye-rust [BattlEye RCON UDP connection]
 - https://github.com/Hypercall/FakeEye [Emulator]
 - https://github.com/tr1xxx/battleye-region-walking
+- https://github.com/SurgeGotTappedAgain/Pink-Eye
 
 > Explore AntiCheat System:EQU8
 - https://back.engineering/12/08/2021
