@@ -1336,6 +1336,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/frida-il2cpp-datacollector [Il2Cpp datacollector for Android/IOS]
 - https://github.com/BepInEx/BepInEx [plugin/modding framework]
 - https://github.com/gmh5225/IL22CPP [ReMake of Il2cpp internal reflection system in C++]
+- https://github.com/sunnamed434/UnityVulnerableEntryPoint [Looks for a vulnerable entry point]
 
 > Game Engine Explorer:Source
 - https://github.com/anarh1st47/Source2Dumps [Dump]
