@@ -1171,6 +1171,7 @@ Or you can send an issue for me.
 - https://github.com/klezVirus/SilentMoonwalk [a TRUE call stack spoofer]
 - https://github.com/altoid29/SafeCall [header only]
 - https://github.com/fortra/hw-call-stack [HWBP]
+- https://github.com/evilashz/ProxyAPICall [Custom stack call]
 
 > Hide
 - https://github.com/JKornev/hidden
