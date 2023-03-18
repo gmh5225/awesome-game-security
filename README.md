@@ -395,6 +395,7 @@ Or you can send an issue for me.
 - https://github.com/SunWeb3Sec [Let's make Web3 more secure]
 - https://github.com/ZhangZhuoSJTU/Web3Bugs [Bugs in Smart Contracts]
 - https://github.com/cryptostaker2/blockchain-security-audits [Security audits]
+- https://github.com/obheda12/Solidity-Security-Compendium [Solidity vuln]
 - https://github.com/crytic [Blockchain Security, by @trailofbits]
 - https://github.com/crytic/building-secure-contracts [Guidelines and training material to write secure smart contracts]
 - https://github.com/crytic/etheno [Ethereum security analysis and testing]
