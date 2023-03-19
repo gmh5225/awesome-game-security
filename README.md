@@ -1020,6 +1020,7 @@ Or you can send an issue for me.
 - https://github.com/namazso/physmem_drivers [Vulnerable Driver List]
 - https://github.com/alfarom256/drivers_and_shit [Vulnerable Driver List]
 - https://github.com/NullArray/WinKernel-Resources/tree/main/Drivers [Vulnerable Driver List]
+- https://github.com/CaledoniaProject/drivers-binaries [Vulnerable Driver List]
 - https://github.com/Xxmmy/vulnerable-driver-scanner [Scans for vulnerable drivers]
 - https://github.com/Sentient111/VulnerableDriverScanner [Scans for vulnerable drivers]
 - https://github.com/fengjixuchui/gdrv-loader/tree/1909_mitigation [gdrv.sys]
