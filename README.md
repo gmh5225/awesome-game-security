@@ -201,6 +201,7 @@ Or you can send an issue for me.
 - https://github.com/nothings/stb
 - https://github.com/libjpeg-turbo/libjpeg-turbo
 - https://github.com/erkkah/tigr
+- https://github.com/tsoding/olive.c
 
 ## Wavefront Obj
 - https://github.com/tinyobjloader/tinyobjloader
