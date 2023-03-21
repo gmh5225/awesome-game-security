@@ -1646,6 +1646,7 @@ Or you can send an issue for me.
 - https://github.com/IVBecy/cartmanv2 [Internal]
 - https://github.com/gmh5225/CSGO-aw-v5.1.13 [aw-v5.1.13]
 - https://github.com/ricencheese/csgo-bot
+- https://github.com/forceinline/csgo-external-esp [External]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
