@@ -135,6 +135,7 @@ Or you can send an issue for me.
 - https://github.com/turanszkij/WickedEngine [C++ 3D]
 - https://github.com/Net5F/AmalgamEngine
 - https://github.com/rxi/kit [pixels]
+- https://github.com/nitaigao/engine-showcase [Old engine]
 
 
 > Game Engine Plugins:Unreal
