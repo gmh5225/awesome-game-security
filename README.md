@@ -1350,7 +1350,9 @@ Or you can send an issue for me.
 - https://github.com/anarh1st47/Source2Dumps [Dump]
 - https://github.com/CallumCVM/ValveGen [SDK Generator]
 - https://github.com/praydog/Source2Gen [SDK Generator]
+- https://github.com/neverlosecc/source2gen [SDK Generator]
 - https://github.com/keowu/sourceengineexplorer [Explorer]
+- https://github.com/neverlosecc/source2sdk
 
 > Explore UWP
 - https://github.com/Wunkolo/UWPDumper
