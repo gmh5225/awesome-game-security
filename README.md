@@ -1653,6 +1653,9 @@ Or you can send an issue for me.
 - https://github.com/forceinline/csgo-external-esp [External]
 - https://github.com/VladislavAlpatov/avhook
 
+> Game:CS2
+- https://github.com/Omn1z/Counter-Strike2-SDK [SDK]
+
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
 - https://github.com/10HEAD/ValorantOffsets [Offset]
