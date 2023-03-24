@@ -2223,6 +2223,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/JustasMasiulis/lazy_importer
 - https://github.com/hypervisor/kli
 - https://github.com/gmh5225/kli-ex
+- https://github.com/1hAck-0/zeroimport
 
 > Obfuscation Engine
 - https://github.com/mike1k/perses
