@@ -1050,6 +1050,7 @@ Or you can send an issue for me.
 - https://github.com/ch3rn0byl/CVE-2021-21551 [dbutil_2_3.sys]
 - https://github.com/SpikySabra/Kernel-Cactus [dbutil_2_3.sys]
 - https://github.com/mzakocs/CVE-2021-21551-POC [dbutil_2_3.sys]
+- https://github.com/Flerov/TS-Fucker [dbutil_2_3.sys]
 - https://github.com/Splitx12/imxyviMapper [AsUpIO.sys]
 - https://github.com/archercreat/vdk [Speedfan.sys]
 - https://github.com/SamLarenN/SpeedFan-Exploit [Speedfan.sys]
