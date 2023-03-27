@@ -1653,6 +1653,7 @@ Or you can send an issue for me.
 - https://github.com/ricencheese/csgo-bot
 - https://github.com/forceinline/csgo-external-esp [External]
 - https://github.com/VladislavAlpatov/avhook
+- https://github.com/si1kyyy/csgo_cheat_external [External]
 
 > Game:CS2
 - https://github.com/Omn1z/Counter-Strike2-SDK [SDK]
