@@ -1413,6 +1413,7 @@ Or you can send an issue for me.
 - https://github.com/Hypercall/FakeEye [Emulator]
 - https://github.com/tr1xxx/battleye-region-walking
 - https://github.com/SurgeGotTappedAgain/Pink-Eye
+- https://github.com/R4YVEN/beservice_intcallbacks [Instrumentation Callback]
 
 > Explore AntiCheat System:EQU8
 - https://back.engineering/12/08/2021
@@ -2455,6 +2456,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/aahmad097/AlternativeShellcodeExec
 - https://github.com/Wra7h/FlavorTown
 - https://github.com/Deputation/instrumentation_callbacks [Instrumentation Callback]
+- https://github.com/R4YVEN/beservice_intcallbacks [Instrumentation Callback]
 - https://github.com/secrary/Hooking-via-InstrumentationCallback [Instrumentation Callback]
 - https://github.com/paranoidninja/EtwTi-Syscall-Hook [Instrumentation Callback]
 - https://github.com/jackullrich/syscall-detect [Instrumentation Callback]
