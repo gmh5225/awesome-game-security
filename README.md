@@ -812,6 +812,7 @@ Or you can send an issue for me.
 - https://github.com/Vector35/workflow_objc [Objective-C]
 - https://github.com/apekros/binja_sigmaker [Create and find signatures]
 - https://github.com/dayzerosec/AMD-SP-Loader [AMD-SP or PSP firmware]
+- https://github.com/WhatTheFuzz/binaryninja-openai [Integrates OpenAI]
 
 > Ghidra Plugins
 - https://github.com/CENSUS/ghidra-frida-hook-gen
