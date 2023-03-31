@@ -2310,6 +2310,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/DoranekoSystems/cheap-engine [Sample implementation of anti-cheat in android]
 - [Proof of concept Anti-Cheat plugin for CS:GO](https://github.com/ekknod/CSGO-AC)
 - [Deep Learning Anti-Cheat For CSGO](https://github.com/LaihoE/DLAC)
+- https://github.com/jnastarot/anti-cheat
+- https://github.com/jnastarot/ice9
 
 > Analysis Framework
 - https://github.com/pandora-analysis/pandora
