@@ -672,6 +672,7 @@ Or you can send an issue for me.
 - https://github.com/Dr-TSNG/ZygiskOnKernelSU [Run Zygisk on KernelSU]
 - https://github.com/svoboda18/magiskboot [Boot Image Modification Tool]
 - https://github.com/xiaoxindada/magiskboot_ndk_on_linux
+- https://github.com/the-dise/EasyPixel [Magisk module that disguises a device under Google Pixel]
 
 > Frida
 - https://github.com/CrackerCat/strongR-frida-android
