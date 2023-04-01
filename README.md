@@ -1834,6 +1834,7 @@ Or you can send an issue for me.
 > Game:Bloodhunt
 - https://github.com/ZZZ-Monster/bloodhunt_External
 - https://github.com/PhysX1337/BloodHunt-v1.1
+- https://github.com/simsgal365/blood-hunt
 
 > Game:Super People
 - https://github.com/EBalloon/Super-People-sdk
