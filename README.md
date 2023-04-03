@@ -1663,6 +1663,7 @@ Or you can send an issue for me.
 > Game:CS2
 - https://github.com/Omn1z/Counter-Strike2-SDK [SDK]
 - https://github.com/imnotdatguy/csgo2-cheat
+- https://github.com/papstuc/counterstrike2
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
