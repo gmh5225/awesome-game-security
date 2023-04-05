@@ -2465,6 +2465,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Windows Ring3 Callback
 - https://github.com/aahmad097/AlternativeShellcodeExec
+- https://github.com/RixedLabs/IDLE-Abuse
 - https://github.com/Wra7h/FlavorTown
 - https://github.com/Deputation/instrumentation_callbacks [Instrumentation Callback]
 - https://github.com/R4YVEN/beservice_intcallbacks [Instrumentation Callback]
