@@ -1834,6 +1834,7 @@ Or you can send an issue for me.
 - https://github.com/simply-codes/Fortnite-External-P2C [External]
 - https://github.com/Zetolac/FortniteExternalExploits [External Exploits]
 - https://github.com/xetzzy/Fortnite-External-Source [External]
+- https://github.com/sysmxer/triadz [External]
 
 > Game:Bloodhunt
 - https://github.com/ZZZ-Monster/bloodhunt_External
