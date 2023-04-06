@@ -2347,6 +2347,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/changeofpace/MouHidInputHook
 - https://github.com/KelvinMsft/UsbMon
 - https://github.com/87andrewh/DeepAimDetector [Deep Learning]
+- https://github.com/waldo-vision/waldo [Deep Learning]
+- https://github.com/waldo-vision/aimbot-detection-prototype [Deep Learning]
 - https://github.com/hkx3upper/Karlann [Keyboard]
 
 > Detection:Hide
