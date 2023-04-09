@@ -2005,6 +2005,9 @@ Or you can send an issue for me.
 > Game:Honkai Impact
 - https://github.com/BuIlDaLiBlE/BetterHI3Launcher
 
+> Game:osu
+- https://github.com/fs-c/maniac [External]
+
 > Game:EldenRing
 - https://github.com/techiew/EldenRingMods [Mod]
 - https://github.com/v-maxson/EldenRingLauncher [Launcher]
