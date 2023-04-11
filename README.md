@@ -1125,6 +1125,7 @@ Or you can send an issue for me.
 - https://github.com/J0xna/Kernel-Overlay-Hider [NtMITPostWindowEventMessage]
 - https://github.com/gmh5225/Eac-Injector-Driver [NtQueryIntervalProfile]
 - https://github.com/gmh5225/job_communication [NtQueryInformationJobObject]
+- https://github.com/estimated1337/custom_data_ptr_swap_sample [NtQueryLicenseValue]
 
 > EFI Driver
 - https://github.com/mrexodia/EfiCMake
