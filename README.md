@@ -889,6 +889,7 @@ Or you can send an issue for me.
 - https://github.com/wbenny/injdrv [APC]
 - https://github.com/alexkrnl/Kernel-dll-injector [APC]
 - https://github.com/w1u0u1/kinject [Map + APC]
+- https://github.com/1401199262/RemoteCall [APC Remote Call]
 - https://github.com/TheCruZ/Simple-Manual-Map-Injector [Manual Map]
 - https://github.com/andrew9382/manual_mapping_dll_injector [Manual Map]
 - https://github.com/danielkrupinski/MemJect [Manual Map]
