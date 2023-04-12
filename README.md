@@ -1404,6 +1404,7 @@ Or you can send an issue for me.
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/561479-eacs-instrumentation-callback-bypass.html
 - https://github.com/gmh5225/Eac-Injector-Driver [Injector]
 - https://github.com/gmh5225/EAC-EasyAntiCheatMemorySig [Memory sig maker]
+- https://github.com/gmh5225/EAC-shellcode-1 [Shellcode]
 
 > Explore AntiCheat System:BE
 - https://github.com/Schnocker/NoEye
