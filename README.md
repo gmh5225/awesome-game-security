@@ -1126,6 +1126,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Eac-Injector-Driver [NtQueryIntervalProfile]
 - https://github.com/gmh5225/job_communication [NtQueryInformationJobObject]
 - https://github.com/estimated1337/custom_data_ptr_swap_sample [NtQueryLicenseValue]
+- https://github.com/zer0condition/ZeroThreadKernel [NtCreateCompositionSurfaceHandle]
 
 > EFI Driver
 - https://github.com/mrexodia/EfiCMake
