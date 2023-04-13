@@ -2321,6 +2321,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/codetronik/AndroidAntiCheat [Android Platform]
 - https://github.com/MrDiamond64/Scythe-AntiCheat [Minecraft]
 - https://github.com/mateusreb/AntiCheat
+- https://github.com/ComodoSecurity/openedr [EDR]
 - https://github.com/0xrawsec/whids [EDR]
 - https://github.com/Neo23x0/Raccine [EDR]
 - https://github.com/ION28/BLUESPAWN [EDR]
