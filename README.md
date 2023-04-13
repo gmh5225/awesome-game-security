@@ -582,6 +582,7 @@ Or you can send an issue for me.
 - https://github.com/evild3ad/MemProcFS-Analyzer [Windows Forensic Analysis]
 - https://github.com/eybisi/kavanoz [Statically unpacking common android banker malware]
 - https://github.com/cyberark/PipeViewer [Shows detailed information about named pipes in Windows]
+- https://github.com/cursey/regenny [Reconstruct structures and generate header files]
 
 > Fix VMP
 - https://github.com/wallds/NoVmpy
@@ -1380,6 +1381,7 @@ Or you can send an issue for me.
 - https://github.com/krispybyte/Vook [VAC hook]
 - https://github.com/ioncodes/vacation3-emu [VAC3 module emulator]
 - https://github.com/altoid29/VACDumper [Dump]
+- https://github.com/x1tan/vac3-dumper [Dump]
 - https://github.com/Jackbail4/VAC-Bypass
 
 > Explore AntiCheat System:EAC
