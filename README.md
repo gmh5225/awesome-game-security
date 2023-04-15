@@ -1676,6 +1676,7 @@ Or you can send an issue for me.
 - https://github.com/lstrsrt/csgo_internal_base [Internal]
 
 > Game:CS2
+- https://github.com/bruhmoment21/cs2-sdk [SDK]
 - https://github.com/Omn1z/Counter-Strike2-SDK [SDK]
 - https://github.com/imnotdatguy/csgo2-cheat
 - https://github.com/papstuc/counterstrike2
