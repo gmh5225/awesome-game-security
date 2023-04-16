@@ -1797,6 +1797,7 @@ Or you can send an issue for me.
 - https://github.com/Neurosisccc/Apex-ItemGlow [Item glow]
 - https://github.com/BaconToaster/UC-Apex-Remastered
 - https://github.com/NekoRem/apex-external [External]
+- https://github.com/M1fisto/nullptr-apex-external [External]
 
 > Game:Fortnite
 - https://github.com/kem0x/FortKit [Dump]
