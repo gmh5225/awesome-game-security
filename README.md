@@ -1677,6 +1677,7 @@ Or you can send an issue for me.
 - https://github.com/si1kyyy/csgo_cheat_external [External]
 - https://github.com/latuh/nebulite-external [External]
 - https://github.com/lstrsrt/csgo_internal_base [Internal]
+- https://github.com/404Kurama/Astra [External]
 
 > Game:CS2
 - https://github.com/bruhmoment21/cs2-sdk [SDK]
