@@ -1857,6 +1857,7 @@ Or you can send an issue for me.
 - https://github.com/Zetolac/FortniteExternalExploits [External Exploits]
 - https://github.com/xetzzy/Fortnite-External-Source [External]
 - https://github.com/sysmxer/triadz [External]
+- https://github.com/DontCry361x/ritz-amazing-fortnite-internal-updated [internal]
 
 > Game:Bloodhunt
 - https://github.com/ZZZ-Monster/bloodhunt_External
