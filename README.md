@@ -629,6 +629,7 @@ Or you can send an issue for me.
 - https://github.com/0xcpu/ExecutiveCallbackObjects [Callback]
 - https://github.com/0xcpu/WinAltSyscallHandler [AltSystemCallHandlers]
 - https://github.com/everdox/InfinityHook [ETW Hook]
+- https://github.com/AyinSama/Anti-AntiDebuggerDriver [ETW Hook]
 - https://github.com/FiYHer/InfinityHookPro [ETW Hook Ex]
 - https://github.com/gmh5225/ETWHOOK-InfinityHookClass [ETW Hook Ex]
 - https://github.com/DearXiaoGui/InfinityHookPro-main [ETW Hook WIN11]
