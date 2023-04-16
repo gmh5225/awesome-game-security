@@ -486,6 +486,7 @@ Or you can send an issue for me.
 - https://www.triplefault.io
 - https://kotae4.github.io
 - https://bright.engineer
+- https://reversing.info
 - https://www.unknowncheats.me
 - https://forum.ragezone.com
 - https://guidedhacking.com
