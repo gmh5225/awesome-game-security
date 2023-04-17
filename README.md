@@ -2054,6 +2054,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Seanghost117/SpookiMystic-GTA-Leak [Menu]
 - https://github.com/Rimmuru/gta-source
 - https://github.com/SyDevTeam/gta5view [Viewer/Editor]
+- https://github.com/skarockoi/pHake [Mod Menu]
 
 > Game:Geometry Dash
 - https://github.com/reservedcloud/gd-internal
