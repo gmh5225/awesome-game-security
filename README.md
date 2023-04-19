@@ -968,7 +968,7 @@ Or you can send an issue for me.
 - https://github.com/HoShiMin/Kernel-Bridge
 - https://github.com/waryas/EUPMAccess
 - https://github.com/waryas/UMPMLib
-- https://github.com/EBalloon/Remap
+- https://github.com/EBalloon/Remap [Clone process]
 - https://github.com/TheCruZ/EFI_Driver_Access [EFI RPM]
 - https://github.com/SamuelTulach/efi-memory [EFI RPM]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/489305-read-write-process-attach.html
