@@ -2606,6 +2606,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/r0ak [r0ak]
 - https://github.com/ZeroMemoryEx/Wizard-Loader [Abuse Xwizard.exe for DLL Side-Loading]
 - https://github.com/LloydLabs/shellcode-plain-sight [Hiding shellcode in plain sight within a large memory region]
+- https://github.com/huntandhackett/process-cloning [Clone process]
 
 
 > Android
