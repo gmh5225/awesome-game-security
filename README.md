@@ -1604,6 +1604,7 @@ Or you can send an issue for me.
 > Game:CS1.6
 - https://github.com/k4ne1337/hpp-hack
 - https://github.com/BloodSharp/CSHackCreator-2-Demo
+- https://github.com/oxiKKK/oxware
 
 > Game:CSGO
 - https://github.com/csgohacks/master-guide [Guide]
