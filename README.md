@@ -2032,6 +2032,9 @@ Or you can send an issue for me.
 > Game:Honkai Impact
 - https://github.com/BuIlDaLiBlE/BetterHI3Launcher
 
+> Game:Honkai Star Rail
+- https://github.com/BuIlDaLiBlE/BetterHI3Launcher
+
 > Game:osu
 - https://github.com/fs-c/maniac [External]
 
