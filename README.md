@@ -413,6 +413,7 @@ Or you can send an issue for me.
 - https://github.com/crytic/slither [Static Analyzer]
 - https://github.com/ConsenSys/mythril [Static Analyzer]
 - https://github.com/Picodes/4naly3er [Static Analyzer]
+- https://github.com/Quillhash/QuillAudit_Auditor_Roadmap [Become a Smart Contract Auditor]
 
 ## DirectX
 > Guide
