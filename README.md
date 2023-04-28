@@ -671,6 +671,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Practical-Reverse-Engineering-Solutions [DPC+APC]
 - https://github.com/br-sn/CheekyBlinder [Enumerating and removing kernel callbacks using signed vulnerable drivers]
 - https://github.com/GetRektBoy724/DCMB [Removing kernel callbacks]
+- https://github.com/Air14/KDBGDecryptor [A simple example how to decrypt kernel debugger data block]
 
 > Magisk
 - https://github.com/PShocker/Zygisk-MagiskHide
