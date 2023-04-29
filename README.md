@@ -1732,6 +1732,7 @@ Or you can send an issue for me.
 - https://github.com/94q/Valorant-Internal [Internal]
 - https://github.com/DX9Paster/Valorant-External-P2C-Leaked [External]
 - https://github.com/kali11211/valorant-internal-cheat [Internal]
+- https://github.com/234945/valo-driver [External]
 
 > Game:VEILED EXPERTS
 - https://github.com/EBalloon/VEILED-EXPERTS-SDK
