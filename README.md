@@ -2218,6 +2218,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Gofrettin/veh-printf-hook [PAGE_GUARD]
 - https://github.com/charliewolfe/PointerGuard [PAGE_GUARD]
 - https://github.com/ilovecsad/veh_hide_memory [PAGE_NOACCESS]
+- https://github.com/gmh5225/PAGE_NO_ACCESS-not-byfron [PAGE_NOACCESS]
 
 > Binary Packer
 - https://github.com/dhondta/awesome-executable-packing
