@@ -616,6 +616,7 @@ Or you can send an issue for me.
 - https://github.com/tandasat/Sushi [Monitoring PG]
 - https://github.com/gmh5225/Disabling-Hyper-V [Disable Hyper-V]
 - https://github.com/AdamOron/PatchGuardBypass
+- https://github.com/zer0condition/Demystifying-PatchGuard
 
 > Windows Kernel Explorer
 - https://github.com/NullArray/WinKernel-Resources [Guide]
