@@ -296,6 +296,7 @@ Or you can send an issue for me.
 - https://github.com/codingben/maple-fighters [A small online game similar to MapleStory]
 - https://github.com/loqix/Fortnite [Fortnite]
 - https://github.com/bradharding/doomretro [DOOM]
+- https://github.com/NSG650/NtDOOM [Doom running in the NT kernel]
 - https://github.com/Luxon98/Super-Mario-Bros-game [Remake of Super Mario]
 - https://github.com/plibither8/2048.cpp [2048]
 - [An open source re-implementation of RollerCoaster Tycoon 2](https://github.com/OpenRCT2/OpenRCT2)
@@ -1012,7 +1013,8 @@ Or you can send an issue for me.
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
 - https://github.com/r1cky33/krnl-gdi-render [Dxgkrnl + GDI]
-- https://github.com/BadPlayer555/KernelGDIDraw
+- https://github.com/BadPlayer555/KernelGDIDraw [Kernel + GDI]
+- https://github.com/NSG650/NtDOOM [Kernel + GDI]
 - https://github.com/Splitx12/StrongSteam [GDI + Steam]
 - https://github.com/Sentient111/KernelDrawing [Drawing from kernelmode without any hooks]
 - https://github.com/wbaby/DoubleCallBack [DWM In Kernel]
