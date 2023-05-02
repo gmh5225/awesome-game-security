@@ -296,6 +296,7 @@ Or you can send an issue for me.
 - https://github.com/codingben/maple-fighters [A small online game similar to MapleStory]
 - https://github.com/loqix/Fortnite [Fortnite]
 - https://github.com/bradharding/doomretro [DOOM]
+- https://github.com/Daivuk/PureDOOM [DOOM]
 - https://github.com/NSG650/NtDOOM [Doom running in the NT kernel]
 - https://github.com/Luxon98/Super-Mario-Bros-game [Remake of Super Mario]
 - https://github.com/plibither8/2048.cpp [2048]
