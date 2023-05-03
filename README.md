@@ -1434,7 +1434,8 @@ Or you can send an issue for me.
 - https://github.com/masterpastaa/BattlEye-Handler-BYPASS
 - https://github.com/dllcrt0/battleye-decryption
 - https://github.com/dllcrt0/bedaisy-reversal
-- https://github.com/dllcrt0/battleye-shellcode
+- https://github.com/dllcrt0/battleye-shellcode [shellcode]
+- https://github.com/gmh5225/BE-BattlEye_shellcode [shellcode]
 - https://github.com/Compiled-Code/be-injector [Attack COW]
 - https://github.com/Aki2k/BEDaisy
 - https://github.com/Luohuayu/BadEye
