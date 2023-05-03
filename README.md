@@ -191,6 +191,7 @@ Or you can send an issue for me.
 - https://github.com/crosire/reshade [A generic post-processing injector for games and video software]
 - https://github.com/harukumo/HorizonEngine [3D rendering engine]
 - https://github.com/Patryk27/strolle [Real-time rendering engine]
+- https://github.com/ssloy/tinyraytracer [A brief computer graphics / rendering course]
 
 ## 3D Graphics
 - https://github.com/Mesa3D/mesa
