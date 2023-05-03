@@ -844,6 +844,7 @@ Or you can send an issue for me.
 - https://github.com/ghidragolf/ghidra_scripts [Scripts]
 - https://github.com/PAGalaxyLab/ghidra_scripts [Scripts]
 - https://github.com/danbrodsky/GFred [Command Palette]
+- https://github.com/Nalen98/AngryGhidra [Use angr in Ghidra]
 
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
