@@ -1120,6 +1120,7 @@ Or you can send an issue for me.
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/483093-vtable-kernel-function-hook-communication.html [NtUserMessageCall]
 - https://github.com/EBalloon/MapPage [NtUserGetObjectInformation]
 - https://github.com/Compiled-Code/eac-mapper [NtMapVisualRelativePoints]
+- https://github.com/gmh5225/eac-bypass-1 [NtMapVisualRelativePoints]
 - https://git.back.engineering/_xeroxz/NtWin32k [NtUserGetThreadState]
 - https://github.com/sbsbsbssbsbs/boundcallback [KeRegisterBoundCallback]
 - https://github.com/Skengdoo/DataPtrSwap-driver [NtSetCompositionSurfaceAnalogExclusive]
