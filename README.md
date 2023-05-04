@@ -498,6 +498,7 @@ Or you can send an issue for me.
 - https://gamehacking.academy
 - https://github.com/GameHackingAcademy
 - https://areweanticheatyet.com [A list of games using anti-cheats]
+- https://github.com/aclist/aclist.github.io [Anti-cheat compatibility list]
 - https://github.com/imadr/Unity-game-hacking [Unity]
 - https://vollragm.github.io/posts/unity-reversing [Unity]
 - https://wiki.cheatengine.org/index.php?title=Mono [CE Mono]
