@@ -1097,6 +1097,7 @@ Or you can send an issue for me.
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
+- https://github.com/gmh5225/ida-find-.data-ptr [.data ptr lookup script]
 - https://github.com/EBalloon/Common-Registry [Registry Callback]
 - https://github.com/gmh5225/Common-Registry-Jmp-RCX [Registry Callback]
 - https://github.com/0xGREG/registry-callbacks [Registry Callback]
