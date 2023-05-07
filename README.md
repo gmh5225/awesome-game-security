@@ -1402,6 +1402,7 @@ Or you can send an issue for me.
 - https://github.com/ioncodes/vacation3-emu [VAC3 module emulator]
 - https://github.com/altoid29/VACDumper [Dump]
 - https://github.com/x1tan/vac3-dumper [Dump]
+- https://github.com/nevioo1337/VAC-ModuleDumper [Dump]
 - https://github.com/Jackbail4/VAC-Bypass
 
 > Explore AntiCheat System:EAC
