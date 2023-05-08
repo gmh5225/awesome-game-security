@@ -41,7 +41,7 @@ Or you can send an issue for me.
 - [Windows Subsystem for Linux](#Windows-Subsystem-for-Linux)
 - [Windows Subsystem for Android](#Windows-Subsystem-for-Android)
 - [Android Emulator](#Android-Emulator)
-- [Nintendo Switch Emulator](#Nintendo Switch Emulator)
+- [Nintendo Switch Emulator](#Nintendo-Switch-Emulator)
 
 ## Game Engine
 > Guide
