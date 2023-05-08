@@ -41,6 +41,7 @@ Or you can send an issue for me.
 - [Windows Subsystem for Linux](#Windows-Subsystem-for-Linux)
 - [Windows Subsystem for Android](#Windows-Subsystem-for-Android)
 - [Android Emulator](#Android-Emulator)
+- [Nintendo Switch Emulator](#Nintendo Switch Emulator)
 
 ## Game Engine
 > Guide
@@ -2687,3 +2688,6 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/google/android-emulator-hypervisor-driver
 - https://github.com/ant4g0nist/rudroid [Rust]
 - https://github.com/qemu-gvm/qemu-gvm [QEMU]
+
+## Nintendo Switch Emulator
+- https://github.com/TheNightmanCodeth/yuzu
