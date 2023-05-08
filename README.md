@@ -1827,6 +1827,7 @@ Or you can send an issue for me.
 - https://github.com/NekoRem/apex-external [External]
 - https://github.com/M1fisto/nullptr-apex-external [External]
 - https://github.com/3nolan5/R5Apex-UserMode [External]
+- https://github.com/NaiJii/Apex-Mizu-Base [Internal]
 
 > Game:Fortnite
 - https://github.com/kem0x/FortKit [Dump]
