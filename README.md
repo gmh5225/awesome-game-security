@@ -2616,6 +2616,11 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Hook-KdTrap [Hook KdTrap]
 - https://github.com/gmh5225/Driver-SoulExtraction [Extracting cert information]
 - https://github.com/gmh5225/Kernel-Special-APC-ReadProcessMemory [Kernel APC RPM]
+- https://github.com/NSG650/Bad-BugCheck-Old [BSOD]
+- https://github.com/NSG650/Bad-Bugcheck [BSOD]
+- https://github.com/NSG650/NoMoreBugCheck [BSOD]
+- https://github.com/NSG650/BugCheckHack [BSOD]
+- https://github.com/NSG650/BugCheck2Linux [BSOD]
 
 
 > Windows Ring3
