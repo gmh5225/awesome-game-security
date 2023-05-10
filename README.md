@@ -1705,6 +1705,7 @@ Or you can send an issue for me.
 - https://github.com/lstrsrt/csgo_internal_base [Internal]
 - https://github.com/404Kurama/Astra [External]
 - https://github.com/AlphenProject/Alphen
+- https://github.com/Enzo0721/ExternalCheatV3 [External]
 
 > Game:CS2
 - https://github.com/bruhmoment21/cs2-sdk [SDK]
