@@ -2600,6 +2600,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Allocating-individual-pages [MmAllocateIndependentPagesEx]
 - https://github.com/gmh5225/Hook-HvlSwitchVirtualAddressSpace [HvlSwitchVirtualAddressSpace]
 - https://github.com/1401199262/HookHvcallCodeVa [HvlSwitchVirtualAddressSpace]
+- https://github.com/gmh5225/Driver-HypercallPageHook [HvlSwitchVirtualAddressSpace]
 - https://github.com/gmh5225/CallMeWin32kDriver [Load your driver like win32k.sys]
 - https://github.com/HypsyNZ/DSEDodge-Signed-Kernel-Driver [Leveraging PTT to defeat DSE]
 - https://github.com/wbenny/KSOCKET [Kernel Berkeley socket]
