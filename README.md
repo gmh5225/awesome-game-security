@@ -2064,6 +2064,7 @@ Or you can send an issue for me.
 > Game:Honkai Star Rail
 - https://github.com/Z4ee/StarRail-S-GC
 - https://github.com/Z4ee/StarRail-ACE-B
+- https://github.com/aderfa/star_rail
 
 > Game:osu
 - https://github.com/fs-c/maniac [External]
