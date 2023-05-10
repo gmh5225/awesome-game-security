@@ -333,6 +333,7 @@ Or you can send an issue for me.
 - https://github.com/galaxyhaxz/devilution [Reversed Devilution]
 - https://github.com/assaultcube/AC [FPS Game]
 - https://github.com/fishfolk/jumpy [Pixels style]
+- https://github.com/jynew/jynew [JinYongLegend]
 
 
 ## Game Assets
