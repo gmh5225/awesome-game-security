@@ -1099,6 +1099,7 @@ Or you can send an issue for me.
 - https://github.com/OmriBaso/RToolZ [ProcExp152.sys]
 - https://github.com/SamuelTulach/nullmap [Afd.sys]
 - https://github.com/gmh5225/Windows-10-22H2-Vulnerable-driver-communication [asromgdrv.sys]
+- https://github.com/alfarom256/HPHardwareDiagnostics-PoC [etdsupp.sys]
 
 
 > Driver Communication
