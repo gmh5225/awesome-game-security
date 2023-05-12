@@ -394,6 +394,7 @@ Or you can send an issue for me.
 - https://github.com/lambdaclass/lambdaworks [Crypto]
 - https://github.com/coinspect/learn-evm-attacks [EVM Security]
 - https://github.com/Dapp-Learning-DAO/Dapp-Learning [Dapp]
+- https://github.com/contractcops/auditingroadmap [Solidity]
 
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
