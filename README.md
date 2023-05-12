@@ -594,6 +594,7 @@ Or you can send an issue for me.
 - https://github.com/cursey/regenny [Reconstruct structures and generate header files]
 
 > Fix VMP
+- https://github.com/Alukym/VMProtect-Source
 - https://github.com/wallds/NoVmpy
 - https://github.com/gmh5225/VMP-Vmp3_64bit_disasm-prerelease-
 - https://github.com/gmh5225/Vmp3_utils
