@@ -2069,6 +2069,7 @@ Or you can send an issue for me.
 
 > Game:Honkai Impact
 - https://github.com/BuIlDaLiBlE/BetterHI3Launcher
+- https://github.com/Z4ee/HI3-ACE-B
 
 > Game:Honkai Star Rail
 - https://github.com/Z4ee/StarRail-S-GC
