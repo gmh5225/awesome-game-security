@@ -2404,6 +2404,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [Deep Learning Anti-Cheat For CSGO](https://github.com/LaihoE/DLAC)
 - https://github.com/jnastarot/anti-cheat
 - https://github.com/jnastarot/ice9
+- https://github.com/realTristan/Reborn [Designed with Rust]
 
 > Analysis Framework
 - https://github.com/pandora-analysis/pandora
