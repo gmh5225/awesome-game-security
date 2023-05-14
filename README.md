@@ -812,6 +812,7 @@ Or you can send an issue for me.
 - https://github.com/yubie-re/ida-jm-xorstr-decrypt-plugin [Attempts to decrypt JM Xorstr in some x64 binaries]
 - https://github.com/timetravelthree/IDARustDemangler [Rust Demangler & Normalizer]
 - https://github.com/gmh5225/ida-find-.data-ptr [.data ptr lookup script]
+- https://github.com/repnz/ida-plugins [Register Cross References]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
