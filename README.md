@@ -2716,3 +2716,4 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 ## Nintendo Switch Emulator
 - https://github.com/TheNightmanCodeth/yuzu
 - https://github.com/CTCaer/hekate [A GUI based Nintendo Switch Bootloader]
+- https://github.com/Atmosphere-NX/Atmosphere [Customized firmware]
