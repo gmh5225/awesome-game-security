@@ -1976,6 +1976,7 @@ Or you can send an issue for me.
 - https://github.com/rushzzz-max/r6-external [External]
 - https://github.com/ArtemisDevGroup/Artemis [Internal]
 - https://github.com/MuffinPanda/R6-Cheat-Dumper [External]
+- https://github.com/Possbl/R6S-External-V2 [External]
 
 > Game:Overwatch 
 - https://github.com/blackhades00/PareidoliaTriggerbot [Triggerbot]
