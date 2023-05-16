@@ -1902,6 +1902,7 @@ Or you can send an issue for me.
 - https://github.com/sysmxer/triadz [External]
 - https://github.com/DontCry361x/ritz-amazing-fortnite-internal-updated [internal]
 - https://github.com/NurdAlert/flirtnite [External]
+- https://github.com/JetBrains-CLion/Fortnite-3.5 [Internal]
 
 > Game:Bloodhunt
 - https://github.com/ZZZ-Monster/bloodhunt_External
