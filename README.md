@@ -989,6 +989,7 @@ Or you can send an issue for me.
 - https://github.com/EBalloon/Remap [Clone process]
 - https://github.com/TheCruZ/EFI_Driver_Access [EFI RPM]
 - https://github.com/SamuelTulach/efi-memory [EFI RPM]
+- https://github.com/ekknod/SubGetVariable [EFI RPM]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/489305-read-write-process-attach.html
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/444289-read-process-physical-memory-attach.html
 - https://github.com/gamozolabs/mempeek [Linux]
