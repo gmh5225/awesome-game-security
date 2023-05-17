@@ -41,7 +41,7 @@ Or you can send an issue for me.
 - [Windows Subsystem for Linux](#Windows-Subsystem-for-Linux)
 - [Windows Subsystem for Android](#Windows-Subsystem-for-Android)
 - [Android Emulator](#Android-Emulator)
-- [Nintendo Switch Emulator](#Nintendo-Switch-Emulator)
+- [Nintendo Switch](#Nintendo-Switch)
 
 ## Game Engine
 > Guide
@@ -2723,7 +2723,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ant4g0nist/rudroid [Rust]
 - https://github.com/qemu-gvm/qemu-gvm [QEMU]
 
-## Nintendo Switch Emulator
+## Nintendo Switch
 - https://github.com/TheNightmanCodeth/yuzu
 - https://github.com/CTCaer/hekate [A GUI based Nintendo Switch Bootloader]
 - https://github.com/Atmosphere-NX/Atmosphere [Customized firmware]
+- https://github.com/tomvita/SE-tools [Memory hacking]
