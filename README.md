@@ -814,6 +814,7 @@ Or you can send an issue for me.
 - https://github.com/timetravelthree/IDARustDemangler [Rust Demangler & Normalizer]
 - https://github.com/gmh5225/ida-find-.data-ptr [.data ptr lookup script]
 - https://github.com/repnz/ida-plugins [Register Cross References]
+- https://github.com/lstaroth/AntiXorstr [Anti Xorstr]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
