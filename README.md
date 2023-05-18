@@ -1923,6 +1923,7 @@ Or you can send an issue for me.
 
 > Game:PUBG
 - https://github.com/owdata1/pubg-dumper [Dump]
+- https://github.com/orange088/pubg_dump_offset [Offset]
 - https://github.com/Skengdoo/pubg-external-cheat
 - https://github.com/ajkhoury/pubg_internal
 - https://github.com/iCollin/pubg-internal
