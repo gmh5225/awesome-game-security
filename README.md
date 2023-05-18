@@ -137,6 +137,7 @@ Or you can send an issue for me.
 - https://github.com/Net5F/AmalgamEngine
 - https://github.com/rxi/kit [pixels]
 - https://github.com/nitaigao/engine-showcase [Old engine]
+- https://github.com/PanosK92/SpartanEngine [Research-focused game engine designed for real-time solutions]
 
 
 > Game Engine Plugins:Unreal
