@@ -2437,6 +2437,11 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Midi12/QueryWorkingSetExample
 - https://github.com/Deputation/integrity_experiments [header only]
 
+> Detection:ShellCode
+- https://github.com/jdu2600/EtwTi-FluctuationMonitor [ETW]
+- https://github.com/jdu2600/Etw-SyscallMonitor [ETW]
+- https://github.com/jdu2600/CFG-FindHiddenShellcode [CFG]
+
 > Detection:Attach
 - https://github.com/KANKOSHEV/Detect-KeAttachProcess
 
