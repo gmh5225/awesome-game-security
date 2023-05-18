@@ -594,6 +594,7 @@ Or you can send an issue for me.
 - https://github.com/eybisi/kavanoz [Statically unpacking common android banker malware]
 - https://github.com/cyberark/PipeViewer [Shows detailed information about named pipes in Windows]
 - https://github.com/cursey/regenny [Reconstruct structures and generate header files]
+- https://github.com/zodiacon/EtwExplorer [View ETW Provider manifest]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
