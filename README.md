@@ -935,6 +935,7 @@ Or you can send an issue for me.
 - https://github.com/5paceman/nightshade [inject tool]
 - https://github.com/deepinstinct/Dirty-Vanity [RtlCreateProcessReflection]
 - https://github.com/LloydLabs/ntqueueapcthreadex-ntdll-gadget-injection [NtQueueApcThreadEx + gadget]
+- https://github.com/3xpl01tc0d3r/ProcessInjection [Various process injection techniques]
 
 > Injection:Linux
 - https://github.com/ixty/mandibule
