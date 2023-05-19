@@ -1774,6 +1774,7 @@ Or you can send an issue for me.
 - https://github.com/EBalloon/VEILED-EXPERTS-SDK
 - https://github.com/LagradOst/ProjectD-Win64-Shipping
 - https://github.com/Da3kL3o/VeiledExpertsSDK
+- https://github.com/percpopper/VX-It [Decrypt]
 
 > Game:COD1
 - https://github.com/attilathedud/CoD_Hacks
