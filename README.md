@@ -1449,6 +1449,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/EAC-EasyAntiCheatMemorySig [Memory sig maker]
 - https://github.com/gmh5225/EAC-shellcode-1 [Shellcode]
 - https://github.com/gmh5225/EAC-Driver-UD-for-now [Sample]
+- https://github.com/lguilhermee/EAC-Extractor-Utility [Decrypt and Extract the files from the EAC]
 
 > Explore AntiCheat System:BE
 - https://github.com/Schnocker/NoEye
