@@ -1722,6 +1722,7 @@ Or you can send an issue for me.
 - https://github.com/AlphenProject/Alphen
 - https://github.com/Enzo0721/ExternalCheatV3 [External]
 - https://github.com/SteamDatabase/Protobufs/tree/master/csgo [Protobuf]
+- https://github.com/kyojig/csgo_kns [Internal]
 
 > Game:CS2
 - https://github.com/bruhmoment21/cs2-sdk [SDK]
