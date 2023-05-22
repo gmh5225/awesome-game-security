@@ -528,6 +528,7 @@ Or you can send an issue for me.
 - https://github.com/SinaKarvandi/Hypervisor-From-Scratch [Hypervisor]
 - https://github.com/JasonGoemaat/CheatEngineMonoHelper [CE Mono Helper]
 - https://github.com/DoranekoSystems/frida-ceserver [CE Server For IOS]
+- https://github.com/DoranekoSystems/ceserver-ios [Porting ceserver to iOS.Dynamic analysis]
 - https://github.com/isabellaflores/ceserver-pcileech [CE Server For Pcileech]
 - https://github.com/user23333/veh [CE Plugin For Manualmap VEH Dll]
 - https://github.com/x64dbg/x64dbg
@@ -595,6 +596,7 @@ Or you can send an issue for me.
 - https://github.com/cyberark/PipeViewer [Shows detailed information about named pipes in Windows]
 - https://github.com/cursey/regenny [Reconstruct structures and generate header files]
 - https://github.com/zodiacon/EtwExplorer [View ETW Provider manifest]
+- https://github.com/DoranekoSystems/ceserver-ios [Porting ceserver to iOS.Dynamic analysis]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
