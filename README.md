@@ -645,6 +645,7 @@ Or you can send an issue for me.
 - https://github.com/winsiderss/systeminformer [Tool]
 - https://github.com/0xcpu/ExecutiveCallbackObjects [Callback]
 - https://github.com/0xcpu/WinAltSyscallHandler [AltSystemCallHandlers]
+- https://github.com/DownWithUp/CallMon [AltSystemCallHandlers]
 - https://github.com/everdox/InfinityHook [ETW Hook]
 - https://github.com/AyinSama/Anti-AntiDebuggerDriver [ETW Hook]
 - https://github.com/FiYHer/InfinityHookPro [ETW Hook Ex]
