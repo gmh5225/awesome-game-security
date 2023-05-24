@@ -597,6 +597,7 @@ Or you can send an issue for me.
 - https://github.com/cursey/regenny [Reconstruct structures and generate header files]
 - https://github.com/zodiacon/EtwExplorer [View ETW Provider manifest]
 - https://github.com/DoranekoSystems/ceserver-ios [Porting ceserver to iOS.Dynamic analysis]
+- https://github.com/VoidSec/ioctlpus [Be used to make DeviceIoControl requests with arbitrary inputs]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
