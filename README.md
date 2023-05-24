@@ -939,6 +939,8 @@ Or you can send an issue for me.
 - https://github.com/deepinstinct/Dirty-Vanity [RtlCreateProcessReflection]
 - https://github.com/LloydLabs/ntqueueapcthreadex-ntdll-gadget-injection [NtQueueApcThreadEx + gadget]
 - https://github.com/3xpl01tc0d3r/ProcessInjection [Various process injection techniques]
+- https://github.com/zorftw/lsass-extend-mapper [Manual mapper from LSASS]
+- https://github.com/zorftw/revert-mapper [Map x64 DLLs in WoW64]
 
 > Injection:Linux
 - https://github.com/ixty/mandibule
@@ -2214,6 +2216,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/D1rkMtr/DumpThatLSASS [Elevating Handle By LSASS]
 - https://github.com/gmh5225/Handle-Ripper [DuplicateHandle]
 - https://github.com/Kudaes/Dumpy [Reuse opened handles By LSASS]
+- https://github.com/zorftw/lsass-extend-mapper [Manual mapper from LSASS]
 - https://github.com/Mattiwatti/EfiGuard [PG Testing]
 - https://github.com/9176324/Shark [PG Testing]
 - https://github.com/gmh5225/HideDriverTesting [Hide Driver Testing]
