@@ -422,6 +422,7 @@ Or you can send an issue for me.
 - https://github.com/ConsenSys/mythril [Static Analyzer]
 - https://github.com/Picodes/4naly3er [Static Analyzer]
 - https://github.com/Quillhash/QuillAudit_Auditor_Roadmap [Become a Smart Contract Auditor]
+- https://github.com/d-xo/weird-erc20 [Weird ERC20]
 
 ## DirectX
 > Guide
