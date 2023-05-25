@@ -1036,6 +1036,7 @@ Or you can send an issue for me.
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
+- https://github.com/thesecretclub/window_hijack [Rendering on external windows via hijacking thread contexts]
 - https://github.com/r1cky33/krnl-gdi-render [Dxgkrnl + GDI]
 - https://github.com/BadPlayer555/KernelGDIDraw [Kernel + GDI]
 - https://github.com/NSG650/NtDOOM [Kernel + GDI]
