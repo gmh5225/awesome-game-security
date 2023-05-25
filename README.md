@@ -724,6 +724,7 @@ Or you can send an issue for me.
 - https://github.com/IAIK/armageddon [Cache attacks on ARM]
 - https://github.com/tamirzb/CVE-2021-1961 [CVE RW]
 - https://github.com/MJx0/KittyMemory [Runtime code patching]
+- https://github.com/vrolife/mypower [Memory scanner]
 
 > Android Kernel Explorer
 - https://docs.kernel.org [Linux Kernel documentation]
