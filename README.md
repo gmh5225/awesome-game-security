@@ -1378,6 +1378,8 @@ Or you can send an issue for me.
 - https://github.com/kp7742/IL2CPPDumper [Il2Cpp Dump for Android Platform]
 - https://github.com/yukiarrr/Il2cppSpy [Unity IL2CPP Disassembler (for apk)]
 - https://github.com/djkaty/Il2CppInspector [Il2Cpp Dump]
+- https://github.com/oobbb/android-il2cpp-modspeed [Il2Cpp hack speed]
+- https://github.com/gmh5225/qiling-il2cpp-dump  [Il2Cpp Dump using qiling]
 - https://github.com/sinai-dev/UnityExplorer
 - https://github.com/4ch12dy/il2cpp [Il2Cpp Version]
 - https://github.com/nneonneo/Il2CppVersions [Il2Cpp Version]
@@ -1404,7 +1406,6 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/IL22CPP [ReMake of Il2cpp internal reflection system in C++]
 - https://github.com/sunnamed434/UnityVulnerableEntryPoint [Looks for a vulnerable entry point]
 - https://github.com/Azvanzed/MatScan [A multi-threaded rust material scanner]
-- https://github.com/oobbb/android-il2cpp-modspeed [Il2Cpp hack speed]
 
 > Game Engine Explorer:Source
 - https://github.com/anarh1st47/Source2Dumps [Dump]
