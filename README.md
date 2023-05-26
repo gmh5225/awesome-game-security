@@ -826,6 +826,7 @@ Or you can send an issue for me.
 - https://github.com/repnz/ida-plugins [Register Cross References]
 - https://github.com/lstaroth/AntiXorstr [Anti Xorstr]
 - https://github.com/SentineLabs/AlphaGolang [Analyzing Golang Binaries]
+- https://github.com/tmr232/Sark [IDAPython Made Easy]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
