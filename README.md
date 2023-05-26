@@ -1067,6 +1067,7 @@ Or you can send an issue for me.
 - https://github.com/adamhlt/ImGui-Standalone
 
 > Vulnerable Driver 
+- https://www.loldrivers.io/drivers
 - https://github.com/hacksysteam/HackSysExtremeVulnerableDriver [Guide]
 - https://github.com/xct/windows-kernel-exploits [Guide]
 - https://github.com/namazso/physmem_drivers [Vulnerable Driver List]
@@ -1120,6 +1121,7 @@ Or you can send an issue for me.
 - https://github.com/SamuelTulach/nullmap [Afd.sys]
 - https://github.com/gmh5225/Windows-10-22H2-Vulnerable-driver-communication [asromgdrv.sys]
 - https://github.com/alfarom256/HPHardwareDiagnostics-PoC [etdsupp.sys]
+- https://github.com/ZeroMemoryEx/Blackout [gmer64.sys]
 
 
 > Driver Communication
