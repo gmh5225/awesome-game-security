@@ -82,7 +82,7 @@ Or you can send an issue for me.
 - https://github.com/nillerusr/source-engine
 - https://github.com/gmh5225/GoldSourceRebuild [GoldSource engine rebuild]
 - https://github.com/adriengivry/Overload
-- https://github.com/flwmxd/MapleEngine
+- https://github.com/gmh5225/GameEngine-MapleEngine
 - https://github.com/inanevin/LinaEngine
 - https://github.com/storm-devs/storm-engine
 - https://github.com/minetest/minetest
