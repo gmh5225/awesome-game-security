@@ -80,7 +80,7 @@ Or you can send an issue for me.
 - https://github.com/UTINKA/source-engine.2003
 - https://github.com/VSES/SourceEngine2007
 - https://github.com/nillerusr/source-engine
-- https://github.com/Triang3l/GoldSourceRebuild [GoldSource engine rebuild]
+- https://github.com/gmh5225/GoldSourceRebuild [GoldSource engine rebuild]
 - https://github.com/adriengivry/Overload
 - https://github.com/flwmxd/MapleEngine
 - https://github.com/inanevin/LinaEngine
