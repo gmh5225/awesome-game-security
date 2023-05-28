@@ -1287,6 +1287,7 @@ Or you can send an issue for me.
 - https://github.com/lucylow/b00m-h3adsh0t [Neural Network]
 - https://github.com/univrsal/input-overlay [Keyboard Mapper]
 - https://github.com/Miffyli/gan-aimbots [Machine Learning]
+- https://github.com/RootKit-Org/AI-Aimbot [Machine Learning YOLOv5]
 - https://github.com/lehmenkuehler/camera-triggerbot [Camera Triggerbot]
 - https://github.com/BuddyBoi/KernelMoveMouse [gptCursorAsync]
 - https://github.com/Zpes/mouse-input-injection [NtUserInjectMouseInput]
