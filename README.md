@@ -112,7 +112,7 @@ Or you can send an issue for me.
 - https://github.com/egret-labs/egret-core [HTML5]
 - https://github.com/TorqueGameEngines/Torque2D [2D]
 - https://github.com/TorqueGameEngines/Torque3D [3D]
-- https://github.com/PardCode/CX3D [3D]
+- https://github.com/gmh5225/GameEngine-CX3D [3D]
 - https://github.com/TrinityCore/TrinityCore [MMORPG]
 - https://github.com/solenum/exengine [C99 3D]
 - https://github.com/TheCherno/Hazel
