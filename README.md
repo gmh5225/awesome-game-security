@@ -267,7 +267,7 @@ Or you can send an issue for me.
 - https://github.com/hampta/csso-src [CSGO Mod]
 - https://github.com/thomaseichhorn/cs16-client [Rewrote CS1.6]
 - https://github.com/s1lentq/ReGameDLL_CS [Reversed CS1.6]
-- https://github.com/td512/re3 [Reversed GTA III, Vice City]
+- https://github.com/gmh5225/Game-GTA-re3 [Reversed GTA III, Vice City]
 - https://github.com/WastedHymn/Grand-Theft-Auto-Modding-Source [Code snippets for Vice City]
 - https://github.com/SmileyAG/ReCZDS [Reversed CZeror]
 - https://github.com/Harrison1/unrealcpp [UE4 C++ examples]
