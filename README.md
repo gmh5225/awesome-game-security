@@ -600,6 +600,7 @@ Or you can send an issue for me.
 - https://github.com/zodiacon/EtwExplorer [View ETW Provider manifest]
 - https://github.com/DoranekoSystems/ceserver-ios [Porting ceserver to iOS.Dynamic analysis]
 - https://github.com/VoidSec/ioctlpus [Be used to make DeviceIoControl requests with arbitrary inputs]
+- https://github.com/horsicq/Nauz-File-Detector [Linker/Compiler/Tool detector]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
