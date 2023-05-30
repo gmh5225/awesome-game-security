@@ -2682,6 +2682,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/NSG650/NoMoreBugCheck [BSOD]
 - https://github.com/NSG650/BugCheckHack [BSOD]
 - https://github.com/NSG650/BugCheck2Linux [BSOD]
+- https://github.com/stuxnet147/PiDqSerializationWrite-Example [PiDqSerializationWrite]
 
 
 > Windows Ring3
