@@ -912,8 +912,8 @@ Or you can send an issue for me.
 - https://github.com/Skyrimfus/CE-lua-extensions [Lua Extensions]
 - https://github.com/bbfox0703/Mydev-Cheat-Engine-Tables [CT]
 - https://github.com/inuNorii/Elden-Ring-CT-TGA [Elden Ring]
-- https://github.com/vmmcall/remap-plugin [Remap]
-- https://github.com/vmmcall/overwatch-iat-fixer [Overwatch IAT Fixer]
+- https://github.com/gmh5225/CE-remap-plugin [Remap]
+- https://github.com/gmh5225/overwatch-iat-fixer [Overwatch IAT Fixer]
 - https://github.com/FreeER/CE-Examples [Some Examples]
 - [Porting ce's monodatacollector to android/ios](https://github.com/gmh5225/frida-il2cpp-datacollector)
 
