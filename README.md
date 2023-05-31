@@ -685,6 +685,7 @@ Or you can send an issue for me.
 - https://github.com/allogic/KDBG [Tool]
 - https://github.com/gmh5225/Voyager [A Hyper-V Hacking Framework For Windows 10 x64 (AMD & Intel)]
 - https://github.com/NurdAlert/modded-voyager
+- https://github.com/gmh5225/Fortnite-VoyagerTF [Voyager for Fortnite]
 - https://github.com/repnz/apc-research [APC Internals Research Code]
 - https://github.com/intel/pcm [Processor Counter Monitor]
 - https://github.com/ChengChengCC/Ark-tools [Some kernel research]
@@ -1934,6 +1935,7 @@ Or you can send an issue for me.
 - https://github.com/DontCry361x/ritz-amazing-fortnite-internal-updated [internal]
 - https://github.com/NurdAlert/flirtnite [External]
 - https://github.com/JetBrains-CLion/Fortnite-3.5 [Internal]
+- https://github.com/gmh5225/Fortnite-VoyagerTF [Voyager]
 
 > Game:Bloodhunt
 - https://github.com/ZZZ-Monster/bloodhunt_External
