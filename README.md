@@ -977,7 +977,7 @@ Or you can send an issue for me.
 - https://github.com/WopsS/RenHook
 - https://github.com/Zeex/subhook
 - https://github.com/axhlzy/PyAsmPatch
-- https://github.com/TupleDev/KDtour [Easy Kernel Detour]
+- https://github.com/gmh5225/Driver-KDtour [Easy Kernel Detour]
 - https://github.com/nelfo/PGHooker [Page Guard]
 - https://github.com/weak1337/SkipHook [Skip Hook]
 - https://github.com/0mdi/edgegdi_hook [gdi32 .data swap]
