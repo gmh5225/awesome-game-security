@@ -970,6 +970,7 @@ Or you can send an issue for me.
 - [Project for identifying executables and DLLs vulnerable to relative path DLL hijacking](https://github.com/wietze/windows-dll-hijacking)
 
 > Hook
+- https://github.com/stars/gmh5225/lists/hook [Lists]
 - https://github.com/microsoft/Detours
 - https://github.com/wbenny/DetoursNT
 - https://github.com/stevemk14ebr/PolyHook
