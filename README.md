@@ -287,7 +287,7 @@ Or you can send an issue for me.
 - https://github.com/OguzKaira/FPS-Movement [Unity FPS]
 - https://github.com/OguzKaira/SQLite-Unity3D [Unity SQLite]
 - https://github.com/swordjoinmagic/MoBaDemo [Unity MoBa]
-- https://github.com/mytechnotalent/unity-vrchat-template [Unity VRChat Template]
+- https://github.com/gmh5225/unity-vrchat-template [Unity VRChat Template]
 - https://github.com/Saukiya/Arknights [Unity Arknights]
 - https://github.com/ZehMatt/SnakeRoyal [Mini Game With Server]
 - https://github.com/MKXJun/Super-Fighter [DX11 Mini Game]
