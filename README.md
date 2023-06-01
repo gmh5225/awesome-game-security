@@ -1022,7 +1022,7 @@ Or you can send an issue for me.
 - https://github.com/coltonon/D2DOverlay
 - https://github.com/SeanPesce/Direct3D9-Overlay [DX9]
 - https://github.com/Unkn0wnH4ck3r/GameOverlayUIHook [Steam]
-- https://github.com/Xenia0/Steam-Hook-Render-PoC [Steam]
+- https://github.com/gmh5225/Steam-Hook-Render-PoC [Steam]
 - https://github.com/xo1337/steam-overlay-x64 [Steam]
 - https://github.com/Splitx12/StrongSteam [GDI + Steam]
 - https://github.com/gmh5225/dwmhook [DWM]
