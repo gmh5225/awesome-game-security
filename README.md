@@ -2647,6 +2647,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Backup File
 - https://github.com/guidoreina/minivers [Generates Backup Copies]
 
+> Backup Drivers
+- https://github.com/gloriouslegacy/ezDrvBAK [Backup & restrore the Windows-Drivers]
+
 > Black Signature
 - https://github.com/gmh5225/BlackSignatureDriver
 - https://github.com/Harvester57/CodeIntegrity-DriverBlocklist
