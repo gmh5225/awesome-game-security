@@ -831,6 +831,7 @@ Or you can send an issue for me.
 - https://github.com/lstaroth/AntiXorstr [Anti Xorstr]
 - https://github.com/SentineLabs/AlphaGolang [Analyzing Golang Binaries]
 - https://github.com/tmr232/Sark [IDAPython Made Easy]
+- https://github.com/govcert-ch/ConfuserEx_IDAPython [Deobfuscation script for ConfuserEx]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
