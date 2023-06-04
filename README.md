@@ -1086,7 +1086,7 @@ Or you can send an issue for me.
 - https://github.com/CaledoniaProject/drivers-binaries [Vulnerable Driver List]
 - https://github.com/Xxmmy/vulnerable-driver-scanner [Scans for vulnerable drivers]
 - https://github.com/Sentient111/VulnerableDriverScanner [Scans for vulnerable drivers]
-- https://github.com/fengjixuchui/gdrv-loader/tree/1909_mitigation [gdrv.sys]
+- https://github.com/gmh5225/gdrv-loader/tree/1909_mitigation [gdrv.sys]
 - http://rexw3wrz5pldtadf3hy4vqnuzokhco4l32kyntj36fcgpjuy3nvxidid.onion/_xeroxz/VDM [gdrv enhance]
 - https://github.com/Compiled-Code/eac-mapper [gdrv.sys]
 - https://github.com/gmh5225/CVE-2018-19320-LPE [gdrv.sys]
