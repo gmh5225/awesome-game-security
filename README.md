@@ -695,6 +695,7 @@ Or you can send an issue for me.
 - https://github.com/br-sn/CheekyBlinder [Enumerating and removing kernel callbacks using signed vulnerable drivers]
 - https://github.com/GetRektBoy724/DCMB [Removing kernel callbacks]
 - https://github.com/Air14/KDBGDecryptor [A simple example how to decrypt kernel debugger data block]
+- https://github.com/FaEryICE/MemScanner [Memory scanner]
 
 > Magisk
 - https://github.com/PShocker/Zygisk-MagiskHide
@@ -2506,6 +2507,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Detection:Vulnerable Driver
 - https://github.com/Deputation/hygieia
+- https://github.com/FaEryICE/MemScanner
 
 > Detection:EFI Driver
 - https://github.com/gmh5225/Detect-EFIGuard
