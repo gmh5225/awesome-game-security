@@ -1400,7 +1400,8 @@ Or you can send an issue for me.
 - https://github.com/sinai-dev/UnityExplorer
 - https://github.com/4ch12dy/il2cpp [Il2Cpp Version]
 - https://github.com/nneonneo/Il2CppVersions [Il2Cpp Version]
-- https://github.com/sneakyevilSK/IL2CPP_Resolver
+- https://github.com/sneakyevilSK/IL2CPP_Resolver [IL2CPP resolver]
+- https://github.com/extremeblackliu/IL2CPP_Resolver_External [IL2CPP resolver]
 - https://github.com/knah/Il2CppAssemblyUnhollower
 - https://github.com/reahly/mono-external-lib [External Mono Example]
 - https://github.com/Compiled-Code/external-il2cpp [Il2Cpp]
