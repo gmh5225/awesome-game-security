@@ -1144,7 +1144,7 @@ Or you can send an issue for me.
 - https://github.com/0xGREG/registry-callbacks [Registry Callback]
 - https://github.com/adrianyy/rw_socket_driver [Socket]
 - https://github.com/zoand/BOOM [Hijack Beep.sys]
-- https://github.com/hrt/read_write [Hijack IRP]
+- https://github.com/gmh5225/Driver-read_write [Hijack IRP]
 - https://github.com/isoadam/gina_public [Hijack IRP]
 - https://github.com/Barracudach/Swap-control-ioctl [Hijack IRP SpeedFan.sys]
 - https://github.com/adspro15/km-um-communication
