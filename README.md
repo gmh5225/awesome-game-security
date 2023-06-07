@@ -2250,6 +2250,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ExpLife0011/HideDriver [Hide Driver Testing]
 - https://github.com/BadPlayer555/TraceCleaner [Hide Driver Testing]
 - https://github.com/muturikaranja/disable-threat-tracing [ETW Testing]
+- https://github.com/Mr-Un1k0d3r/AMSI-ETW-Patch [ETW Testing]
 - https://github.com/daswareinfach/Battleye-VAC-EAC-Kernel-Bypass [FsFilter Testing]
 - https://github.com/aahmad097/MMFCodeInjection [User APC + File Mapping Testing]
 - https://github.com/liors619/TtdAntiDebugging [Debug Testing]
