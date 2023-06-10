@@ -1172,7 +1172,7 @@ Or you can send an issue for me.
 - https://github.com/D3DXVECTOR2/NtUserUpdateWindowTrackingInfo [NtUserUpdateWindowTrackingInfo]
 - https://github.com/KiFilterFiberContext/windows-software-policy [clip]
 - https://github.com/gmh5225/Interep-Driver-Leak [NtGdiPolyPolyDraw]
-- https://github.com/TupleDev/.data-ptr-driver [NtGdiPolyPolyDraw]
+- https://github.com/gmh5225/Comm-data-ptr-driver [NtGdiPolyPolyDraw]
 - https://github.com/JGonz1337/kernel-eac-be-comm [NtGdiPolyPolyDraw]
 - https://github.com/NullTerminatorr/NullHook [NtDxgkGetTrackedWorkloadStatistics]
 - https://github.com/SurgeGotTappedAgain/Data-Pointer-Swap [NtDCompositionSetChildRootVisual]
