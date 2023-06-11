@@ -2355,6 +2355,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/GunshipPenguin/kiteshield [ELF X64]
 - https://github.com/cff0x/KitsuPE [PE]
 - https://github.com/xsj3n/x64-EXE-Packer [PE X64]
+- https://github.com/KooroshRZ/Evader [PE]
 
 > CLR Protection
 - https://github.com/endgameinc/ClrGuard
