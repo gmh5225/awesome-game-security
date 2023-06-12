@@ -1177,7 +1177,7 @@ Or you can send an issue for me.
 - https://github.com/JGonz1337/kernel-eac-be-comm [NtGdiPolyPolyDraw]
 - https://github.com/NullTerminatorr/NullHook [NtDxgkGetTrackedWorkloadStatistics]
 - https://github.com/gmh5225/Comm-Data-Pointer-Swap [NtDCompositionSetChildRootVisual]
-- https://github.com/SamuelTulach/NekoSwap [Win32kApiSetTable]
+- https://github.com/gmh5225/Comm-NekoSwap [Win32kApiSetTable]
 - https://github.com/Deputation/kernel_payload_comms [Shared Memory]
 - https://github.com/Chase1803/UCMiraka-ValorantExternal [NtUserGetPointerProprietaryId]
 - https://github.com/gmh5225/Comm-ImMiraclela [NtDxgkGetTrackedWorkloadStatistics/NtDxgkGetAvailableTrackedWorkLoadIndex]
