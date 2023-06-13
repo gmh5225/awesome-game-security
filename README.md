@@ -1296,7 +1296,7 @@ Or you can send an issue for me.
 - https://github.com/adspro15/DirectInput
 - https://github.com/nbqofficial/norsefire
 - https://github.com/petercunha/Pine [Neural Network]
-- https://github.com/lucylow/b00m-h3adsh0t [Neural Network]
+- https://github.com/gmh5225/AI-FPS-b00m-h3adsh0t [Neural Network]
 - https://github.com/univrsal/input-overlay [Keyboard Mapper]
 - https://github.com/Miffyli/gan-aimbots [Machine Learning]
 - https://github.com/RootKit-Org/AI-Aimbot [Machine Learning YOLOv5]
@@ -1902,7 +1902,7 @@ Or you can send an issue for me.
 - https://github.com/skidseal/FortniteLeak5
 - https://github.com/Zetolac/FortniteExternalW2S
 - https://github.com/Kiaoee/Fortnite-Internal-Cheat-Fixed-and-Updated
-- https://github.com/Kiaoee/Fortnite-EFI-External [EFI]
+- https://github.com/gmh5225/Fortnite-EFI-External [EFI]
 - https://github.com/Giteob/Fortnite-External-Cheat-WinSense-Leak
 - https://github.com/jooola00/fortnite-cheat-source-internal
 - https://github.com/YMY1666527646/Fortnite-Hack-Esp-Exploits-With-Menu
