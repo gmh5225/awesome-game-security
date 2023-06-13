@@ -1201,7 +1201,7 @@ Or you can send an issue for me.
 - https://github.com/TheCruZ/EFI_Driver_Access [RPM]
 - https://github.com/gmh5225/Driver-efi-bootkit
 - https://github.com/SamuelTulach/rainbow [HWID]
-- https://github.com/firebitsbr/-Rainbow---EFI [HWID]
+- https://github.com/gmh5225/-Rainbow---EFI [HWID]
 - https://github.com/Kiaoee/Fortnite-EFI-External [Fortnite]
 - https://github.com/ajkhoury/UEFI-Bootkit
 - https://github.com/SamuelTulach/negativespoofer [HWID]
