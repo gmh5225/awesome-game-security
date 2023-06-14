@@ -1066,6 +1066,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Android-Mod-Menu-ImGui [Imgui For Unity]
 - https://github.com/Octowolve/Unity-ImGUI-Android [Imgui For Unity]
 - https://github.com/lbertitoyt/ImGUI-Zygisk-Unity [Imgui For Unity]
+- https://github.com/gmh5225/zygisk-imgui-modmenu [ImGui with Zygisk]
 - https://github.com/gmh5225/ImGui-Unity-Android [Imgui For Unity]
 - https://github.com/gmh5225/BepInEx-IL2CPPBase [IL2CPP Menu]
 - https://github.com/springmusk026/Android-Mod-Menu-Kotlin [IL2CPP Menu]
