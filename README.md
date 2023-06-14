@@ -399,6 +399,7 @@ Or you can send an issue for me.
 - https://github.com/Dapp-Learning-DAO/Dapp-Learning [Dapp]
 - https://github.com/contractcops/auditingroadmap [Solidity]
 - https://github.com/0xcacti/awesome-solidity-dev-tools [Solidity]
+- https://github.com/nullity00/web3-resources [Web3 resources]
 
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
