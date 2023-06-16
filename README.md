@@ -1305,7 +1305,7 @@ Or you can send an issue for me.
 - https://github.com/lehmenkuehler/camera-triggerbot [Camera Triggerbot]
 - https://github.com/BuddyBoi/KernelMoveMouse [gptCursorAsync]
 - https://github.com/Zpes/mouse-input-injection [NtUserInjectMouseInput]
-- https://github.com/OSNSON/Overwatch-1-cheat-source-. [NtUserInjectMouseInput]
+- https://github.com/gmh5225/Overwatch-1-cheat-source [NtUserInjectMouseInput]
 - https://github.com/gmh5225/NtUserInjectMouseInput-syscall [NtUserInjectMouseInput SYSCALL]
 - https://github.com/327135569/ClickPic [OpenCV + Triggerbot]
 - https://github.com/gmh5225/OpenCV-SmartAimBot [OpenCV + Triggerbot]
