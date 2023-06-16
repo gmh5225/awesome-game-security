@@ -413,6 +413,7 @@ Or you can send an issue for me.
 - https://github.com/cryptostaker2/blockchain-security-audits [Security audits]
 - https://github.com/obheda12/Solidity-Security-Compendium [Solidity vuln]
 - https://github.com/crytic [Blockchain Security, by @trailofbits]
+- https://github.com/Quillhash/Solidity-Attack-Vectors [Solidity SmartContract Attack Vectors]
 - https://github.com/crytic/building-secure-contracts [Guidelines and training material to write secure smart contracts]
 - https://github.com/crytic/etheno [Ethereum security analysis and testing]
 - https://github.com/crytic/echidna [Ethereum smart contract fuzzer]
