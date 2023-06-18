@@ -1326,7 +1326,7 @@ Or you can send an issue for me.
 - https://github.com/semihcevik/hwidspoofer
 - https://github.com/Theordernarkoz/Hwid--Spoofer
 - https://github.com/Theordernarkoz/Hwid-Spoofer
-- https://github.com/SarnaxLii/Apex-ClearTrace
+- https://github.com/gmh5225/Apex-Spoofer
 - https://github.com/InstinctTheDevil/EclipsedSpoofer-EAC-BE
 - https://github.com/BuzzerFelix/HWIDSpooferEAC
 - https://github.com/SamuelTulach/rainbow [EFI]
