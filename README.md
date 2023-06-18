@@ -1327,7 +1327,7 @@ Or you can send an issue for me.
 - https://github.com/Theordernarkoz/Hwid--Spoofer
 - https://github.com/Theordernarkoz/Hwid-Spoofer
 - https://github.com/gmh5225/Apex-Spoofer
-- https://github.com/InstinctTheDevil/EclipsedSpoofer-EAC-BE
+- https://github.com/gmh5225/HWID-EclipsedSpoofer-EAC-BE
 - https://github.com/BuzzerFelix/HWIDSpooferEAC
 - https://github.com/SamuelTulach/rainbow [EFI]
 - https://github.com/firebitsbr/-Rainbow---EFI [EFI]
