@@ -975,6 +975,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/DLL-Hijack-ExportDumper [Dump the export table of PE files]
 - https://github.com/cyberark/DLLSpy [DLL Hijacking Detection Tool]
 - [Project for identifying executables and DLLs vulnerable to relative path DLL hijacking](https://github.com/wietze/windows-dll-hijacking)
+- https://github.com/anhkgg/SuperDllHijack [A general DLL hijack technology]
 
 > Hook
 - https://github.com/stars/gmh5225/lists/hook [Lists]
