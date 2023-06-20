@@ -957,6 +957,7 @@ Or you can send an issue for me.
 - https://github.com/3xpl01tc0d3r/ProcessInjection [Various process injection techniques]
 - https://github.com/zorftw/lsass-extend-mapper [Manual mapper from LSASS]
 - https://github.com/zorftw/revert-mapper [Map x64 DLLs in WoW64]
+- https://github.com/SDXT/MMInject [Using NX Bit Swapping and VAD hide]
 
 > Injection:Linux
 - https://github.com/ixty/mandibule
