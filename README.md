@@ -1342,7 +1342,7 @@ Or you can send an issue for me.
 - https://github.com/Veuqx0/ImGui-Spoofer-Leaked
 - https://github.com/gupr0x4/HWID-Spoofer-for-Fortnite-and-Valorant
 - https://github.com/gmh5225/Full-Hwid-Spoofer-V6
-- https://github.com/Lyut/SteamSpywareTerminator [Steam]
+- https://github.com/gmh5225/HWID-SteamSpywareTerminator [Steam]
 - https://github.com/SamuelTulach/negativespoofer [EFI]
 - https://github.com/Alex3434/wmi-static-spoofer
 - https://github.com/ReFo0/hwid-spoofer
