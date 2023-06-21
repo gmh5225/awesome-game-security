@@ -1217,7 +1217,9 @@ Or you can send an issue for me.
 - https://github.com/sa413x/UEFI-Bootloader [Simple mmapper which using UEFI runtime driver]
 - https://github.com/realoriginal/bootlicker [Generic UEFI bootkit used to achieve initial usermode execution]
 
-> QEMU/KVM Cheat
+> QEMU/KVM
+- https://github.com/airbus-seclab/qemu_blog [Guide]
+- https://github.com/ispras/qemu/tree/windbg [Windbg]
 - https://github.com/Qemu-Gang
 - https://github.com/memflow/memflow-kvm
 - https://github.com/IntroVirt/IntroVirt [Guest introspection library]
