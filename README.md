@@ -1429,7 +1429,7 @@ Or you can send an issue for me.
 - https://github.com/BataBo/ACEPatcher [.NET Patcher]
 - [A tool translate a apk file to common android project and support so hook include il2cpp c++ scaffolding](https://github.com/Efaker/FakerAndroid)
 - https://github.com/xxzzddxzd/unitySpeedTools [IOS Speed Tools]
-- https://github.com/interception-team/il2cpp-finder [Il2Cpp Finder]
+- https://github.com/gmh5225/il2cpp-finder [Il2Cpp Finder]
 - https://github.com/gmh5225/frida-il2cpp-datacollector [Il2Cpp datacollector for Android/IOS]
 - https://github.com/BepInEx/BepInEx [plugin/modding framework]
 - https://github.com/gmh5225/IL22CPP [ReMake of Il2cpp internal reflection system in C++]
