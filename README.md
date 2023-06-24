@@ -1467,7 +1467,7 @@ Or you can send an issue for me.
 - https://github.com/Compiled-Code/eac-mapper [Eac Mapper]
 - https://github.com/EBalloon/MmCopyMemory [Bypass MmCopyMemory]
 - https://github.com/gmh5225/EAC-Kernel-Packet-Fucker [Packet Fucker]
-- https://github.com/TupleDev/HydraHook [Packet Fucker]
+- https://github.com/gmh5225/EAC-HydraHook [Packet Fucker]
 - https://github.com/woomy144/EazyAntiCheatSRC [Reversed Source]
 - https://github.com/chaeyk/eac-leak [EAC sdk's memory leak]
 - https://github.com/ksoju/Eac-Bypass
