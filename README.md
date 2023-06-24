@@ -1514,7 +1514,7 @@ Or you can send an issue for me.
 - https://github.com/R4YVEN/beservice_intcallbacks [Instrumentation Callback]
 
 > Explore AntiCheat System:EQU8
-- https://back.engineering/12/08/2021
+- https://blog.back.engineering/12/08/2021
 - https://github.com/kkent030315/EQU8-PoC
 - https://github.com/hotline1337/equ8_bypass
 
