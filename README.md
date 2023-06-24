@@ -1478,7 +1478,7 @@ Or you can send an issue for me.
 - https://github.com/Sinclairq/hiearchy-eac [Integrity Checks]
 - https://github.com/Rat431/EAC_Emu [Simple EasyAntiCheat x64 emulator]
 - https://github.com/xBrunoMedeiros/eac-overlay [EAC Overlay]
-- https://github.com/Imabot115/ce-EasyAntiCheat-Bypass [UD CE]
+- https://github.com/gmh5225/ce-EasyAntiCheat-Bypass [UD CE]
 - https://github.com/ioncodes/pooldump [Extract the DLL that EACs manualmaps into the game process]
 - https://github.com/gmh5225/EAC-VmCheck.asm [Virtual machine checking]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/561479-eacs-instrumentation-callback-bypass.html
