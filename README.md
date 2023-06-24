@@ -1472,6 +1472,7 @@ Or you can send an issue for me.
 - https://github.com/chaeyk/eac-leak [EAC sdk's memory leak]
 - https://github.com/ksoju/Eac-Bypass
 - https://github.com/EBalloon/EasyAntiCheat-SRC
+- https://github.com/gmh5225/EAC-EasyAntiCheat-Src-1
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/458928-eacs-maskable-interrupt-callback.html [NMI]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/464943-eac-nmi-bypass-callbacks.html [NMI Bypass]
 - https://github.com/CheeZeDark/EasyAntiCheat-Reversing
