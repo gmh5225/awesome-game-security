@@ -1639,7 +1639,6 @@ Or you can send an issue for me.
 - https://github.com/tarekwiz/LeagueDumper [Dump]
 - https://github.com/tarekwiz/League-Unpacker [Dump]
 - https://github.com/LeaguePrank/LeagueTeamBoost
-- https://github.com/newworld7777/League-of-Legends-Bot-Orbwalker-Lasthit-Laneclear-Skin-Changer-Vanguard-Spoofer
 - https://github.com/LeagueSandbox
 - https://github.com/MythicManiac/lol-unpackman
 - [A bran-new League of Legends assistant software, a replacement for WeGame](https://github.com/Java-S12138/frank)
