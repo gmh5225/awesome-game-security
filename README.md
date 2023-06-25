@@ -1659,7 +1659,7 @@ Or you can send an issue for me.
 
 > Game:Dota2
 - https://github.com/skrixx68/Dota2-Overlay-2.0
-- https://github.com/skrixx68/Dota2-Overlay-OffsetUpdater
+- https://github.com/gmh5225/Dota2-Overlay-OffsetUpdater
 - https://github.com/interception-team/dota-cheat
 - https://github.com/LWSS/McDota [linux]
 - https://github.com/ExistedGit/Dota2Cheat
