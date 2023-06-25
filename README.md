@@ -1564,7 +1564,7 @@ Or you can send an issue for me.
 - https://github.com/icelemon1314/mapleLemon [Private Server-CMS-027]
 - https://github.com/ellermister/MapleStory [Private Server-CMS-079]
 - https://forum.ragezone.com/f428/maplestory-private-server-v83-741739 [Private Server-GMS-083]
-- https://github.com/Z41N/v83MaplestoryCPP [Private Server-GMS-083 C++]
+- https://github.com/gmh5225/maplestory-v83MaplestoryCPP [Private Server-GMS-083 C++]
 - https://github.com/Fraysa/Destiny [Private Server-GMS-083 C#]
 - https://github.com/Bratah123/ElectronMS [Private Server-KMS-316]
 - https://github.com/reanox/MapleStory-v113-Server-Eimulator [Private Server-TMS-113]
