@@ -1570,7 +1570,7 @@ Or you can send an issue for me.
 - https://github.com/Bratah123/BattleAnalysis176 [Battle Analysis]
 - https://github.com/johnsonjason/MapleStoryBuildFramework [AntiCheat]
 - https://github.com/Noosh404/Maplestory-V179-Cheat-Engine [V179 CT]
-- https://github.com/HeavenClient/HeavenClient [Heaven Client]
+- https://github.com/gmh5225/MapleStory-HeavenClient [Heaven Client]
 - https://github.com/Inndy/TWMS-Hacking-Data [TMS CT]
 - https://github.com/Inndy/MSDoggy [TMS Old Hack]
 - https://github.com/PrinceFroggy/MSB [GMS Old Hack 128-140]
