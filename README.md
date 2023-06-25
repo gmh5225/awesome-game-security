@@ -1582,7 +1582,7 @@ Or you can send an issue for me.
 - https://github.com/Kagamia/WzComparerR2 [Maplestory online Extractor]
 - [Generate machine learning object detection samples from Maplestory in different formats](https://github.com/charlescao460/MapleStoryDetectionSampleGenerator)
 - https://github.com/Elem8100/MapleStory-GM-Client [Offline MapleStory Client Emulator]
-- https://github.com/SeokguKim/ModPacker [MapleStory Wolrds .mod file packing/unpacking tools]
+- https://github.com/gmh5225/maplestory-packer-ModPacker [MapleStory Wolrds .mod file packing/unpacking tools]
 - https://github.com/Riremito/JMSv186 [JMS v186]
 
 > Game:Minecraft
