@@ -1559,7 +1559,7 @@ Or you can send an issue for me.
 - https://github.com/ekknod/EC_PRO-LAN
 
 > Game:MapleStory
-- https://forum.ragezone.com/f922/getting-packet-structures-opcodes-using-792436 [Packet]
+- https://forum.ragezone.com/threads/getting-packet-structures-opcodes-using-ida.792436/ [Packet]
 - https://github.com/Bratah123/SpiritIDAPlugin [IDA-Plugin]
 - https://github.com/icelemon1314/mapleLemon [Private Server-CMS-027]
 - https://github.com/ellermister/MapleStory [Private Server-CMS-079]
