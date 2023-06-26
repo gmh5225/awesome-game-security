@@ -1217,6 +1217,7 @@ Or you can send an issue for me.
 - https://github.com/ekknod/smm [Smm cheat]
 - https://github.com/sa413x/UEFI-Bootloader [Simple mmapper which using UEFI runtime driver]
 - https://github.com/realoriginal/bootlicker [Generic UEFI bootkit used to achieve initial usermode execution]
+- https://github.com/ekknod/efi-monitor [Hooking MmCopyMemory PG safe]
 
 > QEMU/KVM
 - https://github.com/airbus-seclab/qemu_blog [Guide]
