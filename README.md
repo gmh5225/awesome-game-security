@@ -1759,7 +1759,7 @@ Or you can send an issue for me.
 - https://github.com/latuh/nebulite-external [External]
 - https://github.com/lstrsrt/csgo_internal_base [Internal]
 - https://github.com/404Kurama/Astra [External]
-- https://github.com/AlphenProject/Alphen
+- https://github.com/gmh5225/CSGO-Alphen
 - https://github.com/Enzo0721/ExternalCheatV3 [External]
 - https://github.com/SteamDatabase/Protobufs/tree/master/csgo [Protobuf]
 - https://github.com/kyojig/csgo_kns [Internal]
