@@ -1025,6 +1025,7 @@ Or you can send an issue for me.
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/444289-read-process-physical-memory-attach.html
 - https://github.com/gamozolabs/mempeek [Linux]
 - https://github.com/SamuelTulach/meme-rw [kdmapper]
+- https://github.com/gmh5225/Driver-RPM-DirectPageManipulation [read physical memory]
 
 > W2S
 - https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
