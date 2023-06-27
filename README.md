@@ -1777,7 +1777,7 @@ Or you can send an issue for me.
 - https://github.com/apekros/valorant_offsets [Offset]
 - https://github.com/10HEAD/ValorantOffsets [Offset]
 - https://github.com/ofDataa/offsets [Offset]
-- https://github.com/pebu1337/valorant-externals [Offset]
+- https://github.com/gmh5225/valorant-externals [Offset]
 - https://github.com/GLX-ILLUSION/valorant-offsets-autoupdater [Offset]
 - https://github.com/Pinguu-dev/PINGUU-VAL
 - https://github.com/skechtew/valorant-gui-imgui-remake [GUI]
