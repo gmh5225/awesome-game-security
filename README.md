@@ -1088,6 +1088,7 @@ Or you can send an issue for me.
 
 > Vulnerable Driver 
 - https://www.loldrivers.io/drivers
+- https://github.com/magicsword-io/LOLDrivers
 - https://github.com/rtfmkiesel/loldrivers-client [Scan loldrivers]
 - https://github.com/hacksysteam/HackSysExtremeVulnerableDriver [Guide]
 - https://github.com/xct/windows-kernel-exploits [Guide]
