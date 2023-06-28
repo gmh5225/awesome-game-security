@@ -527,6 +527,7 @@ Or you can send an issue for me.
 - [Undetected Cheat Engine](https://www.unknowncheats.me/forum/anti-cheat-bypass/504191-undetected-cheat-engine-driver-2022-bypass-anticheats-eac.html)
 - [Guide about remote Windows kernel debugging](https://github.com/konstantin89/windows-kernel-debugging-guide)
 - https://github.com/rmusser01/Infosec_Reference/blob/master/Draft/Games.md [Game Hacking]
+- https://github.com/cragson/osmium [C++ Framework for external cheats]
 
 > Debugging
 - https://github.com/stars/gmh5225/lists/debugger [List]
