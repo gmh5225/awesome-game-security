@@ -1452,6 +1452,8 @@ Or you can send an issue for me.
 
 > Explore UWP
 - https://github.com/Wunkolo/UWPDumper
+- https://github.com/Francesco149/uwpinject [dll injector for uwp apps]
+- https://github.com/Francesco149/uwpspy [dll that hooks uwp interfaces]
 
 > Explore AntiCheat System:VAC
 - https://github.com/danielkrupinski/VAC-Bypass-Loader
