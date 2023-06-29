@@ -1786,7 +1786,6 @@ Or you can send an issue for me.
 - https://github.com/GLX-ILLUSION/valorant-offsets-autoupdater [Offset]
 - https://github.com/skechtew/valorant-gui-imgui-remake [GUI]
 - https://github.com/reahly/valorant-internal
-- https://github.com/Chase1803/ValorantKeyAndState [Decryption]
 - https://github.com/gmh5225/Zenti-Valorant-Cheat-Hack-Internal-Spoofer-Driver-Injector-Protector-Auth
 - https://github.com/gmh5225/Valorant-Hack-Esp-Aimbot-Driver-Injector-With-Spoofer-Temporary
 - https://github.com/xehn1337/valorant-dumper [Dump]
