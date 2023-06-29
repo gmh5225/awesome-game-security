@@ -1791,7 +1791,7 @@ Or you can send an issue for me.
 - https://github.com/xehn1337/valorant-dumper [Dump]
 - https://github.com/gmh5225/Valorant-Dumper-Tool [Dump]
 - https://github.com/lil-skies/val-exception-handler [ZwRaiseException Dump]
-- https://github.com/kerememrerer/Eduty-Valorant-Esp-Aimbot-Hack
+- https://github.com/gmh5225/Valorant-Esp-Aimbot-Hack
 - https://github.com/frankelitoc/UE4-c- [External]
 - https://github.com/AryuInka/Valorant-Cheat-External [External]
 - https://github.com/xEnething/Valorant-Cheat
