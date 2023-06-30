@@ -1799,7 +1799,7 @@ Or you can send an issue for me.
 - [Iterate And Decrypt FNamePool->Entries On Valorant](https://github.com/percpopper/VALORANT-FNamePool)
 - https://github.com/gmh5225/Valorant-External-1
 - https://github.com/Chase1803/UCMiraka-ValorantExternal [NtUserGetPointerProprietaryId]
-- https://github.com/Chase1803/ValorantCheatExternal
+- https://github.com/gmh5225/Valorant-CheatExternal
 - https://github.com/weedeej/ValorantCC [Crosshair Setting]
 - https://github.com/gmh5225/Internal-Valorant-Cheat
 - https://github.com/gmh5225/VALORANT-HACK-ESP-AIMBOT-SKINCHANGER
