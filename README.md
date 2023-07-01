@@ -401,6 +401,7 @@ Or you can send an issue for me.
 - https://github.com/Dapp-Learning-DAO/Dapp-Learning [Dapp]
 - https://github.com/contractcops/auditingroadmap [Solidity]
 - https://github.com/0xcacti/awesome-solidity-dev-tools [Solidity]
+- https://github.com/chinmay-farkya/solidity-notes [Solidity Notes]
 - https://github.com/nullity00/web3-resources [Web3 resources]
 
 > Game
