@@ -1811,7 +1811,7 @@ Or you can send an issue for me.
 - https://github.com/R7flex/valorant-internal-base [Internal]
 - https://github.com/gmh5225/VALORANT-HACK-ESP-AIMBOT-SKINCHANGER-SOURCE [Internal]
 - https://github.com/gmh5225/Valorant-External-Source [External]
-- https://github.com/Smelo97/Valorant-cheat-internal [Internal]
+- https://github.com/gmh5225/Valorant-cheat-internal [Internal]
 - https://github.com/BaraX0/Valorant-Esp-Aimbot-Cheat-Hack [External]
 - https://github.com/94q/Valorant-Internal [Internal]
 - https://github.com/DX9Paster/Valorant-External-P2C-Leaked [External]
