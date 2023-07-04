@@ -881,6 +881,7 @@ Or you can send an issue for me.
 - https://github.com/PAGalaxyLab/ghidra_scripts [Scripts]
 - https://github.com/danbrodsky/GFred [Command Palette]
 - https://github.com/Nalen98/AngryGhidra [Use angr in Ghidra]
+- https://github.com/justfoxing/ghidra_bridge [Python 3 bridge to Ghidra's Python scripting]
 
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
