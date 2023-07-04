@@ -1203,6 +1203,7 @@ Or you can send an issue for me.
 - https://github.com/estimated1337/custom_data_ptr_swap_sample [NtQueryLicenseValue]
 - https://github.com/zer0condition/ZeroThreadKernel [NtCreateCompositionSurfaceHandle]
 - https://github.com/gmh5225/NullDriverCheat [NtOpenCompositionSurfaceSectionInfo]
+- https://www.unknowncheats.me/forum/anti-cheat-bypass/560809-firmwaretablehandler.html [FirmwareTableHandler]
 
 > EFI Driver
 - https://github.com/mrexodia/EfiCMake
