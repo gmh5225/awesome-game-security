@@ -1506,6 +1506,7 @@ Or you can send an issue for me.
 
 > Explore AntiCheat System:BE
 - https://github.com/Schnocker/NoEye
+- https://github.com/ZoondEngine/NoBastian_v2 [Elevating Handle By LSASS]
 - https://github.com/haram/splendid_implanter
 - https://github.com/HadockKali/battleye-user-mode-bypass [SetWindowsHookExW]
 - https://github.com/unreaIuser/BE-Emulator
