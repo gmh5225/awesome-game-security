@@ -134,6 +134,7 @@ Or you can send an issue for me.
 - https://github.com/chrismaltby/gb-studio [GameBoy]
 - https://github.com/orx/orx [C++]
 - https://github.com/turanszkij/WickedEngine [C++ 3D]
+- https://github.com/AustinBrunkhorst/Ursine3D [C++ 3D]
 - https://github.com/Net5F/AmalgamEngine
 - https://github.com/rxi/kit [pixels]
 - https://github.com/nitaigao/engine-showcase [Old engine]
