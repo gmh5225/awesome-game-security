@@ -965,6 +965,7 @@ Or you can send an issue for me.
 - https://github.com/zorftw/lsass-extend-mapper [Manual mapper from LSASS]
 - https://github.com/zorftw/revert-mapper [Map x64 DLLs in WoW64]
 - https://github.com/SDXT/MMInject [Using NX Bit Swapping and VAD hide]
+- https://github.com/Fahersto/code_injection [Several code injection techniques]
 
 > Injection:Linux
 - https://github.com/ixty/mandibule
@@ -2253,6 +2254,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/w1u0u1/kinject [Injection Testing]
 - https://github.com/D4stiny/ThreadJect [Injection Testing]
 - https://github.com/KooroshRZ/Windows-DLL-Injector [Injection Testing]
+- https://github.com/Fahersto/code_injection [Injection Testing]
 - https://github.com/deepinstinct/Dirty-Vanity [Injection Testing:RtlCreateProcessReflection]
 - https://github.com/NullTerminatorr/ThreadHijackingInjector [Injection Testing]
 - https://github.com/Skengdo/simple-SetWindowsHookExW-injector [Injection Testing:SetWindowsHookExW]
