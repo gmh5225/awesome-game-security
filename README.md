@@ -1820,6 +1820,7 @@ Or you can send an issue for me.
 - https://github.com/kali11211/valorant-internal-cheat [Internal]
 - https://github.com/234945/valo-driver [External]
 - https://github.com/kali11211/valorant-internal-cheat [Internal]
+- https://github.com/gmh5225/ValorantCheatExternal [External]
 
 > Game:VEILED EXPERTS
 - https://github.com/EBalloon/VEILED-EXPERTS-SDK
@@ -1962,6 +1963,7 @@ Or you can send an issue for me.
 - https://github.com/NurdAlert/flirtnite [External]
 - https://github.com/JetBrains-CLion/Fortnite-3.5 [Internal]
 - https://github.com/gmh5225/Fortnite-VoyagerTF [Voyager]
+- https://github.com/gmh5225/Fortnite-External-4 [External]
 
 > Game:Bloodhunt
 - https://github.com/ZZZ-Monster/bloodhunt_External
