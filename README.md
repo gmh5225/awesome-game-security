@@ -1881,7 +1881,6 @@ Or you can send an issue for me.
 - https://github.com/Astronaut00/apex-external
 - https://github.com/YMY1666527646/Phoenix-Valorant-Cheat
 - https://github.com/CasualX/apexbot
-- https://github.com/loplopuu23/APEX_ESP_AIMBOT
 - https://github.com/TheCruZ/Apex_Legends_Driver_Cheat
 - https://github.com/Keyzp1337/Fortnite
 - https://github.com/Zurek0x/NuremX [AI]
