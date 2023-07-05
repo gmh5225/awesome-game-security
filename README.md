@@ -1876,7 +1876,7 @@ Or you can send an issue for me.
 - https://github.com/dword64/Apex-Legends-SDK-Remaster
 - https://github.com/hooksteroid/ApexD3D_External
 - https://github.com/NMan1/apex-legends-cheat
-- https://github.com/rakuza2/SIMPLE-AIMBOT-GLOW-APEX
+- https://github.com/gmh5225/Apex-SIMPLE-AIMBOT-GLOW-APEX
 - https://github.com/TheCruZ/Direct-EFI-Apex-Cheat
 - https://github.com/Astronaut00/apex-external
 - https://github.com/YMY1666527646/Phoenix-Valorant-Cheat
