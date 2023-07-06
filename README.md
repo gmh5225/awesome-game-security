@@ -674,6 +674,7 @@ Or you can send an issue for me.
 - https://github.com/DProvinciani/pt-detector [Intel PT]
 - https://github.com/googleprojectzero/winafl [Intel PT Fuzzer]
 - https://github.com/intelpt/winipt [ipt.sys]
+- https://github.com/australeo/libipt-rs [ipt.sys]
 - https://github.com/intelpt/processor-trace [Intel PT Decoder]
 - https://github.com/gmh5225/Driver-intel-PEBs-LoopHPCs [Intel PEBs]
 - https://github.com/ilovecsad/Ark [Tool]
