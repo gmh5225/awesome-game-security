@@ -1900,7 +1900,7 @@ Or you can send an issue for me.
 - https://github.com/cheatingwitdacode/apex-cheating
 - https://github.com/LWSS/Ape-ex-Abominations [QEMU]
 - https://github.com/gmh5225/Apex-CHEAT-FIXED
-- https://github.com/cyberpw/apex_legends_sdk
+- https://github.com/gmh5225/apex_legends_sdk
 - https://github.com/ekknod/apex_linux [linux]
 - https://github.com/XRadius/project-tanya [linux]
 - https://github.com/EquinoxAlpha/ayypex [linux]
