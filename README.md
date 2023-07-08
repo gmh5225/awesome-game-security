@@ -505,6 +505,7 @@ Or you can send an issue for me.
 - https://back.engineering
 - https://vollragm.github.io
 - https://www.triplefault.io
+- https://advancedvectorextensions.github.io
 - https://bright.engineer
 - https://reversing.info
 - https://www.unknowncheats.me
