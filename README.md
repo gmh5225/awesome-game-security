@@ -1237,7 +1237,7 @@ Or you can send an issue for me.
 - https://github.com/realoriginal/bootlicker [Generic UEFI bootkit used to achieve initial usermode execution]
 - https://github.com/ekknod/efi-monitor [Hooking MmCopyMemory PG safe]
 
-> QEMU/KVM
+> QEMU/KVM/PVE
 - https://github.com/airbus-seclab/qemu_blog [Guide]
 - https://github.com/ispras/qemu/tree/windbg [Windbg]
 - https://github.com/Qemu-Gang
@@ -1248,6 +1248,7 @@ Or you can send an issue for me.
 - https://github.com/WCharacter/RDTSC-KVM-Handler [Bypass RDTSC]
 - https://github.com/batusan/Hardened-qemu [Hidden QEMU]
 - https://github.com/zhaodice/qemu-anti-detection [Hidden QEMU]
+- https://github.com/zhaodice/proxmox-ve-anti-detection [Hidden PVE]
 - https://github.com/nyx-fuzz/QEMU-Nyx [Intel-PT]
 - https://github.com/doomedraven/Tools/blob/master/Virtualization/kvm-qemu.sh [QEMU Script]
 - https://github.com/GlacierW/MBA [QEMU Malware Behavior Analyzer]
