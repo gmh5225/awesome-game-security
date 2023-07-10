@@ -928,6 +928,7 @@ Or you can send an issue for me.
 - https://github.com/ZehMatt/x64dbgPlaytime [Lua script]
 - https://github.com/milcert/ExpoMon [Exports monitoring]
 - https://github.com/m417z/x64dbg-xfg-marker [Marks XFG call signatures as data]
+- https://github.com/Kwansy98/x64dbgCallFinder [Call Finder]
 
 > Cheat Engine Plugins
 - https://github.com/FreeER/CE-Extensions [Lua Extensions]
