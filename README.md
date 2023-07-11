@@ -1928,7 +1928,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Fortnite-SigsUpdatedEveryUpdate [Offset]
 - https://github.com/gmh5225/fortnite-W2S-offset-Fortnite [Offset]
 - https://github.com/plu1337/fortnite-offsets [Offset]
-- https://github.com/panzehirr/Fortnite-Offset-dumper [Offset & Dump]
+- https://github.com/gmh5225/Fortnite-Offset-dumper [Offset & Dump]
 - https://github.com/plu1337/fortnite-virtual-offsets [Virtual Table Offsets]
 - https://github.com/plu1337/fortnite-sigs [Signature]
 - https://github.com/F0NDO/fortnite-sigs [Signature]
