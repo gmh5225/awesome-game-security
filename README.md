@@ -1250,6 +1250,7 @@ Or you can send an issue for me.
 - https://github.com/batusan/Hardened-qemu [Hidden QEMU]
 - https://github.com/zhaodice/qemu-anti-detection [Hidden QEMU]
 - https://github.com/zhaodice/proxmox-ve-anti-detection [Hidden PVE]
+- https://github.com/tteck/Proxmox [PVE Helper Scripts]
 - https://github.com/nyx-fuzz/QEMU-Nyx [Intel-PT]
 - https://github.com/doomedraven/Tools/blob/master/Virtualization/kvm-qemu.sh [QEMU Script]
 - https://github.com/GlacierW/MBA [QEMU Malware Behavior Analyzer]
