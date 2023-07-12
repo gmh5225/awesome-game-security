@@ -1935,7 +1935,7 @@ Or you can send an issue for me.
 - https://github.com/plu1337/fortnite-exploits [Exploits]
 - https://github.com/ReallReaper/Fortnite-Offsets-Sigs-and-more [Offset]
 - https://github.com/Makk5/FortConsole
-- https://github.com/skidseal/FortniteLeak5
+- https://github.com/gmh5225/Fortnite-Leak5
 - https://github.com/Zetolac/FortniteExternalW2S
 - https://github.com/Kiaoee/Fortnite-Internal-Cheat-Fixed-and-Updated
 - https://github.com/gmh5225/Fortnite-EFI-External [EFI]
