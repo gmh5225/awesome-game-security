@@ -1937,7 +1937,7 @@ Or you can send an issue for me.
 - https://github.com/Makk5/FortConsole
 - https://github.com/gmh5225/Fortnite-Leak5
 - https://github.com/Zetolac/FortniteExternalW2S
-- https://github.com/Kiaoee/Fortnite-Internal-Cheat-Fixed-and-Updated
+- https://github.com/gmh5225/Fortnite-Internal-Cheat-Fixed-and-Updated
 - https://github.com/gmh5225/Fortnite-EFI-External [EFI]
 - https://github.com/Giteob/Fortnite-External-Cheat-WinSense-Leak
 - https://github.com/jooola00/fortnite-cheat-source-internal
