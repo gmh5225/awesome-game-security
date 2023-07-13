@@ -2752,6 +2752,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/utoni/PastDSE [Sign Leaked Cert]
 - https://github.com/Jemmy1228/HookSigntool [Sign Leaked Cert]
 - https://github.com/namazso/MagicSigner [Sign Leaked Cert]
+- https://github.com/hzqst/FuckCertVerifyTimeValidity [Sign Leaked Cert]
 - https://github.com/Sentient111/StealingSignatures [Stealing signatures from pe files]
 - https://github.com/secretsquirrel/SigThief [Stealing signatures from pe files]
 - https://github.com/jfmaes/LazySign [Fake Cert]
