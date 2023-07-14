@@ -2340,6 +2340,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Page Protection
 - https://github.com/changeofpace/Self-Remapping-Code
+- https://github.com/ReFo0/anti-crack-system
 - https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-addsecurememorycachecallback
 - https://github.com/weak1337/NO_ACCESS_Protection
 - https://github.com/noff2k/no-access-protection-x86
