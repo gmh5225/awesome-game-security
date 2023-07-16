@@ -1949,7 +1949,6 @@ Or you can send an issue for me.
 - https://github.com/YMY1666527646/nigusFN
 - https://github.com/Sheeedsh78/Cheto-Fortnite-Source-External-EAC-BE-undetected
 - https://github.com/CheaterRehab/GodFather-Fortnite-Cheat-Cracked
-- https://github.com/newworld7777/FortGay
 - https://github.com/Keyzp1337/Fortnite
 - https://github.com/vk-nom/Basic-Fortnite-Cheat-Source-Internal
 - https://github.com/PasterWolf/Fortnite-UD-External
