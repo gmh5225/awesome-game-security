@@ -1943,7 +1943,7 @@ Or you can send an issue for me.
 - https://github.com/Zetolac/FortniteExternalW2S
 - https://github.com/gmh5225/Fortnite-Internal-Cheat-Fixed-and-Updated
 - https://github.com/gmh5225/Fortnite-EFI-External [EFI]
-- https://github.com/Giteob/Fortnite-External-Cheat-WinSense-Leak
+- https://github.com/gmh5225/Fortnite-External-Cheat-WinSense-Leak
 - https://github.com/jooola00/fortnite-cheat-source-internal
 - https://github.com/YMY1666527646/Fortnite-Hack-Esp-Exploits-With-Menu
 - https://github.com/YMY1666527646/nigusFN
