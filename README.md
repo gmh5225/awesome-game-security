@@ -1716,6 +1716,7 @@ Or you can send an issue for me.
 - https://github.com/BloodSharp/CSHackCreator-2-Demo
 - https://github.com/oxiKKK/oxware
 - https://github.com/execnone/simple-cs-16-multihack
+- https://github.com/bit-paper/sakura
 
 > Game:CSGO
 - https://github.com/csgohacks/master-guide [Guide]
