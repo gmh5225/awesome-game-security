@@ -1952,7 +1952,6 @@ Or you can send an issue for me.
 - https://github.com/Keyzp1337/Fortnite
 - https://github.com/vk-nom/Basic-Fortnite-Cheat-Source-Internal
 - https://github.com/PasterWolf/Fortnite-UD-External
-- https://github.com/Chase1803/Gloomy.cc-Fortnite
 - https://github.com/sanntoomirai/Fortnite-Esp-Aimbot-Exploits-Hwid-Spoofer-Cleaner-Hack-Cheat
 - https://github.com/Waihbe/Fortnite-Cheat-LEAK
 - https://github.com/zinx-YT/Fortnite-Fltokens-and-offsets
