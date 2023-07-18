@@ -1109,6 +1109,7 @@ Or you can send an issue for me.
 - https://www.loldrivers.io/drivers
 - https://github.com/magicsword-io/LOLDrivers
 - https://github.com/rtfmkiesel/loldrivers-client [Scan loldrivers]
+- https://github.com/FourCoreLabs/LolDriverScan [Scan loldrivers]
 - https://github.com/hacksysteam/HackSysExtremeVulnerableDriver [Guide]
 - https://github.com/xct/windows-kernel-exploits [Guide]
 - https://github.com/namazso/physmem_drivers [Vulnerable Driver List]
