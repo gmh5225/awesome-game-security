@@ -1962,7 +1962,6 @@ Or you can send an issue for me.
 - https://github.com/Waihbe/Fortnite-External-Cheat-Leak
 - https://github.com/AlfredIU/Spoofer [HWID]
 - https://github.com/pastor-ritz/ritz-amazing-fortnite-internal
-- https://github.com/SarnaxLii/Fortnite-External
 - https://github.com/plu1337/Fortnite-Masterpasta-ihack-Source-Leak
 - https://github.com/Giteob/Fortnite-Evo.cc-Source-External-Cheat
 - https://github.com/KeyzpOnTheFluxxx/Fortnite-External
