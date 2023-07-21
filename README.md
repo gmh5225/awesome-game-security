@@ -397,6 +397,7 @@ Or you can send an issue for me.
 > Blockchain Guide
 - https://github.com/unbalancedparentheses/practical_cryptography_and_distributed_ledgers
 - https://github.com/slowmist/Web3-Project-Security-Practice-Requirements
+- https://en.hackndo.com/ethereum-virtual-machine [EVM]
 - https://github.com/mektigboy/evm-chad [EVM]
 - https://github.com/jtriley-eth/the-ethereum-virtual-machine [EVM]
 - https://github.com/w1nt3r-eth/evm-from-scratch [EVM]
