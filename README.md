@@ -560,6 +560,7 @@ Or you can send an issue for me.
 - https://github.com/Air14/HyperHide 
 - https://github.com/HyperDbg/HyperDbg
 - https://github.com/3526779568/vt-debuger
+- https://github.com/teemu-l/execution-trace-viewer
 - https://github.com/changeofpace/Force-Page-Protection [Bypass Remap Memory]
 - https://github.com/icsharpcode/ILSpy [For Unity]
 - https://github.com/dnSpy/dnSpy [For Unity]
