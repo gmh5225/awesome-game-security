@@ -1971,7 +1971,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Apple-Lite-Fortnite-Cheat
 - https://github.com/gmh5225/Fortnite-External-Cheat-Source-Code
 - https://github.com/0dayatday0/BattleFN-cheat-analysis
-- https://github.com/aqaylore/fortnite-internal-updated-ritz [Internal]
+- https://github.com/gmh5225/fortnite-internal-updated-ritz [Internal]
 - https://github.com/JeanToBinks/Fortnite-Cheato-UD-EAC-BE
 - https://github.com/gmh5225/BE-Forcer-Fortnite [BE forcer for fortnite]
 - https://github.com/DX9Paster/Fortnite-External [External]
