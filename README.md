@@ -1995,6 +1995,7 @@ Or you can send an issue for me.
 
 > Game:Super People
 - https://github.com/EBalloon/Super-People-sdk
+- https://github.com/gmh5225/Super-People-Esp-Aimbot-Magic-Hack
 - https://github.com/simsgal365/superpeople-client
 
 > Game:Splitgate
