@@ -1803,6 +1803,7 @@ Or you can send an issue for me.
 - https://github.com/Enzo0721/ExternalCheatV3 [External]
 - https://github.com/SteamDatabase/Protobufs/tree/master/csgo [Protobuf]
 - https://github.com/kyojig/csgo_kns [Internal]
+- https://github.com/superyu1337/memcs [External]
 
 > Game:CS2
 - https://github.com/bruhmoment21/cs2-sdk [SDK]
