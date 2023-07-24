@@ -1266,6 +1266,7 @@ Or you can send an issue for me.
 - https://github.com/LWSS/Ape-ex-Abominations [Apex]
 - https://github.com/Qemu-Gang/QemuUnrealDumper-4.25 [UE SDK Dump By QEMU]
 - https://github.com/panda-re/panda [Platform for Architecture-Neutral Dynamic Analysis]
+- https://github.com/cs1ime/blacksun-framework [Framework for game cheat development]
 
 > Wine
 - https://github.com/ValveSoftware/Proton [Steam]
