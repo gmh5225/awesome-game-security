@@ -386,6 +386,7 @@ Or you can send an issue for me.
 - [Command line tool for getting the download URL for the latest or specific version of Unity](https://github.com/neogeek/get-unity)
 - https://github.com/recastnavigation/recastnavigation [Navigation-mesh Toolset for Games]
 - https://github.com/TensorWorks/UE-Clang-Format [UE Clang-Format configuration]
+- https://github.com/inflation/goldberg_emulator [Steam emulator]
 
 ## Game Manager
 - https://github.com/JosefNemec/Playnite
