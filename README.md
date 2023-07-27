@@ -646,6 +646,7 @@ Or you can send an issue for me.
 > Bypass PatchGuard
 - https://github.com/armasm/EasyAntiPatchGuard
 - https://github.com/9176324/Shark
+- https://github.com/gmh5225/Patchguard-2023 [Shark]
 - https://github.com/hfiref0x/UPGDSED [File]
 - https://github.com/Mattiwatti/EfiGuard [EFI]
 - https://github.com/zzhouhe/PG1903 [Demo NX]
