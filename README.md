@@ -2042,7 +2042,7 @@ Or you can send an issue for me.
 - https://github.com/CplNathan/Nathans-Tarkov-Radar-Public [Vmread + Radar]
 - https://github.com/frankie-11/eft-external
 - https://github.com/Splitx12/eft
-- https://github.com/TupleDev/eft-internal
+- https://github.com/gmh5225/eft-internal
 - https://github.com/TupleDev/Veil-EFT
 - https://github.com/Qemu-Gang/Escape-from-TuxKov [QEMU]
 - https://github.com/gmh5225/Comm-ImMiraclela
