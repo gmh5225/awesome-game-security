@@ -1940,6 +1940,7 @@ Or you can send an issue for me.
 > Game:Fortnite
 - https://github.com/kem0x/FortKit [Dump]
 - https://github.com/ofDataa/offsets [Offset]
+- https://github.com/Trydos/fortnite-offsets [Offset]
 - https://github.com/masterpastaa/AutoOffsets [Offset]
 - https://github.com/Zetolac/FortniteOffsetsAndSigs [Offset]
 - https://github.com/Android1337/Fortnite-Offsets [Offset]
