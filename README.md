@@ -2067,7 +2067,7 @@ Or you can send an issue for me.
 - https://github.com/JGonz1337/r6-internal
 - https://github.com/SurgeGotTappedAgain/External-R6S-Cheat
 - https://github.com/vctr74/R6-Internal-V3
-- https://github.com/UnamDeve/R6S-internal-Cheat
+- https://github.com/gmh5225/R6S-internal-Cheat
 - https://github.com/gmh5225/Rainbow-Six-Siege-Rs6-External-Esp-Aimbot-Hack-Cheat
 - https://github.com/gmh5225/Rainbow-6-Siege-Cheat
 - https://github.com/rushzzz-max/r6-external [External]
