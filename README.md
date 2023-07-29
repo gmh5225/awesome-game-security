@@ -1081,6 +1081,7 @@ Or you can send an issue for me.
 - https://github.com/3r4y/imgui-external-overlay [imgui overlay]
 - https://github.com/J0xna/Kernel-Overlay-Hider [Kernel Overlay Hider]
 - https://github.com/geeksonsecurity/android-overlay-malware-example [Android]
+- https://github.com/SamuelTulach/OverlayCord [Discord]
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
