@@ -1275,6 +1275,8 @@ Or you can send an issue for me.
 - https://github.com/Qemu-Gang/QemuUnrealDumper-4.25 [UE SDK Dump By QEMU]
 - https://github.com/panda-re/panda [Platform for Architecture-Neutral Dynamic Analysis]
 - https://github.com/cs1ime/blacksun-framework [Framework for game cheat development]
+- https://github.com/gmh5225/kvm-csgo-cheat [CSGO]
+- https://github.com/gmh5225/cs16-trigger-kvm [CS1.6]
 
 > Wine
 - https://github.com/ValveSoftware/Proton [Steam]
