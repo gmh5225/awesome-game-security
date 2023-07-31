@@ -2077,7 +2077,6 @@ Or you can send an issue for me.
 
 > Game:Overwatch 
 - https://github.com/blackhades00/PareidoliaTriggerbot [Triggerbot]
-- https://github.com/ReynmenRcs/Overwatch-External-Esp-Aimbot-Hack-Cheat
 - https://github.com/OSNSON/Overwatch-1-cheat-source-.
 - https://github.com/vmmcall/overwatch-iat-fixer [Overwatch IAT Fixer]
 - https://github.com/Midi12/ow_unpack
