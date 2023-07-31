@@ -2095,7 +2095,6 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Paladins-internal-Cheat
 
 > Game:DayZ
-- https://github.com/sanntoomirai/DayZ-External-Esp-Aimbot-Spoofer-Hack-Cheat
 - https://github.com/zhitkur/DayZzz
 - https://github.com/SurgeGotTappedAgain/External-Dayz-Cheat
 - https://github.com/ForAnow/DayZ-Cheat
