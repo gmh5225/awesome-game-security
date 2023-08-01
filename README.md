@@ -2099,7 +2099,7 @@ Or you can send an issue for me.
 > Game:DayZ
 - https://github.com/zhitkur/DayZzz
 - https://github.com/SurgeGotTappedAgain/External-Dayz-Cheat
-- https://github.com/ForAnow/DayZ-Cheat
+- https://github.com/gmh5225/DayZ-Cheat
 - https://github.com/JonathanEke/DayZ-Server-Battleye-Remover [Disable battleye]
 
 > Game:Squad
