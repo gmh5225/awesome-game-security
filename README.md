@@ -268,6 +268,7 @@ Or you can send an issue for me.
 - https://github.com/PiMoNFeeD/csgo-src [Leaked CSGO]
 - https://github.com/perilouswithadollarsign/cstrike15_src [Leaked CSGO With CI]
 - https://github.com/gmh5225/Far-Cry-1-Source-Full [Leaked Far Cry 1]
+- https://github.com/gmh5225/FarCry [Leaked Far Cry 1]
 - https://github.com/SwagSoftware/Kisak-Strike [Open Source CSGO]
 - https://github.com/hampta/csso-src [CSGO Mod]
 - https://github.com/thomaseichhorn/cs16-client [Rewrote CS1.6]
