@@ -2123,7 +2123,7 @@ Or you can send an issue for me.
 - https://github.com/Disline1337/Rust-Cheat-External-main
 - https://github.com/gmh5225/Rust-RustInternal [Internal]
 - https://github.com/gmh5225/rust-external-1 [External]
-- https://github.com/Fnoberz/Rust-External [External]
+- https://github.com/gmh5225/Rust-External [External]
 - https://github.com/gmh5225/Rust-ExternaL-and-Driver-AlienCheats [External]
 - https://github.com/Rogue619Z/Rust-External-Source [External]
 - https://github.com/gmh5225/immortal-rust
