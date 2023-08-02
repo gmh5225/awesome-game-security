@@ -2115,7 +2115,7 @@ Or you can send an issue for me.
 - https://github.com/spyder1g/a-pasted-rust-script
 - https://github.com/LordAbbot/Rust-External-Cheat
 - https://github.com/ZentifyZ/Kors_lol [Internal]
-- https://github.com/Allerek/Rust-Internal [Internal]
+- https://github.com/gmh5225/Rust-Internal [Internal]
 - https://github.com/ZentifyZ/CRC32
 - https://github.com/SteepCheat/Rust-Cheat-External
 - https://github.com/krispybyte/Simple-Rust-Base
