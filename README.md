@@ -2104,9 +2104,6 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/DayZ-Cheat
 - https://github.com/JonathanEke/DayZ-Server-Battleye-Remover [Disable battleye]
 
-> Game:Squad
-- https://github.com/TheLoneHaxor/Squad-External-Esp-Aimbot-Cheat-Hack
-
 > Game:Rust
 - https://github.com/Akandesh/rust-auto-dumper [Auto Dump]
 - https://github.com/LabGuy94/OxideDumper [Auto Dump]
