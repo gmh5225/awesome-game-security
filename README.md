@@ -2108,7 +2108,7 @@ Or you can send an issue for me.
 - https://github.com/Akandesh/rust-auto-dumper [Auto Dump]
 - https://github.com/LabGuy94/OxideDumper [Auto Dump]
 - https://github.com/NMan1/OverflowRust
-- https://github.com/ReFo0/simple-rust-hack
+- https://github.com/gmh5225/simple-rust-hack
 - https://github.com/Facepunch-bot/rust-internal
 - https://github.com/Facepunch-bot/Rust-External
 - https://github.com/Facepunch-bot/Rico-Cheat-rust-external
