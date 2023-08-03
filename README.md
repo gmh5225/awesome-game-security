@@ -2143,7 +2143,7 @@ Or you can send an issue for me.
 - https://github.com/JackBro/SmiteESPAimbot 
 
 > Game:POLYGON [UE5]
-- https://github.com/NeScub2/POLYGON_UE5
+- https://github.com/gmh5225/POLYGON_UE5
 
 > Game:Genshin Impact
 - https://github.com/khang06/mhynot2
