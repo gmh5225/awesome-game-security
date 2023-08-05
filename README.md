@@ -735,6 +735,7 @@ Or you can send an issue for me.
 - https://github.com/xiaoxindada/magiskboot_ndk_on_linux
 - https://github.com/the-dise/EasyPixel [Magisk module that disguises a device under Google Pixel]
 - https://github.com/HuskyDG/MagiskHide [Portable MagiskHide]
+- https://github.com/lico-n/ZygiskFrida [Injects frida gadget using zygisk]
 
 > Frida
 - https://github.com/CrackerCat/strongR-frida-android
