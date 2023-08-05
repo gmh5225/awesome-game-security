@@ -2523,6 +2523,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/realTristan/Reborn [Designed with Rust]
 - https://github.com/dllcrt0/Dynsec
 - https://github.com/XZNX5/Basic_Anti-Cheat
+- https://github.com/MegaAntiCheat
 
 > Analysis Framework
 - https://github.com/pandora-analysis/pandora
