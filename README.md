@@ -2151,7 +2151,7 @@ Or you can send an issue for me.
 - https://github.com/khang06/genshinjumpfixer2 [Decode CFG]
 - https://github.com/khang06/misc/tree/master/reversing/genshin [Decode CFG]
 - https://github.com/DNLINYJ/Anti_miHoYo_Jcc_Obfuscate [Decode CFG By X64DBG]
-- https://github.com/GoChanZ/genshin-cheat
+- https://github.com/gmh5225/genshin-cheat
 - https://github.com/Grasscutters/Grasscutter [Private Server]
 - https://github.com/Akebi-Group/Akebi-GC [Cheat]
 - https://github.com/gmh5225/Akebi-Cheat-3.3 [Cheat]
