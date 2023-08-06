@@ -1930,6 +1930,7 @@ Or you can send an issue for me.
 - https://github.com/Zakaria-Master/Apex_ESP_Old_Project
 - https://github.com/cheatingwitdacode/apex-cheating
 - https://github.com/LWSS/Ape-ex-Abominations [QEMU]
+- https://github.com/Y33Tcoder/EzApexDMAAimbot [KVM]
 - https://github.com/gmh5225/Apex-CHEAT-FIXED
 - https://github.com/gmh5225/apex_legends_sdk
 - https://github.com/ekknod/apex_linux [linux]
