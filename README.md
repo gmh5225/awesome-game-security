@@ -2154,7 +2154,7 @@ Or you can send an issue for me.
 - https://github.com/DNLINYJ/Anti_miHoYo_Jcc_Obfuscate [Decode CFG By X64DBG]
 - https://github.com/gmh5225/genshin-cheat
 - https://github.com/Grasscutters/Grasscutter [Private Server]
-- https://github.com/Akebi-Group/Akebi-GC [Cheat]
+- https://github.com/gmh5225/Genshin-Akebi-GC [Cheat]
 - https://github.com/gmh5225/Akebi-Cheat-3.3 [Cheat]
 - https://github.com/Razmoth/GenshinStudio [Asset]
 - https://github.com/Dimbreath/GenshinData [Game Data]
