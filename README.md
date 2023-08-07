@@ -2158,7 +2158,7 @@ Or you can send an issue for me.
 - https://github.com/Grasscutters/Grasscutter [Private Server]
 - https://github.com/gmh5225/Genshin-Akebi-GC [Cheat]
 - https://github.com/gmh5225/Akebi-Cheat-3.3 [Cheat]
-- https://github.com/Dimbreath/GenshinData [Game Data]
+- https://github.com/gmh5225/Genshin-GenshinData [Game Data]
 - https://github.com/HolographicHat/YaeAchievement
 - https://github.com/phonowell/genshin-impact-script [A sweet genshin impact script]
 - https://github.com/KnsGoyoLV/GenshinImpact-Base
