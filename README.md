@@ -2312,7 +2312,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/daswareinfach/Battleye-VAC-EAC-Kernel-Bypass [FsFilter Testing]
 - https://github.com/aahmad097/MMFCodeInjection [User APC + File Mapping Testing]
 - https://github.com/liors619/TtdAntiDebugging [Debug Testing]
-- https://github.com/TupleDev/slemu [Hearbeat Testing]
+- https://github.com/gmh5225/cheat-attack-thread-slemu [Hearbeat Testing]
 - https://github.com/nkga/cheat-driver [MmCopyVirtualMemory Testing]
 - https://github.com/zxd1994/vt-debuuger [Hacked Hypervisor Testing]
 - https://github.com/3526779568/vt-debuger [Hacked Hypervisor Testing]
