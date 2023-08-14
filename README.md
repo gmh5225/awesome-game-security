@@ -1823,6 +1823,7 @@ Or you can send an issue for me.
 > Game:CS2
 - https://github.com/bruhmoment21/cs2-sdk [SDK]
 - https://github.com/Omn1z/Counter-Strike2-SDK [SDK]
+- https://github.com/0wk/cs2-sdk [SDK]
 - https://github.com/imnotdatguy/csgo2-cheat
 - https://github.com/papstuc/counterstrike2
 - https://github.com/nezu-cc/BakaWare4
