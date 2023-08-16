@@ -139,6 +139,7 @@ Or you can send an issue for me.
 - https://github.com/rxi/kit [pixels]
 - https://github.com/nitaigao/engine-showcase [Old engine]
 - https://github.com/PanosK92/SpartanEngine [Research-focused game engine designed for real-time solutions]
+- https://github.com/OpenXRay/xray-16 [Improved version of the X-Ray Engine]
 
 
 > Game Engine Plugins:Unreal
