@@ -2477,7 +2477,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/kirides/screencapture [DX11]
 - https://github.com/bmharper/WindowsDesktopDuplicationSample [DXGI]
 - https://github.com/PierreCiholas/GetPixel-vs-BitBlt_GetDIBits [GetPixel]
-- https://github.com/D1rkMtr/ScreenShot [BitBlt]
+- https://github.com/gmh5225/ScreenShot [BitBlt]
 
 > Game Engine Protection:Unreal
 - https://github.com/zompi2/Static-Variables-Obfuscator-UE4
