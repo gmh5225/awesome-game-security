@@ -1541,6 +1541,7 @@ Or you can send an issue for me.
 - https://github.com/lguilhermee/EAC-Extractor-Utility [Decrypt and Extract the files from the EAC]
 - https://advancedvectorextensions.github.io/posts/easyanticheat-eprocess-emulation [EProcess Emulation]
 - https://advancedvectorextensions.github.io/posts/easyanticheat-cr3-protection [CR3 Protection]
+- https://github.com/Sinclairq/hierarchy-eac [Bypassing self-integrity]
 
 > Explore AntiCheat System:BE
 - https://github.com/Schnocker/NoEye
