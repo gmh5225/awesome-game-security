@@ -2519,7 +2519,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [User-mode C++ Anti-Cheat written for German Roleplay Server GVMP.de](https://github.com/divodeuxsevres/gvmp-anticheat)
 - [Cheat developer platform](https://github.com/c4kef/UAC)
 - https://github.com/ekknod/Anti-Cheat-TestBench [TestBench]
-- https://github.com/hominsu/bugu [Malicious code detection and obfuscation]
+- https://github.com/gmh5225/Malicious-code-detection-bugu [Malicious code detection and obfuscation]
 - [Kernel Security driver used to block past, current and future process injection techniques on Windows Operating System](https://github.com/PI-Defender/pi-defender)
 - https://github.com/DoranekoSystems/cheap-engine [Sample implementation of anti-cheat in android]
 - [Proof of concept Anti-Cheat plugin for CS:GO](https://github.com/ekknod/CSGO-AC)
