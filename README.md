@@ -2481,7 +2481,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Game Engine Protection:Unreal
 - https://github.com/zompi2/Static-Variables-Obfuscator-UE4
-- https://github.com/BrUnOXaVIeRLeiTE/SCUE4-Plugin
+- https://github.com/gmh5225/UE-Plugin-SCUE4-Plugin
 - https://github.com/gmh5225/UnrealEngine-Protection
 
 > Game Engine Protection:Unity
