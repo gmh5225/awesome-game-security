@@ -741,6 +741,7 @@ Or you can send an issue for me.
 
 > Frida
 - https://github.com/CrackerCat/strongR-frida-android
+- https://github.com/gmh5225/frida-ue4dump [UE4]
 
 > Android File Explorer
 - https://github.com/nzcv/note [Guide-zh]
@@ -1420,6 +1421,7 @@ Or you can send an issue for me.
 - https://github.com/Shhoya/Shh0yaUEDumper [SDK Dump]
 - https://github.com/guttir14/UnrealDumper-4.25 [SDK Dump]
 - https://github.com/EZFNDEV/UEDumper [SDK Dump]
+- https://github.com/gmh5225/frida-ue4dump [SDK Dump For Android/IOS]
 - https://github.com/MJx0/AndUE4Dumper [SDK Dump For Android]
 - https://github.com/kp7742/UE4Dumper [SDK Dump For Android]
 - https://github.com/gmh5225/UE4-Apk-Dumper [SDK Dump For Android]
