@@ -909,6 +909,7 @@ Or you can send an issue for me.
 - https://github.com/Nalen98/AngryGhidra [Use angr in Ghidra]
 - https://github.com/justfoxing/ghidra_bridge [Python 3 bridge to Ghidra's Python scripting]
 - https://github.com/astrelsky/GhidraOrbis [Orbis OS specific software and file formats]
+- https://github.com/astrelsky/Ghidra-Cpp-Class-Analyzer [C++ Class and Run Time Type Information Analyzer]
 
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
