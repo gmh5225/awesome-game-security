@@ -1371,6 +1371,7 @@ Or you can send an issue for me.
 - https://github.com/Lexikos/AutoHotkey_L
 - https://github.com/tgillam/HumanMouseMovement
 - https://github.com/Chaoses-Ib/IbInputSimulator [Simulating keyboard, mouse]
+- https://github.com/gmh5225/razer-rzctl [Razer]
 
 > WallHack
 - https://github.com/DrNseven/D3D11-Wallhack
