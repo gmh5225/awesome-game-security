@@ -1149,6 +1149,7 @@ Or you can send an issue for me.
 - https://github.com/kkent030315/MsIoExploit [MsIo64.sys]
 - https://github.com/kkent030315/evil-mhyprot-cli [Mhyprot2.sys]
 - https://github.com/leeza007/evil-mhyprot-cli [Mhyprot2.sys]
+- https://github.com/zer0condition/mhydeath [Mhyprot2.sys]
 - https://github.com/keowu/mhyprot2 [Mhyprot2.sys]
 - https://github.com/kagurazakasanae/Mhyprot2DrvControl [Mhyprot2.sys]
 - https://github.com/gmh5225/CVE-2020-36603 [Mhyprot2.sys]
