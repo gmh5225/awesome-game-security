@@ -2686,7 +2686,6 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Fuzzer
 - https://github.com/0vercl0k/wtf
-- https://null2root.github.io/blog/2022/07/21/When-Hypervisor-Met-Snapshot-Fuzzing.html
 
 > OpenCV
 - https://github.com/YouNeverKnow00/Rust-Auto-Weapon-Detection-OpenCV-Example
