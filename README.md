@@ -2745,7 +2745,6 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Rythorndoran/PageTableHook [PTE Hook]
 - https://github.com/stdhu/windows-kernel-pagehook [PTE Hook]
 - https://github.com/Xyrem/Yumekage [PTE Hook]
-- https://back.engineering/29/03/2021 [Hide Address]
 - https://github.com/Compiled-Code/be-injector [Attack COW]
 - https://github.com/Compiled-Code/eac-mapper [Vulnerable MmCopyMemory]
 - https://github.com/EBalloon/MmCopyMemory [Bypass MmCopyMemory]
