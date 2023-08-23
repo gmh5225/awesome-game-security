@@ -264,6 +264,7 @@ Or you can send an issue for me.
 - https://github.com/QianMo/Unity-Design-Pattern [Unity Design]
 - https://github.com/michal-z/zig-gamedev [Building game development ecosystem for ziglang]
 - https://github.com/OTFCG/Awesome-Game-Analysis [Video game tech analysis resources]
+- https://github.com/killop/anything_about_game [Game Development resources]
 
 > Source
 - https://github.com/PiMoNFeeD/csgo-src [Leaked CSGO]
