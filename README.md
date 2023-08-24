@@ -2804,7 +2804,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [Simple program to stream offsets for your game cheat](https://github.com/gmh5225/OffsetStreaming)
 - https://github.com/jnastarot/HIGU_ntcall [Direct System Calls]
 - https://github.com/rbmm/LockFile-Poc [Lock File]
-- [A kernel exploit leveraging NtUserHardErrorControl to elevate a thread to KernelMode and achieve arbitrary kernel R/W & more](https://github.com/SecIdiot/ANGRYORCHARD)
+- [A kernel exploit leveraging NtUserHardErrorControl to elevate a thread to KernelMode and achieve arbitrary kernel R/W & more](https://github.com/gmh5225/ANGRYORCHARD)
 - https://github.com/gmh5225/dll-encryptor [Able to stream a dll without touching your disk]
 - [Running Shellcode Through EnumDisplayMonitors](https://marcoramilli.com/2022/06/15/running-shellcode-through-windows-callbacks/?utm_source=twitter&utm_medium=social&utm_campaign=ReviveOldPost)
 - [open-source windows defender manager can disable windows defender permanently](https://github.com/qtkite/defender-control)
