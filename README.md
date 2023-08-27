@@ -869,6 +869,7 @@ Or you can send an issue for me.
 - https://github.com/govcert-ch/ConfuserEx_IDAPython [Deobfuscation script for ConfuserEx]
 - https://github.com/sonyps5201314/pdb [PDB plugin with enhance and bugfix]
 - https://github.com/Coldzer0/IDA-For-Delphi [IDA-For-Delphi]
+- https://github.com/AntonKukoba1/BetterCallStack [Improve call stack]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
