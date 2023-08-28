@@ -1017,6 +1017,7 @@ Or you can send an issue for me.
 - https://github.com/cyberark/DLLSpy [DLL Hijacking Detection Tool]
 - [Project for identifying executables and DLLs vulnerable to relative path DLL hijacking](https://github.com/wietze/windows-dll-hijacking)
 - https://github.com/anhkgg/SuperDllHijack [A general DLL hijack technology]
+- https://github.com/ctxis/DLLHSC [DLL Hijack SCanner]
 
 > Hook
 - https://github.com/stars/gmh5225/lists/hook [Lists]
