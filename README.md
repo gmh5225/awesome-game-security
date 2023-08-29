@@ -1071,6 +1071,7 @@ Or you can send an issue for me.
 
 > Overlay
 - https://github.com/coltonon/D2DOverlay
+- https://github.com/SurgeGotTappedAgain/Window-Hijack
 - https://github.com/SeanPesce/Direct3D9-Overlay [DX9]
 - https://github.com/Unkn0wnH4ck3r/GameOverlayUIHook [Steam]
 - https://github.com/gmh5225/Steam-Hook-Render-PoC [Steam]
@@ -1093,7 +1094,7 @@ Or you can send an issue for me.
 - https://github.com/3r4y/imgui-external-overlay [imgui overlay]
 - https://github.com/J0xna/Kernel-Overlay-Hider [Kernel Overlay Hider]
 - https://github.com/geeksonsecurity/android-overlay-malware-example [Android]
-- https://github.com/SamuelTulach/OverlayCord [Discord]
+- https://github.com/SamuelTulach/OverlayCord [Discord] 
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
