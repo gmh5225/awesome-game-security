@@ -1659,6 +1659,7 @@ Or you can send an issue for me.
 - https://github.com/Riremito/JMSv186 [JMS v186]
 - https://github.com/ryantpayton/MapleStory-Client [HeavenMS Client]
 - https://github.com/ryantpayton/MapleStory-Server [HeavenMS Server]
+- https://github.com/YohananTzeviyah/LibreMaple-Client [LibreMaple Client]
 
 > Game:Minecraft
 - [A minecraft server backend written in c++](https://github.com/mmbednarek/minecpp)
