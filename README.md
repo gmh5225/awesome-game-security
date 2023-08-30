@@ -1655,6 +1655,8 @@ Or you can send an issue for me.
 - https://github.com/Elem8100/MapleStory-GM-Client [Offline MapleStory Client Emulator]
 - https://github.com/gmh5225/maplestory-packer-ModPacker [MapleStory Wolrds .mod file packing/unpacking tools]
 - https://github.com/Riremito/JMSv186 [JMS v186]
+- https://github.com/ryantpayton/MapleStory-Client [HeavenMS Client]
+- https://github.com/ryantpayton/MapleStory-Server [HeavenMS Server]
 
 > Game:Minecraft
 - [A minecraft server backend written in c++](https://github.com/mmbednarek/minecpp)
