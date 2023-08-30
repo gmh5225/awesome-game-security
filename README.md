@@ -1236,6 +1236,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Comm-data-ptr-driver [NtGdiPolyPolyDraw]
 - https://github.com/JGonz1337/kernel-eac-be-comm [NtGdiPolyPolyDraw]
 - https://github.com/NullTerminatorr/NullHook [NtDxgkGetTrackedWorkloadStatistics]
+- https://github.com/gmh5225/Kernel-Cheat-for-directx3D [NtDxgkGetTrackedWorkloadStatistics]
 - https://github.com/gmh5225/Comm-Data-Pointer-Swap [NtDCompositionSetChildRootVisual]
 - https://github.com/gmh5225/Comm-NekoSwap [Win32kApiSetTable]
 - https://github.com/Deputation/kernel_payload_comms [Shared Memory]
