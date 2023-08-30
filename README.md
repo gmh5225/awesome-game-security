@@ -1297,6 +1297,7 @@ Or you can send an issue for me.
 - https://github.com/cs1ime/ceserver-rawmem [CE]
 - https://github.com/gmh5225/kvm-csgo-cheat [CSGO]
 - https://github.com/gmh5225/cs16-trigger-kvm [CS1.6]
+- https://github.com/tenclass/mvisor [C++ remake]
 
 > Wine
 - https://github.com/ValveSoftware/Proton [Steam]
