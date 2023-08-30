@@ -113,7 +113,6 @@ Or you can send an issue for me.
 - https://github.com/TorqueGameEngines/Torque2D [2D]
 - https://github.com/TorqueGameEngines/Torque3D [3D]
 - https://github.com/gmh5225/GameEngine-CX3D [3D]
-- https://github.com/TrinityCore/TrinityCore [MMORPG]
 - https://github.com/solenum/exengine [C99 3D]
 - https://github.com/TheCherno/Hazel
 - https://github.com/duddel/yourgamelib
@@ -235,6 +234,7 @@ Or you can send an issue for me.
 - https://github.com/TLeonardUK/ds3os [Dark Souls 3]
 - https://github.com/TLeonardUK/ds2os [Dark Souls 2]
 - https://github.com/rathena/rathena [MMORPG]
+- https://github.com/TrinityCore/TrinityCore [Server for WOW]
 - https://github.com/uNetworking/uWebSockets [WebSockets]
 - https://github.com/socketio/socket.io [Nodejs]
 - https://github.com/mqttjs/MQTT.js [mqtt nodejs]
@@ -326,6 +326,7 @@ Or you can send an issue for me.
 - https://github.com/dufernst/LegionCore-7.3.5 [wow]
 - https://github.com/RageProject/5.4.7-Wow-source [wow]
 - https://github.com/SkyFire/MopCore547 [wow]
+- https://github.com/Arctium/WoW-Launcher [wow launcher]
 - https://github.com/skMetinek/Non-Newtonian-New-York [Spider-Man Remastered Mod]
 - https://github.com/playgameservices/cpp-android-basic-samples [Sample games using the Google Play Games C++ SDK]
 - https://github.com/pafuhana1213/KawaiiPhysics [Simple fake Physics for UnrealEngine4 & 5]
