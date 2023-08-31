@@ -873,6 +873,7 @@ Or you can send an issue for me.
 - https://github.com/Coldzer0/IDA-For-Delphi [IDA-For-Delphi]
 - https://github.com/AntonKukoba1/BetterCallStack [Improve call stack]
 - https://github.com/za233/IDADeflat [deflat]
+- https://github.com/RomanRybachek/Copy_RVA [Copy RVA]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
