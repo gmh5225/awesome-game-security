@@ -2208,6 +2208,7 @@ Or you can send an issue for me.
 - https://github.com/aderfa/star_rail
 - https://github.com/gmh5225/Pom-Pom
 - https://github.com/LmeSzinc/StarRailCopilot [Script]
+- https://github.com/CHNZYX/Auto_Simulated_Universe [Script]
 
 > Game:osu
 - https://github.com/fs-c/maniac [External]
