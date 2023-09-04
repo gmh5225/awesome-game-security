@@ -919,6 +919,7 @@ Or you can send an issue for me.
 - https://github.com/astrelsky/GhidraOrbis [Orbis OS specific software and file formats]
 - https://github.com/astrelsky/Ghidra-Cpp-Class-Analyzer [C++ Class and Run Time Type Information Analyzer]
 - https://github.com/DMaroo/GhidRust [Rust decompiler]
+- https://github.com/Comsecuris/gdbghidra [GDB session]
 
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
