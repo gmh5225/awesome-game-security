@@ -717,6 +717,7 @@ Or you can send an issue for me.
 - https://github.com/mastercodeon314/KsDumper-11 [Classic and legendary KsDumper]
 - https://github.com/not-matthias/Nemesis [Dumping processes using the power of kernel space]
 - https://github.com/allogic/KDBG [Tool]
+- https://github.com/backengineering/Voyager [A Hyper-V Hacking Framework For Windows 10 x64 (AMD & Intel)]
 - https://github.com/gmh5225/Voyager [A Hyper-V Hacking Framework For Windows 10 x64 (AMD & Intel)]
 - https://github.com/NurdAlert/modded-voyager
 - https://github.com/gmh5225/Fortnite-VoyagerTF [Voyager for Fortnite]
