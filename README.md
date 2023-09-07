@@ -921,6 +921,7 @@ Or you can send an issue for me.
 - https://github.com/DMaroo/GhidRust [Rust decompiler]
 - https://github.com/Comsecuris/gdbghidra [GDB session]
 - https://github.com/hyuunnn/Hyara [Yara]
+- https://github.com/Deatty/Ghidra-Obfuscation-Detection [Detect obfuscated/complex code]
 
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
