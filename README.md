@@ -2292,6 +2292,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Game:Team Fortress 2
 - https://github.com/gmh5225/teamfortress2_internal
 - https://github.com/BlueSnoopT/Cunthook [linux]
+- https://github.com/Fedoraware/Fedoraware
 
 ## Anti Cheat
 > Guide
