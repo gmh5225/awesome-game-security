@@ -290,6 +290,7 @@ Or you can send an issue for me.
 - https://github.com/invi1998/MultiplayerBlasterGame [UE5 FPS Game]
 - https://github.com/perfect-hand/ue5-cardgame [UE5 Card Game]
 - https://github.com/stackOverflower92/FightingGame-UE5 [UE5 Fighting Game]
+- https://github.com/gmh5225/UnrealEngine5-UltimateStreetFighters [UE5 StreetFighters Game]
 - https://github.com/EvelynSchwab/ComponentFuseMechanic [UE5 constraining system]
 - https://github.com/tomlooman/ActionRoguelike [UE Roguelike Game]
 - https://github.com/Unity-Technologies/FPSSample [Unity Game]
