@@ -748,6 +748,7 @@ Or you can send an issue for me.
 > Frida
 - https://github.com/CrackerCat/strongR-frida-android
 - https://github.com/gmh5225/frida-ue4dump [UE4]
+- https://github.com/jcalabres/hook-updater [Update Frida hooks automatically]
 
 > Android File Explorer
 - https://github.com/nzcv/note [Guide-zh]
