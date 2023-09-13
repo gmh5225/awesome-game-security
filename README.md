@@ -771,6 +771,7 @@ Or you can send an issue for me.
 - https://github.com/MJx0/KittyMemory [Runtime code patching]
 - https://github.com/vrolife/mypower [Memory scanner]
 - https://github.com/DoranekoSystems/memory_server [Memory scanner & analyzer with REST API]
+- https://github.com/KuhakuPixel/AceTheGame [Game Hacking Tools]
 
 > Android Kernel Explorer
 - https://docs.kernel.org [Linux Kernel documentation]
