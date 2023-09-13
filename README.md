@@ -781,6 +781,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/android_ebpf [EBPF]
 - https://github.com/cloudfuzz/android-kernel-exploitation [Android Kernel Exploitation]
 - https://github.com/Snoopy-Sec/Localroot-ALL-CVE [Root CVE]
+- https://github.com/xmmword/dpatch [Syscall Dispatcher Patching PoC]
 
 > Android Network Explorer
 - https://github.com/emanuele-f/PCAPdroid
