@@ -2576,6 +2576,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/dllcrt0/Dynsec
 - https://github.com/XZNX5/Basic_Anti-Cheat
 - https://github.com/MegaAntiCheat
+- https://github.com/donnaskiez/ac
 
 > Analysis Framework
 - https://github.com/pandora-analysis/pandora
