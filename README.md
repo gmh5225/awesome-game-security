@@ -1736,6 +1736,7 @@ Or you can send an issue for me.
 - https://github.com/Nuxar1/DecryptionDumper [Dump]
 - https://github.com/tarekwiz/LeagueDumper [Dump]
 - https://github.com/tarekwiz/League-Unpacker [Dump]
+- https://github.com/0x6461726B/lol-offset-dumper [Dump]
 - https://github.com/LeaguePrank/LeagueTeamBoost
 - https://github.com/LeagueSandbox
 - https://github.com/MythicManiac/lol-unpackman
