@@ -1015,6 +1015,7 @@ Or you can send an issue for me.
 - https://github.com/zorftw/revert-mapper [Map x64 DLLs in WoW64]
 - https://github.com/SDXT/MMInject [Using NX Bit Swapping and VAD hide]
 - https://github.com/Fahersto/code_injection [Several code injection techniques]
+- https://github.com/KameronHawk/Kernel-VAD-Injector [Hide VAD]
 
 > Injection:Linux
 - https://github.com/ixty/mandibule
