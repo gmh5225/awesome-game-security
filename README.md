@@ -1438,6 +1438,7 @@ Or you can send an issue for me.
 - https://github.com/namazso/hdd_serial_spoofer
 - https://github.com/gmh5225/EASY-HWID-SPOOFER
 - https://github.com/gmh5225/HWID-Pasted-Hwid-Spoofer
+- https://github.com/Android1500/AndroidFaker [Android]
 
 > Bypass Page Protection
 - https://github.com/illegal-instruction-co/CountHook [WorkingSet]
