@@ -2683,6 +2683,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Detection:ESP
 - https://github.com/weak1337/PresentHookDetection
 
+> Detection:DMA
+- https://github.com/gmh5225/DmaProtect [VT-d/IOMMU]
+
 > Detection:Wall Hack
 - https://github.com/87andrewh/CornerCulling
 - https://github.com/87andrewh/CornerCullingSourceEngine
