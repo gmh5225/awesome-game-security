@@ -188,6 +188,7 @@ Or you can send an issue for me.
 - https://github.com/Jaysmito101/cgl
 
 ## Renderer
+- https://github.com/kanition/pbrtbook [Physically Based Rendering: From Theory To Implementation]
 - https://github.com/keith2018/SoftGLRender
 - https://github.com/DQLin/VolumetricReSTIRRelease
 - https://github.com/HackerPoet/NonEuclidean
