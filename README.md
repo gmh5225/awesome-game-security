@@ -2294,6 +2294,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Game:L4D2
 - https://github.com/Fox-Cult/L4D2-Cheat [Linux]
+- https://github.com/Axactt/L4D2Basic
 
 > Game:mhxy
 - https://github.com/gmh5225/mhxy_kernel
