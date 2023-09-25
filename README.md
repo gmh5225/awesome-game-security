@@ -913,6 +913,7 @@ Or you can send an issue for me.
 - https://github.com/WhatTheFuzz/binaryninja-openai [Integrates OpenAI]
 
 > Ghidra Plugins
+- https://github.com/AllsafeCyberSecurity/awesome-ghidra [List]
 - https://github.com/CENSUS/ghidra-frida-hook-gen
 - https://github.com/Gekkio/GhidraBoy [Sharp SM83 / Game Boy extension for Ghidra]
 - https://github.com/fmagin/ghidra-openai [ChatGPT]
