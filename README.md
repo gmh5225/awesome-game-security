@@ -1213,6 +1213,7 @@ Or you can send an issue for me.
 - https://github.com/alfarom256/HPHardwareDiagnostics-PoC [etdsupp.sys]
 - https://github.com/ZeroMemoryEx/Blackout [gmer64.sys]
 - https://github.com/ZeroMemoryEx/Terminator [zam64.sys]
+- https://github.com/gmh5225/zam64-zemina [zam64.sys]
 - https://github.com/gmh5225/CVE-2017-9769 [rzpnk.sys]
 - https://github.com/kite03/echoac-poc [echo_driver.sys]
 - https://github.com/gmh5225/NVDrv [nvaudio.sys]
