@@ -1218,7 +1218,7 @@ Or you can send an issue for me.
 - https://github.com/kite03/echoac-poc [echo_driver.sys]
 - https://github.com/gmh5225/NVDrv [nvaudio.sys]
 - https://github.com/gmh5225/UCMapper [nvaudio.sys]
-
+- https://github.com/zeze-zeze/HITCON-2023-Demo-CVE-2023-20562 [AMDCpuProfiler.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
