@@ -2356,6 +2356,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Ricardonacif/launcher-abuser [Elevating Handle]
 - https://github.com/ContionMig/LSASS-Usermode-Bypass [Elevating Handle By LSASS]
 - https://github.com/gmh5225/LSASS-DumpThatLSASS [Elevating Handle By LSASS]
+- https://github.com/kkent030315/Van1338 [Elevating Handle By Timing Attack]
 - https://github.com/gmh5225/Handle-Ripper [DuplicateHandle]
 - https://github.com/Kudaes/Dumpy [Reuse opened handles By LSASS]
 - https://github.com/zorftw/lsass-extend-mapper [Manual mapper from LSASS]
