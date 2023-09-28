@@ -1879,6 +1879,7 @@ Or you can send an issue for me.
 - https://github.com/bruhmoment21/cs2-sdk [SDK]
 - https://github.com/Omn1z/Counter-Strike2-SDK [SDK]
 - https://github.com/0wk/cs2-sdk [SDK]
+- https://github.com/a2x/cs2-dumper [Dump]
 - https://github.com/imnotdatguy/csgo2-cheat
 - https://github.com/papstuc/counterstrike2
 - https://github.com/nezu-cc/BakaWare4
