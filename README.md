@@ -1876,13 +1876,22 @@ Or you can send an issue for me.
 - https://github.com/bloesway/csgo_sdk [SDK]
 
 > Game:CS2
+- https://github.com/sezzyaep/CS2-OFFSETS [Offset]
 - https://github.com/bruhmoment21/cs2-sdk [SDK]
 - https://github.com/Omn1z/Counter-Strike2-SDK [SDK]
 - https://github.com/0wk/cs2-sdk [SDK]
+- https://github.com/gmh5225/CS2-SDK-Source2Gen [SDK]
+- https://github.com/FrySimpl3/SDK_CS2 [SDK]
 - https://github.com/a2x/cs2-dumper [Dump]
 - https://github.com/imnotdatguy/csgo2-cheat
 - https://github.com/papstuc/counterstrike2
 - https://github.com/nezu-cc/BakaWare4
+- https://github.com/gmh5225/vscript_lua51 [VScript]
+- https://github.com/gmh5225/cs2_things [VScript]
+- https://github.com/IMXNOOBX/cs2-external-esp [External]
+- https://github.com/UnnamedZ03/CS2-external-base [External]
+- https://github.com/Tokyodidit/cs2External [External]
+- https://github.com/KisSsArt/CS2-Cheat-Base [Internal]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
