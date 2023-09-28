@@ -1659,6 +1659,9 @@ Or you can send an issue for me.
 > Explore AntiCheat System:FACEIT
 - https://github.com/ekknod/EC_PRO-LAN
 
+> Explore AntiCheat System:CS2
+- https://github.com/danielkrupinski/cs2-anticheat
+
 > Game:MapleStory
 - https://forum.ragezone.com/threads/getting-packet-structures-opcodes-using-ida.792436/ [Packet]
 - https://github.com/Bratah123/SpiritIDAPlugin [IDA-Plugin]
