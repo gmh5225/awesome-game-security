@@ -1057,6 +1057,7 @@ Or you can send an issue for me.
 - https://github.com/noobpk/frida-android-hook [frida hook for android]
 - https://github.com/SamuelTulach/LightHook [cross-platform hook library]
 - https://github.com/3intermute/arm64_silent_syscall_hook [ARM64 Patching exception handler]
+- https://github.com/kubo/plthook [PLT(Procedure Linkage Table) hook]
 
 > ROP Finder
 - https://github.com/0vercl0k/rp
