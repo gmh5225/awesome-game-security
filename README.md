@@ -1087,6 +1087,8 @@ Or you can send an issue for me.
 - https://github.com/gamozolabs/mempeek [Linux]
 - https://github.com/SamuelTulach/meme-rw [kdmapper]
 - https://github.com/gmh5225/Driver-RPM-DirectPageManipulation [read physical memory]
+- https://github.com/btbd/ddma [Disk based DMA for ATA and SCSI]
+- https://github.com/gmh5225/DDMA-1 [Disk based DMA for ATA and SCSI]
 
 > W2S
 - https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
