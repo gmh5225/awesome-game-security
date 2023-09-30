@@ -680,6 +680,7 @@ Or you can send an issue for me.
 - https://github.com/BlackINT3/OpenArk [Tool]
 - https://github.com/BeneficialCode/WinArk [Tool]
 - https://github.com/hfiref0x/KDU [Kernel Driver Utility Tool]
+- https://github.com/jthuraisamy/TelemetrySourcerer [Enumerate and disable callbacks/ETW]
 - https://github.com/progmboy/openprocmon [open source process monitor]
 - https://github.com/winsiderss/systeminformer [Tool]
 - https://github.com/0xcpu/ExecutiveCallbackObjects [Callback]
