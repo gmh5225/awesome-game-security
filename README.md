@@ -679,6 +679,7 @@ Or you can send an issue for me.
 - https://github.com/jiubanlo/WinNT5_src_20201004 [Leaked Windows XP Source]
 - https://github.com/BlackINT3/OpenArk [Tool]
 - https://github.com/BeneficialCode/WinArk [Tool]
+- https://github.com/hfiref0x/KDU [Kernel Driver Utility Tool]
 - https://github.com/progmboy/openprocmon [open source process monitor]
 - https://github.com/winsiderss/systeminformer [Tool]
 - https://github.com/0xcpu/ExecutiveCallbackObjects [Callback]
