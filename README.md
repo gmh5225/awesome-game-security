@@ -2565,6 +2565,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Open Source Anti Cheat System
 - https://github.com/mq1n/NoMercy
+- https://github.com/NoMercy-ac [NoMercy]
 - https://github.com/JackBro/BetaShield
 - https://github.com/chztbby/RebirthGuard
 - https://github.com/GravitLauncher/Avanguard
