@@ -1901,7 +1901,10 @@ Or you can send an issue for me.
 - https://github.com/IMXNOOBX/cs2-external-esp [External]
 - https://github.com/UnnamedZ03/CS2-external-base [External]
 - https://github.com/Tokyodidit/cs2External [External]
+- https://github.com/TKazer/CS2_External [External]
+- https://github.com/Valthrun/Valthrun [External]
 - https://github.com/KisSsArt/CS2-Cheat-Base [Internal]
+
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
