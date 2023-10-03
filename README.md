@@ -1774,6 +1774,7 @@ Or you can send an issue for me.
 - https://github.com/xkp95175333/Thetan_ArenaSDK
 
 > Game:Dota2
+- https://github.com/ikhsanprasetyo/dota2dumped [Offset dumper]
 - https://github.com/skrixx68/Dota2-Overlay-2.0
 - https://github.com/gmh5225/Dota2-Overlay-OffsetUpdater
 - https://github.com/interception-team/dota-cheat
