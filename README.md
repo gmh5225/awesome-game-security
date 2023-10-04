@@ -1305,6 +1305,7 @@ Or you can send an issue for me.
 - https://github.com/ekknod/efi-monitor [Hooking MmCopyMemory PG safe]
 
 > QEMU/KVM/PVE
+- https://github.com/david942j/kvm-kernel-example [Guide]
 - https://github.com/airbus-seclab/qemu_blog [Guide]
 - https://github.com/BigAnteater/KVM-GPU-Passthrough [GPU Passthrough]
 - https://github.com/ispras/qemu/tree/windbg [Windbg]
