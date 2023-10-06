@@ -1171,6 +1171,7 @@ Or you can send an issue for me.
 - https://github.com/Xxmmy/vulnerable-driver-scanner [Scans for vulnerable drivers]
 - https://github.com/Sentient111/VulnerableDriverScanner [Scans for vulnerable drivers]
 - https://github.com/shareef12/cpuz [CPU-Z]
+- https://github.com/SamLarenN/CPUZ-DSEFix [CPU-Z]
 - https://github.com/gmh5225/gdrv-loader/tree/1909_mitigation [gdrv.sys]
 - https://github.com/backengineering/VDM [gdrv enhance]
 - https://github.com/Compiled-Code/eac-mapper [gdrv.sys]
