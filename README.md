@@ -1203,6 +1203,7 @@ Or you can send an issue for me.
 - https://github.com/SamLarenN/SpeedFan-Exploit [Speedfan.sys]
 - https://github.com/Gbps/CapcomLib [Capcom.sys]
 - https://github.com/es3n1n/dolboeb-executor [Capcom.sys]
+- https://github.com/SamLarenN/CapcomDKOM [Capcom.sys]
 - https://github.com/Exploitables/CVE-2015-2291 [IQVW64.sys]
 - https://github.com/KiFilterFiberContext/AsIO-Exploit [AsIO3.sys]
 - https://github.com/IamM47Z/OpenHardwareMonitor-PoC [OpenHardwareMonitorLib.sys]
