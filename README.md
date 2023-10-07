@@ -698,6 +698,7 @@ Or you can send an issue for me.
 - https://github.com/KelvinMsft/ThreadSpy [PMI Callback]
 - https://github.com/KelvinMsft/PerfMon [PMI Callback]
 - https://github.com/gmh5225/PMI-hpc [PMI]
+- https://github.com/marcusbotacin/BranchMonitoringProject [PMI]
 - https://github.com/gmh5225/NMI-EnumNmiCallback [Enumerate NMI]
 - https://github.com/gmh5225/Disable-nmi-callbacks [Disable NMI]
 - https://github.com/gmh5225/NMI-nmi_callback [Triggering NMI]
