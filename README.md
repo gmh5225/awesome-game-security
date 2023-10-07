@@ -635,6 +635,7 @@ Or you can send an issue for me.
 - https://github.com/VoidSec/ioctlpus [Be used to make DeviceIoControl requests with arbitrary inputs]
 - https://github.com/horsicq/Nauz-File-Detector [Linker/Compiler/Tool detector]
 - https://github.com/gcarmix/HexWalk [Hex Viewer/Editor/Analyzer]
+- https://github.com/RomanRybachek/ioctl_helper [GUI tool for sending IOCTL to windows drivers]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
