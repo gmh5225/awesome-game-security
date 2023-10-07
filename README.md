@@ -649,6 +649,7 @@ Or you can send an issue for me.
 - https://github.com/hzqst/unicorn_pe
 - https://github.com/googleprojectzero/TinyInst
 - https://github.com/revsic/cpp-veh-dbi
+- https://github.com/ZehMatt/CovCane
 - https://github.com/bitdefender/river
 - https://github.com/beehive-lab/mambo [ARM]
 - https://github.com/DynamoRIO/drmemory
