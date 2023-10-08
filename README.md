@@ -1899,6 +1899,7 @@ Or you can send an issue for me.
 - https://github.com/bloesway/csgo_sdk [SDK]
 
 > Game:CS2
+- https://github.com/danielkrupinski/Osiris
 - https://github.com/sezzyaep/CS2-OFFSETS [Offset]
 - https://github.com/bruhmoment21/cs2-sdk [SDK]
 - https://github.com/Omn1z/Counter-Strike2-SDK [SDK]
