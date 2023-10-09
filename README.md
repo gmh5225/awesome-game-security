@@ -1829,6 +1829,7 @@ Or you can send an issue for me.
 - https://github.com/danielkrupinski/Anubis
 - https://github.com/s3pt3mb3r/Dainsleif
 - https://github.com/lagcomp/csgo_sdk
+- https://github.com/felix-rs/csgo-sdk [SDK for Rust]
 - https://github.com/ekknod/csf_w [Win SDK]
 - https://github.com/ekknod/csf [Linux SDK]
 - https://github.com/Speedi13/ROP-COMPILER
