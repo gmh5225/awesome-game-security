@@ -605,6 +605,7 @@ Or you can send an issue for me.
 > SpeedHack
 - https://github.com/absoIute/Speedhack
 - https://github.com/Letomaniy/Speed-Hack
+- https://github.com/IamSanjid/ce_speed_hack
 
 > RE Tools
 - https://dogbolt.org
