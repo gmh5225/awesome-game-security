@@ -944,6 +944,7 @@ Or you can send an issue for me.
 - https://github.com/Comsecuris/gdbghidra [GDB session]
 - https://github.com/hyuunnn/Hyara [Yara]
 - https://github.com/Deatty/Ghidra-Obfuscation-Detection [Detect obfuscated/complex code]
+- https://github.com/advanced-threat-research/GhidraScripts [Some scripts]
 
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
