@@ -1924,6 +1924,8 @@ Or you can send an issue for me.
 - https://github.com/Valthrun/Valthrun [External]
 - https://github.com/KisSsArt/CS2-Cheat-Base [Internal]
 
+> Game:Assault Cube
+- https://github.com/gmh5225/external-esp-hack-assaultcube [GDI overlay]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
