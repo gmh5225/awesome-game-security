@@ -1103,6 +1103,10 @@ Or you can send an issue for me.
 - https://github.com/btbd/ddma [Disk based DMA for ATA and SCSI]
 - https://github.com/gmh5225/DDMA-1 [Disk based DMA for ATA and SCSI]
 
+> DMA
+- https://github.com/ufrisk/pcileech
+- https://github.com/Cr4sh/pico_dma
+
 > W2S
 - https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
 
