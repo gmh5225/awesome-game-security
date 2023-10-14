@@ -1011,6 +1011,7 @@ Or you can send an issue for me.
 - https://github.com/andrew9382/manual_mapping_dll_injector [Manual Map]
 - https://github.com/danielkrupinski/MemJect [Manual Map]
 - https://github.com/can1357/ThePerfectInjector [PTE.User]
+- https://github.com/dumbasPL/fumo_loader [PTE.User]
 - https://github.com/estimated1337/executor [PTE.User]
 - https://github.com/Nou4r/PresentInjector [PTE.User]
 - https://github.com/JGonz1337/kernel-eac-be-injector [PTE.User]
