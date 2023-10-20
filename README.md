@@ -1640,6 +1640,7 @@ Or you can send an issue for me.
 - https://github.com/tr1xxx/battleye-region-walking
 - https://github.com/SurgeGotTappedAgain/Pink-Eye
 - https://github.com/R4YVEN/beservice_intcallbacks [Instrumentation Callback]
+- https://github.com/crtdll/bedaisy-bypass [BEDaisy.sys report bypass]
 
 > Explore AntiCheat System:EQU8
 - https://blog.back.engineering/12/08/2021
