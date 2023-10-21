@@ -1665,6 +1665,7 @@ Or you can send an issue for me.
 
 > Explore AntiCheat System:ACE
 - https://github.com/H3d9/sguard_limit
+- https://github.com/rogxo/ReadPhys
 
 > Explore AntiCheat System:G-Presto
 - https://github.com/ARandomPerson7/G-Presto-Anti-Cheat-Reverse-Engineered/blob/main/Main.cpp
