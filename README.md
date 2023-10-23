@@ -1637,6 +1637,7 @@ Or you can send an issue for me.
 - https://github.com/es3n1n/be-shellcode-tester [BattlEye shellcodes tester]
 - https://github.com/steffalon/battleye-rust [BattlEye RCON UDP connection]
 - https://github.com/Hypercall/FakeEye [Emulator]
+- https://github.com/mexploitui/FakeEye [Emulator]
 - https://github.com/tr1xxx/battleye-region-walking
 - https://github.com/SurgeGotTappedAgain/Pink-Eye
 - https://github.com/R4YVEN/beservice_intcallbacks [Instrumentation Callback]
