@@ -1930,6 +1930,7 @@ Or you can send an issue for me.
 - https://github.com/Tokyodidit/cs2External [External]
 - https://github.com/TKazer/CS2_External [External]
 - https://github.com/Valthrun/Valthrun [External]
+- https://github.com/Zckyy/CS2-External [External]
 - https://github.com/KisSsArt/CS2-Cheat-Base [Internal]
 - https://github.com/redbg/CS2-Internal [Internal]
 
