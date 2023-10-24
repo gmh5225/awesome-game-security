@@ -1383,6 +1383,7 @@ Or you can send an issue for me.
 - https://github.com/sina85/hide-file [Hide File]
 - https://github.com/ch3rn0byl/ANTfs [Delete File]
 - https://github.com/KANKOSHEV/NoScreen [Hide Window]
+- https://github.com/gmh5225/WindowProtect [Hide Window]
 - https://github.com/nlepleux/MappedCallback [Hide Callback]
 - https://github.com/rogerxiii/kernel-codecave-poc [Find Codecave]
 - https://github.com/armvirus/SinMapper [Manual Map In Signed Driver]
