@@ -1107,6 +1107,7 @@ Or you can send an issue for me.
 > DMA
 - https://github.com/ufrisk/pcileech
 - https://github.com/Cr4sh/pico_dma
+- https://github.com/Spuckwaffel/DMALib [DMA library]
 
 > W2S
 - https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
