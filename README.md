@@ -1103,11 +1103,13 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Driver-RPM-DirectPageManipulation [read physical memory]
 - https://github.com/btbd/ddma [Disk based DMA for ATA and SCSI]
 - https://github.com/gmh5225/DDMA-1 [Disk based DMA for ATA and SCSI]
+- https://github.com/ekknod/vm [Minimal memory library for Windows/Linux]
 
 > DMA
 - https://github.com/ufrisk/pcileech
 - https://github.com/Cr4sh/pico_dma
 - https://github.com/Spuckwaffel/DMALib [DMA library]
+- https://github.com/ekknod/vm [Minimal memory library for Windows/Linux]
 
 > W2S
 - https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
