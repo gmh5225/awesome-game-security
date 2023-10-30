@@ -1104,6 +1104,7 @@ Or you can send an issue for me.
 - https://github.com/btbd/ddma [Disk based DMA for ATA and SCSI]
 - https://github.com/gmh5225/DDMA-1 [Disk based DMA for ATA and SCSI]
 - https://github.com/ekknod/vm [Minimal memory library for Windows/Linux]
+- https://github.com/ALittlePatate/TaxiDriver [W/RPM Driver and usermode for Linux]
 
 > DMA
 - https://github.com/ufrisk/pcileech
