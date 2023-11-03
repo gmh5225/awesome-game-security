@@ -946,6 +946,7 @@ Or you can send an issue for me.
 - https://github.com/Deatty/Ghidra-Obfuscation-Detection [Detect obfuscated/complex code]
 - https://github.com/advanced-threat-research/GhidraScripts [Some scripts]
 - https://github.com/fuzzypickles14/BetterStringAnalyzer [A better string analyzer for Ghidra]
+- https://github.com/clearbluejar/ghidriff [Python Command-Line Ghidra Binary Diffing Engine]
 
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
