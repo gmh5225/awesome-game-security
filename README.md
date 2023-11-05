@@ -1622,6 +1622,7 @@ Or you can send an issue for me.
 - https://advancedvectorextensions.github.io/posts/easyanticheat-cr3-protection [CR3 Protection]
 - https://github.com/Sinclairq/hierarchy-eac [Bypassing self-integrity]
 - https://github.com/SamuelTulach/eac_cr3_shuffle [Bypassing CR3 protection]
+- https://github.com/Robert01337/Bypassing-EasyAntiCheat-Integrity-check [Bypassing integrity check]
 
 > Explore AntiCheat System:BE
 - https://github.com/Schnocker/NoEye
