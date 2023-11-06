@@ -1929,6 +1929,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/CS2-SDK-Source2Gen [SDK]
 - https://github.com/FrySimpl3/SDK_CS2 [SDK]
 - https://github.com/nikkacs/cs2_sdk [SDK]
+- https://github.com/NotOfficer/cs2-sdk [SDK]
 - https://github.com/a2x/cs2-dumper [Dump]
 - https://github.com/imnotdatguy/csgo2-cheat
 - https://github.com/papstuc/counterstrike2
