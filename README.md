@@ -3009,3 +3009,4 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/CTCaer/hekate [A GUI based Nintendo Switch Bootloader]
 - https://github.com/Atmosphere-NX/Atmosphere [Customized firmware]
 - https://github.com/tomvita/SE-tools [Memory hacking]
+- https://github.com/jakcron/nstool [General purpose read/extract tool]
