@@ -2295,6 +2295,7 @@ Or you can send an issue for me.
 - https://github.com/xTaiwanPingLord/GenshinDebuggerBypass
 - https://github.com/gmh5225/Genshin-EasyPeasy-Bypass [Anti-Debug Bypass]
 - https://github.com/ELJoOker2004/genshin-remove-banner
+- https://github.com/Micah123321/AutoOpenCAK [Bypass tool]
 
 > Game:Honkai Impact
 - https://github.com/BuIlDaLiBlE/BetterHI3Launcher
