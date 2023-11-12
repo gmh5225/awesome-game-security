@@ -1251,6 +1251,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/UCMapper [nvaudio.sys]
 - https://github.com/zeze-zeze/HITCON-2023-Demo-CVE-2023-20562 [AMDCpuProfiler.sys]
 - https://github.com/keowu/BadRentdrv2 [rentdrv2.sys]
+- https://github.com/gmh5225/S4Mapper [SignalRgbDriver.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
