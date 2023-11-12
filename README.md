@@ -904,6 +904,7 @@ Or you can send an issue for me.
 > Binary Ninja Plugins
 - https://github.com/Vector35/official-plugins
 - https://github.com/Vector35/community-plugins
+- https://github.com/FuzzySecurity/BinaryNinja-Themes [Theme]
 - https://github.com/EliseZeroTwo/SEH-Helper [SEH Helper]
 - https://github.com/Vector35/tanto [Slices Functions]
 - https://github.com/ergrelet/triton-bn [Triton]
