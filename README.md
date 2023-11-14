@@ -1942,6 +1942,7 @@ Or you can send an issue for me.
 - https://github.com/papstuc/counterstrike2
 - https://github.com/nezu-cc/BakaWare4
 - https://github.com/clauadv/cs2_webradar [Radar]
+- https://github.com/MoZiHao/CS2_DMA_Radar [DMA Radar]
 - https://github.com/gmh5225/vscript_lua51 [VScript]
 - https://github.com/gmh5225/cs2_things [VScript]
 - https://github.com/IMXNOOBX/cs2-external-esp [External]
