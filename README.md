@@ -898,6 +898,7 @@ Or you can send an issue for me.
 - https://github.com/za233/IDADeflat [deflat]
 - https://github.com/RomanRybachek/Copy_RVA [Copy RVA]
 - https://github.com/RevEngAI/reai-ida [RevEng.AI]
+- https://github.com/gaasedelen/microavx [AVX Lifter]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
