@@ -901,6 +901,7 @@ Or you can send an issue for me.
 - https://github.com/RevEngAI/reai-ida [RevEng.AI]
 - https://github.com/gaasedelen/microavx [AVX Lifter]
 - https://github.com/thalium/ida_kmdf [IDA kmdf]
+- https://github.com/zengfr/XrefsExt [XrefsExt plugin]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
