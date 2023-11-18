@@ -832,6 +832,7 @@ Or you can send an issue for me.
 > IDA Plugins
 - https://github.com/vmallet/ida-plugins [List of IDA Plugins]
 - https://github.com/onethawt/idaplugins-list [List of IDA Plugins]
+- https://github.com/NyaMisty/idasdk-collection/tree/master [IDA SDK]
 - https://github.com/zyantific/IDASkins [Skins]
 - https://github.com/endofunky/ida-nord-theme [Skins]
 - https://github.com/giladreich/ida_migrator [Migrate Database]
