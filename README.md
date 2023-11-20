@@ -1958,6 +1958,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/CS2-Cheat [External]
 - https://github.com/Half-People/HPCS2 [External]
 - https://github.com/gmh5225/CS2-External-1 [External]
+- https://github.com/CowNowK/AimStarCS2 [External]
 - https://github.com/KisSsArt/CS2-Cheat-Base [Internal]
 - https://github.com/redbg/CS2-Internal [Internal]
 
