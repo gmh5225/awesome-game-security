@@ -165,6 +165,7 @@ Or you can send an issue for me.
 - [Unreal Engine plugin providing a set of Hermes endpoints](https://github.com/cdpred/RedTalaria)
 - [Unreal Engine 4 Plugin for Lua APIs implementation](https://github.com/rdeioris/LuaMachine)
 - [Copies the argument string to the clipboard and outputs the characters copied to the clipboard](https://github.com/aoharudesu/Clipboard_Tools-UE4)
+- [Generic graph data structure plugin for ue4](https://github.com/jinyuliao/GenericGraph)
 
 > Game Engine Plugins:Unity
 - [A markdown viewer for unity](https://github.com/gwaredd/UnityMarkdownViewer)
