@@ -2823,6 +2823,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/rbmm/USN
 - https://github.com/rbmm/SearchEx
 - https://github.com/ch3rn0byl/ANTfs
+- https://github.com/strozfriedberg/ntfs-linker
+- https://github.com/NTFSparse/ntfs_parse
 - https://github.com/bluecapesecurity/PWF [Windows Forensics Training]
 
 > Dynamic Script
