@@ -2616,6 +2616,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/cxxrev0to1dev/nb_obfuscator
 - https://github.com/gmh5225/cerberus [VM]
 - https://github.com/layerfsd/phantasm-x86-virtualizer [VM]
+- https://github.com/felix-rs/guardian-rs [VM]
 - https://github.com/CalebFenton/simplify [Java]
 - https://github.com/open-obfuscator/dProtect [Java/Kotlin]
 - https://github.com/Maldev-Academy/EntropyReducer [Reduce Entropy]
