@@ -1933,6 +1933,7 @@ Or you can send an issue for me.
 
 > Game:CS2
 - https://github.com/danielkrupinski/Osiris
+- https://github.com/ro0ti/CS2-Offsets [Offset]
 - https://github.com/sezzyaep/CS2-OFFSETS [Offset]
 - https://github.com/Salvatore-Als/cs2-signature-list [Signature]
 - https://github.com/bruhmoment21/cs2-sdk [SDK]
