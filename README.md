@@ -1947,6 +1947,7 @@ Or you can send an issue for me.
 - https://github.com/imnotdatguy/csgo2-cheat
 - https://github.com/papstuc/counterstrike2
 - https://github.com/nezu-cc/BakaWare4
+- https://github.com/gmh5225/cs2-fov-changer [FOV changer]
 - https://github.com/clauadv/cs2_webradar [Radar]
 - https://github.com/MoZiHao/CS2_DMA_Radar [DMA Radar]
 - https://github.com/gmh5225/vscript_lua51 [VScript]
