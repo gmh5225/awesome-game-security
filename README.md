@@ -136,6 +136,7 @@ Or you can send an issue for me.
 - https://github.com/AustinBrunkhorst/Ursine3D [C++ 3D]
 - https://github.com/RavEngine/RavEngine [C++ 3D]
 - https://github.com/asc-community/MxEngine [C++ 3D]
+- https://github.com/jmorton06/Lumos [C++ 2D/3D]
 - https://github.com/FlaxEngine/FlaxEngine [C++/C# 3D]
 - https://github.com/stride3d/stride [C# 3D]
 - https://github.com/Net5F/AmalgamEngine
