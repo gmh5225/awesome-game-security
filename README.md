@@ -642,6 +642,7 @@ Or you can send an issue for me.
 - https://github.com/horsicq/Nauz-File-Detector [Linker/Compiler/Tool detector]
 - https://github.com/gcarmix/HexWalk [Hex Viewer/Editor/Analyzer]
 - https://github.com/RomanRybachek/ioctl_helper [GUI tool for sending IOCTL to windows drivers]
+- https://github.com/sevaa/dwex [DWARF Explorer]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
