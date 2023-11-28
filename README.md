@@ -908,6 +908,7 @@ Or you can send an issue for me.
 - https://github.com/thalium/ida_kmdf [IDA kmdf]
 - https://github.com/zengfr/XrefsExt [XrefsExt plugin]
 - https://github.com/sterrasec/genpatch [Python script for patching binary]
+- https://github.com/AzzOnFire/yarka [YARA signature creation]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
