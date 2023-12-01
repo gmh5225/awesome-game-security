@@ -910,6 +910,7 @@ Or you can send an issue for me.
 - https://github.com/zengfr/XrefsExt [XrefsExt plugin]
 - https://github.com/sterrasec/genpatch [Python script for patching binary]
 - https://github.com/AzzOnFire/yarka [YARA signature creation]
+- https://github.com/VirusTotal/vt-ida-plugin [VirusTotal plugin]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
