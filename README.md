@@ -1967,6 +1967,7 @@ Or you can send an issue for me.
 - https://github.com/Zckyy/CS2-External [External]
 - https://github.com/sFIsAnExpert/CS2-External-Cheat [External]
 - https://github.com/gmh5225/tim_apple [External]
+- https://github.com/kristofhracza/tim_apple [External]
 - https://github.com/gmh5225/CS2-Cheat [External]
 - https://github.com/Half-People/HPCS2 [External]
 - https://github.com/gmh5225/CS2-External-1 [External]
