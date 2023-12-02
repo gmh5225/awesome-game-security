@@ -644,6 +644,7 @@ Or you can send an issue for me.
 - https://github.com/gcarmix/HexWalk [Hex Viewer/Editor/Analyzer]
 - https://github.com/RomanRybachek/ioctl_helper [GUI tool for sending IOCTL to windows drivers]
 - https://github.com/sevaa/dwex [DWARF Explorer]
+- https://github.com/katahiromz/RisohEditor [Win32 resource editor]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
