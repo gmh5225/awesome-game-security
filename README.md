@@ -2370,6 +2370,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Rimmuru/gta-source
 - https://github.com/SyDevTeam/gta5view [Viewer/Editor]
 - https://github.com/skarockoi/pHake [Mod Menu]
+- https://github.com/CamxxCore/ExtendedCameraSettings [Extending functionality of the gameplay camera]
 
 > Game:Geometry Dash
 - https://github.com/reservedcloud/gd-internal
