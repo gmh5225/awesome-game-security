@@ -1975,6 +1975,7 @@ Or you can send an issue for me.
 - https://github.com/CowNowK/AimStarCS2 [External]
 - https://github.com/KisSsArt/CS2-Cheat-Base [Internal]
 - https://github.com/redbg/CS2-Internal [Internal]
+- https://github.com/Elsie-Kgafela/CS2-Cheat-Base [Internal]
 
 > Game:Assault Cube
 - https://github.com/gmh5225/external-esp-hack-assaultcube [GDI overlay]
