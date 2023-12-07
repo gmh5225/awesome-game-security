@@ -2615,6 +2615,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/1hAck-0/zeroimport
 
 > Obfuscation Engine
+- https://github.com/jmpoep/vmprotect-3.5.1
 - https://github.com/mike1k/perses
 - https://github.com/weak1337/Alcatraz
 - https://github.com/es3n1n/obfuscator
