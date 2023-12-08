@@ -1713,6 +1713,7 @@ Or you can send an issue for me.
 - https://byfron.com/
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/505486-byfron-tech-anti-cheat-released.html
 - https://gist.github.com/gmh5225/cbe40345a9400b01329e025478ffb826 [hash]
+- https://github.com/EnrickMartins/byfron-bypass
 
 > Explore AntiCheat System:NGS
 - https://github.com/st4ckh0und/NexonGameSecurity-bypass
