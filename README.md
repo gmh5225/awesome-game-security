@@ -1053,6 +1053,7 @@ Or you can send an issue for me.
 - https://github.com/Fahersto/code_injection [Several code injection techniques]
 - https://github.com/KameronHawk/Kernel-VAD-Injector [Hide VAD]
 - https://github.com/nettitude/Tartarus-TpAllocInject [TpAllocInject]
+- https://github.com/SafeBreach-Labs/PoolParty [ThreadPool]
 
 > Injection:Linux
 - https://github.com/ixty/mandibule
