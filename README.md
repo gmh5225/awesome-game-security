@@ -391,6 +391,7 @@ Or you can send an issue for me.
 - https://github.com/Volkanite/Push [Monitor GPU/CPU/RAM performance]
 - https://github.com/google/orbit [C/C++ Performance Profiler]
 - https://github.com/wolfpld/tracy [C++ frame profiler]
+- https://github.com/bombomby/optick [C++ Profiler For Games]
 - https://github.com/RomanceTheHeart/Automation_Examples [Automating certain tasks in the Unreal editor]
 - https://github.com/DaedalicEntertainment/ue4-test-automation [Facilitates setting up integration test suits with Unreal Engine 4 Gauntlet]
 - https://github.com/DenuvoSoftwareSolutions/Onlooker [Tool to collect and visualize memory usage of a process tree]
