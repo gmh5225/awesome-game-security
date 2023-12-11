@@ -1330,6 +1330,7 @@ Or you can send an issue for me.
 > EFI Driver
 - https://github.com/mrexodia/EfiCMake
 - https://github.com/tandasat/MiniVisorPkg
+- https://github.com/Shtan7/VisualUEFI-2.0 [Debug source with clion+clang+gdb]
 - https://github.com/SamuelTulach/EasyUefi [Visual Studio template for GNU-EFI]
 - https://github.com/btbd/umap [EFI Manual Map]
 - https://github.com/ekknod/sumap [EFI Manual Map]
