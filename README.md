@@ -2796,6 +2796,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/LibreHardwareMonitor/LibreHardwareMonitor
 - https://github.com/lfreist/hwinfo
 - https://github.com/KDIo3/PCIBan
+- https://github.com/trustdecision/trustdevice-android [Android]
 
 > Detection:SpeedHack
 - https://github.com/DoranekoSystems/cheap-engine [Android]
