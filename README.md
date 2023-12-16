@@ -649,6 +649,7 @@ Or you can send an issue for me.
 - https://github.com/RomanRybachek/ioctl_helper [GUI tool for sending IOCTL to windows drivers]
 - https://github.com/sevaa/dwex [DWARF Explorer]
 - https://github.com/katahiromz/RisohEditor [Win32 resource editor]
+- https://github.com/Fadi002/de4py [Toolkit for python reverse engineering]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
