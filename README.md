@@ -134,6 +134,8 @@ Or you can send an issue for me.
 - https://github.com/benjinx/Toon [C++]
 - https://github.com/chrismaltby/gb-studio [GameBoy]
 - https://github.com/orx/orx [C++]
+- https://github.com/volcoma/EtherealEngine [C++]
+- https://github.com/clibequilibrium/EquilibriumEngine [C++] 
 - https://github.com/turanszkij/WickedEngine [C++ 3D]
 - https://github.com/AustinBrunkhorst/Ursine3D [C++ 3D]
 - https://github.com/RavEngine/RavEngine [C++ 3D]
