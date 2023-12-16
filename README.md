@@ -1522,6 +1522,7 @@ Or you can send an issue for me.
 - https://github.com/UE4SS-RE [UE RE]
 - https://github.com/asjbdkabs/shootergame-Hack [ShooterGame Demo]
 - https://github.com/CorrM/CleanCheat [Game cheat base]
+- https://github.com/Encryqed/Dumper-7 [SDK Dump for all of UE4 and UE5]
 - https://github.com/Spuckwaffel/UEDumper [SDK Dump for UE 4.19 - 5.2]
 - https://github.com/Shhoya/Shh0yaUEDumper [SDK Dump]
 - https://github.com/guttir14/UnrealDumper-4.25 [SDK Dump]
