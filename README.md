@@ -799,6 +799,7 @@ Or you can send an issue for me.
 - https://github.com/DoranekoSystems/memory_server [Memory scanner & analyzer with REST API]
 - https://github.com/KuhakuPixel/AceTheGame [Game Hacking Tools]
 - https://github.com/gmh5225/Android-MemoryTool [RPM]
+- https://github.com/Anonym0usWork1221/C-Android-Memory-Tool [RPM]
 
 > Android Kernel Explorer
 - https://docs.kernel.org [Linux Kernel documentation]
@@ -1133,6 +1134,7 @@ Or you can send an issue for me.
 - https://github.com/ekknod/vm [Minimal memory library for Windows/Linux]
 - https://github.com/ALittlePatate/TaxiDriver [W/RPM Driver and usermode for Linux]
 - https://github.com/gmh5225/Android-MemoryTool [RPM for Android]
+- https://github.com/Anonym0usWork1221/C-Android-Memory-Tool [RPM for Android]
 
 > DMA
 - https://github.com/ufrisk/pcileech
