@@ -369,6 +369,7 @@ Or you can send an issue for me.
 - https://github.com/johndpope/pianogame [Piano Game]
 - https://github.com/gmh5225/QQTang [QQTang]
 - https://github.com/kvnxiao/storytime [Remake of MapleStory]
+- https://github.com/deathkiller/jazz2-native [Remake of Jazz Jackrabbit 2]
 
 
 ## Game Assets
