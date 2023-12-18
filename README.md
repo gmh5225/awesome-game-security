@@ -881,6 +881,7 @@ Or you can send an issue for me.
 - https://github.com/AntoineBlaud/EasyRe [Trace Execution]
 - https://github.com/flatz/ida_ps5_elf_plugin [PS5 elf loader]
 - https://github.com/gaasedelen/tenet [Execution Traces]
+- https://github.com/synacktiv/frinet [Frida-based tracer]
 - https://github.com/polymorf/findcrypt-yara [Find crypto constants]
 - https://github.com/anatolikalysch/VMAttack [VMAttack PlugIn for IDA Pro]
 - https://github.com/cseagle/sk3wldbg [Unicorn]
@@ -928,7 +929,6 @@ Or you can send an issue for me.
 - https://github.com/VirusTotal/vt-ida-plugin [VirusTotal plugin]
 - https://github.com/crifan/AutoRename [Auto rename symbol]
 - https://github.com/LAC-Japan/IDA_Plugin_AntiDebugSeeker [Extract anti-debugging]
-- https://github.com/synacktiv/frinet [Frida-based tracer]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
