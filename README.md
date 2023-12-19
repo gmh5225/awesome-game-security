@@ -929,6 +929,7 @@ Or you can send an issue for me.
 - https://github.com/VirusTotal/vt-ida-plugin [VirusTotal plugin]
 - https://github.com/crifan/AutoRename [Auto rename symbol]
 - https://github.com/LAC-Japan/IDA_Plugin_AntiDebugSeeker [Extract anti-debugging]
+- https://github.com/cseagle/blc [Integrate Ghidra's decompiler]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
