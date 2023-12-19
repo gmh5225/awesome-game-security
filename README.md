@@ -518,6 +518,7 @@ Or you can send an issue for me.
 - https://github.com/googlesamples/android-vulkan-tutorials
 
 > API
+- https://github.com/liblava/liblava [Modern and easy-to-use library for Vulkan]
 - https://github.com/corporateshark/lightweightvk
 
 > Hook
