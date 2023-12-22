@@ -2686,6 +2686,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Game Engine Protection:Unity
 - https://github.com/ls9512/USecurity
 - https://github.com/bmjoy/Unity3D_Obfuscator
+- https://github.com/Ether2023/Ether-Uprotector
 
 > Game Engine Protection:Source
 - [Source Engine serverside anti-cheat plugin. (CS:S, CS:GO, CS:P, TF2)](https://github.com/kanekikun420/NoCheatZ-3)
