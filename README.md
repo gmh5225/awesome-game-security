@@ -305,6 +305,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/UE5-FPS-CryptRaider [UE5 FPS Game]
 - https://github.com/LeroyTechnologies/ProjectM [UE5 FPS Game]
 - https://github.com/invi1998/MultiplayerBlasterGame [UE5 FPS Game]
+- https://github.com/DruidMech/MultiplayerCourseBlasterGame [UE5 FPS Game]
 - https://github.com/caydenbullock/UE5MultiplayerProject [UE5 horror game with anti-cheat]
 - https://github.com/perfect-hand/ue5-cardgame [UE5 Card Game]
 - https://github.com/stackOverflower92/FightingGame-UE5 [UE5 Fighting Game]
