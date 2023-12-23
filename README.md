@@ -851,6 +851,9 @@ Or you can send an issue for me.
 - https://github.com/angr/binsync [Sync]
 - https://github.com/crytic/ethersplay [EVM dissassembler]
 
+> IDA themes
+- https://github.com/pr701/dp701 [Dark theme for IDA Pro]
+
 > IDA Plugins
 - https://github.com/vmallet/ida-plugins [List of IDA Plugins]
 - https://github.com/onethawt/idaplugins-list [List of IDA Plugins]
