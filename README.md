@@ -1581,6 +1581,7 @@ Or you can send an issue for me.
 - https://github.com/mono/mono [mono]
 - https://github.com/dnSpy/dnSpy-Unity-mono [mono]
 - https://github.com/dnSpy/Mono.Debugger.Soft [Mono Debugger]
+- https://github.com/imerzan/unispectDMAPlugin [Mono Dump + DMA]
 - https://github.com/Perfare/Il2CppDumper [Il2Cpp Dump]
 - https://github.com/khang06/Il2CppDumper-YuanShen [Il2Cpp Dump for Genshin Impact]
 - https://github.com/Perfare/Il2CppDumper [Il2Cpp Dump GUI]
