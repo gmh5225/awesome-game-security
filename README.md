@@ -781,6 +781,7 @@ Or you can send an issue for me.
 - https://github.com/the-dise/EasyPixel [Magisk module that disguises a device under Google Pixel]
 - https://github.com/HuskyDG/MagiskHide [Portable MagiskHide]
 - https://github.com/lico-n/ZygiskFrida [Injects frida gadget using zygisk]
+- https://github.com/anasfanani/Magisk-Tailscaled [Magisk module for running Tailscale]
 
 > Frida
 - https://github.com/CrackerCat/strongR-frida-android
