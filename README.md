@@ -2000,6 +2000,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/cs2-fov-changer [FOV changer]
 - https://github.com/clauadv/cs2_webradar [Radar]
 - https://github.com/MoZiHao/CS2_DMA_Radar [DMA Radar]
+- https://github.com/MoZiHao/CS2_DMA_Extrnal [DMA External]
 - https://github.com/gmh5225/vscript_lua51 [VScript]
 - https://github.com/gmh5225/cs2_things [VScript]
 - https://github.com/IMXNOOBX/cs2-external-esp [External]
