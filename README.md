@@ -2867,6 +2867,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Detection:Frida
 - https://github.com/darvincisec/DetectFrida
 - https://github.com/qtfreet00/AntiFrida
+- https://github.com/muellerberndt/frida-detection
 
 > Detection:Overlay
 - https://github.com/geeksonsecurity/android-overlay-protection [Android]
