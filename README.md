@@ -2020,6 +2020,7 @@ Or you can send an issue for me.
 - https://github.com/KisSsArt/CS2-Cheat-Base [Internal]
 - https://github.com/redbg/CS2-Internal [Internal]
 - https://github.com/Elsie-Kgafela/CS2-Cheat-Base [Internal]
+- https://github.com/chaycee/CS2Internal [Internal]
 
 > Game:Assault Cube
 - https://github.com/gmh5225/external-esp-hack-assaultcube [GDI overlay]
@@ -2414,6 +2415,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/SyDevTeam/gta5view [Viewer/Editor]
 - https://github.com/skarockoi/pHake [Mod Menu]
 - https://github.com/CamxxCore/ExtendedCameraSettings [Extending functionality of the gameplay camera]
+- https://github.com/medusi/gta5cheat
+- https://github.com/ssyatelandisi/gta5cheat_qt
 
 > Game:Geometry Dash
 - https://github.com/reservedcloud/gd-internal
