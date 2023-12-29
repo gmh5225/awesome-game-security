@@ -2954,6 +2954,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/namazso/MagicSigner [Sign Leaked Cert]
 - https://github.com/hzqst/FuckCertVerifyTimeValidity [Sign Leaked Cert]
 - https://github.com/mathisvickie/sign-expired [Sign Leaked Cert]
+- https://github.com/hackerhouse-opensource/SignToolEx [Sign Leaked Cert]
 
 > Backup File
 - https://github.com/guidoreina/minivers [Generates Backup Copies]
