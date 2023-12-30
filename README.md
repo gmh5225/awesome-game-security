@@ -2721,6 +2721,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ApexLegendsUC/anti-cheat-emulator
 - https://github.com/ch4ncellor/EAC-Reversal [Reversed EAC]
 - https://github.com/weak1337/BE-Shellcode [Reversed BE Shellcode]
+- https://github.com/SamuelTulach/be_shellcode_dump [Reversed BE Shellcode]
 - https://github.com/codetronik/AndroidAntiCheat [Android Platform]
 - https://github.com/MrDiamond64/Scythe-AntiCheat [Minecraft]
 - https://github.com/mateusreb/AntiCheat
