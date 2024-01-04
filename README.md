@@ -1381,6 +1381,7 @@ Or you can send an issue for me.
 - https://github.com/ekknod/efi-monitor [Hooking MmCopyMemory PG safe]
 - https://github.com/leap0x7b/luaboot [A fully scriptable UEFI bootloader]
 - https://github.com/Cr4sh/SmmBackdoorNg [UEFI backdoor]
+- https://github.com/Oliver-1-1/UEFI-Graphic [Simpel usage of graphic in UEFI]
 
 > QEMU/KVM/PVE
 - https://github.com/david942j/kvm-kernel-example [Guide]
