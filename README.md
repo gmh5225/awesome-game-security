@@ -1652,6 +1652,7 @@ Or you can send an issue for me.
 - https://github.com/Jackbail4/VAC-Bypass
 - https://github.com/n00bes/PreventVAC
 - https://github.com/b1scoito/cozinha_loader [Injector]
+- https://github.com/shuruk421/VACKeyRetrieval [Retrieves VAC module ice encryption key]
 
 > Explore AntiCheat System:EAC
 - https://github.com/thesecretclub/CVEAC-2020 [Integrity Checks]
