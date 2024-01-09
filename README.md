@@ -941,6 +941,7 @@ Or you can send an issue for me.
 - https://github.com/LAC-Japan/IDA_Plugin_AntiDebugSeeker [Extract anti-debugging]
 - https://github.com/cseagle/blc [Integrate Ghidra's decompiler]
 - https://github.com/Goatman13/ps2_ida_vu_micro [Find and disassembly vu microcode in ps2 executables]
+- https://github.com/arizvisa/ida-minsc [Functional DWIM interface]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
