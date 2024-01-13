@@ -830,6 +830,10 @@ Or you can send an issue for me.
 > Android Network Explorer
 - https://github.com/emanuele-f/PCAPdroid
 
+> Android memory loading
+- https://github.com/icculus/mojoelf
+- https://github.com/lockedbyte/so_loader
+
 > IOS jailbreak
 - https://github.com/KpwnZ/Def1nit3lyN0tAJa1lbr3akTool [iOS 15.7 and iOS 16.5]
 - https://github.com/jjolano/shadow
