@@ -1194,6 +1194,7 @@ Or you can send an issue for me.
 - https://github.com/plu1337/OBS-Hook [OBS Hook]
 - https://github.com/PierreCiholas/NotAnOverlay [Duplicating with GDI]
 - https://github.com/SsageParuders/Android_Native_Surface [Android Native Overlay]
+- https://github.com/fgsqme/Android_Native_Surface [Android Native Overlay]
 - https://github.com/xBrunoMedeiros/eac-overlay [EAC Overlay]
 - https://github.com/3r4y/imgui-external-overlay [imgui overlay]
 - https://github.com/J0xna/Kernel-Overlay-Hider [Kernel Overlay Hider]
