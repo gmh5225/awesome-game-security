@@ -572,6 +572,7 @@ Or you can send an issue for me.
 - [Guide about remote Windows kernel debugging](https://github.com/konstantin89/windows-kernel-debugging-guide)
 - https://github.com/rmusser01/Infosec_Reference/blob/master/Draft/Games.md [Game Hacking]
 - https://github.com/cragson/osmium [C++ Framework for external cheats]
+- https://github.com/WangXuan95/Xilinx-FPGA-PCIe-XDMA-Tutorial [DMA Tutorial]
 
 > Debugging
 - https://github.com/stars/gmh5225/lists/debugger [List]
