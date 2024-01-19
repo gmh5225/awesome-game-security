@@ -700,6 +700,9 @@ Or you can send an issue for me.
 - https://github.com/AdamOron/PatchGuardBypass
 - https://github.com/zer0condition/Demystifying-PatchGuard
 
+> Driver Signature enforcement
+- https://github.com/gmh5225/dse_hook
+
 > Windows Kernel Explorer
 - https://github.com/NullArray/WinKernel-Resources [Guide]
 - https://github.com/supermanc88/Document/tree/master/Windows%20Driver%20Development [Guide]
