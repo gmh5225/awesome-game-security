@@ -826,6 +826,7 @@ Or you can send an issue for me.
 - https://xdaforums.com [Guide]
 - https://github.com/Akipe/awesome-android-aosp [Guide]
 - https://sourceforge.net/projects/recovery-for-xiaomi-devices/files [TWRP for xiaomi]
+- https://github.com/cfig/Android_boot_image_editor [Android ROM tool]
 
 > Android Device Trees
 - https://github.com/MiCode/kernel_devicetree [xiaomi device trees]
