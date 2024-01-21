@@ -828,6 +828,7 @@ Or you can send an issue for me.
 - https://sourceforge.net/projects/recovery-for-xiaomi-devices/files [TWRP for xiaomi]
 
 > Android Device Trees
+- https://github.com/MiCode/kernel_devicetree [xiaomi device trees]
 - https://github.com/cupid-development/ [xiaomi device trees]
 - https://github.com/ymdzq/OFRP-device_xiaomi_mondrian [OFRP for Redmi K60 (mondrian)]
 
@@ -837,6 +838,7 @@ Or you can send an issue for me.
 - https://android.googlesource.com/kernel/manifest [manifest]
 - https://android.googlesource.com/kernel/common [GKI]
 - https://github.com/aosp-mirror/kernel_common [GKI]
+- https://github.com/MiCode/Xiaomi_Kernel_OpenSource [xiaomi kernel]
 - https://github.com/xiaomi-sm8450-kernel [xiaomi kernel]
 - https://github.com/GrapheneOS-Archive/kernel_msm-coral [Pixel 4/4XL/4a]
 - https://github.com/msnx/KernelSU-Pixel4XL [KernelSU for Google Pixel4XL]
