@@ -832,6 +832,7 @@ Or you can send an issue for me.
 - https://github.com/MiCode/kernel_devicetree [xiaomi device trees]
 - https://github.com/cupid-development/ [xiaomi device trees]
 - https://github.com/ymdzq/OFRP-device_xiaomi_mondrian [OFRP for Redmi K60 (mondrian)]
+- https://github.com/flakeforever/device_xiaomi_mondrian [Pixel Experience Plus for for Redmi K6/POCO F5 Pro]
 
 > Android Kernel Source
 - https://source.android.com/docs/setup/build/building-kernels [Docs]
@@ -841,6 +842,7 @@ Or you can send an issue for me.
 - https://github.com/aosp-mirror/kernel_common [GKI]
 - https://github.com/MiCode/Xiaomi_Kernel_OpenSource [xiaomi kernel]
 - https://github.com/xiaomi-sm8450-kernel [xiaomi kernel]
+- https://github.com/LowTension/android_kernel_xiaomi_sm8475 [Pixel Experience Plus for for Redmi K6/POCO F5 Pro]
 - https://github.com/GrapheneOS-Archive/kernel_msm-coral [Pixel 4/4XL/4a]
 - https://github.com/msnx/KernelSU-Pixel4XL [KernelSU for Google Pixel4XL]
 
