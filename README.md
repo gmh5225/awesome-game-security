@@ -834,6 +834,7 @@ Or you can send an issue for me.
 - https://source.android.com/docs/setup/build/building-kernels [Docs]
 - https://android.googlesource.com/kernel/manifest/+refs
 - https://android.googlesource.com/kernel/manifest
+- https://github.com/aosp-mirror/kernel_common
 - https://github.com/xiaomi-sm8450-kernel [xiaomi kernel]
 - https://github.com/GrapheneOS-Archive/kernel_msm-coral [Pixel 4/4XL/4a]
 - https://github.com/msnx/KernelSU-Pixel4XL [KernelSU for Google Pixel4XL]
