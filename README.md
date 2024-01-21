@@ -2656,6 +2656,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/KooroshRZ/Evader [PE]
 - https://github.com/DavidBuchanan314/stelf-loader [ELF X64 loader]
 - https://github.com/frank2/oxide [Written by Rust]
+- https://github.com/Washi1337/AwaitFuscator [.NET]
 
 > CLR Protection
 - https://github.com/endgameinc/ClrGuard
@@ -2706,6 +2707,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/CalebFenton/simplify [Java]
 - https://github.com/open-obfuscator/dProtect [Java/Kotlin]
 - https://github.com/Maldev-Academy/EntropyReducer [Reduce Entropy]
+- https://github.com/Washi1337/AwaitFuscator [.NET]
 
 > Screenshot
 - https://github.com/bavulapati/DXGICaptureApplication [Capture Desktop]
