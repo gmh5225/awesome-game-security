@@ -821,10 +821,16 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Android-MemoryTool [RPM]
 - https://github.com/Anonym0usWork1221/C-Android-Memory-Tool [RPM]
 
+> Android ROM
+- https://xdaforums.com [Guide]
+- https://github.com/Akipe/awesome-android-aosp [Guide]
+
 > Android Kernel Source
 - https://source.android.com/docs/setup/build/building-kernels [Docs]
 - https://android.googlesource.com/kernel/manifest/+refs
 - https://android.googlesource.com/kernel/manifest
+- https://github.com/xiaomi-sm8450-kernel [xiaomi kernel]
+- https://github.com/cupid-development/ [xiaomi device trees]
 - https://github.com/GrapheneOS-Archive/kernel_msm-coral [Pixel 4/4XL/4a]
 - https://github.com/msnx/KernelSU-Pixel4XL [KernelSU for Google Pixel4XL]
 
