@@ -831,6 +831,10 @@ Or you can send an issue for me.
 - https://github.com/Snoopy-Sec/Localroot-ALL-CVE [Root CVE]
 - https://github.com/xmmword/dpatch [Syscall Dispatcher Patching PoC]
 
+> Android Kernel Driver
+- https://github.com/rogxo/kernel_hack
+- https://github.com/Jiang-Night/Kernel_driver_hack
+
 > Android Network Explorer
 - https://github.com/emanuele-f/PCAPdroid
 
