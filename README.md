@@ -821,6 +821,13 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Android-MemoryTool [RPM]
 - https://github.com/Anonym0usWork1221/C-Android-Memory-Tool [RPM]
 
+> Android Kernel Source
+- https://source.android.com/docs/setup/build/building-kernels [Docs]
+- https://android.googlesource.com/kernel/manifest/+refs
+- https://android.googlesource.com/kernel/manifest
+- https://github.com/GrapheneOS-Archive/kernel_msm-coral [Pixel 4/4XL/4a]
+- https://github.com/msnx/KernelSU-Pixel4XL [KernelSU for Google Pixel4XL]
+
 > Android Kernel Explorer
 - https://docs.kernel.org [Linux Kernel documentation]
 - https://armv8-ref.codingbelief.com/en [ARM Architecture Reference Manual for ARMv8-A]
