@@ -574,6 +574,7 @@ Or you can send an issue for me.
 - https://github.com/rmusser01/Infosec_Reference/blob/master/Draft/Games.md [Game Hacking]
 - https://github.com/cragson/osmium [C++ Framework for external cheats]
 - https://github.com/WangXuan95/Xilinx-FPGA-PCIe-XDMA-Tutorial [DMA Tutorial]
+- https://github.com/NetKingJ/awesome-android-security [Android (Samsung) Security Research References]
 
 > Debugging
 - https://github.com/stars/gmh5225/lists/debugger [List]
