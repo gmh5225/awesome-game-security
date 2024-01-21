@@ -443,6 +443,7 @@ Or you can send an issue for me.
 
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
+- https://github.com/0xFableOrg/0xFable [Trading card game]
 
 > SDK
 - https://github.com/Ankr-network/game-unreal-sdk [Mirage Unreal SDK]
