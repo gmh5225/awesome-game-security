@@ -2413,6 +2413,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/POLYGON_UE5
 
 > Game:PalWorld [UE5]
+- https://www.unknowncheats.me/forum/other-fps-games/620076-palworld-reversal-structs-offsets.html
 - https://github.com/gmh5225/Palworld-SDK-Dump
 - https://github.com/gmh5225/Palworld-Server-Modding
 - https://github.com/gmh5225/PalWorld-ServerInjector
