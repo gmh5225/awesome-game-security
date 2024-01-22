@@ -2412,6 +2412,12 @@ Or you can send an issue for me.
 > Game:POLYGON [UE5]
 - https://github.com/gmh5225/POLYGON_UE5
 
+> Game:PalWorld [UE5]
+- https://github.com/gmh5225/Palworld-SDK-Dump
+- https://github.com/gmh5225/Palworld-Server-Modding
+- https://github.com/gmh5225/PalWorld-ServerInjector
+- https://github.com/gmh5225/PalWorld-NetCrack
+
 > Game:Genshin Impact
 - https://github.com/khang06/mhynot2
 - https://github.com/khang06/genshinjumpfixer2 [Decode CFG]
