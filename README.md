@@ -1013,6 +1013,7 @@ Or you can send an issue for me.
 - https://github.com/apekros/binja_sigmaker [Create and find signatures]
 - https://github.com/dayzerosec/AMD-SP-Loader [AMD-SP or PSP firmware]
 - https://github.com/WhatTheFuzz/binaryninja-openai [Integrates OpenAI]
+- https://github.com/dzervas/frinja [Frida plugin for Binary Ninja]
 
 > Ghidra Plugins
 - https://github.com/AllsafeCyberSecurity/awesome-ghidra [List]
