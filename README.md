@@ -1090,6 +1090,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/overwatch-iat-fixer [Overwatch IAT Fixer]
 - https://github.com/FreeER/CE-Examples [Some Examples]
 - [Porting ce's monodatacollector to android/ios](https://github.com/gmh5225/frida-il2cpp-datacollector)
+- https://github.com/DoranekoSystems/wasm-ceserver [Analyzing WebAssembly]
 
 > Injection:Windows
 - https://github.com/btbd/smap [Scatter Manual Map]
