@@ -1519,6 +1519,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Driver-SessionMapper [Session Driver]
 - https://github.com/gmh5225/Driver-DriverNoImage [Hijack Driver]
 - https://github.com/gmh5225/Driver-Systemthread-from-PspCidTable-src [Hide Process/Thread/Handle]
+- https://github.com/reveny/Android-Library-Remap-Hide [Remap a library for Android]
 
 > Anti Forensics
 - https://github.com/PaulNorman01/Forensia
