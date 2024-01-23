@@ -846,6 +846,7 @@ Or you can send an issue for me.
 - https://github.com/aosp-mirror/kernel_common [GKI]
 - https://github.com/MiCode/Xiaomi_Kernel_OpenSource [xiaomi kernel]
 - https://github.com/xiaomi-sm8450-kernel [xiaomi kernel]
+- https://github.com/Danda420/kernel_xiaomi_sm8250 [xiaomi kernel for POCO F3/F4]
 - https://github.com/LowTension/android_kernel_xiaomi_sm8475 [Pixel Experience Plus for for Redmi K6/POCO F5 Pro]
 - https://github.com/GrapheneOS-Archive/kernel_msm-coral [Pixel 4/4XL/4a]
 - https://github.com/msnx/KernelSU-Pixel4XL [KernelSU for Google Pixel4XL]
