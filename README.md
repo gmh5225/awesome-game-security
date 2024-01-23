@@ -2427,8 +2427,8 @@ Or you can send an issue for me.
 - https://github.com/luciouskami/palworld_rcon [Server on Windows]
 - https://github.com/luciouskami/palworld_rcon [Server on Windows]
 - https://github.com/A1RM4X/HowTo-Palworld [Server on Linux]
-- https://github.com/NattKh/PalWorld-Tools [Mod Patcher]
 - https://github.com/jammsen/docker-palworld-dedicated-server [Server based on Linux and Docker]
+- https://github.com/NattKh/PalWorld-Tools [Mod Patcher]
 - https://github.com/weizhking/PalworldSaved [Save]
 
 > Game:Genshin Impact
