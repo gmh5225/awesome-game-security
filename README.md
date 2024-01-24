@@ -784,7 +784,8 @@ Or you can send an issue for me.
 - https://github.com/Fox2Code/FoxMagiskModuleManager [A module manager for Magisk]
 - https://github.com/Dr-TSNG/ZygiskOnKernelSU [Run Zygisk on KernelSU]
 - https://github.com/svoboda18/magiskboot [Boot Image Modification Tool]
-- https://github.com/xiaoxindada/magiskboot_ndk_on_linux
+- https://github.com/xiaoxindada/magiskboot_ndk_on_linux [Boot Image Modification Tool]
+- https://github.com/ookiineko/magiskboot_build [Boot Image Modification Tool]
 - https://github.com/the-dise/EasyPixel [Magisk module that disguises a device under Google Pixel]
 - https://github.com/HuskyDG/MagiskHide [Portable MagiskHide]
 - https://github.com/lico-n/ZygiskFrida [Injects frida gadget using zygisk]
