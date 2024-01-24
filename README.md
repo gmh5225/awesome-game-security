@@ -825,6 +825,7 @@ Or you can send an issue for me.
 
 > Android Kernel CVE
 - https://github.com/ScottyBauer/Android_Kernel_CVE_POCs [List]
+- https://github.com/tangsilian/android-vuln [List]
 - https://github.com/jsirichai/CVE-2019-2215 [Root for Pixel 2/XL]
 - https://github.com/polygraphene/DirtyPipe-Android [Root for Pixel 6]
 - https://github.com/tiann/DirtyPipeRoot [Root for Pixel 6]
