@@ -822,6 +822,10 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Android-MemoryTool [RPM]
 - https://github.com/Anonym0usWork1221/C-Android-Memory-Tool [RPM]
 
+> Android Kernel CVE
+- https://github.com/ScottyBauer/Android_Kernel_CVE_POCs [List]
+- https://github.com/jsirichai/CVE-2019-2215 [Root for Pixel 2/XL]
+
 > Android ROM
 - https://xdaforums.com [Guide]
 - https://github.com/Akipe/awesome-android-aosp [Guide]
