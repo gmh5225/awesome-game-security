@@ -662,6 +662,7 @@ Or you can send an issue for me.
 - https://github.com/katahiromz/RisohEditor [Win32 resource editor]
 - https://github.com/Fadi002/de4py [Toolkit for python reverse engineering]
 - https://github.com/skelsec/minidump [Python library to parse and read Microsoft minidump file format]
+- https://github.com/zodiacon/QuickAsm [x86/x86 assembler and emulator]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
