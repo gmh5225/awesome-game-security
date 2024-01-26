@@ -3158,7 +3158,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/tiann/KernelSU [A Kernel based root solution for Android GKI]
 - https://github.com/CoolestEnoch/kernel-su-huawei-nova2 [KernelSU for huawei]
 - https://github.com/gmh5225/android_kernel_huawei_hi6250-8_Exp [KernelSU for huawei]
-- https://github.com/abcz316/linuxKernelRoot [Kernel root]
+- https://github.com/abcz316/SKRoot-linuxKernelRoot [Kernel root]
 - https://github.com/Dr-TSNG/ZygiskOnKernelSU [Run Zygisk on KernelSU]
 
 
