@@ -913,6 +913,8 @@ Or you can send an issue for me.
 > IDA themes
 - https://github.com/pr701/dp701 [Dark theme for IDA Pro]
 - https://github.com/seanwupi/ida-dark-plus [Dark+ Theme]
+- https://github.com/ioncodes/long_night
+- https://github.com/can1357/IdaThemer
 
 > IDA Plugins
 - https://github.com/vmallet/ida-plugins [List of IDA Plugins]
