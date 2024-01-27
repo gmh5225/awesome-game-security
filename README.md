@@ -2445,6 +2445,7 @@ Or you can send an issue for me.
 - https://github.com/VeroFess/PalWorld-Server-Unoffical-Fix [Server patch]
 - https://github.com/NattKh/PalWorld-Tools [Mod Patcher]
 - https://github.com/weizhking/PalworldSaved [Save]
+- https://github.com/DysonCheng/PalWorldSettingGenerator [Setting Generator]
 
 > Game:Genshin Impact
 - https://github.com/khang06/mhynot2
