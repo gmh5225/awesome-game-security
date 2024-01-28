@@ -1694,6 +1694,7 @@ Or you can send an issue for me.
 - https://github.com/Azvanzed/MatScan [A multi-threaded rust material scanner]
 - https://github.com/vfsfitvnm/frida-il2cpp-bridge [Frida dump Il2Cpp]
 - https://github.com/issuimo/UnityResolve.hpp [Unity cheat framwork]
+- https://github.com/SsageParuders/CheatUnityGames [Unity cheat framwork]
 
 > Game Engine Explorer:Source
 - https://github.com/anarh1st47/Source2Dumps [Dump]
