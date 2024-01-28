@@ -448,6 +448,9 @@ Or you can send an issue for me.
 > SDK
 - https://github.com/Ankr-network/game-unreal-sdk [Mirage Unreal SDK]
 
+> Tools
+- https://github.com/swiss-knife-xyz/swiss-knife [All your EVM tools in one place]
+
 > Security
 - https://github.com/SunWeb3Sec [Let's make Web3 more secure]
 - https://github.com/ZhangZhuoSJTU/Web3Bugs [Bugs in Smart Contracts]
