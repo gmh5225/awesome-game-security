@@ -2444,6 +2444,7 @@ Or you can send an issue for me.
 - https://github.com/jammsen/docker-palworld-dedicated-server [Server based on Linux and Docker]
 - https://github.com/VeroFess/PalWorld-Server-Unoffical-Fix [Server patch]
 - https://github.com/NattKh/PalWorld-Tools [Mod Patcher]
+- https://github.com/localcc/PalworldModdingKit [A modding kit for Palworld]
 - https://github.com/weizhking/PalworldSaved [Save]
 - https://github.com/DysonCheng/PalWorldSettingGenerator [Setting Generator]
 
