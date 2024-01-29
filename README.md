@@ -839,6 +839,7 @@ Or you can send an issue for me.
 > Android ROM
 - https://xdaforums.com [Guide]
 - https://github.com/Akipe/awesome-android-aosp [Guide]
+- https://github.com/musabcel/android_rom_list [List]
 - https://developer.android.com/studio/run/win-usb [Google USB Driver]
 - http://www.miui.com/unlock/download.html [Unlocker for xiaomi]
 - https://miuiver.com/miflash [MiFlash]
