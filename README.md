@@ -846,6 +846,7 @@ Or you can send an issue for me.
 - https://xiaomifirmwareupdater.com [Xiaomi Firmware Updater]
 - https://sourceforge.net/projects/recovery-for-xiaomi-devices/files [TWRP for xiaomi]
 - https://github.com/cfig/Android_boot_image_editor [Android ROM tool]
+- https://github.com/badabing2005/PixelFlasher [Android ROM tool for Pixel]
 - https://github.com/Ctapchuk/android_bootable_recovery-OFRP [OrangeFox Recovery]
 
 > Android Device Trees
