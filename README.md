@@ -2454,6 +2454,8 @@ Or you can send an issue for me.
 - https://github.com/NattKh/PalWorld-Tools [Mod Patcher]
 - https://github.com/localcc/PalworldModdingKit [A modding kit for Palworld]
 - https://github.com/weizhking/PalworldSaved [Save]
+- https://github.com/cheahjs/palworld-save-tools [Save]
+- https://github.com/EternalWraith/PalEdit Save]
 - https://github.com/DysonCheng/PalWorldSettingGenerator [Setting Generator]
 
 > Game:Genshin Impact
