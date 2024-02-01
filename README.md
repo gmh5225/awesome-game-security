@@ -868,6 +868,7 @@ Or you can send an issue for me.
 - https://github.com/GrapheneOS-Archive/kernel_msm-coral [Pixel 4/4XL/4a]
 - https://github.com/msnx/KernelSU-Pixel4XL [KernelSU for Google Pixel4XL]
 - https://github.com/universal5433/android_kernel_samsung_universal5433 [samsung 15433]
+- https://github.com/SM7325-AE/android_kernel_motorola_dubai [Moto Edge 30]
 
 > Android Kernel Explorer
 - https://docs.kernel.org [Linux Kernel documentation]
