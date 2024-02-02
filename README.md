@@ -2459,6 +2459,7 @@ Or you can send an issue for me.
 - https://github.com/EternalWraith/PalEdit Save]
 - https://github.com/DysonCheng/PalWorldSettingGenerator [Setting Generator]
 - https://github.com/hualuoo/palworld-helper [Helper]
+- https://github.com/shalzuth/PalWorldAntiCheat [Anti Cheat]
 
 > Game:Genshin Impact
 - https://github.com/khang06/mhynot2
