@@ -440,6 +440,7 @@ Or you can send an issue for me.
 - https://github.com/chinmay-farkya/solidity-notes [Solidity Notes]
 - https://github.com/nullity00/web3-resources [Web3 resources]
 - https://github.com/JoranHonig/awesome-web3-ai-security [web3 ai security]
+- https://github.com/Malinariy/Solidity-gas-optimizations-tips [Gas optimizations tips]
 
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
