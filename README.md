@@ -870,6 +870,7 @@ Or you can send an issue for me.
 - https://github.com/msnx/KernelSU-Pixel4XL [KernelSU for Google Pixel4XL]
 - https://github.com/universal5433/android_kernel_samsung_universal5433 [samsung 15433]
 - https://github.com/SM7325-AE/android_kernel_motorola_dubai [Moto Edge 30]
+- https://github.com/psavarmattas/android_kernel_oneplus_sm7250-WKSU [KernelSU for Oneplus]
 
 > Android Kernel Explorer
 - https://docs.kernel.org [Linux Kernel documentation]
