@@ -803,6 +803,7 @@ Or you can send an issue for me.
 - https://github.com/jcalabres/hook-updater [Update Frida hooks automatically]
 - https://github.com/gmh5225/frida-boot [A binary instrumentation workshop, with Frida, for beginners]
 - https://github.com/smartdone/Frida-Scripts [Some scripts]
+- https://github.com/SeeFlowerX/frida-smali-trace [Smali trace]
 
 > Android File Explorer
 - https://github.com/nzcv/note [Guide-zh]
