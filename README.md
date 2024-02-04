@@ -1770,6 +1770,7 @@ Or you can send an issue for me.
 - https://github.com/Robert01337/Bypassing-EasyAntiCheat-Integrity-check [Bypassing integrity check]
 - https://github.com/CamxxCore/EasyAntiCheat-Emulator [EAC Emulator]
 - https://github.com/Azvanzed/EAC-Runtime-Extractor [Extracts eac's driver at runtime without it touching the disk]
+- https://gist.github.com/gmh5225/b89938f55bcb65637168f88a433c3d4d [Skip EAC thread detection]
 
 > Explore AntiCheat System:BE
 - https://github.com/Schnocker/NoEye
