@@ -1253,6 +1253,7 @@ Or you can send an issue for me.
 - https://github.com/iraizo/nvidia-overlay-hijack [Hijack Nvidia]
 - https://github.com/Brattlof/D3DOverlay-Nvidia-Hijack [Hijack Nvidia]
 - https://github.com/gmh5225/NVIDIA-OVERLAY [Hijack Nvidia]
+- https://github.com/Calvin-LLC/nvidia-overlay-hijack [Hijack Nvidia]
 - https://github.com/es3n1n/nvidia-overlay-renderer [Nvidia]
 - https://github.com/muturikaranja/overlay [SetWindowsHookEx]
 - https://github.com/gmh5225/OBS-graphics-hook32-Hook [OBS Hook]
