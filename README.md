@@ -669,6 +669,7 @@ Or you can send an issue for me.
 - https://github.com/skelsec/minidump [Python library to parse and read Microsoft minidump file format]
 - https://github.com/zodiacon/QuickAsm [x86/x86 assembler and emulator]
 - https://github.com/skylot/jadx [Dex to Java decompiler]
+- https://github.com/google/android-classyshark [Android and Java bytecode viewer]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
