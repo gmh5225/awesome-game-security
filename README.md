@@ -673,6 +673,7 @@ Or you can send an issue for me.
 - https://github.com/skylot/jadx [Dex to Java decompiler]
 - https://github.com/google/android-classyshark [Android and Java bytecode viewer]
 - https://github.com/marin-m/vmlinux-to-elf [vmlinux to elf]
+- https://github.com/emlinhax/DbgViewEx [A tool to log ETW Events and system debug logs]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
