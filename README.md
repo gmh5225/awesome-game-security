@@ -824,6 +824,7 @@ Or you can send an issue for me.
 - https://github.com/mrcang09/Android-Mem-Edit
 - https://github.com/ExploitTheLoop/writemem
 - https://github.com/abcz316/rwProcMem33 [Linux read & write process memory module]
+- https://github.com/ri-char/rwMem [The fork version of rwProcMem33]
 - https://github.com/IAIK/armageddon [Cache attacks on ARM]
 - https://github.com/tamirzb/CVE-2021-1961 [CVE RW]
 - https://github.com/MJx0/KittyMemory [Runtime code patching]
