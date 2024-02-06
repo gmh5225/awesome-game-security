@@ -616,6 +616,7 @@ Or you can send an issue for me.
 - https://ioninja.com/downloads.html [Protocol Analyzer]
 - https://github.com/wilszdev/SteamAntiAntiDebug [Steam]
 - https://github.com/H5GG/H5GG [IOS cheat engine]
+- https://github.com/ri-char/pwatch [HWBP on linux]
 
 > Packet Sniffer&Filter
 - https://github.com/WPO-Foundation/win-shaper
