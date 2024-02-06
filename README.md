@@ -672,6 +672,7 @@ Or you can send an issue for me.
 - https://github.com/zodiacon/QuickAsm [x86/x86 assembler and emulator]
 - https://github.com/skylot/jadx [Dex to Java decompiler]
 - https://github.com/google/android-classyshark [Android and Java bytecode viewer]
+- https://github.com/marin-m/vmlinux-to-elf [vmlinux to elf]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
