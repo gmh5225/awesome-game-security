@@ -2331,6 +2331,7 @@ Or you can send an issue for me.
 - https://github.com/dot1991/lilypublic
 - https://github.com/kurt2467/PUBG_Internal
 - https://github.com/gmh5225/PUBG-DX
+- https://github.com/gmh5225/PUBGSTAR
 
 > Game:PUBG Lite
 - https://github.com/Zakaria-Master/Pubg-Lite-ESP
