@@ -3174,6 +3174,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [get process token whose integrity level is system and manipulate it to get privilege escalation](https://github.com/gmh5225/manipulating_token)
 - [A library that meant to perform evasive communication using stolen browser socket](https://github.com/Idov31/Venom)
 - https://github.com/cpz/trinity [Fully disables & removes Windows Defender]
+- https://github.com/EvilGreys/Disable-Windows-Defender- [Disable Windows Defender]
 - https://github.com/gabriellandau/ShadowStackWalk [Finding Truth in the Shadows]
 - https://github.com/gmh5225/r0ak [r0ak]
 - https://github.com/ZeroMemoryEx/Wizard-Loader [Abuse Xwizard.exe for DLL Side-Loading]
