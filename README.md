@@ -2927,6 +2927,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Kernel_Anti-Cheat [NMI]
 - https://github.com/jafarlihi/modreveal [Find hidden Linux kernel modules]
 - https://github.com/gmh5225/Hidden-Thread-Finder [Detect hidden threads]
+- https://github.com/gmh5225/StealthSytemThreadFinderBE [Detect hidden threads]
 
 > Detection:Vulnerable Driver
 - https://github.com/Deputation/hygieia
