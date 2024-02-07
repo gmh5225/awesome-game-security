@@ -3195,6 +3195,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ekknod/usbsn [USB serial number changer (root only)]
 - https://github.com/gmh5225/Android-privilege-CVE-2022-20452-LeakValue [Privilege Escalation]
 - https://github.com/tiann/KernelSU [A Kernel based root solution for Android GKI]
+- https://github.com/MlgmXyysd/KernelSU_Debug [KernelSU modified for debugging]
 - https://github.com/CoolestEnoch/kernel-su-huawei-nova2 [KernelSU for huawei]
 - https://github.com/gmh5225/android_kernel_huawei_hi6250-8_Exp [KernelSU for huawei]
 - https://github.com/abcz316/SKRoot-linuxKernelRoot [Kernel root]
