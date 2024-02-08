@@ -1350,6 +1350,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/CVE-2020-36603 [Mhyprot2.sys]
 - https://github.com/tanduRE/AvastHV [Avast]
 - https://github.com/iPower/KasperskyHook [Kaspersky]
+- https://github.com/SamuelTulach/EvilKaspersky [Kaspersky]
 - https://github.com/mathisvickie/CVE-2021-21551 [dbutil_2_3.sys]
 - https://github.com/ch3rn0byl/CVE-2021-21551 [dbutil_2_3.sys]
 - https://github.com/SpikySabra/Kernel-Cactus [dbutil_2_3.sys]
