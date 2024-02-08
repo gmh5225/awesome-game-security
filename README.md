@@ -3239,6 +3239,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 ## Game Boy
 - https://github.com/xkevio/kevboy [Emulator]
+- https://github.com/vojty/feather-gb [Emulator]
 - https://github.com/chrismaltby/gb-studio [GB Studio]
 
 ## Nintendo Switch
