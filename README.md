@@ -2780,12 +2780,14 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/serge-14/encrypted_value [C++]
 - https://github.com/momalab/e3 [C++]
 - https://github.com/obama-gaming/xor-float [C++]
+- https://github.com/emlinhax/xv [C++]
 
 > Lazy Importer
 - https://github.com/JustasMasiulis/lazy_importer
 - https://github.com/hypervisor/kli
 - https://github.com/gmh5225/kli-ex
 - https://github.com/1hAck-0/zeroimport
+- https://github.com/emlinhax/blitz
 
 > Obfuscation Engine
 - https://github.com/vi3t1/vmprotect-3.5.1
