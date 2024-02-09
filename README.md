@@ -913,6 +913,9 @@ Or you can send an issue for me.
 - https://github.com/palera1n/palera1n
 - https://github.com/checkra1n
 
+> IOS Memory Explorer
+- https://github.com/hackcatml/kfd-explorer [iOS kernel memory explorer]
+
 > Virtual Environments
 - https://github.com/FBlackBox/BlackBox [Android]
 - https://github.com/mandiant/flare-vm
