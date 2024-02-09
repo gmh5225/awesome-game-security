@@ -1587,6 +1587,7 @@ Or you can send an issue for me.
 - https://github.com/Chaoses-Ib/IbInputSimulator [Simulating keyboard, mouse]
 - https://github.com/gmh5225/razer-rzctl [Razer]
 - https://github.com/vsaint1/kernel-mouse [MouClass]
+- https://github.com/gmh5225/android_touch [For Android]
 
 > WallHack
 - https://github.com/DrNseven/D3D11-Wallhack
