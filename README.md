@@ -1173,6 +1173,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Android-DLL-Injector
 - https://github.com/reveny/Android-Ptrace-Injector
 - https://github.com/reveny/Android-LD-Preload-Injector
+- https://github.com/ohchase/yaui
 
 
 > DLL Hijack
