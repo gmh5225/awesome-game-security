@@ -2521,6 +2521,7 @@ Or you can send an issue for me.
 > Game:osu
 - https://github.com/fs-c/maniac [External]
 - https://github.com/Ciremun/freedom [difficulty changer & bot]
+- https://github.com/gmh5225/osu-aac [ANTI ANTI CHEAT]
 
 > Game:EldenRing
 - https://github.com/techiew/EldenRingMods [Mod]
