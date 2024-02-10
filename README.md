@@ -1675,6 +1675,7 @@ Or you can send an issue for me.
 - https://github.com/Qemu-Gang/QemuUnrealDumper-4.25 [SDK Dump By QEMU]
 - https://github.com/gmh5225/UE-UnrealEngineSDK [Universal Cheat development kit]
 - https://github.com/atenfyr/UAssetGUI [Viewing and modifying UE4 game assets]
+- https://github.com/UE-Explorer/UE-Explorer [Browser and decompiler for UE packages]
 - https://github.com/UE4SS-RE/RE-UE4SS [Re-Host of Unreal Engine 4/5 Scripting System]
 - https://github.com/SerseDioRe/Unreal-Engine-5-PDB [UE5 PDB]
 
