@@ -106,6 +106,7 @@ Or you can send an issue for me.
 - https://github.com/SamVanheer/halflife-unified-sdk [Half-Life SDK]
 - https://github.com/alliedmodders/hl2sdk [Half-Life SDK]
 - https://github.com/MonoGame/MonoGame [.NET]
+- https://github.com/vchelaru/FlatRedBall [.NET 2D]
 - https://github.com/nCine/nCine [2D]
 - https://github.com/gameplay3d/gameplay [2D/3D]
 - https://github.com/NoelFB/blah [C++ 2D]
