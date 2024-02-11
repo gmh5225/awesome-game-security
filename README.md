@@ -295,6 +295,7 @@ Or you can send an issue for me.
 - https://github.com/Velaron/cs16-client [Reversed CS1.6]
 - https://github.com/Source2ZE/CS2Fixes [CS2 mod]
 - https://github.com/gmh5225/Game-GTA-re3 [Reversed GTA III, Vice City]
+- https://github.com/gta-reversed/gta-reversed-modern [Reimplementation of GTA:SA 1.0 US]
 - https://github.com/WastedHymn/Grand-Theft-Auto-Modding-Source [Code snippets for Vice City]
 - https://github.com/SmileyAG/ReCZDS [Reversed CZeror]
 - https://github.com/Harrison1/unrealcpp [UE4 C++ examples]
