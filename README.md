@@ -677,6 +677,7 @@ Or you can send an issue for me.
 - https://github.com/google/android-classyshark [Android and Java bytecode viewer]
 - https://github.com/marin-m/vmlinux-to-elf [vmlinux to elf]
 - https://github.com/emlinhax/DbgViewEx [A tool to log ETW Events and system debug logs]
+- https://github.com/amosshi/binaryinternals [View Internals of Binary File]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
