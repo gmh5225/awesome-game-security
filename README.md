@@ -105,6 +105,7 @@ Or you can send an issue for me.
 - https://github.com/ValveSoftware/halflife [Half-Life 1]
 - https://github.com/SamVanheer/halflife-unified-sdk [Half-Life SDK]
 - https://github.com/alliedmodders/hl2sdk [Half-Life SDK]
+- https://github.com/ezhangle/hlmaster [Half-Life Master Server]
 - https://github.com/MonoGame/MonoGame [.NET]
 - https://github.com/vchelaru/FlatRedBall [.NET 2D]
 - https://github.com/nCine/nCine [2D]
