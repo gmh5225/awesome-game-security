@@ -722,6 +722,7 @@ Or you can send an issue for me.
 
 > Driver Signature enforcement
 - https://github.com/gmh5225/dse_hook
+- https://github.com/gmh5225/Dse-Patcher-2
 
 > Windows Kernel Explorer
 - https://github.com/NullArray/WinKernel-Resources [Guide]
