@@ -3096,6 +3096,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/mrexodia/dumpulator [Emulating code in minidump files]
 - https://github.com/0vercl0k/symbolizer [Execution trace symbolizer]
 - https://github.com/libyal/libmdmp [Minidump]
+- https://github.com/tasox/miniDumpReader [Minidump]
 
 > Sign Tools
 - https://github.com/mtrojnar/osslsigncode
