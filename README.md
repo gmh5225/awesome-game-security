@@ -2363,6 +2363,7 @@ Or you can send an issue for me.
 - https://github.com/mut1234/BYPASS-PUBG-MOBILE-IMGUI
 - https://github.com/busmanl30/LastIslandOfSurvival-iOSCheat-Source
 - https://github.com/halloweeks/pubg-mobile-pak-extract [pak extracting tool]
+- https://github.com/gmh5225/pubg_mobile_memory_hacking_examples
 
 > Game:The finals
 - https://github.com/gmh5225/the-finals-interior-cheat
