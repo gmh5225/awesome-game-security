@@ -3169,6 +3169,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Rythorndoran/enum_real_dirbase [Find real dirbase]
 - https://github.com/backengineering/POC-ExFlushTb [A POC for monitoring Tb]
 - https://github.com/Cr4sh/KernelForge [A library to develop kernel level Windows payloads for post HVCI era]
+- https://gist.github.com/gmh5225/ab00f831ffdf4ef608ab3b6eb0d37250 [Create process from KernelMode via APC]
 
 
 > Windows Ring3
