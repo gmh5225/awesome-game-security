@@ -817,6 +817,7 @@ Or you can send an issue for me.
 - https://github.com/smartdone/Frida-Scripts [Some scripts]
 - https://github.com/SeeFlowerX/frida-smali-trace [Smali trace]
 - https://github.com/Ylarod/Florida [anti-detection version of frida-server]
+- https://github.com/noobpk/frida-android-hook [Trace classes/functions/and modify the return values]
 
 > Android File Explorer
 - https://github.com/nzcv/note [Guide-zh]
