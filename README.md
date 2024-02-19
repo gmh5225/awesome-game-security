@@ -1,7 +1,6 @@
 
 # `awesome-game-security`
-
-[![GitHub license](https://img.shields.io/github/license/gmh5225/awesome-game-security)](https://github.com/gmh5225/awesome-game-security/blob/main/LICENSE)
+![image](https://github.com/gmh5225/awesome-game-security/assets/13917777/a39c6322-40ed-45b5-afcb-93e8d5477a0b)
 
 ```
 If you find that some links are not working, you can simply replace the username with gmh5225. 
