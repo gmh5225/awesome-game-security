@@ -2096,6 +2096,7 @@ Or you can send an issue for me.
 - https://github.com/superyu1337/memcs [External]
 - https://github.com/rabbitfishy/sdk [SDK]
 - https://github.com/bloesway/csgo_sdk [SDK]
+- https://github.com/DeiVid-12/SmKernel-CSGO [Driver]
 
 > Game:CS2
 - https://github.com/danielkrupinski/Osiris
