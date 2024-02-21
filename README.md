@@ -678,6 +678,7 @@ Or you can send an issue for me.
 - https://github.com/marin-m/vmlinux-to-elf [vmlinux to elf]
 - https://github.com/emlinhax/DbgViewEx [A tool to log ETW Events and system debug logs]
 - https://github.com/amosshi/binaryinternals [View Internals of Binary File]
+- https://github.com/WerWolv/ImHex [A Hex Editor for Reverse Engineers]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
