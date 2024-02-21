@@ -961,6 +961,7 @@ Or you can send an issue for me.
 - https://github.com/aliyunav/Finger [Recognizing Function By Cloud]
 - https://github.com/FelixBer/FindFunc [Recognizing Function By Pattern]
 - https://github.com/kweatherman/sigmakerex [Signature Maker]
+- https://github.com/A200K/IDA-Pro-SigMaker [Signature Maker]
 - https://github.com/Mixaill/FakePDB [PDB Generation From IDA]
 - https://github.com/illera88/Ponce [Symbolic Execution]
 - https://github.com/airbus-cert/ttddbg [Time Travel Debugging]
