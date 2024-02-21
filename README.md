@@ -2369,6 +2369,9 @@ Or you can send an issue for me.
 - https://github.com/halloweeks/pubg-mobile-pak-extract [pak extracting tool]
 - https://github.com/gmh5225/pubg_mobile_memory_hacking_examples
 
+> Game:Sausage Man
+- https://github.com/gmh5225/AndroidCheatTemplate
+
 > Game:The finals
 - https://github.com/gmh5225/the-finals-interior-cheat
 
