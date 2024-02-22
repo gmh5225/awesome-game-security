@@ -478,6 +478,9 @@ Or you can send an issue for me.
 - https://github.com/Quillhash/QuillAudit_Auditor_Roadmap [Become a Smart Contract Auditor]
 - https://github.com/d-xo/weird-erc20 [Weird ERC20]
 
+> Contract source code
+- https://github.com/tangtj/bsc-contract-database [BSC]
+
 ## DirectX
 > Guide
 - https://github.com/planetchili/hw3d [C++ 3D DirectX Tutorial]
