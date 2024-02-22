@@ -202,6 +202,7 @@ Or you can send an issue for me.
 
 ## Renderer
 - https://github.com/bkaradzic/bgfx [Rendering library]
+- https://github.com/DiligentGraphics/DiligentEngine [Rendering library]
 - https://github.com/kanition/pbrtbook [Physically Based Rendering: From Theory To Implementation]
 - https://github.com/keith2018/SoftGLRender
 - https://github.com/DQLin/VolumetricReSTIRRelease
