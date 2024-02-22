@@ -892,6 +892,9 @@ Or you can send an issue for me.
 - https://github.com/fiqri19102002/android_kernel_xiaomi_sweet [Redmi Note 10 Pro]
 - https://github.com/psavarmattas/android_kernel_oneplus_sm7250-WKSU [KernelSU for Oneplus]
 
+> Android Kernel driver development
+- https://github.com/gmh5225/android-kernel-driver-template [A GKI Android kernel driver(AArch64) template]
+
 > Android Kernel Explorer
 - https://docs.kernel.org [Linux Kernel documentation]
 - https://armv8-ref.codingbelief.com/en [ARM Architecture Reference Manual for ARMv8-A]
