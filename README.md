@@ -826,6 +826,9 @@ Or you can send an issue for me.
 - https://github.com/Ylarod/Florida [anti-detection version of frida-server]
 - https://github.com/noobpk/frida-android-hook [Trace classes/functions/and modify the return values]
 
+> Hook ART
+- https://github.com/PAGalaxyLab/YAHFA
+
 > Android File Explorer
 - https://github.com/nzcv/note [Guide-zh]
 - https://github.com/iBotPeaches/Apktool
