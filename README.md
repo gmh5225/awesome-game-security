@@ -1514,6 +1514,7 @@ Or you can send an issue for me.
 - https://github.com/WCharacter/RDTSC-KVM-Handler [Bypass RDTSC]
 - https://github.com/batusan/Hardened-qemu [Hidden QEMU]
 - https://github.com/zhaodice/qemu-anti-detection [Hidden QEMU]
+- https://github.com/Scrut1ny/Hypervisor-Phantom [Hidden QEMU]
 - https://github.com/zhaodice/proxmox-ve-anti-detection [Hidden PVE]
 - https://github.com/tteck/Proxmox [PVE Helper Scripts]
 - https://github.com/nyx-fuzz/QEMU-Nyx [Intel-PT]
