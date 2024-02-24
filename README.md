@@ -1709,6 +1709,7 @@ Or you can send an issue for me.
 > Game Engine Explorer:Unity
 - https://github.com/mono/mono [mono]
 - https://github.com/dnSpy/dnSpy-Unity-mono [mono]
+- https://github.com/Misaka-Mikoto-Tech/MonoHook [mono hook]
 - https://github.com/dnSpy/Mono.Debugger.Soft [Mono Debugger]
 - https://github.com/imerzan/unispectDMAPlugin [Mono Dump + DMA]
 - https://github.com/Perfare/Il2CppDumper [Il2Cpp Dump]
