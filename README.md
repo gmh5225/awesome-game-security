@@ -2167,6 +2167,7 @@ Or you can send an issue for me.
 
 > Game:Assault Cube
 - https://github.com/gmh5225/external-esp-hack-assaultcube [GDI overlay]
+- https://github.com/SkarSys/AssaultCubeCheat
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
