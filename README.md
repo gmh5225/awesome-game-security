@@ -2177,6 +2177,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/valorant-externals [Offset]
 - https://github.com/GLX-ILLUSION/valorant-offsets-autoupdater [Offset]
 - https://github.com/Chuan212/ValorantOffsets-China-version [Offset]
+- https://github.com/hadevn/Valorant-SDK-2024 [SDK]
 - https://github.com/skechtew/valorant-gui-imgui-remake [GUI]
 - https://github.com/reahly/valorant-internal
 - https://github.com/gmh5225/Zenti-Valorant-Cheat-Hack-Internal-Spoofer-Driver-Injector-Protector-Auth
