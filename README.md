@@ -1050,6 +1050,7 @@ Or you can send an issue for me.
 - https://github.com/arizvisa/ida-minsc [Functional DWIM interface]
 - https://github.com/wINfOG/IDA_Easy_Life [Deobfuscation]
 - https://github.com/senko37/yarascan-ida [Scan file with Yara rules]
+- https://github.com/SamuelTulach/ida-unity-pdb-downloader [Unity PDB Downloader]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
