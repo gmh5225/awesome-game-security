@@ -764,6 +764,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Disable-nmi-callbacks [Disable NMI]
 - https://github.com/gmh5225/NMI-nmi_callback [Triggering NMI]
 - https://github.com/gmh5225/Kernel_Anti-Cheat [NMI]
+- https://github.com/jlgreathouse/AMD_IBS_Toolkit [AMD Sampling]
 - https://github.com/intelpt/WindowsIntelPT [Intel PT]
 - https://github.com/CristiNacu/ingsoc [Intel PT]
 - https://github.com/DProvinciani/pt-detector [Intel PT]
