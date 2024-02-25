@@ -840,6 +840,7 @@ Or you can send an issue for me.
 - https://github.com/LuckyPray/DexKit-Android [dex deobfuscator]
 - https://github.com/rednaga/APKiD [PEiD for Android]
 - https://github.com/APKLab/APKLab [Android Reverse-Engineering Workbench for VS Code]
+- https://github.com/pgp/XFiles [File explorer for (rooted) Android]
 
 > Android Memory Explorer
 - https://github.com/misc0110/PTEditor [PT Editor]
