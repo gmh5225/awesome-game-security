@@ -755,6 +755,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/ETWHOOK-InfinityHookClass [ETW Hook Ex]
 - https://github.com/DearXiaoGui/InfinityHookPro-main [ETW Hook WIN11]
 - https://github.com/ThomasonZhao/InfinityHookProMax [ETW Hook WIN11]
+- https://github.com/gmh5225/PDF-PMC-X86 [A Study on PMI in x86-Architecture]
 - https://github.com/KelvinMsft/ThreadSpy [PMI Callback]
 - https://github.com/KelvinMsft/PerfMon [PMI Callback]
 - https://github.com/gmh5225/PMI-hpc [PMI]
