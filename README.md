@@ -841,6 +841,7 @@ Or you can send an issue for me.
 - https://github.com/rednaga/APKiD [PEiD for Android]
 - https://github.com/APKLab/APKLab [Android Reverse-Engineering Workbench for VS Code]
 - https://github.com/pgp/XFiles [File explorer for (rooted) Android]
+- https://github.com/gmh5225/AdbFileManager [File manager using ADB protocol]
 
 > Android Memory Explorer
 - https://github.com/misc0110/PTEditor [PT Editor]
