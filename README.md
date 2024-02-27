@@ -838,6 +838,7 @@ Or you can send an issue for me.
 - https://github.com/pxb1988/dex2jar
 - https://github.com/skylot/jadx [Dex to Java decompiler]
 - https://github.com/LuckyPray/DexKit-Android [dex deobfuscator]
+- https://github.com/LSPosed/DexBuilder [Generate dex file by c++]
 - https://github.com/rednaga/APKiD [PEiD for Android]
 - https://github.com/APKLab/APKLab [Android Reverse-Engineering Workbench for VS Code]
 - https://github.com/pgp/XFiles [File explorer for (rooted) Android]
