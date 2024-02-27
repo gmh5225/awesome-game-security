@@ -3296,6 +3296,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/google/android-emulator-hypervisor-driver
 - https://github.com/ant4g0nist/rudroid [Rust]
 - https://github.com/qemu-gvm/qemu-gvm [QEMU]
+- https://github.com/quarkslab/AERoot [Root]
 
 ## Game Boy
 - https://github.com/xkevio/kevboy [Emulator]
