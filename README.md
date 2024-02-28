@@ -646,6 +646,7 @@ Or you can send an issue for me.
 
 > RE Tools
 - https://dogbolt.org
+- https://github.com/msd0pe-1/cve-maker [Tool to find CVEs and Exploits]
 - https://github.com/mentebinaria/retoolkit [Reverse Engineer's Toolkit]
 - https://github.com/stevemk14ebr/RETools
 - https://github.com/BataBo/ACEPatcher [.NET Patcher]
