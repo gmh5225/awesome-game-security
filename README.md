@@ -1235,6 +1235,7 @@ Or you can send an issue for me.
 - https://github.com/stevemk14ebr/PolyHook
 - https://github.com/stevemk14ebr/PolyHook_2_0
 - https://github.com/WopsS/RenHook
+- https://github.com/bmax121/KernelPatch [Hooking the Linux kernel]
 - https://github.com/Zeex/subhook
 - https://github.com/axhlzy/PyAsmPatch
 - https://github.com/gmh5225/Driver-KDtour [Easy Kernel Detour]
