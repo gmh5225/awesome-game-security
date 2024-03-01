@@ -541,6 +541,8 @@ Or you can send an issue for me.
 - https://github.com/Rebzzel/kiero [X86/64 Windows]
 - https://github.com/bruhmoment21/UniversalHookX [X86/64 Windows]
 - https://github.com/DrNseven/Vulkan-Hook [X86/64 Windows]
+- https://github.com/Sh0ckFR/Universal-Dear-ImGui-Hook
+- https://github.com/Halen84/ImGuiRDR2Hook
 
 ## Cheat
 > Guide
