@@ -437,6 +437,7 @@ Or you can send an issue for me.
 - https://github.com/mektigboy/evm-chad [EVM]
 - https://github.com/jtriley-eth/the-ethereum-virtual-machine [EVM]
 - https://github.com/w1nt3r-eth/evm-from-scratch [EVM]
+- https://github.com/shafu0x/evm-from-scratch-book [EVM]
 - https://github.com/lambdaclass/lambdaworks [Crypto]
 - https://github.com/coinspect/learn-evm-attacks [EVM Security]
 - https://github.com/Dapp-Learning-DAO/Dapp-Learning [Dapp]
