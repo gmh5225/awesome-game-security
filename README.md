@@ -908,6 +908,7 @@ Or you can send an issue for me.
 - https://github.com/SM7325-AE/android_kernel_motorola_dubai [Moto Edge 30]
 - https://github.com/fiqri19102002/android_kernel_xiaomi_sweet [Redmi Note 10 Pro]
 - https://github.com/psavarmattas/android_kernel_oneplus_sm7250-WKSU [KernelSU for Oneplus]
+- https://github.com/huawei-mediatek-devs/android_kernel_huawei_mt6761 [huawei mt6761]
 
 > Android Root
 - https://github.com/topjohnwu/Magisk
