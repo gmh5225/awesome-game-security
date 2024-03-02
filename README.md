@@ -1607,6 +1607,7 @@ Or you can send an issue for me.
 - https://github.com/longpoxin/hideroot [Magisk]
 - https://github.com/Rwkeith/Diglett [Hide Kernel Thread]
 - https://github.com/gmh5225/Driver-SessionMapper [Session Driver]
+- https://github.com/gmh5225/Map-file-in-system-space [MiMapViewInSystemSpace]
 - https://github.com/gmh5225/Driver-DriverNoImage [Hijack Driver]
 - https://github.com/gmh5225/Driver-Systemthread-from-PspCidTable-src [Hide Process/Thread/Handle]
 - https://github.com/reveny/Android-Library-Remap-Hide [Remap a library for Android]
@@ -3219,6 +3220,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/backengineering/POC-ExFlushTb [A POC for monitoring Tb]
 - https://github.com/Cr4sh/KernelForge [A library to develop kernel level Windows payloads for post HVCI era]
 - https://gist.github.com/gmh5225/ab00f831ffdf4ef608ab3b6eb0d37250 [Create process from KernelMode via APC]
+- https://github.com/gmh5225/Map-file-in-system-space [MiMapViewInSystemSpace]
 
 
 > Windows Ring3
