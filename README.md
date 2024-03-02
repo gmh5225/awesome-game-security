@@ -1064,6 +1064,7 @@ Or you can send an issue for me.
 - https://github.com/wINfOG/IDA_Easy_Life [Deobfuscation]
 - https://github.com/senko37/yarascan-ida [Scan file with Yara rules]
 - https://github.com/SamuelTulach/ida-unity-pdb-downloader [Unity PDB Downloader]
+- https://github.com/TrungNguyen1909/aarch64-sysreg-ida [A IDA plugin to show ARM MSRs nicely]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
