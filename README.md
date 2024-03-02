@@ -2176,6 +2176,7 @@ Or you can send an issue for me.
 - https://github.com/CowNowK/AimStarCS2 [External]
 - https://github.com/Fr0go1/Aeonix-Cs2 [External]
 - https://github.com/xvorost/CS-2-Glow [External]
+- https://github.com/yinleiCoder/cs2-cheat-cpp [External]
 - https://github.com/KisSsArt/CS2-Cheat-Base [Internal]
 - https://github.com/redbg/CS2-Internal [Internal]
 - https://github.com/Elsie-Kgafela/CS2-Cheat-Base [Internal]
