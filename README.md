@@ -629,6 +629,7 @@ Or you can send an issue for me.
 - https://github.com/wilszdev/SteamAntiAntiDebug [Steam]
 - https://github.com/H5GG/H5GG [IOS cheat engine]
 - https://github.com/ri-char/pwatch [HWBP on linux]
+- https://github.com/Ylarod/hardware-breakpoint [HWBP on linux/android]
 
 > Packet Sniffer&Filter
 - https://github.com/WPO-Foundation/win-shaper
