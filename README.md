@@ -920,6 +920,7 @@ Or you can send an issue for me.
 - https://github.com/abcz316/SKRoot-linuxKernelRoot
 
 > Android Kernel driver development
+- https://github.com/gmh5225/AndroidDriveSignity [Bypass driver signature verification in Android kernel(ARMv8.3)]
 - https://github.com/gmh5225/android-kernel-driver-template [A GKI Android kernel driver(AArch64) template]
 
 > Android Kernel Explorer
