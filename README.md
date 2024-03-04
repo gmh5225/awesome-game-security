@@ -1225,6 +1225,7 @@ Or you can send an issue for me.
 - https://github.com/reveny/Android-LD-Preload-Injector
 - https://github.com/ohchase/yaui
 - https://github.com/cs1ime/AndroidSuperInject [Injecting into SELinux-protected system service processes]
+- https://github.com/erfur/linjector-rs [Code injection on Android without ptrace]
 
 
 > DLL Hijack
