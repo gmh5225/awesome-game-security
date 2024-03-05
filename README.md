@@ -3328,8 +3328,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/chrismaltby/gb-studio [GB Studio]
 
 ## Nintendo Switch
-- https://github.com/TheNightmanCodeth/yuzu
-- https://github.com/yuzu-emu/yuzu-android
+- https://github.com/gmh5225/Nintendo-Switch-Emulator-yuzu
+- https://github.com/gmh5225/yuzu-android
 - https://github.com/CTCaer/hekate [A GUI based Nintendo Switch Bootloader]
 - https://github.com/Atmosphere-NX/Atmosphere [Customized firmware]
 - https://github.com/tomvita/SE-tools [Memory hacking]
