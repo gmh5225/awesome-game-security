@@ -1446,6 +1446,7 @@ Or you can send an issue for me.
 - https://github.com/keowu/BadRentdrv2 [rentdrv2.sys]
 - https://github.com/gmh5225/S4Mapper [SignalRgbDriver.sys]
 - https://github.com/gmh5225/dse_hook [winio64.sys]
+- https://github.com/enkomio/s4killer [probmon.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
