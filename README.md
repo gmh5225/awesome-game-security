@@ -480,6 +480,7 @@ Or you can send an issue for me.
 - https://github.com/Picodes/4naly3er [Static Analyzer]
 - https://github.com/Quillhash/QuillAudit_Auditor_Roadmap [Become a Smart Contract Auditor]
 - https://github.com/d-xo/weird-erc20 [Weird ERC20]
+- https://github.com/slowmist/solana-smart-contract-security-best-practices [Solana security]
 
 > Contract source code
 - https://github.com/tangtj/bsc-contract-database [BSC]
