@@ -40,6 +40,7 @@ Or you can send an issue for me.
 - [Windows Subsystem for Linux](#windows-subsystem-for-linux)
 - [Windows Subsystem for Android](#windows-subsystem-for-android)
 - [Android Emulator](#android-emulator)
+- [IOS Emulator](#ios-emulator)
 - [Game Boy](#game-boy)
 - [Nintendo Switch](#nintendo-switch)
 
@@ -3326,6 +3327,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ant4g0nist/rudroid [Rust]
 - https://github.com/qemu-gvm/qemu-gvm [QEMU]
 - https://github.com/quarkslab/AERoot [Root]
+
+## IOS Emulator
+- https://github.com/ChefKissInc/qemu-apple-silicon
 
 ## Game Boy
 - https://github.com/xkevio/kevboy [Emulator]
