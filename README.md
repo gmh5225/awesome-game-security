@@ -1075,6 +1075,7 @@ Or you can send an issue for me.
 - https://github.com/senko37/yarascan-ida [Scan file with Yara rules]
 - https://github.com/SamuelTulach/ida-unity-pdb-downloader [Unity PDB Downloader]
 - https://github.com/TrungNguyen1909/aarch64-sysreg-ida [A IDA plugin to show ARM MSRs nicely]
+- https://github.com/danielplohmann/gui-plugin-template [A template for cross-compatible GUI plugins]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
@@ -1103,6 +1104,7 @@ Or you can send an issue for me.
 - https://github.com/dayzerosec/AMD-SP-Loader [AMD-SP or PSP firmware]
 - https://github.com/WhatTheFuzz/binaryninja-openai [Integrates OpenAI]
 - https://github.com/dzervas/frinja [Frida plugin for Binary Ninja]
+- https://github.com/danielplohmann/gui-plugin-template [A template for cross-compatible GUI plugins]
 
 > Ghidra Plugins
 - https://github.com/AllsafeCyberSecurity/awesome-ghidra [List]
@@ -1129,6 +1131,7 @@ Or you can send an issue for me.
 - https://github.com/fuzzypickles14/BetterStringAnalyzer [A better string analyzer for Ghidra]
 - https://github.com/clearbluejar/ghidriff [Python Command-Line Ghidra Binary Diffing Engine]
 - https://github.com/Katharsas/ghidra-struct-importer [Struct Importer]
+- https://github.com/danielplohmann/gui-plugin-template [A template for cross-compatible GUI plugins]
 
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
