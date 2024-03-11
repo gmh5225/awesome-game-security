@@ -39,6 +39,7 @@ Or you can send an issue for me.
 - [Windows Security Features](#windows-security-features)
 - [Windows Subsystem for Linux](#windows-subsystem-for-linux)
 - [Windows Subsystem for Android](#windows-subsystem-for-android)
+- [Windows Emulator](#windows-emulator)
 - [Android Emulator](#android-emulator)
 - [IOS Emulator](#ios-emulator)
 - [Game Boy](#game-boy)
@@ -3322,6 +3323,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/cinit/WSAPatch [Make WSA run on Windows 10]
 - https://github.com/MustardChef/WSABuilds
 - https://github.com/LSPosed/WSA-Kernel-SU [WSA with KernelSU]
+
+## Windows Emulator
+- https://github.com/brunodev85/winlator [Android application for running Windows applications with Wine and Box86/Box64]
 
 ## Android Emulator
 - https://github.com/Genymobile
