@@ -1589,7 +1589,7 @@ Or you can send an issue for me.
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/512002-x64-return-address-spoofing.html
 - https://github.com/Kudaes/Unwinder [Another approach to thread stack spoofing]
 - https://github.com/klezVirus/SilentMoonwalk [a TRUE call stack spoofer]
-- https://github.com/altoid29/SafeCall [header only]
+- https://github.com/gmh5225/spoof-stack-SafeCall [header only]
 - https://github.com/fortra/hw-call-stack [HWBP]
 - https://github.com/evilashz/ProxyAPICall [Custom stack call]
 - https://github.com/Kudaes/Shelter [ROP-based sleep obfuscation]
