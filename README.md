@@ -3040,6 +3040,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Ahora57/MAJESTY-technologies
 - https://github.com/therealdreg/anticuckoo [Cuckoo]
 - https://github.com/strazzere/anti-emulator [Android Anti-Emulator]
+- https://github.com/JuyaSec/Android-Emulator-Detection [Android Anti-Emulator]
 - https://github.com/LloydLabs/wsb-detect [Windows Sandbox ("WSB")]
 - https://github.com/DevDaveid/AntiDebug-AntiVM [Vbox]
 - https://github.com/LukeGoule/compact_vm_detector
