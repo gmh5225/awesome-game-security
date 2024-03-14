@@ -880,6 +880,7 @@ Or you can send an issue for me.
 - https://github.com/polygraphene/DirtyPipe-Android [Root for Pixel 6]
 - https://github.com/tiann/DirtyPipeRoot [Root for Pixel 6]
 - https://github.com/Markakd/bad_io_uring [Root for Pixel 6]
+- https://github.com/0x36/Pixel_GPU_Exploit [Root for Pixel7/8 Pro with Android 14]
 
 > Android ROM
 - https://xdaforums.com [Guide]
@@ -924,6 +925,7 @@ Or you can send an issue for me.
 - https://github.com/tiann/KernelSU
 - https://github.com/bmax121/APatch
 - https://github.com/abcz316/SKRoot-linuxKernelRoot
+- https://github.com/0x36/Pixel_GPU_Exploit
 
 > Android Kernel driver development
 - https://github.com/gmh5225/AndroidDriveSignity [Bypass driver signature verification in Android kernel(ARMv8.3)]
