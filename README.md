@@ -1081,6 +1081,7 @@ Or you can send an issue for me.
 - https://github.com/TrungNguyen1909/aarch64-sysreg-ida [A IDA plugin to show ARM MSRs nicely]
 - https://github.com/danielplohmann/gui-plugin-template [A template for cross-compatible GUI plugins]
 - https://github.com/gmh5225/IDA-MapSymbolParser [IDA Map File Symbol Renamer]
+- https://github.com/gmh5225/IDA-KallsymsSymbolRenamer [IDA kallsyms Renamer]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
