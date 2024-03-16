@@ -468,6 +468,7 @@ Or you can send an issue for me.
 - https://github.com/kadenzipfel/smart-contract-vulnerabilities [A collection of smart contract vulnerabilities]
 - https://github.com/cryptostaker2/blockchain-security-audits [Security audits]
 - https://github.com/obheda12/Solidity-Security-Compendium [Solidity vuln]
+- https://github.com/0xsanny/solsec [Solana smart contract security]
 - https://github.com/crytic [Blockchain Security, by @trailofbits]
 - https://github.com/Quillhash/Solidity-Attack-Vectors [Solidity SmartContract Attack Vectors]
 - https://github.com/crytic/building-secure-contracts [Guidelines and training material to write secure smart contracts]
@@ -485,6 +486,7 @@ Or you can send an issue for me.
 - https://github.com/Quillhash/QuillAudit_Auditor_Roadmap [Become a Smart Contract Auditor]
 - https://github.com/d-xo/weird-erc20 [Weird ERC20]
 - https://github.com/slowmist/solana-smart-contract-security-best-practices [Solana security]
+- https://github.com/JoranHonig/awesome-web3-ai-security [web3 ai security]
 
 > Contract source code
 - https://github.com/tangtj/bsc-contract-database [BSC]
