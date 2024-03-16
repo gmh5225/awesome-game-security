@@ -709,6 +709,9 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Vmp3_utils
 - https://github.com/archercreat/titan
 
+> Fix Themida
+- https://github.com/sodareverse/TDE
+
 > Fix OLLVM
 - https://bbs.pediy.com/thread-272414.htm
 - https://github.com/obpo-project/obpo-plugin
