@@ -616,6 +616,7 @@ Or you can send an issue for me.
 - https://github.com/ReClassNET/ReClass.NET
 - https://github.com/niemand-sec/ReClass.NET-DriverReader [ReClass DriverReader]
 - https://github.com/imerzan/ReClass-DMA [ReClass DMA]
+- https://github.com/Metick/CheatEngine-DMA [CheatEngine DMA]
 - https://github.com/x64dbg/DotX64Dbg
 - https://github.com/imugee/xdv
 - https://github.com/eteran/edb-debugger [For Linux]
