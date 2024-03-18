@@ -1321,6 +1321,8 @@ Or you can send an issue for me.
 - https://github.com/Spuckwaffel/DMALib [DMA library]
 - https://github.com/Metick/DMALibrary [DMA library]
 - https://github.com/ekknod/vm [Minimal memory library for Windows/Linux]
+- https://github.com/imerzan/ReClass-DMA [ReClass DMA]
+- https://github.com/Metick/CheatEngine-DMA [CheatEngine DMA]
 
 > W2S
 - https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
