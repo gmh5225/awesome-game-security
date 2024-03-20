@@ -461,6 +461,8 @@ Or you can send an issue for me.
 
 > Tools
 - https://github.com/swiss-knife-xyz/swiss-knife [All your EVM tools in one place]
+- https://github.com/fukaoi/smart-token-tool [SPL Token/ NFT issue tool on solana]
+- https://github.com/cryptoloutre/solana-tools [A bunch of tools to help people in the Solana ecosystem]
 
 > Security
 - https://github.com/SunWeb3Sec [Let's make Web3 more secure]
