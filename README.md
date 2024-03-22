@@ -851,8 +851,9 @@ Or you can send an issue for me.
 - https://github.com/noobpk/frida-android-hook [Trace classes/functions/and modify the return values]
 - https://github.com/apkunpacker/AntiFrida_Bypass [Bypass Some AntiFrida Checks]
 
-> Hook ART
+> Hook ART(android)
 - https://github.com/PAGalaxyLab/YAHFA
+- https://github.com/canyie/pine
 
 > Android File Explorer
 - https://github.com/nzcv/note [Guide-zh]
