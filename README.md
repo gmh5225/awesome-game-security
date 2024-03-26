@@ -836,7 +836,6 @@ Or you can send an issue for me.
 - https://github.com/xiaoxindada/magiskboot_ndk_on_linux [Boot Image Modification Tool]
 - https://github.com/ookiineko/magiskboot_build [Boot Image Modification Tool]
 - https://github.com/the-dise/EasyPixel [Magisk module that disguises a device under Google Pixel]
-- https://github.com/HuskyDG/MagiskHide [Portable MagiskHide]
 - https://github.com/lico-n/ZygiskFrida [Injects frida gadget using zygisk]
 - https://github.com/anasfanani/Magisk-Tailscaled [Magisk module for running Tailscale]
 
