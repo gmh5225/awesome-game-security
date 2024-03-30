@@ -1095,6 +1095,7 @@ Or you can send an issue for me.
 - https://github.com/tomrus88/OpenLumina [Allows connecting to third party Lumina servers]
 - https://github.com/stuxnet147/IDA-Assistant [Claude-3 models assistant]
 - https://github.com/goseungduk/CE_Tracer-IDA [CheatEngine Value Tracer of IDA]
+- https://github.com/binarly-io/idapcode [Displaying the P-Code for the current function]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
