@@ -1658,6 +1658,7 @@ Or you can send an issue for me.
 > Triggerbot & Aimbot
 - https://github.com/changeofpace/MouHidInputHook
 - https://github.com/ekknod/MouseClassServiceCallbackTrick
+- https://github.com/ekknod/MouseClassServiceCallbackMeme
 - https://github.com/blackhades00/PareidoliaTriggerbot
 - https://github.com/adspro15/DirectInput
 - https://github.com/nbqofficial/norsefire
