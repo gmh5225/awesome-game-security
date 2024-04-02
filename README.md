@@ -2512,6 +2512,7 @@ Or you can send an issue for me.
 - https://github.com/nismo1337/meowsense
 - https://github.com/gmh5225/Ow-Outlines [Shows Players through walls]
 - https://github.com/ZEROWyt/Overwatch-2-TOPE-EXTERNAL-CHEAT
+- https://github.com/gmh5225/OW2-wardenrekter [Emulate OW2 AC]
 
 > Game:Paladins
 - https://github.com/gmh5225/Paladins-Internal-Esp-Aimbot-Hack-Cheat-Hack
