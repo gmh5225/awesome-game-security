@@ -287,6 +287,7 @@ Or you can send an issue for me.
 - https://github.com/OTFCG/Awesome-Game-Analysis [Video game tech analysis resources]
 - https://github.com/killop/anything_about_game [Game Development resources]
 - https://github.com/TastSong/GameProgrammerStudyNotes [Game Development notes]
+- https://github.com/P0L3NARUBA/gtav-sourcecode-build-guide [GTA V Source Code Build Tutorial]
 
 > Source
 - https://github.com/PiMoNFeeD/csgo-src [Leaked CSGO]
@@ -2642,6 +2643,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/GTAIII-DE-GoldHook
 
 > Game:GTA5
+- https://github.com/P0L3NARUBA/gtav-sourcecode-build-guide [GTA V Source Code Build Tutorial]
 - https://github.com/gmh5225/GTA-5-SIGS-1.59 [Offset]
 - [About
 Adds drag- to- resize functionality to the main GTA V window](https://github.com/CamxxCore/GTAV_DragResize)
