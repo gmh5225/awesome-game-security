@@ -714,6 +714,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/VMP-Vmp3_64bit_disasm-prerelease-
 - https://github.com/gmh5225/Vmp3_utils
 - https://github.com/archercreat/titan
+- https://github.com/NaC-L/Mergen
 
 > Fix Themida
 - https://github.com/sodareverse/TDE
