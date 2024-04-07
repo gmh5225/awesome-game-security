@@ -464,6 +464,7 @@ Or you can send an issue for me.
 - https://github.com/swiss-knife-xyz/swiss-knife [All your EVM tools in one place]
 - https://github.com/fukaoi/smart-token-tool [SPL Token/ NFT issue tool on solana]
 - https://github.com/cryptoloutre/solana-tools [A bunch of tools to help people in the Solana ecosystem]
+- https://github.com/costa-group/EthIR [A framework for high-level Analysis of Ethereum Bytecode]
 
 > Security
 - https://github.com/SunWeb3Sec [Let's make Web3 more secure]
@@ -490,6 +491,7 @@ Or you can send an issue for me.
 - https://github.com/d-xo/weird-erc20 [Weird ERC20]
 - https://github.com/slowmist/solana-smart-contract-security-best-practices [Solana security]
 - https://github.com/JoranHonig/awesome-web3-ai-security [web3 ai security]
+- https://github.com/costa-group/EthIR [A framework for high-level Analysis of Ethereum Bytecode]
 
 > Contract source code
 - https://github.com/tangtj/bsc-contract-database [BSC]
