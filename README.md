@@ -1458,6 +1458,7 @@ Or you can send an issue for me.
 - https://github.com/RedCursorSecurityConsulting/PPLKiller [RTCore64.sys]
 - https://github.com/Processus-Thief/PsNotifRoutineUnloader [RTCore64.sys]
 - https://github.com/zeze-zeze/CYBERSEC2023-BYOVD-Demo [RTCore64.sys]
+- https://github.com/oakboat/RTCore64_Vulnerability [RTCore64.sys]
 - https://github.com/ReCryptLLC/CVE-2022-42045 [amsdk.sys]
 - https://github.com/gmh5225/CVE-2022-3699 [LenovoDiagnosticsDriver.sys]
 - https://github.com/estimated1337/lenovo_mapper [LenovoDiagnosticsDriver.sys]
