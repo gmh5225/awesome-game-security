@@ -1101,6 +1101,7 @@ Or you can send an issue for me.
 - https://github.com/stuxnet147/IDA-Assistant [Claude-3 models assistant]
 - https://github.com/goseungduk/CE_Tracer-IDA [CheatEngine Value Tracer of IDA]
 - https://github.com/binarly-io/idapcode [Displaying the P-Code for the current function]
+- https://github.com/ElvisBlue/emotet-deobfuscator [IDA plugin to deobfuscate emotet CFF]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
