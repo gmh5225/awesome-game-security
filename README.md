@@ -1999,6 +1999,7 @@ Or you can send an issue for me.
 - https://github.com/ryantpayton/MapleStory-Client [HeavenMS Client]
 - https://github.com/ryantpayton/MapleStory-Server [HeavenMS Server]
 - https://github.com/YohananTzeviyah/LibreMaple-Client [LibreMaple Client]
+- https://github.com/speedyHKjournalist/MapleServerAndroid [GMS 083 server on Android]
 
 > Game:Minecraft
 - [A minecraft server backend written in c++](https://github.com/mmbednarek/minecpp)
