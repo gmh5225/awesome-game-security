@@ -1723,6 +1723,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/EASY-HWID-SPOOFER
 - https://github.com/singhhdev/Spoofer-AMIDEWIN
 - https://github.com/gmh5225/HWID-Pasted-Hwid-Spoofer
+- https://github.com/Skotschia/hwid_spoofer
 - https://github.com/SamuelTulach/tpm-spoofer [TPM]
 - https://github.com/s0ngidong3/TPM-SPOOFER [TPM]
 - https://github.com/Android1500/AndroidFaker [Android]
