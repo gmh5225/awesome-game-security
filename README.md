@@ -3232,6 +3232,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Black Signature
 - https://github.com/gmh5225/BlackSignatureDriver
+- https://github.com/jsecurity101/MSFT_DriverBlockList
 - https://github.com/Harvester57/CodeIntegrity-DriverBlocklist
 - https://github.com/gmh5225/MS-Vulnerable-Driver-List [Convert Microsoft's blocklist to a hash list]
 
