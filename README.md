@@ -2423,6 +2423,7 @@ Or you can send an issue for me.
 - https://github.com/DontCry361x/ritz-amazing-fortnite-internal-updated [internal]
 - https://github.com/NurdAlert/flirtnite [External]
 - https://github.com/JetBrains-CLion/Fortnite-3.5 [Internal]
+- https://github.com/gmh5225/ZeroGui-Fortnite-Internal [Internal]
 - https://github.com/gmh5225/Fortnite-VoyagerTF [Voyager]
 - https://github.com/gmh5225/Fortnite-External-4 [External]
 
