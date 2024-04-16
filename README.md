@@ -1547,6 +1547,7 @@ Or you can send an issue for me.
 - https://github.com/btbd/umap [EFI Manual Map]
 - https://github.com/ekknod/sumap [EFI Manual Map]
 - https://github.com/xtremegamer1/xigmapper [EFI Manual Map]
+- https://github.com/Valthrun/valthrun-uefi-mapper [EFI Manual Map]
 - https://github.com/ekknod/KiSystemStartupMeme [Custom KiSystemStartup]
 - https://github.com/SamuelTulach/efi-memory [RPM]
 - https://github.com/TheCruZ/EFI_Driver_Access [RPM]
@@ -1565,6 +1566,7 @@ Or you can send an issue for me.
 - https://github.com/leap0x7b/luaboot [A fully scriptable UEFI bootloader]
 - https://github.com/Cr4sh/SmmBackdoorNg [UEFI backdoor]
 - https://github.com/Oliver-1-1/UEFI-Graphic [Simpel usage of graphic in UEFI]
+- https://github.com/Jamesits/BGRTInjector [Changes the boot screen image on a UEFI computer]
 
 > QEMU/KVM/PVE
 - https://github.com/david942j/kvm-kernel-example [Guide]
