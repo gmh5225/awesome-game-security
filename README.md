@@ -3271,6 +3271,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [GetWindowInfo In Kernel Mode](https://www.unknowncheats.me/forum/anti-cheat-bypass/519261-getwindowinfo.html)
 - [Hook KdTrap(Windows global exception hander)](https://www.unknowncheats.me/forum/anti-cheat-bypass/500156-hook-kdtrap-windows-global-exception-hander.html) [Hook KdTrap]
 - https://github.com/gmh5225/Hook-KdTrap [Hook KdTrap]
+- https://github.com/gmh5225/AcDrv [Global exception/KdpDebugRoutineSelect]
 - https://github.com/gmh5225/Driver-SoulExtraction [Extracting cert information]
 - https://github.com/Ido-Moshe-Github/CiDllDemo [Use ci.dll API for validating Authenticode signature of files]
 - https://github.com/mihaly044/pedigest [Calculating the authenticode digest]
