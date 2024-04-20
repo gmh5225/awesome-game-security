@@ -862,7 +862,7 @@ Or you can send an issue for me.
 - https://github.com/PAGalaxyLab/YAHFA
 - https://github.com/canyie/pine
 
-> Android terminal emulator
+> Android Terminal Emulator
 - https://github.com/termux/termux-app
 - https://github.com/sylirre/neotty
 - https://github.com/jackpal/Android-Terminal-Emulator
