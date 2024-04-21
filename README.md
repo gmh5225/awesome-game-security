@@ -1442,6 +1442,7 @@ Or you can send an issue for me.
 - https://github.com/eddeeh/kdmapper [iqvw64e.sys]
 - https://github.com/TheCruZ/kdmapper [iqvw64e.sys]
 - https://github.com/Brattlof/kdmapper-1909 [iqvw64e.sys]
+- https://github.com/paysonism/saturn-mapper [iqvw64e.sys]
 - https://github.com/rmccrystal/kdmapper-rs [A kdmapper library for Rust]
 - https://github.com/kkent030315/MsIoExploit [MsIo64.sys]
 - https://github.com/gmh5225/VulnerableKernel_Driver [MsIo64.sys]
