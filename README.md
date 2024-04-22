@@ -752,6 +752,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Disabling-Hyper-V [Disable Hyper-V]
 - https://github.com/AdamOron/PatchGuardBypass
 - https://github.com/zer0condition/Demystifying-PatchGuard
+- https://github.com/4l3x777/dse_pg_bypass [DSE & PG bypass via BYOVD attack]
 
 > Driver Signature enforcement
 - https://github.com/gmh5225/dse_hook
