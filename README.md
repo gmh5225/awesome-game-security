@@ -1998,6 +1998,7 @@ Or you can send an issue for me.
 - https://github.com/icelemon1314/mapleLemon [Private Server-CMS-027]
 - https://github.com/ellermister/MapleStory [Private Server-CMS-079]
 - https://github.com/mrzhqiang/ms079 [Private Server-CMS-079]
+- https://github.com/unsafeblackcat/MapleStoryEx [Private Server-CMS-079]
 - https://github.com/gmh5225/maplestory-v83MaplestoryCPP [Private Server-GMS-083 C++]
 - https://github.com/Fraysa/Destiny [Private Server-GMS-083 C#]
 - https://github.com/Bratah123/ElectronMS [Private Server-KMS-316]
