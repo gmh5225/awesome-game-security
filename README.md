@@ -709,6 +709,7 @@ Or you can send an issue for me.
 - https://github.com/microsoft/pdblister [Faster version of `symchk /om` for generating PDB manifests]
 - https://github.com/yaxinsn/vermagic [Change vermagic and CRCs of a Linux Kernel Module]
 - https://github.com/rhboot/pesign [Linux tools for signed PE-COFF binaries]
+- https://github.com/SV-Foster/UnSign [Remove all digital signatures from PE/COFF executable]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
