@@ -708,6 +708,7 @@ Or you can send an issue for me.
 - https://github.com/WerWolv/ImHex [A Hex Editor for Reverse Engineers]
 - https://github.com/microsoft/pdblister [Faster version of `symchk /om` for generating PDB manifests]
 - https://github.com/yaxinsn/vermagic [Change vermagic and CRCs of a Linux Kernel Module]
+- https://github.com/rhboot/pesign [Linux tools for signed PE-COFF binaries]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
