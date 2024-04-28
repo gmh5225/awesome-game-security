@@ -1852,6 +1852,7 @@ Or you can send an issue for me.
 - https://github.com/Azvanzed/MatScan [A multi-threaded rust material scanner]
 - https://github.com/vfsfitvnm/frida-il2cpp-bridge [Frida dump Il2Cpp]
 - https://github.com/issuimo/UnityResolve.hpp [Unity cheat framwork]
+- https://github.com/ByNameModding/BNM-Android [Modding il2cpp games]
 - https://github.com/SsageParuders/CheatUnityGames [Unity cheat framwork]
 - https://github.com/sanqiuu/AndroidCheatTemplate [Unity cheat framwork]
 
