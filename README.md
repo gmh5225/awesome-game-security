@@ -1122,6 +1122,7 @@ Or you can send an issue for me.
 - https://github.com/ElvisBlue/emotet-deobfuscator [IDA plugin to deobfuscate emotet CFF]
 - https://github.com/threatlabz/pikabot-deobfuscator [Deobfuscating Pikabot's strings using RC4 and AES]
 - https://github.com/Pycatchown/ClassMaker [IDA plugin to make classes automatically]
+- https://github.com/airbus-cert/comida [An IDA Plugin that help analyzing module that use COM]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
