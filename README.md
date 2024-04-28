@@ -996,6 +996,7 @@ Or you can send an issue for me.
 - https://github.com/Kc57/iHide
 - https://github.com/palera1n/palera1n
 - https://github.com/checkra1n
+- https://github.com/opa334/TrollStore [jailed app]
 
 > IOS Memory Explorer
 - https://github.com/hackcatml/kfd-explorer [iOS kernel memory explorer]
