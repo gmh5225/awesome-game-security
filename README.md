@@ -3090,6 +3090,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Hidden-Thread-Finder [Detect hidden threads]
 - https://github.com/gmh5225/StealthSytemThreadFinderBE [Detect hidden threads]
 - https://github.com/eversinc33/unKover [Using NMI/APC to detect mapped drivers]
+- https://github.com/gmh5225/Rootkit-2 [Using CsrRootProcess to detect hidden process]
 
 > Detection:Vulnerable Driver
 - https://github.com/Deputation/hygieia
