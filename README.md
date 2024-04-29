@@ -959,6 +959,7 @@ Or you can send an issue for me.
 > Android Root
 - https://github.com/topjohnwu/Magisk
 - https://github.com/tiann/KernelSU
+- https://github.com/riarumoda/KernelSU-4.4 [Adapted for Linux Kernel 4.4 + Google GCC 4.9]
 - https://github.com/bmax121/APatch
 - https://github.com/abcz316/SKRoot-linuxKernelRoot
 - https://github.com/0x36/Pixel_GPU_Exploit
