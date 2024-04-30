@@ -1318,6 +1318,7 @@ Or you can send an issue for me.
 - https://github.com/SamuelTulach/LightHook [cross-platform hook library]
 - https://github.com/3intermute/arm64_silent_syscall_hook [ARM64 Patching exception handler]
 - https://github.com/kubo/plthook [PLT(Procedure Linkage Table) hook]
+- https://github.com/WeiJiLab/kernel-hook-framework [linux kernel inline hook framework]
 
 > ROP Finder
 - https://github.com/0vercl0k/rp
