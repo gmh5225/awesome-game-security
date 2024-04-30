@@ -983,6 +983,7 @@ Or you can send an issue for me.
 > Android Kernel Driver
 - https://github.com/rogxo/kernel_hack
 - https://github.com/Jiang-Night/Kernel_driver_hack
+- https://github.com/WeiJiLab/kernel-hook-framework [Kernel inline hook framework]
 
 > Android Network Explorer
 - https://github.com/emanuele-f/PCAPdroid
