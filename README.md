@@ -338,6 +338,7 @@ Or you can send an issue for me.
 - https://github.com/solidi/hl-mods [Modification For Half-Life]
 - https://github.com/codingben/maple-fighters [A small online game similar to MapleStory]
 - https://github.com/gmh5225/WinAPI_MapleStory [WinAPI MapleStory]
+- https://github.com/ZeromaXHe/MapleStoryCopy [Godot MapleStory]
 - https://github.com/loqix/Fortnite [Fortnite]
 - https://github.com/bradharding/doomretro [DOOM]
 - https://github.com/Daivuk/PureDOOM [DOOM]
