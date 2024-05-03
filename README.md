@@ -713,6 +713,7 @@ Or you can send an issue for me.
 - https://github.com/SV-Foster/UnSign [Remove all digital signatures from PE/COFF executable]
 - https://github.com/colinsenner/PECleaner [Strips all RICH header information from x86/x64 binaries]
 - https://github.com/kouzhudong/AntiHook [Enum and Remove Hook in Windows]
+- https://github.com/jixiaoyong/ApkSigner [Android Apk Sign Tool]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
