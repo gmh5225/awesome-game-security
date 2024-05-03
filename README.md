@@ -1122,6 +1122,7 @@ Or you can send an issue for me.
 - https://github.com/danielplohmann/gui-plugin-template [A template for cross-compatible GUI plugins]
 - https://github.com/gmh5225/IDA-MapSymbolParser [IDA Map File Symbol Renamer]
 - https://github.com/gmh5225/IDA-KallsymsSymbolRenamer [IDA kallsyms Renamer]
+- https://github.com/XMCVE/import-kallsyms [IDA Pro Plugin to import /proc/kallsyms for Linux Kernel]
 - https://github.com/tomrus88/OpenLumina [Allows connecting to third party Lumina servers]
 - https://github.com/stuxnet147/IDA-Assistant [Claude-3 models assistant]
 - https://github.com/goseungduk/CE_Tracer-IDA [CheatEngine Value Tracer of IDA]
