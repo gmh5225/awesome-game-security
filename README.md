@@ -1325,6 +1325,8 @@ Or you can send an issue for me.
 - https://github.com/3intermute/arm64_silent_syscall_hook [ARM64 Patching exception handler]
 - https://github.com/kubo/plthook [PLT(Procedure Linkage Table) hook]
 - https://github.com/WeiJiLab/kernel-hook-framework [linux kernel inline hook framework]
+- https://github.com/Rprop/And64InlineHook [Android ARMv8 inline hook framework]
+- https://github.com/GToad/Android_Inline_Hook_ARM64 [Android ARMv8 inline hook framework]
 
 > ROP Finder
 - https://github.com/0vercl0k/rp
