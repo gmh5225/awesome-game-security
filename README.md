@@ -715,6 +715,7 @@ Or you can send an issue for me.
 - https://github.com/colinsenner/PECleaner [Strips all RICH header information from x86/x64 binaries]
 - https://github.com/kouzhudong/AntiHook [Enum and Remove Hook in Windows]
 - https://github.com/jixiaoyong/ApkSigner [Android Apk Sign Tool]
+- https://github.com/4d61726b/VirtualKD-Redux [A revival and modernization of VirtualKD]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
