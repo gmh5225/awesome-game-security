@@ -959,6 +959,7 @@ Or you can send an issue for me.
 - https://github.com/psavarmattas/android_kernel_oneplus_sm7250-WKSU [KernelSU for Oneplus]
 - https://github.com/huawei-mediatek-devs/android_kernel_huawei_mt6761 [huawei mt6761]
 - https://github.com/pascua28/android_kernel_samsung_sm7150 [samsung sm7150]
+- https://github.com/devhunter1/A146B-KSU [KernelSU for SAMSUNG A14 5G (a14x)]
 
 > Android Root
 - https://github.com/topjohnwu/Magisk
