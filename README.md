@@ -3416,6 +3416,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/sxlmnwb/windows-subsystem-linux
 
 ## Windows Subsystem for Android
+- https://github.com/K3V1991/How-to-download-and-install-WSA [Guide]
 - https://github.com/sergiovillaverde/win11_apk_installer
 - https://github.com/LSPosed/MagiskOnWSA
 - https://github.com/alesimula/wsa_pacman
