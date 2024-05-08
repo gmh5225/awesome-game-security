@@ -1138,6 +1138,7 @@ Or you can send an issue for me.
 - https://github.com/airbus-cert/comida [An IDA Plugin that help analyzing module that use COM]
 - https://github.com/Sandspeare/ida2llvm [Lifting IDA Microcode into LLVM IR]
 - https://github.com/crtdll/ida-gameguard-str-dec [GameGuard String Decryption]
+- https://github.com/kkent030315/IDARustCargo [Displaying potentially installed Cargo dependencies]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
