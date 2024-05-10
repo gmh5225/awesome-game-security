@@ -3189,6 +3189,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Detection:Obfuscation
 - https://github.com/mrphrazer/obfuscation_detection
 
+> Detection: Android root
+- https://github.com/rushiranpise/detection [Collection of Various Root Detection Apps for Android]
+
 > Detection:Magisk
 - https://github.com/vvb2060/MagiskDetector
 - https://github.com/canyie/MagiskKiller
