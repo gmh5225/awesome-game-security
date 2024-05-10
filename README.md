@@ -964,6 +964,7 @@ Or you can send an issue for me.
 - https://github.com/huawei-mediatek-devs/android_kernel_huawei_mt6761 [huawei mt6761]
 - https://github.com/pascua28/android_kernel_samsung_sm7150 [samsung sm7150]
 - https://github.com/devhunter1/A146B-KSU [KernelSU for SAMSUNG A14 5G (a14x)]
+- https://github.com/utziacre/android_kernel_xiaomi_pipa [Xiaomi Pad 6 kernel]
 
 > Android Root
 - https://github.com/topjohnwu/Magisk
