@@ -717,6 +717,7 @@ Or you can send an issue for me.
 - https://github.com/kouzhudong/AntiHook [Enum and Remove Hook in Windows]
 - https://github.com/jixiaoyong/ApkSigner [Android Apk Sign Tool]
 - https://github.com/4d61726b/VirtualKD-Redux [A revival and modernization of VirtualKD]
+- https://github.com/ax/apk.sh [A Bash script that makes reverse engineering Android apps easier]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
