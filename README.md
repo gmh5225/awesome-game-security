@@ -1146,6 +1146,7 @@ Or you can send an issue for me.
 - https://github.com/Sandspeare/ida2llvm [Lifting IDA Microcode into LLVM IR]
 - https://github.com/crtdll/ida-gameguard-str-dec [GameGuard String Decryption]
 - https://github.com/kkent030315/IDARustCargo [Displaying potentially installed Cargo dependencies]
+- https://github.com/dNop90/dOffset [IDA Pro and Cheat Engine to get the offset of the current module]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
