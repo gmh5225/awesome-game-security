@@ -1449,6 +1449,7 @@ Or you can send an issue for me.
 - https://github.com/xProHackerx/imgui-ios-mod-menu [Imgui Menu for IOS]
 - https://github.com/sy1ntexx/egui-d3d11 [Menu]
 - https://github.com/springmusk026/Android-ModMenu-SemiJni [Menu for imgui]
+- https://github.com/fedes1to/Zygisk-ImGui-Menu [ImGui menu using Zygisk]
 
 > UI Interface
 - https://github.com/adamhlt/ImGui-Standalone
