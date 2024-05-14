@@ -1148,6 +1148,7 @@ Or you can send an issue for me.
 - https://github.com/kkent030315/IDARustCargo [Displaying potentially installed Cargo dependencies]
 - https://github.com/dNop90/dOffset [IDA Pro and Cheat Engine to get the offset of the current module]
 - https://github.com/sneakyevil/ida_functioncolor [IDA Plugin to colorize function definition in pseudocode]
+- https://github.com/apkunpacker/IDA-Gepetto [IDA plugin which queries Local language models]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
