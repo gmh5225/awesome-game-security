@@ -718,6 +718,7 @@ Or you can send an issue for me.
 - https://github.com/jixiaoyong/ApkSigner [Android Apk Sign Tool]
 - https://github.com/4d61726b/VirtualKD-Redux [A revival and modernization of VirtualKD]
 - https://github.com/ax/apk.sh [A Bash script that makes reverse engineering Android apps easier]
+- https://github.com/vm03/payload_dumper [Android OTA payload dumper]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
@@ -931,6 +932,7 @@ Or you can send an issue for me.
 - https://xdaforums.com [Guide]
 - https://github.com/Akipe/awesome-android-aosp [Guide]
 - https://github.com/musabcel/android_rom_list [List]
+- https://github.com/vm03/payload_dumper [Android OTA payload dumper]
 - https://developer.android.com/studio/run/win-usb [Google USB Driver]
 - http://www.miui.com/unlock/download.html [Unlocker for xiaomi]
 - https://miuiver.com/miflash [MiFlash]
