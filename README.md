@@ -871,6 +871,7 @@ Or you can send an issue for me.
 - https://github.com/Ylarod/Florida [anti-detection version of frida-server]
 - https://github.com/noobpk/frida-android-hook [Trace classes/functions/and modify the return values]
 - https://github.com/apkunpacker/AntiFrida_Bypass [Bypass Some AntiFrida Checks]
+- https://github.com/Abbbbbi/Frida-Seccomp [Frida-Seccomp]
 
 > Hook ART(android)
 - https://github.com/PAGalaxyLab/YAHFA
