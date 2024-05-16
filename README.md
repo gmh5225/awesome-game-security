@@ -2535,6 +2535,8 @@ Or you can send an issue for me.
 - https://github.com/busmanl30/LastIslandOfSurvival-iOSCheat-Source
 - https://github.com/halloweeks/pubg-mobile-pak-extract [pak extracting tool]
 - https://github.com/gmh5225/pubg_mobile_memory_hacking_examples
+- https://github.com/Super-Cssdiv/ChinaPubg
+- https://github.com/wantao1008hh/pubg
 
 > Game:Sausage Man
 - https://github.com/gmh5225/AndroidCheatTemplate
