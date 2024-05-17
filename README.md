@@ -2564,6 +2564,10 @@ Or you can send an issue for me.
 - https://github.com/ZhaoKunqi/simple-eft-superman-training-bot
 - https://github.com/gmh5225/EFT-NewTarkovCheatProject
 
+> Game:Arena Breakout Infinite
+- https://github.com/cra0/UE426_ABInfinite-Win64-Shipping [SDK]
+- https://github.com/Ke4ton/hardware_bypass [GPU check bypass]
+
 > Game:R6
 - https://github.com/NMan1/Rainbow-Six-Cheat
 - https://github.com/NMan1/OverflowR6V2
