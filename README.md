@@ -720,6 +720,7 @@ Or you can send an issue for me.
 - https://github.com/4d61726b/VirtualKD-Redux [A revival and modernization of VirtualKD]
 - https://github.com/ax/apk.sh [A Bash script that makes reverse engineering Android apps easier]
 - https://github.com/vm03/payload_dumper [Android OTA payload dumper]
+- https://github.com/MlgmXyysd/Xiaomi-HyperOS-BootLoader-Bypass [Xiaomi HyperOS BootLoader Bypass]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
