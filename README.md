@@ -1160,6 +1160,7 @@ Or you can send an issue for me.
 - https://github.com/dNop90/dOffset [IDA Pro and Cheat Engine to get the offset of the current module]
 - https://github.com/sneakyevil/ida_functioncolor [IDA Plugin to colorize function definition in pseudocode]
 - https://github.com/apkunpacker/IDA-Gepetto [IDA plugin which queries Local language models]
+- https://github.com/Jackiemin233/Gemini-Genius [IDA python 3 plugin and binary file similarity comparison]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
