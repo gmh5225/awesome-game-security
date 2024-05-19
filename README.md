@@ -2500,6 +2500,7 @@ Or you can send an issue for me.
 - https://github.com/Zetolac/FortniteExternalExploits [External Exploits]
 - https://github.com/xetzzy/Fortnite-External-Source [External]
 - https://github.com/gmh5225/fortnite-triadz [External]
+- https://github.com/gmh5225/Fortnite-External-5 [External]
 - https://github.com/DontCry361x/ritz-amazing-fortnite-internal-updated [internal]
 - https://github.com/NurdAlert/flirtnite [External]
 - https://github.com/JetBrains-CLion/Fortnite-3.5 [Internal]
