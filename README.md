@@ -1161,6 +1161,7 @@ Or you can send an issue for me.
 - https://github.com/sneakyevil/ida_functioncolor [IDA Plugin to colorize function definition in pseudocode]
 - https://github.com/apkunpacker/IDA-Gepetto [IDA plugin which queries Local language models]
 - https://github.com/Jackiemin233/Gemini-Genius [IDA python 3 plugin and binary file similarity comparison]
+- https://github.com/lj94093/IDAAndroidBreakpoint [IDA plugin aid to set android so breakpoint]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
