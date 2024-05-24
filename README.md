@@ -2010,6 +2010,7 @@ Or you can send an issue for me.
 - https://github.com/lil-skies/val-exception-handler [ZwRaiseException Dump]
 - https://github.com/gmh5225/Dump-val-exception-handler [RtlpCallVectoredHandlers Dump]
 - https://github.com/AdvancedVectorExtensions/VanguardImportResolver [Resolve vgk's protected imports]
+- https://github.com/armvirus/VanguardTrace [Decrypting and intercepting encrypted imports of Vanguards Kernel Driver]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/578829-unveiling-unseen-vanguards-guarded-regions.html [CR3 Protection]
 
 > Explore AntiCheat System:XignCode
