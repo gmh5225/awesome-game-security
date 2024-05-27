@@ -54,6 +54,7 @@ Or you can send an issue for me.
 - https://forums.unrealengine.com [Unreal]
 - https://docs.unrealengine.com [Unreal]
 - https://www.unrealengine.com/resources [Unreal]
+- https://github.com/donaldwuid/unreal_source_explained [Unreal]
 - https://github.com/mikeroyal/Unreal-Engine-Guide [Unreal]
 - https://github.com/Allar/ue5-style-guide [Unreal]
 - https://github.com/revan1611/UE-Interview-Cheat-Sheet [Unreal]
