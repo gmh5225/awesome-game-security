@@ -2603,6 +2603,7 @@ Or you can send an issue for me.
 - https://github.com/ArtemisDevGroup/Artemis [Internal]
 - https://github.com/MuffinPanda/R6-Cheat-Dumper [External]
 - https://github.com/Possbl/R6S-External-V2 [External]
+- https://github.com/igromanru/R6-Chams-public [Chams]
 
 > Game:Overwatch 
 - https://github.com/blackhades00/PareidoliaTriggerbot [Triggerbot]
