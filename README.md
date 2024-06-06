@@ -1220,6 +1220,7 @@ Or you can send an issue for me.
 - https://github.com/clearbluejar/ghidriff [Python Command-Line Ghidra Binary Diffing Engine]
 - https://github.com/Katharsas/ghidra-struct-importer [Struct Importer]
 - https://github.com/danielplohmann/gui-plugin-template [A template for cross-compatible GUI plugins]
+- https://github.com/astrelsky/GhidraGradlePlugin [Gradle]
 
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
