@@ -1945,6 +1945,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/EAC-HydraHook [Packet Fucker]
 - https://github.com/woomy144/EazyAntiCheatSRC [Reversed Source]
 - https://github.com/chaeyk/eac-leak [EAC sdk's memory leak]
+- https://github.com/gmh5225/EAC [SDK]
 - https://github.com/ksoju/Eac-Bypass
 - https://github.com/EBalloon/EasyAntiCheat-SRC
 - https://github.com/gmh5225/EAC-EasyAntiCheat-Src-1
@@ -1972,6 +1973,7 @@ Or you can send an issue for me.
 - https://github.com/Azvanzed/EAC-Runtime-Extractor [Extracts eac's driver at runtime without it touching the disk]
 - https://gist.github.com/gmh5225/b89938f55bcb65637168f88a433c3d4d [Skip EAC thread detection]
 - https://github.com/kprprivate/EAC-CR3-BYPASS [A simple UM + KM example of how to bypass EAC CR3]
+
 
 > Explore AntiCheat System:BE
 - https://github.com/Schnocker/NoEye
