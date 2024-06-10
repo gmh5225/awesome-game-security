@@ -1164,6 +1164,7 @@ Or you can send an issue for me.
 - https://github.com/Jackiemin233/Gemini-Genius [IDA python 3 plugin and binary file similarity comparison]
 - https://github.com/lj94093/IDAAndroidBreakpoint [IDA plugin aid to set android so breakpoint]
 - https://github.com/jonpalmisc/ida_screenshot [High-resolution screenshot capture plugin for IDA Pro]
+- https://github.com/JANlittle/IDARustHelper [Small rust binary analysis helper for IDA]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
