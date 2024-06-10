@@ -962,6 +962,8 @@ Or you can send an issue for me.
 - https://android.googlesource.com/kernel/manifest [manifest]
 - https://android.googlesource.com/kernel/common [GKI]
 - https://github.com/aosp-mirror/kernel_common [GKI]
+- https://www.android-x86.org [X86]
+- https://blissos.org [X86]
 - https://github.com/MiCode/Xiaomi_Kernel_OpenSource [xiaomi kernel]
 - https://github.com/xiaomi-sm8450-kernel [xiaomi kernel]
 - https://github.com/Danda420/kernel_xiaomi_sm8250 [xiaomi kernel for POCO F3/F4]
