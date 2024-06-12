@@ -865,6 +865,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/MagiskHide [Portable MagiskHide]
 - https://github.com/lico-n/ZygiskFrida [Injects frida gadget using zygisk]
 - https://github.com/anasfanani/Magisk-Tailscaled [Magisk module for running Tailscale]
+- https://github.com/j-hc/FlagSecurePatcher [Disable flag secure and screenshot listeners]
 
 > Frida
 - https://github.com/CrackerCat/strongR-frida-android
