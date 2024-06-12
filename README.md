@@ -878,6 +878,7 @@ Or you can send an issue for me.
 - https://github.com/noobpk/frida-android-hook [Trace classes/functions/and modify the return values]
 - https://github.com/apkunpacker/AntiFrida_Bypass [Bypass Some AntiFrida Checks]
 - https://github.com/Abbbbbi/Frida-Seccomp [Frida-Seccomp]
+- https://github.com/rednaga/frida-stack [Getting better stacks and backtraces in Frida]
 
 > Hook ART(android)
 - https://github.com/PAGalaxyLab/YAHFA
