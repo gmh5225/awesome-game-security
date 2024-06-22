@@ -1170,6 +1170,7 @@ Or you can send an issue for me.
 - https://github.com/jonpalmisc/ida_screenshot [High-resolution screenshot capture plugin for IDA Pro]
 - https://github.com/JANlittle/IDARustHelper [Small rust binary analysis helper for IDA]
 - https://github.com/mefistotelis/ida-pro-loadmap [Plugin for IDA Pro disassembler which allows loading .map files]
+- https://github.com/OALabs/hashdb-ida [HashDB API hash lookup plugin for IDA Pro]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
