@@ -3152,6 +3152,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/bananya-ml/anti-cheat [Deep Learning for CSGO]
 - https://github.com/hkx3upper/Karlann [Keyboard]
 - https://github.com/Oliver-1-1/MouseDetection [Mouse]
+- https://github.com/Oliver-1-1/EtwKeyboardDetection [ETW]
 
 > Detection:Hide
 - https://github.com/KANKOSHEV/Detect-HiddenThread-via-KPRCB
