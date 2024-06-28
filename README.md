@@ -1172,6 +1172,8 @@ Or you can send an issue for me.
 - https://github.com/JANlittle/IDARustHelper [Small rust binary analysis helper for IDA]
 - https://github.com/mefistotelis/ida-pro-loadmap [Plugin for IDA Pro disassembler which allows loading .map files]
 - https://github.com/OALabs/hashdb-ida [HashDB API hash lookup plugin for IDA Pro]
+- https://github.com/Vu1nT0tal/firmeye [IoT]
+- https://github.com/sean2077/big5-decode-ida [IDA Plugin for decoding bytes as big5]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
