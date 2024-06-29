@@ -737,6 +737,7 @@ Or you can send an issue for me.
 
 > Fix Themida
 - https://github.com/sodareverse/TDE
+- https://github.com/ergrelet/themida-unmutate
 
 > Fix OLLVM
 - https://bbs.pediy.com/thread-272414.htm
