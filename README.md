@@ -773,6 +773,7 @@ Or you can send an issue for me.
 - https://github.com/AdamOron/PatchGuardBypass
 - https://github.com/zer0condition/Demystifying-PatchGuard
 - https://github.com/4l3x777/dse_pg_bypass [DSE & PG bypass via BYOVD attack]
+- https://github.com/i32-Sudo/VulnerablePatchGuardExploit
 
 > Driver Signature enforcement
 - https://github.com/gmh5225/dse_hook
