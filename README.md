@@ -725,6 +725,7 @@ Or you can send an issue for me.
 - https://github.com/vm03/payload_dumper [Android OTA payload dumper]
 - https://github.com/ssut/payload-dumper-go [Android OTA payload dumper]
 - https://github.com/MlgmXyysd/Xiaomi-HyperOS-BootLoader-Bypass [Xiaomi HyperOS BootLoader Bypass]
+- https://github.com/null-luo/btrace [Android App Dynamic Behavior Tracking Tool using eBPF]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
