@@ -449,6 +449,7 @@ Or you can send an issue for me.
 - https://github.com/shafu0x/evm-from-scratch-book [EVM]
 - https://github.com/Unboxed-Software/solana-course [A complete course for learning Solana]
 - https://github.com/lambdaclass/lambdaworks [Crypto]
+- https://github.com/preslavxyz/Web3-Security-Researcher-Roadmap [Web3 Security Researcher Roadmap]
 - https://github.com/coinspect/learn-evm-attacks [EVM Security]
 - https://github.com/Dapp-Learning-DAO/Dapp-Learning [Dapp]
 - https://github.com/contractcops/auditingroadmap [Solidity]
@@ -474,6 +475,7 @@ Or you can send an issue for me.
 - https://github.com/warp-id/solana-trading-bot [Solana Trading Bot]
 
 > Security
+- https://github.com/preslavxyz/Web3-Security-Researcher-Roadmap [Web3 Security Researcher Roadmap]
 - https://github.com/SunWeb3Sec [Let's make Web3 more secure]
 - https://github.com/ZhangZhuoSJTU/Web3Bugs [Bugs in Smart Contracts]
 - https://github.com/kadenzipfel/smart-contract-vulnerabilities [A collection of smart contract vulnerabilities]
