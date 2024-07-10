@@ -280,6 +280,8 @@ Or you can send an issue for me.
 - https://github.com/Calinou/awesome-gamedev
 - https://github.com/notpresident35/learn-awesome-gamedev
 - https://github.com/yrgo/awesome-educational-games
+- https://github.com/bobeff/open-source-games [A list of open source games]
+- https://github.com/michelpereira/awesome-open-source-games [Collection of Games]
 - https://github.com/raizam/gamedev_libraries [A collection of open source c/c++ libraries for gamedev]
 - https://github.com/gheja/game-design-documents [Game design documents]
 - https://github.com/Kavex/GameDev-Resources [Game Development resources]
