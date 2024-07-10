@@ -157,6 +157,7 @@ Or you can send an issue for me.
 - https://github.com/PanosK92/SpartanEngine [Research-focused game engine designed for real-time solutions]
 - https://github.com/OpenXRay/xray-16 [Improved version of the X-Ray Engine]
 - https://github.com/love2d/love [2D game framework for Lua]
+- https://github.com/PixelGuys/Cubyz [3D voxel sandbox game written by Zig language]
 
 
 > Game Engine Plugins:Unreal
