@@ -49,6 +49,7 @@ Or you can send an issue for me.
 > Guide
 - https://github.com/QianMo/Game-Programmer-Study-Notes
 - https://github.com/Gforcex/OpenGraphic [Graphic Engine & Game Engine lists]
+- https://github.com/bobeff/open-source-engines [A list of open source game engines]
 - https://github.com/ThisisGame/cpp-game-engine-book
 - https://github.com/netwarm007/GameEngineFromScratch
 - https://forums.unrealengine.com [Unreal]
