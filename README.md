@@ -2301,6 +2301,7 @@ Or you can send an issue for me.
 - https://github.com/SteamDatabase/Protobufs/tree/master/csgo [Protobuf]
 - https://github.com/kyojig/csgo_kns [Internal]
 - https://github.com/M3351AN/saphire [Internal]
+- https://github.com/VitorMob/GHInterfacesCSGO [Internal]
 - https://github.com/superyu1337/memcs [External]
 - https://github.com/rabbitfishy/sdk [SDK]
 - https://github.com/bloesway/csgo_sdk [SDK]
