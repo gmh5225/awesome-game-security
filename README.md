@@ -1215,6 +1215,7 @@ Or you can send an issue for me.
 - https://github.com/dzervas/frinja [Frida plugin for Binary Ninja]
 - https://github.com/danielplohmann/gui-plugin-template [A template for cross-compatible GUI plugins]
 - https://github.com/ergrelet/themida-spotter-bn [Detect Themida/WinLicense and Code Virtualizer's obfuscated code locations]
+- https://github.com/ahaggard2013/binaryninja-ollama [Binary Ninja Ollama]
 
 > Ghidra Plugins
 - https://github.com/AllsafeCyberSecurity/awesome-ghidra [List]
