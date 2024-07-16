@@ -225,6 +225,7 @@ Or you can send an issue for me.
 
 ## 3D Graphics
 - https://github.com/Mesa3D/mesa
+- https://github.com/MethanePowered/MethaneKit [DirectX 12, Metal & Vulkan]
 
 ## AI
 - https://github.com/ls361664056/GameAI-paper-list [zh]
