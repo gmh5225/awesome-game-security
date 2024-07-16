@@ -221,6 +221,7 @@ Or you can send an issue for me.
 - https://github.com/Patryk27/strolle [Real-time rendering engine]
 - https://github.com/ssloy/tinyraytracer [A brief computer graphics / rendering course]
 - https://github.com/freetype/freetype [Render fonts]
+- https://github.com/MethanePowered/MethaneKit [DirectX 12, Metal & Vulkan]
 
 ## 3D Graphics
 - https://github.com/Mesa3D/mesa
