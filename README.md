@@ -471,6 +471,7 @@ Or you can send an issue for me.
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
 - https://github.com/0xFableOrg/0xFable [Trading card game]
+- https://github.com/MoralisWeb3/unity-web3-game-kit [Unity Web3 Game Kit]
 
 > SDK
 - https://github.com/Ankr-network/game-unreal-sdk [Mirage Unreal SDK]
