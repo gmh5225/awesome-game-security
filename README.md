@@ -1189,6 +1189,7 @@ Or you can send an issue for me.
 - https://github.com/OALabs/hashdb-ida [HashDB API hash lookup plugin for IDA Pro]
 - https://github.com/Vu1nT0tal/firmeye [IoT]
 - https://github.com/sean2077/big5-decode-ida [IDA Plugin for decoding bytes as big5]
+- https://github.com/Vis-Wing/Binoculars [Binoculars is an IDA PRO plugin with an integrated AI interface]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
