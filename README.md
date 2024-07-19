@@ -1592,6 +1592,7 @@ Or you can send an issue for me.
 - https://github.com/floesen/KExecDD [KSecDD.sys]
 - https://github.com/gmh5225/Win-Driver-EXP/tree/main/CVE-2024-33218 [AsUpIO64.sys]
 - https://github.com/gmh5225/Win-Driver-EXP/tree/main/CVE-2024-30804 [AsInsHelp64.sys]
+- https://github.com/gmh5225/CVE-2020-14974 [IObitUnlocker.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
