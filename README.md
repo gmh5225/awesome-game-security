@@ -44,6 +44,7 @@ Or you can send an issue for me.
 - [IOS Emulator](#ios-emulator)
 - [Game Boy](#game-boy)
 - [Nintendo Switch](#nintendo-switch)
+- [Xbox](#Xbox)
 
 ## Game Engine
 > Guide
@@ -3561,3 +3562,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Atmosphere-NX/Atmosphere [Customized firmware]
 - https://github.com/tomvita/SE-tools [Memory hacking]
 - https://github.com/jakcron/nstool [General purpose read/extract tool]
+
+## Xbox
+- https://github.com/xemu-project/xemu [Xbox Emulator for Windows]
+
