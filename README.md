@@ -887,6 +887,7 @@ Or you can send an issue for me.
 - https://github.com/the-dise/EasyPixel [Magisk module that disguises a device under Google Pixel]
 - https://github.com/gmh5225/MagiskHide [Portable MagiskHide]
 - https://github.com/lico-n/ZygiskFrida [Injects frida gadget using zygisk]
+- https://github.com/Admirepowered/Zygisk_mod [Standalone implementation of Zygisk]
 - https://github.com/anasfanani/Magisk-Tailscaled [Magisk module for running Tailscale]
 - https://github.com/j-hc/FlagSecurePatcher [Disable flag secure and screenshot listeners]
 
