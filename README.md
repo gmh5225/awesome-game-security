@@ -473,6 +473,7 @@ Or you can send an issue for me.
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
 - https://github.com/0xFableOrg/0xFable [Trading card game]
+- https://github.com/adrianhajdin/project_web3_battle_game [Web3 NFT Card Game]
 - https://github.com/MoralisWeb3/unity-web3-game-kit [Unity Web3 Game Kit]
 - https://github.com/web3gamesofficial/web3games-blockchain [Web3Games blockchain network based on Substrate]
 - https://github.com/alto-io/game3.js [The Web 3.0 Game Framework]
