@@ -470,6 +470,7 @@ Or you can send an issue for me.
 - https://github.com/JoranHonig/awesome-web3-ai-security [web3 ai security]
 - https://github.com/immunefi-team/Web3-Security-Library [web3 security and programming tutorials/tools]
 - https://github.com/Malinariy/Solidity-gas-optimizations-tips [Gas optimizations tips]
+- https://github.com/w3f/Grants-Program [Web3 Foundation Grants Program]
 
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
@@ -481,6 +482,7 @@ Or you can send an issue for me.
 
 > SDK
 - https://github.com/Ankr-network/game-unreal-sdk [Mirage Unreal SDK]
+- https://github.com/hyperledger/web3j [Lightweight Java and Android library for integration with Ethereum clients]
 
 > Tools
 - https://github.com/swiss-knife-xyz/swiss-knife [All your EVM tools in one place]
