@@ -2136,6 +2136,7 @@ Or you can send an issue for me.
 - https://github.com/YohananTzeviyah/LibreMaple-Client [LibreMaple Client]
 - https://github.com/speedyHKjournalist/MapleServerAndroid [GMS 083 server on Android]
 - https://github.com/Bratah123/ElectronMS [Private Server-KMS-316]
+- https://github.com/SoulGirlJP/AzureV316 [Private Server-KMS-316]
 - https://github.com/Elem8100/MapleNecrocer [MapleStory Client Emulator]
 
 > Game:Minecraft
