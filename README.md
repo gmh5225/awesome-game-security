@@ -2975,13 +2975,13 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/janoglezcampos/DeathSleep
 - https://github.com/gmh5225/Sleep-obf-T.D.P.
 - https://github.com/mgeeky/ShellcodeFluctuation
-- https://github.com/Gofrettin/veh-printf-hook [PAGE_GUARD]
-- https://github.com/charliewolfe/PointerGuard [PAGE_GUARD]
-- https://github.com/connormcgarr/EATGuard [PAGE_GUARD]
-- https://github.com/gmh5225/MemoryGuard [PAGE_GUARD]
-- https://github.com/ilovecsad/veh_hide_memory [PAGE_NOACCESS]
-- https://github.com/gmh5225/PAGE_NO_ACCESS-not-byfron [PAGE_NOACCESS]
-- https://github.com/saveme712/BinCon [PAGE_NOACCESS]
+- https://github.com/Gofrettin/veh-printf-hook [VEH + PAGE_GUARD]
+- https://github.com/charliewolfe/PointerGuard [VEH + PAGE_GUARD]
+- https://github.com/connormcgarr/EATGuard [VEH + PAGE_GUARD]
+- https://github.com/gmh5225/MemoryGuard [VEH + PAGE_GUARD]
+- https://github.com/ilovecsad/veh_hide_memory [VEH + PAGE_NOACCESS]
+- https://github.com/gmh5225/PAGE_NO_ACCESS-not-byfron [VEH + PAGE_NOACCESS]
+- https://github.com/saveme712/BinCon [VEH + PAGE_NOACCESS]
 
 > Binary Packer
 - https://github.com/dhondta/awesome-executable-packing
