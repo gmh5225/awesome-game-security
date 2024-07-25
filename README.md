@@ -471,6 +471,7 @@ Or you can send an issue for me.
 - https://github.com/immunefi-team/Web3-Security-Library [web3 security and programming tutorials/tools]
 - https://github.com/Malinariy/Solidity-gas-optimizations-tips [Gas optimizations tips]
 - https://github.com/w3f/Grants-Program [Web3 Foundation Grants Program]
+- https://github.com/Bonfida/solana-name-service-guide [Solana name service]
 
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
