@@ -1353,6 +1353,7 @@ Or you can send an issue for me.
 - https://github.com/KameronHawk/Kernel-VAD-Injector [Hide VAD]
 - https://github.com/nettitude/Tartarus-TpAllocInject [TpAllocInject]
 - https://github.com/SafeBreach-Labs/PoolParty [ThreadPool]
+- https://github.com/hasherezade/thread_namecalling [SetThreadDescription]
 
 > Injection:Linux
 - https://github.com/ixty/mandibule
