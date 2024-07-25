@@ -3527,6 +3527,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 ## Windows Subsystem for Linux
 - https://github.com/microsoft/WSL2-Linux-Kernel
 - https://github.com/sxlmnwb/windows-subsystem-linux
+- https://github.com/Nevuly/WSL2-Linux-Kernel-Rolling [Stable Kernel for WSL2]
 
 ## Windows Subsystem for Android
 - https://github.com/K3V1991/How-to-download-and-install-WSA [Guide]
