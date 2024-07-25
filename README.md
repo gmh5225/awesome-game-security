@@ -483,6 +483,8 @@ Or you can send an issue for me.
 
 > SDK
 - https://github.com/Ankr-network/game-unreal-sdk [Mirage Unreal SDK]
+- https://github.com/magicblock-labs/Solana.Unity-SDK [Unity-Solana SDK]
+- https://github.com/Virus-Axel/godot-solana-sdk [Godot Solana SDK]
 - https://github.com/hyperledger/web3j [Lightweight Java and Android library for integration with Ethereum clients]
 
 > Tools
