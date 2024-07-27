@@ -464,6 +464,7 @@ Or you can send an issue for me.
 - https://github.com/Dapp-Learning-DAO/Dapp-Learning [Dapp]
 - https://github.com/contractcops/auditingroadmap [Solidity]
 - https://github.com/0xcacti/awesome-solidity-dev-tools [Solidity]
+- https://github.com/mattstam/solidity-template [Solidity Template]
 - https://github.com/chinmay-farkya/solidity-notes [Solidity Notes]
 - https://github.com/33357/smartcontract-apps [Solidity CN]
 - https://github.com/nullity00/web3-resources [Web3 resources]
@@ -480,6 +481,9 @@ Or you can send an issue for me.
 - https://github.com/MoralisWeb3/unity-web3-game-kit [Unity Web3 Game Kit]
 - https://github.com/web3gamesofficial/web3games-blockchain [Web3Games blockchain network based on Substrate]
 - https://github.com/alto-io/game3.js [The Web 3.0 Game Framework]
+
+> Smart Contract Template
+- https://github.com/mattstam/solidity-template [Solidity Template]
 
 > SDK
 - https://github.com/Ankr-network/game-unreal-sdk [Mirage Unreal SDK]
