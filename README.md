@@ -494,6 +494,10 @@ Or you can send an issue for me.
 - https://github.com/costa-group/EthIR [A framework for high-level Analysis of Ethereum Bytecode]
 - https://github.com/warp-id/solana-trading-bot [Solana Trading Bot]
 
+> Unit tests
+- https://github.com/foundry-rs/foundry
+- https://github.com/NomicFoundation/hardhat
+
 > Security
 - https://github.com/preslavxyz/Web3-Security-Researcher-Roadmap [Web3 Security Researcher Roadmap]
 - https://github.com/SunWeb3Sec [Let's make Web3 more secure]
