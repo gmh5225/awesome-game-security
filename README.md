@@ -3350,6 +3350,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Psmths/windows-forensic-artifacts [Guide to the various Windows forensic artifacts]
 - https://github.com/rabbitstack/fibratus [Windows kernel exploration and tracing]
 - https://github.com/google/grr [remote live forensics]
+- https://github.com/MrMugiwara/FTK-imager-OSX [Forensics Tools For MAC OS X]
 
 > Dynamic Script
 - https://github.com/can1357/NtLua
