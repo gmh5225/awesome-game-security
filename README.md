@@ -3329,7 +3329,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/c3rb3ru5d3d53c/binlex
 - https://github.com/mischasan/aho-corasick
 
-> Information System
+> Information System & Forensics
 - https://github.com/Enum0x539/Qvoid-Token-Grabber
 - https://github.com/travisfoley/dfirtriage
 - https://github.com/AlessandroZ/LaZagne
