@@ -534,6 +534,7 @@ Or you can send an issue for me.
 
 > Contract source code
 - https://github.com/tangtj/bsc-contract-database [BSC]
+- https://github.com/smartcontractkit/smart-contract-examples [ERC]
 
 ## DirectX
 > Guide
