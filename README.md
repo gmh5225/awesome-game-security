@@ -3084,9 +3084,10 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/1hAck-0/zeroimport
 - https://github.com/emlinhax/blitz
 
-> Shellcode Engine
+> Shellcode Engine & Tricks
 - https://github.com/jseclab/obj2shellcode
 - https://github.com/lainswork/shellcode-factory
+- https://github.com/H1d3r/GPU_ShellCode [hide the payload inside the gpu memory]
 
 > Obfuscation Engine
 - https://github.com/vi3t1/vmprotect-3.5.1
