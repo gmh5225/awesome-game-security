@@ -1418,6 +1418,8 @@ Or you can send an issue for me.
 - https://github.com/WeiJiLab/kernel-hook-framework [linux kernel inline hook framework]
 - https://github.com/Rprop/And64InlineHook [Android ARMv8 inline hook framework]
 - https://github.com/GToad/Android_Inline_Hook_ARM64 [Android ARMv8 inline hook framework]
+- https://github.com/BossKoopa/BWSR [Arm64 inline hooking for iOS, Android, OSX, and Linux]
+
 
 > ROP Finder
 - https://github.com/0vercl0k/rp
