@@ -459,6 +459,7 @@ Or you can send an issue for me.
 - https://github.com/shafu0x/evm-from-scratch-book [EVM]
 - https://github.com/smlxl/evm.codes [EVM Opcodes Interactive Reference]
 - https://github.com/Unboxed-Software/solana-course [A complete course for learning Solana]
+- https://www.rareskills.io/solana-tutorial [A Solana Course By Rareskills]
 - https://github.com/lambdaclass/lambdaworks [Crypto]
 - https://github.com/preslavxyz/Web3-Security-Researcher-Roadmap [Web3 Security Researcher Roadmap]
 - https://github.com/coinspect/learn-evm-attacks [EVM Security]
