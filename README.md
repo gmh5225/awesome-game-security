@@ -687,7 +687,8 @@ Or you can send an issue for me.
 - https://ioninja.com/downloads.html [Protocol Analyzer]
 - https://github.com/wilszdev/SteamAntiAntiDebug [Steam]
 - https://github.com/H5GG/H5GG [IOS cheat engine]
-- https://github.com/ri-char/pwatch [HWBP on linux]
+- https://github.com/ri-char/pwatch [HWBP on linux/android]
+- https://github.com/enenH/pwatch-c [HWBP on linux/android]
 - https://github.com/Ylarod/hardware-breakpoint [HWBP on linux/android]
 
 > Packet Sniffer&Filter
