@@ -1223,6 +1223,7 @@ Or you can send an issue for me.
 - https://github.com/sean2077/big5-decode-ida [IDA Plugin for decoding bytes as big5]
 - https://github.com/Vis-Wing/Binoculars [Binoculars is an IDA PRO plugin with an integrated AI interface]
 - https://github.com/Reodus/CBS [IDA Plugin to set custom breakpoints on mnemonics]
+- https://github.com/matteyeux/IDArling [IDArling is a collaborative reverse engineering plugin for IDA Pro and Hex-Rays]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
