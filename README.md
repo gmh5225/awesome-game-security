@@ -973,6 +973,9 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Android-MemoryTool [RPM]
 - https://github.com/Anonym0usWork1221/C-Android-Memory-Tool [RPM]
 
+> Android Application CVE
+- https://github.com/nahid0x1/CVE-2024-0044 [a vulnerability affecting Android version 12 & 13]
+
 > Android Kernel CVE
 - https://github.com/ScottyBauer/Android_Kernel_CVE_POCs [List]
 - https://github.com/tangsilian/android-vuln [List]
