@@ -865,6 +865,7 @@ Or you can send an issue for me.
 - https://github.com/australeo/libipt-rs [ipt.sys]
 - https://github.com/intelpt/processor-trace [Intel PT Decoder]
 - https://github.com/gmh5225/Driver-intel-PEBs-LoopHPCs [Intel PEBs]
+- https://github.com/libiht/libiht [Intel Hardware Trace Library]
 - https://github.com/ilovecsad/Ark [Tool]
 - https://github.com/gmh5225/ntoskrnl_file_collection [Ntoskrnl Version]
 - https://github.com/gmh5225/win32k_file_collection [Win32k Version]
