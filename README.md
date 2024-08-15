@@ -1123,6 +1123,7 @@ Or you can send an issue for me.
 - https://github.com/kweatherman/sigmakerex [Signature Maker]
 - https://github.com/A200K/IDA-Pro-SigMaker [Signature Maker]
 - https://github.com/mahmoudimus/ida-pysigmaker [Signature Maker]
+- https://github.com/TKazer/IDA-Pro-9.0-SigMaker [Signature maker plugin for IDA 9.0]
 - https://github.com/Mixaill/FakePDB [PDB Generation From IDA]
 - https://github.com/illera88/Ponce [Symbolic Execution]
 - https://github.com/airbus-cert/ttddbg [Time Travel Debugging]
