@@ -1428,6 +1428,7 @@ Or you can send an issue for me.
 - https://github.com/Rprop/And64InlineHook [Android ARMv8 inline hook framework]
 - https://github.com/GToad/Android_Inline_Hook_ARM64 [Android ARMv8 inline hook framework]
 - https://github.com/BossKoopa/BWSR [Arm64 inline hooking for iOS, Android, OSX, and Linux]
+- https://github.com/regomne/ilhook-rs [Rust x86]
 
 
 > ROP Finder
