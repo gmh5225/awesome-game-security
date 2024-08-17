@@ -766,6 +766,7 @@ Or you can send an issue for me.
 - https://github.com/MlgmXyysd/Xiaomi-HyperOS-BootLoader-Bypass [Xiaomi HyperOS BootLoader Bypass]
 - https://github.com/null-luo/btrace [Android App Dynamic Behavior Tracking Tool using eBPF]
 - https://github.com/michaelmsonne/SignToolGUI [signtool GUI]
+- https://disasm.pro/ [A realtime assembler/disassembler]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
