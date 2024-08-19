@@ -1921,6 +1921,7 @@ Or you can send an issue for me.
 - https://github.com/Zakaria-Master/UE4Dumper_Emulator [SDK Dump For Android]
 - https://github.com/BigWhite666/BigWhiteTool [SDK Dump For Android]
 - https://github.com/MJx0/iOS_UE4Dumper [SDK Dump For IOS]
+- https://github.com/yring-me/ts-ue4dumper [TypeScript and Frida UE4dumper]
 - https://github.com/CorrM/Unreal-Finder-Tool [SDK View]
 - https://github.com/spudgy/UnrealEngine4-SwissKnife [SDK View]
 - https://github.com/shalzuth/UnrealSharp [SDK View]
