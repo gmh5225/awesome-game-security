@@ -1472,6 +1472,7 @@ Or you can send an issue for me.
 - https://github.com/ALittlePatate/TaxiDriver [W/RPM Driver and usermode for Linux]
 - https://github.com/gmh5225/Android-MemoryTool [RPM for Android]
 - https://github.com/Anonym0usWork1221/C-Android-Memory-Tool [RPM for Android]
+- https://github.com/0xenia/remem [RPM for Windows]
 
 > DMA
 - https://github.com/ufrisk/pcileech
