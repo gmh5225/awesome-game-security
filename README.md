@@ -191,6 +191,9 @@ Or you can send an issue for me.
 - [A maintained collection of useful & free unity scripts / library's / plugins and extensions](https://github.com/michidk/Unity-Script-Collection)
 - [ChatGPT integration with Unity Editor](https://github.com/keijiro/AICommand)
 
+> Game Engine Plugins:Godot
+- https://github.com/libriscv/godot-sandbox [Sandboxing that enables safe modding for Godot games]
+
 > Game Engine Plugins:Lumix
 - https://github.com/nem0/lumixengine_maps [Map downloader]
 
