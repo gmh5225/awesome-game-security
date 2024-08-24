@@ -507,6 +507,7 @@ Or you can send an issue for me.
 - https://github.com/cryptoloutre/solana-tools [A bunch of tools to help people in the Solana ecosystem]
 - https://github.com/costa-group/EthIR [A framework for high-level Analysis of Ethereum Bytecode]
 - https://github.com/warp-id/solana-trading-bot [Solana Trading Bot]
+- https://github.com/0xKoda/llevm [Talk with EVM Bytecode using webLLM]
 
 > Unit tests
 - https://github.com/foundry-rs/foundry
