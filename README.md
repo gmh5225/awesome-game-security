@@ -1833,6 +1833,7 @@ Or you can send an issue for me.
 
 > Anti Forensics
 - https://github.com/PaulNorman01/Forensia
+- https://github.com/ashemery/Anti-Forensics
 
 > Triggerbot & Aimbot
 - https://github.com/changeofpace/MouHidInputHook
