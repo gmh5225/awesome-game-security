@@ -455,6 +455,7 @@ Or you can send an issue for me.
 - https://github.com/slowmist/Web3-Project-Security-Practice-Requirements
 - https://github.com/yjjnls/awesome-blockchain [Guide]
 - https://github.com/chaozh/awesome-blockchain-cn [CN Guide]
+- https://github.com/bekatom/awesome-ethereum [ETH Guide]
 - https://github.com/Lilyjjo/mev_reading_list [List of resources to understand what 'mev' is]
 - https://en.hackndo.com/ethereum-virtual-machine [EVM]
 - https://github.com/mektigboy/evm-chad [EVM]
