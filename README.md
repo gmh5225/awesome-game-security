@@ -509,6 +509,7 @@ Or you can send an issue for me.
 - https://github.com/costa-group/EthIR [A framework for high-level Analysis of Ethereum Bytecode]
 - https://github.com/warp-id/solana-trading-bot [Solana Trading Bot]
 - https://github.com/0xKoda/llevm [Talk with EVM Bytecode using webLLM]
+- https://github.com/cdump/evmole [Extracts function selectors, arguments and state mutability from EVM bytecode]
 
 > Unit tests
 - https://github.com/foundry-rs/foundry
