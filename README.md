@@ -472,6 +472,7 @@ Or you can send an issue for me.
 - https://github.com/Dapp-Learning-DAO/Dapp-Learning [Dapp]
 - https://github.com/contractcops/auditingroadmap [Solidity]
 - https://github.com/0xcacti/awesome-solidity-dev-tools [Solidity]
+- https://github.com/0xArDANT/Solidity-Exercises [Solidity Exercises]
 - https://github.com/mattstam/solidity-template [Solidity Template]
 - https://github.com/chinmay-farkya/solidity-notes [Solidity Notes]
 - https://github.com/33357/smartcontract-apps [Solidity CN]
