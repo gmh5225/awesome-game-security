@@ -1246,6 +1246,7 @@ Or you can send an issue for me.
 - https://github.com/richor1042/IDAFuncOutline [optimize the readability of decompiled code for iOS ARM64 binaries]
 - https://github.com/Dump-GUY/IDA_PHNT_TYPES [Converted phnt to IDA TIL, IDC (Hex-Rays)]
 - https://github.com/Mrack/DeObfBR [libtprt.so]
+- https://github.com/janisslsm/ida-ps4-helper [A helper plugin for PS4 module loader]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
