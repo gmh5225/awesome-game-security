@@ -1245,6 +1245,7 @@ Or you can send an issue for me.
 - https://github.com/matteyeux/IDArling [IDArling is a collaborative reverse engineering plugin for IDA Pro and Hex-Rays]
 - https://github.com/richor1042/IDAFuncOutline [optimize the readability of decompiled code for iOS ARM64 binaries]
 - https://github.com/Dump-GUY/IDA_PHNT_TYPES [Converted phnt to IDA TIL, IDC (Hex-Rays)]
+- https://github.com/Mrack/DeObfBR [libtprt.so]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
@@ -1278,6 +1279,7 @@ Or you can send an issue for me.
 - https://github.com/ahaggard2013/binaryninja-ollama [Binary Ninja Ollama]
 - https://github.com/0xricksanchez/Shellcoder [BinaryNinja Shellcoder Plugin]
 - https://github.com/pd0wm/binaryninja-pcode [This plugin serves as a bridge between Binary Ninja and Ghidra's disassembler]
+- https://github.com/zhuzhu-Top/deobf [libtprt.so]
 
 > Ghidra Plugins
 - https://github.com/AllsafeCyberSecurity/awesome-ghidra [List]
