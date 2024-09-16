@@ -1490,6 +1490,7 @@ Or you can send an issue for me.
 - https://github.com/0xenia/remem [RPM for Windows]
 
 > DMA
+- https://github.com/Rakeshmonkee/DMA [Guide]
 - https://github.com/ufrisk/pcileech
 - https://github.com/ekknod/pcileech-wifi [pcileech-fpga with wireless card emulation]
 - https://github.com/Cr4sh/pico_dma
