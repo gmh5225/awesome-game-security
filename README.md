@@ -983,6 +983,7 @@ Or you can send an issue for me.
 - https://github.com/KuhakuPixel/AceTheGame [Game Hacking Tools]
 - https://github.com/gmh5225/Android-MemoryTool [RPM]
 - https://github.com/Anonym0usWork1221/C-Android-Memory-Tool [RPM]
+- https://github.com/Poko-Apps/MemKernel [RPM]
 
 > Android Application CVE
 - https://github.com/nahid0x1/CVE-2024-0044 [a vulnerability affecting Android version 12 & 13]
@@ -1077,6 +1078,7 @@ Or you can send an issue for me.
 - https://github.com/rogxo/kernel_hack
 - https://github.com/Jiang-Night/Kernel_driver_hack
 - https://github.com/WeiJiLab/kernel-hook-framework [Kernel inline hook framework]
+- https://github.com/Poko-Apps/MemKernel [RPM]
 
 > Android Network Explorer
 - https://github.com/emanuele-f/PCAPdroid
@@ -1486,6 +1488,7 @@ Or you can send an issue for me.
 - https://github.com/ekknod/vm [Minimal memory library for Windows/Linux]
 - https://github.com/ALittlePatate/TaxiDriver [W/RPM Driver and usermode for Linux]
 - https://github.com/gmh5225/Android-MemoryTool [RPM for Android]
+- https://github.com/Poko-Apps/MemKernel [RPM for Android]
 - https://github.com/Anonym0usWork1221/C-Android-Memory-Tool [RPM for Android]
 - https://github.com/0xenia/remem [RPM for Windows]
 
