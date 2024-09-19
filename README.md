@@ -1500,6 +1500,7 @@ Or you can send an issue for me.
 - https://github.com/ufrisk/pcileech
 - https://github.com/ekknod/pcileech-wifi [pcileech-fpga with wireless card emulation]
 - https://github.com/Cr4sh/pico_dma
+- https://github.com/kWAYTV/dma-cheat-base [Cheat base]
 - https://github.com/Spuckwaffel/DMALib [DMA library]
 - https://github.com/Metick/DMALibrary [DMA library]
 - https://github.com/ekknod/vm [Minimal memory library for Windows/Linux]
