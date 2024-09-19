@@ -1781,6 +1781,7 @@ Or you can send an issue for me.
 - https://github.com/cs1ime/blacksun-framework [Framework for game cheat development]
 - https://github.com/cs1ime/ceserver-rawmem [CE]
 - https://github.com/gmh5225/kvm-csgo-cheat [CSGO]
+- https://github.com/atombottle/cs2_kvm_dma [CS2]
 - https://github.com/gmh5225/cs16-trigger-kvm [CS1.6]
 - https://github.com/tenclass/mvisor [C++ remake]
 - https://github.com/k3v1n1990s/docker-win [wsl2]
@@ -2445,6 +2446,8 @@ Or you can send an issue for me.
 - https://github.com/Elsie-Kgafela/csgo2-cheat [Internal]
 - https://github.com/vortex1573/Aurora [Internal]
 - https://github.com/eden13378/CS2-DMA-Cheat [DMA]
+- https://github.com/spookykokojunge/CS2-Dma-Radar [DMA]
+- https://github.com/atombottle/cs2_kvm_dma [KVM] 
 
 > Game:Assault Cube
 - https://github.com/gmh5225/external-esp-hack-assaultcube [GDI overlay]
