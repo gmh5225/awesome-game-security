@@ -2441,6 +2441,7 @@ Or you can send an issue for me.
 - https://github.com/chaycee/CS2Internal [Internal]
 - https://github.com/Elsie-Kgafela/csgo2-cheat [Internal]
 - https://github.com/vortex1573/Aurora [Internal]
+- https://github.com/eden13378/CS2-DMA-Cheat [DMA]
 
 > Game:Assault Cube
 - https://github.com/gmh5225/external-esp-hack-assaultcube [GDI overlay]
