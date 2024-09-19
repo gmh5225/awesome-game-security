@@ -679,6 +679,7 @@ Or you can send an issue for me.
 - https://github.com/BeneficialCode/KReClassEx [Kernel ReClassEx]
 - https://github.com/imerzan/ReClass-DMA [ReClass DMA]
 - https://github.com/Metick/CheatEngine-DMA [CheatEngine DMA]
+- https://github.com/kaijia2022/Cheat-Engine-DMA-Plugin [CheatEngine DMA]
 - https://github.com/x64dbg/DotX64Dbg
 - https://github.com/imugee/xdv
 - https://github.com/eteran/edb-debugger [For Linux]
@@ -1506,6 +1507,7 @@ Or you can send an issue for me.
 - https://github.com/ekknod/vm [Minimal memory library for Windows/Linux]
 - https://github.com/imerzan/ReClass-DMA [ReClass DMA]
 - https://github.com/Metick/CheatEngine-DMA [CheatEngine DMA]
+- https://github.com/kaijia2022/Cheat-Engine-DMA-Plugin [CheatEngine DMA]
 
 > W2S
 - https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
