@@ -1498,6 +1498,7 @@ Or you can send an issue for me.
 > DMA
 - https://github.com/JPShag/DMA-FW-Guide-2.0 [Guide]
 - https://github.com/Rakeshmonkee/DMA [Guide]
+- https://github.com/PacktPublishing/Learn-FPGA-Programming [Guide]
 - https://github.com/ufrisk/pcileech
 - https://github.com/ekknod/pcileech-wifi [pcileech-fpga with wireless card emulation]
 - https://github.com/Cr4sh/pico_dma
