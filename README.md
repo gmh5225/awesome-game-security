@@ -2567,6 +2567,7 @@ Or you can send an issue for me.
 - https://github.com/M1fisto/nullptr-apex-external [External]
 - https://github.com/3nolan5/R5Apex-UserMode [External]
 - https://github.com/NaiJii/Apex-Mizu-Base [Internal]
+- https://github.com/boowampp/ApexDmaCheatUpdated [DMA]
 
 > Game:Fortnite
 - https://github.com/kem0x/FortKit [Dump]
