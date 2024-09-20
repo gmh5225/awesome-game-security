@@ -1577,6 +1577,7 @@ Or you can send an issue for me.
 - https://github.com/fedes1to/Zygisk-ImGui-Menu [ImGui menu using Zygisk]
 - https://github.com/reveny/Zygisk-ImGui-Mod-Menu [ImGui menu using Zygisk]
 - https://github.com/s4m33r89/Imgui-Native-ModMenu [Imgui Menu for Android]
+- https://github.com/joeyjurjens/iOS-Mod-Menu-Template-for-Theos [IOS mod menu]
 
 > UI Interface
 - https://github.com/adamhlt/ImGui-Standalone
