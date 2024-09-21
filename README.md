@@ -2448,6 +2448,7 @@ Or you can send an issue for me.
 - https://github.com/chaycee/CS2Internal [Internal]
 - https://github.com/Elsie-Kgafela/csgo2-cheat [Internal]
 - https://github.com/vortex1573/Aurora [Internal]
+- https://github.com/W1lliam1337/cstrike2-hack [Rust-based internal]
 - https://github.com/eden13378/CS2-DMA-Cheat [DMA]
 - https://github.com/spookykokojunge/CS2-Dma-Radar [DMA]
 - https://github.com/atombottle/cs2_kvm_dma [KVM] 
