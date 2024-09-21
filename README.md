@@ -49,6 +49,7 @@ Or you can send an issue for me.
 ## Game Engine
 > Guide
 - https://github.com/QianMo/Game-Programmer-Study-Notes
+- https://github.com/stevinz/awesome-game-engine-dev [Awesome list of resources for Game Engine Development]
 - https://github.com/Gforcex/OpenGraphic [Graphic Engine & Game Engine lists]
 - https://github.com/bobeff/open-source-engines [A list of open source game engines]
 - https://github.com/ThisisGame/cpp-game-engine-book
