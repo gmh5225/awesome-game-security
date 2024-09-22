@@ -1793,6 +1793,7 @@ Or you can send an issue for me.
 - https://github.com/tenclass/mvisor [C++ remake]
 - https://github.com/k3v1n1990s/docker-win [wsl2]
 - https://github.com/SingularityCloud/KVM.Performance [ioapic]
+- https://github.com/xqemu/xqemu [Play original Xbox games]
 
 > Wine
 - https://github.com/ValveSoftware/Proton [Steam]
