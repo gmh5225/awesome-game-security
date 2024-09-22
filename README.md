@@ -988,6 +988,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Android-MemoryTool [RPM]
 - https://github.com/Anonym0usWork1221/C-Android-Memory-Tool [RPM]
 - https://github.com/Poko-Apps/MemKernel [RPM]
+- https://github.com/DeNA/mempatch [Memory tampering tool]
 
 > Android Application CVE
 - https://github.com/nahid0x1/CVE-2024-0044 [a vulnerability affecting Android version 12 & 13]
