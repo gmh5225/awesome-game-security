@@ -1762,6 +1762,7 @@ Or you can send an issue for me.
 - https://github.com/david942j/kvm-kernel-example [Guide]
 - https://github.com/airbus-seclab/qemu_blog [Guide]
 - https://github.com/BigAnteater/KVM-GPU-Passthrough [GPU Passthrough]
+- https://github.com/dmaivel/ntoseye [Kernel Debugger]
 - https://github.com/ispras/qemu/tree/windbg [Windbg]
 - https://github.com/cyberus-technology/virtualbox-kvm [VirtualBox with KVM Backend]
 - https://github.com/Qemu-Gang
