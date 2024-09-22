@@ -454,6 +454,7 @@ Or you can send an issue for me.
 > Blockchain Guide
 - https://github.com/unbalancedparentheses/practical_cryptography_and_distributed_ledgers
 - https://github.com/slowmist/Web3-Project-Security-Practice-Requirements
+- https://www.freeweb3resources.com [Guide]
 - https://github.com/yjjnls/awesome-blockchain [Guide]
 - https://github.com/chaozh/awesome-blockchain-cn [CN Guide]
 - https://github.com/bekatom/awesome-ethereum [ETH Guide]
