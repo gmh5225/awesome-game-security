@@ -783,6 +783,7 @@ Or you can send an issue for me.
 - https://github.com/null-luo/btrace [Android App Dynamic Behavior Tracking Tool using eBPF]
 - https://github.com/michaelmsonne/SignToolGUI [signtool GUI]
 - https://disasm.pro/ [A realtime assembler/disassembler]
+- https://github.com/iofomo/abyss [Android system call hook]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
@@ -951,6 +952,9 @@ Or you can send an issue for me.
 > Hook ART(android)
 - https://github.com/PAGalaxyLab/YAHFA
 - https://github.com/canyie/pine
+
+> Hook syscall(android)
+- https://github.com/iofomo/abyss [Android system call hook]
 
 > Android Terminal Emulator
 - https://github.com/termux/termux-app
@@ -1461,6 +1465,7 @@ Or you can send an issue for me.
 - https://github.com/GToad/Android_Inline_Hook_ARM64 [Android ARMv8 inline hook framework]
 - https://github.com/BossKoopa/BWSR [Arm64 inline hooking for iOS, Android, OSX, and Linux]
 - https://github.com/regomne/ilhook-rs [Rust x86]
+- https://github.com/iofomo/abyss [Android system call hook]
 
 
 > ROP Finder
