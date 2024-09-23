@@ -458,6 +458,7 @@ Or you can send an issue for me.
 - https://github.com/yjjnls/awesome-blockchain [Guide]
 - https://github.com/chaozh/awesome-blockchain-cn [CN Guide]
 - https://github.com/bekatom/awesome-ethereum [ETH Guide]
+- https://github.com/m14r41/PentestingEverything/tree/main/BlockChain%20Pentesting [Pentesting Checklist]
 - https://github.com/ipsilon/eof [evm object format]
 - https://github.com/Lilyjjo/mev_reading_list [List of resources to understand what 'mev' is]
 - https://en.hackndo.com/ethereum-virtual-machine [EVM]
@@ -524,6 +525,7 @@ Or you can send an issue for me.
 > Security
 - https://github.com/preslavxyz/Web3-Security-Researcher-Roadmap [Web3 Security Researcher Roadmap]
 - https://github.com/SunWeb3Sec [Let's make Web3 more secure]
+- https://github.com/m14r41/PentestingEverything/tree/main/BlockChain%20Pentesting [Pentesting Checklist]
 - https://github.com/immunefi-team/Web3-Security-Library [web3 security and programming tutorials/tools]
 - https://github.com/ZhangZhuoSJTU/Web3Bugs [Bugs in Smart Contracts]
 - https://github.com/kadenzipfel/smart-contract-vulnerabilities [A collection of smart contract vulnerabilities]
