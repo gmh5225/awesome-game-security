@@ -3344,6 +3344,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/LukeGoule/compact_vm_detector
 - https://github.com/kernelwernel/VMAware [VM detection library]
 - https://github.com/su-vikas/conbeerlib [Android library for detecting Android virtual containers]
+- https://github.com/can1357/hvdetecc [Collection of hypervisor detections]
 
 > Detection:HWID
 - [All methods of retrieving unique identifiers(HWIDs) on your PC](https://www.unknowncheats.me/forum/anti-cheat-bypass/333662-methods-retrieving-unique-identifiers-hwids-pc.html)
@@ -3356,6 +3357,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/LibreHardwareMonitor/LibreHardwareMonitor
 - https://github.com/lfreist/hwinfo
 - https://github.com/KDIo3/PCIBan
+- https://github.com/can1357/hvdetecc
 - https://github.com/trustdecision/trustdevice-android [Android]
 - https://github.com/trustdecision/trustdevice-ios [IOS]
 
