@@ -406,6 +406,7 @@ Or you can send an issue for me.
 - https://github.com/syoyo/tinygltf [Header only C++11 tiny glTF 2.0 library]
 - https://github.com/atenfyr/UAssetGUI [Viewing and modifying UE4 game assets]
 - https://github.com/UETools/UETools [Accessing, reading and deserializing UE4 assets]
+- https://github.com/atenfyr/UAssetAPI [A low-level .NET library for reading and writing Unreal Engine game assets]
 
 ## Game Hot Patch
 - https://github.com/Tencent/xLua
