@@ -527,6 +527,7 @@ Or you can send an issue for me.
 - https://github.com/SunWeb3Sec [Let's make Web3 more secure]
 - https://github.com/m14r41/PentestingEverything/tree/main/BlockChain%20Pentesting [Pentesting Checklist]
 - https://github.com/immunefi-team/Web3-Security-Library [web3 security and programming tutorials/tools]
+- https://github.com/coinspect/wallet-security-verification-standard [Wallet Security Verification Standard]
 - https://github.com/ZhangZhuoSJTU/Web3Bugs [Bugs in Smart Contracts]
 - https://github.com/kadenzipfel/smart-contract-vulnerabilities [A collection of smart contract vulnerabilities]
 - https://github.com/cryptostaker2/blockchain-security-audits [Security audits]
