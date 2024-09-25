@@ -950,6 +950,7 @@ Or you can send an issue for me.
 - https://github.com/Abbbbbi/Frida-Seccomp [Frida-Seccomp]
 - https://github.com/rednaga/frida-stack [Getting better stacks and backtraces in Frida]
 - https://github.com/DoranekoSystems/frida-FindoutWhatAccess [Find out what accesses this address]
+- https://github.com/piotrbania/frida_usb_dump [Frida script that allows to sniff & dump USB traffic on macOS]
 
 > Hook ART(android)
 - https://github.com/PAGalaxyLab/YAHFA
