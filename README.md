@@ -1265,6 +1265,7 @@ Or you can send an issue for me.
 - https://github.com/Dump-GUY/IDA_PHNT_TYPES [Converted phnt to IDA TIL, IDC (Hex-Rays)]
 - https://github.com/Mrack/DeObfBR [libtprt.so]
 - https://github.com/janisslsm/ida-ps4-helper [A helper plugin for PS4 module loader]
+- https://github.com/Antelcat/ida_copilot [ChatGPT Agent analyses your IDA pseudocode]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
