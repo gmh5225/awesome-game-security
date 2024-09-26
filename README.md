@@ -1266,6 +1266,7 @@ Or you can send an issue for me.
 - https://github.com/Mrack/DeObfBR [libtprt.so]
 - https://github.com/janisslsm/ida-ps4-helper [A helper plugin for PS4 module loader]
 - https://github.com/Antelcat/ida_copilot [ChatGPT Agent analyses your IDA pseudocode]
+- https://github.com/crytic/ida-evm [IDA Processor Module for the Ethereum Virtual Machine (EVM)]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
