@@ -3381,6 +3381,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Detection:Spoof Stack
 - https://github.com/gabriellandau/ShadowStackWalk
+- https://github.com/cryotb/RASD
 
 > Detection:ESP
 - https://github.com/weak1337/PresentHookDetection
