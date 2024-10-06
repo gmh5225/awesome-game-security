@@ -3339,6 +3339,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Detect-Hypervisor_detect_ring_0
 - https://github.com/jonomango/nohv
 - https://github.com/void-stack/Hypervisor-Detection
+- https://github.com/cryotb/VmdtStr [Detect VMMs with faulty handling of STR exit]
 
 > Detection:Virtual Environments 
 - https://github.com/a0rtega/pafish
