@@ -935,6 +935,7 @@ Or you can send an issue for me.
 - https://github.com/Admirepowered/Zygisk_mod [Standalone implementation of Zygisk]
 - https://github.com/anasfanani/Magisk-Tailscaled [Magisk module for running Tailscale]
 - https://github.com/j-hc/FlagSecurePatcher [Disable flag secure and screenshot listeners]
+- https://github.com/hackcatml/zygisk-memdump [A zygisk module that dumps so file from process memory]
 
 > Frida
 - https://github.com/CrackerCat/strongR-frida-android
@@ -999,6 +1000,7 @@ Or you can send an issue for me.
 - https://github.com/Anonym0usWork1221/C-Android-Memory-Tool [RPM]
 - https://github.com/Poko-Apps/MemKernel [RPM]
 - https://github.com/DeNA/mempatch [Memory tampering tool]
+- https://github.com/hackcatml/zygisk-memdump [A zygisk module that dumps so file from process memory]
 
 > Android Application CVE
 - https://github.com/nahid0x1/CVE-2024-0044 [a vulnerability affecting Android version 12 & 13]
