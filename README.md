@@ -1268,6 +1268,7 @@ Or you can send an issue for me.
 - https://github.com/Antelcat/ida_copilot [ChatGPT Agent analyses your IDA pseudocode]
 - https://github.com/crytic/ida-evm [IDA Processor Module for the Ethereum Virtual Machine (EVM)]
 - https://github.com/NoneShell/IDAComments [a IDA plugin helps you to manage your IDA Comments]
+- https://github.com/emoose/idaxex [Xbox360/Xenon loader plugin for IDA 9]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
