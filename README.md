@@ -1273,6 +1273,7 @@ Or you can send an issue for me.
 - https://github.com/crytic/ida-evm [IDA Processor Module for the Ethereum Virtual Machine (EVM)]
 - https://github.com/NoneShell/IDAComments [a IDA plugin helps you to manage your IDA Comments]
 - https://github.com/emoose/idaxex [Xbox360/Xenon loader plugin for IDA 9]
+- https://github.com/junron/auto-enum [automatically identify and set enums for standard functions]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
@@ -1307,6 +1308,7 @@ Or you can send an issue for me.
 - https://github.com/0xricksanchez/Shellcoder [BinaryNinja Shellcoder Plugin]
 - https://github.com/pd0wm/binaryninja-pcode [This plugin serves as a bridge between Binary Ninja and Ghidra's disassembler]
 - https://github.com/zhuzhu-Top/deobf [libtprt.so]
+- https://github.com/junron/auto-enum [automatically identify and set enums for standard functions]
 
 > Ghidra Plugins
 - https://github.com/AllsafeCyberSecurity/awesome-ghidra [List]
