@@ -939,6 +939,7 @@ Or you can send an issue for me.
 - https://github.com/hackcatml/zygisk-memdump [A zygisk module that dumps so file from process memory]
 
 > Frida
+- https://github.com/hackcatml/frida-watchpoint-tutorial [Frida's setHardwareWatchpoint tutorial]
 - https://github.com/CrackerCat/strongR-frida-android
 - https://github.com/gmh5225/frida-ue4dump [UE4]
 - https://github.com/jcalabres/hook-updater [Update Frida hooks automatically]
