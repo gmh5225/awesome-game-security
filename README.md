@@ -528,6 +528,7 @@ Or you can send an issue for me.
 - https://github.com/NomicFoundation/hardhat
 
 > Security
+- https://github.com/OpenZeppelin/openzeppelin-contracts [OpenZeppelin Contracts is a library for secure smart contract development]
 - https://github.com/preslavxyz/Web3-Security-Researcher-Roadmap [Web3 Security Researcher Roadmap]
 - https://github.com/SunWeb3Sec [Let's make Web3 more secure]
 - https://github.com/m14r41/PentestingEverything/tree/main/BlockChain%20Pentesting [Pentesting Checklist]
