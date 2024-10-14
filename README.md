@@ -474,6 +474,7 @@ Or you can send an issue for me.
 - https://github.com/lambdaclass/lambdaworks [Crypto]
 - https://github.com/preslavxyz/Web3-Security-Researcher-Roadmap [Web3 Security Researcher Roadmap]
 - https://github.com/coinspect/learn-evm-attacks [EVM Security]
+- https://github.com/x676f64/secureum-mind_map [EVM Security]
 - https://github.com/SunWeb3Sec/damn-vulnerable-defi-v4-solutions [Defi Security]
 - https://github.com/slowmist/SlowMist-Learning-Roadmap-for-Becoming-a-Smart-Contract-Auditor [Smart contract audit skills roadmap for beginners]
 - https://github.com/Dapp-Learning-DAO/Dapp-Learning [Dapp]
