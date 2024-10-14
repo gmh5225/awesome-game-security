@@ -793,6 +793,9 @@ Or you can send an issue for me.
 - https://disasm.pro/ [A realtime assembler/disassembler]
 - https://github.com/iofomo/abyss [Android system call hook]
 
+> Mixed boolean-arithmetic
+- https://github.com/Colton1skees/mba-resources- [List of mixed boolean-arithmetic resources]
+
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
 - https://github.com/wallds/NoVmpy
