@@ -792,6 +792,7 @@ Or you can send an issue for me.
 - https://github.com/michaelmsonne/SignToolGUI [signtool GUI]
 - https://disasm.pro/ [A realtime assembler/disassembler]
 - https://github.com/iofomo/abyss [Android system call hook]
+- https://github.com/uuksu/RPGMakerDecrypter [Tool for extracting RPG Maker XP, VX and VX Ace encrypted archives]
 
 > Mixed boolean-arithmetic
 - https://github.com/Colton1skees/mba-resources- [List of mixed boolean-arithmetic resources]
