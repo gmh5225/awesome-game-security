@@ -527,6 +527,8 @@ Or you can send an issue for me.
 - https://github.com/foundry-rs/foundry
 - https://github.com/gmh5225/foundry-template [Foundry Template]
 - https://github.com/NomicFoundation/hardhat
+- https://github.com/zeroknots/brokentoken [Foundry Test Suit to test weird ERC20 behavior]
+- https://github.com/SunWeb3Sec/DeFiLabs [On-chain test DeFi using Foundry]
 
 > Security
 - https://github.com/OpenZeppelin/openzeppelin-contracts [OpenZeppelin Contracts is a library for secure smart contract development]
@@ -559,6 +561,8 @@ Or you can send an issue for me.
 - https://github.com/slowmist/solana-smart-contract-security-best-practices [Solana security]
 - https://github.com/JoranHonig/awesome-web3-ai-security [web3 ai security]
 - https://github.com/costa-group/EthIR [A framework for high-level Analysis of Ethereum Bytecode]
+- https://github.com/zeroknots/brokentoken [Foundry Test Suit to test weird ERC20 behavior]
+- https://github.com/SunWeb3Sec/DeFiLabs [On-chain test DeFi using Foundry]
 
 > Contract source code
 - https://github.com/tangtj/bsc-contract-database [BSC]
