@@ -511,13 +511,14 @@ Or you can send an issue for me.
 - https://github.com/Virus-Axel/godot-solana-sdk [Godot Solana SDK]
 - https://github.com/hyperledger/web3j [Lightweight Java and Android library for integration with Ethereum clients]
 
-> Interface
+> Interaction
 - https://github.com/ethereum/go-ethereum [go ethereum]
 - https://github.com/ethereum/web3.py [py ethereum]
 - https://github.com/wevm/viem [js/ts Ethereum]
 - https://github.com/web3/web3.js [js ethereum]
 - https://github.com/ethers-io/ethers.js [js ethereum]
 - https://github.com/mhw0/libethc [c ethereum]
+- https://github.com/sk1122/solana-sdk [js solana]
 
 > Tools
 - https://github.com/swiss-knife-xyz/swiss-knife [All your EVM tools in one place]
