@@ -457,6 +457,7 @@ Or you can send an issue for me.
 - https://github.com/slowmist/Web3-Project-Security-Practice-Requirements
 - https://www.freeweb3resources.com [Guide]
 - https://github.com/yjjnls/awesome-blockchain [Guide]
+- https://github.com/ahmet/awesome-web3 [Guide]
 - https://github.com/chaozh/awesome-blockchain-cn [CN Guide]
 - https://github.com/bekatom/awesome-ethereum [ETH Guide]
 - https://github.com/m14r41/PentestingEverything/tree/main/BlockChain%20Pentesting [Pentesting Checklist]
