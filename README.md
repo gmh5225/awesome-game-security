@@ -512,6 +512,11 @@ Or you can send an issue for me.
 - https://github.com/hyperledger/web3j [Lightweight Java and Android library for integration with Ethereum clients]
 
 > Interface
+- https://github.com/ethereum/go-ethereum [go ethereum]
+- https://github.com/ethereum/web3.py [py ethereum]
+- https://github.com/web3/web3.js [js ethereum]
+- https://github.com/ethers-io/ethers.js [js ethereum]
+- https://github.com/mhw0/libethc [c ethereum]
 - https://github.com/wevm/viem [TypeScript Interface for Ethereum]
 
 > Tools
