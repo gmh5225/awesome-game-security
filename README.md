@@ -1059,6 +1059,7 @@ Or you can send an issue for me.
 > Android Device Trees
 - https://github.com/MiCode/kernel_devicetree [xiaomi device trees]
 - https://github.com/cupid-development/ [xiaomi device trees]
+- https://github.com/PixelOS-AOSP/official_devices [PixelOS device trees]
 - https://github.com/ymdzq/OFRP-device_xiaomi_mondrian [OFRP for Redmi K60 (mondrian)]
 - https://github.com/flakeforever/device_xiaomi_mondrian [Pixel Experience Plus for for Redmi K6/POCO F5 Pro]
 
@@ -1068,6 +1069,7 @@ Or you can send an issue for me.
 - https://android.googlesource.com/kernel/manifest [manifest]
 - https://android.googlesource.com/kernel/common [GKI]
 - https://github.com/aosp-mirror/kernel_common [GKI]
+- https://github.com/PixelOS-AOSP/manifest [An AOSP based ROM aiming to provide the best of Pixel]
 - https://www.android-x86.org [X86]
 - https://blissos.org [X86]
 - https://github.com/MiCode/Xiaomi_Kernel_OpenSource [xiaomi kernel]
