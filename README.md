@@ -827,6 +827,7 @@ Or you can send an issue for me.
 
 > Dynamic Binary Instrumentation
 - https://github.com/hzqst/unicorn_pe
+- https://github.com/momo5502/emulator [Windows User Space Emulator]
 - https://github.com/Nitr0-G/PeVisor [PE]
 - https://github.com/googleprojectzero/TinyInst
 - https://github.com/revsic/cpp-veh-dbi
