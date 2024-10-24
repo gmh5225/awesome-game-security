@@ -533,6 +533,7 @@ Or you can send an issue for me.
 - https://github.com/warp-id/solana-trading-bot [Solana Trading Bot]
 - https://github.com/0xKoda/llevm [Talk with EVM Bytecode using webLLM]
 - https://github.com/cdump/evmole [Extracts function selectors, arguments and state mutability from EVM bytecode]
+- https://openchain.xyz/tools/abi [Some handy tools for encoding/decoding ABI data]
 
 > Unit tests
 - https://github.com/foundry-rs/foundry
