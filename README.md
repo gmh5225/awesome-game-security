@@ -1302,6 +1302,7 @@ Or you can send an issue for me.
 - https://github.com/NoneShell/IDAComments [a IDA plugin helps you to manage your IDA Comments]
 - https://github.com/emoose/idaxex [Xbox360/Xenon loader plugin for IDA 9]
 - https://github.com/junron/auto-enum [automatically identify and set enums for standard functions]
+- https://github.com/ViRb3/swift-ida [IDA plugin to aid with Swift reverse engineering]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
