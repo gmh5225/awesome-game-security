@@ -1308,6 +1308,7 @@ Or you can send an issue for me.
 - https://github.com/junron/auto-enum [automatically identify and set enums for standard functions]
 - https://github.com/ViRb3/swift-ida [IDA plugin to aid with Swift reverse engineering]
 - https://github.com/Krietz7/IDA-DataExportPlus [a IDA Pro plugin to export data better]
+- https://github.com/harlamism/IdaClu [For grouping similar functions]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
