@@ -3387,6 +3387,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Detection:Virtual Environments 
 - https://github.com/a0rtega/pafish
 - https://github.com/gmh5225/Detection-Hyper-v [Hyper-v]
+- https://github.com/gmh5225/Go-Detection-Hyper-v [Hyper-v]
 - https://github.com/Ahora57/MAJESTY-technologies
 - https://github.com/therealdreg/anticuckoo [Cuckoo]
 - https://github.com/strazzere/anti-emulator [Android Anti-Emulator]
