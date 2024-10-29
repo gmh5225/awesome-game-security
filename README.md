@@ -502,6 +502,7 @@ Or you can send an issue for me.
 - https://github.com/web3gamesofficial/web3games-blockchain [Web3Games blockchain network based on Substrate]
 - https://github.com/alto-io/game3.js [The Web 3.0 Game Framework]
 - https://github.com/proofofplay/piratenation-contracts [The Pirate Nation game]
+- https://github.com/MetaMask/red-balloon-game [Red Balloon]
 
 > Wallet connection
 - https://github.com/reown-com/appkit [web]
