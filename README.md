@@ -493,6 +493,7 @@ Or you can send an issue for me.
 - https://github.com/Bonfida/solana-name-service-guide [Solana name service]
 - https://github.com/smartcontractkit/starter-kits [across the smart contract ecosystem]
 - https://github.com/smartcontractkit/solana-starter-kit [Example code for using Chainlink on Solana]
+- https://www.solanaecosystem.com [Solana Ecosystem discoverer]
 
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
