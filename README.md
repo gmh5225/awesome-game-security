@@ -547,6 +547,7 @@ Or you can send an issue for me.
 > Security
 - https://github.com/OpenZeppelin/openzeppelin-contracts [OpenZeppelin Contracts is a library for secure smart contract development]
 - https://github.com/preslavxyz/Web3-Security-Researcher-Roadmap [Web3 Security Researcher Roadmap]
+- https://github.com/tpiliposian/not-awesome-web3-security-roadmap [Web3 Security Researcher roadmap]
 - https://github.com/SunWeb3Sec [Let's make Web3 more secure]
 - https://github.com/m14r41/PentestingEverything/tree/main/BlockChain%20Pentesting [Pentesting Checklist]
 - https://github.com/immunefi-team/Web3-Security-Library [web3 security and programming tutorials/tools]
