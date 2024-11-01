@@ -542,6 +542,7 @@ Or you can send an issue for me.
 > Unit tests
 - https://github.com/foundry-rs/foundry
 - https://github.com/gmh5225/foundry-template [Foundry Template]
+- https://github.com/gmh5225/forge-gui [A GUI wrapper command-line tool for Foundry Template]
 - https://github.com/NomicFoundation/hardhat
 - https://github.com/zeroknots/brokentoken [Foundry Test Suit to test weird ERC20 behavior]
 - https://github.com/SunWeb3Sec/DeFiLabs [On-chain test DeFi using Foundry]
