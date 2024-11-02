@@ -585,6 +585,7 @@ Or you can send an issue for me.
 > Contract source code
 - https://github.com/tangtj/bsc-contract-database [BSC]
 - https://github.com/smartcontractkit/smart-contract-examples [ERC]
+- https://github.com/thirdweb-dev/contracts [ERC]
 - https://github.com/proofofplay/piratenation-contracts [The Pirate Nation game]
 
 ## DirectX
