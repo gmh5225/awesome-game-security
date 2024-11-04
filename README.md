@@ -3668,6 +3668,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/backengineering/msrexec [Elevate arbitrary MSR writes to kernel execution]
 - https://github.com/deepinstinct/Dirty-Vanity [Abusing RtlCreateProcessReflection]
 - https://github.com/mandiant/ShimCacheParser [Shim Cache parser]
+- https://github.com/cmuratori/pmctrace [Real-time collection of PMCs via ETW]
 
 
 > Android
