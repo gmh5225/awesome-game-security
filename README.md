@@ -460,6 +460,7 @@ Or you can send an issue for me.
 - https://github.com/ahmet/awesome-web3 [Guide]
 - https://github.com/chaozh/awesome-blockchain-cn [CN Guide]
 - https://github.com/bekatom/awesome-ethereum [ETH Guide]
+- https://github.com/crytic/awesome-ethereum-security [awesome ethereum security]
 - https://github.com/m14r41/PentestingEverything/tree/main/BlockChain%20Pentesting [Pentesting Checklist]
 - https://github.com/ipsilon/eof [evm object format]
 - https://github.com/Lilyjjo/mev_reading_list [List of resources to understand what 'mev' is]
@@ -548,6 +549,7 @@ Or you can send an issue for me.
 - https://github.com/SunWeb3Sec/DeFiLabs [On-chain test DeFi using Foundry]
 
 > Security
+- https://github.com/crytic/awesome-ethereum-security [awesome ethereum security]
 - https://github.com/OpenZeppelin/openzeppelin-contracts [OpenZeppelin Contracts is a library for secure smart contract development]
 - https://github.com/preslavxyz/Web3-Security-Researcher-Roadmap [Web3 Security Researcher Roadmap]
 - https://github.com/tpiliposian/not-awesome-web3-security-roadmap [Web3 Security Researcher roadmap]
