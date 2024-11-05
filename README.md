@@ -1578,6 +1578,8 @@ Or you can send an issue for me.
 - https://github.com/imerzan/ReClass-DMA [ReClass DMA]
 - https://github.com/Metick/CheatEngine-DMA [CheatEngine DMA]
 - https://github.com/kaijia2022/Cheat-Engine-DMA-Plugin [CheatEngine DMA]
+- https://github.com/bbgsm/MemTools [Windows/Linux DMA testing tools]
+- https://github.com/sonodima/physpatch [Scanning and patching of the entire Windows Kernel using DMA]
 
 > W2S
 - https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
