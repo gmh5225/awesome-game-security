@@ -519,6 +519,8 @@ Or you can send an issue for me.
 - https://github.com/magicblock-labs/Solana.Unity-SDK [Unity-Solana SDK]
 - https://github.com/Virus-Axel/godot-solana-sdk [Godot Solana SDK]
 - https://github.com/hyperledger/web3j [Lightweight Java and Android library for integration with Ethereum clients]
+- https://github.com/gmh5225/UUPSProxyFactorySDK [SDK of UUPSProxyFactory]
+- https://github.com/gmh5225/permit2-light-sdk [Light SDK of Uniswap-permit2]
 
 > Interaction
 - https://github.com/ethereum/go-ethereum [go ethereum]
