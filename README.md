@@ -521,6 +521,7 @@ Or you can send an issue for me.
 - https://github.com/hyperledger/web3j [Lightweight Java and Android library for integration with Ethereum clients]
 - https://github.com/gmh5225/UUPSProxyFactorySDK [SDK of UUPSProxyFactory]
 - https://github.com/gmh5225/permit2-light-sdk [Light SDK of Uniswap-permit2]
+- https://github.com/gmh5225/Multicall3-SDK [SDK of Multicall3]
 
 > Interaction
 - https://github.com/ethereum/go-ethereum [go ethereum]
