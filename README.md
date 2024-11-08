@@ -824,6 +824,7 @@ Or you can send an issue for me.
 - https://github.com/iofomo/abyss [Android system call hook]
 - https://github.com/uuksu/RPGMakerDecrypter [Tool for extracting RPG Maker XP, VX and VX Ace encrypted archives]
 - https://github.com/gmh5225/compiler-binary-richprint [Print compiler information stored in Rich Header of PE executable]
+- https://github.com/mandiant/GoReSym [Go symbol recovery tool]
 
 > Mixed boolean-arithmetic
 - https://github.com/Colton1skees/mba-resources- [List of mixed boolean-arithmetic resources]
