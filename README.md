@@ -547,6 +547,7 @@ Or you can send an issue for me.
 > Unit tests
 - https://github.com/foundry-rs/foundry
 - https://github.com/gmh5225/foundry-template [Foundry Template]
+- https://github.com/risc0/risc0-foundry-template [Foundry Template for integrating RISC Zero]
 - https://github.com/gmh5225/forge-gui [A GUI wrapper command-line tool for Foundry Template]
 - https://github.com/NomicFoundation/hardhat
 - https://github.com/zeroknots/brokentoken [Foundry Test Suit to test weird ERC20 behavior]
