@@ -1478,6 +1478,7 @@ Or you can send an issue for me.
 - https://github.com/nettitude/Tartarus-TpAllocInject [TpAllocInject]
 - https://github.com/SafeBreach-Labs/PoolParty [ThreadPool]
 - https://github.com/hasherezade/thread_namecalling [SetThreadDescription]
+- https://github.com/Cracked5pider/earlycascade-injection [Early Cascade Injection]
 
 > Injection:Linux
 - https://github.com/ixty/mandibule
