@@ -544,6 +544,10 @@ Or you can send an issue for me.
 - https://openchain.xyz/tools/abi [Some handy tools for encoding/decoding ABI data]
 - https://github.com/Polymarket/agents [Trade autonomously on Polymarket using AI Agents]
 
+> Compiler
+- https://github.com/ethereum/solidity [Solidity]
+- https://github.com/paradigmxyz/solar [Solidity compiler, written in Rust]
+
 > Unit tests
 - https://github.com/foundry-rs/foundry
 - https://github.com/gmh5225/foundry-template [Foundry Template]
