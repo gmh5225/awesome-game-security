@@ -1752,6 +1752,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Win-Driver-EXP/tree/main/CVE-2024-30804 [AsInsHelp64.sys]
 - https://github.com/gmh5225/CVE-2020-14974 [IObitUnlocker.sys]
 - https://github.com/CyberSecurityUP/ProcessKiller-BYOVD [viragt64.sys]
+- https://github.com/CyberSecurityUP/UrekMazino-Malware [viragt64.sys]
 - https://github.com/MrAle98/ATDCM64a-LPE [[atdcm64a.sys](https://security.humanativaspa.it/exploiting-amd-atdcm64a.sys-arbitrary-pointer-dereference-part-1/)]
 - https://github.com/varwara/CVE-2024-35250 [ks.sys]
 - https://github.com/varwara/CVE-2024-21338 [appid.sys]
