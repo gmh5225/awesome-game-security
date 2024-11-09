@@ -37,8 +37,8 @@ Or you can send an issue for me.
 - [Anti Cheat](#anti-cheat)
 - [Some Tricks](#some-tricks)
 - [Windows Security Features](#windows-security-features)
-- [Windows Subsystem for Linux](#windows-subsystem-for-linux)
-- [Windows Subsystem for Android](#windows-subsystem-for-android)
+- [WSL](#wsl)
+- [WSA](#wsa)
 - [Windows Emulator](#windows-emulator)
 - [Android Emulator](#android-emulator)
 - [IOS Emulator](#ios-emulator)
@@ -3714,12 +3714,12 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://www.osronline.com/article.cfm%5earticle=469.htm [SEH]
 
 
-## Windows Subsystem for Linux
+## WSL
 - https://github.com/microsoft/WSL2-Linux-Kernel
 - https://github.com/sxlmnwb/windows-subsystem-linux
 - https://github.com/Nevuly/WSL2-Linux-Kernel-Rolling [Stable Kernel for WSL2]
 
-## Windows Subsystem for Android
+## WSA
 - https://github.com/K3V1991/How-to-download-and-install-WSA [Guide]
 - https://github.com/KiruyaMomochi/wsa-kernel-build [Build WSA Kernel with Docker]
 - https://github.com/sergiovillaverde/win11_apk_installer
