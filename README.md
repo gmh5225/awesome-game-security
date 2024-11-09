@@ -2229,6 +2229,7 @@ Or you can send an issue for me.
 - https://github.com/armvirus/VanguardTrace [Decrypting and intercepting encrypted imports of Vanguards Kernel Driver]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/578829-unveiling-unseen-vanguards-guarded-regions.html [CR3 Protection]
 - https://github.com/gmh5225/vgk-illegal-pf-logger [VGK's illegal PF]
+- https://github.com/zer0condition/KernelSnippets/blob/main/VGK_SwapContextHk.h [VGK's SwapContextHk]
 
 > Explore AntiCheat System:XignCode
 - https://github.com/Skengdo/XignCode-Dump
