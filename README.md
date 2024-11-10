@@ -598,6 +598,8 @@ Or you can send an issue for me.
 - https://github.com/smartcontractkit/smart-contract-examples [ERC]
 - https://github.com/thirdweb-dev/contracts [ERC]
 - https://github.com/proofofplay/piratenation-contracts [The Pirate Nation game]
+- https://github.com/tornadocash [Tornado Cash]
+- https://github.com/nkrishang/tornado-cash-rebuilt [Tornado Cash rebuilt]
 
 ## DirectX
 > Guide
