@@ -513,6 +513,8 @@ Or you can send an issue for me.
 
 > Smart Contract Template
 - https://github.com/mattstam/solidity-template [Solidity Template]
+- https://github.com/gmh5225/foundry-template [Foundry Template]
+- https://github.com/risc0/risc0-foundry-template [Foundry Template for integrating RISC Zero]
 
 > SDK
 - https://github.com/Ankr-network/game-unreal-sdk [Mirage Unreal SDK]
