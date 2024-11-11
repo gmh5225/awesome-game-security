@@ -3442,6 +3442,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/medievalghoul/hwid-checker-mg
 - https://github.com/weak1337/NvidiaApi
 - https://github.com/paradoxwastaken/WindowsHardwareInfo
+- https://github.com/gmh5225/query-gpu-name-rs [GPU name for windows]
 - https://github.com/lavoiesl/osx-cpu-temp [CPU temperature for OSX]
 - https://github.com/ashleyhung/WinRing0 [CPU temperature for windows]
 - https://github.com/openhardwaremonitor/openhardwaremonitor
