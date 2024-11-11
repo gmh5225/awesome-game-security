@@ -1757,6 +1757,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/dse_hook [winio64.sys]
 - https://github.com/enkomio/s4killer [probmon.sys]
 - https://github.com/floesen/KExecDD [KSecDD.sys]
+- https://github.com/scrt/KexecDDPlus [KSecDD.sys]
 - https://github.com/varwara/CVE-2024-26229 [csc.sys]
 - https://github.com/zer0condition/ZeroHVCI [csc.sys]
 - https://github.com/gmh5225/Win-Driver-EXP/tree/main/CVE-2024-33218 [AsUpIO64.sys]
