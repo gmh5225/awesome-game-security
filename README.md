@@ -3451,6 +3451,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/KDIo3/PCIBan [A PoC for requesting HWIDs directly from hardware]
 - https://github.com/can1357/hvdetecc [Collection of hypervisor detections]
 - https://github.com/synctop/tpm-mmio [Using MMIO (Memory-Mapped I/O) to read TPM 2.0 public Endorsement Key]
+- https://github.com/asm1314/Uncloaking-RAID0-HWID-Serials [Gather original disk serials hidden behind RAID0]
 - https://github.com/trustdecision/trustdevice-android [Android]
 - https://github.com/trustdecision/trustdevice-ios [IOS]
 
