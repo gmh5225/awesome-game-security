@@ -549,6 +549,7 @@ Or you can send an issue for me.
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
+- https://github.com/vyperlang/vyper [Pythonic Smart Contract Language for the EVM]
 - https://github.com/paradigmxyz/solar [Solidity compiler, written in Rust]
 
 > Unit tests
