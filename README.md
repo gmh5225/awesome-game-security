@@ -715,6 +715,9 @@ Or you can send an issue for me.
 - https://github.com/WangXuan95/Xilinx-FPGA-PCIe-XDMA-Tutorial [DMA Tutorial]
 - https://github.com/NetKingJ/awesome-android-security [Android (Samsung) Security Research References]
 - https://github.com/gregkh/kernel-development [Linux kernel development]
+- https://github.com/ARandomPerson7/Appsealing-Reversal [A Reversal and bypass for Appsealing]
+- https://klecko.github.io/posts/selinux-bypasses [Bypass selinux]
+- https://github.com/Solaree/pairipcore [Public researchings of the Google's Android apps protection]
 
 > Debugging
 - https://github.com/stars/gmh5225/lists/debugger [List]
