@@ -3049,6 +3049,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 ## Anti Cheat
 > Guide
+- [An in-depth exploration of how C programs transform from source code to executable binaries. This repository contains a comprehensive guide to understanding linking, loading, and executable formats](https://github.com/mohitmishra786/underTheHoodOfExecutables)
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
 - https://github.com/87andrewh/WeirdAntiCheatIdeas
 - https://github.com/gmh5225/AntiCheat-chrysalis
