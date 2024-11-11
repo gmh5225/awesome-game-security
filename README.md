@@ -596,6 +596,7 @@ Or you can send an issue for me.
 - https://github.com/costa-group/EthIR [A framework for high-level Analysis of Ethereum Bytecode]
 - https://github.com/zeroknots/brokentoken [Foundry Test Suit to test weird ERC20 behavior]
 - https://github.com/SunWeb3Sec/DeFiLabs [On-chain test DeFi using Foundry]
+- https://github.com/Cyfrin/audit-report-templating [How to generate a PDF audit report]
 
 > Contract source code
 - https://github.com/tangtj/bsc-contract-database [BSC]
