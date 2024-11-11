@@ -3246,6 +3246,17 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/emlinhax/blitz
 
 > Compile Time
+- https://github.com/ManulMap/malstring [Using c++23 compile-time magic to produce obfuscated PIC strings and arrays]
+- https://github.com/reveny/Android-Native-Import-Hide [A library for hiding and retrieving imports in ELF binaries]
+- https://github.com/emlinhax/blitz [a header-only library to dynamically resolve modules and exports while also being able to call them directly]
+- https://github.com/emlinhax/xv [single-header pointer/value encryption]
+- https://github.com/ac3ss0r/obfusheader.h [Obfusheader.h is a portable header file for C++14 compile-time obfuscation]
+- https://github.com/SecondNewtonLaw/DriverBase/blob/dev/Dependencies/obfusheader.h [obfusheader.h for windows driver]
+- https://github.com/dronavallipranav/rust-obfuscator [Automatic Rust Obfuscator and Macro Library]
+- https://github.com/Sherman0236/XorData [A C++17 framework designed to enable obfuscation of constants, variables, and strings]
+- https://github.com/android1337/crycall [Compile-Time Calls Obfuscator for C++14]
+- https://github.com/JustasMasiulis/inline_syscall [Inline syscalls made easy for windows on clang]
+- https://github.com/66flags/inline-syscall [A simple direct syscall wrapper written in C++ with compatibility for x86 and x64 programs]
 - https://github.com/cristeigabriel/STB [Compile-time conversion library, from IDA-style string to array]
 - https://github.com/Deniskore/CompileTimeRandom [Compile time random implementation using C++11]
 - https://github.com/ThatLing/limba [compile-time control flow obfuscation using mba]
@@ -3255,6 +3266,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/hanickadot/compile-time-regular-expressions [Compile Time Regular Expression in C++]
 - https://github.com/CasualX/obfstr [String Crypter for rust]
 - https://github.com/redskal/obfuscatxor [String Crypter for golang]
+- https://github.com/Reijaff/static_string_obfuscation [String Crypter for Zig]
+- https://github.com/pykaso/Swift-String-Obfuscator [String Crypter for Swift]
+- https://github.com/android1337/crystr [String Crypter]
 - https://github.com/adamyaxley/Obfuscate [String Crypter]
 - https://github.com/igozdev/xorlit [String Crypter]
 - https://github.com/JustasMasiulis/xorstr [String Crypter]
