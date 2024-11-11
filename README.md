@@ -3245,6 +3245,16 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/1hAck-0/zeroimport
 - https://github.com/emlinhax/blitz
 
+> Compile Time
+- https://github.com/hanickadot/compile-time-regular-expressions [Compile Time Regular Expression in C++]
+- https://github.com/CasualX/obfstr [String Crypter for rust]
+- https://github.com/JustasMasiulis/xorstr [String Crypter]
+- https://github.com/skadro-official/skCrypter [String Crypter]
+- https://github.com/rad9800/BloatedHammer [API Hammering with C++20 by folding (avoiding loops)]
+- https://github.com/obama-gaming/xor-float [xor float]
+- https://github.com/llxiaoyuan/oxorany [obfuscated any constant encryption in compile time on any platform]
+- https://github.com/DosX-dev/obfus.h [Macro-header for compile-time C obfuscation (tcc, win x86/x64)]
+
 > Shellcode Engine & Tricks
 - https://github.com/jseclab/obj2shellcode
 - https://github.com/lainswork/shellcode-factory
@@ -3252,6 +3262,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Obfuscation Engine
 - https://github.com/vi3t1/vmprotect-3.5.1
+- https://github.com/DosX-dev/obfus.h [Macro-header for compile-time C obfuscation (tcc, win x86/x64)]
 - https://github.com/connorjaydunn/BinaryShield
 - https://github.com/mike1k/perses
 - https://github.com/weak1337/Alcatraz
