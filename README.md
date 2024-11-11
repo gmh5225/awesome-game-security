@@ -3246,8 +3246,15 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/emlinhax/blitz
 
 > Compile Time
+- https://github.com/Deniskore/CompileTimeRandom [Compile time random implementation using C++11]
+- https://github.com/ThatLing/limba [compile-time control flow obfuscation using mba]
+- https://github.com/Nou4r/Polymorphic-Engine [Prototype runtime C++ polymorphic type engine]
+- https://github.com/hanickadot/cthash [constexpr implementation of SHA-2 and SHA-3 family of hashes]
+- https://github.com/PaulNorman01/Dynamizer [Reduce Dynamic Analysis Detection Rates With Built-In Unhooker, Anti Analysis Techniques, And String Obfuscator Modules]
 - https://github.com/hanickadot/compile-time-regular-expressions [Compile Time Regular Expression in C++]
 - https://github.com/CasualX/obfstr [String Crypter for rust]
+- https://github.com/adamyaxley/Obfuscate [String Crypter]
+- https://github.com/igozdev/xorlit [String Crypter]
 - https://github.com/JustasMasiulis/xorstr [String Crypter]
 - https://github.com/skadro-official/skCrypter [String Crypter]
 - https://github.com/rad9800/BloatedHammer [API Hammering with C++20 by folding (avoiding loops)]
