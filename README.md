@@ -497,6 +497,7 @@ Or you can send an issue for me.
 - https://github.com/smartcontractkit/solana-starter-kit [Example code for using Chainlink on Solana]
 - https://www.solanaecosystem.com [Solana Ecosystem discoverer]
 - https://github.com/ithacaxyz/odyssey-examples [Odyssey's features]
+- https://github.com/OpenZeppelin/merkle-tree [Merkle Tree]
 
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
