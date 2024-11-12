@@ -1983,6 +1983,7 @@ Or you can send an issue for me.
 - https://github.com/Lexikos/AutoHotkey_L
 - https://github.com/tgillam/HumanMouseMovement
 - https://github.com/Chaoses-Ib/IbInputSimulator [Simulating keyboard, mouse]
+- https://github.com/ekknod/logitech-cve [logitech]
 - https://github.com/gmh5225/razer-rzctl [Razer]
 - https://github.com/vsaint1/kernel-mouse [MouClass]
 - https://github.com/gmh5225/android_touch [For Android]
