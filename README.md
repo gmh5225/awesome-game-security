@@ -916,7 +916,7 @@ Or you can send an issue for me.
 - https://github.com/hfiref0x/KDU [Kernel Driver Utility Tool]
 - https://github.com/jthuraisamy/TelemetrySourcerer [Enumerate and disable callbacks/ETW]
 - https://github.com/progmboy/openprocmon [open source process monitor]
-- https://github.com/winsiderss/systeminformer [Tool]
+- https://github.com/winsiderss/systeminformer [The original name is "Process Hacker"]
 - https://github.com/0xcpu/ExecutiveCallbackObjects [Callback]
 - https://github.com/0xcpu/WinAltSyscallHandler [AltSystemCallHandlers]
 - https://github.com/DownWithUp/CallMon [AltSystemCallHandlers]
