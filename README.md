@@ -1554,10 +1554,11 @@ Or you can send an issue for me.
 
 
 > ROP Finder
-- https://github.com/0vercl0k/rp
-- https://github.com/JonathanSalwan/ROPgadget
-- https://github.com/helpsystems/Agafi
-- https://github.com/hugsy/ropgadget-rs
+- https://github.com/0vercl0k/rp [rp++ is a fast C++ ROP gadget finder for PE/ELF/Mach-O x86/x64/ARM/ARM64 binaries]
+- https://github.com/JonathanSalwan/ROPgadget [This tool lets you search your gadgets on your binaries to facilitate your ROP exploitation]
+- https://github.com/helpsystems/Agafi [A gadget finder and a ROP-Chainer tool for x86 platforms]
+- https://github.com/hugsy/ropgadget-rs [Another (bad) ROP gadget finder, but this time in Rust]
+- https://github.com/Boyan-MILANOV/ropium [ROPium is a tool that helps you building ROP exploits by finding and chaining gadgets together]
 
 > ROP Generation
 - https://github.com/d4em0n/exrop
