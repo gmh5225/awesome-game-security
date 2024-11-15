@@ -1925,6 +1925,7 @@ Or you can send an issue for me.
 - https://github.com/fortra/hw-call-stack [HWBP]
 - https://github.com/evilashz/ProxyAPICall [Custom stack call]
 - https://github.com/Kudaes/Shelter [ROP-based sleep obfuscation]
+- https://github.com/NtDallas/Fenrir [Stack spoofing using jmp rdi]
 
 > Hide
 - https://github.com/JKornev/hidden
