@@ -1513,6 +1513,7 @@ Or you can send an issue for me.
 - https://github.com/cs1ime/AndroidSuperInject [Injecting into SELinux-protected system service processes]
 - https://github.com/erfur/linjector-rs [Code injection on Android without ptrace]
 - https://github.com/NepMods/InjectARM64 [Non-root injection]
+- https://github.com/reveny/Android-Virtual-Inject [Inject through Virtual Space without root permissions]
 
 
 > DLL Hijack
