@@ -848,7 +848,7 @@ Or you can send an issue for me.
 - https://github.com/mandiant/GoReSym [Go symbol recovery tool]
 
 > Mixed boolean-arithmetic
-- https://github.com/Colton1skees/mba-resources- [List of mixed boolean-arithmetic resources]
+- https://github.com/Colton1skees/mba-resources [List of mixed boolean-arithmetic resources]
 
 > Fix VMP
 - https://github.com/Obfuscator-Collections/VMProtect
