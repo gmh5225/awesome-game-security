@@ -548,6 +548,7 @@ Or you can send an issue for me.
 - https://github.com/cdump/evmole [Extracts function selectors, arguments and state mutability from EVM bytecode]
 - https://openchain.xyz/tools/abi [Some handy tools for encoding/decoding ABI data]
 - https://github.com/Polymarket/agents [Trade autonomously on Polymarket using AI Agents]
+- https://github.com/daijro/camoufox [Anti-detect browser]
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
