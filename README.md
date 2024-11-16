@@ -610,6 +610,8 @@ Or you can send an issue for me.
 - https://github.com/proofofplay/piratenation-contracts [The Pirate Nation game]
 - https://github.com/tornadocash [Tornado Cash]
 - https://github.com/nkrishang/tornado-cash-rebuilt [Tornado Cash rebuilt]
+- https://github.com/luvnft/Memecoin-BASE [MEME]
+- https://github.com/ITExpert0228/Meme_project [MEME]
 
 ## DirectX
 > Guide
