@@ -554,6 +554,7 @@ Or you can send an issue for me.
 - https://github.com/ethereum/solidity [Solidity]
 - https://github.com/vyperlang/vyper [Pythonic Smart Contract Language for the EVM]
 - https://github.com/paradigmxyz/solar [Solidity compiler, written in Rust]
+- https://github.com/solana-developers/seahorse [Write Anchor-compatible Solana programs in Python]
 
 > Unit tests
 - https://github.com/foundry-rs/foundry
