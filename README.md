@@ -3185,6 +3185,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/charliewolfe/PointerGuard [VEH + PAGE_GUARD]
 - https://github.com/connormcgarr/EATGuard [VEH + PAGE_GUARD]
 - https://github.com/gmh5225/MemoryGuard [VEH + PAGE_GUARD]
+- https://github.com/vxCrypt0r/Voidmaw [VEH + PAGE_GUARD]
 - https://github.com/ilovecsad/veh_hide_memory [VEH + PAGE_NOACCESS]
 - https://github.com/gmh5225/PAGE_NO_ACCESS-not-byfron [VEH + PAGE_NOACCESS]
 - https://github.com/saveme712/BinCon [VEH + PAGE_NOACCESS]
