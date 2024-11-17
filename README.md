@@ -559,6 +559,7 @@ Or you can send an issue for me.
 > Development Framework
 - https://github.com/foundry-rs/foundry [Ethereum application development]
 - https://github.com/coral-xyz/anchor [Solana Sealevel Framework]
+- https://github.com/anza-xyz/platform-tools [Customized Rust/Clang toolchain for Solana Platform]
 
 > Unit tests
 - https://github.com/foundry-rs/foundry
