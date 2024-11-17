@@ -496,6 +496,7 @@ Or you can send an issue for me.
 - https://github.com/smartcontractkit/starter-kits [across the smart contract ecosystem]
 - https://github.com/smartcontractkit/solana-starter-kit [Example code for using Chainlink on Solana]
 - https://www.solanaecosystem.com [Solana Ecosystem discoverer]
+- https://github.com/solana-developers/create-solana-dapp [CLI for creating Solana dApps on the fly]
 - https://github.com/ithacaxyz/odyssey-examples [Odyssey's features]
 - https://github.com/OpenZeppelin/merkle-tree [Merkle Tree]
 - [Smart Contract Precision Handling Best Practices](https://github.com/gmh5225/Smart-Contract-Precision-Handling-Best-Practices) [Precision Handling]
