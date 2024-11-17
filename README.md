@@ -556,6 +556,10 @@ Or you can send an issue for me.
 - https://github.com/paradigmxyz/solar [Solidity compiler, written in Rust]
 - https://github.com/solana-developers/seahorse [Write Anchor-compatible Solana programs in Python]
 
+> Development Framework
+- https://github.com/foundry-rs/foundry [Ethereum application development]
+- https://github.com/coral-xyz/anchor [Solana Sealevel Framework]
+
 > Unit tests
 - https://github.com/foundry-rs/foundry
 - https://github.com/gmh5225/foundry-template [Foundry Template]
