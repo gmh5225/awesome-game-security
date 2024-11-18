@@ -3703,6 +3703,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Hook-KdTrap [Hook KdTrap]
 - https://github.com/gmh5225/AcDrv [Global exception/KdpDebugRoutineSelect]
 - https://github.com/gmh5225/AcDrv [SwapContext hook]
+- https://github.com/1401199262/HookSwapContext [SwapContext hook]
 - https://github.com/gmh5225/Driver-SoulExtraction [Extracting cert information]
 - https://github.com/Ido-Moshe-Github/CiDllDemo [Use ci.dll API for validating Authenticode signature of files]
 - https://github.com/mihaly044/pedigest [Calculating the authenticode digest]
