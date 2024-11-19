@@ -460,6 +460,7 @@ Or you can send an issue for me.
 - https://www.freeweb3resources.com [Guide]
 - https://github.com/yjjnls/awesome-blockchain [Guide]
 - https://github.com/ahmet/awesome-web3 [Guide]
+- https://github.com/matter-labs/awesome-zero-knowledge-proofs [ZKP Guide]
 - https://github.com/chaozh/awesome-blockchain-cn [CN Guide]
 - https://github.com/bekatom/awesome-ethereum [ETH Guide]
 - https://github.com/crytic/awesome-ethereum-security [awesome ethereum security]
