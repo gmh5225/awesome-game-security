@@ -454,8 +454,9 @@ Or you can send an issue for me.
 
 ## Web3 Game
 > Blockchain Guide
-- https://github.com/unbalancedparentheses/practical_cryptography_and_distributed_ledgers
-- https://github.com/slowmist/Web3-Project-Security-Practice-Requirements
+- https://github.com/unbalancedparentheses/practical_cryptography_and_distributed_ledgers [Practical Cryptography and Distributed Ledgers]
+- https://github.com/mush-support/mush-news [MushNews - Web3 News Explorer]
+- https://github.com/slowmist/Web3-Project-Security-Practice-Requirements [Web3 Project Security Practice Requirements]
 - https://www.freeweb3resources.com [Guide]
 - https://github.com/yjjnls/awesome-blockchain [Guide]
 - https://github.com/ahmet/awesome-web3 [Guide]
@@ -500,7 +501,6 @@ Or you can send an issue for me.
 - https://github.com/ithacaxyz/odyssey-examples [Odyssey's features]
 - https://github.com/OpenZeppelin/merkle-tree [Merkle Tree]
 - [Smart Contract Precision Handling Best Practices](https://github.com/gmh5225/Smart-Contract-Precision-Handling-Best-Practices) [Precision Handling]
-- https://github.com/mush-support/mush-news [MushNews - Web3 News Explorer]
 
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
