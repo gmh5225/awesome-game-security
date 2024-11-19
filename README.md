@@ -501,6 +501,8 @@ Or you can send an issue for me.
 - https://github.com/ithacaxyz/odyssey-examples [Odyssey's features]
 - https://github.com/OpenZeppelin/merkle-tree [Merkle Tree]
 - [Smart Contract Precision Handling Best Practices](https://github.com/gmh5225/Smart-Contract-Precision-Handling-Best-Practices) [Precision Handling]
+- https://github.com/gmh5225/Layer2-Architecture [Layer2 Architecture]
+- https://github.com/gmh5225/Optimism-VM-Architecture [Optimism VM Architecture]
 
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
