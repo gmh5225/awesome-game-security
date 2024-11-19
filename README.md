@@ -568,6 +568,12 @@ Or you can send an issue for me.
 - https://github.com/coral-xyz/anchor [Solana Sealevel Framework]
 - https://github.com/anza-xyz/platform-tools [Customized Rust/Clang toolchain for Solana Platform]
 
+> ZK Proof
+- https://github.com/matter-labs/awesome-zero-knowledge-proofs [ZKP Guide]
+- https://github.com/scipr-lab/libsnark [C++ library for zkSNARKs]
+- https://github.com/Consensys/gnark [Fast zk-SNARK library]
+- https://github.com/zkcrypto/bellman [zk-SNARK library]
+
 > Unit tests
 - https://github.com/foundry-rs/foundry
 - https://github.com/gmh5225/foundry-template [Foundry Template]
