@@ -1636,6 +1636,8 @@ Or you can send an issue for me.
 - https://github.com/kaijia2022/Cheat-Engine-DMA-Plugin [CheatEngine DMA]
 - https://github.com/bbgsm/MemTools [Windows/Linux DMA testing tools]
 - https://github.com/sonodima/physpatch [Scanning and patching of the entire Windows Kernel using DMA]
+- https://github.com/gmh5225/DMA-PCIE-BOARD-75T [DMA-PCIE-BOARD-75T]
+- https://github.com/gmh5225/DMA-E3100-CFW-BYPASS [DMA-BYPASS-Killer]
 
 > W2S
 - https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
