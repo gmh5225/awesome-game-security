@@ -463,6 +463,7 @@ Or you can send an issue for me.
 - https://github.com/matter-labs/awesome-zero-knowledge-proofs [ZKP Guide]
 - https://github.com/chaozh/awesome-blockchain-cn [CN Guide]
 - https://github.com/bekatom/awesome-ethereum [ETH Guide]
+- https://github.com/InfectedIsm/solana-quick-start-guide [Solana quick start guide]
 - https://github.com/crytic/awesome-ethereum-security [awesome ethereum security]
 - https://github.com/m14r41/PentestingEverything/tree/main/BlockChain%20Pentesting [Pentesting Checklist]
 - https://github.com/ipsilon/eof [evm object format]
