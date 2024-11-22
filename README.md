@@ -461,6 +461,7 @@ Or you can send an issue for me.
 - https://github.com/yjjnls/awesome-blockchain [Guide]
 - https://github.com/ahmet/awesome-web3 [Guide]
 - https://github.com/matter-labs/awesome-zero-knowledge-proofs [ZKP Guide]
+- https://github.com/rkdud007/awesome-zkvm [zkVM Guide]
 - https://github.com/chaozh/awesome-blockchain-cn [CN Guide]
 - https://github.com/bekatom/awesome-ethereum [ETH Guide]
 - https://github.com/InfectedIsm/solana-quick-start-guide [Solana quick start guide]
