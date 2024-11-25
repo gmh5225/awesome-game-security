@@ -1214,6 +1214,10 @@ Or you can send an issue for me.
 
 > IOS Memory Explorer
 - https://github.com/hackcatml/kfd-explorer [iOS kernel memory explorer]
+- https://github.com/DerekSelander/dynadump [A runtime ObjC class-dump]
+
+> IOS File Explorer
+- https://github.com/DerekSelander/dynadump [A runtime ObjC class-dump]
 
 > Virtual Environments
 - https://github.com/FBlackBox/BlackBox [Android]
