@@ -561,6 +561,7 @@ Or you can send an issue for me.
 - https://openchain.xyz/tools/abi [Some handy tools for encoding/decoding ABI data]
 - https://github.com/Polymarket/agents [Trade autonomously on Polymarket using AI Agents]
 - https://github.com/daijro/camoufox [Anti-detect browser]
+- https://github.com/blockscout/blockscout [Blockchain explorer for Ethereum]
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
