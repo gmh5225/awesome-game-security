@@ -1048,6 +1048,7 @@ Or you can send an issue for me.
 - https://github.com/DoranekoSystems/frida-FindoutWhatAccess [Find out what accesses this address]
 - https://github.com/piotrbania/frida_usb_dump [Frida script that allows to sniff & dump USB traffic on macOS]
 - https://github.com/hackcatml/frida-findJNINativeMethods [Find JNI native methods while the app is running]
+- https://github.com/miticollo/xpc-tracer [A tracer based on frida for XPC messages in iOS and macOS]
 
 > Hook ART(android)
 - https://github.com/PAGalaxyLab/YAHFA
