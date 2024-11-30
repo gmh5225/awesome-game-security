@@ -3553,6 +3553,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Nou4r/ModFinder [Mapped Dll]
 - https://github.com/gmh5225/Driver-WatchOwl [ImageNotify+Stack Trace]
 - https://github.com/xuanxuan0/TiEtwAgent [ETW]
+- https://github.com/JingMatrix/Demo [A demo app to detect (Zygisk) library injections]
 
 > Detection:Spoof Stack
 - https://github.com/gabriellandau/ShadowStackWalk
@@ -3585,6 +3586,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Dr-TSNG/ApplistDetector
 - https://github.com/apkunpacker/MagiskDetection
 - https://github.com/canyie/MagiskEoP [exploit]
+- https://github.com/JingMatrix/Demo [A demo app to detect (Zygisk) library injections]
 
 > Detection:Frida
 - https://github.com/darvincisec/DetectFrida
