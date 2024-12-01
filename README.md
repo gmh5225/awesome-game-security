@@ -2522,6 +2522,7 @@ Or you can send an issue for me.
 - https://github.com/soyware/heck_csgo_external [External]
 - https://github.com/martinjanas/Sensum [Internal]
 - https://github.com/cazzwastaken/kakhack [Internal]
+- https://github.com/Spelchure/CSGO-Internal [Internal]
 - https://github.com/binkynz/cstrike-hack
 - https://github.com/R4YVEN/raybot-zero [Kernel-mode]
 - https://github.com/gmh5225/CSGO-Loader [Loader]
