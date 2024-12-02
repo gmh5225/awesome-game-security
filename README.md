@@ -562,6 +562,7 @@ Or you can send an issue for me.
 - https://github.com/Polymarket/agents [Trade autonomously on Polymarket using AI Agents]
 - https://github.com/daijro/camoufox [Anti-detect browser]
 - https://github.com/blockscout/blockscout [Blockchain explorer for Ethereum]
+- https://github.com/mush-support/mush-audit [AI-powered smart contract security analysis platform]
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
@@ -629,6 +630,7 @@ Or you can send an issue for me.
 - https://github.com/zeroknots/brokentoken [Foundry Test Suit to test weird ERC20 behavior]
 - https://github.com/SunWeb3Sec/DeFiLabs [On-chain test DeFi using Foundry]
 - https://github.com/Cyfrin/audit-report-templating [How to generate a PDF audit report]
+- https://github.com/mush-support/mush-audit [AI-powered smart contract security analysis platform]
 
 > Contract source code
 - https://github.com/tangtj/bsc-contract-database [BSC]
