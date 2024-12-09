@@ -563,6 +563,7 @@ Or you can send an issue for me.
 - https://github.com/daijro/camoufox [Anti-detect browser]
 - https://github.com/blockscout/blockscout [Blockchain explorer for Ethereum]
 - https://github.com/mush-support/mush-audit [AI-powered smart contract security analysis platform]
+- https://github.com/Jon-Becker/heimdall-rs [bytecode analysis]
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
@@ -631,6 +632,7 @@ Or you can send an issue for me.
 - https://github.com/SunWeb3Sec/DeFiLabs [On-chain test DeFi using Foundry]
 - https://github.com/Cyfrin/audit-report-templating [How to generate a PDF audit report]
 - https://github.com/mush-support/mush-audit [AI-powered smart contract security analysis platform]
+- https://github.com/Jon-Becker/heimdall-rs [bytecode analysis]
 
 > Contract source code
 - https://github.com/tangtj/bsc-contract-database [BSC]
