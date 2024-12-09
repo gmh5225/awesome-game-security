@@ -467,6 +467,7 @@ Or you can send an issue for me.
 - https://github.com/InfectedIsm/solana-quick-start-guide [Solana quick start guide]
 - https://github.com/crytic/awesome-ethereum-security [awesome ethereum security]
 - https://github.com/sigp/solidity-security-blog [Solidity security]
+- https://github.com/Al-Qa-qa/bank-web3-security-tutorial [Solidity Security]
 - https://github.com/m14r41/PentestingEverything/tree/main/BlockChain%20Pentesting [Pentesting Checklist]
 - https://github.com/ipsilon/eof [evm object format]
 - https://github.com/Lilyjjo/mev_reading_list [List of resources to understand what 'mev' is]
@@ -595,6 +596,7 @@ Or you can send an issue for me.
 > Security
 - https://github.com/crytic/awesome-ethereum-security [awesome ethereum security]
 - https://github.com/sigp/solidity-security-blog [Solidity security]
+- https://github.com/Al-Qa-qa/bank-web3-security-tutorial [Solidity Security]
 - https://github.com/OpenZeppelin/openzeppelin-contracts [OpenZeppelin Contracts is a library for secure smart contract development]
 - https://github.com/preslavxyz/Web3-Security-Researcher-Roadmap [Web3 Security Researcher Roadmap]
 - https://github.com/tpiliposian/not-awesome-web3-security-roadmap [Web3 Security Researcher roadmap]
