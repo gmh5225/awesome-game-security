@@ -458,6 +458,7 @@ Or you can send an issue for me.
 - https://github.com/mush-support/mush-news [MushNews - Web3 News Explorer]
 - https://github.com/slowmist/Web3-Project-Security-Practice-Requirements [Web3 Project Security Practice Requirements]
 - https://www.freeweb3resources.com [Guide]
+- https://github.com/shafu0x/awesome-smart-contracts [Guide]
 - https://github.com/yjjnls/awesome-blockchain [Guide]
 - https://github.com/ahmet/awesome-web3 [Guide]
 - https://github.com/matter-labs/awesome-zero-knowledge-proofs [ZKP Guide]
@@ -637,6 +638,7 @@ Or you can send an issue for me.
 - https://github.com/Jon-Becker/heimdall-rs [bytecode analysis]
 
 > Contract source code
+- https://github.com/shafu0x/awesome-smart-contracts [awesome]
 - https://github.com/tangtj/bsc-contract-database [BSC]
 - https://github.com/smartcontractkit/smart-contract-examples [ERC]
 - https://github.com/thirdweb-dev/contracts [ERC]
