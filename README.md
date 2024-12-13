@@ -7,6 +7,20 @@ If you find that some links are not working, you can simply replace the username
 Or you can send an issue for me.
 ```
 
+## 忠告
+```
+不建议新人进入游戏安全领域. 这行业比传统的网络安全更加封闭.
+你经常能在论坛或者群组里面看到一些人展示自己有多少牛逼, 自己的东西有多少炸裂,  
+他们抄袭着开源项目. 骂着这些开源项目有多愚蠢. 作者多么的傻. 我改了之后有多少牛逼之类的言论.
+最可怕的是这些人可能是你今后入职之后的同事和领导. 他们没有为行业做出任何贡献. 只是在不断的消耗你的生命罢了.
+见过太多激情热血人士最终都因为这些人的内耗丧失了对这行业的激情. 甚至是丧失了自我.
+我想说, 就让这些老登自己去玩吧.
+真的不建议新人进入游戏安全领域. 拒绝老登, 拥抱新事物.
+非常敬佩为行业做出贡献的开源作者mrexodia, can1357等一些人. 他们是伟大的. 他们对行业做出了巨大贡献. 
+但是这样的人毕竟太少了, 所以真的不建议新人进入游戏安全领域 🙏🙏
+
+```
+
 ## How to contribute?
 - https://github.com/HyunCafe/contribute-practice
 - https://docs.github.com/en/get-started/quickstart/contributing-to-projects
