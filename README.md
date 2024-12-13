@@ -522,6 +522,7 @@ Or you can send an issue for me.
 - https://github.com/proofofplay/piratenation-contracts [The Pirate Nation game]
 - https://github.com/MetaMask/red-balloon-game [Red Balloon]
 - https://github.com/apac-chainchanger/MemeSphinx [MEME Coin Riddles Game on the Flow blockchain]
+- https://github.com/nhuxhr/sol-connect-four [Connect Four game built on the Solana blockchain]
 
 > Wallet connection
 - https://github.com/reown-com/appkit [web]
