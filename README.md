@@ -547,6 +547,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/foundry-template [Foundry Template]
 - https://github.com/Uniswap/foundry-template [Foundry Template]
 - https://github.com/risc0/risc0-foundry-template [Foundry Template for integrating RISC Zero]
+- https://github.com/Contract-examples/Avalanche-contract-template [Avalanche Foundry Template]
 
 > SDK
 - https://github.com/Ankr-network/game-unreal-sdk [Mirage Unreal SDK]
