@@ -524,6 +524,8 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Layer2-Architecture [Layer2 Architecture]
 - https://github.com/gmh5225/Optimism-VM-Architecture [Optimism VM Architecture]
 - https://github.com/gmh5225/zkVM-Architecture [zkVM Architecture]
+- https://github.com/awesomelistsio/awesome-crypto-wallets [Awesome Web3 Crypto Wallet]
+- https://github.com/dinhduongha/awesome-wallet [Awesome Web3 Crypto Wallet]
 
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
