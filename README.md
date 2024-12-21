@@ -526,6 +526,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/zkVM-Architecture [zkVM Architecture]
 - https://github.com/awesomelistsio/awesome-crypto-wallets [Awesome Web3 Crypto Wallet]
 - https://github.com/dinhduongha/awesome-wallet [Awesome Web3 Crypto Wallet]
+- https://github.com/gmh5225/awesome-crypto-wallet-address [Awesome crypto wallet address]
 
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
