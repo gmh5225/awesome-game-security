@@ -478,6 +478,7 @@ Or you can send an issue for me.
 - https://github.com/matter-labs/awesome-zero-knowledge-proofs [ZKP Guide]
 - https://github.com/rkdud007/awesome-zkvm [zkVM Guide]
 - https://github.com/chaozh/awesome-blockchain-cn [CN Guide]
+- https://blog.wssh.trade/posts/uniswap-v3/ [Uniswap V3 CN Guide]
 - https://github.com/bekatom/awesome-ethereum [ETH Guide]
 - https://github.com/InfectedIsm/solana-quick-start-guide [Solana quick start guide]
 - https://github.com/crytic/awesome-ethereum-security [awesome ethereum security]
