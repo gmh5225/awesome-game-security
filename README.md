@@ -586,6 +586,7 @@ Or you can send an issue for me.
 - https://github.com/blockscout/blockscout [Blockchain explorer for Ethereum]
 - https://github.com/mush-support/mush-audit [AI-powered smart contract security analysis platform]
 - https://github.com/Jon-Becker/heimdall-rs [bytecode analysis]
+- https://github.com/HrikB/createXcrunch [find zero-leading, zero-containing, or pattern-matching addresses for the CreateX contract factory]
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
