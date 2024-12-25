@@ -1411,6 +1411,7 @@ Or you can send an issue for me.
 - https://github.com/ViRb3/swift-ida [IDA plugin to aid with Swift reverse engineering]
 - https://github.com/Krietz7/IDA-DataExportPlus [a IDA Pro plugin to export data better]
 - https://github.com/harlamism/IdaClu [For grouping similar functions]
+- https://github.com/eset/DelphiHelper [help the analysis of x86/x86_64 binaries written in Delphi]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
