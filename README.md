@@ -882,6 +882,7 @@ Or you can send an issue for me.
 - https://github.com/skelsec/minidump [Python library to parse and read Microsoft minidump file format]
 - https://github.com/zodiacon/QuickAsm [x86/x86 assembler and emulator]
 - https://github.com/skylot/jadx [Dex to Java decompiler]
+- https://github.com/narumii/Deobfuscator [A deobfuscator for java]
 - https://github.com/google/android-classyshark [Android and Java bytecode viewer]
 - https://github.com/marin-m/vmlinux-to-elf [vmlinux to elf]
 - https://github.com/emlinhax/DbgViewEx [A tool to log ETW Events and system debug logs]
