@@ -597,6 +597,7 @@ Or you can send an issue for me.
 - https://github.com/solana-developers/seahorse [Write Anchor-compatible Solana programs in Python]
 - https://github.com/paritytech/revive [Solidity compiler for PolkaVM]
 - https://github.com/ethereum/solc-bin [This repository contains current and historical builds of the Solidity Compiler]
+- https://github.com/alloy-rs/svm-rs [Solidity-Compiler Version Manager]
 
 > Development Framework
 - https://github.com/foundry-rs/foundry [Ethereum application development]
