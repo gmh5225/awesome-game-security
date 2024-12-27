@@ -595,6 +595,7 @@ Or you can send an issue for me.
 - https://github.com/vyperlang/vyper [Pythonic Smart Contract Language for the EVM]
 - https://github.com/paradigmxyz/solar [Solidity compiler, written in Rust]
 - https://github.com/solana-developers/seahorse [Write Anchor-compatible Solana programs in Python]
+- https://github.com/paritytech/revive [Solidity compiler for PolkaVM]
 
 > Development Framework
 - https://github.com/foundry-rs/foundry [Ethereum application development]
