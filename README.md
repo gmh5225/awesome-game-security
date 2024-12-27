@@ -599,6 +599,7 @@ Or you can send an issue for me.
 - https://github.com/matter-labs/era-compiler-solidity [Solidity compiler for ZKsync]
 - https://github.com/ethereum/solc-bin [This repository contains current and historical builds of the Solidity Compiler]
 - https://github.com/alloy-rs/svm-rs [Solidity-Compiler Version Manager]
+- https://github.com/lmittmann/go-solc [Go Bindings for the Solidity Compiler]
 
 > Development Framework
 - https://github.com/foundry-rs/foundry [Ethereum application development]
