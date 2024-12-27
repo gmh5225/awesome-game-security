@@ -597,6 +597,7 @@ Or you can send an issue for me.
 - https://github.com/solana-developers/seahorse [Write Anchor-compatible Solana programs in Python]
 - https://github.com/paritytech/revive [Solidity compiler for PolkaVM]
 - https://github.com/matter-labs/era-compiler-solidity [Solidity compiler for ZKsync]
+- https://github.com/matter-labs/zksolc-bin [Releases of the Solidity compiler for ZKsync]
 - https://github.com/ethereum/solc-bin [This repository contains current and historical builds of the Solidity Compiler]
 - https://github.com/alloy-rs/svm-rs [Solidity-Compiler Version Manager]
 - https://github.com/lmittmann/go-solc [Go Bindings for the Solidity Compiler]
