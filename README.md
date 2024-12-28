@@ -605,6 +605,8 @@ Or you can send an issue for me.
 - https://github.com/ethereum/solc-js [Javascript bindings for the Solidity compiler]
 - https://github.com/ethereum/py-solc [Python wrapper around the solc Solidity compiler]
 - https://github.com/ApeWorX/ape-solidity [Solidity compiler plugin for the Ape Framework]
+- https://github.com/move-language/move-sui [Move on Aptos sui]
+- https://github.com/move-language/move-on-aptos [Move on Aptos]
 
 > Development Framework
 - https://github.com/foundry-rs/foundry [Ethereum application development]
