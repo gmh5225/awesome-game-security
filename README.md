@@ -594,6 +594,7 @@ Or you can send an issue for me.
 - https://github.com/ethereum/solidity [Solidity]
 - https://github.com/vyperlang/vyper [Pythonic Smart Contract Language for the EVM]
 - https://github.com/paradigmxyz/solar [Solidity compiler, written in Rust]
+- https://github.com/hyperledger-solang/solang [Solidity Compiler for Solana and Polkadot]
 - https://github.com/solana-developers/seahorse [Write Anchor-compatible Solana programs in Python]
 - https://github.com/paritytech/revive [Solidity compiler for PolkaVM]
 - https://github.com/matter-labs/era-compiler-solidity [Solidity compiler for ZKsync]
