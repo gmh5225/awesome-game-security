@@ -575,6 +575,7 @@ Or you can send an issue for me.
 - https://github.com/Jon-Becker/heimdall-rs [bytecode analysis]
 - https://github.com/HrikB/createXcrunch [find zero-leading, zero-containing, or pattern-matching addresses for the CreateX contract factory]
 - https://github.com/msuiche/porosity [Decompiler for smart contract written by C++]
+- https://github.com/NeurProjects/neur-app [The Intelligent Copilot for Solana]
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
