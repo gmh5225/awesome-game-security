@@ -1680,6 +1680,7 @@ Or you can send an issue for me.
 - https://github.com/sonodima/physpatch [Scanning and patching of the entire Windows Kernel using DMA]
 - https://github.com/gmh5225/DMA-PCIE-BOARD-75T [DMA-PCIE-BOARD-75T]
 - https://github.com/gmh5225/DMA-E3100-CFW-BYPASS [DMA-BYPASS-Killer]
+- https://github.com/dom0ng/pcileech-wifi-v2 [pcileech-fpga with wireless card emulation]
 
 > W2S
 - https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
