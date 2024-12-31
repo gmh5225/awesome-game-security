@@ -516,6 +516,9 @@ Or you can send an issue for me.
 - https://github.com/dinhduongha/awesome-wallet [Awesome Web3 Crypto Wallet]
 - https://github.com/gmh5225/awesome-crypto-wallet-address [Awesome crypto wallet address]
 
+> AI agent
+- https://github.com/e2b-dev/awesome-ai-agents [A list of AI autonomous agents]
+
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
 - https://github.com/0xFableOrg/0xFable [Trading card game]
