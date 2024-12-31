@@ -662,6 +662,7 @@ Or you can send an issue for me.
 - https://github.com/Jon-Becker/heimdall-rs [bytecode analysis]
 
 > Contract source code
+- https://github.com/ethereum/solidity-examples [Solidity example code]
 - https://github.com/shafu0x/awesome-smart-contracts [awesome]
 - https://github.com/tangtj/bsc-contract-database [BSC]
 - https://github.com/smartcontractkit/smart-contract-examples [ERC]
