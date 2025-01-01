@@ -1422,6 +1422,7 @@ Or you can send an issue for me.
 - https://github.com/Krietz7/IDA-DataExportPlus [a IDA Pro plugin to export data better]
 - https://github.com/harlamism/IdaClu [For grouping similar functions]
 - https://github.com/eset/DelphiHelper [help the analysis of x86/x86_64 binaries written in Delphi]
+- https://github.com/milankovo/YaraVM [IDA processor for loading and disassembling compiled yara rules]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
