@@ -543,6 +543,8 @@ Or you can send an issue for me.
 - https://github.com/Uniswap/foundry-template [Foundry Template]
 - https://github.com/risc0/risc0-foundry-template [Foundry Template for integrating RISC Zero]
 - https://github.com/Contract-examples/Avalanche-contract-template [Avalanche Foundry Template]
+- https://github.com/auditless/cairo-template [Cairo template]
+- https://github.com/rzmahmood/StarkNet-NFT-Template [A Template for deploying NFT Projects on StarkNet]
 
 > SDK
 - https://github.com/Ankr-network/game-unreal-sdk [Mirage Unreal SDK]
