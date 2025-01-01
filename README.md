@@ -584,6 +584,8 @@ Or you can send an issue for me.
 - https://github.com/msuiche/porosity [Decompiler for smart contract written by C++]
 - https://github.com/NeurProjects/neur-app [The Intelligent Copilot for Solana]
 - https://github.com/0xNineteen/solana-arbitrage-bot [solana arbitrage bot across multiple spot dexs]
+- https://github.com/D4Vinci/Scrapling [Undetectable, Lightning-Fast, and Adaptive Web Scraping for Python]
+- https://github.com/bengabp/dexscreener [Reverse engineering dexscreener avro encryption to fit my web scraping needs]
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
