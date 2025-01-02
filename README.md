@@ -519,6 +519,8 @@ Or you can send an issue for me.
 
 > AI agent
 - https://github.com/e2b-dev/awesome-ai-agents [A list of AI autonomous agents]
+- https://github.com/elizaOS/eliza [Autonomous agents for everyone]
+- https://github.com/blorm-network/ZerePy [ZerePy an open-source launch-pad for AI agents]
 
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
