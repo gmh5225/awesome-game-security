@@ -2519,6 +2519,7 @@ Or you can send an issue for me.
 - https://github.com/execnone/simple-cs-16-multihack
 - https://github.com/bit-paper/sakura
 - https://github.com/eversinc33/1.6_C2 [C2]
+- https://github.com/3a1/Zodiak [CS 1.6 Fastcup Full Kernel Driver Cheat]
 
 > Game:CSS
 - https://github.com/yoshisaac/CounterStrikeSource-Linux-Trainer [Linux External]
