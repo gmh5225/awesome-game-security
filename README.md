@@ -945,6 +945,8 @@ Or you can send an issue for me.
 - https://bbs.pediy.com/thread-272414.htm
 - https://github.com/obpo-project/obpo-plugin
 - https://github.com/IIIImmmyyy/AntiOllvm [AntiOllvm Fla with Fake Runtime]
+- https://github.com/Mrack/DeObfBR [libtprt.so]
+- https://github.com/zhuzhu-Top/deobf [libtprt.so]
 
 > Dynamic Binary Instrumentation
 - https://github.com/hzqst/unicorn_pe
