@@ -1152,6 +1152,7 @@ Or you can send an issue for me.
 - https://github.com/Poko-Apps/MemKernel [RPM]
 - https://github.com/DeNA/mempatch [Memory tampering tool]
 - https://github.com/hackcatml/zygisk-memdump [A zygisk module that dumps so file from process memory]
+- https://github.com/mrexodia/lldbext-dump [Extension to create a full memory dump using LLDB on Android]
 
 > Android Application CVE
 - https://github.com/nahid0x1/CVE-2024-0044 [a vulnerability affecting Android version 12 & 13]
