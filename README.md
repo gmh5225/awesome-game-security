@@ -1221,6 +1221,7 @@ Or you can send an issue for me.
 - https://github.com/utziacre/android_kernel_oneplus_sm8250 [OnePlus 8/8T/8Pro/(9R?) kernel]
 
 > Android Root
+- https://github.com/fynks/awesome-android-root [Awesome Android Root]
 - https://github.com/topjohnwu/Magisk
 - https://github.com/tiann/KernelSU
 - https://github.com/riarumoda/KernelSU-4.4 [Adapted for Linux Kernel 4.4 + Google GCC 4.9]
