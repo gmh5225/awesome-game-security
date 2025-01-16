@@ -1875,6 +1875,7 @@ Or you can send an issue for me.
 - https://github.com/MrAle98/ATDCM64a-LPE [[atdcm64a.sys](https://security.humanativaspa.it/exploiting-amd-atdcm64a.sys-arbitrary-pointer-dereference-part-1/)]
 - https://github.com/varwara/CVE-2024-35250 [ks.sys]
 - https://github.com/varwara/CVE-2024-21338 [appid.sys]
+- https://github.com/MrAle98/CVE-2024-49138-POC [CLFS.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
