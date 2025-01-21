@@ -926,6 +926,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/compiler-binary-richprint [Print compiler information stored in Rich Header of PE executable]
 - https://github.com/mandiant/GoReSym [Go symbol recovery tool]
 - https://github.com/PartialVolume/shredos.x86_64 [Disk Eraser]
+- https://github.com/ssnob/hidden_syscall_monitoring [monitors hidden syscalls called from call of duty anticheat]
 
 > Mixed boolean-arithmetic
 - https://github.com/Colton1skees/mba-resources [List of mixed boolean-arithmetic resources]
