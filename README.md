@@ -1236,6 +1236,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/AndroidDriveSignity [Bypass driver signature verification in Android kernel(ARMv8.3)]
 - https://github.com/gmh5225/android-kernel-driver-template [A GKI Android kernel driver(AArch64) template]
 - https://github.com/dabao1955/kernel_build_action [a action to build kernel automatically]
+- https://github.com/TheWildJames/kernel_build_scripts [kernel build scripts]
 
 > Android Kernel Explorer
 - https://docs.kernel.org [Linux Kernel documentation]
