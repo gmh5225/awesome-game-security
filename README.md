@@ -928,6 +928,7 @@ Or you can send an issue for me.
 - https://github.com/PartialVolume/shredos.x86_64 [Disk Eraser]
 - https://github.com/ssnob/hidden_syscall_monitoring [monitors hidden syscalls called from call of duty anticheat]
 - https://github.com/cansarigol/pdbr [pdb + Rich library]
+- https://github.com/microsoft/pdb-rs [Tools and documents for working with Microsoft PDB files, in Rust]
 
 > Mixed boolean-arithmetic
 - https://github.com/Colton1skees/mba-resources [List of mixed boolean-arithmetic resources]
