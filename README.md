@@ -2497,6 +2497,7 @@ Or you can send an issue for me.
 - https://github.com/sooqua/VanderLeague [Hypervisor-assisted]
 - https://github.com/KebsCS/League-DirectX11-Internal [Internal]
 - https://github.com/sr-henry/league-base [External]
+- https://github.com/DimitriFourny/lol_patcher
 
 > Game:NARAKA
 - https://www.unknowncheats.me/forum/other-fps-games/490052-naraka-bladepoint-reversal-structs-offsets.html
