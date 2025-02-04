@@ -1107,6 +1107,7 @@ Or you can send an issue for me.
 - https://github.com/piotrbania/frida_usb_dump [Frida script that allows to sniff & dump USB traffic on macOS]
 - https://github.com/hackcatml/frida-findJNINativeMethods [Find JNI native methods while the app is running]
 - https://github.com/miticollo/xpc-tracer [A tracer based on frida for XPC messages in iOS and macOS]
+- https://github.com/0xCD4/SSL-bypass [Root Detection & SSL Bypass Script]
 
 > Hook ART(android)
 - https://github.com/PAGalaxyLab/YAHFA
@@ -1233,6 +1234,7 @@ Or you can send an issue for me.
 - https://github.com/lzghzr/APatch_kpm [APatch modules]
 - https://github.com/abcz316/SKRoot-linuxKernelRoot
 - https://github.com/0x36/Pixel_GPU_Exploit
+- https://github.com/0xCD4/SSL-bypass [Root Detection & SSL Bypass Script]
 
 > Android Kernel driver development
 - https://github.com/gmh5225/AndroidDriveSignity [Bypass driver signature verification in Android kernel(ARMv8.3)]
