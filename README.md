@@ -2023,6 +2023,7 @@ Or you can send an issue for me.
 - https://github.com/Peribunt/Exception-Ret-Spoofing
 - https://github.com/Peribunt/Ret-Spoofing
 - https://github.com/WithSecureLabs/CallStackSpoofer
+- https://github.com/gmh5225/CallStackSpoofer-2
 - https://github.com/Barracudach/CallStack-Spoofer
 - https://github.com/frkngksl/NimicStack
 - https://github.com/thesecretclub/callout-poc
