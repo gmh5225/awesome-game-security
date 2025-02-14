@@ -1109,6 +1109,7 @@ Or you can send an issue for me.
 - https://github.com/hackcatml/frida-findJNINativeMethods [Find JNI native methods while the app is running]
 - https://github.com/miticollo/xpc-tracer [A tracer based on frida for XPC messages in iOS and macOS]
 - https://github.com/0xCD4/SSL-bypass [Root Detection & SSL Bypass Script]
+- https://github.com/aimardcr/FridaDetectionBypass [Debugger Detection Bypass]
 
 > Hook ART(android)
 - https://github.com/PAGalaxyLab/YAHFA
