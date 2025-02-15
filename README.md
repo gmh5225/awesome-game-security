@@ -868,6 +868,7 @@ Or you can send an issue for me.
 - https://github.com/stevemk14ebr/RETools
 - https://github.com/BataBo/ACEPatcher [.NET Patcher]
 - https://github.com/waryas/KACE [Emulate Drivers in RING3 with self context mapping or unicorn]
+- https://github.com/Qfrost911/KACE [Emulate Drivers in RING3 with self context mapping or unicorn]
 - https://github.com/VollRagm/PTView [Browse Page Tables on Windows]
 - https://github.com/iBotPeaches/Apktool [Apk]
 - https://github.com/user1342/Obfu-DE-Scate [Apk]
