@@ -801,6 +801,7 @@ Or you can send an issue for me.
 - https://klecko.github.io/posts/selinux-bypasses [Bypass selinux]
 - https://github.com/Solaree/pairipcore [Public researchings of the Google's Android apps protection]
 - https://github.com/enjoy-digital/litepcie [Small footprint and configurable PCIe core]
+- https://lolc2.github.io [collection of C2 frameworks that leverage legitimate services to evade detection]
 
 > Debugging
 - https://github.com/stars/gmh5225/lists/debugger [List]
@@ -3690,6 +3691,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/mischasan/aho-corasick
 
 > Information System & Forensics
+- https://lolc2.github.io [collection of C2 frameworks that leverage legitimate services to evade detection]
 - https://github.com/Enum0x539/Qvoid-Token-Grabber
 - https://github.com/travisfoley/dfirtriage
 - https://github.com/AlessandroZ/LaZagne
