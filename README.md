@@ -561,6 +561,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Multicall3-SDK [SDK of Multicall3]
 - https://github.com/nhuxhr/pumpfun-rs [Rust SDK for PumpFun Solana program]
 - https://github.com/rckprtr/pumpdotfun-sdk [Typescript SDK for PumpFun Solana program]
+- https://github.com/hoprnet/gnosis-hosted [self-host Gnosis Safe]
 
 > Interaction
 - https://github.com/ethereum/go-ethereum [go ethereum]
