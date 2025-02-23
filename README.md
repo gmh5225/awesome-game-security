@@ -1717,6 +1717,7 @@ Or you can send an issue for me.
 - https://github.com/ekknod/vm [Minimal memory library for Windows/Linux]
 - https://github.com/imerzan/ReClass-DMA [ReClass DMA]
 - https://github.com/Metick/CheatEngine-DMA [CheatEngine DMA]
+- https://github.com/un4ckn0wl3z/DMACheatEngineLoader [CheatEngine DMA, not open-source]
 - https://github.com/kaijia2022/Cheat-Engine-DMA-Plugin [CheatEngine DMA]
 - https://github.com/bbgsm/MemTools [Windows/Linux DMA testing tools]
 - https://github.com/sonodima/physpatch [Scanning and patching of the entire Windows Kernel using DMA]
