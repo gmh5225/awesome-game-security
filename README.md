@@ -1095,6 +1095,9 @@ Or you can send an issue for me.
 - https://github.com/j-hc/FlagSecurePatcher [Disable flag secure and screenshot listeners]
 - https://github.com/hackcatml/zygisk-memdump [A zygisk module that dumps so file from process memory]
 
+> Xposed
+- https://github.com/NPC2000/AppPealing-new [An Xposed module that disables Inka AppSealing, a popular anti-cheat and anti-root solution]
+
 > Frida
 - https://github.com/hackcatml/frida-watchpoint-tutorial [Frida's setHardwareWatchpoint tutorial]
 - https://github.com/CrackerCat/strongR-frida-android
