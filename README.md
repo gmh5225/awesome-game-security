@@ -1146,6 +1146,7 @@ Or you can send an issue for me.
 - https://github.com/MuntashirAkon/AppManager [A full-featured package manager and viewer]
 - https://github.com/pgp/XFiles [A general-purpose file explorer for (rooted) Android]
 - https://github.com/Raival-e/File-Explorer [An Android file explorer]
+- https://github.com/obfusk/apksigcopier [apksigcopier - copy/extract/patch android apk signatures & compare apks]
 
 > Android Memory Explorer
 - https://github.com/misc0110/PTEditor [PT Editor]
