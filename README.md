@@ -974,6 +974,7 @@ Or you can send an issue for me.
 - https://github.com/aroxby/dynre-x86
 - https://github.com/WaterlooBridge/adbi [For Android]
 - https://github.com/crmulliner/adbi [For Android]
+- https://github.com/ndrewh/pyda [Write dynamic binary analysis tools in Python]
 
 > Launcher Abuser
 - https://github.com/Ricardonacif/launcher-abuser
