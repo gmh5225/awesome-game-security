@@ -489,6 +489,7 @@ Or you can send an issue for me.
 - https://github.com/coinspect/learn-evm-attacks [EVM Security]
 - https://github.com/x676f64/secureum-mind_map [EVM Security]
 - https://github.com/crytic/not-so-smart-contracts [EVM Security]
+- https://github.com/perimetersec/evm-fuzzing-resources [EVM Fuzzing Resources]
 - https://github.com/SunWeb3Sec/damn-vulnerable-defi-v4-solutions [Defi Security]
 - https://github.com/slowmist/SlowMist-Learning-Roadmap-for-Becoming-a-Smart-Contract-Auditor [Smart contract audit skills roadmap for beginners]
 - https://github.com/Dapp-Learning-DAO/Dapp-Learning [Dapp]
