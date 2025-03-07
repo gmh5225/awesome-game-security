@@ -594,6 +594,7 @@ Or you can send an issue for me.
 - https://github.com/0xNineteen/solana-arbitrage-bot [solana arbitrage bot across multiple spot dexs]
 - https://github.com/D4Vinci/Scrapling [Undetectable, Lightning-Fast, and Adaptive Web Scraping for Python]
 - https://github.com/bengabp/dexscreener [Reverse engineering dexscreener avro encryption to fit my web scraping needs]
+- https://github.com/otter-sec/bn-ebpf-solana [Binary Ninja plugin for Solana eBPF]
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
@@ -1495,6 +1496,7 @@ Or you can send an issue for me.
 - https://github.com/pd0wm/binaryninja-pcode [This plugin serves as a bridge between Binary Ninja and Ghidra's disassembler]
 - https://github.com/zhuzhu-Top/deobf [libtprt.so]
 - https://github.com/junron/auto-enum [automatically identify and set enums for standard functions]
+- https://github.com/otter-sec/bn-ebpf-solana [Binary Ninja plugin for Solana eBPF]
 
 > Ghidra Plugins
 - https://github.com/AllsafeCyberSecurity/awesome-ghidra [List]
