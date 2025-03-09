@@ -1462,6 +1462,7 @@ Or you can send an issue for me.
 - https://github.com/cellebrite-labs/LabSync [An IDA plugin that can be used to partially synchronize IDBs between different users reversing the same binaries]
 - https://github.com/cellebrite-labs/FunctionInliner [An IDA plugin that eases reversing of binaries that have been code-size-optimized with function outlining]
 - https://github.com/herosi/PyClassInformer [RTTI Parsing IDA plugin]
+- https://github.com/0xGotcha/XrefXpert [An advanced cross-reference navigation tool for IDA Pro]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
