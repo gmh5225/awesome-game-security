@@ -625,6 +625,7 @@ Or you can send an issue for me.
 - https://github.com/scipr-lab/libsnark [C++ library for zkSNARKs]
 - https://github.com/Consensys/gnark [Fast zk-SNARK library]
 - https://github.com/zkcrypto/bellman [zk-SNARK library]
+- https://github.com/zksecurity/zkbugs [Reproduce ZKP vulnerabilities]
 
 > Unit tests
 - https://github.com/foundry-rs/foundry
@@ -679,6 +680,7 @@ Or you can send an issue for me.
 - https://github.com/Cyfrin/audit-report-templating [How to generate a PDF audit report]
 - https://github.com/mush-support/mush-audit [AI-powered smart contract security analysis platform]
 - https://github.com/Jon-Becker/heimdall-rs [bytecode analysis]
+- https://github.com/zksecurity/zkbugs [Reproduce ZKP vulnerabilities]
 
 > Contract source code
 - https://github.com/ethereum/solidity-examples [Solidity example code]
