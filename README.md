@@ -940,6 +940,7 @@ Or you can send an issue for me.
 - https://github.com/cansarigol/pdbr [pdb + Rich library]
 - https://github.com/microsoft/pdb-rs [Tools and documents for working with Microsoft PDB files, in Rust]
 - https://github.com/roger1337/JDBG [Java Runtime Reverse Engineering and Debugging Tool]
+- https://github.com/atrexus/vulkan [A PE dumper for processes protected by user mode anti-tamper solutions (hyperion, theia, etc.)]
 
 > Mixed boolean-arithmetic
 - https://github.com/Colton1skees/mba-resources [List of mixed boolean-arithmetic resources]
@@ -2410,6 +2411,7 @@ Or you can send an issue for me.
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/505486-byfron-tech-anti-cheat-released.html
 - https://gist.github.com/gmh5225/cbe40345a9400b01329e025478ffb826 [hash]
 - https://github.com/EnrickMartins/byfron-bypass
+- https://github.com/atrexus/vulkan [A PE dumper for processes protected by user mode anti-tamper solutions (hyperion, theia, etc.)]
 
 > Explore AntiCheat System:NGS
 - https://github.com/st4ckh0und/NexonGameSecurity-bypass
