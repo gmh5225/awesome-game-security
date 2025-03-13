@@ -3362,6 +3362,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/89luca89/pakkero [ELF]
 - https://github.com/dimkr/papaw [LZMA]
 - https://github.com/akawashiro/sloader [ELF loader which aims to replace ld-linux.so of glibc]
+- https://github.com/cryonumb/elfloader [ELF Loader for ps5-jar-loader]
 - https://github.com/MahmoudZohdy/IAT-Obfuscation [IAT Obfuscation]
 - https://github.com/gmh5225/shellcode-EntropyFix [Reducing entropy]
 - https://github.com/ORCx41/AtomPePacker [PE X64]
