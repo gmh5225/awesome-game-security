@@ -2066,6 +2066,7 @@ Or you can send an issue for me.
 - https://github.com/Kudaes/Shelter [ROP-based sleep obfuscation]
 - https://github.com/susMdT/LoudSunRun [Stack Spoofing with Synthetic frames based on the work of namazso, SilentMoonWalk, and VulcanRaven]
 - https://github.com/NtDallas/Fenrir [Stack spoofing using jmp rdi]
+- https://github.com/HackerCalico/StackSpoofer_Macro [An easy-to-use and powerful Macro for Stack Spoofing]
 
 > Hide
 - https://github.com/JKornev/hidden
