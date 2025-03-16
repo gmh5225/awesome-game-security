@@ -855,6 +855,8 @@ Or you can send an issue for me.
 - https://github.com/enenH/pwatch-c [HWBP on linux/android]
 - https://github.com/Ylarod/hardware-breakpoint [HWBP on linux/android]
 - https://github.com/roger1337/JDBG [Java Runtime Reverse Engineering and Debugging Tool]
+- https://github.com/Sh11no/eDBG [eBPF-based lightweight debugger for Android]
+- https://github.com/SeeFlowerX/stackplz [eBPF-based debugger for Android]
 
 > Packet Sniffer&Filter
 - https://github.com/WPO-Foundation/win-shaper
@@ -1272,6 +1274,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/android_ebpf [EBPF]
 - https://github.com/PShocker/Android_bpf_sys [EBPF]
 - https://github.com/SeeFlowerX/stackplz [EBPF]
+- https://github.com/Sh11no/eDBG [eBPF-based lightweight debugger for Android]
 - https://github.com/cloudfuzz/android-kernel-exploitation [Android Kernel Exploitation]
 - https://github.com/Snoopy-Sec/Localroot-ALL-CVE [Root CVE]
 - https://github.com/xmmword/dpatch [Syscall Dispatcher Patching PoC]
