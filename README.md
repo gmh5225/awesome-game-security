@@ -235,6 +235,7 @@ Or you can send an issue for me.
 ## 3D Graphics
 - https://github.com/Mesa3D/mesa
 - https://github.com/MethanePowered/MethaneKit [DirectX 12, Metal & Vulkan]
+- https://github.com/mrdoob/three.js [JavaScript 3D Library]
 
 ## AI
 - https://github.com/ls361664056/GameAI-paper-list [zh]
@@ -529,6 +530,9 @@ Or you can send an issue for me.
 - https://github.com/kyegomez/swarms [The Enterprise-Grade Production-Ready Multi-Agent Orchestration Framework]
 - https://github.com/blorm-network/ZerePy [ZerePy an open-source launch-pad for AI agents]
 - https://github.com/openai/openai-agents-python [openai multi-agent framework]
+
+> 3D Graphics
+- https://github.com/mrdoob/three.js [JavaScript 3D Library]
 
 > Game
 - https://github.com/aakarkun/unity-web3-skyrim-market [Web3 SkyRim Market - Unity]
