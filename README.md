@@ -404,6 +404,7 @@ Or you can send an issue for me.
 
 > MCP server
 - https://github.com/ahujasid/blender-mcp [Blender Model Context Protocol Integration]
+- https://github.com/VedantRGosavi/UE5-MCP [MCP for Unreal Engine 5]
 
 ## Game Assets
 - https://github.com/Miziziziz/Retro3DGraphicsCollection
