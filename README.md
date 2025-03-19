@@ -1286,6 +1286,7 @@ Or you can send an issue for me.
 - https://github.com/cloudfuzz/android-kernel-exploitation [Android Kernel Exploitation]
 - https://github.com/Snoopy-Sec/Localroot-ALL-CVE [Root CVE]
 - https://github.com/xmmword/dpatch [Syscall Dispatcher Patching PoC]
+- https://github.com/aquasecurity/tracee [Linux Runtime Security and Forensics using eBPF]
 
 > Android Kernel Driver
 - https://github.com/rogxo/kernel_hack
