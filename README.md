@@ -1092,6 +1092,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Practical-Reverse-Engineering-Solutions [DPC+APC]
 - https://github.com/br-sn/CheekyBlinder [Enumerating and removing kernel callbacks using signed vulnerable drivers]
 - https://github.com/GetRektBoy724/DCMB [Removing kernel callbacks]
+- https://github.com/V-i-x-x/kernel-callback-removal [Removing kernel callbacks]
 - https://github.com/Air14/KDBGDecryptor [A simple example how to decrypt kernel debugger data block]
 - https://github.com/FaEryICE/MemScanner [Memory scanner]
 - https://github.com/irql/nokd [Kernel debugger protocol]
