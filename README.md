@@ -1140,6 +1140,7 @@ Or you can send an issue for me.
 - https://github.com/0xCD4/SSL-bypass [Root Detection & SSL Bypass Script]
 - https://github.com/aimardcr/FridaDetectionBypass [Debugger Detection Bypass]
 - https://github.com/seanistethered/FridaScript [Low level scripting app for iOS]
+- https://github.com/AsenOsen/frida-stealth [Stealth patch for Frida, stealth knowledge collection]
 
 > Hook ART(android)
 - https://github.com/PAGalaxyLab/YAHFA
