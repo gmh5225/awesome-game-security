@@ -693,6 +693,7 @@ Or you can send an issue for me.
 - https://github.com/Jon-Becker/heimdall-rs [bytecode analysis]
 - https://github.com/zksecurity/zkbugs [Reproduce ZKP vulnerabilities]
 - https://github.com/Frankcastleauditor/public-audits [smart contract security public audits]
+- https://github.com/Certora/SecurityReports [smart contract security public audits]
 
 > Contract source code
 - https://github.com/ethereum/solidity-examples [Solidity example code]
