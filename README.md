@@ -3712,6 +3712,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/vvb2060/KeyAttestation [Bootloader]
 - https://github.com/reveny/Android-Native-Root-Detector [A tool for detecting root on android]
 - https://github.com/Mrack/MemDetection [Calculate the CRC of libc.so and libart.so in memory and compare it with the file]
+- https://github.com/apkunpacker/RootAppDetector [Small POC code that detects known root-related apps by attempting to launch their activities and monitoring security exception]
 
 > Detection:Magisk
 - https://github.com/vvb2060/MagiskDetector
