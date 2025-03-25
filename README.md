@@ -695,6 +695,7 @@ Or you can send an issue for me.
 - https://github.com/zksecurity/zkbugs [Reproduce ZKP vulnerabilities]
 - https://github.com/Frankcastleauditor/public-audits [smart contract security public audits]
 - https://github.com/Certora/SecurityReports [smart contract security public audits]
+- https://github.com/Ackee-Blockchain/trident [Rust-based framework to Fuzz Solana programs, designed to help you ship secure code]
 
 > Contract source code
 - https://github.com/ethereum/solidity-examples [Solidity example code]
