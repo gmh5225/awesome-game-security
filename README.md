@@ -525,6 +525,7 @@ Or you can send an issue for me.
 - https://github.com/dinhduongha/awesome-wallet [Awesome Web3 Crypto Wallet]
 - https://github.com/gmh5225/awesome-crypto-wallet-address [Awesome crypto wallet address]
 - https://github.com/Ackee-Blockchain/awesome-wake-tests [Awesome Wake tests]
+- https://github.com/Ackee-Blockchain/reentrancy-examples [Reentrancy vulnerabilities]
 
 > AI agent
 - https://github.com/e2b-dev/awesome-ai-agents [A list of AI autonomous agents]
@@ -655,6 +656,7 @@ Or you can send an issue for me.
 - https://github.com/sigp/solidity-security-blog [Solidity security]
 - https://github.com/Al-Qa-qa/bank-web3-security-tutorial [Solidity Security]
 - https://github.com/crytic/not-so-smart-contracts [Solidity Security]
+- https://github.com/Ackee-Blockchain/reentrancy-examples [Reentrancy vulnerabilities]
 - https://github.com/OpenZeppelin/openzeppelin-contracts [OpenZeppelin Contracts is a library for secure smart contract development]
 - https://github.com/preslavxyz/Web3-Security-Researcher-Roadmap [Web3 Security Researcher Roadmap]
 - https://github.com/tpiliposian/not-awesome-web3-security-roadmap [Web3 Security Researcher roadmap]
