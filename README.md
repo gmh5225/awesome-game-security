@@ -1558,6 +1558,7 @@ Or you can send an issue for me.
 - https://github.com/danielplohmann/gui-plugin-template [A template for cross-compatible GUI plugins]
 - https://github.com/astrelsky/GhidraGradlePlugin [Gradle]
 - https://github.com/jtang613/GhidrAssist [An LLM extension for Ghidra to enable AI assistance in RE]
+- https://github.com/DSecurity/efiSeek [Ghidra analyzer for UEFI firmware]
 
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
