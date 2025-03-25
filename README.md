@@ -524,6 +524,7 @@ Or you can send an issue for me.
 - https://github.com/awesomelistsio/awesome-crypto-wallets [Awesome Web3 Crypto Wallet]
 - https://github.com/dinhduongha/awesome-wallet [Awesome Web3 Crypto Wallet]
 - https://github.com/gmh5225/awesome-crypto-wallet-address [Awesome crypto wallet address]
+- https://github.com/Ackee-Blockchain/awesome-wake-tests [Awesome Wake tests]
 
 > AI agent
 - https://github.com/e2b-dev/awesome-ai-agents [A list of AI autonomous agents]
