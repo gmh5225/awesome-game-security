@@ -410,6 +410,7 @@ Or you can send an issue for me.
 - https://github.com/mrexodia/ida-pro-mcp [MCP for IDA pro]
 - https://github.com/MxIris-Reverse-Engineering/ida-mcp-server [MCP for IDA pro]
 - https://github.com/dnakov/radare2-mcp [Radare2 MCP Server]
+- https://github.com/GLips/Figma-Context-MCP [Cursor Talk To Figma MCP server]
 
 ## Game Assets
 - https://github.com/Miziziziz/Retro3DGraphicsCollection
