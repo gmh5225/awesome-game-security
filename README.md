@@ -406,6 +406,8 @@ Or you can send an issue for me.
 - https://github.com/ahujasid/blender-mcp [Blender Model Context Protocol Integration]
 - https://github.com/VedantRGosavi/UE5-MCP [MCP for Unreal Engine 5]
 - https://github.com/justinpbarnett/unity-mcp [MCP for unity]
+- https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
+- https://github.com/mrexodia/ida-pro-mcp [MCP for IDA pro]
 
 ## Game Assets
 - https://github.com/Miziziziz/Retro3DGraphicsCollection
