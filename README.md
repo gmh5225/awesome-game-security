@@ -409,6 +409,7 @@ Or you can send an issue for me.
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 - https://github.com/mrexodia/ida-pro-mcp [MCP for IDA pro]
 - https://github.com/MxIris-Reverse-Engineering/ida-mcp-server [MCP for IDA pro]
+- https://github.com/dnakov/radare2-mcp [Radare2 MCP Server]
 
 ## Game Assets
 - https://github.com/Miziziziz/Retro3DGraphicsCollection
