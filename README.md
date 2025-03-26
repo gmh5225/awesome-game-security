@@ -1571,6 +1571,7 @@ Or you can send an issue for me.
 - https://github.com/astrelsky/GhidraGradlePlugin [Gradle]
 - https://github.com/jtang613/GhidrAssist [An LLM extension for Ghidra to enable AI assistance in RE]
 - https://github.com/DSecurity/efiSeek [Ghidra analyzer for UEFI firmware]
+- https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
