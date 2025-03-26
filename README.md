@@ -409,6 +409,8 @@ Or you can send an issue for me.
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 - https://github.com/mrexodia/ida-pro-mcp [MCP for IDA pro]
 - https://github.com/MxIris-Reverse-Engineering/ida-mcp-server [MCP for IDA pro]
+- https://github.com/taida957789/ida-mcp-server-plugin [MCP for IDA pro]
+- https://github.com/fdrechsler/mcp-server-idapro [MCP for IDA pro]
 - https://github.com/dnakov/radare2-mcp [Radare2 MCP Server]
 - https://github.com/GLips/Figma-Context-MCP [Cursor Talk To Figma MCP server]
 
@@ -1499,6 +1501,10 @@ Or you can send an issue for me.
 - https://github.com/herosi/PyClassInformer [RTTI Parsing IDA plugin]
 - https://github.com/0xGotcha/XrefXpert [An advanced cross-reference navigation tool for IDA Pro]
 - https://github.com/TKazer/ScyllaHide-For-IDA9.0RC [ScyllaHide-For-IDA9]
+- https://github.com/mrexodia/ida-pro-mcp [MCP for IDA pro]
+- https://github.com/MxIris-Reverse-Engineering/ida-mcp-server [MCP for IDA pro]
+- https://github.com/taida957789/ida-mcp-server-plugin [MCP for IDA pro]
+- https://github.com/fdrechsler/mcp-server-idapro [MCP for IDA pro]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
