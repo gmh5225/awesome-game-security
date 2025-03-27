@@ -413,6 +413,7 @@ Or you can send an issue for me.
 - https://github.com/fdrechsler/mcp-server-idapro [MCP for IDA pro]
 - https://github.com/dnakov/radare2-mcp [Radare2 MCP Server]
 - https://github.com/GLips/Figma-Context-MCP [Cursor Talk To Figma MCP server]
+- https://github.com/gmh5225/hex2dec-mcp [MCP server that provides conversion between hexadecimal and decimal numbers]
 
 ## Game Assets
 - https://github.com/Miziziziz/Retro3DGraphicsCollection
