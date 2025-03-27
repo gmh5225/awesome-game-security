@@ -412,6 +412,7 @@ Or you can send an issue for me.
 - https://github.com/MxIris-Reverse-Engineering/ida-mcp-server [MCP for IDA pro]
 - https://github.com/taida957789/ida-mcp-server-plugin [MCP for IDA pro]
 - https://github.com/fdrechsler/mcp-server-idapro [MCP for IDA pro]
+- https://github.com/rand-tech/pcm [MCP for IDA pro]
 - https://github.com/dnakov/radare2-mcp [Radare2 MCP Server]
 - https://github.com/GLips/Figma-Context-MCP [Cursor Talk To Figma MCP server]
 - https://github.com/gmh5225/hex2dec-mcp [MCP server that provides conversion between hexadecimal and decimal numbers]
