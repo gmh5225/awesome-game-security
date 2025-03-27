@@ -1509,6 +1509,7 @@ Or you can send an issue for me.
 - https://github.com/MxIris-Reverse-Engineering/ida-mcp-server [MCP for IDA pro]
 - https://github.com/taida957789/ida-mcp-server-plugin [MCP for IDA pro]
 - https://github.com/fdrechsler/mcp-server-idapro [MCP for IDA pro]
+- https://github.com/rand-tech/pcm [MCP for IDA pro]
 - https://github.com/gmh5225/ida_export_functions [Export IDA Pro Function List to a Specified Path (Markdown Format)]
 
 > IDA Signature Database
