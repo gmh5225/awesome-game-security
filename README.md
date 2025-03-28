@@ -407,6 +407,8 @@ Or you can send an issue for me.
 - https://github.com/kvick-games/UnrealMCP [MCP for Unreal Engine]
 - https://github.com/VedantRGosavi/UE5-MCP [MCP for Unreal Engine 5]
 - https://github.com/justinpbarnett/unity-mcp [MCP for unity]
+- https://github.com/wondeks/unity-mcp [MCP for unity]
+- https://github.com/nasimali5/mcpup [MCP for unity]
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 - https://github.com/mrexodia/ida-pro-mcp [MCP for IDA pro]
 - https://github.com/MxIris-Reverse-Engineering/ida-mcp-server [MCP for IDA pro]
