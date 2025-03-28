@@ -2042,6 +2042,7 @@ Or you can send an issue for me.
 - https://github.com/NoInitRD/Memory-Dump-UEFI [A UEFI application for dumping the contents of RAM]
 - https://github.com/NSG650/NoMoreBugCheckReloaded [NoMoreBugCheck Reloaded]
 - https://github.com/x90skysn3k/x260-lenovo-opencore [Lenovo-X260-Hackintosh-BigSur-OpenCore-0.8.5]
+- https://github.com/microsoft/OfflineCrashDumpUefi [EDK2 UEFI implementation for writing an Offline Crash Dump]
 
 > QEMU/KVM/PVE
 - https://github.com/david942j/kvm-kernel-example [Guide]
