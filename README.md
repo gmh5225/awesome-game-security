@@ -489,6 +489,7 @@ Or you can send an issue for me.
 - https://github.com/bekatom/awesome-ethereum [ETH Guide]
 - https://github.com/InfectedIsm/solana-quick-start-guide [Solana quick start guide]
 - https://github.com/crytic/awesome-ethereum-security [awesome ethereum security]
+- https://github.com/ArjunaSec/Awesome-Solana-checklist [awesome solana security]
 - https://github.com/sigp/solidity-security-blog [Solidity security]
 - https://github.com/Al-Qa-qa/bank-web3-security-tutorial [Solidity Security]
 - https://github.com/m14r41/PentestingEverything/tree/main/BlockChain%20Pentesting [Pentesting Checklist]
@@ -666,6 +667,7 @@ Or you can send an issue for me.
 
 > Security
 - https://github.com/crytic/awesome-ethereum-security [awesome ethereum security]
+- https://github.com/ArjunaSec/Awesome-Solana-checklist [awesome solana security]
 - https://github.com/sigp/solidity-security-blog [Solidity security]
 - https://github.com/Al-Qa-qa/bank-web3-security-tutorial [Solidity Security]
 - https://github.com/crytic/not-so-smart-contracts [Solidity Security]
