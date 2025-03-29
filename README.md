@@ -1354,6 +1354,7 @@ Or you can send an issue for me.
 > Decompiler
 - IDA Pro
 - Binary Ninja
+- https://github.com/radareorg
 - https://github.com/NationalSecurityAgency/ghidra
 - https://github.com/avast/retdec
 - https://github.com/Col-E/Recaf [Java]
@@ -1580,6 +1581,9 @@ Or you can send an issue for me.
 - https://github.com/jtang613/GhidrAssist [An LLM extension for Ghidra to enable AI assistance in RE]
 - https://github.com/DSecurity/efiSeek [Ghidra analyzer for UEFI firmware]
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
+
+> Radare Plugins
+- https://github.com/radareorg/r2a [local language model for radare2]
 
 > Windbg Plugins
 - https://github.com/comaeio/SwishDbgExt
