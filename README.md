@@ -1025,7 +1025,7 @@ Or you can send an issue for me.
 > Launcher Abuser
 - https://github.com/Ricardonacif/launcher-abuser
 
-> Bypass PatchGuard
+> PatchGuard-related
 - https://github.com/armasm/EasyAntiPatchGuard
 - https://github.com/9176324/Shark
 - https://github.com/gmh5225/Patchguard-2023 [Shark]
@@ -1041,6 +1041,7 @@ Or you can send an issue for me.
 - https://github.com/4l3x777/dse_pg_bypass [DSE & PG bypass via BYOVD attack]
 - https://github.com/i32-Sudo/VulnerablePatchGuardExploit
 - https://github.com/emlinhax/tableflipper [partially disable patchguard up to win11 21H2]
+- https://github.com/AmitMoshel1/PatchGuardEncryptorDriver [Self-implemented PatchGuard]
 
 > Driver Signature enforcement
 - https://github.com/gmh5225/dse_hook
