@@ -1005,6 +1005,7 @@ Or you can send an issue for me.
 - https://github.com/IIIImmmyyy/AntiOllvm [AntiOllvm Fla with Fake Runtime]
 - https://github.com/Mrack/DeObfBR [libtprt.so]
 - https://github.com/zhuzhu-Top/deobf [libtprt.so]
+- https://github.com/cdong1012/ollvm-unflattener [unflattener]
 
 > Dynamic Binary Instrumentation
 - https://github.com/hzqst/unicorn_pe
