@@ -1896,6 +1896,7 @@ Or you can send an issue for me.
 - https://github.com/holi4m/gdrv-loader-v2 [gdrv.sys]
 - https://github.com/gmh5225/KDP-compatible-driver-loader [gdrv.sys]
 - https://github.com/1337kenzo/gdrv-loader-updated [gdrv.sys Win11]
+- https://github.com/AmitMoshel1/gdrv_sys_exploit [gdrv.sys Win11]
 - https://github.com/eddeeh/kdmapper [iqvw64e.sys]
 - https://github.com/TheCruZ/kdmapper [iqvw64e.sys]
 - https://github.com/Brattlof/kdmapper-1909 [iqvw64e.sys]
