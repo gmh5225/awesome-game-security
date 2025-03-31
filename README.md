@@ -1124,6 +1124,7 @@ Or you can send an issue for me.
 - https://github.com/Air14/KDBGDecryptor [A simple example how to decrypt kernel debugger data block]
 - https://github.com/FaEryICE/MemScanner [Memory scanner]
 - https://github.com/irql/nokd [Kernel debugger protocol]
+- https://github.com/DejavuSecure/DetectNtoskrnlIntegrity [Windows Kernel Security: Memory Integrity Verification with Disk Verification of ntoskrnl.exe]
 
 > Magisk
 - https://github.com/PShocker/Zygisk-MagiskHide
@@ -3627,6 +3628,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/afulsamet/integrity
 - https://github.com/Midi12/QueryWorkingSetExample
 - https://github.com/Deputation/integrity_experiments [header only]
+- https://github.com/DejavuSecure/DetectNtoskrnlIntegrity [Windows Kernel Security: Memory Integrity Verification with Disk Verification of ntoskrnl.exe]
 
 > Detection:ShellCode
 - https://github.com/jdu2600/EtwTi-FluctuationMonitor [ETW]
