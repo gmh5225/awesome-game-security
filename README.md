@@ -2059,9 +2059,10 @@ Or you can send an issue for me.
 - https://github.com/x90skysn3k/x260-lenovo-opencore [Lenovo-X260-Hackintosh-BigSur-OpenCore-0.8.5]
 - https://github.com/microsoft/OfflineCrashDumpUefi [EDK2 UEFI implementation for writing an Offline Crash Dump]
 
-> QEMU/KVM/PVE
+> QEMU/KVM/PVE/VBOX
 - https://github.com/david942j/kvm-kernel-example [Guide]
 - https://github.com/airbus-seclab/qemu_blog [Guide]
+- https://github.com/mirror/vbox [VirtualBox Git mirror]
 - https://github.com/BigAnteater/KVM-GPU-Passthrough [GPU Passthrough]
 - https://github.com/dmaivel/ntoseye [Kernel Debugger]
 - https://github.com/ispras/qemu/tree/windbg [Windbg]
