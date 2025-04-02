@@ -1522,6 +1522,7 @@ Or you can send an issue for me.
 - https://github.com/fdrechsler/mcp-server-idapro [MCP for IDA pro]
 - https://github.com/rand-tech/pcm [MCP for IDA pro]
 - https://github.com/gmh5225/ida_export_functions [Export IDA Pro Function List to a Specified Path (Markdown Format)]
+- https://github.com/L4ys/IDA-WPP-Remover [Remove WPP calls from hexrays decompiled code]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
