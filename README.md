@@ -1881,6 +1881,7 @@ Or you can send an issue for me.
 > Vulnerable Driver 
 - https://www.loldrivers.io/drivers
 - https://github.com/magicsword-io/LOLDrivers
+- https://github.com/ghostbyt3/BYOVDFinder [Identifies LOLDrivers that are not blocked by the active HVCI policy]
 - https://github.com/rtfmkiesel/loldrivers-client [Scan loldrivers]
 - https://github.com/FourCoreLabs/LolDriverScan [Scan loldrivers]
 - https://github.com/trailofbits/HVCI-loldrivers-check [HVCI loldrivers check]
