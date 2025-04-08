@@ -892,6 +892,7 @@ Or you can send an issue for me.
 - https://github.com/Ylarod/hardware-breakpoint [HWBP on linux/android]
 - https://github.com/roger1337/JDBG [Java Runtime Reverse Engineering and Debugging Tool]
 - https://github.com/Sh11no/eDBG [eBPF-based lightweight debugger for Android]
+- https://github.com/ShinoLeah/eHook [eBPF hook]
 - https://github.com/SeeFlowerX/stackplz [eBPF-based debugger for Android]
 
 > Packet Sniffer&Filter
