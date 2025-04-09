@@ -423,6 +423,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/hex2dec-mcp [MCP server that provides conversion between hexadecimal and decimal numbers]
 - https://github.com/signal-slot/mcp-gdb [MCP for GDB]
 - https://github.com/ant4g0nist/lisa.py [MCP for LLDB]
+- https://github.com/un4ckn0wl3z/MemMCP [Cheat Engine-like but MCP]
 
 ## Game Assets
 - https://github.com/Miziziziz/Retro3DGraphicsCollection
@@ -895,6 +896,7 @@ Or you can send an issue for me.
 - https://github.com/Sh11no/eDBG [eBPF-based lightweight debugger for Android]
 - https://github.com/ShinoLeah/eHook [eBPF hook]
 - https://github.com/SeeFlowerX/stackplz [eBPF-based debugger for Android]
+- https://github.com/un4ckn0wl3z/MemMCP [Cheat Engine-like but MCP]
 
 > Packet Sniffer&Filter
 - https://github.com/WPO-Foundation/win-shaper
