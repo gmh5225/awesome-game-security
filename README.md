@@ -3522,6 +3522,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/DosX-dev/obfus.h [Macro-header for compile-time C obfuscation (tcc, win x86/x64)]
 
 > Shellcode Engine & Tricks
+- https://github.com/Vector35/scc [shellcode compiler]
 - https://github.com/jseclab/obj2shellcode
 - https://github.com/lainswork/shellcode-factory
 - https://github.com/H1d3r/GPU_ShellCode [hide the payload inside the gpu memory]
