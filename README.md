@@ -418,6 +418,7 @@ Or you can send an issue for me.
 - https://github.com/fdrechsler/mcp-server-idapro [MCP for IDA pro]
 - https://github.com/rand-tech/pcm [MCP for IDA pro]
 - https://github.com/fosdickio/binary_ninja_mcp [MCP for Binary_Ninja]
+- https://github.com/Invoke-RE/binja-lattice-mcp [MCP for Binary_Ninja]
 - https://github.com/dnakov/radare2-mcp [Radare2 MCP Server]
 - https://github.com/GLips/Figma-Context-MCP [Cursor Talk To Figma MCP server]
 - https://github.com/gmh5225/hex2dec-mcp [MCP server that provides conversion between hexadecimal and decimal numbers]
@@ -1569,6 +1570,7 @@ Or you can send an issue for me.
 - https://github.com/junron/auto-enum [automatically identify and set enums for standard functions]
 - https://github.com/otter-sec/bn-ebpf-solana [Binary Ninja plugin for Solana eBPF]
 - https://github.com/fosdickio/binary_ninja_mcp [MCP for Binary_Ninja]
+- https://github.com/Invoke-RE/binja-lattice-mcp [MCP for Binary_Ninja]
 
 > Ghidra Plugins
 - https://github.com/AllsafeCyberSecurity/awesome-ghidra [List]
