@@ -3829,6 +3829,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/MrMugiwara/FTK-imager-OSX [Forensics Tools For MAC OS X]
 - https://github.com/h4sh5/DumpIt-mirror [DumpIt for windows]
 - https://github.com/MagnetForensics/dumpit-linux [DumpIt for linux]
+- https://github.com/GuidoBartoli/sherloq [An open-source digital image forensic toolset]
 
 > Dynamic Script
 - https://github.com/can1357/NtLua
