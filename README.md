@@ -484,6 +484,7 @@ Or you can send an issue for me.
 - https://github.com/mush-support/mush-news [MushNews - Web3 News Explorer]
 - https://github.com/lukasmasuch/best-of-crypto [awesome open-source crypto projects]
 - https://github.com/0xMacro/awesome-solana-security [awesome solana security]
+- https://github.com/amanusk/awesome-starknet-security [awesome starknet security]
 - https://github.com/Ackee-Blockchain/Solana-Auditors-Bootcamp [Solana audit security]
 - https://github.com/slowmist/Web3-Project-Security-Practice-Requirements [Web3 Project Security Practice Requirements]
 - https://www.freeweb3resources.com [Guide]
@@ -676,6 +677,7 @@ Or you can send an issue for me.
 > Security
 - https://github.com/crytic/awesome-ethereum-security [awesome ethereum security]
 - https://github.com/ArjunaSec/Awesome-Solana-checklist [awesome solana security]
+- https://github.com/amanusk/awesome-starknet-security [awesome starknet security]
 - https://github.com/sigp/solidity-security-blog [Solidity security]
 - https://github.com/Al-Qa-qa/bank-web3-security-tutorial [Solidity Security]
 - https://github.com/crytic/not-so-smart-contracts [Solidity Security]
