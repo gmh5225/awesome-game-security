@@ -1348,6 +1348,7 @@ Or you can send an issue for me.
 - https://github.com/opa334/Dopamine [iOS 15 and 16]
 - https://github.com/roothide/Dopamine2-roothide [iOS 15 and 16]
 - https://github.com/felix-pb/kfd [iOS 15 and 16]
+- https://github.com/0x36/weightBufs [ANE kernel r/w exploit for iOS 15 and macOS 12]
 - https://github.com/jjolano/shadow
 - https://github.com/gmh5225/IOS-jailbreak--Fugu15
 - https://github.com/Kc57/iHide
@@ -1359,6 +1360,7 @@ Or you can send an issue for me.
 > IOS Memory Explorer
 - https://github.com/hackcatml/kfd-explorer [iOS kernel memory explorer]
 - https://github.com/DerekSelander/dynadump [A runtime ObjC class-dump]
+- https://github.com/jsherman212/xnuspy [an iOS kernel function hooking framework for checkra1n'able devices]
 
 > IOS File Explorer
 - https://github.com/DerekSelander/dynadump [A runtime ObjC class-dump]
@@ -1750,7 +1752,7 @@ Or you can send an issue for me.
 - https://github.com/BossKoopa/BWSR [Arm64 inline hooking for iOS, Android, OSX, and Linux]
 - https://github.com/regomne/ilhook-rs [Rust x86]
 - https://github.com/iofomo/abyss [Android system call hook]
-
+- https://github.com/jsherman212/xnuspy [an iOS kernel function hooking framework for checkra1n'able devices]
 
 > ROP Finder
 - https://github.com/0vercl0k/rp [rp++ is a fast C++ ROP gadget finder for PE/ELF/Mach-O x86/x64/ARM/ARM64 binaries]
