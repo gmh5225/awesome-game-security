@@ -1371,6 +1371,7 @@ Or you can send an issue for me.
 
 > Virtual Environments
 - https://github.com/FBlackBox/BlackBox [Android]
+- https://github.com/ServenScorpion/VirtualApp [Android]
 - https://github.com/mandiant/flare-vm
 - https://github.com/hzqst/VmwareHardenedLoader
 - https://github.com/d4rksystem/VMwareCloak
