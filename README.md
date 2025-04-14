@@ -740,6 +740,10 @@ Or you can send an issue for me.
 - https://github.com/ITExpert0228/Meme_project [MEME]
 - https://github.com/jamesbachini/DEX-Arbitrage [Trading bot on NEAR Protocol]
 
+> MEV
+- https://github.com/flashbots [for ethereum]
+- https://github.com/jito-foundation/jito-solana [for solana]
+
 ## DirectX
 > Guide
 - https://github.com/planetchili/hw3d [C++ 3D DirectX Tutorial]
