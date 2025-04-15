@@ -3503,6 +3503,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/1hAck-0/zeroimport
 - https://github.com/emlinhax/blitz
 
+> Anti-Cheat Programming
+- https://github.com/m417z/thread-call-stack-scanner [Safely manage the unloading of DLLs that have been hooked into a process. Context]
+
 > Compile Time
 - https://github.com/ManulMap/malstring [Using c++23 compile-time magic to produce obfuscated PIC strings and arrays]
 - https://github.com/reveny/Android-Native-Import-Hide [A library for hiding and retrieving imports in ELF binaries]
