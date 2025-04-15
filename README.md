@@ -599,6 +599,7 @@ Or you can send an issue for me.
 - https://github.com/nhuxhr/pumpfun-rs [Rust SDK for PumpFun Solana program]
 - https://github.com/rckprtr/pumpdotfun-sdk [Typescript SDK for PumpFun Solana program]
 - https://github.com/hoprnet/gnosis-hosted [self-host Gnosis Safe]
+- https://github.com/gagliardetto/solana-go [Go SDK library and RPC client for the Solana Blockchain]
 
 > Interaction
 - https://github.com/ethereum/go-ethereum [go ethereum]
