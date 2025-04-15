@@ -426,6 +426,9 @@ Or you can send an issue for me.
 - https://github.com/ant4g0nist/lisa.py [MCP for LLDB]
 - https://github.com/un4ckn0wl3z/MemMCP [Cheat Engine-like but MCP]
 
+> MCP server security
+- https://github.com/johnhalloran321/mcpSafetyScanner [MCPSafetyScanner - Automated MCP safety auditing and remediation using Agents]
+
 ## Game Assets
 - https://github.com/Miziziziz/Retro3DGraphicsCollection
 - https://github.com/HitmanHimself/GOWTool [God of War 2018]
