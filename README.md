@@ -2054,6 +2054,7 @@ Or you can send an issue for me.
 - https://github.com/zer0condition/ZeroThreadKernel [NtCreateCompositionSurfaceHandle]
 - https://github.com/gmh5225/NullDriverCheat [NtOpenCompositionSurfaceSectionInfo]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/560809-firmwaretablehandler.html [FirmwareTableHandler]
+- https://github.com/oakboat/DataPtrHookWin11 [NtUserSetGestureConfig]
 
 > EFI Driver
 - https://github.com/mrexodia/EfiCMake
