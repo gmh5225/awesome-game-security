@@ -232,6 +232,7 @@ Or you can send an issue for me.
 - https://github.com/ssloy/tinyraytracer [A brief computer graphics / rendering course]
 - https://github.com/freetype/freetype [Render fonts]
 - https://github.com/MethanePowered/MethaneKit [DirectX 12, Metal & Vulkan]
+- https://github.com/EmbarkStudios/kajiya [Experimental real-time global illumination renderer]
 
 ## 3D Graphics
 - https://github.com/Mesa3D/mesa
