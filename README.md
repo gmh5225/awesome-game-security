@@ -1004,6 +1004,7 @@ Or you can send an issue for me.
 - https://github.com/roger1337/JDBG [Java Runtime Reverse Engineering and Debugging Tool]
 - https://github.com/atrexus/vulkan [A PE dumper for processes protected by user mode anti-tamper solutions (hyperion, theia, etc.)]
 - https://github.com/linuxboot/fiano [Go-based tools for modifying UEFI firmware]
+- https://github.com/leeqwind/PESignAnalyzer [A Simple PE File Signature information Extracting Tool]
 
 > Mixed boolean-arithmetic
 - https://github.com/Colton1skees/mba-resources [List of mixed boolean-arithmetic resources]
