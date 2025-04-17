@@ -639,6 +639,8 @@ Or you can send an issue for me.
 - https://github.com/otter-sec/bn-ebpf-solana [Binary Ninja plugin for Solana eBPF]
 - https://github.com/deanmlittle/ezbpf [A simple sBPF (Solana eBPF) disassembler]
 - https://github.com/franck44/evm-dis [An EVM bytecode disassembler/assembler]
+- https://github.com/duaraghav8/Ethlint [Code quality & Security Linter for Solidity]
+- https://github.com/protofire/solhint [Code quality & Security Linter for Solidity]
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
