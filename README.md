@@ -616,6 +616,7 @@ Or you can send an issue for me.
 - https://github.com/sk1122/solana-sdk [js solana]
 
 > Tools
+- https://github.com/Quillhash/Web3-Security-Tools [Web3 Security Tools]
 - https://github.com/swiss-knife-xyz/swiss-knife [All your EVM tools in one place]
 - https://github.com/a16z/halmos [A symbolic testing tool for EVM]
 - https://github.com/fukaoi/smart-token-tool [SPL Token/ NFT issue tool on solana]
