@@ -735,6 +735,7 @@ Or you can send an issue for me.
 - https://github.com/Certora/SecurityReports [smart contract security public audits]
 - https://github.com/Ackee-Blockchain/trident [Rust-based framework to Fuzz Solana programs, designed to help you ship secure code]
 - https://github.com/Ackee-Blockchain/wake [Wake is a Python-based Solidity development and testing framework with built-in vulnerability detectors]
+- https://github.com/numencyber/Move_Security_Course [Move Security]
 
 > Contract source code
 - https://github.com/ethereum/solidity-examples [Solidity example code]
