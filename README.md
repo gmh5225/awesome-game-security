@@ -693,6 +693,7 @@ Or you can send an issue for me.
 - https://github.com/crytic/not-so-smart-contracts [Solidity Security]
 - https://github.com/Ackee-Blockchain/reentrancy-examples [Reentrancy vulnerabilities]
 - https://github.com/OpenZeppelin/openzeppelin-contracts [OpenZeppelin Contracts is a library for secure smart contract development]
+- https://github.com/banteg/legible-math [LegibleMath is a Solidity library providing readable arithmetic with compile-time constants for the letters you need to spell numbers]
 - https://github.com/preslavxyz/Web3-Security-Researcher-Roadmap [Web3 Security Researcher Roadmap]
 - https://github.com/tpiliposian/not-awesome-web3-security-roadmap [Web3 Security Researcher roadmap]
 - https://github.com/SunWeb3Sec [Let's make Web3 more secure]
