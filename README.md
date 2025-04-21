@@ -427,6 +427,7 @@ Or you can send an issue for me.
 - https://github.com/ant4g0nist/lisa.py [MCP for LLDB]
 - https://github.com/droidrun/droidrun [MCP for Android]
 - https://github.com/un4ckn0wl3z/MemMCP [Cheat Engine-like but MCP]
+- https://github.com/zinja-coder/apktool-mcp-server [A MCP Server for APK Tool (Part of Android Reverse Engineering MCP Suites)]
 
 > MCP server security
 - https://github.com/johnhalloran321/mcpSafetyScanner [MCPSafetyScanner - Automated MCP safety auditing and remediation using Agents]
