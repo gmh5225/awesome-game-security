@@ -1686,6 +1686,7 @@ Or you can send an issue for me.
 - https://github.com/DoranekoSystems/wasm-ceserver [Analyzing WebAssembly]
 
 > Injection:Windows
+- https://github.com/itaymigdal/awesome-injection [awesome injection]
 - https://github.com/btbd/smap [Scatter Manual Map]
 - https://github.com/btbd/modmap [Extend Manual Map]
 - https://github.com/KGB-1337/memmap [Extend Manual Map]
@@ -1727,6 +1728,7 @@ Or you can send an issue for me.
 - https://github.com/Cracked5pider/earlycascade-injection [Early Cascade Injection]
 
 > Injection:Linux
+- https://github.com/itaymigdal/awesome-injection [awesome injection]
 - https://github.com/ixty/mandibule
 
 > Injection:Android
