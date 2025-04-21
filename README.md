@@ -3894,6 +3894,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [Enumerate Callback](https://github.com/hfiref0x/WinObjEx64/blob/7284d711b2eeebfd965713fc79353b9b76e23083/Source/WinObjEx64/extras/extrasCallbacks.c#L117)
 - [ImageNotify Callback With RtlWalkFrameChain](https://github.com/Staatsgeheim/PsImageNotifyRoutineSpamFilter)
 - [SymlinkCallback](https://github.com/yardenshafir/SymlinkCallback)
+- https://github.com/Archie-osu/PowerHook [Hooking KPRCB IdlePreselect]
 
 > Winows User Dump Analysis
 - https://github.com/0vercl0k/udmp-parser
@@ -3981,6 +3982,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://gist.github.com/gmh5225/ab00f831ffdf4ef608ab3b6eb0d37250 [Create process from KernelMode via APC]
 - https://github.com/gmh5225/Map-file-in-system-space [MiMapViewInSystemSpace]
 - https://github.com/SamuelTulach/PwnedBoot [Using Windows' own bootloader as a shim to bypass Secure Boot]
+- https://github.com/Archie-osu/PowerHook [Hooking KPRCB IdlePreselect]
 
 
 > Windows Ring3
