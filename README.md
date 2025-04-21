@@ -644,6 +644,7 @@ Or you can send an issue for me.
 - https://github.com/franck44/evm-dis [An EVM bytecode disassembler/assembler]
 - https://github.com/duaraghav8/Ethlint [Code quality & Security Linter for Solidity]
 - https://github.com/protofire/solhint [Code quality & Security Linter for Solidity]
+- https://github.com/byterocket/c4udit [Static analyzer for solidity contracts based on regexs]
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
