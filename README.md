@@ -1011,6 +1011,7 @@ Or you can send an issue for me.
 - https://github.com/atrexus/vulkan [A PE dumper for processes protected by user mode anti-tamper solutions (hyperion, theia, etc.)]
 - https://github.com/linuxboot/fiano [Go-based tools for modifying UEFI firmware]
 - https://github.com/leeqwind/PESignAnalyzer [A Simple PE File Signature information Extracting Tool]
+- https://github.com/microsoft/SDCM [Surface Dev Center Manager tool to automate WHQL/Attestation submissions]
 
 > Mixed boolean-arithmetic
 - https://github.com/Colton1skees/mba-resources [List of mixed boolean-arithmetic resources]
