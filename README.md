@@ -564,6 +564,7 @@ Or you can send an issue for me.
 - https://github.com/blorm-network/ZerePy [ZerePy an open-source launch-pad for AI agents]
 - https://github.com/openai/openai-agents-python [openai multi-agent framework]
 - https://github.com/kortix-ai/suna [Suna - Open Source Generalist AI Agent]
+- https://github.com/HKUDS/AutoAgent [AutoAgent: Fully-Automated and Zero-Code LLM Agent Framework]
 
 > 3D Graphics
 - https://github.com/mrdoob/three.js [JavaScript 3D Library]
