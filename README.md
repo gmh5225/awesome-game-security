@@ -563,6 +563,7 @@ Or you can send an issue for me.
 - https://github.com/kyegomez/swarms [The Enterprise-Grade Production-Ready Multi-Agent Orchestration Framework]
 - https://github.com/blorm-network/ZerePy [ZerePy an open-source launch-pad for AI agents]
 - https://github.com/openai/openai-agents-python [openai multi-agent framework]
+- https://github.com/kortix-ai/suna [Suna - Open Source Generalist AI Agent]
 
 > 3D Graphics
 - https://github.com/mrdoob/three.js [JavaScript 3D Library]
