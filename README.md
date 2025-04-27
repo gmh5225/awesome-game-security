@@ -2019,6 +2019,7 @@ Or you can send an issue for me.
 - https://github.com/varwara/CVE-2024-21338 [appid.sys]
 - https://github.com/MrAle98/CVE-2024-49138-POC [CLFS.sys]
 - https://github.com/gmh5225/CVE-2025-21333-POC [vkrnlintvsp.sys]
+- https://github.com/Xacone/Eneio64-Driver-Exploit [eneio64.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
