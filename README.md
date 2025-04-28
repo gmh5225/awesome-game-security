@@ -2819,6 +2819,7 @@ Or you can send an issue for me.
 - https://github.com/xvorost/CS-2-Glow [External]
 - https://github.com/yinleiCoder/cs2-cheat-cpp [External]
 - https://github.com/ByteCorum/DragonBurn [External]
+- https://github.com/yoshisaac/CounterStrike2-Linux-Cheat [Linux External]
 - https://github.com/KisSsArt/CS2-Cheat-Base [Internal]
 - https://github.com/redbg/CS2-Internal [Internal]
 - https://github.com/Elsie-Kgafela/CS2-Cheat-Base [Internal]
