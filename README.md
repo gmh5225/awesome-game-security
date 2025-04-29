@@ -1733,6 +1733,7 @@ Or you can send an issue for me.
 - https://github.com/SafeBreach-Labs/PoolParty [ThreadPool]
 - https://github.com/hasherezade/thread_namecalling [SetThreadDescription]
 - https://github.com/Cracked5pider/earlycascade-injection [Early Cascade Injection]
+- https://github.com/0xPrimo/KMDllInjector [kernel-mode DLL Injector]
 
 > Injection:Linux
 - https://github.com/itaymigdal/awesome-injection [awesome injection]
