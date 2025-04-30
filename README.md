@@ -1186,6 +1186,7 @@ Or you can send an issue for me.
 - https://github.com/j-hc/FlagSecurePatcher [Disable flag secure and screenshot listeners]
 - https://github.com/hackcatml/zygisk-memdump [A zygisk module that dumps so file from process memory]
 - https://github.com/PerformanC/ReZygisk [Transparent implementation of Zygisk]
+- https://github.com/jiqiu2022/Zygisk-MyInjector [Zygisk Injector]
 
 > Xposed
 - https://github.com/NPC2000/AppPealing-new [An Xposed module that disables Inka AppSealing, a popular anti-cheat and anti-root solution]
