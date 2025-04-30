@@ -1049,7 +1049,7 @@ Or you can send an issue for me.
 
 > Dynamic Binary Instrumentation
 - https://github.com/hzqst/unicorn_pe
-- https://github.com/momo5502/emulator [Windows User Space Emulator]
+- https://github.com/momo5502/sogen [Windows User Space Emulator]
 - https://github.com/ZehMatt/zyemu [x86-64 user mode emulation using Zydis]
 - https://github.com/Nitr0-G/PeVisor [PE]
 - https://github.com/googleprojectzero/TinyInst
