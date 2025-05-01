@@ -1188,6 +1188,7 @@ Or you can send an issue for me.
 - https://github.com/hackcatml/zygisk-memdump [A zygisk module that dumps so file from process memory]
 - https://github.com/PerformanC/ReZygisk [Transparent implementation of Zygisk]
 - https://github.com/jiqiu2022/Zygisk-MyInjector [Zygisk Injector]
+- https://github.com/Exo1i/MagiskHluda [Run a more undetectable frida server on boot using magisk]
 
 > Xposed
 - https://github.com/NPC2000/AppPealing-new [An Xposed module that disables Inka AppSealing, a popular anti-cheat and anti-root solution]
@@ -1214,6 +1215,7 @@ Or you can send an issue for me.
 - https://github.com/aimardcr/FridaDetectionBypass [Debugger Detection Bypass]
 - https://github.com/seanistethered/FridaScript [Low level scripting app for iOS]
 - https://github.com/AsenOsen/frida-stealth [Stealth patch for Frida, stealth knowledge collection]
+- https://github.com/Exo1i/MagiskHluda [Run a more undetectable frida server on boot using magisk]
 
 > Hook ART(android)
 - https://github.com/PAGalaxyLab/YAHFA
