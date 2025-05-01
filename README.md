@@ -1739,6 +1739,7 @@ Or you can send an issue for me.
 - https://github.com/hasherezade/thread_namecalling [SetThreadDescription]
 - https://github.com/Cracked5pider/earlycascade-injection [Early Cascade Injection]
 - https://github.com/0xPrimo/KMDllInjector [kernel-mode DLL Injector]
+- https://github.com/mohanad1-maker/StealthAPCDispatcher [Thread scheduling stealth method using APC with encrypted shellcode]
 
 > Injection:Linux
 - https://github.com/itaymigdal/awesome-injection [awesome injection]
