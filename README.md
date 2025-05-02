@@ -41,6 +41,7 @@ Or you can send an issue for me.
 - [WSL](#wsl)
 - [WSA](#wsa)
 - [Windows Emulator](#windows-emulator)
+- [Linux Emulator](#linux-emulator)
 - [Android Emulator](#android-emulator)
 - [IOS Emulator](#ios-emulator)
 - [Game Boy](#game-boy)
@@ -4096,6 +4097,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/brunodev85/winlator [Android application for running Windows applications with Wine and Box86/Box64]
 - https://github.com/x86matthew/WinVisor [A hypervisor-based emulator for Windows x64 user-mode executables using Windows Hypervisor Platform API]
 - https://github.com/momo5502/sogen [Windows User Space Emulator]
+
+## Linux Emulator
+- https://github.com/OFFTKP/felix86 [Run x86-64 programs on RISC-V Linux]
 
 ## Android Emulator
 - https://github.com/Genymobile
