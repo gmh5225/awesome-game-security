@@ -548,6 +548,7 @@ Or you can send an issue for me.
 - https://github.com/solana-developers/create-solana-dapp [CLI for creating Solana dApps on the fly]
 - https://github.com/ithacaxyz/odyssey-examples [Odyssey's features]
 - https://github.com/OpenZeppelin/merkle-tree [Merkle Tree]
+- https://github.com/cbergoon/merkletree [A Merkle Tree implementation written in Go]
 - [Smart Contract Precision Handling Best Practices](https://github.com/gmh5225/Smart-Contract-Precision-Handling-Best-Practices) [Precision Handling]
 - https://github.com/gmh5225/Layer2-Architecture [Layer2 Architecture]
 - https://github.com/gmh5225/Optimism-VM-Architecture [Optimism VM Architecture]
