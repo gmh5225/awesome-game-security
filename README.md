@@ -893,8 +893,9 @@ Or you can send an issue for me.
 - https://github.com/DoranekoSystems/ceserver-ios [Porting ceserver to iOS.Dynamic analysis]
 - https://github.com/gmh5225/cheat-engine-ceserver-pcileech [CE Server For Pcileech]
 - https://github.com/user23333/veh [CE Plugin For Manualmap VEH Dll]
-- https://github.com/x64dbg/x64dbg
-- https://github.com/marakew/syser
+- https://github.com/x64dbg/x64dbg [A debugger for Windows x86/64]
+- https://github.com/marakew/syser [A debugger for Windows x86/64]
+- https://github.com/keowu/koidbg [A debugger for Windows ARM64]
 - https://github.com/noword/GDB-Windows-Binaries [GDB]
 - https://github.com/ajkhoury/ReClassEx
 - https://github.com/ReClassNET/ReClass.NET
