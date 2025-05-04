@@ -425,6 +425,7 @@ Or you can send an issue for me.
 - https://github.com/GLips/Figma-Context-MCP [Cursor Talk To Figma MCP server]
 - https://github.com/gmh5225/hex2dec-mcp [MCP server that provides conversion between hexadecimal and decimal numbers]
 - https://github.com/signal-slot/mcp-gdb [MCP for GDB]
+- https://github.com/svnscha/mcp-windbg [MCP for WinDBG]
 - https://github.com/ant4g0nist/lisa.py [MCP for LLDB]
 - https://github.com/droidrun/droidrun [MCP for Android]
 - https://github.com/un4ckn0wl3z/MemMCP [Cheat Engine-like but MCP]
