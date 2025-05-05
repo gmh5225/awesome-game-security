@@ -1222,6 +1222,7 @@ Or you can send an issue for me.
 - https://github.com/seanistethered/FridaScript [Low level scripting app for iOS]
 - https://github.com/AsenOsen/frida-stealth [Stealth patch for Frida, stealth knowledge collection]
 - https://github.com/Exo1i/MagiskHluda [Run a more undetectable frida server on boot using magisk]
+- https://github.com/suifei/fridare [Powerful Frida repackaging tool for iOS and Android. Easily modify Frida servers to enhance stealth and bypass detection]
 
 > Hook ART(android)
 - https://github.com/PAGalaxyLab/YAHFA
