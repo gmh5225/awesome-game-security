@@ -415,6 +415,7 @@ Or you can send an issue for me.
 - https://github.com/nasimali5/mcpup [MCP for unity]
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 - https://github.com/mrexodia/ida-pro-mcp [MCP for IDA pro]
+- https://github.com/cnitlrt/headless-ida-mcp-server [MCP for IDA pro(headless)]
 - https://github.com/MxIris-Reverse-Engineering/ida-mcp-server [MCP for IDA pro]
 - https://github.com/taida957789/ida-mcp-server-plugin [MCP for IDA pro]
 - https://github.com/fdrechsler/mcp-server-idapro [MCP for IDA pro]
