@@ -1090,7 +1090,7 @@ Or you can send an issue for me.
 - https://github.com/AdamOron/PatchGuardBypass
 - https://github.com/zer0condition/Demystifying-PatchGuard
 - https://github.com/4l3x777/dse_pg_bypass [DSE & PG bypass via BYOVD attack]
-- https://github.com/i32-Sudo/VulnerablePatchGuardExploit
+- https://github.com/gmh5225/VulnerablePatchGuardExploit
 - https://github.com/emlinhax/tableflipper [partially disable patchguard up to win11 21H2]
 - https://github.com/AmitMoshel1/PatchGuardEncryptorDriver [Self-implemented PatchGuard]
 
