@@ -563,6 +563,7 @@ Or you can send an issue for me.
 - https://github.com/Ackee-Blockchain/reentrancy-examples [Reentrancy vulnerabilities]
 
 > AI agent
+- https://github.com/microsoft/ai-agents-for-beginners [AI Agents for beginners]
 - https://github.com/e2b-dev/awesome-ai-agents [A list of AI autonomous agents]
 - https://github.com/elizaOS/eliza [Autonomous agents for everyone]
 - https://github.com/elizaOS/eliza-starter [eliza starter]
