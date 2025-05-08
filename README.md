@@ -606,6 +606,7 @@ Or you can send an issue for me.
 - https://github.com/auditless/cairo-template [Cairo template]
 - https://github.com/Contract-examples/cairo-example [Cairo template]
 - https://github.com/rzmahmood/StarkNet-NFT-Template [A Template for deploying NFT Projects on StarkNet]
+- https://github.com/mart1n-xyz/eip7702-viem-demo [EIP-7702]
 
 > SDK
 - https://github.com/Ankr-network/game-unreal-sdk [Mirage Unreal SDK]
