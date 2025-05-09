@@ -433,6 +433,7 @@ Or you can send an issue for me.
 - https://github.com/un4ckn0wl3z/MemMCP [Cheat Engine-like but MCP]
 - https://github.com/zinja-coder/apktool-mcp-server [A MCP Server for APK Tool (Part of Android Reverse Engineering MCP Suites)]
 - https://github.com/regenrek/deepwiki-mcp [MCP for deepwiki]
+- https://github.com/jedisct1/zig-mcp-server [A high-performance implementation of the MCP protocol in Zig]
 
 > MCP server security
 - https://github.com/johnhalloran321/mcpSafetyScanner [MCPSafetyScanner - Automated MCP safety auditing and remediation using Agents]
