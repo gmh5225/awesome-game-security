@@ -1406,6 +1406,7 @@ Or you can send an issue for me.
 - https://github.com/checkra1n
 - https://github.com/opa334/TrollStore [jailed app]
 - https://github.com/paradiseduo/IPAPatch [Patch iOS Apps without Jailbreak]
+- https://github.com/34306/mdc0 [CVE-2025-24203]
 
 > IOS Memory Explorer
 - https://github.com/hackcatml/kfd-explorer [iOS kernel memory explorer]
