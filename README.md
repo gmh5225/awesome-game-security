@@ -771,6 +771,7 @@ Or you can send an issue for me.
 - https://github.com/luvnft/Memecoin-BASE [MEME]
 - https://github.com/ITExpert0228/Meme_project [MEME]
 - https://github.com/jamesbachini/DEX-Arbitrage [Trading bot on NEAR Protocol]
+- https://github.com/Vectorized/gasback [A barebones implementation of a gasback contract that implements [RIP-7767](https://github.com/ethereum/RIPs/blob/master/RIPS/rip-7767.md)]
 
 > MEV
 - https://github.com/flashbots [for ethereum]
