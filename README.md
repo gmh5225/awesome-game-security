@@ -1416,6 +1416,7 @@ Or you can send an issue for me.
 
 > IOS File Explorer
 - https://github.com/DerekSelander/dynadump [A runtime ObjC class-dump]
+- https://github.com/LaurieWired/Malimite [Malimite is an iOS and macOS decompiler designed to help researchers analyze and decode IPA files and Application Bundles]
 
 > Virtual Environments
 - https://github.com/FBlackBox/BlackBox [Android]
