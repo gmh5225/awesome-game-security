@@ -621,6 +621,7 @@ Or you can send an issue for me.
 - https://github.com/rckprtr/pumpdotfun-sdk [Typescript SDK for PumpFun Solana program]
 - https://github.com/hoprnet/gnosis-hosted [self-host Gnosis Safe]
 - https://github.com/gagliardetto/solana-go [Go SDK library and RPC client for the Solana Blockchain]
+- https://github.com/evmauth/evmauth-ts [A TypeScript SDK for interacting with EVMAuth contracts]
 
 > Interaction
 - https://github.com/ethereum/go-ethereum [go ethereum]
@@ -630,7 +631,8 @@ Or you can send an issue for me.
 - https://github.com/ethers-io/ethers.js [js ethereum]
 - https://github.com/mhw0/libethc [c ethereum]
 - https://github.com/sk1122/solana-sdk [js solana]
-
+- https://github.com/evmauth/evmauth-ts [A TypeScript SDK for interacting with EVMAuth contracts]
+  
 > Tools
 - https://github.com/Quillhash/Web3-Security-Tools [Web3 Security Tools]
 - https://github.com/swiss-knife-xyz/swiss-knife [All your EVM tools in one place]
@@ -773,6 +775,7 @@ Or you can send an issue for me.
 - https://github.com/ITExpert0228/Meme_project [MEME]
 - https://github.com/jamesbachini/DEX-Arbitrage [Trading bot on NEAR Protocol]
 - https://github.com/Vectorized/gasback [A barebones implementation of a gasback contract that implements [RIP-7767](https://github.com/ethereum/RIPs/blob/master/RIPS/rip-7767.md)]
+- https://github.com/evmauth/evmauth-core [EVMAuth is an advanced implementation of the ERC-1155 token standard that enables robust EVM-based authorization for Web3 applications]
 
 > MEV
 - https://github.com/flashbots [for ethereum]
