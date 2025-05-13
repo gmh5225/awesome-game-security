@@ -1878,6 +1878,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/DMA-E3100-CFW-BYPASS [DMA-BYPASS-Killer]
 - https://github.com/dom0ng/pcileech-wifi-v2 [pcileech-fpga with wireless card emulation]
 - https://github.com/Trustings/DMA_PE_Dumper [DMA PE (Portable Executable) Dumper with DTB patching capabilities]
+- https://github.com/mltpig/PCILeech-FPGA-DMA_VMD [PCILeech FPGA DMA VMD Controller Simulation Project]
 
 > W2S
 - https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
