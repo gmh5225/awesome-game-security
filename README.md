@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/gmh5225-awesome-game-security-badge.png)](https://mseep.ai/app/gmh5225-awesome-game-security)
+
 
 # [`awesome-game-security`](https://gs.awesome.rip)
 ![image](https://github.com/gmh5225/awesome-game-security/assets/13917777/a39c6322-40ed-45b5-afcb-93e8d5477a0b)
