@@ -704,6 +704,7 @@ Or you can send an issue for me.
 - https://github.com/NomicFoundation/hardhat
 - https://github.com/zeroknots/brokentoken [Foundry Test Suit to test weird ERC20 behavior]
 - https://github.com/SunWeb3Sec/DeFiLabs [On-chain test DeFi using Foundry]
+- https://github.com/1inch/solidity-utils [Utility Library for Smart Contracts and Testing]
 
 > Security
 - https://github.com/crytic/awesome-ethereum-security [awesome ethereum security]
