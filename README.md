@@ -944,6 +944,7 @@ Or you can send an issue for me.
 - https://github.com/ShinoLeah/eHook [eBPF hook]
 - https://github.com/SeeFlowerX/stackplz [eBPF-based debugger for Android]
 - https://github.com/un4ckn0wl3z/MemMCP [Cheat Engine-like but MCP]
+- https://github.com/LLeavesG/eBPFDexDumper [DexDumper based eBPF on Android Platform]
 
 > Packet Sniffer&Filter
 - https://github.com/WPO-Foundation/win-shaper
@@ -1267,6 +1268,7 @@ Or you can send an issue for me.
 - https://github.com/misc0110/PTEditor [PT Editor]
 - https://github.com/joaomlneto/procmap
 - https://github.com/kp7742/MemDumper [Dump]
+- https://github.com/LLeavesG/eBPFDexDumper [DexDumper based eBPF on Android Platform]
 - https://github.com/mrcang09/Android-Mem-Edit
 - https://github.com/ExploitTheLoop/writemem
 - https://github.com/abcz316/rwProcMem33 [Linux read & write process memory module]
