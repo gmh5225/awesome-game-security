@@ -1051,6 +1051,7 @@ Or you can send an issue for me.
 - https://github.com/NaC-L/Mergen
 - https://github.com/fjqisba/VmpHelper
 - https://github.com/xtremegamer1/vmdevirt-vtil
+- https://github.com/oureveryday/VMPUnpacker/tree/master [Unpacker]
 
 > Fix Themida
 - https://github.com/sodareverse/TDE
