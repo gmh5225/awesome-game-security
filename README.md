@@ -1785,6 +1785,9 @@ Or you can send an issue for me.
 - https://github.com/NepMods/InjectARM64 [Non-root injection]
 - https://github.com/reveny/Android-Virtual-Inject [Inject through Virtual Space without root permissions]
 
+> Injection:IOS
+- https://github.com/opa334/opainject [iOS runtime dylib injection tool]
+
 
 > DLL Hijack
 - https://github.com/Sh0ckFR/DLLirant [Hijacking researches]
