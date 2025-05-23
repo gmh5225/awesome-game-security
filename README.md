@@ -636,6 +636,7 @@ Or you can send an issue for me.
 > Tools
 - https://github.com/Quillhash/Web3-Security-Tools [Web3 Security Tools]
 - https://github.com/swiss-knife-xyz/swiss-knife [All your EVM tools in one place]
+- https://github.com/EIPTools/eip-tools [Explore all EIPs, ERCs, RIPs and CAIPs easily]
 - https://github.com/a16z/halmos [A symbolic testing tool for EVM]
 - https://github.com/fukaoi/smart-token-tool [SPL Token/ NFT issue tool on solana]
 - https://github.com/cryptoloutre/solana-tools [A bunch of tools to help people in the Solana ecosystem]
