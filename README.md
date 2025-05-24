@@ -2223,6 +2223,7 @@ Or you can send an issue for me.
 - https://github.com/susMdT/LoudSunRun [Stack Spoofing with Synthetic frames based on the work of namazso, SilentMoonWalk, and VulcanRaven]
 - https://github.com/NtDallas/Fenrir [Stack spoofing using jmp rdi]
 - https://github.com/HackerCalico/StackSpoofer_Macro [An easy-to-use and powerful Macro for Stack Spoofing]
+- https://github.com/HulkOperator/Spoof-RetAddr [Spoofing the return address of a WinAPI call by modifying the stack]
 
 > Hide
 - https://github.com/JKornev/hidden
