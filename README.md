@@ -3871,6 +3871,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/apkunpacker/MagiskDetection
 - https://github.com/canyie/MagiskEoP [exploit]
 - https://github.com/JingMatrix/Demo [A demo app to detect (Zygisk) library injections]
+- https://github.com/apkunpacker/DetectZygisk [A POC to detect zygisk]
 
 > Detection:Frida
 - https://github.com/darvincisec/DetectFrida
