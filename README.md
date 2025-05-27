@@ -573,6 +573,9 @@ Or you can send an issue for me.
 - https://github.com/openai/openai-agents-python [openai multi-agent framework]
 - https://github.com/kortix-ai/suna [Suna - Open Source Generalist AI Agent]
 - https://github.com/HKUDS/AutoAgent [AutoAgent: Fully-Automated and Zero-Code LLM Agent Framework]
+- https://github.com/agno-agi/agno [Agno is a lightweight, high-performance library for building Agents]
+- https://github.com/crewAIInc/crewAI [autonomous AI agents]
+- https://github.com/pydantic/pydantic-ai [Agent Framework / shim to use Pydantic with LLMs]
 
 > MCP Server
 - https://github.com/PraneshASP/foundry-mcp-server [foundry mcp]
