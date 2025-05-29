@@ -670,6 +670,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/EthGen [A simple command-line tool written in Go to generate Ethereum wallet addresses and private keys in bulk]
 - https://github.com/hyperliquid-dex/hyper-evm-sync [Proof of concept to execute all transactions from genesis for the entire HyperEVM]
 - https://github.com/sec3-service/IDLGuesser [IDL Guesser is an open-source tool that automatically recovers the IDL information from closed-source Anchor-based Solana programs]
+- https://github.com/verichains/revela [Decompiler for Move smart contracts]
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
