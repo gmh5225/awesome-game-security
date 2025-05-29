@@ -691,6 +691,13 @@ Or you can send an issue for me.
 - https://github.com/move-language/move-on-aptos [Move on Aptos]
 - https://github.com/matter-labs/solx [LLVM-based Solidity compiler]
 
+> Decompiler
+- https://github.com/Jon-Becker/heimdall-rs [Decompiler for EVM smart contract]
+- https://app.dedaub.com/ [Decompiler for EVM smart contract]
+- https://ethervm.io/decompile [Decompiler for EVM smart contract]
+- https://github.com/msuiche/porosity [Decompiler for EVM smart contract written by C++]
+- https://github.com/verichains/revela [Decompiler for Move smart contracts]
+
 > Development Framework
 - https://github.com/foundry-rs/foundry [Ethereum application development]
 - https://github.com/coral-xyz/anchor [Solana Sealevel Framework]
