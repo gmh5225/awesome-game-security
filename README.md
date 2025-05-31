@@ -615,6 +615,7 @@ Or you can send an issue for me.
 - https://github.com/mart1n-xyz/eip7702-viem-demo [EIP-7702]
 - https://github.com/Uniswap/ERC20-eth [ERC-7914]
 - https://github.com/mpeyfuss/vyper-template [Vyper + Foundry Template]
+- https://github.com/Contract-examples/CrimeEnjoyor [CrimeEnjoyor for EIP-7702]
 
 > SDK
 - https://github.com/Ankr-network/game-unreal-sdk [Mirage Unreal SDK]
@@ -795,6 +796,7 @@ Or you can send an issue for me.
 - https://github.com/jamesbachini/DEX-Arbitrage [Trading bot on NEAR Protocol]
 - https://github.com/Vectorized/gasback [A barebones implementation of a gasback contract that implements [RIP-7767](https://github.com/ethereum/RIPs/blob/master/RIPS/rip-7767.md)]
 - https://github.com/evmauth/evmauth-core [EVMAuth is an advanced implementation of the ERC-1155 token standard that enables robust EVM-based authorization for Web3 applications]
+- https://github.com/Contract-examples/CrimeEnjoyor [CrimeEnjoyor for EIP-7702]
 
 > MEV
 - https://github.com/flashbots [for ethereum]
