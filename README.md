@@ -404,6 +404,7 @@ Or you can send an issue for me.
 - https://github.com/kvnxiao/storytime [Remake of MapleStory]
 - https://github.com/deathkiller/jazz2-native [Remake of Jazz Jackrabbit 2]
 - https://github.com/electronicarts/CnC_Red_Alert [Command and Conquer: Red Alert]
+- https://github.com/huangkaoya/redalert2 [Red Alert 2 on Web]
 
 > MCP server
 - https://github.com/ahujasid/blender-mcp [Blender Model Context Protocol Integration]
