@@ -437,6 +437,7 @@ Or you can send an issue for me.
 - https://github.com/jedisct1/zig-mcp-server [A high-performance implementation of the MCP protocol in Zig]
 - https://github.com/noopstudios/interactive-feedback-mcp [Interactive User Feedback MCP]
 - https://github.com/gmh5225/interactive-feedback-macos-mcp [A native macOS MCP server for collecting interactive user feedback with AppleScript dialogs and image support]
+- https://github.com/datalayer/jupyter-mcp-server [MCP for Jupyter]
 
 > MCP server security
 - https://github.com/johnhalloran321/mcpSafetyScanner [MCPSafetyScanner - Automated MCP safety auditing and remediation using Agents]
