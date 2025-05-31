@@ -435,6 +435,7 @@ Or you can send an issue for me.
 - https://github.com/zinja-coder/apktool-mcp-server [A MCP Server for APK Tool (Part of Android Reverse Engineering MCP Suites)]
 - https://github.com/regenrek/deepwiki-mcp [MCP for deepwiki]
 - https://github.com/jedisct1/zig-mcp-server [A high-performance implementation of the MCP protocol in Zig]
+- https://github.com/gmh5225/interactive-feedback-macos-mcp [A native macOS MCP server for collecting interactive user feedback with AppleScript dialogs and image support]
 
 > MCP server security
 - https://github.com/johnhalloran321/mcpSafetyScanner [MCPSafetyScanner - Automated MCP safety auditing and remediation using Agents]
