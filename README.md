@@ -723,6 +723,7 @@ Or you can send an issue for me.
 - https://github.com/1inch/solidity-utils [Utility Library for Smart Contracts and Testing]
 
 > Security
+- https://github.com/TradMod/awesome-audits-checklists [A curated list of smart contracts security audits checklists]
 - https://github.com/crytic/awesome-ethereum-security [awesome ethereum security]
 - https://github.com/ArjunaSec/Awesome-Solana-checklist [awesome solana security]
 - https://github.com/amanusk/awesome-starknet-security [awesome starknet security]
