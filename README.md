@@ -1079,6 +1079,7 @@ Or you can send an issue for me.
 > Fix Themida
 - https://github.com/sodareverse/TDE
 - https://github.com/ergrelet/themida-unmutate
+- https://github.com/stuxnet147/Themida-Research [Themida 3.x research]
 
 > Fix OLLVM
 - https://bbs.pediy.com/thread-272414.htm
