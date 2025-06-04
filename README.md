@@ -2654,6 +2654,7 @@ Or you can send an issue for me.
 - https://github.com/SoulGirlJP/AzureV316 [Private Server-KMS-316]
 - https://github.com/Elem8100/MapleNecrocer [MapleStory Client Emulator]
 - https://github.com/StephLin/maplestory-artale-explab [Experience gain & HP/MP cost lab for MapleStory Worlds Artale]
+- https://github.com/KenYu910645/MapleStoryAutoLevelUp [An auto level up script for Maple Story Artale]
 
 > Game:Minecraft
 - [A minecraft server backend written in c++](https://github.com/mmbednarek/minecpp)
