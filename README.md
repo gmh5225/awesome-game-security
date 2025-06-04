@@ -642,6 +642,7 @@ Or you can send an issue for me.
 - https://github.com/mhw0/libethc [c ethereum]
 - https://github.com/sk1122/solana-sdk [js solana]
 - https://github.com/evmauth/evmauth-ts [A TypeScript SDK for interacting with EVMAuth contracts]
+- https://github.com/loocapro/reth-bsc [A BSC-compatible Reth client implementation]
   
 > Tools
 - https://github.com/Quillhash/Web3-Security-Tools [Web3 Security Tools]
