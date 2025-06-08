@@ -4211,3 +4211,6 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/xemu-project/xemu [Xbox Emulator for Windows]
 - https://github.com/rexdex/recompiler [Porting Xbox360 executables to Windows]
 
+
+## Sponsors
+[![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
