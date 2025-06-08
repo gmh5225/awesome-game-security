@@ -2085,12 +2085,15 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/CVE-2020-14974 [IObitUnlocker.sys]
 - https://github.com/CyberSecurityUP/ProcessKiller-BYOVD [viragt64.sys]
 - https://github.com/CyberSecurityUP/UrekMazino-Malware [viragt64.sys]
+- https://github.com/BlackSnufkin/BYOVD/tree/main/Viragt64-Killer [viragt64.sys]
 - https://github.com/MrAle98/ATDCM64a-LPE [[atdcm64a.sys](https://security.humanativaspa.it/exploiting-amd-atdcm64a.sys-arbitrary-pointer-dereference-part-1/)]
 - https://github.com/varwara/CVE-2024-35250 [ks.sys]
 - https://github.com/varwara/CVE-2024-21338 [appid.sys]
 - https://github.com/MrAle98/CVE-2024-49138-POC [CLFS.sys]
 - https://github.com/gmh5225/CVE-2025-21333-POC [vkrnlintvsp.sys]
 - https://github.com/Xacone/Eneio64-Driver-Exploit [eneio64.sys]
+- https://github.com/BlackSnufkin/BYOVD/tree/main/TfSysMon-Killer [SysMon.sys]
+- https://github.com/BlackSnufkin/BYOVD/tree/main/Ksapi64-Killer [ksapi64.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
