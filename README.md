@@ -3332,6 +3332,7 @@ Or you can send an issue for me.
 
 > Game:Dark Souls
 - https://github.com/igromanru/Dark-Souls-III-Cheat-Engine-Guide
+- https://github.com/dualshock-tools/ds4-tools [Scripts I use to play and reverse-engineer the DualShock 4]
 
 > Game:Sea Of Thieves
 - https://github.com/ToxSylph/SeaOfChoros
