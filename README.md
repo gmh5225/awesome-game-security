@@ -4081,6 +4081,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Map-file-in-system-space [MiMapViewInSystemSpace]
 - https://github.com/SamuelTulach/PwnedBoot [Using Windows' own bootloader as a shim to bypass Secure Boot]
 - https://github.com/Archie-osu/PowerHook [Hooking KPRCB IdlePreselect]
+- https://github.com/Th3Spl/IoCreateDriver [IoCreateDriver Implementation]
 
 
 > Windows Ring3
