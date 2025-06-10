@@ -1167,6 +1167,7 @@ Or you can send an issue for me.
 - https://github.com/marcusbotacin/BranchMonitoringProject [PMI]
 - https://github.com/gmh5225/NMI-EnumNmiCallback [Enumerate NMI]
 - https://github.com/gmh5225/Disable-nmi-callbacks [Disable NMI]
+- https://github.com/DErDYAST1R/NMICallbackBlocker2 [Disable NMI]
 - https://github.com/gmh5225/NMI-nmi_callback [Triggering NMI]
 - https://github.com/gmh5225/Kernel_Anti-Cheat [NMI]
 - https://github.com/jlgreathouse/AMD_IBS_Toolkit [AMD Sampling]
