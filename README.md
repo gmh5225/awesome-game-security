@@ -2276,6 +2276,7 @@ Or you can send an issue for me.
 - https://github.com/armvirus/CosMapper [Signed Driver Map]
 - https://github.com/gmh5225/HideDriverTesting [Hide Driver]
 - https://github.com/IcEy-999/Drv_Hide_And_Camouflage [Hide Driver]
+- [Exploring CI.dll and Bigpool Cache](https://github.com/hLunaaa/hLunaaa.github.io/blob/4eb5450cb245217543733b475ce1198b812551a6/_posts/2025-04-25-Bypassing-CR3-Abuse-with-Physical-RW%20copy.markdown) [Driver Trace Cleaner]
 - https://github.com/BadPlayer555/TraceCleaner [Driver Trace Cleaner]
 - https://github.com/Sentient111/ClearDriverTraces [Driver Trace Cleaner]
 - https://github.com/KelvinMsft/NoTruth [Hide Memory By VT]
