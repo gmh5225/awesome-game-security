@@ -2929,7 +2929,8 @@ Or you can send an issue for me.
 - https://github.com/atombottle/cs2_kvm_dma [KVM] 
 - https://github.com/M3351AN/Samidare [External Ring3/Ring0]
 - https://github.com/Vekor64/PythonCS2 [Python External]
-
+- https://github.com/maecry/asphyxia-cs2 [Internal]
+  
 > Game:Assault Cube
 - https://github.com/gmh5225/external-esp-hack-assaultcube [GDI overlay]
 - https://github.com/SkarSys/AssaultCubeCheat
