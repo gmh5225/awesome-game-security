@@ -2332,6 +2332,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/android_touch [For Android]
 - https://github.com/muchenspace/android_virtualTouch [For Android]
 - https://github.com/gmh5225/PTFakeTouch [For IOS]
+- https://github.com/M3351AN/mouse_input_injection [NtUserInjectMouseInput]
 
 > WallHack
 - https://github.com/DrNseven/D3D11-Wallhack
