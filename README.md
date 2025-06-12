@@ -1900,6 +1900,10 @@ Or you can send an issue for me.
 - https://github.com/Anonym0usWork1221/C-Android-Memory-Tool [RPM for Android]
 - https://github.com/0xenia/remem [RPM for Windows]
 - https://github.com/un4ckn0wl3z/DMAInvoker [DMA RPM for Windows]
+- https://github.com/Vekor64/Driver-physical-rw [Kernel-mode W/RPM for Windows]
+- https://github.com/nbqofficial/norsefire [Kernel-mode W/RPM/mouse_event for Windows]
+- https://github.com/M3351AN/Shirakumo [RPM for Windows]
+- https://github.com/M3351AN/Usugumo [Kernel-mode W/RPM/mouse_event for Windows]
 
 > DMA
 - https://github.com/JPShag/DMA-FW-Guide-2.0 [Guide]
@@ -2333,6 +2337,7 @@ Or you can send an issue for me.
 - https://github.com/muchenspace/android_virtualTouch [For Android]
 - https://github.com/gmh5225/PTFakeTouch [For IOS]
 - https://github.com/M3351AN/mouse_input_injection [NtUserInjectMouseInput]
+- https://github.com/M3351AN/Usugumo [Kernel-mode mouse_event]
 
 > WallHack
 - https://github.com/DrNseven/D3D11-Wallhack
