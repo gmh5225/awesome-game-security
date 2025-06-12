@@ -2773,9 +2773,11 @@ Or you can send an issue for me.
 - https://github.com/bit-paper/sakura
 - https://github.com/eversinc33/1.6_C2 [C2]
 - https://github.com/3a1/Zodiak [CS 1.6 Fastcup Full Kernel Driver Cheat]
+- https://github.com/3a1/Evelion [External]
 
 > Game:CSS
 - https://github.com/yoshisaac/CounterStrikeSource-Linux-Trainer [Linux External]
+- https://github.com/M3351AN/UkiaRPM [External]
 
 > Game:CSGO
 - https://github.com/csgohacks/master-guide [Guide]
@@ -2864,6 +2866,9 @@ Or you can send an issue for me.
 - https://github.com/rabbitfishy/sdk [SDK]
 - https://github.com/bloesway/csgo_sdk [SDK]
 - https://github.com/DeiVid-12/SmKernel-CSGO [Driver]
+- https://github.com/notgoodusename/OsirisAndExtra [Internal]
+- https://github.com/M3351AN/Echinoidea [External C#]
+- https://github.com/Blaumaus/le_chiffre [External]
 
 > Game:CS2
 - https://github.com/danielkrupinski/Osiris
@@ -2916,6 +2921,8 @@ Or you can send an issue for me.
 - https://github.com/eden13378/CS2-DMA-Cheat [DMA]
 - https://github.com/spookykokojunge/CS2-Dma-Radar [DMA]
 - https://github.com/atombottle/cs2_kvm_dma [KVM] 
+- https://github.com/M3351AN/Samidare [External Ring3/Ring0]
+- https://github.com/Vekor64/PythonCS2 [Python External]
 
 > Game:Assault Cube
 - https://github.com/gmh5225/external-esp-hack-assaultcube [GDI overlay]
