@@ -2910,7 +2910,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/CS2-Cheat [External]
 - https://github.com/Half-People/HPCS2 [External]
 - https://github.com/gmh5225/CS2-External-1 [External]
-- https://github.com/M3351AN/AimStar [External Original repo link: https://github.com/CowNowK/AimStarCS2]
+- https://github.com/M3351AN/AimStar [External]
 - https://github.com/Fr0go1/Aeonix-Cs2 [External]
 - https://github.com/xvorost/CS-2-Glow [External]
 - https://github.com/yinleiCoder/cs2-cheat-cpp [External]
