@@ -1900,6 +1900,10 @@ Or you can send an issue for me.
 - https://github.com/Anonym0usWork1221/C-Android-Memory-Tool [RPM for Android]
 - https://github.com/0xenia/remem [RPM for Windows]
 - https://github.com/un4ckn0wl3z/DMAInvoker [DMA RPM for Windows]
+- https://github.com/Vekor64/Driver-physical-rw [Kernel-mode W/RPM for Windows]
+- https://github.com/nbqofficial/norsefire [Kernel-mode W/RPM/mouse_event for Windows]
+- https://github.com/M3351AN/Shirakumo [RPM for Windows]
+- https://github.com/M3351AN/Usugumo [Kernel-mode W/RPM/mouse_event for Windows]
 
 > DMA
 - https://github.com/JPShag/DMA-FW-Guide-2.0 [Guide]
@@ -2332,6 +2336,8 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/android_touch [For Android]
 - https://github.com/muchenspace/android_virtualTouch [For Android]
 - https://github.com/gmh5225/PTFakeTouch [For IOS]
+- https://github.com/M3351AN/mouse_input_injection [NtUserInjectMouseInput]
+- https://github.com/M3351AN/Usugumo [Kernel-mode mouse_event]
 
 > WallHack
 - https://github.com/DrNseven/D3D11-Wallhack
@@ -2773,9 +2779,11 @@ Or you can send an issue for me.
 - https://github.com/bit-paper/sakura
 - https://github.com/eversinc33/1.6_C2 [C2]
 - https://github.com/3a1/Zodiak [CS 1.6 Fastcup Full Kernel Driver Cheat]
+- https://github.com/3a1/Evelion [External]
 
 > Game:CSS
 - https://github.com/yoshisaac/CounterStrikeSource-Linux-Trainer [Linux External]
+- https://github.com/M3351AN/UkiaRPM [External]
 
 > Game:CSGO
 - https://github.com/csgohacks/master-guide [Guide]
@@ -2864,6 +2872,9 @@ Or you can send an issue for me.
 - https://github.com/rabbitfishy/sdk [SDK]
 - https://github.com/bloesway/csgo_sdk [SDK]
 - https://github.com/DeiVid-12/SmKernel-CSGO [Driver]
+- https://github.com/notgoodusename/OsirisAndExtra [Internal]
+- https://github.com/M3351AN/Echinoidea [External C#]
+- https://github.com/Blaumaus/le_chiffre [External]
 
 > Game:CS2
 - https://github.com/danielkrupinski/Osiris
@@ -2899,7 +2910,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/CS2-Cheat [External]
 - https://github.com/Half-People/HPCS2 [External]
 - https://github.com/gmh5225/CS2-External-1 [External]
-- https://github.com/CowNowK/AimStarCS2 [External]
+- https://github.com/M3351AN/AimStar [External Original repo link: https://github.com/CowNowK/AimStarCS2]
 - https://github.com/Fr0go1/Aeonix-Cs2 [External]
 - https://github.com/xvorost/CS-2-Glow [External]
 - https://github.com/yinleiCoder/cs2-cheat-cpp [External]
@@ -2916,7 +2927,10 @@ Or you can send an issue for me.
 - https://github.com/eden13378/CS2-DMA-Cheat [DMA]
 - https://github.com/spookykokojunge/CS2-Dma-Radar [DMA]
 - https://github.com/atombottle/cs2_kvm_dma [KVM] 
-
+- https://github.com/M3351AN/Samidare [External Ring3/Ring0]
+- https://github.com/Vekor64/PythonCS2 [Python External]
+- https://github.com/maecry/asphyxia-cs2 [Internal]
+  
 > Game:Assault Cube
 - https://github.com/gmh5225/external-esp-hack-assaultcube [GDI overlay]
 - https://github.com/SkarSys/AssaultCubeCheat
