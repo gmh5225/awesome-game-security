@@ -2657,6 +2657,7 @@ Or you can send an issue for me.
 - https://github.com/v3921358/Rebirth [Private Server-GMS-095 C#]
 - https://github.com/MapleStoryGameHack/mnwvs196 [Private Server-TMS-196]
 - https://github.com/Maxcloud/MapleResearch [GMS-095 Client Analysis]
+- https://github.com/blackmaple2018/MapleStory-CMS95-Client-Address [CMS-095 Client Analysis]
 - https://github.com/neeerp/RustMS [Private Server-Rust]
 - https://github.com/Kagamia/WzComparerR2 [Maplestory online Extractor]
 - [Generate machine learning object detection samples from Maplestory in different formats](https://github.com/charlescao460/MapleStoryDetectionSampleGenerator)
