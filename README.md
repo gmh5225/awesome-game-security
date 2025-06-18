@@ -3892,6 +3892,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/asm1314/Uncloaking-RAID0-HWID-Serials [Gather original disk serials hidden behind RAID0]
 - https://github.com/hubblo-org/windows-rapl-driver [Windows driver to get RAPL metrics from a bare metal machine]
 - https://github.com/trustdecision/trustdevice-android [Android]
+- https://github.com/imxiaoc996/DeviceWarLock [Android]
 - https://github.com/trustdecision/trustdevice-ios [IOS]
 
 > Detection:SpeedHack
