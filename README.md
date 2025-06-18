@@ -1216,6 +1216,7 @@ Or you can send an issue for me.
 - https://github.com/FaEryICE/MemScanner [Memory scanner]
 - https://github.com/irql/nokd [Kernel debugger protocol]
 - https://github.com/DejavuSecure/DetectNtoskrnlIntegrity [Windows Kernel Security: Memory Integrity Verification with Disk Verification of ntoskrnl.exe]
+- https://github.com/brew02/BudgetEPT [Create stealthy, inline, EPT-like hooks using SMAP and SMEP]
 
 > Magisk
 - https://github.com/PShocker/Zygisk-MagiskHide
