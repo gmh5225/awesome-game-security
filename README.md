@@ -1219,6 +1219,9 @@ Or you can send an issue for me.
 - https://github.com/DejavuSecure/DetectNtoskrnlIntegrity [Windows Kernel Security: Memory Integrity Verification with Disk Verification of ntoskrnl.exe]
 - https://github.com/brew02/BudgetEPT [Create stealthy, inline, EPT-like hooks using SMAP and SMEP]
 
+> Linux Kernel Explorer
+- https://github.com/MatheuZSecurity/Rootkit [Collection of codes focused on Linux rootkits]
+
 > Magisk
 - https://github.com/PShocker/Zygisk-MagiskHide
 - https://github.com/longpoxin/hideroot
