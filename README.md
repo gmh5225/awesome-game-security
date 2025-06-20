@@ -4016,6 +4016,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/jimbeveridge/readdirectorychanges [ReadDirectoryChangesW]
 - https://github.com/blaquee/dllnotif [DllNotification]
 - https://github.com/gmh5225/LdrRegisterDllNotification-modify-testing [DllNotification]
+- https://github.com/brew02/KiUserExceptionDispatcherHook [Hooking the Windows usermode exception handler]
 
 > Windows Ring0 Callback
 - https://github.com/gmh5225/kernel-callback-functions-list [Callback List]
@@ -4158,6 +4159,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/cmuratori/pmctrace [Real-time collection of PMCs via ETW]
 - https://github.com/SamuelTulach/SecureGame [POC game using VBS enclaves to protect itself from cheating]
 - https://github.com/Teach2Breach/moonwalk [find dll base addresses without PEB WALK]
+- https://github.com/brew02/KiUserExceptionDispatcherHook [Hooking the Windows usermode exception handler]
 
 
 > Android
