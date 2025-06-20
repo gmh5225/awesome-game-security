@@ -4115,6 +4115,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Archie-osu/PowerHook [Hooking KPRCB IdlePreselect]
 - https://github.com/Th3Spl/IoCreateDriver [IoCreateDriver Implementation]
 - https://github.com/brew02/BudgetEPT [Create stealthy, inline, EPT-like hooks using SMAP and SMEP]
+- https://github.com/brew02/CovertThread [Creating covert system threads on Windows by leveraging the page tables and IDT]
 
 
 > Windows Ring3
