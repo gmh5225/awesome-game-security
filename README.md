@@ -3656,6 +3656,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/android1337/crycall [Compile-Time Calls Obfuscator for C++14]
 - https://github.com/JustasMasiulis/inline_syscall [Inline syscalls made easy for windows on clang]
 - https://github.com/66flags/inline-syscall [A simple direct syscall wrapper written in C++ with compatibility for x86 and x64 programs]
+- https://github.com/sapdragon/syscalls-cpp [A modern C++20 header-only library for advanced direct system call invocation]
 - https://github.com/cristeigabriel/STB [Compile-time conversion library, from IDA-style string to array]
 - https://github.com/Deniskore/CompileTimeRandom [Compile time random implementation using C++11]
 - https://github.com/ThatLing/limba [compile-time control flow obfuscation using mba]
