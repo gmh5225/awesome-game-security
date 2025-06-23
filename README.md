@@ -498,6 +498,7 @@ Or you can send an issue for me.
 
 ## Web3 Game
 > Blockchain Guide
+- https://github.com/useWeb3/awesome-web3 [awesome web3]
 - https://github.com/unbalancedparentheses/practical_cryptography_and_distributed_ledgers [Practical Cryptography and Distributed Ledgers]
 - https://github.com/mush-support/mush-news [MushNews - Web3 News Explorer]
 - https://github.com/lukasmasuch/best-of-crypto [awesome open-source crypto projects]
