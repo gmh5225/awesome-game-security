@@ -1220,6 +1220,7 @@ Or you can send an issue for me.
 - https://github.com/irql/nokd [Kernel debugger protocol]
 - https://github.com/DejavuSecure/DetectNtoskrnlIntegrity [Windows Kernel Security: Memory Integrity Verification with Disk Verification of ntoskrnl.exe]
 - https://github.com/brew02/BudgetEPT [Create stealthy, inline, EPT-like hooks using SMAP and SMEP]
+- https://github.com/synacktiv/windows_kernel_shadow_stack [Shadow Stack]
 
 > Linux Kernel Explorer
 - https://github.com/MatheuZSecurity/Rootkit [Collection of codes focused on Linux rootkits]
@@ -4186,6 +4187,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/CET-win10 [CET]
 - [HyperGuard](https://windows-internals.com/hyperguard-secure-kernel-patch-guard-part-1-skpg-initialization)
 - https://github.com/gmh5225/QueryShadowStack [Shadow Stack]
+- https://github.com/synacktiv/windows_kernel_shadow_stack [Shadow Stack]
 - https://namazso.github.io/x86/html/INCSSPD_INCSSPQ.html [CET]
 - https://techcommunity.microsoft.com/t5/windows-os-platform-blog/understanding-hardware-enforced-stack-protection/ba-p/1247815 [CET]
 - https://reviews.llvm.org/rG21b25a1fb32ecd2e1f336123c2715f8ef1a49f97 [CET]
