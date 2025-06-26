@@ -530,6 +530,7 @@ Or you can send an issue for me.
 - https://github.com/w1nt3r-eth/evm-from-scratch [EVM]
 - https://github.com/shafu0x/evm-from-scratch-book [EVM]
 - https://github.com/4337Mafia/awesome-account-abstraction [EIP-4337]
+- https://github.com/Arvolear/awesome-eip-7702-delegations [awesome EIP-7702]
 - https://github.com/smlxl/evm.codes [EVM Opcodes Interactive Reference]
 - https://github.com/Unboxed-Software/solana-course [A complete course for learning Solana]
 - https://www.rareskills.io/solana-tutorial [A Solana Course By Rareskills]
