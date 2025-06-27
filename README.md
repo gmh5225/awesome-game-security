@@ -4256,4 +4256,5 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 ## Xbox
 - https://github.com/xemu-project/xemu [Xbox Emulator for Windows]
 - https://github.com/rexdex/recompiler [Porting Xbox360 executables to Windows]
+- https://github.com/exploits-forsale/collateral-damage [Kernel exploit for Xbox SystemOS using CVE-2024-30088]
 
