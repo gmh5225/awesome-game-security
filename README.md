@@ -1101,6 +1101,7 @@ Or you can send an issue for me.
 > Dynamic Binary Instrumentation
 - https://github.com/hzqst/unicorn_pe
 - https://github.com/momo5502/sogen [Windows User Space Emulator]
+- https://github.com/mojtabafalleh/emulator [Windows User Space Emulator]
 - https://github.com/binsnake/KUBERA [A x86 environment emulator for Windows user and kernel binaries]
 - https://github.com/ZehMatt/zyemu [x86-64 user mode emulation using Zydis]
 - https://github.com/Nitr0-G/PeVisor [PE]
@@ -4219,6 +4220,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/brunodev85/winlator [Android application for running Windows applications with Wine and Box86/Box64]
 - https://github.com/x86matthew/WinVisor [A hypervisor-based emulator for Windows x64 user-mode executables using Windows Hypervisor Platform API]
 - https://github.com/momo5502/sogen [Windows User Space Emulator]
+- https://github.com/mojtabafalleh/emulator [Windows User Space Emulator]
 - https://github.com/binsnake/KUBERA [A x86 environment emulator for Windows user and kernel binaries]
 
 ## Linux Emulator
