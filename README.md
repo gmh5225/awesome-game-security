@@ -4133,6 +4133,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/mathisvickie/sign-expired [Sign Leaked Cert]
 - https://github.com/Sentient111/StealingSignatures [Stealing signatures from pe files]
 - https://github.com/secretsquirrel/SigThief [Stealing signatures from pe files]
+- https://github.com/dslee2022/SignatureKid [Stealing signatures from pe files]
 - https://github.com/jfmaes/LazySign [Fake Cert]
 - https://github.com/Tylous/Limelighter [Fake Cert]
 - https://github.com/gmh5225/chainoffools [Fake Cert]
