@@ -1647,6 +1647,7 @@ Or you can send an issue for me.
 - https://github.com/L4ys/IDA-WPP-Remover [Remove WPP calls from hexrays decompiled code]
 - https://github.com/DennyDai/headless-ida [Run IDA scripts headlessly]
 - https://github.com/gilboz/ida_kernelcache_ng [An IDA Plugin for analyzing iOS kernelcaches]
+- https://github.com/0xdea/augur [Augur is a blazing fast IDA Pro headless plugin that extracts strings and related pseudo-code from a binary file]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
