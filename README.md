@@ -2118,6 +2118,7 @@ Or you can send an issue for me.
 - https://github.com/Xacone/Eneio64-Driver-Exploit [eneio64.sys]
 - https://github.com/BlackSnufkin/BYOVD/tree/main/TfSysMon-Killer [SysMon.sys]
 - https://github.com/BlackSnufkin/BYOVD/tree/main/Ksapi64-Killer [ksapi64.sys]
+- https://blog.talosintelligence.com/decrement-by-one-to-rule-them-all [AsIO3.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
