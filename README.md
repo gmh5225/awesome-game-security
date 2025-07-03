@@ -1648,6 +1648,7 @@ Or you can send an issue for me.
 - https://github.com/DennyDai/headless-ida [Run IDA scripts headlessly]
 - https://github.com/gilboz/ida_kernelcache_ng [An IDA Plugin for analyzing iOS kernelcaches]
 - https://github.com/0xdea/augur [Augur is a blazing fast IDA Pro headless plugin that extracts strings and related pseudo-code from a binary file]
+- https://github.com/mahmoudimus/ida-taskr [IDA Taskr is a pure Python library for IDA Pro related parallel computing]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
