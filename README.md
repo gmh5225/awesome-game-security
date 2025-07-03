@@ -2254,6 +2254,7 @@ Or you can send an issue for me.
 
 > Wine
 - https://github.com/ValveSoftware/Proton [Steam]
+- https://github.com/pgarba/ptrace_read_teb [use ptrace to read the TEB of a process on Linux]
 
 > Anti Screenshot
 - https://github.com/KANKOSHEV/NoScreen [Hide Window]
