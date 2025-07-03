@@ -738,6 +738,7 @@ Or you can send an issue for me.
 - https://github.com/TradMod/awesome-audits-checklists [A curated list of smart contracts security audits checklists]
 - https://github.com/crytic/awesome-ethereum-security [awesome ethereum security]
 - https://github.com/ArjunaSec/Awesome-Solana-checklist [awesome solana security]
+- https://github.com/pontifex73/rust-solana-audit-start [rust solana audit start]
 - https://github.com/amanusk/awesome-starknet-security [awesome starknet security]
 - https://github.com/sigp/solidity-security-blog [Solidity security]
 - https://github.com/Al-Qa-qa/bank-web3-security-tutorial [Solidity Security]
