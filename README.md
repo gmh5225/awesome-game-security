@@ -1858,6 +1858,7 @@ Or you can send an issue for me.
 - https://github.com/stars/gmh5225/lists/hook [Lists]
 - https://github.com/microsoft/Detours
 - https://github.com/wbenny/DetoursNT
+- https://github.com/kalhotky/ntminhook [A modified version of MinHook that only uses the Windows Native API]
 - https://github.com/stevemk14ebr/PolyHook
 - https://github.com/stevemk14ebr/PolyHook_2_0
 - https://github.com/WopsS/RenHook
