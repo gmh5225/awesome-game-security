@@ -724,6 +724,7 @@ Or you can send an issue for me.
 - https://github.com/Consensys/gnark [Fast zk-SNARK library]
 - https://github.com/zkcrypto/bellman [zk-SNARK library]
 - https://github.com/zksecurity/zkbugs [Reproduce ZKP vulnerabilities]
+- https://github.com/google/longfellow-zk [Implementation of the Google Zero-Knowledge library for Identity Protocols]
 
 > Unit tests
 - https://github.com/foundry-rs/foundry
