@@ -575,6 +575,8 @@ Or you can send an issue for me.
 
 > AI agent
 - https://github.com/microsoft/ai-agents-for-beginners [AI Agents for beginners]
+- https://github.com/openai/openai-agents-js [openai agent workflows and agents]
+- https://github.com/openai/openai-agents-python [openai agent workflows and agents]
 - https://github.com/e2b-dev/awesome-ai-agents [A list of AI autonomous agents]
 - https://github.com/elizaOS/eliza [Autonomous agents for everyone]
 - https://github.com/elizaOS/eliza-starter [eliza starter]
