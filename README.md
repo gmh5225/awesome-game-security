@@ -1436,6 +1436,7 @@ Or you can send an issue for me.
 - https://github.com/Snoopy-Sec/Localroot-ALL-CVE [Root CVE]
 - https://github.com/xmmword/dpatch [Syscall Dispatcher Patching PoC]
 - https://github.com/aquasecurity/tracee [Linux Runtime Security and Forensics using eBPF]
+- https://github.com/AndroidReverser-Test/Kernel-Trace [A kpm kernel module based on uprobe, capable of simultaneously hooking a large number of user address space functions]
 
 > Android Kernel Driver
 - https://github.com/rogxo/kernel_hack
