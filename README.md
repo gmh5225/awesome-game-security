@@ -1122,6 +1122,7 @@ Or you can send an issue for me.
 - https://github.com/WaterlooBridge/adbi [For Android]
 - https://github.com/crmulliner/adbi [For Android]
 - https://github.com/ndrewh/pyda [Write dynamic binary analysis tools in Python]
+- https://github.com/redthing1/w1tn3ss [dynamic binary instrumentation, analysis, and patching framework]
 
 > Launcher Abuser
 - https://github.com/Ricardonacif/launcher-abuser
