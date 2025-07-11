@@ -706,6 +706,7 @@ Or you can send an issue for me.
 - https://github.com/move-language/move-sui [Move on Aptos sui]
 - https://github.com/move-language/move-on-aptos [Move on Aptos]
 - https://github.com/matter-labs/solx [LLVM-based Solidity compiler]
+- https://github.com/pr0cf5/solana-llvm-compiler [Using llvm to convert an eBPF shared library to x86]
 
 > Decompiler
 - https://github.com/Jon-Becker/heimdall-rs [Decompiler for EVM smart contract]
