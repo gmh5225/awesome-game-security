@@ -1657,6 +1657,7 @@ Or you can send an issue for me.
 - https://github.com/DennyDai/headless-ida [Run IDA scripts headlessly]
 - https://github.com/gilboz/ida_kernelcache_ng [An IDA Plugin for analyzing iOS kernelcaches]
 - https://github.com/mahmoudimus/ida-taskr [IDA Taskr is a pure Python library for IDA Pro related parallel computing]
+- https://github.com/sigwl/AiDA [An AI-powered assistant for IDA 9.0+ to accelerate reverse engineering of C++ games]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
