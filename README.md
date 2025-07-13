@@ -1730,6 +1730,7 @@ Or you can send an issue for me.
 - https://github.com/DSecurity/efiSeek [Ghidra analyzer for UEFI firmware]
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 - https://github.com/Rantanen/ghidra-minidump-loader [Windows Minidump loader for Ghidra]
+- https://github.com/jtang613/GhidrAssistMCP [An MCP extension for Ghidra]
 
 > Radare Plugins
 - https://github.com/radareorg/r2a [local language model for radare2]
