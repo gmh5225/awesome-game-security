@@ -3527,6 +3527,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/zxd1994/vt-debuuger [Hacked Hypervisor Testing]
 - https://github.com/3526779568/vt-debuger [Hacked Hypervisor Testing]
 - https://github.com/MellowNight/AetherVisor [Hacked Hypervisor Testing AMD]
+- https://github.com/Idov31/NovaHypervisor [NovaHypervisor is a defensive x64 Intel host based hypervisor. The goal of this project is to protect against kernel based attacks]
 - https://github.com/rbmm/LockFile-Poc [Lock File]
 - https://github.com/gmh5225/UltraDriver-Game-Cheat [Cheat Driver]
 - https://github.com/gmh5225/Kernel-Special-APC-ReadProcessMemory [RPM]
