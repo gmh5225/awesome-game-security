@@ -3640,6 +3640,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/frank2/oxide [Written by Rust]
 - https://github.com/Washi1337/AwaitFuscator [.NET]
 - https://github.com/Fatmike-GH/Fatpack [A Windows PE packer with full TLS (Thread Local Storage) support]
+- https://github.com/caprinux/rel-fuscate [Modifying the jmprel_entry->r_offset]
 
 > CLR Protection
 - https://github.com/endgameinc/ClrGuard
