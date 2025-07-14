@@ -3741,6 +3741,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/open-obfuscator/dProtect [Java/Kotlin]
 - https://github.com/Maldev-Academy/EntropyReducer [Reduce Entropy]
 - https://github.com/Washi1337/AwaitFuscator [.NET]
+- https://github.com/badhive/stitch [X86: Rewrite and obfuscate code in compiled binaries]
 
 > Screenshot
 - https://github.com/bavulapati/DXGICaptureApplication [Capture Desktop]
