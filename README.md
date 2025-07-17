@@ -2416,6 +2416,7 @@ Or you can send an issue for me.
 - https://github.com/s0ngidong3/TPM-SPOOFER [TPM]
 - https://github.com/Android1500/AndroidFaker [Android]
 - https://github.com/Scrut1ny/Windows-Spoofer
+- https://github.com/roomyoni/Nvidia-GPU-Spoof [Spoofing the NVIDIA GPU UUID by modifying "nvlddmkm.sys"]
 
 > Bypass Page Protection
 - https://github.com/illegal-instruction-co/CountHook [WorkingSet]
