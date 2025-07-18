@@ -689,6 +689,8 @@ Or you can send an issue for me.
 - https://github.com/GianfrancoBazzani/evm-storage.codes [EVM Smart Contract Storage Viewer and Comparator]
 - https://github.com/accretion-xyz/solana-data-reverser [analyzing hex data with deep Solana blockchain integration. Perfect for examining raw binary data, Solana account structures, and discovering patterns in blockchain data]
 - https://github.com/FuzzingLabs/sol-azy [Sol-azy is a modular CLI toolchain for static analysis and reverse engineering of Solana sBPF programs]
+- https://github.com/FuzzingLabs/sierra-analyzer [Sierra Analyzer is a security toolkit designed for analyzing Sierra files. It includes: a decompiler, a call graph
+generator, a control-flow graph generator, and various security detectors]
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
