@@ -1218,6 +1218,7 @@ Or you can send an issue for me.
 - https://github.com/allogic/KDBG [Tool]
 - https://github.com/backengineering/Voyager [A Hyper-V Hacking Framework For Windows 10 x64 (AMD & Intel)]
 - https://github.com/gmh5225/Voyager [A Hyper-V Hacking Framework For Windows 10 x64 (AMD & Intel)]
+- https://github.com/noahware/hyper-reV [memory introspection and reverse engineering hypervisor powered by leveraging Hyper-V]
 - https://github.com/NurdAlert/modded-voyager
 - https://github.com/gmh5225/Fortnite-VoyagerTF [Voyager for Fortnite]
 - https://github.com/repnz/apc-research [APC Internals Research Code]
@@ -3528,6 +3529,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/3526779568/vt-debuger [Hacked Hypervisor Testing]
 - https://github.com/MellowNight/AetherVisor [Hacked Hypervisor Testing AMD]
 - https://github.com/valium007/BareSVM [Hacked Hypervisor Testing AMD]
+- https://github.com/noahware/hyper-reV [memory introspection and reverse engineering hypervisor powered by leveraging Hyper-V]
 - https://github.com/Idov31/NovaHypervisor [NovaHypervisor is a defensive x64 Intel host based hypervisor. The goal of this project is to protect against kernel based attacks]
 - https://github.com/rbmm/LockFile-Poc [Lock File]
 - https://github.com/gmh5225/UltraDriver-Game-Cheat [Cheat Driver]
