@@ -3818,6 +3818,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/AcDrv
 - https://github.com/sc-222/Mandragora [For Assault Cube]
 - https://github.com/J-Tanzanite/Little-Anti-Cheat [For Source Games]
+- https://github.com/noahware/darken-anticheat [Kernel anti-cheat for protecting software]
 
 > Analysis Framework
 - https://github.com/pandora-analysis/pandora
