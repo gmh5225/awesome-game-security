@@ -687,7 +687,8 @@ Or you can send an issue for me.
 - https://github.com/sec3-service/IDLGuesser [IDL Guesser is an open-source tool that automatically recovers the IDL information from closed-source Anchor-based Solana programs]
 - https://github.com/verichains/revela [Decompiler for Move smart contracts]
 - https://github.com/GianfrancoBazzani/evm-storage.codes [EVM Smart Contract Storage Viewer and Comparator]
-- https://github.com/accretion-xyz/solana-data-reverser [analyzing hex data with deep Solana blockchain integration. Perfect for examining raw binary data, Solana account structures, and discovering patterns in blockchain data.]
+- https://github.com/accretion-xyz/solana-data-reverser [analyzing hex data with deep Solana blockchain integration. Perfect for examining raw binary data, Solana account structures, and discovering patterns in blockchain data]
+- https://github.com/FuzzingLabs/sol-azy [Sol-azy is a modular CLI toolchain for static analysis and reverse engineering of Solana sBPF programs]
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
