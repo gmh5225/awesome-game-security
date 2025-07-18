@@ -2156,6 +2156,7 @@ Or you can send an issue for me.
 - https://github.com/btbd/access [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/paradoxwastaken/Poseidon [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/FarmEquipment69/umap-mapper [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
+- https://github.com/0mWindyBug/DataptrHooks [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/weak1337/EvCommunication [NtTokenManagerCreateFlipObjectReturnTokenHandle]
 - https://github.com/gmh5225/Driver-kaldereta [NtTokenManagerGetAnalogExclusiveTokenEvent]
 - https://github.com/UCFoxi/Shared-FlushFileBuffers-Communication [FlushFileBuffers]
