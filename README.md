@@ -2360,6 +2360,7 @@ Or you can send an issue for me.
 - https://github.com/Miffyli/gan-aimbots [Machine Learning]
 - https://github.com/RootKit-Org/AI-Aimbot [Machine Learning YOLOv5]
 - https://github.com/AMXZzzz/SF_TRT_61 [Machine Learning YOLO]
+- https://github.com/Leksa667/YOLOv8-Overlay-CS2 [YOLOv8 in CS2]
 - https://github.com/lehmenkuehler/camera-triggerbot [Camera Triggerbot]
 - https://github.com/BuddyBoi/KernelMoveMouse [gptCursorAsync]
 - https://github.com/Zpes/mouse-input-injection [NtUserInjectMouseInput]
@@ -2973,6 +2974,7 @@ Or you can send an issue for me.
 - https://github.com/M3351AN/Samidare [External Ring3/Ring0]
 - https://github.com/Vekor64/PythonCS2 [Python External]
 - https://github.com/maecry/asphyxia-cs2 [Internal]
+- https://github.com/Leksa667/YOLOv8-Overlay-CS2 [YOLOv8 in CS2]
   
 > Game:Assault Cube
 - https://github.com/gmh5225/external-esp-hack-assaultcube [GDI overlay]
