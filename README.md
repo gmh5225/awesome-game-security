@@ -2364,6 +2364,7 @@ Or you can send an issue for me.
 - https://github.com/RootKit-Org/AI-Aimbot [Machine Learning YOLOv5]
 - https://github.com/AMXZzzz/SF_TRT_61 [Machine Learning YOLO]
 - https://github.com/Leksa667/YOLOv8-Overlay-CS2 [YOLOv8 in CS2]
+- https://github.com/dqforgive-sudo/pubg-ai-yolov4 [pubg yolov4]
 - https://github.com/lehmenkuehler/camera-triggerbot [Camera Triggerbot]
 - https://github.com/BuddyBoi/KernelMoveMouse [gptCursorAsync]
 - https://github.com/Zpes/mouse-input-injection [NtUserInjectMouseInput]
