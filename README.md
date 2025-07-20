@@ -2366,6 +2366,8 @@ Or you can send an issue for me.
 - https://github.com/Leksa667/YOLOv8-Overlay-CS2 [YOLOv8 in CS2]
 - https://github.com/dqforgive-sudo/pubg-ai-yolov4 [PUBG yolov4]
 - https://github.com/lkeai2007/yolov5_PUBG [PUBG yolov5]
+- https://github.com/Hellonihaohh/yolo-v8s [PUBG yolo dataset]
+- https://github.com/Hellonihaohh/yolo-v8m [PUBG yolo dataset]
 - https://github.com/lehmenkuehler/camera-triggerbot [Camera Triggerbot]
 - https://github.com/BuddyBoi/KernelMoveMouse [gptCursorAsync]
 - https://github.com/Zpes/mouse-input-injection [NtUserInjectMouseInput]
