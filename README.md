@@ -817,6 +817,9 @@ Or you can send an issue for me.
 - https://github.com/evmauth/evmauth-core [EVMAuth is an advanced implementation of the ERC-1155 token standard that enables robust EVM-based authorization for Web3 applications]
 - https://github.com/Contract-examples/CrimeEnjoyor [CrimeEnjoyor for EIP-7702]
 
+> Stable Coin
+- https://github.com/lakshayvaishnav/stable-coin [a decentralized stablecoin protocol on the Solana blockchain]
+
 > MEV
 - https://github.com/flashbots [for ethereum]
 - https://github.com/jito-foundation/jito-solana [for solana]
