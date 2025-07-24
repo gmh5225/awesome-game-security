@@ -4220,6 +4220,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/brew02/KiUserExceptionDispatcherHook [Hooking the Windows usermode exception handler]
 - https://github.com/brew02/MountSystemPartition [Mounting the system partition on Windows]
 
+> Linux
+- https://github.com/MatheuZSecurity/RingReaper [Linux post-exploitation agent that uses io_uring to stealthily bypass EDR detection by avoiding traditional syscalls]
 
 > Android
 - https://github.com/WindySha/bypassHiddenApiRestriction [Bypass hidden api restriction]
