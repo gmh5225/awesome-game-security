@@ -443,6 +443,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/interactive-feedback-macos-mcp [A native macOS MCP server for collecting interactive user feedback with AppleScript dialogs and image support]
 - https://github.com/datalayer/jupyter-mcp-server [MCP for Jupyter]
 - https://github.com/PortSwigger/mcp-server [MCP for Burp Suite]
+- https://github.com/cycraft-corp/BinaryAnalysisMCPs [Binary analysis MCPs collections]
 
 > MCP server security
 - https://github.com/johnhalloran321/mcpSafetyScanner [MCPSafetyScanner - Automated MCP safety auditing and remediation using Agents]
