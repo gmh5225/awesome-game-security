@@ -1670,6 +1670,7 @@ Or you can send an issue for me.
 - https://github.com/mahmoudimus/ida-taskr [IDA Taskr is a pure Python library for IDA Pro related parallel computing]
 - https://github.com/sigwl/AiDA [An AI-powered assistant for IDA 9.0+ to accelerate reverse engineering of C++ games]
 - https://github.com/alexhude/FRIEND [FRIEND is an IDA plugin created to improve disassembly and bring register/instruction documentation right into IDA View]
+- https://github.com/cycraft-corp/BinaryAnalysisMCPs [Binary analysis MCPs collections]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
@@ -1789,6 +1790,7 @@ Or you can send an issue for me.
 - https://github.com/mibho/x64dbgTraceReader [Trace Reader]
 - https://github.com/Steesha/CodeCleaner [Cleaning Themida Mutation Assembly codes]
 - https://github.com/notpidgey/ManyTypes [x64dbg typeparsing plugin with Windows types]
+- https://github.com/cycraft-corp/BinaryAnalysisMCPs [Binary analysis MCPs collections]
 
 > Cheat Engine Plugins
 - https://github.com/FreeER/CE-Extensions [Lua Extensions]
