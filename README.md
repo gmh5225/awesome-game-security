@@ -2414,7 +2414,6 @@ Or you can send an issue for me.
 - https://github.com/firebitsbr/-Rainbow---EFI [EFI]
 - https://github.com/btbd/wpp [Intercepting DeviceControl via WPP]
 - https://github.com/vmcall/owned_alignment [Abusing Alignment]
-- https://github.com/mopped7/Hwid-Spoofer-Game-Anticheat-Cleaners-Unban-Any-Games-Drivers
 - https://github.com/gmh5225/HWID-Kernel-Spoofer
 - [HWID-Spoofer-UD-Fortnite-WarZone-Apex-Rust-Escape-From-Tarkov-and-all-EAC-BE-Games-IMGUI-Loader-Base](https://github.com/KakashiiiSan/HWID-Spoofer-UD-Fortnite-WarZone-Apex-Rust-Escape-From-Tarkov-and-all-EAC-BE-Games-IMGUI-Loader-Base)
 - https://github.com/SamuelTulach/mutante
