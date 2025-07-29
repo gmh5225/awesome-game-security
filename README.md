@@ -507,6 +507,7 @@ Or you can send an issue for me.
 - https://github.com/mush-support/mush-news [MushNews - Web3 News Explorer]
 - https://github.com/lukasmasuch/best-of-crypto [awesome open-source crypto projects]
 - https://github.com/0xMacro/awesome-solana-security [awesome solana security]
+- https://github.com/az0mb13/awesome-solana-security [awesome solana security]
 - https://github.com/amanusk/awesome-starknet-security [awesome starknet security]
 - https://github.com/Ackee-Blockchain/Solana-Auditors-Bootcamp [Solana audit security]
 - https://github.com/neodyme-labs/solana-ctf [Solana CTF]
