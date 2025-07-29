@@ -818,6 +818,7 @@ Or you can send an issue for me.
 - https://github.com/Vectorized/gasback [A barebones implementation of a gasback contract that implements [RIP-7767](https://github.com/ethereum/RIPs/blob/master/RIPS/rip-7767.md)]
 - https://github.com/evmauth/evmauth-core [EVMAuth is an advanced implementation of the ERC-1155 token standard that enables robust EVM-based authorization for Web3 applications]
 - https://github.com/Contract-examples/CrimeEnjoyor [CrimeEnjoyor for EIP-7702]
+- https://github.com/justshiftjk/EVM-Pumpfun-Solidity-Contract [EVM version of pumpfun smart contract]
 
 > Stable Coin
 - https://github.com/lakshayvaishnav/stable-coin [a decentralized stablecoin protocol on the Solana blockchain]
