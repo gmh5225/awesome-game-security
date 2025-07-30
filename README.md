@@ -3817,6 +3817,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Neo23x0/Raccine [EDR]
 - https://github.com/ION28/BLUESPAWN [EDR]
 - https://github.com/TheHive-Project/TheHive [EDR]
+- https://github.com/0xflux/Sanctum [Sanctum is an experimental proof-of-concept EDR, designed to detect modern malware techniques, above and beyond the capabilities of antivirus. Built in Rust]
 - https://github.com/wazuh/wazuh [XDR]
 - https://github.com/AlSch092/UltimateAntiCheat
 - https://github.com/JonathanBerkeley/Quack
