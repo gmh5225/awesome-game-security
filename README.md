@@ -1976,6 +1976,7 @@ Or you can send an issue for me.
 - https://github.com/Herooyyy/Free-DMA-Firmware-pcileech [Free DMA Firmware.Bypass VGK/FAC and MSI-X interrupt]
 - https://github.com/Herooyyy/Pcileech-AMDPCI [Using no interrupt bypass faceit/vgk]
 - https://github.com/Herooyyy/Pcileech-Intel-I226-V-FullEmu [Intel-I226-V]
+- https://github.com/Herooyyy/Pcileech-ISABridge [Use specific PID/VID to bypass faceit]
 
 > W2S
 - https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
