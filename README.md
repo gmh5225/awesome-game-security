@@ -1974,6 +1974,7 @@ Or you can send an issue for me.
 - https://github.com/Trustings/DMA_PE_Dumper [DMA PE (Portable Executable) Dumper with DTB patching capabilities]
 - https://github.com/mltpig/PCILeech-FPGA-DMA_VMD [PCILeech FPGA DMA VMD Controller Simulation Project]
 - https://github.com/Herooyyy/Free-DMA-Firmware-pcileech [Free DMA Firmware.Bypass VGK/FAC and MSI-X interrupt]
+- https://github.com/Herooyyy/Pcileech-AMDPCI [Using no interrupt bypass faceit/vgk]
 
 > W2S
 - https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
