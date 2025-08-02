@@ -1673,6 +1673,7 @@ Or you can send an issue for me.
 - https://github.com/sigwl/AiDA [An AI-powered assistant for IDA 9.0+ to accelerate reverse engineering of C++ games]
 - https://github.com/alexhude/FRIEND [FRIEND is an IDA plugin created to improve disassembly and bring register/instruction documentation right into IDA View]
 - https://github.com/cycraft-corp/BinaryAnalysisMCPs [Binary analysis MCPs collections]
+- https://github.com/SamuelTulach/unxorer [Yet another IDA Pro/Home plugin for deobfuscating stack strings]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
