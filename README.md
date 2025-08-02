@@ -417,6 +417,7 @@ Or you can send an issue for me.
 - https://github.com/justinpbarnett/unity-mcp [MCP for unity]
 - https://github.com/wondeks/unity-mcp [MCP for unity]
 - https://github.com/nasimali5/mcpup [MCP for unity]
+- https://github.com/majidmanzarpour/vibe-blocks-mcp [MCP for Roblox Studio]
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 - https://github.com/jtang613/GhidrAssistMCP [MCP for Ghidra]
 - https://github.com/mrexodia/ida-pro-mcp [MCP for IDA pro]
