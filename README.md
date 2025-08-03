@@ -1458,6 +1458,7 @@ Or you can send an issue for me.
 - https://github.com/aquasecurity/tracee [Linux Runtime Security and Forensics using eBPF]
 - https://github.com/AndroidReverser-Test/Kernel-Trace [A kpm kernel module based on uprobe, capable of simultaneously hooking a large number of user address space functions]
 - https://github.com/fuqiuluo/android-wuwa [Android aarch64 rootkit]
+- https://github.com/fuqiuluo/rnidbg [An Android-ARM64 kernel emulator written in Rust. (Rewrite from unidbg)]
 
 > Android Kernel Driver
 - https://github.com/rogxo/kernel_hack
