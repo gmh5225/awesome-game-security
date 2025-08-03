@@ -1441,6 +1441,7 @@ Or you can send an issue for me.
 - https://github.com/dabao1955/kernel_build_action [a action to build kernel automatically]
 - https://github.com/TheWildJames/kernel_build_scripts [kernel build scripts]
 - https://github.com/fuqiuluo/android-wuwa [Android aarch64 rootkit]
+- https://github.com/fuqiuluo/ovo [Android aarch64 kernel driver module providing efficient memory operations, touch simulation and IPC. Features include fast memory remapping]
 
 > Android Kernel Explorer
 - https://docs.kernel.org [Linux Kernel documentation]
