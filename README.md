@@ -1440,6 +1440,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/android-kernel-driver-template [A GKI Android kernel driver(AArch64) template]
 - https://github.com/dabao1955/kernel_build_action [a action to build kernel automatically]
 - https://github.com/TheWildJames/kernel_build_scripts [kernel build scripts]
+- https://github.com/fuqiuluo/android-wuwa [Android aarch64 rootkit]
 
 > Android Kernel Explorer
 - https://docs.kernel.org [Linux Kernel documentation]
@@ -1455,6 +1456,7 @@ Or you can send an issue for me.
 - https://github.com/xmmword/dpatch [Syscall Dispatcher Patching PoC]
 - https://github.com/aquasecurity/tracee [Linux Runtime Security and Forensics using eBPF]
 - https://github.com/AndroidReverser-Test/Kernel-Trace [A kpm kernel module based on uprobe, capable of simultaneously hooking a large number of user address space functions]
+- https://github.com/fuqiuluo/android-wuwa [Android aarch64 rootkit]
 
 > Android Kernel Driver
 - https://github.com/rogxo/kernel_hack
