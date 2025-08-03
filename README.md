@@ -2443,6 +2443,8 @@ Or you can send an issue for me.
 - https://github.com/Android1500/AndroidFaker [Android]
 - https://github.com/Scrut1ny/Windows-Spoofer
 - https://github.com/roomyoni/Nvidia-GPU-Spoof [Spoofing the NVIDIA GPU UUID by modifying "nvlddmkm.sys"]
+- https://github.com/5ec1cff/TrickyStore [trick of keystore. Android 12 or above is required]
+- https://github.com/beakthoven/TrickyStore [A trick of keystore. Android 10 or above is required]
 
 > Bypass Page Protection
 - https://github.com/illegal-instruction-co/CountHook [WorkingSet]
