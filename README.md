@@ -2406,6 +2406,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/PTFakeTouch [For IOS]
 - https://github.com/M3351AN/mouse_input_injection [NtUserInjectMouseInput]
 - https://github.com/M3351AN/Usugumo [Kernel-mode mouse_event]
+- https://github.com/BatogiX/logitech-cve [A Rust library for interacting with Logitech virtual driver]
 
 > WallHack
 - https://github.com/DrNseven/D3D11-Wallhack
