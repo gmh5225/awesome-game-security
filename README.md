@@ -1488,6 +1488,7 @@ Or you can send an issue for me.
 - https://github.com/paradiseduo/IPAPatch [Patch iOS Apps without Jailbreak]
 - https://github.com/34306/mdc0 [CVE-2025-24203]
 - https://github.com/jailbreakdotparty/dirtyZero [CVE-2025-24203]
+- https://github.com/staturnzz/oob_entry [iOS 3.0-10.3.4 tfp0 kernel exploit]
 
 > IOS Memory Explorer
 - https://github.com/hackcatml/kfd-explorer [iOS kernel memory explorer]
