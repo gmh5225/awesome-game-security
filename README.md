@@ -2059,8 +2059,8 @@ Or you can send an issue for me.
 - https://github.com/adamhlt/ImGui-Standalone
 
 > Vulnerable Driver 
-- https://www.loldrivers.io/drivers
-- https://github.com/magicsword-io/LOLDrivers
+- https://www.loldrivers.io/drivers [Living Off The Land Drivers]
+- https://github.com/magicsword-io/LOLDrivers [Living Off The Land Drivers]
 - https://github.com/ghostbyt3/BYOVDFinder [Identifies LOLDrivers that are not blocked by the active HVCI policy]
 - https://github.com/rtfmkiesel/loldrivers-client [Scan loldrivers]
 - https://github.com/FourCoreLabs/LolDriverScan [Scan loldrivers]
