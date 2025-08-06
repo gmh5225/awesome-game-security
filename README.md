@@ -1088,6 +1088,7 @@ Or you can send an issue for me.
 - https://github.com/leeqwind/PESignAnalyzer [A Simple PE File Signature information Extracting Tool]
 - https://github.com/microsoft/SDCM [Surface Dev Center Manager tool to automate WHQL/Attestation submissions]
 - https://github.com/MxIris-Reverse-Engineering/RuntimeViewer [Objective-C Runtime Viewer for macOS and iOS]
+- https://github.com/skylot/raung [Assembler/disassembler for java bytecode]
 
 > Mixed boolean-arithmetic
 - https://github.com/Colton1skees/mba-resources [List of mixed boolean-arithmetic resources]
