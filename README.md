@@ -4243,6 +4243,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Teach2Breach/moonwalk [find dll base addresses without PEB WALK]
 - https://github.com/brew02/KiUserExceptionDispatcherHook [Hooking the Windows usermode exception handler]
 - https://github.com/brew02/MountSystemPartition [Mounting the system partition on Windows]
+- https://github.com/LloydLabs/delete-self-poc [A way to delete a locked file, or current running executable, on disk]
 
 > Linux
 - https://github.com/MatheuZSecurity/RingReaper [Linux post-exploitation agent that uses io_uring to stealthily bypass EDR detection by avoiding traditional syscalls]
