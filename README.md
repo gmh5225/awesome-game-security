@@ -2165,6 +2165,7 @@ Or you can send an issue for me.
 - https://github.com/BlackSnufkin/BYOVD/tree/main/Wsftprm-Killer [wsftprm.sys]
 - https://blog.talosintelligence.com/decrement-by-one-to-rule-them-all [AsIO3.sys]
 - https://github.com/SaadAhla/Killer-Exercice [An Exercice for Red Team to Reverse & Exploit, that's a valide BYOVD Killer, not HVCI Blocklisted, and not in LOLBIN]
+- https://github.com/gmh5225/ampa.sys-exp [ampa.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
