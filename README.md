@@ -2368,6 +2368,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Driver-DriverNoImage [Hijack Driver]
 - https://github.com/gmh5225/Driver-Systemthread-from-PspCidTable-src [Hide Process/Thread/Handle]
 - https://github.com/reveny/Android-Library-Remap-Hide [Remap a library for Android]
+- https://github.com/rad9800/BootExecuteEDR [BootExecute EDR Bypass]
 
 > Anti Forensics
 - https://github.com/PaulNorman01/Forensia
