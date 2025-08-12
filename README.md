@@ -1274,6 +1274,7 @@ Or you can send an issue for me.
 - https://github.com/jiqiu2022/Zygisk-MyInjector [Zygisk Injector]
 - https://github.com/Exo1i/MagiskHluda [Run a more undetectable frida server on boot using magisk]
 - https://github.com/MhmRdd/NoHello [A Zygisk module to hide root]
+- https://github.com/ys1231/MoveCertificate [A Magisk/KernelSU/APatch module for moving user certificates to system certificates. Supports Android 7-15]
 
 > Xposed
 - https://github.com/NPC2000/AppPealing-new [An Xposed module that disables Inka AppSealing, a popular anti-cheat and anti-root solution]
