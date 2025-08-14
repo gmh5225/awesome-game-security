@@ -1090,6 +1090,7 @@ Or you can send an issue for me.
 - https://github.com/MxIris-Reverse-Engineering/RuntimeViewer [Objective-C Runtime Viewer for macOS and iOS]
 - https://github.com/skylot/raung [Assembler/disassembler for java bytecode]
 - https://github.com/hx1997/dayu [Open/HarmonyOS abc file parser and decompiler]
+- https://github.com/jd-opensource/arkdecompiler [HarmonyOS NEXT decompilation tool]
 
 > Mixed boolean-arithmetic
 - https://github.com/Colton1skees/mba-resources [List of mixed boolean-arithmetic resources]
