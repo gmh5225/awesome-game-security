@@ -1159,6 +1159,7 @@ Or you can send an issue for me.
 - https://github.com/emlinhax/tableflipper [partially disable patchguard up to win11 21H2]
 - https://github.com/AmitMoshel1/PatchGuardEncryptorDriver [Self-implemented PatchGuard]
 - https://r0keb.github.io/posts/PatchGuard-Internals [PatchGuard Internals]
+- https://github.com/NeoMaster831/kurasagi [Windows 11 24H2 Runtime PatchGuard Bypass]
 
 > Driver Signature enforcement
 - https://github.com/gmh5225/dse_hook
