@@ -518,6 +518,7 @@ Or you can send an issue for me.
 - https://github.com/shafu0x/awesome-smart-contracts [Guide]
 - https://github.com/yjjnls/awesome-blockchain [Guide]
 - https://github.com/ahmet/awesome-web3 [Guide]
+- https://github.com/gmh5225/wallet-pentesting-article [Wallet Pentesting Guide]
 - https://github.com/matter-labs/awesome-zero-knowledge-proofs [ZKP Guide]
 - https://github.com/rkdud007/awesome-zkvm [zkVM Guide]
 - https://github.com/chaozh/awesome-blockchain-cn [CN Guide]
