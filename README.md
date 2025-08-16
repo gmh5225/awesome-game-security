@@ -1091,6 +1091,7 @@ Or you can send an issue for me.
 - https://github.com/skylot/raung [Assembler/disassembler for java bytecode]
 - https://github.com/hx1997/dayu [Open/HarmonyOS abc file parser and decompiler]
 - https://github.com/jd-opensource/arkdecompiler [HarmonyOS NEXT decompilation tool]
+- https://github.com/loerting/dalvikus [Android reverse-engineering tool / smali editor]
 
 > Mixed boolean-arithmetic
 - https://github.com/Colton1skees/mba-resources [List of mixed boolean-arithmetic resources]
