@@ -1336,6 +1336,7 @@ Or you can send an issue for me.
 - https://github.com/pgp/XFiles [A general-purpose file explorer for (rooted) Android]
 - https://github.com/Raival-e/File-Explorer [An Android file explorer]
 - https://github.com/obfusk/apksigcopier [apksigcopier - copy/extract/patch android apk signatures & compare apks]
+- https://github.com/loerting/dalvikus [Android reverse-engineering tool / smali editor]
 
 > Android Memory Explorer
 - https://github.com/misc0110/PTEditor [PT Editor]
