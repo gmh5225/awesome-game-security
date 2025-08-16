@@ -493,6 +493,7 @@ Or you can send an issue for me.
 - https://github.com/recastnavigation/recastnavigation [Navigation-mesh Toolset for Games]
 - https://github.com/TensorWorks/UE-Clang-Format [UE Clang-Format configuration]
 - https://github.com/inflation/goldberg_emulator [Steam emulator]
+- https://github.com/PixiEditor/PixiEditor [PixiEditor is a Universal Editor for all your 2D needs]
 
 ## Game Manager
 - https://github.com/JosefNemec/Playnite
