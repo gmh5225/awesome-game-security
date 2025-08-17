@@ -2176,6 +2176,7 @@ Or you can send an issue for me.
 - https://blog.talosintelligence.com/decrement-by-one-to-rule-them-all [AsIO3.sys]
 - https://github.com/SaadAhla/Killer-Exercice [An Exercice for Red Team to Reverse & Exploit, that's a valide BYOVD Killer, not HVCI Blocklisted, and not in LOLBIN]
 - https://github.com/gmh5225/ampa.sys-exp [ampa.sys]
+- https://github.com/0xJs/BYOVD_read_write_primitive [BYOVD Read Write primitive]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
