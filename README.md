@@ -4077,6 +4077,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/MagnetForensics/dumpit-linux [DumpIt for linux]
 - https://github.com/GuidoBartoli/sherloq [An open-source digital image forensic toolset]
 - https://github.com/kyxiaxiang/CobaltStrikeBeaconCppSource [Out-of-the-box CobaltStrike Beacon source code use C++]
+- https://github.com/olafhartong/BamboozlEDR [A comprehensive ETW (Event Tracing for Windows) event generation tool designed for testing and research purposes]
 
 > Dynamic Script
 - https://github.com/can1357/NtLua
