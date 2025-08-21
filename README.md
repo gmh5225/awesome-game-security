@@ -1693,6 +1693,7 @@ Or you can send an issue for me.
 - https://github.com/SamuelTulach/unxorer [Yet another IDA Pro/Home plugin for deobfuscating stack strings]
 - https://github.com/loyaltypollution/ida2llvm [IDA2LLVM - Dynamic Binary Lifting IDA code to LLVM IR]
 - https://github.com/GAMMACASE/PltPatcher [Patches PLT sections when IDA fails to do so]
+- https://github.com/yoavst/ida-ios-helper [Plugin to ease reversing iOS projects]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
