@@ -1096,6 +1096,7 @@ Or you can send an issue for me.
 - https://github.com/hx1997/dayu [Open/HarmonyOS abc file parser and decompiler]
 - https://github.com/jd-opensource/arkdecompiler [HarmonyOS NEXT decompilation tool]
 - https://github.com/loerting/dalvikus [Android reverse-engineering tool / smali editor]
+- https://github.com/poppopjmp/VMDragonSlayer [Advanced Virtual Machine Detection and Analysis Framework]
 
 > Mixed boolean-arithmetic
 - https://github.com/Colton1skees/mba-resources [List of mixed boolean-arithmetic resources]
@@ -1110,6 +1111,7 @@ Or you can send an issue for me.
 - https://github.com/fjqisba/VmpHelper
 - https://github.com/xtremegamer1/vmdevirt-vtil
 - https://github.com/oureveryday/VMPUnpacker/tree/master [Unpacker]
+- https://github.com/poppopjmp/VMDragonSlayer [Advanced Virtual Machine Detection and Analysis Framework]
 
 > Fix Themida
 - https://github.com/sodareverse/TDE
@@ -1694,6 +1696,7 @@ Or you can send an issue for me.
 - https://github.com/loyaltypollution/ida2llvm [IDA2LLVM - Dynamic Binary Lifting IDA code to LLVM IR]
 - https://github.com/GAMMACASE/PltPatcher [Patches PLT sections when IDA fails to do so]
 - https://github.com/yoavst/ida-ios-helper [Plugin to ease reversing iOS projects]
+- https://github.com/poppopjmp/VMDragonSlayer [Advanced Virtual Machine Detection and Analysis Framework]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
@@ -1767,6 +1770,7 @@ Or you can send an issue for me.
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 - https://github.com/Rantanen/ghidra-minidump-loader [Windows Minidump loader for Ghidra]
 - https://github.com/jtang613/GhidrAssistMCP [An MCP extension for Ghidra]
+- https://github.com/poppopjmp/VMDragonSlayer [Advanced Virtual Machine Detection and Analysis Framework]
 
 > Radare Plugins
 - https://github.com/radareorg/r2a [local language model for radare2]
