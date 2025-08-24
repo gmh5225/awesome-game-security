@@ -4268,6 +4268,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/LloydLabs/delete-self-poc [A way to delete a locked file, or current running executable, on disk]
 - https://github.com/rad9800/BootExecuteEDR [BootExecute EDR Bypass]
 - https://github.com/unkvolism/Solemn [A command-line tool for Windows that automates adding drivers to the HVCI (HvciDisallowedImages) custom blocklist]
+- https://github.com/2x7EQ13/CreateProcessAsPPL [This is the loader that supports running a program with Protected Process Light (PPL) protection functionality]
 
 > Linux
 - https://github.com/MatheuZSecurity/RingReaper [Linux post-exploitation agent that uses io_uring to stealthily bypass EDR detection by avoiding traditional syscalls]
