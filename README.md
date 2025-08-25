@@ -523,6 +523,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/wallet-pentesting-article [Wallet Pentesting Guide]
 - https://github.com/matter-labs/awesome-zero-knowledge-proofs [ZKP Guide]
 - https://github.com/rkdud007/awesome-zkvm [zkVM Guide]
+- https://github.com/eth-act/zkevm-book [Ethereum zkEVM book]
 - https://github.com/chaozh/awesome-blockchain-cn [CN Guide]
 - https://blog.wssh.trade/posts/uniswap-v3 [Uniswap V3 CN Guide]
 - https://github.com/bekatom/awesome-ethereum [ETH Guide]
