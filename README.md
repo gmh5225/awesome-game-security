@@ -4102,6 +4102,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Windows Ring3 Callback
 - https://github.com/aahmad097/AlternativeShellcodeExec
+- https://github.com/whokilleddb/function-collections [A collection of PoCs to do common things in unconventional ways]
 - https://github.com/RixedLabs/IDLE-Abuse
 - https://github.com/Wra7h/FlavorTown
 - https://github.com/Deputation/instrumentation_callbacks [Instrumentation Callback]
@@ -4118,6 +4119,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/blaquee/dllnotif [DllNotification]
 - https://github.com/gmh5225/LdrRegisterDllNotification-modify-testing [DllNotification]
 - https://github.com/brew02/KiUserExceptionDispatcherHook [Hooking the Windows usermode exception handler]
+- https://github.com/whokilleddb/function-collections/tree/main/hijack_callbacks/vkAllocateMemory [vkAllocateMemory]
+- https://github.com/whokilleddb/function-collections/tree/main/hijack_callbacks/InternetSetStatusCallback [InternetStatusCallback]
 
 > Windows Ring0 Callback
 - https://github.com/gmh5225/kernel-callback-functions-list [Callback List]
