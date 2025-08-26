@@ -699,6 +699,7 @@ Or you can send an issue for me.
 - https://github.com/accretion-xyz/solana-data-reverser [analyzing hex data with deep Solana blockchain integration. Perfect for examining raw binary data, Solana account structures]
 - https://github.com/FuzzingLabs/sol-azy [Sol-azy is a modular CLI toolchain for static analysis and reverse engineering of Solana sBPF programs]
 - https://github.com/FuzzingLabs/sierra-analyzer [Sierra decompiler and analyzer]
+- https://github.com/walnuthq/soldb [CLI debugger for Solidity and EVM]
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
