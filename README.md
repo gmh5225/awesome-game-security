@@ -4121,6 +4121,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/brew02/KiUserExceptionDispatcherHook [Hooking the Windows usermode exception handler]
 - https://github.com/whokilleddb/function-collections/tree/main/hijack_callbacks/vkAllocateMemory [vkAllocateMemory]
 - https://github.com/whokilleddb/function-collections/tree/main/hijack_callbacks/InternetSetStatusCallback [InternetStatusCallback]
+- https://github.com/whokilleddb/function-collections/tree/main/winapi_alternatives/NtAllocateMemoryEx [tprtdll.dll.NtAllocateVirtualMemoryEx]
 
 > Windows Ring0 Callback
 - https://github.com/gmh5225/kernel-callback-functions-list [Callback List]
