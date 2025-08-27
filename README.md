@@ -2328,6 +2328,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/dwmhook [DWM]
 - https://github.com/wongfei/wda_monitor_trick
 - https://github.com/Mes2d/Screenshot-Detection-Bypass [BitBlt]
+- https://github.com/oakboat/DisableNvidiaScreenshot [DWM]
 
 > Spoof Stack
 - https://github.com/mgeeky/ThreadStackSpoofer
