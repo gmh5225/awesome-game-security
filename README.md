@@ -1099,6 +1099,7 @@ Or you can send an issue for me.
 - https://github.com/jd-opensource/arkdecompiler [HarmonyOS NEXT decompilation tool]
 - https://github.com/loerting/dalvikus [Android reverse-engineering tool / smali editor]
 - https://github.com/poppopjmp/VMDragonSlayer [Advanced Virtual Machine Detection and Analysis Framework]
+- https://github.com/Byrom90/XenonDumper [Dumps files & data required to use the Xenon Xbox 360 Low Level Emulator]
 
 > Mixed boolean-arithmetic
 - https://github.com/Colton1skees/mba-resources [List of mixed boolean-arithmetic resources]
@@ -4371,4 +4372,5 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/xemu-project/xemu [Xbox Emulator for Windows]
 - https://github.com/rexdex/recompiler [Porting Xbox360 executables to Windows]
 - https://github.com/exploits-forsale/collateral-damage [Kernel exploit for Xbox SystemOS using CVE-2024-30088]
+- https://github.com/Byrom90/XenonDumper [Dumps files & data required to use the Xenon Xbox 360 Low Level Emulator]
 
