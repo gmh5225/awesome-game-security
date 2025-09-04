@@ -1896,6 +1896,9 @@ Or you can send an issue for me.
 > Injection:IOS
 - https://github.com/opa334/opainject [iOS runtime dylib injection tool]
 
+> Injection:PlayStation
+- https://github.com/buzzer-re/NineS [A PlayStation 5 ELF injector]
+
 
 > DLL Hijack
 - https://github.com/Sh0ckFR/DLLirant [Hijacking researches]
