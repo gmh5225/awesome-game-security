@@ -637,6 +637,8 @@ Or you can send an issue for me.
 - https://github.com/Uniswap/ERC20-eth [ERC-7914]
 - https://github.com/mpeyfuss/vyper-template [Vyper + Foundry Template]
 - https://github.com/Contract-examples/CrimeEnjoyor [CrimeEnjoyor for EIP-7702]
+- https://github.com/aadeexyz/erc-8004 [ERC-8004: Trustless Agents]
+- https://github.com/ChaosChain/trustless-agents-erc-ri [ERC-8004: Trustless Agents]
 
 > SDK
 - https://github.com/Ankr-network/game-unreal-sdk [Mirage Unreal SDK]
