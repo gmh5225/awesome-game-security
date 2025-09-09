@@ -1103,6 +1103,7 @@ Or you can send an issue for me.
 - https://github.com/loerting/dalvikus [Android reverse-engineering tool / smali editor]
 - https://github.com/poppopjmp/VMDragonSlayer [Advanced Virtual Machine Detection and Analysis Framework]
 - https://github.com/Byrom90/XenonDumper [Dumps files & data required to use the Xenon Xbox 360 Low Level Emulator]
+- https://github.com/WenzWenzWenz/DelphiReSym [A Delphi symbol name recovery tool for reverse engineers]
 
 > Mixed boolean-arithmetic
 - https://github.com/Colton1skees/mba-resources [List of mixed boolean-arithmetic resources]
