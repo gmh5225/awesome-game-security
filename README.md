@@ -1711,6 +1711,7 @@ Or you can send an issue for me.
 - https://github.com/GAMMACASE/PltPatcher [Patches PLT sections when IDA fails to do so]
 - https://github.com/yoavst/ida-ios-helper [Plugin to ease reversing iOS projects]
 - https://github.com/poppopjmp/VMDragonSlayer [Advanced Virtual Machine Detection and Analysis Framework]
+- https://github.com/milankovo/ida_enums_helper [IDA Enums Helper Plugin]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
