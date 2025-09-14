@@ -620,6 +620,9 @@ Or you can send an issue for me.
 - https://github.com/nhuxhr/sol-connect-four [Connect Four game built on the Solana blockchain]
 - https://github.com/matthewegyed/BlockchainGambit [A minimalistic chess game on the blockchain using Solidity and Foundry]
 
+> Wallet source code
+- https://github.com/ethereum/wallet-poc [The web3 wallet that makes crypto self-custody easy and secure via hybrid account abstraction. EIP-7702 ready]
+
 > Wallet connection
 - https://github.com/reown-com/appkit [web]
 - https://github.com/rainbow-me/rainbowkit [web]
