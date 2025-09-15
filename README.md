@@ -2205,6 +2205,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/ampa.sys-exp [ampa.sys]
 - https://github.com/0xJs/BYOVD_read_write_primitive [BYOVD Read Write primitive]
 - https://github.com/U65535F/ThrottleStopPoC [ThrottleStop.sys]
+- https://github.com/ANYLNK/NSecSoftBYOVD [NSecKrnl.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
