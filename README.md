@@ -426,6 +426,7 @@ Or you can send an issue for me.
 - https://github.com/taida957789/ida-mcp-server-plugin [MCP for IDA pro]
 - https://github.com/fdrechsler/mcp-server-idapro [MCP for IDA pro]
 - https://github.com/rand-tech/pcm [MCP for IDA pro]
+- https://github.com/axelmierczuk/tenrec [A headless, extendable, multi-session, IDA Pro MCP framework]
 - https://github.com/fosdickio/binary_ninja_mcp [MCP for Binary_Ninja]
 - https://github.com/Invoke-RE/binja-lattice-mcp [MCP for Binary_Ninja]
 - https://github.com/dnakov/radare2-mcp [Radare2 MCP Server]
@@ -1712,6 +1713,7 @@ Or you can send an issue for me.
 - https://github.com/yoavst/ida-ios-helper [Plugin to ease reversing iOS projects]
 - https://github.com/poppopjmp/VMDragonSlayer [Advanced Virtual Machine Detection and Analysis Framework]
 - https://github.com/milankovo/ida_enums_helper [IDA Enums Helper Plugin]
+- https://github.com/axelmierczuk/tenrec [A headless, extendable, multi-session, IDA Pro MCP framework]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
