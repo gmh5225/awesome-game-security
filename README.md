@@ -1548,6 +1548,7 @@ Or you can send an issue for me.
 - https://github.com/java-deobfuscator/deobfuscator [Java]
 - https://github.com/angr/binsync [Sync]
 - https://github.com/crytic/ethersplay [EVM dissassembler]
+- https://github.com/Hexorg/Ouroboros [A Symbolic-Execution Decompiler written in Rust]
 
 > IDA themes
 - https://github.com/pr701/dp701 [Dark theme for IDA Pro]
