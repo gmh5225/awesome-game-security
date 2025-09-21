@@ -4077,6 +4077,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/apkunpacker/Anti-Frida [Some Of Anti-Frida Stuff]
 
 > Detection:Overlay
+- https://github.com/Oliver-1-1/TOPMOST-Detection [Detect simple top most windows]
 - https://github.com/geeksonsecurity/android-overlay-protection [Android]
 
 > Signature Scanning
