@@ -1267,6 +1267,7 @@ Or you can send an issue for me.
 - https://github.com/V-i-x-x/kernel-callback-removal [Removing kernel callbacks]
 - https://github.com/Air14/KDBGDecryptor [A simple example how to decrypt kernel debugger data block]
 - https://github.com/FaEryICE/MemScanner [Memory scanner]
+- https://github.com/Oliver-1-1/RwxScanner [RWX Memory scanner]
 - https://github.com/irql/nokd [Kernel debugger protocol]
 - https://github.com/DejavuSecure/DetectNtoskrnlIntegrity [Windows Kernel Security: Memory Integrity Verification with Disk Verification of ntoskrnl.exe]
 - https://github.com/brew02/BudgetEPT [Create stealthy, inline, EPT-like hooks using SMAP and SMEP]
