@@ -709,6 +709,7 @@ Or you can send an issue for me.
 - https://github.com/FuzzingLabs/sol-azy [Sol-azy is a modular CLI toolchain for static analysis and reverse engineering of Solana sBPF programs]
 - https://github.com/FuzzingLabs/sierra-analyzer [Sierra decompiler and analyzer]
 - https://github.com/walnuthq/soldb [CLI debugger for Solidity and EVM]
+- https://github.com/argotorg/sourcify [Source code verification service for Ethereum smart contracts]
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
