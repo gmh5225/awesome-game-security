@@ -601,6 +601,7 @@ Or you can send an issue for me.
 - https://github.com/agno-agi/agno [Agno is a lightweight, high-performance library for building Agents]
 - https://github.com/crewAIInc/crewAI [autonomous AI agents]
 - https://github.com/pydantic/pydantic-ai [Agent Framework / shim to use Pydantic with LLMs]
+- https://github.com/VoltAgent/voltagent [Open Source TypeScript AI Agent Framework]
 
 > MCP Server
 - https://github.com/PraneshASP/foundry-mcp-server [foundry mcp]
