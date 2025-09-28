@@ -513,6 +513,7 @@ Or you can send an issue for me.
 - https://github.com/az0mb13/awesome-solana-security [awesome solana security]
 - https://github.com/amanusk/awesome-starknet-security [awesome starknet security]
 - https://github.com/Ackee-Blockchain/Solana-Auditors-Bootcamp [Solana audit security]
+- https://github.com/anza-xyz/security-audits [Solana audit security]
 - https://github.com/GammaStrategies/awesome-uniswap-v3 [A curated list of awesome Uniswap v3 resources]
 - https://github.com/fewwwww/awesome-uniswap-hooks [A curated list of awesome Uniswap v4 hooks resources]
 - https://github.com/neodyme-labs/solana-ctf [Solana CTF]
