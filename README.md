@@ -2209,6 +2209,7 @@ Or you can send an issue for me.
 - https://github.com/BlackSnufkin/BYOVD/tree/main/TfSysMon-Killer [SysMon.sys]
 - https://github.com/BlackSnufkin/BYOVD/tree/main/Ksapi64-Killer [ksapi64.sys]
 - https://github.com/BlackSnufkin/BYOVD/tree/main/BdApiUtil-Killer [BdApiUtil64.sys]
+- https://github.com/0xJs/BYOVD_EDRKiller/tree/main/BdApiUtil [BdApiUtil64.sys]
 - https://github.com/BlackSnufkin/BYOVD/tree/main/Wsftprm-Killer [wsftprm.sys]
 - https://github.com/0xJs/BYOVD_EDRKiller/tree/main/Wsftprm [wsftprm.sys]
 - https://blog.talosintelligence.com/decrement-by-one-to-rule-them-all [AsIO3.sys]
