@@ -3741,6 +3741,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Washi1337/AwaitFuscator [.NET]
 - https://github.com/Fatmike-GH/Fatpack [A Windows PE packer with full TLS (Thread Local Storage) support]
 - https://github.com/caprinux/rel-fuscate [Modifying the jmprel_entry->r_offset]
+- https://github.com/dobin/SuperMega [Stealthily inject shellcode into an executable]
 
 > CLR Protection
 - https://github.com/endgameinc/ClrGuard
@@ -3814,6 +3815,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/lainswork/shellcode-factory
 - https://github.com/H1d3r/GPU_ShellCode [hide the payload inside the gpu memory]
 - https://github.com/Lavender-exe/Shellcrypt [A QoL tool to obfuscate shellcode. In the future will be able to chain encoding/encryption/compression methods]
+- https://github.com/dobin/SuperMega [Stealthily inject shellcode into an executable]
 
 > Obfuscation Engine
 - https://github.com/vi3t1/vmprotect-3.5.1
