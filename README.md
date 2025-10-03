@@ -3817,6 +3817,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/H1d3r/GPU_ShellCode [hide the payload inside the gpu memory]
 - https://github.com/Lavender-exe/Shellcrypt [A QoL tool to obfuscate shellcode. In the future will be able to chain encoding/encryption/compression methods]
 - https://github.com/dobin/SuperMega [Stealthily inject shellcode into an executable]
+- https://github.com/mrexodia/RiscyWorkshop [Payload Obfuscation for Red Teams workshop materials]
 
 > Obfuscation Engine
 - https://github.com/vi3t1/vmprotect-3.5.1
