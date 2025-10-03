@@ -3666,6 +3666,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/CheckPointSW/showstopper
 - https://github.com/secrary/makin [Reveal anti-debugging and anti-VM tricks]
 - https://github.com/android1337/brkida [C++ macro for x64 programs that breaks ida hex-rays decompiler tool]
+- https://github.com/sapdragon/hint-break [A 25-year-old architectural blind spot affecting modern reverse engineering tools]
 
 > Page Protection
 - https://github.com/changeofpace/Self-Remapping-Code
