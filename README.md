@@ -1282,6 +1282,7 @@ Or you can send an issue for me.
 > Linux Kernel Explorer
 - https://github.com/MatheuZSecurity/Rootkit [Collection of codes focused on Linux rootkits]
 - https://github.com/djolertrk/kLLDB [LLDB based debugger for Linux Kernel]
+- https://github.com/sad0p/venom [Linux Kernel Rookit Hooking Mechanism]
 
 > Magisk
 - https://github.com/PShocker/Zygisk-MagiskHide
