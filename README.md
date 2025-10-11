@@ -1725,6 +1725,7 @@ Or you can send an issue for me.
 - https://github.com/milankovo/ida_enums_helper [IDA Enums Helper Plugin]
 - https://github.com/axelmierczuk/tenrec [A headless, extendable, multi-session, IDA Pro MCP framework]
 - https://github.com/kweatherman/yara4ida [Unofficial YARA IDA Pro plugin]
+- https://github.com/Berk000x/BinaryLens [An IDA plugin that uses LLM to speed up binary analysis]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
