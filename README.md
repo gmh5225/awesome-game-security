@@ -1726,6 +1726,7 @@ Or you can send an issue for me.
 - https://github.com/axelmierczuk/tenrec [A headless, extendable, multi-session, IDA Pro MCP framework]
 - https://github.com/kweatherman/yara4ida [Unofficial YARA IDA Pro plugin]
 - https://github.com/Berk000x/BinaryLens [An IDA plugin that uses LLM to speed up binary analysis]
+- https://github.com/CyberSecurityUP/DriverVuln-Analyzer-IDA-Plugin [Driver Vuln Analyzer]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
