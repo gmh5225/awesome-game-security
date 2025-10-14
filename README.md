@@ -1352,7 +1352,8 @@ Or you can send an issue for me.
 
 > Android File Explorer
 - https://github.com/nzcv/note [Guide-zh]
-- https://github.com/iBotPeaches/Apktool
+- https://github.com/iBotPeaches/Apktool [A tool for reverse engineering Android apk files]
+- https://github.com/AndnixSH/APKToolGUI [GUI for apktool, signapk, zipalign and baksmali utilities]
 - https://github.com/pxb1988/dex2jar
 - https://github.com/skylot/jadx [Dex to Java decompiler]
 - https://github.com/LuckyPray/DexKit-Android [dex deobfuscator]
