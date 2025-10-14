@@ -1041,6 +1041,7 @@ Or you can send an issue for me.
 - https://github.com/VollRagm/PTView [Browse Page Tables on Windows]
 - https://github.com/iBotPeaches/Apktool [Apk]
 - https://github.com/user1342/Obfu-DE-Scate [Apk]
+- https://github.com/AndnixSH/APKToolGUI [GUI for apktool, signapk, zipalign and baksmali utilities]
 - https://github.com/Genymobile/scrcpy  [Display and control your Android device]
 - https://github.com/barry-ran/QtScrcpy [Display and control your Android device]
 - https://github.com/guided-hacking/GH-Offset-Dumper [Scans for signatures and netvars and dumps their relative offsets]
