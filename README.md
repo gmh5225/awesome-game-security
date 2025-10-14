@@ -3772,6 +3772,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/momalab/e3 [C++]
 - https://github.com/obama-gaming/xor-float [C++]
 - https://github.com/emlinhax/xv [C++]
+- https://github.com/nevergiveup-c/obfuscxx [Header-only compile-time variables obfuscation library for C++20 and later. Compiler Support: MSVC (+WDM), LLVM, GCC. Architecture Support: x86-64, ARM]
 
 > Lazy Importer
 - https://github.com/JustasMasiulis/lazy_importer
@@ -3817,6 +3818,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/llxiaoyuan/oxorany [obfuscated any constant encryption in compile time on any platform]
 - https://github.com/DosX-dev/obfus.h [Macro-header for compile-time C obfuscation (tcc, win x86/x64)]
 - https://github.com/x86byte/Obfusk8 [Obfusk8: C++17-Based Obfuscation Library]
+- https://github.com/nevergiveup-c/obfuscxx [Header-only compile-time variables obfuscation library for C++20 and later. Compiler Support: MSVC (+WDM), LLVM, GCC. Architecture Support: x86-64, ARM]
 
 > Shellcode Engine & Tricks
 - https://github.com/Vector35/scc [shellcode compiler]
