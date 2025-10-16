@@ -3681,7 +3681,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ReFo0/anti-crack-system
 - https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-addsecurememorycachecallback
 - https://github.com/weak1337/NO_ACCESS_Protection
-- https://github.com/noff2k/no-access-protection-x86
+- https://github.com/gmh5225/no-access-protection-x86
 - https://github.com/hotline1337/page_no_access
 - https://github.com/thefLink/DeepSleep
 - https://github.com/janoglezcampos/DeathSleep
