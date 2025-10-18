@@ -1736,6 +1736,7 @@ Or you can send an issue for me.
 - https://github.com/CyberSecurityUP/DriverVuln-Analyzer-IDA-Plugin [Driver Vuln Analyzer]
 - https://github.com/ssmugabi/IDAPlugins [Integrate essential IDA Pro plugins for enhanced functionality, including deobfuscation, binary diffing, and custom cryptography support]
 - https://github.com/momo5502/patch-finder [IDA plugin to find patched memory]
+- https://github.com/HexRaysSA/ida-cyberchef [A Qt-based CyberChef interface designed for malware analysis workflows, particularly in IDA Pro]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
