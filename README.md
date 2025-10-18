@@ -1735,6 +1735,7 @@ Or you can send an issue for me.
 - https://github.com/Berk000x/BinaryLens [An IDA plugin that uses LLM to speed up binary analysis]
 - https://github.com/CyberSecurityUP/DriverVuln-Analyzer-IDA-Plugin [Driver Vuln Analyzer]
 - https://github.com/ssmugabi/IDAPlugins [Integrate essential IDA Pro plugins for enhanced functionality, including deobfuscation, binary diffing, and custom cryptography support]
+- https://github.com/momo5502/patch-finder [IDA plugin to find patched memory]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
