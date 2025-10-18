@@ -605,6 +605,7 @@ Or you can send an issue for me.
 - https://github.com/VoltAgent/voltagent [Open Source TypeScript AI Agent Framework]
 - https://github.com/sendaifun/solana-agent-kit [connect any ai agents to solana protocols]
 - https://github.com/coinbase/agentkit [Every AI Agent deserves a wallet]
+- https://github.com/0xgasless/agentkit [AgentKit is a toolkit that gives AI agents access to crypto wallets and onchain functionality]
 
 > MCP Server
 - https://github.com/PraneshASP/foundry-mcp-server [foundry mcp]
