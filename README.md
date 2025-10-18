@@ -604,6 +604,7 @@ Or you can send an issue for me.
 - https://github.com/pydantic/pydantic-ai [Agent Framework / shim to use Pydantic with LLMs]
 - https://github.com/VoltAgent/voltagent [Open Source TypeScript AI Agent Framework]
 - https://github.com/sendaifun/solana-agent-kit [connect any ai agents to solana protocols]
+- https://github.com/coinbase/agentkit [Every AI Agent deserves a wallet]
 
 > MCP Server
 - https://github.com/PraneshASP/foundry-mcp-server [foundry mcp]
