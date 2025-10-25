@@ -3045,6 +3045,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/cs2-fov-changer [FOV changer]
 - https://github.com/clauadv/cs2_webradar [undetected counter strike 2 browser based radar cheat]
 - https://github.com/MoZiHao/CS2_DMA_Radar [DMA Radar]
+- https://github.com/ferdinandoprates/cs2_webradar [Browser based radar cheat]
 - https://github.com/MoZiHao/CS2_DMA_Extrnal [DMA External]
 - https://github.com/gmh5225/vscript_lua51 [VScript]
 - https://github.com/gmh5225/cs2_things [VScript]
