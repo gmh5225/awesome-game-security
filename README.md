@@ -2236,6 +2236,7 @@ Or you can send an issue for me.
 - https://github.com/U65535F/ThrottleStopPoC [ThrottleStop.sys]
 - https://github.com/ANYLNK/NSecSoftBYOVD [NSecKrnl.sys]
 - https://github.com/moiz-2x/CVE-2025-24990_POC [ltmdm64.sys]
+- https://github.com/symeonp/Lenovo-CVE-2025-8061 [PoC for popping a system shell against the LnvMSRIO.sys driver]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
