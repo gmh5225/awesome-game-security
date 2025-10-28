@@ -661,6 +661,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/Multicall3-SDK [SDK of Multicall3]
 - https://github.com/nhuxhr/pumpfun-rs [Rust SDK for PumpFun Solana program]
 - https://github.com/rckprtr/pumpdotfun-sdk [Typescript SDK for PumpFun Solana program]
+- https://github.com/anza-xyz/solana-sdk [Rust SDK for the Solana blockchain, used by on-chain program developers and the Agave validator]
 - https://github.com/hoprnet/gnosis-hosted [self-host Gnosis Safe]
 - https://github.com/gagliardetto/solana-go [Go SDK library and RPC client for the Solana Blockchain]
 - https://github.com/evmauth/evmauth-ts [A TypeScript SDK for interacting with EVMAuth contracts]
