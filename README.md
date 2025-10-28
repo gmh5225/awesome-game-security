@@ -717,6 +717,7 @@ Or you can send an issue for me.
 - https://github.com/walnuthq/soldb [CLI debugger for Solidity and EVM]
 - https://github.com/argotorg/sourcify [Source code verification service for Ethereum smart contracts]
 - https://github.com/gmh5225/js-debugger-bypass-script [JS Debugger Bypass UserScript]
+- https://github.com/anza-xyz/jetstreamer [A Solana project geared towards realtime indexing, research, and backfilling with support for all epochs in the history of Solana mainnet]
 
 > Compiler
 - https://github.com/ethereum/solidity [Solidity]
