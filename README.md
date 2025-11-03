@@ -606,6 +606,7 @@ Or you can send an issue for me.
 - https://github.com/sendaifun/solana-agent-kit [connect any ai agents to solana protocols]
 - https://github.com/coinbase/agentkit [Every AI Agent deserves a wallet]
 - https://github.com/0xgasless/agentkit [AgentKit is a toolkit that gives AI agents access to crypto wallets and onchain functionality]
+- https://github.com/Ido-Levi/Hephaestus [Semi-Structured Agentic Framework. Workflows build themselves as agents discover what needs to be done, not what you predicted upfront]
 
 > MCP Server
 - https://github.com/PraneshASP/foundry-mcp-server [foundry mcp]
