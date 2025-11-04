@@ -4399,6 +4399,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/momo5502/sogen [Windows User Space Emulator]
 - https://github.com/mojtabafalleh/emulator [Windows User Space Emulator]
 - https://github.com/binsnake/KUBERA [A x86 environment emulator for Windows user and kernel binaries]
+- https://github.com/ShallowFeather/KDemu [A hybrid semi-emulated, semi-native Windows kernel driver emulator designed for advanced rootkit and anti-cheat analysis, addressing the limitations of existing emulation solutions]
 
 ## Linux Emulator
 - https://github.com/OFFTKP/felix86 [Run x86-64 programs on RISC-V Linux]
