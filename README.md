@@ -4337,6 +4337,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/deepinstinct/Dirty-Vanity [Abusing RtlCreateProcessReflection]
 - https://github.com/mandiant/ShimCacheParser [Shim Cache parser]
 - https://github.com/cmuratori/pmctrace [Real-time collection of PMCs via ETW]
+- https://github.com/Idov31/EtwLeakKernel [Leaking kernel addresses from ETW consumers. Requires Administrator privileges]
 - https://github.com/SamuelTulach/SecureGame [POC game using VBS enclaves to protect itself from cheating]
 - https://github.com/Teach2Breach/moonwalk [find dll base addresses without PEB WALK]
 - https://github.com/brew02/KiUserExceptionDispatcherHook [Hooking the Windows usermode exception handler]
