@@ -126,6 +126,7 @@ Or you can send an issue for me.
 - https://github.com/melonjs/melonJS [HTML5]
 - https://github.com/egret-labs/egret-core [HTML5]
 - https://github.com/pixijs/pixijs [HTML5]
+- https://github.com/playcanvas/engine [HTML5 3D]
 - https://github.com/TorqueGameEngines/Torque2D [2D]
 - https://github.com/TorqueGameEngines/Torque3D [3D]
 - https://github.com/gmh5225/GameEngine-CX3D [3D]
