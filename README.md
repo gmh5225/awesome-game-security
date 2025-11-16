@@ -1744,6 +1744,7 @@ Or you can send an issue for me.
 - https://github.com/momo5502/patch-finder [IDA plugin to find patched memory]
 - https://github.com/HexRaysSA/ida-cyberchef [A Qt-based CyberChef interface designed for malware analysis workflows, particularly in IDA Pro]
 - https://github.com/idkhidden/DrawIDA [Lightweight whiteboard plugin for IDA that allows reverse engineers to sketch and brainstorm directly inside IDA]
+- https://github.com/rem0obb/rtti-parser [IDA script to parse RTTI information in executable support for IDA 9.2]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
