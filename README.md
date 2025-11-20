@@ -1745,6 +1745,7 @@ Or you can send an issue for me.
 - https://github.com/HexRaysSA/ida-cyberchef [A Qt-based CyberChef interface designed for malware analysis workflows, particularly in IDA Pro]
 - https://github.com/idkhidden/DrawIDA [Lightweight whiteboard plugin for IDA that allows reverse engineers to sketch and brainstorm directly inside IDA]
 - https://github.com/rem0obb/rtti-parser [IDA script to parse RTTI information in executable support for IDA 9.2]
+- https://github.com/19h/ida-semray [High-performance, AI-driven semantic analysis for the IDA Pro decompiler]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
