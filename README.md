@@ -2028,6 +2028,7 @@ Or you can send an issue for me.
 - https://github.com/nbqofficial/norsefire [Kernel-mode W/RPM/mouse_event for Windows]
 - https://github.com/M3351AN/Shirakumo [RPM for Windows]
 - https://github.com/M3351AN/Usugumo [Kernel-mode W/RPM/mouse_event for Windows]
+- https://github.com/waryas/WaryasSWHE [Usermode exploit to bypass any AC using a 0day shatter attack]
 
 > DMA
 - https://github.com/JPShag/DMA-FW-Guide-2.0 [Guide]
@@ -4354,6 +4355,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/rad9800/BootExecuteEDR [BootExecute EDR Bypass]
 - https://github.com/unkvolism/Solemn [A command-line tool for Windows that automates adding drivers to the HVCI (HvciDisallowedImages) custom blocklist]
 - https://github.com/2x7EQ13/CreateProcessAsPPL [This is the loader that supports running a program with Protected Process Light (PPL) protection functionality]
+- https://github.com/waryas/WaryasSWHE [Usermode exploit to bypass any AC using a 0day shatter attack]
 
 > Linux
 - https://github.com/MatheuZSecurity/RingReaper [Linux post-exploitation agent that uses io_uring to stealthily bypass EDR detection by avoiding traditional syscalls]
