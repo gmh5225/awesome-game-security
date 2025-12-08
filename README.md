@@ -632,6 +632,7 @@ Or you can send an issue for me.
 > Wallet source code
 - https://github.com/MetaMask [MetaMask]
 - https://github.com/ethereum/wallet-poc [The web3 wallet that makes crypto self-custody easy and secure via hybrid account abstraction. EIP-7702 ready]
+- https://github.com/coinbase/smart-wallet [ ERC-4337 compliant smart contract wallet from Coinbase]
 
 > Wallet connection
 - https://github.com/reown-com/appkit [web]
