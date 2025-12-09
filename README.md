@@ -639,6 +639,7 @@ Or you can send an issue for me.
 - https://github.com/coinbase/cb-mpc [Coinbase MPC Library]
 - https://github.com/bnb-chain/tss-lib [Threshold Signature Scheme, for ECDSA and EDDSA]
 - https://github.com/vultisig/mobile-tss-lib [Threshold Signature Scheme on mobile]
+- https://github.com/taurushq-io/multi-party-sig [Implementation of protocols for threshold signatures]
 
 > Wallet connection
 - https://github.com/reown-com/appkit [web]
