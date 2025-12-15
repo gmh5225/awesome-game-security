@@ -3850,6 +3850,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/DosX-dev/obfus.h [Macro-header for compile-time C obfuscation (tcc, win x86/x64)]
 - https://github.com/x86byte/Obfusk8 [Obfusk8: C++17-Based Obfuscation Library]
 - https://github.com/nevergiveup-c/obfuscxx [Header-only compile-time variables obfuscation library for C++20 and later. Compiler Support: MSVC (+WDM), LLVM, GCC. Architecture Support: x86-64, ARM]
+- https://github.com/Mowokuma/vm_str.hpp [Header only C++20 compile time string obfuscator]
 
 > Shellcode Engine & Tricks
 - https://github.com/Vector35/scc [shellcode compiler]
