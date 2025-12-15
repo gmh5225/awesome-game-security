@@ -2257,6 +2257,7 @@ Or you can send an issue for me.
 - https://github.com/ANYLNK/NSecSoftBYOVD [NSecKrnl.sys]
 - https://github.com/moiz-2x/CVE-2025-24990_POC [ltmdm64.sys]
 - https://github.com/symeonp/Lenovo-CVE-2025-8061 [PoC for popping a system shell against the LnvMSRIO.sys driver]
+- https://github.com/SaadAhla/Killer [Non HVCI Block listed - Microsoft signed driver exploited to kill AV/EDR's processes]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
