@@ -526,6 +526,7 @@ Or you can send an issue for me.
 - https://github.com/codeluu/blockchain-osint [A collection of tools and resources useful for OSINT investigations in the cryptocurrency]
 - https://github.com/K2SOsint/Legendary_Crypto [A resource full of Crypto/OSINT tools, techniques and training courses for CTI, AML, and forensic investigations]
 - https://github.com/gmh5225/wallet-pentesting-article [Wallet Pentesting Guide]
+- https://github.com/ValkyriSecurity/awesome-wallet-security [Resources to learn Wallet Security]
 - https://github.com/matter-labs/awesome-zero-knowledge-proofs [ZKP Guide]
 - https://github.com/rkdud007/awesome-zkvm [zkVM Guide]
 - https://github.com/eth-act/zkevm-book [Ethereum zkEVM book]
