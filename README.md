@@ -1756,6 +1756,7 @@ Or you can send an issue for me.
 - https://github.com/rem0obb/rtti-parser [IDA script to parse RTTI information in executable support for IDA 9.2]
 - https://github.com/19h/ida-semray [High-performance, AI-driven semantic analysis for the IDA Pro decompiler]
 - https://github.com/K4ryuu/IDA-VTableExplorer [C++ virtual table detection and annotation tool for IDA Pro 9.x]
+- https://github.com/19h/chernobog [A Hex-Rays IDA Pro plugin for deobfuscating binaries protected with the Hikari LLVM obfuscator]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
