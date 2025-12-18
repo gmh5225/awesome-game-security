@@ -1135,6 +1135,7 @@ Or you can send an issue for me.
 - https://github.com/pandaadir05/re-architect [RE-Architect is an advanced automated reverse engineering platform that utilizes binary analysis techniques and machine learning to understand binary files and extract meaningful information]
 - https://github.com/gmh5225/js-debugger-bypass-script [JS Debugger Bypass UserScript]
 - https://github.com/diversenok/DiaSymbolView [PDB file inspection tool]
+- https://github.com/CheckPointSW/Nodejs-Tracer [Simple Node.jstracer that logs calls to analyze heavily obfuscated Node.js malware]
 
 > Mixed boolean-arithmetic
 - https://github.com/Colton1skees/mba-resources [List of mixed boolean-arithmetic resources]
