@@ -4067,6 +4067,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/can1357/hvdetecc [Collection of hypervisor detections]
 - https://github.com/0xTriboulet/T-1 [T-1 is a shellcode loader that leverages ML techniques to detect VM environments]
 - https://github.com/SaadAhla/Anti-Sandbox [Detecting AnyRun sandbox]
+- https://github.com/gmh5225/hv-detect [Hypervisor IDT Detections (SIDT / LIDT)]
 
 > Detection:HWID
 - [All methods of retrieving unique identifiers(HWIDs) on your PC](https://www.unknowncheats.me/forum/anti-cheat-bypass/333662-methods-retrieving-unique-identifiers-hwids-pc.html)
