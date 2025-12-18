@@ -4047,6 +4047,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/jonomango/nohv
 - https://github.com/void-stack/Hypervisor-Detection
 - https://github.com/cryotb/VmdtStr [Detect VMMs with faulty handling of STR exit]
+- https://github.com/gmh5225/hv-detect [Hypervisor IDT Detections (SIDT / LIDT)]
 
 > Detection:Virtual Environments
 - https://github.com/theo-abel/awesome-anti-virtualization [A curated list of awesome resources related to anti virtualization techniques]
