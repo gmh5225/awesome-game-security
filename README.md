@@ -992,6 +992,7 @@ Or you can send an issue for me.
 - https://github.com/marakew/syser [A debugger for Windows x86/64]
 - https://github.com/keowu/koidbg [A debugger for Windows ARM64]
 - https://github.com/DoranekoSystems/DynaDbg [A debugger for Android/IOS]
+- https://github.com/Yayoi-cs/fastDbg [x86_64 native/qemu kernel debugger]
 - https://github.com/noword/GDB-Windows-Binaries [GDB]
 - https://github.com/ajkhoury/ReClassEx
 - https://github.com/ReClassNET/ReClass.NET
