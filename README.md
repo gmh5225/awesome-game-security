@@ -1431,6 +1431,7 @@ Or you can send an issue for me.
 - https://github.com/0x36/Pixel_GPU_Exploit [Root for Pixel7/8 Pro with Android 14]
 - https://soez.github.io/posts/CVE-2022-22265-Samsung-npu-driver [Root for Samsung]
 - https://github.com/0xbinder/android-kernel-exploitation-lab [CVE-2019-2215]
+- https://github.com/zhuowei/cheese [CVE-2025-21479]
 
 > Android Bootloader Bypass
 - https://github.com/MlgmXyysd/Xiaomi-HyperOS-BootLoader-Bypass [Xiaomi HyperOS BootLoader Bypass]
