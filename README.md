@@ -1762,6 +1762,7 @@ Or you can send an issue for me.
 - https://github.com/19h/ida-semray [High-performance, AI-driven semantic analysis for the IDA Pro decompiler]
 - https://github.com/K4ryuu/IDA-VTableExplorer [C++ virtual table detection and annotation tool for IDA Pro 9.x]
 - https://github.com/19h/chernobog [A Hex-Rays IDA Pro plugin for deobfuscating binaries protected with the Hikari LLVM obfuscator]
+- https://github.com/danielplohmann/mcrit-plugin [A plugin to use MCRIT from IDA Pro]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
