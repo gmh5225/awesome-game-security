@@ -1432,6 +1432,7 @@ Or you can send an issue for me.
 - https://soez.github.io/posts/CVE-2022-22265-Samsung-npu-driver [Root for Samsung]
 - https://github.com/0xbinder/android-kernel-exploitation-lab [CVE-2019-2215]
 - https://github.com/zhuowei/cheese [CVE-2025-21479]
+- https://github.com/farazsth98/poc-CVE-2025-38352 [CVE-2025-38352]
 
 > Android Bootloader Bypass
 - https://github.com/MlgmXyysd/Xiaomi-HyperOS-BootLoader-Bypass [Xiaomi HyperOS BootLoader Bypass]
