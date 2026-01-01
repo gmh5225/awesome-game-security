@@ -2400,6 +2400,7 @@ Or you can send an issue for me.
 - https://github.com/SingularityCloud/KVM.Performance [ioapic]
 - https://github.com/xqemu/xqemu [Play original Xbox games]
 - https://github.com/alephsecurity/xnu-qemu-arm64 [xnu]
+- https://github.com/ktock/qemu-wasm [QEMU on browser]
 
 > Wine
 - https://github.com/ValveSoftware/Proton [Steam]
