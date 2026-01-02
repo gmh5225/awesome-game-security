@@ -513,6 +513,7 @@ Or you can send an issue for me.
 - https://github.com/lukasmasuch/best-of-crypto [awesome open-source crypto projects]
 - https://github.com/0xMacro/awesome-solana-security [awesome solana security]
 - https://github.com/az0mb13/awesome-solana-security [awesome solana security]
+- https://github.com/openSVM/awesome-svm [All things SVM (Solana Virtual Machine)]
 - https://github.com/amanusk/awesome-starknet-security [awesome starknet security]
 - https://github.com/Ackee-Blockchain/Solana-Auditors-Bootcamp [Solana audit security]
 - https://github.com/anza-xyz/security-audits [Solana audit security]
