@@ -412,6 +412,7 @@ Or you can send an issue for me.
 - https://github.com/huangkaoya/redalert2 [Red Alert 2 on Web]
 
 > MCP server
+- https://github.com/TensorBlock/awesome-mcp-servers [Awesome MCP]
 - https://github.com/ahujasid/blender-mcp [Blender Model Context Protocol Integration]
 - https://github.com/chongdashu/unreal-mcp [MCP for Unreal Engine]
 - https://github.com/kvick-games/UnrealMCP [MCP for Unreal Engine]
