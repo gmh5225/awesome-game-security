@@ -1772,6 +1772,7 @@ Or you can send an issue for me.
 - https://github.com/danielplohmann/mcrit-plugin [A plugin to use MCRIT from IDA Pro]
 - https://github.com/dyussekeyev/ida-spotlight [Workflow-centric function triage and prioritization plugin for IDA Pro]
 - https://github.com/s3rg0x/AIMachDec [AIMachDec is an IDA plugin for Apple AARCH64/ARM64 binaries that utilizes LLMs to translate assembly functions into readable pseudo-code in C, Objective-C, or Swift]
+- https://github.com/not1cyyy/Kiroshi [An IDA Pro Plugin to detect common Anti-Cheat Artifacts]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
