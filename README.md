@@ -992,6 +992,7 @@ Or you can send an issue for me.
 - https://github.com/JasonGoemaat/CheatEngineMonoHelper [CE Mono Helper]
 - https://github.com/DoranekoSystems/frida-ceserver [CE Server For IOS]
 - https://github.com/DoranekoSystems/ceserver-ios [Porting ceserver to iOS.Dynamic analysis]
+- https://github.com/0xiuks/ceserver-ios [An iOS port of Cheat Engine's ceserver]
 - https://github.com/gmh5225/cheat-engine-ceserver-pcileech [CE Server For Pcileech]
 - https://github.com/user23333/veh [CE Plugin For Manualmap VEH Dll]
 - https://github.com/x64dbg/x64dbg [A debugger for Windows x86/64]
