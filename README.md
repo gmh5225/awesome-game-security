@@ -2020,6 +2020,7 @@ Or you can send an issue for me.
 - https://github.com/helpsystems/Agafi [A gadget finder and a ROP-Chainer tool for x86 platforms]
 - https://github.com/hugsy/ropgadget-rs [Another (bad) ROP gadget finder, but this time in Rust]
 - https://github.com/Boyan-MILANOV/ropium [ROPium is a tool that helps you building ROP exploits by finding and chaining gadgets together]
+- https://github.com/angr/angrop [angrop is a rop gadget finder and chain builder]
 
 > ROP Generation
 - https://github.com/d4em0n/exrop
