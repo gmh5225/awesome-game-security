@@ -429,6 +429,7 @@ Or you can send an issue for me.
 - https://github.com/taida957789/ida-mcp-server-plugin [MCP for IDA pro]
 - https://github.com/fdrechsler/mcp-server-idapro [MCP for IDA pro]
 - https://github.com/rand-tech/pcm [MCP for IDA pro]
+- https://github.com/Iamgublin/ida-codex-mcp [IDA Codex MCP]
 - https://github.com/axelmierczuk/tenrec [A headless, extendable, multi-session, IDA Pro MCP framework]
 - https://github.com/fosdickio/binary_ninja_mcp [MCP for Binary_Ninja]
 - https://github.com/Invoke-RE/binja-lattice-mcp [MCP for Binary_Ninja]
