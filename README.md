@@ -1310,6 +1310,7 @@ Or you can send an issue for me.
 - https://github.com/brew02/BudgetEPT [Create stealthy, inline, EPT-like hooks using SMAP and SMEP]
 - https://github.com/synacktiv/windows_kernel_shadow_stack [Shadow Stack]
 - https://github.com/noahware/apic [C++ library for sending processor interrupts via x2apic & xapic]
+- https://github.com/zer0condition/NTMemory [Usermode NT Explorer - Query kernel addresses, translate virtual to physical addresses, inspect the PFN database, and more.]
 
 > Linux Kernel Explorer
 - https://github.com/MatheuZSecurity/Rootkit [Collection of codes focused on Linux rootkits]
