@@ -1780,6 +1780,7 @@ Or you can send an issue for me.
 - https://github.com/a1ext/auto_re [IDA PRO auto-renaming plugin with tagging support]
 - https://github.com/SymbioticSec/ida-security-scanner [A security-focused code scanner for IDA Pro]
 - https://github.com/cristeigabriela/IDAFind [Ctrl+F search support for Pseudocode windows]
+- https://github.com/thalium/symless [IDA Pro plugin that helps reconstruct structures]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
