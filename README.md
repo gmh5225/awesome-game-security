@@ -643,6 +643,9 @@ Or you can send an issue for me.
 - https://github.com/samui-build/samui-wallet [Open Source wallet and toolbox for Solana builders]
 - https://github.com/ApeWorX/Ruffsack [A rugged multisig wallet for everyday adventures]
 
+> SKILL.md
+- https://github.com/GuiBibeau/solana-dev-skill [solana skill]
+
 > Wallet MCP
 - https://github.com/coinbase/cb-mpc [Coinbase MPC Library]
 - https://github.com/bnb-chain/tss-lib [Threshold Signature Scheme, for ECDSA and EDDSA]
