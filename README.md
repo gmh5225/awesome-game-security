@@ -782,6 +782,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/js-debugger-bypass-script [JS Debugger Bypass UserScript]
 - https://github.com/diversenok/DiaSymbolView [PDB file inspection tool]
 - https://github.com/CheckPointSW/Nodejs-Tracer [Simple Node.jstracer that logs calls to analyze heavily obfuscated Node.js malware]
+- https://github.com/jsacco/ntoskrnlwalker [Resolve offsets, gadgets and symbols from NTKernel]
 
 > Mixed boolean-arithmetic
 - https://github.com/Colton1skees/mba-resources [List of mixed boolean-arithmetic resources]
