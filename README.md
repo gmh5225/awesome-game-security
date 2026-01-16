@@ -1239,6 +1239,7 @@ Or you can send an issue for me.
 > IDA Plugins
 - https://github.com/vmallet/ida-plugins [List of IDA Plugins]
 - https://github.com/onethawt/idaplugins-list [List of IDA Plugins]
+- https://github.com/williballenthin/idawilli [IDA Pro resources, scripts, and configurations]
 - https://github.com/NyaMisty/idasdk-collection/tree/master [IDA SDK]
 - https://github.com/HexRaysSA/ida-sdk [IDA SDK]
 - https://github.com/zyantific/IDASkins [Skins]
