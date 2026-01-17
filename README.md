@@ -2773,6 +2773,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/external-esp-hack-assaultcube [GDI overlay]
 - https://github.com/SkarSys/AssaultCubeCheat
 - https://github.com/201580ag/AssaultCube_Cheat
+- https://github.com/kotae4/lab-esp-and-aimbot [Walkthrough of an ESP and aimbot cheat from scratch]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
