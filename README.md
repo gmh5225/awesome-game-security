@@ -3328,6 +3328,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/nkga/cheat-driver [MmCopyVirtualMemory Testing]
 - https://github.com/zxd1994/vt-debuuger [Hacked Hypervisor Testing]
 - https://github.com/3526779568/vt-debuger [Hacked Hypervisor Testing]
+- https://github.com/zer0condition/hv [Hacked Hypervisor Testing]
 - https://github.com/MellowNight/AetherVisor [Hacked Hypervisor Testing AMD]
 - https://github.com/valium007/BareSVM [Hacked Hypervisor Testing AMD]
 - https://github.com/noahware/hyper-reV [memory introspection and reverse engineering hypervisor powered by leveraging Hyper-V]
