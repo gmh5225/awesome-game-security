@@ -3558,6 +3558,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Washi1337/AwaitFuscator [.NET]
 - https://github.com/badhive/stitch [X86: Rewrite and obfuscate code in compiled binaries]
 - https://github.com/keowu/Ryujin [X86 PE BIN2BIN]
+- https://github.com/zx0CF1/shredder-rs [A high-fidelity x86_64 polymorphic mutation engine focused on instruction-level fragmentation and context preservation]
 
 > Screenshot
 - https://github.com/bavulapati/DXGICaptureApplication [Capture Desktop]
