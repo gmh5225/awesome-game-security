@@ -1981,6 +1981,7 @@ Or you can send an issue for me.
 - https://github.com/gmh5225/NullDriverCheat [NtOpenCompositionSurfaceSectionInfo]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/560809-firmwaretablehandler.html [FirmwareTableHandler]
 - https://github.com/oakboat/DataPtrHookWin11 [NtUserSetGestureConfig]
+- https://github.com/GetRektBoy724/Win32kHooker [.data ptr swapper for newer win32k versions]
 
 > EFI Driver
 - https://github.com/mrexodia/EfiCMake
