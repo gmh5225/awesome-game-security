@@ -197,6 +197,7 @@ Or you can send an issue for me.
 - [An integrated solution for authoring / importing / simulating / rendering strand-based hair in Unity](https://github.com/Unity-Technologies/com.unity.demoteam.hair)
 - [A maintained collection of useful & free unity scripts / library's / plugins and extensions](https://github.com/michidk/Unity-Script-Collection)
 - [ChatGPT integration with Unity Editor](https://github.com/keijiro/AICommand)
+- [Code editor integration for supporting Cursor as code editor for unity](https://github.com/boxqkrtm/com.unity.ide.cursor)
 
 > Game Engine Plugins:Godot
 - https://github.com/libriscv/godot-sandbox [Sandboxing that enables safe modding for Godot games]
