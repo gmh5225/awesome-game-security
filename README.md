@@ -875,6 +875,7 @@ Or you can send an issue for me.
 - https://github.com/BeneficialCode/WinArk [Tool]
 - https://github.com/hfiref0x/KDU [Kernel Driver Utility Tool]
 - https://github.com/jthuraisamy/TelemetrySourcerer [Enumerate and disable callbacks/ETW]
+- https://github.com/preludeorg/ThreatIntelligenceConsumer [Consuming from the Threat-Intelligence ETW provider without a driver or PPL privilege]
 - https://github.com/progmboy/openprocmon [open source process monitor]
 - https://github.com/winsiderss/systeminformer [The original name is "Process Hacker"]
 - https://github.com/0xcpu/ExecutiveCallbackObjects [Callback]
