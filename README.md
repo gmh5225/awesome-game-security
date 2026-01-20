@@ -1710,6 +1710,7 @@ Or you can send an issue for me.
 - https://github.com/Rakeshmonkee/DMA [Guide]
 - https://github.com/PacktPublishing/Learn-FPGA-Programming [Guide]
 - https://github.com/enjoy-digital/litepcie [Small footprint and configurable PCIe core]
+- https://github.com/cakehonolulu/pciem [A Linux framework for synthetic PCIe device emulation entirely in userspace]
 - https://github.com/ufrisk/pcileech
 - https://github.com/ekknod/pcileech-wifi [pcileech-fpga with wireless card emulation]
 - https://github.com/Cr4sh/pico_dma
