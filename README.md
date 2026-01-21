@@ -4145,6 +4145,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 ## Xbox
 - https://github.com/xemu-project/xemu [Xbox Emulator for Windows]
+- https://github.com/xenia-project/xenia [Xbox 360 Emulator Research Project]
 - https://github.com/rexdex/recompiler [Porting Xbox360 executables to Windows]
 - https://github.com/exploits-forsale/collateral-damage [Kernel exploit for Xbox SystemOS using CVE-2024-30088]
 - https://github.com/Byrom90/XenonDumper [Dumps files & data required to use the Xenon Xbox 360 Low Level Emulator]
