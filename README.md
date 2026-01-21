@@ -456,6 +456,10 @@ Or you can send an issue for me.
 - https://github.com/johnhalloran321/mcpSafetyScanner [MCPSafetyScanner - Automated MCP safety auditing and remediation using Agents]
 - https://github.com/appsecco/vulnerable-mcp-servers-lab [A collection of servers which are deliberately vulnerable to learn Pentesting MCP Servers]
 
+> AI Agents
+- https://github.com/0xeb/windbg-copilot [WinDbg Copilot - Agentic Debugging extension]
+
+
 ## Game Assets
 - https://github.com/Miziziziz/Retro3DGraphicsCollection
 - https://github.com/HitmanHimself/GOWTool [God of War 2018]
