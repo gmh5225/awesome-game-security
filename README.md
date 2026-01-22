@@ -3689,6 +3689,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/hkx3upper/Karlann [Keyboard]
 - https://github.com/AsuNa-jp/HotkeybasedKeyloggerDetector [Detect RegisterHotKey API]
 - https://github.com/Oliver-1-1/MouseDetection [Mouse]
+- https://github.com/chrisgdt/DELBOT-Mouse [Deep learning to distinguish human and bot from mouse movements]
 - https://github.com/Oliver-1-1/EtwKeyboardDetection [ETW]
 
 > Detection:Hide
