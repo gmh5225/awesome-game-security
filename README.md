@@ -1424,6 +1424,7 @@ Or you can send an issue for me.
 - https://github.com/not1cyyy/Kiroshi [An IDA Pro Plugin to detect common Anti-Cheat Artifacts]
 - https://github.com/HexRaysSA/ida-claude-code-plugins [IDA Claude Code Plugins]
 - https://github.com/stolevchristian/LUDA [Lua scripting plugin for IDA Pro]
+- https://github.com/allthingsida/idasql [Interface with IDA in SQL via live virtual tables]
 - https://github.com/a1ext/auto_re [IDA PRO auto-renaming plugin with tagging support]
 - https://github.com/SymbioticSec/ida-security-scanner [A security-focused code scanner for IDA Pro]
 - https://github.com/cristeigabriela/IDAFind [Ctrl+F search support for Pseudocode windows]
