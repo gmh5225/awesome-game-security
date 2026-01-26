@@ -89,3 +89,20 @@ python scripts/generate-toc.py
 ```bash
 python scripts/remove-forks.py
 ```
+
+---
+
+## Data Source
+
+**Important**: This skill provides conceptual guidance and overview information. For detailed information including:
+- Specific GitHub repository links
+- Complete project lists with descriptions
+- Up-to-date tools and resources
+- Code examples and implementations
+
+**Please fetch the complete data from the main repository:**
+```
+https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/README.md
+```
+
+The main README contains thousands of curated links organized by category. When users ask for specific tools, projects, or implementations, retrieve and reference the appropriate sections from this source.
