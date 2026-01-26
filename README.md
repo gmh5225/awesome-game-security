@@ -12,6 +12,37 @@ Or you can send an issue for me.
 - https://github.com/HyunCafe/contribute-practice
 - https://docs.github.com/en/get-started/quickstart/contributing-to-projects
 
+## Skills for AI Coding Assistants
+This repository provides skills that can be used with AI coding assistants like [Cursor](https://www.cursor.com/), [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Codex CLI](https://github.com/openai/codex), and other compatible tools. Install skills to get specialized knowledge about game security topics.
+
+**Installation:**
+```bash
+npx skills add https://github.com/gmh5225/awesome-game-security --skill <skill-name>
+```
+
+**Available Skills:**
+| Skill | Description |
+|-------|-------------|
+| `anti-cheat-systems` | Anti-cheat development and bypass techniques |
+| `dma-attack-techniques` | DMA/PCIe-based attack methods |
+| `game-engine-resources` | Game engine internals and modding |
+| `game-hacking-techniques` | General game hacking methods |
+| `graphics-api-hooking` | DirectX/OpenGL/Vulkan hooking |
+| `mobile-security` | Android/iOS game security |
+| `awesome-game-security-overview` | Overview of this repository |
+| `reverse-engineering-tools` | RE tools and techniques |
+| `windows-kernel-security` | Windows kernel exploitation |
+
+**Example:**
+```bash
+# Install anti-cheat systems skill
+npx skills add https://github.com/gmh5225/awesome-game-security --skill anti-cheat-systems
+
+# Install multiple skills
+npx skills add https://github.com/gmh5225/awesome-game-security --skill windows-kernel-security
+npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-engineering-tools
+```
+
 ## Contents
 - [Game Engine](#game-engine)
 - [Mathematics](#mathematics)
