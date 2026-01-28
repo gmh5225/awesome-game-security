@@ -2383,6 +2383,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/zyhp/vac3_inhibitor
 - https://github.com/krispybyte/Vook [VAC hook]
 - https://github.com/ioncodes/vacation3-emu [VAC3 module emulator]
+- https://github.com/username639/Vac-Emulator [VAC Emulator]
 - https://github.com/altoid29/VACDumper [Dump]
 - https://github.com/x1tan/vac3-dumper [Dump]
 - https://github.com/nevioo1337/VAC-ModuleDumper [Dump]
