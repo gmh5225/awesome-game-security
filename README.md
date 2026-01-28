@@ -2345,6 +2345,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://devxdevelopment.com/Unpacker [Extracting assets]
 - https://github.com/AssetRipper/AssetRipper [Extracting assets]
 - https://github.com/Perfare/AssetStudio [Extracting assets]
+- https://github.com/Razviar/assetstudio [Extracting assets/2025 updated]
 - https://github.com/axhlzy/Il2CppHookScripts [Il2Cpp Hook Scripts]
 - https://github.com/gmh5225/Il2Cpp-HookScripts [Il2Cpp/Mono Hook Scripts]
 - https://github.com/BataBo/ACEPatcher [.NET Patcher]
