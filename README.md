@@ -1551,6 +1551,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ch3rn0byl/WinDbg-Extensions [Callback Extension]
 - https://github.com/KasperskyLab/WinDbg-JS-Scripts [JS Scripts]
 - https://github.com/DumpAnalysis/WinDbg_Copilot [WinDbg Copilot]
+- https://github.com/eversinc33/drvtrace [Trace driver module transitions]
 
 > X64DBG Plugins
 - https://github.com/x64dbg/x64dbg/wiki/Plugins
