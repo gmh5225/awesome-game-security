@@ -1538,6 +1538,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Radare Plugins
 - https://github.com/radareorg/r2a [local language model for radare2]
+- https://github.com/radareorg/radius2 [Fast binary emulation and symbolic execution framework using radare2]
 - https://github.com/seifreed/r2morph [A metamorphic binary transformation engine based on r2pipe and radare2]
 
 > Windbg Plugins
