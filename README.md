@@ -475,6 +475,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ant4g0nist/lisa.py [MCP for LLDB]
 - https://github.com/droidrun/droidrun [MCP for Android]
 - https://github.com/un4ckn0wl3z/MemMCP [Cheat Engine-like but MCP]
+- https://github.com/Eruditi/CE-MCP-Plugin [MCP for Cheat Engine]
 - https://github.com/zinja-coder/apktool-mcp-server [A MCP Server for APK Tool (Part of Android Reverse Engineering MCP Suites)]
 - https://github.com/regenrek/deepwiki-mcp [MCP for deepwiki]
 - https://github.com/jedisct1/zig-mcp-server [A high-performance implementation of the MCP protocol in Zig]
@@ -1596,6 +1597,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/FreeER/CE-Examples [Some Examples]
 - [Porting ce's monodatacollector to android/ios](https://github.com/gmh5225/frida-il2cpp-datacollector)
 - https://github.com/DoranekoSystems/wasm-ceserver [Analyzing WebAssembly]
+- https://github.com/Eruditi/CE-MCP-Plugin [MCP for Cheat Engine]
 
 > Injection:Windows
 - https://github.com/itaymigdal/awesome-injection [awesome injection]
