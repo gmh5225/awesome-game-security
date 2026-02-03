@@ -1644,6 +1644,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/0xPrimo/KMDllInjector [kernel-mode DLL Injector]
 - https://github.com/mohanad1-maker/StealthAPCDispatcher [Thread scheduling stealth method using APC with encrypted shellcode]
 - https://github.com/isiddique2024/Page-Table-Injector [Page Table Injector (PT-Injector)]
+- https://github.com/xan105/Mini-Launcher [Application launcher with DLL Injection and Lua Scripting]
 
 > Injection:Linux
 - https://github.com/itaymigdal/awesome-injection [awesome injection]
