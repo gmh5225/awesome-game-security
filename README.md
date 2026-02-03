@@ -2283,6 +2283,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/cqcallaw/shootergame [ShooterGame Demo]
 - https://github.com/CorrM/CleanCheat [Game cheat base]
 - https://github.com/trumank/patternsleuth [Unreal Engine address scanner and test suite]
+- https://github.com/trumank/jmap [Unreal Engine reflection data format and extractor]
 - https://github.com/Encryqed/Dumper-7 [SDK Dump for all of UE4 and UE5]
 - https://github.com/Spuckwaffel/UEDumper [SDK Dump for UE 4.19 - 5.2]
 - https://github.com/BadBrojo/UEDumper-MemProcFS [UEDumper+MemProcFS 4.19 - 5.2]
