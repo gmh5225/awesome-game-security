@@ -577,6 +577,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Compatibility
 - https://github.com/CnCNet/cnc-ddraw [Old Game]
 - https://github.com/microsoft/D3D9On12 [The Direct3D9-On-12 mapping layer]
+- https://github.com/Daniel-Lobo/WineHooks [Compatibility and enhancement framework for classic PC games]
 
 > Overlay
 - https://github.com/SeanPesce/Direct3D9-Overlay
