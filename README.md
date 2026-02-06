@@ -1327,6 +1327,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - [An IDAPython module for way more convienent way to Reverse Engineering iOS kernelcaches](https://github.com/cellebrite-labs/ida_kcpp)
 - https://gitlab.com/eshard/d810 [Deobfuscate code at decompilation time by modifying IDA Pro microcode]
 - https://github.com/CKCat/d810 [Deobfuscate code at decompilation time by modifying IDA Pro microcode]
+- https://github.com/w00tzenheimer/d810-ng [D-810ng (Next Generation) is an evolution of d810 to deobfuscate code at decompilation time]
 - https://github.com/airbus-seclab/AutoResolv [Resolves functions imported from external libraries]
 - https://github.com/snare/ida-efiutils [EFI binaries]
 - https://github.com/JusticeRage/Gepetto [ChatGPT]
