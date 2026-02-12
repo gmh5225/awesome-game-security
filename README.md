@@ -1328,6 +1328,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - [An IDAPython module for way more convienent way to Reverse Engineering iOS kernelcaches](https://github.com/cellebrite-labs/ida_kcpp)
 - https://gitlab.com/eshard/d810 [Deobfuscate code at decompilation time by modifying IDA Pro microcode]
 - https://github.com/CKCat/d810 [Deobfuscate code at decompilation time by modifying IDA Pro microcode]
+- https://github.com/w00tzenheimer/d810-ng [D-810ng (Next Generation) is an evolution of d810 to deobfuscate code at decompilation time]
 - https://github.com/airbus-seclab/AutoResolv [Resolves functions imported from external libraries]
 - https://github.com/snare/ida-efiutils [EFI binaries]
 - https://github.com/JusticeRage/Gepetto [ChatGPT]
@@ -1965,6 +1966,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/BlackSnufkin/BYOVD/tree/main/Wsftprm-Killer [wsftprm.sys]
 - https://github.com/0xJs/BYOVD_EDRKiller/tree/main/Wsftprm [wsftprm.sys]
 - https://github.com/0xJs/BYOVD_EDRKiller/tree/main/truesight [truesight.sys]
+- https://github.com/kyxiaxiang/360WFP_Exploit [BYOVD: Use 360netmon_x64.sys_wfp ​​WFP driver to block EDR/XDR network connection]
 - https://blog.talosintelligence.com/decrement-by-one-to-rule-them-all [AsIO3.sys]
 - https://github.com/SaadAhla/Killer-Exercice [An Exercice for Red Team to Reverse & Exploit, that's a valide BYOVD Killer, not HVCI Blocklisted, and not in LOLBIN]
 - https://github.com/gmh5225/ampa.sys-exp [ampa.sys]
@@ -3586,6 +3588,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/dobin/SuperMega [Stealthily inject shellcode into an executable]
 - https://github.com/mrexodia/RiscyWorkshop [Payload Obfuscation for Red Teams workshop materials]
 - https://github.com/umpolungfish/byvalver [Shellcode bad-byte banisher with preserved functionalities]
+- https://github.com/wbenny/scfw [A cross-platform C++ framework for building Windows shellcode]
 
 > Obfuscation Engine
 - https://github.com/vi3t1/vmprotect-3.5.1
