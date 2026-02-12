@@ -714,6 +714,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Sh11no/eDBG [eBPF-based lightweight debugger for Android]
 - https://github.com/ShinoLeah/eHook [eBPF hook]
 - https://github.com/SeeFlowerX/stackplz [eBPF-based debugger for Android]
+- https://github.com/Satar07/edbgserver [eBPF-powered debugger server for Linux and Android]
 - https://github.com/g2wfw/qbdi-tracer-android [Android assembly instruction tracing tool]
 - https://github.com/un4ckn0wl3z/MemMCP [Cheat Engine-like but MCP]
 - https://github.com/LLeavesG/eBPFDexDumper [DexDumper based eBPF on Android Platform]
