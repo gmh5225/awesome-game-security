@@ -4191,6 +4191,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Nintendo-Switch-Emulator-yuzu
 - https://github.com/gmh5225/yuzu-android
 - https://github.com/Logboy2000/yuzu-archive
+- https://github.com/Gamer64ytb/Yuzu-Backup
 - https://github.com/gmh5225/nuzu [Yuzu based repository]
 - https://github.com/CTCaer/hekate [A GUI based Nintendo Switch Bootloader]
 - https://github.com/Atmosphere-NX/Atmosphere [Customized firmware]
