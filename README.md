@@ -3341,6 +3341,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/frank2/packer-tutorial [Packer]
 - https://github.com/kid-gorgeous/ghostbusters [Senior Design: Anit-Cheat Detection system]
 - https://github.com/Solaree/pairipcore [Public researchings of the Google's Android apps protection]
+- https://github.com/bad-antics/rce-shield [RCE Shield - Remote Code Execution hardening toolkit for PC gamers. Scans game launchers, anti-cheat, mods, overlays, peripherals & network for vulnerabilities]
 
 > Stress Testing
 - https://github.com/niemand-sec/AntiCheat-Testing-Framework [Testing Framework]
