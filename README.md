@@ -2079,6 +2079,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/dmaivel/ntoseye [Kernel Debugger]
 - https://github.com/ispras/qemu/tree/windbg [Windbg]
 - https://github.com/cyberus-technology/virtualbox-kvm [VirtualBox with KVM Backend]
+- https://github.com/quic/gunyah-hypervisor [Type-1 hypervisor for ARM64]
 - https://github.com/Qemu-Gang
 - https://github.com/memflow/memflow-kvm
 - https://github.com/IntroVirt/IntroVirt [Guest introspection library]
