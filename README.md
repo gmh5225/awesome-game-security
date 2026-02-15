@@ -472,6 +472,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/signal-slot/mcp-gdb [MCP for GDB]
 - https://github.com/svnscha/mcp-windbg [MCP for WinDBG]
 - https://github.com/AgentSmithers/x64DbgMCPServer [MCP for x64Dbg]
+- https://github.com/IChooseYou/Reclass [MCP for Reclass]
 - https://github.com/ant4g0nist/lisa.py [MCP for LLDB]
 - https://github.com/droidrun/droidrun [MCP for Android]
 - https://github.com/un4ckn0wl3z/MemMCP [Cheat Engine-like but MCP]
@@ -686,6 +687,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/niemand-sec/ReClass.NET-DriverReader [ReClass DriverReader]
 - https://github.com/BeneficialCode/KReClassEx [Kernel ReClassEx]
 - https://github.com/imerzan/ReClass-DMA [ReClass DMA]
+- https://github.com/IChooseYou/Reclass [Reclass MCP refactored]
 - https://github.com/Metick/CheatEngine-DMA [CheatEngine DMA]
 - https://github.com/kaijia2022/Cheat-Engine-DMA-Plugin [CheatEngine DMA]
 - https://github.com/x64dbg/DotX64Dbg
