@@ -975,6 +975,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/Voyager [A Hyper-V Hacking Framework For Windows 10 x64 (AMD & Intel)]
 - https://github.com/noahware/hyper-reV [memory introspection and reverse engineering hypervisor powered by leveraging Hyper-V]
 - https://github.com/LabGuy94/Diskjacker [Runtime Hyper-V Hijacking with DDMA]
+- https://github.com/zer0condition/BusterCall [HVCI bypass via PFN swapping to call arbitrary kernel functions from user-mode]
 - https://github.com/NurdAlert/modded-voyager
 - https://github.com/gmh5225/Fortnite-VoyagerTF [Voyager for Fortnite]
 - https://github.com/repnz/apc-research [APC Internals Research Code]
