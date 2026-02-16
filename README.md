@@ -3724,6 +3724,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Midi12/QueryWorkingSetExample
 - https://github.com/Deputation/integrity_experiments [header only]
 - https://github.com/DejavuSecure/DetectNtoskrnlIntegrity [Windows Kernel Security: Memory Integrity Verification with Disk Verification of ntoskrnl.exe]
+- https://github.com/MatheuZSecurity/ksentinel [Linux kernel integrity monitor for detecting syscall hooking]
 
 > Detection:ShellCode
 - https://github.com/jdu2600/EtwTi-FluctuationMonitor [ETW]
@@ -3759,6 +3760,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/donnaskiez/nmi-callback-handler [Mapped Driver by NMI Callback]
 - https://github.com/gmh5225/Kernel_Anti-Cheat [NMI]
 - https://github.com/jafarlihi/modreveal [Find hidden Linux kernel modules]
+- https://github.com/MatheuZSecurity/ksentinel [Linux kernel integrity monitor for detecting syscall hooking]
 - https://github.com/gmh5225/Hidden-Thread-Finder [Detect hidden threads]
 - https://github.com/gmh5225/StealthSytemThreadFinderBE [Detect hidden threads]
 - https://github.com/eversinc33/unKover [Using NMI/APC to detect mapped drivers]
