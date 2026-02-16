@@ -998,6 +998,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Linux Kernel Explorer
 - https://github.com/MatheuZSecurity/Rootkit [Collection of codes focused on Linux rootkits]
+- https://github.com/MatheuZSecurity/ksentinel [Kernel integrity monitor for detecting syscall hooking]
 - https://github.com/djolertrk/kLLDB [LLDB based debugger for Linux Kernel]
 - https://github.com/sad0p/venom [Linux Kernel Rookit Hooking Mechanism]
 
