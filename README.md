@@ -764,6 +764,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/hasherezade/pe-bear [PE Viewer]
 - https://github.com/zodiacon/TotalPE2 [PE Viewer]
 - https://github.com/APKLab/APKLab [Android Reverse-Engineering Workbench for VS Code]
+- https://github.com/zboralski/unflutter [Static analyzer for Flutter/Dart AOT snapshots]
 - https://github.com/evild3ad/MemProcFS-Analyzer [Windows Forensic Analysis]
 - https://github.com/eybisi/kavanoz [Statically unpacking common android banker malware]
 - https://github.com/cyberark/PipeViewer [Shows detailed information about named pipes in Windows]
