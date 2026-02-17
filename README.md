@@ -1640,6 +1640,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/5paceman/nightshade [inject tool]
 - https://github.com/deepinstinct/Dirty-Vanity [RtlCreateProcessReflection]
 - https://github.com/LloydLabs/ntqueueapcthreadex-ntdll-gadget-injection [NtQueueApcThreadEx + gadget]
+- https://github.com/S12cybersecurity/FrankensteinAPCInjection [NtQueueApcThreadEx2 + existing handles & natural RWX]
 - https://github.com/3xpl01tc0d3r/ProcessInjection [Various process injection techniques]
 - https://github.com/zorftw/lsass-extend-mapper [Manual mapper from LSASS]
 - https://github.com/zorftw/revert-mapper [Map x64 DLLs in WoW64]
