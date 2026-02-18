@@ -2210,6 +2210,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Miffyli/gan-aimbots [Machine Learning]
 - https://github.com/RootKit-Org/AI-Aimbot [Machine Learning YOLOv5]
 - https://github.com/AMXZzzz/SF_TRT_61 [Machine Learning YOLO]
+- https://github.com/Fragmentaim/Auto_aim [DXGI + TensorRT + driver-level input]
 - https://github.com/Passer1072/RookieAI_yolov8 [Machine Learning YOLOv8]
 - https://github.com/Leksa667/YOLOv8-Overlay-CS2 [YOLOv8 in CS2]
 - https://github.com/dqforgive-sudo/pubg-ai-yolov4 [PUBG yolov4]
