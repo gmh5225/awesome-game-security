@@ -170,6 +170,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/rbfx/rbfx [C# support and WYSIWYG editor]
 - https://github.com/BobbyAnguelov/Esoterica
 - https://github.com/ZDoom/gzdoom [Doom]
+- https://github.com/UZDoom/UZDoom [Doom source port, GZDoom continuation]
 - https://github.com/L-Spiro/L.-Spiro-Engine-2022
 - https://github.com/MohitSethi99/ArcEngine
 - https://github.com/gscept/nebula
