@@ -1313,6 +1313,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/airbus-cert/ttddbg [Time Travel Debugging]
 - https://github.com/P4nda0s/LazyIDA [LazyIDA]
 - https://github.com/HappyIDA/HappyIDA [Hex-Rays decompiler utilities: parameter labeling, SEH, Rust strings]
+- https://github.com/oxiKKK/ida-function-string-associate [IDA 9.X: auto-generate function comments from string literals]
 - https://github.com/quarkslab/qsynthesis [Greybox Synthesizer geared for deobfuscation of assembly instructions]
 - https://github.com/medigateio/ida_medigate [RTTI]
 - https://github.com/OALabs/findyara-ida [Yara]
