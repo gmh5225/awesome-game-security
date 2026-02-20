@@ -2005,6 +2005,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Spuckwaffel/Kernel-Thread-Driver [Thread]
 - https://github.com/Astronaut00/DoubleDataPointer [Double Data Pointer]
 - https://github.com/btbd/access [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
+- https://github.com/bromoket/access_updated [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/paradoxwastaken/Poseidon [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/FarmEquipment69/umap-mapper [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/0mWindyBug/DataptrHooks [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
@@ -2046,6 +2047,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/NullDriverCheat [NtOpenCompositionSurfaceSectionInfo]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/560809-firmwaretablehandler.html [FirmwareTableHandler]
 - https://github.com/oakboat/DataPtrHookWin11 [NtUserSetGestureConfig]
+- 
 - https://github.com/GetRektBoy724/Win32kHooker [.data ptr swapper for newer win32k versions]
 
 > EFI Driver
