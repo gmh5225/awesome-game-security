@@ -1738,6 +1738,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > RPM
 - https://github.com/btbd/access
 - https://github.com/crvvdev/intraceptor [access]
+- https://github.com/bromoket/access_updated [Updated fork of btbd/access with Zydis-based dynamic pattern finding for Windows 10/11 compatibility]
 - https://github.com/juniorjacob/readwrite-kernel-stable
 - https://github.com/DarthTon/Blackbone
 - https://github.com/HoShiMin/Kernel-Bridge
