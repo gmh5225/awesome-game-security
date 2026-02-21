@@ -473,7 +473,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/signal-slot/mcp-gdb [MCP for GDB]
 - https://github.com/svnscha/mcp-windbg [MCP for WinDBG]
 - https://github.com/AgentSmithers/x64DbgMCPServer [MCP for x64Dbg]
-- https://github.com/bromoket/x64dbg_mcp [MCP for x64Dbg - 152 tools for debugging, disassembly, tracing, memory analysis, anti-debug bypass, and control flow]
+- https://github.com/bromoket/x64dbg_mcp [MCP for x64Dbg with extensive tooling]
 - https://github.com/IChooseYou/Reclass [MCP for Reclass]
 - https://github.com/ant4g0nist/lisa.py [MCP for LLDB]
 - https://github.com/droidrun/droidrun [MCP for Android]
