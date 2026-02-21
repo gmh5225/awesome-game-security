@@ -1262,6 +1262,9 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/DerekSelander/dynadump [A runtime ObjC class-dump]
 - https://github.com/LaurieWired/Malimite [Malimite is an iOS and macOS decompiler designed to help researchers analyze and decode IPA files and Application Bundles]
 
+> IOS App Packaging
+- https://github.com/addrianyy/ios_packager [Package and sign iOS applications]
+
 > Virtual Environments
 - https://github.com/FBlackBox/BlackBox [Android]
 - https://github.com/ServenScorpion/VirtualApp [Android]
