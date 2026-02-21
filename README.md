@@ -473,6 +473,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/signal-slot/mcp-gdb [MCP for GDB]
 - https://github.com/svnscha/mcp-windbg [MCP for WinDBG]
 - https://github.com/AgentSmithers/x64DbgMCPServer [MCP for x64Dbg]
+- https://github.com/bromoket/x64dbg_mcp [MCP for x64Dbg with extensive tooling]
 - https://github.com/IChooseYou/Reclass [MCP for Reclass]
 - https://github.com/ant4g0nist/lisa.py [MCP for LLDB]
 - https://github.com/droidrun/droidrun [MCP for Android]
@@ -1741,6 +1742,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > RPM
 - https://github.com/btbd/access
 - https://github.com/crvvdev/intraceptor [access]
+- https://github.com/bromoket/access_updated [Updated fork of btbd/access with Zydis-based dynamic pattern finding for Windows 10/11 compatibility]
 - https://github.com/juniorjacob/readwrite-kernel-stable
 - https://github.com/DarthTon/Blackbone
 - https://github.com/HoShiMin/Kernel-Bridge
@@ -2007,6 +2009,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Spuckwaffel/Kernel-Thread-Driver [Thread]
 - https://github.com/Astronaut00/DoubleDataPointer [Double Data Pointer]
 - https://github.com/btbd/access [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
+- https://github.com/bromoket/access_updated [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/paradoxwastaken/Poseidon [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/FarmEquipment69/umap-mapper [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
 - https://github.com/0mWindyBug/DataptrHooks [NtConvertBetweenAuxiliaryCounterAndPerformanceCounter]
@@ -2048,6 +2051,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/NullDriverCheat [NtOpenCompositionSurfaceSectionInfo]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/560809-firmwaretablehandler.html [FirmwareTableHandler]
 - https://github.com/oakboat/DataPtrHookWin11 [NtUserSetGestureConfig]
+- 
 - https://github.com/GetRektBoy724/Win32kHooker [.data ptr swapper for newer win32k versions]
 
 > EFI Driver
