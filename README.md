@@ -12,8 +12,8 @@ Or you can send an issue for me.
 - https://github.com/HyunCafe/contribute-practice
 - https://docs.github.com/en/get-started/quickstart/contributing-to-projects
 
-## Skills for AI Coding Assistants
-This repository provides skills that can be used with AI coding assistants like [Cursor](https://www.cursor.com/), [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Codex CLI](https://github.com/openai/codex), and other compatible tools. Install skills to get specialized knowledge about game security topics.
+## Skills for AI Agents
+This repository provides skills that can be used with AI agents and coding assistants such as [Cursor](https://www.cursor.com/), [OpenClaw](https://docs.openclaw.ai/), [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Codex CLI](https://github.com/openai/codex), and other compatible tools. Install skills to get specialized knowledge about game security topics.
 
 **Installation:**
 ```bash
