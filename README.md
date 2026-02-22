@@ -1484,6 +1484,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
+- https://github.com/cpkt9762/solana-sbpf-rlib [Solana sBPF rlib files for IDA Pro / Ghidra / Binary Ninja signature generation]
 
 > Binary Ninja Plugins
 - https://github.com/Vector35/official-plugins
