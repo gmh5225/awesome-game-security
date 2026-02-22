@@ -479,6 +479,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/droidrun/droidrun [MCP for Android]
 - https://github.com/un4ckn0wl3z/MemMCP [Cheat Engine-like but MCP]
 - https://github.com/Eruditi/CE-MCP-Plugin [MCP for Cheat Engine]
+- https://github.com/miscusi-peek/cheatengine-mcp-bridge [Connect Cursor, Copilot & Claude to Cheat Engine via MCP; automate reverse engineering, pointer scanning, and memory analysis with natural language]
 - https://github.com/beamstar/cheatengine-mcp-bridge [Connect AI to Cheat Engine for fast memory analysis, enabling quick mods and audits]
 - https://github.com/illegal-instruction-co/processhacker-mcp [MCP for runtime analysis and process hacking; ProcessHacker for AI agents, extensible with DLL plugins]
 - https://github.com/zinja-coder/apktool-mcp-server [A MCP Server for APK Tool (Part of Android Reverse Engineering MCP Suites)]
