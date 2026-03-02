@@ -1,0 +1,880 @@
+Project Path: arc_oxiKKK_ida-vtable-tools_etk2qeo8
+
+Source Tree:
+
+```txt
+arc_oxiKKK_ida-vtable-tools_etk2qeo8
+├── README.md
+├── assets
+├── ida-plugin.json
+└── vtable_context_tools.py
+
+```
+
+`README.md`:
+
+```md
+# VTable Context Tools
+
+**VTable Context Tools** is an **IDA Pro 9.X** plugin that adds right-click actions for probable vtable entries in disassembly and pseudocode views.
+
+## Features
+
+![](assets/context.png)
+
+### Dump a C++ interface skeleton (`.hpp`) from detected vtable slots.
+
+```cpp
+class CBasePlayerController
+{
+public:
+    virtual ~CBasePlayerController() = default;
+
+    virtual void nullsub_1011(); // 0 0x0
+    virtual void nullsub_1874(); // 1 0x8
+    virtual void sub_180A71030(); // 2 0x10
+    virtual void sub_180A5A550(); // 3 0x18
+    virtual void sub_180A63920(); // 4 0x20
+    virtual void sub_180A65D50(); // 5 0x28
+    virtual void sub_1803BDDE0(); // 6 0x30
+...
+```
+
+### Rename vtable target methods with a class prefix.
+
+![](assets/rename.png)
+
+### Set the first parameter as typed `this` (pointer) for vtable methods.
+
+![](assets/this_ptr.png)
+
+### Show current slot index and relative offset for the selected vtable entry.
+
+![](assets/slot.png)
+
+
+```
+
+`ida-plugin.json`:
+
+```json
+{
+  "IDAMetadataDescriptorVersion": 1,
+  "plugin": {
+    "name": "vtable-context-tools",
+    "version": "1.0.1",
+    "entryPoint": "vtable_context_tools.py",
+    "idaVersions": [
+      "9.0",
+      "9.1",
+      "9.2",
+      "9.3"
+    ],
+    "description": "Adds right-click actions for probable vtable entries so you can rename methods, dump interface skeletons, inspect slot info, and set the 'this' parameter.",
+    "license": "UNLICENSED",
+    "categories": [
+      "api-scripting-and-automation"
+    ],
+    "urls": {
+      "repository": "https://github.com/oxiKKK/ida-vtable-tools"
+    },
+    "authors": [
+      {
+        "name": "oxiKKK",
+        "email": "oxsscze@gmail.com"
+      }
+    ],
+    "keywords": [
+      "vtable",
+      "context-menu",
+      "rename",
+      "dump",
+      "this-pointer"
+    ]
+  }
+}
+```
+
+`vtable_context_tools.py`:
+
+```py
+from __future__ import annotations
+
+from dataclasses import dataclass
+import re
+from typing import List, Optional, Tuple
+
+import idaapi
+import ida_bytes
+import ida_funcs
+import ida_ida
+import ida_idaapi
+import ida_kernwin
+import ida_name
+import ida_nalt
+import ida_typeinf
+import idc
+
+PLUGIN_NAME = "VTable Context Tools"
+ACTION_RENAME = "vtable_tools:rename_methods"
+ACTION_DUMP = "vtable_tools:dump_interface"
+ACTION_SET_THIS = "vtable_tools:set_this_param"
+ACTION_SLOT_INFO = "vtable_tools:slot_info"
+MENU_PATH = "VTable Tools/"
+
+MAX_SCAN_SLOTS = 2048
+MIN_VTABLE_SLOTS = 2
+
+
+def _load_qt_widgets():
+    if idaapi.IDA_SDK_VERSION >= 920:
+        from PySide6 import QtWidgets as _QtWidgets
+
+        return _QtWidgets, "PySide6"
+
+    from PyQt5 import QtWidgets as _QtWidgets
+
+    return _QtWidgets, "PyQt5"
+
+
+QtWidgets, QT_BINDING = _load_qt_widgets()
+
+
+@dataclass
+class VTableEntry:
+    slot_ea: int
+    func_ptr: int
+    func_ea: int
+    func_name: str
+    signature: str
+
+
+def _log(message: str) -> None:
+    print(f"[VTableTools] {message}")
+
+
+def _pointer_size() -> int:
+    return 8 if ida_ida.inf_is_64bit() else 4
+
+
+def _read_ptr(ea: int) -> Optional[int]:
+    if not ida_bytes.is_mapped(ea):
+        return None
+    if _pointer_size() == 8:
+        return ida_bytes.get_qword(ea)
+    return ida_bytes.get_dword(ea)
+
+
+def _get_func_start_from_ptr(ptr: int) -> Optional[int]:
+    if ptr is None or ptr == 0 or ptr == ida_idaapi.BADADDR:
+        return None
+    if not ida_bytes.is_mapped(ptr):
+        return None
+    pfn = ida_funcs.get_func(ptr)
+    if pfn is None:
+        return None
+    return pfn.start_ea
+
+
+def _is_probable_vtable_slot(slot_ea: int) -> bool:
+    ptr = _read_ptr(slot_ea)
+    if ptr is None:
+        return False
+    return _get_func_start_from_ptr(ptr) is not None
+
+
+def _align_down(ea: int, align: int) -> int:
+    return ea - (ea % align)
+
+
+def _find_vtable_start_from_ea(ea: int) -> Optional[int]:
+    step = _pointer_size()
+    cur = _align_down(ea, step)
+
+    if not _is_probable_vtable_slot(cur):
+        return None
+
+    scanned = 0
+    while scanned < MAX_SCAN_SLOTS:
+        prev = cur - step
+        if prev < ida_ida.inf_get_min_ea():
+            break
+        if not _is_probable_vtable_slot(prev):
+            break
+        cur = prev
+        scanned += 1
+
+    return cur
+
+
+def _collect_vtable_entries(start_ea: int) -> List[VTableEntry]:
+    entries: List[VTableEntry] = []
+    step = _pointer_size()
+
+    for i in range(MAX_SCAN_SLOTS):
+        slot = start_ea + i * step
+        ptr = _read_ptr(slot)
+        if ptr is None:
+            break
+
+        func_ea = _get_func_start_from_ptr(ptr)
+        if func_ea is None:
+            break
+
+        name = ida_name.get_name(func_ea) or f"sub_{func_ea:X}"
+        sig = idc.get_type(func_ea) or ""
+
+        entries.append(
+            VTableEntry(
+                slot_ea=slot,
+                func_ptr=ptr,
+                func_ea=func_ea,
+                func_name=name,
+                signature=sig,
+            )
+        )
+
+    if len(entries) < MIN_VTABLE_SLOTS:
+        return []
+    return entries
+
+
+def _get_vtable_from_ea(ea: int) -> List[VTableEntry]:
+    if ea == ida_idaapi.BADADDR:
+        return []
+    start = _find_vtable_start_from_ea(ea)
+    if start is None:
+        return []
+    return _collect_vtable_entries(start)
+
+
+def _strip_type_qualifiers(name: str) -> str:
+    value = name.strip()
+    for token in ("const ", "volatile ", "class ", "struct "):
+        if value.startswith(token):
+            value = value[len(token) :].strip()
+    return value
+
+
+def _extract_class_name_from_vtable_symbol(slot_ea: int) -> str:
+    raw_name = ida_name.get_name(slot_ea) or ""
+    names = [raw_name] if raw_name else []
+
+    if raw_name:
+        demangled = idc.demangle_name(raw_name, idc.get_inf_attr(idc.INF_SHORT_DN))
+        if demangled:
+            names.append(demangled)
+
+    for name in names:
+        text = name.strip()
+        if not text:
+            continue
+
+        if "::`vftable'" in text:
+            klass = _strip_type_qualifiers(text.split("::`vftable'", 1)[0])
+            if klass:
+                return klass
+
+        m = re.search(r"vtable for\s+([A-Za-z_][A-Za-z0-9_:]*)", text)
+        if m:
+            return m.group(1)
+
+    return ""
+
+
+def _guess_class_name(entries: List[VTableEntry]) -> str:
+    if not entries:
+        return ""
+
+    vtable_class = _extract_class_name_from_vtable_symbol(entries[0].slot_ea)
+    if vtable_class:
+        return vtable_class + "::"
+
+    return ""
+
+
+def _guess_class_type_name(entries: List[VTableEntry]) -> str:
+    class_name = _guess_class_name(entries)
+    if class_name.endswith("::"):
+        return class_name[:-2]
+
+    for entry in entries:
+        if "::" in entry.func_name:
+            return entry.func_name.rsplit("::", 1)[0]
+
+    return class_name
+
+
+def _method_basename(entry: VTableEntry, slot_index: int) -> str:
+    name = entry.func_name
+
+    if "::" in name:
+        base = name.split("::")[-1]
+    else:
+        base = name
+
+    return base
+
+
+def _looks_auto_generated_name(name: str) -> bool:
+    return name.startswith(
+        (
+            "sub_",
+            "nullsub_",
+            "j_sub_",
+            "loc_",
+            "locret_",
+            "unk_",
+            "off_",
+            "qword_",
+            "dword_",
+            "word_",
+            "byte_",
+        )
+    )
+
+
+def _has_user_renamed_name(func_ea: int, current_name: str) -> bool:
+    try:
+        flags = ida_bytes.get_full_flags(func_ea)
+        has_user_name = getattr(ida_bytes, "has_user_name", None)
+        if has_user_name is not None:
+            return bool(has_user_name(flags))
+    except Exception:
+        pass
+
+    return not _looks_auto_generated_name(current_name)
+
+
+def _ask_rename_options(default_class: str) -> Optional[Tuple[str, bool]]:
+    if QtWidgets is None:
+        ida_kernwin.warning(f"{QT_BINDING} is required for this dialog.")
+        return None
+
+    dialog = QtWidgets.QDialog()
+    dialog.setWindowTitle("Rename VTable Methods")
+
+    layout = QtWidgets.QVBoxLayout(dialog)
+    form = QtWidgets.QFormLayout()
+
+    class_edit = QtWidgets.QLineEdit(default_class)
+    class_edit.setPlaceholderText("Class name prefix (e.g. MyClass::)")
+    form.addRow("Class prefix:", class_edit)
+
+    only_unnamed = QtWidgets.QCheckBox("Only rename auto/default names")
+    only_unnamed.setChecked(True)
+    form.addRow("", only_unnamed)
+
+    layout.addLayout(form)
+
+    buttons = QtWidgets.QDialogButtonBox(
+        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
+    )
+    buttons.accepted.connect(dialog.accept)
+    buttons.rejected.connect(dialog.reject)
+    layout.addWidget(buttons)
+
+    if dialog.exec() != QtWidgets.QDialog.Accepted:
+        return None
+
+    class_name = class_edit.text().strip()
+    if not class_name:
+        ida_kernwin.warning("Class prefix is required.")
+        return None
+
+    return class_name, only_unnamed.isChecked()
+
+
+def _confirm_action(title: str, message: str) -> bool:
+    if QtWidgets is None:
+        ida_kernwin.warning(f"{QT_BINDING} is required for this confirmation dialog.")
+        return False
+
+    result = QtWidgets.QMessageBox.question(
+        None,
+        title,
+        message,
+        QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+        QtWidgets.QMessageBox.No,
+    )
+    return result == QtWidgets.QMessageBox.Yes
+
+
+def _show_info(title: str, message: str) -> None:
+    if QtWidgets is not None:
+        QtWidgets.QMessageBox.information(None, title, message)
+        return
+    ida_kernwin.info(message)
+
+
+def _rename_vtable_methods(
+    entries: List[VTableEntry], class_name: str, rename_only_unnamed: bool = False
+) -> tuple[int, int, int]:
+    success = 0
+    failed = 0
+    skipped = 0
+
+    _log("Renaming vtable methods with prefix: " + class_name)
+
+    prefix = class_name.strip()
+    if not prefix:
+        return 0, len(entries), 0
+
+    for i, entry in enumerate(entries):
+        if rename_only_unnamed and _has_user_renamed_name(
+            entry.func_ea, entry.func_name
+        ):
+            skipped += 1
+            continue
+
+        base = _method_basename(entry, i)
+        ida_name_candidate = f"{prefix}{base}"
+
+        _log(
+            f"Renaming 0x{entry.func_ea:X} '{entry.func_name}' -> '{ida_name_candidate}'"
+        )
+
+        ok = ida_name.set_name(entry.func_ea, ida_name_candidate, ida_name.SN_CHECK)
+        if not ok:
+            ok = ida_name.set_name(
+                entry.func_ea,
+                ida_name_candidate,
+                ida_name.SN_FORCE | ida_name.SN_CHECK,
+            )
+
+        if ok:
+            success += 1
+        else:
+            failed += 1
+
+    return success, failed, skipped
+
+
+def _build_interface_text(entries: List[VTableEntry], class_name: str) -> str:
+    lines: List[str] = []
+    lines.append(f"class {class_name}")
+    lines.append("{")
+    lines.append("public:")
+
+    vtable_start = entries[0].slot_ea if entries else 0
+
+    for i, entry in enumerate(entries):
+        method_name = _method_basename(entry, i)
+        rel_off = entry.slot_ea - vtable_start
+        lines.append(f"    virtual void {method_name}(); // {i} 0x{rel_off:X}")
+
+    lines.append("};")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _select_this_type(default_type: str) -> Optional[str]:
+    chooser = getattr(ida_kernwin, "choose_struc", None)
+    if chooser is not None:
+        tid = ida_idaapi.BADADDR
+        try:
+            tid = chooser("Select type for 'this'")
+        except TypeError:
+            try:
+                tid = chooser()
+            except Exception:
+                tid = ida_idaapi.BADADDR
+        except Exception:
+            tid = ida_idaapi.BADADDR
+
+        if tid not in (ida_idaapi.BADADDR, -1, None):
+            type_name = idc.get_struc_name(tid)
+            if type_name:
+                return type_name
+
+    value = ida_kernwin.ask_str(
+        default_type,
+        ida_kernwin.HIST_CMT,
+        "Type name for first parameter ('this')",
+    )
+    if not value:
+        return None
+    value = value.strip()
+    return value or None
+
+
+def _build_this_pointer_tinfo(type_name: str) -> Optional[ida_typeinf.tinfo_t]:
+    base_type = ida_typeinf.tinfo_t()
+    if not base_type.get_named_type(None, type_name):
+        return None
+
+    ptr_type = ida_typeinf.tinfo_t()
+    if not ptr_type.create_ptr(base_type):
+        return None
+    return ptr_type
+
+
+def _set_this_param_for_function(
+    func_ea: int, this_ptr_tif: ida_typeinf.tinfo_t
+) -> tuple[bool, str]:
+    func_tif = ida_typeinf.tinfo_t()
+    if not ida_nalt.get_tinfo(func_tif, func_ea):
+        if not ida_typeinf.guess_tinfo(func_tif, func_ea):
+            return False, "no existing or guessed function type"
+
+    if not func_tif.is_func():
+        return False, "resolved type is not a function"
+
+    ftd = ida_typeinf.func_type_data_t()
+    if not func_tif.get_func_details(ftd):
+        return False, "failed to extract function details"
+
+    this_arg = ida_typeinf.funcarg_t()
+    this_arg.name = "this"
+    this_arg.type = this_ptr_tif
+
+    try:
+        if len(ftd) > 0:
+            ftd[0] = this_arg
+        else:
+            ftd.push_back(this_arg)
+    except Exception:
+        return False, "failed to replace/add argument 0"
+
+    updated_tif = ida_typeinf.tinfo_t()
+    if not updated_tif.create_func(ftd):
+        return False, "failed to rebuild function type"
+
+    if not ida_typeinf.apply_tinfo(func_ea, updated_tif, ida_typeinf.TINFO_DEFINITE):
+        return False, "apply_tinfo rejected updated signature"
+
+    return True, ""
+
+
+def _set_this_param_for_entries(
+    entries: List[VTableEntry], type_name: str
+) -> tuple[int, int, List[str]]:
+    this_ptr_tif = _build_this_pointer_tinfo(type_name)
+    if this_ptr_tif is None:
+        return (
+            0,
+            len({entry.func_ea for entry in entries}),
+            [f"Type '{type_name}' was not found in Local Types"],
+        )
+
+    success = 0
+    failed = 0
+    failures: List[str] = []
+    seen: set[int] = set()
+
+    for entry in entries:
+        if entry.func_ea in seen:
+            continue
+        seen.add(entry.func_ea)
+
+        ok, reason = _set_this_param_for_function(entry.func_ea, this_ptr_tif)
+        if ok:
+            success += 1
+        else:
+            failed += 1
+            func_name = ida_name.get_name(entry.func_ea) or f"sub_{entry.func_ea:X}"
+            detail = f"0x{entry.func_ea:X} ({func_name}): {reason}"
+            failures.append(detail)
+            _log("Set 'this' failed: " + detail)
+
+    return success, failed, failures
+
+
+def _current_ea_from_ctx(ctx) -> int:
+    if ctx is not None:
+        ea = getattr(ctx, "cur_ea", ida_idaapi.BADADDR)
+        if ea != ida_idaapi.BADADDR:
+            return ea
+    return ida_kernwin.get_screen_ea()
+
+
+def _get_slot_info(
+    entries: List[VTableEntry], ea: int
+) -> Optional[Tuple[int, int, VTableEntry]]:
+    if not entries:
+        return None
+
+    step = _pointer_size()
+    slot_ea = _align_down(ea, step)
+    start = entries[0].slot_ea
+    index = (slot_ea - start) // step
+
+    if index < 0 or index >= len(entries):
+        return None
+
+    entry = entries[index]
+    if entry.slot_ea != slot_ea:
+        return None
+
+    rel_off = slot_ea - start
+    return index, rel_off, entry
+
+
+class _BaseVTableAction(ida_kernwin.action_handler_t):
+    def _get_entries_or_warn(self, ctx) -> List[VTableEntry]:
+        ea = _current_ea_from_ctx(ctx)
+        entries = _get_vtable_from_ea(ea)
+        if not entries:
+            ida_kernwin.warning(
+                "No probable vtable found at the current cursor location."
+            )
+        return entries
+
+    def update(self, ctx):
+        if ctx.widget_type in (ida_kernwin.BWN_DISASM, ida_kernwin.BWN_PSEUDOCODE):
+            return ida_kernwin.AST_ENABLE_FOR_WIDGET
+        return ida_kernwin.AST_DISABLE_FOR_WIDGET
+
+
+class RenameVTableMethodsAction(_BaseVTableAction):
+    def activate(self, ctx):
+        entries = self._get_entries_or_warn(ctx)
+        if not entries:
+            return 1
+
+        default_class = _guess_class_name(entries)
+        options = _ask_rename_options(default_class)
+        if options is None:
+            return 1
+
+        class_name, rename_only_unnamed = options
+        _log(
+            f"Rename options: class_name='{class_name}', "
+            f"only_auto_names={rename_only_unnamed}"
+        )
+
+        rename_mode_text = (
+            "Only auto/default names" if rename_only_unnamed else "All function names"
+        )
+        if not _confirm_action(
+            "Confirm Rename",
+            "Rename vtable methods with these settings?\n\n"
+            f"Class prefix: {class_name}\n"
+            f"Targets: {len(entries)} methods\n"
+            f"Mode: {rename_mode_text}",
+        ):
+            return 1
+
+        success, failed, skipped = _rename_vtable_methods(
+            entries, class_name, rename_only_unnamed=rename_only_unnamed
+        )
+
+        _log(
+            f"Renamed methods for class '{class_name}': "
+            f"{success} succeeded, {failed} failed, {skipped} skipped"
+        )
+        _show_info(
+            "Rename Complete",
+            f"Renamed {success} method(s)."
+            + (f"\nFailed: {failed}" if failed else "")
+            + (f"\nSkipped (already named): {skipped}" if skipped else ""),
+        )
+        return 1
+
+
+class DumpVTableInterfaceAction(_BaseVTableAction):
+    def activate(self, ctx):
+        entries = self._get_entries_or_warn(ctx)
+        if not entries:
+            return 1
+
+        class_name = _guess_class_type_name(entries) or "VTableInterface"
+        if not class_name:
+            ida_kernwin.warning("Class name is required.")
+            return 1
+
+        default_file = f"{class_name}.hpp"
+        out_path = ida_kernwin.ask_str(
+            default_file, ida_kernwin.HIST_FILE, "Output file path"
+        )
+        if not out_path:
+            return 1
+
+        try:
+            text = _build_interface_text(entries, class_name)
+            with open(out_path, "w", encoding="utf-8", newline="\n") as f:
+                f.write(text)
+        except Exception as exc:
+            ida_kernwin.warning(f"Failed to write output file:\n{out_path}\n\n{exc}")
+            return 1
+
+        _log(f"Wrote interface with {len(entries)} methods: {out_path}")
+        _show_info("Dump Complete", f"Interface written to:\n{out_path}")
+        return 1
+
+
+class SetThisParamTypeAction(_BaseVTableAction):
+    def activate(self, ctx):
+        entries = self._get_entries_or_warn(ctx)
+        if not entries:
+            return 1
+
+        default_type = _guess_class_type_name(entries)
+        type_name = _select_this_type(default_type)
+        if not type_name:
+            return 1
+
+        unique_funcs = len({entry.func_ea for entry in entries})
+        if not _confirm_action(
+            "Confirm Set 'this'",
+            "Set first parameter to selected type on vtable methods?\n\n"
+            f"Type: {type_name} *\n"
+            f"Targets: {unique_funcs} function(s)",
+        ):
+            return 1
+
+        success, failed, failures = _set_this_param_for_entries(entries, type_name)
+        detail = ""
+        if success == 0 and failed > 0:
+            detail = "\n".join(failures[:8])
+            if len(failures) > 8:
+                detail += f"\n... {len(failures) - 8} more failure(s)"
+            ida_kernwin.warning("Failed to set the first parameter.\n\n" + detail)
+            return 1
+
+        if failures:
+            detail = "\n".join(failures[:8])
+            if len(failures) > 8:
+                detail += f"\n... {len(failures) - 8} more failure(s)"
+            _log("Partial failure while setting 'this':\n" + detail)
+
+        _show_info(
+            "Set 'this' Complete",
+            f"Updated first parameter to '{type_name} * this' on {success} function(s)."
+            + (f"\nFailed: {failed}" if failed else "")
+            + (f"\n\nDetails:\n{detail}" if failed else ""),
+        )
+        return 1
+
+
+class ShowCurrentVTableSlotInfoAction(_BaseVTableAction):
+    def activate(self, ctx):
+        entries = self._get_entries_or_warn(ctx)
+        if not entries:
+            return 1
+
+        ea = _current_ea_from_ctx(ctx)
+        slot_info = _get_slot_info(entries, ea)
+        if slot_info is None:
+            ida_kernwin.warning(
+                "Cursor is not on a vtable slot. Place cursor on a table entry and try again."
+            )
+            return 1
+
+        index, rel_off, entry = slot_info
+        method_name = _method_basename(entry, index)
+        msg = (
+            f"VTable slot: {index}\n"
+            f"Offset: 0x{rel_off:X}\n"
+            f"Method: {method_name}\n"
+            f"Function EA: 0x{entry.func_ea:X}"
+        )
+        _log(msg.replace("\n", " | "))
+        _show_info("VTable Slot Info", msg)
+        return 1
+
+
+class VTablePopupHooks(ida_kernwin.UI_Hooks):
+    def finish_populating_widget_popup(self, widget, popup_handle, ctx=None):
+        wtype = ida_kernwin.get_widget_type(widget)
+        if wtype not in (ida_kernwin.BWN_DISASM, ida_kernwin.BWN_PSEUDOCODE):
+            return
+
+        ea = _current_ea_from_ctx(ctx)
+        entries = _get_vtable_from_ea(ea)
+        if not entries:
+            return
+
+        ida_kernwin.attach_action_to_popup(
+            widget, popup_handle, ACTION_RENAME, MENU_PATH
+        )
+        ida_kernwin.attach_action_to_popup(widget, popup_handle, ACTION_DUMP, MENU_PATH)
+        ida_kernwin.attach_action_to_popup(
+            widget, popup_handle, ACTION_SET_THIS, MENU_PATH
+        )
+        ida_kernwin.attach_action_to_popup(
+            widget, popup_handle, ACTION_SLOT_INFO, MENU_PATH
+        )
+
+
+class VTableContextToolsPlugmod(ida_idaapi.plugmod_t):
+    def __init__(self):
+        rename_desc = ida_kernwin.action_desc_t(
+            ACTION_RENAME,
+            "Rename VTable Methods",
+            RenameVTableMethodsAction(),
+            "",
+            "Rename all methods referenced by this vtable",
+            -1,
+        )
+        dump_desc = ida_kernwin.action_desc_t(
+            ACTION_DUMP,
+            "Dump VTable Interface",
+            DumpVTableInterfaceAction(),
+            "",
+            "Dump a C++ interface skeleton for this vtable",
+            -1,
+        )
+        set_this_desc = ida_kernwin.action_desc_t(
+            ACTION_SET_THIS,
+            "Set First Parameter as 'this'",
+            SetThisParamTypeAction(),
+            "",
+            "Set first parameter to selected type pointer named 'this'",
+            -1,
+        )
+        slot_info_desc = ida_kernwin.action_desc_t(
+            ACTION_SLOT_INFO,
+            "Show Current VTable Slot Info",
+            ShowCurrentVTableSlotInfoAction(),
+            "",
+            "Show current vtable method index and relative offset",
+            -1,
+        )
+
+        ida_kernwin.register_action(rename_desc)
+        ida_kernwin.register_action(dump_desc)
+        ida_kernwin.register_action(set_this_desc)
+        ida_kernwin.register_action(slot_info_desc)
+
+        self._hooks = VTablePopupHooks()
+        self._hooks.hook()
+
+        _log("Plugin initialized")
+
+    def run(self, arg):
+        _log("Use right-click on disassembly/pseudocode near a vtable entry")
+
+    def __del__(self):
+        try:
+            if hasattr(self, "_hooks") and self._hooks is not None:
+                self._hooks.unhook()
+        finally:
+            ida_kernwin.unregister_action(ACTION_RENAME)
+            ida_kernwin.unregister_action(ACTION_DUMP)
+            ida_kernwin.unregister_action(ACTION_SET_THIS)
+            ida_kernwin.unregister_action(ACTION_SLOT_INFO)
+            _log("Plugin terminated")
+
+
+class VTableContextToolsPlugin(ida_idaapi.plugin_t):
+    flags = ida_idaapi.PLUGIN_MULTI
+    comment = "Context-menu tools for vtables"
+    help = "Right-click on probable vtable entries"
+    wanted_name = PLUGIN_NAME
+    wanted_hotkey = ""
+
+    def init(self):
+        return VTableContextToolsPlugmod()
+
+
+def PLUGIN_ENTRY():
+    return VTableContextToolsPlugin()
+
+
+if __name__ == "__main__":
+    # For testing outside of IDA
+    plugin = VTableContextToolsPlugmod()
+    plugin.run(0)
+
+```
