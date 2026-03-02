@@ -225,6 +225,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - [Copies the argument string to the clipboard and outputs the characters copied to the clipboard](https://github.com/aoharudesu/Clipboard_Tools-UE4)
 - [Generic graph data structure plugin for ue4](https://github.com/jinyuliao/GenericGraph)
 - [A quick implementation of modular game features for the 'BTS' test](https://github.com/gmh5225/BT_ModularGameFeatures)
+- https://github.com/Natfii/UnrealClaude [Claude Code CLI integration for Unreal Engine 5.7; AI coding assistance with built-in UE5.7 documentation context in the editor]
 
 > Game Engine Plugins:Unity
 - [A markdown viewer for unity](https://github.com/gwaredd/UnityMarkdownViewer)
