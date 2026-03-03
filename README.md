@@ -3108,7 +3108,6 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/fcancelog/EftStreamedCheat
 - https://github.com/Nou4r/pKernelInterface-EFT
 - https://github.com/sailro/EscapeFromTarkov-Trainer
-- https://github.com/gmh5225/tiny_eft
 - https://github.com/gmh5225/Nathans-Tarkov-Radar-Public [Vmread + Radar]
 - https://github.com/frankie-11/eft-external
 - https://github.com/Splitx12/eft
@@ -3162,7 +3161,6 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/OW2-wardenrekter [Emulate OW2 AC]
 
 > Game:Paladins
-- https://github.com/gmh5225/Paladins-Internal-Esp-Aimbot-Hack-Cheat-Hack
 - https://github.com/gmh5225/Paladins-internal-Cheat
 
 > Game:DayZ
