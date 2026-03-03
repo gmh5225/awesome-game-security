@@ -1,0 +1,657 @@
+# TrinityCore - World of Warcraft Server Framework
+
+## Introduction
+
+TrinityCore is a comprehensive MMORPG framework written primarily in C++ that implements a complete World of Warcraft server emulator. Derived from MaNGOS (Massive Network Game Object Server), TrinityCore has been extensively optimized and enhanced to provide robust game mechanics, scriptable AI systems, and flexible database management. The framework enables hosting of private WoW servers with full control over game rules, custom content, and server behavior.
+
+The project is designed with a modular architecture separating concerns between authentication (bnetserver), world simulation (worldserver), database management, and extensive scripting capabilities. It supports multiple WoW expansions through different branches, handles thousands of game mechanics including combat, quests, achievements, battlegrounds, and provides a powerful scripting API for custom content creation. The codebase emphasizes performance, maintainability, and extensibility through careful abstraction layers and clear separation between core engine code and game content scripts.
+
+## Database Management API
+
+### DatabaseWorkerPool - Asynchronous Database Operations
+
+The DatabaseWorkerPool provides thread-safe database connection pooling with both asynchronous and synchronous query execution. It manages separate connection pools for different database types (Login, Character, World, Hotfix) with prepared statement support.
+
+```cpp
+// Execute asynchronous query with prepared statement
+PreparedStatement<CharacterDatabaseStatements>* stmt =
+    CharacterDatabase.GetPreparedStatement(CHAR_UPD_PLAYER_LEVEL);
+stmt->setUInt8(0, newLevel);
+stmt->setUInt32(1, playerGuid.GetCounter());
+CharacterDatabase.Execute(stmt);
+
+// Execute synchronous query with formatted string
+CharacterDatabase.DirectPExecute(
+    "UPDATE characters SET money = {} WHERE guid = {}",
+    goldAmount,
+    playerGuid.GetCounter()
+);
+
+// Query with result handling
+PreparedStatement<WorldDatabaseStatements>* query =
+    WorldDatabase.GetPreparedStatement(WORLD_SEL_CREATURE_TEMPLATE);
+query->setUInt32(0, creatureEntry);
+PreparedQueryResult result = WorldDatabase.Query(query);
+
+if (result)
+{
+    Field* fields = result->Fetch();
+    std::string name = fields[0].GetString();
+    uint32 health = fields[1].GetUInt32();
+    uint8 level = fields[2].GetUInt8();
+
+    // Process creature template data
+    TC_LOG_INFO("server.loading", "Loaded creature: {} (HP: {}, Level: {})",
+        name, health, level);
+}
+
+// Asynchronous callback query
+CharacterDatabase.AsyncQuery(stmt).Then([](PreparedQueryResult result)
+{
+    if (!result)
+        return;
+
+    do
+    {
+        Field* fields = result->Fetch();
+        ProcessPlayerData(fields);
+    } while (result->NextRow());
+});
+```
+
+### Database Configuration
+
+Configure database connections in worldserver.conf with connection strings specifying host, port, credentials, and database names for each database type.
+
+```conf
+LoginDatabaseInfo     = "127.0.0.1;3306;trinity;trinity;auth"
+WorldDatabaseInfo     = "127.0.0.1;3306;trinity;trinity;world"
+CharacterDatabaseInfo = "127.0.0.1;3306;trinity;trinity;characters"
+HotfixDatabaseInfo    = "127.0.0.1;3306;trinity;trinity;hotfixes"
+```
+
+## AI Scripting System
+
+### ScriptedAI - Custom NPC Behavior
+
+The ScriptedAI class provides the foundation for creating custom creature behaviors with event-driven programming using EventMap for scheduling actions and SummonList for managing spawned entities.
+
+```cpp
+class boss_example_ai : public ScriptedAI
+{
+public:
+    boss_example_ai(Creature* creature) : ScriptedAI(creature)
+    {
+        _instance = creature->GetInstanceScript();
+    }
+
+    void Reset() override
+    {
+        _events.Reset();
+        _summons.DespawnAll();
+        me->SetReactState(REACT_AGGRESSIVE);
+        _phase = 0;
+    }
+
+    void JustEngagedWith(Unit* who) override
+    {
+        _events.ScheduleEvent(EVENT_FIREBALL, 3s);
+        _events.ScheduleEvent(EVENT_SUMMON_ADDS, 10s);
+        _events.ScheduleEvent(EVENT_PHASE_TRANSITION, 60s);
+
+        if (_instance)
+            _instance->SetBossState(BOSS_EXAMPLE, IN_PROGRESS);
+
+        Talk(SAY_AGGRO);
+    }
+
+    void JustDied(Unit* killer) override
+    {
+        _events.Reset();
+        _summons.DespawnAll();
+
+        if (_instance)
+        {
+            _instance->SetBossState(BOSS_EXAMPLE, DONE);
+            _instance->DoUpdateAchievementCriteria(
+                ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE,
+                me->GetEntry(), 1, killer);
+        }
+
+        Talk(SAY_DEATH);
+    }
+
+    void JustSummoned(Creature* summon) override
+    {
+        _summons.Summon(summon);
+        summon->SetInCombatWithZone();
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _events.Update(diff);
+
+        if (me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_FIREBALL:
+                    if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 40.0f))
+                        DoCast(target, SPELL_FIREBALL);
+                    _events.Repeat(3s, 5s);
+                    break;
+
+                case EVENT_SUMMON_ADDS:
+                    for (uint8 i = 0; i < 3; ++i)
+                    {
+                        Position pos = me->GetRandomNearPosition(15.0f);
+                        me->SummonCreature(NPC_ADD_ENTRY, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5s);
+                    }
+                    _events.Repeat(25s, 30s);
+                    break;
+
+                case EVENT_PHASE_TRANSITION:
+                    if (me->HealthBelowPct(50))
+                    {
+                        _phase = 1;
+                        Talk(SAY_PHASE_CHANGE);
+                        DoCastSelf(SPELL_ENRAGE);
+                        _events.ScheduleEvent(EVENT_SPECIAL_ABILITY, 5s);
+                    }
+                    break;
+
+                case EVENT_SPECIAL_ABILITY:
+                    DoCastAOE(SPELL_METEOR_STRIKE);
+                    _events.Repeat(15s);
+                    break;
+            }
+        }
+
+        DoMeleeAttackIfReady();
+    }
+
+private:
+    EventMap _events;
+    SummonList _summons;
+    InstanceScript* _instance;
+    uint8 _phase;
+};
+
+// Register the script
+void AddSC_boss_example()
+{
+    RegisterCreatureAI(boss_example_ai);
+}
+```
+
+## Spell Scripting System
+
+### SpellScript - Custom Spell Effects
+
+SpellScript enables modification of spell behavior through hooks for filtering targets, modifying damage, and implementing custom spell effects with full access to spell context.
+
+```cpp
+class spell_example_spell : public SpellScript
+{
+    PrepareSpellScript(spell_example_spell);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_TRIGGERED_EFFECT, SPELL_DEBUFF });
+    }
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        if (targets.empty())
+            return;
+
+        // Remove targets with specific aura
+        targets.remove_if([](WorldObject* obj)
+        {
+            if (Unit* unit = obj->ToUnit())
+                return unit->HasAura(SPELL_IMMUNITY_AURA);
+            return false;
+        });
+
+        // Limit to 5 targets, prioritize lowest health
+        if (targets.size() > 5)
+        {
+            targets.sort([](WorldObject* a, WorldObject* b)
+            {
+                Unit* unitA = a->ToUnit();
+                Unit* unitB = b->ToUnit();
+                if (!unitA || !unitB)
+                    return false;
+                return unitA->GetHealthPct() < unitB->GetHealthPct();
+            });
+            targets.resize(5);
+        }
+    }
+
+    void HandleDamage(SpellEffIndex /*effIndex*/)
+    {
+        Unit* caster = GetCaster();
+        Unit* target = GetHitUnit();
+
+        if (!caster || !target)
+            return;
+
+        int32 damage = GetHitDamage();
+
+        // Increase damage by 10% per stack of debuff
+        if (Aura* debuff = target->GetAura(SPELL_DEBUFF, caster->GetGUID()))
+            damage = AddPct(damage, 10 * debuff->GetStackAmount());
+
+        // Reduce damage based on distance
+        float distance = caster->GetDistance2d(target);
+        if (distance > 10.0f)
+            damage = CalculatePct(damage, 100 - (distance - 10.0f) * 2);
+
+        SetHitDamage(damage);
+    }
+
+    void HandleAfterHit()
+    {
+        Unit* caster = GetCaster();
+        Unit* target = GetHitUnit();
+
+        if (!caster || !target)
+            return;
+
+        // Trigger additional spell on critical hit
+        if (GetSpell()->IsCritForTarget(target))
+        {
+            caster->CastSpell(target, SPELL_TRIGGERED_EFFECT, true);
+
+            // Restore mana to caster
+            int32 manaRestore = CalculatePct(caster->GetMaxPower(POWER_MANA), 5);
+            caster->ModifyPower(POWER_MANA, manaRestore);
+        }
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
+            spell_example_spell::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+        OnEffectHitTarget += SpellEffectFn(
+            spell_example_spell::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        AfterHit += SpellHitFn(spell_example_spell::HandleAfterHit);
+    }
+};
+
+// Aura script for periodic effects
+class spell_example_aura : public AuraScript
+{
+    PrepareAuraScript(spell_example_aura);
+
+    void HandlePeriodic(AuraEffect const* aurEff)
+    {
+        Unit* target = GetTarget();
+        if (!target)
+            return;
+
+        int32 damage = aurEff->GetAmount();
+
+        // Increase damage over time
+        int32 tickNumber = aurEff->GetTickNumber();
+        damage += CalculatePct(damage, tickNumber * 5);
+
+        target->CastCustomSpell(target, SPELL_DOT_DAMAGE, &damage, nullptr, nullptr, true, nullptr, aurEff);
+    }
+
+    void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        Unit* target = GetTarget();
+        if (!target)
+            return;
+
+        // Heal target for 20% of max health when aura expires naturally
+        if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+        {
+            int32 heal = CalculatePct(target->GetMaxHealth(), 20);
+            target->CastCustomSpell(target, SPELL_HEAL, &heal, nullptr, nullptr, true);
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(
+            spell_example_aura::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+        OnEffectRemove += AuraEffectRemoveFn(
+            spell_example_aura::OnRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+// Register both scripts
+void AddSC_example_spells()
+{
+    RegisterSpellScript(spell_example_spell);
+    RegisterSpellScript(spell_example_aura);
+}
+```
+
+## Player Management API
+
+### Player Class - Character Operations
+
+The Player class provides comprehensive character management including inventory, skills, quests, achievements, and social features with direct database persistence.
+
+```cpp
+// Modify player attributes
+void GrantRewards(Player* player, uint32 questId)
+{
+    // Add experience with scaling
+    uint32 xpReward = 10000;
+    player->GiveXP(xpReward, nullptr);
+
+    // Add gold
+    player->ModifyMoney(100 * GOLD);
+
+    // Add items to inventory
+    ItemPosCountVec dest;
+    uint32 itemEntry = 12345;
+    uint32 itemCount = 5;
+
+    InventoryResult msg = player->CanStoreNewItem(
+        NULL_BAG, NULL_SLOT, dest, itemEntry, itemCount);
+
+    if (msg == EQUIP_ERR_OK)
+    {
+        Item* item = player->StoreNewItem(dest, itemEntry, true);
+        if (item)
+            player->SendNewItem(item, itemCount, true, false);
+    }
+    else
+        player->SendEquipError(msg, nullptr, nullptr, itemEntry);
+
+    // Grant reputation
+    player->GetReputationMgr().ModifyReputation(
+        sFactionStore.LookupEntry(FACTION_STORMWIND), 500);
+
+    // Complete achievement
+    player->CompletedAchievement(
+        sAchievementStore.LookupEntry(ACHIEVEMENT_EXAMPLE));
+
+    // Learn spell
+    player->LearnSpell(SPELL_REWARD, false);
+
+    // Add honor points
+    player->AddHonorXP(100);
+
+    // Teleport player
+    player->TeleportTo(0, -8913.23f, 554.633f, 93.7944f, 0.0f);
+
+    // Save to database
+    player->SaveToDB();
+}
+
+// Quest interaction
+void HandleQuestReward(Player* player, Quest const* quest)
+{
+    if (player->CanRewardQuest(quest, false))
+    {
+        // Mark quest as complete
+        player->RewardQuest(quest, 0, nullptr, false);
+
+        // Send quest complete notification
+        WorldPackets::Quest::QuestGiverQuestComplete packet;
+        packet.QuestID = quest->GetQuestId();
+        packet.SkipQuestLog = false;
+        player->SendDirectMessage(packet.Write());
+
+        // Track quest completion
+        TC_LOG_INFO("scripts", "Player {} completed quest {}",
+            player->GetName(), quest->GetQuestId());
+    }
+}
+
+// Group and raid management
+void CreateRaidGroup(Player* leader, std::vector<Player*> const& members)
+{
+    Group* group = new Group();
+    group->ConvertToRaid();
+    group->Create(leader);
+
+    for (Player* member : members)
+    {
+        if (member != leader)
+            group->AddMember(member);
+    }
+
+    // Set loot method
+    group->SetLootMethod(MASTER_LOOT);
+    group->SetMasterLooterGuid(leader->GetGUID());
+
+    // Set difficulty
+    group->SetDifficultyID(DIFFICULTY_HEROIC_RAID);
+}
+```
+
+## Command System API
+
+### CommandScript - Custom GM Commands
+
+CommandScript enables creation of administrative commands with parameter validation, permission checks, and structured command hierarchies using the ChatCommand framework.
+
+```cpp
+class custom_commandscript : public CommandScript
+{
+public:
+    custom_commandscript() : CommandScript("custom_commandscript") { }
+
+    ChatCommandTable GetCommands() const override
+    {
+        static ChatCommandTable customSubCommands =
+        {
+            { "spawn",      HandleCustomSpawnCommand,       rbac::RBAC_PERM_COMMAND_CUSTOM_SPAWN },
+            { "buff",       HandleCustomBuffCommand,        rbac::RBAC_PERM_COMMAND_CUSTOM_BUFF },
+            { "event",      HandleCustomEventCommand,       rbac::RBAC_PERM_COMMAND_CUSTOM_EVENT },
+        };
+
+        static ChatCommandTable commandTable =
+        {
+            { "custom", customSubCommands },
+        };
+
+        return commandTable;
+    }
+
+    static bool HandleCustomSpawnCommand(ChatHandler* handler,
+        uint32 creatureEntry, Optional<uint32> count)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+        if (!player)
+            return false;
+
+        CreatureTemplate const* cInfo = sObjectMgr->GetCreatureTemplate(creatureEntry);
+        if (!cInfo)
+        {
+            handler->PSendSysMessage("Creature entry {} not found", creatureEntry);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        uint32 spawnCount = count.value_or(1);
+
+        for (uint32 i = 0; i < spawnCount; ++i)
+        {
+            Position pos = player->GetRandomNearPosition(5.0f);
+
+            Creature* creature = player->SummonCreature(
+                creatureEntry,
+                pos,
+                TEMPSUMMON_TIMED_DESPAWN,
+                300000);
+
+            if (creature)
+            {
+                creature->SetFaction(player->GetFaction());
+                creature->SetLevel(player->GetLevel());
+            }
+        }
+
+        handler->PSendSysMessage("Spawned {} of creature {} ({})",
+            spawnCount, cInfo->Name, creatureEntry);
+        return true;
+    }
+
+    static bool HandleCustomBuffCommand(ChatHandler* handler,
+        Optional<PlayerIdentifier> target)
+    {
+        Player* player = target ? target->GetConnectedPlayer() : handler->GetSelectedPlayerOrSelf();
+
+        if (!player)
+        {
+            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        // Apply multiple buffs
+        std::vector<uint32> buffSpells =
+        {
+            SPELL_KINGS_BLESSING,       // +10% stats
+            SPELL_MARK_OF_WILD,         // +5% all attributes
+            SPELL_ARCANE_BRILLIANCE,    // +10% spell power
+            SPELL_BATTLE_SHOUT          // +10% attack power
+        };
+
+        for (uint32 spellId : buffSpells)
+        {
+            player->AddAura(spellId, player);
+        }
+
+        handler->PSendSysMessage("Buffed player: {}", player->GetName());
+        return true;
+    }
+
+    static bool HandleCustomEventCommand(ChatHandler* handler,
+        std::string eventName, Tail parameters)
+    {
+        // Parse command parameters
+        std::string params = parameters ? static_cast<std::string>(*parameters) : "";
+
+        WorldDatabase.PExecute(
+            "INSERT INTO game_event_custom (event_name, params, triggered_by) VALUES ('{}', '{}', '{}')",
+            eventName, params, handler->GetSession()->GetAccountId());
+
+        // Trigger custom event logic
+        sWorld->SendWorldText(LANG_CUSTOM_EVENT_STARTED, eventName.c_str());
+
+        handler->PSendSysMessage("Custom event '{}' triggered with params: {}",
+            eventName, params);
+        return true;
+    }
+};
+
+void AddSC_custom_commandscript()
+{
+    new custom_commandscript();
+}
+```
+
+## Configuration System
+
+### World Server Configuration
+
+The worldserver.conf.dist file provides extensive server configuration with database connections, gameplay rates, security settings, and performance tuning parameters.
+
+```conf
+# Core server identification
+RealmID = 1
+DataDir = "."
+LogsDir = ""
+
+# Database connections
+LoginDatabaseInfo     = "127.0.0.1;3306;trinity;trinity;auth"
+WorldDatabaseInfo     = "127.0.0.1;3306;trinity;trinity;world"
+CharacterDatabaseInfo = "127.0.0.1;3306;trinity;trinity;characters"
+HotfixDatabaseInfo    = "127.0.0.1;3306;trinity;trinity;hotfixes"
+
+# Database async/sync worker threads
+LoginDatabase.WorkerThreads     = 1
+WorldDatabase.WorkerThreads     = 1
+CharacterDatabase.WorkerThreads = 1
+HotfixDatabase.WorkerThreads    = 1
+
+# Gameplay rates
+Rate.XP.Kill    = 1.0
+Rate.XP.Quest   = 1.0
+Rate.Money.Quest = 1.0
+Rate.Drop.Item.Poor = 1.0
+Rate.Drop.Item.Normal = 1.0
+Rate.Drop.Money = 1.0
+
+# Server performance
+WorldServerPort = 8085
+GameType = 0
+RealmZone = 1
+MaxPlayerLevel = 70
+MinPetitionSigns = 5
+MaxGroupSize = 5
+MaxRaidSize = 40
+
+# Combat settings
+MaxOverspeedException = 500
+AllowTwoSide.Interaction.Chat = 0
+AllowTwoSide.Interaction.Group = 0
+Quests.EnableQuestTracker = 1
+Battleground.CastDeserter = 1
+
+# Security
+Account.PasswordSecurity = 0
+Warden.Enabled = 1
+Warden.ClientCheckFailAction = 0
+
+# Performance tuning
+MapUpdate.Threads = 4
+ThreadPool = 2
+GridCleanUpDelay = 300000
+SocketTimeOutTime = 900000
+SessionAddDelay = 10000
+```
+
+## Build System
+
+### CMake Configuration
+
+TrinityCore uses CMake for cross-platform compilation with support for multiple build configurations, dependency management, and optional features.
+
+```cmake
+# Configure build
+cmake -S . -B build \
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+  -DCMAKE_INSTALL_PREFIX=/opt/trinitycore \
+  -DTOOLS=1 \
+  -DSCRIPTS=static \
+  -DUSE_COREPCH=1 \
+  -DUSE_SCRIPTPCH=1 \
+  -DWITH_WARNINGS=1
+
+# Build with parallel jobs
+cmake --build build -j$(nproc)
+
+# Install binaries
+cmake --install build
+
+# Available build options:
+# -DTOOLS=1                    Build map extraction tools
+# -DSCRIPTS=static|dynamic     Script compilation mode
+# -DUSE_COREPCH=1             Enable precompiled headers for core
+# -DUSE_SCRIPTPCH=1           Enable precompiled headers for scripts
+# -DWITH_WARNINGS=1           Enable all compiler warnings
+# -DCMAKE_C_COMPILER=gcc      Specify C compiler
+# -DCMAKE_CXX_COMPILER=g++    Specify C++ compiler
+```
+
+## Summary
+
+TrinityCore provides a production-ready MMORPG server framework suitable for hosting World of Warcraft private servers with full customization capabilities. The primary use cases include educational game server development, private server hosting with custom content, game mechanics research, and MMORPG architecture study. The framework excels at scenarios requiring custom boss encounters, modified game rules, special events, custom quests, and unique gameplay mechanics through its extensive scripting system.
+
+Integration with TrinityCore follows a standard workflow: compile the server binaries using CMake, configure database connections in worldserver.conf, initialize databases with provided SQL schemas, implement custom content through C++ scripts in the scripts directory, register scripts in ScriptLoader.cpp, and deploy to production. The modular architecture separates authentication (bnetserver) from game world simulation (worldserver), enabling distributed deployments and horizontal scaling. The comprehensive API surface exposes fine-grained control over all game systems while maintaining backward compatibility with WoW client protocols.
