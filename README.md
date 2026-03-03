@@ -2880,7 +2880,6 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/hadevn/Valorant-SDK-2024 [SDK]
 - https://github.com/gmh5225/valorant-gui-imgui-remake [GUI]
 - https://github.com/gmh5225/valorant-internal
-- https://github.com/gmh5225/Zenti-Valorant-Cheat-Hack-Internal-Spoofer-Driver-Injector-Protector-Auth
 - https://github.com/xehn1337/valorant-dumper [Dump]
 - https://github.com/gmh5225/Valorant-Dumper-Tool [Dump]
 - https://github.com/lil-skies/val-exception-handler [ZwRaiseException Dump]
@@ -3075,7 +3074,6 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ajkhoury/pubg_internal
 - https://github.com/iCollin/pubg-internal
 - https://github.com/K-cazb/pubg-public
-- https://github.com/gmh5225/PlayerUnknown-s-Battlegrounds-Pubg-Steam-Hack-Esp-Aimbot
 - https://github.com/dot1991/lilypublic
 - https://github.com/gmh5225/PUBG_Internal
 - https://github.com/gmh5225/PUBG-DX
