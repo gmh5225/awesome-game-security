@@ -1500,6 +1500,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/SymbioticSec/ida-security-scanner [A security-focused code scanner for IDA Pro]
 - https://github.com/cristeigabriela/IDAFind [Ctrl+F search support for Pseudocode windows]
 - https://github.com/thalium/symless [IDA Pro plugin that helps reconstruct structures]
+- https://github.com/buzzer-re/Rikugan [A reverse-engineering agent for IDA Pro and Binary Ninja that integrates a multi-provider LLM directly into your analysis UI]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
@@ -1541,6 +1542,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Invoke-RE/binja-lattice-mcp [MCP for Binary_Ninja]
 - https://github.com/mrphrazer/obfuscation_analysis [Binary Ninja plugin to analyze and simplify obfuscated code]
 - https://github.com/ScriptWare-Software/native-predicate-solver [Binary Ninja plugin for removing opaque predicates]
+- https://github.com/buzzer-re/Rikugan [A reverse-engineering agent for IDA Pro and Binary Ninja that integrates a multi-provider LLM directly into your analysis UI]
 
 > Ghidra Plugins
 - https://github.com/AllsafeCyberSecurity/awesome-ghidra [List]
