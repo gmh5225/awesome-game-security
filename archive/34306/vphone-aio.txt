@@ -1,0 +1,321 @@
+Project Path: arc_34306_vphone-aio_ib64wzfy
+
+Source Tree:
+
+```txt
+arc_34306_vphone-aio_ib64wzfy
+├── README.md
+├── vphone-aio.sh
+├── vphone-cli.tar.zst.part_aa
+├── vphone-cli.tar.zst.part_ab
+├── vphone-cli.tar.zst.part_ac
+├── vphone-cli.tar.zst.part_ad
+├── vphone-cli.tar.zst.part_ae
+├── vphone-cli.tar.zst.part_af
+└── vphone-cli.tar.zst.part_ag
+
+```
+
+`README.md`:
+
+```md
+# vphone-aio
+1 script run the vphone (iOS 26.1), already jailbroken with full bootstrap installed
+
+Do this step by step:
+
+1. Install prerequisites:
+   ```bash
+   brew install git-lfs wget zstd libimobiledevice
+   ```
+2. Disable SIP, set `amfi_get_out_of_my_way=1`
+3. Download or clone this repo (it might take a while, for me 12GB takes me 20 minutes to finish)
+4. If any split parts are missing, the script will auto-download them. You can also manually download them:
+   ```bash
+   for p in aa ab ac ad ae af ag; do
+     wget -O "vphone-cli.tar.zst.part_${p}" \
+       "https://github.com/34306/vphone-aio/raw/refs/heads/main/vphone-cli.tar.zst.part_${p}?download="
+   done
+   ```
+5. Run the `vphone-aio.sh` script
+6. Make sure your device has more than 128GB free (recommended)
+7. Wait until it merges. When done, it will extract the whole folder (about 15 minutes)
+8. You can remove `.git` and the split files once the merge is done
+9. Connect VNC (using RealVNC or Screen Sharing): `vnc://127.0.0.1:5901`
+10. Enjoy!
+
+## SHA-256 Checksums
+
+To verify your downloaded files are not corrupted:
+
+```
+3c966247deae3fff51a640f6204e0fafc14fd5c76353ba8f28f20f7d1d29e693  vphone-cli.tar.zst.part_aa
+c7d11bbbe32dda2b337933c736171cc94faab2c7465e75391fa49029f3b6f1b1  vphone-cli.tar.zst.part_ab
+f422949080e7f141f32f35f8ea20c1fedffc2b97eadf0390645114feef6bb1aa  vphone-cli.tar.zst.part_ac
+f3acfa47145207b8962ba4d20fb83eb4646934cca768906e65609d7fdde564e7  vphone-cli.tar.zst.part_ad
+efdca69df80386b0aa7af8ac260d9ac576ed1f258429fd4ac21b5bbb87cd78fe  vphone-cli.tar.zst.part_ae
+4628852da12949361d3ea6efcf8af1532eb52194cc43a4ab4993024267947587  vphone-cli.tar.zst.part_af
+8bd1551511eb016325918c2d93519829be04feb54727612e74c32e4299670a88  vphone-cli.tar.zst.part_ag
+```
+
+You can verify manually with:
+```bash
+shasum -a 256 vphone-cli.tar.zst.part_a*
+```
+
+# Preview
+![](preview.png)
+
+# Credits
+- [wh1te4ver (Hyungyu Seo)](https://github.com/wh1te4ever) for a super details and writeup: https://github.com/wh1te4ever/super-tart-vphone-writeup
+
+- [Lakr233](https://github.com/Lakr233) for [non-tart repo vphone (vphone-cli)](https://github.com/Lakr233/vphone-cli)
+
+```
+
+`vphone-aio.sh`:
+
+```sh
+#!/bin/bash
+#
+# vphone-aio — All-in-one vPhone launcher
+#
+# Extracts vphone-cli.tar.zst (if needed), builds & boots the VM,
+# starts iproxy tunnels for SSH and VNC, then waits.
+# Press Ctrl+C to stop everything cleanly.
+#
+# Prerequisites:
+#   - macOS with Xcode (swift, codesign)
+#   - SIP/AMFI disabled (amfi_get_out_of_my_way=1)
+#   - libimobiledevice (iproxy)  — brew install libimobiledevice
+#   - zstd                       — brew install zstd
+#
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ARCHIVE="$SCRIPT_DIR/vphone-cli.tar.zst"
+PROJECT="$SCRIPT_DIR/vphone-cli"
+
+BOOT_PID=""
+IPROXY_SSH_PID=""
+IPROXY_VNC_PID=""
+
+# ── Cleanup on exit ──────────────────────────────────────────────
+cleanup() {
+    echo ""
+    echo "=========================================="
+    echo "  Shutting down vPhone..."
+    echo "=========================================="
+
+    for pid_var in BOOT_PID IPROXY_SSH_PID IPROXY_VNC_PID; do
+        pid="${!pid_var}"
+        if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+            kill "$pid" 2>/dev/null
+        fi
+    done
+
+    sleep 2
+
+    for pid_var in BOOT_PID IPROXY_SSH_PID IPROXY_VNC_PID; do
+        pid="${!pid_var}"
+        if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+            kill -9 "$pid" 2>/dev/null
+        fi
+    done
+
+    echo ""
+    echo "  All processes stopped. Goodbye!"
+    echo "=========================================="
+    exit 0
+}
+
+trap cleanup SIGINT SIGTERM EXIT
+
+# ── Preflight checks ────────────────────────────────────────────
+echo "=========================================="
+echo "  vPhone — All-in-one Launcher"
+echo "=========================================="
+echo ""
+
+missing=()
+command -v swift   >/dev/null 2>&1 || missing+=("swift (Xcode)")
+command -v iproxy  >/dev/null 2>&1 || missing+=("iproxy (brew install libimobiledevice)")
+
+if [ ${#missing[@]} -gt 0 ]; then
+    echo "ERROR: Missing required tools:"
+    for m in "${missing[@]}"; do
+        echo "  - $m"
+    done
+    exit 1
+fi
+
+ALL_SUFFIXES=(aa ab ac ad ae af ag)
+
+REPO_URL="https://github.com/34306/vphone-aio/raw/refs/heads/main"
+
+# ── Download missing parts ───────────────────────────────────────
+download_missing_parts() {
+    local need_download=false
+    for suffix in "${ALL_SUFFIXES[@]}"; do
+        local part_file="$SCRIPT_DIR/vphone-cli.tar.zst.part_${suffix}"
+        if [ ! -f "$part_file" ]; then
+            need_download=true
+            break
+        fi
+    done
+
+    if $need_download; then
+        command -v wget >/dev/null 2>&1 || {
+            echo "ERROR: wget not found. Install with: brew install wget"
+            exit 1
+        }
+
+        echo "       Some split parts are missing. Downloading..."
+        echo ""
+        for suffix in "${ALL_SUFFIXES[@]}"; do
+            local part_file="$SCRIPT_DIR/vphone-cli.tar.zst.part_${suffix}"
+            if [ ! -f "$part_file" ]; then
+                echo "       Downloading vphone-cli.tar.zst.part_${suffix} ..."
+                wget -q --show-progress -O "$part_file" \
+                    "${REPO_URL}/vphone-cli.tar.zst.part_${suffix}?download=" || {
+                    echo "ERROR: Failed to download part_${suffix}"
+                    rm -f "$part_file"
+                    exit 1
+                }
+            fi
+        done
+        echo ""
+    fi
+}
+
+# ── Merge split parts & extract if needed ────────────────────────
+if [ ! -d "$PROJECT" ]; then
+    command -v zstd >/dev/null 2>&1 || {
+        echo "ERROR: zstd not found. Install with: brew install zstd"
+        exit 1
+    }
+
+    # Merge split parts if the full archive doesn't exist yet
+    if [ ! -f "$ARCHIVE" ]; then
+        echo "[1/4] Checking split parts..."
+        download_missing_parts
+
+        PARTS=("$SCRIPT_DIR"/vphone-cli.tar.zst.part_*)
+        echo "[2/4] Merging ${#PARTS[@]} split parts into vphone-cli.tar.zst ..."
+        cat "$SCRIPT_DIR"/vphone-cli.tar.zst.part_* > "$ARCHIVE"
+        echo "       Done. ($(du -h "$ARCHIVE" | cut -f1))"
+        echo ""
+
+        echo "[3/4] Extracting vphone-cli.tar.zst ..."
+    else
+        echo "[1/4] vphone-cli.tar.zst already exists, skipping download & merge."
+        echo ""
+        echo "[3/4] Extracting vphone-cli.tar.zst ..."
+    fi
+
+    zstd -dc "$ARCHIVE" | tar xf - -C "$SCRIPT_DIR"
+    echo "       Done."
+
+    # Clean up the merged archive and split parts to save disk space
+    rm -f "$ARCHIVE"
+    rm -f "$SCRIPT_DIR"/vphone-cli.tar.zst.part_*
+    echo "       Cleaned up archive and split parts to save space."
+else
+    echo "[1/4] vphone-cli/ already exists, skipping merge & extraction."
+fi
+
+echo ""
+
+# ── Start iproxy tunnels ─────────────────────────────────────────
+echo "[3/4] Starting iproxy tunnels ..."
+
+iproxy 22222 22222 >/dev/null 2>&1 &
+IPROXY_SSH_PID=$!
+echo "       SSH : localhost:22222 -> device:22222"
+
+iproxy 5901 5901 >/dev/null 2>&1 &
+IPROXY_VNC_PID=$!
+echo "       VNC : localhost:5901  -> device:5901"
+
+# ── Build & Boot VM ──────────────────────────────────────────────
+echo ""
+echo "[4/4] Building and booting the VM ..."
+echo ""
+echo "=========================================="
+echo ""
+echo "  Connect via VNC : vnc://127.0.0.1:5901"
+echo "  Connect via SSH : ssh -p 22222 root@127.0.0.1"
+echo ""
+echo "  Press Ctrl+C to stop everything."
+echo ""
+echo "=========================================="
+echo ""
+
+cd "$PROJECT"
+./boot.sh
+
+```
+
+`vphone-cli.tar.zst.part_aa`:
+
+```part_aa
+version https://git-lfs.github.com/spec/v1
+oid sha256:3c966247deae3fff51a640f6204e0fafc14fd5c76353ba8f28f20f7d1d29e693
+size 1992294400
+
+```
+
+`vphone-cli.tar.zst.part_ab`:
+
+```part_ab
+version https://git-lfs.github.com/spec/v1
+oid sha256:c7d11bbbe32dda2b337933c736171cc94faab2c7465e75391fa49029f3b6f1b1
+size 1992294400
+
+```
+
+`vphone-cli.tar.zst.part_ac`:
+
+```part_ac
+version https://git-lfs.github.com/spec/v1
+oid sha256:f422949080e7f141f32f35f8ea20c1fedffc2b97eadf0390645114feef6bb1aa
+size 1992294400
+
+```
+
+`vphone-cli.tar.zst.part_ad`:
+
+```part_ad
+version https://git-lfs.github.com/spec/v1
+oid sha256:f3acfa47145207b8962ba4d20fb83eb4646934cca768906e65609d7fdde564e7
+size 1992294400
+
+```
+
+`vphone-cli.tar.zst.part_ae`:
+
+```part_ae
+version https://git-lfs.github.com/spec/v1
+oid sha256:efdca69df80386b0aa7af8ac260d9ac576ed1f258429fd4ac21b5bbb87cd78fe
+size 1992294400
+
+```
+
+`vphone-cli.tar.zst.part_af`:
+
+```part_af
+version https://git-lfs.github.com/spec/v1
+oid sha256:4628852da12949361d3ea6efcf8af1532eb52194cc43a4ab4993024267947587
+size 1992294400
+
+```
+
+`vphone-cli.tar.zst.part_ag`:
+
+```part_ag
+version https://git-lfs.github.com/spec/v1
+oid sha256:8bd1551511eb016325918c2d93519829be04feb54727612e74c32e4299670a88
+size 682708069
+
+```
