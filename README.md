@@ -4206,6 +4206,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 ## IOS Emulator
 - https://github.com/ChefKissInc/qemu-apple-silicon
 - https://github.com/Lakr233/vphone-cli [Boot virtual iPhone (iOS) on macOS via Virtualization.framework using PCC research VM; SIP/AMFI disabled, DFU/restore/ramdisk/CFW]
+- https://github.com/34306/vphone-aio [1 script run the vphone]
 
 ## Game Boy
 - https://github.com/xkevio/kevboy [Emulator]
