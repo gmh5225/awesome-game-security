@@ -1,0 +1,936 @@
+Project Path: arc_guheng-re_unflat_e45b2tsx
+
+Source Tree:
+
+```txt
+arc_guheng-re_unflat_e45b2tsx
+├── README.md
+├── flatPlugin.py
+└── unflat
+    ├── cfgUtil.py
+    ├── config.py
+    ├── logger_config.py
+    ├── my_microcode_log.py
+    ├── new_unflattener.py
+    └── remove_dead_code.py
+
+```
+
+`README.md`:
+
+```md
+## 介绍
+本项目是用于OLLVM反混淆的IDA插件, 如果插件出现报错导致IDA崩溃欢迎各位提issues
+
+## 环境需求
+目前测试了ida 7.7版本、ida 9.0 版本和 ida 9.2 版本可以执行。
+
+## 安装
+把 flatPlugin.py 和 unflat 文件夹放入到 ida 文件夹下 plugins 文件夹中即可。
+
+## 注意事项
+如果ida出现报错, 并且在输出窗口中出现“INTERR 51652”, 需要关闭 死代码消除 选项。
+
+## 使用方法
+在 edit->plugin 中点击“OLLVM 反混淆”
+
+<!-- 这是一张图片，ocr 内容为： -->
+![](https://cdn.nlark.com/yuque/0/2026/png/34941015/1772244570486-b98f9f34-269e-40ed-9d25-402d2b951f1d.png)
+
+然后在反编译界面按 F5 刷新即可
+
+<!-- 这是一张图片，ocr 内容为： -->
+![](https://cdn.nlark.com/yuque/0/2026/png/34941015/1772248405357-dbacd03a-63c2-4c0f-b13f-5097457b9862.png)
+
+右键菜单可以启用或关闭选项
+
+## 使用效果
+正常混淆代码 1300 行
+
+<!-- 这是一张图片，ocr 内容为： -->
+![](https://cdn.nlark.com/yuque/0/2026/png/34941015/1772248443759-ec341cd8-fcd7-486c-b098-5706fd73a8f0.png)
+
+开启后 800 行
+
+<!-- 这是一张图片，ocr 内容为： -->
+![](https://cdn.nlark.com/yuque/0/2026/png/34941015/1772248486453-265bf8b7-813d-431c-8d61-3b334bbfb571.png)
+
+对比使用 hrtng 插件是 1200 行
+
+<!-- 这是一张图片，ocr 内容为： -->
+![](https://cdn.nlark.com/yuque/0/2026/png/34941015/1772248572273-88bef0d0-cc9b-463e-a01b-28edeef96706.png)
+
+
+```
+
+`flatPlugin.py`:
+
+```py
+import idaapi
+import ida_kernwin
+import ida_hexrays
+import unflat.config as config
+
+UNOLLVM_ACTION_NAME = "unflat:toggle_ollvm"
+UNBCF_ACTION_NAME = "unflat:toggle_bcf"
+
+class PopupHook(ida_kernwin.UI_Hooks):
+    def finish_populating_widget_popup(self, widget, popup):
+        if idaapi.get_widget_type(widget) == idaapi.BWN_PSEUDOCODE or idaapi.get_widget_type(widget) == idaapi.BWN_DISASM:
+            ida_kernwin.attach_action_to_popup(
+                widget,
+                popup,
+                UNOLLVM_ACTION_NAME,
+                None
+            )
+            ida_kernwin.attach_action_to_popup(
+                widget,
+                popup,
+                UNBCF_ACTION_NAME,
+                None
+            )
+
+class ToggleOllvmHandler(idaapi.action_handler_t):
+
+    def activate(self, ctx):
+        config.enable_ollvm_unflatten = not config.enable_ollvm_unflatten
+
+        state = "开启" if config.enable_ollvm_unflatten else "关闭"
+        print(f"[+] OLLVM 反混淆已{state}")
+        vdui = ida_hexrays.get_widget_vdui(ida_kernwin.get_current_widget())
+        if vdui:
+            vdui.refresh_view(True)
+        return 1
+
+    def update(self, ctx):
+        return idaapi.AST_ENABLE_ALWAYS
+
+class ToggleBCFHandler(idaapi.action_handler_t):
+    def activate(self, ctx):
+        config.enable_remove_dead_code = not config.enable_remove_dead_code
+
+        state = "开启" if config.enable_remove_dead_code else "关闭"
+        print(f"[+] 死代码消除已{state}")
+        vdui = ida_hexrays.get_widget_vdui(ida_kernwin.get_current_widget())
+        if vdui:
+            vdui.refresh_view(True)
+        return 1
+
+    def update(self, ctx):
+        return idaapi.AST_ENABLE_ALWAYS
+
+class MicroPlugin(idaapi.plugin_t):
+    flags = idaapi.PLUGIN_KEEP
+    comment = "Hot reload microcode plugin"
+    help = ""
+    wanted_name = "OLLVM反混淆"
+    wanted_hotkey = ""
+
+    def init(self):
+        idaapi.register_action(
+                idaapi.action_desc_t(
+                    UNOLLVM_ACTION_NAME,
+                    "启用/关闭 OLLVM 反混淆",
+                    ToggleOllvmHandler(),
+                    None,
+                    "Toggle OLLVM unflatten",
+                    0
+                )
+            )
+        idaapi.register_action(
+                idaapi.action_desc_t(
+                    UNBCF_ACTION_NAME,
+                    "启用/关闭 死代码消除",
+                    ToggleBCFHandler(),
+                    None,
+                    "Toggle BCF remove",
+                    0
+                )
+            )
+        self.menu_handler = PopupHook()
+        self.menu_handler.hook()
+        print("[+] Loader initialized")
+        return idaapi.PLUGIN_KEEP
+
+    def run(self, arg):
+        try:
+            import importlib
+
+            import unflat.cfgUtil as cfgUtil
+            importlib.reload(cfgUtil)
+            print("cfgUtil重载成功")
+               
+            import unflat.remove_dead_code as remove_dead_code
+            importlib.reload(remove_dead_code)
+            print("remove_dead_code重载成功")
+            
+            import unflat.new_unflattener as new_unflattener
+            importlib.reload(new_unflattener)
+            print("new_unflattener重载成功")
+
+            new_unflattener.main()
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+
+    def term(self):
+        if self.menu_handler:
+            self.menu_handler.unhook()
+        idaapi.unregister_action(UNOLLVM_ACTION_NAME)
+        idaapi.unregister_action(UNBCF_ACTION_NAME)
+        print("[+] Plugin terminated")
+
+
+def PLUGIN_ENTRY():
+    return MicroPlugin()
+```
+
+`unflat/cfgUtil.py`:
+
+```py
+from ida_hexrays import *
+import logging
+
+logger = logging.getLogger(__name__)
+
+# 条件跳转指令列表，用于识别和修改条件跳转
+CONDITIONAL_JUMP_LIST = [m_ja, m_jae, m_jb, m_jbe, m_jcnd, m_jg, m_jge, m_jl, m_jle, m_jz, m_jnz]
+
+def insert_goto(mblock:mblock_t, target_mblock_serial:int):
+    """
+    在微代码块中插入无条件跳转指令
+    
+    Args:
+        mblock: 目标微代码块
+        target_mblock_serial: 跳转目标块的序列号
+    """
+    new_goto = minsn_t(mblock.end)
+    new_goto.opcode = m_goto
+    new_goto.l = mop_t()
+    new_goto.l.make_blkref(target_mblock_serial)
+    if mblock.tail:
+        mblock.insert_into_block(new_goto, mblock.tail)
+    else:
+        mblock.head = new_goto
+        mblock.tail = new_goto
+
+def insert_jz(mblock:mblock_t, target_mblock_serial:int, cmp_value:int, cmp_mreg:int, cmp_value_size:int, cmp_mreg_size:int):
+    new_jz = minsn_t(mblock.end)
+    new_jz.opcode = m_jz
+    new_jz.l = mop_t()
+    new_jz.l.make_reg(cmp_mreg, cmp_mreg_size)
+    new_jz.r = mop_t()
+    new_jz.r.make_number(cmp_value, cmp_value_size)
+    new_jz.d = mop_t()
+    new_jz.d.make_blkref(target_mblock_serial)
+    if mblock.tail:
+        mblock.insert_into_block(new_jz, mblock.tail)
+    else:
+        mblock.head = new_jz
+        mblock.tail = new_jz
+
+def change_jmp_target(mblock:mblock_t, target_mblock_serial:int):
+    """
+    修改微代码块的跳转目标
+    
+    Args:
+        mblock: 要修改的微代码块
+        target_mblock_serial: 新的跳转目标块序列号
+    """
+    minsn:minsn_t = mblock.tail
+    ori_mblock_serial = 0
+    if not minsn:
+        return
+    if minsn.opcode == m_goto:
+        ori_mblock_serial = minsn.l.b
+        minsn.l.b = target_mblock_serial
+    elif minsn.opcode in CONDITIONAL_JUMP_LIST:
+        ori_mblock_serial = minsn.d.b
+        minsn.d.b = target_mblock_serial
+    else:
+        ori_mblock_serial = mblock.serial + 1
+        insert_goto(mblock, target_mblock_serial)
+    if ori_mblock_serial != 0 and ori_mblock_serial != target_mblock_serial:
+        logger.info(f"改变块关系:{mblock.serial}->{ori_mblock_serial}, {mblock.serial}->{target_mblock_serial}")
+        modify_edge(mblock.mba, mblock.serial, target_mblock_serial, ori_mblock_serial)
+
+def create_mblock(mblock:mblock_t, mblock_serial:int) -> mblock_t:
+    """
+    在指定位置创建新的微代码块
+    
+    Args:
+        mblock: 参考微代码块（用于获取MBA和地址范围）
+        mblock_serial: 新块的序列号
+        
+    Returns:
+        新创建的微代码块
+    """
+    mba:mba_t = mblock.mba
+    new_mblock:mblock_t = mba.insert_block(mblock_serial)
+    new_mblock.start = mba.alloc_fict_ea(mblock.end)
+    new_mblock.end = mba.alloc_fict_ea(mblock.end + 4)
+    return new_mblock
+
+def clear_edge(mba:mba_t, mblock_id: int):
+    """
+    清除指定微代码块的所有后继边
+    
+    Args:
+        mba: 微代码块数组
+        mblock_id: 要清除边的微代码块ID
+    """
+    mblock:mblock_t = mba.get_mblock(mblock_id)
+    mblock_succset = [x for x in mblock.succset]
+    for succset_mblock_id in mblock_succset:
+        modify_edge(mba, mblock_id, old_block_id=succset_mblock_id)
+
+def modify_edge(mba:mba_t, cur_block_id: int, new_block_id: int = 0, old_block_id: int = 0):
+    """
+    修改微代码块之间的边关系（控制流边）
+
+    Args:
+        mba: 微代码块数组
+        cur_block_id: 当前微代码块ID
+        new_block_id: 新的后继块ID（为0表示不添加新边）
+        old_block_id: 要移除的旧后继块ID（为0表示不移除）
+
+    功能:
+        - 移除从cur_block到old_block的边
+        - 添加从cur_block到new_block的边
+        - 更新相关块的前驱和后继集合
+    """
+    cur_block: mblock_t = mba.get_mblock(cur_block_id)
+
+    # 只在需要时获取块
+    new_block = mba.get_mblock(new_block_id) if new_block_id != 0 else None
+    old_block = mba.get_mblock(old_block_id) if old_block_id != 0 else None
+
+    cur_block_succset = [x for x in cur_block.succset]
+    new_block_predset = [x for x in new_block.predset] if new_block else []
+    old_block_predset = [x for x in old_block.predset] if old_block else []
+    old_block_index = len(cur_block_succset)
+
+    logger.debug(f"修改块关系前:cur_block_succset:{cur_block_succset}, new_block_predset:{new_block_predset}, old_block_predset:{old_block_predset}")
+
+    # 移除旧边
+    if old_block_id != 0 and old_block_id in cur_block_succset and old_block:
+        old_block_index = cur_block_succset.index(old_block_id)
+        cur_block_succset.remove(old_block_id)
+        if cur_block_id in old_block_predset:
+            old_block_predset.remove(cur_block_id)
+            old_block.predset.clear()
+            for i in old_block_predset:
+                old_block.predset.push_back(i)
+
+    # 添加新边
+    if new_block_id != 0 and new_block_id not in cur_block_succset and new_block:
+        cur_block_succset.insert(old_block_index, new_block_id)
+        if cur_block_id not in new_block_predset:
+            new_block_predset.append(cur_block_id)
+            new_block.predset.clear()
+            for i in new_block_predset:
+                new_block.predset.push_back(i)
+
+    # 更新当前块的后继集合
+    cur_block.succset.clear()
+    for i in cur_block_succset:
+        cur_block.succset.push_back(i)
+
+    logger.debug(f"修改块关系后:cur_block_succset:{cur_block_succset}, new_block_predset:{new_block_predset}, old_block_predset:{old_block_predset}")
+    
+def check_mblock_tail_opcode_is_goto(mblock:mblock_t):
+    """
+    检查微代码块的尾部指令是否为无条件跳转
+    
+    Args:
+        mblock: 要检查的微代码块
+        
+    Returns:
+        True 如果尾部是goto指令, 否则返回False
+    """
+    minsn:minsn_t = mblock.tail
+    if minsn.opcode == m_goto:
+        return True
+    else:
+        return False
+    
+def create_goto_mblock(cur_mblock:mblock_t, target_mblock_serial:int) -> mblock_t:
+    """
+    创建一个包含无条件跳转指令的微代码块
+    
+    Args:
+        cur_mblock: 当前微代码块（用于确定新块的位置）
+        target_mblock_serial: 跳转目标块的序列号
+        
+    Returns:
+        新创建的包含goto指令的微代码块
+    """
+    mba:mba_t = cur_mblock.mba
+    new_mblock = create_mblock(cur_mblock, cur_mblock.serial + 1)
+    insert_goto(new_mblock, target_mblock_serial)
+    new_mblock.type = BLT_1WAY
+    new_mblock.flags |= MBL_GOTO
+    if not check_mblock_tail_opcode_is_goto(cur_mblock):
+        modify_edge(mba, cur_mblock.serial, new_mblock.serial, new_mblock.serial + 1)
+    else:
+        modify_edge(mba, cur_mblock.serial, new_mblock.serial)
+    modify_edge(mba, new_mblock.serial, target_mblock_serial)
+    new_mblock.make_lists_ready()
+    new_mblock.mark_lists_dirty()
+    mba.mark_chains_dirty()
+    return new_mblock
+
+def create_jz_mblock(cur_mblock:mblock_t, target_mblock_serial:int, cmp_value: int, cmp_mreg: int, cmp_value_size: int = 4, cmp_mreg_size: int = 4) -> mblock_t:
+    """
+    创建一个包含条件跳转指令（等于则跳转）的微代码块
+    
+    Args:
+        cur_mblock: 当前微代码块（用于确定新块的位置）
+        target_mblock_serial: 跳转目标块的序列号
+        cmp_value: 比较的值
+        cmp_mreg: 比较的寄存器
+        cmp_value_size: 比较值的大小（字节数），默认为4
+        cmp_mreg_size: 比较寄存器的大小（字节数），默认为4
+        
+    Returns:
+        新创建的包含jz指令的微代码块
+    """
+    mba:mba_t = cur_mblock.mba
+    new_mblock = create_mblock(cur_mblock, cur_mblock.serial + 1)
+    insert_jz(new_mblock, target_mblock_serial, cmp_value, cmp_mreg, cmp_value_size, cmp_mreg_size)
+    new_mblock.type = BLT_2WAY
+    new_mblock.flags |= MBL_GOTO
+    if not check_mblock_tail_opcode_is_goto(cur_mblock):
+        modify_edge(mba, cur_mblock.serial, new_mblock.serial, new_mblock.serial + 1)
+    else:
+        modify_edge(mba, cur_mblock.serial, new_mblock.serial)
+    modify_edge(mba, new_mblock.serial, new_mblock.serial + 1)
+    modify_edge(mba, new_mblock.serial, target_mblock_serial)
+    new_mblock.make_lists_ready()
+    new_mblock.mark_lists_dirty()
+    mba.mark_chains_dirty()
+    return new_mblock
+
+def optimize_block(mba:mba_t):
+    """
+    优化微代码块数组中的所有块
+    
+    Args:
+        mba: 微代码块数组
+    
+    功能:
+        - 对每个块的每条指令进行优化
+        - 对每个块本身进行优化
+    """
+    for i in range(1, mba.qty - 1):
+        mblock:mblock_t = mba.get_mblock(i)
+        minsn:minsn_t = mblock.tail
+        while minsn:
+            mblock.optimize_insn(minsn)
+            minsn = minsn.prev
+        mblock.optimize_block()
+```
+
+`unflat/config.py`:
+
+```py
+enable_ollvm_unflatten = True
+enable_remove_dead_code = True
+```
+
+`unflat/logger_config.py`:
+
+```py
+import logging
+import os
+import datetime
+from typing import Optional
+
+# 日志目录（使用当前脚本所在目录）
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_DIR = os.path.join(CURRENT_DIR, "log")
+
+# 日志级别
+LOG_LEVEL = logging.INFO
+
+# 日志格式
+LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
+# 全局日志配置标志
+_logging_configured = False
+
+
+def setup_logging(log_dir: str = LOG_DIR, 
+                 log_level: int = LOG_LEVEL,
+                 log_format: str = LOG_FORMAT,
+                 force: bool = True) -> bool:
+    """
+    配置全局日志系统
+    
+    Args:
+        log_dir: 日志文件目录
+        log_level: 日志级别
+        log_format: 日志格式
+        force: 是否强制重新配置
+        
+    Returns:
+        配置是否成功
+    """
+    global _logging_configured
+    
+    if _logging_configured and not force:
+        return True
+    
+    try:
+        # 确保日志目录存在
+        os.makedirs(log_dir, exist_ok=True)
+        
+        # 获取当前时间用于日志文件名
+        current_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        log_filename = f"unflattener_{current_time}.log"
+        log_file_path = os.path.join(log_dir, log_filename)
+        
+        # 配置日志
+        logging.basicConfig(
+            level=log_level,
+            format=log_format,
+            handlers=[
+                logging.FileHandler(log_file_path, encoding='utf-8'),
+                logging.StreamHandler()
+            ],
+            force=force
+        )
+        
+        _logging_configured = True
+        print(f"日志配置完成，日志文件路径: {log_file_path}")
+        return True
+        
+    except Exception as e:
+        print(f"日志配置失败: {e}")
+        return False
+
+
+def get_logger(name: Optional[str] = None) -> logging.Logger:
+    """
+    获取日志记录器
+    
+    Args:
+        name: 日志记录器名称，通常使用 __name__
+        
+    Returns:
+        日志记录器实例
+    """
+    # 确保日志已配置
+    if not _logging_configured:
+        setup_logging()
+    
+    return logging.getLogger(name)
+
+
+# 初始化日志配置
+setup_logging()
+```
+
+`unflat/my_microcode_log.py`:
+
+```py
+from ida_hexrays import *
+import os
+
+class mba_printer(vd_printer_t):
+    def __init__(self):
+        vd_printer_t.__init__(self)
+        self.mc = []
+
+    def get_mc(self):
+        return self.mc
+
+    def _print(self, indent, line):
+        self.mc.append("".join([c if 0x20 <= ord(c) <= 0x7e else "" for c in line])+"\n")
+        return 1
+
+def write_mc_to_file(mba: mbl_array_t, filename: str, mba_flags: int = 0) -> bool:
+    if not mba:
+        return False
+
+    vp = mba_printer()
+    mba.set_mba_flags(mba_flags)
+    mba._print(vp)
+
+    with open(filename, "w") as f:
+        f.writelines(vp.get_mc())
+    return True
+
+def dump_microcode_for_debug(mba: mbl_array_t, log_dir_path: str, name: str = ""):
+    mc_filename = os.path.join(log_dir_path, "0x{0:x}_maturity_{1}_{2}.log".format(mba.entry_ea, mba.maturity, name))
+    print("保存microcode到{0}".format(mc_filename))
+    write_mc_to_file(mba, mc_filename)
+```
+
+`unflat/new_unflattener.py`:
+
+```py
+from ida_hexrays import *
+from .cfgUtil import *
+from .my_microcode_log import *
+from .instructions import Instructions
+from .remove_dead_code import RemoveDeadCode
+import logging
+from .logger_config import get_logger
+from typing import TypedDict, List
+from . import config
+
+logger = get_logger(__name__)
+
+JMP_OPCODE_HANDLED = [m_jnz, m_jz, m_jae, m_jb, m_ja, m_jbe, m_jge, m_jg, m_jl, m_jle]
+
+hook_instance = None
+class StateAssignment(TypedDict):
+    mblock_id: int
+    storage: str
+    value: int
+
+class PossibleState(TypedDict):
+    mblock_id: int
+    valrange_name: str
+    valrange_value: int
+
+class mblock_valranges_filter(vd_printer_t):
+    def __init__(self):
+        vd_printer_t.__init__(self)
+        self.valranges = []
+        
+    def get_valranges(self):
+        return self.valranges
+    
+    def _print(self, indent, line):
+        if "VALRANGES" in line or "BLOCK" in line:
+            self.valranges.append("".join([c if 0x20 <= ord(c) <= 0x7e else "" for c in line]))
+        return 1
+
+class Unflattener:
+
+    def __init__(self, mba:mba_t, dispatcher_id = 0):
+        self.mba = mba
+        self.dispatcher_id = dispatcher_id
+        self.dispatcher_ea = mba.get_mblock(dispatcher_id).start
+        self.storage_carrier = None
+        self.storage_list:list[mop_t] = [] # 存储所有可能用在ollvm分发的变量
+        self.state_assignments: list[StateAssignment] = []  # 存储状态变量的赋值语句
+        self.possible_states: list[PossibleState] = []  # 存储所有可能的状态值
+
+    def find_dispatcher_id(self):
+        """
+        查找分发块的序号, 查找方法为找到最多入度的块, 如果OLLVM中有预处理块则会被干扰, 需要手动指定分发块序号
+        """
+        max_input_num = -1
+        for i in range(1, self.mba.qty - 1):
+            mblock: mblock_t = self.mba.get_mblock(i)
+            num_input = mblock.npred()
+            if num_input > max_input_num:
+                max_input_num = num_input
+                self.dispatcher_id = i
+
+    def calc_entroy(self, value: int) -> bool:
+        """
+        计算熵值, 计算方法:判断每个字节位上是否都有值
+        """
+        count = 0
+        for i in range(4):
+            if value >> (i * 8) & 0xff != 0:
+                count += 1
+        return count >= 4
+
+    def get_dispatcher_use_compare(self):
+        """
+        找到分发块中用于比较的存储器(寄存器或者栈上变量)
+        """
+        dispatcher_mblock: mblock_t = self.mba.get_mblock(self.dispatcher_id)
+        minsn: minsn_t = dispatcher_mblock.tail
+        logger.debug("minsn: %s", minsn.dstr())
+        if minsn.opcode in JMP_OPCODE_HANDLED:
+            mop_l :mop_t= minsn.l
+            if mop_l.t == mop_S:
+                tmp = "%0x{:X}".format(mop_l.s.off)
+                logger.debug("找到栈上变量: %s", tmp)
+                self.storage_carrier = tmp
+            elif mop_l.t == mop_r:
+                logger.debug("找到寄存器: %s", get_mreg_name(mop_l.r, mop_l.size))
+                self.storage_carrier = get_mreg_name(mop_l.r, mop_l.size)
+        else:
+            logger.debug("不是主分发块")
+
+    def find_use_compare(self):
+        class GetOpt(minsn_visitor_t):
+            def __init__(self):
+                super().__init__()
+                self.mop_list = {}
+
+            def visit_minsn(self):
+                if self.curins.opcode in JMP_OPCODE_HANDLED:
+                    mop_l :mop_t= self.curins.l
+                    if mop_l.t == mop_S:
+                        tmp = "%0x{:X}".format(mop_l.s.off)
+                        # logger.debug("找到栈上变量: %s", tmp)
+                        if tmp not in self.mop_list.keys():
+                            self.mop_list[tmp] = 1
+                        else:
+                            self.mop_list[tmp] += 1
+                    elif mop_l.t == mop_r:
+                        mreg = get_mreg_name(mop_l.r, mop_l.size)
+                        if mreg not in self.mop_list.keys():
+                            self.mop_list[mreg] = 1
+                        else:
+                            self.mop_list[mreg] += 1
+                return 0
+            
+            def get_mop_list(self):
+                return self.mop_list
+
+        getopt = GetOpt()
+        self.mba.for_all_topinsns(getopt)
+        mop_list:dict = getopt.get_mop_list()
+        sort_mop_list = sorted(mop_list.items(), key=lambda x: x[1], reverse=True)
+        self.storage_carrier = sort_mop_list[0][0]
+
+
+    def find_mblock_valranges(self):
+        # 找到所有块的VALRANGES
+        mba = self.mba
+        vp = mblock_valranges_filter()
+        mba._print(vp)
+        # logger.info(vp.get_valranges())
+        for line in vp.get_valranges():
+            if "BLOCK" in line:
+                mblock_id = int(line.split("BLOCK ")[1].split(" ")[0])
+                continue
+            # mblock_id = int(line.split(". ")[0])
+            # logger.debug("mblock_id: %d", mblock_id)
+            valranges_value = line.split("VALRANGES: ")[1]
+            # logger.debug("valranges_value: %s", valranges_value)
+            valranges_list = valranges_value.split(", ")
+            for valrange in valranges_list:
+                if ":==" in valrange:
+                    valrange_name = valrange.split(":==")[0]
+                    # logger.debug("valrange_name: %s", valrange_name)
+                    valrange_value = valrange.split(":==")[1]
+                    # logger.debug("valrange_value: 0x%x", int(valrange_value, 16))
+                    if self.calc_entroy(int(valrange_value, 16)):
+                        logger.info("valrange_name[%s] valrange_value[0x%x] 有足够的熵", valrange_name, int(valrange_value, 16))
+                        self.possible_states.append({
+                            'mblock_id': mblock_id,
+                            'valrange_name': valrange_name.split(".")[0],
+                            'valrange_value': int(valrange_value, 16)
+                        })
+        logging.debug("找到了所有块的可能性状态")
+        if logger.level < logging.INFO:
+            for flow_state in self.possible_states:
+                logging.debug(flow_state)
+
+    def find_next_status_in_mblock(self):
+        """
+        找到所有块中使用到状态赋值的语句并将内容记录
+        """
+        for mblock_id in range(1, self.mba.qty - 1):
+            mblock :mblock_t = self.mba.get_mblock(mblock_id)
+            minsn :minsn_t = mblock.head
+            while minsn:
+                if (minsn.opcode == m_mov and 
+                    minsn.l.t == mop_n and
+                    self.calc_entroy(minsn.l.nnn.value)):
+                    if minsn.d.t == mop_r:
+                        self.state_assignments.append({'mblock_id': mblock_id, 
+                                                    'storage': get_mreg_name(minsn.d.r, minsn.d.size),
+                                                    'value': minsn.l.nnn.value})
+                    elif minsn.d.t == mop_S:
+                        self.state_assignments.append({'mblock_id': mblock_id, 
+                                                    'storage': "%0x{:X}".format(minsn.d.s.off),
+                                                    'value': minsn.l.nnn.value})
+                minsn = minsn.next
+        logging.debug("找到了所有块中赋值的状态值")
+        if logger.level < logging.INFO:
+            for flow_block in self.state_assignments:
+                logging.debug(flow_block)
+
+    def find_in_possible_states(self, valrange_name=None, valrange_value=None):
+        for flow_block in self.possible_states:
+            if valrange_name != None and valrange_value != None:
+                if flow_block['valrange_value'] == valrange_value and flow_block['valrange_name'] == valrange_name:
+                    return flow_block
+            elif valrange_value != None:
+                 if flow_block['valrange_value'] == valrange_value:
+                     return flow_block
+        return None
+    
+    def deflat_level_1(self):
+        """
+        剔除具有双重变量的块
+        """
+        seen = set()
+        black_list = set()
+        for state_assignment in self.state_assignments:
+            mblock_id = state_assignment['mblock_id']
+            if mblock_id in seen:
+                black_list.add(mblock_id)
+            seen.add(mblock_id)
+        for state_assignment in self.state_assignments:
+            flow_block = self.find_in_possible_states(valrange_name=state_assignment['storage'], valrange_value=state_assignment['value'])
+            if flow_block != None:
+                next_mblock_id = flow_block['mblock_id']
+                cur_mblock_id = state_assignment['mblock_id']
+                if cur_mblock_id not in black_list:
+                    cur_mblock = self.mba.get_mblock(cur_mblock_id)
+                    change_jmp_target(cur_mblock, next_mblock_id)
+                else:
+                    logging.debug(f"在同一个mblock{cur_mblock_id}里面存在两重赋值")
+
+    def deflat_level_2(self):
+        """
+        暴力匹配
+        """
+        for state_assignment in self.state_assignments:
+            flow_block = self.find_in_possible_states(valrange_value=state_assignment['value'])
+            if flow_block != None:
+                next_mblock_id = flow_block['mblock_id']
+                cur_mblock_id = state_assignment['mblock_id']
+                cur_mblock = self.mba.get_mblock(cur_mblock_id)
+                change_jmp_target(cur_mblock, next_mblock_id)
+
+    def deflat_level_3(self):
+        """
+        仅修改最多分支部分
+        """
+        self.find_use_compare()
+        for state_assignment in self.state_assignments:
+            if state_assignment['storage'] == self.storage_carrier:
+                flow_block = self.find_in_possible_states(valrange_value=state_assignment['value'])
+                if flow_block != None:
+                    next_mblock_id = flow_block['mblock_id']
+                    cur_mblock_id = state_assignment['mblock_id']
+                    cur_mblock = self.mba.get_mblock(cur_mblock_id)
+                    change_jmp_target(cur_mblock, next_mblock_id)
+
+    def deflat_level_4(self):
+        """
+        安全模式
+        """
+        for state_assignment in self.state_assignments:
+            flow_block = self.find_in_possible_states(valrange_name=state_assignment['storage'], valrange_value=state_assignment['value'])
+            if flow_block != None:
+                next_mblock_id = flow_block['mblock_id']
+                cur_mblock_id = state_assignment['mblock_id']
+                cur_mblock = self.mba.get_mblock(cur_mblock_id)
+                change_jmp_target(cur_mblock, next_mblock_id)
+
+    def deflat(self, level=1):
+        nb_patch = 0
+        if self.dispatcher_id == 0:
+           self.find_dispatcher_id()
+        self.get_dispatcher_use_compare()
+        self.find_mblock_valranges()
+        self.find_next_status_in_mblock()
+        if level == 1:
+            self.deflat_level_1()
+        if level == 2:
+            self.deflat_level_2()
+        if level == 3:
+            self.deflat_level_3()
+        if level == 4:
+            self.deflat_level_4()
+        return nb_patch
+
+class HexraysDecompilationHook(Hexrays_Hooks):
+    def __init__(self):
+        super().__init__()
+        self.deflat_list = []
+    
+    def glbopt(self, mba: mbl_array_t):
+        # dump_microcode_for_debug(mba, "D:\\project\\ida_split", "before_unflatten")
+        # unflat.find_mlbock_valranges(mba)
+        # if not config.enable_ollvm_unflatten:
+        #     return MERR_OK
+        if mba.entry_ea not in self.deflat_list:
+            if config.enable_remove_dead_code:
+                rdc = RemoveDeadCode()
+                mba.for_all_topinsns(rdc)
+                rdc.optimizer()
+            # struction = Instructions(mba)
+            # struction.instructions_fix()
+            if config.enable_ollvm_unflatten:
+                unflat = Unflattener(mba)
+                unflat.deflat(1)
+            # mba.remove_empty_and_unreachable_blocks()
+            # dump_microcode_for_debug(mba, "D:\\project\\ida_split", "after_unflatten")
+            self.deflat_list.append(mba.entry_ea)
+            return MERR_LOOP
+        else:
+            self.deflat_list.remove(mba.entry_ea)
+            return MERR_OK
+
+# testHook = HexraysDecompilationHook()
+# print(testHook.hook())
+
+def main():
+    global hook_instance
+
+    if hook_instance:
+        hook_instance.unhook()
+
+    hook_instance = HexraysDecompilationHook()
+    hook_instance.hook()
+    print("ollvm反混淆已加载")
+
+```
+
+`unflat/remove_dead_code.py`:
+
+```py
+from ida_hexrays import *
+import ida_segment
+import logging
+from .logger_config import get_logger
+
+class RemoveDeadCode(minsn_visitor_t):
+    def __init__(self):
+        self.minsn_line = 0
+        self.mop_list = []
+        self.black_mop_list = []
+        super().__init__()
+
+    def visit_minsn(self):
+        minsn = self.curins
+        self._optimizer(minsn)
+        return 0
+
+    def _optimizer(self, minsn:minsn_t):
+        # mopOptimizer = MopOptimizer()
+        # minsn.for_all_ops(mopOptimizer)
+        logging.debug(f"{self.minsn_line}: {minsn.dstr()}")
+        self._find_ori_minsn(minsn)
+        self.minsn_line += 1
+
+    def _find_ori_minsn(self, minsn:minsn_t):
+        # print(minsn.dstr())
+        if minsn.l.t == mop_d:
+            self._find_ori_minsn(minsn.l.d)
+        if minsn.r.t == mop_d:
+            self._find_ori_minsn(minsn.r.d)
+        if minsn.r.t == mop_v and minsn.r.size > -1:
+            self.mop_list.append(minsn.r)
+        if minsn.l.t == mop_v and minsn.l.size > -1:
+            self.mop_list.append(minsn.l)
+        if minsn.d.t == mop_v and minsn.l.size > -1:
+            self.black_mop_list.append(minsn.d)
+
+    def optimizer(self):
+        black_mop_addr = []
+        for mop in self.black_mop_list:
+            black_mop_addr.append(mop.g)
+        for mop in self.mop_list:
+            mop_str = mop.dstr()
+            seg:ida_segment.segment_t = ida_segment.getseg(mop.g)
+            if mop.g not in black_mop_addr and ida_segment.get_segm_name(seg) == ".bss":
+                mop.make_number(0, mop.size)
+                mop_new_str = mop.dstr()
+                logging.info(f"修改{mop_str} -> {mop_new_str}")
+```
