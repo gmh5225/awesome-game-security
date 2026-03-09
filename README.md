@@ -878,6 +878,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/zhuzhu-Top/deobf [libtprt.so]
 - https://github.com/cdong1012/ollvm-unflattener [unflattener]
 - https://github.com/JbvrgtonYT/ollvm-unflattener [unflattener]
+- https://github.com/guheng-re/unflat [unflattener]
 
 > Dynamic Binary Instrumentation
 - https://github.com/hzqst/unicorn_pe
@@ -1501,6 +1502,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/cristeigabriela/IDAFind [Ctrl+F search support for Pseudocode windows]
 - https://github.com/thalium/symless [IDA Pro plugin that helps reconstruct structures]
 - https://github.com/buzzer-re/Rikugan [A reverse-engineering agent for IDA Pro and Binary Ninja that integrates a multi-provider LLM directly into your analysis UI]
+- https://github.com/guheng-re/unflat [unflattener]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
