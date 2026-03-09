@@ -1289,7 +1289,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/mandiant/flare-vm
 - https://github.com/hzqst/VmwareHardenedLoader
 - https://github.com/d4rksystem/VMwareCloak
-- https://github.com/utmapp/UTM [Run virtual machines on iOS]
+- https://github.com/utmapp/UTM [Virtual machines for iOS and macOS]
 
 > Decompiler
 - IDA Pro
