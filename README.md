@@ -1693,6 +1693,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/isiddique2024/Page-Table-Injector [Page Table Injector (PT-Injector)]
 - https://github.com/xan105/Mini-Launcher [Application launcher with DLL Injection and Lua Scripting]
 - https://github.com/a0yark/DXInject-UC [D3D11 GPU payload transport + compute shader decode, GPU-assisted process hollowing (research)]
+- https://github.com/M3351AN/ZhangBing-Injector [DLL injector using WHQL-signed driver; credits kdmapper]
 
 > Injection:Linux
 - https://github.com/itaymigdal/awesome-injection [awesome injection]
