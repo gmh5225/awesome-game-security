@@ -1503,6 +1503,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/thalium/symless [IDA Pro plugin that helps reconstruct structures]
 - https://github.com/buzzer-re/Rikugan [A reverse-engineering agent for IDA Pro and Binary Ninja that integrates a multi-provider LLM directly into your analysis UI]
 - https://github.com/guheng-re/unflat [unflattener]
+- https://github.com/Dump-GUY/ApplyCalleeTypeEx [ApplyCalleeType reborn for IDA Pro 9.3 — apply function prototype to indirect CALL for correct decompiler/disasm; IDA 8.x–9.3+]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
