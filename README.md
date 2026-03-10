@@ -1546,6 +1546,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/mrphrazer/obfuscation_analysis [Binary Ninja plugin to analyze and simplify obfuscated code]
 - https://github.com/ScriptWare-Software/native-predicate-solver [Binary Ninja plugin for removing opaque predicates]
 - https://github.com/buzzer-re/Rikugan [A reverse-engineering agent for IDA Pro and Binary Ninja that integrates a multi-provider LLM directly into your analysis UI]
+- https://github.com/banteg/bn [binary ninja cli for agents]
 
 > Ghidra Plugins
 - https://github.com/AllsafeCyberSecurity/awesome-ghidra [List]
