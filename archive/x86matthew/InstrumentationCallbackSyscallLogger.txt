@@ -1,0 +1,561 @@
+Project Path: arc_x86matthew_InstrumentationCallbackSyscallLogger_jiwpb2ai
+
+Source Tree:
+
+```txt
+arc_x86matthew_InstrumentationCallbackSyscallLogger_jiwpb2ai
+├── LICENSE
+├── README.md
+└── SyscallLogger.cpp
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 x86matthew
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Instrumentation Callback Syscall Logger
+A simple proof-of-concept Windows syscall logger using the NT instrumentation callback mechanism. I wrote this several years ago, but I've decided to post it now as I've been asked about the topic on many occasions.
+
+## Overview
+
+Windows allows a process to register an instrumentation callback via `NtSetInformationProcess(ProcessInstrumentationCallback)`. This callback is invoked on every return from a kernel syscall, giving user-mode code the opportunity to inspect each call before execution resumes.
+
+This project:
+1. Builds a sorted syscall name table from `ntdll.dll` (NT table) and `win32u.dll` (Win32k table) export lists at runtime.
+2. Allocates and registers a small x64 assembly stub as the instrumentation callback.
+3. The stub atomically stores the current thread ID into a shared slot to notify the handler, and spin-waits for the handler to finish.
+4. A dedicated handler thread waits for syscalls on other threads, suspends the target thread, queries `ThreadLastSystemCall` via `NtQueryInformationThread`, logs the syscall name, first param value, and return value, then clears the shared slot to allow the original thread to continue.
+
+A separate handler thread is required because calling `NtQueryInformationThread(ThreadLastSystemCall)` on the current thread always returns the query call itself (`NtQueryInformationThread`), which is useless for obvious reasons. Instead, each thread that triggers the callback stores its ID in the shared slot and spins until the background handler thread picks it up, suspends it, and performs the query on its behalf. This is very inefficient and introduces an obvious bottleneck - only one thread is processed at a time, and every other intercepted syscall blocks until the handler is ready.
+
+Compounding this, the handler thread itself must spin in a busy-wait loop polling the shared slot, rather than using an event-driven approach. The reason for this is that the threads waiting in the callback cannot execute any syscalls while blocked - doing so would overwrite the `ThreadLastSystemCall` value before the handler reads it. Since an efficient signalling mechanism would necessitate the use of syscalls, a conventional queue is not viable here, and a busy-wait spin loop is the only workable option.
+
+In practice, this was not a concern. The tool was written to assist with tracing a specific application (CTF challenge) where performance was not critical.
+
+## Screenshot
+
+<img width="1011" height="536" alt="image" src="https://github.com/user-attachments/assets/18ff7f98-efe6-44fe-9deb-702677d16abc" />
+
+```
+
+`SyscallLogger.cpp`:
+
+```cpp
+#include <stdio.h>
+#include <windows.h>
+
+#define ThreadLastSystemCall 21
+#define ProcessInstrumentationCallback 0x28
+
+struct PROCESS_INSTRUMENTATION_CALLBACK_INFORMATION
+{
+	ULONG Version;
+	ULONG Reserved;
+	PVOID Callback;
+};
+
+struct THREAD_LAST_SYSCALL_INFORMATION
+{
+	PVOID FirstArgument;
+	USHORT SystemCallNumber;
+};
+
+struct SYSCALL_NAME_ENTRY
+{
+	char szName[128];
+	DWORD dwVirtualAddress;
+};
+
+NTSTATUS (WINAPI *pNtQueryInformationThread)(HANDLE ThreadHandle, DWORD ThreadInformationClass, PVOID ThreadInformation, ULONG ThreadInformationLength, PULONG ReturnLength) = NULL;
+NTSTATUS (WINAPI *pNtSetInformationProcess)(HANDLE ProcessHandle, DWORD ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength) = NULL;
+
+SYSCALL_NAME_ENTRY *gpNtdllSyscallList = NULL;
+DWORD gdwNtdllSyscallCount = 0;
+
+SYSCALL_NAME_ENTRY *gpWin32uSyscallList = NULL;
+DWORD gdwWin32uSyscallCount = 0;
+
+VOID *gpCallbackCode = NULL;
+DWORD gdwCurrentSyscallThreadID = 0;
+BOOL gbInstrumentationCallbackReady = 0;
+
+// (this function avoids deadlocks if another thread is blocked while already calling printf)
+VOID SafePrintf(char *pFormat, ...)
+{
+	va_list args;
+	char szOutput[1024];
+
+	va_start(args, pFormat);
+	int iLength = vsnprintf_s(szOutput, sizeof(szOutput), _TRUNCATE, pFormat, args);
+	va_end(args);
+
+	if(iLength > 0)
+	{
+		DWORD dwBytesWritten;
+		WriteFile(GetStdHandle(STD_OUTPUT_HANDLE), szOutput, (DWORD)iLength, &dwBytesWritten, NULL);
+	}
+}
+
+int GenerateSyscallNameList_Compare(const void *pEntry1, const void *pEntry2)
+{
+	DWORD dwAddress1 = ((SYSCALL_NAME_ENTRY*)pEntry1)->dwVirtualAddress;
+	DWORD dwAddress2 = ((SYSCALL_NAME_ENTRY*)pEntry2)->dwVirtualAddress;
+	if(dwAddress1 > dwAddress2)
+	{
+		return 1;
+	}
+	else if(dwAddress1 < dwAddress2)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+IMAGE_EXPORT_DIRECTORY *GetExportHeader(VOID *pModuleBase)
+{
+	IMAGE_DOS_HEADER *pImageDosHeader = NULL;
+	IMAGE_NT_HEADERS *pImageNtHeader = NULL;
+	IMAGE_DATA_DIRECTORY *pExportDataDirectory = NULL;
+
+	pImageDosHeader = (IMAGE_DOS_HEADER*)pModuleBase;
+	if(pImageDosHeader->e_magic != IMAGE_DOS_SIGNATURE)
+	{
+		return NULL;
+	}
+
+	pImageNtHeader = (IMAGE_NT_HEADERS*)((BYTE*)pModuleBase + pImageDosHeader->e_lfanew);
+	if(pImageNtHeader->Signature != IMAGE_NT_SIGNATURE)
+	{
+		return NULL;
+	}
+
+	pExportDataDirectory = &pImageNtHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+	if(pExportDataDirectory->VirtualAddress == 0 || pExportDataDirectory->Size == 0)
+	{
+		return NULL;
+	}
+
+	return (IMAGE_EXPORT_DIRECTORY*)((BYTE*)pModuleBase + pExportDataDirectory->VirtualAddress);
+}
+
+SYSCALL_NAME_ENTRY *GenerateSyscallNameList(HMODULE hModule, char *pExportNamePrefix, DWORD *pdwSyscallCount)
+{
+	IMAGE_EXPORT_DIRECTORY *pExportHeader = NULL;
+	char *pExportName = NULL;
+	WORD *pwAddressOfNameOrdinals = NULL;
+	DWORD *pdwAddressOfNames = NULL;
+	DWORD *pdwAddressOfFunctions = NULL;
+	DWORD dwCount = 0;
+	SYSCALL_NAME_ENTRY *pSyscallNameList = NULL;
+	DWORD dwCurrIndex = 0;
+
+	// get export directory
+	pExportHeader = GetExportHeader(hModule);
+	if(pExportHeader == NULL)
+	{
+		return NULL;
+	}
+
+	// get export header virtual addresses
+	pwAddressOfNameOrdinals = (WORD*)((BYTE*)hModule + pExportHeader->AddressOfNameOrdinals);
+	pdwAddressOfNames = (DWORD*)((BYTE*)hModule + pExportHeader->AddressOfNames);
+	pdwAddressOfFunctions = (DWORD*)((BYTE*)hModule + pExportHeader->AddressOfFunctions);
+
+	// count syscall exports
+	for(DWORD i = 0; i < pExportHeader->NumberOfNames; i++)
+	{
+		pExportName = (char*)((BYTE*)hModule + pdwAddressOfNames[i]);
+		if(strncmp(pExportName, pExportNamePrefix, strlen(pExportNamePrefix)) != 0)
+		{
+			continue;
+		}
+		dwCount++;
+	}
+
+	// allocate list
+	pSyscallNameList = (SYSCALL_NAME_ENTRY*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwCount * sizeof(SYSCALL_NAME_ENTRY));
+	if(pSyscallNameList == NULL)
+	{
+		return NULL;
+	}
+
+	// copy export names to list
+	dwCurrIndex = 0;
+	for(DWORD i = 0; i < pExportHeader->NumberOfNames; i++)
+	{
+		// store syscall name
+		pExportName = (char*)((BYTE*)hModule + pdwAddressOfNames[i]);
+		if(strncmp(pExportName, pExportNamePrefix, strlen(pExportNamePrefix)) != 0)
+		{
+			continue;
+		}
+		strncpy_s(pSyscallNameList[dwCurrIndex].szName, sizeof(pSyscallNameList[dwCurrIndex].szName), pExportName, _TRUNCATE);
+		pSyscallNameList[dwCurrIndex].dwVirtualAddress = pdwAddressOfFunctions[pwAddressOfNameOrdinals[i]];
+
+		// fix syscall name (Zw - > Nt)
+		pSyscallNameList[dwCurrIndex].szName[0] = 'N';
+		pSyscallNameList[dwCurrIndex].szName[1] = 't';
+
+		dwCurrIndex++;
+	}
+
+	// sort list by virtual address
+	qsort(pSyscallNameList, dwCount, sizeof(SYSCALL_NAME_ENTRY), GenerateSyscallNameList_Compare);
+
+	*pdwSyscallCount = dwCount;
+
+	return pSyscallNameList;
+}
+
+BOOL CreateSyscallLists()
+{
+	HMODULE hWin32u = NULL;
+
+	// generate syscall name list for ntdll.dll (use "Zw" prefix to filter out non-syscalls such as NtdllDefWindowProc_A)
+	gpNtdllSyscallList = GenerateSyscallNameList(GetModuleHandleA("ntdll.dll"), "Zw", &gdwNtdllSyscallCount);
+	if(gpNtdllSyscallList == NULL)
+	{
+		return 1;
+	}
+
+	// generate syscall name list for win32u.dll
+	hWin32u = LoadLibraryA("win32u.dll");
+	if(hWin32u == NULL)
+	{
+		return 1;
+	}
+	gpWin32uSyscallList = GenerateSyscallNameList(hWin32u, "Nt", &gdwWin32uSyscallCount);
+	if(gpWin32uSyscallList == NULL)
+	{
+		return 1;
+	}
+	FreeLibrary(hWin32u);
+
+	return 0;
+}
+
+char *GetSyscallName(DWORD dwSyscallIndex)
+{
+	DWORD dwTableIndex = 0;
+	DWORD dwEntryIndex = 0;
+	SYSCALL_NAME_ENTRY *pSyscallEntry = NULL;
+
+	// extract table and entry index from syscall number
+	dwTableIndex = (dwSyscallIndex >> 12) & 0x3;
+	dwEntryIndex = dwSyscallIndex & 0xFFF;
+
+	if(dwTableIndex == 0)
+	{
+		// ntdll / ntoskrnl
+		if(dwEntryIndex >= gdwNtdllSyscallCount)
+		{
+			return NULL;
+		}
+		pSyscallEntry = &gpNtdllSyscallList[dwEntryIndex];
+	}
+	else if(dwTableIndex == 1)
+	{
+		// win32u / win32k
+		if(dwEntryIndex >= gdwWin32uSyscallCount)
+		{
+			return NULL;
+		}
+		pSyscallEntry = &gpWin32uSyscallList[dwEntryIndex];
+	}
+	else
+	{
+		// invalid table index
+		return NULL;
+	}
+
+	return pSyscallEntry->szName;
+}
+
+VOID HandleSyscallForThread(DWORD dwThreadID)
+{
+	// open target thread
+	HANDLE hThread = OpenThread(THREAD_ALL_ACCESS, 0, dwThreadID);
+	if(hThread == NULL)
+	{
+		SafePrintf("Failed to open thread %u (%u)\n", dwThreadID, GetLastError());
+		return;
+	}
+
+	// occasionally NtQueryInformationThread(ThreadLastSystemCall) fails with error 0xC0000001 (STATUS_UNSUCCESSFUL), retry up to 10 times
+	THREAD_LAST_SYSCALL_INFORMATION LastSyscallInfo;
+	BOOL bGotSyscallInfo = 0;
+	DWORD dwReturnValue = 0;
+	VOID *pSyscallReturnAddress = NULL;
+	for(DWORD i = 0; i < 10; i++)
+	{
+		// the target thread must be in "Waiting" state to use ThreadLastSystemCall
+		SuspendThread(hThread);
+
+		CONTEXT Context;
+		memset(&Context, 0, sizeof(Context));
+		Context.ContextFlags = CONTEXT_INTEGER;
+		GetThreadContext(hThread, &Context);
+	
+		// get return value (original RAX value)
+		dwReturnValue = (DWORD)Context.Rdx;
+		
+		// get syscall return address
+		pSyscallReturnAddress = (VOID*)Context.R10;
+
+		// get last syscall index
+		if(pNtQueryInformationThread(hThread, ThreadLastSystemCall, &LastSyscallInfo, sizeof(LastSyscallInfo), NULL) == 0)
+		{
+			// success
+			bGotSyscallInfo = 1;
+		}
+
+		// resume target thread
+		ResumeThread(hThread);
+
+		if(bGotSyscallInfo)
+		{
+			break;
+		}
+	}
+	CloseHandle(hThread);
+
+	// print syscall info
+	SafePrintf("[0x%p] ", pSyscallReturnAddress);
+	char *pSyscallName = NULL;
+	if(bGotSyscallInfo)
+	{
+		pSyscallName = GetSyscallName(LastSyscallInfo.SystemCallNumber);
+	}
+	if(pSyscallName != NULL)
+	{
+		SafePrintf("%s(0x%p, ...) ", pSyscallName, LastSyscallInfo.FirstArgument);
+	}
+	else
+	{
+		SafePrintf("<unknown> ");
+	}
+	SafePrintf("(returned: 0x%X) ", dwReturnValue);
+	SafePrintf("(thread: %u)\n", dwThreadID);
+}
+
+DWORD WINAPI SyscallHandlerThread(LPVOID lpArg)
+{
+	// handler thread started - trigger event
+	SetEvent((HANDLE)lpArg);
+
+	for(;;)
+	{
+		// wait for a thread to signal that it made a syscall
+		DWORD dwThreadID = (DWORD)InterlockedCompareExchange((LONG*)&gdwCurrentSyscallThreadID, 0, 0);
+		if(dwThreadID != 0)
+		{
+			HandleSyscallForThread(dwThreadID);
+			InterlockedExchange((LONG*)&gdwCurrentSyscallThreadID, 0);
+		}
+		_mm_pause();
+	}
+
+	return 0;
+}
+
+BOOL InitInstrumentationCallback()
+{
+	BYTE bCode[] =
+	{
+		// pushfq
+		0x9C,
+		// push rax
+		0x50,
+		// push rcx
+		0x51,
+		// push rdx
+		0x52,
+		// push rbx
+		0x53,
+
+		// mov rdx, rax (store original return value - this allows the handler thread to read the value directly from RDX rather than from the stack)
+		0x48, 0x89, 0xC2,
+
+		// mov rbx, <&gdwCurrentSyscallThreadID>
+		0x48, 0xBB, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+		// mov ecx, dword ptr gs:[0x48] (get current thread ID from TEB)
+		0x65, 0x8B, 0x0C, 0x25, 0x48, 0x00, 0x00, 0x00,
+		
+		// cmp ecx, <dwSyscallHandlerThreadID> (check if this is the handler thread)
+		0x81, 0xF9, 0x00, 0x00, 0x00, 0x00,
+		
+		// je restore_and_exit (ignore handler thread to avoid deadlock)
+		0x74, 0x0C,
+		
+		// retry:
+		// xor eax, eax
+		0x31, 0xC0,
+		
+		// lock cmpxchg dword ptr [rbx], ecx (attempt to set gdwCurrentSyscallThreadID atomically if handler is not already busy)
+		0xF0, 0x0F, 0xB1, 0x0B,
+		
+		// jnz retry (handler is busy with another thread - retry)
+		0x75, 0xF8,
+		
+		// wait_loop:
+		// cmp ecx, dword ptr [rbx] (wait for handler to finish with the current thread)
+		0x3B, 0x0B,
+		
+		// jz wait_loop (not ready, retry)
+		0x74, 0xFC,
+
+		// restore_and_exit:
+		// pop rbx
+		0x5B,
+		// pop rdx
+		0x5A,
+		// pop rcx
+		0x59,
+		// pop rax
+		0x58,
+		// popfq
+		0x9D,
+		
+		// jmp r10 (continue execution)
+		0x41, 0xFF, 0xE2
+	};
+
+	// prepare syscall name lookup tables
+	if(CreateSyscallLists() != 0)
+	{
+		return 1;
+	}
+
+	// get required ntdll exports
+	pNtSetInformationProcess = (NTSTATUS(WINAPI*)(HANDLE,DWORD,PVOID,ULONG))GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtSetInformationProcess");
+	pNtQueryInformationThread = (NTSTATUS(WINAPI*)(HANDLE,DWORD,PVOID,ULONG,PULONG))GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtQueryInformationThread");
+	if(pNtSetInformationProcess == NULL || pNtQueryInformationThread == NULL)
+	{
+		return 1;
+	}
+
+	// create syscall handler thread and wait until it begins
+	// (this avoids deadlocks during the thread initialization process due to LdrpDrainWorkQueue if a threadpool thread is blocked)
+	HANDLE hThreadReadyEvent = CreateEventA(NULL, 0, 0, NULL);
+	if(hThreadReadyEvent == NULL)
+	{
+		return 1;
+	}
+	DWORD dwSyscallHandlerThreadID = 0;
+	HANDLE hSyscallHandlerThread = CreateThread(NULL, 0, SyscallHandlerThread, hThreadReadyEvent, 0, &dwSyscallHandlerThreadID);
+	if(hSyscallHandlerThread == NULL)
+	{
+		CloseHandle(hThreadReadyEvent);
+		return 1;
+	}
+	WaitForSingleObject(hThreadReadyEvent, INFINITE);
+	CloseHandle(hThreadReadyEvent);
+	CloseHandle(hSyscallHandlerThread);
+
+	// allocate executable memory for callback code
+	*(DWORD64*)&bCode[10] = (DWORD64)&gdwCurrentSyscallThreadID;
+	*(DWORD*)&bCode[28] = dwSyscallHandlerThreadID;
+	gpCallbackCode = VirtualAlloc(NULL, sizeof(bCode), MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	if(gpCallbackCode == NULL)
+	{
+		return 1;
+	}
+	memcpy(gpCallbackCode, bCode, sizeof(bCode));
+	
+	return 0;
+}
+
+BOOL SetInstrumentationCallback(VOID *pCallback)
+{
+	// register instrumentation callback
+	PROCESS_INSTRUMENTATION_CALLBACK_INFORMATION InstrumentationCallbackInfo;
+	memset(&InstrumentationCallbackInfo, 0, sizeof(InstrumentationCallbackInfo));
+	InstrumentationCallbackInfo.Callback = pCallback;
+	if(pNtSetInformationProcess(GetCurrentProcess(), ProcessInstrumentationCallback, &InstrumentationCallbackInfo, sizeof(InstrumentationCallbackInfo)) != 0)
+	{
+		return 1;
+	}
+
+	return 0;
+}
+
+BOOL RegisterInstrumentationCallback()
+{
+	// initialise
+	if(gbInstrumentationCallbackReady == 0)
+	{
+		if(InitInstrumentationCallback() != 0)
+		{
+			return 1;
+		}
+		gbInstrumentationCallbackReady = 1;
+	}
+
+	// register instrumentation callback
+	if(SetInstrumentationCallback(gpCallbackCode) != 0)
+	{
+		return 1;
+	}
+
+	return 0;
+}
+
+BOOL UnregisterInstrumentationCallback()
+{
+	// remove instrumentation callback
+	if(SetInstrumentationCallback(NULL) != 0)
+	{
+		return 1;
+	}
+
+	return 0;
+}
+
+int main()
+{
+	// register callback
+	if(RegisterInstrumentationCallback() != 0)
+	{
+		return 1;
+	}
+
+	// (do stuff here)
+	ShellExecuteA(NULL, "open", "notepad.exe", NULL, NULL, SW_SHOW);
+
+	// unregister callback to prevent deadlocks on exit
+	UnregisterInstrumentationCallback();
+
+	return 0;
+}
+
+
+```
