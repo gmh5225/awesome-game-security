@@ -871,6 +871,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/stuxnet147/Themida-Research [Themida 3.x research]
 
 > Fix OLLVM
+- https://github.com/w00tzenheimer/d810-ng [D-810ng (Next Generation) is an evolution of d810 to deobfuscate code at decompilation time]
 - https://bbs.pediy.com/thread-272414.htm
 - https://github.com/obpo-project/obpo-plugin
 - https://github.com/IIIImmmyyy/AntiOllvm [AntiOllvm Fla with Fake Runtime]
