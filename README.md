@@ -3088,6 +3088,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/PUBG_Internal
 - https://github.com/gmh5225/PUBG-DX
 - https://github.com/gmh5225/PUBGSTAR
+- https://github.com/a0yark/Pubg-demo [External]
 
 > Game:PUBG Lite
 - https://github.com/gmh5225/Pubg-Lite-ESP
