@@ -3127,6 +3127,9 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ZhaoKunqi/simple-eft-superman-training-bot
 - https://github.com/gmh5225/EFT-NewTarkovCheatProject
 
+> Game:Duckov
+- https://github.com/a0yark/Duckov_marketmod [Duckov Market Mod]
+
 > Game:Arena Breakout Infinite
 - https://github.com/cra0/UE426_ABInfinite-Win64-Shipping [SDK]
 - https://github.com/Ke4ton/hardware_bypass [GPU check bypass]
