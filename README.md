@@ -839,6 +839,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/diversenok/DiaSymbolView [PDB file inspection tool]
 - https://github.com/CheckPointSW/Nodejs-Tracer [Simple Node.jstracer that logs calls to analyze heavily obfuscated Node.js malware]
 - https://github.com/jsacco/ntoskrnlwalker [Resolve offsets, gadgets and symbols from NTKernel]
+- https://github.com/glmcdona/strings2 [strings2 - Extract strings from binary files and process memory]
+
 
 > Mixed boolean-arithmetic
 - https://github.com/bliutech/mbased [Practical Simplifications of Mixed Boolean-Arithmetic Obfuscation]
