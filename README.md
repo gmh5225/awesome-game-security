@@ -1249,6 +1249,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Jiang-Night/Kernel_driver_hack
 - https://github.com/WeiJiLab/kernel-hook-framework [Kernel inline hook framework]
 - https://github.com/Poko-Apps/MemKernel [RPM]
+- https://github.com/libtersafe/KPM-MemReader [KPM kernel module, cross-process memory read via ioctl hook; KernelPatch/APatch]
 
 > Android Network Explorer
 - https://github.com/emanuele-f/PCAPdroid
@@ -1797,6 +1798,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ALittlePatate/TaxiDriver [W/RPM Driver and usermode for Linux]
 - https://github.com/gmh5225/Android-MemoryTool [RPM for Android]
 - https://github.com/Poko-Apps/MemKernel [RPM for Android]
+- https://github.com/libtersafe/KPM-MemReader [KPM module, cross-process read for Android; KernelPatch/APatch]
 - https://github.com/Anonym0usWork1221/C-Android-Memory-Tool [RPM for Android]
 - https://github.com/0xenia/remem [RPM for Windows]
 - https://github.com/un4ckn0wl3z/DMAInvoker [DMA RPM for Windows]
