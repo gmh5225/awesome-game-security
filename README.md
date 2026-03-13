@@ -1272,6 +1272,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/34306/mdc0 [CVE-2025-24203]
 - https://github.com/jailbreakdotparty/dirtyZero [CVE-2025-24203]
 - https://github.com/staturnzz/oob_entry [iOS 3.0-10.3.4 tfp0 kernel exploit]
+- https://github.com/khanhduytran0/coruna [Leaked iOS exploit toolkit — WebKit chains for multiple iOS versions, partially deobfuscated]
 
 > IOS Memory Explorer
 - https://github.com/hackcatml/kfd-explorer [iOS kernel memory explorer]
