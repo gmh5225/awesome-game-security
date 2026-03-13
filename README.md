@@ -1243,6 +1243,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/xmmword/dpatch [Syscall Dispatcher Patching PoC]
 - https://github.com/aquasecurity/tracee [Linux Runtime Security and Forensics using eBPF]
 - https://github.com/AndroidReverser-Test/Kernel-Trace [A kpm kernel module based on uprobe, capable of simultaneously hooking a large number of user address space functions]
+- https://github.com/kkkbbb/mkpms [wxshadow — KPM stealth breakpoint/hook via R^X page split, bypass self-read integrity check]
 - https://github.com/fuqiuluo/android-wuwa [Android aarch64 rootkit]
 - https://github.com/fuqiuluo/rnidbg [An Android-ARM64 kernel emulator written in Rust. (Rewrite from unidbg)]
 
@@ -1252,6 +1253,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/WeiJiLab/kernel-hook-framework [Kernel inline hook framework]
 - https://github.com/Poko-Apps/MemKernel [RPM]
 - https://github.com/libtersafe/KPM-MemReader [KPM kernel module, cross-process memory read via ioctl hook; KernelPatch/APatch]
+- https://github.com/kkkbbb/mkpms [wxshadow — KPM stealth probe/hook, R^X page split so read sees original code while exec uses shadow; KernelPatch/APatch]
 
 > Android Network Explorer
 - https://github.com/emanuele-f/PCAPdroid
