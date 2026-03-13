@@ -2562,6 +2562,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Explore AntiCheat System:ACE
 - https://github.com/H3d9/sguard_limit
 - https://github.com/rogxo/ReadPhys
+- https://github.com/libtersafe/dfm_android_unicorn [Coordinate Decryption (Android ARM64)]
 
 > Explore AntiCheat System:G-Presto
 - https://github.com/ARandomPerson7/G-Presto-Anti-Cheat-Reverse-Engineered/blob/main/Main.cpp
