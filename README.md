@@ -289,6 +289,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/libjpeg-turbo/libjpeg-turbo
 - https://github.com/erkkah/tigr
 - https://github.com/tsoding/olive.c
+- https://github.com/kylejckson/PaintFE [Rust raster image editor — layers, wgpu GPU filters, Rhai scripting, CLI batch, GIF/APNG, single portable binary]
 
 ## Wavefront Obj
 - https://github.com/tinyobjloader/tinyobjloader
