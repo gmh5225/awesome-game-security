@@ -325,6 +325,9 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/arlyon/awesome-wow-rust [Rust Server for WOW]
 - https://github.com/2601677867/One-Click-Run_Source_Server [Server for Source Engine]
 
+> JWT / Auth Token
+- https://github.com/ticarpi/jwt_tool [JWT toolkit — validate, forge, scan, tamper; CVE tests (alg=none, RS/HS256, key injection, etc.), fuzzing, dict attack]
+
 ## PhysX SDK
 - https://github.com/NVIDIAGameWorks/PhysX
 - https://github.com/NVIDIAGameWorks/PhysX-3.4
