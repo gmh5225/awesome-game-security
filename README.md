@@ -488,6 +488,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/beamstar/cheatengine-mcp-bridge [MCP for Cheat Engine]
 - https://github.com/illegal-instruction-co/processhacker-mcp [MCP for runtime analysis and process hacking; ProcessHacker for AI agents, extensible with DLL plugins]
 - https://github.com/zinja-coder/apktool-mcp-server [A MCP Server for APK Tool (Part of Android Reverse Engineering MCP Suites)]
+- https://github.com/zhizhuodemao/android_proxy_mcp [Android Proxy MCP — HTTP/HTTPS packet capture for AI assistants, mitmdump + SQLite + natural language query]
 - https://github.com/regenrek/deepwiki-mcp [MCP for deepwiki]
 - https://github.com/gmh5225/zig-mcp-server [A high-performance implementation of the MCP protocol in Zig]
 - https://github.com/noopstudios/interactive-feedback-mcp [Interactive User Feedback MCP]
@@ -1254,6 +1255,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Android Network Explorer
 - https://github.com/emanuele-f/PCAPdroid
+- https://github.com/zhizhuodemao/android_proxy_mcp [Android Proxy MCP — MCP-based HTTP/HTTPS capture & analysis for AI]
 
 > Android memory loading
 - https://github.com/icculus/mojoelf
