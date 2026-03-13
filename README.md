@@ -129,6 +129,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/storm-devs/storm-engine
 - https://github.com/minetest/minetest
 - https://github.com/godotengine/godot
+- https://github.com/NVIDIA-RTX/godot [NVIDIA fork of Godot Engine]
 - https://github.com/gmh5225/reGS
 - https://github.com/nem0/LumixEngine
 - https://github.com/urho3d/Urho3D
