@@ -4222,6 +4222,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 ## Windows Emulator
 - https://github.com/brunodev85/winlator [Android application for running Windows applications with Wine and Box86/Box64]
 - https://github.com/x86matthew/WinVisor [A hypervisor-based emulator for Windows x64 user-mode executables using Windows Hypervisor Platform API]
+- https://github.com/momo5502/vmtrace [Windows Hypervisor Platform (WHP) C++ library for trap-driven guest execution: host-backed memory, page-level traps, CPUID/syscall interception]
 - https://github.com/momo5502/sogen [Windows User Space Emulator]
 - https://github.com/mojtabafalleh/emulator [Windows User Space Emulator]
 - https://github.com/binsnake/KUBERA [A x86 environment emulator for Windows user and kernel binaries]
