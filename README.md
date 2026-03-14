@@ -945,6 +945,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/NullArray/WinKernel-Resources [Guide]
 - https://github.com/supermanc88/Document/tree/master/Windows%20Driver%20Development [Guide]
 - https://windiff.vercel.app [Diff]
+- https://github.com/cristeigabriela/bb [Benowin Blanc — parse Windows SDK/PHNT via libclang; struct layouts, enums, constants like dt without WinDbg; CLI + TUI, JSON export]
 - https://github.com/gmh5225/ntoskrnl_file_collection [Various versions of ntoskrnl files]
 - https://github.com/gmh5225/win32k_file_collection [Various versions of win32k files]
 - https://github.com/gmh5225/win32k_file_collection2 [Various versions of win32k files]
