@@ -1,0 +1,2151 @@
+Project Path: arc_momo5502_vmtrace_csp_ti75
+
+Source Tree:
+
+```txt
+arc_momo5502_vmtrace_csp_ti75
+├── CMakeLists.txt
+├── LICENSE
+├── README.md
+├── cmake
+│   └── vmtraceConfig.cmake.in
+├── include
+│   └── vmtrace
+│       └── vmtrace.hpp
+└── src
+    ├── examples
+    │   └── demo_main.cpp
+    └── lib
+        └── vmtrace.cpp
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.20)
+
+project(vmtrace VERSION 0.1.0 LANGUAGES CXX)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+include(FetchContent)
+
+set(ASMJIT_EMBED ON CACHE BOOL "" FORCE)
+set(ASMJIT_STATIC ON CACHE BOOL "" FORCE)
+set(ASMJIT_NO_INSTALL ON CACHE BOOL "" FORCE)
+
+FetchContent_Declare(
+    asmjit
+    GIT_REPOSITORY https://github.com/asmjit/asmjit.git
+    GIT_TAG 64a88ed1d8abb2e2b17a938a5ce7c1b66dabb695
+    GIT_SHALLOW TRUE
+)
+
+FetchContent_MakeAvailable(asmjit)
+
+add_library(vmtrace STATIC
+    src/lib/vmtrace.cpp
+)
+
+add_library(vmtrace::vmtrace ALIAS vmtrace)
+
+target_compile_features(vmtrace PUBLIC cxx_std_20)
+
+target_compile_definitions(vmtrace PRIVATE
+    NOMINMAX
+    WIN32_LEAN_AND_MEAN
+)
+
+target_include_directories(vmtrace
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+
+target_link_libraries(vmtrace PUBLIC
+    WinHvPlatform
+)
+
+add_executable(vmtrace_demo
+    src/examples/demo_main.cpp
+)
+
+target_compile_features(vmtrace_demo PRIVATE cxx_std_20)
+
+target_compile_definitions(vmtrace_demo PRIVATE
+    NOMINMAX
+    WIN32_LEAN_AND_MEAN
+)
+
+target_link_libraries(vmtrace_demo PRIVATE
+    vmtrace
+    asmjit::asmjit
+)
+
+set(vmtrace_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/vmtrace")
+
+install(
+    TARGETS vmtrace vmtrace_demo
+    EXPORT vmtrace_targets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+install(
+    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/vmtrace/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/vmtrace
+)
+
+install(
+    EXPORT vmtrace_targets
+    NAMESPACE vmtrace::
+    FILE vmtraceTargets.cmake
+    DESTINATION ${vmtrace_install_cmakedir}
+)
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/vmtraceConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vmtraceConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/vmtraceConfig.cmake"
+    INSTALL_DESTINATION ${vmtrace_install_cmakedir}
+)
+
+install(
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/vmtraceConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/vmtraceConfigVersion.cmake"
+    DESTINATION ${vmtrace_install_cmakedir}
+)
+
+```
+
+`LICENSE`:
+
+```
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+                            Preamble
+
+  The GNU General Public License is a free, copyleft license for
+software and other kinds of works.
+
+  The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works.  By contrast,
+the GNU General Public License is intended to guarantee your freedom to
+share and change all versions of a program--to make sure it remains free
+software for all its users.  We, the Free Software Foundation, use the
+GNU General Public License for most of our software; it applies also to
+any other work released this way by its authors.  You can apply it to
+your programs, too.
+
+  When we speak of free software, we are referring to freedom, not
+price.  Our General Public Licenses are designed to make sure that you
+have the freedom to distribute copies of free software (and charge for
+them if you wish), that you receive source code or can get it if you
+want it, that you can change the software or use pieces of it in new
+free programs, and that you know you can do these things.
+
+  To protect your rights, we need to prevent others from denying you
+these rights or asking you to surrender the rights.  Therefore, you have
+certain responsibilities if you distribute copies of the software, or if
+you modify it: responsibilities to respect the freedom of others.
+
+  For example, if you distribute copies of such a program, whether
+gratis or for a fee, you must pass on to the recipients the same
+freedoms that you received.  You must make sure that they, too, receive
+or can get the source code.  And you must show them these terms so they
+know their rights.
+
+  Developers that use the GNU GPL protect your rights with two steps:
+(1) assert copyright on the software, and (2) offer you this License
+giving you legal permission to copy, distribute and/or modify it.
+
+  For the developers' and authors' protection, the GPL clearly explains
+that there is no warranty for this free software.  For both users' and
+authors' sake, the GPL requires that modified versions be marked as
+changed, so that their problems will not be attributed erroneously to
+authors of previous versions.
+
+  Some devices are designed to deny users access to install or run
+modified versions of the software inside them, although the manufacturer
+can do so.  This is fundamentally incompatible with the aim of
+protecting users' freedom to change the software.  The systematic
+pattern of such abuse occurs in the area of products for individuals to
+use, which is precisely where it is most unacceptable.  Therefore, we
+have designed this version of the GPL to prohibit the practice for those
+products.  If such problems arise substantially in other domains, we
+stand ready to extend this provision to those domains in future versions
+of the GPL, as needed to protect the freedom of users.
+
+  Finally, every program is threatened constantly by software patents.
+States should not allow patents to restrict development and use of
+software on general-purpose computers, but in those that do, we wish to
+avoid the special danger that patents applied to a free program could
+make it effectively proprietary.  To prevent this, the GPL assures that
+patents cannot be used to render the program non-free.
+
+  The precise terms and conditions for copying, distribution and
+modification follow.
+
+                       TERMS AND CONDITIONS
+
+  0. Definitions.
+
+  "This License" refers to version 3 of the GNU General Public License.
+
+  "Copyright" also means copyright-like laws that apply to other kinds of
+works, such as semiconductor masks.
+
+  "The Program" refers to any copyrightable work licensed under this
+License.  Each licensee is addressed as "you".  "Licensees" and
+"recipients" may be individuals or organizations.
+
+  To "modify" a work means to copy from or adapt all or part of the work
+in a fashion requiring copyright permission, other than the making of an
+exact copy.  The resulting work is called a "modified version" of the
+earlier work or a work "based on" the earlier work.
+
+  A "covered work" means either the unmodified Program or a work based
+on the Program.
+
+  To "propagate" a work means to do anything with it that, without
+permission, would make you directly or secondarily liable for
+infringement under applicable copyright law, except executing it on a
+computer or modifying a private copy.  Propagation includes copying,
+distribution (with or without modification), making available to the
+public, and in some countries other activities as well.
+
+  To "convey" a work means any kind of propagation that enables other
+parties to make or receive copies.  Mere interaction with a user through
+a computer network, with no transfer of a copy, is not conveying.
+
+  An interactive user interface displays "Appropriate Legal Notices"
+to the extent that it includes a convenient and prominently visible
+feature that (1) displays an appropriate copyright notice, and (2)
+tells the user that there is no warranty for the work (except to the
+extent that warranties are provided), that licensees may convey the
+work under this License, and how to view a copy of this License.  If
+the interface presents a list of user commands or options, such as a
+menu, a prominent item in the list meets this criterion.
+
+  1. Source Code.
+
+  The "source code" for a work means the preferred form of the work
+for making modifications to it.  "Object code" means any non-source
+form of a work.
+
+  A "Standard Interface" means an interface that either is an official
+standard defined by a recognized standards body, or, in the case of
+interfaces specified for a particular programming language, one that
+is widely used among developers working in that language.
+
+  The "System Libraries" of an executable work include anything, other
+than the work as a whole, that (a) is included in the normal form of
+packaging a Major Component, but which is not part of that Major
+Component, and (b) serves only to enable use of the work with that
+Major Component, or to implement a Standard Interface for which an
+implementation is available to the public in source code form.  A
+"Major Component", in this context, means a major essential component
+(kernel, window system, and so on) of the specific operating system
+(if any) on which the executable work runs, or a compiler used to
+produce the work, or an object code interpreter used to run it.
+
+  The "Corresponding Source" for a work in object code form means all
+the source code needed to generate, install, and (for an executable
+work) run the object code and to modify the work, including scripts to
+control those activities.  However, it does not include the work's
+System Libraries, or general-purpose tools or generally available free
+programs which are used unmodified in performing those activities but
+which are not part of the work.  For example, Corresponding Source
+includes interface definition files associated with source files for
+the work, and the source code for shared libraries and dynamically
+linked subprograms that the work is specifically designed to require,
+such as by intimate data communication or control flow between those
+subprograms and other parts of the work.
+
+  The Corresponding Source need not include anything that users
+can regenerate automatically from other parts of the Corresponding
+Source.
+
+  The Corresponding Source for a work in source code form is that
+same work.
+
+  2. Basic Permissions.
+
+  All rights granted under this License are granted for the term of
+copyright on the Program, and are irrevocable provided the stated
+conditions are met.  This License explicitly affirms your unlimited
+permission to run the unmodified Program.  The output from running a
+covered work is covered by this License only if the output, given its
+content, constitutes a covered work.  This License acknowledges your
+rights of fair use or other equivalent, as provided by copyright law.
+
+  You may make, run and propagate covered works that you do not
+convey, without conditions so long as your license otherwise remains
+in force.  You may convey covered works to others for the sole purpose
+of having them make modifications exclusively for you, or provide you
+with facilities for running those works, provided that you comply with
+the terms of this License in conveying all material for which you do
+not control copyright.  Those thus making or running the covered works
+for you must do so exclusively on your behalf, under your direction
+and control, on terms that prohibit them from making any copies of
+your copyrighted material outside their relationship with you.
+
+  Conveying under any other circumstances is permitted solely under
+the conditions stated below.  Sublicensing is not allowed; section 10
+makes it unnecessary.
+
+  3. Protecting Users' Legal Rights From Anti-Circumvention Law.
+
+  No covered work shall be deemed part of an effective technological
+measure under any applicable law fulfilling obligations under article
+11 of the WIPO copyright treaty adopted on 20 December 1996, or
+similar laws prohibiting or restricting circumvention of such
+measures.
+
+  When you convey a covered work, you waive any legal power to forbid
+circumvention of technological measures to the extent such circumvention
+is effected by exercising rights under this License with respect to
+the covered work, and you disclaim any intention to limit operation or
+modification of the work as a means of enforcing, against the work's
+users, your or third parties' legal rights to forbid circumvention of
+technological measures.
+
+  4. Conveying Verbatim Copies.
+
+  You may convey verbatim copies of the Program's source code as you
+receive it, in any medium, provided that you conspicuously and
+appropriately publish on each copy an appropriate copyright notice;
+keep intact all notices stating that this License and any
+non-permissive terms added in accord with section 7 apply to the code;
+keep intact all notices of the absence of any warranty; and give all
+recipients a copy of this License along with the Program.
+
+  You may charge any price or no price for each copy that you convey,
+and you may offer support or warranty protection for a fee.
+
+  5. Conveying Modified Source Versions.
+
+  You may convey a work based on the Program, or the modifications to
+produce it from the Program, in the form of source code under the
+terms of section 4, provided that you also meet all of these conditions:
+
+    a) The work must carry prominent notices stating that you modified
+    it, and giving a relevant date.
+
+    b) The work must carry prominent notices stating that it is
+    released under this License and any conditions added under section
+    7.  This requirement modifies the requirement in section 4 to
+    "keep intact all notices".
+
+    c) You must license the entire work, as a whole, under this
+    License to anyone who comes into possession of a copy.  This
+    License will therefore apply, along with any applicable section 7
+    additional terms, to the whole of the work, and all its parts,
+    regardless of how they are packaged.  This License gives no
+    permission to license the work in any other way, but it does not
+    invalidate such permission if you have separately received it.
+
+    d) If the work has interactive user interfaces, each must display
+    Appropriate Legal Notices; however, if the Program has interactive
+    interfaces that do not display Appropriate Legal Notices, your
+    work need not make them do so.
+
+  A compilation of a covered work with other separate and independent
+works, which are not by their nature extensions of the covered work,
+and which are not combined with it such as to form a larger program,
+in or on a volume of a storage or distribution medium, is called an
+"aggregate" if the compilation and its resulting copyright are not
+used to limit the access or legal rights of the compilation's users
+beyond what the individual works permit.  Inclusion of a covered work
+in an aggregate does not cause this License to apply to the other
+parts of the aggregate.
+
+  6. Conveying Non-Source Forms.
+
+  You may convey a covered work in object code form under the terms
+of sections 4 and 5, provided that you also convey the
+machine-readable Corresponding Source under the terms of this License,
+in one of these ways:
+
+    a) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by the
+    Corresponding Source fixed on a durable physical medium
+    customarily used for software interchange.
+
+    b) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by a
+    written offer, valid for at least three years and valid for as
+    long as you offer spare parts or customer support for that product
+    model, to give anyone who possesses the object code either (1) a
+    copy of the Corresponding Source for all the software in the
+    product that is covered by this License, on a durable physical
+    medium customarily used for software interchange, for a price no
+    more than your reasonable cost of physically performing this
+    conveying of source, or (2) access to copy the
+    Corresponding Source from a network server at no charge.
+
+    c) Convey individual copies of the object code with a copy of the
+    written offer to provide the Corresponding Source.  This
+    alternative is allowed only occasionally and noncommercially, and
+    only if you received the object code with such an offer, in accord
+    with subsection 6b.
+
+    d) Convey the object code by offering access from a designated
+    place (gratis or for a charge), and offer equivalent access to the
+    Corresponding Source in the same way through the same place at no
+    further charge.  You need not require recipients to copy the
+    Corresponding Source along with the object code.  If the place to
+    copy the object code is a network server, the Corresponding Source
+    may be on a different server (operated by you or a third party)
+    that supports equivalent copying facilities, provided you maintain
+    clear directions next to the object code saying where to find the
+    Corresponding Source.  Regardless of what server hosts the
+    Corresponding Source, you remain obligated to ensure that it is
+    available for as long as needed to satisfy these requirements.
+
+    e) Convey the object code using peer-to-peer transmission, provided
+    you inform other peers where the object code and Corresponding
+    Source of the work are being offered to the general public at no
+    charge under subsection 6d.
+
+  A separable portion of the object code, whose source code is excluded
+from the Corresponding Source as a System Library, need not be
+included in conveying the object code work.
+
+  A "User Product" is either (1) a "consumer product", which means any
+tangible personal property which is normally used for personal, family,
+or household purposes, or (2) anything designed or sold for incorporation
+into a dwelling.  In determining whether a product is a consumer product,
+doubtful cases shall be resolved in favor of coverage.  For a particular
+product received by a particular user, "normally used" refers to a
+typical or common use of that class of product, regardless of the status
+of the particular user or of the way in which the particular user
+actually uses, or expects or is expected to use, the product.  A product
+is a consumer product regardless of whether the product has substantial
+commercial, industrial or non-consumer uses, unless such uses represent
+the only significant mode of use of the product.
+
+  "Installation Information" for a User Product means any methods,
+procedures, authorization keys, or other information required to install
+and execute modified versions of a covered work in that User Product from
+a modified version of its Corresponding Source.  The information must
+suffice to ensure that the continued functioning of the modified object
+code is in no case prevented or interfered with solely because
+modification has been made.
+
+  If you convey an object code work under this section in, or with, or
+specifically for use in, a User Product, and the conveying occurs as
+part of a transaction in which the right of possession and use of the
+User Product is transferred to the recipient in perpetuity or for a
+fixed term (regardless of how the transaction is characterized), the
+Corresponding Source conveyed under this section must be accompanied
+by the Installation Information.  But this requirement does not apply
+if neither you nor any third party retains the ability to install
+modified object code on the User Product (for example, the work has
+been installed in ROM).
+
+  The requirement to provide Installation Information does not include a
+requirement to continue to provide support service, warranty, or updates
+for a work that has been modified or installed by the recipient, or for
+the User Product in which it has been modified or installed.  Access to a
+network may be denied when the modification itself materially and
+adversely affects the operation of the network or violates the rules and
+protocols for communication across the network.
+
+  Corresponding Source conveyed, and Installation Information provided,
+in accord with this section must be in a format that is publicly
+documented (and with an implementation available to the public in
+source code form), and must require no special password or key for
+unpacking, reading or copying.
+
+  7. Additional Terms.
+
+  "Additional permissions" are terms that supplement the terms of this
+License by making exceptions from one or more of its conditions.
+Additional permissions that are applicable to the entire Program shall
+be treated as though they were included in this License, to the extent
+that they are valid under applicable law.  If additional permissions
+apply only to part of the Program, that part may be used separately
+under those permissions, but the entire Program remains governed by
+this License without regard to the additional permissions.
+
+  When you convey a copy of a covered work, you may at your option
+remove any additional permissions from that copy, or from any part of
+it.  (Additional permissions may be written to require their own
+removal in certain cases when you modify the work.)  You may place
+additional permissions on material, added by you to a covered work,
+for which you have or can give appropriate copyright permission.
+
+  Notwithstanding any other provision of this License, for material you
+add to a covered work, you may (if authorized by the copyright holders of
+that material) supplement the terms of this License with terms:
+
+    a) Disclaiming warranty or limiting liability differently from the
+    terms of sections 15 and 16 of this License; or
+
+    b) Requiring preservation of specified reasonable legal notices or
+    author attributions in that material or in the Appropriate Legal
+    Notices displayed by works containing it; or
+
+    c) Prohibiting misrepresentation of the origin of that material, or
+    requiring that modified versions of such material be marked in
+    reasonable ways as different from the original version; or
+
+    d) Limiting the use for publicity purposes of names of licensors or
+    authors of the material; or
+
+    e) Declining to grant rights under trademark law for use of some
+    trade names, trademarks, or service marks; or
+
+    f) Requiring indemnification of licensors and authors of that
+    material by anyone who conveys the material (or modified versions of
+    it) with contractual assumptions of liability to the recipient, for
+    any liability that these contractual assumptions directly impose on
+    those licensors and authors.
+
+  All other non-permissive additional terms are considered "further
+restrictions" within the meaning of section 10.  If the Program as you
+received it, or any part of it, contains a notice stating that it is
+governed by this License along with a term that is a further
+restriction, you may remove that term.  If a license document contains
+a further restriction but permits relicensing or conveying under this
+License, you may add to a covered work material governed by the terms
+of that license document, provided that the further restriction does
+not survive such relicensing or conveying.
+
+  If you add terms to a covered work in accord with this section, you
+must place, in the relevant source files, a statement of the
+additional terms that apply to those files, or a notice indicating
+where to find the applicable terms.
+
+  Additional terms, permissive or non-permissive, may be stated in the
+form of a separately written license, or stated as exceptions;
+the above requirements apply either way.
+
+  8. Termination.
+
+  You may not propagate or modify a covered work except as expressly
+provided under this License.  Any attempt otherwise to propagate or
+modify it is void, and will automatically terminate your rights under
+this License (including any patent licenses granted under the third
+paragraph of section 11).
+
+  However, if you cease all violation of this License, then your
+license from a particular copyright holder is reinstated (a)
+provisionally, unless and until the copyright holder explicitly and
+finally terminates your license, and (b) permanently, if the copyright
+holder fails to notify you of the violation by some reasonable means
+prior to 60 days after the cessation.
+
+  Moreover, your license from a particular copyright holder is
+reinstated permanently if the copyright holder notifies you of the
+violation by some reasonable means, this is the first time you have
+received notice of violation of this License (for any work) from that
+copyright holder, and you cure the violation prior to 30 days after
+your receipt of the notice.
+
+  Termination of your rights under this section does not terminate the
+licenses of parties who have received copies or rights from you under
+this License.  If your rights have been terminated and not permanently
+reinstated, you do not qualify to receive new licenses for the same
+material under section 10.
+
+  9. Acceptance Not Required for Having Copies.
+
+  You are not required to accept this License in order to receive or
+run a copy of the Program.  Ancillary propagation of a covered work
+occurring solely as a consequence of using peer-to-peer transmission
+to receive a copy likewise does not require acceptance.  However,
+nothing other than this License grants you permission to propagate or
+modify any covered work.  These actions infringe copyright if you do
+not accept this License.  Therefore, by modifying or propagating a
+covered work, you indicate your acceptance of this License to do so.
+
+  10. Automatic Licensing of Downstream Recipients.
+
+  Each time you convey a covered work, the recipient automatically
+receives a license from the original licensors, to run, modify and
+propagate that work, subject to this License.  You are not responsible
+for enforcing compliance by third parties with this License.
+
+  An "entity transaction" is a transaction transferring control of an
+organization, or substantially all assets of one, or subdividing an
+organization, or merging organizations.  If propagation of a covered
+work results from an entity transaction, each party to that
+transaction who receives a copy of the work also receives whatever
+licenses to the work the party's predecessor in interest had or could
+give under the previous paragraph, plus a right to possession of the
+Corresponding Source of the work from the predecessor in interest, if
+the predecessor has it or can get it with reasonable efforts.
+
+  You may not impose any further restrictions on the exercise of the
+rights granted or affirmed under this License.  For example, you may
+not impose a license fee, royalty, or other charge for exercise of
+rights granted under this License, and you may not initiate litigation
+(including a cross-claim or counterclaim in a lawsuit) alleging that
+any patent claim is infringed by making, using, selling, offering for
+sale, or importing the Program or any portion of it.
+
+  11. Patents.
+
+  A "contributor" is a copyright holder who authorizes use under this
+License of the Program or a work on which the Program is based.  The
+work thus licensed is called the contributor's "contributor version".
+
+  A contributor's "essential patent claims" are all patent claims
+owned or controlled by the contributor, whether already acquired or
+hereafter acquired, that would be infringed by some manner, permitted
+by this License, of making, using, or selling its contributor version,
+but do not include claims that would be infringed only as a
+consequence of further modification of the contributor version.  For
+purposes of this definition, "control" includes the right to grant
+patent sublicenses in a manner consistent with the requirements of
+this License.
+
+  Each contributor grants you a non-exclusive, worldwide, royalty-free
+patent license under the contributor's essential patent claims, to
+make, use, sell, offer for sale, import and otherwise run, modify and
+propagate the contents of its contributor version.
+
+  In the following three paragraphs, a "patent license" is any express
+agreement or commitment, however denominated, not to enforce a patent
+(such as an express permission to practice a patent or covenant not to
+sue for patent infringement).  To "grant" such a patent license to a
+party means to make such an agreement or commitment not to enforce a
+patent against the party.
+
+  If you convey a covered work, knowingly relying on a patent license,
+and the Corresponding Source of the work is not available for anyone
+to copy, free of charge and under the terms of this License, through a
+publicly available network server or other readily accessible means,
+then you must either (1) cause the Corresponding Source to be so
+available, or (2) arrange to deprive yourself of the benefit of the
+patent license for this particular work, or (3) arrange, in a manner
+consistent with the requirements of this License, to extend the patent
+license to downstream recipients.  "Knowingly relying" means you have
+actual knowledge that, but for the patent license, your conveying the
+covered work in a country, or your recipient's use of the covered work
+in a country, would infringe one or more identifiable patents in that
+country that you have reason to believe are valid.
+
+  If, pursuant to or in connection with a single transaction or
+arrangement, you convey, or propagate by procuring conveyance of, a
+covered work, and grant a patent license to some of the parties
+receiving the covered work authorizing them to use, propagate, modify
+or convey a specific copy of the covered work, then the patent license
+you grant is automatically extended to all recipients of the covered
+work and works based on it.
+
+  A patent license is "discriminatory" if it does not include within
+the scope of its coverage, prohibits the exercise of, or is
+conditioned on the non-exercise of one or more of the rights that are
+specifically granted under this License.  You may not convey a covered
+work if you are a party to an arrangement with a third party that is
+in the business of distributing software, under which you make payment
+to the third party based on the extent of your activity of conveying
+the work, and under which the third party grants, to any of the
+parties who would receive the covered work from you, a discriminatory
+patent license (a) in connection with copies of the covered work
+conveyed by you (or copies made from those copies), or (b) primarily
+for and in connection with specific products or compilations that
+contain the covered work, unless you entered into that arrangement,
+or that patent license was granted, prior to 28 March 2007.
+
+  Nothing in this License shall be construed as excluding or limiting
+any implied license or other defenses to infringement that may
+otherwise be available to you under applicable patent law.
+
+  12. No Surrender of Others' Freedom.
+
+  If conditions are imposed on you (whether by court order, agreement or
+otherwise) that contradict the conditions of this License, they do not
+excuse you from the conditions of this License.  If you cannot convey a
+covered work so as to satisfy simultaneously your obligations under this
+License and any other pertinent obligations, then as a consequence you may
+not convey it at all.  For example, if you agree to terms that obligate you
+to collect a royalty for further conveying from those to whom you convey
+the Program, the only way you could satisfy both those terms and this
+License would be to refrain entirely from conveying the Program.
+
+  13. Use with the GNU Affero General Public License.
+
+  Notwithstanding any other provision of this License, you have
+permission to link or combine any covered work with a work licensed
+under version 3 of the GNU Affero General Public License into a single
+combined work, and to convey the resulting work.  The terms of this
+License will continue to apply to the part which is the covered work,
+but the special requirements of the GNU Affero General Public License,
+section 13, concerning interaction through a network will apply to the
+combination as such.
+
+  14. Revised Versions of this License.
+
+  The Free Software Foundation may publish revised and/or new versions of
+the GNU General Public License from time to time.  Such new versions will
+be similar in spirit to the present version, but may differ in detail to
+address new problems or concerns.
+
+  Each version is given a distinguishing version number.  If the
+Program specifies that a certain numbered version of the GNU General
+Public License "or any later version" applies to it, you have the
+option of following the terms and conditions either of that numbered
+version or of any later version published by the Free Software
+Foundation.  If the Program does not specify a version number of the
+GNU General Public License, you may choose any version ever published
+by the Free Software Foundation.
+
+  If the Program specifies that a proxy can decide which future
+versions of the GNU General Public License can be used, that proxy's
+public statement of acceptance of a version permanently authorizes you
+to choose that version for the Program.
+
+  Later license versions may give you additional or different
+permissions.  However, no additional obligations are imposed on any
+author or copyright holder as a result of your choosing to follow a
+later version.
+
+  15. Disclaimer of Warranty.
+
+  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+  16. Limitation of Liability.
+
+  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
+THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
+GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
+USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
+DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
+PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
+EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+
+  17. Interpretation of Sections 15 and 16.
+
+  If the disclaimer of warranty and limitation of liability provided
+above cannot be given local legal effect according to their terms,
+reviewing courts shall apply local law that most closely approximates
+an absolute waiver of all civil liability in connection with the
+Program, unless a warranty or assumption of liability accompanies a
+copy of the Program in return for a fee.
+
+                     END OF TERMS AND CONDITIONS
+
+            How to Apply These Terms to Your New Programs
+
+  If you develop a new program, and you want it to be of the greatest
+possible use to the public, the best way to achieve this is to make it
+free software which everyone can redistribute and change under these terms.
+
+  To do so, attach the following notices to the program.  It is safest
+to attach them to the start of each source file to most effectively
+state the exclusion of warranty; and each file should have at least
+the "copyright" line and a pointer to where the full notice is found.
+
+    <one line to give the program's name and a brief idea of what it does.>
+    Copyright (C) <year>  <name of author>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+Also add information on how to contact you by electronic and paper mail.
+
+  If the program does terminal interaction, make it output a short
+notice like this when it starts in an interactive mode:
+
+    <program>  Copyright (C) <year>  <name of author>
+    This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
+    This is free software, and you are welcome to redistribute it
+    under certain conditions; type `show c' for details.
+
+The hypothetical commands `show w' and `show c' should show the appropriate
+parts of the General Public License.  Of course, your program's commands
+might be different; for a GUI interface, you would use an "about box".
+
+  You should also get your employer (if you work as a programmer) or school,
+if any, to sign a "copyright disclaimer" for the program, if necessary.
+For more information on this, and how to apply and follow the GNU GPL, see
+<https://www.gnu.org/licenses/>.
+
+  The GNU General Public License does not permit incorporating your program
+into proprietary programs.  If your program is a subroutine library, you
+may consider it more useful to permit linking proprietary applications with
+the library.  If this is what you want to do, use the GNU Lesser General
+Public License instead of this License.  But first, please read
+<https://www.gnu.org/licenses/why-not-lgpl.html>.
+
+```
+
+`README.md`:
+
+```md
+# vmtrace
+
+[![Build](https://img.shields.io/github/actions/workflow/status/momo5502/vmtrace/build.yml?branch=main&label=build)](https://github.com/momo5502/vmtrace/actions/workflows/build.yml)
+[![Platform](https://img.shields.io/badge/platform-Windows-0078D6)](https://github.com/momo5502/vmtrace)
+[![C%2B%2B](https://img.shields.io/badge/C%2B%2B-20-00599C)](https://github.com/momo5502/vmtrace)
+[![CMake](https://img.shields.io/badge/cmake-3.20%2B-064F8C)](https://github.com/momo5502/vmtrace)
+
+`vmtrace` is a small Windows Hypervisor Platform library for trap-driven guest execution. It lets you start from a supplied CPU state, map guest memory from host pages, and react to memory, `CPUID`, and syscall-related exits in user mode.
+
+## Features
+
+- Static C++ library with a small public API
+- Host-backed guest memory mappings
+- Page-level trap handling for read, write, and execute faults
+- `CPUID` interception
+- Syscall interception for controlled guest experiments
+- Example program that assembles guest code with `asmjit`
+
+## Repository Layout
+
+- [`include/vmtrace/vmtrace.hpp`](include/vmtrace/vmtrace.hpp): public library API
+- [`src/lib/vmtrace.cpp`](src/lib/vmtrace.cpp): WHP-backed implementation
+- [`src/examples/demo_main.cpp`](src/examples/demo_main.cpp): demo that runs `cpuid` and a syscall in the guest
+
+## Prerequisites
+
+To run the demo locally, enable these Windows features and reboot:
+
+- `Microsoft-Hyper-V-Hypervisor`
+- `HypervisorPlatform`
+
+Building the project does not require running Hyper-V guests, but executing the demo does.
+
+## Build
+
+Use a shell with MSVC available, for example `x64 Native Tools Command Prompt for VS`:
+
+```powershell
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+## Run
+
+```powershell
+.\build\vmtrace_demo.exe
+```
+
+Expected output looks like:
+
+```text
+Starting vmtrace demo
+Intercepted CPUID leaf=0x0 subleaf=0x0
+Intercepted syscall number=0x1234 arg0=0x11111111 arg1=0x22222222 arg2=0x33333333 arg3=0x44444444
+Final registers
+  RIP: 0x...
+  RAX: 0xfeedfacecafebeef
+Vendor captured in guest memory: VmTraceLabs!
+Syscall return captured in guest memory: 0xfeedfacecafebeef
+```
+
+## Install
+
+The project exports a CMake package:
+
+```powershell
+cmake --install build --prefix .\build\install
+```
+
+Then consume it with:
+
+```cmake
+find_package(vmtrace CONFIG REQUIRED)
+target_link_libraries(your_target PRIVATE vmtrace::vmtrace)
+```
+
+## CI
+
+GitHub Actions runs:
+
+- `clang-format` verification for `src` and `include`
+- CMake configure + Ninja build
+- `cmake --install` to validate the install target
+
+```
+
+`cmake/vmtraceConfig.cmake.in`:
+
+```in
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/vmtraceTargets.cmake")
+
+```
+
+`include/vmtrace/vmtrace.hpp`:
+
+```hpp
+#pragma once
+
+#include <Windows.h>
+
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace vmtrace
+{
+    constexpr std::uint64_t page_size = 0x1000;
+
+    enum class trap_access_kind
+    {
+        read,
+        write,
+        execute,
+    };
+
+    enum class trap_resolution
+    {
+        map_page,
+        stop_emulation,
+        deny_access,
+    };
+
+    enum class map_access : std::uint32_t
+    {
+        none = 0,
+        read = 1u << 0,
+        write = 1u << 1,
+        execute = 1u << 2,
+    };
+
+    struct cpu_state
+    {
+        std::uint64_t rip = 0;
+        std::uint64_t rsp = 0;
+        std::uint64_t rflags = 0x2;
+        std::uint64_t rax = 0;
+        std::uint64_t rbx = 0;
+        std::uint64_t rcx = 0;
+        std::uint64_t rdx = 0;
+        std::uint64_t rsi = 0;
+        std::uint64_t rdi = 0;
+        std::uint64_t rbp = 0;
+    };
+
+    struct trap_info
+    {
+        trap_access_kind access_kind = trap_access_kind::read;
+        std::uint64_t guest_physical_address = 0;
+        std::uint64_t guest_virtual_address = 0;
+        bool guest_virtual_address_valid = false;
+        std::vector<std::uint8_t> instruction_bytes;
+    };
+
+    struct cpuid_info
+    {
+        std::uint32_t leaf = 0;
+        std::uint32_t subleaf = 0;
+        std::uint32_t default_eax = 0;
+        std::uint32_t default_ebx = 0;
+        std::uint32_t default_ecx = 0;
+        std::uint32_t default_edx = 0;
+    };
+
+    enum class cpuid_resolution
+    {
+        passthrough,
+        emulate,
+        stop_emulation,
+    };
+
+    struct cpuid_response
+    {
+        cpuid_resolution resolution = cpuid_resolution::passthrough;
+        std::uint32_t eax = 0;
+        std::uint32_t ebx = 0;
+        std::uint32_t ecx = 0;
+        std::uint32_t edx = 0;
+        std::string message;
+    };
+
+    struct trap_response
+    {
+        trap_resolution resolution = trap_resolution::deny_access;
+        map_access access = map_access::none;
+        void* host_page = nullptr;
+        std::vector<std::uint8_t> page_bytes;
+        std::string message;
+    };
+
+    struct syscall_info
+    {
+        std::uint64_t number = 0;
+        std::uint64_t return_rip = 0;
+        std::uint64_t return_rflags = 0;
+        std::uint64_t arg0 = 0;
+        std::uint64_t arg1 = 0;
+        std::uint64_t arg2 = 0;
+        std::uint64_t arg3 = 0;
+        std::uint64_t stack_pointer = 0;
+    };
+
+    enum class syscall_resolution
+    {
+        emulate_and_return,
+        stop_emulation,
+        deny,
+    };
+
+    struct syscall_response
+    {
+        syscall_resolution resolution = syscall_resolution::deny;
+        std::uint64_t return_value = 0;
+        std::string message;
+    };
+
+    struct mapped_range
+    {
+        void* host_address = nullptr;
+        std::size_t size = 0;
+        map_access access = map_access::none;
+        std::optional<std::uint64_t> guest_address;
+    };
+
+    struct register_snapshot
+    {
+        std::uint64_t rip = 0;
+        std::uint64_t rax = 0;
+        std::uint64_t rbx = 0;
+        std::uint64_t rcx = 0;
+        std::uint64_t rdx = 0;
+        std::uint64_t rsp = 0;
+    };
+
+    using memory_trap_handler = std::function<trap_response(const trap_info&)>;
+    using cpuid_handler = std::function<cpuid_response(const cpuid_info&)>;
+    using syscall_handler = std::function<syscall_response(const syscall_info&)>;
+
+    struct emulator_callbacks
+    {
+        memory_trap_handler memory_trap;
+        cpuid_handler cpuid;
+        syscall_handler syscall;
+        std::optional<std::uint64_t> syscall_intercept_address;
+    };
+
+    class emulator
+    {
+      public:
+        explicit emulator(emulator_callbacks callbacks = {});
+        explicit emulator(memory_trap_handler trap_handler_callback);
+        ~emulator();
+
+        emulator(const emulator&) = delete;
+        emulator& operator=(const emulator&) = delete;
+
+        emulator(emulator&&) noexcept;
+        emulator& operator=(emulator&&) noexcept;
+
+        void set_cpu_state(const cpu_state& state);
+        void map_memory(const mapped_range& range);
+        void run();
+        register_snapshot read_registers() const;
+
+      private:
+        class implementation;
+        std::unique_ptr<implementation> implementation_;
+    };
+
+    std::uint64_t align_down_to_page(std::uint64_t value);
+    bool is_page_aligned(std::uint64_t value);
+    map_access operator|(map_access left, map_access right);
+    map_access operator&(map_access left, map_access right);
+    map_access& operator|=(map_access& left, map_access right);
+    std::string to_hex(std::uint64_t value);
+} // namespace vmtrace
+
+```
+
+`src/examples/demo_main.cpp`:
+
+```cpp
+#include "vmtrace/vmtrace.hpp"
+
+#include <asmjit/x86.h>
+#include <Windows.h>
+
+#include <array>
+#include <cstdint>
+#include <cstring>
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+namespace
+{
+    using std::string;
+
+    constexpr std::uint64_t code_page_base = 0x1000;
+    constexpr std::uint64_t output_page_base = 0x2000;
+    constexpr std::uint64_t stack_page_base = 0x3000;
+    constexpr std::uint64_t syscall_intercept_address = 0x4000;
+
+    constexpr std::uint64_t cpuid_vendor_output_base = output_page_base;
+    constexpr std::uint64_t syscall_return_output_base = output_page_base + 0x10;
+
+    constexpr std::uint64_t syscall_number = 0x1234;
+    constexpr std::uint64_t syscall_arg0 = 0x11111111;
+    constexpr std::uint64_t syscall_arg1 = 0x22222222;
+    constexpr std::uint64_t syscall_arg2 = 0x33333333;
+    constexpr std::uint64_t syscall_arg3 = 0x44444444;
+    constexpr std::uint64_t syscall_return_value = 0xFEEDFACECAFEBEEFull;
+
+    class virtual_alloc_page
+    {
+      public:
+        virtual_alloc_page()
+            : page_(static_cast<std::uint8_t*>(::VirtualAlloc(nullptr, vmtrace::page_size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE)))
+        {
+            if (page_ == nullptr)
+            {
+                throw std::runtime_error("VirtualAlloc failed");
+            }
+        }
+
+        virtual_alloc_page(const virtual_alloc_page&) = delete;
+        virtual_alloc_page& operator=(const virtual_alloc_page&) = delete;
+
+        ~virtual_alloc_page()
+        {
+            if (page_ != nullptr)
+            {
+                ::VirtualFree(page_, 0, MEM_RELEASE);
+            }
+        }
+
+        std::uint8_t* data() const
+        {
+            return page_;
+        }
+
+      private:
+        std::uint8_t* page_ = nullptr;
+    };
+
+    std::array<std::uint32_t, 3> vendor_to_registers(const std::string& vendor_string)
+    {
+        std::array<char, 12> padded_vendor = {};
+        std::memcpy(padded_vendor.data(), vendor_string.data(), (std::min)(vendor_string.size(), padded_vendor.size()));
+
+        std::array<std::uint32_t, 3> registers = {};
+        std::memcpy(&registers[0], padded_vendor.data(), 4);
+        std::memcpy(&registers[1], padded_vendor.data() + 4, 4);
+        std::memcpy(&registers[2], padded_vendor.data() + 8, 4);
+        return registers;
+    }
+
+    std::string vendor_from_memory(const std::uint8_t* data)
+    {
+        std::array<char, 13> vendor = {};
+        std::memcpy(vendor.data(), data, 12);
+        return {vendor.data(), 12};
+    }
+
+    struct sample_program
+    {
+        virtual_alloc_page code_page;
+        virtual_alloc_page output_page;
+        virtual_alloc_page stack_page;
+        virtual_alloc_page syscall_page;
+        std::string intercepted_vendor = "VmTraceLabs!";
+
+        sample_program()
+        {
+            std::memset(code_page.data(), 0x90, vmtrace::page_size);
+            std::memset(output_page.data(), 0x00, vmtrace::page_size);
+            std::memset(stack_page.data(), 0x00, vmtrace::page_size);
+            std::memset(syscall_page.data(), 0x90, vmtrace::page_size);
+            syscall_page.data()[0] = 0xF4;
+
+            auto code = build_code();
+            std::memcpy(code_page.data(), code.data(), code.size());
+        }
+
+        std::vector<std::uint8_t> build_code() const
+        {
+            asmjit::CodeHolder code;
+
+            code.init(asmjit::Environment::host(), asmjit::CpuInfo::host().features(), code_page_base);
+
+            asmjit::x86::Assembler assembler(&code);
+            using namespace asmjit::x86;
+
+            assembler.xor_(eax, eax);
+            assembler.xor_(ecx, ecx);
+            assembler.cpuid();
+
+            assembler.mov(rdi, cpuid_vendor_output_base);
+            assembler.mov(dword_ptr(rdi), ebx);
+            assembler.mov(dword_ptr(rdi, 4), edx);
+            assembler.mov(dword_ptr(rdi, 8), ecx);
+
+            assembler.mov(r10, syscall_arg0);
+            assembler.mov(edx, static_cast<std::uint32_t>(syscall_arg1));
+            assembler.mov(r8d, static_cast<std::uint32_t>(syscall_arg2));
+            assembler.mov(r9d, static_cast<std::uint32_t>(syscall_arg3));
+            assembler.mov(eax, static_cast<std::uint32_t>(syscall_number));
+
+            assembler.syscall();
+
+            assembler.mov(rdi, syscall_return_output_base);
+            assembler.mov(qword_ptr(rdi), rax);
+            assembler.hlt();
+
+            code.flatten();
+
+            std::vector<std::uint8_t> bytes(code.code_size());
+            code.copy_flattened_data(bytes.data(), bytes.size(), asmjit::CopySectionFlags::kPadTargetBuffer);
+
+            return bytes;
+        }
+
+        vmtrace::trap_response on_memory_trap(const vmtrace::trap_info& trap) const
+        {
+            std::cout << "Unexpected memory trap: access="
+                      << ((trap.access_kind == vmtrace::trap_access_kind::read)    ? "read"
+                          : (trap.access_kind == vmtrace::trap_access_kind::write) ? "write"
+                                                                                   : "execute")
+                      << " gpa=" << vmtrace::to_hex(trap.guest_physical_address) << " gva=" << vmtrace::to_hex(trap.guest_virtual_address)
+                      << "\n";
+
+            vmtrace::trap_response response = {};
+            response.resolution = vmtrace::trap_resolution::stop_emulation;
+            response.message = "Stopped on unexpected memory trap.";
+            return response;
+        }
+
+        vmtrace::cpuid_response on_cpuid(const vmtrace::cpuid_info& info) const
+        {
+            std::cout << "Intercepted CPUID leaf=" << vmtrace::to_hex(info.leaf) << " subleaf=" << vmtrace::to_hex(info.subleaf) << "\n";
+
+            if (info.leaf != 0 || info.subleaf != 0)
+            {
+                vmtrace::cpuid_response response = {};
+                response.resolution = vmtrace::cpuid_resolution::passthrough;
+                return response;
+            }
+
+            const auto vendor_registers = vendor_to_registers(intercepted_vendor);
+
+            vmtrace::cpuid_response response = {};
+            response.resolution = vmtrace::cpuid_resolution::emulate;
+            response.eax = info.default_eax;
+            response.ebx = vendor_registers[0];
+            response.edx = vendor_registers[1];
+            response.ecx = vendor_registers[2];
+            response.message = "Replaced CPUID vendor string.";
+            return response;
+        }
+
+        vmtrace::syscall_response on_syscall(const vmtrace::syscall_info& info) const
+        {
+            std::cout << "Intercepted syscall number=" << vmtrace::to_hex(info.number) << " arg0=" << vmtrace::to_hex(info.arg0)
+                      << " arg1=" << vmtrace::to_hex(info.arg1) << " arg2=" << vmtrace::to_hex(info.arg2)
+                      << " arg3=" << vmtrace::to_hex(info.arg3) << "\n";
+
+            vmtrace::syscall_response response = {};
+            response.resolution = vmtrace::syscall_resolution::emulate_and_return;
+            response.return_value = syscall_return_value;
+            response.message = "Returned a synthetic syscall result.";
+            return response;
+        }
+    };
+} // namespace
+
+int main()
+{
+    try
+    {
+        std::cout << "Starting vmtrace demo\n";
+
+        sample_program sample = {};
+
+        vmtrace::emulator emulator({
+            .memory_trap = [&sample](const vmtrace::trap_info& trap) { return sample.on_memory_trap(trap); },
+            .cpuid = [&sample](const vmtrace::cpuid_info& info) { return sample.on_cpuid(info); },
+            .syscall = [&sample](const vmtrace::syscall_info& info) { return sample.on_syscall(info); },
+            .syscall_intercept_address = syscall_intercept_address,
+        });
+
+        emulator.map_memory({
+            .host_address = sample.code_page.data(),
+            .size = vmtrace::page_size,
+            .access = vmtrace::map_access::read | vmtrace::map_access::execute,
+            .guest_address = code_page_base,
+        });
+
+        emulator.map_memory({
+            .host_address = sample.output_page.data(),
+            .size = vmtrace::page_size,
+            .access = vmtrace::map_access::read | vmtrace::map_access::write,
+            .guest_address = output_page_base,
+        });
+
+        emulator.map_memory({
+            .host_address = sample.stack_page.data(),
+            .size = vmtrace::page_size,
+            .access = vmtrace::map_access::read | vmtrace::map_access::write,
+            .guest_address = stack_page_base,
+        });
+
+        emulator.map_memory({
+            .host_address = sample.syscall_page.data(),
+            .size = vmtrace::page_size,
+            .access = vmtrace::map_access::read | vmtrace::map_access::execute,
+            .guest_address = syscall_intercept_address,
+        });
+
+        vmtrace::cpu_state initial_state = {};
+        initial_state.rip = code_page_base;
+        initial_state.rsp = stack_page_base + vmtrace::page_size - 0x20;
+
+        emulator.set_cpu_state(initial_state);
+        emulator.run();
+
+        const auto registers = emulator.read_registers();
+        const auto vendor = vendor_from_memory(sample.output_page.data());
+        std::uint64_t syscall_return = 0;
+        std::memcpy(&syscall_return, sample.output_page.data() + 0x10, sizeof(syscall_return));
+
+        std::cout << "Final registers\n";
+        std::cout << "  RIP: " << vmtrace::to_hex(registers.rip) << "\n";
+        std::cout << "  RAX: " << vmtrace::to_hex(registers.rax) << "\n";
+        std::cout << "  RBX: " << vmtrace::to_hex(registers.rbx) << "\n";
+        std::cout << "  RCX: " << vmtrace::to_hex(registers.rcx) << "\n";
+        std::cout << "  RDX: " << vmtrace::to_hex(registers.rdx) << "\n";
+        std::cout << "  RSP: " << vmtrace::to_hex(registers.rsp) << "\n";
+        std::cout << "Vendor captured in guest memory: " << vendor << "\n";
+        std::cout << "Syscall return captured in guest memory: " << vmtrace::to_hex(syscall_return) << "\n";
+
+        return 0;
+    }
+    catch (const std::exception& exception)
+    {
+        std::cerr << "Error: " << exception.what() << "\n";
+        return 1;
+    }
+}
+
+```
+
+`src/lib/vmtrace.cpp`:
+
+```cpp
+#include "vmtrace/vmtrace.hpp"
+
+#include <WinHvPlatform.h>
+
+#include <array>
+#include <cstring>
+#include <iomanip>
+#include <memory>
+#include <optional>
+#include <sstream>
+#include <stdexcept>
+#include <unordered_map>
+
+namespace vmtrace
+{
+    namespace
+    {
+        constexpr UINT32 vp_index = 0;
+        constexpr std::uint64_t page_table_entry_present = 1ull << 0;
+        constexpr std::uint64_t page_table_entry_writable = 1ull << 1;
+        constexpr std::uint64_t page_table_entry_address_mask = 0x000FFFFFFFFFF000ull;
+        constexpr std::uint64_t internal_page_table_base = 0x0000007000000000ull;
+
+        struct mapped_page
+        {
+            struct virtual_free_deleter
+            {
+                void operator()(std::uint8_t* page) const
+                {
+                    if (page != nullptr)
+                    {
+                        ::VirtualFree(page, 0, MEM_RELEASE);
+                    }
+                }
+            };
+
+            void* host_page = nullptr;
+            UINT32 map_flags = 0;
+            std::unique_ptr<std::uint8_t, virtual_free_deleter> owned_page;
+        };
+
+        [[noreturn]] void throw_hr(HRESULT hr, const char* action)
+        {
+            std::ostringstream stream;
+            stream << action << " failed with HRESULT 0x" << std::hex << std::setw(8) << std::setfill('0')
+                   << static_cast<std::uint32_t>(hr);
+            throw std::runtime_error(stream.str());
+        }
+
+        void check_hr(HRESULT hr, const char* action)
+        {
+            if (FAILED(hr))
+            {
+                throw_hr(hr, action);
+            }
+        }
+
+        class partition_handle
+        {
+          public:
+            partition_handle()
+            {
+                check_hr(WHvCreatePartition(&handle_), "WHvCreatePartition");
+            }
+
+            partition_handle(const partition_handle&) = delete;
+            partition_handle& operator=(const partition_handle&) = delete;
+
+            ~partition_handle()
+            {
+                if (handle_ != nullptr)
+                {
+                    WHvDeletePartition(handle_);
+                }
+            }
+
+            WHV_PARTITION_HANDLE get() const
+            {
+                return handle_;
+            }
+
+          private:
+            WHV_PARTITION_HANDLE handle_ = nullptr;
+        };
+
+        class virtual_processor_handle
+        {
+          public:
+            explicit virtual_processor_handle(WHV_PARTITION_HANDLE partition)
+                : partition_(partition)
+            {
+                check_hr(WHvCreateVirtualProcessor(partition_, vp_index, 0), "WHvCreateVirtualProcessor");
+            }
+
+            virtual_processor_handle(const virtual_processor_handle&) = delete;
+            virtual_processor_handle& operator=(const virtual_processor_handle&) = delete;
+
+            ~virtual_processor_handle()
+            {
+                if (partition_ != nullptr)
+                {
+                    WHvDeleteVirtualProcessor(partition_, vp_index);
+                }
+            }
+
+          private:
+            WHV_PARTITION_HANDLE partition_ = nullptr;
+        };
+
+        trap_access_kind access_kind_from_whp(WHV_MEMORY_ACCESS_TYPE access_type)
+        {
+            switch (access_type)
+            {
+            case WHvMemoryAccessRead:
+                return trap_access_kind::read;
+            case WHvMemoryAccessWrite:
+                return trap_access_kind::write;
+            case WHvMemoryAccessExecute:
+                return trap_access_kind::execute;
+            default:
+                throw std::runtime_error("Unknown WHP memory access type.");
+            }
+        }
+
+        UINT32 normalize_map_flags(UINT32 map_flags)
+        {
+            if ((map_flags & (WHvMapGpaRangeFlagRead | WHvMapGpaRangeFlagWrite | WHvMapGpaRangeFlagExecute)) == 0)
+            {
+                throw std::runtime_error("Mapped page needs at least one access flag.");
+            }
+
+            return map_flags;
+        }
+
+        UINT32 to_whp_map_flags(map_access access)
+        {
+            UINT32 flags = 0;
+
+            if ((access & map_access::read) != map_access::none)
+            {
+                flags |= WHvMapGpaRangeFlagRead;
+            }
+
+            if ((access & map_access::write) != map_access::none)
+            {
+                flags |= WHvMapGpaRangeFlagWrite;
+            }
+
+            if ((access & map_access::execute) != map_access::none)
+            {
+                flags |= WHvMapGpaRangeFlagExecute;
+            }
+
+            return normalize_map_flags(flags);
+        }
+
+        WHV_X64_SEGMENT_REGISTER make_code_segment()
+        {
+            WHV_X64_SEGMENT_REGISTER segment = {};
+            segment.Base = 0;
+            segment.Limit = 0xFFFFF;
+            segment.Selector = 0x8;
+            segment.SegmentType = 0xB;
+            segment.NonSystemSegment = 1;
+            segment.DescriptorPrivilegeLevel = 0;
+            segment.Present = 1;
+            segment.Long = 1;
+            segment.Default = 0;
+            segment.Granularity = 1;
+            return segment;
+        }
+
+        WHV_X64_SEGMENT_REGISTER make_data_segment()
+        {
+            WHV_X64_SEGMENT_REGISTER segment = {};
+            segment.Base = 0;
+            segment.Limit = 0xFFFFF;
+            segment.Selector = 0x10;
+            segment.SegmentType = 0x3;
+            segment.NonSystemSegment = 1;
+            segment.DescriptorPrivilegeLevel = 0;
+            segment.Present = 1;
+            segment.Default = 0;
+            segment.Granularity = 1;
+            return segment;
+        }
+
+        trap_info build_trap_info(const WHV_MEMORY_ACCESS_CONTEXT& memory_access)
+        {
+            trap_info info = {};
+            info.access_kind = access_kind_from_whp(static_cast<WHV_MEMORY_ACCESS_TYPE>(memory_access.AccessInfo.AccessType));
+            info.guest_physical_address = memory_access.Gpa;
+            info.guest_virtual_address = memory_access.Gva;
+            info.guest_virtual_address_valid = memory_access.AccessInfo.GvaValid != 0;
+            info.instruction_bytes.assign(memory_access.InstructionBytes,
+                                          memory_access.InstructionBytes + memory_access.InstructionByteCount);
+            return info;
+        }
+    } // namespace
+
+    class emulator::implementation
+    {
+      public:
+        explicit implementation(emulator_callbacks callbacks)
+            : callbacks_(std::move(callbacks))
+        {
+            ensure_platform_support();
+            configure_partition();
+            virtual_processor_ = std::make_unique<virtual_processor_handle>(partition_.get());
+            initialize_long_mode_page_tables();
+        }
+
+        void set_cpu_state(const cpu_state& state)
+        {
+            const std::array<WHV_REGISTER_NAME, 22> names = {
+                WHvX64RegisterRip, WHvX64RegisterRsp,  WHvX64RegisterRflags, WHvX64RegisterRax,    WHvX64RegisterRbx, WHvX64RegisterRcx,
+                WHvX64RegisterRdx, WHvX64RegisterRsi,  WHvX64RegisterRdi,    WHvX64RegisterRbp,    WHvX64RegisterCs,  WHvX64RegisterDs,
+                WHvX64RegisterEs,  WHvX64RegisterFs,   WHvX64RegisterGs,     WHvX64RegisterSs,     WHvX64RegisterCr0, WHvX64RegisterCr4,
+                WHvX64RegisterCr3, WHvX64RegisterEfer, WHvX64RegisterLstar,  WHvX64RegisterSfmask,
+            };
+
+            std::array<WHV_REGISTER_VALUE, names.size()> values = {};
+            values[0].Reg64 = state.rip;
+            values[1].Reg64 = state.rsp;
+            values[2].Reg64 = state.rflags;
+            values[3].Reg64 = state.rax;
+            values[4].Reg64 = state.rbx;
+            values[5].Reg64 = state.rcx;
+            values[6].Reg64 = state.rdx;
+            values[7].Reg64 = state.rsi;
+            values[8].Reg64 = state.rdi;
+            values[9].Reg64 = state.rbp;
+
+            const WHV_X64_SEGMENT_REGISTER code_segment = make_code_segment();
+            const WHV_X64_SEGMENT_REGISTER data_segment = make_data_segment();
+
+            values[10].Segment = code_segment;
+            values[11].Segment = data_segment;
+            values[12].Segment = data_segment;
+            values[13].Segment = data_segment;
+            values[14].Segment = data_segment;
+            values[15].Segment = data_segment;
+            values[16].Reg64 = 0x80000001ull;
+            values[17].Reg64 = 0x20ull;
+            values[18].Reg64 = pml4_gpa_;
+            values[19].Reg64 = (1ull << 8) | (1ull << 10) | (callbacks_.syscall ? 1ull : 0ull);
+            values[20].Reg64 = callbacks_.syscall_intercept_address.value_or(0);
+            values[21].Reg64 = 0;
+
+            check_hr(
+                WHvSetVirtualProcessorRegisters(partition_.get(), vp_index, names.data(), static_cast<UINT32>(names.size()), values.data()),
+                "WHvSetVirtualProcessorRegisters");
+        }
+
+        void map_memory(const mapped_range& range)
+        {
+            if (range.host_address == nullptr)
+            {
+                throw std::runtime_error("map_memory requires a valid host address.");
+            }
+
+            if (range.size == 0)
+            {
+                throw std::runtime_error("map_memory requires a non-zero size.");
+            }
+
+            if (!is_page_aligned(reinterpret_cast<std::uint64_t>(range.host_address)))
+            {
+                throw std::runtime_error("Host address must be page aligned.");
+            }
+
+            if (!is_page_aligned(range.size))
+            {
+                throw std::runtime_error("Mapped size must be page aligned.");
+            }
+
+            const std::uint64_t guest_address = range.guest_address.value_or(reinterpret_cast<std::uint64_t>(range.host_address));
+            if (!is_page_aligned(guest_address))
+            {
+                throw std::runtime_error("Guest address must be page aligned.");
+            }
+
+            const UINT32 map_flags = to_whp_map_flags(range.access);
+
+            trap_response response = {};
+            response.resolution = trap_resolution::map_page;
+            response.access = range.access;
+            response.host_page = range.host_address;
+
+            for (std::size_t offset = 0; offset < range.size; offset += page_size)
+            {
+                const auto current_guest_address = guest_address + offset;
+                auto* const current_host_address = static_cast<void*>(static_cast<std::uint8_t*>(range.host_address) + offset);
+                response.host_page = current_host_address;
+                map_page(current_guest_address, response, map_flags);
+            }
+        }
+
+        void run()
+        {
+            bool running = true;
+
+            while (running)
+            {
+                WHV_RUN_VP_EXIT_CONTEXT exit_context = {};
+                check_hr(WHvRunVirtualProcessor(partition_.get(), vp_index, &exit_context, sizeof(exit_context)), "WHvRunVirtualProcessor");
+
+                switch (exit_context.ExitReason)
+                {
+                case WHvRunVpExitReasonMemoryAccess:
+                    handle_memory_access(exit_context.MemoryAccess, running);
+                    break;
+                case WHvRunVpExitReasonX64Cpuid:
+                    handle_cpuid(exit_context.CpuidAccess, running);
+                    break;
+                case WHvRunVpExitReasonException:
+                    handle_exception(exit_context);
+                    running = false;
+                    break;
+                case WHvRunVpExitReasonUnsupportedFeature:
+                    handle_unsupported_feature(exit_context);
+                    running = false;
+                    break;
+                case WHvRunVpExitReasonX64Halt:
+                    if (callbacks_.syscall && callbacks_.syscall_intercept_address.has_value() &&
+                        align_down_to_page(exit_context.VpContext.Rip) == align_down_to_page(callbacks_.syscall_intercept_address.value()))
+                    {
+                        handle_syscall(running);
+                    }
+                    else
+                    {
+                        running = false;
+                    }
+                    break;
+                default: {
+                    std::ostringstream stream;
+                    stream << "Unexpected exit reason: 0x" << std::hex << exit_context.ExitReason;
+                    throw std::runtime_error(stream.str());
+                }
+                }
+            }
+        }
+
+        register_snapshot read_registers() const
+        {
+            const std::array<WHV_REGISTER_NAME, 6> names = {
+                WHvX64RegisterRip, WHvX64RegisterRax, WHvX64RegisterRbx, WHvX64RegisterRcx, WHvX64RegisterRdx, WHvX64RegisterRsp,
+            };
+
+            std::array<WHV_REGISTER_VALUE, names.size()> values = {};
+            check_hr(
+                WHvGetVirtualProcessorRegisters(partition_.get(), vp_index, names.data(), static_cast<UINT32>(names.size()), values.data()),
+                "WHvGetVirtualProcessorRegisters");
+
+            return {
+                .rip = values[0].Reg64,
+                .rax = values[1].Reg64,
+                .rbx = values[2].Reg64,
+                .rcx = values[3].Reg64,
+                .rdx = values[4].Reg64,
+                .rsp = values[5].Reg64,
+            };
+        }
+
+      private:
+        void ensure_platform_support()
+        {
+            BOOL hypervisor_present = FALSE;
+            UINT32 bytes_written = 0;
+
+            check_hr(WHvGetCapability(WHvCapabilityCodeHypervisorPresent, &hypervisor_present, sizeof(hypervisor_present), &bytes_written),
+                     "WHvGetCapability(HypervisorPresent)");
+
+            if (!hypervisor_present)
+            {
+                throw std::runtime_error("Hypervisor is not present. Enable Hyper-V and Windows Hypervisor Platform.");
+            }
+
+            check_hr(WHvGetCapability(WHvCapabilityCodeExtendedVmExits, &supported_exits_, sizeof(supported_exits_), &bytes_written),
+                     "WHvGetCapability(ExtendedVmExits)");
+        }
+
+        void configure_partition()
+        {
+            UINT32 processor_count = 1;
+            check_hr(WHvSetPartitionProperty(partition_.get(), WHvPartitionPropertyCodeProcessorCount, &processor_count,
+                                             sizeof(processor_count)),
+                     "WHvSetPartitionProperty(ProcessorCount)");
+
+            WHV_EXTENDED_VM_EXITS enabled_exits = {};
+            enabled_exits.ExceptionExit = supported_exits_.ExceptionExit ? 1 : 0;
+            enabled_exits.X64CpuidExit = (callbacks_.cpuid && supported_exits_.X64CpuidExit) ? 1 : 0;
+
+            check_hr(
+                WHvSetPartitionProperty(partition_.get(), WHvPartitionPropertyCodeExtendedVmExits, &enabled_exits, sizeof(enabled_exits)),
+                "WHvSetPartitionProperty(ExtendedVmExits)");
+
+            if (callbacks_.cpuid)
+            {
+                const UINT32 cpuid_leaf_zero = 0;
+                check_hr(WHvSetPartitionProperty(partition_.get(), WHvPartitionPropertyCodeCpuidExitList, &cpuid_leaf_zero,
+                                                 sizeof(cpuid_leaf_zero)),
+                         "WHvSetPartitionProperty(CpuidExitList)");
+            }
+
+            check_hr(WHvSetupPartition(partition_.get()), "WHvSetupPartition");
+        }
+
+        void handle_memory_access(const WHV_MEMORY_ACCESS_CONTEXT& memory_access, bool& running)
+        {
+            if (!callbacks_.memory_trap)
+            {
+                throw std::runtime_error("No memory trap handler is configured.");
+            }
+
+            const trap_response response = callbacks_.memory_trap(build_trap_info(memory_access));
+
+            switch (response.resolution)
+            {
+            case trap_resolution::map_page:
+                map_page(memory_access.Gpa, response);
+                break;
+            case trap_resolution::stop_emulation:
+                running = false;
+                break;
+            case trap_resolution::deny_access:
+                throw std::runtime_error("Trap handler denied access.");
+            }
+        }
+
+        void handle_cpuid(const WHV_X64_CPUID_ACCESS_CONTEXT& cpuid_access, bool& running)
+        {
+            if (!callbacks_.cpuid)
+            {
+                throw std::runtime_error("Unexpected CPUID exit without a CPUID handler.");
+            }
+
+            cpuid_info info = {};
+            info.leaf = static_cast<std::uint32_t>(cpuid_access.Rax);
+            info.subleaf = static_cast<std::uint32_t>(cpuid_access.Rcx);
+            info.default_eax = static_cast<std::uint32_t>(cpuid_access.DefaultResultRax);
+            info.default_ebx = static_cast<std::uint32_t>(cpuid_access.DefaultResultRbx);
+            info.default_ecx = static_cast<std::uint32_t>(cpuid_access.DefaultResultRcx);
+            info.default_edx = static_cast<std::uint32_t>(cpuid_access.DefaultResultRdx);
+
+            const cpuid_response response = callbacks_.cpuid(info);
+
+            switch (response.resolution)
+            {
+            case cpuid_resolution::passthrough:
+                write_cpuid_result(info.default_eax, info.default_ebx, info.default_ecx, info.default_edx);
+                advance_rip();
+                break;
+            case cpuid_resolution::emulate:
+                write_cpuid_result(response.eax, response.ebx, response.ecx, response.edx);
+                advance_rip();
+                break;
+            case cpuid_resolution::stop_emulation:
+                running = false;
+                break;
+            }
+        }
+
+        void handle_syscall(bool& running)
+        {
+            const syscall_info info = read_syscall_info();
+            const syscall_response response = callbacks_.syscall(info);
+
+            switch (response.resolution)
+            {
+            case syscall_resolution::emulate_and_return:
+                write_syscall_result(info.return_rip, info.return_rflags, response.return_value);
+                break;
+            case syscall_resolution::stop_emulation:
+                running = false;
+                break;
+            case syscall_resolution::deny:
+                throw std::runtime_error("Syscall handler denied the syscall.");
+            }
+        }
+
+        void map_page(std::uint64_t guest_physical_address, const trap_response& response)
+        {
+            map_page(guest_physical_address, response, to_whp_map_flags(response.access));
+        }
+
+        void map_page(std::uint64_t guest_physical_address, const trap_response& response, UINT32 map_flags)
+        {
+            const std::uint64_t page_base = align_down_to_page(guest_physical_address);
+
+            auto& page = mapped_pages_[page_base];
+            if (!page)
+            {
+                page = std::make_unique<mapped_page>();
+            }
+
+            if (page->host_page == nullptr)
+            {
+                if (response.host_page != nullptr)
+                {
+                    page->host_page = response.host_page;
+                }
+                else
+                {
+                    auto* raw_page =
+                        static_cast<std::uint8_t*>(::VirtualAlloc(nullptr, page_size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE));
+                    if (raw_page == nullptr)
+                    {
+                        throw std::runtime_error("VirtualAlloc failed while backing a guest page.");
+                    }
+
+                    std::memset(raw_page, 0, page_size);
+                    if (!response.page_bytes.empty())
+                    {
+                        std::memcpy(raw_page, response.page_bytes.data(),
+                                    (std::min)(response.page_bytes.size(), static_cast<size_t>(page_size)));
+                    }
+
+                    page->owned_page.reset(raw_page);
+                    page->host_page = raw_page;
+                }
+            }
+
+            if (page->map_flags != 0)
+            {
+                check_hr(WHvUnmapGpaRange(partition_.get(), page_base, page_size), "WHvUnmapGpaRange");
+            }
+
+            page->map_flags |= map_flags;
+
+            check_hr(WHvMapGpaRange(partition_.get(), page->host_page, page_base, page_size,
+                                    static_cast<WHV_MAP_GPA_RANGE_FLAGS>(page->map_flags)),
+                     "WHvMapGpaRange");
+
+            ensure_virtual_mapping(page_base);
+        }
+
+        void initialize_long_mode_page_tables()
+        {
+            pml4_gpa_ = allocate_internal_page();
+        }
+
+        std::uint64_t allocate_internal_page()
+        {
+            auto* raw_page = static_cast<std::uint8_t*>(::VirtualAlloc(nullptr, page_size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE));
+            if (raw_page == nullptr)
+            {
+                throw std::runtime_error("VirtualAlloc failed while creating an internal page.");
+            }
+
+            std::memset(raw_page, 0, page_size);
+
+            const std::uint64_t page_gpa = next_internal_gpa_;
+            next_internal_gpa_ += page_size;
+
+            auto page = std::make_unique<mapped_page>();
+            page->owned_page.reset(raw_page);
+            page->host_page = raw_page;
+            page->map_flags = WHvMapGpaRangeFlagRead | WHvMapGpaRangeFlagWrite;
+
+            check_hr(WHvMapGpaRange(partition_.get(), page->host_page, page_gpa, page_size,
+                                    static_cast<WHV_MAP_GPA_RANGE_FLAGS>(page->map_flags)),
+                     "WHvMapGpaRange");
+
+            page_table_views_[page_gpa] = reinterpret_cast<std::uint64_t*>(raw_page);
+            mapped_pages_[page_gpa] = std::move(page);
+            return page_gpa;
+        }
+
+        std::uint64_t* get_page_table_entries(std::uint64_t page_gpa)
+        {
+            return page_table_views_.at(page_gpa);
+        }
+
+        std::uint64_t ensure_child_table(std::uint64_t table_gpa, std::size_t index)
+        {
+            auto* const table_entries = get_page_table_entries(table_gpa);
+            auto& entry = table_entries[index];
+            if ((entry & page_table_entry_present) == 0)
+            {
+                const std::uint64_t child_gpa = allocate_internal_page();
+                entry = child_gpa | page_table_entry_present | page_table_entry_writable;
+                return child_gpa;
+            }
+
+            return entry & page_table_entry_address_mask;
+        }
+
+        void ensure_virtual_mapping(std::uint64_t guest_address)
+        {
+            const std::uint64_t page_base = align_down_to_page(guest_address);
+            const auto pml4_index = static_cast<std::size_t>((page_base >> 39) & 0x1FF);
+            const auto pdpt_index = static_cast<std::size_t>((page_base >> 30) & 0x1FF);
+            const auto pd_index = static_cast<std::size_t>((page_base >> 21) & 0x1FF);
+            const auto pt_index = static_cast<std::size_t>((page_base >> 12) & 0x1FF);
+
+            const std::uint64_t pdpt_gpa = ensure_child_table(pml4_gpa_, pml4_index);
+            const std::uint64_t pd_gpa = ensure_child_table(pdpt_gpa, pdpt_index);
+            const std::uint64_t pt_gpa = ensure_child_table(pd_gpa, pd_index);
+
+            auto* const pt_entries = get_page_table_entries(pt_gpa);
+            pt_entries[pt_index] = page_base | page_table_entry_present | page_table_entry_writable;
+        }
+
+        void handle_exception(const WHV_RUN_VP_EXIT_CONTEXT& exit_context)
+        {
+            const auto& exception = exit_context.VpException;
+            std::ostringstream stream;
+            stream << "Guest exception type=0x" << std::hex << static_cast<unsigned>(exception.ExceptionType) << " rip=0x"
+                   << exit_context.VpContext.Rip;
+            throw std::runtime_error(stream.str());
+        }
+
+        void handle_unsupported_feature(const WHV_RUN_VP_EXIT_CONTEXT& exit_context)
+        {
+            const auto& unsupported_feature = exit_context.UnsupportedFeature;
+            std::ostringstream stream;
+            stream << "Unsupported feature exit. code=0x" << std::hex << unsupported_feature.FeatureCode << " rip=0x"
+                   << exit_context.VpContext.Rip;
+            throw std::runtime_error(stream.str());
+        }
+
+        void advance_rip()
+        {
+            const std::array<WHV_REGISTER_NAME, 1> names = {WHvX64RegisterRip};
+            std::array<WHV_REGISTER_VALUE, 1> values = {};
+
+            check_hr(
+                WHvGetVirtualProcessorRegisters(partition_.get(), vp_index, names.data(), static_cast<UINT32>(names.size()), values.data()),
+                "WHvGetVirtualProcessorRegisters");
+
+            values[0].Reg64 += 2;
+
+            check_hr(
+                WHvSetVirtualProcessorRegisters(partition_.get(), vp_index, names.data(), static_cast<UINT32>(names.size()), values.data()),
+                "WHvSetVirtualProcessorRegisters");
+        }
+
+        void write_cpuid_result(std::uint32_t eax, std::uint32_t ebx, std::uint32_t ecx, std::uint32_t edx)
+        {
+            const std::array<WHV_REGISTER_NAME, 4> names = {
+                WHvX64RegisterRax,
+                WHvX64RegisterRbx,
+                WHvX64RegisterRcx,
+                WHvX64RegisterRdx,
+            };
+
+            std::array<WHV_REGISTER_VALUE, 4> values = {};
+            values[0].Reg64 = eax;
+            values[1].Reg64 = ebx;
+            values[2].Reg64 = ecx;
+            values[3].Reg64 = edx;
+
+            check_hr(
+                WHvSetVirtualProcessorRegisters(partition_.get(), vp_index, names.data(), static_cast<UINT32>(names.size()), values.data()),
+                "WHvSetVirtualProcessorRegisters");
+        }
+
+        syscall_info read_syscall_info()
+        {
+            const std::array<WHV_REGISTER_NAME, 8> names = {
+                WHvX64RegisterRax, WHvX64RegisterRcx, WHvX64RegisterRdx, WHvX64RegisterR8,
+                WHvX64RegisterR9,  WHvX64RegisterR10, WHvX64RegisterR11, WHvX64RegisterRsp,
+            };
+
+            std::array<WHV_REGISTER_VALUE, 8> values = {};
+            check_hr(
+                WHvGetVirtualProcessorRegisters(partition_.get(), vp_index, names.data(), static_cast<UINT32>(names.size()), values.data()),
+                "WHvGetVirtualProcessorRegisters");
+
+            syscall_info info = {};
+            info.number = values[0].Reg64;
+            info.return_rip = values[1].Reg64;
+            info.arg1 = values[2].Reg64;
+            info.arg2 = values[3].Reg64;
+            info.arg3 = values[4].Reg64;
+            info.arg0 = values[5].Reg64;
+            info.return_rflags = values[6].Reg64;
+            info.stack_pointer = values[7].Reg64;
+            return info;
+        }
+
+        void write_syscall_result(std::uint64_t return_rip, std::uint64_t return_rflags, std::uint64_t return_value)
+        {
+            const std::array<WHV_REGISTER_NAME, 3> names = {
+                WHvX64RegisterRip,
+                WHvX64RegisterRflags,
+                WHvX64RegisterRax,
+            };
+
+            std::array<WHV_REGISTER_VALUE, 3> values = {};
+            values[0].Reg64 = return_rip;
+            values[1].Reg64 = return_rflags;
+            values[2].Reg64 = return_value;
+
+            check_hr(
+                WHvSetVirtualProcessorRegisters(partition_.get(), vp_index, names.data(), static_cast<UINT32>(names.size()), values.data()),
+                "WHvSetVirtualProcessorRegisters");
+        }
+
+        partition_handle partition_;
+        std::unique_ptr<virtual_processor_handle> virtual_processor_;
+        emulator_callbacks callbacks_;
+        WHV_EXTENDED_VM_EXITS supported_exits_ = {};
+        std::unordered_map<std::uint64_t, std::unique_ptr<mapped_page>> mapped_pages_;
+        std::unordered_map<std::uint64_t, std::uint64_t*> page_table_views_;
+        std::uint64_t pml4_gpa_ = 0;
+        std::uint64_t next_internal_gpa_ = internal_page_table_base;
+    };
+
+    emulator::emulator(emulator_callbacks callbacks)
+        : implementation_(std::make_unique<implementation>(std::move(callbacks)))
+    {
+    }
+
+    emulator::emulator(memory_trap_handler trap_handler_callback)
+        : emulator(emulator_callbacks{.memory_trap = std::move(trap_handler_callback)})
+    {
+    }
+
+    emulator::~emulator() = default;
+    emulator::emulator(emulator&&) noexcept = default;
+    emulator& emulator::operator=(emulator&&) noexcept = default;
+
+    void emulator::set_cpu_state(const cpu_state& state)
+    {
+        implementation_->set_cpu_state(state);
+    }
+
+    void emulator::map_memory(const mapped_range& range)
+    {
+        implementation_->map_memory(range);
+    }
+
+    void emulator::run()
+    {
+        implementation_->run();
+    }
+
+    register_snapshot emulator::read_registers() const
+    {
+        return implementation_->read_registers();
+    }
+
+    std::uint64_t align_down_to_page(std::uint64_t value)
+    {
+        return value & ~(page_size - 1);
+    }
+
+    bool is_page_aligned(std::uint64_t value)
+    {
+        return (value % page_size) == 0;
+    }
+
+    map_access operator|(map_access left, map_access right)
+    {
+        return static_cast<map_access>(static_cast<std::uint32_t>(left) | static_cast<std::uint32_t>(right));
+    }
+
+    map_access operator&(map_access left, map_access right)
+    {
+        return static_cast<map_access>(static_cast<std::uint32_t>(left) & static_cast<std::uint32_t>(right));
+    }
+
+    map_access& operator|=(map_access& left, map_access right)
+    {
+        left = left | right;
+        return left;
+    }
+
+    std::string to_hex(std::uint64_t value)
+    {
+        std::ostringstream stream;
+        stream << "0x" << std::hex << value;
+        return stream.str();
+    }
+} // namespace vmtrace
+
+```
