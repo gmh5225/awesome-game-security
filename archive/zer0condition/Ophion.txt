@@ -1,0 +1,5926 @@
+Project Path: arc_zer0condition_Ophion_5ml4lpdm
+
+Source Tree:
+
+```txt
+arc_zer0condition_Ophion_5ml4lpdm
+├── LICENSE
+├── Ophion.sln
+├── Ophion.vcxproj
+├── Ophion.vcxproj.filters
+├── README.md
+├── asm
+│   ├── AsmCommon.asm
+│   ├── AsmSegmentRegs.asm
+│   ├── AsmVmexitHandler.asm
+│   ├── AsmVmxContext.asm
+│   ├── AsmVmxIntrinsics.asm
+│   └── AsmVmxOperation.asm
+├── include
+│   ├── asm_prototypes.h
+│   ├── hv.h
+│   ├── hv_types.h
+│   ├── ia32.h
+│   └── stealth.h
+└── src
+    ├── broadcast.c
+    ├── driver.c
+    ├── ept.c
+    ├── events.c
+    ├── globals.c
+    ├── hostcr3.c
+    ├── stealth.c
+    ├── util.c
+    ├── vmexit.c
+    └── vmx.c
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 wezo
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`Ophion.sln`:
+
+```sln
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ophion", "Ophion.vcxproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|x64.ActiveCfg = Debug|x64
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|x64.Build.0 = Debug|x64
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|x64.ActiveCfg = Release|x64
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+
+```
+
+`Ophion.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}</ProjectGuid>
+    <RootNamespace>Ophion</RootNamespace>
+    <ProjectName>Ophion</ProjectName>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <!-- Configuration: x64 Release (Kernel Mode) -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>WDM</DriverType>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <!-- Configuration: x64 Debug (Kernel Mode) -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>WDM</DriverType>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <!-- Output directories -->
+  <PropertyGroup>
+    <OutDir>$(ProjectDir)build\bin\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)build\obj\$(Configuration)\</IntDir>
+    <TargetName>Ophion</TargetName>
+    <TargetExt>.sys</TargetExt>
+    <SignMode>TestSign</SignMode>
+    <TestCertificate>26F9E348962C59621D11296D690DD6D13E6B93DB</TestCertificate>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <DriverSign>
+      <FileDigestAlgorithm>SHA256</FileDigestAlgorithm>
+    </DriverSign>
+  </ItemDefinitionGroup>
+  <!-- Compiler settings: Release -->
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>_AMD64_;AMD64;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(WindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\km;$(WindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EntryPointSymbol>DriverEntry</EntryPointSymbol>
+    </Link>
+    <MASM>
+      <PreprocessorDefinitions>_AMD64_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </MASM>
+  </ItemDefinitionGroup>
+  <!-- Compiler settings: Debug -->
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>_AMD64_;AMD64;_DEBUG;DBG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(WindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\km;$(WindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EntryPointSymbol>DriverEntry</EntryPointSymbol>
+    </Link>
+    <MASM>
+      <PreprocessorDefinitions>_AMD64_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </MASM>
+  </ItemDefinitionGroup>
+  <!-- Source Files -->
+  <ItemGroup>
+    <ClCompile Include="src\driver.c" />
+    <ClCompile Include="src\vmx.c" />
+    <ClCompile Include="src\vmexit.c" />
+    <ClCompile Include="src\ept.c" />
+    <ClCompile Include="src\events.c" />
+    <ClCompile Include="src\broadcast.c" />
+    <ClCompile Include="src\globals.c" />
+    <ClCompile Include="src\util.c" />
+    <ClCompile Include="src\stealth.c" />
+    <ClCompile Include="src\hostcr3.c" />
+  </ItemGroup>
+  <!-- Assembly Files (MASM x64) -->
+  <ItemGroup>
+    <MASM Include="asm\AsmSegmentRegs.asm" />
+    <MASM Include="asm\AsmCommon.asm" />
+    <MASM Include="asm\AsmVmxOperation.asm" />
+    <MASM Include="asm\AsmVmxContext.asm" />
+    <MASM Include="asm\AsmVmexitHandler.asm" />
+    <MASM Include="asm\AsmVmxIntrinsics.asm" />
+  </ItemGroup>
+  <!-- Header Files -->
+  <ItemGroup>
+    <ClInclude Include="include\hv.h" />
+    <ClInclude Include="include\ia32.h" />
+    <ClInclude Include="include\hv_types.h" />
+    <ClInclude Include="include\asm_prototypes.h" />
+    <ClInclude Include="include\stealth.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+```
+
+`Ophion.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>c;cpp</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp</Extensions>
+    </Filter>
+    <Filter Include="Assembly Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>asm</Extensions>
+    </Filter>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ClCompile Include="src\driver.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vmx.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vmexit.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ept.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\events.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\broadcast.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\globals.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ClInclude Include="include\hv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ia32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hv_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asm_prototypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+
+  <ItemGroup>
+    <MASM Include="asm\AsmSegmentRegs.asm">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="asm\AsmCommon.asm">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="asm\AsmVmxOperation.asm">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="asm\AsmVmxContext.asm">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="asm\AsmVmexitHandler.asm">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+    <MASM Include="asm\AsmVmxIntrinsics.asm">
+      <Filter>Assembly Files</Filter>
+    </MASM>
+  </ItemGroup>
+</Project>
+
+```
+
+`README.md`:
+
+```md
+# Ophion
+
+Intel VT-x Type-2 hypervisor that virtualizes an already running Windows system. Designed for stealth: passes common hypervisor detection checks and works with **EAC/BE/AVs out of the box.** (possibly more, these are the only that have been tested)
+
+![Demo](vmaware.png)
+***
+
+## Features
+
+- **Per-core VMX** — Virtualizes all logical processors via DPC broadcast. Clean VMXOFF on unload with guest CR3 restoration.
+- **EPT with 2MB large pages** — Identity-mapped, MTRR-aware memory typing (fixed + variable ranges). Per-processor page tables with dynamic 2MB-to-4KB splitting for hooks.
+- **VPID** — Capability-aware INVVPID (prefers type 3 retaining-globals, falls back gracefully).
+- **Private host CR3** — Deep-copied kernel page tables isolate host mode from guest PT corruption. Built after all allocations so VMM stacks and bitmaps are mapped.
+- **CPUID caching** — Caches bare-metal CPUID at init. Invalid/hypervisor-range leaves return cached native values. Clears ECX[31] on leaf 1.
+- **CR4.VMXE hiding** — Guest CR4 reads/writes go through shadow with VMXE stripped. CR0/CR4 writes enforce VMX fixed bits in actual VMCS.
+- **TSC compensation** — "Trap next RDTSC" after CPUID VM-exit. Returns `cpuid_entry_tsc + bare_metal_cost + offset`. TSC_OFFSET never modified — zero drift.
+- **MSR emulation** — Intercepts RDMSR(0x10) to apply TSC offset. Synthetic MSR range (0x40000000+) injects #GP.
+- **External interrupt re-injection** — ACK-on-exit with deferred delivery via interrupt-window exiting when guest is not interruptible.
+- **IDT vectoring** — Re-injects interrupted IDT events with priority. NMI deferral via NMI-window exiting on collision.
+- **Debug register passthrough** — Full DR0-DR7 with DR4/DR5 aliasing. Hardware BP matching merged into pending debug exceptions on RIP advance.
+- **XSETBV validation** — SDM-compliant XCR0 validation using hardware capability mask from CPUID.0Dh.
+- **MOV CR handling** — CR3 writes strip PCID bit 63, flush via INVVPID. CLTS and LMSW per SDM.
+- **VMCALL gate** — Signature-verified (R10/R11/R12), CPL-checked (ring 0 only). User-mode VMCALL gets #UD.
+
+***
+
+## VMCS Configuration
+
+| Field | Value |
+|-------|-------|
+| **Pin-based** | External-interrupt exiting, NMI exiting |
+| **Primary proc** | TSC offsetting, MSR bitmaps, I/O bitmaps, activate secondary. CR3/HLT/MOV-DR/RDTSC/INVLPG exiting may be forced by must-be-1 bits. |
+| **Secondary proc** | EPT, VPID, RDTSCP, INVPCID, XSAVES/XRSTORS |
+| **Exit** | 64-bit host, save debug controls, ACK interrupt on exit |
+| **Entry** | IA-32e mode guest, load debug controls |
+| **PFEC mask/match** | Both 0 — all #PFs go to guest |
+| **CR0 mask** | 0 (full pass-through) |
+| **CR4 mask** | Bit 13 (VMXE) when stealth enabled, 0 otherwise |
+| **MSR bitmap** | Intercept RDMSR(0x10), IA32_FEATURE_CONTROL (0x3A), VMX capability MSRs (0x480-0x493) |
+| **I/O bitmaps** | All zeros |
+| **EPT pointer** | WB cache, 4-level walk |
+| **VPID** | Tag 1 |
+| **HOST_CR3** | Private deep-copied kernel PTs (or system CR3 if disabled) |
+
+***
+
+## Architecture
+
+```
+include/
+    hv.h                Master header, function prototypes
+    hv_types.h          Per-VCPU state, EPT structures, VMCALL numbers
+    ia32.h              Intel architecture defines (MSRs, VMCS fields, EPT, control bits)
+    stealth.h           Anti-detection feature toggles and types
+    asm_prototypes.h    C prototypes for MASM routines
+
+src/
+    driver.c            DriverEntry, IOCTL dispatch, device setup
+    vmx.c               VMX lifecycle (VMXON/VMCS alloc, VMCS programming, launch)
+    vmexit.c            VM-exit handler (CPUID, CR, MSR, EPT, interrupts, etc.)
+    ept.c               EPT init, MTRR map, identity mapping, split/lookup
+    events.c            Exception/interrupt injection (#GP, #UD, #BP, #PF, external)
+    broadcast.c         Multi-processor DPC broadcast for virtualize/terminate
+    hostcr3.c           Private host page table deep-copy
+    stealth.c           CPUID cache init, bare-metal cost calibration, XCR0 validation
+    globals.c           Global variable definitions
+    util.c              VA/PA translation, GDT/segment helpers
+
+asm/
+    AsmVmexitHandler.asm    VM-exit entry point (save/restore GPRs + XMM + MXCSR)
+    AsmVmxContext.asm       Guest state save/restore for VMLAUNCH
+    AsmVmxOperation.asm     CR4.VMXE enable, VMCALL with signature
+    AsmVmxIntrinsics.asm    INVEPT/INVVPID wrappers
+    AsmSegmentRegs.asm      Segment register getters/setters, GDT/IDT
+    AsmCommon.asm           RFLAGS, GDTR/IDTR reload, CR2 write
+```
+
+***
+
+## Building
+
+Requires Visual Studio 2022, WDK 10.0.26100.0, and MSVC with MASM (x64).
+
+```bash
+MSBuild.exe Ophion.sln /p:Configuration=Release /p:Platform=x64
+```
+
+Output: `build\bin\Release\Ophion.sys` (test-signed).
+
+***
+
+## Loading
+
+```bash
+sc create Ophion type= kernel binPath= "C:\path\to\Ophion.sys"
+sc start Ophion
+```
+
+Requires test signing enabled (`bcdedit /set testsigning on`).
+
+```bash
+sc stop Ophion
+sc delete Ophion
+```
+
+***
+
+## Stealth Toggles
+
+Defined in `include/stealth.h`:
+
+| Toggle | Default | Description |
+|--------|---------|-------------|
+| `STEALTH_ENABLED` | 1 | Master stealth switch |
+| `STEALTH_HIDE_CR4_VMXE` | 1 | Hide CR4.VMXE from guest via CR4 shadow |
+| `STEALTH_COMPENSATE_TIMING` | 1 | TSC compensation for RDTSC+CPUID+RDTSC timing attacks |
+| `STEALTH_CPUID_CACHING` | 1 | Cache native CPUID responses for invalid/hypervisor leaves |
+| `USE_PRIVATE_HOST_CR3` | 1 | Isolated host page tables (deep-copied kernel PTs) |
+
+***
+
+## Tested On
+
+- Intel Core i5-14400F (14th Generation), Windows 10 x64
+
+***
+
+## Detection Tests
+
+Passes with all stealth toggles enabled:
+
+- [hvdetecc](https://github.com/can1357/hvdetecc) — CR4.VMXE shadow, MSR 0x10 interception, CPUID timing
+- [VMAware](https://github.com/kernelwernel/VMAware) — DR trap (DR0 + TF on CPUID, DR6 BS+B0), CPUID checks
+- [checkhv_um](https://github.com/zer0condition/checkhv_um) — RDTSC+CPUID+RDTSC timing, CPUID leaf enumeration, brand string
+
+***
+
+## Disclaimer
+
+This project has not been thoroughly tested for long-term usage or stability. It is intended primarily as a learning resource and a foundation for further development. Use at your own risk.
+
+***
+
+## Credits
+
+- [HyperDbg](https://github.com/HyperDbg/HyperDbg) — Referenced for VMX architecture and VM-exit handling patterns
+- [humzak711](https://github.com/humzak711) — Stealth feedback: MSR feature hiding (IA32_FEATURE_CONTROL, VMX MSRs), CPUID SMX masking
+- [VMAware](https://github.com/kernelwernel/VMAware) — Hypervisor detection testing
+- [hvdetecc](https://github.com/can1357/hvdetecc) — Hypervisor detection testing
+- [Claude](https://claude.ai) — Debugging assistance and IA-32 architecture research
+
+## License
+
+MIT
+
+```
+
+`asm/AsmCommon.asm`:
+
+```asm
+; asmCommon.asm
+; common assembly routines — RFLAGS, GDT/IDT reload
+
+PUBLIC asm_get_rflags
+PUBLIC asm_reload_gdtr
+PUBLIC asm_reload_idtr
+PUBLIC asm_write_cr2
+
+.code _text
+
+
+asm_get_rflags PROC
+    pushfq
+    pop     rax
+    ret
+asm_get_rflags ENDP
+
+; asm_reload_gdtr (PVOID gdtBase /*rcx*/, UINT32 gdtLimit /*edx*/)
+
+asm_reload_gdtr PROC
+    push    rcx
+    shl     rdx, 48
+    push    rdx
+    lgdt    fword ptr [rsp+6]
+    pop     rax
+    pop     rax
+    ret
+asm_reload_gdtr ENDP
+
+; asm_reload_idtr (PVOID idtBase /*rcx*/, UINT32 idtLimit /*edx*/)
+
+asm_reload_idtr PROC
+    push    rcx
+    shl     rdx, 48
+    push    rdx
+    lidt    fword ptr [rsp+6]
+    pop     rax
+    pop     rax
+    ret
+asm_reload_idtr ENDP
+
+; asm_write_cr2 (UINT64 value /*rcx*/)
+; MSVC does not provide __writecr2 — we implement it in assembly.
+
+asm_write_cr2 PROC
+    mov     cr2, rcx
+    ret
+asm_write_cr2 ENDP
+
+
+END
+
+```
+
+`asm/AsmSegmentRegs.asm`:
+
+```asm
+; asmSegmentRegs.asm
+; segment register accessors — zero windows API dependency
+
+PUBLIC asm_get_cs
+PUBLIC asm_get_ds
+PUBLIC asm_get_es
+PUBLIC asm_get_ss
+PUBLIC asm_get_fs
+PUBLIC asm_get_gs
+PUBLIC asm_get_ldtr
+PUBLIC asm_get_tr
+PUBLIC asm_get_gdt_base
+PUBLIC asm_get_idt_base
+PUBLIC asm_get_gdt_limit
+PUBLIC asm_get_idt_limit
+PUBLIC asm_set_ds
+PUBLIC asm_set_es
+PUBLIC asm_set_ss
+PUBLIC asm_set_fs
+
+.code _text
+
+
+asm_get_gdt_base PROC
+    LOCAL   gdtr[10]:BYTE
+    sgdt    gdtr
+    mov     rax, QWORD PTR gdtr[2]
+    ret
+asm_get_gdt_base ENDP
+
+
+asm_get_idt_base PROC
+    LOCAL   idtr[10]:BYTE
+    sidt    idtr
+    mov     rax, QWORD PTR idtr[2]
+    ret
+asm_get_idt_base ENDP
+
+
+asm_get_gdt_limit PROC
+    LOCAL   gdtr[10]:BYTE
+    sgdt    gdtr
+    mov     ax, WORD PTR gdtr[0]
+    ret
+asm_get_gdt_limit ENDP
+
+
+asm_get_idt_limit PROC
+    LOCAL   idtr[10]:BYTE
+    sidt    idtr
+    mov     ax, WORD PTR idtr[0]
+    ret
+asm_get_idt_limit ENDP
+
+
+asm_get_cs PROC
+    mov     rax, cs
+    ret
+asm_get_cs ENDP
+
+
+asm_get_ds PROC
+    mov     rax, ds
+    ret
+asm_get_ds ENDP
+
+
+asm_set_ds PROC
+    mov     ds, cx
+    ret
+asm_set_ds ENDP
+
+
+asm_get_es PROC
+    mov     rax, es
+    ret
+asm_get_es ENDP
+
+
+asm_set_es PROC
+    mov     es, cx
+    ret
+asm_set_es ENDP
+
+
+asm_get_ss PROC
+    mov     rax, ss
+    ret
+asm_get_ss ENDP
+
+
+asm_set_ss PROC
+    mov     ss, cx
+    ret
+asm_set_ss ENDP
+
+
+asm_get_fs PROC
+    mov     rax, fs
+    ret
+asm_get_fs ENDP
+
+
+asm_set_fs PROC
+    mov     fs, cx
+    ret
+asm_set_fs ENDP
+
+
+asm_get_gs PROC
+    mov     rax, gs
+    ret
+asm_get_gs ENDP
+
+
+asm_get_ldtr PROC
+    sldt    rax
+    ret
+asm_get_ldtr ENDP
+
+
+asm_get_tr PROC
+    str     rax
+    ret
+asm_get_tr ENDP
+
+
+END
+
+```
+
+`asm/AsmVmexitHandler.asm`:
+
+```asm
+; asm_vmexit_handler.asm
+; vm-exit entry point -- saves all xmm + gprs, calls c handler, restores
+
+PUBLIC asm_vmexit_handler
+
+EXTERN vmexit_handler:PROC
+EXTERN vmx_vmresume:PROC
+EXTERN vmx_return_rsp_for_vmxoff:PROC
+EXTERN vmx_return_rip_for_vmxoff:PROC
+
+.code _text
+
+; asm_vmexit_handler
+;
+; this is HOST_RIP -- the cpu jumps here on every vm-exit.
+;
+; stack layout after all saves (from rsp upward):
+;   [rsp + 0x000] rax (GUEST_REGS starts here)
+;   [rsp + 0x008] rcx
+;   ...
+;   [rsp + 0x078] r15
+;   [rsp + 0x080] xmm0..xmm5 + mxcsr (0x110 bytes)
+;   [rsp + 0x190] rflags (pushfq)
+;   [rsp + 0x198] padding (push 0)
+;   [rsp + 0x1A0] <-- original HOST_RSP
+;   [rsp + 0x1A8] vcpu pointer (stored at HOST_RSP - 8 by vmx_setup_vmcs)
+;
+; offsets:
+;   16 gpr pushes = 0x80
+;   xmm area = 0x110
+;   pushfq = 0x08
+;   push 0 = 0x08
+;   total = 0x1A0 from rsp to original HOST_RSP
+;   vcpu = rsp + 0x1A0 + 0x08 = rsp + 0x1A8
+
+asm_vmexit_handler PROC
+
+    push    0                   ; alignment padding
+
+    pushfq
+
+    ; save xmm registers (6 volatile + mxcsr = 0x110 bytes)
+    sub     rsp, 0110h
+
+    movaps  xmmword ptr [rsp+000h], xmm0
+    movaps  xmmword ptr [rsp+010h], xmm1
+    movaps  xmmword ptr [rsp+020h], xmm2
+    movaps  xmmword ptr [rsp+030h], xmm3
+    movaps  xmmword ptr [rsp+040h], xmm4
+    movaps  xmmword ptr [rsp+050h], xmm5
+    stmxcsr dword ptr   [rsp+100h]
+
+    push    r15
+    push    r14
+    push    r13
+    push    r12
+    push    r11
+    push    r10
+    push    r9
+    push    r8
+    push    rdi
+    push    rsi
+    push    rbp
+    push    rbp             ; placeholder for rsp (read from vmcs later)
+    push    rbx
+    push    rdx
+    push    rcx
+    push    rax
+
+    mov     rcx, rsp                ; arg1: PGUEST_REGS
+    mov     rdx, [rsp + 01A8h]      ; arg2: vcpu pointer (from vmm stack)
+
+    sub     rsp, 020h               ; shadow space (x64 abi)
+    call    vmexit_handler
+    add     rsp, 020h
+
+    ; check return value: TRUE = vmxoff, FALSE = vmresume
+    cmp     al, 1
+    je      VmxoffPath
+
+    pop     rax
+    pop     rcx
+    pop     rdx
+    pop     rbx
+    pop     rbp             ; discard rsp placeholder
+    pop     rbp
+    pop     rsi
+    pop     rdi
+    pop     r8
+    pop     r9
+    pop     r10
+    pop     r11
+    pop     r12
+    pop     r13
+    pop     r14
+    pop     r15
+
+    movaps  xmm0, xmmword ptr [rsp+000h]
+    movaps  xmm1, xmmword ptr [rsp+010h]
+    movaps  xmm2, xmmword ptr [rsp+020h]
+    movaps  xmm3, xmmword ptr [rsp+030h]
+    movaps  xmm4, xmmword ptr [rsp+040h]
+    movaps  xmm5, xmmword ptr [rsp+050h]
+    ldmxcsr dword ptr   [rsp+100h]
+
+    add     rsp, 0110h
+
+    popfq
+
+    ; skip alignment padding (push 0)
+    add     rsp, 08h
+
+    jmp     vmx_vmresume
+
+asm_vmexit_handler ENDP
+
+; vmxoff path -- hypervisor shutting down, restore and return to guest
+
+VmxoffPath PROC
+
+    pop     rax
+    pop     rcx
+    pop     rdx
+    pop     rbx
+    pop     rbp             ; discard rsp placeholder
+    pop     rbp
+    pop     rsi
+    pop     rdi
+    pop     r8
+    pop     r9
+    pop     r10
+    pop     r11
+    pop     r12
+    pop     r13
+    pop     r14
+    pop     r15
+
+    ; skip xmm area + rflags + padding
+    ; 0x110 (xmm) + 0x08 (rflags) + 0x08 (padding) = 0x120
+    add     rsp, 0120h
+
+    sub     rsp, 020h
+    call    vmx_return_rsp_for_vmxoff
+    add     rsp, 020h
+    push    rax             ; save guest rsp
+
+    sub     rsp, 020h
+    call    vmx_return_rip_for_vmxoff
+    add     rsp, 020h
+
+    ; restore rsp and push rip for the ret
+    pop     rsp
+    push    rax
+
+    ; clear rax to indicate vmxoff success to the vmcall caller
+    xor     rax, rax
+
+    ; return to guest code (instruction after vmcall)
+    ret
+
+VmxoffPath ENDP
+
+
+END
+
+```
+
+`asm/AsmVmxContext.asm`:
+
+```asm
+; asmVmxContext.asm
+; save/restore guest state around VMLAUNCH
+
+PUBLIC asm_vmx_save_state
+PUBLIC asm_vmx_restore_state
+
+EXTERN vmx_virtualize_cpu:PROC
+
+.code _text
+
+; asm_vmx_save_state
+; called per-core via DPC. saves all GP registers + RFLAGS, then calls
+; vmx_virtualize_cpu(RSP). on successful VMLAUNCH, execution
+; resumes at asm_vmx_restore_state (set as guest RIP in VMCS).
+
+asm_vmx_save_state PROC
+
+    push    0               ; Alignment padding (ensure 16-byte aligned stack)
+
+    pushfq
+
+    push    rax
+    push    rcx
+    push    rdx
+    push    rbx
+    push    rbp
+    push    rsi
+    push    rdi
+    push    r8
+    push    r9
+    push    r10
+    push    r11
+    push    r12
+    push    r13
+    push    r14
+    push    r15
+
+    sub     rsp, 0100h      ; Shadow space + scratch area
+
+    ;
+    ; first argument (rcx) = current RSP = guestStack
+    ; vmx_virtualize_cpu will store this as VMCS guest RSP
+    ;
+    mov     rcx, rsp
+    call    vmx_virtualize_cpu
+
+    ;
+    ; if we reach here, VMLAUNCH failed (rax = FALSE)
+    ; fall through to asm_vmx_restore_state to unwind the stack
+    ;
+
+    jmp     asm_vmx_restore_state
+
+asm_vmx_save_state ENDP
+
+; asm_vmx_restore_state
+; guest RIP is set to this address in the VMCS. after a successful
+; VMLAUNCH, the CPU "returns" here as if vmx_virtualize_cpu
+; had returned normally.
+
+asm_vmx_restore_state PROC
+
+    add     rsp, 0100h      ; Remove shadow space
+
+    pop     r15
+    pop     r14
+    pop     r13
+    pop     r12
+    pop     r11
+    pop     r10
+    pop     r9
+    pop     r8
+    pop     rdi
+    pop     rsi
+    pop     rbp
+    pop     rbx
+    pop     rdx
+    pop     rcx
+    pop     rax
+
+    popfq
+
+    add     rsp, 08h        ; Remove alignment padding
+
+    ret                     ; Return to DPC routine (broadcast_virtualize_all)
+
+asm_vmx_restore_state ENDP
+
+
+END
+
+```
+
+`asm/AsmVmxIntrinsics.asm`:
+
+```asm
+; asmVmxIntrinsics.asm
+; INVEPT and INVVPID instruction wrappers
+
+PUBLIC asm_invept
+PUBLIC asm_invvpid
+
+.code _text
+
+; asm_invept(UINT32 type /*ecx*/, PVOID descriptor /*rdx*/)
+; returns 0 on success, 1 on failure
+
+asm_invept PROC
+    invept  rcx, oword ptr [rdx]
+    jz      InveptFailure       ; ZF=1 means failure (VMfailValid)
+    jc      InveptFailure       ; CF=1 means failure (VMfailInvalid)
+
+    xor     rax, rax            ; success
+    ret
+
+InveptFailure:
+    mov     rax, 1
+    ret
+asm_invept ENDP
+
+; asm_invvpid(UINT32 type /*ecx*/, PVOID descriptor /*rdx*/)
+; returns 0 on success, 1 on failure
+
+asm_invvpid PROC
+    invvpid rcx, oword ptr [rdx]
+    jz      InvvpidFailure
+    jc      InvvpidFailure
+
+    xor     rax, rax
+    ret
+
+InvvpidFailure:
+    mov     rax, 1
+    ret
+asm_invvpid ENDP
+
+
+END
+
+```
+
+`asm/AsmVmxOperation.asm`:
+
+```asm
+; asmVmxOperation.asm
+; VMX enable, VMCALL interface
+
+PUBLIC asm_enable_vmx
+PUBLIC asm_vmx_vmcall
+
+.code _text
+
+asm_enable_vmx PROC
+    xor     rax, rax
+    mov     rax, cr4
+    or      rax, 02000h         ; Set bit 13 (VMXE)
+    mov     cr4, rax
+    ret
+asm_enable_vmx ENDP
+
+; asm_vmx_vmcall(UINT64 vmcallNumber /*rcx*/, UINT64 param1 /*rdx*/,
+;              UINT64 param2 /*r8*/, UINT64 param3 /*r9*/)
+;
+; sets signature registers R10/R11/R12 so the VM-exit handler can
+; verify this VMCALL came from our code.
+; returns NTSTATUS in RAX (set by the VM-exit handler).
+
+asm_vmx_vmcall PROC
+    pushfq
+
+    push    r10
+    push    r11
+    push    r12
+
+    mov     r10, 48564653h          ; 'HVFS'  — signature
+    mov     r11, 564d43414c4ch      ; 'VMCALL' — signature
+    mov     r12, 4e4f485950455256h  ; 'NOHYPERV' — signature
+
+    vmcall
+
+    pop     r12
+    pop     r11
+    pop     r10
+
+    popfq
+    ret
+asm_vmx_vmcall ENDP
+
+
+END
+
+```
+
+`include/asm_prototypes.h`:
+
+```h
+/*
+*   asm_prototypes.h - prototypes for all masm assembly routines
+*/
+#pragma once
+
+#include <ntddk.h>
+
+//
+// segment register accessors (AsmSegmentRegs.asm)
+//
+extern UINT16 asm_get_cs(VOID);
+extern UINT16 asm_get_ds(VOID);
+extern UINT16 asm_get_es(VOID);
+extern UINT16 asm_get_ss(VOID);
+extern UINT16 asm_get_fs(VOID);
+extern UINT16 asm_get_gs(VOID);
+extern UINT16 asm_get_ldtr(VOID);
+extern UINT16 asm_get_tr(VOID);
+extern UINT64 asm_get_gdt_base(VOID);
+extern UINT64 asm_get_idt_base(VOID);
+extern UINT16 asm_get_gdt_limit(VOID);
+extern UINT16 asm_get_idt_limit(VOID);
+extern UINT64 asm_get_rflags(VOID);
+
+extern VOID asm_set_ds(UINT16 selector);
+extern VOID asm_set_es(UINT16 selector);
+extern VOID asm_set_ss(UINT16 selector);
+extern VOID asm_set_fs(UINT16 selector);
+
+//
+// common routines (AsmCommon.asm)
+//
+extern VOID asm_reload_gdtr(PVOID gdt_base, UINT32 gdt_limit);
+extern VOID asm_reload_idtr(PVOID idt_base, UINT32 idt_limit);
+extern VOID asm_write_cr2(UINT64 value);
+
+//
+// VMX operation (AsmVmxOperation.asm)
+//
+extern VOID asm_enable_vmx(VOID);
+extern NTSTATUS asm_vmx_vmcall(UINT64 vmcall_num, UINT64 param1, UINT64 param2, UINT64 param3);
+
+//
+// VMX save/restore context (AsmVmxContext.asm)
+//
+extern VOID asm_vmx_save_state(VOID);
+extern VOID asm_vmx_restore_state(VOID);
+
+//
+// VM-exit handler entry point (asm_vmexit_handler.asm)
+//
+extern VOID asm_vmexit_handler(VOID);
+
+//
+// INVEPT / INVVPID (AsmVmxIntrinsics.asm)
+//
+extern UINT8 asm_invept(UINT32 type, PVOID descriptor);
+extern UINT8 asm_invvpid(UINT32 type, PVOID descriptor);
+
+```
+
+`include/hv.h`:
+
+```h
+/*
+*   hv.h - master hypervisor header — includes everything needed
+*/
+#pragma once
+
+//
+// windows kernel headers (used only at PASSIVE/DPC level in non-root)
+//
+#include <ntddk.h>
+#include <intrin.h>
+
+#include "ia32.h"
+#include "hv_types.h"
+#include "asm_prototypes.h"
+#include "stealth.h"
+
+UINT64 va_to_pa(PVOID va);
+PVOID  pa_to_va(UINT64 pa);
+UINT64 get_system_cr3(VOID);
+
+//
+// private host page tables (hostcr3.c)
+//
+BOOLEAN hostcr3_build(VOID);
+UINT64  hostcr3_get(VOID);
+VOID    hostcr3_destroy(VOID);
+
+//
+// segment helpers (segment.c)
+//
+VOID segment_get_descriptor(PUCHAR gdt_base, UINT16 selector, VMX_SEGMENT_SELECTOR * result);
+VOID segment_fill_vmcs(PVOID gdt_base, UINT32 seg_reg, UINT16 selector);
+
+BOOLEAN vmx_check_support(VOID);
+BOOLEAN vmx_init(VOID);
+VOID    vmx_terminate(VOID);
+
+BOOLEAN vmx_virtualize_cpu(PVOID guest_stack);
+BOOLEAN vmx_setup_vmcs(VIRTUAL_MACHINE_STATE * vcpu, PVOID guest_stack);
+
+BOOLEAN vmx_alloc_vmxon(VIRTUAL_MACHINE_STATE * vcpu);
+BOOLEAN vmx_alloc_vmcs(VIRTUAL_MACHINE_STATE * vcpu);
+BOOLEAN vmx_clear_vmcs(VIRTUAL_MACHINE_STATE * vcpu);
+BOOLEAN vmx_load_vmcs(VIRTUAL_MACHINE_STATE * vcpu);
+
+UINT32  vmx_adjust_controls(UINT32 requested, UINT32 capability_msr);
+VOID    vmx_set_fixed_bits(VOID);
+VOID    vmx_vmresume(VOID);
+UINT64  vmx_return_rsp_for_vmxoff(VOID);
+UINT64  vmx_return_rip_for_vmxoff(VOID);
+
+BOOLEAN ept_check_features(VOID);
+BOOLEAN ept_build_mtrr_map(VOID);
+BOOLEAN ept_init(VOID);
+PVMM_EPT_PAGE_TABLE ept_alloc_identity_map(VOID);
+UINT8   ept_get_memory_type(SIZE_T pfn, BOOLEAN is_large_page);
+BOOLEAN ept_valid_for_large_page(SIZE_T pfn);
+BOOLEAN ept_setup_pml2(PVMM_EPT_PAGE_TABLE page_table, PEPT_PML2_ENTRY new_entry, SIZE_T pfn);
+
+PEPT_PML1_ENTRY ept_get_pml1(PVMM_EPT_PAGE_TABLE page_table, SIZE_T phys_addr);
+PEPT_PML2_ENTRY ept_get_pml2(PVMM_EPT_PAGE_TABLE page_table, SIZE_T phys_addr);
+BOOLEAN ept_split_large_page(PVMM_EPT_PAGE_TABLE page_table, SIZE_T phys_addr);
+
+VOID ept_invept_single(EPT_POINTER ept_ptr);
+VOID ept_invept_all(VOID);
+VOID vpid_invvpid_single(UINT16 vpid);
+
+BOOLEAN vmexit_handler(PGUEST_REGS regs, VIRTUAL_MACHINE_STATE * vcpu);
+
+//
+// exit sub-handlers
+//
+VOID vmexit_handle_cpuid(VIRTUAL_MACHINE_STATE * vcpu);
+VOID vmexit_handle_msr_read(VIRTUAL_MACHINE_STATE * vcpu);
+VOID vmexit_handle_msr_write(VIRTUAL_MACHINE_STATE * vcpu);
+VOID vmexit_handle_mov_cr(VIRTUAL_MACHINE_STATE * vcpu);
+VOID vmexit_handle_mov_dr(VIRTUAL_MACHINE_STATE * vcpu);
+VOID vmexit_handle_ept_violation(VIRTUAL_MACHINE_STATE * vcpu);
+VOID vmexit_handle_vmcall(VIRTUAL_MACHINE_STATE * vcpu);
+VOID vmexit_handle_triple_fault(VIRTUAL_MACHINE_STATE * vcpu);
+
+//
+// event injection helpers (events.c)
+//
+VOID vmexit_inject_gp(VOID);
+VOID vmexit_inject_ud(VOID);
+VOID vmexit_inject_interrupt(UINT32 vector);
+VOID vmexit_inject_bp(VOID);
+VOID vmexit_inject_pf(UINT32 error_code, UINT64 fault_addr);
+
+VOID broadcast_virtualize_all(VOID);
+VOID broadcast_terminate_all(VOID);
+
+NTSTATUS DriverEntry(PDRIVER_OBJECT driver_obj, PUNICODE_STRING registry_path);
+VOID     DriverUnload(PDRIVER_OBJECT driver_obj);
+
+```
+
+`include/hv_types.h`:
+
+```h
+/*
+*   hv_types.h - core hypervisor type definitions — per-vcpu state, ept structures, configs
+*   zero windows api dependency in vmx-root mode by design
+*/
+#pragma once
+
+#include "ia32.h"
+
+#ifndef MAXULONG64
+#define MAXULONG64              ((ULONG64)~((ULONG64)0))
+#endif
+
+#define VMM_STACK_SIZE          0x8000      // 32 KB per-VCPU VMM stack
+#define VMM_STACK_VCPU_OFFSET   8           // vcpu ptr stored at top-8 of stack
+#define VMXON_SIZE              0x1000
+#define VMCS_SIZE               0x1000
+#define MAX_PROCESSORS          256
+#define MAX_MTRR_RANGES         256
+
+#define HV_POOL_TAG             'nhpO'
+
+typedef struct _GUEST_REGS {
+    UINT64 rax;
+    UINT64 rcx;
+    UINT64 rdx;
+    UINT64 rbx;
+    UINT64 rsp;    // placeholder — real RSP read from VMCS
+    UINT64 rbp;
+    UINT64 rsi;
+    UINT64 rdi;
+    UINT64 r8;
+    UINT64 r9;
+    UINT64 r10;
+    UINT64 r11;
+    UINT64 r12;
+    UINT64 r13;
+    UINT64 r14;
+    UINT64 r15;
+} GUEST_REGS, *PGUEST_REGS;
+
+typedef struct _VMX_VMXOFF_STATE {
+    BOOLEAN executed;
+    UINT64  guest_rip;
+    UINT64  guest_rsp;
+    UINT64  guest_cr3;
+} VMX_VMXOFF_STATE;
+
+typedef struct _MTRR_RANGE_DESCRIPTOR {
+    UINT64  phys_base;
+    UINT64  phys_end;
+    UINT8   mem_type;
+    BOOLEAN fixed;
+} MTRR_RANGE_DESCRIPTOR;
+
+typedef struct _VMM_EPT_PAGE_TABLE {
+    DECLSPEC_ALIGN(PAGE_SIZE) EPT_PML4_ENTRY   PML4[VMM_EPT_PML4E_COUNT];
+    DECLSPEC_ALIGN(PAGE_SIZE) EPT_PML3_POINTER PML3[VMM_EPT_PML3E_COUNT];
+    DECLSPEC_ALIGN(PAGE_SIZE) EPT_PML2_ENTRY   PML2[VMM_EPT_PML3E_COUNT][VMM_EPT_PML2E_COUNT];
+} VMM_EPT_PAGE_TABLE, *PVMM_EPT_PAGE_TABLE;
+
+//
+// dynamic split: when we split a 2MB page into 512 4KB pages
+//
+typedef struct _VMM_EPT_DYNAMIC_SPLIT {
+    DECLSPEC_ALIGN(PAGE_SIZE) EPT_PML1_ENTRY PML1[VMM_EPT_PML1E_COUNT];
+    union {
+        PEPT_PML2_ENTRY   Entry;
+        PEPT_PML2_POINTER Pointer;
+    } u;
+    LIST_ENTRY SplitList;
+} VMM_EPT_DYNAMIC_SPLIT, *PVMM_EPT_DYNAMIC_SPLIT;
+
+typedef struct _EPT_STATE {
+    MTRR_RANGE_DESCRIPTOR mem_ranges[MAX_MTRR_RANGES];
+    UINT32                num_ranges;
+    UINT8                 default_type;
+    BOOLEAN               ad_supported;
+    LIST_ENTRY            hooked_pages;    // reserved for future EPT hooks
+
+    //
+    // INVVPID capability bits (cached from IA32_VMX_EPT_VPID_CAP)
+    //
+    BOOLEAN               invvpid_supported;
+    BOOLEAN               invvpid_individual_addr;
+    BOOLEAN               invvpid_single_context;
+    BOOLEAN               invvpid_all_contexts;
+    BOOLEAN               invvpid_single_retaining_globals;
+} EPT_STATE, *PEPT_STATE;
+
+typedef struct _VIRTUAL_MACHINE_STATE {
+
+    UINT64 vmxon_va;
+    UINT64 vmxon_pa;
+    UINT64 vmcs_va;
+    UINT64 vmcs_pa;
+
+    //
+    // VMM stack (HOST_RSP points near top of this)
+    //
+    UINT64 vmm_stack;
+
+    UINT64 msr_bitmap_va;
+    UINT64 msr_bitmap_pa;
+    UINT64 io_bitmap_va_a;
+    UINT64 io_bitmap_pa_a;
+    UINT64 io_bitmap_va_b;
+    UINT64 io_bitmap_pa_b;
+
+    PVMM_EPT_PAGE_TABLE ept_page_table;
+    EPT_POINTER         ept_pointer;
+
+    PGUEST_REGS regs;
+    UINT32      core_id;
+    UINT32      exit_reason;
+    UINT64      exit_qual;
+    UINT64      vmexit_rip;
+    BOOLEAN     in_root;
+    BOOLEAN     launched;
+    BOOLEAN     advance_rip;
+
+    VMX_VMXOFF_STATE vmxoff;
+
+    //
+    // stealth: per-VCPU TSC compensation state for "trap next RDTSC" approach.
+    // after CPUID exit, RDTSC exiting is armed for one instruction.
+    // the trapped RDTSC returns a compensated value hiding VM-exit overhead.
+    // TSC_OFFSET is never modified — zero drift, zero monotonicity issues.
+    //
+    UINT64  tsc_cpuid_entry;        // TSC recorded at start of CPUID VM-exit handler
+    BOOLEAN tsc_rdtsc_armed;        // TRUE = next RDTSC/RDTSCP should be compensated
+
+    //
+    // pending external interrupt for deferred re-injection
+    // used when external-interrupt exiting is active but the guest
+    // can't accept an interrupt right now (IF=0 or STI/MOV-SS blocking)
+    //
+    UINT8   pending_ext_vector;
+    BOOLEAN has_pending_ext_interrupt;
+
+    //
+    // pending NMI for deferred delivery via NMI-window exiting
+    // set when an NMI VM-exit interrupts IDT delivery of another event
+    //
+    BOOLEAN has_pending_nmi;
+
+    // guest DR0-DR3/DR6 saved on vm-exit, restored before vmresume
+    UINT64  guest_dr0;
+    UINT64  guest_dr1;
+    UINT64  guest_dr2;
+    UINT64  guest_dr3;
+    UINT64  guest_dr6;
+    BOOLEAN mov_dr_exiting;
+
+} VIRTUAL_MACHINE_STATE, *PVIRTUAL_MACHINE_STATE;
+
+#define VMCALL_TEST             0x00000001
+#define VMCALL_VMXOFF           0x00000002
+
+extern VIRTUAL_MACHINE_STATE * g_vcpu;
+extern EPT_STATE *             g_ept;
+extern UINT32                  g_cpu_count;
+extern UINT64                  g_system_cr3;
+extern UINT64 *                g_msr_bitmap_invalid;
+
+```
+
+`include/ia32.h`:
+
+```h
+/**
+ * @file ia32.h
+ * @brief Minimal Intel IA-32/64 architecture definitions for VMX hypervisor
+ * @details Self-contained — no dependency on external ia32-doc or Windows headers
+ *          for architecture constants. Based on Intel SDM Vol 3.
+ */
+#pragma once
+
+#include <ntddk.h>
+
+#pragma warning(push)
+#pragma warning(disable : 4201)
+
+
+#define NULL64_ZERO            0ULL
+
+#ifndef PAGE_SIZE
+#define PAGE_SIZE              0x1000
+#endif
+
+#ifndef ALIGNMENT_PAGE_SIZE
+#define ALIGNMENT_PAGE_SIZE    PAGE_SIZE
+#endif
+#define SIZE_2_MB              (512ULL * PAGE_SIZE)
+#define SIZE_1_GB              (512ULL * SIZE_2_MB)
+#define SIZE_512_GB            (512ULL * SIZE_1_GB)
+
+//
+// MSR Indices (Intel SDM Appendix B)
+//
+
+#define IA32_FEATURE_CONTROL           0x0000003A
+#define IA32_DEBUGCTL                  0x000001D9
+#define IA32_SYSENTER_CS               0x00000174
+#define IA32_SYSENTER_ESP              0x00000175
+#define IA32_SYSENTER_EIP              0x00000176
+#define IA32_FS_BASE                   0xC0000100
+#define IA32_GS_BASE                   0xC0000101
+#define IA32_KERNEL_GS_BASE            0xC0000102
+#define IA32_TSC_AUX                   0xC0000103
+#define IA32_EFER                      0xC0000080
+#define IA32_LSTAR                     0xC0000082
+#define IA32_DS_AREA                   0x00000600
+
+//
+// VMX-specific MSRs
+//
+#define IA32_VMX_BASIC                 0x00000480
+#define IA32_VMX_PINBASED_CTLS         0x00000481
+#define IA32_VMX_PROCBASED_CTLS        0x00000482
+#define IA32_VMX_EXIT_CTLS             0x00000483
+#define IA32_VMX_ENTRY_CTLS            0x00000484
+#define IA32_VMX_MISC                  0x00000485
+#define IA32_VMX_CR0_FIXED0            0x00000486
+#define IA32_VMX_CR0_FIXED1            0x00000487
+#define IA32_VMX_CR4_FIXED0            0x00000488
+#define IA32_VMX_CR4_FIXED1            0x00000489
+#define IA32_VMX_PROCBASED_CTLS2       0x0000048B
+#define IA32_VMX_EPT_VPID_CAP          0x0000048C
+#define IA32_VMX_TRUE_PINBASED_CTLS    0x0000048D
+#define IA32_VMX_TRUE_PROCBASED_CTLS   0x0000048E
+#define IA32_VMX_TRUE_EXIT_CTLS        0x0000048F
+#define IA32_VMX_TRUE_ENTRY_CTLS       0x00000490
+#define IA32_VMX_VMCS_ENUM             0x0000048A
+#define IA32_VMX_VMFUNC                0x00000491
+#define IA32_VMX_PROCBASED_CTLS3       0x00000492
+#define IA32_VMX_EXIT_CTLS2            0x00000493
+
+//
+// MTRR MSRs
+//
+#define IA32_MTRR_CAPABILITIES         0x000000FE
+#define IA32_MTRR_DEF_TYPE             0x000002FF
+#define IA32_MTRR_PHYSBASE0            0x00000200
+#define IA32_MTRR_PHYSMASK0            0x00000201
+#define IA32_MTRR_FIX64K_00000        0x00000250
+#define IA32_MTRR_FIX16K_80000        0x00000258
+#define IA32_MTRR_FIX4K_C0000         0x00000268
+
+//
+// IA32_FEATURE_CONTROL MSR
+//
+
+typedef union _IA32_FEATURE_CONTROL_REGISTER {
+    UINT64 AsUInt;
+    struct {
+        UINT64 Lock                    : 1;
+        UINT64 EnableVmxInsideSmx      : 1;
+        UINT64 EnableVmxOutsideSmx     : 1;
+        UINT64 Reserved1               : 5;
+        UINT64 SenterLocalFunctionEnables : 7;
+        UINT64 SenterGlobalEnable      : 1;
+        UINT64 Reserved2               : 1;
+        UINT64 SgxLaunchControlEnable  : 1;
+        UINT64 SgxGlobalEnable         : 1;
+        UINT64 Reserved3               : 1;
+        UINT64 LmceOn                  : 1;
+        UINT64 Reserved4               : 43;
+    };
+} IA32_FEATURE_CONTROL_REGISTER;
+
+//
+// IA32_VMX_BASIC MSR
+//
+
+typedef union _IA32_VMX_BASIC_REGISTER {
+    UINT64 AsUInt;
+    struct {
+        UINT64 VmcsRevisionId        : 31;
+        UINT64 MustBeZero            : 1;
+        UINT64 VmcsSize              : 13;
+        UINT64 Reserved1             : 3;
+        UINT64 VmcsAddressWidth      : 1;
+        UINT64 DualMonitor           : 1;
+        UINT64 MemoryType            : 4;
+        UINT64 InsOutsReporting      : 1;
+        UINT64 VmxControls           : 1;
+        UINT64 VmEntryHwException    : 1;
+        UINT64 Reserved2             : 7;
+    };
+} IA32_VMX_BASIC_REGISTER;
+
+//
+// IA32_VMX_EPT_VPID_CAP MSR
+//
+
+typedef union _IA32_VMX_EPT_VPID_CAP_REGISTER {
+    UINT64 AsUInt;
+    struct {
+        UINT64 ExecuteOnlyPages                     : 1;
+        UINT64 Reserved1                            : 5;
+        UINT64 PageWalkLength4                      : 1;
+        UINT64 Reserved2                            : 1;
+        UINT64 MemoryTypeUncacheable                : 1;
+        UINT64 Reserved3                            : 5;
+        UINT64 MemoryTypeWriteBack                  : 1;
+        UINT64 Reserved4                            : 1;
+        UINT64 Pde2MbPages                          : 1;
+        UINT64 Pdpte1GbPages                        : 1;
+        UINT64 Reserved5                            : 2;
+        UINT64 Invept                               : 1;
+        UINT64 EptAccessedAndDirtyFlags             : 1;
+        UINT64 AdvancedVmexitEptViolationsInformation : 1;
+        UINT64 SupervisorShadowStack                : 1;
+        UINT64 Reserved6                            : 1;
+        UINT64 InveptSingleContext                   : 1;
+        UINT64 InveptAllContexts                     : 1;
+        UINT64 Reserved7                            : 5;
+        UINT64 Invvpid                              : 1;
+        UINT64 Reserved8                            : 7;
+        UINT64 InvvpidIndividualAddress              : 1;
+        UINT64 InvvpidSingleContext                  : 1;
+        UINT64 InvvpidAllContexts                    : 1;
+        UINT64 InvvpidSingleContextRetainingGlobals  : 1;
+        UINT64 Reserved9                            : 20;
+    };
+} IA32_VMX_EPT_VPID_CAP_REGISTER;
+
+//
+// MTRR Structures
+//
+
+typedef union _IA32_MTRR_CAPABILITIES_REGISTER {
+    UINT64 AsUInt;
+    struct {
+        UINT64 VariableRangeCount : 8;
+        UINT64 FixedRangeSupported : 1;
+        UINT64 Reserved1          : 1;
+        UINT64 WcSupported        : 1;
+        UINT64 SmrrSupported      : 1;
+        UINT64 Reserved2          : 52;
+    };
+} IA32_MTRR_CAPABILITIES_REGISTER;
+
+typedef union _IA32_MTRR_DEF_TYPE_REGISTER {
+    UINT64 AsUInt;
+    struct {
+        UINT64 DefaultMemoryType : 3;
+        UINT64 Reserved1         : 7;
+        UINT64 FixedRangeMtrrEnable : 1;
+        UINT64 MtrrEnable        : 1;
+        UINT64 Reserved2         : 52;
+    };
+} IA32_MTRR_DEF_TYPE_REGISTER;
+
+typedef union _IA32_MTRR_PHYSBASE_REGISTER {
+    UINT64 AsUInt;
+    struct {
+        UINT64 Type             : 8;
+        UINT64 Reserved1        : 4;
+        UINT64 PageFrameNumber  : 36;
+        UINT64 Reserved2        : 16;
+    };
+} IA32_MTRR_PHYSBASE_REGISTER;
+
+typedef union _IA32_MTRR_PHYSMASK_REGISTER {
+    UINT64 AsUInt;
+    struct {
+        UINT64 Reserved1        : 11;
+        UINT64 Valid            : 1;
+        UINT64 PageFrameNumber  : 36;
+        UINT64 Reserved2        : 16;
+    };
+} IA32_MTRR_PHYSMASK_REGISTER;
+
+typedef union _IA32_MTRR_FIXED_RANGE_TYPE {
+    UINT64 AsUInt;
+    struct {
+        UINT8 Types[8];
+    } s;
+} IA32_MTRR_FIXED_RANGE_TYPE;
+
+//
+// EFER MSR
+//
+
+typedef union _IA32_EFER_REGISTER {
+    UINT64 AsUInt;
+    struct {
+        UINT64 SyscallEnable : 1;
+        UINT64 Reserved1     : 7;
+        UINT64 Ia32eModeEnable : 1;
+        UINT64 Reserved2     : 1;
+        UINT64 Ia32eModeActive : 1;
+        UINT64 ExecuteDisableBitEnable : 1;
+        UINT64 Reserved3     : 52;
+    };
+} IA32_EFER_REGISTER;
+
+typedef struct _CPUID {
+    INT32 eax;
+    INT32 ebx;
+    INT32 ecx;
+    INT32 edx;
+} CPUID;
+
+#define CPUID_VMX_BIT                       5
+#define CPUID_PROCESSOR_FEATURES            1
+#define HYPERV_HYPERVISOR_PRESENT_BIT       (1U << 31)
+
+typedef union _CR0 {
+    UINT64 AsUInt;
+    struct {
+        UINT64 ProtectionEnable    : 1;
+        UINT64 MonitorCoprocessor  : 1;
+        UINT64 EmulateFpu          : 1;
+        UINT64 TaskSwitched        : 1;
+        UINT64 ExtensionType       : 1;
+        UINT64 NumericError        : 1;
+        UINT64 Reserved1           : 10;
+        UINT64 WriteProtect        : 1;
+        UINT64 Reserved2           : 1;
+        UINT64 AlignmentMask       : 1;
+        UINT64 Reserved3           : 10;
+        UINT64 NotWriteThrough     : 1;
+        UINT64 CacheDisable        : 1;
+        UINT64 Paging              : 1;
+        UINT64 Reserved4           : 32;
+    };
+} CR0;
+
+typedef union _CR4 {
+    UINT64 AsUInt;
+    struct {
+        UINT64 VirtualModeExtensions    : 1;
+        UINT64 ProtectedVirtualInts     : 1;
+        UINT64 TimestampDisable         : 1;
+        UINT64 DebuggingExtensions      : 1;
+        UINT64 PageSizeExtensions       : 1;
+        UINT64 PhysicalAddressExtension : 1;
+        UINT64 MachineCheckEnable       : 1;
+        UINT64 PageGlobalEnable         : 1;
+        UINT64 PerformanceCounterEnable : 1;
+        UINT64 OsFxsaveFxrstor          : 1;
+        UINT64 OsXmmExcept              : 1;
+        UINT64 UserModeInstructionPrev  : 1;
+        UINT64 Reserved1                : 1;
+        UINT64 VmxEnable                : 1;
+        UINT64 SmxEnable                : 1;
+        UINT64 Reserved2                : 1;
+        UINT64 FsGsBaseEnable           : 1;
+        UINT64 PcidEnable               : 1;
+        UINT64 OsXsave                  : 1;
+        UINT64 Reserved3                : 1;
+        UINT64 SupervisorExecPrevention : 1;
+        UINT64 SupervisorAccessPrevention : 1;
+        UINT64 ProtectionKeyEnable      : 1;
+        UINT64 ControlFlowEnforcement   : 1;
+        UINT64 ProtectionKeySupervisor  : 1;
+        UINT64 Reserved4                : 39;
+    };
+} CR4;
+
+#define CR4_VMX_ENABLE_FLAG (1ULL << 13)
+
+typedef union _CR_FIXED {
+    UINT64 Flags;
+    struct {
+        ULONG Low;
+        LONG  High;
+    } Fields;
+} CR_FIXED;
+
+typedef union _RFLAGS {
+    UINT64 AsUInt;
+    struct {
+        UINT64 CarryFlag       : 1;
+        UINT64 Reserved1       : 1;
+        UINT64 ParityFlag      : 1;
+        UINT64 Reserved2       : 1;
+        UINT64 AuxCarryFlag    : 1;
+        UINT64 Reserved3       : 1;
+        UINT64 ZeroFlag        : 1;
+        UINT64 SignFlag        : 1;
+        UINT64 TrapFlag        : 1;
+        UINT64 InterruptEnable : 1;
+        UINT64 DirectionFlag   : 1;
+        UINT64 OverflowFlag    : 1;
+        UINT64 IoPrivilegeLevel : 2;
+        UINT64 NestedTask      : 1;
+        UINT64 Reserved4       : 1;
+        UINT64 ResumeFlag      : 1;
+        UINT64 Virtual8086     : 1;
+        UINT64 AlignmentCheck  : 1;
+        UINT64 VirtualInterrupt : 1;
+        UINT64 VirtualInterruptPending : 1;
+        UINT64 CpuidAllowed    : 1;
+        UINT64 Reserved5       : 42;
+    };
+} RFLAGS;
+
+typedef union _MSR {
+    UINT64 Flags;
+    struct {
+        ULONG Low;
+        ULONG High;
+    } Fields;
+} MSR;
+
+//
+// Memory Types (MTRR)
+//
+
+#define MEMORY_TYPE_UNCACHEABLE    0x00
+#define MEMORY_TYPE_WRITE_COMBINING 0x01
+#define MEMORY_TYPE_WRITE_THROUGH  0x04
+#define MEMORY_TYPE_WRITE_PROTECTED 0x05
+#define MEMORY_TYPE_WRITE_BACK     0x06
+
+//
+// VMCS Field Encodings (Intel SDM Vol 3, Appendix B)
+//
+
+//
+// 16-Bit Control Fields
+//
+#define VIRTUAL_PROCESSOR_ID                         0x00000000
+
+//
+// 16-Bit Guest-State Fields
+//
+#define VMCS_GUEST_ES_SELECTOR                       0x00000800
+#define VMCS_GUEST_CS_SELECTOR                       0x00000802
+#define VMCS_GUEST_SS_SELECTOR                       0x00000804
+#define VMCS_GUEST_DS_SELECTOR                       0x00000806
+#define VMCS_GUEST_FS_SELECTOR                       0x00000808
+#define VMCS_GUEST_GS_SELECTOR                       0x0000080A
+#define VMCS_GUEST_LDTR_SELECTOR                     0x0000080C
+#define VMCS_GUEST_TR_SELECTOR                       0x0000080E
+
+//
+// 16-Bit Host-State Fields
+//
+#define VMCS_HOST_ES_SELECTOR                        0x00000C00
+#define VMCS_HOST_CS_SELECTOR                        0x00000C02
+#define VMCS_HOST_SS_SELECTOR                        0x00000C04
+#define VMCS_HOST_DS_SELECTOR                        0x00000C06
+#define VMCS_HOST_FS_SELECTOR                        0x00000C08
+#define VMCS_HOST_GS_SELECTOR                        0x00000C0A
+#define VMCS_HOST_TR_SELECTOR                        0x00000C0C
+
+//
+// 64-Bit Control Fields
+//
+#define VMCS_CTRL_IO_BITMAP_A_ADDRESS                0x00002000
+#define VMCS_CTRL_IO_BITMAP_B_ADDRESS                0x00002002
+#define VMCS_CTRL_MSR_BITMAP_ADDRESS                 0x00002004
+#define VMCS_CTRL_VMEXIT_MSR_STORE_ADDRESS           0x00002006
+#define VMCS_CTRL_VMEXIT_MSR_LOAD_ADDRESS            0x00002008
+#define VMCS_CTRL_VMENTRY_MSR_LOAD_ADDRESS           0x0000200A
+#define VMCS_CTRL_TSC_OFFSET                         0x00002010
+#define VMCS_CTRL_EPT_POINTER                        0x0000201A
+#define VMCS_CTRL_PML_ADDRESS                        0x0000200E
+
+//
+// 64-Bit Read-Only Data Field
+//
+#define VMCS_GUEST_PHYSICAL_ADDRESS                  0x00002400
+
+//
+// 64-Bit Guest-State Fields
+//
+#define VMCS_GUEST_VMCS_LINK_POINTER                 0x00002800
+#define VMCS_GUEST_DEBUGCTL                          0x00002802
+#define VMCS_GUEST_DEBUGCTL_HIGH                     0x00002803
+#define VMCS_GUEST_PAT                               0x00002804
+#define VMCS_GUEST_EFER                              0x00002806
+
+//
+// 64-Bit Host-State Fields
+//
+#define VMCS_HOST_PAT                                0x00002C00
+#define VMCS_HOST_EFER                               0x00002C02
+
+//
+// 32-Bit Control Fields
+//
+#define VMCS_CTRL_PIN_BASED_VM_EXECUTION_CONTROLS    0x00004000
+#define VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS 0x00004002
+#define VMCS_CTRL_EXCEPTION_BITMAP                   0x00004004
+#define VMCS_CTRL_PAGEFAULT_ERROR_CODE_MASK          0x00004006
+#define VMCS_CTRL_PAGEFAULT_ERROR_CODE_MATCH         0x00004008
+#define VMCS_CTRL_CR3_TARGET_COUNT                   0x0000400A
+#define VMCS_CTRL_PRIMARY_VMEXIT_CONTROLS            0x0000400C
+#define VMCS_CTRL_VMEXIT_MSR_STORE_COUNT             0x0000400E
+#define VMCS_CTRL_VMEXIT_MSR_LOAD_COUNT              0x00004010
+#define VMCS_CTRL_VMENTRY_CONTROLS                   0x00004012
+#define VMCS_CTRL_VMENTRY_MSR_LOAD_COUNT             0x00004014
+#define VMCS_CTRL_VMENTRY_INTERRUPTION_INFORMATION_FIELD 0x00004016
+#define VMCS_CTRL_VMENTRY_EXCEPTION_ERROR_CODE       0x00004018
+#define VMCS_CTRL_VMENTRY_INSTRUCTION_LENGTH         0x0000401A
+#define VMCS_CTRL_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS 0x0000401E
+#define VMCS_CTRL_PLE_GAP                            0x00004020
+#define VMCS_CTRL_PLE_WINDOW                         0x00004022
+
+//
+// 32-Bit Read-Only Data Fields
+//
+#define VMCS_VM_INSTRUCTION_ERROR                    0x00004400
+#define VMCS_EXIT_REASON                             0x00004402
+#define VMCS_VMEXIT_INTERRUPTION_INFORMATION         0x00004404
+#define VMCS_VMEXIT_INTERRUPTION_ERROR_CODE          0x00004406
+#define VMCS_IDT_VECTORING_INFORMATION               0x00004408
+#define VMCS_IDT_VECTORING_ERROR_CODE                0x0000440A
+#define VMCS_VMEXIT_INSTRUCTION_LENGTH               0x0000440C
+#define VMCS_VMEXIT_INSTRUCTION_INFORMATION          0x0000440E
+
+//
+// 32-Bit Guest-State Fields
+//
+#define VMCS_GUEST_ES_LIMIT                          0x00004800
+#define VMCS_GUEST_CS_LIMIT                          0x00004802
+#define VMCS_GUEST_SS_LIMIT                          0x00004804
+#define VMCS_GUEST_DS_LIMIT                          0x00004806
+#define VMCS_GUEST_FS_LIMIT                          0x00004808
+#define VMCS_GUEST_GS_LIMIT                          0x0000480A
+#define VMCS_GUEST_LDTR_LIMIT                        0x0000480C
+#define VMCS_GUEST_TR_LIMIT                          0x0000480E
+#define VMCS_GUEST_GDTR_LIMIT                        0x00004810
+#define VMCS_GUEST_IDTR_LIMIT                        0x00004812
+#define VMCS_GUEST_ES_ACCESS_RIGHTS                  0x00004814
+#define VMCS_GUEST_CS_ACCESS_RIGHTS                  0x00004816
+#define VMCS_GUEST_SS_ACCESS_RIGHTS                  0x00004818
+#define VMCS_GUEST_DS_ACCESS_RIGHTS                  0x0000481A
+#define VMCS_GUEST_FS_ACCESS_RIGHTS                  0x0000481C
+#define VMCS_GUEST_GS_ACCESS_RIGHTS                  0x0000481E
+#define VMCS_GUEST_LDTR_ACCESS_RIGHTS                0x00004820
+#define VMCS_GUEST_TR_ACCESS_RIGHTS                  0x00004822
+#define VMCS_GUEST_INTERRUPTIBILITY_STATE            0x00004824
+#define VMCS_GUEST_ACTIVITY_STATE                    0x00004826
+#define VMCS_GUEST_SMBASE                            0x00004828
+#define VMCS_GUEST_SYSENTER_CS                       0x0000482A
+#define VMCS_GUEST_VMX_PREEMPTION_TIMER_VALUE        0x0000482E
+
+//
+// 32-Bit Host-State Field
+//
+#define VMCS_HOST_SYSENTER_CS                        0x00004C00
+
+//
+// Natural-Width Control Fields
+//
+#define VMCS_CTRL_CR0_GUEST_HOST_MASK                0x00006000
+#define VMCS_CTRL_CR4_GUEST_HOST_MASK                0x00006002
+#define VMCS_CTRL_CR0_READ_SHADOW                    0x00006004
+#define VMCS_CTRL_CR4_READ_SHADOW                    0x00006006
+#define VMCS_EXIT_QUALIFICATION                      0x00006400
+
+//
+// Natural-Width Guest-State Fields
+//
+#define VMCS_GUEST_CR0                               0x00006800
+#define VMCS_GUEST_CR3                               0x00006802
+#define VMCS_GUEST_CR4                               0x00006804
+#define VMCS_GUEST_ES_BASE                           0x00006806
+#define VMCS_GUEST_CS_BASE                           0x00006808
+#define VMCS_GUEST_SS_BASE                           0x0000680A
+#define VMCS_GUEST_DS_BASE                           0x0000680C
+#define VMCS_GUEST_FS_BASE                           0x0000680E
+#define VMCS_GUEST_GS_BASE                           0x00006810
+#define VMCS_GUEST_LDTR_BASE                         0x00006812
+#define VMCS_GUEST_TR_BASE                           0x00006814
+#define VMCS_GUEST_GDTR_BASE                         0x00006816
+#define VMCS_GUEST_IDTR_BASE                         0x00006818
+#define VMCS_GUEST_DR7                               0x0000681A
+#define VMCS_GUEST_RSP                               0x0000681C
+#define VMCS_GUEST_RIP                               0x0000681E
+#define VMCS_GUEST_RFLAGS                            0x00006820
+#define VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS          0x00006822
+#define VMCS_GUEST_SYSENTER_ESP                      0x00006824
+#define VMCS_GUEST_SYSENTER_EIP                      0x00006826
+
+//
+// Natural-Width Host-State Fields
+//
+#define VMCS_HOST_CR0                                0x00006C00
+#define VMCS_HOST_CR3                                0x00006C02
+#define VMCS_HOST_CR4                                0x00006C04
+#define VMCS_HOST_FS_BASE                            0x00006C06
+#define VMCS_HOST_GS_BASE                            0x00006C08
+#define VMCS_HOST_TR_BASE                            0x00006C0A
+#define VMCS_HOST_GDTR_BASE                          0x00006C0C
+#define VMCS_HOST_IDTR_BASE                          0x00006C0E
+#define VMCS_HOST_SYSENTER_ESP                       0x00006C10
+#define VMCS_HOST_SYSENTER_EIP                       0x00006C12
+#define VMCS_HOST_RSP                                0x00006C14
+#define VMCS_HOST_RIP                                0x00006C16
+
+//
+// VM-Exit Reasons (Intel SDM Vol 3, Appendix C)
+//
+
+#define VMX_EXIT_REASON_EXCEPTION_OR_NMI             0
+#define VMX_EXIT_REASON_EXTERNAL_INTERRUPT            1
+#define VMX_EXIT_REASON_TRIPLE_FAULT                  2
+#define VMX_EXIT_REASON_INIT_SIGNAL                   3
+#define VMX_EXIT_REASON_SIPI                          4
+#define VMX_EXIT_REASON_IO_SMI                        5
+#define VMX_EXIT_REASON_SMI                           6
+#define VMX_EXIT_REASON_INTERRUPT_WINDOW              7
+#define VMX_EXIT_REASON_NMI_WINDOW                    8
+#define VMX_EXIT_REASON_TASK_SWITCH                   9
+#define VMX_EXIT_REASON_EXECUTE_CPUID                 10
+#define VMX_EXIT_REASON_EXECUTE_GETSEC                11
+#define VMX_EXIT_REASON_EXECUTE_HLT                   12
+#define VMX_EXIT_REASON_EXECUTE_INVD                  13
+#define VMX_EXIT_REASON_EXECUTE_INVLPG                14
+#define VMX_EXIT_REASON_EXECUTE_RDPMC                 15
+#define VMX_EXIT_REASON_EXECUTE_RDTSC                 16
+#define VMX_EXIT_REASON_EXECUTE_RSM                   17
+#define VMX_EXIT_REASON_EXECUTE_VMCALL                18
+#define VMX_EXIT_REASON_EXECUTE_VMCLEAR               19
+#define VMX_EXIT_REASON_EXECUTE_VMLAUNCH              20
+#define VMX_EXIT_REASON_EXECUTE_VMPTRLD               21
+#define VMX_EXIT_REASON_EXECUTE_VMPTRST               22
+#define VMX_EXIT_REASON_EXECUTE_VMREAD                23
+#define VMX_EXIT_REASON_EXECUTE_VMRESUME              24
+#define VMX_EXIT_REASON_EXECUTE_VMWRITE               25
+#define VMX_EXIT_REASON_EXECUTE_VMXOFF                26
+#define VMX_EXIT_REASON_EXECUTE_VMXON                 27
+#define VMX_EXIT_REASON_MOV_CR                        28
+#define VMX_EXIT_REASON_MOV_DR                        29
+#define VMX_EXIT_REASON_EXECUTE_IO_INSTRUCTION        30
+#define VMX_EXIT_REASON_EXECUTE_RDMSR                 31
+#define VMX_EXIT_REASON_EXECUTE_WRMSR                 32
+#define VMX_EXIT_REASON_VMENTRY_FAILURE_GUEST_STATE   33
+#define VMX_EXIT_REASON_VMENTRY_FAILURE_MSR_LOADING   34
+#define VMX_EXIT_REASON_EXECUTE_MWAIT                 36
+#define VMX_EXIT_REASON_MONITOR_TRAP_FLAG             37
+#define VMX_EXIT_REASON_EXECUTE_MONITOR               39
+#define VMX_EXIT_REASON_EXECUTE_PAUSE                 40
+#define VMX_EXIT_REASON_VMENTRY_FAILURE_MACHINE_CHECK 41
+#define VMX_EXIT_REASON_TPR_BELOW_THRESHOLD           43
+#define VMX_EXIT_REASON_APIC_ACCESS                   44
+#define VMX_EXIT_REASON_VIRTUALIZED_EOI               45
+#define VMX_EXIT_REASON_GDTR_IDTR_ACCESS              46
+#define VMX_EXIT_REASON_LDTR_TR_ACCESS                47
+#define VMX_EXIT_REASON_EPT_VIOLATION                 48
+#define VMX_EXIT_REASON_EPT_MISCONFIGURATION          49
+#define VMX_EXIT_REASON_EXECUTE_INVEPT                50
+#define VMX_EXIT_REASON_EXECUTE_RDTSCP                51
+#define VMX_EXIT_REASON_VMX_PREEMPTION_TIMER_EXPIRED  52
+#define VMX_EXIT_REASON_EXECUTE_INVVPID               53
+#define VMX_EXIT_REASON_EXECUTE_WBINVD                54
+#define VMX_EXIT_REASON_EXECUTE_XSETBV                55
+#define VMX_EXIT_REASON_APIC_WRITE                    56
+#define VMX_EXIT_REASON_EXECUTE_RDRAND                57
+#define VMX_EXIT_REASON_EXECUTE_INVPCID               58
+#define VMX_EXIT_REASON_EXECUTE_VMFUNC                59
+#define VMX_EXIT_REASON_EXECUTE_ENCLS                 60
+#define VMX_EXIT_REASON_EXECUTE_RDSEED                61
+#define VMX_EXIT_REASON_PAGE_MODIFICATION_LOG_FULL    62
+#define VMX_EXIT_REASON_EXECUTE_XSAVES                63
+#define VMX_EXIT_REASON_EXECUTE_XRSTORS               64
+
+//
+// VMX Pin-Based Controls
+//
+
+#define PIN_BASED_VM_EXEC_CTRL_EXTERNAL_INTERRUPT_EXITING   (1U << 0)
+#define PIN_BASED_VM_EXEC_CTRL_NMI_EXITING                  (1U << 3)
+#define PIN_BASED_VM_EXEC_CTRL_VIRTUAL_NMI                  (1U << 5)
+#define PIN_BASED_VM_EXEC_CTRL_VMX_PREEMPTION_TIMER         (1U << 6)
+
+//
+// VMX Processor-Based Controls (Primary)
+//
+
+#define CPU_BASED_VM_EXEC_CTRL_INTERRUPT_WINDOW_EXITING     (1U << 2)
+#define CPU_BASED_VM_EXEC_CTRL_USE_TSC_OFFSETTING           (1U << 3)
+#define CPU_BASED_VM_EXEC_CTRL_HLT_EXITING                  (1U << 7)
+#define CPU_BASED_VM_EXEC_CTRL_INVLPG_EXITING               (1U << 9)
+#define CPU_BASED_VM_EXEC_CTRL_MWAIT_EXITING                (1U << 10)
+#define CPU_BASED_VM_EXEC_CTRL_RDPMC_EXITING                (1U << 11)
+#define CPU_BASED_VM_EXEC_CTRL_RDTSC_EXITING                (1U << 12)
+#define CPU_BASED_VM_EXEC_CTRL_CR3_LOAD_EXITING             (1U << 15)
+#define CPU_BASED_VM_EXEC_CTRL_CR3_STORE_EXITING            (1U << 16)
+#define CPU_BASED_VM_EXEC_CTRL_CR8_LOAD_EXITING             (1U << 19)
+#define CPU_BASED_VM_EXEC_CTRL_CR8_STORE_EXITING            (1U << 20)
+#define CPU_BASED_VM_EXEC_CTRL_USE_TPR_SHADOW               (1U << 21)
+#define CPU_BASED_VM_EXEC_CTRL_NMI_WINDOW_EXITING           (1U << 22)
+#define CPU_BASED_VM_EXEC_CTRL_MOV_DR_EXITING               (1U << 23)
+#define CPU_BASED_VM_EXEC_CTRL_UNCONDITIONAL_IO_EXITING     (1U << 24)
+#define CPU_BASED_VM_EXEC_CTRL_USE_IO_BITMAPS               (1U << 25)
+#define CPU_BASED_VM_EXEC_CTRL_MONITOR_TRAP_FLAG            (1U << 27)
+#define CPU_BASED_VM_EXEC_CTRL_USE_MSR_BITMAPS              (1U << 28)
+#define CPU_BASED_VM_EXEC_CTRL_MONITOR_EXITING              (1U << 29)
+#define CPU_BASED_VM_EXEC_CTRL_PAUSE_EXITING                (1U << 30)
+#define CPU_BASED_VM_EXEC_CTRL_ACTIVATE_SECONDARY_CONTROLS  (1U << 31)
+
+//
+// VMX Processor-Based Controls (Secondary)
+//
+
+#define CPU_BASED_VM_EXEC_CTRL2_ENABLE_EPT                  (1U << 1)
+#define CPU_BASED_VM_EXEC_CTRL2_RDTSCP                      (1U << 3)
+#define CPU_BASED_VM_EXEC_CTRL2_ENABLE_VPID                 (1U << 5)
+#define CPU_BASED_VM_EXEC_CTRL2_UNRESTRICTED_GUEST          (1U << 7)
+#define CPU_BASED_VM_EXEC_CTRL2_ENABLE_INVPCID              (1U << 12)
+#define CPU_BASED_VM_EXEC_CTRL2_ENABLE_VMFUNC               (1U << 13)
+#define CPU_BASED_VM_EXEC_CTRL2_ENABLE_XSAVES               (1U << 20)
+#define CPU_BASED_VM_EXEC_CTRL2_ENABLE_USER_WAIT_PAUSE      (1U << 26)
+
+//
+// VM-Exit Controls
+//
+
+#define VM_EXIT_CTRL_SAVE_DEBUG_CONTROLS                    (1U << 2)
+#define VM_EXIT_CTRL_HOST_ADDRESS_SPACE_SIZE                (1U << 9)
+#define VM_EXIT_CTRL_LOAD_IA32_PERF_GLOBAL_CTRL             (1U << 12)
+#define VM_EXIT_CTRL_ACK_INTERRUPT_ON_EXIT                  (1U << 15)
+#define VM_EXIT_CTRL_SAVE_IA32_PAT                          (1U << 18)
+#define VM_EXIT_CTRL_LOAD_IA32_PAT                          (1U << 19)
+#define VM_EXIT_CTRL_SAVE_IA32_EFER                         (1U << 20)
+#define VM_EXIT_CTRL_LOAD_IA32_EFER                         (1U << 21)
+
+//
+// VM-Entry Controls
+//
+
+#define VM_ENTRY_CTRL_LOAD_DEBUG_CONTROLS                   (1U << 2)
+#define VM_ENTRY_CTRL_IA32E_MODE_GUEST                      (1U << 9)
+#define VM_ENTRY_CTRL_LOAD_IA32_PERF_GLOBAL_CTRL            (1U << 13)
+#define VM_ENTRY_CTRL_LOAD_IA32_PAT                         (1U << 14)
+#define VM_ENTRY_CTRL_LOAD_IA32_EFER                        (1U << 15)
+
+//
+// Segment Register Indices (matching VMCS segment field encoding offsets)
+//
+
+#define ES   0
+#define CS   1
+#define SS   2
+#define DS   3
+#define FS   4
+#define GS   5
+#define LDTR 6
+#define TR   7
+
+//
+// Segment Descriptor / Selector Structures
+//
+
+typedef union _VMX_SEGMENT_ACCESS_RIGHTS {
+    UINT32 AsUInt;
+    struct {
+        UINT32 Type          : 4;
+        UINT32 System        : 1;
+        UINT32 Dpl           : 2;
+        UINT32 Present       : 1;
+        UINT32 Reserved1     : 4;
+        UINT32 Avl           : 1;
+        UINT32 LongMode      : 1;
+        UINT32 DefaultBig    : 1;
+        UINT32 Granularity   : 1;
+        UINT32 Unusable      : 1;
+        UINT32 Reserved2     : 15;
+    };
+} VMX_SEGMENT_ACCESS_RIGHTS;
+
+typedef struct _VMX_SEGMENT_SELECTOR {
+    UINT16                    Selector;
+    VMX_SEGMENT_ACCESS_RIGHTS Attributes;
+    UINT32                    Limit;
+    UINT64                    Base;
+} VMX_SEGMENT_SELECTOR;
+
+#pragma pack(push, 1)
+typedef struct _SEGMENT_DESCRIPTOR_32 {
+    UINT16 LimitLow;
+    UINT16 BaseLow;
+    union {
+        struct {
+            UINT32 BaseMid       : 8;
+            UINT32 Type          : 4;
+            UINT32 System        : 1;
+            UINT32 Dpl           : 2;
+            UINT32 Present       : 1;
+            UINT32 LimitHigh     : 4;
+            UINT32 Avl           : 1;
+            UINT32 LongMode      : 1;
+            UINT32 DefaultBig    : 1;
+            UINT32 Granularity   : 1;
+            UINT32 BaseHigh      : 8;
+        };
+        UINT32 Flags;
+    };
+} SEGMENT_DESCRIPTOR_32, *PSEGMENT_DESCRIPTOR_32;
+#pragma pack(pop)
+
+//
+// EPT Structures (Intel SDM Vol 3, Chapter 28)
+//
+
+typedef union _EPT_POINTER {
+    UINT64 AsUInt;
+    struct {
+        UINT64 MemoryType             : 3;
+        UINT64 PageWalkLength         : 3;
+        UINT64 EnableAccessAndDirtyFlags : 1;
+        UINT64 EnforcementOfAccessRights : 1;
+        UINT64 Reserved1              : 4;
+        UINT64 PageFrameNumber        : 36;
+        UINT64 Reserved2              : 16;
+    };
+} EPT_POINTER, *PEPT_POINTER;
+
+typedef union _EPT_PML4_ENTRY {
+    UINT64 AsUInt;
+    struct {
+        UINT64 ReadAccess      : 1;
+        UINT64 WriteAccess     : 1;
+        UINT64 ExecuteAccess   : 1;
+        UINT64 Reserved1       : 5;
+        UINT64 Accessed        : 1;
+        UINT64 Ignored1        : 1;
+        UINT64 UserModeExecute : 1;
+        UINT64 Ignored2        : 1;
+        UINT64 PageFrameNumber : 36;
+        UINT64 Reserved2       : 4;
+        UINT64 Ignored3        : 12;
+    };
+} EPT_PML4_ENTRY, *PEPT_PML4_ENTRY;
+
+typedef union _EPT_PML3_POINTER {
+    UINT64 AsUInt;
+    struct {
+        UINT64 ReadAccess      : 1;
+        UINT64 WriteAccess     : 1;
+        UINT64 ExecuteAccess   : 1;
+        UINT64 Reserved1       : 5;
+        UINT64 Accessed        : 1;
+        UINT64 Ignored1        : 1;
+        UINT64 UserModeExecute : 1;
+        UINT64 Ignored2        : 1;
+        UINT64 PageFrameNumber : 36;
+        UINT64 Reserved2       : 4;
+        UINT64 Ignored3        : 12;
+    };
+} EPT_PML3_POINTER;
+
+typedef union _EPT_PML3_ENTRY {
+    UINT64 AsUInt;
+    struct {
+        UINT64 ReadAccess      : 1;
+        UINT64 WriteAccess     : 1;
+        UINT64 ExecuteAccess   : 1;
+        UINT64 MemoryType      : 3;
+        UINT64 IgnorePat       : 1;
+        UINT64 LargePage       : 1;
+        UINT64 Accessed        : 1;
+        UINT64 Dirty           : 1;
+        UINT64 UserModeExecute : 1;
+        UINT64 Ignored1        : 1;
+        UINT64 Reserved1       : 18;
+        UINT64 PageFrameNumber : 18;
+        UINT64 Reserved2       : 4;
+        UINT64 Ignored2        : 7;
+        UINT64 VerifyGuestPaging : 1;
+        UINT64 PagingWriteAccess : 1;
+        UINT64 Ignored3        : 1;
+        UINT64 SuppressVe      : 1;
+        UINT64 Ignored4        : 1;
+    };
+} EPT_PML3_ENTRY;
+
+typedef union _EPT_PML2_ENTRY {
+    UINT64 AsUInt;
+    struct {
+        UINT64 ReadAccess      : 1;
+        UINT64 WriteAccess     : 1;
+        UINT64 ExecuteAccess   : 1;
+        UINT64 MemoryType      : 3;
+        UINT64 IgnorePat       : 1;
+        UINT64 LargePage       : 1;
+        UINT64 Accessed        : 1;
+        UINT64 Dirty           : 1;
+        UINT64 UserModeExecute : 1;
+        UINT64 Ignored1        : 10;
+        UINT64 PageFrameNumber : 27;
+        UINT64 Reserved1       : 4;
+        UINT64 Ignored2        : 7;
+        UINT64 VerifyGuestPaging : 1;
+        UINT64 PagingWriteAccess : 1;
+        UINT64 Ignored3        : 1;
+        UINT64 SuppressVe      : 1;
+        UINT64 Ignored4        : 1;
+    };
+} EPT_PML2_ENTRY, *PEPT_PML2_ENTRY;
+
+typedef union _EPT_PML2_POINTER {
+    UINT64 AsUInt;
+    struct {
+        UINT64 ReadAccess      : 1;
+        UINT64 WriteAccess     : 1;
+        UINT64 ExecuteAccess   : 1;
+        UINT64 Reserved1       : 5;
+        UINT64 Accessed        : 1;
+        UINT64 Ignored1        : 1;
+        UINT64 UserModeExecute : 1;
+        UINT64 Ignored2        : 1;
+        UINT64 PageFrameNumber : 36;
+        UINT64 Reserved2       : 4;
+        UINT64 Ignored3        : 12;
+    };
+} EPT_PML2_POINTER, *PEPT_PML2_POINTER;
+
+typedef union _EPT_PML1_ENTRY {
+    UINT64 AsUInt;
+    struct {
+        UINT64 ReadAccess      : 1;
+        UINT64 WriteAccess     : 1;
+        UINT64 ExecuteAccess   : 1;
+        UINT64 MemoryType      : 3;
+        UINT64 IgnorePat       : 1;
+        UINT64 Ignored1        : 1;
+        UINT64 Accessed        : 1;
+        UINT64 Dirty           : 1;
+        UINT64 UserModeExecute : 1;
+        UINT64 Ignored2        : 1;
+        UINT64 PageFrameNumber : 36;
+        UINT64 Reserved1       : 4;
+        UINT64 Ignored3        : 7;
+        UINT64 VerifyGuestPaging : 1;
+        UINT64 PagingWriteAccess : 1;
+        UINT64 Ignored4        : 1;
+        UINT64 SuppressVe      : 1;
+        UINT64 Ignored5        : 1;
+    };
+} EPT_PML1_ENTRY, *PEPT_PML1_ENTRY;
+
+//
+// EPT Violation Exit Qualification
+//
+
+typedef union _VMX_EXIT_QUALIFICATION_EPT_VIOLATION {
+    UINT64 AsUInt;
+    struct {
+        UINT64 ReadAccess      : 1;
+        UINT64 WriteAccess     : 1;
+        UINT64 ExecuteAccess   : 1;
+        UINT64 EptReadable     : 1;
+        UINT64 EptWriteable    : 1;
+        UINT64 EptExecutable   : 1;
+        UINT64 EptExecutableForUserMode : 1;
+        UINT64 ValidGuestLinearAddress  : 1;
+        UINT64 CausedByTranslation      : 1;
+        UINT64 UserModeLinearAddress    : 1;
+        UINT64 ReadableWritablePage     : 1;
+        UINT64 ExecuteDisablePage       : 1;
+        UINT64 NmiUnblocking            : 1;
+        UINT64 Reserved1                : 51;
+    };
+} VMX_EXIT_QUALIFICATION_EPT_VIOLATION;
+
+//
+// MOV CR Exit Qualification
+//
+
+typedef union _VMX_EXIT_QUALIFICATION_MOV_CR {
+    UINT64 AsUInt;
+    struct {
+        UINT64 ControlRegister          : 4;
+        UINT64 AccessType               : 2;
+        UINT64 LmswOperandType          : 1;
+        UINT64 Reserved1                : 1;
+        UINT64 GeneralPurposeRegister   : 4;
+        UINT64 Reserved2                : 4;
+        UINT64 LmswSourceData           : 16;
+        UINT64 Reserved3                : 32;
+    };
+} VMX_EXIT_QUALIFICATION_MOV_CR;
+
+#define VMX_EXIT_QUALIFICATION_ACCESS_MOV_TO_CR     0
+#define VMX_EXIT_QUALIFICATION_ACCESS_MOV_FROM_CR   1
+#define VMX_EXIT_QUALIFICATION_REGISTER_CR0         0
+#define VMX_EXIT_QUALIFICATION_REGISTER_CR3         3
+#define VMX_EXIT_QUALIFICATION_REGISTER_CR4         4
+
+//
+// INVEPT / INVVPID
+//
+
+typedef enum _INVEPT_TYPE {
+    InveptSingleContext = 1,
+    InveptAllContexts   = 2
+} INVEPT_TYPE;
+
+typedef enum _INVVPID_TYPE {
+    InvvpidIndividualAddress                = 0,
+    InvvpidSingleContext                    = 1,
+    InvvpidAllContexts                      = 2,
+    InvvpidSingleContextRetainingGlobals    = 3
+} INVVPID_TYPE;
+
+typedef struct _INVEPT_DESCRIPTOR {
+    EPT_POINTER EptPointer;
+    UINT64      Reserved;
+} INVEPT_DESCRIPTOR;
+
+typedef struct _INVVPID_DESCRIPTOR {
+    UINT16 Vpid;
+    UINT16 Reserved1;
+    UINT32 Reserved2;
+    UINT64 LinearAddress;
+} INVVPID_DESCRIPTOR;
+
+//
+// VM-Entry Interruption Information Field
+//
+
+typedef union _VMENTRY_INTERRUPT_INFORMATION {
+    UINT32 AsUInt;
+    struct {
+        UINT32 Vector              : 8;
+        UINT32 InterruptionType    : 3;
+        UINT32 DeliverErrorCode    : 1;
+        UINT32 Reserved            : 19;
+        UINT32 Valid               : 1;
+    };
+} VMENTRY_INTERRUPT_INFORMATION;
+
+#define INTERRUPT_TYPE_EXTERNAL_INTERRUPT    0
+#define INTERRUPT_TYPE_NMI                   2
+#define INTERRUPT_TYPE_HARDWARE_EXCEPTION    3
+#define INTERRUPT_TYPE_SOFTWARE_INTERRUPT    4
+#define INTERRUPT_TYPE_SOFTWARE_EXCEPTION    6
+
+//
+// Exception vectors
+//
+#define EXCEPTION_VECTOR_DIVIDE_ERROR            0
+#define EXCEPTION_VECTOR_DEBUG                   1
+#define EXCEPTION_VECTOR_NMI                     2
+#define EXCEPTION_VECTOR_BREAKPOINT              3
+#define EXCEPTION_VECTOR_OVERFLOW                4
+#define EXCEPTION_VECTOR_BOUND_RANGE             5
+#define EXCEPTION_VECTOR_UNDEFINED_OPCODE        6
+#define EXCEPTION_VECTOR_DEVICE_NOT_AVAILABLE    7
+#define EXCEPTION_VECTOR_DOUBLE_FAULT            8
+#define EXCEPTION_VECTOR_INVALID_TSS             10
+#define EXCEPTION_VECTOR_SEGMENT_NOT_PRESENT     11
+#define EXCEPTION_VECTOR_STACK_SEGMENT_FAULT     12
+#define EXCEPTION_VECTOR_GENERAL_PROTECTION      13
+#define EXCEPTION_VECTOR_PAGE_FAULT              14
+#define EXCEPTION_VECTOR_MACHINE_CHECK           18
+
+//
+// EPT Table Constants
+//
+
+#define VMM_EPT_PML4E_COUNT 512
+#define VMM_EPT_PML3E_COUNT 512
+#define VMM_EPT_PML2E_COUNT 512
+#define VMM_EPT_PML1E_COUNT 512
+
+//
+// EPT address mask helpers
+//
+#define ADDRMASK_EPT_PML1_INDEX(_VAR_) ((_VAR_ & 0x1FF000ULL) >> 12)
+#define ADDRMASK_EPT_PML2_INDEX(_VAR_) ((_VAR_ & 0x3FE00000ULL) >> 21)
+#define ADDRMASK_EPT_PML3_INDEX(_VAR_) ((_VAR_ & 0x7FC0000000ULL) >> 30)
+#define ADDRMASK_EPT_PML4_INDEX(_VAR_) ((_VAR_ & 0xFF8000000000ULL) >> 39)
+
+//
+// DR7 — Debug Register 7 (Intel SDM Vol 3, 17.2.4)
+//
+
+#define DR7_L0                  (1ULL << 0)   // Local enable DR0
+#define DR7_G0                  (1ULL << 1)   // Global enable DR0
+#define DR7_L1                  (1ULL << 2)   // Local enable DR1
+#define DR7_G1                  (1ULL << 3)   // Global enable DR1
+#define DR7_L2                  (1ULL << 4)   // Local enable DR2
+#define DR7_G2                  (1ULL << 5)   // Global enable DR2
+#define DR7_L3                  (1ULL << 6)   // Local enable DR3
+#define DR7_G3                  (1ULL << 7)   // Global enable DR3
+
+// R/W and LEN fields for each DR (2 bits each, starting at bit 16)
+#define DR7_RW_SHIFT(n)         (16 + (n) * 4)     // R/W0 at 16, R/W1 at 20, ...
+#define DR7_LEN_SHIFT(n)        (18 + (n) * 4)     // LEN0 at 18, LEN1 at 22, ...
+#define DR7_RW_MASK(n)          (3ULL << DR7_RW_SHIFT(n))
+#define DR7_RW_EXEC             0   // Break on execution only
+
+//
+// Pending Debug Exceptions (VMCS 0x6822 — Intel SDM Vol 3, 24.4.2)
+//
+
+#define PENDING_DEBUG_B0        (1ULL << 0)   // DR0 breakpoint matched
+#define PENDING_DEBUG_B1        (1ULL << 1)   // DR1 breakpoint matched
+#define PENDING_DEBUG_B2        (1ULL << 2)   // DR2 breakpoint matched
+#define PENDING_DEBUG_B3        (1ULL << 3)   // DR3 breakpoint matched
+#define PENDING_DEBUG_ENABLED_BP (1ULL << 12) // At least one enabled BP matched
+#define PENDING_DEBUG_BS        (1ULL << 14)  // Single-step (RFLAGS.TF)
+
+//
+// Guest Interruptibility State (VMCS 0x4824 bits)
+//
+#define GUEST_INTR_STATE_BLOCKING_BY_STI    (1U << 0)
+#define GUEST_INTR_STATE_BLOCKING_BY_MOV_SS (1U << 1)
+#define GUEST_INTR_STATE_BLOCKING_BY_SMI    (1U << 2)
+#define GUEST_INTR_STATE_BLOCKING_BY_NMI    (1U << 3)
+
+//
+// Guest Activity State values (VMCS 0x4826)
+//
+#define GUEST_ACTIVITY_STATE_ACTIVE         0
+#define GUEST_ACTIVITY_STATE_HLT            1
+#define GUEST_ACTIVITY_STATE_SHUTDOWN       2
+#define GUEST_ACTIVITY_STATE_WAIT_FOR_SIPI  3
+
+//
+// VPID Tag
+//
+#define VPID_TAG 1
+
+#pragma warning(pop)
+
+```
+
+`include/stealth.h`:
+
+```h
+/*
+*   stealth.h - anti-detection stealth definitions and function prototypes
+*   ported from stealthhv hyperevade module. implements:
+*   - cpuid bare-metal caching (defeats check_invalid_leaf, hvdetecc)
+*/
+#pragma once
+
+//
+// master stealth switch — set to 0 to disable all stealth globally
+//
+#define STEALTH_ENABLED                     1
+
+//
+// hide CR4.VMXE (bit 13) from guest reads
+// defeats: hvdetecc vm.vmxe
+//
+#define STEALTH_HIDE_CR4_VMXE               1
+
+//
+// compensate TSC for VM-exit overhead
+// defeats: hvdetecc VM::TIMER, RDTSC+CPUID+RDTSC timing attacks
+//
+// approach: after CPUID exit, dynamically enable RDTSC exiting for one
+// instruction. the trapped RDTSC returns a compensated value that hides
+// the VM-exit overhead, then RDTSC exiting is disabled. zero drift —
+// TSC_OFFSET is never modified, only one RDTSC per CPUID is trapped.
+//
+#define STEALTH_COMPENSATE_TIMING           0
+
+//
+// use cached bare-metal CPUID for invalid/hypervisor leaves
+// defeats: check_invalid_leaf, check_highest_low_function_leaf, VM::VMID
+//
+#define STEALTH_CPUID_CACHING               1
+
+//
+// use private (deep-copied) host page tables for VMCS_HOST_CR3
+// protects host-mode from guest/anti-cheat page table corruption
+// disabled by default — enable once base hv is verified stable
+//
+#define USE_PRIVATE_HOST_CR3                1
+
+//
+// CR4.VMXE — bit 13 (may already be defined in ia32.h)
+//
+#ifndef CR4_VMX_ENABLE_FLAG
+#define CR4_VMX_ENABLE_FLAG                 0x2000ULL
+#endif
+
+//
+// CR4.LAM_SUP — bit 28 (supervisor linear address masking)
+// not masked in guest/host mask, passes through transparently
+//
+#ifndef CR4_LAM_SUP_FLAG
+#define CR4_LAM_SUP_FLAG                    0x10000000ULL
+#endif
+
+//
+// estimated hardware VM-exit + VM-entry transition overhead (cycles)
+// used only for the old accumulating approach — no longer needed
+//
+// #define VM_EXIT_ENTRY_OVERHEAD_ESTIMATE     900
+// #define BARE_METAL_CPUID_CYCLES             80
+
+typedef struct _STEALTH_CPUID_CACHE {
+
+    //
+    // what bare metal returns for a completely out-of-range leaf (e.g. 0x13371337)
+    // this is what all invalid leaves should return for consistency.
+    //
+    INT32   invalid_leaf[4];
+
+    UINT32  max_std_leaf;
+
+    UINT32  max_ext_leaf;
+
+    //
+    // hardware-supported XCR0 bitmask from CPUID.0Dh.0 (EAX:EDX)
+    // used to validate XSETBV values instead of a hardcoded mask
+    //
+    UINT64  valid_xcr0_mask;
+
+    BOOLEAN initialized;
+
+    //
+    // calibrated bare-metal CPUID execution cost (min of N samples)
+    // used by TSC compensation to return plausible RDTSC deltas
+    //
+    UINT64  bare_metal_cpuid_cost;
+
+    //
+    // TRUE if the CPU forces RDTSC exiting as a must-be-1 bit.
+    // if forced, we can't toggle it off — just use the armed flag.
+    //
+    BOOLEAN rdtsc_exiting_forced;
+
+} STEALTH_CPUID_CACHE;
+
+extern BOOLEAN              g_stealth_enabled;
+extern STEALTH_CPUID_CACHE  g_stealth_cpuid_cache;
+
+VOID stealth_init_cpuid_cache(VOID);
+
+BOOLEAN stealth_is_leaf_invalid(UINT32 leaf);
+
+BOOLEAN stealth_is_xcr0_valid(UINT64 value);
+
+
+```
+
+`src/broadcast.c`:
+
+```c
+/*
+*   broadcast.c - dpc-based broadcast for multi-processor vmx operations
+*   uses KeGenericCallDpc to execute code on all logical processors
+*/
+#include "hv.h"
+
+// KeGenericCallDpc, KeSignalCallDpcDone, KeSignalCallDpcSynchronize
+// are not in the standard wdk headers
+NTKERNELAPI
+_IRQL_requires_max_(APC_LEVEL)
+_IRQL_requires_min_(PASSIVE_LEVEL)
+_IRQL_requires_same_
+VOID
+KeGenericCallDpc(
+    _In_ PKDEFERRED_ROUTINE Routine,
+    _In_opt_ PVOID          Context);
+
+NTKERNELAPI
+_IRQL_requires_(DISPATCH_LEVEL)
+_IRQL_requires_same_
+VOID
+KeSignalCallDpcDone(
+    _In_ PVOID SystemArgument1);
+
+NTKERNELAPI
+_IRQL_requires_(DISPATCH_LEVEL)
+_IRQL_requires_same_
+LOGICAL
+KeSignalCallDpcSynchronize(
+    _In_ PVOID SystemArgument2);
+
+static VOID
+dpc_init_guest(
+    _In_ PKDPC  Dpc,
+    _In_opt_ PVOID DeferredContext,
+    _In_opt_ PVOID SystemArgument1,
+    _In_opt_ PVOID SystemArgument2)
+{
+    UNREFERENCED_PARAMETER(Dpc);
+    UNREFERENCED_PARAMETER(DeferredContext);
+
+    // saves gprs + rflags, calls vmx_virtualize_cpu(rsp)
+    // on successful vmlaunch, returns via asm_vmx_restore_state
+    asm_vmx_save_state();
+
+    KeSignalCallDpcSynchronize(SystemArgument2);
+    KeSignalCallDpcDone(SystemArgument1);
+}
+
+static VOID
+dpc_terminate_guest(
+    _In_ PKDPC  Dpc,
+    _In_opt_ PVOID DeferredContext,
+    _In_opt_ PVOID SystemArgument1,
+    _In_opt_ PVOID SystemArgument2)
+{
+    UNREFERENCED_PARAMETER(Dpc);
+    UNREFERENCED_PARAMETER(DeferredContext);
+
+    asm_vmx_vmcall(VMCALL_VMXOFF, 0, 0, 0);
+
+    KeSignalCallDpcSynchronize(SystemArgument2);
+    KeSignalCallDpcDone(SystemArgument1);
+}
+
+VOID
+broadcast_virtualize_all(VOID)
+{
+    KeGenericCallDpc(dpc_init_guest, NULL);
+}
+
+VOID
+broadcast_terminate_all(VOID)
+{
+    KeGenericCallDpc(dpc_terminate_guest, NULL);
+}
+
+```
+
+`src/driver.c`:
+
+```c
+/*
+*   driver.c - windows kernel driver entry point for the hypervisor
+*   creates a device object, symbolic link, and initializes vmx
+*   provides ioctl interface for usermode loader communication
+*/
+#include "hv.h"
+
+#define DEVICE_NAME     L"\\Device\\Ophion"
+#define SYMLINK_NAME    L"\\DosDevices\\Ophion"
+
+#define IOCTL_BASE      0x800
+#define IOCTL_HV_STATUS CTL_CODE(FILE_DEVICE_UNKNOWN, IOCTL_BASE + 0, METHOD_BUFFERED, FILE_ANY_ACCESS)
+
+static NTSTATUS DriverCreateClose(PDEVICE_OBJECT device_obj, PIRP irp);
+static NTSTATUS DriverIoControl(PDEVICE_OBJECT device_obj, PIRP irp);
+
+VOID
+DriverUnload(_In_ PDRIVER_OBJECT driver_obj)
+{
+    UNICODE_STRING symlink;
+
+    DbgPrintEx(0, 0, "[hv] Unloading hypervisor driver...\n");
+
+    broadcast_terminate_all();
+    vmx_terminate();
+
+    RtlInitUnicodeString(&symlink, SYMLINK_NAME);
+    IoDeleteSymbolicLink(&symlink);
+
+    if (driver_obj->DeviceObject)
+    {
+        IoDeleteDevice(driver_obj->DeviceObject);
+    }
+
+    DbgPrintEx(0, 0, "[hv] Driver unloaded.\n");
+}
+
+NTSTATUS
+DriverEntry(
+    _In_ PDRIVER_OBJECT  driver_obj,
+    _In_ PUNICODE_STRING registry_path)
+{
+    NTSTATUS       status;
+    PDEVICE_OBJECT device_obj = NULL;
+    UNICODE_STRING device_name;
+    UNICODE_STRING symlink;
+
+    UNREFERENCED_PARAMETER(registry_path);
+
+    DbgPrintEx(0, 0, "[hv] DriverEntry — Hypervisor initializing...\n");
+
+    RtlInitUnicodeString(&device_name, DEVICE_NAME);
+    status = IoCreateDevice(
+        driver_obj,
+        0,
+        &device_name,
+        FILE_DEVICE_UNKNOWN,
+        FILE_DEVICE_SECURE_OPEN,
+        FALSE,
+        &device_obj);
+
+    if (!NT_SUCCESS(status))
+    {
+        DbgPrintEx(0, 0, "[hv] IoCreateDevice failed: 0x%X\n", status);
+        return status;
+    }
+
+    RtlInitUnicodeString(&symlink, SYMLINK_NAME);
+    status = IoCreateSymbolicLink(&symlink, &device_name);
+
+    if (!NT_SUCCESS(status))
+    {
+        DbgPrintEx(0, 0, "[hv] IoCreateSymbolicLink failed: 0x%X\n", status);
+        IoDeleteDevice(device_obj);
+        return status;
+    }
+
+    driver_obj->DriverUnload                         = DriverUnload;
+    driver_obj->MajorFunction[IRP_MJ_CREATE]         = DriverCreateClose;
+    driver_obj->MajorFunction[IRP_MJ_CLOSE]          = DriverCreateClose;
+    driver_obj->MajorFunction[IRP_MJ_DEVICE_CONTROL] = DriverIoControl;
+
+    if (!vmx_init())
+    {
+        DbgPrintEx(0, 0, "[hv] VMX initialization FAILED!\n");
+        vmx_terminate();  // clean up any partially-allocated resources
+        IoDeleteSymbolicLink(&symlink);
+        IoDeleteDevice(device_obj);
+        return STATUS_HV_OPERATION_FAILED;
+    }
+
+    DbgPrintEx(0, 0, "[hv] Hypervisor loaded and active on all cores!\n");
+    return STATUS_SUCCESS;
+}
+
+static NTSTATUS
+DriverCreateClose(
+    _In_ PDEVICE_OBJECT device_obj,
+    _In_ PIRP           irp)
+{
+    UNREFERENCED_PARAMETER(device_obj);
+
+    irp->IoStatus.Status      = STATUS_SUCCESS;
+    irp->IoStatus.Information = 0;
+    IoCompleteRequest(irp, IO_NO_INCREMENT);
+    return STATUS_SUCCESS;
+}
+
+static NTSTATUS
+DriverIoControl(
+    _In_ PDEVICE_OBJECT device_obj,
+    _In_ PIRP           irp)
+{
+    NTSTATUS           status = STATUS_SUCCESS;
+    PIO_STACK_LOCATION io_stack;
+    ULONG              ioctl_code;
+
+    UNREFERENCED_PARAMETER(device_obj);
+
+    io_stack       = IoGetCurrentIrpStackLocation(irp);
+    ioctl_code = io_stack->Parameters.DeviceIoControl.IoControlCode;
+
+    switch (ioctl_code)
+    {
+    case IOCTL_HV_STATUS:
+    {
+        //
+        // return basic status: number of virtualized cores
+        //
+        if (io_stack->Parameters.DeviceIoControl.OutputBufferLength >= sizeof(UINT32))
+        {
+            *(UINT32 *)irp->AssociatedIrp.SystemBuffer = g_cpu_count;
+            irp->IoStatus.Information = sizeof(UINT32);
+        }
+        else
+        {
+            status = STATUS_BUFFER_TOO_SMALL;
+        }
+        break;
+    }
+
+    default:
+        //
+        // add more shi here later
+        //
+        status = STATUS_INVALID_DEVICE_REQUEST;
+        break;
+    }
+
+    irp->IoStatus.Status = status;
+    IoCompleteRequest(irp, IO_NO_INCREMENT);
+    return status;
+}
+
+```
+
+`src/ept.c`:
+
+```c
+/*
+*   ept.c - extended page table (ept) initialization and management
+*   identity-mapped ept with 2mb large pages, mtrr-aware memory typing
+*   based on the stealthhv ept architecture: pml4 -> pml3 -> pml2 (2mb large pages)
+*/
+#include "hv.h"
+
+BOOLEAN
+ept_check_features(VOID)
+{
+    IA32_VMX_EPT_VPID_CAP_REGISTER vpid_reg;
+    IA32_MTRR_DEF_TYPE_REGISTER    mtrr_def;
+
+    vpid_reg.AsUInt = __readmsr(IA32_VMX_EPT_VPID_CAP);
+    mtrr_def.AsUInt  = __readmsr(IA32_MTRR_DEF_TYPE);
+
+    if (!vpid_reg.PageWalkLength4 || !vpid_reg.MemoryTypeWriteBack || !vpid_reg.Pde2MbPages)
+    {
+        DbgPrintEx(0, 0, "[hv] EPT: Missing required features (PW4=%d WB=%d 2MB=%d)\n",
+                 vpid_reg.PageWalkLength4, vpid_reg.MemoryTypeWriteBack, vpid_reg.Pde2MbPages);
+        return FALSE;
+    }
+
+    g_ept->ad_supported = vpid_reg.EptAccessedAndDirtyFlags ? TRUE : FALSE;
+
+    g_ept->invvpid_supported              = vpid_reg.Invvpid ? TRUE : FALSE;
+    g_ept->invvpid_individual_addr        = vpid_reg.InvvpidIndividualAddress ? TRUE : FALSE;
+    g_ept->invvpid_single_context         = vpid_reg.InvvpidSingleContext ? TRUE : FALSE;
+    g_ept->invvpid_all_contexts           = vpid_reg.InvvpidAllContexts ? TRUE : FALSE;
+    g_ept->invvpid_single_retaining_globals = vpid_reg.InvvpidSingleContextRetainingGlobals ? TRUE : FALSE;
+
+    DbgPrintEx(0, 0, "[hv] INVVPID caps: supported=%d individual=%d single=%d all=%d retaining_globals=%d\n",
+             g_ept->invvpid_supported,
+             g_ept->invvpid_individual_addr,
+             g_ept->invvpid_single_context,
+             g_ept->invvpid_all_contexts,
+             g_ept->invvpid_single_retaining_globals);
+
+    if (!mtrr_def.MtrrEnable)
+    {
+        DbgPrintEx(0, 0, "[hv] EPT: MTRR not enabled\n");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+UINT8
+ept_get_memory_type(SIZE_T pfn, BOOLEAN is_large_page)
+{
+    SIZE_T page_addr = is_large_page ? pfn * SIZE_2_MB : pfn * PAGE_SIZE;
+    UINT8  target_type    = (UINT8)-1;
+
+    for (UINT32 i = 0; i < g_ept->num_ranges; i++)
+    {
+        MTRR_RANGE_DESCRIPTOR * range = &g_ept->mem_ranges[i];
+
+        if (page_addr >= range->phys_base &&
+            page_addr < range->phys_end)
+        {
+            if (range->fixed)
+            {
+                target_type = range->mem_type;
+                break;
+            }
+
+            if (target_type == MEMORY_TYPE_UNCACHEABLE)
+            {
+                target_type = range->mem_type;
+                break;
+            }
+
+            if (target_type == MEMORY_TYPE_WRITE_THROUGH ||
+                range->mem_type == MEMORY_TYPE_WRITE_THROUGH)
+            {
+                if (target_type == MEMORY_TYPE_WRITE_BACK)
+                {
+                    target_type = MEMORY_TYPE_WRITE_THROUGH;
+                    continue;
+                }
+            }
+
+            target_type = range->mem_type;
+        }
+    }
+
+    if (target_type == (UINT8)-1)
+        target_type = g_ept->default_type;
+
+    return target_type;
+}
+
+BOOLEAN
+ept_build_mtrr_map(VOID)
+{
+    IA32_MTRR_CAPABILITIES_REGISTER mtrr_cap;
+    IA32_MTRR_DEF_TYPE_REGISTER     mtrr_def;
+    IA32_MTRR_PHYSBASE_REGISTER     cur_base;
+    IA32_MTRR_PHYSMASK_REGISTER     cur_mask;
+    MTRR_RANGE_DESCRIPTOR *         desc;
+
+    mtrr_cap.AsUInt     = __readmsr(IA32_MTRR_CAPABILITIES);
+    mtrr_def.AsUInt = __readmsr(IA32_MTRR_DEF_TYPE);
+
+    if (!mtrr_def.MtrrEnable)
+    {
+        g_ept->default_type = MEMORY_TYPE_UNCACHEABLE;
+        return TRUE;
+    }
+
+    g_ept->default_type = (UINT8)mtrr_def.DefaultMemoryType;
+
+    //
+    // fixed-range mtrrs (64K, 16K, 4K regions)
+    //
+    if (mtrr_cap.FixedRangeSupported && mtrr_def.FixedRangeMtrrEnable)
+    {
+        //
+        // IA32_MTRR_FIX64K_00000: 8 x 64KB regions from 0x00000 to 0x7FFFF
+        //
+        IA32_MTRR_FIXED_RANGE_TYPE k64_types = { __readmsr(IA32_MTRR_FIX64K_00000) };
+        for (UINT32 i = 0; i < 8; i++)
+        {
+            desc = &g_ept->mem_ranges[g_ept->num_ranges++];
+            desc->mem_type          = k64_types.s.Types[i];
+            desc->phys_base = 0x10000 * i;
+            desc->phys_end  = 0x10000 * i + 0x10000 - 1;
+            desc->fixed          = TRUE;
+        }
+
+        //
+        // IA32_MTRR_FIX16K_80000/A0000: 16 x 16KB regions
+        //
+        for (UINT32 i = 0; i < 2; i++)
+        {
+            IA32_MTRR_FIXED_RANGE_TYPE k16_types = { __readmsr(IA32_MTRR_FIX16K_80000 + i) };
+            for (UINT32 j = 0; j < 8; j++)
+            {
+                desc = &g_ept->mem_ranges[g_ept->num_ranges++];
+                desc->mem_type          = k16_types.s.Types[j];
+                desc->phys_base = 0x80000 + (i * 0x20000) + (j * 0x4000);
+                desc->phys_end  = desc->phys_base + 0x4000 - 1;
+                desc->fixed          = TRUE;
+            }
+        }
+
+        //
+        // IA32_MTRR_FIX4K_C0000 through FIX4K_F8000: 64 x 4KB regions
+        //
+        for (UINT32 i = 0; i < 8; i++)
+        {
+            IA32_MTRR_FIXED_RANGE_TYPE k4_types = { __readmsr(IA32_MTRR_FIX4K_C0000 + i) };
+            for (UINT32 j = 0; j < 8; j++)
+            {
+                desc = &g_ept->mem_ranges[g_ept->num_ranges++];
+                desc->mem_type          = k4_types.s.Types[j];
+                desc->phys_base = 0xC0000 + (i * 0x8000) + (j * 0x1000);
+                desc->phys_end  = desc->phys_base + 0x1000 - 1;
+                desc->fixed          = TRUE;
+            }
+        }
+    }
+
+    //
+    // variable-range mtrrs
+    //
+    for (UINT32 i = 0; i < mtrr_cap.VariableRangeCount; i++)
+    {
+        cur_base.AsUInt = __readmsr(IA32_MTRR_PHYSBASE0 + (i * 2));
+        cur_mask.AsUInt = __readmsr(IA32_MTRR_PHYSMASK0 + (i * 2));
+
+        if (cur_mask.Valid)
+        {
+            desc = &g_ept->mem_ranges[g_ept->num_ranges++];
+            desc->phys_base = cur_base.PageFrameNumber * PAGE_SIZE;
+
+            ULONG mask_bits;
+            _BitScanForward64(&mask_bits, cur_mask.PageFrameNumber * PAGE_SIZE);
+
+            desc->phys_end = desc->phys_base + ((1ULL << mask_bits) - 1ULL);
+            desc->mem_type         = (UINT8)cur_base.Type;
+            desc->fixed         = FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
+BOOLEAN
+ept_valid_for_large_page(SIZE_T pfn)
+{
+    SIZE_T start_addr = pfn * SIZE_2_MB;
+    SIZE_T end_addr   = start_addr + SIZE_2_MB - 1;
+
+    for (UINT32 i = 0; i < g_ept->num_ranges; i++)
+    {
+        MTRR_RANGE_DESCRIPTOR * range = &g_ept->mem_ranges[i];
+
+        if ((start_addr <= range->phys_end && end_addr > range->phys_end) ||
+            (start_addr < range->phys_base && end_addr >= range->phys_base))
+        {
+            return FALSE;  // crosses MTRR boundary — must split to 4KB
+        }
+    }
+
+    return TRUE;
+}
+
+BOOLEAN
+ept_setup_pml2(PVMM_EPT_PAGE_TABLE page_table, PEPT_PML2_ENTRY new_entry, SIZE_T pfn)
+{
+    UNREFERENCED_PARAMETER(page_table);
+    new_entry->PageFrameNumber = pfn;
+
+    if (ept_valid_for_large_page(pfn))
+    {
+        new_entry->MemoryType = ept_get_memory_type(pfn, TRUE);
+        return TRUE;
+    }
+    else
+    {
+        //
+        // the 2MB range crosses MTRR boundaries — needs to be split to 4KB
+        // for the skeleton, we just log a warning. you'll implement
+        // ept_split_large_page as needed for EPT hooks.
+        //
+        new_entry->MemoryType = ept_get_memory_type(pfn, TRUE);
+        DbgPrintEx(0, 0, "[hv] EPT: Page at PFN 0x%llx crosses MTRR boundary (split recommended)\n",
+                 pfn);
+        return TRUE;
+    }
+}
+
+/*
+*   allocate and create identity-mapped ept page table
+*   maps all physical memory 1:1 (guest physical = host physical)
+*   pml4 (512 entries) -> pml3 (512 entries) -> pml2 (512 x 512 = 262144 entries)
+*/
+PVMM_EPT_PAGE_TABLE
+ept_alloc_identity_map(VOID)
+{
+    PHYSICAL_ADDRESS    max_phys;
+    PVMM_EPT_PAGE_TABLE page_table;
+    EPT_PML2_ENTRY      pml2_tmpl;
+
+    max_phys.QuadPart = MAXULONG64;
+
+    page_table = (PVMM_EPT_PAGE_TABLE)MmAllocateContiguousMemory(
+        sizeof(VMM_EPT_PAGE_TABLE), max_phys);
+    if (!page_table)
+        return NULL;
+
+    RtlZeroMemory(page_table, sizeof(VMM_EPT_PAGE_TABLE));
+
+    page_table->PML4[0].ReadAccess    = 1;
+    page_table->PML4[0].WriteAccess   = 1;
+    page_table->PML4[0].ExecuteAccess = 1;
+    page_table->PML4[0].PageFrameNumber = va_to_pa(&page_table->PML3[0]) / PAGE_SIZE;
+
+    for (SIZE_T i = 0; i < VMM_EPT_PML3E_COUNT; i++)
+    {
+        page_table->PML3[i].ReadAccess    = 1;
+        page_table->PML3[i].WriteAccess   = 1;
+        page_table->PML3[i].ExecuteAccess = 1;
+        page_table->PML3[i].PageFrameNumber = va_to_pa(&page_table->PML2[i][0]) / PAGE_SIZE;
+    }
+
+    pml2_tmpl.AsUInt        = 0;
+    pml2_tmpl.ReadAccess    = 1;
+    pml2_tmpl.WriteAccess   = 1;
+    pml2_tmpl.ExecuteAccess = 1;
+    pml2_tmpl.LargePage     = 1;
+
+    __stosq((SIZE_T *)&page_table->PML2[0], pml2_tmpl.AsUInt,
+            VMM_EPT_PML3E_COUNT * VMM_EPT_PML2E_COUNT);
+
+    for (SIZE_T group = 0; group < VMM_EPT_PML3E_COUNT; group++)
+    {
+        for (SIZE_T entry_idx = 0; entry_idx < VMM_EPT_PML2E_COUNT; entry_idx++)
+        {
+            ept_setup_pml2(page_table,
+                              &page_table->PML2[group][entry_idx],
+                              (group * VMM_EPT_PML2E_COUNT) + entry_idx);
+        }
+    }
+
+    return page_table;
+}
+
+BOOLEAN
+ept_init(VOID)
+{
+    EPT_POINTER eptp = {0};
+
+    g_ept = (EPT_STATE *)ExAllocatePool2(
+        POOL_FLAG_NON_PAGED, sizeof(EPT_STATE), HV_POOL_TAG);
+    if (!g_ept)
+        return FALSE;
+
+    RtlZeroMemory(g_ept, sizeof(EPT_STATE));
+
+    InitializeListHead(&g_ept->hooked_pages);
+
+    if (!ept_check_features())
+        return FALSE;
+
+    if (!ept_build_mtrr_map())
+        return FALSE;
+
+    for (UINT32 i = 0; i < g_cpu_count; i++)
+    {
+        PVMM_EPT_PAGE_TABLE page_table = ept_alloc_identity_map();
+        if (!page_table)
+        {
+            DbgPrintEx(0, 0, "[hv] EPT: Failed to allocate page table for core %u\n", i);
+            return FALSE;
+        }
+
+        g_vcpu[i].ept_page_table = page_table;
+
+        //
+        // build EPT pointer
+        // memory type for EPT paging structures = WB (most efficient, validated
+        // by ept_check_features checking memoryTypeWriteBack capability).
+        //
+        eptp.MemoryType               = MEMORY_TYPE_WRITE_BACK;
+        eptp.EnableAccessAndDirtyFlags = g_ept->ad_supported;
+        eptp.PageWalkLength           = 3;  // 4-level walk (value = levels - 1)
+        eptp.PageFrameNumber          = va_to_pa(&page_table->PML4) / PAGE_SIZE;
+
+        g_vcpu[i].ept_pointer = eptp;
+    }
+
+    DbgPrintEx(0, 0, "[hv] EPT initialized for %u processors\n", g_cpu_count);
+    return TRUE;
+}
+
+/*
+*   split a 2mb page into 512 4kb pages (for ept hooks)
+*   placeholder — implement when you need fine-grained memory control
+*/
+BOOLEAN
+ept_split_large_page(PVMM_EPT_PAGE_TABLE page_table, SIZE_T phys_addr)
+{
+    PEPT_PML2_ENTRY target;
+    PVMM_EPT_DYNAMIC_SPLIT new_split;
+    EPT_PML1_ENTRY entry_tmpl;
+    EPT_PML2_POINTER new_ptr;
+
+    target = ept_get_pml2(page_table, phys_addr);
+    if (!target || !target->LargePage)
+        return FALSE;
+
+    new_split = (PVMM_EPT_DYNAMIC_SPLIT)ExAllocatePool2(
+        POOL_FLAG_NON_PAGED, sizeof(VMM_EPT_DYNAMIC_SPLIT), HV_POOL_TAG);
+    if (!new_split)
+        return FALSE;
+
+    RtlZeroMemory(new_split, sizeof(VMM_EPT_DYNAMIC_SPLIT));
+    new_split->u.Entry = target;
+
+    entry_tmpl.AsUInt        = 0;
+    entry_tmpl.ReadAccess    = 1;
+    entry_tmpl.WriteAccess   = 1;
+    entry_tmpl.ExecuteAccess = 1;
+
+    __stosq((SIZE_T *)&new_split->PML1[0], entry_tmpl.AsUInt, VMM_EPT_PML1E_COUNT);
+
+    for (SIZE_T i = 0; i < VMM_EPT_PML1E_COUNT; i++)
+    {
+        new_split->PML1[i].PageFrameNumber = ((target->PageFrameNumber * SIZE_2_MB) / PAGE_SIZE) + i;
+        new_split->PML1[i].MemoryType      = ept_get_memory_type(new_split->PML1[i].PageFrameNumber, FALSE);
+    }
+
+    new_ptr.AsUInt            = 0;
+    new_ptr.ReadAccess        = 1;
+    new_ptr.WriteAccess       = 1;
+    new_ptr.ExecuteAccess     = 1;
+    new_ptr.PageFrameNumber   = va_to_pa(&new_split->PML1[0]) / PAGE_SIZE;
+
+    RtlCopyMemory(target, &new_ptr, sizeof(new_ptr));
+
+    return TRUE;
+}
+
+PEPT_PML2_ENTRY
+ept_get_pml2(PVMM_EPT_PAGE_TABLE page_table, SIZE_T phys_addr)
+{
+    SIZE_T dir  = ADDRMASK_EPT_PML2_INDEX(phys_addr);
+    SIZE_T dir_p = ADDRMASK_EPT_PML3_INDEX(phys_addr);
+    SIZE_T pml4 = ADDRMASK_EPT_PML4_INDEX(phys_addr);
+
+    if (pml4 > 0)
+        return NULL;
+
+    return &page_table->PML2[dir_p][dir];
+}
+
+/*
+*   get pml1 entry for a physical address (only if page is split)
+*/
+PEPT_PML1_ENTRY
+ept_get_pml1(PVMM_EPT_PAGE_TABLE page_table, SIZE_T phys_addr)
+{
+    SIZE_T dir  = ADDRMASK_EPT_PML2_INDEX(phys_addr);
+    SIZE_T dir_p = ADDRMASK_EPT_PML3_INDEX(phys_addr);
+    SIZE_T pml4 = ADDRMASK_EPT_PML4_INDEX(phys_addr);
+
+    if (pml4 > 0)
+        return NULL;
+
+    PEPT_PML2_ENTRY pml2 = &page_table->PML2[dir_p][dir];
+    if (pml2->LargePage)
+        return NULL;  // not split
+
+    PEPT_PML2_POINTER ptr = (PEPT_PML2_POINTER)pml2;
+    PEPT_PML1_ENTRY pml1 = (PEPT_PML1_ENTRY)pa_to_va(
+        ptr->PageFrameNumber * PAGE_SIZE);
+
+    if (!pml1)
+        return NULL;
+
+    return &pml1[ADDRMASK_EPT_PML1_INDEX(phys_addr)];
+}
+
+VOID
+ept_invept_single(EPT_POINTER ept_ptr)
+{
+    INVEPT_DESCRIPTOR desc = {0};
+    desc.EptPointer = ept_ptr;
+    asm_invept(InveptSingleContext, &desc);
+}
+
+VOID
+ept_invept_all(VOID)
+{
+    INVEPT_DESCRIPTOR desc = {0};
+    asm_invept(InveptAllContexts, &desc);
+}
+
+VOID
+vpid_invvpid_single(UINT16 vpid)
+{
+    INVVPID_DESCRIPTOR desc = {0};
+    desc.Vpid = vpid;
+    asm_invvpid(InvvpidSingleContext, &desc);
+}
+
+```
+
+`src/events.c`:
+
+```c
+/*
+*   events.c - exception/interrupt injection into guest via vmcs
+*/
+#include "hv.h"
+
+/*
+*   inject #gp (general protection) exception
+*   error code 0 for most software-triggered cases
+*/
+VOID
+vmexit_inject_gp(VOID)
+{
+    VMENTRY_INTERRUPT_INFORMATION info = {0};
+
+    info.Vector           = EXCEPTION_VECTOR_GENERAL_PROTECTION;
+    info.InterruptionType = INTERRUPT_TYPE_HARDWARE_EXCEPTION;
+    info.DeliverErrorCode = 1;
+    info.Valid            = 1;
+
+    __vmx_vmwrite(VMCS_CTRL_VMENTRY_INTERRUPTION_INFORMATION_FIELD, info.AsUInt);
+    __vmx_vmwrite(VMCS_CTRL_VMENTRY_EXCEPTION_ERROR_CODE, 0);
+    __vmx_vmwrite(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS, 0);
+}
+
+VOID
+vmexit_inject_ud(VOID)
+{
+    VMENTRY_INTERRUPT_INFORMATION info = {0};
+
+    info.Vector           = EXCEPTION_VECTOR_UNDEFINED_OPCODE;
+    info.InterruptionType = INTERRUPT_TYPE_HARDWARE_EXCEPTION;
+    info.DeliverErrorCode = 0;
+    info.Valid            = 1;
+
+    __vmx_vmwrite(VMCS_CTRL_VMENTRY_INTERRUPTION_INFORMATION_FIELD, info.AsUInt);
+    __vmx_vmwrite(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS, 0);
+}
+
+VOID
+vmexit_inject_interrupt(UINT32 vector)
+{
+    VMENTRY_INTERRUPT_INFORMATION info = {0};
+
+    info.Vector           = (UINT8)vector;
+    info.InterruptionType = INTERRUPT_TYPE_EXTERNAL_INTERRUPT;
+    info.DeliverErrorCode = 0;
+    info.Valid            = 1;
+
+    __vmx_vmwrite(VMCS_CTRL_VMENTRY_INTERRUPTION_INFORMATION_FIELD, info.AsUInt);
+}
+
+VOID
+vmexit_inject_bp(VOID)
+{
+    VMENTRY_INTERRUPT_INFORMATION info = {0};
+
+    info.Vector           = EXCEPTION_VECTOR_BREAKPOINT;
+    info.InterruptionType = INTERRUPT_TYPE_SOFTWARE_EXCEPTION;
+    info.DeliverErrorCode = 0;
+    info.Valid            = 1;
+
+    __vmx_vmwrite(VMCS_CTRL_VMENTRY_INTERRUPTION_INFORMATION_FIELD, info.AsUInt);
+
+    // software exceptions need instruction length field
+    __vmx_vmwrite(VMCS_CTRL_VMENTRY_INSTRUCTION_LENGTH, 1);
+}
+
+/*
+*   inject #pf (page fault) exception
+*   sets cr2 to faulting address before injection
+*/
+VOID
+vmexit_inject_pf(UINT32 error_code, UINT64 fault_addr)
+{
+    VMENTRY_INTERRUPT_INFORMATION info = {0};
+
+    asm_write_cr2(fault_addr);
+
+    info.Vector           = EXCEPTION_VECTOR_PAGE_FAULT;
+    info.InterruptionType = INTERRUPT_TYPE_HARDWARE_EXCEPTION;
+    info.DeliverErrorCode = 1;
+    info.Valid            = 1;
+
+    __vmx_vmwrite(VMCS_CTRL_VMENTRY_INTERRUPTION_INFORMATION_FIELD, info.AsUInt);
+    __vmx_vmwrite(VMCS_CTRL_VMENTRY_EXCEPTION_ERROR_CODE, error_code);
+    __vmx_vmwrite(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS, 0);
+}
+
+```
+
+`src/globals.c`:
+
+```c
+/*
+*   globals.c - global variable definitions
+*/
+#include "hv.h"
+
+VIRTUAL_MACHINE_STATE *g_vcpu               = NULL;
+EPT_STATE *g_ept                            = NULL;
+UINT32 g_cpu_count                          = 0;
+
+// stable system process CR3 captured before virtualization
+UINT64 g_system_cr3                         = 0;
+
+// bitmap of msrs that cause #gp on bare metal (probed at init time)
+UINT64 *g_msr_bitmap_invalid                = NULL;
+
+BOOLEAN g_stealth_enabled                   = STEALTH_ENABLED;
+STEALTH_CPUID_CACHE g_stealth_cpuid_cache   = {0};
+
+```
+
+`src/hostcr3.c`:
+
+```c
+/*
+*   hostcr3.c - private host page tables for vmx host mode
+*
+*   deep-copies kernel portion of system page tables to create an isolated
+*   cr3 for vmx host mode. protects the hypervisor from guest-mode page
+*   table modifications (eg. anti-cheat drivers that unmap/corrupt kernel ptes)
+*
+*   strategy:
+*     1. read system process pml4 (stable kernel cr3)
+*     2. allocate our own pml4 -> pdpt -> pd -> pt hierarchy
+*     3. copy kernel-space entries (pml4[256..511]), deep-copying every level
+*     4. leaf entries still point to same physical pages — isolation is
+*        at the page table level only
+*     5. set VMCS_HOST_CR3 to our private pml4 physical address
+*/
+#include "hv.h"
+
+#define PTE_PRESENT     (1ULL << 0)
+#define PTE_LARGE_PAGE  (1ULL << 7)
+#define PTE_PFN_MASK    0x000FFFFFFFFFF000ULL
+
+#define MAX_HOST_PT_PAGES 4096
+
+static PVOID   g_host_pt_pages[MAX_HOST_PT_PAGES];
+static UINT32  g_host_pt_count = 0;
+static PUINT64 g_host_pml4_va  = NULL;
+static UINT64  g_host_pml4_pa  = 0;
+
+static PVOID
+host_alloc_page(VOID)
+{
+    PVOID page = ExAllocatePool2(POOL_FLAG_NON_PAGED, PAGE_SIZE, HV_POOL_TAG);
+    if (!page)
+        return NULL;
+
+    RtlZeroMemory(page, PAGE_SIZE);
+
+    if (g_host_pt_count < MAX_HOST_PT_PAGES)
+        g_host_pt_pages[g_host_pt_count++] = page;
+
+    return page;
+}
+
+//
+// map a physical page via MmGetVirtualForPhysical
+// returns existing kernel va for any pfn-tracked ram page
+// unlike MmMapIoSpace, never fails for regular ram and needs no unmap
+//
+static PUINT64
+host_map_phys(UINT64 pa)
+{
+    PHYSICAL_ADDRESS phys;
+    phys.QuadPart = (LONGLONG)(pa & ~0xFFFULL);
+    return (PUINT64)MmGetVirtualForPhysical(phys);
+}
+
+//
+// deep-copy a single pt (level 1) — 512 leaf 4kb entries
+// leaf entries copied as-is (same physical pages)
+//
+static PUINT64
+host_clone_pt(PUINT64 orig_pt)
+{
+    PUINT64 our_pt = (PUINT64)host_alloc_page();
+    if (!our_pt)
+        return NULL;
+
+    RtlCopyMemory(our_pt, orig_pt, PAGE_SIZE);
+    return our_pt;
+}
+
+//
+// deep-copy a pd (level 2) — 512 entries, each either a 2mb large page
+// (copied as-is) or a pointer to a pt (deep-copied)
+//
+static PUINT64
+host_clone_pd(PUINT64 orig_pd)
+{
+    PUINT64 our_pd = (PUINT64)host_alloc_page();
+    if (!our_pd)
+        return NULL;
+
+    for (UINT32 k = 0; k < 512; k++)
+    {
+        if (!(orig_pd[k] & PTE_PRESENT))
+        {
+            our_pd[k] = 0;
+            continue;
+        }
+
+        if (orig_pd[k] & PTE_LARGE_PAGE)
+        {
+            our_pd[k] = orig_pd[k];
+            continue;
+        }
+
+        UINT64  orig_pt_pa = orig_pd[k] & PTE_PFN_MASK;
+        PUINT64 orig_pt    = host_map_phys(orig_pt_pa);
+        if (!orig_pt)
+        {
+            our_pd[k] = orig_pd[k];
+            continue;
+        }
+
+        PUINT64 our_pt = host_clone_pt(orig_pt);
+        if (!our_pt)
+        {
+            our_pd[k] = orig_pd[k];
+            continue;
+        }
+
+        our_pd[k] = (orig_pd[k] & ~PTE_PFN_MASK) | va_to_pa(our_pt);
+    }
+
+    return our_pd;
+}
+
+//
+// deep-copy a pdpt (level 3) — 512 entries, each either a 1gb large page
+// (copied as-is) or a pointer to a pd (deep-copied)
+//
+static PUINT64
+host_clone_pdpt(PUINT64 orig_pdpt)
+{
+    PUINT64 our_pdpt = (PUINT64)host_alloc_page();
+    if (!our_pdpt)
+        return NULL;
+
+    for (UINT32 j = 0; j < 512; j++)
+    {
+        if (!(orig_pdpt[j] & PTE_PRESENT))
+        {
+            our_pdpt[j] = 0;
+            continue;
+        }
+
+        if (orig_pdpt[j] & PTE_LARGE_PAGE)
+        {
+            our_pdpt[j] = orig_pdpt[j];
+            continue;
+        }
+
+        UINT64  orig_pd_pa = orig_pdpt[j] & PTE_PFN_MASK;
+        PUINT64 orig_pd    = host_map_phys(orig_pd_pa);
+        if (!orig_pd)
+        {
+            our_pdpt[j] = orig_pdpt[j];
+            continue;
+        }
+
+        PUINT64 our_pd = host_clone_pd(orig_pd);
+        if (!our_pd)
+        {
+            our_pdpt[j] = orig_pdpt[j];
+            continue;
+        }
+
+        our_pdpt[j] = (orig_pdpt[j] & ~PTE_PFN_MASK) | va_to_pa(our_pd);
+    }
+
+    return our_pdpt;
+}
+
+/*
+*   build private host page tables by deep-copying kernel pml4 entries
+*   must be called after all host-mode allocations (vmm stacks, bitmaps, etc)
+*/
+BOOLEAN
+hostcr3_build(VOID)
+{
+    UINT64 sys_cr3 = get_system_cr3();
+    UINT64 pml4_pa = sys_cr3 & PTE_PFN_MASK;
+
+    PUINT64 orig_pml4 = host_map_phys(pml4_pa);
+    if (!orig_pml4)
+    {
+        DbgPrintEx(0, 0, "[hv] hostcr3: failed to map PML4 at PA 0x%llx\n", pml4_pa);
+        return FALSE;
+    }
+
+    PUINT64 our_pml4 = (PUINT64)host_alloc_page();
+    if (!our_pml4)
+        return FALSE;
+
+    //
+    // zero user-space entries (never run user code in host mode)
+    //
+    for (UINT32 i = 0; i < 256; i++)
+        our_pml4[i] = 0;
+
+    for (UINT32 i = 256; i < 512; i++)
+    {
+        if (!(orig_pml4[i] & PTE_PRESENT))
+        {
+            our_pml4[i] = 0;
+            continue;
+        }
+
+        //
+        // skip self-referencing entry — windows uses one pml4 entry that
+        // points back to the pml4 itself for page table self-mapping.
+        // fix it up after building our pml4
+        //
+        if ((orig_pml4[i] & PTE_PFN_MASK) == pml4_pa)
+        {
+            our_pml4[i] = orig_pml4[i];
+            continue;
+        }
+
+        UINT64  orig_pdpt_pa = orig_pml4[i] & PTE_PFN_MASK;
+        PUINT64 orig_pdpt    = host_map_phys(orig_pdpt_pa);
+        if (!orig_pdpt)
+        {
+            our_pml4[i] = orig_pml4[i];
+            continue;
+        }
+
+        PUINT64 our_pdpt = host_clone_pdpt(orig_pdpt);
+        if (!our_pdpt)
+        {
+            our_pml4[i] = orig_pml4[i];
+            continue;
+        }
+
+        our_pml4[i] = (orig_pml4[i] & ~PTE_PFN_MASK) | va_to_pa(our_pdpt);
+    }
+
+    g_host_pml4_va = our_pml4;
+    g_host_pml4_pa = va_to_pa(our_pml4);
+
+    //
+    // fix self-referencing pml4 entry to point to our pml4
+    //
+    for (UINT32 i = 256; i < 512; i++)
+    {
+        if ((our_pml4[i] & PTE_PRESENT) &&
+            ((our_pml4[i] & PTE_PFN_MASK) == pml4_pa))
+        {
+            our_pml4[i] = (our_pml4[i] & ~PTE_PFN_MASK) | g_host_pml4_pa;
+            break;
+        }
+    }
+
+    DbgPrintEx(0, 0, "[hv] Private host CR3 built: PA=0x%llx (%u pages allocated)\n",
+               g_host_pml4_pa, g_host_pt_count);
+
+    return TRUE;
+}
+
+UINT64
+hostcr3_get(VOID)
+{
+    return g_host_pml4_pa;
+}
+
+VOID
+hostcr3_destroy(VOID)
+{
+    for (UINT32 i = 0; i < g_host_pt_count; i++)
+    {
+        if (g_host_pt_pages[i])
+            ExFreePoolWithTag(g_host_pt_pages[i], HV_POOL_TAG);
+    }
+
+    g_host_pt_count = 0;
+    g_host_pml4_va  = NULL;
+    g_host_pml4_pa  = 0;
+}
+
+```
+
+`src/stealth.c`:
+
+```c
+/*
+*   stealth.c - anti-detection stealth implementation
+*   implements cpuid bare-metal caching and xcr0 validation
+*   ported from stealthhv hyperevade module
+*/
+#include "hv.h"
+
+/*
+*   initialize the bare-metal cpuid cache
+*   must be called at passive_level before any vmxon
+*   samples the cpu's native response for invalid leaves and
+*/
+VOID
+stealth_init_cpuid_cache(VOID)
+{
+    INT32 cpu_info[4] = {0};
+
+    //
+    // cache the response for an obviously invalid leaf.
+    // on intel, CPUID returns the highest standard leaf's response
+    // for any leaf between max_standard+1 and 0x7FFFFFFF.
+    // for the hypervisor range (0x40000000-0x4FFFFFFF), on bare metal
+    // without a hypervisor, the CPU also returns this same response.
+    // anti-cheats compare responses across invalid leaves to detect inconsistency.
+    //
+    __cpuidex(cpu_info, 0x13371337, 0);
+    g_stealth_cpuid_cache.invalid_leaf[0] = cpu_info[0];
+    g_stealth_cpuid_cache.invalid_leaf[1] = cpu_info[1];
+    g_stealth_cpuid_cache.invalid_leaf[2] = cpu_info[2];
+    g_stealth_cpuid_cache.invalid_leaf[3] = cpu_info[3];
+
+    __cpuidex(cpu_info, 0, 0);
+    g_stealth_cpuid_cache.max_std_leaf = (UINT32)cpu_info[0];
+
+    __cpuidex(cpu_info, (int)0x80000000, 0);
+    g_stealth_cpuid_cache.max_ext_leaf = (UINT32)cpu_info[0];
+
+    //
+    // get hardware-supported XCR0 bitmask (CPUID.0Dh.0: EAX=low32, EDX=high32)
+    // this tells us which XCR0 bits the CPU actually supports (PKRU, AMX, etc.)
+    // used to validate XSETBV values instead of a hardcoded mask
+    //
+    __cpuidex(cpu_info, 0x0D, 0);
+    g_stealth_cpuid_cache.valid_xcr0_mask =
+        ((UINT64)(UINT32)cpu_info[3] << 32) | (UINT64)(UINT32)cpu_info[0];
+
+    g_stealth_cpuid_cache.initialized = TRUE;
+
+#if STEALTH_COMPENSATE_TIMING
+    //
+    // calibrate bare-metal CPUID execution cost.
+    // take the minimum of many samples to filter out interrupt/scheduling noise.
+    // must run before VMXON so we measure true hardware cost.
+    //
+    {
+        UINT64 best = MAXULONG64;
+        INT32  dummy[4];
+
+        for (int i = 0; i < 200; i++)
+        {
+            _mm_lfence();
+            UINT64 a = __rdtsc();
+            _mm_lfence();
+            __cpuidex(dummy, 0, 0);
+            _mm_lfence();
+            UINT64 b = __rdtsc();
+            _mm_lfence();
+
+            UINT64 delta = b - a;
+            if (delta < best)
+                best = delta;
+        }
+
+        g_stealth_cpuid_cache.bare_metal_cpuid_cost = best;
+    }
+
+    //
+    // check if the CPU forces RDTSC exiting as a must-be-1 bit.
+    // if so, we can't toggle it off dynamically — performance hit is
+    // unavoidable but compensation still works via the armed flag.
+    //
+    {
+        IA32_VMX_BASIC_REGISTER vmx_basic;
+        vmx_basic.AsUInt = __readmsr(IA32_VMX_BASIC);
+
+        UINT32 msr_id = vmx_basic.VmxControls
+            ? IA32_VMX_TRUE_PROCBASED_CTLS
+            : IA32_VMX_PROCBASED_CTLS;
+
+        MSR msr;
+        msr.Flags = __readmsr(msr_id);
+
+        g_stealth_cpuid_cache.rdtsc_exiting_forced =
+            !!(msr.Fields.Low & CPU_BASED_VM_EXEC_CTRL_RDTSC_EXITING);
+    }
+#endif
+
+    DbgPrintEx(0, 0, "[hv] Stealth CPUID cache: MaxStd=0x%X, MaxExt=0x%X, XCR0=0x%llX, "
+             "InvalidLeaf={0x%X, 0x%X, 0x%X, 0x%X}\n",
+             g_stealth_cpuid_cache.max_std_leaf,
+             g_stealth_cpuid_cache.max_ext_leaf,
+             g_stealth_cpuid_cache.valid_xcr0_mask,
+             (UINT32)g_stealth_cpuid_cache.invalid_leaf[0],
+             (UINT32)g_stealth_cpuid_cache.invalid_leaf[1],
+             (UINT32)g_stealth_cpuid_cache.invalid_leaf[2],
+             (UINT32)g_stealth_cpuid_cache.invalid_leaf[3]);
+
+#if STEALTH_COMPENSATE_TIMING
+    DbgPrintEx(0, 0, "[hv] TSC compensation: bare_metal_cpuid=%llu cycles, rdtsc_exiting_forced=%d\n",
+             g_stealth_cpuid_cache.bare_metal_cpuid_cost,
+             g_stealth_cpuid_cache.rdtsc_exiting_forced);
+#endif
+}
+
+/*
+*   check if a cpuid leaf is out-of-range / invalid on bare metal
+*   on bare metal (no hypervisor), leaves in these ranges all return
+*   the same default response (usually matching the highest standard leaf):
+*/
+BOOLEAN
+stealth_is_leaf_invalid(UINT32 leaf)
+{
+    if (!g_stealth_cpuid_cache.initialized)
+        return FALSE;
+
+    //
+    // hypervisor reserved range — always invalid on bare metal
+    //
+    if (leaf >= 0x40000000 && leaf <= 0x4FFFFFFF)
+        return TRUE;
+
+    //
+    // beyond max standard leaf but below extended range
+    //
+    if (leaf > g_stealth_cpuid_cache.max_std_leaf && leaf < 0x80000000)
+        return TRUE;
+
+    //
+    // beyond max extended leaf
+    //
+    if (leaf >= 0x80000000 && leaf > g_stealth_cpuid_cache.max_ext_leaf)
+        return TRUE;
+
+    return FALSE;
+}
+
+/*
+*   validate a proposed xcr0 value per intel sdm volume 1, section 13.3
+*   uses the hardware-supported mask from cpuid.0dh.0 instead of hardcoding
+*   which bits are valid — supports pkru, amx, and future extensions
+*/
+BOOLEAN
+stealth_is_xcr0_valid(UINT64 value)
+{
+    if (g_stealth_cpuid_cache.initialized &&
+        (value & ~g_stealth_cpuid_cache.valid_xcr0_mask))
+        return FALSE;
+
+    //
+    // bit 0 (x87 FPU) must always be set — this is mandatory
+    //
+    if (!(value & 1ULL))
+        return FALSE;
+
+    //
+    // if AVX (bit 2) is set, SSE (bit 1) must also be set
+    //
+    if ((value & 4ULL) && !(value & 2ULL))
+        return FALSE;
+
+    //
+    // BNDREGS (bit 3) and BNDCSR (bit 4) — must both be set or both clear
+    //
+    {
+        UINT64 mpx_bits = value & 0x18ULL;
+        if (mpx_bits != 0 && mpx_bits != 0x18ULL)
+            return FALSE;
+    }
+
+    //
+    // AVX-512 state bits (5=Opmask, 6=ZMM_Hi256, 7=Hi16_ZMM)
+    // all three must be set together, and AVX (bit 2) + SSE (bit 1) must be set
+    //
+    {
+        UINT64 avx512_bits = value & 0xE0ULL;
+        if (avx512_bits != 0)
+        {
+            if (avx512_bits != 0xE0ULL)
+                return FALSE;
+
+            if (!(value & 6ULL))
+                return FALSE;
+        }
+    }
+
+    //
+    // AMX bits (17=XTILECFG, 18=XTILEDATA) — must both be set or both clear
+    //
+    {
+        UINT64 amx_bits = value & 0x60000ULL;
+        if (amx_bits != 0 && amx_bits != 0x60000ULL)
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
+
+```
+
+`src/util.c`:
+
+```c
+/*
+*   util.c - utility functions — address conversion, segment descriptor parsing
+*   these are our own implementations to avoid relying on undocumented
+*   windows internals wherever possible
+*/
+#include "hv.h"
+
+/*
+*   convert virtual address to physical using mmgetphysicaladdress
+*   this is one of the few windows apis we must use (no safe alternative)
+*   only call from non-root or at dispatch_level
+*/
+UINT64
+va_to_pa(PVOID va)
+{
+    return MmGetPhysicalAddress(va).QuadPart;
+}
+
+PVOID
+pa_to_va(UINT64 pa)
+{
+    PHYSICAL_ADDRESS phys_addr;
+    phys_addr.QuadPart = pa;
+    return MmGetVirtualForPhysical(phys_addr);
+}
+
+/*
+*   get the system (kernel) directory table base (cr3 of system process)
+*   we read it from the eprocess of pid 4 (system). this is needed because
+*   when we set host_cr3 in vmcs we need a valid kernel-space cr3 that won't
+*/
+UINT64
+get_system_cr3(VOID)
+{
+
+    // the safest portable way: just read __readcr3() from DPC context
+    // since DPC runs in system process context.
+    // for maximum safety and portability, we use the sytem eprocess cr3:
+    //
+    PEPROCESS sys_proc = PsInitialSystemProcess;
+    if (sys_proc)
+    {
+        return *(UINT64 *)((UINT8 *)sys_proc + 0x28);
+    }
+
+    //
+    // fallback: use current CR3 (may be user-mode process page tables)
+    //
+    return __readcr3();
+}
+
+VOID
+segment_get_descriptor(PUCHAR gdt_base, UINT16 selector, VMX_SEGMENT_SELECTOR * result)
+{
+    PSEGMENT_DESCRIPTOR_32 desc;
+    UINT16                 index;
+
+    if (!result)
+        return;
+
+    //
+    // the index into the GDT is the upper 13 bits of the selector
+    //
+    index = (selector >> 3) & 0x1FFF;
+
+    if (selector == 0 || index == 0)
+    {
+        result->Selector   = 0;
+        result->Base       = 0;
+        result->Limit      = 0;
+        result->Attributes.AsUInt = 0;
+        result->Attributes.Unusable = TRUE;
+        return;
+    }
+
+    desc = (PSEGMENT_DESCRIPTOR_32)(gdt_base + index * 8);
+
+    result->Selector = selector;
+
+    result->Base = (UINT64)desc->BaseLow |
+                   ((UINT64)desc->BaseMid << 16) |
+                   ((UINT64)desc->BaseHigh << 24);
+
+    //
+    // for system segments (TSS, LDT) in 64-bit mode, the base is 8 bytes
+    // (the next descriptor entry holds the high 32 bits of the base)
+    //
+    if (!desc->System)
+    {
+        UINT64 base_high = *(UINT64 *)(gdt_base + index * 8 + 8);
+        result->Base |= (base_high & 0xFFFFFFFF) << 32;
+    }
+
+    result->Limit = (UINT32)desc->LimitLow |
+                    ((UINT32)desc->LimitHigh << 16);
+
+    if (desc->Granularity)
+    {
+        result->Limit = (result->Limit << 12) | 0xFFF;
+    }
+
+    result->Attributes.AsUInt = 0;
+    result->Attributes.Type        = desc->Type;
+    result->Attributes.System      = desc->System;
+    result->Attributes.Dpl         = desc->Dpl;
+    result->Attributes.Present     = desc->Present;
+    result->Attributes.Avl         = desc->Avl;
+    result->Attributes.LongMode    = desc->LongMode;
+    result->Attributes.DefaultBig  = desc->DefaultBig;
+    result->Attributes.Granularity = desc->Granularity;
+    result->Attributes.Unusable    = 0;
+}
+
+VOID
+segment_fill_vmcs(PVOID gdt_base, UINT32 seg_reg, UINT16 selector)
+{
+    VMX_SEGMENT_SELECTOR seg = {0};
+
+    segment_get_descriptor((PUCHAR)gdt_base, selector, &seg);
+
+    if (selector == 0)
+    {
+        seg.Attributes.Unusable = TRUE;
+    }
+
+    //
+    // clear reserved bits that VMCS checks reject
+    //
+    seg.Attributes.Reserved1 = 0;
+    seg.Attributes.Reserved2 = 0;
+
+    //
+    // write to VMCS — each segment field is offset by seg_reg * 2
+    //
+    __vmx_vmwrite(VMCS_GUEST_ES_SELECTOR + seg_reg * 2,      selector);
+    __vmx_vmwrite(VMCS_GUEST_ES_LIMIT + seg_reg * 2,         seg.Limit);
+    __vmx_vmwrite(VMCS_GUEST_ES_ACCESS_RIGHTS + seg_reg * 2, seg.Attributes.AsUInt);
+    __vmx_vmwrite(VMCS_GUEST_ES_BASE + seg_reg * 2,          seg.Base);
+}
+
+```
+
+`src/vmexit.c`:
+
+```c
+/*
+*   vmexit.c - vm-exit handler — dispatches exits to sub-handlers
+*   this is called from assembly (asm_vmexit_handler) with:
+*   rcx = pguest_regs (pushed gprs on stack)
+*/
+#include "hv.h"
+
+static __forceinline VOID
+vmexit_advance_rip(VIRTUAL_MACHINE_STATE * vcpu)
+{
+    UINT64 instr_len = 0;
+    __vmx_vmread(VMCS_VMEXIT_INSTRUCTION_LENGTH, &instr_len);
+
+    UINT64 new_rip = vcpu->vmexit_rip + instr_len;
+    __vmx_vmwrite(VMCS_GUEST_RIP, new_rip);
+
+    //
+    // merge hardware breakpoint matches into pending debug exceptions.
+    // on bare metal, when TF is set and a hardware BP matches the next
+    // instruction, the CPU delivers #DB with DR6 = BS | Bn | ENABLED_BP.
+    // after a VM-exit (eg. CPUID), the CPU saves the BS bit in the
+    // pending debug field but does NOT check DR0-DR3 — we must do that.
+    //
+    UINT64 pending = 0;
+    __vmx_vmread(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS, &pending);
+
+    if (pending == 0)
+        return;  // fast path: no single-step or debug activity
+
+    //
+    // read guest DR7 from VMCS (not __readdr(7) which returns host value)
+    //
+    UINT64 dr7 = 0;
+    __vmx_vmread(VMCS_GUEST_DR7, &dr7);
+
+    //
+    // check each DR0-DR3: enabled (L or G bit) + execution breakpoint (R/W=00)
+    //
+    static const UINT64 ln_bits[] = { DR7_L0, DR7_L1, DR7_L2, DR7_L3 };
+    static const UINT64 gn_bits[] = { DR7_G0, DR7_G1, DR7_G2, DR7_G3 };
+    static const UINT64 bn_bits[] = { PENDING_DEBUG_B0, PENDING_DEBUG_B1,
+                                      PENDING_DEBUG_B2, PENDING_DEBUG_B3 };
+
+    UINT64 bp_matched = 0;
+
+    for (int i = 0; i < 4; i++)
+    {
+        // skip if this breakpoint is not enabled (neither local nor global)
+        if (!(dr7 & (ln_bits[i] | gn_bits[i])))
+            continue;
+
+        // skip if not an execution breakpoint (R/W must be 00)
+        if ((dr7 & DR7_RW_MASK(i)) != 0)
+            continue;
+
+        UINT64 drn;
+        switch (i)
+        {
+        case 0: drn = vcpu->guest_dr0; break;
+        case 1: drn = vcpu->guest_dr1; break;
+        case 2: drn = vcpu->guest_dr2; break;
+        case 3: drn = vcpu->guest_dr3; break;
+        default: continue;
+        }
+
+        if (drn == new_rip)
+            bp_matched |= bn_bits[i];
+    }
+
+    if (bp_matched)
+    {
+        pending |= bp_matched | PENDING_DEBUG_ENABLED_BP;
+        __vmx_vmwrite(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS, pending);
+    }
+}
+
+UINT64
+vmx_return_rsp_for_vmxoff(VOID)
+{
+    UINT32                  core_id = (UINT32)(__readmsr(IA32_TSC_AUX) & 0xFFF);
+    VIRTUAL_MACHINE_STATE * vcpu   = &g_vcpu[core_id];
+    return vcpu->vmxoff.guest_rsp;
+}
+
+UINT64
+vmx_return_rip_for_vmxoff(VOID)
+{
+    UINT32                  core_id = (UINT32)(__readmsr(IA32_TSC_AUX) & 0xFFF);
+    VIRTUAL_MACHINE_STATE * vcpu   = &g_vcpu[core_id];
+    return vcpu->vmxoff.guest_rip;
+}
+
+//
+// Defeats:
+//   - compare CPUID(0x04201337) vs CPUID(0x40000000)
+//   - CPUID(max_leaf) vs CPUID(0x40000000)
+//   - CPUID.1.ECX[31] hypervisor present bit
+//   - CPUID subleaf handling
+//   - some more
+//
+// Strategy:
+//   before VMXON, we cache what the real CPU returns for an out-of-range leaf.
+//   during VM-exit, if the guest queries an invalid/hypervisor leaf, we return
+//   the cached response — identical to what bare metal would return.
+//   for leaf 1, we clear ECX[31] (hypervisor present bit).
+//
+
+VOID
+vmexit_handle_cpuid(VIRTUAL_MACHINE_STATE * vcpu)
+{
+    INT32       cpu_info[4] = {0};
+    PGUEST_REGS regs       = vcpu->regs;
+    UINT32      leaf       = (UINT32)regs->rax;
+    UINT32      subleaf    = (UINT32)regs->rcx;
+
+#if STEALTH_CPUID_CACHING
+    //
+    // if stealth is enabled and this leaf is invalid/out-of-range,
+    // return the cached bare-metal response for perfect consistency.
+    // on real hardware, CPUID(0x40000000) == CPUID(0x04201337) == CPUID(max+1)
+    //
+    if (g_stealth_enabled && stealth_is_leaf_invalid(leaf))
+    {
+        cpu_info[0] = g_stealth_cpuid_cache.invalid_leaf[0];
+        cpu_info[1] = g_stealth_cpuid_cache.invalid_leaf[1];
+        cpu_info[2] = g_stealth_cpuid_cache.invalid_leaf[2];
+        cpu_info[3] = g_stealth_cpuid_cache.invalid_leaf[3];
+    }
+    else
+#endif
+    {
+        __cpuidex(cpu_info, (int)leaf, (int)subleaf);
+
+        //
+        // leaf 1: clear the hypervisor present bit (ECX[31])
+        // this is the primary detection used by EAC, BattlEye, VMAware, etc.
+        //
+        if (leaf == 1 && g_stealth_enabled)
+        {
+            cpu_info[2] &= ~((1 << 31) | (1 << 6));
+        }
+    }
+
+    regs->rax = (UINT64)cpu_info[0];
+    regs->rbx = (UINT64)cpu_info[1];
+    regs->rcx = (UINT64)cpu_info[2];
+    regs->rdx = (UINT64)cpu_info[3];
+}
+
+//
+// Defeats:
+//   - RDMSR(0x10) must return same value as RDTSC
+//   - MSRs 0x40000000+ must #GP like bare metal
+//
+
+VOID
+vmexit_handle_msr_read(VIRTUAL_MACHINE_STATE * vcpu)
+{
+    MSR         msr       = {0};
+    PGUEST_REGS regs      = vcpu->regs;
+    UINT32      target_msr = (UINT32)(regs->rcx & 0xFFFFFFFF);
+
+    //
+    // hypervisor synthetic MSRs (0x40000000+) — inject #GP on bare metal
+    // this includes Hyper-V (0x40000000-0x400000FF) and KVM (0x4b564d00-02) MSRs
+    //
+    if (target_msr >= 0x40000000 && target_msr <= 0x4FFFFFFF)
+    {
+        vmexit_inject_gp();
+        vcpu->advance_rip = FALSE;
+        return;
+    }
+
+    //
+    // only service MSRs in valid architectural ranges
+    //
+    if ((target_msr <= 0x00001FFF) ||
+        ((0xC0000000 <= target_msr) && (target_msr <= 0xC0001FFF)))
+    {
+        switch (target_msr)
+        {
+        case IA32_SYSENTER_CS:
+            __vmx_vmread(VMCS_GUEST_SYSENTER_CS, &msr.Flags);
+            break;
+
+        case IA32_SYSENTER_ESP:
+            __vmx_vmread(VMCS_GUEST_SYSENTER_ESP, &msr.Flags);
+            break;
+
+        case IA32_SYSENTER_EIP:
+            __vmx_vmread(VMCS_GUEST_SYSENTER_EIP, &msr.Flags);
+            break;
+
+        case IA32_GS_BASE:
+            __vmx_vmread(VMCS_GUEST_GS_BASE, &msr.Flags);
+            break;
+
+        case IA32_FS_BASE:
+            __vmx_vmread(VMCS_GUEST_FS_BASE, &msr.Flags);
+            break;
+
+        //
+        // IA32_TIME_STAMP_COUNTER (MSR 0x10) — Stealth: must match RDTSC
+        //
+        // some anti-cheats compare RDMSR(0x10) vs RDTSC. on bare metal they're
+        // identical. in a hypervisor, RDTSC uses TSC_OFFSET but RDMSR doesn't.
+        // we manually apply the TSC offset to match guest-visible RDTSC.
+        //
+        //
+        case 0x10:
+        {
+            if (g_stealth_enabled)
+            {
+                size_t tsc_offset_raw = 0;
+                __vmx_vmread(VMCS_CTRL_TSC_OFFSET, &tsc_offset_raw);
+                msr.Flags = (UINT64)((INT64)__rdtsc() + (INT64)tsc_offset_raw);
+            }
+            else
+            {
+                msr.Flags = __rdtsc();
+            }
+            break;
+        }
+
+        case IA32_FEATURE_CONTROL:
+        {
+            IA32_FEATURE_CONTROL_REGISTER feat = {0};
+            feat.AsUInt = __readmsr(IA32_FEATURE_CONTROL);
+
+            if (g_stealth_enabled)
+            {
+                feat.Lock                      = 1;
+                feat.EnableVmxInsideSmx        = 0;
+                feat.EnableVmxOutsideSmx       = 0;
+                feat.SenterLocalFunctionEnables = 0;
+                feat.SenterGlobalEnable        = 0;
+                feat.SgxLaunchControlEnable    = 0;
+                feat.SgxGlobalEnable           = 0;
+            }
+
+            msr.Flags = feat.AsUInt;
+            break;
+        }
+
+        default:
+            msr.Flags = __readmsr(target_msr);
+            break;
+        }
+
+        regs->rax = (UINT64)msr.Fields.Low;
+        regs->rdx = (UINT64)msr.Fields.High;
+    }
+    else
+    {
+        vmexit_inject_gp();
+        vcpu->advance_rip = FALSE;
+        return;
+    }
+}
+
+VOID
+vmexit_handle_msr_write(VIRTUAL_MACHINE_STATE * vcpu)
+{
+    MSR         msr       = {0};
+    PGUEST_REGS regs      = vcpu->regs;
+    UINT32      target_msr = (UINT32)(regs->rcx & 0xFFFFFFFF);
+
+    msr.Fields.Low  = (ULONG)regs->rax;
+    msr.Fields.High = (ULONG)regs->rdx;
+
+    //
+    // hypervisor synthetic MSRs — inject #GP
+    //
+    if (target_msr >= 0x40000000 && target_msr <= 0x4FFFFFFF)
+    {
+        vmexit_inject_gp();
+        vcpu->advance_rip = FALSE;
+        return;
+    }
+
+    // IA32_FEATURE_CONTROL (locked) + VMX capability MSRs (read-only)
+    if (target_msr == IA32_FEATURE_CONTROL ||
+        (target_msr >= IA32_VMX_BASIC && target_msr <= 0x493))
+    {
+        vmexit_inject_gp();
+        vcpu->advance_rip = FALSE;
+        return;
+    }
+
+    if ((target_msr <= 0x00001FFF) ||
+        ((0xC0000000 <= target_msr) && (target_msr <= 0xC0001FFF)))
+    {
+        switch (target_msr)
+        {
+        case IA32_SYSENTER_CS:
+            __vmx_vmwrite(VMCS_GUEST_SYSENTER_CS, msr.Flags);
+            break;
+
+        case IA32_SYSENTER_ESP:
+            __vmx_vmwrite(VMCS_GUEST_SYSENTER_ESP, msr.Flags);
+            break;
+
+        case IA32_SYSENTER_EIP:
+            __vmx_vmwrite(VMCS_GUEST_SYSENTER_EIP, msr.Flags);
+            break;
+
+        case IA32_GS_BASE:
+            __vmx_vmwrite(VMCS_GUEST_GS_BASE, msr.Flags);
+            break;
+
+        case IA32_FS_BASE:
+            __vmx_vmwrite(VMCS_GUEST_FS_BASE, msr.Flags);
+            break;
+
+        default:
+            __writemsr(target_msr, msr.Flags);
+            break;
+        }
+    }
+    else
+    {
+        vmexit_inject_gp();
+        vcpu->advance_rip = FALSE;
+        return;
+    }
+}
+
+//
+// Defeats: hvdetecc vm.vmxe (checks if CR4 bit 13 is set)
+//
+//   CR4 guest/host mask has bit 13 set, so guest reads CR4 with VMXE
+//   from the read shadow (where it's 0). Guest writes to CR4 that change
+//   masked bits cause a VM-exit, which we handle here by keeping VMXE=1
+//   in the actual VMCS guest CR4 while the shadow shows VMXE=0.
+//
+
+VOID
+vmexit_handle_mov_cr(VIRTUAL_MACHINE_STATE * vcpu)
+{
+    VMX_EXIT_QUALIFICATION_MOV_CR cr_qual;
+    PGUEST_REGS                   regs = vcpu->regs;
+    UINT64 *                      reg_ptr;
+
+    cr_qual.AsUInt = vcpu->exit_qual;
+
+    switch (cr_qual.GeneralPurposeRegister)
+    {
+    case 0:  reg_ptr = &regs->rax; break;
+    case 1:  reg_ptr = &regs->rcx; break;
+    case 2:  reg_ptr = &regs->rdx; break;
+    case 3:  reg_ptr = &regs->rbx; break;
+    case 4:  reg_ptr = &regs->rsp; break;
+    case 5:  reg_ptr = &regs->rbp; break;
+    case 6:  reg_ptr = &regs->rsi; break;
+    case 7:  reg_ptr = &regs->rdi; break;
+    case 8:  reg_ptr = &regs->r8;  break;
+    case 9:  reg_ptr = &regs->r9;  break;
+    case 10: reg_ptr = &regs->r10; break;
+    case 11: reg_ptr = &regs->r11; break;
+    case 12: reg_ptr = &regs->r12; break;
+    case 13: reg_ptr = &regs->r13; break;
+    case 14: reg_ptr = &regs->r14; break;
+    case 15: reg_ptr = &regs->r15; break;
+    default: reg_ptr = &regs->rax; break;
+    }
+
+    switch (cr_qual.AccessType)
+    {
+    case 0: // MOV to CR
+    {
+        switch (cr_qual.ControlRegister)
+        {
+        case 0:
+        {
+            //
+            // MOV to CR0: enforce VMX fixed bits to prevent VM-entry failure.
+            // shadow gets the guest's requested value so reads return what the
+            // guest wrote (host-owned bits come from shadow, not actual CR0).
+            //
+            UINT64  desired = *reg_ptr;
+            CR_FIXED fixed;
+            UINT64  actual = desired;
+
+            fixed.Flags = __readmsr(IA32_VMX_CR0_FIXED0);
+            actual |= fixed.Fields.Low;
+            fixed.Flags = __readmsr(IA32_VMX_CR0_FIXED1);
+            actual &= fixed.Fields.Low;
+
+            __vmx_vmwrite(VMCS_GUEST_CR0, actual);
+            __vmx_vmwrite(VMCS_CTRL_CR0_READ_SHADOW, desired);
+            break;
+        }
+
+        case 3:
+        {
+            //
+            // MOV to CR3: handle pcid no-invalidate (bit 63) and flush tlb
+            //
+            // with vpid enabled, intercepting mov cr3 prevents the hardware
+            // from flushing stale guest tlb entries. must call invvpid to
+            // maintain tlb coherency unless the pcid no-invalidate bit is set
+            //
+            // bit 63 must be 0 in VMCS_GUEST_CR3 for vm-entry to succeed
+            //
+            UINT64  new_cr3  = *reg_ptr;
+            BOOLEAN no_flush = (new_cr3 >> 63) & 1;
+
+            __vmx_vmwrite(VMCS_GUEST_CR3, new_cr3 & ~(1ULL << 63));
+
+            if (!no_flush)
+            {
+                //
+                // prefer RetainingGlobals (type 3) to preserve global kernel
+                // tlb entries — matches bare-metal mov cr3 behavior
+                //
+                INVVPID_DESCRIPTOR desc = {0};
+                desc.Vpid = VPID_TAG;
+
+                UINT8 ret;
+                if (g_ept->invvpid_single_retaining_globals)
+                {
+                    ret = asm_invvpid(InvvpidSingleContextRetainingGlobals, &desc);
+                }
+                else
+                {
+                    ret = asm_invvpid(InvvpidSingleContext, &desc);
+                }
+
+                if (ret != 0)
+                {
+                    //
+                    // fallback: all-contexts flush (always supported)
+                    //
+                    asm_invvpid(InvvpidAllContexts, &desc);
+                }
+            }
+            break;
+        }
+
+        case 8:
+            //
+            // MOV to CR8 (TPR): pass through directly
+            // only bits [3:0] are valid. required when cr8-load exiting
+            // is forced by must-be-1 bits
+            //
+            __writecr8(*reg_ptr & 0xF);
+            break;
+
+        case 4:
+        {
+            //
+            // MOV to CR4: enforce VMX fixed bits + stealth VMXE hiding.
+            //
+            UINT64  desired = *reg_ptr;
+            CR_FIXED fixed;
+
+#if STEALTH_HIDE_CR4_VMXE
+            if (g_stealth_enabled)
+            {
+                UINT64 actual = desired | CR4_VMX_ENABLE_FLAG;
+                fixed.Flags = __readmsr(IA32_VMX_CR4_FIXED0);
+                actual |= fixed.Fields.Low;
+                fixed.Flags = __readmsr(IA32_VMX_CR4_FIXED1);
+                actual &= fixed.Fields.Low;
+
+                __vmx_vmwrite(VMCS_GUEST_CR4, actual);
+                __vmx_vmwrite(VMCS_CTRL_CR4_READ_SHADOW, desired & ~CR4_VMX_ENABLE_FLAG);
+            }
+            else
+#endif
+            {
+                UINT64 actual = desired;
+                fixed.Flags = __readmsr(IA32_VMX_CR4_FIXED0);
+                actual |= fixed.Fields.Low;
+                fixed.Flags = __readmsr(IA32_VMX_CR4_FIXED1);
+                actual &= fixed.Fields.Low;
+
+                __vmx_vmwrite(VMCS_GUEST_CR4, actual);
+                __vmx_vmwrite(VMCS_CTRL_CR4_READ_SHADOW, desired);
+            }
+            break;
+        }
+
+        default:
+            break;
+        }
+        break;
+    }
+    case 1: // MOV from CR
+    {
+        switch (cr_qual.ControlRegister)
+        {
+        case 3:
+            __vmx_vmread(VMCS_GUEST_CR3, reg_ptr);
+            break;
+
+        case 8:
+            *reg_ptr = __readcr8();
+            break;
+
+        default:
+            break;
+        }
+        break;
+    }
+    case 2: // CLTS — clear CR0.TS (bit 3)
+    {
+        UINT64  guest_cr0 = 0;
+        UINT64  shadow    = 0;
+        CR_FIXED fixed;
+
+        __vmx_vmread(VMCS_GUEST_CR0, &guest_cr0);
+        __vmx_vmread(VMCS_CTRL_CR0_READ_SHADOW, &shadow);
+
+        guest_cr0 &= ~(1ULL << 3);
+        shadow    &= ~(1ULL << 3);
+
+        fixed.Flags = __readmsr(IA32_VMX_CR0_FIXED0);
+        guest_cr0 |= fixed.Fields.Low;
+        fixed.Flags = __readmsr(IA32_VMX_CR0_FIXED1);
+        guest_cr0 &= fixed.Fields.Low;
+
+        __vmx_vmwrite(VMCS_GUEST_CR0, guest_cr0);
+        __vmx_vmwrite(VMCS_CTRL_CR0_READ_SHADOW, shadow);
+        break;
+    }
+    case 3: // LMSW — load machine status word (bits 0-3 of CR0)
+    {
+        //
+        // LMSW loads PE, MP, EM, TS from source data in exit qualification.
+        // PE (bit 0) can be set but NOT cleared by LMSW (Intel SDM Vol 2).
+        //
+        UINT64  guest_cr0 = 0;
+        UINT64  shadow    = 0;
+        CR_FIXED fixed;
+        UINT64  src       = (UINT64)(UINT16)cr_qual.LmswSourceData & 0xFULL;
+
+        __vmx_vmread(VMCS_GUEST_CR0, &guest_cr0);
+        __vmx_vmread(VMCS_CTRL_CR0_READ_SHADOW, &shadow);
+
+        //
+        // Bits 1-3 (MP, EM, TS): loaded from source
+        // Bit 0 (PE): can be set, never cleared — OR with current value
+        //
+        guest_cr0 = (guest_cr0 & ~0xEULL) | (src & 0xEULL) | ((guest_cr0 | src) & 1ULL);
+        shadow    = (shadow    & ~0xEULL) | (src & 0xEULL) | ((shadow    | src) & 1ULL);
+
+        fixed.Flags = __readmsr(IA32_VMX_CR0_FIXED0);
+        guest_cr0 |= fixed.Fields.Low;
+        fixed.Flags = __readmsr(IA32_VMX_CR0_FIXED1);
+        guest_cr0 &= fixed.Fields.Low;
+
+        __vmx_vmwrite(VMCS_GUEST_CR0, guest_cr0);
+        __vmx_vmwrite(VMCS_CTRL_CR0_READ_SHADOW, shadow);
+        break;
+    }
+    default:
+        break;
+    }
+}
+
+VOID
+vmexit_handle_ept_violation(VIRTUAL_MACHINE_STATE * vcpu)
+{
+    UINT64 guest_phys = 0;
+    __vmx_vmread(VMCS_GUEST_PHYSICAL_ADDRESS, &guest_phys);
+
+    DbgPrintEx(0, 0, "[hv] EPT violation at GPA: 0x%llx, Qualification: 0x%llx\n",
+             guest_phys, vcpu->exit_qual);
+
+    vmexit_inject_gp();
+    vcpu->advance_rip = FALSE;
+}
+
+VOID
+vmexit_handle_vmcall(VIRTUAL_MACHINE_STATE * vcpu)
+{
+    PGUEST_REGS regs = vcpu->regs;
+
+    //
+    // reject VMCALL from ring 3 — only kernel callers allowed
+    //
+    {
+        size_t guest_cs_ar = 0;
+        __vmx_vmread(VMCS_GUEST_CS_ACCESS_RIGHTS, &guest_cs_ar);
+        if (((guest_cs_ar >> 5) & 3) != 0)
+        {
+            vmexit_inject_ud();
+            vcpu->advance_rip = FALSE;
+            return;
+        }
+    }
+
+    if (regs->r10 != 0x48564653ULL ||       // 'HVFS'
+        regs->r11 != 0x564d43414c4cULL ||   // 'VMCALL'
+        regs->r12 != 0x4e4f485950455256ULL)  // 'NOHYPERV'
+    {
+        vmexit_inject_ud();
+        vcpu->advance_rip = FALSE;
+        return;
+    }
+
+    UINT64 vmcall_num = regs->rcx;
+
+    switch (vmcall_num)
+    {
+    case VMCALL_TEST:
+        regs->rax = (UINT64)STATUS_SUCCESS;
+        break;
+
+    case VMCALL_VMXOFF:
+    {
+        UINT64 instr_len = 0;
+        __vmx_vmread(VMCS_VMEXIT_INSTRUCTION_LENGTH, &instr_len);
+
+        vcpu->vmxoff.guest_rip = vcpu->vmexit_rip + instr_len;
+        vcpu->vmxoff.guest_rsp = (UINT64)regs->rsp;
+
+        //
+        // save guest CR3 before VMXOFF — with USE_PRIVATE_HOST_CR3,
+        // HOST_CR3 is a stale snapshot. Must restore guest CR3
+        // immediately after __vmx_off() or kernel accesses fault.
+        //
+        UINT64 guest_cr3 = 0;
+        __vmx_vmread(VMCS_GUEST_CR3, &guest_cr3);
+        vcpu->vmxoff.guest_cr3 = guest_cr3;
+
+        vcpu->vmxoff.executed = TRUE;
+
+        __vmx_off();
+        __writecr3(guest_cr3);
+        __writecr4(__readcr4() & ~CR4_VMX_ENABLE_FLAG);
+
+        regs->rax = (UINT64)STATUS_SUCCESS;
+        break;
+    }
+
+    default:
+        regs->rax = (UINT64)STATUS_UNSUCCESSFUL;
+        break;
+    }
+}
+
+VOID
+vmexit_handle_triple_fault(VIRTUAL_MACHINE_STATE * vcpu)
+{
+    UNREFERENCED_PARAMETER(vcpu);
+
+    DbgPrintEx(0, 0, "[hv] TRIPLE FAULT on core %u! Guest RIP: 0x%llx\n",
+             vcpu->core_id, vcpu->vmexit_rip);
+
+    vcpu->advance_rip = FALSE;
+}
+
+//
+// MOV DR pass-through — required when MOV-DR exiting is forced on
+// by must-be-1 bits. Without this, DR reads/writes are silently
+// skipped (RIP advanced but DR unchanged), breaking EAC's DR checks.
+//
+// DR0-DR3, DR6: shared between host and guest (no VMCS save/load),
+//   read/write hardware DRs directly.
+// DR7: saved to VMCS_GUEST_DR7 on VM-exit, loaded on VM-entry.
+//   Must use VMCS field, not __writedr(7) (which writes host DR7).
+//
+VOID
+vmexit_handle_mov_dr(VIRTUAL_MACHINE_STATE * vcpu)
+{
+    PGUEST_REGS regs = vcpu->regs;
+    UINT64      exit_qual = vcpu->exit_qual;
+
+    UINT32 dr_num  = (UINT32)(exit_qual & 7);
+    UINT32 dir     = (UINT32)((exit_qual >> 4) & 1);   // 0=to DR, 1=from DR
+    UINT32 gpr_idx = (UINT32)((exit_qual >> 8) & 0xF);
+
+    UINT64 * reg_ptr;
+    switch (gpr_idx)
+    {
+    case 0:  reg_ptr = &regs->rax; break;
+    case 1:  reg_ptr = &regs->rcx; break;
+    case 2:  reg_ptr = &regs->rdx; break;
+    case 3:  reg_ptr = &regs->rbx; break;
+    case 4:  reg_ptr = &regs->rsp; break;
+    case 5:  reg_ptr = &regs->rbp; break;
+    case 6:  reg_ptr = &regs->rsi; break;
+    case 7:  reg_ptr = &regs->rdi; break;
+    case 8:  reg_ptr = &regs->r8;  break;
+    case 9:  reg_ptr = &regs->r9;  break;
+    case 10: reg_ptr = &regs->r10; break;
+    case 11: reg_ptr = &regs->r11; break;
+    case 12: reg_ptr = &regs->r12; break;
+    case 13: reg_ptr = &regs->r13; break;
+    case 14: reg_ptr = &regs->r14; break;
+    case 15: reg_ptr = &regs->r15; break;
+    default: reg_ptr = &regs->rax; break;
+    }
+
+    //
+    // DR4/DR5 alias DR6/DR7 when CR4.DE=0, #UD when CR4.DE=1
+    //
+    if (dr_num == 4 || dr_num == 5)
+    {
+        UINT64 cr4 = 0;
+        __vmx_vmread(VMCS_GUEST_CR4, &cr4);
+        if (cr4 & (1ULL << 3))
+        {
+            vmexit_inject_ud();
+            vcpu->advance_rip = FALSE;
+            return;
+        }
+        dr_num = (dr_num == 4) ? 6 : 7;
+    }
+
+    if (dir == 0)
+    {
+        UINT64 val = *reg_ptr;
+        switch (dr_num)
+        {
+        case 0: vcpu->guest_dr0 = val; break;
+        case 1: vcpu->guest_dr1 = val; break;
+        case 2: vcpu->guest_dr2 = val; break;
+        case 3: vcpu->guest_dr3 = val; break;
+        case 6: vcpu->guest_dr6 = val; break;
+        case 7:
+            __vmx_vmwrite(VMCS_GUEST_DR7, val);
+            break;
+        }
+    }
+    else
+    {
+        UINT64 val = 0;
+        switch (dr_num)
+        {
+        case 0: val = vcpu->guest_dr0; break;
+        case 1: val = vcpu->guest_dr1; break;
+        case 2: val = vcpu->guest_dr2; break;
+        case 3: val = vcpu->guest_dr3; break;
+        case 6: val = vcpu->guest_dr6; break;
+        case 7:
+            __vmx_vmread(VMCS_GUEST_DR7, &val);
+            break;
+        default: break;
+        }
+        *reg_ptr = val;
+    }
+}
+
+BOOLEAN
+vmexit_handler(_Inout_ PGUEST_REGS regs, _In_ VIRTUAL_MACHINE_STATE * vcpu)
+{
+    size_t  exit_raw = 0;
+    UINT32  exit_reason    = 0;
+    BOOLEAN result        = FALSE;
+
+#if STEALTH_COMPENSATE_TIMING
+    //
+    // capture TSC as early as possible — used by TSC compensation to measure
+    // handler overhead. Must be before any other work.
+    //
+    UINT64 exit_tsc_start = __rdtsc();
+#endif
+
+    vcpu->regs        = regs;
+    vcpu->in_root     = TRUE;
+    vcpu->advance_rip = TRUE;
+
+    vcpu->guest_dr0 = __readdr(0);
+    vcpu->guest_dr1 = __readdr(1);
+    vcpu->guest_dr2 = __readdr(2);
+    vcpu->guest_dr3 = __readdr(3);
+    vcpu->guest_dr6 = __readdr(6);
+
+    // __vmx_vmread writes size_t
+    __vmx_vmread(VMCS_EXIT_REASON, &exit_raw);
+    exit_reason = (UINT32)(exit_raw & 0xFFFF);
+    vcpu->exit_reason = exit_reason;
+
+    //
+    // TSC compensation: if RDTSC exiting was armed for compensation and this
+    // exit is NOT an RDTSC/RDTSCP, the attack pattern was broken (e.g. an
+    // external interrupt fired between CPUID and RDTSC). Disarm and disable
+    // RDTSC exiting to avoid trapping unrelated RDTSCs.
+    //
+#if STEALTH_COMPENSATE_TIMING
+    if (vcpu->tsc_rdtsc_armed &&
+        exit_reason != VMX_EXIT_REASON_EXECUTE_RDTSC &&
+        exit_reason != VMX_EXIT_REASON_EXECUTE_RDTSCP)
+    {
+        vcpu->tsc_rdtsc_armed = FALSE;
+
+        if (!g_stealth_cpuid_cache.rdtsc_exiting_forced)
+        {
+            size_t proc_ctrl = 0;
+            __vmx_vmread(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, &proc_ctrl);
+            proc_ctrl &= ~(size_t)CPU_BASED_VM_EXEC_CTRL_RDTSC_EXITING;
+            __vmx_vmwrite(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, proc_ctrl);
+        }
+    }
+#endif
+
+    __vmx_vmread(VMCS_GUEST_RIP, &vcpu->vmexit_rip);
+    __vmx_vmread(VMCS_GUEST_RSP, &vcpu->regs->rsp);
+    __vmx_vmread(VMCS_EXIT_QUALIFICATION, &vcpu->exit_qual);
+
+    switch (exit_reason)
+    {
+    case VMX_EXIT_REASON_TRIPLE_FAULT:
+        vmexit_handle_triple_fault(vcpu);
+        break;
+
+    //
+    // VMX instructions in guest — inject #UD (bare metal behavior)
+    //
+    case VMX_EXIT_REASON_EXECUTE_VMCLEAR:
+    case VMX_EXIT_REASON_EXECUTE_VMPTRLD:
+    case VMX_EXIT_REASON_EXECUTE_VMPTRST:
+    case VMX_EXIT_REASON_EXECUTE_VMREAD:
+    case VMX_EXIT_REASON_EXECUTE_VMRESUME:
+    case VMX_EXIT_REASON_EXECUTE_VMWRITE:
+    case VMX_EXIT_REASON_EXECUTE_VMXOFF:
+    case VMX_EXIT_REASON_EXECUTE_VMXON:
+    case VMX_EXIT_REASON_EXECUTE_VMLAUNCH:
+    case VMX_EXIT_REASON_EXECUTE_INVEPT:
+    case VMX_EXIT_REASON_EXECUTE_INVVPID:
+    case VMX_EXIT_REASON_EXECUTE_GETSEC:
+        vmexit_inject_ud();
+        vcpu->advance_rip = FALSE;
+        break;
+
+    case VMX_EXIT_REASON_EXECUTE_INVD:
+        // INVD would discard dirty cache lines — use WBINVD instead
+        __wbinvd();
+        break;
+
+    case VMX_EXIT_REASON_EXECUTE_INVLPG:
+    {
+        // flush combined (EPT+guest) TLB mapping for this linear address
+        INVVPID_DESCRIPTOR desc = {0};
+        desc.Vpid          = VPID_TAG;
+        desc.LinearAddress = vcpu->exit_qual;
+
+        if (g_ept->invvpid_individual_addr)
+        {
+            UINT8 ret = asm_invvpid(InvvpidIndividualAddress, &desc);
+            if (ret != 0)
+                asm_invvpid(InvvpidAllContexts, &desc);
+        }
+        else
+        {
+            asm_invvpid(InvvpidAllContexts, &desc);
+        }
+        break;
+    }
+
+    case VMX_EXIT_REASON_EXECUTE_RDPMC:
+    {
+        UINT32 counter = (UINT32)(vcpu->regs->rcx & 0xFFFFFFFF);
+        if (counter < 8 || (counter >= 0x40000000 && counter < 0x40000010))
+        {
+            UINT64 val = __readpmc(counter);
+            vcpu->regs->rax = val & 0xFFFFFFFF;
+            vcpu->regs->rdx = val >> 32;
+        }
+        else
+        {
+            vmexit_inject_gp();
+            vcpu->advance_rip = FALSE;
+        }
+        break;
+    }
+
+    case VMX_EXIT_REASON_EXECUTE_RDTSC:
+    {
+        UINT64 tsc = __rdtsc();
+        size_t offset_raw = 0;
+        __vmx_vmread(VMCS_CTRL_TSC_OFFSET, &offset_raw);
+
+#if STEALTH_COMPENSATE_TIMING
+        if (vcpu->tsc_rdtsc_armed)
+        {
+            //
+            // compensated path: return a value as if CPUID took bare-metal time.
+            // compensated = cpuid_entry_tsc + bare_metal_cost + tsc_offset
+            //
+            //   t1 (guest's previous RDTSC) < cpuid_entry_tsc (exit happened after t1)
+            //   so compensated > t1 + offset
+            //   cpuid_entry_tsc + bare_metal_cost < tsc (real time is always ahead)
+            //   so compensated < real TSC  (future native RDTSCs are safe)
+            //
+            tsc = vcpu->tsc_cpuid_entry
+                + g_stealth_cpuid_cache.bare_metal_cpuid_cost
+                + (UINT64)(INT64)offset_raw;
+
+            vcpu->tsc_rdtsc_armed = FALSE;
+
+            if (!g_stealth_cpuid_cache.rdtsc_exiting_forced)
+            {
+                size_t proc_ctrl = 0;
+                __vmx_vmread(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, &proc_ctrl);
+                proc_ctrl &= ~(size_t)CPU_BASED_VM_EXEC_CTRL_RDTSC_EXITING;
+                __vmx_vmwrite(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, proc_ctrl);
+            }
+        }
+        else
+#endif
+        {
+            tsc = (UINT64)((INT64)tsc + (INT64)offset_raw);
+        }
+
+        vcpu->regs->rax = tsc & 0xFFFFFFFF;
+        vcpu->regs->rdx = tsc >> 32;
+        break;
+    }
+
+    case VMX_EXIT_REASON_EXECUTE_CPUID:
+    {
+        vmexit_handle_cpuid(vcpu);
+
+#if STEALTH_COMPENSATE_TIMING
+        //
+        // arm RDTSC exiting for the next instruction. the timing attack
+        // pattern is RDTSC -> CPUID -> RDTSC. By trapping the next RDTSC,
+        // we can return a compensated value that hides VM-exit overhead.
+        // TSC_OFFSET is never modified — zero drift.
+        //
+        if (g_stealth_enabled)
+        {
+            vcpu->tsc_cpuid_entry = exit_tsc_start;
+            vcpu->tsc_rdtsc_armed = TRUE;
+
+            if (!g_stealth_cpuid_cache.rdtsc_exiting_forced)
+            {
+                size_t proc_ctrl = 0;
+                __vmx_vmread(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, &proc_ctrl);
+                proc_ctrl |= (size_t)CPU_BASED_VM_EXEC_CTRL_RDTSC_EXITING;
+                __vmx_vmwrite(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, proc_ctrl);
+            }
+        }
+#endif
+        break;
+    }
+
+    case VMX_EXIT_REASON_EXECUTE_RDMSR:
+        vmexit_handle_msr_read(vcpu);
+        break;
+
+    case VMX_EXIT_REASON_EXECUTE_WRMSR:
+        vmexit_handle_msr_write(vcpu);
+        break;
+
+    case VMX_EXIT_REASON_MOV_CR:
+        vmexit_handle_mov_cr(vcpu);
+        break;
+
+    case VMX_EXIT_REASON_MOV_DR:
+        vmexit_handle_mov_dr(vcpu);
+        break;
+
+    case VMX_EXIT_REASON_EPT_VIOLATION:
+        vmexit_handle_ept_violation(vcpu);
+        break;
+
+    case VMX_EXIT_REASON_EPT_MISCONFIGURATION:
+    {
+        UINT64 guest_phys = 0;
+        __vmx_vmread(VMCS_GUEST_PHYSICAL_ADDRESS, &guest_phys);
+        DbgPrintEx(0, 0, "[hv] EPT Misconfiguration! GPA: 0x%llx, RIP: 0x%llx\n",
+                 guest_phys, vcpu->vmexit_rip);
+        //
+        // inject #GP to let the guest handle it. Without this, the
+        // guest replays the faulting instruction -> infinite loop
+        //
+        vmexit_inject_gp();
+        vcpu->advance_rip = FALSE;
+        break;
+    }
+
+    case VMX_EXIT_REASON_EXECUTE_VMCALL:
+        vmexit_handle_vmcall(vcpu);
+        break;
+
+    case VMX_EXIT_REASON_EXECUTE_XSETBV:
+    {
+        //
+        // XSETBV — stealth: proper validation per Intel SDM
+        //
+        // Defeats:
+        //   - XSETBV with high bits in ECX should #GP
+        //   - XSETBV with valid ECX should NOT fault
+        //   - XSETBV with invalid XCR0 value should #GP
+        //
+        UINT64 rcx_val   = vcpu->regs->rcx;
+        UINT64 value  = (vcpu->regs->rdx << 32) | (vcpu->regs->rax & 0xFFFFFFFF);
+
+        if (rcx_val & 0xFFFFFFFF00000000ULL)
+        {
+            vmexit_inject_gp();
+            vcpu->advance_rip = FALSE;
+            break;
+        }
+
+        //
+        // check 2: only XCR0 (index 0) is valid
+        //
+        if ((UINT32)rcx_val != 0)
+        {
+            vmexit_inject_gp();
+            vcpu->advance_rip = FALSE;
+            break;
+        }
+
+        if (!stealth_is_xcr0_valid(value))
+        {
+            vmexit_inject_gp();
+            vcpu->advance_rip = FALSE;
+            break;
+        }
+
+        _xsetbv(0, value);
+        break;
+    }
+
+    case VMX_EXIT_REASON_EXECUTE_HLT:
+        __vmx_vmwrite(VMCS_GUEST_ACTIVITY_STATE, GUEST_ACTIVITY_STATE_HLT);
+        break;
+
+    case VMX_EXIT_REASON_EXTERNAL_INTERRUPT:
+    {
+        //
+        // with ack-interrupt-on-exit, the CPU stores the acknowledged
+        // vector in VMCS exit info. re-inject or defer if guest can't
+        // accept it (IF=0 or STI/MOV-SS blocking).
+        //
+        size_t int_info_raw = 0;
+        __vmx_vmread(VMCS_VMEXIT_INTERRUPTION_INFORMATION, &int_info_raw);
+
+        VMENTRY_INTERRUPT_INFORMATION int_info;
+        int_info.AsUInt = (UINT32)int_info_raw;
+
+        if (int_info.Valid)
+        {
+            UINT32 vector = int_info.Vector;
+
+            size_t rflags_raw = 0;
+            size_t intr_state = 0;
+            __vmx_vmread(VMCS_GUEST_RFLAGS, &rflags_raw);
+            __vmx_vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE, &intr_state);
+
+            BOOLEAN guest_interruptible =
+                (rflags_raw & (1ULL << 9)) &&
+                !(intr_state & (GUEST_INTR_STATE_BLOCKING_BY_STI |
+                                GUEST_INTR_STATE_BLOCKING_BY_MOV_SS));
+
+            if (guest_interruptible)
+            {
+                vmexit_inject_interrupt(vector);
+            }
+            else
+            {
+                //
+                // guest can't take it now — defer and enable
+                // interrupt-window exiting to inject later
+                //
+                vcpu->pending_ext_vector = (UINT8)vector;
+                vcpu->has_pending_ext_interrupt = TRUE;
+
+                size_t proc_ctrl = 0;
+                __vmx_vmread(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, &proc_ctrl);
+                proc_ctrl |= (size_t)CPU_BASED_VM_EXEC_CTRL_INTERRUPT_WINDOW_EXITING;
+                __vmx_vmwrite(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, proc_ctrl);
+            }
+        }
+
+        vcpu->advance_rip = FALSE;
+        break;
+    }
+
+    case VMX_EXIT_REASON_EXCEPTION_OR_NMI:
+    {
+        size_t int_info_raw = 0;
+        __vmx_vmread(VMCS_VMEXIT_INTERRUPTION_INFORMATION, &int_info_raw);
+
+        VMENTRY_INTERRUPT_INFORMATION int_info;
+        int_info.AsUInt = (UINT32)int_info_raw;
+
+        if (int_info.Valid)
+        {
+            __vmx_vmwrite(VMCS_CTRL_VMENTRY_INTERRUPTION_INFORMATION_FIELD, int_info.AsUInt);
+
+            if (int_info.DeliverErrorCode)
+            {
+                size_t error_code = 0;
+                __vmx_vmread(VMCS_VMEXIT_INTERRUPTION_ERROR_CODE, &error_code);
+                __vmx_vmwrite(VMCS_CTRL_VMENTRY_EXCEPTION_ERROR_CODE, error_code);
+            }
+
+            if (int_info.InterruptionType == INTERRUPT_TYPE_SOFTWARE_EXCEPTION)
+            {
+                size_t instr_len = 0;
+                __vmx_vmread(VMCS_VMEXIT_INSTRUCTION_LENGTH, &instr_len);
+                __vmx_vmwrite(VMCS_CTRL_VMENTRY_INSTRUCTION_LENGTH, instr_len);
+            }
+        }
+
+        vcpu->advance_rip = FALSE;
+        break;
+    }
+
+    case VMX_EXIT_REASON_INTERRUPT_WINDOW:
+    {
+        size_t proc_ctrl = 0;
+        __vmx_vmread(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, &proc_ctrl);
+        proc_ctrl &= ~(size_t)CPU_BASED_VM_EXEC_CTRL_INTERRUPT_WINDOW_EXITING;
+        __vmx_vmwrite(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, proc_ctrl);
+
+        if (vcpu->has_pending_ext_interrupt)
+        {
+            vmexit_inject_interrupt(vcpu->pending_ext_vector);
+            vcpu->has_pending_ext_interrupt = FALSE;
+        }
+
+        vcpu->advance_rip = FALSE;
+        break;
+    }
+
+    case VMX_EXIT_REASON_NMI_WINDOW:
+    {
+        size_t proc_ctrl = 0;
+        __vmx_vmread(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, &proc_ctrl);
+        proc_ctrl &= ~(size_t)CPU_BASED_VM_EXEC_CTRL_NMI_WINDOW_EXITING;
+        __vmx_vmwrite(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, proc_ctrl);
+
+        if (vcpu->has_pending_nmi)
+        {
+            VMENTRY_INTERRUPT_INFORMATION nmi_info = {0};
+            nmi_info.Vector           = EXCEPTION_VECTOR_NMI;
+            nmi_info.InterruptionType = INTERRUPT_TYPE_NMI;
+            nmi_info.Valid            = 1;
+            __vmx_vmwrite(VMCS_CTRL_VMENTRY_INTERRUPTION_INFORMATION_FIELD, nmi_info.AsUInt);
+            vcpu->has_pending_nmi = FALSE;
+        }
+
+        vcpu->advance_rip = FALSE;
+        break;
+    }
+
+    case VMX_EXIT_REASON_EXECUTE_MWAIT:
+        break;
+
+    case VMX_EXIT_REASON_EXECUTE_MONITOR:
+        break;
+
+    case VMX_EXIT_REASON_EXECUTE_PAUSE:
+        _mm_pause();
+        break;
+
+    case VMX_EXIT_REASON_EXECUTE_RDTSCP:
+    {
+        unsigned int aux = 0;
+        UINT64 tsc = __rdtscp(&aux);
+        size_t offset_raw = 0;
+        __vmx_vmread(VMCS_CTRL_TSC_OFFSET, &offset_raw);
+
+#if STEALTH_COMPENSATE_TIMING
+        if (vcpu->tsc_rdtsc_armed)
+        {
+            tsc = vcpu->tsc_cpuid_entry
+                + g_stealth_cpuid_cache.bare_metal_cpuid_cost
+                + (UINT64)(INT64)offset_raw;
+
+            vcpu->tsc_rdtsc_armed = FALSE;
+
+            if (!g_stealth_cpuid_cache.rdtsc_exiting_forced)
+            {
+                size_t proc_ctrl = 0;
+                __vmx_vmread(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, &proc_ctrl);
+                proc_ctrl &= ~(size_t)CPU_BASED_VM_EXEC_CTRL_RDTSC_EXITING;
+                __vmx_vmwrite(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, proc_ctrl);
+            }
+        }
+        else
+#endif
+        {
+            tsc = (UINT64)((INT64)tsc + (INT64)offset_raw);
+        }
+
+        vcpu->regs->rax = tsc & 0xFFFFFFFF;
+        vcpu->regs->rdx = tsc >> 32;
+        vcpu->regs->rcx = (UINT64)aux;
+        break;
+    }
+
+    case VMX_EXIT_REASON_EXECUTE_WBINVD:
+        __wbinvd();
+        break;
+
+    default:
+        DbgPrintEx(0, 0, "[hv] Unhandled VM-exit reason: 0x%x, RIP: 0x%llx\n",
+                 exit_reason, vcpu->vmexit_rip);
+        break;
+    }
+
+    //
+    // re-inject IDT vectoring event if one was in progress during this VM-exit.
+    // skip when vmxoff has been executed — vmread would #UD outside VMX.
+    //
+    if (!vcpu->vmxoff.executed)
+    {
+        size_t idt_vec_raw = 0;
+        __vmx_vmread(VMCS_IDT_VECTORING_INFORMATION, &idt_vec_raw);
+
+        VMENTRY_INTERRUPT_INFORMATION idt_vec;
+        idt_vec.AsUInt = (UINT32)idt_vec_raw;
+
+        if (idt_vec.Valid)
+        {
+            // if the handler already queued an NMI injection, defer it —
+            // IDT vectoring event takes priority
+            size_t entry_info_raw = 0;
+            __vmx_vmread(VMCS_CTRL_VMENTRY_INTERRUPTION_INFORMATION_FIELD, &entry_info_raw);
+
+            VMENTRY_INTERRUPT_INFORMATION entry_info;
+            entry_info.AsUInt = (UINT32)entry_info_raw;
+
+            if (entry_info.Valid && entry_info.InterruptionType == INTERRUPT_TYPE_NMI)
+            {
+                vcpu->has_pending_nmi = TRUE;
+
+                size_t proc_ctrl = 0;
+                __vmx_vmread(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, &proc_ctrl);
+                proc_ctrl |= (size_t)CPU_BASED_VM_EXEC_CTRL_NMI_WINDOW_EXITING;
+                __vmx_vmwrite(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, proc_ctrl);
+
+                // clear NMI blocking so the window opens after the IDT event
+                size_t intr_state = 0;
+                __vmx_vmread(VMCS_GUEST_INTERRUPTIBILITY_STATE, &intr_state);
+                intr_state &= ~(size_t)GUEST_INTR_STATE_BLOCKING_BY_NMI;
+                __vmx_vmwrite(VMCS_GUEST_INTERRUPTIBILITY_STATE, intr_state);
+            }
+
+            __vmx_vmwrite(VMCS_CTRL_VMENTRY_INTERRUPTION_INFORMATION_FIELD, idt_vec.AsUInt);
+
+            if (idt_vec.DeliverErrorCode)
+            {
+                size_t idt_err = 0;
+                __vmx_vmread(VMCS_IDT_VECTORING_ERROR_CODE, &idt_err);
+                __vmx_vmwrite(VMCS_CTRL_VMENTRY_EXCEPTION_ERROR_CODE, idt_err);
+            }
+
+            if (idt_vec.InterruptionType == INTERRUPT_TYPE_SOFTWARE_EXCEPTION ||
+                idt_vec.InterruptionType == INTERRUPT_TYPE_SOFTWARE_INTERRUPT)
+            {
+                size_t instr_len = 0;
+                __vmx_vmread(VMCS_VMEXIT_INSTRUCTION_LENGTH, &instr_len);
+                __vmx_vmwrite(VMCS_CTRL_VMENTRY_INSTRUCTION_LENGTH, instr_len);
+            }
+
+            vcpu->advance_rip = FALSE;
+        }
+    }
+
+    if (!vcpu->vmxoff.executed && vcpu->advance_rip)
+    {
+        vmexit_advance_rip(vcpu);
+    }
+
+    if (!vcpu->vmxoff.executed)
+    {
+        __writedr(0, vcpu->guest_dr0);
+        __writedr(1, vcpu->guest_dr1);
+        __writedr(2, vcpu->guest_dr2);
+        __writedr(3, vcpu->guest_dr3);
+        __writedr(6, vcpu->guest_dr6);
+    }
+
+    if (vcpu->vmxoff.executed)
+    {
+        result = TRUE;
+    }
+
+    vcpu->in_root = FALSE;
+    return result;
+}
+
+```
+
+`src/vmx.c`:
+
+```c
+/*
+*   vmx.c - vmx initialization, vmcs setup, and vmx lifecycle management
+*   this is the core of the hypervisor. handles vmxon, vmcs allocation,
+*   full vmcs field programming, and vmlaunch
+*/
+#include "hv.h"
+
+/*
+*   get current processor id without windows apis
+*   ia32_tsc_aux (0xc0000103) is set by the os to the processor number
+*   safe to call in vmx-root mode. lower 12 bits = processor number
+*/
+static __forceinline UINT32
+vmx_get_cpu_id(VOID)
+{
+    return (UINT32)(__readmsr(IA32_TSC_AUX) & 0xFFF);
+}
+
+BOOLEAN
+vmx_check_support(VOID)
+{
+    CPUID                         data              = {0};
+    IA32_FEATURE_CONTROL_REGISTER feat_ctrl = {0};
+
+    //
+    // CPUID.1:ECX[5] = VMX support
+    //
+    __cpuid((int *)&data, 1);
+    if (!_bittest((const LONG *)&data.ecx, CPUID_VMX_BIT))
+    {
+        return FALSE;
+    }
+
+    feat_ctrl.AsUInt = __readmsr(IA32_FEATURE_CONTROL);
+
+    if (feat_ctrl.EnableVmxOutsideSmx == FALSE)
+    {
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+UINT32
+vmx_adjust_controls(UINT32 requested, UINT32 capability_msr)
+{
+    MSR msr_val = {0};
+    msr_val.Flags = __readmsr(capability_msr);
+
+    //
+    // bit == 0 in high word -> must be zero
+    // bit == 1 in low word  -> must be one
+    //
+    requested &= msr_val.Fields.High;
+    requested |= msr_val.Fields.Low;
+    return requested;
+}
+
+VOID
+vmx_set_fixed_bits(VOID)
+{
+    CR_FIXED fixed = {0};
+    CR4      cr4   = {0};
+    CR0      cr0   = {0};
+
+    fixed.Flags = __readmsr(IA32_VMX_CR0_FIXED0);
+    cr0.AsUInt  = __readcr0();
+    cr0.AsUInt |= fixed.Fields.Low;
+    fixed.Flags = __readmsr(IA32_VMX_CR0_FIXED1);
+    cr0.AsUInt &= fixed.Fields.Low;
+    __writecr0(cr0.AsUInt);
+
+    fixed.Flags = __readmsr(IA32_VMX_CR4_FIXED0);
+    cr4.AsUInt  = __readcr4();
+    cr4.AsUInt |= fixed.Fields.Low;
+    fixed.Flags = __readmsr(IA32_VMX_CR4_FIXED1);
+    cr4.AsUInt &= fixed.Fields.Low;
+    __writecr4(cr4.AsUInt);
+}
+
+/*
+*   allocate vmxon region (memory only — vmxon runs per-core later)
+*/
+BOOLEAN
+vmx_alloc_vmxon(VIRTUAL_MACHINE_STATE * vcpu)
+{
+    IA32_VMX_BASIC_REGISTER vmx_basic = {0};
+    PHYSICAL_ADDRESS        max_phys;
+    UINT8 *                 vmxon_region;
+    UINT64                  phys_addr;
+    UINT64                  aligned_va;
+    UINT64                  aligned_pa;
+
+    max_phys.QuadPart = MAXULONG64;
+
+    vmxon_region = (UINT8 *)MmAllocateContiguousMemory(2 * VMXON_SIZE + ALIGNMENT_PAGE_SIZE, max_phys);
+    if (!vmxon_region)
+        return FALSE;
+
+    RtlZeroMemory(vmxon_region, 2 * VMXON_SIZE + ALIGNMENT_PAGE_SIZE);
+
+    phys_addr  = va_to_pa(vmxon_region);
+    aligned_va = (UINT64)((ULONG_PTR)(vmxon_region + ALIGNMENT_PAGE_SIZE - 1) & ~(ALIGNMENT_PAGE_SIZE - 1));
+    aligned_pa = (UINT64)((ULONG_PTR)(phys_addr + ALIGNMENT_PAGE_SIZE - 1) & ~(ALIGNMENT_PAGE_SIZE - 1));
+
+    vmx_basic.AsUInt          = __readmsr(IA32_VMX_BASIC);
+    *(UINT64 *)aligned_va        = vmx_basic.VmcsRevisionId;
+
+    vcpu->vmxon_pa = aligned_pa;
+    vcpu->vmxon_va  = (UINT64)vmxon_region;
+    return TRUE;
+}
+
+BOOLEAN
+vmx_alloc_vmcs(VIRTUAL_MACHINE_STATE * vcpu)
+{
+    IA32_VMX_BASIC_REGISTER vmx_basic = {0};
+    PHYSICAL_ADDRESS        max_phys;
+    UINT8 *                 vmcs_region;
+    UINT64                  phys_addr;
+    UINT64                  aligned_va;
+    UINT64                  aligned_pa;
+
+    max_phys.QuadPart = MAXULONG64;
+
+    vmcs_region = (UINT8 *)MmAllocateContiguousMemory(2 * VMCS_SIZE + ALIGNMENT_PAGE_SIZE, max_phys);
+    if (!vmcs_region)
+        return FALSE;
+
+    RtlZeroMemory(vmcs_region, 2 * VMCS_SIZE + ALIGNMENT_PAGE_SIZE);
+
+    phys_addr  = va_to_pa(vmcs_region);
+    aligned_va = (UINT64)((ULONG_PTR)(vmcs_region + ALIGNMENT_PAGE_SIZE - 1) & ~(ALIGNMENT_PAGE_SIZE - 1));
+    aligned_pa = (UINT64)((ULONG_PTR)(phys_addr + ALIGNMENT_PAGE_SIZE - 1) & ~(ALIGNMENT_PAGE_SIZE - 1));
+
+    vmx_basic.AsUInt          = __readmsr(IA32_VMX_BASIC);
+    *(UINT64 *)aligned_va        = vmx_basic.VmcsRevisionId;
+
+    vcpu->vmcs_pa = aligned_pa;
+    vcpu->vmcs_va  = (UINT64)vmcs_region;
+    return TRUE;
+}
+
+BOOLEAN
+vmx_clear_vmcs(VIRTUAL_MACHINE_STATE * vcpu)
+{
+    if (__vmx_vmclear(&vcpu->vmcs_pa))
+    {
+        __vmx_off();
+        return FALSE;
+    }
+    return TRUE;
+}
+
+BOOLEAN
+vmx_load_vmcs(VIRTUAL_MACHINE_STATE * vcpu)
+{
+    if (__vmx_vmptrld(&vcpu->vmcs_pa))
+        return FALSE;
+    return TRUE;
+}
+
+BOOLEAN
+vmx_setup_vmcs(VIRTUAL_MACHINE_STATE * vcpu, PVOID guest_stack)
+{
+    UINT32                  pri_proc;
+    UINT32                  sec_proc;
+    UINT64                  gdt_base;
+    IA32_VMX_BASIC_REGISTER vmx_basic     = {0};
+    VMX_SEGMENT_SELECTOR    seg_sel = {0};
+
+    vmx_basic.AsUInt = __readmsr(IA32_VMX_BASIC);
+
+    //
+    // mask RPL and TI bits (bits 0-2) per Intel SDM
+    //
+    __vmx_vmwrite(VMCS_HOST_ES_SELECTOR, asm_get_es() & 0xF8);
+    __vmx_vmwrite(VMCS_HOST_CS_SELECTOR, asm_get_cs() & 0xF8);
+    __vmx_vmwrite(VMCS_HOST_SS_SELECTOR, asm_get_ss() & 0xF8);
+    __vmx_vmwrite(VMCS_HOST_DS_SELECTOR, asm_get_ds() & 0xF8);
+    __vmx_vmwrite(VMCS_HOST_FS_SELECTOR, asm_get_fs() & 0xF8);
+    __vmx_vmwrite(VMCS_HOST_GS_SELECTOR, asm_get_gs() & 0xF8);
+    __vmx_vmwrite(VMCS_HOST_TR_SELECTOR, asm_get_tr() & 0xF8);
+
+    __vmx_vmwrite(VMCS_GUEST_VMCS_LINK_POINTER, ~0ULL);
+
+    __vmx_vmwrite(VMCS_GUEST_DEBUGCTL, __readmsr(IA32_DEBUGCTL));
+
+    __vmx_vmwrite(VMCS_CTRL_TSC_OFFSET, 0);
+    __vmx_vmwrite(VMCS_CTRL_PAGEFAULT_ERROR_CODE_MASK, 0);
+    __vmx_vmwrite(VMCS_CTRL_PAGEFAULT_ERROR_CODE_MATCH, 0);
+    __vmx_vmwrite(VMCS_CTRL_VMEXIT_MSR_STORE_COUNT, 0);
+    __vmx_vmwrite(VMCS_CTRL_VMEXIT_MSR_LOAD_COUNT, 0);
+    __vmx_vmwrite(VMCS_CTRL_VMENTRY_MSR_LOAD_COUNT, 0);
+    __vmx_vmwrite(VMCS_CTRL_VMENTRY_INTERRUPTION_INFORMATION_FIELD, 0);
+
+    gdt_base = asm_get_gdt_base();
+
+    segment_fill_vmcs((PVOID)gdt_base, ES,   asm_get_es());
+    segment_fill_vmcs((PVOID)gdt_base, CS,   asm_get_cs());
+    segment_fill_vmcs((PVOID)gdt_base, SS,   asm_get_ss());
+    segment_fill_vmcs((PVOID)gdt_base, DS,   asm_get_ds());
+    segment_fill_vmcs((PVOID)gdt_base, FS,   asm_get_fs());
+    segment_fill_vmcs((PVOID)gdt_base, GS,   asm_get_gs());
+    segment_fill_vmcs((PVOID)gdt_base, LDTR, asm_get_ldtr());
+    segment_fill_vmcs((PVOID)gdt_base, TR,   asm_get_tr());
+
+    __vmx_vmwrite(VMCS_GUEST_FS_BASE, __readmsr(IA32_FS_BASE));
+    __vmx_vmwrite(VMCS_GUEST_GS_BASE, __readmsr(IA32_GS_BASE));
+
+    pri_proc = vmx_adjust_controls(
+        CPU_BASED_VM_EXEC_CTRL_USE_TSC_OFFSETTING |
+        CPU_BASED_VM_EXEC_CTRL_USE_MSR_BITMAPS |
+        CPU_BASED_VM_EXEC_CTRL_USE_IO_BITMAPS |
+        CPU_BASED_VM_EXEC_CTRL_ACTIVATE_SECONDARY_CONTROLS,
+        vmx_basic.VmxControls ? IA32_VMX_TRUE_PROCBASED_CTLS : IA32_VMX_PROCBASED_CTLS);
+
+    __vmx_vmwrite(VMCS_CTRL_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, pri_proc);
+
+    vcpu->mov_dr_exiting = !!(pri_proc & CPU_BASED_VM_EXEC_CTRL_MOV_DR_EXITING);
+
+    DbgPrintEx(0, 0, "[hv] Primary proc controls: 0x%08X (CR3load=%d CR3store=%d INVLPG=%d HLT=%d RDTSC=%d MOVDR=%d TSCoff=%d)\n",
+             pri_proc,
+             !!(pri_proc & CPU_BASED_VM_EXEC_CTRL_CR3_LOAD_EXITING),
+             !!(pri_proc & CPU_BASED_VM_EXEC_CTRL_CR3_STORE_EXITING),
+             !!(pri_proc & CPU_BASED_VM_EXEC_CTRL_INVLPG_EXITING),
+             !!(pri_proc & CPU_BASED_VM_EXEC_CTRL_HLT_EXITING),
+             !!(pri_proc & CPU_BASED_VM_EXEC_CTRL_RDTSC_EXITING),
+             !!(pri_proc & CPU_BASED_VM_EXEC_CTRL_MOV_DR_EXITING),
+             !!(pri_proc & CPU_BASED_VM_EXEC_CTRL_USE_TSC_OFFSETTING));
+
+    sec_proc = vmx_adjust_controls(
+        CPU_BASED_VM_EXEC_CTRL2_ENABLE_EPT |
+        CPU_BASED_VM_EXEC_CTRL2_ENABLE_VPID |
+        CPU_BASED_VM_EXEC_CTRL2_RDTSCP |
+        CPU_BASED_VM_EXEC_CTRL2_ENABLE_INVPCID |
+        CPU_BASED_VM_EXEC_CTRL2_ENABLE_XSAVES,
+        IA32_VMX_PROCBASED_CTLS2);
+
+    __vmx_vmwrite(VMCS_CTRL_SECONDARY_PROCESSOR_BASED_VM_EXECUTION_CONTROLS, sec_proc);
+
+    UINT32 pin_ctrl = vmx_adjust_controls(0,
+        vmx_basic.VmxControls ? IA32_VMX_TRUE_PINBASED_CTLS : IA32_VMX_PINBASED_CTLS);
+    __vmx_vmwrite(VMCS_CTRL_PIN_BASED_VM_EXECUTION_CONTROLS, pin_ctrl);
+
+    DbgPrintEx(0, 0, "[hv] Pin controls: 0x%08X (ExtInt=%d NMI=%d VirtNMI=%d Preempt=%d)\n",
+             pin_ctrl,
+             !!(pin_ctrl & PIN_BASED_VM_EXEC_CTRL_EXTERNAL_INTERRUPT_EXITING),
+             !!(pin_ctrl & PIN_BASED_VM_EXEC_CTRL_NMI_EXITING),
+             !!(pin_ctrl & PIN_BASED_VM_EXEC_CTRL_VIRTUAL_NMI),
+             !!(pin_ctrl & PIN_BASED_VM_EXEC_CTRL_VMX_PREEMPTION_TIMER));
+
+    //
+    // 64-bit host, save/load debug controls
+    // SAVE_DEBUG_CONTROLS: saves DR7 + IA32_DEBUGCTL on VM-exit
+    // Required for correct guest debug register state (DR7, pending #DB)
+    //
+    //
+    // ack interrupt on exit: on vm-exit due to external interrupt, the cpu
+    // acknowledges the interrupt at the lapic and stores the vector in
+    // VMCS_VMEXIT_INTERRUPTION_INFORMATION. without this, pending interrupts
+    // cause an infinite vm-exit loop -> TDR -> black blink
+    //
+    UINT32 exit_ctrl = vmx_adjust_controls(
+        VM_EXIT_CTRL_HOST_ADDRESS_SPACE_SIZE |
+        VM_EXIT_CTRL_SAVE_DEBUG_CONTROLS |
+        VM_EXIT_CTRL_ACK_INTERRUPT_ON_EXIT,
+        vmx_basic.VmxControls ? IA32_VMX_TRUE_EXIT_CTLS : IA32_VMX_EXIT_CTLS);
+
+    __vmx_vmwrite(VMCS_CTRL_PRIMARY_VMEXIT_CONTROLS, exit_ctrl);
+
+    DbgPrintEx(0, 0, "[hv] Exit controls: 0x%08X (AckInt=%d)\n",
+             exit_ctrl, !!(exit_ctrl & VM_EXIT_CTRL_ACK_INTERRUPT_ON_EXIT));
+
+    //
+    // IA-32e mode guest, load debug controls
+    // required so guest sees its own DR7 after VM-exit/entry cycle
+    //
+    __vmx_vmwrite(VMCS_CTRL_VMENTRY_CONTROLS,
+                  vmx_adjust_controls(
+                      VM_ENTRY_CTRL_IA32E_MODE_GUEST |
+                      VM_ENTRY_CTRL_LOAD_DEBUG_CONTROLS,
+                      vmx_basic.VmxControls ? IA32_VMX_TRUE_ENTRY_CTLS : IA32_VMX_ENTRY_CTLS));
+
+    //
+    // CR0: 0 = don't cause VM-exit on CR0 modifications (pass-through)
+    //
+    __vmx_vmwrite(VMCS_CTRL_CR0_GUEST_HOST_MASK, 0);
+    __vmx_vmwrite(VMCS_CTRL_CR0_READ_SHADOW, 0);
+
+    //
+    // CR4: stealth mode masks bit 13 (VMXE) so guest reads see VMXE=0
+    //
+    // when bit 13 in the mask is set:
+    //   - guest reads CR4: bit 13 comes from shadow (=0) -> VMXE hidden
+    //   - guest writes CR4 with bit 13 matching shadow: no VM-exit, host bits preserved
+    //   - guest writes CR4 with bit 13 != shadow: VM-exit, we handle it
+    //
+    // defeats: hvdetecc vm.vmxe
+    //
+#if STEALTH_HIDE_CR4_VMXE
+    if (g_stealth_enabled)
+    {
+        __vmx_vmwrite(VMCS_CTRL_CR4_GUEST_HOST_MASK, CR4_VMX_ENABLE_FLAG);
+        __vmx_vmwrite(VMCS_CTRL_CR4_READ_SHADOW, __readcr4() & ~CR4_VMX_ENABLE_FLAG);
+    }
+    else
+#endif
+    {
+        __vmx_vmwrite(VMCS_CTRL_CR4_GUEST_HOST_MASK, 0);
+        __vmx_vmwrite(VMCS_CTRL_CR4_READ_SHADOW, 0);
+    }
+
+    __vmx_vmwrite(VMCS_GUEST_CR0, __readcr0());
+    __vmx_vmwrite(VMCS_GUEST_CR3, __readcr3());
+    __vmx_vmwrite(VMCS_GUEST_CR4, __readcr4());
+    __vmx_vmwrite(VMCS_GUEST_DR7, 0x400);
+
+    //
+    // must be programmed or VMLAUNCH will fail VM-entry checks.
+    //
+    __vmx_vmwrite(VMCS_GUEST_ACTIVITY_STATE, 0);          // Active
+    __vmx_vmwrite(VMCS_GUEST_INTERRUPTIBILITY_STATE, 0);  // No blocking
+    __vmx_vmwrite(VMCS_GUEST_PENDING_DEBUG_EXCEPTIONS, 0);
+
+    __vmx_vmwrite(VMCS_HOST_CR0, __readcr0());
+    __vmx_vmwrite(VMCS_HOST_CR4, __readcr4());
+
+    //
+    // HOST_CR3 = private host page tables (immune to guest pt trashing)
+    //
+#if USE_PRIVATE_HOST_CR3
+    __vmx_vmwrite(VMCS_HOST_CR3, hostcr3_get());
+#else
+    __vmx_vmwrite(VMCS_HOST_CR3, get_system_cr3());
+#endif
+
+    __vmx_vmwrite(VMCS_GUEST_GDTR_BASE,  asm_get_gdt_base());
+    __vmx_vmwrite(VMCS_GUEST_GDTR_LIMIT, asm_get_gdt_limit());
+    __vmx_vmwrite(VMCS_GUEST_IDTR_BASE,  asm_get_idt_base());
+    __vmx_vmwrite(VMCS_GUEST_IDTR_LIMIT, asm_get_idt_limit());
+    __vmx_vmwrite(VMCS_GUEST_RFLAGS,     asm_get_rflags());
+
+    __vmx_vmwrite(VMCS_GUEST_SYSENTER_CS,  __readmsr(IA32_SYSENTER_CS));
+    __vmx_vmwrite(VMCS_GUEST_SYSENTER_EIP, __readmsr(IA32_SYSENTER_EIP));
+    __vmx_vmwrite(VMCS_GUEST_SYSENTER_ESP, __readmsr(IA32_SYSENTER_ESP));
+
+    //
+    // host GDT and IDT — use current OS ones (simplest approach)
+    //
+    segment_get_descriptor((PUCHAR)asm_get_gdt_base(), asm_get_tr(), &seg_sel);
+    __vmx_vmwrite(VMCS_HOST_TR_BASE,    seg_sel.Base);
+    __vmx_vmwrite(VMCS_HOST_GDTR_BASE,  asm_get_gdt_base());
+    __vmx_vmwrite(VMCS_HOST_IDTR_BASE,  asm_get_idt_base());
+
+    __vmx_vmwrite(VMCS_HOST_FS_BASE, __readmsr(IA32_FS_BASE));
+    __vmx_vmwrite(VMCS_HOST_GS_BASE, __readmsr(IA32_GS_BASE));
+
+    __vmx_vmwrite(VMCS_HOST_SYSENTER_CS,  __readmsr(IA32_SYSENTER_CS));
+    __vmx_vmwrite(VMCS_HOST_SYSENTER_EIP, __readmsr(IA32_SYSENTER_EIP));
+    __vmx_vmwrite(VMCS_HOST_SYSENTER_ESP, __readmsr(IA32_SYSENTER_ESP));
+
+    __vmx_vmwrite(VMCS_CTRL_MSR_BITMAP_ADDRESS, vcpu->msr_bitmap_pa);
+
+    __vmx_vmwrite(VMCS_CTRL_IO_BITMAP_A_ADDRESS, vcpu->io_bitmap_pa_a);
+    __vmx_vmwrite(VMCS_CTRL_IO_BITMAP_B_ADDRESS, vcpu->io_bitmap_pa_b);
+
+    __vmx_vmwrite(VMCS_CTRL_EPT_POINTER, vcpu->ept_pointer.AsUInt);
+
+    __vmx_vmwrite(VIRTUAL_PROCESSOR_ID, VPID_TAG);
+
+    //
+    // RSP = current stack (saved by asm_vmx_save_state)
+    // RIP = asm_vmx_restore_state (returns to caller after VMLAUNCH succeeds)
+    //
+    __vmx_vmwrite(VMCS_GUEST_RSP, (UINT64)guest_stack);
+    __vmx_vmwrite(VMCS_GUEST_RIP, (UINT64)asm_vmx_restore_state);
+
+    //
+    // store vcpu pointer at top of VMM stack so assembly can retrieve it
+    // without calling any Windows API in VMX-root mode.
+    //
+    // stack layout:
+    //   [vmm_stack + VMM_STACK_SIZE - 8]  = vcpu pointer
+    //   [vmm_stack + VMM_STACK_SIZE - 16] = HOST_RSP (16-byte aligned)
+    //
+    *(PVIRTUAL_MACHINE_STATE *)((UINT64)vcpu->vmm_stack + VMM_STACK_SIZE - VMM_STACK_VCPU_OFFSET) = vcpu;
+
+    __vmx_vmwrite(VMCS_HOST_RSP, (UINT64)vcpu->vmm_stack + VMM_STACK_SIZE - 16);
+    __vmx_vmwrite(VMCS_HOST_RIP, (UINT64)asm_vmexit_handler);
+
+    return TRUE;
+}
+
+/*
+*   called per-core via dpc — sets up vmx, enters vmx operation, launches
+*   memory for vmxon/vmcs regions is pre-allocated in vmx_init
+*   this function runs at dispatch_level and performs the vmx instructions
+*/
+BOOLEAN
+vmx_virtualize_cpu(PVOID guest_stack)
+{
+    ULONG                   core = KeGetCurrentProcessorNumberEx(NULL);
+    VIRTUAL_MACHINE_STATE * vcpu        = &g_vcpu[core];
+    UINT64                  error_code   = 0;
+
+    vcpu->core_id = core;
+
+    asm_enable_vmx();
+    vmx_set_fixed_bits();
+
+    if (__vmx_on(&vcpu->vmxon_pa))
+    {
+        DbgPrintEx(0, 0, "[hv] VMXON failed on core %u\n", core);
+        return FALSE;
+    }
+
+    if (!vmx_clear_vmcs(vcpu))
+        return FALSE;
+
+    if (!vmx_load_vmcs(vcpu))
+        return FALSE;
+
+    vmx_setup_vmcs(vcpu, guest_stack);
+
+    vcpu->launched = TRUE;
+
+    __vmx_vmlaunch();
+
+    //
+    // if we reach here, VMLAUNCH failed
+    //
+    vcpu->launched = FALSE;
+    __vmx_vmread(VMCS_VM_INSTRUCTION_ERROR, &error_code);
+    __vmx_off();
+
+    DbgPrintEx(0, 0, "[hv] VMLAUNCH failed on core %u, error: 0x%llx\n", core, error_code);
+    return FALSE;
+}
+
+VOID
+vmx_vmresume(VOID)
+{
+    __vmx_vmresume();
+
+    //
+    // should never reach here
+    //
+    UINT64 error_code = 0;
+    __vmx_vmread(VMCS_VM_INSTRUCTION_ERROR, &error_code);
+    __vmx_off();
+
+    DbgPrintEx(0, 0, "[hv] VMRESUME failed! Error: 0x%llx\n", error_code);
+}
+
+BOOLEAN
+vmx_init(VOID)
+{
+    g_cpu_count = KeQueryActiveProcessorCount(0);
+
+    g_vcpu = (VIRTUAL_MACHINE_STATE *)ExAllocatePool2(
+        POOL_FLAG_NON_PAGED, sizeof(VIRTUAL_MACHINE_STATE) * g_cpu_count, HV_POOL_TAG);
+
+    if (!g_vcpu)
+        return FALSE;
+
+    RtlZeroMemory(g_vcpu, sizeof(VIRTUAL_MACHINE_STATE) * g_cpu_count);
+
+    if (!vmx_check_support())
+    {
+        DbgPrintEx(0, 0, "[hv] VMX not supported!\n");
+        return FALSE;
+    }
+
+    //
+    // initialize stealth CPUID cache — MUST be before VMXON
+    // this captures bare-metal CPUID responses for invalid leaves
+    // so we can return consistent values when virtualizing.
+    //
+#if STEALTH_CPUID_CACHING
+    stealth_init_cpuid_cache();
+#endif
+
+    if (!ept_init())
+    {
+        DbgPrintEx(0, 0, "[hv] EPT initialization failed!\n");
+        return FALSE;
+    }
+
+    for (UINT32 i = 0; i < g_cpu_count; i++)
+    {
+        VIRTUAL_MACHINE_STATE * vcpu = &g_vcpu[i];
+
+        vcpu->vmm_stack = (UINT64)ExAllocatePool2(
+            POOL_FLAG_NON_PAGED, VMM_STACK_SIZE, HV_POOL_TAG);
+        if (!vcpu->vmm_stack)
+            return FALSE;
+        RtlZeroMemory((PVOID)vcpu->vmm_stack, VMM_STACK_SIZE);
+
+        //
+        // MSR Bitmap (1 page, all zeros = no MSR VM-exits)
+        //
+        vcpu->msr_bitmap_va = (UINT64)ExAllocatePool2(
+            POOL_FLAG_NON_PAGED, PAGE_SIZE, HV_POOL_TAG);
+        if (!vcpu->msr_bitmap_va)
+            return FALSE;
+        RtlZeroMemory((PVOID)vcpu->msr_bitmap_va, PAGE_SIZE);
+
+        //
+        // intercept RDMSR(0x10) — IA32_TIME_STAMP_COUNTER
+        // stealth: RDMSR(0x10) must return TSC + offset (same as RDTSC)
+        // without interception, the guest reads raw hardware TSC which
+        // differs from RDTSC (which includes TSC offset) — detected by
+        // vm.tscMsrEmulFail
+        //
+        ((PUCHAR)vcpu->msr_bitmap_va)[0x10 / 8] |= (UCHAR)(1 << (0x10 % 8));
+
+        // IA32_FEATURE_CONTROL read+write
+        ((PUCHAR)vcpu->msr_bitmap_va)[0x3A / 8] |= (UCHAR)(1 << (0x3A % 8));
+        ((PUCHAR)vcpu->msr_bitmap_va)[0x800 + 0x3A / 8] |= (UCHAR)(1 << (0x3A % 8));
+
+        // VMX capability MSRs (0x480-0x493) read+write
+        for (UINT32 msr_idx = 0x480; msr_idx <= 0x493; msr_idx++)
+        {
+            ((PUCHAR)vcpu->msr_bitmap_va)[msr_idx / 8] |= (UCHAR)(1 << (msr_idx % 8));
+            ((PUCHAR)vcpu->msr_bitmap_va)[0x800 + msr_idx / 8] |= (UCHAR)(1 << (msr_idx % 8));
+        }
+
+        vcpu->msr_bitmap_pa = va_to_pa(
+            (PVOID)vcpu->msr_bitmap_va);
+
+        //
+        // I/O Bitmap A (ports 0x0000 - 0x7FFF)
+        //
+        vcpu->io_bitmap_va_a = (UINT64)ExAllocatePool2(
+            POOL_FLAG_NON_PAGED, PAGE_SIZE, HV_POOL_TAG);
+        if (!vcpu->io_bitmap_va_a)
+            return FALSE;
+        RtlZeroMemory((PVOID)vcpu->io_bitmap_va_a, PAGE_SIZE);
+        vcpu->io_bitmap_pa_a = va_to_pa(
+            (PVOID)vcpu->io_bitmap_va_a);
+
+        //
+        // I/O Bitmap B (ports 0x8000 - 0xFFFF)
+        //
+        vcpu->io_bitmap_va_b = (UINT64)ExAllocatePool2(
+            POOL_FLAG_NON_PAGED, PAGE_SIZE, HV_POOL_TAG);
+        if (!vcpu->io_bitmap_va_b)
+            return FALSE;
+        RtlZeroMemory((PVOID)vcpu->io_bitmap_va_b, PAGE_SIZE);
+        vcpu->io_bitmap_pa_b = va_to_pa(
+            (PVOID)vcpu->io_bitmap_va_b);
+
+        //
+        // VMXON Region (pre-allocate at PASSIVE_LEVEL; VMXON runs per-core in DPC)
+        //
+        if (!vmx_alloc_vmxon(vcpu))
+            return FALSE;
+
+        //
+        // VMCS Region (pre-allocate at PASSIVE_LEVEL; VMCLEAR/VMPTRLD in DPC)
+        //
+        if (!vmx_alloc_vmcs(vcpu))
+            return FALSE;
+    }
+
+    //
+    // build private host page tables AFTER all allocations are done.
+    // The snapshot must include PTEs for VMM stacks, bitmaps, and all
+    // other structures accessed in host mode. Building before allocations
+    // would leave those VAs unmapped in host CR3 -> #PF -> double fault.
+    //
+#if USE_PRIVATE_HOST_CR3
+    if (!hostcr3_build())
+    {
+        DbgPrintEx(0, 0, "[hv] Host CR3 build failed!\n");
+        return FALSE;
+    }
+#endif
+
+    broadcast_virtualize_all();
+
+    for (UINT32 i = 0; i < g_cpu_count; i++)
+    {
+        if (!g_vcpu[i].launched)
+        {
+            DbgPrintEx(0, 0, "[hv] Core %u failed to launch!\n", i);
+            return FALSE;
+        }
+    }
+
+    DbgPrintEx(0, 0, "[hv] All %u cores virtualized successfully!\n", g_cpu_count);
+    return TRUE;
+}
+
+VOID
+vmx_terminate(VOID)
+{
+    if (!g_vcpu)
+        return;
+
+    for (UINT32 i = 0; i < g_cpu_count; i++)
+    {
+        VIRTUAL_MACHINE_STATE * vcpu = &g_vcpu[i];
+
+        //
+        // free per-VCPU resources.
+        // note: broadcast_terminate_all() must be called before this
+        // to VMCALL(VMXOFF) on each core and exit VMX operation.
+        //
+
+        if (vcpu->vmxon_va)
+            MmFreeContiguousMemory((PVOID)vcpu->vmxon_va);
+        if (vcpu->vmcs_va)
+            MmFreeContiguousMemory((PVOID)vcpu->vmcs_va);
+        if (vcpu->vmm_stack)
+            ExFreePoolWithTag((PVOID)vcpu->vmm_stack, HV_POOL_TAG);
+        if (vcpu->msr_bitmap_va)
+            ExFreePoolWithTag((PVOID)vcpu->msr_bitmap_va, HV_POOL_TAG);
+        if (vcpu->io_bitmap_va_a)
+            ExFreePoolWithTag((PVOID)vcpu->io_bitmap_va_a, HV_POOL_TAG);
+        if (vcpu->io_bitmap_va_b)
+            ExFreePoolWithTag((PVOID)vcpu->io_bitmap_va_b, HV_POOL_TAG);
+    }
+
+    if (g_ept)
+    {
+        for (UINT32 i = 0; i < g_cpu_count; i++)
+        {
+            if (g_vcpu[i].ept_page_table)
+                MmFreeContiguousMemory(g_vcpu[i].ept_page_table);
+        }
+        ExFreePoolWithTag(g_ept, HV_POOL_TAG);
+        g_ept = NULL;
+    }
+
+#if USE_PRIVATE_HOST_CR3
+    hostcr3_destroy();
+#endif
+
+    ExFreePoolWithTag(g_vcpu, HV_POOL_TAG);
+    g_vcpu = NULL;
+
+    DbgPrintEx(0, 0, "[hv] VMX terminated on all cores.\n");
+}
+
+```
