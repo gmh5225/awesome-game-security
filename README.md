@@ -3453,6 +3453,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/zxd1994/vt-debuuger [Hacked Hypervisor Testing]
 - https://github.com/gmh5225/vt-debuger [Hacked Hypervisor Testing]
 - https://github.com/zer0condition/hv [Hacked Hypervisor Testing]
+- https://github.com/zer0condition/Ophion [Stealth Intel VT-x Type-2 hypervisor: passes common HV detection, works with EAC/BE/AVs; CPUID cache, CR4.VMXE hide, TSC compensation, private host CR3]
 - https://github.com/gmh5225/AetherVisor [Hacked Hypervisor Testing AMD]
 - https://github.com/valium007/BareSVM [Hacked Hypervisor Testing AMD]
 - https://github.com/noahware/hyper-reV [memory introspection and reverse engineering hypervisor powered by leveraging Hyper-V]
