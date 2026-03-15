@@ -9,6 +9,14 @@ description: Guide for understanding and contributing to the awesome-game-securi
 
 This is a curated collection of resources related to game security, covering both offensive (game hacking, cheating) and defensive (anti-cheat) aspects. The project serves as a comprehensive reference for security researchers, game developers, and enthusiasts, especially where Windows internals, driver trust, reverse engineering, DMA, and modern anti-cheat defenses intersect.
 
+## README Coverage
+
+- Top-level engines and rendering: `Game Engine`, `Renderer`, `DirectX`, `OpenGL`, `Vulkan`
+- Offensive research: `Cheat`
+- Defensive research: `Anti Cheat`
+- Platform hardening: `Windows Security Features`
+- Platform-specific ecosystems: `Android Emulator`, `IOS Emulator`, `Windows Emulator`, `Linux Emulator`
+
 ## Project Structure
 
 ```

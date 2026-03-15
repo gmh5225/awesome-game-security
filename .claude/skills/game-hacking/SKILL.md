@@ -9,6 +9,23 @@ description: Guide for game-hacking technique taxonomy and threat modeling relev
 
 This skill covers game-hacking techniques documented in the awesome-game-security collection, with emphasis on how cheats move from user mode to kernel mode, hypervisors, and DMA when defenders raise the bar. It is best used to understand the offensive side of the threat model that anti-cheat systems are designed to detect.
 
+## README Coverage
+
+- `Cheat > Debugging`
+- `Cheat > Packet Sniffer&Filter`
+- `Cheat > SpeedHack`
+- `Cheat > Injection:*`
+- `Cheat > Hook`
+- `Cheat > RPM`
+- `Cheat > DMA`
+- `Cheat > W2S`
+- `Cheat > Overlay`
+- `Cheat > Driver Communication`
+- `Cheat > HWID`
+- `Cheat > Game Engine Explorer:*`
+- `Cheat > Explore AntiCheat System:*`
+- `Cheat > Game:*`
+
 ## Escalation Model
 
 ### User-Mode

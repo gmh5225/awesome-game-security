@@ -1,6 +1,6 @@
 ---
 name: graphics-api-hooking
-description: Guide for graphics API hooking and rendering techniques for DirectX, OpenGL, and Vulkan. Use this skill when working with graphics hooks, overlay rendering, shader manipulation, or game rendering pipeline analysis.
+description: Guide for graphics API interception, overlay rendering, and render-pipeline analysis across DirectX, OpenGL, and Vulkan. Use this skill when working with Present or SwapBuffers hooks, DXGI swap chains, shader or draw-call interception, screenshot-sensitive overlays, or graphics debugging in game security research.
 ---
 
 # Graphics API Hooking & Rendering
@@ -8,6 +8,17 @@ description: Guide for graphics API hooking and rendering techniques for DirectX
 ## Overview
 
 This skill covers graphics API resources from the awesome-game-security collection, including DirectX, OpenGL, and Vulkan hooking techniques, overlay rendering, and graphics debugging.
+
+## README Coverage
+
+- `DirectX > Guide`
+- `DirectX > Hook`
+- `DirectX > Overlay`
+- `OpenGL > Hook`
+- `Vulkan > API`
+- `Vulkan > Hook`
+- `Cheat > Overlay`
+- `Anti Cheat > Screenshot`
 
 ## DirectX
 

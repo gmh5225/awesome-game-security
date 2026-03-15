@@ -9,6 +9,19 @@ description: Guide for reverse engineering protected games and anti-cheat compon
 
 This skill covers reverse engineering workflows for game security research, including protected game clients, anti-cheat user-mode modules, kernel drivers, memory artifacts, and debugging environments that must survive anti-analysis checks.
 
+## README Coverage
+
+- `Cheat > Debugging`
+- `Cheat > RE Tools`
+- `Cheat > Dynamic Binary Instrumentation`
+- `Cheat > Fix VMP`
+- `Cheat > Fix Themida`
+- `Cheat > Fix OLLVM`
+- `Anti Cheat > Anti Debugging`
+- `Anti Cheat > Dump Fix`
+- `Anti Cheat > Winows User Dump Analysis`
+- `Anti Cheat > Winows Kernel Dump Analysis`
+
 ## Debugging Tools
 
 ### Windows Debuggers

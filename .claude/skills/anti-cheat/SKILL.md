@@ -9,6 +9,15 @@ description: Guide for modern game anti-cheat architecture, Windows kernel monit
 
 This skill covers layered anti-cheat design across kernel drivers, privileged services, in-game components, and backend telemetry. It is most useful for mapping how modern anti-cheats monitor process handles, image loads, memory integrity, driver trust, virtualization abuse, DMA threats, and suspicious input behavior on Windows.
 
+## README Coverage
+
+- `Anti Cheat > Guide`
+- `Anti Cheat > Stress Testing`
+- `Anti Cheat > Anti Debugging`
+- `Anti Cheat > Open Source Anti Cheat System`
+- `Anti Cheat > Detection:*`
+- `Windows Security Features`
+
 ## Major Anti-Cheat Systems
 
 ### Easy Anti-Cheat (EAC)

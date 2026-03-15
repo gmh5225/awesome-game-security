@@ -9,6 +9,15 @@ description: Guide for PCIe DMA threat modeling, FPGA-based memory access, and d
 
 This skill covers Direct Memory Access research from the awesome-game-security collection, focusing on FPGA-based PCIe attacks, pcileech usage, physical-memory access workflows, and the defensive limits of software anti-cheat once a hostile device can read memory below the OS.
 
+## README Coverage
+
+- `Cheat > DMA`
+- `Anti Cheat > Detection:DMA`
+- `Anti Cheat > Detection: Hacked Hypervisor`
+- `Anti Cheat > Detection:Virtual Environments`
+- `Anti Cheat > Detection:HWID`
+- `Windows Security Features`
+
 ## DMA Fundamentals
 
 ### What is DMA Attack?

@@ -1,6 +1,6 @@
 ---
 name: game-engine-resources
-description: Guide for game engine development resources including engine source code, plugins, and development guides. Use this skill when researching game engines (Unreal, Unity, Godot, custom engines), engine architecture, or game development frameworks.
+description: Guide for game-engine internals, source trees, plugins, and engine-specific security research. Use this skill when researching Unreal, Unity, Source, Godot, custom engines, engine detectors, engine explorers, or engine protection patterns relevant to modding, reverse engineering, and anti-cheat.
 ---
 
 # Game Engine Development Resources
@@ -8,6 +8,19 @@ description: Guide for game engine development resources including engine source
 ## Overview
 
 This skill covers game engine development resources from the awesome-game-security collection, including both commercial (Unreal, Unity) and open-source engines.
+
+## README Coverage
+
+- `Game Engine > Guide`
+- `Game Engine > Source`
+- `Game Engine Plugins:*`
+- `Game Engine Detector`
+- `Cheat > Game Engine Explorer:Unreal`
+- `Cheat > Game Engine Explorer:Unity`
+- `Cheat > Game Engine Explorer:Source`
+- `Anti Cheat > Game Engine Protection:Unreal`
+- `Anti Cheat > Game Engine Protection:Unity`
+- `Anti Cheat > Game Engine Protection:Source`
 
 ## Major Engine Categories
 

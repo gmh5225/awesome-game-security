@@ -1,6 +1,6 @@
 ---
 name: mobile-security
-description: Guide for mobile game security on Android and iOS platforms. Use this skill when working with Android/iOS reverse engineering, mobile game hacking, APK analysis, root/jailbreak detection bypass, or mobile anti-cheat systems.
+description: Guide for Android and iOS game security, reversing, and anti-cheat-adjacent platform research. Use this skill when working with APK or IPA analysis, IL2CPP mobile titles, Frida, Zygisk or Magisk, jailbreak or root detection bypass, Android kernel modules, emulator detection, or mobile anti-cheat systems.
 ---
 
 # Mobile Game Security
@@ -8,6 +8,25 @@ description: Guide for mobile game security on Android and iOS platforms. Use th
 ## Overview
 
 This skill covers mobile security resources from the awesome-game-security collection, focusing on Android and iOS game security research, reverse engineering, and protection bypass techniques.
+
+## README Coverage
+
+- `Cheat > Magisk`
+- `Cheat > Xposed`
+- `Cheat > Frida`
+- `Cheat > Hook ART(android)`
+- `Cheat > Hook syscall(android)`
+- `Cheat > Android File Explorer`
+- `Cheat > Android Memory Explorer`
+- `Cheat > Android Kernel driver development`
+- `Cheat > Android Kernel Explorer`
+- `Cheat > Android Kernel Driver`
+- `Cheat > IOS jailbreak`
+- `Anti Cheat > Detection:Android root`
+- `Anti Cheat > Detection:Magisk`
+- `Anti Cheat > Detection:Frida`
+- `Android Emulator`
+- `IOS Emulator`
 
 ## Android Security
 

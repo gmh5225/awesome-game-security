@@ -25,15 +25,15 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill <skill-n
 **Available Skills:**
 | Skill | Description |
 |-------|-------------|
-| `anti-cheat-systems` | Anti-cheat development and bypass techniques |
-| `dma-attack-techniques` | DMA/PCIe-based attack methods |
-| `game-engine-resources` | Game engine internals and modding |
-| `game-hacking-techniques` | General game hacking methods |
-| `graphics-api-hooking` | DirectX/OpenGL/Vulkan hooking |
-| `mobile-security` | Android/iOS game security |
-| `awesome-game-security-overview` | Overview of this repository |
-| `reverse-engineering-tools` | RE tools and techniques |
-| `windows-kernel-security` | Windows kernel exploitation |
+| `anti-cheat-systems` | Modern anti-cheat architecture, detection tradeoffs, and system-specific research across EAC, BE, Vanguard, FACEIT, and related telemetry or driver defenses |
+| `dma-attack-techniques` | PCIe DMA threat modeling, FPGA memory access, IOMMU constraints, device impersonation, and DMA detection or mitigation |
+| `game-engine-resources` | Engine internals, source trees, plugins, explorers, and protection patterns for Unreal, Unity, Source, Godot, and custom engines |
+| `game-hacking-techniques` | Threat-model view of cheat implementation across user mode, kernel mode, hypervisors, DMA, overlays, memory access, and engine-specific attack surfaces |
+| `graphics-api-hooking` | DirectX, OpenGL, and Vulkan interception, overlay rendering, draw-call hooks, swap-chain analysis, and screenshot-sensitive graphics workflows |
+| `mobile-security` | Android and iOS reversing, Frida, Zygisk or Magisk, jailbreak or root bypass, mobile kernel modules, emulator detection, and mobile anti-cheat research |
+| `awesome-game-security-overview` | Repository taxonomy, category mapping, contribution guidance, and navigation across offensive and defensive game-security topics |
+| `reverse-engineering-tools` | Reverse engineering protected games and anti-cheat components across user mode, kernel mode, debuggers, dump analysis, and anti-analysis workflows |
+| `windows-kernel-security` | Windows kernel internals for game security including callbacks, MMVAD, IOCTL paths, DSE, PatchGuard, PiDDBCache, and hostile-driver detection |
 
 **Example:**
 ```bash
@@ -4270,4 +4270,3 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/exploits-forsale/collateral-damage [Kernel exploit for Xbox SystemOS using CVE-2024-30088]
 - https://github.com/Byrom90/XenonDumper [Dumps files & data required to use the Xenon Xbox 360 Low Level Emulator]
 - https://github.com/exjam/xbox360-emu [A xbox 360 emulator]
-

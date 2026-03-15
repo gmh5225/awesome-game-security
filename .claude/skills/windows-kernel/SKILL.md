@@ -9,6 +9,17 @@ description: Guide for Windows kernel internals and security mechanisms used in 
 
 This skill covers Windows kernel internals that matter for game security research: object callbacks, process and image notifications, APC behavior, driver loading, trust enforcement, memory manager structures, and the bookkeeping anti-cheats inspect to detect hostile drivers or hidden executable code.
 
+## README Coverage
+
+- `Cheat > PatchGuard-related`
+- `Cheat > Driver Signature enforcement`
+- `Cheat > Windows Kernel Explorer`
+- `Anti Cheat > Detection:Attach`
+- `Anti Cheat > Detection:Hide`
+- `Anti Cheat > Detection:Vulnerable Driver`
+- `Anti Cheat > Windows Ring0 Callback`
+- `Windows Security Features`
+
 ## Core Kernel Concepts
 
 ### Important Structures
