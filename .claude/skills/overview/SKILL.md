@@ -1,13 +1,13 @@
 ---
 name: awesome-game-security-overview
-description: Guide for understanding and contributing to the awesome-game-security curated resource list. Use this skill when adding new resources, organizing categories, understanding project structure, or maintaining the README.md format consistency.
+description: Guide for understanding and contributing to the awesome-game-security curated resource list. Use this skill when adding new resources, organizing categories, mapping topics across anti-cheat, Windows kernel, DMA, reverse engineering, and game-engine research, or maintaining README.md format consistency.
 ---
 
 # Awesome Game Security - Project Overview
 
 ## Purpose
 
-This is a curated collection of resources related to game security, covering both offensive (game hacking, cheating) and defensive (anti-cheat) aspects. The project serves as a comprehensive reference for security researchers, game developers, and enthusiasts.
+This is a curated collection of resources related to game security, covering both offensive (game hacking, cheating) and defensive (anti-cheat) aspects. The project serves as a comprehensive reference for security researchers, game developers, and enthusiasts, especially where Windows internals, driver trust, reverse engineering, DMA, and modern anti-cheat defenses intersect.
 
 ## Project Structure
 

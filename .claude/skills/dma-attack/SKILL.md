@@ -1,13 +1,13 @@
 ---
 name: dma-attack-techniques
-description: Guide for Direct Memory Access (DMA) attack techniques using FPGA hardware. Use this skill when researching PCIe DMA attacks, pcileech, FPGA firmware development, or hardware-based memory access for game security research.
+description: Guide for PCIe DMA threat modeling, FPGA-based memory access, and defensive implications in game security. Use this skill when researching pcileech, BAR and TLP behavior, page-table walking, IOMMU or VT-d, device impersonation, firmware mimicry, or DMA detection and mitigation in game security research.
 ---
 
 # DMA Attack Techniques
 
 ## Overview
 
-This skill covers Direct Memory Access (DMA) attack resources from the awesome-game-security collection, focusing on FPGA-based PCIe attacks, pcileech usage, and hardware-level memory access techniques.
+This skill covers Direct Memory Access research from the awesome-game-security collection, focusing on FPGA-based PCIe attacks, pcileech usage, physical-memory access workflows, and the defensive limits of software anti-cheat once a hostile device can read memory below the OS.
 
 ## DMA Fundamentals
 
@@ -27,6 +27,24 @@ system memory without CPU involvement. An attacker can:
 - PCIe interface capability
 - Sufficient logic resources
 - Development environment
+```
+
+## Defensive Context
+
+### Why DMA Matters for Anti-Cheat
+```
+- No hostile process needs to exist on the game PC
+- No suspicious driver or injected module is required
+- Reads can occur from a second machine over PCIe-attached hardware
+- Traditional kernel callbacks and handle protection do not see the access
+```
+
+### Key Defensive Constraints
+```
+- IOMMU / VT-d policy determines whether DMA can access arbitrary memory
+- Device impersonation can blur the line between legitimate hardware and FPGA firmware
+- Secure Boot and TPM help with platform trust, but do not eliminate physical DMA risk
+- Enumeration-based detection is useful but not sufficient against good firmware mimicry
 ```
 
 ## pcileech Framework
@@ -194,6 +212,8 @@ PHYSICAL_ADDRESS TranslateVA(UINT64 cr3, UINT64 virtualAddr) {
 - IOMMU/VT-d monitoring
 - DMA buffer analysis
 - Performance counter anomalies
+- Device identity consistency checks
+- Platform attestation and boot-state validation
 ```
 
 ## Advanced Techniques

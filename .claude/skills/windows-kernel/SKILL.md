@@ -1,18 +1,20 @@
 ---
 name: windows-kernel-security
-description: Guide for Windows kernel security research including driver development, system callbacks, security features, and kernel exploitation. Use this skill when working with Windows drivers, PatchGuard, DSE, or kernel-level security mechanisms.
+description: Guide for Windows kernel internals and security mechanisms used in game protection and low-level research. Use this skill when working with drivers, IRQL-sensitive callbacks, EPROCESS, ETHREAD, MMVAD internals, IOCTL paths, DSE, PatchGuard, HVCI, PiDDBCache, MmUnloadedDrivers, or kernel memory inspection.
 ---
 
 # Windows Kernel Security
 
 ## Overview
 
-This skill covers Windows kernel security topics from the awesome-game-security collection, including driver development, system callbacks, security feature bypasses, and kernel-mode exploitation.
+This skill covers Windows kernel internals that matter for game security research: object callbacks, process and image notifications, APC behavior, driver loading, trust enforcement, memory manager structures, and the bookkeeping anti-cheats inspect to detect hostile drivers or hidden executable code.
 
 ## Core Kernel Concepts
 
 ### Important Structures
 - EPROCESS / ETHREAD
+- KTHREAD / KAPC / KAPC_STATE
+- MMVAD / VAD tree nodes
 - PEB / TEB
 - DRIVER_OBJECT
 - DEVICE_OBJECT
@@ -23,6 +25,7 @@ This skill covers Windows kernel security topics from the awesome-game-security 
 - IDT (Interrupt Descriptor Table)
 - GDT (Global Descriptor Table)
 - PspCidTable (Process/Thread handle table)
+- PiDDBCacheTable / MmUnloadedDrivers / PoolBigPageTable
 
 ## Security Features
 
@@ -56,6 +59,7 @@ This skill covers Windows kernel security topics from the awesome-game-security 
 - Boot loader chain validation
 - Kernel signature checks
 - DBX (forbidden signatures)
+- Foundation for attestation and DMA-hardening assumptions
 ```
 
 ## Kernel Callbacks
@@ -84,6 +88,14 @@ PsSetLoadImageNotifyRoutineEx
 ObRegisterCallbacks
 // OB_OPERATION_HANDLE_CREATE
 // OB_OPERATION_HANDLE_DUPLICATE
+```
+
+### APC / Execution Context
+```cpp
+KeInitializeApc
+KeInsertQueueApc
+KeStackAttachProcess
+RtlWalkFrameChain
 ```
 
 ### Registry Callbacks

@@ -1,33 +1,38 @@
 ---
 name: anti-cheat-systems
-description: Guide for understanding anti-cheat systems and bypass techniques. Use this skill when researching game protection systems (EAC, BattlEye, Vanguard), anti-cheat architecture, detection methods, or bypass strategies.
+description: Guide for modern game anti-cheat architecture, Windows kernel monitoring, and detection tradeoffs. Use this skill when analyzing EAC, BattlEye, Vanguard, FACEIT AC, kernel callbacks, handle protection, manual-map detection, boot-start drivers, BYOVD, DMA threats, or behavioral telemetry in game security research.
 ---
 
 # Anti-Cheat Systems & Analysis
 
 ## Overview
 
-This skill covers anti-cheat systems used in games, their detection mechanisms, and research techniques. Understanding anti-cheat helps both defenders (game developers) and security researchers.
+This skill covers layered anti-cheat design across kernel drivers, privileged services, in-game components, and backend telemetry. It is most useful for mapping how modern anti-cheats monitor process handles, image loads, memory integrity, driver trust, virtualization abuse, DMA threats, and suspicious input behavior on Windows.
 
 ## Major Anti-Cheat Systems
 
 ### Easy Anti-Cheat (EAC)
-- Kernel-mode driver protection
-- Process integrity verification
-- Memory scanning
+- Multi-component architecture with service, driver, and game-facing protections
+- Process integrity verification and memory inspection
+- Runtime driver loading with strong client-side enforcement
 - Used by: Fortnite, Apex Legends, Rust
 
 ### BattlEye
-- Kernel driver with ring-0 access
-- Screenshot capture capability
-- Network traffic analysis
+- Kernel driver plus service and game module coordination
+- Handle protection, process monitoring, and memory scanning
+- Strong focus on injected code and runtime tampering visibility
 - Used by: PUBG, Rainbow Six Siege, DayZ
 
 ### Vanguard (Riot Games)
-- Always-on kernel driver
+- Boot-start kernel driver with early visibility into later-loaded drivers
 - Boot-time initialization
-- Hypervisor detection
+- Driver allowlisting and aggressive system trust checks
 - Used by: Valorant, League of Legends
+
+### FACEIT AC
+- Kernel-level competitive anti-cheat with strong process and driver monitoring
+- Emphasis on platform integrity and low tolerance for hostile drivers
+- Often discussed alongside Vanguard in kernel anti-cheat research
 
 ### Valve Anti-Cheat (VAC)
 - User-mode detection
@@ -46,34 +51,34 @@ This skill covers anti-cheat systems used in games, their detection mechanisms, 
 
 ### Memory Detection
 ```
-- Signature scanning for known cheats
-- Code integrity verification
-- Injected module detection
-- Memory modification monitoring
+- Code section hashing and integrity verification
+- Executable private memory and manual-map detection
+- Injected module and anomalous image mapping detection
+- Memory modification and stack provenance monitoring
 ```
 
 ### Process Detection
 ```
-- Handle enumeration
-- Thread context inspection
-- Debug register monitoring
-- Stack trace analysis
+- Handle access stripping and protected-process enforcement
+- Thread start address, APC, and context inspection
+- Debug register and hidden-thread monitoring
+- Stack trace and module-correlation analysis
 ```
 
 ### Kernel-Level Detection
 ```
-- Driver verification
-- Callback registration monitoring
-- System call hooking detection
-- PatchGuard integration
+- Driver verification, signature policy, and blocklist checks
+- Callback registration and object access monitoring
+- System call, dispatch table, and hook integrity checks
+- PatchGuard, test-signing, and kernel trust state checks
 ```
 
 ### Behavioral Analysis
 ```
-- Input pattern analysis
-- Movement anomaly detection
-- Statistical improbability flagging
-- Network packet inspection
+- Raw input timing and pattern analysis
+- Movement and aim anomaly detection
+- Statistical improbability and ML-assisted scoring
+- Telemetry collection and server-side review
 ```
 
 ## Anti-Cheat Architecture
@@ -88,7 +93,8 @@ This skill covers anti-cheat systems used in games, their detection mechanisms, 
 - Driver loader
 - Memory protection
 - System callback registration
-- Hypervisor detection
+- Hypervisor and driver trust detection
+- VAD and executable memory inspection
 
 ### Server-Side Components
 - Statistical analysis
@@ -102,13 +108,13 @@ This skill covers anti-cheat systems used in games, their detection mechanisms, 
 1. Dump and analyze AC drivers
 2. Reverse engineer detection routines
 3. Identify signature patterns
-4. Map callback registrations
+4. Map callback registrations and trust boundaries
 
 ### Dynamic Analysis
 1. Monitor system calls
 2. Track driver communications
-3. Analyze network traffic
-4. Debug with hypervisor tools
+3. Inspect memory layout and module provenance
+4. Debug with kernel or hypervisor tools
 
 ## Bypass Categories
 
@@ -137,6 +143,7 @@ This skill covers anti-cheat systems used in games, their detection mechanisms, 
 - PatchGuard/Kernel Patch Protection
 - Hypervisor Code Integrity (HVCI)
 - Secure Boot
+- TPM-backed attestation considerations
 
 ### Virtualization
 - VT-x/AMD-V detection

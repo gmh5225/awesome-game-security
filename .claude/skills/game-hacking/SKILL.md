@@ -1,13 +1,30 @@
 ---
 name: game-hacking-techniques
-description: Guide for game hacking techniques and cheat development. Use this skill when researching memory manipulation, code injection, ESP/aimbot development, overlay rendering, or game exploitation methodologies.
+description: Guide for game-hacking technique taxonomy and threat modeling relevant to game security. Use this skill when researching memory access, code injection, overlays, input simulation, engine-specific attack surfaces, or how modern anti-cheat systems constrain user-mode, kernel-mode, hypervisor, and DMA-based cheat implementations.
 ---
 
 # Game Hacking Techniques
 
 ## Overview
 
-This skill covers game hacking techniques documented in the awesome-game-security collection, including memory manipulation, rendering overlays, input simulation, and exploitation methods.
+This skill covers game-hacking techniques documented in the awesome-game-security collection, with emphasis on how cheats move from user mode to kernel mode, hypervisors, and DMA when defenders raise the bar. It is best used to understand the offensive side of the threat model that anti-cheat systems are designed to detect.
+
+## Escalation Model
+
+### User-Mode
+- Read and write process memory
+- Inject DLLs or shellcode
+- Hook graphics or input APIs
+
+### Kernel-Mode
+- Use signed or vulnerable drivers for direct memory access
+- Bypass handle-based protections and inspect protected processes
+- Interact with callbacks, page tables, or kernel objects directly
+
+### Below the OS
+- Virtualize the system with a hypervisor
+- Read memory through PCIe DMA hardware
+- Move logic to external devices or secondary machines
 
 ## Core Concepts
 

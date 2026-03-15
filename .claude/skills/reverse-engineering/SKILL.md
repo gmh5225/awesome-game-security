@@ -1,13 +1,13 @@
 ---
 name: reverse-engineering-tools
-description: Guide for reverse engineering tools and techniques used in game security research. Use this skill when working with debuggers, disassemblers, memory analysis tools, binary analysis, or decompilers for game security research.
+description: Guide for reverse engineering protected games and anti-cheat components across user mode, kernel mode, and hypervisor-aware environments. Use this skill when analyzing drivers, IOCTL protocols, callback registration, injected-code artifacts, integrity checks, protected binaries, or debugging security-sensitive game components.
 ---
 
 # Reverse Engineering Tools & Techniques
 
 ## Overview
 
-This skill covers reverse engineering resources for game security research, including debuggers, disassemblers, memory analysis tools, and specialized game hacking utilities.
+This skill covers reverse engineering workflows for game security research, including protected game clients, anti-cheat user-mode modules, kernel drivers, memory artifacts, and debugging environments that must survive anti-analysis checks.
 
 ## Debugging Tools
 
@@ -74,6 +74,7 @@ This skill covers reverse engineering resources for game security research, incl
 2. Code coverage analysis
 3. Fuzzing harness creation
 4. Behavioral analysis
+5. Driver IOCTL and callback tracing
 
 ## Anti-Analysis Bypass
 
@@ -115,15 +116,15 @@ This skill covers reverse engineering resources for game security research, incl
 1. Identify protections (packer, obfuscator, anti-cheat)
 2. Determine game engine and version
 3. Collect symbol information if available
-4. Map out key modules and dependencies
+4. Map out key modules, callbacks, and trust boundaries
 ```
 
 ### Deep Analysis
 ```
 1. Locate target functionality
 2. Trace execution flow
-3. Document structures and relationships
-4. Develop hooking strategy
+3. Document structures, memory artifacts, and relationships
+4. Correlate IOCTLs, callbacks, and runtime checks
 ```
 
 ## VMProtect/Themida Analysis
