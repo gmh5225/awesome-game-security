@@ -79,6 +79,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - [Game Boy](#game-boy)
 - [Nintendo Switch](#nintendo-switch)
 - [Xbox](#Xbox)
+- [PlayStation](#PlayStation)
 
 ## Game Engine
 > Guide
@@ -4270,3 +4271,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/exploits-forsale/collateral-damage [Kernel exploit for Xbox SystemOS using CVE-2024-30088]
 - https://github.com/Byrom90/XenonDumper [Dumps files & data required to use the Xenon Xbox 360 Low Level Emulator]
 - https://github.com/exjam/xbox360-emu [A xbox 360 emulator]
+
+## PlayStation
+- https://gist.github.com/flatz/620ddda6d64acca6d1c990dc3080ac0e [PS5 Hypervisor exploit]
+
