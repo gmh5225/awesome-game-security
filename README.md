@@ -3962,6 +3962,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/mgeeky/ntfs-journal-viewer
 - https://github.com/volatilityfoundation/volatility
 - https://github.com/volatilityfoundation/volatility3
+- https://github.com/nikaiw/VMkatz [Extract Windows credentials directly from VM memory snapshots and virtual disks (LSASS, SAM/LSA, cached creds, NTDS.dit) in-place]
 - [Decrypt and export browser password, including Chromium,Edge and Firefox](https://github.com/BL0odz/BrowserPasswordExportor)
 - https://github.com/gtworek/VolatileDataCollector
 - https://github.com/mubix/netview
