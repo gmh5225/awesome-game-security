@@ -2110,6 +2110,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > EFI Driver
 - https://github.com/mrexodia/EfiCMake
 - https://github.com/tandasat/MiniVisorPkg
+- https://github.com/Th3Spl/SimpleUEFI [UEFI Environment for VisualStudio (MSVC), Extremely easy to setup]
 - https://github.com/Oliver-1-1/SmmInfect [SMM Driver]
 - https://github.com/Shtan7/VisualUEFI-2.0 [Debug source with clion+clang+gdb]
 - https://github.com/SamuelTulach/EasyUefi [Visual Studio template for GNU-EFI]
