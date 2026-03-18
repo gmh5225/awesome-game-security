@@ -1829,6 +1829,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/cakehonolulu/pciem [A Linux framework for synthetic PCIe device emulation entirely in userspace]
 - https://github.com/ufrisk/pcileech
 - https://github.com/realquantumstealth-hub/PCILeech-DMA-Fullstealth [Quantumstealth open source Fullstealth firmware; Vivado build for M2/Squirrel/Captain 75T/Enigma X1]
+- https://github.com/NoviceLevel/Pcileech-QuantumStealth-Max [Pcileech QuantumStealth Max firmware; Vivado for M2/Squirrel/100T/Captain 75T/Enigma X1/Immortal 75T]
 - https://github.com/ekknod/pcileech-wifi [pcileech-fpga with wireless card emulation]
 - https://github.com/Cr4sh/pico_dma
 - https://github.com/kWAYTV/dma-cheat-base [Cheat base]
