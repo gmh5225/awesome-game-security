@@ -1848,6 +1848,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Herooyyy/Pcileech-AMDPCI [Using no interrupt bypass faceit/vgk]
 - https://github.com/Herooyyy/Pcileech-Intel-I226-V-FullEmu [Intel-I226-V]
 - https://github.com/Herooyyy/Pcileech-ISABridge [Use specific PID/VID to bypass faceit]
+- https://github.com/Herooyyy/Pcileech-Activator-Anti-crack [DMA activator signal config (FT601/SystemVerilog): activation signal definition, state machine, anti-crack]
 - https://github.com/d1skq/vgk-dma-bypass [VGK DMA bypass]
 - https://github.com/gmh5225/Pcileech-DMA-NVMe-VMD [Firmware real camouflage through motherboard VMD function.（Pcileech-DMA）]
 - https://github.com/a0yark/ArcRaidersRadar-dma-Radar [DMA radar/ESP, MemProcFS + Unicorn Engine for pointer decryption emulation]
