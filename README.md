@@ -3663,6 +3663,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/mrexodia/RiscyWorkshop [Payload Obfuscation for Red Teams workshop materials]
 - https://github.com/umpolungfish/byvalver [Shellcode bad-byte banisher with preserved functionalities]
 - https://github.com/wbenny/scfw [A cross-platform C++ framework for building Windows shellcode]
+- https://github.com/IIIImmmyyy/ArmShellCode [Android arm arm64-v8a ShellCode Generate]
 
 > Obfuscation Engine
 - https://github.com/DosX-dev/obfus.h [Macro-header for compile-time C obfuscation (tcc, win x86/x64)]
