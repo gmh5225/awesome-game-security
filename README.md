@@ -2049,6 +2049,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/moiz-2x/CVE-2025-24990_POC [ltmdm64.sys]
 - https://github.com/symeonp/Lenovo-CVE-2025-8061 [PoC for popping a system shell against the LnvMSRIO.sys driver]
 - https://github.com/gmh5225/Killer [Non HVCI Block listed - Microsoft signed driver exploited to kill AV/EDR's processes]
+- https://github.com/andreisss/KslDump [KslD.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
