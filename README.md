@@ -1250,6 +1250,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Snoopy-Sec/Localroot-ALL-CVE [Root CVE]
 - https://github.com/xmmword/dpatch [Syscall Dispatcher Patching PoC]
 - https://github.com/aquasecurity/tracee [Linux Runtime Security and Forensics using eBPF]
+- https://github.com/quarkslab/peetch [eBPF toolkit: dump (sniff traffic with PID/process), tls (OpenSSL key/master-secret extraction), proxy (intercept and decrypt TLS); PCAPng + Scapy; OpenSSL, IPv4, TLS 1.2]
 - https://github.com/AndroidReverser-Test/Kernel-Trace [A kpm kernel module based on uprobe, capable of simultaneously hooking a large number of user address space functions]
 - https://github.com/kkkbbb/mkpms [wxshadow — KPM stealth breakpoint/hook via R^X page split, bypass self-read integrity check]
 - https://github.com/fuqiuluo/android-wuwa [Android aarch64 rootkit]
