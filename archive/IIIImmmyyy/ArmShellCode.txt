@@ -1,0 +1,3128 @@
+Project Path: arc_IIIImmmyyy_ArmShellCode_ygavwn_k
+
+Source Tree:
+
+```txt
+arc_IIIImmmyyy_ArmShellCode_ygavwn_k
+├── ARM64_Shellcode_技术原理.md
+├── CLion配置说明.md
+├── CMakeLists.txt
+├── README.md
+├── improved_loader.cpp
+├── include
+│   ├── android_utils.h
+│   ├── dobby_maps_parser.h
+│   ├── dobby_symbol_resolver.h
+│   ├── elf_common.h
+│   ├── elf_parser.h
+│   ├── file_ops.h
+│   ├── logger.h
+│   ├── string_utils.h
+│   └── syscall_wrapper.h
+├── minimal_test_entry.c
+├── shellcode.ld
+├── shellcode.ld.in
+├── src
+│   ├── dobby_maps_parser.c
+│   ├── dobby_symbol_resolver.c
+│   ├── file_ops.c
+│   ├── logger.c
+│   ├── modular_entry.c
+│   ├── shellcode_main_refactored.c
+│   ├── shellcode_manager.c
+│   ├── simple_test_entry.c
+│   ├── string_utils.c
+│   └── syscall_wrapper.c
+└── test_entry.c
+
+```
+
+`ARM64_Shellcode_技术原理.md`:
+
+```md
+# ARM平台下Shellcode开发技术原理与实现
+
+## 0. 前言
+
+在移动安全领域，ShellCode技术已经成为一个不可或缺的重要组成部分。无论是应用加固、安全防护，还是漏洞利用研究，都离不开对ShellCode的深入理解和灵活运用。本文将以一个实际的开源项目为例，详细介绍在ARM平台下ShellCode的实现原理和关键技术。
+
+## 1. 基础概念
+
+ShellCode本质上是一段位置无关的代码片段。根据应用场景的不同，它的用途大体上有两种：
+
+1. **动态注入执行**：通过加固SO加载ShellCode，执行自定义逻辑（目前主流的加固都有运用，可以实现解密→执行→加密的流程，完成对ShellCode代码的保护）
+2. **静态链接注入**：通过LIEF等工具，将ShellCode注入到对应二进制文件中，通过修改重定向来完成ShellCode的调用
+
+选择哪种方案取决于具体的使用场景和安全限制。本文将重点介绍第一种方案的技术细节。
+
+## 2. 核心技术挑战
+
+### 2.1 位置无关代码(PIC)
+在ARM64架构下，ShellCode必须保证位置无关性。这是因为：
+- 注入时的加载地址是不确定的
+- 需要支持在内存任意位置执行
+- 不能包含任何绝对地址引用
+- **特别注意**：如果是静态链接注入，需慎用全局变量，因为注入的ShellCode基本都在LOAD段，是无法有写入权限的。如果使用单例模式，会导致写入权限异常
+
+### 2.2 系统调用接口
+由于ShellCode的独立性要求，大量标准库函数无法直接使用。这要求我们：
+- 必须通过系统调用实现基础功能
+- 需要自行处理参数传递和返回值
+- 确保系统调用的兼容性
+
+### 2.3 符号解析
+在没有链接器支持的情况下，需要：
+- 实现运行时符号解析
+- 处理动态链接库加载
+- 计算函数实际地址
+
+## 3. 系统调用封装原理
+
+### 3.1 ARM64系统调用约定
+在ARM64架构中，系统调用使用特定的寄存器约定：
+- `x8`: 系统调用号
+- `x0-x5`: 参数寄存器
+- `svc #0`: 触发系统调用指令
+
+### 3.2 关键代码实现
+
+```c
+// ARM64内联汇编系统调用实现
+static inline long syscall3(long number, long arg1, long arg2, long arg3) {
+    register long x8 __asm__("x8") = number;  // 系统调用号
+    register long x0 __asm__("x0") = arg1;    // 第一个参数
+    register long x1 __asm__("x1") = arg2;    // 第二个参数  
+    register long x2 __asm__("x2") = arg3;    // 第三个参数
+    __asm__ volatile("svc #0" : "+r"(x0) : "r"(x8), "r"(x1), "r"(x2) : "memory");
+    return x0;  // 返回值
+}
+
+// 基于系统调用的文件操作
+ssize_t sys_write(int fd, const void *buf, size_t count) {
+    return syscall3(SYS_write, fd, (long)buf, count);
+}
+```
+
+通过这种方式，我们实现了一套完整的系统调用封装框架，支持0-6个参数的系统调用。
+
+## 4. 入口点设计原理
+
+### 4.1 naked函数属性
+```c
+void __attribute__((naked, noreturn, section(".text._start"))) _start(void) {
+```
+关键属性说明：
+- `naked`: 编译器不生成函数序言和尾声代码
+- `noreturn`: 告知编译器函数不会返回
+- `section(".text._start")`: 确保入口点位于代码段开头
+
+### 4.2 关键入口点代码
+```c
+#ifdef ARCH_ARM64
+__asm__ volatile (
+    // 保存链接寄存器和帧指针
+    "stp x29, x30, [sp, #-16]!\n"
+    "mov x29, sp\n"
+    
+    // 调用主函数 (x0寄存器已包含回调函数指针)
+    "bl shellcode_main_refactored\n"
+    
+    // 恢复寄存器并返回
+    "mov sp, x29\n"
+    "ldp x29, x30, [sp], #16\n"
+    "ret\n"
+    :
+    :
+    : "memory", "x0", "x29", "x30"
+);
+#endif
+```
+
+这段代码实现了标准的ARM64函数调用约定，确保ShellCode能够正确地接收参数并返回结果。
+
+## 5. 动态符号解析技术
+
+### 5.1 内存映射解析
+通过读取`/proc/self/maps`文件获取已加载库的基址。这里参考了Dobby框架的实现，解析运行时模块信息：
+
+```c
+typedef struct {
+    char path[MAX_PATH_LEN];
+    uintptr_t load_address;
+} dobby_runtime_module_t;
+
+int dobby_get_runtime_module(const char* name, dobby_runtime_module_t* module) {
+    // 解析 /proc/self/maps 找到目标库
+    // 返回库的加载基址
+}
+```
+
+### 5.2 ELF符号表解析
+解析目标SO文件的符号表以获取函数地址：
+
+```c
+int dobby_resolve_symbol(const char* lib_name, const char* symbol_name, uintptr_t* symbol_address) {
+    dobby_runtime_module_t module;
+    
+    // 1. 获取库的运行时信息
+    if (dobby_get_runtime_module(lib_name, &module) != MAPS_PARSER_SUCCESS) {
+        return RESOLVER_ERR_NOT_FOUND;
+    }
+    
+    // 2. 解析ELF符号表
+    // 3. 计算符号的实际地址 = 基址 + 偏移
+    
+    return RESOLVER_SUCCESS;
+}
+```
+
+通过这种方式，我们就在ShellCode中实现了动态符号解析的功能，可以在运行时获取目标函数的地址，无需依赖系统链接器。
+
+## 6. 链接脚本设计
+
+### 6.1 紧凑的内存布局
+```ld
+SECTIONS
+{
+    . = 0x0;
+    
+    .text : {
+        *(.text._start)     /* 确保_start函数在最前面 */
+        *(.text)            /* 其他代码 */
+        *(.text.*)
+    }
+    
+    .rodata : {
+        *(.rodata)
+        *(.rodata.*)
+    }
+    
+    /* 丢弃不需要的段 */
+    /DISCARD/ : {
+        *(.note.*)
+        *(.comment)
+        *(.eh_frame)
+        /* ... 更多不需要的段 */
+    }
+}
+```
+
+### 6.2 关键编译选项
+```cmake
+set(SHELLCODE_FLAGS
+    "-fPIC"                     # 位置无关代码
+    "-fno-stack-protector"      # 关闭栈保护
+    "-nostdlib"                 # 不链接标准库
+    "-nostartfiles"             # 不使用启动文件
+    "-static"                   # 静态链接
+    "-Os"                       # 优化代码大小
+)
+```
+
+这些编译选项确保生成的ShellCode具有最小的体积和最大的兼容性。
+
+## 7. 实际应用示例
+
+### 7.1 目标函数调用
+```c
+uintptr_t shellcode_main_refactored() {
+    // 目标配置
+    static const char* TARGET_LIBRARY = "libGuardCore.so";
+    static const char* TARGET_SYMBOL = "_Z5ioctlv";
+    
+    uintptr_t symbol_addr;
+    int result = dobby_resolve_symbol(TARGET_LIBRARY, TARGET_SYMBOL, &symbol_addr);
+    
+    if (result != RESOLVER_SUCCESS) {
+        return (uintptr_t)result;
+    }
+    
+    // 调用解析到的函数
+    typedef void (*ioctl_func)();
+    ioctl_func target_func = (ioctl_func)symbol_addr;
+    target_func();
+    
+    return symbol_addr;
+}
+```
+
+### 7.2 加载器集成
+```cpp
+void LoadShellCode() {
+    // 1. 分配可执行内存
+    void* shellcode_memory = mmap(NULL, file_size,
+                                  PROT_READ | PROT_WRITE | PROT_EXEC,
+                                  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    
+    // 2. 加载shellcode
+    memcpy(shellcode_memory, shellcode_data, file_size);
+    
+    // 3. 清除指令缓存
+    __builtin___clear_cache((char*)shellcode_memory, 
+                           (char*)shellcode_memory + file_size);
+    
+    // 4. 执行shellcode
+    typedef void (*shellcode_func_t)(void);
+    auto shellcode_func = (shellcode_func_t)shellcode_memory;
+    shellcode_func();
+}
+```
+
+## 8. 技术特点总结
+
+### 8.1 核心优势
+1. **完全独立**：不依赖任何系统库，通过系统调用实现所有功能
+2. **位置无关**：可以在内存任意位置执行
+3. **动态解析**：支持运行时符号解析，灵活性强
+4. **体积优化**：通过精心设计的链接脚本，生成最小化的二进制文件
+
+### 8.2 适用场景
+- Android应用加固中的代码保护
+- 动态代码注入和执行
+- 安全研究和漏洞分析
+- 二进制分析工具开发
+
+### 8.3 技术局限
+- 需要对目标系统有深入了解
+- 调试相对困难
+- 对系统版本敏感
+- 需要处理各种边界情况
+
+## 9. 项目开源与交流
+
+本项目已在GitHub开源，欢迎大家参与讨论和改进。
+
+---
+
+> 本文作者：Imy
+> 
+> 项目开源地址：[https://github.com/IIIImmmyyy/ArmShellCode]
+> 
+> 声明：本文仅供安全研究和学习交流使用 
+```
+
+`CLion配置说明.md`:
+
+```md
+# CLion Android Shellcode 项目配置指南
+
+## 🎯 快速配置步骤
+
+### 1. 添加工具链 (Toolchain)
+
+1. **File** → **Settings** → **Build, Execution, Deployment** → **Toolchains**
+2. 点击 **+** 添加新工具链，选择 **Remote Host** 或直接使用 **System**
+3. 配置以下工具链：
+
+#### Android ARM64 工具链
+- **Name**: `Android-ARM64`
+- **C Compiler**: `F:\AndroidSDK\ndk\25.1.8937393\toolchains\llvm\prebuilt\windows-x86_64\bin\aarch64-linux-android21-clang.exe`
+- **C++ Compiler**: `F:\AndroidSDK\ndk\25.1.8937393\toolchains\llvm\prebuilt\windows-x86_64\bin\aarch64-linux-android21-clang++.exe`
+- **Debugger**: `F:\AndroidSDK\ndk\25.1.8937393\toolchains\llvm\prebuilt\windows-x86_64\bin\lldb.exe`
+
+#### Android ARM32 工具链
+- **Name**: `Android-ARM32`
+- **C Compiler**: `F:\AndroidSDK\ndk\25.1.8937393\toolchains\llvm\prebuilt\windows-x86_64\bin\armv7a-linux-androideabi21-clang.exe`
+- **C++ Compiler**: `F:\AndroidSDK\ndk\25.1.8937393\toolchains\llvm\prebuilt\windows-x86_64\bin\armv7a-linux-androideabi21-clang++.exe`
+- **Debugger**: `F:\AndroidSDK\ndk\25.1.8937393\toolchains\llvm\prebuilt\windows-x86_64\bin\lldb.exe`
+
+### 2. 配置CMake
+
+1. **File** → **Settings** → **Build, Execution, Deployment** → **CMake**
+2. 添加以下配置：
+
+#### Android ARM64 配置
+- **Name**: `Android-ARM64`
+- **Build type**: `Release`
+- **Toolchain**: `Android-ARM64`
+- **CMake options**:
+```
+-DCMAKE_TOOLCHAIN_FILE=F:/AndroidSDK/ndk/25.1.8937393/build/cmake/android.toolchain.cmake
+-DANDROID_ABI=arm64-v8a
+-DANDROID_PLATFORM=android-21
+-DCMAKE_BUILD_TYPE=Release
+```
+- **Build directory**: `cmake-build-android-arm64`
+
+#### Android ARM32 配置
+- **Name**: `Android-ARM32`
+- **Build type**: `Release`
+- **Toolchain**: `Android-ARM32`
+- **CMake options**:
+```
+-DCMAKE_TOOLCHAIN_FILE=F:/AndroidSDK/ndk/25.1.8937393/build/cmake/android.toolchain.cmake
+-DANDROID_ABI=armeabi-v7a
+-DANDROID_PLATFORM=android-21
+-DCMAKE_BUILD_TYPE=Release
+```
+- **Build directory**: `cmake-build-android-arm32`
+
+### 3. 环境变量设置
+
+在 **Settings** → **Build, Execution, Deployment** → **CMake** 的 **Environment variables** 中添加：
+
+```
+ANDROID_NDK=F:\AndroidSDK\ndk\25.1.8937393
+```
+
+### 4. 构建目标
+
+配置完成后，在CLion的构建选择器中应该会看到：
+- `shellcode_elf | Android-ARM64`
+- `shellcode_elf | Android-ARM32`
+
+## 🚀 快速构建
+
+### 方法1：使用CLion界面
+1. 在右上角选择构建配置（如 `Android-ARM64`）
+2. 选择目标 `shellcode_elf`
+3. 点击 **Build** 按钮（或按 **Ctrl+F9**）
+
+### 方法2：使用Build菜单
+- **Build** → **Build Project** (**Ctrl+F9**)
+- **Build** → **Rebuild Project** (**Ctrl+Shift+F9**)
+
+### 方法3：右键上下文菜单
+- 在项目树中右键点击 `CMakeLists.txt`
+- 选择 **Build Project**
+
+## 📁 输出文件位置
+
+构建完成后，生成的文件将位于：
+
+### ARM64版本：
+```
+cmake-build-android-arm64/
+├── shellcode           # ELF可执行文件
+├── shellcode.bin       # 纯二进制shellcode
+├── shellcode_data.h    # C头文件格式
+└── shellcode.asm       # 反汇编文件
+```
+
+### ARM32版本：
+```
+cmake-build-android-arm32/
+├── shellcode           # ELF可执行文件
+├── shellcode.bin       # 纯二进制shellcode
+├── shellcode_data.h    # C头文件格式
+└── shellcode.asm       # 反汇编文件
+```
+
+## 🛠️ 调试和开发
+
+### 代码提示和补全
+- CLion会自动识别Android NDK的头文件
+- 支持跳转到定义、查找引用等功能
+- 内联汇编也有基本的语法高亮
+
+### 代码分析
+- **Code** → **Inspect Code** 进行静态分析
+- **Code** → **Reformat Code** 格式化代码
+
+### 自定义构建步骤
+如果需要添加自定义构建步骤：
+1. **Run** → **Edit Configurations**
+2. 添加 **CMake Application** 配置
+3. 设置目标为 `shellcode_elf`
+
+## ⚡ 快捷键
+
+- **Ctrl+F9**: 构建项目
+- **Ctrl+Shift+F9**: 重新构建项目
+- **Shift+F10**: 运行（如果配置了运行目标）
+- **Alt+Shift+F10**: 选择配置并运行
+
+## 🔧 故障排除
+
+### 常见问题：
+
+1. **找不到编译器**
+   - 检查NDK路径是否正确
+   - 确保NDK版本支持指定的API级别
+
+2. **链接错误**
+   - 检查CMakeLists.txt中的链接选项
+   - 确保所有源文件都存在
+
+3. **头文件找不到**
+   - 检查include目录设置
+   - 确保所有必要的头文件都存在
+
+4. **Python脚本执行失败**
+   - 安装Python 3
+   - 或者临时注释掉生成.h文件的部分
+
+### 清理和重建：
+- **Build** → **Clean** 清理构建文件
+- 删除 `cmake-build-*` 目录进行完全重建 
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.18.1)
+project(AndroidShellCode)
+
+# 强制设置为Android平台
+if(NOT ANDROID)
+    message(FATAL_ERROR "此项目仅支持Android平台，请使用Android NDK工具链")
+endif()
+
+# 编译标准
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+# Shellcode专用编译选项
+set(SHELLCODE_FLAGS
+        "-fPIC"                     # 位置无关代码
+        "-fno-stack-protector"      # 关闭栈保护
+        "-fomit-frame-pointer"      # 省略帧指针
+        "-fno-builtin"              # 不使用内建函数
+        "-ffreestanding"            # 独立环境
+        "-nostdlib"                 # 不链接标准库
+        "-nostartfiles"             # 不使用启动文件
+        "-static"                   # 静态链接
+        "-Os"                       # 优化大小
+        "-Wall"                     # 警告
+        "-Wextra"                   # 额外警告
+)
+
+# Shellcode专用链接选项
+set(SHELLCODE_LINK_FLAGS
+        "-nostdlib"
+        "-nostartfiles" 
+        "-static"
+        "-Wl,--gc-sections"
+        "-Wl,--strip-all"
+        "-Wl,-T,${CMAKE_SOURCE_DIR}/shellcode.ld"
+        "-Wl,--build-id=none"
+)
+
+# 应用编译选项
+string(REPLACE ";" " " SHELLCODE_FLAGS_STR "${SHELLCODE_FLAGS}")
+string(REPLACE ";" " " SHELLCODE_LINK_FLAGS_STR "${SHELLCODE_LINK_FLAGS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SHELLCODE_FLAGS_STR}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SHELLCODE_LINK_FLAGS_STR}")
+
+# 架构设置
+if(ANDROID_ABI STREQUAL "arm64-v8a")
+    add_definitions(-DARCH_ARM64)
+elseif(ANDROID_ABI STREQUAL "armeabi-v7a")
+    add_definitions(-DARCH_ARM32)
+else()
+    message(FATAL_ERROR "不支持的Android ABI: ${ANDROID_ABI}")
+endif()
+
+add_definitions(-DANDROID_PLATFORM -D__ANDROID__)
+include_directories(${CMAKE_SOURCE_DIR}/include)
+
+# ===========================================
+# 模块化源文件定义
+# ===========================================
+
+# 定义源文件列表
+set(SOURCES
+    src/modular_entry.c
+    src/shellcode_main_refactored.c
+    src/logger.c
+    src/file_ops.c
+    src/dobby_maps_parser.c
+    src/dobby_symbol_resolver.c
+    src/string_utils.c
+    src/syscall_wrapper.c
+)
+
+# ===========================================
+# 构建目标定义
+# ===========================================
+
+add_executable(shellcode ${SOURCES})
+set_target_properties(shellcode PROPERTIES OUTPUT_NAME "shellcode")
+
+# ===========================================
+# 后期处理命令
+# ===========================================
+
+# 生成二进制文件
+add_custom_command(TARGET shellcode POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY} -O binary -j .text -j .rodata -j .data
+    $<TARGET_FILE:shellcode>
+    ${CMAKE_BINARY_DIR}/shellcode.bin
+    COMMENT "gen shellcode.bin"
+)
+
+# 生成反汇编
+add_custom_command(TARGET shellcode POST_BUILD
+    COMMAND ${CMAKE_OBJDUMP} -d $<TARGET_FILE:shellcode> > ${CMAKE_BINARY_DIR}/shellcode.asm
+    COMMENT "gen shellcode.asm"
+)
+
+# ===========================================
+# 构建信息
+# ===========================================
+
+message(STATUS "===== 模块化 Android Shellcode 构建配置 =====")
+message(STATUS "架构: ${ANDROID_ABI}")
+message(STATUS "输出目标: shellcode.bin, shellcode.asm")
+message(STATUS "=============================================")
+
+# 生成链接脚本
+configure_file(
+    ${CMAKE_SOURCE_DIR}/shellcode.ld.in
+    ${CMAKE_SOURCE_DIR}/shellcode.ld
+    @ONLY
+)
+
+```
+
+`README.md`:
+
+```md
+# Android Shellcode 项目
+
+这是一个专门为Android平台设计的shellcode开发框架，可以生成完全独立的二进制文件，用于安全研究和渗透测试。
+
+## 🎯 主要特性
+
+- **纯C实现** - 使用内联汇编，无需单独的.s文件
+- **无依赖库** - 完全通过系统调用实现，不依赖任何系统库
+- **跨架构支持** - 支持ARM32和ARM64架构
+- **ELF符号解析** - 可以读取maps文件并解析SO文件的符号表
+- **位置无关代码** - 生成的shellcode可以在任意地址执行
+- **易于集成** - 自动生成C头文件，便于嵌入到其他程序中
+
+## 📁 项目结构
+
+```
+ShellCode/
+├── CMakeLists.txt              # CMake构建配置
+├── shellcode.ld.in             # 链接脚本模板
+├── bin_to_header.py            # 二进制转C头文件工具
+├── build_shellcode.sh          # 自动构建脚本
+├── README.md                   # 项目说明
+├── include/                    # 头文件目录
+│   ├── syscall_wrapper.h       # 系统调用包装器
+│   ├── android_utils.h         # Android工具函数
+│   └── elf_parser.h            # ELF文件解析器
+└── src/                        # 源文件目录
+    ├── entry.c                 # 程序入口点
+    ├── syscall_wrapper.c       # 系统调用实现
+    ├── android_utils.c         # 工具函数实现
+    ├── elf_parser.c            # ELF解析实现
+    ├── shellcode_manager.c     # Shellcode管理
+    └── main.c                  # 主程序演示
+```
+
+
+
+
+## 💡 使用示例
+
+### 在其他SO文件中加载和执行shellcode
+
+```c
+#include <sys/mman.h>
+#include <string.h>
+#include "shellcode_data.h"  // 自动生成的头文件
+
+int execute_shellcode() {
+    // 分配可执行内存
+    void *exec_mem = mmap(NULL, shellcode_size,
+                         PROT_READ | PROT_WRITE | PROT_EXEC,
+                         MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    
+    if (exec_mem == MAP_FAILED) {
+        return -1;
+    }
+    
+    // 复制shellcode到可执行内存
+    memcpy(exec_mem, shellcode_data, shellcode_size);
+    
+    // 执行shellcode (从偏移0开始，即_start函数)
+    void (*shellcode_func)(void) = (void (*)(void))exec_mem;
+    shellcode_func();
+    
+    // 清理内存
+    munmap(exec_mem, shellcode_size);
+    
+    return 0;
+}
+```
+
+### 直接加载二进制文件
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/mman.h>
+
+int load_and_execute_shellcode(const char *filename) {
+    FILE *file = fopen(filename, "rb");
+    if (!file) return -1;
+    
+    // 获取文件大小
+    fseek(file, 0, SEEK_END);
+    size_t size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+    
+    // 分配可执行内存
+    void *exec_mem = mmap(NULL, size,
+                         PROT_READ | PROT_WRITE | PROT_EXEC,
+                         MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    
+    if (exec_mem == MAP_FAILED) {
+        fclose(file);
+        return -1;
+    }
+    
+    // 读取并执行
+    fread(exec_mem, 1, size, file);
+    fclose(file);
+    
+    void (*shellcode_func)(void) = (void (*)(void))exec_mem;
+    shellcode_func();
+    
+    munmap(exec_mem, size);
+    return 0;
+}
+```
+
+## 🔧 核心功能
+
+### ELF符号解析
+
+```c
+// 查找指定库中的符号
+unsigned long malloc_addr = find_symbol_address("libc.so", "malloc");
+
+// 解析内存映射
+MemoryMap maps[256];
+int map_count = parse_maps_file(maps, 256);
+
+// 枚举库中的所有符号
+SymbolInfo symbols[1024];
+int symbol_count = parse_elf_symbols("/system/lib64/libc.so", base_addr, symbols, 1024);
+```
+
+### 系统调用
+
+```c
+// 直接使用系统调用
+ssize_t bytes = sys_write(1, "Hello Android\n", 14);
+int fd = sys_open("/proc/version", O_RDONLY, 0);
+void *mem = sys_mmap(0, 4096, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+```
+
+### 该项目使用CLion构建 请查看CLion配置说明或者自行构建
+
+### 编译器标志
+
+项目使用以下关键编译标志：
+
+- `-fPIC` - 生成位置无关代码
+- `-nostdlib` - 不链接标准库
+- `-nostartfiles` - 不使用启动文件
+- `-fno-stack-protector` - 关闭栈保护
+- `-Os` - 优化代码大小
+
+## 📋 系统要求
+
+- **Android NDK** r21或更高版本
+- **CMake** 3.18.1或更高版本
+- **Python 3** (可选，用于生成C头文件)
+- **Linux/macOS/Windows** 开发环境
+
+## ⚠️ 注意事项
+
+1. **仅用于合法用途** - 此工具仅供安全研究和教育目的使用
+2. **测试环境** - 请在安全的测试环境中使用
+3. **权限要求** - 某些功能可能需要root权限
+4. **兼容性** - 生成的shellcode与特定的Android版本和架构相关
+
+## 🔗 相关链接
+
+- [Android NDK](https://developer.android.com/ndk)
+- [CMake Documentation](https://cmake.org/documentation/)
+- [ARM Assembly Reference](https://developer.arm.com/documentation/)
+
+## 📝 许可证
+
+本项目仅供学习和研究使用，请遵守相关法律法规。 
+```
+
+`improved_loader.cpp`:
+
+```cpp
+#include <android/log.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <string.h>
+#include <signal.h>
+#include <setjmp.h>
+
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "LOADER", __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "LOADER", __VA_ARGS__)
+
+// 用于异常处理的全局变量
+static jmp_buf crash_jmp;
+static volatile bool crashed = false;
+
+// 信号处理函数
+void crash_handler(int sig) {
+    LOGE("Shellcode crashed with signal %d (%s)", sig, strerror(errno));
+    crashed = true;
+    longjmp(crash_jmp, 1);
+}
+
+void hexDump(const void* data, size_t size) {
+    const unsigned char* bytes = (const unsigned char*)data;
+    for (size_t i = 0; i < size; i += 16) {
+        LOGI("%04lx: ", i);
+        // 打印16个字节的十六进制
+        for (size_t j = 0; j < 16 && i + j < size; j++) {
+            LOGI("%02x ", bytes[i + j]);
+        }
+        LOGI("\n");
+    }
+}
+
+void LoadShellCode() {
+    std::string shellcodePath = "/data/data/com.gxooxzk.nyhakg/shellcode.bin";
+    
+    LOGI("=== Starting shellcode loading process ===");
+    LOGI("Shellcode path: %s", shellcodePath.c_str());
+    
+    // 检查文件是否存在
+    if (access(shellcodePath.c_str(), F_OK) != 0) {
+        LOGE("Shellcode file does not exist: %s", shellcodePath.c_str());
+        return;
+    }
+    
+    if (access(shellcodePath.c_str(), R_OK) != 0) {
+        LOGE("No read permission for shellcode file: %s", shellcodePath.c_str());
+        return;
+    }
+    
+    // 打开文件
+    int fd = open(shellcodePath.c_str(), O_RDONLY);
+    if (fd < 0) {
+        LOGE("Failed to open shellcode file: %s (errno: %d)", shellcodePath.c_str(), errno);
+        return;
+    }
+    
+    // 获取文件大小
+    off_t file_size = lseek(fd, 0, SEEK_END);
+    lseek(fd, 0, SEEK_SET);
+    
+    LOGI("Shellcode file size: %ld bytes", file_size);
+    
+    if (file_size <= 0 || file_size > 1024 * 1024) { // 限制最大1MB
+        LOGE("Invalid file size: %ld", file_size);
+        close(fd);
+        return;
+    }
+    
+    // 分配可执行内存
+    void* shellcode_memory = mmap(NULL, file_size,
+                                  PROT_READ | PROT_WRITE | PROT_EXEC,
+                                  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    
+    if (shellcode_memory == MAP_FAILED) {
+        LOGE("Failed to allocate executable memory: %s (errno: %d)", strerror(errno), errno);
+        close(fd);
+        return;
+    }
+    
+    LOGI("Allocated executable memory at: %p", shellcode_memory);
+    
+    // 读取shellcode到内存
+    ssize_t bytes_read = read(fd, shellcode_memory, file_size);
+    close(fd);
+    
+    if (bytes_read != file_size) {
+        LOGE("Failed to read complete file. Read %ld/%ld bytes", bytes_read, file_size);
+        munmap(shellcode_memory, file_size);
+        return;
+    }
+    
+    LOGI("Shellcode loaded successfully");
+    LOGI("First 64 bytes of shellcode:");
+    hexDump(shellcode_memory, 64);
+    
+    // 检查shellcode开头是否合理（ARM64魔数检查）
+    const unsigned char* bytes = (const unsigned char*)shellcode_memory;
+    LOGI("First 4 bytes: %02x %02x %02x %02x", bytes[0], bytes[1], bytes[2], bytes[3]);
+    
+    // 确保指令缓存同步
+    __builtin___clear_cache((char*)shellcode_memory, (char*)shellcode_memory + file_size);
+    LOGI("Instruction cache cleared");
+    
+    // 设置信号处理器捕获崩溃
+    struct sigaction old_sigsegv, old_sigbus, old_sigill;
+    struct sigaction sa;
+    sa.sa_handler = crash_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    
+    sigaction(SIGSEGV, &sa, &old_sigsegv);
+    sigaction(SIGBUS, &sa, &old_sigbus);
+    sigaction(SIGILL, &sa, &old_sigill);
+    
+    crashed = false;
+    
+    // 使用setjmp/longjmp进行异常处理
+    if (setjmp(crash_jmp) == 0) {
+        LOGI("About to execute shellcode at address: %p", shellcode_memory);
+        
+        // 保存当前上下文信息
+        void* current_sp;
+        #ifdef __aarch64__
+        __asm__ volatile ("mov %0, sp" : "=r" (current_sp));
+        #elif defined(__arm__)
+        __asm__ volatile ("mov %0, sp" : "=r" (current_sp));
+        #endif
+        
+        LOGI("Current stack pointer: %p", current_sp);
+        LOGI("Executing shellcode NOW...");
+        
+        typedef void (*shellcode_func_t)(void);
+        auto shellcode_func = (shellcode_func_t)shellcode_memory;
+        
+        // 调用shellcode
+        shellcode_func();
+        
+        LOGI("*** SHELLCODE RETURNED SUCCESSFULLY ***");
+        
+    } else {
+        LOGE("*** SHELLCODE CRASHED - RECOVERED ***");
+    }
+    
+    // 恢复信号处理器
+    sigaction(SIGSEGV, &old_sigsegv, nullptr);
+    sigaction(SIGBUS, &old_sigbus, nullptr);
+    sigaction(SIGILL, &old_sigill, nullptr);
+    
+    if (!crashed) {
+        LOGI("Shellcode execution completed normally");
+    } else {
+        LOGE("Shellcode execution failed with crash");
+    }
+    
+    // 释放内存
+    if (munmap(shellcode_memory, file_size) == -1) {
+        LOGE("Failed to unmap memory: %s", strerror(errno));
+    } else {
+        LOGI("Memory unmapped successfully");
+    }
+    
+    LOGI("=== Shellcode loading process completed ===");
+} 
+```
+
+`include/android_utils.h`:
+
+```h
+#ifndef ANDROID_UTILS_H
+#define ANDROID_UTILS_H
+
+#include "syscall_wrapper.h"
+
+// 前向声明，避免循环依赖
+#ifdef __LP64__
+    typedef unsigned long long Elf_Addr;
+#else
+    typedef unsigned int Elf_Addr;
+#endif
+
+// 字符串函数
+void *memcpy(void *dest, const void *src, size_t n);
+void *memset(void *s, int c, size_t n);
+int strcmp(const char *s1, const char *s2);
+char *strcat(char *dest, const char *src);
+char *strcpy(char *dest, const char *src);
+char *strncpy(char *dest, const char *src, size_t n);
+size_t strlen(const char *str);
+char *strstr(const char *haystack, const char *needle);
+char *strchr(const char *s, int c);
+
+// 数字转换
+char *itoa(int value, char *str, int base);
+int atoi(const char *str);
+long atol(const char *str);
+
+// 简单的数字转字符串函数（用于shellcode）
+void simple_itoa(int value, char *buffer, size_t buffer_size);
+void simple_itoa_hex(Elf_Addr value, char *buffer, size_t buffer_size);
+
+// 网络字节序转换
+unsigned int htonl(unsigned int hostlong);
+unsigned short htons(unsigned short hostshort);
+unsigned int ntohl(unsigned int netlong);
+unsigned short ntohs(unsigned short netshort);
+
+// 网络连接
+int create_tcp_connection(unsigned int ip, unsigned short port);
+
+// 文件操作
+int file_exists(const char *path);
+ssize_t read_file(const char *path, void *buffer, size_t size);
+ssize_t write_file(const char *path, const void *buffer, size_t size);
+
+// 十六进制转换
+void bytes_to_hex(const unsigned char *bytes, size_t len, char *hex_str);
+int hex_to_bytes(const char *hex_str, unsigned char *bytes, size_t max_len);
+
+// 字符串解析
+int parse_hex_address(const char *hex_str, Elf_Addr *addr);
+char *skip_whitespace(char *str);
+char *find_next_token(char *str, char delimiter);
+
+// 高级封装函数 - 用于简化shellcode逻辑
+typedef struct {
+    char so_name[64];
+    char symbol_name[64];
+    Elf_Addr base_addr;
+    Elf_Addr symbol_addr;
+    int symbol_count;
+} ShellcodeResult;
+
+// 一站式符号查找函数
+int shellcode_find_symbol(const char *so_name, const char *symbol_name, ShellcodeResult *result);
+
+// Android logcat日志函数
+void android_log_info(const char *tag, const char *message);
+void android_log_error(const char *tag, const char *message);
+void android_log_hex(const char *tag, const char *prefix, Elf_Addr value);
+void android_log_debug(const char *tag, const char *message);
+
+#endif // ANDROID_UTILS_H 
+```
+
+`include/dobby_maps_parser.h`:
+
+```h
+#ifndef DOBBY_MAPS_PARSER_H
+#define DOBBY_MAPS_PARSER_H
+
+#include <stddef.h>
+#include <stdint.h>
+
+#define MAX_PATH_LEN 256
+
+// 错误码
+#define MAPS_PARSER_SUCCESS       0
+#define MAPS_PARSER_ERR_NOT_FOUND -1
+#define MAPS_PARSER_ERR_OPEN_FAILED -2
+#define MAPS_PARSER_ERR_READ_FAILED -3
+#define MAPS_PARSER_ERR_PARSE_FAILED -4
+
+// 模仿 Dobby 的 RuntimeModule 结构体
+typedef struct {
+    char path[MAX_PATH_LEN];
+    uintptr_t load_address;
+} dobby_runtime_module_t;
+
+/**
+ * @brief 通过流式解析 /proc/self/maps 查找库信息。
+ * 
+ * @param name 目标库的文件名，例如 "libGuardCore.so"。
+ * @param module [out] 用于存储找到的库信息的结构体指针。
+ * @return MAPS_PARSER_SUCCESS 或错误码。
+ */
+int dobby_get_runtime_module(const char* name, dobby_runtime_module_t* module);
+
+#endif // DOBBY_MAPS_PARSER_H 
+```
+
+`include/dobby_symbol_resolver.h`:
+
+```h
+#ifndef DOBBY_SYMBOL_RESOLVER_H
+#define DOBBY_SYMBOL_RESOLVER_H
+
+#include <elf_common.h>
+#include <stddef.h>
+#include <stdint.h>
+
+// 错误码
+#define RESOLVER_SUCCESS         0
+#define RESOLVER_ERR_NOT_FOUND   -1
+#define RESOLVER_ERR_FILE_ACCESS -2
+#define RESOLVER_ERR_INVALID_ELF -3
+
+// dlsym相关定义
+#define RTLD_DEFAULT    ((void*)0)
+#define RTLD_NEXT      ((void*)-1)
+
+// __loader_dlsym函数指针类型
+typedef void* (*loader_dlsym_t)(void* handle, const char* symbol, const void* caller_addr);
+
+// 全局resolver上下文
+typedef struct {
+    loader_dlsym_t dlsym_func;      // __loader_dlsym函数指针
+    int initialized;                 // 是否已初始化
+} dobby_resolver_ctx_t;
+
+
+
+/**
+ * @brief 移植自 Dobby 的符号解析器。
+ *
+ * @param lib_name 目标库的文件名, e.g., "libGuardCore.so".
+ * @param symbol_name 要查找的符号名.
+ * @param symbol_address [out] 用于存储找到的符号地址的指针.
+ * @return RESOLVER_SUCCESS 或错误码.
+ */
+int dobby_resolve_symbol(const char* lib_name, const char* symbol_name, uintptr_t* symbol_address);
+
+/**
+ * @brief 专门用于从linker64中解析dlsym符号
+ * 
+ * @param symbol_address [out] 用于存储找到的dlsym地址的指针
+ * @return RESOLVER_SUCCESS 或错误码
+ */
+int resolve_linker_dlsym(uintptr_t* symbol_address);
+
+#endif // DOBBY_SYMBOL_RESOLVER_H 
+```
+
+`include/elf_common.h`:
+
+```h
+#ifndef ELF_COMMON_H
+#define ELF_COMMON_H
+
+#include <elf.h>
+
+// 采用 JNI/NDK 中通用的 ElfW() 宏，用于优雅地处理32位和64位架构差异。
+// 使用方法: ElfW(Ehdr), ElfW(Sym), ElfW(Phdr) 等。
+#ifdef ARCH_ARM64
+#define ElfW(type) Elf64_##type
+#else // 默认为 ARM32 或其他32位架构
+#define ElfW(type) Elf32_##type
+#endif
+
+// 注意：
+// 我们不再需要为 Elf_Ehdr, Elf_Shdr 等类型手动 typedef。
+// 所有代码将直接使用 ElfW(Ehdr) 这种形式，使代码更具可移植性和一致性。
+
+#endif // ELF_COMMON_H 
+```
+
+`include/elf_parser.h`:
+
+```h
+#ifndef ELF_PARSER_H
+#define ELF_PARSER_H
+
+#include "syscall_wrapper.h"
+typedef __signed__ int __s32;
+typedef unsigned int __u32;
+// 基本类型定义，参考Android NDK
+typedef unsigned char Elf_Byte;
+typedef unsigned short Elf32_Half;
+typedef unsigned short Elf64_Half;
+typedef __s32 Elf32_Sword;
+typedef unsigned int Elf32_Word;
+typedef unsigned int Elf64_Word;
+typedef unsigned long long Elf64_Xword;
+typedef unsigned int Elf32_Addr;
+typedef unsigned long long Elf64_Addr;
+typedef unsigned int Elf32_Off;
+typedef unsigned long long Elf64_Off;
+typedef long long  Elf64_Sxword;
+
+#define PT_NULL 0
+#define PT_LOAD 1
+#define PT_DYNAMIC 2
+#define PT_INTERP 3
+#define PT_NOTE 4
+#define PT_SHLIB 5
+#define PT_PHDR 6
+// ELF标识符字段索引
+#define EI_MAG0 0
+#define EI_MAG1 1
+#define EI_MAG2 2
+#define EI_MAG3 3
+#define EI_CLASS 4
+#define EI_DATA 5
+#define EI_VERSION 6
+#define EI_OSABI 7
+#define EI_ABIVERSION 8
+#define EI_PAD 9
+#define EI_NIDENT 16
+
+// ELF类别
+#define ELFCLASS32 1
+#define ELFCLASS64 2
+
+// 段类型
+#define SHT_NULL 0
+#define SHT_PROGBITS 1
+#define SHT_SYMTAB 2
+#define SHT_STRTAB 3
+#define SHT_RELA 4
+#define SHT_HASH 5
+#define SHT_DYNAMIC 6
+#define SHT_NOTE 7
+#define SHT_NOBITS 8
+#define SHT_REL 9
+#define SHT_SHLIB 10
+#define SHT_DYNSYM 11
+
+// 符号类型
+#define STT_NOTYPE 0
+#define STT_OBJECT 1
+#define STT_FUNC 2
+#define STT_SECTION 3
+#define STT_FILE 4
+
+// 符号绑定
+#define STB_LOCAL 0
+#define STB_GLOBAL 1
+#define STB_WEAK 2
+
+// ELF32 文件头
+typedef struct {
+    unsigned char e_ident[EI_NIDENT];
+    Elf32_Half e_type;
+    Elf32_Half e_machine;
+    Elf32_Word e_version;
+    Elf32_Addr e_entry;
+    Elf32_Off e_phoff;
+    Elf32_Off e_shoff;
+    Elf32_Word e_flags;
+    Elf32_Half e_ehsize;
+    Elf32_Half e_phentsize;
+    Elf32_Half e_phnum;
+    Elf32_Half e_shentsize;
+    Elf32_Half e_shnum;
+    Elf32_Half e_shstrndx;
+} Elf32_Ehdr;
+
+// ELF64 文件头
+typedef struct {
+    unsigned char e_ident[EI_NIDENT];
+    Elf64_Half e_type;
+    Elf64_Half e_machine;
+    Elf64_Word e_version;
+    Elf64_Addr e_entry;
+    Elf64_Off e_phoff;
+    Elf64_Off e_shoff;
+    Elf64_Word e_flags;
+    Elf64_Half e_ehsize;
+    Elf64_Half e_phentsize;
+    Elf64_Half e_phnum;
+    Elf64_Half e_shentsize;
+    Elf64_Half e_shnum;
+    Elf64_Half e_shstrndx;
+} Elf64_Ehdr;
+
+// ELF32 段头
+typedef struct {
+    Elf32_Word sh_name;
+    Elf32_Word sh_type;
+    Elf32_Word sh_flags;
+    Elf32_Addr sh_addr;
+    Elf32_Off sh_offset;
+    Elf32_Word sh_size;
+    Elf32_Word sh_link;
+    Elf32_Word sh_info;
+    Elf32_Word sh_addralign;
+    Elf32_Word sh_entsize;
+} Elf32_Shdr;
+
+// ELF64 段头
+typedef struct {
+    Elf64_Word sh_name;
+    Elf64_Word sh_type;
+    Elf64_Xword sh_flags;
+    Elf64_Addr sh_addr;
+    Elf64_Off sh_offset;
+    Elf64_Xword sh_size;
+    Elf64_Word sh_link;
+    Elf64_Word sh_info;
+    Elf64_Xword sh_addralign;
+    Elf64_Xword sh_entsize;
+} Elf64_Shdr;
+
+// ELF32 符号表项
+typedef struct {
+    Elf32_Word st_name;
+    Elf32_Addr st_value;
+    Elf32_Word st_size;
+    unsigned char st_info;
+    unsigned char st_other;
+    Elf32_Half st_shndx;
+} Elf32_Sym;
+
+// ELF64 符号表项
+typedef struct {
+    Elf64_Word st_name;
+    unsigned char st_info;
+    unsigned char st_other;
+    Elf64_Half st_shndx;
+    Elf64_Addr st_value;
+    Elf64_Xword st_size;
+} Elf64_Sym;
+
+// ELF32 程序头
+typedef struct {
+    Elf32_Word p_type;
+    Elf32_Off p_offset;
+    Elf32_Addr p_vaddr;
+    Elf32_Addr p_paddr;
+    Elf32_Word p_filesz;
+    Elf32_Word p_memsz;
+    Elf32_Word p_flags;
+    Elf32_Word p_align;
+} Elf32_Phdr;
+
+// ELF64 程序头
+typedef struct {
+    Elf64_Word p_type;
+    Elf64_Word p_flags;
+    Elf64_Off p_offset;
+    Elf64_Addr p_vaddr;
+    Elf64_Addr p_paddr;
+    Elf64_Xword p_filesz;
+    Elf64_Xword p_memsz;
+    Elf64_Xword p_align;
+} Elf64_Phdr;
+typedef struct dynamic {
+    Elf32_Sword d_tag;
+    union {
+        Elf32_Sword d_val;
+        Elf32_Addr d_ptr;
+    } d_un;
+} Elf32_Dyn;
+typedef struct {
+    Elf64_Sxword d_tag;
+    union {
+        Elf64_Xword d_val;
+        Elf64_Addr d_ptr;
+    } d_un;
+} Elf64_Dyn;
+// 架构通用定义（根据编译目标选择）
+#ifdef __LP64__
+    // 64位架构 (ARM64)
+    typedef Elf64_Ehdr Elf_Ehdr;
+    typedef Elf64_Shdr Elf_Shdr;
+    typedef Elf64_Sym Elf_Sym;
+    typedef Elf64_Phdr Elf_Phdr;
+    typedef Elf64_Addr Elf_Addr;
+    typedef Elf64_Off Elf_Off;
+    typedef Elf64_Word Elf_Word;
+    typedef Elf64_Xword Elf_Xword;
+#else
+    // 32位架构 (ARM32)
+    typedef Elf32_Ehdr Elf_Ehdr;
+    typedef Elf32_Shdr Elf_Shdr;
+    typedef Elf32_Sym Elf_Sym;
+    typedef Elf32_Phdr Elf_Phdr;
+    typedef Elf32_Addr Elf_Addr;
+    typedef Elf32_Off Elf_Off;
+    typedef Elf32_Word Elf_Word;
+    #define Elf_Xword Elf32_Word
+#endif
+#if defined(__LP64__)
+#define ElfW(type) Elf64_ ## type
+#else
+#define ElfW(type) Elf32_ ## type
+#endif
+// 内存映射信息结构
+typedef struct {
+    Elf_Addr start;
+    Elf_Addr end;
+    char perms[5];
+    Elf_Off offset;
+    char dev[6];
+    unsigned long inode;
+    char pathname[256];
+} MemoryMap;
+
+// 符号信息结构
+typedef struct {
+    char name[128];
+    Elf_Addr address;
+    Elf_Xword size;
+    unsigned char type;
+} SymbolInfo;
+
+// 符号类型和绑定宏
+#define ELF_ST_BIND(i) ((i) >> 4)
+#define ELF_ST_TYPE(i) ((i) & 0xf)
+#define ELF_ST_INFO(b,t) (((b) << 4) + ((t) & 0xf))
+
+// 函数声明
+int parse_maps_file(MemoryMap *maps, int max_maps);
+int find_library_base(const char *lib_name, Elf_Addr *base_addr);
+int parse_elf_symbols(const char *lib_path, Elf_Addr base_addr, 
+                     SymbolInfo *symbols, int max_symbols);
+Elf_Addr find_symbol_address(const char *lib_name, const char *symbol_name);
+int read_memory_maps(const char *maps_content, MemoryMap *maps, int max_maps);
+
+#endif // ELF_PARSER_H 
+```
+
+`include/file_ops.h`:
+
+```h
+#ifndef FILE_OPS_H
+#define FILE_OPS_H
+
+#include <syscall_wrapper.h> // 包含 syscall 包装器, 里面已经有 <sys/stat.h>
+#include <stddef.h>          // 为了 size_t
+#include <stdint.h>          // 为了 uintptr_t
+
+// 恢复被误删的错误码定义
+#define FILE_SUCCESS        0
+#define FILE_ERR_NOT_FOUND  -1
+#define FILE_ERR_ACCESS     -2
+#define FILE_ERR_SIZE       -3
+#define FILE_ERR_MMAP       -4
+#define FILE_ERR_READ       -5
+
+#define FILE_PATH_MAX 256
+
+// 修正文件信息结构体
+typedef struct {
+    int fd;
+    size_t file_size;      // 保留文件大小
+    void *mapped_memory;   // 保留映射的内存地址
+    struct stat st;        // 加入标准的stat结构体，用于fstat
+} file_info_t;
+
+// 函数声明
+int file_open_and_map(const char *path, file_info_t *info);
+void file_close(file_info_t *info);
+ssize_t file_read(file_info_t *info, void *buf, size_t count, off_t offset);
+
+// 新增函数：用于读取 /proc/ 等大小不确定的文件
+// 返回读取的字节数，或在失败时返回错误码
+ssize_t file_read_all(const char *path, char *buf, size_t buf_size);
+
+// 新增文件写入相关定义
+#define FILE_WRITE_MODE  (O_WRONLY | O_CREAT | O_APPEND)
+#define FILE_PERMISSIONS 0644
+
+// 新增函数声明
+int file_open_for_write(const char *path, file_info_t *info);
+ssize_t file_write(file_info_t *info, const void *buf, size_t count);
+
+#endif //FILE_OPS_H
+```
+
+`include/logger.h`:
+
+```h
+#ifndef LOGGER_H
+#define LOGGER_H
+
+#include <stddef.h>
+#include <stdint.h>
+
+// 日志级别
+typedef enum {
+    LOG_DEBUG = 0,
+    LOG_INFO  = 1,
+    LOG_WARN  = 2,
+    LOG_ERROR = 3
+} log_level_t;
+
+
+// 日志系统初始化
+//void logger_init();
+
+// 基础日志函数
+void log_write(log_level_t level, const char* tag, const char* message);
+
+// 便利宏
+#define LOG_D(tag, msg) log_write(LOG_DEBUG, tag, msg)
+#define LOG_I(tag, msg) log_write(LOG_INFO, tag, msg)
+#define LOG_W(tag, msg) log_write(LOG_WARN, tag, msg)
+#define LOG_E(tag, msg) log_write(LOG_ERROR, tag, msg)
+
+// 格式化日志函数
+void log_printf(log_level_t level, const char* tag, const char* format, ...);
+void log_hex(log_level_t level, const char* tag, const char* prefix, uintptr_t value);
+void log_error_code(log_level_t level, const char* tag, const char* operation, int error_code);
+
+// 便利格式化宏
+#define LOG_DF(tag, fmt, ...) log_printf(LOG_DEBUG, tag, fmt, __VA_ARGS__)
+#define LOG_IF(tag, fmt, ...) log_printf(LOG_INFO, tag, fmt, __VA_ARGS__)
+#define LOG_WF(tag, fmt, ...) log_printf(LOG_WARN, tag, fmt, __VA_ARGS__)
+#define LOG_EF(tag, fmt, ...) log_printf(LOG_ERROR, tag, fmt, __VA_ARGS__)
+
+// 十六进制日志便利宏
+#define LOG_HEX(level, tag, prefix, value) log_hex(level, tag, prefix, value)
+#define LOG_I_HEX(tag, prefix, value) LOG_HEX(LOG_INFO, tag, prefix, value)
+#define LOG_E_HEX(tag, prefix, value) LOG_HEX(LOG_ERROR, tag, prefix, value)
+
+// 错误码日志便利宏
+#define LOG_ERR(level, tag, op, code) log_error_code(level, tag, op, code)
+#define LOG_I_ERR(tag, op, code) LOG_ERR(LOG_INFO, tag, op, code)
+#define LOG_E_ERR(tag, op, code) LOG_ERR(LOG_ERROR, tag, op, code)
+
+// 内部字符串操作函数
+void str_copy(char* dest, const char* src, size_t max_len);
+void str_append(char* dest, const char* src, size_t max_len);
+size_t str_len(const char* str);
+void hex_to_string(char* buffer, uintptr_t value, size_t buffer_size);
+
+#endif // LOGGER_H 
+```
+
+`include/string_utils.h`:
+
+```h
+#ifndef SHELLCODE_STRING_UTILS_H
+#define SHELLCODE_STRING_UTILS_H
+
+#include <stddef.h> // for size_t
+#include <stdint.h> // for uintptr_t
+
+void str_copy(char *dest, const char *src, size_t dest_size);
+void str_append(char* dest, const char* src, size_t max_len);
+size_t str_len(const char* str);
+int str_ends_with(const char* str, const char* suffix);
+int str_compare(const char* s1, const char* s2);
+int str_compare_n(const char* s1, const char* s2, size_t n);
+
+// 新增函数声明
+void hex_to_str(uintptr_t value, char* dest, size_t dest_size);
+void format_log_string_with_hex(char* buf, size_t buf_size, const char* prefix, const char* str, const char* mid, uintptr_t hex_val);
+
+#endif //SHELLCODE_STRING_UTILS_H 
+```
+
+`include/syscall_wrapper.h`:
+
+```h
+#ifndef SYSCALL_WRAPPER_H
+#define SYSCALL_WRAPPER_H
+#include <sys/stat.h>
+#include "asm-generic/unistd.h"
+// Android系统调用号定义
+#ifdef ARCH_ARM64
+    // ARM64系统调用号 (正确的现代Linux值)
+    #define SYS_read            63
+    #define SYS_write           64
+    #define SYS_openat          56  // 现代Linux使用openat而不是open
+    #define SYS_close           57
+    #define SYS_lseek           62  // lseek系统调用
+    #define SYS_fstat           80  // fstat系统调用
+    #define SYS_exit            93
+    #define SYS_execve          221
+    #define SYS_mmap            222
+    #define SYS_munmap          215
+    #define SYS_mprotect        226
+    #define SYS_socket          198
+    #define SYS_connect         203
+    #define SYS_bind            200
+    #define SYS_listen          201
+    #define SYS_accept          202
+    #define SYS_clock_gettime   283 // 修正为Android ARM64正确的clock_gettime系统调用号
+#elif defined(ARCH_ARM32)
+    // ARM32系统调用号
+    #define SYS_read            3
+    #define SYS_write           4
+    #define SYS_open            5
+    #define SYS_close           6
+    #define SYS_lseek           19  // lseek系统调用
+    #define SYS_fstat           108 // fstat系统调用
+    #define SYS_exit            1
+    #define SYS_execve          11
+    #define SYS_mmap            90
+    #define SYS_munmap          91
+    #define SYS_mprotect        125
+    #define SYS_socket          281
+    #define SYS_connect         283
+    #define SYS_bind            282
+    #define SYS_listen          284
+    #define SYS_accept          285
+    #define SYS_clock_gettime   307 // 添加ARM32的clock_gettime系统调用号
+#endif
+
+// 文件操作标志
+#define O_RDONLY            0
+#define O_WRONLY            1
+#define O_RDWR              2
+#define O_CREAT             0100
+#define O_EXCL              0200
+#define O_TRUNC             01000
+#define O_APPEND            02000
+
+// lseek whence 常量
+#define SEEK_SET            0   // 文件开头
+#define SEEK_CUR            1   // 当前位置
+#define SEEK_END            2   // 文件结尾
+
+// 内存保护标志
+#define PROT_READ           0x1
+#define PROT_WRITE          0x2
+#define PROT_EXEC           0x4
+#define PROT_NONE           0x0
+
+// 内存映射标志
+#define MAP_SHARED          0x01
+#define MAP_PRIVATE         0x02
+#define MAP_ANONYMOUS       0x20
+#define MAP_FIXED           0x10
+
+// 网络相关常量
+#define AF_INET             2
+#define SOCK_STREAM         1
+#define SOCK_DGRAM          2
+
+// 基本数据类型
+typedef long ssize_t;
+typedef unsigned long size_t;
+typedef int pid_t;
+typedef unsigned int mode_t;
+typedef long off_t;
+
+
+// 内联汇编系统调用实现
+#ifdef ARCH_ARM64
+    // ARM64内联汇编系统调用
+    static inline long syscall0(long number) {
+        register long x8 __asm__("x8") = number;
+        register long x0 __asm__("x0");
+        __asm__ volatile("svc #0" : "=r"(x0) : "r"(x8) : "memory");
+        return x0;
+    }
+    
+    static inline long syscall1(long number, long arg1) {
+        register long x8 __asm__("x8") = number;
+        register long x0 __asm__("x0") = arg1;
+        __asm__ volatile("svc #0" : "+r"(x0) : "r"(x8) : "memory");
+        return x0;
+    }
+    
+    static inline long syscall2(long number, long arg1, long arg2) {
+        register long x8 __asm__("x8") = number;
+        register long x0 __asm__("x0") = arg1;
+        register long x1 __asm__("x1") = arg2;
+        __asm__ volatile("svc #0" : "+r"(x0) : "r"(x8), "r"(x1) : "memory");
+        return x0;
+    }
+    
+    static inline long syscall3(long number, long arg1, long arg2, long arg3) {
+        register long x8 __asm__("x8") = number;
+        register long x0 __asm__("x0") = arg1;
+        register long x1 __asm__("x1") = arg2;
+        register long x2 __asm__("x2") = arg3;
+        __asm__ volatile("svc #0" : "+r"(x0) : "r"(x8), "r"(x1), "r"(x2) : "memory");
+        return x0;
+    }
+    
+    static inline long syscall4(long number, long arg1, long arg2, long arg3, long arg4) {
+        register long x8 __asm__("x8") = number;
+        register long x0 __asm__("x0") = arg1;
+        register long x1 __asm__("x1") = arg2;
+        register long x2 __asm__("x2") = arg3;
+        register long x3 __asm__("x3") = arg4;
+        __asm__ volatile("svc #0" : "+r"(x0) : "r"(x8), "r"(x1), "r"(x2), "r"(x3) : "memory");
+        return x0;
+    }
+    
+    static inline long syscall5(long number, long arg1, long arg2, long arg3, long arg4, long arg5) {
+        register long x8 __asm__("x8") = number;
+        register long x0 __asm__("x0") = arg1;
+        register long x1 __asm__("x1") = arg2;
+        register long x2 __asm__("x2") = arg3;
+        register long x3 __asm__("x3") = arg4;
+        register long x4 __asm__("x4") = arg5;
+        __asm__ volatile("svc #0" : "+r"(x0) : "r"(x8), "r"(x1), "r"(x2), "r"(x3), "r"(x4) : "memory");
+        return x0;
+    }
+    
+    static inline long syscall6(long number, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6) {
+        register long x8 __asm__("x8") = number;
+        register long x0 __asm__("x0") = arg1;
+        register long x1 __asm__("x1") = arg2;
+        register long x2 __asm__("x2") = arg3;
+        register long x3 __asm__("x3") = arg4;
+        register long x4 __asm__("x4") = arg5;
+        register long x5 __asm__("x5") = arg6;
+        __asm__ volatile("svc #0" : "+r"(x0) : "r"(x8), "r"(x1), "r"(x2), "r"(x3), "r"(x4), "r"(x5) : "memory");
+        return x0;
+    }
+
+#elif defined(ARCH_ARM32)
+    // ARM32内联汇编系统调用
+    static inline long syscall0(long number) {
+        register long r7 __asm__("r7") = number;
+        register long r0 __asm__("r0");
+        __asm__ volatile("swi #0" : "=r"(r0) : "r"(r7) : "memory");
+        return r0;
+    }
+    
+    static inline long syscall1(long number, long arg1) {
+        register long r7 __asm__("r7") = number;
+        register long r0 __asm__("r0") = arg1;
+        __asm__ volatile("swi #0" : "+r"(r0) : "r"(r7) : "memory");
+        return r0;
+    }
+    
+    static inline long syscall2(long number, long arg1, long arg2) {
+        register long r7 __asm__("r7") = number;
+        register long r0 __asm__("r0") = arg1;
+        register long r1 __asm__("r1") = arg2;
+        __asm__ volatile("swi #0" : "+r"(r0) : "r"(r7), "r"(r1) : "memory");
+        return r0;
+    }
+    
+    static inline long syscall3(long number, long arg1, long arg2, long arg3) {
+        register long r7 __asm__("r7") = number;
+        register long r0 __asm__("r0") = arg1;
+        register long r1 __asm__("r1") = arg2;
+        register long r2 __asm__("r2") = arg3;
+        __asm__ volatile("swi #0" : "+r"(r0) : "r"(r7), "r"(r1), "r"(r2) : "memory");
+        return r0;
+    }
+    
+    static inline long syscall4(long number, long arg1, long arg2, long arg3, long arg4) {
+        register long r7 __asm__("r7") = number;
+        register long r0 __asm__("r0") = arg1;
+        register long r1 __asm__("r1") = arg2;
+        register long r2 __asm__("r2") = arg3;
+        register long r3 __asm__("r3") = arg4;
+        __asm__ volatile("swi #0" : "+r"(r0) : "r"(r7), "r"(r1), "r"(r2), "r"(r3) : "memory");
+        return r0;
+    }
+    
+    static inline long syscall5(long number, long arg1, long arg2, long arg3, long arg4, long arg5) {
+        register long r7 __asm__("r7") = number;
+        register long r0 __asm__("r0") = arg1;
+        register long r1 __asm__("r1") = arg2;
+        register long r2 __asm__("r2") = arg3;
+        register long r3 __asm__("r3") = arg4;
+        register long r4 __asm__("r4") = arg5;
+        __asm__ volatile("swi #0" : "+r"(r0) : "r"(r7), "r"(r1), "r"(r2), "r"(r3), "r"(r4) : "memory");
+        return r0;
+    }
+    
+    static inline long syscall6(long number, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6) {
+        register long r7 __asm__("r7") = number;
+        register long r0 __asm__("r0") = arg1;
+        register long r1 __asm__("r1") = arg2;
+        register long r2 __asm__("r2") = arg3;
+        register long r3 __asm__("r3") = arg4;
+        register long r4 __asm__("r4") = arg5;
+        register long r5 __asm__("r5") = arg6;
+        __asm__ volatile("swi #0" : "+r"(r0) : "r"(r7), "r"(r1), "r"(r2), "r"(r3), "r"(r4), "r"(r5) : "memory");
+        return r0;
+    }
+#endif
+
+// 高级系统调用包装函数
+ssize_t sys_read(int fd, void *buf, size_t count);
+ssize_t sys_write(int fd, const void *buf, size_t count);
+int sys_openat(int dirfd, const char *pathname, int flags, mode_t mode);
+int sys_open(const char *pathname, int flags, mode_t mode);  // 便利函数，调用openat
+int sys_close(int fd);
+off_t sys_lseek(int fd, off_t offset, int whence);
+int sys_fstat(int fd, struct stat *statbuf);
+void sys_exit(int status);
+int sys_execve(const char *filename, char *const argv[], char *const envp[]);
+void *sys_mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
+int sys_munmap(void *addr, size_t length);
+int sys_mprotect(void *addr, size_t len, int prot);
+int sys_socket(int domain, int type, int protocol);
+int sys_connect(int sockfd, const void *addr, unsigned int addrlen);
+int sys_bind(int sockfd, const void *addr, unsigned int addrlen);
+int sys_listen(int sockfd, int backlog);
+int sys_accept(int sockfd, void *addr, unsigned int *addrlen);
+
+
+#define CLOCK_REALTIME 0
+
+// 时间系统调用封装
+static inline int sys_clock_gettime(int clock_id, struct timespec *ts) {
+#ifdef ARCH_ARM64
+    return syscall2(__NR_clock_gettime, clock_id, (long)ts);
+#elif defined(ARCH_ARM32)
+    return syscall2(SYS_clock_gettime, clock_id, (long)ts);
+#else
+    return -1;
+#endif
+}
+
+#endif // SYSCALL_WRAPPER_H
+```
+
+`minimal_test_entry.c`:
+
+```c
+#include "syscall_wrapper.h"
+
+// 最简单的测试函数 - 只使用基本系统调用
+int shellcode_main(void) {
+    // 使用基本的write系统调用输出到stdout
+    char msg1[] = "SIMPLE: Shellcode started\n";
+    char msg2[] = "SIMPLE: About to return\n";
+    
+    sys_write(1, msg1, sizeof(msg1) - 1);
+    sys_write(1, msg2, sizeof(msg2) - 1);
+    
+    return 123; // 返回一个特定值
+}
+
+// 入口点
+void __attribute__((naked, noreturn, section(".text._start"))) _start(void) {
+#ifdef ARCH_ARM64
+    __asm__ volatile (
+        "mov x0, sp\n"              
+        "and x0, x0, #0xFFFFFFFFFFFFFFF0\n"  
+        "mov sp, x0\n"              
+        "bl shellcode_main\n"       
+        "ret\n"                     
+        :
+        :
+        : "memory", "x0"
+    );
+#elif defined(ARCH_ARM32)
+    __asm__ volatile (
+        "bic sp, sp, #7\n"          
+        "bl shellcode_main\n"       
+        "bx lr\n"                   
+        :
+        :
+        : "memory", "lr"
+    );
+#endif
+} 
+```
+
+`shellcode.ld`:
+
+```ld
+/* Shellcode链接脚本 - 生成紧凑的二进制文件 */
+
+ENTRY(_start)
+
+SECTIONS
+{
+    /* 将所有代码段合并到一个连续的内存区域 */
+    . = 0x0;
+    
+    /* 代码段 - 放在最前面，确保_start是第一个 */
+    .text : {
+        *(.text._start)     /* 确保_start函数在最前面 */
+        *(.text)            /* 其他代码 */
+        *(.text.*)          /* 所有代码段 */
+    }
+    
+    /* 只读数据段 */
+    .rodata : {
+        *(.rodata)
+        *(.rodata.*)
+    }
+    
+    /* 初始化数据段 */
+    .data : {
+        *(.data)
+        *(.data.*)
+    }
+    
+    /* 未初始化数据段 */
+    .bss : {
+        *(.bss)
+        *(.bss.*)
+        *(COMMON)
+    }
+    
+    /* 丢弃不需要的段 */
+    /DISCARD/ : {
+        *(.note.*)
+        *(.comment)
+        *(.eh_frame)
+        *(.eh_frame_hdr)
+        *(.gnu.hash)
+        *(.gnu.version)
+        *(.gnu.version_d)
+        *(.gnu.version_r)
+        *(.dynsym)
+        *(.dynstr)
+        *(.dynamic)
+        *(.hash)
+        *(.plt)
+        *(.plt.got)
+        *(.got)
+        *(.got.plt)
+        *(.interp)
+        *(.rela.*)
+        *(.rel.*)
+    }
+} 
+
+```
+
+`shellcode.ld.in`:
+
+```in
+/* Shellcode链接脚本 - 生成紧凑的二进制文件 */
+
+ENTRY(_start)
+
+SECTIONS
+{
+    /* 将所有代码段合并到一个连续的内存区域 */
+    . = 0x0;
+    
+    /* 代码段 - 放在最前面，确保_start是第一个 */
+    .text : {
+        *(.text._start)     /* 确保_start函数在最前面 */
+        *(.text)            /* 其他代码 */
+        *(.text.*)          /* 所有代码段 */
+    }
+    
+    /* 只读数据段 */
+    .rodata : {
+        *(.rodata)
+        *(.rodata.*)
+    }
+    
+    /* 初始化数据段 */
+    .data : {
+        *(.data)
+        *(.data.*)
+    }
+    
+    /* 未初始化数据段 */
+    .bss : {
+        *(.bss)
+        *(.bss.*)
+        *(COMMON)
+    }
+    
+    /* 丢弃不需要的段 */
+    /DISCARD/ : {
+        *(.note.*)
+        *(.comment)
+        *(.eh_frame)
+        *(.eh_frame_hdr)
+        *(.gnu.hash)
+        *(.gnu.version)
+        *(.gnu.version_d)
+        *(.gnu.version_r)
+        *(.dynsym)
+        *(.dynstr)
+        *(.dynamic)
+        *(.hash)
+        *(.plt)
+        *(.plt.got)
+        *(.got)
+        *(.got.plt)
+        *(.interp)
+        *(.rela.*)
+        *(.rel.*)
+    }
+} 
+```
+
+`src/dobby_maps_parser.c`:
+
+```c
+#include "dobby_maps_parser.h"
+#include "logger.h"
+#include "string_utils.h"
+#include "syscall_wrapper.h"
+
+#define TAG "DOBBY_MAPS_PARSER"
+#define MAPS_FILE_PATH "/proc/self/maps"
+
+// === 内部辅助函数 ===
+
+static int hex_char_to_value(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    return -1;
+}
+
+static uintptr_t parse_hex(const char** p_str) {
+    uintptr_t val = 0;
+    const char* str = *p_str;
+    while (*str) {
+        int c = hex_char_to_value(*str);
+        if (c < 0) break;
+        val = (val << 4) | c;
+        str++;
+    }
+    *p_str = str;
+    return val;
+}
+
+static const char* skip_whitespace(const char* p) {
+    while (*p == ' ' || *p == '\t') p++;
+    return p;
+}
+
+// === API 实现 ===
+
+int dobby_get_runtime_module(const char* name, dobby_runtime_module_t* module) {
+    if (!name || !module) {
+        return MAPS_PARSER_ERR_PARSE_FAILED;
+    }
+
+    int fd = sys_openat(-100, MAPS_FILE_PATH, O_RDONLY, 0);
+    if (fd < 0) {
+//        LOG_E_ERR(TAG, "open maps file failed", -fd);
+        return MAPS_PARSER_ERR_OPEN_FAILED;
+    }
+
+    char read_buf[4096];
+    char line_buf[512];
+    ssize_t bytes_in_buf = 0;
+    int buf_pos = 0;
+    int line_pos = 0;
+    
+    int result_code = MAPS_PARSER_ERR_NOT_FOUND;
+
+    while (1) {
+        if (buf_pos >= bytes_in_buf) {
+            bytes_in_buf = sys_read(fd, read_buf, sizeof(read_buf));
+            if (bytes_in_buf <= 0) break;
+            buf_pos = 0;
+        }
+
+        while (buf_pos < bytes_in_buf) {
+            char c = read_buf[buf_pos++];
+            if (c == '\n') {
+                line_buf[line_pos] = '\0';
+                line_pos = 0;
+
+                const char* p = line_buf;
+                uintptr_t start_addr = parse_hex(&p);
+                if (*p != '-') continue;
+                p++;
+                parse_hex(&p); // end_addr, not used
+                p = skip_whitespace(p);
+
+                char perms[5];
+                for(int i = 0; i < 4; i++) perms[i] = *p++;
+                perms[4] = '\0';
+                p = skip_whitespace(p);
+
+                uintptr_t offset = parse_hex(&p);
+                p = skip_whitespace(p); // device
+                parse_hex(&p);
+                if (*p != ':') continue;
+                p++;
+                parse_hex(&p);
+                p = skip_whitespace(p);
+                parse_hex(&p); // inode
+                p = skip_whitespace(p);
+
+                const char* pathname = p;
+
+                // Dobby 的判断逻辑: r-xp or r--p 且 offset == 0
+                if (offset == 0 && (str_compare(perms, "r-xp") == 0 || str_compare(perms, "r--p") == 0)) {
+                    if (str_ends_with(pathname, name)) {
+                        module->load_address = start_addr;
+                        str_copy(module->path, pathname, MAX_PATH_LEN);
+                        result_code = MAPS_PARSER_SUCCESS;
+                        goto end_loop;
+                    }
+                }
+
+            } else if (line_pos < sizeof(line_buf) - 1) {
+                line_buf[line_pos++] = c;
+            }
+        }
+    }
+
+end_loop:
+    sys_close(fd);
+    return result_code;
+} 
+```
+
+`src/dobby_symbol_resolver.c`:
+
+```c
+#include "dobby_symbol_resolver.h"
+#include "dobby_maps_parser.h"
+#include "file_ops.h"
+#include "logger.h"
+#include "string_utils.h"
+#include "android_utils.h"
+
+#define TAG "DOBBY_SYMBOL_RESOLVER"
+
+// 全局resolver上下文
+
+// 辅助函数：将数字转换为十六进制字符串
+static void hex_to_str_fixed(char* buf, uintptr_t val, int width) {
+    const char hex_chars[] = "0123456789ABCDEF";
+    buf[width] = '\0';
+    for (int i = width - 1; i >= 0; i--) {
+        buf[i] = hex_chars[val & 0xF];
+        val >>= 4;
+    }
+}
+
+// 新增：打印符号表项的二进制数据
+static void print_sym_binary_data(const ElfW(Sym)* sym) {
+    char log_buf[512];
+    char hex_buf[8];
+    
+    // 构建日志消息
+    str_copy(log_buf, "Symbol binary data:\n  st_name: 0x", sizeof(log_buf));
+    hex_to_str_fixed(hex_buf, sym->st_name, 8);
+    str_append(log_buf, hex_buf, sizeof(log_buf));
+    
+    str_append(log_buf, "\n  st_info: 0x", sizeof(log_buf));
+    hex_to_str_fixed(hex_buf, sym->st_info, 2);
+    str_append(log_buf, hex_buf, sizeof(log_buf));
+    str_append(log_buf, " (bind: 0x", sizeof(log_buf));
+    hex_to_str_fixed(hex_buf, ELF_ST_BIND(sym->st_info), 1);
+    str_append(log_buf, hex_buf, sizeof(log_buf));
+    str_append(log_buf, ", type: 0x", sizeof(log_buf));
+    hex_to_str_fixed(hex_buf, ELF_ST_TYPE(sym->st_info), 1);
+    str_append(log_buf, hex_buf, sizeof(log_buf));
+    str_append(log_buf, ")\n", sizeof(log_buf));
+    
+    str_append(log_buf, "  st_other: 0x", sizeof(log_buf));
+    hex_to_str_fixed(hex_buf, sym->st_other, 2);
+    str_append(log_buf, hex_buf, sizeof(log_buf));
+    
+    str_append(log_buf, "\n  st_shndx: 0x", sizeof(log_buf));
+    hex_to_str_fixed(hex_buf, sym->st_shndx, 4);
+    str_append(log_buf, hex_buf, sizeof(log_buf));
+    
+    str_append(log_buf, "\n  st_value: 0x", sizeof(log_buf));
+    hex_to_str_fixed(hex_buf, sym->st_value, 16);
+    str_append(log_buf, hex_buf, sizeof(log_buf));
+    
+    str_append(log_buf, "\n  st_size: 0x", sizeof(log_buf));
+    hex_to_str_fixed(hex_buf, sym->st_size, 16);
+    str_append(log_buf, hex_buf, sizeof(log_buf));
+    
+//    LOG_D(TAG, log_buf);
+    
+    // 打印原始字节
+    str_copy(log_buf, "Raw bytes: ", sizeof(log_buf));
+    const unsigned char* raw = (const unsigned char*)sym;
+    for (size_t i = 0; i < sizeof(ElfW(Sym)); i++) {
+        hex_to_str_fixed(hex_buf, raw[i], 2);
+        str_append(log_buf, hex_buf, sizeof(log_buf));
+        str_append(log_buf, " ", sizeof(log_buf));
+    }
+    LOG_D(TAG, log_buf);
+}
+
+// Dobby 风格的ELF上下文结构体
+typedef struct {
+    void* header;
+    uintptr_t load_bias;
+    ElfW(Sym)* dynsym;
+    const char* dynstr;
+    size_t dynsym_count;
+    ElfW(Sym)* symtab;
+    const char* strtab;
+    size_t symtab_count;
+} dobby_elf_ctx_t;
+
+// 初始化上下文
+static int dobby_elf_ctx_init(dobby_elf_ctx_t* ctx, void* header, uintptr_t load_address) {
+    ElfW(Ehdr)* ehdr = (ElfW(Ehdr)*)header;
+    if (ehdr->e_ident[EI_MAG0] != ELFMAG0 || ehdr->e_ident[EI_MAG1] != ELFMAG1) {
+        return RESOLVER_ERR_INVALID_ELF;
+    }
+    
+    ctx->header = header;
+    ElfW(Phdr)* phdr = (ElfW(Phdr)*)((char*)header + ehdr->e_phoff);
+
+    // 计算 load_bias，Dobby 的关键逻辑
+    for (int i = 0; i < ehdr->e_phnum; i++) {
+        if (phdr[i].p_type == PT_LOAD) {
+            ctx->load_bias = load_address - phdr[i].p_vaddr;
+            break;
+        }
+    }
+    
+    ElfW(Shdr)* shdr = (ElfW(Shdr)*)((char*)header + ehdr->e_shoff);
+    const char* sh_strtab = (const char*)header + shdr[ehdr->e_shstrndx].sh_offset;
+
+    for (int i = 0; i < ehdr->e_shnum; i++) {
+        const char* name = sh_strtab + shdr[i].sh_name;
+        if (shdr[i].sh_type == SHT_DYNSYM) {
+            ctx->dynsym = (ElfW(Sym)*)((char*)header + shdr[i].sh_offset);
+            ctx->dynsym_count = shdr[i].sh_size / sizeof(ElfW(Sym));
+        } else if (shdr[i].sh_type == SHT_SYMTAB) {
+            ctx->symtab = (ElfW(Sym)*)((char*)header + shdr[i].sh_offset);
+            ctx->symtab_count = shdr[i].sh_size / sizeof(ElfW(Sym));
+        } else if (shdr[i].sh_type == SHT_STRTAB) {
+            if (str_compare(name, ".dynstr") == 0) {
+                ctx->dynstr = (const char*)((char*)header + shdr[i].sh_offset);
+            } else if (str_compare(name, ".strtab") == 0) {
+                ctx->strtab = (const char*)((char*)header + shdr[i].sh_offset);
+            }
+        }
+    }
+    return RESOLVER_SUCCESS;
+}
+
+// 遍历符号
+static uintptr_t dobby_elf_iterate_symbols(dobby_elf_ctx_t* ctx, const char* symbol_name) {
+
+    if (ctx->dynsym) {
+//        LOG_I(TAG, "Iterating .dynsym table...");
+        for (size_t i = 0; i < ctx->dynsym_count; i++) {
+            const char* current_sym_name = ctx->dynstr + ctx->dynsym[i].st_name;
+
+            if (str_compare(symbol_name, current_sym_name) == 0) {
+                // 打印符号表项的二进制数据
+//                print_sym_binary_data(&ctx->dynsym[i]);
+                if (ctx->dynsym[i].st_value != 0) {
+                    return ctx->dynsym[i].st_value;
+                }
+            }
+        }
+    }
+    if (ctx->symtab) {
+//        LOG_I(TAG, "Iterating .symtab table...");
+        for (size_t i = 0; i < ctx->symtab_count; i++) {
+            const char* current_sym_name = ctx->strtab + ctx->symtab[i].st_name;
+
+            if (str_compare(symbol_name, current_sym_name) == 0) {
+                // 打印符号表项的二进制数据
+
+                if (ctx->symtab[i].st_value != 0) {
+                   return ctx->symtab[i].st_value;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+
+
+// 修改主要的符号解析函数
+int dobby_resolve_symbol(const char* lib_name, const char* symbol_name, uintptr_t* symbol_address) {
+    if (!symbol_address) {
+        return RESOLVER_ERR_NOT_FOUND;
+    }
+
+
+
+    dobby_runtime_module_t module;
+    if (dobby_get_runtime_module(lib_name, &module) != MAPS_PARSER_SUCCESS) {
+//        LOG_E(TAG, "Failed to find library in maps");
+        return RESOLVER_ERR_NOT_FOUND;
+    }
+
+    file_info_t file_info;
+    if (file_open_and_map(module.path, &file_info) != FILE_SUCCESS) {
+//        LOG_E_ERR(TAG, "Failed to open library file", 0);
+        return RESOLVER_ERR_FILE_ACCESS;
+    }
+    
+    dobby_elf_ctx_t elf_ctx = {0};
+    if (dobby_elf_ctx_init(&elf_ctx, file_info.mapped_memory, module.load_address) != RESOLVER_SUCCESS) {
+        file_close(&file_info);
+        return RESOLVER_ERR_INVALID_ELF;
+    }
+
+    uintptr_t offset = dobby_elf_iterate_symbols(&elf_ctx, symbol_name);
+    file_close(&file_info);
+
+    if (offset == 0) {
+//        LOG_E(TAG, "Symbol not found");
+        return RESOLVER_ERR_NOT_FOUND;
+    }
+
+    *symbol_address = elf_ctx.load_bias + offset;
+//    LOG_I_HEX(TAG, "Symbol resolved via ELF parsing:", *symbol_address);
+    return RESOLVER_SUCCESS;
+} 
+
+```
+
+`src/file_ops.c`:
+
+```c
+#include "file_ops.h"
+#include "logger.h"
+#include "syscall_wrapper.h"
+
+#define TAG "FILE_OPS"
+
+// 统一的函数，负责打开文件、获取大小并进行内存映射
+int file_open_and_map(const char *path, file_info_t *info) {
+    if (!path || !info) {
+        return FILE_ERR_ACCESS;
+    }
+    
+//    // 为了调试，手动构建日志字符串来打印路径
+//    char log_buffer[FILE_PATH_MAX + 20];
+//    str_copy(log_buffer, "Opening path: ", sizeof(log_buffer));
+//    str_append(log_buffer, path, sizeof(log_buffer));
+//    LOG_I(TAG, log_buffer);
+
+    // 初始化结构体
+    info->fd = -1;
+    info->file_size = 0;
+    info->mapped_memory = NULL;
+
+    // 1. 打开文件
+    // AT_FDCWD (-100) 表示路径是相对于当前工作目录的
+    info->fd = sys_openat(-100, path, O_RDONLY, 0);
+    if (info->fd < 0) {
+//        LOG_E_ERR(TAG, "Failed to open file", -info->fd);
+        return FILE_ERR_ACCESS;
+    }
+//    LOG_I_HEX(TAG, "File opened with fd: ", info->fd);
+
+
+    // 2. 获取文件状态和大小
+    if (sys_fstat(info->fd, &info->st) < 0) {
+//        LOG_E(TAG, "fstat failed");
+        file_close(info); // 使用统一的关闭函数
+        return FILE_ERR_ACCESS;
+    }
+    info->file_size = info->st.st_size; // 从 stat 结构体获取大小
+//    LOG_I_HEX(TAG, "File size: ", info->file_size);
+
+    if (info->file_size == 0) {
+//        LOG_W(TAG, "File size is zero. Continuing without mapping.");
+        // 文件大小为0是有效情况，直接成功返回，但不进行映射
+        return FILE_SUCCESS;
+    }
+
+    // 3. 内存映射
+    info->mapped_memory = sys_mmap(NULL, info->file_size, PROT_READ, MAP_PRIVATE, info->fd, 0);
+    if (info->mapped_memory == (void *)-1 || info->mapped_memory == NULL) {
+//        LOG_E(TAG, "mmap failed");
+        file_close(info); // 映射失败，关闭文件
+        return FILE_ERR_MMAP;
+    }
+//    LOG_I_HEX(TAG, "File mapped at: ", (uintptr_t)info->mapped_memory);
+
+    return FILE_SUCCESS;
+}
+
+// 统一的资源释放函数
+void file_close(file_info_t *info) {
+    if (!info) return;
+
+    // 1. 解除内存映射
+    if (info->mapped_memory) {
+        sys_munmap(info->mapped_memory, info->file_size);
+        info->mapped_memory = NULL;
+    }
+
+    // 2. 关闭文件描述符
+    if (info->fd >= 0) {
+        sys_close(info->fd);
+        LOG_D(TAG, "Closed file descriptor");
+        info->fd = -1;
+    }
+}
+
+// 新函数实现：读取一个文件的全部内容到缓冲区
+ssize_t file_read_all(const char *path, char *buf, size_t buf_size) {
+    if (!path || !buf || buf_size == 0) {
+        return FILE_ERR_ACCESS;
+    }
+
+    int fd = sys_openat(-100, path, O_RDONLY, 0); // AT_FDCWD = -100
+    if (fd < 0) {
+        LOG_E_ERR(TAG, "file_read_all: open failed", -fd);
+        return FILE_ERR_ACCESS;
+    }
+
+    size_t total_read = 0;
+    ssize_t bytes_read;
+
+    // 循环读取，直到文件末尾(EOF)或缓冲区满
+    while (total_read < buf_size) {
+        bytes_read = sys_read(fd, buf + total_read, buf_size - total_read);
+        if (bytes_read == 0) { // EOF
+            break;
+        }
+        if (bytes_read < 0) { // Error
+            LOG_E_ERR(TAG, "file_read_all: read failed", -bytes_read);
+            sys_close(fd);
+            return FILE_ERR_READ;
+        }
+        total_read += bytes_read;
+    }
+
+    sys_close(fd);
+    
+    // 确保缓冲区内容是有效的C字符串
+    if (total_read < buf_size) {
+        buf[total_read] = '\0';
+    } else {
+        buf[buf_size - 1] = '\0'; // 如果缓冲区满了，强制截断
+    }
+
+    LOG_I_HEX(TAG, "file_read_all: total bytes read: ", total_read);
+    return total_read;
+}
+
+
+// 从指定偏移读取文件内容
+ssize_t file_read(file_info_t *info, void *buf, size_t count, off_t offset) {
+    if (!info || !buf || info->fd < 0) {
+        return FILE_ERR_ACCESS;
+    }
+    
+    // 使用 lseek 设置文件读取位置
+    if (sys_lseek(info->fd, offset, SEEK_SET) < 0) {
+        LOG_E(TAG, "lseek failed");
+        return FILE_ERR_READ;
+    }
+    
+    // 读取文件内容
+    ssize_t bytes_read = sys_read(info->fd, buf, count);
+    if (bytes_read < 0) {
+        LOG_E_ERR(TAG, "read failed", -bytes_read);
+        return FILE_ERR_READ;
+    }
+    
+    return bytes_read;
+}
+
+// 打开文件用于写入
+int file_open_for_write(const char *path, file_info_t *info) {
+    if (!path || !info) {
+        return FILE_ERR_ACCESS;
+    }
+
+    // 初始化结构体
+    info->fd = -1;
+    info->file_size = 0;
+    info->mapped_memory = NULL;
+
+    // 打开文件，使用写入模式
+    info->fd = sys_openat(-100, path, FILE_WRITE_MODE, FILE_PERMISSIONS);
+    if (info->fd < 0) {
+        LOG_E_ERR(TAG, "Failed to open file for writing", -info->fd);
+        return FILE_ERR_ACCESS;
+    }
+    LOG_I_HEX(TAG, "File opened for writing with fd: ", info->fd);
+
+    return FILE_SUCCESS;
+}
+
+// 写入文件内容
+ssize_t file_write(file_info_t *info, const void *buf, size_t count) {
+    if (!info || !buf || info->fd < 0) {
+        return FILE_ERR_ACCESS;
+    }
+
+    ssize_t bytes_written = sys_write(info->fd, buf, count);
+    if (bytes_written < 0) {
+        LOG_E_ERR(TAG, "Write failed", -bytes_written);
+        return FILE_ERR_READ; // 复用现有错误码
+    }
+
+//    LOG_I_HEX(TAG, "Bytes written: ", bytes_written);
+    return bytes_written;
+}
+```
+
+`src/logger.c`:
+
+```c
+#include "logger.h"
+#include "syscall_wrapper.h"
+#include "string_utils.h"
+#include "file_ops.h"
+
+#define LOG_BUFFER_SIZE 256
+#define FILE_LOG_BUFFER_SIZE 513
+
+// 全局日志回调函数指针
+//static file_info_t log_file = { .fd = -1, .file_size = 0, .mapped_memory = NULL };
+
+// 注意：
+// str_len, str_copy, str_append 等函数的本地实现已被移除。
+// 我们现在依赖于 "string_utils.h" 中提供的统一实现，
+// 以解决链接器报出的 "duplicate symbol" 错误。
+
+// 日志级别字符串
+static const char* level_strings[] = {
+    "[DEBUG]",
+    "[INFO] ",
+    "[WARN] ",
+    "[ERROR]"
+};
+
+
+
+// 十六进制转字符串
+void hex_to_string(char* buffer, uintptr_t value, size_t buffer_size) {
+    const char hex_chars[] = "0123456789abcdef";
+    char temp[32];
+    int pos = 0;
+    
+    // 处理0的特殊情况
+    if (value == 0) {
+        str_copy(buffer, "0", buffer_size);
+        return;
+    }
+    
+    // 转换为十六进制
+    while (value > 0 && pos < 31) {
+        temp[pos++] = hex_chars[value & 0xF];
+        value >>= 4;
+    }
+    
+    // 反转字符串
+    int i = 0;
+    while (pos > 0 && i < buffer_size - 1) {
+        buffer[i++] = temp[--pos];
+    }
+    buffer[i] = '\0';
+}
+
+// 日期时间结构体
+typedef struct {
+    int year;
+    int month;
+    int day;
+    int hour;
+    int minute;
+    int second;
+} datetime_t;
+
+// 判断是否为闰年
+static int is_leap_year(int year) {
+    if (year % 4 != 0) return 0;
+    if (year % 100 != 0) return 1;
+    if (year % 400 == 0) return 1;
+    return 0;
+}
+
+// 将epoch时间转换为日期时间
+static void epoch_to_datetime(time_t epoch, datetime_t *dt) {
+    // 检查epoch是否为负数或超出合理范围(0~9999年)
+    if (epoch < 0 || epoch > 253402300799LL) {
+        dt->year = 1970;
+        dt->month = 1;
+        dt->day = 1;
+        dt->hour = 0;
+        dt->minute = 0;
+        dt->second = 0;
+        return;
+    }
+
+    // 从1970年开始计算
+    dt->year = 1970;
+    int days = epoch / 86400;
+    int seconds = epoch % 86400;
+
+    // 计算时分秒
+    dt->hour = seconds / 3600;
+    dt->minute = (seconds % 3600) / 60;
+    dt->second = seconds % 60;
+
+    // 计算年和天
+    while (1) {
+        int year_days = is_leap_year(dt->year) ? 366 : 365;
+        if (days < year_days) break;
+        days -= year_days;
+        dt->year++;
+    }
+
+    // 计算月和日
+    int month_days[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+    if (is_leap_year(dt->year)) month_days[1] = 29;
+
+    dt->month = 0;
+    while (dt->month < 12 && days >= month_days[dt->month]) {
+        days -= month_days[dt->month];
+        dt->month++;
+    }
+    dt->month++;
+    dt->day = days + 1;
+}
+
+// 整数转字符串（带前导零）
+static void int_to_string(int num, char *buffer, int min_digits) {
+    int i = 0;
+    int temp = num;
+    char digits[16];
+
+    // 处理0的情况
+    if (temp == 0) {
+        digits[i++] = '0';
+    } else {
+        // 转换数字为字符
+        while (temp > 0) {
+            digits[i++] = (temp % 10) + '0';
+            temp /= 10;
+        }
+    }
+
+    // 补前导零
+    while (i < min_digits) {
+        digits[i++] = '0';
+    }
+
+    // 反转字符串
+    int j = 0;
+    while (i > 0) {
+        buffer[j++] = digits[--i];
+    }
+    buffer[j] = '\0';
+}
+
+// 时间戳格式化函数
+static void format_timestamp(struct timespec *ts, char *buffer, size_t buffer_size) {
+    datetime_t dt;
+    epoch_to_datetime(ts->tv_sec, &dt);
+    char temp[16];
+
+    // YYYY-MM-DD HH:MM:SS
+    str_copy(buffer, "[", buffer_size);
+
+    int_to_string(dt.year, temp, 4);
+    str_append(buffer, temp, buffer_size);
+    str_append(buffer, "-", buffer_size);
+
+    int_to_string(dt.month, temp, 2);
+    str_append(buffer, temp, buffer_size);
+    str_append(buffer, "-", buffer_size);
+
+    int_to_string(dt.day, temp, 2);
+    str_append(buffer, temp, buffer_size);
+    str_append(buffer, " ", buffer_size);
+
+    int_to_string(dt.hour, temp, 2);
+    str_append(buffer, temp, buffer_size);
+    str_append(buffer, ":", buffer_size);
+
+    int_to_string(dt.minute, temp, 2);
+    str_append(buffer, temp, buffer_size);
+    str_append(buffer, ":", buffer_size);
+
+    int_to_string(dt.second, temp, 2);
+    str_append(buffer, temp, buffer_size);
+    str_append(buffer, "]", buffer_size);
+}
+
+// 基础日志写入
+void log_write(log_level_t level, const char* tag, const char* message) {
+
+    // 获取当前时间戳
+    struct timespec ts;
+    int ret = sys_clock_gettime(CLOCK_REALTIME, &ts);
+    if (ret != 0) {
+        // 系统调用失败时使用默认时间
+        ts.tv_sec = 0;
+        ts.tv_nsec = 0;
+    }
+    char timestamp[32];
+    format_timestamp(&ts, timestamp, sizeof(timestamp));
+
+    char log_buffer[512];
+
+    // 构建日志消息: [时间戳] [LEVEL] TAG: message
+    str_copy(log_buffer, timestamp, sizeof(log_buffer));
+    str_append(log_buffer, " ", sizeof(log_buffer));
+    str_append(log_buffer, level_strings[level], sizeof(log_buffer));
+    str_append(log_buffer, " ", sizeof(log_buffer));
+    str_append(log_buffer, tag, sizeof(log_buffer));
+    str_append(log_buffer, ": ", sizeof(log_buffer));
+    str_append(log_buffer, message, sizeof(log_buffer));
+
+
+
+//    // 写入日志文件
+//    if (log_file.fd != -1) {
+//        char file_log_buffer[FILE_LOG_BUFFER_SIZE];
+//        str_copy(file_log_buffer, log_buffer, sizeof(file_log_buffer));
+//        str_append(file_log_buffer, "\n", sizeof(file_log_buffer));
+//        file_write(&log_file, file_log_buffer, str_len(file_log_buffer));
+//    }
+}
+
+// 十六进制值日志
+void log_hex(log_level_t level, const char* tag, const char* prefix, uintptr_t value) {
+    char message[256];
+    char hex_str[32];
+    
+    str_copy(message, prefix, sizeof(message));
+    str_append(message, "0x", sizeof(message));
+    
+    hex_to_string(hex_str, value, sizeof(hex_str));
+    str_append(message, hex_str, sizeof(message));
+    
+    log_write(level, tag, message);
+}
+
+// 错误码日志
+void log_error_code(log_level_t level, const char* tag, const char* operation, int error_code) {
+    char message[256];
+    char code_str[32];
+    
+    str_copy(message, operation, sizeof(message));
+    str_append(message, " failed with code ", sizeof(message));
+    
+    hex_to_string(code_str, (uintptr_t)error_code, sizeof(code_str));
+    str_append(message, code_str, sizeof(message));
+    
+    log_write(level, tag, message);
+}
+
+// 简单的格式化日志（支持基本的%s, %d, %x占位符）
+void log_printf(log_level_t level, const char* tag, const char* format, ...) {
+    // 由于shellcode环境限制，这里先实现基础版本
+    // 实际项目中可以扩展支持更多格式化选项
+    char message[512];
+    str_copy(message, format, sizeof(message));
+    log_write(level, tag, message);
+}
+```
+
+`src/modular_entry.c`:
+
+```c
+#include "logger.h"
+
+// 前向声明新的模块化主函数
+uintptr_t shellcode_main_refactored();
+
+/**
+ * @brief 模块化shellcode的入口点 (_start)
+ * 
+ * 这是shellcode的真正执行起点。它负责：
+ * 1. 从寄存器中获取调用者传递的日志回调函数指针。
+ * 2. 将此回调函数传递给新的、重构后的主函数 `shellcode_main_refactored`。
+ * 3. 安全地返回到调用者。
+ */
+void __attribute__((naked, noreturn, section(".text._start"))) _start(void) {
+#ifdef ARCH_ARM64
+    // ARM64: 回调函数指针在 x0 寄存器中
+    __asm__ volatile (
+        // 保存链接寄存器 (x30) 到栈，并为栈对齐预留空间
+        "stp x29, x30, [sp, #-16]!\n"
+        "mov x29, sp\n"
+
+        // 调用新的主函数，x0 已经包含了回调函数指针
+        "bl shellcode_main_refactored\n"
+
+        // 恢复栈和链接寄存器
+        "mov sp, x29\n"
+        "ldp x29, x30, [sp], #16\n"
+        
+        // 返回到调用者
+        "ret\n"
+        :
+        :
+        : "memory", "x0", "x29", "x30"
+    );
+#elif defined(ARCH_ARM32)
+    // ARM32: 回调函数指针在 r0 寄存器中
+    __asm__ volatile (
+        // 保存链接寄存器 (lr)
+        "push {lr}\n"
+        
+        // 调用新的主函数，r0 已经包含了回调函数指针
+        "bl shellcode_main_refactored\n"
+        
+        // 恢复链接寄存器并返回
+        "pop {lr}\n"
+        "bx lr\n"
+        :
+        :
+        : "memory", "r0", "lr"
+    );
+#endif
+} 
+```
+
+`src/shellcode_main_refactored.c`:
+
+```c
+#include "logger.h"
+#include "dobby_symbol_resolver.h" // <--- 引入新的 Dobby 解析器
+
+// 标签定义
+#define TAG_MAIN "SHELLCODE"
+// 目标配置
+static const char* TARGET_LIBRARY = "libxxx.so";
+static const char* TARGET_SYMBOL = "xxxx";
+
+
+
+
+// 主要shellcode逻辑
+uintptr_t shellcode_main_refactored() {
+
+
+
+    uintptr_t symbol_addr;
+    int result = dobby_resolve_symbol(TARGET_LIBRARY, TARGET_SYMBOL, &symbol_addr);
+
+    if (result != RESOLVER_SUCCESS) { // <--- 使用新的成功码
+        return (uintptr_t)result;
+    }
+
+    typedef void (*ioctl)();
+
+    ioctl fun=(ioctl)symbol_addr;
+    fun();
+    return symbol_addr;
+}
+
+
+
+```
+
+`src/shellcode_manager.c`:
+
+```c
+#include "syscall_wrapper.h"
+
+// shellcode管理相关功能实现
+
+// 将数据写入到指定地址并设置为可执行
+int make_executable(void *addr, size_t size) {
+    return sys_mprotect(addr, size, PROT_READ | PROT_WRITE | PROT_EXEC);
+}
+
+// 创建可执行内存区域
+void *alloc_executable_memory(size_t size) {
+    void *mem = sys_mmap(0, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if ((long)mem < 0) {
+        return (void *)0;
+    }
+    
+    // 设置为可执行
+    if (make_executable(mem, size) < 0) {
+        sys_munmap(mem, size);
+        return (void *)0;
+    }
+    
+    return mem;
+}
+
+// 释放可执行内存
+int free_executable_memory(void *addr, size_t size) {
+    return sys_munmap(addr, size);
+}
+
+// 复制shellcode到内存并执行
+int execute_shellcode(const unsigned char *shellcode, size_t size) {
+    // 分配可执行内存
+    void *exec_mem = alloc_executable_memory(size);
+    if (!exec_mem) {
+        return -1;
+    }
+    
+    // 复制shellcode
+    unsigned char *dest = (unsigned char *)exec_mem;
+    const unsigned char *src = shellcode;
+    for (size_t i = 0; i < size; i++) {
+        dest[i] = src[i];
+    }
+    
+    // 执行shellcode (转换为函数指针并调用)
+    void (*func)(void) = (void (*)(void))exec_mem;
+    func();
+    
+    // 清理内存
+    free_executable_memory(exec_mem, size);
+    
+    return 0;
+} 
+```
+
+`src/simple_test_entry.c`:
+
+```c
+#include "syscall_wrapper.h"
+#include "elf_parser.h"
+#include "android_utils.h"
+
+// 前向声明
+int simple_test_main(void);
+
+// 简单测试入口点
+void __attribute__((naked, noreturn, section(".text._start"))) _start(void) {
+#ifdef ARCH_ARM64
+    __asm__ volatile (
+        "bl simple_test_main\n"     // 调用测试函数
+        "ret\n"                     // 返回结果
+        :
+        :
+        : "memory", "x30"
+    );
+#elif defined(ARCH_ARM32)
+    __asm__ volatile (
+        "bl simple_test_main\n"     // 调用测试函数
+        "bx lr\n"                   // 返回结果
+        :
+        :
+        : "memory", "lr"
+    );
+#endif
+}
+
+// 简单测试：只解析maps文件，返回映射数量
+int simple_test_main(void) {
+    MemoryMap maps[256];
+    int map_count = parse_maps_file(maps, 256);
+    
+    if (map_count <= 0) {
+        return -1;  // 解析失败
+    }
+    
+    // 返回找到的映射数量（限制在合理范围内）
+    return (map_count > 1000) ? 1000 : map_count;
+} 
+```
+
+`src/string_utils.c`:
+
+```c
+#include "string_utils.h"
+
+void str_copy(char* dest, const char* src, size_t max_len) {
+    if (!dest || !src || max_len == 0) return;
+    size_t i = 0;
+    while (src[i] != '\0' && i < max_len - 1) {
+        dest[i] = src[i];
+        i++;
+    }
+    dest[i] = '\0';
+}
+
+void str_append(char* dest, const char* src, size_t max_len) {
+    if (!dest || !src || max_len == 0) return;
+    size_t dest_len = 0;
+    while (dest[dest_len] != '\0' && dest_len < max_len) {
+        dest_len++;
+    }
+    if (dest_len >= max_len - 1) return;
+
+    size_t i = 0;
+    while (src[i] != '\0' && dest_len + i < max_len - 1) {
+        dest[dest_len + i] = src[i];
+        i++;
+    }
+    dest[dest_len + i] = '\0';
+}
+
+size_t str_len(const char* str) {
+    if (!str) return 0;
+    size_t i = 0;
+    while (str[i] != '\0') {
+        i++;
+    }
+    return i;
+}
+
+// 检查字符串是否以指定的后缀结尾
+int str_ends_with(const char* str, const char* suffix) {
+    if (!str || !suffix) {
+        return 0; // false
+    }
+
+    size_t str_len = 0;
+    while(str[str_len]) str_len++;
+
+    size_t suffix_len = 0;
+    while(suffix[suffix_len]) suffix_len++;
+
+    if (suffix_len > str_len) {
+        return 0; // false
+    }
+
+    // 从字符串末尾开始比较
+    for (size_t i = 0; i < suffix_len; i++) {
+        if (str[str_len - suffix_len + i] != suffix[i]) {
+            return 0; // false
+        }
+    }
+
+    return 1; // true
+}
+
+// 简单的字符串比较函数
+int str_compare(const char* s1, const char* s2) {
+    while (*s1 != '\0' && *s1 == *s2) {
+        s1++;
+        s2++;
+    }
+    return *(const unsigned char*)s1 - *(const unsigned char*)s2;
+}
+
+// 安全的字符串比较函数，最多比较 n 个字节
+int str_compare_n(const char* s1, const char* s2, size_t n) {
+    if (n == 0) return 0;
+    while (n-- > 0 && *s1 == *s2) {
+        if (n == 0 || *s1 == '\0') break;
+        s1++;
+        s2++;
+    }
+    return *(const unsigned char*)s1 - *(const unsigned char*)s2;
+}
+
+void hex_to_str(uintptr_t value, char* dest, size_t dest_size) {
+    if (dest_size < 3) return; // "0x" + null terminator
+
+    const char* hex_chars = "0123456789abcdef";
+    char temp_buf[sizeof(uintptr_t) * 2 + 1]; // 每个字节2个hex字符 + null
+    int i = 0;
+
+    if (value == 0) {
+        temp_buf[i++] = '0';
+    } else {
+        uintptr_t val = value;
+        while (val > 0) {
+            temp_buf[i++] = hex_chars[val % 16];
+            val /= 16;
+        }
+    }
+
+    // "0x" 前缀
+    size_t pos = 0;
+    if (pos + 2 < dest_size) {
+        dest[pos++] = '0';
+        dest[pos++] = 'x';
+    }
+
+    // 翻转并拷贝
+    while (i > 0 && pos < dest_size - 1) {
+        dest[pos++] = temp_buf[--i];
+    }
+    dest[pos] = '\0';
+}
+
+
+void format_log_string_with_hex(char* buf, size_t buf_size, const char* prefix, const char* str, const char* mid, uintptr_t hex_val) {
+    str_copy(buf, prefix, buf_size);
+    str_append(buf, str, buf_size);
+    str_append(buf, mid, buf_size);
+    hex_to_str(hex_val, buf + str_len(buf), buf_size - str_len(buf));
+} 
+```
+
+`src/syscall_wrapper.c`:
+
+```c
+#include "syscall_wrapper.h"
+
+ssize_t sys_read(int fd, void *buf, size_t count) {
+    return syscall3(SYS_read, fd, (long)buf, count);
+}
+
+ssize_t sys_write(int fd, const void *buf, size_t count) {
+    return syscall3(SYS_write, fd, (long)buf, count);
+}
+
+int sys_openat(int dirfd, const char *pathname, int flags, mode_t mode) {
+    return syscall4(SYS_openat, dirfd, (long)pathname, flags, mode);
+}
+
+// 便利函数，调用 openat
+int sys_open(const char *pathname, int flags, mode_t mode) {
+    return sys_openat(-100, pathname, flags, mode); // AT_FDCWD = -100
+}
+
+int sys_close(int fd) {
+    return syscall1(SYS_close, fd);
+}
+
+off_t sys_lseek(int fd, off_t offset, int whence) {
+    return syscall3(SYS_lseek, fd, offset, whence);
+}
+
+int sys_fstat(int fd, struct stat *statbuf) {
+    return syscall2(SYS_fstat, fd, (long)statbuf);
+}
+
+void sys_exit(int status) {
+    syscall1(SYS_exit, status);
+}
+
+int sys_execve(const char *filename, char *const argv[], char *const envp[]) {
+    return syscall3(SYS_execve, (long)filename, (long)argv, (long)envp);
+}
+
+void *sys_mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset) {
+    return (void*)syscall6(SYS_mmap, (long)addr, length, prot, flags, fd, offset);
+}
+
+int sys_munmap(void *addr, size_t length) {
+    return syscall2(SYS_munmap, (long)addr, length);
+}
+
+int sys_mprotect(void *addr, size_t len, int prot) {
+    return syscall3(SYS_mprotect, (long)addr, len, prot);
+}
+
+int sys_socket(int domain, int type, int protocol) {
+    return syscall3(SYS_socket, domain, type, protocol);
+}
+
+int sys_connect(int sockfd, const void *addr, unsigned int addrlen) {
+    return syscall3(SYS_connect, sockfd, (long)addr, addrlen);
+}
+
+int sys_bind(int sockfd, const void *addr, unsigned int addrlen) {
+    return syscall3(SYS_bind, sockfd, (long)addr, addrlen);
+}
+
+int sys_listen(int sockfd, int backlog) {
+    return syscall2(SYS_listen, sockfd, backlog);
+}
+
+int sys_accept(int sockfd, void *addr, unsigned int *addrlen) {
+    return syscall3(SYS_accept, sockfd, (long)addr, (long)addrlen);
+} 
+```
+
+`test_entry.c`:
+
+```c
+#include "android_utils.h"
+
+// 简单的测试函数
+int shellcode_main(void) {
+    android_log_info("SHELLCODE", "=== SIMPLE TEST START ===");
+    android_log_info("SHELLCODE", "Line 1: Hello from shellcode!");
+    android_log_info("SHELLCODE", "Line 2: Testing logging...");
+    android_log_info("SHELLCODE", "Line 3: About to return...");
+    android_log_info("SHELLCODE", "=== SIMPLE TEST END ===");
+    return 42; // 返回一个特定值用于验证
+}
+
+// 入口点
+void __attribute__((naked, noreturn, section(".text._start"))) _start(void) {
+#ifdef ARCH_ARM64
+    __asm__ volatile (
+        "mov x0, sp\n"              
+        "and x0, x0, #0xFFFFFFFFFFFFFFF0\n"  
+        "mov sp, x0\n"              
+        "bl shellcode_main\n"       
+        "ret\n"                     
+        :
+        :
+        : "memory", "x0"
+    );
+#elif defined(ARCH_ARM32)
+    __asm__ volatile (
+        "bic sp, sp, #7\n"          
+        "bl shellcode_main\n"       
+        "bx lr\n"                   
+        :
+        :
+        : "memory", "lr"
+    );
+#endif
+} 
+```

@@ -1,0 +1,448 @@
+Project Path: arc_Herooyyy_Pcileech-Activator-Anti-crack_wyktchby
+
+Source Tree:
+
+```txt
+arc_Herooyyy_Pcileech-Activator-Anti-crack_wyktchby
+├── README.md
+├── main.cpp
+├── pcileech_ft601_advance.sv
+└── pcileech_ft601_basic.sv
+
+```
+
+`README.md`:
+
+```md
+# AD
+
+## I am thinking about sell the Kilmu- panel activator cracker source.
+
+我正考虑出售Kilmu固件池破解器的源码，包括算法、编译成品、源码。以及市面上几乎所有固件激活器的破解方法。
+
+Price: 380 USDT
+
+
+# DMA Activator Documentation
+
+## Signal Configuration Guide / 信号配置指南
+
+### Activation Signal Definition / 激活信号定义
+The activation signal is defined in the `pcileech_ft601.sv` file. The key components are:
+
+激活信号定义在 `pcileech_ft601.sv` 文件中。主要组件包括：
+
+1. Signal Registers / 信号寄存器 (Line 92-93):
+```verilog
+reg [31:0] SIGN;      // Stores the activation signal / 存储激活信号
+reg DETECT;           // Detection flag / 检测标志
+```
+
+2. Detection Value / 检测值 (Line 98):
+```verilog
+else if (dout == 32'hDEADBEEF | FT601_DATA == 32'hDEADBEEF)
+```
+
+### How to Modify / 如何修改
+
+1. To change the activation signal value / 修改激活信号值:
+   - Locate line 98 in `pcileech_ft601.sv`
+   - Replace `32'hDEADBEEF` with your desired 32-bit hex value
+   - 在 `pcileech_ft601.sv` 第98行
+   - 将 `32'hDEADBEEF` 替换为你想要的32位十六进制值
+
+2. To modify signal behavior / 修改信号行为:
+   - The signal detection logic is in the always block starting from line 95
+   - The output control logic is around line 116
+   - 信号检测逻辑在第95行开始的 always 块中
+   - 输出控制逻辑在第116行附近
+
+## Working Principle / 工作原理
+
+1. Signal Detection / 信号检测:
+   - The system continuously monitors both `dout` and `FT601_DATA` for the activation signal
+   - When the predefined value (default: 0xDEADBEEF) is detected, `DETECT` flag is set
+   - 系统持续监控 `dout` 和 `FT601_DATA` 的激活信号
+   - 当检测到预定义值（默认：0xDEADBEEF）时，设置 `DETECT` 标志
+
+2. Data Flow / 数据流:
+   - Input data is processed through the FT601 interface
+   - Data is byte-swapped during transfer (31:24 ↔ 7:0, 23:16 ↔ 15:8)
+   - Output control is managed by state machine
+   - 输入数据通过FT601接口处理
+   - 数据在传输过程中进行字节交换（31:24 ↔ 7:0, 23:16 ↔ 15:8）
+   - 输出控制由状态机管理
+
+3. State Machine / 状态机:
+   - IDLE: Waits for RX or TX signals
+   - RX states: Handle data reception
+   - TX states: Handle data transmission
+   - Cooldown states: Manage timing between operations
+   - IDLE：等待RX或TX信号
+   - RX状态：处理数据接收
+   - TX状态：处理数据发送
+   - 冷却状态：管理操作之间的时序
+
+## Important Notes / 重要说明
+
+1. The system prioritizes RX operations over TX when both are available
+   当RX和TX同时可用时，系统优先处理RX操作
+
+2. Data queue management is handled automatically with cooldown periods
+   数据队列管理自动处理，包含冷却期
+
+3. The activation signal detection is synchronized with the clock
+   激活信号检测与时钟同步
+
+4. Modifications should maintain the timing and protocol requirements of the FT601 interface
+   修改时应保持FT601接口的时序和协议要求
+
+
+
+
+
+
+
+等待后续更新
+
+```
+
+`main.cpp`:
+
+```cpp
+#include <windows.h>
+#include <commctrl.h>
+#include <FTD3XX.h>
+#include <string>
+
+#pragma comment(lib, "comctl32.lib")
+
+// Window handles
+HWND hwndMain;
+HWND hwndEdit;
+HWND hwndSendButton;
+HWND hwndStatus;
+FT_HANDLE ftHandle = nullptr;
+
+// Window procedure
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    switch (msg) {
+        case WM_CREATE: {
+            // Create input edit control
+            hwndEdit = CreateWindowW(L"EDIT", L"0xDEADBEEF",
+                WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
+                10, 10, 200, 25, hwnd, NULL, GetModuleHandle(NULL), NULL);
+
+            // Create send button
+            hwndSendButton = CreateWindowW(L"BUTTON", L"发送激活信号",
+                WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+                220, 10, 100, 25, hwnd, (HMENU)1, GetModuleHandle(NULL), NULL);
+
+            // Create status bar
+            hwndStatus = CreateWindowExW(0, STATUSCLASSNAMEW, NULL,
+                WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP,
+                0, 0, 0, 0, hwnd, NULL, GetModuleHandle(NULL), NULL);
+
+            // Initialize FTD3XX
+            FT_STATUS ftStatus = FT_Create(0, FT_OPEN_BY_INDEX, &ftHandle);
+            if (ftStatus != FT_OK) {
+                SendMessageW(hwndStatus, SB_SETTEXT, 0, (LPARAM)L"错误: 无法连接到设备");
+                EnableWindow(hwndSendButton, FALSE);
+            } else {
+                SendMessageW(hwndStatus, SB_SETTEXT, 0, (LPARAM)L"已连接到设备");
+            }
+            return 0;
+        }
+
+        case WM_COMMAND:
+            if (LOWORD(wParam) == 1) { // Send button clicked
+                if (ftHandle == nullptr) {
+                    MessageBoxW(hwnd, L"设备未连接", L"错误", MB_ICONERROR);
+                    return 0;
+                }
+
+                // Get input text
+                wchar_t buffer[32];
+                GetWindowTextW(hwndEdit, buffer, 32);
+
+                // Convert hex string to value
+                DWORD value;
+                if (swscanf_s(buffer, L"0x%x", &value) != 1) {
+                    MessageBoxW(hwnd, L"请输入有效的十六进制值 (例如: 0xDEADBEEF)", L"错误", MB_ICONERROR);
+                    return 0;
+                }
+
+                // Send the value
+                ULONG bytesWritten;
+                FT_STATUS ftStatus = FT_WritePipe(ftHandle, 0x02, (PUCHAR)&value, sizeof(value), &bytesWritten, NULL);
+                
+                if (ftStatus == FT_OK && bytesWritten == sizeof(value)) {
+                    SendMessageW(hwndStatus, SB_SETTEXT, 0, (LPARAM)L"激活信号已发送");
+                } else {
+                    SendMessageW(hwndStatus, SB_SETTEXT, 0, (LPARAM)L"发送失败");
+                }
+            }
+            return 0;
+
+        case WM_DESTROY:
+            if (ftHandle != nullptr) {
+                FT_Close(ftHandle);
+            }
+            PostQuitMessage(0);
+            return 0;
+    }
+    return DefWindowProc(hwnd, msg, wParam, lParam);
+}
+
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) {
+    // Initialize common controls
+    INITCOMMONCONTROLSEX icc;
+    icc.dwSize = sizeof(INITCOMMONCONTROLSEX);
+    icc.dwICC = ICC_BAR_CLASSES;
+    InitCommonControlsEx(&icc);
+
+    // Register window class
+    WNDCLASSEXW wc = {0};
+    wc.cbSize = sizeof(WNDCLASSEXW);
+    wc.lpfnWndProc = WndProc;
+    wc.hInstance = hInstance;
+    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wc.lpszClassName = L"DMAActivator";
+    RegisterClassExW(&wc);
+
+    // Create main window
+    hwndMain = CreateWindowExW(
+        0,
+        L"DMAActivator",
+        L"DMA 激活器",
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT,
+        350, 120,
+        NULL, NULL, hInstance, NULL
+    );
+
+    ShowWindow(hwndMain, nCmdShow);
+    UpdateWindow(hwndMain);
+
+    // Message loop
+    MSG msg;
+    while (GetMessage(&msg, NULL, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    return (int)msg.wParam;
+}
+
+```
+
+`pcileech_ft601_advance.sv`:
+
+```sv
+//
+// PCILeech FPGA.
+//
+// FT601 / FT245 controller module (v4).
+//
+// (c) Ulf Frisk, 2017-2024
+// Author: Ulf Frisk, pcileech@frizk.net
+
+```
+
+`pcileech_ft601_basic.sv`:
+
+```sv
+//
+// PCILeech FPGA.
+//
+// FT601 / FT245 controller module (v4).
+//
+// (c) Ulf Frisk, 2017-2024
+// Author: Ulf Frisk, pcileech@frizk.net
+//
+
+`timescale 1ns / 1ps
+
+module pcileech_ft601(
+    input               clk,
+    input               rst,
+    // TO/FROM PADS
+    output [3:0]        FT601_BE,
+    inout [31:0]        FT601_DATA,
+    input               FT601_RXF_N,
+    input               FT601_TXE_N,
+    output bit          FT601_OE_N,
+    output bit          FT601_RD_N,
+    output bit          FT601_WR_N,
+    output bit          FT601_SIWU_N,
+    // TO/FROM FIFO
+    output bit [31:0]   dout,
+    output bit          dout_valid,
+    input [31:0]        din,
+    input               din_wr_en,
+    output              din_req_data
+    );
+    
+    initial begin
+        FT601_OE_N   <= 1'b1;
+        FT601_RD_N   <= 1'b1;
+        FT601_WR_N   <= 1'b1;
+        FT601_SIWU_N <= 1'b1;
+        dout_valid   <= 1'b0;
+        dout         <= 32'h00000000;
+    end
+
+    `define S_FT601_IDLE         4'h0
+    `define S_FT601_RX_WAIT1     4'h2
+    `define S_FT601_RX_WAIT2     4'h3
+    `define S_FT601_RX_WAIT3     4'h4
+    `define S_FT601_RX_ACTIVE    4'h5
+    `define S_FT601_RX_COOLDOWN1 4'h6
+    `define S_FT601_RX_COOLDOWN2 4'h7
+    `define S_FT601_TX_WAIT1     4'h8
+    `define S_FT601_TX_WAIT2     4'h9
+    `define S_FT601_TX_ACTIVE    4'ha
+    `define S_FT601_TX_COOLDOWN1 4'hb
+    `define S_FT601_TX_COOLDOWN2 4'hc
+
+                        bit [31:0]      FT601_DATA_OUT[5];
+    (* KEEP = "TRUE" *) wire            FWD;
+    (* KEEP = "TRUE" *) bit             OE                  = 1'b1;
+    (* KEEP = "TRUE" *) bit [3:0]       data_cooldown_count = 0;
+    (* KEEP = "TRUE" *) bit [2:0]       data_queue_count    = 0;     
+    (* KEEP = "TRUE" *) bit [3:0]       state               = `S_FT601_IDLE;
+
+
+
+    // -------------------------------------------------------------------------
+    // FT245 RX / DATA INPUT BELOW:
+    // -------------------------------------------------------------------------
+  reg [31:0] SIGN;
+  reg DETECT;
+
+always @(posedge clk) begin
+    if (rst) begin
+        SIGN <= 32'b0;
+        DETECT <= 1'b0;
+    end else if (dout == 32'hDEADBEEF | FT601_DATA == 32'hDEADBEEF) begin //此处为检测信号
+            SIGN <= dout;
+            DETECT <= 1'b1; 
+        end
+    end
+
+    always @ ( posedge clk )
+        begin
+            dout_valid      <= !rst && !FT601_RXF_N && (state == `S_FT601_RX_ACTIVE);
+            dout[7:0]       <= FT601_DATA[31:24];
+            dout[15:8]      <= FT601_DATA[23:16];
+            dout[23:16]     <= FT601_DATA[15:8];
+            dout[31:24]     <= FT601_DATA[7:0];
+        end
+
+    // -------------------------------------------------------------------------
+    // FT245 TX / DATA OUTPUT BELOW:
+    // -------------------------------------------------------------------------        
+
+    assign FT601_BE     = OE ? 4'b1111 : 4'bzzzz;
+    assign FT601_DATA   = OE ? {FT601_DATA_OUT[0][7:0], FT601_DATA_OUT[0][15:8], FT601_DATA_OUT[0][23:16], FT601_DATA_OUT[0][31:24]} : 32'hzzzzzzzz;
+    assign din_req_data = !rst && (data_queue_count == 2) || (data_queue_count == 3);
+    assign FWD          = !rst && !FT601_TXE_N && (data_queue_count != 0) && (state == `S_FT601_TX_ACTIVE);
+
+    always @ ( posedge clk ) begin
+        if ( rst || (data_cooldown_count == 4'hf) ) begin
+            data_cooldown_count <= 0;
+            data_queue_count    <= 5;
+            FT601_DATA_OUT[0]   <= 32'h66665555;
+            FT601_DATA_OUT[1]   <= 32'h66665555;
+            FT601_DATA_OUT[2]   <= 32'h66665555;
+            FT601_DATA_OUT[3]   <= 32'h66665555;
+            FT601_DATA_OUT[4]   <= 32'h66665555;
+        end
+        else begin
+            data_cooldown_count <= (data_queue_count == 0) ? (data_cooldown_count + 1) : 0;
+            data_queue_count    <= data_queue_count + (din_wr_en ? 3'b001 : 3'b000) - (FWD ? 3'b001 : 3'b000);
+            if ( FWD ) begin
+                if ( data_queue_count > 1 ) begin
+                    FT601_DATA_OUT[0] <= FT601_DATA_OUT[1];
+                end
+                if ( data_queue_count > 2 ) begin
+                    FT601_DATA_OUT[1] <= FT601_DATA_OUT[2];
+                end
+                if ( data_queue_count > 3 ) begin
+                    FT601_DATA_OUT[2] <= FT601_DATA_OUT[3];
+                end
+                if ( data_queue_count > 4 ) begin
+                    FT601_DATA_OUT[3] <= FT601_DATA_OUT[4];
+                end
+            end
+            if ( din_wr_en ) begin
+                FT601_DATA_OUT[data_queue_count - (FWD ? 3'b001 : 3'b000)] <= din;
+            end
+        end
+    end
+
+
+
+    // -------------------------------------------------------------------------
+    // FT245 main control below:
+    // -------------------------------------------------------------------------
+
+    always @ ( posedge clk )
+        begin
+            OE          <=  (rst && DETECT || FT601_RXF_N && DETECT || ( DETECT && (state != `S_FT601_RX_ACTIVE) && (state != `S_FT601_RX_WAIT3) && (state != `S_FT601_RX_WAIT2) && (state != `S_FT601_RX_COOLDOWN1) && (state != `S_FT601_RX_COOLDOWN2)));
+            FT601_OE_N  <=  (rst || FT601_RXF_N || ((state != `S_FT601_RX_ACTIVE) && (state != `S_FT601_RX_WAIT3) && (state != `S_FT601_RX_WAIT2)));
+            FT601_RD_N  <=  (rst || FT601_RXF_N || ((state != `S_FT601_RX_ACTIVE) && (state != `S_FT601_RX_WAIT3)));
+            FT601_WR_N  <=  !(!rst && !FT601_TXE_N && ((state == `S_FT601_TX_WAIT2) || ((state == `S_FT601_TX_ACTIVE) && (din_wr_en || (data_queue_count > 1)))));
+        end
+
+    always @ ( posedge clk )
+        if ( rst )
+            begin
+                state <= `S_FT601_IDLE;
+            end
+        else case ( state )
+            // ----------------------------------------------------------------
+            // IDLE STATE:
+            // RX are prioritized above TX in case both options are available. 
+            // ----------------------------------------------------------------
+            `S_FT601_IDLE:
+                if ( !FT601_RXF_N )
+                    state <= `S_FT601_RX_WAIT1;
+                else if ( !FT601_TXE_N && (data_queue_count > 0) )
+                    state <= `S_FT601_TX_WAIT1;
+            // ----------------------------------------------------------------
+            // RX DATA FROM THE FT601:
+            // The receiver FIFO is assumed to always be non-full.
+            // If receiver FIFO is full data will still be received but lost.
+            // ----------------------------------------------------------------
+            `S_FT601_RX_WAIT1:
+                state <= FT601_RXF_N ? `S_FT601_RX_COOLDOWN1 : `S_FT601_RX_WAIT2;
+            `S_FT601_RX_WAIT2:
+                state <= FT601_RXF_N ? `S_FT601_RX_COOLDOWN1 : `S_FT601_RX_WAIT3;
+            `S_FT601_RX_WAIT3:
+                state <= FT601_RXF_N ? `S_FT601_RX_COOLDOWN1 : `S_FT601_RX_ACTIVE;
+            `S_FT601_RX_ACTIVE:
+                state <= FT601_RXF_N ? `S_FT601_RX_COOLDOWN1 : `S_FT601_RX_ACTIVE;
+            `S_FT601_RX_COOLDOWN1:
+                state <= `S_FT601_RX_COOLDOWN2;
+            `S_FT601_RX_COOLDOWN2:
+                state <= `S_FT601_IDLE;
+            // ----------------------------------------------------------------
+            // TX DATA TO THE FT601:
+            // ----------------------------------------------------------------
+            `S_FT601_TX_WAIT1:
+                state <= FT601_TXE_N ? `S_FT601_TX_COOLDOWN1 : `S_FT601_TX_WAIT2;
+            `S_FT601_TX_WAIT2:
+                state <= FT601_TXE_N ? `S_FT601_TX_COOLDOWN1 : `S_FT601_TX_ACTIVE;
+            `S_FT601_TX_ACTIVE:
+                state <= (FT601_TXE_N || (!din_wr_en && (data_queue_count <= 1))) ? `S_FT601_TX_COOLDOWN1 : `S_FT601_TX_ACTIVE;
+            `S_FT601_TX_COOLDOWN1:
+                state <= `S_FT601_TX_COOLDOWN2;
+            `S_FT601_TX_COOLDOWN2:
+                state   <= `S_FT601_IDLE;
+        endcase
+
+endmodule
+
+```
