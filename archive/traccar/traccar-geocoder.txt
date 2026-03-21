@@ -1,0 +1,4792 @@
+Project Path: arc_traccar_traccar-geocoder_x2l4qpt9
+
+Source Tree:
+
+```txt
+arc_traccar_traccar-geocoder_x2l4qpt9
+├── Dockerfile
+├── LICENSE.txt
+├── README.md
+├── builder
+│   ├── CMakeLists.txt
+│   └── src
+│       └── build_index.cpp
+├── docker-compose.yml
+├── entrypoint.sh
+└── server
+    ├── Cargo.lock
+    ├── Cargo.toml
+    └── src
+        ├── auth.rs
+        ├── main.rs
+        └── web
+            ├── dashboard.html
+            └── login.html
+
+```
+
+`Dockerfile`:
+
+```
+# Stage 1: Build C++ indexer
+FROM debian:bookworm-slim AS builder-cpp
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential cmake \
+    libosmium2-dev libprotozero-dev \
+    libs2-dev \
+    zlib1g-dev libbz2-dev libexpat1-dev liblz4-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+COPY builder/ builder/
+RUN mkdir build && cd build && cmake ../builder && make -j$(nproc)
+
+# Stage 2: Build Rust server
+FROM rust:bookworm AS builder-rust
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cmake \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+COPY server/ server/
+RUN cargo build --release --manifest-path server/Cargo.toml
+
+# Stage 3: Runtime
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libs2-0 \
+    zlib1g libbz2-1.0 libexpat1 liblz4-1 \
+    curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder-cpp /src/build/build-index /usr/local/bin/
+COPY --from=builder-rust /src/server/target/release/query-server /usr/local/bin/
+COPY entrypoint.sh /usr/local/bin/
+
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["entrypoint.sh"]
+CMD ["auto"]
+
+```
+
+`LICENSE.txt`:
+
+```txt
+
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+```
+
+`README.md`:
+
+```md
+# Traccar Geocoder
+
+A fast, self-hosted reverse geocoding service built from OpenStreetMap data. Given latitude and longitude coordinates, it returns the nearest street address including house number, street name, city, state, county, postcode, and country.
+
+Part of the [Traccar](https://www.traccar.org) open source GPS tracking platform. Also available as a [hosted service](https://www.traccar.org/product/geocoder/).
+
+## Features
+
+- Street-level reverse geocoding from OSM data
+- Address point, street name, and address interpolation lookup
+- Administrative boundary resolution (country, state, county, city, postcode)
+- Sub-millisecond query latency with memory-mapped index files
+- Automatic HTTPS with Let's Encrypt
+- Docker support with automatic PBF download and indexing
+
+## Quick Start
+
+### Docker Compose
+
+```yaml
+services:
+  geocoder:
+    image: traccar/traccar-geocoder
+    environment:
+      - PBF_URLS=https://download.geofabrik.de/europe/monaco-latest.osm.pbf
+    ports:
+      - "3000:3000"
+    volumes:
+      - geocoder-data:/data
+
+volumes:
+  geocoder-data:
+```
+
+```bash
+docker compose up
+```
+
+### Docker
+
+```bash
+# All-in-one: download, build index, and serve
+docker run -e PBF_URLS="https://download.geofabrik.de/europe-latest.osm.pbf" \
+  -v geocoder-data:/data -p 3000:3000 traccar/traccar-geocoder
+
+# Build index only
+docker run -e PBF_URLS="https://download.geofabrik.de/europe-latest.osm.pbf" \
+  -v geocoder-data:/data traccar/traccar-geocoder build
+
+# Serve only (from pre-built index)
+docker run -v geocoder-data:/data -p 3000:3000 traccar/traccar-geocoder serve
+
+# Multiple PBF files
+docker run -e PBF_URLS="https://download.geofabrik.de/europe/france-latest.osm.pbf https://download.geofabrik.de/europe/germany-latest.osm.pbf" \
+  -v geocoder-data:/data -p 3000:3000 traccar/traccar-geocoder
+
+# With automatic HTTPS
+docker run -e PBF_URLS="https://planet.openstreetmap.org/pbf/planet-latest.osm.pbf" \
+  -e DOMAIN=geocoder.example.com \
+  -v geocoder-data:/data -p 443:443 traccar/traccar-geocoder
+```
+
+PBF files can be downloaded from [Geofabrik](https://download.geofabrik.de/).
+
+## API
+
+### GET /reverse
+
+Query parameters:
+- `lat` - latitude (required)
+- `lon` - longitude (required)
+- `key` - API key (required)
+
+Example request:
+
+```
+GET /reverse?lat=43.7384&lon=7.4246&key=YOUR_API_KEY
+```
+
+Response follows [Nominatim](https://nominatim.org/release-docs/latest/api/Reverse/) format:
+
+```json
+{
+  "display_name": "Avenue de la Costa 42, 98000 Monaco, Monaco",
+  "address": {
+    "house_number": "42",
+    "road": "Avenue de la Costa",
+    "city": "Monaco",
+    "state": "Monaco",
+    "county": "Monaco",
+    "postcode": "98000",
+    "country": "Monaco",
+    "country_code": "MC"
+  }
+}
+```
+
+Fields are omitted when not available.
+
+Status codes:
+- `200` - success
+- `401` - missing or invalid API key
+- `429` - rate limit exceeded
+
+### Authentication
+
+The server includes a web dashboard for managing API keys. On first launch, navigate to the server URL in a browser to create an admin account. Once logged in, you can generate API keys and create additional users with configurable rate limits.
+
+## Architecture
+
+The project consists of two components:
+
+- **Builder** (C++) - Parses OSM PBF files and creates a compact binary index using S2 geometry cells for spatial lookup.
+- **Server** (Rust) - Memory-maps the index files and serves queries via HTTP/HTTPS with sub-millisecond latency.
+
+### Index Structure
+
+The builder produces 14 binary files:
+
+| File | Description |
+|------|-------------|
+| `geo_cells.bin` | Merged S2 cell index for streets, addresses, and interpolations |
+| `street_entries.bin` | Street way IDs per cell |
+| `street_ways.bin` | Street way headers (node offset, name) |
+| `street_nodes.bin` | Street node coordinates |
+| `addr_entries.bin` | Address point IDs per cell |
+| `addr_points.bin` | Address point data (coordinates, house number, street) |
+| `interp_entries.bin` | Interpolation way IDs per cell |
+| `interp_ways.bin` | Interpolation way headers |
+| `interp_nodes.bin` | Interpolation node coordinates |
+| `admin_cells.bin` | S2 cell index for admin boundaries |
+| `admin_entries.bin` | Admin polygon IDs per cell |
+| `admin_polygons.bin` | Admin polygon metadata |
+| `admin_vertices.bin` | Admin polygon vertices |
+| `strings.bin` | Deduplicated string pool |
+
+## Building from Source
+
+### Prerequisites
+
+**Builder (C++):**
+- CMake 3.16+
+- C++17 compiler
+- libosmium, protozero, s2geometry, zlib, bzip2, expat
+
+**Server (Rust):**
+- Rust toolchain
+
+### Build
+
+```bash
+# Build the indexer
+mkdir build && cd build && cmake ../builder && make
+
+# Build the server
+cargo build --release --manifest-path server/Cargo.toml
+```
+
+### Run
+
+```bash
+# Create index from PBF file
+./build/build-index output-dir input.osm.pbf [input2.osm.pbf ...]
+
+# Start the server
+./server/target/release/query-server output-dir [bind-address]
+
+# Start with automatic HTTPS
+./server/target/release/query-server output-dir --domain geocoder.example.com
+```
+
+## Environment Variables (Docker)
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PBF_URLS` | Space-separated list of PBF download URLs | (required for auto/build) |
+| `DOMAIN` | Domain name for automatic HTTPS via Let's Encrypt | (disabled) |
+| `BIND_ADDR` | HTTP bind address | `0.0.0.0:3000` |
+| `DATA_DIR` | Data directory for PBF files and index | `/data` |
+| `CACHE_DIR` | ACME certificate cache directory | `acme-cache` |
+
+## License
+
+    Apache License, Version 2.0
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+```
+
+`builder/CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.16)
+project(traccar-geocoder-build LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(Threads REQUIRED)
+find_package(ZLIB REQUIRED)
+find_package(BZip2 REQUIRED)
+find_package(EXPAT REQUIRED)
+find_package(s2 QUIET)
+
+add_executable(build-index src/build_index.cpp)
+
+if(EXISTS /opt/homebrew/include)
+    target_include_directories(build-index PRIVATE /opt/homebrew/include)
+endif()
+
+if(s2_FOUND)
+    target_link_libraries(build-index PRIVATE
+        s2::s2
+        ZLIB::ZLIB
+        BZip2::BZip2
+        EXPAT::EXPAT
+        Threads::Threads
+    )
+else()
+    target_include_directories(build-index PRIVATE /usr/include/s2)
+    target_link_libraries(build-index PRIVATE
+        s2
+        ZLIB::ZLIB
+        BZip2::BZip2
+        EXPAT::EXPAT
+        Threads::Threads
+    )
+endif()
+
+```
+
+`builder/src/build_index.cpp`:
+
+```cpp
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <cstring>
+#include <fstream>
+#include <iostream>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
+#include <osmium/handler.hpp>
+#include <osmium/io/pbf_input.hpp>
+#include <osmium/visitor.hpp>
+#include <osmium/handler/node_locations_for_ways.hpp>
+#include <fcntl.h>
+#include <unistd.h>
+#include <osmium/index/map/sparse_file_array.hpp>
+#include <osmium/area/assembler.hpp>
+#include <osmium/area/multipolygon_manager.hpp>
+
+#include <s2/s2cell_id.h>
+#include <s2/s2latlng.h>
+#include <s2/s2region_coverer.h>
+#include <s2/s2polyline.h>
+#include <s2/s2polygon.h>
+#include <s2/s2loop.h>
+#include <s2/s2builder.h>
+
+// --- Binary format structs ---
+
+struct WayHeader {
+    uint32_t node_offset;
+    uint8_t node_count;
+    uint32_t name_id;
+};
+
+struct AddrPoint {
+    float lat;
+    float lng;
+    uint32_t housenumber_id;
+    uint32_t street_id;
+};
+
+struct InterpWay {
+    uint32_t node_offset;
+    uint8_t node_count;
+    uint32_t street_id;
+    uint32_t start_number;
+    uint32_t end_number;
+    uint8_t interpolation;
+};
+
+struct AdminPolygon {
+    uint32_t vertex_offset;
+    uint16_t vertex_count;
+    uint32_t name_id;
+    uint8_t admin_level;
+    float area;
+    uint16_t country_code;
+};
+
+struct NodeCoord {
+    float lat;
+    float lng;
+};
+
+static const uint32_t INTERIOR_FLAG = 0x80000000u;
+static const uint32_t ID_MASK = 0x7FFFFFFFu;
+
+// --- String interning ---
+
+class StringPool {
+public:
+    uint32_t intern(const std::string& s) {
+        auto it = index_.find(s);
+        if (it != index_.end()) {
+            return it->second;
+        }
+        uint32_t offset = static_cast<uint32_t>(data_.size());
+        index_[s] = offset;
+        data_.insert(data_.end(), s.begin(), s.end());
+        data_.push_back('\0');
+        return offset;
+    }
+
+    const std::vector<char>& data() const { return data_; }
+
+private:
+    std::unordered_map<std::string, uint32_t> index_;
+    std::vector<char> data_;
+};
+
+// --- Collected data ---
+
+static StringPool strings;
+
+// Streets
+static std::vector<WayHeader> ways;
+static std::vector<NodeCoord> street_nodes;
+static std::unordered_map<uint64_t, std::vector<uint32_t>> cell_to_ways;
+
+// Addresses
+static std::vector<AddrPoint> addr_points;
+static std::unordered_map<uint64_t, std::vector<uint32_t>> cell_to_addrs;
+
+// Interpolation
+static std::vector<InterpWay> interp_ways;
+static std::vector<NodeCoord> interp_nodes;
+static std::unordered_map<uint64_t, std::vector<uint32_t>> cell_to_interps;
+
+// Admin boundaries
+static std::vector<AdminPolygon> admin_polygons;
+static std::vector<NodeCoord> admin_vertices;
+static std::unordered_map<uint64_t, std::vector<uint32_t>> cell_to_admin;
+
+// --- S2 helpers ---
+
+static int kStreetCellLevel = 17;
+static int kAdminCellLevel = 10;
+
+static std::vector<S2CellId> cover_edge(double lat1, double lng1, double lat2, double lng2) {
+    S2Point p1 = S2LatLng::FromDegrees(lat1, lng1).ToPoint();
+    S2Point p2 = S2LatLng::FromDegrees(lat2, lng2).ToPoint();
+
+    if (p1 == p2) {
+        return {S2CellId(p1).parent(kStreetCellLevel)};
+    }
+
+    std::vector<S2Point> points = {p1, p2};
+    S2Polyline polyline(points);
+
+    S2RegionCoverer::Options options;
+    options.set_fixed_level(kStreetCellLevel);
+
+    S2RegionCoverer coverer(options);
+    S2CellUnion covering = coverer.GetCovering(polyline);
+    return covering.cell_ids();
+}
+
+static S2CellId point_to_cell(double lat, double lng) {
+    return S2CellId(S2LatLng::FromDegrees(lat, lng)).parent(kStreetCellLevel);
+}
+
+// Returns pairs of (cell_id, is_interior)
+static std::vector<std::pair<S2CellId, bool>> cover_polygon(const std::vector<std::pair<double,double>>& vertices) {
+    std::vector<S2Point> points;
+    points.reserve(vertices.size());
+    for (const auto& [lat, lng] : vertices) {
+        S2Point p = S2LatLng::FromDegrees(lat, lng).ToPoint();
+        if (!points.empty() && points.back() == p) continue;
+        points.push_back(p);
+    }
+    // Remove closing duplicate if first == last
+    if (points.size() > 1 && points.front() == points.back()) {
+        points.pop_back();
+    }
+    if (points.size() < 3) return {};
+
+    // Build S2Loop (must be CCW), skip invalid polygons
+    S2Error error;
+    auto loop = std::make_unique<S2Loop>(points, S2Debug::DISABLE);
+    loop->Normalize();
+    if (loop->FindValidationError(&error)) return {};
+
+    S2Polygon polygon(std::move(loop));
+
+    S2RegionCoverer::Options options;
+    options.set_max_level(kAdminCellLevel);
+    options.set_max_cells(200);
+
+    S2RegionCoverer coverer(options);
+    S2CellUnion covering = coverer.GetCovering(polygon);
+    S2CellUnion interior = coverer.GetInteriorCovering(polygon);
+
+    // Build set of interior cell IDs for fast lookup
+    std::unordered_set<uint64_t> interior_set;
+    for (const auto& cell : interior.cell_ids()) {
+        if (cell.level() <= kAdminCellLevel) {
+            auto begin = cell.range_min().parent(kAdminCellLevel);
+            auto end = cell.range_max().parent(kAdminCellLevel);
+            for (auto c = begin; c != end; c = c.next()) {
+                interior_set.insert(c.id());
+            }
+            interior_set.insert(end.id());
+        } else {
+            interior_set.insert(cell.parent(kAdminCellLevel).id());
+        }
+    }
+
+    // Normalize all covering cells to kAdminCellLevel
+    std::vector<std::pair<S2CellId, bool>> result;
+    for (const auto& cell : covering.cell_ids()) {
+        if (cell.level() <= kAdminCellLevel) {
+            auto begin = cell.range_min().parent(kAdminCellLevel);
+            auto end = cell.range_max().parent(kAdminCellLevel);
+            for (auto c = begin; c != end; c = c.next()) {
+                result.emplace_back(c, interior_set.count(c.id()) > 0);
+            }
+            result.emplace_back(end, interior_set.count(end.id()) > 0);
+        } else {
+            auto parent = cell.parent(kAdminCellLevel);
+            result.emplace_back(parent, interior_set.count(parent.id()) > 0);
+        }
+    }
+
+    // Deduplicate by cell_id, keeping interior=true if any duplicate is interior
+    std::sort(result.begin(), result.end(), [](const auto& a, const auto& b) {
+        return a.first < b.first;
+    });
+    auto it = result.begin();
+    for (auto curr = result.begin(); curr != result.end(); ) {
+        auto next = curr + 1;
+        bool is_interior = curr->second;
+        while (next != result.end() && next->first == curr->first) {
+            is_interior = is_interior || next->second;
+            ++next;
+        }
+        *it = {curr->first, is_interior};
+        ++it;
+        curr = next;
+    }
+    result.erase(it, result.end());
+    return result;
+}
+
+// Approximate polygon area in square degrees
+static float polygon_area(const std::vector<std::pair<double,double>>& vertices) {
+    double area = 0;
+    size_t n = vertices.size();
+    for (size_t i = 0; i < n; i++) {
+        size_t j = (i + 1) % n;
+        area += vertices[i].first * vertices[j].second;
+        area -= vertices[j].first * vertices[i].second;
+    }
+    return static_cast<float>(std::fabs(area) / 2.0);
+}
+
+// Douglas-Peucker simplification
+static void dp_simplify(const std::vector<std::pair<double,double>>& pts,
+                        size_t start, size_t end, double epsilon,
+                        std::vector<bool>& keep) {
+    if (end <= start + 1) return;
+
+    double max_dist = 0;
+    size_t max_idx = start;
+
+    double ax = pts[start].first, ay = pts[start].second;
+    double bx = pts[end].first, by = pts[end].second;
+    double dx = bx - ax, dy = by - ay;
+    double len_sq = dx * dx + dy * dy;
+
+    for (size_t i = start + 1; i < end; i++) {
+        double px = pts[i].first - ax, py = pts[i].second - ay;
+        double dist;
+        if (len_sq == 0) {
+            dist = std::sqrt(px * px + py * py);
+        } else {
+            double t = std::max(0.0, std::min(1.0, (px * dx + py * dy) / len_sq));
+            double proj_x = t * dx - px, proj_y = t * dy - py;
+            dist = std::sqrt(proj_x * proj_x + proj_y * proj_y);
+        }
+        if (dist > max_dist) {
+            max_dist = dist;
+            max_idx = i;
+        }
+    }
+
+    if (max_dist > epsilon) {
+        keep[max_idx] = true;
+        dp_simplify(pts, start, max_idx, epsilon, keep);
+        dp_simplify(pts, max_idx, end, epsilon, keep);
+    }
+}
+
+static std::vector<std::pair<double,double>> simplify_polygon(
+    const std::vector<std::pair<double,double>>& pts, size_t max_vertices) {
+    if (pts.size() <= max_vertices) return pts;
+
+    // Binary search for epsilon that gives ~max_vertices
+    double lo = 0, hi = 1.0;
+    std::vector<std::pair<double,double>> result;
+
+    for (int iter = 0; iter < 20; iter++) {
+        double epsilon = (lo + hi) / 2;
+        std::vector<bool> keep(pts.size(), false);
+        keep[0] = true;
+        keep[pts.size() - 1] = true;
+        dp_simplify(pts, 0, pts.size() - 1, epsilon, keep);
+
+        size_t count = 0;
+        for (bool k : keep) if (k) count++;
+
+        if (count > max_vertices) {
+            lo = epsilon;
+        } else {
+            hi = epsilon;
+        }
+    }
+
+    std::vector<bool> keep(pts.size(), false);
+    keep[0] = true;
+    keep[pts.size() - 1] = true;
+    dp_simplify(pts, 0, pts.size() - 1, hi, keep);
+
+    result.clear();
+    for (size_t i = 0; i < pts.size(); i++) {
+        if (keep[i]) result.push_back(pts[i]);
+    }
+    return result;
+}
+
+// --- Highway filter ---
+
+static const std::vector<std::string> kExcludedHighways = {
+    "footway", "path", "track", "steps", "cycleway",
+    "service", "pedestrian", "bridleway", "construction"
+};
+
+static bool is_included_highway(const char* value) {
+    for (const auto& excluded : kExcludedHighways) {
+        if (excluded == value) return false;
+    }
+    return true;
+}
+
+// --- Parse house number (leading digits) ---
+
+static uint32_t parse_house_number(const char* s) {
+    if (!s) return 0;
+    uint32_t n = 0;
+    while (*s >= '0' && *s <= '9') {
+        n = n * 10 + (*s - '0');
+        s++;
+    }
+    return n;
+}
+
+// --- Add an address point ---
+
+static uint64_t addr_count_total = 0;
+
+static void add_addr_point(double lat, double lng, const char* housenumber, const char* street) {
+    uint32_t addr_id = static_cast<uint32_t>(addr_points.size());
+    addr_points.push_back({
+        static_cast<float>(lat),
+        static_cast<float>(lng),
+        strings.intern(housenumber),
+        strings.intern(street)
+    });
+
+    S2CellId cell = point_to_cell(lat, lng);
+    cell_to_addrs[cell.id()].push_back(addr_id);
+
+    addr_count_total++;
+    if (addr_count_total % 1000000 == 0) {
+        std::cerr << "Collected " << addr_count_total / 1000000 << "M addresses..." << std::endl;
+    }
+}
+
+// --- Add an admin polygon ---
+
+static void add_admin_polygon(const std::vector<std::pair<double,double>>& vertices,
+                               const char* name, uint8_t admin_level,
+                               const char* country_code) {
+    // Simplify large polygons
+    auto simplified = simplify_polygon(vertices, 500);
+    if (simplified.size() < 3) return;
+
+    uint32_t poly_id = static_cast<uint32_t>(admin_polygons.size());
+    uint32_t vertex_offset = static_cast<uint32_t>(admin_vertices.size());
+
+    for (const auto& [lat, lng] : simplified) {
+        admin_vertices.push_back({static_cast<float>(lat), static_cast<float>(lng)});
+    }
+
+    AdminPolygon poly{};
+    poly.vertex_offset = vertex_offset;
+    poly.vertex_count = static_cast<uint16_t>(std::min(simplified.size(), size_t(65535)));
+    poly.name_id = strings.intern(name);
+    poly.admin_level = admin_level;
+    poly.area = polygon_area(simplified);
+    poly.country_code = (country_code && country_code[0] && country_code[1])
+        ? static_cast<uint16_t>((country_code[0] << 8) | country_code[1])
+        : 0;
+    admin_polygons.push_back(poly);
+
+    // S2 cell coverage (high bit marks interior cells)
+    auto cell_ids = cover_polygon(simplified);
+    for (const auto& [cell_id, is_interior] : cell_ids) {
+        uint32_t entry = is_interior ? (poly_id | INTERIOR_FLAG) : poly_id;
+        cell_to_admin[cell_id.id()].push_back(entry);
+    }
+}
+
+// --- OSM handler (pass 2) ---
+
+class BuildHandler : public osmium::handler::Handler {
+public:
+    void node(const osmium::Node& node) {
+        const char* housenumber = node.tags()["addr:housenumber"];
+        if (!housenumber) return;
+        const char* street = node.tags()["addr:street"];
+        if (!street) return;
+        if (!node.location().valid()) return;
+
+        add_addr_point(node.location().lat(), node.location().lon(), housenumber, street);
+    }
+
+    void way(const osmium::Way& way) {
+        // Address interpolation
+        const char* interpolation = way.tags()["addr:interpolation"];
+        if (interpolation) {
+            process_interpolation_way(way, interpolation);
+            return;
+        }
+
+        // Building addresses
+        const char* housenumber = way.tags()["addr:housenumber"];
+        if (housenumber) {
+            const char* street = way.tags()["addr:street"];
+            if (street) {
+                process_building_address(way, housenumber, street);
+            }
+        }
+
+        // Highway ways
+        const char* highway = way.tags()["highway"];
+        if (highway && is_included_highway(highway)) {
+            const char* name = way.tags()["name"];
+            if (name) {
+                process_highway(way, name);
+            }
+        }
+    }
+
+    void area(const osmium::Area& area) {
+        const char* boundary = area.tags()["boundary"];
+        if (!boundary) return;
+
+        bool is_admin = (std::strcmp(boundary, "administrative") == 0);
+        bool is_postal = (std::strcmp(boundary, "postal_code") == 0);
+        if (!is_admin && !is_postal) return;
+
+        uint8_t admin_level = 0;
+        if (is_admin) {
+            const char* level_str = area.tags()["admin_level"];
+            if (!level_str) return;
+            admin_level = static_cast<uint8_t>(std::atoi(level_str));
+            if (admin_level < 2 || admin_level > 10) return;
+        } else {
+            admin_level = 11; // use 11 for postal codes
+        }
+
+        const char* name = area.tags()["name"];
+        if (!name && is_admin) return;
+
+        // For postal codes, use postal_code tag as name
+        std::string name_str;
+        if (is_postal) {
+            const char* postal_code = area.tags()["postal_code"];
+            if (!postal_code) postal_code = name;
+            if (!postal_code) return;
+            name_str = postal_code;
+        } else {
+            name_str = name;
+        }
+
+        // Extract country code for level 2 boundaries
+        const char* country_code = (admin_level == 2)
+            ? area.tags()["ISO3166-1:alpha2"]
+            : nullptr;
+        // Extract outer ring vertices
+        for (const auto& outer_ring : area.outer_rings()) {
+            std::vector<std::pair<double,double>> vertices;
+            for (const auto& node_ref : outer_ring) {
+                if (node_ref.location().valid()) {
+                    vertices.emplace_back(node_ref.location().lat(), node_ref.location().lon());
+                }
+            }
+            if (vertices.size() >= 3) {
+                add_admin_polygon(vertices, name_str.c_str(), admin_level, country_code);
+            }
+        }
+
+        admin_count_++;
+        if (admin_count_ % 10000 == 0) {
+            std::cerr << "Processed " << admin_count_ / 1000 << "K admin boundaries..." << std::endl;
+        }
+    }
+
+    uint64_t way_count() const { return way_count_; }
+    uint64_t building_addr_count() const { return building_addr_count_; }
+    uint64_t interp_count() const { return interp_count_; }
+    uint64_t admin_count() const { return admin_count_; }
+
+private:
+    uint64_t way_count_ = 0;
+    uint64_t building_addr_count_ = 0;
+    uint64_t interp_count_ = 0;
+    uint64_t admin_count_ = 0;
+
+    void process_building_address(const osmium::Way& way, const char* housenumber, const char* street) {
+        const auto& wnodes = way.nodes();
+        if (wnodes.empty()) return;
+
+        double sum_lat = 0, sum_lng = 0;
+        int valid = 0;
+        for (const auto& nr : wnodes) {
+            if (!nr.location().valid()) continue;
+            sum_lat += nr.location().lat();
+            sum_lng += nr.location().lon();
+            valid++;
+        }
+        if (valid == 0) return;
+
+        add_addr_point(sum_lat / valid, sum_lng / valid, housenumber, street);
+        building_addr_count_++;
+    }
+
+    void process_interpolation_way(const osmium::Way& way, const char* interpolation) {
+        const auto& wnodes = way.nodes();
+        if (wnodes.size() < 2) return;
+
+        for (const auto& nr : wnodes) {
+            if (!nr.location().valid()) return;
+        }
+
+        const char* street = way.tags()["addr:street"];
+        if (!street) return;
+
+        uint8_t interp_type = 0;
+        if (std::strcmp(interpolation, "even") == 0) interp_type = 1;
+        else if (std::strcmp(interpolation, "odd") == 0) interp_type = 2;
+
+        uint32_t interp_id = static_cast<uint32_t>(interp_ways.size());
+        uint32_t node_offset = static_cast<uint32_t>(interp_nodes.size());
+
+        for (const auto& nr : wnodes) {
+            interp_nodes.push_back({
+                static_cast<float>(nr.location().lat()),
+                static_cast<float>(nr.location().lon())
+            });
+        }
+
+        InterpWay iw{};
+        iw.node_offset = node_offset;
+        iw.node_count = static_cast<uint8_t>(std::min(wnodes.size(), size_t(255)));
+        iw.street_id = strings.intern(street);
+        iw.start_number = 0;
+        iw.end_number = 0;
+        iw.interpolation = interp_type;
+        interp_ways.push_back(iw);
+
+        std::unordered_set<uint64_t> interp_cells;
+        for (size_t i = 0; i + 1 < wnodes.size(); i++) {
+            double lat1 = wnodes[i].location().lat();
+            double lng1 = wnodes[i].location().lon();
+            double lat2 = wnodes[i + 1].location().lat();
+            double lng2 = wnodes[i + 1].location().lon();
+
+            auto cell_ids = cover_edge(lat1, lng1, lat2, lng2);
+            for (const auto& cell_id : cell_ids) {
+                interp_cells.insert(cell_id.id());
+            }
+        }
+        for (uint64_t cell_id : interp_cells) {
+            cell_to_interps[cell_id].push_back(interp_id);
+        }
+
+        interp_count_++;
+    }
+
+    void process_highway(const osmium::Way& way, const char* name) {
+        const auto& wnodes = way.nodes();
+        if (wnodes.size() < 2) return;
+
+        for (const auto& nr : wnodes) {
+            if (!nr.location().valid()) return;
+        }
+
+        uint32_t way_id = static_cast<uint32_t>(ways.size());
+        uint32_t node_offset = static_cast<uint32_t>(street_nodes.size());
+
+        for (const auto& nr : wnodes) {
+            street_nodes.push_back({
+                static_cast<float>(nr.location().lat()),
+                static_cast<float>(nr.location().lon())
+            });
+        }
+
+        WayHeader header{};
+        header.node_offset = node_offset;
+        header.node_count = static_cast<uint8_t>(std::min(wnodes.size(), size_t(255)));
+        header.name_id = strings.intern(name);
+        ways.push_back(header);
+
+        std::unordered_set<uint64_t> way_cells;
+        for (size_t i = 0; i + 1 < wnodes.size(); i++) {
+            double lat1 = wnodes[i].location().lat();
+            double lng1 = wnodes[i].location().lon();
+            double lat2 = wnodes[i + 1].location().lat();
+            double lng2 = wnodes[i + 1].location().lon();
+
+            auto cell_ids = cover_edge(lat1, lng1, lat2, lng2);
+            for (const auto& cell_id : cell_ids) {
+                way_cells.insert(cell_id.id());
+            }
+        }
+        for (uint64_t cell_id : way_cells) {
+            cell_to_ways[cell_id].push_back(way_id);
+        }
+
+        way_count_++;
+        if (way_count_ % 1000000 == 0) {
+            std::cerr << "Processed " << way_count_ / 1000000 << "M street ways..." << std::endl;
+        }
+    }
+};
+
+// --- Resolve interpolation way endpoint house numbers ---
+
+static void resolve_interpolation_endpoints() {
+    struct CoordKey {
+        int32_t lat;
+        int32_t lng;
+        bool operator==(const CoordKey& o) const { return lat == o.lat && lng == o.lng; }
+    };
+    struct CoordHash {
+        size_t operator()(const CoordKey& k) const {
+            return std::hash<int64_t>()(((int64_t)k.lat << 32) | (uint32_t)k.lng);
+        }
+    };
+
+    std::unordered_map<CoordKey, uint32_t, CoordHash> addr_by_coord;
+    for (uint32_t i = 0; i < addr_points.size(); i++) {
+        CoordKey key{
+            static_cast<int32_t>(addr_points[i].lat * 100000),
+            static_cast<int32_t>(addr_points[i].lng * 100000)
+        };
+        addr_by_coord[key] = i;
+    }
+
+    uint32_t resolved = 0;
+    for (auto& iw : interp_ways) {
+        if (iw.node_count < 2) continue;
+
+        const auto& start = interp_nodes[iw.node_offset];
+        CoordKey start_key{
+            static_cast<int32_t>(start.lat * 100000),
+            static_cast<int32_t>(start.lng * 100000)
+        };
+        auto it_start = addr_by_coord.find(start_key);
+
+        const auto& end = interp_nodes[iw.node_offset + iw.node_count - 1];
+        CoordKey end_key{
+            static_cast<int32_t>(end.lat * 100000),
+            static_cast<int32_t>(end.lng * 100000)
+        };
+        auto it_end = addr_by_coord.find(end_key);
+
+        if (it_start != addr_by_coord.end()) {
+            const char* hn = strings.data().data() + addr_points[it_start->second].housenumber_id;
+            iw.start_number = parse_house_number(hn);
+        }
+        if (it_end != addr_by_coord.end()) {
+            const char* hn = strings.data().data() + addr_points[it_end->second].housenumber_id;
+            iw.end_number = parse_house_number(hn);
+        }
+
+        if (iw.start_number > 0 && iw.end_number > 0) resolved++;
+    }
+
+    std::cerr << "Resolved " << resolved << "/" << interp_ways.size()
+              << " interpolation ways" << std::endl;
+}
+
+// --- Deduplicate IDs per cell ---
+
+template<typename Map>
+static void deduplicate(Map& cell_map) {
+    for (auto& [cell_id, ids] : cell_map) {
+        std::sort(ids.begin(), ids.end());
+        ids.erase(std::unique(ids.begin(), ids.end()), ids.end());
+    }
+}
+
+// --- Write cell index ---
+
+static const uint32_t NO_DATA = 0xFFFFFFFFu;
+
+// Write entries file and return offset map
+static std::unordered_map<uint64_t, uint32_t> write_entries(
+    const std::string& path,
+    const std::vector<uint64_t>& sorted_cells,
+    const std::unordered_map<uint64_t, std::vector<uint32_t>>& cell_map
+) {
+    std::unordered_map<uint64_t, uint32_t> offsets;
+    std::ofstream f(path, std::ios::binary);
+    uint32_t current = 0;
+    for (uint64_t cell_id : sorted_cells) {
+        auto it = cell_map.find(cell_id);
+        if (it == cell_map.end()) continue;
+        offsets[cell_id] = current;
+        uint16_t count = static_cast<uint16_t>(std::min(it->second.size(), size_t(65535)));
+        f.write(reinterpret_cast<const char*>(&count), sizeof(count));
+        f.write(reinterpret_cast<const char*>(it->second.data()), it->second.size() * sizeof(uint32_t));
+        current += sizeof(uint16_t) + it->second.size() * sizeof(uint32_t);
+    }
+    return offsets;
+}
+
+static void write_cell_index(
+    const std::string& cells_path,
+    const std::string& entries_path,
+    const std::unordered_map<uint64_t, std::vector<uint32_t>>& cell_map
+) {
+    std::vector<std::pair<uint64_t, std::vector<uint32_t>>> sorted(
+        cell_map.begin(), cell_map.end());
+    std::sort(sorted.begin(), sorted.end());
+
+    {
+        std::ofstream f(cells_path, std::ios::binary);
+        uint32_t current_offset = 0;
+        for (const auto& [cell_id, ids] : sorted) {
+            f.write(reinterpret_cast<const char*>(&cell_id), sizeof(cell_id));
+            f.write(reinterpret_cast<const char*>(&current_offset), sizeof(current_offset));
+            current_offset += sizeof(uint16_t) + ids.size() * sizeof(uint32_t);
+        }
+    }
+
+    {
+        std::ofstream f(entries_path, std::ios::binary);
+        for (const auto& [cell_id, ids] : sorted) {
+            uint16_t count = static_cast<uint16_t>(std::min(ids.size(), size_t(65535)));
+            f.write(reinterpret_cast<const char*>(&count), sizeof(count));
+            f.write(reinterpret_cast<const char*>(ids.data()), ids.size() * sizeof(uint32_t));
+        }
+    }
+}
+
+// --- Write all index files ---
+
+static void write_index(const std::string& output_dir) {
+    // Merged geo cell index for streets, addresses, and interpolation
+    std::set<uint64_t> all_geo_cells;
+    for (const auto& [id, _] : cell_to_ways) all_geo_cells.insert(id);
+    for (const auto& [id, _] : cell_to_addrs) all_geo_cells.insert(id);
+    for (const auto& [id, _] : cell_to_interps) all_geo_cells.insert(id);
+    std::vector<uint64_t> sorted_geo_cells(all_geo_cells.begin(), all_geo_cells.end());
+
+    auto street_offsets = write_entries(output_dir + "/street_entries.bin", sorted_geo_cells, cell_to_ways);
+    auto addr_offsets = write_entries(output_dir + "/addr_entries.bin", sorted_geo_cells, cell_to_addrs);
+    auto interp_offsets = write_entries(output_dir + "/interp_entries.bin", sorted_geo_cells, cell_to_interps);
+
+    {
+        std::ofstream f(output_dir + "/geo_cells.bin", std::ios::binary);
+        for (uint64_t cell_id : sorted_geo_cells) {
+            f.write(reinterpret_cast<const char*>(&cell_id), sizeof(cell_id));
+            auto write_offset = [&](const std::unordered_map<uint64_t, uint32_t>& offsets) {
+                auto it = offsets.find(cell_id);
+                uint32_t offset = (it != offsets.end()) ? it->second : NO_DATA;
+                f.write(reinterpret_cast<const char*>(&offset), sizeof(offset));
+            };
+            write_offset(street_offsets);
+            write_offset(addr_offsets);
+            write_offset(interp_offsets);
+        }
+    }
+
+    std::cerr << "geo index: " << sorted_geo_cells.size() << " cells ("
+              << ways.size() << " ways, "
+              << addr_points.size() << " addrs, "
+              << interp_ways.size() << " interps)" << std::endl;
+
+    write_cell_index(output_dir + "/admin_cells.bin", output_dir + "/admin_entries.bin", cell_to_admin);
+    std::cerr << "admin index: " << cell_to_admin.size() << " cells, " << admin_polygons.size() << " polygons" << std::endl;
+
+    // Street ways
+    {
+        std::ofstream f(output_dir + "/street_ways.bin", std::ios::binary);
+        f.write(reinterpret_cast<const char*>(ways.data()), ways.size() * sizeof(WayHeader));
+    }
+
+    // Street nodes
+    {
+        std::ofstream f(output_dir + "/street_nodes.bin", std::ios::binary);
+        f.write(reinterpret_cast<const char*>(street_nodes.data()), street_nodes.size() * sizeof(NodeCoord));
+    }
+
+    // Address points
+    {
+        std::ofstream f(output_dir + "/addr_points.bin", std::ios::binary);
+        f.write(reinterpret_cast<const char*>(addr_points.data()), addr_points.size() * sizeof(AddrPoint));
+    }
+
+    // Interpolation ways
+    {
+        std::ofstream f(output_dir + "/interp_ways.bin", std::ios::binary);
+        f.write(reinterpret_cast<const char*>(interp_ways.data()), interp_ways.size() * sizeof(InterpWay));
+    }
+
+    // Interpolation nodes
+    {
+        std::ofstream f(output_dir + "/interp_nodes.bin", std::ios::binary);
+        f.write(reinterpret_cast<const char*>(interp_nodes.data()), interp_nodes.size() * sizeof(NodeCoord));
+    }
+
+    // Admin polygons
+    {
+        std::ofstream f(output_dir + "/admin_polygons.bin", std::ios::binary);
+        f.write(reinterpret_cast<const char*>(admin_polygons.data()), admin_polygons.size() * sizeof(AdminPolygon));
+    }
+
+    // Admin vertices
+    {
+        std::ofstream f(output_dir + "/admin_vertices.bin", std::ios::binary);
+        f.write(reinterpret_cast<const char*>(admin_vertices.data()), admin_vertices.size() * sizeof(NodeCoord));
+    }
+
+    // Strings
+    {
+        std::ofstream f(output_dir + "/strings.bin", std::ios::binary);
+        f.write(strings.data().data(), strings.data().size());
+        std::cerr << "strings.bin: " << strings.data().size() << " bytes" << std::endl;
+    }
+
+
+}
+
+// --- Main ---
+
+int main(int argc, char* argv[]) {
+    if (argc < 3) {
+        std::cerr << "Usage: build-index <output-dir> <input.osm.pbf> [input2.osm.pbf ...] [--street-level N] [--admin-level N]" << std::endl;
+        return 1;
+    }
+
+    std::string output_dir = argv[1];
+    std::vector<std::string> input_files;
+    for (int i = 2; i < argc; i++) {
+        std::string arg = argv[i];
+        if (arg == "--street-level" && i + 1 < argc) {
+            kStreetCellLevel = std::atoi(argv[++i]);
+        } else if (arg == "--admin-level" && i + 1 < argc) {
+            kAdminCellLevel = std::atoi(argv[++i]);
+        } else {
+            input_files.push_back(arg);
+        }
+    }
+
+    BuildHandler handler;
+
+    for (const auto& input_file : input_files) {
+        std::cerr << "Processing " << input_file << "..." << std::endl;
+
+        // --- Pass 1: collect relation members for multipolygon assembly ---
+        std::cerr << "  Pass 1: scanning relations..." << std::endl;
+
+        osmium::area::Assembler::config_type assembler_config;
+        osmium::area::MultipolygonManager<osmium::area::Assembler> mp_manager{assembler_config};
+
+        {
+            osmium::io::Reader reader1{input_file, osmium::osm_entity_bits::relation};
+            osmium::apply(reader1, mp_manager);
+            reader1.close();
+            mp_manager.prepare_for_lookup();
+        }
+
+        // --- Pass 2: process all data ---
+        std::cerr << "  Pass 2: processing nodes, ways, and areas..." << std::endl;
+
+        using index_type = osmium::index::map::SparseFileArray<
+            osmium::unsigned_object_id_type, osmium::Location>;
+        using location_handler_type = osmium::handler::NodeLocationsForWays<index_type>;
+
+        std::string tmp_path = output_dir + "/node_locations.tmp";
+        int fd = open(tmp_path.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0600);
+        index_type index{fd};
+        location_handler_type location_handler{index};
+
+        osmium::io::Reader reader2{input_file};
+
+        osmium::apply(reader2, location_handler, handler, mp_manager.handler([&handler](osmium::memory::Buffer&& buffer) {
+            osmium::apply(buffer, handler);
+        }));
+        reader2.close();
+        close(fd);
+        std::remove(tmp_path.c_str());
+    }
+
+    std::cerr << "Done reading:" << std::endl;
+    std::cerr << "  " << handler.way_count() << " street ways" << std::endl;
+    std::cerr << "  " << addr_count_total << " address points ("
+              << handler.building_addr_count() << " from buildings)" << std::endl;
+    std::cerr << "  " << handler.interp_count() << " interpolation ways" << std::endl;
+    std::cerr << "  " << handler.admin_count() << " admin/postcode boundaries ("
+              << admin_polygons.size() << " polygon rings)" << std::endl;
+
+    std::cerr << "Resolving interpolation endpoints..." << std::endl;
+    resolve_interpolation_endpoints();
+
+    std::cerr << "Deduplicating..." << std::endl;
+    deduplicate(cell_to_ways);
+    deduplicate(cell_to_addrs);
+    deduplicate(cell_to_interps);
+    deduplicate(cell_to_admin);
+
+    std::cerr << "Writing index files to " << output_dir << "..." << std::endl;
+    write_index(output_dir);
+
+    std::cerr << "Done." << std::endl;
+    return 0;
+}
+
+```
+
+`docker-compose.yml`:
+
+```yml
+services:
+  geocoder:
+    image: traccar/traccar-geocoder
+    environment:
+      - PBF_URLS=https://download.geofabrik.de/europe/monaco-latest.osm.pbf
+    ports:
+      - "3000:3000"
+    volumes:
+      - geocoder-data:/data
+
+volumes:
+  geocoder-data:
+
+```
+
+`entrypoint.sh`:
+
+```sh
+#!/bin/sh
+set -e
+
+DATA_DIR="${DATA_DIR:-/data}"
+
+download_pbf() {
+    mkdir -p "$DATA_DIR/pbf"
+    for url in $PBF_URLS; do
+        filename=$(basename "$url")
+        if [ ! -f "$DATA_DIR/pbf/$filename" ]; then
+            echo "Downloading $url..."
+            curl -fSL -o "$DATA_DIR/pbf/$filename" "$url"
+        else
+            echo "Already downloaded: $filename"
+        fi
+    done
+}
+
+build_index() {
+    files=""
+    for f in "$DATA_DIR"/pbf/*.osm.pbf; do
+        [ -f "$f" ] && files="$files $f"
+    done
+    if [ -z "$files" ]; then
+        echo "Error: no PBF files found in $DATA_DIR/pbf/"
+        exit 1
+    fi
+    mkdir -p "$DATA_DIR/index"
+    level_args=""
+    [ -n "$STREET_LEVEL" ] && level_args="$level_args --street-level $STREET_LEVEL"
+    [ -n "$ADMIN_LEVEL" ] && level_args="$level_args --admin-level $ADMIN_LEVEL"
+    echo "Building index..."
+    build-index "$DATA_DIR/index" $files $level_args
+    echo "Index built."
+}
+
+serve() {
+    args="$DATA_DIR/index"
+    if [ -n "$DOMAIN" ]; then
+        args="$args --domain $DOMAIN"
+        if [ -n "$CACHE_DIR" ]; then
+            args="$args --cache $CACHE_DIR"
+        fi
+    else
+        args="$args ${BIND_ADDR:-0.0.0.0:3000}"
+    fi
+    [ -n "$STREET_LEVEL" ] && args="$args --street-level $STREET_LEVEL"
+    [ -n "$ADMIN_LEVEL" ] && args="$args --admin-level $ADMIN_LEVEL"
+    [ -n "$SEARCH_DISTANCE" ] && args="$args --search-distance $SEARCH_DISTANCE"
+    echo "Starting server..."
+    exec query-server $args
+}
+
+case "${1:-auto}" in
+    build)
+        download_pbf
+        build_index
+        ;;
+    serve)
+        serve
+        ;;
+    auto)
+        download_pbf
+        build_index
+        serve
+        ;;
+    *)
+        exec "$@"
+        ;;
+esac
+
+```
+
+`server/Cargo.lock`:
+
+```lock
+# This file is automatically @generated by Cargo.
+# It is not intended for manual editing.
+version = 4
+
+[[package]]
+name = "android_system_properties"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "819e7219dbd41043ac279b19830f2efc897156490d7fd6ea916720117ee66311"
+dependencies = [
+ "libc",
+]
+
+[[package]]
+name = "anyhow"
+version = "1.0.102"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
+
+[[package]]
+name = "approx"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f2a05fd1bd10b2527e20a2cd32d8873d115b8b39fe219ee25f42a8aca6ba278"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
+name = "arc-swap"
+version = "1.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f9f3647c145568cec02c42054e07bdf9a5a698e15b466fb2341bfc393cd24aa5"
+dependencies = [
+ "rustversion",
+]
+
+[[package]]
+name = "asn1-rs"
+version = "0.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5493c3bedbacf7fd7382c6346bbd66687d12bbaad3a89a2d2c303ee6cf20b048"
+dependencies = [
+ "asn1-rs-derive",
+ "asn1-rs-impl",
+ "displaydoc",
+ "nom",
+ "num-traits",
+ "rusticata-macros",
+ "thiserror 1.0.69",
+ "time",
+]
+
+[[package]]
+name = "asn1-rs-derive"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "965c2d33e53cb6b267e148a4cb0760bc01f4904c1cd4bb4002a085bb016d1490"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+ "synstructure",
+]
+
+[[package]]
+name = "asn1-rs-impl"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7b18050c2cd6fe86c3a76584ef5e0baf286d038cda203eb6223df2cc413565f7"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "async-channel"
+version = "2.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "924ed96dd52d1b75e9c1a3e6275715fd320f5f9439fb5a4a11fa51f4221158d2"
+dependencies = [
+ "concurrent-queue",
+ "event-listener-strategy",
+ "futures-core",
+ "pin-project-lite",
+]
+
+[[package]]
+name = "async-http-codec"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "096146020b08dbc4587685b0730a7ba905625af13c65f8028035cdfd69573c91"
+dependencies = [
+ "anyhow",
+ "futures",
+ "http",
+ "httparse",
+ "log",
+]
+
+[[package]]
+name = "async-io"
+version = "2.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "456b8a8feb6f42d237746d4b3e9a178494627745c3c56c6ea55d92ba50d026fc"
+dependencies = [
+ "autocfg",
+ "cfg-if",
+ "concurrent-queue",
+ "futures-io",
+ "futures-lite",
+ "parking",
+ "polling",
+ "rustix",
+ "slab",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "async-net"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b948000fad4873c1c9339d60f2623323a0cfd3816e5181033c6a5cb68b2accf7"
+dependencies = [
+ "async-io",
+ "blocking",
+ "futures-lite",
+]
+
+[[package]]
+name = "async-task"
+version = "4.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b75356056920673b02621b35afd0f7dda9306d03c79a30f5c56c44cf256e3de"
+
+[[package]]
+name = "async-trait"
+version = "0.1.89"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9035ad2d096bed7955a320ee7e2230574d28fd3c3a0f186cbea1ff3c7eed5dbb"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "async-web-client"
+version = "0.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "37381fb4fad3cd9b579628c21a58f528ef029d1f072d10f16cb9431aa2236d29"
+dependencies = [
+ "async-http-codec",
+ "async-net",
+ "futures",
+ "futures-rustls",
+ "http",
+ "lazy_static",
+ "log",
+ "rustls-pki-types",
+ "thiserror 1.0.69",
+ "webpki-roots 0.26.11",
+]
+
+[[package]]
+name = "atomic-waker"
+version = "1.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
+
+[[package]]
+name = "autocfg"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
+
+[[package]]
+name = "aws-lc-rs"
+version = "1.16.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "94bffc006df10ac2a68c83692d734a465f8ee6c5b384d8545a636f81d858f4bf"
+dependencies = [
+ "aws-lc-sys",
+ "zeroize",
+]
+
+[[package]]
+name = "aws-lc-sys"
+version = "0.38.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4321e568ed89bb5a7d291a7f37997c2c0df89809d7b6d12062c81ddb54aa782e"
+dependencies = [
+ "cc",
+ "cmake",
+ "dunce",
+ "fs_extra",
+]
+
+[[package]]
+name = "axum"
+version = "0.8.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b52af3cb4058c895d37317bb27508dccc8e5f2d39454016b297bf4a400597b8"
+dependencies = [
+ "axum-core",
+ "bytes",
+ "form_urlencoded",
+ "futures-util",
+ "http",
+ "http-body",
+ "http-body-util",
+ "hyper",
+ "hyper-util",
+ "itoa",
+ "matchit",
+ "memchr",
+ "mime",
+ "percent-encoding",
+ "pin-project-lite",
+ "serde_core",
+ "serde_json",
+ "serde_path_to_error",
+ "serde_urlencoded",
+ "sync_wrapper",
+ "tokio",
+ "tower",
+ "tower-layer",
+ "tower-service",
+ "tracing",
+]
+
+[[package]]
+name = "axum-core"
+version = "0.5.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "08c78f31d7b1291f7ee735c1c6780ccde7785daae9a9206026862dab7d8792d1"
+dependencies = [
+ "bytes",
+ "futures-core",
+ "http",
+ "http-body",
+ "http-body-util",
+ "mime",
+ "pin-project-lite",
+ "sync_wrapper",
+ "tower-layer",
+ "tower-service",
+ "tracing",
+]
+
+[[package]]
+name = "axum-server"
+version = "0.7.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c1ab4a3ec9ea8a657c72d99a03a824af695bd0fb5ec639ccbd9cd3543b41a5f9"
+dependencies = [
+ "arc-swap",
+ "bytes",
+ "fs-err",
+ "http",
+ "http-body",
+ "hyper",
+ "hyper-util",
+ "pin-project-lite",
+ "rustls",
+ "rustls-pemfile",
+ "rustls-pki-types",
+ "tokio",
+ "tokio-rustls",
+ "tower-service",
+]
+
+[[package]]
+name = "base64"
+version = "0.22.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
+
+[[package]]
+name = "bcrypt"
+version = "0.15.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e65938ed058ef47d92cf8b346cc76ef48984572ade631927e9937b5ffc7662c7"
+dependencies = [
+ "base64",
+ "blowfish",
+ "getrandom 0.2.17",
+ "subtle",
+ "zeroize",
+]
+
+[[package]]
+name = "bigdecimal"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a6773ddc0eafc0e509fb60e48dff7f450f8e674a0686ae8605e8d9901bd5eefa"
+dependencies = [
+ "num-bigint",
+ "num-integer",
+ "num-traits",
+ "serde",
+]
+
+[[package]]
+name = "bitflags"
+version = "2.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "843867be96c8daad0d758b57df9392b6d8d271134fce549de6ce169ff98a92af"
+
+[[package]]
+name = "blocking"
+version = "1.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e83f8d02be6967315521be875afa792a316e28d57b5a2d401897e2a7921b7f21"
+dependencies = [
+ "async-channel",
+ "async-task",
+ "futures-io",
+ "futures-lite",
+ "piper",
+]
+
+[[package]]
+name = "blowfish"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e412e2cd0f2b2d93e02543ceae7917b3c70331573df19ee046bcbc35e45e87d7"
+dependencies = [
+ "byteorder",
+ "cipher",
+]
+
+[[package]]
+name = "bumpalo"
+version = "3.20.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5d20789868f4b01b2f2caec9f5c4e0213b41e3e5702a50157d699ae31ced2fcb"
+
+[[package]]
+name = "byteorder"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
+
+[[package]]
+name = "bytes"
+version = "1.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33"
+
+[[package]]
+name = "cc"
+version = "1.2.56"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aebf35691d1bfb0ac386a69bac2fde4dd276fb618cf8bf4f5318fe285e821bb2"
+dependencies = [
+ "find-msvc-tools",
+ "jobserver",
+ "libc",
+ "shlex",
+]
+
+[[package]]
+name = "cfg-if"
+version = "1.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
+
+[[package]]
+name = "cgmath"
+version = "0.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1a98d30140e3296250832bbaaff83b27dcd6fa3cc70fb6f1f3e5c9c0023b5317"
+dependencies = [
+ "approx",
+ "num-traits",
+]
+
+[[package]]
+name = "chrono"
+version = "0.4.44"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c673075a2e0e5f4a1dde27ce9dee1ea4558c7ffe648f576438a20ca1d2acc4b0"
+dependencies = [
+ "iana-time-zone",
+ "num-traits",
+ "windows-link",
+]
+
+[[package]]
+name = "cipher"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "773f3b9af64447d2ce9850330c473515014aa235e6a783b02db81ff39e4a3dad"
+dependencies = [
+ "crypto-common",
+ "inout",
+]
+
+[[package]]
+name = "cmake"
+version = "0.1.57"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75443c44cd6b379beb8c5b45d85d0773baf31cce901fe7bb252f4eff3008ef7d"
+dependencies = [
+ "cc",
+]
+
+[[package]]
+name = "concurrent-queue"
+version = "2.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ca0197aee26d1ae37445ee532fefce43251d24cc7c166799f4d46817f1d3973"
+dependencies = [
+ "crossbeam-utils",
+]
+
+[[package]]
+name = "core-foundation-sys"
+version = "0.8.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
+
+[[package]]
+name = "crossbeam-utils"
+version = "0.8.21"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d0a5c400df2834b80a4c3327b3aad3a4c4cd4de0629063962b03235697506a28"
+
+[[package]]
+name = "crypto-common"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "78c8292055d1c1df0cce5d180393dc8cce0abec0a7102adb6c7b1eef6016d60a"
+dependencies = [
+ "generic-array",
+ "typenum",
+]
+
+[[package]]
+name = "data-encoding"
+version = "2.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d7a1e2f27636f116493b8b860f5546edb47c8d8f8ea73e1d2a20be88e28d1fea"
+
+[[package]]
+name = "der-parser"
+version = "9.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5cd0a5c643689626bec213c4d8bd4d96acc8ffdb4ad4bb6bc16abf27d5f4b553"
+dependencies = [
+ "asn1-rs",
+ "displaydoc",
+ "nom",
+ "num-bigint",
+ "num-traits",
+ "rusticata-macros",
+]
+
+[[package]]
+name = "deranged"
+version = "0.5.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7cd812cc2bc1d69d4764bd80df88b4317eaef9e773c75226407d9bc0876b211c"
+dependencies = [
+ "powerfmt",
+]
+
+[[package]]
+name = "displaydoc"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "97369cbbc041bc366949bc74d34658d6cda5621039731c6310521892a3a20ae0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "dunce"
+version = "1.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813"
+
+[[package]]
+name = "equivalent"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
+
+[[package]]
+name = "errno"
+version = "0.3.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
+dependencies = [
+ "libc",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "event-listener"
+version = "5.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e13b66accf52311f30a0db42147dadea9850cb48cd070028831ae5f5d4b856ab"
+dependencies = [
+ "concurrent-queue",
+ "parking",
+ "pin-project-lite",
+]
+
+[[package]]
+name = "event-listener-strategy"
+version = "0.5.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8be9f3dfaaffdae2972880079a491a1a8bb7cbed0b8dd7a347f668b4150a3b93"
+dependencies = [
+ "event-listener",
+ "pin-project-lite",
+]
+
+[[package]]
+name = "fastrand"
+version = "2.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
+
+[[package]]
+name = "find-msvc-tools"
+version = "0.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
+
+[[package]]
+name = "float_extras"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b22b70f8649ea2315955f1a36d964b0e4da482dfaa5f0d04df0d1fb7c338ab7a"
+dependencies = [
+ "libc",
+]
+
+[[package]]
+name = "fnv"
+version = "1.0.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
+
+[[package]]
+name = "form_urlencoded"
+version = "1.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb4cb245038516f5f85277875cdaa4f7d2c9a0fa0468de06ed190163b1581fcf"
+dependencies = [
+ "percent-encoding",
+]
+
+[[package]]
+name = "fs-err"
+version = "3.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "73fde052dbfc920003cfd2c8e2c6e6d4cc7c1091538c3a24226cec0665ab08c0"
+dependencies = [
+ "autocfg",
+ "tokio",
+]
+
+[[package]]
+name = "fs_extra"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "42703706b716c37f96a77aea830392ad231f44c9e9a67872fa5548707e11b11c"
+
+[[package]]
+name = "futures"
+version = "0.3.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b147ee9d1f6d097cef9ce628cd2ee62288d963e16fb287bd9286455b241382d"
+dependencies = [
+ "futures-channel",
+ "futures-core",
+ "futures-executor",
+ "futures-io",
+ "futures-sink",
+ "futures-task",
+ "futures-util",
+]
+
+[[package]]
+name = "futures-channel"
+version = "0.3.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "07bbe89c50d7a535e539b8c17bc0b49bdb77747034daa8087407d655f3f7cc1d"
+dependencies = [
+ "futures-core",
+ "futures-sink",
+]
+
+[[package]]
+name = "futures-core"
+version = "0.3.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e3450815272ef58cec6d564423f6e755e25379b217b0bc688e295ba24df6b1d"
+
+[[package]]
+name = "futures-executor"
+version = "0.3.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "baf29c38818342a3b26b5b923639e7b1f4a61fc5e76102d4b1981c6dc7a7579d"
+dependencies = [
+ "futures-core",
+ "futures-task",
+ "futures-util",
+]
+
+[[package]]
+name = "futures-io"
+version = "0.3.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cecba35d7ad927e23624b22ad55235f2239cfa44fd10428eecbeba6d6a717718"
+
+[[package]]
+name = "futures-lite"
+version = "2.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f78e10609fe0e0b3f4157ffab1876319b5b0db102a2c60dc4626306dc46b44ad"
+dependencies = [
+ "fastrand",
+ "futures-core",
+ "futures-io",
+ "parking",
+ "pin-project-lite",
+]
+
+[[package]]
+name = "futures-macro"
+version = "0.3.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e835b70203e41293343137df5c0664546da5745f82ec9b84d40be8336958447b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "futures-rustls"
+version = "0.26.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a8f2f12607f92c69b12ed746fabf9ca4f5c482cba46679c1a75b874ed7c26adb"
+dependencies = [
+ "futures-io",
+ "rustls",
+ "rustls-pki-types",
+]
+
+[[package]]
+name = "futures-sink"
+version = "0.3.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c39754e157331b013978ec91992bde1ac089843443c49cbc7f46150b0fad0893"
+
+[[package]]
+name = "futures-task"
+version = "0.3.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "037711b3d59c33004d3856fbdc83b99d4ff37a24768fa1be9ce3538a1cde4393"
+
+[[package]]
+name = "futures-util"
+version = "0.3.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "389ca41296e6190b48053de0321d02a77f32f8a5d2461dd38762c0593805c6d6"
+dependencies = [
+ "futures-channel",
+ "futures-core",
+ "futures-io",
+ "futures-macro",
+ "futures-sink",
+ "futures-task",
+ "memchr",
+ "pin-project-lite",
+ "slab",
+]
+
+[[package]]
+name = "generic-array"
+version = "0.14.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "85649ca51fd72272d7821adaf274ad91c288277713d9c18820d8499a7ff69e9a"
+dependencies = [
+ "typenum",
+ "version_check",
+]
+
+[[package]]
+name = "getrandom"
+version = "0.2.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ff2abc00be7fca6ebc474524697ae276ad847ad0a6b3faa4bcb027e9a4614ad0"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "wasi",
+]
+
+[[package]]
+name = "getrandom"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "899def5c37c4fd7b2664648c28120ecec138e4d395b459e5ca34f9cce2dd77fd"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "r-efi",
+ "wasip2",
+]
+
+[[package]]
+name = "h2"
+version = "0.4.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2f44da3a8150a6703ed5d34e164b875fd14c2cdab9af1252a9a1020bde2bdc54"
+dependencies = [
+ "atomic-waker",
+ "bytes",
+ "fnv",
+ "futures-core",
+ "futures-sink",
+ "http",
+ "indexmap",
+ "slab",
+ "tokio",
+ "tokio-util",
+ "tracing",
+]
+
+[[package]]
+name = "hashbrown"
+version = "0.16.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "841d1cc9bed7f9236f321df977030373f4a4163ae1a7dbfe1a51a2c1a51d9100"
+
+[[package]]
+name = "hermit-abi"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc0fef456e4baa96da950455cd02c081ca953b141298e41db3fc7e36b1da849c"
+
+[[package]]
+name = "http"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3ba2a386d7f85a81f119ad7498ebe444d2e22c2af0b86b069416ace48b3311a"
+dependencies = [
+ "bytes",
+ "itoa",
+]
+
+[[package]]
+name = "http-body"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1efedce1fb8e6913f23e0c92de8e62cd5b772a67e7b3946df930a62566c93184"
+dependencies = [
+ "bytes",
+ "http",
+]
+
+[[package]]
+name = "http-body-util"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b021d93e26becf5dc7e1b75b1bed1fd93124b374ceb73f43d4d4eafec896a64a"
+dependencies = [
+ "bytes",
+ "futures-core",
+ "http",
+ "http-body",
+ "pin-project-lite",
+]
+
+[[package]]
+name = "httparse"
+version = "1.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6dbf3de79e51f3d586ab4cb9d5c3e2c14aa28ed23d180cf89b4df0454a69cc87"
+
+[[package]]
+name = "httpdate"
+version = "1.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
+
+[[package]]
+name = "hyper"
+version = "1.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ab2d4f250c3d7b1c9fcdff1cece94ea4e2dfbec68614f7b87cb205f24ca9d11"
+dependencies = [
+ "atomic-waker",
+ "bytes",
+ "futures-channel",
+ "futures-core",
+ "h2",
+ "http",
+ "http-body",
+ "httparse",
+ "httpdate",
+ "itoa",
+ "pin-project-lite",
+ "pin-utils",
+ "smallvec",
+ "tokio",
+]
+
+[[package]]
+name = "hyper-util"
+version = "0.1.20"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96547c2556ec9d12fb1578c4eaf448b04993e7fb79cbaad930a656880a6bdfa0"
+dependencies = [
+ "bytes",
+ "http",
+ "http-body",
+ "hyper",
+ "pin-project-lite",
+ "tokio",
+ "tower-service",
+]
+
+[[package]]
+name = "iana-time-zone"
+version = "0.1.65"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e31bc9ad994ba00e440a8aa5c9ef0ec67d5cb5e5cb0cc7f8b744a35b389cc470"
+dependencies = [
+ "android_system_properties",
+ "core-foundation-sys",
+ "iana-time-zone-haiku",
+ "js-sys",
+ "log",
+ "wasm-bindgen",
+ "windows-core",
+]
+
+[[package]]
+name = "iana-time-zone-haiku"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f31827a206f56af32e590ba56d5d2d085f558508192593743f16b2306495269f"
+dependencies = [
+ "cc",
+]
+
+[[package]]
+name = "indexmap"
+version = "2.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7714e70437a7dc3ac8eb7e6f8df75fd8eb422675fc7678aff7364301092b1017"
+dependencies = [
+ "equivalent",
+ "hashbrown",
+]
+
+[[package]]
+name = "inout"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "879f10e63c20629ecabbb64a8010319738c66a5cd0c29b02d63d272b03751d01"
+dependencies = [
+ "generic-array",
+]
+
+[[package]]
+name = "itoa"
+version = "1.0.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "92ecc6618181def0457392ccd0ee51198e065e016d1d527a7ac1b6dc7c1f09d2"
+
+[[package]]
+name = "jobserver"
+version = "0.1.34"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9afb3de4395d6b3e67a780b6de64b51c978ecf11cb9a462c66be7d4ca9039d33"
+dependencies = [
+ "getrandom 0.3.4",
+ "libc",
+]
+
+[[package]]
+name = "js-sys"
+version = "0.3.91"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b49715b7073f385ba4bc528e5747d02e66cb39c6146efb66b781f131f0fb399c"
+dependencies = [
+ "once_cell",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "lazy_static"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
+
+[[package]]
+name = "libc"
+version = "0.2.183"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b5b646652bf6661599e1da8901b3b9522896f01e736bad5f723fe7a3a27f899d"
+
+[[package]]
+name = "libm"
+version = "0.2.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6d2cec3eae94f9f509c767b45932f1ada8350c4bdb85af2fcab4a3c14807981"
+
+[[package]]
+name = "linux-raw-sys"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
+
+[[package]]
+name = "lock_api"
+version = "0.4.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "224399e74b87b5f3557511d98dff8b14089b3dadafcab6bb93eab67d3aace965"
+dependencies = [
+ "scopeguard",
+]
+
+[[package]]
+name = "log"
+version = "0.4.29"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
+
+[[package]]
+name = "matchit"
+version = "0.8.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "47e1ffaa40ddd1f3ed91f717a33c8c0ee23fff369e3aa8772b9605cc1d22f4c3"
+
+[[package]]
+name = "memchr"
+version = "2.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
+
+[[package]]
+name = "memmap2"
+version = "0.9.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "714098028fe011992e1c3962653c96b2d578c4b4bce9036e15ff220319b1e0e3"
+dependencies = [
+ "libc",
+]
+
+[[package]]
+name = "mime"
+version = "0.3.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6877bb514081ee2a7ff5ef9de3281f14a4dd4bceac4c09388074a6b5df8a139a"
+
+[[package]]
+name = "minimal-lexical"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
+
+[[package]]
+name = "mio"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a69bcab0ad47271a0234d9422b131806bf3968021e5dc9328caf2d4cd58557fc"
+dependencies = [
+ "libc",
+ "wasi",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "nom"
+version = "7.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d273983c5a657a70a3e8f2a01329822f3b8c8172b73826411a55751e404a0a4a"
+dependencies = [
+ "memchr",
+ "minimal-lexical",
+]
+
+[[package]]
+name = "num-bigint"
+version = "0.4.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a5e44f723f1133c9deac646763579fdb3ac745e418f2a7af9cd0c431da1f20b9"
+dependencies = [
+ "num-integer",
+ "num-traits",
+]
+
+[[package]]
+name = "num-conv"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf97ec579c3c42f953ef76dbf8d55ac91fb219dde70e49aa4a6b7d74e9919050"
+
+[[package]]
+name = "num-integer"
+version = "0.1.46"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7969661fd2958a5cb096e56c8e1ad0444ac2bbcd0061bd28660485a44879858f"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
+name = "num-traits"
+version = "0.2.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
+dependencies = [
+ "autocfg",
+]
+
+[[package]]
+name = "oid-registry"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a8d8034d9489cdaf79228eb9f6a3b8d7bb32ba00d6645ebd48eef4077ceb5bd9"
+dependencies = [
+ "asn1-rs",
+]
+
+[[package]]
+name = "once_cell"
+version = "1.21.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "42f5e15c9953c5e4ccceeb2e7382a716482c34515315f7b03532b8b4e8393d2d"
+
+[[package]]
+name = "parking"
+version = "2.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f38d5652c16fde515bb1ecef450ab0f6a219d619a7274976324d5e377f7dceba"
+
+[[package]]
+name = "parking_lot"
+version = "0.12.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93857453250e3077bd71ff98b6a65ea6621a19bb0f559a85248955ac12c45a1a"
+dependencies = [
+ "lock_api",
+ "parking_lot_core",
+]
+
+[[package]]
+name = "parking_lot_core"
+version = "0.9.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2621685985a2ebf1c516881c026032ac7deafcda1a2c9b7850dc81e3dfcb64c1"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "redox_syscall",
+ "smallvec",
+ "windows-link",
+]
+
+[[package]]
+name = "pem"
+version = "3.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1d30c53c26bc5b31a98cd02d20f25a7c8567146caf63ed593a9d87b2775291be"
+dependencies = [
+ "base64",
+ "serde_core",
+]
+
+[[package]]
+name = "percent-encoding"
+version = "2.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
+
+[[package]]
+name = "pin-project-lite"
+version = "0.2.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
+
+[[package]]
+name = "pin-utils"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
+
+[[package]]
+name = "piper"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c835479a4443ded371d6c535cbfd8d31ad92c5d23ae9770a61bc155e4992a3c1"
+dependencies = [
+ "atomic-waker",
+ "fastrand",
+ "futures-io",
+]
+
+[[package]]
+name = "polling"
+version = "3.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5d0e4f59085d47d8241c88ead0f274e8a0cb551f3625263c05eb8dd897c34218"
+dependencies = [
+ "cfg-if",
+ "concurrent-queue",
+ "hermit-abi",
+ "pin-project-lite",
+ "rustix",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "powerfmt"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "439ee305def115ba05938db6eb1644ff94165c5ab5e9420d1c1bcedbba909391"
+
+[[package]]
+name = "proc-macro2"
+version = "1.0.106"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8fd00f0bb2e90d81d1044c2b32617f68fcb9fa3bb7640c23e9c748e53fb30934"
+dependencies = [
+ "unicode-ident",
+]
+
+[[package]]
+name = "query-server"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "axum-server",
+ "bcrypt",
+ "getrandom 0.2.17",
+ "memmap2",
+ "rustls-acme",
+ "s2",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-stream",
+]
+
+[[package]]
+name = "quote"
+version = "1.0.45"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41f2619966050689382d2b44f664f4bc593e129785a36d6ee376ddf37259b924"
+dependencies = [
+ "proc-macro2",
+]
+
+[[package]]
+name = "r-efi"
+version = "5.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "69cdb34c158ceb288df11e18b4bd39de994f6657d83847bdffdbd7f346754b0f"
+
+[[package]]
+name = "rcgen"
+version = "0.13.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75e669e5202259b5314d1ea5397316ad400819437857b90861765f24c4cf80a2"
+dependencies = [
+ "aws-lc-rs",
+ "pem",
+ "rustls-pki-types",
+ "time",
+ "yasna",
+]
+
+[[package]]
+name = "redox_syscall"
+version = "0.5.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed2bf2547551a7053d6fdfafda3f938979645c44812fbfcda098faae3f1a362d"
+dependencies = [
+ "bitflags",
+]
+
+[[package]]
+name = "ring"
+version = "0.17.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a4689e6c2294d81e88dc6261c768b63bc4fcdb852be6d1352498b114f61383b7"
+dependencies = [
+ "cc",
+ "cfg-if",
+ "getrandom 0.2.17",
+ "libc",
+ "untrusted",
+ "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "rusticata-macros"
+version = "4.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "faf0c4a6ece9950b9abdb62b1cfcf2a68b3b67a10ba445b3bb85be2a293d0632"
+dependencies = [
+ "nom",
+]
+
+[[package]]
+name = "rustix"
+version = "1.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6fe4565b9518b83ef4f91bb47ce29620ca828bd32cb7e408f0062e9930ba190"
+dependencies = [
+ "bitflags",
+ "errno",
+ "libc",
+ "linux-raw-sys",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "rustls"
+version = "0.23.37"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "758025cb5fccfd3bc2fd74708fd4682be41d99e5dff73c377c0646c6012c73a4"
+dependencies = [
+ "aws-lc-rs",
+ "once_cell",
+ "rustls-pki-types",
+ "rustls-webpki",
+ "subtle",
+ "zeroize",
+]
+
+[[package]]
+name = "rustls-acme"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4b49bf42910782ed684d992550c267c98fbe602320d6bb4a6362292791076eed"
+dependencies = [
+ "async-io",
+ "async-trait",
+ "async-web-client",
+ "aws-lc-rs",
+ "axum-server",
+ "base64",
+ "blocking",
+ "chrono",
+ "futures",
+ "futures-rustls",
+ "http",
+ "log",
+ "pem",
+ "rcgen",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-util",
+ "tower-service",
+ "webpki-roots 1.0.6",
+ "x509-parser",
+]
+
+[[package]]
+name = "rustls-pemfile"
+version = "2.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dce314e5fee3f39953d46bb63bb8a46d40c2f8fb7cc5a3b6cab2bde9721d6e50"
+dependencies = [
+ "rustls-pki-types",
+]
+
+[[package]]
+name = "rustls-pki-types"
+version = "1.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be040f8b0a225e40375822a563fa9524378b9d63112f53e19ffff34df5d33fdd"
+dependencies = [
+ "zeroize",
+]
+
+[[package]]
+name = "rustls-webpki"
+version = "0.103.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d7df23109aa6c1567d1c575b9952556388da57401e4ace1d15f79eedad0d8f53"
+dependencies = [
+ "aws-lc-rs",
+ "ring",
+ "rustls-pki-types",
+ "untrusted",
+]
+
+[[package]]
+name = "rustversion"
+version = "1.0.22"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
+
+[[package]]
+name = "ryu"
+version = "1.0.23"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9774ba4a74de5f7b1c1451ed6cd5285a32eddb5cccb8cc655a4e50009e06477f"
+
+[[package]]
+name = "s2"
+version = "0.0.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23434007bcef0196e3f083834576ac004241f354001a22c61d2f2208c780e8df"
+dependencies = [
+ "bigdecimal",
+ "cgmath",
+ "float_extras",
+ "lazy_static",
+ "libm",
+ "serde",
+]
+
+[[package]]
+name = "scopeguard"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
+
+[[package]]
+name = "serde"
+version = "1.0.228"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e"
+dependencies = [
+ "serde_core",
+ "serde_derive",
+]
+
+[[package]]
+name = "serde_core"
+version = "1.0.228"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41d385c7d4ca58e59fc732af25c3983b67ac852c1a25000afe1175de458b67ad"
+dependencies = [
+ "serde_derive",
+]
+
+[[package]]
+name = "serde_derive"
+version = "1.0.228"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d540f220d3187173da220f885ab66608367b6574e925011a9353e4badda91d79"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "serde_json"
+version = "1.0.149"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "83fc039473c5595ace860d8c4fafa220ff474b3fc6bfdb4293327f1a37e94d86"
+dependencies = [
+ "itoa",
+ "memchr",
+ "serde",
+ "serde_core",
+ "zmij",
+]
+
+[[package]]
+name = "serde_path_to_error"
+version = "0.1.20"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "10a9ff822e371bb5403e391ecd83e182e0e77ba7f6fe0160b795797109d1b457"
+dependencies = [
+ "itoa",
+ "serde",
+ "serde_core",
+]
+
+[[package]]
+name = "serde_urlencoded"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d3491c14715ca2294c4d6a88f15e84739788c1d030eed8c110436aafdaa2f3fd"
+dependencies = [
+ "form_urlencoded",
+ "itoa",
+ "ryu",
+ "serde",
+]
+
+[[package]]
+name = "shlex"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
+
+[[package]]
+name = "signal-hook-registry"
+version = "1.4.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c4db69cba1110affc0e9f7bcd48bbf87b3f4fc7c61fc9155afd4c469eb3d6c1b"
+dependencies = [
+ "errno",
+ "libc",
+]
+
+[[package]]
+name = "slab"
+version = "0.4.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
+
+[[package]]
+name = "smallvec"
+version = "1.15.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
+
+[[package]]
+name = "socket2"
+version = "0.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3a766e1110788c36f4fa1c2b71b387a7815aa65f88ce0229841826633d93723e"
+dependencies = [
+ "libc",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "subtle"
+version = "2.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
+
+[[package]]
+name = "syn"
+version = "2.0.117"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e665b8803e7b1d2a727f4023456bbbbe74da67099c585258af0ad9c5013b9b99"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "unicode-ident",
+]
+
+[[package]]
+name = "sync_wrapper"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0bf256ce5efdfa370213c1dabab5935a12e49f2c58d15e9eac2870d3b4f27263"
+
+[[package]]
+name = "synstructure"
+version = "0.13.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "728a70f3dbaf5bab7f0c4b1ac8d7ae5ea60a4b5549c8a5914361c99147a709d2"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "thiserror"
+version = "1.0.69"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6aaf5339b578ea85b50e080feb250a3e8ae8cfcdff9a461c9ec2904bc923f52"
+dependencies = [
+ "thiserror-impl 1.0.69",
+]
+
+[[package]]
+name = "thiserror"
+version = "2.0.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4288b5bcbc7920c07a1149a35cf9590a2aa808e0bc1eafaade0b80947865fbc4"
+dependencies = [
+ "thiserror-impl 2.0.18",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "1.0.69"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4fee6c4efc90059e10f81e6d42c60a18f76588c3d74cb83a0b242a2b6c7504c1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "2.0.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ebc4ee7f67670e9b64d05fa4253e753e016c6c95ff35b89b7941d6b856dec1d5"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "time"
+version = "0.3.47"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "743bd48c283afc0388f9b8827b976905fb217ad9e647fae3a379a9283c4def2c"
+dependencies = [
+ "deranged",
+ "itoa",
+ "num-conv",
+ "powerfmt",
+ "serde_core",
+ "time-core",
+ "time-macros",
+]
+
+[[package]]
+name = "time-core"
+version = "0.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7694e1cfe791f8d31026952abf09c69ca6f6fa4e1a1229e18988f06a04a12dca"
+
+[[package]]
+name = "time-macros"
+version = "0.2.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2e70e4c5a0e0a8a4823ad65dfe1a6930e4f4d756dcd9dd7939022b5e8c501215"
+dependencies = [
+ "num-conv",
+ "time-core",
+]
+
+[[package]]
+name = "tokio"
+version = "1.50.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "27ad5e34374e03cfffefc301becb44e9dc3c17584f414349ebe29ed26661822d"
+dependencies = [
+ "bytes",
+ "libc",
+ "mio",
+ "parking_lot",
+ "pin-project-lite",
+ "signal-hook-registry",
+ "socket2",
+ "tokio-macros",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "tokio-macros"
+version = "2.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c55a2eff8b69ce66c84f85e1da1c233edc36ceb85a2058d11b0d6a3c7e7569c"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "tokio-rustls"
+version = "0.26.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1729aa945f29d91ba541258c8df89027d5792d85a8841fb65e8bf0f4ede4ef61"
+dependencies = [
+ "rustls",
+ "tokio",
+]
+
+[[package]]
+name = "tokio-stream"
+version = "0.1.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "32da49809aab5c3bc678af03902d4ccddea2a87d028d86392a4b1560c6906c70"
+dependencies = [
+ "futures-core",
+ "pin-project-lite",
+ "tokio",
+]
+
+[[package]]
+name = "tokio-util"
+version = "0.7.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ae9cec805b01e8fc3fd2fe289f89149a9b66dd16786abd8b19cfa7b48cb0098"
+dependencies = [
+ "bytes",
+ "futures-core",
+ "futures-io",
+ "futures-sink",
+ "pin-project-lite",
+ "tokio",
+]
+
+[[package]]
+name = "tower"
+version = "0.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ebe5ef63511595f1344e2d5cfa636d973292adc0eec1f0ad45fae9f0851ab1d4"
+dependencies = [
+ "futures-core",
+ "futures-util",
+ "pin-project-lite",
+ "sync_wrapper",
+ "tokio",
+ "tower-layer",
+ "tower-service",
+ "tracing",
+]
+
+[[package]]
+name = "tower-layer"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "121c2a6cda46980bb0fcd1647ffaf6cd3fc79a013de288782836f6df9c48780e"
+
+[[package]]
+name = "tower-service"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8df9b6e13f2d32c91b9bd719c00d1958837bc7dec474d94952798cc8e69eeec3"
+
+[[package]]
+name = "tracing"
+version = "0.1.44"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "63e71662fa4b2a2c3a26f570f037eb95bb1f85397f3cd8076caed2f026a6d100"
+dependencies = [
+ "log",
+ "pin-project-lite",
+ "tracing-core",
+]
+
+[[package]]
+name = "tracing-core"
+version = "0.1.36"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "db97caf9d906fbde555dd62fa95ddba9eecfd14cb388e4f491a66d74cd5fb79a"
+dependencies = [
+ "once_cell",
+]
+
+[[package]]
+name = "typenum"
+version = "1.19.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "562d481066bde0658276a35467c4af00bdc6ee726305698a55b86e61d7ad82bb"
+
+[[package]]
+name = "unicode-ident"
+version = "1.0.24"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
+
+[[package]]
+name = "untrusted"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
+
+[[package]]
+name = "version_check"
+version = "0.9.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
+
+[[package]]
+name = "wasi"
+version = "0.11.1+wasi-snapshot-preview1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ccf3ec651a847eb01de73ccad15eb7d99f80485de043efb2f370cd654f4ea44b"
+
+[[package]]
+name = "wasip2"
+version = "1.0.2+wasi-0.2.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9517f9239f02c069db75e65f174b3da828fe5f5b945c4dd26bd25d89c03ebcf5"
+dependencies = [
+ "wit-bindgen",
+]
+
+[[package]]
+name = "wasm-bindgen"
+version = "0.2.114"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6532f9a5c1ece3798cb1c2cfdba640b9b3ba884f5db45973a6f442510a87d38e"
+dependencies = [
+ "cfg-if",
+ "once_cell",
+ "rustversion",
+ "wasm-bindgen-macro",
+ "wasm-bindgen-shared",
+]
+
+[[package]]
+name = "wasm-bindgen-macro"
+version = "0.2.114"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "18a2d50fcf105fb33bb15f00e7a77b772945a2ee45dcf454961fd843e74c18e6"
+dependencies = [
+ "quote",
+ "wasm-bindgen-macro-support",
+]
+
+[[package]]
+name = "wasm-bindgen-macro-support"
+version = "0.2.114"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "03ce4caeaac547cdf713d280eda22a730824dd11e6b8c3ca9e42247b25c631e3"
+dependencies = [
+ "bumpalo",
+ "proc-macro2",
+ "quote",
+ "syn",
+ "wasm-bindgen-shared",
+]
+
+[[package]]
+name = "wasm-bindgen-shared"
+version = "0.2.114"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75a326b8c223ee17883a4251907455a2431acc2791c98c26279376490c378c16"
+dependencies = [
+ "unicode-ident",
+]
+
+[[package]]
+name = "webpki-roots"
+version = "0.26.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "521bc38abb08001b01866da9f51eb7c5d647a19260e00054a8c7fd5f9e57f7a9"
+dependencies = [
+ "webpki-roots 1.0.6",
+]
+
+[[package]]
+name = "webpki-roots"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "22cfaf3c063993ff62e73cb4311efde4db1efb31ab78a3e5c457939ad5cc0bed"
+dependencies = [
+ "rustls-pki-types",
+]
+
+[[package]]
+name = "windows-core"
+version = "0.62.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8e83a14d34d0623b51dce9581199302a221863196a1dde71a7663a4c2be9deb"
+dependencies = [
+ "windows-implement",
+ "windows-interface",
+ "windows-link",
+ "windows-result",
+ "windows-strings",
+]
+
+[[package]]
+name = "windows-implement"
+version = "0.60.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "053e2e040ab57b9dc951b72c264860db7eb3b0200ba345b4e4c3b14f67855ddf"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "windows-interface"
+version = "0.59.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f316c4a2570ba26bbec722032c4099d8c8bc095efccdc15688708623367e358"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "windows-link"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0805222e57f7521d6a62e36fa9163bc891acd422f971defe97d64e70d0a4fe5"
+
+[[package]]
+name = "windows-result"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7781fa89eaf60850ac3d2da7af8e5242a5ea78d1a11c49bf2910bb5a73853eb5"
+dependencies = [
+ "windows-link",
+]
+
+[[package]]
+name = "windows-strings"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7837d08f69c77cf6b07689544538e017c1bfcf57e34b4c0ff58e6c2cd3b37091"
+dependencies = [
+ "windows-link",
+]
+
+[[package]]
+name = "windows-sys"
+version = "0.52.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "282be5f36a8ce781fad8c8ae18fa3f9beff57ec1b52cb3de0789201425d9a33d"
+dependencies = [
+ "windows-targets",
+]
+
+[[package]]
+name = "windows-sys"
+version = "0.61.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ae137229bcbd6cdf0f7b80a31df61766145077ddf49416a728b02cb3921ff3fc"
+dependencies = [
+ "windows-link",
+]
+
+[[package]]
+name = "windows-targets"
+version = "0.52.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9b724f72796e036ab90c1021d4780d4d3d648aca59e491e6b98e725b84e99973"
+dependencies = [
+ "windows_aarch64_gnullvm",
+ "windows_aarch64_msvc",
+ "windows_i686_gnu",
+ "windows_i686_gnullvm",
+ "windows_i686_msvc",
+ "windows_x86_64_gnu",
+ "windows_x86_64_gnullvm",
+ "windows_x86_64_msvc",
+]
+
+[[package]]
+name = "windows_aarch64_gnullvm"
+version = "0.52.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "32a4622180e7a0ec044bb555404c800bc9fd9ec262ec147edd5989ccd0c02cd3"
+
+[[package]]
+name = "windows_aarch64_msvc"
+version = "0.52.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "09ec2a7bb152e2252b53fa7803150007879548bc709c039df7627cabbd05d469"
+
+[[package]]
+name = "windows_i686_gnu"
+version = "0.52.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8e9b5ad5ab802e97eb8e295ac6720e509ee4c243f69d781394014ebfe8bbfa0b"
+
+[[package]]
+name = "windows_i686_gnullvm"
+version = "0.52.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0eee52d38c090b3caa76c563b86c3a4bd71ef1a819287c19d586d7334ae8ed66"
+
+[[package]]
+name = "windows_i686_msvc"
+version = "0.52.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "240948bc05c5e7c6dabba28bf89d89ffce3e303022809e73deaefe4f6ec56c66"
+
+[[package]]
+name = "windows_x86_64_gnu"
+version = "0.52.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "147a5c80aabfbf0c7d901cb5895d1de30ef2907eb21fbbab29ca94c5b08b1a78"
+
+[[package]]
+name = "windows_x86_64_gnullvm"
+version = "0.52.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "24d5b23dc417412679681396f2b49f3de8c1473deb516bd34410872eff51ed0d"
+
+[[package]]
+name = "windows_x86_64_msvc"
+version = "0.52.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
+
+[[package]]
+name = "wit-bindgen"
+version = "0.51.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d7249219f66ced02969388cf2bb044a09756a083d0fab1e566056b04d9fbcaa5"
+
+[[package]]
+name = "x509-parser"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fcbc162f30700d6f3f82a24bf7cc62ffe7caea42c0b2cba8bf7f3ae50cf51f69"
+dependencies = [
+ "asn1-rs",
+ "data-encoding",
+ "der-parser",
+ "lazy_static",
+ "nom",
+ "oid-registry",
+ "rusticata-macros",
+ "thiserror 1.0.69",
+ "time",
+]
+
+[[package]]
+name = "yasna"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e17bb3549cc1321ae1296b9cdc2698e2b6cb1992adfa19a8c72e5b7a738f44cd"
+dependencies = [
+ "time",
+]
+
+[[package]]
+name = "zeroize"
+version = "1.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b97154e67e32c85465826e8bcc1c59429aaaf107c1e4a9e53c8d8ccd5eff88d0"
+
+[[package]]
+name = "zmij"
+version = "1.0.21"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8848ee67ecc8aedbaf3e4122217aff892639231befc6a1b58d29fff4c2cabaa"
+
+```
+
+`server/Cargo.toml`:
+
+```toml
+[package]
+name = "query-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
+tokio-stream = "0.1"
+memmap2 = "0.9"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+s2 = "0.0.13"
+rustls-acme = { version = "0.14", features = ["axum"] }
+axum-server = "0.7"
+bcrypt = "0.15"
+getrandom = "0.2"
+
+[profile.release]
+opt-level = 3
+lto = true
+
+```
+
+`server/src/auth.rs`:
+
+```rs
+use axum::extract::{Form, Path, State};
+use axum::http::header::SET_COOKIE;
+use axum::http::HeaderMap;
+use axum::response::{Html, IntoResponse, Redirect, Response};
+use axum::routing::{get, post};
+use axum::Router;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::fmt::Write;
+use std::fs;
+use std::sync::atomic::{AtomicU32, AtomicU64, Ordering::Relaxed};
+use std::sync::{Arc, RwLock};
+use std::time::{SystemTime, UNIX_EPOCH};
+
+// --- Data model ---
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct User {
+    password_hash: String,
+    admin: bool,
+    rate_per_second: u32,
+    rate_per_day: u32,
+    #[serde(default)]
+    rate_by_ip: bool,
+}
+
+pub struct RateState {
+    second_count: AtomicU32,
+    second_ts: AtomicU64,
+    day_count: AtomicU32,
+    day_ts: AtomicU32,
+}
+
+impl Default for RateState {
+    fn default() -> Self {
+        Self {
+            second_count: AtomicU32::new(0),
+            second_ts: AtomicU64::new(0),
+            day_count: AtomicU32::new(0),
+            day_ts: AtomicU32::new(0),
+        }
+    }
+}
+
+pub type RateLimiter = RwLock<HashMap<String, Arc<RateState>>>;
+
+#[derive(Serialize, Deserialize, Default)]
+pub struct Db {
+    users: HashMap<String, User>,
+    tokens: HashMap<String, String>, // token -> login
+    #[serde(skip)]
+    sessions: HashMap<String, String>, // session_id -> login (in-memory only)
+    #[serde(skip)]
+    path: String,
+}
+
+impl Db {
+    pub fn load(path: &str) -> Self {
+        let mut db = match fs::read_to_string(path) {
+            Ok(data) => serde_json::from_str(&data).unwrap_or_default(),
+            Err(_) => Db::default(),
+        };
+        db.path = path.to_string();
+        db
+    }
+
+    fn save(&self) {
+        let data = serde_json::to_string_pretty(self).unwrap();
+        fs::write(&self.path, data).expect("Failed to save database");
+    }
+
+    fn create_user(&mut self, login: &str, password: &str, admin: bool, rate_per_second: u32, rate_per_day: u32, rate_by_ip: bool) {
+        let hash = bcrypt::hash(password, bcrypt::DEFAULT_COST).expect("bcrypt hash failed");
+        self.users.insert(login.to_string(), User {
+            password_hash: hash,
+            admin,
+            rate_per_second,
+            rate_per_day,
+            rate_by_ip,
+        });
+        self.save();
+    }
+
+    pub fn validate_token(&self, key: &str) -> Option<(String, u32, u32, bool)> {
+        let login = self.tokens.get(key)?;
+        let user = self.users.get(login)?;
+        Some((login.clone(), user.rate_per_second, user.rate_per_day, user.rate_by_ip))
+    }
+}
+
+pub fn check_rate(limiter: &RateLimiter, login: &str, rate_per_second: u32, rate_per_day: u32) -> Result<(), &'static str> {
+    let state = {
+        let map = limiter.read().unwrap();
+        if let Some(s) = map.get(login) {
+            Arc::clone(s)
+        } else {
+            drop(map);
+            let mut map = limiter.write().unwrap();
+            Arc::clone(map.entry(login.to_string()).or_default())
+        }
+    };
+
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+    let now_secs = now.as_secs();
+    let now_day = (now_secs / 86400) as u32;
+
+    if state.second_ts.load(Relaxed) != now_secs {
+        state.second_ts.store(now_secs, Relaxed);
+        state.second_count.store(0, Relaxed);
+    }
+    if state.day_ts.load(Relaxed) != now_day {
+        state.day_ts.store(now_day, Relaxed);
+        state.day_count.store(0, Relaxed);
+    }
+
+    if rate_per_second > 0 && state.second_count.fetch_add(1, Relaxed) >= rate_per_second {
+        return Err("Rate limit exceeded (per second)");
+    }
+    if rate_per_day > 0 && state.day_count.fetch_add(1, Relaxed) >= rate_per_day {
+        return Err("Rate limit exceeded (per day)");
+    }
+
+    Ok(())
+}
+
+fn random_hex(len: usize) -> String {
+    let mut bytes = vec![0u8; len];
+    getrandom::getrandom(&mut bytes).expect("getrandom failed");
+    let mut s = String::with_capacity(len * 2);
+    for b in &bytes {
+        write!(s, "{:02x}", b).unwrap();
+    }
+    s
+}
+
+fn get_session_cookie(headers: &HeaderMap) -> Option<String> {
+    headers
+        .get_all("cookie")
+        .iter()
+        .filter_map(|v| v.to_str().ok())
+        .flat_map(|s| s.split(';'))
+        .map(|s| s.trim())
+        .find_map(|s| s.strip_prefix("session=").map(|v| v.to_string()))
+}
+
+fn set_session_cookie(value: &str) -> ([(axum::http::header::HeaderName, String); 1],) {
+    ([(SET_COOKIE, format!("session={}; Path=/; HttpOnly", value))],)
+}
+
+fn clear_session_cookie() -> ([(axum::http::header::HeaderName, String); 1],) {
+    ([(SET_COOKIE, "session=; Path=/; HttpOnly; Max-Age=0".to_string())],)
+}
+
+// --- Router ---
+
+pub fn router() -> Router<Arc<RwLock<Db>>> {
+    Router::new()
+        .route("/", get(dashboard))
+        .route("/login", get(login_page).post(login_submit))
+        .route("/logout", get(logout))
+        .route("/tokens", post(create_token))
+        .route("/tokens/{token}/delete", get(delete_token))
+        .route("/users", post(create_user_handler))
+        .route("/users/{login}/delete", get(delete_user))
+}
+
+// --- Handlers ---
+
+#[derive(Deserialize)]
+struct LoginForm {
+    login: String,
+    password: String,
+}
+
+async fn login_page(headers: HeaderMap, state: State<Arc<RwLock<Db>>>) -> Response {
+    if let Some(session_id) = get_session_cookie(&headers) {
+        let db = state.read().unwrap();
+        if db.sessions.contains_key(&session_id) {
+            return Redirect::to("/").into_response();
+        }
+    }
+    Html(LOGIN_HTML).into_response()
+}
+
+async fn login_submit(state: State<Arc<RwLock<Db>>>, Form(form): Form<LoginForm>) -> Response {
+    let mut db = state.write().unwrap();
+
+    // First login ever — create admin account
+    if db.users.is_empty() {
+        db.create_user(&form.login, &form.password, true, 0, 0, false);
+    }
+
+    if let Some(user) = db.users.get(&form.login) {
+        if bcrypt::verify(&form.password, &user.password_hash).unwrap_or(false) {
+            let session_id = random_hex(32);
+            db.sessions.insert(session_id.clone(), form.login);
+            let (cookie,) = set_session_cookie(&session_id);
+            return (cookie, Redirect::to("/")).into_response();
+        }
+    }
+    Html(LOGIN_HTML.replace("</form>", "<small><ins>Invalid credentials</ins></small></form>"))
+        .into_response()
+}
+
+async fn logout(headers: HeaderMap, state: State<Arc<RwLock<Db>>>) -> Response {
+    if let Some(session_id) = get_session_cookie(&headers) {
+        let mut db = state.write().unwrap();
+        db.sessions.remove(&session_id);
+    }
+    let (cookie,) = clear_session_cookie();
+    (cookie, Redirect::to("/login")).into_response()
+}
+
+async fn dashboard(
+    headers: HeaderMap,
+    state: State<Arc<RwLock<Db>>>,
+    limiter: axum::extract::Extension<Arc<RateLimiter>>,
+) -> Response {
+    let session_id = match get_session_cookie(&headers) {
+        Some(s) => s,
+        None => return Redirect::to("/login").into_response(),
+    };
+
+    let db = state.read().unwrap();
+    let login = match db.sessions.get(&session_id) {
+        Some(l) => l.clone(),
+        None => return Redirect::to("/login").into_response(),
+    };
+
+    let is_admin = db.users.get(&login).map(|u| u.admin).unwrap_or(false);
+
+    let mut rows = String::new();
+    for (token, owner) in &db.tokens {
+        if owner == &login {
+            rows.push_str(&format!(
+                "<tr><td><code>{}</code></td><td><a href=\"/tokens/{}/delete\">Delete</a></td></tr>",
+                html_escape(token),
+                html_escape(token),
+            ));
+        }
+    }
+
+    let mut user_rows = String::new();
+    if is_admin {
+        for (ulogin, user) in &db.users {
+            let role = if user.admin { "Admin" } else { "User" };
+            let delete = if ulogin != &login {
+                format!("<a href=\"/users/{}/delete\">Delete</a>", html_escape(ulogin))
+            } else {
+                String::new()
+            };
+            let by_ip = if user.rate_by_ip { "Yes" } else { "" };
+            user_rows.push_str(&format!(
+                "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>",
+                html_escape(ulogin), role, user.rate_per_second, user.rate_per_day, by_ip, delete
+            ));
+        }
+    }
+
+    let now_day = (SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() / 86400) as u32;
+    let daily_usage = {
+        let map = limiter.read().unwrap();
+        map.get(&login).map(|s| {
+            if s.day_ts.load(Relaxed) == now_day { s.day_count.load(Relaxed) } else { 0 }
+        }).unwrap_or(0)
+    };
+
+    let html = DASHBOARD_HTML
+        .replace("{user}", &html_escape(&login))
+        .replace("{rows}", &rows)
+        .replace("{user_rows}", &user_rows)
+        .replace("{daily_usage}", &daily_usage.to_string())
+        .replace("{users_display}", if is_admin { "" } else { "display:none" });
+    Html(html).into_response()
+}
+
+async fn create_token(headers: HeaderMap, state: State<Arc<RwLock<Db>>>) -> Response {
+    let session_id = match get_session_cookie(&headers) {
+        Some(s) => s,
+        None => return Redirect::to("/login").into_response(),
+    };
+
+    let mut db = state.write().unwrap();
+    if let Some(login) = db.sessions.get(&session_id).cloned() {
+        let token = random_hex(16);
+        db.tokens.insert(token, login);
+        db.save();
+    }
+    Redirect::to("/").into_response()
+}
+
+async fn delete_token(
+    headers: HeaderMap,
+    state: State<Arc<RwLock<Db>>>,
+    Path(token): Path<String>,
+) -> Response {
+    let session_id = match get_session_cookie(&headers) {
+        Some(s) => s,
+        None => return Redirect::to("/login").into_response(),
+    };
+
+    let mut db = state.write().unwrap();
+    if let Some(login) = db.sessions.get(&session_id) {
+        if db.tokens.get(&token).map(|o| o == login).unwrap_or(false) {
+            db.tokens.remove(&token);
+            db.save();
+        }
+    }
+    Redirect::to("/").into_response()
+}
+
+#[derive(Deserialize)]
+struct CreateUserForm {
+    login: String,
+    password: String,
+    rate_per_second: u32,
+    rate_per_day: u32,
+    #[serde(default)]
+    rate_by_ip: Option<String>,
+}
+
+async fn create_user_handler(headers: HeaderMap, state: State<Arc<RwLock<Db>>>, Form(form): Form<CreateUserForm>) -> Response {
+    let session_id = match get_session_cookie(&headers) {
+        Some(s) => s,
+        None => return Redirect::to("/login").into_response(),
+    };
+
+    let mut db = state.write().unwrap();
+    if let Some(login) = db.sessions.get(&session_id).cloned() {
+        let is_admin = db.users.get(&login).map(|u| u.admin).unwrap_or(false);
+        if is_admin && !form.login.is_empty() && !form.password.is_empty() {
+            db.create_user(&form.login, &form.password, false, form.rate_per_second, form.rate_per_day, form.rate_by_ip.as_deref() == Some("on"));
+        }
+    }
+    Redirect::to("/").into_response()
+}
+
+async fn delete_user(
+    headers: HeaderMap,
+    state: State<Arc<RwLock<Db>>>,
+    Path(target): Path<String>,
+) -> Response {
+    let session_id = match get_session_cookie(&headers) {
+        Some(s) => s,
+        None => return Redirect::to("/login").into_response(),
+    };
+
+    let mut db = state.write().unwrap();
+    if let Some(login) = db.sessions.get(&session_id).cloned() {
+        let is_admin = db.users.get(&login).map(|u| u.admin).unwrap_or(false);
+        if is_admin && target != login {
+            db.users.remove(&target);
+            db.tokens.retain(|_, owner| owner != &target);
+            db.save();
+        }
+    }
+    Redirect::to("/").into_response()
+}
+
+fn html_escape(s: &str) -> String {
+    s.replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
+}
+
+const LOGIN_HTML: &str = include_str!("web/login.html");
+const DASHBOARD_HTML: &str = include_str!("web/dashboard.html");
+
+```
+
+`server/src/main.rs`:
+
+```rs
+mod auth;
+
+use axum::extract::Query;
+use axum::http::StatusCode;
+use axum::response::{IntoResponse, Response};
+use axum::routing::get;
+use axum::Router;
+use memmap2::Mmap;
+use s2::cellid::CellID;
+use s2::latlng::LatLng;
+use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
+use std::fs::File;
+use std::sync::{Arc, RwLock};
+
+// --- S2 helpers ---
+
+const DEFAULT_STREET_CELL_LEVEL: u64 = 17;
+const DEFAULT_ADMIN_CELL_LEVEL: u64 = 10;
+const DEFAULT_SEARCH_DISTANCE: f64 = 75.0;
+
+fn cell_id_at_level(lat: f64, lng: f64, level: u64) -> u64 {
+    let ll = LatLng::from_degrees(lat, lng);
+    CellID::from(ll).parent(level).0
+}
+
+fn cell_neighbors_at_level(cell_id: u64, level: u64) -> Vec<u64> {
+    let cell = CellID(cell_id);
+    cell.all_neighbors(level).into_iter().map(|c| c.0).collect()
+}
+
+// --- Binary format structs (must match C++ build pipeline) ---
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+struct WayHeader {
+    node_offset: u32,
+    node_count: u8,
+    name_id: u32,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+struct AddrPoint {
+    lat: f32,
+    lng: f32,
+    housenumber_id: u32,
+    street_id: u32,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+struct InterpWay {
+    node_offset: u32,
+    node_count: u8,
+    street_id: u32,
+    start_number: u32,
+    end_number: u32,
+    interpolation: u8,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+struct AdminPolygon {
+    vertex_offset: u32,
+    vertex_count: u16,
+    name_id: u32,
+    admin_level: u8,
+    area: f32,
+    country_code: u16,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+struct NodeCoord {
+    lat: f32,
+    lng: f32,
+}
+
+// --- Index data ---
+
+struct Index {
+    geo_cells: Mmap,
+    street_entries: Mmap,
+    street_ways: Mmap,
+    street_nodes: Mmap,
+    addr_entries: Mmap,
+    addr_points: Mmap,
+    interp_entries: Mmap,
+    interp_ways: Mmap,
+    interp_nodes: Mmap,
+    admin_cells: Mmap,
+    admin_entries: Mmap,
+    admin_polygons: Mmap,
+    admin_vertices: Mmap,
+    strings: Mmap,
+    street_cell_level: u64,
+    admin_cell_level: u64,
+    max_distance_sq: f64,
+}
+
+const NO_DATA: u32 = 0xFFFFFFFF;
+
+struct GeoCellOffsets {
+    street: u32,
+    addr: u32,
+    interp: u32,
+}
+
+fn mmap_file(path: &str) -> Result<Mmap, String> {
+    let file = File::open(path).map_err(|e| format!("Failed to open {}: {}", path, e))?;
+    unsafe { Mmap::map(&file).map_err(|e| format!("Failed to mmap {}: {}", path, e)) }
+}
+
+impl Index {
+    fn load(dir: &str, street_cell_level: u64, admin_cell_level: u64, search_distance: f64) -> Result<Self, String> {
+        let meters_to_rad = search_distance / 111_320.0;
+        let max_distance_sq = meters_to_rad * meters_to_rad;
+        Ok(Index {
+            geo_cells: mmap_file(&format!("{}/geo_cells.bin", dir))?,
+            street_entries: mmap_file(&format!("{}/street_entries.bin", dir))?,
+            street_ways: mmap_file(&format!("{}/street_ways.bin", dir))?,
+            street_nodes: mmap_file(&format!("{}/street_nodes.bin", dir))?,
+            addr_entries: mmap_file(&format!("{}/addr_entries.bin", dir))?,
+            addr_points: mmap_file(&format!("{}/addr_points.bin", dir))?,
+            interp_entries: mmap_file(&format!("{}/interp_entries.bin", dir))?,
+            interp_ways: mmap_file(&format!("{}/interp_ways.bin", dir))?,
+            interp_nodes: mmap_file(&format!("{}/interp_nodes.bin", dir))?,
+            admin_cells: mmap_file(&format!("{}/admin_cells.bin", dir))?,
+            admin_entries: mmap_file(&format!("{}/admin_entries.bin", dir))?,
+            admin_polygons: mmap_file(&format!("{}/admin_polygons.bin", dir))?,
+            admin_vertices: mmap_file(&format!("{}/admin_vertices.bin", dir))?,
+            strings: mmap_file(&format!("{}/strings.bin", dir))?,
+            street_cell_level,
+            admin_cell_level,
+            max_distance_sq,
+        })
+    }
+
+    fn get_string(&self, offset: u32) -> &str {
+        let bytes = &self.strings[offset as usize..];
+        let end = bytes.iter().position(|&b| b == 0).unwrap_or(bytes.len());
+        std::str::from_utf8(&bytes[..end]).unwrap_or("")
+    }
+
+    fn read_u16(data: &[u8], offset: usize) -> u16 {
+        u16::from_le_bytes([data[offset], data[offset + 1]])
+    }
+
+    fn read_u32(data: &[u8], offset: usize) -> u32 {
+        u32::from_le_bytes(data[offset..offset + 4].try_into().unwrap())
+    }
+
+    fn read_u64(data: &[u8], offset: usize) -> u64 {
+        u64::from_le_bytes(data[offset..offset + 8].try_into().unwrap())
+    }
+
+    // Iterate entry IDs inline from entries file at given offset
+    fn for_each_entry(entries: &[u8], offset: u32, mut f: impl FnMut(u32)) {
+        if offset == NO_DATA { return; }
+        let offset = offset as usize;
+        if offset + 2 > entries.len() { return; }
+
+        let id_count = Self::read_u16(entries, offset) as usize;
+        let data_start = offset + 2;
+        if data_start + id_count * 4 > entries.len() { return; }
+
+        for i in 0..id_count {
+            f(Self::read_u32(entries, data_start + i * 4));
+        }
+    }
+
+    // Binary search geo cell index: 20 bytes per entry (u64 cell_id + u32 street + u32 addr + u32 interp)
+    fn lookup_geo_cell(cells: &[u8], cell_id: u64) -> GeoCellOffsets {
+        let entry_size: usize = 20;
+        let count = cells.len() / entry_size;
+        let empty = GeoCellOffsets { street: NO_DATA, addr: NO_DATA, interp: NO_DATA };
+        if count == 0 { return empty; }
+
+        let mut lo = 0usize;
+        let mut hi = count;
+        while lo < hi {
+            let mid = lo + (hi - lo) / 2;
+            let mid_id = Self::read_u64(cells, mid * entry_size);
+            if mid_id == cell_id {
+                return GeoCellOffsets {
+                    street: Self::read_u32(cells, mid * entry_size + 8),
+                    addr: Self::read_u32(cells, mid * entry_size + 12),
+                    interp: Self::read_u32(cells, mid * entry_size + 16),
+                };
+            } else if mid_id < cell_id {
+                lo = mid + 1;
+            } else {
+                hi = mid;
+            }
+        }
+        empty
+    }
+
+    // Binary search admin cell index: 12 bytes per entry (u64 cell_id + u32 offset)
+    fn lookup_admin_cell(cells: &[u8], cell_id: u64) -> u32 {
+        let entry_size: usize = 12;
+        let count = cells.len() / entry_size;
+        if count == 0 { return NO_DATA; }
+
+        let mut lo = 0usize;
+        let mut hi = count;
+        while lo < hi {
+            let mid = lo + (hi - lo) / 2;
+            let mid_id = Self::read_u64(cells, mid * entry_size);
+            if mid_id == cell_id {
+                return Self::read_u32(cells, mid * entry_size + 8);
+            } else if mid_id < cell_id {
+                lo = mid + 1;
+            } else {
+                hi = mid;
+            }
+        }
+        NO_DATA
+    }
+
+    // --- Geo lookup (streets, addresses, interpolation from merged index) ---
+
+    fn query_geo(&self, lat: f64, lng: f64) -> (Option<(f64, &AddrPoint)>, Option<(f64, &str, u32)>, Option<(f64, &WayHeader)>) {
+        let cell = cell_id_at_level(lat, lng, self.street_cell_level);
+        let neighbors = cell_neighbors_at_level(cell, self.street_cell_level);
+
+        let all_points: &[AddrPoint] = unsafe {
+            std::slice::from_raw_parts(
+                self.addr_points.as_ptr() as *const AddrPoint,
+                self.addr_points.len() / std::mem::size_of::<AddrPoint>(),
+            )
+        };
+        let all_ways: &[WayHeader] = unsafe {
+            std::slice::from_raw_parts(
+                self.street_ways.as_ptr() as *const WayHeader,
+                self.street_ways.len() / std::mem::size_of::<WayHeader>(),
+            )
+        };
+        let all_street_nodes: &[NodeCoord] = unsafe {
+            std::slice::from_raw_parts(
+                self.street_nodes.as_ptr() as *const NodeCoord,
+                self.street_nodes.len() / std::mem::size_of::<NodeCoord>(),
+            )
+        };
+        let all_interps: &[InterpWay] = unsafe {
+            std::slice::from_raw_parts(
+                self.interp_ways.as_ptr() as *const InterpWay,
+                self.interp_ways.len() / std::mem::size_of::<InterpWay>(),
+            )
+        };
+        let all_interp_nodes: &[NodeCoord] = unsafe {
+            std::slice::from_raw_parts(
+                self.interp_nodes.as_ptr() as *const NodeCoord,
+                self.interp_nodes.len() / std::mem::size_of::<NodeCoord>(),
+            )
+        };
+
+        let cos_lat = lat.to_radians().cos();
+
+        let mut best_addr_dist = f64::MAX;
+        let mut best_addr: Option<&AddrPoint> = None;
+        let mut best_street_dist = f64::MAX;
+        let mut best_street: Option<&WayHeader> = None;
+        let mut best_interp_dist = f64::MAX;
+        let mut best_interp: Option<&InterpWay> = None;
+        let mut best_interp_t: f64 = 0.0;
+
+        // Fixed-size hash set on stack to skip duplicate street IDs across cells
+        let mut seen_streets: [u32; 64] = [u32::MAX; 64];
+
+        for c in std::iter::once(cell).chain(neighbors.into_iter()) {
+            let offsets = Self::lookup_geo_cell(&self.geo_cells, c);
+
+            // Addresses
+            Self::for_each_entry(&self.addr_entries, offsets.addr, |id| {
+                let point = &all_points[id as usize];
+                let dlat = (point.lat as f64 - lat).to_radians();
+                let dlng = (point.lng as f64 - lng).to_radians();
+                let dist = dist_sq(dlat, dlng, cos_lat);
+                if dist < best_addr_dist {
+                    best_addr_dist = dist;
+                    best_addr = Some(point);
+                }
+            });
+
+            // Streets
+            Self::for_each_entry(&self.street_entries, offsets.street, |id| {
+                let slot = (id as usize) & 0x3F;
+                if seen_streets[slot] == id { return; }
+                seen_streets[slot] = id;
+
+                let way = &all_ways[id as usize];
+                let offset = way.node_offset as usize;
+                let count = way.node_count as usize;
+                let nodes = &all_street_nodes[offset..offset + count];
+
+                for i in 0..nodes.len() - 1 {
+                    let dist = point_to_segment_distance(
+                        lat, lng,
+                        nodes[i].lat as f64, nodes[i].lng as f64,
+                        nodes[i + 1].lat as f64, nodes[i + 1].lng as f64,
+                        cos_lat,
+                    );
+                    if dist < best_street_dist {
+                        best_street_dist = dist;
+                        best_street = Some(way);
+                    }
+                }
+            });
+
+            // Interpolation
+            Self::for_each_entry(&self.interp_entries, offsets.interp, |id| {
+                let iw = &all_interps[id as usize];
+                if iw.start_number == 0 || iw.end_number == 0 { return; }
+
+                let offset = iw.node_offset as usize;
+                let count = iw.node_count as usize;
+                let nodes = &all_interp_nodes[offset..offset + count];
+
+                let mut total_len: f64 = 0.0;
+                for i in 0..nodes.len() - 1 {
+                    let dlat = (nodes[i + 1].lat as f64 - nodes[i].lat as f64).to_radians();
+                    let dlng = (nodes[i + 1].lng as f64 - nodes[i].lng as f64).to_radians();
+                    total_len += dist_sq(dlat, dlng, cos_lat);
+                }
+                if total_len == 0.0 { return; }
+
+                let mut best_seg_dist = f64::MAX;
+                let mut best_seg_t: f64 = 0.0;
+                let mut prev_accumulated: f64 = 0.0;
+
+                for i in 0..nodes.len() - 1 {
+                    let dlat = (nodes[i + 1].lat as f64 - nodes[i].lat as f64).to_radians();
+                    let dlng = (nodes[i + 1].lng as f64 - nodes[i].lng as f64).to_radians();
+                    let seg_len = dist_sq(dlat, dlng, cos_lat);
+                    let (dist, seg_t) = point_to_segment_with_t(
+                        lat, lng,
+                        nodes[i].lat as f64, nodes[i].lng as f64,
+                        nodes[i + 1].lat as f64, nodes[i + 1].lng as f64,
+                        cos_lat,
+                    );
+                    if dist < best_seg_dist {
+                        best_seg_dist = dist;
+                        best_seg_t = (prev_accumulated + seg_t * seg_len) / total_len;
+                    }
+                    prev_accumulated += seg_len;
+                }
+
+                if best_seg_dist < best_interp_dist {
+                    best_interp_dist = best_seg_dist;
+                    best_interp = Some(iw);
+                    best_interp_t = best_seg_t;
+                }
+            });
+        }
+
+        let addr_result = best_addr.map(|p| (best_addr_dist, p));
+        let street_result = best_street.map(|w| (best_street_dist, w));
+        let interp_result = best_interp.map(|iw| {
+            let start = iw.start_number as f64;
+            let end = iw.end_number as f64;
+            let raw = start + best_interp_t * (end - start);
+
+            let step: u32 = match iw.interpolation {
+                1 | 2 => 2,
+                _ => 1,
+            };
+
+            let number = if step == 2 {
+                let base = iw.start_number;
+                let offset = ((raw - base as f64) / step as f64).round() as u32 * step;
+                base + offset
+            } else {
+                raw.round() as u32
+            };
+
+            (best_interp_dist, self.get_string(iw.street_id), number)
+        });
+
+        (addr_result, interp_result, street_result)
+    }
+
+    // --- Admin boundary lookup (point-in-polygon) ---
+
+    fn find_admin(&self, lat: f64, lng: f64) -> AdminResult<'_> {
+        let cell = cell_id_at_level(lat, lng, self.admin_cell_level);
+        let neighbors = cell_neighbors_at_level(cell, self.admin_cell_level);
+
+        let all_polygons: &[AdminPolygon] = unsafe {
+            std::slice::from_raw_parts(
+                self.admin_polygons.as_ptr() as *const AdminPolygon,
+                self.admin_polygons.len() / std::mem::size_of::<AdminPolygon>(),
+            )
+        };
+        let all_vertices: &[NodeCoord] = unsafe {
+            std::slice::from_raw_parts(
+                self.admin_vertices.as_ptr() as *const NodeCoord,
+                self.admin_vertices.len() / std::mem::size_of::<NodeCoord>(),
+            )
+        };
+
+        // For each admin level, find the smallest-area polygon containing the point
+        let mut best_by_level: [Option<(f32, &AdminPolygon)>; 12] = [None; 12];
+
+        const INTERIOR_FLAG: u32 = 0x80000000;
+        const ID_MASK: u32 = 0x7FFFFFFF;
+
+        for c in std::iter::once(cell).chain(neighbors.into_iter()) {
+            Self::for_each_entry(&self.admin_entries, Self::lookup_admin_cell(&self.admin_cells, c), |id| {
+                let is_interior = (id & INTERIOR_FLAG) != 0;
+                let poly_id = (id & ID_MASK) as usize;
+                let poly = &all_polygons[poly_id];
+                let level = poly.admin_level as usize;
+                if level >= 12 { return; }
+
+                // Skip if we already have a smaller polygon at this level
+                if let Some((best_area, _)) = best_by_level[level] {
+                    if poly.area >= best_area { return; }
+                }
+
+                // Interior cells skip point-in-polygon test
+                if is_interior || point_in_polygon(lat as f32, lng as f32, {
+                    let offset = poly.vertex_offset as usize;
+                    let count = poly.vertex_count as usize;
+                    &all_vertices[offset..offset + count]
+                }) {
+                    best_by_level[level] = Some((poly.area, poly));
+                }
+            });
+        }
+
+        let mut result = AdminResult::default();
+
+        for level in 0..12 {
+            if let Some((_, poly)) = best_by_level[level] {
+                let name = self.get_string(poly.name_id);
+                match poly.admin_level {
+                    2 => {
+                        result.country = Some(name);
+                        if poly.country_code != 0 {
+                            result.country_code = Some([
+                                (poly.country_code >> 8) as u8,
+                                (poly.country_code & 0xFF) as u8,
+                            ]);
+                        }
+                    }
+                    4 => result.state = Some(name),
+                    6 => result.county = Some(name),
+                    8 => result.city = Some(name),
+                    11 => result.postcode = Some(name),
+                    _ => {}
+                }
+            }
+        }
+
+        result
+    }
+
+    // --- Combined query ---
+
+    fn query(&self, lat: f64, lng: f64) -> Address<'_> {
+        let max_dist = self.max_distance_sq;
+
+        let admin = self.find_admin(lat, lng);
+        let (addr, interp, street) = self.query_geo(lat, lng);
+
+        // Determine house_number and road from best geo match (priority: address > interpolation > street)
+        let mut house_number: Option<Cow<'_, str>> = None;
+        let mut road: Option<&str> = None;
+
+        if let Some((dist, point)) = addr {
+            if dist < max_dist {
+                house_number = Some(Cow::Borrowed(self.get_string(point.housenumber_id)));
+                road = Some(self.get_string(point.street_id));
+            }
+        }
+        if road.is_none() {
+            if let Some((dist, street_name, number)) = interp {
+                if dist < max_dist {
+                    house_number = Some(Cow::Owned(number.to_string()));
+                    road = Some(street_name);
+                }
+            }
+        }
+        if road.is_none() {
+            if let Some((dist, way)) = street {
+                if dist < max_dist {
+                    road = Some(self.get_string(way.name_id));
+                }
+            }
+        }
+
+        if road.is_none() && admin.country.is_none() && admin.city.is_none() {
+            return Address::default();
+        }
+
+        let address = AddressDetails {
+            house_number,
+            road,
+            city: admin.city,
+            state: admin.state,
+            county: admin.county,
+            postcode: admin.postcode,
+            country: admin.country,
+            country_code: admin.country_code.map(|c| String::from_utf8_lossy(&c).into_owned()),
+        };
+        let display_name = format_address(&address);
+        Address { display_name, address }
+    }
+}
+
+// --- Geometry helpers ---
+
+fn dist_sq(dlat: f64, dlng: f64, cos_lat: f64) -> f64 {
+    dlat * dlat + dlng * dlng * cos_lat * cos_lat
+}
+
+fn point_to_segment_with_t(
+    px: f64, py: f64,
+    ax: f64, ay: f64,
+    bx: f64, by: f64,
+    cos_lat: f64,
+) -> (f64, f64) {
+    let dx = bx - ax;
+    let dy = by - ay;
+    let len_sq = dx * dx + dy * dy;
+
+    let t = if len_sq == 0.0 {
+        0.0
+    } else {
+        (((px - ax) * dx + (py - ay) * dy) / len_sq).clamp(0.0, 1.0)
+    };
+
+    let proj_x = ax + t * dx;
+    let proj_y = ay + t * dy;
+    let dlat = (px - proj_x).to_radians();
+    let dlng = (py - proj_y).to_radians();
+    (dist_sq(dlat, dlng, cos_lat), t)
+}
+
+fn point_to_segment_distance(
+    px: f64, py: f64,
+    ax: f64, ay: f64,
+    bx: f64, by: f64,
+    cos_lat: f64,
+) -> f64 {
+    point_to_segment_with_t(px, py, ax, ay, bx, by, cos_lat).0
+}
+
+// Ray casting point-in-polygon test
+fn point_in_polygon(lat: f32, lng: f32, vertices: &[NodeCoord]) -> bool {
+    let mut inside = false;
+    let n = vertices.len();
+    let mut j = n - 1;
+
+    for i in 0..n {
+        let vi = &vertices[i];
+        let vj = &vertices[j];
+
+        if ((vi.lng > lng) != (vj.lng > lng))
+            && (lat < (vj.lat - vi.lat) * (lng - vi.lng) / (vj.lng - vi.lng) + vi.lat)
+        {
+            inside = !inside;
+        }
+        j = i;
+    }
+
+    inside
+}
+
+// --- API types ---
+
+#[derive(Default)]
+struct AdminResult<'a> {
+    country: Option<&'a str>,
+    country_code: Option<[u8; 2]>,
+    state: Option<&'a str>,
+    county: Option<&'a str>,
+    city: Option<&'a str>,
+    postcode: Option<&'a str>,
+}
+
+#[derive(Serialize, Default)]
+struct AddressDetails<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    house_number: Option<Cow<'a, str>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    road: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    city: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    state: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    county: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    postcode: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    country: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    country_code: Option<String>,
+}
+
+#[derive(Serialize, Default)]
+struct Address<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    display_name: Option<String>,
+    address: AddressDetails<'a>,
+}
+
+// Address formatting patterns by country code
+// Returns (number_after_street, postcode_before_city, include_state)
+fn format_rules(country_code: Option<&str>) -> (bool, bool, bool) {
+    match country_code {
+        // Number before street, postcode after city, include state
+        Some("US") | Some("CA") | Some("AU") | Some("NZ")
+        | Some("GB") | Some("IE") | Some("ZA") | Some("IN")
+        | Some("NG") | Some("KE") | Some("GH") | Some("PK")
+        | Some("PH") | Some("TH") | Some("MY") => (false, false, true),
+
+        // Number before street, postcode before city, include state
+        Some("JP") | Some("KR") | Some("CN") | Some("TW") => (false, true, true),
+
+        // Number after street, postcode before city, no state (most of Europe, etc.)
+        _ => (true, true, false),
+    }
+}
+
+fn format_address(addr: &AddressDetails<'_>) -> Option<String> {
+    if addr.road.is_none() && addr.city.is_none() && addr.country.is_none() {
+        return None;
+    }
+
+    let (number_after, postcode_before_city, include_state) = format_rules(addr.country_code.as_deref());
+    let mut parts: Vec<String> = Vec::new();
+
+    // Street + house number
+    if let Some(road) = addr.road {
+        if let Some(ref hn) = addr.house_number {
+            if number_after {
+                parts.push(format!("{} {}", road, hn));
+            } else {
+                parts.push(format!("{} {}", hn, road));
+            }
+        } else {
+            parts.push(road.to_string());
+        }
+    }
+
+    // City + postcode + state
+    if postcode_before_city {
+        let mut city_part = String::new();
+        if let Some(pc) = addr.postcode {
+            city_part.push_str(pc);
+            city_part.push(' ');
+        }
+        if let Some(city) = addr.city {
+            city_part.push_str(city);
+        }
+        if include_state {
+            if let Some(state) = addr.state {
+                if !city_part.is_empty() { city_part.push_str(", "); }
+                city_part.push_str(state);
+            }
+        }
+        if !city_part.is_empty() {
+            parts.push(city_part.trim().to_string());
+        }
+    } else {
+        let mut city_part = String::new();
+        if let Some(city) = addr.city {
+            city_part.push_str(city);
+        }
+        if include_state {
+            if let Some(state) = addr.state {
+                if !city_part.is_empty() { city_part.push_str(", "); }
+                city_part.push_str(state);
+            }
+        }
+        if let Some(pc) = addr.postcode {
+            if !city_part.is_empty() { city_part.push(' '); }
+            city_part.push_str(pc);
+        }
+        if !city_part.is_empty() {
+            parts.push(city_part);
+        }
+    }
+
+    // Country
+    if let Some(country) = addr.country {
+        parts.push(country.to_string());
+    }
+
+    if parts.is_empty() { None } else { Some(parts.join(", ")) }
+}
+
+#[derive(Deserialize)]
+struct QueryParams {
+    lat: f64,
+    lon: f64,
+    key: Option<String>,
+}
+
+async fn reverse_geocode(
+    Query(params): Query<QueryParams>,
+    state: axum::extract::State<Arc<RwLock<auth::Db>>>,
+    index: axum::extract::Extension<Arc<Index>>,
+    limiter: axum::extract::Extension<Arc<auth::RateLimiter>>,
+    connect_info: axum::extract::ConnectInfo<std::net::SocketAddr>,
+) -> Response {
+    let key = match params.key {
+        Some(k) => k,
+        None => return (StatusCode::UNAUTHORIZED, "Missing API key").into_response(),
+    };
+
+    let (login, rps, rpd, by_ip) = match state.read().unwrap().validate_token(&key) {
+        Some(info) => info,
+        None => return (StatusCode::UNAUTHORIZED, "Invalid API key").into_response(),
+    };
+
+    let rate_key = if by_ip {
+        format!("{}:{}", login, connect_info.0.ip())
+    } else {
+        login
+    };
+
+    if let Err(msg) = auth::check_rate(&limiter, &rate_key, rps, rpd) {
+        return (StatusCode::TOO_MANY_REQUESTS, msg).into_response();
+    }
+
+    let address = index.query(params.lat, params.lon);
+    let json = serde_json::to_string(&address).unwrap_or_default();
+    ([(axum::http::header::CONTENT_TYPE, "application/json")], json).into_response()
+}
+
+#[tokio::main]
+async fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    let data_dir = args.get(1).map(|s| s.as_str()).unwrap_or(".");
+
+    let arg_value = |flag: &str| -> Option<&String> {
+        args.iter().position(|a| a == flag).and_then(|p| args.get(p + 1))
+    };
+    let street_cell_level = arg_value("--street-level").and_then(|v| v.parse().ok()).unwrap_or(DEFAULT_STREET_CELL_LEVEL);
+    let admin_cell_level = arg_value("--admin-level").and_then(|v| v.parse().ok()).unwrap_or(DEFAULT_ADMIN_CELL_LEVEL);
+    let search_distance = arg_value("--search-distance").and_then(|v| v.parse().ok()).unwrap_or(DEFAULT_SEARCH_DISTANCE);
+
+    let db_path = format!("{}/geocoder.json", data_dir);
+    let db = auth::Db::load(&db_path);
+
+    eprintln!("Loading index from {}...", data_dir);
+    let index = match Index::load(data_dir, street_cell_level, admin_cell_level, search_distance) {
+        Ok(idx) => Arc::new(idx),
+        Err(e) => {
+            eprintln!("Error: {}", e);
+            std::process::exit(1);
+        }
+    };
+
+    let db = Arc::new(RwLock::new(db));
+    let limiter = Arc::new(auth::RateLimiter::default()); // RwLock<HashMap> with atomic counters
+
+    let app = Router::new()
+        .route("/reverse", get(reverse_geocode))
+        .merge(auth::router())
+        .layer(axum::Extension(index))
+        .layer(axum::Extension(limiter))
+        .with_state(db);
+
+    // ACME mode: --domain <domain> [--cache <dir>]
+    let domain_pos = args.iter().position(|a| a == "--domain");
+    if let Some(pos) = domain_pos {
+        let domain = args.get(pos + 1).expect("--domain requires a value").clone();
+        let cache_dir = args.iter().position(|a| a == "--cache")
+            .and_then(|p| args.get(p + 1).cloned())
+            .unwrap_or_else(|| "acme-cache".to_string());
+
+        use rustls_acme::caches::DirCache;
+        use rustls_acme::AcmeConfig;
+        use tokio_stream::StreamExt;
+
+        let mut state = AcmeConfig::new([domain.clone()])
+            .cache(DirCache::new(cache_dir.clone()))
+            .directory_lets_encrypt(true)
+            .state();
+        let acceptor = state.axum_acceptor(state.default_rustls_config());
+
+        tokio::spawn(async move {
+            loop {
+                match state.next().await {
+                    Some(Ok(ok)) => eprintln!("ACME event: {:?}", ok),
+                    Some(Err(err)) => eprintln!("ACME error: {:?}", err),
+                    None => break,
+                }
+            }
+        });
+
+        let addr = std::net::SocketAddr::from(([0, 0, 0, 0], 443));
+        eprintln!("Starting HTTPS server on :443 for {}...", domain);
+        axum_server::bind(addr)
+            .acceptor(acceptor)
+            .serve(app.into_make_service_with_connect_info::<std::net::SocketAddr>())
+            .await
+            .unwrap();
+    } else {
+        let bind_addr = args.get(2).map(|s| s.as_str()).unwrap_or("0.0.0.0:3000");
+        eprintln!("Starting HTTP server on {}...", bind_addr);
+        let listener = tokio::net::TcpListener::bind(bind_addr).await.unwrap();
+        axum::serve(listener, app.into_make_service_with_connect_info::<std::net::SocketAddr>()).await.unwrap();
+    }
+}
+
+```
+
+`server/src/web/dashboard.html`:
+
+```html
+<!DOCTYPE html>
+<html data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Geocoder</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <style>td { word-break: break-all; } td:last-child { width: 1%; white-space: nowrap; }</style>
+</head>
+<body>
+  <main class="container">
+    <nav>
+      <ul><li>Today: {daily_usage}</li></ul>
+      <ul><li><a href="/logout">Sign out</a></li></ul>
+    </nav>
+    <article>
+      <h4>API Tokens</h4>
+      <form method="post" action="/tokens">
+        <button type="submit" class="outline">Create Token</button>
+      </form>
+      <table>
+        <thead><tr><th>Token</th><th></th></tr></thead>
+        <tbody>{rows}</tbody>
+      </table>
+    </article>
+    <article style="{users_display}">
+      <h4>Users</h4>
+      <form method="post" action="/users">
+        <fieldset role="group">
+          <input type="text" name="login" placeholder="Login" required>
+          <input type="password" name="password" placeholder="Password" required>
+          <input type="number" name="rate_per_second" placeholder="Rate/sec" value="0" min="0" required>
+          <input type="number" name="rate_per_day" placeholder="Rate/day" value="0" min="0" required>
+          <select name="rate_by_ip">
+            <option value="">By user</option>
+            <option value="on">By IP</option>
+          </select>
+          <button type="submit">Create</button>
+        </fieldset>
+      </form>
+      <table>
+        <thead><tr><th>Login</th><th>Role</th><th>Rate/sec</th><th>Rate/day</th><th>By IP</th><th></th></tr></thead>
+        <tbody>{user_rows}</tbody>
+      </table>
+    </article>
+  </main>
+</body>
+</html>
+
+```
+
+`server/src/web/login.html`:
+
+```html
+<!DOCTYPE html>
+<html data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - Geocoder</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+</head>
+<body>
+  <main class="container">
+    <article>
+      <form method="post" action="/login">
+        <label>Login
+          <input type="text" name="login" required autofocus>
+        </label>
+        <label>Password
+          <input type="password" name="password" required>
+        </label>
+        <button type="submit">Sign in</button>
+      </form>
+    </article>
+  </main>
+</body>
+</html>
+
+```
