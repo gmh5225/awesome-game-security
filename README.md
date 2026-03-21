@@ -1173,6 +1173,9 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Android Bootloader Bypass
 - https://github.com/MlgmXyysd/Xiaomi-HyperOS-BootLoader-Bypass [Xiaomi HyperOS BootLoader Bypass]
 
+> IoT / Smart devices
+- https://github.com/TaszkSecLabs/xiaomi-c400-pwn [Xiaomi Smart Camera exploits and jailbreak]
+
 > Android ROM
 - https://xdaforums.com [Guide]
 - https://github.com/Akipe/awesome-android-aosp [Guide]
