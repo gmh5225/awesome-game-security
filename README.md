@@ -331,6 +331,9 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > JWT / Auth Token
 - https://github.com/ticarpi/jwt_tool [JWT toolkit — validate, forge, scan, tamper; CVE tests (alg=none, RS/HS256, key injection, etc.), fuzzing, dict attack]
 
+> Location / Geocoding
+- https://github.com/traccar/traccar-geocoder [Self-hosted reverse geocoding from OpenStreetMap; Traccar stack; Rust server + C++ PBF indexer, Docker]
+
 ## PhysX SDK
 - https://github.com/NVIDIAGameWorks/PhysX
 - https://github.com/NVIDIAGameWorks/PhysX-3.4
