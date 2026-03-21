@@ -284,6 +284,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 ## AI
 - https://github.com/ls361664056/GameAI-paper-list [zh]
+- https://github.com/lightningpixel/modly [Local image-to-3D mesh desktop app; open-source AI on GPU; Windows/Linux; extensible generators]
 
 ## Image Codec
 - https://github.com/nothings/stb
