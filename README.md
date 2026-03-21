@@ -410,6 +410,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/codingben/maple-fighters [A small online game similar to MapleStory]
 - https://github.com/gmh5225/WinAPI_MapleStory [WinAPI MapleStory]
 - https://github.com/ZeromaXHe/MapleStoryCopy [Godot MapleStory]
+- https://github.com/godotengine/godot-demo-projects [Demonstration and Template Projects for Godot]
 - https://github.com/loqix/Fortnite [Fortnite]
 - https://github.com/bradharding/doomretro [DOOM]
 - https://github.com/Daivuk/PureDOOM [DOOM]
