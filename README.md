@@ -285,6 +285,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 ## AI
 - https://github.com/ls361664056/GameAI-paper-list [zh]
 - https://github.com/lightningpixel/modly [Local image-to-3D mesh desktop app; open-source AI on GPU; Windows/Linux; extensible generators]
+- https://github.com/blendi-remade/sprite-sheet-creator [AI 2D pixel-art sprite sheets & parallax backgrounds; fal.ai; Next.js; walk/jump/attack/idle, sandbox]
 
 ## Image Codec
 - https://github.com/nothings/stb
@@ -518,6 +519,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 ## Game Assets
 - https://github.com/Miziziziz/Retro3DGraphicsCollection
+- https://github.com/blendi-remade/sprite-sheet-creator [AI 2D pixel-art sprite sheets & parallax backgrounds; fal.ai; Next.js; walk/jump/attack/idle, sandbox]
 - https://github.com/HitmanHimself/GOWTool [God of War 2018]
 - https://github.com/KhronosGroup/glTF [Runtime 3D Asset Delivery]
 - https://github.com/syoyo/tinygltf [Header only C++11 tiny glTF 2.0 library]
