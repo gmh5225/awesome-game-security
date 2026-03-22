@@ -857,6 +857,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/glmcdona/strings2 [strings2 - Extract strings from binary files and process memory]
 - https://github.com/amruth-sn/kong [Kong - agentic reverse engineer, LLM-orchestrated binary RE via in-process Ghidra, call-graph analysis, agentic deobfuscation]
 - https://github.com/LaurieWired/Malimite [iOS and macOS Decompiler]
+- https://github.com/0xbigshaq/apatchy [Fuzzing Framework for Apache HTTPD Server]
 
 
 > Mixed boolean-arithmetic
