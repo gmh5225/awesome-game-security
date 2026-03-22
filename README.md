@@ -4297,4 +4297,5 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 ## PlayStation
 - https://gist.github.com/flatz/620ddda6d64acca6d1c990dc3080ac0e [PS5 Hypervisor exploit]
 - https://github.com/cragson/a53-code-exec [PoC for code execution on a53 used by PS5 on fw 02.00]
+- https://github.com/Gezine/BD-UN-JB [BD-JB RemoteJarLoader for already-jailbroken PS5 (≤12.00); unpatch BD-J, ISO, network JAR load / logging]
 
