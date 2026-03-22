@@ -1,0 +1,486 @@
+Project Path: arc_gmh5225_augur-riot_m1h1yivs
+
+Source Tree:
+
+```txt
+arc_gmh5225_augur-riot_m1h1yivs
+├── LICENSE
+├── Main.cpp
+├── README.md
+└── VLX
+    ├── Image.cpp
+    ├── Image.hpp
+    ├── Imports
+    │   ├── Imports.cpp
+    │   └── Imports.hpp
+    └── Sections
+        ├── Sections.cpp
+        └── Sections.hpp
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2024 0avx
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`Main.cpp`:
+
+```cpp
+#include "VLX/Image.hpp"
+
+int main( )
+{
+	VLX::Image VLXModule;
+	
+	if ( !VLXModule.Initialize( "VLXModule.bin" ) )
+		return 0;
+
+	if ( !VLXModule.Build( "VLXModule.dll" ) )
+		return 0;
+
+	return 0;
+}
+```
+
+`README.md`:
+
+```md
+# 🏛️ Augur
+
+*A religious official in ancient Rome who interpreted the will of the gods by reading signs and omens hidden in nature.*
+
+Riot Vanguard, the anti cheat system used across Riot Games titles, dynamically streams user mode modules in a proprietary binary format identified by the `RITO` magic signature. These modules arrive with hashed imports and a compact custom header rather than a standard Portable Executable (PE) layout. Augur parses this format, resolves the hashed imports against loaded system modules, constructs PE32+ sections with appropriate memory protections, and writes a valid Dynamic Link Library (DLL) to disk.
+
+---
+
+## 📖 Overview
+
+Augur operates in two phases. The first phase parses the input binary, extracts section data and import descriptors from a compact custom header, and maps them into a new Portable Executable (PE) image using the [LIEF](https://lief-project.github.io/) library. The second phase resolves hashed module and function names against the live process environment, builds `jmp` stub trampolines for each resolved import, patches the original address references, and writes the final DLL.
+
+The Vanguard streamed module format encodes the following at fixed offsets from the file header:
+
+| Offset | Size | Field |
+|--------|------|-------|
+| `0x00` | 4 bytes | Magic (`RITO`) |
+| `0x08` | 8 bytes | Image base address |
+| `0x14` | 4 bytes | Entry point Relative Virtual Address (RVA) |
+| `0x20` | 4 bytes | Offset to import module table |
+| `0x24` | 4 bytes | Number of import modules |
+| `0x30` | 4 bytes | Offset to section table |
+| `0x34` | 4 bytes | Number of sections |
+
+---
+
+## 🏗️ Architecture
+
+The project is organized into three core components:
+
+**`VLX::Image`** serves as the central orchestrator. It owns the raw binary data and the LIEF `PE::Binary` instance. `Initialize` reads the input file, validates the magic signature, and configures the PE optional header with the entry point and image base from the Vanguard format. `Build` delegates to the `Sections` and `Imports` subsystems in sequence, then invokes the LIEF builder to produce the output file.
+
+**`VLX::Sections`** iterates the section table embedded in the Vanguard module. Each entry contains a raw data offset, an RVA, and a size. The builder copies raw content into new PE sections (named `.VLX0`, `.VLX1`, etc.) and marks each with read, write, and execute characteristics.
+
+**`VLX::Imports`** handles the most complex part of the conversion. Module names in the Vanguard format are not stored as strings. They are stored as 64 bit FNV-1a hashes. The resolver enumerates modules loaded in the current process via `CreateToolhelp32Snapshot`, hashes each module name, and matches against the stored hash. Once a module is identified, the resolver parses its export table (loaded from `System32` via LIEF) to match individual function hashes. For each resolved import, the builder creates a 6 byte `jmp [rip+disp32]` stub, calculates the RIP relative displacement to the Import Address Table (IAT) entry predicted by LIEF, and patches the original address slot to point at the stub.
+
+---
+
+## 🔗 Dependencies
+
+- **[LIEF](https://lief-project.github.io/)** - PE parsing, construction, and building. LIEF provides the `PE::Binary`, `PE::Builder`, `PE::Parser`, and `PE::Section` classes that Augur uses to construct the output image from scratch.
+- **Windows API** - `CreateToolhelp32Snapshot`, `Module32FirstW`, `Module32NextW` for runtime module enumeration during import resolution.
+- **C++17** or later - `std::filesystem`, structured bindings, and designated initializers are used throughout the codebase.
+
+---
+
+## 🚀 Usage
+
+```cpp
+#include "VLX/Image.hpp"
+
+int main()
+{
+    VLX::Image VLXModule;
+
+    if (!VLXModule.Initialize("VLXModule.bin"))
+        return 0;
+
+    if (!VLXModule.Build("VLXModule.dll"))
+        return 0;
+
+    return 0;
+}
+```
+
+---
+
+## 📁 Project Structure
+
+```
+.
+├── Main.cpp                      # Entry point
+├── LICENSE                       # MIT License
+└── VLX/
+    ├── Image.hpp                 # Image class declaration
+    ├── Image.cpp                 # Initialization and build orchestration
+    ├── Imports/
+    │   ├── Imports.hpp           # Import resolver and stub builder declarations
+    │   └── Imports.cpp           # Hash resolution, IAT construction, stub generation
+    └── Sections/
+        ├── Sections.hpp          # Section builder declaration
+        └── Sections.cpp          # Section extraction and PE section creation
+```
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## 👥 Contributors
+
+This project was co-authored by [**Xyrem**](https://github.com/Xyrem).
+```
+
+`VLX/Image.cpp`:
+
+```cpp
+#include "Image.hpp"
+#include <fstream>
+#include <VLX/Sections/Sections.hpp>
+#include <VLX/Imports/Imports.hpp>
+
+bool VLX::Image::Build( const char* Name )
+{
+	Sections Sections( *this );
+	if ( !Sections.Build( ) )
+		return false;
+
+	Imports Imports( *this );
+	if ( !Imports.Build( ) )
+		return false;
+
+	LIEF::PE::Builder Builder( Binary );
+	Builder.build_imports( );
+
+	if ( !Imports.BuildStubs( ) )
+		return false;
+
+	Builder.build( );
+	Builder.write( Name );
+
+	return true;
+}
+
+template < class T >
+using Iterator = std::istreambuf_iterator< T >;
+
+bool VLX::Image::Initialize( const std::string& Path )
+{
+	std::ifstream Stream( Path, std::ios_base::binary );
+	Raw = { Iterator< char >( Stream ), Iterator< char >( ) };
+
+	if ( *( std::uint32_t* )Raw.data( ) != 'OTIR' )
+		return false;
+
+	std::uint32_t EntryPoint = *( std::uint32_t* )( Raw.data( ) + 0x14 );
+	Binary.optional_header( ).addressof_entrypoint( EntryPoint );
+
+	std::uintptr_t ImageBase = *( std::uintptr_t* )( Raw.data( ) + 0x08 );
+	Binary.optional_header( ).imagebase( ImageBase );
+
+	return true;
+}
+```
+
+`VLX/Image.hpp`:
+
+```hpp
+#pragma once
+
+#include <LIEF/LIEF.hpp>
+#include <VLX/Imports/Imports.hpp>
+#include <VLX/Sections/Sections.hpp>
+
+namespace VLX
+{
+	class Image
+	{
+		std::vector< std::uint8_t > Raw;
+		LIEF::PE::Binary Binary = { "pe_from_scratch", LIEF::PE::PE_TYPE::PE32_PLUS };
+
+		friend class Imports;
+		friend class Sections;
+
+	public:
+		bool Build( const char* Name );
+
+		bool Initialize( const std::string& Path );
+	};
+}
+```
+
+`VLX/Imports/Imports.cpp`:
+
+```cpp
+#include "Imports.hpp"
+#include <Windows.h>
+#include <tlhelp32.h>
+#include <filesystem>
+#include <VLX/Image.hpp>
+
+std::string VLX::Imports::GetModuleName( std::uint64_t Hash ) const
+{
+	std::unique_ptr< void, decltype( &CloseHandle ) > 
+		Snapshot( CreateToolhelp32Snapshot( TH32CS_SNAPMODULE, GetCurrentProcessId( ) ), &CloseHandle );
+
+	if ( Snapshot.get( ) == INVALID_HANDLE_VALUE )
+		return {};
+
+	MODULEENTRY32W ModuleEntry{ .dwSize = sizeof( MODULEENTRY32W ) };
+	if ( !Module32FirstW( Snapshot.get( ), &ModuleEntry ) )
+		return {};
+
+	do
+	{
+		std::wstring Name( ModuleEntry.szModule );
+		
+		if ( this->Hash( ( std::uint8_t* )Name.c_str( ), Name.size( ) * 2 ) == Hash )
+			return { Name.begin( ), Name.end( ) };
+
+	} while ( Module32NextW( Snapshot.get( ), &ModuleEntry ) );
+
+	return {};
+}
+
+std::string VLX::Imports::GetImportName( const std::unique_ptr< LIEF::PE::Binary >& Binary, std::uint64_t Hash ) const
+{
+	const auto Exports = Binary->exported_functions( );
+	const auto Export = std::find_if( Exports.begin( ), Exports.end( ), [ & ]( const auto& Export )
+		{ return this->Hash( ( std::uint8_t* )Export.name( ).c_str( ), Export.name( ).size( ) ) == Hash; } );
+
+	if ( Export == Exports.cend( ) )
+		return {};
+
+	return Export->name( );
+}
+
+bool VLX::Imports::BuildStubs( )
+{
+#define PAGE_ALIGN( x ) ( ( x + 0xFFF ) & ~0xFFF )
+
+	std::uint8_t Jump[ 0x06 ]{ 0xFF, 0x25 };
+	std::vector< std::uint8_t > Content( Stubs.size( ) * sizeof( Jump ) );
+	
+	const auto	   LastSection = Image.Binary.sections( ).end( ) - 1;
+	std::uintptr_t SectionBase = PAGE_ALIGN( LastSection->virtual_address( ) + LastSection->virtual_size( ) );
+
+	for ( std::size_t Index = 0; Index < Content.size( ); Index += sizeof( Jump ) )
+	{
+		const auto& Stub = Stubs[ Index / sizeof( Jump ) ];
+
+		std::uintptr_t Import = PAGE_ALIGN( Content.size( ) ) 
+			+ Image.Binary.predict_function_rva( Stub.ModuleName, Stub.ImportName );
+		
+		std::int32_t RipRelative = ( Import - ( SectionBase + Index ) ) - sizeof( Jump );
+		*( std::int32_t* )&Jump[ 0x02 ] = RipRelative;
+		
+		std::memcpy( &Content[ Index ], Jump, sizeof( Jump ) );
+
+		Image.Binary.patch_address( Stub.Address, Image.Binary.imagebase( ) + SectionBase + Index );
+	}
+
+	LIEF::PE::Section Section( ".VLXStubs" );
+	Section.content( Content );
+	
+	Image.Binary.add_section( Section, LIEF::PE::PE_SECTION_TYPES::TEXT );
+
+	return true;
+}
+
+bool VLX::Imports::Build( )
+{
+	std::uint32_t NumberOfModules = *( std::uint32_t* )( Image.Raw.data( ) + 0x24 );
+	if ( !NumberOfModules )
+		return false;
+
+	std::uint8_t* Module = Image.Raw.data( ) + *( std::uint32_t* )( Image.Raw.data( ) + 0x20 );
+	for ( std::uint32_t Index = 0; Index < NumberOfModules; ++Index )
+	{
+		std::uint64_t Hash = *( std::uint64_t* )Module;
+		if ( !Hash )
+			return false;
+		
+		std::uint32_t NumberOfImports = *( std::uint32_t* )( Module + 0x0C );
+		if ( !NumberOfImports )
+			return false;
+
+		std::uint32_t ImportsBase = *( std::uint32_t* )( Module + 0x08 );
+		if ( !ImportsBase )
+			return false;
+
+		std::string ModuleName = GetModuleName( Hash );
+		if ( ModuleName.empty( ) )
+			continue;
+
+		Image.Binary.add_library( ModuleName );
+
+		static const auto System32 = std::filesystem::path( std::getenv( "SystemRoot" ) ) / "System32";
+		auto			  Binary = LIEF::PE::Parser::parse( ( System32 / ModuleName ).string( ) );
+
+		for ( std::uint32_t Index = 0; Index < NumberOfImports; ++Index)
+		{
+			std::uint8_t* Import = Module + 0x10 + ( Index * 0x09 );
+			if ( *( bool* )Import )
+				continue;
+			
+			std::uint64_t Hash = *( std::uint64_t* )( Import + 0x01 );
+			if ( !Hash )
+				continue;
+
+			std::string ImportName = GetImportName( Binary, Hash );
+			if ( ImportName.empty( ) )
+				continue;
+
+			Image.Binary.add_import_function( ModuleName, ImportName );
+			Stubs.emplace_back( ModuleName, ImportName, ImportsBase + ( Index * 0x08 ) );
+		}
+
+		Module += 0x19 + ( std::uint64_t( NumberOfImports - 1 ) * 0x09 );
+	}
+	
+	return true;
+}
+```
+
+`VLX/Imports/Imports.hpp`:
+
+```hpp
+#pragma once
+
+#include <LIEF/LIEF.hpp>
+
+namespace VLX
+{
+	class Image;
+
+	class Imports
+	{
+		Image& Image;
+
+		struct Stub
+		{
+			std::string ModuleName;
+			std::string ImportName;
+			std::uint32_t Address;
+		};
+
+		std::vector< Stub > Stubs;
+
+		std::uint64_t Hash( std::uint8_t* Value, std::size_t Size ) const
+		{
+			std::uint64_t Hash = 0xCBF29CE484222325;
+
+			for ( std::size_t Index = 0; Index < Size; ++Index )
+				Hash = 0x100000001B3ull * ( ( *Value++ | 0x20 ) ^ Hash );
+
+			return Hash;
+		}
+
+		std::string GetModuleName( std::uint64_t Hash ) const;
+		std::string GetImportName( const std::unique_ptr< LIEF::PE::Binary >& Binary, std::uint64_t Hash ) const;
+
+	public:
+		Imports( VLX::Image& Image ) : Image( Image ) {}
+
+		bool BuildStubs( );
+		bool Build( );
+	};
+}
+```
+
+`VLX/Sections/Sections.cpp`:
+
+```cpp
+#include "Sections.hpp"
+#include <VLX/Image.hpp>
+
+bool VLX::Sections::Build( )
+{
+	std::uint8_t* Sections	   = Image.Raw.data( ) + *( std::uint32_t* )( Image.Raw.data( ) + 0x30 );
+	std::uint32_t SectionCount = *( std::uint32_t* )( Image.Raw.data( ) + 0x34 );
+	
+	if ( !SectionCount )
+		return false;
+	
+	for ( std::uint32_t Index = 0; Index < SectionCount; ++Index )
+	{
+		std::uint8_t* Section = Sections + Index * 0x0C;
+		
+		std::uint32_t Rva = *( std::uint32_t* )( Section + 0x04 );
+		if ( !Rva )
+			return false;
+
+		std::uint32_t Size = *( std::uint32_t* )( Section + 0x08 );
+		if ( !Size )
+			return false;
+
+		LIEF::PE::Section VLXSection( ".VLX" + std::to_string( Index ) );
+
+		std::vector< std::uint8_t > Content( Image.Raw.data( ) + Rva, Image.Raw.data( ) + Rva + Size );
+		VLXSection.content( Content );
+
+		using Characteristics = LIEF::PE::SECTION_CHARACTERISTICS;
+		VLXSection.characteristics( std::uint32_t( Characteristics::IMAGE_SCN_MEM_READ 
+			| Characteristics::IMAGE_SCN_MEM_WRITE | Characteristics::IMAGE_SCN_MEM_EXECUTE ) );
+		
+		Image.Binary.add_section( VLXSection );
+	}
+
+	return true;
+}
+```
+
+`VLX/Sections/Sections.hpp`:
+
+```hpp
+#pragma once
+
+namespace VLX
+{
+	class Image;
+
+	class Sections
+	{
+		Image& Image;
+		
+	public:
+		Sections( VLX::Image& Image ) : Image( Image ) {}
+
+		bool Build( );
+	};
+}
+```
