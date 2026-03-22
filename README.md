@@ -2584,6 +2584,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/578829-unveiling-unseen-vanguards-guarded-regions.html [CR3 Protection]
 - https://github.com/gmh5225/vgk-illegal-pf-logger [VGK's illegal PF]
 - https://github.com/gmh5225/KernelSnippets/blob/main/VGK_SwapContextHk.h [VGK's SwapContextHk]
+- https://github.com/gmh5225/augur-riot [Riot Vanguard streamed module to PE converter. Resolves hashed imports, reconstructs sections, and writes valid DLLs from RITO format binaries]
 
 > Explore AntiCheat System:XignCode
 - https://github.com/gmh5225/XignCode-Dump
