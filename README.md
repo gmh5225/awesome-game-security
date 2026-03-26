@@ -720,9 +720,10 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/korcankaraokcu/PINCE [For Linux]
 - https://github.com/djolertrk/kLLDB [LLDB based debugger for Linux Kernel]
 - https://github.com/mrexodia/TitanHide
-- https://github.com/Air14/HyperHide 
-- https://github.com/HyperDbg/HyperDbg
-- https://github.com/gmh5225/vt-debuger
+- https://github.com/Air14/HyperHide [VT debuger]
+- https://github.com/HyperDbg/HyperDbg [VT debuger]
+- https://github.com/gmh5225/vt-debuger [VT debuger]
+- https://github.com/kkpwn/ErisDbg [VT debuger]
 - https://github.com/teemu-l/execution-trace-viewer
 - https://github.com/changeofpace/Force-Page-Protection [Bypass Remap Memory]
 - https://github.com/icsharpcode/ILSpy [For Unity]
@@ -1541,6 +1542,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/buzzer-re/Rikugan [A reverse-engineering agent for IDA Pro and Binary Ninja that integrates a multi-provider LLM directly into your analysis UI]
 - https://github.com/guheng-re/unflat [unflattener]
 - https://github.com/Dump-GUY/ApplyCalleeTypeEx [ApplyCalleeType reborn for IDA Pro 9.3 — apply function prototype to indirect CALL for correct decompiler/disasm; IDA 8.x–9.3+]
+- https://github.com/allthingsida/idacpp [A C++ REPL for IDA Pro / IDA C++ SDK]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
@@ -1873,6 +1875,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/d1skq/vgk-dma-bypass [VGK DMA bypass]
 - https://github.com/gmh5225/Pcileech-DMA-NVMe-VMD [Firmware real camouflage through motherboard VMD function.（Pcileech-DMA）]
 - https://github.com/a0yark/ArcRaidersRadar-dma-Radar [DMA radar/ESP, MemProcFS + Unicorn Engine for pointer decryption emulation]
+- https://github.com/MGreif/PCILeech_DMA_Proxy [A DLL with Loader that hooks common windows memory API functions and proxies them to the remote device via DMA]
 
 > W2S
 - https://github.com/DrNseven/D3D11-Worldtoscreen-Finder
