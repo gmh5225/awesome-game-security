@@ -1,0 +1,4914 @@
+Project Path: arc_allthingsida_idacpp_86w6m_pq
+
+Source Tree:
+
+```txt
+arc_allthingsida_idacpp_86w6m_pq
+├── BUILDING.md
+├── CMakeLists.txt
+├── LICENSE
+├── README.md
+├── USAGE.md
+├── cpp_highlight_keywords.h
+├── cpp_highlighter.cpp
+├── cpp_highlighter.h
+├── docs
+│   └── images
+├── examples
+│   ├── decompile_first.cpp
+│   ├── hello.cpp
+│   ├── list_functions.cpp
+│   ├── list_segments.cpp
+│   └── xrefs.cpp
+├── extlang_core.cpp
+├── extlang_core.h
+├── idalib_setup.cpp
+├── idalib_setup.h
+├── install-agent.md
+├── plugin.cpp
+├── plugins
+│   ├── CMakeLists.txt
+│   ├── README.md
+│   ├── common
+│   │   ├── idacpp_plugin_helpers.cmake
+│   │   └── plugin_api.h
+│   ├── ida_sdk
+│   │   ├── CMakeLists.txt
+│   │   ├── README.md
+│   │   └── ida_sdk.h
+│   ├── idax
+│   │   ├── CMakeLists.txt
+│   │   ├── README.md
+│   │   ├── examples
+│   │   │   ├── callers_callees.cpp
+│   │   │   ├── database_info.cpp
+│   │   │   ├── decompile.cpp
+│   │   │   ├── find_calls.cpp
+│   │   │   ├── imports.cpp
+│   │   │   ├── list_functions.cpp
+│   │   │   ├── list_segments.cpp
+│   │   │   └── xrefs_to.cpp
+│   │   ├── idax_plugin_setup.cpp
+│   │   └── idax_plugin_setup.h
+│   └── qt6
+│       ├── CMakeLists.txt
+│       ├── README.md
+│       ├── examples
+│       │   ├── qt_form_builder.cpp
+│       │   ├── qt_introspect.cpp
+│       │   ├── qt_list_windows.cpp
+│       │   └── qt_widget_explorer.cpp
+│       ├── qt6_plugin_setup.cpp
+│       └── qt6_plugin_setup.h
+└── tools
+    ├── idgen.cpp
+    └── sync_ida_sdk_headers.py
+
+```
+
+`BUILDING.md`:
+
+```md
+# Building idacpp
+
+## Prerequisites
+
+- CMake 3.20+
+- C++17 compiler (MSVC, GCC, or Clang)
+- IDA SDK (9.x)
+- A [clinglite](https://github.com/0xeb/clinglite) source checkout
+- A pre-built Cling/LLVM tree — see clinglite's [BUILDING.md](https://github.com/0xeb/clinglite/blob/main/BUILDING.md) for build instructions
+- Runtime access to the Cling build tree (baked in at compile time or via `CLING_DIR`)
+
+## Runtime model
+
+idacpp runs in **source-first** mode: the LLVM/Cling compiler infrastructure is statically linked into the plugin, but runtime resources (Clang built-in headers, Cling runtime headers, C++ standard library headers) are resolved from a Cling build tree at runtime.
+
+## CMake variables
+
+| Variable | Description |
+|----------|-------------|
+| `CLINGLITE_SOURCE_DIR` | Path to your clinglite source checkout |
+| `CLING_BUILD_DIR` | Path to a Cling/LLVM build tree |
+| `IDASDK` | Path to the IDA SDK root (bootstrap auto-detects GitHub-clone layouts) |
+
+Each variable can be set via `-D` flag or environment variable.
+
+## Windows (MSVC, fully static)
+
+Requires LLVM built with `/MT` (static CRT). The resulting `idacpp.dll` has zero MSVC runtime dependencies.
+
+```bash
+mkdir build && cd build
+cmake -A x64 \
+    -DCLINGLITE_SOURCE_DIR=C:/path/to/clinglite \
+    -DCLING_BUILD_DIR=C:/path/to/cling-build \
+    -DIDASDK=C:/path/to/idasdk \
+    ..
+cmake --build . --config Release -j 8
+```
+
+On Windows, LLVM must be built with `-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded` (static CRT) to produce a self-contained plugin DLL. If you get **LNK2038 CRT mismatch** errors, both LLVM and idacpp must use the same MSVC runtime — build both with `/MT`.
+
+## Linux / macOS
+
+```bash
+mkdir build && cd build
+cmake -G Ninja \
+    -DCLINGLITE_SOURCE_DIR=/path/to/clinglite \
+    -DCLING_BUILD_DIR=/path/to/cling-build \
+    -DIDASDK=/path/to/idasdk \
+    -DCMAKE_BUILD_TYPE=Release \
+    ..
+cmake --build . -j$(nproc)  # macOS: use -j$(sysctl -n hw.ncpu)
+```
+
+## Build output
+
+The build produces `idacpp.dll` / `idacpp.so` / `idacpp.dylib` (placed in the IDA SDK plugin directory by `ida_add_plugin()`).
+
+| Platform | Output | Size | Runtime dependencies |
+|----------|--------|------|---------------------|
+| Windows MSVC `/MT` | `idacpp.dll` | ~114 MB | `ida.dll` + Windows system DLLs only |
+| Linux GCC | `idacpp.so` | ~152 MB | `libida.so` + system libs |
+| macOS Clang | `idacpp.dylib` | ~152 MB | `libida.dylib` + system libs |
+
+## IDA SDK include order
+
+**Always include standard C/C++ headers BEFORE `<pro.h>`.**
+
+`pro.h` poisons `getenv`, `fprintf`, `snprintf`, `stderr` with macros. If standard headers come after, the binary imports symbols from the SDK link stubs whose global constructors abort headless binaries.
+
+```cpp
+// CORRECT — standard headers first
+#include <cstdio>
+#include <string>
+
+#include <clinglite/clinglite.h>
+#include <extlang_core.h>
+
+#include <pro.h>     // IDA SDK — LAST
+#include <expr.hpp>
+```
+
+## Project structure
+
+| File | Description |
+|------|-------------|
+| `plugin.cpp` | IDA plugin entry point (`idacpp.dll` / `idacpp.so` / `idacpp.dylib`) |
+| `extlang_core.cpp/h` | C++ extlang implementation (compile, evaluate, completions) |
+| `cpp_highlighter.cpp/h` | C++ syntax highlighting for the CLI tab |
+| `cpp_highlight_keywords.h` | C++ and IDA SDK keyword lists for syntax highlighting |
+| `idalib_setup.cpp/h` | Headless IDA setup for standalone consumers (idalib) |
+| `ida_sdk.h` | Curated IDA SDK umbrella header for PCH generation |
+| `tools/idgen.cpp` | Build-time tool: generates sorted IDA SDK identifier table for completion and highlighting |
+| `tools/sync_ida_sdk_headers.py` | Utility: synchronizes `ida_sdk.h` include list with the IDA SDK headers on disk |
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.20)
+project(idacpp VERSION 0.0.4 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# CRT policy: static CRT (/MT) to match LLVM and produce self-contained DLLs
+# CMP0091 NEW enables the MSVC_RUNTIME_LIBRARY target property so we can
+# force /MT for all configs (including Debug) to match the LLVM libs.
+# Must be set before add_subdirectory(clinglite) so clinglite targets inherit.
+if(MSVC)
+  cmake_policy(SET CMP0091 NEW)
+  # CACHE FORCE so clinglite's own CACHE set (without FORCE) doesn't override.
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded" CACHE STRING
+    "MSVC runtime library — /MT for fully static plugin binary" FORCE)
+endif()
+
+# Locate clinglite source directory
+# Priority: 1) -DCLINGLITE_SOURCE_DIR  2) env CLINGLITE_SOURCE_DIR
+if(NOT CLINGLITE_SOURCE_DIR)
+  if(DEFINED ENV{CLINGLITE_SOURCE_DIR})
+    set(CLINGLITE_SOURCE_DIR "$ENV{CLINGLITE_SOURCE_DIR}")
+  else()
+    message(FATAL_ERROR
+      "clinglite source directory not found. Either:\n"
+      "  - Set: -DCLINGLITE_SOURCE_DIR=<path-to-clinglite-source>\n"
+      "  - Set: env CLINGLITE_SOURCE_DIR=<path>")
+  endif()
+endif()
+message(STATUS "clinglite source: ${CLINGLITE_SOURCE_DIR}")
+
+# Cling build directory (optional pass-through to clinglite)
+if(NOT CLING_BUILD_DIR)
+  if(DEFINED ENV{CLING_BUILD_DIR})
+    set(CLING_BUILD_DIR "$ENV{CLING_BUILD_DIR}")
+  endif()
+  # If still unset, clinglite's own CMake will attempt discovery or error.
+endif()
+
+# clinglite library
+# Guard: clinglite may already be a target (monorepo inclusion)
+if(NOT TARGET clinglite)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+  add_subdirectory("${CLINGLITE_SOURCE_DIR}" clinglite)
+endif()
+
+# Clang resource dir (propagated from clinglite, with fallback)
+# CLINGLITE_CLANG_BUILTIN_DIR and CLINGLITE_CLANG_RESOURCE_VERSION are
+# propagated by clinglite via PARENT_SCOPE.  Fall back to manual derivation
+# only when clinglite was already a target before our add_subdirectory().
+if(NOT CLINGLITE_CLANG_BUILTIN_DIR AND CLING_BUILD_DIR)
+  file(GLOB _clang_res_dirs "${CLING_BUILD_DIR}/lib/clang/*")
+  foreach(_dir ${_clang_res_dirs})
+    if(IS_DIRECTORY "${_dir}/include")
+      get_filename_component(CLINGLITE_CLANG_RESOURCE_VERSION "${_dir}" NAME)
+      set(CLINGLITE_CLANG_BUILTIN_DIR "${_dir}/include")
+      break()
+    endif()
+  endforeach()
+endif()
+
+# IDA SDK (required)
+# Accept IDASDK as cmake variable (-DIDASDK=...) or env variable
+if(DEFINED IDASDK AND NOT DEFINED ENV{IDASDK})
+  set(ENV{IDASDK} "${IDASDK}")
+elseif(DEFINED ENV{IDASDK} AND NOT DEFINED IDASDK)
+  set(IDASDK "$ENV{IDASDK}")
+endif()
+
+if(NOT DEFINED IDASDK)
+  message(FATAL_ERROR
+    "Set -DIDASDK=<path-to-idasdk> or env IDASDK")
+endif()
+
+# Guard: IDA SDK may already be bootstrapped (monorepo inclusion)
+if(NOT TARGET ida_platform_settings)
+  include($ENV{IDASDK}/src/cmake/bootstrap.cmake)
+  # Re-sync: bootstrap may adjust $ENV{IDASDK} for GitHub-clone SDK layouts
+  set(IDASDK "$ENV{IDASDK}")
+  find_package(idasdk REQUIRED)
+endif()
+message(STATUS "IDA SDK found: $ENV{IDASDK}")
+
+# Restore /MT after IDA SDK bootstrap
+# IDA SDK's platform.cmake sets CMAKE_MSVC_RUNTIME_LIBRARY to /MT with a
+# Debug genex. Override to unconditional /MT so all configs match the
+# Release LLVM static libs. The VS generator adds /D_DEBUG for Debug
+# configs, causing the MSVC STL to stamp objects as MTd_StaticDebug
+# (LNK2038 with Release LLVM). /U_DEBUG undoes that;
+# _ITERATOR_DEBUG_LEVEL=0 matches the LLVM libs.
+if(MSVC)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
+  add_compile_options($<$<CONFIG:Debug>:/U_DEBUG>)
+  add_compile_definitions($<$<CONFIG:Debug>:_ITERATOR_DEBUG_LEVEL=0>)
+endif()
+
+# Identifier generator tool
+add_executable(idacpp_idgen tools/idgen.cpp)
+target_link_libraries(idacpp_idgen PRIVATE clinglite)
+if(MSVC)
+  target_compile_options(idacpp_idgen PRIVATE /EHsc)
+endif()
+
+# Shared extlang library
+# Static library used by both the plugin and standalone consumers.
+add_library(idacpp_core STATIC extlang_core.cpp idalib_setup.cpp cpp_highlighter.cpp)
+target_include_directories(idacpp_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(idacpp_core PRIVATE $ENV{IDASDK}/include)
+target_link_libraries(idacpp_core PUBLIC clinglite)
+target_compile_definitions(idacpp_core PRIVATE
+  IDACPP_VERSION="${PROJECT_VERSION}")
+
+if(MSVC)
+  target_compile_options(idacpp_core PRIVATE /EHsc)
+endif()
+
+# Plugin target
+ida_add_plugin(idacpp_plugin
+  SOURCES plugin.cpp
+  LIBRARIES idacpp_core)
+set_target_properties(idacpp_plugin PROPERTIES OUTPUT_NAME idacpp)
+target_compile_definitions(idacpp_plugin PRIVATE
+  IDACPP_VERSION="${PROJECT_VERSION}")
+
+if(MSVC)
+  target_compile_options(idacpp_plugin PRIVATE /EHsc)
+elseif(UNIX)
+  target_compile_options(idacpp_plugin PRIVATE -fPIC)
+endif()
+
+# Bake build-time paths as compile-time fallbacks for source-first mode.
+# Normalize to forward slashes to avoid C escape sequence issues on Windows.
+if(CLING_BUILD_DIR)
+  file(TO_CMAKE_PATH "${CLING_BUILD_DIR}" _cling_build_dir)
+  target_compile_definitions(idacpp_plugin PRIVATE
+    CLINGLITE_DEFAULT_CLING_DIR="${_cling_build_dir}")
+endif()
+if(IDASDK)
+  file(TO_CMAKE_PATH "${IDASDK}" _idasdk_path)
+  target_compile_definitions(idacpp_plugin PRIVATE
+    CLINGLITE_DEFAULT_IDASDK="${_idasdk_path}")
+endif()
+
+# Plugin system
+# Discovers plugins, generates dispatch, assembles PCH, builds idgen table.
+# Must come after idacpp_core and idacpp_plugin targets are defined.
+add_subdirectory(plugins)
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) Elias Bachaalany
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# idacpp
+
+C++ scripting for IDA Pro — the C++ counterpart to [IDAPython](https://github.com/HexRaysSA/ida-sdk/tree/main/src/plugins/idapython).
+
+idacpp embeds a C++ interpreter directly into IDA's scripting engine, giving you native access to the full IDA SDK — including Hex-Rays — at interpreter speed. No bindings, no FFI, no type translation: the same `ea_t`, `func_t*`, and `cfunc_t*` you use in compiled plugins, live in a REPL. Built on [Cling](https://github.com/root-project/cling) and Clang 20.
+
+## Screenshots
+
+<p align="center">
+<img src="docs/images/idacpp-windows-snippet.jpg" alt="idacpp on Windows — snippet editor with segment listing" width="600">
+</p>
+<p align="center"><em>Windows — C++ snippet listing segments</em></p>
+
+<p align="center">
+<img src="docs/images/idacpp-macos.jpg" alt="idacpp on macOS — snippet editor listing functions" width="600">
+</p>
+<p align="center"><em>macOS — C++ snippet listing functions</em></p>
+
+<p align="center">
+<img src="docs/images/idacpp-cli-snippet.jpg" alt="idacpp REPL in IDA output window" width="400">
+</p>
+<p align="center"><em>C++ REPL tab in IDA's output window</em></p>
+
+## Interactive REPL
+
+Select the **C++** tab in IDA's output window:
+
+```
+C++> auto n = get_func_qty();
+C++> msg("%d functions\n", n);
+142 functions
+C++> auto f = get_next_func(0);
+C++> qstring name;
+C++> get_func_name(&name, f->start_ea);
+C++> msg("%s @ %a\n", name.c_str(), f->start_ea);
+_start @ 0x1000
+```
+
+All declarations persist across lines — variables, functions, and types remain available for subsequent input.
+
+## Scripts
+
+```cpp
+#include <funcs.hpp>
+#include <segment.hpp>
+
+int main() {
+    msg("%d functions, %d segments\n",
+           get_func_qty(), get_segm_qty());
+    return 0;
+}
+```
+
+```
+C++> .x hello.cpp
+4 functions, 3 segments
+```
+
+## What you can do
+
+- **Interactive REPL** — C++ tab in IDA's output window with a persistent session
+- **Full IDA SDK** — headers available via PCH (or source-header fallback), including Hex-Rays decompiler types
+- **Script execution** — `.x` scripts with `main()` entrypoint; reloading auto-unloads the previous version
+- **Code completion** — SDK-aware completions with prefix matching
+- **Crash recovery** — `SIGSEGV` / SEH caught, interpreter stays alive
+- **Undo / rollback** — `.undo` and `.clear` to revert interpreter state
+- **Expression evaluator** — IDA's expression engine routes through C++ when active
+- **Plain C++ mode** — works without IDA SDK as a C++ REPL (no SDK types available)
+
+## Examples
+
+The [`examples/`](examples/) directory contains ready-to-run scripts:
+
+| Script | Description |
+|--------|-------------|
+| [`hello.cpp`](examples/hello.cpp) | Minimal starter — prints function and segment counts |
+| [`list_functions.cpp`](examples/list_functions.cpp) | Enumerate all functions with addresses and names |
+| [`list_segments.cpp`](examples/list_segments.cpp) | Enumerate all segments with address ranges |
+| [`decompile_first.cpp`](examples/decompile_first.cpp) | Decompile the first function using Hex-Rays |
+| [`xrefs.cpp`](examples/xrefs.cpp) | List cross-references to the first function |
+
+## Quick start
+
+### Agent-assisted install
+
+Feed [`install-agent.md`](install-agent.md) to your AI coding agent (Claude Code, Cursor, etc.) — it will clone the dependencies, build LLVM/Cling, and compile the plugin automatically.
+
+### Manual
+
+```bash
+git clone https://github.com/allthingsida/idacpp.git
+cd idacpp && mkdir build && cd build
+cmake .. -DCLINGLITE_SOURCE_DIR=/path/to/clinglite \
+         -DCLING_BUILD_DIR=/path/to/cling-build \
+         -DIDASDK=/path/to/idasdk
+cmake --build . --config Release
+```
+
+The build produces `idacpp.dll` / `idacpp.so` / `idacpp.dylib`, placed in the IDA SDK plugin directory by CMake. See [BUILDING.md](BUILDING.md) for prerequisites, platform-specific instructions, and build output details.
+
+## Plugins
+
+idacpp has a plugin system that extends the REPL with additional headers, libraries, and PCH contributions. Plugins are auto-discovered from `plugins/*/CMakeLists.txt` and enabled via cmake variables.
+
+### Available plugins
+
+| Plugin | Variable | Auto-enabled | Description |
+|--------|----------|--------------|-------------|
+| `ida_sdk` | *(always on)* | Yes | IDA SDK headers and idalib — the base layer |
+| [`idax`](plugins/idax/) | `-DPLUGIN_IDAX_SRC_DIR=<path>` | When source dir is provided | [idax](https://github.com/19h/idax) C++23 SDK wrapper by [Kenan Sulayman](https://github.com/19h) |
+| `winsdk` | `-DPLUGIN_WINSDK=ON` | `WIN32` | Windows SDK headers (windows.h, tlhelp32.h, etc.) |
+| `linux` | `-DPLUGIN_LINUX=ON` | `UNIX AND NOT APPLE` | Linux system headers (sys/mman.h, elf.h, etc.) |
+| [`qt6`](plugins/qt6/) | `-DPLUGIN_QT6=ON` | No | Qt6 Core/Gui/Widgets — UI introspection and dynamic forms |
+
+### Enable / disable
+
+```bash
+# Enable by providing source directory
+cmake .. -DPLUGIN_IDAX_SRC_DIR=/path/to/idax
+
+# Disable an auto-enabled plugin
+cmake .. -DPLUGIN_WINSDK=OFF
+```
+
+In the monorepo, plugins are auto-enabled based on platform and source availability — no flags needed.
+
+### idax examples
+
+The idax plugin includes [example scripts](plugins/idax/examples/) using the C++23 API:
+
+| Script | Description |
+|--------|-------------|
+| [`list_functions.cpp`](plugins/idax/examples/list_functions.cpp) | All functions with addresses and names |
+| [`list_segments.cpp`](plugins/idax/examples/list_segments.cpp) | Segments with ranges and R/W/X permissions |
+| [`database_info.cpp`](plugins/idax/examples/database_info.cpp) | File path, format, processor, bitness, MD5 |
+| [`xrefs_to.cpp`](plugins/idax/examples/xrefs_to.cpp) | Cross-references to the first function |
+| [`callers_callees.cpp`](plugins/idax/examples/callers_callees.cpp) | Call graph of the first function |
+| [`find_calls.cpp`](plugins/idax/examples/find_calls.cpp) | Call instructions with resolved targets |
+| [`imports.cpp`](plugins/idax/examples/imports.cpp) | Import modules and symbols |
+| [`decompile.cpp`](plugins/idax/examples/decompile.cpp) | Decompile the first function (Hex-Rays) |
+
+### Creating a new plugin
+
+Copy `plugins/template/` and follow the [plugin README](plugins/README.md) for a detailed walkthrough.
+
+## Documentation
+
+| Document | Contents |
+|----------|----------|
+| [install-agent.md](install-agent.md) | Agent prompt for automated build & install |
+| [BUILDING.md](BUILDING.md) | Prerequisites, CMake variables, platform builds, output sizes |
+| [USAGE.md](USAGE.md) | CLI commands, script format, runtime setup, expression evaluator |
+| [examples/](examples/) | Ready-to-run IDA SDK scripts |
+| [plugins/](plugins/) | Plugin system — extending the REPL with additional APIs |
+
+## Troubleshooting
+
+- **`failed to initialize C++ interpreter`**: check `CLING_DIR` — it must point to a valid Cling/LLVM build tree with `lib/clang/<ver>/include/` intact.
+- **`IDA SDK headers unavailable`**: set `IDASDK` to enable IDA API declarations in the interpreter.
+- **Runtime library lookup issues**: set `IDADIR` to the IDA installation directory on the target machine.
+- **Plugin load crash / abort on startup**: if test binaries that also link LLVM statically live in `$IDADIR/plugins/`, `init_library()` loads duplicate LLVM symbols and aborts. Move the plugin aside before running tests.
+
+## License
+
+MIT License. Copyright (c) Elias Bachaalany. See [LICENSE](LICENSE).
+
+This project depends on [clinglite](https://github.com/0xeb/clinglite) and Cling — see their respective licenses.
+
+```
+
+`USAGE.md`:
+
+```md
+# Using idacpp
+
+idacpp exposes the C++ interpreter through two IDA interfaces: a **CLI tab** for interactive use and an **expression evaluator** for programmatic evaluation. Both share the same interpreter session — definitions made in one are visible to the other.
+
+## CLI commands
+
+Select the **C++** tab in IDA's output window to get an interactive REPL. The CLI supports Cling's dot commands:
+
+| Command | Description |
+|---------|-------------|
+| `.help` (or `.?`) | Show all available commands |
+| `.L <file>` | Load and execute a file or library |
+| `.x <file>[(args)]` | Load file and call its entry function |
+| `.U <file>` | Unload a previously loaded file |
+| `.I [path]` | Show or add include paths |
+| `.O [level]` | Show or set optimization level (0-3) |
+| `.class <name>` | Print class layout (one level) |
+| `.Class <name>` | Print class layout (all levels) |
+| `.namespace` | List all known namespaces |
+| `.g [var]` | Print global variable info |
+| `.undo [n]` | Undo the last N inputs |
+| `.clear` | Undo all user inputs, restoring initial state |
+| `.@` | Cancel multiline input |
+
+## Script format
+
+IDA C++ scripts should put all imperative code inside functions with a conventional entrypoint:
+
+```cpp
+#include <funcs.hpp>
+#include <segment.hpp>
+
+int main() {
+    int n = get_func_qty();
+    msg("functions: %d\n", n);
+    return 0;
+}
+```
+
+**Rules:**
+1. Entrypoint: `int main()` or `int main(int argc, char** argv)`
+2. File scope may contain: `#include` directives, function/class/struct definitions, global variable declarations, `using` directives
+3. **No bare expression statements at file scope** (e.g., `msg(...)`, `vec.push_back(...)`) — these must go inside functions
+
+Scripts are loaded and executed via `.x` (CLI) or Alt-F7 (IDA UI). The entrypoint is invoked automatically. Loading the same file again auto-unloads the previous version.
+
+## Expression evaluator
+
+When C++ is the active language, IDA's expression evaluator uses idacpp. The evaluator handles several operations, each with different scoping:
+
+- **Evaluate expression** — executes at global scope, returns a value
+- **Execute snippet** — multi-line snippets are wrapped in `{ }` so local variables don't leak into the global session; single-line snippets run at global scope
+- **Compile file** — loads file via Cling's `.L` command; auto-unloads previous version of the same file. If a namespace is provided, wraps in `namespace name { ... }` instead
+- **Compile expression** — wraps the expression in a named function at global scope for later invocation
+
+## Runtime setup
+
+The plugin can use compile-time fallback paths baked in at build time, but on a different machine you will usually want to set the runtime paths explicitly:
+
+```bash
+export CLING_DIR=/path/to/cling-build
+export IDASDK=/path/to/idasdk
+export IDADIR=/path/to/ida-pro   # optional
+```
+
+| Variable | Required | Effect when missing |
+|----------|----------|-------------------|
+| `CLING_DIR` | Yes | Plugin cannot initialize Cling and will not start |
+| `IDASDK` | No | Plugin still loads as a plain C++ REPL (no IDA SDK types) |
+| `IDADIR` | No | Runtime library lookup uses default loader search paths |
+
+When `IDASDK` is present, the plugin preloads IDA SDK headers through a cached PCH for instant startup.
+
+```
+
+`cpp_highlight_keywords.h`:
+
+```h
+// cpp_highlight_keywords.h — C++ and IDA SDK keyword lists for syntax highlighting
+// Copyright (c) Elias Bachaalany
+// SPDX-License-Identifier: MIT
+//
+// Pure C++ header with no IDA dependency. Pipe-delimited strings compatible
+// with ida_syntax_highlighter_t::add_keywords().
+
+#pragma once
+
+namespace idacpp { namespace highlight {
+
+// C++ language keywords (HF_KEYWORD1)
+// Covers C++17 + C++20/23 additions + alternative tokens
+constexpr const char* kCppKeywords1 =
+    "alignas|alignof|and|and_eq|asm|auto|bitand|bitor|bool|break|"
+    "case|catch|char|char8_t|char16_t|char32_t|class|compl|concept|"
+    "const|consteval|constexpr|constinit|const_cast|continue|"
+    "co_await|co_return|co_yield|"
+    "decltype|default|delete|do|double|dynamic_cast|"
+    "else|enum|explicit|export|extern|"
+    "false|float|for|friend|goto|"
+    "if|inline|int|long|mutable|"
+    "namespace|new|noexcept|not|not_eq|nullptr|"
+    "operator|or|or_eq|"
+    "private|protected|public|"
+    "register|reinterpret_cast|requires|return|"
+    "short|signed|sizeof|static|static_assert|static_cast|"
+    "struct|switch|"
+    "template|this|thread_local|throw|true|try|typedef|typeid|typename|"
+    "union|unsigned|using|virtual|void|volatile|while|xor|xor_eq";
+
+// IDA SDK types (HF_KEYWORD2)
+constexpr const char* kIdaTypes =
+    "ea_t|sel_t|tid_t|flags_t|uval_t|sval_t|asize_t|adiff_t|"
+    "func_t|segment_t|struc_t|member_t|insn_t|op_t|"
+    "tinfo_t|til_t|argloc_t|funcarg_t|udt_member_t|"
+    "cfunc_t|cinsn_t|cexpr_t|citem_t|ctree_item_t|"
+    "qstring|qvector|qlist|qstack|"
+    "linput_t|loader_t|idainfo|"
+    "netnode|"
+    "fixup_info_t|refinfo_t|xrefblk_t|"
+    "bytevec_t|relobj_t|eavec_t|"
+    "idc_value_t|extlang_t|"
+    "mbl_array_t|minsn_t|mop_t|mblock_t|"
+    "graph_visitor_t|abstract_graph_t";
+
+// IDA SDK constants (HF_KEYWORD3)
+constexpr const char* kIdaConstants =
+    "BADADDR|BADSEL|MAXADDR|MAXSTR|"
+    "SEGPERM_EXEC|SEGPERM_WRITE|SEGPERM_READ|"
+    "SFL_HIDDEN|SFL_DEBUG|SFL_LOADER|SFL_COMDAT|"
+    "cot_num|cot_var|cot_call|cot_memref|cot_idx|"
+    "cit_if|cit_for|cit_while|cit_do|cit_switch|cit_return|cit_block|"
+    "fl_CF|fl_CN|fl_JF|fl_JN|fl_F|"
+    "dt_byte|dt_word|dt_dword|dt_qword|dt_float|dt_double";
+
+}} // namespace idacpp::highlight
+
+```
+
+`cpp_highlighter.cpp`:
+
+```cpp
+// cpp_highlighter.cpp — C++ syntax highlighter implementation
+// Copyright (c) Elias Bachaalany
+// SPDX-License-Identifier: MIT
+
+#include "cpp_highlighter.h"
+#include "cpp_highlight_keywords.h"
+
+#include <pro.h>
+#include <expr.hpp>
+#include <ida_highlighter.hpp>
+
+#include <algorithm>
+#include <cstring>
+
+#include "ida_sdk_identifiers.inc"
+
+namespace idacpp {
+
+/// Highlights IDA SDK identifiers (functions, types, enumerators) from the
+/// pre-generated table using binary search. Registered as a helper on the
+/// syntax highlighter — IDA calls get_ident_color() for each identifier token.
+struct ida_ident_highlighter_t : ida_syntax_highlighter_helper_t
+{
+    bool get_ident_color(syntax_highlight_style* out_color,
+                         const qstring& ident) override
+    {
+        auto cmp = [](const char* a, const char* b) {
+            return strcmp(a, b) < 0;
+        };
+        if (std::binary_search(g_idaSdkIdentifiers,
+                               g_idaSdkIdentifiers + g_idaSdkIdentifierCount,
+                               ident.c_str(), cmp)) {
+            *out_color = HF_USER1;
+            return true;
+        }
+        return false;
+    }
+};
+
+static ida_ident_highlighter_t g_ident_highlighter;
+
+struct cpp_highlighter_t : public ida_syntax_highlighter_t
+{
+    cpp_highlighter_t() : ida_syntax_highlighter_t()
+    {
+        // String and character literals
+        open_strconst  = '"';
+        close_strconst = '"';
+        open_chrconst  = '\'';
+        close_chrconst = '\'';
+        escape_char    = '\\';
+
+        // Preprocessor
+        preprocessor_char = '#';
+
+        // Colors
+        text_color         = HF_DEFAULT;
+        comment_color      = HF_COMMENT;
+        string_color       = HF_STRING;
+        preprocessor_color = HF_PREPROC;
+        style              = HF_DEFAULT;
+        literal_closer     = '\0';
+
+        // Comments
+        set_open_cmt("//");
+        add_multi_line_comment("/*", "*/");
+
+        // C++ language keywords
+        add_keywords(highlight::kCppKeywords1, HF_KEYWORD1);
+
+        // IDA SDK types
+        add_keywords(highlight::kIdaTypes, HF_KEYWORD2);
+
+        // IDA SDK constants
+        add_keywords(highlight::kIdaConstants, HF_KEYWORD3);
+
+        // IDA SDK functions/identifiers from generated table
+        add_ida_syntax_highlighter_helper(&g_ident_highlighter);
+    }
+};
+
+syntax_highlighter_t* getCppHighlighter()
+{
+    static cpp_highlighter_t g_cpp_highlighter;
+    return &g_cpp_highlighter;
+}
+
+} // namespace idacpp
+
+```
+
+`cpp_highlighter.h`:
+
+```h
+// cpp_highlighter.h — C++ syntax highlighter for IDA extlang_t
+// Copyright (c) Elias Bachaalany
+// SPDX-License-Identifier: MIT
+//
+// Returns a pointer to a static ida_syntax_highlighter_t configured for C++.
+// Requires IDA kernel (code_highlight_block symbol).
+
+#pragma once
+
+struct syntax_highlighter_t;
+
+namespace idacpp {
+
+/// Returns the C++ syntax highlighter instance for use in extlang_t.
+syntax_highlighter_t* getCppHighlighter();
+
+} // namespace idacpp
+
+```
+
+`examples/decompile_first.cpp`:
+
+```cpp
+// decompile_first.cpp — decompile the first function using Hex-Rays
+//
+// Adapted from the IDA SDK vds1 sample.  Requires Hex-Rays decompiler.
+// If Hex-Rays is not available, prints a message and returns gracefully.
+// Demonstrates: init_hexrays_plugin(), decompile(), pseudocode extraction
+
+#include <kernwin.hpp>
+#include <funcs.hpp>
+#include <hexrays.hpp>
+
+int main() {
+    if (!init_hexrays_plugin()) {
+        msg("Hex-Rays decompiler not available.\n");
+        return -1;
+    }
+
+    func_t *fn = get_next_func(0);
+    if (fn == nullptr) {
+        msg("No functions in the database.\n");
+        term_hexrays_plugin();
+        return 0;
+    }
+
+    msg("Decompiling function at %a...\n", fn->start_ea);
+
+    hexrays_failure_t hf;
+    cfuncptr_t cfunc = decompile(fn, &hf, DECOMP_WARNINGS);
+    if (cfunc == nullptr) {
+        msg("Decompilation failed: %s\n", hf.desc().c_str());
+        term_hexrays_plugin();
+        return -1;
+    }
+
+    const strvec_t &sv = cfunc->get_pseudocode();
+    msg("Pseudocode (%d lines):\n", (int)sv.size());
+    for (int i = 0; i < (int)sv.size(); ++i) {
+        qstring clean;
+        tag_remove(&clean, sv[i].line);
+        msg("  %s\n", clean.c_str());
+    }
+
+    term_hexrays_plugin();
+    return (int)sv.size();
+}
+
+```
+
+`examples/hello.cpp`:
+
+```cpp
+// hello.cpp — minimal idacpp script
+//
+// Usage from IDA's C++ CLI tab:
+//   .L hello.cpp
+//   main()
+//
+// Or load + run in one step:
+//   .x hello.cpp
+
+#include <kernwin.hpp>
+#include <funcs.hpp>
+#include <segment.hpp>
+
+int main() {
+    msg("Hello from idacpp!\n");
+    msg("  Functions: %d\n", get_func_qty());
+    msg("  Segments:  %d\n", get_segm_qty());
+    return 0;
+}
+
+```
+
+`examples/list_functions.cpp`:
+
+```cpp
+// list_functions.cpp — enumerate all functions in the database
+//
+// Prints each function's address and name.
+// Demonstrates: get_func_qty(), get_next_func(), get_func_name()
+
+#include <kernwin.hpp>
+#include <funcs.hpp>
+#include <name.hpp>
+
+int main() {
+    int count = get_func_qty();
+    msg("Functions: %d\n", count);
+
+    func_t *fn = get_next_func(0);
+    int i = 0;
+    while (fn != nullptr) {
+        qstring name;
+        get_func_name(&name, fn->start_ea);
+        msg("  [%4d] %a  %s\n",
+            i++, fn->start_ea, name.c_str());
+        fn = get_next_func(fn->start_ea);
+    }
+
+    return count;
+}
+
+```
+
+`examples/list_segments.cpp`:
+
+```cpp
+// list_segments.cpp — enumerate all segments in the database
+//
+// Prints each segment's name, address range, and size.
+// Demonstrates: get_segm_qty(), get_first_seg(), get_next_seg(), get_segm_name()
+
+#include <kernwin.hpp>
+#include <segment.hpp>
+
+int main() {
+    int count = get_segm_qty();
+    msg("Segments: %d\n", count);
+
+    segment_t *seg = get_first_seg();
+    int i = 0;
+    while (seg != nullptr) {
+        qstring name;
+        get_segm_name(&name, seg);
+        msg("  [%2d] %-16s  %a - %a  (%llu bytes)\n",
+            i++, name.c_str(),
+            seg->start_ea,
+            seg->end_ea,
+            (unsigned long long)(seg->end_ea - seg->start_ea));
+        seg = get_next_seg(seg->start_ea);
+    }
+
+    return count;
+}
+
+```
+
+`examples/xrefs.cpp`:
+
+```cpp
+// xrefs.cpp — enumerate cross-references to the first function
+//
+// Finds all code and data references pointing to the first function's
+// entry address.  Demonstrates: xrefblk_t iteration, xref type names.
+
+#include <kernwin.hpp>
+#include <funcs.hpp>
+#include <xref.hpp>
+#include <name.hpp>
+
+int main() {
+    func_t *fn = get_next_func(0);
+    if (fn == nullptr) {
+        msg("No functions in the database.\n");
+        return 0;
+    }
+
+    qstring func_name;
+    get_func_name(&func_name, fn->start_ea);
+    msg("Cross-references to %s (%a):\n",
+        func_name.c_str(), fn->start_ea);
+
+    int count = 0;
+    xrefblk_t xb;
+    for (bool ok = xb.first_to(fn->start_ea, XREF_ALL);
+         ok;
+         ok = xb.next_to()) {
+        qstring from_name;
+        get_name(&from_name, xb.from);
+        msg("  [%3d] %a  %-20s  type=%d\n",
+            count++,
+            xb.from,
+            from_name.c_str(),
+            xb.type);
+    }
+
+    msg("Total: %d xrefs\n", count);
+    return count;
+}
+
+```
+
+`extlang_core.cpp`:
+
+```cpp
+// extlang_core.cpp — C++ expression language for IDA via clinglite
+// Copyright (c) Elias Bachaalany
+// SPDX-License-Identifier: MIT
+//
+// Implements extlang_t callbacks that bridge IDA's expression evaluator
+// to a clinglite::Interpreter instance.
+
+#include "extlang_core.h"
+#include "cpp_highlighter.h"
+
+#include <pro.h>
+#include <expr.hpp>
+
+#include <cerrno>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
+#include <memory>
+#include <string>
+
+namespace idacpp {
+
+// Globals
+static clinglite::Interpreter* g_interp = nullptr;
+static std::unique_ptr<clinglite::Session> g_session;
+static std::unique_ptr<clinglite::ScriptRunner> g_runner;
+static RuntimeStatus g_status;
+
+// Error helpers
+/// Fill qstring errbuf from a std::string error message.
+static void fillError(qstring* errbuf, const std::string& error,
+                      const char* fallback) {
+    if (!errbuf) return;
+    if (!error.empty())
+        *errbuf = error.c_str();
+    else
+        *errbuf = fallback;
+}
+
+static void setLastError(const std::string& error) {
+    g_status.lastError = error;
+}
+
+static void clearLastError() {
+    g_status.lastError.clear();
+}
+
+
+// Value conversion helpers
+static std::string trim_ascii(std::string s) {
+    const size_t begin = s.find_first_not_of(" \t\r\n");
+    if (begin == std::string::npos)
+        return {};
+    const size_t end = s.find_last_not_of(" \t\r\n");
+    return s.substr(begin, end - begin + 1);
+}
+
+static std::string strip_type_prefix(const std::string& s) {
+    std::string trimmed = trim_ascii(s);
+    if (trimmed.empty() || trimmed[0] != '(')
+        return trimmed;
+
+    const size_t close = trimmed.find(')');
+    if (close == std::string::npos)
+        return trimmed;
+
+    const size_t value_pos = trimmed.find_first_not_of(" \t", close + 1);
+    if (value_pos == std::string::npos)
+        return trimmed;
+
+    return trimmed.substr(value_pos);
+}
+
+static bool has_float_literal_chars(const std::string& s) {
+    if (s.empty())
+        return false;
+    for (char c : s) {
+        const unsigned char uc = static_cast<unsigned char>(c);
+        if (std::isdigit(uc))
+            continue;
+        switch (c) {
+        case '+':
+        case '-':
+        case '.':
+        case 'e':
+        case 'E':
+        case 'i':
+        case 'I':
+        case 'n':
+        case 'N':
+        case 'f':
+        case 'F':
+        case 'a':
+        case 'A':
+            continue;
+        default:
+            return false;
+        }
+    }
+    return true;
+}
+
+static bool parse_quoted_string(std::string* out, const std::string& s) {
+    if (s.size() < 2 || s.front() != '"' || s.back() != '"')
+        return false;
+
+    std::string decoded;
+    decoded.reserve(s.size() - 2);
+    for (size_t i = 1; i + 1 < s.size(); ++i) {
+        char c = s[i];
+        if (c == '\\' && i + 2 < s.size()) {
+            char esc = s[++i];
+            switch (esc) {
+            case '\\': decoded.push_back('\\'); break;
+            case '"':  decoded.push_back('"'); break;
+            case 'n':  decoded.push_back('\n'); break;
+            case 'r':  decoded.push_back('\r'); break;
+            case 't':  decoded.push_back('\t'); break;
+            case '0':  decoded.push_back('\0'); break;
+            default:
+                decoded.push_back('\\');
+                decoded.push_back(esc);
+                break;
+            }
+        } else {
+            decoded.push_back(c);
+        }
+    }
+    *out = std::move(decoded);
+    return true;
+}
+
+static bool parse_int64(int64* out, const std::string& s) {
+    if (s.empty())
+        return false;
+
+    errno = 0;
+    char* end = nullptr;
+    const long long value = std::strtoll(s.c_str(), &end, 0);
+    if (errno != 0 || end == s.c_str() || *end != '\0')
+        return false;
+
+    *out = static_cast<int64>(value);
+    return true;
+}
+
+static bool parse_double(double* out, const std::string& s) {
+    if (s.empty())
+        return false;
+
+    errno = 0;
+    char* end = nullptr;
+    const double value = std::strtod(s.c_str(), &end);
+    if (errno != 0 || end == s.c_str() || *end != '\0')
+        return false;
+
+    *out = value;
+    return true;
+}
+
+static void release_idc_value(idc_value_t* value) {
+    if (value == nullptr)
+        return;
+    free_idcv(value);
+}
+
+static bool assign_idc_string(
+    idc_value_t* dst,
+    const std::string& value)
+{
+    if (dst == nullptr)
+        return true;
+    dst->set_string(value.c_str(), value.size());
+    return true;
+}
+
+static bool value_to_idc_impl(
+    const clinglite::Value& src,
+    idc_value_t* dst,
+    qstring* errbuf = nullptr)
+{
+    if (dst == nullptr)
+        return true;
+
+    if (!src.hasValue()) {
+        dst->set_long(0);
+        return true;
+    }
+
+    const std::string printed = trim_ascii(src.toString());
+    const std::string value = strip_type_prefix(printed);
+
+    if (printed.find("(void *)") != std::string::npos
+        || printed.find("(void*)") != std::string::npos) {
+        dst->set_pvoid(src.asPtr());
+        return true;
+    }
+
+    std::string decoded;
+    if (parse_quoted_string(&decoded, value)) {
+        return assign_idc_string(dst, decoded);
+    }
+
+    if (value == "true") {
+        dst->set_long(1);
+        return true;
+    }
+    if (value == "false") {
+        dst->set_long(0);
+        return true;
+    }
+
+    double as_double = 0.0;
+    if (parse_double(&as_double, value)
+        && (value.find('.') != std::string::npos
+            || value.find('e') != std::string::npos
+            || value.find('E') != std::string::npos
+            || printed.find("(double)") != std::string::npos
+            || printed.find("(float)") != std::string::npos)) {
+        fpvalue_t fp;
+        fp.clear();
+        fp.from_double(as_double);
+        dst->set_float(fp);
+        return true;
+    }
+
+    int64 as_int = 0;
+    if (parse_int64(&as_int, value)) {
+        dst->set_int64(as_int);
+        return true;
+    }
+
+    if (!printed.empty()) {
+        return assign_idc_string(dst, printed);
+    }
+
+    fillError(errbuf, "Unsupported C++ result value", "Unsupported C++ result value");
+    return false;
+}
+
+// Convert idc_value_t -> C++ literal string for building expressions
+static bool idc_to_literal_impl(
+    std::string* out,
+    const idc_value_t& v,
+    qstring* errbuf = nullptr)
+{
+    if (out == nullptr)
+        return false;
+
+    switch (v.vtype) {
+    case VT_LONG:
+        *out = std::to_string(v.num);
+        return true;
+    case VT_INT64:
+        *out = std::to_string(v.i64) + "LL";
+        return true;
+    case VT_PVOID: {
+        char buf[64];
+        qsnprintf(buf, sizeof(buf), "(void*)0x%" FMT_64 "x",
+                  static_cast<uint64>(reinterpret_cast<uintptr_t>(v.pvoid)));
+        *out = buf;
+        return true;
+    }
+    case VT_FLOAT: {
+        double d = 0.0;
+        if (v.e.to_double(&d) == REAL_ERROR_OK) {
+            if (!std::isfinite(d)) {
+                fillError(errbuf, "Non-finite IDC floating-point value is unsupported",
+                          "Non-finite IDC floating-point value is unsupported");
+                return false;
+            }
+            char buf[64];
+            qsnprintf(buf, sizeof(buf), "%.17g", d);
+            *out = buf;
+        } else {
+            char buf[128];
+            v.e.to_str(buf, sizeof(buf), 0);
+            *out = trim_ascii(buf);
+            if (!has_float_literal_chars(*out)) {
+                fillError(errbuf, "Unsupported IDC floating-point value",
+                          "Unsupported IDC floating-point value");
+                return false;
+            }
+        }
+        // Ensure the literal parses as floating-point in C++
+        if (out->find('.') == std::string::npos
+            && out->find('e') == std::string::npos
+            && out->find('E') == std::string::npos) {
+            *out += ".0";
+        }
+        return true;
+    }
+    case VT_STR:
+        *out = "\"" + clinglite::escapePath(v.c_str()) + "\"";
+        return true;
+    default:
+        fillError(errbuf,
+                  "Unsupported IDC value type for C++ call/assignment",
+                  "Unsupported IDC value type for C++ call/assignment");
+        return false;
+    }
+}
+
+static bool ensure_session(std::string* error) {
+    if (g_session && g_session->interp() != nullptr)
+        return true;
+    if (error != nullptr)
+        *error = "C++ interpreter not initialized";
+    setLastError("C++ interpreter not initialized");
+    return false;
+}
+
+static bool eval_snippet_with_optional_wrap(
+    clinglite::Session* session,
+    const std::string& input,
+    std::string* error)
+{
+    std::string code = input;
+    const bool needsWrap = code.find('\n') != std::string::npos
+                           && code.find('{') != 0;
+    if (needsWrap)
+        code = "{\n" + code + "\n}";
+    return session->evalSnippet(code, error);
+}
+
+// extlang_t callbacks
+static bool idaapi cpp_compile_expr(
+    const char* name,
+    ea_t /*current_ea*/,
+    const char* expr,
+    qstring* errbuf)
+{
+    if (!g_session) {
+        if (errbuf) *errbuf = "C++ interpreter not initialized";
+        return false;
+    }
+
+    // Wrap expression in a callable function: auto name() { return (expr); }
+    std::string code = "auto ";
+    code += name;
+    code += "() { return (";
+    code += expr;
+    code += "); }";
+
+    std::string error;
+    if (!g_session->evalSnippet(code, &error)) {
+        fillError(errbuf, error, "C++ compilation error");
+        return false;
+    }
+    return true;
+}
+
+static bool idaapi cpp_compile_file(
+    const char* file,
+    const char* /*requested_namespace*/,
+    qstring* errbuf)
+{
+    // Match IDAPython behavior: compile_file both compiles AND executes.
+    // The IDA kernel does not call a separate "run" callback after this.
+    FileExecOptions opts;
+    opts.entrypoint = FileEntrypoint::Auto;
+    std::string error;
+    if (!execFile(file, opts, nullptr, &error)) {
+        fillError(errbuf, error, "C++ file execution error");
+        return false;
+    }
+    return true;
+}
+
+static bool idaapi cpp_call_func(
+    idc_value_t* result,
+    const char* name,
+    const idc_value_t args[],
+    size_t nargs,
+    qstring* errbuf)
+{
+    if (!g_session) {
+        if (errbuf) *errbuf = "C++ interpreter not initialized";
+        return false;
+    }
+
+    // Build call expression: name(arg0, arg1, ...)
+    std::string code = name;
+    code += "(";
+    for (size_t i = 0; i < nargs; ++i) {
+        if (i > 0) code += ", ";
+        std::string literal;
+        if (!idc_to_literal_impl(&literal, args[i], errbuf))
+            return false;
+        code += literal;
+    }
+    code += ")";
+
+    clinglite::Value val;
+    std::string error;
+    if (!g_session->evalExpr(code, val, &error)) {
+        fillError(errbuf, error, "C++ call error");
+        return false;
+    }
+
+    return result == nullptr || value_to_idc_impl(val, result, errbuf);
+}
+
+static bool idaapi cpp_eval_expr(
+    idc_value_t* rv,
+    ea_t /*current_ea*/,
+    const char* expr,
+    qstring* errbuf)
+{
+    if (!g_session) {
+        if (errbuf) *errbuf = "C++ interpreter not initialized";
+        return false;
+    }
+
+    clinglite::Value val;
+    std::string error;
+    if (!g_session->evalExpr(expr, val, &error)) {
+        fillError(errbuf, error, "C++ evaluation error");
+        return false;
+    }
+
+    return rv == nullptr || value_to_idc_impl(val, rv, errbuf);
+}
+
+static bool idaapi cpp_eval_snippet(
+    const char* str,
+    qstring* errbuf)
+{
+    if (!g_session) {
+        if (errbuf) *errbuf = "C++ interpreter not initialized";
+        return false;
+    }
+
+    std::string error;
+    if (!eval_snippet_with_optional_wrap(g_session.get(), str, &error)) {
+        fillError(errbuf, error, "C++ snippet error");
+        return false;
+    }
+    return true;
+}
+
+static bool idaapi cpp_create_object(
+    idc_value_t* /*result*/,
+    const char* /*name*/,
+    const idc_value_t /*args*/[],
+    size_t /*nargs*/,
+    qstring* errbuf)
+{
+    // C++ doesn't have IDA-style dynamic objects
+    if (errbuf) *errbuf = "C++ does not support IDC objects";
+    return false;
+}
+
+static bool idaapi cpp_get_attr(
+    idc_value_t* result,
+    const idc_value_t* /*obj*/,
+    const char* attr)
+{
+    if (!g_session)
+        return false;
+
+    // If attr is nullptr or empty, return the language name
+    if (attr == nullptr || attr[0] == '\0') {
+        if (result)
+            return assign_idc_string(result, "c++");
+        return true;
+    }
+
+    // Evaluate the variable name
+    clinglite::Value val;
+    if (!g_session->evalExpr(attr, val))
+        return false;
+
+    return result == nullptr || value_to_idc_impl(val, result);
+}
+
+static bool idaapi cpp_set_attr(
+    idc_value_t* /*obj*/,
+    const char* attr,
+    const idc_value_t& value)
+{
+    if (!g_session || attr == nullptr || attr[0] == '\0')
+        return false;
+
+    // Build assignment: attr = literal_value;
+    std::string code = attr;
+    code += " = ";
+    std::string literal;
+    if (!idc_to_literal_impl(&literal, value))
+        return false;
+    code += literal;
+    code += ";";
+
+    return g_session->evalSnippet(code);
+}
+
+static bool idaapi cpp_call_method(
+    idc_value_t* /*result*/,
+    const idc_value_t* /*obj*/,
+    const char* /*name*/,
+    const idc_value_t /*args*/[],
+    size_t /*nargs*/,
+    qstring* errbuf)
+{
+    if (errbuf) *errbuf = "C++ does not support IDC method calls";
+    return false;
+}
+
+static bool idaapi cpp_load_procmod(
+    idc_value_t* /*procobj*/,
+    const char* /*path*/,
+    qstring* /*errbuf*/)
+{
+    return false;
+}
+
+static bool idaapi cpp_unload_procmod(
+    const char* /*path*/,
+    qstring* /*errbuf*/)
+{
+    return false;
+}
+
+// extlang_t struct
+static extlang_t extlang_cpp = {
+    sizeof(extlang_t),
+    0,                    // flags
+    0,                    // refcnt
+    "C++",                // name
+    "cpp",                // fileext
+    nullptr,              // highlighter (set lazily in install())
+    cpp_compile_expr,
+    cpp_compile_file,
+    cpp_call_func,
+    cpp_eval_expr,
+    cpp_eval_snippet,
+    cpp_create_object,
+    cpp_get_attr,
+    cpp_set_attr,
+    cpp_call_method,
+    cpp_load_procmod,
+    cpp_unload_procmod,
+};
+
+// Public API
+void prepareOptions(clinglite::Options& opts) {
+    // IDA SDK platform defines — same as used to build the plugin/PCH
+    opts.compilerFlags.push_back("-D__EA64__=1");
+    opts.compilerFlags.push_back("-D__IDP__");
+#ifdef __NT__
+    opts.compilerFlags.push_back("-D__NT__");
+#elif defined(__LINUX__)
+    opts.compilerFlags.push_back("-D__LINUX__");
+#elif defined(__MAC__)
+    opts.compilerFlags.push_back("-D__MAC__");
+#endif
+    opts.compilerFlags.push_back("-std=c++2b");
+}
+
+void init(clinglite::Interpreter* interp) {
+    g_interp = interp;
+    g_session = std::make_unique<clinglite::Session>(interp);
+    g_runner = std::make_unique<clinglite::ScriptRunner>(g_session.get());
+    g_runner->setNamespacePrefix("idacpp_exec_file_");
+    g_runner->setRuntimeNamespace("idacpp_runtime");
+    g_status = RuntimeStatus{};
+    g_status.sessionReady = g_session != nullptr;
+}
+
+clinglite::Session* getSession() {
+    return g_session.get();
+}
+
+bool compileFile(
+    const std::string& file,
+    const char* requestedNamespace,
+    std::string* error)
+{
+    if (!ensure_session(error))
+        return false;
+    g_status.sessionReady = true;
+
+    if (!g_runner->compileFile(file, requestedNamespace, error)) {
+        auto rs = g_runner->status();
+        setLastError(rs.lastError);
+        g_status.lastFileExecuted = rs.lastFileExecuted;
+        g_status.lastFileNamespace = rs.lastFileNamespace;
+        return false;
+    }
+
+    auto rs = g_runner->status();
+    g_status.lastFileExecuted = rs.lastFileExecuted;
+    g_status.lastFileNamespace = rs.lastFileNamespace;
+    g_status.lastEntrypointChosen.clear();
+    clearLastError();
+    return true;
+}
+
+bool execFile(
+    const std::string& file,
+    const FileExecOptions& options,
+    clinglite::Value* result,
+    std::string* error)
+{
+    if (!ensure_session(error))
+        return false;
+    g_status.sessionReady = true;
+
+    clinglite::FileExecOptions clOpts;
+    clOpts.args = options.args;
+
+    switch (options.entrypoint) {
+    case FileEntrypoint::Auto:
+        clOpts.entrypointGroups = {clinglite::standardMainCandidates()};
+        clOpts.allowNoEntrypoint = true;
+        break;
+    case FileEntrypoint::Main:
+        clOpts.entrypointGroups = {clinglite::standardMainCandidates()};
+        clOpts.allowNoEntrypoint = false;
+        break;
+    case FileEntrypoint::None:
+        clOpts.allowNoEntrypoint = true;
+        break;
+    }
+
+    if (!g_runner->execFile(file, clOpts, result, error)) {
+        auto rs = g_runner->status();
+        setLastError(rs.lastError);
+        g_status.lastFileExecuted = rs.lastFileExecuted;
+        g_status.lastFileNamespace = rs.lastFileNamespace;
+        g_status.lastEntrypointChosen = rs.lastEntrypointChosen;
+        return false;
+    }
+
+    auto rs = g_runner->status();
+    g_status.lastFileExecuted = rs.lastFileExecuted;
+    g_status.lastFileNamespace = rs.lastFileNamespace;
+    g_status.lastEntrypointChosen = rs.lastEntrypointChosen;
+    clearLastError();
+    return true;
+}
+
+bool valueToIdc(
+    const clinglite::Value& src,
+    idc_value_t* dst,
+    qstring* errbuf)
+{
+    return value_to_idc_impl(src, dst, errbuf);
+}
+
+bool idcToLiteral(
+    std::string* out,
+    const idc_value_t& v,
+    qstring* errbuf)
+{
+    return idc_to_literal_impl(out, v, errbuf);
+}
+
+RuntimeStatus getRuntimeStatus() {
+    return g_status;
+}
+
+void resetRuntimeStatus() {
+    const bool sessionReady = g_session != nullptr;
+    const bool extlangInstalled = g_status.extlangInstalled;
+    g_status = RuntimeStatus{};
+    g_status.sessionReady = sessionReady;
+    g_status.extlangInstalled = extlangInstalled;
+    if (g_runner)
+        g_runner->resetStatus();
+}
+
+void install() {
+    extlang_cpp.highlighter = idacpp::getCppHighlighter();
+    install_extlang(&extlang_cpp);
+    g_status.extlangInstalled = true;
+}
+
+void remove() {
+    remove_extlang(&extlang_cpp);
+    g_status.extlangInstalled = false;
+}
+
+const extlang_t* getExtlang() {
+    return &extlang_cpp;
+}
+
+void term() {
+    g_runner.reset();
+    g_session.reset();
+    g_interp = nullptr;
+    g_status = RuntimeStatus{};
+}
+
+} // namespace idacpp
+
+```
+
+`extlang_core.h`:
+
+```h
+// extlang_core.h — C++ expression language for IDA
+//
+// Bridges clinglite::Interpreter to IDA's extlang_t interface.
+// This header is safe to include from files that don't include pro.h.
+
+#pragma once
+
+#include <clinglite/clinglite.h>
+
+template <class T> class _qstring;
+typedef _qstring<char> qstring;
+class idc_value_t;
+struct extlang_t;
+
+namespace idacpp {
+
+enum class FileEntrypoint {
+    Auto,
+    Main,
+    None,
+};
+
+struct FileExecOptions {
+    std::vector<std::string> args;
+    FileEntrypoint entrypoint = FileEntrypoint::Auto;
+};
+
+/// Snapshot of the runtime lifecycle.
+/// Fields sessionReady, extlangInstalled, lastFile*, lastEntrypoint*, and
+/// lastError are managed by extlang_core.
+/// Fields rcLoaded and startupScriptLoaded are set by the host (plugin or
+/// standalone) after their respective operations complete.
+struct RuntimeStatus {
+    bool sessionReady = false;
+    bool extlangInstalled = false;
+    bool rcLoaded = false;
+    bool startupScriptLoaded = false;
+    std::string lastFileExecuted;
+    std::string lastFileNamespace;
+    std::string lastEntrypointChosen;
+    std::string lastError;
+};
+
+/// Set up IDA SDK PCH in interpreter options.
+void prepareOptions(clinglite::Options& opts);
+
+/// Initialize and register the C++ extlang with IDA.
+void init(clinglite::Interpreter* interp);
+
+/// Get the Session used by the extlang (for CLI tab, etc.).
+/// Returns nullptr if not initialized.
+clinglite::Session* getSession();
+
+/// Compile and load a .cpp file into the active session.
+/// If requestedNamespace is non-empty, the file is wrapped in that namespace.
+bool compileFile(
+    const std::string& file,
+    const char* requestedNamespace = nullptr,
+    std::string* error = nullptr);
+
+/// Load a .cpp file and optionally invoke a conventional entrypoint.
+/// When entrypoint is Auto, probes for main(argc, argv), then main().
+bool execFile(
+    const std::string& file,
+    const FileExecOptions& options = {},
+    clinglite::Value* result = nullptr,
+    std::string* error = nullptr);
+
+/// Convert a Cling value to IDC.
+bool valueToIdc(
+    const clinglite::Value& src,
+    idc_value_t* dst,
+    qstring* errbuf = nullptr);
+
+/// Convert an IDC value into a C++ literal string.
+bool idcToLiteral(
+    std::string* out,
+    const idc_value_t& v,
+    qstring* errbuf = nullptr);
+
+/// Return a snapshot of the runtime status.
+RuntimeStatus getRuntimeStatus();
+
+/// Reset the runtime status snapshot.
+void resetRuntimeStatus();
+
+/// Install the extlang (calls install_extlang).
+void install();
+
+/// Unregister and clean up the extlang.
+void remove();
+
+/// Get the extlang_t pointer for direct callback invocation.
+const extlang_t* getExtlang();
+
+/// Cleanup interpreter reference.
+void term();
+
+} // namespace idacpp
+
+```
+
+`idalib_setup.cpp`:
+
+```cpp
+// idalib_setup.cpp — headless IDA setup implementation
+// Copyright (c) Elias Bachaalany
+// SPDX-License-Identifier: MIT
+//
+// Provides preparePCH() / initIda() / termIda() for standalone consumers
+// that want to set up IDA libraries, headers, and extlang without being a plugin.
+
+#include "idalib_setup.h"
+#include "extlang_core.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#elif defined(__APPLE__)
+#include <mach-o/dyld.h>
+#else
+#include <unistd.h>
+#endif
+
+#include <pro.h>
+#include <diskio.hpp>
+#include <idalib.hpp>
+#include <expr.hpp>
+
+#include <chrono>
+#include <climits>
+#include <cstring>
+#include <filesystem>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+
+namespace fs = std::filesystem;
+
+namespace idacpp {
+
+// C++ stdlib headers to include in PCH
+static const char* g_stdHeaders[] = {
+    "cstdio", "cstdlib", "cstring", "cstdint", "cmath", "cassert",
+    "string", "vector", "map", "set", "unordered_map", "unordered_set",
+    "algorithm", "functional", "memory", "utility", "iostream",
+    "sstream", "fstream", "array", "deque", "list", "optional",
+    "variant", "tuple", "numeric", "iterator", "type_traits",
+};
+
+// IDA SDK header list for PCH generation
+static const char* g_idaHeaders[] = {
+    "pro.h",
+    "auto.hpp",
+    "allins.hpp",
+    "bitrange.hpp",
+    "bytes.hpp",
+    "compress.hpp",
+    "config.hpp",
+    "cvt64.hpp",
+    "dbg.hpp",
+    "demangle.hpp",
+    "diff3.hpp",
+    "dirtree.hpp",
+    "diskio.hpp",
+    "entry.hpp",
+    "err.h",
+    "exehdr.h",
+    "expr.hpp",
+    "fixup.hpp",
+    "fpro.h",
+    "frame.hpp",
+    "funcs.hpp",
+    "gdl.hpp",
+    "graph.hpp",
+    "help.h",
+    "hexrays.hpp",
+    "ida.hpp",
+    "ida_highlighter.hpp",
+    "idacfg.hpp",
+    "idalib.hpp",
+    "idd.hpp",
+    "idp.hpp",
+    "ieee.h",
+    "jumptable.hpp",
+    "kernwin.hpp",
+    "lex.hpp",
+    "libfuncs.hpp",
+    "lines.hpp",
+    "llong.hpp",
+    "loader.hpp",
+    "lumina.hpp",
+    "make_script_ns.hpp",
+    "md5.h",
+    "merge.hpp",
+    "mergemod.hpp",
+    "moves.hpp",
+    "nalt.hpp",
+    "name.hpp",
+    "netnode.hpp",
+    "network.hpp",
+    "offset.hpp",
+    "parsejson.hpp",
+    "problems.hpp",
+    "prodir.h",
+    "pronet.h",
+    "range.hpp",
+    "regfinder.hpp",
+    "registry.hpp",
+    "search.hpp",
+    "segment.hpp",
+    "segregs.hpp",
+    "srclang.hpp",
+    "strlist.hpp",
+    "tryblks.hpp",
+    "typeinf.hpp",
+    "ua.hpp",
+    "undo.hpp",
+    "workarounds.hpp",
+    "xref.hpp"
+};
+
+// Public path resolution helpers
+std::string resolveClingDir() {
+    qstring env;
+    if (qgetenv("CLING_DIR", &env) && !env.empty())
+        return env.c_str();
+#ifdef CLINGLITE_DEFAULT_CLING_DIR
+    if (fs::is_directory(CLINGLITE_DEFAULT_CLING_DIR))
+        return CLINGLITE_DEFAULT_CLING_DIR;
+#endif
+    return {};
+}
+
+static std::string probeIdaDir(const std::string& base) {
+    if (base.empty()) return {};
+    // Direct directory (e.g. IDADIR pointing to IDA installation)
+    if (fs::exists(fs::path(base) / "libida.so")
+        || fs::exists(fs::path(base) / "ida.dll")
+        || fs::exists(fs::path(base) / "libida.dylib"))
+        return base;
+    // $IDASDK/src/bin layout (ida-cmake)
+    fs::path srcBin = fs::path(base) / "src" / "bin";
+    if (fs::is_directory(srcBin)) return srcBin.string();
+    // $IDASDK/bin fallback
+    fs::path bin = fs::path(base) / "bin";
+    if (fs::is_directory(bin)) return bin.string();
+    return {};
+}
+
+static std::string probeSdkInclude(const std::string& base) {
+    if (base.empty()) return {};
+    fs::path root(base);
+    if (fs::is_regular_file(root / "include" / "pro.h"))
+        return (root / "include").string();
+    if (fs::is_regular_file(root / "src" / "include" / "pro.h"))
+        return (root / "src" / "include").string();
+    return {};
+}
+
+std::string resolveIdaDir() {
+    // 1. IDADIR env takes precedence
+    qstring env;
+    if (qgetenv("IDADIR", &env) && !env.empty()) {
+        std::string result = probeIdaDir(env.c_str());
+        if (!result.empty()) return result;
+        // IDADIR might point directly to the bin dir
+        if (fs::is_directory(env.c_str())) return env.c_str();
+    }
+    // 2. IDASDK env → $IDASDK/src/bin
+    if (qgetenv("IDASDK", &env) && !env.empty()) {
+        std::string result = probeIdaDir(env.c_str());
+        if (!result.empty()) return result;
+    }
+#ifdef CLINGLITE_DEFAULT_IDASDK
+    // 3. Compile-time IDASDK → bin/
+    {
+        std::string result = probeIdaDir(CLINGLITE_DEFAULT_IDASDK);
+        if (!result.empty()) return result;
+    }
+#endif
+    return {};
+}
+
+std::string resolveSdkInclude() {
+    qstring env;
+    if (qgetenv("IDASDK", &env) && !env.empty()) {
+        std::string result = probeSdkInclude(env.c_str());
+        if (!result.empty()) return result;
+    }
+#ifdef CLINGLITE_DEFAULT_IDASDK
+    {
+        std::string result = probeSdkInclude(CLINGLITE_DEFAULT_IDASDK);
+        if (!result.empty()) return result;
+    }
+#endif
+    return {};
+}
+
+// Default PCH cache directory
+static fs::path defaultCacheDir() {
+    return fs::path(get_user_idadir()) / "idacpp";
+}
+
+static std::string compilerFlagsKey(const std::vector<std::string>& flags) {
+    std::ostringstream oss;
+    for (const auto& flag : flags)
+        oss << flag << '\n';
+    return oss.str();
+}
+
+static std::string getExecutableIdentity() {
+#ifdef _WIN32
+    wchar_t exeBuf[MAX_PATH];
+    if (GetModuleFileNameW(nullptr, exeBuf, MAX_PATH) != 0)
+        return fs::path(exeBuf).string();
+    return "";
+#elif defined(__APPLE__)
+    uint32_t size = 0;
+    if (_NSGetExecutablePath(nullptr, &size) != -1 || size == 0)
+        return "";
+    std::string buf(size, '\0');
+    if (_NSGetExecutablePath(buf.data(), &size) != 0)
+        return "";
+    buf.resize(std::strlen(buf.c_str()));
+    std::error_code ec;
+    fs::path resolved = fs::weakly_canonical(fs::path(buf), ec);
+    return ec ? buf : resolved.string();
+#else
+    char exeBuf[PATH_MAX];
+    const ssize_t len = readlink("/proc/self/exe", exeBuf, sizeof(exeBuf) - 1);
+    if (len <= 0)
+        return "";
+    exeBuf[len] = '\0';
+    return exeBuf;
+#endif
+}
+
+static std::string buildPchCacheKey(
+    const std::string& sdkInclude,
+    const std::vector<std::string>& compilerFlags,
+    const std::string& llvmDir)
+{
+    std::error_code ec;
+    const fs::path sdkRoot = fs::weakly_canonical(fs::path(sdkInclude), ec);
+    std::ostringstream oss;
+    oss << "sdk=" << (ec ? sdkInclude : sdkRoot.string()) << '\n';
+
+    const std::string exeIdentity = getExecutableIdentity();
+    if (!exeIdentity.empty())
+        oss << "exe=" << exeIdentity << '\n';
+    else
+        oss << "exe=<unknown>\n";
+
+    oss << "llvmDir=" << llvmDir << '\n';
+    oss << "flags=\n" << compilerFlagsKey(compilerFlags);
+    oss << "std_headers=\n";
+    for (const char* hdr : g_stdHeaders)
+        oss << hdr << '\n';
+    oss << "ida_headers=\n";
+    for (const char* hdr : g_idaHeaders) {
+        const fs::path headerPath = fs::path(sdkInclude) / hdr;
+        std::error_code hdr_ec;
+        oss << hdr;
+        if (fs::exists(headerPath, hdr_ec)) {
+            const auto stamp = fs::last_write_time(headerPath, hdr_ec);
+            if (!hdr_ec) {
+                oss << '|'
+                    << std::chrono::duration_cast<std::chrono::nanoseconds>(
+                           stamp.time_since_epoch()).count();
+            }
+        }
+        oss << '\n';
+    }
+    return oss.str();
+}
+
+// preparePCH
+bool preparePCH(clinglite::Options& opts,
+                const std::string& sdkInclude,
+                const std::string& cacheDir_) {
+    if (sdkInclude.empty()) return false;
+
+    // Check that SDK include path exists
+    std::error_code ec;
+    if (!fs::is_directory(sdkInclude, ec)) return false;
+
+    // Determine cache path, keyed by SDK include path hash for invalidation
+    fs::path cacheDir = cacheDir_.empty() ? defaultCacheDir() : fs::path(cacheDir_);
+    fs::create_directories(cacheDir, ec);
+
+    // Cache key includes SDK path, host executable identity, compiler flags,
+    // llvmDir, and the SDK header mtimes that contribute to the generated PCH.
+    // This avoids stale reuse when the SDK or platform-specific options change.
+    const std::string keyStr =
+        buildPchCacheKey(sdkInclude, opts.compilerFlags, opts.llvmDir);
+    const std::string exeIdentity = getExecutableIdentity();
+    if (exeIdentity.empty())
+        std::cerr << "Warning: PCH cache using fallback executable identity\n";
+    size_t pathHash = std::hash<std::string>{}(keyStr);
+    std::ostringstream hashBuf;
+    hashBuf << std::hex << pathHash;
+    std::string pchName = std::string("ida_sdk_") + hashBuf.str() + ".pch";
+    fs::path pchPath = cacheDir / pchName;
+
+    if (fs::exists(pchPath, ec)) {
+        opts.pchPath = pchPath.string();
+        opts.includePaths.push_back(sdkInclude);
+        return true;
+    }
+
+    // Remove stale PCH files before generating a new one
+    for (auto& entry : fs::directory_iterator(cacheDir, ec)) {
+        if (!entry.is_regular_file())
+            continue;
+        const std::string name = entry.path().filename().string();
+        if (name.size() > 8 && name.compare(0, 8, "ida_sdk_") == 0
+            && name.size() > 4 && name.compare(name.size() - 4, 4, ".pch") == 0
+            && entry.path() != pchPath) {
+            std::error_code rm_ec;
+            fs::remove(entry.path(), rm_ec);
+        }
+    }
+
+    // Generate PCH on-the-fly
+    std::cerr << "Generating IDA SDK PCH (first run, this takes a moment)...\n";
+
+    // Create a temporary interpreter with -noruntime for PCH generation
+    clinglite::Options pchOpts;
+    pchOpts.args = {"pchgen", "-noruntime"};
+    pchOpts.includePaths = {sdkInclude};
+    pchOpts.compilerFlags = opts.compilerFlags;  // inherit platform defines
+    // Suppress noisy IDA SDK warnings during PCH generation
+    pchOpts.compilerFlags.push_back("-Wno-nullability-completeness");
+    pchOpts.compilerFlags.push_back("-Wno-nontrivial-memcall");
+    pchOpts.compilerFlags.push_back("-Wno-varargs");
+    pchOpts.compilerFlags.push_back("-Wno-tautological-constant-out-of-range-compare");
+    pchOpts.compilerFlags.push_back("-Wno-format");
+    // Emit all declarations so inline function bodies (e.g. qstring::find)
+    // are available for JIT after PCH load.
+    pchOpts.compilerFlags.push_back("-femit-all-decls");
+
+    pchOpts.llvmDir = opts.llvmDir;
+
+    clinglite::Interpreter pchInterp(pchOpts);
+    if (!pchInterp.isValid()) {
+        std::cerr << "Warning: failed to create PCH generator interpreter\n";
+        return false;
+    }
+
+    // Include C++ stdlib headers first
+    int included = 0;
+    for (const char* hdr : g_stdHeaders) {
+        if (pchInterp.includeHeader(hdr))
+            ++included;
+    }
+
+    // Include all IDA SDK headers
+    for (const char* hdr : g_idaHeaders) {
+        if (pchInterp.includeHeader(hdr))
+            ++included;
+        else
+            std::cerr << "  skipped: " << hdr << "\n";
+    }
+
+    if (included == 0) {
+        std::cerr << "Warning: no IDA headers could be included\n";
+        return false;
+    }
+
+    // Serialize to PCH
+    if (!pchInterp.generatePCH(pchPath.string())) {
+        std::cerr << "Warning: PCH generation failed\n";
+        return false;
+    }
+
+    std::cerr << "IDA SDK PCH cached: " << pchPath.string()
+              << " (" << included << " headers)\n";
+
+    opts.pchPath = pchPath.string();
+    opts.includePaths.push_back(sdkInclude);
+    return true;
+}
+
+// initIda
+IdaSession initIda(clinglite::Interpreter& interp,
+                   const std::string& idaDir,
+                   const std::string& dbPath,
+                   bool hasPch)
+{
+    IdaSession session;
+
+    // If PCH was loaded, all IDA headers are already available
+    if (hasPch) {
+        std::cerr << "IDA SDK headers loaded from PCH\n";
+        session.headersReady = true;
+    }
+    // Otherwise fall back to header-by-header inclusion
+    else if (interp.execute("#include <pro.h>") == clinglite::ExecResult::Success) {
+        for (const char* hdr : g_idaHeaders) {
+            if (hdr == std::string("pro.h")) continue; // already included
+            if (!interp.includeHeader(hdr))
+                std::cerr << "Note: skipped " << hdr << "\n";
+        }
+        session.headersReady = true;
+    }
+
+    // Auto-load IDA libraries for JIT symbol resolution
+    if (session.headersReady) {
+#ifdef _WIN32
+        const char* idaLibs[] = {"ida.dll", "idalib.dll"};
+#elif defined(__APPLE__)
+        const char* idaLibs[] = {"libida.dylib", "libidalib.dylib"};
+#else
+        const char* idaLibs[] = {"libida.so", "libidalib.so"};
+#endif
+        for (const char* lib : idaLibs) {
+            bool loaded = false;
+            if (!idaDir.empty()) {
+                std::string fullPath = (fs::path(idaDir) / lib).string();
+                loaded = (interp.loadLibrary(fullPath) ==
+                          clinglite::ExecResult::Success);
+            }
+            if (!loaded)
+                loaded = (interp.loadLibrary(lib) ==
+                          clinglite::ExecResult::Success);
+            std::cerr << (loaded ? "Loaded: " : "Warning: failed to load ")
+                      << lib << "\n";
+        }
+
+        // Initialize IDA library runtime
+        clinglite::Value initResult;
+        if (interp.execute("init_library();", initResult) ==
+            clinglite::ExecResult::Success) {
+            if (initResult.hasValue() && initResult.asInt() == 0) {
+                std::cerr << "IDA library initialized\n";
+                interp.execute("enable_console_messages(true);");
+                session.libInitialized = true;
+            } else {
+                std::cerr << "Warning: init_library() returned non-zero\n";
+            }
+        } else {
+            std::cerr << "Warning: init_library() call failed\n";
+        }
+
+        // Register extlang
+        if (session.libInitialized) {
+            idacpp::init(&interp);
+            idacpp::install();
+        }
+
+        // Open database if requested
+        if (session.libInitialized && !dbPath.empty()) {
+            std::string cmd =
+                "open_database(\"" + clinglite::escapePath(dbPath) + "\", true);";
+            if (interp.execute(cmd) == clinglite::ExecResult::Success) {
+                interp.execute("auto_wait();");
+                session.dbOpen = true;
+                std::cerr << "Database opened: " << dbPath << "\n";
+            } else {
+                std::cerr << "Warning: failed to open database: " << dbPath << "\n";
+            }
+        }
+    }
+
+    return session;
+}
+
+// termIda
+void termIda(clinglite::Interpreter& interp, const IdaSession& session) {
+    if (session.libInitialized) {
+        idacpp::remove();
+        idacpp::term();
+    }
+
+    if (session.dbOpen)
+        interp.execute("close_database(false);");
+}
+
+} // namespace idacpp
+
+```
+
+`idalib_setup.h`:
+
+```h
+// idalib_setup.h — headless IDA setup API for standalone consumers
+//
+// No IDA types leak through this header. Consumers only need clinglite.
+
+#pragma once
+
+#include <clinglite/clinglite.h>
+#include <string>
+
+namespace idacpp {
+
+struct IdaSession {
+    bool headersReady = false;
+    bool libInitialized = false;
+    bool dbOpen = false;
+};
+
+/// Generate or load a cached IDA SDK PCH.
+/// Caches to cacheDir (default: get_user_idadir()/idacpp/). If a cached
+/// PCH matching the current configuration (SDK path, compiler flags, header
+/// mtimes) exists, sets opts.pchPath and returns true. Otherwise, generates
+/// one on-the-fly using a temporary interpreter.
+/// sdkInclude: path to IDA SDK include directory (e.g. IDASDK/include).
+/// cacheDir: override cache directory (empty = default get_user_idadir()/idacpp/).
+/// Returns true if PCH is available (opts.pchPath set).
+bool preparePCH(clinglite::Options& opts,
+                const std::string& sdkInclude,
+                const std::string& cacheDir = "");
+
+/// Resolve Cling/LLVM build directory.
+/// Checks CLING_DIR env, then compile-time CLINGLITE_DEFAULT_CLING_DIR
+/// (only defined in the plugin build, not in idacpp_core consumers).
+std::string resolveClingDir();
+
+/// Resolve IDA runtime directory from IDADIR env, then IDASDK env (/bin),
+/// then compile-time CLINGLITE_DEFAULT_IDASDK (/bin).
+/// Compile-time defaults are only defined in the plugin build.
+/// Returns empty string if nothing found.
+std::string resolveIdaDir();
+
+/// Resolve IDA SDK include directory from IDASDK env or compile-time default.
+/// Probes both $IDASDK/include and $IDASDK/src/include layouts.
+/// Compile-time defaults are only defined in the plugin build.
+/// Returns empty string if nothing found.
+std::string resolveSdkInclude();
+
+/// Full headless IDA setup: load libraries, init_library(), include headers,
+/// register extlang. Call AFTER Interpreter is created and valid.
+IdaSession initIda(clinglite::Interpreter& interp,
+                   const std::string& idaDir,
+                   const std::string& dbPath,
+                   bool hasPch);
+
+/// Cleanup: unregister extlang, close database.
+void termIda(clinglite::Interpreter& interp, const IdaSession& session);
+
+} // namespace idacpp
+
+```
+
+`install-agent.md`:
+
+```md
+ Build the idacpp C++ scripting plugin for IDA Pro from source. Execute each step in sequence.
+
+  First, detect which operating system you are running on and adapt all commands accordingly — Windows uses cmd/PowerShell and cmake -A x64 with MSVC, Linux/macOS
+  uses bash and cmake -G Ninja.
+
+  Step 1 — IDA SDK. Check if the IDASDK environment variable (%IDASDK% on Windows) is already set and points to a valid SDK directory (containing include/pro.h or
+  src/include/pro.h). If so, skip this step. Otherwise, clone the IDA SDK and set the variable:
+  git clone https://github.com/hexrayssa/ida-sdk.git
+  export IDASDK=/absolute/path/to/ida-sdk
+
+  Next, verify that IDA Pro is installed in $IDASDK/src/bin/. By convention, IDA SDK development requires an installed copy of IDA at this location. Check that either "ida" (Linux/macOS) or "ida.exe" (Windows) exists in $IDASDK/src/bin/. If not found, instruct the user to install or copy their IDA Pro installation to $IDASDK/src/bin/ before proceeding.
+
+  Step 2 — clinglite + LLVM/Cling. Clone clinglite with submodules (--shallow-submodules saves ~3 GB), then build the Cling/LLVM tree using clinglite's build
+  script. This is a one-time ~30-90 min build. On Windows, LLVM must use static CRT (-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded). If the build script doesn't handle
+   this, build LLVM manually with Ninja+MSVC, targeting only the cling libraries — not cling.exe, which cannot link with /MT.
+  git clone --recurse-submodules --shallow-submodules https://github.com/0xeb/clinglite.git
+  cd clinglite
+  python scripts/build_cling.py -j <cores>
+
+  Step 3 — idacpp. Clone idacpp and build it against clinglite and the IDA SDK. The CMakeLists.txt handles CRT matching, path normalization, and IDA SDK bootstrap
+  automatically. Use -G Ninja on Linux/macOS and -A x64 on Windows (MSVC).
+  git clone https://github.com/allthingsida/idacpp.git
+  cd idacpp && mkdir build && cd build
+  # Linux / macOS:
+  cmake -G Ninja \
+      -DCLINGLITE_SOURCE_DIR=<path/to/clinglite> \
+      -DCLING_BUILD_DIR=<path/to/clinglite>/build-cling \
+      -DIDASDK=$IDASDK \
+      ..
+  # Windows (MSVC):
+  cmake -A x64 \
+      -DCLINGLITE_SOURCE_DIR=<path/to/clinglite> \
+      -DCLING_BUILD_DIR=<path/to/clinglite>/build-cling \
+      -DIDASDK=%IDASDK% \
+      ..
+  cmake --build . --config Release
+
+  Plugins: idacpp has a modular plugin system (see plugins/README.md). Platform plugins (winsdk on Windows, linux on Linux) auto-enable and require no extra flags.
+
+  Optional plugins must be cloned separately and/or enabled via CMake flags:
+  - idax (C++23 IDA SDK wrapper by Kenan Sulayman):
+    git clone https://github.com/19h/idax.git /path/to/idax
+    Then add to the cmake configure step above: -DPLUGIN_IDAX_SRC_DIR=/path/to/idax
+  - qt6 (Qt6 Core/Gui/Widgets for the REPL — introspection, dynamic forms):
+    Add to the cmake configure step: -DPLUGIN_QT6=ON
+    If Qt6 with QT_NAMESPACE=QT is not already installed, build it first:
+      cmake --build . --target build_qt
+    Then reconfigure and rebuild. To point to a prebuilt Qt install instead:
+      -DPLUGIN_QT6=ON -DPLUGIN_QT6_DIR=/path/to/qt-install
+
+  To disable an auto-enabled platform plugin: add e.g. -DPLUGIN_WINSDK=OFF to the cmake configure step.
+  Enabled plugins appear in the startup banner.
+
+  Step 4 — Verify. Confirm the plugin binary (idacpp.dll, idacpp.so, or idacpp.dylib) was placed in $IDASDK/src/bin/plugins/. Launch IDA and check that the C++ tab appears in the output window.
+
+```
+
+`plugin.cpp`:
+
+```cpp
+// plugin.cpp — IDA GUI plugin: C++ interpreter via Cling
+// Copyright (c) Elias Bachaalany
+// SPDX-License-Identifier: MIT
+//
+// Registers a cli_t (command line interpreter tab) and an extlang_t
+// so IDA's expression evaluator supports C++.
+
+// IDA SDK headers
+#include <pro.h>
+#include <kernwin.hpp>
+#include <expr.hpp>
+#include <loader.hpp>
+#include <idp.hpp>
+
+// clinglite + extlang core
+#include "extlang_core.h"
+#include "idalib_setup.h"
+#include "plugins/common/plugin_api.h"
+#include <clinglite/clinglite.h>
+
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
+#include <filesystem>
+#include <memory>
+#include <string>
+
+#include "ida_sdk_identifiers.inc"
+
+// Forward declarations
+struct idacpp_t;
+static idacpp_t* g_plugin = nullptr;
+
+// ══════════════════════════════════════════════════════════════════════════════
+// cli_t implementation
+// ══════════════════════════════════════════════════════════════════════════════
+
+static bool idaapi cli_execute_line(const char* line);
+static bool idaapi cli_find_completions(
+    qstrvec_t*, qstrvec_t*, qstrvec_t*, int*, int*, const char*, int);
+
+static const cli_t cli_cpp = {
+    sizeof(cli_t),
+    0,                              // flags
+    "c++",                          // sname (button text)
+    "C++ interpreter",              // lname
+    "Enter any C++ expression",     // hint
+    cli_execute_line,
+    nullptr,                        // keydown
+    cli_find_completions,
+};
+
+// cli_execute_line and cli_find_completions defined below (after idacpp_t)
+
+// ══════════════════════════════════════════════════════════════════════════════
+// plugmod_t — plugin lifecycle
+// ══════════════════════════════════════════════════════════════════════════════
+
+namespace fs = std::filesystem;
+
+struct idacpp_t : public plugmod_t {
+    std::unique_ptr<clinglite::Environment> env;
+    std::unique_ptr<clinglite::Interpreter> interp;
+    bool extlang_installed = false;
+    bool cli_installed = false;
+    bool sdk_headers_ready = false;
+
+    idacpp_t() = default;
+    ~idacpp_t() override;
+
+    bool idaapi run(size_t arg) override;
+    bool init_plugin();
+};
+
+bool idacpp_t::init_plugin() {
+    env = std::make_unique<clinglite::Environment>("idacpp");
+
+    clinglite::Options opts;
+    opts.args = {"idacpp"};
+
+    // Resolve IDA SDK include directory
+    std::string sdkInclude;
+    qstring idasdk_buf;
+    bool have_sdk = qgetenv("IDASDK", &idasdk_buf);
+#ifdef CLINGLITE_DEFAULT_IDASDK
+    if (!have_sdk) {
+        // Use compile-time baked path, but verify it still exists
+        if (fs::is_directory(CLINGLITE_DEFAULT_IDASDK))
+            idasdk_buf = CLINGLITE_DEFAULT_IDASDK;
+        else
+            msg("idacpp: build-time IDASDK path no longer exists: %s\n"
+                "  Set IDASDK environment variable to override.\n",
+                CLINGLITE_DEFAULT_IDASDK);
+        have_sdk = !idasdk_buf.empty();
+    }
+#endif
+    if (have_sdk) {
+        std::string base = idasdk_buf.c_str();
+        if (fs::is_regular_file(fs::path(base) / "include" / "pro.h"))
+            sdkInclude = (fs::path(base) / "include").string();
+        else if (fs::is_regular_file(fs::path(base) / "src" / "include" / "pro.h"))
+            sdkInclude = (fs::path(base) / "src" / "include").string();
+        else
+            msg("idacpp: IDASDK set to '%s' but pro.h not found there.\n",
+                idasdk_buf.c_str());
+    }
+    if (!sdkInclude.empty()) {
+        opts.includePaths.push_back(sdkInclude);
+    }
+
+    // Resolve Cling/LLVM build tree
+    {
+        qstring cling_dir_buf;
+        if (qgetenv("CLING_DIR", &cling_dir_buf))
+            opts.llvmDir = cling_dir_buf.c_str();
+#ifdef CLINGLITE_DEFAULT_CLING_DIR
+        else {
+            if (fs::is_directory(CLINGLITE_DEFAULT_CLING_DIR))
+                opts.llvmDir = CLINGLITE_DEFAULT_CLING_DIR;
+            else
+                msg("idacpp: build-time CLING_DIR no longer exists: %s\n"
+                    "  Set CLING_DIR environment variable to override.\n",
+                    CLINGLITE_DEFAULT_CLING_DIR);
+        }
+#endif
+    }
+    if (opts.llvmDir.empty()) {
+        msg("idacpp: Cling/LLVM build tree not found.\n"
+            "  Set CLING_DIR environment variable to the Cling build directory.\n");
+        return false;
+    }
+    if (!fs::is_directory(opts.llvmDir)) {
+        msg("idacpp: Cling/LLVM build tree not found at: %s\n"
+            "  Set CLING_DIR environment variable to override.\n",
+            opts.llvmDir.c_str());
+        return false;
+    }
+
+    // Platform defines
+    idacpp::prepareOptions(opts);
+
+    // On-the-fly PCH generation from IDA SDK headers
+    bool hasPch = false;
+    if (!sdkInclude.empty())
+        hasPch = idacpp::preparePCH(opts, sdkInclude);
+
+    interp = std::make_unique<clinglite::Interpreter>(opts);
+    if (!interp->isValid()) {
+        msg("idacpp: failed to initialize C++ interpreter.\n"
+            "  CLING_DIR: %s\n", opts.llvmDir.c_str());
+        return false;
+    }
+
+    // Redirect output and diagnostics to IDA's message window
+    interp->setOutputCallback([](const std::string& s) {
+        msg("%s", s.c_str());
+    });
+    interp->setErrorCallback([](const std::string& s) {
+        msg("%s", s.c_str());
+    });
+
+    // Load IDA libraries for JIT symbol resolution
+    bool all_libs_loaded = true;
+    {
+#ifdef __NT__
+        // MSVC CRT DLLs
+        interp->loadLibrary("vcruntime140.dll");
+        interp->loadLibrary("ucrtbase.dll");
+
+        const char* idaLibs[] = {"ida.dll"};
+#elif defined(__MAC__)
+        const char* idaLibs[] = {"libida.dylib"};
+#else
+        const char* idaLibs[] = {"libida.so"};
+#endif
+        // Try loading from IDA installation directory first
+        qstring idadir_buf;
+        std::string idadir;
+        if (qgetenv("IDADIR", &idadir_buf))
+            idadir = idadir_buf.c_str();
+
+        for (const char* lib : idaLibs) {
+            bool loaded = false;
+            if (!idadir.empty()) {
+                std::string fullPath = (fs::path(idadir) / lib).string();
+                loaded = (interp->loadLibrary(fullPath) ==
+                          clinglite::ExecResult::Success);
+            }
+            if (!loaded)
+                loaded = (interp->loadLibrary(lib) ==
+                          clinglite::ExecResult::Success);
+            if (!loaded) {
+                all_libs_loaded = false;
+                msg("idacpp: note: could not confirm runtime symbol load for %s\n",
+                    lib);
+            }
+        }
+    }
+
+    if (hasPch) {
+        sdk_headers_ready = true;
+    } else {
+        // No PCH — fall back to header-by-header inclusion
+        if (!sdkInclude.empty())
+            interp->addIncludePath(sdkInclude);
+        if (sdkInclude.empty()) {
+            msg("idacpp: IDA SDK headers unavailable — set IDASDK environment variable.\n"
+                "  Plugin will load as a plain C++ REPL (no IDA API support).\n");
+        } else if (!interp->includeHeader("pro.h")) {
+            msg("idacpp: failed to include pro.h\n");
+            return false;
+        } else {
+            int loaded_headers = 1; // pro.h
+            int skipped_headers = 0;
+
+            sdk_headers_ready = true;
+            msg("idacpp: IDA SDK PCH unavailable, falling back to source headers\n");
+
+            static const char* headers[] = {
+                "ida.hpp", "idp.hpp", "kernwin.hpp", "bytes.hpp", "funcs.hpp",
+                "segment.hpp", "name.hpp", "xref.hpp", "ua.hpp", "lines.hpp",
+                "entry.hpp", "loader.hpp", "auto.hpp", "typeinf.hpp",
+            };
+            for (const char* hdr : headers) {
+                if (interp->includeHeader(hdr))
+                    ++loaded_headers;
+                else
+                    ++skipped_headers;
+            }
+
+            if (skipped_headers != 0) {
+                msg("idacpp: warning: loaded %d IDA SDK headers, skipped %d\n",
+                    loaded_headers, skipped_headers);
+            } else {
+                msg("idacpp: IDA SDK headers loaded from source (%d headers)\n",
+                    loaded_headers);
+            }
+        }
+    }
+
+    // Run extension plugin setup
+    clinglite::PluginSetupOptions pluginOpts;
+    pluginOpts.hasPch = hasPch;
+    clinglite::plugins::setupAll(*interp, pluginOpts);   // generic (linux, winsdk)
+    idacpp::plugins::setupAll(*interp, pluginOpts);      // IDA-specific (qt6, idax)
+
+    g_plugin = this;  // set before registering callbacks that use g_plugin
+
+    // Register extlang
+    idacpp::init(interp.get());
+    idacpp::install();
+    extlang_installed = true;
+
+    // Register CLI tab
+    install_command_interpreter(&cli_cpp);
+    cli_installed = true;
+
+    // Startup banner
+    {
+        auto clingVer = clinglite::Environment::version();
+
+        // Build plugin list: ida_sdk (always) + clinglite + idacpp plugins
+        std::string plugins = "ida_sdk";
+        for (const auto& name : clinglite::plugins::pluginNames())
+            plugins += ", " + name;
+        for (const auto& name : idacpp::plugins::pluginNames())
+            plugins += ", " + name;
+
+        std::string banner = std::string("idacpp v") + IDACPP_VERSION
+            + " (Cling " + clingVer;
+        if (sdk_headers_ready)
+            banner += " ; plugins: " + plugins;
+        banner += ")";
+
+        std::string sep(banner.size(), '-');
+        msg("%s\n%s\n%s\n", sep.c_str(), banner.c_str(), sep.c_str());
+    }
+    return true;
+}
+
+idacpp_t::~idacpp_t() {
+    if (cli_installed)
+        remove_command_interpreter(&cli_cpp);
+
+    if (extlang_installed)
+        idacpp::remove();
+
+    idacpp::term();
+
+    if (g_plugin == this)
+        g_plugin = nullptr;
+}
+
+bool idaapi idacpp_t::run(size_t /*arg*/) {
+    return true;
+}
+
+// cli_execute_line (needs complete idacpp_t)
+static bool idaapi cli_execute_line(const char* line) {
+    auto* session = idacpp::getSession();
+    if (!session)
+        return true;
+
+    int crashCode = 0;
+    clinglite::ExecResult res;
+    int indent = session->processLine(line, &res, &crashCode);
+
+    if (crashCode != 0) {
+        msg("C++ crash caught (code 0x%08x), recovering...\n", crashCode);
+        return true;
+    }
+
+    return indent <= 0;
+}
+
+// cli_find_completions (needs complete idacpp_t)
+static const char* const s_dotCommands[] = {
+    ".L", ".x", ".X", ".U", ".I", ".include",
+    ".O", ".class", ".Class", ".namespace", ".typedef",
+    ".files", ".fileEx", ".g",
+    ".@", ".rawInput", ".dynamicExtensions",
+    ".debug", ".printDebug",
+    ".storeState", ".compareState", ".stats",
+    ".T", ".trace",
+    ".undo", ".help", ".?", ".q",
+    ".clear",   // clinglite Session extension
+    ".>",       // redirect
+};
+
+static bool idaapi cli_find_completions(
+    qstrvec_t* out_completions,
+    qstrvec_t* out_hints,
+    qstrvec_t* out_docs,
+    int* out_match_start,
+    int* out_match_end,
+    const char* line,
+    int x)
+{
+    if (!g_plugin || !g_plugin->interp)
+        return false;
+
+    std::string input(line);
+    size_t cursor = static_cast<size_t>(x);
+    if (cursor > input.size())
+        cursor = input.size();
+
+    // Check if line starts with a dot command
+    std::string upToCursor = input.substr(0, cursor);
+    size_t tokenStart = upToCursor.find_first_not_of(" \t");
+    bool isDotCommand = (tokenStart != std::string::npos
+                         && upToCursor[tokenStart] == '.');
+
+    if (isDotCommand) {
+        std::string typed = upToCursor.substr(tokenStart);
+        // Only complete the command name (not arguments after a space)
+        if (typed.find(' ') != std::string::npos)
+            return false;
+
+        *out_match_start = static_cast<int>(tokenStart);
+        *out_match_end   = static_cast<int>(cursor);
+
+        for (const char* cmd : s_dotCommands) {
+            if (strncmp(cmd, typed.c_str(), typed.size()) == 0)
+                out_completions->push_back(cmd);
+        }
+        return !out_completions->empty();
+    }
+
+    // Compute prefix by walking backwards from cursor through identifier chars
+    size_t start = cursor;
+    while (start > 0) {
+        char c = input[start - 1];
+        if (std::isalnum(static_cast<unsigned char>(c)) || c == '_')
+            --start;
+        else
+            break;
+    }
+
+    std::string prefix = input.substr(start, cursor - start);
+    if (prefix.empty())
+        return false;
+
+    *out_match_start = static_cast<int>(start);
+    *out_match_end   = static_cast<int>(cursor);
+
+    // Static table lookup — O(log n) prefix search, instant
+    auto cmpPrefix = [](const char* entry, const std::string& pfx) {
+        return strncmp(entry, pfx.c_str(), pfx.size()) < 0;
+    };
+    auto* begin = g_idaSdkIdentifiers;
+    auto* end = begin + g_idaSdkIdentifierCount;
+    auto it = std::lower_bound(begin, end, prefix, cmpPrefix);
+    while (it != end && strncmp(*it, prefix.c_str(), prefix.size()) == 0)
+        out_completions->push_back(*it++);
+
+    return !out_completions->empty();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// plugin_t entry point
+// ══════════════════════════════════════════════════════════════════════════════
+
+static plugmod_t* idaapi idacpp_init() {
+    auto* p = new idacpp_t();
+    if (p->init_plugin())
+        return p;
+    delete p;
+    return nullptr;
+}
+
+plugin_t PLUGIN = {
+    IDP_INTERFACE_VERSION,
+    PLUGIN_FIX | PLUGIN_HIDE | PLUGIN_MULTI,
+    idacpp_init,            // init
+    nullptr,                    // term (nullptr for PLUGIN_MULTI)
+    nullptr,                    // run  (nullptr for PLUGIN_MULTI)
+    "C++ interpreter for IDA",          // comment
+    "C++ REPL and expression evaluator\n",  // help
+    "idacpp",                 // wanted_name
+    nullptr,                    // wanted_hotkey
+};
+
+```
+
+`plugins/CMakeLists.txt`:
+
+```txt
+# idacpp plugin system — discovery, dispatch generation, PCH assembly, idgen.
+#
+# Orchestrates IDA-specific plugins:
+#   1. ida_sdk (built-in, always-on) — provides IDA SDK header list
+#   2. Extension plugins (opt-in via -DPLUGIN_<NAME>_SRC_DIR=<path> or -DPLUGIN_<NAME>=ON)
+#   3. Generates plugin dispatch .cpp (reuses clinglite_generate_plugin_dispatch)
+#   4. Assembles shared PCH from all plugin contributions (IDA + clinglite)
+#   5. Generates identifier table for tab completion
+
+include("${CMAKE_CURRENT_SOURCE_DIR}/common/idacpp_plugin_helpers.cmake")
+
+# Accumulators (reset, then plugins append via CACHE INTERNAL)
+set(IDACPP_PLUGIN_PCH_FLAGS "" CACHE INTERNAL "")
+set(IDACPP_PLUGIN_PCH_HEADERS "" CACHE INTERNAL "")
+set(IDACPP_PLUGIN_SOURCES "" CACHE INTERNAL "")
+set(IDACPP_PLUGIN_SETUP_FUNCTIONS "" CACHE INTERNAL "")
+set(IDACPP_PLUGIN_SETUP_HEADERS "" CACHE INTERNAL "")
+set(IDACPP_PLUGIN_NAMES "" CACHE INTERNAL "")
+
+# Built-in plugins (always enabled)
+add_subdirectory(ida_sdk)
+
+# Extension plugins (opt-in, auto-enabled by _SRC_DIR or explicit =ON)
+# Scans plugins/<name>/CMakeLists.txt, skipping built-in and common.
+set(_skip_dirs "ida_sdk" "common")
+file(GLOB _plugin_dirs "${CMAKE_CURRENT_SOURCE_DIR}/*/CMakeLists.txt")
+foreach(_plugin_cmake ${_plugin_dirs})
+    get_filename_component(_plugin_dir "${_plugin_cmake}" DIRECTORY)
+    get_filename_component(_plugin_name "${_plugin_dir}" NAME)
+    if(_plugin_name IN_LIST _skip_dirs)
+        continue()
+    endif()
+    string(TOUPPER "${_plugin_name}" _PLUGIN_NAME)
+    # Auto-enable if a source directory was provided (no need for -DPLUGIN_<NAME>=ON)
+    if(DEFINED PLUGIN_${_PLUGIN_NAME}_SRC_DIR AND NOT DEFINED PLUGIN_${_PLUGIN_NAME})
+        set(PLUGIN_${_PLUGIN_NAME} ON CACHE BOOL "Auto-enabled via PLUGIN_${_PLUGIN_NAME}_SRC_DIR" FORCE)
+    endif()
+    if(PLUGIN_${_PLUGIN_NAME})
+        message(STATUS "idacpp plugin: ${_plugin_name}")
+        add_subdirectory("${_plugin_dir}"
+            "${CMAKE_CURRENT_BINARY_DIR}/plugins/${_plugin_name}")
+    endif()
+endforeach()
+
+# Generate plugin dispatch .cpp
+# Reuses clinglite's parameterized dispatch generator with IDACPP prefix.
+clinglite_generate_plugin_dispatch(IDACPP "idacpp::plugins"
+    "${CMAKE_CURRENT_BINARY_DIR}/plugin_dispatch.cpp")
+
+# Wire into idacpp_core
+target_sources(idacpp_core PRIVATE
+    ${IDACPP_PLUGIN_SOURCES}
+    "${CMAKE_CURRENT_BINARY_DIR}/plugin_dispatch.cpp")
+target_include_directories(idacpp_core PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/common")
+
+# Build-time PCH assembly (shared service)
+# Assembles one PCH from all plugin contributions:
+#   IDA_PCH_HEADERS             — ida_sdk base headers (from ida_sdk plugin)
+#   CLINGLITE_PLUGIN_PCH_FLAGS  — flags from clinglite plugins (linux, winsdk)
+#   CLINGLITE_PLUGIN_PCH_HEADERS — headers from clinglite plugins
+#   IDACPP_PLUGIN_PCH_FLAGS     — extra flags from idacpp plugins (qt6, idax)
+#   IDACPP_PLUGIN_PCH_HEADERS   — extra headers from idacpp plugins
+if(IDA_PCH_HEADERS AND TARGET clinglite_pchgen)
+    set(IDA_PCH_FILE "${CMAKE_CURRENT_BINARY_DIR}/ida_sdk.pch")
+
+    add_custom_command(
+        OUTPUT ${IDA_PCH_FILE}
+        COMMAND clinglite_pchgen
+            -I$ENV{IDASDK}/include
+            ${CLINGLITE_PLUGIN_PCH_FLAGS}
+            ${IDACPP_PLUGIN_PCH_FLAGS}
+            -D__EA64__=1 -D__IDP__ -D${IDAPROPLAT}
+            -std=c++2b
+            -o ${IDA_PCH_FILE}
+            ${IDA_PCH_HEADERS}
+            ${CLINGLITE_PLUGIN_PCH_HEADERS}
+            ${IDACPP_PLUGIN_PCH_HEADERS}
+        DEPENDS clinglite_pchgen
+            "${CMAKE_CURRENT_SOURCE_DIR}/ida_sdk/ida_sdk.h"
+        COMMENT "Generating PCH (IDA SDK + clinglite plugins + idacpp plugins)"
+    )
+    add_custom_target(ida_pch DEPENDS ${IDA_PCH_FILE})
+else()
+    message(WARNING
+        "PCH generation disabled — clinglite_pchgen not available or no headers")
+endif()
+
+# Identifier table generation
+# Uses idacpp_idgen (built in parent cmake) to scan IDA SDK headers and
+# shared libraries for identifiers used in tab completion.
+set(IDA_IDGEN_INC "${CMAKE_CURRENT_BINARY_DIR}/ida_sdk_identifiers.inc")
+
+# Find IDA shared libraries for export extraction
+set(_ida_libs)
+foreach(_lib libida.so libidalib.so ida.dll idalib.dll libida.dylib libidalib.dylib)
+    if(EXISTS "$ENV{IDASDK}/bin/${_lib}")
+        list(APPEND _ida_libs "$ENV{IDASDK}/bin/${_lib}")
+    endif()
+endforeach()
+
+if(IDA_PCH_HEADERS AND TARGET idacpp_idgen)
+    set(_idgen_args
+        -I$ENV{IDASDK}/include
+        -D__EA64__=1 -D__IDP__ -D${IDAPROPLAT}
+        -std=c++2b
+        --sdk-dir $ENV{IDASDK}/include
+        -o ${IDA_IDGEN_INC}
+        ${IDA_PCH_HEADERS})
+    if(_ida_libs)
+        list(APPEND _idgen_args --libs ${_ida_libs})
+    endif()
+
+    add_custom_command(
+        OUTPUT ${IDA_IDGEN_INC}
+        COMMAND idacpp_idgen ${_idgen_args}
+        DEPENDS idacpp_idgen
+            "${CMAKE_CURRENT_SOURCE_DIR}/ida_sdk/ida_sdk.h"
+        COMMENT "Generating IDA SDK identifier table"
+    )
+    add_custom_target(ida_identifiers DEPENDS ${IDA_IDGEN_INC})
+
+    # Wire identifier table into idacpp_core and idacpp_plugin
+    add_dependencies(idacpp_core ida_identifiers)
+    target_include_directories(idacpp_core PRIVATE
+        "${CMAKE_CURRENT_BINARY_DIR}")
+    add_dependencies(idacpp_plugin ida_identifiers)
+    target_include_directories(idacpp_plugin PRIVATE
+        "${CMAKE_CURRENT_BINARY_DIR}")
+endif()
+
+```
+
+`plugins/README.md`:
+
+```md
+# idacpp Plugin System
+
+IDA-specific plugins that extend the idacpp REPL. Built on top of clinglite's
+generic plugin infrastructure (`clinglite/plugins/common/clinglite_plugin_helpers.cmake`).
+
+Generic platform plugins (linux, winsdk) live in clinglite. This directory
+contains only IDA-specific plugins.
+
+## Directory Layout
+
+| Directory | Type | Description |
+|-----------|------|-------------|
+| `common/` | Framework | Thin wrappers around clinglite helpers + public API header |
+| `ida_sdk/` | Built-in | IDA SDK header list — always enabled, loads first |
+| `idax/` | Extension | C++23 IDA SDK wrapper (`-DPLUGIN_IDAX_SRC_DIR=<path>`) |
+| `qt6/` | Extension | Qt6 support — Core, Gui, Widgets (`-DPLUGIN_QT6=ON`) |
+
+## Creating a New Plugin
+
+See `clinglite/plugins/template/` for a detailed walkthrough.
+
+1. Copy the template to `plugins/<your-name>/`
+2. Rename placeholders (`<PLUGIN_NAME>`, `<plugin_name>`)
+3. Use `idacpp_register_plugin()` / `idacpp_plugin_extend_pch()` for IDA dispatch
+4. Use `clinglite_plugin_generate_pch_bridge()` / `clinglite_plugin_make_shared()` directly
+5. Enable with `-DPLUGIN_<YOUR_NAME>_SRC_DIR=<path>`
+
+## How It Works
+
+1. **Discovery**: `plugins/CMakeLists.txt` scans for `*/CMakeLists.txt` and
+   includes each directory whose `PLUGIN_<NAME>` variable is `ON`.
+2. **Registration**: Each plugin calls `idacpp_register_plugin()` (thin wrapper
+   around clinglite's `_clinglite_plugin_register_impl(IDACPP, ...)`).
+3. **Dispatch**: `clinglite_generate_plugin_dispatch(IDACPP ...)` generates
+   `plugin_dispatch.cpp` with `idacpp::plugins::setupAll()`.
+4. **PCH assembly**: Merges clinglite plugin + idacpp plugin PCH contributions.
+5. **Runtime**: `clinglite::plugins::setupAll()` runs first (generic plugins),
+   then `idacpp::plugins::setupAll()` (IDA-specific plugins).
+
+## Helpers
+
+| Function | Source | Purpose |
+|----------|--------|---------|
+| `idacpp_register_plugin()` | idacpp wrapper | Register with IDACPP dispatch |
+| `idacpp_plugin_extend_pch()` | idacpp wrapper | Add to IDACPP PCH contributions |
+| `clinglite_plugin_generate_pch_bridge()` | clinglite | Generate bridge header |
+| `clinglite_plugin_make_shared()` | clinglite | Wrap static→shared for JIT |
+| `clinglite_generate_plugin_dispatch()` | clinglite | Generate dispatch .cpp |
+
+## Plugin Load Order
+
+1. **clinglite plugins** — generic (linux, winsdk) via `clinglite::plugins::setupAll()`
+2. **ida_sdk** (built-in) — IDA SDK headers and libraries via `idalib_setup.cpp`
+3. **idacpp plugins** — IDA-specific (qt6, idax) via `idacpp::plugins::setupAll()`
+
+## Conventions
+
+- Plugin cmake variables use the `PLUGIN_<NAME>_` prefix
+- Setup functions: `<name>_plugin_setup(clinglite::Interpreter&, clinglite::PluginSetupOptions&)`
+- All setup operations should be idempotent (safe to call with or without PCH)
+- Plugins that layer on top of `pro.h` use `clinglite_plugin_generate_pch_bridge()`
+
+```
+
+`plugins/common/idacpp_plugin_helpers.cmake`:
+
+```cmake
+# idacpp_plugin_helpers.cmake — thin wrappers around clinglite's plugin helpers.
+#
+# All real logic lives in clinglite_plugin_helpers.cmake. These wrappers
+# accumulate into IDACPP_PLUGIN_* variables (separate from CLINGLITE_PLUGIN_*).
+#
+# Stateless utilities (bridge gen, make_shared, dispatch gen) are used
+# directly from clinglite — no wrappers needed.
+
+include("${CLINGLITE_SOURCE_DIR}/plugins/common/clinglite_plugin_helpers.cmake")
+
+# Registration (accumulates into IDACPP_PLUGIN_*) 
+function(idacpp_register_plugin PLUGIN_NAME SETUP_FN SETUP_HEADER SETUP_SOURCE)
+    _clinglite_plugin_register_impl(IDACPP
+        ${PLUGIN_NAME} ${SETUP_FN} ${SETUP_HEADER} ${SETUP_SOURCE})
+endfunction()
+
+# PCH contribution (accumulates into IDACPP_PLUGIN_PCH_*) 
+function(idacpp_plugin_extend_pch)
+    _clinglite_plugin_extend_pch_impl(IDACPP ${ARGN})
+endfunction()
+
+```
+
+`plugins/common/plugin_api.h`:
+
+```h
+// plugin_api.h — idacpp plugin system public API.
+//
+// Call setupAll() after interpreter + IDA SDK initialization to run
+// all registered IDA-specific plugin setup functions (qt6, idax, etc.).
+
+#pragma once
+
+#include <clinglite/clinglite.h>
+#include <string>
+#include <vector>
+
+namespace idacpp { namespace plugins {
+
+/// Run setup for all registered IDA-specific extension plugins.
+/// Call after initIda() completes. Each plugin loads its shared library,
+/// adds include paths, and includes headers via the interpreter.
+void setupAll(clinglite::Interpreter& interp, clinglite::PluginSetupOptions& opts);
+
+/// Return names of all enabled IDA-specific extension plugins (baked at build time).
+std::vector<std::string> pluginNames();
+
+}} // namespace idacpp::plugins
+
+```
+
+`plugins/ida_sdk/CMakeLists.txt`:
+
+```txt
+# ida_sdk — built-in plugin. Always enabled, loads first.
+#
+# Owns the IDA SDK header list used for PCH generation and identifier table
+# generation. The header inventory is parsed from ida_sdk.h in this directory.
+#
+# Runtime setup (library loading, PCH caching, extlang registration) is
+# handled by the existing idalib_setup.cpp — this plugin only provides the
+# build-time configuration.
+
+# Parse ida_sdk.h — extract individual header names for pchgen + idgen
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/ida_sdk.h" _ida_hdr_lines
+    REGEX "^#include")
+set(IDA_PCH_HEADERS)
+foreach(_line ${_ida_hdr_lines})
+    string(REGEX REPLACE "^#include [<\"]([^>\"]+)[>\"].*" "\\1" _hdr "${_line}")
+    list(APPEND IDA_PCH_HEADERS "${_hdr}")
+endforeach()
+
+# Export to parent — plugins/CMakeLists.txt uses this for PCH + idgen
+set(IDA_PCH_HEADERS "${IDA_PCH_HEADERS}" PARENT_SCOPE)
+
+list(LENGTH IDA_PCH_HEADERS _count)
+message(STATUS "ida_sdk plugin: ${_count} headers from ida_sdk.h")
+
+```
+
+`plugins/ida_sdk/README.md`:
+
+```md
+# ida_sdk — Built-in Plugin
+
+The `ida_sdk` plugin is the base layer of the idacpp plugin system. It is
+**always enabled** and loads first, before any extension plugins.
+
+## What it provides
+
+- **`ida_sdk.h`** — curated list of 56+ IDA SDK headers used for:
+  - Build-time PCH generation (`clinglite_pchgen`)
+  - Identifier table generation (`idacpp_idgen`)
+  - Runtime PCH generation (`preparePCH()` in `idalib_setup.cpp`)
+
+## Runtime setup
+
+Runtime initialization (library loading, PCH caching, extlang registration)
+is handled by the existing `idalib_setup.cpp`. This plugin only provides the
+build-time header configuration.
+
+## Modifying the header list
+
+Edit `ida_sdk.h` to add or remove IDA SDK headers. The build system
+automatically re-parses the file on the next configure. Keep the list
+ordered and conservative — broad enough for useful SDK coverage, but not
+every public SDK header belongs here.
+
+```
+
+`plugins/ida_sdk/ida_sdk.h`:
+
+```h
+// IDA SDK umbrella header for PCH generation
+// Copyright (c) Elias Bachaalany
+// SPDX-License-Identifier: MIT
+//
+// Generate PCH with clang from the cling build tree:
+//   <cling-build>/bin/clang -x c++-header -std=c++17 \
+//     -D__EA64__=1 -D__IDP__ -D__NT__ \
+//     -I<idasdk>/include -o ida_sdk.pch ida_sdk.h
+//
+// On Linux replace -D__NT__ with -D__LINUX__
+// On macOS replace -D__NT__ with -D__MAC__
+//
+// This curated list intentionally tracks the headers used by idacpp's
+// PCH/completion generation. Keep it ordered and conservative: broad enough
+// for useful SDK coverage, but not every public SDK header belongs here.
+
+#include <pro.h>
+#include <auto.hpp>
+#include <allins.hpp>
+#include <bitrange.hpp>
+#include <bytes.hpp>
+#include <compress.hpp>
+#include <config.hpp>
+#include <cvt64.hpp>
+#include <dbg.hpp>
+#include <demangle.hpp>
+#include <diff3.hpp>
+#include <dirtree.hpp>
+#include <diskio.hpp>
+#include <entry.hpp>
+#include <err.h>
+#include <exehdr.h>
+#include <expr.hpp>
+#include <fixup.hpp>
+#include <fpro.h>
+#include <frame.hpp>
+#include <funcs.hpp>
+#include <gdl.hpp>
+#include <graph.hpp>
+#include <help.h>
+#include <hexrays.hpp>
+#include <ida.hpp>
+#include <ida_highlighter.hpp>
+#include <idacfg.hpp>
+#include <idalib.hpp>
+#include <idd.hpp>
+#include <idp.hpp>
+#include <ieee.h>
+#include <jumptable.hpp>
+#include <kernwin.hpp>
+#include <lex.hpp>
+#include <libfuncs.hpp>
+#include <lines.hpp>
+#include <llong.hpp>
+#include <loader.hpp>
+#include <lumina.hpp>
+#include <make_script_ns.hpp>
+#include <md5.h>
+#include <merge.hpp>
+#include <mergemod.hpp>
+#include <moves.hpp>
+#include <nalt.hpp>
+#include <name.hpp>
+#include <netnode.hpp>
+#include <network.hpp>
+#include <offset.hpp>
+#include <parsejson.hpp>
+#include <problems.hpp>
+#include <prodir.h>
+#include <pronet.h>
+#include <range.hpp>
+#include <regfinder.hpp>
+#include <registry.hpp>
+#include <search.hpp>
+#include <segment.hpp>
+#include <segregs.hpp>
+#include <srclang.hpp>
+#include <strlist.hpp>
+#include <tryblks.hpp>
+#include <typeinf.hpp>
+#include <ua.hpp>
+#include <undo.hpp>
+#include <workarounds.hpp>
+#include <xref.hpp>
+
+```
+
+`plugins/idax/CMakeLists.txt`:
+
+```txt
+# idax — extension plugin for idacpp.
+#
+# Provides the idax C++23 IDA SDK wrapper as a runtime-loadable library.
+# When enabled, the REPL preloads idax headers and shared library so users
+# can immediately use ida::function::all(), ida::segment::count(), etc.
+#
+# Enable: -DPLUGIN_IDAX_SRC_DIR=<path-to-idax-source>
+
+include("${CMAKE_CURRENT_SOURCE_DIR}/../common/idacpp_plugin_helpers.cmake")
+
+# Validate inputs
+if(NOT PLUGIN_IDAX_SRC_DIR)
+    message(FATAL_ERROR
+        "idax plugin requires -DPLUGIN_IDAX_SRC_DIR=<path-to-idax>\n"
+        "  Point it at the idax source tree containing include/ida/idax.hpp")
+endif()
+
+file(TO_CMAKE_PATH "${PLUGIN_IDAX_SRC_DIR}" PLUGIN_IDAX_SRC_DIR)
+set(_idax_inc "${PLUGIN_IDAX_SRC_DIR}/include")
+if(NOT EXISTS "${_idax_inc}/ida/idax.hpp")
+    message(FATAL_ERROR
+        "idax master header not found at ${_idax_inc}/ida/idax.hpp\n"
+        "  Check PLUGIN_IDAX_SRC_DIR=${PLUGIN_IDAX_SRC_DIR}")
+endif()
+
+message(STATUS "idax plugin: ${PLUGIN_IDAX_SRC_DIR}")
+
+# Find Python (needed by gen_exports_def.py for shared lib .def generation)
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
+# Ensure idasdk_headers target exists
+# idax expects an idasdk_headers INTERFACE target providing SDK includes.
+# When built standalone via idax's own CMakeLists.txt it creates this target,
+# but here we build idax sources directly, so create it if missing.
+if(NOT TARGET idasdk_headers)
+    add_library(idasdk_headers INTERFACE IMPORTED)
+    set_target_properties(idasdk_headers PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "$ENV{IDASDK}/include")
+    target_compile_definitions(idasdk_headers INTERFACE __EA64__)
+    target_link_libraries(idasdk_headers INTERFACE
+        ida_platform_settings
+        ida_compiler_settings)
+endif()
+
+# Build idax static library
+file(GLOB_RECURSE _idax_srcs CONFIGURE_DEPENDS
+    "${PLUGIN_IDAX_SRC_DIR}/src/*.cpp")
+
+add_library(idax_plugin_static STATIC ${_idax_srcs})
+target_include_directories(idax_plugin_static
+    PUBLIC "${_idax_inc}"
+    PRIVATE "${PLUGIN_IDAX_SRC_DIR}/src")
+target_link_libraries(idax_plugin_static PUBLIC idasdk_headers)
+target_compile_features(idax_plugin_static PUBLIC cxx_std_23)
+set_property(TARGET idax_plugin_static
+    PROPERTY INTERPROCEDURAL_OPTIMIZATION FALSE)
+
+if(MSVC)
+    target_compile_options(idax_plugin_static PRIVATE /W4 /permissive- /Zc:__cplusplus)
+else()
+    target_compile_options(idax_plugin_static PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+
+# Shared variant for JIT loading
+clinglite_plugin_make_shared(idax_plugin_shared idax_plugin_static
+    LINK_LIBS idasdk::idalib)
+
+# PCH bridge (undoes pro.h poison, then includes idax)
+clinglite_plugin_generate_pch_bridge(
+    "${CMAKE_CURRENT_BINARY_DIR}/idax_pch_bridge.h"
+    UNDEFS snprintf sprintf getenv
+    HEADERS ida/idax.hpp)
+
+idacpp_plugin_extend_pch(
+    FLAGS "-I${_idax_inc}" "-I${CMAKE_CURRENT_BINARY_DIR}"
+    HEADERS idax_pch_bridge.h)
+
+# Setup source (baked paths via compile definitions)
+add_library(idax_plugin_init OBJECT
+    "${CMAKE_CURRENT_SOURCE_DIR}/idax_plugin_setup.cpp")
+target_link_libraries(idax_plugin_init PRIVATE clinglite)
+target_compile_definitions(idax_plugin_init PRIVATE
+    IDACPP_PLUGIN_IDAX_INCLUDE_DIR="${_idax_inc}"
+    IDACPP_PLUGIN_IDAX_SHARED_LIB="$<TARGET_FILE:idax_plugin_shared>")
+add_dependencies(idax_plugin_init idax_plugin_shared)
+
+if(MSVC)
+    target_compile_options(idax_plugin_init PRIVATE /EHsc)
+endif()
+
+# Register with dispatch system
+idacpp_register_plugin(idax
+    idax_plugin_setup
+    "${CMAKE_CURRENT_SOURCE_DIR}/idax_plugin_setup.h"
+    "$<TARGET_OBJECTS:idax_plugin_init>")
+
+```
+
+`plugins/idax/README.md`:
+
+```md
+# idax — Extension Plugin
+
+The `idax` plugin integrates [idax](https://github.com/19h/idax) — a C++23
+opaque wrapper over the IDA Pro SDK by
+[Kenan Sulayman](https://github.com/19h) — into the idacpp REPL. When
+enabled, users can immediately use the idax API without any manual setup:
+
+```cpp
+// These just work — no #include or #undef needed
+for (auto fn : ida::function::all())
+    std::cout << fn.name() << "\n";
+
+auto count = ida::segment::count().value_or(0);
+```
+
+## Enable
+
+```bash
+cmake .. -DPLUGIN_IDAX_SRC_DIR=/path/to/idax
+```
+
+## What it does
+
+1. **Builds** idax as a static + shared library from `PLUGIN_IDAX_SRC_DIR`
+2. **Generates** a PCH bridge header (`#undef` pro.h poisons + `#include <ida/idax.hpp>`)
+3. **Extends** the build-time PCH with idax headers
+4. **At runtime**: loads the shared library, adds include paths, includes headers
+
+## Requirements
+
+- `PLUGIN_IDAX_SRC_DIR` must point to an idax source tree with `include/ida/idax.hpp`
+- IDA SDK must be available (idax depends on `idasdk_headers` and `idasdk::idalib`)
+
+## Attribution
+
+**idax** — *The IDA SDK, redesigned for humans.*
+- Author: [Kenan Sulayman](https://github.com/19h) (<kenan@int.mov>)
+- Repository: [github.com/19h/idax](https://github.com/19h/idax)
+- License: MIT
+
+```
+
+`plugins/idax/examples/callers_callees.cpp`:
+
+```cpp
+// Show callers and callees of the first function.
+using namespace ida;
+
+int main() {
+    auto fn = function::by_index(0);
+    if (!fn) {
+        msg("No functions found\n");
+        return 1;
+    }
+
+    auto addr = fn->start();
+    auto nm = function::name_at(addr).value_or("???");
+    msg("=== %s (%a) ===\n", nm.c_str(), addr);
+
+    if (auto callers = function::callers(addr); callers && !callers->empty()) {
+        msg("Callers (%zu):\n", callers->size());
+        for (auto ea : *callers)
+            msg("  %a  %s\n", ea, function::name_at(ea).value_or("???").c_str());
+    } else {
+        msg("Callers: (none)\n");
+    }
+
+    if (auto callees = function::callees(addr); callees && !callees->empty()) {
+        msg("Callees (%zu):\n", callees->size());
+        for (auto ea : *callees)
+            msg("  %a  %s\n", ea, function::name_at(ea).value_or("???").c_str());
+    } else {
+        msg("Callees: (none)\n");
+    }
+    return 0;
+}
+
+```
+
+`plugins/idax/examples/database_info.cpp`:
+
+```cpp
+// Print database metadata.
+using namespace ida;
+
+int main() {
+    auto path = database::input_file_path().value_or("(unknown)");
+    auto fmt  = database::file_type_name().value_or("(unknown)");
+    auto proc = database::processor_name().value_or("(unknown)");
+    auto bits = database::address_bitness().value_or(0);
+    auto md5  = database::input_md5().value_or("(unavailable)");
+    auto base = database::image_base().value_or(0);
+
+    msg("Input:     %s\n", path.c_str());
+    msg("Format:    %s\n", fmt.c_str());
+    msg("Processor: %s (%d-bit)\n", proc.c_str(), bits);
+    msg("Image base: %a\n", base);
+    msg("MD5:       %s\n", md5.c_str());
+    msg("Functions: %zu\n", function::count().value_or(0));
+    msg("Segments:  %zu\n", segment::count().value_or(0));
+    return 0;
+}
+
+```
+
+`plugins/idax/examples/decompile.cpp`:
+
+```cpp
+// Decompile the first function (requires Hex-Rays).
+using namespace ida;
+
+int main() {
+    if (auto avail = decompiler::available(); !avail || !*avail) {
+        msg("Hex-Rays decompiler not available\n");
+        return -1;
+    }
+
+    auto fn = function::by_index(0);
+    if (!fn) {
+        msg("No functions found\n");
+        return 1;
+    }
+
+    auto addr = fn->start();
+    auto nm = function::name_at(addr).value_or("???");
+    msg("Decompiling %s (%a)...\n\n", nm.c_str(), addr);
+
+    auto result = decompiler::decompile(addr);
+    if (!result) {
+        msg("Decompilation failed\n");
+        return 1;
+    }
+
+    auto code = result->pseudocode().value_or("(empty)");
+    msg("%s\n", code.c_str());
+    return 0;
+}
+
+```
+
+`plugins/idax/examples/find_calls.cpp`:
+
+```cpp
+// Find all call instructions in the first function.
+using namespace ida;
+
+int main() {
+    auto fn = function::by_index(0);
+    if (!fn) {
+        msg("No functions found\n");
+        return 1;
+    }
+
+    auto addr = fn->start();
+    auto nm = function::name_at(addr).value_or("???");
+    msg("Call instructions in %s:\n", nm.c_str());
+
+    int count = 0;
+    for (auto ea : *function::code_addresses(addr)) {
+        if (instruction::is_call(ea)) {
+            auto text = instruction::text(ea).value_or("???");
+            auto targets = instruction::call_targets(ea);
+            msg("  %a  %s", ea, text.c_str());
+            if (targets && !targets->empty()) {
+                auto tgt_name = name::get((*targets)[0]).value_or("");
+                if (!tgt_name.empty())
+                    msg("  -> %s", tgt_name.c_str());
+            }
+            msg("\n");
+            ++count;
+        }
+    }
+    msg("(%d calls)\n", count);
+    return 0;
+}
+
+```
+
+`plugins/idax/examples/imports.cpp`:
+
+```cpp
+// List imported modules and their symbols.
+using namespace ida;
+
+int main() {
+    auto modules = database::import_modules();
+    if (!modules || modules->empty()) {
+        msg("No imports found\n");
+        return 0;
+    }
+
+    msg("%zu import modules:\n", modules->size());
+    for (const auto& mod : *modules) {
+        msg("\n  %s (%zu symbols):\n", mod.name.c_str(), mod.symbols.size());
+        for (const auto& sym : mod.symbols) {
+            if (sym.ordinal > 0 && sym.name.empty())
+                msg("    %a  ordinal #%u\n", sym.address, sym.ordinal);
+            else
+                msg("    %a  %s\n", sym.address, sym.name.c_str());
+        }
+    }
+    return 0;
+}
+
+```
+
+`plugins/idax/examples/list_functions.cpp`:
+
+```cpp
+// List all functions with addresses and names.
+using namespace ida;
+
+int main() {
+    auto n = function::count().value_or(0);
+    msg("%zu functions:\n", n);
+
+    for (const auto& fn : function::all()) {
+        auto addr = fn.start();
+        auto nm = function::name_at(addr).value_or("???");
+        msg("  %a  %s\n", addr, nm.c_str());
+    }
+    return 0;
+}
+
+```
+
+`plugins/idax/examples/list_segments.cpp`:
+
+```cpp
+// List all segments with address ranges and permissions.
+using namespace ida;
+
+int main() {
+    auto n = segment::count().value_or(0);
+    msg("%zu segments:\n", n);
+
+    for (const auto& seg : segment::all()) {
+        auto perm = seg.permissions();
+        msg("  %a-%a  %-12s  %c%c%c\n",
+               seg.start(), seg.end(), seg.name().c_str(),
+               perm.read    ? 'R' : '-',
+               perm.write   ? 'W' : '-',
+               perm.execute ? 'X' : '-');
+    }
+    return 0;
+}
+
+```
+
+`plugins/idax/examples/xrefs_to.cpp`:
+
+```cpp
+// Show all cross-references to the first function.
+using namespace ida;
+
+int main() {
+    auto fn = function::by_index(0);
+    if (!fn) {
+        msg("No functions found\n");
+        return 1;
+    }
+
+    auto addr = fn->start();
+    auto nm = function::name_at(addr).value_or("???");
+    msg("Xrefs to %s (%a):\n", nm.c_str(), addr);
+
+    auto refs = xref::refs_to(addr);
+    if (!refs || refs->empty()) {
+        msg("  (none)\n");
+        return 0;
+    }
+
+    for (const auto& ref : *refs) {
+        auto from_name = name::get(ref.from).value_or("");
+        msg("  %a  %s\n", ref.from,
+               from_name.empty() ? "(unnamed)" : from_name.c_str());
+    }
+    return 0;
+}
+
+```
+
+`plugins/idax/idax_plugin_setup.cpp`:
+
+```cpp
+// idax_plugin_setup.cpp — idax extension plugin setup.
+//
+// Called by the generated plugin dispatch after IDA SDK initialization.
+// Uses compile-time baked paths (IDACPP_PLUGIN_IDAX_INCLUDE_DIR,
+// IDACPP_PLUGIN_IDAX_SHARED_LIB) set by the plugin's CMakeLists.txt.
+
+#include "idax_plugin_setup.h"
+#include <clinglite/clinglite.h>
+#include <iostream>
+
+#ifndef IDACPP_PLUGIN_IDAX_INCLUDE_DIR
+#error "IDACPP_PLUGIN_IDAX_INCLUDE_DIR not defined — check plugin CMakeLists.txt"
+#endif
+#ifndef IDACPP_PLUGIN_IDAX_SHARED_LIB
+#error "IDACPP_PLUGIN_IDAX_SHARED_LIB not defined — check plugin CMakeLists.txt"
+#endif
+
+void idax_plugin_setup(clinglite::Interpreter& interp, clinglite::PluginSetupOptions& /*opts*/) {
+    // Load idax shared library for JIT symbol resolution.
+    // Path baked at compile time by the plugin's CMakeLists.txt.
+    const char* sharedLib = IDACPP_PLUGIN_IDAX_SHARED_LIB;
+    auto r = interp.loadLibrary(sharedLib);
+    if (r == clinglite::ExecResult::Success)
+        std::cerr << "Plugin idax: loaded shared library\n";
+    else
+        std::cerr << "Plugin idax: warning — failed to load " << sharedLib << "\n";
+
+    // Add idax include path for header resolution
+    const char* includeDir = IDACPP_PLUGIN_IDAX_INCLUDE_DIR;
+    interp.addIncludePath(includeDir);
+
+    // Undo pro.h macro poisoning (no-op if already undefined via PCH).
+    clinglite::undoProhPoisoning(interp);
+
+    // Include idax master header — hits include guards if already in PCH.
+    if (!interp.includeHeader("ida/idax.hpp"))
+        std::cerr << "Plugin idax: warning — failed to include ida/idax.hpp\n";
+    else
+        std::cerr << "Plugin idax: ready\n";
+}
+
+```
+
+`plugins/idax/idax_plugin_setup.h`:
+
+```h
+// idax_plugin_setup.h — idax extension plugin for idacpp.
+#pragma once
+
+namespace clinglite { class Interpreter; struct PluginSetupOptions; }
+
+/// Set up the idax plugin on an initialized interpreter.
+/// Loads the idax shared library, adds include paths, undoes pro.h macro
+/// poisoning, and includes the idax master header.
+void idax_plugin_setup(clinglite::Interpreter& interp, clinglite::PluginSetupOptions& opts);
+
+```
+
+`plugins/qt6/CMakeLists.txt`:
+
+```txt
+# qt6 — extension plugin for idacpp.
+#
+# Provides Qt6 (Core, Gui, Widgets) support in the C++ REPL. Discovers an
+# existing Qt6 installation built with QT_NAMESPACE=QT, or offers to build
+# one via the IDA SDK's QtSupport.cmake.
+#
+# Enable: -DPLUGIN_QT6=ON [-DPLUGIN_QT6_DIR=<path-to-qt6-install>]
+
+include("${CMAKE_CURRENT_SOURCE_DIR}/../common/idacpp_plugin_helpers.cmake")
+
+# Qt6 discovery (layered, first match wins)
+# (a) Explicit override via -DPLUGIN_QT6_DIR
+if(PLUGIN_QT6_DIR)
+    file(TO_CMAKE_PATH "${PLUGIN_QT6_DIR}" PLUGIN_QT6_DIR)
+    list(PREPEND CMAKE_PREFIX_PATH "${PLUGIN_QT6_DIR}")
+    message(STATUS "qt6 plugin: using PLUGIN_QT6_DIR=${PLUGIN_QT6_DIR}")
+endif()
+
+# (b) IDA SDK's QtSupport.cmake — auto-detects ${CMAKE_BINARY_DIR}/qt-install/
+#     and creates the build_qt target for first-time Qt builds.
+set(_qt_support "$ENV{IDASDK}/src/cmake/cmake/QtSupport.cmake")
+if(EXISTS "${_qt_support}" AND NOT TARGET build_qt)
+    include("${_qt_support}")
+    message(STATUS "qt6 plugin: included IDA SDK QtSupport.cmake")
+endif()
+
+# (c) Try to find Qt6
+find_package(Qt6 QUIET COMPONENTS Core Gui Widgets)
+
+# (d) Fail or soft-fail depending on whether an explicit override was given
+if(NOT Qt6_FOUND)
+    if(PLUGIN_QT6_DIR)
+        message(FATAL_ERROR
+            "qt6 plugin: Qt6 not found at PLUGIN_QT6_DIR=${PLUGIN_QT6_DIR}")
+    elseif(TARGET build_qt)
+        message(STATUS "qt6 plugin: Qt6 not found — build it with:")
+        message(STATUS "  cmake --build ${CMAKE_BINARY_DIR} --target build_qt")
+    else()
+        message(STATUS "qt6 plugin: Qt6 not found, skipping")
+        message(STATUS "  Set -DPLUGIN_QT6_DIR=<path-to-qt6-install>")
+    endif()
+    return()
+endif()
+
+# Validate found Qt6
+# If PLUGIN_QT6_DIR was set, the resolved Qt6 must come from that prefix.
+if(PLUGIN_QT6_DIR)
+    file(REAL_PATH "${PLUGIN_QT6_DIR}" _qt6_override_real)
+    file(REAL_PATH "${Qt6_DIR}" _qt6_found_real)
+    string(FIND "${_qt6_found_real}" "${_qt6_override_real}/" _pos)
+    if(NOT _pos EQUAL 0)
+        message(FATAL_ERROR
+            "qt6 plugin: Qt6 found at ${Qt6_DIR} which is outside PLUGIN_QT6_DIR=${PLUGIN_QT6_DIR}\n"
+            "  Resolved override: ${_qt6_override_real}\n"
+            "  Resolved Qt6_DIR:  ${_qt6_found_real}\n"
+            "  Remove stale Qt from CMAKE_PREFIX_PATH or fix PLUGIN_QT6_DIR")
+    endif()
+endif()
+
+# IDA's Qt is built with QT_NAMESPACE=QT — reject incompatible installs.
+get_target_property(_qt6_core_defs Qt6::Core INTERFACE_COMPILE_DEFINITIONS)
+if(NOT _qt6_core_defs MATCHES "QT_NAMESPACE=QT")
+    message(FATAL_ERROR
+        "qt6 plugin: Qt6 at ${Qt6_DIR} was not built with QT_NAMESPACE=QT\n"
+        "  IDA requires QT_NAMESPACE=QT. Build Qt with: -DQT_NAMESPACE=QT")
+endif()
+
+message(STATUS "qt6 plugin: Qt6 ${Qt6_VERSION} found")
+
+# Extract Qt6 paths
+# Derive the Qt install prefix from Qt6_DIR (set by find_package).
+# Qt6_DIR is typically <prefix>/lib/cmake/Qt6, so go up 3 levels.
+get_filename_component(_qt6_prefix "${Qt6_DIR}/../../.." ABSOLUTE)
+set(_qt6_inc_main "${_qt6_prefix}/include")
+
+# Collect all include dirs from imported targets for PCH flags.
+set(_qt6_all_inc_dirs "${_qt6_inc_main}")
+foreach(_comp Core Gui Widgets)
+    get_target_property(_dirs Qt6::${_comp} INTERFACE_INCLUDE_DIRECTORIES)
+    if(_dirs)
+        list(APPEND _qt6_all_inc_dirs ${_dirs})
+    endif()
+endforeach()
+list(REMOVE_DUPLICATES _qt6_all_inc_dirs)
+
+# Resolve Qt6 runtime libraries from IDABIN
+# Use IDA's copies (what IDA actually loads at runtime), not qt-install.
+# Resolve actual filenames via glob to handle versioned names (e.g. .so.6).
+if(NOT DEFINED IDABIN)
+    set(IDABIN "${IDASDK}/bin")
+endif()
+
+function(_qt6_resolve_runtime var component)
+    if(WIN32)
+        set(_pattern "${IDABIN}/${component}.dll")
+    elseif(APPLE)
+        set(_pattern "${IDABIN}/lib${component}*.dylib")
+    else()
+        set(_pattern "${IDABIN}/lib${component}.so*")
+    endif()
+    file(GLOB _matches "${_pattern}")
+    if(NOT _matches)
+        message(FATAL_ERROR
+            "qt6 plugin: ${component} runtime not found in ${IDABIN}\n"
+            "  Pattern: ${_pattern}")
+    endif()
+    list(GET _matches 0 _resolved)
+    set(${var} "${_resolved}" PARENT_SCOPE)
+endfunction()
+
+_qt6_resolve_runtime(_qt6_core_lib Qt6Core)
+_qt6_resolve_runtime(_qt6_gui_lib Qt6Gui)
+_qt6_resolve_runtime(_qt6_widgets_lib Qt6Widgets)
+
+message(STATUS "qt6 plugin: include=${_qt6_inc_main}")
+message(STATUS "qt6 plugin: core=${_qt6_core_lib}")
+message(STATUS "qt6 plugin: gui=${_qt6_gui_lib}")
+message(STATUS "qt6 plugin: widgets=${_qt6_widgets_lib}")
+
+# PCH bridge (undoes pro.h poison, defines Qt namespace, includes Qt headers)
+clinglite_plugin_generate_pch_bridge(
+    "${CMAKE_CURRENT_BINARY_DIR}/qt6_pch_bridge.h"
+    UNDEFS snprintf sprintf getenv
+    DEFINES QT_NAMESPACE=QT QT_CORE_LIB QT_GUI_LIB QT_WIDGETS_LIB QT_DLL
+    HEADERS QtCore/QtCore QtGui/QtGui QtWidgets/QtWidgets)
+
+# Build PCH flags from all Qt include directories
+set(_qt6_pch_flags)
+foreach(_dir ${_qt6_all_inc_dirs})
+    list(APPEND _qt6_pch_flags "-I${_dir}")
+endforeach()
+
+idacpp_plugin_extend_pch(
+    FLAGS
+        ${_qt6_pch_flags}
+        "-I${CMAKE_CURRENT_BINARY_DIR}"
+        "-DQT_NAMESPACE=QT"
+        "-DQT_CORE_LIB"
+        "-DQT_GUI_LIB"
+        "-DQT_WIDGETS_LIB"
+        "-DQT_DLL"
+    HEADERS qt6_pch_bridge.h)
+
+# Setup source (baked paths via compile definitions)
+add_library(qt6_plugin_init OBJECT
+    "${CMAKE_CURRENT_SOURCE_DIR}/qt6_plugin_setup.cpp")
+target_link_libraries(qt6_plugin_init PRIVATE clinglite)
+target_compile_definitions(qt6_plugin_init PRIVATE
+    IDACPP_PLUGIN_QT6_INCLUDE_DIR="${_qt6_inc_main}"
+    IDACPP_PLUGIN_QT6_CORE_LIB="${_qt6_core_lib}"
+    IDACPP_PLUGIN_QT6_GUI_LIB="${_qt6_gui_lib}"
+    IDACPP_PLUGIN_QT6_WIDGETS_LIB="${_qt6_widgets_lib}")
+
+if(MSVC)
+    target_compile_options(qt6_plugin_init PRIVATE /EHsc)
+endif()
+
+# Register with dispatch system
+idacpp_register_plugin(qt6
+    qt6_plugin_setup
+    "${CMAKE_CURRENT_SOURCE_DIR}/qt6_plugin_setup.h"
+    "$<TARGET_OBJECTS:qt6_plugin_init>")
+
+```
+
+`plugins/qt6/README.md`:
+
+```md
+# qt6 — Extension Plugin
+
+Makes Qt6 (Core, Gui, Widgets) available in the idacpp C++ REPL. Discovers
+an existing Qt6 installation built with `QT_NAMESPACE=QT`, loads its shared
+libraries for JIT resolution, and preloads Qt headers.
+
+## QT_NAMESPACE
+
+IDA's Qt is **always** built with `QT_NAMESPACE=QT`. All Qt classes live in
+the `QT` namespace. Standard Qt installations will not work — you must use a
+Qt built with `-DQT_NAMESPACE=QT`.
+
+The plugin adds `using namespace QT;` automatically, so you can write
+`QWidget*` directly instead of `QT::QWidget*`.
+
+## Enable
+
+### Option 1: Build Qt from the IDA SDK (recommended)
+
+```bash
+cmake .. -DPLUGIN_QT6=ON              # includes QtSupport.cmake, creates build_qt target
+cmake --build . --target build_qt     # one-time build (~1-2 hours)
+# build_qt auto-reconfigures — just rebuild:
+cmake --build .
+```
+
+Qt 6.8.2 is downloaded, built with `QT_NAMESPACE=QT`, and installed into
+`<build-dir>/qt-install/`. Subsequent configures auto-detect it.
+
+### Option 2: Point to existing Qt installation
+
+```bash
+cmake .. -DPLUGIN_QT6=ON -DPLUGIN_QT6_DIR=/path/to/qt-install
+```
+
+The directory must contain `lib/cmake/Qt6/` from a Qt build with
+`QT_NAMESPACE=QT`.
+
+### Option 3: Auto-detect
+
+If Qt6 is already on `CMAKE_PREFIX_PATH` or was built by the SDK in the
+same build tree, it's found automatically:
+
+```bash
+cmake .. -DPLUGIN_QT6=ON
+```
+
+## What It Does
+
+1. **Build time**: Generates a PCH bridge header with `QT_NAMESPACE=QT` and
+   Qt umbrella includes. Extends the shared PCH with Qt6 headers.
+2. **Runtime**: Loads Qt6Core/Gui/Widgets shared libraries, adds include
+   paths, defines `QT_NAMESPACE=QT`, includes Qt headers, and adds
+   `using namespace QT;`.
+
+## REPL Usage
+
+```cpp
+// QApplication is already running in IDA — access it directly
+auto app = qApp;
+auto widgets = app->topLevelWidgets();
+printf("%d top-level widgets\n", widgets.size());
+
+// QMetaObject introspection
+for (auto* w : widgets) {
+    auto* meta = w->metaObject();
+    printf("%s: %d properties, %d methods\n",
+           meta->className(), meta->propertyCount(), meta->methodCount());
+}
+
+// Create a widget dynamically
+auto* dlg = new QDialog(nullptr);
+dlg->setWindowTitle("Hello from C++");
+dlg->resize(300, 200);
+dlg->show();
+```
+
+## MOC Limitation
+
+The REPL has no MOC (Meta-Object Compiler) step, so you cannot define
+`Q_OBJECT` classes or use `signals:`/`slots:` keywords. Instead:
+
+- Use **lambda-based `QObject::connect()`** for signal/slot connections
+- Use **`QMetaObject`** API for runtime reflection
+- Access **existing IDA widgets** and their properties
+
+```cpp
+// Lambda connect — no MOC needed
+auto* btn = new QPushButton("Click me");
+QObject::connect(btn, &QPushButton::clicked, []() {
+    msg("Button clicked!\n");
+});
+```
+
+## Persistent Forms
+
+Use IDA's widget API for dockable panels that survive REPL sessions:
+
+```cpp
+auto* tw = find_widget("My Panel");
+if (!tw) {
+    tw = create_empty_widget("My Panel");
+    display_widget(tw, WOPN_DP_TAB | WOPN_RESTORE);
+}
+auto* w = reinterpret_cast<QWidget*>(tw);
+// Populate w with Qt layouts and widgets...
+```
+
+See `examples/qt_widget_explorer.cpp` for a complete implementation.
+
+## Examples
+
+| File | Description |
+|------|-------------|
+| `qt_introspect.cpp` | QMetaObject reflection — properties, signals, slots |
+| `qt_list_windows.cpp` | Enumerate docked windows and toolbars |
+| `qt_widget_explorer.cpp` | Persistent dockable widget hierarchy explorer |
+| `qt_form_builder.cpp` | Dynamic QDialog with tree view and controls |
+
+```
+
+`plugins/qt6/examples/qt_form_builder.cpp`:
+
+```cpp
+// Dynamically build a Qt form from the REPL.
+//
+// Creates a non-modal QDialog populated with live IDA window information.
+// Demonstrates dynamic widget creation, layouts, and lambda signal
+// connections (no MOC needed). Run from the idacpp REPL:
+//   C++> .x qt_form_builder.cpp
+
+using namespace QT;
+
+static void populateTree(QTreeWidget* tree)
+{
+    tree->clear();
+    auto* app = qApp;
+    if (!app)
+        return;
+
+    for (QWidget* w : app->topLevelWidgets()) {
+        if (!w->isVisible())
+            continue;
+
+        auto* item = new QTreeWidgetItem(tree);
+        item->setText(0, w->metaObject()->className());
+        item->setText(1, w->windowTitle().isEmpty()
+                        ? w->objectName() : w->windowTitle());
+
+        // Size
+        auto* sizeItem = new QTreeWidgetItem(item);
+        sizeItem->setText(0, "Size");
+        sizeItem->setText(1, QString("%1x%2").arg(w->width()).arg(w->height()));
+
+        // Position
+        auto* posItem = new QTreeWidgetItem(item);
+        posItem->setText(0, "Position");
+        posItem->setText(1, QString("(%1, %2)").arg(w->x()).arg(w->y()));
+
+        // Children count
+        int childCount = 0;
+        for (QObject* c : w->children())
+            if (qobject_cast<QWidget*>(c))
+                ++childCount;
+        auto* childItem = new QTreeWidgetItem(item);
+        childItem->setText(0, "Child widgets");
+        childItem->setText(1, QString::number(childCount));
+
+        // Meta-object info
+        const QMetaObject* meta = w->metaObject();
+        auto* metaItem = new QTreeWidgetItem(item);
+        metaItem->setText(0, "Properties");
+        metaItem->setText(1, QString::number(meta->propertyCount()));
+
+        auto* methodItem = new QTreeWidgetItem(item);
+        methodItem->setText(0, "Methods");
+        methodItem->setText(1, QString::number(meta->methodCount()));
+    }
+
+    tree->expandAll();
+}
+
+int main() {
+    auto* app = qApp;
+    if (!app) {
+        msg("No QApplication instance\n");
+        return 1;
+    }
+
+    // Create a non-modal dialog
+    auto* dlg = new QDialog(nullptr);
+    dlg->setWindowTitle("idacpp Form Builder");
+    dlg->resize(480, 400);
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+
+    auto* layout = new QVBoxLayout(dlg);
+
+    // Header
+    auto* header = new QLabel("IDA C++ REPL — Dynamic Form", dlg);
+    header->setAlignment(Qt::AlignCenter);
+    QFont headerFont = header->font();
+    headerFont.setPointSize(headerFont.pointSize() + 2);
+    headerFont.setBold(true);
+    header->setFont(headerFont);
+    layout->addWidget(header);
+
+    // Tree
+    auto* tree = new QTreeWidget(dlg);
+    tree->setHeaderLabels({"Property", "Value"});
+    tree->setColumnCount(2);
+    tree->header()->setStretchLastSection(true);
+    tree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    layout->addWidget(tree);
+
+    // Populate
+    populateTree(tree);
+
+    // Status label
+    auto* status = new QLabel(dlg);
+    int widgetCount = 0;
+    for (QWidget* w : app->allWidgets())
+        ++widgetCount;
+    status->setText(QString("Total widgets in application: %1").arg(widgetCount));
+    layout->addWidget(status);
+
+    // Buttons
+    auto* btnLayout = new QHBoxLayout();
+    auto* refreshBtn = new QPushButton("Refresh", dlg);
+    auto* closeBtn = new QPushButton("Close", dlg);
+    btnLayout->addStretch();
+    btnLayout->addWidget(refreshBtn);
+    btnLayout->addWidget(closeBtn);
+    layout->addLayout(btnLayout);
+
+    // Signal connections (lambda style — no MOC needed)
+    QObject::connect(refreshBtn, &QPushButton::clicked, [tree, status, app]() {
+        populateTree(tree);
+        int count = 0;
+        for (QWidget* w : app->allWidgets())
+            ++count;
+        status->setText(QString("Total widgets in application: %1 (refreshed)").arg(count));
+    });
+    QObject::connect(closeBtn, &QPushButton::clicked, dlg, &QDialog::close);
+
+    // Show non-modal — dialog stays alive after script returns
+    dlg->show();
+    msg("Form created. Close the dialog when done.\n");
+    return 0;
+}
+
+```
+
+`plugins/qt6/examples/qt_introspect.cpp`:
+
+```cpp
+// Qt6 introspection via QMetaObject.
+//
+// Enumerates top-level widgets and prints their properties, signals, and
+// slots using Qt's meta-object system. Run from the idacpp REPL:
+//   C++> .x qt_introspect.cpp
+
+using namespace QT;
+
+int main() {
+    auto* app = qApp;
+    if (!app) {
+        msg("No QApplication instance\n");
+        return 1;
+    }
+
+    auto topLevel = app->topLevelWidgets();
+    msg("=== Qt Introspection: %d top-level widgets ===\n\n", topLevel.size());
+
+    for (QWidget* w : topLevel) {
+        if (!w->isVisible())
+            continue;
+
+        const QMetaObject* meta = w->metaObject();
+        msg("--- %s", meta->className());
+        if (!w->objectName().isEmpty())
+            msg(" [%s]", qPrintable(w->objectName()));
+        if (!w->windowTitle().isEmpty())
+            msg(" \"%s\"", qPrintable(w->windowTitle()));
+        msg(" ---\n");
+        msg("  Size: %dx%d  Pos: (%d,%d)  Visible: %s\n",
+               w->width(), w->height(), w->x(), w->y(),
+               w->isVisible() ? "yes" : "no");
+
+        // Properties (own class only, skip inherited)
+        int ownPropStart = meta->superClass() ? meta->superClass()->propertyCount() : 0;
+        int ownPropCount = meta->propertyCount() - ownPropStart;
+        if (ownPropCount > 0) {
+            msg("  Properties (%d own):\n", ownPropCount);
+            for (int i = ownPropStart; i < meta->propertyCount(); ++i) {
+                QMetaProperty prop = meta->property(i);
+                QVariant val = prop.read(w);
+                QString valStr = val.toString();
+                if (valStr.length() > 60)
+                    valStr = valStr.left(57) + "...";
+                msg("    %s %s = %s\n",
+                       prop.typeName(), prop.name(),
+                       qPrintable(valStr));
+            }
+        }
+
+        // Signals (own class only)
+        int ownMethodStart = meta->superClass() ? meta->superClass()->methodCount() : 0;
+        bool hasSignals = false;
+        for (int i = ownMethodStart; i < meta->methodCount(); ++i) {
+            QMetaMethod m = meta->method(i);
+            if (m.methodType() == QMetaMethod::Signal) {
+                if (!hasSignals) {
+                    msg("  Signals:\n");
+                    hasSignals = true;
+                }
+                msg("    %s\n", qPrintable(QString::fromLatin1(m.methodSignature())));
+            }
+        }
+
+        // Slots (own class only)
+        bool hasSlots = false;
+        for (int i = ownMethodStart; i < meta->methodCount(); ++i) {
+            QMetaMethod m = meta->method(i);
+            if (m.methodType() == QMetaMethod::Slot) {
+                if (!hasSlots) {
+                    msg("  Slots:\n");
+                    hasSlots = true;
+                }
+                msg("    %s\n", qPrintable(QString::fromLatin1(m.methodSignature())));
+            }
+        }
+
+        msg("\n");
+    }
+
+    // Summary of all properties across inheritance chain for the main window
+    for (QWidget* w : topLevel) {
+        if (qobject_cast<QMainWindow*>(w)) {
+            const QMetaObject* meta = w->metaObject();
+            msg("=== Full meta-object chain for %s ===\n", meta->className());
+            const QMetaObject* m = meta;
+            while (m) {
+                msg("  %s (%d methods, %d properties)\n",
+                       m->className(), m->methodCount(), m->propertyCount());
+                m = m->superClass();
+            }
+            break;
+        }
+    }
+
+    return 0;
+}
+
+```
+
+`plugins/qt6/examples/qt_list_windows.cpp`:
+
+```cpp
+// List all open IDA windows, docked panels, and toolbars.
+//
+// Run from the idacpp REPL:
+//   C++> .x qt_list_windows.cpp
+
+using namespace QT;
+
+int main() {
+    auto* app = qApp;
+    if (!app) {
+        msg("No QApplication instance\n");
+        return 1;
+    }
+
+    auto allWidgets = app->allWidgets();
+
+    // Find the main window
+    QMainWindow* mainWin = nullptr;
+    for (QWidget* w : app->topLevelWidgets()) {
+        if (auto* mw = qobject_cast<QMainWindow*>(w)) {
+            mainWin = mw;
+            break;
+        }
+    }
+
+    if (mainWin) {
+        msg("=== Main Window ===\n");
+        msg("  %s \"%s\"  %dx%d\n\n",
+               mainWin->metaObject()->className(),
+               qPrintable(mainWin->windowTitle()),
+               mainWin->width(), mainWin->height());
+    }
+
+    // Collect visible docked windows (deduplicated by title)
+    QMap<QString, QString> dockWindows;  // title -> className
+    for (QWidget* w : allWidgets) {
+        if (auto* dock = qobject_cast<QDockWidget*>(w)) {
+            if (dock->isVisible() && !dock->windowTitle().isEmpty())
+                dockWindows.insert(dock->windowTitle(), dock->metaObject()->className());
+        }
+    }
+
+    msg("=== Visible Docked Windows (%d) ===\n", dockWindows.size());
+    for (auto it = dockWindows.constBegin(); it != dockWindows.constEnd(); ++it)
+        msg("  %-40s  [%s]\n", qPrintable(it.key()), qPrintable(it.value()));
+
+    // Collect visible toolbars
+    QStringList toolbars;
+    for (QWidget* w : allWidgets) {
+        if (auto* tb = qobject_cast<QToolBar*>(w)) {
+            if (tb->isVisible()) {
+                QString name = tb->windowTitle();
+                if (name.isEmpty())
+                    name = tb->objectName();
+                if (!name.isEmpty())
+                    toolbars.append(name);
+            }
+        }
+    }
+    toolbars.sort();
+
+    msg("\n=== Visible Toolbars (%d) ===\n", toolbars.size());
+    for (const QString& name : toolbars)
+        msg("  %s\n", qPrintable(name));
+
+    // Summary
+    int totalVisible = 0;
+    for (QWidget* w : allWidgets)
+        if (w->isVisible())
+            ++totalVisible;
+
+    msg("\n=== Summary ===\n");
+    msg("  Total widgets: %d\n", allWidgets.size());
+    msg("  Visible: %d\n", totalVisible);
+    msg("  Dock windows: %d\n", dockWindows.size());
+    msg("  Toolbars: %d\n", toolbars.size());
+
+    return 0;
+}
+
+```
+
+`plugins/qt6/examples/qt_widget_explorer.cpp`:
+
+```cpp
+// Persistent dockable widget hierarchy explorer.
+//
+// Creates an IDA-dockable panel with a tree view of the Qt widget hierarchy.
+//
+// Uses IDA's create_empty_widget()/display_widget() for a persistent tab
+// that survives REPL session changes. Run from the idacpp REPL:
+//   C++> .x qt_widget_explorer.cpp
+//
+// Running again brings the existing panel to front. Close via IDA's tab close.
+
+using namespace QT;
+
+// Forward declarations
+static void populateCombo(QComboBox* combo);
+static void buildTree(QTreeWidget* tree, QWidget* root, int maxDepth = 10);
+
+// Custom tree item that stores a widget pointer
+class WidgetTreeItem : public QTreeWidgetItem {
+public:
+    QWidget* widget;
+    WidgetTreeItem(QWidget* w, QTreeWidgetItem* parent = nullptr)
+        : QTreeWidgetItem(parent), widget(w) {}
+    WidgetTreeItem(QWidget* w, QTreeWidget* tree)
+        : QTreeWidgetItem(tree), widget(w) {}
+};
+
+static void addChildren(WidgetTreeItem* parentItem, QWidget* parentWidget,
+                         int depth, int maxDepth)
+{
+    if (depth >= maxDepth)
+        return;
+
+    for (QObject* child : parentWidget->children()) {
+        QWidget* cw = qobject_cast<QWidget*>(child);
+        if (!cw)
+            continue;
+
+        auto* item = new WidgetTreeItem(cw, parentItem);
+        QString label = QString("%1").arg(cw->metaObject()->className());
+        if (!cw->objectName().isEmpty())
+            label += QString(" [%1]").arg(cw->objectName());
+        if (!cw->windowTitle().isEmpty())
+            label += QString(" \"%1\"").arg(cw->windowTitle());
+
+        item->setText(0, label);
+        item->setText(1, cw->isVisible() ? "visible" : "hidden");
+        item->setText(2, QString("%1x%2").arg(cw->width()).arg(cw->height()));
+
+        addChildren(item, cw, depth + 1, maxDepth);
+    }
+}
+
+static void buildTree(QTreeWidget* tree, QWidget* root, int maxDepth)
+{
+    tree->clear();
+    if (!root)
+        return;
+
+    auto* rootItem = new WidgetTreeItem(root, tree);
+    QString label = QString("%1").arg(root->metaObject()->className());
+    if (!root->objectName().isEmpty())
+        label += QString(" [%1]").arg(root->objectName());
+    if (!root->windowTitle().isEmpty())
+        label += QString(" \"%1\"").arg(root->windowTitle());
+
+    rootItem->setText(0, label);
+    rootItem->setText(1, root->isVisible() ? "visible" : "hidden");
+    rootItem->setText(2, QString("%1x%2").arg(root->width()).arg(root->height()));
+
+    addChildren(rootItem, root, 0, maxDepth);
+    tree->expandToDepth(2);
+}
+
+static void populateCombo(QComboBox* combo)
+{
+    combo->clear();
+    auto* app = qApp;
+    if (!app)
+        return;
+
+    for (QWidget* w : app->topLevelWidgets()) {
+        QString display = QString("[%1]").arg(w->metaObject()->className());
+        if (!w->windowTitle().isEmpty())
+            display += QString(" %1").arg(w->windowTitle());
+        else if (!w->objectName().isEmpty())
+            display += QString(" %1").arg(w->objectName());
+        combo->addItem(display, QVariant::fromValue(static_cast<void*>(w)));
+    }
+}
+
+int main() {
+    const char* widgetName = "C++ Widget Explorer";
+
+    // Idempotent: find existing or create new
+    TWidget* tw = find_widget(widgetName);
+    if (tw) {
+        activate_widget(tw, true);
+        msg("Widget Explorer already open — activated\n");
+        return 0;
+    }
+
+    tw = create_empty_widget(widgetName);
+    display_widget(tw, WOPN_DP_TAB | WOPN_RESTORE);
+
+    // Cast TWidget* to QWidget* — same pattern as IDA SDK's qwindow/qproject.
+    QWidget* container = (QWidget*)tw;
+    auto* layout = new QVBoxLayout(container);
+    layout->setContentsMargins(4, 4, 4, 4);
+
+    // Selector
+    auto* selectorLayout = new QHBoxLayout();
+    auto* selectorLabel = new QLabel("Widget:", container);
+    auto* combo = new QComboBox(container);
+    combo->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    selectorLayout->addWidget(selectorLabel);
+    selectorLayout->addWidget(combo);
+    layout->addLayout(selectorLayout);
+
+    // Tree
+    auto* tree = new QTreeWidget(container);
+    tree->setHeaderLabels({"Widget", "Visibility", "Size"});
+    tree->setColumnCount(3);
+    tree->header()->setStretchLastSection(false);
+    tree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    tree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    tree->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    layout->addWidget(tree);
+
+    // Buttons
+    auto* btnLayout = new QHBoxLayout();
+    auto* expandBtn = new QPushButton("Expand All", container);
+    auto* collapseBtn = new QPushButton("Collapse All", container);
+    auto* refreshBtn = new QPushButton("Refresh", container);
+    btnLayout->addWidget(expandBtn);
+    btnLayout->addWidget(collapseBtn);
+    btnLayout->addStretch();
+    btnLayout->addWidget(refreshBtn);
+    layout->addLayout(btnLayout);
+
+    // Populate combo
+    populateCombo(combo);
+
+    // Combo selection → rebuild tree
+    QObject::connect(combo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+                     [combo, tree](int index) {
+        if (index < 0)
+            return;
+        void* ptr = combo->itemData(index).value<void*>();
+        auto* w = static_cast<QWidget*>(ptr);
+        buildTree(tree, w);
+    });
+
+    // Click tree item → raise the widget
+    QObject::connect(tree, &QTreeWidget::itemClicked,
+                     [](QTreeWidgetItem* item, int) {
+        auto* wti = static_cast<WidgetTreeItem*>(item);
+        if (wti && wti->widget) {
+            wti->widget->raise();
+            wti->widget->activateWindow();
+        }
+    });
+
+    // Buttons
+    QObject::connect(expandBtn, &QPushButton::clicked, tree, &QTreeWidget::expandAll);
+    QObject::connect(collapseBtn, &QPushButton::clicked, tree, &QTreeWidget::collapseAll);
+    QObject::connect(refreshBtn, &QPushButton::clicked, [combo, tree]() {
+        int idx = combo->currentIndex();
+        populateCombo(combo);
+        if (idx >= 0 && idx < combo->count())
+            combo->setCurrentIndex(idx);
+    });
+
+    // Auto-select first entry
+    if (combo->count() > 0)
+        combo->setCurrentIndex(0);
+
+    msg("Widget Explorer opened as dockable tab\n");
+    return 0;
+}
+
+```
+
+`plugins/qt6/qt6_plugin_setup.cpp`:
+
+```cpp
+// qt6_plugin_setup.cpp — Qt6 extension plugin setup.
+//
+// Called by the generated plugin dispatch after IDA SDK initialization.
+// Uses compile-time baked paths (IDACPP_PLUGIN_QT6_*) set by the plugin's
+// CMakeLists.txt.
+
+#include "qt6_plugin_setup.h"
+#include <clinglite/clinglite.h>
+#include <iostream>
+
+#ifndef IDACPP_PLUGIN_QT6_INCLUDE_DIR
+#error "IDACPP_PLUGIN_QT6_INCLUDE_DIR not defined — check plugin CMakeLists.txt"
+#endif
+#ifndef IDACPP_PLUGIN_QT6_CORE_LIB
+#error "IDACPP_PLUGIN_QT6_CORE_LIB not defined — check plugin CMakeLists.txt"
+#endif
+#ifndef IDACPP_PLUGIN_QT6_GUI_LIB
+#error "IDACPP_PLUGIN_QT6_GUI_LIB not defined — check plugin CMakeLists.txt"
+#endif
+#ifndef IDACPP_PLUGIN_QT6_WIDGETS_LIB
+#error "IDACPP_PLUGIN_QT6_WIDGETS_LIB not defined — check plugin CMakeLists.txt"
+#endif
+
+void qt6_plugin_setup(clinglite::Interpreter& interp, clinglite::PluginSetupOptions& /*opts*/) {
+    // Load Qt6 shared libraries for JIT symbol resolution.
+    // IDA has already loaded these DLLs; this tells Cling's JIT where to
+    // find Qt symbols. Paths baked at compile time by the plugin's CMakeLists.txt.
+    struct QtLib { const char* name; const char* path; };
+    QtLib libs[] = {
+        {"Qt6Core",    IDACPP_PLUGIN_QT6_CORE_LIB},
+        {"Qt6Gui",     IDACPP_PLUGIN_QT6_GUI_LIB},
+        {"Qt6Widgets", IDACPP_PLUGIN_QT6_WIDGETS_LIB},
+    };
+
+    int loaded = 0;
+    for (const auto& lib : libs) {
+        auto r = interp.loadLibrary(lib.path);
+        if (r == clinglite::ExecResult::Success)
+            ++loaded;
+        else
+            std::cerr << "Plugin qt6: warning — failed to load " << lib.name
+                      << " (" << lib.path << ")\n";
+    }
+
+    // Add Qt6 include path for header resolution
+    interp.addIncludePath(IDACPP_PLUGIN_QT6_INCLUDE_DIR);
+
+    // Undo pro.h macro poisoning (no-op if already undefined via PCH).
+    clinglite::undoProhPoisoning(interp);
+
+    // IDA's Qt is always built with QT_NAMESPACE=QT.
+    // Define it so all Qt headers put classes in the QT namespace.
+    interp.execute("#define QT_NAMESPACE QT");
+    interp.execute("#define QT_CORE_LIB");
+    interp.execute("#define QT_GUI_LIB");
+    interp.execute("#define QT_WIDGETS_LIB");
+    interp.execute("#define QT_DLL");
+
+    // Include Qt6 umbrella headers — hits include guards if already in PCH.
+    static const char* headers[] = {
+        "QtCore/QtCore",
+        "QtGui/QtGui",
+        "QtWidgets/QtWidgets",
+    };
+
+    int hdrs = 0;
+    for (const char* hdr : headers) {
+        if (interp.includeHeader(hdr))
+            ++hdrs;
+        else
+            std::cerr << "Plugin qt6: warning — failed to include " << hdr << "\n";
+    }
+
+    // Convenience: bring QT namespace into scope so users can write QWidget*
+    // instead of QT::QWidget*.
+    interp.execute("using namespace QT;");
+
+    if (loaded == 3 && hdrs == 3)
+        std::cerr << "Plugin qt6: ready\n";
+    else
+        std::cerr << "Plugin qt6: " << loaded << "/3 libraries, "
+                  << hdrs << "/3 headers\n";
+}
+
+```
+
+`plugins/qt6/qt6_plugin_setup.h`:
+
+```h
+// qt6_plugin_setup.h — Qt6 extension plugin for idacpp.
+#pragma once
+
+namespace clinglite { class Interpreter; struct PluginSetupOptions; }
+
+/// Set up the Qt6 plugin on an initialized interpreter.
+/// Loads Qt6 shared libraries, adds include paths, defines QT_NAMESPACE=QT,
+/// and includes Qt6 umbrella headers (Core, Gui, Widgets).
+void qt6_plugin_setup(clinglite::Interpreter& interp, clinglite::PluginSetupOptions& opts);
+
+```
+
+`tools/idgen.cpp`:
+
+```cpp
+// idacpp_idgen — generate sorted IDA SDK identifier table
+// Copyright (c) Elias Bachaalany
+// SPDX-License-Identifier: MIT
+//
+// Usage: idacpp_idgen [options] -o output.inc header1.h header2.h ...
+//   -I <path>         Add include path
+//   -D <macro>        Add define
+//   -std=<std>        C++ standard (default: c++2b)
+//   -o <path>         Output .inc file (C++ header with sorted table)
+//   --sdk-dir <path>  IDA SDK include dir (for source filtering)
+//   --libs lib1 lib2  Shared libraries to extract exports from
+//   --help            Show usage
+//
+// Combines AST declarations from headers + library exports into a single
+// sorted, deduplicated C++ table for instant Tab completion and syntax
+// highlighting in the idacpp plugin.
+
+#include <clinglite/clinglite.h>
+
+#include <algorithm>
+#include <cctype>
+#include <cstdio>
+#include <set>
+#include <string>
+#include <vector>
+
+static void usage(const char* argv0) {
+    fprintf(stderr,
+        "Usage: %s [options] -o output.inc header1.h header2.h ...\n"
+        "  -I <path>         Add include path\n"
+        "  -D <macro>        Add define\n"
+        "  -std=<std>        C++ standard (default: c++2b)\n"
+        "  -o <path>         Output .inc file\n"
+        "  --sdk-dir <path>  IDA SDK include dir (source filter)\n"
+        "  --libs lib1 ...   Shared libraries for export extraction\n"
+        "  --help            Show usage\n",
+        argv0);
+}
+
+/// Returns true if the identifier looks useful for completion.
+/// Filters out mangled C++ names, very short names, and internal prefixes.
+static bool isUsefulIdentifier(const std::string& name) {
+    if (name.size() < 2) return false;
+
+    // Skip C++ mangled names (start with _Z on Itanium ABI)
+    if (name.size() > 2 && name[0] == '_' && name[1] == 'Z')
+        return false;
+
+    // Skip names starting with double underscore (compiler internals)
+    if (name.size() > 2 && name[0] == '_' && name[1] == '_')
+        return false;
+
+    // Skip names that are purely numeric or start with digit
+    if (std::isdigit(static_cast<unsigned char>(name[0])))
+        return false;
+
+    // Must contain only valid C/C++ identifier characters
+    for (char c : name) {
+        if (!std::isalnum(static_cast<unsigned char>(c)) && c != '_')
+            return false;
+    }
+
+    return true;
+}
+
+int main(int argc, char** argv) {
+    std::string outputPath;
+    std::string sdkDir;
+    std::vector<std::string> includePaths;
+    std::vector<std::string> compilerFlags;
+    std::vector<std::string> headers;
+    std::vector<std::string> libs;
+    std::string cxxStd = "-std=c++2b";
+
+    for (int i = 1; i < argc; ++i) {
+        std::string arg(argv[i]);
+        if (arg == "--help" || arg == "-h") {
+            usage(argv[0]);
+            return 0;
+        } else if (arg == "-o" && i + 1 < argc) {
+            outputPath = argv[++i];
+        } else if (arg == "--sdk-dir" && i + 1 < argc) {
+            sdkDir = argv[++i];
+        } else if (arg == "--libs") {
+            while (i + 1 < argc && argv[i + 1][0] != '-')
+                libs.push_back(argv[++i]);
+        } else if (arg.substr(0, 2) == "-I") {
+            if (arg.size() > 2)
+                includePaths.push_back(arg.substr(2));
+            else if (i + 1 < argc)
+                includePaths.push_back(argv[++i]);
+        } else if (arg.substr(0, 2) == "-D") {
+            if (arg.size() > 2)
+                compilerFlags.push_back(arg);
+            else if (i + 1 < argc)
+                compilerFlags.push_back(std::string("-D") + argv[++i]);
+        } else if (arg.substr(0, 5) == "-std=") {
+            cxxStd = arg;
+        } else if (arg[0] != '-') {
+            headers.push_back(arg);
+        } else {
+            fprintf(stderr, "Unknown option: %s\n", arg.c_str());
+            usage(argv[0]);
+            return 1;
+        }
+    }
+
+    if (outputPath.empty()) {
+        fprintf(stderr, "Error: -o output.inc is required\n");
+        usage(argv[0]);
+        return 1;
+    }
+
+    // Collect all identifiers into a set for automatic dedup + sort
+    std::set<std::string> identifiers;
+
+    // AST declarations from headers
+    if (!headers.empty()) {
+        clinglite::Environment env(argv[0]);
+
+        clinglite::Options opts;
+        opts.args = {"idacpp_idgen", "-noruntime"};
+        opts.includePaths = includePaths;
+        compilerFlags.push_back(cxxStd);
+        // Suppress noisy IDA SDK warnings
+        compilerFlags.push_back("-Wno-nullability-completeness");
+        compilerFlags.push_back("-Wno-nontrivial-memcall");
+        compilerFlags.push_back("-Wno-varargs");
+        compilerFlags.push_back("-Wno-tautological-constant-out-of-range-compare");
+        compilerFlags.push_back("-Wno-format");
+        opts.compilerFlags = compilerFlags;
+
+        clinglite::Interpreter interp(opts);
+        if (!interp.isValid()) {
+            fprintf(stderr, "Error: failed to initialize interpreter\n");
+            return 1;
+        }
+
+        // Pre-include C++ stdlib headers that IDA SDK depends on transitively.
+        // macOS libc++ in C++2b mode de-transitivizes headers, so std::is_pod
+        // (used by pro.h:2183) won't be found through <memory>/<string> alone.
+        static const char* stdPreIncludes[] = {
+            "cstdio", "cstdlib", "cstring", "cstdint",
+            "string", "vector", "map", "set",
+            "memory", "functional", "type_traits",
+        };
+        for (const char* hdr : stdPreIncludes)
+            interp.includeHeader(hdr);
+
+        int included = 0;
+        for (const auto& hdr : headers) {
+            if (interp.includeHeader(hdr))
+                ++included;
+            else
+                fprintf(stderr, "Warning: failed to include <%s>\n",
+                        hdr.c_str());
+        }
+        fprintf(stderr, "Included %d/%zu headers\n", included, headers.size());
+
+        auto decls = interp.enumerateDeclarations(sdkDir);
+        size_t filtered = 0;
+        for (auto& name : decls) {
+            if (isUsefulIdentifier(name)) {
+                identifiers.insert(std::move(name));
+            } else {
+                ++filtered;
+            }
+        }
+        fprintf(stderr, "Declarations: %zu kept, %zu filtered\n",
+                decls.size() - filtered, filtered);
+    }
+
+    // Library exports
+    for (const auto& lib : libs) {
+        auto exports =
+            clinglite::Interpreter::enumerateLibraryExports(lib);
+        size_t filtered = 0;
+        for (auto& name : exports) {
+            if (isUsefulIdentifier(name)) {
+                identifiers.insert(std::move(name));
+            } else {
+                ++filtered;
+            }
+        }
+        fprintf(stderr, "Exports from %s: %zu kept, %zu filtered\n",
+                lib.c_str(), exports.size() - filtered, filtered);
+    }
+
+    fprintf(stderr, "Total unique identifiers: %zu\n", identifiers.size());
+
+    // Write .inc header
+    FILE* out = fopen(outputPath.c_str(), "w");
+    if (!out) {
+        fprintf(stderr, "Error: cannot open %s for writing\n",
+                outputPath.c_str());
+        return 1;
+    }
+
+    fprintf(out,
+        "// ida_sdk_identifiers.inc — Pre-computed IDA SDK identifier table\n"
+        "// Generated by idacpp_idgen from SDK headers + library exports.\n"
+        "//\n"
+        "// This table is used for instant Tab completion and syntax highlighting\n"
+        "// instead of Cling's live code completer (codeCompleteWithContext), which\n"
+        "// performs full Clang Sema analysis per keystroke. Pre-computing the table\n"
+        "// at build time gives O(log n) prefix lookup with zero runtime overhead.\n"
+        "//\n"
+        "// DO NOT EDIT — regenerate by deleting this file and rebuilding.\n"
+        "\n"
+        "static const char* const g_idaSdkIdentifiers[] = {\n");
+
+    for (const auto& id : identifiers)
+        fprintf(out, "    \"%s\",\n", id.c_str());
+
+    fprintf(out,
+        "};\n"
+        "static constexpr size_t g_idaSdkIdentifierCount =\n"
+        "    sizeof(g_idaSdkIdentifiers) / sizeof(g_idaSdkIdentifiers[0]);\n");
+
+    fclose(out);
+
+    fprintf(stderr, "Written %zu identifiers to %s\n",
+            identifiers.size(), outputPath.c_str());
+    return 0;
+}
+
+```
+
+`tools/sync_ida_sdk_headers.py`:
+
+```py
+#!/usr/bin/env python3
+"""Synchronize idalib_setup.cpp's runtime header list with ida_sdk.h.
+
+Usage:
+  python tools/sync_ida_sdk_headers.py [--check] [--sdk-dir /path/to/idasdk/src/include]
+
+The curated source of truth is ida_sdk.h. This script:
+  1. Parses all #include <...> lines from ida_sdk.h
+  2. Rewrites g_idaHeaders[] in idalib_setup.cpp to match that exact order
+  3. Optionally reports headers present in the SDK include directory that are
+     not part of the current curated set
+  4. Validates that no excluded header (EXCLUDED_HEADERS) appears in ida_sdk.h
+
+It does not modify ida_sdk.h itself.
+"""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+IDA_SDK_H = ROOT / "ida_sdk.h"
+IDALIB_SETUP = ROOT / "idalib_setup.cpp"
+
+# Headers that must NOT appear in ida_sdk.h or g_idaHeaders[].
+EXCLUDED_HEADERS: set[str] = {
+    # Pragma-only: globally suppresses deprecation warnings in the PCH.
+    "allow_deprecated.hpp",
+}
+
+
+def parse_umbrella_headers(path: Path) -> list[str]:
+    headers: list[str] = []
+    pattern = re.compile(r'^\s*#include\s+<([^>]+)>\s*$')
+    for line in path.read_text().splitlines():
+        match = pattern.match(line)
+        if match:
+            headers.append(match.group(1))
+    if not headers:
+        raise RuntimeError(f"no headers parsed from {path}")
+    return headers
+
+
+def format_header_block(headers: list[str]) -> str:
+    lines = ['static const char* g_idaHeaders[] = {']
+    for index, header in enumerate(headers):
+        suffix = "," if index + 1 < len(headers) else ""
+        lines.append(f'    "{header}"{suffix}')
+    lines.append("};")
+    return "\n".join(lines)
+
+
+def rewrite_runtime_list(headers: list[str], path: Path) -> bool:
+    text = path.read_text()
+    pattern = re.compile(
+        r"static const char\* g_idaHeaders\[\] = \{\n.*?\n\};",
+        re.DOTALL,
+    )
+    replacement = format_header_block(headers)
+    updated, count = pattern.subn(replacement, text, count=1)
+    if count != 1:
+        raise RuntimeError(f"failed to locate g_idaHeaders block in {path}")
+    if updated == text:
+        return False
+    path.write_text(updated)
+    return True
+
+
+def scan_sdk_dir(path: Path) -> list[str]:
+    return sorted(p.name for p in path.iterdir() if p.is_file())
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--check", action="store_true",
+                        help="report drift but do not rewrite files")
+    parser.add_argument("--sdk-dir", type=Path,
+                        help="optional IDA SDK include dir to scan for uncatalogued headers")
+    args = parser.parse_args()
+
+    headers = parse_umbrella_headers(IDA_SDK_H)
+
+    # Verify no excluded headers leaked into ida_sdk.h
+    leaked = EXCLUDED_HEADERS & set(headers)
+    if leaked:
+        for hdr in sorted(leaked):
+            print(f"ERROR: excluded header '{hdr}' found in {IDA_SDK_H.name}", file=sys.stderr)
+        if args.check:
+            return 1
+        # In sync mode, filter them out before writing
+        headers = [h for h in headers if h not in EXCLUDED_HEADERS]
+
+    current = IDALIB_SETUP.read_text()
+    desired_block = format_header_block(headers)
+    drifted = desired_block not in current
+
+    if args.check:
+        print("runtime header list:", "out of sync" if drifted else "in sync")
+    else:
+        changed = rewrite_runtime_list(headers, IDALIB_SETUP)
+        print("runtime header list:", "updated" if changed else "already in sync")
+
+    if args.sdk_dir:
+        sdk_headers = scan_sdk_dir(args.sdk_dir)
+        curated = set(headers)
+        excluded_found = [h for h in sdk_headers if h in EXCLUDED_HEADERS]
+        extras = [h for h in sdk_headers
+                  if h not in curated and h not in EXCLUDED_HEADERS]
+        print(f"SDK scan: {len(sdk_headers)} headers, "
+              f"{len(extras)} not in ida_sdk.h, "
+              f"{len(excluded_found)} excluded")
+        for hdr in extras:
+            print(f"  {hdr}")
+        if excluded_found:
+            print(f"  (excluded: {', '.join(excluded_found)})")
+
+    return 1 if args.check and drifted else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
