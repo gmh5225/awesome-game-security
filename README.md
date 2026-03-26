@@ -720,9 +720,10 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/korcankaraokcu/PINCE [For Linux]
 - https://github.com/djolertrk/kLLDB [LLDB based debugger for Linux Kernel]
 - https://github.com/mrexodia/TitanHide
-- https://github.com/Air14/HyperHide 
-- https://github.com/HyperDbg/HyperDbg
-- https://github.com/gmh5225/vt-debuger
+- https://github.com/Air14/HyperHide [VT debuger]
+- https://github.com/HyperDbg/HyperDbg [VT debuger]
+- https://github.com/gmh5225/vt-debuger [VT debuger]
+- https://github.com/kkpwn/ErisDbg [VT debuger]
 - https://github.com/teemu-l/execution-trace-viewer
 - https://github.com/changeofpace/Force-Page-Protection [Bypass Remap Memory]
 - https://github.com/icsharpcode/ILSpy [For Unity]
