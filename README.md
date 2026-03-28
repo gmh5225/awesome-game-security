@@ -2078,6 +2078,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/0xJs/BYOVD_EDRKiller/tree/main/BdApiUtil [BdApiUtil64.sys]
 - https://github.com/gmh5225/BYOVD/tree/main/Wsftprm-Killer [wsftprm.sys]
 - https://github.com/0xJs/BYOVD_EDRKiller/tree/main/Wsftprm [wsftprm.sys]
+- https://github.com/xM0kht4r/AV-EDR-Killer [wsftprm.sys]
 - https://github.com/0xJs/BYOVD_EDRKiller/tree/main/truesight [truesight.sys]
 - https://github.com/kyxiaxiang/360WFP_Exploit [BYOVD: Use 360netmon_x64.sys_wfp ​​WFP driver to block EDR/XDR network connection]
 - https://blog.talosintelligence.com/decrement-by-one-to-rule-them-all [AsIO3.sys]
