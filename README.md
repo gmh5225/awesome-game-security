@@ -2090,6 +2090,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/symeonp/Lenovo-CVE-2025-8061 [PoC for popping a system shell against the LnvMSRIO.sys driver]
 - https://github.com/gmh5225/Killer [Non HVCI Block listed - Microsoft signed driver exploited to kill AV/EDR's processes]
 - https://github.com/andreisss/KslDump [PPL LSASS dump via Defender KslD.sys — legacy on-disk driver, IOCTL 0x222044 + MmCopyMemory read]
+- https://github.com/xM0kht4r/VEN0m-Ransomware [IMFForceDelete.sys]
+- https://github.com/ZeroMemoryEx/CVE-2025-26125 [IMFForceDelete.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
@@ -2149,7 +2151,6 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/NullDriverCheat [NtOpenCompositionSurfaceSectionInfo]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/560809-firmwaretablehandler.html [FirmwareTableHandler]
 - https://github.com/oakboat/DataPtrHookWin11 [NtUserSetGestureConfig]
-- 
 - https://github.com/GetRektBoy724/Win32kHooker [.data ptr swapper for newer win32k versions]
 
 > EFI Driver
