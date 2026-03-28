@@ -3619,6 +3619,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/KitsuPE [PE]
 - https://github.com/KooroshRZ/Evader [PE]
 - https://github.com/greyb1t/GreyM [PE]
+- https://github.com/xM0kht4r/2Pack [Rust Based PE & Shellcode Packer]
 - https://github.com/DavidBuchanan314/stelf-loader [ELF X64 loader]
 - https://github.com/frank2/oxide [Written by Rust]
 - https://github.com/Washi1337/AwaitFuscator [.NET]
