@@ -105,6 +105,16 @@ This skill covers layered anti-cheat design across kernel drivers, privileged se
 - Hypervisor and driver trust detection
 - VAD and executable memory inspection
 
+### Hypervisor-Level Components
+```
+- EPT-based memory access monitoring
+- Callback list write protection via EPT hooks
+- ETW structure integrity enforcement
+- AC driver code page protection (prevent patching)
+- VMCALL interface for policy configuration from kernel driver
+- VM exit handlers for EPT violations on protected regions
+```
+
 ### Server-Side Components
 - Statistical analysis
 - Replay verification
@@ -154,11 +164,56 @@ This skill covers layered anti-cheat design across kernel drivers, privileged se
 - Secure Boot
 - TPM-backed attestation considerations
 
-### Virtualization
+### Virtualization Detection
 - VT-x/AMD-V detection
 - Hypervisor presence checks
 - VM escape detection
 - Timing-based detection
+
+### Hypervisor-Based Defense for Anti-Cheat
+```
+Concept:
+- Use hypervisor (EPT/SLAT) to enforce anti-cheat protections
+  from a privilege level above the kernel
+- Even if attacker achieves kernel R/W (BYOVD, exploit),
+  hypervisor-level enforcement remains intact
+- EPT hooks replace traditional kernel hooks:
+  operate outside the guest OS, invisible to kernel-level rootkits
+
+EPT Hook Protection Targets:
+- Anti-cheat driver executable pages
+  → Prevents attackers from patching AC driver code in memory
+- Kernel callback lists (PsSetCreateProcessNotifyRoutine, ObRegisterCallbacks)
+  → Write authorization moved to hypervisor; kernel-level callback removal denied
+- ETW-related structures
+  → Unauthorized writes trigger EPT violations, caught by hypervisor
+- EPP/AC process memory
+  → Protects security software from silent tampering
+
+Hypervisor vs Kernel-Level Threats:
+- Common kernel-level attack chain:
+  1. Attacker uses BYOVD or kernel exploit for R/W primitives
+  2. Patches callbacks to remove AC notifications
+  3. Tampers with ETW to disable telemetry
+  4. Modifies AC driver code to blind detection
+- With hypervisor defense:
+  1. Same kernel R/W primitives obtained
+  2. Write to protected callback list → EPT violation → VM exit
+  3. Hypervisor evaluates context and denies unauthorized modification
+  4. AC callbacks and telemetry remain intact
+
+Advantages:
+- Higher privilege than kernel — cannot be disabled by kernel rootkits
+- Transparent to guest: no kernel patches needed
+- Effective even after full kernel compromise
+- Complements existing kernel-mode detection (callbacks, signatures, scans)
+
+Limitations:
+- Requires hardware virtualization support (VT-x/AMD-V)
+- Performance overhead from VM exits on protected region access
+- Complexity: must handle nested virtualization (VMware, Hyper-V)
+- DMA attacks bypass hypervisor memory protections (separate threat)
+```
 
 ## Ethical Considerations
 

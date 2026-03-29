@@ -56,12 +56,33 @@ This skill covers Windows kernel internals that matter for game security researc
 - WHQL certification
 ```
 
-### Hypervisor Code Integrity (HVCI)
+### Virtualization-Based Security (VBS)
 ```
-- VBS-based protection
-- Kernel code integrity
-- Driver compatibility requirements
-- Memory restrictions
+Architecture:
+- Uses the Windows hypervisor to create an isolated execution environment
+- Splits the system into Virtual Trust Levels (VTLs)
+  - VTL0: Normal world — standard Windows kernel and user-mode processes
+  - VTL1: Secure world — Secure Kernel, security policy enforcement
+- Even if VTL0 kernel is fully compromised, VTL1 remains isolated
+- Three main buckets:
+  - Memory-protection features (HVCI)
+  - Virtual Trust Levels (VTL0/VTL1 separation)
+  - VBS enclaves (isolated execution for selected workloads)
+```
+
+### Hypervisor-Enforced Code Integrity (HVCI)
+```
+- Also known as Memory Integrity
+- Ensures only trusted, validated code executes in kernel mode
+- Combines Windows hypervisor + Secure Kernel (VTL1) for enforcement
+- Key mechanism: W→X transition restriction
+  - Executable kernel pages cannot become writable
+  - Writable pages cannot become executable without re-validation
+- Enforcement pipeline:
+  - Code integrity policy defines what is trusted
+  - Hypervisor memory enforcement via second-stage address translation (EPT/SLAT)
+  - Once a kernel page is validated, strict execution rules are enforced
+- Driver compatibility requirements: drivers must be HVCI-compatible
 ```
 
 ### Secure Boot
@@ -268,21 +289,207 @@ MmMapLockedPagesSpecifyCache
 
 ## Hypervisor Development
 
-### Intel VT-x
-- VMCS configuration
-- EPT (Extended Page Tables)
-- VM exits handling
+### Hypervisor Types
+```
+Type 1 (bare-metal):
+- Runs directly on hardware
+- Examples: VMware ESXi, Microsoft Hyper-V, Xen
+- Used for VBS, production security enforcement
 
-### AMD-V
-- VMCB structure
-- NPT (Nested Page Tables)
-- SVM operations
+Type 2 (hosted):
+- Runs on top of a host operating system
+- Examples: Oracle VirtualBox, VMware Workstation
+- Common for research, development, and testing
+```
+
+### Hardware Virtualization Platforms
+```
+Intel VT-x:
+- Introduced 2005, widely supported on modern Intel CPUs
+- Foundation for VMCS, EPT, VM exits
+
+AMD-V (SVM):
+- AMD's counterpart to VT-x, also introduced 2005
+- VMCB structure, NPT (Nested Page Tables)
+
+ARM Virtualization Extensions:
+- EL2 (hypervisor mode) and stage-2 memory translation
+- Used on ARM platforms for mobile and embedded security
+```
+
+### Intel VT-x Core Concepts
+
+#### VMCS (Virtual Machine Control Structure)
+```
+Central data structure for Intel VT-x:
+- Describes guest state, host state, and virtualization controls
+- Tells the processor:
+  - What state to restore on VM entry
+  - What state to save on VM exit
+  - Which events transfer control back to the hypervisor
+
+Guest/Host State Areas:
+- Control registers (CR0, CR3, CR4)
+- Segment registers (CS, SS, DS, ES, FS, GS)
+- Debug registers (DR7 — hardware breakpoints)
+- Descriptor-table registers (GDTR, IDTR)
+- Key fields:
+  - CR3: root of guest page tables, central to virtual memory
+  - GDTR/IDTR: Global/Interrupt Descriptor Tables
+  - CS/SS: code and stack segments
+  - DR7: hardware breakpoint control
+
+Control Fields:
+- Pin-based controls
+- Primary processor-based controls
+- Secondary processor-based controls
+- Events that cause VM exits:
+  - CPUID interception
+  - INVLPG interception
+  - Control-register access
+  - EPT violations
+  - MSR access
+```
+
+#### EPT (Extended Page Tables)
+```
+Intel's implementation of SLAT (Second-Level Address Translation):
+- Gives the hypervisor independent control over guest memory
+- Two-stage address translation pipeline:
+  1. GVA → GPA: Guest Virtual → Guest Physical (via guest page tables, rooted at CR3)
+  2. GPA → HPA: Guest Physical → Host Physical (via EPT, rooted at EPTP in VMCS)
+- Guest believes it owns its own memory mappings
+- Hypervisor has a second, independent layer controlling:
+  - What physical memory is reachable
+  - What permissions apply (read/write/execute)
+
+EPT Hierarchy:
+- PML4 → PDPT → PD → PT (4-level page table)
+- Each entry carries read/write/execute permissions
+- EPT violations trigger VM exits when access permissions are violated
+
+Page Table Entries (PTE):
+- Maps GVA to GPA
+- Carries: read/write, supervisor-only, caching, software-defined bits
+- Guest PTEs and EPT serve different roles:
+  - Guest PTE: controls guest's view of memory
+  - EPT: controls hypervisor's view of the guest
+```
+
+#### VM Exits & VMCALL
+```
+VM Exits:
+- Occur when configured events happen in the guest
+- Triggers: CPUID, CR access, I/O instructions, EPT violations, MSR access
+- On exit: processor saves guest state (per VMCS), restores host state,
+  records exit reason for hypervisor handler
+
+VMCALL:
+- Guest intentionally transfers control to hypervisor
+- Similar in concept to a system call (guest → hypervisor)
+- Used for guest-hypervisor communication interfaces
+```
+
+#### Nested Virtualization
+```
+- Running a hypervisor inside a VM managed by another hypervisor
+- Useful for research, testing, and development
+- Adds complexity: multiple layers participate in the same virtualization flow
+- Relevant for testing hypervisor-based defense under VMware/Hyper-V
+```
+
+### AMD-V (SVM)
+- VMCB (Virtual Machine Control Block) structure
+- NPT (Nested Page Tables) — AMD's SLAT equivalent
+- SVM operations (VMRUN, VMSAVE, VMLOAD)
 
 ### Use Cases
 - Memory hiding
 - Syscall interception
 - Security monitoring
 - Anti-cheat evasion
+- EPT-based memory protection and introspection
+
+## Hypervisor-Based Defense
+
+### Concept
+```
+- Security approach using virtualization primitives to enforce protections
+  from a higher privilege level than the guest kernel
+- Moves security decisions into an isolated execution environment
+  that a compromised kernel cannot easily tamper with
+- Present across major OS platforms:
+  - Windows: Virtualization-Based Security (VBS)
+  - Android: Android Virtualization Framework (AVF)
+  - Apple: Secure execution environments, hardware-backed isolation
+```
+
+### EPT Hooks as Defensive Primitives
+```
+Mechanism:
+- Instead of patching the guest kernel, modify EPT permissions
+- Specific memory accesses trigger EPT violations → VM exit
+- Hypervisor inspects the access and decides: allow, deny, or log
+
+Example: Watching writes to a sensitive region
+1. Remove write permission from the EPT entry for target region
+2. Guest runs normally until it attempts a write to that region
+3. EPT violation → VM exit → hypervisor receives control
+4. Hypervisor evaluates context:
+   - Which module performed the access
+   - What memory was touched
+   - Whether the access is authorized
+5. Decision: allow write, deny and return, or log and continue
+
+Advantages over traditional kernel hooks:
+- Operate outside the guest OS
+- Remain effective even if guest kernel is compromised
+- Transparent to guest-level detection
+- Cannot be removed by kernel-level rootkits
+```
+
+### Protectable Assets via EPT
+```
+- Executable pages of EPP (Endpoint Protection Platform) drivers
+  → Prevents silent patching of security software
+- ETW-related structures
+  → Unauthorized writes fault into hypervisor
+- Callback/callout/routine lists (PsSetCreateProcessNotifyRoutine, etc.)
+  → Write authorization moved outside the guest kernel
+- Critical kernel data structures
+  → PatchGuard-protected regions, SSDT, IDT
+```
+
+### Threat Model for Hypervisor Defense
+```
+Assumes kernel compromise has already happened:
+- Attacker has kernel code execution
+- Attacker can load vulnerable drivers (BYOVD)
+- Attacker can modify kernel memory
+- Traditional kernel-resident protections are untrustworthy
+
+Hypervisor advantage:
+- Sits above the guest kernel in privilege hierarchy
+- Enforces policies from a higher privilege layer
+- Kernel-level rootkits cannot disable hypervisor-level enforcement
+```
+
+### Attack Scenario: BYOVD vs EPT Protection
+```
+Without hypervisor defense:
+1. Attacker loads vulnerable signed driver
+2. Gains kernel R/W primitives
+3. Patches callback list to remove EPP callbacks
+4. EPP is blinded — attacker operates undetected
+
+With EPT-based defense:
+1. Attacker loads vulnerable signed driver
+2. Gains kernel R/W primitives
+3. Attempts to patch callback list
+4. EPT violation triggers VM exit
+5. Hypervisor catches the write, evaluates context
+6. Write is denied — callback list remains intact
+```
 
 ## Resource Organization
 
