@@ -1562,6 +1562,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/guheng-re/unflat [unflattener]
 - https://github.com/Dump-GUY/ApplyCalleeTypeEx [ApplyCalleeType reborn for IDA Pro 9.3 — apply function prototype to indirect CALL for correct decompiler/disasm; IDA 8.x–9.3+]
 - https://github.com/allthingsida/idacpp [A C++ REPL for IDA Pro / IDA C++ SDK]
+- https://github.com/milankovo/ida-search [An IDA Pro 9.x plugin that brings 010 Editor-style type-aware binary search to IDA]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
