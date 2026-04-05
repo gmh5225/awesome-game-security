@@ -2689,6 +2689,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/MapleNecrocer [MapleStory Client Emulator]
 - https://github.com/gmh5225/maplestory-artale-explab [Experience gain & HP/MP cost lab for MapleStory Worlds Artale]
 - https://github.com/gmh5225/MapleStoryAutoLevelUp [An auto level up script for Maple Story Artale]
+- https://github.com/tingwei1111/MapleStory-YOLOv8-Training [YOLOv8 training project for MapleStory object detection using Apple MPS acceleration]
 
 > Game:Minecraft
 - [A minecraft server backend written in c++](https://github.com/gmh5225/minecpp)
