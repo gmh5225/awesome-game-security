@@ -1265,6 +1265,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/abcz316/SKRoot-linuxKernelRoot
 - https://github.com/0x36/Pixel_GPU_Exploit
 - https://github.com/0xCD4/SSL-bypass [Root Detection & SSL Bypass Script]
+- https://github.com/eltavine/Duck-Detector-Refactoring [DuckDetector refactor: Android local device-integrity inspector for root tampering, runtime hooking, mount anomalies, attestation trust, and virtualization evidence]
 
 > Android Kernel driver development
 - https://github.com/gmh5225/AndroidDriveSignity [Bypass driver signature verification in Android kernel(ARMv8.3)]
