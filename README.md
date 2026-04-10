@@ -1125,6 +1125,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Exo1i/MagiskHluda [Run a more undetectable frida server on boot using magisk]
 - https://github.com/suifei/fridare [Powerful Frida repackaging tool for iOS and Android. Easily modify Frida servers to enhance stealth and bypass detection]
 - https://github.com/kkkbbb/rustFrida [Frida-like Android ARM64 hook — QuickJS, Java/native/stealth hook, QBDI; pairs with wxshadow (mkpms)]
+- https://github.com/TheQmaks/phantom-frida [Build anti-detection Frida server from source]
 
 > Hook ART(android)
 - https://github.com/PAGalaxyLab/YAHFA
