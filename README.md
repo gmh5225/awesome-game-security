@@ -1327,6 +1327,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/34306/mdc0 [CVE-2025-24203]
 - https://github.com/jailbreakdotparty/dirtyZero [CVE-2025-24203]
 - https://github.com/rooootdev/lara [WIP darksword kexploit implementation; iOS 17.1.1-26.0.1 tested; includes font overwrite, app bypass, file manager, and DirtyZero2 experiments]
+- https://github.com/zeroxjf/lightsaber [iOS 18.4-18.6.2 userland exploit chain with JS injection into SpringBoard and other processes. Derived from DarkSword]
 - https://github.com/staturnzz/oob_entry [iOS 3.0-10.3.4 tfp0 kernel exploit]
 - https://github.com/khanhduytran0/coruna [Leaked iOS exploit toolkit — WebKit chains for multiple iOS versions, partially deobfuscated]
 - https://github.com/crazymind90/CVE-2026-XNU-AIO-KEVENT-UAF [XNU kern_aio.c AIO+kevent UAF; sandbox app, no entitlements; panic/double-free; iOS 26.2, patched 26.3]
