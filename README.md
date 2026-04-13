@@ -2090,6 +2090,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/xM0kht4r/AV-EDR-Killer [wsftprm.sys]
 - https://github.com/0xJs/BYOVD_EDRKiller/tree/main/truesight [truesight.sys]
 - https://github.com/kyxiaxiang/360WFP_Exploit [BYOVD: Use 360netmon_x64.sys_wfp ​​WFP driver to block EDR/XDR network connection]
+- https://github.com/sai2fast/DsArk64 [BYOVD: DsArk64.sys (Qihoo 360) - WHQL-signed, process kill from ring 0 + kernel R/W]
 - https://blog.talosintelligence.com/decrement-by-one-to-rule-them-all [AsIO3.sys]
 - https://github.com/gmh5225/Killer-Exercice [An Exercice for Red Team to Reverse & Exploit, that's a valide BYOVD Killer, not HVCI Blocklisted, and not in LOLBIN]
 - https://github.com/gmh5225/ampa.sys-exp [ampa.sys]
