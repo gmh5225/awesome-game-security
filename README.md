@@ -894,6 +894,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/LostOxygen/gnn_deobfuscation [Mixed boolean arithmetic deobfuscation using graph neural networks]
 - https://github.com/MBA-research/mba-wasm [Mixed Boolean-Arithmetic in Rust for WebAssembly]
 - https://github.com/trailofbits/CoBRA [Coefficient-Based Reconstruction of Arithmetic — a Mixed Boolean-Arithmetic (MBA) expression simplifier for deobfuscation]
+- https://github.com/thalium/rumba [Cracking MBAs - An MBA simplification library]
 
 
 
