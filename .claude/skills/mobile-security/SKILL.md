@@ -16,15 +16,32 @@ This skill covers mobile security resources from the awesome-game-security colle
 - `Cheat > Frida`
 - `Cheat > Hook ART(android)`
 - `Cheat > Hook syscall(android)`
+- `Cheat > Android Terminal Emulator`
 - `Cheat > Android File Explorer`
 - `Cheat > Android Memory Explorer`
+- `Cheat > Android Application CVE`
+- `Cheat > Android Kernel CVE`
+- `Cheat > Android Bootloader Bypass`
+- `Cheat > IoT / Smart devices`
+- `Cheat > Android ROM`
+- `Cheat > Android Device Trees`
+- `Cheat > Android Kernel Source`
+- `Cheat > Android Root`
 - `Cheat > Android Kernel driver development`
 - `Cheat > Android Kernel Explorer`
 - `Cheat > Android Kernel Driver`
+- `Cheat > Android Network Explorer`
+- `Cheat > Android memory loading`
 - `Cheat > IOS jailbreak`
+- `Cheat > IOS Memory Explorer`
+- `Cheat > IOS File Explorer`
+- `Cheat > IOS App Packaging`
+- `Cheat > Injection:Android`
+- `Cheat > Injection:IOS`
 - `Anti Cheat > Detection:Android root`
 - `Anti Cheat > Detection:Magisk`
 - `Anti Cheat > Detection:Frida`
+- `Some Tricks > Android`
 - `Android Emulator`
 - `IOS Emulator`
 
@@ -105,6 +122,34 @@ Interceptor.attach(Module.findExportByName("libgame.so", "function_name"), {
 - **xHook**: PLT hook library
 - **Dobby**: Multi-platform hook framework
 
+### Modern Root Solutions
+
+#### KernelSU
+```
+- Kernel-based root solution, works at kernel level (no /system modification)
+- Module system compatible with Magisk modules via KSU module API
+- Stealth advantage: no su binary on filesystem, harder to detect
+- Requires custom kernel or GKI (Generic Kernel Image) patching
+- APatch: newer alternative, patches boot.img with KernelPatch
+```
+
+#### APatch
+```
+- Patches Android kernel at boot via KernelPatch
+- No need for custom kernel source (works on stock GKI kernels)
+- Module support similar to Magisk/KernelSU
+- Root process runs within kernel context
+```
+
+#### Root Solution Comparison
+```
+| Solution  | Level       | Stealth | GKI Support | Module System |
+|-----------|-------------|---------|-------------|---------------|
+| Magisk    | User/Init   | Medium  | Yes         | Mature        |
+| KernelSU  | Kernel      | High    | Yes         | Growing       |
+| APatch    | Kernel      | High    | Yes         | Growing       |
+```
+
 ### Root Detection Bypass
 
 #### Common Checks
@@ -118,10 +163,11 @@ Interceptor.attach(Module.findExportByName("libgame.so", "function_name"), {
 ```
 
 #### Bypass Methods
-- **Magisk Hide**: Built-in root hiding
+- **Magisk DenyList / Shamiko**: Modern root hiding (replaces MagiskHide)
 - **LSPosed/EdXposed**: Xposed framework hooks
 - **Frida scripts**: Hook detection functions
 - **APK patching**: Remove detection code
+- **KernelSU SU isolation**: Process-level root visibility control
 
 ### Zygisk Modules
 
@@ -282,6 +328,80 @@ Java.perform(function() {
 3. Hide injection footprint
 4. Timing attack consideration
 5. Clean environment emulation
+```
+
+## eBPF-Based Tools
+
+### Tracing & Hooking
+```
+- stackplz: eBPF-based stack trace tool for Android
+- eDBG: eBPF-powered debugger for Android processes
+- tracee: Aqua Security's eBPF runtime security tool (Linux/Android)
+- eBPF hooking: attach to tracepoints, kprobes, uprobes without kernel module
+```
+
+### Advantages Over Traditional Approaches
+```
+- No kernel module compilation required (runs in eBPF VM)
+- Works on stock GKI kernels with BTF support
+- Lower detection surface than kernel driver injection
+- CO-RE (Compile Once, Run Everywhere) portability
+- Safe: eBPF verifier prevents kernel crashes
+```
+
+## Android Kernel Driver Development
+
+### Development Patterns
+```
+- Loadable kernel module (LKM) for older kernels
+- GKI-compatible modules via vendor_dlkm partition
+- Kernel build scripts: build from AOSP source or vendor BSP
+- Device Trees: hardware description for board-specific drivers
+```
+
+### Common Use Cases in Game Security
+```
+- Process memory access: /dev/custom_mem → read/write target process
+- Syscall hooking: __NR_read, __NR_write interception
+- Binder hooking: intercept IPC transactions
+- GPU memory inspection: access GPU buffers directly
+```
+
+### Android Kernel Source
+```
+- AOSP Common Kernel (ACK): google/common branch
+- GKI: Generic Kernel Image for Android 12+
+- Vendor-specific: Qualcomm (CodeAurora), MediaTek, Samsung Exynos
+- Build system: build/build.sh or Bazel-based (newer)
+```
+
+## HarmonyOS / OpenHarmony
+
+```
+- HarmonyOS (Huawei): abc file format for compiled apps
+- arkdecompiler: decompile HarmonyOS abc bytecode
+- OpenHarmony: open-source base, growing ecosystem
+- Security model differs from Android: distributed capabilities
+- Reverse engineering challenges: new bytecode VM, different IPC
+```
+
+## Android CVE Research
+
+### Application-Level CVEs
+```
+- WebView RCE (CVE-based exploit chains)
+- Intent redirection / deep link abuse
+- Content provider data leaks
+- Serialization vulnerabilities (Parcel, Bundle)
+```
+
+### Kernel-Level CVEs
+```
+- Use-after-free in Binder driver
+- Privilege escalation via ion/DMA-BUF
+- GPU driver vulnerabilities (Adreno, Mali, PowerVR)
+- SELinux policy bypass chains
+- Reference: Android Security Bulletins (monthly)
 ```
 
 ## Emulator Considerations

@@ -13,18 +13,47 @@ This skill covers game-hacking techniques documented in the awesome-game-securit
 
 - `Cheat > Debugging`
 - `Cheat > Packet Sniffer&Filter`
+- `Cheat > Packet Capture&Parse`
 - `Cheat > SpeedHack`
-- `Cheat > Injection:*`
+- `Cheat > Injection:Windows`
+- `Cheat > Injection:Linux`
+- `Cheat > Injection:Android`
+- `Cheat > Injection:IOS`
+- `Cheat > Injection:PlayStation`
+- `Cheat > DLL Hijack`
 - `Cheat > Hook`
+- `Cheat > Anti Signature Scanning`
 - `Cheat > RPM`
 - `Cheat > DMA`
 - `Cheat > W2S`
 - `Cheat > Overlay`
+- `Cheat > Render/Draw`
+- `Cheat > UI Interface`
+- `Cheat > Vulnerable Driver`
 - `Cheat > Driver Communication`
+- `Cheat > EFI Driver`
+- `Cheat > QEMU/KVM/PVE/VBOX`
+- `Cheat > Wine`
+- `Cheat > Anti Screenshot`
+- `Cheat > Spoof Stack`
+- `Cheat > Hide`
+- `Cheat > Anti Forensics`
+- `Cheat > Triggerbot & Aimbot`
+- `Cheat > WallHack`
 - `Cheat > HWID`
+- `Cheat > Bypass Page Protection`
+- `Cheat > SDK CodeGen`
 - `Cheat > Game Engine Explorer:*`
+- `Cheat > Explore UWP`
 - `Cheat > Explore AntiCheat System:*`
 - `Cheat > Game:*`
+- `Cheat > Launcher Abuser`
+- `Cheat > Linux Kernel Explorer`
+- `Cheat > Cheat Engine Plugins`
+- `Some Tricks > Windows Ring0`
+- `Some Tricks > Windows Ring3`
+- `Some Tricks > Linux`
+- `Some Tricks > Android`
 
 ## Escalation Model
 
@@ -145,21 +174,115 @@ This skill covers game-hacking techniques documented in the awesome-game-securit
 - Hardware-based (FPGA)
 ```
 
+## EFI/UEFI Cheats
+
+### Boot-Time Loading
+```
+- EFI manual map: load unsigned driver payload during UEFI boot phase
+- ExitBootServices hook: intercept Windows boot to inject kernel code
+- Runtime DXE drivers: persist across OS boot via EFI runtime services
+- GetVariable/SetVariable: communicate between EFI and OS runtime
+```
+
+### EFI-Based Memory Access
+```
+- Map physical memory via EFI runtime services
+- Bypass DSE entirely (code runs before Windows kernel loads)
+- Survive Secure Boot if firmware is compromised or test-signed
+- Combine with DMA for maximum stealth
+```
+
+### Detection Challenges
+```
+- No driver load event (PsSetLoadImageNotifyRoutine never fires)
+- Not visible in MmUnloadedDrivers or PiDDBCacheTable
+- Secure Boot + TPM attestation is primary defense
+- Firmware integrity measurement (UEFI capsule verification)
+```
+
+## HWID Spoofing
+
+### Targets
+```
+- Disk serial: IOCTL_STORAGE_QUERY_PROPERTY, SMART data
+- NIC MAC address: NDIS OID_802_3_PERMANENT_ADDRESS
+- SMBIOS: motherboard serial, system UUID, BIOS vendor
+- GPU serial: registry-based or NVAPI/ADL queries
+- Monitor EDID: display serial number
+- Volume serial: NtQueryVolumeInformationFile
+- TPM EK: Endorsement Key fingerprint
+```
+
+### Techniques
+```
+- Disk filter driver: intercept IOCTL and replace serial in response
+- Registry value spoofing: modify cached hardware IDs
+- SMBIOS table patching: modify raw SMBIOS memory region
+- NIC driver hook: replace MAC in NDIS miniport response
+- Full HWID spoofer: coordinated spoofing across all identifiers
+```
+
+## Stack Spoofing
+
+### Return Address Spoofing
+```
+- Replace return address on stack before API call
+- Restore original after call returns
+- Evades stack-walk-based detection (RtlWalkFrameChain)
+- Techniques: JMP RBX gadget, synthetic frames, fiber-based
+```
+
+### Call Stack Reconstruction
+```
+- Build fake but plausible call stack frames
+- Match expected module return addresses (ntdll, kernel32)
+- Evade NtQueryInformationThread stack inspection
+- Tools: SpoofCallStack, Vulcan, CallStackSpoofer
+```
+
+### Detection & Evasion
+```
+- Anti-cheat walks thread stacks looking for non-module returns
+- Stack unwinding via .pdata / UNWIND_INFO validation
+- Spoofed stacks must pass RtlVirtualUnwind consistency checks
+```
+
 ## Driver Communication
 
-### Methods
-- IOCTL-based
-- Shared memory
-- Registry callbacks
-- Syscall hooks
-- Data pointer swaps
+### Full Taxonomy (40+ methods in README)
+```
+IOCTL-based:
+- Standard DeviceIoControl with custom control codes
+- Buffered I/O, Direct I/O, METHOD_NEITHER
 
-### Common Patterns
-```cpp
-// Data pointer swap example
-NtUserGetObjectInformation
-NtConvertBetweenAuxiliaryCounterAndPerformanceCounter
-Win32k syscall hooks
+Data pointer swaps (abusing legitimate syscalls):
+- NtUserGetObjectInformation
+- NtConvertBetweenAuxiliaryCounterAndPerformanceCounter
+- NtUserRegisterRawInputDevices
+- NtGdiGetCOPPCompatibleOPMInformation
+- NtDxgkGetTrackedWorkloadStatistics
+- NtUserGetPointerInfoList
+- NtUserSetInformationThread
+- NtDCompositionSetChildRootVisual
+- Win32k syscall hooks
+
+Shared memory:
+- Named shared sections (ZwCreateSection + ZwMapViewOfSection)
+- Physical memory mapping
+- Shared event objects for signaling
+
+Callback-based:
+- Registry callbacks (CmRegisterCallbackEx)
+- Minifilter communication ports (FltCreateCommunicationPort)
+- Object callbacks with embedded data
+
+Unconventional channels:
+- Named pipes from kernel
+- Window messages (NtUserPostMessage)
+- ETW provider channels
+- Socket from kernel (Winsock Kernel / WSK)
+- File system filter callbacks
+- Debugging APIs (DbgPrint interception)
 ```
 
 ## World-to-Screen Calculation

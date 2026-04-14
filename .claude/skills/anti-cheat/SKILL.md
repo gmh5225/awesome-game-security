@@ -13,9 +13,37 @@ This skill covers layered anti-cheat design across kernel drivers, privileged se
 
 - `Anti Cheat > Guide`
 - `Anti Cheat > Stress Testing`
+- `Anti Cheat > Driver Unit Test Framework`
 - `Anti Cheat > Anti Debugging`
+- `Anti Cheat > Page Protection`
+- `Anti Cheat > Binary Packer`
+- `Anti Cheat > CLR Protection`
+- `Anti Cheat > Anti Disassembly`
+- `Anti Cheat > Sample Unpacker`
+- `Anti Cheat > Dump Fix`
+- `Anti Cheat > Encrypt Variable`
+- `Anti Cheat > Lazy Importer`
+- `Anti Cheat > Anti-Cheat Programming`
+- `Anti Cheat > Compile Time`
+- `Anti Cheat > Shellcode Engine & Tricks`
+- `Anti Cheat > Obfuscation Engine`
+- `Anti Cheat > Screenshot`
+- `Anti Cheat > Game Engine Protection:*`
 - `Anti Cheat > Open Source Anti Cheat System`
+- `Anti Cheat > Analysis Framework`
 - `Anti Cheat > Detection:*`
+- `Anti Cheat > Signature Scanning`
+- `Anti Cheat > Information System & Forensics`
+- `Anti Cheat > Dynamic Script`
+- `Anti Cheat > Kernel Mode Winsock`
+- `Anti Cheat > Fuzzer`
+- `Anti Cheat > Windows Ring3 Callback`
+- `Anti Cheat > Windows Ring0 Callback`
+- `Anti Cheat > Winows User Dump Analysis`
+- `Anti Cheat > Winows Kernel Dump Analysis`
+- `Anti Cheat > Sign Tools`
+- `Anti Cheat > Backup File / Backup Drivers`
+- `Anti Cheat > Black Signature`
 - `Windows Security Features`
 
 ## Major Anti-Cheat Systems
@@ -213,6 +241,69 @@ Limitations:
 - Performance overhead from VM exits on protected region access
 - Complexity: must handle nested virtualization (VMware, Hyper-V)
 - DMA attacks bypass hypervisor memory protections (separate threat)
+```
+
+## Code Protection Techniques
+
+### Page Protection
+```
+- Executable page guard pages and trap-based integrity monitoring
+- NX bit enforcement and DEP policy
+- PAGE_GUARD + single-step trap for code coverage without patching
+- VirtualProtect monitoring to detect runtime permission changes
+```
+
+### Binary Packing & Encryption
+```
+- PE packers: UPX, Themida, VMProtect, Enigma, MPRESS
+- CLR protection: .NET obfuscation (ConfuserEx, Dotfuscator, .NET Reactor)
+- Encrypt Variable: runtime value encryption to frustrate memory scanners
+- Lazy Importer: compile-time import hiding to avoid IAT-based detection
+- Compile-time techniques: string encryption, constexpr obfuscation, COFF obfuscation
+```
+
+### Shellcode & Obfuscation
+```
+- Shellcode engines: position-independent code generation, syscall stubs
+- Obfuscation engines: OLLVM-based, custom LLVM passes, MBA (Mixed Boolean-Arithmetic)
+- Anti-disassembly: opaque predicates, junk code insertion, control flow flattening
+```
+
+## Heartbeat & Screenshot
+
+### Heartbeat Mechanisms
+```
+- Periodic client-to-server health check packets
+- Encrypted challenge-response with server nonce
+- Timing-based integrity: detect suspended or debugged processes
+- Failure modes: silent disconnect, delayed ban, immediate kick
+```
+
+### Screenshot Capture
+```
+- AC-initiated screen capture for manual or automated review
+- BitBlt / PrintWindow / DXGI desktop duplication
+- Anti-screenshot evasion: overlay hiding, DWM composition bypass
+- Server-side ML classifiers for ESP/overlay detection in captured frames
+```
+
+## Telemetry Pipeline
+
+### Client-Side Collection
+```
+- Module list enumeration and hash reporting
+- Handle table snapshots for suspicious access patterns
+- Stack trace sampling at periodic intervals
+- Driver load events and callback registration state
+- Hardware fingerprint (disk serial, NIC MAC, SMBIOS, GPU)
+```
+
+### Transport & Server-Side
+```
+- Encrypted telemetry channel (TLS + custom encryption layer)
+- Server-side aggregation and anomaly scoring
+- ML-based behavioral clustering for ban waves
+- Replay system integration for suspicious session review
 ```
 
 ## Ethical Considerations

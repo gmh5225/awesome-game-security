@@ -16,6 +16,10 @@ This is a curated collection of resources related to game security, covering bot
 - Defensive research: `Anti Cheat`
 - Platform hardening: `Windows Security Features`
 - Platform-specific ecosystems: `Android Emulator`, `IOS Emulator`, `Windows Emulator`, `Linux Emulator`
+- Supporting infrastructure: `Mathematics`, `3D Graphics`, `AI`, `Image Codec`, `Wavefront Obj`, `Task Scheduler`, `Game Network`, `PhysX SDK`, `Game Develop`, `Game Assets`, `Game Hot Patch`, `Game Testing`, `Game Tools`, `Game Manager`, `Game CI`
+- Platform subsystems: `WSL`, `WSA`
+- Console emulation: `Game Boy`, `Nintendo Switch`, `Xbox`, `PlayStation`
+- Tips and tricks: `Some Tricks`
 
 ## Project Structure
 
@@ -44,7 +48,8 @@ Each category follows this format:
 
 ### Link Format
 
-- Always use full GitHub URLs
+- Always use full GitHub URLs for repositories
+- Non-GitHub links are also supported (blog posts, articles, documentation sites)
 - Add brief descriptions in square brackets `[description]`
 - Use consistent spacing and formatting
 - Group related resources under subcategories with `>`
@@ -60,16 +65,48 @@ Each category follows this format:
 - https://github.com/example/engine [Open source game engine]
 ```
 
+## Skill Routing Guide
+
+When an AI agent receives a query, use this table to select the best skill:
+
+| Query topic | Primary skill | Related skills |
+|---|---|---|
+| EAC, BattlEye, Vanguard, detection, heartbeat, screenshot | anti-cheat | windows-kernel |
+| pcileech, FPGA, DMA, IOMMU, Thunderbolt | dma-attack | anti-cheat |
+| Unreal SDK, Unity IL2CPP, engine structs, Godot, Lumix | game-engine | game-hacking |
+| Memory hacking, injection, overlays, driver comm, HWID spoof | game-hacking | graphics-api |
+| D3D/Vulkan/OpenGL hooks, Present hook, shader interception | graphics-api | game-hacking |
+| Android root, Frida, iOS jailbreak, KernelSU, APatch | mobile-security | game-hacking |
+| IDA, Ghidra, DBI, deobfuscation, binary diffing, MCP RE tools, trap-and-emulate CFT, WHP tracing | reverse-engineering | anti-cheat, windows-kernel |
+| Drivers, callbacks, PatchGuard, HVCI, ETW, pool forensics, WHP API | windows-kernel | anti-cheat, reverse-engineering |
+| Adding resources, README format, link validation | overview | (any) |
+
 ## Main Categories
 
-1. **Game Development**: Engines, renderers, networking, physics
-2. **Graphics APIs**: DirectX, OpenGL, Vulkan hooks and tools
-3. **Cheat/Hacking**: Memory manipulation, injection, bypasses
-4. **Anti-Cheat**: Protection systems, detection methods
-5. **Reverse Engineering**: Debuggers, disassemblers, analysis tools
-6. **Windows Kernel**: Drivers, callbacks, security features
-7. **Web3 Security**: Blockchain, smart contracts, DeFi
-8. **Emulators**: Windows, Linux, Android, iOS, consoles
+All 27 top-level `##` sections in README.md:
+
+1. **Game Engine**: Engines, source code, plugins (Unreal/Unity/Godot/Lumix), detectors
+2. **Mathematics**: Linear algebra, physics libraries
+3. **Renderer**: Software renderers, ray tracing
+4. **3D Graphics**: 3D modeling and graphics resources
+5. **AI**: Machine learning for games
+6. **Image Codec**: Image processing libraries
+7. **Wavefront Obj**: OBJ file parsers
+8. **Task Scheduler**: Job/task scheduling systems
+9. **Game Network**: Networking, KCP, JWT, geolocation
+10. **PhysX SDK**: NVIDIA PhysX resources
+11. **Game Develop**: Development guides, source code, MCP servers, AI agents
+12. **Game Assets / Hot Patch / Testing / Tools / Manager / CI**: Supporting infrastructure
+13. **DirectX**: Guides, hooks, tools, emulation, overlays
+14. **OpenGL**: Guides, source, hooks
+15. **Vulkan**: API, guides, hooks
+16. **Cheat**: Offensive research (debugging, injection, hooking, DMA, overlays, driver comm, EFI, anti-forensics, game-specific)
+17. **Anti Cheat**: Defensive research (protection, detection, callbacks, forensics, signature scanning)
+18. **Some Tricks**: Ring0/Ring3/Linux/Android tricks and techniques
+19. **Windows Security Features**: DSE, PatchGuard, VBS, HVCI, Secure Boot
+20. **WSL / WSA**: Windows Subsystem for Linux/Android
+21. **Windows / Linux / Android / IOS Emulator**: Platform emulators
+22. **Game Boy / Nintendo Switch / Xbox / PlayStation**: Console emulators and research
 
 ## Contributing Guidelines
 

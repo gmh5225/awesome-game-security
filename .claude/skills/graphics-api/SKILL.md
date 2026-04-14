@@ -13,12 +13,21 @@ This skill covers graphics API resources from the awesome-game-security collecti
 
 - `DirectX > Guide`
 - `DirectX > Hook`
+- `DirectX > Tools`
+- `DirectX > Emulation`
+- `DirectX > Compatibility`
 - `DirectX > Overlay`
+- `OpenGL > Guide`
+- `OpenGL > Source`
 - `OpenGL > Hook`
+- `Vulkan > Guide`
 - `Vulkan > API`
 - `Vulkan > Hook`
 - `Cheat > Overlay`
+- `Cheat > Render/Draw`
+- `Cheat > Anti Screenshot`
 - `Anti Cheat > Screenshot`
+- `Anti Cheat > Detection:Overlay`
 
 ## DirectX
 
@@ -245,6 +254,42 @@ D3DXVECTOR3 WorldToScreen(D3DXVECTOR3 pos, D3DXMATRIX viewProjection) {
 - Performance analysis
 - Shader debugging
 - Frame profiling
+
+## Anti-Screenshot Techniques
+
+### How Anti-Cheat Captures Screenshots
+```
+- BitBlt from game window DC: captures visible content including overlays
+- DXGI Desktop Duplication API: captures composited desktop output
+- IDXGISwapChain::Present interception: grab backbuffer before present
+- PrintWindow: capture specific window contents
+- DirectX/Vulkan frame readback: copy render target to CPU-readable buffer
+- Scheduled captures: random intervals to catch intermittent overlays
+```
+
+### Overlay Evasion Against Screenshot
+```
+- Disable overlay rendering during screenshot frame:
+  - Detect screenshot by hooking BitBlt/PrintWindow in AC module
+  - Suppress ImGui rendering for captured frame
+- DWM composition tricks:
+  - Render to a separate window that DWM excludes from capture
+  - Use WDA_EXCLUDEFROMCAPTURE (SetWindowDisplayAffinity) on overlay window
+- Hardware overlay planes:
+  - Use IDXGIOutput::FindClosestMatchingMode + hardware overlay
+  - Content on hardware overlay plane may not appear in software capture
+- External rendering:
+  - Render on secondary display or capture card output
+  - OBS virtual camera trick: render to virtual camera feed
+```
+
+### Cheat-Side Anti-Screenshot (README > Anti Screenshot)
+```
+- Projects that detect and evade AC screenshot capture
+- Techniques: hook Present to suppress overlay on screenshot frames
+- DWM-based overlays that survive PrintWindow but not BitBlt
+- Kernel-level: suppress screenshot by blocking DC access
+```
 
 ## Anti-Detection Considerations
 

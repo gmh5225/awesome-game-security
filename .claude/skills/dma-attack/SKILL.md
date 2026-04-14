@@ -114,6 +114,30 @@ pcileech write -a 0x12345000 -v 0x41414141
 - Capability structure emulation
 ```
 
+### Firmware Mimicry Details
+```
+Intel I210 NIC Emulation (most common target):
+- Full PCI configuration space replication:
+  - Vendor ID: 0x8086, Device ID: 0x1533 (I210-AT)
+  - Subsystem Vendor/Device matching real OEM boards
+  - Capability list: PCIe cap, MSI-X cap, Power Management
+- BAR layout: 128KB MMIO BAR0, optional I/O BAR2
+- PHY register emulation: basic link status response
+- No actual network traffic needed (NIC appears "cable unplugged")
+
+Intel I226 NIC Emulation (newer boards):
+- Device ID: 0x125C (I226-V)
+- Updated capability structures (PCIe Gen3 vs Gen2)
+- Requires correct ASPM (Active State Power Management) config
+
+Detection vectors anti-cheat can inspect:
+- Device does not respond to real NIC operational commands
+- Missing DMA ring buffer activity (no Tx/Rx descriptors)
+- Power state never transitions (always D0)
+- PCIe link training characteristics differ from real silicon
+- Compare config space values against known-good database
+```
+
 ## Device Emulation
 
 ### Common Emulation Targets
@@ -223,6 +247,66 @@ PHYSICAL_ADDRESS TranslateVA(UINT64 cr3, UINT64 virtualAddr) {
 - Performance counter anomalies
 - Device identity consistency checks
 - Platform attestation and boot-state validation
+```
+
+## Thunderbolt / USB4 DMA
+
+### Attack Surface
+```
+- Thunderbolt 1-4 / USB4 provide direct PCIe tunneling
+- Hot-plug capable: device can be attached at runtime
+- Pre-boot DMA: device has memory access before OS loads
+- Thunderbolt Security Levels:
+  - SL0 (None): no security, legacy mode
+  - SL1 (User Auth): user must approve new devices
+  - SL2 (Secure Connect): device must match a previously approved UUID
+  - SL3 (No PCIe tunneling): completely disables DMA
+```
+
+### Thunderbolt-Specific Attacks
+```
+- Thunderclap: malicious Thunderbolt peripherals bypass IOMMU
+- Device re-identification: change device UUID to bypass SL2
+- OS-level Thunderbolt driver vulnerabilities
+- PCIe tunneling through USB4 hubs
+```
+
+### Defensive Measures
+```
+- Kernel DMA Protection (Windows 10 1803+): automatic IOMMU for hot-plug
+- Thunderbolt firmware verification
+- Platform-level: BIOS setting to disable Thunderbolt PCIe tunneling
+- macOS: T2 chip enforces DMA restrictions on Thunderbolt ports
+```
+
+## Shadow CR3 / Split TLB
+
+### Page Table Manipulation
+```
+- Maintain two sets of page tables (two CR3 values):
+  - "Clean" CR3: points to legitimate page tables visible to anti-cheat
+  - "Shadow" CR3: modified page tables with cheat-accessible mappings
+- Swap CR3 before/after anti-cheat inspection windows
+- Combine with EPT manipulation for hypervisor-level split
+```
+
+### Split TLB Techniques
+```
+- Desync instruction TLB (iTLB) and data TLB (dTLB):
+  - Execute code from one physical page
+  - Read data from another physical page at same virtual address
+- Requires precise TLB invalidation control
+- Hypervisor can create EPT-based split: execute permission on page A,
+  read permission on page B, at same GPA
+- Anti-cheat mitigation: TLB flush + re-walk, serializing instructions
+```
+
+### Detection Challenges
+```
+- Legitimate CR3 value may pass all validation checks
+- Shadow mappings only active during cheat execution windows
+- Requires hypervisor or hardware-level inspection to detect
+- Timing anomalies from frequent CR3 switches may be measurable
 ```
 
 ## Advanced Techniques

@@ -14,10 +14,16 @@ This skill covers Windows kernel internals that matter for game security researc
 - `Cheat > PatchGuard-related`
 - `Cheat > Driver Signature enforcement`
 - `Cheat > Windows Kernel Explorer`
+- `Cheat > EFI Driver` (cross-reference with game-hacking skill)
+- `Cheat > Vulnerable Driver`
 - `Anti Cheat > Detection:Attach`
 - `Anti Cheat > Detection:Hide`
 - `Anti Cheat > Detection:Vulnerable Driver`
+- `Anti Cheat > Detection:Spoof Stack`
+- `Anti Cheat > Windows Ring3 Callback`
 - `Anti Cheat > Windows Ring0 Callback`
+- `Anti Cheat > Information System & Forensics`
+- `Some Tricks > Windows Ring0`
 - `Windows Security Features`
 
 ## Core Kernel Concepts
@@ -215,6 +221,72 @@ NTSTATUS DriverEntry(
 - System call tracing
 ```
 
+## ETW Internals
+
+### Provider / Consumer Model
+```
+Architecture:
+- Providers: kernel or user-mode components that emit events
+  - Manifest-based providers (registered via wevtutil)
+  - TraceLogging providers (self-describing, no manifest)
+  - MOF providers (legacy WMI-based)
+- Consumers: tools that subscribe to and process events
+  - Real-time consumers (ETW sessions)
+  - Log file consumers (.etl files)
+- Controllers: manage sessions (xperf, tracelog, logman)
+
+Key kernel providers:
+  Microsoft-Windows-Kernel-Process (process/thread lifecycle)
+  Microsoft-Windows-Kernel-File (file I/O)
+  Microsoft-Windows-Kernel-Audit-API-Calls (security-sensitive APIs)
+```
+
+### ThreatIntel ETW Provider
+```
+- Microsoft-Windows-Threat-Intelligence
+- Available to PPL (Protected Process Light) and above
+- Events: NtReadVirtualMemory, NtWriteVirtualMemory, NtMapViewOfSection on protected processes
+- Used by EDR and anti-cheat for detecting memory access to protected processes
+- Attackers target: patch EtwThreatIntProvRegHandle or EtwpEventWriteFull
+```
+
+### Common ETW Bypass Patterns
+```
+- Patch EtwEventWrite in ntdll.dll (user-mode ETW silencing)
+- Patch nt!EtwpEventWriteFull in kernel (kernel-mode ETW silencing)
+- NtSetInformationThread(ThreadHideFromDebugger) — hides thread from ETW
+- Remove provider registration by walking EtwRegistration list
+- EPT-based protection can defend ETW structures from tampering
+```
+
+## Pool Allocation & Forensics
+
+### Pool Forensics Artifacts
+```
+PiDDBCacheTable:
+- Tracks historically loaded drivers by hash + timestamp
+- Anti-cheat inspects this to detect BYOVD or test-signed driver loads
+- Attackers attempt to remove entries post-load
+
+MmUnloadedDrivers:
+- Circular buffer of recently unloaded drivers (name + address range)
+- Cannot be cleared from user mode
+- Anti-cheat uses to detect load-unload-reload patterns
+
+PoolBigPageTable:
+- Maps large pool allocations (>= PAGE_SIZE) to owning driver tag
+- Used for: identifying hidden drivers, finding leaked pool allocations
+- Anti-cheat walks this to detect manually mapped driver memory
+```
+
+### Pool Tag Forensics
+```
+- ExAllocatePoolWithTag / ExAllocatePool2: every allocation carries a 4-byte tag
+- Pool tag scanning: identify driver presence by known tags
+- Tool: pooltag.txt (Microsoft), PoolMon, WinDbg !poolfind
+- Anti-cheat technique: scan pool tags for known cheat driver signatures
+```
+
 ### SSDT Hooking (Legacy)
 ```
 - Modify service table entries
@@ -271,20 +343,33 @@ MmMapLockedPagesSpecifyCache
 - API Monitor
 - ETW consumers
 
-## EFI/UEFI Integration
+## EFI/Boot-Time Threats
+
+### EFI Driver Cross-Reference
+```
+The README's > EFI Driver subcategory (under Cheat) contains 30+ projects:
+- EFI bootkit frameworks: UEFI DXE drivers that persist across boots
+- Boot-time memory mappers: inject code before Windows kernel initializes
+- ExitBootServices hooks: intercept Windows boot handoff
+- EFI runtime service abuse: GetVariable/SetVariable for kernel ↔ EFI comm
+
+See also: game-hacking skill for EFI cheat workflows
+```
 
 ### Boot-Time Access
 ```
-- EFI runtime services
-- Boot driver loading
-- Pre-OS execution
+- EFI runtime services persist after ExitBootServices
+- DXE (Driver Execution Environment) phase: full hardware access
+- Pre-kernel execution: no DSE, no PatchGuard, no HVCI enforcement
+- Secure Boot is the primary mitigation (firmware signature verification)
 ```
 
 ### Memory Access
 ```
-- GetVariable/SetVariable
-- Runtime memory mapping
-- Physical memory access
+- GetVariable/SetVariable: pass data between EFI and OS runtime
+- Runtime memory mapping via EFI memory map
+- Physical memory access before Windows memory manager initializes
+- ACPI table injection for persistent low-level modifications
 ```
 
 ## Hypervisor Development
@@ -409,6 +494,30 @@ VMCALL:
 - Security monitoring
 - Anti-cheat evasion
 - EPT-based memory protection and introspection
+
+### Windows Hypervisor Platform (WHP) API
+```
+User-mode hypervisor interface (Windows 10+):
+- WHvCreatePartition / WHvSetupPartition: create VM partition
+- WHvCreateVirtualProcessor: add vCPU
+- WHvMapGpaRange: map host memory into guest physical address space
+- WHvRunVirtualProcessor: enter guest execution, blocks until VM exit
+- WHvGetVirtualProcessorRegisters / Set: read/write guest CPU state
+
+Key capability:
+- Enables hypervisor-assisted analysis from user mode (no kernel driver)
+- Page-level trap handling: set R/W/X permissions per guest page
+- VM exit reasons: memory access violation, CPUID, MSR access, I/O port, syscall
+- Deterministic execution: host controls all guest state and memory
+
+Prerequisites:
+- Enable Windows features: Microsoft-Hyper-V-Hypervisor + HypervisorPlatform
+- Hardware: VT-x or AMD-V support
+- Note: WHP coexists with Hyper-V but conflicts with some third-party hypervisors
+
+See also: reverse-engineering skill → User-Mode Hypervisor-Assisted Tracing
+for analysis workflows built on WHP
+```
 
 ## Hypervisor-Based Defense
 
