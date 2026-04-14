@@ -1360,6 +1360,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - IDA Pro
 - Binary Ninja
 - https://github.com/radareorg
+- https://github.com/radareorg/iaito [Official radare2 GUI (Qt5/6), focused on reverse engineering workflow]
 - https://github.com/gmh5225/ghidra
 - https://github.com/gmh5225/retdec
 - https://github.com/Col-E/Recaf [Java]
