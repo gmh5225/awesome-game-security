@@ -935,6 +935,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ZehMatt/zyemu [x86-64 user mode emulation using Zydis]
 - https://github.com/Nitr0-G/PeVisor [PE]
 - https://github.com/googleprojectzero/TinyInst
+- https://revers.engineering/applied-re-crude-te-for-control-flow-tracing/ [Applied RE: Crude Trap-and-Emulate for control-flow tracing on Windows x64 user mode]
 - https://github.com/revsic/cpp-veh-dbi
 - https://github.com/ZehMatt/CovCane
 - https://github.com/bitdefender/river
