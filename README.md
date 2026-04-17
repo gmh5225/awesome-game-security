@@ -1530,6 +1530,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/L4ys/IDA-WPP-Remover [Remove WPP calls from hexrays decompiled code]
 - https://github.com/0xdea/augur [Augur is a blazing fast IDA Pro headless plugin that extracts strings and related pseudo-code from a binary file]
 - https://github.com/DennyDai/headless-ida [Run IDA scripts headlessly]
+- https://github.com/cpkt9762/ida-cli [Headless IDA Pro MCP server for AI-assisted binary analysis, powered by idalib]
 - https://github.com/gilboz/ida_kernelcache_ng [An IDA Plugin for analyzing iOS kernelcaches]
 - https://github.com/mahmoudimus/ida-taskr [IDA Taskr is a pure Python library for IDA Pro related parallel computing]
 - https://github.com/sigwl/AiDA [An AI-powered assistant for IDA 9.0+ to accelerate reverse engineering of C++ games]
