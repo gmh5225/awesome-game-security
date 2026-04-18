@@ -892,6 +892,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/xtremegamer1/vmdevirt-vtil
 - https://github.com/oureveryday/VMPUnpacker/tree/master [Unpacker]
 - https://github.com/poppopjmp/VMDragonSlayer [Advanced Virtual Machine Detection and Analysis Framework]
+- https://github.com/notsnakesilent/VMPStatic [A static VMProtect unpacker for PE files, supports VMProtect 1.x–3.x and rebuilding unpacked PE images]
 
 > Fix Themida
 - https://github.com/sodareverse/TDE
