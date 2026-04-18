@@ -2107,6 +2107,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/andreisss/KslDump [PPL LSASS dump via Defender KslD.sys — legacy on-disk driver, IOCTL 0x222044 + MmCopyMemory read]
 - https://github.com/xM0kht4r/VEN0m-Ransomware [IMFForceDelete.sys]
 - https://github.com/ZeroMemoryEx/CVE-2025-26125 [IMFForceDelete.sys]
+- https://github.com/KeServiceDescriptorTable/cormem.sys-vulnerable-driver [cormem.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
