@@ -2091,6 +2091,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/xM0kht4r/VEN0m-Ransomware [IMFForceDelete.sys]
 - https://github.com/ZeroMemoryEx/CVE-2025-26125 [IMFForceDelete.sys]
 - https://github.com/KeServiceDescriptorTable/cormem.sys-vulnerable-driver [cormem.sys]
+- https://github.com/Muz1K1zuM/PoisonKiller_bof [PoisonX.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
