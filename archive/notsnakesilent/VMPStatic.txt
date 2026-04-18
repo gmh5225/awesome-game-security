@@ -1,0 +1,1355 @@
+Project Path: arc_notsnakesilent_VMPStatic_7301b3mi
+
+Source Tree:
+
+```txt
+arc_notsnakesilent_VMPStatic_7301b3mi
+├── README.md
+└── main.go
+
+```
+
+`README.md`:
+
+```md
+# VMPStatic
+A static VMProtect unpacker for PE files, compatible with VMProtect 1.x–3.x and capable of reconstructing decompressed PE images
+
+Unlike dynamic unpacker, this tool works without executing the target file. The goal is to recover a usable PE image that can be further analyzed in tools such as IDA, Ghidra, x64dbg, or similar software.
+
+<img width="1113" height="626" alt="image" src="https://github.com/user-attachments/assets/8fea91d2-7340-4973-8a11-d635fc37ef59" />
+
+## Features
+
+- Static VMProtect unpacking  
+- Compatible with VMProtect 1.x, 2.x, and 3.x patterns  
+- Analysis of PE headers and sections  
+- Detection of VMProtect sections and stubs  
+- Reconstruction of packed images  
+- Recovers data hidden by packing, such as strings, resources, and embedded PE files  
+
+## Limitations
+
+- Does not include an import address table fixer  
+- Does not include automatic OEP recovery for all samples  
+- Does not include de-virtualization  
+- Some protected samples may still require manual repair after unpacking  
+
+## Usage
+
+```bash
+vmpstatic.exe packed.exe unpacked.exe
+
+```
+
+`main.go`:
+
+```go
+package main
+
+import (
+	"bytes"
+	"encoding/binary"
+	"fmt"
+	"io"
+	"math"
+	"os"
+	"strings"
+
+	"github.com/ulikunitz/xz/lzma"
+)
+
+const (
+	dosSignature  = 0x5A4D
+	ntSignature   = 0x00004550
+	pe32Magic     = 0x010B
+	pe32PlusMagic = 0x020B
+
+	sectionCntUninitData = 0x00000080
+	sectionMemExecute    = 0x20000000
+
+	dirImport    = 1
+	dirResource  = 2
+	dirBaseReloc = 5
+	dirCLR       = 14
+
+	lzmaPropsSize = 5
+)
+
+type SectionInfo struct {
+	Name             string
+	VirtualSize      uint32
+	VirtualAddress   uint32
+	SizeOfRawData    uint32
+	PointerToRawData uint32
+	Characteristics  uint32
+}
+
+type DataDirectory struct {
+	VirtualAddress uint32
+	Size           uint32
+}
+
+type ImportEntry struct {
+	LibraryName string
+}
+
+type PEFile struct {
+	data            []byte
+	is64            bool
+	sizeOfImage     uint32
+	sizeOfHeaders   uint32
+	entryPointRVA   uint32
+	ntHeadersOffset int
+	sections        []SectionInfo
+	imports         []ImportEntry
+	dataDirectories [16]DataDirectory
+}
+
+type PackerInfo struct {
+	Src uint32
+	Dst uint32
+}
+
+type VMPResult struct {
+	Detected bool
+	Version  string
+	Options  string
+}
+
+type MutationAnalysis struct {
+	Level               string
+	Entropy             float64
+	VirtualizedHandlers int
+	CodeComplexity      float64
+	VMPSectionSize      uint32
+	Confidence          int
+}
+
+func (r VMPResult) String() string {
+	if !r.Detected {
+		return "VMProtect: Not detected"
+	}
+	out := "VMProtect"
+	if r.Version != "" {
+		out += " v" + r.Version
+	}
+	if r.Options != "" {
+		out += " [" + r.Options + "]"
+	}
+	return out
+}
+
+func parsePE(data []byte) (*PEFile, error) {
+	if len(data) < 64 {
+		return nil, fmt.Errorf("file too small to be a PE")
+	}
+
+	if binary.LittleEndian.Uint16(data[0:2]) != dosSignature {
+		return nil, fmt.Errorf("invalid DOS signature")
+	}
+
+	lfanew := int(int32(binary.LittleEndian.Uint32(data[60:64])))
+	if lfanew+24 > len(data) {
+		return nil, fmt.Errorf("NT headers offset 0x%X is out of file bounds", lfanew)
+	}
+
+	if binary.LittleEndian.Uint32(data[lfanew:lfanew+4]) != ntSignature {
+		return nil, fmt.Errorf("invalid NT signature")
+	}
+
+	pe := &PEFile{
+		data:            data,
+		ntHeadersOffset: lfanew,
+	}
+
+	fhOff := lfanew + 4
+	numSections := int(binary.LittleEndian.Uint16(data[fhOff+2 : fhOff+4]))
+	sizeOfOptHeader := int(binary.LittleEndian.Uint16(data[fhOff+16 : fhOff+18]))
+
+	ohOff := fhOff + 20
+	if ohOff+2 > len(data) {
+		return nil, fmt.Errorf("optional header is out of file bounds")
+	}
+
+	magic := binary.LittleEndian.Uint16(data[ohOff : ohOff+2])
+	pe.is64 = (magic == pe32PlusMagic)
+	pe.entryPointRVA = binary.LittleEndian.Uint32(data[ohOff+16 : ohOff+20])
+
+	if pe.is64 {
+		pe.sizeOfImage = binary.LittleEndian.Uint32(data[ohOff+56 : ohOff+60])
+		pe.sizeOfHeaders = binary.LittleEndian.Uint32(data[ohOff+60 : ohOff+64])
+		numDirs := binary.LittleEndian.Uint32(data[ohOff+108 : ohOff+112])
+		ddOff := ohOff + 112
+		for i := 0; i < 16 && uint32(i) < numDirs; i++ {
+			if ddOff+i*8+8 > len(data) {
+				break
+			}
+			pe.dataDirectories[i].VirtualAddress = binary.LittleEndian.Uint32(data[ddOff+i*8:])
+			pe.dataDirectories[i].Size = binary.LittleEndian.Uint32(data[ddOff+i*8+4:])
+		}
+	} else {
+		pe.sizeOfImage = binary.LittleEndian.Uint32(data[ohOff+56 : ohOff+60])
+		pe.sizeOfHeaders = binary.LittleEndian.Uint32(data[ohOff+60 : ohOff+64])
+		numDirs := binary.LittleEndian.Uint32(data[ohOff+92 : ohOff+96])
+		ddOff := ohOff + 96
+		for i := 0; i < 16 && uint32(i) < numDirs; i++ {
+			if ddOff+i*8+8 > len(data) {
+				break
+			}
+			pe.dataDirectories[i].VirtualAddress = binary.LittleEndian.Uint32(data[ddOff+i*8:])
+			pe.dataDirectories[i].Size = binary.LittleEndian.Uint32(data[ddOff+i*8+4:])
+		}
+	}
+
+	sectionsOff := ohOff + sizeOfOptHeader
+	pe.sections = make([]SectionInfo, numSections)
+	for i := 0; i < numSections; i++ {
+		sOff := sectionsOff + i*40
+		if sOff+40 > len(data) {
+			return nil, fmt.Errorf("section header %d is out of file bounds", i)
+		}
+		nameBytes := data[sOff : sOff+8]
+		nameLen := bytes.IndexByte(nameBytes, 0)
+		if nameLen == -1 {
+			nameLen = 8
+		}
+		pe.sections[i] = SectionInfo{
+			Name:             string(nameBytes[:nameLen]),
+			VirtualSize:      binary.LittleEndian.Uint32(data[sOff+8:]),
+			VirtualAddress:   binary.LittleEndian.Uint32(data[sOff+12:]),
+			SizeOfRawData:    binary.LittleEndian.Uint32(data[sOff+16:]),
+			PointerToRawData: binary.LittleEndian.Uint32(data[sOff+20:]),
+			Characteristics:  binary.LittleEndian.Uint32(data[sOff+36:]),
+		}
+	}
+
+	pe.imports = parseImports(data, pe)
+	return pe, nil
+}
+
+func rvaToRawOffset(pe *PEFile, rva uint32) (uint32, error) {
+	if rva < pe.sizeOfHeaders {
+		if int(rva) >= len(pe.data) {
+			return 0, fmt.Errorf("header RVA 0x%X is out of file bounds", rva)
+		}
+		return rva, nil
+	}
+
+	for _, s := range pe.sections {
+		if rva < s.VirtualAddress || rva >= s.VirtualAddress+s.VirtualSize {
+			continue
+		}
+		if s.PointerToRawData == 0 {
+			return 0, fmt.Errorf("RVA 0x%X is in section %q which has no raw data", rva, s.Name)
+		}
+		offsetInSection := rva - s.VirtualAddress
+		if offsetInSection >= s.SizeOfRawData {
+			return 0, fmt.Errorf("RVA 0x%X is in the virtual-only (BSS) part of section %q", rva, s.Name)
+		}
+		rawOffset := s.PointerToRawData + offsetInSection
+		if int(rawOffset) >= len(pe.data) {
+			return 0, fmt.Errorf("computed raw offset 0x%X for RVA 0x%X is out of file bounds", rawOffset, rva)
+		}
+		return rawOffset, nil
+	}
+
+	return 0, fmt.Errorf("RVA 0x%X was not found in any section", rva)
+}
+
+func parseImports(data []byte, pe *PEFile) []ImportEntry {
+	importDirRVA := pe.dataDirectories[dirImport].VirtualAddress
+	if importDirRVA == 0 {
+		return nil
+	}
+	importRawOff, err := rvaToRawOffset(pe, importDirRVA)
+	if err != nil {
+		return nil
+	}
+
+	var imports []ImportEntry
+	off := int(importRawOff)
+	for off+20 <= len(data) {
+		nameRVA := binary.LittleEndian.Uint32(data[off+12 : off+16])
+		if nameRVA == 0 {
+			break
+		}
+		nameOff, err := rvaToRawOffset(pe, nameRVA)
+		if err != nil {
+			off += 20
+			continue
+		}
+		nameEnd := bytes.IndexByte(data[nameOff:], 0)
+		if nameEnd == -1 {
+			off += 20
+			continue
+		}
+		imports = append(imports, ImportEntry{
+			LibraryName: string(data[nameOff : int(nameOff)+nameEnd]),
+		})
+		off += 20
+	}
+	return imports
+}
+
+func (pe *PEFile) isNetAssembly() bool {
+	return pe.dataDirectories[dirCLR].VirtualAddress != 0 &&
+		pe.dataDirectories[dirCLR].Size > 0
+}
+
+func (pe *PEFile) getRelocsSection() int {
+	for i, s := range pe.sections {
+		if s.Name == ".reloc" {
+			return i
+		}
+	}
+	rva := pe.dataDirectories[dirBaseReloc].VirtualAddress
+	if rva == 0 {
+		return -1
+	}
+	for i, s := range pe.sections {
+		if rva >= s.VirtualAddress && rva < s.VirtualAddress+s.VirtualSize {
+			return i
+		}
+	}
+	return -1
+}
+
+func (pe *PEFile) getResourceSection() int {
+	for i, s := range pe.sections {
+		if s.Name == ".rsrc" {
+			return i
+		}
+	}
+	rva := pe.dataDirectories[dirResource].VirtualAddress
+	if rva == 0 {
+		return -1
+	}
+	for i, s := range pe.sections {
+		if rva >= s.VirtualAddress && rva < s.VirtualAddress+s.VirtualSize {
+			return i
+		}
+	}
+	return -1
+}
+
+func (pe *PEFile) getEntryPointSection() int {
+	ep := pe.entryPointRVA
+	for i, s := range pe.sections {
+		if ep >= s.VirtualAddress && ep < s.VirtualAddress+s.VirtualSize {
+			return i
+		}
+	}
+	return -1
+}
+
+func detectVMProtect(data []byte) VMPResult {
+	pe, err := parsePE(data)
+	if err != nil {
+		return VMPResult{}
+	}
+
+	if pe.isNetAssembly() {
+		return VMPResult{}
+	}
+
+	result := detectByVMPSections(pe)
+
+	if !result.Detected {
+		result = detectByEntryPoint(pe)
+	}
+
+	if !result.Detected {
+		result = detectBySectionCharacteristics(pe)
+	}
+
+	if !result.Detected && detectVMP2Heuristic(pe) {
+		result.Detected = true
+		result.Version = "2.X"
+	}
+
+	if !result.Detected {
+		result = detectByDeepScan(pe)
+	}
+
+	result = checkPackedVariant(data, pe, result)
+
+	if result.Detected && len(pe.sections) < 3 {
+		if len(pe.sections) == 3 && pe.sections[0].SizeOfRawData == 0 {
+			result.Detected = false
+		} else if len(pe.sections) < 3 {
+			result.Detected = false
+		}
+	}
+
+	return result
+}
+
+func detectByVMPSections(pe *PEFile) VMPResult {
+	result := VMPResult{}
+	nSections := len(pe.sections)
+	relocIdx := pe.getRelocsSection()
+	resourceIdx := pe.getResourceSection()
+
+	var vmpSectionName string
+
+	for i := nSections - 1; i >= 0; i-- {
+		if i == relocIdx || i == resourceIdx {
+			continue
+		}
+
+		name := pe.sections[i].Name
+		if name == "" {
+			break
+		}
+		vmpSectionName = name
+
+		switch {
+		case i > 0 && name == ".vmp0":
+			result.Detected = true
+
+		case i > 1 && strings.HasSuffix(name, "1"):
+			collision := getSectionNameCollision(pe, "0", "1")
+			if collision != "" && isSectionNamePresent(pe, collision+"1") {
+				result.Detected = true
+			}
+
+		case i > 2 && strings.HasSuffix(name, "2"):
+			collision := getSectionNameCollision(pe, "1", "2")
+			if collision != "" &&
+				isSectionNamePresent(pe, collision+"1") &&
+				isSectionNamePresent(pe, collision+"0") {
+				result.Detected = true
+			}
+
+		case i > 3 && strings.HasSuffix(name, "3"):
+			collision := getSectionNameCollision(pe, "2", "3")
+			if collision != "" &&
+				isSectionNamePresent(pe, collision+"2") &&
+				isSectionNamePresent(pe, collision+"1") &&
+				isSectionNamePresent(pe, collision+"0") {
+				result.Detected = true
+			}
+		}
+
+		break
+	}
+
+	if result.Detected {
+		if pe.is64 {
+			result.Version = "2.XX-3.XX"
+		} else {
+			result.Version = "1.X-3.XX"
+		}
+		if strings.HasSuffix(vmpSectionName, "0") {
+			result.Options = "Min protection"
+		}
+	}
+
+	return result
+}
+
+func detectBySectionCharacteristics(pe *PEFile) VMPResult {
+	vmpCharacteristics := []uint32{
+		0x60000060,
+		0xE0000060,
+		0xE0000040,
+		0x68000060,
+		0xE2000060,
+	}
+
+	for _, s := range pe.sections {
+		for _, char := range vmpCharacteristics {
+			if s.Characteristics == char {
+				if strings.HasPrefix(s.Name, ".vmp") {
+					return VMPResult{
+						Detected: true,
+						Version:  "1.X-3.XX",
+					}
+				}
+			}
+		}
+	}
+
+	collision := getSectionNameCollision(pe, "0", "1")
+	if collision != "" {
+		for i := 0; i <= 2; i++ {
+			sectionName := fmt.Sprintf("%s%d", collision, i)
+			if isSectionNamePresent(pe, sectionName) {
+				for _, s := range pe.sections {
+					if s.Name == sectionName {
+						for _, char := range vmpCharacteristics {
+							if s.Characteristics == char {
+								return VMPResult{
+									Detected: true,
+									Version:  "1.X-3.XX",
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return VMPResult{}
+}
+
+func detectByEntryPoint(pe *PEFile) VMPResult {
+	epPatterns := []struct {
+		pattern string
+		version string
+		options string
+	}{
+		{"68 ?? ?? ?? ?? E9", "1.60-2.05", ""},
+		{"68 ?? ?? ?? ?? E8", "1.60-2.05", ""},
+		{"54 C7 04 24 ?? ?? ?? ?? 9C 60 C7 44 24 ?? ?? ?? ?? ?? C6 44 24 ?? ?? 88 74 24 ?? 60", "2.06", ""},
+		{"E8 $$ $$ $$ $$ E9 $$ $$ $$ $$ 88 04 24 88 1C 24 C7 04 24 ?? ?? ?? ?? 9C E8", "2.07", ""},
+		{"9C E8 $$ $$ $$ $$ E8 $$ $$ $$ $$ C7 44 24 ?? ?? ?? ?? ?? E9 $$ $$ $$ $$ E8 $$ $$ $$ $$ C7 44 24 ?? ?? ?? ?? ?? 52 60 68", "2.12-2.13", ""},
+		{"9C 9C C7 44 24 ?? ?? ?? ?? ?? 9C C7 44 24 ?? ?? ?? ?? ?? 9C 52 8D 64 24 ?? E9", "2.12-2.13", ""},
+		{"68 ?? ?? ?? ?? E8 $$ $$ $$ $$ 41 57 41 50 44 8A C3 50 41 0F 96 C0 57 41 51 48 C7 C7", "3.0X", ""},
+		{"9C E9", "2.X", ""},
+		{"9C FF", "2.X", ""},
+	}
+
+	epOffset, err := rvaToRawOffset(pe, pe.entryPointRVA)
+	if err != nil {
+		return VMPResult{}
+	}
+
+	if int(epOffset)+20 > len(pe.data) {
+		return VMPResult{}
+	}
+
+	for _, ep := range epPatterns {
+		pattern := parseHexPatternWithWildcard(ep.pattern)
+		if matchesAtOffset(pe.data, pattern, int(epOffset)) {
+			result := VMPResult{
+				Detected: true,
+				Version:  ep.version,
+				Options:  ep.options,
+			}
+			return result
+		}
+	}
+
+	return VMPResult{}
+}
+
+func detectByDeepScan(pe *PEFile) VMPResult {
+	epOffset, err := rvaToRawOffset(pe, pe.entryPointRVA)
+	if err != nil {
+		return VMPResult{}
+	}
+
+	if int(epOffset)+1000 > len(pe.data) {
+		return VMPResult{}
+	}
+
+	vmOpsCount := 0
+	instructionCount := 0
+	offset := int(epOffset)
+	foundFreshExit := false
+
+	for instructionCount < 1000 && offset < len(pe.data)-15 {
+		opcode := pe.data[offset]
+
+		if offset+6 < len(pe.data) {
+			if pe.data[offset] == 0x8B && offset+2 < len(pe.data) {
+				modrm := pe.data[offset+1]
+				sib := pe.data[offset+2]
+				if (modrm == 0x14 || modrm == 0x1C || modrm == 0x0C) && sib == 0x85 {
+					break
+				}
+			}
+		}
+
+		if opcode == 0xC3 || opcode == 0xC2 {
+			if instructionCount < 200 {
+				foundFreshExit = true
+			}
+			break
+		}
+
+		if opcode == 0xFF && offset+1 < len(pe.data) {
+			modrm := pe.data[offset+1]
+			reg := (modrm >> 3) & 7
+
+			if reg == 4 {
+				if (modrm & 0xC0) == 0xC0 {
+					foundFreshExit = true
+					break
+				}
+			}
+
+			if reg == 2 {
+				break
+			}
+		}
+
+		instrSize := analyzeVMInstruction(pe.data[offset:], &vmOpsCount)
+		if instrSize > 0 {
+			offset += instrSize
+		} else {
+			offset++
+		}
+
+		instructionCount++
+	}
+
+	if vmOpsCount > 10 && instructionCount < 200 {
+		version := "old"
+		if foundFreshExit {
+			version = "new"
+		}
+		return VMPResult{
+			Detected: true,
+			Version:  version,
+			Options:  "DS",
+		}
+	}
+
+	return VMPResult{}
+}
+
+func analyzeVMInstruction(data []byte, vmOpsCount *int) int {
+	if len(data) < 2 {
+		return 0
+	}
+
+	opcode := data[0]
+
+	switch opcode {
+	case 0x9C:
+		*vmOpsCount++
+		return 1
+	case 0x9D:
+		*vmOpsCount++
+		return 1
+	case 0x60:
+		*vmOpsCount++
+		return 1
+	case 0x61:
+		*vmOpsCount++
+		return 1
+	case 0xF8:
+		*vmOpsCount++
+		return 1
+	case 0xF9:
+		*vmOpsCount++
+		return 1
+	case 0xF5:
+		*vmOpsCount++
+		return 1
+
+	case 0xF6, 0xF7:
+		if len(data) >= 2 {
+			modrm := data[1]
+			reg := (modrm >> 3) & 7
+			if reg == 2 || reg == 3 {
+				*vmOpsCount++
+			}
+			return getInstructionLength(data)
+		}
+
+	case 0xD0, 0xD1, 0xD2, 0xD3:
+		*vmOpsCount++
+		return getInstructionLength(data)
+
+	case 0x30, 0x31, 0x32, 0x33:
+		*vmOpsCount++
+		return getInstructionLength(data)
+
+	case 0x0F:
+		if len(data) >= 2 {
+			second := data[1]
+			switch second {
+			case 0x31:
+				*vmOpsCount++
+				return 2
+			case 0xA3, 0xAB, 0xB3, 0xBB:
+				*vmOpsCount++
+				return getInstructionLength(data)
+			case 0xBC, 0xBD:
+				*vmOpsCount++
+				return getInstructionLength(data)
+			case 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD, 0xCE, 0xCF:
+				*vmOpsCount++
+				return 2
+			}
+		}
+	}
+
+	return 0
+}
+
+func getInstructionLength(data []byte) int {
+	if len(data) < 2 {
+		return 1
+	}
+
+	opcode := data[0]
+
+	if opcode == 0x0F && len(data) >= 2 {
+		modrm := data[1]
+		if (modrm & 0xC0) == 0xC0 {
+			return 2
+		}
+		return 3
+	}
+
+	if len(data) >= 2 {
+		modrm := data[1]
+		mod := (modrm >> 6) & 3
+
+		switch mod {
+		case 0:
+			if (modrm & 7) == 5 {
+				return 6
+			}
+			if (modrm & 7) == 4 {
+				return 3
+			}
+			return 2
+		case 1:
+			if (modrm & 7) == 4 {
+				return 4
+			}
+			return 3
+		case 2:
+			if (modrm & 7) == 4 {
+				return 7
+			}
+			return 6
+		case 3:
+			return 2
+		}
+	}
+
+	return 2
+}
+
+func checkPackedVariant(data []byte, pe *PEFile, result VMPResult) VMPResult {
+	kernel32Count := 0
+	for _, imp := range pe.imports {
+		if strings.EqualFold(imp.LibraryName, "KERNEL32.dll") {
+			kernel32Count++
+		}
+		if kernel32Count >= 2 {
+			if pe.is64 {
+				pattern := parseHexPattern(
+					"4D 5A ?? 00 ?? 00 00 00 04 00 ?? 00 FF FF 00 00 " +
+						"B8 00 00 00 00 00 00 00 40 00 ?? 00 00 00 00 00 " +
+						"00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 " +
+						"00 00 00 00 00 00 00 00 00 00 00 00 80 00 00 00 " +
+						"?? ?? ?? 0E ?? B4 09 CD 21 B8 01 4C CD",
+				)
+				if len(data) >= len(pattern) && matchesAtOffset(data, pattern, 0) {
+					result.Detected = true
+					if result.Options != "" {
+						result.Options += ", "
+					}
+					result.Options += "Packed"
+				}
+			}
+			break
+		}
+	}
+	return result
+}
+
+func detectVMP2Heuristic(pe *PEFile) bool {
+	nSections := len(pe.sections)
+	if nSections <= 7 {
+		return false
+	}
+
+	nCount := 5
+	resourceIdx := pe.getResourceSection()
+	relocIdx := pe.getRelocsSection()
+
+	if resourceIdx > nSections-nCount {
+		nCount++
+	}
+	if relocIdx > nSections-nCount {
+		nCount++
+	}
+
+	detectCount := 0
+	lastVMPSection := -1
+
+	for i := nSections - nCount; i < nSections; i++ {
+		if i == resourceIdx || i == relocIdx {
+			continue
+		}
+		s := pe.sections[i]
+		if s.SizeOfRawData == 0 && s.PointerToRawData == 0 {
+			detectCount++
+		}
+		if s.SizeOfRawData != 0 && s.PointerToRawData != 0 {
+			lastVMPSection = i
+		}
+	}
+
+	if detectCount < 3 || lastVMPSection == -1 {
+		return false
+	}
+
+	if pe.getEntryPointSection() != lastVMPSection {
+		return false
+	}
+
+	s := pe.sections[lastVMPSection]
+
+	if s.Characteristics == 0xE0000060 {
+		end := s.PointerToRawData + s.SizeOfRawData
+		if int(end) <= len(pe.data) {
+			sectionData := pe.data[s.PointerToRawData:end]
+			if calculateEntropy(sectionData) > 7.6 {
+				return true
+			}
+		}
+	}
+
+	if s.Characteristics&0x20000000 != 0 {
+		end := s.PointerToRawData + s.SizeOfRawData
+		if int(end) <= len(pe.data) {
+			sectionData := pe.data[s.PointerToRawData:end]
+			sig := []byte{0x9C, 0x8D, 0x64}
+			count := 0
+			for i := 0; i+3 <= len(sectionData); {
+				idx := bytes.Index(sectionData[i:], sig)
+				if idx == -1 {
+					break
+				}
+				count++
+				if count >= 2 {
+					return true
+				}
+				i += idx + 3
+			}
+		}
+	}
+
+	return false
+}
+
+func getSectionNameCollision(pe *PEFile, suffix1, suffix2 string) string {
+	for _, s := range pe.sections {
+		if strings.HasSuffix(s.Name, suffix1) {
+			base := s.Name[:len(s.Name)-len(suffix1)]
+			if isSectionNamePresent(pe, base+suffix2) {
+				return base
+			}
+		}
+	}
+	return ""
+}
+
+func isSectionNamePresent(pe *PEFile, name string) bool {
+	for _, s := range pe.sections {
+		if s.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
+func parseHexPattern(pattern string) []byte {
+	parts := strings.Fields(pattern)
+	result := make([]byte, len(parts))
+	for i, p := range parts {
+		if p == "??" {
+			result[i] = 0xFF
+		} else {
+			val := uint64(0)
+			fmt.Sscanf(p, "%x", &val)
+			result[i] = byte(val)
+		}
+	}
+	return result
+}
+
+func parseHexPatternWithWildcard(pattern string) []byte {
+	parts := strings.Fields(pattern)
+	result := make([]byte, len(parts))
+	for i, p := range parts {
+		if p == "??" || p == "$$" {
+			result[i] = 0xFF
+		} else {
+			val := uint64(0)
+			fmt.Sscanf(p, "%x", &val)
+			result[i] = byte(val)
+		}
+	}
+	return result
+}
+
+func findPattern(data, pattern []byte) int {
+	if len(pattern) == 0 || len(data) < len(pattern) {
+		return -1
+	}
+	for i := 0; i <= len(data)-len(pattern); i++ {
+		if matchesAtOffset(data, pattern, i) {
+			return i
+		}
+	}
+	return -1
+}
+
+func matchesAtOffset(data, pattern []byte, offset int) bool {
+	if offset+len(pattern) > len(data) {
+		return false
+	}
+	for j, pb := range pattern {
+		if pb != 0xFF && data[offset+j] != pb {
+			return false
+		}
+	}
+	return true
+}
+
+func decompressLZMA(props, compressed []byte) ([]byte, error) {
+	if len(props) != lzmaPropsSize {
+		return nil, fmt.Errorf("LZMA props must be %d bytes, got %d", lzmaPropsSize, len(props))
+	}
+
+	header := make([]byte, 13)
+	copy(header[:5], props)
+	binary.LittleEndian.PutUint64(header[5:], 0xFFFFFFFFFFFFFFFF)
+
+	stream := io.MultiReader(
+		bytes.NewReader(header),
+		bytes.NewReader(compressed),
+	)
+
+	r, err := lzma.NewReader(stream)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialise LZMA reader: %w", err)
+	}
+
+	return io.ReadAll(r)
+}
+
+func unpackPE(data []byte) ([]byte, error) {
+	pe, err := parsePE(data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse packed PE: %w", err)
+	}
+
+	unpacked := make([]byte, pe.sizeOfImage)
+
+	if int(pe.sizeOfHeaders) > len(data) {
+		return nil, fmt.Errorf("sizeOfHeaders (0x%X) exceeds file size", pe.sizeOfHeaders)
+	}
+	copy(unpacked[:pe.sizeOfHeaders], data[:pe.sizeOfHeaders])
+
+	for _, s := range pe.sections {
+		if s.PointerToRawData == 0 || s.SizeOfRawData == 0 {
+			continue
+		}
+		srcEnd := s.PointerToRawData + s.SizeOfRawData
+		dstEnd := s.VirtualAddress + s.SizeOfRawData
+		if int(srcEnd) > len(data) || int(dstEnd) > len(unpacked) {
+			fmt.Printf("  Warning: section %q raw data out of bounds, skipping\n", s.Name)
+			continue
+		}
+		copy(unpacked[s.VirtualAddress:dstEnd], data[s.PointerToRawData:srcEnd])
+	}
+
+	fhOff := pe.ntHeadersOffset + 4
+	sizeOfOptHeader := int(binary.LittleEndian.Uint16(unpacked[fhOff+16 : fhOff+18]))
+	sectionsOff := fhOff + 20 + sizeOfOptHeader
+
+	for i, s := range pe.sections {
+		sOff := sectionsOff + i*40
+		binary.LittleEndian.PutUint32(unpacked[sOff+20:sOff+24], s.VirtualAddress)
+		if s.VirtualSize > 0 {
+			binary.LittleEndian.PutUint32(unpacked[sOff+16:sOff+20], s.VirtualSize)
+		}
+	}
+
+	var rvaPattern []byte
+	for _, s := range pe.sections {
+		isVirtualOnly := s.SizeOfRawData == 0 && s.PointerToRawData == 0
+		isNotUninit := s.Characteristics&sectionCntUninitData == 0
+		if isVirtualOnly && isNotUninit {
+			rvaPattern = append(rvaPattern, 0xFF, 0xFF, 0xFF, 0xFF)
+			vaBytes := make([]byte, 4)
+			binary.LittleEndian.PutUint32(vaBytes, s.VirtualAddress)
+			rvaPattern = append(rvaPattern, vaBytes...)
+		}
+	}
+
+	if len(rvaPattern) == 0 {
+		fmt.Println("  No virtual-only sections found; no LZMA blocks to decompress.")
+		return unpacked, nil
+	}
+
+	matchIdx := findPattern(data, rvaPattern)
+	if matchIdx < 0 {
+		return nil, fmt.Errorf("could not locate PACKER_INFO RVA pattern in packed PE")
+	}
+	if matchIdx < 8 {
+		return nil, fmt.Errorf("PACKER_INFO[0] would be before the start of the file")
+	}
+
+	piBase := matchIdx - 8
+	numBlocks := len(rvaPattern) / 8
+
+	propsInfo := PackerInfo{
+		Src: binary.LittleEndian.Uint32(data[piBase:]),
+		Dst: binary.LittleEndian.Uint32(data[piBase+4:]),
+	}
+	propsRawOff, err := rvaToRawOffset(pe, propsInfo.Src)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve LZMA props RVA 0x%X: %w", propsInfo.Src, err)
+	}
+	if int(propsRawOff)+lzmaPropsSize > len(data) {
+		return nil, fmt.Errorf("LZMA props at 0x%X extend past end of file", propsRawOff)
+	}
+	lzmaProps := data[propsRawOff : propsRawOff+lzmaPropsSize]
+	fmt.Printf("LZMA props: %X (from RVA 0x%X)\n", lzmaProps, propsInfo.Src)
+
+	for i := 1; i <= numBlocks; i++ {
+		entryOff := piBase + i*8
+		if entryOff+8 > len(data) {
+			return nil, fmt.Errorf("PACKER_INFO[%d] is out of file bounds", i)
+		}
+		entry := PackerInfo{
+			Src: binary.LittleEndian.Uint32(data[entryOff:]),
+			Dst: binary.LittleEndian.Uint32(data[entryOff+4:]),
+		}
+
+		compRawOff, err := rvaToRawOffset(pe, entry.Src)
+		if err != nil {
+			return nil, fmt.Errorf("block %d: failed to resolve compressed data RVA 0x%X: %w", i, entry.Src, err)
+		}
+		if int(entry.Dst) >= len(unpacked) {
+			return nil, fmt.Errorf("block %d: destination RVA 0x%X is outside unpacked image", i, entry.Dst)
+		}
+
+		compressedData := data[compRawOff:]
+		decompressed, err := decompressLZMA(lzmaProps, compressedData)
+		if err != nil {
+			return nil, fmt.Errorf("block %d: LZMA decompression failed: %w", i, err)
+		}
+
+		dstOff := int(entry.Dst)
+		available := len(unpacked) - dstOff
+		if len(decompressed) > available {
+			decompressed = decompressed[:available]
+		}
+		copy(unpacked[dstOff:], decompressed)
+
+		fmt.Printf("  Block %d: SrcRVA=0x%08X DstRVA=0x%08X DecompressedSize=%d\n",
+			i, entry.Src, entry.Dst, len(decompressed))
+	}
+
+	return unpacked, nil
+}
+
+func getVMPSections(pe *PEFile) []int {
+	var vmpSections []int
+	relocIdx := pe.getRelocsSection()
+	rsrcIdx := pe.getResourceSection()
+
+	for i, s := range pe.sections {
+		if i == relocIdx || i == rsrcIdx {
+			continue
+		}
+
+		name := s.Name
+		if strings.HasPrefix(name, ".vmp") ||
+			(len(name) > 0 && name[len(name)-1] >= '0' && name[len(name)-1] <= '3') {
+			vmpSections = append(vmpSections, i)
+			continue
+		}
+
+		isExecutable := s.Characteristics&sectionMemExecute != 0
+		isHighEntropy := s.VirtualSize > 0 && s.SizeOfRawData > 0
+		isVirtualOnly := s.SizeOfRawData == 0 && s.VirtualSize > 0
+
+		if (isExecutable && isHighEntropy) || isVirtualOnly {
+			ep := pe.entryPointRVA
+			if ep >= s.VirtualAddress && ep < s.VirtualAddress+s.VirtualSize {
+				vmpSections = append(vmpSections, i)
+			}
+		}
+	}
+
+	return vmpSections
+}
+
+func calculateVMPEntropy(pe *PEFile, vmpSections []int) float64 {
+	if len(vmpSections) == 0 {
+		return 0.0
+	}
+
+	totalEntropy := 0.0
+	count := 0
+
+	for _, idx := range vmpSections {
+		s := pe.sections[idx]
+		if s.SizeOfRawData == 0 {
+			continue
+		}
+
+		end := s.PointerToRawData + s.SizeOfRawData
+		if int(end) > len(pe.data) {
+			continue
+		}
+
+		sectionData := pe.data[s.PointerToRawData:end]
+		entropy := calculateEntropy(sectionData)
+		totalEntropy += entropy
+		count++
+	}
+
+	if count == 0 {
+		return 0.0
+	}
+	return totalEntropy / float64(count)
+}
+
+func calculateEntropy(data []byte) float64 {
+	if len(data) == 0 {
+		return 0.0
+	}
+
+	freq := make(map[byte]int)
+	for _, b := range data {
+		freq[b]++
+	}
+
+	entropy := 0.0
+	dataLen := float64(len(data))
+
+	for _, count := range freq {
+		if count == 0 {
+			continue
+		}
+		p := float64(count) / dataLen
+		entropy -= p * math.Log2(p)
+	}
+
+	return entropy
+}
+
+func detectVMHandlers(pe *PEFile, vmpSections []int) int {
+	handlerCount := 0
+
+	vmHandlerPatterns := [][]byte{
+		parseHexPattern("FF 24 85 ?? ?? ?? ??"),
+		parseHexPattern("FF 24 8D ?? ?? ?? ??"),
+		parseHexPattern("FF 24 C5 ?? ?? ?? ??"),
+		parseHexPattern("41 FF 24 C4"),
+		parseHexPattern("8B ?? 24 ?? 8B ?? 24 ??"),
+		parseHexPattern("48 8B ?? 24 ?? 48 8B ?? 24 ??"),
+		parseHexPattern("AC ?? ?? ?? E0"),
+		parseHexPattern("0F B6 ?? 48 FF C?"),
+	}
+
+	for _, idx := range vmpSections {
+		s := pe.sections[idx]
+		if s.SizeOfRawData == 0 {
+			continue
+		}
+
+		end := s.PointerToRawData + s.SizeOfRawData
+		if int(end) > len(pe.data) {
+			continue
+		}
+
+		sectionData := pe.data[s.PointerToRawData:end]
+
+		for _, pattern := range vmHandlerPatterns {
+			handlerCount += countPatternOccurrences(sectionData, pattern)
+		}
+	}
+
+	handlerCount += detectDispatchTables(pe, vmpSections)
+
+	return handlerCount
+}
+
+func countPatternOccurrences(data, pattern []byte) int {
+	count := 0
+	offset := 0
+
+	for {
+		idx := findPattern(data[offset:], pattern)
+		if idx < 0 {
+			break
+		}
+		count++
+		offset += idx + len(pattern)
+		if offset >= len(data) {
+			break
+		}
+	}
+
+	return count
+}
+
+func detectDispatchTables(pe *PEFile, vmpSections []int) int {
+	tables := 0
+
+	for _, idx := range vmpSections {
+		s := pe.sections[idx]
+		if s.SizeOfRawData == 0 {
+			continue
+		}
+
+		end := s.PointerToRawData + s.SizeOfRawData
+		if int(end) > len(pe.data) {
+			continue
+		}
+
+		sectionData := pe.data[s.PointerToRawData:end]
+
+		ptrSize := 4
+		if pe.is64 {
+			ptrSize = 8
+		}
+
+		for i := 0; i+ptrSize*16 <= len(sectionData); i += ptrSize {
+			if isDispatchTable(sectionData[i:], pe, ptrSize) {
+				tables++
+				i += ptrSize * 32
+			}
+		}
+	}
+
+	return tables
+}
+
+func isDispatchTable(data []byte, pe *PEFile, ptrSize int) bool {
+	minEntries := 16
+	validPointers := 0
+
+	for i := 0; i < minEntries*ptrSize && i+ptrSize <= len(data); i += ptrSize {
+		var ptr uint32
+		if ptrSize == 4 {
+			ptr = binary.LittleEndian.Uint32(data[i:])
+		} else {
+			ptr64 := binary.LittleEndian.Uint64(data[i:])
+			ptr = uint32(ptr64)
+		}
+
+		if ptr > 0 && ptr < pe.sizeOfImage {
+			for _, s := range pe.sections {
+				if ptr >= s.VirtualAddress &&
+					ptr < s.VirtualAddress+s.VirtualSize &&
+					s.Characteristics&sectionMemExecute != 0 {
+					validPointers++
+					break
+				}
+			}
+		}
+	}
+
+	return float64(validPointers)/float64(minEntries) > 0.75
+}
+
+func analyzeCodeComplexity(pe *PEFile, vmpSections []int) float64 {
+	if len(vmpSections) == 0 {
+		return 0.0
+	}
+
+	totalComplexity := 0.0
+	count := 0
+
+	complexPatterns := [][]byte{
+		parseHexPattern("FF E?"),
+		parseHexPattern("FF ?? ??"),
+		parseHexPattern("FF 1?"),
+		parseHexPattern("FF ?? ?? ?? ?? ??"),
+		parseHexPattern("9C"),
+		parseHexPattern("9D"),
+		parseHexPattern("0F 31"),
+		parseHexPattern("0F 01"),
+	}
+
+	for _, idx := range vmpSections {
+		s := pe.sections[idx]
+		if s.SizeOfRawData == 0 {
+			continue
+		}
+
+		end := s.PointerToRawData + s.SizeOfRawData
+		if int(end) > len(pe.data) {
+			continue
+		}
+
+		sectionData := pe.data[s.PointerToRawData:end]
+
+		complexity := 0
+		for _, pattern := range complexPatterns {
+			complexity += countPatternOccurrences(sectionData, pattern)
+		}
+
+		normalizedComplexity := float64(complexity) / float64(len(sectionData)) * 1000.0
+		totalComplexity += normalizedComplexity
+		count++
+	}
+
+	if count == 0 {
+		return 0.0
+	}
+
+	complexity := totalComplexity / float64(count)
+
+	if complexity > 1.0 {
+		complexity = 1.0
+	}
+
+	return complexity
+}
+
+func main() {
+	if len(os.Args) < 3 {
+		fmt.Fprintf(os.Stderr, "Usage: %s <packed.exe> <output.exe>\n", os.Args[0])
+		os.Exit(1)
+	}
+
+	packedPath := os.Args[1]
+	unpackedPath := os.Args[2]
+
+	data, err := os.ReadFile(packedPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading input file: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("Loaded %q — %d bytes\n\n", packedPath, len(data))
+
+	_, err = parsePE(data)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error parsing pe file: %v\n", err)
+		os.Exit(1)
+	}
+
+	vmpResult := detectVMProtect(data)
+
+	if !vmpResult.Detected {
+		fmt.Println("Warning: VMProtect signature not found. The file may still be packed")
+	} else {
+		fmt.Println(vmpResult)
+	}
+
+	fmt.Printf("\n")
+	unpacked, err := unpackPE(data)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "\nUnpacking failed: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("\nUnpacked image size: %d bytes\n", len(unpacked))
+
+	if err := os.WriteFile(unpackedPath, unpacked, 0644); err != nil {
+		fmt.Fprintf(os.Stderr, "Error writing output file: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("Unpacked file written to %q\n", unpackedPath)
+}
+
+```
