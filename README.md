@@ -3631,6 +3631,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Fatmike-GH/Fatpack [A Windows PE packer with full TLS (Thread Local Storage) support]
 - https://github.com/caprinux/rel-fuscate [Modifying the jmprel_entry->r_offset]
 - https://github.com/dobin/SuperMega [Stealthily inject shellcode into an executable]
+- https://github.com/raskolnikov90/Beatrice.py [Modify machine code in binaries with alternative x64 assembly opcodes for AV evasion]
 
 > CLR Protection
 - https://github.com/endgameinc/ClrGuard
