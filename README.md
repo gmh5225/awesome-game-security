@@ -985,6 +985,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/jiubanlo/WinNT5_src_20201004 [Leaked Windows XP Source]
 - https://github.com/yyl-20020115/OpenArk [Tool]
 - https://github.com/BeneficialCode/WinArk [Tool]
+- https://github.com/kernullist/kn-diff-pool [Windows kernel Big Pool snapshot/diff tool with kernel driver and Go TUI]
 - https://github.com/hfiref0x/KDU [Kernel Driver Utility Tool]
 - https://github.com/jthuraisamy/TelemetrySourcerer [Enumerate and disable callbacks/ETW]
 - https://github.com/preludeorg/ThreatIntelligenceConsumer [Consuming from the Threat-Intelligence ETW provider without a driver or PPL privilege]
