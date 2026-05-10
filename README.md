@@ -284,6 +284,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/nv-graphics-mesa
 - https://github.com/MethanePowered/MethaneKit [DirectX 12, Metal & Vulkan]
 - https://github.com/mrdoob/three.js [JavaScript 3D Library]
+- https://github.com/playcanvas/supersplat [3D Gaussian Splat Editor]
 
 ## AI
 - https://github.com/ls361664056/GameAI-paper-list [zh]
