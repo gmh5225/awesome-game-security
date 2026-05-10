@@ -3630,6 +3630,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/andrew9382/exe_packer
 - https://github.com/dr4k0nia/Origami [Compressing .net assemblies]
 - https://github.com/mix64/ELFpacker [ELF]
+- https://github.com/litemars/hARMless [ARM64 Linux ELF Packer/Loader]
 - https://github.com/jnastarot/shibari [Linking multiple PE\PE + files to one]
 - [Simple ELF runtime packer for creating stealthy droppers](https://github.com/ex0dus-0x/ward)
 - [A simple packer working with all PE files which cipher your exe with a XOR implementation](https://github.com/nqntmqmqmb/xorPacker)
