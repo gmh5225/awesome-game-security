@@ -1,0 +1,2373 @@
+Project Path: arc_litemars_hARMless_n8rthetl
+
+Source Tree:
+
+```txt
+arc_litemars_hARMless_n8rthetl
+├── CONTRIBUTING.md
+├── LICENSE
+├── Makefile
+├── README.md
+├── include
+│   ├── common.h
+│   ├── crypto.h
+│   └── elf64.h
+├── loader
+│   ├── loader.c
+│   └── memexec.c
+├── packer
+│   ├── crypto.c
+│   ├── elf64.c
+│   ├── obfuscation.c
+│   └── packer.c
+├── stubgen
+│   └── stubgen.c
+└── tests
+    └── unit_test.sh
+
+```
+
+`CONTRIBUTING.md`:
+
+```md
+# Contributing to hARMless
+
+Welcome! Contributions are encouraged and appreciated.
+- Please fork the repo and create your branch off `main`.
+- Follow the existing code style.
+- Write descriptive commit messages.
+- All code must be compatible with ARM64/AArch64 Linux.
+
+Open a PR and describe your changes clearly. Report bugs or request features by opening an issue.
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2025 Massimo Bertocchi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`Makefile`:
+
+```
+# Compiler detection
+UNAME_M := $(shell uname -m)
+CC := gcc
+TARGET_CC := gcc
+
+# Cross-compilation setup for ARM64
+ifeq ($(UNAME_M), x86_64)
+    TARGET_CC := aarch64-linux-gnu-gcc
+endif
+
+# Compiler flags
+CFLAGS := -Wall -Wextra -O2 -std=c99
+# Write method: choose one of -DCOPY_WITH_MMAP, -DCOPY_WITH_IO_URING, or neither (plain write syscall)
+TARGET_CFLAGS := -Wall -Wextra -O2 -std=c99 -static -DCOPY_WITH_IO_URING
+LDFLAGS := -static
+
+# OpenSSL flags - prefer shared libraries to avoid static linking warnings
+OPENSSL_CFLAGS := $(shell pkg-config --cflags openssl 2>/dev/null || echo "")
+OPENSSL_LDFLAGS := $(shell pkg-config --libs openssl 2>/dev/null || echo "-lssl -lcrypto")
+
+# Security flags
+SECURITY_FLAGS := -fstack-protector-strong -D_FORTIFY_SOURCE=2 -fPIE
+STEALTH_FLAGS := -fomit-frame-pointer -s -fno-asynchronous-unwind-tables -fno-stack-protector
+
+# Directories
+INCLUDE_DIR := include
+PACKER_DIR := packer
+LOADER_DIR := loader
+STUBGEN_DIR := stubgen
+BUILD_DIR := build
+
+# Output binaries
+PACKER_BIN := $(BUILD_DIR)/packer
+LOADER_BIN := $(BUILD_DIR)/loader
+STUBGEN_BIN := $(BUILD_DIR)/stubgen
+
+# Enhanced source files (including obfuscation)
+PACKER_SOURCES := $(PACKER_DIR)/packer.c $(PACKER_DIR)/crypto.c $(PACKER_DIR)/obfuscation.c
+LOADER_SOURCES := $(LOADER_DIR)/loader.c $(LOADER_DIR)/memexec.c $(PACKER_DIR)/elf64.c $(PACKER_DIR)/crypto.c $(PACKER_DIR)/obfuscation.c
+STUBGEN_SOURCES := $(STUBGEN_DIR)/stubgen.c
+
+# Include paths
+INCLUDES := -I$(INCLUDE_DIR)
+
+# Default target
+all: $(BUILD_DIR) $(PACKER_BIN) $(LOADER_BIN) $(STUBGEN_BIN)
+
+# Create build directory
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+# Build packer
+$(PACKER_BIN): $(PACKER_SOURCES)
+	$(CC) $(CFLAGS) $(SECURITY_FLAGS) $(OPENSSL_CFLAGS) $(INCLUDES) -o $@ $^ $(OPENSSL_LDFLAGS)
+
+# Build loader
+$(LOADER_BIN): $(LOADER_SOURCES)
+	$(TARGET_CC) $(TARGET_CFLAGS) $(STEALTH_FLAGS) $(OPENSSL_CFLAGS) $(INCLUDES) -o $@ $^ $(OPENSSL_LDFLAGS) 2>/dev/null || $(TARGET_CC) $(TARGET_CFLAGS) $(STEALTH_FLAGS) $(OPENSSL_CFLAGS) $(INCLUDES) -o $@ $^ $(OPENSSL_LDFLAGS) -lzstd -lz
+
+# Build stub generator
+$(STUBGEN_BIN): $(STUBGEN_SOURCES)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $^ $(LDFLAGS)
+
+# Advanced packing presets
+pack: $(PACKER_BIN) $(LOADER_BIN) $(STUBGEN_BIN)
+	@if [ -z "$(INPUT)" ] || [ -z "$(OUTPUT)" ]; then \
+		echo "Usage: make pack INPUT=<binary> OUTPUT=<output>"; \
+		exit 1; \
+	fi
+	$(PACKER_BIN) $(INPUT) $(OUTPUT).packed
+	$(STUBGEN_BIN) $(LOADER_BIN) $(OUTPUT).packed $(OUTPUT)
+	@echo "Output packed binary created: $(OUTPUT)"
+
+# Clean build artifacts
+clean:
+	rm -rf $(BUILD_DIR)
+	rm -f *.packed
+	rm -f test_* bench_*
+
+test:
+	@echo "Running tests..."
+	@if [ -x tests/unit_test.sh ]; then \
+		cd tests && ./unit_test.sh; \
+	else \
+		echo "No tests found: tests/unit_test.sh"; \
+		exit 1; \
+	fi
+
+# Install dependencies
+install-deps:
+	@echo "Installing ARM64 cross-compilation and OpenSSL dependencies..."
+	@if command -v apt-get >/dev/null 2>&1; then \
+		sudo apt-get update && \
+		sudo apt-get install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu libssl-dev; \
+	elif command -v yum >/dev/null 2>&1; then \
+		sudo yum install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu openssl-devel; \
+	elif command -v pacman >/dev/null 2>&1; then \
+		sudo pacman -S aarch64-linux-gnu-gcc aarch64-linux-gnu-binutils openssl; \
+	else \
+		echo "Please install ARM64 cross-compilation and OpenSSL tools manually"; \
+	fi
+```
+
+`README.md`:
+
+```md
+# 🛡️ hARMless
+
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Platform](https://img.shields.io/badge/platform-ARM64%20Linux-green.svg)
+![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)
+![Stars](https://img.shields.io/github/stars/litemars/hARMless?style=social)
+
+
+
+**An ARM64 ELF Packer/Loader for AArch64 Linux Binaries**
+
+A comprehensive security research tool that encrypts ARM64 ELF executables using multi-layer encryption and provides runtime in-memory execution without writing the original binary to disk.
+
+---
+
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [Quick Start](#-quick-start)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Technical Details](#-technical-details)
+- [Security Features](#-security-features)
+- [Architecture](#-architecture)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
+
+## ✨ Features
+
+- **🎯 ARM64 ELF Support**: Specifically designed for AArch64 Linux binaries
+- **🔐 Multi-Layer Encryption**: Triple encryption using AES-256, ChaCha20, and RC4
+- **💾 Memory Execution**: Runtime decryption and execution entirely in memory using `memfd_create`
+- **🔒 Code Obfuscation**: Advanced obfuscation techniques for anti-analysis
+- **✅ CRC32 Verification**: Integrity checking to detect tampering
+- **📦 Self-Contained**: Packed binaries are completely standalone
+- **🛡️ Core Dump Prevention**: Prevents memory dumps using `setrlimit`
+- **🧹 Secure Memory Wiping**: Multi-pass memory erasure for sensitive data
+- **🔧 Direct Syscalls**: Bypasses userland hooks for enhanced stealth
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/litemars/hARMless.git
+cd hARMless
+
+# Build everything
+make all
+
+# Pack a binary
+make pack INPUT=/bin/ls OUTPUT=packed_ls
+
+# Run the packed binary
+./packed_ls
+```
+
+---
+
+## 📦 Installation
+
+### Prerequisites
+
+- **ARM64/AArch64 Linux system** or cross-compilation toolchain
+- **GCC** for ARM64 (`aarch64-linux-gnu-gcc` or native)
+- **Make**
+- **Standard development tools** (`git`, `build-essential`)
+
+### Build Steps
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/litemars/hARMless.git
+cd hARMless
+
+# 2. Build all components
+make all
+
+# This creates:
+# - build/packer    : Binary packer
+# - build/loader    : Stub loader
+# - build/stubgen   : Stub generator
+```
+
+### Cross-Compilation (x86_64 → ARM64)
+
+```bash
+# Install ARM64 cross-compiler
+sudo apt-get install gcc-aarch64-linux-gnu
+
+# Build with cross-compiler
+make CC=aarch64-linux-gnu-gcc all
+```
+
+---
+
+## 📖 Usage
+
+### Basic Packing
+
+```bash
+# Pack an ARM64 binary
+make pack INPUT=your_arm64_binary OUTPUT=packed_binary
+
+# Alternative: Use tools directly
+./build/packer your_arm64_binary packed_data
+./build/stubgen ./build/loader packed_data packed_binary
+```
+
+### Running Packed Binaries
+
+```bash
+# Simply execute the packed binary
+./packed_binary
+
+# The packed binary will:
+# 1. Read its own embedded encrypted data
+# 2. Decrypt the original ELF in memory
+# 3. Verify integrity with CRC32
+# 4. Execute directly from memory using memfd_create
+```
+
+### Test
+
+```bash
+# Testing using /bin/ls
+
+make test
+# Output: packed_binary: packed_ls
+
+```
+
+---
+
+## 🔬 Technical Details
+
+### Encryption Pipeline
+
+The packer uses a **triple-layer encryption** approach:
+
+1. **RC4 Stream Cipher**: Initial obfuscation layer
+2. **AES-256-CTR**: Industry-standard symmetric encryption
+3. **ChaCha20**: Modern stream cipher for additional security
+
+```
+Original Binary → RC4 → AES-256 → ChaCha20 → Packed Data
+```
+
+**Key Generation**: Cryptographically secure random keys from `/dev/urandom` (256 bits per layer)
+
+### ARM64 Direct Syscalls
+
+The loader uses direct syscalls to bypass userland hooks:
+
+| Syscall | Number | Purpose |
+|---------|--------|---------|
+| `memfd_create` | 279 | Create anonymous file descriptor |
+| `execve` | 221 | Execute decrypted binary |
+| `mmap` | 222 | Memory mapping |
+| `write` | 64 | Output operations |
+| `fexecve` | 281 | Execute from file descriptor |
+
+**Syscall Convention (ARM64)**:
+```c
+// x8 = syscall number
+// x0-x5 = arguments
+// svc #0 = invoke
+```
+
+### Memory Safety
+
+- **Secure Wiping**: 3-pass overwrite (zeros, ones, random)
+- **No Disk Writes**: Original binary never touches filesystem
+- **Stack Protection**: Non-executable stack
+- **ASLR Compatible**: Position-independent code
+
+---
+
+## 🛡️ Security Features
+
+### Core Dump Prevention
+
+```c
+setrlimit(RLIMIT_CORE, &(struct rlimit){0, 0});
+```
+
+Ensures sensitive memory is never written to disk, even during crashes.
+
+### Integrity Verification
+
+CRC32 checksums detect any tampering with:
+- Encrypted payload
+- Decryption keys
+- Loader code
+
+### Anti-Analysis
+
+- **No debug symbols**: Stripped binaries
+- **Obfuscated control flow**: Reduces reverse engineering surface
+- **Direct syscalls**: Evades LD_PRELOAD and EDR hooks
+- **In-memory execution**: No `/tmp` artifacts
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Original Binary                       │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ▼
+         ┌───────────────────────┐
+         │   Packer (packer.c)   │
+         │  - Read ELF           │
+         │  - Generate keys      │
+         │  - Triple encrypt     │
+         │  - Compute CRC32      │
+         └───────────┬───────────┘
+                     │
+                     ▼
+         ┌───────────────────────┐
+         │  Packed Data File     │
+         │  [encrypted payload]  │
+         └───────────┬───────────┘
+                     │
+                     ▼
+         ┌───────────────────────┐
+         │ Stub Generator        │
+         │ (stubgen.c)           │
+         │  - Embed loader       │
+         │  - Append data        │
+         └───────────┬───────────┘
+                     │
+                     ▼
+┌────────────────────────────────────────────────────────┐
+│              Packed Binary (Output)                     │
+│  ┌──────────────────────────────────────────────┐     │
+│  │ Loader Stub (loader.c)                       │     │
+│  │  - Read embedded data                        │     │
+│  │  - Decrypt (ChaCha20 → AES → RC4)           │     │
+│  │  - Verify CRC32                              │     │
+│  │  - Create memfd                              │     │
+│  │  - Execute via fexecve                       │     │
+│  └──────────────────────────────────────────────┘     │
+│  ┌──────────────────────────────────────────────┐     │
+│  │ Encrypted Payload + Metadata                 │     │
+│  └──────────────────────────────────────────────┘     │
+└────────────────────────────────────────────────────────┘
+                     │
+                     ▼
+         ┌───────────────────────┐
+         │   Runtime Execution   │
+         │  (in-memory only)     │
+         └───────────────────────┘
+```
+
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+
+---
+
+
+**⚠️ Legal Notice**: This tool is intended for:
+- Authorized penetration testing
+- Security research and education
+- Red team operations
+- Malware analysis
+
+**Unauthorized use is prohibited and may be illegal.**
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+
+```
+
+`include/common.h`:
+
+```h
+#ifndef COMMON_H
+#define COMMON_H
+
+#include <stdint.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/ptrace.h>
+#include <sys/wait.h>
+#include <sys/mman.h>
+#include <sys/resource.h>
+#include <sys/prctl.h>
+#include <fcntl.h>
+#include <string.h>
+#include <stdio.h>
+#include <time.h>
+#include <errno.h>
+
+#define PACKED_MAGIC 0x41524D36 // "ARM6"
+
+typedef struct {
+    uint32_t magic;              
+    uint32_t original_size;
+    uint32_t packed_size;
+    uint32_t crc32;
+    uint8_t primary_key[32];     // AES-256 key
+    uint8_t secondary_key[32];   // ChaCha20 key
+    uint8_t tertiary_key[32];    // RC4 key
+    uint8_t nonce[16];           
+    uint8_t salt[16];            
+} pack_header_t;
+
+// Linux-specific mmap flags (not exposed without _GNU_SOURCE)
+#ifndef MAP_ANON
+#define MAP_ANON     0x20   /* ARM64/x86: anonymous mapping           */
+#endif
+#ifndef MAP_POPULATE
+#define MAP_POPULATE 0x8000 /* ARM64/x86: prefault pages at mmap time */
+#endif
+
+#define SC_XOR_KEY 0xDEADBEEFU
+
+#define SC_IDX_READ              0
+#define SC_IDX_WRITE             1
+#define SC_IDX_OPEN              2
+#define SC_IDX_CLOSE             3
+#define SC_IDX_MMAP              4
+#define SC_IDX_MUNMAP            5
+#define SC_IDX_EXECVE            6
+#define SC_IDX_MEMFD_CREATE      7
+#define SC_IDX_FTRUNCATE         8
+#define SC_IDX_LSEEK             9
+#define SC_IDX_MPROTECT         10
+#define SC_IDX_PTRACE           11
+#define SC_IDX_GETPID           12
+#define SC_IDX_GETPPID          13
+#define SC_IDX_PRCTL            14
+#define SC_IDX_MSYNC            15
+#define SC_IDX_IO_URING_SETUP    16
+#define SC_IDX_IO_URING_ENTER    17
+#define SC_IDX_IO_URING_REGISTER 18
+#define SC_TABLE_LEN             19
+
+extern const volatile uint32_t hARMless_sc[SC_TABLE_LEN];
+
+#define __NR_read              ((long)(hARMless_sc[SC_IDX_READ]              ^ SC_XOR_KEY))
+#define __NR_write             ((long)(hARMless_sc[SC_IDX_WRITE]             ^ SC_XOR_KEY))
+#define __NR_open              ((long)(hARMless_sc[SC_IDX_OPEN]              ^ SC_XOR_KEY))
+#define __NR_close             ((long)(hARMless_sc[SC_IDX_CLOSE]             ^ SC_XOR_KEY))
+#define __NR_mmap              ((long)(hARMless_sc[SC_IDX_MMAP]              ^ SC_XOR_KEY))
+#define __NR_munmap            ((long)(hARMless_sc[SC_IDX_MUNMAP]            ^ SC_XOR_KEY))
+#define __NR_execve            ((long)(hARMless_sc[SC_IDX_EXECVE]            ^ SC_XOR_KEY))
+#define __NR_memfd_create      ((long)(hARMless_sc[SC_IDX_MEMFD_CREATE]      ^ SC_XOR_KEY))
+#define __NR_ftruncate         ((long)(hARMless_sc[SC_IDX_FTRUNCATE]         ^ SC_XOR_KEY))
+#define __NR_lseek             ((long)(hARMless_sc[SC_IDX_LSEEK]             ^ SC_XOR_KEY))
+#define __NR_mprotect          ((long)(hARMless_sc[SC_IDX_MPROTECT]          ^ SC_XOR_KEY))
+#define __NR_ptrace            ((long)(hARMless_sc[SC_IDX_PTRACE]            ^ SC_XOR_KEY))
+#define __NR_getpid            ((long)(hARMless_sc[SC_IDX_GETPID]            ^ SC_XOR_KEY))
+#define __NR_getppid           ((long)(hARMless_sc[SC_IDX_GETPPID]           ^ SC_XOR_KEY))
+#define __NR_prctl             ((long)(hARMless_sc[SC_IDX_PRCTL]             ^ SC_XOR_KEY))
+#define __NR_msync             ((long)(hARMless_sc[SC_IDX_MSYNC]             ^ SC_XOR_KEY))
+#define __NR_io_uring_setup    ((long)(hARMless_sc[SC_IDX_IO_URING_SETUP]    ^ SC_XOR_KEY))
+#define __NR_io_uring_enter    ((long)(hARMless_sc[SC_IDX_IO_URING_ENTER]    ^ SC_XOR_KEY))
+#define __NR_io_uring_register ((long)(hARMless_sc[SC_IDX_IO_URING_REGISTER] ^ SC_XOR_KEY))
+
+#ifdef COPY_WITH_IO_URING
+
+/* mmap offsets for the three ring regions returned by io_uring_setup(2)  */
+#define IORING_OFF_SQ_RING   0ULL
+#define IORING_OFF_CQ_RING   0x8000000ULL
+#define IORING_OFF_SQES      0x10000000ULL
+
+/* io_uring_enter(2) flags                                                 */
+#define IORING_ENTER_GETEVENTS (1U << 0)
+
+/* io_uring_params.features flags                                          */
+#define IORING_FEAT_SINGLE_MMAP (1U << 0)
+
+/* Opcode: write to a file descriptor (flat buffer, no iovec)             */
+#define IORING_OP_WRITE  23
+
+/* Submission Queue Entry – only fields used by IORING_OP_WRITE           */
+struct uring_sqe {
+    uint8_t  opcode;
+    uint8_t  flags;
+    uint16_t ioprio;
+    int32_t  fd;
+    uint64_t off;
+    uint64_t addr;
+    uint32_t len;
+    uint32_t rw_flags;
+    uint64_t user_data;
+    uint16_t buf_index;
+    uint16_t personality;
+    int32_t  splice_fd_in;
+    uint64_t __pad2[2];
+};
+
+/* Completion Queue Entry                                                  */
+struct uring_cqe {
+    uint64_t user_data;
+    int32_t  res;
+    uint32_t flags;
+};
+
+/* Offsets into the SQ ring control slab                                  */
+struct io_sqring_offsets {
+    uint32_t head;
+    uint32_t tail;
+    uint32_t ring_mask;
+    uint32_t ring_entries;
+    uint32_t flags;
+    uint32_t dropped;
+    uint32_t array;
+    uint32_t resv1;
+    uint64_t resv2;
+};
+
+/* Offsets into the CQ ring control slab                                  */
+struct io_cqring_offsets {
+    uint32_t head;
+    uint32_t tail;
+    uint32_t ring_mask;
+    uint32_t ring_entries;
+    uint32_t overflow;
+    uint32_t cqes;
+    uint32_t flags;
+    uint32_t resv1;
+    uint64_t resv2;
+};
+
+/* Parameters structure for io_uring_setup(2)                             */
+struct uring_params {
+    uint32_t sq_entries;
+    uint32_t cq_entries;
+    uint32_t flags;
+    uint32_t sq_thread_cpu;
+    uint32_t sq_thread_idle;
+    uint32_t features;
+    uint32_t wq_fd;
+    uint32_t resv[3];
+    struct io_sqring_offsets sq_off;
+    struct io_cqring_offsets cq_off;
+};
+
+/*
+ * ARM64 memory barriers for ring head/tail updates.
+ * dmb ishld: data-memory barrier, inner-shareable, load-before-load/store.
+ * dmb ishst: data-memory barrier, inner-shareable, store-before-store.
+ */
+#define io_read_barrier()  __asm__ __volatile__("dmb ishld" ::: "memory")
+#define io_write_barrier() __asm__ __volatile__("dmb ishst" ::: "memory")
+
+#endif /* COPY_WITH_IO_URING */
+
+
+static inline long syscall1(long number, long arg1) {
+    long ret;
+    __asm__ volatile (
+        "mov x8, %1\n"
+        "mov x0, %2\n"
+        "svc 0\n"
+        "mov %0, x0\n"
+        : "=r"(ret)
+        : "r"(number), "r"(arg1)
+        : "x0", "x8", "memory"
+    );
+    return ret;
+}
+
+static inline long syscall2(long number, long arg1, long arg2) {
+    long ret;
+    __asm__ volatile (
+        "mov x8, %1\n"
+        "mov x0, %2\n"
+        "mov x1, %3\n"
+        "svc 0\n"
+        "mov %0, x0\n"
+        : "=r"(ret)
+        : "r"(number), "r"(arg1), "r"(arg2)
+        : "x0", "x1", "x8", "memory"
+    );
+    return ret;
+}
+
+static inline long syscall3(long number, long arg1, long arg2, long arg3) {
+    long ret;
+    __asm__ volatile (
+        "mov x8, %1\n"
+        "mov x0, %2\n"
+        "mov x1, %3\n"
+        "mov x2, %4\n"
+        "svc 0\n"
+        "mov %0, x0\n"
+        : "=r"(ret)
+        : "r"(number), "r"(arg1), "r"(arg2), "r"(arg3)
+        : "x0", "x1", "x2", "x8", "memory"
+    );
+    return ret;
+}
+
+static inline long syscall6(long number, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6) {
+    long ret;
+    __asm__ volatile (
+        "mov x8, %1\n"
+        "mov x0, %2\n"
+        "mov x1, %3\n"
+        "mov x2, %4\n"
+        "mov x3, %5\n"
+        "mov x4, %6\n"
+        "mov x5, %7\n"
+        "svc 0\n"
+        "mov %0, x0\n"
+        : "=r"(ret)
+        : "r"(number), "r"(arg1), "r"(arg2), "r"(arg3), "r"(arg4), "r"(arg5), "r"(arg6)
+        : "x0", "x1", "x2", "x3", "x4", "x5", "x8", "memory"
+    );
+    return ret;
+}
+
+// Add -DDEBUG on the TARGET_CFLAGS in the Makefile to show the debug
+#ifdef DEBUG
+static inline void debug_print(const char *msg) {
+    size_t len = 0;
+    while (msg[len]) len++;
+    syscall3(__NR_write, 2, (long)msg, (long)len);
+}
+#define DBG(msg) debug_print("[hARMless] " msg)
+#else
+#define DBG(msg) ((void)0)
+#endif
+
+// Function prototypes
+uint32_t crc32(const uint8_t* data, size_t len);
+void generate_random_key(uint8_t* key, size_t key_size);
+int comprehensive_anti_debug_check();
+void multi_layer_encrypt(uint8_t* data, size_t len, const pack_header_t* header);
+void multi_layer_decrypt(uint8_t* data, size_t len, const pack_header_t* header);
+int execute_from_memory(const uint8_t* elf_data, size_t elf_size, char* const argv[], char* const envp[]);
+pack_header_t* find_packed_header(const uint8_t* data, size_t data_size);
+
+// Pre-encryption ELF transforms
+void strip_elf_metadata(uint8_t* data, size_t len);
+void deobf_str_xor(char* dst, const uint8_t* src, size_t len, uint8_t key);
+
+// Enhanced anti-forensics functions
+void secure_memory_wipe(void* ptr, size_t size);
+void prevent_core_dumps(void);
+void hide_process_title(int argc, char* argv[]);
+
+// Process masquerading functions
+int create_masqueraded_memfd(void);
+const char* get_random_innocent_name(void);
+
+#endif // COMMON_H
+```
+
+`include/crypto.h`:
+
+```h
+
+#ifndef CRYPTO_H
+#define CRYPTO_H
+
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+typedef struct {
+    uint8_t S[256];
+    uint8_t i;
+    uint8_t j;
+} rc4_context_t;
+
+// RC4 functions
+void rc4_init(rc4_context_t* ctx, const uint8_t* key, size_t key_len);
+void rc4_crypt(rc4_context_t* ctx, const uint8_t* input, uint8_t* output, size_t len);
+void rc4_encrypt_decrypt(const uint8_t* key, size_t key_len, const uint8_t* input, uint8_t* output, size_t len);
+
+// Advanced cryptographic functions
+void aes256_encrypt(uint8_t* data, size_t len, const uint8_t* key);
+void aes256_decrypt(uint8_t* data, size_t len, const uint8_t* key);
+void chacha20_encrypt(uint8_t* data, size_t len, const uint8_t* key, const uint8_t* nonce);
+void chacha20_decrypt(uint8_t* data, size_t len, const uint8_t* key, const uint8_t* nonce);
+
+// Utility functions
+void secure_random_bytes(uint8_t* buffer, size_t size);
+
+#endif
+
+```
+
+`include/elf64.h`:
+
+```h
+#ifndef ELF64_H
+#define ELF64_H
+
+#include <stdint.h>
+
+// ELF64 structures for ARM64
+typedef uint16_t Elf64_Half;
+typedef uint32_t Elf64_Word;
+typedef uint64_t Elf64_Addr;
+typedef uint64_t Elf64_Off;
+typedef uint64_t Elf64_Xword;
+typedef int64_t Elf64_Sxword;
+
+// ELF Magic numbers
+#define EI_NIDENT 16
+#define ELFMAG0 0x7f
+#define ELFMAG1 'E'
+#define ELFMAG2 'L'
+#define ELFMAG3 'F'
+
+// ELF Class
+#define ELFCLASSNONE 0
+#define ELFCLASS32 1
+#define ELFCLASS64 2
+
+// ELF Data encoding
+#define ELFDATANONE 0
+#define ELFDATA2LSB 1
+#define ELFDATA2MSB 2
+
+// ELF Machine types
+#define EM_NONE 0
+#define EM_AARCH64 183  // ARM64
+
+// ELF File types
+#define ET_NONE 0
+#define ET_REL 1
+#define ET_EXEC 2
+#define ET_DYN 3
+#define ET_CORE 4
+
+// Program header types
+#define PT_NULL 0
+#define PT_LOAD 1
+#define PT_DYNAMIC 2
+#define PT_INTERP 3
+#define PT_NOTE 4
+#define PT_SHLIB 5
+#define PT_PHDR 6
+
+
+#define PF_X 0x1
+#define PF_W 0x2
+#define PF_R 0x4
+
+
+typedef struct {
+    unsigned char e_ident[EI_NIDENT];
+    Elf64_Half e_type;
+    Elf64_Half e_machine;
+    Elf64_Word e_version;
+    Elf64_Addr e_entry;
+    Elf64_Off e_phoff;
+    Elf64_Off e_shoff;
+    Elf64_Word e_flags;
+    Elf64_Half e_ehsize;
+    Elf64_Half e_phentsize;
+    Elf64_Half e_phnum;
+    Elf64_Half e_shentsize;
+    Elf64_Half e_shnum;
+    Elf64_Half e_shstrndx;
+} Elf64_Ehdr;
+
+
+typedef struct {
+    Elf64_Word p_type;
+    Elf64_Word p_flags;
+    Elf64_Off p_offset;
+    Elf64_Addr p_vaddr;
+    Elf64_Addr p_paddr;
+    Elf64_Xword p_filesz;
+    Elf64_Xword p_memsz;
+    Elf64_Xword p_align;
+} Elf64_Phdr;
+
+
+typedef struct {
+    Elf64_Word sh_name;
+    Elf64_Word sh_type;
+    Elf64_Xword sh_flags;
+    Elf64_Addr sh_addr;
+    Elf64_Off sh_offset;
+    Elf64_Xword sh_size;
+    Elf64_Word sh_link;
+    Elf64_Word sh_info;
+    Elf64_Xword sh_addralign;
+    Elf64_Xword sh_entsize;
+} Elf64_Shdr;
+
+int is_elf64(const void* data);
+int is_elf64_arm64(const void* data);
+void print_elf64_header(const Elf64_Ehdr* ehdr);
+
+#endif // ELF64_H
+
+```
+
+`loader/loader.c`:
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/ptrace.h>
+#include <sys/wait.h>
+#include <sys/prctl.h>
+#include <time.h>
+#include <errno.h>
+#include "common.h"
+#include "elf64.h"
+#include "crypto.h"
+
+#define OBF_KEY 0x5A
+
+static const uint8_t obf_gdb[]      = {0x3D, 0x3E, 0x38};
+static const uint8_t obf_strace[]   = {0x29, 0x2E, 0x28, 0x3B, 0x39, 0x3F};
+static const uint8_t obf_ltrace[]   = {0x36, 0x2E, 0x28, 0x3B, 0x39, 0x3F};
+static const uint8_t obf_radare2[]  = {0x28, 0x3B, 0x3E, 0x3B, 0x28, 0x3F, 0x68};
+static const uint8_t obf_objdump[]  = {0x35, 0x38, 0x30, 0x3E, 0x2F, 0x37, 0x2A};
+static const uint8_t obf_hexdump[]  = {0x32, 0x3F, 0x22, 0x3E, 0x2F, 0x37, 0x2A};
+static const uint8_t obf_ghidra[]   = {0x3D, 0x32, 0x33, 0x3E, 0x28, 0x3B};
+
+static const struct { const uint8_t* obf; size_t len; } tool_names[] = {
+    { obf_gdb,     sizeof(obf_gdb)     },
+    { obf_strace,  sizeof(obf_strace)  },
+    { obf_ltrace,  sizeof(obf_ltrace)  },
+    { obf_radare2, sizeof(obf_radare2) },
+    { obf_objdump, sizeof(obf_objdump) },
+    { obf_hexdump, sizeof(obf_hexdump) },
+    { obf_ghidra,  sizeof(obf_ghidra)  },
+};
+
+static const uint8_t obf_hypervisor[] = {0x32, 0x23, 0x2A, 0x3F, 0x28, 0x2C, 0x33, 0x29, 0x35, 0x28};
+static const uint8_t obf_qemu[]       = {0x2B, 0x3F, 0x37, 0x2F};
+static const uint8_t obf_kvm[]        = {0x31, 0x2C, 0x37};
+static const uint8_t obf_xen[]        = {0x22, 0x3F, 0x34};
+static const uint8_t obf_vmware[]     = {0x2C, 0x37, 0x2D, 0x3B, 0x28, 0x3F};
+static const uint8_t obf_virtualbox[] = {0x2C, 0x33, 0x28, 0x2E, 0x2F, 0x3B, 0x36, 0x38, 0x35, 0x22};
+
+static const struct { const uint8_t* obf; size_t len; } hyper_names[] = {
+    { obf_hypervisor, sizeof(obf_hypervisor) },
+    { obf_qemu,       sizeof(obf_qemu)       },
+    { obf_kvm,        sizeof(obf_kvm)        },
+    { obf_xen,        sizeof(obf_xen)        },
+    { obf_vmware,     sizeof(obf_vmware)     },
+    { obf_virtualbox, sizeof(obf_virtualbox) },
+};
+
+static const uint8_t obf_LD_PRELOAD[]   = {0x16, 0x1E, 0x05, 0x0A, 0x08, 0x1F, 0x16, 0x15, 0x1B, 0x1E};
+static const uint8_t obf_GDB_ENV[]      = {0x1D, 0x1E, 0x18};
+static const uint8_t obf_PTRACE_SCOPE[] = {0x0A, 0x0E, 0x08, 0x1B, 0x19, 0x1F, 0x05, 0x09, 0x19, 0x15, 0x0A, 0x1F};
+static const uint8_t obf_STRACE_LOG[]   = {0x09, 0x0E, 0x08, 0x1B, 0x19, 0x1F, 0x05, 0x16, 0x15, 0x1D};
+static const uint8_t obf_LTRACE_LOG[]   = {0x16, 0x0E, 0x08, 0x1B, 0x19, 0x1F, 0x05, 0x16, 0x15, 0x1D};
+static const uint8_t obf_RADARE2_LOG[]  = {0x08, 0x1B, 0x1E, 0x1B, 0x08, 0x1F, 0x68, 0x05, 0x16, 0x15, 0x1D};
+
+static const struct { const uint8_t* obf; size_t len; } env_names[] = {
+    { obf_LD_PRELOAD,   sizeof(obf_LD_PRELOAD)   },
+    { obf_GDB_ENV,      sizeof(obf_GDB_ENV)      },
+    { obf_PTRACE_SCOPE, sizeof(obf_PTRACE_SCOPE) },
+    { obf_STRACE_LOG,   sizeof(obf_STRACE_LOG)   },
+    { obf_LTRACE_LOG,   sizeof(obf_LTRACE_LOG)   },
+    { obf_RADARE2_LOG,  sizeof(obf_RADARE2_LOG)  },
+};
+
+static const uint8_t obf_TracerPid[] = {0x0E, 0x28, 0x3B, 0x39, 0x3F, 0x28, 0x0A, 0x33, 0x3E, 0x60};
+
+int detect_ptrace_arm64(void) {
+    pid_t child = fork();
+    if (child == 0) { 
+        if (ptrace(PTRACE_TRACEME, 0, NULL, NULL) < 0) {
+            exit(1);
+        }
+        exit(0); 
+    } else if (child > 0) {
+        int status;
+        waitpid(child, &status, 0);
+        return WEXITSTATUS(status) != 0;
+    }
+    return 0;
+}
+
+int check_proc_status(void) {
+    FILE* status_file = fopen("/proc/self/status", "r");
+    if (!status_file) return 0;
+
+    char tracer_prefix[16];
+    deobf_str_xor(tracer_prefix, obf_TracerPid, sizeof(obf_TracerPid), OBF_KEY);
+    tracer_prefix[sizeof(obf_TracerPid)] = '\0';
+
+    char line[256];
+    while (fgets(line, sizeof(line), status_file)) {
+        if (strncmp(line, tracer_prefix, sizeof(obf_TracerPid)) == 0) {
+            int tracer_pid = atoi(line + sizeof(obf_TracerPid));
+            fclose(status_file);
+            secure_memory_wipe(tracer_prefix, sizeof(tracer_prefix));
+            return tracer_pid != 0;
+        }
+    }
+    fclose(status_file);
+    secure_memory_wipe(tracer_prefix, sizeof(tracer_prefix));
+    return 0;
+}
+
+int check_parent_process(void) {
+    FILE* stat_file = fopen("/proc/self/stat", "r");
+    if (!stat_file) return 0;
+
+    pid_t ppid;
+    if (fscanf(stat_file, "%*d %*s %*c %d", &ppid) != 1) {
+        fclose(stat_file);
+        return 0;
+    }
+    fclose(stat_file);
+
+    char comm_path[64];
+    snprintf(comm_path, sizeof(comm_path), "/proc/%d/comm", ppid);
+
+    FILE* comm_file = fopen(comm_path, "r");
+    if (comm_file) {
+        char parent_name[64];
+        if (fgets(parent_name, sizeof(parent_name), comm_file)) {
+            fclose(comm_file);
+
+            parent_name[strcspn(parent_name, "\n")] = 0;
+
+            char decoded[16];
+            for (size_t i = 0; i < sizeof(tool_names) / sizeof(tool_names[0]); i++) {
+                size_t len = tool_names[i].len;
+                if (len >= sizeof(decoded)) continue;
+                deobf_str_xor(decoded, tool_names[i].obf, len, OBF_KEY);
+                decoded[len] = '\0';
+                if (strcmp(parent_name, decoded) == 0) {
+                    secure_memory_wipe(decoded, sizeof(decoded));
+                    return 1;
+                }
+            }
+            secure_memory_wipe(decoded, sizeof(decoded));
+        } else {
+            fclose(comm_file);
+        }
+    }
+    return 0;
+}
+
+
+int detect_virtualization(void) {
+    FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
+    if (!cpuinfo) return 0;
+
+    char decoded[16];
+    char line[256];
+    while (fgets(line, sizeof(line), cpuinfo)) {
+        for (char* p = line; *p; p++) {
+            if (*p >= 'A' && *p <= 'Z') *p += 32;
+        }
+
+        for (size_t i = 0; i < sizeof(hyper_names) / sizeof(hyper_names[0]); i++) {
+            size_t len = hyper_names[i].len;
+            if (len >= sizeof(decoded)) continue;
+            deobf_str_xor(decoded, hyper_names[i].obf, len, OBF_KEY);
+            decoded[len] = '\0';
+            if (strstr(line, decoded)) {
+                fclose(cpuinfo);
+                secure_memory_wipe(decoded, sizeof(decoded));
+                return 1;
+            }
+        }
+    }
+    fclose(cpuinfo);
+    secure_memory_wipe(decoded, sizeof(decoded));
+
+    /* /proc paths kept in plaintext: these are generic kernel paths that
+     * appear in countless system binaries; encoding them buys little. */
+    if (access("/proc/xen", F_OK) == 0) return 1;
+    if (access("/sys/hypervisor/type", F_OK) == 0) return 1;
+    if (access("/proc/vz", F_OK) == 0) return 1;
+    if (access("/proc/bc", F_OK) == 0) return 1;
+
+    return 0;
+}
+
+int check_debug_environment(void) {
+    char decoded[16];
+    int found = 0;
+    for (size_t i = 0; i < sizeof(env_names) / sizeof(env_names[0]); i++) {
+        size_t len = env_names[i].len;
+        if (len >= sizeof(decoded)) continue;
+        deobf_str_xor(decoded, env_names[i].obf, len, OBF_KEY);
+        decoded[len] = '\0';
+        if (getenv(decoded)) { found = 1; break; }
+    }
+    secure_memory_wipe(decoded, sizeof(decoded));
+    return found;
+}
+
+int comprehensive_anti_debug_check() {
+
+    // This logic can be expanded
+    if (detect_ptrace_arm64()) {
+        return 1;
+    }
+    if (check_proc_status()) {
+        return 1;
+    }
+    if (check_parent_process()) {
+        return 1;
+    }
+    if (detect_virtualization()) {
+        return 1;
+    }
+    if (check_debug_environment()) {
+        return 1;
+    }
+
+    return 0;
+}
+
+
+void multi_layer_decrypt(uint8_t* data, size_t len, const pack_header_t* header) {
+    
+    rc4_encrypt_decrypt(header->tertiary_key, 32, data, data, len);
+    
+    chacha20_decrypt(data, len, header->secondary_key, header->nonce);
+
+    aes256_decrypt(data, len, header->primary_key);
+    
+}
+
+pack_header_t* find_packed_header(const uint8_t* data, size_t data_size) {
+    if (data_size < sizeof(pack_header_t)) {
+        return NULL;
+    }
+    for (size_t i = data_size - sizeof(pack_header_t); i > 0; i--) {
+        pack_header_t* header = (pack_header_t*)(data + i);
+        if (header->magic == PACKED_MAGIC) {
+            return header;
+        }
+    }
+    return NULL;
+}
+
+int main(int argc, char* argv[], char* envp[]) {
+    FILE* self_fp;
+    uint8_t* self_data;
+    size_t self_size;
+    pack_header_t* header;
+    uint8_t* encrypted_data;
+    uint8_t* decrypted_data;
+    uint32_t calculated_crc;
+
+    unlink(argv[0]);
+    prevent_core_dumps();
+    hide_process_title(argc, argv);
+
+    self_fp = fopen("/proc/self/exe", "rb");
+    if (!self_fp) {
+        return 1;
+    }
+
+    fseek(self_fp, 0, SEEK_END);
+    self_size = ftell(self_fp);
+    fseek(self_fp, 0, SEEK_SET);
+
+    if (self_size == 0 || self_size > SIZE_MAX / 2) {
+        fclose(self_fp);
+        return 1;
+    }
+
+    self_data = malloc(self_size);
+    if (!self_data) {
+        fclose(self_fp);
+        return 1;
+    }
+
+    size_t bytes_read = fread(self_data, 1, self_size, self_fp);
+    if (bytes_read != self_size) {
+        secure_memory_wipe(self_data, self_size);
+        free(self_data);
+        fclose(self_fp);
+        return 1;
+    }
+    fclose(self_fp);
+
+    header = find_packed_header(self_data, self_size);
+    if (!header) {
+        secure_memory_wipe(self_data, self_size);
+        free(self_data);
+        return 1;
+    }
+
+    if (comprehensive_anti_debug_check()) {
+        secure_memory_wipe(self_data, self_size);
+        free(self_data);
+        exit(0);
+    }
+
+    encrypted_data = (uint8_t*)header + sizeof(pack_header_t);
+    if (encrypted_data + header->packed_size > self_data + self_size) {
+        secure_memory_wipe(self_data, self_size);
+        free(self_data);
+        return 1;
+    }
+    decrypted_data = malloc(header->original_size);
+    if (!decrypted_data) {
+        secure_memory_wipe(self_data, self_size);
+        free(self_data);
+        return 1;
+    }
+
+    memcpy(decrypted_data, encrypted_data, header->original_size);
+
+    multi_layer_decrypt(decrypted_data, header->original_size, header);
+    calculated_crc = crc32(decrypted_data, header->original_size);
+    if (calculated_crc != header->crc32) {
+        secure_memory_wipe(decrypted_data, header->original_size);
+        secure_memory_wipe(self_data, self_size);
+        free(decrypted_data);
+        free(self_data);
+        return 1;
+    }
+    if (!is_elf64(decrypted_data)) {
+        secure_memory_wipe(decrypted_data, header->original_size);
+        secure_memory_wipe(self_data, self_size);
+        free(decrypted_data);
+        free(self_data);
+        return 1;
+    } 
+    if (comprehensive_anti_debug_check()) {
+        secure_memory_wipe(decrypted_data, header->original_size);
+        secure_memory_wipe(self_data, self_size);
+        free(decrypted_data);
+        free(self_data);
+        exit(0);
+    }
+    if (execute_from_memory(decrypted_data, header->original_size, argv, envp) < 0) {
+        secure_memory_wipe(decrypted_data, header->original_size);
+        secure_memory_wipe(self_data, self_size);
+        free(decrypted_data);
+        free(self_data);
+        return 1;
+    }
+
+    secure_memory_wipe(decrypted_data, header->original_size);
+    secure_memory_wipe(self_data, self_size);
+    free(decrypted_data);
+    free(self_data);
+
+    return 0;
+}
+```
+
+`loader/memexec.c`:
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+#include "common.h"
+
+/* int sys_memfd_create(const char* name, unsigned int flags) {
+    return syscall2(__NR_memfd_create, (long)name, flags);
+}
+
+int sys_ftruncate(int fd, off_t length) {
+    return syscall2(__NR_ftruncate, fd, length);
+}
+
+ssize_t sys_write(int fd, const void* buf, size_t count) {
+    return syscall3(__NR_write, fd, (long)buf, count);
+}
+
+int sys_execve(const char* filename, char* const argv[], char* const envp[]) {
+    return syscall3(__NR_execve, (long)filename, (long)argv, (long)envp);
+} */
+
+#ifdef COPY_WITH_IO_URING
+
+/*
+ * write_via_io_uring()
+ *
+ * Writes elf_size bytes from elf_data into memfd using a single
+ * IORING_OP_WRITE submission through a raw io_uring ring.
+ * No liburing, no libc I/O helpers — only the syscall wrappers from
+ * common.h are used.
+ *
+ * Returns 0 on success, -1 on any failure.
+ */
+static int write_via_io_uring(int memfd, const uint8_t *elf_data, size_t elf_size)
+{
+    struct uring_params p;
+    int uring_fd;
+    int ret = -1;
+
+    /* ------------------------------------------------------------------
+     * 1. Create the ring (depth 1 is sufficient for a single write).
+     * ------------------------------------------------------------------ */
+    __builtin_memset(&p, 0, sizeof(p));
+    uring_fd = (int)syscall2(__NR_io_uring_setup, 1, (long)&p);
+    if (uring_fd < 0)
+        return -1;
+
+    /* ------------------------------------------------------------------
+     * 2. Map SQ ring, CQ ring, and SQE array.
+     *    On kernels >= 5.4 IORING_FEAT_SINGLE_MMAP allows the SQ and CQ
+     *    rings to share a single mmap region; we handle both cases.
+     * ------------------------------------------------------------------ */
+    unsigned sq_sz = p.sq_off.array + p.sq_entries * sizeof(unsigned int);
+    unsigned cq_sz = p.cq_off.cqes  + p.cq_entries * sizeof(struct uring_cqe);
+
+    if (p.features & IORING_FEAT_SINGLE_MMAP) {
+        if (cq_sz > sq_sz)
+            sq_sz = cq_sz;
+        cq_sz = sq_sz;
+    }
+
+    uint8_t *sq_ptr = (uint8_t *)syscall6(
+        __NR_mmap, (long)NULL, sq_sz,
+        PROT_READ | PROT_WRITE, MAP_SHARED | MAP_POPULATE,
+        uring_fd, (long)IORING_OFF_SQ_RING);
+    if ((void *)sq_ptr == MAP_FAILED)
+        goto out_close_uring;
+
+    uint8_t *cq_ptr;
+    if (p.features & IORING_FEAT_SINGLE_MMAP) {
+        cq_ptr = sq_ptr;
+    } else {
+        cq_ptr = (uint8_t *)syscall6(
+            __NR_mmap, (long)NULL, cq_sz,
+            PROT_READ | PROT_WRITE, MAP_SHARED | MAP_POPULATE,
+            uring_fd, (long)IORING_OFF_CQ_RING);
+        if ((void *)cq_ptr == MAP_FAILED)
+            goto out_unmap_sq;
+    }
+
+    struct uring_sqe *sqes = (struct uring_sqe *)syscall6(
+        __NR_mmap, (long)NULL, p.sq_entries * sizeof(struct uring_sqe),
+        PROT_READ | PROT_WRITE, MAP_SHARED | MAP_POPULATE,
+        uring_fd, (long)IORING_OFF_SQES);
+    if ((void *)sqes == MAP_FAILED)
+        goto out_unmap_cq;
+
+    /* Convenience pointers into the SQ control block                     */
+    volatile unsigned *sq_head  = (volatile unsigned *)(sq_ptr + p.sq_off.head);
+    volatile unsigned *sq_tail  = (volatile unsigned *)(sq_ptr + p.sq_off.tail);
+    volatile unsigned *sq_mask  = (volatile unsigned *)(sq_ptr + p.sq_off.ring_mask);
+    volatile unsigned *sq_array = (volatile unsigned *)(sq_ptr + p.sq_off.array);
+    (void)sq_head; /* head is managed by the kernel for the SQ            */
+
+    /* Convenience pointers into the CQ control block                     */
+    volatile unsigned *cq_head = (volatile unsigned *)(cq_ptr + p.cq_off.head);
+    volatile unsigned *cq_tail = (volatile unsigned *)(cq_ptr + p.cq_off.tail);
+    volatile unsigned *cq_mask = (volatile unsigned *)(cq_ptr + p.cq_off.ring_mask);
+    struct uring_cqe  *cqes    = (struct uring_cqe  *)(cq_ptr + p.cq_off.cqes);
+    (void)cq_tail; /* tail is managed by the kernel for the CQ            */
+
+    /* ------------------------------------------------------------------
+     * 3. Build one IORING_OP_WRITE SQE at the current tail slot.
+     * ------------------------------------------------------------------ */
+    unsigned tail_idx = *sq_tail;
+    unsigned slot     = tail_idx & *sq_mask;
+
+    __builtin_memset(&sqes[slot], 0, sizeof(sqes[slot]));
+    sqes[slot].opcode    = IORING_OP_WRITE;
+    sqes[slot].fd        = memfd;
+    sqes[slot].off       = 0;                              /* start of file */
+    sqes[slot].addr      = (uint64_t)(uintptr_t)elf_data;
+    sqes[slot].len       = (uint32_t)elf_size;
+    sqes[slot].user_data = 0xdeadbeefULL;                  /* CQE correlator */
+
+    sq_array[slot] = slot;
+
+    io_write_barrier();
+    *sq_tail = tail_idx + 1;
+    io_write_barrier();
+
+    /* ------------------------------------------------------------------
+     * 4. Submit 1 SQE and block until 1 CQE is ready (single syscall).
+     * ------------------------------------------------------------------ */
+    long entered = syscall6(
+        __NR_io_uring_enter,
+        uring_fd,
+        1,                      /* to_submit   */
+        1,                      /* min_complete */
+        IORING_ENTER_GETEVENTS,
+        (long)NULL,             /* sigmask     */
+        0);                     /* sigmask_sz  */
+
+    if (entered < 0)
+        goto out_unmap_sqes;
+
+    /* ------------------------------------------------------------------
+     * 5. Harvest the CQE and validate the byte count.
+     * ------------------------------------------------------------------ */
+    io_read_barrier();
+    unsigned cq_idx = *cq_head & *cq_mask;
+    struct uring_cqe cqe = cqes[cq_idx];   /* snapshot before advancing  */
+    io_read_barrier();
+    *cq_head = *cq_head + 1;
+    io_write_barrier();
+
+    /* cqe.res is the number of bytes written (>=0) or -errno on error    */
+    if (cqe.res != (int32_t)elf_size)
+        goto out_unmap_sqes;
+
+    ret = 0;
+
+out_unmap_sqes:
+    syscall2(__NR_munmap, (long)sqes,
+             p.sq_entries * sizeof(struct uring_sqe));
+out_unmap_cq:
+    if (!(p.features & IORING_FEAT_SINGLE_MMAP))
+        syscall2(__NR_munmap, (long)cq_ptr, cq_sz);
+out_unmap_sq:
+    syscall2(__NR_munmap, (long)sq_ptr, sq_sz);
+out_close_uring:
+    syscall1(__NR_close, uring_fd);
+    return ret;
+}
+
+#endif /* COPY_WITH_IO_URING */
+
+/* ========================================================================= */
+
+int execute_from_memory(const uint8_t* elf_data, size_t elf_size, char* const argv[], char* const envp[]) {
+
+   // Allocate randomized address space to leverage ASLR
+    void *randomized_base = (void *)syscall6(__NR_mmap, (long)NULL, elf_size, PROT_NONE, MAP_PRIVATE | MAP_ANON, -1, 0);
+    if (randomized_base == MAP_FAILED) {
+        return -1;
+    }
+
+    // Use masqueraded memfd creation
+    int memfd = create_masqueraded_memfd();
+    if (memfd < 0) {
+        syscall2(__NR_munmap, (long)randomized_base, elf_size);
+        return -1;
+    }
+
+    // Set file size using direct syscall
+    if (syscall2(__NR_ftruncate, memfd, elf_size) < 0) {
+        syscall1(__NR_close, memfd);
+        syscall2(__NR_munmap, (long)randomized_base, elf_size);
+        return -1;
+    }
+
+#ifdef COPY_WITH_MMAP
+    /* ------------------------------------------------------------------
+     * Path A: mmap the memfd PROT_WRITE and byte-copy the ELF into it.
+     * ------------------------------------------------------------------ */
+    DBG("write path: mmap\n");
+    uint8_t *map = (uint8_t *)syscall6(__NR_mmap, (long)NULL, elf_size, PROT_WRITE, MAP_SHARED, memfd, 0);
+    size_t i;
+    if (map == MAP_FAILED) {
+        syscall1(__NR_close, memfd);
+        syscall2(__NR_munmap, (long)randomized_base, elf_size);
+        return -1;
+    }
+    for (i = 0; i < elf_size; ++i) {
+        /* This could be quite a bit faster at the cost of a library call. */
+        map[i] = elf_data[i];
+    }
+#ifdef _POSIX_MAPPED_FILES
+    if (syscall3(__NR_msync, (long)map, elf_size, MS_SYNC) == -1) {
+        syscall1(__NR_close, memfd);
+        syscall2(__NR_munmap, (long)randomized_base, elf_size);
+        return -1;
+    }
+#endif /* #ifdef _POSIX_MAPPED_FILES */
+    if (syscall2(__NR_munmap, (long)map, elf_size) == -1) {
+        syscall1(__NR_close, memfd);
+        syscall2(__NR_munmap, (long)randomized_base, elf_size);
+        return -1;
+    }
+
+#elif defined(COPY_WITH_IO_URING)
+    /* ------------------------------------------------------------------
+     * Path B: write the ELF into the memfd via io_uring IORING_OP_WRITE.
+     * Requires kernel >= 5.1. No liburing — raw syscalls only.
+     * ------------------------------------------------------------------ */
+    DBG("write path: io_uring\n");
+    if (write_via_io_uring(memfd, elf_data, elf_size) < 0) {
+        syscall1(__NR_close, memfd);
+        syscall2(__NR_munmap, (long)randomized_base, elf_size);
+        return -1;
+    }
+
+#else
+    /* ------------------------------------------------------------------
+     * Path C: plain write(2) syscall (original default).
+     * ------------------------------------------------------------------ */
+    DBG("write path: plain write(2)\n");
+    if (syscall3(__NR_write, memfd, (long)elf_data, elf_size) != (long)elf_size) {
+        syscall1(__NR_close, memfd);
+        syscall2(__NR_munmap, (long)randomized_base, elf_size);
+        return -1;
+    }
+#endif /* #ifdef COPY_WITH_MMAP */
+
+    char memfd_path[256];
+    snprintf(memfd_path, sizeof(memfd_path), "/proc/self/fd/%d", memfd);
+
+    // Execute using direct syscall
+    syscall3(__NR_execve, (long)memfd_path, (long)argv, (long)envp);
+
+    // Cleanup on execve failure
+    syscall2(__NR_munmap, (long)randomized_base, elf_size);
+    syscall1(__NR_close, memfd);
+    return -1;
+}
+```
+
+`packer/crypto.c`:
+
+```c
+#include "crypto.h"
+#include "common.h"
+#include <string.h>
+#include <time.h>
+#include <openssl/evp.h>
+#include <openssl/rand.h>
+#include <openssl/err.h>
+
+const volatile uint32_t hARMless_sc[SC_TABLE_LEN] = {
+    [SC_IDX_READ]              =  63u ^ SC_XOR_KEY,
+    [SC_IDX_WRITE]             =  64u ^ SC_XOR_KEY,
+    [SC_IDX_OPEN]              =  56u ^ SC_XOR_KEY,
+    [SC_IDX_CLOSE]             =  57u ^ SC_XOR_KEY,
+    [SC_IDX_MMAP]              = 222u ^ SC_XOR_KEY,
+    [SC_IDX_MUNMAP]            = 215u ^ SC_XOR_KEY,
+    [SC_IDX_EXECVE]            = 221u ^ SC_XOR_KEY,
+    [SC_IDX_MEMFD_CREATE]      = 279u ^ SC_XOR_KEY,
+    [SC_IDX_FTRUNCATE]         =  46u ^ SC_XOR_KEY,
+    [SC_IDX_LSEEK]             =  62u ^ SC_XOR_KEY,
+    [SC_IDX_MPROTECT]          = 226u ^ SC_XOR_KEY,
+    [SC_IDX_PTRACE]            = 101u ^ SC_XOR_KEY,
+    [SC_IDX_GETPID]            = 172u ^ SC_XOR_KEY,
+    [SC_IDX_GETPPID]           = 173u ^ SC_XOR_KEY,
+    [SC_IDX_PRCTL]             = 167u ^ SC_XOR_KEY,
+    [SC_IDX_MSYNC]             = 227u ^ SC_XOR_KEY,
+    [SC_IDX_IO_URING_SETUP]    = 425u ^ SC_XOR_KEY,
+    [SC_IDX_IO_URING_ENTER]    = 426u ^ SC_XOR_KEY,
+    [SC_IDX_IO_URING_REGISTER] = 427u ^ SC_XOR_KEY,
+};
+
+static const uint32_t crc32_table[256] = {
+    0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F,
+    0xE963A535, 0x9E6495A3, 0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988,
+    0x09B64C2B, 0x7EB17CBD, 0xE7B82D07, 0x90BF1D91, 0x1DB71064, 0x6AB020F2,
+    0xF3B97148, 0x84BE41DE, 0x1ADAD47D, 0x6DDDE4EB, 0xF4D4B551, 0x83D385C7,
+    0x136C9856, 0x646BA8C0, 0xFD62F97A, 0x8A65C9EC, 0x14015C4F, 0x63066CD9,
+    0xFA0F3D63, 0x8D080DF5, 0x3B6E20C8, 0x4C69105E, 0xD56041E4, 0xA2677172,
+    0x3C03E4D1, 0x4B04D447, 0xD20D85FD, 0xA50AB56B, 0x35B5A8FA, 0x42B2986C,
+    0xDBBBC9D6, 0xACBCF940, 0x32D86CE3, 0x45DF5C75, 0xDCD60DCF, 0xABD13D59,
+    0x26D930AC, 0x51DE003A, 0xC8D75180, 0xBFD06116, 0x21B4F4B5, 0x56B3C423,
+    0xCFBA9599, 0xB8BDA50F, 0x2802B89E, 0x5F058808, 0xC60CD9B2, 0xB10BE924,
+    0x2F6F7C87, 0x58684C11, 0xC1611DAB, 0xB6662D3D, 0x76DC4190, 0x01DB7106,
+    0x98D220BC, 0xEFD5102A, 0x71B18589, 0x06B6B51F, 0x9FBFE4A5, 0xE8B8D433,
+    0x7807C9A2, 0x0F00F934, 0x9609A88E, 0xE10E9818, 0x7F6A0DBB, 0x086D3D2D,
+    0x91646C97, 0xE6635C01, 0x6B6B51F4, 0x1C6C6162, 0x856530D8, 0xF262004E,
+    0x6C0695ED, 0x1B01A57B, 0x8208F4C1, 0xF50FC457, 0x65B0D9C6, 0x12B7E950,
+    0x8BBEB8EA, 0xFCB9887C, 0x62DD1DDF, 0x15DA2D49, 0x8CD37CF3, 0xFBD44C65,
+    0x4DB26158, 0x3AB551CE, 0xA3BC0074, 0xD4BB30E2, 0x4ADFA541, 0x3DD895D7,
+    0xA4D1C46D, 0xD3D6F4FB, 0x4369E96A, 0x346ED9FC, 0xAD678846, 0xDA60B8D0,
+    0x44042D73, 0x33031DE5, 0xAA0A4C5F, 0xDD0D7CC9, 0x5005713C, 0x270241AA,
+    0xBE0B1010, 0xC90C2086, 0x5768B525, 0x206F85B3, 0xB966D409, 0xCE61E49F,
+    0x5EDEF90E, 0x29D9C998, 0xB0D09822, 0xC7D7A8B4, 0x59B33D17, 0x2EB40D81,
+    0xB7BD5C3B, 0xC0BA6CAD, 0xEDB88320, 0x9ABFB3B6, 0x03B6E20C, 0x74B1D29A,
+    0xEAD54739, 0x9DD277AF, 0x04DB2615, 0x73DC1683, 0xE3630B12, 0x94643B84,
+    0x0D6D6A3E, 0x7A6A5AA8, 0xE40ECF0B, 0x9309FF9D, 0x0A00AE27, 0x7D079EB1,
+    0xF00F9344, 0x8708A3D2, 0x1E01F268, 0x6906C2FE, 0xF762575D, 0x806567CB,
+    0x196C3671, 0x6E6B06E7, 0xFED41B76, 0x89D32BE0, 0x10DA7A5A, 0x67DD4ACC,
+    0xF9B9DF6F, 0x8EBEEFF9, 0x17B7BE43, 0x60B08ED5, 0xD6D6A3E8, 0xA1D1937E,
+    0x38D8C2C4, 0x4FDFF252, 0xD1BB67F1, 0xA6BC5767, 0x3FB506DD, 0x48B2364B,
+    0xD80D2BDA, 0xAF0A1B4C, 0x36034AF6, 0x41047A60, 0xDF60EFC3, 0xA867DF55,
+    0x316E8EEF, 0x4669BE79, 0xCB61B38C, 0xBC66831A, 0x256FD2A0, 0x5268E236,
+    0xCC0C7795, 0xBB0B4703, 0x220216B9, 0x5505262F, 0xC5BA3BBE, 0xB2BD0B28,
+    0x2BB45A92, 0x5CB36A04, 0xC2D7FFA7, 0xB5D0CF31, 0x2CD99E8B, 0x5BDEAE1D,
+    0x9B64C2B0, 0xEC63F226, 0x756AA39C, 0x026D930A, 0x9C0906A9, 0xEB0E363F,
+    0x72076785, 0x05005713, 0x95BF4A82, 0xE2B87A14, 0x7BB12BAE, 0x0CB61B38,
+    0x92D28E9B, 0xE5D5BE0D, 0x7CDCEFB7, 0x0BDBDF21, 0x86D3D2D4, 0xF1D4E242,
+    0x68DDB3F8, 0x1FDA836E, 0x81BE16CD, 0xF6B9265B, 0x6FB077E1, 0x18B74777,
+    0x88085AE6, 0xFF0F6A70, 0x66063BCA, 0x11010B5C, 0x8F659EFF, 0xF862AE69,
+    0x616BFFD3, 0x166CCF45, 0xA00AE278, 0xD70DD2EE, 0x4E048354, 0x3903B3C2,
+    0xA7672661, 0xD06016F7, 0x4969474D, 0x3E6E77DB, 0xAED16A4A, 0xD9D65ADC,
+    0x40DF0B66, 0x37D83BF0, 0xA9BCAE53, 0xDEBB9EC5, 0x47B2CF7F, 0x30B5FFE9,
+    0xBDBDF21C, 0xCABAC28A, 0x53B39330, 0x24B4A3A6, 0xBAD03605, 0xCDD70693,
+    0x54DE5729, 0x23D967BF, 0xB3667A2E, 0xC4614AB8, 0x5D681B02, 0x2A6F2B94,
+    0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D
+};
+
+uint32_t crc32(const uint8_t* data, size_t len) {
+    uint32_t crc = 0xFFFFFFFF;
+    size_t i;
+    for (i = 0; i < len; i++) {
+        crc = crc32_table[(crc ^ data[i]) & 0xFF] ^ (crc >> 8);
+    }
+    return crc ^ 0xFFFFFFFF;
+}
+
+void rc4_init(rc4_context_t* ctx, const uint8_t* key, size_t key_len) {
+    int i, j;
+    uint8_t temp;
+
+    // Initialize S-box
+    for (i = 0; i < 256; i++) {
+        ctx->S[i] = i;
+    }
+
+    j = 0;
+    for (i = 0; i < 256; i++) {
+        j = (j + ctx->S[i] + key[i % key_len]) & 0xFF;
+        temp = ctx->S[i];
+        ctx->S[i] = ctx->S[j];
+        ctx->S[j] = temp;
+    }
+
+    ctx->i = 0;
+    ctx->j = 0;
+}
+
+void rc4_crypt(rc4_context_t* ctx, const uint8_t* input, uint8_t* output, size_t len) {
+    size_t n;
+    uint8_t temp;
+
+    for (n = 0; n < len; n++) {
+        ctx->i = (ctx->i + 1) & 0xFF;
+        ctx->j = (ctx->j + ctx->S[ctx->i]) & 0xFF;
+
+        temp = ctx->S[ctx->i];
+        ctx->S[ctx->i] = ctx->S[ctx->j];
+        ctx->S[ctx->j] = temp;
+
+        output[n] = input[n] ^ ctx->S[(ctx->S[ctx->i] + ctx->S[ctx->j]) & 0xFF];
+    }
+}
+
+void rc4_encrypt_decrypt(const uint8_t* key, size_t key_len, const uint8_t* input, uint8_t* output, size_t len) {
+    rc4_context_t ctx;
+    rc4_init(&ctx, key, key_len);
+    rc4_crypt(&ctx, input, output, len);
+}
+
+// OpenSSL-based AES-256
+void aes256_encrypt(uint8_t* data, size_t len, const uint8_t* key) {
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    if (!ctx) return;
+
+    if (EVP_EncryptInit_ex(ctx, EVP_aes_256_ecb(), NULL, key, NULL) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        return;
+    }
+
+    int out_len;
+    uint8_t* output = malloc(len + 16); // Padding space
+    if (!output) {
+        EVP_CIPHER_CTX_free(ctx);
+        return;
+    }
+
+    if (EVP_EncryptUpdate(ctx, output, &out_len, data, len) != 1) {
+        free(output);
+        EVP_CIPHER_CTX_free(ctx);
+        return;
+    }
+
+    int final_len;
+    EVP_EncryptFinal_ex(ctx, output + out_len, &final_len);
+
+    memcpy(data, output, len); // Copy back (ECB mode preserves length)
+    free(output);
+    EVP_CIPHER_CTX_free(ctx);
+}
+
+void aes256_decrypt(uint8_t* data, size_t len, const uint8_t* key) {
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    if (!ctx) return;
+
+    if (EVP_DecryptInit_ex(ctx, EVP_aes_256_ecb(), NULL, key, NULL) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        return;
+    }
+
+    int out_len;
+    uint8_t* output = malloc(len + 16);
+    if (!output) {
+        EVP_CIPHER_CTX_free(ctx);
+        return;
+    }
+
+    if (EVP_DecryptUpdate(ctx, output, &out_len, data, len) != 1) {
+        free(output);
+        EVP_CIPHER_CTX_free(ctx);
+        return;
+    }
+
+    int final_len;
+    EVP_DecryptFinal_ex(ctx, output + out_len, &final_len);
+
+    memcpy(data, output, len);
+    free(output);
+    EVP_CIPHER_CTX_free(ctx);
+}
+
+// OpenSSL-based ChaCha20
+void chacha20_encrypt(uint8_t* data, size_t len, const uint8_t* key, const uint8_t* nonce) {
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    if (!ctx) return;
+
+    // ChaCha20 uses 32-byte key, 16-byte IV (nonce + counter)
+    uint8_t iv[16] = {0};
+    memcpy(iv, nonce, 12); // Copy 12-byte nonce, counter starts at 0
+
+    if (EVP_EncryptInit_ex(ctx, EVP_chacha20(), NULL, key, iv) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        return;
+    }
+
+    int out_len;
+    uint8_t* output = malloc(len);
+    if (!output) {
+        EVP_CIPHER_CTX_free(ctx);
+        return;
+    }
+
+    if (EVP_EncryptUpdate(ctx, output, &out_len, data, len) != 1) {
+        free(output);
+        EVP_CIPHER_CTX_free(ctx);
+        return;
+    }
+
+    memcpy(data, output, len);
+    free(output);
+    EVP_CIPHER_CTX_free(ctx);
+}
+
+void chacha20_decrypt(uint8_t* data, size_t len, const uint8_t* key, const uint8_t* nonce) {
+    // ChaCha20 is symmetric
+    chacha20_encrypt(data, len, key, nonce);
+}
+
+```
+
+`packer/elf64.c`:
+
+```c
+#include "elf64.h"
+#include <stdio.h>
+#include <string.h>
+
+int is_elf64(const void* data) {
+    const unsigned char* ident = (const unsigned char*)data;
+    return ident[0] == 0x7f &&
+           ident[1] == 'E' &&
+           ident[2] == 'L' &&
+           ident[3] == 'F' &&
+           ident[4] == ELFCLASS64;
+}
+
+int is_elf64_arm64(const void* data) {
+    const Elf64_Ehdr* ehdr = (const Elf64_Ehdr*)data;
+    return is_elf64(data) && ehdr->e_machine == EM_AARCH64;
+}
+
+void print_elf64_header(const Elf64_Ehdr* ehdr) {
+    printf("ELF Header:\n");
+    printf("  Entry point: 0x%lx\n", (unsigned long)ehdr->e_entry);
+    printf("  Program header offset: 0x%lx\n", (unsigned long)ehdr->e_phoff);
+    printf("  Section header offset: 0x%lx\n", (unsigned long)ehdr->e_shoff);
+    printf("  Machine: %u\n", ehdr->e_machine);
+    printf("  Type: %u\n", ehdr->e_type);
+    printf("  Number of program headers: %u\n", ehdr->e_phnum);
+    printf("  Number of section headers: %u\n", ehdr->e_shnum);
+}
+```
+
+`packer/obfuscation.c`:
+
+```c
+#include "common.h"
+#include "elf64.h"
+#include <unistd.h>
+
+void strip_elf_metadata(uint8_t* data, size_t len) {
+    if (!data || len < sizeof(Elf64_Ehdr)) return;
+    if (!is_elf64(data)) return;
+
+    Elf64_Ehdr* ehdr = (Elf64_Ehdr*)data;
+    ehdr->e_shoff     = 0;
+    ehdr->e_shnum     = 0;
+    ehdr->e_shentsize = 0;
+    ehdr->e_shstrndx  = 0;
+
+    for (int i = 7; i < EI_NIDENT; i++) {
+        ehdr->e_ident[i] = 0;
+    }
+}
+
+void deobf_str_xor(char* dst, const uint8_t* src, size_t len, uint8_t key) {
+    for (size_t i = 0; i < len; i++) {
+        dst[i] = (char)(src[i] ^ key);
+    }
+}
+
+void secure_memory_wipe(void* ptr, size_t size) {
+    if (!ptr || size == 0) return;
+
+    volatile uint8_t* mem = (volatile uint8_t*)ptr;
+
+    // Use secure random if available, fallback to rand
+    static int rand_initialized = 0;
+    if (!rand_initialized) {
+        srand(time(NULL) ^ getpid());
+        rand_initialized = 1;
+    }
+
+    for (int pass = 0; pass < 3; pass++) {
+        for (size_t i = 0; i < size; i++) {
+            switch (pass) {
+                case 0: mem[i] = 0x00; break;      // Zeros
+                case 1: mem[i] = 0xFF; break;      // Ones
+                case 2: mem[i] = (uint8_t)rand(); break;  // Random
+            }
+        }
+    }
+
+    // Prevent optimization
+    __asm__ __volatile__("" : : "r"(mem) : "memory");
+}
+
+void prevent_core_dumps(void) {
+    struct rlimit rl;
+    rl.rlim_cur = 0;
+    rl.rlim_max = 0;
+    // The below might fail, but the execution won't be impacted
+    setrlimit(RLIMIT_CORE, &rl);
+}
+
+void hide_process_title(int argc, char* argv[]) {
+    if (argc > 0 && argv && argv[0]) {
+
+        size_t orig_len = strlen(argv[0]);
+        memset(argv[0], 0, orig_len);
+
+        const char* innocent_name = get_random_innocent_name();
+        size_t copy_len = strlen(innocent_name);
+        if (copy_len >= orig_len) {
+            copy_len = orig_len - 1;
+        }
+        memcpy(argv[0], innocent_name, copy_len);
+        argv[0][copy_len] = '\0';
+
+        prctl(PR_SET_NAME, innocent_name, 0, 0, 0);
+    }
+}
+
+
+#define INNOCENT_XOR_KEY 0x5A
+
+static const uint8_t innocent_obf_kworker[]   = {0x01, 0x31, 0x2D, 0x35, 0x28, 0x31, 0x3F, 0x28, 0x75, 0x6A, 0x60, 0x6B, 0x07};
+static const uint8_t innocent_obf_ksoftirqd[] = {0x01, 0x31, 0x29, 0x35, 0x3C, 0x2E, 0x33, 0x28, 0x2B, 0x3E, 0x75, 0x6A, 0x07};
+static const uint8_t innocent_obf_migration[] = {0x01, 0x37, 0x33, 0x3D, 0x28, 0x3B, 0x2E, 0x33, 0x35, 0x34, 0x75, 0x6A, 0x07};
+static const uint8_t innocent_obf_rcugp[]     = {0x01, 0x28, 0x39, 0x2F, 0x05, 0x3D, 0x2A, 0x07};
+static const uint8_t innocent_obf_watchdog[]  = {0x01, 0x2D, 0x3B, 0x2E, 0x39, 0x32, 0x3E, 0x35, 0x3D, 0x75, 0x6A, 0x07};
+static const uint8_t innocent_obf_kcompactd[] = {0x01, 0x31, 0x39, 0x35, 0x37, 0x2A, 0x3B, 0x39, 0x2E, 0x3E, 0x6A, 0x07};
+static const uint8_t innocent_obf_kswapd[]    = {0x01, 0x31, 0x29, 0x2D, 0x3B, 0x2A, 0x3E, 0x6A, 0x07};
+static const uint8_t innocent_obf_journal[]   = {0x01, 0x29, 0x23, 0x29, 0x2E, 0x3F, 0x37, 0x3E, 0x77, 0x30, 0x35, 0x2F, 0x28, 0x34, 0x3B, 0x36, 0x07};
+
+static const struct {
+    const uint8_t* obf;
+    size_t len;
+} innocent_obf_table[] = {
+    { innocent_obf_kworker,   sizeof(innocent_obf_kworker)   },
+    { innocent_obf_ksoftirqd, sizeof(innocent_obf_ksoftirqd) },
+    { innocent_obf_migration, sizeof(innocent_obf_migration) },
+    { innocent_obf_rcugp,     sizeof(innocent_obf_rcugp)     },
+    { innocent_obf_watchdog,  sizeof(innocent_obf_watchdog)  },
+    { innocent_obf_kcompactd, sizeof(innocent_obf_kcompactd) },
+    { innocent_obf_kswapd,    sizeof(innocent_obf_kswapd)    },
+    { innocent_obf_journal,   sizeof(innocent_obf_journal)   },
+};
+
+const char* get_random_innocent_name(void) {
+    static char decoded[32];
+    static int initialized = 0;
+    if (!initialized) {
+        srand(time(NULL));
+        initialized = 1;
+    }
+
+    size_t count = sizeof(innocent_obf_table) / sizeof(innocent_obf_table[0]);
+    int index = rand() % count;
+    size_t len = innocent_obf_table[index].len;
+    if (len >= sizeof(decoded)) len = sizeof(decoded) - 1;
+
+    deobf_str_xor(decoded, innocent_obf_table[index].obf, len, INNOCENT_XOR_KEY);
+    decoded[len] = '\0';
+    return decoded;
+}
+
+int create_masqueraded_memfd(void) {
+    const char* innocent_name = get_random_innocent_name();
+    return syscall2(__NR_memfd_create, (long)innocent_name, 0);
+}
+```
+
+`packer/packer.c`:
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include "common.h"
+#include "elf64.h"
+#include "crypto.h"
+
+void generate_random_key(uint8_t* key, size_t key_size) {
+    size_t i;
+    FILE* urandom = fopen("/dev/urandom", "rb");
+    if (urandom) {
+        if (fread(key, 1, key_size, urandom) != key_size) {
+            // Fallback if read fails
+            srand(time(NULL));
+            for (i = 0; i < key_size; i++) {
+                key[i] = rand() & 0xFF;
+            }
+        }
+        fclose(urandom);
+    } else {
+        srand(time(NULL));
+        for (i = 0; i < key_size; i++) {
+            key[i] = rand() & 0xFF;
+        }
+    }
+}
+
+void multi_layer_encrypt(uint8_t* data, size_t len, const pack_header_t* header) {
+    // Layer 1: AES-256
+    
+    aes256_encrypt(data, len, header->primary_key);
+    
+
+    // Layer 2: ChaCha20
+    
+    chacha20_encrypt(data, len, header->secondary_key, header->nonce);
+    
+
+    // Layer 3: RC4
+    
+    rc4_encrypt_decrypt(header->tertiary_key, 32, data, data, len);
+    
+}
+
+int is_elf64(const void* data) {
+    const Elf64_Ehdr* ehdr = (const Elf64_Ehdr*)data;
+    return (ehdr->e_ident[0] == ELFMAG0 &&
+            ehdr->e_ident[1] == ELFMAG1 &&
+            ehdr->e_ident[2] == ELFMAG2 &&
+            ehdr->e_ident[3] == ELFMAG3 &&
+            ehdr->e_ident[4] == ELFCLASS64);
+}
+
+int is_elf64_arm64(const void* data) {
+    const Elf64_Ehdr* ehdr = (const Elf64_Ehdr*)data;
+    return is_elf64(data) && ehdr->e_machine == EM_AARCH64;
+}
+
+void print_usage(const char* program_name) {
+    printf("Advanced ARM64 ELF Packer v2 - Integrated Obfuscation\n");
+    printf("Usage: %s <input_elf> <output_packed>\n", program_name);
+}
+
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        print_usage(argv[0]);
+        return 1;
+    }
+
+    const char* input_file = argv[1];
+    const char* output_file = argv[2];
+
+
+    printf("Advanced ARM64 ELF Packer\n");
+
+
+    // Open and read input file
+    FILE* input_fp = fopen(input_file, "rb");
+    if (!input_fp) {
+        fprintf(stderr, "Error: Cannot open input file '%s'\n", input_file);
+        return 1;
+    }
+
+    fseek(input_fp, 0, SEEK_END);
+    size_t file_size = ftell(input_fp);
+    fseek(input_fp, 0, SEEK_SET);
+
+    if (file_size == 0 || file_size > SIZE_MAX / 2) {
+        fprintf(stderr, "Error: Input file is empty or too large\n");
+        fclose(input_fp);
+        return 1;
+    }
+
+    uint8_t* file_data = malloc(file_size);
+    if (!file_data) {
+        fprintf(stderr, "Error: Cannot allocate memory for file data\n");
+        fclose(input_fp);
+        return 1;
+    }
+
+    size_t bytes_read = fread(file_data, 1, file_size, input_fp);
+    if (bytes_read != file_size) {
+        fprintf(stderr, "Error: Cannot read input file (read %zu of %zu bytes)\n", bytes_read, file_size);
+        free(file_data);
+        fclose(input_fp);
+        return 1;
+    }
+    fclose(input_fp);
+
+    // Verify ARM64 ELF
+    if (!is_elf64_arm64(file_data)) {
+        fprintf(stderr, "Error: Input file is not an ARM64 ELF binary\n");
+        free(file_data);
+        return 1;
+    }
+
+    printf("Packing ARM64 ELF binary: %s\n", input_file);
+    printf("Original size: %zu bytes\n", file_size);
+
+    strip_elf_metadata(file_data, file_size);
+
+    uint32_t original_crc = crc32(file_data, file_size);
+    uint8_t* encrypted_data = malloc(file_size);
+    if (!encrypted_data) {
+        fprintf(stderr, "Error: Cannot allocate memory for encrypted data\n");
+        free(file_data);
+        return 1;
+    }
+
+    memcpy(encrypted_data, file_data, file_size);
+
+    pack_header_t header;
+    memset(&header, 0, sizeof(header));
+
+    header.magic = PACKED_MAGIC;
+    header.original_size = file_size;
+    header.packed_size = file_size;
+    header.crc32 = original_crc;
+
+    generate_random_key(header.primary_key, 32);
+    generate_random_key(header.secondary_key, 32);
+    generate_random_key(header.tertiary_key, 32);
+    generate_random_key(header.nonce, 16);
+    generate_random_key(header.salt, 16);
+
+    multi_layer_encrypt(encrypted_data, file_size, &header);
+
+    FILE* output_fp = fopen(output_file, "wb");
+    if (!output_fp) {
+        fprintf(stderr, "Error: Cannot create output file '%s'\n", output_file);
+        free(file_data);
+        free(encrypted_data);
+        return 1;
+    }
+
+    size_t header_written = fwrite(&header, sizeof(header), 1, output_fp);
+    if (header_written != 1) {
+        fprintf(stderr, "Error: Cannot write header to output file\n");
+        fclose(output_fp);
+        free(file_data);
+        free(encrypted_data);
+        return 1;
+    }
+
+    size_t data_written = fwrite(encrypted_data, 1, file_size, output_fp);
+    if (data_written != file_size) {
+        fprintf(stderr, "Error: Cannot write encrypted data to output file (wrote %zu of %zu bytes)\n", data_written, file_size);
+        fclose(output_fp);
+        free(file_data);
+        free(encrypted_data);
+        return 1;
+    }
+    fclose(output_fp);
+
+    chmod(output_file, 0755);
+
+    printf("\nPacking completed successfully!\n");
+    printf("==========================================\n");
+    printf("Output file: %s\n", output_file);
+    printf("Packed size: %zu bytes\n", sizeof(header) + file_size);
+    printf("CRC32: 0x%08X\n", original_crc);
+
+    secure_memory_wipe(file_data, file_size);
+    secure_memory_wipe(encrypted_data, file_size);
+    free(file_data);
+    free(encrypted_data);
+
+    return 0;
+}
+```
+
+`stubgen/stubgen.c`:
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include "common.h"
+
+void print_usage(const char* program_name) {
+    printf("Usage: %s <loader_binary> <packed_data> <output_stub>\n", program_name);
+    printf("\nCombines loader with packed data to create self-contained executable\n");
+    printf("\nOptions:\n");
+    printf("  loader_binary  - The loader executable\n");
+    printf("  packed_data    - The packed data file\n");
+    printf("  output_stub    - Output self-contained executable\n");
+}
+
+int main(int argc, char* argv[]) {
+    if (argc != 4) {
+        print_usage(argv[0]);
+        return 1;
+    }
+
+    const char* loader_file = argv[1];
+    const char* packed_file = argv[2];
+    const char* output_file = argv[3];
+
+    FILE* loader_fp = NULL;
+    FILE* packed_fp = NULL;
+    FILE* output_fp = NULL;
+    uint8_t* loader_data = NULL;
+    uint8_t* packed_data = NULL;
+    size_t loader_size = 0;
+    size_t packed_size = 0;
+    int ret = 1;
+
+    loader_fp = fopen(loader_file, "rb");
+    if (!loader_fp) {
+        fprintf(stderr, "Error: Cannot open loader file '%s': %s\n", loader_file, strerror(errno));
+        goto cleanup;
+    }
+
+    fseek(loader_fp, 0, SEEK_END);
+    loader_size = ftell(loader_fp);
+    fseek(loader_fp, 0, SEEK_SET);
+
+    if (loader_size == 0 || loader_size > SIZE_MAX / 2) {
+        fprintf(stderr, "Error: Loader file is empty or too large\n");
+        goto cleanup;
+    }
+
+    packed_fp = fopen(packed_file, "rb");
+    if (!packed_fp) {
+        fprintf(stderr, "Error: Cannot open packed file '%s': %s\n", packed_file, strerror(errno));
+        goto cleanup;
+    }
+
+    fseek(packed_fp, 0, SEEK_END);
+    packed_size = ftell(packed_fp);
+    fseek(packed_fp, 0, SEEK_SET);
+
+    if (packed_size == 0 || packed_size > SIZE_MAX / 2) {
+        fprintf(stderr, "Error: Packed file is empty or too large\n");
+        goto cleanup;
+    }
+
+    loader_data = malloc(loader_size);
+    if (!loader_data) {
+        fprintf(stderr, "Error: Cannot allocate memory for loader data\n");
+        goto cleanup;
+    }
+
+    size_t loader_bytes_read = fread(loader_data, 1, loader_size, loader_fp);
+    if (loader_bytes_read != loader_size) {
+        fprintf(stderr, "Error: Cannot read loader file (read %zu of %zu bytes)\n", loader_bytes_read, loader_size);
+        goto cleanup;
+    }
+
+    packed_data = malloc(packed_size);
+    if (!packed_data) {
+        fprintf(stderr, "Error: Cannot allocate memory for packed data\n");
+        goto cleanup;
+    }
+
+    size_t packed_bytes_read = fread(packed_data, 1, packed_size, packed_fp);
+    if (packed_bytes_read != packed_size) {
+        fprintf(stderr, "Error: Cannot read packed file (read %zu of %zu bytes)\n", packed_bytes_read, packed_size);
+        goto cleanup;
+    }
+
+    output_fp = fopen(output_file, "wb");
+    if (!output_fp) {
+        fprintf(stderr, "Error: Cannot create output file '%s': %s\n", output_file, strerror(errno));
+        goto cleanup;
+    }
+
+    size_t loader_written = fwrite(loader_data, 1, loader_size, output_fp);
+    if (loader_written != loader_size) {
+        fprintf(stderr, "Error: Cannot write loader data to output file (wrote %zu of %zu bytes)\n", loader_written, loader_size);
+        goto cleanup;
+    }
+
+    size_t packed_written = fwrite(packed_data, 1, packed_size, output_fp);
+    if (packed_written != packed_size) {
+        fprintf(stderr, "Error: Cannot write packed data to output file (wrote %zu of %zu bytes)\n", packed_written, packed_size);
+        goto cleanup;
+    }
+
+    printf("Stub generation completed successfully!\n");
+    printf("Loader size: %zu bytes\n", loader_size);
+    printf("Packed size: %zu bytes\n", packed_size);
+    printf("Total size: %zu bytes\n", loader_size + packed_size);
+    printf("Output file: %s\n", output_file);
+
+    if (chmod(output_file, 0755) < 0) {
+        fprintf(stderr, "Warning: Cannot make output file executable: %s\n", strerror(errno));
+    }
+
+    ret = 0;
+
+cleanup:
+    if (loader_fp) fclose(loader_fp);
+    if (packed_fp) fclose(packed_fp);
+    if (output_fp) fclose(output_fp);
+    if (loader_data) free(loader_data);
+    if (packed_data) free(packed_data);
+
+    return ret;
+}
+
+```
+
+`tests/unit_test.sh`:
+
+```sh
+#!/bin/bash
+
+# Simple unit test for hARMless
+# Tests packing and execution of /bin/ls
+
+create_packed_binary(){ 
+    # The binary self delete every run, thus it needs to recreated for every test
+    echo "Generating self-contained executable..."
+    echo
+    ../build/stubgen ../build/loader test_ls.packed test_ls_packed
+    echo 
+    if [[ ! -f test_ls_packed ]]; then
+        echo "ERROR: Packed executable not created"
+        exit 1
+    fi
+}
+
+set -e
+
+echo "=== hARMless Test ==="
+echo "Testing with /bin/ls"
+echo
+
+# Check if we're on ARM64
+if [[ $(uname -m) != "aarch64" ]]; then
+    echo "ERROR: This test must run on ARM64 architecture"
+    exit 1
+fi
+
+# Check if /bin/ls exists and is ARM64 ELF
+if [[ ! -f /bin/ls ]]; then
+    echo "ERROR: /bin/ls not found"
+    exit 1
+fi
+
+if ! file /bin/ls | grep -q "ARM aarch64"; then
+    echo "ERROR: /bin/ls is not an ARM64 binary"
+    exit 1
+fi
+
+echo
+echo "[x] Found ARM64 /bin/ls"
+echo
+
+# Build the tools
+echo "Building tools..."
+cd ..
+make clean && make all
+cd tests
+
+# Test packing
+echo "Packing /bin/ls..."
+../build/packer /bin/ls test_ls.packed
+
+if [[ ! -f test_ls.packed ]]; then
+    echo "ERROR: Packed file not created"
+    exit 1
+fi
+
+echo
+echo "[x] Created packed file: $(ls -lh test_ls.packed)"
+echo
+
+# Test stub generation
+create_packed_binary
+
+echo
+echo "[x] Created packed executable: $(ls -lh test_ls_packed)"
+echo
+
+chmod +x test_ls_packed
+
+# Test execution
+echo "Testing execution..."
+timeout 10s ./test_ls_packed --version > /dev/null 2>&1
+if [[ $? -eq 0 ]]; then
+    echo
+    echo "[x] Packed executable runs successfully"
+    echo
+else
+    echo "ERROR: Packed executable failed to run"
+    exit 1
+fi
+
+create_packed_binary
+
+# Test that output is similar to original
+echo "Comparing output with original..."
+ORIGINAL_OUTPUT=$(timeout 5s /bin/ls --version 2>/dev/null | head -1 || echo "ls version output")
+PACKED_OUTPUT=$(timeout 5s ./test_ls_packed --version 2>/dev/null | head -1 || echo "packed ls version output")
+
+if [[ "$ORIGINAL_OUTPUT" == "$PACKED_OUTPUT" ]]; then
+    echo
+    echo "[x] Output matches original"
+    echo
+else
+    echo "WARNING: Output differs from original"
+    echo "  Original: $ORIGINAL_OUTPUT"
+    echo "  Packed:   $PACKED_OUTPUT"
+fi
+
+create_packed_binary
+
+# Test basic functionality
+echo "Testing basic ls functionality..."
+ORIGINAL_LS=$(timeout 5s /bin/ls / | wc -l)
+PACKED_LS=$(timeout 5s ./test_ls_packed / | wc -l)
+
+if [[ $ORIGINAL_LS -eq $PACKED_LS ]]; then
+    echo
+    echo "[x] Basic functionality works"
+    echo
+else
+    echo "WARNING: Different output count ($ORIGINAL_LS vs $PACKED_LS)"
+fi
+
+# Uncomment the below to keep the packed binary
+# create_packed_binary
+
+# Cleanup
+echo "Cleaning up..."
+rm -f test_ls.packed
+
+echo
+echo "[x] Test completed successfully."
+
+```
