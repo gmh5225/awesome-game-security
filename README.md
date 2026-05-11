@@ -1260,6 +1260,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/A146B-KSU [KernelSU for SAMSUNG A14 5G (a14x)]
 - https://github.com/utziacre/android_kernel_xiaomi_pipa [Xiaomi Pad 6 kernel]
 - https://github.com/utziacre/android_kernel_oneplus_sm8250 [OnePlus 8/8T/8Pro/(9R?) kernel]
+- https://github.com/Andrea-lyz/oppo_oplus_realme_sm8750 [Automatic kernel builder for Oppo/OnePlus/Realme Snapdragon SM8750 / MediaTek MT6991 devices]
 
 > Android Root
 - https://github.com/fynks/awesome-android-root [Awesome Android Root]
