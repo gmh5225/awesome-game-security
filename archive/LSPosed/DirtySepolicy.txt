@@ -1,0 +1,872 @@
+Project Path: arc_LSPosed_DirtySepolicy_tuubgles
+
+Source Tree:
+
+```txt
+arc_LSPosed_DirtySepolicy_tuubgles
+├── README.md
+├── app
+│   ├── build.gradle.kts
+│   └── src
+│       └── main
+│           ├── AndroidManifest.xml
+│           ├── aidl
+│           │   └── org
+│           │       └── lsposed
+│           │           └── dirtysepolicy
+│           │               └── IDirtySepolicyService.aidl
+│           ├── java
+│           │   └── org
+│           │       └── lsposed
+│           │           └── dirtysepolicy
+│           │               ├── AppZygote.java
+│           │               ├── DirtySepolicyService.java
+│           │               └── MainActivity.java
+│           └── keepRules
+│               └── rules.keep
+├── build.gradle.kts
+├── gradle
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── settings.gradle.kts
+└── stub
+    ├── build.gradle.kts
+    └── src
+        └── main
+            ├── AndroidManifest.xml
+            └── java
+                └── android
+                    └── os
+                        └── SELinux.java
+
+```
+
+`README.md`:
+
+```md
+# Dirty Sepolicy: Check Android SELinux access
+
+This project discloses a method to detect the Android device sepolicy. 
+It can accurately identify all userspace su solutions, and it is impossible to bypass.
+
+## Background
+
+The LSPosed team originally discovered this method in August 2024. 
+At that time, we decided not to disclose it and chose not to implement this detection mechanism.
+
+In May 2026, [FldBudin](https://github.com/FldBudin) independently discovered this method and made it public in [Duck Detector](https://github.com/eltavine/Duck-Detector-Refactoring/pull/22). 
+Given that the method is now publicly known, we have decided to publish our example implementation as well.
+
+## How it works
+
+The detection utilizes the **App Zygote** process. An App Zygote is an application-specific Zygote process that preloads resources and forks isolated services for the application. 
+To function correctly, the App Zygote must transition into the restricted context of the isolated service. Because of this requirement, it is indispensable for it to have the permission to [query and check SELinux access rules](https://android.googlesource.com/platform/system/sepolicy/+/master/private/app_zygote.te#:~:text=%23%20Check%20validity%20of%20SELinux,selinux_check_access(app_zygote)). 
+This inherent design makes it the perfect candidate to query SELinux without being restricted by normal untrusted app constraints.
+
+In this implementation, the `AppZygote` uses the `SELinux.checkSELinuxAccess` API to analyze the system's global SELinux policies for "dirty" rules injected by common root and hooking solutions.
+Developers can easily extend this implementation by adding the specific SELinux rule characteristics of other future popular su solutions or root tools. 
+Because the app zygote and zygote share code, SELinux permissions must be checked, otherwise, the process will crash, so this detection cannot be bypassed in userspace. 
+The only way to circumvent this detection is by modifying the kernel itself.
+
+## License
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+```
+
+`app/build.gradle.kts`:
+
+```kts
+plugins {
+    id("com.android.application")
+}
+
+android {
+    enableKotlin = false
+    namespace = "org.lsposed.dirtysepolicy"
+    defaultConfig {
+        versionCode = 1
+        versionName = "1.0"
+    }
+    buildTypes {
+        release {
+            vcsInfo.include = false
+            signingConfig = signingConfigs["debug"]
+            optimization {
+                enable = true
+                keepRules {
+                    ignoreFromAllExternalDependencies = true
+                    includeDefault = false
+                }
+            }
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+    buildFeatures {
+        aidl = true
+    }
+    packaging {
+        resources {
+            excludes += "**"
+        }
+    }
+    lint {
+        checkReleaseBuilds = false
+    }
+    dependenciesInfo {
+        includeInApk = false
+    }
+}
+
+dependencies {
+    compileOnly(projects.stub)
+}
+
+```
+
+`app/src/main/AndroidManifest.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:icon="@android:drawable/sym_def_app_icon"
+        android:label="Dirty Sepolicy"
+        android:theme="@android:style/Theme.DeviceDefault.DayNight"
+        android:zygotePreloadName="org.lsposed.dirtysepolicy.AppZygote">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <service
+            android:name=".DirtySepolicyService"
+            android:isolatedProcess="true"
+            android:useAppZygote="true" />
+    </application>
+
+</manifest>
+
+```
+
+`app/src/main/aidl/org/lsposed/dirtysepolicy/IDirtySepolicyService.aidl`:
+
+```aidl
+package org.lsposed.dirtysepolicy;
+
+interface IDirtySepolicyService {
+    String getResult();
+}
+
+```
+
+`app/src/main/java/org/lsposed/dirtysepolicy/AppZygote.java`:
+
+```java
+package org.lsposed.dirtysepolicy;
+
+import android.app.ZygotePreload;
+import android.content.pm.ApplicationInfo;
+import android.os.Build;
+import android.os.SELinux;
+import android.system.Os;
+
+public final class AppZygote implements ZygotePreload {
+    static String result = "ERROR: app zygote not called";
+
+    @Override
+    public void doPreload(ApplicationInfo appInfo) {
+        var uid = Os.getuid();
+        if (uid != appInfo.uid) {
+            result = "ERROR: UID mismatch: " + uid + " != app uid " + appInfo.uid;
+            return;
+        }
+        if (!SELinux.isSELinuxEnabled()) {
+            result = "ERROR: SELinux is disabled";
+            return;
+        }
+        var context = SELinux.getContext();
+        if (!context.startsWith("u:r:app_zygote:s0")) {
+            result = "ERROR: unexpected SELinux context: " + context;
+            return;
+        }
+        var pidContext = SELinux.getPidContext(Os.getpid());
+        if (!pidContext.equals(context)) {
+            result = "ERROR: PID context mismatch: " + pidContext;
+            return;
+        }
+        var procContext = SELinux.getFileContext("/proc/self");
+        if (!procContext.equals(context)) {
+            result = "ERROR: /proc/self context mismatch: " + procContext;
+            return;
+        }
+        if (!SELinux.isSELinuxEnforced()) {
+            result = "ERROR: SELinux is permissive";
+            return;
+        }
+        if (!SELinux.checkSELinuxAccess("u:r:app_zygote:s0", "u:r:isolated_app:s0", "process", "dyntransition")) {
+            result = "ERROR: cannot check SELinux access";
+            return;
+        }
+        var sb = new StringBuilder();
+        if (SELinux.checkSELinuxAccess("u:r:system_server:s0", "u:r:system_server:s0", "process", "execmem")) {
+            sb.append("system_server can execmem; ");
+        }
+        if (SELinux.checkSELinuxAccess("u:r:fsck_untrusted:s0", "u:r:fsck_untrusted:s0", "capability", "sys_admin")) {
+            sb.append("neverallow violated; ");
+        }
+        if (Build.TYPE.equals("user") && SELinux.checkSELinuxAccess("u:r:shell:s0", "u:r:su:s0", "process", "transition")) {
+            sb.append("found AOSP su in user build; ");
+        }
+        if (SELinux.checkSELinuxAccess("u:r:adbd:s0", "u:r:adbroot:s0", "binder", "call")) {
+            sb.append("found adb_root; ");
+        }
+        if (SELinux.checkSELinuxAccess("u:r:untrusted_app:s0", "u:r:magisk:s0", "binder", "call")) {
+            sb.append("found Magisk; ");
+        }
+        if (SELinux.checkSELinuxAccess("u:r:untrusted_app:s0", "u:object_r:ksu_file:s0", "file", "read")) {
+            sb.append("found KernelSU; ");
+        }
+        if (SELinux.checkSELinuxAccess("u:r:untrusted_app:s0", "u:object_r:lsposed_file:s0", "file", "read")) {
+            sb.append("found LSPosed; ");
+        }
+        if (SELinux.checkSELinuxAccess("u:r:untrusted_app:s0", "u:object_r:xposed_data:s0", "file", "read")) {
+            sb.append("found Xposed; ");
+        }
+        if (SELinux.checkSELinuxAccess("u:r:zygote:s0", "u:object_r:adb_data_file:s0", "dir", "search")) {
+            sb.append("found ZygiskNext; ");
+        }
+        if (sb.length() == 0) {
+            result = "OK: no dirty sepolicy found";
+        } else {
+            result = "WARNING: " + sb;
+        }
+    }
+}
+
+```
+
+`app/src/main/java/org/lsposed/dirtysepolicy/DirtySepolicyService.java`:
+
+```java
+package org.lsposed.dirtysepolicy;
+
+import android.app.Service;
+import android.content.Intent;
+import android.os.IBinder;
+import android.os.Process;
+
+public class DirtySepolicyService extends Service {
+    private final IDirtySepolicyService.Stub binder = new IDirtySepolicyService.Stub() {
+        @Override
+        public String getResult() {
+            return AppZygote.result;
+        }
+    };
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        if (Process.isIsolated()) {
+            return binder;
+        } else {
+            return null;
+        }
+    }
+}
+
+```
+
+`app/src/main/java/org/lsposed/dirtysepolicy/MainActivity.java`:
+
+```java
+package org.lsposed.dirtysepolicy;
+
+import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.util.Log;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+public class MainActivity extends Activity {
+    private TextView textView;
+    private final ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder binder) {
+            var server = IDirtySepolicyService.Stub.asInterface(binder);
+            try {
+                textView.setText(server.getResult());
+            } catch (RemoteException e) {
+                textView.setText(Log.getStackTraceString(e));
+            }
+            unbindService(this);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+        }
+
+        @Override
+        public void onNullBinding(ComponentName name) {
+            textView.setText("ERROR: Fake Environment");
+            unbindService(this);
+        }
+    };
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        var layout = new RelativeLayout(this);
+        textView = new TextView(this);
+        textView.setTextIsSelectable(true);
+        textView.setTextSize(20);
+        var def = "INFO: Wiaiting for service...";
+        textView.setText(def);
+        var params = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        params.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        params.addRule(RelativeLayout.CENTER_VERTICAL);
+        layout.addView(textView, params);
+        setContentView(layout);
+        try {
+            if (bindIsolatedService(new Intent(this, DirtySepolicyService.class),
+                    Context.BIND_AUTO_CREATE, "dirtysepolicy", getMainExecutor(), connection)) {
+                textView.postDelayed(() -> {
+                    if (textView.getText().toString().equals(def)) {
+                        textView.setText("WARNING: Service connection timedout, app zygote crashed?");
+                        unbindService(connection);
+                    }
+                }, 5000);
+            } else {
+                textView.setText("ERROR: Failed to bind service, service disabled?");
+                unbindService(connection);
+            }
+        } catch (SecurityException e) {
+            textView.setText(Log.getStackTraceString(e));
+            unbindService(connection);
+        }
+    }
+
+}
+
+```
+
+`app/src/main/keepRules/rules.keep`:
+
+```keep
+-repackageclasses
+-allowaccessmodification
+
+```
+
+`gradle.properties`:
+
+```properties
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+org.gradle.parallel=true
+org.gradle.caching=true
+org.gradle.configureondemand=true
+org.gradle.configuration-cache=true
+org.gradle.configuration-cache.parallel=true
+android.r8.gradual.support=true
+
+```
+
+`gradle/wrapper/gradle-wrapper.properties`:
+
+```properties
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.5.0-bin.zip
+networkTimeout=10000
+retries=0
+retryBackOffMs=500
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+```
+
+`gradlew`:
+
+```
+#!/bin/sh
+
+#
+# Copyright © 2015 the original authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+##############################################################################
+#
+#   Gradle start up script for POSIX generated by Gradle.
+#
+#   Important for running:
+#
+#   (1) You need a POSIX-compliant shell to run this script. If your /bin/sh is
+#       noncompliant, but you have some other compliant shell such as ksh or
+#       bash, then to run this script, type that shell name before the whole
+#       command line, like:
+#
+#           ksh Gradle
+#
+#       Busybox and similar reduced shells will NOT work, because this script
+#       requires all of these POSIX shell features:
+#         * functions;
+#         * expansions «$var», «${var}», «${var:-default}», «${var+SET}»,
+#           «${var#prefix}», «${var%suffix}», and «$( cmd )»;
+#         * compound commands having a testable exit status, especially «case»;
+#         * various built-in commands including «command», «set», and «ulimit».
+#
+#   Important for patching:
+#
+#   (2) This script targets any POSIX shell, so it avoids extensions provided
+#       by Bash, Ksh, etc; in particular arrays are avoided.
+#
+#       The "traditional" practice of packing multiple parameters into a
+#       space-separated string is a well documented source of bugs and security
+#       problems, so this is (mostly) avoided, by progressively accumulating
+#       options in "$@", and eventually passing that to Java.
+#
+#       Where the inherited environment variables (DEFAULT_JVM_OPTS, JAVA_OPTS,
+#       and GRADLE_OPTS) rely on word-splitting, this is performed explicitly;
+#       see the in-line comments for details.
+#
+#       There are tweaks for specific operating systems such as AIX, CygWin,
+#       Darwin, MinGW, and NonStop.
+#
+#   (3) This script is generated from the Groovy template
+#       https://github.com/gradle/gradle/blob/3d91ce3b8caaf77ad09f381f43615b715b53f72c/platforms/jvm/plugins-application/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt
+#       within the Gradle project.
+#
+#       You can find Gradle at https://github.com/gradle/gradle/.
+#
+##############################################################################
+
+# Attempt to set APP_HOME
+
+# Resolve links: $0 may be a link
+app_path=$0
+
+# Need this for daisy-chained symlinks.
+while
+    APP_HOME=${app_path%"${app_path##*/}"}  # leaves a trailing /; empty if no leading path
+    [ -h "$app_path" ]
+do
+    ls=$( ls -ld "$app_path" )
+    link=${ls#*' -> '}
+    case $link in             #(
+      /*)   app_path=$link ;; #(
+      *)    app_path=$APP_HOME$link ;;
+    esac
+done
+
+# This is normally unused
+# shellcheck disable=SC2034
+APP_BASE_NAME=${0##*/}
+# Discard cd standard output in case $CDPATH is set (https://github.com/gradle/gradle/issues/25036)
+APP_HOME=$( cd -P "${APP_HOME:-./}" > /dev/null && printf '%s\n' "$PWD" ) || exit
+
+# Use the maximum available, or set MAX_FD != -1 to use that value.
+MAX_FD=maximum
+
+warn () {
+    echo "$*"
+} >&2
+
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+} >&2
+
+# OS specific support (must be 'true' or 'false').
+cygwin=false
+msys=false
+darwin=false
+nonstop=false
+case "$( uname )" in                #(
+  CYGWIN* )         cygwin=true  ;; #(
+  Darwin* )         darwin=true  ;; #(
+  MSYS* | MINGW* )  msys=true    ;; #(
+  NONSTOP* )        nonstop=true ;;
+esac
+
+
+
+# Determine the Java command to use to start the JVM.
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+        # IBM's JDK on AIX uses strange locations for the executables
+        JAVACMD=$JAVA_HOME/jre/sh/java
+    else
+        JAVACMD=$JAVA_HOME/bin/java
+    fi
+    if [ ! -x "$JAVACMD" ] ; then
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+else
+    JAVACMD=java
+    if ! command -v java >/dev/null 2>&1
+    then
+        die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+fi
+
+# Increase the maximum file descriptors if we can.
+if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
+    case $MAX_FD in #(
+      max*)
+        # In POSIX sh, ulimit -H is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        MAX_FD=$( ulimit -H -n ) ||
+            warn "Could not query maximum file descriptor limit"
+    esac
+    case $MAX_FD in  #(
+      '' | soft) :;; #(
+      *)
+        # In POSIX sh, ulimit -n is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        ulimit -n "$MAX_FD" ||
+            warn "Could not set maximum file descriptor limit to $MAX_FD"
+    esac
+fi
+
+# Collect all arguments for the java command, stacking in reverse order:
+#   * args from the command line
+#   * the main class name
+#   * -classpath
+#   * -D...appname settings
+#   * --module-path (only if needed)
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and GRADLE_OPTS environment variables.
+
+# For Cygwin or MSYS, switch paths to Windows format before running java
+if "$cygwin" || "$msys" ; then
+    APP_HOME=$( cygpath --path --mixed "$APP_HOME" )
+
+    JAVACMD=$( cygpath --unix "$JAVACMD" )
+
+    # Now convert the arguments - kludge to limit ourselves to /bin/sh
+    for arg do
+        if
+            case $arg in                                #(
+              -*)   false ;;                            # don't mess with options #(
+              /?*)  t=${arg#/} t=/${t%%/*}              # looks like a POSIX filepath
+                    [ -e "$t" ] ;;                      #(
+              *)    false ;;
+            esac
+        then
+            arg=$( cygpath --path --ignore --mixed "$arg" )
+        fi
+        # Roll the args list around exactly as many times as the number of
+        # args, so each arg winds up back in the position where it started, but
+        # possibly modified.
+        #
+        # NB: a `for` loop captures its iteration list before it begins, so
+        # changing the positional parameters here affects neither the number of
+        # iterations, nor the values presented in `arg`.
+        shift                   # remove old arg
+        set -- "$@" "$arg"      # push replacement arg
+    done
+fi
+
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+
+# Collect all arguments for the java command:
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and optsEnvironmentVar are not allowed to contain shell fragments,
+#     and any embedded shellness will be escaped.
+#   * For example: A user cannot expect ${Hostname} to be expanded, as it is an environment variable and will be
+#     treated as '${Hostname}' itself on the command line.
+
+set -- \
+        "-Dorg.gradle.appname=$APP_BASE_NAME" \
+        -jar "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" \
+        "$@"
+
+# Stop when "xargs" is not available.
+if ! command -v xargs >/dev/null 2>&1
+then
+    die "xargs is not available"
+fi
+
+# Use "xargs" to parse quoted args.
+#
+# With -n1 it outputs one arg per line, with the quotes and backslashes removed.
+#
+# In Bash we could simply go:
+#
+#   readarray ARGS < <( xargs -n1 <<<"$var" ) &&
+#   set -- "${ARGS[@]}" "$@"
+#
+# but POSIX shell has neither arrays nor command substitution, so instead we
+# post-process each arg (as a line of input to sed) to backslash-escape any
+# character that might be a shell metacharacter, then use eval to reverse
+# that process (while maintaining the separation between arguments), and wrap
+# the whole thing up as a single "set" statement.
+#
+# This will of course break if any of these variables contains a newline or
+# an unmatched quote.
+#
+
+eval "set -- $(
+        printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
+        xargs -n1 |
+        sed ' s~[^-[:alnum:]+,./:=@_]~\\&~g; ' |
+        tr '\n' ' '
+    )" '"$@"'
+
+exec "$JAVACMD" "$@"
+
+```
+
+`gradlew.bat`:
+
+```bat
+@rem
+@rem Copyright 2015 the original author or authors.
+@rem
+@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem you may not use this file except in compliance with the License.
+@rem You may obtain a copy of the License at
+@rem
+@rem      https://www.apache.org/licenses/LICENSE-2.0
+@rem
+@rem Unless required by applicable law or agreed to in writing, software
+@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@rem See the License for the specific language governing permissions and
+@rem limitations under the License.
+@rem
+@rem SPDX-License-Identifier: Apache-2.0
+@rem
+
+@if "%DEBUG%"=="" @echo off
+@rem ##########################################################################
+@rem
+@rem  Gradle startup script for Windows
+@rem
+@rem ##########################################################################
+
+@rem Set local scope for the variables, and ensure extensions are enabled
+setlocal EnableExtensions
+
+set DIRNAME=%~dp0
+if "%DIRNAME%"=="" set DIRNAME=.
+@rem This is normally unused
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%
+
+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
+
+@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+
+@rem Find java.exe
+if defined JAVA_HOME goto findJavaFromJavaHome
+
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if %ERRORLEVEL% equ 0 goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH. 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+"%COMSPEC%" /c exit 1
+
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+
+if exist "%JAVA_EXE%" goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME% 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+"%COMSPEC%" /c exit 1
+
+:execute
+@rem Setup the command line
+
+
+
+@rem Execute Gradle
+@rem endlocal doesn't take effect until after the line is parsed and variables are expanded
+@rem which allows us to clear the local environment before executing the java command
+endlocal & "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %* & call :exitWithErrorLevel
+
+:exitWithErrorLevel
+@rem Use "%COMSPEC%" /c exit to allow operators to work properly in scripts
+"%COMSPEC%" /c exit %ERRORLEVEL%
+
+```
+
+`settings.gradle.kts`:
+
+```kts
+@file:Suppress("UnstableApiUsage")
+
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    plugins {
+        val agp = "9.2.1"
+        id("com.android.application") version agp
+        id("com.android.library") version agp
+        id("com.android.settings") version agp
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google {
+            content {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
+            }
+        }
+        mavenCentral()
+    }
+}
+
+plugins {
+    id("com.android.settings")
+}
+
+android {
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 0
+        }
+    }
+    minSdk {
+        version = release(29)
+    }
+    targetSdk {
+        version = release(37)
+    }
+    buildToolsVersion = "37.0.0"
+}
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
+
+rootProject.name = "DirtySepolicy"
+include(":app", ":stub")
+
+```
+
+`stub/build.gradle.kts`:
+
+```kts
+plugins {
+    id("com.android.library")
+}
+
+android {
+    enableKotlin = false
+    namespace = "stub"
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+}
+
+```
+
+`stub/src/main/AndroidManifest.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest />
+
+```
+
+`stub/src/main/java/android/os/SELinux.java`:
+
+```java
+package android.os;
+
+public class SELinux {
+    public static native boolean isSELinuxEnabled();
+
+    public static native boolean isSELinuxEnforced();
+
+    public static native String getFileContext(String path);
+
+    public static native String getContext();
+
+    public static native String getPidContext(int pid);
+
+    public static native boolean checkSELinuxAccess(String scon, String tcon, String tclass, String perm);
+}
+
+```
