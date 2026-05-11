@@ -371,6 +371,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/FarCry [Leaked Far Cry 1]
 - https://github.com/SwagSoftware/Kisak-Strike [Open Source CSGO]
 - https://github.com/SwagSoftware/KisakCOD [COD4 Open Source Reimplementation]
+- https://github.com/SwagSoftware/KisakBlack [COD:Black Ops Open Source Reimplementation]
 - https://github.com/gmh5225/csso-src [CSGO Mod]
 - https://github.com/thomaseichhorn/cs16-client [Rewrote CS1.6]
 - https://github.com/s1lentq/ReGameDLL_CS [Reversed CS1.6]
