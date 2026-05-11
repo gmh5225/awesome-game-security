@@ -4027,6 +4027,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/apkunpacker/RootAppDetector [Small POC code that detects known root-related apps by attempting to launch their activities and monitoring security exception]
 - https://github.com/Rem01Gaming/meowna_detector [Prove of concept of detecting meowna module]
 - https://github.com/WsttXm/RiskEngine [Android risk-control SDK and management platform: device fingerprinting and runtime detection (root/hook/emulator/debug/sandbox)]
+- https://github.com/LSPosed/DirtySepolicy [Detect userspace su solutions via SELinux access checks from the App Zygote process]
 
 > Detection:Magisk
 - https://github.com/vvb2060/MagiskDetector
