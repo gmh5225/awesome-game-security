@@ -4212,6 +4212,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/NSG650/BugCheckHack [BSOD]
 - https://github.com/NSG650/BugCheck2Linux [BSOD]
 - https://github.com/AnalogFeelings/KmdfMandelcheck [BSOD]
+- https://github.com/XaFF-XaFF/BugcheckSuppressor [HVCI/kCET-aware bugcheck suppressor PoC via data-only HAL dispatch hook + RtlUnwindEx recovery]
 - https://github.com/stuxnet147/PiDqSerializationWrite-Example [PiDqSerializationWrite]
 - https://github.com/Rythorndoran/enum_real_dirbase [Find real dirbase]
 - https://github.com/backengineering/POC-ExFlushTb [A POC for monitoring Tb]
