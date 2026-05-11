@@ -110,6 +110,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/QianMo/Unity-Design-Pattern [Unity Design]
 - https://github.com/whx-prog/The-Seed-Link-Future [Unity VR]
 - https://github.com/twohyjr/Metal-Game-Engine-Tutorial [Apple's Metal Api]
+- https://github.com/GameDevGrzesiek/OptimizationBible [Game optimization notes focused on Unity and Unreal Engine]
 
 > Source
 - https://github.com/EpicGames/UnrealEngine
@@ -691,6 +692,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - [Guide about remote Windows kernel debugging](https://github.com/konstantin89/windows-kernel-debugging-guide)
 - https://github.com/rmusser01/Infosec_Reference/blob/master/Draft/Games.md [Game Hacking]
 - https://github.com/cragson/osmium [C++ Framework for external cheats]
+- https://github.com/april-ivy/Apwil [Rust Windows gamehacking library, internal & external; process/memory/module/scan/hook/render/syscall/input/window]
 - https://github.com/WangXuan95/Xilinx-FPGA-PCIe-XDMA-Tutorial [DMA Tutorial]
 - https://github.com/NetKingJ/awesome-android-security [Android (Samsung) Security Research References]
 - https://github.com/gregkh/kernel-development [Linux kernel development]
@@ -1775,6 +1777,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/xan105/Mini-Launcher [Application launcher with DLL Injection and Lua Scripting]
 - https://github.com/a0yark/DXInject-UC [D3D11 GPU payload transport + compute shader decode, GPU-assisted process hollowing (research)]
 - https://github.com/M3351AN/ZhangBing-Injector [DLL injector using WHQL-signed driver; credits kdmapper]
+- https://github.com/qiufuyu123/Positron [Runtime JS injection toolkit for Electron (V8/Node.js) apps via manual-map DLL injection; self-unmapping payload, REPL/SDK]
 
 > Injection:Linux
 - https://github.com/itaymigdal/awesome-injection [awesome injection]
