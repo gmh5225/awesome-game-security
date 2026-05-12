@@ -1,0 +1,2367 @@
+Project Path: arc_jonny-jhnson_EtwWatcher_7989zqbg
+
+Source Tree:
+
+```txt
+arc_jonny-jhnson_EtwWatcher_7989zqbg
+├── LICENSE
+├── README.md
+├── css
+│   └── styles.css
+├── index.html
+├── js
+│   ├── app.js
+│   ├── diff.js
+│   └── parse.js
+├── scripts
+│   └── update-manifest.ps1
+└── snapshots
+    └── manifest.json
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Jonathan Johnson
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# EtwWatcher
+
+A static web app for browsing and diffing snapshots of Windows ETW (Event Tracing for Windows) provider state across builds. Snapshots are produced by [ETWInspector](https://github.com/jonny-jhnson/ETWInspector) and committed to this repo as NDJSON.
+
+## Using it
+
+> **Live site: https://jonny-jhnson.github.io/EtwWatcher/**
+
+You don't need to clone or run anything to use EtwWatcher. Open the live site and you can:
+
+- **Browse** any committed snapshot - filter providers by name/GUID, scope by Manifest or MOF, drill into events, search descriptions/keywords/template fields.
+- **Diff** any two snapshots to see providers added, changed, and removed - including per-event field-level changes.
+- **Bring your own** snapshot via the upload zone at the top of the page. The file is parsed entirely in your browser; nothing is uploaded anywhere. Either plain `.ndjson` (straight from `Export-EtwSnapshot`) or gzipped `.ndjson.gz` works - the upload zone detects the format from the filename and decompresses in-browser when needed. You only need the `.ndjson.gz` form if you want a smaller file to share around; produce one by dropping the plain `.ndjson` into `snapshots/` and running `./scripts/update-manifest.ps1` (it compresses in place).
+- **Share findings** by copying the URL - it captures the active tab, picked snapshots, and all filters, so a teammate clicking your link sees the exact same view.
+
+## Why this exists
+
+Detection engineers, threat hunters, and Windows internals researchers frequently need to answer questions like:
+
+- What ETW providers and events exist on a given Windows build?
+- Which events were added, removed, or had their metadata changed between two builds?
+- Did a Patch Tuesday update silently rename or rewrite an event that an existing detection depends on?
+- Which keywords and template fields does a specific event expose, and how did those evolve?
+
+Today, getting this information usually means provisioning a VM, installing tooling, dumping provider state, and repeating the whole process on a second VM to compare. That's a meaningful barrier - and it's why a lot of detection content is written against assumptions that go stale silently.
+
+EtwWatcher does that work once. Real Windows snapshots are produced by [ETWInspector](https://github.com/jonny-jhnson/ETWInspector), committed to this repo, and rendered in a browser-side UI. Anyone can browse, search, and diff provider state across Windows builds without standing up infrastructure - and link a teammate directly to a specific finding.
+
+## What's coming
+
+Snapshots will be added on an ongoing basis. The intent is to cover:
+
+- **Patch Tuesday cumulative updates** for currently-supported Windows builds, so you can see what shifted between e.g. `26200.7171` and `26200.7462`.
+- **Insider / Canary builds** as Microsoft ships them - early signal on what providers and events are being added or restructured before they hit general availability.
+
+If you want a specific build snapshotted, open an issue with the build number, or grab [ETWInspector](https://github.com/jonny-jhnson/ETWInspector) and contribute the NDJSON directly via the [Adding a snapshot](#adding-a-snapshot-contributors) flow below.
+
+## What it does
+
+- **Browse** - pick a snapshot and explore every Manifest, MOF, or TraceLogging provider on that Windows build. Filter by provider (name, GUID, resource path), event description, keyword name, or template XML field. Toggle All / Manifest / MOF / TraceLogging at the top to scope by schema source. Click a provider to see its events, levels, opcodes, keyword names, full template XML, and (for TraceLogging) the list of binaries the provider was discovered in.
+- **Diff** - pick two snapshots and see exactly what changed: providers added, providers whose events were added/removed/changed, and per-event field-level diffs with line-by-line highlighting on Description and Template. New schema versions of an existing event Id are paired against the closest version in the older snapshot and rendered as a "new version" diff (e.g. `Id 2 v1 -> v3 [NEW VERSION]`) instead of as separate "added" events.
+
+Everything runs in your browser. No backend, no telemetry. The page fetches the NDJSON files committed to `/snapshots/` and parses them client-side.
+
+Manifest, MOF, and TraceLogging providers are covered (out of the four ETW provider types - WPP is not yet supported). Toggle between them in the Browse and Diff views with the schema-source segmented control.
+
+## Querying providers
+
+Browse and Diff both expose the same four text filters plus a schema-source toggle. All filters are **case-insensitive substring matches** and are **AND-combined** - a provider has to satisfy every filter you've set. Leave a box empty to ignore that dimension.
+
+| Filter | What it matches |
+| --- | --- |
+| **Provider** | `ProviderName`, `ProviderGuid`, or `ResourceFilePath` (any of the three). Use this to pin to a known GUID, search a name fragment like `Kernel-Process`, or scope by binary path. |
+| **Description** | Substring of an event's `Description`. For Manifest events this is the human-readable description; for TraceLogging events it's the event name (e.g. `ProcessStarted`). |
+| **Keyword** | Substring of an ETW keyword name. Keywords are the 64-bit bitmask flags a provider declares (e.g. `KERNEL_THREATINT_KEYWORD_ALLOCVM_REMOTE` on Microsoft-Windows-Threat-Intelligence) - consumers enable a session by OR'ing these together to receive only events tagged with the matching bits. Use this filter when you know the keyword you want to subscribe to and need to find which provider declares it. |
+| **Template** | Substring of an event's template XML - field names, `inType`/`outType` values. Use this to find every event that exposes a field like `ProcessId` or `TargetUserName`. |
+| **Schema toggle** | `All` / `Manifest` / `MOF` / `TraceLogging`. Filters out providers from the other source kinds. |
+
+A few practical patterns:
+
+- **"What providers carry a `CommandLine` field?"** - clear all filters, set Template to `CommandLine`. The provider list narrows to providers with at least one event containing that field.
+- **"Show me everything new in TraceLogging this build."** - in the Diff view, set Schema toggle to `TraceLogging`. Providers Added / Changed / Removed sections all scope down.
+- **"Find this specific provider."** - paste the GUID (with or without braces) into the Provider box. Substring matching means partial GUIDs work too.
+- **"Reset."** - click `Clear filters` next to the schema toggle.
+
+The active filter set is also encoded into the URL (`#view=browse&snap=...&p=...&d=...&k=...&t=...&s=manifest`), so once a query lands on something interesting, copy the URL send to a teammate. By clicking it, they sees the same filtered view.
+
+### Querying your own snapshot
+
+Upload a snapshot via the drop zone at the top of the page and the Browse and Diff views work against it identically - same four filters, same schema toggle, same URL state. Plain `.ndjson` straight from `Export-EtwSnapshot` works; `.ndjson.gz` works too (decompressed in the browser). Uploaded files live only in the current tab; close it and they're gone.
+
+> Note: MOF *providers* are listed, but their *events* don't currently populate due to enumeration complexities - the MOF event metadata isn't always present in WMI even when the provider class is registered. Manifest and TraceLogging providers carry their full event metadata. Better approaches to MOF event enumeration are being actively explored.
+
+> Note on TraceLogging: events are not individually mapped to a specific provider. TraceLogging metadata is compiled into the binary itself as a `_TraceLoggingMetadata_t` structure beginning with the four-byte signature `ETW0`. It carries an array of provider metadata and an array of event metadata, but no per-event provider ID. When a binary declares multiple TraceLogging providers, each one ends up listed against the binary's full event set. If you need a real per-event binding, do static analysis on the binary via IDA or leverage a plugin like - [TLGMapper](https://github.com/AsuNa-jp/TLGMapper) which walks `TraceLoggingWrite` calls and recovers the actual mapping. Better approaches to in-tool attribution are being actively explored.
+
+## ETW Provider Snapshots
+
+Stored in [NDJSON](https://github.com/ndjson/ndjson-spec) (newline-delimited JSON: one JSON object per line) in `/snapshots/`:
+
+- First line of each file is a header: `{"SchemaVersion":"1.0","OSVersion":"10.0.x.y.z"}` (the OS version is `Major.Minor.Build.UBR`, read straight from the registry by ETWInspector).
+- Each subsequent line is one provider record.
+
+`snapshots/manifest.json` is the index of which snapshots show up in the dropdowns - it's regenerated automatically by the deploy workflow whenever NDJSONs change.
+
+## Adding a snapshot (contributors)
+
+1. On a target machine, install [ETWInspector](https://github.com/jonny-jhnson/ETWInspector) and run:
+   ```powershell
+   Import-Module .\EtwInspector\EtwInspectorModule\EtwInspector.psd1 -Force
+   Export-EtwSnapshot C:\Snapshots\<filename>.ndjson
+   ```
+   Naming convention: `<major>_<minor>_<build>_<UBR>.ndjson` (e.g. `10_0_26200_7171.ndjson`).
+2. Copy the file into this repo's `snapshots/` directory.
+3. Run `./scripts/update-manifest.ps1` from the repo root **before committing**. This is required, not optional:
+   ```powershell
+   .\scripts\update-manifest.ps1
+   ```
+   The script gzips every plain `*.ndjson` in `snapshots/` in place (the originals are removed; only `*.ndjson.gz` ships) and rewrites `snapshots/manifest.json` sorted by OS version. TraceLogging-aware snapshots routinely exceed 100 MB, which is GitHub's hard per-file push limit - if you skip this step, your push is rejected outright. CI cannot fix this for you, since the rejection happens before the workflow runs.
+4. Commit the resulting `*.ndjson.gz` and the updated `manifest.json`, then push. The deploy workflow re-runs `update-manifest.ps1` on its end, but at that point it's a no-op safety net (the compression already happened locally; the manifest just gets validated).
+
+Existing manifest labels are preserved across re-runs (customizations like `(Insider)` survive); new entries get a default label of `Build <OSVersion>` that you can edit if you want a prettier name.
+
+## Running locally
+
+You only need this if you're developing the site itself. The site is plain HTML + JS + Tailwind via CDN with no build step:
+
+```bash
+# Python
+python -m http.server 8080
+
+# Node
+npx http-server -p 8080
+```
+
+Then open `http://localhost:8080`.
+
+> Note: opening `index.html` directly via `file://` won't work - the JS uses `fetch()` and ES module imports, both of which require an HTTP origin. Use a local server.
+
+## Tech
+
+- Vanilla HTML / JS / CSS
+- [Tailwind CSS](https://tailwindcss.com) loaded via CDN
+- ES modules, no bundler
+- Hosted on [GitHub Pages](https://pages.github.com/)
+
+## Backing tool
+
+Snapshots are produced by [ETWInspector](https://github.com/jonny-jhnson/ETWInspector) - a PowerShell module that enumerates Manifest, MOF, and TraceLogging providers and exports them as JSON or NDJSON. The diff algorithm in this site (`js/diff.js`) is a JavaScript port of `Compare-EtwSnapshot` from the same module.
+
+## License
+
+MIT. See [LICENSE](./LICENSE).
+
+```
+
+`css/styles.css`:
+
+```css
+/* Small overrides on top of Tailwind. Keep this minimal. */
+
+details > summary {
+  list-style: none;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+details > summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 0.5rem;
+  color: #64748b;
+  transition: transform 0.1s;
+}
+
+details[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+/* Scrollable code blocks for long templates */
+pre {
+  max-height: 320px;
+  overflow: auto;
+}
+
+/* Subtle glow behind the page header. Sits absolutely positioned so it
+   never interferes with layout; pure decoration. */
+.header-glow {
+  position: absolute;
+  inset: -40px -10% -40px -10%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 600px 200px at 15% 50%,
+      rgba(56, 189, 248, 0.16) 0%,
+      rgba(56, 189, 248, 0.06) 40%,
+      transparent 70%);
+  z-index: 0;
+}
+
+/* Loading skeleton shimmer (used in diff view while computing) */
+@keyframes shimmer {
+  0%   { background-position: -800px 0; }
+  100% { background-position:  800px 0; }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgb(15 23 42 / 0.5) 0%,
+    rgb(30 41 59 / 0.9) 50%,
+    rgb(15 23 42 / 0.5) 100%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite linear;
+  border-radius: 0.25rem;
+}
+
+```
+
+`index.html`:
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EtwWatcher - Browse and diff ETW provider snapshots</title>
+  <meta name="description" content="Inspect Windows ETW providers across builds. Browse a snapshot or diff two snapshots to see what changed.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-slate-200 min-h-screen">
+  <div class="max-w-6xl mx-auto px-4 py-10">
+
+    <header class="relative mb-10 pt-2">
+      <div class="header-glow" aria-hidden="true"></div>
+      <div class="relative flex items-start justify-between gap-4 flex-wrap">
+        <div class="flex items-stretch gap-5">
+          <div class="w-1.5 bg-gradient-to-b from-sky-400 to-cyan-500 rounded-full"></div>
+          <div>
+            <h1 class="text-5xl font-bold tracking-tight leading-none bg-gradient-to-r from-sky-300 via-sky-400 to-cyan-400 bg-clip-text text-transparent">EtwWatcher</h1>
+            <p class="text-slate-300 text-lg mt-3 max-w-2xl leading-relaxed">
+              Browse and diff snapshots of Windows ETW providers across builds.
+            </p>
+            <p class="text-slate-500 text-sm mt-1 max-w-2xl">
+              Snapshots are produced by
+              <a href="https://github.com/jonny-jhnson/ETWInspector" class="text-sky-400 hover:text-sky-300">ETWInspector</a>.
+            </p>
+          </div>
+        </div>
+        <a href="https://github.com/jonny-jhnson/EtwWatcher" class="text-sm text-slate-400 hover:text-slate-200 mt-2 inline-flex items-center gap-1.5">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.05c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.76 2.69 1.25 3.34.96.1-.74.4-1.25.72-1.54-2.55-.29-5.24-1.27-5.24-5.66 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.18a10.93 10.93 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.59.23 2.76.11 3.05.73.8 1.18 1.82 1.18 3.07 0 4.4-2.69 5.36-5.25 5.65.41.36.78 1.06.78 2.13v3.16c0 .31.21.68.8.56C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5Z"/></svg>
+          GitHub
+        </a>
+      </div>
+    </header>
+
+    <div id="manifest-error" class="text-sm mb-4"></div>
+
+    <!-- Upload local NDJSON snapshots -->
+    <div id="upload-zone" class="mb-6 border border-dashed border-slate-700 rounded-lg p-3 text-sm text-slate-400 flex flex-wrap items-center gap-3">
+      <span class="font-medium text-slate-300">Bring your own:</span>
+      <span>Drop one or more <code class="font-mono text-slate-300">.ndjson</code> files here, or</span>
+      <label class="inline-flex items-center gap-2 cursor-pointer text-sky-400 hover:text-sky-300">
+        <input id="upload-input" type="file" accept=".ndjson,.jsonl,.ndjson.gz,.jsonl.gz,application/json,application/gzip" multiple class="hidden">
+        <span>browse&hellip;</span>
+      </label>
+      <span class="text-slate-500 text-xs">(parsed in your browser; nothing is uploaded anywhere)</span>
+      <div id="upload-status" class="basis-full text-xs"></div>
+      <div id="upload-list" class="basis-full text-xs flex flex-wrap gap-2"></div>
+    </div>
+
+    <nav class="flex gap-1 mb-6 border-b border-slate-800">
+      <button data-tab="browse" class="text-white px-4 py-2.5 text-sm font-medium border-b-2 border-sky-400 -mb-px transition-colors">
+        <span class="inline-flex items-center gap-2">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          Browse
+        </span>
+      </button>
+      <button data-tab="diff" class="text-slate-400 px-4 py-2.5 text-sm font-medium border-b-2 border-transparent -mb-px hover:text-slate-200 transition-colors">
+        <span class="inline-flex items-center gap-2">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h12"/><path d="m11 2 4 4-4 4"/><path d="M21 18H9"/><path d="m13 14-4 4 4 4"/></svg>
+          Diff
+        </span>
+      </button>
+    </nav>
+
+    <!-- Browse view -->
+    <section data-view="browse">
+      <div class="grid md:grid-cols-[1fr_auto] gap-3 mb-4">
+        <div class="flex gap-2">
+          <select id="browse-snapshot" class="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-sky-500/60 transition-colors"></select>
+          <button id="browse-load" class="bg-gradient-to-br from-sky-500 to-cyan-600 hover:from-sky-400 hover:to-cyan-500 text-white px-4 py-2 text-sm font-medium rounded shadow-sm shadow-sky-900/40 transition-colors">Load</button>
+        </div>
+        <div id="browse-meta" class="text-sm text-slate-400 self-center"></div>
+      </div>
+
+      <div id="browse-progress" class="mb-4"></div>
+
+      <div class="grid md:grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="flex items-center gap-1.5 text-sm text-slate-400 mb-1.5 font-medium">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+            Provider
+          </label>
+          <input id="filter-provider" type="text" placeholder="name, GUID, or resource file path" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-sky-500/60 transition-colors">
+        </div>
+        <div>
+          <label class="flex items-center gap-1.5 text-sm text-slate-400 mb-1.5 font-medium">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>
+            Event Description
+          </label>
+          <input id="filter-description" type="text" placeholder="substring of an event Description" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-sky-500/60 transition-colors">
+        </div>
+        <div>
+          <label class="flex items-center gap-1.5 text-sm text-slate-400 mb-1.5 font-medium">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3 8 21"/><path d="M16 3 14 21"/></svg>
+            Keyword
+          </label>
+          <input id="filter-keyword" type="text" placeholder="event keyword name" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-sky-500/60 transition-colors">
+        </div>
+        <div>
+          <label class="flex items-center gap-1.5 text-sm text-slate-400 mb-1.5 font-medium">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m8 6-6 6 6 6"/><path d="m16 6 6 6-6 6"/></svg>
+            Template / Metadata Field
+          </label>
+          <input id="filter-template" type="text" placeholder="substring of an event Template (XML field names, types)" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-sky-500/60 transition-colors">
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center mb-3 gap-3 flex-wrap">
+        <div class="flex items-center gap-3">
+          <div class="inline-flex bg-slate-900 border border-slate-700 rounded-md p-0.5" role="group" aria-label="Schema source filter">
+            <button data-schema-browse="all" class="px-3 py-1 text-sm rounded transition-colors">All</button>
+            <button data-schema-browse="manifest" class="px-3 py-1 text-sm rounded transition-colors">Manifest</button>
+            <button data-schema-browse="mof" class="px-3 py-1 text-sm rounded transition-colors">MOF</button>
+            <button data-schema-browse="tracelogging" class="px-3 py-1 text-sm rounded transition-colors">TraceLogging</button>
+          </div>
+          <button id="filter-clear" class="text-sm text-slate-500 hover:text-slate-300">Clear filters</button>
+        </div>
+        <div id="browse-count" class="text-sm text-slate-500"></div>
+      </div>
+
+      <div id="browse-results" class="bg-slate-900 border border-slate-800 rounded"></div>
+    </section>
+
+    <!-- Diff view -->
+    <section data-view="diff" hidden>
+      <div class="grid md:grid-cols-2 gap-3 mb-4">
+        <div>
+          <label class="block text-sm text-slate-400 mb-1.5 font-medium">Snapshot A (baseline)</label>
+          <select id="diff-a" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-sky-500/60 transition-colors"></select>
+        </div>
+        <div>
+          <label class="block text-sm text-slate-400 mb-1.5 font-medium">Snapshot B (compare)</label>
+          <select id="diff-b" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-sky-500/60 transition-colors"></select>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 mb-3">
+        <button id="diff-run" class="bg-gradient-to-br from-sky-500 to-cyan-600 hover:from-sky-400 hover:to-cyan-500 text-white px-4 py-2 text-sm font-medium rounded shadow-sm shadow-sky-900/40 transition-colors">Compute diff</button>
+        <div id="diff-status" class="text-xs text-slate-500"></div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="flex items-center gap-1.5 text-sm text-slate-400 mb-1.5 font-medium">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+            Provider
+          </label>
+          <input id="diff-filter-provider" type="text" placeholder="name, GUID, or resource file path" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-sky-500/60 transition-colors">
+        </div>
+        <div>
+          <label class="flex items-center gap-1.5 text-sm text-slate-400 mb-1.5 font-medium">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>
+            Event Description
+          </label>
+          <input id="diff-filter-description" type="text" placeholder="substring of an event Description" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-sky-500/60 transition-colors">
+        </div>
+        <div>
+          <label class="flex items-center gap-1.5 text-sm text-slate-400 mb-1.5 font-medium">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3 8 21"/><path d="M16 3 14 21"/></svg>
+            Keyword
+          </label>
+          <input id="diff-filter-keyword" type="text" placeholder="event keyword name" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-sky-500/60 transition-colors">
+        </div>
+        <div>
+          <label class="flex items-center gap-1.5 text-sm text-slate-400 mb-1.5 font-medium">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m8 6-6 6 6 6"/><path d="m16 6 6 6-6 6"/></svg>
+            Template / Metadata Field
+          </label>
+          <input id="diff-filter-template" type="text" placeholder="substring of an event Template" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-sky-500/60 transition-colors">
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center mb-3 gap-3 flex-wrap">
+        <div class="inline-flex bg-slate-900 border border-slate-700 rounded-md p-0.5" role="group" aria-label="Schema source filter">
+          <button data-schema-diff="all" class="px-3 py-1 text-sm rounded transition-colors">All</button>
+          <button data-schema-diff="manifest" class="px-3 py-1 text-sm rounded transition-colors">Manifest</button>
+          <button data-schema-diff="mof" class="px-3 py-1 text-sm rounded transition-colors">MOF</button>
+          <button data-schema-diff="tracelogging" class="px-3 py-1 text-sm rounded transition-colors">TraceLogging</button>
+        </div>
+        <button id="diff-filter-clear" class="text-sm text-slate-500 hover:text-slate-300">Clear filters</button>
+      </div>
+
+      <div id="diff-results"></div>
+    </section>
+
+    <footer class="mt-12 pt-6 border-t border-slate-900 text-xs text-slate-600">
+      <p>Snapshots produced by <a href="https://github.com/jonny-jhnson/ETWInspector" class="text-slate-400 hover:text-slate-200">ETWInspector</a> - a PowerShell module for enumerating ETW providers, generating snapshots, and diffing them locally.</p>
+    </footer>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
+
+```
+
+`js/app.js`:
+
+```js
+// EtwWatcher frontend controller.
+// Wires the snapshot picker, browse view, and diff view together.
+
+import { loadManifest, loadSnapshot, loadSnapshotFromFile, getCachedSnapshot } from './parse.js';
+import { diffSnapshots } from './diff.js';
+
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+
+let manifest = null;
+const localSnapshots = []; // [{ key, label, osVersion, sourceName }]
+
+const state = {
+  browse: {
+    snapshot: null,
+    filters: { provider: '', description: '', keyword: '', template: '', schemaSource: 'all' },
+    expanded: new Set(),
+  },
+  diff: {
+    result: null,
+    filters: { provider: '', description: '', keyword: '', template: '', schemaSource: 'all' },
+    expanded: new Set(),
+  },
+};
+
+// ---------- Bootstrap ----------
+
+window.addEventListener('DOMContentLoaded', async () => {
+  bindTabs();
+  bindBrowseControls();
+  bindDiffControls();
+  bindUploadControls();
+
+  try {
+    manifest = await loadManifest();
+    populateSnapshotPickers();
+    await applyUrlState();
+  } catch (err) {
+    showError($('#manifest-error'), `Could not load snapshots/manifest.json: ${err.message}`);
+  }
+});
+
+function bindTabs() {
+  $$('[data-tab]').forEach((btn) => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+}
+
+function switchTab(name) {
+  $$('[data-tab]').forEach((btn) => {
+    const active = btn.dataset.tab === name;
+    btn.classList.toggle('text-white', active);
+    btn.classList.toggle('border-sky-400', active);
+    btn.classList.toggle('text-slate-400', !active);
+    btn.classList.toggle('border-transparent', !active);
+  });
+  $$('section[data-view]').forEach((sec) => {
+    sec.hidden = sec.dataset.view !== name;
+  });
+  updateUrl();
+}
+
+function activeTab() {
+  for (const sec of $$('section[data-view]')) {
+    if (!sec.hidden) return sec.dataset.view;
+  }
+  return 'browse';
+}
+
+// ---------- URL state ----------
+
+let _restoringFromUrl = false;
+
+function updateUrl() {
+  if (_restoringFromUrl) return;
+  const view = activeTab();
+  const params = new URLSearchParams();
+  params.set('view', view);
+  if (view === 'browse') {
+    const snap = $('#browse-snapshot')?.value;
+    if (snap) params.set('snap', snap);
+    const f = state.browse.filters;
+    if (f.provider) params.set('p', f.provider);
+    if (f.description) params.set('d', f.description);
+    if (f.keyword) params.set('k', f.keyword);
+    if (f.template) params.set('t', f.template);
+    if (f.schemaSource && f.schemaSource !== 'all') params.set('s', f.schemaSource);
+  } else if (view === 'diff') {
+    const a = $('#diff-a')?.value;
+    const b = $('#diff-b')?.value;
+    if (a) params.set('a', a);
+    if (b) params.set('b', b);
+    const f = state.diff.filters;
+    if (f.provider) params.set('p', f.provider);
+    if (f.description) params.set('d', f.description);
+    if (f.keyword) params.set('k', f.keyword);
+    if (f.template) params.set('t', f.template);
+    if (f.schemaSource && f.schemaSource !== 'all') params.set('s', f.schemaSource);
+  }
+  const next = '#' + params.toString();
+  if (window.location.hash !== next) {
+    history.replaceState(null, '', next);
+  }
+}
+
+async function applyUrlState() {
+  const raw = window.location.hash.replace(/^#/, '');
+  if (!raw) return;
+  const params = new URLSearchParams(raw);
+  const view = params.get('view');
+  if (!view) return;
+
+  _restoringFromUrl = true;
+  try {
+    switchTab(view);
+
+    if (view === 'browse') {
+      const filters = state.browse.filters;
+      filters.provider = params.get('p') ?? '';
+      filters.description = params.get('d') ?? '';
+      filters.keyword = params.get('k') ?? '';
+      filters.template = params.get('t') ?? '';
+      const sParam = (params.get('s') ?? 'all').toLowerCase();
+      filters.schemaSource = ['manifest', 'mof', 'tracelogging', 'all'].includes(sParam) ? sParam : 'all';
+      $('#filter-provider').value = filters.provider;
+      $('#filter-description').value = filters.description;
+      $('#filter-keyword').value = filters.keyword;
+      $('#filter-template').value = filters.template;
+      paintSchemaToggle('browse', filters.schemaSource);
+
+      const snap = params.get('snap');
+      if (snap && snap !== 'local:' && optionExists('#browse-snapshot', snap)) {
+        $('#browse-snapshot').value = snap;
+        await loadBrowseSnapshot();
+      } else {
+        renderBrowseList();
+      }
+    } else if (view === 'diff') {
+      const filters = state.diff.filters;
+      filters.provider = params.get('p') ?? '';
+      filters.description = params.get('d') ?? '';
+      filters.keyword = params.get('k') ?? '';
+      filters.template = params.get('t') ?? '';
+      const sParam = (params.get('s') ?? 'all').toLowerCase();
+      filters.schemaSource = ['manifest', 'mof', 'tracelogging', 'all'].includes(sParam) ? sParam : 'all';
+      $('#diff-filter-provider').value = filters.provider;
+      $('#diff-filter-description').value = filters.description;
+      $('#diff-filter-keyword').value = filters.keyword;
+      $('#diff-filter-template').value = filters.template;
+      paintSchemaToggle('diff', filters.schemaSource);
+
+      const a = params.get('a');
+      const b = params.get('b');
+      if (a && optionExists('#diff-a', a)) $('#diff-a').value = a;
+      if (b && optionExists('#diff-b', b)) $('#diff-b').value = b;
+      // Auto-run if both A and B are valid bundled snapshots and differ
+      const aOk = a && !a.startsWith('local:') && optionExists('#diff-a', a);
+      const bOk = b && !b.startsWith('local:') && optionExists('#diff-b', b);
+      if (aOk && bOk && a !== b) {
+        await runDiff();
+      }
+    }
+  } finally {
+    _restoringFromUrl = false;
+  }
+}
+
+function optionExists(selectSel, value) {
+  const sel = $(selectSel);
+  if (!sel) return false;
+  return [...sel.options].some((o) => o.value === value);
+}
+
+function populateSnapshotPickers() {
+  const bundled = (manifest?.snapshots ?? []).map(
+    (s) => `<option value="${escapeAttr(s.file)}">${escapeHtml(decoratedLabel(s.label, s.osVersion))}</option>`,
+  );
+  const local = localSnapshots.map(
+    (s) => `<option value="${escapeAttr(s.key)}">${escapeHtml(`[Local] ${decoratedLabel(s.sourceName, s.osVersion)}`)}</option>`,
+  );
+  const optsHtml = [...bundled, ...local].join('');
+
+  for (const id of ['#browse-snapshot', '#diff-a', '#diff-b']) {
+    const sel = $(id);
+    const prevValue = sel.value;
+    sel.innerHTML = optsHtml;
+    if (prevValue && [...sel.options].some((o) => o.value === prevValue)) {
+      sel.value = prevValue;
+    }
+  }
+
+  // Default diff B to a different option than A
+  if (!$('#diff-b').value || $('#diff-a').value === $('#diff-b').value) {
+    const total = $('#diff-b').options.length;
+    if (total >= 2) $('#diff-b').selectedIndex = 1;
+  }
+}
+
+// ---------- Upload (BYO snapshots) ----------
+
+function bindUploadControls() {
+  const zone = $('#upload-zone');
+  const input = $('#upload-input');
+
+  input.addEventListener('change', (e) => handleFiles(e.target.files));
+
+  // Drag & drop
+  ['dragenter', 'dragover'].forEach((ev) => {
+    zone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      zone.classList.add('border-sky-500', 'bg-slate-900/50');
+    });
+  });
+  ['dragleave', 'drop'].forEach((ev) => {
+    zone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      zone.classList.remove('border-sky-500', 'bg-slate-900/50');
+    });
+  });
+  zone.addEventListener('drop', (e) => {
+    handleFiles(e.dataTransfer?.files);
+  });
+}
+
+async function handleFiles(fileList) {
+  if (!fileList || fileList.length === 0) return;
+  const status = $('#upload-status');
+  for (const file of fileList) {
+    status.classList.remove('text-red-400');
+    status.textContent = `Parsing ${file.name}...`;
+    try {
+      const snap = await loadSnapshotFromFile(file, (p) => {
+        if (p.done) return;
+        const pct = p.total > 0 ? ` ${((p.bytesRead / p.total) * 100).toFixed(0)}%` : '';
+        status.textContent = `Parsing ${file.name}...${pct} (${p.providers} providers)`;
+      });
+
+      // Replace any existing entry under the same key, otherwise append
+      const idx = localSnapshots.findIndex((s) => s.key === snap.file);
+      const entry = {
+        key: snap.file,
+        sourceName: snap.sourceName,
+        osVersion: snap.osVersion,
+        label: snap.sourceName,
+      };
+      if (idx >= 0) localSnapshots[idx] = entry;
+      else localSnapshots.push(entry);
+
+      status.textContent = `Loaded ${file.name} (${snap.providers.length} providers, OS ${snap.osVersion})`;
+      populateSnapshotPickers();
+      renderUploadList();
+    } catch (err) {
+      showError(status, `${file.name}: ${err.message}`);
+      return;
+    }
+  }
+}
+
+function renderUploadList() {
+  const list = $('#upload-list');
+  if (localSnapshots.length === 0) {
+    list.innerHTML = '';
+    return;
+  }
+  list.innerHTML = localSnapshots
+    .map(
+      (s) => `
+        <span class="inline-flex items-center gap-2 bg-slate-900 border border-slate-700 rounded px-2 py-1">
+          <span class="text-slate-300 font-mono">${escapeHtml(s.sourceName)}</span>
+          <span class="text-slate-500">${escapeHtml(s.osVersion)}</span>
+          <button data-remove-local="${escapeAttr(s.key)}" class="text-slate-500 hover:text-rose-400 ml-1">&times;</button>
+        </span>`,
+    )
+    .join('');
+  list.querySelectorAll('[data-remove-local]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.removeLocal;
+      const idx = localSnapshots.findIndex((s) => s.key === key);
+      if (idx >= 0) localSnapshots.splice(idx, 1);
+      populateSnapshotPickers();
+      renderUploadList();
+    });
+  });
+}
+
+// ---------- Browse view ----------
+
+function bindBrowseControls() {
+  $('#browse-snapshot').addEventListener('change', loadBrowseSnapshot);
+  $('#browse-load').addEventListener('click', loadBrowseSnapshot);
+
+  for (const [id, key] of [
+    ['#filter-provider', 'provider'],
+    ['#filter-description', 'description'],
+    ['#filter-keyword', 'keyword'],
+    ['#filter-template', 'template'],
+  ]) {
+    $(id).addEventListener('input', (e) => {
+      state.browse.filters[key] = e.target.value;
+      renderBrowseList();
+      updateUrl();
+    });
+  }
+
+  $('#filter-clear').addEventListener('click', () => {
+    state.browse.filters = { provider: '', description: '', keyword: '', template: '', schemaSource: 'all' };
+    for (const id of ['#filter-provider', '#filter-description', '#filter-keyword', '#filter-template']) {
+      $(id).value = '';
+    }
+    paintSchemaToggle('browse', 'all');
+    renderBrowseList();
+    updateUrl();
+  });
+
+  $$('[data-schema-browse]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.browse.filters.schemaSource = btn.dataset.schemaBrowse;
+      paintSchemaToggle('browse', btn.dataset.schemaBrowse);
+      renderBrowseList();
+      updateUrl();
+    });
+  });
+  paintSchemaToggle('browse', state.browse.filters.schemaSource);
+}
+
+// Resolves a snapshot picker value to a snapshot object. Bundled keys are
+// fetched via loadSnapshot; local keys (`local:<filename>`) come from the
+// parser cache (uploaded earlier).
+async function resolveSnapshot(key, onProgress) {
+  if (key.startsWith('local:')) {
+    const cached = getCachedSnapshot(key);
+    if (!cached) {
+      throw new Error('That local snapshot is no longer in memory. Re-upload it.');
+    }
+    onProgress?.({ done: true, fromCache: true });
+    return cached;
+  }
+  return loadSnapshot(key, onProgress);
+}
+
+async function loadBrowseSnapshot() {
+  const key = $('#browse-snapshot').value;
+  if (!key) return;
+  const progress = $('#browse-progress');
+  showProgress(progress, 0, 'Loading...');
+  try {
+    const snap = await resolveSnapshot(key, (p) => {
+      if (p.done) {
+        showProgress(progress, 100, p.fromCache ? 'Loaded (cached)' : 'Loaded');
+      } else if (p.total > 0) {
+        showProgress(progress, (p.bytesRead / p.total) * 100, `${formatBytes(p.bytesRead)} / ${formatBytes(p.total)} - ${p.providers} providers`);
+      } else {
+        showProgress(progress, 0, `${formatBytes(p.bytesRead)} - ${p.providers} providers`);
+      }
+    });
+    state.browse.snapshot = snap;
+    state.browse.expanded.clear();
+    $('#browse-meta').textContent = snapshotSummaryLine(snap);
+    renderBrowseList();
+    updateUrl();
+  } catch (err) {
+    showProgress(progress, 0, `Error: ${err.message}`);
+  }
+}
+
+function renderBrowseList() {
+  const snap = state.browse.snapshot;
+  const out = $('#browse-results');
+  if (!snap) {
+    out.innerHTML = '';
+    return;
+  }
+
+  const f = normalizeFilters(state.browse.filters);
+  const matches = anyFilterActive(f)
+    ? snap.providers.filter((p) => providerMatchesFilters(p, f))
+    : snap.providers;
+
+  $('#browse-count').textContent = `${matches.length} / ${snap.providers.length}`;
+
+  const rows = matches.slice(0, 500).map((p) => providerRowHtml(p, state.browse.expanded, f));
+  out.innerHTML = rows.join('');
+  if (matches.length > 500) {
+    out.insertAdjacentHTML('beforeend', `<p class="text-slate-500 text-sm mt-2">Showing first 500 of ${matches.length}. Refine the filter to narrow results.</p>`);
+  }
+
+  out.querySelectorAll('[data-toggle-provider]').forEach((row) => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('[data-copy]')) return;
+      const guid = row.dataset.toggleProvider;
+      if (state.browse.expanded.has(guid)) state.browse.expanded.delete(guid);
+      else state.browse.expanded.add(guid);
+      renderBrowseList();
+    });
+  });
+}
+
+function normalizeFilters(filters) {
+  return {
+    provider: filters.provider.trim().toLowerCase(),
+    description: filters.description.trim().toLowerCase(),
+    keyword: filters.keyword.trim().toLowerCase(),
+    template: filters.template.trim().toLowerCase(),
+    schemaSource: (filters.schemaSource ?? 'all').toLowerCase(),
+  };
+}
+
+function anyFilterActive(f) {
+  return !!(f.provider || f.description || f.keyword || f.template
+    || (f.schemaSource && f.schemaSource !== 'all'));
+}
+
+// All non-empty filters must match (AND). Within a single filter input,
+// the substring is OR'd across the relevant fields. The provider filter
+// applies to the provider record; description/keyword/template are
+// event-level filters and require at least one event to match.
+function providerMatchesFilters(p, f) {
+  if (f.schemaSource && f.schemaSource !== 'all') {
+    if ((p.SchemaSource ?? '').toLowerCase() !== f.schemaSource) return false;
+  }
+  if (f.provider && !matchesProvider(p, f.provider)) return false;
+  if (anyEventFilterActive(f) && !matchesAnyEvent(p, (e) => eventMatchesFilters(e, f))) {
+    return false;
+  }
+  return true;
+}
+
+function matchesProvider(p, needle) {
+  return includes(p.ProviderName, needle)
+      || includes(p.ProviderGuid, needle)
+      || includes(p.ResourceFilePath, needle);
+}
+
+// Event-level filters: each must independently match this event.
+function eventMatchesFilters(e, f) {
+  if (f.description && !includes(e.Description, f.description)) return false;
+  if (f.keyword && !eventHasKeyword(e, f.keyword)) return false;
+  if (f.template && !includes(e.Template, f.template)) return false;
+  return true;
+}
+
+function eventHasKeyword(e, needle) {
+  for (const kn of e.KeywordNames ?? []) {
+    if (includes(kn, needle)) return true;
+  }
+  return false;
+}
+
+function anyEventFilterActive(f) {
+  return !!(f.description || f.keyword || f.template);
+}
+
+function matchesAnyEvent(p, predicate) {
+  for (const e of p.Events ?? []) if (predicate(e)) return true;
+  return false;
+}
+
+function includes(haystack, needleLower) {
+  if (!haystack) return false;
+  return String(haystack).toLowerCase().includes(needleLower);
+}
+
+// Diff-specific filtering helpers. Added/Removed providers are full
+// ProviderSnapshot objects (uppercase keys), so providerMatchesFilters
+// works directly. Changed providers are ProviderDiff objects with their
+// own field shape and split event lists.
+function providerSnapshotMatchesDiff(p, f) {
+  return providerMatchesFilters(p, f);
+}
+
+function providerDiffMatches(pd, f) {
+  if (f.schemaSource && f.schemaSource !== 'all') {
+    if ((pd.schemaSource ?? '').toLowerCase() !== f.schemaSource) return false;
+  }
+  if (f.provider) {
+    if (!includes(pd.providerName, f.provider)
+        && !includes(pd.providerGuid, f.provider)
+        && !includes(pd.resourceFilePath, f.provider)) return false;
+  }
+  if (anyEventFilterActive(f)) {
+    const someAdded = (pd.eventsAdded ?? []).some((e) => eventMatchesFilters(e, f));
+    const someRemoved = (pd.eventsRemoved ?? []).some((e) => eventMatchesFilters(e, f));
+    const someChanged = (pd.eventsChanged ?? []).some((ed) =>
+      eventMatchesFilters(ed.a ?? {}, f) || eventMatchesFilters(ed.b ?? {}, f)
+    );
+    if (!someAdded && !someRemoved && !someChanged) return false;
+  }
+  return true;
+}
+
+function filterEventList(events, f) {
+  if (!anyEventFilterActive(f)) return events ?? [];
+  return (events ?? []).filter((e) => eventMatchesFilters(e, f));
+}
+
+function filterChangedEventList(eds, f) {
+  if (!anyEventFilterActive(f)) return eds ?? [];
+  return (eds ?? []).filter((ed) =>
+    eventMatchesFilters(ed.a ?? {}, f) || eventMatchesFilters(ed.b ?? {}, f)
+  );
+}
+
+function providerRowHtml(p, expandedSet, filters) {
+  const guid = p.ProviderGuid;
+  const expanded = expandedSet.has(guid);
+  const totalEvents = (p.Events ?? []).length;
+  const kwCount = (p.Keywords ?? []).length;
+
+  const filteringEvents = filters && anyEventFilterActive(filters);
+  const visibleEvents = filteringEvents
+    ? (p.Events ?? []).filter((e) => eventMatchesFilters(e, filters))
+    : (p.Events ?? []);
+
+  const eventCountLabel = filteringEvents
+    ? `${visibleEvents.length} / ${totalEvents} events`
+    : `${totalEvents} events`;
+
+  const head = `
+    <div data-toggle-provider="${guid}" class="cursor-pointer px-4 py-3.5 hover:bg-slate-800/40 border-b border-slate-800 flex items-baseline gap-3 transition-colors">
+      <span class="text-slate-600 w-4 text-center">${expanded ? '▾' : '▸'}</span>
+      <div class="flex-1 min-w-0">
+        <div class="text-base text-slate-100 truncate">${escapeHtml(p.ProviderName ?? '(no name)')}${copyBtn(p.ProviderName ?? '', 'provider name')}</div>
+        <div class="text-sm text-slate-500 truncate mt-1"><span class="font-mono text-xs">${escapeHtml(guid)}</span>${copyBtn(guid, 'GUID')} <span class="text-slate-700">·</span> ${escapeHtml(p.SchemaSource ?? '')} <span class="text-slate-700">·</span> ${eventCountLabel} <span class="text-slate-700">·</span> ${kwCount} keywords</div>
+      </div>
+    </div>`;
+  if (!expanded) return head;
+
+  const path = providerSourcesHtml(p);
+  const keywords = (p.Keywords ?? []).length === 0 ? '' : `
+    <details class="mb-3">
+      <summary class="text-xs text-slate-400 cursor-pointer hover:text-slate-200">${(p.Keywords ?? []).length} provider keyword(s) defined</summary>
+      <table class="text-xs font-mono mt-2 w-full">
+        ${(p.Keywords ?? []).map((k) => `<tr><td class="pr-4 text-slate-300">${escapeHtml(k.Name ?? '')}</td><td class="text-slate-500">0x${formatKeywordsHex(k.Value)}</td></tr>`).join('')}
+      </table>
+    </details>`;
+
+  let events;
+  if (visibleEvents.length === 0) {
+    events = filteringEvents
+      ? '<p class="text-slate-500 text-sm">No events match the active filter(s).</p>'
+      : '<p class="text-slate-500 text-sm">No events.</p>';
+  } else {
+    const filterNote = filteringEvents
+      ? `<div class="text-xs text-slate-500 mb-2">Showing ${visibleEvents.length} of ${totalEvents} event(s) matching active filters.</div>`
+      : '';
+    events = filterNote + `
+      <table class="w-full text-sm">
+        <thead class="text-xs text-slate-500 uppercase">
+          <tr><th class="text-left py-1 pr-3 w-12">Id</th><th class="text-left pr-3 w-12">v</th><th class="text-left pr-3 w-16">Level</th><th class="text-left">Description</th></tr>
+        </thead>
+        <tbody>
+          ${visibleEvents.map(eventRowHtml).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  return head + `<div class="px-6 py-3 bg-slate-900/40 border-b border-slate-800">${path}${keywords}${events}</div>`;
+}
+
+function eventRowHtml(e) {
+  const desc = e.Description ?? '';
+  const truncDesc = desc.length > 120 ? desc.slice(0, 117) + '…' : desc;
+  return `
+    <tr class="border-t border-slate-800/50">
+      <td class="py-1 pr-3 font-mono text-slate-300 align-top">${e.Id}</td>
+      <td class="pr-3 font-mono text-slate-500 align-top">${e.Version}</td>
+      <td class="pr-3 font-mono text-slate-500 align-top">${e.Level}</td>
+      <td class="text-slate-200 py-1">
+        <details>
+          <summary class="cursor-pointer hover:text-white">${escapeHtml(truncDesc) || '<span class="text-slate-600 italic">no description</span>'}</summary>
+          ${eventDetailHtml(e)}
+        </details>
+      </td>
+    </tr>`;
+}
+
+// Shared details block used by both the browse view's expanded event row
+// and the diff view's added/removed event entries.
+function eventDetailHtml(e) {
+  const desc = e.Description ?? '';
+  const keywordChips = (e.KeywordNames ?? []).map(
+    (k) => `<span class="inline-block bg-slate-800 text-slate-300 text-xs px-1.5 py-0.5 rounded mr-1">${escapeHtml(k)}</span>`,
+  ).join('');
+  const template = e.Template
+    ? `<details class="mt-2"><summary class="text-xs text-slate-400 cursor-pointer hover:text-slate-200">Template XML</summary><pre class="text-xs whitespace-pre-wrap text-slate-400 mt-1 font-mono">${escapeHtml(e.Template)}</pre></details>`
+    : '';
+  return `
+    <div class="text-xs text-slate-400 mt-1 space-y-1">
+      ${desc.length > 120 ? `<div class="whitespace-pre-wrap">${escapeHtml(desc)}</div>` : ''}
+      <div><span class="text-slate-500">Opcode:</span> ${e.Opcode} <span class="text-slate-500 ml-3">Task:</span> ${e.Task} <span class="text-slate-500 ml-3">Keywords:</span> 0x${formatEventKeywordsHex(e.Keywords)}</div>
+      ${keywordChips ? `<div>${keywordChips}</div>` : ''}
+      ${template}
+    </div>`;
+}
+
+// ---------- Diff view ----------
+
+function bindDiffControls() {
+  $('#diff-run').addEventListener('click', runDiff);
+
+  for (const [id, key] of [
+    ['#diff-filter-provider', 'provider'],
+    ['#diff-filter-description', 'description'],
+    ['#diff-filter-keyword', 'keyword'],
+    ['#diff-filter-template', 'template'],
+  ]) {
+    $(id).addEventListener('input', (e) => {
+      state.diff.filters[key] = e.target.value;
+      if (state.diff.result) renderDiff();
+      updateUrl();
+    });
+  }
+
+  $('#diff-filter-clear').addEventListener('click', () => {
+    state.diff.filters = { provider: '', description: '', keyword: '', template: '', schemaSource: 'all' };
+    for (const id of ['#diff-filter-provider', '#diff-filter-description', '#diff-filter-keyword', '#diff-filter-template']) {
+      $(id).value = '';
+    }
+    paintSchemaToggle('diff', 'all');
+    if (state.diff.result) renderDiff();
+    updateUrl();
+  });
+
+  $$('[data-schema-diff]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.diff.filters.schemaSource = btn.dataset.schemaDiff;
+      paintSchemaToggle('diff', btn.dataset.schemaDiff);
+      if (state.diff.result) renderDiff();
+      updateUrl();
+    });
+  });
+  paintSchemaToggle('diff', state.diff.filters.schemaSource);
+
+  $('#diff-a').addEventListener('change', updateUrl);
+  $('#diff-b').addEventListener('change', updateUrl);
+}
+
+function paintSchemaToggle(view, value) {
+  const attr = view === 'browse' ? 'data-schema-browse' : 'data-schema-diff';
+  $$(`[${attr}]`).forEach((btn) => {
+    const active = btn.getAttribute(attr) === value;
+    btn.classList.toggle('bg-slate-700', active);
+    btn.classList.toggle('text-white', active);
+    btn.classList.toggle('text-slate-400', !active);
+    btn.classList.toggle('hover:text-white', !active);
+  });
+}
+
+async function runDiff() {
+  const aFile = $('#diff-a').value;
+  const bFile = $('#diff-b').value;
+  if (!aFile || !bFile) return;
+  if (aFile === bFile) {
+    showError($('#diff-status'), 'A and B are the same snapshot.');
+    return;
+  }
+  const status = $('#diff-status');
+  status.textContent = 'Loading snapshots...';
+  status.classList.remove('text-red-400');
+  $('#diff-results').innerHTML = skeletonDiffHtml();
+
+  try {
+    const [snapA, snapB] = await Promise.all([
+      resolveSnapshot(aFile),
+      resolveSnapshot(bFile),
+    ]);
+    status.textContent = 'Computing diff...';
+    const result = diffSnapshots(snapA, snapB);
+    state.diff.result = result;
+    state.diff.expanded.clear();
+    status.textContent = '';
+    renderDiff();
+    updateUrl();
+  } catch (err) {
+    $('#diff-results').innerHTML = '';
+    showError(status, `Error: ${err.message}`);
+  }
+}
+
+function renderDiff() {
+  const r = state.diff.result;
+  const out = $('#diff-results');
+  if (!r) {
+    out.innerHTML = '';
+    return;
+  }
+
+  const f = normalizeFilters(state.diff.filters);
+  const evtActive = anyEventFilterActive(f);
+
+  // For Added / Removed (full ProviderSnapshot objects)
+  const added = r.providersAdded.filter((p) => providerSnapshotMatchesDiff(p, f));
+  const removed = r.providersRemoved.filter((p) => providerSnapshotMatchesDiff(p, f));
+  // For Changed (ProviderDiff objects)
+  const changed = r.providersChanged.filter((pd) => providerDiffMatches(pd, f));
+
+  const eventsAddedTotal = added.reduce((n, p) => n + filterEventList(p.Events, f).length, 0)
+                         + changed.reduce((n, p) => n + filterEventList(p.eventsAdded, f).length, 0);
+  const eventsRemovedTotal = removed.reduce((n, p) => n + filterEventList(p.Events, f).length, 0)
+                           + changed.reduce((n, p) => n + filterEventList(p.eventsRemoved, f).length, 0);
+  const eventsChangedTotal = changed.reduce((n, p) => n + filterChangedEventList(p.eventsChanged, f).length, 0);
+
+  const iconPlus  = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>';
+  const iconMinus = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>';
+  const iconTilde = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13c0-3 2-5 4-5s3 2 5 2 4-2 4-2 2-2 5-2"/></svg>';
+
+  const summary = `
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-md px-3 py-2.5">
+        <div class="text-slate-500 text-xs uppercase tracking-wide">Snapshot A</div>
+        <div class="font-mono text-slate-200 text-base mt-1">${escapeHtml(r.osVersionA)}</div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-md px-3 py-2.5">
+        <div class="text-slate-500 text-xs uppercase tracking-wide">Snapshot B</div>
+        <div class="font-mono text-slate-200 text-base mt-1">${escapeHtml(r.osVersionB)}</div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-md px-3 py-2.5">
+        <div class="flex items-center gap-1.5 text-emerald-400 text-xs uppercase tracking-wide">${iconPlus}<span>Added</span></div>
+        <div class="text-emerald-300 text-base mt-1">${added.length} <span class="text-slate-500 text-sm">providers</span></div>
+        <div class="text-emerald-300/80 text-sm">${eventsAddedTotal} <span class="text-slate-500">events</span></div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-md px-3 py-2.5">
+        <div class="flex items-center gap-1.5 text-amber-400 text-xs uppercase tracking-wide">${iconTilde}<span>Changed</span></div>
+        <div class="text-amber-300 text-base mt-1">${changed.length} <span class="text-slate-500 text-sm">providers</span></div>
+        <div class="text-amber-300/80 text-sm">${eventsChangedTotal} <span class="text-slate-500">events</span></div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-md px-3 py-2.5">
+        <div class="flex items-center gap-1.5 text-rose-400 text-xs uppercase tracking-wide">${iconMinus}<span>Removed</span></div>
+        <div class="text-rose-300 text-base mt-1">${removed.length} <span class="text-slate-500 text-sm">providers</span></div>
+        <div class="text-rose-300/80 text-sm">${eventsRemovedTotal} <span class="text-slate-500">events</span></div>
+      </div>
+    </div>`;
+
+  const addedSection = sectionHtml('Providers added (only in B)', 'emerald', added.map((p) => addedRemovedRowHtml(p, 'emerald', state.diff.expanded, f)).join(''), added.length);
+  const changedSection = sectionHtml('Providers changed', 'amber', changed.map((p) => changedProviderRowHtml(p, state.diff.expanded, f)).join(''), changed.length);
+  const removedSection = sectionHtml('Providers removed (only in A)', 'rose', removed.map((p) => addedRemovedRowHtml(p, 'rose', state.diff.expanded, f)).join(''), removed.length);
+
+  out.innerHTML = summary + addedSection + changedSection + removedSection;
+
+  out.querySelectorAll('[data-toggle-diff-provider]').forEach((row) => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('[data-copy]')) return;
+      const g = row.dataset.toggleDiffProvider;
+      if (state.diff.expanded.has(g)) state.diff.expanded.delete(g);
+      else state.diff.expanded.add(g);
+      renderDiff();
+    });
+  });
+}
+
+function skeletonDiffHtml() {
+  const row = `
+    <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-800/50 last:border-0">
+      <div class="w-3 h-3 skeleton"></div>
+      <div class="w-3 h-3 skeleton opacity-70"></div>
+      <div class="flex-1">
+        <div class="h-4 w-1/3 skeleton mb-1.5"></div>
+        <div class="h-3 w-2/3 skeleton opacity-70"></div>
+      </div>
+    </div>`;
+  const cards = Array(5).fill('<div class="h-16 skeleton rounded-md"></div>').join('');
+  return `
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">${cards}</div>
+    <div class="mt-6">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-1 h-5 rounded-full skeleton"></div>
+        <div class="h-4 w-48 skeleton"></div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-md overflow-hidden">
+        ${row.repeat(4)}
+      </div>
+    </div>`;
+}
+
+function sectionHtml(title, color, body, count) {
+  if (!body) return '';
+  const countBadge = count != null
+    ? `<span class="text-slate-500 font-normal text-sm ml-2">${count}</span>`
+    : '';
+  return `
+    <div class="mt-6 first:mt-0 mb-4">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-1.5 h-6 bg-gradient-to-b from-${color}-400 to-${color}-600 rounded-full"></div>
+        <h3 class="text-${color}-300 font-medium text-base">${title}${countBadge}</h3>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-md overflow-hidden">${body}</div>
+    </div>`;
+}
+
+function addedRemovedRowHtml(p, color, expandedSet, f) {
+  const sign = color === 'emerald' ? '+' : '−';
+  const guid = p.ProviderGuid ?? '';
+  const expanded = expandedSet.has(guid);
+  const totalEvents = (p.Events ?? []).length;
+  const evtActive = f && anyEventFilterActive(f);
+  const visibleEvents = evtActive ? filterEventList(p.Events, f) : (p.Events ?? []);
+  const eventCountLabel = evtActive
+    ? `${visibleEvents.length} / ${totalEvents} events`
+    : `${totalEvents} events`;
+
+  const head = `
+    <div data-toggle-diff-provider="${escapeAttr(guid)}" class="cursor-pointer px-4 py-3.5 hover:bg-slate-800/40 border-b border-slate-800/50 last:border-0 flex items-baseline gap-3 transition-colors">
+      <span class="text-slate-600 w-4 text-center">${expanded ? '▾' : '▸'}</span>
+      <span class="text-${color}-400 w-4 text-center font-mono">${sign}</span>
+      <div class="flex-1 min-w-0">
+        <div class="text-base text-slate-100 truncate">${escapeHtml(p.ProviderName ?? '(no name)')}${copyBtn(p.ProviderName ?? '', 'provider name')}</div>
+        <div class="text-sm text-slate-500 truncate mt-1"><span class="font-mono text-xs">${escapeHtml(guid)}</span>${copyBtn(guid, 'GUID')} <span class="text-slate-700">·</span> ${escapeHtml(p.SchemaSource ?? '')} <span class="text-slate-700">·</span> ${eventCountLabel}</div>
+      </div>
+    </div>`;
+
+  if (!expanded) return head;
+  let body;
+  if (visibleEvents.length === 0) {
+    body = evtActive
+      ? '<p class="text-slate-500 text-sm">No events match the active filter(s).</p>'
+      : '<p class="text-slate-500 text-sm">No events.</p>';
+  } else {
+    body = diffEventListHtml(visibleEvents, color);
+  }
+  return head + `<div class="px-6 py-3 bg-slate-950/60 border-b border-slate-800/50">${body}</div>`;
+}
+
+function changedProviderRowHtml(pd, expandedSet, f) {
+  const expanded = expandedSet.has(pd.providerGuid);
+  const evtActive = f && anyEventFilterActive(f);
+  const eventsAdded = evtActive ? filterEventList(pd.eventsAdded, f) : pd.eventsAdded;
+  const eventsRemoved = evtActive ? filterEventList(pd.eventsRemoved, f) : pd.eventsRemoved;
+  const eventsChanged = evtActive ? filterChangedEventList(pd.eventsChanged, f) : pd.eventsChanged;
+
+  const counts = [
+    eventsAdded.length ? `<span class="text-emerald-400">+${eventsAdded.length}</span>` : '',
+    eventsRemoved.length ? `<span class="text-rose-400">−${eventsRemoved.length}</span>` : '',
+    eventsChanged.length ? `<span class="text-amber-400">~${eventsChanged.length}</span>` : '',
+    pd.providerFieldsChanged.length ? `<span class="text-sky-400">⚙${pd.providerFieldsChanged.length}</span>` : '',
+  ].filter(Boolean).join(' ');
+
+  const head = `
+    <div data-toggle-diff-provider="${escapeAttr(pd.providerGuid)}" class="cursor-pointer px-4 py-3.5 hover:bg-slate-800/40 border-b border-slate-800/50 flex items-baseline gap-3 transition-colors">
+      <span class="text-slate-600 w-4 text-center">${expanded ? '▾' : '▸'}</span>
+      <span class="text-amber-400 w-4 text-center font-mono">~</span>
+      <div class="flex-1 min-w-0">
+        <div class="text-base text-slate-100 truncate">${escapeHtml(pd.providerName ?? '(no name)')}${copyBtn(pd.providerName ?? '', 'provider name')}</div>
+        <div class="text-sm text-slate-500 truncate mt-1"><span class="font-mono text-xs">${escapeHtml(pd.providerGuid)}</span>${copyBtn(pd.providerGuid ?? '', 'GUID')}</div>
+      </div>
+      <div class="text-sm font-mono">${counts}</div>
+    </div>`;
+
+  if (!expanded) return head;
+
+  const fieldsBlock = pd.providerFieldsChanged.length === 0 ? '' : `
+    <div class="mb-3">
+      <div class="text-xs text-sky-400 font-medium mb-1">Provider field changes</div>
+      <table class="text-xs font-mono w-full">
+        <thead><tr class="text-slate-500"><th class="text-left pr-3 w-32">Field</th><th class="text-left pr-3">A</th><th class="text-left">B</th></tr></thead>
+        <tbody>
+          ${pd.providerFieldsChanged.map((c) => `<tr><td class="pr-3 text-slate-300">${escapeHtml(c.field)}</td><td class="pr-3 text-rose-300">${escapeHtml(String(c.a ?? ''))}</td><td class="text-emerald-300">${escapeHtml(String(c.b ?? ''))}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+
+  const eventsAddedBlock = eventsAdded.length === 0 ? '' : `
+    <div class="mb-3">
+      <div class="text-xs text-emerald-400 font-medium mb-1">${eventsAdded.length} event(s) added${evtActive && eventsAdded.length !== pd.eventsAdded.length ? ` (filtered from ${pd.eventsAdded.length})` : ''}</div>
+      ${diffEventListHtml(eventsAdded, 'emerald')}
+    </div>`;
+
+  const eventsRemovedBlock = eventsRemoved.length === 0 ? '' : `
+    <div class="mb-3">
+      <div class="text-xs text-rose-400 font-medium mb-1">${eventsRemoved.length} event(s) removed${evtActive && eventsRemoved.length !== pd.eventsRemoved.length ? ` (filtered from ${pd.eventsRemoved.length})` : ''}</div>
+      ${diffEventListHtml(eventsRemoved, 'rose')}
+    </div>`;
+
+  const eventsChangedBlock = eventsChanged.length === 0 ? '' : `
+    <div class="mb-3">
+      <div class="text-xs text-amber-400 font-medium mb-1">${eventsChanged.length} event(s) changed${evtActive && eventsChanged.length !== pd.eventsChanged.length ? ` (filtered from ${pd.eventsChanged.length})` : ''}</div>
+      ${eventsChanged.map(diffEventChangedHtml).join('')}
+    </div>`;
+
+  return head + `<div class="px-6 py-3 bg-slate-950/60 border-b border-slate-800/50">${fieldsBlock}${eventsAddedBlock}${eventsRemovedBlock}${eventsChangedBlock}</div>`;
+}
+
+function diffEventListHtml(events, color) {
+  return `<table class="w-full text-sm">
+    <thead class="text-xs text-slate-500 uppercase">
+      <tr>
+        <th class="text-left py-1 pr-3 w-12">Id</th>
+        <th class="text-left pr-3 w-10">v</th>
+        <th class="text-left pr-3 w-12">Level</th>
+        <th class="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${events.map((e) => diffEventRowHtml(e, color)).join('')}
+    </tbody>
+  </table>`;
+}
+
+function diffEventRowHtml(e, color) {
+  const desc = e.Description ?? '';
+  const truncDesc = desc.length > 120 ? desc.slice(0, 117) + '…' : desc;
+  return `
+    <tr class="border-t border-slate-800/50">
+      <td class="py-1 pr-3 font-mono text-${color}-300 align-top">${e.Id}</td>
+      <td class="pr-3 font-mono text-slate-500 align-top">${e.Version}</td>
+      <td class="pr-3 font-mono text-slate-500 align-top">${e.Level}</td>
+      <td class="text-slate-200 py-1">
+        <details>
+          <summary class="cursor-pointer hover:text-white">${escapeHtml(truncDesc) || '<span class="text-slate-600 italic">no description</span>'}</summary>
+          ${eventDetailHtml(e)}
+        </details>
+      </td>
+    </tr>`;
+}
+
+// Fields that often contain long, multi-line strings; these get full-width
+// stacked panels with a line-diff. Everything else stays in a compact table.
+const LONG_TEXT_FIELDS = new Set(['Description', 'Template', 'KeywordNames', 'ResourceFilePath']);
+
+function diffEventChangedHtml(ed) {
+  const versionChanged = !!ed.versionChanged;
+  // Version is shown in the header for bumps; suppress it from the scalar table.
+  const visibleChanges = versionChanged
+    ? ed.changes.filter((c) => c.field !== 'Version')
+    : ed.changes;
+  const scalarChanges = visibleChanges.filter((c) => !isLongTextChange(c));
+  const longChanges = visibleChanges.filter((c) => isLongTextChange(c));
+
+  const scalars = scalarChanges.length === 0 ? '' : `
+    <table class="text-xs font-mono w-full mb-3">
+      <thead><tr class="text-slate-500">
+        <th class="text-left pr-3 w-32">Field</th>
+        <th class="text-left pr-3">A</th>
+        <th class="text-left">B</th>
+      </tr></thead>
+      <tbody>
+        ${scalarChanges.map((c) => `
+          <tr>
+            <td class="pr-3 text-slate-300 align-top">${escapeHtml(c.field)}</td>
+            <td class="pr-3 text-rose-300 align-top whitespace-pre-wrap break-all">${escapeHtml(String(c.a ?? ''))}</td>
+            <td class="text-emerald-300 align-top whitespace-pre-wrap break-all">${escapeHtml(String(c.b ?? ''))}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+
+  const longs = longChanges.map(longTextChangePanelHtml).join('');
+
+  const aVer = ed.a?.Version ?? ed.version;
+  const bVer = ed.b?.Version ?? ed.version;
+  const versionDisplay = versionChanged ? `v${aVer} -> v${bVer}` : `v${ed.version}`;
+  const versionBadge = versionChanged
+    ? '<span class="ml-2 inline-block px-1.5 py-0.5 text-[10px] uppercase tracking-wide bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded">New version</span>'
+    : '';
+
+  return `
+    <div class="border border-slate-800 rounded p-3 mb-3 bg-slate-900/40">
+      <div class="text-xs text-amber-300 font-mono mb-2">Id ${ed.id} ${versionDisplay}${versionBadge}</div>
+      ${scalars}
+      ${longs}
+    </div>`;
+}
+
+function isLongTextChange(c) {
+  if (LONG_TEXT_FIELDS.has(c.field)) return true;
+  const a = String(c.a ?? '');
+  const b = String(c.b ?? '');
+  if (a.length > 80 || b.length > 80) return true;
+  if (a.includes('\n') || b.includes('\n')) return true;
+  return false;
+}
+
+function longTextChangePanelHtml(c) {
+  const a = c.a == null ? '' : String(c.a);
+  const b = c.b == null ? '' : String(c.b);
+  const linesA = a.length === 0 ? [] : a.split('\n');
+  const linesB = b.length === 0 ? [] : b.split('\n');
+  const ops = lcsLineDiff(linesA, linesB);
+
+  const body = ops.map(diffOpHtml).join('');
+
+  return `
+    <div class="mb-3 last:mb-0">
+      <div class="text-xs text-amber-300 font-medium mb-1">${escapeHtml(c.field)}</div>
+      <div class="border border-slate-800 rounded bg-slate-950 font-mono text-xs leading-relaxed overflow-x-auto">
+        ${body || '<div class="px-3 py-2 text-slate-600">(no content)</div>'}
+      </div>
+    </div>`;
+}
+
+function diffOpHtml(op) {
+  const cls = op.type === 'add'
+    ? 'bg-emerald-500/10 text-emerald-200 border-l-2 border-emerald-500/60'
+    : op.type === 'remove'
+    ? 'bg-rose-500/10 text-rose-200 border-l-2 border-rose-500/60'
+    : 'text-slate-400 border-l-2 border-transparent';
+  const sigil = op.type === 'add' ? '+' : op.type === 'remove' ? '-' : ' ';
+  return `<div class="${cls} px-2 whitespace-pre-wrap break-all"><span class="inline-block w-4 text-slate-500 select-none">${sigil}</span>${escapeHtml(op.text) || '&nbsp;'}</div>`;
+}
+
+// LCS-based line diff. Returns an array of { type: 'common' | 'add' | 'remove', text }.
+// Suitable for ETW Description / Template content (small enough that O(m*n) is fine).
+function lcsLineDiff(a, b) {
+  const m = a.length;
+  const n = b.length;
+  // dp[i][j] = LCS length of a[0..i] vs b[0..j]
+  const dp = Array(m + 1);
+  for (let i = 0; i <= m; i++) dp[i] = new Int32Array(n + 1);
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1]
+        ? dp[i - 1][j - 1] + 1
+        : Math.max(dp[i - 1][j], dp[i][j - 1]);
+    }
+  }
+  const ops = [];
+  let i = m, j = n;
+  while (i > 0 && j > 0) {
+    if (a[i - 1] === b[j - 1]) {
+      ops.push({ type: 'common', text: a[i - 1] });
+      i--; j--;
+    } else if (dp[i - 1][j] >= dp[i][j - 1]) {
+      ops.push({ type: 'remove', text: a[i - 1] });
+      i--;
+    } else {
+      ops.push({ type: 'add', text: b[j - 1] });
+      j--;
+    }
+  }
+  while (i > 0) { ops.push({ type: 'remove', text: a[i - 1] }); i--; }
+  while (j > 0) { ops.push({ type: 'add', text: b[j - 1] }); j--; }
+  ops.reverse();
+  return ops;
+}
+
+// ---------- Helpers ----------
+
+function showProgress(el, pct, label) {
+  el.innerHTML = `
+    <div class="w-full bg-slate-800 rounded h-1.5 overflow-hidden">
+      <div class="bg-sky-500 h-full transition-all" style="width:${Math.min(100, Math.max(0, pct)).toFixed(1)}%"></div>
+    </div>
+    <div class="text-xs text-slate-500 mt-1">${escapeHtml(label)}</div>`;
+}
+
+function showError(el, message) {
+  el.textContent = message;
+  el.classList.add('text-red-400');
+}
+
+function formatBytes(n) {
+  if (!n) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let i = 0;
+  let v = n;
+  while (v >= 1024 && i < units.length - 1) {
+    v /= 1024;
+    i++;
+  }
+  return `${v.toFixed(v >= 10 ? 0 : 1)} ${units[i]}`;
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// ETW keyword bitmasks are 64-bit unsigned, but EtwInspector serializes them
+// from C# `long` (signed Int64). High-bit keywords come across the wire as
+// negative numbers, so plain .toString(16) renders them as e.g.
+// "-8000000000000000" instead of the correct unsigned hex. Mask to 64 bits
+// via BigInt to recover the on-the-wire ULONGLONG representation.
+function formatKeywordsHex(v) {
+  if (v == null) return '0';
+  let n;
+  try {
+    n = typeof v === 'bigint' ? v : BigInt(v);
+  } catch {
+    return String(v);
+  }
+  if (n < 0n) n += 1n << 64n;
+  return n.toString(16);
+}
+
+// Per-event keyword masks always carry the top 16 Microsoft-reserved bits
+// (bit 63 MICROSOFT_KEYWORD_RESERVED, bits 48-62 WINEVENT_KEYWORD_*: AUDIT_*,
+// CLASSIC_EVENTLOG, CORRELATION_HINT, WDI_*, etc.) - the OS OR's these in
+// at registration time, so otherwise every Threat-Intelligence event would
+// render as 0x8000000000000004 instead of the user-meaningful 0x4. Strip
+// them so the displayed hex matches the provider's keyword table and the
+// KeywordNames chips below.
+function formatEventKeywordsHex(v) {
+  if (v == null) return '0';
+  let n;
+  try {
+    n = typeof v === 'bigint' ? v : BigInt(v);
+  } catch {
+    return String(v);
+  }
+  if (n < 0n) n += 1n << 64n;
+  n &= 0x0000FFFFFFFFFFFFn;
+  return n.toString(16);
+}
+
+function escapeAttr(s) {
+  return escapeHtml(s);
+}
+
+function copyBtn(value, label) {
+  if (!value) return '';
+  return `<button type="button" data-copy="${escapeAttr(value)}" title="Copy ${escapeAttr(label)}" class="ml-1.5 px-1.5 py-0.5 text-[10px] uppercase tracking-wide font-medium border border-slate-700 rounded text-slate-400 hover:text-sky-300 hover:border-sky-500/50 align-middle transition-colors" aria-label="Copy ${escapeAttr(label)}">Copy</button>`;
+}
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-copy]');
+  if (!btn) return;
+  e.stopPropagation();
+  e.preventDefault();
+  const value = btn.dataset.copy;
+  if (!value) return;
+  copyToClipboard(value).then((ok) => {
+    const orig = btn.textContent;
+    if (ok) {
+      btn.textContent = '✓';
+      btn.classList.add('text-emerald-400');
+    } else {
+      btn.textContent = '✗';
+      btn.classList.add('text-rose-400');
+    }
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.classList.remove('text-emerald-400', 'text-rose-400');
+    }, 1200);
+  });
+});
+
+async function copyToClipboard(text) {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {}
+  // Fallback for older / file:// contexts
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
+// Builds the dropdown label. If the human label already contains the
+// OS version (e.g. "Build 10.0.26200.7171"), don't repeat it.
+function decoratedLabel(label, osVersion) {
+  const l = label ?? '';
+  if (osVersion && !l.includes(osVersion)) {
+    return `${l} (${osVersion})`;
+  }
+  return l;
+}
+
+// Renders the file-of-origin block for an expanded provider row. Manifest/MOF
+// providers have a single ResourceFilePath; TraceLogging providers have a
+// Sources[] array (the same provider can be embedded in multiple binaries).
+function providerSourcesHtml(p) {
+  const sources = Array.isArray(p.Sources) ? p.Sources : [];
+  if (sources.length > 0) {
+    const summary = sources.length === 1
+      ? '1 source binary'
+      : `${sources.length} source binaries`;
+    const list = sources.map((s) => `<li class="font-mono">${escapeHtml(s)}</li>`).join('');
+    return `
+      <details class="mb-3">
+        <summary class="text-xs text-slate-400 cursor-pointer hover:text-slate-200">${summary}</summary>
+        <ul class="text-xs text-slate-300 mt-1 space-y-0.5 ml-4 list-disc">${list}</ul>
+      </details>`;
+  }
+  if (p.ResourceFilePath) {
+    return `<div class="text-xs text-slate-500 mb-3"><span class="text-slate-400">ResourceFilePath:</span> <span class="font-mono">${escapeHtml(p.ResourceFilePath)}</span></div>`;
+  }
+  return '';
+}
+
+function snapshotSummaryLine(snap) {
+  const counts = new Map();
+  for (const p of snap.providers ?? []) {
+    const key = p.SchemaSource || 'Unknown';
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  const breakdown = [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => `${v} ${k}`)
+    .join(', ');
+  const parts = [`${(snap.providers ?? []).length} providers`];
+  if (breakdown) parts[0] += ` (${breakdown})`;
+  parts.push(`OS ${snap.osVersion}`);
+  return parts.join(' - ');
+}
+
+```
+
+`js/diff.js`:
+
+```js
+// Snapshot diff logic.
+//
+// Mirrors the C# Compare-EtwSnapshot cmdlet in EtwInspector. Two snapshots
+// in, structured diff out:
+//
+//   {
+//     osVersionA, osVersionB,
+//     providersAdded:   [ProviderSnapshot],     // in B, not A
+//     providersRemoved: [ProviderSnapshot],     // in A, not B
+//     providersChanged: [ProviderDiff]          // in both, differ
+//   }
+//
+// ProviderDiff: { providerGuid, providerName, providerFieldsChanged,
+//                 eventsAdded, eventsRemoved, eventsChanged }
+// EventDiff:    { id, version, changes: [{ field, a, b }], a, b }
+//               (a and b are the full event objects, used by the diff view's
+//               render-time filtering by description/keyword/template)
+
+export function diffSnapshots(snapA, snapB) {
+  const aMap = indexProviders(snapA.providers);
+  const bMap = indexProviders(snapB.providers);
+
+  const out = {
+    osVersionA: snapA.osVersion,
+    osVersionB: snapB.osVersion,
+    providersAdded: [],
+    providersRemoved: [],
+    providersChanged: [],
+  };
+
+  for (const [guid, p] of bMap) if (!aMap.has(guid)) out.providersAdded.push(p);
+  for (const [guid, p] of aMap) if (!bMap.has(guid)) out.providersRemoved.push(p);
+
+  for (const [guid, a] of aMap) {
+    const b = bMap.get(guid);
+    if (!b) continue;
+    const pd = diffProvider(a, b);
+    if (pd) out.providersChanged.push(pd);
+  }
+
+  out.providersAdded.sort(byName);
+  out.providersRemoved.sort(byName);
+  out.providersChanged.sort(byName);
+
+  return out;
+}
+
+function indexProviders(providers) {
+  const m = new Map();
+  for (const p of providers ?? []) {
+    const key = normalizeGuid(p.ProviderGuid);
+    if (!m.has(key)) m.set(key, p);
+  }
+  return m;
+}
+
+function normalizeGuid(guid) {
+  if (!guid) return '';
+  return guid.trim().replace(/^\{|\}$/g, '').toLowerCase();
+}
+
+const byName = (x, y) => {
+  const xn = (x.ProviderName ?? x.providerName ?? '').toLowerCase();
+  const yn = (y.ProviderName ?? y.providerName ?? '').toLowerCase();
+  return xn < yn ? -1 : xn > yn ? 1 : 0;
+};
+
+function diffProvider(a, b) {
+  const fieldsChanged = [];
+  pushIfDifferent(fieldsChanged, 'ProviderName', a.ProviderName, b.ProviderName);
+  pushIfDifferent(fieldsChanged, 'SchemaSource', a.SchemaSource, b.SchemaSource);
+  // Compare on the basename only - the same DLL/EXE/SYS routinely shows up
+  // under different path prefixes (e.g. C:\Windows\System32\foo.dll vs
+  // %SystemRoot%\System32\foo.dll), which would otherwise produce a noisy
+  // diff for every such provider. The full paths still get reported when
+  // the actual file name changes.
+  if (resourceFileBasename(a.ResourceFilePath) !== resourceFileBasename(b.ResourceFilePath)) {
+    pushIfDifferent(fieldsChanged, 'ResourceFilePath', a.ResourceFilePath, b.ResourceFilePath);
+  }
+  // For TraceLogging providers, the Sources[] array may differ across builds
+  // (a provider gets added to or removed from a binary). Compare on the
+  // sorted set of basenames (same rationale as ResourceFilePath above -
+  // C:\Windows\... vs %SystemRoot%\... is the same binary), but surface the
+  // original full paths in the diff entry when an actual binary changes.
+  const aSrc = Array.isArray(a.Sources) ? [...a.Sources].sort().join('\n') : null;
+  const bSrc = Array.isArray(b.Sources) ? [...b.Sources].sort().join('\n') : null;
+  const aSrcKey = Array.isArray(a.Sources)
+    ? [...a.Sources].map(resourceFileBasename).sort().join('\n')
+    : null;
+  const bSrcKey = Array.isArray(b.Sources)
+    ? [...b.Sources].map(resourceFileBasename).sort().join('\n')
+    : null;
+  if (aSrcKey !== bSrcKey) pushIfDifferent(fieldsChanged, 'Sources', aSrc, bSrc);
+
+  // Group events on each side by the appropriate identity key. Manifest
+  // and MOF events identify by Id (with Version distinguishing schema
+  // bumps); TraceLogging events identify by Description (event name),
+  // because their Id and Version fields are typically 0/0 - the binary
+  // embeds a name array, not a numeric ID. Without this split, multiple
+  // TraceLogging events sharing (Id=0, Version=0) would collapse in the
+  // per-Version map and silently drop entries.
+  const schemaSource = (a.SchemaSource ?? b.SchemaSource ?? '').toLowerCase();
+  const isTraceLogging = schemaSource === 'tracelogging';
+  const groupKey = (e) => (isTraceLogging ? (e.Description ?? '') : (e.Id ?? 0));
+
+  const aByKey = new Map();
+  const bByKey = new Map();
+  for (const e of a.Events ?? []) {
+    const k = groupKey(e);
+    if (!aByKey.has(k)) aByKey.set(k, []);
+    aByKey.get(k).push(e);
+  }
+  for (const e of b.Events ?? []) {
+    const k = groupKey(e);
+    if (!bByKey.has(k)) bByKey.set(k, []);
+    bByKey.get(k).push(e);
+  }
+
+  const eventsAdded = [];
+  const eventsRemoved = [];
+  const eventsChanged = [];
+
+  const allKeys = new Set([...aByKey.keys(), ...bByKey.keys()]);
+  for (const k of allKeys) {
+    const aList = aByKey.get(k) ?? [];
+    const bList = bByKey.get(k) ?? [];
+
+    if (aList.length === 0) { eventsAdded.push(...bList); continue; }
+    if (bList.length === 0) { eventsRemoved.push(...aList); continue; }
+
+    if (isTraceLogging) {
+      // TraceLogging within a same-name group: pair in two phases.
+      // Phase 1 - exact-content matches (every diffable field equal,
+      // detected by `diffEvent(ae, be) == null`). These are "the same event,
+      // just possibly reordered in the binary's metadata array". Consuming
+      // them first prevents the iteration-order pairing bug where two same-
+      // Description+same-Template events that differ only in Opcode (or
+      // Task, Level, Keywords, etc.) get cross-paired and spuriously report
+      // scalar-field changes.
+      // Phase 2 - same-Template fallback for events whose template stayed
+      // put but a scalar field genuinely changed; diffEvent surfaces it.
+      // Phase 3 - leftovers (different template) become removed/added.
+      const aRemaining = [...aList];
+      const bRemaining = [...bList];
+      for (let i = bRemaining.length - 1; i >= 0; i--) {
+        const be = bRemaining[i];
+        const aIdx = aRemaining.findIndex((ae) => diffEvent(ae, be) == null);
+        if (aIdx >= 0) {
+          aRemaining.splice(aIdx, 1);
+          bRemaining.splice(i, 1);
+        }
+      }
+      for (let i = bRemaining.length - 1; i >= 0; i--) {
+        const be = bRemaining[i];
+        const aIdx = aRemaining.findIndex(
+          (ae) => (ae.Template ?? '') === (be.Template ?? ''),
+        );
+        if (aIdx >= 0) {
+          const ed = diffEvent(aRemaining[aIdx], be);
+          if (ed) eventsChanged.push(ed);
+          aRemaining.splice(aIdx, 1);
+          bRemaining.splice(i, 1);
+        }
+      }
+      eventsRemoved.push(...aRemaining);
+      eventsAdded.push(...bRemaining);
+      continue;
+    }
+
+    // Manifest/MOF within a same-Id group: exact (Id, Version) match diffs
+    // in place; B versions with no exact A counterpart pair against A's
+    // highest version of that Id as a "new version" diff. A-only versions
+    // for the same Id are implicitly superseded by B's existing versions.
+    const aByVer = new Map();
+    for (const e of aList) aByVer.set(e.Version ?? 0, e);
+    const baselineA = [...aList].sort(
+      (x, y) => (y.Version ?? 0) - (x.Version ?? 0),
+    )[0];
+
+    for (const be of bList) {
+      const ae = aByVer.get(be.Version ?? 0);
+      if (ae) {
+        const ed = diffEvent(ae, be);
+        if (ed) eventsChanged.push(ed);
+      } else {
+        const ed = diffEvent(baselineA, be);
+        if (ed) {
+          ed.versionChanged = true;
+          eventsChanged.push(ed);
+        }
+      }
+    }
+  }
+
+  eventsAdded.sort(eventOrder);
+  eventsRemoved.sort(eventOrder);
+  eventsChanged.sort(eventOrder);
+
+  if (
+    fieldsChanged.length === 0 &&
+    eventsAdded.length === 0 &&
+    eventsRemoved.length === 0 &&
+    eventsChanged.length === 0
+  ) {
+    return null;
+  }
+
+  return {
+    providerGuid: b.ProviderGuid,
+    providerName: b.ProviderName,
+    resourceFilePath: b.ResourceFilePath,
+    schemaSource: b.SchemaSource,
+    sources: Array.isArray(b.Sources) ? b.Sources : undefined,
+    providerFieldsChanged: fieldsChanged,
+    eventsAdded,
+    eventsRemoved,
+    eventsChanged,
+  };
+}
+
+const eventOrder = (x, y) => (x.Id - y.Id) || (x.Version - y.Version);
+
+function diffEvent(a, b) {
+  const changes = [];
+  pushIfDifferent(changes, 'Version', a.Version, b.Version);
+  pushIfDifferent(changes, 'Level', a.Level, b.Level);
+  pushIfDifferent(changes, 'Opcode', a.Opcode, b.Opcode);
+  pushIfDifferent(changes, 'Task', a.Task, b.Task);
+  pushIfDifferent(changes, 'Keywords', a.Keywords, b.Keywords);
+  pushIfDifferent(changes, 'Description', a.Description, b.Description);
+  pushIfDifferent(changes, 'Template', a.Template, b.Template);
+
+  const aKw = new Set(a.KeywordNames ?? []);
+  const bKw = new Set(b.KeywordNames ?? []);
+  if (!setsEqual(aKw, bKw)) {
+    changes.push({
+      field: 'KeywordNames',
+      a: [...aKw].sort().join(','),
+      b: [...bKw].sort().join(','),
+    });
+  }
+
+  if (changes.length === 0) return null;
+  return { id: b.Id, version: b.Version, changes, a, b };
+}
+
+function pushIfDifferent(list, field, a, b) {
+  if (a === b) return;
+  // Treat null/undefined as equal
+  if ((a == null) && (b == null)) return;
+  list.push({ field, a: a ?? null, b: b ?? null });
+}
+
+function setsEqual(a, b) {
+  if (a.size !== b.size) return false;
+  for (const v of a) if (!b.has(v)) return false;
+  return true;
+}
+
+// Reduce a Windows path to its lowercased final segment so prefix variations
+// (drive-letter vs %SystemRoot%, backslash vs forward slash, casing) don't
+// register as a ResourceFilePath change.
+function resourceFileBasename(p) {
+  if (!p) return p;
+  const parts = String(p).split(/[\\/]/);
+  return (parts[parts.length - 1] ?? '').toLowerCase();
+}
+
+```
+
+`js/parse.js`:
+
+```js
+// NDJSON snapshot loader.
+//
+// Each snapshot file starts with a header object on line 1:
+//   {"SchemaVersion":"1.0","OSVersion":"10.0.26200.0"}
+// followed by one provider per line:
+//   {"ProviderGuid":"...","ProviderName":"...","Events":[...], ...}
+//
+// We stream the body, decode UTF-8 progressively, split on '\n', and parse
+// each line. Reports progress so the UI can show a bar. Two entry points:
+//   loadSnapshot(file)            -> fetches snapshots/<file>
+//   loadSnapshotFromFile(handle)  -> reads a File picked by the user
+
+const _snapshotCache = new Map(); // key -> parsed snapshot
+
+// Per-event Keywords are emitted as signed Int64 by EtwInspector. Values like
+// -9223372036854775804 are beyond IEEE 754 safe-integer range, so JSON.parse
+// silently rounds them to the nearest representable double (-2^63 here),
+// destroying the low keyword bits before any code can see them. Convert the
+// raw integer text to an unsigned 64-bit hex string before JSON.parse so
+// precision survives the round-trip; downstream code feeds the string into
+// BigInt() to render. Lookahead ensures we only rewrite the event-level
+// "Keywords":<number>, not the provider-level "Keywords":[...] array.
+function preservePrecision(line) {
+  return line.replace(/"Keywords":(-?\d+)(?=[,}\]])/g, (_m, num) => {
+    let n = BigInt(num);
+    if (n < 0n) n += 1n << 64n;
+    return `"Keywords":"0x${n.toString(16)}"`;
+  });
+}
+
+export async function loadSnapshot(file, onProgress) {
+  if (_snapshotCache.has(file)) {
+    onProgress?.({ done: true, fromCache: true });
+    return _snapshotCache.get(file);
+  }
+
+  const url = `snapshots/${file}`;
+  const response = await fetch(url, { cache: 'force-cache' });
+  if (!response.ok) {
+    throw new Error(`Failed to load ${url}: ${response.status} ${response.statusText}`);
+  }
+
+  // Compressed payload size, before decompression. We use this for the progress
+  // bar (it's the actual number of bytes flowing over the network); the
+  // post-gunzip stream will report many more bytes. For plain .ndjson, the
+  // compressed and decompressed totals match.
+  const total = Number(response.headers.get('content-length')) || 0;
+
+  // GitHub Pages serves .gz files as opaque application/gzip - the browser
+  // does NOT auto-decompress. We pipe through DecompressionStream when the
+  // filename ends in .gz; otherwise the stream passes through unchanged.
+  const stream = file.toLowerCase().endsWith('.gz')
+    ? response.body.pipeThrough(new DecompressionStream('gzip'))
+    : response.body;
+
+  return consumeNdjsonStream({
+    reader: stream.getReader(),
+    total,
+    onProgress,
+    keyForCache: file,
+    file,
+  });
+}
+
+// Parses an NDJSON File handed to us by the user (file picker / drag-drop).
+// Returns the parsed snapshot; cache key is `local:<filename>`.
+export async function loadSnapshotFromFile(fileHandle, onProgress) {
+  const key = `local:${fileHandle.name}`;
+  // Replace any prior copy under the same name so re-uploads pick up edits
+  _snapshotCache.delete(key);
+
+  const stream = fileHandle.name.toLowerCase().endsWith('.gz')
+    ? fileHandle.stream().pipeThrough(new DecompressionStream('gzip'))
+    : fileHandle.stream();
+  return consumeNdjsonStream({
+    reader: stream.getReader(),
+    total: fileHandle.size,
+    onProgress,
+    keyForCache: key,
+    file: key,
+    isLocal: true,
+    sourceName: fileHandle.name,
+  });
+}
+
+async function consumeNdjsonStream({ reader, total, onProgress, keyForCache, file, isLocal, sourceName }) {
+  const decoder = new TextDecoder('utf-8');
+  let header = null;
+  const providers = [];
+  let buffer = '';
+  let bytesRead = 0;
+  let isFirstLine = true;
+  let lineNumber = 0;
+
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      bytesRead += value.byteLength;
+      buffer += decoder.decode(value, { stream: true });
+
+      let nl;
+      while ((nl = buffer.indexOf('\n')) !== -1) {
+        const line = buffer.slice(0, nl).trim();
+        buffer = buffer.slice(nl + 1);
+        if (!line) continue;
+        lineNumber++;
+
+        let obj;
+        try {
+          obj = JSON.parse(preservePrecision(line));
+        } catch (e) {
+          throw new Error(`Could not parse line ${lineNumber} as JSON: ${e.message}`);
+        }
+        if (isFirstLine) {
+          if (!isHeaderShape(obj)) {
+            throw new Error("First line isn't a snapshot header (expected SchemaVersion + OSVersion, no ProviderGuid).");
+          }
+          header = obj;
+          isFirstLine = false;
+        } else {
+          providers.push(obj);
+        }
+      }
+
+      onProgress?.({ bytesRead, total, providers: providers.length, done: false });
+    }
+
+    buffer += decoder.decode();
+    const tail = buffer.trim();
+    if (tail) {
+      lineNumber++;
+      const obj = JSON.parse(preservePrecision(tail));
+      if (isFirstLine) {
+        if (!isHeaderShape(obj)) {
+          throw new Error("Single-line file isn't a snapshot header.");
+        }
+        header = obj;
+      } else {
+        providers.push(obj);
+      }
+    }
+  } finally {
+    reader.releaseLock?.();
+  }
+
+  if (!header) throw new Error('Snapshot is empty.');
+  if (providers.length === 0) throw new Error('Snapshot contains no providers (header only).');
+
+  const snapshot = {
+    file,
+    isLocal: !!isLocal,
+    sourceName: sourceName ?? file,
+    schemaVersion: header.SchemaVersion ?? '1.0',
+    osVersion: header.OSVersion ?? 'unknown',
+    providers,
+  };
+  _snapshotCache.set(keyForCache, snapshot);
+  onProgress?.({ done: true, fromCache: false });
+  return snapshot;
+}
+
+function isHeaderShape(obj) {
+  if (!obj || typeof obj !== 'object') return false;
+  if (obj.ProviderGuid) return false;
+  return 'SchemaVersion' in obj || 'OSVersion' in obj;
+}
+
+export async function loadManifest() {
+  const r = await fetch('snapshots/manifest.json', { cache: 'no-cache' });
+  if (!r.ok) throw new Error(`Failed to load manifest: ${r.status}`);
+  return r.json();
+}
+
+export function getCachedSnapshot(file) {
+  return _snapshotCache.get(file);
+}
+
+```
+
+`scripts/update-manifest.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+Compresses *.ndjson to *.ndjson.gz and regenerates snapshots/manifest.json.
+
+.DESCRIPTION
+- Any plain *.ndjson found in snapshots/ is gzipped in place. The original
+  is removed; only the .ndjson.gz remains. (TraceLogging-aware NDJSONs
+  routinely exceed GitHub's 100 MB file limit; gzip cuts them ~4-6x to
+  comfortably under it.)
+- Then scans snapshots/*.ndjson.gz, reads each file's header line to extract
+  OSVersion (decompressing as it goes), sorts entries by OSVersion, and
+  writes the manifest.
+
+Existing labels are preserved so customizations like "(Insider)" survive
+re-runs. Files no longer present are dropped from the manifest. New files
+get a default label of "Build <OSVersion>".
+
+.EXAMPLE
+PS> .\scripts\update-manifest.ps1
+
+Run from the repo root after dropping a new .ndjson into snapshots/.
+#>
+[CmdletBinding()]
+param(
+    [string]$Root,
+    [string]$ManifestPath
+)
+
+if (-not $Root) { $Root = Join-Path $PSScriptRoot '../snapshots' }
+if (-not $ManifestPath) { $ManifestPath = Join-Path $Root 'manifest.json' }
+
+if (-not (Test-Path $Root)) {
+    throw "Snapshots directory not found: $Root"
+}
+$Root = (Resolve-Path $Root).Path
+
+function Compress-NdjsonInPlace {
+    param([string]$Path)
+    $gz = $Path + '.gz'
+    $inStream = [System.IO.File]::OpenRead($Path)
+    try {
+        $outStream = [System.IO.File]::Create($gz)
+        try {
+            $gzStream = New-Object System.IO.Compression.GZipStream(
+                $outStream, [System.IO.Compression.CompressionLevel]::Optimal)
+            try {
+                $inStream.CopyTo($gzStream)
+            } finally {
+                $gzStream.Dispose()
+            }
+        } finally {
+            $outStream.Dispose()
+        }
+    } finally {
+        $inStream.Dispose()
+    }
+    Remove-Item -LiteralPath $Path -Force
+}
+
+function Read-FirstLineFromGzip {
+    param([string]$Path)
+    $fs = [System.IO.File]::OpenRead($Path)
+    try {
+        $gz = New-Object System.IO.Compression.GZipStream(
+            $fs, [System.IO.Compression.CompressionMode]::Decompress)
+        try {
+            $reader = New-Object System.IO.StreamReader($gz)
+            try {
+                return $reader.ReadLine()
+            } finally {
+                $reader.Dispose()
+            }
+        } finally {
+            $gz.Dispose()
+        }
+    } finally {
+        $fs.Dispose()
+    }
+}
+
+function Get-VersionSortKey {
+    param([string]$Version)
+    # Pad each numeric segment so 10.0.26200.7171 sorts before 10.0.28020.1921
+    $sb = New-Object System.Text.StringBuilder
+    foreach ($p in ($Version -split '\.')) {
+        $n = 0
+        if ([int]::TryParse($p, [ref]$n)) {
+            [void]$sb.Append($n.ToString('D10')).Append('.')
+        } else {
+            [void]$sb.Append($p).Append('.')
+        }
+    }
+    return $sb.ToString()
+}
+
+# Compress any plain .ndjson files first so we only ever ship .ndjson.gz.
+$plain = Get-ChildItem -Path $Root -Filter '*.ndjson' -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -notlike '*.ndjson.gz' }
+foreach ($p in $plain) {
+    Write-Host ("Compressing {0}..." -f $p.Name)
+    try {
+        Compress-NdjsonInPlace -Path $p.FullName
+    } catch {
+        Write-Warning ("Failed to compress {0}: {1}" -f $p.Name, $_.Exception.Message)
+    }
+}
+
+# Preserve any existing custom labels (keyed by current filename, including .gz)
+$existingLabels = @{}
+if (Test-Path $ManifestPath) {
+    try {
+        $existing = Get-Content $ManifestPath -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+        foreach ($s in @($existing.snapshots)) {
+            if ($s.file) { $existingLabels[$s.file] = $s.label }
+        }
+    } catch {
+        Write-Warning "Could not parse existing manifest at ${ManifestPath}: $($_.Exception.Message). Starting fresh."
+    }
+}
+
+$entries = @()
+$files = Get-ChildItem -Path $Root -Filter '*.ndjson.gz' -File -ErrorAction SilentlyContinue
+foreach ($f in $files) {
+    try {
+        $firstLine = Read-FirstLineFromGzip -Path $f.FullName
+    } catch {
+        Write-Warning ("Skipping {0}: cannot read header ({1})" -f $f.Name, $_.Exception.Message)
+        continue
+    }
+    if ([string]::IsNullOrWhiteSpace($firstLine)) {
+        Write-Warning "Skipping empty file: $($f.Name)"
+        continue
+    }
+    try {
+        $header = $firstLine | ConvertFrom-Json -ErrorAction Stop
+    } catch {
+        Write-Warning "Skipping $($f.Name): first line is not valid JSON"
+        continue
+    }
+    if (-not $header.OSVersion) {
+        Write-Warning "Skipping $($f.Name): header has no OSVersion"
+        continue
+    }
+    $label = $existingLabels[$f.Name]
+    if (-not $label) {
+        $label = "Build $($header.OSVersion)"
+        # Filename-driven annotations. Add more here as needed.
+        $base = $f.Name -replace '\.ndjson\.gz$', ''
+        if ($base -match '(?i)_Server')  { $label += ' (Server)' }
+        if ($base -match '(?i)_Insider') { $label += ' (Insider)' }
+    }
+
+    $entries += [pscustomobject]@{
+        file = $f.Name
+        label = $label
+        osVersion = [string]$header.OSVersion
+        _sortKey = Get-VersionSortKey ([string]$header.OSVersion)
+    }
+}
+
+if ($entries.Count -eq 0) {
+    Write-Warning "No valid snapshots found in $Root. Manifest not written."
+    exit 1
+}
+
+$sorted = @($entries | Sort-Object _sortKey)
+
+# Write JSON by hand for clean 2-space indentation. PS 5.1's ConvertTo-Json
+# produces an awkward deeply-aligned format that's valid but ugly to read.
+$lines = New-Object System.Collections.Generic.List[string]
+$lines.Add('{')
+$lines.Add('  "snapshots": [')
+for ($i = 0; $i -lt $sorted.Count; $i++) {
+    $e = $sorted[$i]
+    $sep = if ($i -lt $sorted.Count - 1) { ',' } else { '' }
+    $lines.Add('    {')
+    $lines.Add('      "file": ' + (ConvertTo-Json $e.file -Compress) + ',')
+    $lines.Add('      "label": ' + (ConvertTo-Json $e.label -Compress) + ',')
+    $lines.Add('      "osVersion": ' + (ConvertTo-Json $e.osVersion -Compress))
+    $lines.Add('    }' + $sep)
+}
+$lines.Add('  ]')
+$lines.Add('}')
+
+$json = ($lines -join [Environment]::NewLine) + [Environment]::NewLine
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText($ManifestPath, $json, $utf8NoBom)
+
+Write-Host ("Wrote {0} entries to {1}" -f $sorted.Count, $ManifestPath)
+foreach ($e in $sorted) {
+    Write-Host ("  {0,-36} {1,-22} {2}" -f $e.file, $e.osVersion, $e.label)
+}
+
+```
+
+`snapshots/manifest.json`:
+
+```json
+{
+  "snapshots": [
+    {
+      "file": "10_0_19045_5371.ndjson.gz",
+      "label": "Build 10.0.19045.5371",
+      "osVersion": "10.0.19045.5371"
+    },
+    {
+      "file": "10_0_20348_4297_Server.ndjson.gz",
+      "label": "Build 10.0.20348.4297 (Server)",
+      "osVersion": "10.0.20348.4297"
+    },
+    {
+      "file": "10_0_26100_4946.ndjson.gz",
+      "label": "Build 10.0.26100.4946",
+      "osVersion": "10.0.26100.4946"
+    },
+    {
+      "file": "10_0_26200_7171.ndjson.gz",
+      "label": "Build 10.0.26200.7171",
+      "osVersion": "10.0.26200.7171"
+    },
+    {
+      "file": "10_0_26200_7462.ndjson.gz",
+      "label": "Build 10.0.26200.7462",
+      "osVersion": "10.0.26200.7462"
+    },
+    {
+      "file": "10_0_28020_1921_Insider.ndjson.gz",
+      "label": "Build 10.0.28020.1921 (Insider)",
+      "osVersion": "10.0.28020.1921"
+    },
+    {
+      "file": "10_0_28020_2075_Insider.ndjson.gz",
+      "label": "Build 10.0.28020.2075 (Insider)",
+      "osVersion": "10.0.28020.2075"
+    }
+  ]
+}
+
+```
