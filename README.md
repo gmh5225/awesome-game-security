@@ -809,6 +809,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/cyberark/PipeViewer [Shows detailed information about named pipes in Windows]
 - https://github.com/cursey/regenny [Reconstruct structures and generate header files]
 - https://github.com/zodiacon/EtwExplorer [View ETW Provider manifest]
+- https://github.com/jonny-jhnson/EtwWatcher [Browse and diff ETW provider snapshots across Windows builds; backed by ETWInspector]
 - https://github.com/gmh5225/ceserver-ios [Porting ceserver to iOS.Dynamic analysis]
 - https://github.com/VoidSec/ioctlpus [Be used to make DeviceIoControl requests with arbitrary inputs]
 - https://github.com/horsicq/Nauz-File-Detector [Linker/Compiler/Tool detector]
