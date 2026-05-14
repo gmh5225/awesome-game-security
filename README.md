@@ -207,6 +207,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/OpenXRay/xray-16 [Improved version of the X-Ray Engine]
 - https://github.com/love2d/love [2D game framework for Lua]
 - https://github.com/PixelGuys/Cubyz [3D voxel sandbox game written by Zig language]
+- https://github.com/RSDKModding/RSDKv5-Decompilation [Retro Engine v5 / v5Ultimate decompilation]
 
 
 > Game Engine Plugins:Unreal
