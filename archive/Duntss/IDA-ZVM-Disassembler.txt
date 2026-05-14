@@ -1,0 +1,669 @@
+Project Path: arc_Duntss_IDA-ZVM-Disassembler_fgxt_pvr
+
+Source Tree:
+
+```txt
+arc_Duntss_IDA-ZVM-Disassembler_fgxt_pvr
+├── README.md
+├── test_shellcode.zvm
+└── zvm_ida
+    ├── zvm_ida_loader.py
+    └── zvm_ida_proc.py
+
+```
+
+`README.md`:
+
+```md
+# IDA-ZVM-Disassembler
+
+IDA Pro processor module and loader for the Zeus VM custom bytecode instruction set, ported from the [OALabs Binary Ninja plugin](https://github.com/OALabs/ZVM).
+
+## Installation
+
+Copy the two files into your IDA Pro installation:
+
+- `zvm_ida_loader.py` → `<IDA_DIR>/loaders/`
+- `zvm_ida_proc.py` → `<IDA_DIR>/procs/`
+
+Then open any `.zvm` bytecode file — IDA will auto-detect the format and use the Zeus VM processor.
+
+You can try the disassembly on this sample [f792997cb36a477fa55102ad6b680c97e3517b2e63c83c802bf8d57ae9ed525e](https://www.unpac.me/results/bb557f46-a12a-4737-a638-787f982963fd?hash=f792997cb36a477fa55102ad6b680c97e3517b2e63c83c802bf8d57ae9ed525e#/). Or on the dumped shellcode in the repository !
+
+## Features
+
+- 69 instructions fully decoded (arithmetic, bitwise, memory, control flow, RC4, shuffle)
+- XOR key chain decryption handled transparently during analysis
+- Cross-references for loop branch targets
+- Auto-comments describing instruction semantics
+- Register display with size suffixes (`.b`, `.w`)
+
+## References
+
+### OALabs - Zeus VM
+
+- Original Binary Ninja plugin: https://github.com/OALabs/ZVM
+- OALabs Patreon (subscription required): https://www.patreon.com/cw/oalabs
+- Intro to VMs: https://research.openanalysis.net/vmzues/zeus/vm/obfuscation/tutorial/2024/01/07/into-to-vms.html
+- Zeus VM Disassembler: https://research.openanalysis.net/vmzues/zeus/vm/obfuscation/tutorial/2024/01/21/vmzeus-disassembler.html
+
+### IDA Pro Plugin Development
+
+- [IDAPython: Generating disassembly lines and instruction decoding](https://www.youtube.com/watch?v=qRS6310gDoQ)
+
+```
+
+`zvm_ida/zvm_ida_loader.py`:
+
+```py
+import idaapi as ida
+
+LOADER_NAME = 'Zeus VM bytecode'
+
+NUM_OPCODES = 69
+
+perm_RX = ida.SEGPERM_READ | ida.SEGPERM_EXEC
+perm_RW = ida.SEGPERM_READ | ida.SEGPERM_WRITE
+
+
+def accept_file(f, n):
+    data = f.read(1)
+    if len(data) < 1:
+        return 0
+    opcode = data[0] & 0x7F
+    if opcode < NUM_OPCODES:
+        return {'format': LOADER_NAME, 'processor': 'zvmproc', 'options': 1 | ida.ACCEPT_FIRST}
+    return 0
+
+
+def load_file(li: ida.loader_input_t, neflags, fmt):
+
+    ida.set_processor_type("zvmproc",
+                           ida.SETPROC_LOADER_NON_FATAL | ida.SETPROC_LOADER)
+    ida.set_compiler_id(ida.COMP_GNU)
+
+    image_base = 0
+    ida.set_imagebase(image_base)
+
+    def create_segment(name, sclass, start, end, perms):
+        s = ida.segment_t()
+        s.start_ea = start
+        s.end_ea = end
+        s.bitness = 1  # 32-bit
+        s.align = ida.saRelByte
+        s.perm = perms
+        s.set_loader_segm(True)
+        ida.add_segm_ex(s, name, sclass, 0)
+
+    li.file2base(0, 0, li.size(), True)
+    create_segment(".text", "CODE", 0, li.size(), perm_RX)
+
+    ida.add_entry(0, image_base, "start", 1)
+
+    return 1
+
+```
+
+`zvm_ida/zvm_ida_proc.py`:
+
+```py
+import struct
+import logging
+
+import ida_idp
+import idaapi as ida
+from idaapi import (
+    o_void, o_reg, o_imm, o_phrase, o_near,
+    CF_USE1, CF_USE2, CF_USE3, CF_CHG1, CF_JUMP, CF_STOP,
+)
+
+
+def PROCESSOR_ENTRY():
+    return ZVMProcessor()
+
+
+# -------------------------------------------------------------------
+# Register indices
+# -------------------------------------------------------------------
+R_PC   = 16
+R_DP   = 17
+R_LOOP = 18
+R_SP   = 19
+R_CS   = 20
+R_DS   = 21
+
+REG_NAMES = [
+    'reg0',  'reg1',  'reg2',  'reg3',
+    'reg4',  'reg5',  'reg6',  'reg7',
+    'reg8',  'reg9',  'reg10', 'reg11',
+    'reg12', 'reg13', 'reg14', 'reg15',
+    'pc', 'dp', 'loop_counter', 'sp',
+    'CS', 'DS',
+]
+
+# -------------------------------------------------------------------
+# Operand encoding types (how the operand is stored in bytecode)
+# -------------------------------------------------------------------
+E_NONE = 0   # virtual operand, 0 bytes
+E_RL   = 1   # register low nibble, 1 byte consumed
+E_RH   = 2   # register high nibble, 0 bytes (shares byte with E_RL)
+E_IB   = 3   # unsigned byte immediate, 1 byte
+E_IW   = 4   # unsigned word immediate (LE), 2 bytes
+E_ID   = 5   # unsigned dword immediate (LE), 4 bytes
+E_IWS  = 6   # signed word immediate (LE), 2 bytes
+
+_ENC_SZ = {E_NONE: 0, E_RL: 1, E_RH: 0, E_IB: 1, E_IW: 2, E_ID: 4, E_IWS: 2}
+
+# Display categories
+D_REG  = 0   # o_reg
+D_IMM  = 1   # o_imm
+D_MEM  = 2   # o_phrase  [dp]
+D_NEAR = 3   # o_near    branch target
+
+
+def _sz_dt(sz):
+    return {1: ida.dt_byte, 2: ida.dt_word, 4: ida.dt_dword}.get(sz, ida.dt_byte)
+
+
+# -------------------------------------------------------------------
+# Instruction table  (index == opcode == itype)
+# Each entry:
+#   (mnemonic, base_xor_key, base_size, data_increment,
+#    ida_features, [(display, encoding, data_size, fixed_reg), ...])
+# -------------------------------------------------------------------
+INSN_TABLE = [
+    # 0-2: nop variants
+    ('nop',     0xC7, 1, 0, 0, []),
+    ('nop',     0x45, 2, 0, 0, []),
+    ('nop',     0x25, 4, 0, 0, []),
+    # 3-5: xor [dp], imm
+    ('xor',     0x51, 1, 1, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,1,None),(D_IMM,E_IB,1,None)]),
+    ('xor',     0x32, 1, 2, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,2,None),(D_IMM,E_IW,2,None)]),
+    ('xor',     0x7C, 1, 4, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,4,None),(D_IMM,E_ID,4,None)]),
+    # 6-8: add [dp], imm
+    ('add',     0xB4, 1, 1, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,1,None),(D_IMM,E_IB,1,None)]),
+    ('add',     0x16, 1, 2, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,2,None),(D_IMM,E_IW,2,None)]),
+    ('add',     0x02, 1, 4, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,4,None),(D_IMM,E_ID,4,None)]),
+    # 9-11: sub [dp], imm
+    ('sub',     0xC9, 1, 1, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,1,None),(D_IMM,E_IB,1,None)]),
+    ('sub',     0xF7, 1, 2, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,2,None),(D_IMM,E_IW,2,None)]),
+    ('sub',     0x71, 1, 4, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,4,None),(D_IMM,E_ID,4,None)]),
+    # 12-14: rol [dp], imm8
+    ('rol',     0x0C, 1, 1, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,1,None),(D_IMM,E_IB,1,None)]),
+    ('rol',     0xFA, 1, 2, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,2,None),(D_IMM,E_IB,1,None)]),
+    ('rol',     0x57, 1, 4, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,4,None),(D_IMM,E_IB,1,None)]),
+    # 15-17: ror [dp], imm8
+    ('ror',     0x98, 1, 1, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,1,None),(D_IMM,E_IB,1,None)]),
+    ('ror',     0xD3, 1, 2, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,2,None),(D_IMM,E_IB,1,None)]),
+    ('ror',     0xFB, 1, 4, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,4,None),(D_IMM,E_IB,1,None)]),
+    # 18-20: not [dp]
+    ('not',     0xFA, 1, 1, CF_CHG1, [(D_MEM,E_NONE,1,None)]),
+    ('not',     0x28, 1, 2, CF_CHG1, [(D_MEM,E_NONE,2,None)]),
+    ('not',     0x04, 1, 4, CF_CHG1, [(D_MEM,E_NONE,4,None)]),
+    # 21: shuffle dword [dp], imm8
+    ('shuffle', 0x82, 1, 4, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,4,None),(D_IMM,E_IB,1,None)]),
+    # 22: rc4  (handled as special case)
+    ('rc4',     0xC9, 1, 0, CF_USE1|CF_USE2|CF_USE3, []),
+    # 23-25: mov loop_counter, imm
+    ('mov',     0x4E, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_NONE,4,R_LOOP),(D_IMM,E_IB,1,None)]),
+    ('mov',     0x9D, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_NONE,4,R_LOOP),(D_IMM,E_IW,2,None)]),
+    ('mov',     0x61, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_NONE,4,R_LOOP),(D_IMM,E_ID,4,None)]),
+    # 26: add dp, signed_imm16
+    ('add',     0x8F, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_NONE,4,R_DP),(D_IMM,E_IWS,2,None)]),
+    # 27-28: loop (backward branch)
+    ('loop',    0xF8, 1, 0, CF_JUMP|CF_USE1, [(D_NEAR,E_IB,1,None)]),
+    ('loop',    0x2C, 1, 0, CF_JUMP|CF_USE1, [(D_NEAR,E_IW,2,None)]),
+    # 29-31: mov reg, imm
+    ('mov',     0xB3, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_IMM,E_IB,1,None)]),
+    ('mov',     0x9D, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_IMM,E_IW,2,None)]),
+    ('mov',     0xAF, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_IMM,E_ID,4,None)]),
+    # 32-34: mov reg, reg
+    ('mov',     0xD5, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_REG,E_RH,1,None)]),
+    ('mov',     0x9D, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_REG,E_RH,2,None)]),
+    ('mov',     0x4C, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_REG,E_RH,4,None)]),
+    # 35-37: add reg, reg
+    ('add',     0x1F, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_REG,E_RH,1,None)]),
+    ('add',     0xC9, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_REG,E_RH,2,None)]),
+    ('add',     0xE0, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_REG,E_RH,4,None)]),
+    # 38-40: sub reg, reg
+    ('sub',     0x75, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_REG,E_RH,1,None)]),
+    ('sub',     0x8B, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_REG,E_RH,2,None)]),
+    ('sub',     0xDD, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_REG,E_RH,4,None)]),
+    # 41-43: xor reg, reg
+    ('xor',     0x77, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_REG,E_RH,1,None)]),
+    ('xor',     0x79, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_REG,E_RH,2,None)]),
+    ('xor',     0x6A, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_REG,E_RH,4,None)]),
+    # 44-46: add reg, imm
+    ('add',     0x49, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_IMM,E_IB,1,None)]),
+    ('add',     0xF3, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_IMM,E_IW,2,None)]),
+    ('add',     0x1C, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_IMM,E_ID,4,None)]),
+    # 47-49: sub reg, imm
+    ('sub',     0x54, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_IMM,E_IB,1,None)]),
+    ('sub',     0x53, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_IMM,E_IW,2,None)]),
+    ('sub',     0x23, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_IMM,E_ID,4,None)]),
+    # 50-52: xor reg, imm
+    ('xor',     0x6E, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_IMM,E_IB,1,None)]),
+    ('xor',     0x9A, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_IMM,E_IW,2,None)]),
+    ('xor',     0xD1, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_IMM,E_ID,4,None)]),
+    # 53-55: add [dp], reg
+    ('add',     0x46, 1, 1, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,1,None),(D_REG,E_RL,1,None)]),
+    ('add',     0x32, 1, 2, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,2,None),(D_REG,E_RL,2,None)]),
+    ('add',     0x3D, 1, 4, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,4,None),(D_REG,E_RL,4,None)]),
+    # 56-58: sub [dp], reg
+    ('sub',     0x04, 1, 1, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,1,None),(D_REG,E_RL,1,None)]),
+    ('sub',     0xDB, 1, 2, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,2,None),(D_REG,E_RL,2,None)]),
+    ('sub',     0xC6, 1, 4, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,4,None),(D_REG,E_RL,4,None)]),
+    # 59-61: xor [dp], reg
+    ('xor',     0x7D, 1, 1, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,1,None),(D_REG,E_RL,1,None)]),
+    ('xor',     0x71, 1, 2, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,2,None),(D_REG,E_RL,2,None)]),
+    ('xor',     0x7A, 1, 4, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,4,None),(D_REG,E_RL,4,None)]),
+    # 62-64: mov reg, [dp]
+    ('mov',     0xBC, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_MEM,E_NONE,1,None)]),
+    ('mov',     0x3D, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_MEM,E_NONE,2,None)]),
+    ('mov',     0x9F, 1, 0, CF_CHG1|CF_USE2, [(D_REG,E_RL,4,None),(D_MEM,E_NONE,4,None)]),
+    # 65-67: mov [dp], reg  (push to data)
+    ('mov',     0x22, 1, 1, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,1,None),(D_REG,E_RL,1,None)]),
+    ('mov',     0xF8, 1, 2, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,2,None),(D_REG,E_RL,2,None)]),
+    ('mov',     0x56, 1, 4, CF_CHG1|CF_USE2, [(D_MEM,E_NONE,4,None),(D_REG,E_RL,4,None)]),
+    # 68: exit
+    ('exit',    0x00, 1, 0, CF_STOP, []),
+]
+
+NUM_INSN = len(INSN_TABLE)  # 69
+MAX_INSN_LEN = 260
+
+# -------------------------------------------------------------------
+# Key-byte-offset helper  (which byte XORs with the base key)
+# -------------------------------------------------------------------
+def _key_byte_offset(ops, base_size):
+    n = len(ops)
+    if n == 0:
+        return 1 if base_size > 1 else 0
+    sizes = [_ENC_SZ.get(op[1], 0) for op in ops]
+    if n == 1:
+        return 1 if sizes[0] > 0 else 0
+    if n == 2:
+        return 2 if (sizes[0] > 0 and sizes[1] > 0) else 1
+    if n == 4:
+        return 3
+    return 0
+
+# Module-level XOR key state  {address: key}
+_xor_keys = {0: 0}
+
+
+# -------------------------------------------------------------------
+# Processor class
+# -------------------------------------------------------------------
+class ZVMProcessor(ida.processor_t):
+
+    id = ida.CUSTOM_INSN_ITYPE + 0x5A56
+
+    flag = ida.PR_ADJSEGS | ida.PRN_HEX | ida.PR_TYPEINFO
+
+    cnbits = 8
+    dnbits = 8
+
+    psnames = ['zvmproc']
+    plnames = ['Zeus VM Processor']
+
+    segreg_size = 0
+
+    instruc = [
+        {'name': entry[0], 'feature': entry[4]}
+        for entry in INSN_TABLE
+    ]
+    instruc_start = 0
+    instruc_end = NUM_INSN
+
+    reg_names = REG_NAMES
+
+    reg_first_sreg = R_CS
+    reg_last_sreg  = R_DS
+    reg_code_sreg  = R_CS
+    reg_data_sreg  = R_DS
+
+    icode_return = 68
+
+    codestart = []
+    retcodes  = []
+
+    assembler = {
+        'flag':  ida_idp.ASH_HEXF3 | ida_idp.AS_UNEQU
+               | ida_idp.AS_COLON  | ida_idp.ASB_BINF4
+               | ida_idp.AS_N2CHR,
+        'uflag': 0,
+        'name': "Zeus VM assembler",
+        'header': [""],
+        'origin': "org",
+        'end':    "end",
+        'cmnt':   ";",
+        'ascsep': "\"",
+        'accsep': "'",
+        'esccodes': "\"'",
+        'a_ascii':  "db",
+        'a_byte':   "db",
+        'a_word':   "dw",
+        'a_dword':  "dd",
+        'a_qword':  "dq",
+        'a_float':  "dd",
+        'a_double': "dq",
+        'a_tbyte':  "dt",
+        'a_dups':   "#d dup(#v)",
+        'a_bss':    "%s dup ?",
+        'a_equ':    ".equ",
+        'a_seg':    "seg",
+        'a_curip':  "$",
+        'a_public': "public",
+        'a_weak':   "weak",
+        'a_extrn':  "extrn",
+        'a_comdef': "",
+        'a_align':  "align",
+        'lbrace':   "(",
+        'rbrace':   ")",
+        'a_mod':  "%",
+        'a_band': "&",
+        'a_bor':  "|",
+        'a_xor':  "^",
+        'a_bnot': "~",
+        'a_shl':  "<<",
+        'a_shr':  ">>",
+        'a_sizeof_fmt':  "size %s",
+        'flag2': 0,
+        'cmnt2': "",
+        'low8':  "", 'high8':  "",
+        'low16': "", 'high16': "",
+        'a_include_fmt': "include %s",
+        'a_vstruc_fmt':  "",
+        'a_rva': "rva",
+    }
+
+    def __init__(self):
+        super().__init__()
+        global _xor_keys
+        _xor_keys = {0: 0}
+
+    def ev_newprc(self, nproc, keep_cfg):
+        global _xor_keys
+        ida.inf_set_be(False)
+        _xor_keys = {0: 0}
+        return 0
+
+    # -----------------------------------------------------------------
+    # Instruction decoding
+    # -----------------------------------------------------------------
+    def ev_ana_insn(self, insn):
+        ea = insn.ea
+
+        if ea not in _xor_keys:
+            return 0
+
+        raw = ida.get_bytes(ea, MAX_INSN_LEN)
+        if raw is None or len(raw) < 1:
+            return 0
+
+        key = _xor_keys[ea]
+        opcode = (raw[0] ^ key) & 0x7F
+
+        if opcode >= NUM_INSN:
+            return 0
+
+        insn.itype = opcode
+
+        # Build decrypted view (only byte 0 is encrypted)
+        dec = bytes([opcode]) + raw[1:]
+
+        mnem, base_key, base_size, data_inc, features, ops = INSN_TABLE[opcode]
+
+        # ---- RC4 special case ----
+        if opcode == 22:
+            return self._decode_rc4(insn, dec, base_key, ea)
+
+        # ---- Generic decode ----
+        pos = base_size
+        reg_byte = None
+
+        for i, (disp, enc, dsz, freg) in enumerate(ops):
+            op = insn[i]
+
+            if enc == E_NONE:
+                if disp == D_REG:
+                    op.type  = o_reg
+                    op.reg   = freg
+                    op.dtype = _sz_dt(dsz)
+                    op.specflag1 = dsz
+                elif disp == D_MEM:
+                    op.type   = o_phrase
+                    op.phrase = R_DP
+                    op.dtype  = _sz_dt(dsz)
+                    op.specflag1 = dsz
+
+            elif enc == E_RL:
+                reg_byte = dec[pos]
+                op.type  = o_reg
+                op.reg   = reg_byte & 0x0F
+                op.dtype = _sz_dt(dsz)
+                op.specflag1 = dsz
+                pos += 1
+
+            elif enc == E_RH:
+                idx = (reg_byte >> 4) & 0x0F if reg_byte is not None else 0
+                op.type  = o_reg
+                op.reg   = idx
+                op.dtype = _sz_dt(dsz)
+                op.specflag1 = dsz
+
+            elif enc == E_IB:
+                val = dec[pos]
+                if disp == D_NEAR:
+                    op.type  = o_near
+                    op.addr  = val          # displacement, fixed up below
+                    op.dtype = ida.dt_dword
+                else:
+                    op.type  = o_imm
+                    op.value = val
+                    op.dtype = ida.dt_byte
+                pos += 1
+
+            elif enc == E_IW:
+                val = struct.unpack_from('<H', dec, pos)[0]
+                if disp == D_NEAR:
+                    op.type  = o_near
+                    op.addr  = val
+                    op.dtype = ida.dt_dword
+                else:
+                    op.type  = o_imm
+                    op.value = val
+                    op.dtype = ida.dt_word
+                pos += 2
+
+            elif enc == E_ID:
+                val = struct.unpack_from('<I', dec, pos)[0]
+                op.type  = o_imm
+                op.value = val
+                op.dtype = ida.dt_dword
+                pos += 4
+
+            elif enc == E_IWS:
+                val = struct.unpack_from('<h', dec, pos)[0]
+                op.type      = o_imm
+                op.value     = val & 0xFFFF
+                op.dtype     = ida.dt_word
+                op.specflag2 = 1           # signed flag
+                pos += 2
+
+        insn.size = pos
+
+        # Fix up branch targets  (loop: target = ea + size - displacement)
+        for i, (disp, enc, dsz, freg) in enumerate(ops):
+            if disp == D_NEAR:
+                insn[i].addr = ea + insn.size - insn[i].addr
+
+        # Compute and store XOR key for the next instruction
+        kbo = _key_byte_offset(ops, base_size)
+        _xor_keys[ea + insn.size] = base_key ^ dec[kbo]
+
+        return insn.size
+
+    # -----------------------------------------------------------------
+    def _decode_rc4(self, insn, dec, base_key, ea):
+        if len(dec) < 3:
+            return 0
+        key_len  = dec[1]
+        data_len = dec[2]
+        if len(dec) < 3 + key_len:
+            return 0
+
+        insn.size = 3 + key_len
+
+        insn[0].type  = o_imm
+        insn[0].value = key_len
+        insn[0].dtype = ida.dt_byte
+
+        insn[1].type  = o_imm
+        insn[1].value = data_len
+        insn[1].dtype = ida.dt_byte
+
+        # key byte offset for rc4 is always 3 (first byte of key buffer)
+        _xor_keys[ea + insn.size] = base_key ^ dec[3]
+
+        return insn.size
+
+    # -----------------------------------------------------------------
+    # Instruction output
+    # -----------------------------------------------------------------
+    def ev_out_insn(self, ctx):
+        try:
+            ctx.out_mnemonic()
+
+            for i in range(6):
+                op = ctx.insn[i]
+                if op.type == o_void:
+                    break
+                if i > 0:
+                    ctx.out_symbol(',')
+                    ctx.out_char(' ')
+                ctx.out_one_operand(i)
+
+            ctx.set_gen_cmt()
+            ctx.flush_outbuf()
+        except Exception as e:
+            logging.exception("ev_out_insn error at 0x%X", ctx.insn_ea)
+            return False
+        return True
+
+    # -----------------------------------------------------------------
+    def ev_out_operand(self, ctx, op):
+        try:
+            if op.type == o_reg:
+                ctx.out_register(self.reg_names[op.reg])
+                dsz = op.specflag1 if op.specflag1 else 4
+                if dsz == 1:
+                    ctx.out_line(".b")
+                elif dsz == 2:
+                    ctx.out_line(".w")
+
+            elif op.type == o_imm:
+                if op.specflag2:
+                    ctx.out_value(op, ida.OOFW_IMM | ida.OOF_SIGNED | ida.OOFS_NEEDSIGN)
+                else:
+                    ctx.out_value(op, ida.OOFW_IMM)
+
+            elif op.type == o_phrase:
+                dsz = op.specflag1 if op.specflag1 else 4
+                if dsz == 1:
+                    ctx.out_line("byte ")
+                elif dsz == 2:
+                    ctx.out_line("word ")
+                elif dsz == 4:
+                    ctx.out_line("dword ")
+                ctx.out_symbol('[')
+                ctx.out_register(self.reg_names[op.phrase])
+                ctx.out_symbol(']')
+
+            elif op.type == o_near:
+                ok = ctx.out_name_expr(op, op.addr, ida.BADADDR)
+                if not ok:
+                    ctx.out_tagon(ida.COLOR_ERROR)
+                    ctx.out_long(op.addr, 16)
+                    ctx.out_tagoff(ida.COLOR_ERROR)
+
+            else:
+                return False
+
+        except Exception as e:
+            logging.exception("ev_out_operand error at 0x%X", ctx.insn_ea)
+            return False
+        return True
+
+    # -----------------------------------------------------------------
+    # Emulation  (cross-references & flow)
+    # -----------------------------------------------------------------
+    def ev_emu_insn(self, insn):
+        try:
+            if insn.itype >= NUM_INSN:
+                return False
+
+            _, _, _, _, features, _ = INSN_TABLE[insn.itype]
+
+            if features & CF_JUMP:
+                if insn[0].type == o_near:
+                    ida.add_cref(insn.ea, insn[0].addr, ida.fl_JN)
+                ida.add_cref(insn.ea, insn.ea + insn.size, ida.fl_F)
+            elif features & CF_STOP:
+                pass
+            else:
+                ida.add_cref(insn.ea, insn.ea + insn.size, ida.fl_F)
+
+            for i in range(6):
+                op = insn[i]
+                if op.type == o_void:
+                    break
+                if op.type == o_imm:
+                    ida.set_immd(insn.ea)
+                    break
+
+        except Exception as e:
+            logging.exception("ev_emu_insn error at 0x%X", insn.ea)
+            return False
+        return True
+
+    # -----------------------------------------------------------------
+    # Auto comments
+    # -----------------------------------------------------------------
+    def ev_get_autocmt(self, insn):
+        itype = insn.itype
+        if itype >= NUM_INSN:
+            return None
+        _, _, base_size, data_inc, _, _ = INSN_TABLE[itype]
+
+        if itype == 22:
+            return "RC4 encrypt/decrypt data at [dp]"
+        if itype == 68:
+            return "terminate VM"
+        if itype in (0, 1, 2):
+            return "nop (%d byte%s)" % (base_size, 's' if base_size > 1 else '')
+        if itype in (27, 28):
+            return "if --loop_counter > 0, branch to target"
+        if itype == 21:
+            return "shuffle dword bytes at [dp]; dp += 4"
+        if data_inc:
+            return "dp += %d" % data_inc
+        return None
+
+    # -----------------------------------------------------------------
+    # Optional helpers
+    # -----------------------------------------------------------------
+    def ev_is_basic_block_end(self, insn, call_insn_stops_block):
+        if insn.itype < NUM_INSN:
+            _, _, _, _, features, _ = INSN_TABLE[insn.itype]
+            if features & (CF_STOP | CF_JUMP):
+                return 1
+        return 0
+
+    def ev_is_ret_insn(self, insn, strict):
+        if insn.itype == 68:
+            return 1
+        return 0
+
+```
