@@ -1519,6 +1519,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/janisslsm/ida-ps4-helper [A helper plugin for PS4 module loader]
 - https://github.com/Antelcat/ida_copilot [ChatGPT Agent analyses your IDA pseudocode]
 - https://github.com/crytic/ida-evm [IDA Processor Module for the Ethereum Virtual Machine (EVM)]
+- https://github.com/Duntss/IDA-ZVM-Disassembler [Zeus VM bytecode processor + loader for IDA Pro, from OALabs ZVM]
 - https://github.com/NoneShell/IDAComments [a IDA plugin helps you to manage your IDA Comments]
 - https://github.com/emoose/idaxex [Xbox360/Xenon loader plugin for IDA 9]
 - https://github.com/junron/auto-enum [automatically identify and set enums for standard functions]
