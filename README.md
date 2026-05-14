@@ -1154,6 +1154,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/AndnixSH/APKToolGUI [GUI for apktool, signapk, zipalign and baksmali utilities]
 - https://github.com/pxb1988/dex2jar
 - https://github.com/skylot/jadx [Dex to Java decompiler]
+- https://github.com/neocanable/garlic [Fast APK/DEX/JAR Java decompiler (C)]
 - https://github.com/LuckyPray/DexKit-Android [dex deobfuscator]
 - https://github.com/LSPosed/DexBuilder [Generate dex file by c++]
 - https://github.com/rednaga/APKiD [PEiD for Android]
@@ -1668,6 +1669,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Radare Plugins
 - https://github.com/radareorg/r2a [local language model for radare2]
 - https://github.com/radareorg/radius2 [Fast binary emulation and symbolic execution framework using radare2]
+- https://github.com/radareorg/r2garlic [Garlic DEX/Dalvik decompiler plugin for radare2]
 - https://github.com/seifreed/r2morph [A metamorphic binary transformation engine based on r2pipe and radare2]
 
 > Windbg Plugins
