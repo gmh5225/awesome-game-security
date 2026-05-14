@@ -1,0 +1,1112 @@
+Project Path: arc_radareorg_r2garlic_t5ycb6ig
+
+Source Tree:
+
+```txt
+arc_radareorg_r2garlic_t5ycb6ig
+├── LICENSE
+├── Makefile
+├── README.md
+├── garlic
+└── src
+    ├── memstream.c
+    ├── memstream.h
+    ├── r2garlic.c
+    └── r2garlic.h
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 AbhiTheModder
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`Makefile`:
+
+```
+GARLIC_SRC  = garlic/src
+
+R2_CFLAGS   ?= $(shell r2 -H R2_CFLAGS)
+R2_LDFLAGS  ?= $(shell r2 -H R2_LDFLAGS)
+R2_PLUGINS  ?= $(shell r2 -H R2_USER_PLUGINS)
+R2_LIBEXT   ?= $(shell r2 -H R2_LIBEXT)
+R2_INCDIR   ?= $(shell r2 -H R2_INCDIR)
+
+CC ?= gcc
+CFLAGS  = -Wall -Wextra -O2 -fPIC -fvisibility=default -std=c11
+CFLAGS += -D_GNU_SOURCE -DGARLIC_NO_MAIN
+CFLAGS += $(R2_CFLAGS)
+CFLAGS += -I$(GARLIC_SRC)
+CFLAGS += -I$(GARLIC_SRC)/common
+CFLAGS += -I$(GARLIC_SRC)/libs/memory
+CFLAGS += -I$(GARLIC_SRC)/libs/hashmap
+CFLAGS += -I$(GARLIC_SRC)/libs/list
+CFLAGS += -I$(GARLIC_SRC)/libs/bitset
+CFLAGS += -I$(GARLIC_SRC)/libs/queue
+CFLAGS += -I$(GARLIC_SRC)/libs/str
+CFLAGS += -I$(GARLIC_SRC)/libs/zip
+CFLAGS += -I$(GARLIC_SRC)/libs/threadpool
+CFLAGS += -I$(GARLIC_SRC)/libs/trie
+CFLAGS += -I$(GARLIC_SRC)/parser/class
+CFLAGS += -I$(GARLIC_SRC)/parser/dex
+CFLAGS += -I$(GARLIC_SRC)/parser/pe
+CFLAGS += -I$(GARLIC_SRC)/parser/reader
+CFLAGS += -I$(GARLIC_SRC)/dalvik
+CFLAGS += -I$(GARLIC_SRC)/decompiler
+CFLAGS += -I$(GARLIC_SRC)/decompiler/transformer
+CFLAGS += -I$(GARLIC_SRC)/jvm
+CFLAGS += -I$(GARLIC_SRC)/jar
+CFLAGS += -I$(GARLIC_SRC)/apk
+CFLAGS += -Isrc
+
+CFLAGS += -Wno-unused-variable -Wno-unused-function -Wno-unused-parameter
+CFLAGS += -Wno-unused-but-set-variable -Wno-implicit-function-declaration
+CFLAGS += -Wno-incompatible-pointer-types -Wno-misleading-indentation -Wno-format
+
+LDFLAGS = -shared -fPIC $(R2_LDFLAGS) -lpthread
+
+ifeq ($(R2_LIBEXT),dylib)
+LDFLAGS += -dynamiclib -undefined dynamic_lookup
+endif
+
+GARLIC_C_SRCS = $(filter-out $(GARLIC_SRC)/garlic.c, \
+	$(wildcard $(GARLIC_SRC)/common/*.c) \
+	$(wildcard $(GARLIC_SRC)/libs/memory/*.c) \
+	$(wildcard $(GARLIC_SRC)/libs/hashmap/*.c) \
+	$(wildcard $(GARLIC_SRC)/libs/list/*.c) \
+	$(wildcard $(GARLIC_SRC)/libs/bitset/*.c) \
+	$(wildcard $(GARLIC_SRC)/libs/queue/*.c) \
+	$(wildcard $(GARLIC_SRC)/libs/str/*.c) \
+	$(wildcard $(GARLIC_SRC)/libs/zip/*.c) \
+	$(wildcard $(GARLIC_SRC)/libs/threadpool/*.c) \
+	$(wildcard $(GARLIC_SRC)/libs/trie/*.c) \
+	$(wildcard $(GARLIC_SRC)/parser/class/*.c) \
+	$(wildcard $(GARLIC_SRC)/parser/dex/*.c) \
+	$(wildcard $(GARLIC_SRC)/parser/pe/*.c) \
+	$(wildcard $(GARLIC_SRC)/parser/reader/*.c) \
+	$(wildcard $(GARLIC_SRC)/dalvik/*.c) \
+	$(wildcard $(GARLIC_SRC)/decompiler/*.c) \
+	$(wildcard $(GARLIC_SRC)/decompiler/transformer/*.c) \
+	$(wildcard $(GARLIC_SRC)/jvm/*.c) \
+	$(wildcard $(GARLIC_SRC)/jar/*.c) \
+	$(wildcard $(GARLIC_SRC)/apk/*.c) \
+)
+
+PLUGIN_SRC = src/r2garlic.c src/memstream.c
+
+GARLIC_OBJS = $(GARLIC_C_SRCS:.c=.o)
+PLUGIN_OBJ  = $(PLUGIN_SRC:.c=.o)
+
+PLUGIN = core_r2garlic.$(R2_LIBEXT)
+
+.PHONY: all clean install user-install user-uninstall help
+
+all: $(PLUGIN)
+
+fmt:
+	clang-format-radare2 src/*.c src/*.h
+
+$(PLUGIN): $(PLUGIN_OBJ) libgarlic.a
+	$(CC) $(LDFLAGS) -o $@ $(PLUGIN_OBJ) -L. -lgarlic
+
+libgarlic.a: $(GARLIC_OBJS)
+	ar rcs $@ $^
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(PLUGIN_OBJ): src/r2garlic.h src/memstream.h
+
+ifeq ($(R2_LIBEXT),dll)
+clean:
+	del /Q $(GARLIC_OBJS) $(PLUGIN_OBJ) libgarlic.a $(PLUGIN) 2>nul || exit 0
+else
+clean:
+	rm -f $(GARLIC_OBJS) $(PLUGIN_OBJ) libgarlic.a $(PLUGIN)
+endif
+
+ifeq ($(R2_LIBEXT),dll)
+user-install: $(PLUGIN)
+	if not exist "$(R2_PLUGINS)" mkdir "$(R2_PLUGINS)"
+	copy $(PLUGIN) "$(R2_PLUGINS)\\"
+
+user-uninstall:
+	if exist "$(R2_PLUGINS)\\core_r2garlic.$(R2_LIBEXT)" del "$(R2_PLUGINS)\\core_r2garlic.$(R2_LIBEXT)"
+else
+user-install: $(PLUGIN)
+	mkdir -p $(R2_PLUGINS)
+	cp -f $(PLUGIN) $(R2_PLUGINS)/
+
+user-uninstall:
+	rm -f $(R2_PLUGINS)/core_r2garlic.$(R2_LIBEXT)
+endif
+
+help:
+	@echo "r2garlic - Garlic DEX/Dalvik decompiler plugin for radare2"
+	@echo ""
+	@echo "Targets:"
+	@echo "  all            Build the plugin (default)"
+	@echo "  clean          Remove build artifacts"
+	@echo "  user-install   Install plugin to radare2 user plugins directory"
+	@echo "  user-uninstall Remove plugin from radare2 user plugins directory"
+	@echo ""
+	@echo "Variables:"
+	@echo "  CC             C compiler (default: gcc)"
+	@echo "  R2_CFLAGS      radare2 C flags (from r2 -H)"
+	@echo "  R2_LDFLAGS     radare2 link flags (from r2 -H)"
+	@echo "  R2_PLUGINS     radare2 plugin directory (from r2 -H)"
+	@echo ""
+	@echo "Usage:"
+	@echo "  make"
+	@echo "  make user-install"
+	@echo "  r2 classes.dex -c 'pd:G'"
+
+```
+
+`README.md`:
+
+```md
+# r2garlic
+
+radare2 plugin for the [Garlic](https://github.com/neocanable/garlic) DEX/Dalvik decompiler.
+
+## Build
+
+```bash
+git clone https://github.com/neocanable/r2garlic.git
+cd r2garlic
+git submodule init
+git submodule update
+make
+```
+
+## Install
+
+### From r2pm (recommended)
+
+```bash
+r2pm -Uci r2garlic
+```
+
+### From source
+
+```bash
+make user-install
+```
+
+## Uninstall
+
+```bash
+make user-uninstall
+```
+
+## Usage
+
+### Commands
+
+| Command | Description                              |
+| ------- | ---------------------------------------- |
+| `pd:G`  | Decompile the method at current seek     |
+| `pd:Gc` | Decompile the full class at current seek |
+| `pd:Ga` | Decompile all classes                    |
+| `pd:Gi` | Show DEX file info (dexdump)             |
+| `pd:Gs` | Output smali for current class           |
+| `pd:G?` | Show help                                |
+
+```
+
+`src/memstream.c`:
+
+```c
+#include "memstream.h"
+
+#include <stdlib.h>
+#include <string.h>
+
+static char *empty_string(void) {
+	char *out = malloc (1);
+	if (out) {
+		out[0] = '\0';
+	}
+	return out;
+}
+
+bool mem_stream_open(R2GarlicMemStream *ms) {
+	if (!ms) {
+		return false;
+	}
+	memset (ms, 0, sizeof (*ms));
+#ifdef _WIN32
+	ms->stream = tmpfile ();
+	ms->tmpfile_backed = true;
+#else
+	ms->stream = open_memstream (&ms->buf, &ms->len);
+#endif
+	return ms->stream != NULL;
+}
+
+void mem_stream_discard(R2GarlicMemStream *ms) {
+	if (!ms || !ms->stream) {
+		return;
+	}
+	fclose (ms->stream);
+	ms->stream = NULL;
+	free (ms->buf);
+	ms->buf = NULL;
+	ms->len = 0;
+}
+
+char *mem_stream_close(R2GarlicMemStream *ms) {
+	if (!ms || !ms->stream) {
+		return NULL;
+	}
+	fflush (ms->stream);
+	if (ms->tmpfile_backed) {
+		long len;
+		char *out;
+		if (fseek (ms->stream, 0, SEEK_END) != 0) {
+			mem_stream_discard (ms);
+			return NULL;
+		}
+		len = ftell (ms->stream);
+		if (len < 0 || fseek (ms->stream, 0, SEEK_SET) != 0) {
+			mem_stream_discard (ms);
+			return NULL;
+		}
+		out = malloc ((size_t)len + 1);
+		if (!out) {
+			mem_stream_discard (ms);
+			return NULL;
+		}
+		if (len > 0 && fread (out, 1, (size_t)len, ms->stream) != (size_t)len) {
+			free (out);
+			mem_stream_discard (ms);
+			return NULL;
+		}
+		out[len] = '\0';
+		fclose (ms->stream);
+		ms->stream = NULL;
+		return out;
+	}
+	if (fclose (ms->stream) != 0) {
+		ms->stream = NULL;
+		free (ms->buf);
+		ms->buf = NULL;
+		ms->len = 0;
+		return NULL;
+	}
+	ms->stream = NULL;
+	if (!ms->buf) {
+		return empty_string ();
+	}
+	return ms->buf;
+}
+
+```
+
+`src/memstream.h`:
+
+```h
+#ifndef MEMSTREAM_H
+#define MEMSTREAM_H
+
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+
+typedef struct {
+	FILE *stream;
+	char *buf;
+	size_t len;
+	bool tmpfile_backed;
+} R2GarlicMemStream;
+
+bool mem_stream_open(R2GarlicMemStream *ms);
+void mem_stream_discard(R2GarlicMemStream *ms);
+char *mem_stream_close(R2GarlicMemStream *ms);
+
+#endif
+
+```
+
+`src/r2garlic.c`:
+
+```c
+#include "r2garlic.h"
+#include "memstream.h"
+
+#include <r_core.h>
+#include <r_config.h>
+#include <r_cons.h>
+#include <r_io.h>
+#include <r_bin.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "parser/dex/metadata.h"
+#include "parser/dex/dex.h"
+#include "dalvik/dex_decompile.h"
+#include "dalvik/dex_structure.h"
+#include "dalvik/dex_class.h"
+#include "dalvik/dex_dump.h"
+#include "dalvik/dex_smali.h"
+#include "decompiler/expression_writter.h"
+#include "decompiler/structure.h"
+#include "decompiler/method.h"
+#include "libs/memory/mem_pool.h"
+#include "common/types.h"
+#include "common/str_tools.h"
+#include "libs/list/list.h"
+#include "libs/trie/trie_tree.h"
+
+extern jd_dex *dex_init(jd_meta_dex *meta, int thread_num);
+
+static void set_node_output_stream(jd_node *node, FILE *stream);
+
+static void set_source_file_output_stream(jsource_file *jf, FILE *stream) {
+	if (!jf) {
+		return;
+	}
+	jf->source = stream;
+	if (!jf->blocks) {
+		return;
+	}
+	for (size_t i = 0; i < jf->blocks->size; i++) {
+		set_node_output_stream (lget_obj (jf->blocks, i), stream);
+	}
+}
+
+static void set_node_output_stream(jd_node *node, FILE *stream) {
+	if (!node) {
+		return;
+	}
+	if ((node->type == JD_NODE_CLASS_ROOT ||
+		node->type == JD_NODE_PACKAGE_IMPORT ||
+		node->type == JD_NODE_CLASS ||
+		node->type == JD_NODE_FIELD) &&
+		node->data) {
+		jsource_file *jf = (jsource_file *)node->data;
+		if (jf->source != stream) {
+			set_source_file_output_stream (jf, stream);
+		}
+	}
+	if (!node->children) {
+		return;
+	}
+	for (size_t i = 0; i < node->children->size; i++) {
+		set_node_output_stream (lget_obj (node->children, i), stream);
+	}
+}
+
+static const char *help_msg[] = {
+	"Usage: pd:G[cmd] [args]",
+	"",
+	"Garlic DEX/Dalvik decompiler plugin for radare2",
+	"",
+	"  pd:G            Decompile the method at current seek",
+	"  pd:Gc           Decompile the full class at current seek",
+	"  pd:Ga           Decompile all classes in the DEX",
+	"  pd:Gi           Show DEX file info (dexdump)",
+	"  pd:Gs           Output smali for current class",
+	"  pd:G?           Show this help",
+	"",
+	"Config:",
+	"  e r2garlic.show_imports=false  Hide imports in pd:G output",
+	"",
+	"Only works on DEX files (format=dex, arch=dalvik).",
+	NULL
+};
+
+static void print_help(RCore *core) {
+	int i;
+	for (i = 0; help_msg[i]; i++) {
+		r_cons_println (core->cons, help_msg[i]);
+	}
+}
+
+static bool is_dex_file(RCore *core) {
+	RBinInfo *bi = r_bin_get_info (core->bin);
+	if (bi) {
+		if (bi->lang && !strcmp (bi->lang, "dalvik")) {
+			return true;
+		}
+		if (bi->rclass && !strcmp (bi->rclass, "DEX CLASS")) {
+			return true;
+		}
+	}
+	const char *format = r_config_get (core->config, "bin.format");
+	if (format && !strcmp (format, "dex")) {
+		return true;
+	}
+	const char *arch = r_config_get (core->config, "bin.arch");
+	if (arch && !strcmp (arch, "dalvik")) {
+		return true;
+	}
+	return false;
+}
+
+static char *get_file_path(RCore *core) {
+	RBinInfo *bi = r_bin_get_info (core->bin);
+	if (bi && bi->file) {
+		return strdup (bi->file);
+	}
+	const char *fp = r_config_get (core->config, "file.path");
+	if (fp && *fp) {
+		return strdup (fp);
+	}
+	return NULL;
+}
+
+static ut8 *get_file_bytes(RCore *core, size_t *out_size) {
+	ut64 sz = r_io_size (core->io);
+	if (sz == 0 || sz == UT64_MAX) {
+		return NULL;
+	}
+	ut8 *buf = malloc ((size_t)sz);
+	if (!buf) {
+		return NULL;
+	}
+	bool ok = r_io_read_at (core->io, 0, buf, (int)sz);
+	if (!ok) {
+		free (buf);
+		return NULL;
+	}
+	*out_size = (size_t)sz;
+	return buf;
+}
+
+static char *decompile_class_to_string(jd_dex *dex, dex_class_def *cf) {
+	R2GarlicMemStream ms;
+	if (!mem_stream_open (&ms)) {
+		return NULL;
+	}
+	jsource_file *jf = dex_class_inside (dex, cf, NULL);
+	if (!jf) {
+		mem_stream_discard (&ms);
+		return NULL;
+	}
+	if (jf->parent != NULL) {
+		mem_stream_discard (&ms);
+		return NULL;
+	}
+	set_source_file_output_stream (jf, ms.stream);
+	writter_for_class (jf, NULL);
+	set_source_file_output_stream (jf, NULL);
+	return mem_stream_close (&ms);
+}
+
+static void find_class_name_from_type(jd_meta_dex *meta, u4 class_idx, char *out, size_t out_size) {
+	string name = dex_str_of_type_id (meta, class_idx);
+	if (name) {
+		const char *p = name;
+		if (*p == 'L') {
+			p++;
+		}
+		size_t i = 0;
+		while (*p && *p != ';' && i < out_size - 1) {
+			out[i++] = (*p == '/')? '.': *p;
+			p++;
+		}
+		out[i] = '\0';
+	} else {
+		snprintf (out, out_size, "class_%u", class_idx);
+	}
+}
+
+static bool get_r2_class_name(RCore *core, char *out, size_t out_size) {
+	char *ic_result = r_core_cmd_str (core, "ic.");
+	if (!ic_result || !*ic_result) {
+		free (ic_result);
+		return false;
+	}
+	char *first_line = ic_result;
+	char *nl = strchr (first_line, '\n');
+	if (nl) {
+		*nl = '\0';
+	}
+	char *colon = strchr (first_line, ':');
+	if (!colon) {
+		free (ic_result);
+		return false;
+	}
+	const char *classname = colon + 1;
+	while (*classname == ':') {
+		classname++;
+	}
+	size_t i = 0;
+	while (*classname && *classname != '.' && *classname != ';' && i < out_size - 2) {
+		out[i++] = *classname++;
+	}
+	out[i++] = ';';
+	out[i] = '\0';
+	free (ic_result);
+	return (i > 1);
+}
+
+static int find_class_by_name(jd_meta_dex *meta, const char *dex_type_name) {
+	dex_header *hdr = meta->header;
+	for (int i = 0; i < (int)hdr->class_defs_size; i++) {
+		dex_class_def *cf = &meta->class_defs[i];
+		string name = dex_str_of_type_id (meta, cf->class_idx);
+		if (name && strcmp (name, dex_type_name) == 0) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+static int find_class_at_seek(jd_meta_dex *meta, ut64 seek_addr) {
+	dex_header *hdr = meta->header;
+	int found = -1;
+	for (int i = 0; i < (int)hdr->class_defs_size; i++) {
+		dex_class_def *cf = &meta->class_defs[i];
+		if (cf->is_inner || cf->is_anonymous) {
+			continue;
+		}
+		if (cf->class_data_off != 0 && cf->class_data_off <= seek_addr) {
+			if (found == -1 || cf->class_data_off > meta->class_defs[found].class_data_off) {
+				found = i;
+			}
+		}
+	}
+	if (found == -1) {
+		for (int i = 0; i < (int)hdr->class_defs_size; i++) {
+			dex_class_def *cf = &meta->class_defs[i];
+			if (cf->is_inner || cf->is_anonymous) {
+				continue;
+			}
+			found = i;
+			break;
+		}
+	}
+	return found;
+}
+
+static bool get_r2_method_name(RCore *core, char *out, size_t out_size) {
+	char *ic_result = r_core_cmd_str (core, "ic.");
+	if (!ic_result || !*ic_result) {
+		free (ic_result);
+		return false;
+	}
+	char *first_line = ic_result;
+	char *nl = strchr (first_line, '\n');
+	if (nl) {
+		*nl = '\0';
+	}
+	const char *marker = strstr (first_line, ".method.");
+	if (!marker) {
+		marker = strstr (first_line, ".method ");
+	}
+	if (!marker) {
+		free (ic_result);
+		return false;
+	}
+	const char *method_start = marker + strlen (".method.");
+	const char *paren = strchr (method_start, '(');
+	size_t len = paren? (size_t) (paren - method_start): strlen (method_start);
+	if (len == 0 || len >= out_size) {
+		free (ic_result);
+		return false;
+	}
+	memcpy (out, method_start, len);
+	out[len] = '\0';
+	free (ic_result);
+	return true;
+}
+
+static void find_method_nodes(jd_node *node, const char *method_name, jd_node **result, int *result_count, int max_results) {
+	if (!node || !node->children || *result_count >= max_results) {
+		return;
+	}
+	if (node->type == JD_NODE_METHOD && node->data) {
+		jd_method *m = (jd_method *)node->data;
+		if (method_is_lambda (m) || method_is_hide (m)) {
+			return;
+		}
+		if (m->name && strcmp (m->name, method_name) == 0) {
+			result[*result_count] = node;
+			(*result_count)++;
+			return;
+		}
+	}
+	for (size_t i = 0; i < node->children->size; i++) {
+		find_method_nodes (lget_obj (node->children, i), method_name, result, result_count, max_results);
+	}
+}
+
+static char *decompile_method_to_string(jsource_file *jf, jd_node *method_node) {
+	jd_method *m = (jd_method *)method_node->data;
+	string ident = get_node_ident (method_node);
+	R2GarlicMemStream ms;
+	if (!mem_stream_open (&ms)) {
+		return NULL;
+	}
+	FILE *stream = ms.stream;
+	string def = create_method_defination (m);
+	if (method_is_empty (m)) {
+		fprintf (stream, "%s%s;\n", ident, def);
+	} else {
+		fprintf (stream, "%s%s {\n", ident, def);
+		set_source_file_output_stream (jf, stream);
+		writter_for_class (jf, method_node);
+		set_source_file_output_stream (jf, NULL);
+		fprintf (stream, "%s}\n", ident);
+	}
+	return mem_stream_close (&ms);
+}
+
+static void cmd_decompile_method(RCore *core, ut8 *file_buf, size_t file_size) {
+	if (!file_buf || file_size == 0) {
+		R_LOG_WARN ("r2garlic: no file loaded");
+		return;
+	}
+	mem_init_pool ();
+	jd_meta_dex *meta = parse_dex_from_buffer ((char *)file_buf, file_size);
+	if (!meta) {
+		mem_free_pool ();
+		R_LOG_ERROR ("r2garlic: failed to parse DEX file");
+		return;
+	}
+	meta->source_dir = NULL;
+	jd_dex *dex = dex_init_without_thread (meta);
+	if (!dex) {
+		mem_pool_free (meta->pool);
+		mem_free_pool ();
+		R_LOG_ERROR ("r2garlic: failed to init DEX context");
+		return;
+	}
+	int found = -1;
+	char r2_class[256] = { 0 };
+	if (get_r2_class_name (core, r2_class, sizeof (r2_class))) {
+		found = find_class_by_name (meta, r2_class);
+	}
+	if (found == -1) {
+		found = find_class_at_seek (meta, core->addr);
+	}
+	if (found == -1) {
+		mem_pool_free (meta->pool);
+		mem_free_pool ();
+		R_LOG_WARN ("r2garlic: no decompilable class found at current seek");
+		return;
+	}
+	dex_class_def *cf = &meta->class_defs[found];
+	char method_name[256] = { 0 };
+	bool has_method = get_r2_method_name (core, method_name, sizeof (method_name));
+
+	jsource_file *jf = dex_class_inside (dex, cf, NULL);
+	if (!jf || jf->parent != NULL) {
+		mem_pool_free (meta->pool);
+		mem_free_pool ();
+		R_LOG_ERROR ("r2garlic: decompilation failed for this class");
+		return;
+	}
+	jd_node *root = lget_obj_first (jf->blocks);
+	if (!root || !root->children) {
+		mem_pool_free (meta->pool);
+		mem_free_pool ();
+		R_LOG_ERROR ("r2garlic: decompilation failed for this class");
+		return;
+	}
+	char class_name[256] = { 0 };
+	find_class_name_from_type (meta, cf->class_idx, class_name, sizeof (class_name));
+	if (!has_method) {
+		r_cons_printf (core->cons, "/* Decompiled by r2garlic (Garlic) - Class: %s */\n", class_name);
+		R2GarlicMemStream ms;
+		if (mem_stream_open (&ms)) {
+			set_source_file_output_stream (jf, ms.stream);
+			writter_for_class (jf, NULL);
+			set_source_file_output_stream (jf, NULL);
+			char *result = mem_stream_close (&ms);
+			if (result) {
+				r_cons_print (core->cons, result);
+				r_cons_newline (core->cons);
+				free (result);
+			}
+		}
+		mem_pool_free (meta->pool);
+		mem_free_pool ();
+		return;
+	}
+	jd_node *matched_nodes[16] = { NULL };
+	int match_count = 0;
+	find_method_nodes (root, method_name, matched_nodes, &match_count, 16);
+	if (match_count == 0) {
+		r_cons_printf (core->cons, "/* Decompiled by r2garlic (Garlic) - Class: %s (method: %s not found) */\n", class_name, method_name);
+		R2GarlicMemStream ms;
+		if (mem_stream_open (&ms)) {
+			set_source_file_output_stream (jf, ms.stream);
+			writter_for_class (jf, NULL);
+			set_source_file_output_stream (jf, NULL);
+			char *result = mem_stream_close (&ms);
+			if (result) {
+				r_cons_print (core->cons, result);
+				r_cons_newline (core->cons);
+				free (result);
+			}
+		}
+		mem_pool_free (meta->pool);
+		mem_free_pool ();
+		return;
+	}
+	r_cons_printf (core->cons, "/* Decompiled by r2garlic (Garlic) - Class: %s Method: %s */\n", class_name, method_name);
+	R2GarlicMemStream ms;
+	if (mem_stream_open (&ms)) {
+		bool show_imports = r_config_get_i (core->config, "r2garlic.show_imports");
+		if (show_imports) {
+			set_source_file_output_stream (jf, ms.stream);
+			if (jf->pname) {
+				fprintf (ms.stream, "package ");
+				for (size_t i = 0; i < strlen (jf->pname); i++) {
+					unsigned char c = (unsigned char)jf->pname[i];
+					fputc (c == '/'? '.': c, ms.stream);
+				}
+				fprintf (ms.stream, ";\n\n");
+			}
+			trie_leaf_to_stream (jf->imports, ms.stream);
+			fprintf (ms.stream, "\n// class: %s\n", jf->fname);
+			fprintf (ms.stream, "%s {\n", jf->defination);
+			set_source_file_output_stream (jf, NULL);
+		} else {
+			fprintf (ms.stream, "// class: %s\n%s {\n", jf->fname, jf->defination);
+		}
+		char *result = mem_stream_close (&ms);
+		if (result) {
+			r_cons_print (core->cons, result);
+			free (result);
+		}
+	}
+	for (int i = 0; i < match_count; i++) {
+		char *method_result = decompile_method_to_string (jf, matched_nodes[i]);
+		if (method_result) {
+			r_cons_print (core->cons, method_result);
+			free (method_result);
+		}
+	}
+	r_cons_println (core->cons, "}");
+	mem_pool_free (meta->pool);
+	mem_free_pool ();
+}
+
+static char *smali_class_to_string(jd_meta_dex *meta, dex_class_def *cf) {
+	R2GarlicMemStream ms;
+	if (!mem_stream_open (&ms)) {
+		return NULL;
+	}
+	dex_class_def_to_smali (meta, cf, ms.stream);
+	return mem_stream_close (&ms);
+}
+
+static char *dexdump_to_string(jd_meta_dex *meta) {
+	R2GarlicMemStream ms;
+	if (!mem_stream_open (&ms)) {
+		return NULL;
+	}
+	FILE *real_stdout = stdout;
+	stdout = ms.stream;
+	dexdump (meta);
+	fflush (ms.stream);
+	stdout = real_stdout;
+	return mem_stream_close (&ms);
+}
+
+static void cmd_decompile_class(RCore *core, ut8 *file_buf, size_t file_size) {
+	if (!file_buf || file_size == 0) {
+		R_LOG_WARN ("r2garlic: no file loaded");
+		return;
+	}
+	mem_init_pool ();
+	jd_meta_dex *meta = parse_dex_from_buffer ((char *)file_buf, file_size);
+	if (!meta) {
+		mem_free_pool ();
+		R_LOG_ERROR ("r2garlic: failed to parse DEX file");
+		return;
+	}
+	meta->source_dir = NULL;
+	jd_dex *dex = dex_init_without_thread (meta);
+	if (!dex) {
+		mem_pool_free (meta->pool);
+		mem_free_pool ();
+		R_LOG_ERROR ("r2garlic: failed to init DEX context");
+		return;
+	}
+	int found = -1;
+	char r2_class[256] = { 0 };
+	if (get_r2_class_name (core, r2_class, sizeof (r2_class))) {
+		found = find_class_by_name (meta, r2_class);
+	}
+	if (found == -1) {
+		found = find_class_at_seek (meta, core->addr);
+	}
+	if (found == -1) {
+		mem_pool_free (meta->pool);
+		mem_free_pool ();
+		R_LOG_WARN ("r2garlic: no decompilable class found at current seek");
+		return;
+	}
+	dex_class_def *cf = &meta->class_defs[found];
+	char class_name[256] = { 0 };
+	find_class_name_from_type (meta, cf->class_idx, class_name, sizeof (class_name));
+	r_cons_printf (core->cons, "/* Decompiled by r2garlic (Garlic) - Class: %s */\n", class_name);
+	char *result = decompile_class_to_string (dex, cf);
+	if (result) {
+		r_cons_print (core->cons, result);
+		r_cons_newline (core->cons);
+		free (result);
+	} else {
+		R_LOG_ERROR ("r2garlic: decompilation failed for this class");
+	}
+	mem_pool_free (meta->pool);
+	mem_free_pool ();
+}
+
+static void cmd_decompile_all(RCore *core, ut8 *file_buf, size_t file_size) {
+	if (!file_buf || file_size == 0) {
+		R_LOG_WARN ("r2garlic: no file loaded");
+		return;
+	}
+	mem_init_pool ();
+	jd_meta_dex *meta = parse_dex_from_buffer ((char *)file_buf, file_size);
+	if (!meta) {
+		mem_free_pool ();
+		R_LOG_ERROR ("r2garlic: failed to parse DEX file");
+		return;
+	}
+	meta->source_dir = NULL;
+	jd_dex *dex = dex_init_without_thread (meta);
+	if (!dex) {
+		mem_pool_free (meta->pool);
+		mem_free_pool ();
+		R_LOG_ERROR ("r2garlic: failed to init DEX context");
+		return;
+	}
+	r_cons_println (core->cons, "[r2garlic] Decompiling all classes...");
+	dex_header *hdr = meta->header;
+	for (int i = 0; i < (int)hdr->class_defs_size; i++) {
+		dex_class_def *cf = &meta->class_defs[i];
+		if (cf->is_inner || cf->is_anonymous) {
+			continue;
+		}
+		char class_name[256] = { 0 };
+		find_class_name_from_type (meta, cf->class_idx, class_name, sizeof (class_name));
+		r_cons_printf (core->cons, "\n/* ===== %s ===== */\n", class_name);
+		char *result = decompile_class_to_string (dex, cf);
+		if (result) {
+			r_cons_print (core->cons, result);
+			r_cons_newline (core->cons);
+			free (result);
+		}
+	}
+	mem_pool_free (meta->pool);
+	mem_free_pool ();
+}
+
+static void cmd_dexdump(RCore *core, ut8 *file_buf, size_t file_size) {
+	if (!file_buf || file_size == 0) {
+		R_LOG_WARN ("r2garlic: no file loaded");
+		return;
+	}
+	mem_init_pool ();
+	jd_meta_dex *meta = parse_dex_from_buffer ((char *)file_buf, file_size);
+	if (!meta) {
+		mem_free_pool ();
+		R_LOG_ERROR ("r2garlic: failed to parse DEX file");
+		return;
+	}
+	meta->source_dir = NULL;
+	char *result = dexdump_to_string (meta);
+	if (result) {
+		r_cons_print (core->cons, result);
+		free (result);
+	}
+	mem_pool_free (meta->pool);
+	mem_free_pool ();
+}
+
+static void cmd_smali_class(RCore *core, ut8 *file_buf, size_t file_size) {
+	if (!file_buf || file_size == 0) {
+		R_LOG_WARN ("r2garlic: no file loaded");
+		return;
+	}
+	mem_init_pool ();
+	jd_meta_dex *meta = parse_dex_from_buffer ((char *)file_buf, file_size);
+	if (!meta) {
+		mem_free_pool ();
+		R_LOG_ERROR ("r2garlic: failed to parse DEX file");
+		return;
+	}
+	meta->source_dir = NULL;
+	int found = -1;
+	char r2_class[256] = { 0 };
+	if (get_r2_class_name (core, r2_class, sizeof (r2_class))) {
+		found = find_class_by_name (meta, r2_class);
+	}
+	if (found == -1) {
+		found = find_class_at_seek (meta, core->addr);
+	}
+	if (found >= 0) {
+		dex_class_def *cf = &meta->class_defs[found];
+		char *result = smali_class_to_string (meta, cf);
+		if (result) {
+			r_cons_print (core->cons, result);
+			free (result);
+		}
+	} else {
+		R_LOG_WARN ("r2garlic: no class found at current address");
+	}
+	mem_pool_free (meta->pool);
+	mem_free_pool ();
+}
+
+static bool r2garlic_call(RCorePluginSession *cps, const char *input) {
+	RCore *core = cps? cps->core: NULL;
+	if (!core || !input) {
+		return false;
+	}
+	if (!r_str_startswith (input, "pd:G")) {
+		return false;
+	}
+	if (!is_dex_file (core)) {
+		R_LOG_ERROR ("r2garlic: this plugin only works on DEX files (format=dex, arch=dalvik)");
+		return true;
+	}
+	GarlicContext *ctx = (GarlicContext *)cps->data;
+	if (!ctx) {
+		return false;
+	}
+	char *fp = get_file_path (core);
+	if (!ctx->file_path || !fp || strcmp (ctx->file_path, fp? fp: "") != 0) {
+		free (ctx->file_path);
+		ctx->file_path = fp;
+		free (ctx->file_buf);
+		ctx->file_buf = NULL;
+		ctx->file_size = 0;
+		ctx->file_buf = get_file_bytes (core, &ctx->file_size);
+	} else {
+		free (fp);
+	}
+	const char *arg = input + 4;
+	switch (*arg) {
+	case '\0':
+	case ' ':
+		cmd_decompile_method (core, ctx->file_buf, ctx->file_size);
+		break;
+	case 'c':
+		cmd_decompile_class (core, ctx->file_buf, ctx->file_size);
+		break;
+	case 'a':
+		cmd_decompile_all (core, ctx->file_buf, ctx->file_size);
+		break;
+	case 'i':
+		cmd_dexdump (core, ctx->file_buf, ctx->file_size);
+		break;
+	case 's':
+		cmd_smali_class (core, ctx->file_buf, ctx->file_size);
+		break;
+	case '?':
+	default:
+		print_help (core);
+		break;
+	}
+	return true;
+}
+
+static bool r2garlic_init(RCorePluginSession *cps) {
+	RCore *core = cps? cps->core: NULL;
+	if (!core) {
+		return false;
+	}
+	GarlicContext *ctx = calloc (1, sizeof (GarlicContext));
+	if (!ctx) {
+		return false;
+	}
+	ctx->core = core;
+	cps->data = ctx;
+	RConfig *cfg = core->config;
+	r_config_lock (cfg, false);
+	r_config_set (cfg, "r2garlic.threads", "1");
+	r_config_set (cfg, "r2garlic.show_imports", "true");
+	r_config_lock (cfg, true);
+	return true;
+}
+
+static bool r2garlic_fini(RCorePluginSession *cps) {
+	if (!cps) {
+		return false;
+	}
+	GarlicContext *ctx = (GarlicContext *)cps->data;
+	if (ctx) {
+		free (ctx->file_path);
+		free (ctx->file_buf);
+		free (ctx);
+	}
+	cps->data = NULL;
+	return true;
+}
+
+static RCorePlugin r_core_plugin_r2garlic = {
+	.meta = {
+		.name = "r2garlic",
+		.desc = "Garlic DEX/Dalvik decompiler plugin",
+		.license = "MIT",
+		.author = "AbhiTheModder",
+		.version = R2GARLIC_VERSION,
+	},
+	.call = r2garlic_call,
+	.init = r2garlic_init,
+	.fini = r2garlic_fini,
+};
+
+R_API RLibStruct radare_plugin = {
+	.type = R_LIB_TYPE_CORE,
+	.data = &r_core_plugin_r2garlic,
+	.version = R2_VERSION,
+	.abiversion = R2_ABIVERSION,
+	.pkgname = "r2garlic"
+};
+
+```
+
+`src/r2garlic.h`:
+
+```h
+#ifndef R2GARLIC_H
+#define R2GARLIC_H
+
+#include <r_core.h>
+
+#define R2GARLIC_VERSION "0.1.0"
+
+typedef struct {
+	RCore *core;
+	char *file_path;
+	ut8 *file_buf;
+	size_t file_size;
+} GarlicContext;
+
+#endif
+
+```
