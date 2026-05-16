@@ -2928,7 +2928,6 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/M3351AN/saphire [Internal]
 - https://github.com/VitorMob/GHInterfacesCSGO [Internal]
 - https://github.com/gmh5225/memcs [External]
-- https://github.com/rabbitfishy/sdk [SDK]
 - https://github.com/bloesway/csgo_sdk [SDK]
 - https://github.com/DeiVid-12/SmKernel-CSGO [Driver]
 - https://github.com/notgoodusename/OsirisAndExtra [Internal]
