@@ -3758,6 +3758,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/naorhaziz/irql [Rust: compile-time IRQL safety for Windows kernel drivers]
 
 > Shellcode Engine & Tricks
+- https://github.com/jakobfriedl/usb-monitor-bof [Async BOF: monitor USB connect/disconnect, report device info, and act on USB storage volumes; Conquest; optional NetNTLM coerce via .url]
 - https://github.com/Vector35/scc [shellcode compiler]
 - https://github.com/jseclab/obj2shellcode
 - https://github.com/lainswork/shellcode-factory
