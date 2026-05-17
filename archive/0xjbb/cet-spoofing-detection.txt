@@ -1,0 +1,392 @@
+Project Path: arc_0xjbb_cet-spoofing-detection_vlt8rmcx
+
+Source Tree:
+
+```txt
+arc_0xjbb_cet-spoofing-detection_vlt8rmcx
+├── CMakeLists.txt
+├── README.md
+├── main.cpp
+├── screenshots
+├── util.cpp
+└── util.h
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 4.2)
+project(CETSpoofingDetection)
+
+set(CMAKE_CXX_STANDARD 23)
+
+add_executable(CETSpoofingDetection main.cpp
+        util.cpp
+)
+
+```
+
+`README.md`:
+
+```md
+# CET Spoofing Detection
+
+This tool is a proof of concept aimed to detect stackspoofing within CET processes. It does this by comparing the shadow stack to the userstack and looks for missing frames.
+There are some false positives when a process uses .NET. 
+
+
+### Compilation
+
+- assumes clang/++, cmake and ninja are in your path
+- untested with MSVC.
+
+## Build
+
+```
+cmake -B build -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -G Ninja
+cmake --build build
+```
+
+```text
+PS C:\Users\dev\CLionProjects\CETSpoofingDetection> cmake -B build -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -G Ninja
+-- The C compiler identification is Clang 22.1.2 with GNU-like command-line
+-- The CXX compiler identification is Clang 22.1.2 with GNU-like command-line
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/Program Files/LLVM/bin/clang.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files/LLVM/bin/clang++.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (4.7s)
+-- Generating done (0.0s)
+-- Build files have been written to: C:/Users/dev/CLionProjects/CETSpoofingDetection/build
+PS C:\Users\dev\CLionProjects\CETSpoofingDetection> cmake --build build
+[6/6] Linking CXX executable CETSpoofingDetection.exe
+PS C:\Users\dev\CLionProjects\CETSpoofingDetection>
+```
+
+### Usage
+
+Just run the application inside a terminal, it will take a snapshot of threads and iterate through, extract CET processes and them check the stacks of those.
+
+Below is an example of using it against the BOYUD project : https://github.com/klezVirus/BYOUD
+
+<img src="screenshots/udinject.jpg" width="600" />
+
+The spoofed callstack
+
+<img src="screenshots/callstack.jpg" width="600" />
+
+Detection from the tool.
+
+<img src="screenshots/alert.jpg" width="600" />
+
+```
+
+`main.cpp`:
+
+```cpp
+#include "util.h"
+
+#pragma comment(lib, "dbghelp.lib")
+
+
+int main(int argc, char **argv)
+{
+    try {
+        auto processes = util::GetCETProcesses();
+
+        if (processes.size() == 0)
+            return -2;
+
+
+        for (auto& [pid, process_] : processes) {
+            if (pid == GetCurrentProcessId())
+                continue;
+
+            auto hProcess = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
+            if (!hProcess) continue;
+
+            SymSetOptions(SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
+            SymInitialize(hProcess, nullptr, true);  // once per process
+
+            for (auto& t : process_.threads) {
+                auto thread_handle = OpenThread(THREAD_ALL_ACCESS, FALSE, t.threadId);
+                if (!thread_handle) continue;
+
+                SuspendThread(thread_handle);
+                auto SSP = util::GetShadowStackFrames(thread_handle, hProcess);
+                auto normalStack = util::GetNormalFrames(thread_handle, hProcess);  // no SymInit inside
+                ResumeThread(thread_handle);
+
+                if (!SSP.HasShadowStack)
+                    continue;
+
+                if (SSP.frames.empty() || normalStack.empty())
+                    continue;
+
+                size_t si = 0;
+
+                for (size_t i = 0; i <  normalStack.size() && si <  SSP.frames.size(); ++i) {
+                    if (normalStack[i] == SSP.frames[si])
+                        ++si;
+                }
+
+                if (si != SSP.frames.size()) {
+                    std::cout << "[ALERT] Shadow stack frames missing or out of order\n";
+                    std::cout << "Process: " << t.processId << '\n';
+                    std::cout << "Thread: " << t.threadId << '\n';
+                }
+
+                CloseHandle(thread_handle);
+            }
+
+            SymCleanup(hProcess);  // once per process
+            CloseHandle(hProcess);
+        }
+    }
+    catch (std::exception& e) {
+        std::cout << e.what() << std::endl;
+    }
+    return 0;
+}
+
+```
+
+`util.cpp`:
+
+```cpp
+#include "util.h"
+
+namespace util {
+    bool HasCetEnabled(int process_id) {
+        PROCESS_MITIGATION_USER_SHADOW_STACK_POLICY cet{};
+        bool result = true;
+
+        auto hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, process_id);
+
+        if (hProcess == INVALID_HANDLE_VALUE)
+            return false;
+
+        if (!GetProcessMitigationPolicy(hProcess, ProcessUserShadowStackPolicy, &cet, sizeof(PROCESS_MITIGATION_USER_SHADOW_STACK_POLICY)))
+            result = false;
+
+        if (cet.EnableUserShadowStack)
+            result = true;
+
+        CloseHandle(hProcess);
+        return result;
+    }
+
+    std::unordered_map<unsigned int, Process> GetCETProcesses() {
+        std::unordered_map<unsigned int, Process> processes_;
+        std::unordered_set<unsigned int> rejected_;
+
+        THREADENTRY32 thread_entry{};
+        thread_entry.dwSize = sizeof(THREADENTRY32);
+
+        auto snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+        if (snapshot == INVALID_HANDLE_VALUE)
+            throw std::runtime_error(std::format("Failed to get snapshot: {}", GetLastError()));
+
+        if (!Thread32First(snapshot, &thread_entry)) {
+            CloseHandle(snapshot);
+            throw std::runtime_error(std::format("Failed to get first thread: {}", GetLastError()));
+        }
+
+        do {
+            auto pid = thread_entry.th32OwnerProcessID;
+            auto tid = thread_entry.th32ThreadID;
+
+            if (rejected_.contains(pid))
+                continue;
+
+            auto [it, inserted] = processes_.try_emplace(pid, Process{ .processId = pid });
+
+            if (inserted && !HasCetEnabled(pid)) {
+                processes_.erase(it);
+                rejected_.insert(pid);
+                continue;
+            }
+
+            it->second.threads.push_back(Thread{ .processId = pid, .threadId = tid });
+
+        } while (Thread32Next(snapshot, &thread_entry));
+
+        CloseHandle(snapshot);
+        return processes_;
+    }
+
+    ShadowStackResult GetShadowStackFrames(HANDLE thread_handle, HANDLE process) {
+        ShadowStackResult result;
+        result.HasShadowStack = false;
+
+        auto features = GetEnabledXStateFeatures();
+
+        if (!(features & XSTATE_MASK_CET_U))
+            throw std::runtime_error("Required CET features not available.");
+
+        DWORD ctx_size = 0;
+        InitializeContext2(nullptr, CONTEXT_FULL | CONTEXT_XSTATE, nullptr, &ctx_size, XSTATE_MASK_CET_U);
+
+        auto ctx_buf = std::vector<uint8_t>(ctx_size);
+        CONTEXT* ctx = nullptr;
+
+        if (!InitializeContext2(ctx_buf.data(), CONTEXT_FULL | CONTEXT_XSTATE, &ctx, &ctx_size, XSTATE_MASK_CET_U)) {
+            //ERROR
+            return result;
+        }
+
+        if (!SetXStateFeaturesMask(ctx, XSTATE_MASK_CET_U)) {
+            //error
+            return result;
+        }
+
+        if (!GetThreadContext(thread_handle, ctx)) {
+            return result;
+        }
+
+        uint64_t mask = 0;
+        GetXStateFeaturesMask(ctx, &mask);
+
+        if (!(mask & XSTATE_MASK_CET_U)) {
+            // CET_U wasn't populated - thread has no active shadow stack
+            return result;
+        }
+
+
+        DWORD feature_len = 0;
+
+        auto* cet_state = static_cast<uint64_t*>(LocateXStateFeature(ctx, XSTATE_CET_U, &feature_len));
+
+        if (!cet_state || feature_len < sizeof(uint64_t)) {
+            return result;
+        }
+
+        auto ssp = cet_state[1];
+
+        if (ssp == 0) {
+            return result;
+        }
+
+        result.HasShadowStack = true;
+
+        result.frames.reserve(64);
+
+        for (size_t i = 0; i < 64; ++i) {
+            auto addr = ssp + (i * sizeof(uint64_t));
+            uint64_t ret = 0;
+            size_t bytesread = 0;
+
+
+            if (!ReadProcessMemory(process, reinterpret_cast<void*>(addr), &ret, sizeof(ret), &bytesread))
+                break;
+
+            if (ret == 0)
+                break;
+
+            if (ret & 1)
+                continue;
+
+            result.frames.push_back(ret);
+        }
+
+        return result;
+    }
+    std::vector<uintptr_t> GetNormalFrames(HANDLE thread_handle, HANDLE process) {
+        std::vector<uintptr_t> frames;
+
+        CONTEXT ctx{};
+        ctx.ContextFlags = CONTEXT_FULL;
+        if (!GetThreadContext(thread_handle, &ctx)) {
+            return {};
+        }
+
+        STACKFRAME_EX sf{};
+        sf.StackFrameSize = sizeof(sf);
+        sf.AddrPC.Offset = ctx.Rip;
+        sf.AddrPC.Mode = AddrModeFlat;
+        sf.AddrFrame.Offset = ctx.Rbp;
+        sf.AddrFrame.Mode = AddrModeFlat;
+        sf.AddrStack.Offset = ctx.Rsp;
+        sf.AddrStack.Mode = AddrModeFlat;
+
+        for (size_t i = 0; i < 64; ++i) {
+            auto result = StackWalkEx(
+            IMAGE_FILE_MACHINE_AMD64,
+                process,
+                thread_handle,
+                &sf,
+                &ctx,
+                nullptr,
+                SymFunctionTableAccess64,
+                SymGetModuleBase64,
+                nullptr,
+                SYM_STKWALK_DEFAULT
+            );
+
+            if (!sf.AddrPC.Offset || sf.AddrPC.Offset == UINT64_MAX)
+                break;
+
+            if (SymGetModuleBase64(process, sf.AddrPC.Offset) == 0)
+                break;
+
+            frames.push_back(sf.AddrPC.Offset);
+
+        }
+
+        return frames;
+    }
+}
+```
+
+`util.h`:
+
+```h
+#ifndef CETSPOOFINGDETECTION_UTIL_H
+#define CETSPOOFINGDETECTION_UTIL_H
+#include <iostream>
+#include <unordered_set>
+#include <unordered_map>
+#include <format>
+#include <exception>
+#include <print>
+
+#include <cstdint>
+#include <Windows.h>
+#include <tlhelp32.h>
+#include <dbghelp.h>
+
+namespace util {
+
+
+    struct Thread {
+        DWORD processId;
+        DWORD threadId;
+    };
+
+    struct Process {
+        DWORD processId;
+        std::vector<Thread> threads;
+    };
+
+    struct ShadowStackResult {
+        bool HasShadowStack;
+        uintptr_t ssp;
+        std::vector<uint64_t> frames;
+    };
+
+    bool HasCetEnabled(int process_id);
+    std::unordered_map<unsigned int, Process> GetCETProcesses();
+    ShadowStackResult GetShadowStackFrames(HANDLE thread_handle, HANDLE process);
+    std::vector<uintptr_t> GetNormalFrames(HANDLE thread_handle, HANDLE process);
+}
+
+
+#endif //CETSPOOFINGDETECTION_UTIL_H
+```
