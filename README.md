@@ -526,6 +526,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > AI Agents
 - https://github.com/0xeb/windbg-copilot [WinDbg Copilot - Agentic Debugging extension]
+- https://github.com/originsec/pocsmith [Autonomous Windows POC developer from patchwatch diff reports; Claude agent + MCP (Hyper-V, kd, Ghidra) to write, build, and verify PoCs on pre-patch VMs]
 - https://github.com/leigest519/OpenGame [Open agentic coding for web games end-to-end from prompts; Game Skill (template + debug); GameCoder-27B; OpenGame-Bench; qwen-code-based CLI]
 - https://github.com/0x0funky/agent-sprite-forge [Codex skills for game-ready 2D sprites, layered maps, and engine-ready prototypes (Godot/Unity)]
 
