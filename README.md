@@ -935,6 +935,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Dynamic Binary Instrumentation
 - https://github.com/hzqst/unicorn_pe
+- https://github.com/AdvDebug/Brovan [User-mode x86_64 binary emulator for PE, ELF, memory dumps, and unrecognized file formats; C#, Unicorn, interactive debugger shell]
 - https://github.com/momo5502/sogen [Windows User Space Emulator]
 - https://github.com/mojtabafalleh/emulator [Windows User Space Emulator]
 - https://github.com/binsnake/KUBERA [A x86 environment emulator for Windows user and kernel binaries]
