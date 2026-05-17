@@ -4018,6 +4018,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Detection:Spoof Stack
 - https://github.com/gabriellandau/ShadowStackWalk
+- https://github.com/0xjbb/cet-spoofing-detection [PoC: detect stack spoofing in CET-enabled processes by comparing shadow stack vs user stack for missing frames; usermode, Clang/CMake]
 - https://github.com/cryotb/RASD
 
 > Detection:ESP
