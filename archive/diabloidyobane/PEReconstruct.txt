@@ -1,0 +1,1982 @@
+Project Path: arc_diabloidyobane_PEReconstruct_ox02cjdf
+
+Source Tree:
+
+```txt
+arc_diabloidyobane_PEReconstruct_ox02cjdf
+├── 01_acquire
+│   ├── dump_contiguous_image.py
+│   ├── dump_manualmap.py
+│   ├── scan_exec_private.py
+│   └── scan_pe_deep.py
+├── 02_reconstruct
+│   └── rebuild_headerless.py
+├── 03_enrich
+│   ├── analyze_hooks.py
+│   └── resolve_exports.py
+├── LICENSE
+├── README.md
+└── skills
+    └── pe-reconstruct
+        └── SKILL.md
+
+```
+
+`01_acquire/dump_contiguous_image.py`:
+
+```py
+"""
+dump_contiguous_image.py — dump a contiguous VA range from a target process,
+walking VirtualQueryEx and stitching mapped sub-regions with zero-fill over
+unmapped/protected gaps.
+
+Use case: rebuild an MM-mapped DLL whose .text/.rdata/.pdata live in
+non-contiguous sub-allocations (the loader allocated each section
+separately, leaving gaps for unallocated/RW sections).
+
+Usage:
+    python dump_contiguous_image.py --pid <PID> --base 0x<HEX> --size 0x<HEX> --out <path>
+"""
+
+import argparse
+import ctypes
+import os
+import sys
+from ctypes import wintypes
+
+kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+
+PROCESS_QUERY_INFORMATION = 0x0400
+PROCESS_VM_READ           = 0x0010
+MEM_COMMIT                = 0x1000
+PAGE_NOACCESS             = 0x01
+PAGE_GUARD                = 0x100
+
+
+class MEMORY_BASIC_INFORMATION(ctypes.Structure):
+    _fields_ = [
+        ('BaseAddress',       ctypes.c_void_p),
+        ('AllocationBase',    ctypes.c_void_p),
+        ('AllocationProtect', wintypes.DWORD),
+        ('__alignment1',      wintypes.DWORD),
+        ('RegionSize',        ctypes.c_size_t),
+        ('State',             wintypes.DWORD),
+        ('Protect',           wintypes.DWORD),
+        ('Type',              wintypes.DWORD),
+        ('__alignment2',      wintypes.DWORD),
+    ]
+
+
+kernel32.OpenProcess.restype = wintypes.HANDLE
+kernel32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+kernel32.VirtualQueryEx.restype = ctypes.c_size_t
+kernel32.VirtualQueryEx.argtypes = [wintypes.HANDLE, ctypes.c_void_p,
+                                    ctypes.POINTER(MEMORY_BASIC_INFORMATION),
+                                    ctypes.c_size_t]
+kernel32.ReadProcessMemory.restype = wintypes.BOOL
+kernel32.ReadProcessMemory.argtypes = [wintypes.HANDLE, ctypes.c_void_p,
+                                       ctypes.c_void_p, ctypes.c_size_t,
+                                       ctypes.POINTER(ctypes.c_size_t)]
+kernel32.CloseHandle.restype = wintypes.BOOL
+kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--pid',  type=int, required=True)
+    ap.add_argument('--base', type=lambda x: int(x, 0), required=True)
+    ap.add_argument('--size', type=lambda x: int(x, 0), required=True)
+    ap.add_argument('--out',  required=True)
+    args = ap.parse_args()
+
+    h = kernel32.OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+                             False, args.pid)
+    if not h:
+        print(f'[-] OpenProcess failed: err={ctypes.get_last_error()}')
+        return 1
+
+    img_base = args.base
+    img_end  = args.base + args.size
+    out      = bytearray(args.size)   # zero-init
+    cur      = img_base
+    total_in = 0
+
+    print(f'{"BASE":<18} {"SIZE":>10}  STATE PROT  result')
+    print('-' * 72)
+    while cur < img_end:
+        mbi = MEMORY_BASIC_INFORMATION()
+        r = kernel32.VirtualQueryEx(h, ctypes.c_void_p(cur),
+                                    ctypes.byref(mbi),
+                                    ctypes.sizeof(mbi))
+        if r == 0:
+            print(f'{cur:016X}  -- VirtualQueryEx failed (err={ctypes.get_last_error()})')
+            break
+        rb = mbi.BaseAddress or 0
+        rs = mbi.RegionSize or 0
+        nx = rb + rs
+        if nx <= cur:
+            nx = cur + 0x1000
+
+        # Trim to image window
+        eff_base = max(rb, img_base)
+        eff_end  = min(nx, img_end)
+        eff_size = eff_end - eff_base
+
+        committed = (mbi.State == MEM_COMMIT)
+        guarded   = bool(mbi.Protect & (PAGE_GUARD | PAGE_NOACCESS))
+        readable  = committed and not guarded and (mbi.Protect & 0xFF) != 0
+
+        if eff_size > 0 and readable:
+            buf = ctypes.create_string_buffer(eff_size)
+            n = ctypes.c_size_t(0)
+            ok = kernel32.ReadProcessMemory(h, ctypes.c_void_p(eff_base), buf,
+                                            eff_size, ctypes.byref(n))
+            got = n.value
+            if ok and got > 0:
+                out[eff_base - img_base : eff_base - img_base + got] = buf.raw[:got]
+                total_in += got
+                print(f'{eff_base:016X}  0x{eff_size:8X}  C 0x{mbi.Protect:03X}  ok read=0x{got:X}')
+            else:
+                print(f'{eff_base:016X}  0x{eff_size:8X}  C 0x{mbi.Protect:03X}  RPM FAIL err={ctypes.get_last_error()}')
+        else:
+            print(f'{eff_base:016X}  0x{max(0,eff_size):8X}  S 0x{mbi.State:05X} P 0x{mbi.Protect:03X}  skip (uncommitted/guarded)')
+
+        cur = nx
+
+    print('-' * 72)
+    print(f'[=] read 0x{total_in:X} of 0x{args.size:X} bytes')
+
+    with open(args.out, 'wb') as f:
+        f.write(out)
+    print(f'[+] wrote {args.out} ({len(out):,} bytes)')
+
+    kernel32.CloseHandle(h)
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+
+```
+
+`01_acquire/dump_manualmap.py`:
+
+```py
+"""
+dump_manualmap.py — find manual-mapped DLLs in a target process and dump them.
+
+Sweeps every MEM_COMMIT + MEM_PRIVATE region via VirtualQueryEx, checks for
+MZ+PE headers, then reads the full image via ReadProcessMemory and rebuilds
+section headers so raw==virtual (the file loads 1:1 into IDA).
+
+Usage:
+    python dump_manualmap.py --pid 12345
+    python dump_manualmap.py --name target.exe
+    python dump_manualmap.py --pid 12345 --out C:\\dumps --min-size 0x10000
+
+Works against any target you can OpenProcess() on — no driver, no debugger
+required. For kernel-protected processes a kernel-mode read primitive is
+needed instead (out of scope for this toolkit).
+"""
+
+import argparse
+import ctypes
+from ctypes import wintypes
+import os
+import struct
+import sys
+
+kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+
+# --- access rights & constants ---
+PROCESS_QUERY_INFORMATION = 0x0400
+PROCESS_VM_READ           = 0x0010
+
+MEM_COMMIT   = 0x1000
+MEM_PRIVATE  = 0x20000
+MEM_IMAGE    = 0x1000000
+MEM_MAPPED   = 0x40000
+
+PAGE_NOACCESS = 0x01
+PAGE_GUARD    = 0x100
+
+TH32CS_SNAPPROCESS = 0x00000002
+
+# --- structs ---
+class MEMORY_BASIC_INFORMATION(ctypes.Structure):
+    _fields_ = [
+        ('BaseAddress',       ctypes.c_void_p),
+        ('AllocationBase',    ctypes.c_void_p),
+        ('AllocationProtect', wintypes.DWORD),
+        ('__alignment1',      wintypes.DWORD),
+        ('RegionSize',        ctypes.c_size_t),
+        ('State',             wintypes.DWORD),
+        ('Protect',           wintypes.DWORD),
+        ('Type',              wintypes.DWORD),
+        ('__alignment2',      wintypes.DWORD),
+    ]
+
+
+class PROCESSENTRY32(ctypes.Structure):
+    _fields_ = [
+        ('dwSize',              wintypes.DWORD),
+        ('cntUsage',            wintypes.DWORD),
+        ('th32ProcessID',       wintypes.DWORD),
+        ('th32DefaultHeapID',   ctypes.c_void_p),
+        ('th32ModuleID',        wintypes.DWORD),
+        ('cntThreads',          wintypes.DWORD),
+        ('th32ParentProcessID', wintypes.DWORD),
+        ('pcPriClassBase',      wintypes.LONG),
+        ('dwFlags',             wintypes.DWORD),
+        ('szExeFile',           ctypes.c_char * 260),
+    ]
+
+
+# --- API bindings ---
+kernel32.OpenProcess.restype = wintypes.HANDLE
+kernel32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+
+kernel32.VirtualQueryEx.restype = ctypes.c_size_t
+kernel32.VirtualQueryEx.argtypes = [wintypes.HANDLE, ctypes.c_void_p,
+                                    ctypes.POINTER(MEMORY_BASIC_INFORMATION),
+                                    ctypes.c_size_t]
+
+kernel32.ReadProcessMemory.restype = wintypes.BOOL
+kernel32.ReadProcessMemory.argtypes = [wintypes.HANDLE, ctypes.c_void_p,
+                                       ctypes.c_void_p, ctypes.c_size_t,
+                                       ctypes.POINTER(ctypes.c_size_t)]
+
+kernel32.CloseHandle.restype = wintypes.BOOL
+kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+
+kernel32.CreateToolhelp32Snapshot.restype = wintypes.HANDLE
+kernel32.CreateToolhelp32Snapshot.argtypes = [wintypes.DWORD, wintypes.DWORD]
+
+kernel32.Process32First.restype = wintypes.BOOL
+kernel32.Process32First.argtypes = [wintypes.HANDLE, ctypes.POINTER(PROCESSENTRY32)]
+kernel32.Process32Next.restype = wintypes.BOOL
+kernel32.Process32Next.argtypes = [wintypes.HANDLE, ctypes.POINTER(PROCESSENTRY32)]
+
+
+# --- helpers ---
+def read_memory(handle, address, size):
+    """Read `size` bytes at `address` in the target. Returns bytes on success."""
+    buf = ctypes.create_string_buffer(size)
+    read = ctypes.c_size_t(0)
+    ok = kernel32.ReadProcessMemory(handle, ctypes.c_void_p(address),
+                                    buf, size, ctypes.byref(read))
+    if not ok:
+        return None
+    return bytes(buf.raw[:read.value])
+
+
+def find_pid_by_name(name):
+    """Case-insensitive exe-name → PID via Toolhelp snapshot."""
+    snap = kernel32.CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)
+    if snap == wintypes.HANDLE(-1).value or not snap:
+        return None
+    pe = PROCESSENTRY32()
+    pe.dwSize = ctypes.sizeof(PROCESSENTRY32)
+    found = None
+    try:
+        if kernel32.Process32First(snap, ctypes.byref(pe)):
+            while True:
+                exe = pe.szExeFile.decode('ascii', errors='replace')
+                if exe.lower() == name.lower():
+                    found = pe.th32ProcessID
+                    break
+                if not kernel32.Process32Next(snap, ctypes.byref(pe)):
+                    break
+    finally:
+        kernel32.CloseHandle(snap)
+    return found
+
+
+def parse_pe_header(header_bytes):
+    """Return dict with bitness, machine, nsec, oh_size, image_base, size_of_image, dd_off.
+    `dd_off` is the offset of the DataDirectory array inside the buffer."""
+    if len(header_bytes) < 0x40 or header_bytes[:2] != b'MZ':
+        return None
+    e_lfanew = struct.unpack_from('<I', header_bytes, 0x3C)[0]
+    if e_lfanew <= 0 or e_lfanew + 0x18 + 0x70 > len(header_bytes):
+        return None
+    if struct.unpack_from('<I', header_bytes, e_lfanew)[0] != 0x00004550:  # 'PE\0\0'
+        return None
+    machine = struct.unpack_from('<H', header_bytes, e_lfanew + 4)[0]
+    nsec    = struct.unpack_from('<H', header_bytes, e_lfanew + 6)[0]
+    oh_size = struct.unpack_from('<H', header_bytes, e_lfanew + 0x14)[0]
+    magic   = struct.unpack_from('<H', header_bytes, e_lfanew + 0x18)[0]
+    oh_off  = e_lfanew + 0x18 + 2  # immediately after Magic
+    if magic == 0x20B:  # PE32+
+        bitness = 64
+        image_base    = struct.unpack_from('<Q', header_bytes, e_lfanew + 0x18 + 0x18)[0]
+        size_of_image = struct.unpack_from('<I', header_bytes, e_lfanew + 0x18 + 0x38)[0]
+        dd_off        = e_lfanew + 0x18 + 0x70
+        image_base_off = e_lfanew + 0x18 + 0x18
+    elif magic == 0x10B:  # PE32
+        bitness = 32
+        image_base    = struct.unpack_from('<I', header_bytes, e_lfanew + 0x18 + 0x1C)[0]
+        size_of_image = struct.unpack_from('<I', header_bytes, e_lfanew + 0x18 + 0x38)[0]
+        dd_off        = e_lfanew + 0x18 + 0x60
+        image_base_off = e_lfanew + 0x18 + 0x1C
+    else:
+        return None
+    return {
+        'e_lfanew':       e_lfanew,
+        'machine':        machine,
+        'nsec':           nsec,
+        'oh_size':        oh_size,
+        'magic':          magic,
+        'bitness':        bitness,
+        'image_base':     image_base,
+        'image_base_off': image_base_off,
+        'size_of_image':  size_of_image,
+        'dd_off':         dd_off,
+        'first_sec_off':  e_lfanew + 4 + 0x14 + oh_size,
+    }
+
+
+def reconstruct(img, base, meta):
+    """In-place fixups:
+        1. ImageBase := runtime base (so absolute addresses match the dump).
+        2. Every section: PointerToRawData := VirtualAddress,
+                          SizeOfRawData    := VirtualSize
+           (raw == virtual so file layout mirrors loaded image, IDA opens 1:1).
+        3. IMAGE_DIRECTORY_ENTRY_BASERELOC := 0 / 0 — loader won't try to
+           relocate (we just baked ImageBase to the runtime address).
+    """
+    # 1. ImageBase
+    if meta['bitness'] == 64:
+        struct.pack_into('<Q', img, meta['image_base_off'], base)
+    else:
+        struct.pack_into('<I', img, meta['image_base_off'], base & 0xFFFFFFFF)
+
+    # 2. Sections
+    SECTION_HEADER_SIZE = 0x28
+    for i in range(meta['nsec']):
+        so = meta['first_sec_off'] + i * SECTION_HEADER_SIZE
+        if so + SECTION_HEADER_SIZE > len(img):
+            break
+        virt_addr = struct.unpack_from('<I', img, so + 0x0C)[0]
+        virt_size = struct.unpack_from('<I', img, so + 0x08)[0]
+        # Clamp if the image got truncated
+        if virt_addr + virt_size > len(img):
+            virt_size = max(0, len(img) - virt_addr)
+            struct.pack_into('<I', img, so + 0x08, virt_size)
+        struct.pack_into('<I', img, so + 0x10, virt_size)   # SizeOfRawData
+        struct.pack_into('<I', img, so + 0x14, virt_addr)   # PointerToRawData
+
+    # 3. Clear relocation directory (entry index 5 in DataDirectory)
+    struct.pack_into('<II', img, meta['dd_off'] + 5 * 8, 0, 0)
+
+
+def scan_process(pid, min_size, max_size, out_dir):
+    """Walk every committed private region, dump each MZ+PE hit."""
+    h = kernel32.OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, False, pid)
+    if not h:
+        err = ctypes.get_last_error()
+        print(f'[-] OpenProcess({pid}) failed: err={err} ({ctypes.FormatError(err).strip()})')
+        print('    If the target is kernel-protected, the usermode handle was stripped.')
+        print('    A kernel-mode read primitive is required to proceed.')
+        return 0
+
+    addr = 0
+    limit = 0x7FFF_FFFFFFFF
+    dumped = 0
+    scanned = 0
+
+    os.makedirs(out_dir, exist_ok=True)
+
+    while addr < limit:
+        mbi = MEMORY_BASIC_INFORMATION()
+        ret = kernel32.VirtualQueryEx(h, ctypes.c_void_p(addr),
+                                      ctypes.byref(mbi), ctypes.sizeof(mbi))
+        if ret == 0:
+            break
+        scanned += 1
+
+        region_base = mbi.BaseAddress or 0
+        region_size = mbi.RegionSize or 0
+        next_addr = region_base + region_size
+        # Safety net against stuck-at-zero loops
+        if next_addr <= addr:
+            next_addr = addr + 0x1000
+        addr = next_addr
+
+        if mbi.State != MEM_COMMIT:                     continue
+        if mbi.Type  != MEM_PRIVATE:                    continue
+        if region_size < min_size:                      continue
+        if region_size > max_size:                      continue
+        if mbi.Protect & PAGE_NOACCESS:                 continue
+        if mbi.Protect & PAGE_GUARD:                    continue
+
+        # Read enough to see the DOS + NT headers + section table (generous)
+        head = read_memory(h, region_base, min(0x2000, region_size))
+        if not head or head[:2] != b'MZ':               continue
+
+        meta = parse_pe_header(head)
+        if not meta:                                    continue
+
+        soi = meta['size_of_image']
+        if soi == 0 or soi > region_size + 0x100_0000:  # sanity cap ~16 MB slack
+            print(f'[!] {region_base:016X} SizeOfImage=0x{soi:X} looks wrong, skip')
+            continue
+
+        print(f'[+] {region_base:016X}  {meta["bitness"]}-bit  '
+              f'sections={meta["nsec"]}  SizeOfImage=0x{soi:X}  '
+              f'RegionSize=0x{region_size:X}')
+
+        # Read the full mapped image, clamped to the region bound
+        read_size = min(soi, region_size)
+        img_bytes = read_memory(h, region_base, read_size)
+        if not img_bytes or len(img_bytes) < read_size:
+            # Sometimes pages within the allocation aren't all committed; fall
+            # back to reading page-by-page so we salvage what we can.
+            img = bytearray(read_size)
+            for off in range(0, read_size, 0x1000):
+                chunk = read_memory(h, region_base + off,
+                                    min(0x1000, read_size - off))
+                if chunk:
+                    img[off:off + len(chunk)] = chunk
+        else:
+            img = bytearray(img_bytes)
+
+        # Reconstruct headers
+        reconstruct(img, region_base, meta)
+
+        # Save
+        tag = 'x64' if meta['bitness'] == 64 else 'x86'
+        fname = f'mm_{region_base:016X}_{tag}.bin'
+        fpath = os.path.join(out_dir, fname)
+        with open(fpath, 'wb') as f:
+            f.write(img)
+        print(f'    → {fpath}  ({len(img):,} bytes)')
+        dumped += 1
+
+    kernel32.CloseHandle(h)
+    print(f'\n[=] Scanned {scanned} regions, dumped {dumped} PE images to {out_dir}')
+    return dumped
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--pid',      type=int)
+    ap.add_argument('--name',     type=str)
+    ap.add_argument('--min-size', type=lambda x: int(x, 0), default=0x10000,
+                    help='Minimum region size to probe (default 0x10000)')
+    ap.add_argument('--max-size', type=lambda x: int(x, 0), default=0x40000000,
+                    help='Maximum region size (default 0x40000000 = 1 GB)')
+    ap.add_argument('--out',      type=str, default=None)
+    args = ap.parse_args()
+
+    pid = args.pid
+    if not pid and args.name:
+        pid = find_pid_by_name(args.name)
+        if not pid:
+            print(f'[-] Process "{args.name}" not running'); return 1
+        print(f'[+] Resolved {args.name} → PID {pid}')
+    if not pid:
+        ap.print_help(); return 1
+
+    out_dir = args.out or os.path.join(os.path.expanduser('~'), 'Desktop',
+                                       f'manualmap_{pid}')
+    return 0 if scan_process(pid, args.min_size, args.max_size, out_dir) >= 0 else 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+
+```
+
+`01_acquire/scan_exec_private.py`:
+
+```py
+"""
+scan_exec_private.py — list every MEM_PRIVATE region with an executable
+protection (PAGE_EXECUTE*, PAGE_EXECUTE_READ, PAGE_EXECUTE_READWRITE).
+
+A manual-mapped DLL always has at least one RX region (its .text). Even if
+the loader wiped every PE/MZ byte out of the headers, the code section
+itself still has to be executable — you can't run from non-X pages.
+
+If we see suspicious RX private regions of reasonable size (>= ~0x8000),
+those are strong manual-map candidates. A "clean" process has very few RX
+private regions: JITs, some shims, maybe a dozen. Most executable mappings
+are MEM_IMAGE (real DLLs loaded by the Windows loader).
+
+Usage:
+    python scan_exec_private.py --pid <PID>
+"""
+
+import argparse
+import ctypes
+import os
+import struct
+import sys
+from ctypes import wintypes
+
+kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+
+PROCESS_QUERY_INFORMATION = 0x0400
+PROCESS_VM_READ           = 0x0010
+MEM_COMMIT                = 0x1000
+MEM_PRIVATE               = 0x20000
+PAGE_EXECUTE              = 0x10
+PAGE_EXECUTE_READ         = 0x20
+PAGE_EXECUTE_READWRITE    = 0x40
+PAGE_EXECUTE_WRITECOPY    = 0x80
+EXEC_MASK                 = (PAGE_EXECUTE | PAGE_EXECUTE_READ |
+                             PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY)
+PAGE_GUARD                = 0x100
+PAGE_NOACCESS             = 0x01
+
+
+class MEMORY_BASIC_INFORMATION(ctypes.Structure):
+    _fields_ = [
+        ('BaseAddress',       ctypes.c_void_p),
+        ('AllocationBase',    ctypes.c_void_p),
+        ('AllocationProtect', wintypes.DWORD),
+        ('__alignment1',      wintypes.DWORD),
+        ('RegionSize',        ctypes.c_size_t),
+        ('State',             wintypes.DWORD),
+        ('Protect',           wintypes.DWORD),
+        ('Type',              wintypes.DWORD),
+        ('__alignment2',      wintypes.DWORD),
+    ]
+
+
+kernel32.OpenProcess.restype = wintypes.HANDLE
+kernel32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+kernel32.VirtualQueryEx.restype = ctypes.c_size_t
+kernel32.VirtualQueryEx.argtypes = [wintypes.HANDLE, ctypes.c_void_p,
+                                    ctypes.POINTER(MEMORY_BASIC_INFORMATION),
+                                    ctypes.c_size_t]
+kernel32.ReadProcessMemory.restype = wintypes.BOOL
+kernel32.ReadProcessMemory.argtypes = [wintypes.HANDLE, ctypes.c_void_p,
+                                       ctypes.c_void_p, ctypes.c_size_t,
+                                       ctypes.POINTER(ctypes.c_size_t)]
+kernel32.CloseHandle.restype = wintypes.BOOL
+kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+
+
+def read_mem(h, addr, size):
+    buf = ctypes.create_string_buffer(size)
+    n = ctypes.c_size_t(0)
+    ok = kernel32.ReadProcessMemory(h, ctypes.c_void_p(addr), buf, size, ctypes.byref(n))
+    return bytes(buf.raw[:n.value]) if ok else None
+
+
+def entropy(data):
+    """Shannon entropy, normalized to 0..8."""
+    if not data:
+        return 0.0
+    counts = [0] * 256
+    for b in data:
+        counts[b] += 1
+    n = len(data)
+    import math
+    H = 0.0
+    for c in counts:
+        if c:
+            p = c / n
+            H -= p * math.log2(p)
+    return H
+
+
+def prot_name(p):
+    names = []
+    if p & PAGE_EXECUTE_WRITECOPY: names.append('X-COW')
+    elif p & PAGE_EXECUTE_READWRITE: names.append('XRW')
+    elif p & PAGE_EXECUTE_READ: names.append('XR')
+    elif p & PAGE_EXECUTE: names.append('X')
+    if p & 0x200: names.append('NC')
+    if p & PAGE_GUARD: names.append('GUARD')
+    return '|'.join(names) if names else f'0x{p:X}'
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--pid', type=int, required=True)
+    ap.add_argument('--min-size', type=lambda x: int(x, 0), default=0x2000)
+    ap.add_argument('--dump', action='store_true',
+                    help='Write each candidate region to ~/Desktop/execprivate_<pid>/')
+    args = ap.parse_args()
+
+    h = kernel32.OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+                             False, args.pid)
+    if not h:
+        print(f'[-] OpenProcess failed: err={ctypes.get_last_error()}')
+        return 1
+
+    out_dir = os.path.join(os.path.expanduser('~'), 'Desktop',
+                           f'execprivate_{args.pid}')
+    if args.dump:
+        os.makedirs(out_dir, exist_ok=True)
+
+    addr = 0
+    hits = []
+    print(f'{"BASE":<18} {"SIZE":>12} {"PROT":<8}  first bytes             entropy')
+    print('-' * 90)
+
+    while addr < 0x7FFF_FFFFFFFF:
+        mbi = MEMORY_BASIC_INFORMATION()
+        if kernel32.VirtualQueryEx(h, ctypes.c_void_p(addr),
+                                   ctypes.byref(mbi), ctypes.sizeof(mbi)) == 0:
+            break
+        region_base = mbi.BaseAddress or 0
+        region_size = mbi.RegionSize or 0
+        next_addr = region_base + region_size
+        if next_addr <= addr:
+            next_addr = addr + 0x1000
+        addr = next_addr
+
+        if mbi.State != MEM_COMMIT:                continue
+        if mbi.Type != MEM_PRIVATE:                continue
+        if region_size < args.min_size:            continue
+        if not (mbi.Protect & EXEC_MASK):          continue
+        if mbi.Protect & (PAGE_GUARD | PAGE_NOACCESS): continue
+
+        sample = read_mem(h, region_base, min(0x100, region_size))
+        if not sample:
+            continue
+        ent = entropy(read_mem(h, region_base, min(0x4000, region_size)) or b'')
+
+        # First 16 bytes as hex
+        hexbytes = ' '.join(f'{b:02X}' for b in sample[:16])
+        print(f'{region_base:016X}  0x{region_size:10X}  {prot_name(mbi.Protect):<7}  {hexbytes}  {ent:.2f}')
+
+        hits.append((region_base, region_size, mbi.Protect))
+
+        if args.dump:
+            full = read_mem(h, region_base, region_size)
+            if full:
+                fname = f'execpriv_{region_base:016X}_0x{region_size:X}.bin'
+                fpath = os.path.join(out_dir, fname)
+                with open(fpath, 'wb') as f:
+                    f.write(full)
+
+    print('-' * 90)
+    print(f'[=] Found {len(hits)} executable private regions')
+    if args.dump and hits:
+        print(f'[+] Dumped to {out_dir}')
+    kernel32.CloseHandle(h)
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+
+```
+
+`01_acquire/scan_pe_deep.py`:
+
+```py
+"""
+scan_pe_deep.py — aggressive PE-signature sweep.
+
+Where dump_manualmap.py only looks for `MZ` at the start of a region,
+this one:
+  1. Reads EVERY committed region (not just MEM_PRIVATE)
+  2. Scans inside the region for `PE\0\0` sigs at 0x1000-aligned offsets
+  3. Back-computes the probable image start (PE sig minus e_lfanew)
+  4. Validates machine + OptionalHeader.Magic
+  5. Reports all candidates with their bitness / SizeOfImage
+
+This catches manual-maps where the DOS stub was wiped after DllMain —
+a common anti-dumping trick. You then pass the reported base to
+dump_manualmap.py's reconstruction helpers, or just carve the region out
+by hand.
+
+Usage:
+    python scan_pe_deep.py --pid <PID>
+"""
+
+import argparse
+import ctypes
+import os
+import struct
+import sys
+from ctypes import wintypes
+
+kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+
+PROCESS_QUERY_INFORMATION = 0x0400
+PROCESS_VM_READ           = 0x0010
+MEM_COMMIT                = 0x1000
+PAGE_NOACCESS             = 0x01
+PAGE_GUARD                = 0x100
+
+
+class MEMORY_BASIC_INFORMATION(ctypes.Structure):
+    _fields_ = [
+        ('BaseAddress',       ctypes.c_void_p),
+        ('AllocationBase',    ctypes.c_void_p),
+        ('AllocationProtect', wintypes.DWORD),
+        ('__alignment1',      wintypes.DWORD),
+        ('RegionSize',        ctypes.c_size_t),
+        ('State',             wintypes.DWORD),
+        ('Protect',           wintypes.DWORD),
+        ('Type',              wintypes.DWORD),
+        ('__alignment2',      wintypes.DWORD),
+    ]
+
+
+kernel32.OpenProcess.restype = wintypes.HANDLE
+kernel32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+kernel32.VirtualQueryEx.restype = ctypes.c_size_t
+kernel32.VirtualQueryEx.argtypes = [wintypes.HANDLE, ctypes.c_void_p,
+                                    ctypes.POINTER(MEMORY_BASIC_INFORMATION),
+                                    ctypes.c_size_t]
+kernel32.ReadProcessMemory.restype = wintypes.BOOL
+kernel32.ReadProcessMemory.argtypes = [wintypes.HANDLE, ctypes.c_void_p,
+                                       ctypes.c_void_p, ctypes.c_size_t,
+                                       ctypes.POINTER(ctypes.c_size_t)]
+kernel32.CloseHandle.restype = wintypes.BOOL
+kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+
+
+def read_mem(handle, address, size):
+    buf = ctypes.create_string_buffer(size)
+    n = ctypes.c_size_t(0)
+    if not kernel32.ReadProcessMemory(handle, ctypes.c_void_p(address), buf,
+                                      size, ctypes.byref(n)):
+        return None
+    return bytes(buf.raw[:n.value])
+
+
+TYPE_NAMES = {0x1000000: 'IMAGE  ', 0x40000: 'MAPPED ', 0x20000: 'PRIVATE'}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--pid',  type=int, required=True)
+    ap.add_argument('--min-size', type=lambda x: int(x, 0), default=0x4000)
+    ap.add_argument('--dump-all', action='store_true',
+                    help='Also dump every PE hit to ~/Desktop/deepscan_<pid>/')
+    args = ap.parse_args()
+
+    h = kernel32.OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+                             False, args.pid)
+    if not h:
+        print(f'[-] OpenProcess({args.pid}) failed: err={ctypes.get_last_error()}')
+        return 1
+
+    out_dir = os.path.join(os.path.expanduser('~'), 'Desktop',
+                           f'deepscan_{args.pid}')
+    if args.dump_all:
+        os.makedirs(out_dir, exist_ok=True)
+
+    addr = 0
+    hits = []
+    scanned = 0
+    mz_at_0 = 0
+    pe_elsewhere = 0
+
+    print(f'{"TYPE":<8} {"PROTECT":>8} {"SIZE":>12}  BASE              hit')
+    print('-' * 70)
+
+    while addr < 0x7FFF_FFFFFFFF:
+        mbi = MEMORY_BASIC_INFORMATION()
+        if kernel32.VirtualQueryEx(h, ctypes.c_void_p(addr),
+                                   ctypes.byref(mbi),
+                                   ctypes.sizeof(mbi)) == 0:
+            break
+        scanned += 1
+        region_base = mbi.BaseAddress or 0
+        region_size = mbi.RegionSize or 0
+        next_addr = region_base + region_size
+        if next_addr <= addr:
+            next_addr = addr + 0x1000
+        addr = next_addr
+
+        if mbi.State != MEM_COMMIT:            continue
+        if region_size < args.min_size:        continue
+        if mbi.Protect & PAGE_NOACCESS:        continue
+        if mbi.Protect & PAGE_GUARD:           continue
+
+        # Read a chunk — for very big regions (> 16 MB) only read first 16 MB,
+        # that's enough to catch most mapped images but avoids eating RAM.
+        read_cap = min(region_size, 16 * 1024 * 1024)
+        data = read_mem(h, region_base, read_cap)
+        if not data:
+            continue
+
+        # Look for MZ at offset 0
+        hit_note = None
+        if data[:2] == b'MZ' and len(data) >= 0x40:
+            e_lfanew = struct.unpack_from('<I', data, 0x3C)[0]
+            if 0 < e_lfanew < len(data) - 4 and \
+               struct.unpack_from('<I', data, e_lfanew)[0] == 0x00004550:
+                mz_at_0 += 1
+                hit_note = f'MZ+PE  e_lfanew=0x{e_lfanew:X}'
+                hits.append(('mz0', region_base, region_size, data, e_lfanew))
+
+        # Also look for PE\0\0 anywhere on 4-byte aligned offset — catches
+        # manual-maps with DOS header wiped. For each, compute a plausible
+        # base by subtracting a few common e_lfanew values (0x80, 0xE8, 0xF0,
+        # 0x108, 0x200) and checking if that offset resolves to an MZ... or
+        # if there's no MZ at all, treat the PE sig itself as the anchor.
+        if not hit_note:
+            off = 0
+            while True:
+                p = data.find(b'PE\x00\x00', off)
+                if p < 0: break
+                off = p + 1
+                if p < 0x40 or (p & 3): continue
+                # Validate OptionalHeader.Magic immediately after 24-byte
+                # FileHeader (sig4 + FileHeader20 + OptMagic at +0x18)
+                magic_off = p + 0x18
+                if magic_off + 2 > len(data): continue
+                magic = struct.unpack_from('<H', data, magic_off)[0]
+                if magic not in (0x10B, 0x20B): continue
+                nsec = struct.unpack_from('<H', data, p + 6)[0]
+                if nsec == 0 or nsec > 96: continue
+                pe_elsewhere += 1
+                tag = 'PE-hdr-only' if data[:2] != b'MZ' else 'MZ+PE (deep)'
+                hit_note = f'{tag}  pe_at=0x{p:X}  magic={hex(magic)}  secs={nsec}'
+                hits.append(('deep', region_base, region_size, data, p))
+                break  # only report first match per region
+
+        if hit_note:
+            tname = TYPE_NAMES.get(mbi.Type, f'0x{mbi.Type:X}')
+            print(f'{tname} 0x{mbi.Protect:06X} 0x{region_size:10X}  '
+                  f'{region_base:016X}  {hit_note}')
+
+    print('-' * 70)
+    print(f'[=] Scanned {scanned} regions. MZ-at-0 hits: {mz_at_0}. '
+          f'PE-header-only hits: {pe_elsewhere}. Total: {len(hits)}')
+
+    if args.dump_all and hits:
+        for kind, base, region_size, data, pe_off in hits:
+            fname = f'{kind}_{base:016X}.bin'
+            fpath = os.path.join(out_dir, fname)
+            with open(fpath, 'wb') as f:
+                f.write(data)
+            print(f'    -> {fpath}  ({len(data):,} bytes)')
+        print(f'[+] Dumped to {out_dir}')
+    elif hits:
+        print('\n(Re-run with --dump-all to save region bytes to disk.)')
+
+    kernel32.CloseHandle(h)
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+
+```
+
+`02_reconstruct/rebuild_headerless.py`:
+
+```py
+"""
+rebuild_headerless.py — forge a minimal valid PE header in front of a
+raw code blob whose DOS/PE headers were wiped post-DllMain.
+
+For a typical multi-MB region we don't know the original section layout,
+so we emit a single catch-all `.text` covering the whole image with RX
+attributes. IDA will analyze the entire region as code, which lets you
+reverse anything without the original loader's help.
+
+Usage:
+    python rebuild_headerless.py <input.bin> <runtime_base_hex> <output.dll>
+    python rebuild_headerless.py execpriv_<BASE>_<SIZE>.bin 0x<BASE> reconstructed.dll
+"""
+
+import struct
+import sys
+import os
+
+
+def build_header(image_base, size_of_image, bitness=64):
+    """Produce a 0x400-byte buffer containing a valid DOS + NT + 1-section
+    PE header. Callers overlay this onto the dumped region's first page."""
+    assert bitness == 64, 'only x64 supported for now'
+
+    # --- DOS header (0x40 bytes) ---
+    dos = bytearray(0x40)
+    dos[0:2] = b'MZ'
+    struct.pack_into('<I', dos, 0x3C, 0x80)   # e_lfanew -> NT headers start at 0x80
+
+    # --- zero-padding to 0x80 ---
+    # (already zero since bytearray)
+
+    nt_off = 0x80
+
+    # --- NT headers ---
+    nt = bytearray()
+    nt += b'PE\x00\x00'                       # Signature (4)
+
+    # IMAGE_FILE_HEADER (20 bytes)
+    nt += struct.pack('<HHIIIHH',
+                      0x8664,                 # Machine = AMD64
+                      1,                      # NumberOfSections (single .text)
+                      0,                      # TimeDateStamp
+                      0,                      # PointerToSymbolTable
+                      0,                      # NumberOfSymbols
+                      0xF0,                   # SizeOfOptionalHeader (PE32+)
+                      0x2022)                 # Characteristics: DLL|LARGE_ADDRESS_AWARE|EXECUTABLE_IMAGE
+
+    # IMAGE_OPTIONAL_HEADER64 (0xF0 bytes)
+    oh_start = len(nt)
+    nt += struct.pack('<H', 0x20B)           # Magic = PE32+
+    nt += struct.pack('<B', 14)              # MajorLinkerVersion
+    nt += struct.pack('<B', 0)               # MinorLinkerVersion
+    nt += struct.pack('<I', size_of_image - 0x1000)  # SizeOfCode (everything after headers)
+    nt += struct.pack('<I', 0)               # SizeOfInitializedData
+    nt += struct.pack('<I', 0)               # SizeOfUninitializedData
+    nt += struct.pack('<I', 0x1000)          # AddressOfEntryPoint (first code byte)
+    nt += struct.pack('<I', 0x1000)          # BaseOfCode
+    nt += struct.pack('<Q', image_base)      # ImageBase
+    nt += struct.pack('<I', 0x1000)          # SectionAlignment
+    nt += struct.pack('<I', 0x1000)          # FileAlignment (raw==virtual for the dump)
+    nt += struct.pack('<H', 6)               # MajorOperatingSystemVersion
+    nt += struct.pack('<H', 0)               # MinorOperatingSystemVersion
+    nt += struct.pack('<H', 0)               # MajorImageVersion
+    nt += struct.pack('<H', 0)               # MinorImageVersion
+    nt += struct.pack('<H', 6)               # MajorSubsystemVersion
+    nt += struct.pack('<H', 0)               # MinorSubsystemVersion
+    nt += struct.pack('<I', 0)               # Win32VersionValue
+    nt += struct.pack('<I', size_of_image)   # SizeOfImage
+    nt += struct.pack('<I', 0x400)           # SizeOfHeaders
+    nt += struct.pack('<I', 0)               # CheckSum
+    nt += struct.pack('<H', 2)               # Subsystem = Windows GUI
+    nt += struct.pack('<H', 0x160)           # DllCharacteristics (NX_COMPAT|NO_SEH|TERMINAL_SERVER_AWARE)
+    nt += struct.pack('<Q', 0x100000)        # SizeOfStackReserve
+    nt += struct.pack('<Q', 0x1000)          # SizeOfStackCommit
+    nt += struct.pack('<Q', 0x100000)        # SizeOfHeapReserve
+    nt += struct.pack('<Q', 0x1000)          # SizeOfHeapCommit
+    nt += struct.pack('<I', 0)               # LoaderFlags
+    nt += struct.pack('<I', 16)              # NumberOfRvaAndSizes
+    # 16 DataDirectory entries (each 8 bytes), all zero
+    nt += b'\x00' * (16 * 8)
+
+    # IMAGE_SECTION_HEADER for .text (0x28 bytes)
+    sec = bytearray(0x28)
+    sec[0:8]  = b'.text\x00\x00\x00'
+    struct.pack_into('<I', sec, 0x08, size_of_image - 0x1000)  # VirtualSize
+    struct.pack_into('<I', sec, 0x0C, 0x1000)                   # VirtualAddress
+    struct.pack_into('<I', sec, 0x10, size_of_image - 0x1000)  # SizeOfRawData
+    struct.pack_into('<I', sec, 0x14, 0x1000)                   # PointerToRawData
+    struct.pack_into('<I', sec, 0x24, 0x60000020)               # Characteristics: CODE|EXECUTE|READ
+
+    # Assemble full header page
+    out = bytearray(0x1000)
+    out[:0x40] = dos
+    out[nt_off:nt_off + len(nt)] = nt
+    sec_off = nt_off + len(nt)
+    out[sec_off:sec_off + len(sec)] = sec
+
+    return bytes(out)
+
+
+def main():
+    if len(sys.argv) != 4:
+        print(__doc__)
+        return 1
+    in_path, base_str, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
+
+    image_base = int(base_str, 0)
+    with open(in_path, 'rb') as f:
+        raw = bytearray(f.read())
+
+    size_of_image = len(raw)
+    if size_of_image & 0xFFF:
+        print(f'[!] Input size 0x{size_of_image:X} not page-aligned; padding up')
+        pad = 0x1000 - (size_of_image & 0xFFF)
+        raw += b'\x00' * pad
+        size_of_image = len(raw)
+
+    header = build_header(image_base, size_of_image)
+    # Only overwrite the zero-prologue (first 0x1000) — code from 0x1000 onward is untouched
+    raw[0:0x1000] = header
+
+    with open(out_path, 'wb') as f:
+        f.write(raw)
+
+    print(f'[+] Wrote {out_path}  ({len(raw):,} bytes)')
+    print(f'    ImageBase  = 0x{image_base:X}')
+    print(f'    SizeOfImage = 0x{size_of_image:X}')
+    print(f'    Single .text section covers 0x1000..0x{size_of_image:X} (RX)')
+    print()
+    print('In IDA: open as PE file. It should auto-detect as a 64-bit DLL.')
+    print('All calls/jumps with absolute addresses in the 0x{0:X}-0x{1:X} range'
+          .format(image_base, image_base + size_of_image))
+    print('will resolve internally without you having to rebase.')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+
+```
+
+`03_enrich/analyze_hooks.py`:
+
+```py
+"""
+analyze_hooks.py — post-dump forensics on a manual-mapped DLL.
+
+Given a target PID and the analyzed target region, do three things:
+    1. Enumerate every loaded module in the target (IMAGE mappings) and map
+       their [base, base+size) ranges to file names via GetMappedFileNameW.
+    2. Read each tagged trampoline page and identify the functions it
+       hooks (by finding `jmp [RIP+0]; <8-byte absolute target>` patterns and
+       resolving the target address against the module map).
+    3. Scan the target blob for 8-byte absolute addresses that fall into
+       known loaded modules — those are the module's import-table references.
+       Group by module and sort by frequency.
+
+Produces a markdown report to stdout + to a file. No driver needed.
+
+Usage:
+    python analyze_hooks.py --pid <PID> \
+        --target "execpriv_<BASE>_<SIZE>.bin" \
+        --target-base 0x<BASE> \
+        --trampoline "execpriv_<TBASE>_<TSIZE>.bin" 0x<TBASE> \
+        --out report.md
+"""
+
+import argparse
+import ctypes
+import os
+import struct
+import sys
+from ctypes import wintypes
+from collections import Counter, defaultdict
+
+kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+psapi    = ctypes.WinDLL('psapi', use_last_error=True)
+
+PROCESS_QUERY_INFORMATION = 0x0400
+PROCESS_VM_READ           = 0x0010
+MEM_COMMIT                = 0x1000
+MEM_IMAGE                 = 0x1000000
+
+
+class MEMORY_BASIC_INFORMATION(ctypes.Structure):
+    _fields_ = [
+        ('BaseAddress',       ctypes.c_void_p),
+        ('AllocationBase',    ctypes.c_void_p),
+        ('AllocationProtect', wintypes.DWORD),
+        ('__alignment1',      wintypes.DWORD),
+        ('RegionSize',        ctypes.c_size_t),
+        ('State',             wintypes.DWORD),
+        ('Protect',           wintypes.DWORD),
+        ('Type',              wintypes.DWORD),
+        ('__alignment2',      wintypes.DWORD),
+    ]
+
+
+kernel32.OpenProcess.restype = wintypes.HANDLE
+kernel32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+kernel32.VirtualQueryEx.restype = ctypes.c_size_t
+kernel32.VirtualQueryEx.argtypes = [wintypes.HANDLE, ctypes.c_void_p,
+                                    ctypes.POINTER(MEMORY_BASIC_INFORMATION),
+                                    ctypes.c_size_t]
+kernel32.CloseHandle.restype = wintypes.BOOL
+kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+
+psapi.GetMappedFileNameW.restype = wintypes.DWORD
+psapi.GetMappedFileNameW.argtypes = [wintypes.HANDLE, ctypes.c_void_p,
+                                     wintypes.LPWSTR, wintypes.DWORD]
+
+
+def enumerate_modules(handle):
+    """Walk VAD for MEM_IMAGE allocations. For each unique AllocationBase,
+    record the total image extent + resolved file name."""
+    images = {}  # alloc_base -> {'end': int, 'name': str}
+
+    addr = 0
+    while addr < 0x7FFF_FFFFFFFF:
+        mbi = MEMORY_BASIC_INFORMATION()
+        if kernel32.VirtualQueryEx(handle, ctypes.c_void_p(addr),
+                                   ctypes.byref(mbi), ctypes.sizeof(mbi)) == 0:
+            break
+        region_base = mbi.BaseAddress or 0
+        region_size = mbi.RegionSize or 0
+        next_addr = region_base + region_size
+        if next_addr <= addr: next_addr = addr + 0x1000
+        addr = next_addr
+
+        if mbi.State != MEM_COMMIT: continue
+        if mbi.Type  != MEM_IMAGE: continue
+
+        alloc = mbi.AllocationBase or region_base
+        end = region_base + region_size
+        if alloc in images:
+            if end > images[alloc]['end']:
+                images[alloc]['end'] = end
+        else:
+            buf = ctypes.create_unicode_buffer(512)
+            n = psapi.GetMappedFileNameW(handle, ctypes.c_void_p(region_base),
+                                         buf, 512)
+            name = buf.value if n else ''
+            images[alloc] = {'end': end, 'name': name}
+
+    out = []
+    for base, info in sorted(images.items()):
+        out.append((base, info['end'] - base, info['name']))
+    return out
+
+
+def module_at(modules, addr):
+    """Return (base, size, name) for the module containing addr, or None."""
+    for base, size, name in modules:
+        if base <= addr < base + size:
+            return (base, size, name)
+    return None
+
+
+def parse_trampoline(data, page_base, modules, target_base, target_size):
+    """Scan every 8-byte aligned qword. Any value that resolves either to a
+    loaded module OR into the target region is a candidate. This catches
+    both the MinHook classic FF25 form AND custom dispatch tables that use
+    raw qword pointers.
+
+    Skips self-references (pointers within this page itself) since those are
+    just internal slot chain bookkeeping.
+    """
+    hits = []
+    page_end = page_base + len(data)
+    for off in range(0, len(data) - 8, 8):
+        target = struct.unpack_from('<Q', data, off)[0]
+        if target == 0: continue
+        if target < 0x10000 or target > 0x7FFF_FFFFFFFF: continue
+        if page_base <= target < page_end: continue
+        mod = module_at(modules, target)
+        in_target = (target_base is not None and
+                     target_base <= target < target_base + target_size)
+        if not mod and not in_target: continue
+        hits.append({
+            'trampoline_va': page_base + off,
+            'target':        target,
+            'module':        mod,
+            'in_target':     in_target,
+        })
+    return hits
+
+
+def scan_absolutes(data, base_of_data, modules, min_count=1):
+    """Scan every 8-byte-aligned qword in `data`. If the value is in a known
+    loaded module, count it — those are the module's external references
+    (imports + hooked-function callbacks + callback pointers etc)."""
+    by_target = Counter()      # absolute addr -> hit count
+    by_source = defaultdict(list)  # absolute addr -> list of data offsets pointing there
+
+    for off in range(0, len(data) - 8, 8):
+        v = struct.unpack_from('<Q', data, off)[0]
+        if v == 0: continue
+        if v < 0x10000: continue
+        mod = module_at(modules, v)
+        if not mod: continue
+        by_target[v] += 1
+        by_source[v].append(off)
+
+    # Also scan unaligned offsets — some loaders store function pointers in
+    # packed structs not aligned to 8 bytes. Slower but finds more.
+    for off in range(0, len(data) - 8, 1):
+        if off % 8 == 0: continue
+        v = struct.unpack_from('<Q', data, off)[0]
+        if v == 0: continue
+        if v < 0x10000: continue
+        mod = module_at(modules, v)
+        if not mod: continue
+        if v in by_target: continue
+        by_target[v] += 1
+        by_source[v].append(off)
+
+    return by_target, by_source
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--pid', type=int, required=True)
+    ap.add_argument('--target', type=str, required=True,
+                    help='Path to the dumped target region')
+    ap.add_argument('--target-base', type=lambda x: int(x, 0), required=True,
+                    help='Runtime base address where the target was loaded')
+    ap.add_argument('--trampoline', action='append', nargs=2,
+                    metavar=('PATH', 'BASE'),
+                    help='Can repeat. Trampoline page: path + runtime base (hex)')
+    ap.add_argument('--out', type=str, default=None,
+                    help='Write full markdown report to this file (also prints to stdout)')
+    args = ap.parse_args()
+
+    h = kernel32.OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+                             False, args.pid)
+    if not h:
+        print(f'[-] OpenProcess failed: err={ctypes.get_last_error()}')
+        return 1
+    print(f'[+] Enumerating loaded modules in PID {args.pid}...')
+    modules = enumerate_modules(h)
+    kernel32.CloseHandle(h)
+    print(f'    Found {len(modules)} loaded image mappings')
+
+    lines = []
+    def emit(s=''):
+        lines.append(s)
+        print(s)
+
+    emit('# Hook + import analysis')
+    emit('')
+    emit(f'- **PID**: {args.pid}')
+    emit(f'- **Target base**: 0x{args.target_base:X}')
+    emit(f'- **Loaded images**: {len(modules)}')
+    emit('')
+
+    with open(args.target, 'rb') as f:
+        target_bytes = f.read()
+    target_size = len(target_bytes)
+
+    trampolines = args.trampoline or []
+    all_tramp_hits = []
+    for path, base_str in trampolines:
+        page_base = int(base_str, 0)
+        with open(path, 'rb') as f:
+            data = f.read()
+        emit(f'## Trampoline page @ 0x{page_base:X}  ({os.path.basename(path)}, {len(data):,} bytes)')
+        emit('')
+        hits = parse_trampoline(data, page_base, modules, args.target_base, target_size)
+        if not hits:
+            emit('_No qword pointers to loaded modules or target in this page._')
+            emit('')
+            continue
+        all_tramp_hits.extend(hits)
+        emit('| Slot VA | Target VA | Destination | Offset |')
+        emit('|---|---|---|---|')
+        for h in hits[:200]:
+            mod = h['module']
+            if mod:
+                mod_name = os.path.basename(mod[2]).replace('\\', '/') or '(unnamed)'
+                mod_off = h['target'] - mod[0]
+                emit(f'| 0x{h["trampoline_va"]:X} | 0x{h["target"]:X} | `{mod_name}` | +0x{mod_off:X} |')
+            elif h['in_target']:
+                rva = h['target'] - args.target_base
+                emit(f'| 0x{h["trampoline_va"]:X} | 0x{h["target"]:X} | **target (detour)** | +0x{rva:X} |')
+            else:
+                emit(f'| 0x{h["trampoline_va"]:X} | 0x{h["target"]:X} | _unmapped_ | — |')
+        if len(hits) > 200:
+            emit(f'_(+{len(hits) - 200} more omitted)_')
+        emit('')
+
+    emit(f'### Trampoline summary: {len(all_tramp_hits)} total pointer entries')
+    mod_breakdown = Counter()
+    detour_count = 0
+    for h in all_tramp_hits:
+        if h['module']:
+            mod_breakdown[os.path.basename(h['module'][2]) or h['module'][2]] += 1
+        elif h['in_target']:
+            detour_count += 1
+        else:
+            mod_breakdown['<unmapped>'] += 1
+    if detour_count:
+        emit(f'- **Target detours**: {detour_count} (hook handlers inside the target)')
+    for mod, n in mod_breakdown.most_common():
+        emit(f'- `{mod}`: **{n}** (hook victims)')
+    emit('')
+
+    emit(f'## Import-table reconstruction')
+    emit('')
+    emit('Scanning target for 8-byte absolute addresses that resolve to a')
+    emit('loaded module\'s code/data range. These are the target\'s external')
+    emit('callable targets (Win32 APIs, host-process functions, vtables...).')
+    emit('')
+    by_target, by_source = scan_absolutes(target_bytes, args.target_base, modules)
+    emit(f'_{sum(by_target.values())} absolute hits across {len(by_target)} unique targets._')
+    emit('')
+
+    by_mod = defaultdict(Counter)
+    for tgt, count in by_target.items():
+        mod = module_at(modules, tgt)
+        if not mod: continue
+        mod_name = os.path.basename(mod[2]) or mod[2]
+        mod_off = tgt - mod[0]
+        by_mod[mod_name][mod_off] = count
+
+    mod_totals = [(n, sum(c.values())) for n, c in by_mod.items()]
+    mod_totals.sort(key=lambda x: -x[1])
+
+    emit('### External references by module (top 20)')
+    emit('')
+    emit('| Module | Unique targets | Total refs |')
+    emit('|---|---|---|')
+    for mod_name, total in mod_totals[:20]:
+        uniq = len(by_mod[mod_name])
+        emit(f'| `{mod_name}` | {uniq} | {total} |')
+    emit('')
+
+    emit('### Top import candidates per module (top 30 offsets each)')
+    emit('')
+    for mod_name, _ in mod_totals[:6]:
+        emit(f'#### `{mod_name}`')
+        emit('')
+        emit('| Offset in module | Hits | Notes |')
+        emit('|---|---|---|')
+        top = by_mod[mod_name].most_common(30)
+        for off, n in top:
+            emit(f'| +0x{off:X} | {n} | |')
+        emit('')
+
+    if args.out:
+        with open(args.out, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(lines))
+        print(f'\n[+] Report written: {args.out}')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+
+```
+
+`03_enrich/resolve_exports.py`:
+
+```py
+"""
+resolve_exports.py — resolve function offsets to export names.
+
+Given a PID and a list of "module+offset" lookups, read each module's PE
+export directory from the target process and map each offset to the nearest
+lower-or-equal exported function. Prints a name like
+"kernel32!CreateFileA+0x12" for each hit.
+
+Standalone — uses only OpenProcess + ReadProcessMemory.
+
+Usage:
+    python resolve_exports.py --pid <PID> \
+        kernel32.dll:0x382C7 ntdll.dll:0x18605 user32.dll:0x12B07
+"""
+
+import argparse
+import bisect
+import ctypes
+import os
+import struct
+import sys
+from ctypes import wintypes
+
+kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+psapi    = ctypes.WinDLL('psapi', use_last_error=True)
+
+PROCESS_QUERY_INFORMATION = 0x0400
+PROCESS_VM_READ           = 0x0010
+MEM_COMMIT                = 0x1000
+MEM_IMAGE                 = 0x1000000
+
+
+class MEMORY_BASIC_INFORMATION(ctypes.Structure):
+    _fields_ = [
+        ('BaseAddress',       ctypes.c_void_p),
+        ('AllocationBase',    ctypes.c_void_p),
+        ('AllocationProtect', wintypes.DWORD),
+        ('__alignment1',      wintypes.DWORD),
+        ('RegionSize',        ctypes.c_size_t),
+        ('State',             wintypes.DWORD),
+        ('Protect',           wintypes.DWORD),
+        ('Type',              wintypes.DWORD),
+        ('__alignment2',      wintypes.DWORD),
+    ]
+
+
+kernel32.OpenProcess.restype = wintypes.HANDLE
+kernel32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+kernel32.VirtualQueryEx.restype = ctypes.c_size_t
+kernel32.VirtualQueryEx.argtypes = [wintypes.HANDLE, ctypes.c_void_p,
+                                    ctypes.POINTER(MEMORY_BASIC_INFORMATION),
+                                    ctypes.c_size_t]
+kernel32.ReadProcessMemory.restype = wintypes.BOOL
+kernel32.ReadProcessMemory.argtypes = [wintypes.HANDLE, ctypes.c_void_p,
+                                       ctypes.c_void_p, ctypes.c_size_t,
+                                       ctypes.POINTER(ctypes.c_size_t)]
+kernel32.CloseHandle.restype = wintypes.BOOL
+kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+psapi.GetMappedFileNameW.restype = wintypes.DWORD
+psapi.GetMappedFileNameW.argtypes = [wintypes.HANDLE, ctypes.c_void_p,
+                                     wintypes.LPWSTR, wintypes.DWORD]
+
+
+def rpm(h, addr, size):
+    buf = ctypes.create_string_buffer(size)
+    n = ctypes.c_size_t(0)
+    if not kernel32.ReadProcessMemory(h, ctypes.c_void_p(addr), buf,
+                                      size, ctypes.byref(n)):
+        return None
+    return bytes(buf.raw[:n.value])
+
+
+def enumerate_modules(h):
+    """Return list of (base, end, name) for every IMAGE allocation."""
+    images = {}
+    addr = 0
+    while addr < 0x7FFF_FFFFFFFF:
+        mbi = MEMORY_BASIC_INFORMATION()
+        if kernel32.VirtualQueryEx(h, ctypes.c_void_p(addr),
+                                   ctypes.byref(mbi), ctypes.sizeof(mbi)) == 0:
+            break
+        rb = mbi.BaseAddress or 0
+        rs = mbi.RegionSize or 0
+        next_a = rb + rs
+        if next_a <= addr: next_a = addr + 0x1000
+        addr = next_a
+        if mbi.State != MEM_COMMIT: continue
+        if mbi.Type  != MEM_IMAGE: continue
+        alloc = mbi.AllocationBase or rb
+        end = rb + rs
+        if alloc in images:
+            if end > images[alloc]['end']:
+                images[alloc]['end'] = end
+        else:
+            buf = ctypes.create_unicode_buffer(512)
+            psapi.GetMappedFileNameW(h, ctypes.c_void_p(rb), buf, 512)
+            images[alloc] = {'end': end, 'name': buf.value}
+    return [(b, v['end'], v['name']) for b, v in sorted(images.items())]
+
+
+def find_module(modules, needle):
+    """Case-insensitive substring match against the module basename."""
+    for base, end, name in modules:
+        if needle.lower() in os.path.basename(name).lower():
+            return (base, end, name)
+    return None
+
+
+def read_exports(h, mod_base):
+    """Return a sorted list of (rva, name) exports from the module at mod_base."""
+    # DOS + NT headers
+    hdr = rpm(h, mod_base, 0x1000)
+    if not hdr or hdr[:2] != b'MZ': return []
+    e_lfanew = struct.unpack_from('<I', hdr, 0x3C)[0]
+    if e_lfanew <= 0 or e_lfanew + 0x100 > len(hdr): return []
+    if struct.unpack_from('<I', hdr, e_lfanew)[0] != 0x4550: return []
+    magic = struct.unpack_from('<H', hdr, e_lfanew + 0x18)[0]
+    if magic == 0x20B:
+        exp_dir_off = e_lfanew + 0x18 + 0x70   # DataDirectory[0] for PE32+
+    elif magic == 0x10B:
+        exp_dir_off = e_lfanew + 0x18 + 0x60
+    else:
+        return []
+    exp_rva  = struct.unpack_from('<I', hdr, exp_dir_off)[0]
+    exp_size = struct.unpack_from('<I', hdr, exp_dir_off + 4)[0]
+    if exp_rva == 0 or exp_size == 0: return []
+
+    exp_bytes = rpm(h, mod_base + exp_rva, max(exp_size, 0x50))
+    if not exp_bytes or len(exp_bytes) < 0x28: return []
+
+    # IMAGE_EXPORT_DIRECTORY
+    base_ord      = struct.unpack_from('<I', exp_bytes, 0x10)[0]
+    num_fns       = struct.unpack_from('<I', exp_bytes, 0x14)[0]
+    num_names     = struct.unpack_from('<I', exp_bytes, 0x18)[0]
+    addr_fns      = struct.unpack_from('<I', exp_bytes, 0x1C)[0]
+    addr_names    = struct.unpack_from('<I', exp_bytes, 0x20)[0]
+    addr_ords     = struct.unpack_from('<I', exp_bytes, 0x24)[0]
+    if num_fns == 0 or num_names == 0: return []
+
+    # Functions RVA array
+    fns_bytes   = rpm(h, mod_base + addr_fns,   4 * num_fns)   or b''
+    names_bytes = rpm(h, mod_base + addr_names, 4 * num_names) or b''
+    ords_bytes  = rpm(h, mod_base + addr_ords,  2 * num_names) or b''
+    if len(fns_bytes) < 4 * num_fns or len(names_bytes) < 4 * num_names: return []
+
+    # Build name-by-ordinal index
+    name_of_ord = [None] * num_fns
+    for i in range(num_names):
+        name_rva = struct.unpack_from('<I', names_bytes, 4 * i)[0]
+        ord_val  = struct.unpack_from('<H', ords_bytes,  2 * i)[0]
+        if ord_val >= num_fns: continue
+        raw = rpm(h, mod_base + name_rva, 256)
+        if not raw: continue
+        nul = raw.find(b'\x00')
+        name = raw[:nul].decode('ascii', errors='replace') if nul >= 0 else ''
+        if name:
+            name_of_ord[ord_val] = name
+
+    # Produce sorted list of (func_rva, name_or_ord)
+    out = []
+    for i in range(num_fns):
+        frva = struct.unpack_from('<I', fns_bytes, 4 * i)[0]
+        if frva == 0: continue
+        # Skip forwarder entries (they point inside the export directory itself)
+        if exp_rva <= frva < exp_rva + exp_size: continue
+        label = name_of_ord[i] or f'ord_{base_ord + i}'
+        out.append((frva, label))
+    out.sort(key=lambda x: x[0])
+    return out
+
+
+def resolve(exports, offset):
+    """Given sorted (rva, name) list, return (name, offset-from-name)."""
+    if not exports: return ('<no exports>', 0)
+    rvas = [e[0] for e in exports]
+    # bisect_right gives index AFTER offset; we want the one at or before.
+    idx = bisect.bisect_right(rvas, offset) - 1
+    if idx < 0: return ('<below first export>', offset)
+    rva, name = exports[idx]
+    return (name, offset - rva)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--pid', type=int, required=True)
+    ap.add_argument('lookups', nargs='+',
+                    help='module.dll:0xOFFSET entries (case-insensitive module match)')
+    args = ap.parse_args()
+
+    h = kernel32.OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+                             False, args.pid)
+    if not h:
+        print(f'[-] OpenProcess failed: err={ctypes.get_last_error()}')
+        return 1
+
+    mods = enumerate_modules(h)
+    print(f'[+] {len(mods)} modules enumerated')
+
+    # Cache exports per module
+    cached = {}
+
+    for lkp in args.lookups:
+        if ':' not in lkp:
+            print(f'[-] bad lookup {lkp}, expected module:0xoff'); continue
+        mod_needle, off_str = lkp.split(':', 1)
+        offset = int(off_str, 0)
+        m = find_module(mods, mod_needle)
+        if not m:
+            print(f'{lkp}  -> module not loaded'); continue
+        base, end, fullname = m
+        if base not in cached:
+            cached[base] = read_exports(h, base)
+        name, delta = resolve(cached[base], offset)
+        print(f'{lkp:<40s}  -> {os.path.basename(fullname)}!{name}'
+              f'{f"+0x{delta:X}" if delta else ""}  '
+              f'(abs 0x{base + offset:X})')
+
+    kernel32.CloseHandle(h)
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Jonathan Gresham
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# PEReconstruct
+
+Recover and statically analyze **manually-mapped DLLs** whose PE headers are
+wiped at runtime. Works against any process you can `OpenProcess()` on. No
+driver, no debugger, no symbols required. Pure-stdlib Python 3.
+
+Common targets: malware loaders, in-process implants, packers, anti-cheat
+modules, and any other code mapped by a custom user-mode loader rather than
+the Windows loader.
+
+> **Authorized use only.** Only point this at processes you own or are
+> explicitly authorized to analyze (your own code, malware in a lab, samples
+> from a sandbox). Don't use it against software you don't have rights to.
+
+## When you need this
+
+Manually-mapped DLLs commonly:
+1. Get loaded by a custom user-mode loader (not the Windows loader)
+2. Wipe their `MZ` / `PE\0\0` headers post-`DllMain` so a casual memory scan
+   doesn't see them
+3. Sometimes also wipe the section table, leaving only raw RX pages
+
+A normal dumper (`scylla`, `pe-sieve`) finds them inconsistently or not at
+all when the headers are gone. PEReconstruct finds the regions by their
+runtime characteristics (executable + private) and forges a synthetic PE
+header so IDA can analyze the dump as a normal DLL.
+
+## Pipeline
+
+```
+                    ┌─────────────────────────────────┐
+                    │   Target process (running)      │
+                    │   PID = whatever                │
+                    └────────────┬────────────────────┘
+                                 │
+        ┌────────────────────────┼────────────────────────┐
+        ▼                        ▼                        ▼
+┌──────────────────┐  ┌──────────────────────┐  ┌────────────────────┐
+│ scan_exec_       │  │ scan_pe_deep.py      │  │ dump_manualmap.py  │
+│ private.py       │  │                      │  │                    │
+│                  │  │ Aggressive PE-sig    │  │ Looks for MZ at    │
+│ Lists every RX   │  │ sweep — finds wiped  │  │ region start (the  │
+│ MEM_PRIVATE      │  │ DLLs by their PE\0\0 │  │ "well-behaved"     │
+│ region. The big  │  │ at +e_lfanew.        │  │ case where headers │
+│ one (~1-10 MB,   │  │ Catches anti-dumping │  │ survive).          │
+│ entropy ~7) is   │  │ tricks where MZ is   │  │                    │
+│ usually it.      │  │ zeroed but PE isn't. │  │                    │
+└────────┬─────────┘  └──────────┬───────────┘  └─────────┬──────────┘
+         │                       │                        │
+         └───────────────────────┼────────────────────────┘
+                                 │  (you pick the right region from the surveys)
+                                 ▼
+                    ┌────────────────────────────────┐
+                    │   raw .bin file on disk        │
+                    │   "execpriv_<HEX_BASE>_        │
+                    │    0x<SIZE>.bin"               │
+                    │   filename encodes runtime VA  │
+                    │   you'll feed to step 3.       │
+                    └────────────┬───────────────────┘
+                                 │
+                                 ▼
+                    ┌────────────────────────────────┐
+                    │   rebuild_headerless.py        │
+                    │                                │
+                    │   Forges a synthetic PE header │
+                    │   in the first 0x1000 bytes:   │
+                    │   - DOS stub                   │
+                    │   - PE32+ NT headers           │
+                    │   - Single .text section RX    │
+                    │   covering the whole image.    │
+                    └────────────┬───────────────────┘
+                                 │
+                                 ▼
+                    ┌────────────────────────────────┐
+                    │   <name>_reconstructed.dll     │
+                    │   (loadable PE — open in IDA)  │
+                    └────────────┬───────────────────┘
+                                 │
+                                 ▼
+                    ┌────────────────────────────────┐
+                    │   analyze_hooks.py             │
+                    │   resolve_exports.py           │
+                    │                                │
+                    │   Reconstruct the IAT from     │
+                    │   absolute addresses found in  │
+                    │   the dump; name every API     │
+                    │   call by module+offset.       │
+                    └────────────────────────────────┘
+```
+
+## Quick start
+
+```bash
+# 1. Find your target process
+tasklist | findstr /i "<your_target>"
+# Note the PID
+
+# 2. Survey executable private regions (the headerless catcher)
+py 01_acquire/scan_exec_private.py --pid <PID> --dump
+
+# 2b. Optionally also try the deep PE-sig sweep
+py 01_acquire/scan_pe_deep.py --pid <PID>
+
+# 2c. If the target HAS valid MZ headers (rare for hidden modules), this is fastest
+py 01_acquire/dump_manualmap.py --pid <PID>
+
+# Output: a folder of .bin files at C:\path\to\execprivate_<PID>\
+# Identify the candidate by size (1-10 MB) and entropy (~6-7).
+# Filename pattern: execpriv_<runtime_base_hex>_0x<size_hex>.bin
+
+# 3. Reconstruct the PE — pass the runtime base from the filename
+py 02_reconstruct/rebuild_headerless.py \
+    execprivate_<PID>/execpriv_<BASE_HEX>_<SIZE_HEX>.bin \
+    0x<BASE_HEX> \
+    target_reconstructed.dll
+
+# 4. Open target_reconstructed.dll in IDA. Auto-analyze. Done.
+
+# 5. Optional: enrich with imports + named API calls
+py 03_enrich/analyze_hooks.py --pid <PID> \
+    --target target_reconstructed.dll \
+    --target-base 0x<BASE_HEX> \
+    --out target_imports.md
+```
+
+## Folder layout
+
+| Folder | Script | Purpose |
+|---|---|---|
+| `01_acquire/` | `scan_exec_private.py` | **Primary tool.** Lists every RX MEM_PRIVATE region. Use this first — works on headerless dumps. |
+| `01_acquire/` | `scan_pe_deep.py` | Aggressive PE-signature sweep across all committed memory. Catches dumps where `MZ` was zeroed but `PE\0\0` wasn't. |
+| `01_acquire/` | `dump_manualmap.py` | Strict `MZ`-at-region-start detector. Use only if the target preserves headers. |
+| `01_acquire/` | `dump_contiguous_image.py` | Stitch a contiguous VA range from a target into a single dump, zero-filling unmapped gaps. |
+| `02_reconstruct/` | `rebuild_headerless.py` | **Core tool.** Forges DOS+NT+section-table over the first 0x1000 bytes of a raw dump. |
+| `03_enrich/` | `analyze_hooks.py` | Walks trampoline pages, identifies hooked functions by absolute-address pattern. Produces a markdown report. |
+| `03_enrich/` | `resolve_exports.py` | Resolves `module.dll:0xOFFSET` → `kernel32!CreateFileA+0x12` style names. |
+
+## Reconstruction caveats
+
+**No section recovery.** `rebuild_headerless.py` declares ONE `.text`
+section covering the whole image RX. The original may have had separate
+`.rdata` / `.data` / `.pdata` sections — those become indistinguishable
+from code. Side effects:
+- IDA tries to disassemble data regions as code (look like garbage)
+- High-entropy embedded data (encrypted blobs, compressed assets) appears
+  as a stretch of "invalid instructions" — that's fine, just don't try
+  to interpret them as functions
+- `.idata` import table is GONE — you can't follow API calls by name
+  unless you reconstruct imports (use `analyze_hooks.py`)
+
+**No relocation table.** The reconstructed DLL hardcodes the original
+runtime `ImageBase`. If you try to actually LOAD it via `LoadLibrary`,
+ASLR will rebase it and absolute pointers internal to the dump will be
+broken. **Only use the output for static analysis in IDA**, not for
+re-injection.
+
+**Wiped padding.** If the loader zeroed regions inside the dump (PE
+header padding, freed allocations), those bytes are lost. Reconstruction
+won't recover them — the IDB will have zero-filled gaps where things
+used to be.
+
+**Hardened processes.**
+`OpenProcess(PROCESS_VM_READ)` is blocked when the target installs a
+kernel callback (e.g. `ObRegisterCallbacks`). You'll get
+`ERROR_ACCESS_DENIED (5)` or a stripped-rights handle. To proceed:
+- Suspend the protective service before launching (only works for
+  protections that run as a separate user-mode service)
+- Or use a kernel-mode read primitive — your own driver via `kdmapper`,
+  or any `\Device\PhysicalMemory`-style helper. The dump scripts here
+  all assume user-mode RPM and will silently fail otherwise.
+
+## Required Python
+
+Stdlib only. Tested with CPython 3.12 on Windows. No pip installs needed.
+
+## Using with Claude Code
+
+PEReconstruct is built to be driven from a coding agent — every script
+is `argparse`-based, prints structured output, and writes deterministic
+filenames. A typical Claude Code session looks like:
+
+> **You:** Dump the manually-mapped DLL inside PID 24468 and reconstruct
+> it as a loadable PE for IDA.
+>
+> **Claude Code:** *(runs `scan_exec_private.py --pid 24468 --dump`,
+> reads the entropy + size table, picks the highest-entropy region in
+> the 1-10 MB range, runs `rebuild_headerless.py` against the dumped
+> `.bin` with the base parsed from the filename, outputs the path to
+> the reconstructed `.dll`)*
+
+Helpful prompts:
+
+- *"Survey PID `<N>` for hidden modules and tell me which regions look
+  like manual-mapped DLLs."*
+- *"Reconstruct `<path-to-bin>` at base `0x<BASE>` and open it in IDA
+  via the IDA-Pro MCP server."*
+- *"Run `analyze_hooks.py` against the reconstructed DLL and summarize
+  which Win32 modules it imports from."*
+
+Tip: this pairs well with [ida-pro-mcp](https://github.com/mrexodia/ida-pro-mcp).
+After reconstruction, point Claude at the IDA MCP server to drive
+disassembly, decompilation, and symbol-naming over MCP.
+
+## Install as a Claude Code skill
+
+The `skills/pe-reconstruct/` directory in this repo is a ready-to-use
+[Claude Code skill](https://docs.claude.com/en/docs/claude-code/skills).
+Once installed, Claude Code automatically invokes it when you ask about
+dumping, recovering, or analyzing manually-mapped/headerless DLLs.
+
+```bash
+# Install for the current user (all projects)
+mkdir -p ~/.claude/skills
+cp -r skills/pe-reconstruct ~/.claude/skills/
+
+# Or install for one project only
+mkdir -p .claude/skills
+cp -r skills/pe-reconstruct .claude/skills/
+```
+
+The skill's `SKILL.md` tells Claude exactly which script to run for which
+task and how to chain them.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+```
+
+`skills/pe-reconstruct/SKILL.md`:
+
+```md
+---
+name: pe-reconstruct
+description: Recover and statically analyze manually-mapped DLLs (in-process implants, malware loaders, packers, anti-cheat modules) whose PE headers are wiped at runtime. Use when the user asks to dump a hidden DLL from a process, find a manually-mapped module, recover a headerless PE, reconstruct a wiped image, identify hooks installed by an in-process implant, or analyze a code region whose `MZ`/`PE\0\0` headers were zeroed post-DllMain. Triggers on terms like manual-map, manualmap, MM-loader, headerless DLL, hidden module, in-process implant, wiped PE header, RX private region, dumped cheat, dumped loader, post-DllMain dump.
+---
+
+# PEReconstruct skill
+
+This skill drives the PEReconstruct toolkit — a pure-stdlib Python pipeline
+for finding manually-mapped DLLs in a running process and rebuilding a
+loadable PE so IDA can analyze the dump.
+
+## Pipeline (read this before running anything)
+
+```
+PID  →  scan_exec_private.py        (find candidate RX private regions)
+     →  scan_pe_deep.py             (optional: PE-sig sweep for headerless)
+     →  pick the best candidate     (size 1-10 MB, entropy ~6-7)
+     →  rebuild_headerless.py       (forge synthetic PE header)
+     →  reconstructed.dll           (open in IDA)
+     →  analyze_hooks.py            (optional: enumerate imports + hooks)
+```
+
+The pipeline tools live under `01_acquire/`, `02_reconstruct/`, and
+`03_enrich/` in the repo root (or wherever the toolkit was cloned).
+
+## When to invoke each script
+
+### Acquire (step 1)
+
+Use **`scan_exec_private.py`** first when:
+- The user wants to find hidden / manual-mapped code in a process
+- The headers may be wiped (most realistic case)
+- They mention "MEM_PRIVATE", "RX region", "private executable region"
+
+```
+py 01_acquire/scan_exec_private.py --pid <PID> --dump
+```
+
+This dumps every executable private region to `~/Desktop/execprivate_<PID>/`
+with filenames `execpriv_<RUNTIME_BASE_HEX>_0x<SIZE_HEX>.bin`. Read the
+output table — pick the candidate by:
+
+- **Size**: typically 1-10 MB (smaller = trampoline page, larger = a real
+  module) — note the size in the filename for step 3.
+- **Entropy**: ~6.0-7.0 (looks like compiled code/data; pure code is ~5.5,
+  encrypted blobs are ~7.9)
+- **First bytes**: a manual-mapped DLL with surviving headers starts `4D 5A`
+  (`MZ`); wiped ones start with whatever comes after the header (often
+  `48 89 ...` for x64 prologue or pure zeros for the first page).
+
+Use **`scan_pe_deep.py`** as a second-opinion when `scan_exec_private` looks
+empty:
+```
+py 01_acquire/scan_pe_deep.py --pid <PID>
+```
+It scans every committed region (not just MEM_PRIVATE) for `PE\0\0`
+signatures even when `MZ` is wiped — catches anti-dump tricks where only
+the DOS stub was zeroed.
+
+Use **`dump_manualmap.py`** ONLY when the target preserves valid `MZ`
+headers (rare for hidden modules):
+```
+py 01_acquire/dump_manualmap.py --pid <PID>
+```
+
+Use **`dump_contiguous_image.py`** when the user gives you an explicit VA
+range and wants it stitched (with zero-fill over unmapped gaps):
+```
+py 01_acquire/dump_contiguous_image.py --pid <PID> --base 0x<BASE> --size 0x<SIZE> --out target.bin
+```
+
+### Reconstruct (step 2)
+
+Once you have a `.bin`, parse the runtime base from the filename and run:
+
+```
+py 02_reconstruct/rebuild_headerless.py <input.bin> 0x<RUNTIME_BASE> <output.dll>
+```
+
+The runtime base is the hex part of the filename:
+`execpriv_00007FF8E0010000_0x300000.bin` → base `0x7FF8E0010000`.
+
+Output is a synthetic PE32+ DLL with one `.text` section covering the whole
+image RX. **Do not try to LoadLibrary the result** — it's for static analysis
+in IDA only (the relocation table is empty and ImageBase is hardcoded).
+
+### Enrich (step 3, optional)
+
+To recover the import table from absolute addresses inside the dump:
+
+```
+py 03_enrich/analyze_hooks.py --pid <PID> \
+    --target reconstructed.dll \
+    --target-base 0x<RUNTIME_BASE> \
+    --out imports.md
+```
+
+This requires the target process to still be running so it can enumerate
+loaded modules. If the user already closed the process, this step is not
+possible — say so explicitly.
+
+To resolve named API offsets from a list of `module.dll:0xOFFSET` strings:
+
+```
+py 03_enrich/resolve_exports.py --pid <PID> kernel32.dll:0x382C7 ntdll.dll:0x18605
+```
+
+## Picking the right candidate from `scan_exec_private` output
+
+When the survey shows multiple RX private regions, rank like this:
+
+1. **Skip pages < 0x8000.** Those are trampolines / hook stubs / shellcode
+   stubs — interesting later, not the main module.
+2. **Prefer entropy 6.0-7.5.** Below 5 = mostly zeros (uncommitted padding).
+   Above 7.8 = encrypted/compressed data, not a code section.
+3. **Prefer XR over XRW** when both exist at similar size — XR is the
+   `.text` section of a real module; XRW is a JIT/scratch buffer.
+4. **The largest qualifying region is almost always the target.**
+
+When in doubt, dump multiple candidates and reconstruct each — the one that
+disassembles cleanly in IDA is the right one.
+
+## After reconstruction
+
+If the user has the [ida-pro-mcp](https://github.com/mrexodia/ida-pro-mcp)
+server running, drive IDA over MCP:
+- Open the reconstructed DLL
+- Auto-analyze
+- Use `analyze_hooks.py`'s output as a worklist for naming external calls
+
+If they don't have IDA MCP set up, just print the path to the reconstructed
+DLL and tell them: open in IDA Pro, accept defaults, auto-analysis will
+run for a few minutes on a multi-MB dump.
+
+## Things to refuse / push back on
+
+- The user wants to use this against a live online game's process to bypass
+  anti-cheat → stop and ask what they're doing. This skill is for
+  authorized analysis (your own code, malware in a lab, samples from a
+  sandbox). Cheating on online games is a TOS violation and likely
+  illegal in some jurisdictions; the user should be doing this work in
+  an isolated VM against a sample they have rights to analyze.
+- The user wants to LoadLibrary the reconstructed DLL → no. The output is
+  for static analysis only; ASLR will rebase it and break all internal
+  absolute pointers.
+- `scan_exec_private` returns nothing → the target is probably kernel-
+  protected (anti-cheat / DRM with a kernel callback that strips
+  `PROCESS_VM_READ`). Tell the user they need a kernel-mode read
+  primitive (their own signed driver via `kdmapper`, or a sample from
+  their authorized analysis environment) — this skill can't proceed.
+
+## Required environment
+
+- Windows host (the scripts use Win32 APIs via ctypes)
+- Python 3.10+ (3.12 tested) — stdlib only, no pip installs
+- IDA Pro for the analysis step (the toolkit doesn't depend on it, but
+  the workflow does)
+
+```
