@@ -291,6 +291,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 ## AI
 - https://github.com/ls361664056/GameAI-paper-list [zh]
 - https://github.com/lightningpixel/modly [Local image-to-3D mesh desktop app; open-source AI on GPU; Windows/Linux; extensible generators]
+- https://github.com/neilsonnn/image-blaster [Claude skillset: single image to 3D meshes (.glb/.obj), Gaussian splat environment (.spz), and SFX; World Labs + FAL; Unity/Unreal/Godot/Blender]
 - https://github.com/blendi-remade/sprite-sheet-creator [AI 2D pixel-art sprite sheets & parallax backgrounds; fal.ai; Next.js; walk/jump/attack/idle, sandbox]
 
 ## Image Codec
@@ -3061,6 +3062,9 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Game:COD Black Ops 3
 - https://github.com/gmh5225/COD-boiii [Reverse engineering and analysis]
+
+> Game:COD WWII
+- https://github.com/Brentdevent/S2x [Custom Call of Duty: WWII client; modding and client-side improvements; offline MP/zombies/campaign, Steam/Demonware emulation]
 
 > Game:COD Warzone
 - https://github.com/YMY1666527646/Call-of-Duty-Warzone-MW-HACK-ESP-AIMBOT
