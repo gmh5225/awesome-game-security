@@ -3890,6 +3890,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Luchinkin/device-control-hooks-scanner [device-control-hooks-scanner]
 - https://github.com/ORCx41/KnownDllUnhook [Replace the .txt section of the current loaded modules from \KnownDlls\]
 - https://github.com/Teach2Breach/nt_unhooker [demo unhooking functions in ntdll]
+- https://github.com/0xjbb/EyYoEtwWhereYouAt [PoC: correlate kernel notifications (process/thread/image load) with missing ETW events to detect ETW patching; EtwDriver + etw_exe; CMake/MSVC, krabs]
 
 > Detection:Memory Integrity
 - https://github.com/afulsamet/integrity
