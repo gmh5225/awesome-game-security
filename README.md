@@ -781,6 +781,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > RE Tools
 - https://dogbolt.org
 - https://github.com/msd0pe-1/cve-maker [Tool to find CVEs and Exploits]
+- https://github.com/Zierax/Grafana-Final-Scanner [Grafana scanner with public CVE checks, version fingerprinting, and config analysis for easier Grafana security testing]
 - https://github.com/mentebinaria/retoolkit [Reverse Engineer's Toolkit]
 - https://github.com/stevemk14ebr/RETools
 - https://github.com/smallworld-re/smallworld [Environment for streamlined binary harnessing for dynamic analysis]
