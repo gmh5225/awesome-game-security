@@ -3622,6 +3622,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Binary Packer
 - https://github.com/gmh5225/awesome-executable-packing
 - https://github.com/phra/PEzor
+- https://github.com/iamsopotatoe-coder/TinyLoad [Simple Windows PE packer/crypter: compress and encrypt via custom VM into a self-extracting stub]
 - https://github.com/czs108/PE-Packer [X86]
 - https://github.com/longqun/Packer [X86]
 - https://github.com/ATsahikian/pe-protector [X86]
