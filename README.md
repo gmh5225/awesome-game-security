@@ -817,6 +817,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/ceserver-ios [Porting ceserver to iOS.Dynamic analysis]
 - https://github.com/VoidSec/ioctlpus [Be used to make DeviceIoControl requests with arbitrary inputs]
 - https://github.com/horsicq/Nauz-File-Detector [Linker/Compiler/Tool detector]
+- https://github.com/t0asts/DIE-engine-web [Detect It Easy in the browser — WASM-based file format, packer, and compiler detection]
 - https://github.com/gcarmix/HexWalk [Hex Viewer/Editor/Analyzer]
 - https://github.com/RomanRybachek/ioctl_helper [GUI tool for sending IOCTL to windows drivers]
 - https://github.com/0xDbgMan/DrvEye [Static analysis and exploitation triage for Windows kernel drivers: discover IOCTLs, symbolic links, and certificate checks]
