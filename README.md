@@ -4040,6 +4040,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/weak1337/PresentHookDetection
 
 > Detection:DMA
+- https://github.com/zer0condition/x670e-tomahawk-anticheat-update [Reverse of MSI MAG X670E TOMAHAWK BIOS v1KB anti-cheat update — Bds strips EFI_PCI_IO_ATTRIBUTE_EMBEDDED_ROM pre-boot, DxeCore NX policy retune]
 - https://github.com/cutecatsandvirtualmachines/DmaProtect [VT-d/AMD-Vi IOMMU]
 - https://github.com/iqrw0/DieDMAProtection [IOMMU]
 - https://github.com/tandasat/HelloIommuPkg [The sample DXE runtime driver demonstrating how to program DMA remapping]
