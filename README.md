@@ -3818,6 +3818,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/LeoChen-CoreMind/VMPacker [ARM64 ELF Virtual Machine Protection System]
 - https://github.com/cursey/x64-virtualizer-rs [x86-64 virtualizing obfuscator written in Rust]
 - https://github.com/noahware/binprotect [x64 PE bin2bin obfuscator which doesn't add a section to the binary]
+- https://github.com/nodiuus/nocturne [bin2bin x86-64 PE code virtualizer and binary rewriter — SDK markers, 30+ VM handlers, junk obfuscation]
 
 
 > Screenshot
