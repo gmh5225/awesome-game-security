@@ -3771,6 +3771,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Vector35/scc [shellcode compiler]
 - https://github.com/jseclab/obj2shellcode
 - https://github.com/lainswork/shellcode-factory
+- https://github.com/D7EAD/mkPIVM [Generate polymorphic position-independent virtual machines (PIVMs) from arbitrary x86/x64 shellcode]
 - https://github.com/H1d3r/GPU_ShellCode [hide the payload inside the gpu memory]
 - https://github.com/a0yark/DXInject-UC [D3D11 GPU payload transport + compute shader decode, GPU-assisted process hollowing (research)]
 - https://github.com/Schich/Lucky-Spark [A stealthy loader for shellcode staged over HTTP/HTTPS, similar to Sliver]
