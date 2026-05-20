@@ -2084,6 +2084,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/CVE-2022-3699 [LenovoDiagnosticsDriver.sys]
 - https://github.com/gmh5225/lenovo_mapper [LenovoDiagnosticsDriver.sys]
 - https://github.com/gmh5225/lenovo_exec [LenovoDiagnosticsDriver.sys]
+- https://github.com/redteamfortress/PhantomKiller [BYOVD process killer via signed Lenovo BootRepair.sys — IOCTL 0x222014 ZwTerminateProcess, kills PPL-protected EDR/AV]
 - https://github.com/gmh5225/CVE-2022-42046 [wfshbr64.sys]
 - https://github.com/gmh5225/amd-ryzen-master-driver-v17-exploit [AMD's Ryzen Master Driver]
 - https://github.com/gmh5225/RToolZ [ProcExp152.sys]
@@ -4335,6 +4336,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 
 ## Windows Security Features
+- https://github.com/fsquirt/SEWindows [TPM-based verifier for CPU virtualization, IOMMU, Secure Boot, VBS/HVCI, DSE, and vulnerable driver blocklist — local PCR replay and remote attestation]
 - https://github.com/yardenshafir/cet-research [CET]
 - https://github.com/gmh5225/CET-win10 [CET]
 - [HyperGuard](https://windows-internals.com/hyperguard-secure-kernel-patch-guard-part-1-skpg-initialization)
