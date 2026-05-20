@@ -1389,6 +1389,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/radareorg/iaito [Official radare2 GUI (Qt5/6), focused on reverse engineering workflow]
 - https://github.com/gmh5225/ghidra
 - https://github.com/gmh5225/retdec
+- https://github.com/Sidenai/hyperion-disassembler [Native multi-arch disassembler & decompiler — PE/ELF/Mach-O/.NET, x86/x64/ARM64/MIPS/PPC, RTTI recovery, SSA decompiler, Lua scripting, packer detection]
 - https://github.com/Col-E/Recaf [Java]
 - https://github.com/gmh5225/bytecode-viewer [Java]
 - https://github.com/gmh5225/deobfuscator [Java]
