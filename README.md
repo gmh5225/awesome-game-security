@@ -1000,6 +1000,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/yyl-20020115/OpenArk [Tool]
 - https://github.com/BeneficialCode/WinArk [Tool]
 - https://github.com/kernullist/kn-diff-pool [Windows kernel Big Pool snapshot/diff tool with kernel driver and Go TUI]
+- https://github.com/kernullist/kn-live-dbg [Windows kernel live debugging — driver exposes memory primitives, user-mode TUI handles symbols, types, and UX (LiveKD-style)]
 - https://github.com/hfiref0x/KDU [Kernel Driver Utility Tool]
 - https://github.com/jthuraisamy/TelemetrySourcerer [Enumerate and disable callbacks/ETW]
 - https://github.com/preludeorg/ThreatIntelligenceConsumer [Consuming from the Threat-Intelligence ETW provider without a driver or PPL privilege]
