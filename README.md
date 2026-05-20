@@ -2539,6 +2539,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/il2cpp-finder [Il2Cpp Finder]
 - https://github.com/gmh5225/frida-il2cpp-datacollector [Il2Cpp datacollector for Android/IOS]
 - https://github.com/BepInEx/BepInEx [plugin/modding framework]
+- https://github.com/BepInEx/BepInEx.Utility.IL2CPP [Universal BepInEx utility plugins for IL2CPP Unity games — graphics settings, window resize, mute in background, Message Center, ByteFiddler, ProcessAffinityOverride]
 - https://github.com/gmh5225/IL22CPP [ReMake of Il2cpp internal reflection system in C++]
 - https://github.com/sunnamed434/UnityVulnerableEntryPoint [Looks for a vulnerable entry point]
 - https://github.com/gmh5225/MatScan [A multi-threaded rust material scanner]
