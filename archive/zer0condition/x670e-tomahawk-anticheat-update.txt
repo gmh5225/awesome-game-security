@@ -1,0 +1,154 @@
+Project Path: arc_zer0condition_x670e-tomahawk-anticheat-update_c3pbgizu
+
+Source Tree:
+
+```txt
+arc_zer0condition_x670e-tomahawk-anticheat-update_c3pbgizu
+└── README.md
+
+```
+
+`README.md`:
+
+```md
+# MSI 7E12 v1KB BIOS "anti-cheat update" Reverse
+
+reverse of msi's MAG X670E TOMAHAWK WIFI bios v1KB (2026-03-20) which claims "Implemented the anti-cheat mechanism" in the release notes. v1KA (2026-03-04) is the diff baseline since it only carries AGESA PI 1.3.0.0 with no anti-cheat changes
+
+## tldr
+
+two pre-boot dxe-phase code changes. no new module, no new smi handler, no new os-facing interface
+
+1. `Bds` +52 bytes that strip `EFI_PCI_IO_ATTRIBUTE_EMBEDDED_ROM` (bit 14) per pci resource during root-bridge enumeration. closes the pre-boot option-rom injection vector used by pcie dma cheat hardware
+2. `DxeCore` retunes `DxeNxMemoryProtectionPolicy` from `0x4FD5` to `0x4F41`. drops NX from `EfiLoaderData` / `EfiBootServicesData` / `EfiConventionalMemory`
+
+neither change adds attack surface accessible from a kernel driver post-boot
+
+## finding 1: Bds pci option-rom strip
+
+function at `.text+0x3ee0` in both versions. body up to offset `+0x263` is identical. KA returns after the third vtable call. KB inserts 52 bytes before the loop tail
+
+### KA last block of the loop body
+
+```asm
+0x4131: and     ecx, 3
+0x4134: add     ecx, 2
+0x4137: mov     r10, qword ptr [rax + 0x18]
+0x413b: call    r10                            ; vtable[+0x18]
+0x413e: inc     rdi                            ; loop iterator++
+0x4141: add     rbx, 0x38                      ; stride to next descriptor
+0x4145: cmp     rdi, qword ptr [rsp + 0x38]
+0x414a: jb      0x40b4                         ; continue loop
+```
+
+### KB new fourth vtable call inserted
+
+```asm
+0x4131: and     ecx, 3
+0x4134: add     ecx, 2
+0x4137: mov     r10, qword ptr [rax + 0x18]
+0x413b: call    r10                            ; vtable[+0x18]   (unchanged)
+
+0x4146: cmp     rax, rsi                       ; check status of prev call
+0x4149: jae     0x4171                         ; bail if error
+0x414b: mov     rcx, qword ptr [rsp + 0x30]
+0x4150: mov     rax, qword ptr [rip + 0x17cf1] ; global vtable
+0x4157: mov     r8,  qword ptr [rbx + rcx + 0x18]  ; load attributes
+0x415c: mov     rdx, qword ptr [rbx + rcx + 0x08]  ; address
+0x4161: btr     r8, 0xe                        ; clear bit 14 (EMBEDDED_ROM)
+0x4166: mov     r9,  qword ptr [rax + 0x40]    ; vtable[+0x40] (Pci.Write if EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL)
+0x416a: mov     rcx, qword ptr [rbx + rcx]
+0x416e: call    r9
+
+0x4171: inc     rdi
+0x4174: add     rbx, 0x38
+0x4178: cmp     rdi, qword ptr [rsp + 0x38]
+0x417d: jb      0x40b4
+```
+
+`btr r8, 0xe` clears bit 14. attribute constants from `MdePkg/Include/Protocol/PciIo.h`:
+
+```c
+#define EFI_PCI_IO_ATTRIBUTE_MEMORY_DISABLE          0x1000
+#define EFI_PCI_IO_ATTRIBUTE_EMBEDDED_DEVICE         0x2000
+#define EFI_PCI_IO_ATTRIBUTE_EMBEDDED_ROM            0x4000   // bit 14
+#define EFI_PCI_IO_ATTRIBUTE_DUAL_ADDRESS_CYCLE      0x8000
+```
+
+new code reads an existing attribute mask out of the per-resource struct, strips bit 14, writes it back via `vtable[+0x40]`. the exact callee identity depends on which global protocol the vtable belongs to (most likely `EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL.Pci.Write`), but the observable effect is the same: a value with `EMBEDDED_ROM` cleared is propagated downstream
+
+some pcie dma cheat hardware (PCILeech-style fpga rigs, custom probes) advertises an option rom in its config space, and firmware that honors `EMBEDDED_ROM` will map/execute it during boot. plausibly this is what msi is gating, though no vendor statement confirms the specific detection model
+
+### descriptor struct (offsets verified, labels inferred)
+
+```c
+struct entry {              // stride 0x38, labels are inference from usage
+    uint64_t f00;           // +0x00   passed as `this` to vtable call
+    uint64_t f08;           // +0x08   passed as second arg
+    uint64_t f10;           // +0x10   (f10 >> 56) & 7 must == 3
+    uint64_t attrs;         // +0x18   KB strips bit 14 here
+    uint32_t f20;           // +0x20   must == 1
+};
+```
+
+## finding 2: DxeCore NX policy mask
+
+helper at `.text+0xab1c` in both versions. signature is essentially `UINT64 GetNxFor(EFI_MEMORY_TYPE type)`
+
+```asm
+0x0ab1c: cmp     ecx, 0x6fffffff
+0x0ab22: ja      0xab3d            ; out of range -> 0
+0x0ab24: mov     eax, 1
+0x0ab29: shl     rax, cl           ; rax = 1 << type
+0x0ab2c: and     eax, MASK         ; <-- mask differs between v1KA and v1KB
+0x0ab31: neg     rax
+0x0ab34: sbb     rax, rax
+0x0ab37: and     eax, 0x4000       ; EFI_MEMORY_XP
+0x0ab3c: ret
+0x0ab3d: xor     eax, eax
+0x0ab3f: ret
+```
+
+the mask is the compiled-in value of `gEfiMdeModulePkgTokenSpaceGuid.PcdDxeNxMemoryProtectionPolicy` (lower 16 bits). each set bit means memory of that `EFI_MEMORY_TYPE` index gets `EFI_MEMORY_XP` (no-execute)
+
+```
+v1KA  0x4FD5  =  0100 1111 1101 0101
+v1KB  0x4F41  =  0100 1111 0100 0001
+```
+
+decoded against the `EFI_MEMORY_TYPE` enum:
+
+```
+bit  EFI_MEMORY_TYPE             v1KA   v1KB
+---  --------------------------  -----  -----
+ 0   EfiReservedMemoryType        NX     NX
+ 1   EfiLoaderCode                 .      .
+ 2   EfiLoaderData                NX      .
+ 3   EfiBootServicesCode           .      .
+ 4   EfiBootServicesData          NX      .
+ 5   EfiRuntimeServicesCode        .      .
+ 6   EfiRuntimeServicesData       NX     NX
+ 7   EfiConventionalMemory        NX      .
+ 8   EfiUnusableMemory            NX     NX
+ 9   EfiACPIReclaimMemory         NX     NX
+10   EfiACPIMemoryNVS             NX     NX
+11   EfiMemoryMappedIO            NX     NX
+12   EfiMemoryMappedIOPortSpace    .      .
+13   EfiPalCode                    .      .
+14   EfiPersistentMemory          NX     NX
+```
+
+delta is removal-only. `0x4FD5 ^ 0x4F41 = 0x0094` (bits 2, 4, 7):
+- removed NX from `EfiLoaderData` (bit 2)
+- removed NX from `EfiBootServicesData` (bit 4)
+- removed NX from `EfiConventionalMemory` (bit 7)
+
+loosening NX on `EfiBootServicesData` and `EfiLoaderData` lets code execute from those pool types, which is unusual for a security update. plausible reasons: compat shim for a new pre-boot component, or an msi-side workaround for a regression introduced by AGESA PI 1.3.0.0. doesnt look like hardening
+
+## risk
+
+both changes are pre-boot dxe phase. no os-facing surface added. an installed driver post-boot cannot interact with either change. the `Bds` modification runs once during root-bridge handle enumeration and is final. the `DxeCore` mask is compiled into the dispatcher and is read-only at boot. no SMI, no ACPI method, no runtime UEFI variable callback
+
+safe to flash
+
+```
