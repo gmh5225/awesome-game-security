@@ -1320,6 +1320,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Android Kernel Driver
 - https://github.com/rogxo/kernel_hack
 - https://github.com/Jiang-Night/Kernel_driver_hack
+- https://github.com/systemnb/android-kernel-hacking-toolkit [Android aarch64 LKM toolkit — filecopy, hideproc, propedit, syscall_hijack; CFI bypass, kprobes, mmuhack for sys_call_table]
 - https://github.com/WeiJiLab/kernel-hook-framework [Kernel inline hook framework]
 - https://github.com/Poko-Apps/MemKernel [RPM]
 - https://github.com/libtersafe/KPM-MemReader [KPM kernel module, cross-process memory read via ioctl hook; KernelPatch/APatch]
