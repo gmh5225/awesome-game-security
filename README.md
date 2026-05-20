@@ -1073,6 +1073,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Air14/KDBGDecryptor [A simple example how to decrypt kernel debugger data block]
 - https://github.com/FaEryICE/MemScanner [Memory scanner]
 - https://github.com/Oliver-1-1/RwxScanner [RWX Memory scanner]
+- https://github.com/S12cybersecurity/RWXFinder [Find Windows RWX memory regions in a target process by size via VirtualQueryEx]
 - https://github.com/irql/nokd [Kernel debugger protocol]
 - https://github.com/DejavuSecure/DetectNtoskrnlIntegrity [Windows Kernel Security: Memory Integrity Verification with Disk Verification of ntoskrnl.exe]
 - https://github.com/brew02/BudgetEPT [Create stealthy, inline, EPT-like hooks using SMAP and SMEP]
