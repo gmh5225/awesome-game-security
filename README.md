@@ -1397,6 +1397,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/binsync [Sync]
 - https://github.com/gmh5225/ethersplay [EVM dissassembler]
 - https://github.com/Hexorg/Ouroboros [A Symbolic-Execution Decompiler written in Rust]
+- https://github.com/sefcom/oxidizer [Rust decompiler on angr — high-fidelity pseudocode from stripped binaries, enum/match/? recovery, Rust 1.39–1.93]
 
 > IDA themes
 - https://github.com/gmh5225/dp701 [Dark theme for IDA Pro]
