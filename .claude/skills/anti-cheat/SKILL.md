@@ -108,6 +108,67 @@ This skill covers layered anti-cheat design across kernel drivers, privileged se
 - Callback registration and object access monitoring
 - System call, dispatch table, and hook integrity checks
 - PatchGuard, test-signing, and kernel trust state checks
+- Kernel pool scanning (Segment Heap aware) for hidden drivers and shellcode
+```
+
+### Kernel Pool Scanning (Segment Heap Era)
+```
+Why Segment Heap matters for anti-cheat:
+Cheat drivers allocate memory in NonPagedPool for shellcode, hook tables,
+hidden modules. The Segment Heap (19H1+) changed pool internals:
+headers are HeapKey XOR encoded, allocation paths are split (kLFH, VS,
+Segment, Large), metadata is isolated. Anti-cheat pool scanners must
+understand these mechanisms to scan accurately without false positives.
+
+Detection targets:
+
+1. BigPool / Large Allocation scanning:
+   - Walk nt!PoolBigPageTable (nt!PoolTrackTable)
+   - Find allocations without corresponding DRIVER_OBJECT or loaded module
+   - Detect manually mapped drivers that allocate large pool chunks
+   - Large allocations have no inline header; metadata is external
+
+2. VS Allocator chunk scanning:
+   - Traverse _SEGMENT_HEAP → VsContext → SubsegmentList
+   - Decode _HEAP_VS_CHUNK_HEADER using HeapKey:
+     real_sizes = encoded_header ^ chunk_address ^ HeapKey
+   - Check decoded chunk for suspicious PoolTag, executable content,
+     or allocation without matching driver
+   - VS chunks carry both _HEAP_VS_CHUNK_HEADER (encoded) and
+     _POOL_HEADER (PoolTag still present)
+
+3. kLFH bucket scanning:
+   - _SEGMENT_HEAP → LfhContext → Buckets[] → AffinitySlots → Subsegments
+   - kLFH randomizes block placement (harder to predict adjacency)
+   - FreeHint encoded with LfhKey
+   - Allocation pattern anomalies in specific size buckets can indicate
+     pool grooming by cheat drivers
+
+4. Suspicious PoolTag detection:
+   - Cheat drivers use custom or rare tags; maintain blacklist
+   - Cross-reference tags against known-good tag database (pooltag.txt)
+   - Tags present in pool but absent from any loaded module = suspicious
+
+5. Executable memory in NonPagedPool:
+   - Find chunks with X permission but no corresponding module
+   - Scan decoded chunk content for known cheat signatures, ROP gadgets,
+     specific syscall stub patterns
+
+6. Segment Heap integrity checks:
+   - Validate _SEGMENT_HEAP.Signature == 0xDDEEDDEE
+   - Verify VS chunk header encoding consistency
+   - Detect tampered heap metadata (indicates heap exploitation attempt)
+
+Required knowledge for scanner:
+- nt!RtlpHpHeapGlobals (HeapKey, LfhKey) — obtained via pattern scan
+- nt!ExpPoolQuotaCookie — for ProcessBilled decoding
+- Per-pool-type _SEGMENT_HEAP instance addresses (nt!PoolVector)
+- Allocation path determination (size → kLFH/VS/Segment/Large)
+
+Anti-cheat KDP integration:
+- Store detection rule tables in Secure Pool (ExAllocatePool3 + KDP)
+- Rules become VTL0-immutable — cheat drivers cannot modify
+  detection signatures even with kernel R/W primitives
 ```
 
 ### Behavioral Analysis
