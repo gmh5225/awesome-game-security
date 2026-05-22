@@ -291,6 +291,85 @@ D3DXVECTOR3 WorldToScreen(D3DXVECTOR3 pos, D3DXMATRIX viewProjection) {
 - Kernel-level: suppress screenshot by blocking DC access
 ```
 
+## OBS Capture Pipeline and AI Visual Cheat Surface
+
+### OBS Frame Capture Modes
+```
+OBS (Open Broadcaster Software) is the primary frame source for
+AI visual cheats. Its capture modes have distinct detection profiles:
+
+Game Capture (most common for cheats):
+- Injects obs-graphics-hook64.dll into game process
+- Hooks IDXGISwapChain::Present (D3D11/12) or SwapBuffers (OpenGL)
+  or vkQueuePresentKHR (Vulkan) inside the game process
+- Copies backbuffer to shared texture/memory each frame
+- Lowest latency, highest quality (pre-composition, native resolution)
+- Detection: DLL appears in game process module list;
+  shared texture handle creation visible to kernel callbacks
+
+Window Capture:
+- Uses DXGI Desktop Duplication API (no injection into game)
+- Captures composited window output from DWM
+- Slightly higher latency (post-composition)
+- Detection: IDXGIOutputDuplication usage from non-game process
+
+Display Capture:
+- Captures entire monitor output
+- Highest latency, captures everything including overlays
+- No per-process interaction
+
+OBS Virtual Camera:
+- Outputs captured frames as a virtual camera device
+- Can feed AI model running in separate process or machine
+- Detectable via virtual camera driver enumeration
+```
+
+### Frame Pipeline for AI Aimbot
+```
+Capture path (latency-critical):
+  Game render → Present hook copies backbuffer
+  → Shared GPU texture (ID3D11Texture2D, GPU-side)
+  → GPU→CPU readback (staging texture + Map/Unmap)
+  → CPU-side frame buffer (system memory)
+  → Crop to ROI (Region of Interest, e.g., 640x640 around crosshair)
+  → AI inference input (CUDA/TensorRT/DirectML)
+
+OBS plugin form factor:
+  AI model implemented as OBS video filter plugin
+  → Receives frames through obs_source_frame callback
+  → Runs inference in-process
+  → Outputs mouse commands to hardware device
+  → Appears as "OBS running a filter" to the system
+
+Dual-machine pipeline:
+  Game PC OBS → NDI (Network Device Interface) or capture card
+  → Cheat PC receives video stream
+  → AI inference on cheat PC GPU
+  → Mouse commands sent via network to KMBox on game PC
+  Latency: +5-15 ms for NDI, +2-5 ms for hardware capture card
+
+Performance targets:
+  Capture: < 5 ms (GPU shared texture copy)
+  Crop + preprocess: < 2 ms
+  YOLO inference: 5-15 ms (TensorRT FP16 on RTX 3060+)
+  Coordinate calc + smoothing: < 1 ms
+  Hardware input transmission: < 2 ms (USB) or < 5 ms (network)
+  Total pipeline: 15-40 ms end-to-end
+```
+
+### Detection-Relevant Graphics Signals
+```
+- obs-graphics-hook64.dll in game process module list
+- IDXGISwapChain::Present hook or detour in game process
+- Staging texture creation at frame rate (ID3D11Texture2D with
+  D3D11_USAGE_STAGING + CPU_ACCESS_READ created per frame)
+- GPU-to-CPU memory copy bandwidth anomaly (Map/Unmap calls
+  at 60+ FPS on backbuffer-sized resources)
+- DXGI shared handle creation from game process to external process
+- NDI SDK DLLs loaded (Processing.NDI.Lib.*.dll)
+- Virtual camera driver (obs-virtualcam) registered
+```
+
 ## Anti-Detection Considerations
 
 ### Present Hook Detection
@@ -298,6 +377,7 @@ D3DXVECTOR3 WorldToScreen(D3DXVECTOR3 pos, D3DXMATRIX viewProjection) {
 - VTable integrity checks
 - Code section verification
 - Call stack analysis
+- Module list scanning for known capture DLLs
 ```
 
 ### Evasion Techniques

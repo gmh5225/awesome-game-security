@@ -108,11 +108,177 @@ This skill covers game-hacking techniques documented in the awesome-game-securit
 
 ### Aim Assistance
 ```
-- Aimbot algorithms
-- Triggerbot (auto-fire)
+- Aimbot algorithms (memory-based and AI visual)
+- Triggerbot (auto-fire on crosshair detection)
 - No recoil/no spread
-- Bullet prediction
-- Silent aim
+- Bullet prediction and lead calculation
+- Silent aim (server-side angle manipulation)
+- AI visual aimbot (YOLO-based, no memory access required)
+```
+
+### AI Visual Cheats (Computer Vision Aimbot)
+```
+Architecture overview:
+"Zero memory, zero driver injection" paradigm — uses screen capture +
+AI object detection + hardware input injection. No process attachment,
+no kernel driver, no game memory reading.
+
+Typical setup:
+┌─────────────────┐     screen capture      ┌──────────────────┐
+│  Gaming PC      │ ───────────────────────▶ │  AI Pipeline     │
+│  Game + OBS     │                          │  (same PC, or    │
+│                 │ ◀─────────────────────── │   second PC)     │
+└─────────────────┘     hardware input       │  YOLO model      │
+                        (KMBox / Logitech)   │  TensorRT/CUDA   │
+                                             └──────────────────┘
+
+Dual-machine variant (maximum isolation):
+- Machine A (game): only runs game + OBS, sends frames via NDI/capture card
+- Machine B (cheat): runs AI model, sends mouse commands via USB/network
+  to hardware input device on Machine A
+- Game machine has zero cheat code/process
+
+Single-machine variant:
+- OBS + AI model run on the same PC
+- AI implemented as OBS filter plugin (looks like "OBS is running")
+- Mouse output via hardware device or driver-level injection
+
+Pipeline stages:
+
+1. Frame Capture:
+   - OBS Game Capture (injects graphics hook DLL into game process)
+   - OBS Window Capture (no injection, uses DXGI Desktop Duplication)
+   - OBS plugin filter form (AI as OBS filter, minimal footprint)
+   - Direct framebuffer copy from GPU output layer (60+ FPS)
+   - Capture card (for dual-machine: HDMI/DP input on cheat PC)
+
+2. AI Object Detection:
+   - Model: YOLOv5 / YOLOv8 / YOLOv10 / YOLO11 (lightweight variants)
+   - Training: fine-tuned on game-specific screenshots
+     (enemy bodies, heads, torsos as labeled bounding boxes)
+   - Input: cropped region around crosshair (320x320 or 640x640)
+     to reduce inference cost
+   - Output: bounding boxes with class (head/body/enemy) + confidence score
+   - Acceleration: TensorRT (NVIDIA), CUDA, DirectML, OpenVINO
+   - Target latency: < 20–30 ms per frame for competitive play
+
+3. Coordinate Transform and Aiming Logic:
+   - Convert pixel coordinates to mouse movement delta:
+     delta_x = (target_x - screen_center_x) * sensitivity
+     delta_y = (target_y - screen_center_y) * sensitivity
+   - Target selection: closest to crosshair, highest confidence,
+     head priority, or combined scoring
+   - FOV (Field of View) lock: only engage targets within
+     configurable pixel radius from crosshair center
+
+4. Human-like Trajectory Smoothing:
+   - Not instant snap — gradual movement with acceleration curve
+   - Micro-jitter injection (simulates hand tremor)
+   - Bézier curve or cubic interpolation for path
+   - End-point correction (overshoot then settle)
+   - Random engagement probability (e.g., 85-90% lock rate)
+   - Slight intentional offset (not pixel-perfect center-mass)
+   - Variable reaction delay (50-200 ms simulated human response)
+
+5. Mouse Movement Execution:
+   - Hardware input devices (see Input Simulation section below)
+   - Movement commands sent as physical HID reports
+   - Game sees genuine hardware mouse input, not API calls
+
+Why OBS specifically:
+- Legitimate streaming software, used by millions of streamers
+- Anti-cheat cannot ban OBS-related processes without collateral damage
+- Game Capture provides fast, low-latency frame access
+- Plugin system allows embedding AI as a filter (invisible to AC)
+- Supports D3D11, D3D12, Vulkan, OpenGL capture paths
+```
+
+### YOLO Model Training Pipeline (for Game AI Aimbot)
+```
+End-to-end workflow from raw game screenshots to deployed TensorRT model.
+
+1. Data Collection:
+   - Capture game screenshots during actual gameplay (OBS recording or replay)
+   - Capture diverse scenarios: different maps, lighting, character skins,
+     distances, poses, partial occlusion, smoke/flash effects
+   - Aim for 2,000-10,000+ labeled images for robust detection
+   - Include negative samples (empty scenes, friendlies, environment objects)
+
+2. Annotation / Labeling:
+   - Tools: LabelImg (YOLO format), CVAT (collaborative), Roboflow (cloud),
+     Label Studio, makesense.ai (browser-based)
+   - YOLO format: one .txt per image, each line:
+     <class_id> <center_x> <center_y> <width> <height>
+     (all values normalized to 0-1 relative to image dimensions)
+   - Class definitions (typical):
+     0: enemy_body (full body bounding box)
+     1: enemy_head (head-only bounding box, for headshot targeting)
+     2: friendly (to avoid shooting teammates)
+   - Label head separately from body for head-priority targeting
+   - Quality control: consistent label boundaries, no missed instances
+
+3. Data Augmentation:
+   - Built-in Ultralytics augmentations (mosaic, mixup, copy-paste)
+   - Game-specific augmentations:
+     - Brightness/contrast variation (simulate different map lighting)
+     - Random crop around crosshair area (match inference ROI)
+     - Motion blur (simulate fast movement)
+     - Noise injection (simulate compression artifacts)
+   - Avoid augmentations that distort aspect ratio
+     (characters would look unnatural, hurting accuracy)
+
+4. Training:
+   - Framework: Ultralytics YOLOv8/v10/v11/YOLO11
+   - Base model: yolov8n.pt or yolov8s.pt (nano/small for speed)
+     or yolo11n.pt for latest architecture
+   - Training command:
+     yolo detect train data=game_dataset.yaml model=yolov8n.pt
+       epochs=100 imgsz=640 batch=16 device=0
+   - dataset.yaml structure:
+     path: /path/to/dataset
+     train: images/train
+     val: images/val
+     names: {0: enemy_body, 1: enemy_head, 2: friendly}
+   - Key hyperparameters to tune:
+     - imgsz: 320 (fastest) or 640 (more accurate)
+     - lr0: initial learning rate (default 0.01)
+     - conf: confidence threshold for inference (typically 0.4-0.6)
+     - iou: IoU threshold for NMS (typically 0.45-0.7)
+   - Training time: 1-4 hours on RTX 3060+ for nano model
+
+5. Validation and Testing:
+   - Evaluate mAP@0.5 and mAP@0.5:0.95 on validation set
+   - Target: mAP@0.5 > 0.85 for reliable game detection
+   - Test inference speed on target hardware
+   - Visual inspection on held-out game screenshots
+
+6. Export to TensorRT (deployment):
+   - Step 1: Export to ONNX
+     yolo export model=best.pt format=onnx simplify=True opset=17
+   - Step 2: Convert ONNX to TensorRT engine
+     yolo export model=best.pt format=engine half=True device=0
+     (half=True enables FP16 precision)
+   - Or use trtexec directly:
+     trtexec --onnx=best.onnx --saveEngine=best.engine
+       --fp16 --workspace=4096
+   - FP16 performance: ~17 ms latency, ~57 FPS throughput,
+     ~0.9% mAP drop vs FP32 (acceptable trade-off)
+   - INT8 quantization: even faster but requires calibration dataset
+     and careful accuracy validation
+
+7. Runtime Integration:
+   - Load TensorRT engine in C++/Python inference loop
+   - Input: preprocessed frame (resize, normalize, HWC→CHW, float32/16)
+   - Output: [N, 6] tensor (x1, y1, x2, y2, confidence, class_id)
+   - Apply NMS (Non-Maximum Suppression) to deduplicate detections
+   - Select target based on: closest to crosshair + highest confidence
+   - Convert pixel coordinates to mouse delta
+
+Alternative acceleration backends:
+- DirectML (AMD GPUs, Windows native)
+- OpenVINO (Intel GPUs/CPUs)
+- ONNX Runtime with CUDA EP (cross-platform)
+- CoreML (macOS, less common for game cheats)
 ```
 
 ### Movement Cheats
@@ -340,7 +506,7 @@ Vector2 WorldToScreen(Vector3 worldPos, Matrix viewMatrix) {
 
 ## Input Simulation
 
-### Methods
+### Software Methods
 - SendInput API
 - mouse_event/keybd_event
 - DirectInput hooking
@@ -351,6 +517,129 @@ Vector2 WorldToScreen(Vector3 worldPos, Matrix viewMatrix) {
 - Mouse class service callback
 - Keyboard filter drivers
 - HID manipulation
+
+### Hardware Input Devices (for AI Visual Cheats)
+```
+Hardware input devices produce genuine HID reports indistinguishable
+from real mouse/keyboard at the USB protocol level. This is the
+critical stealth layer for AI visual aimbot setups.
+
+KMBox series (KMBox Net, KMBox B Pro, KMBox B+):
+- Standalone hardware device connected via USB or network
+- Receives mouse/keyboard commands over TCP/UDP or serial
+- Generates real USB HID reports to the gaming PC
+- Gaming PC sees a standard USB mouse, not API-injected input
+- Network variant enables dual-machine setups
+- Supports relative movement, absolute positioning, button events
+- API: simple serial/network protocol for move(dx, dy), click, etc.
+
+Arduino / Teensy / STM32 microcontroller:
+- Custom firmware emulating USB HID device
+- Receives commands from cheat PC via serial/USB CDC
+- Generates USB HID mouse reports
+- Cheapest hardware option, fully customizable
+- Leonardo / Pro Micro (ATmega32U4) most common for native USB HID
+
+Logitech driver exploitation:
+- Older versions of G HUB / LGS (Logitech Gaming Software) expose
+  internal APIs for mouse movement
+- ghub_mouse_move() or lgs_mouse_move() via DLL injection into GHUB
+- Logitech devices have driver-level whitelist advantage
+- Specific driver versions required (newer versions patched)
+- No external hardware needed, but driver-version-dependent
+
+Interception driver (interception.sys):
+- Open-source keyboard/mouse filter driver
+- Intercepts and injects input at driver level
+- Commonly used with AI aimbots for zero-hardware-cost injection
+- Detectable by anti-cheat (driver signature known)
+
+HDMI/DP KVM-style middleman:
+- Hardware device sitting between mouse and PC
+- Intercepts real mouse data, injects AI-calculated deltas
+- Transparent to both the mouse and the PC
+- Highest stealth but most complex hardware setup
+
+Detection difficulty ranking:
+1. Dedicated hardware (KMBox, Arduino HID) — hardest to detect
+   (genuine USB HID, no driver anomaly)
+2. KVM middleman — very hard (transparent hardware interposer)
+3. Logitech driver method — moderate (known driver versions)
+4. Interception driver — easier (known driver signature)
+5. SendInput / mouse_event — easiest (API-level, trivially detected)
+```
+
+### KMBox Protocol Details
+```
+KMBox Net (network variant) — UDP-based protocol:
+
+Packet header (16 bytes, Little-Endian):
+Offset  Field      Size   Description
+0x00    MAC        4 B    Device UUID (unique per device, used for auth)
+0x04    RAND       4 B    Random value or parameter
+0x08    INDEXPTS   4 B    Incrementing sequence number (replay protection)
+0x0C    CMD        4 B    Command code
+
+Key command codes:
+Code          Command          Description
+0xAF3C2828    connect          Establish connection with device
+0xAEDE7345    mouse_move       Direct mouse movement (dx, dy)
+0xAEDE7346    mouse_automove   Human-like movement with interpolation
+0xA238455A    mouse_beizer     Bézier curve mouse movement
+0x9823AE8D    mouse_left       Left button press/release
+0x238D8212    mouse_right      Right button press/release
+0x97A3AE8D    mouse_middle     Middle button press/release
+0xFFEEAD38    mouse_wheel      Scroll wheel
+0x123C2C2F    keyboard_all     Keyboard key event
+
+Mouse API functions:
+- move(x, y):                 Direct relative movement, no interpolation
+- move_auto(x, y, ms):        Human-like movement over ms milliseconds,
+                               built-in Bézier curve interpolation
+- move_beizer(x, y, ms,       Second-order Bézier curve with custom
+    x1, y1, x2, y2):          control points for trajectory shaping
+
+Encrypted variants (enc_*):   Same functions with packet-level encryption
+                               to resist network packet analysis
+
+Performance:
+- Network (UDP): ~1,000 commands/second
+- Serial (KMBox B/B+, 115200 baud): ~300 commands/second
+- Network latency: < 2 ms per command (LAN)
+
+KMBox B / B Pro (serial variant):
+- USB CDC serial communication (COM port)
+- Baud rate: 115200 or higher
+- Simpler protocol: ASCII or binary command frames
+- move(x, y) over serial: ~3 ms round trip
+
+Physical keyboard/mouse monitoring:
+- monitor() function reads real user input from the device
+- Enables "pass-through + inject" mode:
+  real user input flows through normally,
+  AI-calculated deltas are added on top
+
+Arduino / Teensy HID protocol:
+- Custom serial command format (typically simple ASCII):
+  "M,dx,dy\n"      — mouse move
+  "C,button\n"      — click (1=left, 2=right, 3=middle)
+  "K,keycode\n"     — keypress
+- USB HID report generated by ATmega32U4 (Leonardo)
+  or ARM-based Teensy (3.2, 4.0, 4.1)
+- HID report descriptor mimics standard mouse:
+  buttons (3 bits) + X delta (8-16 bits) + Y delta (8-16 bits)
+- No custom driver needed — OS uses generic HID driver
+
+Logitech driver API (exploitable versions):
+- G HUB versions prior to certain patches expose internal functions
+- Key DLLs: LGS (lcore.dll), G HUB (ghub_mouse.dll or internal APIs)
+- ghub_mouse_move(dx, dy) or equivalent internal symbol
+- Accessed via DLL injection into GHUB process
+  or LoadLibrary + GetProcAddress
+- Movement appears as Logitech device input in the HID stack
+- Patched in newer G HUB versions; specific version numbers
+  circulate in cheat communities
+```
 
 ## Anti-Detection Techniques
 
