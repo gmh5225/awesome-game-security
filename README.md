@@ -699,6 +699,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/april-ivy/Apwil [Rust Windows gamehacking library, internal & external; process/memory/module/scan/hook/render/syscall/input/window]
 - https://github.com/WangXuan95/Xilinx-FPGA-PCIe-XDMA-Tutorial [DMA Tutorial]
 - https://github.com/NetKingJ/awesome-android-security [Android (Samsung) Security Research References]
+- https://github.com/shakevsky/keybuster [Samsung TrustZone Keymaster TA research client — send unfiltered requests via libkeymaster_helper; USENIX Security'22 supplemental; CVE-2021-25444/25490 PoC]
 - https://github.com/gregkh/kernel-development [Linux kernel development]
 - https://github.com/MatheuZSecurity/Rootkit [Collection of codes focused on Linux rootkits]
 - https://github.com/ARandomPerson7/Appsealing-Reversal [A Reversal and bypass for Appsealing]
@@ -1208,6 +1209,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/g2wfw/qbdi-tracer-android [Android assembly instruction tracing tool]
 
 > Android Application CVE
+- https://github.com/shakevsky/keybuster [Samsung Keymaster TA — AES-GCM IV reuse (CVE-2021-25444) and downgrade (CVE-2021-25490) PoC; hardware key extraction on Galaxy S8–S21; TrustZone research client]
 - https://github.com/nahid0x1/CVE-2024-0044 [a vulnerability affecting Android version 12 & 13]
 
 > Android Kernel CVE
