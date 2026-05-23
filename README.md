@@ -512,6 +512,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/beamstar/cheatengine-mcp-bridge [MCP for Cheat Engine]
 - https://github.com/illegal-instruction-co/processhacker-mcp [MCP for runtime analysis and process hacking; ProcessHacker for AI agents, extensible with DLL plugins]
 - https://github.com/zinja-coder/apktool-mcp-server [A MCP Server for APK Tool (Part of Android Reverse Engineering MCP Suites)]
+- https://github.com/azw413/Glass [Built-in MCP for mobile RE — CLI verbs (disasm, search, cfg-of, dex-callers, bin-search, insn-search, etc.) as MCP tools on APK/IPA/AArch64; `glass mcp`]
 - https://github.com/zhizhuodemao/android_proxy_mcp [Android Proxy MCP — HTTP/HTTPS packet capture for AI assistants, mitmdump + SQLite + natural language query]
 - https://github.com/regenrek/deepwiki-mcp [MCP for deepwiki]
 - https://github.com/gmh5225/zig-mcp-server [A high-performance implementation of the MCP protocol in Zig]
@@ -885,6 +886,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/nico/demumble [Itanium + MSVC symbol demangler; D/Rust/Swift; cross-platform replacement for c++filt / undname.exe]
 - https://github.com/amruth-sn/kong [Kong - agentic reverse engineer, LLM-orchestrated binary RE via in-process Ghidra, call-graph analysis, agentic deobfuscation]
 - https://github.com/LaurieWired/Malimite [iOS and macOS Decompiler]
+- https://github.com/azw413/Glass [Rust mobile-first disassembler for APK/DEX/smali and AArch64 .so/.dylib; CFG, xref, CLI/MCP automation]
 - https://github.com/0xbigshaq/apatchy [Fuzzing Framework for Apache HTTPD Server]
 
 
@@ -1178,6 +1180,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Raival-e/File-Explorer [An Android file explorer]
 - https://github.com/obfusk/apksigcopier [apksigcopier - copy/extract/patch android apk signatures & compare apks]
 - https://github.com/loerting/dalvikus [Android reverse-engineering tool / smali editor]
+- https://github.com/azw413/Glass [APK/AAB: DEX class tree, smali viewer, arm64 .so disassembly, manifest, CFG, xref, bundle search; GPU-accelerated Rust disassembler]
 
 > Android Memory Explorer
 - https://github.com/misc0110/PTEditor [PT Editor]
@@ -1370,6 +1373,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > IOS File Explorer
 - https://github.com/DerekSelander/dynadump [A runtime ObjC class-dump]
 - https://github.com/LaurieWired/Malimite [Malimite is an iOS and macOS decompiler designed to help researchers analyze and decode IPA files and Application Bundles]
+- https://github.com/azw413/Glass [IPA/Mach-O: fat slice selection, Info.plist, Frameworks disassembly, CFG, xref; AArch64 native RE in the same bundle workflow as Android]
 
 > IOS App Packaging
 - https://github.com/addrianyy/ios_packager [Package and sign iOS applications]
@@ -1390,6 +1394,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/ghidra
 - https://github.com/gmh5225/retdec
 - https://github.com/Sidenai/hyperion-disassembler [Native multi-arch disassembler & decompiler — PE/ELF/Mach-O/.NET, x86/x64/ARM64/MIPS/PPC, RTTI recovery, SSA decompiler, Lua scripting, packer detection]
+- https://github.com/azw413/Glass [Rust, GPL-3.0] Mobile-first GPU disassembler (gpui) for APK/DEX/smali and AArch64 ELF/Mach-O (Android/iOS); CFG, xref, bin/insn search, annotations, in-place patch export; CLI + MCP; free IDA alternative]
 - https://github.com/Col-E/Recaf [Java]
 - https://github.com/gmh5225/bytecode-viewer [Java]
 - https://github.com/gmh5225/deobfuscator [Java]
