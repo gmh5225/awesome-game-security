@@ -954,6 +954,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ZehMatt/CovCane
 - https://github.com/bitdefender/river
 - https://github.com/beehive-lab/mambo [ARM]
+- https://github.com/GJDuck/e9patch [E9Patch is a powerful static binary rewriting tool for x86_64 Linux ELF binaries]
 - https://github.com/DynamoRIO/drmemory
 - https://github.com/aroxby/dynre-x86
 - https://github.com/WaterlooBridge/adbi [For Android]
