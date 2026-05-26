@@ -1,0 +1,3357 @@
+Project Path: arc_robert-yates_gdbserver9x_kx7t01p6
+
+Source Tree:
+
+```txt
+arc_robert-yates_gdbserver9x_kx7t01p6
+├── README.md
+├── context.c
+├── context.h
+├── debugger.c
+├── gdb.c
+├── main.c
+├── main.h
+├── server.c
+└── utils.c
+
+```
+
+`README.md`:
+
+```md
+# gdbserver9x
+
+# Info
+
+`gdbserver9x` is a very hacked together gdbserver implementation for debugging 32bits exes on old windows machines. It works best with [BinaryNinja's](https://binary.ninja/) `GDP RSP` adapter. Tested on Windows 98SE and Windows XP-SP3
+## Status
+
+It implements the basics needed for practical 32-bit process debugging on old Windows machines, with a focus on keeping the code simple enough to build with the Visual C++ 6.0 toolchain.
+
+Implemented support includes:
+
+- Launching a target process under the Windows debugging API.
+- GDB RSP packet framing, checksums, and no-ack mode.
+- Basic process, host, thread, and register queries.
+- Memory reads and memory region queries.
+- Continue and single-step requests.
+- Software breakpoints via `Z0` and `z0`.
+- Thread listing and thread selection.
+- Module/library metadata used by Binary Ninja and LLDB-style adapters.
+
+## Building
+
+The tested toolchain is Microsoft Visual Studio 6.0 / Visual C++ 6.0
+targeting 32-bit x86 Windows.
+
+A helper script is available at `build\build.cmd`. Update `TOOLCHAIN_DIR` in
+that script to match your Visual Studio 6.0 installation, then run it from the
+`build` directory:
+
+```bat
+cd build
+build.cmd
+```
+
+The script compiles the C sources and writes `gdbserver9x.exe` into `build`.
+If you use another compatible toolchain, compile the project as a Win32 console
+program and link against Winsock 2 (`ws2_32.lib`) plus the normal Win32 system
+libraries.
+
+## Usage
+
+```text
+gdbserver9x.exe HOST:PORT PROGRAM [ARGS...]
+```
+
+Example:
+
+```bat
+gdbserver9x.exe 0.0.0.0:31337 C:\targets\hello.exe arg1 arg2
+```
+
+To enable verbose packet and debugger logging, set `GDBLOG` before launching:
+
+```bat
+set GDBLOG=1
+gdbserver9x.exe 0.0.0.0:31337 C:\targets\hello.exe
+```
+
+```bat
+set GDBRESTART=1
+```
+
+will restart the server on exit
+
+## Limitations
+
+- Only 32-bit Windows debuggees are in scope.
+- The server launches a new process; it does not attach to an existing process.
+- While the debuggee is running, the main loop waits for the next Windows debug
+  event and does not process arbitrary incoming RSP packets.
+- Hardware breakpoints and watchpoints, are not currently implemented.
+
+## History
+
+v1.0  
+  - inital release not battle tested  
+v1.1  
+  - allows round trip debugging via `GDBRESTART` var  
+  - allows register writes  
+  - allows memory writes  
+  
+have fun  
+/yates.
+```
+
+`context.c`:
+
+```c
+#include "context.h"
+#include <string.h>
+
+struct context g_ctx;
+
+void context_init() {
+    memset(&g_ctx, 0, sizeof(g_ctx));
+    g_ctx.rsp.client = INVALID_SOCKET;
+}
+
+```
+
+`context.h`:
+
+```h
+
+#ifndef CONTEXT_H
+#define CONTEXT_H
+
+#ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+#endif
+
+#include <windows.h>
+#include <stdio.h>
+#include <tlhelp32.h>
+#include <winsock2.h>
+
+
+extern int do_logging;
+extern int do_restart;
+int gdb_log_printf(const char* fmt, ...);
+
+#define printf gdb_log_printf
+
+#define PACKET_NOT_HANDLED 0
+#define PACKET_HANDLED 1
+
+#define MAX_PACKET 8192
+#define MAX_THREADS 64
+
+struct thread {
+    DWORD tid;
+    HANDLE hThread;
+};
+
+#define MAX_BREAKPOINTS 128
+struct breakpoints {
+    int used;
+    DWORD addr;
+    BYTE original_byte;
+    int inserted;
+};
+
+#define MAX_MODULES 128
+#define MAX_MODULE_PATH 260
+#define MAX_MODULE_SECTIONS 32
+#define MAPS_BUF_SIZE 16384
+#define FAKE_MAPS_FD 3
+struct modules {
+    DWORD base;
+    DWORD size;
+    int section_count;
+    DWORD section_va[MAX_MODULE_SECTIONS]; /* absolute VAs */
+    char path[MAX_MODULE_PATH];
+};
+
+#define LIBRARIES_XML_SIZE 16384
+
+struct rsp_context {
+    SOCKET client;
+    int wsa_started;
+    char pkt[MAX_PACKET];
+    char reply[MAX_PACKET];
+    int no_ack;
+    int thread_suffix_supported;
+    int list_threads_in_stop_reply;
+};
+
+struct dbg_context {
+    DWORD process_id;
+    HANDLE process_handle;
+    int thread_count;
+    struct thread threads[MAX_THREADS];
+    DWORD current_tid;
+    DWORD last_signal;
+    DEBUG_EVENT last_event;
+    int have_pending_event;
+    struct breakpoints bps[MAX_BREAKPOINTS];
+    int inserted_bp_count;
+    int last_stop_was_breakpoint;
+    int last_stop_was_single_step;
+
+    /*
+       cached_ctx_tid == 0 means the slot is empty. While the debuggee is
+       stopped its registers cannot change, so any consumer asking for the
+       same thread can reuse the cached CONTEXT instead of issuing another
+       GetThreadContext syscall.
+    */
+    CONTEXT cached_ctx;
+    DWORD cached_ctx_tid;
+
+    /*
+       Pre-formatted hex reply for the 'g' (read all registers) packet,
+       valid until the next continue or any SetThreadContext.
+    */
+    char cached_g_reply[160];
+    DWORD cached_g_reply_tid;
+    int cached_g_reply_valid;
+};
+
+struct module_context {
+    struct modules mods[MAX_MODULES];
+    int mod_count;
+    char maps_buf[MAPS_BUF_SIZE];
+    int maps_len;
+    int maps_fd_open;
+    char exec_file[MAX_MODULE_PATH];
+    char libraries_xml[LIBRARIES_XML_SIZE];
+    int libraries_xml_len;
+    DWORD main_module_base;
+    int modules_changed;
+};
+
+struct context {
+    struct rsp_context rsp;
+    struct dbg_context dbg;
+    struct module_context mod;
+};
+
+extern struct context g_ctx;
+
+// utils
+int hexval(int c);
+void put_hex_byte(char* out, unsigned char b);
+char* append_hex_byte(char* p, unsigned char b);
+char* append_u32_le(char* p, DWORD v);
+int decode_hex_string_until_comma(const char* in, char* out, int outsz, const char** after);
+char* append_escaped_binary(char* p, char* end, const unsigned char* buf, int len);
+char* append_hex_string(char* p, const char* s);
+int stricmp_slash_insensitive(const char* a, const char* b);
+int decode_hex_string_all(const char* in, char* out, int outsz);
+void xml_escape_append(char** pp, char* end, const char* s);
+void make_posix_win_path(const char* win_path, char* out, int outsz);
+void protect_to_permissions(DWORD protect, char* out);
+void make_proc_maps_path(const char* win_path, char* out, int outsz);
+void make_lldb_module_path(const char* win_path, char* out, int outsz);
+void normalize_module_query_path(const char* in, char* out, int outsz);
+int same_module_path(const char* a, const char* b);
+
+#endif
+
+```
+
+`debugger.c`:
+
+```c
+#include "context.h"
+#include "windows.h"
+#include "stdio.h"
+#include "stdlib.h"
+
+int wait_for_interesting_stop();
+void add_thread(DWORD tid, HANDLE hThread);
+void remove_thread(DWORD tid);
+DWORD exception_to_signal(DWORD code);
+DWORD reg_by_index(CONTEXT* c, int n, int* ok);
+int write_reg_by_index(CONTEXT* c, int n, DWORD v);
+int find_bp_by_addr(DWORD addr);
+int alloc_bp_slot();
+int write_debuggee_byte(DWORD addr, BYTE value);
+int read_debuggee_byte(DWORD addr, BYTE* value);
+void maybe_flush_icache(LPCVOID addr, SIZE_T len);
+int get_context_for_current(CONTEXT* ctx);
+int set_context_for_current(CONTEXT* ctx);
+int handle_possible_swbreak_hit(void);
+void make_stop_reply(char* out, int outsz);
+void patch_breakpoints_out_of_memory_read(DWORD addr, BYTE* buf, DWORD len);
+DWORD get_first_section_rva_from_file(const char* path);
+void populate_module_sections_from_pe(struct modules* m);
+static void invalidate_thread_caches(void);
+
+void cleanup_debuggee(int terminate) {
+    int i;
+
+    if (terminate && g_ctx.dbg.process_handle) {
+        TerminateProcess(g_ctx.dbg.process_handle, 0);
+    }
+
+    if (g_ctx.dbg.have_pending_event) {
+        ContinueDebugEvent(g_ctx.dbg.last_event.dwProcessId, g_ctx.dbg.last_event.dwThreadId, DBG_CONTINUE);
+        g_ctx.dbg.have_pending_event = 0;
+    }
+
+    if (terminate && g_ctx.dbg.process_handle) {
+        
+        // drain the queue whilst waiting for TerminateProcess's signal
+        DEBUG_EVENT ev;
+        DWORD start = GetTickCount();
+        for (;;) {
+            DWORD elapsed = GetTickCount() - start;
+            DWORD timeout = elapsed >= 2000 ? 0 : 2000 - elapsed;
+            if (!WaitForDebugEvent(&ev, timeout))
+                break;
+            if (ev.dwDebugEventCode == LOAD_DLL_DEBUG_EVENT)
+                CloseHandle(ev.u.LoadDll.hFile);
+            ContinueDebugEvent(ev.dwProcessId, ev.dwThreadId, DBG_CONTINUE);
+            if (ev.dwDebugEventCode == EXIT_PROCESS_DEBUG_EVENT)
+                break;
+        }
+    }
+
+    for (i = 0; i < g_ctx.dbg.thread_count; ++i) {
+        if (g_ctx.dbg.threads[i].hThread) {
+            CloseHandle(g_ctx.dbg.threads[i].hThread);
+            g_ctx.dbg.threads[i].hThread = NULL;
+        }
+    }
+    g_ctx.dbg.thread_count = 0;
+
+    if (g_ctx.dbg.process_handle) {
+        CloseHandle(g_ctx.dbg.process_handle);
+        g_ctx.dbg.process_handle = NULL;
+    }
+
+    invalidate_thread_caches();
+}
+
+int launch_debuggee(const char* cmdline) {
+
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    char exe_path[MAX_PATH];
+    const char* p;
+    const char* exe_end;
+    size_t exe_len;
+
+    if (!cmdline || !cmdline[0]) {
+        printf("[launch_debuggee]: empty cmdline\n");
+        return 0;
+    }
+
+    p = cmdline;
+    while (*p == ' ' || *p == '\t')
+        p++;
+    exe_end = p;
+    while (*exe_end && *exe_end != ' ' && *exe_end != '\t')
+        exe_end++;
+    exe_len = (size_t)(exe_end - p);
+    if (exe_len >= sizeof(exe_path))
+        exe_len = sizeof(exe_path) - 1;
+    memcpy(exe_path, p, exe_len);
+    exe_path[exe_len] = '\0';
+
+    GetFullPathName(exe_path, sizeof(g_ctx.mod.exec_file), g_ctx.mod.exec_file, NULL);
+
+    memset(&si, 0, sizeof(si));
+    memset(&pi, 0, sizeof(pi));
+    si.cb = sizeof(si);
+
+    if (!CreateProcess(NULL, (LPSTR)cmdline, NULL, NULL, FALSE, DEBUG_ONLY_THIS_PROCESS, NULL, NULL, &si, &pi)) {
+        printf("[launch_debuggee]: CreateProcess failed: %lu\n", GetLastError());
+        return 0;
+    }
+
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+
+    return wait_for_interesting_stop();
+}
+
+int wait_for_interesting_stop() {
+    DEBUG_EVENT ev;
+    DWORD cont = 0;
+
+    for (;;) {
+        if (!WaitForDebugEvent(&ev, INFINITE)) {
+            printf("WaitForDebugEvent failed: %lu\n", GetLastError());
+            return 0;
+        }
+
+        g_ctx.dbg.last_event = ev;
+        g_ctx.dbg.have_pending_event = 1;
+        g_ctx.dbg.current_tid = ev.dwThreadId;
+
+        switch (ev.dwDebugEventCode) {
+            case CREATE_PROCESS_DEBUG_EVENT: {
+                printf("[debugger]: CREATE_PROCESS_DEBUG_EVENT pid=%lu tid=%lu\n", ev.dwProcessId, ev.dwThreadId);
+                g_ctx.mod.modules_changed = 1;
+                g_ctx.dbg.process_id = ev.dwProcessId;
+                g_ctx.dbg.process_handle = ev.u.CreateProcessInfo.hProcess;
+                g_ctx.mod.main_module_base = (DWORD)ev.u.CreateProcessInfo.lpBaseOfImage;
+                add_thread(ev.dwThreadId, ev.u.CreateProcessInfo.hThread);
+                CloseHandle(ev.u.CreateProcessInfo.hFile);
+                cont = DBG_CONTINUE;
+                break;
+            }
+
+            case CREATE_THREAD_DEBUG_EVENT: {
+                printf("[debugger]: CREATE_THREAD_DEBUG_EVENT pid=%lu tid=%lu\n", ev.dwProcessId, ev.dwThreadId);
+                add_thread(ev.dwThreadId, ev.u.CreateThread.hThread);
+                cont = DBG_CONTINUE;
+                break;
+            }
+
+            case EXIT_THREAD_DEBUG_EVENT: {
+                printf("[debugger]: EXIT_THREAD_DEBUG_EVENT pid=%lu tid=%lu\n", ev.dwProcessId, ev.dwThreadId);
+                remove_thread(ev.dwThreadId);
+                cont = DBG_CONTINUE;
+                break;
+            }
+
+            case LOAD_DLL_DEBUG_EVENT: {
+                printf("[debugger]: LOAD_DLL_DEBUG_EVENT pid=%lu tid=%lu\n", ev.dwProcessId, ev.dwThreadId);
+                g_ctx.mod.modules_changed = 1;
+                CloseHandle(ev.u.LoadDll.hFile);
+                cont = DBG_CONTINUE;
+                break;
+            }
+
+            case UNLOAD_DLL_DEBUG_EVENT: {
+                printf("[debugger]: UNLOAD_DLL_DEBUG_EVENT pid=%lu tid=%lu\n", ev.dwProcessId, ev.dwThreadId);
+                g_ctx.mod.modules_changed = 1;
+                cont = DBG_CONTINUE;
+                break;
+            }
+            case OUTPUT_DEBUG_STRING_EVENT: {
+                printf("[debugger]: OUTPUT_DEBUG_STRING_EVENT pid=%lu tid=%lu\n", ev.dwProcessId, ev.dwThreadId);
+                cont = DBG_CONTINUE;
+                break;
+            }
+
+            case EXIT_PROCESS_DEBUG_EVENT: {
+                printf("[debugger]: EXIT_PROCESS_DEBUG_EVENT pid=%lu tid=%lu\n", ev.dwProcessId, ev.dwThreadId);
+                g_ctx.dbg.last_signal = 0;
+                return 1;
+            }
+
+            case EXCEPTION_DEBUG_EVENT: {
+                printf("[debugger]: EXCEPTION_DEBUG_EVENT pid=%lu tid=%lu code=0x%08lx\n", ev.dwProcessId, ev.dwThreadId,
+                       ev.u.Exception.ExceptionRecord.ExceptionCode);
+                g_ctx.dbg.last_stop_was_breakpoint = 0;
+                g_ctx.dbg.last_stop_was_single_step = (ev.u.Exception.ExceptionRecord.ExceptionCode == EXCEPTION_SINGLE_STEP);
+
+                if (ev.u.Exception.ExceptionRecord.ExceptionCode == EXCEPTION_BREAKPOINT) {
+                    printf("[debugger]: Hit breakpoint at EIP=0x%08lx\n", ev.u.Exception.ExceptionRecord.ExceptionAddress);
+                    if (handle_possible_swbreak_hit()) {
+                        printf("[debugger]: Handled breakpoint hit at 0x%08lx\n", ev.u.Exception.ExceptionRecord.ExceptionAddress);
+                        g_ctx.dbg.last_signal = 5; /* SIGTRAP */
+                        return 1;
+                    }
+                    printf("[debugger]: Unhandled breakpoint at 0x%08lx\n", ev.u.Exception.ExceptionRecord.ExceptionAddress);
+                }
+
+                g_ctx.dbg.last_signal = exception_to_signal(ev.u.Exception.ExceptionRecord.ExceptionCode);
+                printf("[debugger]: Mapped exception code 0x%08lx to signal %lu\n", ev.u.Exception.ExceptionRecord.ExceptionCode,
+                       g_ctx.dbg.last_signal);
+                return 1;
+            }
+
+            default: {
+                fprintf(stdout, "[debugger]: UNKNOWN_EVENT %lu pid=%lu tid=%lu\n", ev.dwDebugEventCode, ev.dwProcessId, ev.dwThreadId);
+                ExitProcess(-1);
+            }
+        }
+
+        g_ctx.dbg.have_pending_event = 0;
+        invalidate_thread_caches();
+        ContinueDebugEvent(ev.dwProcessId, ev.dwThreadId, cont);
+    }
+}
+
+void set_pc_if_present(const char* pkt) {
+    CONTEXT c;
+    DWORD addr;
+
+    if (pkt[1] == 0)
+        return;
+
+    addr = strtoul(pkt + 1, NULL, 16);
+
+    if (get_context_for_current(&c)) {
+        c.Eip = addr;
+        set_context_for_current(&c);
+    }
+}
+
+int handle_possible_swbreak_hit(void) {
+    CONTEXT c;
+    DWORD bp_addr;
+    int idx;
+
+    if (!get_context_for_current(&c))
+        return 0;
+
+    bp_addr = c.Eip - 1;
+
+    idx = find_bp_by_addr(bp_addr);
+    if (idx < 0 || !g_ctx.dbg.bps[idx].inserted)
+        return 0;
+
+    /*
+       Restore original instruction byte.
+    */
+    if (!write_debuggee_byte(bp_addr, g_ctx.dbg.bps[idx].original_byte))
+        return 0;
+
+    g_ctx.dbg.bps[idx].inserted = 0;
+    g_ctx.dbg.inserted_bp_count--;
+
+    /*
+       Rewind EIP so the frontend sees execution stopped at the
+       breakpoint address, not one byte after it.
+    */
+    c.Eip = bp_addr;
+    set_context_for_current(&c);
+
+    g_ctx.dbg.last_stop_was_breakpoint = 1;
+    return 1;
+}
+
+int find_bp_at_current_eip(void) {
+    CONTEXT c;
+
+    if (!get_context_for_current(&c))
+        return -1;
+
+    return find_bp_by_addr(c.Eip);
+}
+
+int ensure_bp_temporarily_removed(int idx) {
+    if (idx < 0)
+        return 1;
+
+    if (!g_ctx.dbg.bps[idx].used)
+        return 1;
+
+    if (!g_ctx.dbg.bps[idx].inserted)
+        return 1;
+
+    if (!write_debuggee_byte(g_ctx.dbg.bps[idx].addr, g_ctx.dbg.bps[idx].original_byte))
+        return 0;
+
+    g_ctx.dbg.bps[idx].inserted = 0;
+    g_ctx.dbg.inserted_bp_count--;
+    return 1;
+}
+
+int reinsert_bp(int idx) {
+    if (idx < 0)
+        return 1;
+
+    if (!g_ctx.dbg.bps[idx].used)
+        return 1;
+
+    if (g_ctx.dbg.bps[idx].inserted)
+        return 1;
+
+    if (!write_debuggee_byte(g_ctx.dbg.bps[idx].addr, 0xCC))
+        return 0;
+
+    g_ctx.dbg.bps[idx].inserted = 1;
+    g_ctx.dbg.inserted_bp_count++;
+    return 1;
+}
+
+int continue_pending_event(DWORD status) {
+    if (!g_ctx.dbg.have_pending_event)
+        return 1;
+
+    invalidate_thread_caches();
+
+    if (!ContinueDebugEvent(g_ctx.dbg.last_event.dwProcessId, g_ctx.dbg.last_event.dwThreadId, status)) {
+        printf("ContinueDebugEvent failed: %lu\n", GetLastError());
+        return 0;
+    }
+
+    g_ctx.dbg.have_pending_event = 0;
+    return 1;
+}
+
+HANDLE find_thread(DWORD tid) {
+    int i;
+    for (i = 0; i < g_ctx.dbg.thread_count; ++i) {
+        if (g_ctx.dbg.threads[i].tid == tid)
+            return g_ctx.dbg.threads[i].hThread;
+    }
+    return NULL;
+}
+
+static void invalidate_thread_caches(void) {
+    g_ctx.dbg.cached_ctx_tid = 0;
+    g_ctx.dbg.cached_g_reply_valid = 0;
+}
+
+int get_context_for_current(CONTEXT* ctx) {
+    HANDLE ht;
+
+    if (g_ctx.dbg.cached_ctx_tid != 0 && g_ctx.dbg.cached_ctx_tid == g_ctx.dbg.current_tid) {
+        memcpy(ctx, &g_ctx.dbg.cached_ctx, sizeof(*ctx));
+        return 1;
+    }
+
+    ht = find_thread(g_ctx.dbg.current_tid);
+
+    if (!ht)
+        return 0;
+
+    memset(ctx, 0, sizeof(*ctx));
+    ctx->ContextFlags = CONTEXT_FULL | CONTEXT_SEGMENTS;
+
+    if (!GetThreadContext(ht, ctx)) {
+        printf("GetThreadContext failed tid=%lu err=%lu\n", g_ctx.dbg.current_tid, GetLastError());
+        return 0;
+    }
+
+    memcpy(&g_ctx.dbg.cached_ctx, ctx, sizeof(*ctx));
+    g_ctx.dbg.cached_ctx_tid = g_ctx.dbg.current_tid;
+
+    return 1;
+}
+
+int set_context_for_current(CONTEXT* ctx) {
+    HANDLE ht = find_thread(g_ctx.dbg.current_tid);
+
+    if (!ht)
+        return 0;
+
+    if (!SetThreadContext(ht, ctx)) {
+        printf("SetThreadContext failed tid=%lu err=%lu\n", g_ctx.dbg.current_tid, GetLastError());
+        return 0;
+    }
+
+    memcpy(&g_ctx.dbg.cached_ctx, ctx, sizeof(*ctx));
+    g_ctx.dbg.cached_ctx_tid = g_ctx.dbg.current_tid;
+    g_ctx.dbg.cached_g_reply_valid = 0;
+
+    return 1;
+}
+
+void read_all_registers(char* out, int outsz) {
+    CONTEXT c;
+    char* p;
+    int n;
+
+    if (g_ctx.dbg.cached_g_reply_valid && g_ctx.dbg.cached_g_reply_tid == g_ctx.dbg.current_tid) {
+        strcpy(out, g_ctx.dbg.cached_g_reply);
+        return;
+    }
+
+    if (!get_context_for_current(&c)) {
+        strcpy(out, "E01");
+        return;
+    }
+
+    /*
+       Register order:
+       eax ebx ecx edx edi esi ebp esp eip eflags cs fs gs ss ds es
+    */
+    p = out;
+    p = append_u32_le(p, c.Eax);
+    p = append_u32_le(p, c.Ebx);
+    p = append_u32_le(p, c.Ecx);
+    p = append_u32_le(p, c.Edx);
+    p = append_u32_le(p, c.Edi);
+    p = append_u32_le(p, c.Esi);
+    p = append_u32_le(p, c.Ebp);
+    p = append_u32_le(p, c.Esp);
+    p = append_u32_le(p, c.Eip);
+    p = append_u32_le(p, c.EFlags);
+    p = append_u32_le(p, c.SegCs);
+    p = append_u32_le(p, c.SegFs);
+    p = append_u32_le(p, c.SegGs);
+    p = append_u32_le(p, c.SegSs);
+    p = append_u32_le(p, c.SegDs);
+    p = append_u32_le(p, c.SegEs);
+
+    *p = 0;
+
+    n = (int)(p - out);
+    if (n < (int)sizeof(g_ctx.dbg.cached_g_reply)) {
+        memcpy(g_ctx.dbg.cached_g_reply, out, n + 1);
+        g_ctx.dbg.cached_g_reply_tid = g_ctx.dbg.current_tid;
+        g_ctx.dbg.cached_g_reply_valid = 1;
+    }
+}
+
+void read_one_register(const char* pkt, char* out, int outsz) {
+    CONTEXT c;
+    int n, ok;
+    DWORD v;
+    char* p = out;
+
+    n = (int)strtoul(pkt + 1, NULL, 16);
+
+    if (!get_context_for_current(&c)) {
+        strcpy(out, "E01");
+        return;
+    }
+
+    v = reg_by_index(&c, n, &ok);
+    if (!ok) {
+        strcpy(out, "xxxxxxxx");
+        return;
+    }
+
+    p = append_u32_le(p, v);
+    *p = 0;
+}
+
+void write_one_register(const char* pkt, char* out, int outsz) {
+    CONTEXT c;
+    int n;
+    DWORD v = 0;
+    const char* eq;
+    const char* p;
+    int i;
+
+    (void)outsz;
+
+    eq = strchr(pkt, '=');
+    if (!eq) {
+        strcpy(out, "E01");
+        return;
+    }
+
+    n = (int)strtoul(pkt + 1, NULL, 16);
+
+    p = eq + 1;
+    for (i = 0; i < 4; ++i) {
+        int hi, lo;
+        if (!p[0] || !p[1]) {
+            strcpy(out, "E01");
+            return;
+        }
+        hi = hexval((unsigned char)p[0]);
+        lo = hexval((unsigned char)p[1]);
+        if (hi < 0 || lo < 0) {
+            strcpy(out, "E01");
+            return;
+        }
+        v |= ((DWORD)((hi << 4) | lo)) << (i * 8);
+        p += 2;
+    }
+
+    if (!get_context_for_current(&c)) {
+        strcpy(out, "E01");
+        return;
+    }
+
+    if (!write_reg_by_index(&c, n, v)) {
+        strcpy(out, "E01");
+        return;
+    }
+
+    if (!set_context_for_current(&c)) {
+        strcpy(out, "E01");
+        return;
+    }
+
+    strcpy(out, "OK");
+}
+
+void add_thread(DWORD tid, HANDLE hThread) {
+    if (g_ctx.dbg.thread_count >= MAX_THREADS) {
+        if (hThread)
+            CloseHandle(hThread);
+        return;
+    }
+
+    g_ctx.dbg.threads[g_ctx.dbg.thread_count].tid = tid;
+    g_ctx.dbg.threads[g_ctx.dbg.thread_count].hThread = hThread;
+    g_ctx.dbg.thread_count++;
+
+    if (g_ctx.dbg.current_tid == 0)
+        g_ctx.dbg.current_tid = tid;
+}
+
+void remove_thread(DWORD tid) {
+    int i;
+
+    for (i = 0; i < g_ctx.dbg.thread_count; ++i) {
+        if (g_ctx.dbg.threads[i].tid != tid)
+            continue;
+
+        if (g_ctx.dbg.threads[i].hThread)
+            CloseHandle(g_ctx.dbg.threads[i].hThread);
+
+        if (i != g_ctx.dbg.thread_count - 1)
+            g_ctx.dbg.threads[i] = g_ctx.dbg.threads[g_ctx.dbg.thread_count - 1];
+
+        g_ctx.dbg.thread_count--;
+        memset(&g_ctx.dbg.threads[g_ctx.dbg.thread_count], 0, sizeof(g_ctx.dbg.threads[g_ctx.dbg.thread_count]));
+
+        if (g_ctx.dbg.current_tid == tid)
+            g_ctx.dbg.current_tid = g_ctx.dbg.thread_count > 0 ? g_ctx.dbg.threads[0].tid : 0;
+
+        return;
+    }
+}
+
+DWORD exception_to_signal(DWORD code) {
+    switch (code) {
+        case EXCEPTION_BREAKPOINT:
+        case EXCEPTION_SINGLE_STEP:
+            return 5; /* SIGTRAP */
+        case EXCEPTION_ACCESS_VIOLATION:
+            return 11; /* SIGSEGV */
+        case EXCEPTION_ILLEGAL_INSTRUCTION:
+            return 4; /* SIGILL */
+        case EXCEPTION_INT_DIVIDE_BY_ZERO:
+        case EXCEPTION_FLT_DIVIDE_BY_ZERO:
+            return 8; /* SIGFPE */
+        default:
+            return 5;
+    }
+}
+
+int insert_sw_breakpoint(DWORD addr, DWORD kind) {
+    int idx;
+    BYTE b;
+
+    (void)kind;
+
+    idx = find_bp_by_addr(addr);
+
+    if (idx >= 0) {
+        if (g_ctx.dbg.bps[idx].inserted)
+            return 1;
+
+        if (!write_debuggee_byte(addr, 0xCC))
+            return 0;
+
+        g_ctx.dbg.bps[idx].inserted = 1;
+        g_ctx.dbg.inserted_bp_count++;
+        return 1;
+    }
+
+    idx = alloc_bp_slot();
+    if (idx < 0)
+        return 0;
+
+    if (!read_debuggee_byte(addr, &b))
+        return 0;
+
+    if (!write_debuggee_byte(addr, 0xCC))
+        return 0;
+
+    {
+        BYTE check = 0;
+        if (read_debuggee_byte(addr, &check))
+            printf("[bp]: insert addr=0x%08lx orig=0x%02x readback=0x%02x\n", addr, b, check);
+        else
+            printf("[bp]: insert addr=0x%08lx orig=0x%02x readback=FAILED\n", addr, b);
+    }
+
+    g_ctx.dbg.bps[idx].used = 1;
+    g_ctx.dbg.bps[idx].addr = addr;
+    g_ctx.dbg.bps[idx].original_byte = b;
+    g_ctx.dbg.bps[idx].inserted = 1;
+    g_ctx.dbg.inserted_bp_count++;
+
+    return 1;
+}
+
+int remove_sw_breakpoint(DWORD addr) {
+    int idx;
+
+    idx = find_bp_by_addr(addr);
+    if (idx < 0) {
+        return 1;
+    }
+
+    if (g_ctx.dbg.bps[idx].inserted) {
+        if (!write_debuggee_byte(addr, g_ctx.dbg.bps[idx].original_byte))
+            return 0;
+
+        g_ctx.dbg.inserted_bp_count--;
+    }
+
+    memset(&g_ctx.dbg.bps[idx], 0, sizeof(g_ctx.dbg.bps[idx]));
+    return 1;
+}
+
+void read_memory_packet(const char* pkt, char* out, int outsz) {
+    DWORD addr;
+    DWORD len;
+    const char* comma;
+    BYTE buf[1024];
+    SIZE_T got = 0;
+    DWORD i;
+    char* p = out;
+
+    comma = strchr(pkt, ',');
+    if (!comma) {
+        strcpy(out, "E22");
+        return;
+    }
+
+    addr = strtoul(pkt + 1, NULL, 16);
+    len = strtoul(comma + 1, NULL, 16);
+
+    if (len > sizeof(buf))
+        len = sizeof(buf);
+
+    if (!ReadProcessMemory(g_ctx.dbg.process_handle, (LPCVOID)addr, buf, len, &got)) {
+        strcpy(out, "E14");
+        return;
+    }
+
+    patch_breakpoints_out_of_memory_read(addr, buf, (DWORD)got);
+
+    for (i = 0; i < got && (p + 2) < (out + outsz); ++i)
+        p = append_hex_byte(p, buf[i]);
+
+    *p = '\0';
+}
+
+void write_memory_packet(const char* pkt, char* out, int outsz) {
+    DWORD addr;
+    DWORD len;
+    const char* comma;
+    const char* colon;
+    const char* hex;
+    BYTE buf[1024];
+    SIZE_T written = 0;
+    DWORD i;
+
+    (void)outsz;
+
+    comma = strchr(pkt, ',');
+    if (!comma) {
+        strcpy(out, "E22");
+        return;
+    }
+
+    colon = strchr(comma + 1, ':');
+    if (!colon) {
+        strcpy(out, "E22");
+        return;
+    }
+
+    addr = strtoul(pkt + 1, NULL, 16);
+    len = strtoul(comma + 1, NULL, 16);
+
+    if (len == 0) {
+        strcpy(out, "OK");
+        return;
+    }
+
+    if (len > sizeof(buf)) {
+        strcpy(out, "E22");
+        return;
+    }
+
+    hex = colon + 1;
+    for (i = 0; i < len; ++i) {
+        int hi, lo;
+        if (!hex[0] || !hex[1]) {
+            strcpy(out, "E22");
+            return;
+        }
+        hi = hexval((unsigned char)hex[0]);
+        lo = hexval((unsigned char)hex[1]);
+        if (hi < 0 || lo < 0) {
+            strcpy(out, "E22");
+            return;
+        }
+        buf[i] = (BYTE)((hi << 4) | lo);
+        hex += 2;
+    }
+
+    if (!WriteProcessMemory(g_ctx.dbg.process_handle, (LPVOID)addr, buf, len, &written) || written != len) {
+        strcpy(out, "E14");
+        return;
+    }
+
+    maybe_flush_icache((LPCVOID)addr, len);
+
+    strcpy(out, "OK");
+}
+
+int read_debuggee_byte(DWORD addr, BYTE* out) {
+    SIZE_T got = 0;
+
+    if (!ReadProcessMemory(g_ctx.dbg.process_handle, (LPCVOID)addr, out, 1, &got))
+        return 0;
+
+    return got == 1;
+}
+
+int write_debuggee_byte(DWORD addr, BYTE value) {
+    SIZE_T written = 0;
+
+    if (!WriteProcessMemory(g_ctx.dbg.process_handle, (LPVOID)addr, &value, 1, &written))
+        return 0;
+
+    if (written != 1)
+        return 0;
+
+    maybe_flush_icache((LPCVOID)addr, 1);
+
+    return 1;
+}
+
+int find_bp_by_addr(DWORD addr) {
+    int i;
+
+    for (i = 0; i < MAX_BREAKPOINTS; ++i) {
+        if (g_ctx.dbg.bps[i].used && g_ctx.dbg.bps[i].addr == addr) {
+            printf("Found breakpoint slot %d for address 0x%08lx\n", i, addr);
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+int alloc_bp_slot(void) {
+    int i;
+
+    for (i = 0; i < MAX_BREAKPOINTS; ++i) {
+        if (!g_ctx.dbg.bps[i].used)
+            return i;
+    }
+
+    return -1;
+}
+
+DWORD reg_by_index(CONTEXT* c, int n, int* ok) {
+    *ok = 1;
+
+    switch (n) {
+        case 0:
+            return c->Eax;
+        case 1:
+            return c->Ebx;
+        case 2:
+            return c->Ecx;
+        case 3:
+            return c->Edx;
+        case 4:
+            return c->Edi;
+        case 5:
+            return c->Esi;
+        case 6:
+            return c->Ebp;
+        case 7:
+            return c->Esp;
+        case 8:
+            return c->Eip;
+        case 9:
+            return c->EFlags;
+        case 10:
+            return c->SegCs;
+        case 11:
+            return c->SegFs;
+        case 12:
+            return c->SegGs;
+        case 13:
+            return c->SegSs;
+        case 14:
+            return c->SegDs;
+        case 15:
+            return c->SegEs;
+        default:
+            *ok = 0;
+            return 0;
+    }
+}
+
+int write_reg_by_index(CONTEXT* c, int n, DWORD v) {
+    switch (n) {
+        case 0:  c->Eax    = v; return 1;
+        case 1:  c->Ebx    = v; return 1;
+        case 2:  c->Ecx    = v; return 1;
+        case 3:  c->Edx    = v; return 1;
+        case 4:  c->Edi    = v; return 1;
+        case 5:  c->Esi    = v; return 1;
+        case 6:  c->Ebp    = v; return 1;
+        case 7:  c->Esp    = v; return 1;
+        case 8:  c->Eip    = v; return 1;
+        case 9:  c->EFlags = v; return 1;
+        case 10: c->SegCs  = v; return 1;
+        case 11: c->SegFs  = v; return 1;
+        case 12: c->SegGs  = v; return 1;
+        case 13: c->SegSs  = v; return 1;
+        case 14: c->SegDs  = v; return 1;
+        case 15: c->SegEs  = v; return 1;
+        default: return 0;
+    }
+}
+
+typedef BOOL(WINAPI* PFN_FLUSH_INSTRUCTION_CACHE)(HANDLE, LPCVOID, SIZE_T);
+void maybe_flush_icache(LPCVOID addr, SIZE_T len) {
+    HMODULE k32;
+    PFN_FLUSH_INSTRUCTION_CACHE pFlush;
+
+    k32 = GetModuleHandle("KERNEL32.DLL");
+    if (!k32)
+        return;
+
+    pFlush = (PFN_FLUSH_INSTRUCTION_CACHE)GetProcAddress(k32, "FlushInstructionCache");
+
+    if (pFlush)
+        pFlush(g_ctx.dbg.process_handle, addr, len);
+}
+
+void set_single_step_flag(void) {
+    CONTEXT c;
+
+    if (get_context_for_current(&c)) {
+        c.EFlags |= 0x100; /* x86 trap flag */
+        set_context_for_current(&c);
+    }
+}
+
+void clear_single_step_flag(void) {
+    CONTEXT c;
+
+    if (g_ctx.dbg.last_event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT &&
+        g_ctx.dbg.last_event.u.Exception.ExceptionRecord.ExceptionCode == EXCEPTION_SINGLE_STEP) {
+        return;
+    }
+
+    if (get_context_for_current(&c)) {
+        c.EFlags &= ~0x100;
+        set_context_for_current(&c);
+    }
+}
+
+int step_over_breakpoint_for_continue(void) {
+    int idx;
+
+    idx = find_bp_at_current_eip();
+    if (idx < 0) {
+        if (!continue_pending_event(DBG_CONTINUE))
+            return 0;
+
+        return 1;
+    }
+
+    if (!ensure_bp_temporarily_removed(idx))
+        return 0;
+
+    set_single_step_flag();
+
+    if (!continue_pending_event(DBG_CONTINUE))
+        return 0;
+
+    if (!wait_for_interesting_stop())
+        return 0;
+
+    clear_single_step_flag();
+
+    /*
+       Expected stop: EXCEPTION_SINGLE_STEP.
+       If something else happened, report it to the frontend instead
+       of swallowing it.
+    */
+    if (g_ctx.dbg.last_event.dwDebugEventCode != EXCEPTION_DEBUG_EVENT ||
+        g_ctx.dbg.last_event.u.Exception.ExceptionRecord.ExceptionCode != EXCEPTION_SINGLE_STEP) {
+        reinsert_bp(idx);
+        return 2; /* real stop happened */
+    }
+
+    if (!reinsert_bp(idx))
+        return 0;
+
+    /*
+       Swallow the internal single-step event.
+       The caller will continue again and wait for a real stop.
+    */
+    if (!continue_pending_event(DBG_CONTINUE))
+        return 0;
+
+    return 1;
+}
+
+int step_once_for_frontend(char* reply, int replysz) {
+    int idx;
+
+    idx = find_bp_at_current_eip();
+
+    if (idx >= 0) {
+        if (!ensure_bp_temporarily_removed(idx)) {
+            strcpy(reply, "E01");
+            return 1;
+        }
+    }
+
+    set_single_step_flag();
+
+    if (!continue_pending_event(DBG_CONTINUE)) {
+        strcpy(reply, "E01");
+        return 1;
+    }
+
+    if (!wait_for_interesting_stop()) {
+        strcpy(reply, "E02");
+        return 1;
+    }
+
+    clear_single_step_flag();
+
+    if (idx >= 0)
+        reinsert_bp(idx);
+
+    make_stop_reply(reply, replysz);
+    return 1;
+}
+
+void add_or_update_module(DWORD base, DWORD size, const char* path) {
+    int i;
+    int idx = -1;
+
+    for (i = 0; i < g_ctx.mod.mod_count; ++i) {
+        if (g_ctx.mod.mods[i].base == base) {
+            idx = i;
+            break;
+        }
+    }
+
+    if (idx < 0) {
+        if (g_ctx.mod.mod_count >= MAX_MODULES)
+            return;
+
+        idx = g_ctx.mod.mod_count++;
+        memset(&g_ctx.mod.mods[idx], 0, sizeof(g_ctx.mod.mods[idx]));
+    }
+
+    g_ctx.mod.mods[idx].base = base;
+    g_ctx.mod.mods[idx].size = size ? size : 0x1000;
+
+    if (path && path[0]) {
+        strncpy(g_ctx.mod.mods[idx].path, path, MAX_MODULE_PATH - 1);
+        g_ctx.mod.mods[idx].path[MAX_MODULE_PATH - 1] = '\0';
+    }
+
+    populate_module_sections_from_pe(&g_ctx.mod.mods[idx]);
+
+    // printf("[modules]: module base=0x%08lx sections=%d path=%s\n",
+    //        g_ctx.mod.mods[idx].base,
+    //        g_ctx.mod.mods[idx].section_count,
+    //        g_ctx.mod.mods[idx].path);
+}
+
+void make_bn_maps_path(const char* win_path, char* out, int outsz) {
+    int i, j;
+
+    if (!win_path || !win_path[0]) {
+        strncpy(out, "/unknown", outsz - 1);
+        out[outsz - 1] = 0;
+        return;
+    }
+
+    /*
+       Binary Ninja's GDB adapter expects the maps path field to begin
+       with '/', so turn:
+
+           C:\WINDOWS\SYSTEM32\KERNEL32.DLL
+
+       into:
+
+           /C:/WINDOWS/SYSTEM32/KERNEL32.DLL
+    */
+    j = 0;
+
+    if (j < outsz - 1)
+        out[j++] = '/';
+
+    for (i = 0; win_path[i] && j < outsz - 1; ++i) {
+        char c = win_path[i];
+
+        if (c == '\\')
+            c = '/';
+
+        out[j++] = c;
+    }
+
+    out[j] = 0;
+}
+
+int refresh_modules_from_toolhelp(void);
+void build_proc_maps(void) {
+    int i;
+    char* p = g_ctx.mod.maps_buf;
+    char* end = g_ctx.mod.maps_buf + sizeof(g_ctx.mod.maps_buf);
+
+    if (g_ctx.mod.modules_changed) {
+        refresh_modules_from_toolhelp();
+        g_ctx.mod.modules_changed = 0;
+    }
+
+    for (i = 0; i < g_ctx.mod.mod_count; ++i) {
+        DWORD start = g_ctx.mod.mods[i].base;
+        DWORD finish = g_ctx.mod.mods[i].base + g_ctx.mod.mods[i].size;
+        char maps_path[512];
+
+        if (p >= end - 512)
+            break;
+
+        make_bn_maps_path(g_ctx.mod.mods[i].path, maps_path, sizeof(maps_path));
+
+        p += sprintf(p, "%08lx-%08lx r-xp 00000000 00:00 0 %s\n", start, finish, maps_path);
+    }
+
+    g_ctx.mod.maps_len = (int)(p - g_ctx.mod.maps_buf);
+
+    printf("[modules]: generated /proc/maps:\n%.*s\n", g_ctx.mod.maps_len, g_ctx.mod.maps_buf);
+}
+
+int refresh_modules_from_toolhelp(void) {
+    HANDLE snap;
+    MODULEENTRY32 me;
+
+    g_ctx.mod.mod_count = 0;
+
+    snap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, g_ctx.dbg.process_id);
+    if (snap == INVALID_HANDLE_VALUE) {
+        printf("[modules]: CreateToolhelp32Snapshot failed: %lu\n", GetLastError());
+        return 0;
+    }
+
+    memset(&me, 0, sizeof(me));
+    me.dwSize = sizeof(me);
+
+    if (!Module32First(snap, &me)) {
+        printf("[modules]: Module32First failed: %lu\n", GetLastError());
+        CloseHandle(snap);
+        return 0;
+    }
+
+    do {
+        /*
+            MODULEENTRY32:
+              modBaseAddr = base
+              modBaseSize = image size
+              szExePath   = path
+              szModule    = short name
+        */
+        add_or_update_module((DWORD)me.modBaseAddr, (DWORD)me.modBaseSize, me.szExePath[0] ? me.szExePath : me.szModule);
+
+        me.dwSize = sizeof(me);
+    } while (Module32Next(snap, &me));
+
+    CloseHandle(snap);
+    return 1;
+}
+
+int handle_qxfer_exec_file(const char* pkt, char* reply, int replysz) {
+    const char* prefix = "qXfer:exec-file:read:";
+    const char* p;
+    const char* annex;
+    char annex_buf[64];
+    char* endptr;
+    unsigned long offset;
+    unsigned long length;
+    unsigned long n;
+    unsigned long path_len;
+
+    if (strncmp(pkt, prefix, strlen(prefix)) != 0) {
+        reply[0] = '\0';
+        return 1;
+    }
+
+    /*
+        Format:
+            qXfer:exec-file:read:annex:offset,length
+
+        Common:
+            qXfer:exec-file:read::0,2001e
+
+        With pid annex:
+            qXfer:exec-file:read:50e0:0,2001e
+    */
+    p = pkt + strlen(prefix);
+
+    annex = p;
+    p = strchr(annex, ':');
+    if (!p) {
+        strcpy(reply, "E22");
+        return 1;
+    }
+
+    if ((p - annex) >= sizeof(annex_buf)) {
+        strcpy(reply, "E22");
+        return 1;
+    }
+
+    memcpy(annex_buf, annex, p - annex);
+    annex_buf[p - annex] = 0;
+
+    /*
+        For a single-process stub:
+          empty annex -> current process
+          pid annex   -> accept only our pid, or ignore and return current
+    */
+    if (annex_buf[0] != '\0') {
+        unsigned long requested_pid = strtoul(annex_buf, NULL, 16);
+
+        if (requested_pid != 0 && requested_pid != g_ctx.dbg.process_id) {
+            /*
+                Unknown process.
+                Empty response means unsupported/no data.
+            */
+            reply[0] = '\0';
+            return 1;
+        }
+    }
+
+    p++; /* now points at offset,length */
+
+    offset = strtoul(p, &endptr, 16);
+    if (*endptr != ',') {
+        strcpy(reply, "E22");
+        return 1;
+    }
+
+    length = strtoul(endptr + 1, NULL, 16);
+
+    path_len = (unsigned long)strlen(g_ctx.mod.exec_file);
+
+    if (offset >= path_len) {
+        strcpy(reply, "l");
+        return 1;
+    }
+
+    n = path_len - offset;
+
+    if (n > length)
+        n = length;
+
+    if (n > (unsigned long)(replysz - 2))
+        n = replysz - 2;
+
+    reply[0] = ((offset + n) >= path_len) ? 'l' : 'm';
+    memcpy(reply + 1, g_ctx.mod.exec_file + offset, n);
+    reply[1 + n] = '\0';
+
+    return 1;
+}
+
+void build_libraries_xml(void) {
+    int i, j;
+    char* p = g_ctx.mod.libraries_xml;
+    char* end = g_ctx.mod.libraries_xml + sizeof(g_ctx.mod.libraries_xml);
+
+    refresh_modules_from_toolhelp();
+
+    p += sprintf(p, "<library-list>");
+
+    for (i = 0; i < g_ctx.mod.mod_count; ++i) {
+        char module_path[512];
+
+        if (p >= end - 512)
+            break;
+
+        make_lldb_module_path(g_ctx.mod.mods[i].path, module_path, sizeof(module_path));
+
+        p += sprintf(p, "<library name=\"");
+        xml_escape_append(&p, end, module_path);
+        p += sprintf(p, "\">");
+
+        /*
+           Important:
+           Emit the PE header VA first, then each real PE section VA.
+        */
+        for (j = 0; j < g_ctx.mod.mods[i].section_count; ++j) {
+            if (p >= end - 64)
+                break;
+
+            p += sprintf(p, "<section address=\"0x%08lx\"/>", g_ctx.mod.mods[i].section_va[j]);
+        }
+
+        p += sprintf(p, "</library>");
+    }
+
+    p += sprintf(p, "</library-list>");
+
+    g_ctx.mod.libraries_xml_len = (int)(p - g_ctx.mod.libraries_xml);
+}
+
+const char* find_module_path_for_addr(DWORD addr) {
+    int i;
+
+    refresh_modules_from_toolhelp();
+
+    for (i = 0; i < g_ctx.mod.mod_count; ++i) {
+        DWORD start = g_ctx.mod.mods[i].base;
+        DWORD end = g_ctx.mod.mods[i].base + g_ctx.mod.mods[i].size;
+
+        if (addr >= start && addr < end)
+            return g_ctx.mod.mods[i].path;
+    }
+
+    return NULL;
+}
+
+void patch_breakpoints_out_of_memory_read(DWORD addr, BYTE* buf, DWORD len) {
+    int i;
+    int remaining;
+
+    if (g_ctx.dbg.inserted_bp_count == 0)
+        return;
+
+    remaining = g_ctx.dbg.inserted_bp_count;
+
+    for (i = 0; i < MAX_BREAKPOINTS && remaining > 0; ++i) {
+        DWORD off;
+
+        if (!g_ctx.dbg.bps[i].used || !g_ctx.dbg.bps[i].inserted)
+            continue;
+
+        remaining--;
+
+        if (g_ctx.dbg.bps[i].addr < addr)
+            continue;
+
+        off = g_ctx.dbg.bps[i].addr - addr;
+
+        if (off < len)
+            buf[off] = g_ctx.dbg.bps[i].original_byte;
+    }
+}
+
+DWORD get_first_section_rva_from_file(const char* path) {
+    HANDLE h;
+    DWORD got;
+    IMAGE_DOS_HEADER dos;
+    IMAGE_NT_HEADERS32 nt;
+    IMAGE_SECTION_HEADER sh;
+    LONG nt_off;
+
+    h = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (h == INVALID_HANDLE_VALUE)
+        return 0x1000;
+
+    if (!ReadFile(h, &dos, sizeof(dos), &got, NULL) || got != sizeof(dos)) {
+        CloseHandle(h);
+        return 0x1000;
+    }
+
+    if (dos.e_magic != IMAGE_DOS_SIGNATURE) {
+        CloseHandle(h);
+        return 0x1000;
+    }
+
+    nt_off = dos.e_lfanew;
+    SetFilePointer(h, nt_off, NULL, FILE_BEGIN);
+
+    if (!ReadFile(h, &nt, sizeof(nt), &got, NULL) || got != sizeof(nt)) {
+        CloseHandle(h);
+        return 0x1000;
+    }
+
+    if (nt.Signature != IMAGE_NT_SIGNATURE || nt.FileHeader.NumberOfSections == 0) {
+        CloseHandle(h);
+        return 0x1000;
+    }
+
+    /*
+        Move to first section header.
+    */
+    SetFilePointer(h, nt_off + FIELD_OFFSET(IMAGE_NT_HEADERS32, OptionalHeader) + nt.FileHeader.SizeOfOptionalHeader, NULL,
+                   FILE_BEGIN);
+
+    if (!ReadFile(h, &sh, sizeof(sh), &got, NULL) || got != sizeof(sh)) {
+        CloseHandle(h);
+        return 0x1000;
+    }
+
+    CloseHandle(h);
+
+    return sh.VirtualAddress ? sh.VirtualAddress : 0x1000;
+}
+
+void populate_module_sections_from_pe(struct modules* m) {
+    HANDLE h;
+    DWORD got;
+    IMAGE_DOS_HEADER dos;
+    IMAGE_NT_HEADERS32 nt;
+    IMAGE_SECTION_HEADER sh;
+    DWORD i;
+    LONG sec_off;
+
+    m->section_count = 0;
+
+    /*
+       Synthetic PE/COFF header section.
+       This is the important one for Binary Ninja's LLDB adapter.
+    */
+    m->section_va[m->section_count++] = m->base;
+
+    h = CreateFileA(m->path, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (h == INVALID_HANDLE_VALUE) {
+        printf("[modules]: failed to open module file %s (%lu)\n", m->path, GetLastError());
+        return;
+    }
+
+    if (!ReadFile(h, &dos, sizeof(dos), &got, NULL) || got != sizeof(dos))
+        goto done;
+
+    if (dos.e_magic != IMAGE_DOS_SIGNATURE)
+        goto done;
+
+    SetFilePointer(h, dos.e_lfanew, NULL, FILE_BEGIN);
+
+    if (!ReadFile(h, &nt, sizeof(nt), &got, NULL) || got != sizeof(nt))
+        goto done;
+
+    if (nt.Signature != IMAGE_NT_SIGNATURE)
+        goto done;
+
+    sec_off = dos.e_lfanew + FIELD_OFFSET(IMAGE_NT_HEADERS32, OptionalHeader) + nt.FileHeader.SizeOfOptionalHeader;
+
+    SetFilePointer(h, sec_off, NULL, FILE_BEGIN);
+
+    for (i = 0; i < nt.FileHeader.NumberOfSections; ++i) {
+        if (!ReadFile(h, &sh, sizeof(sh), &got, NULL) || got != sizeof(sh))
+            break;
+
+        if (m->section_count >= MAX_MODULE_SECTIONS)
+            break;
+
+        if (sh.VirtualAddress != 0) {
+            m->section_va[m->section_count] = m->base + sh.VirtualAddress;
+            m->section_count++;
+        }
+    }
+
+done:
+    CloseHandle(h);
+}
+
+```
+
+`gdb.c`:
+
+```c
+#include "context.h"
+#include "windows.h"
+#include "main.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
+
+void handle_qxfer_features(const char* pkt, char* reply, int replysz);
+void make_stop_reply(char* out, int outsz);
+int parse_z0_packet(const char* pkt, DWORD* addr, DWORD* kind);
+int handle_vfile_packet(const char* pkt, char* reply, int replysz);
+int parse_B_packet(const char* pkt, DWORD* addr, char* mode);
+int handle_qFileLoadAddress(const char* pkt, char* reply, int replysz);
+int handle_qxfer_libraries(const char* pkt, char* reply, int replysz);
+int handle_qMemoryRegionInfo(const char* pkt, char* reply, int replysz);
+int do_continue_common(char* reply, int replysz);
+int parse_thread_id_token(const char* in, const char** end_out, DWORD* tid_out);
+int parse_vcont_resume_action(const char* pkt, DWORD fallback_tid, char* action_out, DWORD* action_tid_out);
+
+int parse_thread_id_token(const char* in, const char** end_out, DWORD* tid_out) {
+    const char* p;
+    char* end_hex;
+    char* end_dec;
+    DWORD tid_hex;
+    DWORD tid_dec;
+
+    p = in;
+
+    if (*p == 'p') {
+        p++;
+
+        if (p[0] == '-' && p[1] == '1') {
+            p += 2;
+        } else {
+            (void)strtoul(p, &end_hex, 16);
+            if (end_hex == p)
+                return 0;
+            p = end_hex;
+        }
+
+        if (*p != '.')
+            return 0;
+
+        p++;
+    }
+
+    if (p[0] == '-' && p[1] == '1') {
+        *tid_out = 0;
+        *end_out = p + 2;
+        return 1;
+    }
+
+    tid_hex = strtoul(p, &end_hex, 16);
+    if (end_hex == p)
+        return 0;
+
+    if (tid_hex == 0) {
+        *tid_out = 0;
+        *end_out = end_hex;
+        return 1;
+    }
+
+    tid_dec = strtoul(p, &end_dec, 10);
+
+    if (find_thread(tid_hex)) {
+        *tid_out = tid_hex;
+        *end_out = end_hex;
+        return 1;
+    }
+
+    if (end_dec == end_hex && tid_dec != 0 && find_thread(tid_dec)) {
+        *tid_out = tid_dec;
+        *end_out = end_hex;
+        return 1;
+    }
+
+    if (g_ctx.dbg.thread_count == 1) {
+        printf("Thread id '%.*s' did not match a known thread; using only thread %lu\n", (int)(end_hex - p), p,
+               g_ctx.dbg.threads[0].tid);
+        *tid_out = g_ctx.dbg.threads[0].tid;
+        *end_out = end_hex;
+        return 1;
+    }
+
+    return 0;
+}
+
+int parse_vcont_resume_action(const char* pkt, DWORD fallback_tid, char* action_out, DWORD* action_tid_out) {
+    const char* p;
+    char default_action = 0;
+    char selected_action = 0;
+    DWORD selected_tid = 0;
+    char any_thread_action = 0;
+    DWORD any_thread_tid = 0;
+
+    if (strncmp(pkt, "vCont;", 6) != 0)
+        return 0;
+
+    p = pkt + 5;
+
+    while (*p == ';') {
+        char act;
+        DWORD tid = 0;
+        int has_tid = 0;
+        const char* q;
+        const char* end;
+
+        p++;
+        if (*p == '\0')
+            return 0;
+
+        act = *p++;
+        if (act != 'c' && act != 's')
+            return 0;
+
+        q = p;
+        if (*q == ':') {
+            q++;
+            if (!parse_thread_id_token(q, &end, &tid))
+                return 0;
+            has_tid = 1;
+            q = end;
+        }
+
+        if (*q != '\0' && *q != ';')
+            return 0;
+
+        if (has_tid) {
+            if (any_thread_action == 0) {
+                any_thread_action = act;
+                any_thread_tid = tid;
+            }
+
+            if (tid == fallback_tid) {
+                selected_action = act;
+                selected_tid = tid;
+            }
+        } else {
+            default_action = act;
+        }
+
+        p = q;
+    }
+
+    if (selected_action == 0)
+        selected_action = default_action;
+
+    if (selected_action == 0 && any_thread_action != 0) {
+        selected_action = any_thread_action;
+        selected_tid = any_thread_tid;
+    }
+
+    if (selected_action == 0)
+        return 0;
+
+    *action_out = selected_action;
+    *action_tid_out = selected_tid;
+    return 1;
+}
+
+int handle_packet(const char* pkt_in, char* reply, int replysz) {
+    char pktbuf[MAX_PACKET];
+    char* pkt;
+    DWORD saved_tid;
+    DWORD suffix_tid = 0;
+    int suffix_result;
+    int had_packet_thread_override = 0;
+    int keep_selected_tid = 0;
+    int result = PACKET_NOT_HANDLED;
+
+#define RETURN_HANDLE_PACKET(v)                                                                                                       \
+    do {                                                                                                                              \
+        result = (v);                                                                                                                 \
+        goto done;                                                                                                                    \
+    } while (0)
+
+    reply[0] = '\0';
+
+    strncpy(pktbuf, pkt_in, sizeof(pktbuf) - 1);
+    pktbuf[sizeof(pktbuf) - 1] = '\0';
+    pkt = pktbuf;
+
+    saved_tid = g_ctx.dbg.current_tid;
+
+    suffix_result = strip_thread_suffix(pkt, &suffix_tid);
+
+    if (suffix_result < 0) {
+        strcpy(reply, "E01");
+        RETURN_HANDLE_PACKET(1);
+    }
+
+    if (suffix_result > 0 && suffix_tid != 0) {
+        had_packet_thread_override = 1;
+        g_ctx.dbg.current_tid = suffix_tid;
+        printf("Temporarily switched to thread %lu for packet '%s'\n", suffix_tid, pkt);
+    }
+
+    // ---------------------------------------------------------------------------------
+    if (strncmp(pkt, "qSupported", 10) == 0) {
+        strcpy(reply, "PacketSize=1f00;"
+                      "QStartNoAckMode+;"
+                      "QThreadSuffixSupported+;"
+                      "QListThreadsInStopReply+;"
+                      "qXfer:features:read+;"
+                      "qXfer:exec-file:read+;"
+                      "swbreak+");
+        RETURN_HANDLE_PACKET(PACKET_HANDLED);
+    }
+    // ---------------------------------------------------------------------------------
+    if (strcmp(pkt, "QThreadSuffixSupported") == 0) {
+        g_ctx.rsp.thread_suffix_supported = 1;
+        strcpy(reply, "OK");
+        RETURN_HANDLE_PACKET(1);
+    }
+    if (strcmp(pkt, "QListThreadsInStopReply") == 0) {
+        g_ctx.rsp.list_threads_in_stop_reply = 1;
+        strcpy(reply, "OK");
+        RETURN_HANDLE_PACKET(1);
+    }
+    if (strcmp(pkt, "qVAttachOrWaitSupported") == 0) {
+        reply[0] = '\0';
+        RETURN_HANDLE_PACKET(1);
+    }
+    if (strcmp(pkt, "QEnableErrorStrings") == 0) {
+        reply[0] = '\0';
+        RETURN_HANDLE_PACKET(1);
+    }
+    if (strcmp(pkt, "qOffsets") == 0) {
+        reply[0] = '\0';
+        RETURN_HANDLE_PACKET(1);
+    }
+    if (strcmp(pkt, "qStructuredDataPlugins") == 0) {
+        strcpy(reply, "[]");
+        RETURN_HANDLE_PACKET(1);
+    }
+    if (strcmp(pkt, "qShlibInfoAddr") == 0) {
+        reply[0] = '\0';
+        RETURN_HANDLE_PACKET(1);
+    }
+    if (strcmp(pkt, "qSymbol::") == 0) {
+        strcpy(reply, "OK");
+        RETURN_HANDLE_PACKET(1);
+    }
+    if (pkt[0] == 'x') {
+        reply[0] = '\0';
+        RETURN_HANDLE_PACKET(1);
+    }
+    if (strcmp(pkt, "!") == 0) {
+        strcpy(reply, "OK");
+        RETURN_HANDLE_PACKET(1);
+    }
+    if (strncmp(pkt, "QDisableRandomization", 21) == 0) {
+        reply[0] = '\0';
+        RETURN_HANDLE_PACKET(1);
+    }
+    if (strncmp(pkt, "vRun", 4) == 0) {
+        make_stop_reply(reply, replysz);
+        RETURN_HANDLE_PACKET(1);
+    }
+    // ---------------------------------------------------------------------------------
+    if (strcmp(pkt, "qHostInfo") == 0) {
+        char* p = reply;
+
+        p += sprintf(p, "triple:");
+        p = append_hex_string(p, "i686-pc-windows-msvc");
+
+        p += sprintf(p, ";ptrsize:4;"
+                        "watchpoint_exceptions_received:after;"
+                        "endian:little;"
+                        "os_version:4.10;"
+                        "hostname:");
+
+        p = append_hex_string(p, "WIN98");
+        *p++ = ';';
+        *p = '\0';
+
+        RETURN_HANDLE_PACKET(1);
+    }
+    if (strcmp(pkt, "qProcessInfo") == 0) {
+        char* p = reply;
+
+        p += sprintf(p,
+                     "pid:%lx;"
+                     "parent-pid:0;"
+                     "real-uid:ffffffff;"
+                     "real-gid:ffffffff;"
+                     "effective-uid:ffffffff;"
+                     "effective-gid:ffffffff;"
+                     "triple:",
+                     g_ctx.dbg.process_id);
+
+        p = append_hex_string(p, "i386-pc-windows");
+
+        p += sprintf(p, ";ostype:windows;"
+                        "endian:little;"
+                        "ptrsize:4;");
+
+        RETURN_HANDLE_PACKET(1);
+    }
+    // ---------------------------------------------------------------------------------
+    if (strcmp(pkt, "vCont?") == 0) {
+        strcpy(reply, "vCont;c;s");
+        RETURN_HANDLE_PACKET(1);
+    }
+    // ---------------------------------------------------------------------------------
+    if (strcmp(pkt, "?") == 0) {
+        make_stop_reply(reply, replysz);
+        RETURN_HANDLE_PACKET(PACKET_HANDLED);
+    }
+    if (pkt[0] == 'c') {
+        set_pc_if_present(pkt);
+        keep_selected_tid = 1;
+        RETURN_HANDLE_PACKET(do_continue_common(reply, replysz));
+    }
+    if (strncmp(pkt, "vCont;", 6) == 0) {
+        char action = 0;
+        DWORD action_tid = 0;
+
+        if (!parse_vcont_resume_action(pkt, g_ctx.dbg.current_tid, &action, &action_tid)) {
+            strcpy(reply, "E01");
+            RETURN_HANDLE_PACKET(1);
+        }
+
+        if (action_tid != 0) {
+            g_ctx.dbg.current_tid = action_tid;
+            printf("Selected vCont thread %lu for packet '%s'\n", action_tid, pkt);
+        }
+
+        keep_selected_tid = 1;
+        if (action == 's') {
+            RETURN_HANDLE_PACKET(step_once_for_frontend(reply, replysz));
+        }
+
+        RETURN_HANDLE_PACKET(do_continue_common(reply, replysz));
+    }
+    if (pkt[0] == 's') {
+        set_pc_if_present(pkt);
+        RETURN_HANDLE_PACKET(step_once_for_frontend(reply, replysz));
+    }
+    // ---------------------------------------------------------------------------------
+    if (strncmp(pkt, "qXfer:features:read:", 20) == 0) {
+        handle_qxfer_features(pkt, reply, replysz);
+        RETURN_HANDLE_PACKET(PACKET_HANDLED);
+    }
+    // ---------------------------------------------------------------------------------
+    if (pkt[0] == 'p') {
+        read_one_register(pkt, reply, replysz);
+        RETURN_HANDLE_PACKET(PACKET_HANDLED);
+    }
+    if (pkt[0] == 'P') {
+        write_one_register(pkt, reply, replysz);
+        RETURN_HANDLE_PACKET(PACKET_HANDLED);
+    }
+    if (strcmp(pkt, "g") == 0) {
+        read_all_registers(reply, replysz);
+        return PACKET_HANDLED;
+    }
+    // ---------------------------------------------------------------------------------
+    if (strncmp(pkt, "qFileLoadAddress:", 17) == 0) {
+        RETURN_HANDLE_PACKET(handle_qFileLoadAddress(pkt, reply, replysz));
+    }
+    // ---------------------------------------------------------------------------------
+    if ((pkt[0] == 'Z' || pkt[0] == 'z') && pkt[1] == '0' && pkt[2] == ',') {
+        DWORD addr, kind;
+        int ok;
+
+        if (!parse_z0_packet(pkt, &addr, &kind)) {
+            strcpy(reply, "E22");
+            RETURN_HANDLE_PACKET(1);
+        }
+
+        if (pkt[0] == 'Z')
+            ok = insert_sw_breakpoint(addr, kind);
+        else
+            ok = remove_sw_breakpoint(addr);
+
+        strcpy(reply, ok ? "OK" : "E14");
+        RETURN_HANDLE_PACKET(1);
+    }
+    // ---------------------------------------------------------------------------------
+    if (strcmp(pkt, "qfThreadInfo") == 0) {
+        int i;
+        char* p = reply;
+
+        if (g_ctx.dbg.thread_count == 0) {
+            strcpy(reply, "l");
+            RETURN_HANDLE_PACKET(PACKET_HANDLED);
+        }
+
+        *p++ = 'm';
+        for (i = 0; i < g_ctx.dbg.thread_count; ++i) {
+            if (i)
+                *p++ = ',';
+            p += sprintf(p, "%lx", g_ctx.dbg.threads[i].tid);
+        }
+        RETURN_HANDLE_PACKET(PACKET_HANDLED);
+    }
+    if (strcmp(pkt, "qsThreadInfo") == 0) {
+        strcpy(reply, "l");
+        RETURN_HANDLE_PACKET(PACKET_HANDLED);
+    }
+    if (strcmp(pkt, "jThreadsInfo") == 0) {
+        int i;
+        char* p = reply;
+
+        p += sprintf(p, "[");
+
+        for (i = 0; i < g_ctx.dbg.thread_count; ++i) {
+            if (i)
+                p += sprintf(p, ",");
+
+            p += sprintf(p,
+                         "{"
+                         "\"tid\":%lu,"
+                         "\"name\":\"Thread %lx\""
+                         "}",
+                         (unsigned long)g_ctx.dbg.threads[i].tid, (unsigned long)g_ctx.dbg.threads[i].tid);
+        }
+
+        p += sprintf(p, "]");
+        RETURN_HANDLE_PACKET(1);
+    }
+    if (pkt[0] == 'H') {
+        DWORD tid;
+
+        if (pkt[2] == '-' || pkt[2] == '0' || pkt[2] == '\0') {
+            strcpy(reply, "OK");
+            RETURN_HANDLE_PACKET(1);
+        }
+
+        tid = strtoul(pkt + 2, NULL, 16);
+
+        if (find_thread(tid)) {
+            printf("Switching to thread %lu\n", tid);
+            g_ctx.dbg.current_tid = tid;
+            strcpy(reply, "OK");
+        } else {
+            strcpy(reply, "E01");
+        }
+
+        RETURN_HANDLE_PACKET(1);
+    }
+    if (strcmp(pkt, "qC") == 0) {
+        DWORD tid = g_ctx.dbg.current_tid;
+
+        if (tid == 0 && g_ctx.dbg.thread_count > 0)
+            tid = g_ctx.dbg.threads[0].tid;
+
+        sprintf(reply, "QC%lx", tid);
+        RETURN_HANDLE_PACKET(1);
+    }
+    // ---------------------------------------------------------------------------------
+    if (strncmp(pkt, "qMemoryRegionInfo:", 18) == 0) {
+        RETURN_HANDLE_PACKET(handle_qMemoryRegionInfo(pkt, reply, replysz));
+    }
+    // ---------------------------------------------------------------------------------
+    if (pkt[0] == 'm') {
+        read_memory_packet(pkt, reply, replysz);
+        RETURN_HANDLE_PACKET(PACKET_HANDLED);
+    }
+    if (pkt[0] == 'M') {
+        write_memory_packet(pkt, reply, replysz);
+        RETURN_HANDLE_PACKET(PACKET_HANDLED);
+    }
+    // ---------------------------------------------------------------------------------
+    // IDA's ctrl+f2
+    if (pkt[0] == 'k') {
+        cleanup_debuggee(1);
+        RETURN_HANDLE_PACKET(PACKET_HANDLED);
+    }
+    // ---------------------------------------------------------------------------------
+    if (strncmp(pkt, "vFile:", 6) == 0) {
+        return handle_vfile_packet(pkt, reply, replysz);
+    }
+    // ---------------------------------------------------------------------------------
+    // This lets IDA read the module name
+    if (strncmp(pkt, "qXfer:exec-file:read:", 21) == 0) {
+        return handle_qxfer_exec_file(pkt, reply, replysz);
+    }
+    // ---------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------
+
+done:
+    if (had_packet_thread_override && !keep_selected_tid) {
+        g_ctx.dbg.current_tid = saved_tid;
+    }
+
+#undef RETURN_HANDLE_PACKET
+    return result;
+}
+
+int do_continue_common(char* reply, int replysz) {
+    int r;
+
+    r = step_over_breakpoint_for_continue();
+
+    if (r == 0) {
+        strcpy(reply, "E01");
+        return 1;
+    }
+
+    if (r == 2) {
+        make_stop_reply(reply, replysz);
+        return 1;
+    }
+
+    if (!wait_for_interesting_stop()) {
+        strcpy(reply, "E02");
+        return 1;
+    }
+
+    make_stop_reply(reply, replysz);
+    return 1;
+}
+
+int handle_qMemoryRegionInfo(const char* pkt, char* reply, int replysz) {
+    DWORD addr;
+    MEMORY_BASIC_INFORMATION mbi;
+    SIZE_T got;
+    char perms[4];
+    char* p;
+    const char* path;
+
+    if (strncmp(pkt, "qMemoryRegionInfo:", 18) != 0)
+        return 0;
+
+    addr = strtoul(pkt + 18, NULL, 16);
+
+    got = VirtualQueryEx(g_ctx.dbg.process_handle, (LPCVOID)addr, &mbi, sizeof(mbi));
+
+    if (got == 0) {
+        strcpy(reply, "E01");
+        return 1;
+    }
+
+    protect_to_permissions(mbi.Protect, perms);
+
+    p = reply;
+
+    p += sprintf(p, "start:%lx;size:%lx;permissions:%s;", (DWORD)mbi.BaseAddress, (DWORD)mbi.RegionSize, perms);
+
+    path = find_module_path_for_addr(addr);
+    if (path && path[0]) {
+        char posix_path[512];
+
+        // make_posix_win_path(path, posix_path, sizeof(posix_path));
+        make_lldb_module_path(path, posix_path, sizeof(posix_path));
+        printf("PATH: %s\n", posix_path);
+
+        p += sprintf(p, "name:");
+        p = append_hex_string(p, posix_path);
+        *p++ = ';';
+        *p = '\0';
+    }
+
+    return 1;
+}
+
+int handle_qFileLoadAddress(const char* pkt, char* reply, int replysz) {
+    char requested[512];
+    int i;
+
+    if (strncmp(pkt, "qFileLoadAddress:", 17) != 0)
+        return 0;
+
+    if (!decode_hex_string_all(pkt + 17, requested, sizeof(requested))) {
+        strcpy(reply, "E22");
+        return 1;
+    }
+
+    printf("[qFileLoadAddress]: '%s'\n", requested);
+
+    refresh_modules_from_toolhelp();
+
+    for (i = 0; i < g_ctx.mod.mod_count; ++i) {
+        char posix_path[512];
+        char lldb_path[512];
+
+        /*
+            posix_path:
+                /D:/main/code/HelloWorld9x.exe
+
+            lldb_path:
+                D:/main/code/HelloWorld9x.exe
+        */
+        make_posix_win_path(g_ctx.mod.mods[i].path, posix_path, sizeof(posix_path));
+        make_lldb_module_path(g_ctx.mod.mods[i].path, lldb_path, sizeof(lldb_path));
+
+        if (same_module_path(requested, g_ctx.mod.mods[i].path) || same_module_path(requested, posix_path) ||
+            same_module_path(requested, lldb_path)) {
+
+            sprintf(reply, "00000000%08lx", g_ctx.mod.mods[i].base);
+            return 1;
+        }
+    }
+
+    strcpy(reply, "E01");
+    return 1;
+}
+
+int parse_z0_packet(const char* pkt, DWORD* addr, DWORD* kind) {
+    char* end;
+
+    /*
+       Format:
+           Z0,401041,1
+           z0,401041,1
+    */
+
+    if (!(pkt[0] == 'Z' || pkt[0] == 'z'))
+        return 0;
+
+    if (pkt[1] != '0' || pkt[2] != ',')
+        return 0;
+
+    *addr = strtoul(pkt + 3, &end, 16);
+    if (*end != ',')
+        return 0;
+
+    *kind = strtoul(end + 1, NULL, 16);
+    return 1;
+}
+
+void make_stop_reply(char* out, int outsz) {
+    CONTEXT c;
+    char* p = out;
+    char* end = out + outsz;
+
+    if (outsz <= 0)
+        return;
+
+    out[0] = '\0';
+
+    if (g_ctx.dbg.last_event.dwDebugEventCode == EXIT_PROCESS_DEBUG_EVENT) {
+        sprintf(out, "W%02lx", g_ctx.dbg.last_event.u.ExitProcess.dwExitCode & 0xff);
+        return;
+    }
+
+    p += sprintf(p, "T%02lxthread:%lx;", g_ctx.dbg.last_signal & 0xff, g_ctx.dbg.current_tid);
+
+    if (g_ctx.dbg.last_stop_was_breakpoint) {
+        p += sprintf(p, "swbreak:;");
+    } else if (g_ctx.dbg.last_stop_was_single_step) {
+        // p += sprintf(p, "reason:trace;");
+    }
+
+    if (get_context_for_current(&c)) {
+        p += sprintf(p, "08:");
+        p = append_u32_le(p, c.Eip);
+        *p++ = ';';
+        *p = '\0';
+
+        p += sprintf(p, "07:");
+        p = append_u32_le(p, c.Esp);
+        *p++ = ';';
+        *p = '\0';
+    }
+}
+
+// clang-format off
+const char g_target_xml[] =
+    "<target>"
+      "<architecture>i386</architecture>"
+      "<endian>little</endian>"
+      "<feature name=\"org.gnu.gdb.i386.core\">"
+        "<reg name=\"eax\" bitsize=\"32\" regnum=\"0\"/>"
+        "<reg name=\"ebx\" bitsize=\"32\" regnum=\"1\"/>"
+        "<reg name=\"ecx\" bitsize=\"32\" regnum=\"2\"/>"
+        "<reg name=\"edx\" bitsize=\"32\" regnum=\"3\"/>"
+        "<reg name=\"edi\" bitsize=\"32\" regnum=\"4\"/>"
+        "<reg name=\"esi\" bitsize=\"32\" regnum=\"5\"/>"
+        "<reg name=\"ebp\" bitsize=\"32\" regnum=\"6\"/>"
+        "<reg name=\"esp\" bitsize=\"32\" regnum=\"7\"/>"
+        "<reg name=\"eip\" bitsize=\"32\" regnum=\"8\"/>"
+        "<reg name=\"eflags\" bitsize=\"32\" regnum=\"9\"/>"
+        "<reg name=\"cs\" bitsize=\"32\" regnum=\"10\"/>"
+        "<reg name=\"fs\" bitsize=\"32\" regnum=\"11\"/>"
+        "<reg name=\"gs\" bitsize=\"32\" regnum=\"12\"/>"
+        "<reg name=\"ss\" bitsize=\"32\" regnum=\"13\"/>"
+        "<reg name=\"ds\" bitsize=\"32\" regnum=\"14\"/>"
+        "<reg name=\"es\" bitsize=\"32\" regnum=\"15\"/>"
+      "</feature>"
+    "</target>";
+// clang-format on
+
+void handle_qxfer_features(const char* pkt, char* reply, int replysz) {
+    const char* prefix = "qXfer:features:read:";
+    const char* p;
+    const char* annex;
+    const char* offstr;
+    const char* lenstr;
+    char annex_buf[128];
+    unsigned long offset;
+    unsigned long length;
+    unsigned long xml_len;
+    unsigned long remain;
+    unsigned long n;
+
+    if (strncmp(pkt, prefix, strlen(prefix)) != 0) {
+        reply[0] = 0;
+        return;
+    }
+
+    p = pkt + strlen(prefix);
+
+    /*
+       Format now:
+           target.xml:offset,length
+    */
+
+    annex = p;
+    p = strchr(annex, ':');
+    if (!p) {
+        strcpy(reply, "E22");
+        return;
+    }
+
+    if ((p - annex) >= sizeof(annex_buf)) {
+        strcpy(reply, "E22");
+        return;
+    }
+
+    memcpy(annex_buf, annex, p - annex);
+    annex_buf[p - annex] = 0;
+
+    offstr = p + 1;
+    p = strchr(offstr, ',');
+    if (!p) {
+        strcpy(reply, "E22");
+        return;
+    }
+
+    lenstr = p + 1;
+
+    offset = strtoul(offstr, NULL, 16);
+    length = strtoul(lenstr, NULL, 16);
+
+    if (strcmp(annex_buf, "target.xml") != 0) {
+        reply[0] = 0; /* unknown XML annex */
+        printf(reply, "[warning]: qXfer:features:read: - EAnnex '%s' not found", annex_buf);
+        return;
+    }
+
+    xml_len = (unsigned long)strlen(g_target_xml);
+
+    if (offset >= xml_len) {
+        strcpy(reply, "l");
+        return;
+    }
+
+    remain = xml_len - offset;
+    n = remain;
+
+    if (n > length)
+        n = length;
+
+    if (n > (unsigned long)(replysz - 2))
+        n = replysz - 2;
+
+    // l = final chunk, m = ask again with larger offset
+    reply[0] = ((offset + n) >= xml_len) ? 'l' : 'm';
+
+    memcpy(reply + 1, g_target_xml + offset, n);
+    reply[1 + n] = 0;
+}
+
+int is_proc_maps_path(const char* path) {
+    const char* p;
+
+    if (strncmp(path, "/proc/", 6) != 0)
+        return 0;
+
+    p = strrchr(path, '/');
+    if (!p)
+        return 0;
+
+    return strcmp(p, "/maps") == 0;
+}
+
+int handle_vfile_packet(const char* pkt, char* reply, int replysz) {
+
+    if (strcmp(pkt, "vFile:setfs:0") == 0) {
+        strcpy(reply, "F0");
+        return 1;
+    }
+
+    if (strncmp(pkt, "vFile:open:", 11) == 0) {
+        char filename[512];
+        const char* after;
+
+        if (!decode_hex_string_until_comma(pkt + 11, filename, sizeof(filename), &after)) {
+            strcpy(reply, "F-1,16"); /* EINVAL-ish */
+            return 1;
+        }
+
+        printf("[vFile]: open '%s'\n", filename);
+
+        if (is_proc_maps_path(filename)) {
+            build_proc_maps();
+            g_ctx.mod.maps_fd_open = 1;
+            sprintf(reply, "F%x", FAKE_MAPS_FD);
+            return 1;
+        }
+
+        strcpy(reply, "F-1,2"); /* ENOENT */
+        return 1;
+    }
+
+    if (strncmp(pkt, "vFile:pread:", 12) == 0) {
+        unsigned long fd, count, offset;
+        const char* p;
+        int n;
+        char* out;
+
+        /*
+            Format:
+              vFile:pread:fd,count,offset
+        */
+        fd = strtoul(pkt + 12, (char**)&p, 16);
+        if (*p != ',') {
+            strcpy(reply, "F-1,16");
+            return 1;
+        }
+
+        count = strtoul(p + 1, (char**)&p, 16);
+        if (*p != ',') {
+            strcpy(reply, "F-1,16");
+            return 1;
+        }
+
+        offset = strtoul(p + 1, NULL, 16);
+
+        printf("[vFile]: pread fd=%lu count=%lu offset=%lu\n", fd, count, offset);
+
+        if (fd != FAKE_MAPS_FD || !g_ctx.mod.maps_fd_open) {
+            strcpy(reply, "F-1,9"); /* EBADF */
+            return 1;
+        }
+
+        if (offset >= (unsigned long)g_ctx.mod.maps_len) {
+            strcpy(reply, "F0;");
+            return 1;
+        }
+
+        n = g_ctx.mod.maps_len - (int)offset;
+
+        if ((unsigned long)n > count)
+            n = (int)count;
+
+        if (n > 1024)
+            n = 1024;
+
+        out = reply;
+        out += sprintf(out, "F%x;", n);
+
+        append_escaped_binary(out, reply + replysz - 1, (const unsigned char*)(g_ctx.mod.maps_buf + offset), n);
+
+        return 1;
+    }
+
+    if (strncmp(pkt, "vFile:close:", 12) == 0) {
+        unsigned long fd = strtoul(pkt + 12, NULL, 16);
+
+        printf("[vFile]: close fd=%lu\n", fd);
+
+        if (fd == FAKE_MAPS_FD) {
+            g_ctx.mod.maps_fd_open = 0;
+            strcpy(reply, "F0");
+            return 1;
+        }
+
+        strcpy(reply, "F-1,9");
+        return 1;
+    }
+
+    reply[0] = 0;
+    return 1;
+}
+
+int strip_thread_suffix(char* pkt, DWORD* tid_out) {
+    char* s;
+    char* id_start;
+    const char* end;
+    DWORD tid;
+
+    /*
+        Examples:
+            p0;thread:567c;
+            g;thread:567c;
+
+        After this:
+            p0;thread:567c; -> p0
+            g;thread:567c;  -> g
+    */
+
+    s = strstr(pkt, ";thread:");
+    if (!s)
+        return 0; /* no suffix */
+
+    id_start = s + 8; /* strlen(";thread:") */
+
+    if (!parse_thread_id_token(id_start, &end, &tid))
+        return -1;
+
+    if (*end != ';')
+        return -1;
+
+    *s = '\0';
+
+    if (tid_out)
+        *tid_out = tid;
+
+    return 1;
+}
+
+```
+
+`main.c`:
+
+```c
+#include "stdio.h"
+#include "stdlib.h"
+
+#define WIN32_LEAN_AND_MEAN
+#include "context.h"
+#include "windows.h"
+#include "main.h"
+#include <winsock2.h>
+
+#pragma comment(lib, "ws2_32.lib")
+
+static void print_usage(const char* prog) {
+    fprintf(stderr, "Usage: %s HOST:PORT PROGRAM [ARGS...]\n", prog);
+}
+
+int core(int argc, char** argv) {
+    char host[64];
+    unsigned short port;
+    const char* host_port;
+    const char* colon;
+    size_t host_len;
+    char cmdline[1024];
+    int i;
+    size_t used;
+    int rc = 1;
+    int debuggee_started = 0;
+
+    context_init();
+
+    if (argc < 3) {
+        print_usage(argv[0]);
+        goto done;
+    }
+
+    host_port = argv[1];
+    colon = strrchr(host_port, ':');
+    if (!colon || colon == host_port) {
+        fprintf(stderr, "Bad HOST:PORT argument: '%s'\n", host_port);
+        print_usage(argv[0]);
+        goto done;
+    }
+
+    host_len = (size_t)(colon - host_port);
+    if (host_len >= sizeof(host)) {
+        fprintf(stderr, "Host name too long\n");
+        goto done;
+    }
+    memcpy(host, host_port, host_len);
+    host[host_len] = '\0';
+
+    {
+        int p = atoi(colon + 1);
+        if (p <= 0 || p > 65535) {
+            fprintf(stderr, "Bad port: '%s'\n", colon + 1);
+            goto done;
+        }
+        port = (unsigned short)p;
+    }
+
+    cmdline[0] = '\0';
+    used = 0;
+    for (i = 2; i < argc; ++i) {
+        const char* tok = argv[i];
+        int needs_quotes = (strchr(tok, ' ') != NULL) && tok[0] != '"';
+        size_t tok_len = strlen(tok);
+        size_t need = tok_len + (i > 2 ? 1 : 0) + (needs_quotes ? 2 : 0) + 1;
+
+        if (used + need >= sizeof(cmdline)) {
+            fprintf(stderr, "Command line too long\n");
+            goto done;
+        }
+
+        if (i > 2)
+            cmdline[used++] = ' ';
+        if (needs_quotes)
+            cmdline[used++] = '"';
+        memcpy(cmdline + used, tok, tok_len);
+        used += tok_len;
+        if (needs_quotes)
+            cmdline[used++] = '"';
+        cmdline[used] = '\0';
+    }
+
+    if (!start_server(host, port)) {
+        fprintf(stderr, "Failed to start server.\n");
+        goto done;
+    }
+
+    if (!launch_debuggee(cmdline))
+        goto done;
+    debuggee_started = 1;
+
+    while (recv_packet(g_ctx.rsp.pkt, sizeof(g_ctx.rsp.pkt))) {
+
+        printf("-------------------------------\n");
+        printf("GDB: %s\n", g_ctx.rsp.pkt);
+
+        if (strcmp(g_ctx.rsp.pkt, "QStartNoAckMode") == 0) {
+            send_packet("OK");
+            g_ctx.rsp.no_ack = 1;
+            printf("RSP: OK\n");
+            continue;
+        }
+
+        if (handle_packet(g_ctx.rsp.pkt, g_ctx.rsp.reply, sizeof(g_ctx.rsp.reply)) == PACKET_NOT_HANDLED) {
+            fprintf(stderr, "Couldnt handle packet: strict aborting: %s\n", g_ctx.rsp.pkt);
+            break;
+        }
+
+        printf("RSP: %s\n", g_ctx.rsp.reply);
+
+        if (g_ctx.rsp.pkt[0] == 'k')
+            break;
+
+        send_packet(g_ctx.rsp.reply);
+    }
+
+    fprintf(stdout, "GDB Server exiting.\n");
+    rc = 0;
+
+done:
+    if (debuggee_started || g_ctx.dbg.process_handle)
+        cleanup_debuggee(1);
+    stop_server();
+    return rc;
+}
+
+int main(int argc, char** argv) {
+
+    fprintf(stdout, "gdbserver9x - version 1.1.24052026\n");
+
+    do_logging = (getenv("GDBLOG") != NULL);
+    do_restart = (getenv("GDBRESTART") != NULL);
+
+    for (;;) {
+        int rc = core(argc, argv);
+
+        if (rc != 0 || !do_restart)
+            return rc;
+
+        fprintf(stdout, "Restarting gdbserver.\n");
+    }
+}
+
+```
+
+`main.h`:
+
+```h
+
+
+void context_init();
+
+int start_server(const char* host, unsigned short port);
+void stop_server(void);
+int recv_packet(char* out, int outsz);
+int send_packet(const char* payload);
+int handle_packet(const char* pkt, char* reply, int replysz);
+
+int launch_debuggee(const char* cmdline);
+void cleanup_debuggee(int terminate);
+void read_memory_packet(const char* pkt, char* out, int outsz);
+void write_memory_packet(const char* pkt, char* out, int outsz);
+void read_all_registers(char* out, int outsz);
+void read_one_register(const char* pkt, char* out, int outsz);
+void write_one_register(const char* pkt, char* out, int outsz);
+int continue_pending_event(DWORD status);
+int step_over_breakpoint_for_continue(void);
+int handle_possible_swbreak_hit(void);
+int wait_for_interesting_stop();
+int insert_sw_breakpoint(DWORD addr, DWORD kind);
+int remove_sw_breakpoint(DWORD addr);
+void set_pc_if_present(const char* pkt);
+int get_context_for_current(CONTEXT* ctx);
+void make_stop_reply(char* out, int outsz);
+int step_once_for_frontend(char* reply, int replysz);
+void build_proc_maps(void);
+int handle_qxfer_exec_file(const char* pkt, char* reply, int replysz);
+HANDLE find_thread(DWORD tid);
+int refresh_modules_from_toolhelp(void);
+void make_posix_win_path(const char* win_path, char* out, int outsz);
+void build_libraries_xml(void);
+const char* find_module_path_for_addr(DWORD addr);
+int set_context_for_current(CONTEXT* ctx);
+int strip_thread_suffix(char* pkt, DWORD* tid_out);
+
+```
+
+`server.c`:
+
+```c
+#define WIN32_LEAN_AND_MEAN
+#include "context.h"
+#include "windows.h"
+#include "stdio.h"
+#include <winsock2.h>
+
+static char s_recv_buf[4096];
+static int s_recv_len = 0;
+static int s_recv_pos = 0;
+
+static void reset_recv_buffer(void) {
+    s_recv_len = 0;
+    s_recv_pos = 0;
+}
+
+void stop_server(void) {
+    if (g_ctx.rsp.client != INVALID_SOCKET) {
+        shutdown(g_ctx.rsp.client, SD_BOTH);
+        closesocket(g_ctx.rsp.client);
+        g_ctx.rsp.client = INVALID_SOCKET;
+    }
+
+    reset_recv_buffer();
+
+    if (g_ctx.rsp.wsa_started) {
+        WSACleanup();
+        g_ctx.rsp.wsa_started = 0;
+    }
+}
+
+int start_server(const char* host, unsigned short port) {
+
+    WSADATA wsa;
+    SOCKET s;
+    struct sockaddr_in a;
+    int yes = 1;
+    unsigned long bind_addr;
+
+    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
+        printf("[start_server]: WSAStartup failed\n");
+        return 0;
+    }
+    g_ctx.rsp.wsa_started = 1;
+
+    s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (s == INVALID_SOCKET) {
+        printf("[start_server]: socket failed\n");
+        stop_server();
+        return 0;
+    }
+
+    setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const char*)&yes, sizeof(yes));
+
+    if (!host || !host[0] || strcmp(host, "*") == 0 || strcmp(host, "0.0.0.0") == 0) {
+        bind_addr = htonl(INADDR_ANY);
+    } else {
+        bind_addr = inet_addr(host);
+        if (bind_addr == INADDR_NONE) {
+            fprintf(stderr, "[start_server]: invalid host '%s'\n", host);
+            closesocket(s);
+            stop_server();
+            return 0;
+        }
+    }
+
+    memset(&a, 0, sizeof(a));
+    a.sin_family = AF_INET;
+    a.sin_addr.s_addr = bind_addr;
+    a.sin_port = htons(port);
+
+    if (bind(s, (struct sockaddr*)&a, sizeof(a)) == SOCKET_ERROR) {
+        fprintf(stderr, "[start_server]: bind failed\n");
+        closesocket(s);
+        stop_server();
+        return 0;
+    }
+
+    if (listen(s, 1) == SOCKET_ERROR) {
+        fprintf(stderr, "[start_server]: listen failed\n");
+        closesocket(s);
+        stop_server();
+        return 0;
+    }
+
+    fprintf(stdout, "Listening on port %u...\n", port);
+
+    g_ctx.rsp.client = accept(s, NULL, NULL);
+    closesocket(s);
+    reset_recv_buffer();
+
+    if (g_ctx.rsp.client == INVALID_SOCKET) {
+        fprintf(stderr, "accept failed\n");
+        stop_server();
+        return 0;
+    }
+
+    {
+        int nodelay = 1;
+        setsockopt(g_ctx.rsp.client, IPPROTO_TCP, TCP_NODELAY, (const char*)&nodelay, sizeof(nodelay));
+    }
+
+    fprintf(stdout, "GDB connected.\n");
+
+    return 1;
+}
+
+int recv_char(void) {
+    if (s_recv_pos >= s_recv_len) {
+        int r = recv(g_ctx.rsp.client, s_recv_buf, sizeof(s_recv_buf), 0);
+        if (r <= 0)
+            return -1;
+        s_recv_len = r;
+        s_recv_pos = 0;
+    }
+    return (unsigned char)s_recv_buf[s_recv_pos++];
+}
+
+int send_all(const char* buf, int len) {
+    int sent = 0;
+    while (sent < len) {
+        int r = send(g_ctx.rsp.client, buf + sent, len - sent, 0);
+        if (r <= 0)
+            return 0;
+        sent += r;
+    }
+    return 1;
+}
+
+int send_packet_len(const char* payload, int len) {
+    /*
+       Assemble $payload#XX into one buffer and send in a single call,
+       so Nagle never sees a partial frame.
+    */
+    static char buf[MAX_PACKET + 8];
+    unsigned char sum = 0;
+    int i;
+    int total;
+
+    if (payload == NULL) {
+        payload = "";
+        len = 0;
+    }
+
+    if (len > MAX_PACKET)
+        len = MAX_PACKET;
+
+    buf[0] = '$';
+    for (i = 0; i < len; ++i) {
+        unsigned char c = (unsigned char)payload[i];
+        buf[1 + i] = (char)c;
+        sum += c;
+    }
+
+    buf[1 + len] = '#';
+    put_hex_byte(&buf[1 + len + 1], sum);
+    total = 1 + len + 3;
+
+    return send_all(buf, total);
+}
+
+int send_packet(const char* payload) {
+    if (payload == NULL)
+        return send_packet_len("", 0);
+
+    return send_packet_len(payload, (int)strlen(payload));
+}
+
+int recv_packet(char* out, int outsz) {
+    int c, c1, c2;
+    unsigned char sum, got;
+    int n;
+
+again:
+    do {
+        c = recv_char();
+        if (c < 0)
+            return 0;
+    } while (c != '$');
+
+    sum = 0;
+    n = 0;
+
+    for (;;) {
+        c = recv_char();
+        if (c < 0)
+            return 0;
+
+        if (c == '#')
+            break;
+
+        if (n < outsz - 1)
+            out[n++] = (char)c;
+
+        sum += (unsigned char)c;
+    }
+
+    out[n] = 0;
+
+    c1 = recv_char();
+    c2 = recv_char();
+    if (c1 < 0 || c2 < 0)
+        return 0;
+
+    got = (unsigned char)((hexval(c1) << 4) | hexval(c2));
+
+    if (got != sum) {
+        if (!g_ctx.rsp.no_ack) {
+            send_all("-", 1);
+        }
+        goto again;
+    }
+
+    if (!g_ctx.rsp.no_ack) {
+        send_all("+", 1);
+    }
+    return 1;
+}
+
+```
+
+`utils.c`:
+
+```c
+#define WIN32_LEAN_AND_MEAN
+#include "context.h"
+#include "windows.h"
+#include "stdio.h"
+#include <stdarg.h>
+
+#undef printf
+
+int do_logging = 0;
+int do_restart = 0;
+
+int gdb_log_printf(const char* fmt, ...) {
+    va_list ap;
+    int n;
+
+    if (!do_logging)
+        return 0;
+
+    va_start(ap, fmt);
+    n = vprintf(fmt, ap);
+    va_end(ap);
+    return n;
+}
+
+int hexval(int c) {
+    if (c >= '0' && c <= '9')
+        return c - '0';
+    if (c >= 'a' && c <= 'f')
+        return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F')
+        return c - 'A' + 10;
+    return -1;
+}
+
+/*
+   hex_lut[b] holds the two ASCII hex characters for byte b, packed so
+   that a single little-endian 16-bit store writes the high-nibble char
+   to *p and the low-nibble char to *(p+1).
+*/
+#define HEX_ENTRY(hi, lo) ((unsigned short)((((unsigned char)(lo)) << 8) | (unsigned char)(hi)))
+#define HEX_ROW(hi)                                                                                                                   \
+    HEX_ENTRY(hi, '0'), HEX_ENTRY(hi, '1'), HEX_ENTRY(hi, '2'), HEX_ENTRY(hi, '3'), HEX_ENTRY(hi, '4'), HEX_ENTRY(hi, '5'),           \
+        HEX_ENTRY(hi, '6'), HEX_ENTRY(hi, '7'), HEX_ENTRY(hi, '8'), HEX_ENTRY(hi, '9'), HEX_ENTRY(hi, 'a'), HEX_ENTRY(hi, 'b'),       \
+        HEX_ENTRY(hi, 'c'), HEX_ENTRY(hi, 'd'), HEX_ENTRY(hi, 'e'), HEX_ENTRY(hi, 'f')
+
+static const unsigned short hex_lut[256] = {HEX_ROW('0'), HEX_ROW('1'), HEX_ROW('2'), HEX_ROW('3'), HEX_ROW('4'), HEX_ROW('5'),
+                                            HEX_ROW('6'), HEX_ROW('7'), HEX_ROW('8'), HEX_ROW('9'), HEX_ROW('a'), HEX_ROW('b'),
+                                            HEX_ROW('c'), HEX_ROW('d'), HEX_ROW('e'), HEX_ROW('f')};
+
+#undef HEX_ENTRY
+#undef HEX_ROW
+
+void put_hex_byte(char* out, unsigned char b) {
+    *(unsigned short*)out = hex_lut[b];
+}
+
+char* append_hex_byte(char* p, unsigned char b) {
+    *(unsigned short*)p = hex_lut[b];
+    return p + 2;
+}
+
+char* append_u32_le(char* p, DWORD v) {
+    p = append_hex_byte(p, (unsigned char)(v & 0xff));
+    p = append_hex_byte(p, (unsigned char)((v >> 8) & 0xff));
+    p = append_hex_byte(p, (unsigned char)((v >> 16) & 0xff));
+    p = append_hex_byte(p, (unsigned char)((v >> 24) & 0xff));
+    return p;
+}
+
+int decode_hex_string_until_comma(const char* in, char* out, int outsz, const char** after) {
+    int n = 0;
+
+    while (*in && *in != ',') {
+        int hi, lo;
+
+        if (!in[1])
+            return 0;
+
+        hi = hexval((unsigned char)in[0]);
+        lo = hexval((unsigned char)in[1]);
+
+        if (hi < 0 || lo < 0)
+            return 0;
+
+        if (n < outsz - 1)
+            out[n++] = (char)((hi << 4) | lo);
+
+        in += 2;
+    }
+
+    out[n] = 0;
+
+    if (after)
+        *after = in;
+
+    return *in == ',';
+}
+
+char* append_escaped_binary(char* p, char* end, const unsigned char* buf, int len) {
+    int i;
+
+    for (i = 0; i < len; ++i) {
+        unsigned char c = buf[i];
+
+        if (c == '$' || c == '#' || c == '}' || c == '*') {
+            if (p + 2 >= end)
+                break;
+
+            *p++ = '}';
+            *p++ = (char)(c ^ 0x20);
+        } else {
+            if (p + 1 >= end)
+                break;
+
+            *p++ = (char)c;
+        }
+    }
+
+    *p = 0;
+    return p;
+}
+
+char* append_hex_string(char* p, const char* s) {
+    while (*s) {
+        p = append_hex_byte(p, (unsigned char)*s);
+        s++;
+    }
+    return p;
+}
+
+int stricmp_slash_insensitive(const char* a, const char* b) {
+    while (*a && *b) {
+        char ca = *a++;
+        char cb = *b++;
+
+        if (ca == '\\')
+            ca = '/';
+        if (cb == '\\')
+            cb = '/';
+
+        if (ca >= 'A' && ca <= 'Z')
+            ca = (char)(ca - 'A' + 'a');
+        if (cb >= 'A' && cb <= 'Z')
+            cb = (char)(cb - 'A' + 'a');
+
+        if (ca != cb)
+            return ca - cb;
+    }
+
+    return *a - *b;
+}
+
+int decode_hex_string_all(const char* in, char* out, int outsz) {
+    int n = 0;
+
+    while (*in) {
+        int hi, lo;
+
+        if (!in[1])
+            return 0;
+
+        hi = hexval((unsigned char)in[0]);
+        lo = hexval((unsigned char)in[1]);
+
+        if (hi < 0 || lo < 0)
+            return 0;
+
+        if (n < outsz - 1)
+            out[n++] = (char)((hi << 4) | lo);
+
+        in += 2;
+    }
+
+    out[n] = 0;
+    return 1;
+}
+
+void make_posix_win_path(const char* win_path, char* out, int outsz) {
+    int i, j = 0;
+
+    if (outsz <= 0)
+        return;
+
+    if (!win_path || !win_path[0]) {
+        strncpy(out, "/unknown", outsz - 1);
+        out[outsz - 1] = 0;
+        return;
+    }
+
+    out[j++] = '/';
+
+    for (i = 0; win_path[i] && j < outsz - 1; ++i) {
+        char c = win_path[i];
+        if (c == '\\')
+            c = '/';
+        out[j++] = c;
+    }
+
+    out[j] = 0;
+}
+
+void xml_escape_append(char** pp, char* end, const char* s) {
+    char* p = *pp;
+
+    while (*s && p < end - 8) {
+        switch (*s) {
+            case '&':
+                p += sprintf(p, "&amp;");
+                break;
+            case '<':
+                p += sprintf(p, "&lt;");
+                break;
+            case '>':
+                p += sprintf(p, "&gt;");
+                break;
+            case '"':
+                p += sprintf(p, "&quot;");
+                break;
+            case '\'':
+                p += sprintf(p, "&apos;");
+                break;
+            default:
+                *p++ = *s;
+                break;
+        }
+
+        s++;
+    }
+
+    *p = '\0';
+    *pp = p;
+}
+
+void protect_to_permissions(DWORD protect, char* out) {
+    int r = 0, w = 0, x = 0;
+
+    protect &= 0xff; /* remove PAGE_GUARD / PAGE_NOCACHE-ish bits */
+
+    switch (protect) {
+        case PAGE_READONLY:
+            r = 1;
+            break;
+
+        case PAGE_READWRITE:
+        case PAGE_WRITECOPY:
+            r = 1;
+            w = 1;
+            break;
+
+        case PAGE_EXECUTE:
+            x = 1;
+            break;
+
+        case PAGE_EXECUTE_READ:
+            r = 1;
+            x = 1;
+            break;
+
+        case PAGE_EXECUTE_READWRITE:
+        case PAGE_EXECUTE_WRITECOPY:
+            r = 1;
+            w = 1;
+            x = 1;
+            break;
+
+        default:
+            break;
+    }
+
+    out[0] = r ? 'r' : '-';
+    out[1] = w ? 'w' : '-';
+    out[2] = x ? 'x' : '-';
+    out[3] = '\0';
+}
+
+void make_proc_maps_path(const char* win_path, char* out, int outsz) {
+    int i, j = 0;
+
+    if (!win_path || !win_path[0]) {
+        strncpy(out, "/unknown", outsz - 1);
+        out[outsz - 1] = 0;
+        return;
+    }
+
+    out[j++] = '/';
+
+    for (i = 0; win_path[i] && j < outsz - 1; ++i) {
+        char c = win_path[i];
+        if (c == '\\')
+            c = '/';
+        out[j++] = c;
+    }
+
+    out[j] = 0;
+}
+
+void make_lldb_module_path(const char* win_path, char* out, int outsz) {
+    int i, j = 0;
+
+    if (!win_path || !win_path[0]) {
+        strncpy(out, "unknown", outsz - 1);
+        out[outsz - 1] = 0;
+        return;
+    }
+
+    for (i = 0; win_path[i] && j < outsz - 1; ++i) {
+        char c = win_path[i];
+
+        if (c == '\\')
+            c = '/';
+
+        /*
+           If the source path is accidentally already /D:/foo,
+           strip that leading slash for LLDB.
+        */
+        if (i == 0 && c == '/' && win_path[1] && win_path[2] == ':') {
+            continue;
+        }
+
+        out[j++] = c;
+    }
+
+    out[j] = 0;
+}
+
+void normalize_module_query_path(const char* in, char* out, int outsz) {
+    int i, j = 0;
+
+    if (!in || !in[0]) {
+        out[0] = 0;
+        return;
+    }
+
+    /*
+       Convert:
+         /D:/main/foo.exe
+         D:\main\foo.exe
+
+       into:
+         d:/main/foo.exe
+    */
+
+    if (in[0] == '/' && in[1] && in[2] == ':')
+        in++;
+
+    for (i = 0; in[i] && j < outsz - 1; ++i) {
+        char c = in[i];
+
+        if (c == '\\')
+            c = '/';
+
+        if (c >= 'A' && c <= 'Z')
+            c = (char)(c - 'A' + 'a');
+
+        out[j++] = c;
+    }
+
+    out[j] = 0;
+}
+
+int same_module_path(const char* a, const char* b) {
+    char na[512];
+    char nb[512];
+
+    normalize_module_query_path(a, na, sizeof(na));
+    normalize_module_query_path(b, nb, sizeof(nb));
+
+    return strcmp(na, nb) == 0;
+}
+
+```
