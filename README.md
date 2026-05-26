@@ -3004,6 +3004,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/xvorost/CS-2-Glow [External]
 - https://github.com/yinleiCoder/cs2-cheat-cpp [External]
 - https://github.com/ByteCorum/DragonBurn [External]
+- https://github.com/snipcola/ProExt [Open-source external CS2 cheat written in Rust; ESP/RCS/Aimbot/Triggerbot/Crosshair/Radar/Bomb Timer/Spectator List]
 - https://github.com/yoshisaac/CounterStrike2-Linux-Cheat [Linux External]
 - https://github.com/KisSsArt/CS2-Cheat-Base [Internal]
 - https://github.com/redbg/CS2-Internal [Internal]
