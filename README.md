@@ -725,6 +725,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/DoranekoSystems/DynaDbg [A debugger for Android/IOS]
 - https://github.com/Yayoi-cs/fastDbg [x86_64 native/qemu kernel debugger]
 - https://github.com/noword/GDB-Windows-Binaries [GDB]
+- https://github.com/robert-yates/gdbserver9x [Primitive GDB RSP server for debugging 32-bit exes on retro Windows (Win98SE/XP); builds with VC6; pairs with Binary Ninja GDB adapter]
 - https://github.com/ajkhoury/ReClassEx
 - https://github.com/ReClassNET/ReClass.NET
 - https://github.com/niemand-sec/ReClass.NET-DriverReader [ReClass DriverReader]
