@@ -78,6 +78,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - [Android Emulator](#android-emulator)
 - [IOS Emulator](#ios-emulator)
 - [Game Boy](#game-boy)
+- [GameCube/Wii](#gamecubewii)
 - [Nintendo Switch](#nintendo-switch)
 - [Xbox](#Xbox)
 - [PlayStation](#PlayStation)
@@ -4408,6 +4409,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/xkevio/kevboy [Emulator]
 - https://github.com/vojty/feather-gb [Emulator]
 - https://github.com/chrismaltby/gb-studio [GB Studio]
+
+## GameCube/Wii
+- https://github.com/ioncodes/gecko [A cross-platform GameCube/Wii emulator and debugger written in Rust]
 
 ## Nintendo Switch
 - https://github.com/yuzu-mirror
