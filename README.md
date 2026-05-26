@@ -2243,6 +2243,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/-Rainbow---EFI [HWID]
 - https://github.com/gmh5225/Fortnite-EFI-External [Fortnite]
 - https://github.com/ajkhoury/UEFI-Bootkit
+- https://github.com/iss4cf0ng/OpenPetya [PoC MBR bootkit inspired by Petya ransomware; custom MBR/stage-2; Real→Protected Mode; NTFS MFT Salsa20 encryption; Assembly/C/C++]
 - https://github.com/SamuelTulach/negativespoofer [HWID]
 - https://github.com/gmh5225/EfiDump [Dump]
 - https://github.com/ekknod/Nmi [Blocking NMI interrupts]
