@@ -3875,6 +3875,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/GravitLauncher/Avanguard
 - https://github.com/Rycooop/Bloom-Anticheat
 - https://github.com/Vasieco/Kernel-Anticheat [Kernel Anticheat]
+- https://github.com/PatchRequest/PeregrineAntiCheat [Educational Windows anti-cheat: kernel minifilter, ObCallbacks, APC injection, MinHook API hooks, ETW-TI, YARA, Tauri GUI, cheat test suite]
 - https://github.com/AvivShabtay/Stresser [Anti Virus in fact but also Anti Cheat]
 - https://github.com/D4stiny/PeaceMaker [Anti Virus in fact but also Anti Cheat]
 - https://github.com/danielkrupinski/VAC [Reversed VAC]
