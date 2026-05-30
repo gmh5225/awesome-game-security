@@ -3785,6 +3785,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/llxiaoyuan/oxorany [obfuscated any constant encryption in compile time on any platform]
 - https://github.com/DosX-dev/obfus.h [Macro-header for compile-time C obfuscation (tcc, win x86/x64)]
 - https://github.com/x86byte/Obfusk8 [Obfusk8: C++17-Based Obfuscation Library]
+- https://github.com/x86byte/sbox [Compile-time AES-128 string obfuscation for C++: constexpr blocks, no delimiters, binary-safe; spin-off from Obfusk8]
 - https://github.com/nevergiveup-c/obfuscxx [Header-only compile-time variables obfuscation library for C++20 and later. Compiler Support: MSVC (+WDM), LLVM, GCC. Architecture Support: x86-64, ARM]
 - https://github.com/Mowokuma/vm_str.hpp [Header only C++20 compile time string obfuscator]
 - https://github.com/naorhaziz/irql [Rust: compile-time IRQL safety for Windows kernel drivers]
