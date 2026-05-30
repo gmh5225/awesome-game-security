@@ -1,0 +1,5309 @@
+Project Path: arc_JustasMasiulis_ida_buddy_m_4dzoeh
+
+Source Tree:
+
+```txt
+arc_JustasMasiulis_ida_buddy_m_4dzoeh
+├── README.md
+├── pyproject.toml
+├── src
+│   └── idb
+│       ├── __init__.py
+│       ├── __main__.py
+│       ├── cli.py
+│       ├── doctor.py
+│       ├── errors.py
+│       ├── fmt
+│       │   ├── __init__.py
+│       │   ├── columns.py
+│       │   ├── disasm.py
+│       │   ├── listing.py
+│       │   ├── memory.py
+│       │   ├── sessions.py
+│       │   ├── types.py
+│       │   ├── writes.py
+│       │   └── xrefs.py
+│       ├── protocol.py
+│       ├── registry.py
+│       ├── spawn.py
+│       ├── transport.py
+│       └── worker
+│           ├── __init__.py
+│           ├── activate.py
+│           ├── budget.py
+│           ├── dispatch.py
+│           ├── handlers
+│           │   ├── __init__.py
+│           │   ├── annotate.py
+│           │   ├── disasm.py
+│           │   ├── info.py
+│           │   ├── memory.py
+│           │   ├── symbols.py
+│           │   ├── types.py
+│           │   └── xrefs.py
+│           ├── idahelp.py
+│           ├── lifecycle.py
+│           ├── main.py
+│           └── serve.py
+└── tests
+    ├── conftest.py
+    ├── fake_worker.py
+    ├── integration
+    │   └── test_smoke_real_ida.py
+    ├── test_cli_resolution.py
+    ├── test_fmt_golden.py
+    ├── test_idahelp_pure.py
+    ├── test_import_order.py
+    ├── test_protocol.py
+    ├── test_registry.py
+    ├── test_spawn.py
+    ├── test_transport.py
+    └── test_worker_unit.py
+
+```
+
+`README.md`:
+
+```md
+# idb — IDA Pro Buddy
+
+A windbg-flavored CLI for interacting with IDA that is optimized for agentic harnesses. `idb` maintains a persistent headless worker per database and tries to minimize token use with compact text output.
+
+```
+idb open foo.exe          # spawn + analyze, print a triage summary
+idb u sub_401000          # disassemble a function (windbg alias for `disas`)
+idb dec sub_401000        # decompile (Hex-Rays)
+idb db 0x401000 -n 64     # hexdump 64 bytes
+idb x CreateFile          # find symbols by pattern  (alias for `names`)
+idb xref_to validate_key  # who references this, with instruction context
+idb t GUID                # inspect a type
+idb close                 # save + shut the worker down
+```
+
+## Install
+
+idalib needs **install + activation**, then `idb` installs into that same
+interpreter (the CLI and the worker share `sys.executable`):
+
+```powershell
+cd "C:\Program Files\IDA Professional 9.3\idalib\python"
+python -m pip install .\idapro-0.0.7-py3-none-any.whl   # version-matched idapro
+python .\py-activate-idalib.py                           # writes %APPDATA%\Hex-Rays\IDA Pro\ida-config.json
+python -m pip install -e D:\ida_buddy                    # idb + pyzmq + msgspec
+idb doctor                                               # verify the environment
+```
+
+`idapro` is intentionally **not** a PyPI dependency of `ida-buddy` — the correct
+build ships with the IDA install, not PyPI. `idb doctor` confirms it imports and
+reports the kernel version.
+
+> The `idb` console script lands in your user Scripts dir (e.g.
+> `%APPDATA%\Python\Python313\Scripts`). If that is not on `PATH`, invoke as
+> `python -m idb ...`.
+
+## Model
+
+- **One database per worker.** Multiple sessions = multiple worker processes.
+- **Every worker is fully writable.** Read and mutate commands are always
+  available; mutating commands create an undo point first (`idb undo` / `idb redo`).
+- **Save policy:** `idb save` persists mid-session; `idb close` saves by default;
+  `idb close --no-save` discards; `idb close --kill` hard-terminates a wedged
+  worker (no save); an idle worker shuts down after its TTL (saving).
+- **Sessions** live in per-user registry files (`%LOCALAPPDATA%\ida-buddy`).
+  Commands resolve a session by `-s <id>`, `--idb <path>`, or — when exactly one
+  worker is healthy — automatically.
+- **Stuck command:** `-t` is a *soft* client timeout. Native IDA/Hex-Rays calls
+  cannot be interrupted; recover a wedged worker with `idb close --kill`.
+
+## Output
+
+Dense windbg-style text. **Data goes to stdout**; banners, errors, and
+`[+more]` truncation notices go to **stderr** (never ingested as data).
+Sequence-style output paginates with `-o/--offset` + `-n/--count`.
+
+## Commands
+
+Aliases in parens. `[mut]` mutates the database (creates an undo point).
+
+| Command | Meaning |
+|---|---|
+| `open [--fresh] [--idle-ttl SEC] <path>` | spawn + analyze, print summary |
+| `sessions` (`ps`) / `close [--no-save\|--kill\|--all]` / `save` / `doctor` | lifecycle |
+| `segments` (`seg`) | segments + rwx |
+| `funcs [pat]` / `names <pat>` (`x`) / `nearest <addr>` (`ln`) | symbols |
+| `imports [pat]` / `exports [pat]` / `strings [pat]` | imports / entry points / strings |
+| `disas <target>` (`u`) | whole function, or `-n N` insns from an address |
+| `decompile <func>` (`dec`) | Hex-Rays pseudocode |
+| `read <addr>` (`db`/`dw`/`dd`/`dq`) | dump cells (`-w 1\|2\|4\|8`, `-n N`) |
+| `string <addr>` (`da`/`du`) | read a string (`-e ascii\|utf16`) |
+| `xref_to <addr>` / `xref_from <addr>` | refs + kind + enclosing func + instruction |
+| `calls <func>` | callers + callees |
+| `search <pat>` | `-k bytes\|imm\|str\|ref` |
+| `type <name>` (`t`) / `types [pat]` | inspect / list local types (`-k kind`) |
+| `struct <type> [addr]` | layout (+ live values if addr) |
+| `member <type> <byte_off>` | member at offset — full nested path, all union arms |
+| `typeof <target>` | type of a global / function / `func:var` local |
+| `frame <func>` | stack / local variables |
+| `rename <addr\|func:var> <name>` *(mut)* | rename a name or local |
+| `comment <addr> <text>` *(mut)* | set a comment (disassembly + decompiler) |
+| `declare ("<C>" \| --file P \| @P)` *(mut)* | create types |
+| `settype <target> <type>` *(mut)* | apply a type (global / function / `func:var` local) |
+| `setmember <struct> <off\|name> <type> [newname]` *(mut)* | edit a struct member |
+| `enum <name> <k=v,...> [--bitfield]` *(mut)* | create or extend an enum |
+| `patch <addr> <hex>` *(mut)* | patch bytes |
+| `union-select <addr> <member>` *(mut)* | choose a union arm at a Hex-Rays usage site |
+| `undo` / `redo` *(mut)* | revert / replay the last mutation |
+
+Global flags: `-s/--session`, `--idb`, `-o/--offset`, `-n/--count`, `-t/--timeout`,
+`--total`, `-v/--verbose`. Addresses are hex by default (windbg style); `0n`
+prefixes decimal; a symbol name resolves to its address.
+
+### Exit codes
+
+`0` ok · `1` error (IDA/not-found/bad-address/internal) · `2` usage · `3` no
+session · `4` ambiguous session · `5` not ready · `6` timeout · `7` unauthorized.
+
+## Testing
+
+```
+python -m pytest tests --ignore=tests/integration   # Tiers 1–3 (no IDA)
+python -m pytest tests/integration                   # Tier 4 (needs idapro + a binary)
+```
+
+Tier 4 opens a real worker against `tests/fixtures/where.exe` (override with
+`IDB_TEST_BINARY=<path>`); it auto-skips when idapro or the binary is absent.
+
+See `plan.md` for the full design.
+
+```
+
+`pyproject.toml`:
+
+```toml
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ida-buddy"
+version = "0.1.0"
+description = "windbg-flavored CLI for headless IDA Pro reverse engineering (idalib)"
+readme = "README.md"
+requires-python = ">=3.13"
+license = { text = "MIT" }
+authors = [{ name = "Armatum" }]
+dependencies = ["pyzmq>=25", "msgspec>=0.18"]
+
+# NB: idapro is intentionally NOT a dependency. The correct build ships with the
+# IDA install (idalib/python), not PyPI. `idb doctor` verifies it is importable.
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.scripts]
+idb = "idb.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/idb"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+```
+
+`src/idb/__init__.py`:
+
+```py
+"""idb — a windbg-flavored CLI for headless IDA Pro reverse engineering.
+
+The top-level package and everything under it (except worker/handlers and a few
+idahelp functions) imports ONLY stdlib + pyzmq + msgspec. ida_* modules are
+imported solely inside the worker, and only after idapro has been activated.
+"""
+
+__version__ = "0.1.0"
+
+```
+
+`src/idb/__main__.py`:
+
+```py
+import sys
+
+from idb.cli import main
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
+
+`src/idb/cli.py`:
+
+```py
+"""idb command-line front end. Imports NO ida_* / idapro — it resolves a session
+from the registry files and does one RPC round-trip per invocation.
+
+Windbg-flavored aliases (u, dec, db/dw/dd/dq, da/du, x, ln, ps, seg, t) are
+accepted by argparse, then canonicalized through the ALIASES table so aliases
+can carry distinct option defaults (e.g. db vs dq both map to `read` with
+different widths).
+"""
+
+import argparse
+import sys
+
+from idb import __version__, protocol, registry, spawn
+from idb import doctor as doctor_mod
+from idb.errors import IdbError, exit_code_for, NO_SESSION, AMBIGUOUS
+from idb.transport import ZmqClient
+from idb.fmt import (
+    listing,
+    disasm as fmt_disasm,
+    memory as fmt_memory,
+    xrefs as fmt_xrefs,
+    types as fmt_types,
+    writes as fmt_writes,
+    sessions as fmt_sessions,
+)
+
+DEFAULT_TIMEOUT = 30.0
+
+ALIASES = {
+    "u": ("disas", {}),
+    "dec": ("decompile", {}),
+    "db": ("read", {"width": 1}),
+    "dw": ("read", {"width": 2}),
+    "dd": ("read", {"width": 4}),
+    "dq": ("read", {"width": 8}),
+    "da": ("string", {"encoding": "ascii"}),
+    "du": ("string", {"encoding": "utf16"}),
+    "x": ("names", {}),
+    "ln": ("nearest", {}),
+    "ps": ("sessions", {}),
+    "seg": ("segments", {}),
+    "t": ("type", {}),
+}
+
+_ALIASES_BY_COMMAND = {}
+for _alias, (_command, _defaults) in ALIASES.items():
+    _ALIASES_BY_COMMAND.setdefault(_command, []).append(_alias)
+
+FORMATTERS = {
+    "open_summary": listing.format_open_summary,
+    "segments": listing.format_segments,
+    "save": listing.format_saved,
+    "disas": fmt_disasm.format_disas,
+    "decompile": fmt_disasm.format_decompile,
+    "read": fmt_memory.format_read,
+    "string": fmt_memory.format_string,
+    "funcs": listing.format_funcs,
+    "names": listing.format_names,
+    "imports": listing.format_imports,
+    "exports": listing.format_exports,
+    "strings": listing.format_strings,
+    "nearest": listing.format_nearest,
+    "xref_to": fmt_xrefs.format_xrefs,
+    "xref_from": fmt_xrefs.format_xrefs,
+    "calls": fmt_xrefs.format_calls,
+    "search": fmt_xrefs.format_search,
+    "type": fmt_types.format_type,
+    "types": fmt_types.format_types,
+    "struct": fmt_types.format_struct,
+    "member": fmt_types.format_member,
+    "typeof": fmt_types.format_typeof,
+    "frame": fmt_types.format_frame,
+    "rename": fmt_writes.format_rename,
+    "comment": fmt_writes.format_comment,
+    "patch": fmt_writes.format_patch,
+    "undo": fmt_writes.format_undo,
+    "redo": fmt_writes.format_redo,
+    "declare": fmt_writes.format_declare,
+    "settype": fmt_writes.format_settype,
+    "setmember": fmt_writes.format_setmember,
+    "enum": fmt_writes.format_enum,
+    "union_select": fmt_writes.format_union_select,
+}
+
+_LIVE = (registry.STATUS_READY, registry.STATUS_BUSY, registry.STATUS_ANALYZING)
+
+_GLOBAL_DEFAULTS = {
+    "session": None,
+    "idb": None,
+    "offset": 0,
+    "count": None,
+    "timeout": None,
+    "total": False,
+    "verbose": 0,
+}
+
+
+def _global_flags():
+    g = argparse.ArgumentParser(add_help=False)
+    g.add_argument("-s", "--session", default=argparse.SUPPRESS,
+                   help="session id (see `idb sessions`)")
+    g.add_argument("--idb", default=argparse.SUPPRESS,
+                   help="resolve the session by database/binary path")
+    g.add_argument("-o", "--offset", type=int, default=argparse.SUPPRESS,
+                   help="pagination offset")
+    g.add_argument("-n", "--count", type=int, default=argparse.SUPPRESS,
+                   help="item/insn/cell count")
+    g.add_argument("-t", "--timeout", type=float, default=argparse.SUPPRESS,
+                   help="client wait, seconds")
+    g.add_argument("--total", action="store_true", default=argparse.SUPPRESS,
+                   help="compute total counts when possible")
+    g.add_argument("-v", "--verbose", action="count", default=argparse.SUPPRESS)
+    return g
+
+
+def build_parser():
+    root_globals = _global_flags()
+    command_globals = _global_flags()
+    p = argparse.ArgumentParser(
+        prog="idb",
+        description="IDA Pro Buddy",
+        parents=[root_globals],
+    )
+    sub = p.add_subparsers(dest="command", required=True, metavar="<command>")
+
+    def cmd(name, **kw):
+        aliases = _ALIASES_BY_COMMAND.get(name, ())
+        return sub.add_parser(name, parents=[command_globals], aliases=aliases, **kw)
+
+    sp = cmd("open", help="spawn+analyze a binary/db and print a summary")
+    sp.add_argument("target")
+    sp.add_argument("--fresh", action="store_true", help="re-analyze from the binary")
+    sp.add_argument("--idle-ttl", dest="idle_ttl", type=float, default=None)
+
+    cmd("sessions", help="list workers (alias: ps)")
+    sp = cmd("close", help="shut a worker down")
+    sp.add_argument("--no-save", dest="no_save", action="store_true")
+    sp.add_argument("--kill", action="store_true", help="TerminateProcess (wedged worker)")
+    sp.add_argument("--all", action="store_true")
+    cmd("save", help="persist the .i64 now")
+    cmd("doctor", help="probe the environment")
+
+    cmd("segments", help="segments + rwx (alias: seg)")
+    for name, helptext in (("funcs", "functions"), ("imports", "imports"),
+                           ("exports", "entry points"), ("strings", "strings")):
+        sp = cmd(name, help=helptext)
+        sp.add_argument("pattern", nargs="?", default=None)
+    sp = cmd("names", help="symbols by pattern (alias: x)")
+    sp.add_argument("pattern", nargs="?", default=None)
+    sp = cmd("nearest", help="nearest symbol to addr (alias: ln)")
+    sp.add_argument("addr")
+
+    sp = cmd("disas", help="disassemble a function or N insns (alias: u)")
+    sp.add_argument("target")
+    sp = cmd("decompile", help="pseudocode (alias: dec)")
+    sp.add_argument("func")
+    sp = cmd("read", help="dump cells (aliases: db/dw/dd/dq)")
+    sp.add_argument("addr")
+    sp.add_argument("-w", "--width", type=int, choices=(1, 2, 4, 8), default=None)
+    sp = cmd("string", help="read a string (aliases: da/du)")
+    sp.add_argument("addr")
+    sp.add_argument("-e", "--encoding", choices=("ascii", "utf16"), default=None)
+
+    for name in ("xref_to", "xref_from"):
+        sp = cmd(name, help="cross-references")
+        sp.add_argument("addr")
+    sp = cmd("calls", help="callers + callees")
+    sp.add_argument("func")
+    sp = cmd("search", help="search bytes/imm/str/ref")
+    sp.add_argument("pattern")
+    sp.add_argument("-k", "--kind", choices=("bytes", "imm", "str", "ref"), default="bytes")
+
+    sp = cmd("type", help="inspect a type (alias: t)")
+    sp.add_argument("name")
+    sp = cmd("types", help="list/search local types")
+    sp.add_argument("pattern", nargs="?", default=None)
+    sp.add_argument("-k", "--kind", default=None)
+    sp = cmd("struct", help="struct layout (+ values if addr)")
+    sp.add_argument("type")
+    sp.add_argument("addr", nargs="?", default=None)
+    sp = cmd("member", help="member at byte offset (nested path, union arms)")
+    sp.add_argument("type")
+    sp.add_argument("member_offset", metavar="byte_off")
+    sp = cmd("typeof", help="type of a global/local/stack-var/function")
+    sp.add_argument("target")
+    sp = cmd("frame", help="stack/local variables")
+    sp.add_argument("func")
+
+    sp = cmd("rename", help="rename func/global/local/stack [mut]")
+    sp.add_argument("addr")
+    sp.add_argument("name")
+    sp = cmd("comment", help="set a comment [mut]")
+    sp.add_argument("addr")
+    sp.add_argument("text")
+    sp = cmd("declare", help='create types: "<C>" | --file P | @P [mut]')
+    sp.add_argument("decl", nargs="?", default=None)
+    sp.add_argument("--file", default=None)
+    sp = cmd("settype", help="apply a type [mut]")
+    sp.add_argument("target")
+    sp.add_argument("type")
+    sp = cmd("setmember", help="edit a struct member [mut]")
+    sp.add_argument("type")
+    sp.add_argument("member")
+    sp.add_argument("new_type")
+    sp.add_argument("new_name", nargs="?", default=None)
+    sp = cmd("enum", help="create/extend an enum [mut]")
+    sp.add_argument("name")
+    sp.add_argument("members", help="k=v,k=v,...")
+    sp.add_argument("--bitfield", action="store_true")
+    sp = cmd("patch", help="patch bytes [mut]")
+    sp.add_argument("addr")
+    sp.add_argument("hex")
+    cmd("undo", help="revert last mutation [mut]")
+    cmd("redo", help="replay [mut]")
+    sp = cmd("union-select", help="choose a union arm at a usage site [mut]")
+    sp.add_argument("addr")
+    sp.add_argument("member")
+    return p
+
+
+def _read_decl(ns):
+    if ns.file:
+        with open(ns.file, "r", encoding="utf-8") as f:
+            return f.read()
+    text = ns.decl
+    if text and text.startswith("@"):
+        with open(text[1:], "r", encoding="utf-8") as f:
+            return f.read()
+    if not text:
+        raise IdbError(protocol.BAD_ARGS, "declare needs a C declaration, --file PATH, or @PATH")
+    return text
+
+
+def normalize_namespace(ns):
+    canonical, implied = ALIASES.get(ns.command, (ns.command, {}))
+    ns.command = canonical
+    for key, value in implied.items():
+        if getattr(ns, key, None) is None:
+            setattr(ns, key, value)
+    for key, value in _GLOBAL_DEFAULTS.items():
+        if not hasattr(ns, key):
+            setattr(ns, key, value)
+    return ns
+
+
+def _page(ns):
+    return {"offset": ns.offset, "count": ns.count}
+
+
+def _lpage(ns):
+    return {"offset": ns.offset, "count": ns.count, "total": ns.total}
+
+
+def _paginate_list(items, offset=0, count=None):
+    offset = int(offset or 0)
+    if offset >= len(items):
+        return [], None
+    if count is None:
+        return items[offset:], None
+    end = offset + int(count)
+    return items[offset:end], (end if end < len(items) else None)
+
+
+def build_request(ns):
+    c = ns.command
+    if c in ("save", "undo", "redo"):
+        return c, {}
+    if c == "segments":
+        return c, _lpage(ns)
+    if c in ("funcs", "imports", "exports", "strings", "names"):
+        return c, {"pattern": ns.pattern, **_lpage(ns)}
+    if c == "nearest":
+        return c, {"addr": ns.addr}
+    if c == "disas":
+        return c, {"target": ns.target, **_page(ns)}
+    if c == "decompile":
+        return c, {"func": ns.func, **_page(ns)}
+    if c == "read":
+        return c, {"addr": ns.addr, "width": ns.width or 1, **_page(ns)}
+    if c == "string":
+        return c, {"addr": ns.addr, "encoding": ns.encoding}
+    if c in ("xref_to", "xref_from"):
+        return c, {"addr": ns.addr, **_page(ns)}
+    if c == "calls":
+        return c, {"func": ns.func, **_page(ns)}
+    if c == "search":
+        return c, {"pattern": ns.pattern, "kind": ns.kind, **_page(ns)}
+    if c == "type":
+        return c, {"name": ns.name, **_page(ns)}
+    if c == "types":
+        return c, {"pattern": ns.pattern, "kind": ns.kind, **_lpage(ns)}
+    if c == "struct":
+        return c, {"type": ns.type, "addr": ns.addr, **_page(ns)}
+    if c == "member":
+        return c, {"type": ns.type, "offset": ns.member_offset, "page_offset": ns.offset, "count": ns.count}
+    if c == "typeof":
+        return c, {"target": ns.target}
+    if c == "frame":
+        return c, {"func": ns.func, **_page(ns)}
+    if c == "rename":
+        return c, {"addr": ns.addr, "name": ns.name}
+    if c == "comment":
+        return c, {"addr": ns.addr, "text": ns.text}
+    if c == "declare":
+        return c, {"text": _read_decl(ns)}
+    if c == "settype":
+        return c, {"target": ns.target, "type": ns.type}
+    if c == "setmember":
+        return c, {"type": ns.type, "member": ns.member, "new_type": ns.new_type, "new_name": ns.new_name}
+    if c == "enum":
+        return c, {"name": ns.name, "members": ns.members, "bitfield": ns.bitfield}
+    if c == "patch":
+        return c, {"addr": ns.addr, "hex": ns.hex}
+    if c == "union-select":
+        return "union_select", {"addr": ns.addr, "member": ns.member}
+    raise IdbError(protocol.BAD_ARGS, f"unhandled command {c!r}")
+
+
+def resolve_session(ns):
+    registry.cleanup_stale()
+    entries = registry.list_all()
+    if ns.session:
+        matched = registry.match(entries, session=ns.session)
+        if not matched:
+            raise IdbError(NO_SESSION, f"no session named {ns.session!r}")
+        return matched[0]
+    if ns.idb:
+        matched = registry.match(entries, idb=ns.idb)
+        if not matched:
+            raise IdbError(NO_SESSION, f"no session for {ns.idb!r}")
+        if len(matched) > 1:
+            print(fmt_sessions.format_sessions(matched), file=sys.stderr)
+            raise IdbError(AMBIGUOUS, f"{len(matched)} sessions match {ns.idb!r}; use -s")
+        return matched[0]
+    live = [e for e in entries if registry.probe(e) in _LIVE]
+    if not live:
+        raise IdbError(NO_SESSION, "no running sessions; run `idb open <binary>` first")
+    if len(live) == 1:
+        return live[0]
+    print(fmt_sessions.format_sessions([{**e, "status": registry.probe(e)} for e in live]),
+          file=sys.stderr)
+    raise IdbError(AMBIGUOUS, f"{len(live)} sessions; disambiguate with -s <id> or --idb <path>")
+
+
+def _banner(meta):
+    parts = []
+    if meta.get("truncated"):
+        nxt = meta.get("next_offset")
+        parts.append(f"[+more; resume with -o {nxt}]" if nxt is not None else "[+more]")
+    if meta.get("total") is not None:
+        parts.append(f"[total {meta['total']}]")
+    return " ".join(parts)
+
+
+def emit(rpc_cmd, reply, ns):
+    if not protocol.is_ok(reply):
+        err = reply["error"]
+        print(f"idb: {err['code']}: {err['message']}", file=sys.stderr)
+        return exit_code_for(err["code"])
+    text = FORMATTERS.get(rpc_cmd, listing.format_generic)(reply.get("result"), ns)
+    if text:
+        print(text)
+    meta = reply.get("meta")
+    if meta:
+        line = _banner(meta)
+        if line:
+            print(line, file=sys.stderr)
+    return 0
+
+
+def run_remote(ns, rpc_cmd, rpc_args):
+    entry = resolve_session(ns)
+    client = ZmqClient(entry["port"], entry["token"])
+    timeout = ns.timeout if ns.timeout else DEFAULT_TIMEOUT
+    try:
+        reply = client.call(rpc_cmd, rpc_args, timeout_ms=int(timeout * 1000))
+    finally:
+        client.close()
+    return emit(rpc_cmd, reply, ns)
+
+
+def cmd_open(ns):
+    entry, summary = spawn.open_or_reuse(
+        ns.target,
+        fresh=ns.fresh,
+        idle_ttl=ns.idle_ttl if ns.idle_ttl is not None else spawn.DEFAULT_IDLE_TTL,
+        deadline_s=ns.timeout if ns.timeout else spawn.DEFAULT_OPEN_DEADLINE,
+    )
+    print(listing.format_open_summary(summary))
+    if ns.verbose:
+        print(f"session {entry['id']}  port {entry['port']}  pid {entry['pid']}", file=sys.stderr)
+    return 0
+
+
+def cmd_sessions(ns):
+    registry.cleanup_stale()
+    rows = [{**e, "status": registry.probe(e) or "dead"} for e in registry.list_all()]
+    page, next_offset = _paginate_list(rows, ns.offset, ns.count)
+    print(fmt_sessions.format_sessions(page))
+    meta = _banner({"shown": len(page), "truncated": True, "next_offset": next_offset}) if next_offset is not None else ""
+    if meta:
+        print(meta, file=sys.stderr)
+    return 0
+
+
+def _close_one(entry, kill, save, timeout_s=20.0):
+    import time
+
+    sid, pid = entry["id"], entry.get("pid")
+    if kill:
+        spawn.kill_pid(pid)
+        registry.unregister(sid)
+        return f"killed {sid} (pid {pid})"
+    client = ZmqClient(entry["port"], entry["token"])
+    try:
+        client.call("shutdown", {"save": save}, timeout_ms=15000)
+    except IdbError:
+        spawn.kill_pid(pid)
+        registry.unregister(sid)
+        return f"{sid} unreachable; killed"
+    finally:
+        client.close()
+    deadline = time.time() + timeout_s
+    while time.time() < deadline and registry.pid_alive(pid):
+        time.sleep(0.1)
+    registry.unregister(sid)
+    return f"closed {sid} (save={save})"
+
+
+def cmd_close(ns):
+    if ns.all:
+        targets = registry.list_all()
+        if not targets:
+            print("no sessions to close", file=sys.stderr)
+            return 0
+    else:
+        targets = [resolve_session(ns)]
+    for entry in targets:
+        print(_close_one(entry, kill=ns.kill, save=not ns.no_save), file=sys.stderr)
+    return 0
+
+
+def cmd_doctor(ns):
+    rows, ok = doctor_mod.run()
+    page, next_offset = _paginate_list(rows, ns.offset, ns.count)
+    print(fmt_sessions.format_doctor(page))
+    meta = _banner({"shown": len(page), "truncated": True, "next_offset": next_offset}) if next_offset is not None else ""
+    if meta:
+        print(meta, file=sys.stderr)
+    return 0 if ok else 1
+
+
+LIFECYCLE = {
+    "open": cmd_open,
+    "sessions": cmd_sessions,
+    "close": cmd_close,
+    "doctor": cmd_doctor,
+}
+
+
+def main(argv=None):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if not argv or argv[0] in ("-h", "--help"):
+        build_parser().print_help()
+        return 0
+    if argv[0] in ("--version", "-V"):
+        print(__version__)
+        return 0
+
+    try:
+        ns = build_parser().parse_args(argv)
+    except SystemExit as exc:
+        return int(exc.code or 0)
+    normalize_namespace(ns)
+
+    try:
+        if ns.command in LIFECYCLE:
+            return LIFECYCLE[ns.command](ns)
+        rpc_cmd, rpc_args = build_request(ns)
+        return run_remote(ns, rpc_cmd, rpc_args)
+    except IdbError as exc:
+        print(f"idb: {exc.code}: {exc.message}", file=sys.stderr)
+        if exc.data:
+            print(str(exc.data), file=sys.stderr)
+        return exit_code_for(exc.code)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
+
+`src/idb/doctor.py`:
+
+```py
+"""Environment probe. Verifies the things idb needs WITHOUT importing ida_* into
+the CLI process: idapro is checked via find_spec + a throwaway subprocess that
+actually initializes the kernel and reports the version."""
+
+import os
+import sys
+import json
+import importlib.util
+import subprocess
+from pathlib import Path
+
+from idb import registry
+
+
+def _ida_config_path():
+    if sys.platform == "win32":
+        base = os.environ.get("APPDATA") or str(Path.home() / "AppData" / "Roaming")
+        return Path(base) / "Hex-Rays" / "IDA Pro" / "ida-config.json"
+    return Path.home() / ".idapro" / "ida-config.json"
+
+
+def _check_python():
+    return ("python", "OK", f"{sys.version.split()[0]} @ {sys.executable}")
+
+
+def _check_module(name):
+    spec = importlib.util.find_spec(name)
+    if spec is None:
+        return (name, "MISSING", "pip install " + name)
+    try:
+        mod = importlib.import_module(name)
+        return (name, "OK", getattr(mod, "__version__", "(installed)"))
+    except Exception as exc:
+        return (name, "ERROR", str(exc))
+
+
+def _check_idapro():
+    if importlib.util.find_spec("idapro") is None:
+        return ("idapro", "MISSING",
+                "install the idapro wheel + run py-activate-idalib.py into this interpreter")
+    code = "import idapro,sys; sys.stdout.write('%d.%d.%d' % idapro.get_library_version())"
+    try:
+        res = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, timeout=90)
+    except subprocess.TimeoutExpired:
+        return ("idapro", "ERROR", "kernel init timed out")
+    if res.returncode != 0:
+        tail = (res.stderr.strip().splitlines() or [""])[-1]
+        return ("idapro", "ERROR", tail)
+    return ("idapro", "OK", f"IDA library {res.stdout.strip()}")
+
+
+def _check_ida_config():
+    path = _ida_config_path()
+    if not path.exists():
+        return ("ida-config", "MISSING", f"{path} (run py-activate-idalib.py)")
+    try:
+        cfg = json.loads(path.read_text())
+        return ("ida-config", "OK", cfg.get("Paths", {}).get("ida-install-dir", "(no install dir)"))
+    except (ValueError, OSError) as exc:
+        return ("ida-config", "ERROR", str(exc))
+
+
+def _check_sessions():
+    try:
+        entries = registry.list_all()
+    except Exception as exc:
+        return ("sessions", "ERROR", str(exc))
+    return ("sessions", "OK", f"{len(entries)} registered in {registry.state_dir()}")
+
+
+def run():
+    """Return (rows, ok) where rows are (check, status, detail)."""
+    rows = [
+        _check_python(),
+        _check_idapro(),
+        _check_module("zmq"),
+        _check_module("msgspec"),
+        _check_ida_config(),
+        _check_sessions(),
+    ]
+    ok = all(status != "MISSING" and status != "ERROR" for _, status, _ in rows)
+    return rows, ok
+
+```
+
+`src/idb/errors.py`:
+
+```py
+"""IdbError and the protocol-code -> process exit-code mapping. No ida_* imports."""
+
+from . import protocol
+
+EXIT_OK = 0
+EXIT_ERROR = 1
+EXIT_USAGE = 2
+EXIT_NO_SESSION = 3
+EXIT_AMBIGUOUS = 4
+EXIT_NOT_READY = 5
+EXIT_TIMEOUT = 6
+EXIT_UNAUTHORIZED = 7
+
+NO_SESSION = "NO_SESSION"
+AMBIGUOUS = "AMBIGUOUS"
+
+_CODE_EXIT = {
+    NO_SESSION: EXIT_NO_SESSION,
+    AMBIGUOUS: EXIT_AMBIGUOUS,
+    protocol.BAD_REQUEST: EXIT_ERROR,
+    protocol.UNAUTHORIZED: EXIT_UNAUTHORIZED,
+    protocol.UNKNOWN_CMD: EXIT_USAGE,
+    protocol.BAD_ARGS: EXIT_USAGE,
+    protocol.BAD_ADDRESS: EXIT_ERROR,
+    protocol.NOT_FOUND: EXIT_ERROR,
+    protocol.IDA_ERROR: EXIT_ERROR,
+    protocol.NOT_READY: EXIT_NOT_READY,
+    protocol.TIMEOUT: EXIT_TIMEOUT,
+    protocol.INTERNAL: EXIT_ERROR,
+}
+
+
+class IdbError(Exception):
+    """Carries a protocol code so both the worker (-> error envelope) and the
+    client (-> exit code) can act on it uniformly."""
+
+    def __init__(self, code, message, data=None):
+        super().__init__(message)
+        self.code = code
+        self.message = message
+        self.data = data
+
+    def to_error(self, req_id):
+        return protocol.build_error(req_id, self.code, self.message, self.data)
+
+
+def exit_code_for(code) -> int:
+    return _CODE_EXIT.get(code, EXIT_ERROR)
+
+```
+
+`src/idb/fmt/__init__.py`:
+
+```py
+"""Text formatters. Pure functions over result-dicts; NO ida_* imports, so the
+whole package is golden-testable without a worker. Data -> stdout; banners and
+[+N more] notices -> stderr (never ingested as data)."""
+
+```
+
+`src/idb/fmt/columns.py`:
+
+```py
+"""Fixed-width column aligner. Pure; the basis for every table formatter."""
+
+
+def align(rows, headers=None, gap=2, aligns=None):
+    rows = [tuple("" if c is None else str(c) for c in r) for r in rows]
+    ncol = max((len(r) for r in rows), default=len(headers or ()))
+    if headers:
+        ncol = max(ncol, len(headers))
+    widths = [0] * ncol
+    for r in ([tuple(headers)] if headers else []) + rows:
+        for i, cell in enumerate(r):
+            widths[i] = max(widths[i], len(cell))
+    spacer = " " * gap
+
+    def render(r):
+        out = []
+        for i in range(ncol):
+            cell = r[i] if i < len(r) else ""
+            right = aligns is not None and i < len(aligns) and aligns[i] == ">"
+            out.append(f"{cell:>{widths[i]}}" if right else f"{cell:<{widths[i]}}")
+        return spacer.join(out).rstrip()
+
+    lines = []
+    if headers:
+        lines.append(render(tuple(headers)))
+    lines.extend(render(r) for r in rows)
+    return "\n".join(lines)
+
+```
+
+`src/idb/fmt/disasm.py`:
+
+```py
+"""disas / decompile formatters."""
+
+
+def _addr_width(lines):
+    return max((len(f"{ln['ea']:x}") for ln in lines), default=8)
+
+
+def format_disas(result, ns=None):
+    lines = result.get("lines", [])
+    out = []
+    f = result.get("func")
+    if result.get("mode") == "func" and f:
+        out.append(f"{f['name']}  ({f['seg']} @ {f['start']:#x}):")
+    width = _addr_width(lines)
+    for ln in lines:
+        row = f"{ln['ea']:0{width}x}  {ln['text']}"
+        if ln.get("comment"):
+            row += f"   ; {ln['comment']}"
+        out.append(row)
+    return "\n".join(out) if out else "(no instructions)"
+
+
+def format_decompile(result, ns=None):
+    head = f"// {result['func']} @ {result['ea']:#x}"
+    return head + "\n" + "\n".join(result.get("lines", []))
+
+```
+
+`src/idb/fmt/listing.py`:
+
+```py
+"""Open summary / segments formatters, plus a generic fallback used by
+commands whose dedicated formatter hasn't landed yet."""
+
+import json
+
+from .columns import align
+
+
+def _h(value):
+    return hex(value) if isinstance(value, int) else str(value)
+
+
+def format_open_summary(s, ns=None):
+    size = s.get("size", 0)
+    lines = [
+        f"{s.get('input', '?')}   {s.get('format', '')}",
+        f"  arch     {s.get('arch')} {s.get('bitness')}-bit {s.get('endian')}-endian",
+        f"  base     {_h(s.get('base', 0))}   size {_h(size)} ({size} bytes)",
+        f"  range    {_h(s.get('min_ea', 0))} - {_h(s.get('max_ea', 0))}",
+    ]
+    if s.get("md5"):
+        lines.append(f"  md5      {s['md5']}")
+    if s.get("sha256"):
+        lines.append(f"  sha256   {s['sha256']}")
+    lines.append(
+        f"  segments {s.get('num_segments')}   functions {s.get('num_functions')}"
+        f"   named globals {s.get('num_globals')}"
+    )
+    eps = s.get("entry_points") or []
+    if eps:
+        shown = ", ".join(f"{e['name']}@{_h(e['ea'])}" for e in eps[:4])
+        more = f" (+{len(eps) - 4} more)" if len(eps) > 4 else ""
+        lines.append(f"  entry    {shown}{more}")
+    return "\n".join(lines)
+
+
+def format_segments(result, ns=None):
+    rows = result.get("data", [])
+    if not rows:
+        return "(no segments)"
+    table = [
+        (r["name"], _h(r["start"]), _h(r["end"]), _h(r["size"]), r["perm"], r.get("class", ""))
+        for r in rows
+    ]
+    return align(table, headers=("NAME", "START", "END", "SIZE", "PERM", "CLASS"),
+                 aligns=("<", ">", ">", ">", "<", "<"))
+
+
+def format_saved(result, ns=None):
+    return f"saved {result.get('saved')}"
+
+
+def _oneline(text, limit=100):
+    flat = text.replace("\r", "\\r").replace("\n", "\\n").replace("\t", "\\t")
+    return flat if len(flat) <= limit else flat[: limit - 1] + "…"
+
+
+def format_funcs(result, ns=None):
+    rows = result.get("data", [])
+    if not rows:
+        return "(no functions)"
+    table = [(_h(r["ea"]), _h(r["size"]), r["name"]) for r in rows]
+    return align(table, headers=("ADDR", "SIZE", "NAME"), aligns=(">", ">", "<"))
+
+
+def format_names(result, ns=None):
+    rows = result.get("data", [])
+    if not rows:
+        return "(no names)"
+    return align([(_h(r["ea"]), r["name"]) for r in rows], headers=("ADDR", "NAME"),
+                 aligns=(">", "<"))
+
+
+def format_imports(result, ns=None):
+    rows = result.get("data", [])
+    if not rows:
+        return "(no imports)"
+    table = [(_h(r["ea"]), r.get("module", ""), r["name"]) for r in rows]
+    return align(table, headers=("ADDR", "MODULE", "NAME"), aligns=(">", "<", "<"))
+
+
+def format_exports(result, ns=None):
+    rows = result.get("data", [])
+    if not rows:
+        return "(no exports)"
+    table = [(_h(r["ea"]), str(r["ordinal"]), r["name"]) for r in rows]
+    return align(table, headers=("ADDR", "ORD", "NAME"), aligns=(">", ">", "<"))
+
+
+def format_strings(result, ns=None):
+    rows = result.get("data", [])
+    if not rows:
+        return "(no strings)"
+    table = [(_h(r["ea"]), str(r["length"]), _oneline(r["text"])) for r in rows]
+    return align(table, headers=("ADDR", "LEN", "STRING"), aligns=(">", ">", "<"))
+
+
+def format_nearest(result, ns=None):
+    parts = [f"{result['addr']:#x}"]
+    sym = result.get("symbol")
+    if sym:
+        parts.append(f"{sym['name']}+{sym['offset']:#x}" if sym["offset"] else sym["name"])
+    func = result.get("func")
+    if func:
+        suffix = f"+{func['offset']:#x}" if func["offset"] else ""
+        parts.append(f"(in {func['name']}{suffix})")
+    if not sym and not func:
+        parts.append("(no nearby symbol)")
+    return "   ".join(parts)
+
+
+def format_generic(result, ns=None):
+    def default(o):
+        if isinstance(o, (bytes, bytearray)):
+            return o.hex()
+        return str(o)
+
+    return json.dumps(result, indent=2, default=default)
+
+```
+
+`src/idb/fmt/memory.py`:
+
+```py
+"""read (hexdump / grouped values) and string formatters."""
+
+_HEXW = 16 * 3 - 1  # "xx xx ... xx" with one byte's space replaced by the hyphen
+
+
+def _hexdump(base, data):
+    out = []
+    for off in range(0, len(data), 16):
+        chunk = data[off:off + 16]
+        hexs = [f"{b:02x}" for b in chunk]
+        left = " ".join(hexs[:8])
+        right = " ".join(hexs[8:])
+        col = (left + "-" + right) if right else left
+        gutter = "".join(chr(b) if 32 <= b < 127 else "." for b in chunk)
+        out.append(f"{base + off:012x}  {col:<{_HEXW}}  {gutter}")
+    return "\n".join(out) if out else "(no bytes)"
+
+
+def _values(base, width, values):
+    per_row = max(1, 16 // width)
+    out = []
+    for i in range(0, len(values), per_row):
+        row = values[i:i + per_row]
+        cells = " ".join(f"{v:0{width * 2}x}" for v in row)
+        out.append(f"{base + i * width:012x}  {cells}")
+    return "\n".join(out) if out else "(no values)"
+
+
+def format_read(result, ns=None):
+    if "bytes" in result:
+        return _hexdump(result["addr"], result["bytes"])
+    return _values(result["addr"], result["width"], result["values"])
+
+
+def format_string(result, ns=None):
+    text = result["text"].replace("\r", "\\r").replace("\n", "\\n")
+    return f'{result["addr"]:#x}  {result["encoding"]} {result["length"]} bytes  "{text}"'
+
+```
+
+`src/idb/fmt/sessions.py`:
+
+```py
+"""sessions / doctor table formatters."""
+
+from .columns import align
+
+
+def format_sessions(rows):
+    if not rows:
+        return "(no sessions)"
+    table = [
+        (
+            r.get("id", "?"),
+            r.get("status", "?"),
+            r.get("pid") or "-",
+            r.get("port") or "-",
+            r.get("input_path") or r.get("idb_path") or "-",
+        )
+        for r in rows
+    ]
+    return align(table, headers=("SESSION", "STATUS", "PID", "PORT", "INPUT"),
+                 aligns=("<", "<", ">", ">", "<"))
+
+
+def format_doctor(rows):
+    table = [(check, status, detail) for check, status, detail in rows]
+    return align(table, headers=("CHECK", "STATUS", "DETAIL"))
+
+```
+
+`src/idb/fmt/types.py`:
+
+```py
+"""type / types / struct / member / typeof / frame formatters."""
+
+from .columns import align
+
+
+def _members_table(members, with_values=False):
+    headers = ["OFFSET", "SIZE", "TYPE", "NAME"]
+    aligns = [">", ">", "<", "<"]
+    if with_values:
+        headers.insert(2, "VALUE")
+        aligns.insert(2, ">")
+    rows = []
+    for m in members:
+        cells = [f"{m['offset']:#x}", f"{m['size']:#x}"]
+        if with_values:
+            v = m.get("value")
+            cells.append(hex(v) if isinstance(v, int) else (str(v) if v is not None else "?"))
+        name = m["name"] + ("  :bitfield" if m.get("bitfield") else "")
+        cells.extend([m["type"], name])
+        rows.append(tuple(cells))
+    return align(rows, headers=tuple(headers), aligns=tuple(aligns))
+
+
+def format_type(result, ns=None):
+    head = f"{result['kind']} {result['name']}   size {result['size']:#x}"
+    members = result.get("members")
+    if members is None:
+        return f"{head}\n  {result.get('decl', '')}"
+    if result["kind"] == "enum":
+        rows = [(m["name"], hex(m["value"])) for m in members]
+        return head + "\n" + align(rows, headers=("NAME", "VALUE"), aligns=("<", ">"))
+    return head + "\n" + _members_table(members)
+
+
+def format_struct(result, ns=None):
+    head = f"{result['kind']} {result['name']}   size {result['size']:#x}"
+    if result.get("addr") is not None:
+        head += f"   @ {result['addr']:#x}"
+    return head + "\n" + _members_table(result.get("members", []), with_values=result.get("addr") is not None)
+
+
+def format_types(result, ns=None):
+    rows = result.get("data", [])
+    if not rows:
+        return "(no types)"
+    table = [(str(r["ordinal"]), r["kind"], f"{r['size']:#x}", r["name"]) for r in rows]
+    return align(table, headers=("ORD", "KIND", "SIZE", "NAME"), aligns=(">", "<", ">", "<"))
+
+
+def format_member(result, ns=None):
+    out = [f"{result['type']} @ byte {result['offset']} ({result['offset']:#x}):"]
+    for p in result.get("paths", []):
+        out.append(f"  {p['path']} : {p['type']}  (size {p['size']:#x})")
+    return "\n".join(out)
+
+
+def format_typeof(result, ns=None):
+    guessed = "  (guessed)" if result.get("guessed") else ""
+    size = result.get("size")
+    size_str = f", {size:#x} bytes" if isinstance(size, int) else ""
+    return f"{result['target']} : {result['type']}  ({result.get('kind', '?')}{size_str}){guessed}"
+
+
+def format_frame(result, ns=None):
+    head = f"frame of {result['func']} @ {result['ea']:#x}   size {result['size']:#x}"
+    return head + "\n" + _members_table(result.get("members", []))
+
+```
+
+`src/idb/fmt/writes.py`:
+
+```py
+"""Terse confirmations for mutating commands."""
+
+
+def format_rename(result, ns=None):
+    if result.get("kind") == "lvar":
+        return f"renamed local {result['target']} -> {result['name']}"
+    return f"renamed {result['ea']:#x} -> {result['name']}"
+
+
+def format_comment(result, ns=None):
+    views = "disasm+pseudo" if result.get("pseudocode") else "disasm"
+    return f"comment @ {result['ea']:#x} ({views}): {result['comment']}"
+
+
+def format_patch(result, ns=None):
+    data = result.get("bytes", b"")
+    hexs = data.hex() if isinstance(data, (bytes, bytearray)) else ""
+    return f"patched {result['count']} bytes @ {result['ea']:#x}: {hexs}"
+
+
+def format_undo(result, ns=None):
+    label = result.get("label")
+    return f"undone{(': ' + label) if label else ''}"
+
+
+def format_redo(result, ns=None):
+    return "redone"
+
+
+def format_declare(result, ns=None):
+    return "declared ok"
+
+
+def format_settype(result, ns=None):
+    where = f"{result['ea']:#x}" if "ea" in result else result.get("target", "?")
+    return f"{where} : {result['type']}"
+
+
+def format_setmember(result, ns=None):
+    return f"{result['type']}[{result['index']}] {result['name']} : {result['member_type']}"
+
+
+def format_enum(result, ns=None):
+    members = ", ".join(f"{m['name']}={m['value']}" for m in result.get("members", []))
+    if result.get("extended"):
+        return f"enum {result['name']} extended: {members}"
+    tag = " (bitfield)" if result.get("bitfield") else ""
+    return f"enum {result['name']}{tag}: {members}"
+
+
+def format_union_select(result, ns=None):
+    tag = "" if result.get("verified", True) else " (unverified)"
+    return f"union @ {result['ea']:#x}: {result['union']} -> .{result['member']} (arm {result['ordinal']}){tag}"
+
+```
+
+`src/idb/fmt/xrefs.py`:
+
+```py
+"""xref_to / xref_from / calls / search formatters."""
+
+
+def _addr_width(rows):
+    return max((len(f"{r['ea']:x}") for r in rows), default=8)
+
+
+def _ctx_lines(rows):
+    width = _addr_width(rows)
+    out = []
+    for r in rows:
+        line = f"{r['ea']:0{width}x}  {r.get('kind', ''):<6}  {r['insn']}"
+        if r.get("func"):
+            line += f"   ; in {r['func']}"
+        out.append(line.rstrip())
+    return out
+
+
+def format_xrefs(result, ns=None):
+    rows = result.get("data", [])
+    if not rows:
+        return "(no xrefs)"
+    return "\n".join(_ctx_lines(rows))
+
+
+def format_search(result, ns=None):
+    rows = result.get("data", [])
+    if not rows:
+        return "(no matches)"
+    return "\n".join(_ctx_lines(rows))
+
+
+def format_calls(result, ns=None):
+    out = [f"{result['func']}  @ {result['ea']:#x}"]
+    callers = result.get("callers", [])
+    out.append(f"  callers ({len(callers)}):")
+    for c in callers:
+        where = f"  ; in {c['func']}" if c.get("func") else ""
+        out.append(f"    {c['ea']:#x}  {c['insn']}{where}")
+    callees = result.get("callees", [])
+    out.append(f"  callees ({len(callees)}):")
+    for c in callees:
+        out.append(f"    {c['ea']:#x}  {c.get('name') or '?'}")
+    return "\n".join(out)
+
+```
+
+`src/idb/protocol.py`:
+
+```py
+"""RPC envelope + msgpack codec shared by client and worker.
+
+Contract: text fields are `str`, only payloads are `bytes`; dict keys are `str`.
+msgspec.msgpack gives us native 64-bit ints and round-trips `bytes` as msgpack
+bin. No ida_* imports here.
+"""
+
+import msgspec
+
+PROTOCOL_VERSION = 1
+
+BAD_REQUEST = "BAD_REQUEST"
+UNAUTHORIZED = "UNAUTHORIZED"
+UNKNOWN_CMD = "UNKNOWN_CMD"
+BAD_ARGS = "BAD_ARGS"
+BAD_ADDRESS = "BAD_ADDRESS"
+NOT_FOUND = "NOT_FOUND"
+IDA_ERROR = "IDA_ERROR"
+NOT_READY = "NOT_READY"
+TIMEOUT = "TIMEOUT"
+INTERNAL = "INTERNAL"
+
+_encoder = msgspec.msgpack.Encoder()
+_decoder = msgspec.msgpack.Decoder()
+
+
+def encode(obj) -> bytes:
+    return _encoder.encode(obj)
+
+
+def decode(buf):
+    return _decoder.decode(buf)
+
+
+def build_request(req_id, token, cmd, args=None):
+    return {"v": PROTOCOL_VERSION, "id": req_id, "tok": token, "cmd": cmd, "args": args or {}}
+
+
+def build_ok(req_id, result, meta=None):
+    msg = {"v": PROTOCOL_VERSION, "id": req_id, "ok": True, "result": result}
+    if meta:
+        msg["meta"] = meta
+    return msg
+
+
+def build_error(req_id, code, message, data=None):
+    err = {"code": code, "message": message}
+    if data:
+        err["data"] = data
+    return {"v": PROTOCOL_VERSION, "id": req_id, "ok": False, "error": err}
+
+
+def is_ok(reply) -> bool:
+    return isinstance(reply, dict) and reply.get("ok") is True
+
+```
+
+`src/idb/registry.py`:
+
+```py
+"""Session registry: one JSON file per worker under the per-user state dir.
+
+Security rests on that directory's ACL (per-user %LOCALAPPDATA% on Windows,
+0o700 + 0o600 files on POSIX). No ida_* imports; transport is imported lazily
+inside ping() so the pure helpers stay importable without a worker running.
+
+Entry schema (all keys str):
+    v, id, input_path, idb_path, status, port, token, pid, started_at, logfile
+
+Lifecycle of `status`: pending (CLI claimed, spawning) -> analyzing (worker bound,
+open_database running) -> ready (worker serving). The worker is the authoritative
+writer once it is up (it knows every field from argv/env), which avoids a
+dual-writer race with the spawning CLI.
+"""
+
+import os
+import re
+import sys
+import json
+import time
+import ctypes
+import hashlib
+from pathlib import Path
+
+from .errors import IdbError
+
+SCHEMA_VERSION = 1
+
+STATUS_PENDING = "pending"
+STATUS_ANALYZING = "analyzing"
+STATUS_READY = "ready"
+STATUS_BUSY = "busy"
+
+_DB_SUFFIXES = (".i64", ".idb")
+
+
+def state_dir() -> Path:
+    if sys.platform == "win32":
+        base = os.environ.get("LOCALAPPDATA") or str(Path.home() / "AppData" / "Local")
+        root = Path(base) / "ida-buddy" / "sessions"
+    else:
+        base = os.environ.get("XDG_STATE_HOME") or str(Path.home() / ".local" / "state")
+        root = Path(base) / "ida-buddy" / "sessions"
+    root.mkdir(parents=True, exist_ok=True)
+    if os.name == "posix":
+        try:
+            os.chmod(root, 0o700)
+        except OSError:
+            pass
+    return root
+
+
+def _entry_path(session_id) -> Path:
+    return state_dir() / f"{session_id}.json"
+
+
+def normkey(path) -> str:
+    """Canonical comparison key for a filesystem path (case-folded on Windows)."""
+    return os.path.normcase(os.path.abspath(str(path)))
+
+
+def session_id(target) -> str:
+    """Stable id derived from the path passed to `open` (not the resulting .i64),
+    so reopening the same target is idempotent regardless of analysis outcome."""
+    key = normkey(target)
+    slug = re.sub(r"[^A-Za-z0-9._-]+", "_", Path(key).name).strip("_") or "db"
+    return f"{slug[:32]}-{hashlib.sha1(key.encode('utf-8', 'surrogatepass')).hexdigest()[:8]}"
+
+
+def candidate_keys(path) -> set:
+    """normkeys that should resolve to the same logical DB. IDA names a database
+    <input><.i64|.idb> (the FULL input name plus the suffix), so a binary maps to
+    <binary>.i64/.idb and a database maps back to its <binary>."""
+    p = os.path.abspath(str(path))
+    cands = {normkey(p)}
+    if p.lower().endswith(_DB_SUFFIXES):
+        cands.add(normkey(p[:-4]))
+    else:
+        for suffix in _DB_SUFFIXES:
+            cands.add(normkey(p + suffix))
+    return cands
+
+
+def predicted_db_paths(target) -> list:
+    """Where IDA would place the database for `target`: the path itself if it is
+    already a .i64/.idb, else <target>.i64 and <target>.idb (bitness unknown)."""
+    p = os.path.abspath(str(target))
+    if p.lower().endswith(_DB_SUFFIXES):
+        return [p]
+    return [p + suffix for suffix in _DB_SUFFIXES]
+
+
+def _serialize(entry) -> bytes:
+    return json.dumps(entry, separators=(",", ":")).encode("utf-8")
+
+
+def _write_atomic(path: Path, entry) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        with open(tmp, "wb") as f:
+            f.write(_serialize(entry))
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            tmp.unlink()
+        except FileNotFoundError:
+            pass
+        raise
+    if os.name == "posix":
+        try:
+            os.chmod(path, 0o600)
+        except OSError:
+            pass
+
+
+def write(entry) -> dict:
+    _write_atomic(_entry_path(entry["id"]), entry)
+    return entry
+
+
+def claim(entry) -> bool:
+    """Atomically create a pending entry. Returns False if one already exists
+    (a concurrent open of the same target won the race)."""
+    path = _entry_path(entry["id"])
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+    except FileExistsError:
+        return False
+    with os.fdopen(fd, "wb") as f:
+        f.write(_serialize(entry))
+    return True
+
+
+def read(session_id_str):
+    return read_path(_entry_path(session_id_str))
+
+
+def read_path(path):
+    try:
+        with open(path, "rb") as f:
+            entry = json.loads(f.read().decode("utf-8"))
+    except (FileNotFoundError, ValueError, UnicodeDecodeError):
+        return None
+    return entry if isinstance(entry, dict) and "id" in entry else None
+
+
+def update(session_id_str, **fields) -> dict:
+    entry = read(session_id_str) or {"v": SCHEMA_VERSION, "id": session_id_str}
+    entry.update(fields)
+    return write(entry)
+
+
+def unregister(session_id_str) -> None:
+    try:
+        _entry_path(session_id_str).unlink()
+    except FileNotFoundError:
+        pass
+
+
+def list_all() -> list:
+    out = []
+    try:
+        names = os.listdir(state_dir())
+    except FileNotFoundError:
+        return out
+    for name in names:
+        if name.startswith(".") or not name.endswith(".json"):
+            continue
+        entry = read_path(state_dir() / name)
+        if entry is not None:
+            out.append(entry)
+    return out
+
+
+def match(entries, session=None, idb=None) -> list:
+    if session is not None:
+        return [e for e in entries if e.get("id") == session]
+    if idb is not None:
+        cands = candidate_keys(idb)
+        return [
+            e
+            for e in entries
+            if normkey(e.get("input_path") or "x") in cands
+            or normkey(e.get("idb_path") or "x") in cands
+        ]
+    return list(entries)
+
+
+def pid_alive(pid) -> bool:
+    if not pid:
+        return False
+    if sys.platform == "win32":
+        SYNCHRONIZE = 0x00100000
+        WAIT_TIMEOUT = 0x00000102
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        handle = kernel32.OpenProcess(SYNCHRONIZE, False, int(pid))
+        if not handle:
+            return False
+        try:
+            return kernel32.WaitForSingleObject(handle, 0) == WAIT_TIMEOUT
+        finally:
+            kernel32.CloseHandle(handle)
+    try:
+        os.kill(int(pid), 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def ping(entry, timeout_ms=800):
+    """Auth-checked liveness over TCP -> status string, or None if unreachable."""
+    from .transport import ZmqClient
+    from . import protocol
+
+    port, token = entry.get("port"), entry.get("token")
+    if not port or not token:
+        return None
+    client = ZmqClient(port, token)
+    try:
+        reply = client.call("ping", {}, timeout_ms=timeout_ms)
+    except IdbError:
+        return None
+    finally:
+        client.close()
+    if protocol.is_ok(reply):
+        result = reply.get("result") or {}
+        return result.get("status", STATUS_READY)
+    return None
+
+
+def probe(entry, timeout_ms=800):
+    """Best-effort current status: ready/analyzing/busy/pending, or None if dead.
+    ping is authoritative; pid is only a fast negative / PID-reuse-aware guard."""
+    pid = entry.get("pid")
+    if pid and not pid_alive(pid):
+        return None
+    status = ping(entry, timeout_ms)
+    if status:
+        return status
+    file_status = entry.get("status")
+    if file_status in (STATUS_PENDING, STATUS_ANALYZING):
+        return file_status
+    if pid and pid_alive(pid):
+        return STATUS_BUSY
+    return None
+
+
+def cleanup_stale() -> list:
+    """Unlink only hard-stale entries (worker pid definitively gone). Conservative
+    by design: an alive-but-unreachable worker (mid native call) is left alone."""
+    removed = []
+    for entry in list_all():
+        pid = entry.get("pid")
+        if pid and not pid_alive(pid):
+            unregister(entry["id"])
+            removed.append(entry["id"])
+    return removed
+
+
+def now() -> float:
+    return time.time()
+
+```
+
+`src/idb/spawn.py`:
+
+```py
+"""Detached worker launch, readiness polling, and kill-by-PID. No ida_* imports.
+
+The CLI never imports IDA; it spawns `idb.worker.main` as a detached process and
+talks to it over RPC. open_or_reuse owns the spawn dance: reuse a healthy worker
+for the same target, or claim a pending registry entry (closing the TOCTOU window)
+and poll until the worker reports ready, retrying on a port-bind collision.
+"""
+
+import os
+import sys
+import time
+import ctypes
+import socket
+import secrets
+import subprocess
+
+from idb import protocol, registry
+from idb.errors import IdbError
+from idb.transport import ZmqClient
+
+DEFAULT_IDLE_TTL = 1800.0
+DEFAULT_OPEN_DEADLINE = 600.0
+_RETRIES = 6
+
+
+def free_port() -> int:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
+    finally:
+        s.close()
+
+
+def _logs_dir():
+    d = registry.state_dir().parent / "logs"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def _logfile(session_id):
+    return str(_logs_dir() / f"{session_id}.log")
+
+
+def _logtail(path, n=20):
+    if not path or not os.path.exists(path):
+        return ""
+    try:
+        with open(path, "r", errors="replace") as f:
+            return "".join(f.readlines()[-n:]).rstrip()
+    except OSError:
+        return ""
+
+
+def launch_worker(open_path, input_path, session_id, port, token, idle_ttl, save_policy, logfile):
+    env = dict(os.environ)
+    env["IDB_WORKER_TOKEN"] = token
+    argv = [
+        sys.executable, "-m", "idb.worker.main",
+        "--port", str(port), "--session", session_id,
+        "--open", open_path, "--input", os.path.abspath(input_path),
+        "--idle-ttl", str(idle_ttl), "--save-policy", save_policy, "--logfile", logfile,
+    ]
+    creationflags = 0
+    extra = {}
+    if sys.platform == "win32":
+        creationflags = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+    else:
+        extra["start_new_session"] = True
+    log = open(logfile, "ab")
+    try:
+        return subprocess.Popen(
+            argv, stdin=subprocess.DEVNULL, stdout=log, stderr=log,
+            env=env, creationflags=creationflags, close_fds=True, **extra,
+        )
+    finally:
+        log.close()
+
+
+def kill_pid(pid) -> bool:
+    if not pid:
+        return False
+    if sys.platform == "win32":
+        PROCESS_TERMINATE = 0x0001
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        handle = kernel32.OpenProcess(PROCESS_TERMINATE, False, int(pid))
+        if not handle:
+            return False
+        try:
+            return bool(kernel32.TerminateProcess(handle, 1))
+        finally:
+            kernel32.CloseHandle(handle)
+    import signal
+
+    try:
+        os.kill(int(pid), signal.SIGKILL)
+        return True
+    except ProcessLookupError:
+        return False
+
+
+def _client(entry):
+    return ZmqClient(entry["port"], entry["token"])
+
+
+def _fetch_summary(entry, timeout_s):
+    client = _client(entry)
+    try:
+        reply = client.call("open_summary", {}, timeout_ms=int(timeout_s * 1000))
+    finally:
+        client.close()
+    if not protocol.is_ok(reply):
+        raise IdbError(reply["error"]["code"], reply["error"]["message"])
+    return reply["result"]
+
+
+def _wait_ready(session_id, deadline):
+    while time.time() < deadline:
+        entry = registry.read(session_id)
+        if entry is None:
+            raise IdbError(protocol.IDA_ERROR, f"session {session_id} vanished while starting")
+        status = registry.probe(entry)
+        if status in (registry.STATUS_READY, registry.STATUS_BUSY):
+            return entry
+        if status is None:
+            raise IdbError(protocol.IDA_ERROR,
+                           f"worker died while starting\n{_logtail(entry.get('logfile'))}")
+        time.sleep(0.2)
+    raise IdbError(protocol.TIMEOUT, f"timed out waiting for {session_id} to become ready")
+
+
+def _poll_ready(session_id, port, token, proc, deadline):
+    client = ZmqClient(port, token)
+    try:
+        while time.time() < deadline:
+            rc = proc.poll()
+            if rc is not None:
+                return False, ("bind" if rc == 3 else f"worker exited rc={rc}")
+            try:
+                reply = client.call("ping", {}, timeout_ms=800)
+                if protocol.is_ok(reply) and reply["result"].get("status") == registry.STATUS_READY:
+                    return True, "ready"
+            except IdbError:
+                pass
+            time.sleep(0.2)
+        return False, "timeout waiting for ready"
+    finally:
+        client.close()
+
+
+def _choose_open_path(target, fresh):
+    if fresh:
+        return os.path.abspath(target)
+    for candidate in registry.predicted_db_paths(target):
+        if os.path.exists(candidate):
+            return candidate
+    return os.path.abspath(target)
+
+
+def open_or_reuse(target, fresh=False, idle_ttl=DEFAULT_IDLE_TTL,
+                  save_policy="save", deadline_s=DEFAULT_OPEN_DEADLINE):
+    session_id = registry.session_id(target)
+    registry.cleanup_stale()
+
+    existing = registry.read(session_id)
+    if existing:
+        status = registry.probe(existing)
+        if status in (registry.STATUS_READY, registry.STATUS_BUSY):
+            if fresh:
+                raise IdbError(
+                    protocol.IDA_ERROR,
+                    f"a worker is already open for {target!r}; close it first "
+                    "(open --fresh would clobber the live database)",
+                )
+            return existing, _fetch_summary(existing, deadline_s)
+        if status in (registry.STATUS_PENDING, registry.STATUS_ANALYZING):
+            entry = _wait_ready(session_id, time.time() + deadline_s)
+            return entry, _fetch_summary(entry, deadline_s)
+        registry.unregister(session_id)
+
+    open_path = _choose_open_path(target, fresh)
+    token = secrets.token_hex(16)
+    logfile = _logfile(session_id)
+    claimed = False
+    last_reason = None
+
+    for _ in range(_RETRIES):
+        port = free_port()
+        entry = {
+            "v": registry.SCHEMA_VERSION, "id": session_id,
+            "input_path": os.path.abspath(target), "status": registry.STATUS_PENDING,
+            "port": port, "token": token, "pid": os.getpid(),
+            "started_at": registry.now(), "logfile": logfile,
+        }
+        if not claimed:
+            if not registry.claim(entry):
+                won = _wait_ready(session_id, time.time() + deadline_s)
+                return won, _fetch_summary(won, deadline_s)
+            claimed = True
+        else:
+            registry.write(entry)
+
+        proc = launch_worker(open_path, target, session_id, port, token, idle_ttl, save_policy, logfile)
+        ok, reason = _poll_ready(session_id, port, token, proc, time.time() + deadline_s)
+        if ok:
+            ready = registry.read(session_id)
+            return ready, _fetch_summary(ready, deadline_s)
+        last_reason = reason
+        if reason == "bind":
+            continue
+        registry.unregister(session_id)
+        raise IdbError(protocol.IDA_ERROR, f"worker failed to start: {reason}\n{_logtail(logfile)}")
+
+    registry.unregister(session_id)
+    raise IdbError(protocol.IDA_ERROR, f"could not start worker after retries: {last_reason}")
+
+```
+
+`src/idb/transport.py`:
+
+```py
+"""ZeroMQ REQ/REP transport over loopback TCP. No ida_* imports.
+
+Client: one REQ socket, per-call Poller timeout. A timeout leaves the REQ state
+machine mid-cycle, so we close the socket (LINGER=0) and recreate it for the next
+call. Server: one REP socket, Poller-driven recv so the worker can re-check its
+stop flag on each timeout. Strict REQ/REP lockstep: every recv MUST be answered
+by exactly one send (the worker always replies, even to malformed requests).
+"""
+
+import zmq
+
+from . import protocol
+from .errors import IdbError
+
+LOOPBACK = "127.0.0.1"
+
+
+class ZmqClient:
+    def __init__(self, port, token, ctx=None):
+        self.port = int(port)
+        self.token = token
+        self._ctx = ctx or zmq.Context.instance()
+        self._sock = None
+        self._next_id = 0
+
+    def _connect(self):
+        if self._sock is None:
+            sock = self._ctx.socket(zmq.REQ)
+            sock.setsockopt(zmq.LINGER, 0)
+            sock.connect(f"tcp://{LOOPBACK}:{self.port}")
+            self._sock = sock
+        return self._sock
+
+    def _reset(self):
+        if self._sock is not None:
+            self._sock.close(linger=0)
+            self._sock = None
+
+    def call(self, cmd, args=None, timeout_ms=30000):
+        self._next_id += 1
+        req = protocol.build_request(self._next_id, self.token, cmd, args)
+        sock = self._connect()
+        sock.send(protocol.encode(req))
+        poller = zmq.Poller()
+        poller.register(sock, zmq.POLLIN)
+        if not (dict(poller.poll(timeout_ms)).get(sock, 0) & zmq.POLLIN):
+            self._reset()
+            raise IdbError(protocol.TIMEOUT, f"no reply from worker within {timeout_ms} ms")
+        return protocol.decode(sock.recv())
+
+    def close(self):
+        self._reset()
+
+
+class ZmqServer:
+    def __init__(self, port, ctx=None):
+        self._ctx = ctx or zmq.Context.instance()
+        self._sock = self._ctx.socket(zmq.REP)
+        self._sock.setsockopt(zmq.LINGER, 0)
+        self.port = self._bind(port)
+        self._poller = zmq.Poller()
+        self._poller.register(self._sock, zmq.POLLIN)
+
+    def _bind(self, port):
+        if not port:
+            return self._sock.bind_to_random_port(f"tcp://{LOOPBACK}")
+        self._sock.bind(f"tcp://{LOOPBACK}:{int(port)}")
+        return int(port)
+
+    def recv(self, timeout_ms=500):
+        """Raw request bytes, or None on timeout (so the loop can re-check stop)."""
+        if not (dict(self._poller.poll(timeout_ms)).get(self._sock, 0) & zmq.POLLIN):
+            return None
+        return self._sock.recv()
+
+    def send(self, payload):
+        self._sock.send(payload)
+
+    def close(self):
+        self._sock.close(linger=0)
+
+```
+
+`src/idb/worker/__init__.py`:
+
+```py
+"""Worker subpackage. Importing this package must NOT pull in any ida_* module;
+those are imported only after idapro is activated, from within the modules that
+need them (handlers, parts of idahelp/serve)."""
+
+```
+
+`src/idb/worker/activate.py`:
+
+```py
+"""Activate idalib (`import idapro`) BEFORE any ida_* import.
+
+Importing idapro loads idalib.dll and initializes the IDA kernel. DLL resolution
+needs the IDA install dir, which idapro derives from ida-config.json (written by
+py-activate-idalib.py) or, as a fallback, IDADIR. A bare sys.path prepend does
+NOT fix DLL resolution, so on failure we surface the activation hint rather than
+guessing. Stdlib-only imports here so this stays loadable in any interpreter."""
+
+_HINT = (
+    "idalib (the `idapro` module) is not importable in this interpreter.\n"
+    "Install + activate it into THIS Python, then reinstall idb:\n"
+    '  cd "C:\\Program Files\\IDA Professional 9.3\\idalib\\python"\n'
+    "  python -m pip install .\\idapro-0.0.7-py3-none-any.whl\n"
+    "  python .\\py-activate-idalib.py        # writes %APPDATA%\\Hex-Rays\\IDA Pro\\ida-config.json\n"
+    "(or set the IDADIR env var to the IDA install dir as a fallback)."
+)
+
+
+def ensure_idalib():
+    try:
+        import idapro
+    except Exception as exc:
+        from idb import protocol
+        from idb.errors import IdbError
+
+        raise IdbError(protocol.IDA_ERROR, f"{type(exc).__name__}: {exc}\n\n{_HINT}")
+    return idapro
+
+```
+
+`src/idb/worker/budget.py`:
+
+```py
+"""Cooperative deadline for PURE-PYTHON worker loops (paginated line generation,
+immediate/byte search iteration). It CANNOT interrupt a single in-flight native
+call (decompile, a whole-range find_bytes, auto_wait) — those are covered by the
+client soft timeout + `idb close --kill`. No ida_* imports."""
+
+import time
+
+from idb import protocol
+from idb.errors import IdbError
+
+
+class Budget:
+    def __init__(self, seconds=None):
+        self.deadline = (time.monotonic() + seconds) if seconds is not None else None
+
+    @property
+    def expired(self):
+        return self.deadline is not None and time.monotonic() > self.deadline
+
+    def check(self):
+        if self.expired:
+            raise IdbError(protocol.TIMEOUT, "operation exceeded its server-side time budget")
+
+```
+
+`src/idb/worker/dispatch.py`:
+
+```py
+"""@handler registry + request dispatch.
+
+The REP loop is single-threaded and lockstep, so handlers call ida_* directly
+(no execute_sync). This module imports no ida_* itself; the only ida call is the
+lazy `create_undo_point` before a mutation. Handler return contract:
+    result_dict                       -> ok, no envelope meta
+    (result_dict, meta_dict|None)     -> ok, meta carries truncation/next_offset
+"""
+
+import hmac
+import inspect
+
+from idb import protocol
+from idb.errors import IdbError
+
+HANDLERS = {}
+
+MAX_REPLY_BYTES = 8 * 1024 * 1024
+
+
+def handler(name, *, writes=False, always=False, budget=None):
+    def deco(fn):
+        fn._writes = writes
+        fn._always = always
+        fn._budget = budget
+        HANDLERS[name] = fn
+        return fn
+
+    return deco
+
+
+class Context:
+    def __init__(self):
+        self.token = ""
+        self.ready = False
+        self.session_id = ""
+        self.target = ""
+        self.stop = None
+        self.save_override = None
+
+
+CTX = Context()
+
+
+def _err(rid, code, message, data=None):
+    return protocol.encode(protocol.build_error(rid, code, message, data))
+
+
+def _create_undo_point(cmd):
+    import ida_undo
+
+    ida_undo.create_undo_point("idb", cmd)
+
+
+def dispatch(raw):
+    try:
+        msg = protocol.decode(raw)
+    except Exception:
+        return _err(0, protocol.BAD_REQUEST, "undecodable request")
+    if not isinstance(msg, dict):
+        return _err(0, protocol.BAD_REQUEST, "request is not a map")
+    rid = msg.get("id", 0)
+    if msg.get("v") != protocol.PROTOCOL_VERSION:
+        return _err(rid, protocol.BAD_REQUEST, f"protocol version mismatch: {msg.get('v')!r}")
+    if not hmac.compare_digest(str(msg.get("tok", "")), CTX.token):
+        return _err(rid, protocol.UNAUTHORIZED, "bad token")
+    cmd = msg.get("cmd")
+    fn = HANDLERS.get(cmd)
+    if fn is None:
+        return _err(rid, protocol.UNKNOWN_CMD, f"unknown command: {cmd!r}")
+    if not CTX.ready and not fn._always:
+        return _err(rid, protocol.NOT_READY, "worker is still analyzing")
+    args = msg.get("args") or {}
+    if not isinstance(args, dict):
+        return _err(rid, protocol.BAD_ARGS, "args is not a map")
+    try:
+        inspect.signature(fn).bind(**args)
+    except TypeError as exc:
+        return _err(rid, protocol.BAD_ARGS, f"{cmd}: {exc}")
+
+    if fn._writes:
+        try:
+            _create_undo_point(cmd)
+        except Exception:
+            pass
+
+    try:
+        out = fn(**args)
+    except IdbError as exc:
+        return protocol.encode(exc.to_error(rid))
+    except Exception as exc:
+        return _err(rid, protocol.INTERNAL, f"{type(exc).__name__}: {exc}")
+
+    if isinstance(out, tuple) and len(out) == 2:
+        result, meta = out
+    else:
+        result, meta = out, None
+    return _finalize(rid, result, meta)
+
+
+def _finalize(rid, result, meta):
+    blob = protocol.encode(protocol.build_ok(rid, result, meta))
+    if len(blob) <= MAX_REPLY_BYTES:
+        return blob
+    if isinstance(result, dict) and isinstance(result.get("data"), list) and result["data"]:
+        data = result["data"]
+        meta = dict(meta or {})
+        while data and len(blob) > MAX_REPLY_BYTES:
+            del data[-max(1, len(data) // 8):]
+            meta.update(truncated=True, shown=len(data), next_offset=len(data))
+            blob = protocol.encode(protocol.build_ok(rid, result, meta))
+        return blob
+    return _err(rid, protocol.INTERNAL, "reply exceeds size cap and cannot be trimmed")
+
+```
+
+`src/idb/worker/handlers/__init__.py`:
+
+```py
+"""Handler modules register themselves on import via the @handler decorator.
+
+`load_all()` imports every handler module (which is what triggers registration).
+It is called from serve.py AFTER idapro is activated, so importing this package
+on its own (e.g. during pure tests) does not pull in any ida_* module.
+"""
+
+
+def load_all():
+    from . import info, symbols, disasm, memory, xrefs, types, annotate  # noqa: F401
+
+```
+
+`src/idb/worker/handlers/annotate.py`:
+
+```py
+"""annotate handlers: rename, comment, patch, undo, redo.
+
+Mutating handlers are registered writes=True so dispatch creates an undo point
+before they run. undo/redo are NOT writes (they must not create undo points of
+their own) and report honestly: if perform_undo/redo returns false, we surface an
+error instead of claiming a revert that did not happen.
+"""
+
+import ida_bytes
+import ida_funcs
+import ida_hexrays
+import ida_name
+import ida_undo
+
+from idb import protocol
+from idb.errors import IdbError
+from idb.worker import idahelp
+from idb.worker.dispatch import handler
+
+
+@handler("rename", writes=True)
+def rename(addr, name):
+    try:
+        ea = idahelp.resolve_target(addr)
+    except IdbError:
+        ea = None
+    if ea is None and ":" in addr:
+        func, _, var = addr.partition(":")
+        f = ida_funcs.get_func(idahelp.resolve_target(func))
+        if f is None:
+            raise IdbError(protocol.NOT_FOUND, f"no function {func!r}")
+        if not ida_hexrays.init_hexrays_plugin():
+            raise IdbError(protocol.IDA_ERROR, "Hex-Rays is required to rename a local variable")
+        if not ida_hexrays.rename_lvar(f.start_ea, var, name):
+            raise IdbError(protocol.IDA_ERROR, f"could not rename local {var!r} (unknown name?)")
+        return {"target": addr, "name": name, "kind": "lvar"}
+    if ea is None:
+        raise IdbError(protocol.NOT_FOUND, f"cannot resolve {addr!r}")
+    if not ida_name.set_name(ea, name, ida_name.SN_NOWARN):
+        raise IdbError(protocol.IDA_ERROR, f"set_name failed at {ea:#x} (name already in use?)")
+    return {"ea": ea, "name": ida_name.get_name(ea), "kind": "name"}
+
+
+def _set_pseudocode_comment(func_start, ea, text):
+    """Attach a Hex-Rays comment at ea. The comment ea must map to a ctree
+    statement; we try each statement-level ITP and use refresh_func_ctext to
+    apply + detect orphaning on the same cfunc. Returns True if it anchored."""
+    if not ida_hexrays.init_hexrays_plugin():
+        return False
+    try:
+        cfunc = ida_hexrays.decompile(func_start)
+    except ida_hexrays.DecompilationFailure:
+        return False
+    if cfunc is None:
+        return False
+    tl = ida_hexrays.treeloc_t()
+    tl.ea = ea
+    for itp in range(int(ida_hexrays.ITP_SEMI), int(ida_hexrays.ITP_COLON) + 1):
+        tl.itp = itp
+        cfunc.set_user_cmt(tl, text)
+        cfunc.refresh_func_ctext()
+        if not cfunc.has_orphan_cmts():
+            cfunc.save_user_cmts()
+            return True
+        cfunc.del_orphan_cmts()
+    return False
+
+
+@handler("comment", writes=True)
+def comment(addr, text):
+    ea = idahelp.resolve_target(addr)
+    if not ida_bytes.set_cmt(ea, text, False):
+        raise IdbError(protocol.IDA_ERROR, f"set_cmt failed at {ea:#x}")
+    pseudocode = False
+    f = ida_funcs.get_func(ea)
+    if f is not None:
+        pseudocode = _set_pseudocode_comment(f.start_ea, ea, text)
+    return {"ea": ea, "comment": text, "disasm": True, "pseudocode": pseudocode}
+
+
+@handler("patch", writes=True)
+def patch(addr, hex):
+    ea = idahelp.resolve_target(addr)
+    tokens = hex.replace("0x", "").replace(",", " ").split()
+    try:
+        data = bytes.fromhex("".join(tokens))
+    except ValueError:
+        raise IdbError(protocol.BAD_ARGS, "patch bytes must be hex (e.g. '90 90' or '9090')")
+    if not data:
+        raise IdbError(protocol.BAD_ARGS, "empty patch")
+    if not ida_bytes.is_mapped(ea):
+        raise IdbError(protocol.BAD_ADDRESS, f"address {ea:#x} is not mapped")
+    ida_bytes.patch_bytes(ea, data)
+    return {"ea": ea, "count": len(data), "bytes": data}
+
+
+@handler("undo")
+def undo():
+    label = ""
+    try:
+        label = ida_undo.get_undo_action_label() or ""
+    except Exception:
+        pass
+    if not ida_undo.perform_undo():
+        raise IdbError(protocol.IDA_ERROR, "nothing to undo (or the last action is not undoable in idalib)")
+    return {"undone": True, "label": label}
+
+
+@handler("redo")
+def redo():
+    if not ida_undo.perform_redo():
+        raise IdbError(protocol.IDA_ERROR, "nothing to redo")
+    return {"redone": True}
+
+```
+
+`src/idb/worker/handlers/disasm.py`:
+
+```py
+"""disasm handlers: disas (u), decompile (dec). Every listing line is run through
+tag_remove so color tags never reach the formatter."""
+
+import ida_bytes
+import ida_funcs
+import ida_lines
+import ida_segment
+import ida_ida
+import ida_hexrays
+import idautils
+from ida_idaapi import BADADDR
+
+from idb import protocol
+from idb.errors import IdbError
+from idb.worker import idahelp
+from idb.worker.dispatch import handler
+
+_FUNC_CAP = 2048
+_RAW_DEFAULT = 32
+
+
+def _seg_name(ea):
+    s = ida_segment.getseg(ea)
+    return ida_segment.get_segm_name(s) if s else "?"
+
+
+def _func_header(f):
+    return {
+        "name": ida_funcs.get_func_name(f.start_ea),
+        "start": f.start_ea,
+        "end": f.end_ea,
+        "seg": _seg_name(f.start_ea),
+    }
+
+
+def _line(ea):
+    return {
+        "ea": ea,
+        "text": ida_lines.tag_remove(ida_lines.generate_disasm_line(ea, 0)),
+        "size": ida_bytes.get_item_size(ea),
+    }
+
+
+def _walk(ea):
+    cur = ea
+    max_ea = ida_ida.inf_get_max_ea()
+    while cur != BADADDR and cur < max_ea:
+        yield _line(cur)
+        nxt = ida_bytes.next_head(cur, max_ea)
+        if nxt <= cur:
+            break
+        cur = nxt
+
+
+@handler("disas")
+def disas(target, count=None, offset=0):
+    ea = idahelp.resolve_target(target)
+    if not ida_bytes.is_mapped(ea):
+        raise IdbError(protocol.BAD_ADDRESS, f"address {ea:#x} is not mapped")
+    f = ida_funcs.get_func(ea)
+    if f is not None and count is None:
+        gen = (_line(e) for e in idautils.FuncItems(f.start_ea))
+        items, next_offset = idahelp.paginate(gen, offset, _FUNC_CAP)
+        return ({"mode": "func", "func": _func_header(f), "lines": items},
+                idahelp.page_meta(items, next_offset))
+    n = count if count else _RAW_DEFAULT
+    items, next_offset = idahelp.paginate(_walk(ea), offset, n)
+    header = _func_header(f) if f is not None else None
+    return ({"mode": "raw", "func": header, "lines": items},
+            idahelp.page_meta(items, next_offset))
+
+
+@handler("decompile")
+def decompile(func, offset=0, count=None):
+    ea = idahelp.resolve_target(func)
+    if not ida_hexrays.init_hexrays_plugin():
+        raise IdbError(protocol.IDA_ERROR, "Hex-Rays decompiler is not available (no license)")
+    f = ida_funcs.get_func(ea)
+    if f is None:
+        raise IdbError(protocol.NOT_FOUND, f"no function at {func!r}")
+    try:
+        cfunc = ida_hexrays.decompile(f.start_ea)
+    except ida_hexrays.DecompilationFailure as exc:
+        raise IdbError(protocol.IDA_ERROR, f"decompilation failed: {exc}")
+    if cfunc is None:
+        raise IdbError(protocol.IDA_ERROR, "decompilation returned null")
+    lines = (ida_lines.tag_remove(sl.line) for sl in cfunc.get_pseudocode())
+    items, next_offset = idahelp.paginate(lines, offset, count)
+    return ({"func": ida_funcs.get_func_name(f.start_ea), "ea": f.start_ea, "lines": items},
+            idahelp.page_meta(items, next_offset))
+
+```
+
+`src/idb/worker/handlers/info.py`:
+
+```py
+"""Session handlers: ping, shutdown, save, open_summary, segments."""
+
+import ida_ida
+import ida_nalt
+import ida_segment
+import ida_funcs
+import ida_entry
+import ida_loader
+import idautils
+import idc
+
+from idb import protocol, registry
+from idb.errors import IdbError
+from idb.worker import idahelp
+from idb.worker.dispatch import handler, CTX
+
+_SUMMARY = {}
+
+
+def _perm_str(perm):
+    return (
+        ("r" if perm & ida_segment.SEGPERM_READ else "-")
+        + ("w" if perm & ida_segment.SEGPERM_WRITE else "-")
+        + ("x" if perm & ida_segment.SEGPERM_EXEC else "-")
+    )
+
+
+def _hashes():
+    md5 = ida_nalt.retrieve_input_file_md5()
+    sha = ida_nalt.retrieve_input_file_sha256()
+    return (md5.hex() if md5 else None, sha.hex() if sha else None)
+
+
+def _num_globals():
+    n = 0
+    for ea, _name in idautils.Names():
+        if ida_funcs.get_func(ea) is None:
+            n += 1
+    return n
+
+
+def _entry_points():
+    out = []
+    for i in range(ida_entry.get_entry_qty()):
+        ordn = ida_entry.get_entry_ordinal(i)
+        out.append({"ea": ida_entry.get_entry(ordn), "name": ida_entry.get_entry_name(ordn) or ""})
+    return out
+
+
+def _compute_summary():
+    min_ea = ida_ida.inf_get_min_ea()
+    max_ea = ida_ida.inf_get_max_ea()
+    md5, sha = _hashes()
+    return {
+        "input": ida_nalt.get_root_filename(),
+        "path": ida_nalt.get_input_file_path(),
+        "format": ida_loader.get_file_type_name(),
+        "arch": ida_ida.inf_get_procname(),
+        "bitness": ida_ida.inf_get_app_bitness(),
+        "endian": "big" if ida_ida.inf_is_be() else "little",
+        "base": ida_nalt.get_imagebase(),
+        "min_ea": min_ea,
+        "max_ea": max_ea,
+        "size": max_ea - min_ea,
+        "md5": md5,
+        "sha256": sha,
+        "num_functions": sum(1 for _ in idautils.Functions()),
+        "num_globals": _num_globals(),
+        "num_segments": ida_segment.get_segm_qty(),
+        "entry_points": _entry_points(),
+    }
+
+
+def warmup():
+    try:
+        for _ in idautils.Strings():
+            pass
+    except Exception:
+        pass
+    _SUMMARY.clear()
+    _SUMMARY.update(_compute_summary())
+
+
+@handler("ping", always=True)
+def ping():
+    return {
+        "status": registry.STATUS_READY if CTX.ready else registry.STATUS_ANALYZING,
+        "session": CTX.session_id,
+    }
+
+
+@handler("shutdown", always=True)
+def shutdown(save=None):
+    CTX.save_override = save
+    if CTX.stop is not None:
+        CTX.stop.set()
+    return {"stopping": True, "save": save}
+
+
+@handler("open_summary")
+def open_summary():
+    return dict(_SUMMARY)
+
+
+@handler("save")
+def save():
+    path = idc.get_idb_path()
+    ok = ida_loader.save_database()
+    if not ok:
+        raise IdbError(protocol.IDA_ERROR, "save_database returned false")
+    return {"saved": path}
+
+
+@handler("segments")
+def segments(offset=0, count=None, total=False):
+    def gen():
+        for ea in idautils.Segments():
+            s = ida_segment.getseg(ea)
+            yield {
+                "name": ida_segment.get_segm_name(s),
+                "class": ida_segment.get_segm_class(s),
+                "start": s.start_ea,
+                "end": s.end_ea,
+                "size": s.end_ea - s.start_ea,
+                "perm": _perm_str(s.perm),
+            }
+
+    items, next_offset = idahelp.paginate(gen(), offset, count)
+    total_count = ida_segment.get_segm_qty() if total else None
+    return {"data": items}, idahelp.page_meta(items, next_offset, total_count)
+
+```
+
+`src/idb/worker/handlers/memory.py`:
+
+```py
+"""memory handlers: read (db/dw/dd/dq), string (da/du)."""
+
+import ida_bytes
+import ida_ida
+import ida_nalt
+import ida_segment
+
+from idb import protocol
+from idb.errors import IdbError
+from idb.worker import idahelp
+from idb.worker.dispatch import handler
+
+_GETTERS = {2: ida_bytes.get_word, 4: ida_bytes.get_dword, 8: ida_bytes.get_qword}
+
+
+def _string_encoding(strtype):
+    width = int(strtype or 0) & ida_nalt.STRWIDTH_MASK
+    if width == ida_nalt.STRWIDTH_2B:
+        return "utf16"
+    if width == ida_nalt.STRWIDTH_4B:
+        return "utf32"
+    return "ascii"
+
+
+def _string_width(strtype):
+    width = int(strtype or 0) & ida_nalt.STRWIDTH_MASK
+    if width == ida_nalt.STRWIDTH_2B:
+        return 2
+    if width == ida_nalt.STRWIDTH_4B:
+        return 4
+    return 1
+
+
+def _string_storage_size(ea, strtype, text_bytes):
+    flags = ida_bytes.get_full_flags(ea)
+    if ida_bytes.is_strlit(flags):
+        size = ida_bytes.get_item_size(ea)
+        if size > 0:
+            return size
+    return len(text_bytes) * _string_width(strtype)
+
+
+@handler("read")
+def read(addr, width=1, count=None, offset=0):
+    width = width or 1
+    if width not in (1, 2, 4, 8):
+        raise IdbError(protocol.BAD_ARGS, "width must be 1, 2, 4, or 8")
+    ea = idahelp.resolve_target(addr) + (offset or 0) * width
+    if not ida_bytes.is_mapped(ea):
+        raise IdbError(protocol.BAD_ADDRESS, f"address {ea:#x} is not mapped")
+    seg = ida_segment.getseg(ea)
+    seg_end = seg.end_ea if seg else ida_ida.inf_get_max_ea()
+
+    if width == 1:
+        total = max(0, min(count if count else 64, seg_end - ea))
+        data = ida_bytes.get_bytes(ea, total)
+        if data is None:
+            data = bytes(total)  # BSS / uninitialized -> zeros
+        return {"addr": ea, "width": 1, "bytes": data, "count": len(data)}
+
+    getter = _GETTERS[width]
+    values, cur = [], ea
+    for _ in range(count if count else 16):
+        if cur + width > seg_end:
+            break
+        values.append(int(getter(cur)))
+        cur += width
+    return {"addr": ea, "width": width, "values": values, "count": len(values),
+            "be": ida_ida.inf_is_be()}
+
+
+@handler("string")
+def string(addr, encoding=None):
+    ea = idahelp.resolve_target(addr)
+    if not ida_bytes.is_mapped(ea):
+        raise IdbError(protocol.BAD_ADDRESS, f"address {ea:#x} is not mapped")
+    if encoding == "ascii":
+        strtype = ida_nalt.STRTYPE_C
+    elif encoding == "utf16":
+        strtype = ida_nalt.STRTYPE_C_16
+    else:
+        strtype = ida_nalt.get_str_type(ea)
+        if strtype is None or strtype < 0:
+            strtype = ida_nalt.STRTYPE_C
+        encoding = _string_encoding(strtype)
+    raw = ida_bytes.get_strlit_contents(ea, -1, strtype)
+    if raw is None:
+        raise IdbError(protocol.NOT_FOUND, f"no string literal at {ea:#x}")
+    # IDA returns display bytes for string contents, not the raw storage bytes.
+    text = raw.decode("utf-8", "replace")
+    byte_length = _string_storage_size(ea, strtype, raw)
+    return {"addr": ea, "encoding": encoding,
+            "bytes": raw, "text": text, "length": byte_length}
+
+```
+
+`src/idb/worker/handlers/symbols.py`:
+
+```py
+"""symbols handlers: funcs, imports, exports, strings, names, nearest."""
+
+import ida_entry
+import ida_funcs
+import ida_nalt
+import idautils
+
+from idb.worker import idahelp
+from idb.worker.dispatch import handler
+
+_LIST_DEFAULT = 200
+
+
+def _cap(count):
+    return count if count else _LIST_DEFAULT
+
+
+def _result(make_gen, offset, count, total=False):
+    items, next_offset = idahelp.paginate(make_gen(), offset, _cap(count))
+    total_count = sum(1 for _ in make_gen()) if total else None
+    return {"data": items}, idahelp.page_meta(items, next_offset, total_count)
+
+
+@handler("funcs")
+def funcs(pattern=None, offset=0, count=None, total=False):
+    pred = idahelp.name_filter(pattern)
+
+    def gen():
+        for ea in idautils.Functions():
+            name = ida_funcs.get_func_name(ea)
+            if pred(name):
+                f = ida_funcs.get_func(ea)
+                yield {"ea": ea, "name": name, "size": (f.end_ea - f.start_ea) if f else 0}
+
+    return _result(gen, offset, count, total)
+
+
+@handler("names")
+def names(pattern=None, offset=0, count=None, total=False):
+    pred = idahelp.name_filter(pattern)
+
+    def gen():
+        for ea, name in idautils.Names():
+            if pred(name):
+                yield {"ea": ea, "name": name}
+
+    return _result(gen, offset, count, total)
+
+
+@handler("strings")
+def strings(pattern=None, offset=0, count=None, total=False):
+    pred = idahelp.name_filter(pattern)
+
+    def gen():
+        for s in idautils.Strings():
+            text = str(s)
+            if pred(text):
+                yield {"ea": s.ea, "length": s.length, "text": text}
+
+    return _result(gen, offset, count, total)
+
+
+@handler("imports")
+def imports(pattern=None, offset=0, count=None, total=False):
+    pred = idahelp.name_filter(pattern)
+
+    def gen():
+        for i in range(ida_nalt.get_import_module_qty()):
+            module = ida_nalt.get_import_module_name(i) or ""
+            collected = []
+
+            def cb(ea, name, ordinal):
+                collected.append((ea, name or "", ordinal))
+                return True
+
+            ida_nalt.enum_import_names(i, cb)
+            for ea, name, ordinal in collected:
+                if pred(name):
+                    yield {"ea": ea, "name": name, "module": module, "ordinal": ordinal}
+
+    return _result(gen, offset, count, total)
+
+
+@handler("exports")
+def exports(pattern=None, offset=0, count=None, total=False):
+    pred = idahelp.name_filter(pattern)
+
+    def gen():
+        for i in range(ida_entry.get_entry_qty()):
+            ordn = ida_entry.get_entry_ordinal(i)
+            name = ida_entry.get_entry_name(ordn) or ""
+            if pred(name):
+                yield {"ea": ida_entry.get_entry(ordn), "name": name, "ordinal": ordn}
+
+    return _result(gen, offset, count, total)
+
+
+@handler("nearest")
+def nearest(addr):
+    ea = idahelp.resolve_target(addr)
+    symbol = None
+    for nea, name in idautils.Names():
+        if nea <= ea:
+            symbol = {"name": name, "ea": nea, "offset": ea - nea}
+        if nea > ea:
+            break
+    func = None
+    f = ida_funcs.get_func(ea)
+    if f is not None:
+        func = {"name": ida_funcs.get_func_name(f.start_ea), "ea": f.start_ea,
+                "offset": ea - f.start_ea}
+    return {"addr": ea, "symbol": symbol, "func": func}
+
+```
+
+`src/idb/worker/handlers/types.py`:
+
+```py
+"""types read handlers: type, types, struct, member, typeof, frame.
+
+Type writes (declare/settype/setmember/enum) and the Hex-Rays union-arm selector
+(union-select) live here too.
+"""
+
+import ida_bytes
+import ida_frame
+import ida_funcs
+import ida_nalt
+import ida_typeinf as T
+from ida_idaapi import BADADDR
+
+from idb import protocol
+from idb.errors import IdbError
+from idb.worker import idahelp
+from idb.worker.dispatch import handler
+
+_LIST_DEFAULT = 300
+_INT_MAX = 0x7FFFFFFF
+_UINT32_MAX = 0xFFFFFFFF
+
+
+def _kind(tif):
+    if tif.is_union():
+        return "union"
+    if tif.is_struct():
+        return "struct"
+    if tif.is_enum():
+        return "enum"
+    if tif.is_ptr():
+        return "pointer"
+    if tif.is_func():
+        return "function"
+    if tif.is_array():
+        return "array"
+    if tif.is_typeref():
+        return "typedef"
+    return "scalar"
+
+
+def _udt_members(tif):
+    udt = T.udt_type_data_t()
+    if not tif.get_udt_details(udt):
+        return []
+    out = []
+    for m in udt:
+        out.append({
+            "name": m.name,
+            "offset": m.offset // 8,
+            "size": m.type.get_size(),
+            "type": str(m.type),
+            "bitfield": m.is_bitfield(),
+        })
+    return out
+
+
+def _enum_members(tif):
+    ed = T.enum_type_data_t()
+    if not tif.get_enum_details(ed):
+        return []
+    nbytes = tif.get_size()
+    if nbytes <= 0:
+        nbytes = ed.calc_nbytes()
+    mask = (1 << (max(1, min(int(nbytes), 8)) * 8)) - 1
+    return [{"name": e.name, "value": int(e.value) & mask} for e in ed]
+
+
+def _named(name):
+    tif = T.tinfo_t()
+    if not tif.get_named_type(idahelp.til(), name):
+        raise IdbError(protocol.NOT_FOUND, f"no type named {name!r}")
+    return tif
+
+
+@handler("type")
+def type_(name, offset=0, count=None):
+    tif = _named(name)
+    result = {"name": name, "kind": _kind(tif), "size": tif.get_size(), "decl": str(tif)}
+    if tif.is_union() or tif.is_struct():
+        members, next_offset = idahelp.paginate(_udt_members(tif), offset, count)
+        result["members"] = members
+        result["is_union"] = tif.is_union()
+        return result, idahelp.page_meta(members, next_offset)
+    elif tif.is_enum():
+        members, next_offset = idahelp.paginate(_enum_members(tif), offset, count)
+        result["members"] = members
+        return result, idahelp.page_meta(members, next_offset)
+    return result
+
+
+@handler("types")
+def types(pattern=None, kind=None, offset=0, count=None, total=False):
+    til = idahelp.til()
+    pred = idahelp.name_filter(pattern)
+
+    def gen():
+        for ordn in range(1, T.get_ordinal_limit(til)):
+            name = T.get_numbered_type_name(til, ordn)
+            if not name or not pred(name):
+                continue
+            tif = T.tinfo_t()
+            if not tif.get_numbered_type(til, ordn):
+                continue
+            k = _kind(tif)
+            if kind and k != kind:
+                continue
+            yield {"ordinal": ordn, "name": name, "kind": k, "size": tif.get_size()}
+
+    items, next_offset = idahelp.paginate(gen(), offset, count if count else _LIST_DEFAULT)
+    total_count = sum(1 for _ in gen()) if total else None
+    return {"data": items}, idahelp.page_meta(items, next_offset, total_count)
+
+
+def _read_value(ea, size):
+    if not ida_bytes.is_mapped(ea):
+        return None
+    if size == 1:
+        return ida_bytes.get_byte(ea)
+    if size == 2:
+        return ida_bytes.get_word(ea)
+    if size == 4:
+        return ida_bytes.get_dword(ea)
+    if size == 8:
+        return ida_bytes.get_qword(ea)
+    data = ida_bytes.get_bytes(ea, min(size or 0, 32))
+    return data.hex() if data else None
+
+
+@handler("struct")
+def struct(type, addr=None, offset=0, count=None):
+    tif = _named(type)
+    if not (tif.is_struct() or tif.is_union()):
+        raise IdbError(protocol.BAD_ARGS, f"{type!r} is not a struct or union")
+    members = _udt_members(tif)
+    base = None
+    if addr is not None:
+        base = idahelp.resolve_target(addr)
+        for m in members:
+            m["value"] = _read_value(base + m["offset"], m["size"])
+    items, next_offset = idahelp.paginate(members, offset, count)
+    return ({"name": type, "kind": "union" if tif.is_union() else "struct",
+             "size": tif.get_size(), "addr": base, "members": items},
+            idahelp.page_meta(items, next_offset))
+
+
+def _join(prefix, name):
+    name = name or "<anon>"
+    return f"{prefix}.{name}" if prefix else name
+
+
+def _enter(mtype, off, path, paths, depth):
+    t = mtype
+    while t.is_array():
+        elem = t.get_array_element()
+        esize = max(1, elem.get_size())
+        path = f"{path}[{off // esize}]"
+        off = off % esize
+        t = elem
+    if t.is_struct() or t.is_union():
+        _walk(t, off, path, paths, depth + 1)
+    else:
+        paths.append({"path": path, "type": str(t), "size": t.get_size(), "offset": off})
+
+
+def _walk(tif, off, prefix, paths, depth=0):
+    if depth > 24:
+        return
+    if tif.is_union():
+        udt = T.udt_type_data_t()
+        if not tif.get_udt_details(udt):
+            return
+        for m in udt:
+            if off < max(1, m.type.get_size()):
+                _enter(m.type, off, _join(prefix, m.name), paths, depth)
+        return
+    if tif.is_struct():
+        idx = tif.find_udm(off * 8, T.STRMEM_OFFSET | T.STRMEM_SKIP_GAPS)
+        if idx < 0:
+            return
+        _, m = tif.get_udm(idx)
+        _enter(m.type, off - m.offset // 8, _join(prefix, m.name), paths, depth)
+        return
+    paths.append({"path": prefix, "type": str(tif), "size": tif.get_size(), "offset": off})
+
+
+@handler("member")
+def member(type, offset, page_offset=0, count=None):
+    if isinstance(offset, str):
+        off = int(offset, 16) if offset.lower().startswith("0x") else int(offset, 10)
+    else:
+        off = int(offset)
+    tif = _named(type)
+    if not (tif.is_struct() or tif.is_union()):
+        raise IdbError(protocol.BAD_ARGS, f"{type!r} is not a struct or union")
+    paths = []
+    _walk(tif, off, "", paths)
+    if not paths:
+        raise IdbError(protocol.NOT_FOUND, f"no member spans byte offset {off} of {type!r}")
+    items, next_offset = idahelp.paginate(paths, page_offset, count)
+    return {"type": type, "offset": off, "paths": items}, idahelp.page_meta(items, next_offset)
+
+
+def _typeof_lvar(func, var):
+    ea = idahelp.resolve_target(func)
+    f = ida_funcs.get_func(ea)
+    if f is None:
+        raise IdbError(protocol.NOT_FOUND, f"no function {func!r}")
+    import ida_hexrays
+
+    if ida_hexrays.init_hexrays_plugin():
+        try:
+            cfunc = ida_hexrays.decompile(f.start_ea)
+            for lv in cfunc.get_lvars():
+                if lv.name == var:
+                    lt = lv.type()
+                    return {"target": f"{func}:{var}", "kind": "lvar",
+                            "type": str(lt), "size": lt.get_size()}
+        except ida_hexrays.DecompilationFailure:
+            pass
+    ftif = T.tinfo_t()
+    if ftif.get_func_frame(f):
+        idx = ftif.find_udm(var)
+        if idx >= 0:
+            _, m = ftif.get_udm(idx)
+            return {"target": f"{func}:{var}", "kind": "stack",
+                    "type": str(m.type), "size": m.type.get_size()}
+    raise IdbError(protocol.NOT_FOUND, f"no local/stack variable {var!r} in {func!r}")
+
+
+@handler("typeof")
+def typeof(target):
+    try:
+        ea = idahelp.resolve_target(target)
+    except IdbError:
+        ea = None
+    if ea is None:
+        if ":" in target:
+            func, _, var = target.partition(":")
+            return _typeof_lvar(func, var)
+        raise IdbError(protocol.NOT_FOUND, f"cannot resolve {target!r}")
+
+    tif = T.tinfo_t()
+    if ida_nalt.get_tinfo(tif, ea):
+        return {"target": target, "ea": ea, "kind": _kind(tif),
+                "type": str(tif), "size": tif.get_size()}
+    guess = T.tinfo_t()
+    if T.guess_tinfo(guess, ea) != T.GUESS_FUNC_FAILED:
+        return {"target": target, "ea": ea, "kind": _kind(guess),
+                "type": str(guess), "size": guess.get_size(), "guessed": True}
+    raise IdbError(protocol.NOT_FOUND, f"no type information for {target!r}")
+
+
+@handler("frame")
+def frame(func, offset=0, count=None):
+    ea = idahelp.resolve_target(func)
+    f = ida_funcs.get_func(ea)
+    if f is None:
+        raise IdbError(protocol.NOT_FOUND, f"no function at {func!r}")
+    ftif = T.tinfo_t()
+    if not ftif.get_func_frame(f):
+        raise IdbError(protocol.IDA_ERROR, f"no stack frame for {func!r}")
+    members, next_offset = idahelp.paginate(_udt_members(ftif), offset, count)
+    return ({"func": ida_funcs.get_func_name(f.start_ea), "ea": f.start_ea,
+             "size": ftif.get_size(), "members": members},
+            idahelp.page_meta(members, next_offset))
+
+
+def _parse_type(spec):
+    til = idahelp.til()
+    existing = T.tinfo_t()
+    if existing.get_named_type(til, spec):
+        return existing
+
+    text = str(spec).strip().rstrip(";").strip()
+    candidates = [text + ";", f"{text} _idb;"]
+    lparen = text.find("(")
+    if lparen > 0 and text[lparen + 1:lparen + 2] not in ("*", "&"):
+        candidates.append(f"{text[:lparen].rstrip()} _idb{text[lparen:]};")
+
+    for candidate in candidates:
+        tif = T.tinfo_t()
+        name = T.parse_decl(tif, til, candidate, T.PT_SIL)
+        if name is not None and not tif.empty():
+            return tif
+
+    if not text:
+        raise IdbError(protocol.BAD_ARGS, f"could not parse type {spec!r}")
+    raise IdbError(protocol.BAD_ARGS, f"could not parse type {spec!r}")
+
+
+@handler("declare", writes=True)
+def declare(text):
+    errors = T.parse_decls(idahelp.til(), text, None, T.PT_SIL)
+    if errors != 0:
+        raise IdbError(protocol.IDA_ERROR, f"parse_decls reported {errors} error(s)")
+    return {"ok": True, "declared": text.strip()}
+
+
+def _settype_local(func, var, new_type):
+    f = ida_funcs.get_func(idahelp.resolve_target(func))
+    if f is None:
+        raise IdbError(protocol.NOT_FOUND, f"no function {func!r}")
+    import ida_hexrays
+
+    if ida_hexrays.init_hexrays_plugin():
+        try:
+            cfunc = ida_hexrays.decompile(f.start_ea)
+            for lv in cfunc.get_lvars():
+                if lv.name == var:
+                    lsi = ida_hexrays.lvar_saved_info_t()
+                    lsi.ll = lv
+                    lsi.type = new_type
+                    if ida_hexrays.modify_user_lvar_info(f.start_ea, ida_hexrays.MLI_TYPE, lsi):
+                        return {"target": f"{func}:{var}", "kind": "lvar", "type": str(new_type)}
+                    break
+        except ida_hexrays.DecompilationFailure:
+            pass
+    ftif = T.tinfo_t()
+    if ftif.get_func_frame(f):
+        idx = ftif.find_udm(var)
+        if idx >= 0:
+            _, m = ftif.get_udm(idx)
+            if ida_frame.set_frame_member_type(f, m.offset // 8, new_type):
+                return {"target": f"{func}:{var}", "kind": "stack", "type": str(new_type)}
+    raise IdbError(protocol.IDA_ERROR, f"could not set type of local {var!r} in {func!r}")
+
+
+@handler("settype", writes=True)
+def settype(target, type):
+    new_type = _parse_type(type)
+    try:
+        ea = idahelp.resolve_target(target)
+    except IdbError:
+        ea = None
+    if ea is None:
+        if ":" in target:
+            func, _, var = target.partition(":")
+            return _settype_local(func, var, new_type)
+        raise IdbError(protocol.NOT_FOUND, f"cannot resolve {target!r}")
+    if not T.apply_tinfo(ea, new_type, T.TINFO_DEFINITE):
+        raise IdbError(protocol.IDA_ERROR, f"apply_tinfo failed at {ea:#x}")
+    readback = T.tinfo_t()
+    ida_nalt.get_tinfo(readback, ea)
+    return {"ea": ea, "type": str(readback) if not readback.empty() else str(new_type)}
+
+
+def _member_index(tif, member):
+    s = str(member)
+    try:
+        off = int(s, 16) if s.lower().startswith("0x") else int(s, 10)
+        return tif.find_udm(off * 8, T.STRMEM_OFFSET | T.STRMEM_SKIP_GAPS)
+    except ValueError:
+        return tif.find_udm(s)
+
+
+@handler("setmember", writes=True)
+def setmember(type, member, new_type, new_name=None):
+    tif = _named(type)
+    if not (tif.is_struct() or tif.is_union()):
+        raise IdbError(protocol.BAD_ARGS, f"{type!r} is not a struct or union")
+    idx = _member_index(tif, member)
+    if idx < 0:
+        raise IdbError(protocol.NOT_FOUND, f"no member {member!r} in {type!r}")
+    code = tif.set_udm_type(idx, _parse_type(new_type))
+    if code != T.TERR_OK:
+        raise IdbError(protocol.IDA_ERROR, f"set_udm_type failed: {T.tinfo_errstr(code)}")
+    if new_name:
+        code = tif.rename_udm(idx, new_name)
+        if code != T.TERR_OK:
+            raise IdbError(protocol.IDA_ERROR, f"rename_udm failed: {T.tinfo_errstr(code)}")
+    _, m = tif.get_udm(idx)
+    return {"type": type, "index": idx, "name": m.name, "member_type": str(m.type)}
+
+
+def _parse_enum_members(members):
+    parsed, nxt = [], 0
+    for chunk in members.split(","):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        if "=" in chunk:
+            key, raw = chunk.split("=", 1)
+            value = int(raw.strip(), 0)
+        else:
+            key, value = chunk, nxt
+        parsed.append({"name": key.strip(), "value": value})
+        nxt = value + 1
+    if not parsed:
+        raise IdbError(protocol.BAD_ARGS, "enum needs at least one k=v member")
+    return parsed
+
+
+def _enum_needs_unsigned(members):
+    return all(m["value"] >= 0 for m in members) and any(m["value"] > _INT_MAX for m in members)
+
+
+def _enum_nbytes(members):
+    max_value = max((m["value"] for m in members), default=0)
+    min_value = min((m["value"] for m in members), default=0)
+    if min_value < -0x80000000 or max_value > _UINT32_MAX:
+        return 8
+    return 4
+
+
+@handler("enum", writes=True)
+def enum(name, members, bitfield=False):
+    parsed = _parse_enum_members(members)
+    unsigned = _enum_needs_unsigned(parsed)
+
+    existing = T.tinfo_t()
+    if existing.get_named_type(idahelp.til(), name) and existing.is_enum():
+        if unsigned:
+            existing.set_enum_sign(False)
+        for m in parsed:
+            try:
+                existing.add_edm(m["name"], m["value"])
+            except ValueError as exc:
+                raise IdbError(protocol.IDA_ERROR, f"add enumerator {m['name']!r} failed: {exc}")
+        return {"name": name, "extended": True, "members": parsed}
+
+    ei = T.enum_type_data_t()
+    if unsigned:
+        ei.taenum_bits |= T.TAENUM_UNSIGNED
+    for m in parsed:
+        ei.push_back(T.edm_t(m["name"], m["value"]))
+    tid = T.create_enum_type(name, ei, _enum_nbytes(parsed), 0, bool(bitfield))
+    if tid == BADADDR:
+        raise IdbError(protocol.IDA_ERROR, f"create_enum_type failed for {name!r}")
+    return {"name": name, "extended": False, "bitfield": bool(bitfield), "members": parsed}
+
+
+def _union_arm_ordinal(union_tif, member):
+    """member as an int (or 0x-int) is the union-arm ordinal directly; otherwise a
+    field name resolved via find_udm. Union arms all share offset 0, so a byte-offset
+    lookup (as setmember uses) is meaningless here. Returns -1 if not an arm."""
+    s = str(member)
+    try:
+        return int(s, 16) if s.lower().startswith("0x") else int(s, 10)
+    except ValueError:
+        return union_tif.find_udm(s)
+
+
+def _addressable_ea(cfunc, item):
+    """Walk up from item to the nearest ctree node carrying a real ea. Union access
+    expressions are sometimes unaddressable (BADADDR); the decompiler keys a selection
+    on the addressable parent (see IDA's vds17 example)."""
+    while item is not None and item.ea == BADADDR:
+        item = cfunc.body.find_parent_of(item)
+    return item.ea if item is not None else BADADDR
+
+
+@handler("union_select", writes=True)
+def union_select(addr, member):
+    import ida_hexrays
+    import ida_pro
+
+    ea = idahelp.resolve_target(addr)
+    f = ida_funcs.get_func(ea)
+    if f is None:
+        raise IdbError(protocol.NOT_FOUND, f"no function contains {addr!r}")
+    if not ida_hexrays.init_hexrays_plugin():
+        raise IdbError(protocol.IDA_ERROR, "Hex-Rays is required for union-select")
+    try:
+        cfunc = ida_hexrays.decompile(f.start_ea)
+    except ida_hexrays.DecompilationFailure as exc:
+        raise IdbError(protocol.IDA_ERROR, f"decompilation failed: {exc}")
+    if cfunc is None:
+        raise IdbError(protocol.IDA_ERROR, "decompilation produced no result")
+    cfunc.get_pseudocode()
+
+    union_ops = (ida_hexrays.cot_memptr, ida_hexrays.cot_memref)
+    cands = []
+    items = cfunc.treeitems
+    for i in range(items.size()):
+        it = items.at(i)
+        if not it.is_expr() or it.op not in union_ops:
+            continue
+        e = it.cexpr
+        base = T.remove_pointer(e.x.type)
+        if not base.is_union():
+            continue
+        ordinal = _union_arm_ordinal(base, member)
+        cands.append({"it": it, "base": base, "expr_ea": e.ea,
+                      "site_ea": e.ea if e.ea != BADADDR else _addressable_ea(cfunc, it),
+                      "ordinal": ordinal, "valid": 0 <= ordinal < len(_udt_members(base))})
+
+    if not cands:
+        raise IdbError(protocol.NOT_FOUND,
+                       f"no union field access in {ida_funcs.get_func_name(f.start_ea)}")
+
+    at_ea = [c for c in cands if ea in (c["expr_ea"], c["site_ea"])]
+    if at_ea:
+        chosen = next((c for c in at_ea if c["valid"]), None)
+        if chosen is None:
+            arms = ", ".join(m["name"] for m in _udt_members(at_ea[0]["base"]))
+            raise IdbError(protocol.NOT_FOUND,
+                           f"union {at_ea[0]['base']} at {ea:#x} has no arm {member!r}; arms: {arms}")
+    else:
+        matching = [c for c in cands if c["valid"]]
+        sites = sorted({c["site_ea"] for c in matching})
+        if not matching:
+            raise IdbError(protocol.NOT_FOUND, f"no union arm named {member!r} at or near {ea:#x}")
+        if len(sites) > 1:
+            raise IdbError(protocol.BAD_ARGS,
+                           f"arm {member!r} is ambiguous across sites {', '.join(f'{s:#x}' for s in sites)}; "
+                           "pass the exact address")
+        chosen = matching[0]
+
+    key_ea = chosen["site_ea"]
+    if key_ea == BADADDR:
+        raise IdbError(protocol.IDA_ERROR, "the union access expression has no addressable location")
+    ordinal = chosen["ordinal"]
+
+    path = ida_pro.intvec_t()
+    path.push_back(ordinal)
+    cfunc.set_user_union_selection(key_ea, path)
+    cfunc.save_user_unions()
+
+    _, arm = chosen["base"].get_udm(ordinal)
+    union_name = str(chosen["base"])
+
+    ida_hexrays.mark_cfunc_dirty(f.start_ea)
+    verified = False
+    try:
+        cf2 = ida_hexrays.decompile(f.start_ea)
+        out = ida_pro.intvec_t()
+        if cf2 is not None and cf2.get_user_union_selection(key_ea, out):
+            verified = out.size() == 1 and out.at(0) == ordinal
+    except ida_hexrays.DecompilationFailure:
+        pass
+
+    return {"ea": key_ea, "func": ida_funcs.get_func_name(f.start_ea), "union": union_name,
+            "member": arm.name, "ordinal": ordinal, "path": [ordinal], "verified": verified}
+
+```
+
+`src/idb/worker/handlers/xrefs.py`:
+
+```py
+"""xrefs handlers: xref_to, xref_from, calls, search.
+
+Every xref/search row carries the high-value context IDA's UI omits: a compact
+kind label, the enclosing function, and the tag-removed disassembly of the
+instruction at that address.
+"""
+
+import ida_bytes
+import ida_ida
+import ida_lines
+import ida_funcs
+import ida_name
+import ida_search
+import ida_xref
+import idautils
+from ida_idaapi import BADADDR
+
+from idb import protocol
+from idb.errors import IdbError
+from idb.worker import idahelp
+from idb.worker.budget import Budget
+from idb.worker.dispatch import handler
+
+_KIND = {
+    ida_xref.dr_O: "offset", ida_xref.dr_W: "write", ida_xref.dr_R: "read",
+    ida_xref.dr_T: "text", ida_xref.dr_I: "info",
+    ida_xref.fl_CF: "call", ida_xref.fl_CN: "call",
+    ida_xref.fl_JF: "jump", ida_xref.fl_JN: "jump",
+    ida_xref.fl_F: "flow",
+}
+_CALL_TYPES = (ida_xref.fl_CF, ida_xref.fl_CN)
+_FWD = ida_bytes.BIN_SEARCH_FORWARD | ida_bytes.BIN_SEARCH_NOSHOW
+_DEFAULT = 200
+
+
+def _kind(xtype):
+    return _KIND.get(xtype, "?")
+
+
+def _insn(ea):
+    return ida_lines.tag_remove(ida_lines.generate_disasm_line(ea, 0))
+
+
+def _ctx_row(ea, kind):
+    return {"ea": ea, "kind": kind, "func": idahelp.func_name_at(ea), "insn": _insn(ea)}
+
+
+def _find_bytes(pattern, start, end):
+    return ida_bytes.find_bytes(pattern, start, range_end=end, flags=_FWD)
+
+
+def _find_string(pattern, start, end):
+    return ida_bytes.find_string(pattern, start, range_end=end, flags=_FWD)
+
+
+def _next_hit(source, end, budget):
+    while source["cur"] < end:
+        budget.check()
+        ea = source["find"](source["cur"], end)
+        if ea == BADADDR or ea >= end:
+            source["ea"] = BADADDR
+            return
+        source["ea"] = ea
+        return
+    source["ea"] = BADADDR
+
+
+def _string_search_gen(pattern, start, end, budget):
+    text = str(pattern)
+    if not text:
+        return
+
+    storage_encoding = "utf-16-be" if ida_ida.inf_is_be() else "utf-16-le"
+    sources = [{"cur": start, "find": lambda cur, limit: _find_string(text, cur, limit), "ea": BADADDR}]
+    hex_pattern = text.encode(storage_encoding).hex(" ")
+    sources.append({"cur": start, "find": lambda cur, limit, p=hex_pattern: _find_bytes(p, cur, limit), "ea": BADADDR})
+
+    for source in sources:
+        _next_hit(source, end, budget)
+
+    seen = set()
+    while True:
+        live = [source for source in sources if source["ea"] != BADADDR]
+        if not live:
+            return
+        source = min(live, key=lambda item: item["ea"])
+        ea = source["ea"]
+        source["cur"] = ea + 1
+        _next_hit(source, end, budget)
+        if ea in seen:
+            continue
+        seen.add(ea)
+        yield ea
+
+
+@handler("xref_to")
+def xref_to(addr, offset=0, count=None):
+    ea = idahelp.resolve_target(addr)
+    gen = (_ctx_row(x.frm, _kind(x.type)) for x in idautils.XrefsTo(ea))
+    items, next_offset = idahelp.paginate(gen, offset, count if count else _DEFAULT)
+    return {"data": items, "target": ea}, idahelp.page_meta(items, next_offset)
+
+
+@handler("xref_from")
+def xref_from(addr, offset=0, count=None):
+    ea = idahelp.resolve_target(addr)
+    gen = (_ctx_row(x.to, _kind(x.type)) for x in idautils.XrefsFrom(ea))
+    items, next_offset = idahelp.paginate(gen, offset, count if count else _DEFAULT)
+    return {"data": items, "source": ea}, idahelp.page_meta(items, next_offset)
+
+
+@handler("calls")
+def calls(func, offset=0, count=None):
+    ea = idahelp.resolve_target(func)
+    f = ida_funcs.get_func(ea)
+    if f is None:
+        raise IdbError(protocol.NOT_FOUND, f"no function at {func!r}")
+    start = f.start_ea
+
+    seen = set()
+
+    def gen():
+        for x in idautils.XrefsTo(start):
+            if x.type in _CALL_TYPES:
+                yield "caller", {"ea": x.frm, "func": idahelp.func_name_at(x.frm), "insn": _insn(x.frm)}
+
+        for item in idautils.FuncItems(start):
+            for x in idautils.XrefsFrom(item):
+                if x.type in _CALL_TYPES and x.to not in seen:
+                    seen.add(x.to)
+                    name = idahelp.func_name_at(x.to) or ida_name.get_name(x.to) or ""
+                    yield "callee", {"ea": x.to, "name": name, "from": item}
+
+    rows, next_offset = idahelp.paginate(gen(), offset, count)
+    callers, callees = [], []
+    for kind, row in rows:
+        if kind == "caller":
+            callers.append(row)
+        else:
+            callees.append(row)
+
+    return ({"func": ida_funcs.get_func_name(start), "ea": start,
+             "callers": callers, "callees": callees},
+            idahelp.page_meta(rows, next_offset))
+
+def _search_gen(kind, pattern, start, end, budget):
+    if kind == "ref":
+        target = idahelp.resolve_target(pattern)
+        seen = set()
+        for ea in list(idautils.DataRefsTo(target)) + list(idautils.CodeRefsTo(target, 0)):
+            if ea not in seen:
+                seen.add(ea)
+                yield ea
+        return
+    if kind == "imm":
+        value = idahelp.parse_addr(pattern)
+        cur = start
+        while start <= cur < end:
+            budget.check()
+            res = ida_search.find_imm(cur, ida_search.SEARCH_DOWN, value)
+            ea = res[0] if isinstance(res, (tuple, list)) else res
+            if ea is None or ea == BADADDR or ea >= end:
+                break
+            yield ea
+            cur = ea + 1
+        return
+    if kind == "str":
+        yield from _string_search_gen(pattern, start, end, budget)
+        return
+    find = ida_bytes.find_string if kind == "str" else ida_bytes.find_bytes
+    cur = start
+    while start <= cur < end:
+        budget.check()
+        ea = find(pattern, cur, range_end=end, flags=_FWD)
+        if ea == BADADDR or ea >= end:
+            break
+        yield ea
+        cur = ea + 1
+
+
+@handler("search")
+def search(pattern, kind="bytes", offset=0, count=None):
+    if kind not in ("bytes", "imm", "str", "ref"):
+        raise IdbError(protocol.BAD_ARGS, f"unknown search kind {kind!r}")
+    start, end = ida_ida.inf_get_min_ea(), ida_ida.inf_get_max_ea()
+    gen = (_ctx_row(ea, kind) for ea in _search_gen(kind, pattern, start, end, Budget(20.0)))
+    items, next_offset = idahelp.paginate(gen, offset, count if count else _DEFAULT)
+    return {"data": items, "kind": kind, "pattern": pattern}, idahelp.page_meta(items, next_offset)
+
+```
+
+`src/idb/worker/idahelp.py`:
+
+```py
+"""Shared worker helpers.
+
+parse_addr / paginate / name_filter are pure (no ida_*) and Tier-1 testable.
+The rest import ida_* lazily, inside the function, so importing this module never
+pulls in IDA on its own.
+"""
+
+import re
+import fnmatch
+
+from idb import protocol
+from idb.errors import IdbError
+
+_SENTINEL = object()
+
+
+def parse_addr(value):
+    """int | '0x..' hex | '0n..' decimal | bare hex (windbg default). No symbols."""
+    if isinstance(value, int):
+        return value
+    s = str(value).strip()
+    try:
+        low = s.lower()
+        if low.startswith("0x"):
+            return int(s, 16)
+        if low.startswith("0n"):
+            return int(s[2:], 10)
+        if re.fullmatch(r"[0-9a-fA-F]+", s):
+            return int(s, 16)
+    except ValueError:
+        pass
+    raise IdbError(protocol.BAD_ADDRESS, f"cannot parse address: {value!r}")
+
+
+def paginate(iterable, offset=0, count=None):
+    """Apply offset/count WHILE walking an iterator (never build-then-cap).
+    Returns (items, next_offset); next_offset is None once the source is
+    exhausted within the page, else the offset to resume from."""
+    offset = int(offset or 0)
+    it = iter(iterable)
+    for _ in range(offset):
+        if next(it, _SENTINEL) is _SENTINEL:
+            return [], None
+    if count is None:
+        return list(it), None
+    items = []
+    for _ in range(int(count)):
+        value = next(it, _SENTINEL)
+        if value is _SENTINEL:
+            return items, None
+        items.append(value)
+    has_more = next(it, _SENTINEL) is not _SENTINEL
+    return items, (offset + len(items)) if has_more else None
+
+
+def page_meta(items, next_offset, total=None):
+    """Build envelope meta for a paginated result, or None if nothing was cut."""
+    if next_offset is None and total is None:
+        return None
+    meta = {"shown": len(items)}
+    if next_offset is not None:
+        meta["truncated"] = True
+        meta["next_offset"] = next_offset
+    if total is not None:
+        meta["total"] = total
+    return meta
+
+
+def name_filter(pattern):
+    """Predicate over a name. '/re/' -> regex; '*'/'?' -> glob; else case-
+    insensitive substring. None matches everything."""
+    if pattern is None:
+        return lambda name: True
+    if len(pattern) >= 2 and pattern.startswith("/") and pattern.endswith("/"):
+        rx = re.compile(pattern[1:-1], re.IGNORECASE)
+        return lambda name: rx.search(name or "") is not None
+    if "*" in pattern or "?" in pattern:
+        pat = pattern.lower()
+        return lambda name: fnmatch.fnmatch((name or "").lower(), pat)
+    needle = pattern.lower()
+    return lambda name: needle in (name or "").lower()
+
+
+def resolve_target(value):
+    """ea from int, explicit 0x/0n number, a symbol name, or bare-hex fallback."""
+    import ida_idaapi
+    import ida_name
+
+    if isinstance(value, int):
+        return value
+    s = str(value).strip()
+    if s.lower().startswith(("0x", "0n")):
+        return parse_addr(s)
+    ea = ida_name.get_name_ea(ida_idaapi.BADADDR, s)
+    if ea != ida_idaapi.BADADDR:
+        return ea
+    try:
+        return parse_addr(s)
+    except IdbError:
+        raise IdbError(protocol.NOT_FOUND, f"no symbol or address named {value!r}")
+
+
+def til():
+    import ida_typeinf
+
+    return ida_typeinf.get_idati()
+
+
+def func_name_at(ea):
+    import ida_funcs
+
+    f = ida_funcs.get_func(ea)
+    return ida_funcs.get_func_name(f.start_ea) if f else None
+
+```
+
+`src/idb/worker/lifecycle.py`:
+
+```py
+"""Idle-TTL watchdog: a daemon thread that fires on_expire after `idle_ttl`
+seconds without a .touch(). No ida_* deps — it only flips a flag the main-thread
+REP loop reads, so the actual shutdown/save still happens on the IDA thread."""
+
+import threading
+import time
+
+
+class WorkerLifecycle:
+    def __init__(self, idle_ttl, on_expire):
+        self.idle_ttl = float(idle_ttl or 0)
+        self._on_expire = on_expire
+        self._last = time.monotonic()
+        self._lock = threading.Lock()
+        self._stop = threading.Event()
+        self._thread = threading.Thread(target=self._run, name="idb-idle-ttl", daemon=True)
+
+    def start(self):
+        if self.idle_ttl > 0:
+            self._thread.start()
+        return self
+
+    def touch(self):
+        with self._lock:
+            self._last = time.monotonic()
+
+    def _run(self):
+        tick = min(self.idle_ttl, 5.0)
+        while not self._stop.wait(tick):
+            with self._lock:
+                idle = time.monotonic() - self._last
+            if idle >= self.idle_ttl:
+                self._on_expire()
+                return
+
+    def stop(self):
+        self._stop.set()
+
+```
+
+`src/idb/worker/main.py`:
+
+```py
+"""Strict worker bootstrap.
+
+Imports ONLY stdlib until idapro is activated, so the invariant "no ida_* import
+before idapro" holds (test_import_order asserts it in a clean process). serve and
+everything that touches ida_* are imported lazily, AFTER ensure_idalib().
+"""
+
+import argparse
+import os
+import sys
+
+
+def _parse_args(argv):
+    p = argparse.ArgumentParser(prog="idb-worker", add_help=True)
+    p.add_argument("--port", type=int, required=True)
+    p.add_argument("--session", required=True)
+    p.add_argument("--open", dest="open_path", required=True, help="path passed to open_database")
+    p.add_argument("--input", dest="input_path", required=True, help="logical target (for display/identity)")
+    p.add_argument("--idle-ttl", type=float, default=1800.0)
+    p.add_argument("--save-policy", default="save", choices=("save", "no-save"))
+    p.add_argument("--logfile", default=None)
+    return p.parse_args(argv)
+
+
+def main(argv=None):
+    args = _parse_args(sys.argv[1:] if argv is None else argv)
+    token = os.environ.get("IDB_WORKER_TOKEN", "")
+
+    from idb.worker.activate import ensure_idalib
+
+    ensure_idalib()  # import idapro (kernel init) -> only now may ida_* be imported
+
+    from idb.worker.serve import serve
+
+    return serve(
+        port=args.port,
+        token=token,
+        session_id=args.session,
+        open_path=args.open_path,
+        input_path=args.input_path,
+        idle_ttl=args.idle_ttl,
+        save_policy=args.save_policy,
+        logfile=args.logfile,
+    )
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
+
+`src/idb/worker/serve.py`:
+
+```py
+"""Worker lifecycle: bind -> open -> batch(1) -> warmup -> ready -> REP loop ->
+shutdown/save. All on the main thread (idalib is single-threaded), so handlers
+call ida_* directly. ida_* imports happen here and below, AFTER idapro activation.
+"""
+
+import os
+import sys
+import threading
+
+from idb import registry
+from idb.errors import IdbError
+from idb import protocol
+from idb.transport import ZmqServer
+from idb.worker import dispatch as dispatch_mod
+from idb.worker.dispatch import CTX, dispatch
+from idb.worker.lifecycle import WorkerLifecycle
+
+
+def _warmup():
+    from idb.worker.handlers import load_all
+
+    load_all()
+    try:
+        import ida_hexrays
+
+        ida_hexrays.init_hexrays_plugin()
+    except Exception:
+        pass
+    from idb.worker.handlers import info
+
+    info.warmup()
+
+
+def _save_decision(save_policy):
+    if CTX.save_override is not None:
+        return bool(CTX.save_override)
+    return save_policy != "no-save"
+
+
+def serve(port, token, session_id, open_path, input_path, idle_ttl, save_policy, logfile=None):
+    import idapro
+    import ida_auto
+    import idc
+
+    stop = threading.Event()
+    try:
+        server = ZmqServer(port)
+    except Exception as exc:
+        print(f"bind failed on port {port}: {exc}", file=sys.stderr, flush=True)
+        return 3
+
+    CTX.token = token
+    CTX.session_id = session_id
+    CTX.target = input_path
+    CTX.stop = stop
+    CTX.ready = False
+    CTX.save_override = None
+
+    registry.update(
+        session_id,
+        status=registry.STATUS_ANALYZING,
+        port=server.port,
+        token=token,
+        pid=os.getpid(),
+        input_path=os.path.abspath(input_path),
+        started_at=registry.now(),
+        logfile=logfile,
+    )
+
+    life = None
+    opened = False
+    try:
+        rc = idapro.open_database(open_path, True)
+        if rc != 0:
+            raise IdbError(protocol.IDA_ERROR, f"open_database failed rc={rc}")
+        opened = True
+        ida_auto.auto_wait()
+        idc.batch(1)
+        _warmup()
+
+        registry.update(session_id, status=registry.STATUS_READY, idb_path=idc.get_idb_path())
+        CTX.ready = True
+        life = WorkerLifecycle(idle_ttl, on_expire=stop.set).start()
+
+        while not stop.is_set():
+            raw = server.recv(timeout_ms=500)
+            if raw is None:
+                continue
+            server.send(dispatch(raw))
+            life.touch()
+    except IdbError as exc:
+        print(f"worker error: {exc.code}: {exc.message}", file=sys.stderr, flush=True)
+    except Exception as exc:
+        print(f"worker crashed: {type(exc).__name__}: {exc}", file=sys.stderr, flush=True)
+    finally:
+        if life is not None:
+            life.stop()
+        registry.unregister(session_id)
+        if opened:
+            save = _save_decision(save_policy)
+            try:
+                idapro.close_database(save)
+            except Exception as exc:
+                print(f"close_database error: {exc}", file=sys.stderr, flush=True)
+        server.close()
+    return 0 if opened else 4
+
+```
+
+`tests/conftest.py`:
+
+```py
+import pathlib
+import sys
+
+_SRC = pathlib.Path(__file__).resolve().parent.parent / "src"
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
+
+```
+
+`tests/fake_worker.py`:
+
+```py
+"""Non-IDA fake worker for spawn/CLI tests. Speaks the idb protocol over ZMQ so
+spawn's readiness/reuse logic can be exercised without launching IDA.
+
+Modes: ready (bind + serve), crash (exit 1 immediately). A bind collision exits 3,
+matching the real serve.py, so port-retry can be tested by pre-occupying the port.
+"""
+
+import argparse
+import hmac
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+
+from idb import protocol, registry
+from idb.transport import ZmqServer
+
+_SUMMARY = {
+    "input": "thing.exe", "format": "FAKE", "arch": "metapc", "bitness": 64,
+    "endian": "little", "base": 0x140000000, "min_ea": 0x140001000,
+    "max_ea": 0x140002000, "size": 0x1000, "md5": None, "sha256": None,
+    "num_functions": 1, "num_globals": 0, "num_segments": 1, "entry_points": [],
+}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--port", type=int, required=True)
+    ap.add_argument("--session", required=True)
+    ap.add_argument("--mode", default="ready")
+    ap.add_argument("--register", action="store_true")
+    args = ap.parse_args()
+    token = os.environ.get("IDB_WORKER_TOKEN", "")
+
+    if args.mode == "crash":
+        sys.exit(1)
+    try:
+        server = ZmqServer(args.port)
+    except Exception:
+        sys.exit(3)
+
+    if args.register:
+        registry.update(args.session, status=registry.STATUS_READY, port=args.port, token=token,
+                        pid=os.getpid(), input_path=r"C:\fake\thing.exe",
+                        idb_path=r"C:\fake\thing.exe.i64", started_at=registry.now())
+
+    stop = False
+    while not stop:
+        raw = server.recv(timeout_ms=200)
+        if raw is None:
+            continue
+        msg = protocol.decode(raw)
+        rid = msg.get("id")
+        if not hmac.compare_digest(str(msg.get("tok", "")), token):
+            server.send(protocol.encode(protocol.build_error(rid, protocol.UNAUTHORIZED, "bad token")))
+            continue
+        cmd = msg.get("cmd")
+        if cmd == "ping":
+            server.send(protocol.encode(protocol.build_ok(rid, {"status": "ready", "session": args.session})))
+        elif cmd == "open_summary":
+            server.send(protocol.encode(protocol.build_ok(rid, dict(_SUMMARY))))
+        elif cmd == "shutdown":
+            server.send(protocol.encode(protocol.build_ok(rid, {"stopping": True})))
+            registry.unregister(args.session)
+            stop = True
+        else:
+            server.send(protocol.encode(protocol.build_error(rid, protocol.UNKNOWN_CMD, "?")))
+    server.close()
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`tests/integration/test_smoke_real_ida.py`:
+
+```py
+"""Tier-4 smoke tests against a real headless IDA worker.
+
+Gated on idapro being importable and a test binary existing (IDB_TEST_BINARY, or
+the bundled tests/fixtures/where.exe). One warm worker is shared across the module
+in an isolated registry; each phase appends cases here.
+"""
+
+import importlib.util
+import os
+import shutil
+import tempfile
+import time
+
+import pytest
+
+from idb import protocol, spawn
+from idb.transport import ZmqClient
+
+BINARY = os.environ.get(
+    "IDB_TEST_BINARY",
+    os.path.join(os.path.dirname(__file__), "..", "fixtures", "where.exe"),
+)
+_AVAILABLE = importlib.util.find_spec("idapro") is not None and os.path.exists(BINARY)
+pytestmark = pytest.mark.skipif(not _AVAILABLE, reason="needs idapro + a test binary")
+
+
+@pytest.fixture(scope="module")
+def client():
+    tmp = tempfile.mkdtemp(prefix="idb-it-")
+    saved = {k: os.environ.get(k) for k in ("LOCALAPPDATA", "XDG_STATE_HOME")}
+    os.environ["LOCALAPPDATA"] = tmp
+    os.environ["XDG_STATE_HOME"] = tmp
+    entry = None
+    try:
+        entry, summary = spawn.open_or_reuse(BINARY, deadline_s=300)
+        conn = ZmqClient(entry["port"], entry["token"])
+        conn.summary = summary
+        conn.entry = entry
+        yield conn
+        conn.close()
+    finally:
+        if entry is not None:
+            killer = ZmqClient(entry["port"], entry["token"])
+            try:
+                killer.call("shutdown", {"save": False}, timeout_ms=15000)
+            except Exception:
+                spawn.kill_pid(entry.get("pid"))
+            finally:
+                killer.close()
+            time.sleep(0.5)
+        for key, value in saved.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def ok(conn, cmd, args=None, timeout_ms=20000):
+    reply = conn.call(cmd, args or {}, timeout_ms=timeout_ms)
+    assert protocol.is_ok(reply), reply
+    return reply["result"], reply.get("meta")
+
+
+def test_ping_ready(client):
+    result, _ = ok(client, "ping")
+    assert result["status"] == "ready"
+
+
+def test_segments(client):
+    result, meta = ok(client, "segments", {"count": 3})
+    rows = result["data"]
+    assert rows and any(r["perm"] == "r-x" for r in rows)
+    assert meta and meta["truncated"] and meta["next_offset"] == 3
+
+
+def test_save(client):
+    result, _ = ok(client, "save", timeout_ms=60000)
+    assert os.path.exists(result["saved"])
+
+
+def _entry_ea(client):
+    eps = client.summary.get("entry_points") or []
+    if not eps:
+        pytest.skip("binary has no entry points")
+    return eps[0]["ea"]
+
+
+def test_disas_function(client):
+    result, _ = ok(client, "disas", {"target": hex(_entry_ea(client))})
+    assert result["mode"] == "func"
+    assert result["func"]["name"]
+    assert result["lines"] and all("ea" in ln and ln["text"] for ln in result["lines"])
+
+
+def test_disas_raw_count_paginates(client):
+    result, meta = ok(client, "disas", {"target": hex(_entry_ea(client)), "count": 4})
+    assert result["mode"] == "raw"
+    assert len(result["lines"]) == 4
+    assert meta and meta["truncated"] and meta["next_offset"] == 4
+
+
+def test_decompile_or_graceful(client):
+    reply = client.call("decompile", {"func": hex(_entry_ea(client))}, timeout_ms=60000)
+    if protocol.is_ok(reply):
+        assert reply["result"]["lines"]
+    else:
+        assert reply["error"]["code"] == protocol.IDA_ERROR  # no Hex-Rays license
+
+
+def test_read_bytes_and_clamp(client):
+    ea = _entry_ea(client)
+    result, _ = ok(client, "read", {"addr": hex(ea), "width": 1, "count": 32})
+    assert isinstance(result["bytes"], bytes) and 0 < result["count"] <= 32
+
+
+def test_read_values(client):
+    ea = _entry_ea(client)
+    result, _ = ok(client, "read", {"addr": hex(ea), "width": 4, "count": 4})
+    assert result["values"] and all(isinstance(v, int) for v in result["values"])
+
+
+def test_read_unmapped_is_bad_address(client):
+    reply = client.call("read", {"addr": "0x1", "width": 1, "count": 8})
+    assert not protocol.is_ok(reply) and reply["error"]["code"] == protocol.BAD_ADDRESS
+
+
+def test_funcs_and_filter(client):
+    result, _ = ok(client, "funcs", {"count": 10})
+    assert result["data"] and all("name" in r and "ea" in r for r in result["data"])
+
+
+def test_total_meta(client):
+    result, meta = ok(client, "funcs", {"count": 2, "total": True})
+    assert len(result["data"]) == 2
+    assert meta and meta.get("total") and meta["total"] >= 2
+
+
+def test_names_nonempty(client):
+    result, _ = ok(client, "names", {"count": 10})
+    assert result["data"]
+
+
+def test_strings_nonempty(client):
+    result, _ = ok(client, "strings", {"count": 10})
+    assert result["data"] and all("text" in r for r in result["data"])
+
+
+def test_nearest_in_function(client):
+    result, _ = ok(client, "nearest", {"addr": hex(_entry_ea(client))})
+    assert result["func"] is not None
+
+
+def test_xref_to_returns_context(client):
+    result, _ = ok(client, "xref_to", {"addr": hex(_entry_ea(client))})
+    assert isinstance(result["data"], list)
+    for row in result["data"]:
+        assert {"ea", "kind", "insn"} <= set(row)
+
+
+def test_calls_structure(client):
+    result, _ = ok(client, "calls", {"func": hex(_entry_ea(client))})
+    assert isinstance(result["callers"], list) and isinstance(result["callees"], list)
+
+
+def test_search_bytes_finds_self(client):
+    ea = _entry_ea(client)
+    data, _ = ok(client, "read", {"addr": hex(ea), "width": 1, "count": 6})
+    pattern = " ".join(f"{b:02x}" for b in data["bytes"])
+    result, _ = ok(client, "search", {"pattern": pattern, "kind": "bytes", "count": 100})
+    assert any(r["ea"] == ea for r in result["data"])
+
+
+def test_search_str_finds_known(client):
+    strs, _ = ok(client, "strings", {"count": 40})
+    # an ASCII string has byte-length ~= char-length (wide strings are 2x); only
+    # those are findable by an ASCII (single-byte) str search.
+    ascii_str = next(
+        (s for s in strs["data"]
+         if len(s["text"]) >= 4 and s["length"] <= len(s["text"]) + 2 and s["text"][:8].isprintable()),
+        None,
+    )
+    if ascii_str is None:
+        pytest.skip("no ASCII string to search for")
+    result, _ = ok(client, "search", {"pattern": ascii_str["text"][:8], "kind": "str", "count": 50})
+    assert result["data"]
+
+
+def test_string_and_search_str_handle_utf16(client):
+    strs, _ = ok(client, "strings", {"count": 80})
+    wide_str = next(
+        (s for s in strs["data"]
+         if s["text"] and s["length"] >= 2 * (len(s["text"]) + 1) and s["text"][:8].isprintable()),
+        None,
+    )
+    if wide_str is None:
+        pytest.skip("no UTF-16 string literal found")
+
+    text, _ = ok(client, "string", {"addr": hex(wide_str["ea"])})
+    assert text["encoding"] == "utf16"
+    assert text["text"] == wide_str["text"]
+    assert text["length"] == wide_str["length"]
+    assert text["length"] > len(text["text"])
+
+    result, _ = ok(client, "search", {"pattern": wide_str["text"][:8], "kind": "str", "count": 100})
+    assert any(r["ea"] == wide_str["ea"] for r in result["data"])
+
+
+def test_search_str_utf16_substring_has_no_shifted_hit(client):
+    strs, _ = ok(client, "strings", {"count": 80})
+    wide_str = next(
+        (s for s in strs["data"]
+         if len(s["text"]) >= 5 and s["length"] >= 2 * (len(s["text"]) + 1) and s["text"][:8].isprintable()),
+        None,
+    )
+    if wide_str is None:
+        pytest.skip("no UTF-16 string literal found")
+
+    pattern = wide_str["text"][1:5]
+    result, _ = ok(client, "search", {"pattern": pattern, "kind": "str", "count": 100})
+    hits = sorted(r["ea"] for r in result["data"])
+    expected = wide_str["ea"] + 2
+    assert expected in hits
+    assert expected - 1 not in hits
+    assert not any(b == a + 1 for a, b in zip(hits, hits[1:]))
+
+
+def test_types_list(client):
+    result, _ = ok(client, "types", {"count": 50})
+    assert result["data"] and all("name" in r and "kind" in r for r in result["data"])
+
+
+def test_type_struct_and_member(client):
+    structs, _ = ok(client, "types", {"kind": "struct", "count": 50})
+    if not structs["data"]:
+        pytest.skip("no structs with type info")
+    name = structs["data"][0]["name"]
+    typ, _ = ok(client, "type", {"name": name})
+    assert typ["kind"] in ("struct", "union")
+    if typ.get("members"):
+        m, _ = ok(client, "member", {"type": name, "offset": "0"})
+        assert m["paths"] and all("path" in p and "type" in p for p in m["paths"])
+
+
+def test_typeof_function(client):
+    result, _ = ok(client, "typeof", {"target": hex(_entry_ea(client))})
+    assert result["type"]
+
+
+def test_frame_or_graceful(client):
+    reply = client.call("frame", {"func": hex(_entry_ea(client))}, timeout_ms=20000)
+    if protocol.is_ok(reply):
+        assert "members" in reply["result"]
+    else:
+        assert reply["error"]["code"] == protocol.IDA_ERROR
+
+
+def test_rename_then_undo_restores(client):
+    ea = _entry_ea(client)
+    before, _ = ok(client, "nearest", {"addr": hex(ea)})
+    original = before["func"]["name"] if before.get("func") else before["symbol"]["name"]
+    ok(client, "rename", {"addr": hex(ea), "name": "idb_it_renamed"})
+    after, _ = ok(client, "nearest", {"addr": hex(ea)})
+    assert "idb_it_renamed" in (after.get("func") or after.get("symbol"))["name"]
+    ok(client, "undo")
+    restored, _ = ok(client, "nearest", {"addr": hex(ea)})
+    assert (restored.get("func") or restored.get("symbol"))["name"] == original
+
+
+def test_patch_then_undo_restores(client):
+    ea = _entry_ea(client)
+    before, _ = ok(client, "read", {"addr": hex(ea), "width": 1, "count": 2})
+    ok(client, "patch", {"addr": hex(ea), "hex": "90 90"})
+    patched, _ = ok(client, "read", {"addr": hex(ea), "width": 1, "count": 2})
+    assert patched["bytes"] == b"\x90\x90"
+    ok(client, "undo")
+    restored, _ = ok(client, "read", {"addr": hex(ea), "width": 1, "count": 2})
+    assert restored["bytes"] == before["bytes"]
+
+
+def test_declare_then_setmember(client):
+    ok(client, "declare", {"text": "struct IDB_IT { int a; char b; };"})
+    typ, _ = ok(client, "type", {"name": "IDB_IT"})
+    assert any(m["name"] == "a" for m in typ["members"])
+    ok(client, "setmember", {"type": "IDB_IT", "member": "a", "new_type": "unsigned int", "new_name": "aa"})
+    typ2, _ = ok(client, "type", {"name": "IDB_IT"})
+    assert any(m["name"] == "aa" and m["type"] == "unsigned int" for m in typ2["members"])
+
+
+def test_enum_create(client):
+    ok(client, "enum", {"name": "IDB_ENUM", "members": "X=1,Y=2,Z=7", "bitfield": False})
+    typ, _ = ok(client, "type", {"name": "IDB_ENUM"})
+    assert {m["name"]: m["value"] for m in typ["members"]} == {"X": 1, "Y": 2, "Z": 7}
+
+
+def _member_values(typ):
+    return {m["name"]: m["value"] for m in typ["members"]}
+
+
+def test_enum_create_unsigned_high_value(client):
+    created, _ = ok(client, "enum", {"name": "IDB_ENUM_HIGH", "members": "HI=0x9c402000", "bitfield": False})
+    assert created["name"] == "IDB_ENUM_HIGH"
+    assert created["extended"] is False
+    assert created["bitfield"] is False
+    assert _member_values(created) == {"HI": 0x9C402000}
+
+    typ, _ = ok(client, "type", {"name": "IDB_ENUM_HIGH"})
+    assert typ["kind"] == "enum"
+    assert typ["size"] == 4
+    assert _member_values(typ) == {"HI": 0x9C402000}
+    assert _member_values(typ)["HI"] != 0xFFFFFFFF9C402000
+
+
+def test_type_masks_declared_enum_sign_extension(client):
+    ok(client, "declare", {"text": "enum IDB_DECL_HIGH { IDB_DECL_HI = 0x9c402000 };"})
+    typ, _ = ok(client, "type", {"name": "IDB_DECL_HIGH"})
+    assert typ["kind"] == "enum"
+    assert typ["size"] == 4
+    assert _member_values(typ) == {"IDB_DECL_HI": 0x9C402000}
+    assert _member_values(typ)["IDB_DECL_HI"] != 0xFFFFFFFF9C402000
+
+
+def test_union_select_live_negative(client):
+    if not _has_hexrays(client):
+        pytest.skip("no Hex-Rays")
+    reply = client.call("union_select", {"addr": hex(_entry_ea(client)), "member": "__no_such_arm__"})
+    assert not protocol.is_ok(reply), reply
+    err = reply["error"]
+    assert err["code"] in (protocol.NOT_FOUND, protocol.IDA_ERROR)
+    assert "deferred" not in err["message"]
+
+
+def test_union_select_roundtrip(client):
+    if not _has_hexrays(client):
+        pytest.skip("no Hex-Rays")
+    addr, arm = os.environ.get("IDB_UNION_ADDR"), os.environ.get("IDB_UNION_MEMBER")
+    if not (addr and arm):
+        pytest.skip("set IDB_UNION_ADDR + IDB_UNION_MEMBER to a known union usage site")
+    res, _ = ok(client, "union_select", {"addr": addr, "member": arm})
+    assert res["member"] == arm or str(res["ordinal"]) == arm
+    assert res["verified"], res
+    ok(client, "undo")
+
+
+def _has_hexrays(client):
+    return protocol.is_ok(client.call("decompile", {"func": hex(_entry_ea(client))}, timeout_ms=60000))
+
+
+def test_pseudocode_comment(client):
+    if not _has_hexrays(client):
+        pytest.skip("no Hex-Rays")
+    dis, _ = ok(client, "disas", {"target": hex(_entry_ea(client))})
+    text = "IDB_PSEUDO_CMT"
+    anchored = False
+    for ln in dis["lines"][:20]:
+        res, _ = ok(client, "comment", {"addr": hex(ln["ea"]), "text": text})
+        assert res["disasm"] is True
+        if res["pseudocode"]:
+            anchored = True
+            dec = client.call("decompile", {"func": hex(_entry_ea(client))}, timeout_ms=60000)
+            assert text in "\n".join(dec["result"]["lines"])
+            break
+    assert anchored, "no statement address anchored a pseudocode comment"
+
+
+def test_settype_local_lvar(client):
+    if not _has_hexrays(client):
+        pytest.skip("no Hex-Rays")
+    import re
+
+    funcs, _ = ok(client, "funcs", {"count": 40})
+    chosen = None
+    for f in funcs["data"]:
+        dec = client.call("decompile", {"func": hex(f["ea"])}, timeout_ms=60000)
+        if not protocol.is_ok(dec):
+            continue
+        for line in dec["result"]["lines"]:  # local decl: "  int v0; // eax"
+            m = re.match(r"\s+[\w ]+?\b([A-Za-z_]\w*);\s*//", line)
+            if m:
+                chosen = (f["ea"], m.group(1))
+                break
+        if chosen:
+            break
+    if not chosen:
+        pytest.skip("no function with a local variable found")
+    target = f"{hex(chosen[0])}:{chosen[1]}"
+    ok(client, "settype", {"target": target, "type": "char"})
+    res, _ = ok(client, "typeof", {"target": target})
+    assert "char" in res["type"]
+
+
+def test_settype_function_prototype(client):
+    ea = _entry_ea(client)
+    result, _ = ok(
+        client,
+        "settype",
+        {"target": hex(ea), "type": "int __fastcall(int idb_argc_unique, char **idb_argv_unique)"},
+    )
+    assert result["ea"] == ea
+    assert "int" in result["type"]
+    assert "idb_argc_unique" in result["type"] and "idb_argv_unique" in result["type"]
+    readback, _ = ok(client, "typeof", {"target": hex(ea)})
+    assert "idb_argc_unique" in readback["type"] and "idb_argv_unique" in readback["type"]
+    ok(client, "undo")
+
+
+def test_enum_create_and_extend(client):
+    created, _ = ok(client, "enum", {"name": "IDB_EXT", "members": "A=1,B=2", "bitfield": False})
+    assert created["extended"] is False
+    assert _member_values(created) == {"A": 1, "B": 2}
+
+    after_create, _ = ok(client, "type", {"name": "IDB_EXT"})
+    assert _member_values(after_create) == {"A": 1, "B": 2}
+
+    extended, _ = ok(client, "enum", {"name": "IDB_EXT", "members": "C=9"})
+    assert extended["extended"] is True
+    assert _member_values(extended) == {"C": 9}
+
+    typ, _ = ok(client, "type", {"name": "IDB_EXT"})
+    assert _member_values(typ) == {"A": 1, "B": 2, "C": 9}
+
+
+def test_enum_extend_unsigned_high_value(client):
+    created, _ = ok(client, "enum", {"name": "IDB_EXT_HIGH", "members": "A=1", "bitfield": False})
+    assert created["extended"] is False
+    assert _member_values(created) == {"A": 1}
+
+    after_create, _ = ok(client, "type", {"name": "IDB_EXT_HIGH"})
+    assert after_create["kind"] == "enum"
+    assert after_create["size"] == 4
+    assert _member_values(after_create) == {"A": 1}
+
+    extended, _ = ok(client, "enum", {"name": "IDB_EXT_HIGH", "members": "HI_EXT=0x9c402000"})
+    assert extended["extended"] is True
+    assert _member_values(extended) == {"HI_EXT": 0x9C402000}
+
+    typ, _ = ok(client, "type", {"name": "IDB_EXT_HIGH"})
+    assert typ["kind"] == "enum"
+    assert typ["size"] == 4
+    assert _member_values(typ) == {"A": 1, "HI_EXT": 0x9C402000}
+    assert _member_values(typ)["HI_EXT"] != 0xFFFFFFFF9C402000
+
+```
+
+`tests/test_cli_resolution.py`:
+
+```py
+import argparse
+
+import pytest
+
+from idb import cli, registry
+from idb.errors import IdbError, NO_SESSION, AMBIGUOUS
+
+
+def _ns(**kw):
+    base = {"session": None, "idb": None}
+    base.update(kw)
+    return argparse.Namespace(**base)
+
+
+def _entry(sid, **over):
+    e = {"id": sid, "port": 1, "token": "t", "status": "ready", "input_path": f"C:\\b\\{sid}.exe"}
+    e.update(over)
+    return e
+
+
+def _request(argv):
+    ns = cli.build_parser().parse_args(argv)
+    return cli.build_request(cli.normalize_namespace(ns))
+
+
+@pytest.fixture(autouse=True)
+def _no_cleanup(monkeypatch):
+    monkeypatch.setattr(registry, "cleanup_stale", lambda: None)
+
+
+def test_resolve_zero_raises_no_session(monkeypatch):
+    monkeypatch.setattr(registry, "list_all", lambda: [])
+    with pytest.raises(IdbError) as ei:
+        cli.resolve_session(_ns())
+    assert ei.value.code == NO_SESSION
+
+
+def test_resolve_single_healthy(monkeypatch):
+    monkeypatch.setattr(registry, "list_all", lambda: [_entry("a")])
+    monkeypatch.setattr(registry, "probe", lambda e: "ready")
+    assert cli.resolve_session(_ns())["id"] == "a"
+
+
+def test_resolve_many_raises_ambiguous(monkeypatch, capsys):
+    monkeypatch.setattr(registry, "list_all", lambda: [_entry("a"), _entry("b")])
+    monkeypatch.setattr(registry, "probe", lambda e: "ready")
+    with pytest.raises(IdbError) as ei:
+        cli.resolve_session(_ns())
+    assert ei.value.code == AMBIGUOUS
+    assert "SESSION" in capsys.readouterr().err  # table dumped to stderr
+
+
+def test_resolve_by_session_id(monkeypatch):
+    monkeypatch.setattr(registry, "list_all", lambda: [_entry("a"), _entry("b")])
+    assert cli.resolve_session(_ns(session="b"))["id"] == "b"
+    with pytest.raises(IdbError) as ei:
+        cli.resolve_session(_ns(session="zzz"))
+    assert ei.value.code == NO_SESSION
+
+
+def test_resolve_by_idb_path(monkeypatch):
+    entries = [
+        _entry("a", input_path=r"C:\b\foo.exe", idb_path=r"C:\b\foo.exe.i64"),
+        _entry("b", input_path=r"C:\b\bar.exe", idb_path=r"C:\b\bar.exe.i64"),
+    ]
+    monkeypatch.setattr(registry, "list_all", lambda: entries)
+    assert cli.resolve_session(_ns(idb=r"C:\b\foo.exe"))["id"] == "a"
+    assert cli.resolve_session(_ns(idb=r"C:\b\bar.exe.i64"))["id"] == "b"
+
+
+def test_sessions_paginates_local_rows(monkeypatch, capsys):
+    monkeypatch.setattr(registry, "list_all", lambda: [_entry("a"), _entry("b"), _entry("c")])
+    monkeypatch.setattr(registry, "probe", lambda e: "ready")
+
+    assert cli.cmd_sessions(_ns(offset=1, count=1)) == 0
+
+    captured = capsys.readouterr()
+    lines = captured.out.splitlines()
+    assert len(lines) == 2
+    assert lines[1].split()[0] == "b"
+    assert "[+more; resume with -o 2]" in captured.err
+
+
+def test_disas_forwards_pagination_flags():
+    assert _request(["disas", "0x401000", "-o", "8", "-n", "4"]) == (
+        "disas",
+        {"target": "0x401000", "offset": 8, "count": 4},
+    )
+
+
+def test_read_forwards_pagination_flags():
+    assert _request(["read", "0x401000", "-w", "4", "-o", "8", "-n", "4"]) == (
+        "read",
+        {"addr": "0x401000", "width": 4, "offset": 8, "count": 4},
+    )
+
+
+def test_read_alias_forwards_pagination_flags_and_width():
+    assert _request(["db", "0x401000", "-o", "8", "-n", "4"]) == (
+        "read",
+        {"addr": "0x401000", "width": 1, "offset": 8, "count": 4},
+    )
+
+
+def test_global_pagination_flags_work_before_command():
+    assert _request(["-o", "8", "-n", "4", "db", "0x401000"]) == (
+        "read",
+        {"addr": "0x401000", "width": 1, "offset": 8, "count": 4},
+    )
+
+
+def test_command_flags_override_globals():
+    assert _request(["-o", "8", "-n", "4", "disas", "0x401000", "-n", "2"]) == (
+        "disas",
+        {"target": "0x401000", "offset": 8, "count": 2},
+    )
+
+
+@pytest.mark.parametrize(
+    ("argv", "expected_cmd", "expected_args"),
+    [
+        (["segments"], "segments", {"offset": 8, "count": 4, "total": False}),
+        (["funcs"], "funcs", {"pattern": None, "offset": 8, "count": 4, "total": False}),
+        (["imports"], "imports", {"pattern": None, "offset": 8, "count": 4, "total": False}),
+        (["exports"], "exports", {"pattern": None, "offset": 8, "count": 4, "total": False}),
+        (["strings"], "strings", {"pattern": None, "offset": 8, "count": 4, "total": False}),
+        (["names", "CreateFile"], "names", {"pattern": "CreateFile", "offset": 8, "count": 4, "total": False}),
+        (["disas", "0x401000"], "disas", {"target": "0x401000", "offset": 8, "count": 4}),
+        (["decompile", "sub_401000"], "decompile", {"func": "sub_401000", "offset": 8, "count": 4}),
+        (["read", "0x401000"], "read", {"addr": "0x401000", "width": 1, "offset": 8, "count": 4}),
+        (["xref_to", "0x401000"], "xref_to", {"addr": "0x401000", "offset": 8, "count": 4}),
+        (["xref_from", "0x401000"], "xref_from", {"addr": "0x401000", "offset": 8, "count": 4}),
+        (["calls", "sub_401000"], "calls", {"func": "sub_401000", "offset": 8, "count": 4}),
+        (
+            ["search", "90"],
+            "search",
+            {"pattern": "90", "kind": "bytes", "offset": 8, "count": 4},
+        ),
+        (
+            ["types", "GUID"],
+            "types",
+            {"pattern": "GUID", "kind": None, "offset": 8, "count": 4, "total": False},
+        ),
+        (["type", "GUID"], "type", {"name": "GUID", "offset": 8, "count": 4}),
+        (["struct", "GUID"], "struct", {"type": "GUID", "addr": None, "offset": 8, "count": 4}),
+        (
+            ["member", "GUID", "8"],
+            "member",
+            {"type": "GUID", "offset": "8", "page_offset": 8, "count": 4},
+        ),
+        (["frame", "sub_401000"], "frame", {"func": "sub_401000", "offset": 8, "count": 4}),
+    ],
+)
+def test_all_paginated_commands_forward_pagination(argv, expected_cmd, expected_args):
+    cmd, args = _request(["-o", "8", "-n", "4", *argv])
+    assert cmd == expected_cmd
+    assert args == expected_args
+
+```
+
+`tests/test_fmt_golden.py`:
+
+```py
+from idb.fmt import listing
+from idb.fmt import memory as fmt_memory
+from idb.fmt import sessions as fmt_sessions
+from idb.fmt import xrefs as fmt_xrefs
+from idb.fmt import types as fmt_types
+from idb.fmt import writes as fmt_writes
+from idb.fmt.columns import align
+
+_SUMMARY = {
+    "input": "where.exe", "format": "Portable executable for AMD64 (PE)",
+    "arch": "metapc", "bitness": 64, "endian": "little", "base": 0x140000000,
+    "min_ea": 0x140001000, "max_ea": 0x14000E000, "size": 0xD000,
+    "md5": "8066fe09b1f19ba7752896c2fd68b04c", "sha256": "f51f",
+    "num_functions": 103, "num_globals": 186, "num_segments": 7,
+    "entry_points": [{"ea": 0x140001300, "name": "wmainCRTStartup"}],
+}
+
+
+def test_align_exact():
+    out = align([("a", "bb"), ("ccc", "d")], headers=("H1", "H2"))
+    assert out == "H1   H2\na    bb\nccc  d"
+
+
+def test_align_right_alignment():
+    out = align([("x", "1"), ("yy", "1000")], aligns=("<", ">"))
+    line1, line2 = out.splitlines()
+    assert line1 == "x      1"
+    assert line2 == "yy  1000"
+
+
+def test_open_summary_lines():
+    out = listing.format_open_summary(_SUMMARY)
+    lines = out.splitlines()
+    assert lines[0] == "where.exe   Portable executable for AMD64 (PE)"
+    assert "arch     metapc 64-bit little-endian" in out
+    assert "base     0x140000000   size 0xd000 (53248 bytes)" in out
+    assert "md5      8066fe09b1f19ba7752896c2fd68b04c" in out
+    assert "segments 7   functions 103   named globals 186" in out
+    assert "wmainCRTStartup@0x140001300" in out
+
+
+def test_segments_table():
+    result = {"data": [
+        {"name": ".text", "start": 0x1000, "end": 0x2000, "size": 0x1000, "perm": "r-x", "class": "CODE"},
+        {"name": ".data", "start": 0x2000, "end": 0x3000, "size": 0x1000, "perm": "rw-", "class": "DATA"},
+    ]}
+    out = listing.format_segments(result)
+    lines = out.splitlines()
+    assert lines[0].split() == ["NAME", "START", "END", "SIZE", "PERM", "CLASS"]
+    assert lines[1].split() == [".text", "0x1000", "0x2000", "0x1000", "r-x", "CODE"]
+    assert lines[2].split() == [".data", "0x2000", "0x3000", "0x1000", "rw-", "DATA"]
+
+
+def test_sessions_table():
+    rows = [{"id": "s1", "status": "ready", "pid": 100, "port": 5000, "input_path": r"C:\b\x.exe"}]
+    out = fmt_sessions.format_sessions(rows)
+    lines = out.splitlines()
+    assert lines[0].split() == ["SESSION", "STATUS", "PID", "PORT", "INPUT"]
+    assert lines[1].split() == ["s1", "ready", "100", "5000", r"C:\b\x.exe"]
+    assert fmt_sessions.format_sessions([]) == "(no sessions)"
+
+
+def test_doctor_table():
+    rows = [("python", "OK", "3.13"), ("idapro", "MISSING", "install it")]
+    out = fmt_sessions.format_doctor(rows)
+    assert out.splitlines()[0].split() == ["CHECK", "STATUS", "DETAIL"]
+    assert "idapro" in out and "MISSING" in out
+
+
+def test_hexdump_layout():
+    out = fmt_memory.format_read({"addr": 0x401000, "width": 1, "bytes": bytes(range(16))})
+    line = out.splitlines()[0]
+    assert line.startswith("000000401000  ")
+    assert "00 01 02 03 04 05 06 07-08 09 0a 0b 0c 0d 0e 0f" in line
+    assert line.endswith("................")
+
+
+def test_values_layout():
+    out = fmt_memory.format_read({"addr": 0x401000, "width": 4, "values": [1, 2, 3, 4]})
+    assert "00000001 00000002 00000003 00000004" in out
+
+
+def test_string_layout():
+    out = fmt_memory.format_string({"addr": 0x401000, "encoding": "ascii", "length": 3, "text": "abc"})
+    assert out == '0x401000  ascii 3 bytes  "abc"'
+
+
+def test_nearest_layout():
+    out = listing.format_nearest({"addr": 0x401010, "symbol": {"name": "f", "ea": 0x401000, "offset": 0x10},
+                                  "func": {"name": "f", "ea": 0x401000, "offset": 0x10}})
+    assert "0x401010" in out and "f+0x10" in out and "(in f+0x10)" in out
+
+
+def test_xrefs_format():
+    result = {"data": [{"ea": 0x401204, "kind": "call", "func": "validate_key",
+                        "insn": "call sub_401300"}]}
+    out = fmt_xrefs.format_xrefs(result)
+    assert out == "401204  call    call sub_401300   ; in validate_key"
+
+
+def test_calls_format():
+    result = {"func": "f", "ea": 0x401000,
+              "callers": [{"ea": 0x401100, "func": "g", "insn": "call f"}],
+              "callees": [{"ea": 0x402000, "name": "h"}]}
+    out = fmt_xrefs.format_calls(result)
+    assert "callers (1)" in out and "callees (1)" in out
+    assert "call f" in out and "h" in out
+
+
+def test_type_members_format():
+    result = {"name": "GUID", "kind": "struct", "size": 16, "is_union": False,
+              "members": [{"name": "Data1", "offset": 0, "size": 4, "type": "unsigned int", "bitfield": False}]}
+    out = fmt_types.format_type(result)
+    assert "struct GUID" in out and "Data1" in out and "unsigned int" in out
+
+
+def test_member_paths_format():
+    result = {"type": "GUID", "offset": 8,
+              "paths": [{"path": "Data4[0]", "type": "unsigned __int8", "size": 1}]}
+    out = fmt_types.format_member(result)
+    assert "Data4[0] : unsigned __int8" in out and "size 0x1" in out
+
+
+def test_typeof_format():
+    out = fmt_types.format_typeof({"target": "g", "type": "int", "kind": "scalar", "size": 4})
+    assert out == "g : int  (scalar, 0x4 bytes)"
+
+
+def test_write_formats():
+    assert fmt_writes.format_rename({"ea": 0x401000, "name": "f", "kind": "name"}) == "renamed 0x401000 -> f"
+    assert fmt_writes.format_rename({"target": "g:v", "name": "x", "kind": "lvar"}) == "renamed local g:v -> x"
+    assert fmt_writes.format_patch({"ea": 0x401000, "count": 2, "bytes": b"\x90\x90"}) == "patched 2 bytes @ 0x401000: 9090"
+    assert fmt_writes.format_enum({"name": "E", "members": [{"name": "A", "value": 1}]}) == "enum E: A=1"
+    assert fmt_writes.format_undo({"undone": True, "label": "patch"}) == "undone: patch"
+    assert fmt_writes.format_settype({"ea": 0x401000, "type": "int *"}) == "0x401000 : int *"
+    us = {"ea": 0x401000, "union": "U", "member": "u1", "ordinal": 1, "verified": True}
+    assert fmt_writes.format_union_select(us) == "union @ 0x401000: U -> .u1 (arm 1)"
+    assert fmt_writes.format_union_select({**us, "verified": False}) == "union @ 0x401000: U -> .u1 (arm 1) (unverified)"
+
+
+def test_comment_and_extend_formats():
+    both = {"ea": 0x401000, "comment": "x", "disasm": True, "pseudocode": True}
+    assert fmt_writes.format_comment(both) == "comment @ 0x401000 (disasm+pseudo): x"
+    dis_only = {"ea": 0x401000, "comment": "x", "disasm": True, "pseudocode": False}
+    assert fmt_writes.format_comment(dis_only) == "comment @ 0x401000 (disasm): x"
+    extended = {"name": "E", "extended": True, "members": [{"name": "C", "value": 9}]}
+    assert fmt_writes.format_enum(extended) == "enum E extended: C=9"
+    assert fmt_writes.format_settype({"target": "f:v", "type": "char"}) == "f:v : char"
+
+
+def test_generic_renders_bytes_as_hex():
+    out = listing.format_generic({"blob": b"\xde\xad", "n": 1})
+    assert "dead" in out and '"n": 1' in out
+
+```
+
+`tests/test_idahelp_pure.py`:
+
+```py
+import pytest
+
+from idb import protocol
+from idb.errors import IdbError
+from idb.worker import idahelp
+
+
+def test_parse_addr_forms():
+    assert idahelp.parse_addr(0x401000) == 0x401000
+    assert idahelp.parse_addr("0x401000") == 0x401000
+    assert idahelp.parse_addr("0X401000") == 0x401000
+    assert idahelp.parse_addr("0n4096") == 4096
+    assert idahelp.parse_addr("401000") == 0x401000  # bare hex (windbg default)
+    assert idahelp.parse_addr("deadbeef") == 0xDEADBEEF
+
+
+@pytest.mark.parametrize("bad", ["xyz", "sub_401000", "0xZZ", ""])
+def test_parse_addr_rejects(bad):
+    with pytest.raises(IdbError) as ei:
+        idahelp.parse_addr(bad)
+    assert ei.value.code == protocol.BAD_ADDRESS
+
+
+def test_paginate_basic():
+    assert idahelp.paginate(range(10), 0, 3) == ([0, 1, 2], 3)
+    assert idahelp.paginate(range(10), 0, None) == (list(range(10)), None)
+    assert idahelp.paginate(range(3), 0, 5) == ([0, 1, 2], None)
+    assert idahelp.paginate(range(10), 8, 5) == ([8, 9], None)
+    assert idahelp.paginate(range(10), 0, 10) == (list(range(10)), None)
+    assert idahelp.paginate(range(11), 0, 10) == (list(range(10)), 10)
+    assert idahelp.paginate(range(10), 20, 3) == ([], None)
+
+
+def test_paginate_resume_cursor():
+    items, nxt = idahelp.paginate(range(100), 0, 25)
+    assert nxt == 25 and items[-1] == 24
+    items2, nxt2 = idahelp.paginate(range(100), nxt, 25)
+    assert items2[0] == 25 and nxt2 == 50
+
+
+def test_name_filter_substring_glob_regex():
+    assert idahelp.name_filter(None)("whatever") is True
+    sub = idahelp.name_filter("foo")
+    assert sub("xFOOy") and not sub("bar")
+    glob = idahelp.name_filter("sub_*")
+    assert glob("sub_401000") and not glob("main")
+    rx = idahelp.name_filter("/^sub_[0-9a-f]+$/")
+    assert rx("sub_401000") and not rx("sub_xyz")
+
+
+def test_page_meta():
+    assert idahelp.page_meta([1, 2, 3], None) is None
+    assert idahelp.page_meta([1, 2, 3], 3) == {"shown": 3, "truncated": True, "next_offset": 3}
+    assert idahelp.page_meta([1, 2, 3], None, total=10) == {"shown": 3, "total": 10}
+
+```
+
+`tests/test_import_order.py`:
+
+```py
+"""Bootstrap invariant: no ida_* module is imported before idapro is activated.
+
+Part A needs no IDA (asserts the worker bootstrap is lazy). Part B is gated on
+idapro being importable (asserts idapro precedes any ida_* import).
+"""
+
+import importlib.util
+import subprocess
+import sys
+
+import pytest
+
+_HAS_IDAPRO = importlib.util.find_spec("idapro") is not None
+
+_PART_A = r"""
+import sys
+import idb.worker.main          # module import must NOT pull in IDA
+bad = sorted(m for m in sys.modules if m == "idapro" or m.startswith("ida_") or m == "idautils")
+print("BAD:" + ",".join(bad))
+"""
+
+_PART_B = r"""
+import sys
+seq = []
+sys.addaudithook(lambda event, args: seq.append(args[0]) if event == "import" else None)
+
+import idb.worker.activate as activate
+pre = [m for m in sys.modules if m == "idapro" or m.startswith("ida_") or m == "idautils"]
+assert not pre, f"ida imported too early: {pre}"
+
+activate.ensure_idalib()
+assert "idapro" in sys.modules, "idapro not imported by ensure_idalib"
+
+def is_ida(name):
+    return name == "idautils" or name.startswith("ida_")
+
+i_idapro = next((i for i, n in enumerate(seq) if n == "idapro"), None)
+i_ida = next((i for i, n in enumerate(seq) if is_ida(n)), None)
+assert i_idapro is not None
+assert i_ida is None or i_ida > i_idapro, f"ida_* (#{i_ida}) imported before idapro (#{i_idapro})"
+print("OK")
+"""
+
+
+def _run(code):
+    return subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, timeout=120)
+
+
+def test_worker_bootstrap_is_lazy():
+    res = _run(_PART_A)
+    assert res.returncode == 0, res.stderr
+    assert "BAD:\n" in res.stdout or res.stdout.strip() == "BAD:", res.stdout
+
+
+@pytest.mark.skipif(not _HAS_IDAPRO, reason="idapro not installed")
+def test_idapro_precedes_ida_modules():
+    res = _run(_PART_B)
+    assert res.returncode == 0, res.stderr
+    assert "OK" in res.stdout, res.stdout
+
+```
+
+`tests/test_protocol.py`:
+
+```py
+from idb import protocol
+
+
+def _roundtrip(obj):
+    return protocol.decode(protocol.encode(obj))
+
+
+def test_request_roundtrip_and_version():
+    req = protocol.build_request(7, "deadbeef", "read", {"addr": 0x401000, "n": 16})
+    out = _roundtrip(req)
+    assert out == req
+    assert out["v"] == protocol.PROTOCOL_VERSION
+    assert out["id"] == 7
+    assert out["cmd"] == "read"
+
+
+def test_ok_and_error_shapes():
+    ok = protocol.build_ok(1, {"x": 1}, meta={"truncated": True, "next_offset": 50})
+    out = _roundtrip(ok)
+    assert out["ok"] is True
+    assert out["result"] == {"x": 1}
+    assert out["meta"]["next_offset"] == 50
+
+    err = protocol.build_error(2, protocol.BAD_ADDRESS, "nope", data={"addr": 0})
+    out = _roundtrip(err)
+    assert out["ok"] is False
+    assert out["error"]["code"] == "BAD_ADDRESS"
+    assert out["error"]["message"] == "nope"
+    assert out["error"]["data"] == {"addr": 0}
+    assert protocol.is_ok(ok) and not protocol.is_ok(err)
+
+
+def test_no_meta_no_data_keys_when_absent():
+    assert "meta" not in protocol.build_ok(1, 5)
+    assert "data" not in protocol.build_error(1, protocol.INTERNAL, "boom")
+
+
+def test_bytes_payload_survives_as_bytes():
+    blob = bytes(range(256))
+    out = _roundtrip(protocol.build_ok(1, {"bytes": blob, "text": "hello"}))
+    assert out["result"]["bytes"] == blob
+    assert isinstance(out["result"]["bytes"], bytes)
+    assert isinstance(out["result"]["text"], str)
+
+
+def test_64bit_ints_preserved():
+    for value in (0, 0x401000, 0x7FFF_FFFF_FFFF, 0xFFFF_FFFF_FFFF_FFFF):
+        out = _roundtrip(protocol.build_ok(1, {"ea": value}))
+        assert out["result"]["ea"] == value
+
+
+def test_decoded_keys_are_str():
+    req = protocol.build_request(1, "t", "x", {"nested": {"a": 1}})
+    out = _roundtrip(req)
+    assert all(isinstance(k, str) for k in out)
+    assert all(isinstance(k, str) for k in out["args"])
+    assert all(isinstance(k, str) for k in out["args"]["nested"])
+
+```
+
+`tests/test_registry.py`:
+
+```py
+import os
+
+import pytest
+
+from idb import registry
+
+
+@pytest.fixture
+def reg_dir(tmp_path, monkeypatch):
+    monkeypatch.setattr(registry, "state_dir", lambda: tmp_path)
+    return tmp_path
+
+
+def _entry(session_id, **over):
+    base = {
+        "v": registry.SCHEMA_VERSION,
+        "id": session_id,
+        "input_path": r"C:\bins\foo.exe",
+        "idb_path": r"C:\bins\foo.i64",
+        "status": registry.STATUS_READY,
+        "port": 51000,
+        "token": "abc123",
+        "pid": os.getpid(),
+        "started_at": 1.0,
+    }
+    base.update(over)
+    return base
+
+
+def test_session_id_stable_and_slugged():
+    a = registry.session_id(r"C:\bins\foo.exe")
+    b = registry.session_id(r"c:\bins\FOO.exe" if os.name == "nt" else r"C:\bins\foo.exe")
+    assert a == b  # case-folded on Windows, identical path elsewhere
+    assert a.startswith("foo.exe-")
+    assert registry.session_id(r"C:\bins\bar.exe") != a
+
+
+def test_candidate_keys_includes_db_siblings():
+    cands = registry.candidate_keys(r"C:\bins\foo.exe")
+    assert registry.normkey(r"C:\bins\foo.exe") in cands
+    assert registry.normkey(r"C:\bins\foo.exe.i64") in cands
+    assert registry.normkey(r"C:\bins\foo.exe.idb") in cands
+    back = registry.candidate_keys(r"C:\bins\foo.exe.i64")
+    assert registry.normkey(r"C:\bins\foo.exe.i64") in back
+    assert registry.normkey(r"C:\bins\foo.exe") in back
+
+
+def test_predicted_db_paths():
+    assert registry.predicted_db_paths(r"C:\bins\foo.exe") == [
+        os.path.abspath(r"C:\bins\foo.exe.i64"),
+        os.path.abspath(r"C:\bins\foo.exe.idb"),
+    ]
+    assert registry.predicted_db_paths(r"C:\bins\foo.exe.i64") == [os.path.abspath(r"C:\bins\foo.exe.i64")]
+
+
+def test_claim_is_exclusive(reg_dir):
+    sid = "foo-00000000"
+    assert registry.claim(_entry(sid, status=registry.STATUS_PENDING, port=None, token=None)) is True
+    assert registry.claim(_entry(sid, status=registry.STATUS_PENDING)) is False
+    assert registry.read(sid)["status"] == registry.STATUS_PENDING
+
+
+def test_pending_to_ready_update(reg_dir):
+    sid = "foo-00000000"
+    registry.claim(_entry(sid, status=registry.STATUS_PENDING, port=None, token=None))
+    registry.update(sid, status=registry.STATUS_READY, port=51234, token="tok")
+    got = registry.read(sid)
+    assert got["status"] == registry.STATUS_READY
+    assert got["port"] == 51234 and got["token"] == "tok"
+
+
+def test_write_read_roundtrip_and_no_temp_left(reg_dir):
+    sid = "foo-00000000"
+    registry.write(_entry(sid))
+    assert registry.read(sid)["port"] == 51000
+    leftovers = [n for n in os.listdir(reg_dir) if not n.endswith(".json")]
+    assert leftovers == []
+
+
+def test_read_corrupt_returns_none(reg_dir):
+    (reg_dir / "bad.json").write_text("{not json")
+    assert registry.read_path(reg_dir / "bad.json") is None
+    assert registry.list_all() == []
+
+
+def test_list_and_match(reg_dir):
+    registry.write(_entry("foo-1", input_path=r"C:\bins\foo.exe", idb_path=r"C:\bins\foo.exe.i64"))
+    registry.write(_entry("bar-2", input_path=r"C:\bins\bar.exe", idb_path=r"C:\bins\bar.exe.i64"))
+    entries = registry.list_all()
+    assert len(entries) == 2
+
+    assert [e["id"] for e in registry.match(entries, session="bar-2")] == ["bar-2"]
+    assert [e["id"] for e in registry.match(entries, idb=r"C:\bins\foo.exe")] == ["foo-1"]
+    assert [e["id"] for e in registry.match(entries, idb=r"C:\bins\foo.exe.i64")] == ["foo-1"]
+    assert registry.match(entries, idb=r"C:\bins\nope.exe") == []
+    assert len(registry.match(entries)) == 2
+
+
+def test_pid_alive_self_and_bogus():
+    assert registry.pid_alive(os.getpid()) is True
+    assert registry.pid_alive(0) is False
+    assert registry.pid_alive(0x7FFFFFFE) is False
+
+
+def test_cleanup_stale_only_dead(reg_dir, monkeypatch):
+    registry.write(_entry("dead-1", pid=4242))
+    registry.write(_entry("live-2", pid=4243))
+    monkeypatch.setattr(registry, "pid_alive", lambda pid: pid == 4243)
+    removed = registry.cleanup_stale()
+    assert removed == ["dead-1"]
+    assert {e["id"] for e in registry.list_all()} == {"live-2"}
+
+
+def test_probe_states(reg_dir, monkeypatch):
+    monkeypatch.setattr(registry, "pid_alive", lambda pid: True)
+    monkeypatch.setattr(registry, "ping", lambda entry, timeout_ms=800: "ready")
+    assert registry.probe(_entry("a")) == "ready"
+
+    monkeypatch.setattr(registry, "ping", lambda entry, timeout_ms=800: None)
+    assert registry.probe(_entry("a", status=registry.STATUS_ANALYZING)) == registry.STATUS_ANALYZING
+    assert registry.probe(_entry("a", status=registry.STATUS_READY)) == registry.STATUS_BUSY
+
+    monkeypatch.setattr(registry, "pid_alive", lambda pid: False)
+    assert registry.probe(_entry("a", status=registry.STATUS_READY)) is None
+
+```
+
+`tests/test_spawn.py`:
+
+```py
+import os
+import socket
+import subprocess
+import sys
+import time
+
+import pytest
+
+from idb import registry, spawn
+
+_FAKE = os.path.join(os.path.dirname(__file__), "fake_worker.py")
+
+
+@pytest.fixture
+def tmp_env(tmp_path, monkeypatch):
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
+    monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path))
+    return tmp_path
+
+
+def _launch_fake(port, sid, token, mode="ready", register=False):
+    argv = [sys.executable, _FAKE, "--port", str(port), "--session", sid, "--mode", mode]
+    if register:
+        argv.append("--register")
+    env = {**os.environ, "IDB_WORKER_TOKEN": token}
+    return subprocess.Popen(argv, env=env)
+
+
+def _stop(proc):
+    try:
+        proc.terminate()
+        proc.wait(timeout=5)
+    except Exception:
+        proc.kill()
+
+
+def test_free_port_returns_usable_port():
+    p = spawn.free_port()
+    assert isinstance(p, int) and 1024 < p < 65536
+
+
+def test_poll_ready_success():
+    port, sid, token = spawn.free_port(), "fake-ok", "a" * 32
+    proc = _launch_fake(port, sid, token, mode="ready")
+    try:
+        ok, reason = spawn._poll_ready(sid, port, token, proc, time.time() + 15)
+        assert ok and reason == "ready"
+    finally:
+        _stop(proc)
+
+
+def test_poll_ready_detects_early_exit():
+    port, sid, token = spawn.free_port(), "fake-crash", "a" * 32
+    proc = _launch_fake(port, sid, token, mode="crash")
+    ok, reason = spawn._poll_ready(sid, port, token, proc, time.time() + 15)
+    assert not ok and "rc=1" in reason
+
+
+def test_poll_ready_bind_collision_is_retryable():
+    occupy = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    occupy.bind(("127.0.0.1", 0))
+    occupy.listen()
+    port = occupy.getsockname()[1]
+    sid, token = "fake-bind", "a" * 32
+    proc = _launch_fake(port, sid, token, mode="ready")  # cannot bind -> exit 3
+    try:
+        ok, reason = spawn._poll_ready(sid, port, token, proc, time.time() + 15)
+        assert not ok and reason == "bind"
+    finally:
+        _stop(proc)
+        occupy.close()
+
+
+def test_open_or_reuse_reuses_running_worker(tmp_env):
+    target = r"C:\fake\thing.exe"
+    sid = registry.session_id(target)
+    port, token = spawn.free_port(), "b" * 32
+    proc = _launch_fake(port, sid, token, mode="ready", register=True)
+    try:
+        deadline = time.time() + 15
+        while time.time() < deadline and (registry.read(sid) or {}).get("status") != registry.STATUS_READY:
+            time.sleep(0.1)
+        assert (registry.read(sid) or {}).get("status") == registry.STATUS_READY
+
+        entry, summary = spawn.open_or_reuse(target, deadline_s=10)
+        assert entry["id"] == sid
+        assert summary["input"] == "thing.exe" and summary["format"] == "FAKE"
+    finally:
+        _stop(proc)
+        registry.unregister(sid)
+
+
+def test_concurrent_claim_is_exclusive(tmp_env):
+    sid = "race-1"
+    e = {"v": registry.SCHEMA_VERSION, "id": sid, "status": registry.STATUS_PENDING}
+    assert registry.claim(e) is True
+    assert registry.claim(e) is False  # mid-start file survives a concurrent scan/claim
+
+```
+
+`tests/test_transport.py`:
+
+```py
+import hmac
+import threading
+import time
+
+import pytest
+import zmq
+
+from idb import protocol
+from idb.errors import IdbError
+from idb.transport import ZmqClient, ZmqServer
+
+TOKEN = "00112233445566778899aabbccddeeff"
+
+
+def _serve(server, stop):
+    while not stop.is_set():
+        raw = server.recv(timeout_ms=100)
+        if raw is None:
+            continue
+        req = protocol.decode(raw)
+        rid = req.get("id")
+        if not hmac.compare_digest(str(req.get("tok", "")), TOKEN):
+            server.send(protocol.encode(protocol.build_error(rid, protocol.UNAUTHORIZED, "bad token")))
+            continue
+        cmd = req.get("cmd")
+        if cmd == "ping":
+            server.send(protocol.encode(protocol.build_ok(rid, {"status": "ready"})))
+        elif cmd == "echo":
+            server.send(protocol.encode(protocol.build_ok(rid, req.get("args"))))
+        elif cmd == "slow":
+            time.sleep(0.3)  # outlast the client timeout; late reply lands on a dead peer
+            server.send(protocol.encode(protocol.build_ok(rid, {"slow": True})))
+        else:
+            server.send(protocol.encode(protocol.build_error(rid, protocol.UNKNOWN_CMD, "?")))
+
+
+@pytest.fixture
+def server():
+    ctx = zmq.Context()
+    srv = ZmqServer(0, ctx=ctx)
+    stop = threading.Event()
+    thread = threading.Thread(target=_serve, args=(srv, stop), daemon=True)
+    thread.start()
+    yield srv, ctx
+    stop.set()
+    thread.join(timeout=2)
+    srv.close()
+    ctx.term()
+
+
+def test_ping_roundtrip(server):
+    srv, ctx = server
+    client = ZmqClient(srv.port, TOKEN, ctx=ctx)
+    reply = client.call("ping", {}, timeout_ms=2000)
+    assert protocol.is_ok(reply)
+    assert reply["result"]["status"] == "ready"
+    client.close()
+
+
+def test_echo_preserves_bytes(server):
+    srv, ctx = server
+    client = ZmqClient(srv.port, TOKEN, ctx=ctx)
+    payload = {"blob": bytes(range(8)), "text": "hi"}
+    reply = client.call("echo", payload, timeout_ms=2000)
+    assert reply["result"] == payload
+    assert isinstance(reply["result"]["blob"], bytes)
+    client.close()
+
+
+def test_bad_token_is_unauthorized(server):
+    srv, ctx = server
+    client = ZmqClient(srv.port, "deadbeef", ctx=ctx)
+    reply = client.call("ping", {}, timeout_ms=2000)
+    assert reply["ok"] is False
+    assert reply["error"]["code"] == protocol.UNAUTHORIZED
+    client.close()
+
+
+def test_unknown_cmd(server):
+    srv, ctx = server
+    client = ZmqClient(srv.port, TOKEN, ctx=ctx)
+    reply = client.call("nope", {}, timeout_ms=2000)
+    assert reply["error"]["code"] == protocol.UNKNOWN_CMD
+    client.close()
+
+
+def test_timeout_then_socket_reset_recovers(server):
+    srv, ctx = server
+    client = ZmqClient(srv.port, TOKEN, ctx=ctx)
+    with pytest.raises(IdbError) as ei:
+        client.call("slow", {}, timeout_ms=50)
+    assert ei.value.code == protocol.TIMEOUT
+    # The REQ socket was reset; a fresh call on a new socket must still work,
+    # proving the Poller re-register + LINGER=0 recreation path.
+    reply = client.call("ping", {}, timeout_ms=2000)
+    assert protocol.is_ok(reply)
+    client.close()
+
+```
+
+`tests/test_worker_unit.py`:
+
+```py
+"""Tier-1/2 worker tests that need no IDA: budget + dispatch (error mapping,
+meta-tuple contract, size-cap guard). dispatch imports no ida_*; handlers are
+registered ad hoc here, so the real (ida-importing) handler modules never load."""
+
+import pytest
+
+from idb import protocol
+from idb.errors import IdbError
+from idb.worker import dispatch
+from idb.worker.budget import Budget
+
+
+def test_budget_trips_on_pure_loop():
+    b = Budget(-1.0)
+    with pytest.raises(IdbError) as ei:
+        for _ in range(100000):
+            b.check()
+    assert ei.value.code == protocol.TIMEOUT
+
+
+def test_budget_none_never_trips():
+    b = Budget(None)
+    for _ in range(1000):
+        b.check()
+    assert not b.expired
+
+
+@pytest.fixture
+def ctx():
+    dispatch.CTX.token = "secret"
+    dispatch.CTX.ready = True
+    saved = dict(dispatch.HANDLERS)
+    yield
+    dispatch.HANDLERS.clear()
+    dispatch.HANDLERS.update(saved)
+
+
+def _call(token, cmd, args):
+    raw = protocol.encode(protocol.build_request(1, token, cmd, args))
+    return protocol.decode(dispatch.dispatch(raw))
+
+
+def test_ok_and_meta_tuple(ctx):
+    @dispatch.handler("echo")
+    def _echo(x):
+        return {"x": x}
+
+    @dispatch.handler("pg")
+    def _pg():
+        return {"data": [1, 2]}, {"truncated": True, "next_offset": 2}
+
+    assert _call("secret", "echo", {"x": 5})["result"]["x"] == 5
+    assert _call("secret", "pg", {})["meta"]["next_offset"] == 2
+
+
+def test_bad_args_from_binding(ctx):
+    @dispatch.handler("need")
+    def _need(a):
+        return {"a": a}
+
+    assert _call("secret", "need", {"b": 1})["error"]["code"] == protocol.BAD_ARGS
+
+
+def test_unknown_cmd(ctx):
+    assert _call("secret", "nope", {})["error"]["code"] == protocol.UNKNOWN_CMD
+
+
+def test_unauthorized(ctx):
+    @dispatch.handler("p")
+    def _p():
+        return {}
+
+    assert _call("wrong", "p", {})["error"]["code"] == protocol.UNAUTHORIZED
+
+
+def test_bad_version(ctx):
+    raw = protocol.encode({"v": 99, "id": 1, "tok": "secret", "cmd": "x", "args": {}})
+    assert protocol.decode(dispatch.dispatch(raw))["error"]["code"] == protocol.BAD_REQUEST
+
+
+def test_idberror_and_internal(ctx):
+    @dispatch.handler("boom")
+    def _boom():
+        raise IdbError(protocol.NOT_FOUND, "missing")
+
+    @dispatch.handler("crash")
+    def _crash():
+        raise RuntimeError("oops")
+
+    assert _call("secret", "boom", {})["error"]["code"] == protocol.NOT_FOUND
+    assert _call("secret", "crash", {})["error"]["code"] == protocol.INTERNAL
+
+
+def test_not_ready(ctx):
+    dispatch.CTX.ready = False
+
+    @dispatch.handler("q")
+    def _q():
+        return {}
+
+    assert _call("secret", "q", {})["error"]["code"] == protocol.NOT_READY
+
+
+def test_writes_handler_runs_without_ida(ctx):
+    @dispatch.handler("w", writes=True)
+    def _w():
+        return {"ok": True}
+
+    # _create_undo_point imports ida_undo, which fails here and is swallowed.
+    assert _call("secret", "w", {})["result"]["ok"] is True
+
+
+def test_finalize_size_cap(monkeypatch):
+    monkeypatch.setattr(dispatch, "MAX_REPLY_BYTES", 64)
+    reply = protocol.decode(dispatch._finalize(1, {"data": list(range(2000))}, None))
+    assert reply["ok"] and reply["meta"]["truncated"]
+    assert len(reply["result"]["data"]) < 2000
+
+```
