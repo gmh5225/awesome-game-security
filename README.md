@@ -815,6 +815,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/evild3ad/MemProcFS-Analyzer [Windows Forensic Analysis]
 - https://github.com/eybisi/kavanoz [Statically unpacking common android banker malware]
 - https://github.com/cyberark/PipeViewer [Shows detailed information about named pipes in Windows]
+- https://github.com/synacktiv/thats_no_pipe [Frida-based Windows named pipe interceptor: hooks ReadFile/WriteFile, relays IPC to an HTTP proxy over WebSocket]
 - https://github.com/cursey/regenny [Reconstruct structures and generate header files]
 - https://github.com/zodiacon/EtwExplorer [View ETW Provider manifest]
 - https://github.com/jonny-jhnson/EtwWatcher [Browse and diff ETW provider snapshots across Windows builds; backed by ETWInspector]
