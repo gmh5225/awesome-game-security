@@ -1,0 +1,4470 @@
+Project Path: arc_synacktiv_thats_no_pipe_ophewbl9
+
+Source Tree:
+
+```txt
+arc_synacktiv_thats_no_pipe_ophewbl9
+├── Makefile
+├── README.md
+├── agent
+│   ├── communication.ts
+│   ├── dynamic_hook.ts
+│   ├── globals.ts
+│   ├── hooks.ts
+│   ├── inject
+│   │   └── main.ts
+│   ├── ioqueue.ts
+│   ├── lib
+│   │   ├── handle_filtering.ts
+│   │   ├── heap.ts
+│   │   └── queue_apc.ts
+│   ├── lib.ts
+│   ├── main.ts
+│   ├── ntioqueue.ts
+│   ├── ntreadfile.ts
+│   ├── ntwait.ts
+│   ├── ntwritefile.ts
+│   ├── overlapped_operations.ts
+│   ├── overlappedresult.ts
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── readfile.ts
+│   ├── tsconfig.json
+│   ├── wait.ts
+│   └── writefile.ts
+├── backend
+│   ├── main.py
+│   ├── requirements-dev.txt
+│   └── requirements.txt
+├── docs
+│   ├── format.md
+│   └── hooks.md
+├── tests
+│   ├── client
+│   │   └── named_pipe.go
+│   ├── config
+│   │   └── config.go
+│   ├── go.mod
+│   ├── go.sum
+│   ├── log
+│   │   └── log.go
+│   ├── main.go
+│   ├── routines
+│   │   ├── completionroutine.go
+│   │   ├── iocompletionports.go
+│   │   ├── overlapped.go
+│   │   ├── sync.go
+│   │   └── types.go
+│   ├── server
+│   │   └── named_pipe.go
+│   ├── tools
+│   │   └── acls.go
+│   └── winlib
+│       ├── hooking.go
+│       ├── readfileex.go
+│       ├── waitforsingleobjectex.go
+│       └── windows.go
+└── tools
+    └── pipe_parser.py
+
+```
+
+`Makefile`:
+
+```
+.DEFAULT_GOAL := build
+build: agent/dist/agent.js
+	@echo Ready to go
+
+dev-env: agent/node_modules backend/venv
+	@echo Ready to go
+
+build-tests: tests/dist/pipe.exe
+	@echo Ready to go
+
+tests/dist/pipe.exe: tests/**/*.go tests/go.mod tests/go.sum
+	cd tests && CC=x86_64-w64-mingw32-gcc CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -o dist/pipe.exe -trimpath
+
+agent/dist/agent.js: agent/node_modules agent/*.ts agent/**/*.ts
+	cd agent && npm run build
+
+agent/node_modules:
+	cd agent && npm ci --ignore-scripts
+
+backend/venv:
+	cd backend && python3 -m venv venv && ./venv/bin/python3 -m pip install -r requirements.txt && ./venv/bin/python3 -m pip install -r requirements-dev.txt
+
+clean:
+	rm -rf backend/venv
+	rm -rf agent/dist
+	rm -rf agent/node_modules
+	rm -rf tests/dist
+
+```
+
+`README.md`:
+
+```md
+# Thats no pipe
+
+Frida-based project to intercept Windows named pipe communication
+
+## Objectives
+
+This project aims at intercepting IPC communications by hooking specific WinAPI functions and forwarding them to an HTTP proxy using a websocket.
+
+## Architecture
+
+Read from and write to a named pipe can happen in different functions. In this section, WriteFile depicts a write to a named pipe and ReadFile depicts a read from a named pipe.
+
+When intercepted, data to be written follows this schema.
+
+```
+WriteFile --> frida hook --> python process --> websocket client --> HTTP Proxy --> websocket server --> python process --> frida hook --> WriteFile
+```
+
+On the other side, data to be read by the process follows this schema.
+
+```
+ReadFile --> frida hook --> python process --> websocket server --> HTTP Proxy --> websocket client --> python process --> frida hook --> ReadFile
+```
+
+The HTTP Proxy will receive a message "to the server" when the action is a write to a named pipe, and a message "to the client" when the action is the read from a named pipe.
+
+## Setup
+
+### Using Burp as an HTTP Proxy
+
+Add a proxy on port 8090, listening on all interfaces
+
+### Build the project
+
+Build the frida agent script using `make build`, the agent will be in `agent/dist/`
+
+### Windows setup
+
+1. Copy the `backend/*.py` and `backend/requirements.txt` (backend) and `agent/dist/agent.js` (agent) to the windows host
+2. `py -m pip install -r requirements.txt`
+3. `py .\main.py <pid_of_target> .\agent.js --ws-port 9090 --ws-host <ip_of_windows> --http-proxy-port 8090 --http-proxy-host <ip_of_burp> --handle-regexes '.*' --log-level INFO`
+
+## Disclamer
+
+Data sent to the HTTP Proxy follows a specific format defined in `docs/format.md`, tools to manipulate this custom format are provieded in `tools/`.
+**Modifying metadata can result in unability of the project to recognize and correctly route the message to the correct named pipe.**
+
+The frida script indefinitely waits for a response, therefore the process **can hang indefinitely** if you decide to drop the message.
+
+Injecting new messages is currently not supported by the project.
+
+## Development
+
+### LSP
+
+Frida provides typescript bindings to develop the agent. Once devDependencies have been installed, VSCode should recognize types automagically.
+
+A Makefile target `make dev-env` is provided to easily setup a development environment.
+
+
+```
+
+`agent/communication.ts`:
+
+```ts
+export const randomId = (length = 10) => {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  let counter = 0;
+  while (counter < length) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    counter += 1;
+  }
+  return result
+}
+
+
+// Communication between script and python process
+// funcName and message are mandatory
+export const sendMsg = ({ funcName, message, id, handleId, handlePath }: { funcName: string, message: number[] | ArrayBuffer, id?: string, handleId?: number, handlePath?: string }) => {
+  if (!id) {
+    id = "auto_" + randomId();
+  }
+  if (!handleId) {
+    handleId = 0
+  }
+  if (!handlePath) {
+    handlePath = "generic_pipe"
+  }
+  const payload = JSON.stringify({ funcName, id, handleId, handlePath })
+  send(payload, message)
+  return id
+}
+// identifier and callback are mandatory
+export const recvMsg = ({ identifier, callback, wait }: { identifier: string, callback: MessageCallback, wait?: boolean }) => {
+  const msgRecv = recv(identifier, callback)
+  if (!!wait) {
+    msgRecv.wait()
+  }
+}
+
+// Get a read operation from the data
+// if dontwait is true, the operation returns "immediately" with NO_DATA if the pipe is empty
+export const popReadOperation = ({ identifier, callback, handleId, bufferLength, dontwait }: { identifier?: string, callback: (status: string, payload: number[]) => void, handleId: number, bufferLength: number, dontwait?: boolean }) => {
+  if (!identifier) {
+    identifier = "auto_" + randomId();
+  }
+  const payload = JSON.stringify({ funcName: "ThatsNoPipeGetReadData", id: identifier, handleId, bufferLength, dontwait })
+  send(payload)
+  const msgRecv = recv(identifier, (value) => callback(value.status, value.payload))
+  msgRecv.wait()
+}
+
+// Correspond to the status returned by the python script
+export enum ReadResultStatus {
+  SUCCESS="SUCCESS",
+  FAILED="FAILED",
+  BUFFER_TOO_SMALL="BUFFER_TOO_SMALL",
+  NO_DATA="NO_DATA",
+}
+```
+
+`agent/dynamic_hook.ts`:
+
+```ts
+import { popReadOperation, ReadResultStatus, recvMsg, sendMsg } from "./communication.js";
+import { log } from "./globals.js";
+import { ERROR_INSUFFICIENT_BUFFER, ERROR_OPERATION_ABORTED, ERROR_SUCCESS } from "./hooks.js";
+import { logOverlappedOperations, popOverlappedOperationByOverlapped } from "./overlapped_operations.js";
+
+const attachedFunctions: number[] = [];
+const isHooked = (addr: NativePointer) => {
+  return attachedFunctions.indexOf(addr.toInt32()) !== -1
+}
+
+const completionRoutineOnEnter = (args: InvocationArguments) => {
+  const dwErrorCode = args[0];
+  const dwNumberOfBytesTransfered = args[1];
+  const lpOverlapped = args[2];
+
+  log("CustomCompletionRoutine-e:", dwErrorCode, dwNumberOfBytesTransfered, lpOverlapped)
+
+  if (dwErrorCode.toInt32() !== 0) {
+    // The I/O completion was not successful, do nothing
+    return
+  }
+
+  // Otherwise, we need to check if the overlapped is known
+  const overlappedOperation = popOverlappedOperationByOverlapped(lpOverlapped);
+  if (overlappedOperation === undefined) {
+    // Probably because the routine was called using tracked and untracked pipes
+    // therefore, not an error
+    return
+  }
+
+  const handleId = overlappedOperation.handleId;
+  const handlePath = overlappedOperation.handlePath;
+  const buffer = overlappedOperation.pBuffer;
+  const bufferLength = overlappedOperation.bufferLength;
+  const identifier = sendMsg({
+    id: "to_ReadOperations",
+    funcName: "CustomCompletionRoutine",
+    message: buffer.readByteArray(dwNumberOfBytesTransfered.toInt32()) ?? new ArrayBuffer(0),
+    handlePath,
+    handleId
+  })
+
+  popReadOperation({
+    handleId: handleId,
+    bufferLength: bufferLength,
+    callback: (status, payload) => {
+      log("CustomCompletionRoutine-m:", status, payload)
+      if (ReadResultStatus.SUCCESS === status) {
+        if (bufferLength >= payload.length) {
+          lpOverlapped.add(Process.pointerSize).writeU32(payload.length);
+          args[1] = ptr(payload.length);
+          args[0] = ptr(ERROR_SUCCESS);
+          buffer.writeByteArray(payload);
+        } else { 
+          console.error("CustomCompletionRoutine: Buffer is shorter than data read!")
+        }
+      } else if (ReadResultStatus.FAILED === status) {
+        lpOverlapped.add(Process.pointerSize).writeU32(0);
+        args[1] = ptr(0);
+        args[0] = ptr(ERROR_OPERATION_ABORTED); // ERROR_OPERATION_ABORTED
+        // result.replace(ptr(ERROR_IO_INCOMPLETE)); // ERROR_IO_INCOMPLETE
+        // Replace data so that we completely hide data from the process
+        // even if it does not follow the spec
+        buffer.writeByteArray(Array<number>(lpOverlapped.add(Process.pointerSize).readU32()).fill(0));
+      } else if (ReadResultStatus.BUFFER_TOO_SMALL === status) {
+        lpOverlapped.add(Process.pointerSize).writeU32(0);
+        args[1] = ptr(0);
+        args[0] = ptr(ERROR_INSUFFICIENT_BUFFER); // ERROR_INSUFFICIENT_BUFFER
+        // Replace data so that we completely hide data from the process
+        // even if it does not follow the spec
+        buffer.writeByteArray(Array<number>(lpOverlapped.add(Process.pointerSize).readU32()).fill(0));
+      } else if (ReadResultStatus.NO_DATA === status) {
+        // Thats weird, we shouldn't be in that case
+        lpOverlapped.add(Process.pointerSize).writeU32(0);
+        args[1] = ptr(0);
+        args[0] = ptr(ERROR_SUCCESS);
+        // Replace data so that we completely hide data from the process
+        // even if it does not follow the spec
+        buffer.writeByteArray(Array<number>(lpOverlapped.add(Process.pointerSize).readU32()).fill(0));
+      } else {
+        console.error(`CustomCompletionRoutine: Unhandled status code ${status}`)
+      }
+    }
+  })
+}
+
+const completionRoutineOnLeave = (result: InvocationReturnValue) => {
+  // Do stuff
+}
+
+export const hookCompletionRoutine = (routineAddr: NativePointer) => {
+  if (!isHooked(routineAddr)) {
+    log(`Hooking function ${routineAddr}`)
+    Interceptor.attach(routineAddr, {
+      onEnter: completionRoutineOnEnter,
+      onLeave: completionRoutineOnLeave,
+    })
+    attachedFunctions.push(routineAddr.toInt32())
+  }
+};
+
+```
+
+`agent/globals.ts`:
+
+```ts
+export const config = {
+  logSyscalls: false,
+}
+
+export const setLogSyscalls = (value: boolean) => {
+  config.logSyscalls = value;
+}
+
+export const log = (...args: any[]) => {
+  if (config.logSyscalls === true) {
+    console.log(new Date().toISOString(), ...args)
+  }
+}
+
+
+```
+
+`agent/hooks.ts`:
+
+```ts
+export const readFileAddr = Module.getExportByName(null, "ReadFile");
+export const readFile = new NativeFunction(readFileAddr, 'bool', ['pointer', 'pointer', 'uint32', 'pointer', 'pointer']);
+export const readFileExAddr = Module.getExportByName(null, "ReadFileEx");
+export const NtReadFileAddr = Module.getExportByName(null, "NtReadFile");
+
+export const writeFileAddr = Module.getExportByName(null, "WriteFile")
+export const writeFile = new NativeFunction(writeFileAddr, 'uint32', ['pointer', 'pointer', 'uint32', 'pointer', 'pointer'])
+export const writeFileExAddr = Module.getExportByName(null, "WriteFileEx")
+export const NtWriteFileAddr = Module.getExportByName(null, "NtWriteFile")
+
+export const getOverlappedResultAddr = Module.getExportByName(null, "GetOverlappedResult");
+export const getOverlappedResult = new SystemFunction(getOverlappedResultAddr, 'uint32', ['pointer', 'pointer', 'pointer', 'uint32'])
+export const getOverlappedResultExAddr = Module.getExportByName(null, "GetOverlappedResultEx");
+export const waitForSingleObjectAddr = Module.getExportByName(null, "WaitForSingleObject");
+export const waitForSingleObjectExAddr = Module.getExportByName(null, "WaitForSingleObjectEx");
+// export const waitForMultipleObjectsAddr = Module.getExportByName(null, "WaitForMultipleObjects");
+// export const waitForMultipleObjectsExAddr = Module.getExportByName(null, "WaitForMultipleObjectsEx");
+export const NtWaitForSingleObjectAddr = Module.getExportByName(null, "NtWaitForSingleObject");
+export const NtWaitForMultipleObjectsAddr = Module.getExportByName(null, "NtWaitForMultipleObjects");
+
+const OpenThreadAddr = Module.getExportByName(null, 'OpenThread');
+export const OpenThread = new SystemFunction(OpenThreadAddr, 'uint32', ['uint32', 'uint32', 'uint32'])
+const QueueUserAPCAddr = Module.getExportByName(null, "QueueUserAPC");
+export const QueueUserAPC = new SystemFunction(QueueUserAPCAddr, 'uint32', ['pointer', 'uint32', 'pointer'])
+const CloseHandleAddr = Module.getExportByName(null, "CloseHandle")
+export const CloseHandle = new SystemFunction(CloseHandleAddr, 'uint32', ['uint32'])
+
+// NtStatus codes
+export const ERROR_SUCCESS = 0;
+export const ERROR_INSUFFICIENT_BUFFER = 0x7a;
+export const ERROR_IO_PENDING = 997;
+export const ERROR_OPERATION_ABORTED = 0x3e3;
+export const ERROR_IO_INCOMPLETE = 0x3e4;
+
+export const setEventAddr = Module.getExportByName(null, "SetEvent");
+export const setEvent = new SystemFunction(setEventAddr, 'bool', ['uint32'])
+
+export const getQueuedCompletionStatusAddr = Module.getExportByName(null, "GetQueuedCompletionStatus");
+export const getQueuedCompletionStatusExAddr = Module.getExportByName(null, "GetQueuedCompletionStatusEx");
+export const NtRemoveIoCompletionAddr = Module.getExportByName(null, "NtRemoveIoCompletion")
+
+export const overlappedEventOffset = (() => {
+  if (Process.pointerSize === 8) {
+    // 64 bits
+    return 24
+  } else if (Process.pointerSize === 4) {
+    // 32 bits
+    return 8
+  } else {
+    throw new Error(`No known overlapped.hEvent offset with pointerSize: ${Process.pointerSize}`)
+  }
+})();
+
+export const getFileInformationByHandleExAddr = Module.getExportByName(null, "GetFileInformationByHandleEx");
+export const getFileInformationByHandleEx = new SystemFunction(getFileInformationByHandleExAddr, 'uint32', ['pointer', 'uint32', 'pointer', 'uint32']);
+
+export const getLastErrorAddr = Module.getExportByName(null, "GetLastError");
+export const getLastError = new SystemFunction(getLastErrorAddr, 'uint32', [])
+
+export const getFileTypeAddr = Module.getExportByName(null, "GetFileType");
+export const getFileType = new NativeFunction(getFileTypeAddr, 'uint32', ['pointer']);
+
+export const FileNameInfo = 2; // https://learn.microsoft.com/fr-fr/windows/win32/api/minwinbase/ne-minwinbase-file_info_by_handle_class
+export const VOLUME_NAME_DOS = 0;
+export const FILE_NAME_NORMALIZED = 0;
+export const FILE_TYPE_PIPE = 3;
+
+export const createFileAddr = Module.getExportByName(null, "CreateFileA");
+export const createFile = new SystemFunction(createFileAddr, 'pointer', ['pointer', 'uint32', 'uint32', 'pointer', 'uint32', 'uint32', 'pointer']);
+export const GENERIC_READ = 0x80000000;
+export const GENERIC_WRITE = 0x40000000;
+export const OPEN_EXISTING = 3;
+export const FILE_FLAG_OVERLAPPED = 0x40000000;
+
+
+```
+
+`agent/inject/main.ts`:
+
+```ts
+import { pushHeapAllocatedBuffer } from "../lib/heap.js";
+import { log } from '../globals.js';
+import { writeFile } from '../hooks.js';
+
+const createFileAddr = Module.getExportByName(null, "CreateFileA");
+const createFile = new SystemFunction(createFileAddr, 'pointer', ['pointer', 'uint32', 'uint32', 'pointer', 'uint32', 'uint32', 'pointer']);
+const GENERIC_READ = 0x80000000;
+const GENERIC_WRITE = 0x40000000;
+const OPEN_EXISTING = 3;
+const FILE_FLAG_OVERLAPPED = 0x40000000;
+
+const connectToPipe = (pipePath: string) => {
+  const finalPath = "\\\\.\\pipe" + pipePath;
+  const lpFileName = Memory.alloc(finalPath.length);
+  lpFileName.writeUtf8String(finalPath);
+  log(lpFileName.readByteArray(finalPath.length));
+  const result = createFile(lpFileName, GENERIC_READ | GENERIC_WRITE, 0, ptr(0), OPEN_EXISTING, FILE_FLAG_OVERLAPPED, ptr(0x0)) as WindowsSystemFunctionResult<NativePointer>;
+  log(result.value, result.lastError);
+  return result.value
+}
+
+const sendDataToPipeFromBuffer = (pipeHandle: NativePointer, buffer: NativePointer, size: number) => {
+  const bytesWritten = Memory.alloc(0x4);
+  pushHeapAllocatedBuffer(bytesWritten);
+  log("Calling WriteFile:", pipeHandle, buffer, size, bytesWritten, ptr(0))
+  const success = writeFile(pipeHandle, buffer, size, bytesWritten, ptr(0));
+  return [success, bytesWritten.readU32()];
+}
+
+const sendDataToExistingPipe_internal = (handle: NativePointer, payload: ArrayBuffer) => {
+  log(`Sending the following data (size ${payload.byteLength}):\n` + hexdump(payload))
+  const buffer = Memory.alloc(payload.byteLength);
+  pushHeapAllocatedBuffer(buffer);
+  buffer.writeByteArray(payload);
+  const [success, nbBytesWritten] = sendDataToPipeFromBuffer(handle, buffer, payload.byteLength);
+  log("Sent data to pipe", success === 0 ? "failed" : "success", nbBytesWritten)
+}
+
+export const sendDataToExistingPipe = (handle: number, payload: ArrayBuffer) => {
+  return sendDataToExistingPipe_internal(ptr(handle), payload)
+}
+
+export const sendDataToPipe = (pipeName: string, payload: ArrayBuffer) => {
+  const handle = connectToPipe(pipeName);
+  log("Connected to named pipe");
+  sendDataToExistingPipe_internal(handle, payload);
+}
+```
+
+`agent/ioqueue.ts`:
+
+```ts
+import {
+  getQueuedCompletionStatusAddr,
+  getQueuedCompletionStatusExAddr,
+  getLastError,
+} from './hooks.js';
+import {
+  recvMsg,
+  sendMsg
+} from './communication.js'
+import { log } from './globals.js';
+import {
+  getLpNumberOfBytesTransferred,
+  logOverlappedOperations,
+  popOverlappedOperationByOverlapped
+} from './overlapped_operations.js';
+
+export const hookGetQueuedCompletionStatus = () => {
+  Interceptor.attach(getQueuedCompletionStatusAddr, {
+    onEnter: function(args) {
+      const completionPort = args[0];
+      const lpNumberOfBytesTransferred = args[1];
+      const lpCompletionKey = args[2];
+      const lpOverlapped = args[3];
+      const dwMilliseconds = args[4];
+
+      log("GetQueuedCompletionStatus-e:", completionPort, lpNumberOfBytesTransferred, lpCompletionKey, lpOverlapped, dwMilliseconds)
+      this.completionPort = completionPort;
+      this.lpNumberOfBytesTransferred = lpNumberOfBytesTransferred;
+      this.lpCompletionKey = lpCompletionKey;
+      this.lpOverlapped = lpOverlapped;
+      this.dwMilliseconds = dwMilliseconds;
+      this.doIntercept = true;
+    },
+    onLeave: function(result) {
+      if (!this.doIntercept) {
+        return
+      }
+      const completionPort: NativePointer = this.completionPort;
+      const lpNumberOfBytesTransferred: NativePointer = this.lpNumberOfBytesTransferred;
+      const lpCompletionKey: NativePointer = this.lpCompletionKey;
+      const lpOverlapped: NativePointer = this.lpOverlapped;
+      const dwMilliseconds: NativePointer = this.dwMilliseconds;
+
+      const returnedLpOverlapped = lpOverlapped.readPointer();
+      const overlappedOperation = popOverlappedOperationByOverlapped(returnedLpOverlapped);
+      log("GetQueuedCompletionStatus-l:", completionPort, lpNumberOfBytesTransferred, lpCompletionKey, lpOverlapped, dwMilliseconds, result)
+      if (result.toInt32() === 0) {
+        // The syscall failed, return
+        // The overlapped was still triggered, we need to forget about it
+        // Following is a SYSCALL
+        const lasterr = getLastError();
+        log("GetQueuedCompletionStatus-e: failed with", result.toInt32(), lasterr.value)
+        return
+      }
+
+      log("GetQueuedCompletionStatus-l-metadata:", completionPort, lpNumberOfBytesTransferred, lpCompletionKey, lpOverlapped, dwMilliseconds, "R", result.toInt32(), returnedLpOverlapped, overlappedOperation === undefined ? "undefined": overlappedOperation.pOverlapped);
+      logOverlappedOperations()
+      if (overlappedOperation === undefined) {
+        // Does not correspond to a known lpOverlapped
+        return
+      }
+
+      // Ths correspond to a known overlapped, we need to intercept the buffer
+      const bufferLength = getLpNumberOfBytesTransferred(overlappedOperation).readU32();
+      const buffer = overlappedOperation.pBuffer;
+      const handlePath = overlappedOperation.handlePath;
+      const handleId = overlappedOperation.handleId;
+      if (bufferLength === undefined) {
+        console.error("GetQueuedCompletionStatus: Could not find the buffer length, cannot intercept")
+        return
+      }
+
+      const identifier = sendMsg({
+        funcName: "GetQueuedCompletionStatus",
+        message: buffer.readByteArray(bufferLength) ?? new ArrayBuffer(0),
+        handlePath,
+        handleId
+      })
+      recvMsg({
+        identifier,
+        callback: (value) => {
+          const data = value.payload;
+          // If length is 0, it will trigger an error, instead, change the return value of ReadFile
+          const mBufferLength = data.length;
+          // TODO: handle modified data
+          // const mBuffer = Memory.alloc(mBufferLength);
+          // mBuffer.writeByteArray(data);
+          // pushHeapAllocatedBuffer(mBuffer);
+
+          // this.buffer = mBuffer;
+          // this.nbBytesRead = new NativePointer(mBufferLength);
+        },
+        wait: true
+      })
+    }
+  })
+}
+
+export const hookGetQueuedCompletionStatusEx = () => {
+  Interceptor.attach(getQueuedCompletionStatusExAddr, {
+    onEnter: function(args) {
+      log("GetQueuedCompletionStatusEx-e")
+    },
+    // onLeave: function(args) {
+    // }
+  })
+}
+
+```
+
+`agent/lib.ts`:
+
+```ts
+export const arrayBufferEqual = (obj1: ArrayBufferLike, obj2: ArrayBufferLike) => {
+  const arr1 = new Uint8Array(obj1);
+  const arr2 = new Uint8Array(obj2);
+  return nbArrayEqual(arr1, arr2)
+}
+
+export const nbArrayEqual = (arr1: Uint8Array, arr2: Uint8Array) => {
+  for (let i = arr1.length; -1 < i; i -= 1) {
+    if ((arr1[i] !== arr2[i])) return false;
+  }
+  return true;
+}
+
+
+```
+
+`agent/lib/handle_filtering.ts`:
+
+```ts
+import {
+  FILE_TYPE_PIPE,
+  getFileType,
+  getFileInformationByHandleEx,
+  FileNameInfo
+} from '../hooks.js'
+
+let targetHandlesPath: RegExp[] = [];
+const blacklistedHandlePaths: RegExp[] = [/\\frida-.*/];
+
+export const isTargetHandlePath = (handlePath: string) => {
+  if (handlePath === "") {
+    return false
+  }
+  // Proactively blacklist frida communication from being intercepted
+  if (blacklistedHandlePaths.some((el) => el.test(handlePath))) {
+    return false;
+  }
+  return targetHandlesPath.some((el) => el.test(handlePath));
+};
+export const setHandleRegexes = (regexes: string[]) => {
+  targetHandlesPath = regexes.map((value) => new RegExp(value));
+}
+
+export const getPathByHandle = (handle: NativePointer) => {
+  const size = 512;
+  // Following function is a SYSCALL
+  const fileType = getFileType(handle);
+  if (fileType !== FILE_TYPE_PIPE) {
+    return "";
+  }
+  const lpBuffer = Memory.alloc(size);
+  // Following function is a SYSCALL
+  const retval = getFileInformationByHandleEx(handle, FileNameInfo, lpBuffer, size) as WindowsSystemFunctionResult<number>;
+  const status = retval.value;
+  const lasterror = retval.lastError;
+  if (status === 0) {
+    console.error(`Error while calling GetFileInformationByHandleEx: ${lasterror}`);
+    return "";
+  };
+  const fileNameLength = lpBuffer.readU32();
+  const fileNameInfo = lpBuffer.add(0x04).readUtf16String(fileNameLength);
+  return fileNameInfo ?? "";
+};
+
+
+```
+
+`agent/lib/heap.ts`:
+
+```ts
+
+// TODO: clean this buffers so that we dont leave too much objects on the heap
+const heapAllocatedBuffers: NativePointer[] = [];
+
+export const isFridaScriptBuffer = (buffer: NativePointer) => {
+  return heapAllocatedBuffers.some((value) => {return buffer.toUInt32() === value.toUInt32()})
+}
+
+export const pushHeapAllocatedBuffer = (buffer: NativePointer) => {
+  heapAllocatedBuffers.push(buffer)
+}
+
+```
+
+`agent/lib/queue_apc.ts`:
+
+```ts
+import { log } from "../globals.js";
+import { CloseHandle, OpenThread, QueueUserAPC } from "../hooks.js"
+
+// https://learn.microsoft.com/en-us/windows/win32/procthread/thread-security-and-access-rights
+const THREAD_GET_CONTEXT = 0x0008
+const THREAD_SET_CONTEXT = 0x0010
+
+const CloseThreadHandle = (handle: number) => {
+    const retval = CloseHandle(handle) as WindowsSystemFunctionResult<number>;
+    if (retval.value === 0) {
+        log("CloseHandle: failed to close thread handle:", retval.lastError)
+    }
+}
+
+type ApcContext = {
+    apcRoutine: NativePointer,
+    arg_0: NativePointer,
+    arg_1: NativePointer,
+    arg_2: NativePointer,
+}
+
+const GlobalApcContexts: { [id:number]: ApcContext } = {}
+
+const randU32Sync = () => {
+    return Math.floor(Math.random() * 0xffffffff)
+}
+
+// The following function will be executed in the context of the target thread
+const UserAPCDispatcher3argsCallback = new NativeCallback((idContext: number) => {
+    // Retrieve the context
+    const apcContext = GlobalApcContexts[idContext]
+    log("Calling original routine")
+    const routine = new SystemFunction(apcContext.apcRoutine, 'void', ['pointer', 'pointer', 'pointer'])
+    const { arg_0, arg_1, arg_2 } = apcContext
+    delete GlobalApcContexts[idContext]
+    // Finally call the routine
+    routine(apcContext.arg_0, apcContext.arg_1, apcContext.arg_2)
+}, 'void', ['uint32'])
+
+export const QueueAPC = (apcRoutine: NativePointer, threadId: number, arg_0: NativePointer, arg_1: NativePointer, arg_2: NativePointer) => {
+    const openThreadRet = OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT, 0, threadId) as WindowsSystemFunctionResult<number>;
+    if (openThreadRet.value === 0) {
+        log("OpenThread: failed to open handle to thread:", openThreadRet.lastError)
+        return
+    }
+    const threadHandle = openThreadRet.value
+    log("QueueUserAPC:", apcRoutine, threadHandle, arg_0, arg_1, arg_2)
+    log("QueueUserAPC apcRoutine hexdump:","\n"+hexdump(apcRoutine, {length: 300}))
+    // Kernel is allowed to queue APC with 3 arguments, but we are not, we need to create a custom dispatcher that will call the
+    // apcRoutine with correct arguments
+    const idContext = randU32Sync()
+    GlobalApcContexts[idContext] = {
+        apcRoutine,
+        arg_0,
+        arg_1,
+        arg_2,
+    }
+    const queueUserApcRet = QueueUserAPC(UserAPCDispatcher3argsCallback, threadHandle, ptr(idContext)) as WindowsSystemFunctionResult<number>;
+    if (queueUserApcRet.value === 0) {
+        log("QueueUserAPC: failed queue APC:", queueUserApcRet.lastError)
+    }
+    CloseThreadHandle(threadHandle)
+}
+```
+
+`agent/main.ts`:
+
+```ts
+import { setLogSyscalls } from './globals.js';
+import { hookNtWriteFile } from './ntwritefile.js';
+import {
+  setHandleRegexes,
+} from './lib/handle_filtering.js'
+import { hookNtReadFile } from './ntreadfile.js';
+import { hookNtWaitForMultipleObjects, hookNtWaitForSingleObject } from './ntwait.js';
+import { hookNtRemoveIoCompletion } from './ntioqueue.js';
+import { sendDataToExistingPipe } from './inject/main.js';
+import { hookReadFile, hookReadFileEx } from './readfile.js';
+import { hookWaitForSingleObject, hookWaitForSingleObjectEx } from './wait.js';
+import { hookGetOverlappedResult, hookGetOverlappedResultEx } from './overlappedresult.js';
+import { hookGetQueuedCompletionStatus, hookGetQueuedCompletionStatusEx } from './ioqueue.js';
+import { hookWriteFile, hookWriteFileEx } from './writefile.js';
+
+var hooksInstalled = false
+const installHooks = (nthooking: boolean) => {
+  if (hooksInstalled) {
+    return
+  }
+  if (nthooking) {
+    // Low level hooking
+    hookNtWriteFile()
+    hookNtReadFile()
+  } else {
+    // High level hooking
+    hookWriteFile()
+    hookWriteFileEx()
+    hookReadFile()
+    hookReadFileEx()
+  }
+  hookNtWaitForSingleObject()
+  hookNtWaitForMultipleObjects()
+  hookNtRemoveIoCompletion()
+
+  hookWaitForSingleObject()
+  hookWaitForSingleObjectEx()
+  hookGetOverlappedResult()
+  hookGetOverlappedResultEx()
+  hookGetQueuedCompletionStatus()
+  hookGetQueuedCompletionStatusEx()
+
+  hooksInstalled = true
+}
+
+rpc.exports = {
+  // This function is used to update the filtering regexes
+  setHandleRegexes: setHandleRegexes,
+  setLogSyscalls: setLogSyscalls,
+  sendDataToExistingPipe: sendDataToExistingPipe,
+  installHooks: installHooks,
+}
+
+```
+
+`agent/ntioqueue.ts`:
+
+```ts
+import {
+  NtRemoveIoCompletionAddr,
+} from './hooks.js'
+import { log } from './globals.js'
+import { getLpNumberOfBytesTransferred, popOverlappedOperationByOverlapped } from './overlapped_operations.js'
+import { recvMsg, sendMsg } from './communication.js'
+import { pushHeapAllocatedBuffer } from './lib/heap.js'
+
+interface NtRemoveIoCompletionInvocationContext extends WindowsInvocationContext {
+  args: {
+    IoCompletionHandle: NativePointer // [in] HANDLE
+    KeyContext: NativePointer // [out] PVOID
+    ApcContext: NativePointer // [out] PVOID
+    IoStatusBlock: NativePointer // [out] PIO_STATUS_BLOCK
+    Timeout: NativePointer // [in,out] PLARGE_INTEGER
+  }
+
+  ResultNtStatus: NativePointer // NTSTATUS
+}
+
+export const hookNtRemoveIoCompletion = () => {
+  Interceptor.attach(NtRemoveIoCompletionAddr, {
+    onEnter: function(this: NtRemoveIoCompletionInvocationContext, args: InvocationArguments) {
+      this.args = {
+        IoCompletionHandle: args[0], // [in] HANDLE
+        KeyContext: args[1], // [out] PVOID
+      // ApcContext is a pointer to a lpOverlapped structure (pointer to the Overlapped structure)
+      // corresponding to the event
+        ApcContext: args[2], // [out] PVOID
+        IoStatusBlock: args[3], // [out] PIO_STATUS_BLOCK
+        Timeout: args[4], // [in,out] PLARGE_INTEGER
+      }
+
+      // TODO: check if the IoCompletionHandle contains a handle that is in scope
+      this.doLogSyscall = true
+
+      log("NtRemoveIoCompletion-e:", this.args.IoCompletionHandle, this.args.KeyContext, this.args.ApcContext, this.args.IoStatusBlock, this.args.Timeout)
+    } as ((this: InvocationContext, args: InvocationArguments) => void),
+
+    onLeave: function(this: NtRemoveIoCompletionInvocationContext, result: InvocationReturnValue) {
+      this.ResultNtStatus = result // NTSATUS
+
+      if (!!this.doLogSyscall) {
+        log("NtRemoveIoCompletion-l:", this.args.IoCompletionHandle, this.args.KeyContext, this.args.ApcContext, this.args.IoStatusBlock, this.args.Timeout, this.ResultNtStatus)
+      }
+
+      if (this.ResultNtStatus.toInt32() === 0) {
+        // The syscall failed, return
+        return
+      }
+
+      // TODO: This will fail if ApcContext is null, check what to to in that case
+      const returnedLpOverlapped = this.args.ApcContext.readPointer();
+
+      const overlappedOperation = popOverlappedOperationByOverlapped(returnedLpOverlapped);
+      if (overlappedOperation === undefined) {
+        // Does not correspond to a known lpOverlapped
+        return
+      }
+
+      const bufferLength = getLpNumberOfBytesTransferred(overlappedOperation)?.readU32();
+      const buffer = overlappedOperation.pBuffer;
+      const handlePath = overlappedOperation.handlePath;
+      const handleId = overlappedOperation.handleId;
+      if (bufferLength === undefined) {
+        console.error("NtRemoveIoCompletion: Could not find the buffer length, cannot intercept")
+        return
+      }
+
+      const identifier = sendMsg({
+        funcName: "NtRemoveIoCompletion",
+        message: buffer.readByteArray(bufferLength) ?? new ArrayBuffer(0),
+        handlePath,
+        handleId
+      })
+      // TODO: handle modified data
+
+    } as ((this: InvocationContext, args: InvocationReturnValue) => void)
+  })
+}
+
+
+```
+
+`agent/ntreadfile.ts`:
+
+```ts
+import {
+  ERROR_INSUFFICIENT_BUFFER,
+  ERROR_IO_INCOMPLETE,
+  ERROR_IO_PENDING,
+  ERROR_OPERATION_ABORTED,
+  NtReadFileAddr,
+  overlappedEventOffset,
+  setEvent
+} from './hooks.js'
+import { log } from './globals.js'
+import {
+  getPathByHandle,
+  isTargetHandlePath
+} from './lib/handle_filtering.js'
+import {
+  popReadOperation,
+  ReadResultStatus,
+  recvMsg,
+  sendMsg
+} from './communication.js'
+import { popOverlappedOperationByOverlapped, pushOverlappedOperation } from './overlapped_operations.js'
+import { hookCompletionRoutine } from './dynamic_hook.js'
+import { QueueAPC } from './lib/queue_apc.js'
+
+interface NtReadFileInvocationContext extends WindowsInvocationContext {
+  FileHandle: NativePointer // [in] HANDLE
+  Event: NativePointer // [in, optional] HANDLE
+  ApcRoutine: NativePointer // [in, optional] PIO_APC_ROUTINE
+  ApcContext: NativePointer // [in, optional] PVOID
+  IoStatusBlock: NativePointer // [out] PIO_STATUS_BLOCK
+  Buffer: NativePointer // [out] PVOID
+  Length: NativePointer // [in] ULONG
+  ByteOffset: NativePointer// [in, optional] PLARGE_INTEGER
+  Key: NativePointer // [in, optional] PULONG
+
+  ResultNtStatus: NativePointer // NTSTATUS
+
+  IoStatusBlock_Information: NativePointer // [out] number of bytes read
+
+  doIntercept: boolean
+  isOverlapped: boolean
+
+  statusCode: string
+  readData: number[]
+  handlePath: string
+}
+
+export const hookNtReadFile = () => {
+  Interceptor.attach(NtReadFileAddr, {
+    onEnter: function(this: NtReadFileInvocationContext, args: InvocationArguments) {
+      this.FileHandle = args[0]; // [in] HANDLE
+      this.Event = args[1]; // [in, optional] HANDLE
+      this.ApcRoutine = args[2]; // [in, optional] PIO_APC_ROUTINE
+      this.ApcContext = args[3]; // [in, optional] PVOID
+      this.IoStatusBlock = args[4]; // [out] PIO_STATUS_BLOCK
+      this.Buffer = args[5]; // [out] PVOID
+      this.Length = args[6]; // [in] ULONG
+      this.ByteOffset = args[7] // [in, optional] PLARGE_INTEGER
+      this.Key = args[8] // [in, optional] PULONG
+
+      // ApcContext is probably the user defined IoCompletionRoutine
+      // IoStatusBlock contains a pointer, then an Information member, containing the number of bytes read
+      this.IoStatusBlock_Information = this.IoStatusBlock.add(Process.pointerSize)
+
+      // Check if the Handle is a NamedPipe, and if we should intercept it
+      this.handlePath = getPathByHandle(this.FileHandle)
+      if (!isTargetHandlePath(this.handlePath)) {
+        this.doIntercept = false;
+        return
+      }
+      this.doIntercept = true;
+
+      // Check if there are already data waiting in the pipe
+      this.statusCode = "NO_DATA";
+      this.readData = [];
+      const data = popReadOperation({
+        callback: (status, payload) => {
+          this.statusCode = status;
+          this.readData = payload;
+        },
+        handleId: this.FileHandle.toInt32(),
+        bufferLength: this.Length.toInt32(),
+        dontwait: true,
+      });
+
+      // Check if this is an overlapped operation
+      if (this.Event.toInt32() === 0 && this.ApcRoutine.toInt32() === 0) {
+        this.isOverlapped = false
+      } else {
+        this.isOverlapped = true
+      }
+
+      if (this.statusCode != 'NO_DATA') {
+        // Intercept call and nullify the syscall
+        args[0] = ptr(0) // Invalid Handle, should be enough to make the syscall fail
+        args[1] = ptr(0)
+        args[2] = ptr(0)
+        args[3] = ptr(0)
+        args[4] = ptr(0)
+        args[5] = ptr(0)
+        args[6] = ptr(0)
+        args[7] = ptr(0)
+        args[8] = ptr(0)
+        log("NtReadFile-e: nullifying syscall");
+        return
+      }
+
+      if (this.isOverlapped === false) {
+        log("NtReadFile-e:", this.FileHandle, this.Event, this.ApcRoutine, this.ApcContext, this.IoStatusBlock, this.Buffer, this.Length, this.ByteOffset, this.Key, "direct")
+      } else if (this.ApcRoutine.toInt32() != 0) {
+        // The developper probably wanted to handle the result of the read in a completion routine
+        // therefore we need to ensure that function is hooked
+        pushOverlappedOperation({
+          pOverlapped: this.IoStatusBlock,
+          pBuffer: this.Buffer,
+          bufferLength: this.Length.toInt32(),
+          hEvent: this.Event.toInt32(),
+          handleId: this.FileHandle.toInt32(),
+          handlePath: this.handlePath,
+        })
+        hookCompletionRoutine(this.ApcContext)
+        log("NtReadFile-e:", this.FileHandle, this.Event, this.ApcRoutine, this.ApcContext, this.IoStatusBlock, this.Buffer, this.Length, this.ByteOffset, this.Key, "completionroutine")
+      } else {
+        // This is an overlapped operation
+        // register the overlapped operation for further use in getOverlappedResult
+        pushOverlappedOperation({
+          pOverlapped: this.IoStatusBlock,
+          pBuffer: this.Buffer,
+          bufferLength: this.Length.toInt32(),
+          hEvent: this.Event.toInt32(),
+          handleId: this.FileHandle.toInt32(),
+          handlePath: this.handlePath,
+        })
+        log("NtReadFile-e:", this.FileHandle, this.Event, this.ApcRoutine, this.ApcContext, this.IoStatusBlock, this.Buffer, this.Length, this.ByteOffset, this.Key, "overlapped")
+      }
+      
+      log("NtReadFile-e:", this.FileHandle, this.Event, this.ApcRoutine, this.ApcContext, this.IoStatusBlock, this.Buffer, this.Length, this.ByteOffset, this.Key)
+    } as ((this: InvocationContext, args: InvocationArguments) => void),
+    onLeave: function(this: NtReadFileInvocationContext, result: InvocationReturnValue) {
+      this.ResultNtStatus = result // NTSATUS
+      if (!this.doIntercept) {
+        return;
+      }
+
+      if (this.statusCode !== "NO_DATA") {
+        log("NtReadFile-l: resuming from nullifyed syscall with statusCode:", this.statusCode)
+        if (ReadResultStatus.SUCCESS === this.statusCode) {
+          if (this.Length.toInt32() >= this.readData.length) {
+            this.IoStatusBlock_Information.writeU32(this.readData.length);
+            this.Buffer.writeByteArray(this.readData);
+          } else { 
+            console.error("NtReadFile: Buffer is shorter than data read!")
+          }
+          if (!this.isOverlapped) {
+            // Case 1, synchronous read
+            result.replace(ptr(0)); // ERROR_SUCCESS
+          } else {
+            // Case 2, asynchronous, we need to return ERROR_IO_PENDING
+            // and signal the overlapped hEvent
+            result.replace(ptr(ERROR_IO_PENDING))
+            // if (this.Event.toUInt32() !== 0) {
+            //   const setEventResult = setEvent(this.Event.toUInt32()) as WindowsSystemFunctionResult<number>;
+            //   if (setEventResult.value != 1) {
+            //     console.warn(`NtReadFile: error while calling SetEvent error code: ${ptr(setEventResult.lastError)}`)
+            //   }
+            // }
+            // // If the overlapped structure has an event, signal it
+            // const _overlappedEvent = this.IoStatusBlock.add(overlappedEventOffset).readU32();
+            // if (_overlappedEvent !== 0 && _overlappedEvent !== this.Event.toUInt32()) {
+            //   const setEventResult = setEvent(_overlappedEvent) as WindowsSystemFunctionResult<number>;
+            //   if (setEventResult.value != 1) {
+            //     console.warn(`NtReadFile: error while calling SetEvent for overlapped Event error code: ${ptr(setEventResult.lastError)}`)
+            //   }
+            // }
+          }
+        } else if (ReadResultStatus.FAILED === this.statusCode) {
+          this.IoStatusBlock_Information.writeU32(0);
+          result.replace(ptr(ERROR_OPERATION_ABORTED)); // ERROR_OPERATION_ABORTED
+          // result.replace(ptr(ERROR_IO_INCOMPLETE)); // ERROR_IO_INCOMPLETE
+        } else if (ReadResultStatus.BUFFER_TOO_SMALL === this.statusCode) {
+          result.replace(ptr(ERROR_INSUFFICIENT_BUFFER)); // ERROR_INSUFFICIENT_BUFFER
+        } else {
+          console.error(`Unhandled status code ${this.statusCode}`)
+        }
+
+        // The syscall is emulated, therefore we need to handle everything ourselves
+        // Case 1: synchronous, nothing to do
+        // Case 2: asynchronous, we need to signal the overlapped event
+        // Case 3: completion routine, we need to queue the routine to the APC queue
+        if (this.ApcRoutine.toInt32() != 0) {
+          // Call completion routine if it exist
+          // TODO: check if the completion routine is called whatever the NtStatus is
+          // const routineFunction = new NativeFunction(this.ApcContext, 'void', ['uint32', 'uint32', 'pointer'])
+          // routineFunction(result.toUInt32(), this.IoStatusBlock_Information.readUInt(), this.IoStatusBlock)
+          log("NtReadFile-l: queuing completion routine")
+          QueueAPC(this.ApcContext, this.threadId, result, ptr(this.IoStatusBlock_Information.readU32()), this.IoStatusBlock);
+          // log("NtReadFile-l: Signaling event")
+          // if (this.Event.toUInt32() !== 0) {
+          //   const setEventResult = setEvent(this.Event.toUInt32()) as WindowsSystemFunctionResult<number>;
+          //   if (setEventResult.value != 1) {
+          //     console.warn(`NtReadFile: error while calling SetEvent error code: ${ptr(setEventResult.lastError)}`)
+          //   }
+          // }
+          // // If the overlapped structure has an event, signal it
+          // const _overlappedEvent = this.IoStatusBlock.add(overlappedEventOffset).readU32();
+          // if (_overlappedEvent !== 0 && _overlappedEvent !== this.Event.toUInt32()) {
+          //   const setEventResult = setEvent(_overlappedEvent) as WindowsSystemFunctionResult<number>;
+          //   if (setEventResult.value != 1) {
+          //     console.warn(`NtReadFile: error while calling SetEvent for overlapped Event error code: ${ptr(setEventResult.lastError)}`)
+          //   }
+          // }
+        } else if (this.isOverlapped) {
+          log("NtReadFile-l: Signaling event")
+          if (this.Event.toUInt32() !== 0) {
+            const setEventResult = setEvent(this.Event.toUInt32()) as WindowsSystemFunctionResult<number>;
+            if (setEventResult.value != 1) {
+              console.warn(`NtReadFile: error while calling SetEvent error code: ${ptr(setEventResult.lastError)}`)
+            }
+          }
+          // If the overlapped structure has an event, signal it
+          const _overlappedEvent = this.IoStatusBlock.add(overlappedEventOffset).readU32();
+          if (_overlappedEvent !== 0 && _overlappedEvent !== this.Event.toUInt32()) {
+            const setEventResult = setEvent(_overlappedEvent) as WindowsSystemFunctionResult<number>;
+            if (setEventResult.value != 1) {
+              console.warn(`NtReadFile: error while calling SetEvent for overlapped Event error code: ${ptr(setEventResult.lastError)}`)
+            }
+          }
+        }
+        log("NtReadFile-l:", this.FileHandle, this.Event, this.ApcRoutine, this.ApcContext, this.IoStatusBlock, this.Buffer, this.Length, this.ByteOffset, this.Key, result)
+        return
+      }
+
+      log("NtReadFile-l:", this.FileHandle, this.Event, this.ApcRoutine, this.ApcContext, this.IoStatusBlock, this.Buffer, this.Length, this.ByteOffset, this.Key, this.ResultNtStatus)
+
+      // If the return code 0 and we read bytes, the operation completed successfully
+      // the number of bytes read is written to the Information member of the IoStatusBlock
+      if (this.ResultNtStatus.toInt32() === 0 && this.IoStatusBlock_Information.readU32() !== 0) {
+        const identifier = sendMsg({
+          id: "to_ReadOperations",
+          funcName: "NtReadFile",
+          message: this.Buffer.readByteArray(this.IoStatusBlock_Information.readU32()) ?? new ArrayBuffer(0),
+          handlePath: this.handlePath,
+          handleId: this.FileHandle.toInt32()
+        })
+
+        popReadOperation({
+          handleId: this.FileHandle.toInt32(),
+          bufferLength: this.Length.toInt32(),
+          callback: (status, payload) => {
+            log("NtReadFile-m:", status, payload)
+            if (ReadResultStatus.SUCCESS === status) {
+              if (this.Length.toInt32() >= payload.length) {
+                this.IoStatusBlock_Information.writeU32(payload.length);
+                this.Buffer.writeByteArray(payload);
+              } else { 
+                console.error("NtReadFile: Buffer is shorter than data read!")
+              }
+            } else if (ReadResultStatus.FAILED === status) {
+              this.IoStatusBlock_Information.writeU32(0);
+              result.replace(ptr(ERROR_OPERATION_ABORTED)); // ERROR_OPERATION_ABORTED
+              // result.replace(ptr(ERROR_IO_INCOMPLETE)); // ERROR_IO_INCOMPLETE
+              // Replace data so that we completely hide data from the process
+              // even if it does not follow the spec
+              this.Buffer.writeByteArray(Array<number>(this.IoStatusBlock_Information.readU32()).fill(0));
+            } else if (ReadResultStatus.BUFFER_TOO_SMALL === status) {
+              this.IoStatusBlock_Information.writeU32(0);
+              result.replace(ptr(ERROR_INSUFFICIENT_BUFFER)); // ERROR_INSUFFICIENT_BUFFER
+              // Replace data so that we completely hide data from the process
+              // even if it does not follow the spec
+              this.Buffer.writeByteArray(Array<number>(this.IoStatusBlock_Information.readU32()).fill(0));
+            } else if (ReadResultStatus.NO_DATA === status) {
+              // Thats weird, we shouldn't be in that case
+              this.IoStatusBlock_Information.writeU32(0);
+              // Replace data so that we completely hide data from the process
+              // even if it does not follow the spec
+              this.Buffer.writeByteArray(Array<number>(this.IoStatusBlock_Information.readU32()).fill(0));
+            } else {
+              console.error(`Unhandled status code ${status}`)
+            }
+          }
+        })
+
+        // The syscall is NOT emulated, we don't need to emulate
+        // asynchronous operations or call the completion routine
+        return
+      }
+
+      // If the operation was async (overlapped), and we got an error that is ERROR_IO_PENDING,
+      // we need to keep the event registered to intercept it during other syscalls
+      if (this.isOverlapped && this.ResultNtStatus.toInt32() !== ERROR_IO_PENDING) {
+        log("ReadFile: expecting other call with following overlapped", this.IoStatusBlock)
+        return
+      }
+
+      // Otherwise, there is an error in the syscall, we unregister the event
+      const overlappedOperation = popOverlappedOperationByOverlapped(this.IoStatusBlock);
+      if (this.isOverlapped && overlappedOperation === undefined) {
+        console.warn("ReadFile: Wanted to unregister an overlapped that was not registered", this.IoStatusBlock)
+      }
+
+      // When the event is Async, Kernel returns with 0x103 STATUS_PENDING
+    } as ((this: InvocationContext, args: InvocationReturnValue) => void)
+  })
+}
+
+
+```
+
+`agent/ntwait.ts`:
+
+```ts
+import {
+  NtWaitForSingleObjectAddr,
+  NtWaitForMultipleObjectsAddr
+} from './hooks.js'
+import { log } from './globals.js'
+import {
+  getPathByHandle,
+  isTargetHandlePath
+} from './lib/handle_filtering.js'
+
+interface NtWaitForSingleObjectInvocationContext extends WindowsInvocationContext {
+  args: {
+    Handle: NativePointer // [in] HANDLE
+    Alertable: NativePointer // [in] BOOLEAN
+    Timeout: NativePointer // [in] PLARGE_INTEGER
+  }
+
+  ResultNtStatus: NativePointer // NTSTATUS
+}
+
+export const hookNtWaitForSingleObject = () => {
+  Interceptor.attach(NtWaitForSingleObjectAddr, {
+    onEnter: function(this: NtWaitForSingleObjectInvocationContext, args: InvocationArguments) {
+      this.args = {
+        Handle: args[0], // [in] HANDLE
+        Alertable: args[1], // [in] BOOLEAN
+        Timeout: args[2], // [in] PLARGE_INTEGER
+      }
+
+      // Check if the Handle is a NamedPipe, and if we should intercept it
+      const fileHandlePath = getPathByHandle(this.args.Handle)
+      if (!isTargetHandlePath(fileHandlePath)) {
+        this.doLogSyscall = false
+        return
+      }
+      this.doLogSyscall = true
+
+      log("NtWaitForSingleObject-e:", this.args.Handle, this.args.Alertable, this.args.Timeout)
+    } as ((this: InvocationContext, args: InvocationArguments) => void),
+
+    onLeave: function(this: NtWaitForSingleObjectInvocationContext, result: InvocationReturnValue) {
+      this.ResultNtStatus = result // NTSATUS
+
+      if (!!this.doLogSyscall) {
+        log("NtWaitForSingleObject-l:", this.args.Handle, this.args.Alertable, this.args.Timeout, this.ResultNtStatus)
+      }
+    } as ((this: InvocationContext, args: InvocationReturnValue) => void)
+  })
+}
+
+interface NtWaitForMultipleObjectsInvocationContext extends WindowsInvocationContext {
+  args: {
+    ObjectCount: NativePointer // [in] ULONG
+    ObjectsArray: NativePointer // [in] PHANDLE
+    WaitType: NativePointer // [in] OBJECT_WAIT_TYPE
+    Alertable: NativePointer // [in] BOOLEAN
+    TimeOut: NativePointer // [in, optional] PLARGE_INTEGER
+  }
+
+  ResultNtStatus: NativePointer // NTSTATUS
+}
+
+export const hookNtWaitForMultipleObjects = () => {
+  Interceptor.attach(NtWaitForMultipleObjectsAddr, {
+    onEnter: function(this: NtWaitForMultipleObjectsInvocationContext, args: InvocationArguments) {
+      this.args = {
+        ObjectCount: args[0], // [in] ULONG
+        ObjectsArray: args[1], // [in] PHANDLE
+        WaitType: args[2], // [in] OBJECT_WAIT_TYPE
+        Alertable: args[3], // [in] BOOLEAN
+        TimeOut: args[4], // [in, optional] PLARGE_INTEGER
+      }
+
+      // TODO: Check if there is one Handle in scope
+      this.doLogSyscall = true
+
+      log("NtWaitForMultipleObjects-e:", this.args.ObjectCount, this.args.ObjectsArray, this.args.WaitType, this.args.Alertable, this.args.TimeOut)
+      const len = this.args.ObjectCount.toInt32()
+      const handles: NativePointer[] = Array(len)
+      for (let i = 0; i < len; i++) {
+        handles[i] = this.args.ObjectsArray.add(Process.pointerSize * i).readPointer();
+      }
+      log("NtWaitForMultipleObjects-e: Array of handles is", handles)
+    } as ((this: InvocationContext, args: InvocationArguments) => void),
+
+    onLeave: function(this: NtWaitForMultipleObjectsInvocationContext, result: InvocationReturnValue) {
+      this.ResultNtStatus = result // NTSATUS
+
+      if (!!this.doLogSyscall) {
+        log("NtWaitForMultipleObjects-l:", this.args.ObjectCount, this.args.ObjectsArray, this.args.WaitType, this.args.Alertable, this.args.TimeOut, this.ResultNtStatus)
+      }
+    } as ((this: InvocationContext, args: InvocationReturnValue) => void)
+  })
+}
+
+```
+
+`agent/ntwritefile.ts`:
+
+```ts
+import {
+  NtWriteFileAddr
+} from './hooks.js'
+import { log } from './globals.js'
+import {
+  getPathByHandle,
+  isTargetHandlePath
+} from './lib/handle_filtering.js'
+import {
+  recvMsg,
+  sendMsg
+} from './communication.js'
+import { pushHeapAllocatedBuffer, isFridaScriptBuffer } from './lib/heap.js'
+import { arrayBufferEqual, nbArrayEqual } from './lib.js'
+
+interface NtWriteFileInvocationContext extends WindowsInvocationContext {
+  FileHandle: NativePointer // [in] HANDLE
+  Event: NativePointer // [in, optional] HANDLE
+  ApcRoutine: NativePointer // [in, optional] PIO_APC_ROUTINE
+  ApcContext: NativePointer // [in, optional] PVOID
+  IoStatusBlock: NativePointer // [out] PIO_STATUS_BLOCK
+  Buffer: NativePointer // [in] PVOID
+  Length: NativePointer // [in] ULONG
+  ByteOffset: NativePointer// [in, optional] PLARGE_INTEGER
+  Key: NativePointer// [in, optional] PULONG
+
+  ResultNtStatus: NativePointer // NTSTATUS
+}
+
+export const hookNtWriteFile = () => {
+  Interceptor.attach(NtWriteFileAddr, {
+    onEnter: function(this: NtWriteFileInvocationContext, args: InvocationArguments) {
+      this.FileHandle = args[0]; // [in] HANDLE
+      this.Event = args[1]; // [in, optional] HANDLE
+      this.ApcRoutine = args[2]; // [in, optional] PIO_APC_ROUTINE
+      this.ApcContext = args[3]; // [in, optional] PVOID
+      this.IoStatusBlock = args[4]; // [out] PIO_STATUS_BLOCK
+      this.Buffer = args[5]; // [in] PVOID
+      this.Length = args[6]; // [in] ULONG
+      this.ByteOffset = args[7] // [in, optional] PLARGE_INTEGER
+      this.Key = args[8] // [in, optional] PULONG
+
+      // Check if the Handle is a NamedPipe, and if we should intercept it
+      const fileHandlePath = getPathByHandle(this.FileHandle)
+
+      if (!isTargetHandlePath(fileHandlePath)) {
+        this.doLogSyscall = false
+        return
+      }
+      if (isFridaScriptBuffer(this.Buffer)) {
+        // We detected an injected WriteFile operation, prevent frida from intercepting itself
+        this.doLogSyscall = false
+        log("NtWriteFile-e: detected self buffer")
+        return
+      }
+      this.doLogSyscall = true
+
+      log("NtWriteFile-e:", this.FileHandle, this.Event, this.ApcRoutine, this.ApcContext, this.IoStatusBlock, this.Buffer, this.Length, this.ByteOffset, this.Key)
+
+      const message = this.Buffer.readByteArray(this.Length.toInt32()) ?? new ArrayBuffer(0)
+      const identifier = sendMsg({
+        funcName: "NtWriteFile",
+        message,
+        handlePath: fileHandlePath,
+        handleId: this.FileHandle.toInt32()
+      })
+      recvMsg({
+        identifier,
+        callback: (value) => {
+          const data: number[] = value.payload;
+          const dataArrayBuffer = new Uint8Array(data);
+          if (!arrayBufferEqual(dataArrayBuffer.buffer, message)) {
+            if (data.length <= this.Length.toInt32()) {
+              // We just need to overwrite the buffer
+              this.Buffer.writeByteArray(data)
+              // Make sure subsequent data are zeroed
+              this.Buffer.add(data.length).writeByteArray(Array.from(new Uint8Array(this.Length.toInt32() - data.length)))
+              // Modify the buffer length of the writefile call
+              args[6] = ptr(data.length)
+            } else {
+              // We need to allocate a new buffer
+              const mBuffer = Memory.alloc(data.length)
+              mBuffer.writeByteArray(data)
+              pushHeapAllocatedBuffer(mBuffer);
+              args[5] = mBuffer;
+              args[6] = ptr(data.length);
+            }
+          }
+        },
+        wait: true
+      })
+    } as ((this: InvocationContext, args: InvocationArguments) => void),
+    onLeave: function(this: NtWriteFileInvocationContext, result: InvocationReturnValue) {
+      this.ResultNtStatus = result // NTSATUS
+
+      if (!!this.doLogSyscall) {
+        log("NtWriteFile-l:", this.FileHandle, this.Event, this.ApcRoutine, this.ApcContext, this.IoStatusBlock, this.Buffer, this.Length, this.ByteOffset, this.Key, this.ResultNtStatus)
+      }
+    } as ((this: InvocationContext, args: InvocationReturnValue) => void)
+  })
+}
+
+
+```
+
+`agent/overlapped_operations.ts`:
+
+```ts
+import { config } from "./globals.js";
+import { getOverlappedResult } from "./hooks.js";
+
+type OverlappedOperation = {
+  pOverlapped: NativePointer;
+  hEvent: number;
+  pBuffer: NativePointer;
+  bufferLength: number;
+  pNbBytesRead?: NativePointer;
+  handleId: number;
+  handlePath: string;
+}
+
+const overlappedOperations: OverlappedOperation[] = []
+
+export const pushOverlappedOperation = (overlappedOperation: OverlappedOperation) => {
+  const index = overlappedOperations.findIndex((registeredOverlappedOperation) => registeredOverlappedOperation.pOverlapped.toUInt32() === overlappedOperation.pOverlapped.toUInt32())
+  if (index !== -1) {
+    // Not found, aborting
+    console.warn(`Another overlapped operation is registered with the same address ${overlappedOperation.pOverlapped}`)
+  }
+  overlappedOperations.push(overlappedOperation)
+}
+
+export const logOverlappedOperations = () => {
+  const lpOverlappedList = overlappedOperations.map((overlappedOperation) => overlappedOperation.pOverlapped);
+  if (config.logSyscalls) {
+    console.log("OverlappedOperation[]:", ...lpOverlappedList)
+  }
+}
+
+export const getLpNumberOfBytesTransferred = (overlappedOperation: OverlappedOperation) => {
+  if (overlappedOperation.pNbBytesRead !== undefined && overlappedOperation.pNbBytesRead.toInt32() != 0) {
+    return overlappedOperation.pNbBytesRead
+  } else {
+    const lpNumberOfBytesTransferred = overlappedOperation.pOverlapped.add(Process.pointerSize).readPointer();
+    return lpNumberOfBytesTransferred;
+  }
+}
+
+export const popOverlappedOperationByOverlapped = (pOverlapped: NativePointer) => {
+  const index = overlappedOperations.findIndex((overlappedOperation) => overlappedOperation.pOverlapped.toUInt32() === pOverlapped.toUInt32())
+  if (index === -1) {
+    // Not found, aborting
+    return undefined
+  }
+  const ops = overlappedOperations.splice(index, 1);
+  if (ops.length !== 1) {
+    // We should never end in this branch
+    console.error(`Found index ${index} but no elements removed from list!`)
+    return undefined
+  }
+  return ops[0];
+}
+
+export const findOverlappedOperationByEvent = (hEvent: NativePointer) => {
+  const index = overlappedOperations.findIndex((overlappedOperation) => overlappedOperation.hEvent === hEvent.toInt32())
+  return overlappedOperations[index];
+}
+
+export const popOverlappedOperationByEvent = (hEvent: NativePointer) => {
+  const index = overlappedOperations.findIndex((overlappedOperation) => overlappedOperation.hEvent === hEvent.toInt32())
+  if (index === -1) {
+    // Not found, aborting
+    return undefined
+  }
+  const ops = overlappedOperations.splice(index, 1)
+  if (ops.length !== 1) {
+    // We should never end in this branch
+    console.error(`Found index ${index} but no elements removed from list!`)
+    return undefined
+  }
+  return ops[0];
+}
+
+```
+
+`agent/overlappedresult.ts`:
+
+```ts
+import {
+  getOverlappedResultAddr,
+  getOverlappedResultExAddr,
+} from './hooks.js';
+import {
+  popReadOperation,
+  recvMsg,
+  sendMsg
+} from './communication.js'
+import { log } from './globals.js';
+import { popOverlappedOperationByOverlapped } from './overlapped_operations.js';
+import {
+  isTargetHandlePath,
+  getPathByHandle,
+} from './lib/handle_filtering.js'
+
+export const hookGetOverlappedResult = () => {
+  Interceptor.attach(getOverlappedResultAddr, {
+    onEnter: function(args) {
+      // See Microsoft documentation for meaning of all arguments
+      const handle = args[0];
+      const lpOverlapped = args[1];
+      const nbBytesTransferred = args[2];
+      const bWait = args[3];
+
+      const handlePath = getPathByHandle(handle);
+
+      if (!isTargetHandlePath(handlePath)) {
+        // Not something we monitor, exit
+        return
+      }
+      const overlappedOperation = popOverlappedOperationByOverlapped(lpOverlapped)
+
+      this.lpOverlapped = lpOverlapped
+      this.nbBytesTransferred = nbBytesTransferred
+      this.handlePath = handlePath
+      this.handleId = handle.toInt32()
+
+      log("GetOverlappedResult-e:", handle, lpOverlapped, overlappedOperation !== undefined ? "TRACKED" : "unk");
+      if (overlappedOperation === undefined) {
+        // No overlapped operation could be found, that is a problem...
+        console.warn(`GetOverlappedResult found an untracked overlapped structure at ${lpOverlapped} associated with a target handle ${handle} (${handlePath})`)
+        return
+      }
+
+      // Save all context data so that we can access them after the syscall
+      this.doIntercept = true
+      this.lpOverlapped = lpOverlapped
+      this.buffer = overlappedOperation.pBuffer
+      this.nbBytesTransferred = nbBytesTransferred
+      this.handlePath = handlePath
+      this.handleId = handle.toInt32()
+    },
+    onLeave: function(result) {
+      if (!this.doIntercept) {
+        return;
+      }
+      if (result.toInt32() === 0) {
+        // Function failed
+        return;
+      }
+
+      // Restore the context
+      const lpOverlapped: NativePointer = this.lpOverlapped;
+      const buffer: NativePointer = this.buffer;
+      const bufferLength = (this.nbBytesTransferred as NativePointer).readU32();
+      const handlePath: string = this.handlePath;
+      const handleId: number = this.handleId;
+
+      log("GetOverlappedResult-l:", lpOverlapped)
+      const identifier = sendMsg({
+        funcName: "GetOverlappedResult",
+        message: buffer.readByteArray(bufferLength) ?? new ArrayBuffer(0),
+        id: 'to_ReadOperations',
+        handlePath,
+        handleId
+      })
+      popReadOperation({
+        handleId,
+        bufferLength,
+        callback: (status, payload) => {
+          log("GetOverlappedResult", status, payload)
+        }
+      })
+    }
+  })
+}
+
+export const hookGetOverlappedResultEx = () => {
+  Interceptor.attach(getOverlappedResultExAddr, {
+    onEnter: function(args) {
+      // See Microsoft documentation for meaning of all arguments
+      const handle = args[0];
+      const lpOverlapped = args[1];
+      // const nbBytesTransferred = args[2];
+      // const dwMilliseconds = args[3];
+      // const bAlertable = args[5];
+
+      const handlePath = getPathByHandle(handle);
+      const overlappedOperation = popOverlappedOperationByOverlapped(lpOverlapped)
+
+      log("GetOverlappedResultEx-e:", handle.toInt32(), lpOverlapped, overlappedOperation !== undefined ? "TRACKED" : "unk");
+
+      log("Unhandled call to GetOverlappedResultEx")
+    }
+  })
+}
+
+
+```
+
+`agent/package-lock.json`:
+
+```json
+{
+  "name": "Named pipe toolkit",
+  "version": "1.0.0",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "Named pipe toolkit",
+      "version": "1.0.0",
+      "devDependencies": {
+        "@types/frida-gum": "^18.7.2",
+        "@types/node": "~20.9",
+        "frida-compile": "^16.4.1"
+      }
+    },
+    "node_modules/@frida/assert": {
+      "version": "3.0.2",
+      "resolved": "https://registry.npmjs.org/@frida/assert/-/assert-3.0.2.tgz",
+      "integrity": "sha512-JXJq5SbXGrM5EkjrZKfRmB29zOoEOix02NC6A5TSJ+C1GE/X051EinJJsuOO2pEOx7KZwpvAHvS0WXW0+levKg==",
+      "dev": true
+    },
+    "node_modules/@frida/base64-js": {
+      "version": "2.0.3",
+      "resolved": "https://registry.npmjs.org/@frida/base64-js/-/base64-js-2.0.3.tgz",
+      "integrity": "sha512-2w0F+1TynOTCZ/v7du9LdHPWwq0lJhazjo2fF9upMyQmA1zHetT14fLuQ1v/6T0qPgyeEGkiSrybstU8EsgeUA==",
+      "dev": true,
+      "funding": [
+        {
+          "type": "github",
+          "url": "https://github.com/sponsors/feross"
+        },
+        {
+          "type": "patreon",
+          "url": "https://www.patreon.com/feross"
+        },
+        {
+          "type": "consulting",
+          "url": "https://feross.org/support"
+        }
+      ]
+    },
+    "node_modules/@frida/buffer": {
+      "version": "7.0.4",
+      "resolved": "https://registry.npmjs.org/@frida/buffer/-/buffer-7.0.4.tgz",
+      "integrity": "sha512-RxQ1lZRRiCJj7nhcCiD8xeJx0NsLpGGnjqsmTg7jShGmbnVFMN5W7+J+3gqdPSQhc/IxNBIWc6zRXVp4+qnYHg==",
+      "dev": true,
+      "funding": [
+        {
+          "type": "github",
+          "url": "https://github.com/sponsors/feross"
+        },
+        {
+          "type": "patreon",
+          "url": "https://www.patreon.com/feross"
+        },
+        {
+          "type": "consulting",
+          "url": "https://feross.org/support"
+        }
+      ],
+      "dependencies": {
+        "base64-js": "^1.5.1",
+        "ieee754": "^1.2.1"
+      }
+    },
+    "node_modules/@frida/crosspath": {
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/@frida/crosspath/-/crosspath-3.0.0.tgz",
+      "integrity": "sha512-bNdO1spIPD2P40XtK89N49oZpJhstdlnkJZcD4yJ17jrdkm9Ctu0sd9MIEX6Z8Tm8ydhVJBAOMEKl9/R27onAQ==",
+      "dev": true,
+      "dependencies": {
+        "@types/node": "^17.0.36"
+      },
+      "engines": {
+        "node": ">=14.9.0"
+      }
+    },
+    "node_modules/@frida/crosspath/node_modules/@types/node": {
+      "version": "17.0.45",
+      "resolved": "https://registry.npmjs.org/@types/node/-/node-17.0.45.tgz",
+      "integrity": "sha512-w+tIMs3rq2afQdsPJlODhoUEKzFP1ayaoyl1CcnwtIlsVe7K7bA1NGm4s3PraqTLlXnbIN84zuBlxBWo1u9BLw==",
+      "dev": true
+    },
+    "node_modules/@frida/crypto": {
+      "version": "1.0.1",
+      "resolved": "https://registry.npmjs.org/@frida/crypto/-/crypto-1.0.1.tgz",
+      "integrity": "sha512-WXTkVjESvX8TIVXIynJJv9BKSIdQP0Iis04StIXknkDi1ULdMlrypA9p5C4KW1H6GCkNsVnKbybpzsulYCTvag==",
+      "dev": true
+    },
+    "node_modules/@frida/diagnostics_channel": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/@frida/diagnostics_channel/-/diagnostics_channel-1.0.0.tgz",
+      "integrity": "sha512-mYX1jp/5Bpk24tHArJNx65iCk7qSuV8YJkdU0gFNVtJUXxfV8BG5WuPa4mL+ynxsbWWpsg/cwKZbLAepYKTdQQ==",
+      "dev": true
+    },
+    "node_modules/@frida/events": {
+      "version": "4.0.4",
+      "resolved": "https://registry.npmjs.org/@frida/events/-/events-4.0.4.tgz",
+      "integrity": "sha512-qJVQ6VWHf9sjUKuiJzoCAC00frbpcwxeYfvQ+PP9LU/d70j+QvjWgYe98Qa3ekLaBU6r/AvWm8ThKCDUCLWrQQ==",
+      "dev": true,
+      "engines": {
+        "node": ">=0.8.x"
+      }
+    },
+    "node_modules/@frida/http": {
+      "version": "4.0.2",
+      "resolved": "https://registry.npmjs.org/@frida/http/-/http-4.0.2.tgz",
+      "integrity": "sha512-cvkc7ex7GmVXVOWqtjXKBWUUbYEBgpNRKZbEEoMeI8KiIs8zejKwg+N7rx7296Ao+EP3+xcUr4wBVr3xLaUVfQ==",
+      "dev": true,
+      "dependencies": {
+        "http-parser-js": "^0.5.3"
+      }
+    },
+    "node_modules/@frida/http-parser-js": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/@frida/http-parser-js/-/http-parser-js-1.0.0.tgz",
+      "integrity": "sha512-2nMrNXt/OeTlWbqnE8AH4Sfz4I2+BGoN206dzKEyC/g2svtn83Xu+zuv/V3TkwrA27s26Mcy84ZwsXeNlqNxUQ==",
+      "dev": true
+    },
+    "node_modules/@frida/https": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/@frida/https/-/https-1.0.0.tgz",
+      "integrity": "sha512-OiqQ6qsALcWOktRLq07oJ0i6sH8eX6MXb/MdZS1qVKDRf6wchH4Pjn6fiLB+pt/OlYbggk+DOfpHwSdjTwuHMQ==",
+      "dev": true
+    },
+    "node_modules/@frida/ieee754": {
+      "version": "2.0.2",
+      "resolved": "https://registry.npmjs.org/@frida/ieee754/-/ieee754-2.0.2.tgz",
+      "integrity": "sha512-wlcUebnne4ENN7GDr5pTH598ZDLMVOsh0FjenxeVOe6u7ewZkz9gGRnLnZKJAm9kl5G6XhdxhI0cSXVQK/rQUw==",
+      "dev": true,
+      "funding": [
+        {
+          "type": "github",
+          "url": "https://github.com/sponsors/feross"
+        },
+        {
+          "type": "patreon",
+          "url": "https://www.patreon.com/feross"
+        },
+        {
+          "type": "consulting",
+          "url": "https://feross.org/support"
+        }
+      ]
+    },
+    "node_modules/@frida/net": {
+      "version": "4.0.2",
+      "resolved": "https://registry.npmjs.org/@frida/net/-/net-4.0.2.tgz",
+      "integrity": "sha512-qQRe7hQ+ZfCcG/SE3P1TRqQ9bmuK/T7wPCYaT4z56rBPWAxsaQbQHpX4fR6OrFaSDr7X0xJLsTbdIp9hGhhLZg==",
+      "dev": true
+    },
+    "node_modules/@frida/os": {
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/@frida/os/-/os-1.0.2.tgz",
+      "integrity": "sha512-3ISAiGNiyIya3QN2EHBCz1wqP0enTdSxP99wUeroeh8+AQRmgoOr/5TRnrVry8pe378anay3fmV/tdUMMSkehQ==",
+      "dev": true
+    },
+    "node_modules/@frida/path": {
+      "version": "2.0.3",
+      "resolved": "https://registry.npmjs.org/@frida/path/-/path-2.0.3.tgz",
+      "integrity": "sha512-2RQy36QatoC846fzBhBhV8sXMsSOBGoYvwTHeaE1zUdz7F4RNScP4QEekTTooBYWYX/XjiF36KQpYAzc9OYFtg==",
+      "dev": true
+    },
+    "node_modules/@frida/process": {
+      "version": "1.2.1",
+      "resolved": "https://registry.npmjs.org/@frida/process/-/process-1.2.1.tgz",
+      "integrity": "sha512-nvCu22DstFW2ttGFtOKekHM7vnjbZm+XgtvavOt427GNT6uV7k0JYK9tnMbcLMRWv57DG6udAmuJlWs8Paq1ag==",
+      "dev": true
+    },
+    "node_modules/@frida/punycode": {
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/@frida/punycode/-/punycode-3.0.0.tgz",
+      "integrity": "sha512-XVSDY2KamDs1D5/fTVgHcOSNxdU4kTboxzqJMBbTjcQC7XScIT9c0EfbwKCq7Kci6gWQdsHSCr7lU+9Oc4KAdg==",
+      "dev": true
+    },
+    "node_modules/@frida/querystring": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/@frida/querystring/-/querystring-1.0.0.tgz",
+      "integrity": "sha512-15m1fOZPmoO/vWlgPJrG/J9/BJDz6a2/JpVGpS8ynNzo+fBhTznaStX5nHxUs24mVTqh/OqLo0EiYJM5WWHXxg==",
+      "dev": true
+    },
+    "node_modules/@frida/readable-stream": {
+      "version": "4.1.3",
+      "resolved": "https://registry.npmjs.org/@frida/readable-stream/-/readable-stream-4.1.3.tgz",
+      "integrity": "sha512-ntGUFmi+CryRGRJIK13a/VST2Ad19uivbln8Xd92vKPAARq+6vMIASDyZIqyl5BLRccfiyCHdYgrgQ6RI5rUig==",
+      "dev": true
+    },
+    "node_modules/@frida/reserved-words": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/@frida/reserved-words/-/reserved-words-1.0.0.tgz",
+      "integrity": "sha512-2yG/XxJlsGlk/mm6eZTb4OAaQEhkTI2qaFfZFtAsrA/XuCpuMWkS4y/guyBlsRu4hAuhK2HPmNM8+OLLK1zM9Q==",
+      "dev": true
+    },
+    "node_modules/@frida/stream": {
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/@frida/stream/-/stream-1.0.2.tgz",
+      "integrity": "sha512-4OuaC1ztmEKgTq3WeBhsy8Oq+AwW9n9cYnvLklcC9jwD93AEwgbWpecLlxJCVuALvTMdhKPg0nQVfyGYP/i9Bw==",
+      "dev": true,
+      "dependencies": {
+        "@frida/readable-stream": "^4.1.3"
+      }
+    },
+    "node_modules/@frida/string_decoder": {
+      "version": "2.0.0",
+      "resolved": "https://registry.npmjs.org/@frida/string_decoder/-/string_decoder-2.0.0.tgz",
+      "integrity": "sha512-in371tYZMHQiW9HF5MS3JDw6Ao6tyBoq34UWy2rzOswYyMG1rpizh85ofi/yVkxDiaqybEZefxzkVittpPGT6g==",
+      "dev": true
+    },
+    "node_modules/@frida/terser": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/@frida/terser/-/terser-1.0.0.tgz",
+      "integrity": "sha512-59h9WuNzD1Rx/zwoWqQ/FW/4Y/Q3R91Eng2hEwdHapqiTDvtKbZ08F6CynCR7ZVinrh4tLYsF46AtVPTz1ys9g==",
+      "dev": true,
+      "dependencies": {
+        "@jridgewell/source-map": "^0.3.2",
+        "acorn": "^8.5.0",
+        "commander": "^2.20.0",
+        "source-map-support": "~0.5.20"
+      },
+      "bin": {
+        "terser": "bin/terser"
+      },
+      "engines": {
+        "node": ">=10"
+      }
+    },
+    "node_modules/@frida/terser/node_modules/commander": {
+      "version": "2.20.3",
+      "resolved": "https://registry.npmjs.org/commander/-/commander-2.20.3.tgz",
+      "integrity": "sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==",
+      "dev": true
+    },
+    "node_modules/@frida/timers": {
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/@frida/timers/-/timers-3.0.0.tgz",
+      "integrity": "sha512-3b+0igv10aT8TMxefrTAd06rActqbxJLY2Xkkq9vYcPBffB/yHszl0NYIp/5ko8WC3ecDYPU6bQiY6fjs72zTA==",
+      "dev": true
+    },
+    "node_modules/@frida/tty": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/@frida/tty/-/tty-1.0.0.tgz",
+      "integrity": "sha512-p/kjLnKYxEAB1MdYP8+5rKv9CsHzyA+0jg9BcGETzjQVKHHcroHDULRxDYUh+DC7qs6cpX8QdDQh9E+a6ydgsQ==",
+      "dev": true
+    },
+    "node_modules/@frida/url": {
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/@frida/url/-/url-1.0.2.tgz",
+      "integrity": "sha512-ZKunbKJHMr8w2Eb/5K1avy0MzK1B998S17wYXNv3RmzBGxMm8S5T0F3qEpRxkU7/72P8m4izyQU87fWl+FjQsQ==",
+      "dev": true,
+      "dependencies": {
+        "@frida/punycode": "^3.0.0",
+        "@frida/querystring": "^1.0.0"
+      }
+    },
+    "node_modules/@frida/util": {
+      "version": "1.0.3",
+      "resolved": "https://registry.npmjs.org/@frida/util/-/util-1.0.3.tgz",
+      "integrity": "sha512-htcG3uDiRXv89ERVNNYhfase39kJ2X75ZARfrYcYEtJLFEsSk0nemM1YnEIR4CjrHvdvkWHrwgKkS+acOyoNEg==",
+      "dev": true
+    },
+    "node_modules/@frida/vm": {
+      "version": "2.0.0",
+      "resolved": "https://registry.npmjs.org/@frida/vm/-/vm-2.0.0.tgz",
+      "integrity": "sha512-7fsjLWscZT5odNIBtg6qbLNI+vAk1xmii6H5W2kaYkMYt0vRohQEcDSUWacA+eaWlu5SvMjZI82Yibj/3G9pJw==",
+      "dev": true
+    },
+    "node_modules/@jridgewell/gen-mapping": {
+      "version": "0.3.8",
+      "resolved": "https://registry.npmjs.org/@jridgewell/gen-mapping/-/gen-mapping-0.3.8.tgz",
+      "integrity": "sha512-imAbBGkb+ebQyxKgzv5Hu2nmROxoDOXHh80evxdoXNOrvAnVx7zimzc1Oo5h9RlfV4vPXaE2iM5pOFbvOCClWA==",
+      "dev": true,
+      "dependencies": {
+        "@jridgewell/set-array": "^1.2.1",
+        "@jridgewell/sourcemap-codec": "^1.4.10",
+        "@jridgewell/trace-mapping": "^0.3.24"
+      },
+      "engines": {
+        "node": ">=6.0.0"
+      }
+    },
+    "node_modules/@jridgewell/resolve-uri": {
+      "version": "3.1.2",
+      "resolved": "https://registry.npmjs.org/@jridgewell/resolve-uri/-/resolve-uri-3.1.2.tgz",
+      "integrity": "sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==",
+      "dev": true,
+      "engines": {
+        "node": ">=6.0.0"
+      }
+    },
+    "node_modules/@jridgewell/set-array": {
+      "version": "1.2.1",
+      "resolved": "https://registry.npmjs.org/@jridgewell/set-array/-/set-array-1.2.1.tgz",
+      "integrity": "sha512-R8gLRTZeyp03ymzP/6Lil/28tGeGEzhx1q2k703KGWRAI1VdvPIXdG70VJc2pAMw3NA6JKL5hhFu1sJX0Mnn/A==",
+      "dev": true,
+      "engines": {
+        "node": ">=6.0.0"
+      }
+    },
+    "node_modules/@jridgewell/source-map": {
+      "version": "0.3.6",
+      "resolved": "https://registry.npmjs.org/@jridgewell/source-map/-/source-map-0.3.6.tgz",
+      "integrity": "sha512-1ZJTZebgqllO79ue2bm3rIGud/bOe0pP5BjSRCRxxYkEZS8STV7zN84UBbiYu7jy+eCKSnVIUgoWWE/tt+shMQ==",
+      "dev": true,
+      "dependencies": {
+        "@jridgewell/gen-mapping": "^0.3.5",
+        "@jridgewell/trace-mapping": "^0.3.25"
+      }
+    },
+    "node_modules/@jridgewell/sourcemap-codec": {
+      "version": "1.5.0",
+      "resolved": "https://registry.npmjs.org/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.0.tgz",
+      "integrity": "sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==",
+      "dev": true
+    },
+    "node_modules/@jridgewell/trace-mapping": {
+      "version": "0.3.25",
+      "resolved": "https://registry.npmjs.org/@jridgewell/trace-mapping/-/trace-mapping-0.3.25.tgz",
+      "integrity": "sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==",
+      "dev": true,
+      "dependencies": {
+        "@jridgewell/resolve-uri": "^3.1.0",
+        "@jridgewell/sourcemap-codec": "^1.4.14"
+      }
+    },
+    "node_modules/@types/frida-gum": {
+      "version": "18.7.2",
+      "resolved": "https://registry.npmjs.org/@types/frida-gum/-/frida-gum-18.7.2.tgz",
+      "integrity": "sha512-nOxTk8n45nQlFQhSSXcnePrzjw6k6JMJMESZ8HlHhUiIQqvGI4RYa69FYdUbGoBRnITn8srEq5vn0dkVwO/ezQ==",
+      "dev": true
+    },
+    "node_modules/@types/node": {
+      "version": "20.9.5",
+      "resolved": "https://registry.npmjs.org/@types/node/-/node-20.9.5.tgz",
+      "integrity": "sha512-Uq2xbNq0chGg+/WQEU0LJTSs/1nKxz6u1iemLcGomkSnKokbW1fbLqc3HOqCf2JP7KjlL4QkS7oZZTrOQHQYgQ==",
+      "dev": true,
+      "dependencies": {
+        "undici-types": "~5.26.4"
+      }
+    },
+    "node_modules/acorn": {
+      "version": "8.14.0",
+      "resolved": "https://registry.npmjs.org/acorn/-/acorn-8.14.0.tgz",
+      "integrity": "sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==",
+      "dev": true,
+      "bin": {
+        "acorn": "bin/acorn"
+      },
+      "engines": {
+        "node": ">=0.4.0"
+      }
+    },
+    "node_modules/base64-js": {
+      "version": "1.5.1",
+      "resolved": "https://registry.npmjs.org/base64-js/-/base64-js-1.5.1.tgz",
+      "integrity": "sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==",
+      "dev": true,
+      "funding": [
+        {
+          "type": "github",
+          "url": "https://github.com/sponsors/feross"
+        },
+        {
+          "type": "patreon",
+          "url": "https://www.patreon.com/feross"
+        },
+        {
+          "type": "consulting",
+          "url": "https://feross.org/support"
+        }
+      ]
+    },
+    "node_modules/buffer-from": {
+      "version": "1.1.2",
+      "resolved": "https://registry.npmjs.org/buffer-from/-/buffer-from-1.1.2.tgz",
+      "integrity": "sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==",
+      "dev": true
+    },
+    "node_modules/commander": {
+      "version": "11.1.0",
+      "resolved": "https://registry.npmjs.org/commander/-/commander-11.1.0.tgz",
+      "integrity": "sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==",
+      "dev": true,
+      "engines": {
+        "node": ">=16"
+      }
+    },
+    "node_modules/frida-compile": {
+      "version": "16.4.1",
+      "resolved": "https://registry.npmjs.org/frida-compile/-/frida-compile-16.4.1.tgz",
+      "integrity": "sha512-xI9HNtUFpHxuKBGXaL6XJAYH1zWTvNJDrHRnz1hp0oS24iPHt6c01Jmm3qljZek3oQWn8HhvfNvrzfgbsKzoBQ==",
+      "dev": true,
+      "dependencies": {
+        "@frida/assert": "^3.0.1",
+        "@frida/base64-js": "^2.0.3",
+        "@frida/buffer": "^7.0.4",
+        "@frida/crosspath": "^3.0.0",
+        "@frida/crypto": "^1.0.1",
+        "@frida/diagnostics_channel": "^1.0.0",
+        "@frida/events": "^4.0.4",
+        "@frida/http": "^4.0.2",
+        "@frida/http-parser-js": "^1.0.0",
+        "@frida/https": "^1.0.0",
+        "@frida/ieee754": "^2.0.2",
+        "@frida/net": "^4.0.1",
+        "@frida/os": "^1.0.0",
+        "@frida/path": "^2.0.3",
+        "@frida/process": "^1.2.1",
+        "@frida/punycode": "^3.0.0",
+        "@frida/querystring": "^1.0.0",
+        "@frida/readable-stream": "^4.1.3",
+        "@frida/reserved-words": "^1.0.0",
+        "@frida/stream": "^1.0.2",
+        "@frida/string_decoder": "^2.0.0",
+        "@frida/terser": "^1.0.0",
+        "@frida/timers": "^3.0.0",
+        "@frida/tty": "^1.0.0",
+        "@frida/url": "^1.0.2",
+        "@frida/util": "^1.0.3",
+        "@frida/vm": "^2.0.0",
+        "commander": "^11.1.0",
+        "frida-fs": "^5.2.3",
+        "typed-emitter": "^2.1.0"
+      },
+      "bin": {
+        "frida-compile": "dist/cli.js"
+      }
+    },
+    "node_modules/frida-fs": {
+      "version": "5.2.5",
+      "resolved": "https://registry.npmjs.org/frida-fs/-/frida-fs-5.2.5.tgz",
+      "integrity": "sha512-Eyb4OqUlcv1/Eq7Q+B9IZmYZIgIM2YjqDojrjmAGzPSSXBuUKwSkuObQcQ8Dup9JTOMIUcSII9/I8DaTe6LFKw==",
+      "dev": true
+    },
+    "node_modules/http-parser-js": {
+      "version": "0.5.9",
+      "resolved": "https://registry.npmjs.org/http-parser-js/-/http-parser-js-0.5.9.tgz",
+      "integrity": "sha512-n1XsPy3rXVxlqxVioEWdC+0+M+SQw0DpJynwtOPo1X+ZlvdzTLtDBIJJlDQTnwZIFJrZSzSGmIOUdP8tu+SgLw==",
+      "dev": true
+    },
+    "node_modules/ieee754": {
+      "version": "1.2.1",
+      "resolved": "https://registry.npmjs.org/ieee754/-/ieee754-1.2.1.tgz",
+      "integrity": "sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==",
+      "dev": true,
+      "funding": [
+        {
+          "type": "github",
+          "url": "https://github.com/sponsors/feross"
+        },
+        {
+          "type": "patreon",
+          "url": "https://www.patreon.com/feross"
+        },
+        {
+          "type": "consulting",
+          "url": "https://feross.org/support"
+        }
+      ]
+    },
+    "node_modules/rxjs": {
+      "version": "7.8.1",
+      "resolved": "https://registry.npmjs.org/rxjs/-/rxjs-7.8.1.tgz",
+      "integrity": "sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==",
+      "dev": true,
+      "optional": true,
+      "dependencies": {
+        "tslib": "^2.1.0"
+      }
+    },
+    "node_modules/source-map": {
+      "version": "0.6.1",
+      "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.6.1.tgz",
+      "integrity": "sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==",
+      "dev": true,
+      "engines": {
+        "node": ">=0.10.0"
+      }
+    },
+    "node_modules/source-map-support": {
+      "version": "0.5.21",
+      "resolved": "https://registry.npmjs.org/source-map-support/-/source-map-support-0.5.21.tgz",
+      "integrity": "sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==",
+      "dev": true,
+      "dependencies": {
+        "buffer-from": "^1.0.0",
+        "source-map": "^0.6.0"
+      }
+    },
+    "node_modules/tslib": {
+      "version": "2.8.1",
+      "resolved": "https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz",
+      "integrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==",
+      "dev": true,
+      "optional": true
+    },
+    "node_modules/typed-emitter": {
+      "version": "2.1.0",
+      "resolved": "https://registry.npmjs.org/typed-emitter/-/typed-emitter-2.1.0.tgz",
+      "integrity": "sha512-g/KzbYKbH5C2vPkaXGu8DJlHrGKHLsM25Zg9WuC9pMGfuvT+X25tZQWo5fK1BjBm8+UrVE9LDCvaY0CQk+fXDA==",
+      "dev": true,
+      "optionalDependencies": {
+        "rxjs": "*"
+      }
+    },
+    "node_modules/undici-types": {
+      "version": "5.26.5",
+      "resolved": "https://registry.npmjs.org/undici-types/-/undici-types-5.26.5.tgz",
+      "integrity": "sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==",
+      "dev": true
+    }
+  }
+}
+
+```
+
+`agent/package.json`:
+
+```json
+{
+  "name": "Named pipe toolkit",
+  "version": "1.0.0",
+  "description": "Named pipe interception scripts",
+  "private": true,
+  "author": "Thomas Borot <thomas.borot@synacktiv.com> (https://www.synacktiv.com/)",
+  "main": "main.ts",
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "mkdir -p dist/ && frida-compile main.ts -o dist/agent.js -c",
+    "watch": "mkdir -p dist/ && frida-compile main.ts -o dist/agent.js -w"
+  },
+  "devDependencies": {
+    "@types/frida-gum": "^18.7.2",
+    "@types/node": "~20.9",
+    "frida-compile": "^16.4.1"
+  }
+}
+
+```
+
+`agent/readfile.ts`:
+
+```ts
+import {
+  readFileAddr,
+  readFileExAddr,
+  ERROR_IO_PENDING,
+  overlappedEventOffset,
+  readFile,
+} from './hooks.js';
+import {
+  popReadOperation,
+  recvMsg,
+  sendMsg
+} from './communication.js'
+import { hookCompletionRoutine } from './dynamic_hook.js';
+import { log } from './globals.js';
+import { logOverlappedOperations, popOverlappedOperationByOverlapped, pushOverlappedOperation } from './overlapped_operations.js';
+import {
+  isTargetHandlePath,
+  getPathByHandle,
+} from './lib/handle_filtering.js'
+
+export const hookReadFileEx = () => {
+  Interceptor.attach(readFileExAddr, {
+    onEnter: function(args) {
+      // See Microsoft documentation for meaning of all arguments
+      const hFile = args[0];
+      const lpBuffer = args[1];
+      const nNumberOfBytesToRead = args[2].toInt32();
+      const lpOverlapped = args[3];
+      const lpCompletionRoutine = args[4];
+
+      const handlePath = getPathByHandle(hFile);
+
+      if (!isTargetHandlePath(handlePath)) {
+        this.doIntercept = false;
+        return
+      }
+      if (lpCompletionRoutine.toInt32() !== 0) {
+        // The developper probably wanted to handle the result of the read in a completion routine
+        // therefore we need to ensure that function is hooked
+        hookCompletionRoutine(lpCompletionRoutine)
+      }
+
+      // This is an overlapped operation
+      // register the overlapped operation for further use
+      pushOverlappedOperation({
+        pOverlapped: lpOverlapped,
+        pBuffer: lpBuffer,
+        bufferLength: nNumberOfBytesToRead,
+        pNbBytesRead: undefined, // Should be retrieved in the Overlapped structure
+        hEvent: lpOverlapped.add(overlappedEventOffset).readU32(),
+        handleId: hFile.toInt32(),
+        handlePath: handlePath,
+      })
+      this.isOverlapped = true;
+      this.lpOverlapped = lpOverlapped;
+
+      log("ReadFileEx-e:", hFile.toInt32(), lpBuffer, nNumberOfBytesToRead, lpOverlapped, lpCompletionRoutine, "overlapped", lpOverlapped.add(overlappedEventOffset).readU32())
+    },
+    // TODO: Check return code to avoid waiting for an overlapped that will never be used
+  })
+}
+
+export const hookReadFile = () => {
+  Interceptor.attach(readFileAddr, {
+    onEnter: function(args) {
+      // See Microsoft documentation for meaning of all arguments
+      const hFile = args[0];
+      const lpBuffer = args[1];
+      const nNumberOfBytesToRead = args[2].toInt32();
+      const lpNumberOfBytesRead = args[3];
+      const lpOverlapped = args[4];
+
+      const handlePath = getPathByHandle(hFile);
+
+      if (!isTargetHandlePath(handlePath)) {
+        this.doIntercept = false;
+        return
+      }
+
+      // Save all context data so that we can access them after the syscall
+      this.doIntercept = true
+      this.buffer = lpBuffer
+      this.nbBytesRead = lpNumberOfBytesRead
+      this.handlePath = handlePath
+      this.handleId = hFile.toInt32()
+
+      // Check if there are already data waiting in the pipe
+      this.statusCode = "NO_DATA";
+      this.readData = [];
+      const data = popReadOperation({
+        callback: (status, payload) => {
+          this.statusCode = status;
+          this.readData = payload;
+        },
+        handleId: hFile.toInt32(),
+        bufferLength: nNumberOfBytesToRead,
+        dontwait: true,
+      });
+      if (this.statusCode != 'NO_DATA') {
+        // Intercept call and nullify the syscall
+        args[0] = ptr(0) // Invalid Handle, should be enough to make the syscall fail
+        args[1] = ptr(0)
+        args[2] = ptr(0)
+        args[3] = ptr(0)
+        args[4] = ptr(0)
+        log("ReadFile-e: nullifying syscall");
+        return
+      }
+
+      if (lpOverlapped.toInt32() === 0) {
+        this.isOverlapped = false;
+
+        log("ReadFile-e:", hFile, lpBuffer, nNumberOfBytesToRead, lpNumberOfBytesRead, lpOverlapped, "direct")
+      } else {
+
+        log("ReadFile-e:", hFile, lpBuffer, nNumberOfBytesToRead, lpNumberOfBytesRead, lpOverlapped, "overlapped", lpOverlapped.add(overlappedEventOffset).readU32())
+        // This is an overlapped operation
+        // register the overlapped operation for further use in getOverlappedResult
+        pushOverlappedOperation({
+          pOverlapped: lpOverlapped,
+          pBuffer: lpBuffer,
+          bufferLength: nNumberOfBytesToRead,
+          pNbBytesRead: lpNumberOfBytesRead,
+          hEvent: lpOverlapped.add(overlappedEventOffset).readU32(),
+          handleId: this.handleId,
+          handlePath: handlePath,
+        })
+        this.isOverlapped = true;
+        this.lpOverlapped = lpOverlapped;
+      }
+    },
+    onLeave: function(result) {
+      if (!this.doIntercept) {
+        return;
+      }
+
+      // Restore the context
+      const lpBuffer: NativePointer = this.buffer;
+      const lpNumberOfBytesRead: NativePointer = this.nbBytesRead;
+      const handlePath: string = this.handlePath;
+      const handleId: number = this.handleId;
+      const isOverlapped: boolean = this.isOverlapped;
+      const lpOverlapped: NativePointer = this.lpOverlapped;
+      const retCode = result.toInt32();
+
+      const statusCode: string = this.statusCode;
+      const readData: number[] = this.readData;
+
+      if (statusCode != "NO_DATA") {
+        if (statusCode == "BUFFER_TOO_SMALL") {
+          // TODO: handle
+        } else if (statusCode == "SUCCESS") {
+          if (!isOverlapped) {
+            // Case 1, synchronous read
+            result.replace(ptr(1)); // Read Success
+            lpNumberOfBytesRead.writeInt(readData.length);
+            lpBuffer.writeByteArray(readData);
+          } else {
+            // CASE 2, asynchronous read
+            // TODO
+          }
+        }
+      }
+
+      const nbBytesRead = lpNumberOfBytesRead.readU32();
+      log("ReadFile-l:", handleId, lpBuffer, "unk", nbBytesRead, lpOverlapped, isOverlapped ? "overlapped" : "direct", retCode)
+
+      // If the return code is non-0 and we read bytes, the operation completed successfully
+      if (retCode !== 0 && lpNumberOfBytesRead.readU32() !== 0) {
+        const identifier = sendMsg({
+          funcName: "ReadFile",
+          message: lpBuffer.readByteArray(nbBytesRead) ?? new ArrayBuffer(0),
+          handlePath,
+          handleId
+        })
+        recvMsg({
+          identifier,
+          callback: (value) => {
+            const data = value.payload;
+            // If length is 0, it will trigger an error, instead, change the return value of ReadFile
+            const mBufferLength = data.length;
+            // TODO: handle modified data
+            // const mBuffer = Memory.alloc(mBufferLength);
+            // mBuffer.writeByteArray(data);
+            // pushHeapAllocatedBuffer(mBuffer);
+
+            // this.buffer = mBuffer;
+            // this.nbBytesRead = new NativePointer(mBufferLength);
+          },
+          wait: true
+        })
+        return
+      }
+
+      // If the operation was async (overlapped), and we got an error that is ERROR_IO_PENDING,
+      // we need to keep the event registered to intercept it during other syscalls
+      if (isOverlapped && retCode !== ERROR_IO_PENDING) {
+        log("ReadFile: expecting other call with following overlapped", lpOverlapped)
+        return
+      }
+
+      // Otherwise, there is an error in the syscall, we unregister the event
+      const overlappedOperation = popOverlappedOperationByOverlapped(lpOverlapped);
+      if (isOverlapped && overlappedOperation === undefined) {
+        console.warn("ReadFile: Wanted to unregister an overlapped that was not registered", lpOverlapped)
+      }
+    }
+  });
+
+}
+
+```
+
+`agent/tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": ["es2020"],
+    "allowJs": true,
+    "noEmit": true,
+    "strict": true,
+    "esModuleInterop": true
+  }
+}
+
+```
+
+`agent/wait.ts`:
+
+```ts
+import {
+  waitForSingleObjectAddr,
+  waitForSingleObjectExAddr,
+} from './hooks.js';
+import { log } from './globals.js';
+import { findOverlappedOperationByEvent } from './overlapped_operations.js';
+
+export const hookWaitForSingleObject = () => {
+  Interceptor.attach(waitForSingleObjectAddr, {
+    onEnter: function(args) {
+      const hHandle = args[0];
+      const dwMilliseconds = args[1];
+
+      // Check if we know that event
+      const overlappedOperation = findOverlappedOperationByEvent(hHandle);
+      if (!overlappedOperation) {
+        // We don't know that event, return
+        return
+      }
+      this.doIntercept = true;
+      log("WaitForSingleObject-e:", hHandle.toInt32(), dwMilliseconds.toInt32(), overlappedOperation?.pOverlapped)
+    },
+    onLeave: function(result) {
+      if (!this.doIntercept) {
+        return;
+      }
+      log("WaitForSingleObject-l:", result)
+    }
+  })
+}
+
+export const hookWaitForSingleObjectEx = () => {
+  Interceptor.attach(waitForSingleObjectExAddr, {
+    onEnter: function(args) {
+      const hHandle = args[0]; // HANDLE
+      const dwMilliseconds = args[1]; // DWORD
+      const bAlertable = args[2]; // BOOL
+
+      // Check if we know that event
+      const overlappedOperation = findOverlappedOperationByEvent(hHandle);
+      if (!overlappedOperation) {
+        // We don't know that event, return
+        return
+      }
+
+      log("WaitForSingleObjectEx-e:", hHandle.toInt32(), dwMilliseconds.toInt32(), bAlertable.toInt32())
+    }
+  })
+}
+
+```
+
+`agent/writefile.ts`:
+
+```ts
+import {
+  writeFileAddr,
+  writeFileExAddr,
+} from './hooks.js';
+import {
+  recvMsg,
+  sendMsg
+} from './communication.js'
+import { log } from './globals.js';
+import {
+  isTargetHandlePath,
+  getPathByHandle,
+} from './lib/handle_filtering.js'
+import { pushHeapAllocatedBuffer } from './lib/heap.js';
+import { arrayBufferEqual } from './lib.js';
+
+
+export const hookWriteFile = () => {
+  Interceptor.attach(writeFileAddr, {
+    onEnter: function(args) {
+      const handle = args[0];
+      const buffer = args[1];
+      const bufferLength = args[2].toInt32();
+      const handlePath = getPathByHandle(handle);
+
+      if (!isTargetHandlePath(handlePath)) {
+        return;
+      }
+
+      log("WriteFile-e:", handle.toInt32(), buffer, bufferLength)
+      const message = buffer.readByteArray(bufferLength) ?? new ArrayBuffer(0)
+
+      const identifier = sendMsg({
+        funcName: "WriteFile",
+        message,
+        handlePath,
+        handleId: handle.toInt32()
+      })
+      recvMsg({
+        identifier,
+        callback: (value) => {
+          const data: number[] = value.payload;
+          const dataArrayBuffer = new Uint8Array(data);
+          if (!arrayBufferEqual(dataArrayBuffer.buffer, message)) {
+            if (data.length <= this.Length.toInt32()) {
+              // We just need to overwrite the buffer
+              this.Buffer.writeByteArray(data)
+              // Make sure subsequent data are zeroed
+              this.Buffer.add(data.length).writeByteArray(Array.from(new Uint8Array(this.Length.toInt32() - data.length)))
+              // Modify the buffer length of the writefile call
+              args[2] = ptr(data.length)
+            } else {
+              // We need to allocate a new buffer
+              const mBuffer = Memory.alloc(data.length)
+              mBuffer.writeByteArray(data)
+              pushHeapAllocatedBuffer(mBuffer);
+              args[1] = mBuffer;
+              args[2] = ptr(data.length);
+            }
+          }
+        },
+        wait: true
+      })
+    }
+  });
+}
+
+export const hookWriteFileEx = () => {
+  Interceptor.attach(writeFileExAddr, {
+    onEnter: function(args) {
+      const handle = args[0];
+      const lpBuffer = args[1];
+      const nNumberOfBytesToWrite = args[2].toInt32();
+      // const lpOverlapped = args[3];
+      // const lpCompletionRoutine = args[4];
+
+      const handlePath = getPathByHandle(handle);
+
+      if (!isTargetHandlePath(handlePath)) {
+        return;
+      }
+
+      log("WriteFileEx-e:", handle.toInt32(), lpBuffer, nNumberOfBytesToWrite)
+
+      const message = lpBuffer.readByteArray(nNumberOfBytesToWrite) ?? new ArrayBuffer(0)
+      const identifier = sendMsg({
+        funcName: "WriteFile",
+        message,
+        handlePath,
+        handleId: handle.toInt32()
+      })
+      recvMsg({
+        identifier,
+        callback: (value) => {
+          const data: number[] = value.payload;
+          const dataArrayBuffer = new Uint8Array(data);
+          if (!arrayBufferEqual(dataArrayBuffer.buffer, message)) {
+            if (data.length <= this.Length.toInt32()) {
+              // We just need to overwrite the buffer
+              this.Buffer.writeByteArray(data)
+              // Make sure subsequent data are zeroed
+              this.Buffer.add(data.length).writeByteArray(Array.from(new Uint8Array(this.Length.toInt32() - data.length)))
+              // Modify the buffer length of the writefile call
+              args[1] = ptr(data.length)
+            } else {
+              // We need to allocate a new buffer
+              const mBuffer = Memory.alloc(data.length)
+              mBuffer.writeByteArray(data)
+              pushHeapAllocatedBuffer(mBuffer);
+              args[1] = mBuffer;
+              args[2] = ptr(data.length);
+            }
+          }
+        },
+        wait: true
+      })
+    },
+  })
+}
+
+```
+
+`backend/main.py`:
+
+```py
+#!/usr/bin/env python3
+import collections
+import cmd
+import shlex
+import threading
+from typing import Literal
+import frida
+import websocket
+import asyncio
+import argparse
+import pathlib
+import logging
+import json
+import queue
+import re
+from time import monotonic as time
+from urllib.parse import quote_plus
+from frida.core import Script, ScriptExportsSync
+from websockets.server import ServerConnection
+from websockets.asyncio.server import serve
+from collections.abc import Callable
+
+class SingletonMeta(type):
+    """
+    The Singleton class can be implemented in different ways in Python. Some
+    possible methods include: base class, decorator, metaclass. We will use the
+    metaclass because it is best suited for this purpose.
+    """
+
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        """
+        Possible changes to the value of the `__init__` argument do not affect
+        the returned instance.
+        """
+        if cls not in cls._instances:
+            instance = super().__call__(*args, **kwargs)
+            cls._instances[cls] = instance
+        return cls._instances[cls]
+
+
+
+class PredicateFailed(Exception):
+    """Raised when attempting to dequeue an element and the predicate fails."""
+    pass
+
+
+WRITE_FUNCTIONS = ['NtWriteFile', 'WriteFile']
+READ_FUNCTIONS = ['NtReadFile', 'ReadFile', 'GetOverlappedResult', 'GetQueuedCompletionStatus', 'NtRemoveIoCompletion', 'CustomCompletionRoutine']
+
+# The following class is a slightly modified version of asyncio.Queue
+# which offers the possibility to block the pop of the element if it does not
+# satisfy a predicates
+class PredicateQueue[T]:
+    '''Create a queue object with a given maximum size.
+
+    When getting an element, the "PredicateFailed" exception is raised if the element to be
+    poped does not satisfy the "predicate" function.
+
+    If maxsize is <= 0, the queue size is infinite.
+    '''
+
+    def __init__(self, maxsize=0):
+        self.maxsize = maxsize
+        self._init(maxsize)
+
+        # mutex must be held whenever the queue is mutating.  All methods
+        # that acquire mutex must release it before returning.  mutex
+        # is shared between the three conditions, so acquiring and
+        # releasing the conditions also acquires and releases mutex.
+        self.mutex = threading.Lock()
+
+        # Notify not_empty whenever an item is added to the queue; a
+        # thread waiting to get is notified then.
+        self.not_empty = threading.Condition(self.mutex)
+
+        # Notify not_full whenever an item is removed from the queue;
+        # a thread waiting to put is notified then.
+        self.not_full = threading.Condition(self.mutex)
+
+        # Notify all_tasks_done whenever the number of unfinished tasks
+        # drops to zero; thread waiting to join() is notified to resume
+        self.all_tasks_done = threading.Condition(self.mutex)
+        self.unfinished_tasks = 0
+
+    def task_done(self):
+        '''Indicate that a formerly enqueued task is complete.
+
+        Used by Queue consumer threads.  For each get() used to fetch a task,
+        a subsequent call to task_done() tells the queue that the processing
+        on the task is complete.
+
+        If a join() is currently blocking, it will resume when all items
+        have been processed (meaning that a task_done() call was received
+        for every item that had been put() into the queue).
+
+        Raises a ValueError if called more times than there were items
+        placed in the queue.
+        '''
+        with self.all_tasks_done:
+            unfinished = self.unfinished_tasks - 1
+            if unfinished <= 0:
+                if unfinished < 0:
+                    raise ValueError('task_done() called too many times')
+                self.all_tasks_done.notify_all()
+            self.unfinished_tasks = unfinished
+
+    def join(self):
+        '''Blocks until all items in the Queue have been gotten and processed.
+
+        The count of unfinished tasks goes up whenever an item is added to the
+        queue. The count goes down whenever a consumer thread calls task_done()
+        to indicate the item was retrieved and all work on it is complete.
+
+        When the count of unfinished tasks drops to zero, join() unblocks.
+        '''
+        with self.all_tasks_done:
+            while self.unfinished_tasks:
+                self.all_tasks_done.wait()
+
+    def qsize(self):
+        '''Return the approximate size of the queue (not reliable!).'''
+        with self.mutex:
+            return self._qsize()
+
+    def empty(self):
+        '''Return True if the queue is empty, False otherwise (not reliable!).
+
+        This method is likely to be removed at some point.  Use qsize() == 0
+        as a direct substitute, but be aware that either approach risks a race
+        condition where a queue can grow before the result of empty() or
+        qsize() can be used.
+
+        To create code that needs to wait for all queued tasks to be
+        completed, the preferred technique is to use the join() method.
+        '''
+        with self.mutex:
+            return not self._qsize()
+
+    def full(self):
+        '''Return True if the queue is full, False otherwise (not reliable!).
+
+        This method is likely to be removed at some point.  Use qsize() >= n
+        as a direct substitute, but be aware that either approach risks a race
+        condition where a queue can shrink before the result of full() or
+        qsize() can be used.
+        '''
+        with self.mutex:
+            return 0 < self.maxsize <= self._qsize()
+
+    def put(self, item: T, block=True, timeout=None):
+        '''Put an item into the queue.
+
+        If optional args 'block' is true and 'timeout' is None (the default),
+        block if necessary until a free slot is available. If 'timeout' is
+        a non-negative number, it blocks at most 'timeout' seconds and raises
+        the Full exception if no free slot was available within that time.
+        Otherwise ('block' is false), put an item on the queue if a free slot
+        is immediately available, else raise the Full exception ('timeout'
+        is ignored in that case).
+        '''
+        with self.not_full:
+            if self.maxsize > 0:
+                if not block:
+                    if self._qsize() >= self.maxsize:
+                        raise queue.Full
+                elif timeout is None:
+                    while self._qsize() >= self.maxsize:
+                        self.not_full.wait()
+                elif timeout < 0:
+                    raise ValueError("'timeout' must be a non-negative number")
+                else:
+                    endtime = time() + timeout
+                    while self._qsize() >= self.maxsize:
+                        remaining = endtime - time()
+                        if remaining <= 0.0:
+                            raise queue.Full
+                        self.not_full.wait(remaining)
+            self._put(item)
+            self.unfinished_tasks += 1
+            self.not_empty.notify()
+
+    def get(self, block=True, timeout=None, predicate: Callable[[T], bool]=lambda _: True):
+        '''Remove and return an item from the queue.
+
+        If optional args 'block' is true and 'timeout' is None (the default),
+        block if necessary until an item is available. If 'timeout' is
+        a non-negative number, it blocks at most 'timeout' seconds and raises
+        the Empty exception if no item was available within that time.
+        Otherwise ('block' is false), return an item if one is immediately
+        available, else raise the Empty exception ('timeout' is ignored
+        in that case).
+        '''
+        with self.not_empty:
+            if not block:
+                if not self._qsize():
+                    raise queue.Empty
+            elif timeout is None:
+                while not self._qsize():
+                    self.not_empty.wait()
+            elif timeout < 0:
+                raise ValueError("'timeout' must be a non-negative number")
+            else:
+                endtime = time() + timeout
+                while not self._qsize():
+                    remaining = endtime - time()
+                    if remaining <= 0.0:
+                        raise queue.Empty
+                    self.not_empty.wait(remaining)
+            item = self._get(predicate)
+            self.not_full.notify()
+            return item
+
+    def put_nowait(self, item: T):
+        '''Put an item into the queue without blocking.
+
+        Only enqueue the item if a free slot is immediately available.
+        Otherwise raise the Full exception.
+        '''
+        return self.put(item, block=False)
+
+    def get_nowait(self, predicate: Callable[[T], bool]):
+        '''Remove and return an item from the queue without blocking.
+
+        Only get an item if one is immediately available. Otherwise
+        raise the Empty exception.
+        '''
+        return self.get(block=False, predicate=predicate)
+
+    # Override these methods to implement other queue organizations
+    # (e.g. stack or priority queue).
+    # These will only be called with appropriate locks held
+
+    # Initialize the queue representation
+    def _init(self, maxsize):
+        self.queue: collections.deque[T] = collections.deque()
+
+    def _qsize(self):
+        return len(self.queue)
+
+    # Put a new item in the queue
+    def _put(self, item):
+        self.queue.append(item)
+
+    # Get an item from the queue, or raise PredicateFailed
+    def _get(self, predicate: Callable[[T], bool]):
+        left_el = self.queue[0]
+        if not predicate(left_el):
+            raise PredicateFailed
+        return self.queue.popleft()
+
+class ReadOperation():
+    buffer: bytes
+    
+    def __init__(self, buffer: bytes):
+        self.buffer = buffer
+
+
+type ReadResultStatus = Literal['SUCCESS'] | Literal['FAILED'] | Literal['BUFFER_TOO_SMALL'] | Literal['NO_DATA']
+class ReadResult():
+    status: ReadResultStatus
+    data: bytes
+
+    def __init__(self, status: ReadResultStatus='FAILED', data=b"") -> None:
+        self.status = status
+        self.data = data
+
+
+class ReadOperationsController(metaclass=SingletonMeta):
+    _queues: dict[int, PredicateQueue[ReadOperation]]
+    _create_lock: threading.Lock
+
+    def __init__(self) -> None:
+        self._queues = {}
+        self._create_lock = threading.Lock()
+
+    def ensure_created(self, handle_id: int):
+        with self._create_lock:
+            if self._queues.get(handle_id) is None:
+                self._queues[handle_id] = PredicateQueue()
+
+    def get(self, handle_id: int, max_length: int, wait: bool = True):
+        self.ensure_created(handle_id)
+        try:
+            read_operation = self._queues[handle_id].get(block=wait, predicate=lambda el: len(el.buffer) <= max_length)
+        except PredicateFailed:
+            return ReadResult(status="BUFFER_TOO_SMALL", data=b"")
+        except queue.Empty:
+            return ReadResult(status="NO_DATA", data=b"")
+        return ReadResult(status="SUCCESS", data=read_operation.buffer)
+
+    def put(self, handle_id: int, item: ReadOperation):
+        self.ensure_created(handle_id)
+        self._queues[handle_id].put(item)
+
+
+def handle_data_request(payload):
+    script = WSConnectionRouter().script
+    if script is None:
+        raise RuntimeError("Script was not initialized")
+    handle_id = payload.get("handleId")
+    max_length = payload.get("bufferLength")
+    msg_id = payload.get('id')
+    should_wait = not payload.get('dontwait', False)
+
+    read_result = ReadOperationsController().get(handle_id, max_length, should_wait)
+
+    script.post({"type": msg_id, "status": read_result.status, "payload": list(read_result.data)})
+
+
+class WSMessage():
+    identifier: str
+    function: str
+    data: bytes
+
+    def __init__(self) -> None:
+        pass
+
+    @staticmethod
+    def from_raw(msg: bytes | str):
+        if type(msg) == str:
+            msg_bytes = msg.encode()
+        elif type(msg) == bytes:
+            msg_bytes = msg
+        else:
+            raise RuntimeError(f"Unknown message type: {type(msg)}")
+
+        ws_msg = WSMessage()
+        metadata_bytes, data = msg_bytes.split(b"\n", maxsplit=1)
+        metadata = json.loads(metadata_bytes)
+        ws_msg.identifier = metadata['identifier']
+        ws_msg.function = metadata.get('function', 'unknown')
+        ws_msg.data = data
+        return ws_msg
+
+    def to_bytes(self):
+        metadata = json.dumps({"identifier": self.identifier, "function":self.function})
+        return metadata.encode() + b'\n' + self.data
+
+
+class WriteOperationsController(metaclass=SingletonMeta):
+    _ongoing_operations: set[str]
+
+    def __init__(self) -> None:
+        self._ongoing_operations = set()
+
+    def forward_message_from_pipe(self, ws_msg: WSMessage, path: str):
+        self._ongoing_operations.add(ws_msg.identifier)
+        full_data = ws_msg.to_bytes()
+        WSConnectionRouter().send_with_client(path, full_data)
+
+    def forward_message_from_websocket(self, handle: int, ws_msg: WSMessage, script: Script, rpc: ScriptExportsSync):
+        try:
+            self._ongoing_operations.remove(ws_msg.identifier)
+            script.post({"type": ws_msg.identifier, "payload": list(ws_msg.data)})
+            return
+        except KeyError:
+            # This means the message has to be injected
+            pass
+        rpc.send_data_to_existing_pipe(handle, ws_msg.data)
+
+
+class ProxyConnection():
+    '''This materialises a connection to a proxy. It is composed of both a websocket client and server.
+    Its inner logic ensures both client and server are connected.
+    The creation of a ProxyConnection object will create a thread which will handle the client part'''
+    path: str
+    handle_id: int
+    script: Script
+    rpc: ScriptExportsSync
+    connected: bool
+    _connected_condition: threading.Condition
+    _ws_client_app: websocket.WebSocketApp
+    _ws_client_thread: threading.Thread
+    _ws_server_conn: ServerConnection
+    _ws_server_thread: threading.Thread
+
+    def __init__(self, ws_server_host: str, ws_server_port: int, path: str, script: Script, http_proxy_host: str, http_proxy_port: int) -> None:
+        self.ws_server_host = ws_server_host
+        self.path = path
+        self.handle_id = int(path.split('/')[-1])
+        self.script = script
+        self.rpc = script.exports_sync
+        self.connected = False
+        self._connected_condition = threading.Condition()
+        logging.debug(f"Creating connection to 'ws://{ws_server_host}:{ws_server_port}/pipe/{path}' via http://{http_proxy_host}:{http_proxy_port}")
+        self._ws_client_app = websocket.WebSocketApp(f"ws://{ws_server_host}:{ws_server_port}/pipe/{path}",
+                                                     on_message=lambda ws_client_conn, msg: self._recv_client(ws_client_conn, msg),
+                                                     on_open=self._on_open_client,
+                                                     )
+        self._ws_client_thread = threading.Thread(target=self._run_ws_client, args=(http_proxy_host, http_proxy_port))
+        self._ws_client_thread.start()
+
+    def __del__(self):
+        logging.debug("Object is about to be deleted, closing connection")
+        try:
+            self._ws_client_app.close()
+            self._ws_server_conn.close()  # type:ignore
+        except Exception as e:
+            logging.exception(e)
+
+    def send_client(self, msg: bytes) -> None:
+        self._ws_client_app.send(msg, websocket.ABNF.OPCODE_BINARY)
+
+    def send_server(self, msg: bytes) -> None:
+        asyncio.run(self._ws_server_conn.send(msg))  # type:ignore
+
+    async def _run_recv_server(self):
+        try:
+            while True:
+                msg = await self._ws_server_conn.recv()
+                ws_msg = WSMessage.from_raw(msg)
+                # This will end up in a WriteFile
+                WriteOperationsController().forward_message_from_websocket(handle=self.handle_id, ws_msg=ws_msg, script=self.script, rpc=self.rpc)
+        except Exception as e:
+            logging.exception(e)
+            await self._ws_server_conn.close()  # type:ignore
+
+    def _recv_client(self, ws_client_conn: websocket.WebSocket, message: bytes):
+        ws_msg = WSMessage.from_raw(message)
+        # This will end up in a ReadFile
+        if ws_msg.identifier == 'to_ReadOperations':
+            ReadOperationsController().put(self.handle_id, ReadOperation(ws_msg.data))
+        # Legacy method: forward without going to ReadOperationsController
+        else:
+            self.script.post({"type": ws_msg.identifier, "payload": list(ws_msg.data)})
+
+    def _run_ws_client(self, http_proxy_host: str, http_proxy_port: int):
+        try:
+            logging.debug(f"Connecting using proxy {http_proxy_host}:{http_proxy_port}")
+            self._ws_client_app.run_forever(
+                    proxy_type='http',
+                    http_proxy_host=http_proxy_host,
+                    http_proxy_port=http_proxy_port,
+                    http_no_proxy=['dummyhost'])
+        except Exception as e:
+            logging.exception(e)
+        self._ws_client_app.close()
+        logging.debug("run_ws_client exited")
+
+    def _on_open_client(self, websocket: websocket.WebSocket):
+        with self._connected_condition:
+            self.connected = True
+            self._connected_condition.notify_all()
+
+    def wait_connected(self):
+        if not self.connected:
+            with self._connected_condition:
+                condition_set = self._connected_condition.wait(10)
+                if not condition_set:
+                    logging.warning("Timeout waiting for client WS to connect")
+
+
+class WSConnectionRouter(metaclass=SingletonMeta):
+    '''This class is a Singleton, it manages all ProxyConnections, ensuring to send messages through the right ProxyConnection.
+    It also handles the creation of ProxyConnection on the fly. The first call to the constructor must specify its global variables'''
+    script: Script | None = None
+    ws_server_host: str = ""
+    ws_server_port: int = 0
+    http_proxy_host: str = ""
+    http_proxy_port: int = 0
+    connections: dict[str, ProxyConnection] = {}
+
+    def __init__(self, ws_server_host: str = "", ws_server_port: int = 0, script: Script | None = None, http_proxy_host: str = "", http_proxy_port: int = 0):
+        if self.ws_server_host == "":
+            if ws_server_host == "":
+                raise RuntimeError("You need to initialize 'ws_server_host'")
+            self.ws_server_host = ws_server_host
+        if self.ws_server_port == 0:
+            if ws_server_port == 0:
+                raise RuntimeError("You need to initialize 'ws_server_port'")
+            self.ws_server_port = ws_server_port
+        if self.script is None:
+            if script is None:
+                raise RuntimeError("You need to initialize 'script'")
+            self.script = script
+        if self.http_proxy_host == "":
+            if http_proxy_host == "":
+                raise RuntimeError("You need to initialize 'http_proxy_host'")
+            self.http_proxy_host = http_proxy_host
+        if self.http_proxy_port == 0:
+            if http_proxy_port == 0:
+                raise RuntimeError("You need to initialize 'http_proxy_port'")
+            self.http_proxy_port = http_proxy_port
+        self.connections = {}
+
+    def init_connection(self, path: str):
+        connection = self.connections.get(path)
+        if connection is not None:
+            return connection
+        if self.script is None:
+            raise RuntimeError("Script is undefined cannot create connection")
+        self.connections[path] = ProxyConnection(self.ws_server_host, self.ws_server_port, path, self.script ,self.http_proxy_host, self.http_proxy_port)
+        self.connections[path].wait_connected()
+        return self.connections[path]
+
+    def send_with_client(self, path: str, msg: bytes):
+        connection = self.connections.get(path)
+        if connection is None:
+            connection = self.init_connection(path)
+        connection.send_client(msg)
+
+    def send_with_server(self, path: str, msg: bytes):
+        connection = self.connections.get(path)
+        if connection is None:
+            connection = self.init_connection(path)
+        connection.send_server(msg)
+
+
+def on_message(message: dict[str, str], data: bytes):
+    '''What to do when the agent sends a message to the backend.
+    It uses WSConnectionRouter to send messages.'''
+    message_metadata = message.get('payload')
+    message_type = message.get("type")
+    if message_type == "error":
+        logging.error(message)
+        logging.error(message.get("stack"))
+        return
+    if message_metadata is None:
+        logging.error(f"Unknown message: {message}")
+        return
+
+    payload = json.loads(message_metadata)
+
+    if payload.get('funcName') == "ThatsNoPipeGetReadData":
+        # Trick to "call a python function" from frida
+        handle_data_request(payload)
+        return
+
+    logging.debug(f"{payload.get('funcName')} {message} => {data}")
+    # Read the handleId and handlePath from the JS script
+    path = f"{quote_plus(payload.get('handlePath'))}/{payload.get('handleId')}"
+    # Create a WSMessage so that we can have metadata
+    ws_msg = WSMessage()
+    ws_msg.identifier = payload.get('id')
+    ws_msg.function = payload.get('funcName', 'unknown')
+    ws_msg.data = data
+    full_data = ws_msg.to_bytes()
+
+    if payload.get('funcName') in WRITE_FUNCTIONS:
+        WriteOperationsController().forward_message_from_pipe(ws_msg=ws_msg, path=path)
+    elif payload.get('funcName') in READ_FUNCTIONS:
+        WSConnectionRouter().send_with_server(path, full_data)
+    else:
+        logging.error(f"Unknown function: {payload.get('funcName')}")
+
+
+def parse_cmdline():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("pid", type=int, help="PID of process to spy on")
+    parser.add_argument("scriptpath", type=pathlib.Path, help="Path to the script")
+    parser.add_argument(
+        '--ws-host',
+        required=False,
+        help='The addr on which the WebSocket server will be accessed by the proxy (default is 127.0.0.1)',
+        default='127.0.0.1',
+        type=str)
+    parser.add_argument(
+        '--ws-port',
+        required=False,
+        help='An available port number for the internal WebSocket server',
+        default=9000,
+        type=int)
+
+    parser.add_argument(
+        '--http-proxy-host',
+        required=False,
+        help='The host of the HTTP proxy (if not specified, the default is 127.0.0.1)',
+        default='127.0.0.1',
+        type=str)
+
+    parser.add_argument(
+        '--http-proxy-port',
+        required=False,
+        help='The port number of the HTTP proxy (if not specified, the default is 8080)',
+        default=8080,
+        type=int)
+
+    parser.add_argument(
+        '--log-level',
+        required=False,
+        choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
+        help='Log level (if not specified, the default is INFO)',
+        default='INFO')
+
+    parser.add_argument(
+        "--handle-regexes",
+        "--hr",
+        action='append',
+        type=str,
+        required=True,
+        help="Regex to filter handles path on")
+
+    parser.add_argument(
+        "--log-syscalls",
+        action="store_true",
+        help="Log intercepted syscalls (see code)")
+
+    parser.add_argument(
+        "--high-level-hooking",
+        action='store_true',
+        help="Hook high level primitives instead of low level NT primitives")
+
+    return parser.parse_args()
+
+def get_path(ws_server_conn: ServerConnection) -> str:
+    return ws_server_conn.request.path # type:ignore
+
+async def ws_server_handler(ws_server_conn: ServerConnection):
+    path = get_path(ws_server_conn)
+    logging.debug(f"New connection: {path}")
+    if path.startswith(f'/pipe/'):
+        pipe_name = path.removeprefix(f'/pipe/')
+        connection = WSConnectionRouter().init_connection(pipe_name)
+        connection._ws_server_conn = ws_server_conn
+        await connection._run_recv_server()
+    else:
+        logging.warning(f"Got connection on '{path}' not matching expected prefix")
+
+
+async def run_ws_server(stop, port: int):
+    async with serve(ws_server_handler, '0.0.0.0', port, compression=None): #type:ignore
+        await stop
+
+
+async def shutdown(loop: asyncio.AbstractEventLoop):
+    tasks = [t for t in asyncio.all_tasks(loop) if t is not asyncio.current_task(loop)]
+    for task in tasks:
+        task.cancel()
+    await asyncio.gather(*tasks, return_exceptions=True)
+    loop.stop()
+
+class CLI(cmd.Cmd):
+    prompt = '>> '
+    intro = 'Type help to get list of commands'
+
+    def __init__(self, completekey: str = "tab", stdin: None = None, stdout: None = None, rpc: ScriptExportsSync | None = None) -> None:
+        super().__init__(completekey, stdin, stdout)
+        self.rpc = rpc
+        self._to_snake_case_pattern = re.compile(r'(?<!^)(?=[A-Z])')
+
+    def _to_snake_case(self, name: str) -> str:
+        return self._to_snake_case_pattern.sub('_', name).lower()
+
+    def do_lsrpc(self, line: str):
+        """List functions exported by frida script"""
+        js_functions = dir(self.rpc)
+        functions = list(map(self._to_snake_case, js_functions))
+        print(functions)
+
+    def do_frida(self, line: str):
+        """Sends a command using frida"""
+        if self.rpc is None:
+            print("RPC is None")
+            return
+        args = shlex.split(line)
+        try:
+            self.rpc.__getattr__(args[0])(*args[1:])
+        except Exception as error:
+            print(error)
+            print("Here is a list of frida commands")
+            self.do_lsrpc('')
+
+    def do_lsqueues(self, line: str):
+        """List queues and their sizes"""
+        try:
+            for handleId, queue in ReadOperationsController()._queues.items():
+                print(f"Handle {handleId} has {queue.qsize()} items enqueues")
+        except Exception as error:
+            print(error)
+
+    def do_eval(self, line: str):
+        """Executes python code (DEBUG purposes)"""
+        try:
+            print(eval(line))
+        except Exception as error:
+            print(error)
+
+    def do_exit(self, line: str):
+        """Exits the program"""
+        return True
+
+
+def start_background_loop(loop: asyncio.AbstractEventLoop):
+    asyncio.set_event_loop(loop)
+    loop.run_forever()
+
+def main():
+    args = parse_cmdline()
+    logging.basicConfig(level=logging.getLevelName(args.log_level))
+
+    # Read the script
+    try:
+        with open(args.scriptpath, 'r', encoding="utf-8", newline='\n') as f:
+            script_str = f.read()
+    except FileNotFoundError:
+        logging.error("Script not found, did you correctly build the agent? Did you specify the path to agent.js?")
+        return
+
+    # Attack to target process and create the script
+    session = frida.attach(args.pid)
+    script = session.create_script(script_str)
+
+    # Run the asyncio loop in another python thread
+    loop = asyncio.new_event_loop()
+    asyncio_loop_thread = threading.Thread(target=start_background_loop, args=(loop,), daemon=True)
+    stop_ws = loop.create_future()
+    # Start the websocket server untip stop_ws is signaled
+    loop.create_task(run_ws_server(stop_ws, args.ws_port))
+
+    # Init ws_server_port, subsequent calls to WSConnectionRouter will use the parameters defined in the first call
+    router = WSConnectionRouter(args.ws_host, args.ws_port, script, args.http_proxy_host, args.http_proxy_port)
+
+    # register message handler and load script in session
+    script.on('message', on_message)
+    script.load()
+
+    # Load RPC from the agent
+    rpc = script.exports_sync
+    # Initializes the CLI interface
+    cli = CLI(rpc=rpc)
+    logging.info(f"Filtering on the following regexes: {args.handle_regexes}")
+    # Modify the handle regex list on which handles are filtered
+    rpc.set_handle_regexes(args.handle_regexes)
+    rpc.set_log_syscalls(args.log_syscalls)
+    logging.info("[!] Ctrl+C to detach from instrumented program (this may take a while due to hooking of non-busy wait functions).\n\n")
+    asyncio_loop_thread.start()
+    rpc.install_hooks(not args.high_level_hooking)
+    try:
+        cli.cmdloop()
+    except KeyboardInterrupt:
+        logging.info("Received KeyboardInterrupt, exiting")
+    session.detach()
+    logging.info("Session detached, goodbye...")
+    stop_ws.set_result(True)
+    loop.stop()
+    logging.info(f"Sent stop signal to main loop")
+    asyncio_loop_thread.join()
+    logging.info("Thread is now stopped")
+    loop.run_until_complete(shutdown(loop))
+    loop.close()
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`backend/requirements-dev.txt`:
+
+```txt
+pyright==1.1.391
+
+```
+
+`backend/requirements.txt`:
+
+```txt
+frida-tools==13.6.0
+websockets==13.1
+websocket-client==1.8.0
+asyncio==3.4.3
+
+```
+
+`docs/format.md`:
+
+```md
+# Format
+
+## Websockets messages
+
+Once a named pipe message is intercepted, a new websocket is open using the format `/pipe/{pipe_name}/{handle_id}`
+
+While the pipe_name is informative, the handle is used internally to route to the correct named pipe handle.
+
+Websocket messages sent by the projet to the HTTP Proxy contains a header and the pipe data.
+The header does not contain any `\n` character. Header and data are separated by a single `\n` character.
+The header is JSON encoded.
+
+### Header
+
+The keys of the JSON header have the following meaning:
+
+- `identifier`: this is the internal identifier of the operation, it is used by the frida script to know which WinAPI call triggered the message.
+- `function`: this is the WinAPI function that was intercepted. This is purely informative.
+
+```
+
+`docs/hooks.md`:
+
+```md
+# Hooks
+
+This section describe which cases are handled by the frida script.
+We suppose that we always hook the client.
+
+## Synchronous operations
+
+### Client to server
+
+Synchronous communication from client to server is handled by two functions:
+- WriteFile
+- WriteFileEx
+
+Both functions are hooked
+
+### From server to client
+
+Synchronous communication from server to client can only be handled by two functions:
+- ReadFile
+- ReadFileEx
+
+Read and modification of the buffer can be applied when the function returns.
+
+Both functions are hooked
+
+## Asynchronous operations
+
+### Client to server
+
+Asynchronous operations from client to server can only be handled by two functions:
+- WriteFile
+- WriteFileEx
+
+Both functions are hooked, and buffer can be read and modified when the function is called.
+
+### Server to client
+
+Asynchronous communication from server to client begin by a call to one of the two following functions:
+- ReadFile
+- ReadFileEx
+This internally calls NtReadFile.
+
+Functions are called with Overlapped structures which contains an Event, or with a completion routine.
+Depending on the client's structure, the notification "data is available" is made by a call to another WinAPI function.
+Overlapped and Event objects that are found linked to a target handled are checked in arguments of the following functions. If such an object is found, the buffer is intercepted.
+- GetOverlappedResult
+- GetOverlappedResultEx
+- GetQueuedCompletionStatus
+- GetQueuedCompletionStatusEx
+- WaitForSingleObject
+- WaitForSingleObjectEx
+
+However, calls to ReadFileEx can include an address to a completion routine (which is basically a pointer to a function). These functions are hooked when they are seen.
+
+## Summary
+
+| Function name               | Variant      | Hooking | Interception | Allows modification | Allows injection |
+| --------------------------- | ------------ | ------- | ------------ | ------------------- | ---------------- |
+| WriteFile                   | -            | Yes     | Yes          | Yes                 | No               |
+| WriteFileEx                 | -            | Yes     | Yes          | Yes                 | No               |
+| NtWriteFile                 | -            | Yes     | Yes          | Yes                 | Yes              |
+| ReadFile                    | Synchronous  | Yes     | Yes          | No                  | No               |
+| ReadFileEx                  | Synchronous  | Yes     | Yes          | No                  | No               |
+| NtReadFile                  | Synchronous  | Yes     | Yes          | No                  | No               |
+| ReadFile                    | Asynchronous | Yes     | Partial      | -                   | No               |
+| ReadFileEx                  | Asynchronous | Yes     | Partial      | -                   | No               |
+| NtReadFile                  | Asynchronous | Yes     | Yes          | -                   | No               |
+| ReadFileEx                  | Routine      | Yes     | Yes          | Yes                 | Yes              |
+| NtReadFile                  | Routine      | Yes     | Yes          | Yes                 | Yes              |
+| WaitForSingleObject         | -            | Yes     | No           | No                  | -                |
+| WaitForSingleObjectEx       | -            | Yes     | No           | No                  | -                |
+| NtWaitForSingleObject       | -            | Yes     | No           | No                  | -                |
+| WaitForMultipleObject       | -            | Yes     | No           | No                  | -                |
+| WaitForMultipleObjectEx     | -            | Yes     | No           | No                  | -                |
+| NtWaitForMultipleObject     | -            | No      | No           | No                  | -                |
+| GetOverlappedResult         | -            | Yes     | No           | No                  | -                |
+| GetOverlappedResultEx       | -            | Yes     | No           | No                  | -                |
+| GetQueuedCompletionStatus   | -            | Yes     | No           | No                  | -                |
+| GetQueuedCompletionStatusEx | -            | Yes     | No           | No                  | -                |
+| NtRemoveIoCompletion        | -            | Yes     | No           | No                  | -                |
+
+```
+
+`tests/client/named_pipe.go`:
+
+```go
+package client
+
+import (
+	"thats_no_pipe/tests/routines"
+	"thats_no_pipe/tests/winlib"
+
+	"golang.org/x/sys/windows"
+)
+
+func Run(name string, overlapped bool, routine routines.ReadWriteRoutine) {
+	pipename := "\\\\.\\pipe\\" + name
+
+	var flags uint32 = 0
+	if overlapped {
+		flags = flags | windows.FILE_FLAG_OVERLAPPED
+	}
+
+	handle, err := winlib.CreateFile(pipename, windows.GENERIC_READ|windows.GENERIC_WRITE, 0, nil, windows.OPEN_EXISTING, flags, windows.InvalidHandle)
+	if err != nil {
+		return
+	}
+	defer windows.CloseHandle(handle)
+	routine(handle, "Client says ", false)
+}
+
+```
+
+`tests/config/config.go`:
+
+```go
+package config
+
+import "time"
+
+var Pipename string
+var IsServer bool
+var FirstPipeInstance bool
+var Mode string
+var ACL bool
+var SleepTime = 5 * time.Second
+
+```
+
+`tests/go.mod`:
+
+```mod
+module thats_no_pipe/tests
+
+go 1.23.0
+
+toolchain go1.23.9
+
+require golang.org/x/sys v0.33.0
+
+```
+
+`tests/go.sum`:
+
+```sum
+golang.org/x/sys v0.33.0 h1:q3i8TbbEz+JRD9ywIRlyRAQbM0qF7hu24q3teo2hbuw=
+golang.org/x/sys v0.33.0/go.mod h1:BJP2sWEmIv4KK5OTEluFJCKSidICx8ciO85XgH3Ak8k=
+
+```
+
+`tests/log/log.go`:
+
+```go
+package log
+
+import (
+	"fmt"
+	"time"
+)
+
+func Info(format string, a ...any) (n int, err error) {
+	finalString := fmt.Sprintf(format, a...)
+	t := time.Now()
+	n, err = fmt.Printf("[%s][INFO] %s\n", t.UTC().Format(time.RFC3339), finalString)
+	return
+}
+
+func Error(format string, a ...any) (n int, err error) {
+	finalString := fmt.Sprintf(format, a...)
+	t := time.Now()
+	n, err = fmt.Printf("[%s][ERROR] %s\n", t.UTC().Format(time.RFC3339), finalString)
+	return
+}
+
+```
+
+`tests/main.go`:
+
+```go
+package main
+
+import (
+	"flag"
+	"fmt"
+	"os"
+	"thats_no_pipe/tests/client"
+	"thats_no_pipe/tests/config"
+	"thats_no_pipe/tests/log"
+	"thats_no_pipe/tests/routines"
+	"thats_no_pipe/tests/server"
+	"thats_no_pipe/tests/tools"
+)
+
+func parseArgs() {
+	flag.BoolVar(&config.ACL, "acl", false, "Turn on to query ACLs")
+	flag.StringVar(&config.Pipename, "pipename", "thats_no_pipe_test", "Name of the named pipe")
+	flag.BoolVar(&config.IsServer, "servermode", false, "Whether this should be the server")
+	flag.BoolVar(&config.FirstPipeInstance, "firstinstance", false, "Whether to create the named pipe with FILE_FLAG_FIRST_PIPE_INSTANCE")
+	flag.StringVar(&config.Mode, "mode", "sync", "Which mode to enable, can be \"sync\", \"waitforsingleobject\", \"completionport\" or \"routine\"")
+	flag.Parse()
+}
+
+func main() {
+	parseArgs()
+
+	var routine routines.ReadWriteRoutine
+	overlapped := true
+	switch config.Mode {
+	case "sync":
+		routine = routines.ReadWriteSyncRoutine
+		overlapped = false
+	case "waitforsingleobject":
+		routine = routines.ReadWriteOverlappedRoutine
+	case "completionport":
+		routine = routines.ReadWriteCompletionPortRoutine
+	case "routine":
+		routine = routines.ReadWriteCompletionRoutineRoutine
+	default:
+		fmt.Printf("[ERROR] Unrecognized mode %s\n", config.Mode)
+		os.Exit(1)
+	}
+
+	if config.ACL {
+		tools.PrintAclFromName(config.Pipename)
+	} else if config.IsServer {
+		log.Info("Running server in mode \"%s\"", config.Mode)
+		server.Run(config.Pipename, overlapped, routine)
+	} else {
+		log.Info("Running client in mode \"%s\"", config.Mode)
+		client.Run(config.Pipename, overlapped, routine)
+	}
+
+}
+
+```
+
+`tests/routines/completionroutine.go`:
+
+```go
+package routines
+
+import (
+	"syscall"
+	"thats_no_pipe/tests/log"
+	"thats_no_pipe/tests/winlib"
+
+	"golang.org/x/sys/windows"
+)
+
+func ReadWriteCompletionRoutineRoutine(handle windows.Handle, message string, readFirst bool) {
+	var readMaxLength = 65536
+	readData := make([]byte, readMaxLength)
+	var err error
+	var event windows.Handle
+	var overlapped windows.Overlapped
+
+	completionRoutine := func(dwErrorCode syscall.Errno, dwNumberOfBytesTransfered uint32, lpOverlapped *windows.Overlapped) {
+		if dwErrorCode == windows.ERROR_SUCCESS {
+			log.Info("Got data (%v bytes): %s", dwNumberOfBytesTransfered, readData[:dwNumberOfBytesTransfered])
+		}
+	}
+
+	go WriteOverlappedRoutine(handle, message)
+
+	for {
+		event, err = windows.CreateEvent(nil, 0, 0, nil)
+		if err != nil {
+			log.Error("CreateEvent: %s", err)
+			return
+		}
+		overlapped = windows.Overlapped{
+			HEvent: event,
+		}
+		log.Info("About to read")
+		err = winlib.ReadFileEx(handle, readData, &overlapped, completionRoutine)
+		if err != nil && err != windows.ERROR_IO_PENDING {
+			log.Error("ReadFile: %v", err)
+			return
+		}
+		log.Info("Called ReadFile")
+		// We need to be in an alertable state, therefore, we need WaitForSingleObjectEx
+		// see https://learn.microsoft.com/en-us/windows/win32/fileio/alertable-i-o
+		ret, _ := winlib.WaitForSingleObjectEx(overlapped.HEvent, windows.INFINITE, true)
+		if ret != windows.WAIT_IO_COMPLETION && ret != 0 {
+			log.Error("WaitForSingleObjectEx: %v", ret)
+			return
+		}
+	}
+}
+
+```
+
+`tests/routines/iocompletionports.go`:
+
+```go
+package routines
+
+import (
+	"thats_no_pipe/tests/log"
+
+	"golang.org/x/sys/windows"
+)
+
+func ReadCompletionPortRoutine(completionPort windows.Handle, handle windows.Handle) {
+	var readMaxLength = 65536
+	readData := make([]byte, readMaxLength)
+	var nbBytesWritten uint32
+	var err error
+	var event windows.Handle
+	var overlapped windows.Overlapped
+	var completionKey uintptr
+
+	for {
+		log.Info("About to read")
+		event, err = windows.CreateEvent(nil, 0, 0, nil)
+		if err != nil {
+			log.Error("CreateEvent: %s", err)
+			return
+		}
+		overlapped = windows.Overlapped{
+			HEvent: event,
+		}
+		err = windows.ReadFile(handle, readData, &nbBytesWritten, &overlapped)
+		if err != nil && err != windows.ERROR_IO_PENDING {
+			log.Error("ReadFile: %v", err)
+			return
+		}
+		var completionOverlapped *windows.Overlapped = nil
+		log.Info("Called ReadFile")
+		for completionOverlapped == nil || completionOverlapped != &overlapped {
+			log.Info("Calling GetQueuedCompletionStatus")
+			err = windows.GetQueuedCompletionStatus(completionPort, &nbBytesWritten, &completionKey, &completionOverlapped, windows.INFINITE)
+			if err != nil {
+				log.Error("GetQueuedCompletionStatus: %s", err)
+				return
+			}
+		}
+		err = windows.GetOverlappedResult(handle, completionOverlapped, &nbBytesWritten, false)
+		if err != nil {
+			log.Error("GetOverlappedResult: %s", err)
+			return
+		}
+		log.Info("Got data (%v bytes): %s", nbBytesWritten, readData[:nbBytesWritten])
+	}
+}
+
+func ReadWriteCompletionPortRoutine(handle windows.Handle, message string, readFirst bool) {
+	// Create an empty completion port
+	completionPort, err := windows.CreateIoCompletionPort(handle, 0, 0, 0)
+	if err != nil {
+		log.Error("CreateIoCompletionPort: %s", err)
+		return
+	}
+
+	go ReadCompletionPortRoutine(completionPort, handle)
+	WriteOverlappedRoutine(handle, message)
+}
+
+```
+
+`tests/routines/overlapped.go`:
+
+```go
+package routines
+
+import (
+	"thats_no_pipe/tests/config"
+	"thats_no_pipe/tests/log"
+	"thats_no_pipe/tests/winlib"
+	"time"
+
+	"golang.org/x/sys/windows"
+)
+
+func ReadOverlappedRoutine(handle windows.Handle) {
+	var readMaxLength = 65536
+	readData := make([]byte, readMaxLength)
+	var nbBytesRead uint32
+	var err error
+	var event windows.Handle
+	var overlapped windows.Overlapped
+
+	for {
+		log.Info("About to read")
+		event, err = windows.CreateEvent(nil, 0, 0, nil)
+		if err != nil {
+			log.Error("CreateEvent: %s", err)
+			return
+		}
+		overlapped = windows.Overlapped{
+			HEvent: event,
+		}
+		err = winlib.ReadFile(handle, readData, &nbBytesRead, &overlapped)
+		if err != nil && err != windows.ERROR_IO_PENDING {
+			log.Error("ReadFile: %v", err)
+			return
+		}
+		log.Info("Called ReadFile")
+		_, err = windows.WaitForSingleObject(overlapped.HEvent, windows.INFINITE)
+		if err != nil {
+			log.Error("WaitForSingleObject: %s", err)
+			return
+		}
+		log.Info("Called WaitForSingleObject")
+		err = windows.GetOverlappedResult(handle, &overlapped, &nbBytesRead, false)
+		if err != nil {
+			log.Error("GetOverlappedResult: %s", err)
+			return
+		}
+		log.Info("Got data (%v bytes): %s", nbBytesRead, readData[:nbBytesRead])
+	}
+}
+
+func WriteOverlappedRoutine(handle windows.Handle, message string) {
+	var nbBytesWritten uint32
+	var err error
+	var event windows.Handle
+	var overlapped windows.Overlapped
+
+	for {
+		time.Sleep(config.SleepTime)
+
+		var writeData = append([]byte(message), randStringBytes(10)...)
+		log.Info("About to write %s", writeData)
+		event, err = windows.CreateEvent(nil, 0, 0, nil)
+		if err != nil {
+			log.Error("CreateEvent: %s", err)
+			return
+		}
+		overlapped = windows.Overlapped{
+			HEvent: event,
+		}
+		err := winlib.WriteFile(handle, writeData, &nbBytesWritten, &overlapped)
+		if err != nil {
+			log.Error("Cannot write to pipe: %v", err)
+			return
+		}
+		log.Info("Called WriteFile")
+		_, err = windows.WaitForSingleObject(overlapped.HEvent, 0)
+		if err != nil {
+			log.Error("WaitForSingleObject: %s", err)
+			return
+		}
+		log.Info("Wrote %v bytes", nbBytesWritten)
+	}
+}
+
+func ReadWriteOverlappedRoutine(handle windows.Handle, message string, readFirst bool) {
+	go ReadOverlappedRoutine(handle)
+	WriteOverlappedRoutine(handle, message)
+}
+
+```
+
+`tests/routines/sync.go`:
+
+```go
+package routines
+
+import (
+	"math/rand"
+	"thats_no_pipe/tests/config"
+	"thats_no_pipe/tests/log"
+	"thats_no_pipe/tests/winlib"
+	"time"
+
+	"golang.org/x/sys/windows"
+)
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+func randStringBytes(n int) []byte {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return b
+}
+
+func WriteSyncRoutine(handle windows.Handle, message string) {
+	var nbBytesWritten uint32
+	for {
+		var data = append([]byte(message), randStringBytes(10)...)
+		err := winlib.WriteFile(handle, data, &nbBytesWritten, nil)
+		if err != nil {
+			log.Error("Cannot write to pipe: %v", err)
+			return
+		}
+		log.Info("Wrote %v bytes", nbBytesWritten)
+		time.Sleep(config.SleepTime)
+	}
+}
+
+func ReadSyncRoutine(handle windows.Handle) {
+	var maxLength = 65536
+	data := make([]byte, maxLength)
+	var nbBytesWritten uint32
+	var err error
+	for {
+		err = winlib.ReadFile(handle, data, &nbBytesWritten, nil)
+		if err != nil {
+			log.Error("Cannot read from pipe: %v", err)
+			return
+		}
+		log.Info("Got data (%v bytes): %s", nbBytesWritten, data[:nbBytesWritten])
+	}
+}
+
+func ReadWriteSyncRoutine(handle windows.Handle, message string, readFirst bool) {
+	var readMaxLength = 65536
+	readData := make([]byte, readMaxLength)
+	var nbBytesWritten uint32
+	var err error
+
+	if readFirst {
+
+		log.Info("About to read")
+		err = winlib.ReadFile(handle, readData, &nbBytesWritten, nil)
+		if err != nil {
+			log.Error("Cannot read from pipe: %v", err)
+			return
+		}
+		log.Info("Got data (%v bytes): %s", nbBytesWritten, readData[:nbBytesWritten])
+
+	}
+	for {
+		time.Sleep(config.SleepTime)
+
+		var writeData = append([]byte(message), randStringBytes(10)...)
+		log.Info("About to write %s", writeData)
+		err := winlib.WriteFile(handle, writeData, &nbBytesWritten, nil)
+		if err != nil {
+			log.Error("Cannot write to pipe: %v", err)
+			return
+		}
+		log.Info("Wrote %v bytes", nbBytesWritten)
+
+		log.Info("About to read")
+		err = winlib.ReadFile(handle, readData, &nbBytesWritten, nil)
+		if err != nil {
+			log.Error("Cannot read from pipe: %v", err)
+			return
+		}
+		log.Info("Got data (%v bytes): %s", nbBytesWritten, readData[:nbBytesWritten])
+
+	}
+}
+
+```
+
+`tests/routines/types.go`:
+
+```go
+package routines
+
+import "golang.org/x/sys/windows"
+
+type ReadWriteRoutine = func(handle windows.Handle, message string, readFirst bool)
+
+```
+
+`tests/server/named_pipe.go`:
+
+```go
+package server
+
+import (
+	"thats_no_pipe/tests/config"
+	"thats_no_pipe/tests/log"
+	"thats_no_pipe/tests/routines"
+	"thats_no_pipe/tests/winlib"
+	"unsafe"
+
+	"golang.org/x/sys/windows"
+)
+
+func CreateAcl() (sa *windows.SecurityAttributes, err error) {
+	sddl, err := windows.SecurityDescriptorFromString("D:(A;;FA;;;SY)(A;;FA;;;BA)(A;;FR;;;WD)(A;;FR;;;AN)")
+	if err != nil {
+		log.Error("SecurityDescriptorFromString")
+		return
+	}
+
+	var currentProcessToken windows.Token
+	err = windows.OpenProcessToken(windows.CurrentProcess(), windows.TOKEN_QUERY, &currentProcessToken)
+	if err != nil {
+		log.Error("OpenProcessToken")
+		return
+	}
+	defer currentProcessToken.Close()
+	tokenUser, err := currentProcessToken.GetTokenUser()
+	if err != nil {
+		log.Error("GetTokenUser")
+		return
+	}
+
+	currentUser := windows.TRUSTEE{
+		MultipleTrustee:          nil,
+		MultipleTrusteeOperation: windows.NO_MULTIPLE_TRUSTEE,
+		TrusteeForm:              windows.TRUSTEE_IS_SID,
+		TrusteeType:              windows.TRUSTEE_IS_USER,
+		TrusteeValue:             windows.TrusteeValueFromSID(tokenUser.User.Sid),
+	}
+
+	everyoneSID, err := windows.CreateWellKnownSid(windows.WinWorldSid)
+	if err != nil {
+		log.Error("CreateWellKnownSid")
+		return
+	}
+	everyoneTrustee := windows.TRUSTEE{
+		MultipleTrustee:          nil,
+		MultipleTrusteeOperation: windows.NO_MULTIPLE_TRUSTEE,
+		TrusteeForm:              windows.TRUSTEE_IS_SID,
+		TrusteeType:              windows.TRUSTEE_IS_WELL_KNOWN_GROUP,
+		TrusteeValue:             windows.TrusteeValueFromSID(everyoneSID),
+	}
+	aces := []windows.EXPLICIT_ACCESS{
+		{
+			AccessPermissions: windows.FILE_GENERIC_READ | windows.FILE_GENERIC_WRITE,
+			AccessMode:        windows.GRANT_ACCESS,
+			Inheritance:       windows.NO_INHERITANCE,
+			Trustee:           currentUser,
+		},
+		{
+			AccessPermissions: windows.FILE_GENERIC_READ | windows.FILE_GENERIC_WRITE,
+			AccessMode:        windows.GRANT_ACCESS,
+			Inheritance:       windows.NO_INHERITANCE,
+			Trustee:           everyoneTrustee,
+		},
+	}
+	originalAcl, _, err := sddl.DACL()
+	if err != nil {
+		log.Error("GetDACL")
+		return
+	}
+
+	acl, err := windows.ACLFromEntries(aces, originalAcl)
+	if err != nil {
+		log.Error("ACLFromEntries")
+		return
+	}
+	newSddl, err := windows.NewSecurityDescriptor()
+	if err != nil {
+		log.Error("ACLFromEntries")
+		return
+	}
+
+	err = newSddl.SetDACL(acl, true, false)
+	if err != nil {
+		log.Error("SetDACL")
+		return
+	}
+
+	sa = &windows.SecurityAttributes{
+		Length:             uint32(unsafe.Sizeof(windows.SecurityAttributes{})),
+		SecurityDescriptor: newSddl,
+		InheritHandle:      0,
+	}
+	return
+}
+
+func Run(name string, overlapped bool, routine routines.ReadWriteRoutine) {
+	pipename := "\\\\.\\pipe\\" + name
+
+	// PIPE_TYPE_MESSAGE and PIPE_READMODE_MESSAGE are non-default
+	var pipeMode uint32 = windows.PIPE_TYPE_MESSAGE | windows.PIPE_READMODE_MESSAGE | windows.PIPE_WAIT
+
+	var dwOpenMode uint32 = windows.PIPE_ACCESS_DUPLEX
+	if overlapped {
+		dwOpenMode = dwOpenMode | windows.FILE_FLAG_OVERLAPPED
+	}
+
+	var sa *windows.SecurityAttributes = nil
+	var err error
+	if config.FirstPipeInstance {
+		dwOpenMode = dwOpenMode | windows.FILE_FLAG_FIRST_PIPE_INSTANCE
+		sa, err = CreateAcl()
+		if err != nil {
+			log.Error(err.Error())
+			return
+		}
+	}
+
+	handle, err := winlib.CreateNamedPipe(pipename, dwOpenMode, pipeMode, windows.PIPE_UNLIMITED_INSTANCES, 65536, 65536, 0, sa)
+	if err != nil {
+		return
+	}
+
+	err = windows.ConnectNamedPipe(handle, nil)
+	if err != nil {
+		log.Error(err.Error())
+		windows.CloseHandle(handle)
+		return
+	}
+
+	routine(handle, "Server says ", true)
+	windows.CloseHandle(handle)
+
+}
+
+```
+
+`tests/tools/acls.go`:
+
+```go
+package tools
+
+import (
+	"thats_no_pipe/tests/log"
+	"thats_no_pipe/tests/winlib"
+
+	"golang.org/x/sys/windows"
+)
+
+func PrintAclFromName(name string) (err error) {
+
+	var flags uint32
+	flags = windows.PIPE_ACCESS_DUPLEX | windows.PIPE_WAIT
+	pipename := "\\\\.\\pipe\\" + name
+	handle, err := winlib.CreateFile(pipename, windows.READ_CONTROL, 0, nil, windows.OPEN_EXISTING, flags, windows.InvalidHandle)
+	if err != nil {
+		return
+	}
+	defer windows.CloseHandle(handle)
+
+	//objType := windows.DACL_SECURITY_INFORMATION
+	//objType := windows.SE_FILE_OBJECT
+	//secInfo := windows.SE_DACL_PRESENT|windows.SE_DACL_DEFAULTED|windows.SE_DACL_AUTO_INHERIT_REQ|windows.SE_DACL_PROTECTED
+	sd, err := windows.GetSecurityInfo(handle, windows.SE_KERNEL_OBJECT, windows.DACL_SECURITY_INFORMATION)
+	if err != nil {
+		log.Error("GetSecurityInfo: %s", err)
+	}
+	printSD(sd)
+	return
+}
+
+func printSD(sd *windows.SECURITY_DESCRIPTOR) {
+	log.Info("SD: %s", sd)
+	owner, defaulted, err := sd.Owner()
+	if err != nil {
+		log.Error("Owner: %s", err)
+	} else {
+		defaultedString := ""
+		if defaulted {
+			defaultedString = " (defaulted)"
+		}
+		log.Info("Owner: %v%s", owner, defaultedString)
+	}
+
+	dacl, defaulted, err := sd.DACL()
+	if err != nil {
+		log.Error("DACL: %s", err)
+	} else {
+		defaultedString := ""
+		if defaulted {
+			defaultedString = " (defaulted)"
+		}
+		log.Info("DACL: %v%s", dacl, defaultedString)
+	}
+
+	sacl, defaulted, err := sd.SACL()
+	if err != nil {
+		log.Error("SACL: %s", err)
+	} else {
+		defaultedString := ""
+		if defaulted {
+			defaultedString = " (defaulted)"
+		}
+		log.Info("SACL: %v%s", sacl, defaultedString)
+	}
+}
+
+```
+
+`tests/winlib/hooking.go`:
+
+```go
+package winlib
+
+import (
+	"syscall"
+
+	"golang.org/x/sys/windows"
+)
+
+var (
+	modkernel32 = windows.NewLazySystemDLL("kernel32.dll")
+)
+
+// Copy paste from golang.org/x/sys/windows
+// Do the interface allocations only once for common
+// Errno values.
+const (
+	errnoERROR_IO_PENDING = 997
+)
+
+// Copy paste from golang.org/x/sys/windows
+var (
+	errERROR_IO_PENDING error = syscall.Errno(errnoERROR_IO_PENDING)
+	errERROR_EINVAL     error = syscall.EINVAL
+)
+
+// Copy paste from golang.org/x/sys/windows
+// errnoErr returns common boxed Errno values, to prevent
+// allocations at runtime.
+func errnoErr(e syscall.Errno) error {
+	switch e {
+	case 0:
+		return errERROR_EINVAL
+	case errnoERROR_IO_PENDING:
+		return errERROR_IO_PENDING
+	}
+	// TODO: add more here, after collecting data on the common
+	// error values see on Windows. (perhaps when running
+	// all.bat?)
+	return e
+}
+
+```
+
+`tests/winlib/readfileex.go`:
+
+```go
+//go:build cgo
+
+package winlib
+
+import (
+	"syscall"
+	"unsafe"
+
+	"golang.org/x/sys/windows"
+)
+
+/*
+#include <stdint.h>
+#include <stdio.h>
+
+// We define the golang callback here, so that CGO can link it to Golang code
+extern void GoReadFileCallback(uint32_t dwErrorCode, uint32_t dwNumberOfBytesTransfered, uintptr_t lpOverlapped);
+
+// We define the callback that will be passed to every call to ReadFileEx
+// it will only call a C gateway function to route the execution flow to the correct function
+static inline void __stdcall c_readfile_callback(uint32_t dwErrorCode, uint32_t dwNumberOfBytesTransfered, uintptr_t lpOverlapped) {
+	GoReadFileCallback(dwErrorCode, dwNumberOfBytesTransfered, lpOverlapped);
+}
+// Workaround to get the address of the C function as cgo does not expose it
+static inline uintptr_t get_c_readfile_callback_addr() {
+	return (uintptr_t)c_readfile_callback;
+}
+*/
+import "C"
+
+type CompletionRoutine func(syscall.Errno, uint32, *windows.Overlapped)
+
+// Copy paste from golang.org/x/sys/windows
+var (
+	procReadFileEx = modkernel32.NewProc("ReadFileEx")
+)
+
+var c_readfile_callback_addr = uintptr(C.get_c_readfile_callback_addr())
+
+// This map is used to known where to route the execution flow once we have the callback
+var callbacksByOverlapped = map[uintptr]*CompletionRoutine{}
+
+// Gateway function to link to the correct callback, this is mandatory as CGO creates C stubs to call Go functions from C
+//
+//export GoReadFileCallback
+func GoReadFileCallback(dwErrorCode C.uint32_t, dwNumberOfBytesTransfered C.uint32_t, lpOverlapped C.uintptr_t) {
+	// Get the callback from the map, if we fail, then the user did something wrong with its overlapped objects
+	routine := *callbacksByOverlapped[uintptr(lpOverlapped)]
+	// Deregister it
+	delete(callbacksByOverlapped, uintptr(lpOverlapped))
+	// Call it with correct parameters
+	routine(syscall.Errno(dwErrorCode), uint32(dwNumberOfBytesTransfered), (*windows.Overlapped)(unsafe.Pointer(uintptr(lpOverlapped))))
+}
+
+// Copy paste from golang.org/x/sys/windows with small modifications
+func readFileEx(handle windows.Handle, buf []byte, overlapped *windows.Overlapped, completionRoutine CompletionRoutine) (err error) {
+	var _p0 *byte
+	if len(buf) > 0 {
+		_p0 = &buf[0]
+	}
+	var completionRoutineAddr uintptr = 0
+	if completionRoutine != nil {
+		completionRoutineAddr = c_readfile_callback_addr
+		callbacksByOverlapped[uintptr(unsafe.Pointer(overlapped))] = &completionRoutine
+	}
+	r1, _, e1 := syscall.SyscallN(procReadFileEx.Addr(), uintptr(handle), uintptr(unsafe.Pointer(_p0)), uintptr(len(buf)), uintptr(unsafe.Pointer(overlapped)), completionRoutineAddr)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+// Copy paste from golang.org/x/sys/windows
+func ReadFileEx(fd windows.Handle, p []byte, overlapped *windows.Overlapped, completionRoutine CompletionRoutine) error {
+	err := readFileEx(fd, p, overlapped, completionRoutine)
+	// if raceenabled {
+	// 	if *done > 0 {
+	// 		raceWriteRange(unsafe.Pointer(&p[0]), int(*done))
+	// 	}
+	// 	raceAcquire(unsafe.Pointer(&ioSync))
+	// }
+	return err
+}
+
+```
+
+`tests/winlib/waitforsingleobjectex.go`:
+
+```go
+package winlib
+
+import (
+	"syscall"
+
+	"golang.org/x/sys/windows"
+)
+
+var procWaitForSingleObjectEx = modkernel32.NewProc("WaitForSingleObjectEx")
+
+// Copy paste from golang.org/x/sys/windows with small modifications
+func waitForSingleObjectEx(handle windows.Handle, dwMilliseconds uint32, bAlertable bool) (event uint32, err error) {
+	var _p0 uint32
+	if bAlertable {
+		_p0 = 1
+	}
+	r0, _, e1 := syscall.SyscallN(procWaitForSingleObjectEx.Addr(), uintptr(handle), uintptr(dwMilliseconds), uintptr(_p0))
+	event = uint32(r0)
+	if event == 0xffffffff {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+// Copy paste from golang.org/x/sys/windows
+func WaitForSingleObjectEx(handle windows.Handle, dwMilliseconds uint32, bAlertable bool) (uint32, error) {
+	event, err := waitForSingleObjectEx(handle, dwMilliseconds, bAlertable)
+	return event, err
+}
+
+```
+
+`tests/winlib/windows.go`:
+
+```go
+package winlib
+
+import (
+	"thats_no_pipe/tests/log"
+	"unicode/utf16"
+
+	"golang.org/x/sys/windows"
+)
+
+func CreateFile(name string, access uint32, mode uint32, sa *windows.SecurityAttributes, createmode uint32, attrs uint32, templatefile windows.Handle) (handle windows.Handle, err error) {
+	utf16PipeName := utf16.Encode([]rune(name))
+
+	log.Info("CreateFile(\"%s\", ...)", name)
+	handle, err = windows.CreateFile(&utf16PipeName[0], access, mode, sa, createmode, attrs, templatefile)
+	log.Info("CreateFile -> %x, %s", handle, err)
+	return
+}
+
+func CreateNamedPipe(name string, flags uint32, pipeMode uint32, maxInstances uint32, outSize uint32, inSize uint32, defaultTimeout uint32, sa *windows.SecurityAttributes) (handle windows.Handle, err error) {
+	utf16PipeName := utf16.Encode([]rune(name))
+
+	log.Info("CreateNamedPipe(\"%s\", ...)", name)
+	handle, err = windows.CreateNamedPipe(&utf16PipeName[0], flags, pipeMode, maxInstances, outSize, inSize, defaultTimeout, sa)
+	log.Info("CreateNamedPipe -> %x, %s", handle, err)
+	return
+}
+
+func WriteFile(fd windows.Handle, p []byte, done *uint32, overlapped *windows.Overlapped) (err error) {
+	log.Info("WriteFile(%v, ...)", fd)
+	err = windows.WriteFile(fd, p, done, overlapped)
+	log.Info("WriteFile -> %s", err)
+	return
+}
+
+func ReadFile(fd windows.Handle, p []byte, done *uint32, overlapped *windows.Overlapped) (err error) {
+	log.Info("ReadFile(%v, buf, )", fd)
+	err = windows.ReadFile(fd, p, done, overlapped)
+	log.Info("ReadFile -> %s", err)
+	return
+}
+
+```
+
+`tools/pipe_parser.py`:
+
+```py
+#!/usr/bin/env python3
+import argparse
+import sys
+import json
+
+EXAMPLES='''
+Examples:
+  Extract the data that was sent through the named pipe
+  $ ./pipe_parser.py data ./pipe_msg_from_proxy.raw | xxd
+
+  Get all metadata of the named pipe message in JSON format
+  $ ./pipe_parser.py header ./pipe_msg_from_proxy.raw | jq .
+
+  Read the message from stdin
+  $ cat ./pipe_msg_from_proxy.raw | ./pipe_parser.py data - | xxd
+'''
+
+
+def parse_cmdline():
+    parser = argparse.ArgumentParser(epilog=EXAMPLES, formatter_class=argparse.RawDescriptionHelpFormatter)
+
+    parser.add_argument("--output", "-o", type=str, default="-", help="Output file, defaults to stdout if undefined")
+
+    subparsers = parser.add_subparsers(dest="action")
+
+    data_parser = subparsers.add_parser("data", help="Extract data from the pipe message")
+    data_parser.add_argument("input", type=str, help="Input filename or '-' for stdout")
+
+    header_parser = subparsers.add_parser("header", help="Extract the metadata in JSON format")
+    header_parser.add_argument("input", type=str, help="Input filename or '-' for stdout")
+
+    encode_parser = subparsers.add_parser("encode", help="Encode the message")
+    encode_parser.add_argument("header", type=str, help="JSON header to add to the message")
+    encode_parser.add_argument("data", type=str, help="Input filename or '-' for stdout")
+
+    return parser.parse_args()
+
+
+def log_error(msg: str):
+    print("[ERROR] " + msg, file=sys.stderr)
+
+
+def read_data(filename: str) -> bytes:
+    """Reads data from filename or stdin if '-' is provided as argument"""
+    content = b""
+    if filename == "-":
+        content = sys.stdin.buffer.read()
+    else:
+        with open(filename, 'rb') as f:
+            content = f.read()
+    return content
+
+
+def write_data(data: bytes, filename: str):
+    """Writes data to a filename or stdout if '-' is provided as argument"""
+    if filename == "-":
+        sys.stdout.buffer.write(data)
+    else:
+        with open(filename, 'wb') as f:
+            f.write(data)
+
+
+def get_header(content: bytes):
+    """Returns the header of the message."""
+    return content.split(b"\n", maxsplit=1)[0]
+
+
+def get_data(content: bytes):
+    """Returns the actual data that was sent through the pipe"""
+    return content.split(b"\n", maxsplit=1)[1]
+
+
+def decode(action: str, input_filename: str, output_filename: str):
+    """Decodes a websocket message to extract its header or data"""
+    full_data = read_data(input_filename)
+
+    if action == "header":
+        data = get_header(full_data)
+    else:
+        data = get_data(full_data)
+
+    write_data(data, output_filename)
+
+
+def encode(header: str, data_filename: str, output_filename: str):
+    """Creates a new websocket message formed with the specified header and content of the specified file"""
+    try:
+        json_header = json.loads(header)
+    except:
+        log_error("Header does not seem to be a valid JSON")
+        sys.exit(1)
+    compressed_header = json.dumps(json_header).encode()
+    if b"\n" in compressed_header:
+        log_error("Header contains newlines, aborting")
+        sys.exit(1)
+    
+    data = read_data(data_filename)
+
+    write_data(compressed_header + b"\n" + data, output_filename)
+
+
+def main():
+    args = parse_cmdline()
+    if args.action == "encode":
+        encode(args.header, args.data, args.output)
+    else:
+        decode(args.action, args.input, args.output)
+
+
+if __name__ == "__main__":
+    main()
+
+```
