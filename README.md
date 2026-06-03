@@ -4442,6 +4442,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/exjam/xbox360-emu [A xbox 360 emulator]
 
 ## PlayStation
+- https://github.com/DrYenyen/Drive-Cloning-For-PS4-PS5 [Research and instructions for cloning PS4 and PS5 internal storage drives]
 - https://gist.github.com/flatz/620ddda6d64acca6d1c990dc3080ac0e [PS5 Hypervisor exploit]
 - https://github.com/ps5-linux/ps5-linux-loader [Linux payload implementing HV exploits to run a custom bootloader]
 - https://github.com/cragson/a53-code-exec [PoC for code execution on a53 used by PS5 on fw 02.00]
