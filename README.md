@@ -1401,6 +1401,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/adam-040/Enigma [C++ reimplementation of Ghidra analytical core (SoftwareModeling + Utility): no JVM, SLEIGH + native Capstone pipelines, embeddable for AI/agents]
 - https://github.com/gmh5225/retdec
 - https://github.com/Sidenai/hyperion-disassembler [Native multi-arch disassembler & decompiler — PE/ELF/Mach-O/.NET, x86/x64/ARM64/MIPS/PPC, RTTI recovery, SSA decompiler, Lua scripting, packer detection]
+- https://github.com/kernelstub/Retract [Static binary analysis workbench: PE/ELF/Mach-O, x86/x64 disasm, CFG, pseudocode, browser UI via --serve; malware triage and RE]
 - https://github.com/azw413/Glass [Rust, GPL-3.0] Mobile-first GPU disassembler (gpui) for APK/DEX/smali and AArch64 ELF/Mach-O (Android/iOS); CFG, xref, bin/insn search, annotations, in-place patch export; CLI + MCP; free IDA alternative]
 - https://github.com/Col-E/Recaf [Java]
 - https://github.com/gmh5225/bytecode-viewer [Java]
