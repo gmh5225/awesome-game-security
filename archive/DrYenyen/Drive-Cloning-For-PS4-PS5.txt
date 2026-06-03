@@ -1,0 +1,439 @@
+Project Path: arc_DrYenyen_Drive-Cloning-For-PS4-PS5_dp6j9wkx
+
+Source Tree:
+
+```txt
+arc_DrYenyen_Drive-Cloning-For-PS4-PS5_dp6j9wkx
+├── README.md
+└── original yap
+    ├── Linux commands.txt
+    └── extended storage.txt
+
+```
+
+`README.md`:
+
+```md
+# Notes 
+There may be some obscure methods to do this a bit better, but from the end result later you'll see that it's mostly heavy in creating an image but light on using an image. And no having people mess with their drive firmware is not a good option.
+
+This is NOT for piracy.
+
+
+> [!WARNING]
+> Anything you do with your drive will wipe it so back up any data you care about.
+
+# Requirments to create images
+1. Jailbroken PS4 and or PS5 
+2. Linux (Ubuntu was used and it had dd and sparse by default)
+3. dd 
+4. sparse
+5. bmap-tools - sudo apt update sudo apt install bmap-tools or your distro's equvalent. 
+6. SSD 250GB and above or HDD 250GB and above. And a way to connect it to your PC. NVMe M.2 and SATA SSD's work for external extended storage with an enclosure. For internal extended storage you need an enclosure only on PC.
+> [!IMPORTANT]
+> To make a shareable or easily usable image use an ssd that supports trim and while it is formatted to NTFS optimise it from the properties>tools bar. 
+
+# Requirments to use images
+1. Electricity 
+2. A PC Windows/Linux/MacOS
+3. SSD 250GB and above or HDD 250GB and above. And a way to connect it to your PC. NVMe M.2 and SATA SSD's work for external extended storage with an enclosure. For internal extended storage you need an enclosure only on PC.
+4. BelenaEtcher
+5. On PS4 you require the license of the media app (or otherwise) you are receiving. And a real PSN account for retail apps. 
+6. On PS5 you do NOT require a license of the media app you are receiving but do need a license if it is a retail app. And any kind of activated account (meaning PSN or fake activated) if only for media apps. 
+
+# PS4 Extended Storage
+On PS4 Extended extended storage is easier to deal with, unlike on ps5 and its m.2 extended storage which requires exact size images 
+the PS4 drive source can be 256GB (Or 250GB per it's minimum) and target 1TB. And the write will be successful although the source partition size will be what is available. 
+This is why these methods are not for long term use but for short transfers to obtain retail apps you usually cannot without a jailbreak or latest firmware. And any larger drive up to 8TB will work.
+The source firmware matters meaning it can't be used on lower firmware than it was made on at least on PS4 could not test on PS5. A jailbroken PS4 is usually able to ignore the firmware limit on the drive but it's best to make the image with a drive from a PS4 on 9.00 or so. But should always work on higher.
+
+On PS4 adding apps to extended storage is easy as the console usually makes extended storage the install location after it is added.
+Or for anything else you want to move or more help https://www.playstation.com/en-gb/support/hardware/ps4-external-hdd-support/
+
+## System-internal-app-extended-storage-workaround
+This is how to install an application that is already installed from the factory upgrading it.
+
+### Vue After Free 
+This was discovered while looking for a way to load PlayStation Vue via extended storage to compliment earthonion's save file exploit loading. 
+1. Install Vue 1.01 and 1.24 or greater.
+2. With FTP take the installed versions from user/app and user/patch.
+3. Connect an external drive and format it as extended storage.
+4. Via ftp to /mnt/ext0/user/app and patch place the folders of the installed Vue app.
+5. Rename the title id of the app folder to a different one CUSA00960 to CUSA00961 was used leave the patch folder as CUSA00960.
+6. Stop using the drive from settings.
+7. Unplug it and plug it in on the target console while it's idling on the home screen.
+
+# PS5 External Extended Storage
+PS5 Extended Storage is a bit limited as it cannot usually have PS5 media apps moved to it. Only PS5 games for storage and PS4 games for use and storage. Thanks to TeRex777 telling us about a nice little FTP trick this limitation is out the window. 
+By taking the files of an installed PS5 app from a PS5 and putting them into extended storage on a PS4 (may also work with a PS5) you can then have the app show up on PS5 extended storage ready to be moved to internal for usage. (Cannot be run from extended storage)
+In this situation again the size of the source drive can be 256GB (Or 250GB per it's minimum) and target 1TB. And the write will be successful although the source partition size will be what is available. And any larger drive up to 8TB will work.
+Firmware limitations unknown. But should always work on higher.
+
+On PS5 adding media apps to extended storage is a bit of a run around. You need to take the installed app data from a jailbroken PS5. You do so by making the following path. 
+1. Create a folder called "ps5"
+2. Inside the ps5 folder create the following path user\app 
+3. Inside the ps5 folder create the following path system_data\priv\appmeta
+4. From your jailbroken PS5 place the PPSAXXXXX folder of each end path into the equvalent you now have. 
+
+End result should be this ps5\system_data\priv\appmeta\PPSA01615 and ps5\user\app\PPSA01615.
+It's okay if the appmeta\PPSA01615 is empty. Just the app\PPSA01615 should have the app data. 
+
+Or for anything else you want to move https://www.playstation.com/en-gb/support/hardware/ps5-extended-storage/
+
+# PS5 Internal Extended Storage M.2 Slot  
+This medium is ass and should be a last resort for sharing files. The drive size is locked in and we could not get around it during testing. Meaning that people you share an image with need the same size otherwise an error will show up and drive will not be usable till formatted.
+As it needs an M.2 SSD it's not a big loss to not use this since the other methods above are easier and more flexible. 
+M.2 images are not firmware limited from testing as an image made on 9.00 PS5 firmware worked on 4.03.
+
+To add media apps and etc to it see here https://www.playstation.com/en-gb/support/hardware/ps5-extended-storage/
+
+# Creating Images
+For whichever console or drive type you are creating an image the process is the same but limitations from above apply. (Mostly the PS5 Internal Extended Storage M.2 Slot section for drive size).
+
+1. Creating an image of the drive. Time varies based on drive size and type. Can be half an hour with a small SSD or 4 hours with a large HDD. 
+ ```
+ sudo dd if=/dev/sde bs=4M status=progress conv=sparse of=sparse_250gb.img
+ ```
+
+*"sde" Is the source drive and will change between systems so it has to be checked and changed.*
+
+*"sparse_250gb.img" Is the output image name and can be whatever you want.*
+
+2. Creating the bmap so you can write back to a different drive very fast.
+ 
+```
+sudo bmaptool create -o sparse_250gb.img.bmap sparse_250gb.img
+```
+
+*"sparse_250gb.img.bmap" Is the output file.* 
+
+*"sparse_250gb.img" Is the source image that gets scanned for mapping.*
+
+# Compressing images
+The final image size will usually take up very little space around 300MB or so.(Depending on the files that were on the drive). 
+
+The size will show up as the full drive size and will take a bit of time to compress. 
+
+1. Rename the .bmap file you generated to "image.bmap".
+2. Create a folder called ".meta" it might poof away. (On Linux press Ctrl + H to show hidden folders)
+3. Select the .img you made and the .meta folder and compress them to a zip. 
+4. To compress a bit more compress the .zip to to 7z. 
+
+# Writing the image 
+1. On Windows/Linux/MacOS unpack the 7z and select the zip with BelenaEtcher and write to a targed drive. Writing is usually about 15 minutes. Can take longer if there is more actual data. 
+
+# PS5 Internal Extended Storage M.2 Slot PCIe 4 bypass 
+Usually the PS5 has a strict requirment for PCIe 4 and will not allow the console to fully boot with anything lesser, but in the PS5 discord server user Windfox wrote the NetflixNHack image to his PCIe 3.0 SSD which allowed him to format it afterwards and access all the space in a usable manner to install ps4 games and even run Linux from it. (PS5 games untested)
+
+Afterwards user @flaviopenas-ps traced the steps and trimmed down the original image to a reasonable sized one to quickly get this going. This means you can now use PCIE 3.0 drive internally by following the steps below:
+
+Note - The usual 250 GB limit is also not in effect courtesy Bringus Studios a 128GB ssd was mounted.
+
+1. Download the img file from https://github.com/DrYenyen/Drive-Cloning-For-PS4-PS5/blob/main/gen3_ssd_enabler_4.00.img for 4.00 and up or https://github.com/flaviopenas-ps/ps5_94_netflix_____image for 4.03 and above (backup links will be made).
+2. On Windows/Linux/MacOS select the img with BelenaEtcher or other similar software and write to it to the targed drive.
+3. While your console is off plug the drive in and boot. Format it when it says it is corrupted to regain the full storage size.
+> [!WARNING]
+>Consider this experimental and test before you commit to long term usage.
+
+# ConsoleMods guide i wrote for users 
+This guide was written last year to https://consolemods.org/wiki/PS4:How_to_clone_your_storage by me before the above testing and is a more general use one. The time and etc is more realistic for a drive full of data vs the above which assumes 100MB-1GB of actual data. 
+It is meant for PS4.
+> [!WARNING]
+>NOTICE do not format/enable/initialise the drive in any way it will cause complete data loss. 
+ 
+* Cloning Internal and extended storage works on both jailbroken and retail consoles.
+
+* App2USB is only for jailbroken consoles.
+
+* Before going forward use either the native Application Saved Data Management tool to backup your save data to a USB drive or use Apollo Save Tool if on an exploited console.
+
+# Introduction
+## External/Extended storage and App2USB  
+*See here on how to use them and the differences between them https://consolemods.org/wiki/PS4:Installing_PKGs_to_an_External_Hard_Drive.*
+
+## How was it tested?
+*With reference from the [https://www.psdevwiki.com/ps4/HDD%20SSD#Migrating_/_copy_original_data devwiki] a few different options were tested. Most free windows software failed to clone the partitions as needed.*
+
+*A free Windows alternative was found and worked well so it was used for the guide.*
+
+*A plain live Linux distro performed best while Clonezilla a standalone Disk Imaging and Cloning software took the longest (Described below)*
+
+*All tests were ran on 2 PC's with relative specs and ultimately the HDD's were the bottleneck when being ran from external enclosures and over direct SATA connection. (Your mileage may vary if using external enclosures)*
+
+## Software options?  
+* You are free to attempt to use alternative software at your own discretion be it paid or free the guide offers 3 free options.
+1. HD Clone for Windows.
+* HD Clone is a quick solution if you don't want to restart your PC and dedicate it to this job. 
+* This option was tested and took around 5 hours from a 500GB HDD to another 500GB HDD.
+2. Ubuntu live USB a basic Linux distro or on an already installed Linux OS you will use "dd".
+* Ubuntu and any other Linux live USB or already installed OS are practically the best option for the job being the fastest and easiest to run albeit needing you to reboot your PC and dedicate it to the job.
+* This option  was tested and took just under 5 hours from a 500GB HDD to another 500GB HDD.
+* If you already have a Linux OS installed but do not have GParted install it or use the terminal or alternative software to view drives and tell them apart. 
+3. Clonezilla live USB a standalone Disk Imaging and Cloning software. 
+* Clonezilla is known worldwide and is also a great option unfortunately due to predetermined commands which fail being run and take up extra time slowing down the job this is the least recommended use this only if a normal Linux live USB gives you extreme trouble.
+* Additionally Clonezilla gives errors and gives up on cloning extended storage and is more trouble than it's worth to amend it.
+* This option was tested and took just over 8 hours from a 500GB HDD to another 500GB HDD.
+
+### Warning for alternative software
+* The cloning software only needs to see the drive detected certain software will not detect it because it does not have a drive letter and etc. This disqualifies any such software from being used as an alternative. 
+* Do not format/enable/initialise the drive in any way it will cause complete data loss. 
+
+## Can i clone to a larger drive/Different size drives?
+* Unfortunately currently any attempts to alter the partition size leads to failure due to it breaking the encrypted partitions and may not ever be possible so any drive you use needs to be the same size or larger but you cannot take advantage of the extra space. 
+
+* See https://consolemods.org/wiki/PS4:Upgrading_your_Hard_Drive for help with backing up data when moving from a smaller drive to a larger drive. (You will need a 3rd drive)
+
+## How long will it take? 
+* Depending on the size of the drives and the speed of the drives 5-12 hours possibly more but this is normal. A test was done and it took roughly 5 hours from a 500GB HDD to another 500GB HDD.
+         
+# Cloning Internal or External/Extended storage
+* Cloning both Internal and External/Extended storage is the same process for both.
+ 
+* Additionally Clonezilla gives errors and gives up on cloning extended storage so it only works with Internal storage.
+
+* Only App2USB is different and does not need precise cloning.
+
+ NOTICE do not format/enable/initialise the drive in any way it will cause complete data loss. 
+ 
+* The cloning software only needs to see the drive detected certain software will not detect it because it does not have a drive letter and etc. This disqualifies any such software from being used as an alternative.  
+
+1. Cloning on Windows with HD Clone (Internal or External/Extended)  
+2.  For this guide the free edition of [https://www.miray.de/download/hdclone.html HD Clone]  was used It has a Windows exe and a Linux AppImage.
+3. Download and unpack the zip 
+4. Connect both the PS4 HDD and the new drive to the PC via external USB enclosure or via SATA directly to the motherboard.(Reboot needed if you will use SATA)
+5. Open HD Clone and Under "Clone" Select "Disk" 
+6. Select the Source Disk the one from your PS4. (If your Source disk is not being recognized allow some time to pass while in the available disks menu)
+7. Select the Target Disk the new one you want to clone your data to. (If your Target disk is not being recognized allow some time to pass while in the available disks menu)
+8. Press "Start" and "Continue" then allow it time to complete the process. 
+9. After it is done you can put the new drive in the PS4 and boot it up. 
+* If it boots into safe mode and asks for a software reinstall turn off the console and do the following.
+10. While the console is shutdown hold the power button till you hear a second beep. 
+11. Connect a PS4 controller with a cable to the console and press the PS button. 
+12. Choose to restart the console. 
+* If that does not work enter safe mode again and this time choose to rebuild the database. (If you are on a exploited console this will cause your homebrew and games to disappear at the bottom of this page there is a guide on how to restore them)
+
+# Cloning with a Linux live USB or active OS (Ubuntu used)(Internal or External/Extended)
+1. Download the [https://ubuntu.com/download/desktop Ubuntu install image]
+2. Download [https://rufus.ie/en/ Rufus]. 
+3. Flash the Ubuntu image to rufus 
+4. Open Rufus and select the Clonezilla image.
+5. Show the advanced properties and select "List USB Hard Drives"
+6. Select your drive.
+7. Set "Partition scheme" MBR
+8. Set "Target system" BIOS or  UEFI
+9. Press on "Start" and allow it some time to flash.
+10. After it is done turn off your computer.
+11. Connect both the PS4 HDD and the new drive to the PC via external USB enclosure or via SATA directly to the motherboard. 
+* Preferably unplug your main storage drives from the PC to avoid accidentally deleting important data and speed up scans later in the process.
+12. Boot into Ubuntu and in the shell choose the top option. 
+13. When it boots into the desktop follow the setup popup until it asks if you want to install or try choose try.
+14. Open GParted and choose to authenticate the user it will then launch the program. If you already have a Linux OS installed but do not have GParted install it or use the terminal or alternative software to view drives and tell them apart. 
+15. Once it opens click on the top left of the app "GParted" and under "Devices" you want to do the following. 
+16. In "Devices" all the current drives will be show you can click on them an view their partitions you first want to find the Source drive this is the drive that was inside your PS4 it will have 15 partitions the largest one showing as 420GB take note of its name for example "sda".
+17. Again in "Devices" you want to find your target drive this is the new drive that you want to clone the data to. Find it by going through the available drives and matching it's size and it having an empty "unallocated" partition table (As mentioned before) or if you are sure of the drive just take note of its name for example "sdc".
+18. You can now open a terminal and run the command
+ ```
+ sudo su
+ ```
+* You can then build and run the clone command by putting in the names of the drives in the appropriate space and example is given below. 
+This command is an example 
+ ```
+ dd if=/dev/sda of=/dev/sdc status=progress 
+ ```
+* In the command the first drive in the "if" section is the drive that was inside the PS4.
+* In the command the first drive in the "of" section is the new drive you want to clone data to.
+* In the command "status=progress" displays a simple progress bar to show you what it is doing. 
+* Build the command and run it then wait for the process to finish. 
+19. After it is done you can put the new drive in the PS4 and boot it up. 
+* If it boots into safe mode and asks for a software reinstall turn off the console and do the following. 
+20. While the console is shutdown hold the power button till you hear a second beep. 
+21. Connect a PS4 controller with a cable to the console and press the PS button. 
+22. Choose to restart the console. 
+* If that does not work enter safe mode again and this time choose to rebuild the database. (If you are on a exploited console this will cause your homebrew and games to disappear at the bottom of this page there is a guide on how to restore them)
+
+# Cloning with a Clonezilla live USB ( Internal storage only)   
+* Notice during the process some stages may take some time they may even look stuck but just give it time. The guide tells you at one point that no more user input is needed after that you can leave it and wait for it to be done. 
+* Notice during the process errors and warnings as shown below can be ignored
+* Unrecognised disk label 
+* Failed to translate partition name 
+* not a block device
+* Refusing to sfsck unknown or unsupported file system
+      
+1. You will need a USB Flash Drive or a External HDD/SSD. 
+2. Download the [https://clonezilla.org/downloads.php Clonezilla]  live image 
+3. Download [https://rufus.ie/en/ Rufus]. 
+4. Flash the Clonezilla image to rufus 
+5. Open Rufus and select the Clonezilla image.
+6. Show the advanced properties and select "List USB Hard Drives"
+7. Select your drive.
+8. Set "Partition scheme" MBR
+9. Set "Target system" BIOS or  UEFI
+10. Press on "Start" and allow it some time to flash.
+11. After it is done turn off your computer.
+12. Connect both the PS4 HDD and the new drive to the PC via external USB enclosure or via SATA directly to the motherboard. 
+* Preferably unplug your main storage drives from the PC to avoid accidentally deleting important data and speed up scans later in the process.
+13. Boot into Clonezilla.
+14. Choose your language and keyboard layout. (Preferably keep the default keyboard layout)
+15. Choose "Start Clonezilla" (Do not enter the shell unless you know what you are doing) 
+16. Choose "device-device" then give it some time.
+17. Choose "Beginner mode" (Do not enter the expert menu unless you know what you are doing)
+18. Choose "disk_to_local_disk" 
+19. Choose the local disk source this is the PS4 drive you want to clone to the other drive. Here select the drive with the name or serial number that matches your PS4 drive.    
+20. Choose the local disk as target this is the new drive you want to clone the data to select the one that matches the name or serial number of the new drive .
+21. Parameters here choose "-sfsck Skip checking/repairing source file system"
+22. Partition table on the target disk here choose "-k0 Use the partition table from the source disk"
+23. Choose what to do once the process is complete. Here you can choose what you want the system to do once its done cloning. 
+24. You will be asked to press Enter do so. 
+25. After some time the setup will give the last user prompt which confirms you are okay with deleting all data on the Target disk this is the new drive that you want to clone to it needs to be erased and all data on it will be overwritten. 
+26. Visually confirm the selected drive is the correct one then type y and press enter then type y and press enter a second time. 
+27. There will be no more user prompts and the cloning will take a few hours depending on the speed of the drives and etc. Once it is done the system will do whatever you have previously decided.
+28. After it is done you can put the new drive in the PS4 and boot it up. 
+* If it boots into safe mode and asks for a software reinstall turn off the console and do the following. 
+29. While the console is shutdown hold the power button till you hear a second beep. 
+30. Connect a PS4 controller with a cable to the console and press the PS button. 
+31. Choose to restart the console. 
+* If that does not work enter safe mode again and this time choose to rebuild the database. (If you are on a exploited console this will cause your homebrew and games to disappear at the bottom of this page there is a guide on how to restore them)
+
+# Cloning a drive being used with App2USB
+*You do not need to clone a drive due to how App2USB works simply copy over the pkgs and .ini file and run the payload again. 
+* Optionally you can use any simple cloning method.
+* See here on how to use App2USB [[PS4:Installing PKGs to an External Hard Drive]].
+
+# Rebuilding Database in case drive is not registering 
+If your cloned HDD/SSD is not allowing the console to boot normally you will rebuild the database and or reboot the console a few times. 
+1. While the console is off hold down the power button until you hear a second beep.
+2. Once in safe mode connect your controller with a usb cable to the PS4.
+3. Choose option 5.Rebuild Database. 
+4. Allow it to do so then look at the next part of this guide to get back fpkgs and etc.
+
+# I rebuilt my database and now all my homebrew and games are gone how do I get them back?
+## For both internal and extended/external storage
+* When you rebuild the PS4 database you lose the home screen entries of homebrew apps and dumped games on internal and extended/external storage all of which are FPKG apps but they will still be taking up space because they are still there.
+* Here are a few ways to recover them. Take note that sometimes the games may not show up on the home screen but become available in the Library app from there you can select them and they will start showing up again.
+* Sometimes unplugging your extended/external storage can cause the games to be locked even when jailbroken. Allow it to repair itself then continue the guide to recover the games and apps
+* Itemzflow and Apollo Save Tool have an option to also rebuild the DLC database but only Itemzflow has a dedicated option to Re-activate for extended storage.
+** See Itemzflow section for extended storage restore options. Take note Itemzflow cannot run from extended storage if you install it and it defaults to there move it to internal storage.
+
+# Using Apollo Save Tool 
+1. Download the latest version Apollo Save Tool from Pkg Zone or Github and put it in the root of a USB drive ( Has to be formatted in Exfat) then plug it into your PS4. 
+2. Jailbreak your console as you usually do.
+3. In GoldHEN Debug Settings before entering the Package Installer under it are some options make sure Enable Background Installation is NOT enabled.
+4. Install Apollo and select yes to reinstall it if it asks you to ( This happens only if it was previously installed)
+5. Open Apollo Save Tool and go to User Tools.
+6. Then select App.db Database Management.
+7. There you can select Rebuild App.db Database (Restore missing XMB items) and you can also select Rebuild DLC Database (addcont.db)
+8. Then close Apollo and log out of and log in the user account for everything to properly show up.
+* If you cannot see the games and apps on the home screen check in the PS4 Library App.
+* Optionally you can then create a backup of your current database to use in the future with the restore option.
+* If you are not using GoldHEN or cannot see the app after it has been reinstalled try one of the other ones in this guide. Or if all apps have not been recovered try using one of the other apps in this guide.
+
+# Using Itemzflow 
+1. Download and install Itemzflow from Pkg Zone and put it in the root of a USB drive ( Has to be formatted in Exfat) then plug it into your PS4. 
+2. Jailbreak your console as you usually do.
+3. In GoldHEN Debug Settings before entering the Package Installer under it are some options make sure Enable Background Installation is NOT enabled.
+4. Install Itemzflow and select yes to reinstall it if it asks you to ( This happens only if it was previously installed)
+5. Open Itemzflow and press the Options button on your controller.
+6. Navigate to Rebuild FPKG Database and press X to interact with the submenu.
+* The submenu has 3 options you can navigate it with righ and left on the dpad.
+1. Rebuild Internal Database
+* Rebuilds the internal storage database to recover home screen items.
+2. Rebuild Only DLCs (inc. ext hdd)
+* Rebuilds the DLC database for both internal and external drives.
+3. Re-activate ext. Content 
+* Re-activates the games and apps on extended storage that are disabled.
+** Notice even if they still have a warning sign on them try running them anyway after running it should dissapear.
+7. Choose an option according to what you need and you're done. If you cannot see them on the home screen check in the PS4 Library App.
+* If you are not using GoldHEN or cannot see the app after it has been reinstalled try one of the other ones in this guide. Or if all apps have not been recovered try using one of the other apps in this guide.
+
+# Credits
+Credits include people who did work on the Netflix exploit project and people who tested and gave information about the drives. 
+## Netflix 
+- [c0w-ar](https://github.com/c0w-ar/) for complete inject.js userland exploit and lapse port from Y2JB!
+- [ufm42](https://github.com/ufm42) for regex sandbox escape exploit and ideas!
+- [autechre](https://github.com/autechre-warp) for the idea!
+- [Dr.Yenyen](https://github.com/DrYenyen) for testing and coordinating system back up, M.2 Drives, Extended Storage, making PS5 Extended storage Image and much more help!
+- [Gezine](https://github.com/gezine) for help with exploit/Y2JB for reference and original lapse.js!
+- Rush for creating system backup, 256GB and 2TB M.2 Images, PS4 Extended Storage Images and hours of testing!!
+- [Jester](https://github.com/god-jester) for testing 2TB and devising easiest imaging method, and gathering all images for m.2!
+- [TeRex777](https://x.com/TeRex777_) for PS5 App Extended Storage method.
+## Vue 
+- [Dr.Yenyen](https://github.com/DrYenyen) - Extended storage workaround.
+## PCIe 4.0 bypass
+- Windfox - Discovery.
+- [flaviopenas-ps](https://github.com/flaviopenas-ps) - Testing, initial image and smallest size.
+- [Bringus Studios](https://github.com/BringusStudios) - Testing and lowest possible fw image in small size.
+## Other
+- [AlAzif](https://github.com/Al-Azif)
+- [LM](https://github.com/LightningMods)
+- [Zecoxao](https://github.com/zecoxao)
+
+
+```
+
+`original yap/Linux commands.txt`:
+
+```txt
+so this is the command to image it 
+its better than the one in the cloning guide i wrote it makes it a few hours faster probably 
+
+```sudo dd if=/dev/sde bs=4M status=progress conv=sparse of=sparse_2tb.img```
+
+"sde" is the source drive and will change between systems so it has to be checked 
+"sparse_2tb.img" is the output image
+
+```sudo bmaptool create -o sparse_2tb.img.bmap sparse_2tb.img```
+"sparse_2tb.img.bmap" is the output file 
+"sparse_2tb.img" is the source image that gets scanned for mapping 
+bmap is to save yourself either hours or minutes when writing back 
+for the netflix exploit it saved hours of people writing back the bmap maps out the space that is already 0s and skips writing thus saving time 
+
+compression takes a bit of time if the image will be shared 
+
+this is how it should be done 
+
+bmap file named image.bmap in a folder called .meta 
+(on linux you press some button combo to show hidden folders which the . causes)
+then in the same place with the sparse image you place the .meta folder then you zip them
+compression takes a while then you can also 7z the .zip for a bit more compression 
+But the .zip itself already greatly compresses it 
+
+then you use belena etcher to write the .zip that you extract first from the .7z if its in one 
+the netflix n hack instructions can be used as reference 
+
+the images allow personal backups of legit games between consoles 
+sideloading fpkgs and retail apps on consoles albeit with an already jailbroken ps4 or ps5 required to make the image
+probably other shenanigans
+```
+
+`original yap/extended storage.txt`:
+
+```txt
+Very sorry for the yap below just wanted to explain everything for future reference 
+
+on ps4 extended storage is easier to deal with 
+unlike on ps5 and its m.2 extended storage which requires exact size images 
+the ps4 drive source can be 256gb and target 1tb and it works and shows the pkg
+unlike ps5 though 
+the source firmware matters meaning it cant be used on lower firmware than it was made on at least on ps4 could not test on ps5 
+
+Lucky us that extended storage of PS4 works over onto PS5 
+Double lucky that like I mentioned it's flexible on the size smaller to larger 
+
+And then the 3rd stroke of luck is that @terex777 showed us how to add PS5 apps to extended storage 
+
+This isn't usually a thing through retail 
+The PS5 stops you from moving PS5 media apps and or games to extended storage 
+
+But if you FTP into ext0 on a PS4 you can drop in the *installed* version of a ps5 app via a folder path that starts with ps5 at the root of ext0 and continues with the folders of an installed app from ps5
+Then when you plug it into PS5 you can't run the app from extended storage but you can move it to internal and then launch it 
+So for the purpose of netflix on PS4 and PS5 we'll now have extended storage images that are flexible removing the need for m.2 on PS5 
+PS4 licence requirement still stands 
+
+To note the external storage method seems to be fiddly after 9.60 
+
+2nd note the PS4 extended storage is usually firmware limited 
+The image that will be uploaded is from 9.00 PS4 
+This is for ps4 users since the vulnerable app itself is 9.00 minimum 
+But since the PS5 extended storage is made on the same firmware if some limitation applies it'll be equivalent to 4.00 or so 
+The PS5 version of the app works on 4.03 and above so it should be close enough
+```
