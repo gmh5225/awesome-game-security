@@ -456,6 +456,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ProjectBorealis/PBCharacterMovement [HL2-style, classic FPS movement for UE4 implemented in C++]
 - https://github.com/Merisho/tx-holdem [Texas Holdem Poker made by JS]
 - https://github.com/raysan5/raylib [A simple and easy-to-use library to enjoy videogames programming]
+- https://github.com/Bigfoot71/r3d [3D Extension Library for raylib]
 - https://github.com/scottcgi/Mojoc [A cross-platform, open-source, pure C game engine for mobile game]
 - https://github.com/MarilynDafa/Bulllord-Engine [lightspeed lightweight elegant game engine in pure c]
 - https://github.com/orangeduck/Corange [Pure C Game Engine]
