@@ -909,6 +909,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/thalium/rumba [Cracking MBAs - An MBA simplification library]
 - https://github.com/LLVMParty/smt-server [A small SMT solving server and wire-format toolkit for bit-vector and Boolean formulas]
 - https://github.com/stp/stp [Simple Theorem Prover, an efficient SMT solver for bitvectors]
+- https://github.com/nbulsi/cirsat [A circuit-based Boolean satisfiability (SAT) solver based on DAG logic networks instead of CNF]
 
 
 
