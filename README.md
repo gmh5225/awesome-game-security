@@ -2187,7 +2187,6 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/Driver-read_write [Hijack IRP Beep.sys]
 - https://github.com/isoadam/gina_public [Hijack IRP Null]
 - https://github.com/Barracudach/Swap-control-ioctl [Hijack IRP SpeedFan.sys]
-- https://github.com/wesmar/KeyboardKit [Educational kernel-mode keylogger rootkit — intercepts keyboard IRPs for UDP logging; demonstrates stealth persistence, privilege escalation and IRP hooking for offensive security research and defensive analysis]
 - https://github.com/adspro15/km-um-communication
 - https://github.com/Spuckwaffel/Kernel-Thread-Driver [Thread]
 - https://github.com/Astronaut00/DoubleDataPointer [Double Data Pointer]
@@ -3975,6 +3974,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Oliver-1-1/MouseDetection [Mouse]
 - https://github.com/chrisgdt/DELBOT-Mouse [Deep learning to distinguish human and bot from mouse movements]
 - https://github.com/Oliver-1-1/EtwKeyboardDetection [ETW]
+- https://github.com/wesmar/KeyboardKit [Educational kernel-mode keylogger rootkit — intercepts keyboard IRPs for UDP logging; demonstrates stealth persistence, privilege escalation and IRP hooking for offensive security research and defensive analysis]
 
 > Detection:Hide
 - https://github.com/KANKOSHEV/Detect-HiddenThread-via-KPRCB
@@ -4133,6 +4133,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/volatilityfoundation/volatility
 - https://github.com/volatilityfoundation/volatility3
 - https://github.com/nikaiw/VMkatz [Extract Windows credentials directly from VM memory snapshots and virtual disks (LSASS, SAM/LSA, cached creds, NTDS.dit) in-place]
+- https://github.com/wesmar/KvcForensic [Windows/Linux LSA credential extractor for lsass.dmp minidumps — Win11 24H2/25H2/26H1 and Server 2025; pure Win32, no DbgHelp; MSV, WDigest, Kerberos, CredMan, DPAPI via BCrypt (AES-CFB128, 3DES-CBC)]
 - [Decrypt and export browser password, including Chromium,Edge and Firefox](https://github.com/BL0odz/BrowserPasswordExportor)
 - https://github.com/gtworek/VolatileDataCollector
 - https://github.com/mubix/netview
