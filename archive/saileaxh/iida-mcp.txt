@@ -1,0 +1,5542 @@
+Project Path: arc_saileaxh_iida-mcp_xrv6gk26
+
+Source Tree:
+
+```txt
+arc_saileaxh_iida-mcp_xrv6gk26
+├── README.md
+├── README_EN.md
+├── arts
+│   └── iida-mcp-capability-matrix.svg
+├── driver
+│   ├── build.bat
+│   ├── driver.c
+│   ├── driver.h
+│   ├── helper.c
+│   └── iida-mcp-ioctl.sys
+├── iida.py
+└── iida_core
+    ├── __init__.py
+    ├── cache.py
+    ├── kdriver.py
+    ├── protocol.py
+    ├── registry.py
+    ├── router.py
+    ├── server.py
+    ├── thread_safe.py
+    ├── tools.py
+    └── worker.py
+
+```
+
+`README.md`:
+
+```md
+# iida-mcp
+
+[中文](README.md) | [English](README_EN.md)
+
+![iida-mcp capability matrix](arts/iida-mcp-capability-matrix.svg)
+
+`iida-mcp` 是一个 IDA Pro 插件，通过本地 HTTP MCP 服务暴露当前 IDB 的静态分析能力。
+
+该 MCP 主要面向 x86/x86-64 架构可执行文件及对应 IDA 能力设计；如果有其他需求，请提出 issue。
+
+- 77 个 MCP 工具
+- 主要兼容 IDA 8+，包括 IDA 9.x
+- 支持多 IDA 实例自动路由
+- 可选 Windows 内核驱动能力
+- 快捷键：`Alt+Shift+I`
+
+## 功能
+
+- 文件信息、原始字节、PE/ELF 解析
+- 函数、反汇编、控制流图、交叉引用、调用树
+- Hex-Rays 反编译、函数参数、局部变量
+- 结构体、枚举、本地类型、类型化读取
+- 名称、字符串、字节模式、立即数搜索
+- 重命名、注释、类型、补丁、书签、批量操作
+- 可选内核内存读取、内核模块枚举、IDA 地址到运行时地址映射
+
+## 安装
+
+把 `iida.py` 和 `iida_core/` 复制到 IDA 的 `plugins/` 目录：
+
+```text
+plugins/
+  iida.py
+  iida_core/
+    __init__.py
+    cache.py
+    kdriver.py
+    protocol.py
+    registry.py
+    router.py
+    server.py
+    thread_safe.py
+    tools.py
+    worker.py
+```
+
+## 使用
+
+1. 在 IDA 中打开目标文件。
+2. 点击 `Edit > Plugins > iida-mcp`，或按 `Alt+Shift+I` 启动。
+3. 第一个启动的 IDA 实例监听 `0.0.0.0:13897`，可通过本机回环地址或主机网卡 IP 访问；后续 IDA 实例自动作为 Worker 接入。
+4. 再次点击菜单项或再次按 `Alt+Shift+I`，关闭当前 IDA 实例中的 iida-mcp 服务/连接。
+5. 单 IDB 时工具参数 `f` 可省略；多 IDB 时先调用 `list_files`，再用返回的 file id 指定 `f`。
+
+## MCP 客户端配置
+
+服务端点：
+
+```text
+http://127.0.0.1:13897/mcp
+```
+
+如果从其他机器连接，请把 `127.0.0.1` 换成运行 IDA 的主机 IP，例如：
+
+```text
+http://192.168.153.1:13897/mcp
+```
+
+对支持 HTTP/Streamable HTTP MCP server 的客户端，配置一个远程 MCP server，并把 URL 指向上面的地址即可。
+
+通用示例：
+
+```json
+{
+  "mcpServers": {
+    "iida": {
+      "url": "http://127.0.0.1:13897/mcp"
+    }
+  }
+}
+```
+
+不同终端或客户端的字段名可能略有差异；核心是使用 HTTP MCP 连接到 `http://127.0.0.1:13897/mcp`。
+
+## 依赖
+
+插件主体只依赖 IDA 自带的 IDAPython 和 Python 标准库。
+
+- 反编译相关工具需要 Hex-Rays Decompiler。
+- `disasm_bytes` 需要在 IDA 的 Python 环境中安装 `capstone`。未安装时会返回 `capstone not installed (pip install capstone)`。
+- 内核相关工具需要加载 `iida-mcp-ioctl` 驱动。
+
+## 内核驱动
+
+`driver/` 目录包含 `iida-mcp-ioctl` Windows 内核驱动源码，提供：
+
+- 读取内核内存
+- 获取内核模块列表
+- 按名称查询模块基址
+
+编译需要 Visual Studio Build Tools 和 WDK。`driver/build.bat` 会优先使用 `MSVC`、`WDK`、`SDK_VER` 环境变量；未设置时会尝试从标准安装路径自动探测。
+
+预编译的 `iida-mcp-ioctl.sys` 位于 `driver/`。加载驱动需要自行处理签名和系统策略。未加载驱动时，内核工具会返回明确错误。
+
+## 端口
+
+| 端口 | 用途 |
+|------|------|
+| `13897` | MCP HTTP 服务，监听所有网卡 |
+| `13898` | 内部 Worker 通信，仅本机 |
+
+```
+
+`README_EN.md`:
+
+```md
+# iida-mcp
+
+[Chinese](README.md) | [English](README_EN.md)
+
+![iida-mcp capability matrix](arts/iida-mcp-capability-matrix.svg)
+
+`iida-mcp` is an IDA Pro plugin that exposes the current IDB through a local HTTP MCP server.
+
+This MCP is primarily designed for x86/x86-64 executables and the corresponding IDA capabilities. For other needs, please open an issue.
+
+- 77 MCP tools
+- Mainly compatible with IDA 8+, including IDA 9.x
+- Multi-IDA instance routing
+- Optional Windows kernel driver support
+- Hotkey: `Alt+Shift+I`
+
+## Overview
+
+- File metadata, raw bytes, PE/ELF parsing
+- Functions, disassembly, CFG, xrefs, call trees
+- Hex-Rays pseudocode, arguments, local variables
+- Structs, enums, local types, typed reads
+- Name, string, byte-pattern, and immediate searches
+- Renaming, comments, types, patches, bookmarks, batch operations
+- Optional kernel memory reads, kernel module enumeration, and IDA-to-runtime address mapping
+
+## Installation
+
+Copy `iida.py` and `iida_core/` into IDA's `plugins/` directory:
+
+```text
+plugins/
+  iida.py
+  iida_core/
+    __init__.py
+    cache.py
+    kdriver.py
+    protocol.py
+    registry.py
+    router.py
+    server.py
+    thread_safe.py
+    tools.py
+    worker.py
+```
+
+## Usage
+
+1. Open a target file in IDA.
+2. Start the plugin from `Edit > Plugins > iida-mcp`, or press `Alt+Shift+I`.
+3. The first active IDA instance listens on `0.0.0.0:13897`, so it can be reached through loopback or a host network-interface IP; later instances join as Workers.
+4. Trigger the menu item or hotkey again to stop iida-mcp in the current IDA instance.
+5. With one IDB, the `f` parameter can be omitted. With multiple IDBs, call `list_files` and pass the returned file id as `f`.
+
+## MCP Client Configuration
+
+Endpoint:
+
+```text
+http://127.0.0.1:13897/mcp
+```
+
+When connecting from another machine, replace `127.0.0.1` with the IDA host IP, for example:
+
+```text
+http://192.168.153.1:13897/mcp
+```
+
+For clients that support HTTP/Streamable HTTP MCP servers, add a remote MCP server and point it to the endpoint above.
+
+Generic example:
+
+```json
+{
+  "mcpServers": {
+    "iida": {
+      "url": "http://127.0.0.1:13897/mcp"
+    }
+  }
+}
+```
+
+Client-specific field names may vary. The required target is the local HTTP MCP endpoint above.
+
+## Dependencies
+
+The core plugin uses IDA's bundled IDAPython and the Python standard library.
+
+- Decompiler tools require Hex-Rays Decompiler.
+- `disasm_bytes` requires `capstone` in IDA's Python environment. If missing, it returns `capstone not installed (pip install capstone)`.
+- Kernel tools require the `iida-mcp-ioctl` driver.
+
+## Kernel Driver
+
+The `driver/` directory contains the `iida-mcp-ioctl` Windows kernel driver source. It provides:
+
+- Kernel memory reads
+- Kernel module listing
+- Module base lookup by name
+
+Building requires Visual Studio Build Tools and WDK. `driver/build.bat` uses the `MSVC`, `WDK`, and `SDK_VER` environment variables when set, otherwise it tries to detect standard installation paths.
+
+A prebuilt `iida-mcp-ioctl.sys` is included under `driver/`. Loading it requires appropriate signing and system policy configuration. If the driver is not loaded, kernel tools return a clear error.
+
+## Ports
+
+| Port | Purpose |
+|------|---------|
+| `13897` | MCP HTTP server, listens on all network interfaces |
+| `13898` | Internal Worker communication, loopback only |
+
+```
+
+`arts/iida-mcp-capability-matrix.svg`:
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1648" viewBox="0 0 1600 1648" role="img" aria-labelledby="title desc">
+  <title id="title">iida-mcp tool matrix</title>
+  <desc id="desc">A compact dark matrix listing all 77 iida-mcp tools grouped by capability area.</desc>
+  <defs>
+    <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".42"/>
+      <stop offset=".34" stop-color="#8ff4e5" stop-opacity=".32"/>
+      <stop offset=".70" stop-color="#7f8cff" stop-opacity=".24"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity=".08"/>
+    </linearGradient>
+    <linearGradient id="rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".02"/>
+      <stop offset=".5" stop-color="#8ff4e5" stop-opacity=".44"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity=".02"/>
+    </linearGradient>
+    <style>
+      .font { font-family: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Arial, sans-serif; }
+      .bg { fill: #000; }
+      .cell { fill: #070707; stroke: url(#edge); stroke-width: 1; }
+      .title { fill: #f2f5f8; }
+      .muted { fill: #737b85; }
+      .section { fill: #8b949f; font-size: 11px; font-weight: 680; letter-spacing: .9px; }
+      .tool { fill: #e4eaf0; font-size: 12px; font-weight: 660; }
+      .hint { fill: #88929d; font-size: 10.5px; font-weight: 520; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1648" class="bg"/>
+  <g class="font">
+    <text x="102" y="76" class="title" font-size="32" font-weight="700">iida-mcp tool matrix</text>
+    <text x="1498" y="76" class="muted" font-size="15" text-anchor="end">77 actual tools from TOOLS_SCHEMA</text>
+    <g transform="translate(102 124)">
+      <line x1="0" y1="0" x2="1380" y2="0" stroke="url(#rule)" stroke-width="1"/>
+      <text x="0" y="16" class="section">FILE / SESSION</text>
+    </g>
+    <g transform="translate(102 150)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">list_files</tspan><tspan x="168" dy="16" class="hint">List connected IDA instances</tspan></text>
+    </g>
+    <g transform="translate(450 150)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_info</tspan><tspan x="168" dy="16" class="hint">IDB info: filename, paths, arch, bits, entry,...</tspan></text>
+    </g>
+    <g transform="translate(798 150)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">read_file_bytes</tspan><tspan x="168" dy="16" class="hint">Read raw original file bytes at file offset</tspan></text>
+    </g>
+    <g transform="translate(1146 150)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">addr_to_fileoff</tspan><tspan x="168" dy="16" class="hint">Convert IDB address to raw file offset</tspan></text>
+    </g>
+    <g transform="translate(102 200)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">parse_pe</tspan><tspan x="168" dy="16" class="hint">Parse PE header from raw file</tspan></text>
+    </g>
+    <g transform="translate(450 200)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">parse_elf</tspan><tspan x="168" dy="16" class="hint">Parse ELF header from raw file</tspan></text>
+    </g>
+    <g transform="translate(798 200)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_cursor</tspan><tspan x="168" dy="16" class="hint">Get the current IDA UI cursor address</tspan></text>
+    </g>
+    <g transform="translate(1146 200)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_cursor_func</tspan><tspan x="168" dy="16" class="hint">Get the function under the current IDA UI cursor</tspan></text>
+    </g>
+    <g transform="translate(102 264)">
+      <line x1="0" y1="0" x2="1380" y2="0" stroke="url(#rule)" stroke-width="1"/>
+      <text x="0" y="16" class="section">FUNCTIONS / DECOMPILER</text>
+    </g>
+    <g transform="translate(102 290)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">list_functions</tspan><tspan x="168" dy="16" class="hint">List functions (paginated, filterable)</tspan></text>
+    </g>
+    <g transform="translate(450 290)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_func_info</tspan><tspan x="168" dy="16" class="hint">Get function info: name, start, end, size, frame</tspan></text>
+    </g>
+    <g transform="translate(798 290)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_func_by_name</tspan><tspan x="168" dy="16" class="hint">Find a function by exact name</tspan></text>
+    </g>
+    <g transform="translate(1146 290)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">decompile</tspan><tspan x="168" dy="16" class="hint">Decompile function to pseudocode</tspan></text>
+    </g>
+    <g transform="translate(102 340)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_func_type</tspan><tspan x="168" dy="16" class="hint">Get function prototype/type declaration</tspan></text>
+    </g>
+    <g transform="translate(450 340)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_callers</tspan><tspan x="168" dy="16" class="hint">List functions that call this address</tspan></text>
+    </g>
+    <g transform="translate(798 340)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_callees</tspan><tspan x="168" dy="16" class="hint">List functions called by this function</tspan></text>
+    </g>
+    <g transform="translate(1146 340)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_vars</tspan><tspan x="168" dy="16" class="hint">List decompiled function variables and argume...</tspan></text>
+    </g>
+    <g transform="translate(102 390)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">disassemble</tspan><tspan x="168" dy="16" class="hint">Disassemble N instructions at address</tspan></text>
+    </g>
+    <g transform="translate(102 454)">
+      <line x1="0" y1="0" x2="1380" y2="0" stroke="url(#rule)" stroke-width="1"/>
+      <text x="0" y="16" class="section">READ / DATABASE</text>
+    </g>
+    <g transform="translate(102 480)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">read_bytes</tspan><tspan x="168" dy="16" class="hint">Read bytes from IDB at address</tspan></text>
+    </g>
+    <g transform="translate(450 480)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">read_value</tspan><tspan x="168" dy="16" class="hint">Read an integer value from IDB memory. size i...</tspan></text>
+    </g>
+    <g transform="translate(798 480)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">read_string</tspan><tspan x="168" dy="16" class="hint">Read a string literal from IDB at address</tspan></text>
+    </g>
+    <g transform="translate(1146 480)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_head</tspan><tspan x="168" dy="16" class="hint">Get item head address containing the given ad...</tspan></text>
+    </g>
+    <g transform="translate(102 530)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_name</tspan><tspan x="168" dy="16" class="hint">Get name/label at address</tspan></text>
+    </g>
+    <g transform="translate(450 530)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">set_name</tspan><tspan x="168" dy="16" class="hint">Set name/label at address</tspan></text>
+    </g>
+    <g transform="translate(798 530)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_comment</tspan><tspan x="168" dy="16" class="hint">Get comment at address</tspan></text>
+    </g>
+    <g transform="translate(1146 530)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">set_comment</tspan><tspan x="168" dy="16" class="hint">Set comment at address</tspan></text>
+    </g>
+    <g transform="translate(102 580)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">search_names</tspan><tspan x="168" dy="16" class="hint">Search all names/labels by substring</tspan></text>
+    </g>
+    <g transform="translate(450 580)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">list_globals</tspan><tspan x="168" dy="16" class="hint">List named non-function globals (paginated, f...</tspan></text>
+    </g>
+    <g transform="translate(798 580)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">read_global</tspan><tspan x="168" dy="16" class="hint">Read a named global value</tspan></text>
+    </g>
+    <g transform="translate(102 644)">
+      <line x1="0" y1="0" x2="1380" y2="0" stroke="url(#rule)" stroke-width="1"/>
+      <text x="0" y="16" class="section">TYPE SYSTEM</text>
+    </g>
+    <g transform="translate(102 670)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_type</tspan><tspan x="168" dy="16" class="hint">Get type info at address</tspan></text>
+    </g>
+    <g transform="translate(450 670)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">set_type</tspan><tspan x="168" dy="16" class="hint">Apply C type declaration at address</tspan></text>
+    </g>
+    <g transform="translate(798 670)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">set_c_decls</tspan><tspan x="168" dy="16" class="hint">Parse one or more C typedef/struct/enum decla...</tspan></text>
+    </g>
+    <g transform="translate(1146 670)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">list_types</tspan><tspan x="168" dy="16" class="hint">List local types. kind may be struct, enum, t...</tspan></text>
+    </g>
+    <g transform="translate(102 720)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_type_decl</tspan><tspan x="168" dy="16" class="hint">Get a local type declaration plus member deta...</tspan></text>
+    </g>
+    <g transform="translate(450 720)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">read_struct</tspan><tspan x="168" dy="16" class="hint">Read memory as an IDA struct and parse fields...</tspan></text>
+    </g>
+    <g transform="translate(798 720)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">delete_type</tspan><tspan x="168" dy="16" class="hint">Delete a local type by name: struct, enum, ty...</tspan></text>
+    </g>
+    <g transform="translate(1146 720)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">find_enum_value</tspan><tspan x="168" dy="16" class="hint">Find enum constants matching a numeric value,...</tspan></text>
+    </g>
+    <g transform="translate(102 784)">
+      <line x1="0" y1="0" x2="1380" y2="0" stroke="url(#rule)" stroke-width="1"/>
+      <text x="0" y="16" class="section">ANALYSIS GRAPH / SEARCH</text>
+    </g>
+    <g transform="translate(102 810)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">list_segments</tspan><tspan x="168" dy="16" class="hint">List all segments/sections</tspan></text>
+    </g>
+    <g transform="translate(450 810)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_segment_info</tspan><tspan x="168" dy="16" class="hint">Get segment info for address</tspan></text>
+    </g>
+    <g transform="translate(798 810)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">xrefs_to</tspan><tspan x="168" dy="16" class="hint">Get all cross-references TO this address</tspan></text>
+    </g>
+    <g transform="translate(1146 810)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">xrefs_from</tspan><tspan x="168" dy="16" class="hint">Get all cross-references FROM this address</tspan></text>
+    </g>
+    <g transform="translate(102 860)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">xrefs_to_field</tspan><tspan x="168" dy="16" class="hint">Find xrefs to a struct field by struct and fi...</tspan></text>
+    </g>
+    <g transform="translate(450 860)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">search_bytes</tspan><tspan x="168" dy="16" class="hint">Search for byte pattern (e.g. &#x27;48 8B ?? 90&#x27;)</tspan></text>
+    </g>
+    <g transform="translate(798 860)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">search_strings</tspan><tspan x="168" dy="16" class="hint">Search string list by substring</tspan></text>
+    </g>
+    <g transform="translate(1146 860)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">search_imm</tspan><tspan x="168" dy="16" class="hint">Search little-endian encoded immediate/value...</tspan></text>
+    </g>
+    <g transform="translate(102 910)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">list_imports</tspan><tspan x="168" dy="16" class="hint">List import table</tspan></text>
+    </g>
+    <g transform="translate(450 910)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">list_exports</tspan><tspan x="168" dy="16" class="hint">List export table</tspan></text>
+    </g>
+    <g transform="translate(798 910)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">list_entries</tspan><tspan x="168" dy="16" class="hint">List entry points</tspan></text>
+    </g>
+    <g transform="translate(1146 910)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_cfg</tspan><tspan x="168" dy="16" class="hint">Get function control flow graph as basic bloc...</tspan></text>
+    </g>
+    <g transform="translate(102 974)">
+      <line x1="0" y1="0" x2="1380" y2="0" stroke="url(#rule)" stroke-width="1"/>
+      <text x="0" y="16" class="section">MUTATION</text>
+    </g>
+    <g transform="translate(102 1000)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">patch_bytes</tspan><tspan x="168" dy="16" class="hint">Patch bytes in IDB at address (modifies datab...</tspan></text>
+    </g>
+    <g transform="translate(450 1000)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">patch_asm</tspan><tspan x="168" dy="16" class="hint">Assemble one or more instructions with keysto...</tspan></text>
+    </g>
+    <g transform="translate(798 1000)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">patch_list</tspan><tspan x="168" dy="16" class="hint">List all patched bytes in IDB</tspan></text>
+    </g>
+    <g transform="translate(1146 1000)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">bookmark_list</tspan><tspan x="168" dy="16" class="hint">List all bookmarks</tspan></text>
+    </g>
+    <g transform="translate(102 1050)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">bookmark_set</tspan><tspan x="168" dy="16" class="hint">Set bookmark at address</tspan></text>
+    </g>
+    <g transform="translate(450 1050)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">bookmark_delete</tspan><tspan x="168" dy="16" class="hint">Delete bookmark at address</tspan></text>
+    </g>
+    <g transform="translate(798 1050)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">reanalyze</tspan><tspan x="168" dy="16" class="hint">Trigger IDA auto-analysis and wait</tspan></text>
+    </g>
+    <g transform="translate(1146 1050)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">create_function</tspan><tspan x="168" dy="16" class="hint">Create function at address</tspan></text>
+    </g>
+    <g transform="translate(102 1100)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">delete_function</tspan><tspan x="168" dy="16" class="hint">Delete function at address</tspan></text>
+    </g>
+    <g transform="translate(450 1100)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">make_data</tspan><tspan x="168" dy="16" class="hint">Define data at address</tspan></text>
+    </g>
+    <g transform="translate(798 1100)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">undefine</tspan><tspan x="168" dy="16" class="hint">Undefine (make unknown) bytes at address</tspan></text>
+    </g>
+    <g transform="translate(1146 1100)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">rename_var</tspan><tspan x="168" dy="16" class="hint">Rename a decompiled local variable</tspan></text>
+    </g>
+    <g transform="translate(102 1150)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">retype_var</tspan><tspan x="168" dy="16" class="hint">Change type of a decompiled variable</tspan></text>
+    </g>
+    <g transform="translate(102 1214)">
+      <line x1="0" y1="0" x2="1380" y2="0" stroke="url(#rule)" stroke-width="1"/>
+      <text x="0" y="16" class="section">STACK FRAME</text>
+    </g>
+    <g transform="translate(102 1240)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">list_frame_vars</tspan><tspan x="168" dy="16" class="hint">List a function&#x27;s stack frame variables: [off...</tspan></text>
+    </g>
+    <g transform="translate(450 1240)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">create_frame_var</tspan><tspan x="168" dy="16" class="hint">Create a stack frame variable at byte offset</tspan></text>
+    </g>
+    <g transform="translate(798 1240)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">delete_frame_var</tspan><tspan x="168" dy="16" class="hint">Delete a stack frame variable by name</tspan></text>
+    </g>
+    <g transform="translate(1146 1240)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">rename_frame_var</tspan><tspan x="168" dy="16" class="hint">Rename a stack frame variable</tspan></text>
+    </g>
+    <g transform="translate(102 1290)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">retype_frame_var</tspan><tspan x="168" dy="16" class="hint">Change a stack frame variable type</tspan></text>
+    </g>
+    <g transform="translate(102 1354)">
+      <line x1="0" y1="0" x2="1380" y2="0" stroke="url(#rule)" stroke-width="1"/>
+      <text x="0" y="16" class="section">BATCH / TREES</text>
+    </g>
+    <g transform="translate(102 1380)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">batch</tspan><tspan x="168" dy="16" class="hint">Batch execute multiple tools in one call</tspan></text>
+    </g>
+    <g transform="translate(450 1380)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">get_func_by_addr</tspan><tspan x="168" dy="16" class="hint">Find which function contains the given addres...</tspan></text>
+    </g>
+    <g transform="translate(798 1380)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">call_tree</tspan><tspan x="168" dy="16" class="hint">Build forward call tree (recursive callees fr...</tspan></text>
+    </g>
+    <g transform="translate(1146 1380)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">callers_tree</tspan><tspan x="168" dy="16" class="hint">Build reverse call tree (recursive callers of...</tspan></text>
+    </g>
+    <g transform="translate(102 1444)">
+      <line x1="0" y1="0" x2="1380" y2="0" stroke="url(#rule)" stroke-width="1"/>
+      <text x="0" y="16" class="section">KERNEL DRIVER / STANDALONE</text>
+    </g>
+    <g transform="translate(102 1470)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">kernel_read</tspan><tspan x="168" dy="16" class="hint">Read kernel memory via iida-mcp-ioctl driver...</tspan></text>
+    </g>
+    <g transform="translate(450 1470)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">kernel_modules</tspan><tspan x="168" dy="16" class="hint">List all loaded kernel modules via driver. Re...</tspan></text>
+    </g>
+    <g transform="translate(798 1470)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">kernel_module_base</tspan><tspan x="168" dy="16" class="hint">Get kernel module base address and size by na...</tspan></text>
+    </g>
+    <g transform="translate(1146 1470)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">calc</tspan><tspan x="168" dy="16" class="hint">Integer calculator. Evaluate arithmetic expre...</tspan></text>
+    </g>
+    <g transform="translate(102 1520)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">disasm_bytes</tspan><tspan x="168" dy="16" class="hint">Disassemble raw hex bytes (no IDB needed). Re...</tspan></text>
+    </g>
+    <g transform="translate(450 1520)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">kernel_read_values</tspan><tspan x="168" dy="16" class="hint">Read kernel memory and interpret as typed val...</tspan></text>
+    </g>
+    <g transform="translate(798 1520)" text-anchor="middle">
+      <rect x="0" y="0" width="336" height="42" rx="8" class="cell"/>
+      <text x="168" y="17"><tspan class="tool">ida_to_runtime</tspan><tspan x="168" dy="16" class="hint">Convert IDA virtual address to runtime kernel...</tspan></text>
+    </g>
+  </g>
+</svg>
+
+```
+
+`driver/build.bat`:
+
+```bat
+@echo off
+setlocal
+
+if not defined MSVC (
+    set VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe
+    if exist "%VSWHERE%" (
+        for /f "usebackq delims=" %%I in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set VS_INSTALL=%%I
+    )
+    if defined VS_INSTALL (
+        for /f "delims=" %%I in ('dir /b /ad /o-n "%VS_INSTALL%\VC\Tools\MSVC" 2^>nul') do (
+            if not defined MSVC set MSVC=%VS_INSTALL%\VC\Tools\MSVC\%%I
+        )
+    )
+)
+
+if not defined WDK set WDK=%ProgramFiles(x86)%\Windows Kits\10
+
+if not defined SDK_VER (
+    for /f "delims=" %%I in ('dir /b /ad /o-n "%WDK%\Include" 2^>nul') do (
+        if exist "%WDK%\Include\%%I\km" if not defined SDK_VER set SDK_VER=%%I
+    )
+)
+
+if not defined MSVC (
+    echo MSVC path not found. Install Visual Studio Build Tools or set MSVC before running this script.
+    exit /b 1
+)
+
+if not defined SDK_VER (
+    echo WDK SDK version not found. Install WDK or set WDK and SDK_VER before running this script.
+    exit /b 1
+)
+
+set CL_EXE=%MSVC%\bin\Hostx64\x64\cl.exe
+set LINK_EXE=%MSVC%\bin\Hostx64\x64\link.exe
+
+set INCLUDE=%WDK%\Include\%SDK_VER%\km;%WDK%\Include\%SDK_VER%\shared;%WDK%\Include\%SDK_VER%\ucrt;%MSVC%\include
+set LIB=%WDK%\Lib\%SDK_VER%\km\x64;%MSVC%\lib\x64
+
+echo [1/2] Compiling driver.c ...
+"%CL_EXE%" /nologo /c /kernel /GS- /Gz /W4 /WX /Ox /D_AMD64_ /DAMD64 /DNDEBUG /Zp8 /Zl /Fo"driver.obj" driver.c
+if errorlevel 1 (
+    echo Compile failed.
+    exit /b 1
+)
+
+echo [2/2] Linking iida-mcp-ioctl.sys ...
+"%LINK_EXE%" /nologo /DRIVER /SUBSYSTEM:NATIVE /ENTRY:DriverEntry /OUT:iida-mcp-ioctl.sys /RELEASE /OPT:REF /OPT:ICF /MERGE:.rdata=.text driver.obj ntoskrnl.lib hal.lib wdm.lib BufferOverflowK.lib ntstrsafe.lib
+if errorlevel 1 (
+    echo Link failed.
+    exit /b 1
+)
+
+echo Done: iida-mcp-ioctl.sys
+del /q driver.obj 2>nul
+endlocal
+
+```
+
+`driver/driver.c`:
+
+```c
+#include "driver.h"
+
+typedef struct _RTL_PROCESS_MODULE_INFORMATION {
+    HANDLE Section;
+    PVOID  MappedBase;
+    PVOID  ImageBase;
+    ULONG  ImageSize;
+    ULONG  Flags;
+    USHORT LoadOrderIndex;
+    USHORT InitOrderIndex;
+    USHORT LoadCount;
+    USHORT OffsetToFileName;
+    UCHAR  FullPathName[256];
+} RTL_PROCESS_MODULE_INFORMATION, *PRTL_PROCESS_MODULE_INFORMATION;
+
+typedef struct _RTL_PROCESS_MODULES {
+    ULONG NumberOfModules;
+    RTL_PROCESS_MODULE_INFORMATION Modules[1];
+} RTL_PROCESS_MODULES, *PRTL_PROCESS_MODULES;
+
+NTSYSAPI NTSTATUS NTAPI ZwQuerySystemInformation(
+    ULONG SystemInformationClass,
+    PVOID SystemInformation,
+    ULONG SystemInformationLength,
+    PULONG ReturnLength
+);
+
+#define SystemModuleInformation 11
+
+static UNICODE_STRING g_DeviceName = RTL_CONSTANT_STRING(L"\\Device\\iida-mcp-ioctl");
+static UNICODE_STRING g_SymLink   = RTL_CONSTANT_STRING(L"\\DosDevices\\iida-mcp-ioctl");
+static PDEVICE_OBJECT g_DeviceObject = NULL;
+
+static NTSTATUS HandleReadKernelMemory(PIRP Irp, PIO_STACK_LOCATION IoSp)
+{
+    READ_KERNEL_REQUEST req;
+    PVOID outBuf;
+    ULONG outLen;
+    PVOID srcAddr;
+    MM_COPY_ADDRESS src;
+    SIZE_T bytesRead = 0;
+    NTSTATUS status;
+
+    if (IoSp->Parameters.DeviceIoControl.InputBufferLength < sizeof(READ_KERNEL_REQUEST))
+        return STATUS_BUFFER_TOO_SMALL;
+
+    RtlCopyMemory(&req, Irp->AssociatedIrp.SystemBuffer, sizeof(req));
+    outBuf = Irp->AssociatedIrp.SystemBuffer;
+    outLen = IoSp->Parameters.DeviceIoControl.OutputBufferLength;
+
+    if (req.Size == 0 || req.Size > outLen)
+        return STATUS_BUFFER_TOO_SMALL;
+
+    if (req.Address < 0xFFFF000000000000ULL)
+        return STATUS_INVALID_PARAMETER;
+
+    srcAddr = (PVOID)req.Address;
+    src.VirtualAddress = srcAddr;
+    status = MmCopyMemory(outBuf, src, req.Size, MM_COPY_MEMORY_VIRTUAL, &bytesRead);
+
+    Irp->IoStatus.Information = bytesRead;
+    return status;
+}
+
+static NTSTATUS HandleGetModuleList(PIRP Irp, PIO_STACK_LOCATION IoSp)
+{
+    NTSTATUS status;
+    ULONG retLen = 0;
+    PRTL_PROCESS_MODULES mods = NULL;
+    PVOID outBuf;
+    ULONG outLen;
+    ULONG i, count, needed;
+    PMODULE_LIST_HEADER hdr;
+    PMODULE_ENTRY entries;
+
+    status = ZwQuerySystemInformation(SystemModuleInformation, NULL, 0, &retLen);
+    if (retLen == 0)
+        return STATUS_UNSUCCESSFUL;
+
+    mods = (PRTL_PROCESS_MODULES)ExAllocatePool2(POOL_FLAG_NON_PAGED, retLen, 'iiDM');
+    if (!mods)
+        return STATUS_INSUFFICIENT_RESOURCES;
+
+    status = ZwQuerySystemInformation(SystemModuleInformation, mods, retLen, &retLen);
+    if (!NT_SUCCESS(status)) {
+        ExFreePoolWithTag(mods, 'iiDM');
+        return status;
+    }
+
+    outBuf = Irp->AssociatedIrp.SystemBuffer;
+    outLen = IoSp->Parameters.DeviceIoControl.OutputBufferLength;
+    count = mods->NumberOfModules;
+    needed = sizeof(MODULE_LIST_HEADER) + count * sizeof(MODULE_ENTRY);
+
+    if (outLen < needed) {
+        if (outLen >= sizeof(MODULE_LIST_HEADER)) {
+            hdr = (PMODULE_LIST_HEADER)outBuf;
+            hdr->Count = 0;
+            Irp->IoStatus.Information = sizeof(MODULE_LIST_HEADER);
+            *(ULONG*)((PUCHAR)outBuf + sizeof(MODULE_LIST_HEADER) - sizeof(ULONG)) = needed;
+        }
+        ExFreePoolWithTag(mods, 'iiDM');
+        return STATUS_BUFFER_OVERFLOW;
+    }
+
+    hdr = (PMODULE_LIST_HEADER)outBuf;
+    hdr->Count = count;
+    entries = (PMODULE_ENTRY)((PUCHAR)outBuf + sizeof(MODULE_LIST_HEADER));
+
+    for (i = 0; i < count; i++) {
+        PRTL_PROCESS_MODULE_INFORMATION m = &mods->Modules[i];
+        MODULE_ENTRY *e = &entries[i];
+        RtlZeroMemory(e, sizeof(MODULE_ENTRY));
+        e->Base = (ULONG64)m->ImageBase;
+        e->Size = m->ImageSize;
+        RtlCopyMemory(e->Path, m->FullPathName, 255);
+        e->Path[255] = '\0';
+        RtlCopyMemory(e->Name, &m->FullPathName[m->OffsetToFileName], 63);
+        e->Name[63] = '\0';
+    }
+
+    Irp->IoStatus.Information = needed;
+    ExFreePoolWithTag(mods, 'iiDM');
+    return STATUS_SUCCESS;
+}
+
+static NTSTATUS HandleGetModuleBase(PIRP Irp, PIO_STACK_LOCATION IoSp)
+{
+    NTSTATUS status;
+    ULONG retLen = 0;
+    PRTL_PROCESS_MODULES mods = NULL;
+    PMODULE_BASE_REQUEST req;
+    PMODULE_BASE_RESPONSE resp;
+    ULONG i;
+    SIZE_T nameLen;
+
+    if (IoSp->Parameters.DeviceIoControl.InputBufferLength < sizeof(MODULE_BASE_REQUEST))
+        return STATUS_BUFFER_TOO_SMALL;
+    if (IoSp->Parameters.DeviceIoControl.OutputBufferLength < sizeof(MODULE_BASE_RESPONSE))
+        return STATUS_BUFFER_TOO_SMALL;
+
+    req = (PMODULE_BASE_REQUEST)Irp->AssociatedIrp.SystemBuffer;
+    req->Name[63] = '\0';
+
+    status = ZwQuerySystemInformation(SystemModuleInformation, NULL, 0, &retLen);
+    if (retLen == 0)
+        return STATUS_UNSUCCESSFUL;
+
+    mods = (PRTL_PROCESS_MODULES)ExAllocatePool2(POOL_FLAG_NON_PAGED, retLen, 'iiDM');
+    if (!mods)
+        return STATUS_INSUFFICIENT_RESOURCES;
+
+    status = ZwQuerySystemInformation(SystemModuleInformation, mods, retLen, &retLen);
+    if (!NT_SUCCESS(status)) {
+        ExFreePoolWithTag(mods, 'iiDM');
+        return status;
+    }
+
+    nameLen = strlen(req->Name);
+    for (i = 0; i < mods->NumberOfModules; i++) {
+        PRTL_PROCESS_MODULE_INFORMATION m = &mods->Modules[i];
+        const char *modName = (const char *)&m->FullPathName[m->OffsetToFileName];
+        if (_strnicmp(modName, req->Name, nameLen) == 0 && (modName[nameLen] == '\0' || modName[nameLen] == '.')) {
+            resp = (PMODULE_BASE_RESPONSE)Irp->AssociatedIrp.SystemBuffer;
+            resp->Base = (ULONG64)m->ImageBase;
+            resp->Size = m->ImageSize;
+            Irp->IoStatus.Information = sizeof(MODULE_BASE_RESPONSE);
+            ExFreePoolWithTag(mods, 'iiDM');
+            return STATUS_SUCCESS;
+        }
+    }
+
+    ExFreePoolWithTag(mods, 'iiDM');
+    return STATUS_NOT_FOUND;
+}
+
+static NTSTATUS DispatchDeviceControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
+{
+    PIO_STACK_LOCATION ioSp = IoGetCurrentIrpStackLocation(Irp);
+    NTSTATUS status = STATUS_INVALID_DEVICE_REQUEST;
+
+    UNREFERENCED_PARAMETER(DeviceObject);
+
+    Irp->IoStatus.Information = 0;
+
+    switch (ioSp->Parameters.DeviceIoControl.IoControlCode) {
+    case IOCTL_READ_KERNEL_MEMORY:
+        status = HandleReadKernelMemory(Irp, ioSp);
+        break;
+    case IOCTL_GET_MODULE_LIST:
+        status = HandleGetModuleList(Irp, ioSp);
+        break;
+    case IOCTL_GET_MODULE_BASE:
+        status = HandleGetModuleBase(Irp, ioSp);
+        break;
+    }
+
+    Irp->IoStatus.Status = status;
+    IoCompleteRequest(Irp, IO_NO_INCREMENT);
+    return status;
+}
+
+static NTSTATUS DispatchCreateClose(PDEVICE_OBJECT DeviceObject, PIRP Irp)
+{
+    UNREFERENCED_PARAMETER(DeviceObject);
+    Irp->IoStatus.Status = STATUS_SUCCESS;
+    Irp->IoStatus.Information = 0;
+    IoCompleteRequest(Irp, IO_NO_INCREMENT);
+    return STATUS_SUCCESS;
+}
+
+VOID DriverUnload(PDRIVER_OBJECT DriverObject)
+{
+    UNREFERENCED_PARAMETER(DriverObject);
+    IoDeleteSymbolicLink(&g_SymLink);
+    if (g_DeviceObject)
+        IoDeleteDevice(g_DeviceObject);
+}
+
+NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
+{
+    NTSTATUS status;
+
+    UNREFERENCED_PARAMETER(RegistryPath);
+
+    status = IoCreateDevice(DriverObject, 0, &g_DeviceName, IIDA_DEVICE_TYPE, 0, FALSE, &g_DeviceObject);
+    if (!NT_SUCCESS(status))
+        return status;
+
+    status = IoCreateSymbolicLink(&g_SymLink, &g_DeviceName);
+    if (!NT_SUCCESS(status)) {
+        IoDeleteDevice(g_DeviceObject);
+        g_DeviceObject = NULL;
+        return status;
+    }
+
+    DriverObject->MajorFunction[IRP_MJ_CREATE] = DispatchCreateClose;
+    DriverObject->MajorFunction[IRP_MJ_CLOSE]  = DispatchCreateClose;
+    DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = DispatchDeviceControl;
+    DriverObject->DriverUnload = DriverUnload;
+
+    return STATUS_SUCCESS;
+}
+
+```
+
+`driver/driver.h`:
+
+```h
+#pragma once
+#include <ntddk.h>
+
+#define IIDA_DEVICE_TYPE 0x8000
+
+#define IOCTL_READ_KERNEL_MEMORY  CTL_CODE(IIDA_DEVICE_TYPE, 0x800, METHOD_BUFFERED, FILE_READ_ACCESS)
+#define IOCTL_GET_MODULE_LIST     CTL_CODE(IIDA_DEVICE_TYPE, 0x801, METHOD_BUFFERED, FILE_READ_ACCESS)
+#define IOCTL_GET_MODULE_BASE     CTL_CODE(IIDA_DEVICE_TYPE, 0x802, METHOD_BUFFERED, FILE_READ_ACCESS)
+
+#pragma pack(push, 1)
+
+typedef struct _READ_KERNEL_REQUEST {
+    ULONG64 Address;
+    ULONG   Size;
+} READ_KERNEL_REQUEST, *PREAD_KERNEL_REQUEST;
+
+typedef struct _MODULE_ENTRY {
+    ULONG64 Base;
+    ULONG   Size;
+    CHAR    Name[64];
+    CHAR    Path[256];
+} MODULE_ENTRY, *PMODULE_ENTRY;
+
+typedef struct _MODULE_LIST_HEADER {
+    ULONG Count;
+} MODULE_LIST_HEADER, *PMODULE_LIST_HEADER;
+
+typedef struct _MODULE_BASE_REQUEST {
+    CHAR Name[64];
+} MODULE_BASE_REQUEST, *PMODULE_BASE_REQUEST;
+
+typedef struct _MODULE_BASE_RESPONSE {
+    ULONG64 Base;
+    ULONG   Size;
+} MODULE_BASE_RESPONSE, *PMODULE_BASE_RESPONSE;
+
+#pragma pack(pop)
+
+```
+
+`driver/helper.c`:
+
+```c
+#include <windows.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define IIDA_DEVICE_TYPE 0x8000
+#define IOCTL_READ_KERNEL_MEMORY  CTL_CODE(IIDA_DEVICE_TYPE, 0x800, METHOD_BUFFERED, FILE_READ_ACCESS)
+#define IOCTL_GET_MODULE_LIST     CTL_CODE(IIDA_DEVICE_TYPE, 0x801, METHOD_BUFFERED, FILE_READ_ACCESS)
+#define IOCTL_GET_MODULE_BASE     CTL_CODE(IIDA_DEVICE_TYPE, 0x802, METHOD_BUFFERED, FILE_READ_ACCESS)
+
+#pragma pack(push, 1)
+typedef struct _READ_KERNEL_REQUEST {
+    uint64_t Address;
+    uint32_t Size;
+} READ_KERNEL_REQUEST;
+
+typedef struct _MODULE_ENTRY {
+    uint64_t Base;
+    uint32_t Size;
+    char Name[64];
+    char Path[256];
+} MODULE_ENTRY;
+
+typedef struct _MODULE_LIST_HEADER {
+    uint32_t Count;
+} MODULE_LIST_HEADER;
+
+typedef struct _MODULE_BASE_REQUEST {
+    char Name[64];
+} MODULE_BASE_REQUEST;
+
+typedef struct _MODULE_BASE_RESPONSE {
+    uint64_t Base;
+    uint32_t Size;
+} MODULE_BASE_RESPONSE;
+#pragma pack(pop)
+
+static void print_error(const char *msg)
+{
+    printf("{\"e\":\"%s\"}", msg);
+}
+
+static void print_win_error(const char *prefix)
+{
+    printf("{\"e\":\"%s: 0x%lx\"}", prefix, GetLastError());
+}
+
+static HANDLE open_device(void)
+{
+    HANDLE h = CreateFileW(L"\\\\.\\iida-mcp-ioctl", GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
+    if (h == INVALID_HANDLE_VALUE)
+        return NULL;
+    return h;
+}
+
+static void json_string(const char *s)
+{
+    putchar('"');
+    while (*s) {
+        unsigned char c = (unsigned char)*s++;
+        if (c == '\\' || c == '"') {
+            putchar('\\');
+            putchar(c);
+        } else if (c >= 0x20) {
+            putchar(c);
+        }
+    }
+    putchar('"');
+}
+
+static int cmd_read(int argc, char **argv)
+{
+    HANDLE h;
+    READ_KERNEL_REQUEST req;
+    unsigned char *out;
+    DWORD ret = 0;
+    DWORD i;
+    BOOL ok;
+
+    if (argc < 4) {
+        print_error("usage: read <hex_addr> <size>");
+        return 2;
+    }
+
+    req.Address = _strtoui64(argv[2], NULL, 16);
+    req.Size = strtoul(argv[3], NULL, 0);
+    if (req.Size == 0 || req.Size > 65536) {
+        print_error("bad size");
+        return 2;
+    }
+
+    h = open_device();
+    if (!h) {
+        print_error("kernel driver iida-mcp-ioctl not loaded");
+        return 3;
+    }
+
+    out = (unsigned char *)calloc(req.Size, 1);
+    if (!out) {
+        CloseHandle(h);
+        print_error("out of memory");
+        return 4;
+    }
+
+    ok = DeviceIoControl(h, IOCTL_READ_KERNEL_MEMORY, &req, sizeof(req), out, req.Size, &ret, NULL);
+    if (!ok) {
+        free(out);
+        CloseHandle(h);
+        print_win_error("read failed");
+        return 5;
+    }
+
+    putchar('"');
+    for (i = 0; i < ret; i++)
+        printf("%02x", out[i]);
+    putchar('"');
+
+    free(out);
+    CloseHandle(h);
+    return 0;
+}
+
+static int cmd_modules(void)
+{
+    HANDLE h;
+    unsigned char *out;
+    DWORD outsz = sizeof(MODULE_LIST_HEADER) + sizeof(MODULE_ENTRY) * 2048;
+    DWORD ret = 0;
+    BOOL ok;
+    MODULE_LIST_HEADER *hdr;
+    MODULE_ENTRY *mods;
+    DWORD i;
+
+    h = open_device();
+    if (!h) {
+        print_error("kernel driver iida-mcp-ioctl not loaded");
+        return 3;
+    }
+
+    out = (unsigned char *)calloc(outsz, 1);
+    if (!out) {
+        CloseHandle(h);
+        print_error("out of memory");
+        return 4;
+    }
+
+    ok = DeviceIoControl(h, IOCTL_GET_MODULE_LIST, NULL, 0, out, outsz, &ret, NULL);
+    if (!ok) {
+        free(out);
+        CloseHandle(h);
+        print_win_error("module list failed");
+        return 5;
+    }
+
+    if (ret < sizeof(MODULE_LIST_HEADER)) {
+        free(out);
+        CloseHandle(h);
+        print_error("truncated response");
+        return 6;
+    }
+
+    hdr = (MODULE_LIST_HEADER *)out;
+    mods = (MODULE_ENTRY *)(out + sizeof(MODULE_LIST_HEADER));
+    putchar('[');
+    for (i = 0; i < hdr->Count && sizeof(MODULE_LIST_HEADER) + (i + 1) * sizeof(MODULE_ENTRY) <= ret; i++) {
+        if (i)
+            putchar(',');
+        printf("[\"%llx\",%lu,", (unsigned long long)mods[i].Base, (unsigned long)mods[i].Size);
+        json_string(mods[i].Name);
+        putchar(',');
+        json_string(mods[i].Path);
+        putchar(']');
+    }
+    putchar(']');
+
+    free(out);
+    CloseHandle(h);
+    return 0;
+}
+
+static int cmd_base(int argc, char **argv)
+{
+    HANDLE h;
+    MODULE_BASE_REQUEST req;
+    MODULE_BASE_RESPONSE resp;
+    DWORD ret = 0;
+    BOOL ok;
+
+    if (argc < 3) {
+        print_error("usage: base <module>");
+        return 2;
+    }
+
+    memset(&req, 0, sizeof(req));
+    strncpy(req.Name, argv[2], sizeof(req.Name) - 1);
+
+    h = open_device();
+    if (!h) {
+        print_error("kernel driver iida-mcp-ioctl not loaded");
+        return 3;
+    }
+
+    memset(&resp, 0, sizeof(resp));
+    ok = DeviceIoControl(h, IOCTL_GET_MODULE_BASE, &req, sizeof(req), &resp, sizeof(resp), &ret, NULL);
+    if (!ok) {
+        CloseHandle(h);
+        print_win_error("module base failed");
+        return 5;
+    }
+
+    printf("[\"%llx\",%lu]", (unsigned long long)resp.Base, (unsigned long)resp.Size);
+    CloseHandle(h);
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+    if (argc < 2) {
+        print_error("usage: read/modules/base");
+        return 2;
+    }
+    if (strcmp(argv[1], "read") == 0)
+        return cmd_read(argc, argv);
+    if (strcmp(argv[1], "modules") == 0)
+        return cmd_modules();
+    if (strcmp(argv[1], "base") == 0)
+        return cmd_base(argc, argv);
+    print_error("unknown command");
+    return 2;
+}
+
+```
+
+`iida.py`:
+
+```py
+"""iida-mcp plugin - Exposes IDA's static analysis capabilities via MCP protocol.
+Supports multiple IDA instances auto-networking on port 13897.
+"""
+import os
+import sys
+import hashlib
+import threading
+
+import idaapi
+import ida_nalt
+import ida_ida
+import ida_idaapi
+import ida_kernwin
+import ida_funcs
+import ida_segment
+
+# Ensure our package is importable
+PLUGIN_DIR = os.path.dirname(os.path.abspath(__file__))
+if PLUGIN_DIR not in sys.path:
+    sys.path.insert(0, PLUGIN_DIR)
+
+
+class _SuppressDialogs(ida_kernwin.UI_Hooks):
+    """Auto-dismiss all modal dialogs/warnings to prevent MCP from blocking.
+    Always answers YES/OK to any question IDA asks."""
+
+    def ask_yn(self, deflt, fmt):
+        return 1  # ASKBTN_YES
+
+    def ask_buttons(self, yes_text, no_text, cancel_text, deflt, fmt):
+        return 1  # first button (YES/OK)
+
+
+_dialog_suppressor = None
+
+
+def _reload_core_modules():
+    """Reload iida_core modules so plugin restart picks up local edits."""
+    import importlib
+
+    for name in (
+        'iida_core.thread_safe',
+        'iida_core.protocol',
+        'iida_core.registry',
+        'iida_core.cache',
+        'iida_core.kdriver',
+        'iida_core.router',
+        'iida_core.server',
+        'iida_core.worker',
+        'iida_core.tools',
+    ):
+        mod = sys.modules.get(name)
+        if not mod:
+            continue
+        try:
+            importlib.reload(mod)
+        except Exception as ex:
+            ida_kernwin.msg(f"[iida-mcp] reload {name} failed: {ex}\n")
+
+
+def _get_file_id():
+    """Generate stable 8-char file_id from IDB path (the .i64/.idb file, truly unique)."""
+    idb_path = idaapi.get_path(idaapi.PATH_TYPE_IDB)
+    h = hashlib.sha256(idb_path.encode('utf-8')).hexdigest()[:8]
+    return h
+
+
+def _get_file_info():
+    """Collect current file metadata."""
+    is64 = ida_ida.inf_is_64bit()
+    is32 = ida_ida.inf_is_32bit_exactly() if hasattr(ida_ida, 'inf_is_32bit_exactly') else not is64
+    return {
+        'fid': _get_file_id(),
+        'name': os.path.basename(ida_nalt.get_input_file_path()),
+        'arch': ida_ida.inf_get_procname().strip(),
+        'bits': 64 if is64 else (32 if is32 else 16),
+        'path': ida_nalt.get_input_file_path(),
+        'idb': idaapi.get_path(idaapi.PATH_TYPE_IDB)
+    }
+
+
+class IdaMcpPlugin(idaapi.plugin_t):
+    flags = idaapi.PLUGIN_MULTI
+    comment = "iida-mcp"
+    help = ""
+    wanted_name = "iida-mcp"
+    wanted_hotkey = "Alt-Shift-I"
+
+    def init(self):
+        return IdaMcpPlugMod()
+
+    def term(self):
+        pass
+
+    def run(self, arg):
+        pass
+
+
+class IdaMcpPlugMod(idaapi.plugmod_t):
+    def __init__(self):
+        super().__init__()
+        self._server = None
+        self._worker = None
+        self._started = False
+
+    def run(self, arg):
+        """Called when user clicks iida-mcp in Edit>Plugins."""
+        if self._started:
+            ida_kernwin.msg("[iida-mcp] Stopping current instance...\n")
+            self._cleanup()
+            ida_kernwin.msg("[iida-mcp] Stopped\n")
+            return
+        self._started = True
+
+        global _dialog_suppressor
+        if _dialog_suppressor is None:
+            _dialog_suppressor = _SuppressDialogs()
+            _dialog_suppressor.hook()
+
+        ida_kernwin.msg("[iida-mcp] Activating...\n")
+        threading.Thread(target=self._init_network, daemon=True).start()
+
+    def _show_status(self):
+        if self._server:
+            from iida_core.server import MCP_PORT
+            entries = self._server.registry.list_all()
+            names = ', '.join(e.name for e in entries)
+            ida_kernwin.msg(f"[iida-mcp] Master :{MCP_PORT} | files: {names}\n")
+        elif self._worker:
+            if self._worker.is_promoted():
+                from iida_core.server import MCP_PORT
+                srv = self._worker.get_master_server()
+                entries = srv.registry.list_all() if srv else []
+                names = ', '.join(e.name for e in entries)
+                ida_kernwin.msg(f"[iida-mcp] Promoted Master :{MCP_PORT} | files: {names}\n")
+            else:
+                ida_kernwin.msg("[iida-mcp] Worker connected\n")
+        else:
+            ida_kernwin.msg("[iida-mcp] Not connected\n")
+
+    def _init_network(self):
+        _reload_core_modules()
+
+        from iida_core.server import McpServer, try_bind_master, try_election_lock, MCP_PORT
+        from iida_core.worker import Worker
+        from iida_core.registry import FileEntry
+        from iida_core import tools
+        from iida_core.thread_safe import read as ida_read
+        from iida_core.cache import get_cache
+
+        file_info = ida_read(_get_file_info)
+
+        # Pre-build caches (strings, functions, names, imports, exports, segments)
+        cache = get_cache()
+        cache.ensure_built()
+
+        election_lock = try_election_lock()
+        become_master = election_lock is not None and try_bind_master()
+        try:
+            if become_master:
+                self._server = McpServer(tools, tools.execute_tool, election_lock=election_lock)
+                entry = FileEntry(
+                    fid=file_info['fid'],
+                    name=file_info['name'],
+                    arch=file_info['arch'],
+                    bits=file_info['bits'],
+                    path=file_info['path'],
+                    pid=os.getpid(),
+                    conn=None,
+                    local=True
+                )
+                self._server.registry.register(entry)
+                self._server.start()
+                election_lock = None
+        finally:
+            if election_lock:
+                try:
+                    election_lock.close()
+                except:
+                    pass
+
+        if become_master:
+            bt = cache.get_build_time()
+            ida_read(lambda: ida_kernwin.msg(
+                f"[iida-mcp] Master on :{MCP_PORT} | {file_info['name']} ({file_info['fid']}) | cache {bt:.1f}s\n"
+            ))
+        else:
+            def on_promoted(worker):
+                srv = worker.get_master_server()
+                entries = srv.registry.list_all() if srv else []
+                names = ', '.join(e.name for e in entries)
+                ida_read(lambda: ida_kernwin.msg(
+                    f"[iida-mcp] Promoted to Master :{MCP_PORT} | files: {names}\n"
+                ))
+
+            self._worker = Worker(file_info, tools.execute_tool, on_promoted=on_promoted)
+            self._worker.start()
+            bt = cache.get_build_time()
+            ida_read(lambda: ida_kernwin.msg(
+                f"[iida-mcp] Worker | {file_info['name']} ({file_info['fid']}) | cache {bt:.1f}s\n"
+            ))
+
+    def __del__(self):
+        self._cleanup()
+
+    def _cleanup(self):
+        if self._server:
+            self._server.stop()
+            self._server = None
+        if self._worker:
+            try:
+                srv = self._worker.get_master_server()
+                if srv:
+                    srv.stop()
+            except:
+                pass
+            self._worker.stop()
+            self._worker = None
+        self._started = False
+
+
+def PLUGIN_ENTRY():
+    return IdaMcpPlugin()
+
+```
+
+`iida_core/__init__.py`:
+
+```py
+"""iida-mcp core - Zero-dependency MCP server for IDA Pro 9"""
+__version__ = "0.4.0"
+
+```
+
+`iida_core/cache.py`:
+
+```py
+"""Pre-built caches for expensive IDA queries.
+Built once at activation in a SINGLE execute_sync call, invalidated on IDB changes.
+Uses ida_strlist to read IDB's pre-built string list instead of re-scanning.
+"""
+import threading
+import time
+
+import idautils
+import ida_funcs
+import ida_bytes
+import ida_nalt
+import ida_segment
+import ida_name
+import ida_entry
+import ida_strlist
+
+from .thread_safe import read
+
+
+class IdbCache:
+    """Holds pre-built indexes for a single IDA instance."""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._strings = None         # [(ea, string, strtype), ...]
+        self._functions = None       # [(ea, name, size), ...]
+        self._names = None           # [(ea, name), ...]
+        self._imports = None         # [(module, name, ea, ord), ...]
+        self._exports = None         # [(ea, name, ord), ...]
+        self._segments = None        # [(start, end, name, cls, perm, bitness), ...]
+        self._build_time = 0
+        self._dirty = True
+
+    def invalidate(self):
+        with self._lock:
+            self._dirty = True
+
+    def ensure_built(self):
+        """Build all caches if dirty. Single execute_sync call for all data."""
+        with self._lock:
+            if not self._dirty:
+                return
+            self._dirty = False
+
+        t0 = time.time()
+
+        def _build_all():
+            result = {}
+
+            # Strings: use ida_strlist (reads IDB's stored string list, no re-scan)
+            strs = []
+            qty = ida_strlist.get_strlist_qty()
+            si = ida_strlist.string_info_t()
+            for i in range(qty):
+                if ida_strlist.get_strlist_item(si, i):
+                    s = ida_bytes.get_strlit_contents(si.ea, si.length, si.type)
+                    if s is not None:
+                        try:
+                            sv = s.decode('utf-8', errors='replace')
+                        except:
+                            sv = s.hex()
+                        strs.append((si.ea, sv, si.type))
+            result['strings'] = strs
+
+            # Functions
+            #
+            # Do not use idautils.Functions() here. On large IDA 9.x databases it
+            # can enumerate fewer starts than ida_funcs.get_func_qty() reports,
+            # which makes paged list_functions exports incomplete. getn_func()
+            # walks IDA's function array directly and stays consistent with
+            # get_func_qty().
+            funcs = []
+            for i in range(ida_funcs.get_func_qty()):
+                func = ida_funcs.getn_func(i)
+                if not func:
+                    continue
+                ea = func.start_ea
+                name = ida_funcs.get_func_name(ea)
+                sz = func.size()
+                funcs.append((ea, name, sz))
+            result['functions'] = funcs
+
+            # Names
+            result['names'] = list(idautils.Names())
+
+            # Imports
+            imps = []
+            nimps = ida_nalt.get_import_module_qty()
+            for i in range(nimps):
+                mod_name = ida_nalt.get_import_module_name(i)
+                def _cb(ea, name, ordinal, mod=mod_name):
+                    imps.append((mod, name or '', ea, ordinal))
+                    return True
+                ida_nalt.enum_import_names(i, _cb)
+            result['imports'] = imps
+
+            # Exports
+            exps = []
+            eqty = ida_entry.get_entry_qty()
+            for i in range(eqty):
+                ordinal = ida_entry.get_entry_ordinal(i)
+                ea = ida_entry.get_entry(ordinal)
+                name = ida_entry.get_entry_name(ordinal) or ''
+                exps.append((ea, name, ordinal))
+            result['exports'] = exps
+
+            # Segments
+            segs = []
+            for i in range(ida_segment.get_segm_qty()):
+                seg = ida_segment.getnseg(i)
+                name = ida_segment.get_segm_name(seg)
+                cls = ida_segment.get_segm_class(seg)
+                segs.append((seg.start_ea, seg.end_ea, name, cls, seg.perm, seg.bitness))
+            result['segments'] = segs
+
+            return result
+
+        data = read(_build_all)
+        self._strings = data['strings']
+        self._functions = data['functions']
+        self._names = data['names']
+        self._imports = data['imports']
+        self._exports = data['exports']
+        self._segments = data['segments']
+        self._build_time = time.time() - t0
+
+    # --- Query methods (pure in-memory, zero IDA API calls) ---
+
+    def get_strings(self, q='', off=0, n=100):
+        data = self._strings or []
+        if q:
+            ql = q.lower()
+            data = [s for s in data if ql in s[1].lower()]
+        return data[off:off + n]
+
+    def get_functions(self, q='', off=0, n=100):
+        data = self._functions or []
+        if q:
+            ql = q.lower()
+            data = [f for f in data if ql in f[1].lower()]
+        return data[off:off + n]
+
+    def get_names(self, q='', n=50):
+        data = self._names or []
+        if q:
+            ql = q.lower()
+            results = []
+            for ea, name in data:
+                if ql in name.lower():
+                    results.append((ea, name))
+                    if len(results) >= n:
+                        break
+            return results
+        return data[:n]
+
+    def get_imports(self):
+        return self._imports or []
+
+    def get_exports(self):
+        return self._exports or []
+
+    def get_segments(self):
+        return self._segments or []
+
+    def get_build_time(self):
+        return self._build_time
+
+
+# Global cache instance per IDA process
+_cache = IdbCache()
+
+
+def get_cache():
+    return _cache
+
+```
+
+`iida_core/kdriver.py`:
+
+```py
+"""Out-of-process client for iida-mcp-ioctl kernel driver communication."""
+import json
+import os
+import subprocess
+
+_DRIVER_NOT_LOADED = {'e': 'kernel driver iida-mcp-ioctl not loaded'}
+
+
+def _helper_path():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), 'iida-kdrv-helper.exe')
+
+
+def _run_helper(args):
+    helper = _helper_path()
+    if not os.path.exists(helper):
+        return {'e': f'kernel helper missing: {helper}'}
+    try:
+        proc = subprocess.run(
+            [helper] + args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=3.0,
+            creationflags=subprocess.CREATE_NO_WINDOW
+        )
+    except subprocess.TimeoutExpired:
+        return {'e': 'kernel helper timeout'}
+    except OSError as e:
+        return {'e': f'kernel helper launch failed: {e}'}
+    except Exception as e:
+        return {'e': f'kernel helper exception: {e}'}
+
+    out = proc.stdout.decode('utf-8', errors='replace').strip()
+    if not out:
+        err = proc.stderr.decode('utf-8', errors='replace').strip()
+        return {'e': f'kernel helper exited {proc.returncode}: {err}'}
+    try:
+        return json.loads(out)
+    except Exception:
+        return {'e': f'bad helper output: {out[:200]}'}
+
+
+def read_kernel_memory(address, size):
+    if size <= 0:
+        return {'e': 'size must be > 0'}
+    if size > 65536:
+        return {'e': 'size too large (max 65536)'}
+    result = _run_helper(['read', format(address, 'x'), str(size)])
+    if isinstance(result, dict):
+        if result.get('e') == 'kernel driver iida-mcp-ioctl not loaded':
+            return _DRIVER_NOT_LOADED
+        return result
+    if not result:
+        return {'e': f'read returned 0 bytes at {address:x}'}
+    return result
+
+
+def get_module_list():
+    return _run_helper(['modules'])
+
+
+def get_module_base(name):
+    return _run_helper(['base', name])
+
+```
+
+`iida_core/protocol.py`:
+
+```py
+"""Internal TCP protocol for Master <-> Worker communication.
+Wire format: [4-byte big-endian length][JSON payload]
+"""
+import json
+import struct
+import socket
+
+HEADER_SIZE = 4
+
+
+def send_msg(sock, obj):
+    """Send a JSON-serializable object over socket."""
+    data = json.dumps(obj, separators=(',', ':')).encode('utf-8')
+    sock.sendall(struct.pack('>I', len(data)) + data)
+
+
+def recv_msg(sock):
+    """Receive a complete message from socket. Returns parsed object or None on disconnect."""
+    hdr = _recv_exact(sock, HEADER_SIZE)
+    if not hdr:
+        return None
+    length = struct.unpack('>I', hdr)[0]
+    if length == 0:
+        return {}
+    data = _recv_exact(sock, length)
+    if not data:
+        return None
+    return json.loads(data)
+
+
+def _recv_exact(sock, n):
+    """Receive exactly n bytes."""
+    buf = bytearray()
+    while len(buf) < n:
+        chunk = sock.recv(n - len(buf))
+        if not chunk:
+            return None
+        buf.extend(chunk)
+    return bytes(buf)
+
+
+# Message types
+MSG_REGISTER = 'R'
+MSG_UNREGISTER = 'U'
+MSG_CALL = 'C'
+MSG_RESULT = 'S'
+MSG_PROMOTE = 'P'
+MSG_PROMOTED = 'D'
+MSG_HEARTBEAT = 'H'
+MSG_ACK = 'A'
+
+```
+
+`iida_core/registry.py`:
+
+```py
+"""Instance registry - maps file_id to connection/handler."""
+import threading
+
+
+class FileEntry:
+    __slots__ = ('fid', 'name', 'arch', 'bits', 'path', 'pid', 'conn', 'local', 'call_port')
+
+    def __init__(self, fid, name, arch, bits, path, pid, conn=None, local=False, call_port=0):
+        self.fid = fid
+        self.name = name
+        self.arch = arch
+        self.bits = bits
+        self.path = path
+        self.pid = pid
+        self.conn = conn  # control socket for remote workers
+        self.local = local
+        self.call_port = call_port  # worker's dedicated call-handling port
+
+
+class Registry:
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._files = {}  # fid -> FileEntry
+        self._conns = {}  # socket -> [fid, ...]
+
+    def register(self, entry):
+        with self._lock:
+            self._files[entry.fid] = entry
+            if entry.conn:
+                self._conns.setdefault(id(entry.conn), []).append(entry.fid)
+
+    def unregister(self, fid):
+        with self._lock:
+            entry = self._files.pop(fid, None)
+            if entry and entry.conn:
+                cl = self._conns.get(id(entry.conn), [])
+                if fid in cl:
+                    cl.remove(fid)
+            return entry
+
+    def unregister_conn(self, conn):
+        """Remove all files associated with a connection."""
+        with self._lock:
+            fids = self._conns.pop(id(conn), [])
+            for fid in fids:
+                self._files.pop(fid, None)
+            return fids
+
+    def get(self, fid):
+        with self._lock:
+            return self._files.get(fid)
+
+    def list_all(self):
+        with self._lock:
+            return list(self._files.values())
+
+    def has(self, fid):
+        with self._lock:
+            return fid in self._files
+
+    def count(self):
+        with self._lock:
+            return len(self._files)
+
+    def all_conns(self):
+        """Return unique remote connections."""
+        with self._lock:
+            seen = set()
+            conns = []
+            for e in self._files.values():
+                if e.conn and id(e.conn) not in seen:
+                    seen.add(id(e.conn))
+                    conns.append(e.conn)
+            return conns
+
+    def remote_entries(self):
+        with self._lock:
+            return [e for e in self._files.values() if not e.local]
+
+```
+
+`iida_core/router.py`:
+
+```py
+"""Request router - dispatches tool calls to the correct IDA instance."""
+import socket
+from . import protocol
+
+_NO_FILE_TOOLS = frozenset(['kernel_read', 'kernel_modules', 'kernel_module_base', 'kernel_read_values', 'calc', 'disasm_bytes'])
+
+
+class Router:
+    def __init__(self, registry, local_handler):
+        self.registry = registry
+        self.local_handler = local_handler
+
+    def dispatch(self, tool, args):
+        fid = args.get('f')
+
+        if tool == 'list_files':
+            return self._list_files()
+
+        if tool == 'batch':
+            return self._batch(args)
+
+        if tool in _NO_FILE_TOOLS:
+            return self.local_handler(tool, args)
+
+        if not fid:
+            entries = self.registry.list_all()
+            if len(entries) == 1:
+                fid = entries[0].fid
+                args['f'] = fid
+            else:
+                return {'e': 'f required'}
+
+        entry = self.registry.get(fid)
+        if not entry:
+            return {'e': 'unknown f'}
+
+        if entry.local:
+            return self.local_handler(tool, args)
+        else:
+            return self._call_remote(entry, tool, args)
+
+    def _list_files(self):
+        entries = self.registry.list_all()
+        return [[e.fid, e.name, e.arch, e.bits, e.path] for e in entries]
+
+    def _batch(self, args):
+        ops = args.get('ops', [])
+        results = []
+        for op in ops:
+            t = op[0]
+            a = op[1] if len(op) > 1 else {}
+            if 'f' not in a and 'f' in args:
+                a['f'] = args['f']
+            try:
+                results.append(self.dispatch(t, a))
+            except Exception as ex:
+                results.append({'e': str(ex)})
+        return results
+
+    def _call_remote(self, entry, tool, args):
+        worker_port = entry.call_port
+        if not worker_port:
+            return {'e': 'worker has no call port'}
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(60.0)
+            sock.connect(('127.0.0.1', worker_port))
+            protocol.send_msg(sock, {
+                't': protocol.MSG_CALL,
+                'tool': tool,
+                'args': args
+            })
+            resp = protocol.recv_msg(sock)
+            sock.close()
+            if resp is None:
+                return {'e': 'worker no response'}
+            return resp.get('r', {'e': 'no result'})
+        except Exception as ex:
+            return {'e': str(ex)}
+
+```
+
+`iida_core/server.py`:
+
+```py
+"""Lightweight HTTP MCP server - implements MCP JSON-RPC over Streamable HTTP."""
+import json
+import threading
+import socket
+import time
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from socketserver import ThreadingMixIn
+from urllib.parse import urlparse
+
+from . import protocol
+from .registry import Registry, FileEntry
+from .router import Router
+
+
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    """Handle each request in a new thread to avoid blocking."""
+    daemon_threads = True
+    allow_reuse_address = True
+
+MCP_BIND_HOST = '0.0.0.0'
+MCP_PORT = 13897
+INTERNAL_PORT = 13898  # internal worker connections
+ELECTION_PORT = 13899
+
+SERVER_INFO = {
+    "name": "iida-mcp",
+    "version": "0.4.0"
+}
+
+CAPABILITIES = {
+    "tools": {},
+    "resources": {}
+}
+
+
+class McpHandler(BaseHTTPRequestHandler):
+    """Handle MCP Streamable HTTP requests."""
+
+    def log_message(self, format, *args):
+        pass  # silence logs
+
+    def do_POST(self):
+        if self.path != '/mcp':
+            self._err(404, 'not found')
+            return
+
+        length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(length) if length else b''
+
+        try:
+            req = json.loads(body) if body else {}
+        except json.JSONDecodeError:
+            self._jsonrpc_error(None, -32700, 'parse error')
+            return
+
+        method = req.get('method', '')
+        rid = req.get('id')
+        params = req.get('params', {})
+
+        if method == 'initialize':
+            self._jsonrpc_ok(rid, {
+                "protocolVersion": "2025-03-26",
+                "serverInfo": SERVER_INFO,
+                "capabilities": CAPABILITIES
+            })
+        elif method.startswith('notifications/'):
+            # Notifications have no id, return 202 Accepted
+            self._send(202, b'', 'application/json')
+        elif method == 'tools/list':
+            tools = self.server.mcp_server.get_tools_list()
+            self._jsonrpc_ok(rid, {"tools": tools})
+        elif method == 'tools/call':
+            name = params.get('name', '')
+            args = params.get('arguments', {})
+            try:
+                result = self.server.mcp_server.handle_tool_call(name, args)
+                self._jsonrpc_ok(rid, {
+                    "content": [{"type": "text", "text": json.dumps(result, separators=(',', ':'))}]
+                })
+            except Exception as e:
+                self._jsonrpc_ok(rid, {
+                    "content": [{"type": "text", "text": json.dumps({"e": str(e)}, separators=(',', ':'))}]
+                })
+        elif method == 'resources/list':
+            resources = self.server.mcp_server.get_resources_list()
+            self._jsonrpc_ok(rid, {"resources": resources})
+        elif method == 'resources/templates/list':
+            templates = self.server.mcp_server.get_resource_templates_list()
+            self._jsonrpc_ok(rid, {"resourceTemplates": templates})
+        elif method == 'resources/read':
+            uri = params.get('uri', '')
+            try:
+                content = self.server.mcp_server.read_resource(uri)
+                self._jsonrpc_ok(rid, {"contents": [content]})
+            except Exception as e:
+                self._jsonrpc_error(rid, -32602, str(e))
+        elif method == 'prompts/list':
+            self._jsonrpc_ok(rid, {"prompts": []})
+        elif method == 'ping':
+            self._jsonrpc_ok(rid, {})
+        else:
+            self._jsonrpc_error(rid, -32601, 'method not found')
+
+    def do_GET(self):
+        if self.path == '/mcp':
+            self._send(405, b'use POST', 'text/plain')
+        else:
+            self._err(404, 'not found')
+
+    def do_DELETE(self):
+        self._send(200, b'', 'text/plain')
+
+    def _jsonrpc_ok(self, rid, result):
+        resp = {"jsonrpc": "2.0", "id": rid, "result": result}
+        self._send_json(resp)
+
+    def _jsonrpc_error(self, rid, code, msg):
+        resp = {"jsonrpc": "2.0", "id": rid, "error": {"code": code, "message": msg}}
+        self._send_json(resp)
+
+    def _send_json(self, obj):
+        data = json.dumps(obj, separators=(',', ':')).encode('utf-8')
+        self._send(200, data, 'application/json')
+
+    def _send(self, code, data, ctype):
+        self.send_response(code)
+        self.send_header('Content-Type', ctype)
+        self.send_header('Content-Length', str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
+    def _err(self, code, msg):
+        self._send(code, msg.encode(), 'text/plain')
+
+
+class McpServer:
+    """Master MCP server managing registry, router, and HTTP."""
+
+    def __init__(self, tools_module, local_handler, election_lock=None):
+        self.registry = Registry()
+        self.router = Router(self.registry, local_handler)
+        self.tools_module = tools_module
+        self._election_lock = election_lock
+        self._http = None
+        self._http_thread = None
+        self._internal_sock = None
+        self._internal_thread = None
+        self._running = False
+
+    def start(self):
+        self._running = True
+        self._start_http()
+        self._start_internal()
+
+    def stop(self):
+        self._running = False
+        conns = self.registry.all_conns()
+        handoff_sock, handoff_port = _make_handoff_socket() if conns else (None, 0)
+        if self._http:
+            try:
+                self._http.shutdown()
+            except:
+                pass
+            try:
+                self._http.server_close()
+            except:
+                pass
+        if self._internal_sock:
+            try:
+                self._internal_sock.shutdown(socket.SHUT_RDWR)
+            except:
+                pass
+            try:
+                self._internal_sock.close()
+            except:
+                pass
+        if self._http_thread:
+            self._http_thread.join(timeout=2.0)
+        if self._internal_thread:
+            self._internal_thread.join(timeout=2.0)
+        self._http = None
+        self._internal_sock = None
+        if self._election_lock:
+            try:
+                self._election_lock.close()
+            except:
+                pass
+            self._election_lock = None
+        self._notify_workers_shutdown(conns, handoff_port)
+        for conn in conns:
+            try:
+                conn.shutdown(socket.SHUT_RDWR)
+            except:
+                pass
+            try:
+                conn.close()
+            except:
+                pass
+        if conns:
+            _wait_for_handoff_or_master(handoff_sock, INTERNAL_PORT, 3.0)
+        if handoff_sock:
+            try:
+                handoff_sock.close()
+            except:
+                pass
+
+    def _start_http(self):
+        self._http = ThreadedHTTPServer((MCP_BIND_HOST, MCP_PORT), McpHandler)
+        self._http.mcp_server = self
+        self._http_thread = threading.Thread(target=self._http.serve_forever, daemon=True)
+        self._http_thread.start()
+
+    def _start_internal(self):
+        self._internal_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._internal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self._internal_sock.bind(('127.0.0.1', INTERNAL_PORT))
+        self._internal_sock.listen(16)
+        self._internal_sock.settimeout(1.0)
+        self._internal_thread = threading.Thread(target=self._accept_workers, daemon=True)
+        self._internal_thread.start()
+
+    def _accept_workers(self):
+        while self._running:
+            try:
+                conn, addr = self._internal_sock.accept()
+                t = threading.Thread(target=self._handle_worker, args=(conn,), daemon=True)
+                t.start()
+            except socket.timeout:
+                continue
+            except OSError:
+                break
+
+    def _handle_worker(self, conn):
+        """Handle a single worker connection."""
+        try:
+            while self._running:
+                msg = protocol.recv_msg(conn)
+                if msg is None:
+                    break
+                mt = msg.get('t')
+                if mt == protocol.MSG_REGISTER:
+                    entry = FileEntry(
+                        fid=msg['fid'],
+                        name=msg['name'],
+                        arch=msg['arch'],
+                        bits=msg['bits'],
+                        path=msg['path'],
+                        pid=msg['pid'],
+                        conn=conn,
+                        local=False,
+                        call_port=msg.get('call_port', 0)
+                    )
+                    self.registry.register(entry)
+                    protocol.send_msg(conn, {'t': protocol.MSG_ACK, 'ok': True})
+                elif mt == protocol.MSG_UNREGISTER:
+                    self.registry.unregister(msg['fid'])
+                    protocol.send_msg(conn, {'t': protocol.MSG_ACK, 'ok': True})
+                elif mt == protocol.MSG_HEARTBEAT:
+                    protocol.send_msg(conn, {'t': protocol.MSG_HEARTBEAT})
+                elif mt == protocol.MSG_RESULT:
+                    pass  # handled inline by router
+        except Exception:
+            pass
+        finally:
+            self.registry.unregister_conn(conn)
+            try:
+                conn.close()
+            except:
+                pass
+
+    def _notify_workers_shutdown(self, conns=None, handoff_port=0):
+        """Notify all workers to elect a new master."""
+        for conn in conns if conns is not None else self.registry.all_conns():
+            try:
+                protocol.send_msg(conn, {'t': protocol.MSG_PROMOTE, 'handoff_port': handoff_port})
+            except:
+                pass
+
+    def get_tools_list(self):
+        return self.tools_module.TOOLS_SCHEMA
+
+    def get_resources_list(self):
+        resources = [
+            {
+                "uri": "iida://files",
+                "name": "Connected IDA files",
+                "description": "JSON list of IDA databases currently registered with iida-mcp.",
+                "mimeType": "application/json"
+            },
+            {
+                "uri": "iida://tools",
+                "name": "iida-mcp tool catalog",
+                "description": "JSON MCP tool schemas exposed by iida-mcp.",
+                "mimeType": "application/json"
+            }
+        ]
+        for entry in self.registry.list_all():
+            resources.append({
+                "uri": "iida://file/{}/summary".format(entry.fid),
+                "name": "{} ({})".format(entry.name, entry.fid),
+                "description": "Connected IDA file summary.",
+                "mimeType": "application/json"
+            })
+        return resources
+
+    def get_resource_templates_list(self):
+        return [
+            {
+                "uriTemplate": "iida://file/{f}/info",
+                "name": "IDA file info",
+                "description": "Detailed IDB metadata for a connected file_id.",
+                "mimeType": "application/json"
+            },
+            {
+                "uriTemplate": "iida://file/{f}/functions",
+                "name": "IDA functions",
+                "description": "First page of functions for a connected file_id.",
+                "mimeType": "application/json"
+            }
+        ]
+
+    def read_resource(self, uri):
+        if uri == "iida://files":
+            data = self.router.dispatch('list_files', {})
+            return _json_resource(uri, data)
+        if uri == "iida://tools":
+            return _json_resource(uri, self.tools_module.TOOLS_SCHEMA)
+
+        parsed = urlparse(uri)
+        if parsed.scheme != "iida" or parsed.netloc != "file":
+            raise ValueError("unknown resource uri")
+
+        parts = [p for p in parsed.path.split('/') if p]
+        if len(parts) != 2:
+            raise ValueError("unknown resource uri")
+
+        fid, kind = parts
+        entry = self.registry.get(fid)
+        if not entry:
+            raise ValueError("unknown file_id")
+
+        if kind == "summary":
+            data = {
+                "fid": entry.fid,
+                "name": entry.name,
+                "arch": entry.arch,
+                "bits": entry.bits,
+                "path": entry.path,
+                "pid": entry.pid,
+                "local": entry.local
+            }
+            return _json_resource(uri, data)
+        if kind == "info":
+            return _json_resource(uri, self.router.dispatch('get_info', {'f': fid}))
+        if kind == "functions":
+            return _json_resource(uri, self.router.dispatch('list_functions', {'f': fid, 'n': 100}))
+
+        raise ValueError("unknown resource uri")
+
+    def handle_tool_call(self, name, args):
+        return self.router.dispatch(name, args)
+
+
+def _json_resource(uri, data):
+    return {
+        "uri": uri,
+        "mimeType": "application/json",
+        "text": json.dumps(data, ensure_ascii=False, separators=(',', ':'))
+    }
+
+
+def try_bind_master():
+    """Check if we should become master by trying to connect to existing master.
+    Returns True if no master exists (we should become master)."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.settimeout(0.5)
+        s.connect(('127.0.0.1', INTERNAL_PORT))
+        return False
+    except (ConnectionRefusedError, OSError, TimeoutError):
+        return True
+    finally:
+        try:
+            s.close()
+        except:
+            pass
+
+
+def try_election_lock():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if hasattr(socket, 'SO_EXCLUSIVEADDRUSE'):
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+    try:
+        s.bind(('127.0.0.1', ELECTION_PORT))
+        s.listen(1)
+        return s
+    except OSError:
+        try:
+            s.close()
+        except:
+            pass
+        return None
+
+
+def _make_handoff_socket():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.bind(('127.0.0.1', 0))
+        s.listen(1)
+        s.settimeout(0.2)
+        return s, s.getsockname()[1]
+    except OSError:
+        try:
+            s.close()
+        except:
+            pass
+        return None, 0
+
+
+def _wait_for_handoff_or_master(handoff_sock, master_port, timeout):
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if handoff_sock:
+            try:
+                conn, _addr = handoff_sock.accept()
+                try:
+                    conn.settimeout(0.2)
+                    msg = protocol.recv_msg(conn)
+                    if msg and msg.get('t') == protocol.MSG_PROMOTED:
+                        return True
+                finally:
+                    try:
+                        conn.close()
+                    except:
+                        pass
+            except socket.timeout:
+                pass
+            except OSError:
+                handoff_sock = None
+
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(0.1)
+        try:
+            s.connect(('127.0.0.1', master_port))
+            return True
+        except (ConnectionRefusedError, OSError, TimeoutError):
+            pass
+        finally:
+            try:
+                s.close()
+            except:
+                pass
+        time.sleep(0.03)
+    return False
+
+```
+
+`iida_core/thread_safe.py`:
+
+```py
+"""Thread-safe IDA API execution wrapper.
+All IDA API calls run in batch mode to suppress modal dialogs/warnings."""
+import threading
+
+import ida_kernwin
+
+MFF_READ = ida_kernwin.MFF_READ
+MFF_WRITE = ida_kernwin.MFF_WRITE
+
+_batch_fn = None  # lazy-init: callable(int) -> old_value, or False if unavailable
+IDA_SYNC_TIMEOUT = 60.0
+
+
+def _get_batch_fn():
+    """Lazily detect the batch mode API."""
+    global _batch_fn
+    if _batch_fn is not None:
+        return _batch_fn
+    # idc.batch(v) returns the previous batch value -- works on IDA 7.x-9.x
+    try:
+        import idc
+        old = idc.batch(0)
+        idc.batch(old)
+        _batch_fn = idc.batch
+        return _batch_fn
+    except:
+        pass
+    try:
+        import idaapi
+        if hasattr(idaapi, 'cvar') and hasattr(idaapi.cvar, 'batch'):
+            def _set(v):
+                old = idaapi.cvar.batch
+                idaapi.cvar.batch = v
+                return old
+            _batch_fn = _set
+            return _batch_fn
+    except:
+        pass
+    _batch_fn = False
+    return _batch_fn
+
+
+def run_in_ida(fn, *args, write=False):
+    """Execute fn(*args) on IDA's main thread, blocking until done.
+    Temporarily enables batch mode to suppress all dialogs."""
+    result = [None]
+    exc = [None]
+    ev = threading.Event()
+
+    def _run():
+        batch = _get_batch_fn()
+        prev = None
+        try:
+            if batch:
+                prev = batch(1)
+            result[0] = fn(*args)
+        except Exception as e:
+            exc[0] = e
+        finally:
+            if batch and prev is not None:
+                batch(prev)
+            ev.set()
+        return 0
+
+    mode = MFF_WRITE if write else MFF_READ
+    ida_kernwin.execute_sync(_run, mode)
+    if not ev.wait(IDA_SYNC_TIMEOUT):
+        raise TimeoutError(f'IDA main thread did not run callback within {IDA_SYNC_TIMEOUT}s')
+    if exc[0]:
+        raise exc[0]
+    return result[0]
+
+
+def read(fn, *args):
+    """Shorthand for run_in_ida with MFF_READ."""
+    return run_in_ida(fn, *args, write=False)
+
+
+def write(fn, *args):
+    """Shorthand for run_in_ida with MFF_WRITE."""
+    return run_in_ida(fn, *args, write=True)
+
+```
+
+`iida_core/tools.py`:
+
+```py
+"""All MCP tool definitions and implementations for IDA static analysis."""
+import os
+import struct as pystruct
+import hashlib
+import json
+
+import idautils
+import idaapi
+import ida_funcs
+import ida_bytes
+import ida_frame
+import ida_name
+import ida_nalt
+import ida_segment
+import ida_xref
+import ida_ua
+import ida_typeinf
+import ida_entry
+import ida_auto
+import ida_gdl
+import ida_lines
+import ida_ida
+import ida_loader
+import ida_idaapi
+import ida_kernwin
+import idc
+
+from .thread_safe import read, write
+from .cache import get_cache
+
+# ============================================================
+# Tool schema definitions (MCP tools/list response)
+# ============================================================
+
+def _t(name, desc, params=None):
+    """Helper to build tool schema entry."""
+    schema = {"name": name, "description": desc}
+    if params:
+        schema["inputSchema"] = {
+            "type": "object",
+            "properties": params,
+            "required": [k for k, v in params.items() if not v.get("optional")]
+        }
+    else:
+        schema["inputSchema"] = {"type": "object", "properties": {}}
+    return schema
+
+_F = {"type": "string", "description": "file_id"}
+_A = {"type": "string", "description": "hex address"}
+_N = {"type": "integer", "description": "count", "optional": True}
+_Q = {"type": "string", "description": "filter query", "optional": True}
+_OFF = {"type": "integer", "description": "offset for pagination", "optional": True}
+_STR_PAIR = {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 2}
+_COMMENT_ITEM = {
+    "type": "array",
+    "items": {"anyOf": [{"type": "string"}, {"type": "integer"}]},
+    "minItems": 2,
+    "maxItems": 3,
+}
+_BATCH_OP = {
+    "type": "array",
+    "items": {"anyOf": [{"type": "string"}, {"type": "object"}]},
+    "minItems": 2,
+    "maxItems": 2,
+}
+
+TOOLS_SCHEMA = [
+    _t("list_files", "List connected IDA instances"),
+    _t("get_info", "IDB info: filename, paths, arch, bits, entry, address range, segment/function counts, and loader type", {"f": _F}),
+    _t("read_file_bytes", "Read raw original file bytes at file offset", {"f": _F, "off": {"type":"integer","description":"file offset"}, "sz": {"type":"integer","description":"size"}}),
+    _t("addr_to_fileoff", "Convert IDB address to raw file offset", {"f": _F, "a": _A}),
+    _t("parse_pe", "Parse PE header from raw file", {"f": _F}),
+    _t("parse_elf", "Parse ELF header from raw file", {"f": _F}),
+    _t("get_cursor", "Get the current IDA UI cursor address", {"f": _F}),
+    _t("get_cursor_func", "Get the function under the current IDA UI cursor", {"f": _F}),
+    _t("list_functions", "List functions (paginated, filterable)", {"f": _F, "q": _Q, "off": _OFF, "n": _N}),
+    _t("get_func_info", "Get function info: name, start, end, size, frame", {"f": _F, "a": _A}),
+    _t("get_func_by_name", "Find a function by exact name", {"f": _F, "name": {"type":"string","description":"function name"}}),
+    _t("decompile", "Decompile function to pseudocode", {"f": _F, "a": _A}),
+    _t("get_func_type", "Get function prototype/type declaration", {"f": _F, "a": _A}),
+    _t("get_callers", "List functions that call this address", {"f": _F, "a": _A}),
+    _t("get_callees", "List functions called by this function", {"f": _F, "a": _A}),
+    _t("get_vars", "List decompiled function variables and arguments: [name, type, kind, location]", {"f": _F, "a": _A}),
+    _t("disassemble", "Disassemble N instructions at address", {"f": _F, "a": _A, "n": _N}),
+    _t("read_bytes", "Read bytes from IDB at address", {"f": _F, "a": _A, "sz": {"type":"integer","description":"size"}}),
+    _t("read_value", "Read an integer value from IDB memory. size is 1, 2, 4, or 8 bytes. Returns [dec, hex].", {"f": _F, "a": _A, "sz": {"type":"integer","description":"1/2/4/8 bytes"}}),
+    _t("read_string", "Read a string literal from IDB at address", {"f": _F, "a": _A, "strtype": {"type":"integer","description":"IDA STRTYPE_* constant; default uses IDA default","optional":True}, "max": {"type":"integer","description":"max bytes to read","optional":True}}),
+    _t("get_head", "Get item head address containing the given address", {"f": _F, "a": _A}),
+    _t("get_name", "Get name/label at address", {"f": _F, "a": _A}),
+    _t("set_name", "Set name/label at address", {"f": _F, "a": _A, "name": {"type":"string","description":"new name"}}),
+    _t("get_comment", "Get comment at address", {"f": _F, "a": _A, "rep": {"type":"integer","description":"1=repeatable","optional":True}}),
+    _t("set_comment", "Set comment at address", {"f": _F, "a": _A, "cmt": {"type":"string","description":"comment text"}, "rep": {"type":"integer","description":"1=repeatable","optional":True}}),
+    _t("search_names", "Search all names/labels by substring", {"f": _F, "q": {"type":"string","description":"substring"}, "n": _N}),
+    _t("list_globals", "List named non-function globals (paginated, filterable)", {"f": _F, "q": _Q, "off": _OFF, "n": _N}),
+    _t("read_global", "Read a named global value", {"f": _F, "name": {"type":"string","description":"global name"}, "sz": {"type":"integer","description":"override byte size","optional":True}}),
+    _t("get_type", "Get type info at address", {"f": _F, "a": _A}),
+    _t("set_type", "Apply C type declaration at address", {"f": _F, "a": _A, "decl": {"type":"string","description":"C type declaration"}}),
+    _t("set_c_decls", "Parse one or more C typedef/struct/enum declarations into local types", {"f": _F, "decl": {"type":"string","description":"C declarations"}}),
+    _t("list_types", "List local types. kind may be struct, enum, type, or all.", {"f": _F, "q": _Q, "kind": {"type":"string","description":"struct/enum/type/all (default all)","optional":True}}),
+    _t("get_type_decl", "Get a local type declaration plus member details when available.", {"f": _F, "name": {"type":"string","description":"local type name"}}),
+    _t("read_struct", "Read memory as an IDA struct and parse fields. source=idb reads IDB bytes, source=kernel reads runtime kernel memory.", {"f": _F, "name": {"type":"string","description":"struct name"}, "a": _A, "source": {"type":"string","description":"idb/kernel (default idb)","optional":True}, "enums": {"type":"integer","description":"include enum candidates for integer fields (default 1)","optional":True}}),
+    _t("delete_type", "Delete a local type by name: struct, enum, typedef, or alias", {"f": _F, "name": {"type":"string","description":"local type name"}}),
+    _t("find_enum_value", "Find enum constants matching a numeric value, including bitmask flag candidates.", {"f": _F, "val": {"type":"string","description":"numeric value, e.g. 3 or 0x15F0"}, "q": {"type":"string","description":"optional enum/name substring filter","optional":True}, "n": _N}),
+    _t("list_segments", "List all segments/sections", {"f": _F}),
+    _t("get_segment_info", "Get segment info for address", {"f": _F, "a": _A}),
+    _t("xrefs_to", "Get all cross-references TO this address", {"f": _F, "a": _A}),
+    _t("xrefs_from", "Get all cross-references FROM this address", {"f": _F, "a": _A}),
+    _t("xrefs_to_field", "Find xrefs to a struct field by struct and field name", {"f": _F, "struct": {"type":"string","description":"struct name"}, "field": {"type":"string","description":"field name"}}),
+    _t("search_bytes", "Search for byte pattern (e.g. '48 8B ?? 90')", {"f": _F, "pat": {"type":"string","description":"hex pattern with ?? wildcards"}, "start": {"type":"string","description":"start addr","optional":True}, "dir": {"type":"integer","description":"1=down 0=up","optional":True}}),
+    _t("search_strings", "Search string list by substring", {"f": _F, "q": _Q, "off": _OFF, "n": _N}),
+    _t("search_imm", "Search little-endian encoded immediate/value bytes using minimal width (1/2/4/8). Example val=15F0 searches F0 15.", {"f": _F, "val": {"type":"string","description":"hex value string, e.g. 15F0 or 0x15F0"}}),
+    _t("list_imports", "List import table", {"f": _F}),
+    _t("list_exports", "List export table", {"f": _F}),
+    _t("list_entries", "List entry points", {"f": _F}),
+    _t("get_cfg", "Get function control flow graph as basic block nodes and edges", {"f": _F, "a": _A}),
+    _t("patch_bytes", "Patch bytes in IDB at address (modifies database)", {"f": _F, "a": _A, "hex": {"type":"string","description":"hex bytes to write"}}),
+    _t("patch_asm", "Assemble one or more instructions with keystone and patch bytes at address", {"f": _F, "a": _A, "asm": {"type":"string","description":"assembly text, e.g. nop or mov rax, 1"}}),
+    _t("patch_list", "List all patched bytes in IDB", {"f": _F}),
+    _t("bookmark_list", "List all bookmarks", {"f": _F}),
+    _t("bookmark_set", "Set bookmark at address", {"f": _F, "a": _A, "desc": {"type":"string","description":"description"}}),
+    _t("bookmark_delete", "Delete bookmark at address", {"f": _F, "a": _A}),
+    _t("reanalyze", "Trigger IDA auto-analysis and wait", {"f": _F}),
+    _t("create_function", "Create function at address", {"f": _F, "a": _A, "end": {"type":"string","description":"end addr","optional":True}}),
+    _t("delete_function", "Delete function at address", {"f": _F, "a": _A}),
+    _t("make_data", "Define data at address", {"f": _F, "a": _A, "sz": {"type":"integer","description":"size"}, "type": {"type":"string","description":"byte/word/dword/qword","optional":True}}),
+    _t("undefine", "Undefine (make unknown) bytes at address", {"f": _F, "a": _A, "sz": {"type":"integer","description":"size"}}),
+    _t("rename_var", "Rename a decompiled local variable", {"f": _F, "a": _A, "old": {"type":"string","description":"old name"}, "new": {"type":"string","description":"new name"}}),
+    _t("retype_var", "Change type of a decompiled variable", {"f": _F, "a": _A, "var": {"type":"string","description":"var name"}, "decl": {"type":"string","description":"C type"}}),
+    _t("list_frame_vars", "List a function's stack frame variables: [offset, size, name, type]", {"f": _F, "a": _A}),
+    _t("create_frame_var", "Create a stack frame variable at byte offset", {"f": _F, "a": _A, "name": {"type":"string","description":"variable name"}, "off": {"type":"integer","description":"frame byte offset"}, "decl": {"type":"string","description":"C type (default unsigned char)","optional":True}}),
+    _t("delete_frame_var", "Delete a stack frame variable by name", {"f": _F, "a": _A, "name": {"type":"string","description":"variable name"}}),
+    _t("rename_frame_var", "Rename a stack frame variable", {"f": _F, "a": _A, "old": {"type":"string","description":"old name"}, "new": {"type":"string","description":"new name"}}),
+    _t("retype_frame_var", "Change a stack frame variable type", {"f": _F, "a": _A, "name": {"type":"string","description":"variable name"}, "decl": {"type":"string","description":"C type"}}),
+    _t("batch", "Batch execute multiple tools in one call", {"f": {"type":"string","description":"default file_id","optional":True}, "ops": {"type":"array","description":"[[tool_name,{args}],...]","items":_BATCH_OP}}),
+    _t("get_func_by_addr", "Find which function contains the given address (any addr, not just func start)", {"f": _F, "a": _A}),
+    _t("call_tree", "Build forward call tree (recursive callees from function)", {"f": _F, "a": _A, "depth": {"type":"integer","description":"max depth (default 5)","optional":True}}),
+    _t("callers_tree", "Build reverse call tree (recursive callers of function)", {"f": _F, "a": _A, "depth": {"type":"integer","description":"max depth (default 5)","optional":True}}),
+    _t("kernel_read", "Read kernel memory via iida-mcp-ioctl driver (SEH protected). Returns hex string of bytes.", {"a": {"type":"string","description":"kernel virtual address (hex, e.g. fffff80455740000)"}, "sz": {"type":"integer","description":"size in bytes (max 65536)"}}),
+    _t("kernel_modules", "List all loaded kernel modules via driver. Returns [[base_hex, size, name, path], ...]"),
+    _t("kernel_module_base", "Get kernel module base address and size by name via driver. Returns [base_hex, size]", {"name": {"type":"string","description":"module name, e.g. ntoskrnl or nvlddmkm"}}),
+    _t("calc", "Integer calculator. Evaluate arithmetic expression with hex(0x)/dec/oct(0o)/bin(0b). Supports + - * / % ** << >> & | ^ ~. Returns [dec, hex]", {"expr": {"type":"string","description":"expression, e.g. 0xfffff804+0x1000*3"}}),
+    _t("disasm_bytes", "Disassemble raw hex bytes (no IDB needed). Returns [[offset, hex, mnemonic, operands], ...]", {"hex": {"type":"string","description":"hex bytes, e.g. 4889e5 or 48 89 e5"}, "arch": {"type":"string","description":"x86/x64/arm/arm64 (default x64)","optional":True}, "addr": {"type":"string","description":"base address for display (default 0)","optional":True}}),
+    _t("kernel_read_values", "Read kernel memory and interpret as typed values. Use a for one address or addrs for batch. fmt defaults to p(pointer).", {"a": {"type":"string","description":"single kernel virtual address (hex)","optional":True}, "addrs": {"type":"array","description":"batch kernel virtual addresses [hex_addr, ...]","items":{"type":"string"},"optional":True}, "fmt": {"type":"string","description":"format: p(pointer/u64) d(u32) w(u16) b(u8) s(null-term string) or NNx(raw bytes). e.g. p, ppd, 16x. default p","optional":True}}),
+    _t("ida_to_runtime", "Convert IDA virtual address to runtime kernel address. Uses runtime module base from driver + IDA segment info to compute correct mapping per-section.", {"f": _F, "a": _A, "mod": {"type":"string","description":"kernel module name (e.g. nvlddmkm)","optional":True}}),
+]
+
+
+# ============================================================
+# Tool implementations
+# ============================================================
+
+def _ea(s):
+    """Parse hex address string to int."""
+    if isinstance(s, int):
+        return s
+    return int(s, 16)
+
+
+def _num(s):
+    """Parse a user-facing numeric value: decimal by default, hex with 0x or A-F."""
+    if isinstance(s, int):
+        return s
+    text = str(s).strip().replace('_', '')
+    if not text:
+        raise ValueError('empty numeric value')
+    if text.lower().startswith(('0x', '0o', '0b')):
+        return int(text, 0)
+    if any(c in text.lower() for c in 'abcdef'):
+        return int(text, 16)
+    return int(text, 10)
+
+
+def _hex(val):
+    """Int to hex string without 0x prefix."""
+    return format(val, 'x')
+
+
+def _pt_sil():
+    return getattr(ida_typeinf, 'PT_SIL', getattr(idc, 'PT_SIL', 0))
+
+
+def _ntf_replace():
+    return getattr(ida_typeinf, 'NTF_REPLACE', getattr(idc, 'NTF_REPLACE', 1))
+
+
+def _tinfo_present(tif):
+    try:
+        return tif.present()
+    except:
+        try:
+            return not tif.empty()
+        except:
+            return False
+
+
+def _parse_tinfo_decl(tif, til, decl):
+    """Parse a C declaration across IDA 8.x/9.x return-value differences."""
+    try:
+        r = ida_typeinf.parse_decl(tif, til, decl, _pt_sil())
+        return bool(r) or _tinfo_present(tif)
+    except TypeError:
+        pass
+    try:
+        return bool(tif.parse(decl, til, _pt_sil())) or _tinfo_present(tif)
+    except:
+        return False
+
+
+def _apply_tinfo(ea, tif):
+    flags = getattr(ida_typeinf, 'TINFO_DEFINITE', getattr(idaapi, 'TINFO_DEFINITE', 0))
+    for mod in (idaapi, ida_typeinf):
+        fn = getattr(mod, 'apply_tinfo', None)
+        if fn:
+            try:
+                if fn(ea, tif, flags):
+                    return True
+            except:
+                pass
+    return False
+
+
+def _apply_type_decl(ea, decl):
+    try:
+        if idc.SetType(ea, decl):
+            return True
+    except:
+        pass
+    til = ida_typeinf.get_idati()
+    tif = ida_typeinf.tinfo_t()
+    if _parse_tinfo_decl(tif, til, decl):
+        return _apply_tinfo(ea, tif)
+    return False
+
+
+def _type_ordinal_by_name(til, name):
+    if not name:
+        return 0
+    try:
+        ordinal = ida_typeinf.get_type_ordinal(til, name)
+        if ordinal:
+            return ordinal
+    except:
+        pass
+    try:
+        limit = idc.get_ordinal_limit()
+    except:
+        try:
+            limit = ida_typeinf.get_ordinal_qty(til) + 1
+        except:
+            limit = 0
+    for ordinal in range(1, limit):
+        try:
+            if idc.get_numbered_type_name(ordinal) == name:
+                return ordinal
+        except:
+            pass
+    return 0
+
+
+def _local_type_ordinals(til):
+    try:
+        limit = ida_typeinf.get_ordinal_qty(til) + 1
+        return range(1, limit)
+    except:
+        pass
+    try:
+        limit = idc.get_ordinal_limit()
+        return range(1, limit)
+    except:
+        return range(1, 0)
+
+
+def _save_local_type_decl(decl):
+    """Create/update a named local type in a way that works on IDA 8.3 and 9.x."""
+    try:
+        ordinal = idc.set_local_type(-1, decl, _pt_sil())
+        if ordinal:
+            return ordinal
+    except:
+        pass
+
+    til = ida_typeinf.get_idati()
+    tif = ida_typeinf.tinfo_t()
+    if not _parse_tinfo_decl(tif, til, decl):
+        return 0
+    name = tif.get_type_name()
+    if not name:
+        return 0
+
+    for saver in ('set_named_type', 'save_type'):
+        fn = getattr(tif, saver, None)
+        if not fn:
+            continue
+        try:
+            if saver == 'set_named_type':
+                fn(til, name, _ntf_replace())
+            else:
+                fn(_ntf_replace())
+            ordinal = _type_ordinal_by_name(til, name)
+            if ordinal:
+                return ordinal
+        except:
+            pass
+
+    try:
+        ordinal = _type_ordinal_by_name(til, name) or ida_typeinf.alloc_type_ordinal(til)
+        tif.set_numbered_type(til, ordinal, _ntf_replace(), name)
+        return _type_ordinal_by_name(til, name) or ordinal
+    except:
+        return 0
+
+
+def _delete_local_type(name):
+    til = ida_typeinf.get_idati()
+    ordinal = _type_ordinal_by_name(til, name)
+    if not ordinal:
+        return 'not found'
+    try:
+        ida_typeinf.del_numbered_type(til, ordinal)
+    except:
+        try:
+            idc.set_local_type(ordinal, '', 0)
+        except:
+            return 'fail'
+    return 'ok' if not _type_ordinal_by_name(til, name) else 'fail'
+
+
+def _block_succs(block):
+    try:
+        return list(block.succs())
+    except:
+        pass
+    try:
+        return [block.succ(i) for i in range(block.nsucc())]
+    except:
+        return []
+
+
+def _block_preds(block):
+    try:
+        return list(block.preds())
+    except:
+        pass
+    try:
+        return [block.pred(i) for i in range(block.npred())]
+    except:
+        return []
+
+
+def _addr_ctx(ea):
+    """Get context for an address: (func_name, comment). Runs on IDA main thread."""
+    func = ida_funcs.get_func(ea)
+    fname = ida_funcs.get_func_name(func.start_ea) if func else ''
+    cmt = ida_bytes.get_cmt(ea, 0) or ida_bytes.get_cmt(ea, 1) or ''
+    return fname, cmt
+
+
+def _bin_search_ea(result):
+    if isinstance(result, tuple):
+        result = result[0]
+    return result
+
+
+def _get_input_path():
+    return ida_nalt.get_input_file_path()
+
+
+# --- 4.1 Meta & File ---
+
+def _info(args):
+    def _impl():
+        input_path = ida_nalt.get_input_file_path()
+        idb_path = ''
+        try:
+            idb_path = idaapi.get_path(idaapi.PATH_TYPE_IDB)
+        except:
+            pass
+        procname = ida_ida.inf_get_procname()
+        is64 = ida_ida.inf_is_64bit()
+        is32 = ida_ida.inf_is_32bit_exactly() if hasattr(ida_ida, 'inf_is_32bit_exactly') else not is64
+        return {
+            'file': os.path.basename(input_path),
+            'path': input_path,
+            'idb': idb_path,
+            'proc': procname,
+            'bits': 64 if is64 else (32 if is32 else 16),
+            'entry': _hex(ida_ida.inf_get_start_ea()),
+            'min': _hex(ida_ida.inf_get_min_ea()),
+            'max': _hex(ida_ida.inf_get_max_ea()),
+            'segs': ida_segment.get_segm_qty(),
+            'funcs': ida_funcs.get_func_qty(),
+            'type': ida_loader.get_file_type_name(),
+            'compiler': ida_ida.inf_get_cc_id()
+        }
+    return read(_impl)
+
+
+def _cursor(args):
+    def _impl():
+        return _hex(idaapi.get_screen_ea())
+    return read(_impl)
+
+
+def _cursor_func(args):
+    def _impl():
+        ea = idaapi.get_screen_ea()
+        func = ida_funcs.get_func(ea)
+        if not func:
+            return {'e': 'no func'}
+        return [
+            _hex(func.start_ea),
+            ida_funcs.get_func_name(func.start_ea),
+            func.size()
+        ]
+    return read(_impl)
+
+
+def _fraw(args):
+    off = args.get('off', 0)
+    sz = min(args.get('sz', 256), 0x100000)  # cap at 1MB
+    if off < 0:
+        return {'e': 'off must be non-negative'}
+    if sz <= 0:
+        return ''
+    path = read(_get_input_path)
+    with open(path, 'rb') as fp:
+        fp.seek(off)
+        data = fp.read(sz)
+    return data.hex()
+
+
+def _fmap(args):
+    ea = _ea(args['a'])
+    def _impl():
+        return ida_loader.get_fileregion_offset(ea)
+    offset = read(_impl)
+    return offset if offset != -1 else None
+
+
+def _fpath(args):
+    return read(_get_input_path)
+
+
+# --- 4.2 PE/ELF ---
+
+def _pe(args):
+    path = read(_get_input_path)
+    with open(path, 'rb') as fp:
+        dos = fp.read(64)
+        if dos[:2] != b'MZ':
+            return {'e': 'not PE'}
+        pe_off = pystruct.unpack_from('<I', dos, 60)[0]
+        fp.seek(pe_off)
+        sig = fp.read(4)
+        if sig != b'PE\x00\x00':
+            return {'e': 'bad PE sig'}
+        coff = fp.read(20)
+        machine, nsections, timestamp = pystruct.unpack_from('<HHI', coff, 0)
+        opt_size = pystruct.unpack_from('<H', coff, 16)[0]
+        opt = fp.read(opt_size)
+        magic = pystruct.unpack_from('<H', opt, 0)[0]
+        is64 = magic == 0x20b
+        if is64:
+            entry = pystruct.unpack_from('<I', opt, 16)[0]
+            image_base = pystruct.unpack_from('<Q', opt, 24)[0]
+            subsystem = pystruct.unpack_from('<H', opt, 68)[0]
+            nrva = pystruct.unpack_from('<I', opt, 108)[0]
+        else:
+            entry = pystruct.unpack_from('<I', opt, 16)[0]
+            image_base = pystruct.unpack_from('<I', opt, 28)[0]
+            subsystem = pystruct.unpack_from('<H', opt, 68)[0]
+            nrva = pystruct.unpack_from('<I', opt, 92)[0]
+
+        sections = []
+        for _ in range(nsections):
+            shdr = fp.read(40)
+            sname = shdr[:8].rstrip(b'\x00').decode('ascii', errors='replace')
+            vsize, vaddr, rawsz, rawoff = pystruct.unpack_from('<IIII', shdr, 8)
+            chars = pystruct.unpack_from('<I', shdr, 36)[0]
+            sections.append([sname, _hex(vaddr), vsize, rawsz, rawoff, chars])
+
+        return {
+            'machine': machine,
+            'timestamp': timestamp,
+            'image_base': _hex(image_base),
+            'entry': _hex(entry),
+            'subsystem': subsystem,
+            'is64': is64,
+            'sections': sections
+        }
+
+
+def _elf(args):
+    path = read(_get_input_path)
+    with open(path, 'rb') as fp:
+        ident = fp.read(16)
+        if ident[:4] != b'\x7fELF':
+            return {'e': 'not ELF'}
+        ei_class = ident[4]  # 1=32, 2=64
+        ei_data = ident[5]   # 1=LE, 2=BE
+        endian = '<' if ei_data == 1 else '>'
+        is64 = ei_class == 2
+
+        if is64:
+            hdr = fp.read(48)
+            etype, machine = pystruct.unpack_from(endian + 'HH', hdr, 0)
+            entry = pystruct.unpack_from(endian + 'Q', hdr, 8)[0]
+            phoff = pystruct.unpack_from(endian + 'Q', hdr, 16)[0]
+            shoff = pystruct.unpack_from(endian + 'Q', hdr, 24)[0]
+            phnum = pystruct.unpack_from(endian + 'H', hdr, 40)[0]
+            shnum = pystruct.unpack_from(endian + 'H', hdr, 44)[0]
+        else:
+            hdr = fp.read(36)
+            etype, machine = pystruct.unpack_from(endian + 'HH', hdr, 0)
+            entry = pystruct.unpack_from(endian + 'I', hdr, 8)[0]
+            phoff = pystruct.unpack_from(endian + 'I', hdr, 12)[0]
+            shoff = pystruct.unpack_from(endian + 'I', hdr, 16)[0]
+            phnum = pystruct.unpack_from(endian + 'H', hdr, 28)[0]
+            shnum = pystruct.unpack_from(endian + 'H', hdr, 30)[0]
+
+        phdrs = []
+        if phoff:
+            fp.seek(phoff)
+            for _ in range(min(phnum, 64)):
+                if is64:
+                    p = fp.read(56)
+                    ptype, pflags = pystruct.unpack_from(endian + 'II', p, 0)
+                    poff, pvaddr, pmemsz = pystruct.unpack_from(endian + 'QQQ', p, 8)[:3]
+                    phdrs.append([ptype, _hex(pvaddr), pmemsz, pflags])
+                else:
+                    p = fp.read(32)
+                    ptype = pystruct.unpack_from(endian + 'I', p, 0)[0]
+                    poff, pvaddr = pystruct.unpack_from(endian + 'II', p, 4)
+                    pmemsz = pystruct.unpack_from(endian + 'I', p, 20)[0]
+                    pflags = pystruct.unpack_from(endian + 'I', p, 24)[0]
+                    phdrs.append([ptype, _hex(pvaddr), pmemsz, pflags])
+
+        return {
+            'class': ei_class,
+            'machine': machine,
+            'entry': _hex(entry),
+            'type': etype,
+            'phdr': phdrs,
+            'shnum': shnum
+        }
+
+
+# --- 4.3 Functions ---
+
+def _fl(args):
+    q = args.get('q', '')
+    off = args.get('off', 0)
+    n = min(args.get('n', 100), 1000)
+    if n <= 0:
+        return []
+    cache = get_cache()
+    data = cache.get_functions(q, off, n)
+    eas = [ea for ea, _, _ in data]
+    def _get_comments(addrs=eas):
+        return {a: (ida_bytes.get_cmt(a, 0) or ida_bytes.get_cmt(a, 1) or '') for a in addrs}
+    cmts = read(_get_comments) if eas else {}
+    results = []
+    for ea, name, sz in data:
+        row = [_hex(ea), name, sz]
+        c = cmts.get(ea, '')
+        if c:
+            row.append(c)
+        results.append(row)
+    return results
+
+
+def _fi(args):
+    ea = _ea(args['a'])
+    def _impl():
+        func = ida_funcs.get_func(ea)
+        if not func:
+            return {'e': 'no func'}
+        tif = ida_typeinf.tinfo_t()
+        ida_typeinf.guess_tinfo(tif, ea)
+        frame_size = ida_frame.get_frame_size(func) if func.frame != idaapi.BADADDR else 0
+        return [
+            _hex(func.start_ea),
+            ida_funcs.get_func_name(func.start_ea),
+            func.size(),
+            func.flags,
+            frame_size,
+            func.frsize,
+            func.argsize,
+            str(tif) if tif.present() else ''
+        ]
+    return read(_impl)
+
+
+def _fbn(args):
+    name = args['name']
+    def _impl():
+        ea = ida_name.get_name_ea(idaapi.BADADDR, name)
+        if ea == idaapi.BADADDR:
+            return {'e': 'not found'}
+        func = ida_funcs.get_func(ea)
+        if not func or func.start_ea != ea:
+            return {'e': 'not a function', 'addr': _hex(ea)}
+        return [
+            _hex(func.start_ea),
+            ida_funcs.get_func_name(func.start_ea),
+            func.size()
+        ]
+    return read(_impl)
+
+
+def _dec(args):
+    ea = _ea(args['a'])
+    def _impl():
+        try:
+            import ida_hexrays
+            cfunc = ida_hexrays.decompile(ea)
+            if cfunc:
+                lines = cfunc.get_pseudocode()
+                text = '\n'.join(ida_lines.tag_remove(l.line) for l in lines)
+                return text
+            return {'e': 'decompile failed'}
+        except Exception as ex:
+            return {'e': str(ex)}
+    return read(_impl)
+
+
+def _decl(args):
+    ea = _ea(args['a'])
+    def _impl():
+        tif = ida_typeinf.tinfo_t()
+        if idaapi.get_tinfo(tif, ea) or ida_typeinf.guess_tinfo(tif, ea):
+            name = ida_funcs.get_func_name(ea) or ''
+            return tif.dstr() if not name else str(tif) + ' ' + name
+        return ''
+    return read(_impl)
+
+
+def _sft(args):
+    ea = _ea(args['a'])
+    decl = args['decl']
+    def _impl():
+        return 'ok' if _apply_type_decl(ea, decl) else 'fail'
+    return write(_impl)
+
+
+def _cf(args):
+    ea = _ea(args['a'])
+    def _impl():
+        results = []
+        for xref in idautils.CodeRefsTo(ea, 0):
+            fn = ida_funcs.get_func(xref)
+            fname = ida_funcs.get_func_name(fn.start_ea) if fn else ''
+            cmt = ida_bytes.get_cmt(fn.start_ea, 0) or ida_bytes.get_cmt(fn.start_ea, 1) or '' if fn else ''
+            row = [_hex(xref), fname]
+            if cmt:
+                row.append(cmt)
+            results.append(row)
+        return results
+    return read(_impl)
+
+
+def _ct(args):
+    ea = _ea(args['a'])
+    def _impl():
+        func = ida_funcs.get_func(ea)
+        if not func:
+            return []
+        seen = set()
+        results = []
+        for item_ea in idautils.FuncItems(func.start_ea):
+            for xref in idautils.CodeRefsFrom(item_ea, 0):
+                fn = ida_funcs.get_func(xref)
+                if fn and fn.start_ea != func.start_ea and fn.start_ea not in seen:
+                    seen.add(fn.start_ea)
+                    name = ida_funcs.get_func_name(fn.start_ea) or ''
+                    cmt = ida_bytes.get_cmt(fn.start_ea, 0) or ida_bytes.get_cmt(fn.start_ea, 1) or ''
+                    row = [_hex(fn.start_ea), name]
+                    if cmt:
+                        row.append(cmt)
+                    results.append(row)
+        return results
+    return read(_impl)
+
+
+def _decompiled_vars(ea):
+    try:
+        import ida_hexrays
+        cfunc = ida_hexrays.decompile(ea)
+        if not cfunc:
+            return []
+        results = []
+        for v in cfunc.lvars:
+            kind = 'arg' if v.is_arg_var else 'local'
+            try:
+                loc = v.location.dstr() if v.is_arg_var else (v.location.stkoff() if v.is_stk_var() else -1)
+            except:
+                loc = ''
+            results.append([v.name, str(v.tif), kind, loc])
+        return results
+    except:
+        return []
+
+
+def _vars(args):
+    ea = _ea(args['a'])
+    return read(lambda: _decompiled_vars(ea))
+
+
+def _fv(args):
+    ea = _ea(args['a'])
+    def _impl():
+        rows = _decompiled_vars(ea)
+        return [[name, typ, loc] for name, typ, kind, loc in rows if kind == 'local']
+    return read(_impl)
+
+
+def _fa(args):
+    ea = _ea(args['a'])
+    def _impl():
+        rows = _decompiled_vars(ea)
+        return [[name, typ, loc] for name, typ, kind, loc in rows if kind == 'arg']
+    return read(_impl)
+
+
+# --- 4.4 Disassembly & Bytes ---
+
+def _dis(args):
+    ea = _ea(args['a'])
+    n = min(args.get('n', 32), 512)
+    if n <= 0:
+        return []
+    def _impl():
+        results = []
+        cur = ea
+        for _ in range(n):
+            sz = ida_bytes.get_item_size(cur)
+            if sz == 0:
+                break
+            raw = ida_bytes.get_bytes(cur, sz)
+            insn = ida_ua.insn_t()
+            cmt = ida_bytes.get_cmt(cur, 0) or ida_bytes.get_cmt(cur, 1) or ''
+            if ida_ua.decode_insn(insn, cur) > 0:
+                mnem = insn.get_canon_mnem()
+                ops = ida_lines.tag_remove(idc.GetDisasm(cur))
+                ops_part = ops[len(mnem):].strip() if ops.startswith(mnem) else ops
+                row = [_hex(cur), raw.hex() if raw else '', mnem, ops_part]
+            else:
+                row = [_hex(cur), raw.hex() if raw else '', 'db', '']
+            if cmt:
+                row.append(cmt)
+            results.append(row)
+            cur += sz
+        return results
+    return read(_impl)
+
+
+def _rb(args):
+    ea = _ea(args['a'])
+    sz = min(args.get('sz', 16), 0x100000)
+    if sz <= 0:
+        return ''
+    def _impl():
+        data = ida_bytes.get_bytes(ea, sz)
+        return data.hex() if data else ''
+    return read(_impl)
+
+
+def _read_int(args, size):
+    ea = _ea(args['a'])
+    if size not in (1, 2, 4, 8):
+        return {'e': 'sz must be 1, 2, 4, or 8'}
+    def _impl():
+        if size == 1:
+            val = idc.get_wide_byte(ea)
+        elif size == 2:
+            val = idc.get_wide_word(ea)
+        elif size == 4:
+            val = idc.get_wide_dword(ea)
+        else:
+            val = idc.get_qword(ea)
+        return [val, _hex(val)]
+    return read(_impl)
+
+
+def _rval(args):
+    return _read_int(args, args.get('sz', 8))
+
+
+def _rbyte(args):
+    return _read_int(args, 1)
+
+
+def _rword(args):
+    return _read_int(args, 2)
+
+
+def _rdword(args):
+    return _read_int(args, 4)
+
+
+def _rqword(args):
+    return _read_int(args, 8)
+
+
+def _rstr(args):
+    ea = _ea(args['a'])
+    strtype = args.get('strtype')
+    maxlen = min(args.get('max', 4096), 0x100000)
+    def _impl():
+        if strtype is not None:
+            st = strtype
+        else:
+            try:
+                st = ida_nalt.get_default_str_type()
+            except:
+                st = getattr(idc, 'STRTYPE_C', getattr(ida_nalt, 'STRTYPE_C', 0))
+        data = idc.get_strlit_contents(ea, maxlen, st)
+        if data is None:
+            raw = ida_bytes.get_bytes(ea, maxlen) or b''
+            nul = raw.find(b'\x00')
+            if nul >= 0:
+                raw = raw[:nul]
+            data = raw
+        if isinstance(data, (bytes, bytearray)):
+            return data.decode('utf-8', errors='replace')
+        return str(data)
+    return read(_impl)
+
+
+def _wb(args):
+    ea = _ea(args['a'])
+    hexstr = args['hex']
+    data = bytes.fromhex(hexstr)
+    def _impl():
+        if ida_segment.getseg(ea) is None:
+            return {'e': 'address not mapped'}
+        return 'ok' if ida_bytes.put_bytes(ea, data) else 'fail'
+    return write(_impl)
+
+
+def _head(args):
+    ea = _ea(args['a'])
+    def _impl():
+        return _hex(ida_bytes.get_item_head(ea))
+    return read(_impl)
+
+
+# --- 4.5 Names & Comments ---
+
+def _gn(args):
+    ea = _ea(args['a'])
+    def _impl():
+        n = ida_name.get_name(ea)
+        if n:
+            demang = ida_name.demangle_name(n, 0)
+            return demang if demang else n
+        return ''
+    return read(_impl)
+
+
+def _sn(args):
+    ea = _ea(args['a'])
+    name = args['name']
+    def _impl():
+        return 'ok' if ida_name.set_name(ea, name, ida_name.SN_NOWARN) else 'fail'
+    return write(_impl)
+
+
+def _gc(args):
+    ea = _ea(args['a'])
+    rep = args.get('rep', 0)
+    def _impl():
+        return ida_bytes.get_cmt(ea, bool(rep)) or ''
+    return read(_impl)
+
+
+def _sc(args):
+    ea = _ea(args['a'])
+    cmt = args['cmt']
+    rep = args.get('rep', 0)
+    def _impl():
+        ida_bytes.set_cmt(ea, cmt, bool(rep))
+        return 'ok'
+    return write(_impl)
+
+
+def _an(args):
+    q = args['q']
+    n = min(args.get('n', 50), 500)
+    if n <= 0:
+        return []
+    cache = get_cache()
+    data = cache.get_names(q, n)
+    return [[_hex(ea), name] for ea, name in data]
+
+
+def _lg(args):
+    q = (args.get('q') or '').lower()
+    off = args.get('off', 0)
+    n = min(args.get('n', 100), 1000)
+    if n <= 0:
+        return []
+    def _impl():
+        results = []
+        skipped = 0
+        for ea, name in idautils.Names():
+            if ida_funcs.get_func(ea):
+                continue
+            if q and q not in name.lower():
+                continue
+            if skipped < off:
+                skipped += 1
+                continue
+            size = ida_bytes.get_item_size(ea) or 0
+            tif = ida_typeinf.tinfo_t()
+            row = [_hex(ea), name, size]
+            if idaapi.get_tinfo(tif, ea) and _tinfo_present(tif):
+                row.append(str(tif))
+            results.append(row)
+            if len(results) >= n:
+                break
+        return results
+    return read(_impl)
+
+
+def _global_value(ea, size=0):
+    name = ida_name.get_name(ea) or ''
+    if size:
+        data = ida_bytes.get_bytes(ea, min(size, 0x100000)) or b''
+        return {'addr': _hex(ea), 'name': name, 'size': len(data), 'raw': data.hex()}
+
+    item_size = ida_bytes.get_item_size(ea) or 0
+    if item_size <= 0 or item_size > 16:
+        item_size = 8 if ida_ida.inf_is_64bit() else 4
+
+    if item_size == 1:
+        val = idc.get_wide_byte(ea)
+    elif item_size == 2:
+        val = idc.get_wide_word(ea)
+    elif item_size == 4:
+        val = idc.get_wide_dword(ea)
+    elif item_size == 8:
+        val = idc.get_qword(ea)
+    else:
+        data = ida_bytes.get_bytes(ea, item_size) or b''
+        return {'addr': _hex(ea), 'name': name, 'size': item_size, 'raw': data.hex()}
+
+    return {'addr': _hex(ea), 'name': name, 'size': item_size, 'value': _hex(val), 'dec': val}
+
+
+def _rg(args):
+    name = args['name']
+    size = args.get('sz', 0)
+    def _impl():
+        ea = ida_name.get_name_ea(idaapi.BADADDR, name)
+        if ea == idaapi.BADADDR:
+            return {'e': 'not found'}
+        return _global_value(ea, size)
+    return read(_impl)
+
+
+def _rga(args):
+    ea = _ea(args['a'])
+    size = args.get('sz', 0)
+    def _impl():
+        return _global_value(ea, size)
+    return read(_impl)
+
+
+# --- 4.6 Types ---
+
+def _gt(args):
+    ea = _ea(args['a'])
+    def _impl():
+        tif = ida_typeinf.tinfo_t()
+        if idaapi.get_tinfo(tif, ea):
+            return str(tif)
+        if ida_typeinf.guess_tinfo(tif, ea):
+            return str(tif)
+        return ''
+    return read(_impl)
+
+
+def _st(args):
+    ea = _ea(args['a'])
+    decl = args['decl']
+    def _impl():
+        return 'ok' if _apply_type_decl(ea, decl) else 'fail'
+    return write(_impl)
+
+
+def _cdecls(args):
+    decl = args['decl']
+    def _impl():
+        til = ida_typeinf.get_idati()
+        flags = getattr(ida_typeinf, 'HTI_DCL', 0) | getattr(ida_typeinf, 'HTI_PAK1', 0)
+        try:
+            errors = ida_typeinf.parse_decls(til, decl, None, flags)
+            return {'errors': errors}
+        except Exception as ex:
+            return {'e': str(ex)}
+    return write(_impl)
+
+
+def _tl(args):
+    q = args.get('q', '').lower()
+    def _impl():
+        til = ida_typeinf.get_idati()
+        results = []
+        for ordinal in _local_type_ordinals(til):
+            tif = ida_typeinf.tinfo_t()
+            if tif.get_numbered_type(til, ordinal):
+                if tif.is_struct():
+                    name = tif.get_type_name()
+                    if not q or q in name.lower():
+                        results.append([name, tif.get_size()])
+        return results
+    return read(_impl)
+
+
+def _types(args):
+    q = (args.get('q') or '').lower()
+    kind = (args.get('kind') or 'all').lower()
+    def _impl():
+        til = ida_typeinf.get_idati()
+        results = []
+        for ordinal in _local_type_ordinals(til):
+            tif = ida_typeinf.tinfo_t()
+            if not tif.get_numbered_type(til, ordinal):
+                continue
+            name = tif.get_type_name() or ''
+            if q and q not in name.lower():
+                continue
+            if tif.is_struct():
+                row_kind = 'struct'
+            elif tif.is_enum():
+                row_kind = 'enum'
+            else:
+                row_kind = 'type'
+            if kind != 'all' and kind != row_kind:
+                continue
+            results.append([ordinal, name, row_kind, tif.get_size()])
+        return results
+    return read(_impl)
+
+
+def _tg(args):
+    name = args['name']
+    def _impl():
+        til = ida_typeinf.get_idati()
+        tif = ida_typeinf.tinfo_t()
+        if tif.get_named_type(til, name):
+            return tif.dstr()
+        return ''
+    return read(_impl)
+
+
+def _type_decl(args):
+    name = args['name']
+    def _impl():
+        til = ida_typeinf.get_idati()
+        tif = ida_typeinf.tinfo_t()
+        if not tif.get_named_type(til, name):
+            return {'e': 'not found'}
+        if tif.is_struct():
+            return _struct_detail_in_ida(name)
+        if tif.is_enum():
+            members = []
+            for member in _enum_constants_from_tif(tif):
+                row = [member[0], _hex(member[1]), member[1]]
+                if len(member) > 2 and member[2]:
+                    row.append(member[2])
+                members.append(row)
+            return {
+                'name': name,
+                'kind': 'enum',
+                'size': tif.get_size(),
+                'decl': tif.dstr(),
+                'members': members
+            }
+        return {
+            'name': name,
+            'kind': 'type',
+            'size': tif.get_size(),
+            'decl': tif.dstr()
+        }
+    return read(_impl)
+
+
+def _tsa(args):
+    ea = _ea(args['a'])
+    def _impl():
+        tif = ida_typeinf.tinfo_t()
+        if not idaapi.get_tinfo(tif, ea):
+            return {'e': 'no type'}
+        if not tif.is_struct():
+            return {'e': 'not struct', 'type': str(tif)}
+        return {
+            'addr': _hex(ea),
+            'name': tif.get_type_name() or '',
+            'size': tif.get_size(),
+            'decl': tif.dstr()
+        }
+    return read(_impl)
+
+
+def _struct_member_attr(member, name, default=None):
+    try:
+        v = getattr(member, name)
+        return v() if callable(v) else v
+    except:
+        return default
+
+
+def _struct_member_bits(member):
+    for attr in ('size', 'size_bits'):
+        v = _struct_member_attr(member, attr)
+        if isinstance(v, int) and v >= 0:
+            return v
+    try:
+        t = _struct_member_attr(member, 'type')
+        if t:
+            sz = t.get_size()
+            if sz and sz > 0:
+                return sz * 8
+    except:
+        pass
+    return 0
+
+
+def _enum_member_attr(member, name, default=None):
+    try:
+        v = getattr(member, name)
+        return v() if callable(v) else v
+    except:
+        return default
+
+
+def _enum_constants_from_tif(tif):
+    constants = []
+    try:
+        enum_data = ida_typeinf.enum_type_data_t()
+        if tif.get_enum_details(enum_data):
+            for member in enum_data:
+                name = _enum_member_attr(member, 'name', '') or ''
+                value = _enum_member_attr(member, 'value')
+                if value is None:
+                    value = _enum_member_attr(member, 'val')
+                if not name or value is None:
+                    continue
+                try:
+                    value = int(value)
+                except:
+                    continue
+                cmt = _enum_member_attr(member, 'cmt', '') or ''
+                row = [name, value]
+                if cmt:
+                    row.append(cmt)
+                constants.append(row)
+    except:
+        pass
+    if constants:
+        return constants
+    try:
+        return _enum_constants_from_decl(tif.dstr())
+    except:
+        return []
+
+
+def _struct_detail_in_ida(name):
+    til = ida_typeinf.get_idati()
+    tif = ida_typeinf.tinfo_t()
+    if not tif.get_named_type(til, name):
+        return {'e': 'not found'}
+
+    result = {
+        'name': name,
+        'size': tif.get_size(),
+        'decl': tif.dstr(),
+        'members': []
+    }
+
+    try:
+        udt = ida_typeinf.udt_type_data_t()
+        if not tif.get_udt_details(udt):
+            return result
+        for m in udt:
+            off_bits = _struct_member_attr(m, 'offset', 0) or 0
+            size_bits = _struct_member_bits(m)
+            mname = _struct_member_attr(m, 'name', '') or ''
+            mtif = _struct_member_attr(m, 'type')
+            mtype = str(mtif) if mtif else ''
+            cmt = _struct_member_attr(m, 'cmt', '') or ''
+            result['members'].append([
+                off_bits // 8,
+                size_bits // 8 if size_bits else 0,
+                mname,
+                mtype,
+                cmt
+            ])
+    except Exception as ex:
+        result['member_error'] = str(ex)
+    return result
+
+
+def _tgd(args):
+    name = args['name']
+    def _impl():
+        return _struct_detail_in_ida(name)
+    return read(_impl)
+
+
+def _ts(args):
+    decl = args['decl']
+    def _impl():
+        ordinal = _save_local_type_decl(decl)
+        return 'ok' if ordinal else 'parse error'
+    return write(_impl)
+
+
+def _td(args):
+    name = args['name']
+    def _impl():
+        return _delete_local_type(name)
+    return write(_impl)
+
+
+def _el(args):
+    q = args.get('q', '').lower()
+    def _impl():
+        til = ida_typeinf.get_idati()
+        results = []
+        for ordinal in _local_type_ordinals(til):
+            tif = ida_typeinf.tinfo_t()
+            if tif.get_numbered_type(til, ordinal):
+                if tif.is_enum():
+                    name = tif.get_type_name()
+                    if not q or q in name.lower():
+                        results.append([name, tif.get_size()])
+        return results
+    return read(_impl)
+
+
+def _eg(args):
+    name = args['name']
+    def _impl():
+        til = ida_typeinf.get_idati()
+        tif = ida_typeinf.tinfo_t()
+        if tif.get_named_type(til, name):
+            return tif.dstr()
+        return ''
+    return read(_impl)
+
+
+def _enum_eval_expr(expr, known):
+    import re
+    expr = expr.strip()
+    expr = re.sub(r'\b([0-9A-Fa-f]+)[uUlL]+\b', r'\1', expr)
+    expr = re.sub(r'\b[A-Za-z_][A-Za-z0-9_]*\b', lambda m: str(known.get(m.group(0), 0)), expr)
+    if not all(c in '0123456789abcdefABCDEFxX+-*/%()<>&|^~ \t' for c in expr):
+        raise ValueError('bad enum expr')
+    return int(eval(compile(expr, '<enum>', 'eval'), {"__builtins__": {}}, {}))
+
+
+def _enum_constants_from_decl(decl):
+    import re
+    body_match = re.search(r'\{(.*)\}', decl, re.S)
+    if not body_match:
+        return []
+    body = re.sub(r'/\*.*?\*/|//.*?$', '', body_match.group(1), flags=re.S | re.M)
+    parts = [p.strip() for p in body.split(',') if p.strip()]
+    consts = []
+    known = {}
+    cur = -1
+    for part in parts:
+        m = re.match(r'([A-Za-z_][A-Za-z0-9_]*)(?:\s*=\s*(.*))?$', part)
+        if not m:
+            continue
+        cname = m.group(1)
+        expr = (m.group(2) or '').strip()
+        try:
+            cur = _enum_eval_expr(expr, known) if expr else cur + 1
+        except:
+            cur += 1
+        known[cname] = cur
+        consts.append([cname, cur])
+    return consts
+
+
+def _find_enum_value_in_ida(val, q='', limit=50):
+    q = (q or '').lower()
+    til = ida_typeinf.get_idati()
+    exact = []
+    flags = []
+    for ordinal in _local_type_ordinals(til):
+        tif = ida_typeinf.tinfo_t()
+        if not tif.get_numbered_type(til, ordinal) or not tif.is_enum():
+            continue
+        ename = tif.get_type_name() or ''
+        decl = tif.dstr()
+        consts = _enum_constants_from_tif(tif)
+        names_text = ' '.join(c[0] for c in consts).lower()
+        if q and q not in ename.lower() and q not in decl.lower() and q not in names_text:
+            continue
+        if not consts:
+            continue
+
+        ex = [[n, _hex(v)] for n, v, *_ in consts if v == val]
+        if ex:
+            exact.append([ename, ex])
+
+        parts = [[n, _hex(v)] for n, v, *_ in consts if v and (val & v) == v]
+        if parts:
+            flags.append([ename, parts[:32]])
+
+        if len(exact) + len(flags) >= limit:
+            break
+
+    return {'value': _hex(val), 'exact': exact[:limit], 'flags': flags[:limit]}
+
+
+def _find_enum_value(args):
+    val = _num(args['val'])
+    q = args.get('q', '').lower()
+    limit = min(args.get('n', 50), 500)
+    def _impl():
+        return _find_enum_value_in_ida(val, q, limit)
+
+    return read(_impl)
+
+
+def _guess_field_size(mtype, msize):
+    if msize:
+        return msize
+    t = (mtype or '').lower()
+    if '*' in t or 'qword' in t or '__int64' in t or 'uint64' in t:
+        return 8
+    if 'dword' in t or '__int32' in t or 'uint32' in t or 'int ' in t:
+        return 4
+    if 'word' in t or '__int16' in t or 'uint16' in t:
+        return 2
+    if 'byte' in t or 'char' in t or 'bool' in t:
+        return 1
+    return 0
+
+
+def _read_struct(args):
+    name = args['name']
+    ea = _ea(args['a'])
+    source = args.get('source', 'idb').lower()
+    include_enums = bool(args.get('enums', 1))
+
+    detail = read(lambda: _struct_detail_in_ida(name))
+    if isinstance(detail, dict) and 'e' in detail:
+        return detail
+
+    size = int(detail.get('size') or 0)
+    if size <= 0:
+        return {'e': 'struct has unknown size', 'struct': detail}
+    if size > 0x100000:
+        return {'e': 'struct too large (max 1MB)', 'size': size}
+
+    if source == 'kernel':
+        from .kdriver import read_kernel_memory
+        raw = read_kernel_memory(ea, size)
+        if isinstance(raw, dict):
+            return raw
+        data = bytes.fromhex(raw)
+    elif source == 'idb':
+        data = read(lambda: ida_bytes.get_bytes(ea, size))
+        if not data:
+            return {'e': f'no IDB bytes at {_hex(ea)}'}
+    else:
+        return {'e': 'source must be idb or kernel'}
+
+    fields = []
+    enum_cache = {}
+    for off, msize, mname, mtype, cmt in detail.get('members', []):
+        fsize = _guess_field_size(mtype, int(msize or 0))
+        if fsize <= 0:
+            fsize = 1
+        raw = data[off:off + fsize] if off < len(data) else b''
+        row = {
+            'off': _hex(off),
+            'size': fsize,
+            'name': mname,
+            'type': mtype,
+            'raw': raw.hex()
+        }
+        if cmt:
+            row['cmt'] = cmt
+        if raw and fsize <= 8:
+            val = int.from_bytes(raw.ljust(fsize, b'\x00'), 'little')
+            row['value'] = _hex(val)
+            if include_enums and val:
+                q = (mtype or mname or '').replace('*', '').replace('const ', '').strip()
+                key = (val, q)
+                if key not in enum_cache:
+                    enum_cache[key] = read(lambda v=val, qq=q: _find_enum_value_in_ida(v, qq, 8))
+                    if not enum_cache[key].get('exact') and not enum_cache[key].get('flags') and q:
+                        enum_cache[key] = read(lambda v=val: _find_enum_value_in_ida(v, '', 8))
+                cand = enum_cache[key]
+                if cand.get('exact') or cand.get('flags'):
+                    row['enum'] = cand
+        elif raw and ('char' in (mtype or '').lower() or fsize > 8):
+            z = raw.find(b'\x00')
+            preview = raw[:z if z >= 0 else min(len(raw), 64)]
+            try:
+                row['str'] = preview.decode('utf-8', errors='replace')
+            except:
+                pass
+        fields.append(row)
+
+    return {
+        'addr': _hex(ea),
+        'source': source,
+        'struct': name,
+        'size': size,
+        'raw': data[:size].hex(),
+        'fields': fields
+    }
+
+
+def _es(args):
+    decl = args['decl']
+    def _impl():
+        ordinal = _save_local_type_decl(decl)
+        return 'ok' if ordinal else 'parse error'
+    return write(_impl)
+
+
+def _lti(args):
+    q = args.get('q', '').lower()
+    def _impl():
+        til = ida_typeinf.get_idati()
+        results = []
+        for ordinal in _local_type_ordinals(til):
+            tif = ida_typeinf.tinfo_t()
+            if tif.get_numbered_type(til, ordinal):
+                name = tif.get_type_name()
+                if name and (not q or q in name.lower()):
+                    results.append([ordinal, name, tif.dstr()])
+        return results
+    return read(_impl)
+
+
+def _ltg(args):
+    ordinal = args['ord']
+    def _impl():
+        til = ida_typeinf.get_idati()
+        tif = ida_typeinf.tinfo_t()
+        if tif.get_numbered_type(til, ordinal):
+            return tif.dstr()
+        return ''
+    return read(_impl)
+
+
+def _lts(args):
+    decl = args['decl']
+    def _impl():
+        ordinal = _save_local_type_decl(decl)
+        return ordinal if ordinal else 'fail'
+    return write(_impl)
+
+
+# --- 4.7 Segments ---
+
+def _segs(args):
+    cache = get_cache()
+    data = cache.get_segments()
+    return [[_hex(s), _hex(e), name, cls, perm, bits] for s, e, name, cls, perm, bits in data]
+
+
+def _segi(args):
+    ea = _ea(args['a'])
+    def _impl():
+        seg = ida_segment.getseg(ea)
+        if not seg:
+            return None
+        return {
+            'start': _hex(seg.start_ea),
+            'end': _hex(seg.end_ea),
+            'name': ida_segment.get_segm_name(seg),
+            'cls': ida_segment.get_segm_class(seg),
+            'perm': seg.perm,
+            'bits': seg.bitness
+        }
+    return read(_impl)
+
+
+# --- 4.8 Xrefs ---
+
+def _xto(args):
+    ea = _ea(args['a'])
+    def _impl():
+        results = []
+        for xref in idautils.XrefsTo(ea, 0):
+            fn, cmt = _addr_ctx(xref.frm)
+            row = [_hex(xref.frm), xref.type, fn]
+            if cmt:
+                row.append(cmt)
+            results.append(row)
+        return results
+    return read(_impl)
+
+
+def _xfrom(args):
+    ea = _ea(args['a'])
+    def _impl():
+        results = []
+        for xref in idautils.XrefsFrom(ea, 0):
+            fn, cmt = _addr_ctx(xref.to)
+            row = [_hex(xref.to), xref.type, fn]
+            if cmt:
+                row.append(cmt)
+            results.append(row)
+        return results
+    return read(_impl)
+
+
+def _xtof(args):
+    struct_name = args['struct']
+    field_name = args['field']
+    def _impl():
+        til = ida_typeinf.get_idati()
+        tif = ida_typeinf.tinfo_t()
+        if not tif.get_named_type(til, struct_name):
+            return {'e': 'struct not found'}
+
+        udt = ida_typeinf.udt_type_data_t()
+        if not tif.get_udt_details(udt):
+            return {'e': 'cannot read struct'}
+
+        field_off = None
+        field_tid = idaapi.BADADDR
+        for member in udt:
+            name = _struct_member_attr(member, 'name', '') or ''
+            if name != field_name:
+                continue
+            field_off = (_struct_member_attr(member, 'offset', 0) or 0) // 8
+            try:
+                field_tid = _struct_member_attr(member, 'tid', idaapi.BADADDR)
+            except:
+                field_tid = idaapi.BADADDR
+            break
+
+        if field_off is None:
+            return {'e': 'field not found'}
+
+        results = []
+        if field_tid != idaapi.BADADDR:
+            for xref in idautils.XrefsTo(field_tid, 0):
+                fn, cmt = _addr_ctx(xref.frm)
+                row = [_hex(xref.frm), xref.type, fn]
+                if cmt:
+                    row.append(cmt)
+                results.append(row)
+        elif hasattr(ida_typeinf, 'get_udm_tid'):
+            try:
+                field_tid = ida_typeinf.get_udm_tid(tif, field_off * 8)
+                if field_tid != idaapi.BADADDR:
+                    for xref in idautils.XrefsTo(field_tid, 0):
+                        fn, cmt = _addr_ctx(xref.frm)
+                        row = [_hex(xref.frm), xref.type, fn]
+                        if cmt:
+                            row.append(cmt)
+                        results.append(row)
+            except:
+                pass
+
+        return {
+            'struct': struct_name,
+            'field': field_name,
+            'off': field_off,
+            'xrefs': results
+        }
+    return read(_impl)
+
+
+# --- 4.9 Search ---
+
+def _srch(args):
+    pat = args['pat']
+    start = _ea(args['start']) if 'start' in args else None
+    direction = args.get('dir', 1)
+
+    def _impl():
+        if start is None:
+            s = ida_ida.inf_get_min_ea()
+        else:
+            s = start
+        flag = ida_bytes.BIN_SEARCH_FORWARD if direction else ida_bytes.BIN_SEARCH_BACKWARD
+        flag |= ida_bytes.BIN_SEARCH_NOBREAK | ida_bytes.BIN_SEARCH_NOSHOW
+        compiled = ida_bytes.compiled_binpat_vec_t()
+        ida_bytes.parse_binpat_str(compiled, s, pat, 16)
+        results = []
+        ea = s
+        for _ in range(256):
+            ea = _bin_search_ea(ida_bytes.bin_search(ea, ida_ida.inf_get_max_ea(), compiled, flag))
+            if ea == idaapi.BADADDR:
+                break
+            func = ida_funcs.get_func(ea)
+            fname = ida_funcs.get_func_name(func.start_ea) if func else ''
+            results.append([_hex(ea), fname])
+            ea += 1
+        return results
+    return read(_impl)
+
+
+def _strs(args):
+    q = args.get('q', '')
+    off = args.get('off', 0)
+    n = min(args.get('n', 100), 1000)
+    if n <= 0:
+        return []
+    cache = get_cache()
+    data = cache.get_strings(q, off, n)
+    return [[_hex(ea), s, st] for ea, s, st in data]
+
+
+def _imm(args):
+    val = _ea(args['val'])
+    def _impl():
+        min_ea = ida_ida.inf_get_min_ea()
+        max_ea = ida_ida.inf_get_max_ea()
+        flag = ida_bytes.BIN_SEARCH_FORWARD | ida_bytes.BIN_SEARCH_NOBREAK | ida_bytes.BIN_SEARCH_NOSHOW
+
+        if val <= 0xFF:
+            w = 1
+        elif val <= 0xFFFF:
+            w = 2
+        elif val <= 0xFFFFFFFF:
+            w = 4
+        else:
+            w = 8
+
+        pat_bytes = val.to_bytes(w, byteorder='little')
+        pat_hex = ' '.join(f'{b:02X}' for b in pat_bytes)
+        compiled = ida_bytes.compiled_binpat_vec_t()
+        ida_bytes.parse_binpat_str(compiled, min_ea, pat_hex, 16)
+
+        results = []
+        ea = min_ea
+        for _ in range(512):
+            ea = _bin_search_ea(ida_bytes.bin_search(ea, max_ea, compiled, flag))
+            if ea == idaapi.BADADDR:
+                break
+            func = ida_funcs.get_func(ea)
+            fname = ida_funcs.get_func_name(func.start_ea) if func else ''
+            results.append([_hex(ea), fname])
+            ea += 1
+            if len(results) >= 256:
+                break
+        return results
+    return read(_impl)
+
+
+# --- 4.10 Imports/Exports ---
+
+def _imp(args):
+    cache = get_cache()
+    data = cache.get_imports()
+    return [[mod, name, _hex(ea), ordinal] for mod, name, ea, ordinal in data]
+
+
+def _exp(args):
+    cache = get_cache()
+    data = cache.get_exports()
+    return [[_hex(ea), name, ordinal] for ea, name, ordinal in data]
+
+
+def _ent(args):
+    def _impl():
+        results = []
+        qty = ida_entry.get_entry_qty()
+        for i in range(qty):
+            ordinal = ida_entry.get_entry_ordinal(i)
+            ea = ida_entry.get_entry(ordinal)
+            name = ida_entry.get_entry_name(ordinal) or ''
+            results.append([_hex(ea), name])
+        return results
+    return read(_impl)
+
+
+# --- 4.11 CFG ---
+
+def _cfg(args):
+    ea = _ea(args['a'])
+    def _impl():
+        func = ida_funcs.get_func(ea)
+        if not func:
+            return {'e': 'no func'}
+        fc = ida_gdl.FlowChart(func)
+        nodes = []
+        edges = []
+        for block in fc:
+            nodes.append([_hex(block.start_ea), _hex(block.end_ea)])
+            for succ_block in _block_succs(block):
+                edges.append([_hex(block.start_ea), _hex(succ_block.start_ea)])
+        return {'nodes': nodes, 'edges': edges}
+    return read(_impl)
+
+
+def _preds(args):
+    ea = _ea(args['a'])
+    def _impl():
+        func = ida_funcs.get_func(ea)
+        if not func:
+            return []
+        fc = ida_gdl.FlowChart(func)
+        for block in fc:
+            if block.start_ea <= ea < block.end_ea:
+                return [_hex(pred.start_ea) for pred in _block_preds(block)]
+        return []
+    return read(_impl)
+
+
+def _succs(args):
+    ea = _ea(args['a'])
+    def _impl():
+        func = ida_funcs.get_func(ea)
+        if not func:
+            return []
+        fc = ida_gdl.FlowChart(func)
+        for block in fc:
+            if block.start_ea <= ea < block.end_ea:
+                return [_hex(succ.start_ea) for succ in _block_succs(block)]
+        return []
+    return read(_impl)
+
+
+# --- 4.17 Call trees ---
+
+def _ctree(args):
+    """Build forward call tree: function -> all callees recursively.
+    Uses CodeRefsFrom which only returns code-to-code refs (faster than XrefsFrom)."""
+    ea = _ea(args['a'])
+    max_depth = min(args.get('depth', 5), 16)
+
+    def _impl():
+        tree = {}
+        visited = set()
+
+        def _walk(func_ea, depth):
+            if depth > max_depth or func_ea in visited:
+                return
+            visited.add(func_ea)
+            func = ida_funcs.get_func(func_ea)
+            if not func:
+                return
+            seen = set()
+            callees = []
+            for item_ea in idautils.FuncItems(func.start_ea):
+                for target in idautils.CodeRefsFrom(item_ea, 0):
+                    tfunc = ida_funcs.get_func(target)
+                    if tfunc and tfunc.start_ea != func_ea and tfunc.start_ea not in seen:
+                        seen.add(tfunc.start_ea)
+                        callees.append((tfunc.start_ea, ida_funcs.get_func_name(tfunc.start_ea) or ''))
+            node_key = _hex(func_ea)
+            tree[node_key] = {
+                'name': ida_funcs.get_func_name(func_ea) or '',
+                'calls': [[_hex(c[0]), c[1]] for c in callees]
+            }
+            for c_ea, _ in callees:
+                _walk(c_ea, depth + 1)
+
+        _walk(ea, 0)
+        return tree
+    return read(_impl)
+
+
+def _ctreet(args):
+    """Build reverse call tree: who calls this function, recursively up.
+    Uses CodeRefsTo which is O(xrefs to entry point) per function, no FuncItems scan."""
+    ea = _ea(args['a'])
+    max_depth = min(args.get('depth', 5), 16)
+
+    def _impl():
+        tree = {}
+        visited = set()
+
+        def _walk(func_ea, depth):
+            if depth > max_depth or func_ea in visited:
+                return
+            visited.add(func_ea)
+            seen = set()
+            callers = []
+            for xref_ea in idautils.CodeRefsTo(func_ea, 0):
+                cfunc = ida_funcs.get_func(xref_ea)
+                if cfunc and cfunc.start_ea != func_ea and cfunc.start_ea not in seen:
+                    seen.add(cfunc.start_ea)
+                    callers.append((cfunc.start_ea, ida_funcs.get_func_name(cfunc.start_ea) or ''))
+            node_key = _hex(func_ea)
+            tree[node_key] = {
+                'name': ida_funcs.get_func_name(func_ea) or '',
+                'callers': [[_hex(c[0]), c[1]] for c in callers]
+            }
+            for c_ea, _ in callers:
+                _walk(c_ea, depth + 1)
+
+        _walk(ea, 0)
+        return tree
+    return read(_impl)
+
+
+# --- 4.12 Patches & Bookmarks ---
+
+def _pat(args):
+    ea = _ea(args['a'])
+    hexstr = args['hex']
+    data = bytes.fromhex(hexstr)
+    def _impl():
+        if ida_segment.getseg(ea) is None:
+            return {'e': 'address not mapped'}
+        for i, b in enumerate(data):
+            cur = idc.get_wide_byte(ea + i)
+            if cur == b:
+                continue
+            ida_bytes.patch_byte(ea + i, b)
+            if idc.get_wide_byte(ea + i) != b:
+                return 'fail'
+        return 'ok'
+    return write(_impl)
+
+
+_KS_CACHE = {}
+
+
+def _ks_for_idb():
+    try:
+        import keystone
+    except ImportError:
+        return None, 'keystone not installed (pip install keystone-engine)'
+
+    proc = (ida_ida.inf_get_procname() or '').lower()
+    is64 = ida_ida.inf_is_64bit()
+    is32 = ida_ida.inf_is_32bit_exactly() if hasattr(ida_ida, 'inf_is_32bit_exactly') else not is64
+    bits = 64 if is64 else (32 if is32 else 16)
+    key = (proc, bits)
+    if key in _KS_CACHE:
+        return _KS_CACHE[key], ''
+
+    arch = None
+    mode = None
+    if proc.startswith('metapc') or proc.startswith('80'):
+        arch = keystone.KS_ARCH_X86
+        mode = keystone.KS_MODE_64 if bits == 64 else (keystone.KS_MODE_32 if bits == 32 else keystone.KS_MODE_16)
+    elif proc.startswith('arm'):
+        if bits == 64:
+            arch = keystone.KS_ARCH_ARM64
+            mode = keystone.KS_MODE_LITTLE_ENDIAN
+        else:
+            arch = keystone.KS_ARCH_ARM
+            mode = keystone.KS_MODE_ARM
+    elif proc.startswith('mips'):
+        arch = keystone.KS_ARCH_MIPS
+        mode = (keystone.KS_MODE_MIPS64 if bits == 64 else keystone.KS_MODE_MIPS32) | keystone.KS_MODE_LITTLE_ENDIAN
+    elif proc.startswith('ppc'):
+        arch = keystone.KS_ARCH_PPC
+        mode = (keystone.KS_MODE_PPC64 if bits == 64 else keystone.KS_MODE_PPC32) | keystone.KS_MODE_BIG_ENDIAN
+
+    if arch is None:
+        return None, f'unsupported processor for keystone: {proc} {bits}-bit'
+
+    try:
+        ks = keystone.Ks(arch, mode)
+    except Exception as ex:
+        return None, str(ex)
+    _KS_CACHE[key] = ks
+    return ks, ''
+
+
+def _pasm(args):
+    ea = _ea(args['a'])
+    asm = args['asm']
+    def _impl():
+        ks, err = _ks_for_idb()
+        if ks is None:
+            return {'e': err}
+        try:
+            encoding, count = ks.asm(asm, ea)
+        except Exception as ex:
+            return {'e': f'assemble failed: {ex}'}
+        if not encoding:
+            return {'e': 'assemble produced no bytes'}
+        data = bytes(encoding)
+        for i, b in enumerate(data):
+            ida_bytes.patch_byte(ea + i, b)
+        return {'addr': _hex(ea), 'bytes': data.hex(), 'count': count}
+    return write(_impl)
+
+
+def _patl(args):
+    def _impl():
+        patches = []
+        class _visitor:
+            def __call__(self, ea, fpos, o, v):
+                patches.append([_hex(ea), format(o & 0xFF, '02x'), format(v & 0xFF, '02x')])
+                return 0
+        ida_bytes.visit_patched_bytes(0, idaapi.BADADDR, _visitor())
+        return patches
+    return read(_impl)
+
+
+def _bml(args):
+    def _impl():
+        results = []
+        slot = 1
+        while True:
+            ea = idc.get_bookmark(slot)
+            if ea is None or ea == idaapi.BADADDR:
+                break
+            desc = idc.get_bookmark_desc(slot) or ''
+            results.append([_hex(ea), desc])
+            slot += 1
+        return results
+    return read(_impl)
+
+
+def _bms(args):
+    ea = _ea(args['a'])
+    desc = args.get('desc', '')
+    def _impl():
+        slot = 1
+        while True:
+            existing = idc.get_bookmark(slot)
+            if existing is None or existing == idaapi.BADADDR:
+                break
+            slot += 1
+        idc.put_bookmark(ea, 0, 0, 0, slot, desc)
+        return 'ok'
+    return write(_impl)
+
+
+def _bmd(args):
+    ea = _ea(args['a'])
+    def _impl():
+        slot = 1
+        while True:
+            existing = idc.get_bookmark(slot)
+            if existing is None or existing == idaapi.BADADDR:
+                break
+            if existing == ea:
+                idc.put_bookmark(idaapi.BADADDR, 0, 0, 0, slot, '')
+                return 'ok'
+            slot += 1
+        return 'not found'
+    return write(_impl)
+
+
+# --- 4.13 Analysis ---
+
+def _aa(args):
+    def _impl():
+        ida_auto.auto_wait()
+        return 'ok'
+    return write(_impl)
+
+
+def _mkfn(args):
+    ea = _ea(args['a'])
+    end = _ea(args['end']) if 'end' in args else idaapi.BADADDR
+    def _impl():
+        return 'ok' if ida_funcs.add_func(ea, end) else 'fail'
+    return write(_impl)
+
+
+def _delfn(args):
+    ea = _ea(args['a'])
+    def _impl():
+        func = ida_funcs.get_func(ea)
+        if func:
+            ida_funcs.del_func(func.start_ea)
+            return 'ok'
+        return 'no func'
+    return write(_impl)
+
+
+def _mkdt(args):
+    ea = _ea(args['a'])
+    sz = args.get('sz', 1)
+    dtype = args.get('type', 'byte')
+    def _impl():
+        if sz <= 0:
+            return {'e': 'sz must be positive'}
+        if ida_segment.getseg(ea) is None:
+            return {'e': 'address not mapped'}
+        type_map = {'byte': 1, 'word': 2, 'dword': 4, 'qword': 8}
+        dsz = type_map.get(dtype, sz)
+        if dsz == 1:
+            ok = ida_bytes.create_byte(ea, sz)
+        elif dsz == 2:
+            ok = ida_bytes.create_word(ea, sz)
+        elif dsz == 4:
+            ok = ida_bytes.create_dword(ea, sz)
+        elif dsz == 8:
+            ok = ida_bytes.create_qword(ea, sz)
+        else:
+            return {'e': 'type must be byte, word, dword, or qword'}
+        return 'ok' if ok else 'fail'
+    return write(_impl)
+
+
+def _undef(args):
+    ea = _ea(args['a'])
+    sz = args['sz']
+    def _impl():
+        if sz <= 0:
+            return {'e': 'sz must be positive'}
+        if ida_segment.getseg(ea) is None:
+            return {'e': 'address not mapped'}
+        return 'ok' if ida_bytes.del_items(ea, ida_bytes.DELIT_SIMPLE, sz) else 'fail'
+    return write(_impl)
+
+
+# --- 4.14 Decompiler advanced ---
+
+def _rnv(args):
+    ea = _ea(args['a'])
+    old = args['old']
+    new = args['new']
+    def _impl():
+        try:
+            import ida_hexrays
+            cfunc = ida_hexrays.decompile(ea)
+            if not cfunc:
+                return 'decompile failed'
+            lv = None
+            for v in cfunc.lvars:
+                if v.name == old:
+                    lv = v
+                    break
+            if not lv:
+                return 'var not found'
+            lsi = ida_hexrays.lvar_saved_info_t()
+            lsi.ll = lv
+            lsi.name = new
+            if ida_hexrays.modify_user_lvar_info(cfunc.entry_ea, ida_hexrays.MLI_NAME, lsi):
+                return 'ok'
+            return 'fail'
+        except Exception as ex:
+            return str(ex)
+    return write(_impl)
+
+
+def _rtv(args):
+    ea = _ea(args['a'])
+    var_name = args['var']
+    decl = args['decl']
+    def _impl():
+        try:
+            import ida_hexrays
+            cfunc = ida_hexrays.decompile(ea)
+            if not cfunc:
+                return 'decompile failed'
+            lv = None
+            for v in cfunc.lvars:
+                if v.name == var_name:
+                    lv = v
+                    break
+            if not lv:
+                return 'var not found'
+            tif = ida_typeinf.tinfo_t()
+            til = ida_typeinf.get_idati()
+            decl_s = decl if decl.rstrip().endswith(';') else decl + ';'
+            if not _parse_tinfo_decl(tif, til, decl_s):
+                return 'parse error'
+            lsi = ida_hexrays.lvar_saved_info_t()
+            lsi.ll = lv
+            lsi.type = tif
+            if ida_hexrays.modify_user_lvar_info(cfunc.entry_ea, ida_hexrays.MLI_TYPE, lsi):
+                return 'ok'
+            return 'fail'
+        except Exception as ex:
+            return str(ex)
+    return write(_impl)
+
+
+def _func_frame_tif(func):
+    if hasattr(ida_frame, 'get_func_frame'):
+        try:
+            tif = ida_typeinf.tinfo_t()
+            if ida_frame.get_func_frame(tif, func):
+                return tif
+        except:
+            pass
+    return None
+
+
+def _frame_udm_index(tif, name):
+    try:
+        idx = tif.find_udm(name)
+        if idx is not None and idx >= 0:
+            return idx
+    except:
+        pass
+    try:
+        udt = ida_typeinf.udt_type_data_t()
+        if tif.get_udt_details(udt):
+            for idx, member in enumerate(udt):
+                if (_struct_member_attr(member, 'name', '') or '') == name:
+                    return idx
+    except:
+        pass
+    return -1
+
+
+def _frame_member_info(func, name):
+    tif = _func_frame_tif(func)
+    if tif is not None:
+        try:
+            udt = ida_typeinf.udt_type_data_t()
+            if tif.get_udt_details(udt):
+                for idx, member in enumerate(udt):
+                    if (_struct_member_attr(member, 'name', '') or '') == name:
+                        off_bits = _struct_member_attr(member, 'offset', 0) or 0
+                        size_bits = _struct_member_bits(member)
+                        return {
+                            'tif': tif,
+                            'idx': idx,
+                            'off': off_bits // 8,
+                            'size': size_bits // 8 if size_bits else 1,
+                        }
+        except:
+            pass
+
+    ida_struct, sptr = _frame_struct(func)
+    if ida_struct and sptr:
+        try:
+            member = ida_struct.get_member_by_name(sptr, name)
+            if member:
+                return {
+                    'struct': ida_struct,
+                    'sptr': sptr,
+                    'member': member,
+                    'off': member.soff,
+                    'size': max(member.eoff - member.soff, 1),
+                }
+        except:
+            pass
+    return None
+
+
+def _parse_frame_type(decl):
+    tif = ida_typeinf.tinfo_t()
+    til = ida_typeinf.get_idati()
+    decl = decl or 'unsigned char'
+    decl = decl if decl.rstrip().endswith(';') else decl + ';'
+    if not _parse_tinfo_decl(tif, til, decl):
+        return None
+    return tif
+
+
+def _frame_struct(func):
+    try:
+        import ida_struct
+        sptr = ida_struct.get_struct(func.frame)
+        return ida_struct, sptr
+    except:
+        return None, None
+
+
+def _fv_frame(args):
+    ea = _ea(args['a'])
+    def _impl():
+        func = ida_funcs.get_func(ea)
+        if not func:
+            return {'e': 'no func'}
+
+        tif = _func_frame_tif(func)
+        if tif is not None:
+            udt = ida_typeinf.udt_type_data_t()
+            if not tif.get_udt_details(udt):
+                return []
+            results = []
+            for member in udt:
+                off_bits = _struct_member_attr(member, 'offset', 0) or 0
+                size_bits = _struct_member_bits(member)
+                mtif = _struct_member_attr(member, 'type')
+                results.append([
+                    off_bits // 8,
+                    size_bits // 8 if size_bits else 0,
+                    _struct_member_attr(member, 'name', '') or '',
+                    str(mtif) if mtif else ''
+                ])
+            return results
+
+        ida_struct, sptr = _frame_struct(func)
+        if not ida_struct or not sptr:
+            return []
+        results = []
+        for i in range(sptr.memqty):
+            member = sptr.get_member(i)
+            if not member:
+                continue
+            results.append([
+                member.soff,
+                member.eoff - member.soff,
+                ida_struct.get_member_name(member.id) or '',
+                ''
+            ])
+        return results
+    return read(_impl)
+
+
+def _cfv(args):
+    ea = _ea(args['a'])
+    name = args['name']
+    off = args.get('off', args.get('offset'))
+    off = off if isinstance(off, int) else int(off, 0)
+    decl = args.get('decl', 'unsigned char')
+    def _impl():
+        func = ida_funcs.get_func(ea)
+        if not func:
+            return {'e': 'no func'}
+        mtif = _parse_frame_type(decl)
+        if mtif is None:
+            return {'e': 'parse error'}
+
+        if hasattr(ida_frame, 'add_frame_member'):
+            try:
+                return 'ok' if ida_frame.add_frame_member(func, name, off, mtif, None) else 'fail'
+            except Exception as ex:
+                return {'e': str(ex)}
+
+        ida_struct, sptr = _frame_struct(func)
+        if not ida_struct or not sptr:
+            return {'e': 'no frame'}
+        size = max(mtif.get_size(), 1)
+        flags = ida_bytes.byte_flag()
+        if size == 2:
+            flags = ida_bytes.word_flag()
+        elif size == 4:
+            flags = ida_bytes.dword_flag()
+        elif size == 8:
+            flags = ida_bytes.qword_flag()
+        try:
+            rc = ida_struct.add_struc_member(sptr, name, off, flags, None, size)
+            if rc != 0:
+                return {'e': f'add_struc_member rc={rc}'}
+            try:
+                member = ida_struct.get_member_by_name(sptr, name)
+                if member:
+                    ida_struct.set_member_tinfo(sptr, member, 0, mtif, 0)
+            except:
+                pass
+            return 'ok'
+        except Exception as ex:
+            return {'e': str(ex)}
+    return write(_impl)
+
+
+def _dfv(args):
+    ea = _ea(args['a'])
+    name = args['name']
+    def _impl():
+        func = ida_funcs.get_func(ea)
+        if not func:
+            return {'e': 'no func'}
+
+        info = _frame_member_info(func, name)
+        if not info:
+            return {'e': 'not found'}
+        if hasattr(ida_frame, 'delete_frame_members'):
+            try:
+                if ida_frame.delete_frame_members(func, info['off'], info['off'] + info['size']):
+                    return 'ok'
+            except Exception as ex:
+                frame_err = str(ex)
+            else:
+                frame_err = 'delete_frame_members failed'
+
+        tif = info.get('tif')
+        if tif is not None:
+            try:
+                return 'ok' if tif.del_udm(info['idx']) == ida_typeinf.TERR_OK else {'e': frame_err}
+            except Exception as ex:
+                return {'e': str(ex)}
+
+        ida_struct, sptr = _frame_struct(func)
+        if not ida_struct or not sptr:
+            return {'e': 'no frame'}
+        member = info.get('member') or ida_struct.get_member_by_name(sptr, name)
+        if not member:
+            return {'e': 'not found'}
+        ida_struct.del_struc_member(sptr, member.soff)
+        return 'ok'
+    return write(_impl)
+
+
+def _rfv(args):
+    ea = _ea(args['a'])
+    old = args['old']
+    new = args['new']
+    def _impl():
+        func = ida_funcs.get_func(ea)
+        if not func:
+            return {'e': 'no func'}
+
+        info = _frame_member_info(func, old)
+        if not info:
+            return {'e': 'not found'}
+        tif = info.get('tif')
+        if tif is not None:
+            try:
+                return 'ok' if tif.rename_udm(info['idx'], new) == ida_typeinf.TERR_OK else 'fail'
+            except Exception as ex:
+                return {'e': str(ex)}
+
+        ida_struct, sptr = _frame_struct(func)
+        if not ida_struct or not sptr:
+            return {'e': 'rename requires legacy frame struct API'}
+        member = info.get('member') or ida_struct.get_member_by_name(sptr, old)
+        if not member:
+            return {'e': 'not found'}
+        return 'ok' if ida_struct.set_member_name(sptr, member.soff, new) else 'fail'
+    return write(_impl)
+
+
+def _tfv(args):
+    ea = _ea(args['a'])
+    name = args['name']
+    decl = args['decl']
+    def _impl():
+        func = ida_funcs.get_func(ea)
+        if not func:
+            return {'e': 'no func'}
+        mtif = _parse_frame_type(decl)
+        if mtif is None:
+            return {'e': 'parse error'}
+
+        info = _frame_member_info(func, name)
+        if not info:
+            return {'e': 'not found'}
+        if hasattr(ida_frame, 'set_frame_member_type'):
+            try:
+                if ida_frame.set_frame_member_type(func, info['off'], mtif, None):
+                    return 'ok'
+            except Exception as ex:
+                frame_err = str(ex)
+            else:
+                frame_err = 'set_frame_member_type failed'
+
+        tif = info.get('tif')
+        if tif is not None:
+            try:
+                return 'ok' if tif.set_udm_type(info['idx'], mtif) == ida_typeinf.TERR_OK else {'e': frame_err}
+            except Exception as ex:
+                return {'e': str(ex)}
+
+        ida_struct, sptr = _frame_struct(func)
+        if not ida_struct or not sptr:
+            return {'e': 'no frame'}
+        member = info.get('member') or ida_struct.get_member_by_name(sptr, name)
+        if not member:
+            return {'e': 'not found'}
+        try:
+            return 'ok' if ida_struct.set_member_tinfo(sptr, member, 0, mtif, 0) else 'fail'
+        except Exception as ex:
+            return {'e': str(ex)}
+    return write(_impl)
+
+
+# --- 4.18 Batch write tools ---
+
+def _batch_set_names(args):
+    entries = args['names']
+    def _impl():
+        ok = 0
+        for item in entries:
+            ea = _ea(item[0])
+            name = item[1]
+            if ida_name.set_name(ea, name, ida_name.SN_NOWARN):
+                ok += 1
+        return {'ok': ok, 'fail': len(entries) - ok}
+    return write(_impl)
+
+
+def _batch_set_comments(args):
+    entries = args['comments']
+    def _impl():
+        for item in entries:
+            ea = _ea(item[0])
+            text = item[1]
+            rep = bool(item[2]) if len(item) > 2 else False
+            ida_bytes.set_cmt(ea, text, rep)
+        return {'ok': len(entries)}
+    return write(_impl)
+
+
+def _batch_set_types(args):
+    entries = args['types']
+    def _impl():
+        ok = 0
+        for item in entries:
+            ea = _ea(item[0])
+            decl = item[1]
+            if _apply_type_decl(ea, decl):
+                ok += 1
+        return {'ok': ok, 'fail': len(entries) - ok}
+    return write(_impl)
+
+
+# --- 4.19 Enhanced read tools ---
+
+def _batch_decompile(args):
+    addrs = [_ea(a) for a in args['addrs']]
+    def _impl():
+        try:
+            import ida_hexrays
+        except:
+            return {'e': 'hexrays not available'}
+        results = []
+        for ea in addrs:
+            try:
+                cfunc = ida_hexrays.decompile(ea)
+                if cfunc:
+                    lines = cfunc.get_pseudocode()
+                    text = '\n'.join(ida_lines.tag_remove(l.line) for l in lines)
+                    results.append([_hex(ea), text])
+                else:
+                    results.append([_hex(ea), None])
+            except:
+                results.append([_hex(ea), None])
+        return results
+    return read(_impl)
+
+
+def _get_func_by_addr(args):
+    ea = _ea(args['a'])
+    def _impl():
+        func = ida_funcs.get_func(ea)
+        if not func:
+            return {'e': 'no func at this addr'}
+        start = func.start_ea
+        name = ida_funcs.get_func_name(start) or ''
+        cmt = ida_bytes.get_cmt(start, 0) or ida_bytes.get_cmt(start, 1) or ''
+        return [_hex(start), name, cmt]
+    return read(_impl)
+
+
+# --- Kernel driver tools (iida-mcp-ioctl) ---
+
+def _kernel_read(args):
+    from .kdriver import read_kernel_memory
+    return read_kernel_memory(_ea(args['a']), int(args['sz']))
+
+def _kernel_modules(args):
+    from .kdriver import get_module_list
+    return get_module_list()
+
+def _kernel_module_base(args):
+    from .kdriver import get_module_base
+    return get_module_base(args['name'])
+
+
+def _kernel_read_values(args):
+    from .kdriver import read_kernel_memory
+    fmt = args.get('fmt', 'p').strip() or 'p'
+
+    total = 0
+    ops = []
+    i = 0
+    while i < len(fmt):
+        c = fmt[i]
+        if c == 'p':
+            ops.append(('p', 8)); total += 8; i += 1
+        elif c == 'd':
+            ops.append(('d', 4)); total += 4; i += 1
+        elif c == 'w':
+            ops.append(('w', 2)); total += 2; i += 1
+        elif c == 'b':
+            ops.append(('b', 1)); total += 1; i += 1
+        elif c == 's':
+            ops.append(('s', 256)); total += 256; i += 1
+        elif c.isdigit():
+            j = i
+            while j < len(fmt) and fmt[j].isdigit():
+                j += 1
+            if j < len(fmt) and fmt[j] == 'x':
+                n = int(fmt[i:j])
+                ops.append(('x', n)); total += n; i = j + 1
+            else:
+                return {'e': f'bad fmt at pos {i}: digits must end with x'}
+        else:
+            return {'e': f'bad fmt char: {c}'}
+
+    if total == 0:
+        return {'e': 'empty format'}
+    if total > 65536:
+        return {'e': 'total read too large'}
+
+    def _read_one(addr_s):
+        addr = _ea(addr_s)
+        raw = read_kernel_memory(addr, total)
+        if isinstance(raw, dict):
+            return raw
+        data = bytes.fromhex(raw)
+
+        result = []
+        off = 0
+        for typ, sz in ops:
+            if off + sz > len(data):
+                result.append(None)
+                break
+            if typ == 'p':
+                v = pystruct.unpack_from('<Q', data, off)[0]
+                result.append(format(v, 'x'))
+            elif typ == 'd':
+                v = pystruct.unpack_from('<I', data, off)[0]
+                result.append(v)
+            elif typ == 'w':
+                v = pystruct.unpack_from('<H', data, off)[0]
+                result.append(v)
+            elif typ == 'b':
+                result.append(data[off])
+            elif typ == 's':
+                end = data.find(b'\x00', off, off + sz)
+                if end == -1:
+                    end = off + sz
+                result.append(data[off:end].decode('utf-8', errors='replace'))
+            elif typ == 'x':
+                result.append(data[off:off + sz].hex())
+            off += sz
+        return result[0] if len(result) == 1 else result
+
+    if 'addrs' in args:
+        return [[a, _read_one(a)] for a in args.get('addrs', [])]
+    if 'a' not in args:
+        return {'e': 'a or addrs required'}
+    return _read_one(args['a'])
+
+
+def _ida_to_runtime(args):
+    ea = _ea(args['a'])
+
+    def _get_seg_and_pe():
+        seg = ida_segment.getseg(ea)
+        if not seg:
+            return None
+        seg_start = seg.start_ea
+        seg_name = ida_segment.get_segm_name(seg)
+
+        path = ida_nalt.get_input_file_path()
+        image_base = 0
+        sections = []
+        try:
+            with open(path, 'rb') as fp:
+                dos = fp.read(64)
+                if dos[:2] == b'MZ':
+                    pe_off = pystruct.unpack_from('<I', dos, 60)[0]
+                    fp.seek(pe_off + 4)
+                    coff = fp.read(20)
+                    nsections = pystruct.unpack_from('<H', coff, 2)[0]
+                    opt_size = pystruct.unpack_from('<H', coff, 16)[0]
+                    opt = fp.read(opt_size)
+                    magic = pystruct.unpack_from('<H', opt, 0)[0]
+                    if magic == 0x20b:
+                        image_base = pystruct.unpack_from('<Q', opt, 24)[0]
+                    else:
+                        image_base = pystruct.unpack_from('<I', opt, 28)[0]
+                    for _ in range(nsections):
+                        shdr = fp.read(40)
+                        sname = shdr[:8].rstrip(b'\x00').decode('ascii', errors='replace')
+                        vaddr = pystruct.unpack_from('<I', shdr, 12)[0]
+                        sections.append((sname, vaddr))
+        except:
+            pass
+
+        return {
+            'ea': ea,
+            'seg_start': seg_start,
+            'seg_name': seg_name,
+            'image_base': image_base,
+            'sections': sections,
+            'filename': os.path.basename(path)
+        }
+
+    info = read(_get_seg_and_pe)
+    if info is None:
+        return {'e': f'address {_hex(ea)} not in any segment'}
+
+    rva = ea - info['image_base']
+
+    mod_name = args.get('mod', '')
+    if not mod_name:
+        fname = info['filename']
+        dot = fname.rfind('.')
+        mod_name = fname[:dot] if dot > 0 else fname
+
+    from .kdriver import get_module_base
+    mod_result = get_module_base(mod_name)
+    if isinstance(mod_result, dict) and 'e' in mod_result:
+        return {'e': f'driver: {mod_result["e"]}. provide mod= or load driver.', 'rva': _hex(rva)}
+
+    runtime_base = int(mod_result[0], 16)
+    runtime_addr = runtime_base + rva
+
+    return {
+        'ida': _hex(ea),
+        'rva': _hex(rva),
+        'runtime_base': mod_result[0],
+        'runtime': format(runtime_addr, 'x'),
+        'mod': mod_name
+    }
+
+
+# --- Standalone utilities (no IDB required) ---
+
+_CALC_ALLOWED = set('0123456789abcdefABCDEFxXoObB+-*/%()<>&|^~ \t')
+
+def _calc(args):
+    expr = args['expr'].strip()
+    if not expr:
+        return {'e': 'empty expression'}
+    if not all(c in _CALC_ALLOWED for c in expr):
+        return {'e': 'invalid characters in expression'}
+    try:
+        val = eval(compile(expr, '<calc>', 'eval', flags=0), {"__builtins__": {}}, {})
+        if not isinstance(val, int):
+            return {'e': 'result is not integer'}
+        return [val, format(val & 0xFFFFFFFFFFFFFFFF, 'x')]
+    except Exception as ex:
+        return {'e': str(ex)}
+
+
+def _disasm_bytes(args):
+    try:
+        import capstone
+    except ImportError:
+        return {'e': 'capstone not installed (pip install capstone)'}
+
+    raw = bytes.fromhex(args['hex'].replace(' ', ''))
+    arch_str = args.get('arch', 'x64').lower()
+    base = _ea(args['addr']) if 'addr' in args else 0
+
+    arch_map = {
+        'x86':   (capstone.CS_ARCH_X86, capstone.CS_MODE_32),
+        'x64':   (capstone.CS_ARCH_X86, capstone.CS_MODE_64),
+        'arm':   (capstone.CS_ARCH_ARM, capstone.CS_MODE_ARM),
+        'arm64': (capstone.CS_ARCH_ARM64, capstone.CS_MODE_ARM),
+    }
+    if arch_str not in arch_map:
+        return {'e': f'unknown arch: {arch_str}, use x86/x64/arm/arm64'}
+
+    cs_arch, cs_mode = arch_map[arch_str]
+    md = capstone.Cs(cs_arch, cs_mode)
+    result = []
+    for insn in md.disasm(raw, base):
+        result.append([format(insn.address, 'x'), insn.bytes.hex(), insn.mnemonic, insn.op_str])
+    if not result:
+        return {'e': 'no valid instructions'}
+    return result
+
+
+# ============================================================
+# Dispatch table
+# ============================================================
+
+DISPATCH = {
+    'get_info': _info,
+    'read_file_bytes': _fraw,
+    'addr_to_fileoff': _fmap,
+    'parse_pe': _pe,
+    'parse_elf': _elf,
+    'get_cursor': _cursor,
+    'get_cursor_func': _cursor_func,
+    'list_functions': _fl,
+    'get_func_info': _fi,
+    'get_func_by_name': _fbn,
+    'decompile': _dec,
+    'get_func_type': _decl,
+    'get_callers': _cf,
+    'get_callees': _ct,
+    'get_vars': _vars,
+    'disassemble': _dis,
+    'read_bytes': _rb,
+    'read_value': _rval,
+    'read_string': _rstr,
+    'get_head': _head,
+    'get_name': _gn,
+    'set_name': _sn,
+    'get_comment': _gc,
+    'set_comment': _sc,
+    'search_names': _an,
+    'list_globals': _lg,
+    'read_global': _rg,
+    'get_type': _gt,
+    'set_type': _st,
+    'set_c_decls': _cdecls,
+    'list_types': _types,
+    'get_type_decl': _type_decl,
+    'read_struct': _read_struct,
+    'delete_type': _td,
+    'find_enum_value': _find_enum_value,
+    'list_segments': _segs,
+    'get_segment_info': _segi,
+    'xrefs_to': _xto,
+    'xrefs_from': _xfrom,
+    'xrefs_to_field': _xtof,
+    'search_bytes': _srch,
+    'search_strings': _strs,
+    'search_imm': _imm,
+    'list_imports': _imp,
+    'list_exports': _exp,
+    'list_entries': _ent,
+    'get_cfg': _cfg,
+    'patch_bytes': _pat,
+    'patch_asm': _pasm,
+    'patch_list': _patl,
+    'bookmark_list': _bml,
+    'bookmark_set': _bms,
+    'bookmark_delete': _bmd,
+    'reanalyze': _aa,
+    'create_function': _mkfn,
+    'delete_function': _delfn,
+    'make_data': _mkdt,
+    'undefine': _undef,
+    'rename_var': _rnv,
+    'retype_var': _rtv,
+    'list_frame_vars': _fv_frame,
+    'create_frame_var': _cfv,
+    'delete_frame_var': _dfv,
+    'rename_frame_var': _rfv,
+    'retype_frame_var': _tfv,
+    'call_tree': _ctree,
+    'callers_tree': _ctreet,
+    'get_func_by_addr': _get_func_by_addr,
+    'kernel_read': _kernel_read,
+    'kernel_modules': _kernel_modules,
+    'kernel_module_base': _kernel_module_base,
+    'kernel_read_values': _kernel_read_values,
+    'ida_to_runtime': _ida_to_runtime,
+    'calc': _calc,
+    'disasm_bytes': _disasm_bytes,
+}
+
+
+_CACHE_INVALIDATING = frozenset([
+    'set_name', 'set_type', 'delete_type',
+    'set_c_decls', 'patch_bytes', 'patch_asm',
+    'create_function', 'delete_function', 'make_data', 'undefine', 'reanalyze',
+    'rename_var', 'retype_var', 'create_frame_var', 'delete_frame_var',
+    'rename_frame_var', 'retype_frame_var'
+])
+
+
+def execute_tool(tool, args):
+    """Execute a single tool. Used as local_handler."""
+    fn = DISPATCH.get(tool)
+    if not fn:
+        return {'e': f'unknown tool: {tool}'}
+    try:
+        result = fn(args)
+        if tool in _CACHE_INVALIDATING:
+            import threading
+            cache = get_cache()
+            cache.invalidate()
+            threading.Thread(target=cache.ensure_built, daemon=True).start()
+        return result
+    except Exception as ex:
+        return {'e': str(ex)}
+
+```
+
+`iida_core/worker.py`:
+
+```py
+"""Worker node - connects to master and handles forwarded tool calls."""
+import socket
+import threading
+import time
+import os
+
+from . import protocol
+from .server import INTERNAL_PORT, MCP_PORT, McpServer, try_bind_master, try_election_lock
+
+
+class Worker:
+    """Runs inside a non-master IDA instance."""
+
+    def __init__(self, file_info, local_handler, on_promoted=None):
+        """
+        file_info: dict with fid, name, arch, bits, path
+        local_handler: function(tool, args) -> result
+        """
+        self.file_info = file_info
+        self.local_handler = local_handler
+        self.on_promoted = on_promoted
+        self._conn = None
+        self._running = False
+        self._thread = None
+        self._promoted = False
+        self._master_server = None
+        self._call_port = 0
+        self._call_sock = None
+        self._call_thread = None
+
+    def start(self):
+        self._running = True
+        self._start_call_server()
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread.start()
+
+    def stop(self):
+        self._running = False
+        if self._conn:
+            try:
+                protocol.send_msg(self._conn, {
+                    't': protocol.MSG_UNREGISTER,
+                    'fid': self.file_info['fid']
+                })
+            except:
+                pass
+            try:
+                self._conn.close()
+            except:
+                pass
+        if self._call_sock:
+            try:
+                self._call_sock.shutdown(socket.SHUT_RDWR)
+            except:
+                pass
+            try:
+                self._call_sock.close()
+            except:
+                pass
+            self._call_sock = None
+        if self._thread:
+            self._thread.join(timeout=2.0)
+        if self._call_thread:
+            self._call_thread.join(timeout=2.0)
+
+    def is_promoted(self):
+        return self._promoted
+
+    def get_master_server(self):
+        return self._master_server
+
+    def _start_call_server(self):
+        """Start a TCP server on a random port to handle tool calls from master."""
+        self._call_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._call_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self._call_sock.bind(('127.0.0.1', 0))  # OS picks a free port
+        self._call_port = self._call_sock.getsockname()[1]
+        self._call_sock.listen(16)
+        self._call_sock.settimeout(1.0)
+        self._call_thread = threading.Thread(target=self._accept_calls, daemon=True)
+        self._call_thread.start()
+
+    def _accept_calls(self):
+        """Accept incoming call connections from master's router."""
+        while self._running:
+            try:
+                conn, addr = self._call_sock.accept()
+                t = threading.Thread(target=self._handle_call_conn, args=(conn,), daemon=True)
+                t.start()
+            except socket.timeout:
+                continue
+            except OSError:
+                break
+
+    def _handle_call_conn(self, conn):
+        """Handle a single call request on a dedicated connection."""
+        try:
+            msg = protocol.recv_msg(conn)
+            if msg and msg.get('t') == protocol.MSG_CALL:
+                result = self._handle_call(msg)
+                protocol.send_msg(conn, {'t': protocol.MSG_RESULT, 'r': result})
+        except:
+            pass
+        finally:
+            try:
+                conn.close()
+            except:
+                pass
+
+    def _run(self):
+        while self._running:
+            try:
+                self._conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self._conn.settimeout(2.0)
+                self._conn.connect(('127.0.0.1', INTERNAL_PORT))
+                self._conn.settimeout(1.0)
+                self._register()
+                self._loop()
+            except (ConnectionRefusedError, OSError, TimeoutError):
+                if not self._running:
+                    break
+                if self._try_become_master():
+                    break
+                time.sleep(0.5)
+            except Exception:
+                if not self._running:
+                    break
+                time.sleep(1.0)
+
+    def _register(self):
+        protocol.send_msg(self._conn, {
+            't': protocol.MSG_REGISTER,
+            'fid': self.file_info['fid'],
+            'name': self.file_info['name'],
+            'arch': self.file_info['arch'],
+            'bits': self.file_info['bits'],
+            'path': self.file_info['path'],
+            'pid': os.getpid(),
+            'call_port': self._call_port
+        })
+        ack = protocol.recv_msg(self._conn)
+        if not ack or not ack.get('ok'):
+            raise RuntimeError('register failed')
+
+    def _loop(self):
+        """Control connection loop - only handles control messages (promote, heartbeat)."""
+        while self._running:
+            try:
+                msg = protocol.recv_msg(self._conn)
+            except socket.timeout:
+                if not self._heartbeat_master():
+                    self._promote_until(deadline=time.time() + 10.0)
+                    break
+                continue
+            except OSError:
+                msg = None
+            if msg is None:
+                self._promote_until(deadline=time.time() + 10.0)
+                break
+
+            mt = msg.get('t')
+            if mt == protocol.MSG_PROMOTE:
+                self._promote_until(deadline=time.time() + 10.0, handoff_port=msg.get('handoff_port', 0))
+                break
+            elif mt == protocol.MSG_HEARTBEAT:
+                try:
+                    protocol.send_msg(self._conn, {'t': protocol.MSG_HEARTBEAT})
+                except:
+                    break
+
+    def _handle_call(self, msg):
+        tool = msg.get('tool', '')
+        args = msg.get('args', {})
+        try:
+            return self.local_handler(tool, args)
+        except Exception as ex:
+            return {'e': str(ex)}
+
+    def _try_become_master(self, handoff_port=0):
+        """Attempt to take over as master."""
+        from . import tools as tools_module
+        election_lock = try_election_lock()
+        if not election_lock:
+            return False
+        try:
+            if self._conn:
+                self._conn.close()
+                self._conn = None
+
+            if not (_port_available(MCP_PORT) and _port_available(INTERNAL_PORT)):
+                return False
+
+            self._master_server = McpServer(tools_module, self.local_handler, election_lock=election_lock)
+            from .registry import FileEntry
+            entry = FileEntry(
+                fid=self.file_info['fid'],
+                name=self.file_info['name'],
+                arch=self.file_info['arch'],
+                bits=self.file_info['bits'],
+                path=self.file_info['path'],
+                pid=os.getpid(),
+                conn=None,
+                local=True
+            )
+            self._master_server.registry.register(entry)
+            self._master_server.start()
+            self._promoted = True
+            self._emit_promoted()
+            self._notify_promoted(handoff_port)
+            election_lock = None
+            return True
+        except Exception:
+            return False
+        finally:
+            try:
+                if election_lock:
+                    election_lock.close()
+            except:
+                pass
+
+    def _heartbeat_master(self):
+        try:
+            protocol.send_msg(self._conn, {'t': protocol.MSG_HEARTBEAT})
+            msg = protocol.recv_msg(self._conn)
+            return bool(msg and msg.get('t') == protocol.MSG_HEARTBEAT)
+        except:
+            return False
+
+    def _notify_promoted(self, handoff_port):
+        if not handoff_port:
+            return
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(0.5)
+            s.connect(('127.0.0.1', int(handoff_port)))
+            protocol.send_msg(s, {'t': protocol.MSG_PROMOTED, 'fid': self.file_info['fid']})
+        except:
+            pass
+        finally:
+            try:
+                s.close()
+            except:
+                pass
+
+    def _emit_promoted(self):
+        if not self.on_promoted:
+            return
+        try:
+            self.on_promoted(self)
+        except:
+            pass
+
+    def _promote_until(self, deadline, handoff_port=0):
+        while self._running and time.time() < deadline:
+            if self._try_become_master(handoff_port):
+                return True
+            if not try_bind_master():
+                return False
+            time.sleep(0.3)
+        return False
+
+
+def _port_available(port):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.settimeout(0.5)
+        s.connect(('127.0.0.1', port))
+        return False  # someone is listening
+    except (ConnectionRefusedError, OSError, TimeoutError):
+        return True
+    finally:
+        try:
+            s.close()
+        except:
+            pass
+
+```
