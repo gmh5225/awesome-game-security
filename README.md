@@ -996,6 +996,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/dse_hook
 - https://github.com/gmh5225/Dse-Patcher-2
 - https://github.com/gmh5225/DisableDSE
+- https://github.com/wesmar/KernelResearchKit [Windows 11 kernel research framework — boot-time DSE bypass on 25H2 by surgically patching SeCiCallbacks via native subsystem to load unsigned drivers; anti-loop protection and dual-path architecture]
 
 > Windows Kernel Explorer
 - https://github.com/NullArray/WinKernel-Resources [Guide]
