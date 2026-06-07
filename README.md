@@ -4128,6 +4128,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/AlessandroZ/LaZagne
 - https://github.com/thewhiteninja/ntfstool
 - https://github.com/mgeeky/ntfs-journal-viewer
+- https://github.com/wesmar/FileRecoveryTool [Professional file recovery for Windows — NTFS/FAT32/exFAT via MFT scanning, USN Journal analysis and file carving; pure Win32 C++, zero dependencies, multi-threaded GUI, direct disk access]
 - https://github.com/volatilityfoundation/volatility
 - https://github.com/volatilityfoundation/volatility3
 - https://github.com/nikaiw/VMkatz [Extract Windows credentials directly from VM memory snapshots and virtual disks (LSASS, SAM/LSA, cached creds, NTDS.dit) in-place]
