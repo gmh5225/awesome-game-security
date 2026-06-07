@@ -1616,6 +1616,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/cristeigabriela/IDAFind [Ctrl+F search support for Pseudocode windows]
 - https://github.com/thalium/symless [IDA Pro plugin that helps reconstruct structures]
 - https://github.com/buzzer-re/Rikugan [A reverse-engineering agent for IDA Pro and Binary Ninja that integrates a multi-provider LLM directly into your analysis UI]
+- https://github.com/buzzer-re/ToCode [Transform binaries into source-code-like projects that coding agents can traverse, analyze, and use as an oracle for large binaries; supports IDA Pro and radare2]
 - https://github.com/guheng-re/unflat [unflattener]
 - https://github.com/Dump-GUY/ApplyCalleeTypeEx [ApplyCalleeType reborn for IDA Pro 9.3 — apply function prototype to indirect CALL for correct decompiler/disasm; IDA 8.x–9.3+]
 - https://github.com/allthingsida/idacpp [A C++ REPL for IDA Pro / IDA C++ SDK]
