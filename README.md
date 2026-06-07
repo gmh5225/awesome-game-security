@@ -2368,6 +2368,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/HideDriverTesting [Hide Driver]
 - https://github.com/IcEy-999/Drv_Hide_And_Camouflage [Hide Driver]
 - https://github.com/Kudaes/Puzzle [Windows minifilter abuse PoCs for stealth and concealment]
+- https://github.com/wesmar/VaultGuard [Folder and file protection via kernel FSFilter minifilter — pure x64 MASM, zero CRT (~60 KB); hide, lock, read-only or block execution; Win11 GUI with Mica, scriptable CLI, drag-and-drop, per-process trusted bypass]
 - [Exploring CI.dll and Bigpool Cache](https://github.com/hLunaaa/hLunaaa.github.io/blob/4eb5450cb245217543733b475ce1198b812551a6/_posts/2025-04-25-Bypassing-CR3-Abuse-with-Physical-RW%20copy.markdown) [Driver Trace Cleaner]
 - https://github.com/BadPlayer555/TraceCleaner [Driver Trace Cleaner]
 - https://github.com/Sentient111/ClearDriverTraces [Driver Trace Cleaner]
