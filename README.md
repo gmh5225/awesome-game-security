@@ -2187,6 +2187,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/Driver-read_write [Hijack IRP Beep.sys]
 - https://github.com/isoadam/gina_public [Hijack IRP Null]
 - https://github.com/Barracudach/Swap-control-ioctl [Hijack IRP SpeedFan.sys]
+- https://github.com/wesmar/KeyboardKit [Educational kernel-mode keylogger rootkit — intercepts keyboard IRPs for UDP logging; demonstrates stealth persistence, privilege escalation and IRP hooking for offensive security research and defensive analysis]
 - https://github.com/adspro15/km-um-communication
 - https://github.com/Spuckwaffel/Kernel-Thread-Driver [Thread]
 - https://github.com/Astronaut00/DoubleDataPointer [Double Data Pointer]
