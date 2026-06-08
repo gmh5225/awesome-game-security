@@ -2542,6 +2542,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/dnSpy/Mono.Debugger.Soft [Mono Debugger]
 - https://github.com/gmh5225/unispectDMAPlugin [Mono Dump + DMA]
 - https://github.com/Perfare/Il2CppDumper [Il2Cpp Dump]
+- https://github.com/bombaris34/il2cpp-pdb [Il2CppDumper fork with native Rust PDB generator for x64 PE (GameAssembly.dll) — function names, full struct types and typed prototypes, auto-loaded by IDA]
 - https://github.com/khang06/Il2CppDumper-YuanShen [Il2Cpp Dump for Genshin Impact]
 - https://github.com/Perfare/Il2CppDumper [Il2Cpp Dump GUI]
 - https://github.com/Poko-Apps/Il2cppDumpDroidGUI [Il2Cpp Dump GUI]
