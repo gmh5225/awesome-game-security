@@ -2177,6 +2177,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Muz1K1zuM/PoisonKiller_bof [PoisonX.sys]
 - https://github.com/waryas/xign_poc_april_2026 [xhunter64.sys]
 - https://github.com/gmh5225/qiomem [Qiomem.sys]
+- https://github.com/gmh5225/PdFwKrnlMapper [PdFwKrnl.sys]
+- https://github.com/gmh5225/pdfwkrnl-exploit [PdFwKrnl.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
