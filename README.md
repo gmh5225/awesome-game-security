@@ -2179,6 +2179,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/qiomem [Qiomem.sys]
 - https://github.com/gmh5225/PdFwKrnlMapper [PdFwKrnl.sys]
 - https://github.com/gmh5225/pdfwkrnl-exploit [PdFwKrnl.sys]
+- https://github.com/Bad-Jubies/Exploits [AmdPowerProfiler.sys]
 
 > Driver Communication
 - https://github.com/gmh5225/Driver-Communication-List
