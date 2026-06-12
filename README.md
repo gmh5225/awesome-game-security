@@ -294,6 +294,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ls361664056/GameAI-paper-list [zh]
 - https://github.com/lightningpixel/modly [Local image-to-3D mesh desktop app; open-source AI on GPU; Windows/Linux; extensible generators]
 - https://github.com/neilsonnn/image-blaster [Claude skillset: single image to 3D meshes (.glb/.obj), Gaussian splat environment (.spz), and SFX; World Labs + FAL; Unity/Unreal/Godot/Blender]
+- https://github.com/PSkinnerTech/3d-asset-factory [CLI-first YAML→3D pipeline: GPT Image 2.0 concept → TRELLIS.2 GLB; QA gate, review HTML, web/Unity/Unreal export; mock & remote GPU runners]
 - https://github.com/blendi-remade/sprite-sheet-creator [AI 2D pixel-art sprite sheets & parallax backgrounds; fal.ai; Next.js; walk/jump/attack/idle, sandbox]
 
 ## Image Codec
@@ -543,6 +544,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/HitmanHimself/GOWTool [God of War 2018]
 - https://github.com/KhronosGroup/glTF [Runtime 3D Asset Delivery]
 - https://github.com/syoyo/tinygltf [Header only C++11 tiny glTF 2.0 library]
+- https://github.com/PSkinnerTech/3d-asset-factory [CLI-first YAML→3D asset pipeline: spec → GLB; QA gate, review HTML, web/Unity/Unreal export packages; manifest provenance]
 - https://github.com/atenfyr/UAssetGUI [Viewing and modifying UE4 game assets]
 - https://github.com/UETools/UETools [Accessing, reading and deserializing UE4 assets]
 - https://github.com/atenfyr/UAssetAPI [A low-level .NET library for reading and writing Unreal Engine game assets]
