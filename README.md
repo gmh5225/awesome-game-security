@@ -953,6 +953,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/momo5502/sogen [Windows User Space Emulator]
 - https://github.com/mojtabafalleh/emulator [Windows User Space Emulator]
 - https://github.com/binsnake/KUBERA [A x86 environment emulator for Windows user and kernel binaries]
+- https://github.com/HexRaysSA/rax [Self-checking CPU emulator: x86-64/AArch64/Hexagon/RISC-V; instruction-level diff vs KVM/QEMU oracles; boots Linux, SDE trace, GDB stub for IDA, SMIR JIT; Rust, MIT]
 - https://github.com/ZehMatt/zyemu [x86-64 user mode emulation using Zydis]
 - https://github.com/Nitr0-G/PeVisor [PE]
 - https://github.com/googleprojectzero/TinyInst
@@ -2283,6 +2284,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Twobot7/advanced-efi-driver-with-gdi-and-kernel-mouse-input [A UEFI-based driver for direct memory access and process manipulation, with built-in security features and stealth capabilities]
 
 > QEMU/KVM/PVE/VBOX
+- https://github.com/HexRaysSA/rax [Self-checking CPU emulator: x86-64/AArch64/Hexagon/RISC-V; differential-verified vs KVM/QEMU; boots Linux, GDB stub; Hex-Rays, Rust, MIT]
 - https://github.com/david942j/kvm-kernel-example [Guide]
 - https://github.com/airbus-seclab/qemu_blog [Guide]
 - https://github.com/quickemu-project/quickemu [Quickly create and run optimized QEMU VMs for Windows/macOS/Linux]
