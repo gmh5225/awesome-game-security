@@ -2643,6 +2643,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/458928-eacs-maskable-interrupt-callback.html [NMI]
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/464943-eac-nmi-bypass-callbacks.html [NMI Bypass]
 - https://github.com/gmh5225/EasyAntiCheat-Reversing
+- https://github.com/19h/eac-analysis [eac.elf VM reconstruction: dlopen/trace harness, dispatch & VMTAIL probes, bytecode recover/IR/CFG, handler ISA, static path replay, MBA reducers; Linux ELF]
 - https://github.com/Sinclairq/hiearchy-eac [Integrity Checks]
 - https://github.com/Rat431/EAC_Emu [Simple EasyAntiCheat x64 emulator]
 - https://github.com/xBrunoMedeiros/eac-overlay [EAC Overlay]
@@ -4433,6 +4434,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/google/android-emulator-hypervisor-driver
 - https://github.com/ant4g0nist/rudroid [Rust]
 - https://github.com/qemu-gvm/qemu-gvm [QEMU]
+- https://github.com/Droid-VM/DroidVM [Android VM manager on Snapdragon: Gunyah hypervisor; crosvm/QEMU; UEFI Linux/Windows; VirGL/GfxStream GPU, VNC, VirtFS; root required]
 - https://github.com/quarkslab/AERoot [Root]
 
 ## IOS Emulator
