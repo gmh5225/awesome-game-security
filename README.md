@@ -825,6 +825,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/cursey/regenny [Reconstruct structures and generate header files]
 - https://github.com/zodiacon/EtwExplorer [View ETW Provider manifest]
 - https://github.com/jonny-jhnson/EtwWatcher [Browse and diff ETW provider snapshots across Windows builds; backed by ETWInspector]
+- https://github.com/kernelstub/Cognitor [Defensive Patch Tuesday semantic diff for Windows snapshots: PE/driver IOCTL diff, rule engine, lab dossiers, SARIF/MD/JSON; sibling-bug triage]
 - https://github.com/gmh5225/ceserver-ios [Porting ceserver to iOS.Dynamic analysis]
 - https://github.com/VoidSec/ioctlpus [Be used to make DeviceIoControl requests with arbitrary inputs]
 - https://github.com/horsicq/Nauz-File-Detector [Linker/Compiler/Tool detector]
@@ -1413,6 +1414,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/retdec
 - https://github.com/Sidenai/hyperion-disassembler [Native multi-arch disassembler & decompiler — PE/ELF/Mach-O/.NET, x86/x64/ARM64/MIPS/PPC, RTTI recovery, SSA decompiler, Lua scripting, packer detection]
 - https://github.com/kernelstub/Retract [Static binary analysis workbench: PE/ELF/Mach-O, x86/x64 disasm, CFG, pseudocode, browser UI via --serve; malware triage and RE]
+- https://github.com/kernelstub/Cognitor [Patch Tuesday semantic diff CLI for Windows build snapshots; driver IOCTL lab, defensive patch review, disclosure workflows]
 - https://github.com/azw413/Glass [Rust, GPL-3.0] Mobile-first GPU disassembler (gpui) for APK/DEX/smali and AArch64 ELF/Mach-O (Android/iOS); CFG, xref, bin/insn search, annotations, in-place patch export; CLI + MCP; free IDA alternative]
 - https://github.com/Col-E/Recaf [Java]
 - https://github.com/gmh5225/bytecode-viewer [Java]
