@@ -1584,6 +1584,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/ida_export_functions [Export IDA Pro Function List to a Specified Path (Markdown Format)]
 - https://github.com/L4ys/IDA-WPP-Remover [Remove WPP calls from hexrays decompiled code]
 - https://github.com/0xdea/augur [Augur is a blazing fast IDA Pro headless plugin that extracts strings and related pseudo-code from a binary file]
+- https://github.com/0xdea/rhabdomancer [IDA Pro headless plugin: locate calls to potentially insecure API functions; tiered badness, bookmarks, backtrace audit paths; idalib/Rust]
 - https://github.com/DennyDai/headless-ida [Run IDA scripts headlessly]
 - https://github.com/cpkt9762/ida-cli [Headless IDA Pro MCP server for AI-assisted binary analysis, powered by idalib]
 - https://github.com/trailofbits/idac [IDA Pro CLI for agents and humans: Unix socket to live GUI or headless idalib, structured JSON, batch/preview/dry-run, bundled agent skill; not MCP — early alpha]
