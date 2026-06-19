@@ -594,6 +594,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 ## Game CI
 - https://github.com/game-ci
 - https://github.com/nikaera/Unity-GameCI-Sample [Unity]
+- https://github.com/EpicGames/lore [Epic Games open source VCS for games: content-addressed chunk storage, sparse workspaces, tamper-evident history, large binary assets; Rust; UEFN]
 
 ## DirectX
 > Guide
