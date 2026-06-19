@@ -1,0 +1,1704 @@
+Project Path: arc_cocomelonc_pawtrace_czaznx0u
+
+Source Tree:
+
+```txt
+arc_cocomelonc_pawtrace_czaznx0u
+├── Makefile
+├── README.md
+├── asm
+│   └── arch_x86_64.S
+├── build
+│   ├── asm
+│   └── src
+├── examples
+│   ├── chatter
+│   ├── chatter.c
+│   ├── sock
+│   └── sock.c
+├── include
+│   └── pawtrace.h
+├── pawtrace
+├── screenshots
+└── src
+    ├── decode.c
+    ├── main.c
+    ├── proc.c
+    ├── remote.c
+    └── trace.c
+
+```
+
+`Makefile`:
+
+```
+CC ?= cc
+AS ?= cc
+CFLAGS ?= -std=c11 -Wall -Wextra -Wpedantic -O2 -g -D_GNU_SOURCE
+LDFLAGS ?=
+
+BIN := pawtrace
+BUILD := build
+SRC := src/main.c src/trace.c src/decode.c src/remote.c src/proc.c
+ASM := asm/arch_x86_64.S
+OBJ := $(SRC:%.c=$(BUILD)/%.o) $(ASM:%.S=$(BUILD)/%.o)
+
+.PHONY: all clean examples release
+
+all: $(BIN)
+
+release:
+	$(MAKE) clean
+	$(MAKE) LDFLAGS="$(LDFLAGS) -s"
+
+$(BIN): $(OBJ)
+	$(CC) $(LDFLAGS) -o $@ $^
+
+$(BUILD)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -Iinclude -c -o $@ $<
+
+$(BUILD)/%.o: %.S
+	@mkdir -p $(dir $@)
+	$(AS) -c -o $@ $<
+
+examples: examples/chatter examples/sock
+
+examples/chatter: examples/chatter.c asm/arch_x86_64.S
+	$(CC) $(CFLAGS) -Iinclude -o $@ examples/chatter.c asm/arch_x86_64.S
+
+examples/sock: examples/sock.c
+	$(CC) $(CFLAGS) -Iinclude -o $@ examples/sock.c
+
+clean:
+	rm -rf $(BUILD) $(BIN) examples/chatter examples/sock
+
+```
+
+`README.md`:
+
+```md
+# pawtrace
+
+my tiny project `pawtrace` - is a Linux x86-64 syscall tracer written in C with a small assembly support layer.     
+
+![img](./screenshots/2026-06-19_14-35.png)    
+
+![img](./screenshots/2026-06-19_14-10.png)    
+
+It launches a program under `ptrace`, follows forks/clones, pairs syscall enter/exit stops, decodes common syscall arguments, reads traced process memory for paths and small buffer previews, decodes socket addresses, flags writable+executable memory (`!W^X`), and can snapshot `/proc/<pid>/maps` around exec/exit events.    
+
+This is intended for defensive research, reverse engineering practice, binary behavior auditing, and red-team lab validation of what a process actually does at the syscall layer. It does not inject code, bypass controls, hide processes, or modify traced programs.    
+
+## build
+
+```bash
+make
+```
+
+`make` produces a debug build (with `-g`). use `make release` for a stripped binary (no symbols/debug info, ~60% smaller on disk).
+
+![img](./screenshots/2026-06-19_13-06.png)    
+
+```bash
+make examples
+```
+
+![img](./screenshots/2026-06-19_13-08.png)    
+
+## usage
+
+```bash
+./pawtrace -- /bin/ls /tmp
+./pawtrace -m -- examples/chatter
+./pawtrace -- examples/sock
+./pawtrace -e connect,sendto,bind -- examples/sock
+./pawtrace -j -o trace.jsonl -- /usr/bin/true
+```
+
+![img](./screenshots/2026-06-19_13-09.png)    
+
+![img](./screenshots/2026-06-19_15-54.png)    
+
+options:
+
+`-j`, `--json`: emit JSONL records.    
+`-m`, `--maps`: dump `/proc/<pid>/maps` at exec and exit events.    
+`-s`, `--string-max N`: cap remote string reads.    
+`-p`, `--preview-max N`: cap read/write buffer previews.    
+`-o`, `--output FILE`: write trace output to a file.    
+`-e`, `--trace NAMES`: only show these syscalls (comma-separated, exact names).    
+`-h`, `--help`: show usage.    
+
+`-s`, `-p`, `-o`, and `-e` each require an argument; pawtrace exits with an error if it is missing. `N` must be in the range 1..1048576.    
+
+text output is colorized automatically when writing to a terminal (disabled for pipes, files, `-j` JSON, and when `NO_COLOR` is set).    
+
+## technical notes
+
+on x86-64 Linux, syscall arguments are read from `rdi`, `rsi`, `rdx`, `r10`, `r8`, and `r9`; the syscall number is in `orig_rax`; the return value is in `rax`. `pawtrace` stores the enter-side frame so the exit-side return value can be interpreted with the original arguments.    
+
+the tracer uses:    
+
+`PTRACE_TRACEME` for the initial child.   
+`PTRACE_O_TRACESYSGOOD` to distinguish syscall stops from normal `SIGTRAP`.   
+`PTRACE_O_TRACEFORK`, `PTRACE_O_TRACEVFORK`, and `PTRACE_O_TRACECLONE` to follow process trees.   
+`PTRACE_O_TRACEEXEC` and `PTRACE_O_TRACEEXIT` for lifecycle context.   
+`process_vm_readv` first for remote memory reads, with `PTRACE_PEEKDATA` as a fallback.   
+
+the assembly file provides raw syscall and timestamp helpers:       
+
+`pt_raw_syscall6`   
+`pt_gettid_raw`   
+`pt_rdtsc`   
+
+## useful next extensions
+
+add an attach mode with `PTRACE_SEIZE`.   
+add socket address decoding for `recvfrom` and `accept` (exit-side, the address is an output).    
+add a dump of the observed syscall set at exit (seccomp allowlist seed).    
+add richer JSON argument decoding instead of raw numeric args.    
+
+`connect`, `bind`, and `sendto` already decode the destination address (`inet`/`inet6`/`unix`).    
+
+```
+
+`asm/arch_x86_64.S`:
+
+```S
+/* author: cocomelonc */
+.text
+
+.globl pt_raw_syscall6
+.type pt_raw_syscall6,@function
+pt_raw_syscall6:
+    mov %rdi, %rax
+    mov %rsi, %rdi
+    mov %rdx, %rsi
+    mov %rcx, %rdx
+    mov %r8,  %r10
+    mov %r9,  %r8
+    mov 8(%rsp), %r9
+    syscall
+    ret
+
+.globl pt_gettid_raw
+.type pt_gettid_raw,@function
+pt_gettid_raw:
+    mov $186, %rax
+    syscall
+    ret
+
+.globl pt_rdtsc
+.type pt_rdtsc,@function
+pt_rdtsc:
+    rdtsc
+    shl $32, %rdx
+    or %rdx, %rax
+    ret
+
+```
+
+`examples/chatter.c`:
+
+```c
+// author: cocomelonc
+#include "pawtrace.h"
+
+#include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+
+int main(void) {
+  char buf[64] = {0};
+  long tid = pt_gettid_raw();
+  dprintf(STDOUT_FILENO, "chatter tid=%ld\n", tid);
+
+  int fd = open("/etc/hostname", O_RDONLY);
+  if (fd >= 0) {
+    ssize_t n = read(fd, buf, sizeof(buf) - 1);
+    if (n > 0) {
+      write(STDOUT_FILENO, buf, (size_t)n);
+    }
+    close(fd);
+  }
+
+  long pid = pt_raw_syscall6(SYS_getpid, 0, 0, 0, 0, 0, 0);
+  dprintf(STDOUT_FILENO, "raw getpid=%ld\n", pid);
+  return 0;
+}
+
+```
+
+`examples/sock.c`:
+
+```c
+// author: cocomelonc
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <unistd.h>
+
+int main(void) {
+  // udp sendto an inet address
+  int u = socket(AF_INET, SOCK_DGRAM, 0);
+  if (u >= 0) {
+    struct sockaddr_in in = {0};
+    in.sin_family = AF_INET;
+    in.sin_port = htons(53);
+    inet_pton(AF_INET, "8.8.8.8", &in.sin_addr);
+    sendto(u, "x", 1, 0, (struct sockaddr *)&in, sizeof(in));
+    close(u);
+  }
+
+  // bind an inet socket to a loopback port
+  int b = socket(AF_INET, SOCK_STREAM, 0);
+  if (b >= 0) {
+    struct sockaddr_in in = {0};
+    in.sin_family = AF_INET;
+    in.sin_port = htons(0);
+    inet_pton(AF_INET, "127.0.0.1", &in.sin_addr);
+    bind(b, (struct sockaddr *)&in, sizeof(in));
+    close(b);
+  }
+
+  // connect to a unix socket path
+  int s = socket(AF_UNIX, SOCK_STREAM, 0);
+  if (s >= 0) {
+    struct sockaddr_un un = {0};
+    un.sun_family = AF_UNIX;
+    strncpy(un.sun_path, "/run/pawtrace-demo.sock", sizeof(un.sun_path) - 1);
+    connect(s, (struct sockaddr *)&un, sizeof(un));
+    close(s);
+  }
+
+  return 0;
+}
+
+```
+
+`include/pawtrace.h`:
+
+```h
+// author: cocomelonc
+#ifndef PAWTRACE_H
+#define PAWTRACE_H
+
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <sys/types.h>
+
+#define PT_MAX_ARGS 6
+#define PT_DEFAULT_STRING_MAX 256
+#define PT_DEFAULT_PREVIEW_MAX 64
+
+struct pt_config {
+  bool json;
+  bool maps;
+  bool color;
+  size_t string_max;
+  size_t preview_max;
+  const char *filter;
+  FILE *out;
+};
+
+enum pt_color {
+  PT_C_RESET, PT_C_DIM, PT_C_BOLD, PT_C_RED, PT_C_GREEN,
+  PT_C_YELLOW, PT_C_BLUE, PT_C_CYAN, PT_C_MAGENTA
+};
+
+struct pt_syscall_frame {
+  long nr;
+  unsigned long args[PT_MAX_ARGS];
+  long ret;
+};
+
+struct pt_state {
+  pid_t pid;
+  bool in_syscall;
+  struct pt_syscall_frame frame;
+  struct pt_state *next;
+};
+
+struct pt_syscall_meta {
+  long nr;
+  const char *name;
+};
+
+long pt_raw_syscall6(long nr, long a0, long a1, long a2, long a3, long a4, long a5);
+long pt_gettid_raw(void);
+uint64_t pt_rdtsc(void);
+
+int pt_trace_launch(char **argv, const struct pt_config *cfg);
+
+const char *pt_color(const struct pt_config *cfg, enum pt_color c);
+const char *pt_syscall_name(long nr);
+const char *pt_errno_name(long neg_ret);
+void pt_print_syscall_enter(FILE *out, pid_t pid, const struct pt_syscall_frame *f,
+              const struct pt_config *cfg);
+void pt_print_syscall_exit(FILE *out, pid_t pid, const struct pt_syscall_frame *f,
+               const struct pt_config *cfg);
+
+ssize_t pt_remote_read(pid_t pid, unsigned long addr, void *buf, size_t len);
+char *pt_remote_str(pid_t pid, unsigned long addr, size_t max);
+char *pt_remote_preview(pid_t pid, unsigned long addr, size_t len, size_t max);
+
+void pt_json_escape(FILE *out, const char *s);
+
+char *pt_fd_path(pid_t pid, int fd);
+void pt_dump_maps(FILE *out, pid_t pid);
+void pt_dump_maps_json(FILE *out, pid_t pid);
+
+#endif
+
+```
+
+`src/decode.c`:
+
+```c
+// author: cocomelonc
+#include "pawtrace.h"
+
+#include <errno.h>
+#include <fcntl.h>
+#include <arpa/inet.h>
+#include <linux/futex.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+
+// ANSI code for c, or "" when color is disabled (non-tty / json / NO_COLOR)
+const char *pt_color(const struct pt_config *cfg, enum pt_color c) {
+  static const char *const codes[] = {
+    "\x1b[0m", "\x1b[2m", "\x1b[1m", "\x1b[31m", "\x1b[32m",
+    "\x1b[33m", "\x1b[34m", "\x1b[36m", "\x1b[35m",
+  };
+  return cfg->color ? codes[c] : "";
+}
+
+const char *pt_syscall_name(long nr) {
+  switch (nr) {
+  case 0: return "read";
+  case 1: return "write";
+  case 2: return "open";
+  case 3: return "close";
+  case 4: return "stat";
+  case 5: return "fstat";
+  case 6: return "lstat";
+  case 7: return "poll";
+  case 8: return "lseek";
+  case 9: return "mmap";
+  case 10: return "mprotect";
+  case 11: return "munmap";
+  case 12: return "brk";
+  case 13: return "rt_sigaction";
+  case 14: return "rt_sigprocmask";
+  case 15: return "rt_sigreturn";
+  case 16: return "ioctl";
+  case 17: return "pread64";
+  case 18: return "pwrite64";
+  case 19: return "readv";
+  case 20: return "writev";
+  case 21: return "access";
+  case 22: return "pipe";
+  case 23: return "select";
+  case 24: return "sched_yield";
+  case 25: return "mremap";
+  case 26: return "msync";
+  case 27: return "mincore";
+  case 28: return "madvise";
+  case 29: return "shmget";
+  case 30: return "shmat";
+  case 31: return "shmctl";
+  case 32: return "dup";
+  case 33: return "dup2";
+  case 34: return "pause";
+  case 35: return "nanosleep";
+  case 36: return "getitimer";
+  case 37: return "alarm";
+  case 38: return "setitimer";
+  case 39: return "getpid";
+  case 40: return "sendfile";
+  case 41: return "socket";
+  case 42: return "connect";
+  case 43: return "accept";
+  case 44: return "sendto";
+  case 45: return "recvfrom";
+  case 46: return "sendmsg";
+  case 47: return "recvmsg";
+  case 48: return "shutdown";
+  case 49: return "bind";
+  case 50: return "listen";
+  case 51: return "getsockname";
+  case 52: return "getpeername";
+  case 53: return "socketpair";
+  case 54: return "setsockopt";
+  case 55: return "getsockopt";
+  case 56: return "clone";
+  case 57: return "fork";
+  case 58: return "vfork";
+  case 59: return "execve";
+  case 60: return "exit";
+  case 61: return "wait4";
+  case 62: return "kill";
+  case 63: return "uname";
+  case 64: return "semget";
+  case 65: return "semop";
+  case 66: return "semctl";
+  case 67: return "shmdt";
+  case 68: return "msgget";
+  case 69: return "msgsnd";
+  case 70: return "msgrcv";
+  case 71: return "msgctl";
+  case 72: return "fcntl";
+  case 73: return "flock";
+  case 74: return "fsync";
+  case 75: return "fdatasync";
+  case 76: return "truncate";
+  case 77: return "ftruncate";
+  case 78: return "getdents";
+  case 79: return "getcwd";
+  case 80: return "chdir";
+  case 81: return "fchdir";
+  case 82: return "rename";
+  case 83: return "mkdir";
+  case 84: return "rmdir";
+  case 85: return "creat";
+  case 86: return "link";
+  case 87: return "unlink";
+  case 88: return "symlink";
+  case 89: return "readlink";
+  case 90: return "chmod";
+  case 91: return "fchmod";
+  case 92: return "chown";
+  case 93: return "fchown";
+  case 94: return "lchown";
+  case 95: return "umask";
+  case 96: return "gettimeofday";
+  case 97: return "getrlimit";
+  case 98: return "getrusage";
+  case 99: return "sysinfo";
+  case 100: return "times";
+  case 101: return "ptrace";
+  case 102: return "getuid";
+  case 103: return "syslog";
+  case 104: return "getgid";
+  case 105: return "setuid";
+  case 106: return "setgid";
+  case 107: return "geteuid";
+  case 108: return "getegid";
+  case 109: return "setpgid";
+  case 110: return "getppid";
+  case 111: return "getpgrp";
+  case 112: return "setsid";
+  case 113: return "setreuid";
+  case 114: return "setregid";
+  case 115: return "getgroups";
+  case 116: return "setgroups";
+  case 117: return "setresuid";
+  case 118: return "getresuid";
+  case 119: return "setresgid";
+  case 120: return "getresgid";
+  case 121: return "getpgid";
+  case 122: return "setfsuid";
+  case 123: return "setfsgid";
+  case 124: return "getsid";
+  case 125: return "capget";
+  case 126: return "capset";
+  case 127: return "rt_sigpending";
+  case 128: return "rt_sigtimedwait";
+  case 129: return "rt_sigqueueinfo";
+  case 130: return "rt_sigsuspend";
+  case 131: return "sigaltstack";
+  case 132: return "utime";
+  case 133: return "mknod";
+  case 134: return "uselib";
+  case 135: return "personality";
+  case 136: return "ustat";
+  case 137: return "statfs";
+  case 138: return "fstatfs";
+  case 139: return "sysfs";
+  case 140: return "getpriority";
+  case 141: return "setpriority";
+  case 142: return "sched_setparam";
+  case 143: return "sched_getparam";
+  case 144: return "sched_setscheduler";
+  case 145: return "sched_getscheduler";
+  case 146: return "sched_get_priority_max";
+  case 147: return "sched_get_priority_min";
+  case 148: return "sched_rr_get_interval";
+  case 149: return "mlock";
+  case 150: return "munlock";
+  case 151: return "mlockall";
+  case 152: return "munlockall";
+  case 153: return "vhangup";
+  case 154: return "modify_ldt";
+  case 155: return "pivot_root";
+  case 156: return "_sysctl";
+  case 157: return "prctl";
+  case 158: return "arch_prctl";
+  case 159: return "adjtimex";
+  case 160: return "setrlimit";
+  case 161: return "chroot";
+  case 162: return "sync";
+  case 163: return "acct";
+  case 164: return "settimeofday";
+  case 165: return "mount";
+  case 166: return "umount2";
+  case 167: return "swapon";
+  case 168: return "swapoff";
+  case 169: return "reboot";
+  case 170: return "sethostname";
+  case 171: return "setdomainname";
+  case 172: return "iopl";
+  case 173: return "ioperm";
+  case 174: return "create_module";
+  case 175: return "init_module";
+  case 176: return "delete_module";
+  case 177: return "get_kernel_syms";
+  case 178: return "query_module";
+  case 179: return "quotactl";
+  case 180: return "nfsservctl";
+  case 181: return "getpmsg";
+  case 182: return "putpmsg";
+  case 183: return "afs_syscall";
+  case 184: return "tuxcall";
+  case 185: return "security";
+  case 186: return "gettid";
+  case 187: return "readahead";
+  case 188: return "setxattr";
+  case 189: return "lsetxattr";
+  case 190: return "fsetxattr";
+  case 191: return "getxattr";
+  case 192: return "lgetxattr";
+  case 193: return "fgetxattr";
+  case 194: return "listxattr";
+  case 195: return "llistxattr";
+  case 196: return "flistxattr";
+  case 197: return "removexattr";
+  case 198: return "lremovexattr";
+  case 199: return "fremovexattr";
+  case 200: return "tkill";
+  case 201: return "time";
+  case 202: return "futex";
+  case 203: return "sched_setaffinity";
+  case 204: return "sched_getaffinity";
+  case 205: return "set_thread_area";
+  case 206: return "io_setup";
+  case 207: return "io_destroy";
+  case 208: return "io_getevents";
+  case 209: return "io_submit";
+  case 210: return "io_cancel";
+  case 211: return "get_thread_area";
+  case 212: return "lookup_dcookie";
+  case 213: return "epoll_create";
+  case 214: return "epoll_ctl_old";
+  case 215: return "epoll_wait_old";
+  case 216: return "remap_file_pages";
+  case 217: return "getdents64";
+  case 218: return "set_tid_address";
+  case 219: return "restart_syscall";
+  case 220: return "semtimedop";
+  case 221: return "fadvise64";
+  case 222: return "timer_create";
+  case 223: return "timer_settime";
+  case 224: return "timer_gettime";
+  case 225: return "timer_getoverrun";
+  case 226: return "timer_delete";
+  case 227: return "clock_settime";
+  case 228: return "clock_gettime";
+  case 229: return "clock_getres";
+  case 230: return "clock_nanosleep";
+  case 231: return "exit_group";
+  case 232: return "epoll_wait";
+  case 233: return "epoll_ctl";
+  case 234: return "tgkill";
+  case 235: return "utimes";
+  case 236: return "vserver";
+  case 237: return "mbind";
+  case 238: return "set_mempolicy";
+  case 239: return "get_mempolicy";
+  case 240: return "mq_open";
+  case 241: return "mq_unlink";
+  case 242: return "mq_timedsend";
+  case 243: return "mq_timedreceive";
+  case 244: return "mq_notify";
+  case 245: return "mq_getsetattr";
+  case 246: return "kexec_load";
+  case 247: return "waitid";
+  case 248: return "add_key";
+  case 249: return "request_key";
+  case 250: return "keyctl";
+  case 251: return "ioprio_set";
+  case 252: return "ioprio_get";
+  case 253: return "inotify_init";
+  case 254: return "inotify_add_watch";
+  case 255: return "inotify_rm_watch";
+  case 256: return "migrate_pages";
+  case 257: return "openat";
+  case 258: return "mkdirat";
+  case 259: return "mknodat";
+  case 260: return "fchownat";
+  case 261: return "futimesat";
+  case 262: return "newfstatat";
+  case 263: return "unlinkat";
+  case 264: return "renameat";
+  case 265: return "linkat";
+  case 266: return "symlinkat";
+  case 267: return "readlinkat";
+  case 268: return "fchmodat";
+  case 269: return "faccessat";
+  case 270: return "pselect6";
+  case 271: return "ppoll";
+  case 272: return "unshare";
+  case 273: return "set_robust_list";
+  case 274: return "get_robust_list";
+  case 275: return "splice";
+  case 276: return "tee";
+  case 277: return "sync_file_range";
+  case 278: return "vmsplice";
+  case 279: return "move_pages";
+  case 280: return "utimensat";
+  case 281: return "epoll_pwait";
+  case 282: return "signalfd";
+  case 283: return "timerfd_create";
+  case 284: return "eventfd";
+  case 285: return "fallocate";
+  case 286: return "timerfd_settime";
+  case 287: return "timerfd_gettime";
+  case 288: return "accept4";
+  case 289: return "signalfd4";
+  case 290: return "eventfd2";
+  case 291: return "epoll_create1";
+  case 292: return "dup3";
+  case 293: return "pipe2";
+  case 294: return "inotify_init1";
+  case 295: return "preadv";
+  case 296: return "pwritev";
+  case 297: return "rt_tgsigqueueinfo";
+  case 298: return "perf_event_open";
+  case 299: return "recvmmsg";
+  case 300: return "fanotify_init";
+  case 301: return "fanotify_mark";
+  case 302: return "prlimit64";
+  case 303: return "name_to_handle_at";
+  case 304: return "open_by_handle_at";
+  case 305: return "clock_adjtime";
+  case 306: return "syncfs";
+  case 307: return "sendmmsg";
+  case 308: return "setns";
+  case 309: return "getcpu";
+  case 310: return "process_vm_readv";
+  case 311: return "process_vm_writev";
+  case 312: return "kcmp";
+  case 313: return "finit_module";
+  case 314: return "sched_setattr";
+  case 315: return "sched_getattr";
+  case 316: return "renameat2";
+  case 317: return "seccomp";
+  case 318: return "getrandom";
+  case 319: return "memfd_create";
+  case 320: return "kexec_file_load";
+  case 321: return "bpf";
+  case 322: return "execveat";
+  case 323: return "userfaultfd";
+  case 324: return "membarrier";
+  case 325: return "mlock2";
+  case 326: return "copy_file_range";
+  case 327: return "preadv2";
+  case 328: return "pwritev2";
+  case 329: return "pkey_mprotect";
+  case 330: return "pkey_alloc";
+  case 331: return "pkey_free";
+  case 332: return "statx";
+  case 333: return "io_pgetevents";
+  case 334: return "rseq";
+  case 335: return "uretprobe";
+  case 424: return "pidfd_send_signal";
+  case 425: return "io_uring_setup";
+  case 426: return "io_uring_enter";
+  case 427: return "io_uring_register";
+  case 428: return "open_tree";
+  case 429: return "move_mount";
+  case 430: return "fsopen";
+  case 431: return "fsconfig";
+  case 432: return "fsmount";
+  case 433: return "fspick";
+  case 434: return "pidfd_open";
+  case 435: return "clone3";
+  case 436: return "close_range";
+  case 437: return "openat2";
+  case 438: return "pidfd_getfd";
+  case 439: return "faccessat2";
+  case 440: return "process_madvise";
+  case 441: return "epoll_pwait2";
+  case 442: return "mount_setattr";
+  case 443: return "quotactl_fd";
+  case 444: return "landlock_create_ruleset";
+  case 445: return "landlock_add_rule";
+  case 446: return "landlock_restrict_self";
+  case 447: return "memfd_secret";
+  case 448: return "process_mrelease";
+  case 449: return "futex_waitv";
+  case 450: return "set_mempolicy_home_node";
+  case 451: return "cachestat";
+  case 452: return "fchmodat2";
+  case 453: return "map_shadow_stack";
+  case 454: return "futex_wake";
+  case 455: return "futex_wait";
+  case 456: return "futex_requeue";
+  case 457: return "statmount";
+  case 458: return "listmount";
+  case 459: return "lsm_get_self_attr";
+  case 460: return "lsm_set_self_attr";
+  case 461: return "lsm_list_modules";
+  case 462: return "mseal";
+  default: return "unknown";
+  }
+}
+
+const char *pt_errno_name(long neg_ret) {
+  if (neg_ret >= 0 || neg_ret < -4095) {
+    return NULL;
+  }
+  switch (-neg_ret) {
+  case EPERM: return "EPERM";
+  case ENOENT: return "ENOENT";
+  case ESRCH: return "ESRCH";
+  case EINTR: return "EINTR";
+  case EIO: return "EIO";
+  case ENXIO: return "ENXIO";
+  case E2BIG: return "E2BIG";
+  case ENOEXEC: return "ENOEXEC";
+  case EBADF: return "EBADF";
+  case ECHILD: return "ECHILD";
+  case EAGAIN: return "EAGAIN";
+  case ENOMEM: return "ENOMEM";
+  case EACCES: return "EACCES";
+  case EFAULT: return "EFAULT";
+  case EBUSY: return "EBUSY";
+  case EEXIST: return "EEXIST";
+  case ENODEV: return "ENODEV";
+  case ENOTDIR: return "ENOTDIR";
+  case EISDIR: return "EISDIR";
+  case EINVAL: return "EINVAL";
+  case EMFILE: return "EMFILE";
+  case ENOTTY: return "ENOTTY";
+  case ETXTBSY: return "ETXTBSY";
+  case EFBIG: return "EFBIG";
+  case ENOSPC: return "ENOSPC";
+  case ESPIPE: return "ESPIPE";
+  case EROFS: return "EROFS";
+  case EMLINK: return "EMLINK";
+  case EPIPE: return "EPIPE";
+  default: return "ERR";
+  }
+}
+
+void pt_json_escape(FILE *out, const char *s) {
+  for (; s && *s; s++) {
+    unsigned char c = (unsigned char)*s;
+    if (c == '"' || c == '\\') {
+      fputc('\\', out);
+      fputc(c, out);
+    } else if (c == '\n') {
+      fputs("\\n", out);
+    } else if (c == '\t') {
+      fputs("\\t", out);
+    } else if (c < 32) {
+      fprintf(out, "\\u%04x", c);
+    } else {
+      fputc(c, out);
+    }
+  }
+}
+
+struct pt_bit_name {
+  unsigned long bit;
+  const char *name;
+};
+
+static void print_named_bits(FILE *out, unsigned long v,
+               const struct pt_bit_name *bits, size_t count) {
+  bool first = true;
+  fputc('[', out);
+  for (size_t i = 0; i < count; i++) {
+    if (v & bits[i].bit) {
+      fprintf(out, "%s%s", first ? "" : "|", bits[i].name);
+      first = false;
+    }
+  }
+  if (first) {
+    fputc('0', out);
+  }
+  fputc(']', out);
+}
+
+static void print_prot(FILE *out, unsigned long v) {
+  static const struct pt_bit_name bits[] = {
+    {PROT_READ, "PROT_READ"},
+    {PROT_WRITE, "PROT_WRITE"},
+    {PROT_EXEC, "PROT_EXEC"},
+  };
+  print_named_bits(out, v, bits, sizeof(bits) / sizeof(bits[0]));
+}
+
+static void print_mmap_flags(FILE *out, unsigned long v) {
+  bool first = true;
+  fputc('[', out);
+  if ((v & MAP_TYPE) == MAP_PRIVATE) {
+    fputs("MAP_PRIVATE", out);
+    first = false;
+  } else if ((v & MAP_TYPE) == MAP_SHARED) {
+    fputs("MAP_SHARED", out);
+    first = false;
+  }
+#ifdef MAP_SHARED_VALIDATE
+  else if ((v & MAP_TYPE) == MAP_SHARED_VALIDATE) {
+    fputs("MAP_SHARED_VALIDATE", out);
+    first = false;
+  }
+#endif
+  static const struct pt_bit_name bits[] = {
+    {MAP_ANONYMOUS, "MAP_ANONYMOUS"},
+    {MAP_FIXED, "MAP_FIXED"},
+#ifdef MAP_FIXED_NOREPLACE
+    {MAP_FIXED_NOREPLACE, "MAP_FIXED_NOREPLACE"},
+#endif
+    {MAP_GROWSDOWN, "MAP_GROWSDOWN"},
+    {MAP_LOCKED, "MAP_LOCKED"},
+    {MAP_NORESERVE, "MAP_NORESERVE"},
+    {MAP_POPULATE, "MAP_POPULATE"},
+    {MAP_STACK, "MAP_STACK"},
+  };
+  for (size_t i = 0; i < sizeof(bits) / sizeof(bits[0]); i++) {
+    if (v & bits[i].bit) {
+      fprintf(out, "%s%s", first ? "" : "|", bits[i].name);
+      first = false;
+    }
+  }
+  if (first) {
+    fputc('0', out);
+  }
+  fputc(']', out);
+}
+
+static void print_open_flags(FILE *out, unsigned long v) {
+  bool first = true;
+  fputc('[', out);
+  switch (v & O_ACCMODE) {
+  case O_RDONLY: fputs("O_RDONLY", out); break;
+  case O_WRONLY: fputs("O_WRONLY", out); break;
+  case O_RDWR: fputs("O_RDWR", out); break;
+  }
+  first = false;
+
+  static const struct pt_bit_name bits[] = {
+    {O_CREAT, "O_CREAT"},
+    {O_EXCL, "O_EXCL"},
+    {O_TRUNC, "O_TRUNC"},
+    {O_APPEND, "O_APPEND"},
+    {O_NONBLOCK, "O_NONBLOCK"},
+    {O_CLOEXEC, "O_CLOEXEC"},
+    {O_DIRECTORY, "O_DIRECTORY"},
+    {O_NOFOLLOW, "O_NOFOLLOW"},
+  };
+  for (size_t i = 0; i < sizeof(bits) / sizeof(bits[0]); i++) {
+    if (v & bits[i].bit) {
+      fprintf(out, "%s%s", first ? "" : "|", bits[i].name);
+      first = false;
+    }
+  }
+  fputc(']', out);
+}
+
+static void print_path_arg(FILE *out, pid_t pid, unsigned long addr, const struct pt_config *cfg) {
+  char *s = pt_remote_str(pid, addr, cfg->string_max);
+  if (s) {
+    fprintf(out, "%s\"%s\"%s", pt_color(cfg, PT_C_YELLOW), s, pt_color(cfg, PT_C_RESET));
+    free(s);
+  } else {
+    fprintf(out, "0x%lx", addr);
+  }
+}
+
+static void print_sockaddr(FILE *out, pid_t pid, unsigned long addr, unsigned long len) {
+  if (!addr) {
+    fputs("NULL", out);
+    return;
+  }
+  struct sockaddr_storage ss;
+  memset(&ss, 0, sizeof(ss));
+  size_t want = len < sizeof(ss) ? len : sizeof(ss);
+  if (pt_remote_read(pid, addr, &ss, want) < (ssize_t)sizeof(sa_family_t)) {
+    fprintf(out, "0x%lx", addr);
+    return;
+  }
+  switch (ss.ss_family) {
+  case AF_INET: {
+    struct sockaddr_in *in = (struct sockaddr_in *)&ss;
+    char ip[INET_ADDRSTRLEN] = {0};
+    inet_ntop(AF_INET, &in->sin_addr, ip, sizeof(ip));
+    fprintf(out, "inet:%s:%u", ip, ntohs(in->sin_port));
+    break;
+  }
+  case AF_INET6: {
+    struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)&ss;
+    char ip[INET6_ADDRSTRLEN] = {0};
+    inet_ntop(AF_INET6, &in6->sin6_addr, ip, sizeof(ip));
+    fprintf(out, "inet6:[%s]:%u", ip, ntohs(in6->sin6_port));
+    break;
+  }
+  case AF_UNIX:
+    fprintf(out, "unix:%s", ((struct sockaddr_un *)&ss)->sun_path);
+    break;
+  default:
+    fprintf(out, "af=%u", ss.ss_family);
+  }
+}
+
+// flag memory that is both writable and executable (W^X violation)
+static void print_wx(FILE *out, const struct pt_config *cfg, unsigned long prot) {
+  if ((prot & PROT_WRITE) && (prot & PROT_EXEC)) {
+    fprintf(out, " %s%s!W^X%s", pt_color(cfg, PT_C_BOLD), pt_color(cfg, PT_C_RED),
+        pt_color(cfg, PT_C_RESET));
+  }
+}
+
+// true if name is a token of the comma-separated filter (or filter is unset)
+static bool pt_syscall_selected(const char *filter, const char *name) {
+  if (!filter) {
+    return true;
+  }
+  size_t len = strlen(name);
+  for (const char *p = filter; *p;) {
+    const char *comma = strchr(p, ',');
+    size_t tok = comma ? (size_t)(comma - p) : strlen(p);
+    if (tok == len && !strncmp(p, name, len)) {
+      return true;
+    }
+    if (!comma) {
+      break;
+    }
+    p = comma + 1;
+  }
+  return false;
+}
+
+static void print_common_enter(FILE *out, pid_t pid, const struct pt_syscall_frame *f,
+                 const struct pt_config *cfg) {
+  switch (f->nr) {
+  case 0:
+  case 1: {
+    char *fdp = pt_fd_path(pid, (int)f->args[0]);
+    fprintf(out, " fd=%lu", f->args[0]);
+    if (fdp) {
+      fprintf(out, "<%s>", fdp);
+      free(fdp);
+    }
+    fprintf(out, " buf=0x%lx count=%lu", f->args[1], f->args[2]);
+    if (f->nr == 1) {
+      char *p = pt_remote_preview(pid, f->args[1], f->args[2], cfg->preview_max);
+      if (p) {
+        fprintf(out, " preview=\"%s\"", p);
+        free(p);
+      }
+    }
+    break;
+  }
+  case 2:
+    fputs(" path=", out);
+    print_path_arg(out, pid, f->args[0], cfg);
+    fputs(" flags=", out);
+    print_open_flags(out, f->args[1]);
+    fprintf(out, " mode=0%lo", f->args[2]);
+    break;
+  case 59:
+    fputs(" path=", out);
+    print_path_arg(out, pid, f->args[0], cfg);
+    break;
+  case 80:
+  case 83:
+  case 84:
+  case 87:
+  case 89:
+    fputs(" path=", out);
+    print_path_arg(out, pid, f->args[0], cfg);
+    break;
+  case 9:
+    fprintf(out, " addr=0x%lx len=%lu prot=", f->args[0], f->args[1]);
+    print_prot(out, f->args[2]);
+    fputs(" flags=", out);
+    print_mmap_flags(out, f->args[3]);
+    fprintf(out, " fd=%d off=%lu", (int)f->args[4], f->args[5]);
+    print_wx(out, cfg, f->args[2]);
+    break;
+  case 10:
+    fprintf(out, " addr=0x%lx len=%lu prot=", f->args[0], f->args[1]);
+    print_prot(out, f->args[2]);
+    print_wx(out, cfg, f->args[2]);
+    break;
+  case 257:
+    fprintf(out, " dirfd=%d path=", (int)f->args[0]);
+    print_path_arg(out, pid, f->args[1], cfg);
+    fputs(" flags=", out);
+    print_open_flags(out, f->args[2]);
+    fprintf(out, " mode=0%lo", f->args[3]);
+    break;
+  case 262:
+    fprintf(out, " dirfd=%d path=", (int)f->args[0]);
+    print_path_arg(out, pid, f->args[1], cfg);
+    fprintf(out, " flags=0x%lx", f->args[3]);
+    break;
+  case 42:
+  case 49:
+    fprintf(out, " fd=%d addr=", (int)f->args[0]);
+    print_sockaddr(out, pid, f->args[1], f->args[2]);
+    break;
+  case 44:
+    fprintf(out, " fd=%d len=%lu dest=", (int)f->args[0], f->args[2]);
+    print_sockaddr(out, pid, f->args[4], f->args[5]);
+    break;
+  default:
+    fprintf(out, " a0=0x%lx a1=0x%lx a2=0x%lx a3=0x%lx a4=0x%lx a5=0x%lx",
+        f->args[0], f->args[1], f->args[2], f->args[3], f->args[4], f->args[5]);
+  }
+}
+
+void pt_print_syscall_enter(FILE *out, pid_t pid, const struct pt_syscall_frame *f,
+              const struct pt_config *cfg) {
+  if (!pt_syscall_selected(cfg->filter, pt_syscall_name(f->nr))) {
+    return;
+  }
+  if (cfg->json) {
+    fprintf(out, "{\"event\":\"enter\",\"pid\":%d,\"nr\":%ld,\"name\":\"%s\",\"args\":[%lu,%lu,%lu,%lu,%lu,%lu]}\n",
+        pid, f->nr, pt_syscall_name(f->nr), f->args[0], f->args[1], f->args[2],
+        f->args[3], f->args[4], f->args[5]);
+    return;
+  }
+  fprintf(out, "%s%spid=%d%s %s->%s %s%s%s%s(%ld)",
+      pt_color(cfg, PT_C_BOLD), pt_color(cfg, PT_C_BLUE), pid, pt_color(cfg, PT_C_RESET),
+      pt_color(cfg, PT_C_CYAN), pt_color(cfg, PT_C_RESET),
+      pt_color(cfg, PT_C_BOLD), pt_color(cfg, PT_C_YELLOW), pt_syscall_name(f->nr),
+      pt_color(cfg, PT_C_RESET), f->nr);
+  print_common_enter(out, pid, f, cfg);
+  fputc('\n', out);
+}
+
+void pt_print_syscall_exit(FILE *out, pid_t pid, const struct pt_syscall_frame *f,
+               const struct pt_config *cfg) {
+  if (!pt_syscall_selected(cfg->filter, pt_syscall_name(f->nr))) {
+    return;
+  }
+  if (cfg->json) {
+    const char *err = pt_errno_name(f->ret);
+    fprintf(out, "{\"event\":\"exit\",\"pid\":%d,\"nr\":%ld,\"name\":\"%s\",\"ret\":%ld",
+        pid, f->nr, pt_syscall_name(f->nr), f->ret);
+    if (err) {
+      fprintf(out, ",\"errno\":\"%s\"", err);
+    }
+    if (f->ret > 0 && (f->nr == 0 || f->nr == 1)) {
+      char *p = pt_remote_preview(pid, f->args[1], (size_t)f->ret, cfg->preview_max);
+      if (p) {
+        fputs(",\"preview\":\"", out);
+        pt_json_escape(out, p);
+        fputc('"', out);
+        free(p);
+      }
+    }
+    fputs("}\n", out);
+    return;
+  }
+
+  const char *err = pt_errno_name(f->ret);
+  const char *ret_c = err ? pt_color(cfg, PT_C_RED) : pt_color(cfg, PT_C_GREEN);
+  fprintf(out, "%s%spid=%d%s %s<-%s %s%s%s%s = %s%ld%s",
+      pt_color(cfg, PT_C_BOLD), pt_color(cfg, PT_C_BLUE), pid, pt_color(cfg, PT_C_RESET),
+      pt_color(cfg, PT_C_MAGENTA), pt_color(cfg, PT_C_RESET),
+      pt_color(cfg, PT_C_BOLD), pt_color(cfg, PT_C_YELLOW), pt_syscall_name(f->nr),
+      pt_color(cfg, PT_C_RESET), ret_c, f->ret, pt_color(cfg, PT_C_RESET));
+  if (err) {
+    fprintf(out, " %s%s%s", pt_color(cfg, PT_C_RED), err, pt_color(cfg, PT_C_RESET));
+  }
+  if (f->nr == 0 && f->ret > 0) {
+    char *p = pt_remote_preview(pid, f->args[1], (size_t)f->ret, cfg->preview_max);
+    if (p) {
+      fprintf(out, " read=%s\"%s\"%s", pt_color(cfg, PT_C_YELLOW), p, pt_color(cfg, PT_C_RESET));
+      free(p);
+    }
+  }
+  fputc('\n', out);
+}
+
+```
+
+`src/main.c`:
+
+```c
+// author: cocomelonc
+#include "pawtrace.h"
+
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+static void usage(FILE *out) {
+  fprintf(out,
+    "usage: pawtrace [options] -- program [args...]\n"
+    "\n"
+    "options:\n"
+    "  -j, --json            emit JSONL records\n"
+    "  -m, --maps            dump /proc/<pid>/maps at exec and exit events\n"
+    "  -s, --string-max N    maximum remote string bytes (default %d)\n"
+    "  -p, --preview-max N   maximum buffer preview bytes (default %d)\n"
+    "  -o, --output FILE     write trace to FILE\n"
+    "  -e, --trace NAMES     only show these syscalls (comma-separated)\n"
+    "  -h, --help            show this help\n",
+    PT_DEFAULT_STRING_MAX, PT_DEFAULT_PREVIEW_MAX);
+}
+
+static int parse_size(const char *s, size_t *out) {
+  char *end = NULL;
+  errno = 0;
+  unsigned long v = strtoul(s, &end, 10);
+  if (errno || !end || *end || v == 0 || v > 1024 * 1024) {
+    return -1;
+  }
+  *out = (size_t)v;
+  return 0;
+}
+
+int main(int argc, char **argv) {
+  struct pt_config cfg = {
+    .json = false,
+    .maps = false,
+    .color = false,
+    .string_max = PT_DEFAULT_STRING_MAX,
+    .preview_max = PT_DEFAULT_PREVIEW_MAX,
+    .filter = NULL,
+    .out = stdout,
+  };
+
+  int i = 1;
+  for (; i < argc; i++) {
+    if (!strcmp(argv[i], "--")) {
+      i++;
+      break;
+    } else if (!strcmp(argv[i], "-j") || !strcmp(argv[i], "--json")) {
+      cfg.json = true;
+    } else if (!strcmp(argv[i], "-m") || !strcmp(argv[i], "--maps")) {
+      cfg.maps = true;
+    } else if (!strcmp(argv[i], "-s") || !strcmp(argv[i], "--string-max")) {
+      if (i + 1 >= argc) {
+        fprintf(stderr, "%s requires an argument\n", argv[i]);
+        return 2;
+      }
+      if (parse_size(argv[++i], &cfg.string_max) < 0) {
+        fprintf(stderr, "invalid string max: %s\n", argv[i]);
+        return 2;
+      }
+    } else if (!strcmp(argv[i], "-p") || !strcmp(argv[i], "--preview-max")) {
+      if (i + 1 >= argc) {
+        fprintf(stderr, "%s requires an argument\n", argv[i]);
+        return 2;
+      }
+      if (parse_size(argv[++i], &cfg.preview_max) < 0) {
+        fprintf(stderr, "invalid preview max: %s\n", argv[i]);
+        return 2;
+      }
+    } else if (!strcmp(argv[i], "-o") || !strcmp(argv[i], "--output")) {
+      if (i + 1 >= argc) {
+        fprintf(stderr, "%s requires an argument\n", argv[i]);
+        return 2;
+      }
+      cfg.out = fopen(argv[++i], "w");
+      if (!cfg.out) {
+        perror("fopen");
+        return 2;
+      }
+    } else if (!strcmp(argv[i], "-e") || !strcmp(argv[i], "--trace")) {
+      if (i + 1 >= argc) {
+        fprintf(stderr, "%s requires an argument\n", argv[i]);
+        return 2;
+      }
+      cfg.filter = argv[++i];
+    } else if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
+      usage(stdout);
+      return 0;
+    } else {
+      break;
+    }
+  }
+
+  if (i >= argc) {
+    usage(stderr);
+    return 2;
+  }
+
+  // color only for human text on a real terminal, unless NO_COLOR is set
+  cfg.color = !cfg.json && isatty(fileno(cfg.out)) && !getenv("NO_COLOR");
+
+  int rc = pt_trace_launch(&argv[i], &cfg);
+  if (cfg.out && cfg.out != stdout) {
+    fclose(cfg.out);
+  }
+  return rc;
+}
+
+```
+
+`src/proc.c`:
+
+```c
+// author: cocomelonc
+#include "pawtrace.h"
+
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+char *pt_fd_path(pid_t pid, int fd) {
+  char link_path[64];
+  snprintf(link_path, sizeof(link_path), "/proc/%d/fd/%d", pid, fd);
+
+  char *buf = calloc(PATH_MAX + 1, 1);
+  if (!buf) {
+    return NULL;
+  }
+  ssize_t n = readlink(link_path, buf, PATH_MAX);
+  if (n < 0) {
+    free(buf);
+    return NULL;
+  }
+  buf[n] = 0;
+  return buf;
+}
+
+void pt_dump_maps(FILE *out, pid_t pid) {
+  char path[64];
+  snprintf(path, sizeof(path), "/proc/%d/maps", pid);
+  FILE *f = fopen(path, "r");
+  if (!f) {
+    fprintf(out, "pid=%d maps unavailable\n", pid);
+    return;
+  }
+
+  fprintf(out, "pid=%d maps begin\n", pid);
+  char line[4096];
+  while (fgets(line, sizeof(line), f)) {
+    fputs(line, out);
+  }
+  fprintf(out, "pid=%d maps end\n", pid);
+  fclose(f);
+}
+
+void pt_dump_maps_json(FILE *out, pid_t pid) {
+  char path[64];
+  snprintf(path, sizeof(path), "/proc/%d/maps", pid);
+  FILE *f = fopen(path, "r");
+  if (!f) {
+    fprintf(out, "{\"event\":\"maps-error\",\"pid\":%d}\n", pid);
+    return;
+  }
+
+  char line[4096];
+  while (fgets(line, sizeof(line), f)) {
+    fprintf(out, "{\"event\":\"maps-line\",\"pid\":%d,\"line\":\"", pid);
+    pt_json_escape(out, line);
+    fputs("\"}\n", out);
+  }
+  fclose(f);
+}
+
+```
+
+`src/remote.c`:
+
+```c
+// author: cocomelonc
+#include "pawtrace.h"
+
+#include <errno.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ptrace.h>
+#include <sys/uio.h>
+
+ssize_t pt_remote_read(pid_t pid, unsigned long addr, void *buf, size_t len) {
+  if (!addr || !buf || len == 0) {
+    return -1;
+  }
+
+  struct iovec local = {.iov_base = buf, .iov_len = len};
+  struct iovec remote = {.iov_base = (void *)addr, .iov_len = len};
+  ssize_t n = process_vm_readv(pid, &local, 1, &remote, 1, 0);
+  if (n >= 0) {
+    return n;
+  }
+
+  size_t off = 0;
+  while (off < len) {
+    errno = 0;
+    long word = ptrace(PTRACE_PEEKDATA, pid, (void *)(addr + off), NULL);
+    if (word == -1 && errno) {
+      return off ? (ssize_t)off : -1;
+    }
+    size_t copy = sizeof(word);
+    if (copy > len - off) {
+      copy = len - off;
+    }
+    memcpy((unsigned char *)buf + off, &word, copy);
+    off += copy;
+  }
+  return (ssize_t)off;
+}
+
+char *pt_remote_str(pid_t pid, unsigned long addr, size_t max) {
+  if (!addr || max == 0) {
+    return NULL;
+  }
+
+  char *s = calloc(max + 1, 1);
+  if (!s) {
+    return NULL;
+  }
+
+  ssize_t n = pt_remote_read(pid, addr, s, max);
+  if (n <= 0) {
+    free(s);
+    return NULL;
+  }
+
+  s[max] = 0;
+  for (ssize_t i = 0; i < n; i++) {
+    if (s[i] == 0) {
+      return s;
+    }
+  }
+  s[max] = 0;
+  return s;
+}
+
+char *pt_remote_preview(pid_t pid, unsigned long addr, size_t len, size_t max) {
+  if (!addr || max == 0 || len == 0) {
+    return NULL;
+  }
+  if (len > max) {
+    len = max;
+  }
+
+  unsigned char *tmp = malloc(len);
+  if (!tmp) {
+    return NULL;
+  }
+  ssize_t n = pt_remote_read(pid, addr, tmp, len);
+  if (n <= 0) {
+    free(tmp);
+    return NULL;
+  }
+
+  size_t out_cap = (size_t)n * 4 + 1;
+  char *out = calloc(out_cap, 1);
+  if (!out) {
+    free(tmp);
+    return NULL;
+  }
+
+  size_t o = 0;
+  for (ssize_t i = 0; i < n && o + 5 < out_cap; i++) {
+    unsigned char c = tmp[i];
+    if (c >= 32 && c <= 126 && c != '\\' && c != '"') {
+      out[o++] = (char)c;
+    } else if (c == '\n') {
+      out[o++] = '\\';
+      out[o++] = 'n';
+    } else if (c == '\t') {
+      out[o++] = '\\';
+      out[o++] = 't';
+    } else {
+      static const char hex[] = "0123456789abcdef";
+      out[o++] = '\\';
+      out[o++] = 'x';
+      out[o++] = hex[c >> 4];
+      out[o++] = hex[c & 0xf];
+    }
+  }
+  out[o] = 0;
+  free(tmp);
+  return out;
+}
+
+```
+
+`src/trace.c`:
+
+```c
+// author: cocomelonc
+#include "pawtrace.h"
+
+#include <errno.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ptrace.h>
+#include <sys/reg.h>
+#include <sys/user.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+static struct pt_state *state_get(struct pt_state **head, pid_t pid) {
+  for (struct pt_state *s = *head; s; s = s->next) {
+    if (s->pid == pid) {
+      return s;
+    }
+  }
+  struct pt_state *s = calloc(1, sizeof(*s));
+  if (!s) {
+    return NULL;
+  }
+  s->pid = pid;
+  s->next = *head;
+  *head = s;
+  return s;
+}
+
+static void state_del(struct pt_state **head, pid_t pid) {
+  struct pt_state **pp = head;
+  while (*pp) {
+    if ((*pp)->pid == pid) {
+      struct pt_state *victim = *pp;
+      *pp = victim->next;
+      free(victim);
+      return;
+    }
+    pp = &(*pp)->next;
+  }
+}
+
+static bool state_empty(const struct pt_state *head) {
+  return head == NULL;
+}
+
+static int set_opts(pid_t pid) {
+  long opts = PTRACE_O_TRACESYSGOOD |
+    PTRACE_O_TRACEEXEC |
+    PTRACE_O_TRACEFORK |
+    PTRACE_O_TRACEVFORK |
+    PTRACE_O_TRACECLONE |
+    PTRACE_O_TRACEEXIT;
+  return ptrace(PTRACE_SETOPTIONS, pid, NULL, (void *)opts);
+}
+
+static int resume_syscall(pid_t pid, int sig) {
+  return ptrace(PTRACE_SYSCALL, pid, NULL, (void *)(long)sig);
+}
+
+static void fill_enter(struct pt_syscall_frame *f, const struct user_regs_struct *r) {
+  f->nr = (long)r->orig_rax;
+  f->args[0] = r->rdi;
+  f->args[1] = r->rsi;
+  f->args[2] = r->rdx;
+  f->args[3] = r->r10;
+  f->args[4] = r->r8;
+  f->args[5] = r->r9;
+}
+
+static int handle_syscall(pid_t pid, struct pt_state **states, const struct pt_config *cfg) {
+  struct user_regs_struct regs;
+  if (ptrace(PTRACE_GETREGS, pid, NULL, &regs) < 0) {
+    return -1;
+  }
+
+  struct pt_state *s = state_get(states, pid);
+  if (!s) {
+    return -1;
+  }
+
+  if (!s->in_syscall) {
+    fill_enter(&s->frame, &regs);
+    pt_print_syscall_enter(cfg->out, pid, &s->frame, cfg);
+    s->in_syscall = true;
+  } else {
+    s->frame.ret = (long)regs.rax;
+    pt_print_syscall_exit(cfg->out, pid, &s->frame, cfg);
+    s->in_syscall = false;
+  }
+  fflush(cfg->out);
+  return 0;
+}
+
+static void log_event(FILE *out, const struct pt_config *cfg, const char *event,
+            pid_t pid, unsigned long msg) {
+  if (cfg->json) {
+    fprintf(out, "{\"event\":\"ptrace-%s\",\"pid\":%d,\"msg\":%lu}\n",
+        event, pid, msg);
+  } else {
+    fprintf(out, "%s%spid=%d%s event=%s%s%s msg=%lu\n",
+        pt_color(cfg, PT_C_BOLD), pt_color(cfg, PT_C_BLUE), pid, pt_color(cfg, PT_C_RESET),
+        pt_color(cfg, PT_C_MAGENTA), event, pt_color(cfg, PT_C_RESET), msg);
+  }
+}
+
+static const char *ptrace_event_name(int event) {
+  switch (event) {
+  case PTRACE_EVENT_FORK: return "fork";
+  case PTRACE_EVENT_VFORK: return "vfork";
+  case PTRACE_EVENT_CLONE: return "clone";
+  case PTRACE_EVENT_EXEC: return "exec";
+  case PTRACE_EVENT_EXIT: return "exit";
+  default: return "ptrace-event";
+  }
+}
+
+int pt_trace_launch(char **argv, const struct pt_config *cfg) {
+  pid_t child = fork();
+  if (child < 0) {
+    perror("fork");
+    return 1;
+  }
+
+  if (child == 0) {
+    if (ptrace(PTRACE_TRACEME, 0, NULL, NULL) < 0) {
+      perror("PTRACE_TRACEME");
+      _exit(127);
+    }
+    raise(SIGSTOP);
+    execvp(argv[0], argv);
+    perror("execvp");
+    _exit(127);
+  }
+
+  int status = 0;
+  if (waitpid(child, &status, 0) < 0) {
+    perror("waitpid");
+    return 1;
+  }
+  if (!WIFSTOPPED(status)) {
+    fprintf(stderr, "child did not stop cleanly\n");
+    return 1;
+  }
+  if (set_opts(child) < 0) {
+    perror("PTRACE_SETOPTIONS");
+    return 1;
+  }
+
+  struct pt_state *states = NULL;
+  if (!state_get(&states, child)) {
+    return 1;
+  }
+  if (resume_syscall(child, 0) < 0) {
+    perror("PTRACE_SYSCALL");
+    return 1;
+  }
+
+  while (!state_empty(states)) {
+    pid_t pid = waitpid(-1, &status, __WALL);
+    if (pid < 0) {
+      if (errno == EINTR) {
+        continue;
+      }
+      perror("waitpid");
+      break;
+    }
+
+    if (WIFEXITED(status)) {
+      if (cfg->json) {
+        fprintf(cfg->out, "{\"event\":\"process-exit\",\"pid\":%d,\"status\":%d}\n",
+            pid, WEXITSTATUS(status));
+      } else {
+        int es = WEXITSTATUS(status);
+        fprintf(cfg->out, "%s%spid=%d%s exited status=%s%d%s\n",
+            pt_color(cfg, PT_C_BOLD), pt_color(cfg, PT_C_BLUE), pid, pt_color(cfg, PT_C_RESET),
+            pt_color(cfg, es ? PT_C_RED : PT_C_GREEN), es, pt_color(cfg, PT_C_RESET));
+      }
+      state_del(&states, pid);
+      continue;
+    }
+    if (WIFSIGNALED(status)) {
+      if (cfg->json) {
+        fprintf(cfg->out, "{\"event\":\"process-signal\",\"pid\":%d,\"signal\":%d}\n",
+            pid, WTERMSIG(status));
+      } else {
+        fprintf(cfg->out, "%s%spid=%d%s killed signal=%s%d%s\n",
+            pt_color(cfg, PT_C_BOLD), pt_color(cfg, PT_C_BLUE), pid, pt_color(cfg, PT_C_RESET),
+            pt_color(cfg, PT_C_RED), WTERMSIG(status), pt_color(cfg, PT_C_RESET));
+      }
+      state_del(&states, pid);
+      continue;
+    }
+    if (!WIFSTOPPED(status)) {
+      continue;
+    }
+
+    int sig = WSTOPSIG(status);
+    if (sig == (SIGTRAP | 0x80)) {
+      if (handle_syscall(pid, &states, cfg) < 0) {
+        perror("handle_syscall");
+        state_del(&states, pid);
+        continue;
+      }
+      if (resume_syscall(pid, 0) < 0) {
+        perror("PTRACE_SYSCALL");
+        state_del(&states, pid);
+      }
+      continue;
+    }
+
+    if (sig == SIGTRAP) {
+      int event = (status >> 16) & 0xffff;
+      unsigned long msg = 0;
+      (void)ptrace(PTRACE_GETEVENTMSG, pid, NULL, &msg);
+      log_event(cfg->out, cfg, ptrace_event_name(event), pid, msg);
+
+      if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK ||
+        event == PTRACE_EVENT_CLONE) {
+        pid_t new_pid = (pid_t)msg;
+        state_get(&states, new_pid);
+        (void)set_opts(new_pid);
+        (void)resume_syscall(new_pid, 0);
+      } else if (cfg->maps &&
+             (event == PTRACE_EVENT_EXEC || event == PTRACE_EVENT_EXIT)) {
+        if (cfg->json) {
+          pt_dump_maps_json(cfg->out, pid);
+        } else {
+          pt_dump_maps(cfg->out, pid);
+        }
+      }
+
+      if (resume_syscall(pid, 0) < 0) {
+        perror("PTRACE_SYSCALL");
+        state_del(&states, pid);
+      }
+      continue;
+    }
+
+    if (resume_syscall(pid, sig) < 0) {
+      perror("PTRACE_SYSCALL");
+      state_del(&states, pid);
+    }
+  }
+
+  while (states) {
+    state_del(&states, states->pid);
+  }
+  return 0;
+}
+
+```
