@@ -867,6 +867,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/null-luo/btrace [Android App Dynamic Behavior Tracking Tool using eBPF]
 - https://github.com/michaelmsonne/SignToolGUI [signtool GUI]
 - https://disasm.pro/ [A realtime assembler/disassembler]
+- https://github.com/binsnake/fARM64 [Pure-Rust no_std AArch64 disassembler and encoder — iced-x86-shaped API, zero-heap decode path, SVE/SME/SIMD/FP coverage, semantic round-trip encode; wasm and bare-metal friendly]
 - https://github.com/iofomo/abyss [Android system call hook]
 - https://github.com/uuksu/RPGMakerDecrypter [Tool for extracting RPG Maker XP, VX and VX Ace encrypted archives]
 - https://github.com/gmh5225/compiler-binary-richprint [Print compiler information stored in Rich Header of PE executable]
