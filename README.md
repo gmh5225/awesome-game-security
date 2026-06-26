@@ -4152,6 +4152,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/wesmar/FileRecoveryTool [Professional file recovery for Windows — NTFS/FAT32/exFAT via MFT scanning, USN Journal analysis and file carving; pure Win32 C++, zero dependencies, multi-threaded GUI, direct disk access]
 - https://github.com/volatilityfoundation/volatility
 - https://github.com/volatilityfoundation/volatility3
+- https://github.com/MemNixFS/MemNixFS [Linux memory forensics]
 - https://github.com/nikaiw/VMkatz [Extract Windows credentials directly from VM memory snapshots and virtual disks (LSASS, SAM/LSA, cached creds, NTDS.dit) in-place]
 - https://github.com/wesmar/KvcForensic [Windows/Linux LSA credential extractor for lsass.dmp minidumps — Win11 24H2/25H2/26H1 and Server 2025; pure Win32, no DbgHelp; MSV, WDigest, Kerberos, CredMan, DPAPI via BCrypt (AES-CFB128, 3DES-CBC)]
 - [Decrypt and export browser password, including Chromium,Edge and Firefox](https://github.com/BL0odz/BrowserPasswordExportor)
