@@ -628,6 +628,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Compatibility
 - https://github.com/CnCNet/cnc-ddraw [Old Game]
+- https://github.com/REDPOWAR/D2GI [DirectDraw7/D3D7 to D3D9 wrapper for Hard Truck 2 (King of the Road) — modern resolutions, MSAA, anisotropic filtering, graphics fixes, widescreen hooks]
 - https://github.com/microsoft/D3D9On12 [The Direct3D9-On-12 mapping layer]
 - https://github.com/Daniel-Lobo/WineHooks [Compatibility and enhancement framework for classic PC games]
 - https://github.com/samuelgr/Xidi [DirectInput interface for XInput controllers]
