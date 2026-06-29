@@ -1362,6 +1362,9 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/emanuele-f/PCAPdroid
 - https://github.com/zhizhuodemao/android_proxy_mcp [Android Proxy MCP — MCP-based HTTP/HTTPS capture & analysis for AI]
 
+> Cellular / SIM
+- https://github.com/tomasz-lisowski/swsim [Pure-software USIM/UICC SIM card simulator — full APDU/SIM logic without physical hardware; PC/SC via swICC reader; pairs with SIMtrace2/cardem for phone testing; GSM/LTE auth, MILENAGE, private LTE/IoT and cellular security research]
+
 > Android memory loading
 - https://github.com/icculus/mojoelf
 - https://github.com/lockedbyte/so_loader
