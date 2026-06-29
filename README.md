@@ -609,6 +609,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Hook
 - https://github.com/rdbo/DX11-BaseHook [DX11 Imgui]
 - https://github.com/DrNseven/D3D12-Hook-ImGui [DX12 Imgui]
+- https://github.com/frostbone25/ShaderInjector [D3D12 shader injector for FF7 Rebirth PC — intercepts rendering API calls to inject/replace pixel shaders at runtime; minhook + ImGui; adaptable to other D3D12 titles]
 - https://github.com/niemand-sec/DirectX11Hook [DX11 Imgui]
 - https://github.com/guided-hacking/GH_D3D11_Hook [DX11]
 - https://github.com/gogo9211/Discord-Overlay-Hook [DX11]
