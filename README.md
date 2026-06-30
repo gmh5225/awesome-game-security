@@ -537,6 +537,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/originsec/pocsmith [Autonomous Windows POC developer from patchwatch diff reports; Claude agent + MCP (Hyper-V, kd, Ghidra) to write, build, and verify PoCs on pre-patch VMs]
 - https://github.com/leigest519/OpenGame [Open agentic coding for web games end-to-end from prompts; Game Skill (template + debug); GameCoder-27B; OpenGame-Bench; qwen-code-based CLI]
 - https://github.com/0x0funky/agent-sprite-forge [Codex skills for game-ready 2D sprites, layered maps, and engine-ready prototypes (Godot/Unity)]
+- https://github.com/dreiachse-cyber/image-cockpit-for-codex-workflows [Local cockpit for Codex imagegen workflows — pixel art, region-based editing, animation frames and sprite sheets via codex-handoff inbox/outbox; no direct OpenAI API calls]
 - https://github.com/htdt/godogen [Autonomous game development for Godot, Bevy, and Babylon.js with Claude Code and Codex; plans, generates assets, screenshot-guided self-repair]
 
 
