@@ -1396,6 +1396,9 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/khanhduytran0/coruna [Leaked iOS exploit toolkit — WebKit chains for multiple iOS versions, partially deobfuscated]
 - https://github.com/crazymind90/CVE-2026-XNU-AIO-KEVENT-UAF [XNU kern_aio.c AIO+kevent UAF; sandbox app, no entitlements; panic/double-free; iOS 26.2, patched 26.3]
 
+> IOS Network / Location
+- https://github.com/Yu9191/wloc [Spoof Apple WiFi/cell network location (gs-loc WLOC) — MITM protobuf patch via Surge/Quantumult X/Loon/Stash/Shadowrocket; online picker + Shortcuts; GCJ-02→WGS84; no jailbreak; indoor/WiFi positioning only]
+
 > IOS Memory Explorer
 - https://github.com/hackcatml/kfd-explorer [iOS kernel memory explorer]
 - https://github.com/DerekSelander/dynadump [A runtime ObjC class-dump]
