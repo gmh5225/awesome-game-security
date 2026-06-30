@@ -4164,6 +4164,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/volatilityfoundation/volatility
 - https://github.com/volatilityfoundation/volatility3
 - https://github.com/MemNixFS/MemNixFS [Linux memory forensics]
+- https://github.com/heeeyaaaa/vmem-decrypt [Decrypt VMware vTPM-encrypted .vmem/.vmsn/.vmss/.nvram from VM password — pure-Python encobj AES-256-CBC; vmem_flatten.py to Volatility 3-ready image; Win11 partial VM encryption]
 - https://github.com/nikaiw/VMkatz [Extract Windows credentials directly from VM memory snapshots and virtual disks (LSASS, SAM/LSA, cached creds, NTDS.dit) in-place]
 - https://github.com/wesmar/KvcForensic [Windows/Linux LSA credential extractor for lsass.dmp minidumps — Win11 24H2/25H2/26H1 and Server 2025; pure Win32, no DbgHelp; MSV, WDigest, Kerberos, CredMan, DPAPI via BCrypt (AES-CFB128, 3DES-CBC)]
 - [Decrypt and export browser password, including Chromium,Edge and Firefox](https://github.com/BL0odz/BrowserPasswordExportor)
