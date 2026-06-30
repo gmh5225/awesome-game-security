@@ -1,0 +1,870 @@
+Project Path: arc_Yu9191_wloc__dzqldiu
+
+Source Tree:
+
+```txt
+arc_Yu9191_wloc__dzqldiu
+├── README.md
+├── dist
+│   ├── wloc-settings.js
+│   └── wloc.js
+├── docs
+│   └── shortcut-guide.md
+├── modules
+│   ├── wloc.conf
+│   ├── wloc.lpx
+│   ├── wloc.module
+│   ├── wloc.sgmodule
+│   └── wloc.stoverride
+└── worker
+    ├── dist
+    │   └── _routes.json
+    ├── functions
+    │   └── [[route]].js
+    ├── wloc-worker.js
+    ├── wrangler.jsonc
+    └── wrangler.pages.jsonc
+
+```
+
+`README.md`:
+
+```md
+<p align="center">
+  <img src="wloc.jpg" width="144" />
+</p>
+
+# Apple WLOC 定位修改
+
+修改 Apple 网络定位服务 (WiFi/基站) 返回的坐标，实现 iOS 网络定位虚拟定位。打开在线选点页面选位置即可生效，无需手动填经纬度。
+
+---
+
+## 订阅地址
+
+**Surge:**
+https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/modules/wloc.sgmodule
+
+**Quantumult X:**
+https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/modules/wloc.conf
+
+**Loon:**
+https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/modules/wloc.lpx
+
+**Stash:**
+https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/modules/wloc.stoverride
+
+**Shadowrocket(小火箭):**
+https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/modules/wloc.module
+
+> Egern 可直接使用 Surge 模块
+> Stash 请直接订阅上面的 `.stoverride`，无需用 Script Hub 转换
+
+---
+
+## 快捷指令（推荐，最方便）
+
+直接用快捷指令切换 / 清除定位，无需打开选点页面：
+
+- **wloc 设置地理位置**：https://www.icloud.com/shortcuts/a82717d8fdad4e6280866fcf911173f7
+- **wloc 清理恢复位置**：https://www.icloud.com/shortcuts/f42632d406504f24a2cd163af4fe012f
+
+**用法**
+
+- **设置位置：** 在地图 App 里选好位置（长按地图选点）→ 共享 → 选「wloc 设置地理位置」即可切换。
+  - 苹果地图：选点 → 共享 → 「wloc 设置地理位置」
+  - 高德地图：选点 → 分享 → **更多** → 「wloc 设置地理位置」
+- **清理位置：** 点「wloc 清理恢复位置」即可恢复真实定位。
+
+支持苹果地图、高德（含短链，自动跟跳转 + GCJ-02→WGS84 坐标换算）。
+
+> 前提：代理已开 + 模块已启用 + 信任 `gs-loc.apple.com`。选点页面（Worker / Pages）方案仍保留，见下方。
+
+---
+
+### 关于地图链接解析（worker）
+
+为了让苹果地图和高德走同一条流程，链接统一发给 `wloc-spoofer.wloc.workers.dev/api/parse` 解析：
+
+- **高德**：分享出来是短链，真实坐标只藏在 302 跳转的 `Location` 头里，且是 GCJ-02 偏移坐标。快捷指令既读不到跳转头、也难做坐标换算，所以由 worker 跟跳转 → 抠坐标 → GCJ-02→WGS84 → 返回经纬度。
+- **苹果地图**：链接里直接带 `coordinate=纬度,经度`，但在**中国大陆同样是 GCJ-02 偏移坐标**，所以和高德一样由 worker 做 GCJ-02→WGS84 换算后返回；境外坐标会自动跳过换算（`out_of_china` 判断）原样返回。除了统一坐标系，走同一接口也方便统一处理短链、文本夹链接、名称解码等。
+
+**隐私：** `/api/parse` 是纯转发解析——收到链接 → 跟跳转 → 解析坐标 → 返回 JSON，全程不写任何存储、不记日志、不缓存，处理完即丢。
+
+**不放心可自行部署：** worker 源码完全开源，可自己部署一份替换上面的地址：
+
+- 解析逻辑：[`worker/src/parse.js`](worker/src/parse.js)，路由：[`worker/src/index.js`](worker/src/index.js)
+- 部署后把快捷指令里的 `wloc-spoofer.wloc.workers.dev` 换成你自己的 worker 域名即可。
+
+---
+
+<details>
+<summary><b>使用方法</b></summary>
+
+1. 订阅模块并启用 MITM
+2. 打开在线选点页面（公共 Worker，建议添加到主屏幕）
+3. 地图选位置 / 搜索地名 / 粘贴地图链接
+4. 点击「储存到设备」
+5. 下次 Apple 定位触发时自动生效
+
+支持 Apple Maps / Google Maps / 高德 / 百度 / 坐标文本 链接解析。
+
+> **iOS 26/27 及更高版本注意：** Apple 从 iOS 26 开始大幅强化了 `locationd` 的定位缓存机制，系统会将之前获取的真实定位结果缓存在内存中并长时间复用。这意味着安装模块或切换目标坐标后，即使脚本已成功修改了 WLOC 响应（日志显示"已修改"），系统仍可能继续使用缓存中的旧坐标，导致定位看起来没有变化。
+>
+> **解决方法：重启设备。** 重启会清空 `locationd` 的内存缓存，系统重新发起 WLOC 请求时会拿到修改后的坐标。飞行模式开关、关闭定位服务等方式在 iOS 26+ 上**无法**清除此缓存，必须重启。iOS 15~18 通常不需要重启即可生效。
+
+**高版本系统推荐操作流程（成功率最高）：**
+
+方法一：
+1. 先在选点页面选好需要修改的定位并储存到设备
+2. 开飞行模式 → 关闭定位服务 → 重启设备
+3. 关闭飞行模式（WiFi 也要关）→ 连接代理工具（确认 VPN 图标出现）→ 打开定位服务
+4. 打开地图验证
+
+方法二：
+1. 关闭定位服务
+2. 在选点页面选好位置并储存到设备
+3. 打开定位服务 → 弹出「允许访问位置信息」时选择**「下次询问或在我共享时」**
+4. 打开地图验证
+
+</details>
+
+<details>
+<summary><b>工作原理</b></summary>
+
+```
+选点页面 → fetch gs-loc.apple.com/wloc-settings/save?lon=x&lat=y
+         → 代理模块拦截 → wloc-settings.js 写入 $persistentStore
+         → 下次 WLOC 触发 → wloc.js 读取坐标 → patch protobuf 响应
+```
+
+模块包含两条规则：
+- `wloc.js` — 拦截 `/clls/wloc` 响应，解析 protobuf 并替换坐标
+- `wloc-settings.js` — 拦截 `/wloc-settings/save` 请求，写入持久化存储
+
+</details>
+
+<details>
+<summary><b>参数配置</b></summary>
+
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| longitude | 目标经度(在线选点优先) | null (透传) |
+| latitude | 目标纬度(在线选点优先) | null (透传) |
+| accuracy | 精度(米) | 25 |
+| logLevel | 日志级别 | info |
+
+优先级: 在线选点储存 > 模块参数 > 默认值
+
+</details>
+
+<details>
+<summary><b>取消虚拟定位 / 恢复真实定位</b></summary>
+
+**方法一：关闭或删除模块**（推荐）
+
+关闭模块后脚本不再拦截 WLOC 请求，系统自动恢复真实定位。iOS 26+ 需要重启设备清除定位缓存。
+
+**方法二：清除持久化数据（透传模式）**
+
+清除已保存的坐标后，脚本进入**透传模式**——不修改 WLOC 响应，直接放行原始数据，系统自动恢复真实 GPS 定位。
+
+**透传模式触发条件：** 持久化数据为空（null）且模块参数为默认值（113.94114, 22.544577）时，脚本判定用户未自定义坐标，自动跳过修改。模块默认参数无需更改，仅清除持久化数据即可触发透传。
+
+在代理工具中删除持久化数据，字段名为 `wloc_settings`：
+
+- **Surge** — 脚本编辑器运行: `$persistentStore.write(null, "wloc_settings")`
+- **Quantumult X** — 运行: `$prefs.removeValueForKey("wloc_settings")`
+- **Loon** — 运行: `$persistentStore.write(null, "wloc_settings")`
+
+清除后重启设备即可恢复真实定位。无需关闭模块，脚本会自动检测到无自定义坐标并跳过修改。
+
+> **注意：** 如果用户在模块参数中手动修改了经纬度（非默认 113.94114, 22.544577），即使清除持久化数据，脚本仍会使用模块参数中的坐标进行修改。只有保持默认参数不变时，清除持久化数据才会进入透传模式。
+
+</details>
+
+<details>
+<summary><b>收藏位置功能</b></summary>
+
+在线选点页面支持收藏多个位置，方便来回切换：
+
+- **添加收藏**：选好位置后点击「收藏位置」→ 输入备注名称（支持中文/英文/数字，最多 30 字）→ 保存
+- **快速切换**：点击收藏列表中的位置 → 地图自动跳转 → 点「储存到设备」即可切换
+- **当前生效标记**：与设备已保存坐标一致的收藏会显示「✓ 当前生效」
+- **删除管理**：单个删除（×按钮）或清空全部
+- **当前生效坐标**：页面显示设备端持久化数据（wloc_settings），支持刷新查询和清除
+
+**数据存储说明：**
+- **收藏列表** → 保存在浏览器 `localStorage`（仅用于选点页面的 UI 便捷操作）
+- **生效坐标** → 保存在代理工具持久化存储 `$persistentStore`（脚本运行时实际读取的数据）
+
+两者独立存储。收藏列表是浏览器端的辅助数据，清除浏览器缓存或换浏览器后需重新收藏，但不影响已储存到设备的生效坐标。
+
+</details>
+
+<details>
+<summary><b>自部署 Worker（推荐）</b></summary>
+
+公共选点页面有请求上限，建议部署自己的实例：
+
+- **Workers**: `https://wloc-spoofer.wloc.workers.dev/`
+- **Pages**: `https://wloc-pages.pages.dev/`
+
+**一键部署（Workers）：**
+
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Yu9191/wloc/tree/main/worker)
+
+> 一键部署仅支持 Workers 模式，点击按钮后按提示授权即可完成部署。
+
+**手动部署（Workers）：**
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/Yu9191/wloc.git
+cd wloc/worker
+
+# 2. 安装依赖
+npm install
+
+# 3. 登录 Cloudflare（首次需要）
+npx wrangler login
+
+# 4. 部署
+npm run deploy
+```
+
+部署成功后会得到你自己的 Worker 地址（如 `https://wloc-spoofer.<你的子域名>.workers.dev`），用这个地址选点即可。
+
+> 免费账户每天 10 万次请求，个人使用完全够用。
+
+<details>
+<summary>高级：Pages 部署</summary>
+
+Pages 部署不支持一键按钮，需要手动执行：
+
+```bash
+git clone https://github.com/Yu9191/wloc.git
+cd wloc/worker
+npm install
+npx wrangler pages deploy dist --project-name <自定义项目名>
+```
+
+部署时会提示设置 production branch，输入 `main` 即可。部署成功后得到 `https://<项目名>.pages.dev` 地址。
+
+Pages 和 Workers 功能完全一致，按需选择即可。
+
+</details>
+
+</details>
+
+<details>
+<summary><b>注意事项</b></summary>
+
+- 需要 MITM 证书信任 `gs-loc.apple.com` 和 `gs-loc-cn.apple.com`
+- 仅修改网络定位(WiFi/基站)，不影响 GPS 硬件定位
+- iOS 在 GPS 信号强时可能忽略网络定位结果
+- 适用于 WiFi 定位为主的室内场景效果最佳
+- 选点页面需在代理模式下使用（Safari 走代理才能拦截储存请求）
+
+</details>
+
+---
+
+## 致谢
+
+- [proxypin-wloc-spoofer](https://github.com/FFF686868/proxypin-wloc-spoofer) - 原始 WLOC 定位修改思路 by FFF686868
+- [NSNanoCat/Util](https://github.com/NSNanoCat/util) - 跨平台脚本工具框架
+
+```
+
+`dist/wloc-settings.js`:
+
+```js
+/* wloc-settings.js - Build 2026-06-28 05:58:28 */
+const e=(()=>{const e=e=>e in globalThis;switch(!0){case e("$task"):return"Quantumult X";case e("$loon"):return"Loon";case e("$rocket"):return"Shadowrocket";case e("Egern"):return"Egern";case Boolean(globalThis.$environment?.["surge-version"]):return"Surge";case Boolean(globalThis.$environment?.["stash-version"]):return"Stash";case e("Cloudflare"):return"Worker";case Boolean(globalThis.process?.versions?.node):return"Node.js";default:return}})();class t{static#e=new Map([]);static#t=[];static#a=new Map([]);static clear=()=>{};static count=(e="default")=>{switch(t.#e.has(e)){case!0:t.#e.set(e,t.#e.get(e)+1);break;case!1:t.#e.set(e,0)}t.log(`${e}: ${t.#e.get(e)}`)};static countReset=(e="default")=>{switch(t.#e.has(e)){case!0:t.#e.set(e,0),t.log(`${e}: ${t.#e.get(e)}`);break;case!1:t.warn(`Counter "${e}" doesn’t exist`)}};static debug=(...e)=>{t.#s<4||(e=e.map(e=>` ${e}`),t.log(...e))};static error(...a){if(!(t.#s<1)){switch(e){case"Surge":case"Loon":case"Stash":case"Egern":case"Shadowrocket":case"Quantumult X":default:a=a.map(e=>` ${e}`);break;case"Worker":case"Node.js":a=a.map(e=>` ${e?.stack??e}`)}t.log(...a)}}static exception=(...e)=>t.error(...e);static group=e=>t.#t.unshift(e);static groupEnd=()=>t.#t.shift();static info(...e){t.#s<3||(e=e.map(e=>` ${e}`),t.log(...e))}static#s=3;static get logLevel(){switch(t.#s){case 0:return"OFF";case 1:return"ERROR";case 2:return"WARN";case 3:default:return"INFO";case 4:return"DEBUG";case 5:return"ALL"}}static set logLevel(e){switch(typeof e){case"string":e=e.toLowerCase();break;case"number":break;default:e="warn"}switch(e){case 0:case"off":t.#s=0;break;case 1:case"error":t.#s=1;break;case 2:case"warn":case"warning":default:t.#s=2;break;case 3:case"info":t.#s=3;break;case 4:case"debug":t.#s=4;break;case 5:case"all":t.#s=5}}static log=(...e)=>{0!==t.#s&&(e=e.flatMap(e=>{switch(typeof e){case"object":return[JSON.stringify(e)];case"bigint":case"number":case"boolean":return[e.toString()];case"string":return e.split(/\r?\n/u);default:return[e]}}),t.#t.forEach(t=>{(e=e.map(e=>`  ${e}`)).unshift(` ${t}:`)}),e=["",...e],console.log(e.join("\n")))};static time=(e="default")=>t.#a.set(e,Date.now());static timeEnd=(e="default")=>t.#a.delete(e);static timeLog=(e="default")=>{const a=t.#a.get(e);a?t.log(`${e}: ${Date.now()-a}ms`):t.warn(`Timer "${e}" doesn’t exist`)};static warn(...e){t.#s<2||(e=e.map(e=>` ${e}`),t.log(...e))}}class a{static escape(e){const t={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"};return e.replace(/[&<>"']/g,e=>t[e])}static get(e={},t="",s=void 0){Array.isArray(t)||(t=a.toPath(t));const r=t.reduce((e,t)=>Object(e)[t],e);return void 0===r?s:r}static merge(e,...t){if(null==e)return e;for(const s of t)if(null!=s)for(const t of Object.keys(s)){const r=s[t],o=e[t];switch(!0){case a.#r(r)&&a.#r(o):e[t]=a.merge(o,r);break;case r instanceof Map&&o instanceof Map:if(r.size>0)for(const[e,t]of r)o.set(e,t);break;case r instanceof Set&&o instanceof Set:if(r.size>0)for(const e of r)o.add(e);break;case Array.isArray(r)&&0===r.length&&void 0!==o:case r instanceof Map&&0===r.size&&void 0!==o:case r instanceof Set&&0===r.size&&void 0!==o:break;case void 0!==r:e[t]=r}}return e}static#r(e){if(null===e||"object"!=typeof e)return!1;const t=Object.getPrototypeOf(e);return null===t||t===Object.prototype}static omit(e={},t=[]){return Array.isArray(t)||(t=[t.toString()]),t.forEach(t=>a.unset(e,t)),e}static pick(e={},t=[]){Array.isArray(t)||(t=[t.toString()]);const a=Object.entries(e).filter(([e,a])=>t.includes(e));return Object.fromEntries(a)}static set(e,t,s){return Array.isArray(t)||(t=a.toPath(t)),t.slice(0,-1).reduce((e,a,s)=>Object(e[a])===e[a]?e[a]:e[a]=/^\d+$/.test(t[s+1])?[]:{},e)[t[t.length-1]]=s,e}static toPath(e){return e.replace(/\[(\d+)\]/g,".$1").split(".").filter(Boolean)}static unescape(e){const t={"&amp;":"&","&lt;":"<","&gt;":">","&quot;":'"',"&#39;":"'"};return e.replace(/&amp;|&lt;|&gt;|&quot;|&#39;/g,e=>t[e])}static unset(e={},t=""){Array.isArray(t)||(t=a.toPath(t));return t.reduce((e,a,s)=>s===t.length-1?(delete e[a],!0):Object(e)[a],e)}}class s{static parse(e){let t={};switch(typeof e){case"string":{const r=e.replace(/^\?/,"");if(!r)break;const o=Object.fromEntries(r.split("&").filter(Boolean).map(e=>{const[t="",a=""]=e.split("=",2);return[s.#o(t).replace(/\[([^\[\]]+)\]/g,".$1"),s.#o(a).replace(/\"/g,"")]}));Object.keys(o).forEach(e=>a.set(t,e,o[e]));break}case"object":switch(e){case null:break;default:{const s={};Object.keys(e).forEach(t=>a.set(s,t,e[t])),t=s;break}}break;case"undefined":t={}}return t}static stringify(e={}){if(!e||"object"!=typeof e)return"";const t=[];return Object.keys(e).forEach(a=>s.#c(e,a,t)),0===t.length?"":t.map(([e,t])=>`${s.#n(s.#i(e))}=${s.#n(t)}`).join("&")}static#c(e,t,r){const o=a.get(e,t);void 0!==o&&(null!==o?Array.isArray(o)?o.forEach((a,o)=>{void 0!==a&&s.#c(e,`${t}[${o}]`,r)}):s.#r(o)?Object.keys(o).forEach(a=>s.#c(e,`${t}.${a}`,r)):r.push([t,String(o)]):r.push([t,""]))}static#i(e){const[t,...s]=a.toPath(e);return s.reduce((e,t)=>/^\d+$/.test(t)?`${e}[${t}]`:`${e}.${t}`,t)}static#r(e){if(null===e||"object"!=typeof e||Array.isArray(e))return!1;const t=Object.getPrototypeOf(e);return null===t||t===Object.prototype}static#n(e){return encodeURIComponent(e)}static#o(e){return decodeURIComponent(e.replace(/\+/g," "))}}t.debug(" $argument"),globalThis.$argument=s.parse(globalThis.$argument),globalThis.$argument.LogLevel&&(t.logLevel=globalThis.$argument.LogLevel),t.debug(" $argument",`$argument: ${JSON.stringify(globalThis.$argument)}`);const r={100:"Continue",101:"Switching Protocols",102:"Processing",103:"Early Hints",200:"OK",201:"Created",202:"Accepted",203:"Non-Authoritative Information",204:"No Content",205:"Reset Content",206:"Partial Content",207:"Multi-Status",208:"Already Reported",226:"IM Used",300:"Multiple Choices",301:"Moved Permanently",302:"Found",304:"Not Modified",307:"Temporary Redirect",308:"Permanent Redirect",400:"Bad Request",401:"Unauthorized",402:"Payment Required",403:"Forbidden",404:"Not Found",405:"Method Not Allowed",406:"Not Acceptable",407:"Proxy Authentication Required",408:"Request Timeout",409:"Conflict",410:"Gone",411:"Length Required",412:"Precondition Failed",413:"Content Too Large",414:"URI Too Long",415:"Unsupported Media Type",416:"Range Not Satisfiable",417:"Expectation Failed",418:"I'm a teapot",421:"Misdirected Request",422:"Unprocessable Entity",423:"Locked",424:"Failed Dependency",425:"Too Early",426:"Upgrade Required",428:"Precondition Required",429:"Too Many Requests",431:"Request Header Fields Too Large",451:"Unavailable For Legal Reasons",500:"Internal Server Error",501:"Not Implemented",502:"Bad Gateway",503:"Service Unavailable",504:"Gateway Timeout",505:"HTTP Version Not Supported",506:"Variant Also Negotiates",507:"Insufficient Storage",508:"Loop Detected",510:"Not Extended",511:"Network Authentication Required"};function o(s={}){switch(e){case"Surge":s.policy&&a.set(s,"headers.X-Surge-Policy",s.policy),t.log(" 执行结束!",` ${(new Date).getTime()/1e3-$script.startTime} 秒`),$done(s);break;case"Loon":s.policy&&(s.node=s.policy),t.log(" 执行结束!",` ${(new Date-$script.startTime)/1e3} 秒`),$done(s);break;case"Stash":s.policy&&a.set(s,"headers.X-Stash-Selected-Proxy",encodeURI(s.policy)),t.log(" 执行结束!",` ${(new Date-$script.startTime)/1e3} 秒`),$done(s);break;case"Egern":case"Shadowrocket":t.log(" 执行结束!"),$done(s);break;case"Quantumult X":switch(s.policy&&a.set(s,"opts.policy",s.policy),typeof(s=a.pick(s,["status","url","headers","body","bodyBytes"])).status){case"number":s.status=`HTTP/1.1 ${s.status} ${r[s.status]}`;break;case"string":case"undefined":break;default:throw new TypeError(`${Function.name}: 参数类型错误, status 必须为数字或字符串`)}s.body instanceof ArrayBuffer?(s.bodyBytes=s.body,s.body=void 0):ArrayBuffer.isView(s.body)?(s.bodyBytes=s.body.buffer.slice(s.body.byteOffset,s.body.byteLength+s.body.byteOffset),s.body=void 0):s.body&&(s.bodyBytes=void 0),t.log(" 执行结束!"),$done(s);break;case"Worker":default:t.log(" 执行结束!");break;case"Node.js":t.log(" 执行结束!"),process.exit(1)}}class c{static data=null;static dataFile="box.dat";static#l=/^@(?<key>[^.]+)(?:\.(?<path>.*))?$/;static getItem(t,s=null){let r=s;switch(t.startsWith("@")){case!0:{const{key:e,path:s}=t.match(c.#l)?.groups;t=e;let o=c.getItem(t,{});"object"!=typeof o&&(o={}),r=a.get(o,s);try{r=JSON.parse(r)}catch{}break}default:switch(e){case"Surge":case"Loon":case"Stash":case"Egern":case"Shadowrocket":r=$persistentStore.read(t);break;case"Quantumult X":r=$prefs.valueForKey(t);break;case"Worker":c.data=c.data??{},r=c.data[t];break;case"Node.js":c.data=c.#u(c.dataFile),r=c.data?.[t];break;default:r=c.data?.[t]||null}try{r=JSON.parse(r)}catch{}}return r??s}static setItem(t=new String,s=new String){let r=!1;if("object"==typeof s)s=JSON.stringify(s);else s=String(s);switch(t.startsWith("@")){case!0:{const{key:e,path:o}=t.match(c.#l)?.groups;t=e;let n=c.getItem(t,{});"object"!=typeof n&&(n={}),a.set(n,o,s),r=c.setItem(t,n);break}default:switch(e){case"Surge":case"Loon":case"Stash":case"Egern":case"Shadowrocket":r=$persistentStore.write(s,t);break;case"Quantumult X":r=$prefs.setValueForKey(s,t);break;case"Worker":c.data=c.data??{},c.data[t]=s,r=!0;break;case"Node.js":c.data=c.#u(c.dataFile),c.data[t]=s,c.#d(c.dataFile),r=!0;break;default:r=c.data?.[t]||null}}return r}static removeItem(t){let s=!1;switch(t.startsWith("@")){case!0:{const{key:e,path:r}=t.match(c.#l)?.groups;t=e;let o=c.getItem(t);"object"!=typeof o&&(o={}),a.unset(o,r),s=c.setItem(t,o);break}default:switch(e){case"Surge":s=$persistentStore.write(null,t);break;case"Loon":case"Stash":case"Egern":case"Shadowrocket":default:s=!1;break;case"Quantumult X":s=$prefs.removeValueForKey(t);break;case"Worker":c.data=c.data??{},delete c.data[t],s=!0;break;case"Node.js":c.data=c.#u(c.dataFile),delete c.data[t],c.#d(c.dataFile),s=!0}}return s}static clear(){let t=!1;switch(e){case"Surge":case"Loon":case"Stash":case"Egern":case"Shadowrocket":default:t=!1;break;case"Quantumult X":t=$prefs.removeAllValues();break;case"Worker":c.data={},t=!0;break;case"Node.js":c.data=c.#u(c.dataFile),c.data={},c.#d(c.dataFile),t=!0}return t}static#u=t=>{if("Node.js"!==e)return{};{this.fs=this.fs?this.fs:require("fs"),this.path=this.path?this.path:require("path");const e=this.path.resolve(t),a=this.path.resolve(process.cwd(),t),s=this.fs.existsSync(e),r=!s&&this.fs.existsSync(a);if(!s&&!r)return{};{const t=s?e:a;try{return JSON.parse(this.fs.readFileSync(t))}catch(e){return{}}}}};static#d=(t=this.dataFile)=>{if("Node.js"===e){this.fs=this.fs?this.fs:require("fs"),this.path=this.path?this.path:require("path");const e=this.path.resolve(t),a=this.path.resolve(process.cwd(),t),s=this.fs.existsSync(e),r=!s&&this.fs.existsSync(a),o=JSON.stringify(this.data);s?this.fs.writeFileSync(e,o):r?this.fs.writeFileSync(a,o):this.fs.writeFileSync(e,o)}}}const n="wloc_settings",i=$request.url||"";const l=function(e){const t=e.split("?")[1]||"",a=new Map;for(const e of t.split("&")){if(!e)continue;const t=e.indexOf("="),s=-1===t?e:e.slice(0,t),r=-1===t?"":e.slice(t+1);let o,c;try{o=decodeURIComponent(s.replace(/\+/g," "))}catch{o=s}try{c=decodeURIComponent(r.replace(/\+/g," "))}catch{c=r}a.has(o)||a.set(o,c)}return a}(i),u=l.get("action")||"save";let d;if(t.debug(`[wloc-settings] url=${i}, action=${u}`),"query"===u)try{const e=c.getItem(n);e&&"object"==typeof e&&e.longitude&&e.latitude?(d={success:!0,longitude:e.longitude,latitude:e.latitude,accuracy:e.accuracy||25,updatedAt:e.updatedAt||null},t.debug(`[wloc-settings] 查询: ${e.longitude}, ${e.latitude}`)):d={success:!1,error:"无已保存的坐标"}}catch(e){d={success:!1,error:e.message||"读取失败"}}else if("clear"===u)try{c.setItem(n,null),d={success:!0},t.info("[wloc-settings] 已清除坐标数据")}catch(e){d={success:!1,error:e.message||"清除失败"},t.error(`[wloc-settings] 清除失败: ${e.message}`)}else{const e=parseFloat(l.get("lon")||l.get("longitude")||"0"),a=parseFloat(l.get("lat")||l.get("latitude")||"0"),s=parseInt(l.get("acc")||l.get("accuracy")||"25",10);if(e&&a){const r={longitude:e,latitude:a,accuracy:s,updatedAt:new Date(Date.now()+288e5).toISOString().replace("Z","+08:00")};try{c.setItem(n,r)?(d={success:!0,longitude:e,latitude:a,accuracy:s},t.info(`[wloc-settings] 已保存: ${e}, ${a}`)):(d={success:!1,error:"Storage.setItem 返回 false"},t.error("[wloc-settings] setItem 返回 false"))}catch(e){d={success:!1,error:e.message||"写入失败"},t.error(`[wloc-settings] ${e.message}`)}}else d={success:!1,error:"缺少 lon/lat 参数"}}const g={status:200,headers:{"Content-Type":"application/json","Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"GET, OPTIONS"},body:JSON.stringify(d)};o("Quantumult X"===e?g:{response:g});
+
+```
+
+`dist/wloc.js`:
+
+```js
+/* wloc.js - Build 2026-06-25 10:20:48 */
+const e=(()=>{const e=e=>e in globalThis;switch(!0){case e("$task"):return"Quantumult X";case e("$loon"):return"Loon";case e("$rocket"):return"Shadowrocket";case e("Egern"):return"Egern";case Boolean(globalThis.$environment?.["surge-version"]):return"Surge";case Boolean(globalThis.$environment?.["stash-version"]):return"Stash";case e("Cloudflare"):return"Worker";case Boolean(globalThis.process?.versions?.node):return"Node.js";default:return}})();class t{static#e=new Map([]);static#t=[];static#a=new Map([]);static clear=()=>{};static count=(e="default")=>{switch(t.#e.has(e)){case!0:t.#e.set(e,t.#e.get(e)+1);break;case!1:t.#e.set(e,0)}t.log(`${e}: ${t.#e.get(e)}`)};static countReset=(e="default")=>{switch(t.#e.has(e)){case!0:t.#e.set(e,0),t.log(`${e}: ${t.#e.get(e)}`);break;case!1:t.warn(`Counter "${e}" doesn’t exist`)}};static debug=(...e)=>{t.#r<4||(e=e.map(e=>` ${e}`),t.log(...e))};static error(...a){if(!(t.#r<1)){switch(e){case"Surge":case"Loon":case"Stash":case"Egern":case"Shadowrocket":case"Quantumult X":default:a=a.map(e=>` ${e}`);break;case"Worker":case"Node.js":a=a.map(e=>` ${e?.stack??e}`)}t.log(...a)}}static exception=(...e)=>t.error(...e);static group=e=>t.#t.unshift(e);static groupEnd=()=>t.#t.shift();static info(...e){t.#r<3||(e=e.map(e=>` ${e}`),t.log(...e))}static#r=3;static get logLevel(){switch(t.#r){case 0:return"OFF";case 1:return"ERROR";case 2:return"WARN";case 3:default:return"INFO";case 4:return"DEBUG";case 5:return"ALL"}}static set logLevel(e){switch(typeof e){case"string":e=e.toLowerCase();break;case"number":break;default:e="warn"}switch(e){case 0:case"off":t.#r=0;break;case 1:case"error":t.#r=1;break;case 2:case"warn":case"warning":default:t.#r=2;break;case 3:case"info":t.#r=3;break;case 4:case"debug":t.#r=4;break;case 5:case"all":t.#r=5}}static log=(...e)=>{0!==t.#r&&(e=e.flatMap(e=>{switch(typeof e){case"object":return[JSON.stringify(e)];case"bigint":case"number":case"boolean":return[e.toString()];case"string":return e.split(/\r?\n/u);default:return[e]}}),t.#t.forEach(t=>{(e=e.map(e=>`  ${e}`)).unshift(` ${t}:`)}),e=["",...e],console.log(e.join("\n")))};static time=(e="default")=>t.#a.set(e,Date.now());static timeEnd=(e="default")=>t.#a.delete(e);static timeLog=(e="default")=>{const a=t.#a.get(e);a?t.log(`${e}: ${Date.now()-a}ms`):t.warn(`Timer "${e}" doesn’t exist`)};static warn(...e){t.#r<2||(e=e.map(e=>` ${e}`),t.log(...e))}}class a{static escape(e){const t={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"};return e.replace(/[&<>"']/g,e=>t[e])}static get(e={},t="",r=void 0){Array.isArray(t)||(t=a.toPath(t));const n=t.reduce((e,t)=>Object(e)[t],e);return void 0===n?r:n}static merge(e,...t){if(null==e)return e;for(const r of t)if(null!=r)for(const t of Object.keys(r)){const n=r[t],i=e[t];switch(!0){case a.#n(n)&&a.#n(i):e[t]=a.merge(i,n);break;case n instanceof Map&&i instanceof Map:if(n.size>0)for(const[e,t]of n)i.set(e,t);break;case n instanceof Set&&i instanceof Set:if(n.size>0)for(const e of n)i.add(e);break;case Array.isArray(n)&&0===n.length&&void 0!==i:case n instanceof Map&&0===n.size&&void 0!==i:case n instanceof Set&&0===n.size&&void 0!==i:break;case void 0!==n:e[t]=n}}return e}static#n(e){if(null===e||"object"!=typeof e)return!1;const t=Object.getPrototypeOf(e);return null===t||t===Object.prototype}static omit(e={},t=[]){return Array.isArray(t)||(t=[t.toString()]),t.forEach(t=>a.unset(e,t)),e}static pick(e={},t=[]){Array.isArray(t)||(t=[t.toString()]);const a=Object.entries(e).filter(([e,a])=>t.includes(e));return Object.fromEntries(a)}static set(e,t,r){return Array.isArray(t)||(t=a.toPath(t)),t.slice(0,-1).reduce((e,a,r)=>Object(e[a])===e[a]?e[a]:e[a]=/^\d+$/.test(t[r+1])?[]:{},e)[t[t.length-1]]=r,e}static toPath(e){return e.replace(/\[(\d+)\]/g,".$1").split(".").filter(Boolean)}static unescape(e){const t={"&amp;":"&","&lt;":"<","&gt;":">","&quot;":'"',"&#39;":"'"};return e.replace(/&amp;|&lt;|&gt;|&quot;|&#39;/g,e=>t[e])}static unset(e={},t=""){Array.isArray(t)||(t=a.toPath(t));return t.reduce((e,a,r)=>r===t.length-1?(delete e[a],!0):Object(e)[a],e)}}class r{static parse(e){let t={};switch(typeof e){case"string":{const n=e.replace(/^\?/,"");if(!n)break;const i=Object.fromEntries(n.split("&").filter(Boolean).map(e=>{const[t="",a=""]=e.split("=",2);return[r.#i(t).replace(/\[([^\[\]]+)\]/g,".$1"),r.#i(a).replace(/\"/g,"")]}));Object.keys(i).forEach(e=>a.set(t,e,i[e]));break}case"object":switch(e){case null:break;default:{const r={};Object.keys(e).forEach(t=>a.set(r,t,e[t])),t=r;break}}break;case"undefined":t={}}return t}static stringify(e={}){if(!e||"object"!=typeof e)return"";const t=[];return Object.keys(e).forEach(a=>r.#o(e,a,t)),0===t.length?"":t.map(([e,t])=>`${r.#s(r.#l(e))}=${r.#s(t)}`).join("&")}static#o(e,t,n){const i=a.get(e,t);void 0!==i&&(null!==i?Array.isArray(i)?i.forEach((a,i)=>{void 0!==a&&r.#o(e,`${t}[${i}]`,n)}):r.#n(i)?Object.keys(i).forEach(a=>r.#o(e,`${t}.${a}`,n)):n.push([t,String(i)]):n.push([t,""]))}static#l(e){const[t,...r]=a.toPath(e);return r.reduce((e,t)=>/^\d+$/.test(t)?`${e}[${t}]`:`${e}.${t}`,t)}static#n(e){if(null===e||"object"!=typeof e||Array.isArray(e))return!1;const t=Object.getPrototypeOf(e);return null===t||t===Object.prototype}static#s(e){return encodeURIComponent(e)}static#i(e){return decodeURIComponent(e.replace(/\+/g," "))}}t.debug(" $argument"),globalThis.$argument=r.parse(globalThis.$argument),globalThis.$argument.LogLevel&&(t.logLevel=globalThis.$argument.LogLevel),t.debug(" $argument",`$argument: ${JSON.stringify(globalThis.$argument)}`);const n={100:"Continue",101:"Switching Protocols",102:"Processing",103:"Early Hints",200:"OK",201:"Created",202:"Accepted",203:"Non-Authoritative Information",204:"No Content",205:"Reset Content",206:"Partial Content",207:"Multi-Status",208:"Already Reported",226:"IM Used",300:"Multiple Choices",301:"Moved Permanently",302:"Found",304:"Not Modified",307:"Temporary Redirect",308:"Permanent Redirect",400:"Bad Request",401:"Unauthorized",402:"Payment Required",403:"Forbidden",404:"Not Found",405:"Method Not Allowed",406:"Not Acceptable",407:"Proxy Authentication Required",408:"Request Timeout",409:"Conflict",410:"Gone",411:"Length Required",412:"Precondition Failed",413:"Content Too Large",414:"URI Too Long",415:"Unsupported Media Type",416:"Range Not Satisfiable",417:"Expectation Failed",418:"I'm a teapot",421:"Misdirected Request",422:"Unprocessable Entity",423:"Locked",424:"Failed Dependency",425:"Too Early",426:"Upgrade Required",428:"Precondition Required",429:"Too Many Requests",431:"Request Header Fields Too Large",451:"Unavailable For Legal Reasons",500:"Internal Server Error",501:"Not Implemented",502:"Bad Gateway",503:"Service Unavailable",504:"Gateway Timeout",505:"HTTP Version Not Supported",506:"Variant Also Negotiates",507:"Insufficient Storage",508:"Loop Detected",510:"Not Extended",511:"Network Authentication Required"};function i(r={}){switch(e){case"Surge":r.policy&&a.set(r,"headers.X-Surge-Policy",r.policy),t.log(" 执行结束!",` ${(new Date).getTime()/1e3-$script.startTime} 秒`),$done(r);break;case"Loon":r.policy&&(r.node=r.policy),t.log(" 执行结束!",` ${(new Date-$script.startTime)/1e3} 秒`),$done(r);break;case"Stash":r.policy&&a.set(r,"headers.X-Stash-Selected-Proxy",encodeURI(r.policy)),t.log(" 执行结束!",` ${(new Date-$script.startTime)/1e3} 秒`),$done(r);break;case"Egern":case"Shadowrocket":t.log(" 执行结束!"),$done(r);break;case"Quantumult X":switch(r.policy&&a.set(r,"opts.policy",r.policy),typeof(r=a.pick(r,["status","url","headers","body","bodyBytes"])).status){case"number":r.status=`HTTP/1.1 ${r.status} ${n[r.status]}`;break;case"string":case"undefined":break;default:throw new TypeError(`${Function.name}: 参数类型错误, status 必须为数字或字符串`)}r.body instanceof ArrayBuffer?(r.bodyBytes=r.body,r.body=void 0):ArrayBuffer.isView(r.body)?(r.bodyBytes=r.body.buffer.slice(r.body.byteOffset,r.body.byteLength+r.body.byteOffset),r.body=void 0):r.body&&(r.bodyBytes=void 0),t.log(" 执行结束!"),$done(r);break;case"Worker":default:t.log(" 执行结束!");break;case"Node.js":t.log(" 执行结束!"),process.exit(1)}}class o{static data=null;static dataFile="box.dat";static#c=/^@(?<key>[^.]+)(?:\.(?<path>.*))?$/;static getItem(t,r=null){let n=r;switch(t.startsWith("@")){case!0:{const{key:e,path:r}=t.match(o.#c)?.groups;t=e;let i=o.getItem(t,{});"object"!=typeof i&&(i={}),n=a.get(i,r);try{n=JSON.parse(n)}catch{}break}default:switch(e){case"Surge":case"Loon":case"Stash":case"Egern":case"Shadowrocket":n=$persistentStore.read(t);break;case"Quantumult X":n=$prefs.valueForKey(t);break;case"Worker":o.data=o.data??{},n=o.data[t];break;case"Node.js":o.data=o.#d(o.dataFile),n=o.data?.[t];break;default:n=o.data?.[t]||null}try{n=JSON.parse(n)}catch{}}return n??r}static setItem(t=new String,r=new String){let n=!1;if("object"==typeof r)r=JSON.stringify(r);else r=String(r);switch(t.startsWith("@")){case!0:{const{key:e,path:i}=t.match(o.#c)?.groups;t=e;let s=o.getItem(t,{});"object"!=typeof s&&(s={}),a.set(s,i,r),n=o.setItem(t,s);break}default:switch(e){case"Surge":case"Loon":case"Stash":case"Egern":case"Shadowrocket":n=$persistentStore.write(r,t);break;case"Quantumult X":n=$prefs.setValueForKey(r,t);break;case"Worker":o.data=o.data??{},o.data[t]=r,n=!0;break;case"Node.js":o.data=o.#d(o.dataFile),o.data[t]=r,o.#f(o.dataFile),n=!0;break;default:n=o.data?.[t]||null}}return n}static removeItem(t){let r=!1;switch(t.startsWith("@")){case!0:{const{key:e,path:n}=t.match(o.#c)?.groups;t=e;let i=o.getItem(t);"object"!=typeof i&&(i={}),a.unset(i,n),r=o.setItem(t,i);break}default:switch(e){case"Surge":r=$persistentStore.write(null,t);break;case"Loon":case"Stash":case"Egern":case"Shadowrocket":default:r=!1;break;case"Quantumult X":r=$prefs.removeValueForKey(t);break;case"Worker":o.data=o.data??{},delete o.data[t],r=!0;break;case"Node.js":o.data=o.#d(o.dataFile),delete o.data[t],o.#f(o.dataFile),r=!0}}return r}static clear(){let t=!1;switch(e){case"Surge":case"Loon":case"Stash":case"Egern":case"Shadowrocket":default:t=!1;break;case"Quantumult X":t=$prefs.removeAllValues();break;case"Worker":o.data={},t=!0;break;case"Node.js":o.data=o.#d(o.dataFile),o.data={},o.#f(o.dataFile),t=!0}return t}static#d=t=>{if("Node.js"!==e)return{};{this.fs=this.fs?this.fs:require("fs"),this.path=this.path?this.path:require("path");const e=this.path.resolve(t),a=this.path.resolve(process.cwd(),t),r=this.fs.existsSync(e),n=!r&&this.fs.existsSync(a);if(!r&&!n)return{};{const t=r?e:a;try{return JSON.parse(this.fs.readFileSync(t))}catch(e){return{}}}}};static#f=(t=this.dataFile)=>{if("Node.js"===e){this.fs=this.fs?this.fs:require("fs"),this.path=this.path?this.path:require("path");const e=this.path.resolve(t),a=this.path.resolve(process.cwd(),t),r=this.fs.existsSync(e),n=!r&&this.fs.existsSync(a),i=JSON.stringify(this.data);r?this.fs.writeFileSync(e,i):n?this.fs.writeFileSync(a,i):this.fs.writeFileSync(e,i)}}}function s(e){let t=e.length;for(;--t>=0;)e[t]=0}s(new Array(576));s(new Array(60));s(new Array(512));s(new Array(256));s(new Array(29));s(new Array(30));var l=(e,t,a,r)=>{let n=65535&e,i=e>>>16&65535,o=0;for(;0!==a;){o=a>2e3?2e3:a,a-=o;do{n=n+t[r++]|0,i=i+n|0}while(--o);n%=65521,i%=65521}return n|i<<16};const c=new Uint32Array((()=>{let e,t=[];for(var a=0;a<256;a++){e=a;for(var r=0;r<8;r++)e=1&e?3988292384^e>>>1:e>>>1;t[a]=e}return t})());var d=(e,t,a,r)=>{const n=c,i=r+a;e^=-1;for(let a=r;a<i;a++)e=e>>>8^n[255&(e^t[a])];return-1^e},f={2:"need dictionary",1:"stream end",0:"","-1":"file error","-2":"stream error","-3":"data error","-4":"insufficient memory","-5":"buffer error","-6":"incompatible version"},u={Z_NO_FLUSH:0,Z_FINISH:4,Z_BLOCK:5,Z_TREES:6,Z_OK:0,Z_STREAM_END:1,Z_NEED_DICT:2,Z_STREAM_ERROR:-2,Z_DATA_ERROR:-3,Z_MEM_ERROR:-4,Z_BUF_ERROR:-5,Z_DEFLATED:8};const h=(e,t)=>Object.prototype.hasOwnProperty.call(e,t);var w=function(e){const t=Array.prototype.slice.call(arguments,1);for(;t.length;){const a=t.shift();if(a){if("object"!=typeof a)throw new TypeError(a+"must be non-object");for(const t in a)h(a,t)&&(e[t]=a[t])}}return e},g=e=>{let t=0;for(let a=0,r=e.length;a<r;a++)t+=e[a].length;const a=new Uint8Array(t);for(let t=0,r=0,n=e.length;t<n;t++){let n=e[t];a.set(n,r),r+=n.length}return a};let p=!0;try{String.fromCharCode.apply(null,new Uint8Array(1))}catch(e){p=!1}const b=new Uint8Array(256);for(let e=0;e<256;e++)b[e]=e>=252?6:e>=248?5:e>=240?4:e>=224?3:e>=192?2:1;b[254]=b[255]=1;var y=e=>{if("function"==typeof TextEncoder&&TextEncoder.prototype.encode)return(new TextEncoder).encode(e);let t,a,r,n,i,o=e.length,s=0;for(n=0;n<o;n++)a=e.charCodeAt(n),55296==(64512&a)&&n+1<o&&(r=e.charCodeAt(n+1),56320==(64512&r)&&(a=65536+(a-55296<<10)+(r-56320),n++)),s+=a<128?1:a<2048?2:a<65536?3:4;for(t=new Uint8Array(s),i=0,n=0;i<s;n++)a=e.charCodeAt(n),55296==(64512&a)&&n+1<o&&(r=e.charCodeAt(n+1),56320==(64512&r)&&(a=65536+(a-55296<<10)+(r-56320),n++)),a<128?t[i++]=a:a<2048?(t[i++]=192|a>>>6,t[i++]=128|63&a):a<65536?(t[i++]=224|a>>>12,t[i++]=128|a>>>6&63,t[i++]=128|63&a):(t[i++]=240|a>>>18,t[i++]=128|a>>>12&63,t[i++]=128|a>>>6&63,t[i++]=128|63&a);return t},m=(e,t)=>{const a=t||e.length;if("function"==typeof TextDecoder&&TextDecoder.prototype.decode)return(new TextDecoder).decode(e.subarray(0,t));let r,n;const i=new Array(2*a);for(n=0,r=0;r<a;){let t=e[r++];if(t<128){i[n++]=t;continue}let o=b[t];if(o>4)i[n++]=65533,r+=o-1;else{for(t&=2===o?31:3===o?15:7;o>1&&r<a;)t=t<<6|63&e[r++],o--;o>1?i[n++]=65533:t<65536?i[n++]=t:(t-=65536,i[n++]=55296|t>>10&1023,i[n++]=56320|1023&t)}}return((e,t)=>{if(t<65534&&e.subarray&&p)return String.fromCharCode.apply(null,e.length===t?e:e.subarray(0,t));let a="";for(let r=0;r<t;r++)a+=String.fromCharCode(e[r]);return a})(i,n)},k=(e,t)=>{(t=t||e.length)>e.length&&(t=e.length);let a=t-1;for(;a>=0&&128==(192&e[a]);)a--;return a<0||0===a?t:a+b[e[a]]>t?a:t};var v=function(){this.input=null,this.next_in=0,this.avail_in=0,this.total_in=0,this.output=null,this.next_out=0,this.avail_out=0,this.total_out=0,this.msg="",this.state=null,this.data_type=2,this.adler=0};const _=16209;var x=function(e,t){let a,r,n,i,o,s,l,c,d,f,u,h,w,g,p,b,y,m,k,v,x,E,A,$;const S=e.state;a=e.next_in,A=e.input,r=a+(e.avail_in-5),n=e.next_out,$=e.output,i=n-(t-e.avail_out),o=n+(e.avail_out-257),s=S.dmax,l=S.wsize,c=S.whave,d=S.wnext,f=S.window,u=S.hold,h=S.bits,w=S.lencode,g=S.distcode,p=(1<<S.lenbits)-1,b=(1<<S.distbits)-1;e:do{h<15&&(u+=A[a++]<<h,h+=8,u+=A[a++]<<h,h+=8),y=w[u&p];t:for(;;){if(m=y>>>24,u>>>=m,h-=m,m=y>>>16&255,0===m)$[n++]=65535&y;else{if(!(16&m)){if(64&m){if(32&m){S.mode=16191;break e}e.msg="invalid literal/length code",S.mode=_;break e}y=w[(65535&y)+(u&(1<<m)-1)];continue t}for(k=65535&y,m&=15,m&&(h<m&&(u+=A[a++]<<h,h+=8),k+=u&(1<<m)-1,u>>>=m,h-=m),h<15&&(u+=A[a++]<<h,h+=8,u+=A[a++]<<h,h+=8),y=g[u&b];;){if(m=y>>>24,u>>>=m,h-=m,m=y>>>16&255,16&m){if(v=65535&y,m&=15,h<m&&(u+=A[a++]<<h,h+=8,h<m&&(u+=A[a++]<<h,h+=8)),v+=u&(1<<m)-1,v>s){e.msg="invalid distance too far back",S.mode=_;break e}if(u>>>=m,h-=m,m=n-i,v>m){if(m=v-m,m>c&&S.sane){e.msg="invalid distance too far back",S.mode=_;break e}if(x=0,E=f,0===d){if(x+=l-m,m<k){k-=m;do{$[n++]=f[x++]}while(--m);x=n-v,E=$}}else if(d<m){if(x+=l+d-m,m-=d,m<k){k-=m;do{$[n++]=f[x++]}while(--m);if(x=0,d<k){m=d,k-=m;do{$[n++]=f[x++]}while(--m);x=n-v,E=$}}}else if(x+=d-m,m<k){k-=m;do{$[n++]=f[x++]}while(--m);x=n-v,E=$}for(;k>2;)$[n++]=E[x++],$[n++]=E[x++],$[n++]=E[x++],k-=3;k&&($[n++]=E[x++],k>1&&($[n++]=E[x++]))}else{x=n-v;do{$[n++]=$[x++],$[n++]=$[x++],$[n++]=$[x++],k-=3}while(k>2);k&&($[n++]=$[x++],k>1&&($[n++]=$[x++]))}break}if(64&m){e.msg="invalid distance code",S.mode=_;break e}y=g[(65535&y)+(u&(1<<m)-1)]}}break}}while(a<r&&n<o);k=h>>3,a-=k,h-=k<<3,u&=(1<<h)-1,e.next_in=a,e.next_out=n,e.avail_in=a<r?r-a+5:5-(a-r),e.avail_out=n<o?o-n+257:257-(n-o),S.hold=u,S.bits=h};const E=15,A=new Uint16Array([3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258,0,0]),$=new Uint8Array([16,16,16,16,16,16,16,16,17,17,17,17,18,18,18,18,19,19,19,19,20,20,20,20,21,21,21,21,16,199,75]),S=new Uint16Array([1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577,0,0]),R=new Uint8Array([16,16,16,16,17,17,18,18,19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,27,27,28,28,29,29,64,64]);var T=(e,t,a,r,n,i,o,s)=>{const l=s.bits;let c,d,f,u,h,w,g=0,p=0,b=0,y=0,m=0,k=0,v=0,_=0,x=0,T=0,O=null;const N=new Uint16Array(16),j=new Uint16Array(16);let L,B,F,C=null;for(g=0;g<=E;g++)N[g]=0;for(p=0;p<r;p++)N[t[a+p]]++;for(m=l,y=E;y>=1&&0===N[y];y--);if(m>y&&(m=y),0===y)return n[i++]=20971520,n[i++]=20971520,s.bits=1,0;for(b=1;b<y&&0===N[b];b++);for(m<b&&(m=b),_=1,g=1;g<=E;g++)if(_<<=1,_-=N[g],_<0)return-1;if(_>0&&(0===e||1!==y))return-1;for(j[1]=0,g=1;g<E;g++)j[g+1]=j[g]+N[g];for(p=0;p<r;p++)0!==t[a+p]&&(o[j[t[a+p]]++]=p);if(0===e?(O=C=o,w=20):1===e?(O=A,C=$,w=257):(O=S,C=R,w=0),T=0,p=0,g=b,h=i,k=m,v=0,f=-1,x=1<<m,u=x-1,1===e&&x>852||2===e&&x>592)return 1;for(;;){L=g-v,o[p]+1<w?(B=0,F=o[p]):o[p]>=w?(B=C[o[p]-w],F=O[o[p]-w]):(B=96,F=0),c=1<<g-v,d=1<<k,b=d;do{d-=c,n[h+(T>>v)+d]=L<<24|B<<16|F}while(0!==d);for(c=1<<g-1;T&c;)c>>=1;if(0!==c?(T&=c-1,T+=c):T=0,p++,0===--N[g]){if(g===y)break;g=t[a+o[p]]}if(g>m&&(T&u)!==f){for(0===v&&(v=m),h+=b,k=g-v,_=1<<k;k+v<y&&(_-=N[k+v],!(_<=0));)k++,_<<=1;if(x+=1<<k,1===e&&x>852||2===e&&x>592)return 1;f=T&u,n[f]=m<<24|k<<16|h-i}}return 0!==T&&(n[h+T]=g-v<<24|64<<16),s.bits=m,0};const{Z_FINISH:O,Z_BLOCK:N,Z_TREES:j,Z_OK:L,Z_STREAM_END:B,Z_NEED_DICT:F,Z_STREAM_ERROR:C,Z_DATA_ERROR:U,Z_MEM_ERROR:I,Z_BUF_ERROR:M,Z_DEFLATED:D}=u,Z=16180,P=16190,z=16191,q=16192,H=16194,W=16199,K=16200,X=16206,Q=16209,V=e=>(e>>>24&255)+(e>>>8&65280)+((65280&e)<<8)+((255&e)<<24);function J(){this.strm=null,this.mode=0,this.last=!1,this.wrap=0,this.havedict=!1,this.flags=0,this.dmax=0,this.check=0,this.total=0,this.head=null,this.wbits=0,this.wsize=0,this.whave=0,this.wnext=0,this.window=null,this.hold=0,this.bits=0,this.length=0,this.offset=0,this.extra=0,this.lencode=null,this.distcode=null,this.lenbits=0,this.distbits=0,this.ncode=0,this.nlen=0,this.ndist=0,this.have=0,this.next=null,this.lens=new Uint16Array(320),this.work=new Uint16Array(288),this.lendyn=null,this.distdyn=null,this.sane=0,this.back=0,this.was=0}const G=e=>{if(!e)return 1;const t=e.state;return!t||t.strm!==e||t.mode<Z||t.mode>16211?1:0},Y=e=>{if(G(e))return C;const t=e.state;return e.total_in=e.total_out=t.total=0,e.msg="",t.wrap&&(e.adler=1&t.wrap),t.mode=Z,t.last=0,t.havedict=0,t.flags=-1,t.dmax=32768,t.head=null,t.hold=0,t.bits=0,t.lencode=t.lendyn=new Int32Array(852),t.distcode=t.distdyn=new Int32Array(592),t.sane=1,t.back=-1,L},ee=e=>{if(G(e))return C;const t=e.state;return t.wsize=0,t.whave=0,t.wnext=0,Y(e)},te=(e,t)=>{let a;if(G(e))return C;const r=e.state;return t<0?(a=0,t=-t):(a=5+(t>>4),t<48&&(t&=15)),t&&(t<8||t>15)?C:(null!==r.window&&r.wbits!==t&&(r.window=null),r.wrap=a,r.wbits=t,ee(e))},ae=(e,t)=>{if(!e)return C;const a=new J;e.state=a,a.strm=e,a.window=null,a.mode=Z;const r=te(e,t);return r!==L&&(e.state=null),r};let re,ne,ie=!0;const oe=e=>{if(ie){re=new Int32Array(512),ne=new Int32Array(32);let t=0;for(;t<144;)e.lens[t++]=8;for(;t<256;)e.lens[t++]=9;for(;t<280;)e.lens[t++]=7;for(;t<288;)e.lens[t++]=8;for(T(1,e.lens,0,288,re,0,e.work,{bits:9}),t=0;t<32;)e.lens[t++]=5;T(2,e.lens,0,32,ne,0,e.work,{bits:5}),ie=!1}e.lencode=re,e.lenbits=9,e.distcode=ne,e.distbits=5},se=(e,t,a,r)=>{let n;const i=e.state;return null===i.window&&(i.window=new Uint8Array(1<<i.wbits)),0===i.wsize&&(i.wsize=1<<i.wbits,i.wnext=0,i.whave=0),r>=i.wsize?(i.window.set(t.subarray(a-i.wsize,a),0),i.wnext=0,i.whave=i.wsize):(n=i.wsize-i.wnext,n>r&&(n=r),i.window.set(t.subarray(a-r,a-r+n),i.wnext),(r-=n)?(i.window.set(t.subarray(a-r,a),0),i.wnext=r,i.whave=i.wsize):(i.wnext+=n,i.wnext===i.wsize&&(i.wnext=0),i.whave<i.wsize&&(i.whave+=n))),0};var le={inflateReset:ee,inflateReset2:te,inflateResetKeep:Y,inflateInit:e=>ae(e,15),inflateInit2:ae,inflate:(e,t)=>{let a,r,n,i,o,s,c,f,u,h,w,g,p,b,y,m,k,v,_,E,A,$,S=0;const R=new Uint8Array(4);let J,Y;const ee=new Uint8Array([16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15]);if(G(e)||!e.output||!e.input&&0!==e.avail_in)return C;a=e.state,a.mode===z&&(a.mode=q),o=e.next_out,n=e.output,c=e.avail_out,i=e.next_in,r=e.input,s=e.avail_in,f=a.hold,u=a.bits,h=s,w=c,$=L;e:for(;;)switch(a.mode){case Z:if(0===a.wrap){a.mode=q;break}for(;u<16;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}if(2&a.wrap&&35615===f){0===a.wbits&&(a.wbits=15),a.check=0,R[0]=255&f,R[1]=f>>>8&255,a.check=d(a.check,R,2,0),f=0,u=0,a.mode=16181;break}if(a.head&&(a.head.done=!1),!(1&a.wrap)||(((255&f)<<8)+(f>>8))%31){e.msg="incorrect header check",a.mode=Q;break}if((15&f)!==D){e.msg="unknown compression method",a.mode=Q;break}if(f>>>=4,u-=4,A=8+(15&f),0===a.wbits&&(a.wbits=A),A>15||A>a.wbits){e.msg="invalid window size",a.mode=Q;break}a.dmax=1<<a.wbits,a.flags=0,e.adler=a.check=1,a.mode=512&f?16189:z,f=0,u=0;break;case 16181:for(;u<16;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}if(a.flags=f,(255&a.flags)!==D){e.msg="unknown compression method",a.mode=Q;break}if(57344&a.flags){e.msg="unknown header flags set",a.mode=Q;break}a.head&&(a.head.text=f>>8&1),512&a.flags&&4&a.wrap&&(R[0]=255&f,R[1]=f>>>8&255,a.check=d(a.check,R,2,0)),f=0,u=0,a.mode=16182;case 16182:for(;u<32;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}a.head&&(a.head.time=f),512&a.flags&&4&a.wrap&&(R[0]=255&f,R[1]=f>>>8&255,R[2]=f>>>16&255,R[3]=f>>>24&255,a.check=d(a.check,R,4,0)),f=0,u=0,a.mode=16183;case 16183:for(;u<16;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}a.head&&(a.head.xflags=255&f,a.head.os=f>>8),512&a.flags&&4&a.wrap&&(R[0]=255&f,R[1]=f>>>8&255,a.check=d(a.check,R,2,0)),f=0,u=0,a.mode=16184;case 16184:if(1024&a.flags){for(;u<16;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}a.length=f,a.head&&(a.head.extra_len=f),512&a.flags&&4&a.wrap&&(R[0]=255&f,R[1]=f>>>8&255,a.check=d(a.check,R,2,0)),f=0,u=0}else a.head&&(a.head.extra=null);a.mode=16185;case 16185:if(1024&a.flags&&(g=a.length,g>s&&(g=s),g&&(a.head&&(A=a.head.extra_len-a.length,a.head.extra||(a.head.extra=new Uint8Array(a.head.extra_len)),a.head.extra.set(r.subarray(i,i+g),A)),512&a.flags&&4&a.wrap&&(a.check=d(a.check,r,g,i)),s-=g,i+=g,a.length-=g),a.length))break e;a.length=0,a.mode=16186;case 16186:if(2048&a.flags){if(0===s)break e;g=0;do{A=r[i+g++],a.head&&A&&a.length<65536&&(a.head.name+=String.fromCharCode(A))}while(A&&g<s);if(512&a.flags&&4&a.wrap&&(a.check=d(a.check,r,g,i)),s-=g,i+=g,A)break e}else a.head&&(a.head.name=null);a.length=0,a.mode=16187;case 16187:if(4096&a.flags){if(0===s)break e;g=0;do{A=r[i+g++],a.head&&A&&a.length<65536&&(a.head.comment+=String.fromCharCode(A))}while(A&&g<s);if(512&a.flags&&4&a.wrap&&(a.check=d(a.check,r,g,i)),s-=g,i+=g,A)break e}else a.head&&(a.head.comment=null);a.mode=16188;case 16188:if(512&a.flags){for(;u<16;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}if(4&a.wrap&&f!==(65535&a.check)){e.msg="header crc mismatch",a.mode=Q;break}f=0,u=0}a.head&&(a.head.hcrc=a.flags>>9&1,a.head.done=!0),e.adler=a.check=0,a.mode=z;break;case 16189:for(;u<32;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}e.adler=a.check=V(f),f=0,u=0,a.mode=P;case P:if(0===a.havedict)return e.next_out=o,e.avail_out=c,e.next_in=i,e.avail_in=s,a.hold=f,a.bits=u,F;e.adler=a.check=1,a.mode=z;case z:if(t===N||t===j)break e;case q:if(a.last){f>>>=7&u,u-=7&u,a.mode=X;break}for(;u<3;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}switch(a.last=1&f,f>>>=1,u-=1,3&f){case 0:a.mode=16193;break;case 1:if(oe(a),a.mode=W,t===j){f>>>=2,u-=2;break e}break;case 2:a.mode=16196;break;case 3:e.msg="invalid block type",a.mode=Q}f>>>=2,u-=2;break;case 16193:for(f>>>=7&u,u-=7&u;u<32;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}if((65535&f)!=(f>>>16^65535)){e.msg="invalid stored block lengths",a.mode=Q;break}if(a.length=65535&f,f=0,u=0,a.mode=H,t===j)break e;case H:a.mode=16195;case 16195:if(g=a.length,g){if(g>s&&(g=s),g>c&&(g=c),0===g)break e;n.set(r.subarray(i,i+g),o),s-=g,i+=g,c-=g,o+=g,a.length-=g;break}a.mode=z;break;case 16196:for(;u<14;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}if(a.nlen=257+(31&f),f>>>=5,u-=5,a.ndist=1+(31&f),f>>>=5,u-=5,a.ncode=4+(15&f),f>>>=4,u-=4,a.nlen>286||a.ndist>30){e.msg="too many length or distance symbols",a.mode=Q;break}a.have=0,a.mode=16197;case 16197:for(;a.have<a.ncode;){for(;u<3;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}a.lens[ee[a.have++]]=7&f,f>>>=3,u-=3}for(;a.have<19;)a.lens[ee[a.have++]]=0;if(a.lencode=a.lendyn,a.lenbits=7,J={bits:a.lenbits},$=T(0,a.lens,0,19,a.lencode,0,a.work,J),a.lenbits=J.bits,$){e.msg="invalid code lengths set",a.mode=Q;break}a.have=0,a.mode=16198;case 16198:for(;a.have<a.nlen+a.ndist;){for(;S=a.lencode[f&(1<<a.lenbits)-1],y=S>>>24,m=S>>>16&255,k=65535&S,!(y<=u);){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}if(k<16)f>>>=y,u-=y,a.lens[a.have++]=k;else{if(16===k){for(Y=y+2;u<Y;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}if(f>>>=y,u-=y,0===a.have){e.msg="invalid bit length repeat",a.mode=Q;break}A=a.lens[a.have-1],g=3+(3&f),f>>>=2,u-=2}else if(17===k){for(Y=y+3;u<Y;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}f>>>=y,u-=y,A=0,g=3+(7&f),f>>>=3,u-=3}else{for(Y=y+7;u<Y;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}f>>>=y,u-=y,A=0,g=11+(127&f),f>>>=7,u-=7}if(a.have+g>a.nlen+a.ndist){e.msg="invalid bit length repeat",a.mode=Q;break}for(;g--;)a.lens[a.have++]=A}}if(a.mode===Q)break;if(0===a.lens[256]){e.msg="invalid code -- missing end-of-block",a.mode=Q;break}if(a.lenbits=9,J={bits:a.lenbits},$=T(1,a.lens,0,a.nlen,a.lencode,0,a.work,J),a.lenbits=J.bits,$){e.msg="invalid literal/lengths set",a.mode=Q;break}if(a.distbits=6,a.distcode=a.distdyn,J={bits:a.distbits},$=T(2,a.lens,a.nlen,a.ndist,a.distcode,0,a.work,J),a.distbits=J.bits,$){e.msg="invalid distances set",a.mode=Q;break}if(a.mode=W,t===j)break e;case W:a.mode=K;case K:if(s>=6&&c>=258){e.next_out=o,e.avail_out=c,e.next_in=i,e.avail_in=s,a.hold=f,a.bits=u,x(e,w),o=e.next_out,n=e.output,c=e.avail_out,i=e.next_in,r=e.input,s=e.avail_in,f=a.hold,u=a.bits,a.mode===z&&(a.back=-1);break}for(a.back=0;S=a.lencode[f&(1<<a.lenbits)-1],y=S>>>24,m=S>>>16&255,k=65535&S,!(y<=u);){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}if(m&&!(240&m)){for(v=y,_=m,E=k;S=a.lencode[E+((f&(1<<v+_)-1)>>v)],y=S>>>24,m=S>>>16&255,k=65535&S,!(v+y<=u);){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}f>>>=v,u-=v,a.back+=v}if(f>>>=y,u-=y,a.back+=y,a.length=k,0===m){a.mode=16205;break}if(32&m){a.back=-1,a.mode=z;break}if(64&m){e.msg="invalid literal/length code",a.mode=Q;break}a.extra=15&m,a.mode=16201;case 16201:if(a.extra){for(Y=a.extra;u<Y;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}a.length+=f&(1<<a.extra)-1,f>>>=a.extra,u-=a.extra,a.back+=a.extra}a.was=a.length,a.mode=16202;case 16202:for(;S=a.distcode[f&(1<<a.distbits)-1],y=S>>>24,m=S>>>16&255,k=65535&S,!(y<=u);){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}if(!(240&m)){for(v=y,_=m,E=k;S=a.distcode[E+((f&(1<<v+_)-1)>>v)],y=S>>>24,m=S>>>16&255,k=65535&S,!(v+y<=u);){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}f>>>=v,u-=v,a.back+=v}if(f>>>=y,u-=y,a.back+=y,64&m){e.msg="invalid distance code",a.mode=Q;break}a.offset=k,a.extra=15&m,a.mode=16203;case 16203:if(a.extra){for(Y=a.extra;u<Y;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}a.offset+=f&(1<<a.extra)-1,f>>>=a.extra,u-=a.extra,a.back+=a.extra}if(a.offset>a.dmax){e.msg="invalid distance too far back",a.mode=Q;break}a.mode=16204;case 16204:if(0===c)break e;if(g=w-c,a.offset>g){if(g=a.offset-g,g>a.whave&&a.sane){e.msg="invalid distance too far back",a.mode=Q;break}g>a.wnext?(g-=a.wnext,p=a.wsize-g):p=a.wnext-g,g>a.length&&(g=a.length),b=a.window}else b=n,p=o-a.offset,g=a.length;g>c&&(g=c),c-=g,a.length-=g;do{n[o++]=b[p++]}while(--g);0===a.length&&(a.mode=K);break;case 16205:if(0===c)break e;n[o++]=a.length,c--,a.mode=K;break;case X:if(a.wrap){for(;u<32;){if(0===s)break e;s--,f|=r[i++]<<u,u+=8}if(w-=c,e.total_out+=w,a.total+=w,4&a.wrap&&w&&(e.adler=a.check=a.flags?d(a.check,n,w,o-w):l(a.check,n,w,o-w)),w=c,4&a.wrap&&(a.flags?f:V(f))!==a.check){e.msg="incorrect data check",a.mode=Q;break}f=0,u=0}a.mode=16207;case 16207:if(a.wrap&&a.flags){for(;u<32;){if(0===s)break e;s--,f+=r[i++]<<u,u+=8}if(4&a.wrap&&f!==(4294967295&a.total)){e.msg="incorrect length check",a.mode=Q;break}f=0,u=0}a.mode=16208;case 16208:$=B;break e;case Q:$=U;break e;case 16210:return I;default:return C}return e.next_out=o,e.avail_out=c,e.next_in=i,e.avail_in=s,a.hold=f,a.bits=u,(a.wsize||w!==e.avail_out&&a.mode<Q&&(a.mode<X||t!==O))&&se(e,e.output,e.next_out,w-e.avail_out),h-=e.avail_in,w-=e.avail_out,e.total_in+=h,e.total_out+=w,a.total+=w,4&a.wrap&&w&&(e.adler=a.check=a.flags?d(a.check,n,w,e.next_out-w):l(a.check,n,w,e.next_out-w)),e.data_type=a.bits+(a.last?64:0)+(a.mode===z?128:0)+(a.mode===W||a.mode===H?256:0),(0===h&&0===w||t===O)&&$===L&&($=M),$},inflateEnd:e=>{if(G(e))return C;let t=e.state;return t.window&&(t.window=null),e.state=null,L},inflateGetHeader:(e,t)=>{if(G(e))return C;const a=e.state;return 2&a.wrap?(a.head=t,t.done=!1,L):C},inflateSetDictionary:(e,t)=>{const a=t.length;let r,n,i;return G(e)?C:(r=e.state,0!==r.wrap&&r.mode!==P?C:r.mode===P&&(n=1,n=l(n,t,a,0),n!==r.check)?U:(i=se(e,t,a,a),i?(r.mode=16210,I):(r.havedict=1,L)))},inflateInfo:"pako inflate (from Nodeca project)"};var ce=function(){this.text=0,this.time=0,this.xflags=0,this.os=0,this.extra=null,this.extra_len=0,this.name="",this.comment="",this.hcrc=0,this.done=!1};const de=Object.prototype.toString,{Z_NO_FLUSH:fe,Z_FINISH:ue,Z_OK:he,Z_STREAM_END:we,Z_NEED_DICT:ge,Z_STREAM_ERROR:pe,Z_DATA_ERROR:be,Z_MEM_ERROR:ye,Z_BUF_ERROR:me}=u,ke={chunkSize:65536,windowBits:15,to:""};function ve(e){this.options=w({},ke,e||{});const t=this.options;t.raw&&t.windowBits>=0&&t.windowBits<16&&(t.windowBits=-t.windowBits,0===t.windowBits&&(t.windowBits=-15)),!(t.windowBits>=0&&t.windowBits<16)||e&&e.windowBits||(t.windowBits+=32),t.windowBits>15&&t.windowBits<48&&(15&t.windowBits||(t.windowBits|=15)),this.err=0,this.msg="",this.ended=!1,this.chunks=[],this.strm=new v,this.strm.avail_out=0;let a=le.inflateInit2(this.strm,t.windowBits);if(a!==he)throw new Error(f[a]);if(this.header=new ce,le.inflateGetHeader(this.strm,this.header),t.dictionary&&("string"==typeof t.dictionary?t.dictionary=y(t.dictionary):"[object ArrayBuffer]"===de.call(t.dictionary)&&(t.dictionary=new Uint8Array(t.dictionary)),t.raw&&(a=le.inflateSetDictionary(this.strm,t.dictionary),a!==he)))throw new Error(f[a])}ve.prototype.push=function(e,t){const a=this.strm,r=this.options.chunkSize,n=this.options.dictionary;let i,o,s;if(this.ended)return!1;for(o=t===~~t?t:!0===t?ue:fe,"[object ArrayBuffer]"===de.call(e)?a.input=new Uint8Array(e):a.input=e,a.next_in=0,a.avail_in=a.input.length;;){for(0===a.avail_out&&(a.output=new Uint8Array(r),a.next_out=0,a.avail_out=r),i=le.inflate(a,o),i===ge&&n&&(i=le.inflateSetDictionary(a,n),i===he?i=le.inflate(a,o):i===be&&(i=ge));a.avail_in>0&&i===we&&2&a.state.wrap&&0!==a.state.flags&&0!==a.input[a.next_in];)le.inflateReset(a),i=le.inflate(a,o);switch(i){case pe:case be:case ge:case ye:return this.onEnd(i),this.ended=!0,!1}if(s=a.avail_out,a.next_out&&(0===a.avail_out||i===we||o>0))if("string"===this.options.to){let e=k(a.output,a.next_out),t=a.next_out-e,n=m(a.output,e);a.next_out=t,a.avail_out=r-t,t&&a.output.set(a.output.subarray(e,e+t),0),this.onData(n)}else this.onData(a.output.length===a.next_out?a.output:a.output.subarray(0,a.next_out)),a.avail_out=0,a.next_out=0;if(i!==he&&i!==me||0!==s){if(i===we)return i=le.inflateEnd(this.strm),this.onEnd(i),this.ended=!0,!0;if(0===a.avail_in){if(o===ue)return i=le.inflateEnd(this.strm),this.onEnd(i===he?me:i),this.ended=!0,!1;break}}}return!0},ve.prototype.onData=function(e){this.chunks.push(e)},ve.prototype.onEnd=function(e){e===he&&("string"===this.options.to?this.result=this.chunks.join(""):this.result=g(this.chunks)),this.chunks=[],this.err=e,this.msg=this.strm.msg};var _e={ungzip:function(e,t){const a=new ve(t);if(a.push(e,!0),a.err)throw a.msg||f[a.err];return a.result}};const{ungzip:xe}=_e;var Ee=xe;function Ae(e,t){let a=0,r=1,n=0;for(;t<e.length;){const i=255&e[t++];if(n<56&&(a+=(127&i)*r),!(128&i))return[a,t];if(r*=128,n+=7,n>=70)throw new Error("varint too long at "+t)}throw new Error("truncated varint")}function $e(e){let t=Math.floor(e);if(t>=0){const e=[];for(;t>=128;)e.push(t%128|128),t=Math.floor(t/128);return e.push(t),e}const a=[0,0,0,0,0,0,0,0];let r=-t;for(let e=0;e<8;e++)a[e]=255&r,r=Math.floor(r/256);let n=1;for(let e=0;e<8;e++){const t=(255&~a[e])+n;a[e]=255&t,n=t>>8}const i=[];for(let e=0;e<10;e++){let t=0;for(let r=0;r<7;r++){const n=7*e+r;n<64&&(t|=(a[n>>3]>>(7&n)&1)<<r)}e<9&&(t|=128),i.push(t)}return i}function Se(e){const t=[];for(let a=0;a<e.length;a++)for(let r=0;r<e[a].length;r++)t.push(255&e[a][r]);return t}function Re(e){const t=[];let a=0;for(;a<e.length;){const r=a,[n,i]=Ae(e,a);a=i;const o=Math.floor(n/8),s=7&n;if(0===o)throw new Error("invalid protobuf field 0 at "+r);let l;if(0===s){const[t,r]=Ae(e,a);l=t,a=r}else if(1===s)l=e.slice(a,a+8),a+=8;else if(2===s){const[t,r]=Ae(e,a);a=r,l=e.slice(a,a+t),a+=t}else{if(5!==s)throw new Error("unsupported wire type "+s);l=e.slice(a,a+4),a+=4}t.push({fieldNo:o,wireType:s,value:l,raw:e.slice(r,a)})}return t}function Te(e,t,a){const r=$e(8*e+t);if(0===t)return Se([r,$e(a)]);if(1===t||5===t)return Se([r,a]);if(2===t)return Se([r,$e(a.length),a]);throw new Error("cannot encode wire type "+t)}function Oe(e,t,a){const r=Re(e);let n=!1,i=!1;for(const e of r)1===e.fieldNo&&0===e.wireType&&(n=!0),2===e.fieldNo&&0===e.wireType&&(i=!0);if(!n||!i)return e;const o=[];for(const e of r)1===e.fieldNo&&0===e.wireType?o.push(Te(1,0,Math.round(1e8*t.latitude))):2===e.fieldNo&&0===e.wireType?o.push(Te(2,0,Math.round(1e8*t.longitude))):3===e.fieldNo&&0===e.wireType?o.push(Te(3,0,t.accuracy)):o.push(e.raw);return a.locations++,Se(o)}function Ne(e,t,a){const r=Re(e);let n=!1;for(const e of r)if(1===e.fieldNo&&2===e.wireType){const t=Array.from(e.value).map(e=>String.fromCharCode(255&e)).join("");n=/^[0-9a-fA-F]{1,2}(:[0-9a-fA-F]{1,2}){5}$/.test(t)}if(!n)return e;let i=!1;const o=[];for(const e of r)if(2===e.fieldNo&&2===e.wireType)try{const r=Oe(e.value,t,a);r.length===e.value.length&&r.join(",")===e.value.join(",")||(i=!0),o.push(Te(e.fieldNo,e.wireType,r))}catch{a.skipped++,o.push(e.raw)}else o.push(e.raw);return i&&a.wifi++,Se(o)}function je(e,t,a){const r=Re(e);let n=!1;const i=[];for(const e of r)if(5===e.fieldNo&&2===e.wireType)try{const r=Oe(e.value,t,a);r.length===e.value.length&&r.join(",")===e.value.join(",")||(n=!0),i.push(Te(e.fieldNo,e.wireType,r))}catch{a.skipped++,i.push(e.raw)}else i.push(e.raw);return n&&a.cell++,Se(i)}function Le(e,t,a){const r=Re(e),n=[];for(const e of r)2===e.wireType&&2===e.fieldNo?n.push(Te(e.fieldNo,e.wireType,Ne(e.value,t,a))):2!==e.wireType||22!==e.fieldNo&&24!==e.fieldNo?n.push(e.raw):n.push(Te(e.fieldNo,e.wireType,je(e.value,t,a)));return Se(n)}function Be(e){return{wifi:e.wifi||0,cell:e.cell||0,locations:e.locations||0,skipped:e.skipped||0}}function Fe(e,t){e.wifi=t.wifi,e.cell=t.cell,e.locations=t.locations,e.skipped=t.skipped}function Ce(e,t){if(e.length!==t.length)return!1;for(let a=0;a<e.length;a++)if(e[a]!==t[a])return!1;return!0}function Ue(e,t,a,r){if(e.length<t+10)throw new Error("body too short: "+e.length+", base="+t);const n=(255&e[t+8])<<8|255&e[t+9];if(n<=0)throw new Error("invalid empty frame length at "+t);if(n+t+10>e.length)throw new Error("invalid frame length "+n+" at "+t+" for "+e.length);const i=e.slice(0,t+8),o=e.slice(t+10,t+10+n),s=e.slice(t+10+n),l=Be(r),c=Le(o,a,r),d=r.locations-l.locations+(r.wifi-l.wifi)+(r.cell-l.cell);if(c.length>65535)throw new Error("patched payload too large: "+c.length);if(d<=0||Ce(o,c))throw Fe(r,l),new Error("frame parsed but no patchable wloc payload at "+t);return Se([i,[c.length>>8&255,255&c.length],c,s])}function Ie(e,a){const r={wifi:0,cell:0,locations:0,skipped:0};if(e.length<10)throw new Error("body too short: "+e.length);const n=[],i=[0,2,4,6,8,10,12,14,16],o=Math.min(96,Math.max(0,e.length-10));for(let e=0;e<=o;e++)i.indexOf(e)<0&&i.push(e);for(let o=0;o<i.length;o++){const s=i[o],l=Be(r);try{const n=Ue(e,s,a,r);return t.info(`[wloc] patched at offset=${s} locations=${r.locations} wifi=${r.wifi} cell=${r.cell} skipped=${r.skipped}`),{data:n,stats:r}}catch(e){Fe(r,l),n.length<6&&n.push("@"+s+":"+(e&&e.message?e.message:String(e)))}}try{const n=function(e,t,a){const r=[],n=Math.min(256,e.length);for(let i=0;i<=n;i++){const n=Be(a);try{const r=e.slice(i),o=Le(r,t,a);if(a.locations-n.locations+(a.wifi-n.wifi)+(a.cell-n.cell)>0&&!Ce(r,o))return Se([e.slice(0,i),o]);Fe(a,n)}catch(e){Fe(a,n),r.length<6&&r.push("raw@"+i+":"+(e&&e.message?e.message:String(e)))}}throw new Error("raw protobuf scan failed; "+r.join(" | "))}(e,a,r);return t.info(`[wloc] patched via raw fallback locations=${r.locations} wifi=${r.wifi} cell=${r.cell} skipped=${r.skipped}`),{data:n,stats:r}}catch(e){n.push("raw:"+(e&&e.message?e.message:String(e)))}throw new Error("no patchable wloc payload found; "+n.join(" | "))}function Me(e){return e.length>=2&&31===e[0]&&139===e[1]}async function De(e,a,r){const n=e.url||"";t.group(`[wloc] Response ${n}`);try{let e=function(e){if(!e)return[];if("undefined"!=typeof ArrayBuffer){if(e instanceof ArrayBuffer)return Array.prototype.slice.call(new Uint8Array(e));if(ArrayBuffer.isView&&ArrayBuffer.isView(e))return Array.prototype.slice.call(new Uint8Array(e.buffer,e.byteOffset,e.byteLength))}if("number"==typeof e.length&&"string"!=typeof e){const t=[];for(let a=0;a<e.length;a++)t.push(255&e[a]);return t}if("string"==typeof e){const t=[];for(let a=0;a<e.length;a++)t.push(255&e.charCodeAt(a));return t}return[]}(a.bodyBytes||a.rawBody||a.body);if(!e.length)return t.warn("[wloc] 无二进制 body，跳过"),a;if(t.debug(`[wloc] input length=${e.length} gzip=${Me(e)}`),null==r.longitude||null==r.latitude)return t.info("[wloc] 透传模式：未设置坐标，不修改响应（恢复真实定位）"),a;let n=e;Me(e)&&(n=Array.from(Ee(new Uint8Array(e))));const{data:i,stats:o}=Ie(n,r),s=new Uint8Array(i);return a.body=s,a.bodyBytes=s,a.rawBody=s,a.headers&&(delete a.headers["Content-Encoding"],delete a.headers["content-encoding"],delete a.headers["Transfer-Encoding"],delete a.headers["transfer-encoding"],a.headers["Content-Length"]=String(s.length)),a.status=200,a.statusCode=200,t.info(`[wloc] 目标坐标: ${r.longitude},${r.latitude} 精度=${r.accuracy} patched=${o.locations}`),a}catch(e){return t.error(`[wloc] ${e.message||e}`),a}finally{t.groupEnd()}}const Ze={longitude:null,latitude:null,accuracy:25,logLevel:"info"};function Pe(){const e=globalThis.$argument||{},a=function(){try{const e=o.getItem("wloc_settings");if(e&&"object"==typeof e)return e}catch(e){t.debug(`[settings] 持久化数据读取失败: ${e.message}`)}return null}(),r={...Ze};if(e.longitude&&(r.longitude=parseFloat(e.longitude)),e.latitude&&(r.latitude=parseFloat(e.latitude)),e.accuracy&&(r.accuracy=parseInt(e.accuracy,10)),e.logLevel&&(r.logLevel=e.logLevel),e.LogLevel&&(r.logLevel=e.LogLevel),a)a.longitude&&(r.longitude=parseFloat(a.longitude)),a.latitude&&(r.latitude=parseFloat(a.latitude)),a.accuracy&&(r.accuracy=parseInt(a.accuracy,10)),t.info(`[settings] 使用已保存坐标: ${r.longitude},${r.latitude}`);else if(113.94114===r.longitude&&22.544577===r.latitude)return r.longitude=null,r.latitude=null,t.info("[settings] 透传模式：持久化数据为空且为默认参数，不修改定位"),r;return null==r.longitude||null==r.latitude?t.info("[settings] 透传模式：未设置坐标，将不修改定位响应"):t.debug(`[settings] lon=${r.longitude} lat=${r.latitude} acc=${r.accuracy}`),r}let ze;(async()=>{const e=function(){try{return"undefined"!=typeof $response?$response:void 0}catch{return}}();if(!e)return void t.warn("[wloc] 非响应模式，跳过");const a=Pe();t.logLevel=a.logLevel,ze=await De($request,e,a)})().catch(e=>t.error(e)).finally(()=>{switch(typeof ze){case"object":ze.headers?.["Content-Encoding"]&&(ze.headers["Content-Encoding"]="identity"),ze.headers?.["content-encoding"]&&(ze.headers["content-encoding"]="identity"),"Quantumult X"===e?(ze.status||(ze.status=200),delete ze.headers?.["Content-Length"],delete ze.headers?.["content-length"],delete ze.headers?.["Transfer-Encoding"],i(ze)):i({response:ze});break;case"undefined":i({});break;default:t.error("[wloc] 不合法的 response 类型: "+typeof ze),i({})}});
+
+```
+
+`modules/wloc.conf`:
+
+```conf
+#!name=Apple WLOC 定位修改
+#!desc=修改 Apple 网络定位返回坐标 | 快捷指令(推荐): 设置地理位置 https://www.icloud.com/shortcuts/a82717d8fdad4e6280866fcf911173f7 清理恢复位置 https://www.icloud.com/shortcuts/f42632d406504f24a2cd163af4fe012f | 选点页面: https://wloc-pages.pages.dev/
+#!author=Yu9191 Rewrite
+#!homepage=https://github.com/Yu9191/wloc
+
+[rewrite_local]
+^https?:\/\/gs-loc(-cn)?\.apple\.com\/clls\/wloc url script-response-body https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/dist/wloc.js
+^https?:\/\/gs-loc(-cn)?\.apple\.com\/wloc-settings\/save url script-echo-response https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/dist/wloc-settings.js
+
+[mitm]
+hostname = gs-loc.apple.com, gs-loc-cn.apple.com
+
+```
+
+`modules/wloc.lpx`:
+
+```lpx
+#!name=Apple WLOC 定位修改
+#!desc=修改 Apple 网络定位返回坐标 | 快捷指令(推荐): 设置地理位置 https://www.icloud.com/shortcuts/a82717d8fdad4e6280866fcf911173f7 清理恢复位置 https://www.icloud.com/shortcuts/f42632d406504f24a2cd163af4fe012f
+#!icon=https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/wloc.jpg
+#!author=Yu9191 Rewrite
+#!homepage=https://github.com/Yu9191/wloc
+#!openUrl=https://wloc-pages.pages.dev/
+
+[Argument]
+longitude = input, "113.94114", tag=经度(在线选点优先)
+latitude = input, "22.544577", tag=纬度(在线选点优先)
+accuracy = input, "25", tag=精度(米)
+logLevel = select, "info", "off", "error", "warn", "debug", "all", tag=日志级别
+
+[Script]
+http-response ^https?:\/\/gs-loc(-cn)?\.apple\.com\/clls\/wloc script-path=https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/dist/wloc.js, requires-body=true, binary-body-mode=true, timeout=30, tag=Apple WLOC, argument=[{longitude},{latitude},{accuracy},{logLevel}]
+http-request ^https?:\/\/gs-loc(-cn)?\.apple\.com\/wloc-settings\/save script-path=https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/dist/wloc-settings.js, timeout=10, tag=WLOC Settings
+
+[MITM]
+hostname = gs-loc.apple.com, gs-loc-cn.apple.com
+
+```
+
+`modules/wloc.module`:
+
+```module
+#!name=Apple WLOC 定位修改
+#!desc=修改 Apple 网络定位返回坐标 (Shadowrocket 小火箭) | 快捷指令(推荐): 设置地理位置 https://www.icloud.com/shortcuts/a82717d8fdad4e6280866fcf911173f7 清理恢复位置 https://www.icloud.com/shortcuts/f42632d406504f24a2cd163af4fe012f | 选点页面: https://wloc-pages.pages.dev/
+#!author=Yu9191 Rewrite
+#!homepage=https://github.com/Yu9191/wloc
+#!icon=https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/wloc.jpg
+#!category=Tools
+
+[Script]
+Apple WLOC = type=http-response,pattern=^https?:\/\/gs-loc(-cn)?\.apple\.com\/clls\/wloc,requires-body=1,binary-body-mode=1,max-size=0,timeout=30,script-path=https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/dist/wloc.js,argument=longitude=113.94114&latitude=22.544577&accuracy=25&logLevel=info
+WLOC Settings = type=http-request,pattern=^https?:\/\/gs-loc(-cn)?\.apple\.com\/wloc-settings\/save,requires-body=0,max-size=0,timeout=10,script-path=https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/dist/wloc-settings.js
+
+[MITM]
+hostname = %APPEND% gs-loc.apple.com, gs-loc-cn.apple.com
+
+```
+
+`modules/wloc.sgmodule`:
+
+```sgmodule
+#!name=Apple WLOC 定位修改
+#!desc=修改 Apple 网络定位返回坐标 | 快捷指令(推荐): 设置地理位置 https://www.icloud.com/shortcuts/a82717d8fdad4e6280866fcf911173f7 清理恢复位置 https://www.icloud.com/shortcuts/f42632d406504f24a2cd163af4fe012f | 选点页面: https://wloc-pages.pages.dev/
+#!author=Yu9191 Rewrite
+#!homepage=https://github.com/Yu9191/wloc
+#!category=Tools
+#!arguments=经度:113.94114, 纬度:22.544577, 精度:25, 日志级别:info
+#!arguments-desc=经度/纬度: 默认坐标(在线选点储存后优先)\n精度: GPS精度(米)\n日志级别: off/error/warn/info/debug/all\n\n使用方法: 打开选点页面 -> 选位置 -> 储存到设备
+
+[Script]
+Apple WLOC = type=http-response, pattern="^https?:\/\/gs-loc(-cn)?\.apple\.com\/clls\/wloc", requires-body=1, binary-body-mode=1, max-size=0, timeout=30, script-path=https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/dist/wloc.js, argument=longitude={{{经度}}}&latitude={{{纬度}}}&accuracy={{{精度}}}&logLevel={{{日志级别}}}
+WLOC Settings = type=http-request, pattern="^https?:\/\/gs-loc(-cn)?\.apple\.com\/wloc-settings\/save", requires-body=0, max-size=0, timeout=10, script-path=https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/dist/wloc-settings.js
+
+[MITM]
+hostname = %APPEND% gs-loc.apple.com, gs-loc-cn.apple.com
+
+```
+
+`modules/wloc.stoverride`:
+
+```stoverride
+name: Apple WLOC 定位修改
+desc: "修改 Apple 网络定位返回坐标 | 快捷指令(推荐): 设置地理位置 https://www.icloud.com/shortcuts/a82717d8fdad4e6280866fcf911173f7 清理恢复位置 https://www.icloud.com/shortcuts/f42632d406504f24a2cd163af4fe012f | 选点页面: https://wloc-pages.pages.dev/"
+author: Yu9191 Rewrite
+homepage: https://github.com/Yu9191/wloc
+icon: https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/wloc.jpg
+category: Tools
+
+http:
+  mitm:
+    - "gs-loc.apple.com"
+    - "gs-loc-cn.apple.com"
+  script:
+    - match: ^https?:\/\/gs-loc(-cn)?\.apple\.com\/clls\/wloc
+      name: WLOC.Location
+      type: response
+      require-body: true
+      binary-mode: true
+      max-size: 0
+      timeout: 30
+      argument: longitude=113.94114&latitude=22.544577&accuracy=25&logLevel=info
+    - match: ^https?:\/\/gs-loc(-cn)?\.apple\.com\/wloc-settings\/save
+      name: WLOC.Settings
+      type: request
+      require-body: false
+      timeout: 10
+
+script-providers:
+  WLOC.Location:
+    url: https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/dist/wloc.js
+    interval: 86400
+  WLOC.Settings:
+    url: https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/dist/wloc-settings.js
+    interval: 86400
+
+```
+
+`worker/dist/_routes.json`:
+
+```json
+{ "version": 1, "include": ["/*"], "exclude": ["/static/*"] }
+
+```
+
+`worker/functions/[[route]].js`:
+
+```js
+import { handle } from "hono/cloudflare-pages";
+import app from "../src/index.js";
+
+export const onRequest = handle(app);
+
+```
+
+`worker/wloc-worker.js`:
+
+```js
+/**
+ * WLOC 虚拟定位 Cloudflare Worker
+ * 
+ * 纯静态页面，无需 KV 或任何存储绑定
+ * 坐标通过代理模块写入设备本地 $persistentStore
+ * 
+ * 部署: Cloudflare Workers (无需绑定任何资源)
+ */
+
+export default {
+	async fetch(request) {
+		const url = new URL(request.url);
+		if (request.method === "OPTIONS") {
+			return new Response(null, { headers: { "Access-Control-Allow-Origin": "*" } });
+		}
+		return servePage(url);
+	},
+};
+
+function servePage(url) {
+	const html = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>WLOC 虚拟定位</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="WLOC">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
+<style>
+:root { --blue:#007aff; --green:#34c759; --red:#ff3b30; --gray:#8e8e93; --bg:#f2f2f7; --orange:#ff9500; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,system-ui,"SF Pro","Helvetica Neue",sans-serif; background:var(--bg); }
+#map { height:50vh; width:100%; min-height:250px; }
+.panel { padding:16px; max-width:600px; margin:0 auto; }
+.card { background:#fff; border-radius:12px; padding:16px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+.card h3 { font-size:15px; font-weight:600; margin-bottom:10px; }
+.coords { font-family:"SF Mono",monospace; font-size:14px; color:#333; padding:8px 12px; background:var(--bg); border-radius:8px; word-break:break-all; }
+.row { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+.btn { flex:1; min-width:100px; padding:12px 16px; border:none; border-radius:10px; font-size:14px; font-weight:500; cursor:pointer; transition:all .15s; }
+.btn-primary { background:var(--blue); color:#fff; }
+.btn-primary:active { background:#005bb5; transform:scale(.97); }
+.btn-secondary { background:#e5e5ea; color:#333; }
+.btn-secondary:active { background:#d1d1d6; transform:scale(.97); }
+.btn-danger { background:var(--red); color:#fff; }
+.btn-danger:active { background:#d63027; transform:scale(.97); }
+.btn.success { background:var(--green); color:#fff; }
+.btn-sm { flex:none; min-width:auto; padding:6px 12px; font-size:12px; border-radius:8px; }
+.input-row { display:flex; gap:8px; margin-top:10px; }
+.input-row input { flex:1; padding:10px 12px; border:1px solid #d1d1d6; border-radius:8px; font-size:14px; outline:none; min-width:0; }
+.input-row input:focus { border-color:var(--blue); }
+.status { font-size:12px; color:var(--gray); margin-top:8px; text-align:center; }
+.error-banner { background:var(--red); color:#fff; padding:14px 16px; border-radius:12px; margin-bottom:12px; font-size:14px; line-height:1.5; display:none; }
+.error-banner b { display:block; margin-bottom:4px; }
+.toast { position:fixed; top:60px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.8); color:#fff; padding:10px 20px; border-radius:20px; font-size:14px; opacity:0; transition:opacity .3s; pointer-events:none; z-index:9999; max-width:90vw; text-align:center; }
+.toast.show { opacity:1; }
+.active-loc { background:var(--bg); border-radius:8px; padding:10px 12px; font-size:13px; color:#333; }
+.active-loc .label { font-size:11px; color:var(--gray); margin-bottom:4px; }
+.active-loc .value { font-family:"SF Mono",monospace; font-size:13px; }
+.fav-list { max-height:240px; overflow-y:auto; }
+.fav-item { display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--bg); border-radius:8px; margin-bottom:6px; cursor:pointer; transition:background .15s; }
+.fav-item:active { background:#e0e0e5; }
+.fav-item .fav-info { flex:1; min-width:0; }
+.fav-item .fav-name { font-size:14px; font-weight:500; color:#333; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.fav-item .fav-coords { font-size:11px; color:var(--gray); font-family:"SF Mono",monospace; margin-top:2px; }
+.fav-item .fav-active { font-size:10px; color:var(--green); font-weight:600; }
+.fav-item .fav-del { flex:none; width:28px; height:28px; border:none; border-radius:50%; background:transparent; color:var(--red); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s; }
+.fav-item .fav-del:hover { background:rgba(255,59,48,.1); }
+.fav-empty { text-align:center; color:var(--gray); font-size:13px; padding:16px 0; }
+.fav-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.fav-header h3 { margin-bottom:0; }
+.modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.4); z-index:10000; display:none; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.show { display:flex; }
+.modal { background:#fff; border-radius:16px; padding:20px; width:100%; max-width:340px; }
+.modal h3 { font-size:17px; font-weight:600; margin-bottom:16px; text-align:center; }
+.modal input { width:100%; padding:12px; border:1px solid #d1d1d6; border-radius:10px; font-size:15px; outline:none; margin-bottom:12px; }
+.modal input:focus { border-color:var(--blue); }
+.modal .modal-btns { display:flex; gap:8px; }
+.modal .modal-btns .btn { padding:12px; }
+@media(max-width:480px) { #map { height:44vh; } .panel { padding:12px; } }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div class="panel">
+  <div class="error-banner" id="errorBanner">
+    <b>模块未生效</b>
+    请检查以下配置：<br>
+    1. 已安装并启用 WLOC 定位模块<br>
+    2. MITM 已开启且信任证书<br>
+    3. MITM 主机名包含 gs-loc.apple.com<br>
+    4. 当前网络已走代理
+  </div>
+  <div class="card">
+    <h3>选择目标位置</h3>
+    <div class="coords" id="coords">点击地图或使用下方工具选择位置</div>
+    <div class="row">
+      <button class="btn btn-primary" id="saveBtn" onclick="save()">储存到设备</button>
+      <button class="btn btn-secondary" onclick="addFav()">收藏位置</button>
+      <button class="btn btn-secondary" onclick="locateMe()">当前位置</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="fav-header">
+      <h3>收藏的位置</h3>
+      <button class="btn btn-sm btn-secondary" onclick="clearAllFav()" id="clearAllBtn" style="display:none">清空全部</button>
+    </div>
+    <div id="favList" class="fav-list"></div>
+  </div>
+  <div class="card">
+    <h3>当前生效坐标</h3>
+    <div class="active-loc" id="activeLoc">
+      <div class="label">设备持久化数据 (wloc_settings)</div>
+      <div class="value" id="activeValue">查询中...</div>
+    </div>
+    <div class="row">
+      <button class="btn btn-sm btn-secondary" onclick="queryActive()">刷新</button>
+      <button class="btn btn-sm btn-danger" onclick="clearActive()">清除数据</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>粘贴地图链接</h3>
+    <div class="input-row">
+      <input id="urlInput" placeholder="Apple/Google/高德地图链接 或 经纬度" />
+      <button class="btn btn-secondary" style="flex:none;min-width:56px" onclick="parseUrl()">解析</button>
+    </div>
+    <div style="font-size:11px;color:var(--gray);margin-top:6px">支持 Apple Maps · Google Maps · 高德 · 百度 · 坐标文本</div>
+  </div>
+  <div class="card">
+    <h3>搜索地点</h3>
+    <div class="input-row">
+      <input id="searchInput" placeholder="输入地名（如: 上海外滩）" />
+      <button class="btn btn-secondary" style="flex:none;min-width:56px" onclick="searchPlace()">搜索</button>
+    </div>
+  </div>
+  <div class="status" id="status">选好位置后点击「储存到设备」写入代理工具</div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="modal-overlay" id="favModal">
+  <div class="modal">
+    <h3>收藏此位置</h3>
+    <input id="favNameInput" placeholder="输入备注名称（如: 公司、家）" maxlength="30" />
+    <div style="font-size:12px;color:var(--gray);margin-bottom:12px;text-align:center" id="favModalCoords"></div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeFavModal()">取消</button>
+      <button class="btn btn-primary" onclick="confirmFav()">保存</button>
+    </div>
+  </div>
+</div>
+<script>
+const SAVE_API = 'https://gs-loc.apple.com/wloc-settings/save';
+const FAV_KEY = 'wloc_favorites';
+let lat = 22.544577, lon = 113.94114;
+let selected = false;
+let activeLon = null, activeLat = null;
+
+const map = L.map('map').setView([lat, lon], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19, attribution: '\\u00a9 OSM'
+}).addTo(map);
+let marker = L.marker([lat, lon], {draggable:true}).addTo(map);
+
+marker.on('dragend', e => { const p=e.target.getLatLng(); setPos(p.lat, p.lng); });
+map.on('click', e => { setPos(e.latlng.lat, e.latlng.lng); });
+
+function setPos(newLat, newLon) {
+  lat = newLat; lon = newLon; selected = true;
+  marker.setLatLng([lat, lon]);
+  document.getElementById('coords').textContent = '\\u7ecf\\u5ea6 ' + lon.toFixed(6) + '  \\u7eac\\u5ea6 ' + lat.toFixed(6);
+}
+
+function moveTo(newLat, newLon, zoom) {
+  setPos(newLat, newLon);
+  map.setView([lat, lon], zoom || 15);
+}
+
+function toast(msg, ms) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), ms || 2500);
+}
+
+function showError(show) {
+  document.getElementById('errorBanner').style.display = show ? 'block' : 'none';
+}
+
+/* ---- Favorites (localStorage) ---- */
+function getFavs() {
+  try { return JSON.parse(localStorage.getItem(FAV_KEY)) || []; } catch(e) { return []; }
+}
+function saveFavs(favs) {
+  localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+}
+
+function renderFavs() {
+  const favs = getFavs();
+  const el = document.getElementById('favList');
+  const clearBtn = document.getElementById('clearAllBtn');
+  clearBtn.style.display = favs.length ? '' : 'none';
+  if (!favs.length) {
+    el.innerHTML = '<div class="fav-empty">\\u6682\\u65e0\\u6536\\u85cf\\uff0c\\u9009\\u597d\\u4f4d\\u7f6e\\u540e\\u70b9\\u51fb\\u300c\\u6536\\u85cf\\u4f4d\\u7f6e\\u300d</div>';
+    return;
+  }
+  el.innerHTML = favs.map((f, i) => {
+    const isActive = activeLon !== null && Math.abs(f.lon - activeLon) < 0.000001 && Math.abs(f.lat - activeLat) < 0.000001;
+    return '<div class="fav-item" onclick="loadFav(' + i + ')">' +
+      '<div class="fav-info">' +
+        '<div class="fav-name">' + escHtml(f.name) + '</div>' +
+        '<div class="fav-coords">' + f.lon.toFixed(6) + ', ' + f.lat.toFixed(6) + '</div>' +
+        (isActive ? '<div class="fav-active">\\u2713 \\u5f53\\u524d\\u751f\\u6548</div>' : '') +
+      '<\/div>' +
+      '<button class="fav-del" onclick="event.stopPropagation();delFav(' + i + ')" title="\\u5220\\u9664">\\u00d7<\/button>' +
+    '<\/div>';
+  }).join('');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function addFav() {
+  if (!selected) { toast('\\u8bf7\\u5148\\u5728\\u5730\\u56fe\\u4e0a\\u9009\\u62e9\\u4e00\\u4e2a\\u4f4d\\u7f6e'); return; }
+  document.getElementById('favModalCoords').textContent = lon.toFixed(6) + ', ' + lat.toFixed(6);
+  document.getElementById('favNameInput').value = '';
+  document.getElementById('favModal').classList.add('show');
+  setTimeout(() => document.getElementById('favNameInput').focus(), 100);
+}
+
+function closeFavModal() {
+  document.getElementById('favModal').classList.remove('show');
+}
+
+function confirmFav() {
+  const name = document.getElementById('favNameInput').value.trim();
+  if (!name) { toast('\\u8bf7\\u8f93\\u5165\\u5907\\u6ce8\\u540d\\u79f0'); return; }
+  const favs = getFavs();
+  favs.push({ name, lon, lat, time: new Date().toISOString() });
+  saveFavs(favs);
+  closeFavModal();
+  renderFavs();
+  toast('\\u5df2\\u6536\\u85cf: ' + name);
+}
+
+function loadFav(i) {
+  const favs = getFavs();
+  if (!favs[i]) return;
+  moveTo(favs[i].lat, favs[i].lon, 15);
+  toast(favs[i].name + ' (' + favs[i].lon.toFixed(4) + ', ' + favs[i].lat.toFixed(4) + ')');
+}
+
+function delFav(i) {
+  const favs = getFavs();
+  if (!favs[i]) return;
+  const name = favs[i].name;
+  favs.splice(i, 1);
+  saveFavs(favs);
+  renderFavs();
+  toast('\\u5df2\\u5220\\u9664: ' + name);
+}
+
+function clearAllFav() {
+  if (!confirm('\\u786e\\u5b9a\\u6e05\\u7a7a\\u6240\\u6709\\u6536\\u85cf\\uff1f')) return;
+  saveFavs([]);
+  renderFavs();
+  toast('\\u5df2\\u6e05\\u7a7a\\u6240\\u6709\\u6536\\u85cf');
+}
+
+/* ---- Active location query ---- */
+function queryActive() {
+  const el = document.getElementById('activeValue');
+  el.textContent = '\\u67e5\\u8be2\\u4e2d...';
+  fetch(SAVE_API + '?action=query', { method:'GET', mode:'cors', cache:'no-store' })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success && d.longitude && d.latitude) {
+        activeLon = parseFloat(d.longitude);
+        activeLat = parseFloat(d.latitude);
+        el.textContent = '\\u7ecf\\u5ea6 ' + activeLon.toFixed(6) + '  \\u7eac\\u5ea6 ' + activeLat.toFixed(6) + (d.accuracy ? '  \\u7cbe\\u5ea6 ' + d.accuracy + 'm' : '');
+        renderFavs();
+      } else {
+        activeLon = null; activeLat = null;
+        el.textContent = '\\u65e0\\u5df2\\u4fdd\\u5b58\\u7684\\u5750\\u6807';
+        renderFavs();
+      }
+    })
+    .catch(() => {
+      el.textContent = '\\u67e5\\u8be2\\u5931\\u8d25 (\\u9700\\u8981\\u4ee3\\u7406\\u6a21\\u5757\\u652f\\u6301)';
+    });
+}
+
+function clearActive() {
+  if (!confirm('\\u786e\\u5b9a\\u6e05\\u9664\\u8bbe\\u5907\\u4e0a\\u5df2\\u4fdd\\u5b58\\u7684\\u5750\\u6807\\uff1f\\u6e05\\u9664\\u540e\\u5c06\\u4f7f\\u7528\\u6a21\\u5757\\u9ed8\\u8ba4\\u53c2\\u6570\\u6216\\u505c\\u6b62\\u4fee\\u6539\\u5b9a\\u4f4d\\u3002')) return;
+  fetch(SAVE_API + '?action=clear', { method:'GET', mode:'cors', cache:'no-store' })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        activeLon = null; activeLat = null;
+        document.getElementById('activeValue').textContent = '\\u5df2\\u6e05\\u9664';
+        renderFavs();
+        toast('\\u5df2\\u6e05\\u9664\\u8bbe\\u5907\\u5750\\u6807');
+      } else { toast('\\u6e05\\u9664\\u5931\\u8d25: ' + (d.error || ''), 3000); }
+    })
+    .catch(() => { toast('\\u6e05\\u9664\\u5931\\u8d25 - \\u8bf7\\u68c0\\u67e5\\u6a21\\u5757\\u914d\\u7f6e', 3000); });
+}
+
+/* ---- Save to device ---- */
+async function save() {
+  if (!selected) { toast('\\u8bf7\\u5148\\u5728\\u5730\\u56fe\\u4e0a\\u9009\\u62e9\\u4e00\\u4e2a\\u4f4d\\u7f6e'); return; }
+  const btn = document.getElementById('saveBtn');
+  btn.textContent = '\\u50a8\\u5b58\\u4e2d...'; btn.disabled = true;
+  showError(false);
+  try {
+    const r = await fetch(SAVE_API + '?lon=' + lon + '&lat=' + lat + '&acc=25', {
+      method: 'GET', mode: 'cors', cache: 'no-store'
+    });
+    const d = await r.json();
+    if (d.success) {
+      activeLon = lon; activeLat = lat;
+      btn.textContent = '\\u2713 \\u5df2\\u50a8\\u5b58'; btn.className = 'btn btn-primary success';
+      document.getElementById('status').textContent = '\\u2713 \\u5df2\\u5199\\u5165: ' + lon.toFixed(6) + ', ' + lat.toFixed(6) + ' \\u00b7 ' + new Date().toLocaleTimeString('zh-CN');
+      document.getElementById('activeValue').textContent = '\\u7ecf\\u5ea6 ' + lon.toFixed(6) + '  \\u7eac\\u5ea6 ' + lat.toFixed(6) + '  \\u7cbe\\u5ea6 25m';
+      renderFavs();
+      toast('\\u2713 \\u5750\\u6807\\u5df2\\u5199\\u5165\\u8bbe\\u5907\\uff0c\\u4e0b\\u6b21\\u5b9a\\u4f4d\\u751f\\u6548');
+      setTimeout(() => { btn.textContent='\\u50a8\\u5b58\\u5230\\u8bbe\\u5907'; btn.className='btn btn-primary'; btn.disabled=false; }, 2500);
+    } else {
+      throw new Error(d.error || '\\u5199\\u5165\\u5931\\u8d25');
+    }
+  } catch(e) {
+    btn.textContent = '\\u50a8\\u5b58\\u5230\\u8bbe\\u5907'; btn.className = 'btn btn-primary'; btn.disabled = false;
+    showError(true);
+    toast('\\u2717 \\u50a8\\u5b58\\u5931\\u8d25 - \\u8bf7\\u68c0\\u67e5\\u6a21\\u5757\\u914d\\u7f6e', 4000);
+  }
+}
+
+function locateMe() {
+  if (!navigator.geolocation) return toast('\\u6d4f\\u89c8\\u5668\\u4e0d\\u652f\\u6301\\u5b9a\\u4f4d');
+  toast('\\u83b7\\u53d6\\u4f4d\\u7f6e\\u4e2d...');
+  navigator.geolocation.getCurrentPosition(
+    pos => { moveTo(pos.coords.latitude, pos.coords.longitude, 16); toast('\\u5df2\\u83b7\\u53d6\\u5f53\\u524d\\u4f4d\\u7f6e'); },
+    err => toast('\\u5b9a\\u4f4d\\u5931\\u8d25: ' + err.message, 3000),
+    { enableHighAccuracy:true, timeout:10000 }
+  );
+}
+
+function parseMapUrl(text) {
+  let m;
+  m = text.match(/ll=([0-9.-]+),([0-9.-]+)/);
+  if (m) return { lat: parseFloat(m[1]), lon: parseFloat(m[2]) };
+  m = text.match(/@([0-9.-]+),([0-9.-]+)/);
+  if (m) return { lat: parseFloat(m[1]), lon: parseFloat(m[2]) };
+  m = text.match(/lnglat=([0-9.-]+),([0-9.-]+)/);
+  if (m) return { lat: parseFloat(m[2]), lon: parseFloat(m[1]) };
+  m = text.match(/(?:location|center)=([0-9.-]+),([0-9.-]+)/);
+  if (m) return { lat: parseFloat(m[2]), lon: parseFloat(m[1]) };
+  m = text.match(/([0-9]+\\.[0-9]+)[,\\s]+([0-9]+\\.[0-9]+)/);
+  if (m) {
+    const a = parseFloat(m[1]), b = parseFloat(m[2]);
+    if (a < 90 && b > 90) return { lat: a, lon: b };
+    if (b < 90 && a > 90) return { lat: b, lon: a };
+    return { lat: a, lon: b };
+  }
+  return null;
+}
+
+function parseUrl() {
+  const input = document.getElementById('urlInput').value.trim();
+  if (!input) return toast('\\u8bf7\\u7c98\\u8d34\\u5730\\u56fe\\u94fe\\u63a5\\u6216\\u5750\\u6807');
+  const result = parseMapUrl(input);
+  if (!result) { toast('\\u65e0\\u6cd5\\u89e3\\u6790\\u5750\\u6807\\uff0c\\u8bf7\\u68c0\\u67e5\\u94fe\\u63a5\\u683c\\u5f0f', 3000); return; }
+  moveTo(result.lat, result.lon, 15);
+  toast('\\u5df2\\u89e3\\u6790: ' + result.lon.toFixed(4) + ', ' + result.lat.toFixed(4));
+}
+
+async function searchPlace() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return toast('\\u8bf7\\u8f93\\u5165\\u5730\\u540d');
+  toast('\\u641c\\u7d22\\u4e2d...');
+  try {
+    const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q));
+    const results = await r.json();
+    if (!results.length) { toast('\\u672a\\u627e\\u5230: ' + q, 3000); return; }
+    const p = results[0];
+    moveTo(parseFloat(p.lat), parseFloat(p.lon), 15);
+    toast(p.display_name.slice(0, 40));
+  } catch(e) { toast('\\u641c\\u7d22\\u5931\\u8d25', 3000); }
+}
+
+document.addEventListener('paste', e => {
+  const text = (e.clipboardData||window.clipboardData).getData('text');
+  if (text && (text.includes('map') || text.includes('loc') || text.includes('lnglat') || /[0-9]+\\.[0-9]+/.test(text))) {
+    document.getElementById('urlInput').value = text;
+    setTimeout(parseUrl, 200);
+  }
+});
+document.getElementById('searchInput').addEventListener('keydown', e => { if(e.key==='Enter') searchPlace(); });
+document.getElementById('urlInput').addEventListener('keydown', e => { if(e.key==='Enter') parseUrl(); });
+document.getElementById('favNameInput').addEventListener('keydown', e => { if(e.key==='Enter') confirmFav(); });
+
+renderFavs();
+queryActive();
+<\/script>
+</body>
+</html>`;
+
+	return new Response(html, {
+		headers: { "Content-Type": "text/html;charset=utf-8", "Cache-Control": "no-cache" },
+	});
+}
+
+```
+
+`worker/wrangler.jsonc`:
+
+```jsonc
+{
+  "name": "wloc-spoofer",
+  "main": "src/index.js",
+  "compatibility_date": "2024-01-01",
+  "compatibility_flags": ["nodejs_compat"]
+}
+
+```
+
+`worker/wrangler.pages.jsonc`:
+
+```jsonc
+{
+  "name": "wloc-spoofer",
+  "compatibility_date": "2024-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "pages_build_output_dir": "./dist"
+}
+
+```
