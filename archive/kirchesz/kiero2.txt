@@ -1,0 +1,1876 @@
+Project Path: arc_kirchesz_kiero2_biw3qkpi
+
+Source Tree:
+
+```txt
+arc_kirchesz_kiero2_biw3qkpi
+├── CMakeLists.txt
+├── LICENSE
+├── MIGRATION_GUIDE.md
+├── README.md
+├── cmake
+│   ├── kiero.generated.hpp.in
+│   └── kieroConfig.cmake.in
+├── kiero.hpp
+├── kiero_d3d10.cpp
+├── kiero_d3d10.hpp
+├── kiero_d3d11.cpp
+├── kiero_d3d11.hpp
+├── kiero_d3d12.cpp
+├── kiero_d3d12.hpp
+├── kiero_d3d9.cpp
+├── kiero_d3d9.hpp
+├── kiero_intern.cpp
+├── kiero_intern.hpp
+├── kiero_opengl.cpp
+├── kiero_opengl.hpp
+├── kiero_vulkan.cpp
+└── kiero_vulkan.hpp
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.16)
+
+project(kiero VERSION 2.0.0 LANGUAGES CXX)
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+option(KIERO_BUILD_D3D9 "Build the Direct3D 9 backend" ${WIN32})
+option(KIERO_BUILD_D3D10 "Build the Direct3D 10 backend" ${WIN32})
+option(KIERO_BUILD_D3D11 "Build the Direct3D 11 backend" ${WIN32})
+option(KIERO_BUILD_D3D12 "Build the Direct3D 12 backend" ${WIN32})
+option(KIERO_BUILD_OPENGL "Build the OpenGL backend" ON)
+option(KIERO_BUILD_VULKAN "Build the Vulkan backend" ${WIN32})
+option(KIERO_INSTALL "Install kiero targets and CMake package files" ${PROJECT_IS_TOP_LEVEL})
+
+if(NOT WIN32)
+  foreach(kiero_windows_backend IN ITEMS
+    KIERO_BUILD_D3D9
+    KIERO_BUILD_D3D10
+    KIERO_BUILD_D3D11
+    KIERO_BUILD_D3D12
+    KIERO_BUILD_VULKAN
+  )
+    if(${kiero_windows_backend})
+      message(FATAL_ERROR "${kiero_windows_backend} is only supported on Windows")
+    endif()
+  endforeach()
+endif()
+
+set(kiero_public_headers
+  kiero.hpp
+  kiero_intern.hpp
+  kiero_d3d9.hpp
+  kiero_d3d10.hpp
+  kiero_d3d11.hpp
+  kiero_d3d12.hpp
+  kiero_opengl.hpp
+  kiero_vulkan.hpp
+)
+
+set(kiero_generated_includes "")
+
+if(KIERO_BUILD_D3D9)
+  string(APPEND kiero_generated_includes "#include \"kiero_d3d9.hpp\"\n")
+endif()
+
+if(KIERO_BUILD_D3D10)
+  string(APPEND kiero_generated_includes "#include \"kiero_d3d10.hpp\"\n")
+endif()
+
+if(KIERO_BUILD_D3D11)
+  string(APPEND kiero_generated_includes "#include \"kiero_d3d11.hpp\"\n")
+endif()
+
+if(KIERO_BUILD_D3D12)
+  string(APPEND kiero_generated_includes "#include \"kiero_d3d12.hpp\"\n")
+endif()
+
+if(KIERO_BUILD_OPENGL)
+  string(APPEND kiero_generated_includes "#include \"kiero_opengl.hpp\"\n")
+endif()
+
+if(KIERO_BUILD_VULKAN)
+  string(APPEND kiero_generated_includes "#include \"kiero_vulkan.hpp\"\n")
+endif()
+
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/kiero.generated.hpp.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/kiero.generated.hpp"
+  @ONLY
+)
+
+set(kiero_sources
+  kiero_intern.cpp
+)
+
+set(kiero_impl_slot 0)
+
+if(KIERO_BUILD_D3D9)
+  list(APPEND kiero_sources kiero_d3d9.cpp)
+  set_source_files_properties(kiero_d3d9.cpp PROPERTIES
+    COMPILE_DEFINITIONS "KIERO_IMPL_FIRST_SLOT=${kiero_impl_slot}"
+  )
+  math(EXPR kiero_impl_slot "${kiero_impl_slot} + 1")
+endif()
+
+if(KIERO_BUILD_D3D10)
+  list(APPEND kiero_sources kiero_d3d10.cpp)
+  set_source_files_properties(kiero_d3d10.cpp PROPERTIES
+    COMPILE_DEFINITIONS "KIERO_IMPL_FIRST_SLOT=${kiero_impl_slot}"
+  )
+  math(EXPR kiero_impl_slot "${kiero_impl_slot} + 1")
+endif()
+
+if(KIERO_BUILD_D3D11)
+  list(APPEND kiero_sources kiero_d3d11.cpp)
+  set_source_files_properties(kiero_d3d11.cpp PROPERTIES
+    COMPILE_DEFINITIONS "KIERO_IMPL_FIRST_SLOT=${kiero_impl_slot}"
+  )
+  math(EXPR kiero_impl_slot "${kiero_impl_slot} + 1")
+endif()
+
+if(KIERO_BUILD_D3D12)
+  list(APPEND kiero_sources kiero_d3d12.cpp)
+  set_source_files_properties(kiero_d3d12.cpp PROPERTIES
+    COMPILE_DEFINITIONS "KIERO_IMPL_FIRST_SLOT=${kiero_impl_slot}"
+  )
+  math(EXPR kiero_impl_slot "${kiero_impl_slot} + 1")
+endif()
+
+if(KIERO_BUILD_OPENGL)
+  list(APPEND kiero_sources kiero_opengl.cpp)
+  set_source_files_properties(kiero_opengl.cpp PROPERTIES
+    COMPILE_DEFINITIONS "KIERO_IMPL_FIRST_SLOT=${kiero_impl_slot}"
+  )
+  math(EXPR kiero_impl_slot "${kiero_impl_slot} + 1")
+endif()
+
+if(KIERO_BUILD_VULKAN)
+  list(APPEND kiero_sources kiero_vulkan.cpp)
+  set_source_files_properties(kiero_vulkan.cpp PROPERTIES
+    COMPILE_DEFINITIONS "KIERO_IMPL_FIRST_SLOT=${kiero_impl_slot}"
+  )
+  math(EXPR kiero_impl_slot "${kiero_impl_slot} + 1")
+endif()
+
+add_library(kiero ${kiero_sources} ${kiero_public_headers})
+add_library(kiero::kiero ALIAS kiero)
+
+target_compile_features(kiero PUBLIC cxx_std_17)
+
+set_target_properties(kiero PROPERTIES
+  CXX_EXTENSIONS OFF
+  POSITION_INDEPENDENT_CODE ON
+)
+
+target_include_directories(kiero
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+
+if(WIN32)
+  target_link_libraries(kiero PUBLIC user32)
+elseif(UNIX AND NOT APPLE)
+  if(KIERO_BUILD_OPENGL)
+    target_link_libraries(kiero PUBLIC ${CMAKE_DL_LIBS})
+  endif()
+endif()
+
+target_compile_definitions(kiero
+  PUBLIC
+    $<$<BOOL:${KIERO_BUILD_D3D9}>:KIERO_BUILD_D3D9=1>
+    $<$<BOOL:${KIERO_BUILD_D3D10}>:KIERO_BUILD_D3D10=1>
+    $<$<BOOL:${KIERO_BUILD_D3D11}>:KIERO_BUILD_D3D11=1>
+    $<$<BOOL:${KIERO_BUILD_D3D12}>:KIERO_BUILD_D3D12=1>
+    $<$<BOOL:${KIERO_BUILD_OPENGL}>:KIERO_BUILD_OPENGL=1>
+    $<$<BOOL:${KIERO_BUILD_VULKAN}>:KIERO_BUILD_VULKAN=1>
+)
+
+if(KIERO_INSTALL)
+  install(
+    TARGETS kiero
+    EXPORT kieroTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  )
+
+  install(
+    FILES ${kiero_public_headers}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  )
+
+  install(
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/kiero.generated.hpp"
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  )
+
+  install(
+    EXPORT kieroTargets
+    NAMESPACE kiero::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/kiero
+  )
+
+  write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/kieroConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+  )
+
+  configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/kieroConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/kieroConfig.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/kiero"
+  )
+
+  install(
+    FILES
+      "${CMAKE_CURRENT_BINARY_DIR}/kieroConfig.cmake"
+      "${CMAKE_CURRENT_BINARY_DIR}/kieroConfigVersion.cmake"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/kiero"
+  )
+endif()
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2021-2026 Rebzzel
+Copyright (c) 2026 kirchesz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`MIGRATION_GUIDE.md`:
+
+```md
+## Introduction
+
+After a long time, I find that kiero had too much responsibility for a library whose only real job is to tell you *where* a methods located. So I decided to create kiero v2, which focuses solely on the core purpose of the library: locating methods.
+
+
+## Migrating from v1
+```C++
+// v1
+if (kiero::init(kiero::RenderType::D3D9) != kiero::Status::Success) {
+    return;
+}
+
+kiero::bind(42, (void**)&oEndScene, hkEndScene);
+kiero::shutdown();
+```
+
+Same code on v2:
+
+```C++
+// v2
+kiero::D3D9Output output;
+auto error = kiero::locate<kiero::Implementation_D3D9>(nullptr, &output);
+if (error != kiero::Error_Nil) {
+    return;
+}
+
+auto oEndScene = output.device_methods[42];
+
+// hook with your favorite hook library
+MH_CreateHook(oEndScene, hkEndScene, nullptr);
+MH_EnableHook(oEndScene);
+```
+
+### No more kiero::RenderType::Auto
+
+Instead of trying to guess one of the graphical apis which application use, we suggest locating each of them:
+
+```C++
+struct {
+  kiero::D3D9Output d3d9;
+  kiero::D3D10Output d3d10;
+  kiero::D3D11Output d3d11;
+  kiero::D3D12Output d3d12;
+  kiero::OpenGLOutput opengl;
+  kiero::VulkanOutput vulkan;
+  //kiero::MyOutput my;
+} output;
+
+if (GetModuleHandleA("d3d12.dll")) {
+  kiero::locate<kiero::Implementation_D3D12>(nullptr, &output.d3d12);
+}
+if (GetModuleHandleA("d3d11.dll")) {
+  kiero::locate<kiero::Implementation_D3D11>(nullptr, &output.d3d11);
+}
+if (GetModuleHandleA("d3d10.dll")) {
+  kiero::locate<kiero::Implementation_D3D10>(nullptr, &output.d3d10);
+}
+if (GetModuleHandleA("d3d9.dll")) {
+  kiero::locate<kiero::Implementation_D3D9>(nullptr, &output.d3d9);
+}
+if (GetModuleHandleA("opengl32.dll")) {
+  kiero::locate<kiero::Implementation_OpenGL>(nullptr, &output.opengl);
+}
+if (GetModuleHandleA("vulkan-1.dll")) {
+  kiero::locate<kiero::Implementation_Vulkan>(nullptr, &output.vulkan);
+}
+//if (GetModuleHandleA("supercoolapi.dll")) {
+//  kiero::locate<kiero::Implementation_My>(nullptr, &output.my);
+//}
+```
+
+```
+
+`README.md`:
+
+```md
+
+<h1 align="center">kiero v2</h1>
+<p align="center">
+A lightweight C++ library that <strike>hooks</strike> locates graphics API methods
+at runtime.
+</p>
+<br>
+
+> [!IMPORTANT]
+> ## Breaking Changes (compared to v1)
+>
+> You bring your own hooking library. kiero just finds the
+> addresses.
+>
+> Check [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) for more details.
+
+## Official Supported APIs
+
+- DirectX 9 (kiero_d3d9.hpp)
+- DirectX 10 (kiero_d3d10.hpp)
+- DirectX 11 (kiero_d3d11.hpp)
+- DirectX 12 (kiero_d3d12.hpp)
+- OpenGL (kiero_opengl.hpp)
+  - [x] Windows
+  - [x] Linux
+  - [ ] MacOS
+- Vulkan (kiero_vulkan.hpp)
+  - [x] Windows
+  - [ ] Linux
+  - [ ] MacOS
+
+## Requirements
+
+- C++17
+- Windows SDK (for DirectX backends)
+- DirectX SDK (for DirectX backends)
+- Vulkan SDK (for Vulkan backends)
+
+## Installing
+
+### CMake
+
+`kiero` now provides a standard CMake target and works well with
+`FetchContent`:
+
+```cmake
+include(FetchContent)
+
+FetchContent_Declare(
+  kiero
+  GIT_REPOSITORY https://github.com/kirchesz/kiero2.git
+  GIT_TAG master
+)
+
+FetchContent_MakeAvailable(kiero)
+
+target_link_libraries(your_target PRIVATE kiero::kiero)
+```
+
+> [!WARNING]
+> When you use `FetchContent`, CMake also generates `kiero.generated.hpp`.
+>
+> You must include this after `kiero.hpp`.
+
+Available options:
+
+- `KIERO_BUILD_D3D9`
+- `KIERO_BUILD_D3D10`
+- `KIERO_BUILD_D3D11`
+- `KIERO_BUILD_D3D12`
+- `KIERO_BUILD_OPENGL`
+- `KIERO_BUILD_VULKAN`
+
+### Without CMake
+1. Download repository.
+2. Copy `kiero.hpp`, `kiero_intern.hpp`, `kiero_intern.cpp`, and the backend files you want to use into your project.
+
+For example, for DirectX 11:
+
+```text
+kiero.hpp
+kiero_intern.hpp
+kiero_intern.cpp
+kiero_d3d11.hpp
+kiero_d3d11.cpp
+```
+
+3. Then add those `.cpp` files to your build system and make sure your compiler
+can find the headers.
+
+## Quick start
+
+```cpp
+#include "kiero.hpp"
+#include <kiero.generated.h> // if you use CMake FetchContent
+#include "kiero_d3d9.hpp"    // order is important!
+                             // kiero.hpp must be included before any backend header
+                             // also order changes implementation indices
+                             // for example if you include kiero_d3d11.hpp before
+                             // kiero_d3d9.hpp, then kiero::Implementation_D3D9
+                             // will be 2 instead of 1
+
+kiero::D3D9Output d3d9;
+auto err = kiero::locate<kiero::Implementation_D3D9>(
+  nullptr, &d3d9
+);
+if (err != kiero::Error_Nil) {
+  // handle error
+}
+
+// d3d9.device_methods[42] is the address of
+// IDirect3DDevice9::EndScene — hook it however you like
+```
+
+## How it works
+
+Each backend do some magic inside (check each backend cpp file for details), and results
+stores in a typed output structs. The temporary
+resources are released before `locate` returns.
+
+The single entry point is a function template:
+
+```cpp
+template<int Impl>
+kiero::Error kiero::locate(void* in, void* out);
+```
+
+Each backend provides a full specialization. Include only
+the headers you need — unused backends add zero overhead.
+
+## Error handling
+
+`locate` returns `kiero::Error`. Shared codes:
+
+| Code | Meaning |
+|---|---|
+| `Error_Nil` | Success |
+| `Error_ModuleNotFound` | Required DLL not loaded |
+| `Error_MethodNotFound` | Export not found in DLL |
+
+Each backend defines additional codes.
+Check the corresponding header for the full list.
+
+## Adding a new backend
+
+1. Create `kiero_myapi.hpp`:
+   - Define `Implementation_MyAPI = KIERO_IMPL_FREE_SLOT`
+   - Define backend-specific errors from `Error_BaseIndex`
+   - Define your `MyAPIOutput` struct
+   - `#undef` and `#define KIERO_IMPL_CURR_SLOT`
+
+2. Create `kiero_myapi.cpp`:
+   - Include `kiero.hpp`, your header, `kiero_intern.hpp`
+   - Provide `template<> kiero::locate<...>(...)`
+
+## License
+
+kiero v2 is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+```
+
+`cmake/kiero.generated.hpp.in`:
+
+```in
+#pragma once
+#ifndef KIERO_GENERATED_HPP
+#define KIERO_GENERATED_HPP
+
+@kiero_generated_includes@
+
+#endif // KIERO_GENERATED_HPP
+
+```
+
+`cmake/kieroConfig.cmake.in`:
+
+```in
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/kieroTargets.cmake")
+
+```
+
+`kiero.hpp`:
+
+```hpp
+#pragma once
+#ifndef KIERO_HPP
+#define KIERO_HPP
+
+#ifndef KIERO_ASSERT
+# include <cassert>
+# define KIERO_ASSERT assert
+#endif
+
+// You can change this macro to your own logging system
+// But this must support printf-like arguments
+#ifndef KIERO_DBG_MSG
+# ifdef _DEBUG
+#  include <cstdio>
+#  define KIERO_DBG_MSG(msg, ...) printf(msg "\n", ##__VA_ARGS__)
+# else
+#  define KIERO_DBG_MSG(msg, ...) (void)(0)
+# endif
+#endif
+
+#define KIERO_UNUSED(x) (void)(x)
+
+namespace kiero {
+
+// You MUST specify similar block in your implementation this way:
+// Implementation_<IMPLEMENTATION_SHORT_NAME> = KIERO_IMPL_FREE_SLOT
+enum {
+  Implementation_Nil,
+};
+
+using Error = int;
+
+// You should specify similar block in your implementation this way:
+// Error_<IMPLEMENTATION_SHORT_NAME>_<ERROR_NAME>
+enum {
+  Error_Nil,            // should be return if no error occured
+  Error_Unknown,        // should be never return, but sometimes needed
+  Error_ModuleNotFound, // should be return if specific module was not found
+  Error_MethodNotFound, // should be return if specific method was not found
+  Error_BaseIndex,      // should be used as first index for your errors
+};
+
+template<int Impl>
+Error locate(void* in, void* out)
+{
+  KIERO_UNUSED(in);
+  KIERO_UNUSED(out);
+
+  static_assert(Impl == Implementation_Nil,
+      "Did you forget about implementation?"
+  );
+
+  return Error_Nil;
+}
+
+} // namespace kiero
+
+// In every implementation header
+// you MUST do undef for KIERO_IMPL_CURR_SLOT
+// and set this to your new implementation index this way:
+//#undef KIERO_IMPL_CURR_SLOT
+//#define KIERO_IMPL_CURR_SLOT kiero::Implementation_MyRender
+#define KIERO_IMPL_CURR_SLOT kiero::Implementation_Nil
+#define KIERO_IMPL_FREE_SLOT (KIERO_IMPL_CURR_SLOT + 1)
+
+// You can use this for override first index
+// This is necessary, for example, to save the index
+// when building the static library (see CMakeLists.txt).
+#ifdef KIERO_IMPL_FIRST_SLOT
+# undef KIERO_IMPL_CURR_SLOT
+# define KIERO_IMPL_CURR_SLOT KIERO_IMPL_FIRST_SLOT
+#endif
+
+#endif // KIERO_HPP
+
+```
+
+`kiero_d3d10.cpp`:
+
+```cpp
+#include <dxgi.h>
+#include <d3d10.h>
+#include "kiero.hpp"
+#include "kiero_d3d10.hpp"
+#include "kiero_intern.hpp"
+
+using CreateDXGIFactory_t =
+  HRESULT(WINAPI*)(REFIID riid, void** ppFactory);
+
+using D3D10CreateDeviceAndSwapChain_t = HRESULT(WINAPI*)(
+  IDXGIAdapter*,
+  D3D10_DRIVER_TYPE,
+  HMODULE,
+  UINT,
+  UINT,
+  DXGI_SWAP_CHAIN_DESC*,
+  IDXGISwapChain**,
+  ID3D10Device**
+);
+
+template <>
+kiero::Error kiero::locate<kiero::Implementation_D3D10>(void* in, void* out)
+{
+  KIERO_UNUSED(in);
+
+  auto dxgi_dll = GetModuleHandleA("dxgi.dll");
+  if (!dxgi_dll) {
+    KIERO_DBG_MSG("dxgi.dll not loaded");
+    return Error_ModuleNotFound;
+  }
+
+  auto d3d10_dll = GetModuleHandleA("d3d10.dll");
+  if (!d3d10_dll) {
+    KIERO_DBG_MSG("d3d10.dll not loaded");
+    return Error_ModuleNotFound;
+  }
+
+  auto CreateDXGIFactory = (
+    (CreateDXGIFactory_t)
+    GetProcAddress(dxgi_dll, "CreateDXGIFactory")
+  );
+  if (!CreateDXGIFactory) {
+    KIERO_DBG_MSG("CreateDXGIFactory not found");
+    return Error_MethodNotFound;
+  }
+
+  IDXGIFactory* factory = nullptr;
+  auto hresult = CreateDXGIFactory(
+    __uuidof(IDXGIFactory),
+    (void**)&factory
+  );
+  if (hresult != S_OK) {
+    KIERO_DBG_MSG("CreateDXGIFactory failed (%d)", hresult);
+    return Error_D3D10_CreateDXGIFactoryFailed;
+  }
+  KIERO_DEFER([&]() { factory->Release(); });
+
+  IDXGIAdapter* adapter;
+  hresult = factory->EnumAdapters(0, &adapter);
+  if (hresult != S_OK) {
+    KIERO_DBG_MSG("EnumAdapters failed (%d)", hresult);
+    return Error_D3D10_EnumAdaptersFailed;
+  }
+  KIERO_DEFER([&]() { adapter->Release(); });
+
+  auto D3D10CreateDeviceAndSwapChain = (
+    (D3D10CreateDeviceAndSwapChain_t)
+    GetProcAddress(d3d10_dll, "D3D10CreateDeviceAndSwapChain")
+  );
+  if (!D3D10CreateDeviceAndSwapChain) {
+    KIERO_DBG_MSG("D3D10CreateDeviceAndSwapChain not found");
+    return Error_MethodNotFound;
+  }
+
+  kiero::_::DummyWin32Window window;
+  kiero::_::create_dummy_win32_window(&window);
+  KIERO_DEFER([&]() { kiero::_::destroy_dummy_win32_window(&window); });
+
+  DXGI_SWAP_CHAIN_DESC sc_desc = {};
+  sc_desc.BufferDesc.Width = 100;
+  sc_desc.BufferDesc.Height = 100;
+  sc_desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  sc_desc.BufferDesc.RefreshRate.Numerator = 60;
+  sc_desc.BufferDesc.RefreshRate.Denominator = 1;
+  sc_desc.SampleDesc.Count = 1;
+  sc_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+  sc_desc.BufferCount = 1;
+  sc_desc.OutputWindow = window.hwnd;
+  sc_desc.Windowed = TRUE;
+  sc_desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+
+  IDXGISwapChain* swapchain;
+  ID3D10Device* device;
+  hresult = D3D10CreateDeviceAndSwapChain(
+    adapter,
+    D3D10_DRIVER_TYPE_HARDWARE,
+    nullptr,
+    0,
+    D3D10_SDK_VERSION,
+    &sc_desc,
+    &swapchain,
+    &device
+  );
+  if (hresult != S_OK) {
+    KIERO_DBG_MSG(
+      "D3D10CreateDeviceAndSwapChain failed (%d)",
+      hresult
+    );
+    return Error_D3D10_DeviceCreateFailed;
+  }
+  KIERO_DEFER([&]() {
+    swapchain->Release();
+    device->Release();
+  });
+
+  D3D10Output* output = (D3D10Output*)out;
+
+  for (auto vtable = *(void***)swapchain; vtable; vtable++) {
+    auto ptr = *vtable;
+    if (!ptr) break;
+    output->swapchain_methods.push_back(ptr);
+  }
+
+  for (auto vtable = *(void***)device; vtable; vtable++) {
+    auto ptr = *vtable;
+    if (!ptr) break;
+    output->device_methods.push_back(ptr);
+  }
+
+  return Error_Nil;
+}
+
+```
+
+`kiero_d3d10.hpp`:
+
+```hpp
+#pragma once
+#ifndef KIERO_D3D10_HPP
+#define KIERO_D3D10_HPP
+
+#include <vector>
+
+namespace kiero {
+
+enum {
+  Implementation_D3D10 = KIERO_IMPL_FREE_SLOT,
+};
+
+enum {
+  Error_D3D10_CreateDXGIFactoryFailed = Error_BaseIndex,
+  Error_D3D10_EnumAdaptersFailed,
+  Error_D3D10_DeviceCreateFailed,
+};
+
+struct D3D10Output {
+  // Corresponds to IDXGISwapChain indexes
+  // For example: swapchain_methods[0] is IDXGISwapChain::QueryInterface
+  // Find your index here: https://github.com/apitrace/dxsdk/blob/d964b66467aaa734edbc24326da8119f5f063dd3/Include/dxgi.h#L1767
+  std::vector<void*> swapchain_methods;
+
+  // Corresponds to ID3D10Device indexes
+  // For example: device_methods[0] is ID3D10Device::QueryInterface
+  // Find your index here: https://github.com/apitrace/dxsdk/blob/d964b66467aaa734edbc24326da8119f5f063dd3/Include/d3d10.h#L859
+  std::vector<void*> device_methods;
+};
+
+template <>
+kiero::Error kiero::locate<kiero::Implementation_D3D10>(void* in, void* out);
+
+} // namespace kiero
+
+#undef KIERO_IMPL_CURR_SLOT
+#define KIERO_IMPL_CURR_SLOT kiero::Implementation_D3D10
+
+#endif // KIERO_D3D10_HPP
+
+```
+
+`kiero_d3d11.cpp`:
+
+```cpp
+#include <dxgi.h>
+#include <d3d11.h>
+#include "kiero.hpp"
+#include "kiero_d3d11.hpp"
+#include "kiero_intern.hpp"
+
+using CreateDXGIFactory_t =
+  HRESULT(WINAPI*)(REFIID riid, void** ppFactory);
+
+using D3D11CreateDeviceAndSwapChain_t = HRESULT(WINAPI*)(
+  IDXGIAdapter*,
+  D3D_DRIVER_TYPE,
+  HMODULE,
+  UINT,
+  const D3D_FEATURE_LEVEL*,
+  UINT,
+  UINT,
+  const DXGI_SWAP_CHAIN_DESC*,
+  IDXGISwapChain**,
+  ID3D11Device**,
+  D3D_FEATURE_LEVEL*,
+  ID3D11DeviceContext**
+);
+
+template <>
+kiero::Error kiero::locate<kiero::Implementation_D3D11>(void* in, void* out)
+{
+  KIERO_UNUSED(in);
+
+  auto dxgi_dll = GetModuleHandleA("dxgi.dll");
+  if (!dxgi_dll) {
+    KIERO_DBG_MSG("dxgi.dll not loaded");
+    return Error_ModuleNotFound;
+  }
+
+  auto d3d11_dll = GetModuleHandleA("d3d11.dll");
+  if (!d3d11_dll) {
+    KIERO_DBG_MSG("d3d11.dll not loaded");
+    return Error_ModuleNotFound;
+  }
+
+  auto CreateDXGIFactory = (
+    (CreateDXGIFactory_t)
+    GetProcAddress(dxgi_dll, "CreateDXGIFactory")
+  );
+  if (!CreateDXGIFactory) {
+    KIERO_DBG_MSG("CreateDXGIFactory not found");
+    return Error_MethodNotFound;
+  }
+
+  IDXGIFactory* factory;
+  auto hresult = CreateDXGIFactory(
+    __uuidof(IDXGIFactory),
+    (void**)&factory
+  );
+  if (hresult != S_OK) {
+    KIERO_DBG_MSG("CreateDXGIFactory failed (%d)", hresult);
+    return Error_D3D11_CreateDXGIFactoryFailed;
+  }
+  KIERO_DEFER([&]() { factory->Release(); });
+
+  IDXGIAdapter* adapter;
+  hresult = factory->EnumAdapters(0, &adapter);
+  if (hresult != S_OK) {
+    KIERO_DBG_MSG("EnumAdapters failed (%d)", hresult);
+    return Error_D3D11_EnumAdaptersFailed;
+  }
+  KIERO_DEFER([&]() { adapter->Release(); });
+
+  auto D3D11CreateDeviceAndSwapChain =(
+    (D3D11CreateDeviceAndSwapChain_t)
+    GetProcAddress(d3d11_dll, "D3D11CreateDeviceAndSwapChain")
+  );
+  if (!D3D11CreateDeviceAndSwapChain) {
+    KIERO_DBG_MSG("D3D11CreateDeviceAndSwapChain not found");
+    return Error_MethodNotFound;
+  }
+
+  kiero::_::DummyWin32Window window;
+  kiero::_::create_dummy_win32_window(&window);
+  KIERO_DEFER([&]() { kiero::_::destroy_dummy_win32_window(&window); });
+
+  DXGI_SWAP_CHAIN_DESC sc_desc = {};
+  sc_desc.BufferDesc.Width = 100;
+  sc_desc.BufferDesc.Height = 100;
+  sc_desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  sc_desc.BufferDesc.RefreshRate.Numerator = 60;
+  sc_desc.BufferDesc.RefreshRate.Denominator = 1;
+  sc_desc.SampleDesc.Count = 1;
+  sc_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+  sc_desc.BufferCount = 1;
+  sc_desc.OutputWindow = window.hwnd;
+  sc_desc.Windowed = TRUE;
+  sc_desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+  sc_desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
+  const D3D_FEATURE_LEVEL feature_levels[] = {
+    D3D_FEATURE_LEVEL_11_0,
+    D3D_FEATURE_LEVEL_10_1,
+    D3D_FEATURE_LEVEL_10_0,
+  };
+
+  IDXGISwapChain* swapchain;
+  ID3D11Device* device;
+  ID3D11DeviceContext* context;
+  D3D_FEATURE_LEVEL feature_level;
+
+  hresult = D3D11CreateDeviceAndSwapChain(
+    adapter,
+    D3D_DRIVER_TYPE_UNKNOWN,
+    nullptr,
+    0,
+    feature_levels,
+    ARRAYSIZE(feature_levels),
+    D3D11_SDK_VERSION,
+    &sc_desc,
+    &swapchain,
+    &device,
+    &feature_level,
+    &context
+  );
+  if (hresult != S_OK) {
+    KIERO_DBG_MSG("D3D11CreateDeviceAndSwapChain failed (%d)", hresult);
+    return Error_D3D11_CreateDeviceAndSwapChainFailed;
+  }
+  KIERO_DEFER([&]() {
+    swapchain->Release();
+    device->Release();
+    context->Release();
+  });
+
+  D3D11Output* output = (D3D11Output*)out;
+
+  for (auto vtable = *(void***)swapchain; vtable; vtable++) {
+    auto ptr = *vtable;
+    if (!ptr) break;
+    output->swapchain_methods.push_back(ptr);
+  }
+
+  for (auto vtable = *(void***)device; vtable; vtable++) {
+    auto ptr = *vtable;
+    if (!ptr) break;
+    output->device_methods.push_back(ptr);
+  }
+
+  for (auto vtable = *(void***)context; vtable; vtable++) {
+    auto ptr = *vtable;
+    if (!ptr) break;
+    output->context_methods.push_back(ptr);
+  }
+
+  return Error_Nil;
+}
+
+```
+
+`kiero_d3d11.hpp`:
+
+```hpp
+#pragma once
+#ifndef KIERO_D3D11_HPP
+#define KIERO_D3D11_HPP
+
+#include <vector>
+
+namespace kiero {
+
+enum {
+  Implementation_D3D11 = KIERO_IMPL_FREE_SLOT,
+};
+
+enum {
+  Error_D3D11_CreateDXGIFactoryFailed = Error_BaseIndex,
+  Error_D3D11_EnumAdaptersFailed,
+  Error_D3D11_CreateDeviceAndSwapChainFailed,
+};
+
+struct D3D11Output {
+  // Corresponds to IDXGISwapChain indexes
+  // For example: swapchain_methods[0] is IDXGISwapChain::QueryInterface
+  // Find your index here: https://github.com/apitrace/dxsdk/blob/d964b66467aaa734edbc24326da8119f5f063dd3/Include/dxgi.h#L1767
+  std::vector<void*> swapchain_methods;
+
+  // Corresponds to ID3D11Device indexes
+  // For example: device_methods[0] is ID3D11Device::QueryInterface
+  // Find your index here: https://github.com/apitrace/dxsdk/blob/d964b66467aaa734edbc24326da8119f5f063dd3/Include/d3d11.h#L1421
+  std::vector<void*> device_methods;
+
+  // Corresponds to ID3D11DeviceContext indexes
+  // For example: context_methods[0] is ID3D11DeviceContext::QueryInterface
+  // Find your index here: https://github.com/apitrace/dxsdk/blob/d964b66467aaa734edbc24326da8119f5f063dd3/Include/d3d11.h#L8308
+  std::vector<void*> context_methods;
+};
+
+template <>
+kiero::Error kiero::locate<kiero::Implementation_D3D11>(void* in, void* out);
+
+} // namespace kiero
+
+#undef KIERO_IMPL_CURR_SLOT
+#define KIERO_IMPL_CURR_SLOT kiero::Implementation_D3D11
+
+#endif // KIERO_D3D11_HPP
+
+```
+
+`kiero_d3d12.cpp`:
+
+```cpp
+#include <dxgi.h>
+#include <d3d12.h>
+#include "kiero.hpp"
+#include "kiero_d3d12.hpp"
+#include "kiero_intern.hpp"
+
+using CreateDXGIFactory_t =
+  HRESULT(WINAPI*)(REFIID riid, void** ppFactory);
+
+using D3D12CreateDevice_t = HRESULT(WINAPI*)(
+  IUnknown*,
+  D3D_FEATURE_LEVEL,
+  REFIID,
+  void**
+);
+
+template <>
+kiero::Error kiero::locate<kiero::Implementation_D3D12>(void* in, void* out)
+{
+  KIERO_UNUSED(in);
+
+  auto dxgi_dll = GetModuleHandleA("dxgi.dll");
+  if (!dxgi_dll) {
+    KIERO_DBG_MSG("dxgi.dll not loaded");
+    return Error_ModuleNotFound;
+  }
+
+  auto d3d12_dll = GetModuleHandleA("d3d12.dll");
+  if (!d3d12_dll) {
+    KIERO_DBG_MSG("d3d12.dll not loaded");
+    return Error_ModuleNotFound;
+  }
+
+  auto CreateDXGIFactory = (
+    (CreateDXGIFactory_t)
+    GetProcAddress(dxgi_dll, "CreateDXGIFactory")
+  );
+  if (!CreateDXGIFactory) {
+    KIERO_DBG_MSG("CreateDXGIFactory not found");
+    return Error_MethodNotFound;
+  }
+
+  IDXGIFactory* factory;
+  auto hresult = CreateDXGIFactory(
+    __uuidof(IDXGIFactory),
+    (void**)&factory
+  );
+  if (hresult != S_OK) {
+    KIERO_DBG_MSG("CreateDXGIFactory failed");
+    return Error_D3D12_CreateDXGIFactoryFailed;
+  }
+  KIERO_DEFER([&]() { factory->Release(); });
+
+  IDXGIAdapter* adapter;
+  hresult = factory->EnumAdapters(0, &adapter);
+  if (hresult != S_OK) {
+    KIERO_DBG_MSG("EnumAdapters failed (%d)", hresult);
+    return Error_D3D12_EnumAdaptersFailed;
+  }
+  KIERO_DEFER([&]() { adapter->Release(); });
+
+  auto D3D12CreateDevice = (
+    (D3D12CreateDevice_t)
+    GetProcAddress(d3d12_dll, "D3D12CreateDevice")
+  );
+  if (!D3D12CreateDevice) {
+    KIERO_DBG_MSG("D3D12CreateDevice not found");
+    return Error_MethodNotFound;
+  }
+
+  ID3D12Device* device;
+  hresult = D3D12CreateDevice(
+    adapter,
+    D3D_FEATURE_LEVEL_11_0,
+    __uuidof(ID3D12Device),
+    (void**)&device
+  );
+  if (hresult != S_OK) {
+    KIERO_DBG_MSG("D3D12CreateDevice failed (%d)", hresult);
+    return Error_D3D12_CreateDeviceFailed;
+  }
+  KIERO_DEFER([&]() { device->Release(); });
+
+  D3D12_COMMAND_QUEUE_DESC cq_desc = {};
+  cq_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+  cq_desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+
+  ID3D12CommandQueue* command_queue;
+  hresult = device->CreateCommandQueue(
+    &cq_desc,
+    __uuidof(ID3D12CommandQueue),
+    (void**)&command_queue
+  );
+  if (hresult != S_OK) {
+    KIERO_DBG_MSG("CreateCommandQueue failed (%d)", hresult);
+    return Error_D3D12_CreateCommandQueueFailed;
+  }
+  KIERO_DEFER([&]() { command_queue->Release(); });
+
+  ID3D12CommandAllocator* command_allocator;
+  hresult = device->CreateCommandAllocator(
+    D3D12_COMMAND_LIST_TYPE_DIRECT,
+    __uuidof(ID3D12CommandAllocator),
+    (void**)&command_allocator
+  );
+  if (hresult != S_OK) {
+    KIERO_DBG_MSG("CreateCommandAllocator failed (%d)", hresult);
+    return Error_D3D12_CreateCommandAllocatorFailed;
+  }
+  KIERO_DEFER([&]() { command_allocator->Release(); });
+
+  ID3D12GraphicsCommandList* command_list;
+  hresult = device->CreateCommandList(
+    0,
+    D3D12_COMMAND_LIST_TYPE_DIRECT,
+    command_allocator,
+    nullptr,
+    __uuidof(ID3D12GraphicsCommandList),
+    (void**)&command_list
+  );
+  if (hresult != S_OK) {
+    KIERO_DBG_MSG("CreateCommandList failed (%d)", hresult);
+    return Error_D3D12_CreateCommandListFailed;
+  }
+  KIERO_DEFER([&]() { command_list->Release(); });
+
+  kiero::_::DummyWin32Window window;
+  kiero::_::create_dummy_win32_window(&window);
+  KIERO_DEFER([&]() { kiero::_::destroy_dummy_win32_window(&window); });
+
+  DXGI_SWAP_CHAIN_DESC sc_desc = {};
+  sc_desc.BufferDesc.Width = 100;
+  sc_desc.BufferDesc.Height = 100;
+  sc_desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  sc_desc.BufferDesc.RefreshRate.Numerator = 60;
+  sc_desc.BufferDesc.RefreshRate.Denominator = 1;
+  sc_desc.SampleDesc.Count = 1;
+  sc_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+  sc_desc.BufferCount = 2;
+  sc_desc.OutputWindow = window.hwnd;
+  sc_desc.Windowed = TRUE;
+  sc_desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+  sc_desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
+  IDXGISwapChain* swapchain;
+  hresult = factory->CreateSwapChain(
+    command_queue,
+    &sc_desc,
+    &swapchain
+  );
+  if (hresult != S_OK) {
+    KIERO_DBG_MSG("CreateSwapChain failed (%d)", hresult);
+    return Error_D3D12_CreateSwapChainFailed;
+  }
+  KIERO_DEFER([&]() { swapchain->Release(); });
+
+  D3D12Output* output = (D3D12Output*)out;
+
+  for (auto vtable = *(void***)device; vtable; vtable++) {
+    auto ptr = *vtable;
+    if (!ptr) break;
+    output->device_methods.push_back(ptr);
+  }
+
+  for (auto vtable = *(void***)command_queue; vtable; vtable++) {
+    auto ptr = *vtable;
+    if (!ptr) break;
+    output->command_queue_methods.push_back(ptr);
+  }
+
+  for (auto vtable = *(void***)command_allocator; vtable; vtable++) {
+    auto ptr = *vtable;
+    if (!ptr) break;
+    output->command_allocator_methods.push_back(ptr);
+  }
+
+  for (auto vtable = *(void***)command_list; vtable; vtable++) {
+    auto ptr = *vtable;
+    if (!ptr) break;
+    output->command_list_methods.push_back(ptr);
+  }
+
+  for (auto vtable = *(void***)swapchain; vtable; vtable++) {
+    auto ptr = *vtable;
+    if (!ptr) break;
+    output->swapchain_methods.push_back(ptr);
+  }
+
+  return Error_Nil;
+}
+
+```
+
+`kiero_d3d12.hpp`:
+
+```hpp
+#pragma once
+#ifndef KIERO_D3D12_HPP
+#define KIERO_D3D12_HPP
+
+#include <vector>
+
+namespace kiero {
+
+enum {
+  Implementation_D3D12 = KIERO_IMPL_FREE_SLOT,
+};
+
+enum {
+  Error_D3D12_CreateDXGIFactoryFailed = Error_BaseIndex,
+  Error_D3D12_EnumAdaptersFailed,
+  Error_D3D12_CreateDeviceFailed,
+  Error_D3D12_CreateCommandQueueFailed,
+  Error_D3D12_CreateCommandAllocatorFailed,
+  Error_D3D12_CreateCommandListFailed,
+  Error_D3D12_CreateSwapChainFailed,
+};
+
+struct D3D12Output {
+  // Corresponds to ID3D12Device indexes
+  // For example: device_methods[0] is ID3D12Device::QueryInterface
+  // Find your index here: https://github.com/apitrace/dxsdk/blob/d964b66467aaa734edbc24326da8119f5f063dd3/Include/d3d12.h#L8028
+  std::vector<void*> device_methods;
+
+  // Corresponds to ID3D12CommandQueue indexes
+  // For example: command_queue_methods[0] is ID3D12CommandQueue::QueryInterface
+  // Find your index here: https://github.com/apitrace/dxsdk/blob/d964b66467aaa734edbc24326da8119f5f063dd3/Include/d3d12.h#L7591
+  std::vector<void*> command_queue_methods;
+
+  // Corresponds to ID3D12CommandAllocator indexes
+  // For example: command_allocator_methods[0] is ID3D12CommandAllocator::QueryInterface
+  // Find your index here: https://github.com/apitrace/dxsdk/blob/d964b66467aaa734edbc24326da8119f5f063dd3/Include/d3d12.h#L4344
+  std::vector<void*> command_allocator_methods;
+
+  // Corresponds to ID3D12GraphicsCommandList indexes
+  // For example: command_list_methods[0] is ID3D12GraphicsCommandList::QueryInterface
+  // Find your index here: https://github.com/apitrace/dxsdk/blob/d964b66467aaa734edbc24326da8119f5f063dd3/Include/d3d12.h#L5615
+  std::vector<void*> command_list_methods;
+
+  // Corresponds to IDXGISwapChain indexes
+  // For example: swapchain_methods[0] is IDXGISwapChain::QueryInterface
+  // Find your index here: https://github.com/apitrace/dxsdk/blob/d964b66467aaa734edbc24326da8119f5f063dd3/Include/dxgi.h#L1767
+  std::vector<void*> swapchain_methods;
+};
+
+template <>
+kiero::Error kiero::locate<kiero::Implementation_D3D12>(void* in, void* out);
+
+} // namespace kiero
+
+#undef KIERO_IMPL_CURR_SLOT
+#define KIERO_IMPL_CURR_SLOT kiero::Implementation_D3D12
+
+#endif // KIERO_D3D12_HPP
+
+```
+
+`kiero_d3d9.cpp`:
+
+```cpp
+#include <d3d9.h>
+#include "kiero.hpp"
+#include "kiero_d3d9.hpp"
+#include "kiero_intern.hpp"
+
+using Direct3DCreate9_t = IDirect3D9*(WINAPI*)(UINT SDKVersion);
+
+template <>
+kiero::Error kiero::locate<kiero::Implementation_D3D9>(void* in, void* out)
+{
+  KIERO_UNUSED(in);
+
+  auto d3d9_dll = GetModuleHandleA("d3d9.dll");
+  if (!d3d9_dll) {
+    KIERO_DBG_MSG("d3d9.dll not loaded");
+    return Error_ModuleNotFound;
+  }
+
+  auto Direct3DCreate9 = (
+    (Direct3DCreate9_t)
+    GetProcAddress(d3d9_dll, "Direct3DCreate9")
+  );
+  if (!Direct3DCreate9) {
+    KIERO_DBG_MSG("Direct3DCreate9 not found");
+    return Error_MethodNotFound;
+  }
+
+  auto d3d9 = Direct3DCreate9(D3D_SDK_VERSION);
+  if (!d3d9) {
+    KIERO_DBG_MSG("Direct3DCreate9 failed");
+    return Error_D3D9_Direct3DCreate9Failed;
+  }
+  KIERO_DEFER([&]() { d3d9->Release(); });
+
+  kiero::_::DummyWin32Window window;
+  kiero::_::create_dummy_win32_window(&window);
+  KIERO_DEFER([&]() { kiero::_::destroy_dummy_win32_window(&window); });
+
+  D3DPRESENT_PARAMETERS present_parameters = {};
+  present_parameters.Windowed = TRUE;
+  present_parameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
+  present_parameters.hDeviceWindow = window.hwnd;
+
+  IDirect3DDevice9* device;
+  auto hresult = d3d9->CreateDevice(
+    D3DADAPTER_DEFAULT,
+    D3DDEVTYPE_HAL,
+    window.hwnd,
+    D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+    &present_parameters,
+    &device
+  );
+  if (hresult != S_OK) {
+    KIERO_DBG_MSG("CreateDevice failed (%d)", hresult);
+    return Error_D3D9_CreateDeviceFailed;
+  }
+  KIERO_DEFER([&]() { device->Release(); });
+
+  D3D9Output* output = (D3D9Output*)out;
+
+  for (auto vtable = *(void***)device; vtable; vtable++) {
+    auto ptr = *vtable;
+    if (!ptr) break;
+    output->device_methods.push_back(ptr);
+  }
+
+  return Error_Nil;
+}
+
+```
+
+`kiero_d3d9.hpp`:
+
+```hpp
+#pragma once
+#ifndef KIERO_D3D9_HPP
+#define KIERO_D3D9_HPP
+
+#include <vector>
+
+namespace kiero {
+
+enum {
+  Implementation_D3D9 = KIERO_IMPL_FREE_SLOT,
+};
+
+enum {
+  Error_D3D9_Direct3DCreate9Failed = Error_BaseIndex,
+  Error_D3D9_CreateDeviceFailed,
+};
+
+struct D3D9Output {
+  // Corresponds to IDirect3DDevice9 indexes
+  // For example: device_methods[0] is IDirect3DDevice9::QueryInterface
+  // Find your index here: https://github.com/apitrace/dxsdk/blob/d964b66467aaa734edbc24326da8119f5f063dd3/Include/d3d9.h#L426
+  std::vector<void*> device_methods;
+};
+
+template <>
+kiero::Error kiero::locate<kiero::Implementation_D3D9>(void* in, void* out);
+
+} // namespace kiero
+
+#undef KIERO_IMPL_CURR_SLOT
+#define KIERO_IMPL_CURR_SLOT kiero::Implementation_D3D9
+
+#endif // KIERO_D3D9_HPP
+```
+
+`kiero_intern.cpp`:
+
+```cpp
+#include "kiero_intern.hpp"
+
+#ifdef KIERO_ON_WINDOWS
+void kiero::_::create_dummy_win32_window(DummyWin32Window* window)
+{
+  window->wc = {};
+  window->wc.cbSize = sizeof(window->wc);
+  window->wc.lpfnWndProc = DefWindowProcA;
+  window->wc.hInstance = GetModuleHandleA(nullptr);
+  window->wc.lpszClassName = "kiero_dummy_window";
+
+  RegisterClassExA(&window->wc);
+
+  window->hwnd = CreateWindowExA(
+    0,
+    window->wc.lpszClassName,
+    "Kiero Dummy Window",
+    WS_OVERLAPPEDWINDOW,
+    CW_USEDEFAULT,
+    CW_USEDEFAULT,
+    100,
+    100,
+    nullptr,
+    nullptr,
+    window->wc.hInstance,
+    nullptr
+  );
+}
+
+void kiero::_::destroy_dummy_win32_window(DummyWin32Window* window)
+{
+  DestroyWindow(window->hwnd);
+  UnregisterClassA(window->wc.lpszClassName, window->wc.hInstance);
+}
+#endif // KIERO_ON_WINDOWS
+```
+
+`kiero_intern.hpp`:
+
+```hpp
+// Should be included only in implementation files
+// After including other headers
+
+#pragma once
+#ifndef KIERO_INTERN_HPP
+#define KIERO_INTERN_HPP
+
+#if defined(WIN32) || defined(WIN64)
+# define KIERO_ON_WINDOWS
+# include <windows.h>
+#elif defined(__linux__)
+# define KIERO_ON_LINUX
+#elif defined(__APPLE__)
+# define KIERO_ON_MACOS
+#endif
+
+#define KIERO_TOKEN_CONCAT(a, b) a##b
+#define KIERO_TOKEN_CONCAT2(a, b) KIERO_TOKEN_CONCAT(a, b)
+
+
+namespace kiero {
+namespace _ {
+
+template<typename F>
+struct Defer {
+  F f;
+  Defer(F f) : f(f) {}
+  Defer(const Defer&) = delete;
+  ~Defer() { f(); }
+};
+
+} // namespace _
+} // namespace kiero
+
+#define KIERO_DEFER(x) kiero::_::Defer KIERO_TOKEN_CONCAT2(_defer_, __LINE__) = (x);
+
+
+namespace kiero {
+namespace _ {
+#ifdef KIERO_ON_WINDOWS
+
+struct DummyWin32Window {
+  WNDCLASSEXA wc;
+  HWND hwnd;
+};
+
+void create_dummy_win32_window(DummyWin32Window* window);
+void destroy_dummy_win32_window(DummyWin32Window* window);
+
+#endif // KIERO_ON_WINDOWS
+} // namespace _
+} // namespace kiero
+
+#endif // KIERO_INTERN_HPP
+```
+
+`kiero_opengl.cpp`:
+
+```cpp
+#include "kiero.hpp"
+#include "kiero_opengl.hpp"
+#include "kiero_intern.hpp"
+
+#if defined(KIERO_ON_LINUX)
+#include <dlfcn.h>
+#endif
+
+static const char* const k_gl_methods[] = {
+  "glAccum", "glAlphaFunc", "glAreTexturesResident",
+  "glArrayElement", "glBegin", "glBindTexture",
+  "glBitmap", "glBlendFunc", "glCallList", "glCallLists",
+  "glClear", "glClearAccum", "glClearColor", "glClearDepth",
+  "glClearIndex", "glClearStencil", "glClipPlane",
+  "glColor3b", "glColor3bv", "glColor3d", "glColor3dv",
+  "glColor3f", "glColor3fv", "glColor3i", "glColor3iv",
+  "glColor3s", "glColor3sv", "glColor3ub", "glColor3ubv",
+  "glColor3ui", "glColor3uiv", "glColor3us", "glColor3usv",
+  "glColor4b", "glColor4bv", "glColor4d", "glColor4dv",
+  "glColor4f", "glColor4fv", "glColor4i", "glColor4iv",
+  "glColor4s", "glColor4sv", "glColor4ub", "glColor4ubv",
+  "glColor4ui", "glColor4uiv", "glColor4us", "glColor4usv",
+  "glColorMask", "glColorMaterial", "glColorPointer",
+  "glCopyPixels", "glCopyTexImage1D", "glCopyTexImage2D",
+  "glCopyTexSubImage1D", "glCopyTexSubImage2D",
+  "glCullFace", "glDeleteLists", "glDeleteTextures",
+  "glDepthFunc", "glDepthMask", "glDepthRange",
+  "glDisable", "glDisableClientState", "glDrawArrays",
+  "glDrawBuffer", "glDrawElements", "glDrawPixels",
+  "glEdgeFlag", "glEdgeFlagPointer", "glEdgeFlagv",
+  "glEnable", "glEnableClientState", "glEnd", "glEndList",
+  "glEvalCoord1d", "glEvalCoord1dv", "glEvalCoord1f",
+  "glEvalCoord1fv", "glEvalCoord2d", "glEvalCoord2dv",
+  "glEvalCoord2f", "glEvalCoord2fv", "glEvalMesh1",
+  "glEvalMesh2", "glEvalPoint1", "glEvalPoint2",
+  "glFeedbackBuffer", "glFinish", "glFlush",
+  "glFogf", "glFogfv", "glFogi", "glFogiv",
+  "glFrontFace", "glFrustum", "glGenLists", "glGenTextures",
+  "glGetBooleanv", "glGetClipPlane", "glGetDoublev",
+  "glGetError", "glGetFloatv", "glGetIntegerv",
+  "glGetLightfv", "glGetLightiv", "glGetMapdv",
+  "glGetMapfv", "glGetMapiv", "glGetMaterialfv",
+  "glGetMaterialiv", "glGetPixelMapfv", "glGetPixelMapuiv",
+  "glGetPixelMapusv", "glGetPointerv", "glGetPolygonStipple",
+  "glGetString", "glGetTexEnvfv", "glGetTexEnviv",
+  "glGetTexGendv", "glGetTexGenfv", "glGetTexGeniv",
+  "glGetTexImage", "glGetTexLevelParameterfv",
+  "glGetTexLevelParameteriv", "glGetTexParameterfv",
+  "glGetTexParameteriv", "glHint", "glIndexMask",
+  "glIndexPointer", "glIndexd", "glIndexdv", "glIndexf",
+  "glIndexfv", "glIndexi", "glIndexiv", "glIndexs",
+  "glIndexsv", "glIndexub", "glIndexubv", "glInitNames",
+  "glInterleavedArrays", "glIsEnabled", "glIsList",
+  "glIsTexture", "glLightModelf", "glLightModelfv",
+  "glLightModeli", "glLightModeliv", "glLightf",
+  "glLightfv", "glLighti", "glLightiv", "glLineStipple",
+  "glLineWidth", "glListBase", "glLoadIdentity",
+  "glLoadMatrixd", "glLoadMatrixf", "glLoadName",
+  "glLogicOp", "glMap1d", "glMap1f", "glMap2d", "glMap2f",
+  "glMapGrid1d", "glMapGrid1f", "glMapGrid2d", "glMapGrid2f",
+  "glMaterialf", "glMaterialfv", "glMateriali",
+  "glMaterialiv", "glMatrixMode", "glMultMatrixd",
+  "glMultMatrixf", "glNewList", "glNormal3b", "glNormal3bv",
+  "glNormal3d", "glNormal3dv", "glNormal3f", "glNormal3fv",
+  "glNormal3i", "glNormal3iv", "glNormal3s", "glNormal3sv",
+  "glNormalPointer", "glOrtho", "glPassThrough",
+  "glPixelMapfv", "glPixelMapuiv", "glPixelMapusv",
+  "glPixelStoref", "glPixelStorei", "glPixelTransferf",
+  "glPixelTransferi", "glPixelZoom", "glPointSize",
+  "glPolygonMode", "glPolygonOffset", "glPolygonStipple",
+  "glPopAttrib", "glPopClientAttrib", "glPopMatrix",
+  "glPopName", "glPrioritizeTextures", "glPushAttrib",
+  "glPushClientAttrib", "glPushMatrix", "glPushName",
+  "glRasterPos2d", "glRasterPos2dv", "glRasterPos2f",
+  "glRasterPos2fv", "glRasterPos2i", "glRasterPos2iv",
+  "glRasterPos2s", "glRasterPos2sv", "glRasterPos3d",
+  "glRasterPos3dv", "glRasterPos3f", "glRasterPos3fv",
+  "glRasterPos3i", "glRasterPos3iv", "glRasterPos3s",
+  "glRasterPos3sv", "glRasterPos4d", "glRasterPos4dv",
+  "glRasterPos4f", "glRasterPos4fv", "glRasterPos4i",
+  "glRasterPos4iv", "glRasterPos4s", "glRasterPos4sv",
+  "glReadBuffer", "glReadPixels", "glRectd", "glRectdv",
+  "glRectf", "glRectfv", "glRecti", "glRectiv",
+  "glRects", "glRectsv", "glRenderMode", "glRotated",
+  "glRotatef", "glScaled", "glScalef", "glScissor",
+  "glSelectBuffer", "glShadeModel", "glStencilFunc",
+  "glStencilMask", "glStencilOp", "glTexCoord1d",
+  "glTexCoord1dv", "glTexCoord1f", "glTexCoord1fv",
+  "glTexCoord1i", "glTexCoord1iv", "glTexCoord1s",
+  "glTexCoord1sv", "glTexCoord2d", "glTexCoord2dv",
+  "glTexCoord2f", "glTexCoord2fv", "glTexCoord2i",
+  "glTexCoord2iv", "glTexCoord2s", "glTexCoord2sv",
+  "glTexCoord3d", "glTexCoord3dv", "glTexCoord3f",
+  "glTexCoord3fv", "glTexCoord3i", "glTexCoord3iv",
+  "glTexCoord3s", "glTexCoord3sv", "glTexCoord4d",
+  "glTexCoord4dv", "glTexCoord4f", "glTexCoord4fv",
+  "glTexCoord4i", "glTexCoord4iv", "glTexCoord4s",
+  "glTexCoord4sv", "glTexCoordPointer", "glTexEnvf",
+  "glTexEnvfv", "glTexEnvi", "glTexEnviv", "glTexGend",
+  "glTexGendv", "glTexGenf", "glTexGenfv", "glTexGeni",
+  "glTexGeniv", "glTexImage1D", "glTexImage2D",
+  "glTexParameterf", "glTexParameterfv", "glTexParameteri",
+  "glTexParameteriv", "glTexSubImage1D", "glTexSubImage2D",
+  "glTranslated", "glTranslatef", "glVertex2d",
+  "glVertex2dv", "glVertex2f", "glVertex2fv",
+  "glVertex2i", "glVertex2iv", "glVertex2s", "glVertex2sv",
+  "glVertex3d", "glVertex3dv", "glVertex3f", "glVertex3fv",
+  "glVertex3i", "glVertex3iv", "glVertex3s", "glVertex3sv",
+  "glVertex4d", "glVertex4dv", "glVertex4f", "glVertex4fv",
+  "glVertex4i", "glVertex4iv", "glVertex4s", "glVertex4sv",
+  "glVertexPointer", "glViewport",
+
+#if defined(KIERO_ON_WINDOWS)
+  "wglSwapBuffers",
+#elif defined(KIERO_ON_LINUX)
+  "glXSwapBuffers",
+#endif
+};
+
+template <>
+kiero::Error kiero::locate<kiero::Implementation_OpenGL>(void* in, void* out)
+{
+#ifdef KIERO_ON_WINDOWS
+  KIERO_UNUSED(in);
+
+  auto opengl_dll = GetModuleHandleA("opengl32.dll");
+  if (!opengl_dll) {
+    KIERO_DBG_MSG("opengl32.dll not loaded");
+    return Error_ModuleNotFound;
+  }
+
+  OpenGLOutput* output = (OpenGLOutput*)out;
+
+  for (auto name : k_gl_methods) {
+    auto ptr = (void*)GetProcAddress(opengl_dll, name);
+    output->methods[name] = ptr;
+  }
+#elif defined(KIERO_ON_LINUX)
+  KIERO_UNUSED(in);
+
+  auto opengl_so = dlopen("libGL.so", RTLD_LAZY | RTLD_NOLOAD);
+  if (!opengl_so) {
+    KIERO_DBG_MSG("libGL.so not loaded");
+    return Error_ModuleNotFound;
+  }
+
+  OpenGLOutput* output = (OpenGLOutput*)out;
+
+  for (auto name : k_gl_methods) {
+    auto ptr = (void*)dlsym(opengl_so, name);
+    output->methods[name] = ptr;
+  }
+#else
+# error "Not implemented yet"
+#endif
+
+  return Error_Nil;
+}
+
+```
+
+`kiero_opengl.hpp`:
+
+```hpp
+#pragma once
+#ifndef KIERO_OPENGL_HPP
+#define KIERO_OPENGL_HPP
+
+#include <string>
+#include <unordered_map>
+
+namespace kiero {
+
+enum {
+  Implementation_OpenGL = KIERO_IMPL_FREE_SLOT,
+};
+
+struct OpenGLOutput {
+  // function name -> function pointer
+  std::unordered_map<std::string, void*> methods;
+};
+
+template <>
+kiero::Error kiero::locate<kiero::Implementation_OpenGL>(void* in, void* out);
+
+} // namespace kiero
+
+#undef KIERO_IMPL_CURR_SLOT
+#define KIERO_IMPL_CURR_SLOT kiero::Implementation_OpenGL
+
+#endif // KIERO_OPENGL_HPP
+
+```
+
+`kiero_vulkan.cpp`:
+
+```cpp
+#include "kiero.hpp"
+#include "kiero_vulkan.hpp"
+#include "kiero_intern.hpp"
+
+static const char* const k_vk_methods[] = {
+  "vkCreateInstance",
+  "vkDestroyInstance",
+  "vkEnumeratePhysicalDevices",
+  "vkGetPhysicalDeviceFeatures",
+  "vkGetPhysicalDeviceFormatProperties",
+  "vkGetPhysicalDeviceImageFormatProperties",
+  "vkGetPhysicalDeviceProperties",
+  "vkGetPhysicalDeviceQueueFamilyProperties",
+  "vkGetPhysicalDeviceMemoryProperties",
+  "vkGetInstanceProcAddr",
+  "vkGetDeviceProcAddr",
+  "vkCreateDevice",
+  "vkDestroyDevice",
+  "vkEnumerateInstanceExtensionProperties",
+  "vkEnumerateDeviceExtensionProperties",
+  "vkEnumerateDeviceLayerProperties",
+  "vkGetDeviceQueue",
+  "vkQueueSubmit",
+  "vkQueueWaitIdle",
+  "vkDeviceWaitIdle",
+  "vkAllocateMemory",
+  "vkFreeMemory",
+  "vkMapMemory",
+  "vkUnmapMemory",
+  "vkFlushMappedMemoryRanges",
+  "vkInvalidateMappedMemoryRanges",
+  "vkGetDeviceMemoryCommitment",
+  "vkBindBufferMemory",
+  "vkBindImageMemory",
+  "vkGetBufferMemoryRequirements",
+  "vkGetImageMemoryRequirements",
+  "vkGetImageSparseMemoryRequirements",
+  "vkGetPhysicalDeviceSparseImageFormatProperties",
+  "vkQueueBindSparse",
+  "vkCreateFence",
+  "vkDestroyFence",
+  "vkResetFences",
+  "vkGetFenceStatus",
+  "vkWaitForFences",
+  "vkCreateSemaphore",
+  "vkDestroySemaphore",
+  "vkCreateEvent",
+  "vkDestroyEvent",
+  "vkGetEventStatus",
+  "vkSetEvent",
+  "vkResetEvent",
+  "vkCreateQueryPool",
+  "vkDestroyQueryPool",
+  "vkGetQueryPoolResults",
+  "vkCreateBuffer",
+  "vkDestroyBuffer",
+  "vkCreateBufferView",
+  "vkDestroyBufferView",
+  "vkCreateImage",
+  "vkDestroyImage",
+  "vkGetImageSubresourceLayout",
+  "vkCreateImageView",
+  "vkDestroyImageView",
+  "vkCreateShaderModule",
+  "vkDestroyShaderModule",
+  "vkCreatePipelineCache",
+  "vkDestroyPipelineCache",
+  "vkGetPipelineCacheData",
+  "vkMergePipelineCaches",
+  "vkCreateGraphicsPipelines",
+  "vkCreateComputePipelines",
+  "vkDestroyPipeline",
+  "vkCreatePipelineLayout",
+  "vkDestroyPipelineLayout",
+  "vkCreateSampler",
+  "vkDestroySampler",
+  "vkCreateDescriptorSetLayout",
+  "vkDestroyDescriptorSetLayout",
+  "vkCreateDescriptorPool",
+  "vkDestroyDescriptorPool",
+  "vkResetDescriptorPool",
+  "vkAllocateDescriptorSets",
+  "vkFreeDescriptorSets",
+  "vkUpdateDescriptorSets",
+  "vkCreateFramebuffer",
+  "vkDestroyFramebuffer",
+  "vkCreateRenderPass",
+  "vkDestroyRenderPass",
+  "vkGetRenderAreaGranularity",
+  "vkCreateCommandPool",
+  "vkDestroyCommandPool",
+  "vkResetCommandPool",
+  "vkAllocateCommandBuffers",
+  "vkFreeCommandBuffers",
+  "vkBeginCommandBuffer",
+  "vkEndCommandBuffer",
+  "vkResetCommandBuffer",
+  "vkCmdBindPipeline",
+  "vkCmdSetViewport",
+  "vkCmdSetScissor",
+  "vkCmdSetLineWidth",
+  "vkCmdSetDepthBias",
+  "vkCmdSetBlendConstants",
+  "vkCmdSetDepthBounds",
+  "vkCmdSetStencilCompareMask",
+  "vkCmdSetStencilWriteMask",
+  "vkCmdSetStencilReference",
+  "vkCmdBindDescriptorSets",
+  "vkCmdBindIndexBuffer",
+  "vkCmdBindVertexBuffers",
+  "vkCmdDraw",
+  "vkCmdDrawIndexed",
+  "vkCmdDrawIndirect",
+  "vkCmdDrawIndexedIndirect",
+  "vkCmdDispatch",
+  "vkCmdDispatchIndirect",
+  "vkCmdCopyBuffer",
+  "vkCmdCopyImage",
+  "vkCmdBlitImage",
+  "vkCmdCopyBufferToImage",
+  "vkCmdCopyImageToBuffer",
+  "vkCmdUpdateBuffer",
+  "vkCmdFillBuffer",
+  "vkCmdClearColorImage",
+  "vkCmdClearDepthStencilImage",
+  "vkCmdClearAttachments",
+  "vkCmdResolveImage",
+  "vkCmdSetEvent",
+  "vkCmdResetEvent",
+  "vkCmdWaitEvents",
+  "vkCmdPipelineBarrier",
+  "vkCmdBeginQuery",
+  "vkCmdEndQuery",
+  "vkCmdResetQueryPool",
+  "vkCmdWriteTimestamp",
+  "vkCmdCopyQueryPoolResults",
+  "vkCmdPushConstants",
+  "vkCmdBeginRenderPass",
+  "vkCmdNextSubpass",
+  "vkCmdEndRenderPass",
+  "vkCmdExecuteCommands",
+};
+
+template <>
+kiero::Error kiero::locate<kiero::Implementation_Vulkan>(void* in, void* out)
+{
+#ifdef KIERO_ON_WINDOWS
+  KIERO_UNUSED(in);
+
+  auto vulkan_dll = GetModuleHandleA("vulkan-1.dll");
+  if (!vulkan_dll) {
+    KIERO_DBG_MSG("vulkan-1.dll not loaded");
+    return Error_ModuleNotFound;
+  }
+
+  VulkanOutput* output = (VulkanOutput*)out;
+
+  for (auto name : k_vk_methods) {
+    auto ptr = (void*)GetProcAddress(vulkan_dll, name);
+    output->methods[name] = ptr;
+  }
+#else
+# error "Not implemented yet"
+#endif
+
+  return Error_Nil;
+}
+
+```
+
+`kiero_vulkan.hpp`:
+
+```hpp
+#pragma once
+#ifndef KIERO_VULKAN_HPP
+#define KIERO_VULKAN_HPP
+
+#include <unordered_map>
+#include <string>
+
+namespace kiero {
+
+enum {
+  Implementation_Vulkan = KIERO_IMPL_FREE_SLOT,
+};
+
+struct VulkanOutput {
+  // function name -> function pointer
+  std::unordered_map<std::string, void*> methods;
+};
+
+template <>
+kiero::Error kiero::locate<kiero::Implementation_Vulkan>(void* in, void* out);
+
+} // namespace kiero
+
+#undef KIERO_IMPL_CURR_SLOT
+#define KIERO_IMPL_CURR_SLOT kiero::Implementation_Vulkan
+
+#endif // KIERO_VULKAN_HPP
+
+```
