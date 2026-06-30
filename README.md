@@ -617,6 +617,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ocornut/imgui/commit/923bd2fd217c1dc1e75fa92b0284d3817904988b [DX11/12 ResizeBuffers]
 - https://github.com/marlkiller/d3dhook_imgui [d3d opengl hook imgui x86/x64]
 - [Universal graphical hook for a D3D9-D3D12, OpenGL and Vulkan based games](https://github.com/Rebzzel/kiero)
+- https://github.com/kirchesz/kiero2 [kiero v2 — runtime locator for D3D9–D12, OpenGL, and Vulkan graphics API method addresses; BYO hooking library; CMake FetchContent; cross-platform OpenGL/Vulkan on Win/Linux/macOS]
 - https://github.com/jmpews/Dobby [a lightweight, multi-platform, multi-architecture hook framework]
 - https://github.com/Sh0ckFR/Universal-Dear-ImGui-Hook [An universal Dear ImGui Hook]
 - https://github.com/bruhmoment21/UniversalHookX [DX/OpenGL/Vulkan]
@@ -659,6 +660,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Hook
 - https://github.com/Rebzzel/kiero [X86/64 Windows]
+- https://github.com/kirchesz/kiero2 [kiero v2 — locate Vulkan/D3D/OpenGL API method addresses at runtime; BYO hooking; Win/Linux/macOS]
 - https://github.com/bruhmoment21/UniversalHookX [X86/64 Windows]
 - https://github.com/gmh5225/Vulkan-Hook [X86/64 Windows]
 - https://github.com/Sh0ckFR/Universal-Dear-ImGui-Hook
