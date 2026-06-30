@@ -1,0 +1,935 @@
+Project Path: arc_heeeyaaaa_vmem-decrypt_l2imexgr
+
+Source Tree:
+
+```txt
+arc_heeeyaaaa_vmem-decrypt_l2imexgr
+├── LICENSE
+├── README.md
+├── docs
+│   └── FORMAT.md
+├── requirements.txt
+├── vmem_decrypt.py
+├── vmem_flatten.py
+└── vmem_inspect.py
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 heeeyaaaa
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# vmem-decrypt
+
+Decrypt the encrypted data files of a **VMware Workstation / Fusion** virtual machine -
+`.vmem` (saved RAM), `.vmsn` / `.vmss` (snapshot / suspend state) and `.nvram` - using
+only the VM **password**.
+
+VMware forces "partial" VM encryption on **Windows 11** guests that have a **vTPM**, which
+also encrypts the memory/snapshot files. That makes them unusable for memory forensics
+(Volatility, etc.) until they're decrypted. This tool reproduces VMware's `encobj`
+decryption in pure Python so you don't need ESXi or VMware's internal tooling for the
+decryption step.
+
+> **Scope / honesty up front:** this tool fully and correctly performs the **decryption**.
+> For `.vmsn` / `.vmss` / `.nvram` the decrypted output is directly usable. For `.vmem`,
+> VMware **compresses *then* encrypts**, so the decrypted memory is still in VMware's
+> proprietary compressed checkpoint layout, which `vmem_flatten.py` then expands to a flat
+> image. See [Getting a Volatility-ready image](#getting-a-volatility-ready-image).
+
+**Tested on:** VMware® Workstation Pro **26H1**, guest Windows 11 **25H2** (build 26100),
+analysed with Volatility 3 (2.28). The encobj decryption and the block/LZ container were
+reverse-engineered against this build's `vmware-vmx`; very different VMware versions *may*
+use a different checkpoint format (the tools fail loudly rather than producing silent
+garbage, so you'll know).
+
+---
+
+## How VMware encrypts these files
+
+```
+                    STAGE 1  (password recovery)                STAGE 2  (this tool)
+ .vmx ──VM-Password-Extractor──▶ $vmx$ hash ──hashcat──▶ password ─┐
+                                                                   ▼
+ password ─PBKDF2-HMAC-SHA1(salt,10000)─▶ KEK
+ KEK[:32] ─AES-256-CBC─▶ keySafe dict ─▶ config_key (64 B)
+ config_key[:32] ─AES-256-CBC─▶ encryption.data ─▶ dataFileKey (64 B)
+ dataFileKey[:32] = AES-256-CBC key for .vmem/.vmsn/.vmss/.nvram
+```
+
+VMware labels every key `XTS-AES-256`, but it actually uses the **first 256 bits as an
+AES-256-CBC key** - it is **not** real XTS. (Real XTS will not decrypt these files; that
+trips up most people who try.)
+
+### encobj data-file layout (`magic 0x8943dd9e`, little-endian)
+
+```
+[0x000 .. 0x1000)  4096-byte plaintext header
+    u32 magic         @0x00 = 0x8943dd9e
+    u32 version       @0x04            (1 = vmsn, 2 = vmem)
+    u32 data_per_page @0x08 = 4064
+    u32 iv_size       @0x0c = 16
+    u32 mac_size      @0x10 = 16
+    u64 logical_size  @0x18            (trim the decrypted output to this)
+[0x1000 .. EOF)    4096-byte on-disk pages, each:
+    [ ciphertext : 4064 ][ IV : 16 ][ MAC : 16 ]
+    plaintext = AES-256-CBC( ciphertext, key = dataFileKey[:32], iv = the page's IV )
+```
+
+---
+
+## Install
+
+```bash
+git clone https://github.com/heeeyaaaa/vmem-decrypt
+cd vmem-decrypt
+pip install -r requirements.txt   # just: cryptography
+```
+
+---
+
+## Usage
+
+### Stage 1 - recover the password (separate tools)
+
+The `.vmx` holds a PBKDF2 verifier, not the keys. Extract it as a crackable hash and
+brute/dictionary-crack it:
+
+```bash
+# extract the hash from the .vmx  (https://github.com/archidote/VM-Password-Extractor)
+python3 VM-Password-Extractor.py --vmx VM.vmx --vmx-password-hash-to-hashcat
+#   -> $vmx$0$10000$<salt>$<hash>
+
+# crack it with hashcat  (VMware VMX = mode 27400)
+hashcat -m 27400 hash.txt /usr/share/wordlists/rockyou.txt
+```
+
+(John the Ripper also works; the same `$vmx$…` hash is its VMware format.)
+
+### Stage 2 - decrypt (this tool)
+
+```bash
+# decrypt straight from the .vmx + recovered password
+python3 vmem_decrypt.py VM-Snapshot1.vmsn  VM-Snapshot1.dec.vmsn  --vmx VM.vmx --password 'P@ssw0rd'
+python3 vmem_decrypt.py VM-Snapshot1.vmem  VM-Snapshot1.dec.vmem  --vmx VM.vmx --password 'P@ssw0rd'
+
+# or recover the key once and reuse it
+python3 vmem_decrypt.py --vmx VM.vmx --password 'P@ssw0rd' --print-key
+python3 vmem_decrypt.py VM.vmem  VM.dec.vmem  --key 151bcbc1...981f85
+
+# inspect a file's structure without decrypting
+python3 vmem_inspect.py VM-Snapshot1.vmem
+```
+
+**Verify it worked:** a correctly decrypted `.vmsn`/`.vmss` starts with a VMware snapshot
+magic (`0xbed2bed2`, also `0xbed2bed0` / `0xbad1bad1` / `0xbed3bed3`), followed by a `u32`
+group count and ASCII group names (`Checkpoint`, `ConfigParams`, `memory`, `cpu`, …).
+
+---
+
+## Getting a Volatility-ready image
+
+For `.vmsn` / `.vmss` / `.nvram`: the decrypted file is already in VMware's native format
+and is directly usable.
+
+For `.vmem`: VMware **compresses then encrypts**, so the decrypted `.vmem` is still VMware's
+compressed checkpoint format. Expand it with `vmem_flatten.py`, then hand the result to
+Volatility **together with the decrypted `.vmsn`**:
+
+```bash
+# expand -- IMPORTANT: name the output  <base>.vmem  (NOT .raw)
+python3 vmem_flatten.py VM-Snapshot1.dec.vmem  out.vmem
+
+# put the decrypted .vmsn beside it with the SAME basename, then run vol on the .vmem:
+cp VM-Snapshot1.dec.vmsn  out.vmsn
+vol -f out.vmem windows.info        # vol3 auto-detects its vmware layer from the .vmem/.vmsn pair
+vol -f out.vmem windows.pslist
+```
+
+> **Why `.vmem` + a paired `.vmsn`, not a bare `.raw`?** The flat image is region 0
+> (phys 0-3 GiB) followed by region 1 (phys 4-7 GiB) - there is a 1 GiB MMIO hole at 3-4 GiB,
+> so *file offset ≠ physical address*. Volatility's **vmware layer** uses the `.vmsn`'s
+> `memory` group to remap the regions; feeding it the bare image as a raw layer fails the
+> kernel/DTB validation. The `.vmem`/`.vmsn` naming is what triggers that layer.
+
+The flat image is the concatenation of the 4 MiB physical blocks. The codec is a custom
+byte-oriented LZ77 reverse-engineered from `vmware-vmx`'s checkpoint inflater - see
+[`docs/FORMAT.md`](docs/FORMAT.md) for the full container + LZ grammar.
+
+(ESXi's `crypto-util encobj decrypt` does decrypt **and** decompress in one step, if you have
+access to ESXi.)
+
+---
+
+## Example run
+
+Starting point: an encrypted VM you own - `VM.vmx`, `VM-Snapshot1.vmem`,
+`VM-Snapshot1.vmsn` - plus the VM password (recovered with VM-Password-Extractor
++ hashcat; see Stage 1).
+
+```console
+$ python3 vmem_decrypt.py VM-Snapshot1.vmem VM-Snapshot1-dec.vmem --password 'S3cret-Pass!' --vmx VM.vmx
+[*] recovered dataFileKey: 7d9f2a…c41e8b
+[*] VM-Snapshot1.vmem: magic ok, version 2, 833440 pages, data/page=4064, trim->3387096127
+     11%  (406404064 bytes)
+     …
+     95%  (3251204064 bytes)
+[+] wrote 3387096127 bytes -> VM-Snapshot1-dec.vmem
+
+$ python3 vmem_decrypt.py VM-Snapshot1.vmsn VM-Snapshot1-dec.vmsn --password 'S3cret-Pass!' --vmx VM.vmx
+[*] recovered dataFileKey: 7d9f2a…c41e8b
+[*] VM-Snapshot1.vmsn: magic ok, version 1, 1601 pages, data/page=4064, trim->6503245
+[+] wrote 6503245 bytes -> VM-Snapshot1-dec.vmsn
+```
+
+The `.vmsn`/`.vmss` is now directly usable. For the `.vmem`, flatten it and pair
+it with the decrypted `.vmsn` (same basename) for Volatility:
+
+```console
+$ python3 vmem_flatten.py VM-Snapshot1-dec.vmem VM-Snapshot1-flat.vmem
+    block 1400: in 0x9522d13f/a5506698, out 5871763456
+[+] 1552 blocks -> 6509559808 bytes flat image -> VM-Snapshot1-flat.vmem
+
+$ cp VM-Snapshot1-dec.vmsn VM-Snapshot1-flat.vmsn   # same basename, beside the .vmem
+
+$ vol -f VM-Snapshot1-flat.vmem windows.info        # vol3 auto-pairs via its vmware layer
+Variable           Value
+Kernel Base        0xf80xxxxxxxxx
+DTB                0x1ae000
+Symbols            …/ntkrnlmp.pdb/<GUID>-1/…
+Is64Bit            True
+NtMajorVersion     10
+NtMinorVersion     0
+SystemTime         2026-06-24 18:23:11
+NumberOfProcessors 2
+```
+
+
+---
+
+## Status
+
+| File | Decrypt | Volatility-ready |
+|------|:------:|:----------------:|
+| `.vmsn` / `.vmss` | ✅ | ✅ (native format) |
+| `.nvram` | ✅ | n/a |
+| `.vmem` | ✅ | ✅ (via `vmem_flatten.py`, paired with the decrypted `.vmsn`) |
+
+---
+
+## Credits
+
+- Key-chain reference: [RF3/VMwareVMX](https://github.com/RF3/VMwareVMX),
+  [axcheron/pyvmx-cracker](https://github.com/axcheron/pyvmx-cracker)
+- Hash extraction: [archidote/VM-Password-Extractor](https://github.com/archidote/VM-Password-Extractor)
+- `encobj` container format + per-page AES-256-CBC layout reverse-engineered for this tool.
+
+## License
+
+Licensed under the [MIT License](LICENSE).
+
+```
+
+`docs/FORMAT.md`:
+
+```md
+# VMware encrypted checkpoint internals
+
+Notes gathered while building this tool. The full pipeline - key chain, `encobj`
+decryption, and the `.vmem` checkpoint **decompression** - is solved and implemented.
+This doc records the on-disk formats and the reverse-engineered codec.
+
+## Key chain (.vmx)
+
+```
+encryption.keySafe = "vmware:key/list/(pair/(phrase/<id>
+    /pass2key=PBKDF2-HMAC-SHA-1:cipher=XTS-AES-256:rounds=10000:salt=<b64>
+    ,HMAC-SHA-1,<b64 dict>))"
+encryption.data    = "<b64: [IV16][AES-256-CBC ciphertext][HMAC-SHA1 20]>"
+```
+
+1. `KEK = PBKDF2-HMAC-SHA1(password, salt, rounds, dklen)` - `dklen` = 64 for an
+   `XTS-AES-256` dict, else 32. Only the first 32 bytes are used as the AES key.
+2. keySafe dict blob = `[IV16][ciphertext][HMAC-SHA1 20]`; AES-256-CBC decrypt with
+   `KEK[:32]`; PKCS#7 unpad; verify `HMAC-SHA1(KEK, plaintext)`.
+   Plaintext = `type=key:cipher=XTS-AES-256:key=<b64 config_key(64)>`.
+3. `encryption.data` decrypts the same way with `config_key[:32]` → the original `.vmx`
+   text, which contains `dataFileKey = "type=key:cipher=XTS-AES-256:key=<b64 64B>"`.
+4. `dataFileKey[:32]` = the AES-256-CBC key for the data files.
+
+"XTS-AES-256" is a misnomer throughout: only `key[:32]` is used, as AES-256-**CBC**.
+
+## encobj data-file container (.vmem/.vmsn/.vmss/.nvram)
+
+`magic = 0x8943dd9e`. 4096-byte plaintext header (fields at 0x00/0x04/0x08/0x0c/0x10/0x18,
+see README), then 4096-byte on-disk pages `[ct:4064][iv:16][mac:16]`. Each page decrypts
+(AES-256-CBC, `dataFileKey[:32]`, page IV) to 4064 plaintext bytes; concatenate and trim
+to `logical_size`. Verified byte-exact (decrypted `.vmsn` parses 100%: magic `0xbed2bed2`,
+102 groups, valid CPU/region state).
+
+## .vmsn `memory` group (the map for expanding `.vmem`)
+
+Tags (VMware tag stream: `flags, name_len, name, indices[], data`):
+
+- `regionsCount` = 2
+- per region *i*: `regionPPN[i]`, `regionPageNum[i]` (file page), `regionSize[i]` (pages)
+  - region 0: PPN 0,         file 0,       size 786432  (phys 0..3 GiB)
+  - region 1: PPN 0x100000,  file 786432,  size 802816  (phys 4..~7 GiB; 3-4 GiB MMIO hole)
+- `MainMemKnownZero` - 1 bit/page bitmap (1,589,248 bits); set = page known zero (4,701 set)
+- `hotSet` - 1 bit/page bitmap; set = "hot" page (1,522,627 set)
+- `align_mask = 0xffff`
+
+The CPU `cpu` group holds per-vCPU `CR64` (CR0,CR1,CR2,CR3,CR4 as 8-byte words → DTB=CR3),
+`gpregs`, `rip`, `GDTR/IDTR`, MSRs, etc.
+
+## The `.vmem` compression
+
+Reverse-engineered from `vmware-vmx` (`DumperFastInflate` / inner decoder `fcn.007181c0`)
+and validated: decompressed block 0 reconstructs valid Windows page tables (self-referential
+PML4 entry at the DTB), the ACPI firmware, and PE images.
+
+**Block container** (a decrypted `.vmem` is a sequence of these):
+```
+struct block { u32 uncompressed_size;  // 0x00400000 (4 MiB) for full blocks
+               u32 0;
+               u32 compressed_size;     // length of the LZ stream that follows
+               u32 0;
+               u8  stream[compressed_size]; }   // -> uncompressed_size bytes
+```
+If `compressed_size == uncompressed_size` the block is stored **raw** (verbatim, no LZ).
+Concatenating all decompressed blocks gives the flat physical image (paired with the
+decrypted `.vmsn` `memory` group for region mapping -> Volatility's `vmware` layer).
+
+**Inner LZ77** (zero-initialised back-reference window):
+```
+first control byte F (F>>5 must be 0 or 1):  literal run of (F & 0x1f) + 1 bytes
+then per control byte C:
+  C <= 0x1f :  literal run of (C + 1) bytes
+  C  > 0x1f :  match
+      lf = C >> 5
+      if lf == 7:  acc=6; do { b=next; acc+=b } while b==0xff;  length = 3 + acc   # len escape
+      else:        length = lf + 2
+      dlo = next
+      if (C & 0x1f)==0x1f and dlo==0xff:  dist = 0x2000 + (next<<8 | next)          # dist escape
+      else:                               dist = ((C & 0x1f)<<8 | dlo) + 1
+      copy `length` bytes from (pos - dist)   (overlap allowed; zeros before start)
+```
+Verified: block headers at file 0x0, 0x12aed8, 0x217b93, ... with
+`next = prev + 0x10 + compressed_size` holding exactly; each block decompresses to 4 MiB and
+they tile physical memory in order (region 0 then region 1 per the `memory` group). Implemented
+in `vmem_flatten.py`. The appendix below records how the codec was identified before the
+disassembly confirmed it.
+
+## Appendix: how the codec was identified (black-box, pre-disassembly)
+
+Kept for context; the grammar above is the authoritative, validated result.
+
+The decrypted `.vmem` is not a flat physical image - VMware compresses **before** encrypting:
+
+- Information-theoretic: encrypted `.vmem` (~2.91 GiB) < physical span (~6 GiB); AES is 1:1.
+- 0 valid x64 page-table pages across **all** 8-byte alignments in 192 MB (a flat Windows
+  image would have hundreds); the known DTB (CR3 = 0x1ae000) at flat offset yields garbage.
+- Short literal strings survive (`ntoskrnl.exe`, `\Windows\System32\...`, EFI firmware) but
+  distinctive 48-byte chunks do not -> an LZ-style codec that preserves literals.
+- Entropy ~6.8 bits/byte (below ~7.95 for entropy-coded compressors) -> fast LZ without
+  Huffman/range coding. Not lz4 / zlib / zstd / snappy / lzo at any tested offset or framing.
+
+Inspecting a region of known structure (the ACPI XSDT, located via the literal
+`XSDT`/`INTEL 440BX`/`VMW ` strings) confirmed byte-oriented LZ77: the XSDT header appears as
+verbatim literals, while its body (8-byte pointers sharing high bytes `be 0f`/`bf 0f` with a
+trailing `00 00 00 00`) is replaced by short 2-4 byte match tokens (`9f ff 10 44`,
+`a0 07 00 ed`, `02 e3 00 20`, `80 07 05 3b`, ...). Disassembly of `vmware-vmx`
+(`DumperFastInflate` / `fcn.007181c0`) then pinned the exact grammar - including the length
+and distance escapes - giving the validated decoder documented above.
+
+**Known-plaintext validation:** restoring the snapshot in VMware (it decompresses on resume)
+and dumping RAM from inside gives boot-invariant ground truth (ACPI firmware: XSDT checksum
+matches; kernel `.text`); converting that crashdump to flat physical with vol3's
+`WindowsCrashDump64Layer.read()` confirms the decompressor byte-exact (physical 0..0x2000 =
+zeros, XSDT at phys 0x5018).
+
+For reference, ESXi's `crypto-util encobj decrypt` performs both the decrypt **and** the
+decompress in one step, producing a flat `.vmem` - if you have access to ESXi.
+
+```
+
+`requirements.txt`:
+
+```txt
+cryptography>=3.0
+
+```
+
+`vmem_decrypt.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+vmem-decrypt -- decrypt VMware Workstation/Fusion encrypted VM data files.
+
+Decrypts the "encobj" container used for the .vmem / .vmsn / .vmss / .nvram files
+of an encrypted virtual machine -- the encryption VMware forces on Windows 11
+guests configured with a vTPM.
+
+This is STAGE 2 (decryption). You need the VM password first (STAGE 1): extract the
+KDF hash from the .vmx with VM-Password-Extractor and crack it with hashcat -- see
+the README.
+
+Key chain recovered from the .vmx:
+
+    password --PBKDF2-HMAC-SHA1(salt, rounds)--> KEK (key-encryption key)
+    KEK[:32] --AES-256-CBC--> keySafe dictionary --> config_key (64 bytes)
+    config_key[:32] --AES-256-CBC--> encryption.data --> dataFileKey (64 bytes)
+    dataFileKey[:32] = AES-256-CBC key that encrypts the actual data files
+
+(VMware labels these keys "XTS-AES-256" but actually uses the first 256 bits as an
+AES-256-CBC key -- it is NOT real XTS. Real XTS will not decrypt these files.)
+
+encobj data-file layout (little-endian, magic 0x8943dd9e):
+
+    [0x000 .. 0x1000)  4096-byte plaintext header
+        u32 magic         @0x00 = 0x8943dd9e
+        u32 version       @0x04 (1=vmsn, 2=vmem here)
+        u32 data_per_page @0x08 = 4064
+        u32 iv_size       @0x0c = 16
+        u32 mac_size      @0x10 = 16
+        u64 logical_size  @0x18  -> trim the decrypted output to this many bytes
+    [0x1000 .. EOF)    sequence of 4096-byte on-disk pages, each laid out as
+        [ ciphertext : data_per_page ][ IV : iv_size ][ MAC : mac_size ]
+        page_plaintext = AES-256-CBC-decrypt(ciphertext,
+                                             key = dataFileKey[:32],
+                                             iv  = the page's stored IV)
+        (The per-page MAC is not needed to decrypt; dataFileKey[32:] is unused.)
+
+OUTPUT: the decrypted bytes are VMware's *native checkpoint* format. For .vmsn /
+.vmss / .nvram that is directly usable. For .vmem, VMware compresses-then-encrypts,
+so the decrypted memory is still compressed (NOT a flat physical image). Expanding
+it to a flat, Volatility-ready dump currently requires VMware's own ESXi tool
+`crypto-util`; an offline decompressor is not yet implemented (see README).
+"""
+
+import argparse
+import base64
+import hashlib
+import hmac
+import os
+import re
+import struct
+import sys
+import urllib.parse
+
+try:
+    from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+except ImportError:
+    sys.exit("Missing dependency: pip install cryptography")
+
+MAGIC = 0x8943DD9E
+AES_BLOCK = 16
+HASH_SIZE = 20  # SHA-1
+
+
+# --------------------------------------------------------------------------- #
+# Stage 2a: recover keys from the .vmx
+# --------------------------------------------------------------------------- #
+
+_KEYSAFE_RE = (
+    r".+phrase/([A-Za-z0-9+/=]+)"
+    r"/pass2key=([A-Z0-9-]+)"
+    r":cipher=([A-Z0-9-]+)"
+    r":rounds=([0-9]+)"
+    r":salt=([A-Za-z0-9+/%]+)"
+    r",([A-Z0-9-]+)"
+    r",([A-Za-z0-9+/=]+)\)"
+)
+_DICT_RE = r"type=([a-z]+):cipher=([A-Z0-9-]+):key=([A-Za-z0-9+/%]+)"
+_DATA_RE = r'.*"([A-Za-z0-9+/=]+)"'
+
+
+def _aes_cbc_decrypt(key, iv, data):
+    d = Cipher(algorithms.AES(key), modes.CBC(iv)).decryptor()
+    return d.update(data) + d.finalize()
+
+
+def _key_size_for_cipher(cipher):
+    # VMware "XTS-AES-256" stores a 64-byte key (data key + HMAC key);
+    # "AES-256" stores 32 bytes. The CBC key is always the first 32 bytes.
+    return 64 if cipher == "XTS-AES-256" else 32
+
+
+def _unwrap_dictionary(blob, derived_key, label):
+    """Decrypt a keySafe 'dictionary' blob: [IV][ciphertext][HMAC-SHA1]."""
+    iv = blob[:AES_BLOCK]
+    dec = _aes_cbc_decrypt(derived_key[:32], iv, blob[AES_BLOCK:-HASH_SIZE])
+    pad = dec[-1]
+    if not 1 <= pad <= 16:
+        raise ValueError(f"{label}: bad PKCS#7 padding {pad} (wrong password?)")
+    plain = dec[:-pad]
+    mac = blob[-HASH_SIZE:]
+    if mac != hmac.new(derived_key, plain, hashlib.sha1).digest():
+        raise ValueError(f"{label}: HMAC mismatch -- wrong password")
+    return plain
+
+
+def recover_keys(vmx_path, password):
+    """Return (dataFileKey: 64 bytes, decrypted_vmx_config: str)."""
+    keysafe = data = None
+    with open(vmx_path, encoding="utf-8", errors="replace") as fh:
+        for line in fh:
+            s = line.strip()
+            if s.startswith("encryption.keySafe"):
+                keysafe = s
+            elif s.startswith("encryption.data"):
+                data = s
+    if not keysafe or not data:
+        raise ValueError("encryption.keySafe / encryption.data not found in .vmx "
+                         "(is this VM actually encrypted?)")
+
+    m = re.match(_KEYSAFE_RE, urllib.parse.unquote(keysafe))
+    if not m:
+        raise ValueError("unsupported encryption.keySafe format")
+    _id, pass2key, dict_cipher, rounds, salt_q, _hmac_alg, dict_b64 = m.groups()
+    if pass2key != "PBKDF2-HMAC-SHA-1":
+        raise ValueError(f"unsupported KDF: {pass2key}")
+    rounds = int(rounds)
+    salt = base64.b64decode(urllib.parse.unquote(salt_q))
+    key_size = _key_size_for_cipher(dict_cipher)
+
+    # password -> KEK -> keySafe dictionary -> config_key
+    kek = hashlib.pbkdf2_hmac("sha1", password.encode(), salt, rounds, key_size)
+    dict_plain = _unwrap_dictionary(base64.b64decode(dict_b64), kek, "keySafe")
+    dm = re.match(_DICT_RE, dict_plain.decode("ascii", "replace"))
+    if not dm:
+        raise ValueError("unexpected keySafe dictionary contents")
+    config_key = base64.b64decode(urllib.parse.unquote(dm.group(3)))
+
+    # config_key -> encryption.data -> decrypted vmx config (holds dataFileKey)
+    dmatch = re.match(_DATA_RE, urllib.parse.unquote(data))
+    if not dmatch:
+        raise ValueError("unsupported encryption.data format")
+    cfg_blob = base64.b64decode(dmatch.group(1))
+    cfg = _aes_cbc_decrypt(config_key[:32], cfg_blob[:AES_BLOCK],
+                           cfg_blob[AES_BLOCK:-HASH_SIZE])
+    pad = cfg[-1]
+    if 1 <= pad <= 16:
+        cfg = cfg[:-pad]
+    cfg_text = cfg.decode("utf-8", "replace")
+
+    fm = re.search(r'dataFileKey\s*=\s*"[^"]*key=([A-Za-z0-9+/%]+)"', cfg_text)
+    if not fm:
+        raise ValueError("dataFileKey not present in decrypted config")
+    return base64.b64decode(urllib.parse.unquote(fm.group(1))), cfg_text
+
+
+# --------------------------------------------------------------------------- #
+# Stage 2b: decrypt an encobj data file
+# --------------------------------------------------------------------------- #
+
+def parse_header(fh, page_size):
+    fh.seek(0)
+    h = fh.read(page_size)
+    return {
+        "magic": struct.unpack_from("<I", h, 0)[0],
+        "version": struct.unpack_from("<I", h, 4)[0],
+        "data_per_page": struct.unpack_from("<I", h, 8)[0],
+        "iv_size": struct.unpack_from("<I", h, 12)[0],
+        "mac_size": struct.unpack_from("<I", h, 16)[0],
+        "logical_size": struct.unpack_from("<Q", h, 24)[0],
+    }
+
+
+def decrypt_data_file(inp, outp, data_file_key, header_size=4096, page_size=4096,
+                      data_per_page=None, iv_offset=None, iv_size=16,
+                      logical_size=None, quiet=False):
+    aes_key = data_file_key[:32]
+    size = os.path.getsize(inp)
+    with open(inp, "rb") as fh:
+        hdr = parse_header(fh, page_size)
+    if hdr["magic"] != MAGIC:
+        print(f"[!] warning: magic 0x{hdr['magic']:08x} != 0x{MAGIC:08x} "
+              f"(not an encobj file?)", file=sys.stderr)
+    dpp = data_per_page or hdr["data_per_page"] or 4064
+    ivo = iv_offset if iv_offset is not None else dpp
+    trim = logical_size if logical_size is not None else hdr["logical_size"]
+
+    n_pages = (size - header_size) // page_size
+    if not quiet:
+        print(f"[*] {os.path.basename(inp)}: magic ok, version {hdr['version']}, "
+              f"{n_pages} pages, data/page={dpp}, trim->{trim}")
+
+    written = 0
+    with open(inp, "rb") as fh, open(outp, "wb") as out:
+        fh.seek(header_size)
+        for i in range(n_pages):
+            page = fh.read(page_size)
+            if len(page) < page_size:
+                break
+            iv = page[ivo:ivo + iv_size]
+            dec = Cipher(algorithms.AES(aes_key), modes.CBC(iv)).decryptor()
+            pt = dec.update(page[:dpp]) + dec.finalize()
+            if trim and written + len(pt) > trim:
+                pt = pt[:trim - written]
+            out.write(pt)
+            written += len(pt)
+            if trim and written >= trim:
+                break
+            if not quiet and n_pages > 100000 and i and i % 100000 == 0:
+                print(f"    {100 * i // n_pages:3d}%  ({written} bytes)")
+    if not quiet:
+        print(f"[+] wrote {written} bytes -> {outp}")
+    return written
+
+
+# --------------------------------------------------------------------------- #
+# CLI
+# --------------------------------------------------------------------------- #
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(
+        description="Decrypt VMware encrypted VM data files (.vmem/.vmsn/.vmss/.nvram).")
+    ap.add_argument("input", nargs="?", help="encrypted data file to decrypt")
+    ap.add_argument("output", nargs="?", help="output path for the decrypted file")
+
+    g = ap.add_mutually_exclusive_group()
+    g.add_argument("--vmx", help="encrypted .vmx (with --password) to recover the key")
+    g.add_argument("--key", help="dataFileKey as hex (>=32 bytes; first 32 used)")
+    ap.add_argument("--password", help="VM password (used with --vmx)")
+    ap.add_argument("--print-key", action="store_true",
+                    help="recover and print dataFileKey from --vmx/--password, then exit")
+
+    ap.add_argument("--header-size", type=int, default=4096)
+    ap.add_argument("--page-size", type=int, default=4096)
+    ap.add_argument("--data-per-page", type=int, default=None,
+                    help="override ciphertext bytes per page (default: header field)")
+    ap.add_argument("--iv-offset", type=int, default=None,
+                    help="override IV offset within each page (default: data-per-page)")
+    ap.add_argument("--iv-size", type=int, default=16)
+    ap.add_argument("--logical-size", type=int, default=None,
+                    help="override output trim length (default: header field)")
+    ap.add_argument("--no-trim", action="store_true", help="do not trim trailing padding")
+    args = ap.parse_args(argv)
+
+    key = None
+    if args.key:
+        key = bytes.fromhex(args.key)
+    elif args.vmx:
+        if not args.password:
+            ap.error("--vmx requires --password")
+        try:
+            key, _cfg = recover_keys(args.vmx, args.password)
+        except ValueError as exc:
+            sys.exit(f"[!] {exc}")
+        print(f"[*] recovered dataFileKey: {key.hex()}")
+
+    if args.print_key:
+        if key is None:
+            ap.error("--print-key needs --vmx and --password")
+        return 0
+
+    if not args.input or not args.output:
+        ap.error("input and output are required (unless --print-key)")
+    if key is None:
+        ap.error("provide a key via --vmx/--password or --key")
+    if len(key) < 32:
+        ap.error("key must be at least 32 bytes")
+
+    decrypt_data_file(
+        args.input, args.output, key,
+        header_size=args.header_size, page_size=args.page_size,
+        data_per_page=args.data_per_page, iv_offset=args.iv_offset,
+        iv_size=args.iv_size,
+        logical_size=(None if args.no_trim else args.logical_size),
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+```
+
+`vmem_flatten.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+vmem-flatten -- expand a *decrypted* VMware checkpoint .vmem into a flat physical image.
+
+The decrypted .vmem is a sequence of compressed blocks:
+
+    struct block { u32 uncompressed_size; u32 0; u32 compressed_size; u32 0;
+                   u8 stream[compressed_size]; }   // stream -> uncompressed_size bytes
+
+Each block's `stream` is VMware's checkpoint LZ77 (reverse-engineered from vmware-vmx's
+DumperFastInflate / fcn.007181c0). Grammar (zero-initialised back-reference window):
+
+    first control byte F (F>>5 must be 0 or 1):
+        literal run of (F & 0x1f) + 1 bytes
+    then, per control byte C:
+        C <= 0x1f : literal run of (C + 1) bytes
+        C  > 0x1f : match
+            length field lf = C >> 5
+            if lf == 7:                                  # length escape
+                acc = 6; repeat { b = next; acc += b } while b == 0xff
+                length = 3 + acc
+            else:
+                length = lf + 2
+            dlo = next byte
+            if (C & 0x1f) == 0x1f and dlo == 0xff:        # distance escape
+                eb1 = next; eb2 = next; dist = 0x2000 + (eb1<<8 | eb2)
+            else:
+                dist = ((C & 0x1f) << 8 | dlo) + 1
+            copy `length` bytes from (out_pos - dist), zero if before start
+
+Concatenating all blocks yields the flat physical image VMware/Volatility expect (paired
+with the decrypted .vmsn, whose `memory` group maps file offsets to physical addresses).
+"""
+
+import argparse
+import mmap
+import os
+import struct
+import sys
+
+
+def decompress_block(data, cp, out, out_size):
+    """Decompress one block's LZ stream into bytearray `out`; return new cp."""
+    end = len(out) + out_size
+    F = data[cp]; cp += 1
+    if (F >> 5) > 1:
+        raise ValueError(f"bad first control byte 0x{F:02x} at 0x{cp-1:x}")
+    n = (F & 0x1f) + 1
+    out += data[cp:cp + n]; cp += n
+    while len(out) < end:
+        c = data[cp]; cp += 1
+        if c <= 0x1f:                                   # literal run
+            n = c + 1
+            out += data[cp:cp + n]; cp += n
+        else:                                           # match
+            lf = c >> 5
+            if lf == 7:                                 # length escape
+                acc = 6
+                while True:
+                    b = data[cp]; cp += 1; acc += b
+                    if b != 0xff:
+                        break
+                length = 3 + acc
+            else:
+                length = lf + 2
+            dlo = data[cp]; cp += 1
+            if (c & 0x1f) == 0x1f and dlo == 0xff:       # distance escape
+                dist = 0x2000 + ((data[cp] << 8) | data[cp + 1]); cp += 2
+            else:
+                dist = (((c & 0x1f) << 8) | dlo) + 1
+            pos = len(out)
+            src = pos - dist
+            if src < 0:                                  # zero-init window
+                z = min(-src, length)
+                out += b"\x00" * z
+                length -= z
+                src = len(out) - dist
+            if length:
+                if dist >= length:                       # non-overlapping
+                    out += out[src:src + length]
+                else:                                    # overlapping run
+                    chunk = out[src:src + dist]
+                    out += (chunk * (length // dist + 1))[:length]
+    del out[end:]                                        # trim any over-copy
+    return cp
+
+
+def flatten(inp, outp, quiet=False):
+    # Back-references reach across block boundaries (dist up to ~0x12000), so the
+    # decompression window is continuous. Keep a sliding tail as context and flush
+    # the rest at block boundaries to bound memory.
+    KEEP = 0x40000  # 256 KiB context (> max back-distance)
+    # mmap the input so RSS stays tiny (the file is read once, sequentially, and the
+    # back-reference window lives in the small output buffer -- not the input).
+    fin = open(inp, "rb")
+    size = os.fstat(fin.fileno()).st_size
+    if size == 0:
+        sys.exit("[!] empty input")
+    data = mmap.mmap(fin.fileno(), 0, access=mmap.ACCESS_READ)
+    try:
+        data.madvise(mmap.MADV_SEQUENTIAL)              # let the kernel drop pages behind us
+    except (AttributeError, OSError):
+        pass
+    # sanity: this must be a decrypted .vmem (16-byte block headers), not a .vmsn
+    if data[:4] in (b"\xd2\xbe\xd2\xbe", b"\xd0\xbe\xd2\xbe",
+                    b"\xd1\xba\xd1\xba", b"\xd3\xbe\xd3\xbe"):
+        sys.exit("[!] input looks like a .vmsn/.vmss (VMware snapshot magic), not a .vmem.\n"
+                 "    vmem_flatten operates on the decrypted .vmem; the .vmsn needs no flattening.")
+    if size >= 16:
+        u0, r0, c0, r1 = struct.unpack_from("<IIII", data, 0)
+        if r0 or r1 or not (0 < u0 <= 0x400000) or not (0 < c0 <= u0):
+            sys.exit("[!] input doesn't look like a decrypted VMware .vmem "
+                     "(first block header is invalid).")
+    out = bytearray()
+    cp = 0
+    nblocks = 0
+    with open(outp, "wb", buffering=1 << 20) as fh:
+        while cp + 16 <= size:
+            usize, _r0, csize, _r1 = struct.unpack_from("<IIII", data, cp)
+            cp += 16
+            if usize == 0 or cp + csize > size:
+                break
+            if csize == usize:                          # raw (uncompressed) block
+                out += data[cp:cp + csize]
+            else:
+                ncp = decompress_block(data, cp, out, usize)
+                if ncp != cp + csize:
+                    raise ValueError(f"block {nblocks}: consumed {ncp-cp:#x} != csize {csize:#x}")
+            cp += csize
+            nblocks += 1
+            if len(out) >= (8 << 20):                   # flush early, keep last KEEP as context
+                fh.write(out[:-KEEP])
+                del out[:-KEEP]
+            if not quiet and nblocks % 200 == 0:
+                print(f"    block {nblocks}: in 0x{cp:x}/{size:x}, out {fh.tell() + len(out) - KEEP}")
+        fh.write(out)
+        total = fh.tell()
+    data.close()
+    fin.close()
+    if not quiet:
+        print(f"[+] {nblocks} blocks -> {total} bytes flat image -> {outp}")
+        if not outp.endswith(".vmem"):
+            print("[!] NOTE: name this output '<base>.vmem' (NOT .raw) and put the decrypted")
+            print("    '<base>.vmsn' beside it, so Volatility auto-pairs them via its vmware layer:")
+            base = "<base>"
+        else:
+            base = outp[:-len(".vmem")]
+        print(f"    next:  vol -f {base}.vmem windows.info        "
+              f"(needs {base}.vmsn next to it)")
+    return total
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Expand a decrypted VMware .vmem to a flat image.")
+    ap.add_argument("input", help="decrypted .vmem (from vmem_decrypt.py)")
+    ap.add_argument("output", help="flat image output -- name it '<base>.vmem' and keep the "
+                                   "decrypted '<base>.vmsn' beside it for Volatility")
+    args = ap.parse_args()
+    if not os.path.isfile(args.input):
+        sys.exit(f"not a file: {args.input}")
+    flatten(args.input, args.output)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`vmem_inspect.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+vmem-inspect -- read-only structure inspector for VMware encobj files.
+
+Dumps the plaintext header and locates the encrypted-payload / footer boundaries
+of a .vmem / .vmsn / .vmss / .nvram, WITHOUT decrypting anything. Useful to confirm
+a file really is an encobj container and to read its layout fields before decrypting.
+"""
+
+import argparse
+import math
+import os
+import struct
+import sys
+
+MAGIC = 0x8943DD9E
+
+
+def shannon(data):
+    if not data:
+        return 0.0
+    counts = [0] * 256
+    for b in data:
+        counts[b] += 1
+    n = len(data)
+    return -sum((c / n) * math.log2(c / n) for c in counts if c)
+
+
+def dump_words(data, base, label):
+    print(f"\n=== {label} (file offset 0x{base:x}) ===")
+    pad = (-len(data)) % 16
+    buf = data + b"\x00" * pad
+    for row in range(0, len(buf), 16):
+        words = struct.unpack_from("<IIII", buf, row)
+        chunk = data[row:row + 16]
+        ascii_repr = "".join(chr(c) if 32 <= c < 127 else "." for c in chunk)
+        print(f"0x{base + row:08x}  " + " ".join(f"{w:08x}" for w in words)
+              + f"  |{ascii_repr}|")
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Inspect a VMware encobj file (no decryption).")
+    ap.add_argument("path")
+    ap.add_argument("--tail-bytes", type=int, default=65536)
+    args = ap.parse_args()
+    if not os.path.isfile(args.path):
+        sys.exit(f"not a file: {args.path}")
+
+    size = os.path.getsize(args.path)
+    with open(args.path, "rb") as f:
+        head = f.read(min(512, size))
+        magic = struct.unpack_from("<I", head, 0)[0]
+        print(f"file size : {size} bytes ({size / 1024**3:.3f} GiB)")
+        print(f"magic     : 0x{magic:08x} "
+              + ("[OK encobj]" if magic == MAGIC else f"[expected 0x{MAGIC:08x}]"))
+        if magic == MAGIC:
+            print("header fields:")
+            print(f"  version       @0x04 = {struct.unpack_from('<I', head, 4)[0]}")
+            print(f"  data_per_page @0x08 = {struct.unpack_from('<I', head, 8)[0]}")
+            print(f"  iv_size       @0x0c = {struct.unpack_from('<I', head, 12)[0]}")
+            print(f"  mac_size      @0x10 = {struct.unpack_from('<I', head, 16)[0]}")
+            print(f"  logical_size  @0x18 = {struct.unpack_from('<Q', head, 24)[0]}")
+        dump_words(head, 0, "first 512 bytes")
+
+        tail_n = min(args.tail_bytes, size)
+        f.seek(size - tail_n)
+        tail = f.read(tail_n)
+    last_nz = next((i for i in range(len(tail) - 1, -1, -1) if tail[i]), -1)
+    if last_nz >= 0:
+        abs_nz = size - tail_n + last_nz
+        print(f"\nlast non-zero byte @0x{abs_nz:x}; trailing zero padding "
+              f"= {size - 1 - abs_nz} bytes")
+        pre = tail[max(0, last_nz - 4096):last_nz + 1]
+        print(f"entropy of ~{len(pre)} bytes before padding: {shannon(pre):.3f} bits/byte")
+
+    print("\nalignment check (encobj payload starts at 0x1000):")
+    payload = size - 0x1000
+    for unit in (512, 4096):
+        q, r = divmod(payload, unit)
+        print(f"  (size-0x1000) / {unit} = {q}{' exact' if r == 0 else f' remainder {r}'}")
+
+
+if __name__ == "__main__":
+    main()
+
+```
