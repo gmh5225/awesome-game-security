@@ -1398,6 +1398,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > IOS Network / Location
 - https://github.com/Yu9191/wloc [Spoof Apple WiFi/cell network location (gs-loc WLOC) — MITM protobuf patch via Surge/Quantumult X/Loon/Stash/Shadowrocket; online picker + Shortcuts; GCJ-02→WGS84; no jailbreak; indoor/WiFi positioning only]
+- https://github.com/mekos2772/ios-location-spoofer [iOS network location spoofer without jailbreak — MITM Apple map lookup responses; patch WiFi BSSID + CellTower coords; Surge/Shadowrocket/Loon/Stash/QX modules; motion state spoof; location-picker web UI]
 
 > IOS Memory Explorer
 - https://github.com/hackcatml/kfd-explorer [iOS kernel memory explorer]
