@@ -782,6 +782,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/g2wfw/qbdi-tracer-android [Android assembly instruction tracing tool]
 - https://github.com/un4ckn0wl3z/MemMCP [Cheat Engine-like but MCP]
 - https://github.com/LLeavesG/eBPFDexDumper [DexDumper based eBPF on Android Platform]
+- https://github.com/un4ckn0wl3z/dioprocess-private [Advanced Windows Internals, Evasion, Rootkit, Hypervisor, SMM & Bootkit Research Framework]
 
 > Packet Sniffer&Filter
 - https://github.com/WPO-Foundation/win-shaper
