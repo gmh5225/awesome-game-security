@@ -543,6 +543,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 ## Game Assets
 - https://github.com/Miziziziz/Retro3DGraphicsCollection
+- https://github.com/KyleBing/retro-game-console-icons [Retro game console icons in multiple PNG sizes; TrimUI/Miyoo themes]
 - https://github.com/blendi-remade/sprite-sheet-creator [AI 2D pixel-art sprite sheets & parallax backgrounds; fal.ai; Next.js; walk/jump/attack/idle, sandbox]
 - https://github.com/HitmanHimself/GOWTool [God of War 2018]
 - https://github.com/KhronosGroup/glTF [Runtime 3D Asset Delivery]
