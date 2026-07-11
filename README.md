@@ -2292,6 +2292,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/Fortnite-EFI-External [Fortnite]
 - https://github.com/ajkhoury/UEFI-Bootkit
 - https://github.com/iss4cf0ng/OpenPetya [PoC MBR bootkit inspired by Petya ransomware; custom MBR/stage-2; Real→Protected Mode; NTFS MFT Salsa20 encryption; Assembly/C/C++]
+- https://github.com/wesmar/EfiTool [0/68 VirusTotal. NT AUTHORITY\SYSTEM before the logon screen. No disk writes. No kernel driver. No PCR violations in production builds — BitLocker never prompts. In-RAM SYSTEM hive patching via direct gBS->ExitBootServices hook at UEFI level]
 - https://github.com/SamuelTulach/negativespoofer [HWID]
 - https://github.com/gmh5225/EfiDump [Dump]
 - https://github.com/ekknod/Nmi [Blocking NMI interrupts]
