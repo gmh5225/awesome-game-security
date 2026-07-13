@@ -34,8 +34,8 @@ GITHUB_REPO_PATTERN = re.compile(
     r"https://github\.com/([^/\s\)\]>\"']+)/([^/\s\)\]>\"'#]+)"
 )
 MAX_WORKERS = 3
-CLONE_TIMEOUT = 180       # seconds
-CODE2PROMPT_TIMEOUT = 60  # seconds — abandon large repos quickly
+CLONE_TIMEOUT = 300       # seconds — large game trees need longer clones
+CODE2PROMPT_TIMEOUT = 180 # seconds — abandon huge repos after a few minutes
 MAX_FILE_MB = 95          # GitHub hard-rejects files > 100 MB; keep safely below
 
 # Binary / large-asset extensions excluded from code2prompt output.
@@ -312,8 +312,9 @@ def archive_repo(
             capture_output=True, text=True, timeout=CLONE_TIMEOUT,
             env=clone_env,
         )
-        # Some servers reject the filter-spec — retry without it
-        if r.returncode != 0 and "invalid filter-spec" in r.stderr:
+        # Some remotes/locales reject the filter-spec (e.g. Traditional Chinese
+        # "無效的過濾器規格"). Always retry once without the filter on failure.
+        if r.returncode != 0:
             shutil.rmtree(tmp_dir, ignore_errors=True)
             tmp_dir = tempfile.mkdtemp(prefix=f"arc_{owner}_{repo}_")
             r = subprocess.run(
@@ -353,29 +354,154 @@ def archive_repo(
         size_bytes = out_file.stat().st_size
         size_mb = size_bytes / 1024 / 1024
         if size_mb > MAX_FILE_MB:
-            out_file.unlink(missing_ok=True)
+            # Prefer a truncated local archive over dropping the repo entirely
+            # when the snapshot API is unavailable or also too large.
             ok, content = _fetch_via_snapshot(owner, repo)
             if ok:
                 written, size = _write_snapshot(out_dir, out_file, content)
                 if written:
                     return (slug, "OK", f"{size:.1f} KB [snapshot, was {size_mb:.1f} MB]")
-                return (slug, "TOOLARGE", f"c2p {size_mb:.1f} MB, snapshot {size:.1f} MB — both too large")
-            return (slug, "TOOLARGE", f"c2p {size_mb:.1f} MB; snapshot failed: {content}")
+            # Truncate code2prompt output to fit GitHub's hard limit.
+            max_bytes = int(MAX_FILE_MB * 1024 * 1024 * 0.98)
+            raw = out_file.read_bytes()[:max_bytes]
+            truncated = raw.decode("utf-8", errors="ignore").rstrip()
+            truncated += (
+                "\n\n[TRUNCATED: full code2prompt output was "
+                f"{size_mb:.1f} MB; kept first {MAX_FILE_MB} MB for GitHub limits]\n"
+            )
+            out_file.write_text(truncated, encoding="utf-8")
+            kept_kb = out_file.stat().st_size / 1024
+            return (slug, "OK", f"{kept_kb:.1f} KB [truncated from {size_mb:.1f} MB]")
 
         return (slug, "OK", f"{size_bytes / 1024:.1f} KB")
 
     except subprocess.TimeoutExpired:
+        # Prefer a lightweight tree+source archive over leaving a gap.
+        light = _archive_lightweight(owner, repo, out_dir, out_file, tmp_dir if Path(tmp_dir).exists() else None)
+        if light[0] == "OK":
+            return light
         ok, content = _fetch_via_snapshot(owner, repo)
         if ok:
             written, size = _write_snapshot(out_dir, out_file, content)
             if written:
                 return (slug, "OK", f"{size:.1f} KB [snapshot, after timeout]")
             return (slug, "TOOLARGE", f"snapshot {size:.1f} MB still too large after timeout")
-        return (slug, "TIMEOUT", "exceeded timeout")
+        return (slug, "TIMEOUT", light[2] if light[0] != "OK" else "exceeded timeout")
     except Exception as e:
         return (slug, "ERROR", str(e))
     finally:
         shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+def _archive_lightweight(
+    owner: str,
+    repo: str,
+    out_dir: Path,
+    out_file: Path,
+    existing_clone: Path | None,
+) -> tuple[str, str, str]:
+    """Build a size-capped tree + source archive when code2prompt times out."""
+    slug = f"{owner}/{repo}"
+    max_bytes = int(MAX_FILE_MB * 1024 * 1024 * 0.95)
+    max_single = 256 * 1024
+    code_exts = {
+        ".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hh", ".cs", ".java", ".kt",
+        ".go", ".rs", ".py", ".js", ".ts", ".tsx", ".jsx", ".lua", ".gd", ".swift",
+        ".m", ".mm", ".sh", ".ps1", ".cmake", ".md", ".txt", ".json", ".yml",
+        ".yaml", ".toml", ".ini", ".cfg", ".xml", ".sln", ".vcxproj", ".gradle",
+        ".mk", ".bat", ".cmd", ".sv", ".v", ".asm", ".s", ".idl", ".proto",
+    }
+    skip_dir = {".git", "node_modules", ".vs", "bin", "obj", "__pycache__", ".idea"}
+
+    tmp_owned = False
+    root = existing_clone
+    try:
+        if root is None or not Path(root).exists():
+            root = Path(tempfile.mkdtemp(prefix=f"lw_{owner}_{repo}_"))
+            tmp_owned = True
+            clone_env = {"GIT_LFS_SKIP_SMUDGE": "1", **os.environ}
+            r = subprocess.run(
+                ["git", "clone", "--depth", "1", "--single-branch", "--quiet",
+                 f"https://github.com/{owner}/{repo}.git", str(root)],
+                capture_output=True, text=True, timeout=CLONE_TIMEOUT, env=clone_env,
+            )
+            if r.returncode != 0:
+                return (slug, "FAIL", f"lightweight clone: {(r.stderr or '')[:200]}")
+
+        root = Path(root)
+        lines = [f"Project Path: {owner}/{repo}", "", "Source Tree:", "", "```txt", root.name]
+        count = 0
+        for dirpath, dirnames, filenames in os.walk(root):
+            dirnames[:] = sorted(
+                d for d in dirnames if d not in skip_dir and not d.startswith(".")
+            )
+            rel = Path(dirpath).relative_to(root)
+            depth = 0 if str(rel) == "." else len(rel.parts)
+            indent = "│   " * depth
+            for name in dirnames:
+                lines.append(f"{indent}├── {name}/")
+                count += 1
+                if count >= 4000:
+                    lines.append(f"{indent}└── ... [tree truncated]")
+                    break
+            if count >= 4000:
+                break
+            for name in sorted(filenames):
+                if name.startswith("."):
+                    continue
+                lines.append(f"{indent}├── {name}")
+                count += 1
+                if count >= 4000:
+                    lines.append(f"{indent}└── ... [tree truncated]")
+                    break
+            if count >= 4000:
+                break
+        lines.append("```")
+        lines.append("")
+
+        prefer: list[Path] = []
+        other: list[Path] = []
+        for p in root.rglob("*"):
+            if not p.is_file():
+                continue
+            if any(part in skip_dir or part.startswith(".") for part in p.relative_to(root).parts[:-1]):
+                continue
+            low = p.name.lower()
+            if low.startswith("readme") or low in {"license", "license.md", "copying"}:
+                prefer.append(p)
+            elif p.suffix.lower() in code_exts:
+                other.append(p)
+        other.sort(key=lambda p: (len(p.relative_to(root).parts), str(p).lower()))
+
+        used = len("\n".join(lines).encode("utf-8"))
+        included = 0
+        for p in prefer + other:
+            try:
+                raw = p.read_bytes()
+            except OSError:
+                continue
+            body = raw[:max_single].decode("utf-8", errors="replace")
+            note = ""
+            if len(raw) > max_single:
+                note = f"\n\n[... truncated file; original {len(raw)} bytes ...]\n"
+            block = f"`{p.relative_to(root)}`:\n\n```\n{body}{note}\n```\n"
+            encoded = block.encode("utf-8")
+            if used + len(encoded) > max_bytes:
+                lines.append("\n[STOPPED: reached archive size budget]\n")
+                break
+            lines.append(block)
+            used += len(encoded)
+            included += 1
+
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_file.write_text("\n".join(lines), encoding="utf-8")
+        size_kb = out_file.stat().st_size / 1024
+        return (slug, "OK", f"{size_kb:.1f} KB [lightweight, {included} files]")
+    except Exception as exc:
+        return (slug, "FAIL", f"lightweight: {exc}")
+    finally:
+        if tmp_owned and root is not None:
+            shutil.rmtree(root, ignore_errors=True)
 
 
 def main() -> None:
