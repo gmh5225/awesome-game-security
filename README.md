@@ -1740,7 +1740,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/westfox-5/GhidraMetrics [A Ghidra plugin for native code metrics]
 
 > Radare Plugins
-- https://github.com/radareorg/r2a [local language model for radare2]
+- https://github.com/radareorg/r2ai [LLM-based reversing for radare2]
 - https://github.com/radareorg/radius2 [Fast binary emulation and symbolic execution framework using radare2]
 - https://github.com/radareorg/r2garlic [Garlic DEX/Dalvik decompiler plugin for radare2]
 - https://github.com/seifreed/r2morph [A metamorphic binary transformation engine based on r2pipe and radare2]
