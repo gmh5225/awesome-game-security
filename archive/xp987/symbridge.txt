@@ -1,0 +1,3563 @@
+Project Path: arc_xp987_symbridge_hjc7j5e2
+
+Source Tree:
+
+```txt
+arc_xp987_symbridge_hjc7j5e2
+├── LICENSE
+├── README.md
+├── adapters
+│   ├── __init__.py
+│   ├── common
+│   │   ├── __init__.py
+│   │   └── client.py
+│   ├── ida
+│   │   ├── __init__.py
+│   │   ├── ida_sync.py
+│   │   └── symbridge_ida.py
+│   └── x64dbg
+│       ├── README.md
+│       └── plugin
+│           ├── CMakeLists.txt
+│           ├── build.bat
+│           ├── pluginmain.h
+│           ├── symbridge_x64dbg.cpp
+│           └── type_sync.h
+├── broker
+│   ├── __init__.py
+│   ├── model.py
+│   └── symbridge_broker.py
+├── dev
+│   ├── __init__.py
+│   └── simclient.py
+├── shared
+│   └── schema.json
+└── tests
+    ├── __init__.py
+    ├── test_broker.py
+    ├── test_client.py
+    ├── test_ida_sync.py
+    ├── test_model.py
+    ├── test_persist.py
+    └── type_sync_tests.cpp
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 xp987
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# symbridge
+
+**Live annotation sync between IDA Pro and x64dbg.** Rename a function, drop a
+comment, or define a struct in one tool — it shows up in the other within a
+second. No more re-doing your analysis when you switch from static to dynamic.
+
+> Status: working, cross-verified live on **IDA Pro 9.4 ↔ x64dbg**. Names,
+> comments, and C struct/type definitions all sync bidirectionally.
+
+---
+
+## The problem
+
+Reverse engineers work on the same binary in more than one tool: IDA for static
+analysis, x64dbg for debugging. You spend hours naming functions, writing
+comments, and rebuilding structs in IDA — then you open x64dbg and none of it is
+there. Existing tools either only sync the cursor position (`ret-sync`) or are
+Ghidra-centric and rough (`BinSync`). There was no drop-in, *live* bridge that
+carries **names + comments + types** between IDA and x64dbg. symbridge is that
+bridge.
+
+## What it syncs
+
+| Annotation | IDA → x64dbg | x64dbg → IDA |
+|---|---|---|
+| Symbol names (labels) | ✅ | ✅ |
+| Comments (regular / repeatable) | ✅ | ✅ |
+| Structs / types (C declarations) | ✅ | ✅ |
+
+- **Address-independent:** everything is keyed by `(module, RVA)`, so ASLR and
+  different image bases never matter — a function at RVA `0x1500` lines up in
+  both tools automatically.
+- **Live:** local edits are captured via IDA's `IDB_Hooks` and an x64dbg polling
+  thread, relayed instantly through a broker.
+- **Loop-free:** every change carries an `origin`; the broker never echoes it
+  back, and adapters guard with an "applying remote" flag.
+- **Persistent:** run the broker with `--persist state.json` and your
+  annotations survive restarts — reopen tomorrow and everything is still there.
+
+## Architecture
+
+A small hub-and-spoke design. A standalone **broker** holds the canonical state;
+each tool runs a thin **adapter** that pushes local edits and applies remote
+ones. Transport is newline-delimited JSON over localhost TCP — zero third-party
+dependencies, so IDA's embedded Python and a native C++ plugin both speak it
+without installing anything.
+
+```
+   IDA (IDAPython plugin) ──┐
+                            ├──►  Broker (localhost TCP, canonical state)
+   x64dbg (C++ .dp64) ──────┘
+```
+
+Adding a third tool (Ghidra, Binary Ninja) later means writing one more adapter
+against the same fixed protocol — the broker and data model don't change.
+
+## Quick start
+
+### 1. Run the broker
+```bash
+python -m broker.symbridge_broker -v            # or: --persist state.json
+```
+
+### 2. Try it with no tools installed (recommended first step)
+Two fake adapters in separate terminals let you watch the sync happen:
+```bash
+python -m dev.simclient --id A --tool ida      --module target.exe
+python -m dev.simclient --id B --tool x64dbg   --module target.exe
+```
+Type `sym 1000 decrypt_string` in one and watch it appear in the other.
+
+### 3. IDA adapter
+Load `adapters/ida/symbridge_ida.py` via **File → Script file…** (or drop it in
+your `plugins/` folder). Run it (Ctrl-Alt-S) to connect. Rename a function (`N`)
+or add a comment (`;`) and it flows to the broker. Details:
+[adapters/ida/](adapters/ida/).
+
+### 4. x64dbg adapter
+Build the plugin and copy `symbridge.dp64` into x64dbg's `x64\plugins\`, then
+**Plugins → symbridge → Connect**. Full build/use notes:
+[adapters/x64dbg/README.md](adapters/x64dbg/README.md).
+
+```bat
+cd adapters\x64dbg\plugin
+build.bat "C:\path\to\pluginsdk"
+```
+
+Broker host/port are configurable via `SYMBRIDGE_HOST` / `SYMBRIDGE_PORT`
+(default `127.0.0.1:9100`).
+
+## How it works
+
+- **Canonical model** (`broker/model.py`): `Symbol{module,rva,name}`,
+  `Comment{module,rva,text,kind}`, `TypeDef{module,name,decl,deleted}`. Types are
+  carried as **C-declaration text** — the common denominator both tools parse.
+- **Merge:** last-write-wins by timestamp, so replays and out-of-order delivery
+  are idempotent. Type deletes/renames travel as tombstones.
+- **Protocol** (`shared/schema.json`): `hello` → broker replies with a full
+  `snapshot`; `update` carries one changed record; `ack` confirms receipt.
+
+## Project layout
+
+```
+broker/            standalone broker + canonical data model (pure Python)
+adapters/
+  common/client.py reusable socket client (used by Python adapters)
+  ida/             IDAPython plugin + unit-tested pure sync logic
+  x64dbg/          native C++ plugin (plugin SDK) + its own README
+shared/schema.json wire protocol (single source of truth across tools)
+dev/simclient.py   fake adapter for a no-tools live demo
+tests/             broker/model/client/persist/ida-sync test suites
+```
+
+## Testing
+
+No dependencies required (Python 3.11+; `pytest` optional):
+```bash
+python -m tests.test_broker
+python -m tests.test_client
+python -m tests.test_persist
+python -c "import tests.test_model as m, tests.test_ida_sync as i; [getattr(x,n)() for x in (m,i) for n in dir(x) if n.startswith('test_')]; print('ok')"
+```
+The C++ type-diff logic has its own tests under `tests/type_sync_tests.cpp`.
+
+## Roadmap
+
+- Ghidra and Binary Ninja adapters (same protocol, new spoke).
+- Native x64dbg change events to replace polling if/when exposed.
+- Richer type support beyond structs/unions/enums with primitive & array fields.
+
+## License
+
+[MIT](LICENSE) — free to use, modify, and distribute.
+
+```
+
+`adapters/common/client.py`:
+
+```py
+"""Reusable broker client for Python adapters (IDA, Ghidra, Binary Ninja, ...).
+
+Blocking-socket + background reader thread, using only the stdlib so it runs
+inside IDA's embedded CPython without installing anything. The transport speaks
+the newline-delimited JSON protocol in ``shared/schema.json``.
+
+Threading model: incoming messages are delivered on the reader thread via the
+``on_message`` callback. GUI-bound adapters (IDA) must marshal any tool-API work
+onto their main thread themselves (e.g. ``ida_kernwin.execute_sync``); this
+client stays framework-agnostic.
+"""
+
+from __future__ import annotations
+
+import itertools
+import json
+import socket
+import threading
+from typing import Callable, Dict, Optional
+
+OnMessage = Callable[[Dict], None]
+
+
+class BrokerClient:
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        client_id: str,
+        tool: str,
+        on_message: OnMessage,
+        on_disconnect: Optional[Callable[[], None]] = None,
+    ) -> None:
+        self.host = host
+        self.port = port
+        self.client_id = client_id
+        self.tool = tool
+        self.on_message = on_message
+        self.on_disconnect = on_disconnect
+
+        self._sock: Optional[socket.socket] = None
+        self._reader: Optional[threading.Thread] = None
+        self._send_lock = threading.Lock()
+        self._seq = itertools.count(1)
+        self._running = False
+
+    # -- lifecycle ------------------------------------------------------------
+
+    def connect(self, timeout: float = 5.0) -> None:
+        """Open the socket, announce ourselves, and start the reader thread."""
+        self._sock = socket.create_connection((self.host, self.port), timeout=timeout)
+        self._sock.settimeout(None)  # blocking reads in the reader thread
+        self._running = True
+        self.send({"type": "hello", "client_id": self.client_id, "tool": self.tool})
+        self._reader = threading.Thread(
+            target=self._read_loop, name=f"symbridge-{self.client_id}", daemon=True
+        )
+        self._reader.start()
+
+    def close(self) -> None:
+        self._running = False
+        if self._sock is not None:
+            try:
+                self._sock.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+            try:
+                self._sock.close()
+            except OSError:
+                pass
+            self._sock = None
+
+    @property
+    def connected(self) -> bool:
+        return self._running and self._sock is not None
+
+    # -- sending --------------------------------------------------------------
+
+    def send(self, msg: Dict) -> None:
+        if self._sock is None:
+            raise ConnectionError("not connected")
+        data = (json.dumps(msg, separators=(",", ":")) + "\n").encode("utf-8")
+        with self._send_lock:
+            self._sock.sendall(data)
+
+    def send_update(self, record: str, data: Dict, origin: Optional[str] = None) -> None:
+        """Send a single changed record (symbol/comment/type) to the broker."""
+        self.send(
+            {
+                "type": "update",
+                "origin": origin or self.client_id,
+                "seq": next(self._seq),
+                "record": record,
+                "data": data,
+            }
+        )
+
+    # -- receiving ------------------------------------------------------------
+
+    def _read_loop(self) -> None:
+        assert self._sock is not None
+        try:
+            with self._sock.makefile("rb") as f:
+                for raw in f:
+                    if not self._running:
+                        break
+                    raw = raw.strip()
+                    if not raw:
+                        continue
+                    try:
+                        msg = json.loads(raw)
+                    except json.JSONDecodeError:
+                        continue
+                    try:
+                        self.on_message(msg)
+                    except Exception:  # noqa: BLE001 - never let a handler kill the reader
+                        pass
+        except OSError:
+            pass  # socket closed under us
+        finally:
+            self._running = False
+            if self.on_disconnect is not None:
+                try:
+                    self.on_disconnect()
+                except Exception:  # noqa: BLE001
+                    pass
+
+```
+
+`adapters/ida/ida_sync.py`:
+
+```py
+"""Pure, IDA-free sync logic for the IDA adapter.
+
+Everything address- and record-shaped lives here so it can be unit tested
+without IDA installed. The IDA glue in ``symbridge_ida.py`` only does two things
+this module can't: subscribe to IDB hooks and call the IDA name/comment APIs.
+
+Address model: on the wire we only ever carry an RVA (``ea - imagebase``). IDA
+gives us absolute effective addresses (``ea``); convert at the boundary.
+"""
+
+from __future__ import annotations
+
+import time
+from typing import Dict, Optional, Tuple
+
+TOOL = "ida"
+
+COMMENT_REGULAR = "regular"
+COMMENT_REPEATABLE = "repeatable"
+
+
+def norm_module(module: str) -> str:
+    """Normalize a module name for cross-tool keying.
+
+    IDA (``get_root_filename``) and x64dbg (``LabelInfo.mod``) can differ in
+    case; lowercasing on both sides guarantees the ``(module, rva)`` key lines
+    up so sync doesn't silently no-op. Kept as a single shared rule.
+    """
+    return module.lower()
+
+
+# -- address conversion -------------------------------------------------------
+
+def rva_from_ea(ea: int, imagebase: int) -> int:
+    return ea - imagebase
+
+
+def ea_from_rva(rva: int, imagebase: int) -> int:
+    return imagebase + rva
+
+
+# -- building outbound records (local change -> wire ``data`` payload) --------
+
+def make_symbol_record(
+    module: str, ea: int, imagebase: int, name: str, origin: str, ts: Optional[float] = None
+) -> Dict:
+    return {
+        "module": norm_module(module),
+        "rva": rva_from_ea(ea, imagebase),
+        "name": name,
+        "origin": origin,
+        "ts": time.time() if ts is None else ts,
+    }
+
+
+def make_comment_record(
+    module: str,
+    ea: int,
+    imagebase: int,
+    text: str,
+    repeatable: bool,
+    origin: str,
+    ts: Optional[float] = None,
+) -> Dict:
+    return {
+        "module": norm_module(module),
+        "rva": rva_from_ea(ea, imagebase),
+        "text": text,
+        "kind": COMMENT_REPEATABLE if repeatable else COMMENT_REGULAR,
+        "origin": origin,
+        "ts": time.time() if ts is None else ts,
+    }
+
+
+def make_type_record(
+    module: str,
+    name: str,
+    decl: str,
+    origin: str,
+    ts: Optional[float] = None,
+    deleted: bool = False,
+) -> Dict:
+    """Build a canonical local-type payload.
+
+    Types are scoped by module and name rather than by address, so unlike
+    symbol/comment records this payload intentionally contains no ``rva``.
+    ``decl`` is kept verbatim: newlines, packing pragmas, and array syntax are
+    meaningful input to the receiving tool's C declaration parser.
+    """
+    return {
+        "module": norm_module(module),
+        "name": name,
+        "decl": decl,
+        "deleted": deleted,
+        "origin": origin,
+        "ts": time.time() if ts is None else ts,
+    }
+
+
+# -- planning inbound changes (wire record -> concrete local action) ----------
+
+def belongs_to(data: Dict, module: str) -> bool:
+    """Whether an incoming record targets the module this adapter has open."""
+    return norm_module(data.get("module", "")) == norm_module(module)
+
+
+def plan_apply(record: str, data: Dict, imagebase: int) -> Optional[Tuple]:
+    """Translate an incoming wire record into a concrete local action tuple.
+
+    Returns one of:
+      ``("symbol", ea, name)``
+      ``("comment", ea, text, repeatable_bool)``
+      ``("type", name, decl)``
+    or ``None`` if the record type is unknown.
+    """
+    if record == "symbol":
+        return ("symbol", ea_from_rva(data["rva"], imagebase), data["name"])
+    if record == "comment":
+        repeatable = data.get("kind") == COMMENT_REPEATABLE
+        return ("comment", ea_from_rva(data["rva"], imagebase), data["text"], repeatable)
+    if record == "type":
+        if data.get("deleted", False):
+            return ("type_delete", data["name"])
+        return ("type", data["name"], data["decl"])
+    return None
+
+```
+
+`adapters/ida/symbridge_ida.py`:
+
+```py
+"""symbridge IDA adapter (IDAPython plugin).
+
+Install: copy the ``symbridge`` repo somewhere, then either
+  * drop this file (with the repo on disk beside it) into IDA's ``plugins/`` dir, or
+  * run it as a script from IDA (File > Script file...).
+Then run the "symbridge" plugin (Ctrl-Alt-S) to connect/disconnect.
+
+Config via env vars: ``SYMBRIDGE_HOST`` (default 127.0.0.1), ``SYMBRIDGE_PORT`` (9100).
+
+Design: local renames/comments are captured with ``IDB_Hooks`` and pushed to the
+broker; remote updates are applied on IDA's main thread via ``execute_sync`` with
+an ``applying_remote`` guard so applying a remote change never re-broadcasts it.
+All address math and record shaping lives in :mod:`ida_sync` (unit tested).
+"""
+
+from __future__ import annotations
+
+import os
+import sys
+import time
+
+# Make the repo packages importable when this file is dropped into IDA's plugins dir.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_ROOT = os.path.abspath(os.path.join(_HERE, "..", ".."))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
+from adapters.common.client import BrokerClient  # noqa: E402
+from adapters.ida import ida_sync  # noqa: E402
+
+try:
+    import idaapi
+    import idc
+    import ida_idp
+    import ida_nalt
+    import ida_bytes
+    import ida_kernwin
+    import ida_typeinf
+
+    _IDA = True
+except ImportError:  # imported outside IDA (e.g. for tests) -- glue stays dormant
+    _IDA = False
+
+
+if _IDA:
+
+    class _IDBHooks(ida_idp.IDB_Hooks):
+        """Forwards local IDB edits to the adapter.
+
+        Hook signatures gained extra trailing args across IDA versions (8.x vs
+        9.x), so we accept ``*args`` and read positionally -- the same file then
+        works on both without a signature-mismatch crash.
+        """
+
+        def __init__(self, adapter: "SymbridgeIDA") -> None:
+            super().__init__()
+            self._adapter = adapter
+
+        def renamed(self, *args):
+            ea, new_name = args[0], args[1]
+            self._adapter.on_local_rename(ea, new_name or "")
+            return 0
+
+        def cmt_changed(self, *args):
+            ea, repeatable = args[0], bool(args[1])
+            text = ida_bytes.get_cmt(ea, repeatable) or ""
+            self._adapter.on_local_comment(ea, text, repeatable)
+            return 0
+
+        def local_types_changed(self, ltc, ordinal, name):
+            # IDA 9.x: (local_type_change_t ltc, uint32 ordinal,
+            # const char *name). Unlike rename/comment callbacks, IDA 9.4's
+            # SWIG director does not marshal this event into a ``*args``
+            # override; the exact signature is required or args arrives empty.
+            self._adapter.on_local_type(ltc, int(ordinal), name or "")
+            return 0
+
+    class SymbridgeIDA:
+        """Owns the broker client + IDB hooks and bridges the two directions."""
+
+        def __init__(self, host: str, port: int) -> None:
+            self.module = ida_nalt.get_root_filename()
+            self.imagebase = ida_nalt.get_imagebase()
+            self.origin = f"ida:{os.getpid()}"
+            self.applying_remote = False
+            self._local_type_names_by_ordinal = {}
+            self._hooks = _IDBHooks(self)
+            self._client = BrokerClient(
+                host, port, self.origin, ida_sync.TOOL, self._on_broker_message
+            )
+
+        # -- lifecycle --------------------------------------------------------
+
+        def start(self) -> None:
+            self._client.connect()
+            self._remember_local_type_names()
+            self._hooks.hook()
+            ida_kernwin.msg(
+                f"[symbridge] connected as {self.origin} (module={self.module})\n"
+            )
+
+        def stop(self) -> None:
+            try:
+                self._hooks.unhook()
+            finally:
+                self._client.close()
+            ida_kernwin.msg("[symbridge] disconnected\n")
+
+        # -- local IDA -> broker ---------------------------------------------
+
+        def _remember_local_type_names(self) -> None:
+            """Seed ordinal/name state so the first rename can tombstone old name."""
+            qty = ida_typeinf.get_ordinal_limit(ida_typeinf.get_idati())
+            for ordinal in range(1, qty):
+                name = ida_typeinf.idc_get_local_type_name(ordinal) or ""
+                if name:
+                    self._local_type_names_by_ordinal[ordinal] = name
+
+        def on_local_rename(self, ea: int, new_name: str) -> None:
+            if self.applying_remote:
+                return
+            # `renamed` also fires for struct/enum members etc.; only sync real
+            # addresses that live in the image.
+            if not ida_bytes.is_mapped(ea):
+                return
+            rec = ida_sync.make_symbol_record(
+                self.module, ea, self.imagebase, new_name, self.origin
+            )
+            self._client.send_update("symbol", rec, origin=self.origin)
+
+        def on_local_comment(self, ea: int, text: str, repeatable: bool) -> None:
+            if self.applying_remote:
+                return
+            rec = ida_sync.make_comment_record(
+                self.module, ea, self.imagebase, text, repeatable, self.origin
+            )
+            self._client.send_update("comment", rec, origin=self.origin)
+
+        def on_local_type(self, change_kind: int, ordinal: int, name: str) -> None:
+            """Export a changed IDA local type as canonical C text.
+
+            M5 represents delete/rename with persistent tombstones. IDA reports
+            a rename as an edited ordinal, so the ordinal/name cache identifies
+            the old key and emits old-name deletion plus new-name definition at
+            one timestamp.
+            """
+            if self.applying_remote:
+                return
+            if change_kind == ida_idp.LTC_DELETED:
+                known_name = self._local_type_names_by_ordinal.pop(ordinal, "")
+                deleted_name = name or known_name
+                if deleted_name:
+                    rec = ida_sync.make_type_record(
+                        self.module,
+                        deleted_name,
+                        "",
+                        self.origin,
+                        deleted=True,
+                    )
+                    self._client.send_update("type", rec, origin=self.origin)
+                return
+            exportable = {
+                ida_idp.LTC_ADDED,
+                ida_idp.LTC_EDITED,
+                ida_idp.LTC_ALIASED,
+            }
+            if change_kind not in exportable:
+                return
+
+            if ordinal <= 0 and name:
+                ordinal = ida_typeinf.get_type_ordinal(
+                    ida_typeinf.get_idati(), name
+                )
+            if ordinal <= 0:
+                return
+
+            # PRTYPE_DEF is essential for named UDTs: without it IDA may emit
+            # only ``struct Foo;`` instead of the member-bearing definition.
+            flags = (
+                ida_typeinf.PRTYPE_MULTI
+                | ida_typeinf.PRTYPE_TYPE
+                | ida_typeinf.PRTYPE_SEMI
+                | ida_typeinf.PRTYPE_DEF
+            )
+            decl = ida_typeinf.idc_get_local_type(ordinal, flags) or ""
+            type_name = ida_typeinf.idc_get_local_type_name(ordinal) or name
+            if not type_name or not decl:
+                ida_kernwin.msg(
+                    f"[symbridge] cannot export local type ordinal {ordinal}\n"
+                )
+                return
+
+            changed_at = time.time()
+            old_name = self._local_type_names_by_ordinal.get(ordinal, "")
+            if old_name and old_name != type_name:
+                tombstone = ida_sync.make_type_record(
+                    self.module,
+                    old_name,
+                    "",
+                    self.origin,
+                    ts=changed_at,
+                    deleted=True,
+                )
+                self._client.send_update("type", tombstone, origin=self.origin)
+
+            self._local_type_names_by_ordinal[ordinal] = type_name
+            rec = ida_sync.make_type_record(
+                self.module, type_name, decl, self.origin, ts=changed_at
+            )
+            self._client.send_update("type", rec, origin=self.origin)
+
+        # -- broker -> local IDA (reader thread; marshal to main thread) ------
+
+        def _on_broker_message(self, msg: dict) -> None:
+            mtype = msg.get("type")
+            if mtype == "snapshot":
+                for wire in msg.get("records", []):
+                    self._apply_wire(wire)
+            elif mtype == "update":
+                self._apply_wire(msg)
+
+        def _apply_wire(self, wire: dict) -> None:
+            record = wire.get("record")
+            data = wire.get("data", {})
+            if not ida_sync.belongs_to(data, self.module):
+                return
+            plan = ida_sync.plan_apply(record, data, self.imagebase)
+            if plan is None:
+                return
+            # IDA APIs must run on the main thread.
+            ida_kernwin.execute_sync(
+                lambda: self._apply_plan(plan), ida_kernwin.MFF_WRITE
+            )
+
+        def _apply_plan(self, plan) -> int:
+            self.applying_remote = True
+            try:
+                kind = plan[0]
+                if kind == "symbol":
+                    _, ea, name = plan
+                    idc.set_name(ea, name, idc.SN_NOWARN)
+                elif kind == "comment":
+                    _, ea, text, repeatable = plan
+                    ida_bytes.set_cmt(ea, text, repeatable)
+                elif kind == "type":
+                    _, name, decl = plan
+                    # Parse into a real tinfo_t and replace by canonical name.
+                    # The legacy idc_set_local_type wrapper can create a slot,
+                    # but IDA 9.4 may reject replacement of an existing UDT.
+                    tif = ida_typeinf.tinfo_t(decl)
+                    result = tif.set_named_type(
+                        None, name, ida_typeinf.NTF_REPLACE
+                    )
+                    if result != ida_typeinf.TERR_OK:
+                        ida_kernwin.msg(
+                            f"[symbridge] failed to apply remote type {name!r}: "
+                            f"{ida_typeinf.tinfo_errstr(result)}\n"
+                        )
+                    else:
+                        ordinal = ida_typeinf.get_type_ordinal(
+                            ida_typeinf.get_idati(), name
+                        )
+                        if ordinal > 0:
+                            self._local_type_names_by_ordinal[ordinal] = name
+                elif kind == "type_delete":
+                    _, name = plan
+                    if not ida_typeinf.del_named_type(
+                        None, name, ida_typeinf.NTF_TYPE
+                    ):
+                        # Deleting an already-absent type is idempotent.
+                        ordinal = ida_typeinf.get_type_ordinal(
+                            ida_typeinf.get_idati(), name
+                        )
+                        if ordinal > 0:
+                            ida_kernwin.msg(
+                                f"[symbridge] failed to delete remote type {name!r}\n"
+                            )
+                    for ordinal, known_name in list(
+                        self._local_type_names_by_ordinal.items()
+                    ):
+                        if known_name == name:
+                            del self._local_type_names_by_ordinal[ordinal]
+            finally:
+                self.applying_remote = False
+            return 0
+
+    class SymbridgePlugin(idaapi.plugin_t):
+        flags = idaapi.PLUGIN_KEEP
+        comment = "Live name/comment/type sync with x64dbg via the symbridge broker"
+        help = comment
+        wanted_name = "symbridge"
+        wanted_hotkey = "Ctrl-Alt-S"
+
+        def init(self):
+            self.adapter = None
+            return idaapi.PLUGIN_KEEP
+
+        def run(self, arg):
+            if self.adapter is None:
+                host = os.environ.get("SYMBRIDGE_HOST", "127.0.0.1")
+                port = int(os.environ.get("SYMBRIDGE_PORT", "9100"))
+                try:
+                    self.adapter = SymbridgeIDA(host, port)
+                    self.adapter.start()
+                except OSError as exc:
+                    ida_kernwin.warning(f"symbridge: cannot reach broker: {exc}")
+                    self.adapter = None
+            else:
+                self.adapter.stop()
+                self.adapter = None
+
+        def term(self):
+            if self.adapter is not None:
+                self.adapter.stop()
+                self.adapter = None
+
+    def PLUGIN_ENTRY():  # noqa: N802 - IDA entry point name
+        return SymbridgePlugin()
+
+    # Convenience: when run via IDA's "File > Script file...", this block runs
+    # (as __main__) and toggles the adapter on/off. Run the file once to start,
+    # again to stop. (When imported as a package module -- e.g. tests -- it is
+    # skipped.) Global name is kept in IDA's persistent script namespace.
+    if __name__ == "__main__":
+        _g = globals()
+        if _g.get("SYMBRIDGE") is not None:
+            _g["SYMBRIDGE"].stop()
+            _g["SYMBRIDGE"] = None
+        else:
+            _host = os.environ.get("SYMBRIDGE_HOST", "127.0.0.1")
+            _port = int(os.environ.get("SYMBRIDGE_PORT", "9100"))
+            try:
+                _g["SYMBRIDGE"] = SymbridgeIDA(_host, _port)
+                _g["SYMBRIDGE"].start()
+                ida_kernwin.msg(
+                    "[symbridge] adapter started (run this script again to stop)\n"
+                )
+            except OSError as _exc:
+                _g["SYMBRIDGE"] = None
+                ida_kernwin.warning(f"symbridge: cannot reach broker: {_exc}")
+
+```
+
+`adapters/x64dbg/README.md`:
+
+```md
+# symbridge — x64dbg adapter
+
+Native x64dbg plugin (`.dp64`) that syncs labels, comments, and C type
+declarations with the symbridge broker, so annotations flow live between
+x64dbg and IDA.
+
+## What it does
+
+- **Remote → x64dbg:** applies incoming `symbol`/`comment` updates via
+  `Script::Label::Set` / `Script::Comment::Set` at `BaseFromName(module) + rva`.
+- **Broker → x64dbg types:** batches canonical C declarations into a generated
+  header and imports it with x64dbg's native `ParseTypes` command. Each reload
+  replaces the preceding symbridge-owned type generation.
+- **x64dbg → broker:** x64dbg emits no reliable label/comment-change event, so a
+  background thread polls `Script::Label::GetList` / `Comment::GetList` every
+  ~750 ms and sends whatever changed. Applied remote values are seeded into the
+  same "last seen" maps, so they are never echoed back.
+- **x64dbg → broker types:** watches an x64dbg-owned C header, diffs its named
+  `struct`/`union`/`enum` definitions, imports the aggregate through `ParseTypes`,
+  and publishes create/edit/delete records. A rename is delete+create.
+- Keys labels/comments by `(module, rva)` and types by `(module, name)`;
+  module names are lowercased to match the IDA side.
+
+## Build
+
+Needs the x64dbg **plugin SDK** (the `pluginsdk` folder from an x64dbg snapshot)
+and MSVC (Visual Studio Build Tools).
+
+### Quick (batch)
+
+```bat
+cd adapters\x64dbg\plugin
+build.bat "C:\path\to\pluginsdk"
+```
+
+Produces `symbridge.dp64`. (If you omit the SDK path it falls back to the path
+baked into `build.bat` — edit it for your machine.)
+
+### CMake
+
+```bat
+cd adapters\x64dbg\plugin
+cmake -B build -DX64DBG_SDK="C:/path/to/pluginsdk" -A x64
+cmake --build build --config Release
+```
+
+> 32-bit target: link `x32dbg.lib` / `x32bridge.lib` / `jansson_x86.lib` and use
+> a `.dp32` suffix. Only x64 is wired up right now.
+
+## Install
+
+Copy `symbridge.dp64` into your x64dbg `x64\plugins\` folder and (re)start x64dbg.
+You should see `[symbridge] plugin loaded` in the log and a **symbridge** menu
+under Plugins.
+
+## Use
+
+1. Start the broker:  `python -m broker.symbridge_broker -v`
+2. In x64dbg, open (debug) your target so the main module is loaded.
+3. Plugins → symbridge → **Connect to broker**
+   (broker address via `SYMBRIDGE_HOST` / `SYMBRIDGE_PORT`, default 127.0.0.1:9100).
+4. Rename via a label or add a comment → it appears on the other tool within ~1 s.
+   Menu **Push all annotations** force-sends the current state.
+5. Add or edit a named Local Type in IDA → its C declaration is imported into
+   x64dbg's type system through `ParseTypes`.
+6. To edit types from x64dbg, register a local canonical header once per
+   x64dbg session:
+
+   ```text
+   symbridgewatchtypes "C:\path\target_types.h"
+   ```
+
+   Save that file after adding/editing/renaming/deleting a named aggregate.
+   The plugin notices it within ~750 ms, reloads x64dbg, and sends the diff to
+   IDA. `symbridgetypesync` forces an immediate rescan.
+
+The same menu actions are available from x64dbg's command bar/scripts:
+
+```text
+symbridgeconnect
+symbridgepush
+symbridgedisconnect
+symbridgewatchtypes "C:\path\target_types.h"
+symbridgetypesync
+```
+
+## Notes / limits (MVP)
+
+- Only the **main debuggee module** is synced. Load the target before Connect so
+  incoming updates resolve (`BaseFromName` needs the module present).
+- Poll latency is ~750 ms (not instant). Native change events can replace polling
+  later if x64dbg exposes them.
+- Type edits made through x64dbg's built-in `AddStruct`/`AddMember` commands
+  cannot be reconstructed through the public plugin SDK: `EnumStructs` exposes
+  names only. Use the watched canonical header for outbound type changes.
+- Complex IDA-specific C extensions
+  may exceed x64dbg's header parser; ordinary structs, primitive fields, and
+  arrays are the supported baseline.
+- x64dbg has a single comment slot, so both IDA regular & repeatable comments map
+  onto it; x64dbg → IDA comments are sent as `regular`.
+
+```
+
+`adapters/x64dbg/plugin/CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.15)
+project(symbridge_x64dbg CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Path to the x64dbg plugin SDK (the "pluginsdk" folder from an x64dbg snapshot).
+# Pass with:  cmake -DX64DBG_SDK="C:/path/to/pluginsdk" ...
+if(NOT DEFINED X64DBG_SDK)
+    message(FATAL_ERROR "Set -DX64DBG_SDK=<path to pluginsdk>")
+endif()
+
+add_library(symbridge SHARED symbridge_x64dbg.cpp pluginmain.h type_sync.h)
+
+target_include_directories(symbridge PRIVATE
+    "${X64DBG_SDK}"
+    "${X64DBG_SDK}/jansson")
+
+# x64 build. For a 32-bit x64dbg use x32dbg.lib / x32bridge.lib / jansson_x86.lib
+# and a .dp32 suffix instead.
+target_link_libraries(symbridge PRIVATE
+    "${X64DBG_SDK}/x64dbg.lib"
+    "${X64DBG_SDK}/x64bridge.lib"
+    "${X64DBG_SDK}/jansson/jansson_x64.lib"
+    ws2_32)
+
+set_target_properties(symbridge PROPERTIES
+    OUTPUT_NAME "symbridge"
+    PREFIX ""
+    SUFFIX ".dp64")
+
+```
+
+`adapters/x64dbg/plugin/build.bat`:
+
+```bat
+@echo off
+REM Quick MSVC build for the symbridge x64dbg plugin (no CMake needed).
+REM Usage:  build.bat "C:\path\to\pluginsdk"
+REM If no arg is given, falls back to the SDK path discovered during development.
+
+setlocal
+cd /d "%~dp0"
+set "SDK=%~1"
+if "%SDK%"=="" set "SDK=C:\Users\jjhjhjh\Downloads\snapshot_2026-05-27_12-11\pluginsdk"
+
+set "VCVARS=C:\Program Files\Microsoft Visual Studio\18\Insiders\VC\Auxiliary\Build\vcvars64.bat"
+if not exist "%VCVARS%" (
+    echo [build] vcvars64.bat not found at "%VCVARS%"
+    echo         Edit this file to point at your Visual Studio, or run from an
+    echo         "x64 Native Tools Command Prompt" and call cl directly.
+    exit /b 1
+)
+
+call "%VCVARS%"
+
+cl /nologo /LD /EHsc /std:c++17 /O2 /DNDEBUG ^
+   /I "%SDK%" /I "%SDK%\jansson" ^
+   symbridge_x64dbg.cpp ^
+   /link "%SDK%\x64dbg.lib" "%SDK%\x64bridge.lib" "%SDK%\jansson\jansson_x64.lib" ws2_32.lib ^
+   /OUT:symbridge.dp64
+
+if %errorlevel%==0 (
+    echo.
+    echo [build] OK: symbridge.dp64 created
+    echo [build] Copy symbridge.dp64 into x64dbg\x64\plugins\
+) else (
+    echo [build] FAILED
+)
+endlocal
+
+```
+
+`adapters/x64dbg/plugin/pluginmain.h`:
+
+```h
+#pragma once
+
+// x64dbg SDK. Include dirs (SDK root and SDK/jansson) are set by CMake.
+#include "bridgemain.h"
+#include "_plugins.h"
+#include "_scriptapi_label.h"
+#include "_scriptapi_comment.h"
+#include "_scriptapi_module.h"
+#include "jansson.h"
+
+#define PLUGIN_NAME "symbridge"
+#define PLUGIN_VERSION 2
+
+// x64dbg plugin entry points (exported from the .dp64).
+extern "C" __declspec(dllexport) bool pluginit(PLUG_INITSTRUCT* initStruct);
+extern "C" __declspec(dllexport) bool plugstop();
+extern "C" __declspec(dllexport) void plugsetup(PLUG_SETUPSTRUCT* setupStruct);
+
+```
+
+`adapters/x64dbg/plugin/symbridge_x64dbg.cpp`:
+
+```cpp
+// symbridge x64dbg adapter.
+//
+// Mirrors the Python IDA adapter: connects to the symbridge broker, applies
+// remote name/comment/type updates to x64dbg, and pushes local annotations back. x64dbg
+// emits no reliable label/comment-change event, so local->broker is done with
+// a background poll+diff thread (~750ms). Echo is prevented by recording every
+// value we *apply* into the same "last seen" maps the poll diffs against, so an
+// applied remote change is never re-broadcast.
+//
+// Address model: on the wire we carry only (module, rva). x64dbg's LabelInfo /
+// CommentInfo already give us mod+rva directly; to apply we resolve
+// addr = Script::Module::BaseFromName(mod) + rva.
+//
+// Build: see CMakeLists.txt (links x64dbg.lib, x64bridge.lib, jansson, ws2_32).
+
+#define WIN32_LEAN_AND_MEAN
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
+#include "pluginmain.h"
+#include "type_sync.h"
+
+#include <atomic>
+#include <cctype>
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
+#include <map>
+#include <mutex>
+#include <string>
+#include <thread>
+#include <utility>
+#include <vector>
+
+#pragma comment(lib, "ws2_32.lib")
+
+// ---------------------------------------------------------------------------
+// small helpers
+// ---------------------------------------------------------------------------
+
+static std::string toLower(std::string s)
+{
+    for (auto& c : s)
+        c = (char)tolower((unsigned char)c);
+    return s;
+}
+
+static std::string wideToUtf8(const std::wstring& value)
+{
+    if (value.empty())
+        return {};
+    int length = WideCharToMultiByte(CP_UTF8, 0, value.data(), (int)value.size(),
+                                     nullptr, 0, nullptr, nullptr);
+    if (length <= 0)
+        return {};
+    std::string result((size_t)length, '\0');
+    if (WideCharToMultiByte(CP_UTF8, 0, value.data(), (int)value.size(),
+                            result.data(), length, nullptr, nullptr) != length)
+        return {};
+    return result;
+}
+
+// Unix epoch seconds, matching Python's time.time() so last-write-wins agrees.
+static double nowSeconds()
+{
+    FILETIME ft;
+    GetSystemTimeAsFileTime(&ft);
+    ULARGE_INTEGER u;
+    u.LowPart = ft.dwLowDateTime;
+    u.HighPart = ft.dwHighDateTime;
+    const double EPOCH_DIFF = 11644473600.0; // 1601 -> 1970
+    return (double)u.QuadPart / 1e7 - EPOCH_DIFF;
+}
+
+// ---------------------------------------------------------------------------
+// broker client (Winsock + jansson, newline-delimited JSON)
+// ---------------------------------------------------------------------------
+
+class BrokerClient
+{
+public:
+    using MsgHandler = void (*)(json_t* root);
+
+    bool connect(const std::string& host, int port, const std::string& clientId,
+                 const std::string& tool, MsgHandler onMsg)
+    {
+        WSADATA wsa;
+        if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+            return false;
+
+        addrinfo hints{};
+        hints.ai_family = AF_INET;
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_protocol = IPPROTO_TCP;
+        addrinfo* res = nullptr;
+        std::string portStr = std::to_string(port);
+        if (getaddrinfo(host.c_str(), portStr.c_str(), &hints, &res) != 0 || !res)
+        {
+            WSACleanup();
+            return false;
+        }
+        sock_ = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+        if (sock_ == INVALID_SOCKET || ::connect(sock_, res->ai_addr, (int)res->ai_addrlen) != 0)
+        {
+            freeaddrinfo(res);
+            close();
+            return false;
+        }
+        freeaddrinfo(res);
+
+        clientId_ = clientId;
+        tool_ = tool;
+        onMsg_ = onMsg;
+        running_ = true;
+
+        // hello
+        json_t* hello = json_object();
+        json_object_set_new(hello, "type", json_string("hello"));
+        json_object_set_new(hello, "client_id", json_string(clientId_.c_str()));
+        json_object_set_new(hello, "tool", json_string(tool_.c_str()));
+        sendRaw(hello);
+        json_decref(hello);
+
+        reader_ = std::thread(&BrokerClient::readLoop, this);
+        return true;
+    }
+
+    void close()
+    {
+        running_ = false;
+        if (sock_ != INVALID_SOCKET)
+        {
+            shutdown(sock_, SD_BOTH);
+            closesocket(sock_);
+            sock_ = INVALID_SOCKET;
+        }
+        if (reader_.joinable())
+            reader_.join();
+        WSACleanup();
+    }
+
+    bool connected() const { return running_ && sock_ != INVALID_SOCKET; }
+
+    void sendUpdate(const char* record, json_t* data, const std::string& origin)
+    {
+        json_t* msg = json_object();
+        json_object_set_new(msg, "type", json_string("update"));
+        json_object_set_new(msg, "origin", json_string(origin.c_str()));
+        json_object_set_new(msg, "record", json_string(record));
+        json_object_set_new(msg, "data", data); // steals data's ref
+        sendRaw(msg);
+        json_decref(msg);
+    }
+
+    void sendRaw(json_t* msg)
+    {
+        char* s = json_dumps(msg, JSON_COMPACT);
+        if (!s)
+            return;
+        std::string line(s);
+        free(s);
+        line.push_back('\n');
+        std::lock_guard<std::mutex> lk(sendMutex_);
+        if (sock_ == INVALID_SOCKET)
+            return;
+        send(sock_, line.data(), (int)line.size(), 0);
+    }
+
+private:
+    void readLoop()
+    {
+        std::string buf;
+        char chunk[4096];
+        while (running_)
+        {
+            int n = recv(sock_, chunk, sizeof(chunk), 0);
+            if (n <= 0)
+                break;
+            buf.append(chunk, n);
+            size_t pos;
+            while ((pos = buf.find('\n')) != std::string::npos)
+            {
+                std::string line = buf.substr(0, pos);
+                buf.erase(0, pos + 1);
+                if (line.empty())
+                    continue;
+                json_error_t err;
+                json_t* root = json_loads(line.c_str(), 0, &err);
+                if (!root)
+                    continue;
+                if (onMsg_)
+                    onMsg_(root);
+                json_decref(root);
+            }
+        }
+        running_ = false;
+    }
+
+    SOCKET sock_ = INVALID_SOCKET;
+    std::thread reader_;
+    std::atomic<bool> running_{false};
+    std::mutex sendMutex_;
+    std::string clientId_, tool_;
+    MsgHandler onMsg_ = nullptr;
+};
+
+// ---------------------------------------------------------------------------
+// adapter (single global instance)
+// ---------------------------------------------------------------------------
+
+class Adapter
+{
+public:
+    void start()
+    {
+        const char* host = getenv("SYMBRIDGE_HOST");
+        const char* portEnv = getenv("SYMBRIDGE_PORT");
+        std::string h = host ? host : "127.0.0.1";
+        int p = portEnv ? atoi(portEnv) : 9100;
+        origin_ = "x64dbg:" + std::to_string(GetCurrentProcessId());
+        refreshModule();
+
+        if (!client_.connect(h, p, origin_, "x64dbg", &Adapter::onMessageStatic))
+        {
+            _plugin_logprintf("[symbridge] could not connect to broker %s:%d\n", h.c_str(), p);
+            return;
+        }
+        _plugin_logprintf("[symbridge] connected as %s to %s:%d\n", origin_.c_str(), h.c_str(), p);
+        runningPoll_ = true;
+        poll_ = std::thread(&Adapter::pollLoop, this);
+    }
+
+    void stop()
+    {
+        runningPoll_ = false;
+        if (poll_.joinable())
+            poll_.join();
+        client_.close();
+        _plugin_logprintf("[symbridge] disconnected\n");
+    }
+
+    bool connected() const { return client_.connected(); }
+
+    // Push every current label/comment regardless of diff (menu action).
+    void pushAll()
+    {
+        if (!DbgIsDebugging())
+        {
+            _plugin_logprintf("[symbridge] push: not debugging\n");
+            return;
+        }
+        refreshModule();
+        scanLabels(true);
+        scanComments(true);
+        syncLocalTypeFile(true);
+        _plugin_logprintf("[symbridge] pushed all labels/comments/types\n");
+    }
+
+    bool watchTypeFile(const std::string& path)
+    {
+        if(!DbgIsDebugging())
+        {
+            _plugin_logprintf("[symbridge] watch types: not debugging\n");
+            return false;
+        }
+        refreshModule();
+        std::filesystem::path candidate = std::filesystem::u8path(path);
+        std::error_code ec;
+        if(!std::filesystem::is_regular_file(candidate, ec))
+        {
+            _plugin_logprintf("[symbridge] type header not found: %s\n", path.c_str());
+            return false;
+        }
+        std::string module = currentModule();
+        {
+            std::lock_guard<std::mutex> lk(localTypeMutex_);
+            if(watchedModule_ != module)
+                localOwnedTypes_.clear();
+            localTypePath_ = std::move(candidate);
+            watchedModule_ = module;
+            localTypeWriteTime_ = {};
+        }
+        _plugin_logprintf("[symbridge] watching type header for %s: %s\n",
+                          module.c_str(), path.c_str());
+        return syncLocalTypeFile(true);
+    }
+
+    bool syncTypes()
+    {
+        return syncLocalTypeFile(true);
+    }
+
+    // Called on CB_CREATEPROCESS: the main module is now loaded, so pick up its
+    // name and apply anything that arrived before it existed.
+    void onDebugStart()
+    {
+        refreshModule();
+        flushPending();
+        // Types are not address-based, but they are module-scoped on the wire.
+        // Re-import the aggregate belonging to the newly loaded main module.
+        reloadCurrentTypes();
+    }
+
+    // -- inbound (reader thread) --------------------------------------------
+
+    static void onMessageStatic(json_t* root); // defined after g_adapter
+
+    void onMessage(json_t* root)
+    {
+        const char* type = json_string_value(json_object_get(root, "type"));
+        if (!type)
+            return;
+        if (strcmp(type, "snapshot") == 0)
+        {
+            json_t* records = json_object_get(root, "records");
+            size_t n = json_array_size(records);
+            for (size_t i = 0; i < n; i++)
+            {
+                json_t* wire = json_array_get(records, i);
+                const char* record = json_string_value(json_object_get(wire, "record"));
+                if (!record || strcmp(record, "type") != 0)
+                    applyWire(wire, true);
+            }
+            // A snapshot is authoritative, including the empty case. Rebuild
+            // the type cache atomically so reconnecting cannot retain types
+            // that disappeared from a restarted/replaced broker state.
+            replaceTypesFromSnapshot(records);
+            reloadCurrentTypes();
+            // The broker snapshot can predate edits in the x64dbg-owned local
+            // header. Re-overlay and publish that file after every snapshot.
+            syncLocalTypeFile(true);
+        }
+        else if (strcmp(type, "update") == 0)
+        {
+            applyWire(root, false);
+        }
+    }
+
+private:
+    void flushPending()
+    {
+        std::vector<Pending> items;
+        {
+            std::lock_guard<std::mutex> lk(pendingMutex_);
+            items.swap(pending_);
+        }
+        for (auto& p : items)
+        {
+            if (p.kind == PEND_LABEL)
+                applyLabel(p.module, p.rva, p.text);
+            else
+                applyComment(p.module, p.rva, p.text);
+        }
+    }
+
+    // Returns true when the wire item was a valid type record. deferTypeReload
+    // lets snapshot handling collect all declarations before invoking ParseTypes.
+    bool applyWire(json_t* wire, bool deferTypeReload)
+    {
+        const char* record = json_string_value(json_object_get(wire, "record"));
+        json_t* data = json_object_get(wire, "data");
+        if (!record || !data)
+            return false;
+        const char* mod = json_string_value(json_object_get(data, "module"));
+        if (!mod)
+            return false;
+        std::string module = toLower(mod);
+
+        if (strcmp(record, "type") == 0)
+        {
+            const char* name = json_string_value(json_object_get(data, "name"));
+            const char* decl = json_string_value(json_object_get(data, "decl"));
+            bool deleted = json_is_true(json_object_get(data, "deleted"));
+            if (!name || !*name || (!deleted && (!decl || !*decl)))
+                return false;
+            bool changed = deleted
+                ? eraseType(module, name)
+                : storeType(module, name, decl);
+            if (changed && !deferTypeReload && module == currentModule())
+                reloadCurrentTypes();
+            return true;
+        }
+
+        duint rva = (duint)json_integer_value(json_object_get(data, "rva"));
+
+        if (strcmp(record, "symbol") == 0)
+        {
+            const char* name = json_string_value(json_object_get(data, "name"));
+            if (name)
+                applyLabel(module, rva, name);
+        }
+        else if (strcmp(record, "comment") == 0)
+        {
+            const char* text = json_string_value(json_object_get(data, "text"));
+            if (text)
+                applyComment(module, rva, text);
+        }
+        return false;
+    }
+
+    bool storeType(const std::string& module, const std::string& name,
+                   const std::string& decl)
+    {
+        std::lock_guard<std::mutex> lk(typeMutex_);
+        auto& moduleTypes = typeDecls_[module];
+        auto it = moduleTypes.find(name);
+        if (it != moduleTypes.end() && it->second == decl)
+            return false;
+        moduleTypes[name] = decl;
+        return true;
+    }
+
+    void replaceTypesFromSnapshot(json_t* records)
+    {
+        std::map<std::string, std::map<std::string, std::string>> replacement;
+        size_t n = json_array_size(records);
+        for (size_t i = 0; i < n; i++)
+        {
+            json_t* wire = json_array_get(records, i);
+            const char* record = json_string_value(json_object_get(wire, "record"));
+            if (!record || strcmp(record, "type") != 0)
+                continue;
+            json_t* data = json_object_get(wire, "data");
+            const char* module = json_string_value(json_object_get(data, "module"));
+            const char* name = json_string_value(json_object_get(data, "name"));
+            const char* decl = json_string_value(json_object_get(data, "decl"));
+            bool deleted = json_is_true(json_object_get(data, "deleted"));
+            if (!module || !*module || !name || !*name || deleted || !decl || !*decl)
+                continue;
+            replacement[toLower(module)][name] = decl;
+        }
+        std::lock_guard<std::mutex> lk(typeMutex_);
+        typeDecls_.swap(replacement);
+    }
+
+    bool eraseType(const std::string& module, const std::string& name)
+    {
+        std::lock_guard<std::mutex> lk(typeMutex_);
+        auto moduleIt = typeDecls_.find(module);
+        if(moduleIt == typeDecls_.end())
+            return false;
+        bool changed = moduleIt->second.erase(name) != 0;
+        if(moduleIt->second.empty())
+            typeDecls_.erase(moduleIt);
+        return changed;
+    }
+
+    std::string currentModule()
+    {
+        std::lock_guard<std::mutex> lk(stateMutex_);
+        return module_;
+    }
+
+    // Write a complete, immutable header generation and queue x64dbg's native
+    // C parser. DbgCmdExec is asynchronous, so overwriting/deleting a shared
+    // file immediately would race the command-processing thread. Each queued
+    // command gets its own directory while the basename remains constant:
+    // ParseTypes uses that basename as the owner and replaces the preceding
+    // symbridge generation rather than accumulating stale definitions.
+    void reloadCurrentTypes()
+    {
+        std::string module = currentModule();
+        if (module.empty())
+            return;
+
+        std::map<std::string, std::string> declarations;
+        unsigned long long generation;
+        std::wstring root;
+        {
+            std::lock_guard<std::mutex> lk(typeMutex_);
+            auto it = typeDecls_.find(module);
+            if (it != typeDecls_.end())
+                declarations = it->second;
+            generation = ++typeGeneration_;
+
+            if (typeTempRoot_.empty())
+            {
+                wchar_t temp[MAX_PATH] = L"";
+                DWORD len = GetTempPathW(MAX_PATH, temp);
+                if (len == 0 || len >= MAX_PATH)
+                {
+                    _plugin_logprintf("[symbridge] GetTempPath failed for type import\n");
+                    return;
+                }
+                typeTempRoot_ = std::wstring(temp) + L"symbridge_" +
+                    std::to_wstring(GetCurrentProcessId());
+            }
+            root = typeTempRoot_;
+        }
+
+        if (!CreateDirectoryW(root.c_str(), nullptr) &&
+            GetLastError() != ERROR_ALREADY_EXISTS)
+        {
+            _plugin_logprintf("[symbridge] cannot create type temp directory\n");
+            return;
+        }
+
+        // A PID can eventually be reused while its old temp tree remains.
+        // Advance until this process owns a fresh immutable generation path.
+        std::wstring generationDir;
+        for (;;)
+        {
+            generationDir = root + L"\\" + std::to_wstring(generation);
+            if (CreateDirectoryW(generationDir.c_str(), nullptr))
+                break;
+            if (GetLastError() != ERROR_ALREADY_EXISTS)
+            {
+                _plugin_logprintf("[symbridge] cannot create type generation directory\n");
+                return;
+            }
+            std::lock_guard<std::mutex> lk(typeMutex_);
+            generation = ++typeGeneration_;
+        }
+
+        const std::wstring header = generationDir + L"\\symbridge_types.h";
+        {
+            std::ofstream out(
+                std::filesystem::path(header), std::ios::binary | std::ios::trunc
+            );
+            if (!out)
+            {
+                _plugin_logprintf("[symbridge] cannot write type header\n");
+                return;
+            }
+            out << "/* generated by symbridge for " << module << " */\n";
+            for (const auto& item : declarations)
+            {
+                out << item.second;
+                if (item.second.empty() || item.second.back() != '\n')
+                    out << '\n';
+            }
+            if (!out)
+            {
+                _plugin_logprintf("[symbridge] failed while writing type header\n");
+                return;
+            }
+        }
+
+        std::string headerUtf8 = wideToUtf8(header);
+        if (headerUtf8.empty())
+        {
+            _plugin_logprintf("[symbridge] cannot encode type header path as UTF-8\n");
+            return;
+        }
+        std::string command = "ParseTypes \"" + headerUtf8 + "\"";
+        if (!DbgCmdExec(command.c_str()))
+        {
+            _plugin_logprintf("[symbridge] could not queue ParseTypes for %s\n", module.c_str());
+            return;
+        }
+        _plugin_logprintf(
+            "[symbridge] queued %llu type declaration(s) for %s\n",
+            (unsigned long long)declarations.size(), module.c_str());
+    }
+
+    void applyLabel(const std::string& module, duint rva, const std::string& name)
+    {
+        duint base = Script::Module::BaseFromName(module.c_str());
+        if (!base)
+        {
+            // Module not loaded yet (e.g. Connect before the target is running).
+            // Buffer and retry when the process starts.
+            std::lock_guard<std::mutex> lk(pendingMutex_);
+            pending_.push_back({PEND_LABEL, module, rva, name});
+            return;
+        }
+        std::lock_guard<std::mutex> lk(stateMutex_);
+        // 4-arg overload (…, manual, temporary) picked explicitly to avoid an
+        // ambiguous-overload error against the 3-arg form.
+        Script::Label::Set(base + rva, name.c_str(), true, false);
+        lastLabels_[rva] = name; // seed so the poll won't echo it back
+        GuiUpdateAllViews();
+    }
+
+    void applyComment(const std::string& module, duint rva, const std::string& text)
+    {
+        duint base = Script::Module::BaseFromName(module.c_str());
+        if (!base)
+        {
+            std::lock_guard<std::mutex> lk(pendingMutex_);
+            pending_.push_back({PEND_COMMENT, module, rva, text});
+            return;
+        }
+        std::lock_guard<std::mutex> lk(stateMutex_);
+        Script::Comment::Set(base + rva, text.c_str(), true);
+        lastComments_[rva] = text;
+        GuiUpdateAllViews();
+    }
+
+    // -- outbound poll (poll thread) ----------------------------------------
+
+    void pollLoop()
+    {
+        while (runningPoll_)
+        {
+            Sleep(750);
+            if (!client_.connected() || !DbgIsDebugging())
+                continue;
+            refreshModule();
+            scanLabels(false);
+            scanComments(false);
+            syncLocalTypeFile(false);
+        }
+    }
+
+    bool syncLocalTypeFile(bool force)
+    {
+        std::filesystem::path path;
+        std::string module;
+        std::filesystem::file_time_type oldWriteTime;
+        {
+            std::lock_guard<std::mutex> lk(localTypeMutex_);
+            if(localTypePath_.empty())
+                return false;
+            path = localTypePath_;
+            module = watchedModule_;
+            oldWriteTime = localTypeWriteTime_;
+        }
+        if(module.empty() || module != currentModule())
+            return false;
+
+        std::error_code ec;
+        auto writeTime = std::filesystem::last_write_time(path, ec);
+        if(ec)
+            return false;
+        if(!force && writeTime == oldWriteTime)
+            return false;
+
+        std::ifstream input(path, std::ios::binary);
+        if(!input)
+            return false;
+        std::string source((std::istreambuf_iterator<char>(input)),
+                           std::istreambuf_iterator<char>());
+        auto parsed = symbridge::parseNamedTypes(source);
+
+        std::map<std::string, std::string> previous;
+        {
+            std::lock_guard<std::mutex> lk(localTypeMutex_);
+            // Another poll/command may have won while I/O was in progress.
+            if(!force && localTypeWriteTime_ == writeTime)
+                return false;
+            previous = localOwnedTypes_;
+            localOwnedTypes_ = parsed;
+            localTypeWriteTime_ = writeTime;
+        }
+
+        const double changedAt = nowSeconds();
+        bool changed = false;
+        for(const auto& oldType : previous)
+        {
+            if(parsed.find(oldType.first) == parsed.end())
+            {
+                eraseType(module, oldType.first);
+                sendType(module, oldType.first, "", true, changedAt);
+                changed = true;
+            }
+        }
+        for(const auto& newType : parsed)
+        {
+            auto old = previous.find(newType.first);
+            if(force || old == previous.end() || old->second != newType.second)
+            {
+                storeType(module, newType.first, newType.second);
+                sendType(module, newType.first, newType.second, false, changedAt);
+                changed = true;
+            }
+        }
+        if(changed)
+        {
+            reloadCurrentTypes();
+            _plugin_logprintf("[symbridge] synced %llu local type declaration(s)\n",
+                              (unsigned long long)parsed.size());
+        }
+        return true;
+    }
+
+    void refreshModule()
+    {
+        char name[MAX_MODULE_SIZE] = "";
+        if (Script::Module::GetMainModuleName(name))
+        {
+            std::lock_guard<std::mutex> lk(stateMutex_);
+            module_ = toLower(name);
+        }
+    }
+
+    void scanLabels(bool forceAll)
+    {
+        BridgeList<Script::Label::LabelInfo> labels;
+        if (!Script::Label::GetList(&labels))
+            return;
+        std::lock_guard<std::mutex> lk(stateMutex_);
+        for (int i = 0; i < labels.Count(); i++)
+        {
+            auto& L = labels[i];
+            if (toLower(L.mod) != module_)
+                continue;
+            std::string text = L.text;
+            auto it = lastLabels_.find(L.rva);
+            if (forceAll || it == lastLabels_.end() || it->second != text)
+            {
+                lastLabels_[L.rva] = text;
+                sendSymbol(module_, L.rva, text);
+            }
+        }
+    }
+
+    void scanComments(bool forceAll)
+    {
+        BridgeList<Script::Comment::CommentInfo> comments;
+        if (!Script::Comment::GetList(&comments))
+            return;
+        std::lock_guard<std::mutex> lk(stateMutex_);
+        for (int i = 0; i < comments.Count(); i++)
+        {
+            auto& C = comments[i];
+            if (toLower(C.mod) != module_)
+                continue;
+            std::string text = C.text;
+            auto it = lastComments_.find(C.rva);
+            if (forceAll || it == lastComments_.end() || it->second != text)
+            {
+                lastComments_[C.rva] = text;
+                sendComment(module_, C.rva, text);
+            }
+        }
+    }
+
+    void sendSymbol(const std::string& module, duint rva, const std::string& name)
+    {
+        json_t* d = json_object();
+        json_object_set_new(d, "module", json_string(module.c_str()));
+        json_object_set_new(d, "rva", json_integer((json_int_t)rva));
+        json_object_set_new(d, "name", json_string(name.c_str()));
+        json_object_set_new(d, "origin", json_string(origin_.c_str()));
+        json_object_set_new(d, "ts", json_real(nowSeconds()));
+        client_.sendUpdate("symbol", d, origin_);
+    }
+
+    void sendComment(const std::string& module, duint rva, const std::string& text)
+    {
+        json_t* d = json_object();
+        json_object_set_new(d, "module", json_string(module.c_str()));
+        json_object_set_new(d, "rva", json_integer((json_int_t)rva));
+        json_object_set_new(d, "text", json_string(text.c_str()));
+        json_object_set_new(d, "kind", json_string("regular")); // x64dbg has one comment slot
+        json_object_set_new(d, "origin", json_string(origin_.c_str()));
+        json_object_set_new(d, "ts", json_real(nowSeconds()));
+        client_.sendUpdate("comment", d, origin_);
+    }
+
+    void sendType(const std::string& module, const std::string& name,
+                  const std::string& decl, bool deleted, double ts)
+    {
+        if(!client_.connected())
+            return;
+        json_t* d = json_object();
+        json_object_set_new(d, "module", json_string(module.c_str()));
+        json_object_set_new(d, "name", json_string(name.c_str()));
+        json_object_set_new(d, "decl", json_string(decl.c_str()));
+        json_object_set_new(d, "deleted", json_boolean(deleted));
+        json_object_set_new(d, "origin", json_string(origin_.c_str()));
+        json_object_set_new(d, "ts", json_real(ts));
+        client_.sendUpdate("type", d, origin_);
+    }
+
+    enum PendingKind
+    {
+        PEND_LABEL,
+        PEND_COMMENT,
+    };
+    struct Pending
+    {
+        PendingKind kind;
+        std::string module;
+        duint rva;
+        std::string text;
+    };
+
+    BrokerClient client_;
+    std::string origin_;
+    std::string module_;
+    std::atomic<bool> runningPoll_{false};
+    std::thread poll_;
+    std::mutex stateMutex_;
+    std::map<duint, std::string> lastLabels_;
+    std::map<duint, std::string> lastComments_;
+    std::mutex typeMutex_;
+    std::map<std::string, std::map<std::string, std::string>> typeDecls_;
+    unsigned long long typeGeneration_ = 0;
+    std::wstring typeTempRoot_;
+    std::mutex localTypeMutex_;
+    std::filesystem::path localTypePath_;
+    std::filesystem::file_time_type localTypeWriteTime_{};
+    std::string watchedModule_;
+    std::map<std::string, std::string> localOwnedTypes_;
+    std::mutex pendingMutex_;
+    std::vector<Pending> pending_;
+};
+
+static Adapter g_adapter;
+
+void Adapter::onMessageStatic(json_t* root)
+{
+    g_adapter.onMessage(root);
+}
+
+static bool CBCONNECT(int, char**)
+{
+    if (g_adapter.connected())
+    {
+        _plugin_logprintf("[symbridge] already connected\n");
+        return true;
+    }
+    g_adapter.start();
+    return g_adapter.connected();
+}
+
+static bool CBDISCONNECT(int, char**)
+{
+    g_adapter.stop();
+    return true;
+}
+
+static bool CBPUSHALL(int, char**)
+{
+    if (!g_adapter.connected())
+    {
+        _plugin_logprintf("[symbridge] push: not connected\n");
+        return false;
+    }
+    g_adapter.pushAll();
+    return true;
+}
+
+static bool CBWATCHTYPES(int argc, char** argv)
+{
+    if(argc < 2 || !argv[1] || !*argv[1])
+    {
+        _plugin_logprintf("[symbridge] usage: symbridgewatchtypes \"C:\\path\\types.h\"\n");
+        return false;
+    }
+    if(!g_adapter.connected())
+    {
+        _plugin_logprintf("[symbridge] watch types: not connected\n");
+        return false;
+    }
+    return g_adapter.watchTypeFile(argv[1]);
+}
+
+static bool CBSYNCTYPES(int, char**)
+{
+    if(!g_adapter.connected())
+    {
+        _plugin_logprintf("[symbridge] sync types: not connected\n");
+        return false;
+    }
+    return g_adapter.syncTypes();
+}
+
+// ---------------------------------------------------------------------------
+// plugin lifecycle
+// ---------------------------------------------------------------------------
+
+static int g_pluginHandle = 0;
+
+enum MenuEntry
+{
+    MENU_CONNECT = 0,
+    MENU_DISCONNECT,
+    MENU_PUSHALL,
+};
+
+static void CBCREATEPROCESS(CBTYPE, void*)
+{
+    g_adapter.onDebugStart();
+}
+
+static void CBMENUENTRY(CBTYPE, void* callbackInfo)
+{
+    PLUG_CB_MENUENTRY* info = (PLUG_CB_MENUENTRY*)callbackInfo;
+    switch (info->hEntry)
+    {
+    case MENU_CONNECT:
+        if (g_adapter.connected())
+            _plugin_logprintf("[symbridge] already connected\n");
+        else
+            g_adapter.start();
+        break;
+    case MENU_DISCONNECT:
+        g_adapter.stop();
+        break;
+    case MENU_PUSHALL:
+        g_adapter.pushAll();
+        break;
+    }
+}
+
+bool pluginit(PLUG_INITSTRUCT* initStruct)
+{
+    initStruct->sdkVersion = PLUG_SDKVERSION;
+    initStruct->pluginVersion = PLUGIN_VERSION;
+    strncpy_s(initStruct->pluginName, PLUGIN_NAME, _TRUNCATE);
+    g_pluginHandle = initStruct->pluginHandle;
+    _plugin_registercallback(g_pluginHandle, CB_MENUENTRY, CBMENUENTRY);
+    _plugin_registercallback(g_pluginHandle, CB_CREATEPROCESS, CBCREATEPROCESS);
+    _plugin_registercommand(g_pluginHandle, "symbridgeconnect", CBCONNECT, false);
+    _plugin_registercommand(g_pluginHandle, "symbridgedisconnect", CBDISCONNECT, false);
+    _plugin_registercommand(g_pluginHandle, "symbridgepush", CBPUSHALL, true);
+    _plugin_registercommand(g_pluginHandle, "symbridgewatchtypes", CBWATCHTYPES, true);
+    _plugin_registercommand(g_pluginHandle, "symbridgetypesync", CBSYNCTYPES, true);
+    _plugin_logprintf("[symbridge] plugin loaded (v%d)\n", PLUGIN_VERSION);
+    return true;
+}
+
+bool plugstop()
+{
+    g_adapter.stop();
+    _plugin_unregistercallback(g_pluginHandle, CB_MENUENTRY);
+    _plugin_unregistercallback(g_pluginHandle, CB_CREATEPROCESS);
+    _plugin_unregistercommand(g_pluginHandle, "symbridgeconnect");
+    _plugin_unregistercommand(g_pluginHandle, "symbridgedisconnect");
+    _plugin_unregistercommand(g_pluginHandle, "symbridgepush");
+    _plugin_unregistercommand(g_pluginHandle, "symbridgewatchtypes");
+    _plugin_unregistercommand(g_pluginHandle, "symbridgetypesync");
+    return true;
+}
+
+void plugsetup(PLUG_SETUPSTRUCT* setupStruct)
+{
+    int hMenu = setupStruct->hMenu;
+    _plugin_menuaddentry(hMenu, MENU_CONNECT, "Connect to broker");
+    _plugin_menuaddentry(hMenu, MENU_DISCONNECT, "Disconnect");
+    _plugin_menuaddseparator(hMenu);
+    _plugin_menuaddentry(hMenu, MENU_PUSHALL, "Push all annotations");
+}
+
+BOOL WINAPI DllMain(HINSTANCE, DWORD, LPVOID)
+{
+    return TRUE;
+}
+
+```
+
+`adapters/x64dbg/plugin/type_sync.h`:
+
+```h
+#pragma once
+
+#include <cctype>
+#include <map>
+#include <string>
+#include <string_view>
+
+namespace symbridge
+{
+namespace detail
+{
+inline bool identStart(char c)
+{
+    return std::isalpha(static_cast<unsigned char>(c)) || c == '_';
+}
+
+inline bool identChar(char c)
+{
+    return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
+}
+
+inline void skipQuoted(std::string_view text, size_t& pos, char quote)
+{
+    ++pos;
+    while(pos < text.size())
+    {
+        if(text[pos] == '\\' && pos + 1 < text.size())
+            pos += 2;
+        else if(text[pos++] == quote)
+            break;
+    }
+}
+
+inline void skipTrivia(std::string_view text, size_t& pos)
+{
+    for(;;)
+    {
+        while(pos < text.size() && std::isspace(static_cast<unsigned char>(text[pos])))
+            ++pos;
+        if(pos + 1 < text.size() && text[pos] == '/' && text[pos + 1] == '/')
+        {
+            pos = text.find('\n', pos + 2);
+            if(pos == std::string_view::npos)
+                pos = text.size();
+            continue;
+        }
+        if(pos + 1 < text.size() && text[pos] == '/' && text[pos + 1] == '*')
+        {
+            auto end = text.find("*/", pos + 2);
+            pos = end == std::string_view::npos ? text.size() : end + 2;
+            continue;
+        }
+        break;
+    }
+}
+
+inline std::string readIdentifier(std::string_view text, size_t& pos)
+{
+    if(pos >= text.size() || !identStart(text[pos]))
+        return {};
+    const size_t start = pos++;
+    while(pos < text.size() && identChar(text[pos]))
+        ++pos;
+    return std::string(text.substr(start, pos - start));
+}
+
+inline size_t matchingBrace(std::string_view text, size_t open)
+{
+    int depth = 0;
+    for(size_t pos = open; pos < text.size();)
+    {
+        if(text[pos] == '\'' || text[pos] == '"')
+        {
+            skipQuoted(text, pos, text[pos]);
+            continue;
+        }
+        if(pos + 1 < text.size() && text[pos] == '/' &&
+           (text[pos + 1] == '/' || text[pos + 1] == '*'))
+        {
+            skipTrivia(text, pos);
+            continue;
+        }
+        if(text[pos] == '{')
+            ++depth;
+        else if(text[pos] == '}' && --depth == 0)
+            return pos;
+        ++pos;
+    }
+    return std::string_view::npos;
+}
+
+inline std::string trimDeclaration(std::string_view text)
+{
+    while(!text.empty() && std::isspace(static_cast<unsigned char>(text.front())))
+        text.remove_prefix(1);
+    while(!text.empty() && std::isspace(static_cast<unsigned char>(text.back())))
+        text.remove_suffix(1);
+    std::string result(text);
+    result.push_back('\n');
+    return result;
+}
+}
+
+// Extract complete top-level named C aggregate definitions. This intentionally
+// accepts the common interchange subset rather than pretending to be a full C
+// parser; x64dbg's ParseTypes remains the authority that validates declarations.
+inline std::map<std::string, std::string> parseNamedTypes(std::string_view text)
+{
+    std::map<std::string, std::string> result;
+    size_t pos = 0;
+    size_t previousTokenStart = 0;
+    std::string previousToken;
+
+    while(pos < text.size())
+    {
+        detail::skipTrivia(text, pos);
+        if(pos >= text.size())
+            break;
+        if(text[pos] == '#')
+        {
+            pos = text.find('\n', pos + 1);
+            if(pos == std::string_view::npos)
+                break;
+            continue;
+        }
+        if(text[pos] == '\'' || text[pos] == '"')
+        {
+            detail::skipQuoted(text, pos, text[pos]);
+            continue;
+        }
+        if(!detail::identStart(text[pos]))
+        {
+            ++pos;
+            continue;
+        }
+
+        const size_t tokenStart = pos;
+        std::string token = detail::readIdentifier(text, pos);
+        if(token != "struct" && token != "union" && token != "enum")
+        {
+            previousTokenStart = tokenStart;
+            previousToken = std::move(token);
+            continue;
+        }
+
+        size_t cursor = pos;
+        detail::skipTrivia(text, cursor);
+        std::string name = detail::readIdentifier(text, cursor);
+        if(name.empty())
+        {
+            previousToken = token;
+            previousTokenStart = tokenStart;
+            continue;
+        }
+        detail::skipTrivia(text, cursor);
+        if(cursor >= text.size() || text[cursor] != '{')
+        {
+            pos = cursor;
+            previousToken = token;
+            previousTokenStart = tokenStart;
+            continue; // forward declaration or a use of an existing type
+        }
+
+        const size_t close = detail::matchingBrace(text, cursor);
+        if(close == std::string_view::npos)
+            break;
+        size_t semicolon = close + 1;
+        while(semicolon < text.size() && text[semicolon] != ';')
+        {
+            if(text[semicolon] == '\'' || text[semicolon] == '"')
+                detail::skipQuoted(text, semicolon, text[semicolon]);
+            else
+                ++semicolon;
+        }
+        if(semicolon >= text.size())
+            break;
+
+        const size_t declarationStart = previousToken == "typedef"
+            ? previousTokenStart
+            : tokenStart;
+        result[name] = detail::trimDeclaration(
+            text.substr(declarationStart, semicolon - declarationStart + 1));
+        pos = semicolon + 1;
+        previousToken.clear();
+    }
+    return result;
+}
+}
+
+```
+
+`broker/__init__.py`:
+
+```py
+"""symbridge broker package."""
+
+```
+
+`broker/model.py`:
+
+```py
+"""Canonical data model for symbridge.
+
+Everything is keyed by ``(module, rva)`` so annotations line up across tools
+regardless of the runtime image base (ASLR). This module knows nothing about
+transport or asyncio -- it is pure data + last-write-wins merge logic, which
+makes it trivial to unit test.
+
+Wire representation of a single annotation is a ``record``: a dict with a
+``"record"`` discriminator (``"symbol" | "comment" | "type"``) and a ``"data"``
+payload. See ``shared/schema.json`` for the full protocol.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+from dataclasses import asdict, dataclass
+from typing import Dict, List, Tuple
+
+# Record type discriminators used on the wire.
+SYMBOL = "symbol"
+COMMENT = "comment"
+TYPE = "type"
+
+# Comment kinds (IDA distinguishes these; x64dbg has a single comment slot and
+# maps both onto it).
+COMMENT_REGULAR = "regular"
+COMMENT_REPEATABLE = "repeatable"
+
+
+@dataclass
+class Symbol:
+    """A name applied to an address (function / data label)."""
+
+    module: str
+    rva: int
+    name: str
+    origin: str = ""
+    ts: float = 0.0
+
+    def key(self) -> Tuple:
+        return (SYMBOL, self.module, self.rva)
+
+
+@dataclass
+class Comment:
+    """A comment at an address. ``kind`` is regular or repeatable."""
+
+    module: str
+    rva: int
+    text: str
+    kind: str = COMMENT_REGULAR
+    origin: str = ""
+    ts: float = 0.0
+
+    def key(self) -> Tuple:
+        return (COMMENT, self.module, self.rva, self.kind)
+
+
+@dataclass
+class TypeDef:
+    """A struct/type definition, carried as canonical C-declaration text."""
+
+    module: str
+    name: str
+    decl: str
+    origin: str = ""
+    ts: float = 0.0
+    deleted: bool = False
+
+    def key(self) -> Tuple:
+        return (TYPE, self.module, self.name)
+
+
+_RECORD_CLASSES = {SYMBOL: Symbol, COMMENT: Comment, TYPE: TypeDef}
+
+
+def record_to_wire(rec) -> Dict:
+    """Serialize a dataclass record to its ``{"record", "data"}`` wire form."""
+    for disc, cls in _RECORD_CLASSES.items():
+        if isinstance(rec, cls):
+            return {"record": disc, "data": asdict(rec)}
+    raise TypeError(f"not a symbridge record: {type(rec)!r}")
+
+
+def record_from_wire(wire: Dict):
+    """Parse a ``{"record", "data"}`` wire dict back into a dataclass record."""
+    disc = wire.get("record")
+    cls = _RECORD_CLASSES.get(disc)
+    if cls is None:
+        raise ValueError(f"unknown record type: {disc!r}")
+    data = wire.get("data", {})
+    return cls(**data)
+
+
+class Store:
+    """In-memory canonical state with last-write-wins merge.
+
+    Keyed by each record's ``key()``. An incoming record is accepted only if it
+    is at least as new as what we already hold (``ts`` comparison), so replays
+    and out-of-order deliveries are safe/idempotent.
+    """
+
+    def __init__(self) -> None:
+        self._records: Dict[Tuple, object] = {}
+
+    def apply(self, rec) -> bool:
+        """Merge ``rec`` into the store.
+
+        Returns ``True`` if the store changed (record was new or newer than the
+        held one) and therefore should be broadcast; ``False`` if it was stale
+        or an exact duplicate.
+        """
+        key = rec.key()
+        existing = self._records.get(key)
+        if existing is not None:
+            incoming_data = asdict(rec)
+            existing_data = asdict(existing)
+            if incoming_data == existing_data:
+                return False
+
+            # Timestamp is the primary LWW clock. Equal timestamps can occur
+            # during coarse/frozen-clock tests or genuinely simultaneous
+            # edits, so use stable record content as a deterministic tie-break.
+            # Every broker therefore converges regardless of arrival order.
+            incoming_version = (
+                rec.ts,
+                getattr(rec, "origin", ""),
+                json.dumps(incoming_data, sort_keys=True, separators=(",", ":")),
+            )
+            existing_version = (
+                existing.ts,
+                getattr(existing, "origin", ""),
+                json.dumps(existing_data, sort_keys=True, separators=(",", ":")),
+            )
+            if incoming_version <= existing_version:
+                return False
+        self._records[key] = rec
+        return True
+
+    def records(self) -> List:
+        """All held records (order not guaranteed)."""
+        return list(self._records.values())
+
+    def snapshot_wire(self) -> List[Dict]:
+        """All records in wire form, for sending to a freshly connected client."""
+        return [record_to_wire(r) for r in self._records.values()]
+
+    def __len__(self) -> int:
+        return len(self._records)
+
+    # -- persistence ----------------------------------------------------------
+
+    def save(self, path: str) -> None:
+        """Write the whole store to ``path`` as JSON (atomic replace).
+
+        Lets annotations survive a broker restart -- reopen tomorrow and the
+        names/comments are still there.
+        """
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(self.snapshot_wire(), f)
+        os.replace(tmp, path)
+
+    def load(self, path: str) -> int:
+        """Load records from ``path`` if it exists. Returns how many were loaded."""
+        if not os.path.exists(path):
+            return 0
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        count = 0
+        for wire in data:
+            try:
+                if self.apply(record_from_wire(wire)):
+                    count += 1
+            except (ValueError, TypeError):
+                continue  # skip malformed entries rather than fail startup
+        return count
+
+```
+
+`broker/symbridge_broker.py`:
+
+```py
+"""symbridge broker.
+
+A standalone localhost hub that holds canonical annotation state and relays
+changes between tool adapters (IDA, x64dbg, ...). Transport is newline-delimited
+JSON over TCP -- zero third-party dependencies, so IDA's embedded Python and a
+C++ socket client can both speak it without installing anything.
+
+Message types (see shared/schema.json):
+
+  hello    client -> broker : announce identity; broker replies with a snapshot
+  snapshot broker -> client : full current state as a list of records
+  update   both ways        : a single changed record (symbol/comment/type)
+  ack      broker -> client : optional receipt for an update
+
+Echo/loop prevention: an ``update`` carries an ``origin`` client id. The broker
+never sends an update back to the connection it came from. Adapters additionally
+guard with an ``applying_remote`` flag on their side.
+
+Run:  python -m broker.symbridge_broker --host 127.0.0.1 --port 9100
+"""
+
+from __future__ import annotations
+
+import argparse
+import asyncio
+import json
+import logging
+from typing import Dict, Optional
+
+from .model import Store, record_from_wire
+
+log = logging.getLogger("symbridge.broker")
+
+
+class _Client:
+    """Per-connection state held by the broker."""
+
+    __slots__ = ("writer", "client_id", "tool", "peer")
+
+    def __init__(self, writer: asyncio.StreamWriter, peer: str) -> None:
+        self.writer = writer
+        self.peer = peer
+        self.client_id: str = peer  # replaced by the id sent in `hello`
+        self.tool: str = "unknown"
+
+
+class Broker:
+    """Owns the canonical :class:`Store` and the set of connected clients."""
+
+    def __init__(self, persist_path: Optional[str] = None) -> None:
+        self.store = Store()
+        self.persist_path = persist_path
+        self._clients: Dict[asyncio.StreamWriter, _Client] = {}
+        if persist_path:
+            loaded = self.store.load(persist_path)
+            if loaded:
+                log.info("loaded %d record(s) from %s", loaded, persist_path)
+
+    # -- connection lifecycle -------------------------------------------------
+
+    async def handle_connection(
+        self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
+    ) -> None:
+        peername = writer.get_extra_info("peername")
+        peer = f"{peername[0]}:{peername[1]}" if peername else "?"
+        client = _Client(writer, peer)
+        self._clients[writer] = client
+        log.info("client connected: %s", peer)
+        try:
+            while True:
+                line = await reader.readline()
+                if not line:  # EOF
+                    break
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    msg = json.loads(line)
+                except json.JSONDecodeError:
+                    log.warning("bad JSON from %s: %r", peer, line[:120])
+                    continue
+                await self._dispatch(client, msg)
+        except (ConnectionError, asyncio.IncompleteReadError):
+            pass
+        finally:
+            self._clients.pop(writer, None)
+            log.info("client disconnected: %s (%s)", client.client_id, peer)
+            try:
+                writer.close()
+            except Exception:  # noqa: BLE001 - best-effort close
+                pass
+
+    # -- message dispatch -----------------------------------------------------
+
+    async def _dispatch(self, client: _Client, msg: Dict) -> None:
+        mtype = msg.get("type")
+        if mtype == "hello":
+            await self._on_hello(client, msg)
+        elif mtype == "update":
+            await self._on_update(client, msg)
+        else:
+            log.warning("ignoring message of unknown type %r from %s", mtype, client.peer)
+
+    async def _on_hello(self, client: _Client, msg: Dict) -> None:
+        client.client_id = str(msg.get("client_id") or client.peer)
+        client.tool = str(msg.get("tool") or "unknown")
+        log.info("hello from %s (tool=%s)", client.client_id, client.tool)
+        # Send the full current state so a late joiner catches up.
+        await self._send(
+            client.writer,
+            {"type": "snapshot", "records": self.store.snapshot_wire()},
+        )
+
+    async def _on_update(self, client: _Client, msg: Dict) -> None:
+        origin = str(msg.get("origin") or client.client_id)
+        try:
+            rec = record_from_wire(msg)
+        except (ValueError, TypeError) as exc:
+            log.warning("dropping bad update from %s: %s", client.client_id, exc)
+            return
+        if not rec.origin:
+            rec.origin = origin
+        changed = self.store.apply(rec)
+        # Always ack so the sender knows the message was processed.
+        await self._send(client.writer, {"type": "ack", "seq": msg.get("seq")})
+        if not changed:
+            return  # stale/duplicate: nothing to propagate
+        self._persist()
+        await self._broadcast(msg, exclude_origin=origin)
+
+    def _persist(self) -> None:
+        if not self.persist_path:
+            return
+        try:
+            self.store.save(self.persist_path)
+        except OSError as exc:
+            log.warning("could not persist state: %s", exc)
+
+    # -- outbound helpers -----------------------------------------------------
+
+    async def _broadcast(self, msg: Dict, exclude_origin: Optional[str]) -> None:
+        """Relay ``msg`` to every client except the one that originated it."""
+        for writer, client in list(self._clients.items()):
+            if client.client_id == exclude_origin:
+                continue
+            await self._send(writer, msg)
+
+    async def _send(self, writer: asyncio.StreamWriter, msg: Dict) -> None:
+        data = (json.dumps(msg, separators=(",", ":")) + "\n").encode("utf-8")
+        try:
+            writer.write(data)
+            await writer.drain()
+        except (ConnectionError, RuntimeError):
+            # Peer went away mid-write; connection cleanup handles removal.
+            pass
+
+
+async def serve(
+    host: str = "127.0.0.1", port: int = 9100, persist_path: Optional[str] = None
+) -> None:
+    broker = Broker(persist_path=persist_path)
+    server = await asyncio.start_server(broker.handle_connection, host, port)
+    addrs = ", ".join(str(s.getsockname()) for s in server.sockets)
+    log.info("symbridge broker listening on %s", addrs)
+    async with server:
+        await server.serve_forever()
+
+
+def main(argv=None) -> None:
+    parser = argparse.ArgumentParser(description="symbridge annotation broker")
+    parser.add_argument("--host", default="127.0.0.1")
+    parser.add_argument("--port", type=int, default=9100)
+    parser.add_argument(
+        "--persist",
+        metavar="FILE",
+        help="JSON file to load state from on start and save to on every change",
+    )
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="debug-level logging"
+    )
+    args = parser.parse_args(argv)
+    logging.basicConfig(
+        level=logging.DEBUG if args.verbose else logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    )
+    try:
+        asyncio.run(serve(args.host, args.port, args.persist))
+    except KeyboardInterrupt:
+        log.info("shutting down")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`dev/simclient.py`:
+
+```py
+"""Interactive fake adapter for demoing/verifying the broker without IDA/x64dbg.
+
+Open a broker and two of these in separate terminals to watch annotations sync
+live. It uses the same :class:`BrokerClient` the real adapters use, so it also
+exercises the exact wire protocol.
+
+Example
+-------
+Terminal 1:  python -m broker.symbridge_broker -v
+Terminal 2:  python -m dev.simclient --id A --tool ida
+Terminal 3:  python -m dev.simclient --id B --tool x64dbg
+
+Then in terminal 2 type:
+    sym 1000 decrypt_string
+    cmt 1000 xor loop, key in ecx
+and watch terminal 3 print the incoming updates (and vice versa).
+
+Commands (one per line):
+    sym <rva_hex> <name...>      send a symbol (name) update
+    cmt <rva_hex> <text...>      send a regular comment update
+    rcmt <rva_hex> <text...>     send a repeatable comment update
+    type <name> <c-decl...>      send a struct/type update
+    quit                         disconnect and exit
+"""
+
+from __future__ import annotations
+
+import argparse
+import sys
+import threading
+import time
+
+from adapters.common.client import BrokerClient
+
+
+def _fmt(msg: dict) -> str:
+    t = msg.get("type")
+    if t == "snapshot":
+        return f"[snapshot] {len(msg.get('records', []))} record(s)"
+    if t == "update":
+        d = msg.get("data", {})
+        rec = msg.get("record")
+        if rec == "symbol":
+            return f"[update:symbol] rva={d.get('rva'):#x} name={d.get('name')!r} (from {msg.get('origin')})"
+        if rec == "comment":
+            return f"[update:comment/{d.get('kind')}] rva={d.get('rva'):#x} text={d.get('text')!r} (from {msg.get('origin')})"
+        if rec == "type":
+            return f"[update:type] {d.get('name')} = {d.get('decl')!r} (from {msg.get('origin')})"
+    if t == "ack":
+        return f"[ack] seq={msg.get('seq')}"
+    return f"[{t}] {msg}"
+
+
+def main(argv=None) -> None:
+    parser = argparse.ArgumentParser(description="symbridge fake adapter (demo/verify)")
+    parser.add_argument("--host", default="127.0.0.1")
+    parser.add_argument("--port", type=int, default=9100)
+    parser.add_argument("--id", dest="client_id", required=True, help="client id / origin")
+    parser.add_argument("--tool", default="test", help="tool label (ida/x64dbg/...)")
+    parser.add_argument("--module", default="target.exe", help="module name to key by")
+    args = parser.parse_args(argv)
+
+    def on_message(msg: dict) -> None:
+        # Printed from the reader thread; fine for a console demo.
+        sys.stdout.write("\r" + _fmt(msg) + "\n> ")
+        sys.stdout.flush()
+
+    client = BrokerClient(args.host, args.port, args.client_id, args.tool, on_message)
+    client.connect()
+    print(f"connected as {args.client_id} (tool={args.tool}, module={args.module})")
+    print("type 'help' for commands, 'quit' to exit")
+
+    try:
+        while True:
+            try:
+                line = input("> ").strip()
+            except EOFError:
+                break
+            if not line:
+                continue
+            cmd, _, rest = line.partition(" ")
+            cmd = cmd.lower()
+
+            if cmd in ("quit", "exit"):
+                break
+            if cmd == "help":
+                print(__doc__)
+                continue
+
+            try:
+                if cmd == "sym":
+                    rva_s, _, name = rest.partition(" ")
+                    client.send_update(
+                        "symbol",
+                        {"module": args.module, "rva": int(rva_s, 16), "name": name, "ts": time.time()},
+                        origin=args.client_id,
+                    )
+                elif cmd in ("cmt", "rcmt"):
+                    rva_s, _, text = rest.partition(" ")
+                    client.send_update(
+                        "comment",
+                        {
+                            "module": args.module,
+                            "rva": int(rva_s, 16),
+                            "text": text,
+                            "kind": "repeatable" if cmd == "rcmt" else "regular",
+                            "ts": time.time(),
+                        },
+                        origin=args.client_id,
+                    )
+                elif cmd == "type":
+                    name, _, decl = rest.partition(" ")
+                    client.send_update(
+                        "type",
+                        {"module": args.module, "name": name, "decl": decl, "ts": time.time()},
+                        origin=args.client_id,
+                    )
+                else:
+                    print(f"unknown command: {cmd!r} (try 'help')")
+            except ValueError as exc:
+                print(f"bad argument: {exc}")
+    finally:
+        client.close()
+        print("disconnected")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`shared/schema.json`:
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "symbridge wire protocol",
+  "description": "Newline-delimited JSON messages exchanged between the broker and tool adapters. Every physical line on the socket is exactly one of these objects.",
+  "oneOf": [
+    { "$ref": "#/definitions/hello" },
+    { "$ref": "#/definitions/snapshot" },
+    { "$ref": "#/definitions/update" },
+    { "$ref": "#/definitions/ack" }
+  ],
+  "definitions": {
+    "hello": {
+      "type": "object",
+      "description": "client -> broker: announce identity on connect. Broker replies with a snapshot.",
+      "required": ["type", "client_id"],
+      "properties": {
+        "type": { "const": "hello" },
+        "client_id": { "type": "string", "description": "unique id for this adapter instance (used as origin)" },
+        "tool": { "type": "string", "enum": ["ida", "x64dbg", "ghidra", "binaryninja", "test", "unknown"] }
+      }
+    },
+    "snapshot": {
+      "type": "object",
+      "description": "broker -> client: full current canonical state.",
+      "required": ["type", "records"],
+      "properties": {
+        "type": { "const": "snapshot" },
+        "records": { "type": "array", "items": { "$ref": "#/definitions/record" } }
+      }
+    },
+    "update": {
+      "type": "object",
+      "description": "both ways: a single changed record. Broker never echoes it back to `origin`.",
+      "required": ["type", "record", "data"],
+      "properties": {
+        "type": { "const": "update" },
+        "origin": { "type": "string", "description": "client_id that produced this change" },
+        "seq": { "type": ["integer", "null"], "description": "optional sequence number, echoed back in ack" },
+        "record": { "$ref": "#/definitions/recordDiscriminator" },
+        "data": { "type": "object" }
+      }
+    },
+    "ack": {
+      "type": "object",
+      "description": "broker -> client: receipt for a processed update.",
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "ack" },
+        "seq": { "type": ["integer", "null"] }
+      }
+    },
+    "recordDiscriminator": {
+      "type": "string",
+      "enum": ["symbol", "comment", "type"]
+    },
+    "record": {
+      "type": "object",
+      "description": "A single annotation in wire form, as embedded in snapshot/update.",
+      "required": ["record", "data"],
+      "properties": {
+        "record": { "$ref": "#/definitions/recordDiscriminator" },
+        "data": { "type": "object" }
+      },
+      "oneOf": [
+        { "$ref": "#/definitions/symbolRecord" },
+        { "$ref": "#/definitions/commentRecord" },
+        { "$ref": "#/definitions/typeRecord" }
+      ]
+    },
+    "symbolRecord": {
+      "properties": {
+        "record": { "const": "symbol" },
+        "data": {
+          "type": "object",
+          "required": ["module", "rva", "name"],
+          "properties": {
+            "module": { "type": "string", "description": "module/image name, e.g. target.exe" },
+            "rva": { "type": "integer", "description": "relative virtual address (addr - module base)" },
+            "name": { "type": "string" },
+            "origin": { "type": "string" },
+            "ts": { "type": "number", "description": "epoch seconds; last-write-wins" }
+          }
+        }
+      }
+    },
+    "commentRecord": {
+      "properties": {
+        "record": { "const": "comment" },
+        "data": {
+          "type": "object",
+          "required": ["module", "rva", "text"],
+          "properties": {
+            "module": { "type": "string" },
+            "rva": { "type": "integer" },
+            "text": { "type": "string" },
+            "kind": { "type": "string", "enum": ["regular", "repeatable"], "default": "regular" },
+            "origin": { "type": "string" },
+            "ts": { "type": "number" }
+          }
+        }
+      }
+    },
+    "typeRecord": {
+      "properties": {
+        "record": { "const": "type" },
+        "data": {
+          "type": "object",
+          "required": ["module", "name", "decl"],
+          "properties": {
+            "module": { "type": "string" },
+            "name": { "type": "string", "description": "type/struct name" },
+            "decl": { "type": "string", "description": "canonical C declaration text, e.g. 'struct Foo { int a; };'" },
+            "deleted": { "type": "boolean", "default": false, "description": "persistent tombstone; decl is empty when true" },
+            "origin": { "type": "string" },
+            "ts": { "type": "number" }
+          }
+        }
+      }
+    }
+  }
+}
+
+```
+
+`tests/test_broker.py`:
+
+```py
+"""Integration tests for the broker: real TCP, two fake clients.
+
+Each test spins the broker up on an ephemeral port and drives it with plain
+asyncio socket clients, so it exercises the exact newline-JSON framing that the
+IDA/x64dbg adapters will use.
+"""
+
+import asyncio
+import json
+
+from broker.symbridge_broker import Broker
+
+
+async def _send(writer, msg):
+    writer.write((json.dumps(msg) + "\n").encode("utf-8"))
+    await writer.drain()
+
+
+async def _recv(reader, timeout=1.0):
+    line = await asyncio.wait_for(reader.readline(), timeout)
+    if not line:
+        raise EOFError("connection closed")
+    return json.loads(line)
+
+
+async def _start_broker():
+    broker = Broker()
+    server = await asyncio.start_server(broker.handle_connection, "127.0.0.1", 0)
+    port = server.sockets[0].getsockname()[1]
+    return broker, server, port
+
+
+async def _hello(port, client_id):
+    reader, writer = await asyncio.open_connection("127.0.0.1", port)
+    await _send(writer, {"type": "hello", "client_id": client_id, "tool": "test"})
+    snap = await _recv(reader)
+    assert snap["type"] == "snapshot"
+    return reader, writer, snap
+
+
+async def _scenario_broadcast_excludes_origin():
+    _, server, port = await _start_broker()
+    async with server:
+        ra, wa, _ = await _hello(port, "A")
+        rb, wb, _ = await _hello(port, "B")
+
+        update = {
+            "type": "update",
+            "origin": "A",
+            "seq": 1,
+            "record": "symbol",
+            "data": {"module": "t.exe", "rva": 0x1000, "name": "main", "ts": 1.0},
+        }
+        await _send(wa, update)
+
+        # Origin A receives an ack, never the echoed update.
+        ack = await _recv(ra)
+        assert ack["type"] == "ack" and ack["seq"] == 1
+
+        # Peer B receives the update.
+        got = await _recv(rb)
+        assert got["type"] == "update"
+        assert got["data"]["name"] == "main"
+
+        # A must not receive the update back (origin exclusion).
+        try:
+            leaked = await _recv(ra, timeout=0.25)
+            raise AssertionError(f"origin A unexpectedly got: {leaked}")
+        except asyncio.TimeoutError:
+            pass
+
+        for w in (wa, wb):
+            w.close()
+
+
+async def _scenario_snapshot_to_late_joiner():
+    broker, server, port = await _start_broker()
+    async with server:
+        ra, wa, _ = await _hello(port, "A")
+        await _send(
+            wa,
+            {
+                "type": "update",
+                "origin": "A",
+                "record": "comment",
+                "data": {
+                    "module": "t.exe",
+                    "rva": 0x2000,
+                    "text": "entry point",
+                    "kind": "regular",
+                    "ts": 5.0,
+                },
+            },
+        )
+        await _recv(ra)  # ack
+
+        # Late joiner C should receive the already-known comment in its snapshot.
+        rc, wc, snap = await _hello(port, "C")
+        assert len(snap["records"]) == 1
+        rec = snap["records"][0]
+        assert rec["record"] == "comment"
+        assert rec["data"]["text"] == "entry point"
+
+        wa.close()
+        wc.close()
+
+
+async def _scenario_stale_update_not_rebroadcast():
+    _, server, port = await _start_broker()
+    async with server:
+        ra, wa, _ = await _hello(port, "A")
+        rb, wb, _ = await _hello(port, "B")
+
+        newer = {
+            "type": "update",
+            "origin": "A",
+            "record": "symbol",
+            "data": {"module": "t.exe", "rva": 0x1000, "name": "new", "ts": 10.0},
+        }
+        await _send(wa, newer)
+        await _recv(ra)  # ack
+        await _recv(rb)  # B gets the update
+
+        stale = {
+            "type": "update",
+            "origin": "A",
+            "record": "symbol",
+            "data": {"module": "t.exe", "rva": 0x1000, "name": "old", "ts": 1.0},
+        }
+        await _send(wa, stale)
+        await _recv(ra)  # ack still sent
+
+        # B must NOT receive the stale update.
+        try:
+            leaked = await _recv(rb, timeout=0.25)
+            raise AssertionError(f"stale update leaked to B: {leaked}")
+        except asyncio.TimeoutError:
+            pass
+
+        wa.close()
+        wb.close()
+
+
+async def _scenario_type_broadcast_and_late_snapshot():
+    _, server, port = await _start_broker()
+    async with server:
+        ra, wa, _ = await _hello(port, "IDA")
+        rb, wb, _ = await _hello(port, "X64DBG")
+        decl = "struct Foo {\n    unsigned int a;\n    char b[8];\n};"
+        data = {
+            "module": "t.exe",
+            "name": "Foo",
+            "decl": decl,
+            "origin": "IDA",
+            "ts": 20.0,
+        }
+        await _send(
+            wa,
+            {
+                "type": "update",
+                "origin": "IDA",
+                "seq": 7,
+                "record": "type",
+                "data": data,
+            },
+        )
+
+        ack = await _recv(ra)
+        assert ack == {"type": "ack", "seq": 7}
+        live = await _recv(rb)
+        assert live["record"] == "type"
+        assert live["data"] == data
+
+        rc, wc, snapshot = await _hello(port, "LATE")
+        snapshot_data = dict(data, deleted=False)
+        assert snapshot["records"] == [{"record": "type", "data": snapshot_data}]
+
+        try:
+            leaked = await _recv(ra, timeout=0.25)
+            raise AssertionError(f"origin IDA unexpectedly got: {leaked}")
+        except asyncio.TimeoutError:
+            pass
+
+        for w in (wa, wb, wc):
+            w.close()
+
+
+async def _scenario_type_tombstone_is_broadcast_and_persisted_in_snapshot():
+    _, server, port = await _start_broker()
+    async with server:
+        ra, wa, _ = await _hello(port, "IDA")
+        rb, wb, _ = await _hello(port, "X64DBG")
+        tombstone = {
+            "module": "t.exe",
+            "name": "OldFoo",
+            "decl": "",
+            "deleted": True,
+            "origin": "X64DBG",
+            "ts": 30.0,
+        }
+        await _send(
+            wb,
+            {
+                "type": "update",
+                "origin": "X64DBG",
+                "record": "type",
+                "data": tombstone,
+            },
+        )
+        await _recv(rb)  # ack
+        assert (await _recv(ra))["data"] == tombstone
+
+        _, wc, snapshot = await _hello(port, "LATE")
+        assert snapshot["records"] == [{"record": "type", "data": tombstone}]
+        for w in (wa, wb, wc):
+            w.close()
+
+
+def test_broadcast_excludes_origin():
+    asyncio.run(_scenario_broadcast_excludes_origin())
+
+
+def test_snapshot_to_late_joiner():
+    asyncio.run(_scenario_snapshot_to_late_joiner())
+
+
+def test_stale_update_not_rebroadcast():
+    asyncio.run(_scenario_stale_update_not_rebroadcast())
+
+
+def test_type_broadcast_and_late_snapshot():
+    asyncio.run(_scenario_type_broadcast_and_late_snapshot())
+
+
+def test_type_tombstone_is_broadcast_and_persisted_in_snapshot():
+    asyncio.run(_scenario_type_tombstone_is_broadcast_and_persisted_in_snapshot())
+
+
+if __name__ == "__main__":
+    # Allow running without pytest: python -m tests.test_broker
+    for name, fn in list(globals().items()):
+        if name.startswith("test_") and callable(fn):
+            print(f"running {name} ...", end=" ")
+            fn()
+            print("ok")
+    print("all broker tests passed")
+
+```
+
+`tests/test_client.py`:
+
+```py
+"""End-to-end test for the reusable BrokerClient over a real socket.
+
+Runs the asyncio broker in a background thread and drives it with two blocking
+BrokerClients (the same class the IDA adapter uses), proving the transport,
+hello/snapshot, update send, and origin-exclusion all work together.
+"""
+
+import asyncio
+import threading
+import time
+
+from adapters.common.client import BrokerClient
+from broker.symbridge_broker import Broker
+
+
+class _BrokerThread:
+    def __init__(self):
+        self.port = None
+        self._ready = threading.Event()
+        self._stop = threading.Event()
+        self._thread = threading.Thread(target=self._run, daemon=True)
+
+    def start(self):
+        self._thread.start()
+        assert self._ready.wait(5), "broker did not start"
+        return self.port
+
+    def stop(self):
+        self._stop.set()
+        self._thread.join(2.0)
+
+    def _run(self):
+        async def main():
+            broker = Broker()
+            server = await asyncio.start_server(broker.handle_connection, "127.0.0.1", 0)
+            self.port = server.sockets[0].getsockname()[1]
+            self._ready.set()
+            async with server:
+                while not self._stop.is_set():
+                    await asyncio.sleep(0.05)
+
+        asyncio.run(main())
+
+
+def test_client_update_roundtrip_and_origin_exclusion():
+    bt = _BrokerThread()
+    port = bt.start()
+
+    a_msgs, b_msgs = [], []
+    b_got_update = threading.Event()
+
+    a = BrokerClient("127.0.0.1", port, "A", "test", a_msgs.append)
+    b = BrokerClient(
+        "127.0.0.1",
+        port,
+        "B",
+        "test",
+        lambda m: (b_msgs.append(m), b_got_update.set() if m.get("type") == "update" else None),
+    )
+    try:
+        a.connect()
+        b.connect()
+        time.sleep(0.3)  # let both hellos + snapshots settle
+
+        a.send_update(
+            "symbol",
+            {"module": "t.exe", "rva": 0x1000, "name": "main", "ts": 1.0},
+            origin="A",
+        )
+
+        assert b_got_update.wait(2.0), "B never received the update"
+        updates_b = [m for m in b_msgs if m.get("type") == "update"]
+        assert updates_b and updates_b[0]["data"]["name"] == "main"
+
+        # Origin A must not receive its own update echoed back.
+        time.sleep(0.3)
+        updates_a = [m for m in a_msgs if m.get("type") == "update"]
+        assert not updates_a, f"origin A got its own update back: {updates_a}"
+    finally:
+        a.close()
+        b.close()
+        bt.stop()
+
+
+def test_client_type_update_preserves_large_multiline_decl():
+    bt = _BrokerThread()
+    port = bt.start()
+
+    a_msgs, b_msgs = [], []
+    a_snapshot = threading.Event()
+    a_ack = threading.Event()
+    b_snapshot = threading.Event()
+    b_update = threading.Event()
+
+    def on_a(msg):
+        a_msgs.append(msg)
+        if msg.get("type") == "snapshot":
+            a_snapshot.set()
+        elif msg.get("type") == "ack":
+            a_ack.set()
+
+    def on_b(msg):
+        b_msgs.append(msg)
+        if msg.get("type") == "snapshot":
+            b_snapshot.set()
+        elif msg.get("type") == "update":
+            b_update.set()
+
+    a = BrokerClient("127.0.0.1", port, "IDA", "ida", on_a)
+    b = BrokerClient("127.0.0.1", port, "X64DBG", "x64dbg", on_b)
+    try:
+        a.connect()
+        b.connect()
+        assert a_snapshot.wait(2.0)
+        assert b_snapshot.wait(2.0)
+
+        decl = (
+            "struct BigFoo {\n"
+            "    unsigned int a;\n"
+            "    char b[8];\n"
+            "};\n/* " + ("padding " * 800) + "*/"
+        )
+        data = {
+            "module": "target.exe",
+            "name": "BigFoo",
+            "decl": decl,
+            "origin": "IDA",
+            "ts": 30.0,
+        }
+        a.send_update("type", data, origin="IDA")
+
+        assert a_ack.wait(2.0), "IDA never received the type ack"
+        assert b_update.wait(2.0), "x64dbg peer never received the type update"
+        updates = [m for m in b_msgs if m.get("type") == "update"]
+        assert len(updates) == 1
+        assert updates[0]["record"] == "type"
+        assert updates[0]["data"] == data
+        assert len(decl.encode("utf-8")) > 4096
+
+        time.sleep(0.2)
+        assert not [m for m in a_msgs if m.get("type") == "update"]
+    finally:
+        a.close()
+        b.close()
+        bt.stop()
+
+
+if __name__ == "__main__":
+    for name, fn in list(globals().items()):
+        if name.startswith("test_") and callable(fn):
+            print(f"running {name} ...", end=" ")
+            fn()
+            print("ok")
+    print("all client tests passed")
+
+```
+
+`tests/test_ida_sync.py`:
+
+```py
+"""Unit tests for the IDA adapter's pure logic (no IDA required)."""
+
+from adapters.ida import ida_sync
+
+
+def test_rva_roundtrip():
+    base = 0x140000000
+    ea = 0x140001500
+    rva = ida_sync.rva_from_ea(ea, base)
+    assert rva == 0x1500
+    assert ida_sync.ea_from_rva(rva, base) == ea
+
+
+def test_make_symbol_record():
+    rec = ida_sync.make_symbol_record(
+        "t.exe", 0x140001500, 0x140000000, "main", "ida:1", ts=1.0
+    )
+    assert rec == {
+        "module": "t.exe",
+        "rva": 0x1500,
+        "name": "main",
+        "origin": "ida:1",
+        "ts": 1.0,
+    }
+
+
+def test_make_comment_record_kind():
+    rec = ida_sync.make_comment_record(
+        "t.exe", 0x140001000, 0x140000000, "hi", True, "ida:1", ts=2.0
+    )
+    assert rec["kind"] == "repeatable"
+    assert rec["rva"] == 0x1000
+    assert rec["text"] == "hi"
+
+
+def test_make_type_record_preserves_c_declaration():
+    decl = "struct Foo {\n    unsigned int a;\n    char b[8];\n};"
+    rec = ida_sync.make_type_record(
+        "TARGET.EXE", "Foo", decl, "ida:1", ts=3.0
+    )
+    assert rec == {
+        "module": "target.exe",
+        "name": "Foo",
+        "decl": decl,
+        "deleted": False,
+        "origin": "ida:1",
+        "ts": 3.0,
+    }
+    assert "rva" not in rec
+
+
+def test_plan_apply_symbol():
+    plan = ida_sync.plan_apply(
+        "symbol", {"module": "t.exe", "rva": 0x1500, "name": "main"}, 0x140000000
+    )
+    assert plan == ("symbol", 0x140001500, "main")
+
+
+def test_plan_apply_comment():
+    plan = ida_sync.plan_apply(
+        "comment",
+        {"module": "t.exe", "rva": 0x1000, "text": "x", "kind": "repeatable"},
+        0x140000000,
+    )
+    assert plan == ("comment", 0x140001000, "x", True)
+
+
+def test_plan_apply_type_and_unknown():
+    plan = ida_sync.plan_apply(
+        "type",
+        {"module": "t.exe", "name": "Foo", "decl": "struct Foo{int a;};"},
+        0,
+    )
+    assert plan == ("type", "Foo", "struct Foo{int a;};")
+    assert ida_sync.plan_apply(
+        "type", {"module": "t.exe", "name": "Foo", "decl": "", "deleted": True}, 0
+    ) == ("type_delete", "Foo")
+    assert ida_sync.plan_apply("bogus", {}, 0) is None
+
+
+def test_make_type_tombstone():
+    rec = ida_sync.make_type_record(
+        "T.EXE", "OldName", "", "ida:1", ts=4.0, deleted=True
+    )
+    assert rec["module"] == "t.exe"
+    assert rec["name"] == "OldName"
+    assert rec["decl"] == ""
+    assert rec["deleted"] is True
+
+
+def test_belongs_to():
+    assert ida_sync.belongs_to({"module": "t.exe"}, "t.exe")
+    assert not ida_sync.belongs_to({"module": "other.dll"}, "t.exe")
+
+
+def test_glue_module_imports_without_ida():
+    # The plugin file must import cleanly outside IDA (glue stays dormant).
+    from adapters.ida import symbridge_ida
+
+    assert symbridge_ida._IDA is False
+
+```
+
+`tests/test_model.py`:
+
+```py
+"""Unit tests for the canonical data model (pure, no I/O)."""
+
+from broker.model import (
+    Comment,
+    Store,
+    Symbol,
+    TypeDef,
+    record_from_wire,
+    record_to_wire,
+)
+
+
+def test_wire_roundtrip_symbol():
+    sym = Symbol(module="t.exe", rva=0x1000, name="main", origin="A", ts=1.0)
+    wire = record_to_wire(sym)
+    assert wire["record"] == "symbol"
+    assert record_from_wire(wire) == sym
+
+
+def test_wire_roundtrip_comment_and_type():
+    c = Comment(module="t.exe", rva=0x1000, text="hi", kind="repeatable", ts=2.0)
+    decl = "struct Foo {\n    int a;\n    char b[8];\n};"
+    t = TypeDef(module="t.exe", name="Foo", decl=decl, ts=3.0)
+    assert record_from_wire(record_to_wire(c)) == c
+    assert record_from_wire(record_to_wire(t)) == t
+
+
+def test_type_store_last_write_wins_per_module_and_name():
+    store = Store()
+    assert store.apply(TypeDef("a.exe", "Foo", "struct Foo { int a; };", ts=1.0))
+    assert store.apply(TypeDef("a.exe", "Foo", "struct Foo { int b; };", ts=2.0))
+    assert not store.apply(TypeDef("a.exe", "Foo", "struct Foo { int old; };", ts=1.5))
+    assert store.apply(TypeDef("b.exe", "Foo", "struct Foo { char c; };", ts=1.0))
+
+    held = {(r.module, r.name): r.decl for r in store.records()}
+    assert held == {
+        ("a.exe", "Foo"): "struct Foo { int b; };",
+        ("b.exe", "Foo"): "struct Foo { char c; };",
+    }
+
+
+def test_type_tombstone_roundtrip_and_prevents_stale_resurrection():
+    store = Store()
+    assert store.apply(TypeDef("a.exe", "Foo", "struct Foo {};", ts=1.0))
+    deleted = TypeDef("a.exe", "Foo", "", deleted=True, origin="B", ts=2.0)
+    assert record_from_wire(record_to_wire(deleted)) == deleted
+    assert store.apply(deleted)
+    assert not store.apply(
+        TypeDef("a.exe", "Foo", "struct Foo { int stale; };", ts=1.5)
+    )
+    held = store.records()[0]
+    assert held.deleted is True and held.decl == ""
+
+
+def test_equal_timestamp_conflict_converges_independent_of_arrival_order():
+    left = TypeDef("a.exe", "Foo", "struct Foo { int a; };", origin="A", ts=5.0)
+    right = TypeDef("a.exe", "Foo", "struct Foo { int b; };", origin="B", ts=5.0)
+    store_ab = Store()
+    store_ba = Store()
+    for rec in (left, right):
+        store_ab.apply(rec)
+    for rec in (right, left):
+        store_ba.apply(rec)
+    assert store_ab.snapshot_wire() == store_ba.snapshot_wire()
+
+
+def test_store_accepts_new_record():
+    store = Store()
+    assert store.apply(Symbol("t.exe", 0x1000, "main", ts=1.0)) is True
+    assert len(store) == 1
+
+
+def test_store_last_write_wins():
+    store = Store()
+    store.apply(Symbol("t.exe", 0x1000, "old", ts=1.0))
+    # Newer ts overwrites and reports change.
+    assert store.apply(Symbol("t.exe", 0x1000, "new", ts=2.0)) is True
+    # Older ts is rejected.
+    assert store.apply(Symbol("t.exe", 0x1000, "stale", ts=0.5)) is False
+    held = {s.name for s in store.records()}
+    assert held == {"new"}
+
+
+def test_store_duplicate_same_ts_is_noop():
+    store = Store()
+    rec = Symbol("t.exe", 0x1000, "main", origin="A", ts=1.0)
+    assert store.apply(rec) is True
+    # Exact duplicate at same ts should not re-broadcast.
+    assert store.apply(Symbol("t.exe", 0x1000, "main", origin="A", ts=1.0)) is False
+
+
+def test_comment_kinds_are_distinct_keys():
+    store = Store()
+    store.apply(Comment("t.exe", 0x1000, "reg", kind="regular", ts=1.0))
+    store.apply(Comment("t.exe", 0x1000, "rep", kind="repeatable", ts=1.0))
+    # Regular and repeatable comments coexist at the same address.
+    assert len(store) == 2
+
+```
+
+`tests/test_persist.py`:
+
+```py
+"""Tests for broker state persistence (Store.save/load + broker wiring)."""
+
+import asyncio
+import json
+import os
+import tempfile
+
+from broker.model import Comment, Store, Symbol, TypeDef
+from broker.symbridge_broker import Broker
+
+
+def test_store_save_load_roundtrip():
+    store = Store()
+    store.apply(Symbol("t.exe", 0x1000, "main", origin="A", ts=1.0))
+    store.apply(Comment("t.exe", 0x1000, "entry", kind="regular", origin="A", ts=1.0))
+    decl = "struct Foo {\n    int a;\n    char b[8];\n};"
+    store.apply(TypeDef("t.exe", "Foo", decl, origin="A", ts=2.0))
+
+    with tempfile.TemporaryDirectory() as d:
+        path = os.path.join(d, "state.json")
+        store.save(path)
+        assert os.path.exists(path)
+
+        reloaded = Store()
+        n = reloaded.load(path)
+        assert n == 3
+        names = {getattr(r, "name", None) for r in reloaded.records()}
+        assert {"main", "Foo"}.issubset(names)
+        loaded_type = next(r for r in reloaded.records() if isinstance(r, TypeDef))
+        assert loaded_type.decl == decl
+
+
+def test_store_load_missing_file_is_noop():
+    store = Store()
+    assert store.load(os.path.join(tempfile.gettempdir(), "does-not-exist-xyz.json")) == 0
+    assert len(store) == 0
+
+
+def test_store_load_skips_malformed_entries():
+    with tempfile.TemporaryDirectory() as d:
+        path = os.path.join(d, "state.json")
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(
+                [
+                    {"record": "symbol", "data": {"module": "t.exe", "rva": 1, "name": "ok", "ts": 1.0}},
+                    {"record": "bogus", "data": {}},  # unknown type -> skipped
+                ],
+                f,
+            )
+        store = Store()
+        assert store.load(path) == 1
+
+
+def test_broker_persists_on_update():
+    async def scenario():
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "state.json")
+
+            broker = Broker(persist_path=path)
+            # Simulate an applied update by driving the store + persist directly.
+            broker.store.apply(Symbol("t.exe", 0x2000, "decrypt", ts=5.0))
+            broker._persist()
+
+            assert os.path.exists(path)
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            assert any(r["data"].get("name") == "decrypt" for r in data)
+
+            # A fresh broker pointed at the same file loads it on construction.
+            broker2 = Broker(persist_path=path)
+            assert len(broker2.store) == 1
+
+    asyncio.run(scenario())
+
+
+if __name__ == "__main__":
+    for name, fn in list(globals().items()):
+        if name.startswith("test_") and callable(fn):
+            print(f"running {name} ...", end=" ")
+            fn()
+            print("ok")
+    print("all persist tests passed")
+
+```
+
+`tests/type_sync_tests.cpp`:
+
+```cpp
+#include "../adapters/x64dbg/plugin/type_sync.h"
+
+#include <cassert>
+#include <string>
+
+int main()
+{
+    const std::string source = R"(
+        // Forward declarations are deliberately ignored.
+        struct Forward;
+        struct Foo {
+            int a;
+            char text[8]; // braces in comments: { }
+        };
+        union Value { int i; float f; };
+        enum Kind { K_A, K_B };
+    )";
+    auto parsed = symbridge::parseNamedTypes(source);
+    assert(parsed.size() == 3);
+    assert(parsed.at("Foo").find("char text[8]") != std::string::npos);
+    assert(parsed.at("Value").find("union Value") == 0);
+    assert(parsed.at("Kind").find("enum Kind") == 0);
+
+    auto edited = symbridge::parseNamedTypes(
+        "struct Foo { int a; char text[16]; };\n"
+        "struct Renamed { unsigned long long q; };\n");
+    assert(edited.size() == 2);
+    assert(edited.at("Foo").find("text[16]") != std::string::npos);
+    assert(edited.count("Renamed") == 1);
+    assert(edited.count("Value") == 0); // caller turns this diff into tombstone
+    return 0;
+}
+
+```
