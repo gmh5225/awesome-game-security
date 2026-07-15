@@ -951,6 +951,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/sodareverse/TDE
 - https://github.com/ergrelet/themida-unmutate
 - https://github.com/stuxnet147/Themida-Research [Themida 3.x research]
+- https://github.com/Marisa-Chan/GhidrOrean [Ghidra Python reimplementation of Deathway's Orean's Unvirtualizer — Oreans VM (Themida/Code Virtualizer) CISC/TIGER/RISC/FISH]
 
 > Fix OLLVM
 - https://github.com/w00tzenheimer/d810-ng [D-810ng (Next Generation) is an evolution of d810 to deobfuscate code at decompilation time]
