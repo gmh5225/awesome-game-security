@@ -1,0 +1,322 @@
+name: Translate Descriptions (Cursor CLI)
+
+# Translate description_en.txt → zh-CN / zh-TW / ja / ko / fr / de / es / it / ru
+# using Cursor CLI (cursor-grok-4.5-high-fast, max mode).
+#
+# Triggers:
+# - workflow_dispatch: scan & fill missing translations (optional repos/langs/limit)
+# - pull_request: when description_en.txt is added/changed on a same-repo PR
+#
+# Secret safety:
+# - Canonical repo only; forks never inherit CURSOR_API_KEY.
+# - Fork PRs are refused (head.repo must equal this repository).
+# - No pull_request_target.
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Max repos to process (0 = all needing work)"
+        required: false
+        default: "0"
+      repos:
+        description: "Optional space-separated owner/repo list (empty = scan missing)"
+        required: false
+        default: ""
+      langs:
+        description: "Comma-separated lang codes (empty = all 9)"
+        required: false
+        default: ""
+      force:
+        description: "Re-translate even if target files exist"
+        type: boolean
+        required: false
+        default: false
+      model:
+        description: "Cursor CLI model id"
+        required: false
+        default: "cursor-grok-4.5-high-fast"
+
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "description/**/description_en.txt"
+
+concurrency:
+  group: translate-descriptions-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  translate:
+    if: >-
+      github.repository == 'gmh5225/awesome-game-security' &&
+      github.event.repository.fork == false &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    # No job timeout: agent runs unbounded; --commit-every 1 persists each repo.
+    # (GitHub-hosted runners still enforce a platform max ~6h.)
+    permissions:
+      contents: write
+
+    steps:
+      - name: Assert canonical repository
+        run: |
+          set -euo pipefail
+          echo "repository=${GITHUB_REPOSITORY}"
+          echo "event_name=${GITHUB_EVENT_NAME}"
+          echo "actor=${GITHUB_ACTOR}"
+          if [ "${GITHUB_REPOSITORY}" != "gmh5225/awesome-game-security" ]; then
+            echo "Refusing to run outside canonical repository."
+            exit 1
+          fi
+          case "${GITHUB_EVENT_NAME}" in
+            workflow_dispatch|pull_request) ;;
+            *)
+              echo "Refusing unexpected event: ${GITHUB_EVENT_NAME}"
+              exit 1
+              ;;
+          esac
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            HEAD_REPO="${{ github.event.pull_request.head.repo.full_name }}"
+            if [ "${HEAD_REPO}" != "${GITHUB_REPOSITORY}" ]; then
+              echo "Refusing fork PR head: ${HEAD_REPO}"
+              exit 1
+            fi
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # PR: push translations back onto the PR branch.
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Collect PR-changed description_en.txt repos
+        id: pr_repos
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          mapfile -t FILES < <(
+            git diff --name-only --diff-filter=ACMR "${BASE_SHA}...${HEAD_SHA}" \
+              | grep -E '^description/[^/]+/[^/]+/description_en\.txt$' \
+              || true
+          )
+          REPOS=()
+          for f in "${FILES[@]+"${FILES[@]}"}"; do
+            # description/owner/repo/description_en.txt
+            owner=$(echo "$f" | cut -d/ -f2)
+            repo=$(echo "$f" | cut -d/ -f3)
+            slug="${owner}/${repo}"
+            if [[ ! "$slug" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]]; then
+              echo "ERROR: invalid path derived slug: $slug (from $f)"
+              exit 1
+            fi
+            REPOS+=("$slug")
+          done
+          if [ "${#REPOS[@]}" -eq 0 ]; then
+            echo "No description_en.txt changes in this PR."
+            echo "repos=" >> "$GITHUB_OUTPUT"
+            echo "count=0" >> "$GITHUB_OUTPUT"
+          else
+            # unique, stable order
+            REPOS_INLINE=$(printf '%s\n' "${REPOS[@]}" | sort -u | tr '\n' ' ' | xargs)
+            echo "PR repos to translate: ${REPOS_INLINE}"
+            echo "repos=${REPOS_INLINE}" >> "$GITHUB_OUTPUT"
+            COUNT=$(printf '%s\n' "${REPOS[@]}" | sort -u | wc -l | tr -d ' ')
+            echo "count=${COUNT}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Scan missing translations
+        id: scan
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          DESC_LANGS: ${{ inputs.langs }}
+        run: |
+          set -euo pipefail
+          ARGS=(--list-missing)
+          if [ -n "${DESC_LANGS}" ]; then
+            ARGS+=(--langs "$DESC_LANGS")
+          fi
+          python3 scripts/translate-descriptions-cli.py "${ARGS[@]}" | tee /tmp/missing-scan.txt
+          MISSING=$(grep -E '^MISSING_COUNT=' /tmp/missing-scan.txt | tail -1 | cut -d= -f2 || true)
+          if ! [[ "${MISSING}" =~ ^[0-9]+$ ]]; then
+            echo "ERROR: failed to parse MISSING_COUNT from scan output."
+            exit 1
+          fi
+          echo "missing_count=$MISSING" >> "$GITHUB_OUTPUT"
+          echo "Found $MISSING repo(s) needing translations"
+
+      - name: Decide whether to run
+        id: gate
+        run: |
+          set -euo pipefail
+          RUN=0
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            if [ "${{ steps.pr_repos.outputs.count }}" != "0" ] && [ -n "${{ steps.pr_repos.outputs.repos }}" ]; then
+              RUN=1
+            fi
+          else
+            # Manual: missing work, explicit repos, or force-all (optionally limited).
+            FORCE="${{ inputs.force }}"
+            if [ "${{ steps.scan.outputs.missing_count }}" != "0" ] \
+              || [ -n "${{ inputs.repos }}" ] \
+              || [ "${FORCE}" = "true" ]; then
+              RUN=1
+            fi
+          fi
+          echo "run=${RUN}" >> "$GITHUB_OUTPUT"
+          if [ "$RUN" = "0" ]; then
+            echo "Nothing to translate — skipping agent steps."
+          fi
+
+      - name: Install Cursor CLI
+        if: steps.gate.outputs.run == '1'
+        run: |
+          curl https://cursor.com/install -fsS | bash
+          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
+
+      - name: Enable Max Mode
+        if: steps.gate.outputs.run == '1'
+        run: |
+          mkdir -p "$HOME/.cursor"
+          cat > "$HOME/.cursor/cli-config.json" <<'EOF'
+          {
+            "version": 1,
+            "editor": { "vimMode": false },
+            "permissions": { "allow": [], "deny": [] },
+            "maxMode": true,
+            "approvalMode": "unrestricted",
+            "attribution": {
+              "attributeCommitsToAgent": false,
+              "attributePRsToAgent": false
+            }
+          }
+          EOF
+          echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
+
+      - name: Configure git
+        if: steps.gate.outputs.run == '1'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Translate via Cursor CLI
+        id: translate
+        if: steps.gate.outputs.run == '1'
+        continue-on-error: true
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_REPOS: ${{ steps.pr_repos.outputs.repos }}
+          INPUT_REPOS: ${{ inputs.repos }}
+          INPUT_LANGS: ${{ inputs.langs }}
+          INPUT_LIMIT: ${{ inputs.limit }}
+          INPUT_FORCE: ${{ inputs.force }}
+          INPUT_MODEL: ${{ inputs.model }}
+          GIT_PUSH_BRANCH: ${{ github.event_name == 'pull_request' && github.head_ref || 'main' }}
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_REPOSITORY}" != "gmh5225/awesome-game-security" ]; then
+            echo "Refusing to use CURSOR_API_KEY outside canonical repository."
+            exit 1
+          fi
+          if [ -z "${CURSOR_API_KEY:-}" ]; then
+            echo "ERROR: CURSOR_API_KEY secret is not set."
+            echo "Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+          agent --version || true
+
+          MODEL="${INPUT_MODEL:-cursor-grok-4.5-high-fast}"
+          if [ -z "$MODEL" ]; then
+            MODEL="cursor-grok-4.5-high-fast"
+          fi
+          ARGS=(--model "$MODEL" --commit-every 1)
+
+          if [ "${EVENT_NAME}" = "pull_request" ]; then
+            # EN changed on the PR ⇒ refresh all target langs for those repos.
+            ARGS+=(--force)
+            export DESC_REPOS="${PR_REPOS}"
+            ARGS+=(--repos-env DESC_REPOS)
+          else
+            if [ "${INPUT_FORCE:-false}" = "true" ]; then
+              ARGS+=(--force)
+            fi
+            if [ -n "${INPUT_LANGS:-}" ]; then
+              ARGS+=(--langs "$INPUT_LANGS")
+            fi
+            if [ -n "${INPUT_LIMIT:-}" ] && [ "${INPUT_LIMIT}" != "0" ]; then
+              ARGS+=(--limit "$INPUT_LIMIT")
+            fi
+            if [ -n "${INPUT_REPOS:-}" ]; then
+              export DESC_REPOS="${INPUT_REPOS}"
+              ARGS+=(--repos-env DESC_REPOS)
+            fi
+          fi
+
+          python3 scripts/translate-descriptions-cli.py "${ARGS[@]}"
+
+      - name: Final commit (any remainder)
+        if: steps.gate.outputs.run == '1'
+        run: |
+          set -euo pipefail
+          # Per-repo commits already ran inside the script; this catches leftovers.
+          KEEP_RE='^description/[^/]+/[^/]+/description_(zh-CN|zh-TW|ja|ko|fr|de|es|it|ru)\.txt$'
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            git checkout -- "$f" 2>/dev/null || rm -rf -- "$f"
+          done < <(
+            git ls-files -m -o --exclude-standard \
+              | grep -v -E "$KEEP_RE" \
+              || true
+          )
+
+          git add -- \
+            ':(glob)description/**/description_zh-CN.txt' \
+            ':(glob)description/**/description_zh-TW.txt' \
+            ':(glob)description/**/description_ja.txt' \
+            ':(glob)description/**/description_ko.txt' \
+            ':(glob)description/**/description_fr.txt' \
+            ':(glob)description/**/description_de.txt' \
+            ':(glob)description/**/description_es.txt' \
+            ':(glob)description/**/description_it.txt' \
+            ':(glob)description/**/description_ru.txt' \
+            2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "No translation files left to commit."
+          else
+            COUNT=$(git diff --cached --name-only | grep -c 'description_' || true)
+            git commit -m "description: translate ${COUNT} file(s) via Cursor CLI [skip ci]"
+
+            if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+              BRANCH="${{ github.head_ref }}"
+            else
+              BRANCH="main"
+            fi
+
+            PUSHED=0
+            for i in 1 2 3 4 5; do
+              if git push origin "HEAD:${BRANCH}"; then
+                echo "Pushed successfully to ${BRANCH}."
+                PUSHED=1
+                break
+              fi
+              echo "Push rejected (attempt $i/5), rebasing onto origin/${BRANCH} ..."
+              git pull --rebase origin "${BRANCH}" || { echo "Rebase failed — aborting."; exit 1; }
+            done
+            if [ "$PUSHED" != 1 ]; then
+              echo "Failed to push after 5 attempts."
+              exit 1
+            fi
+          fi
+
+          if [ "${{ steps.translate.outcome }}" = "failure" ]; then
+            echo "Translation had failures — see the Translate step logs."
+            exit 1
+          fi

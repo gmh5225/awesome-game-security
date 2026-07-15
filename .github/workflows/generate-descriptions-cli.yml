@@ -30,7 +30,8 @@ jobs:
     # Refuse on forks / renamed mirrors — skipped jobs do not receive secrets.
     if: github.repository == 'gmh5225/awesome-game-security' && github.event.repository.fork == false
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    # No job timeout: agent runs unbounded; --commit-every 1 persists each repo.
+    # (GitHub-hosted runners still enforce a platform max ~6h.)
     permissions:
       contents: write
 
@@ -109,6 +110,7 @@ jobs:
           DESC_REPOS: ${{ inputs.repos }}
           DESC_MODEL: ${{ inputs.model }}
           DESC_LIMIT: ${{ inputs.limit }}
+          GIT_PUSH_BRANCH: main
         run: |
           set -euo pipefail
           if [ "${GITHUB_REPOSITORY}" != "gmh5225/awesome-game-security" ]; then
@@ -123,7 +125,7 @@ jobs:
 
           agent --version || true
 
-          ARGS=(--model "$DESC_MODEL")
+          ARGS=(--model "$DESC_MODEL" --commit-every 1)
 
           if [ "$DESC_LIMIT" != "0" ]; then
             ARGS+=(--limit "$DESC_LIMIT")
@@ -136,11 +138,11 @@ jobs:
           # No --repos-env ⇒ script scans archive/ and only fills missing descriptions.
           python3 scripts/generate-descriptions-cli.py "${ARGS[@]}"
 
-      - name: Commit & push descriptions
+      - name: Final commit (any remainder)
         if: steps.scan.outputs.missing_count != '0' || inputs.repos != ''
         run: |
           set -euo pipefail
-          # Sandbox is disabled; only keep description_en.txt artifacts.
+          # Per-repo commits already ran inside the script; this catches leftovers.
           while IFS= read -r f; do
             [ -z "$f" ] && continue
             git checkout -- "$f" 2>/dev/null || rm -rf -- "$f"
@@ -152,7 +154,7 @@ jobs:
 
           git add -- ':(glob)description/**/description_en.txt' 2>/dev/null || true
           if git diff --cached --quiet; then
-            echo "No description files to commit."
+            echo "No description files left to commit."
           else
             COUNT=$(git diff --cached --name-only | grep -c "description_en.txt" || true)
             git commit -m "description: fill ${COUNT} missing summary(ies) via Cursor CLI [skip ci]"

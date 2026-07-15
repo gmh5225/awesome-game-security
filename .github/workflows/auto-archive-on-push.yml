@@ -137,8 +137,8 @@ jobs:
       github.repository == 'gmh5225/awesome-game-security' &&
       github.event.repository.fork == false
     runs-on: ubuntu-latest
-    timeout-minutes: 120
-    # Least privilege for this job (inherit contents:write from workflow).
+    # No job timeout: Cursor Max Mode can run a long time; progress is saved via
+    # --commit-every 1. (GitHub-hosted runners still enforce a platform max ~6h.)
     permissions:
       contents: write
 
@@ -211,6 +211,7 @@ jobs:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           # Env-based handoff avoids shell metacharacter injection from README URLs.
           DESC_REPOS: ${{ needs.auto-archive.outputs.repos }}
+          GIT_PUSH_BRANCH: main
         run: |
           set -euo pipefail
           if [ "${GITHUB_REPOSITORY}" != "gmh5225/awesome-game-security" ]; then
@@ -227,12 +228,13 @@ jobs:
 
           python3 scripts/generate-descriptions-cli.py \
             --model cursor-grok-4.5-high-fast \
+            --commit-every 1 \
             --repos-env DESC_REPOS
 
-      - name: Commit & push descriptions
+      - name: Final commit (any remainder)
         run: |
           set -euo pipefail
-          # Sandbox is disabled; only keep description_en.txt artifacts.
+          # Per-repo commits already ran inside the script; this catches leftovers.
           while IFS= read -r f; do
             [ -z "$f" ] && continue
             git checkout -- "$f" 2>/dev/null || rm -rf -- "$f"
@@ -244,7 +246,7 @@ jobs:
 
           git add -- ':(glob)description/**/description_en.txt' 2>/dev/null || true
           if git diff --cached --quiet; then
-            echo "No description files to commit."
+            echo "No description files left to commit."
           else
             COUNT=$(git diff --cached --name-only | grep -c "description_en.txt" || true)
             git commit -m "description: add ${COUNT} summary(ies) via Cursor CLI [skip ci]"

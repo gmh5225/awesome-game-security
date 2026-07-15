@@ -45,9 +45,11 @@ DESC_DIR = ROOT_DIR / "description"
 DEFAULT_MODEL = "cursor-grok-4.5-high-fast"
 # Archives can be tens of MB; only ask the agent to read a bounded prefix.
 ARCHIVE_READ_BYTES = 200_000
-AGENT_TIMEOUT_SEC = 600
+# No per-agent wall clock — long Max Mode runs must not be killed mid-write.
+# GitHub-hosted jobs still have a platform cap (~6h); --commit-every saves progress.
 # GitHub owner/repo character set (reject shell metacharacters early).
 REPO_SLUG_RE = re.compile(r"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$")
+DESC_EN_KEEP_RE = re.compile(r"^description/[^/]+/[^/]+/description_en\.txt$")
 
 
 def get_api_key() -> str:
@@ -206,17 +208,13 @@ def run_agent(
 
     print(f"  $ {agent_bin} -p --force --trust --sandbox disabled --model {model} ...")
     started = time.time()
-    try:
-        proc = subprocess.run(
-            cmd,
-            cwd=ROOT_DIR,
-            env=os.environ.copy(),
-            timeout=AGENT_TIMEOUT_SEC,
-            check=False,
-        )
-    except subprocess.TimeoutExpired:
-        print(f"  TIMEOUT after {AGENT_TIMEOUT_SEC}s")
-        return 124
+    proc = subprocess.run(
+        cmd,
+        cwd=ROOT_DIR,
+        env=os.environ.copy(),
+        timeout=None,
+        check=False,
+    )
 
     elapsed = time.time() - started
     print(f"  exit={proc.returncode}  elapsed={elapsed:.1f}s")
@@ -225,20 +223,105 @@ def run_agent(
     if proc.returncode != 0 and "--trust" in cmd and elapsed < 2.0:
         print("  retrying without --trust (possible older CLI) ...")
         cmd_no_trust = [c for c in cmd if c != "--trust"]
-        try:
-            proc = subprocess.run(
-                cmd_no_trust,
-                cwd=ROOT_DIR,
-                env=os.environ.copy(),
-                timeout=AGENT_TIMEOUT_SEC,
-                check=False,
-            )
-        except subprocess.TimeoutExpired:
-            print(f"  TIMEOUT after {AGENT_TIMEOUT_SEC}s")
-            return 124
+        proc = subprocess.run(
+            cmd_no_trust,
+            cwd=ROOT_DIR,
+            env=os.environ.copy(),
+            timeout=None,
+            check=False,
+        )
         elapsed2 = time.time() - started
         print(f"  exit={proc.returncode}  elapsed={elapsed2:.1f}s (no --trust)")
     return proc.returncode
+
+
+def _git(*args: str, check: bool = True) -> subprocess.CompletedProcess[bytes]:
+    return subprocess.run(
+        ["git", *args],
+        cwd=ROOT_DIR,
+        capture_output=True,
+        check=check,
+    )
+
+
+def _discard_path(rel: str) -> None:
+    path = ROOT_DIR / rel
+    checked = _git("checkout", "--", rel, check=False)
+    if checked.returncode != 0 and path.exists():
+        if path.is_dir():
+            shutil.rmtree(path, ignore_errors=True)
+        else:
+            path.unlink(missing_ok=True)
+
+
+def discard_non_description_en(keep: list[Path] | None = None) -> None:
+    """Drop agent side-effects; only preserve the description_en.txt paths we intend to commit."""
+    keep_set = {str(p.relative_to(ROOT_DIR)) for p in (keep or [])}
+    proc = _git("ls-files", "-m", "-o", "--exclude-standard", check=False)
+    for line in proc.stdout.decode().splitlines():
+        rel = line.strip()
+        if not rel:
+            continue
+        if DESC_EN_KEEP_RE.match(rel):
+            # Revert other repos' description edits; keep only this commit batch.
+            if rel not in keep_set:
+                _discard_path(rel)
+            continue
+        _discard_path(rel)
+
+
+def git_commit_and_push_en(paths: list[Path], branch: str) -> bool:
+    """Commit+push description_en.txt files. False ⇒ caller should exit so CI Final can save."""
+    if not paths:
+        return True
+    discard_non_description_en(paths)
+    rels = [str(p.relative_to(ROOT_DIR)) for p in paths if p.is_file()]
+    if not rels:
+        return True
+    try:
+        _git("add", "--", *rels)
+        if _git("diff", "--cached", "--quiet", check=False).returncode == 0:
+            return True
+        msg = f"description: add {len(rels)} summary(ies) via Cursor CLI [skip ci]"
+        _git("commit", "-m", msg)
+    except subprocess.CalledProcessError as e:
+        err = (e.stderr or b"").decode().strip()[:200]
+        print(f"  [GIT ERROR] commit: {err or e}")
+        return False
+
+    for attempt in range(1, 6):
+        try:
+            _git("push", "origin", f"HEAD:{branch}")
+            print(f"  [GIT] committed+pushed {len(rels)} file(s) → {branch}")
+            return True
+        except subprocess.CalledProcessError as e:
+            err = (e.stderr or b"").decode().strip()
+            if attempt >= 5:
+                print(f"  [GIT ERROR] push failed after 5 retries: {err[:200]}")
+                _git("reset", "HEAD~1", check=False)
+                return False
+            if any(k in err for k in ("rejected", "fetch first", "non-fast-forward")):
+                print(f"  [GIT] push rejected (attempt {attempt}/5), rebasing ...")
+                try:
+                    _git("pull", "--rebase", "origin", branch)
+                except subprocess.CalledProcessError as re_err:
+                    re_msg = (re_err.stderr or b"").decode().strip()[:200]
+                    print(f"  [GIT ERROR] rebase failed: {re_msg}")
+                    _git("rebase", "--abort", check=False)
+                    _git("reset", "HEAD~1", check=False)
+                    return False
+            elif any(
+                k in err
+                for k in ("408", "RPC failed", "unexpected disconnect", "timed out")
+            ):
+                wait = 5 * attempt
+                print(f"  [GIT] push timeout, retrying in {wait}s ...")
+                time.sleep(wait)
+            else:
+                print(f"  [GIT ERROR] push: {err[:200]}")
+                _git("reset", "HEAD~1", check=False)
+                return False
+    return False
 
 
 def main() -> None:
@@ -262,6 +345,12 @@ def main() -> None:
         type=int,
         default=0,
         help="Max repos to process in this run (0 = all)",
+    )
+    parser.add_argument(
+        "--commit-every",
+        type=int,
+        default=0,
+        help="Git commit+push every N successful repos (0 = no auto-commit; CI uses 1)",
     )
     parser.add_argument(
         "--skip-existing",
@@ -297,6 +386,8 @@ def main() -> None:
 
     if args.limit < 0:
         sys.exit("ERROR: --limit must be >= 0")
+    if args.commit_every < 0:
+        sys.exit("ERROR: --commit-every must be >= 0")
 
     # Default path (no --repos / --repos-env): fill every archive that lacks a description.
     scan_missing = list_missing_descriptions()
@@ -347,6 +438,25 @@ def main() -> None:
         return
 
     ok = fail = 0
+    pending_commit: list[Path] = []
+    kept_outputs: list[Path] = []
+    repos_since_commit = 0
+    push_branch = os.environ.get("GIT_PUSH_BRANCH", "main").strip() or "main"
+    if args.commit_every:
+        print(f"Commit every         : {args.commit_every} (branch={push_branch})")
+
+    def flush_commits() -> None:
+        nonlocal pending_commit, repos_since_commit, kept_outputs
+        if pending_commit:
+            committed = list(pending_commit)
+            if not git_commit_and_push_en(pending_commit, push_branch):
+                sys.exit(1)
+            pending_commit = []
+            # Stop protecting already-pushed files from later agent side-effects.
+            committed_set = set(committed)
+            kept_outputs = [p for p in kept_outputs if p not in committed_set]
+        repos_since_commit = 0
+
     for i, (owner, repo) in enumerate(pending, start=1):
         print(f"\n[{i}/{len(pending)}] {owner}/{repo}")
         prompt = build_prompt(owner, repo)
@@ -361,6 +471,14 @@ def main() -> None:
             if code != 0:
                 print(f"  note: agent exit={code}, but description file is present — counting as ok")
             ok += 1
+            kept_outputs.append(out)
+            # Drop agent side-effects; keep this run's outputs (+ unpushed commit batch).
+            discard_non_description_en(pending_commit + kept_outputs)
+            if args.commit_every:
+                pending_commit.append(out)
+                repos_since_commit += 1
+                if repos_since_commit >= args.commit_every:
+                    flush_commits()
         else:
             print(f"  FAILED (exit={code}, exists={out.is_file()})")
             # Remove empty stubs so the next run still sees this repo as missing.
@@ -368,6 +486,11 @@ def main() -> None:
                 out.unlink()
                 print(f"  removed empty stub {out.relative_to(ROOT_DIR)}")
             fail += 1
+            # Still scrub side-effects from the failed agent run.
+            discard_non_description_en(pending_commit + kept_outputs)
+
+    if args.commit_every and not args.dry_run:
+        flush_commits()
 
     print(f"\nSummary: ok={ok} fail={fail}")
     if fail:
