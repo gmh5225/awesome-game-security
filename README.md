@@ -1727,6 +1727,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Comsecuris/gdbghidra [GDB session]
 - https://github.com/hyuunnn/Hyara [Yara]
 - https://github.com/Deatty/Ghidra-Obfuscation-Detection [Detect obfuscated/complex code]
+- https://github.com/Marisa-Chan/GhidrOrean [Ghidra Python scripts: Oreans VM (Themida/Code Virtualizer) DeVirt — Deathway Unvirtualizer reimplementation; CISC/TIGER]
 - https://github.com/advanced-threat-research/GhidraScripts [Some scripts]
 - https://github.com/fuzzypickles14/BetterStringAnalyzer [A better string analyzer for Ghidra]
 - https://github.com/clearbluejar/ghidriff [Python Command-Line Ghidra Binary Diffing Engine]
