@@ -1,5 +1,6 @@
 name: Generate Repo Descriptions
 
+# Secret safety: workflow_dispatch only; no PR triggers; fork jobs gated below.
 on:
   workflow_dispatch:
     inputs:
@@ -28,10 +29,23 @@ on:
 
 jobs:
   generate:
+    if: github.repository == 'gmh5225/awesome-game-security' && github.event.repository.fork == false
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      - name: Assert canonical repository
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_REPOSITORY}" != "gmh5225/awesome-game-security" ]; then
+            echo "Refusing to run outside canonical repository."
+            exit 1
+          fi
+          if [ "${GITHUB_EVENT_NAME}" != "workflow_dispatch" ]; then
+            echo "Refusing unexpected event: ${GITHUB_EVENT_NAME}"
+            exit 1
+          fi
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0   # need full history for merging remote branches
@@ -47,6 +61,16 @@ jobs:
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
         run: |
+          set -euo pipefail
+          if [ "${GITHUB_REPOSITORY}" != "gmh5225/awesome-game-security" ]; then
+            echo "Refusing to use CURSOR_API_KEY outside canonical repository."
+            exit 1
+          fi
+          if [ -z "${CURSOR_API_KEY:-}" ]; then
+            echo "ERROR: CURSOR_API_KEY secret is not set."
+            exit 1
+          fi
+
           ARGS="--batch-size ${{ inputs.batch_size }}"
 
           if [ "${{ inputs.limit }}" != "0" ]; then

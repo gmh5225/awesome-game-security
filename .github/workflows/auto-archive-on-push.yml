@@ -1,5 +1,10 @@
 name: Auto Archive New Repos on Push
 
+# Secret safety:
+# - Triggers only on push to main (not pull_request / pull_request_target).
+# - Fork PRs never receive this repo's Actions secrets (GitHub platform rule).
+# - Forks do not inherit CURSOR_API_KEY; jobs below also refuse to run outside
+#   the canonical repo so a forked workflow cannot usefully bind our secret.
 on:
   push:
     branches:
@@ -12,8 +17,11 @@ permissions:
 
 jobs:
   auto-archive:
+    if: github.repository == 'gmh5225/awesome-game-security' && github.event.repository.fork == false
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    outputs:
+      repos: ${{ steps.diff.outputs.repos }}
 
     steps:
       - name: Checkout
@@ -70,11 +78,27 @@ jobs:
         if: steps.diff.outputs.repos != ''
         env:
           REPO_SNAPSHOT_HOST: ${{ secrets.REPO_SNAPSHOT_HOST }}
+          # Pass via env (not ${{ }} in the script body) to avoid shell injection.
+          ARCHIVE_REPOS: ${{ steps.diff.outputs.repos }}
         run: |
+          set -euo pipefail
+          REPOS=()
+          # shellcheck disable=SC2086
+          for slug in $ARCHIVE_REPOS; do
+            if [[ ! "$slug" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]]; then
+              echo "ERROR: invalid repo slug from README diff: $slug"
+              exit 1
+            fi
+            REPOS+=("$slug")
+          done
+          if [ "${#REPOS[@]}" -eq 0 ]; then
+            echo "ERROR: ARCHIVE_REPOS was empty after parsing."
+            exit 1
+          fi
           python3 scripts/archive-repos.py \
             --workers 3 \
             --commit-every 5 \
-            --repos ${{ steps.diff.outputs.repos }}
+            --repos "${REPOS[@]}"
 
       - name: Final commit (any remainder)
         if: steps.diff.outputs.repos != ''
@@ -88,11 +112,160 @@ jobs:
           COUNT=$(git diff --cached --name-only | grep -c "^archive/" || true)
           git commit -m "archive: add ${COUNT} repo prompt(s) [skip ci]"
 
+          PUSHED=0
           for i in 1 2 3 4 5; do
             if git push; then
               echo "Pushed successfully."
+              PUSHED=1
               break
             fi
             echo "Push rejected (attempt $i/5), rebasing ..."
             git pull --rebase origin main || { echo "Rebase failed — aborting."; exit 1; }
           done
+          if [ "$PUSHED" != 1 ]; then
+            echo "Failed to push after 5 attempts."
+            exit 1
+          fi
+
+  # After archives land on main, summarize each new repo with Cursor CLI.
+  generate-descriptions:
+    needs: auto-archive
+    # Hard gate: canonical repo only + not a fork + archive job found work.
+    # Skipped jobs never materialize secrets.* into the runner environment.
+    if: >-
+      needs.auto-archive.outputs.repos != '' &&
+      github.repository == 'gmh5225/awesome-game-security' &&
+      github.event.repository.fork == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    # Least privilege for this job (inherit contents:write from workflow).
+    permissions:
+      contents: write
+
+    steps:
+      - name: Assert canonical repository
+        run: |
+          set -euo pipefail
+          echo "repository=${GITHUB_REPOSITORY}"
+          echo "event_name=${GITHUB_EVENT_NAME}"
+          echo "ref=${GITHUB_REF}"
+          if [ "${GITHUB_REPOSITORY}" != "gmh5225/awesome-game-security" ]; then
+            echo "Refusing to run outside canonical repository."
+            exit 1
+          fi
+          if [ "${GITHUB_EVENT_NAME}" != "push" ]; then
+            echo "Refusing unexpected event: ${GITHUB_EVENT_NAME}"
+            exit 1
+          fi
+          if [ "${GITHUB_REF}" != "refs/heads/main" ]; then
+            echo "Refusing unexpected ref: ${GITHUB_REF}"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Pick up archive commits pushed by the previous job.
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Ensure latest main (post-archive)
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Install Cursor CLI
+        run: |
+          curl https://cursor.com/install -fsS | bash
+          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
+
+      - name: Enable Max Mode
+        run: |
+          mkdir -p "$HOME/.cursor"
+          cat > "$HOME/.cursor/cli-config.json" <<'EOF'
+          {
+            "version": 1,
+            "editor": { "vimMode": false },
+            "permissions": { "allow": [], "deny": [] },
+            "maxMode": true,
+            "approvalMode": "unrestricted",
+            "attribution": {
+              "attributeCommitsToAgent": false,
+              "attributePRsToAgent": false
+            }
+          }
+          EOF
+          echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Generate descriptions via Cursor CLI
+        id: generate
+        continue-on-error: true
+        env:
+          # Injected only into this step on the canonical non-fork job above.
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          # Env-based handoff avoids shell metacharacter injection from README URLs.
+          DESC_REPOS: ${{ needs.auto-archive.outputs.repos }}
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_REPOSITORY}" != "gmh5225/awesome-game-security" ]; then
+            echo "Refusing to use CURSOR_API_KEY outside canonical repository."
+            exit 1
+          fi
+          if [ -z "${CURSOR_API_KEY:-}" ]; then
+            echo "ERROR: CURSOR_API_KEY secret is not set."
+            echo "Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+          agent --version || true
+
+          python3 scripts/generate-descriptions-cli.py \
+            --model cursor-grok-4.5-high-fast \
+            --repos-env DESC_REPOS
+
+      - name: Commit & push descriptions
+        run: |
+          set -euo pipefail
+          # Sandbox is disabled; only keep description_en.txt artifacts.
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            git checkout -- "$f" 2>/dev/null || rm -rf -- "$f"
+          done < <(
+            git ls-files -m -o --exclude-standard \
+              | grep -v -E '^description/[^/]+/[^/]+/description_en\.txt$' \
+              || true
+          )
+
+          git add -- ':(glob)description/**/description_en.txt' 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No description files to commit."
+          else
+            COUNT=$(git diff --cached --name-only | grep -c "description_en.txt" || true)
+            git commit -m "description: add ${COUNT} summary(ies) via Cursor CLI [skip ci]"
+
+            PUSHED=0
+            for i in 1 2 3 4 5; do
+              if git push; then
+                echo "Pushed successfully."
+                PUSHED=1
+                break
+              fi
+              echo "Push rejected (attempt $i/5), rebasing ..."
+              git pull --rebase origin main || { echo "Rebase failed — aborting."; exit 1; }
+            done
+            if [ "$PUSHED" != 1 ]; then
+              echo "Failed to push after 5 attempts."
+              exit 1
+            fi
+          fi
+
+          if [ "${{ steps.generate.outcome }}" = "failure" ]; then
+            echo "Generation had failures — see the Generate step logs."
+            exit 1
+          fi

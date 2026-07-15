@@ -1,0 +1,179 @@
+name: Fill Missing Descriptions (Cursor CLI)
+
+# Manual trigger: scan archive/ for repos that lack description_en.txt, then
+# summarize them with Cursor CLI (cursor-grok-4.5-high-fast, max mode).
+# New README entries are still handled automatically by auto-archive-on-push.yml.
+#
+# Secret safety:
+# - workflow_dispatch only (write access required on this repo to click Run).
+# - No pull_request / pull_request_target — fork PRs cannot start this job with
+#   our secrets. Forks never inherit repository secrets from upstream.
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Max missing repos to process (0 = all missing)"
+        required: false
+        default: "0"
+      repos:
+        description: "Optional space-separated owner/repo list (empty = scan all missing)"
+        required: false
+        default: ""
+      model:
+        description: "Cursor CLI model id"
+        required: false
+        default: "cursor-grok-4.5-high-fast"
+
+jobs:
+  fill-missing:
+    # Refuse on forks / renamed mirrors — skipped jobs do not receive secrets.
+    if: github.repository == 'gmh5225/awesome-game-security' && github.event.repository.fork == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      contents: write
+
+    steps:
+      - name: Assert canonical repository
+        run: |
+          set -euo pipefail
+          echo "repository=${GITHUB_REPOSITORY}"
+          echo "event_name=${GITHUB_EVENT_NAME}"
+          echo "actor=${GITHUB_ACTOR}"
+          if [ "${GITHUB_REPOSITORY}" != "gmh5225/awesome-game-security" ]; then
+            echo "Refusing to run outside canonical repository."
+            exit 1
+          fi
+          if [ "${GITHUB_EVENT_NAME}" != "workflow_dispatch" ]; then
+            echo "Refusing unexpected event: ${GITHUB_EVENT_NAME}"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - name: Scan archive/ for missing descriptions
+        id: scan
+        run: |
+          set -euo pipefail
+          python3 scripts/generate-descriptions-cli.py --list-missing | tee /tmp/missing-scan.txt
+          MISSING=$(grep -E '^MISSING_COUNT=' /tmp/missing-scan.txt | tail -1 | cut -d= -f2 || true)
+          if ! [[ "${MISSING}" =~ ^[0-9]+$ ]]; then
+            echo "ERROR: failed to parse MISSING_COUNT from scan output."
+            exit 1
+          fi
+          echo "missing_count=$MISSING" >> "$GITHUB_OUTPUT"
+          echo "Found $MISSING archive(s) without description_en.txt"
+
+      - name: Skip if nothing missing
+        if: steps.scan.outputs.missing_count == '0' && inputs.repos == ''
+        run: echo "All archived repos already have descriptions — nothing to do."
+
+      - name: Install Cursor CLI
+        if: steps.scan.outputs.missing_count != '0' || inputs.repos != ''
+        run: |
+          curl https://cursor.com/install -fsS | bash
+          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
+
+      - name: Enable Max Mode
+        if: steps.scan.outputs.missing_count != '0' || inputs.repos != ''
+        run: |
+          mkdir -p "$HOME/.cursor"
+          cat > "$HOME/.cursor/cli-config.json" <<'EOF'
+          {
+            "version": 1,
+            "editor": { "vimMode": false },
+            "permissions": { "allow": [], "deny": [] },
+            "maxMode": true,
+            "approvalMode": "unrestricted",
+            "attribution": {
+              "attributeCommitsToAgent": false,
+              "attributePRsToAgent": false
+            }
+          }
+          EOF
+          echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
+
+      - name: Configure git
+        if: steps.scan.outputs.missing_count != '0' || inputs.repos != ''
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fill missing descriptions via Cursor CLI
+        id: generate
+        if: steps.scan.outputs.missing_count != '0' || inputs.repos != ''
+        continue-on-error: true
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          DESC_REPOS: ${{ inputs.repos }}
+          DESC_MODEL: ${{ inputs.model }}
+          DESC_LIMIT: ${{ inputs.limit }}
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_REPOSITORY}" != "gmh5225/awesome-game-security" ]; then
+            echo "Refusing to use CURSOR_API_KEY outside canonical repository."
+            exit 1
+          fi
+          if [ -z "${CURSOR_API_KEY:-}" ]; then
+            echo "ERROR: CURSOR_API_KEY secret is not set."
+            echo "Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+          agent --version || true
+
+          ARGS=(--model "$DESC_MODEL")
+
+          if [ "$DESC_LIMIT" != "0" ]; then
+            ARGS+=(--limit "$DESC_LIMIT")
+          fi
+
+          if [ -n "$DESC_REPOS" ]; then
+            ARGS+=(--repos-env DESC_REPOS)
+          fi
+
+          # No --repos-env ⇒ script scans archive/ and only fills missing descriptions.
+          python3 scripts/generate-descriptions-cli.py "${ARGS[@]}"
+
+      - name: Commit & push descriptions
+        if: steps.scan.outputs.missing_count != '0' || inputs.repos != ''
+        run: |
+          set -euo pipefail
+          # Sandbox is disabled; only keep description_en.txt artifacts.
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            git checkout -- "$f" 2>/dev/null || rm -rf -- "$f"
+          done < <(
+            git ls-files -m -o --exclude-standard \
+              | grep -v -E '^description/[^/]+/[^/]+/description_en\.txt$' \
+              || true
+          )
+
+          git add -- ':(glob)description/**/description_en.txt' 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No description files to commit."
+          else
+            COUNT=$(git diff --cached --name-only | grep -c "description_en.txt" || true)
+            git commit -m "description: fill ${COUNT} missing summary(ies) via Cursor CLI [skip ci]"
+
+            PUSHED=0
+            for i in 1 2 3 4 5; do
+              if git push; then
+                echo "Pushed successfully."
+                PUSHED=1
+                break
+              fi
+              echo "Push rejected (attempt $i/5), rebasing ..."
+              git pull --rebase origin main || { echo "Rebase failed — aborting."; exit 1; }
+            done
+            if [ "$PUSHED" != 1 ]; then
+              echo "Failed to push after 5 attempts."
+              exit 1
+            fi
+          fi
+
+          if [ "${{ steps.generate.outcome }}" = "failure" ]; then
+            echo "Generation had failures — see the Fill step logs."
+            exit 1
+          fi
