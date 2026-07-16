@@ -8,9 +8,11 @@ sources:
   - wiki/sources/descriptions/zyhp__vac3_inhibitor.md
   - wiki/sources/descriptions/zxd1994__vt-debuuger.md
   - wiki/sources/descriptions/zx0CF1__shredder-rs.md
+  - wiki/sources/descriptions/zouxianyu__BlindEye.md
 updated: 2026-07-16
 confidence: high
 ---
+
 
 # Anti-Cheat
 
@@ -19,10 +21,11 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 ## Major systems
 
 - [[easy-anti-cheat]] — service + driver + game-facing integrity (Fortnite, Apex, Rust)
-- [[battleye]] — handle protection, process/memory scanning (PUBG, R6, DayZ)
+- [[battleye]] — handle protection, process/memory scanning (PUBG, R6, DayZ); research ref [[blindeye]] drops BE report-path pool allocs via hooked `ExAllocatePool*` (source: wiki/sources/descriptions/zouxianyu__BlindEye.md)
 - [[vanguard]] — boot-start driver, early driver allowlisting (Valorant, LoL)
 - FACEIT AC, VAC (user-mode signatures), GameGuard, XIGNCODE3, ACE
 - [[vac3-inhibitor]] — C++ VAC3 exploration (hooking / memory analysis) under cheat → explore anticheat:vac (source: wiki/sources/descriptions/zyhp__vac3_inhibitor.md)
+
 
 ## Key sub-areas
 
@@ -38,7 +41,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vt-debuuger]] · [[shredder-rs]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vt-debuuger]] · [[shredder-rs]] · [[blindeye]]
 
 ## README map
 
