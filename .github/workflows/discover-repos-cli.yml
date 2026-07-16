@@ -1,0 +1,201 @@
+name: Discover Repos (Cursor CLI)
+
+# Scan GitHub for theme-related repos using README headings, then run TWO
+# Cursor CLI passes (relevance screen → confirm + placement). A PR is opened
+# only if both passes agree, the target section already exists, and the URL
+# is present in README.md. Human review still required before merge.
+#
+# Triggers:
+# - schedule: daily 08:00 UTC
+# - workflow_dispatch: tunable lookback / limits / model / queries
+#
+# Secret safety:
+# - Canonical repo only; forks never inherit CURSOR_API_KEY.
+# - No pull_request / pull_request_target.
+
+on:
+  schedule:
+    # 08:00 UTC daily
+    - cron: "0 8 * * *"
+
+  workflow_dispatch:
+    inputs:
+      lookback_days:
+        description: "Only repos pushed within this many days"
+        required: false
+        default: "3"
+      max_candidates:
+        description: "Max candidates after merge/dedupe"
+        required: false
+        default: "30"
+      min_stars:
+        description: "Minimum stars filter"
+        required: false
+        default: "3"
+      max_queries:
+        description: "Cap README-derived search queries (0 = no cap)"
+        required: false
+        default: "300"
+      model:
+        description: "Cursor CLI model id"
+        required: false
+        default: "cursor-grok-4.5-high-fast"
+      queries:
+        description: "Optional extra queries appended to README headings (newline or ||; empty = README-only)"
+        required: false
+        default: ""
+
+concurrency:
+  group: discover-repos
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    if: github.repository == 'gmh5225/awesome-game-security' && github.event.repository.fork == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Assert canonical repository
+        run: |
+          set -euo pipefail
+          echo "repository=${GITHUB_REPOSITORY}"
+          echo "event_name=${GITHUB_EVENT_NAME}"
+          echo "actor=${GITHUB_ACTOR}"
+          if [ "${GITHUB_REPOSITORY}" != "gmh5225/awesome-game-security" ]; then
+            echo "Refusing to run outside canonical repository."
+            exit 1
+          fi
+          case "${GITHUB_EVENT_NAME}" in
+            schedule|workflow_dispatch) ;;
+            *)
+              echo "Refusing unexpected event: ${GITHUB_EVENT_NAME}"
+              exit 1
+              ;;
+          esac
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Resolve inputs
+        id: opts
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            LOOKBACK="${{ inputs.lookback_days }}"
+            MAX_CAND="${{ inputs.max_candidates }}"
+            MIN_STARS="${{ inputs.min_stars }}"
+            MAX_QUERIES="${{ inputs.max_queries }}"
+            MODEL="${{ inputs.model }}"
+            QUERIES="${{ inputs.queries }}"
+          else
+            LOOKBACK="3"
+            MAX_CAND="30"
+            MIN_STARS="3"
+            MAX_QUERIES="300"
+            MODEL="cursor-grok-4.5-high-fast"
+            QUERIES=""
+          fi
+
+          for name in LOOKBACK MAX_CAND MIN_STARS MAX_QUERIES; do
+            val="${!name}"
+            if ! [[ "${val}" =~ ^[0-9]+$ ]]; then
+              echo "ERROR: ${name} must be an integer, got: ${val}"
+              exit 1
+            fi
+          done
+
+          {
+            echo "lookback_days=${LOOKBACK}"
+            echo "max_candidates=${MAX_CAND}"
+            echo "min_stars=${MIN_STARS}"
+            echo "max_queries=${MAX_QUERIES}"
+            echo "model<<EOF"
+            printf '%s\n' "${MODEL}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "DISCOVER_QUERIES<<EOF"
+            printf '%s\n' "${QUERIES}"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+
+          echo "lookback_days=${LOOKBACK}"
+          echo "max_candidates=${MAX_CAND}"
+          echo "min_stars=${MIN_STARS}"
+          echo "max_queries=${MAX_QUERIES}"
+          echo "model=${MODEL}"
+
+      - name: Install Cursor CLI
+        run: |
+          curl https://cursor.com/install -fsS | bash
+          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
+
+      - name: Enable Max Mode
+        run: |
+          mkdir -p "$HOME/.cursor"
+          cat > "$HOME/.cursor/cli-config.json" <<'EOF'
+          {
+            "version": 1,
+            "editor": { "vimMode": false },
+            "permissions": { "allow": [], "deny": [] },
+            "maxMode": true,
+            "approvalMode": "unrestricted",
+            "attribution": {
+              "attributeCommitsToAgent": false,
+              "attributePRsToAgent": false
+            }
+          }
+          EOF
+          echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Discover + 2-pass review + open PR
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          PYTHONUNBUFFERED: "1"
+          LOOKBACK: ${{ steps.opts.outputs.lookback_days }}
+          MAX_CAND: ${{ steps.opts.outputs.max_candidates }}
+          MIN_STARS: ${{ steps.opts.outputs.min_stars }}
+          MAX_QUERIES: ${{ steps.opts.outputs.max_queries }}
+          DESC_MODEL: ${{ steps.opts.outputs.model }}
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_REPOSITORY}" != "gmh5225/awesome-game-security" ]; then
+            echo "Refusing to use CURSOR_API_KEY outside canonical repository."
+            exit 1
+          fi
+          if [ -z "${CURSOR_API_KEY:-}" ]; then
+            echo "ERROR: CURSOR_API_KEY secret is not set."
+            echo "Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+          agent --version || true
+          gh --version || true
+
+          ARGS=(
+            --lookback-days "$LOOKBACK"
+            --max-candidates "$MAX_CAND"
+            --min-stars "$MIN_STARS"
+            --max-queries "$MAX_QUERIES"
+            --model "$DESC_MODEL"
+            --create-pr
+            --run-id "${GITHUB_RUN_ID}"
+          )
+
+          if [ -n "${DISCOVER_QUERIES//[[:space:]]/}" ]; then
+            ARGS+=(--queries-env DISCOVER_QUERIES)
+          fi
+
+          python3 scripts/discover-repos-cli.py "${ARGS[@]}"
