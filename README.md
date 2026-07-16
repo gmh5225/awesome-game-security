@@ -157,6 +157,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/alliedmodders/hl2sdk [Half-Life SDK]
 - https://github.com/ezhangle/hlmaster [Half-Life Master Server]
 - https://github.com/MonoGame/MonoGame [.NET]
+- https://github.com/libgdx/libgdx [Cross-platform Java game development framework]
 - https://github.com/vchelaru/FlatRedBall [.NET 2D]
 - https://github.com/nCine/nCine [2D]
 - https://github.com/gameplay3d/gameplay [2D/3D]
@@ -168,6 +169,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/melonjs/melonJS [HTML5]
 - https://github.com/egret-labs/egret-core [HTML5]
 - https://github.com/pixijs/pixijs [HTML5]
+- https://github.com/BabylonJS/Babylon.js [HTML5/WebGL/WebGPU game and rendering engine]
 - https://github.com/playcanvas/engine [HTML5 3D]
 - https://github.com/TorqueGameEngines/Torque2D [2D]
 - https://github.com/TorqueGameEngines/Torque3D [3D]
@@ -210,6 +212,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/PanosK92/SpartanEngine [Research-focused game engine designed for real-time solutions]
 - https://github.com/OpenXRay/xray-16 [Improved version of the X-Ray Engine]
 - https://github.com/love2d/love [2D game framework for Lua]
+- https://github.com/4ian/GDevelop [Open-source cross-platform 2D/3D/multiplayer game engine]
 - https://github.com/PixelGuys/Cubyz [3D voxel sandbox game written by Zig language]
 - https://github.com/RSDKModding/RSDKv5-Decompilation [Retro Engine v5 / v5Ultimate decompilation]
 
@@ -953,6 +956,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/fjqisba/VmpHelper
 - https://github.com/xtremegamer1/vmdevirt-vtil
 - https://github.com/oureveryday/VMPUnpacker/tree/master [Unpacker]
+- https://github.com/void-stack/VMUnprotect.Dumper [Dynamically untamper/unpack VMProtect-protected .NET assemblies]
+- https://github.com/void-stack/VMUnprotect [Dynamically log/manipulate VMProtect-virtualized .NET methods via Harmony]
 - https://github.com/poppopjmp/VMDragonSlayer [Advanced Virtual Machine Detection and Analysis Framework]
 - https://github.com/notsnakesilent/VMPStatic [A static VMProtect unpacker for PE files, supports VMProtect 1.x–3.x and rebuilding unpacked PE images]
 
@@ -1818,6 +1823,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/FreeER/CE-Extensions [Lua Extensions]
 - https://github.com/Skyrimfus/CE-lua-extensions [Lua Extensions]
 - https://github.com/bbfox0703/Mydev-Cheat-Engine-Tables [CT]
+- https://github.com/Hexorg/CheatEngineTables [Collection of Cheat Engine tables curated from CE forums (offline-focused)]
 - https://github.com/inuNorii/Elden-Ring-CT-TGA [Elden Ring]
 - https://github.com/gmh5225/CE-remap-plugin [Remap]
 - https://github.com/gmh5225/overwatch-iat-fixer [Overwatch IAT Fixer]
@@ -3892,6 +3898,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Alcatraz
 - https://github.com/es3n1n/obfuscator
 - https://github.com/ykus4/kagura [LLVM pass plugin for CFG/string obfuscation, anti-tamper, and anti-debug across mobile/desktop/Wasm]
+- https://github.com/nkhmelni/Obscura [Hassle-free LLVM pass-plugin obfuscator for C/C++/ObjC/Swift]
 - https://github.com/jnastarot/furikuri
 - https://github.com/nickcano/RelocBonus [Attack Reloc]
 - https://github.com/maoabc/nmmp [Dex]
@@ -3900,6 +3907,11 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/nelfo/Milfuscator
 - https://github.com/romainthomas/the-poor-mans-obfuscator [elf/macho]
 - https://github.com/Guardsquare/proguard [Java]
+- https://github.com/javascript-obfuscator/javascript-obfuscator [JavaScript/Node.js obfuscator]
+- https://github.com/burrowers/garble [Go build-time obfuscator]
+- https://github.com/dashingsoft/pyarmor [Python script obfuscator with machine-binding and expiry options]
+- https://github.com/rockbruno/swiftshield [Swift identifier obfuscator for iOS apps against RE]
+- https://github.com/sfr-development/Lua-Obfuscator-Clyde-Protection [Luau/Lua VM-based obfuscator for Roblox script protection]
 - https://github.com/xiaoweime/WProtect
 - https://github.com/DeDf/WProtect
 - https://github.com/jokerNi/WProtectSDK
@@ -3913,6 +3925,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/EntropyReducer [Reduce Entropy]
 - https://github.com/Washi1337/AwaitFuscator [.NET]
 - https://github.com/obfuscar/obfuscar [Open-source .NET assembly obfuscator]
+- https://github.com/nak0823/ObfuscationMethods [C#/.NET assembly obfuscation technique demos using dnlib]
 - https://github.com/badhive/stitch [X86: Rewrite and obfuscate code in compiled binaries]
 - https://github.com/0xMohammedHassan/morphkatz [Polymorphic PE rewriter for Windows x64; semantically identical but byte-different binary variants]
 - https://github.com/keowu/Ryujin [X86 PE BIN2BIN]
