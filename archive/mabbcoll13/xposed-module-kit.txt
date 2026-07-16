@@ -1,0 +1,926 @@
+Project Path: arc_mabbcoll13_xposed-module-kit_wcos4s18
+
+Source Tree:
+
+```txt
+arc_mabbcoll13_xposed-module-kit_wcos4s18
+├── LICENSE
+├── README.md
+├── app
+│   ├── build.gradle
+│   ├── proguard-rules.pro
+│   └── src
+│       └── main
+│           ├── AndroidManifest.xml
+│           └── java
+│               └── com
+│                   └── qtphone
+│                       └── xposedkit
+│                           ├── MainHook.java
+│                           ├── XKitLogger.java
+│                           └── hooks
+│                               ├── HookTemplate.java
+│                               ├── MethodHook.java
+│                               └── PackageHook.java
+├── build.gradle
+├── examples
+│   └── bypass_root_check
+│       ├── RootCheckBypass.java
+│       └── xposed_init
+├── gradle.properties
+├── settings.gradle
+└── src
+    └── utils
+        ├── __pycache__
+        │   ├── class_scanner.cpython-311.pyc
+        │   └── logger.cpython-311.pyc
+        ├── class_scanner.py
+        └── logger.py
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 qtphone.com
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Xposed Module Kit
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+A batteries-included scaffold for building **Xposed / LSPosed** modules on Android,
+plus a small set of command-line helpers for discovering hook targets.
+
+> 📧 Contact / 联系方式: **qtphone.com**
+
+---
+
+## Features
+
+- Gradle build configuration for Xposed / LSPosed modules (api 82 → 93).
+- Reusable hook templates under `src/hooks/`:
+  - `HookTemplate` – abstract base for before/after hooks.
+  - `MethodHook` – hook a single method by name + signature (defensive).
+  - `PackageHook` – scope hooks to a target package.
+- `src/utils/` Python tools for offline analysis:
+  - `logger.py` – colored console logger.
+  - `class_scanner.py` – parse compiled `.class` files (or a `.jar`) and emit
+    ready-to-use hook stubs.
+- `examples/bypass_root_check/` – worked example: neutralise common
+  root-detection logic (File.exists on `su`, `Runtime.exec`, `Build.TAGS`).
+
+## Project layout
+
+```
+xposed-module-kit/
+├── build.gradle / settings.gradle / gradle.properties
+├── app/                         # Android module project
+│   ├── build.gradle
+│   └── src/main/java/com/qtphone/xposedkit/
+│       ├── MainHook.java        # IXposedHookLoadPackage entry
+│       ├── XKitLogger.java
+│       └── hooks/               # HookTemplate / MethodHook / PackageHook
+├── examples/bypass_root_check/  # Root-detection bypass example
+└── src/utils/                   # Python dev tooling
+    ├── logger.py
+    └── class_scanner.py
+```
+
+## Building the module
+
+```bash
+# Requires Android SDK + JDK 17
+./gradlew assembleRelease
+# install the generated APK, then enable the module in LSPosed.
+```
+
+## Using class_scanner.py
+
+```bash
+cd src/utils
+python class_scanner.py path/to/decompiled/classes --filter com.example --emit-hooks
+```
+
+This prints every non-constructor method and a copy-pasteable
+`MethodHook.hookMethod(...)` line for each.
+
+## Disclaimer
+
+Provided for **security research, education and lawful testing** on devices and
+apps you own or are authorised to test. The authors are not responsible for
+misuse.
+
+```
+
+`app/build.gradle`:
+
+```gradle
+apply plugin: 'com.android.application'
+
+android {
+    namespace 'com.qtphone.xposedkit'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.qtphone.xposedkit"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // Xposed / LSPosed bridge (provided at runtime by the framework)
+    compileOnly 'de.robv.android.xposed:api:82'
+    compileOnly 'de.robv.android.xposed:api:82:sources'
+
+    implementation 'androidx.annotation:annotation:1.7.0'
+}
+
+```
+
+`app/proguard-rules.pro`:
+
+```pro
+# Keep Xposed entry points and annotated hooks.
+-keep class com.qtphone.xposedkit.** { *; }
+-keep class * implements de.robv.android.xposed.IXposedMod { *; }
+-keep class * implements de.robv.android.xposed.IXposedHookLoadPackage { *; }
+-keepattributes *Annotation*
+
+```
+
+`app/src/main/AndroidManifest.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Xposed module meta-data consumed by the Xposed Installer / LSPosed. -->
+    <meta-data
+        android:name="xposedmodule"
+        android:value="true" />
+    <meta-data
+        android:name="xposeddescription"
+        android:value="Xposed/LSPosed module development kit by qtphone.com" />
+    <meta-data
+        android:name="xposedminversion"
+        android:value="82" />
+    <meta-data
+        android:name="xposedmaxversion"
+        android:value="93" />
+
+    <application
+        android:allowBackup="true"
+        android:label="Xposed Module Kit"
+        android:supportsRtl="true" />
+</manifest>
+
+```
+
+`app/src/main/java/com/qtphone/xposedkit/MainHook.java`:
+
+```java
+package com.qtphone.xposedkit;
+
+import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
+
+import com.qtphone.xposedkit.hooks.MethodHook;
+import com.qtphone.xposedkit.hooks.PackageHook;
+
+/**
+ * Main Xposed entry point. The framework loads this class and calls
+ * {@link #handleLoadPackage(LoadPackageParam)} whenever any app is loaded.
+ *
+ * Register your own hooks here, or use {@link PackageHook} to scope hooks to
+ * a specific target package.
+ */
+public class MainHook implements IXposedHookLoadPackage {
+
+    @Override
+    public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
+        final String pkg = lpparam.packageName;
+        XKitLogger.debug("Loaded package: " + pkg);
+
+        // Example: register a generic method hook scoped to the system server.
+        if ("android".equals(pkg)) {
+            MethodHook.hookMethod(lpparam,
+                    "android.os.SystemProperties",
+                    "get",
+                    new Class<?>[]{String.class},
+                    (param) -> {
+                        XKitLogger.debug("SystemProperties.get(" + param.args[0] + ")");
+                        return null; // return null => proceed normally
+                    });
+        }
+
+        // Example: scope an entire package of hooks.
+        if (pkg.startsWith("com.example.target")) {
+            PackageHook.hookPackage(lpparam);
+        }
+    }
+}
+
+```
+
+`app/src/main/java/com/qtphone/xposedkit/XKitLogger.java`:
+
+```java
+package com.qtphone.xposedkit;
+
+import android.util.Log;
+
+/**
+ * Lightweight logging helper for Xposed modules. Tagged so all module output
+ * is easy to filter with {@code logcat -s XKit}.
+ */
+public final class XKitLogger {
+
+    private static final String TAG = "XKit";
+    private static volatile boolean enabled = true;
+
+    private XKitLogger() { }
+
+    public static void setEnabled(boolean on) {
+        enabled = on;
+    }
+
+    public static void debug(String msg) {
+        if (enabled) Log.d(TAG, msg);
+    }
+
+    public static void info(String msg) {
+        if (enabled) Log.i(TAG, msg);
+    }
+
+    public static void warn(String msg) {
+        if (enabled) Log.w(TAG, msg);
+    }
+
+    public static void error(String msg, Throwable t) {
+        if (enabled) Log.e(TAG, msg, t);
+    }
+}
+
+```
+
+`app/src/main/java/com/qtphone/xposedkit/hooks/HookTemplate.java`:
+
+```java
+package com.qtphone.xposedkit.hooks;
+
+import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedBridge;
+
+import com.qtphone.xposedkit.XKitLogger;
+
+import java.lang.reflect.Member;
+
+/**
+ * Abstract base class for all hook templates shipped with the kit.
+ *
+ * Subclasses implement {@link #before(Member, Object, Object[])} and/or
+ * {@link #after(Member, Object, Object[], Object)} to inspect or modify the
+ * behaviour of a hooked method.
+ */
+public abstract class HookTemplate extends XC_MethodHook {
+
+    /** Human readable name used in logs. */
+    protected final String name;
+
+    protected HookTemplate(String name) {
+        this.name = name;
+    }
+
+    @Override
+    protected final void beforeHookedMethod(MethodHookParam param) throws Throwable {
+        try {
+            before(param.method, param.thisObject, param.args);
+        } catch (Throwable t) {
+            XKitLogger.error("before(" + name + ") failed", t);
+        }
+    }
+
+    @Override
+    protected final void afterHookedMethod(MethodHookParam param) throws Throwable {
+        try {
+            Object result = after(param.method, param.thisObject, param.args, param.getResult());
+            if (result != DO_NOT_MODIFY) {
+                param.setResult(result);
+            }
+        } catch (Throwable t) {
+            XKitLogger.error("after(" + name + ") failed", t);
+        }
+    }
+
+    /** Override to run logic before the original method. */
+    protected void before(Member method, Object thisObject, Object[] args) { }
+
+    /**
+     * Override to inspect / replace the result. Return {@link #DO_NOT_MODIFY}
+     * to leave the original result untouched.
+     */
+    protected Object after(Member method, Object thisObject, Object[] args, Object result) {
+        return DO_NOT_MODIFY;
+    }
+
+    /** Sentinel returned by {@link #after} to indicate "keep original result". */
+    protected static final Object DO_NOT_MODIFY = new Object();
+}
+
+```
+
+`app/src/main/java/com/qtphone/xposedkit/hooks/MethodHook.java`:
+
+```java
+package com.qtphone.xposedkit.hooks;
+
+import de.robv.android.xposed.XposedBridge;
+import de.robv.android.xposed.XposedHelpers;
+
+import com.qtphone.xposedkit.XKitLogger;
+
+import java.lang.reflect.Member;
+
+import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
+
+/**
+ * Convenience helpers for hooking a single method on a class that may not
+ * be present in every app (hence the defensive try/catch).
+ */
+public final class MethodHook {
+
+    private MethodHook() { }
+
+    @FunctionalInterface
+    public interface ResultHandler {
+        /** Return the replacement result, or null to proceed normally. */
+        Object handle(XC_MethodHook.MethodHookParam param) throws Throwable;
+    }
+
+    /**
+     * Hook a method by class name + method name + parameter types.
+     *
+     * @return true if the hook was installed successfully.
+     */
+    public static boolean hookMethod(LoadPackageParam lpp, String className,
+                                     String methodName, ResultHandler handler) {
+        return hookMethod(lpp, className, methodName, new Class<?>[0], handler);
+    }
+
+    public static boolean hookMethod(LoadPackageParam lpp, String className,
+                                     String methodName, Class<?>[] params,
+                                     ResultHandler handler) {
+        try {
+            Class<?> clazz = XposedHelpers.findClass(className, lpp.classLoader);
+            XposedBridge.hookAllMethods(clazz, methodName, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    Object replacement = handler.handle(param);
+                    if (replacement != null) {
+                        param.setResult(replacement);
+                    }
+                }
+            });
+            XKitLogger.info("Hooked " + className + "#" + methodName);
+            return true;
+        } catch (Throwable t) {
+            XKitLogger.warn("Could not hook " + className + "#" + methodName + ": " + t.getMessage());
+            return false;
+        }
+    }
+
+    /** Hook a member directly (use after you already resolved the class). */
+    public static void hookMember(Member member, ResultHandler handler) {
+        XposedBridge.hookMethod(member, new XC_MethodHook() {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                Object replacement = handler.handle(param);
+                if (replacement != null) {
+                    param.setResult(replacement);
+                }
+            }
+        });
+    }
+}
+
+```
+
+`app/src/main/java/com/qtphone/xposedkit/hooks/PackageHook.java`:
+
+```java
+package com.qtphone.xposedkit.hooks;
+
+import de.robv.android.xposed.XposedHelpers;
+
+import com.qtphone.xposedkit.XKitLogger;
+
+import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
+
+/**
+ * Scopes a set of hooks to a target package. Use this when you only want your
+ * logic to run inside a specific app rather than globally.
+ */
+public final class PackageHook {
+
+    private PackageHook() { }
+
+    /** Called once the target package is loaded. Override and add your hooks. */
+    public static void hookPackage(LoadPackageParam lpp) {
+        // Subclasses / callers register concrete hooks here.
+        XKitLogger.info("PackageHook activated for " + lpp.packageName);
+    }
+
+    /**
+     * Resolve a class from the target app's class loader, returning null if it
+     * cannot be found (so callers can degrade gracefully).
+     */
+    public static Class<?> safeFind(LoadPackageParam lpp, String className) {
+        try {
+            return XposedHelpers.findClass(className, lpp.classLoader);
+        } catch (Throwable t) {
+            XKitLogger.warn("Class not found: " + className);
+            return null;
+        }
+    }
+}
+
+```
+
+`build.gradle`:
+
+```gradle
+// Xposed / LSPosed module build configuration
+// Compatible with the Xposed API (api-82 / api-93).
+
+plugins {
+    id 'com.android.application' version '8.1.4' apply false
+}
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://api.xposed.info/' }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.4'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://api.xposed.info/' }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+```
+
+`examples/bypass_root_check/RootCheckBypass.java`:
+
+```java
+package com.qtphone.xposedkit.examples;
+
+import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedBridge;
+import de.robv.android.xposed.XposedHelpers;
+import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
+
+import com.qtphone.xposedkit.XKitLogger;
+
+/**
+ * Example: bypass common root-detection techniques.
+ *
+ * Demonstrates three patterns frequently used by banking / paywall apps:
+ *   1. reading {@code /system/app/Superuser.apk} style paths
+ *   2. executing {@code which su} via Runtime.exec
+ *   3. {@code Build.TAGS} containing "test-keys"
+ *
+ * Educational / security-research use only.
+ */
+public class RootCheckBypass implements IXposedHookLoadPackage {
+
+    @Override
+    public void handleLoadPackage(final LoadPackageParam lpp) throws Throwable {
+        // 1) File.exists() on known root artifacts -> always false.
+        XposedHelpers.findAndHookMethod("java.io.File", lpp.classLoader, "exists",
+                new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        String path = ((java.io.File) param.thisObject).getAbsolutePath();
+                        if (path != null && (path.contains("su") || path.contains("Superuser")
+                                || path.contains("Magisk") || path.contains("busybox"))) {
+                            param.setResult(false);
+                            XKitLogger.debug("File.exists neutralised: " + path);
+                        }
+                    }
+                });
+
+        // 2) Runtime.exec -> drop any "su"/"which"/"busybox" invocation.
+        XposedBridge.hookAllMethods(Runtime.class, "exec", new XC_MethodHook() {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                Object cmd = param.args[0];
+                String cmdStr = cmd instanceof String ? (String) cmd
+                        : (cmd instanceof String[] ? String.join(" ", (String[]) cmd) : "");
+                if (cmdStr != null && (cmdStr.contains("su") || cmdStr.contains("which")
+                        || cmdStr.contains("busybox"))) {
+                    param.setResult(new java.io.IOException("blocked by RootCheckBypass"));
+                    XKitLogger.debug("Runtime.exec blocked: " + cmdStr);
+                }
+            }
+        });
+
+        // 3) Build.TAGS "test-keys" -> empty.
+        try {
+            Class<?> build = XposedHelpers.findClass("android.os.Build", lpp.classLoader);
+            XposedHelpers.setStaticObjectField(build, "TAGS", "release-keys");
+            XposedHelpers.setStaticObjectField(build, "TYPE", "user");
+        } catch (Throwable t) {
+            XKitLogger.warn("Could not patch Build fields: " + t.getMessage());
+        }
+    }
+}
+
+```
+
+`examples/bypass_root_check/xposed_init`:
+
+```
+com.qtphone.xposedkit.examples.RootCheckBypass
+
+```
+
+`gradle.properties`:
+
+```properties
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+android.useAndroidX=true
+android.nonTransitiveRClass=true
+
+```
+
+`settings.gradle`:
+
+```gradle
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+rootProject.name = "XposedModuleKit"
+include ':app'
+
+```
+
+`src/utils/class_scanner.py`:
+
+```py
+#!/usr/bin/env python3
+"""class_scanner.py - Scan compiled Java classes for hook targets.
+
+Walks a directory (or a .jar/.zip) and parses `.class` files to extract:
+  * fully qualified class name
+  * superclass
+  * declared methods (name + descriptor)
+
+It also emits ready-to-use Xposed hook templates so you can quickly wire up
+hooks in the module. Pure stdlib (zipfile + struct) - no external deps.
+
+Usage:
+    python class_scanner.py path/to/classes  [--filter com.example] [--emit-hooks]
+"""
+from __future__ import annotations
+
+import argparse
+import os
+import struct
+import sys
+import zipfile
+
+CONSTANT_Utf8 = 1
+CONSTANT_Integer = 3
+CONSTANT_Float = 4
+CONSTANT_Long = 5
+CONSTANT_Double = 6
+CONSTANT_Class = 7
+CONSTANT_String = 8
+CONSTANT_Fieldref = 9
+CONSTANT_Methodref = 10
+CONSTANT_InterfaceMethodref = 11
+CONSTANT_NameAndType = 12
+CONSTANT_MethodHandle = 15
+CONSTANT_MethodType = 16
+CONSTANT_Dynamic = 17
+CONSTANT_InvokeDynamic = 18
+CONSTANT_Module = 19
+CONSTANT_Package = 20
+
+
+def _read_constant_pool(f) -> list:
+    (count,) = struct.unpack(">H", f.read(2))
+    pool = [None] * count
+    i = 1
+    while i < count:
+        (tag,) = struct.unpack(">B", f.read(1))
+        if tag in (CONSTANT_Utf8,):
+            (length,) = struct.unpack(">H", f.read(2))
+            pool[i] = (CONSTANT_Utf8, f.read(length).decode("utf-8", "replace"))
+        elif tag in (CONSTANT_Class, CONSTANT_String, CONSTANT_MethodType,
+                     CONSTANT_Module, CONSTANT_Package):
+            (idx,) = struct.unpack(">H", f.read(2))
+            pool[i] = (tag, idx)
+        elif tag in (CONSTANT_Fieldref, CONSTANT_Methodref,
+                     CONSTANT_InterfaceMethodref, CONSTANT_NameAndType,
+                     CONSTANT_Dynamic, CONSTANT_InvokeDynamic):
+            (a, b) = struct.unpack(">HH", f.read(4))
+            pool[i] = (tag, a, b)
+        elif tag in (CONSTANT_Integer, CONSTANT_Float):
+            pool[i] = (tag, struct.unpack(">I", f.read(4))[0])
+        elif tag in (CONSTANT_Long, CONSTANT_Double):
+            pool[i] = (tag, f.read(8))
+            i += 1  # these take two slots
+        elif tag == CONSTANT_MethodHandle:
+            (ref_kind,) = struct.unpack(">B", f.read(1))
+            (ref_index,) = struct.unpack(">H", f.read(2))
+            pool[i] = (tag, ref_kind, ref_index)
+        else:
+            raise ValueError(f"Unknown constant pool tag {tag}")
+        i += 1
+    return pool
+
+
+def _utf8(pool, entry):
+    if entry is None:
+        return None
+    if entry[0] == CONSTANT_Utf8:
+        return entry[1]
+    if entry[0] == CONSTANT_Class:
+        return _utf8(pool, pool[entry[1]])
+    return None
+
+
+def _descriptor_to_jvm_types(desc: str):
+    """Very small descriptor parser -> (params, ret). best-effort."""
+    if not desc.startswith("("):
+        return [], "V"
+    params, ret = [], ""
+    i = 1
+    depth = 0
+    cur = ""
+    while i < len(desc):
+        c = desc[i]
+        if c == ")":
+            if cur:
+                params.append(cur)
+            ret = desc[i + 1:]
+            break
+        if c == "[":
+            cur += "[]"
+        elif c == "L":
+            end = desc.find(";", i)
+            cls = desc[i + 1:end].replace("/", ".")
+            cur = cls + cur
+            i = end
+        elif c == "Z":
+            cur += ("boolean" if not cur.endswith("[]") else "")
+        elif c == "B":
+            cur = "byte" + cur
+        elif c == "C":
+            cur = "char" + cur
+        elif c == "S":
+            cur = "short" + cur
+        elif c == "I":
+            cur = "int" + cur
+        elif c == "J":
+            cur = "long" + cur
+        elif c == "F":
+            cur = "float" + cur
+        elif c == "D":
+            cur = "double" + cur
+        # when array done, push param
+        if c == ";":
+            params.append(cur)
+            cur = ""
+        i += 1
+    return params, ret
+
+
+def parse_class(data: bytes) -> dict | None:
+    try:
+        f = __import__("io").BytesIO(data)
+        if f.read(4) != b"\xca\xfe\xba\xbe":
+            return None
+        f.read(4)  # version
+        pool = _read_constant_pool(f)
+        f.read(2)  # access flags
+        (this_idx,) = struct.unpack(">H", f.read(2))
+        (super_idx,) = struct.unpack(">H", f.read(2))
+        this_class = _utf8(pool, pool[this_idx])
+        super_class = _utf8(pool, pool[super_idx])
+        (interfaces_count,) = struct.unpack(">H", f.read(2))
+        f.read(2 * interfaces_count)  # interfaces
+        (fields_count,) = struct.unpack(">H", f.read(2))
+        for _ in range(fields_count):
+            f.read(2)  # access
+            (name_idx,) = struct.unpack(">H", f.read(2))
+            (desc_idx,) = struct.unpack(">H", f.read(2))
+            (attrs_count,) = struct.unpack(">H", f.read(2))
+            for _a in range(attrs_count):
+                f.read(2)  # attr_name
+                (len_,) = struct.unpack(">I", f.read(4))
+                f.read(len_)
+        methods = []
+        (methods_count,) = struct.unpack(">H", f.read(2))
+        for _ in range(methods_count):
+            f.read(2)  # access
+            (name_idx,) = struct.unpack(">H", f.read(2))
+            (desc_idx,) = struct.unpack(">H", f.read(2))
+            (attrs_count,) = struct.unpack(">H", f.read(2))
+            for _a in range(attrs_count):
+                f.read(2)  # attr_name
+                (len_,) = struct.unpack(">I", f.read(4))
+                f.read(len_)
+            name = _utf8(pool, pool[name_idx])
+            desc = _utf8(pool, pool[desc_idx])
+            if name and desc:
+                methods.append((name, desc))
+        return {"class": this_class, "super": super_class, "methods": methods}
+    except Exception as e:  # noqa: BLE001
+        sys.stderr.write(f"parse error: {e}\n")
+        return None
+
+
+def _classfiles(root: str):
+    if os.path.isfile(root) and root.endswith((".jar", ".zip")):
+        with zipfile.ZipFile(root) as z:
+            for n in z.namelist():
+                if n.endswith(".class"):
+                    with z.open(n) as fh:
+                        yield n, fh.read()
+    else:
+        for dirpath, _, files in os.walk(root):
+            for fn in files:
+                if fn.endswith(".class"):
+                    path = os.path.join(dirpath, fn)
+                    with open(path, "rb") as fh:
+                        yield fn, fh.read()
+
+
+def emit_hook(cls: str, method: str, desc: str) -> str:
+    params, ret = _descriptor_to_jvm_types(desc)
+    return (
+        f'MethodHook.hookMethod(lpp, "{cls}", "{method}", param -> '
+        f'{{ /* return replacement; null = proceed */ return null; }});'
+    )
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Scan .class files for hook targets")
+    ap.add_argument("path", help="directory or .jar/.zip to scan")
+    ap.add_argument("--filter", default="", help="substring filter on class name")
+    ap.add_argument("--emit-hooks", action="store_true", help="print hook stubs")
+    args = ap.parse_args()
+
+    for name, data in _classfiles(args.path):
+        info = parse_class(data)
+        if not info:
+            continue
+        cls = info["class"] or name
+        if args.filter and args.filter not in cls:
+            continue
+        print(f"\n== {cls}  (extends {info['super']}) ==")
+        for m, d in info["methods"]:
+            if m in ("<init>", "<clinit>"):
+                continue
+            print(f"  - {m}{d}")
+            if args.emit_hooks:
+                print(f"      {emit_hook(cls, m, d)}")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`src/utils/logger.py`:
+
+```py
+#!/usr/bin/env python3
+"""logger.py - Tiny colored logging utility for the Xposed Module Kit tooling.
+
+Usage:
+    from logger import Logger
+    log = Logger("mymodule")
+    log.info("hello")
+    log.warn("careful")
+    log.error("boom", exc=Exception("x"))
+
+Or run directly to demo:
+    python logger.py
+"""
+from __future__ import annotations
+
+import sys
+import datetime
+
+# ANSI color codes (disabled automatically when not attached to a tty).
+_RESET = "\033[0m"
+_COLORS = {
+    "DEBUG": "\033[36m",   # cyan
+    "INFO": "\033[32m",    # green
+    "WARN": "\033[33m",    # yellow
+    "ERROR": "\033[31m",   # red
+}
+
+
+class Logger:
+    def __init__(self, name: str = "xkit", level: str = "DEBUG", use_color: bool = True):
+        self.name = name
+        self.level = level.upper()
+        self.use_color = use_color and sys.stdout.isatty()
+
+    def _emit(self, level: str, msg: str, exc: BaseException | None = None):
+        if self._level_rank(level) < self._level_rank(self.level):
+            return
+        ts = datetime.datetime.now().strftime("%H:%M:%S")
+        color = _COLORS.get(level, "")
+        prefix = f"{color}[{ts}][{level}][{self.name}]{_RESET if color else ''}"
+        line = f"{prefix} {msg}"
+        if exc is not None:
+            line += f"\n    {type(exc).__name__}: {exc}"
+        print(line, flush=True)
+
+    @staticmethod
+    def _level_rank(level: str) -> int:
+        return {"DEBUG": 0, "INFO": 1, "WARN": 2, "ERROR": 3}.get(level.upper(), 1)
+
+    def debug(self, msg: str):
+        self._emit("DEBUG", msg)
+
+    def info(self, msg: str):
+        self._emit("INFO", msg)
+
+    def warn(self, msg: str):
+        self._emit("WARN", msg)
+
+    def error(self, msg: str, exc: BaseException | None = None):
+        self._emit("ERROR", msg, exc)
+
+
+if __name__ == "__main__":
+    log = Logger("demo")
+    log.debug("debug message")
+    log.info("info message")
+    log.warn("warning message")
+    log.error("error message", exc=RuntimeError("something failed"))
+
+```
