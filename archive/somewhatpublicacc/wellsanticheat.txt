@@ -1,0 +1,1233 @@
+Project Path: arc_somewhatpublicacc_wellsanticheat_b7x1dmmx
+
+Source Tree:
+
+```txt
+arc_somewhatpublicacc_wellsanticheat_b7x1dmmx
+├── README.md
+├── WellsAntiCheat.csproj
+└── src
+    ├── Anticheat.cs
+    ├── HostTools.cs
+    ├── MeetingTimer.cs
+    ├── NameFilter.cs
+    ├── Notifier.cs
+    ├── RateTracker.cs
+    ├── RpcCheck.cs
+    ├── WellsGui.cs
+    ├── WellsPlugin.cs
+    └── rpc
+        ├── CheckName.cs
+        ├── MovementChecks.cs
+        ├── ReportDeadBody.cs
+        ├── SendChat.cs
+        ├── SetName.cs
+        └── SetStartCounter.cs
+
+```
+
+`README.md`:
+
+```md
+# Wells Anti Cheat
+
+A host-side moderation mod for Among Us. It protects your lobby and does **nothing** unless you are the host — and it never acts against you.
+
+## Features
+
+**Detection (auto-kick when you're host):**
+- **Offensive / banned names** — leetspeak-aware filter. Includes `Antipride` by default plus a slur list; matching catches `n1gg3r`, `n i g g e r`, `niiigger`, etc. Blocklist is an editable text file, no recompile needed.
+- **Chat spam** — kicks players who send too many messages in a short window (default 5 / 3s).
+- **Crash attempts** — catches malformed RPCs (too-short payloads), RPC floods (default 50 / 1s), and oversized chat messages, all common client/server crashers.
+- **RPC anti-cheat** — illegal vents, teleports (SnapTo) in the lobby, impostors completing tasks, start-counter spoofing, host-only RPC forgery, early meetings.
+
+**Meeting grace:**
+- Blocks meetings called before a configurable grace period (default 10s) after each round starts. Catches modded clients that fire the meeting RPC directly to skip the emergency button.
+
+**Modded lobby toggle:**
+- One switch loosens the role/gameplay-semantic checks (venting, tasks, name length/format) so role mods don't trip false positives. The offensive-name, spam, and crash checks stay active.
+
+**Host tools:**
+- **Map hotswap** — spawn/despawn any map (Skeld, MiraHQ, Polus, Dleks, Airship, Fungle) live.
+- **Lobby spawn/despawn.**
+- **Force crew / impostor victory.**
+
+## Safety design (the important part)
+
+- **You are exempt from the anti-cheat.** Your own RPCs are never inspected, flagged, blocked, or punished (`player.AmOwner` check runs before everything). Using a feature or firing an action can never kick or ban you.
+- **Nothing happens when you're not host.** Detection still runs and still notifies you of cheaters, but no RPC is discarded and no one is kicked/banned. In the panel, every control is grayed out and can't be toggled while you're not host — so a mistoggle can't get you kicked by your own tool.
+- **Kicking/banning is host-only** and gated twice (dispatcher + `Flag`).
+
+
+## Install
+Copy `WellsAntiCheat.dll` into `<Among Us>/BepInEx/plugins/` and launch.
+
+## Use
+- **F8** opens/closes the panel (configurable).
+- Host a lobby; the panel goes active. Set punishment (None / Kick / Ban), thresholds, and host tools.
+- Edit the name blocklist at `<Among Us>/BepInEx/config/WellsAntiCheat_blocklist.txt` (one term per line, plain lowercase, leetspeak handled automatically). Click **Reload blocklist file** after editing.
+- Settings persist in `<Among Us>/BepInEx/config/com.wells.anticheat.cfg`.
+
+## Notes & limits
+- Detection is heuristic: it raises the cost of cheating a lot, but a mod that only does things indistinguishable from legit play won't be caught.
+- **Map hotswap is the least-tested feature.** Spawning/despawning ShipStatus mid-game can desync clients in edge cases; use it deliberately. The spawn/despawn calls themselves match the game's own flow.
+- On a game update, if the build errors the likely culprits are the Harmony targets (`HandleRpc`, `ShipStatus.FixedUpdate`, `MeetingHud.Close`) or an `RpcCalls` member. Update the game libs to match.
+- Flood/spam thresholds are tunable in the config if you see false positives during heavy legit bursts.
+
+```
+
+`WellsAntiCheat.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <DebugType>embedded</DebugType>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <VersionPrefix>1.0.0</VersionPrefix>
+        <AssemblyName>WellsAntiCheat</AssemblyName>
+        <Description>Wells Anti Cheat: host-side moderation for Among Us (name kick, spam/crash protection, meeting grace, RPC anti-cheat, host map tools). Host only.</Description>
+        <Authors>you</Authors>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.735" Private="false" ExcludeAssets="runtime;native" />
+        <!-- Pin this to the Among Us version you actually run. Check the version in the game's main menu. -->
+        <PackageReference Include="AmongUs.GameLibs.Steam" Version="2026.6.5" PrivateAssets="all" />
+        <PackageReference Include="BepInEx.IL2CPP.MSBuild" Version="2.1.0-rc.1" PrivateAssets="all" ExcludeAssets="runtime" />
+    </ItemGroup>
+
+    <!-- Optional: set the AmongUs env var (or edit this path) to auto-copy the built DLL into your plugins folder -->
+    <Target Name="CopyToGame" AfterTargets="Build" Condition="'$(AmongUs)' != ''">
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(AmongUs)/BepInEx/plugins/" />
+        <Copy SourceFiles="$(TargetDir)$(TargetName).deps.json" DestinationFolder="$(AmongUs)/BepInEx/plugins/" />
+    </Target>
+</Project>
+
+```
+
+`src/Anticheat.cs`:
+
+```cs
+using HarmonyLib;
+using Hazel;
+using WellsAntiCheat.Rpc;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace WellsAntiCheat
+{
+    // RPC-validation dispatcher. Detection always runs and notifies; DISCARDING an RPC and
+    // PUNISHING a player only happen when you are the host. Your own RPCs are never checked, so
+    // the anti-cheat can never act against you.
+    internal static class Anticheat
+    {
+        public static bool Enabled = true;
+
+        // Manual "this is a modded lobby" switch. When on (or when the game build is modded),
+        // role/gameplay-semantic checks relax to avoid false positives from role mods.
+        public static bool ModdedLobby = false;
+        public static bool IsModded() => ModdedLobby || Constants.IsVersionModded();
+
+        // --- crash / flood protection thresholds (tunable) ---
+        public static bool CrashProtection = true;
+        public static int  FloodThreshold  = 50;   // RPCs within FloodWindow => flagged as flood
+        public static float FloodWindow    = 1.0f;  // seconds
+
+        public static readonly Dictionary<RpcCalls, RpcCheck> RpcHandlers = new()
+        {
+            { RpcCalls.CompleteTask,     new CompleteTask() },
+            { RpcCalls.CheckName,        new CheckName() },
+            { RpcCalls.SetName,          new SetName() },
+            { RpcCalls.SendChat,         new SendChat() },
+            { RpcCalls.ReportDeadBody,   new ReportDeadBody() },
+            { RpcCalls.SetStartCounter,  new SetStartCounter() },
+            { RpcCalls.EnterVent,        new EnterVent() },
+            { RpcCalls.ExitVent,         new ExitVent() },
+            { RpcCalls.SnapTo,           new SnapTo() },
+            { RpcCalls.ClimbLadder,      new ClimbLadder() },
+        };
+
+        // Minimum payload byte counts. An RPC shorter than this is malformed and often a crash
+        // attempt. Ported from HyperMenu's RpcValidator. Unknown RPCs (0) pass through.
+        private static readonly Dictionary<RpcCalls, int> MinBytes = new()
+        {
+            { RpcCalls.PlayAnimation, 1 }, { RpcCalls.CompleteTask, 1 }, { RpcCalls.SyncSettings, 1 },
+            { RpcCalls.SetInfected, 1 }, { RpcCalls.CheckName, 1 }, { RpcCalls.SetName, 1 },
+            { RpcCalls.CheckColor, 1 }, { RpcCalls.SetColor, 1 }, { RpcCalls.ReportDeadBody, 1 },
+            { RpcCalls.MurderPlayer, 1 }, { RpcCalls.SendChat, 1 }, { RpcCalls.StartMeeting, 1 },
+            { RpcCalls.SetScanner, 2 }, { RpcCalls.SendChatNote, 2 }, { RpcCalls.SetStartCounter, 1 },
+            { RpcCalls.EnterVent, 1 }, { RpcCalls.ExitVent, 1 }, { RpcCalls.SnapTo, 8 },
+            { RpcCalls.VotingComplete, 1 }, { RpcCalls.CastVote, 2 }, { RpcCalls.AddVote, 1 },
+            { RpcCalls.CloseDoorsOfType, 1 }, { RpcCalls.SetTasks, 1 }, { RpcCalls.ClimbLadder, 2 },
+        };
+
+        public enum Punishments { None, Kick, Ban }
+
+        public static Punishments Punishment = Punishments.Kick;
+        public static bool SendNotification = true;
+        public static bool DiscardRpc = true;
+
+        private static readonly RateTracker _rpcRate = new();
+
+        private static bool AmHost => AmongUsClient.Instance != null && AmongUsClient.Instance.AmHost;
+
+        // True if this RPC belongs to us (the local player / host). We NEVER check our own RPCs.
+        private static bool IsSelf(PlayerControl player)
+            => player != null && (player.AmOwner || player == PlayerControl.LocalPlayer);
+
+        // --- Harmony hooks: one per net object that routes RPCs ---
+
+        [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
+        private static class OnPlayerControlRpc
+        {
+            private static bool Prefix(PlayerControl __instance, byte callId, MessageReader reader)
+                => HandleRpc(typeof(PlayerControl), __instance, (RpcCalls)callId, reader);
+        }
+
+        [HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.HandleRpc))]
+        private static class OnPlayerPhysicsRpc
+        {
+            private static bool Prefix(PlayerPhysics __instance, byte callId, MessageReader reader)
+                => HandleRpc(typeof(PlayerPhysics), __instance.myPlayer, (RpcCalls)callId, reader);
+        }
+
+        [HarmonyPatch(typeof(CustomNetworkTransform), nameof(CustomNetworkTransform.HandleRpc))]
+        private static class OnNetTransformRpc
+        {
+            private static bool Prefix(CustomNetworkTransform __instance, byte callId, MessageReader reader)
+                => HandleRpc(typeof(CustomNetworkTransform), __instance.myPlayer, (RpcCalls)callId, reader);
+        }
+
+        // Returns false to swallow the RPC (Harmony convention), true to let it run.
+        private static bool HandleRpc(Type sourceNetObj, PlayerControl player, RpcCalls rpc, MessageReader reader)
+        {
+            if (!Enabled) return true;
+
+            // HOST EXEMPTION: our own RPCs are never inspected, flagged, blocked, or punished.
+            if (IsSelf(player)) return true;
+
+            bool blockRpc = false;
+
+            // --- crash protection: runs on ALL RPCs, before the per-RPC checks ---
+            if (CrashProtection && player != null)
+            {
+                // Malformed (too-short) payload.
+                if (MinBytes.TryGetValue(rpc, out int min) && reader.Length < min)
+                {
+                    Flag(player, $"{Name(player)} sent a malformed {rpc} RPC (crash attempt).");
+                    blockRpc = true;
+                }
+
+                // RPC flood.
+                int count = _rpcRate.Record(player.OwnerId, Time.realtimeSinceStartup, FloodWindow);
+                if (count > FloodThreshold)
+                {
+                    Flag(player, $"{Name(player)} is flooding RPCs ({count}/{FloodWindow:0.#}s) - crash attempt.");
+                    blockRpc = true;
+                }
+            }
+
+            if (RpcHandlers.TryGetValue(rpc, out var check) && check != null && check.Enabled && !blockRpc)
+            {
+                // Wrong net object for this RPC => malformed/exploit. Drop it (host only).
+                if (check.GetExpectedNetObject() != sourceNetObj)
+                    return AmHost ? false : true;
+
+                // Only the host should originate host-only RPCs.
+                if (AmHost && check.IsHostOnly())
+                {
+                    Flag(player, $"{Name(player)} sent host-only RPC {rpc} as a non-host.");
+                    blockRpc = true;
+                }
+                else
+                {
+                    int savedPos = reader.Position;
+                    try
+                    {
+                        check.Validate(player, reader, ref blockRpc);
+                    }
+                    catch (Exception e)
+                    {
+                        WellsPlugin.Log.LogWarning($"Wells check for {rpc} threw: {e.Message}");
+                        blockRpc = false;
+                    }
+                    reader.Position = savedPos; // rewind for vanilla HandleRpc
+                }
+            }
+
+            // Blocking/discarding only happens when we are host. Non-host = notify only.
+            if (AmHost && DiscardRpc && blockRpc) return false;
+            return true;
+        }
+
+        public static void Flag(PlayerControl player, string reason, bool shouldPunish = true)
+        {
+            WellsPlugin.Log.LogMessage($"[Wells] {reason}");
+            if (SendNotification)
+                Notifier.Show(reason);
+
+            // Punishment is host-only, and never applies to ourselves (self is already exempt).
+            if (AmHost && shouldPunish && !IsSelf(player))
+                Punish(player);
+        }
+
+        private static void Punish(PlayerControl player)
+        {
+            if (player == null) return;
+            switch (Punishment)
+            {
+                case Punishments.None: break;
+                case Punishments.Kick: AmongUsClient.Instance.KickPlayer(player.OwnerId, false); break;
+                case Punishments.Ban:  AmongUsClient.Instance.KickPlayer(player.OwnerId, true);  break;
+            }
+        }
+
+        public static string Name(PlayerControl p) => p?.Data?.PlayerName ?? "<unknown>";
+    }
+}
+
+```
+
+`src/HostTools.cs`:
+
+```cs
+using System.Collections;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
+using InnerNet;
+using UnityEngine;
+using UnityEngine.ResourceManagement.AsyncOperations;
+
+namespace WellsAntiCheat
+{
+    // Host-only utilities. Everything here checks AmHost before doing anything, so the GUI can
+    // gray these out but even a stray call is safe.
+    internal static class HostTools
+    {
+        // Map ids: 0 Skeld, 1 MiraHQ, 2 Polus, 3 Dleks, 4 Airship, 5 Fungle.
+        public static byte SelectedMap = 0;
+        public const byte MaxMapId = 5;
+
+        private static bool AmHost => AmongUsClient.Instance != null && AmongUsClient.Instance.AmHost;
+
+        public static void DespawnMap()
+        {
+            if (!AmHost) return;
+            if (ShipStatus.Instance != null)
+            {
+                ShipStatus.Instance.Despawn();
+                Notifier.Show("Current map despawned.");
+            }
+            else Notifier.Show("No map is currently spawned.");
+        }
+
+        public static void SpawnMap()
+        {
+            if (!AmHost) return;
+            AmongUsClient.Instance.StartCoroutine(SpawnMapRoutine(SelectedMap).WrapToIl2Cpp());
+        }
+
+        private static IEnumerator SpawnMapRoutine(byte mapId)
+        {
+            WellsPlugin.Log.LogInfo($"Spawning map id {mapId}");
+            AsyncOperationHandle<GameObject> handle =
+                AmongUsClient.Instance.ShipPrefabs[mapId].InstantiateAsync(null, false);
+            yield return handle;
+
+            ShipStatus ship = handle.Result.GetComponent<ShipStatus>();
+            AmongUsClient.Instance.Spawn(ship, -2, SpawnFlags.None);
+            Notifier.Show($"Map {(MapNames)mapId} spawned.");
+        }
+
+        public static void DespawnLobby()
+        {
+            if (!AmHost) return;
+            if (LobbyBehaviour.Instance != null)
+            {
+                LobbyBehaviour.Instance.Despawn();
+                Notifier.Show("Lobby despawned.");
+            }
+            else Notifier.Show("Lobby is already despawned.");
+        }
+
+        public static void SpawnLobby()
+        {
+            if (!AmHost) return;
+            LobbyBehaviour.Instance = Object.Instantiate(GameStartManager.Instance.LobbyPrefab);
+            AmongUsClient.Instance.Spawn(LobbyBehaviour.Instance, -2, SpawnFlags.None);
+            Notifier.Show("Lobby spawned.");
+        }
+
+        public static void ForceCrewVictory()
+        {
+            if (!AmHost || GameManager.Instance == null) return;
+            GameManager.Instance.RpcEndGame(GameOverReason.CrewmatesByTask, false);
+            Notifier.Show("Forced crewmate victory.");
+        }
+
+        public static void ForceImpostorVictory()
+        {
+            if (!AmHost || GameManager.Instance == null) return;
+            GameManager.Instance.RpcEndGame(GameOverReason.ImpostorsByKill, false);
+            Notifier.Show("Forced impostor victory.");
+        }
+    }
+}
+
+```
+
+`src/MeetingTimer.cs`:
+
+```cs
+using HarmonyLib;
+using System;
+
+namespace WellsAntiCheat
+{
+    // Tracks when the current task phase began, so we can reject meetings called too early.
+    // A round "starts" when gameplay (re)begins: the first ShipStatus.FixedUpdate after leaving
+    // the lobby (first round) and every MeetingHud.Close (subsequent rounds). Both target methods
+    // are confirmed to exist in the current Among Us API.
+    internal static class MeetingTimer
+    {
+        public static bool Enabled = true;
+
+        // How long after a round starts before meetings are allowed.
+        public static float GraceSeconds = 10f;
+
+        // If true, only emergency-button meetings (bodyId == 0xFF) are restricted; body reports
+        // are always allowed. If false, all meetings are restricted during the grace window.
+        public static bool EmergencyOnly = false;
+
+        private static DateTime _roundStartUtc = DateTime.MinValue;
+        private static bool _latched; // have we marked the start of the current game's first round?
+
+        public static void MarkRoundStart() => _roundStartUtc = DateTime.UtcNow;
+
+        public static bool InGracePeriod(out float remaining)
+        {
+            remaining = 0f;
+            if (!Enabled || _roundStartUtc == DateTime.MinValue) return false;
+
+            float elapsed = (float)(DateTime.UtcNow - _roundStartUtc).TotalSeconds;
+            if (elapsed < GraceSeconds)
+            {
+                remaining = GraceSeconds - elapsed;
+                return true;
+            }
+            return false;
+        }
+
+        // First round: latch the start the first frame gameplay is running (lobby despawned).
+        // Reset the latch when we're back in the lobby so the next game re-arms.
+        [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.FixedUpdate))]
+        private static class OnShipFixedUpdate
+        {
+            private static void Postfix()
+            {
+                if (LobbyBehaviour.Instance != null)
+                {
+                    _latched = false;
+                    return;
+                }
+                if (!_latched)
+                {
+                    MarkRoundStart();
+                    _latched = true;
+                }
+            }
+        }
+
+        // Every subsequent round begins when a meeting closes.
+        [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Close))]
+        private static class OnMeetingClose
+        {
+            private static void Postfix() => MarkRoundStart();
+        }
+    }
+}
+
+```
+
+`src/NameFilter.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using BepInEx;
+
+namespace WellsAntiCheat
+{
+    // Decides whether a requested name is offensive. The blocklist lives in a plain-text file
+    // (BepInEx/config/WellsAntiCheat_blocklist.txt) so you can edit it without recompiling.
+    internal static class NameFilter
+    {
+        public static bool Enabled = true;
+
+        private static readonly HashSet<string> Blocked = new(StringComparer.Ordinal);
+        private static string BlocklistPath => Path.Combine(Paths.ConfigPath, "WellsAntiCheat_blocklist.txt");
+
+        // Common substitutions people use to smuggle slurs past a naive substring match.
+        private static readonly Dictionary<char, char> LeetMap = new()
+        {
+            ['0'] = 'o', ['1'] = 'i', ['!'] = 'i', ['|'] = 'i',
+            ['3'] = 'e', ['4'] = 'a', ['@'] = 'a', ['5'] = 's',
+            ['$'] = 's', ['7'] = 't', ['+'] = 't', ['8'] = 'b',
+            ['9'] = 'g', ['6'] = 'g', ['2'] = 'z',
+        };
+
+        // A minimal seed list so the mod is functional on first run. Add your own terms to the
+        // config file. Kept short on purpose; the file is where the real list should live.
+        private static readonly string[] SeedList =
+        {
+            // named-player kick target requested by the host
+            "antipride",
+            // slurs / hate terms (normalized form, i.e. what a name collapses to)
+            "nigger", "nigga", "faggot", "retard", "kike", "spic", "chink", "tranny",
+            // add more via the config file
+        };
+
+        public static void Load()
+        {
+            Blocked.Clear();
+
+            if (!File.Exists(BlocklistPath))
+            {
+                var header =
+                    "# WellsAntiCheat offensive-name blocklist.\n" +
+                    "# One term per line. Lines starting with # are comments.\n" +
+                    "# Matching is case-insensitive and leetspeak-aware:\n" +
+                    "#   'nigger' also catches 'N1GG3R', 'n i g g e r', 'niiiggerr', etc.\n" +
+                    "# Enter each term in plain lowercase letters.\n\n";
+                File.WriteAllText(BlocklistPath, header + string.Join("\n", SeedList) + "\n");
+            }
+
+            foreach (var raw in File.ReadAllLines(BlocklistPath))
+            {
+                var line = raw.Trim();
+                if (line.Length == 0 || line.StartsWith("#")) continue;
+                var norm = Normalize(line);
+                if (norm.Length > 0) Blocked.Add(norm);
+            }
+
+            WellsPlugin.Log.LogInfo($"[WellsAntiCheat] Loaded {Blocked.Count} blocklist term(s).");
+        }
+
+        // Returns true and the offending term if the name should be blocked.
+        public static bool IsOffensive(string name, out string matched)
+        {
+            matched = null;
+            if (!Enabled || string.IsNullOrEmpty(name)) return false;
+
+            var norm = Normalize(name);
+            if (norm.Length == 0) return false;
+
+            foreach (var term in Blocked)
+            {
+                if (norm.Contains(term))
+                {
+                    matched = term;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Lowercase, strip formatting tags, apply leet map, drop non-letters, collapse runs of
+        // the same letter so "niiigger" -> "niger"... wait: collapsing before match would break
+        // legit words, so we collapse to a single repeat max, which still catches padding tricks.
+        public static string Normalize(string input)
+        {
+            // remove TMP rich-text tags like <color=...> that could hide characters
+            var noTags = StripTags(input).ToLowerInvariant();
+
+            var sb = new StringBuilder(noTags.Length);
+            foreach (var ch in noTags)
+            {
+                char c = LeetMap.TryGetValue(ch, out var mapped) ? mapped : ch;
+                if (c >= 'a' && c <= 'z') sb.Append(c);
+                // everything else (spaces, punctuation, emoji) is dropped, which defeats
+                // "n.i.g.g.e.r" and "n i g g e r" style spacing.
+            }
+
+            // Collapse 3+ identical letters down to 2 so "niiiiigger" normalizes toward "niigger",
+            // then also produce a fully de-duplicated pass for matching.
+            return Deduplicate(sb.ToString());
+        }
+
+        private static string StripTags(string s)
+        {
+            var sb = new StringBuilder(s.Length);
+            bool inTag = false;
+            foreach (var ch in s)
+            {
+                if (ch == '<') { inTag = true; continue; }
+                if (ch == '>') { inTag = false; continue; }
+                if (!inTag) sb.Append(ch);
+            }
+            return sb.ToString();
+        }
+
+        // Collapse any run of the same character to a single instance. This makes padding like
+        // "niiiggggerr" match "niger"-style stored terms IF the stored term is also deduped.
+        // We dedupe both sides, so store terms are deduped at load implicitly via this same call.
+        private static string Deduplicate(string s)
+        {
+            if (s.Length == 0) return s;
+            var sb = new StringBuilder(s.Length);
+            char prev = '\0';
+            foreach (var ch in s)
+            {
+                if (ch != prev) sb.Append(ch);
+                prev = ch;
+            }
+            return sb.ToString();
+        }
+    }
+}
+
+```
+
+`src/Notifier.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+
+namespace WellsAntiCheat
+{
+    // Minimal notification store. The GUI reads recent entries and draws them; entries expire.
+    internal static class Notifier
+    {
+        private struct Entry { public string Text; public DateTime At; }
+
+        private static readonly List<Entry> _entries = new();
+        public static float DisplaySeconds = 10f;
+
+        public static void Show(string text)
+        {
+            lock (_entries)
+                _entries.Add(new Entry { Text = text, At = DateTime.UtcNow });
+        }
+
+        public static IEnumerable<string> Recent()
+        {
+            lock (_entries)
+            {
+                _entries.RemoveAll(e => (DateTime.UtcNow - e.At).TotalSeconds > DisplaySeconds);
+                var copy = new List<string>(_entries.Count);
+                foreach (var e in _entries) copy.Add(e.Text);
+                return copy;
+            }
+        }
+    }
+}
+
+```
+
+`src/RateTracker.cs`:
+
+```cs
+using System.Collections.Generic;
+
+namespace WellsAntiCheat
+{
+    // Tracks timestamped events per player (keyed by OwnerId) and reports how many happened
+    // within a sliding window. Used for chat-spam and RPC-flood (crash attempt) detection.
+    internal class RateTracker
+    {
+        private readonly Dictionary<int, Queue<float>> _events = new();
+
+        // Record an event for a player at `now` (Time.realtimeSinceStartup) and return the count
+        // of events (including this one) within `windowSeconds`.
+        public int Record(int ownerId, float now, float windowSeconds)
+        {
+            if (!_events.TryGetValue(ownerId, out var q))
+            {
+                q = new Queue<float>();
+                _events[ownerId] = q;
+            }
+
+            q.Enqueue(now);
+            while (q.Count > 0 && now - q.Peek() > windowSeconds)
+                q.Dequeue();
+
+            return q.Count;
+        }
+
+        public void Reset(int ownerId) => _events.Remove(ownerId);
+        public void ResetAll() => _events.Clear();
+    }
+}
+
+```
+
+`src/RpcCheck.cs`:
+
+```cs
+using Hazel;
+using System;
+
+namespace WellsAntiCheat
+{
+    // Base class for a per-RPC validator. Each RPC we care about gets a subclass.
+    internal class RpcCheck
+    {
+        public virtual bool Enabled { get; set; } = true;
+
+        // Read the RPC payload and set blockRpc=true to discard it. Call Anticheat.Flag(...) to punish.
+        public virtual void Validate(PlayerControl player, MessageReader reader, ref bool blockRpc) { }
+
+        // If true, a non-host player sending this RPC is itself a violation.
+        public virtual bool IsHostOnly() => false;
+
+        // Which net object this RPC is expected to arrive on. Most are PlayerControl.
+        public virtual Type GetExpectedNetObject() => typeof(PlayerControl);
+    }
+}
+
+```
+
+`src/WellsGui.cs`:
+
+```cs
+using System;
+using UnityEngine;
+
+namespace WellsAntiCheat
+{
+    // Injected MonoBehaviour that draws the panel. Toggle with the configured key (default F8).
+    // When you are NOT host, every control is grayed out and cannot be changed - but detection
+    // still runs and still notifies you of cheaters; it simply takes no action.
+    public class WellsGui : MonoBehaviour
+    {
+        public WellsGui(IntPtr ptr) : base(ptr) { }
+
+        public static KeyCode ToggleKey = KeyCode.F8;
+
+        private bool _open = true;
+        private Rect _window = new Rect(20, 20, 340, 620);
+        private Vector2 _scroll = Vector2.zero;
+        private const int WindowId = 0x57454C; // "WEL"
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(ToggleKey))
+                _open = !_open;
+        }
+
+        private void OnGUI()
+        {
+            GUI.enabled = true;          // notifications are never grayed
+            DrawNotifications();
+
+            if (!_open) return;
+            _window = GUI.Window(WindowId, _window, (GUI.WindowFunction)DrawWindow, "Wells Anti Cheat");
+        }
+
+        private void DrawWindow(int id)
+        {
+            bool amHost = AmongUsClient.Instance != null && AmongUsClient.Instance.AmHost;
+
+            _scroll = GUILayout.BeginScrollView(_scroll);
+
+            GUILayout.Label(amHost
+                ? "Status: HOST - fully active"
+                : "Status: NOT HOST - alerts only, controls locked");
+
+            // Everything below is interactive only while hosting.
+            GUI.enabled = amHost;
+
+            GUILayout.Space(6);
+            GUILayout.Label("Lobby:");
+            Anticheat.ModdedLobby = GUILayout.Toggle(Anticheat.ModdedLobby, " Modded lobby (loosen checks for role mods)");
+
+            GUILayout.Space(6);
+            GUILayout.Label("Detection:");
+            Anticheat.Enabled = GUILayout.Toggle(Anticheat.Enabled, " Anti-cheat (RPC checks)");
+            Anticheat.CrashProtection = GUILayout.Toggle(Anticheat.CrashProtection, " Crash / flood protection");
+            NameFilter.Enabled = GUILayout.Toggle(NameFilter.Enabled, " Kick offensive / banned names");
+            if (GUILayout.Button("Reload blocklist file"))
+                NameFilter.Load();
+
+            GUILayout.Space(6);
+            GUILayout.Label("Meeting grace:");
+            MeetingTimer.Enabled = GUILayout.Toggle(MeetingTimer.Enabled, " Block early meetings");
+            MeetingTimer.EmergencyOnly = GUILayout.Toggle(MeetingTimer.EmergencyOnly, " Emergency button only");
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"Grace: {MeetingTimer.GraceSeconds:0}s", GUILayout.Width(80));
+            MeetingTimer.GraceSeconds = Mathf.Round(GUILayout.HorizontalSlider(MeetingTimer.GraceSeconds, 0f, 30f));
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(6);
+            GUILayout.Label("On violation:");
+            Anticheat.SendNotification = GUILayout.Toggle(Anticheat.SendNotification, " Notify");
+            Anticheat.DiscardRpc = GUILayout.Toggle(Anticheat.DiscardRpc, " Discard the RPC");
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"Punish: {Anticheat.Punishment}", GUILayout.Width(110));
+            Anticheat.Punishment = (Anticheat.Punishments)Mathf.RoundToInt(
+                GUILayout.HorizontalSlider((float)Anticheat.Punishment, 0, 2));
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(6);
+            GUILayout.Label("Individual RPC checks:");
+            foreach (var kvp in Anticheat.RpcHandlers)
+                kvp.Value.Enabled = GUILayout.Toggle(kvp.Value.Enabled, $" {kvp.Key}");
+
+            GUILayout.Space(8);
+            GUILayout.Label("--- Host tools ---");
+
+            GUILayout.Label($"Map: {(MapNames)HostTools.SelectedMap}");
+            HostTools.SelectedMap = (byte)Mathf.Round(
+                GUILayout.HorizontalSlider(HostTools.SelectedMap, 0, HostTools.MaxMapId));
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Spawn Map")) HostTools.SpawnMap();
+            if (GUILayout.Button("Despawn Map")) HostTools.DespawnMap();
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Spawn Lobby")) HostTools.SpawnLobby();
+            if (GUILayout.Button("Despawn Lobby")) HostTools.DespawnLobby();
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Force Crew Win")) HostTools.ForceCrewVictory();
+            if (GUILayout.Button("Force Impostor Win")) HostTools.ForceImpostorVictory();
+            GUILayout.EndHorizontal();
+
+            GUI.enabled = true;
+            GUILayout.EndScrollView();
+            GUI.DragWindow();
+        }
+
+        private void DrawNotifications()
+        {
+            float y = 10f;
+            foreach (var msg in Notifier.Recent())
+            {
+                GUI.Box(new Rect(Screen.width - 420, y, 410, 40), msg);
+                y += 44f;
+            }
+        }
+    }
+}
+
+```
+
+`src/WellsPlugin.cs`:
+
+```cs
+using BepInEx;
+using BepInEx.Configuration;
+using BepInEx.Logging;
+using BepInEx.Unity.IL2CPP;
+using HarmonyLib;
+using UnityEngine;
+
+namespace WellsAntiCheat
+{
+    [BepInPlugin(Guid, "Wells Anti Cheat", "1.0.0")]
+    [BepInProcess("Among Us.exe")]
+    public class WellsPlugin : BasePlugin
+    {
+        public const string Guid = "com.wells.anticheat";
+
+        public new static ManualLogSource Log;
+        private readonly Harmony _harmony = new(Guid);
+
+        public override void Load()
+        {
+            Log = base.Log;
+            Log.LogInfo("Wells Anti Cheat loading...");
+
+            // Persistent settings (BepInEx/config/com.wells.anticheat.cfg).
+            var antiCheat     = Config.Bind("General", "AntiCheatEnabled", true, "Master switch for the RPC anti-cheat.");
+            var crash         = Config.Bind("General", "CrashProtection", true, "Detect malformed/flooded RPCs (crash attempts).");
+            var nameFilter    = Config.Bind("General", "NameFilterEnabled", true, "Kick players with offensive/banned usernames.");
+            var meetingTimer  = Config.Bind("General", "MeetingTimerEnabled", true, "Punish meetings called before the grace window.");
+            var moddedLobby   = Config.Bind("General", "ModdedLobby", false, "Loosen role/gameplay checks for modded lobbies.");
+            var discardRpc    = Config.Bind("General", "DiscardRpc", true, "Drop the offending RPC so its effect never applies.");
+            var punishment    = Config.Bind("General", "Punishment", "Kick", "Action on a flagged player: None, Kick, or Ban.");
+            var keyCfg        = Config.Bind("General", "ToggleKey", "F8", "Key to open/close the panel.");
+            var graceCfg      = Config.Bind("Meeting", "GraceSeconds", 10f, "Seconds after a round starts before meetings are allowed.");
+            var emergencyOnly = Config.Bind("Meeting", "EmergencyOnly", false, "Restrict only emergency-button meetings (body reports always allowed).");
+            var floodCfg      = Config.Bind("Crash", "FloodThreshold", 50, "RPCs from one player within the flood window that trigger a crash-attempt flag.");
+            var floodWindow   = Config.Bind("Crash", "FloodWindowSeconds", 1.0f, "Sliding window for the flood threshold.");
+
+            Anticheat.Enabled          = antiCheat.Value;
+            Anticheat.CrashProtection  = crash.Value;
+            Anticheat.ModdedLobby      = moddedLobby.Value;
+            Anticheat.DiscardRpc       = discardRpc.Value;
+            Anticheat.Punishment       = ParsePunishment(punishment.Value);
+            Anticheat.FloodThreshold   = floodCfg.Value;
+            Anticheat.FloodWindow      = floodWindow.Value;
+            NameFilter.Enabled         = nameFilter.Value;
+            MeetingTimer.Enabled       = meetingTimer.Value;
+            MeetingTimer.GraceSeconds  = graceCfg.Value;
+            MeetingTimer.EmergencyOnly = emergencyOnly.Value;
+
+            if (System.Enum.TryParse<KeyCode>(keyCfg.Value, true, out var key))
+                WellsGui.ToggleKey = key;
+
+            NameFilter.Load();
+
+            _harmony.PatchAll();
+
+            AddComponent<WellsGui>();
+
+            Log.LogInfo("Wells Anti Cheat loaded. Press F8 in-game to open the panel.");
+        }
+
+        private static Anticheat.Punishments ParsePunishment(string s)
+            => System.Enum.TryParse<Anticheat.Punishments>(s, true, out var p) ? p : Anticheat.Punishments.Kick;
+    }
+}
+
+```
+
+`src/rpc/CheckName.cs`:
+
+```cs
+using Hazel;
+
+namespace WellsAntiCheat.Rpc
+{
+    // Fired when a client proposes a name (join / rename). This is the earliest place to catch
+    // an offensive name, before it's committed. Runs regardless of modded status, unlike HyperMenu.
+    internal class CheckName : RpcCheck
+    {
+        public const int MaxNameLength = 10;
+
+        public override void Validate(PlayerControl player, MessageReader reader, ref bool blockRpc)
+        {
+            string requested = reader.ReadString();
+
+            if (NameFilter.IsOffensive(requested, out var term))
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"'{requested}' contains a blocked term ('{term}').");
+                return;
+            }
+
+            if (requested.Length > MaxNameLength)
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"'{requested}' is too long ({requested.Length}).");
+                return;
+            }
+
+            if (requested.Contains('<'))
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"'{requested}' contains invalid formatting characters.");
+            }
+        }
+    }
+}
+
+```
+
+`src/rpc/MovementChecks.cs`:
+
+```cs
+using Hazel;
+using System;
+using UnityEngine;
+
+namespace WellsAntiCheat.Rpc
+{
+    // Task completion: impossible-context and impostor-completing-tasks detection.
+    internal class CompleteTask : RpcCheck
+    {
+        public override void Validate(PlayerControl player, MessageReader reader, ref bool blockRpc)
+        {
+            uint taskIndex = reader.ReadPackedUInt32();
+
+            if (ShipStatus.Instance == null)
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"{Anticheat.Name(player)} completed task {taskIndex} with no ShipStatus.");
+                return;
+            }
+
+            // Role semantics vary on modded lobbies; skip role-based checks there to avoid false positives.
+            if (!Anticheat.IsModded())
+            {
+                if (RoleManager.IsImpostorRole(player.Data.RoleType))
+                {
+                    blockRpc = true;
+                    Anticheat.Flag(player, $"{Anticheat.Name(player)} completed task {taskIndex} as an impostor.");
+                    return;
+                }
+
+                if (taskIndex + 1 > (uint)player.Data.Tasks.Count)
+                {
+                    blockRpc = true;
+                    Anticheat.Flag(player, $"{Anticheat.Name(player)} completed task {taskIndex} but only has {player.Data.Tasks.Count}.");
+                }
+            }
+        }
+    }
+
+    internal class EnterVent : RpcCheck
+    {
+        public override Type GetExpectedNetObject() => typeof(PlayerPhysics);
+
+        public override void Validate(PlayerControl player, MessageReader reader, ref bool blockRpc)
+        {
+            if (ShipStatus.Instance == null)
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"{Anticheat.Name(player)} vented with no ShipStatus.");
+                return;
+            }
+
+            if (Anticheat.IsModded()) return; // custom roles may vent
+
+            if (!player.Data.IsDead && !player.Data.Role.CanVent)
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"{Anticheat.Name(player)} vented but role ({player.Data.RoleType}) can't vent.");
+            }
+        }
+    }
+
+    internal class ExitVent : RpcCheck
+    {
+        public override Type GetExpectedNetObject() => typeof(PlayerPhysics);
+
+        public override void Validate(PlayerControl player, MessageReader reader, ref bool blockRpc)
+        {
+            if (ShipStatus.Instance == null)
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"{Anticheat.Name(player)} exited a vent with no ShipStatus.");
+                return;
+            }
+
+            if (Anticheat.IsModded()) return;
+
+            if (!player.Data.IsDead && !player.Data.Role.CanVent)
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"{Anticheat.Name(player)} exited a vent but role ({player.Data.RoleType}) can't vent.");
+            }
+        }
+    }
+
+    internal class ClimbLadder : RpcCheck
+    {
+        public override Type GetExpectedNetObject() => typeof(PlayerPhysics);
+
+        public override void Validate(PlayerControl player, MessageReader reader, ref bool blockRpc)
+        {
+            if (ShipStatus.Instance == null)
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"{Anticheat.Name(player)} climbed a ladder with no ShipStatus.");
+                return;
+            }
+
+            if (!player.Data.IsDead) return; // living players climbing is normal
+
+            blockRpc = true;
+            Anticheat.Flag(player, $"{Anticheat.Name(player)} climbed a ladder while dead.");
+        }
+    }
+
+    // SnapTo (teleport) is only legitimate during gameplay, never in the lobby.
+    internal class SnapTo : RpcCheck
+    {
+        public override Type GetExpectedNetObject() => typeof(CustomNetworkTransform);
+
+        public override void Validate(PlayerControl player, MessageReader reader, ref bool blockRpc)
+        {
+            NetHelpers.ReadVector2(reader); // position - read to advance, value unused
+
+            if (LobbyBehaviour.Instance != null)
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"{Anticheat.Name(player)} used SnapTo (teleport) inside the lobby.");
+
+                // Snap them back so the illegitimate move doesn't stick for other clients.
+                if (AmongUsClient.Instance.AmHost && player?.NetTransform != null)
+                    player.NetTransform.RpcSnapTo(player.transform.position);
+            }
+        }
+    }
+}
+
+```
+
+`src/rpc/ReportDeadBody.cs`:
+
+```cs
+using Hazel;
+
+namespace WellsAntiCheat.Rpc
+{
+    // Meeting calls (emergency button and body reports) route through this RPC. We enforce the
+    // grace-period rule here. This catches modded clients that fire the meeting RPC directly to
+    // skip the emergency-button cooldown/limit (e.g. HyperMenu's "call meeting" button).
+    internal class ReportDeadBody : RpcCheck
+    {
+        public override void Validate(PlayerControl player, MessageReader reader, ref bool blockRpc)
+        {
+            // First byte is the reported player id; 0xFF (255) means an emergency-button meeting.
+            byte targetId = reader.ReadByte();
+            bool isEmergency = targetId == byte.MaxValue;
+
+            // Meetings are never valid in Hide and Seek.
+            if (GameManager.Instance != null && GameManager.Instance.IsHideAndSeek())
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"{Anticheat.Name(player)} tried to call a meeting in Hide and Seek.");
+                return;
+            }
+
+            // Grace-period rule.
+            bool restricted = MeetingTimer.EmergencyOnly ? isEmergency : true;
+            if (restricted && MeetingTimer.InGracePeriod(out float remaining))
+            {
+                blockRpc = true;
+                string kind = isEmergency ? "an emergency meeting" : "a body report";
+                Anticheat.Flag(player,
+                    $"{Anticheat.Name(player)} called {kind} {remaining:0.0}s too early " +
+                    $"(grace {MeetingTimer.GraceSeconds:0}s).");
+            }
+        }
+    }
+}
+
+```
+
+`src/rpc/SendChat.cs`:
+
+```cs
+using Hazel;
+using UnityEngine;
+
+namespace WellsAntiCheat.Rpc
+{
+    // Detects chat spam (too many messages in a short window) and oversized messages that can
+    // lag or crash clients.
+    internal class SendChat : RpcCheck
+    {
+        public static int SpamThreshold = 5;      // messages within SpamWindow => spam
+        public static float SpamWindow = 3.0f;    // seconds
+        public static int MaxMessageLength = 300; // longer than this is treated as a crash attempt
+
+        private static readonly RateTracker _chatRate = new();
+
+        public override void Validate(PlayerControl player, MessageReader reader, ref bool blockRpc)
+        {
+            if (player == null) return;
+
+            string message = reader.ReadString();
+
+            if (message != null && message.Length > MaxMessageLength)
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"{Anticheat.Name(player)} sent an oversized chat message ({message.Length} chars) - crash attempt.");
+                return;
+            }
+
+            int count = _chatRate.Record(player.OwnerId, Time.realtimeSinceStartup, SpamWindow);
+            if (count > SpamThreshold)
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"{Anticheat.Name(player)} is spamming chat ({count} msgs / {SpamWindow:0.#}s).");
+            }
+        }
+    }
+}
+
+```
+
+`src/rpc/SetName.cs`:
+
+```cs
+using Hazel;
+
+namespace WellsAntiCheat.Rpc
+{
+    // Fired when a name is actually committed. HyperMenu bails out entirely on modded lobbies
+    // (`if (Anticheat.IsModded()) return;`), which is exactly where name-bypass tools live.
+    // We keep the offensive-name check active in all lobby types and only relax the length/format
+    // rules for modded lobbies (where custom long/colored names are legitimate).
+    internal class SetName : RpcCheck
+    {
+        public const int MaxNameLength = 12; // +2 for the disambiguation numbers vanilla appends
+
+        public override void Validate(PlayerControl player, MessageReader reader, ref bool blockRpc)
+        {
+            reader.ReadUInt32(); // netId - not needed for our checks
+            string requested = reader.ReadString();
+
+            // Offensive-name check ALWAYS runs, modded or not.
+            if (NameFilter.IsOffensive(requested, out var term))
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"'{requested}' contains a blocked term ('{term}').");
+                return;
+            }
+
+            // On modded lobbies, long/colored names are expected; skip the cosmetic checks.
+            if (Anticheat.IsModded()) return;
+
+            if (requested.Length > MaxNameLength)
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"'{requested}' is too long ({requested.Length}).");
+                return;
+            }
+
+            if (requested.Contains('<'))
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"'{requested}' contains invalid formatting characters.");
+            }
+        }
+
+        // On modded servers the host should never receive a SetName from a client.
+        public override bool IsHostOnly() => Anticheat.IsModded();
+    }
+}
+
+```
+
+`src/rpc/SetStartCounter.cs`:
+
+```cs
+using Hazel;
+
+namespace WellsAntiCheat.Rpc
+{
+    // Non-host clients may only send SetStartCounter with a value of -1. Anything else is an
+    // attempt to force/spoof the lobby countdown.
+    internal class SetStartCounter : RpcCheck
+    {
+        public override void Validate(PlayerControl player, MessageReader reader, ref bool blockRpc)
+        {
+            reader.ReadPackedInt32(); // sequence id
+            sbyte counter = reader.ReadSByte();
+
+            if (player.OwnerId != AmongUsClient.Instance.HostId && counter != -1)
+            {
+                blockRpc = true;
+                Anticheat.Flag(player, $"{Anticheat.Name(player)} spoofed the start counter ({counter}).");
+
+                // Revert the fake countdown value.
+                if (AmongUsClient.Instance.AmHost && PlayerControl.LocalPlayer != null)
+                    PlayerControl.LocalPlayer.RpcSetStartCounter(-1);
+            }
+        }
+    }
+}
+
+```

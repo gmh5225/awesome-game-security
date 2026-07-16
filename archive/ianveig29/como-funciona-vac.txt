@@ -1,0 +1,246 @@
+Project Path: arc_ianveig29_como-funciona-vac_7rbme7mp
+
+Source Tree:
+
+```txt
+arc_ianveig29_como-funciona-vac_7rbme7mp
+└── README.md
+
+```
+
+`README.md`:
+
+```md
+# ¿Cómo Funciona VAC?
+
+> **Análisis del sistema anti-cheat de Valve en CS2**
+>
+> Basado en los repositorios públicos:
+> - [Aspasia1337/cs2-vac-internals](https://github.com/Aspasia1337/cs2-vac-internals)
+> - [danielkrupinski/VAC](https://github.com/danielkrupinski/VAC)
+> - [crvdev/vac-bypass-kernel](https://github.com/crvvdev/vac-bypass-kernel)
+> - [GitHub/CS2-Anticheat (análisis junio 2023)](https://github.com/danielkrupinski/cs2-anticheat)
+> - GitHub/VAC-modules (análisis histórico de módulos) 
+
+---
+
+## Tabla de Contenidos
+
+1. [Introducción](#1-introducción)
+2. [Arquitectura General](#2-arquitectura-general)
+3. [Trusted Launch](#3-trusted-launch-cs2exe-pre-engine)
+4. [Secuencia de Arranque](#4-secuencia-de-arranque-boot-sequence)
+5. [Escáner In-Process (client.dll)](#5-escáner-in-process-clientdll)
+   - 5.1 [CDllVerificationMonitor_Init](#51-cdllverificationmonitor_init)
+   - 5.2 [CollectThreadInfo](#52-collectthreadinfo)
+   - 5.3 [VEH Exception Handler](#53-veh-exception-handler-ring-buffer)
+   - 5.4 [Interface CRC Scanner](#54-interface-crc-scanner-scanner-3)
+   - 5.5 [PE Module Hash Scanner](#55-pe-module-hash-scanner-scanner-1)
+   - 5.6 [DLL Status Report](#56-dll-status-report-mensaje-159)
+   - 5.7 [Diagnósticos Dirigidos por Servidor](#57-diagnósticos-dirigidos-por-servidor-mensaje-162)
+6. [Escáner Externo (steam.exe)](#6-escáner-externo-steamexe)
+7. [Resumen de Capacidades y Limitaciones](#7-resumen-de-capacidades-y-limitaciones)
+
+---
+
+## 1. Introducción
+
+**Valve Anti-Cheat (VAC)** es el sistema anti-cheat de Valve Corporation para sus juegos en Steam, incluyendo Counter-Strike 2. A diferencia de soluciones como Easy Anti-Cheat o Vanguard (Riot Games), VAC opera completamente en **modo usuario (usermode)**, sin ningún driver de kernel.
+
+Su diseño filosófico central es el de un **sistema de recolección de evidencia**: no bloquea cheats en tiempo real sino que recolecta datos del cliente, los envía al servidor de Valve, y las decisiones de baneo se toman del lado del servidor.
+
+Este documento resume el análisis técnico de tres fuentes de ingeniería inversa pública sobre los binarios de CS2 y los módulos históricos de VAC.
+
+---
+
+## 2. Arquitectura General
+
+VAC en CS2 tiene dos componentes principales que operan de forma independiente:
+
+| Componente | Proceso | Descripción |
+|---|---|---|
+| **Escáner In-Process** | `client.dll` | Corre dentro del proceso del juego |
+| **Escáner Externo** | `steam.exe` | Corre fuera del proceso del juego |
+
+El escáner externo (`steam.exe`) es sorprendentemente minimalista: en 5 minutos de observación solo realiza dos syscalls:
+- `NtReadVirtualMemory` → **192.006 veces**
+- `NtQueryVirtualMemory` → **2.347 veces**
+
+Todo el procesamiento ocurre del lado del servidor de Valve.
+
+---
+
+## 3. Trusted Launch (cs2.exe, pre-engine)
+
+Antes de que cargue `engine2.dll`, `cs2.exe` ejecuta un módulo de verificación de arranque completamente independiente de `client.dll`. Sus acciones al inicializarse:
+
+- Carga **4 catálogos de firmas digitales** via `CryptCatAdminAcquireContext2`.
+- **Hookea 3 APIs** del sistema operativo, incluyendo `NtOpenFile`.
+- Registra un **Vectored Exception Handler (VEH)** de prioridad 1.
+
+El hook sobre `NtOpenFile` es la pieza central: cualquier intento de abrir un archivo con permisos de lectura + ejecución (`DesiredAccess & 0x21`) dispara una verificación de firma de catálogo digital. Si la firma no es válida, la apertura se bloquea.
+
+> **Flags de lanzamiento:**
+> - `-insecure` → omite toda esta verificación
+> - `-trusted` → exige verificación completa de catálogo
+
+---
+
+## 4. Secuencia de Arranque (Boot Sequence)
+
+Tiempos aproximados desde la creación del proceso `cs2.exe`:
+
+| Tiempo | Evento |
+|---|---|
+| `t = 0ms` | Creación del proceso `cs2.exe` |
+| `t ≈ 50ms` | Inicialización de Trusted Launch (hooks + VEH) |
+| `t ≈ 200ms` | Carga de `engine2.dll` |
+| `t ≈ 500ms` | Inicialización de `client.dll` y VAC in-process |
+| `t ≈ 1000ms` | Primera conexión al servidor VAC |
+
+---
+
+## 5. Escáner In-Process (client.dll)
+
+Todo lo que `client.dll` envía al servidor viaja como mensajes `CSVCMsg_UserMessage` codificados en formato **protobuf** a través del canal de red del juego.
+
+### 5.1 CDllVerificationMonitor_Init
+
+Se llama al inicio del scan y en **cada frame del juego**. Verifica si hay módulos no firmados mediante `BSecureAllowed()`. Si detecta un módulo no autorizado, setea un flag global de modo inseguro (`g_VAC_Insecure`).
+
+### 5.2 CollectThreadInfo
+
+Se activa en cada `THREAD_ATTACH` via ConcRT. Obtiene la dirección de inicio de cada nuevo thread y lo clasifica como **sospechoso** si cumple alguna de estas condiciones:
+
+- No tiene módulo de respaldo (*backing module*).
+- Tiene permisos de memoria `PAGE_EXECUTE_READWRITE` (RWX).
+- Su punto de inicio apunta dentro de `kernel32.dll` o `kernelbase.dll`.
+
+Para threads sospechosos, copia el primer page de código del thread (`0x1000 bytes`) y los primeros 8 bytes de `NtOpenFile` y `LoadLibraryExW` para enviarlos al servidor.
+
+### 5.3 VEH Exception Handler (Ring Buffer)
+
+El VEH registrado es de prioridad 1. Captura dos tipos de excepciones:
+
+- `STATUS_ACCESS_VIOLATION` — violaciones de acceso a memoria.
+- `STATUS_SINGLE_STEP` — solo si `Dr6 & 0xF != 0` (filtra single-steps que no vienen de hardware breakpoints).
+
+Por cada excepción, guarda en un **ring buffer circular de 64 entradas**:
+- La dirección, el código, flags R/W, RSP, Dr6
+- Hasta **2944 bytes del stack raw** desde RSP
+
+El buffer se envía al servidor en cada mensaje periódico.
+
+> **Auto-reparación:** Si una AV ocurre dentro de la sección `.text` de `client.dll`, VAC restaura automáticamente los permisos a `PAGE_EXECUTE_READ`. También setea el Trap Flag en EFlags para provocar un `STATUS_SINGLE_STEP` inmediatamente después.
+
+### 5.4 Interface CRC Scanner (Scanner 3)
+
+Escanea **112 interfaces de Source2 Engine**. Para cada interfaz calcula:
+
+- Un offset estable frente al ASLR: `vtable_ptr - vfunc0` (la dirección del primer método virtual).
+- Lo acumula en un **CRC32 global**.
+- Aplica un hash **DJB2** (seed `1171724434`, multiplicador `33`) al nombre de la interfaz.
+
+> **Nota importante:** Solo se verifica el slot `[0]` de cada vtable (el primer método virtual). El resto de los métodos se reportan *verbatim* pero no se verifican con hash.
+
+### 5.5 PE Module Hash Scanner (Scanner 1)
+
+Para cada módulo registrado via `Plat_GetRegisteredModules()`, realiza el siguiente proceso:
+
+1. Crea una copia del DLL en `VirtualAlloc` (tamaño = `SizeOfImage`).
+2. Copia los headers y todas las secciones no-writable al buffer.
+3. Deshace las relocaciones `DIR64` (`IMAGE_REL_BASED_DIR64`).
+4. Zeroa el Export Address Table — `DataDirectory[0]`.
+5. Zeroa la Import Address Table — `DataDirectory[12]`.
+6. Saltea secciones con flag `MEM_WRITE` (`Characteristics & 0x80000000`).
+7. Calcula **CRC32** y **SHA1** del resto.
+
+Secciones de `client.dll` y si se hashean:
+
+| Sección | ¿Se hashea? |
+|---|---|
+| `.text` | ✅ Sí |
+| `.rdata` | ✅ Sí |
+| `.data` | ❌ No (writable) |
+| `.bss` | ❌ No (writable) |
+
+### 5.6 DLL Status Report (Mensaje 159)
+
+Enviado **una vez al conectar**. Contiene más de 40 campos:
+
+- Lista de todos los DLLs cargados con nombre, base y tamaño (`CModuleListSnapshot`).
+- Timestamps PE de `client.dll`, `kernel32`, `cs2.exe`, `ntdll` y `gameoverlayrenderer64`.
+- TID del thread principal (`GetCurrentThreadId()`, reportado en los campos 25 y 34).
+- Resultado de `BSecureAllowed(0,0,0)` + string de violación de hasta 100KB.
+- Resultado de `IsDebuggerPresent()`.
+- CPUID del procesador.
+- Línea de comandos completa del proceso.
+
+### 5.7 Diagnósticos Dirigidos por Servidor (Mensaje 162)
+
+El servidor puede ordenar remotamente cualquiera de estos casos:
+
+| Código | Acción |
+|---|---|
+| `0x01` | Dump de memoria de un rango específico |
+| `0x02` | Re-scan completo de módulos |
+| `0x03` | Snapshot del estado de threads |
+| `0x04` | Lectura de registros de hardware (Dr0-Dr7) |
+
+---
+
+## 6. Escáner Externo (steam.exe)
+
+El escáner externo opera completamente **fuera del proceso del juego** usando exclusivamente `NtReadVirtualMemory` y `NtQueryVirtualMemory`. Sin driver de kernel, sin ETW, puro usermode. Opera en **cuatro fases**:
+
+### Fase 1 — VAS Walk (~2.5s al inicio)
+
+Recorre cada página comprometida del espacio de memoria virtual de `cs2.exe`. Por cada página obtiene `MemoryBasicInformation` y `MemoryMappedFilenameInformation`. Construye una lista de **153 módulos** en un heap protegido.
+
+### Fase 2 — Polling Loop Continuo
+
+Por cada uno de los 153 módulos, repite continuamente 4 lecturas:
+
+- `136 bytes` — descriptor del módulo (`struct VAC_ModuleDescriptor`).
+- `16 bytes` — sub-campo del descriptor.
+- `8 bytes` — puntero guardado en la arena protegida de VAC (snapshot).
+- `8 bytes` — valor en vivo desde la sección compartida de win32k (UMI).
+
+Los bytes `[3]` y `[4]` se comparan como verificación de integridad de puntero: al inicio VAC lee un puntero desde la sección UMI de win32k, lo guarda en su arena protegida, y luego lo compara continuamente con el valor en vivo.
+
+### Fase 3 — Scan Completo Periódico (~10-20s, thread pool)
+
+Doble pasada sobre los 153 descriptores. Escribe un resultado de 20 bytes en una dirección fija. Este es el **scan de hash periódico** del estado del proceso completo.
+
+### Fase 4 — Auto-Verificación Cross-Process
+
+`steam.exe` abre **4 handles reales** a sí mismo y lee los mismos 153 módulos (312 bytes cada uno) para comparación cruzada.
+
+| Tipo de lectura | Cantidad en 5 min |
+|---|---|
+| Reads externos a `cs2.exe` | ~192.006 |
+| Reads propios (self-check) | ~2.347 |
+
+Los bytes 136-312 de cada descriptor contienen punteros al buffer de hash por sección en una arena separada.
+
+---
+
+## 7. Resumen de Capacidades y Limitaciones
+
+| Capacidad | Estado |
+|---|---|
+| Detección de módulos no firmados | ✅ In-process + externo |
+| Detección de hardware breakpoints | ✅ Via VEH + Dr6 |
+| Detección de modificación de vtables | ✅ Solo slot [0] |
+| Detección de hooks en NtOpenFile | ✅ Trusted Launch |
+| Detección de cheats en kernel | ❌ No (usermode only) |
+| Bloqueo en tiempo real | ❌ No (evidencia diferida) |
+| Anti-tamper del escáner externo | ✅ Cross-process self-check |
+
+> **Conclusión:** VAC es un sistema de **recolección de evidencia forense**, no de prevención activa. Su fortaleza está en la detección retrospectiva del lado del servidor, no en el bloqueo en tiempo real del cliente.
+
+---
+
+*Análisis basado en ingeniería inversa pública. Documentación con fines educativos.*
+
+```
