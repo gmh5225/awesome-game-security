@@ -1,9 +1,13 @@
 name: Auto Archive New Repos on Push
 
 # Pipeline on README.md push to main:
-#   1) auto-archive          → archive/{owner}/{repo}.txt
-#   2) generate-descriptions → description/.../description_en.txt
+#   1) auto-archive           → archive/{owner}/{repo}.txt
+#   2) generate-descriptions  → description/.../description_en.txt
 #   3) translate-descriptions → description/.../description_{lang}.txt
+#
+# No-op pushes (merge / README doc tweak / already-archived URLs):
+#   sparse-checkout README only → empty repo list → success, no full tree,
+#   generate/translate skipped. Avoids checkout failures on huge merges.
 #
 # Secret safety:
 # - Triggers only on push to main (not pull_request / pull_request_target).
@@ -26,52 +30,145 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     outputs:
+      # Downstream generate/translate (needs work of any kind).
       repos: ${{ steps.diff.outputs.repos }}
+      # Only repos still missing archive/ (controls full-tree materialize).
+      archive_repos: ${{ steps.diff.outputs.archive_repos }}
 
     steps:
-      - name: Checkout
+      # Sparse README-only first: merge pushes that barely touch README.md must not
+      # materialize the whole archive/description tree (that checkout can fail/time out).
+      - name: Checkout (README only)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2   # need HEAD and HEAD~1 to compute the diff
+          # Shallow tip is enough; we fetch `before` by SHA only if missing.
+          # (fetch-depth: 0 on this repo is huge and slow for no-op README pushes.)
+          fetch-depth: 1
+          persist-credentials: true
+          sparse-checkout: |
+            README.md
+          sparse-checkout-cone-mode: false
 
       - name: Extract newly added GitHub repo URLs
         id: diff
+        env:
+          # Push range on the remote tip — correct for merge commits too.
+          # (HEAD~1..HEAD is first-parent only and misses/misfires on merges.)
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
         run: |
-          # Lines added in this push that contain a github.com URL
-          REPOS=$(git diff HEAD~1 HEAD -- README.md \
-            | grep '^+' \
-            | grep -v '^+++' \
-            | grep -oP 'https://github\.com/\K[^/\s\)\]>\"'\''#]+/[^/\s\)\]>\"'\''#]+' \
-            | sed 's/[.,;:]$//' \
-            | sort -u \
-            | grep -v '^gmh5225/awesome-game-security$' \
-            | grep -v '^stars/' \
-            || true)
+          set -euo pipefail
 
-          if [ -z "$REPOS" ]; then
-            echo "No new GitHub repos found in this push."
+          emit_empty() {
             echo "repos=" >> "$GITHUB_OUTPUT"
-          else
-            echo "New repos to archive:"
-            echo "$REPOS"
-            # space-separated for passing to --repos
-            REPOS_INLINE=$(echo "$REPOS" | tr '\n' ' ' | xargs)
-            echo "repos=$REPOS_INLINE" >> "$GITHUB_OUTPUT"
+            echo "archive_repos=" >> "$GITHUB_OUTPUT"
+          }
+
+          BEFORE="$BEFORE_SHA"
+          AFTER="$AFTER_SHA"
+          if [ -z "$BEFORE" ] || [[ "$BEFORE" =~ ^0+$ ]]; then
+            # Branch creation / unknown before — deepen once for first parent.
+            git fetch --no-tags --deepen=1 origin "${GITHUB_REF_NAME}" || true
+            if git rev-parse --verify "${AFTER}^" >/dev/null 2>&1; then
+              BEFORE="$(git rev-parse "${AFTER}^")"
+            else
+              echo "No usable before SHA — nothing to diff."
+              emit_empty
+              exit 0
+            fi
           fi
 
-      - name: Skip if nothing to archive
+          if ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            echo "Fetching before SHA ${BEFORE} ..."
+            if ! git fetch --no-tags --depth=1 origin "$BEFORE"; then
+              echo "WARNING: could not fetch before SHA ${BEFORE}; treating as no-op."
+              emit_empty
+              exit 0
+            fi
+          fi
+
+          echo "Diffing README.md over ${BEFORE:0:12}..${AFTER:0:12}"
+
+          # Lines added in this push that contain a github.com URL
+          mapfile -t RAW < <(
+            git diff "$BEFORE" "$AFTER" -- README.md \
+              | grep '^+' \
+              | grep -v '^+++' \
+              | grep -oP 'https://github\.com/\K[^/\s\)\]>\"'\''#]+/[^/\s\)\]>\"'\''#]+' \
+              | sed 's/[.,;:]$//' \
+              | sort -u \
+              | grep -v '^gmh5225/awesome-game-security$' \
+              | grep -v '^stars/' \
+              || true
+          )
+
+          REPOS=()
+          ARCHIVE_REPOS=()
+          for slug in "${RAW[@]+"${RAW[@]}"}"; do
+            [ -z "$slug" ] && continue
+            if [[ ! "$slug" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]]; then
+              echo "WARNING: skipping invalid slug from README diff: $slug"
+              continue
+            fi
+            owner="${slug%%/*}"
+            repo="${slug#*/}"
+            # Tip already has archive + EN summary ⇒ merge/re-push noise, skip.
+            # (Translations for brand-new repos are handled later in this workflow.)
+            has_archive=0
+            has_en=0
+            git cat-file -e "${AFTER}:archive/${owner}/${repo}.txt" 2>/dev/null && has_archive=1
+            git cat-file -e "${AFTER}:description/${owner}/${repo}/description_en.txt" 2>/dev/null && has_en=1
+            if [ "$has_archive" = 1 ] && [ "$has_en" = 1 ]; then
+              echo "Already archived+described (skip): $slug"
+              continue
+            fi
+            REPOS+=("$slug")
+            if [ "$has_archive" != 1 ]; then
+              ARCHIVE_REPOS+=("$slug")
+            else
+              echo "Archive present, EN missing — queue for generate only: $slug"
+            fi
+          done
+
+          if [ "${#REPOS[@]}" -eq 0 ]; then
+            echo "No new GitHub repos needing work in this push (README tweak / merge / already done)."
+            emit_empty
+          else
+            echo "Repos needing generate/translate:"
+            printf '%s\n' "${REPOS[@]}"
+            REPOS_INLINE=$(printf '%s\n' "${REPOS[@]}" | tr '\n' ' ' | xargs)
+            echo "repos=${REPOS_INLINE}" >> "$GITHUB_OUTPUT"
+            if [ "${#ARCHIVE_REPOS[@]}" -eq 0 ]; then
+              echo "archive_repos=" >> "$GITHUB_OUTPUT"
+            else
+              echo "Repos needing archive:"
+              printf '%s\n' "${ARCHIVE_REPOS[@]}"
+              ARCHIVE_INLINE=$(printf '%s\n' "${ARCHIVE_REPOS[@]}" | tr '\n' ' ' | xargs)
+              echo "archive_repos=${ARCHIVE_INLINE}" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Skip if nothing to do
         if: steps.diff.outputs.repos == ''
-        run: echo "Nothing to archive — skipping."
+        run: echo "Nothing to archive/generate/translate — skipping full tree and downstream jobs."
+
+      # Only pay the full-checkout cost when archive files still need writing.
+      - name: Materialize full tree
+        if: steps.diff.outputs.archive_repos != ''
+        run: |
+          set -euo pipefail
+          git sparse-checkout disable
+          git checkout --force -- .
 
       - name: Install code2prompt
-        if: steps.diff.outputs.repos != ''
+        if: steps.diff.outputs.archive_repos != ''
         run: |
           curl -fsSL -o /usr/local/bin/code2prompt \
             https://github.com/mufeedvh/code2prompt/releases/download/v4.2.0/code2prompt-x86_64-unknown-linux-gnu
           chmod +x /usr/local/bin/code2prompt
 
       - name: Configure git
-        if: steps.diff.outputs.repos != ''
+        if: steps.diff.outputs.archive_repos != ''
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -80,11 +177,11 @@ jobs:
           git config http.lowSpeedTime  999999
 
       - name: Archive new repos
-        if: steps.diff.outputs.repos != ''
+        if: steps.diff.outputs.archive_repos != ''
         env:
           REPO_SNAPSHOT_HOST: ${{ secrets.REPO_SNAPSHOT_HOST }}
           # Pass via env (not ${{ }} in the script body) to avoid shell injection.
-          ARCHIVE_REPOS: ${{ steps.diff.outputs.repos }}
+          ARCHIVE_REPOS: ${{ steps.diff.outputs.archive_repos }}
         run: |
           set -euo pipefail
           REPOS=()
@@ -106,7 +203,7 @@ jobs:
             --repos "${REPOS[@]}"
 
       - name: Final commit (any remainder)
-        if: steps.diff.outputs.repos != ''
+        if: steps.diff.outputs.archive_repos != ''
         run: |
           git add archive/ 2>/dev/null || true
           if git diff --cached --quiet; then
