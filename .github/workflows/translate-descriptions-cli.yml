@@ -4,6 +4,7 @@ name: Translate Descriptions (Cursor CLI)
 # using Cursor CLI (cursor-grok-4.5-high-fast, max mode).
 #
 # Triggers:
+# - schedule: every 6 hours at minute 20 UTC (catch-up missing translations)
 # - workflow_dispatch: scan & fill missing translations (optional repos/langs/limit)
 # - pull_request: when description_en.txt is added/changed on a same-repo PR
 #
@@ -17,6 +18,10 @@ name: Translate Descriptions (Cursor CLI)
 # - No pull_request_target.
 
 on:
+  schedule:
+    # Every 6 hours at minute 20 UTC (00:20, 06:20, 12:20, 18:20).
+    - cron: "20 */6 * * *"
+
   workflow_dispatch:
     inputs:
       limit:
@@ -47,7 +52,8 @@ on:
       - "description/**/description_en.txt"
 
 concurrency:
-  group: translate-descriptions-${{ github.event.pull_request.number || github.run_id }}
+  # PRs isolated; schedule/dispatch share one backfill group so overlaps cancel.
+  group: translate-descriptions-${{ github.event.pull_request.number || 'backfill' }}
   cancel-in-progress: true
 
 jobs:
@@ -75,7 +81,7 @@ jobs:
             exit 1
           fi
           case "${GITHUB_EVENT_NAME}" in
-            workflow_dispatch|pull_request) ;;
+            schedule|workflow_dispatch|pull_request) ;;
             *)
               echo "Refusing unexpected event: ${GITHUB_EVENT_NAME}"
               exit 1
@@ -89,13 +95,73 @@ jobs:
             fi
           fi
 
-      - name: Checkout
+      - name: Resolve inputs
+        id: opts
+        if: github.event_name != 'pull_request'
+        env:
+          INPUT_LIMIT: ${{ github.event.inputs.limit }}
+          INPUT_REPOS: ${{ github.event.inputs.repos }}
+          INPUT_LANGS: ${{ github.event.inputs.langs }}
+          INPUT_FORCE: ${{ github.event.inputs.force }}
+          INPUT_MODEL: ${{ github.event.inputs.model }}
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            LIMIT="${INPUT_LIMIT:-0}"
+            REPOS="${INPUT_REPOS:-}"
+            LANGS="${INPUT_LANGS:-}"
+            FORCE="${INPUT_FORCE:-false}"
+            MODEL="${INPUT_MODEL:-cursor-grok-4.5-high-fast}"
+          else
+            # Scheduled catch-up: scan missing, cap batch size.
+            LIMIT="20"
+            REPOS=""
+            LANGS=""
+            FORCE="false"
+            MODEL="cursor-grok-4.5-high-fast"
+          fi
+          if ! [[ "${LIMIT}" =~ ^[0-9]+$ ]]; then
+            echo "ERROR: limit must be an integer, got: ${LIMIT}"
+            exit 1
+          fi
+          {
+            echo "limit=${LIMIT}"
+            echo "force=${FORCE}"
+            echo "model<<EOF"
+            printf '%s\n' "${MODEL}"
+            echo "EOF"
+            echo "repos<<EOF"
+            printf '%s\n' "${REPOS}"
+            echo "EOF"
+            echo "langs<<EOF"
+            printf '%s\n' "${LANGS}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "limit=${LIMIT} force=${FORCE} model=${MODEL}"
+          echo "repos=${REPOS:-"(scan missing)"}"
+          echo "langs=${LANGS:-"(all 9)"}"
+
+      # PR needs full history for base...head diff; backfill only needs description/.
+      - name: Checkout (PR)
+        if: github.event_name == 'pull_request'
         uses: actions/checkout@v4
         with:
-          # PR: push translations back onto the PR branch.
-          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
           persist-credentials: true
+
+      - name: Checkout (sparse backfill)
+        if: github.event_name != 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          persist-credentials: true
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /scripts/
+            /description/
+            /.github/
 
       - name: Collect PR-changed description_en.txt repos
         id: pr_repos
@@ -136,13 +202,13 @@ jobs:
 
       - name: Scan missing translations
         id: scan
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name != 'pull_request'
         env:
-          DESC_LANGS: ${{ inputs.langs }}
+          DESC_LANGS: ${{ steps.opts.outputs.langs }}
         run: |
           set -euo pipefail
           ARGS=(--list-missing)
-          if [ -n "${DESC_LANGS}" ]; then
+          if [ -n "${DESC_LANGS:-}" ]; then
             ARGS+=(--langs "$DESC_LANGS")
           fi
           python3 scripts/translate-descriptions-cli.py "${ARGS[@]}" | tee /tmp/missing-scan.txt
@@ -156,19 +222,24 @@ jobs:
 
       - name: Decide whether to run
         id: gate
+        env:
+          PR_COUNT: ${{ steps.pr_repos.outputs.count }}
+          PR_REPOS: ${{ steps.pr_repos.outputs.repos }}
+          SCAN_MISSING: ${{ steps.scan.outputs.missing_count }}
+          OPT_REPOS: ${{ steps.opts.outputs.repos }}
+          OPT_FORCE: ${{ steps.opts.outputs.force }}
         run: |
           set -euo pipefail
           RUN=0
           if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
-            if [ "${{ steps.pr_repos.outputs.count }}" != "0" ] && [ -n "${{ steps.pr_repos.outputs.repos }}" ]; then
+            if [ "${PR_COUNT:-0}" != "0" ] && [ -n "${PR_REPOS:-}" ]; then
               RUN=1
             fi
           else
-            # Manual: missing work, explicit repos, or force-all (optionally limited).
-            FORCE="${{ inputs.force }}"
-            if [ "${{ steps.scan.outputs.missing_count }}" != "0" ] \
-              || [ -n "${{ inputs.repos }}" ] \
-              || [ "${FORCE}" = "true" ]; then
+            # schedule / dispatch: missing work, explicit repos, or force.
+            if [ "${SCAN_MISSING:-0}" != "0" ] \
+              || [ -n "${OPT_REPOS:-}" ] \
+              || [ "${OPT_FORCE:-false}" = "true" ]; then
               RUN=1
             fi
           fi
@@ -201,6 +272,11 @@ jobs:
           }
           EOF
           echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
+          rm -rf "$HOME/.cursor/projects" "$HOME/.cursor/chats" \
+                 "$HOME/.cursor/ai-tracking" "$HOME/.cursor/agent-transcripts" \
+                 /tmp/cursor* 2>/dev/null || true
+          echo "TMPDIR=${RUNNER_TEMP:-/tmp}" >> "$GITHUB_ENV"
+          df -h
 
       - name: Configure git
         if: steps.gate.outputs.run == '1'
@@ -216,11 +292,11 @@ jobs:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           EVENT_NAME: ${{ github.event_name }}
           PR_REPOS: ${{ steps.pr_repos.outputs.repos }}
-          INPUT_REPOS: ${{ inputs.repos }}
-          INPUT_LANGS: ${{ inputs.langs }}
-          INPUT_LIMIT: ${{ inputs.limit }}
-          INPUT_FORCE: ${{ inputs.force }}
-          INPUT_MODEL: ${{ inputs.model }}
+          INPUT_REPOS: ${{ steps.opts.outputs.repos }}
+          INPUT_LANGS: ${{ steps.opts.outputs.langs }}
+          INPUT_LIMIT: ${{ steps.opts.outputs.limit }}
+          INPUT_FORCE: ${{ steps.opts.outputs.force }}
+          INPUT_MODEL: ${{ steps.opts.outputs.model }}
           GIT_PUSH_BRANCH: ${{ github.event_name == 'pull_request' && github.head_ref || 'main' }}
         run: |
           set -euo pipefail
@@ -235,6 +311,7 @@ jobs:
           fi
 
           agent --version || true
+          df -h
 
           MODEL="${INPUT_MODEL:-cursor-grok-4.5-high-fast}"
           if [ -z "$MODEL" ]; then
