@@ -1462,6 +1462,161 @@ def _current_branch() -> str:
     return name if name and name != "HEAD" else "main"
 
 
+def _proc_err_text(proc: subprocess.CompletedProcess[Any]) -> str:
+    err = proc.stderr or ""
+    out = proc.stdout or ""
+    if isinstance(err, bytes):
+        err = err.decode("utf-8", errors="replace")
+    if isinstance(out, bytes):
+        out = out.decode("utf-8", errors="replace")
+    return f"{err}\n{out}".strip()
+
+
+def _is_transient_git_remote_error(err: str) -> bool:
+    low = err.lower()
+    return any(
+        tok in low
+        for tok in (
+            "http 500",
+            "http 502",
+            "http 503",
+            "http 429",
+            "error 500",
+            "error 502",
+            "error 503",
+            "timeout",
+            "timed out",
+            "unexpected disconnect",
+            "remote end hung up",
+            "rpc failed",
+            "curl 22",
+            "curl 56",
+            "curl 28",
+            "connection reset",
+            "tls",
+            "temporary failure",
+            "internal server error",
+        )
+    )
+
+
+def _remote_branch_sha(branch: str) -> str | None:
+    proc = _git("ls-remote", "--heads", "origin", branch, check=False)
+    if proc.returncode != 0:
+        return None
+    for line in (proc.stdout or b"").decode("utf-8", errors="replace").splitlines():
+        parts = line.split()
+        if parts:
+            return parts[0]
+    return None
+
+
+def push_branch(branch: str, *, attempts: int = 5) -> None:
+    """
+    Push HEAD to origin/<branch> with retries for transient GitHub HTTP errors.
+    Also treats 'already on remote' as success (HTTP 500 after a successful
+    receive sometimes surfaces as a false failure + 'Everything up-to-date').
+    """
+    sha = (_git("rev-parse", "HEAD").stdout or b"").decode().strip()
+    if not sha:
+        sys.exit("ERROR: cannot resolve HEAD for push")
+
+    last_err = ""
+    for attempt in range(1, attempts + 1):
+        remote_sha = _remote_branch_sha(branch)
+        if remote_sha == sha:
+            print(f"origin/{branch} already at {sha[:12]} — push not needed.")
+            return
+
+        push = _git("push", "-u", "origin", f"HEAD:{branch}", check=False)
+        if push.returncode == 0:
+            print(f"Pushed origin/{branch} ({sha[:12]}).")
+            return
+
+        last_err = _proc_err_text(push)
+        print(f"Push failed (attempt {attempt}/{attempts}): {last_err[:300]}")
+
+        # Server may have accepted the pack despite a broken sideband reply.
+        remote_sha = _remote_branch_sha(branch)
+        if remote_sha == sha or "everything up-to-date" in last_err.lower():
+            if remote_sha == sha:
+                print(
+                    f"origin/{branch} has {sha[:12]} after failed push — "
+                    "treating as success."
+                )
+                return
+
+        if attempt < attempts and _is_transient_git_remote_error(last_err):
+            delay = min(2**attempt, 30)
+            print(f"Transient remote error — retrying in {delay}s ...")
+            time.sleep(delay)
+            continue
+        break
+
+    sys.exit(f"ERROR: git push failed: {last_err[:400]}")
+
+
+def create_pr_on_github(
+    *,
+    title: str,
+    body: str,
+    branch: str,
+    attempts: int = 4,
+) -> str:
+    last_err = ""
+    for attempt in range(1, attempts + 1):
+        proc = _gh(
+            "pr",
+            "create",
+            "--title",
+            title,
+            "--body",
+            body,
+            "--base",
+            "main",
+            "--head",
+            branch,
+            check=False,
+            timeout=120,
+        )
+        if proc.returncode == 0:
+            url = (proc.stdout or "").strip().splitlines()[-1] if proc.stdout else ""
+            if url:
+                return url
+            last_err = "gh pr create succeeded but printed no URL"
+        else:
+            last_err = _proc_err_text(proc)
+            low = last_err.lower()
+            # Branch already has an open PR — recover its URL instead of failing.
+            if "already exists" in low or "pull request already exists" in low:
+                view = _gh(
+                    "pr",
+                    "view",
+                    branch,
+                    "--json",
+                    "url",
+                    "--jq",
+                    ".url",
+                    check=False,
+                    timeout=60,
+                )
+                existing = (view.stdout or "").strip()
+                if view.returncode == 0 and existing:
+                    print(f"PR already exists for {branch}: {existing}")
+                    return existing
+            print(
+                f"gh pr create failed (attempt {attempt}/{attempts}): "
+                f"{last_err[:300]}"
+            )
+            if attempt < attempts and _is_transient_git_remote_error(last_err):
+                delay = min(2**attempt, 20)
+                print(f"Transient API error — retrying in {delay}s ...")
+                time.sleep(delay)
+                continue
+            break
+    sys.exit(f"ERROR: gh pr create failed: {last_err[:400]}")
+
+
 def create_pr(
     decision: dict[str, Any],
     run_id: str,
@@ -1507,33 +1662,15 @@ def create_pr(
         _git("checkout", prev_branch, check=False)
         sys.exit(f"ERROR: git commit failed: {err}")
 
-    push = _git("push", "-u", "origin", f"HEAD:{branch}", check=False)
-    if push.returncode != 0:
-        err = (push.stderr or b"").decode().strip()[:300]
+    try:
+        push_branch(branch)
+        title = f"discover: propose {n} new repo(s)"
+        body = build_pr_body(decision, screen)
+        url = create_pr_on_github(title=title, body=body, branch=branch)
+    except SystemExit:
         _git("checkout", prev_branch, check=False)
-        sys.exit(f"ERROR: git push failed: {err}")
+        raise
 
-    title = f"discover: propose {n} new repo(s)"
-    body = build_pr_body(decision, screen)
-    proc = _gh(
-        "pr",
-        "create",
-        "--title",
-        title,
-        "--body",
-        body,
-        "--base",
-        "main",
-        "--head",
-        branch,
-        check=False,
-        timeout=120,
-    )
-    if proc.returncode != 0:
-        err = (proc.stderr or proc.stdout or "").strip()[:400]
-        _git("checkout", prev_branch, check=False)
-        sys.exit(f"ERROR: gh pr create failed: {err}")
-    url = (proc.stdout or "").strip().splitlines()[-1] if proc.stdout else ""
     print(f"PR_URL={url}")
     _git("checkout", prev_branch, check=False)
     return url or None
