@@ -1,0 +1,2402 @@
+Project Path: arc_void-stack_VMUnprotect_xm93192e
+
+Source Tree:
+
+```txt
+arc_void-stack_VMUnprotect_xm93192e
+├── LICENSE
+├── README.md
+├── VMUP
+│   ├── VMUP.sln
+│   ├── VMUnprotect
+│   │   ├── FodyWeavers.xml
+│   │   ├── FodyWeavers.xsd
+│   │   ├── Program.cs
+│   │   ├── Properties
+│   │   │   └── AssemblyInfo.cs
+│   │   ├── Utils
+│   │   │   └── ConsoleLogger.cs
+│   │   ├── VMUnprotect.csproj
+│   │   ├── manifest.manifest
+│   │   └── packages.config
+│   └── VMUnprotect.Runtime
+│       ├── General
+│       │   ├── AssemblyLoader.cs
+│       │   ├── CommandLineOptions.cs
+│       │   ├── ContainerConfig.cs
+│       │   ├── Context.cs
+│       │   ├── Engine.cs
+│       │   ├── ILogger.cs
+│       │   └── Project.cs
+│       ├── Helpers
+│       │   ├── Formatter.cs
+│       │   ├── Params.cs
+│       │   └── StringCounts.cs
+│       ├── Hooks
+│       │   ├── HooksManager.cs
+│       │   ├── IVmupHook.cs
+│       │   ├── Methods
+│       │   │   ├── AntiDebug
+│       │   │   │   ├── DebugIsAttachedPatch.cs
+│       │   │   │   ├── DebugIsLoggingPatch.cs
+│       │   │   │   └── NtQueryInformationProcessPatch.cs
+│       │   │   ├── AssemblyFix
+│       │   │   │   ├── GetCallingAssemblyPatch.cs
+│       │   │   │   ├── GetEntryAssemblyPatch.cs
+│       │   │   │   └── GetExecutingAssemblyPatch.cs
+│       │   │   ├── VmProtectDumperTranspiler.cs
+│       │   │   └── VmProtectDumperUnsafeInvoke.cs
+│       │   └── VmUnprotectPatch.cs
+│       ├── MiddleMan
+│       │   ├── TranspilerMiddleMan.cs
+│       │   └── UnsafeInvokeMiddleMan.cs
+│       ├── Modules
+│       │   └── VmProtectPatchesModule.cs
+│       ├── Properties
+│       │   └── AssemblyInfo.cs
+│       ├── Structure
+│       │   ├── VmRuntimeAnalyzer.cs
+│       │   └── VmRuntimeStructure.cs
+│       ├── VMUnprotect.Runtime.csproj
+│       └── packages.config
+└── docs
+    └── desktop.ini
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2021 void
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+<p align="center">
+  <img width="256" heigth="256" src="docs/vmup.png">
+<h1 align="center">VMUnprotect.NET</h1>
+<p align="center">
+  <strong>VMUnprotect</strong> is a project engaged in hunting virtualized <a href="https://vmpsoft.com">VMProtect</a> methods. It makes use of <a href="https://github.com/pardeike/Harmony">Harmony</a> to dynamically read <strong>VMP</strong> behavior. Currently only supports method administration. Works on <a href="https://vmpsoft.com/20210919/vmprotect-3-5-1/">VMProtect 3.6.0</a> (Latest) and few versions back.
+</p>
+</p>
+<p align="center">
+  <img src="https://forthebadge.com/images/badges/built-with-love.svg" alt="appveyor-ci" />
+  <img src="https://forthebadge.com/images/badges/made-with-c-sharp.svg" alt="appveyor-ci" />
+</p>
+</p>
+
+## Showcase
+<img src="docs/show.gif">
+
+# Usage
+```sh
+VMUnprotect.exe 
+  -f, --file             Required. Path to file.
+  --enableharmonylogs    (Default: false) Disable or Enable logs from Harmony.
+  --bypassantidebug      (Default: false) Bypass VMProtect Anti Debug.
+  --help                 Display this help screen.
+  --version              Display version information.
+```
+
+### Doesn't work? Make sure you dump the file before with:
+* [VMUnprotect.Dumper](https://github.com/void-stack/VMUnprotect.Dumper)
+
+# Supported Protections
+Note: ***All Supported Protections are working combined***
+
+Protection Name         | Is supported 
+------------------------|-------------- 
+Memory Protection       | ✓  
+Import Protection       | ✓  
+Resource Protection     | ✓  
+Debugger Detection      | ✓  
+Virtualization Tools    | ✓ 
+Strip Debug Information | ✓  
+Pack the Output File    | ✓ 
+
+## Current Features
+- Tracing invokes in virtualized methods.
+- Manipulating parameters and return values.
+- Bypass NtQueryInformationProcess, IsLogging, get_IsAttached
+
+## Usage can be found in VMUnprotect.Runtime.MiddleMan
+```csharp
+/// <summary>
+/// A prefix is a method that is executed before the original method
+/// </summary>
+public bool Prefix(ref object __result, ref object __instance, ref object obj, ref object[] parameters, ref object[] arguments) {
+    var virtualizedMethodName = new StackTrace().GetFrame(7).GetMethod();
+    var method = (MethodBase) __instance;
+    Logger.Print("VMP MethodName: {0} (MDToken 0x{1:X4})", virtualizedMethodName.FullDescription(),
+                 virtualizedMethodName.MetadataToken.ToString());
+    Logger.Print("MethodName: {0}", method.Name);
+    Logger.Print("FullDescription: {0}", method.FullDescription());
+    Logger.Print("MethodType: {0}", method.GetType());
+    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+    if (obj is not null)
+        Logger.Print("Obj: {0}", Formatter.FormatObject(obj));
+    // Loop through parameters and log them
+    for (var i = 0; i < parameters.Length; i++) {
+        var parameter = parameters[i];
+        Logger.Print("Parameter ({1}) [{0}]: ({2})", i, parameter.GetType(), Formatter.FormatObject(parameter));
+    }
+    var returnType = method is MethodInfo info ? info.ReturnType.FullName : "System.Object";
+    Logger.Print("MDToken: 0x{0:X4}", method.MetadataToken);
+    Logger.Print("Return Type: {0}", returnType ?? "null");
+    return true;
+}
+
+/// <summary>
+///  A postfix is a method that is executed after the original method
+/// </summary>
+public void Postfix(ref object __instance, ref object __result, ref object obj, ref object[] parameters, ref object[] arguments) {
+    Logger.Print("Returns: {0}", __result);
+}
+```
+
+# FAQ
+### What is code virtualization? 
+As VMProtect describes it on their's website. Code virtualization is the next step in software protection. Most protection systems encrypt the code and then decrypt it at the application’s startup. VMProtect doesn’t decrypt the code at all! Instead, the encrypted code runs on a virtual CPU that is markedly different from generic x86 and x64 CPUs as the command set is different for each protected file.
+
+### Can it devirtualize VMP?
+No, isn't even meant for devirtualization.
+
+Todo                             | Done
+---------------------------------|---------
+Change this to support more VM's | X
+VMP Stack tracing                | X 
+Bypass VMP Debugger Detection    | ✓  
+Bypass VMP CRC Check             | X  
+WPF GUI                          | X 
+
+
+# Credits, checkout my blog about [VMUnprotect](https://void-stack.github.io)
+* [Washi](https://github.com/Washi1337) Overall credits for the project and inspiration with UnsafeInvokeInternal, thanks <3
+
+This tool uses the following (open source) software:
+* [dnlib](https://github.com/0xd4d/dnlib) by [0xd4d](https://github.com/0xd4d), licensed under the MIT license, for reading/writing assemblies.
+* [Harmony](https://github.com/pardeike/Harmony) by [Andreas Pardeike](https://github.com/pardeike), licensed under the MIT license
+* [Serilog](https://github.com/serilog/serilog) provides diagnostic logging to files, the console, and elsewhere. It is easy to set up, has a clean API.
+* [commandline](https://github.com/commandlineparser/commandline) offers CLR applications a clean and concise API for manipulating command line arguments and related tasks
+* [Autofac](https://github.com/autofac/Autofac) Autofac is an IoC container for Microsoft .NET. It manages the dependencies between classes so that applications stay easy to change as they grow in size and complexity. This is achieved by treating regular .NET classes as components.
+
+## 💵 Want to buy me a Coffee?
+     - Donate BTC at `bc1q048wrqztka5x2syt9mtj68uuf73vqry60s38vf`
+     - Donate ETH at `0x86b2C17C94A1E6f35d498d17a37dc1f8A715139b`
+
+```
+
+`VMUP/VMUP.sln`:
+
+```sln
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VMUnprotect", "VMUnprotect\VMUnprotect.csproj", "{42C88429-9A67-4087-91BD-7D76383BC86D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VMUnprotect.Runtime", "VMUnprotect.Runtime\VMUnprotect.Runtime.csproj", "{3EE03C52-C17B-4771-BF5A-32D04A2D435E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{42C88429-9A67-4087-91BD-7D76383BC86D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42C88429-9A67-4087-91BD-7D76383BC86D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42C88429-9A67-4087-91BD-7D76383BC86D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42C88429-9A67-4087-91BD-7D76383BC86D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EE03C52-C17B-4771-BF5A-32D04A2D435E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EE03C52-C17B-4771-BF5A-32D04A2D435E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EE03C52-C17B-4771-BF5A-32D04A2D435E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EE03C52-C17B-4771-BF5A-32D04A2D435E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
+
+```
+
+`VMUP/VMUnprotect.Runtime/General/AssemblyLoader.cs`:
+
+```cs
+using dnlib.DotNet;
+using System;
+using System.Reflection;
+using VMUnprotect.Runtime.Helpers;
+
+namespace VMUnprotect.Runtime.General
+{
+    internal class AssemblyLoader : Params, IAssemblyLoader
+    {
+        public AssemblyLoader(Context ctx, ILogger logger) : base(ctx, logger) { }
+
+        public void LoadAssembly() {
+            var assembly = Ctx.Project.TargetFilePath;
+
+            try {
+                Ctx.Module = ModuleDefMD.Load(assembly);
+                Ctx.Assembly = Assembly.LoadFile(assembly);
+                Logger.Info("Loaded assembly '{0}'", Ctx.Module.Name);
+            } catch (Exception exception) {
+                Logger.Info("Failed to load assembly '{0}'", assembly);
+                Logger.Error($"Stacktrace: {exception}");
+                Environment.Exit(0);
+            }
+        }
+    }
+
+    public interface IAssemblyLoader
+    {
+        void LoadAssembly();
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/General/CommandLineOptions.cs`:
+
+```cs
+using CommandLine;
+
+namespace VMUnprotect.Runtime.General
+{
+    public class CommandLineOptions
+    {
+        [Option('f', "file", HelpText = "Path to file.", Required = true)]
+        public string FilePath { get; set; } = null!;
+
+        /*[Option(Default = false, HelpText = "Use an older method that makes use of Transpiler (not recommended).",
+                Required = false)]
+        public bool UseTranspiler { get; set; }*/
+
+        [Option(Default = false, HelpText = "Disable or Enable logs from Harmony.", Required = false)]
+        public bool EnableHarmonyLogs { get; set; }
+
+        [Option(Default = false, HelpText = "Bypass VMProtect Anti Debug.", Required = false)]
+        public bool BypassAntiDebug { get; set; }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/General/ContainerConfig.cs`:
+
+```cs
+using Autofac;
+using VMUnprotect.Runtime.Hooks;
+using VMUnprotect.Runtime.Hooks.Methods.AntiDebug;
+using VMUnprotect.Runtime.MiddleMan;
+using VMUnprotect.Runtime.Modules;
+using VMUnprotect.Runtime.Structure;
+
+namespace VMUnprotect.Runtime.General
+{
+    internal static class ContainerConfig
+    {
+        private static ContainerBuilder Builder { get; set; }
+
+        public static IContainer Configure(ILogger logger, Project project, CommandLineOptions options) {
+            Builder = new ContainerBuilder();
+
+            Builder.RegisterInstance(logger).As<ILogger>().SingleInstance();
+            Builder.RegisterType<AssemblyLoader>().As<IAssemblyLoader>().SingleInstance();
+            Builder.RegisterType<VmRuntimeAnalyzer>().As<IVmRuntimeAnalyzer>().SingleInstance();
+            Builder.RegisterType<HooksManager>().As<IHooksManager>().SingleInstance();
+
+            Builder.RegisterType<UnsafeInvokeMiddleMan>().As<IUnsafeInvokeMiddleMan>().SingleInstance();
+            Builder.RegisterType<NtQueryInformationProcessPatch>().As<INtQueryInformationProcessPatch>().SingleInstance();
+
+            Builder.RegisterModule(new VmProtectPatchesModule());
+
+            logger.Debug("Creating context...");
+            Builder.RegisterInstance(new Context(project, logger, options)).As<Context>().SingleInstance();
+
+            return Builder.Build();
+        }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/General/Context.cs`:
+
+```cs
+using Autofac;
+using dnlib.DotNet;
+using HarmonyLib;
+using System.Reflection;
+using VMUnprotect.Runtime.Structure;
+
+namespace VMUnprotect.Runtime.General
+{
+    public class Context
+    {
+        public Context(Project project, ILogger logger, CommandLineOptions options) {
+            Logger = logger;
+            Project = project;
+            Options = options;
+        }
+
+        public Project Project { get; }
+        public Assembly Assembly { get; internal set; }
+        public ModuleDef Module { get; internal set; }
+        public Harmony Harmony { get; internal set; }
+        public CommandLineOptions Options { get; }
+        public VmRuntimeStructure VmRuntimeStructure { get; internal set; }
+
+        public ILogger Logger { get; }
+        public ILifetimeScope Scope { get; internal set; }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/General/Engine.cs`:
+
+```cs
+using Autofac;
+using HarmonyLib;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using VMUnprotect.Runtime.Hooks;
+using VMUnprotect.Runtime.Structure;
+
+namespace VMUnprotect.Runtime.General
+{
+    internal static class Engine
+    {
+        private static IContainer Container { get; set; }
+
+        internal static void Initialize(Project project, ILogger logger, CommandLineOptions options) {
+            logger.Info("initializing Engine...");
+            Container = ContainerConfig.Configure(logger, project, options);
+        }
+
+        internal static void Run(Project project) {
+            var logger = Container.Resolve<ILogger>();
+            var ctx = Container.Resolve<Context>();
+            var hooks = Container.Resolve<IHooksManager>();
+
+            logger.Info("Starting...");
+            var stopwatch = Stopwatch.StartNew();
+
+            logger.Debug("Loading sample...");
+            Container.Resolve<IAssemblyLoader>().LoadAssembly();
+
+            logger.Debug("Discovering VMProtect Runtime...");
+            Container.Resolve<IVmRuntimeAnalyzer>().Discover();
+
+            using var scope = Container.BeginLifetimeScope();
+            ctx.Scope = scope;
+
+            logger.Debug("Applying VMProtect hooks...");
+            hooks.Initialize();
+            hooks.ApplyHooks();
+
+
+            logger.Debug("Invoking Target...");
+            InvokeTarget(ctx, logger);
+
+            stopwatch.Stop();
+            logger.Info("Finished all tasks in {0}", stopwatch.Elapsed);
+            logger.Info("Restoring Hooks...");
+            hooks.RestoreAll();
+        }
+
+        private static void InvokeTarget(Context ctx, ILogger logger) {
+
+            var fileEntryPoint = ctx.Assembly.EntryPoint;
+            var moduleHandle = ctx.Assembly.ManifestModule.ModuleHandle;
+            var parameters = fileEntryPoint.GetParameters();
+
+            logger.Debug("Entrypoint method: {0}", fileEntryPoint.FullDescription());
+            logger.Debug("ModuleHandle: {0:X4}", moduleHandle);
+
+            logger.Info("--- Invoking Constructor.");
+            RuntimeHelpers.RunModuleConstructor(moduleHandle);
+
+            logger.Info("--- Invoking assembly.\n");
+            fileEntryPoint.Invoke(
+                null,
+                parameters.Length == 0 ? null : new object[] {new[] {string.Empty}}); // parse arguments from commandlineoptions
+        }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/General/ILogger.cs`:
+
+```cs
+namespace VMUnprotect.Runtime.General
+{
+    public interface ILogger
+    {
+        public void Debug(string m, params object[] f);
+        public void Error(string m, params object[] f);
+        public void Info(string m, params object[] f);
+        public void Warn(string m, params object[] f);
+        public void Print(string m, params object[] f);
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/General/Project.cs`:
+
+```cs
+using System;
+using System.IO;
+
+namespace VMUnprotect.Runtime.General
+{
+    public class Project
+    {
+        public string TargetFilePath { get; set; }
+
+        public void Run(ILogger logger, CommandLineOptions options) {
+            if (!File.Exists(TargetFilePath)) {
+                logger.Error($"{TargetFilePath} is not a file or it does not exist");
+                Console.ReadLine();
+                return;
+            }
+
+            Engine.Initialize(this, logger, options);
+
+
+            Engine.Run(this);
+        }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/Helpers/Formatter.cs`:
+
+```cs
+using System;
+using System.Collections;
+using System.Linq;
+
+namespace VMUnprotect.Runtime.Helpers
+{
+    public static class Formatter
+    {
+        /// <summary>
+        ///     Formats code to more reliable format
+        /// </summary>
+        public static string FormatObject(object obj) {
+            try {
+                return obj switch {
+                    null     => "null",
+                    string x => $"\"{x}\"",
+                    IEnumerable enumerable =>
+                        $"{obj.GetType().Name} {{{string.Join(", ", enumerable.Cast<object>().Select(FormatObject))}}}",
+                    var _ => obj.ToString()
+                };
+            } catch (Exception) {
+                return "???";
+            }
+        }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/Helpers/Params.cs`:
+
+```cs
+using VMUnprotect.Runtime.General;
+
+namespace VMUnprotect.Runtime.Helpers
+{
+    public abstract class Params
+    {
+        internal static Context Ctx;
+        internal static ILogger Logger;
+
+        protected Params(Context ctx, ILogger logger) {
+            Ctx = ctx;
+            Logger = logger;
+
+        }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/Helpers/StringCounts.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace VMUnprotect.Runtime.Helpers
+{
+    public class StringCounts
+    {
+        private readonly Dictionary<string, int> _strings = new(StringComparer.Ordinal);
+
+        public IEnumerable<string> Strings => _strings.Keys;
+        public int NumStrings => _strings.Count;
+
+        protected void Add(string s) {
+            _strings.TryGetValue(s, out var count);
+            _strings[s] = count + 1;
+        }
+
+        private bool Exists(string s) {
+            return _strings.ContainsKey(s);
+        }
+
+        public bool All(IEnumerable<string> list) {
+            return list.All(Exists);
+        }
+
+        public bool Exactly(ICollection<string> list) {
+            return list.Count == _strings.Count && All(list);
+        }
+
+        public int Count(string s) {
+            _strings.TryGetValue(s, out var count);
+            return count;
+        }
+    }
+
+
+    public class LocalTypes : StringCounts
+    {
+        public LocalTypes(MethodDef method) {
+            if (method is {Body: { }}) Initialize(method.Body.Variables);
+        }
+
+        public LocalTypes(IEnumerable<Local> locals) {
+            Initialize(locals);
+        }
+
+        private void Initialize(IEnumerable<Local> locals) {
+            foreach (var local in locals) Add(local.Type.FullName);
+        }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/Hooks/HooksManager.cs`:
+
+```cs
+using Autofac;
+using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using VMUnprotect.Runtime.General;
+using VMUnprotect.Runtime.Helpers;
+
+namespace VMUnprotect.Runtime.Hooks
+{
+    public class HooksManager : Params, IHooksManager
+    {
+        private readonly Harmony _harmony = new("com.hussaryyn.vmup");
+        private bool _isApplied;
+
+        public HooksManager(Context ctx, ILogger logger) : base(ctx, logger) { }
+
+        public void RestoreAll() {
+            if (!_isApplied)
+                return;
+
+            foreach (var patch in Ctx.Scope.Resolve<IEnumerable<IVmupHook>>()) {
+                Logger.Debug($"Restoring hook {patch.GetType().Name}");
+                patch.Restore(_harmony);
+            }
+
+            _isApplied = false;
+        }
+
+        public void Initialize() {
+            if (_isApplied)
+                return;
+
+            Logger.Info("Starting");
+            Harmony.DEBUG = Ctx.Options.EnableHarmonyLogs;
+
+            _isApplied = true;
+        }
+
+        public void ApplyHooks() {
+            Logger.Info("Patching...");
+
+            foreach (var patch in Ctx.Scope.Resolve<IEnumerable<IVmupHook>>()) {
+                Logger.Debug($"Applying hook {patch.GetType().Name}");
+                try {
+                    patch.Patch(_harmony);
+                } catch (Exception e) {
+                    Logger.Error($"Error patching {patch.GetType().Name}. Error: {e.Message}");
+                }
+            }
+
+            Logger.Info("Completed!");
+        }
+    }
+
+    public interface IHooksManager
+    {
+        void Initialize();
+        void ApplyHooks();
+        void RestoreAll();
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/Hooks/IVmupHook.cs`:
+
+```cs
+using HarmonyLib;
+
+namespace VMUnprotect.Runtime.Hooks
+{
+    public interface IVmupHook
+    {
+        void Patch(Harmony instance);
+        void Restore(Harmony instance);
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/Hooks/Methods/AntiDebug/DebugIsAttachedPatch.cs`:
+
+```cs
+using HarmonyLib;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using VMUnprotect.Runtime.General;
+
+namespace VMUnprotect.Runtime.Hooks.Methods.AntiDebug
+{
+    public class DebugIsAttachedPatch : VmUnprotectPatch
+    {
+        private static readonly MethodInfo TargetMethod = AccessTools.Method(typeof(Debugger), "get_IsAttached");
+
+        public DebugIsAttachedPatch(Context ctx, ILogger logger) : base(ctx, logger) { }
+
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+            var codes = new List<CodeInstruction>(instructions) {
+                new(OpCodes.Ldc_I4_0),
+                new(OpCodes.Ret)
+            };
+
+            Logger.Debug($"Recompiled {nameof(TargetMethod)} body to IL and forced to return: false");
+            return codes.AsEnumerable();
+        }
+
+        public override void Patch(Harmony instance) {
+            if (Ctx.Options.BypassAntiDebug)
+                PatchTranspiler(instance, TargetMethod);
+        }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/Hooks/Methods/AntiDebug/DebugIsLoggingPatch.cs`:
+
+```cs
+using HarmonyLib;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using VMUnprotect.Runtime.General;
+
+namespace VMUnprotect.Runtime.Hooks.Methods.AntiDebug
+{
+    public class DebugIsLoggingPatch : VmUnprotectPatch
+    {
+        private static readonly MethodInfo TargetMethod = AccessTools.Method(typeof(Debugger), nameof(Debugger.IsLogging));
+
+        public DebugIsLoggingPatch(Context ctx, ILogger logger) : base(ctx, logger) { }
+
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+            var codes = new List<CodeInstruction>(instructions) {
+                new(OpCodes.Ldc_I4_0),
+                new(OpCodes.Ret)
+            };
+
+            Logger.Debug($"Recompiled {nameof(Debugger.IsLogging)} body to IL and forced to return: false");
+            return codes.AsEnumerable();
+        }
+
+        public override void Patch(Harmony instance) {
+            if (Ctx.Options.BypassAntiDebug)
+                PatchTranspiler(instance, TargetMethod);
+        }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/Hooks/Methods/AntiDebug/NtQueryInformationProcessPatch.cs`:
+
+```cs
+using System;
+using System.Linq;
+using VMUnprotect.Runtime.General;
+using VMUnprotect.Runtime.Helpers;
+
+namespace VMUnprotect.Runtime.Hooks.Methods.AntiDebug
+{
+    public class NtQueryInformationProcessPatch : Params, INtQueryInformationProcessPatch
+    {
+        private IntPtr _ntQueryInformationProcessPtr = new(0x0);
+        public NtQueryInformationProcessPatch(Context ctx, ILogger logger) : base(ctx, logger) { }
+        private Delegate NtQueryInformationProcessDelegate { get; set; }
+
+        //__kernel_entry NTSTATUS NtQueryInformationProcess(
+        //    [in]            HANDLE           ProcessHandle,
+        //    [in]            PROCESSINFOCLASS ProcessInformationClass,
+        //    [out]           PVOID            ProcessInformation,
+        //    [in]            ULONG            ProcessInformationLength,
+        //    [out, optional] PULONG           ReturnLength
+        //);
+        public void OverwriteProcessInformation(object obj, ref object[] arguments) {
+            if (obj is not null && obj.Equals(NtQueryInformationProcessDelegate))
+                arguments[2] = (IntPtr) 0x0; // [out] PVOID ProcessInformation = 0x0 // We don't care about this structure
+        }
+
+        public void GetDelegateForFunctionPointer(object __result, object[] parameters) {
+            if (parameters == null)
+                return;
+
+            if (parameters.Any(x => x.Equals("NtQueryInformationProcess")))
+                _ntQueryInformationProcessPtr = (IntPtr) __result;
+
+            if (parameters.Any(x => x.Equals(_ntQueryInformationProcessPtr) &&
+                                    _ntQueryInformationProcessPtr != new IntPtr(0x0)))
+                NtQueryInformationProcessDelegate = (Delegate) __result;
+        }
+    }
+
+    public interface INtQueryInformationProcessPatch
+    {
+        public void OverwriteProcessInformation(object obj, ref object[] arguments);
+        public void GetDelegateForFunctionPointer(object __result, object[] parameters);
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/Hooks/Methods/AssemblyFix/GetCallingAssemblyPatch.cs`:
+
+```cs
+using HarmonyLib;
+using System.Reflection;
+using VMUnprotect.Runtime.General;
+
+// ReSharper disable InconsistentNaming
+
+namespace VMUnprotect.Runtime.Hooks.Methods.AssemblyFix
+{
+    public class GetCallingAssemblyPatch : VmUnprotectPatch
+    {
+        private static readonly MethodInfo TargetMethod =
+            AccessTools.Method(typeof(Assembly), nameof(Assembly.GetCallingAssembly));
+
+        public GetCallingAssemblyPatch(Context ctx, ILogger logger) : base(ctx, logger) { }
+
+        public static void Postfix(ref Assembly __result) {
+            if (__result != typeof(string).Assembly)
+                return;
+
+            //MessageBox.Show($"Swapped {__result.FullName} | GetCallingAssembly", "GetCallingAssembly");
+            __result = Ctx.Assembly;
+        }
+
+        public override void Patch(Harmony instance) {
+            PatchPostfix(instance, TargetMethod);
+        }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/Hooks/Methods/AssemblyFix/GetEntryAssemblyPatch.cs`:
+
+```cs
+using HarmonyLib;
+using System.Reflection;
+using VMUnprotect.Runtime.General;
+
+// ReSharper disable InconsistentNaming
+
+namespace VMUnprotect.Runtime.Hooks.Methods.AssemblyFix
+{
+    public class GetEntryAssemblyPatch : VmUnprotectPatch
+    {
+        private static readonly MethodInfo TargetMethod =
+            AccessTools.Method(typeof(Assembly), nameof(Assembly.GetEntryAssembly));
+
+        public GetEntryAssemblyPatch(Context ctx, ILogger logger) : base(ctx, logger) { }
+
+        public static void Postfix(ref Assembly __result) {
+            if (__result != typeof(string).Assembly)
+                return;
+
+            //MessageBox.Show($"Swapped {__result.FullName} | GetCallingAssembly", "GetCallingAssembly");
+            __result = Ctx.Assembly;
+        }
+
+        public override void Patch(Harmony instance) {
+            PatchPostfix(instance, TargetMethod);
+        }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/Hooks/Methods/AssemblyFix/GetExecutingAssemblyPatch.cs`:
+
+```cs
+using HarmonyLib;
+using System.Reflection;
+using VMUnprotect.Runtime.General;
+
+// ReSharper disable InconsistentNaming
+
+namespace VMUnprotect.Runtime.Hooks.Methods.AssemblyFix
+{
+    public class GetExecutingAssemblyPatch : VmUnprotectPatch
+    {
+        private static readonly MethodInfo TargetMethod =
+            AccessTools.Method(typeof(Assembly), nameof(Assembly.GetExecutingAssembly));
+
+        public GetExecutingAssemblyPatch(Context ctx, ILogger logger) : base(ctx, logger) { }
+
+        public static void Postfix(ref Assembly __result) {
+            if (__result != typeof(string).Assembly)
+                return;
+
+            //MessageBox.Show($"Swapped {__result.FullName} | GetExecutingAssembly", "GetExecutingAssembly");
+            __result = Ctx.Assembly;
+        }
+
+        public override void Patch(Harmony instance) {
+            PatchPostfix(instance, TargetMethod);
+        }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/Hooks/Methods/VmProtectDumperTranspiler.cs`:
+
+```cs
+/*using Autofac;
+using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using VMUnprotect.Runtime.General;
+using VMUnprotect.Runtime.MiddleMan;
+
+namespace VMUnprotect.Runtime.Hooks.Methods
+{
+    public class VmProtectDumperTranspiler : VmUnprotectPatch
+    {
+        public VmProtectDumperTranspiler(Context ctx, ILogger logger) : base(ctx, logger) { }
+
+        public static object HookedInvoke(
+            object obj,
+            BindingFlags bindingFlags,
+            Binder binder,
+            object[] parameters,
+            CultureInfo culture,
+            MethodBase methodBase) {
+            try {
+                // Indicate this method was called by newer version of VMP.
+                Logger.Warn(
+                    "============================================= HookedInvoke =============================================\n");
+
+                // Route the arguments and return value to our middleman function where they can be manipulated or logged.
+                return Ctx.Scope.Resolve<ITranspilerMiddleMan>().Log(obj, null, null, ref parameters, null, methodBase);
+            } catch (Exception ex) {
+                // Log the exception.
+                Logger.Error(ex.ToString());
+                return null;
+            }
+        }
+
+        public static object HookedInvokeOld(object obj, object[] parameters, MethodBase methodBase) {
+            try {
+                // Indicate this method was called by older version of VMP.
+                Logger.Warn(
+                    "============================================= HookedInvokeOld =============================================\n");
+
+                // Route the arguments and return value to our middleman function where they can be manipulated or logged.
+                return Ctx.Scope.Resolve<ITranspilerMiddleMan>().Log(obj, null, null, ref parameters, null, methodBase);
+            } catch (Exception ex) {
+                // Log the exception.
+                Logger.Error(ex.ToString());
+                return null;
+            }
+        }
+
+        /// <summary>A transpiler that replaces all occurrences of a given method with another with additional Ldarg_1 instruction</summary>
+        /// <param name="instructions">The enumeration of <see cref="T:HarmonyLib.CodeInstruction" /> to act on</param>
+        /// <param name="from">Method to search for</param>
+        /// <param name="to">Method to replace with</param>
+        /// <returns>Modified enumeration of <see cref="T:HarmonyLib.CodeInstruction" /></returns>
+        private static void ReplaceVmpInvoke(ref IEnumerable<CodeInstruction> instructions, MethodBase @from, MethodBase to) {
+            if ((object) from == null) throw new ArgumentException("Unexpected null argument", nameof(from));
+            if ((object) to == null) throw new ArgumentException("Unexpected null argument", nameof(to));
+
+            var code = new List<CodeInstruction>(instructions);
+
+            for (var x = 0; x < code.Count; x++) {
+                var ins = code[x];
+                if (ins.operand as MethodBase != from) continue;
+
+                // replace callvirt Invoke with our debug invoke.
+                ins.opcode = OpCodes.Callvirt;
+                ins.operand = to;
+
+                // insert additional Ldarg_1 which corresponds to MethodBase of invoked function.
+                // TODO: Improve this, can be easily broken by obfuscation or future VMP updates
+                code.Insert(x, new CodeInstruction(OpCodes.Ldarg_1));
+                Logger.Info("Replaced with custom Invoke and injected MethodBase argument at {0}.", x);
+            }
+
+        }
+
+        /// <summary>A transpiler that alters instructions that calls specific method</summary>
+        /// <param name="instructions">The enumeration of <see cref="T:HarmonyLib.CodeInstruction" /> to act on</param>
+        /// <returns>Modified enumeration of <see cref="T:HarmonyLib.CodeInstruction" /></returns>
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+            Logger.Debug("VMP Function Handler Transpiler");
+
+            // Newer version
+            ReplaceVmpInvoke(ref instructions, AccessTools.Method(typeof(MethodBase), "Invoke", new[] {
+                typeof(object), typeof(BindingFlags), typeof(Binder), typeof(object[]),
+                typeof(CultureInfo)
+            }), AccessTools.Method(typeof(VmProtectDumperTranspiler), nameof(HookedInvoke)));
+
+            // Older version
+            /*ReplaceVmpInvoke(ref instructions,
+                             AccessTools.Method(typeof(MethodBase), "Invoke", new[] {typeof(object), typeof(object[])}),
+                             AccessTools.Method(typeof(VmProtectDumperTranspiler), nameof(HookedInvokeOld)));#1#
+
+            // Replace all occurrences of MethodBase.Invoke with our debug version.
+            return instructions;
+        }
+
+        public override void Patch(Harmony harmony) {
+            if (!Ctx.Options.UseTranspiler)
+                return;
+
+            var resolvedMethod =
+                Ctx.Assembly.ManifestModule.ResolveMethod(Ctx.VmRuntimeStructure.FunctionHandler.MDToken.ToInt32());
+
+            if (resolvedMethod is not null)
+                PatchTranspiler(harmony, resolvedMethod);
+            else
+                Logger.Error("Failed to resolve FunctionHandler!");
+        }
+
+        public override void Restore(Harmony harmony) {
+            throw new NotImplementedException();
+        }
+    }
+}*/
+
+```
+
+`VMUP/VMUnprotect.Runtime/Hooks/Methods/VmProtectDumperUnsafeInvoke.cs`:
+
+```cs
+using Autofac;
+using HarmonyLib;
+using System.Diagnostics;
+using System.Reflection;
+using VMUnprotect.Runtime.General;
+using VMUnprotect.Runtime.Hooks.Methods.AntiDebug;
+using VMUnprotect.Runtime.MiddleMan;
+
+// ReSharper disable InconsistentNaming
+
+namespace VMUnprotect.Runtime.Hooks.Methods
+{
+    public class VmProtectDumperUnsafeInvoke : VmUnprotectPatch
+    {
+        public VmProtectDumperUnsafeInvoke(Context ctx, ILogger logger) : base(ctx, logger) { }
+
+        private static MethodInfo TargetMethod() {
+            var runtimeMethodInfoType = AccessTools.TypeByName("System.Reflection.RuntimeMethodInfo");
+            var invokeMethod = AccessTools.DeclaredMethod(runtimeMethodInfoType, "UnsafeInvokeInternal");
+            return invokeMethod;
+        }
+
+        public static bool Prefix(
+            ref object __result,
+            ref object __instance,
+            ref object obj,
+            ref object[] parameters,
+            ref object[] arguments) {
+            var structure = Ctx.VmRuntimeStructure;
+
+            // Check if this invoke is coming from VMP Handler
+            var isVmpFunction = structure is { } && new StackTrace().GetFrame(3).GetMethod().MetadataToken ==
+                structure.FunctionHandler.MDToken.ToInt32();
+
+            if (!isVmpFunction)
+                return true;
+
+            if (Ctx.Options.BypassAntiDebug)
+                Ctx.Scope.Resolve<INtQueryInformationProcessPatch>().OverwriteProcessInformation(obj, ref arguments);
+
+
+            Logger.Info("VmProtectDumperUnsafeInvoke Prefix:");
+            Logger.Warn("{");
+            return Ctx.Scope.Resolve<IUnsafeInvokeMiddleMan>()
+                      .Prefix(ref __result, ref __instance, ref obj, ref parameters, ref arguments);
+        }
+
+
+        public static void Postfix(
+            ref object __instance,
+            ref object __result,
+            ref object obj,
+            ref object[] parameters,
+            ref object[] arguments) {
+            var structure = Ctx.VmRuntimeStructure;
+
+            // Check if this invoke is coming from VMP Handler
+            var isVmpFunction = structure is { } && new StackTrace().GetFrame(3).GetMethod().MetadataToken ==
+                structure.FunctionHandler.MDToken.ToInt32();
+
+            if (!isVmpFunction)
+                return;
+
+            if (Ctx.Options.BypassAntiDebug)
+                Ctx.Scope.Resolve<INtQueryInformationProcessPatch>().GetDelegateForFunctionPointer(__result, arguments);
+
+            Logger.Info("VmProtectDumperUnsafeInvoke Result:");
+            Ctx.Scope.Resolve<IUnsafeInvokeMiddleMan>()
+               .Postfix(ref __instance, ref __result, ref obj, ref parameters, ref arguments);
+            Logger.Warn("}\n");
+        }
+
+        public override void Patch(Harmony harmony) {
+            PatchPrefix(harmony, TargetMethod());
+            PatchPostfix(harmony, TargetMethod());
+        }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/Hooks/VmUnprotectPatch.cs`:
+
+```cs
+using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using VMUnprotect.Runtime.General;
+using VMUnprotect.Runtime.Helpers;
+
+namespace VMUnprotect.Runtime.Hooks
+{
+    // NitroxPatcher
+    public abstract class VmUnprotectPatch : Params, IVmupHook
+    {
+        private readonly List<MethodBase> _activePatches = new();
+
+        protected VmUnprotectPatch(Context ctx, ILogger logger) : base(ctx, logger) { }
+
+        public abstract void Patch(Harmony harmony);
+
+        public void Restore(Harmony harmony) {
+            foreach (var targetMethod in _activePatches)
+                harmony.Unpatch(targetMethod, HarmonyPatchType.All, harmony.Id);
+        }
+
+        private HarmonyMethod GetHarmonyMethod(string methodName) {
+
+            var method = AccessTools.DeclaredMethod(GetType(), methodName);
+
+            if (method is null)
+                throw new Exception($"Couldn't find {methodName}");
+
+            return new HarmonyMethod(method);
+        }
+
+        protected void PatchTranspiler(Harmony harmony, MethodBase targetMethod, string transpilerMethod = "Transpiler") {
+            PatchMultiple(harmony, targetMethod, null, null, transpilerMethod);
+        }
+
+        protected void PatchPrefix(Harmony harmony, MethodBase targetMethod, string prefixMethod = "Prefix") {
+            PatchMultiple(harmony, targetMethod, prefixMethod);
+        }
+
+        protected void PatchPostfix(Harmony harmony, MethodBase targetMethod, string postfixMethod = "Postfix") {
+            PatchMultiple(harmony, targetMethod, null, postfixMethod);
+        }
+
+        protected void PatchMultiple(
+            Harmony harmony,
+            MethodBase targetMethod,
+            bool prefix = false,
+            bool postfix = false,
+            bool transpiler = false,
+            bool finalizer = false,
+            bool iLManipulator = false) {
+            var prefixMethod = prefix ? "Prefix" : null;
+            var postfixMethod = postfix ? "Postfix" : null;
+            var transpilerMethod = transpiler ? "Transpiler" : null;
+            var finalizerMethod = finalizer ? "Finalizer" : null;
+
+            PatchMultiple(harmony, targetMethod, prefixMethod, postfixMethod, transpilerMethod, finalizerMethod);
+        }
+
+        private void PatchMultiple(
+            Harmony harmony,
+            MethodBase targetMethod,
+            string prefixMethod = null,
+            string postfixMethod = null,
+            string transpilerMethod = null,
+            string finalizerMethod = null) {
+            if (targetMethod is null)
+                throw new Exception("Target method cannot be null");
+
+            var harmonyPrefixMethod = prefixMethod != null ? GetHarmonyMethod(prefixMethod) : null;
+            var harmonyPostfixMethod = postfixMethod != null ? GetHarmonyMethod(postfixMethod) : null;
+            var harmonyTranspilerMethod = transpilerMethod != null ? GetHarmonyMethod(transpilerMethod) : null;
+            var harmonyFinalizerMethod = finalizerMethod != null ? GetHarmonyMethod(finalizerMethod) : null;
+
+            harmony.Patch(targetMethod, harmonyPrefixMethod, harmonyPostfixMethod, harmonyTranspilerMethod,
+                          harmonyFinalizerMethod);
+
+            _activePatches.Add(targetMethod);
+        }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/MiddleMan/TranspilerMiddleMan.cs`:
+
+```cs
+/*using HarmonyLib;
+using System.Diagnostics;
+using System.Globalization;
+using System.Reflection;
+using VMUnprotect.Runtime.General;
+using VMUnprotect.Runtime.Helpers;
+
+namespace VMUnprotect.Runtime.MiddleMan
+{
+    public class TranspilerMiddleMan : Params, ITranspilerMiddleMan
+    {
+        public TranspilerMiddleMan(Context ctx, ILogger logger) : base(ctx, logger) { }
+
+        /// <summary>
+        ///     This function manipulate can manipulate, log actual invokes from virtualized VMP functions.
+        /// </summary>
+        public object Log(
+            object obj,
+            BindingFlags? bindingFlags,
+            Binder binder,
+            ref object[] parameters,
+            CultureInfo culture,
+            MethodBase methodBase) {
+            // THIS IS OLD METHOD!!! Check Methods/MiddleMan.cs
+            // Invoke the method and get return value.
+            var returnValue = methodBase.Invoke(obj, parameters);
+
+            // TODO: Add option to disable this because can cause bugs and can be broken easily
+            var trace = new StackTrace();
+            var frame = trace.GetFrame(5); // <--
+            var method = frame.GetMethod();
+
+            Logger.Warn($"VMP Method: {method.FullDescription()}");
+
+            Logger.Warn("MethodName: {0}", methodBase.Name);
+            Logger.Warn("FullDescription: {0}", methodBase.FullDescription());
+            Logger.Warn("MethodType: {0}", methodBase.GetType());
+
+            if (obj is not null)
+                Logger.Warn("obj: {0}", obj.GetType());
+
+            // Loop through parameters and log them
+            for (var i = 0; i < parameters.Length; i++) {
+                var parameter = parameters[i];
+                Logger.Warn("Parameter ({1}) [{0}]: ({2})", i, parameter.GetType(), parameter);
+            }
+
+            Logger.Warn("MDToken: {0}", methodBase.MetadataToken);
+            Logger.Warn("Returns: {0}", returnValue ?? "null");
+
+            return returnValue ?? null;
+        }
+    }
+
+    public interface ITranspilerMiddleMan
+    {
+        public object Log(
+            object obj,
+            BindingFlags? bindingFlags,
+            Binder binder,
+            ref object[] parameters,
+            CultureInfo culture,
+            MethodBase methodBase);
+    }
+}*/
+
+```
+
+`VMUP/VMUnprotect.Runtime/MiddleMan/UnsafeInvokeMiddleMan.cs`:
+
+```cs
+using HarmonyLib;
+using System.Diagnostics;
+using System.Reflection;
+using VMUnprotect.Runtime.General;
+using VMUnprotect.Runtime.Helpers;
+
+// ReSharper disable InconsistentNaming
+
+namespace VMUnprotect.Runtime.MiddleMan
+{
+    public class UnsafeInvokeMiddleMan : Params, IUnsafeInvokeMiddleMan
+    {
+        public UnsafeInvokeMiddleMan(Context ctx, ILogger logger) : base(ctx, logger) { }
+
+        /// <summary>
+        ///     A prefix is a method that is executed before the original method
+        /// </summary>
+        public bool Prefix(
+            ref object __result,
+            ref object __instance,
+            ref object obj,
+            ref object[] parameters,
+            ref object[] arguments) {
+            var virtualizedMethodName = new StackTrace().GetFrame(7).GetMethod();
+            var method = (MethodBase) __instance;
+
+            Logger.Print("VMP MethodName: {0} (MDToken 0x{1:X4})", virtualizedMethodName.FullDescription(),
+                         virtualizedMethodName.MetadataToken.ToString());
+            Logger.Print("MethodName: {0}", method.Name);
+            Logger.Print("FullDescription: {0}", method.FullDescription());
+            Logger.Print("MethodType: {0}", method.GetType());
+
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (obj is not null)
+                Logger.Print("Obj: {0}", Formatter.FormatObject(obj));
+
+            // Loop through parameters and log them
+            for (var i = 0; i < parameters.Length; i++) {
+                var parameter = parameters[i];
+                Logger.Print("Parameter ({1}) [{0}]: ({2})", i, parameter.GetType(), Formatter.FormatObject(parameter));
+            }
+
+            var returnType = method is MethodInfo info ? info.ReturnType.FullName : "System.Object";
+            Logger.Print("MDToken: 0x{0:X4}", method.MetadataToken);
+            Logger.Print("Return Type: {0}", returnType ?? "null");
+            return true;
+        }
+
+        /// <summary>
+        ///     A postfix is a method that is executed after the original method
+        /// </summary>
+        public void Postfix(
+            ref object __instance,
+            ref object __result,
+            ref object obj,
+            ref object[] parameters,
+            ref object[] arguments) {
+            Logger.Print("Returns: {0}", __result);
+        }
+    }
+
+    public interface IUnsafeInvokeMiddleMan
+    {
+        public void Postfix(
+            ref object __result,
+            ref object __instance,
+            ref object obj,
+            ref object[] parameters,
+            ref object[] arguments);
+
+        public bool Prefix(
+            ref object __result,
+            ref object __instance,
+            ref object obj,
+            ref object[] parameters,
+            ref object[] arguments);
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/Modules/VmProtectPatchesModule.cs`:
+
+```cs
+using Autofac;
+using System.Reflection;
+using VMUnprotect.Runtime.Hooks;
+using Module = Autofac.Module;
+
+namespace VMUnprotect.Runtime.Modules
+{
+    public class VmProtectPatchesModule : Module
+    {
+        protected override void Load(ContainerBuilder builder) {
+            builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly()).AssignableTo<IVmupHook>().AsImplementedInterfaces();
+        }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/Properties/AssemblyInfo.cs`:
+
+```cs
+using System.Reflection;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("VMUnprotect.Runtime")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("VMUnprotect.Runtime")]
+[assembly: AssemblyCopyright("Copyright ©  2022")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("3EE03C52-C17B-4771-BF5A-32D04A2D435E")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+```
+
+`VMUP/VMUnprotect.Runtime/Structure/VmRuntimeAnalyzer.cs`:
+
+```cs
+using dnlib.DotNet;
+using System;
+using System.Linq;
+using VMUnprotect.Runtime.General;
+using VMUnprotect.Runtime.Helpers;
+using ILogger = VMUnprotect.Runtime.General.ILogger;
+
+namespace VMUnprotect.Runtime.Structure
+{
+    internal class VmRuntimeAnalyzer : Params, IVmRuntimeAnalyzer
+    {
+        public VmRuntimeAnalyzer(Context ctx, ILogger logger) : base(ctx, logger) { }
+
+        public void Discover() {
+            var (functionHandler, vmTypeDef) = LocateVmHandlerAndTypDef(Ctx.Module);
+
+            if (functionHandler is null || vmTypeDef is null)
+                throw new ApplicationException("Could not locate VmProtectFunctionHandler.");
+
+            Ctx.VmRuntimeStructure = new VmRuntimeStructure {
+                FunctionHandler = functionHandler,
+                VmTypeDef = vmTypeDef
+            };
+        }
+
+    #region VMP_FUNCTION_HANDLER
+
+        /// <summary>
+        ///     These locals can be found in VMP Function Handler
+        /// </summary>
+        private static readonly string[] VmpFunctionHandlerLocals = {
+            "System.Object", "System.Int32", "System.Reflection.MethodInfo", "System.Reflection.ParameterInfo[]",
+            "System.Type[]", "System.Reflection.Emit.DynamicMethod", "System.Reflection.Emit.ILGenerator"
+        };
+
+        /// <summary>
+        ///     Tries to search and match VMProtect MethodHandler
+        /// </summary>
+        /// <param name="module">Target Module</param>
+        /// <returns>MethodDef and TypeDef of Handler, if not returns NULL</returns>
+        private static (MethodDef vmpHandler, TypeDef vmTypeDef) LocateVmHandlerAndTypDef(ModuleDef module) {
+            MethodDef vmpHandler = null;
+            TypeDef vmTypeDef = null;
+
+            foreach (var type in module.GetTypes()) {
+                // search pattern for 3.5.1 and older
+                vmpHandler = type.Methods.Where(IsVmpFunctionHandler)
+                                 .FirstOrDefault(method => new LocalTypes(method).All(VmpFunctionHandlerLocals)) ?? type.Methods
+                    // Search for pattern in 3.6.0
+                    .Where(IsVmpFunctionHandlerNew)
+                    .FirstOrDefault(method => new LocalTypes(method).All(VmpFunctionHandlerLocals));
+
+                if (vmpHandler == null)
+                    continue;
+
+                vmTypeDef = type;
+
+                Logger.Info("Found VmTypeDef, MDToken 0x{0:X4}", vmTypeDef.MDToken);
+                Logger.Info("Found VMPFunctionHandler, MDToken 0x{0:X4}", vmpHandler.MDToken);
+                break;
+            }
+
+            if (vmpHandler is null) {
+                Logger.Error("Could not find VMP Method handler? Are you using supported version of VMP?");
+                Console.ReadKey();
+            }
+
+            return (vmpHandler, vmTypeDef);
+        }
+
+        /// <summary>
+        ///     Checks RetType and Params, etc of MethodDef
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns>Does method match the requirements</returns>
+        private static bool IsVmpFunctionHandlerNew(MethodDef method) {
+            return method is {IsStatic: false} && method.MethodSig.GetParamCount() == 0;
+        }
+
+
+        /// <summary>
+        ///     Checks RetType and Params, etc of MethodDef
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns>Does method match the requirements</returns>
+        private static bool IsVmpFunctionHandler(MethodDef method) {
+            return method is {IsStatic: false} && method.MethodSig.GetParamCount() == 2 &&
+                   method.MethodSig.RetType.GetElementType() == ElementType.Class &&
+                   method.MethodSig.Params[0].GetElementType() == ElementType.Class &&
+                   method.MethodSig.Params[1].GetElementType() == ElementType.Boolean;
+        }
+    #endregion
+    }
+
+    internal interface IVmRuntimeAnalyzer
+    {
+        void Discover();
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/Structure/VmRuntimeStructure.cs`:
+
+```cs
+using dnlib.DotNet;
+
+namespace VMUnprotect.Runtime.Structure
+{
+    /// <summary>
+    ///     Structure of VMP Virtual Machine
+    /// </summary>
+    public class VmRuntimeStructure
+    {
+        /// <summary>
+        ///     TypeDefinition of Virtual Machine
+        /// </summary>
+        public TypeDef VmTypeDef { get; set; }
+
+        /// <summary>
+        ///     Call handler of VMP Function Handler
+        /// </summary>
+        public MethodDef FunctionHandler { get; set; }
+    }
+}
+```
+
+`VMUP/VMUnprotect.Runtime/VMUnprotect.Runtime.csproj`:
+
+```csproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"/>
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProjectGuid>{3EE03C52-C17B-4771-BF5A-32D04A2D435E}</ProjectGuid>
+        <OutputType>Library</OutputType>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <RootNamespace>VMUnprotect.Runtime</RootNamespace>
+        <AssemblyName>VMUnprotect.Runtime</AssemblyName>
+        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+        <FileAlignment>512</FileAlignment>
+        <LangVersion>default</LangVersion>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>false</Optimize>
+        <OutputPath>bin\Debug\</OutputPath>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>bin\Release\</OutputPath>
+        <DefineConstants>TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="0Harmony, Version=2.1.1.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\packages\Lib.Harmony.2.1.1\lib\net48\0Harmony.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Autofac, Version=6.3.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da">
+            <HintPath>..\packages\Autofac.6.3.0\lib\netstandard2.0\Autofac.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Autofac.Extensions.DependencyInjection, Version=7.2.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da">
+            <HintPath>..\packages\Autofac.Extensions.DependencyInjection.7.2.0\lib\netstandard2.0\Autofac.Extensions.DependencyInjection.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="CommandLine, Version=2.8.0.0, Culture=neutral, PublicKeyToken=5a870481e358d379">
+            <HintPath>..\packages\CommandLineParser.2.8.0\lib\net461\CommandLine.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="dnlib, Version=3.3.5.0, Culture=neutral, PublicKeyToken=50e96378b6e77999">
+            <HintPath>..\packages\dnlib.3.3.5\lib\net45\dnlib.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+            <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.1.1.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=2.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+            <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.2.1.0\lib\netstandard2.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="mscorlib"/>
+        <Reference Include="System"/>
+        <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+            <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Core"/>
+        <Reference Include="System.Data"/>
+        <Reference Include="System.Diagnostics.DiagnosticSource, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+            <HintPath>..\packages\System.Diagnostics.DiagnosticSource.4.7.1\lib\net46\System.Diagnostics.DiagnosticSource.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+            <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Numerics"/>
+        <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+            <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.2\lib\netstandard2.0\System.Threading.Tasks.Extensions.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Windows.Forms"/>
+        <Reference Include="System.Xml"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="General\AssemblyLoader.cs"/>
+        <Compile Include="General\CommandLineOptions.cs"/>
+        <Compile Include="General\ContainerConfig.cs"/>
+        <Compile Include="General\Context.cs"/>
+        <Compile Include="General\Engine.cs"/>
+        <Compile Include="General\ILogger.cs"/>
+        <Compile Include="General\Project.cs"/>
+        <Compile Include="Helpers\Formatter.cs"/>
+        <Compile Include="Helpers\Params.cs"/>
+        <Compile Include="Helpers\StringCounts.cs"/>
+        <Compile Include="Hooks\HooksManager.cs"/>
+        <Compile Include="Hooks\IVmupHook.cs"/>
+        <Compile Include="Hooks\Methods\AntiDebug\DebugIsAttachedPatch.cs"/>
+        <Compile Include="Hooks\Methods\AntiDebug\DebugIsLoggingPatch.cs"/>
+        <Compile Include="Hooks\Methods\AntiDebug\NtQueryInformationProcessPatch.cs"/>
+        <Compile Include="Hooks\Methods\AssemblyFix\GetCallingAssemblyPatch.cs"/>
+        <Compile Include="Hooks\Methods\AssemblyFix\GetEntryAssemblyPatch.cs"/>
+        <Compile Include="Hooks\Methods\AssemblyFix\GetExecutingAssemblyPatch.cs"/>
+        <Compile Include="Hooks\Methods\VmProtectDumperTranspiler.cs"/>
+        <Compile Include="Hooks\Methods\VmProtectDumperUnsafeInvoke.cs"/>
+        <Compile Include="Hooks\VmUnprotectPatch.cs"/>
+        <Compile Include="MiddleMan\TranspilerMiddleMan.cs"/>
+        <Compile Include="MiddleMan\UnsafeInvokeMiddleMan.cs"/>
+        <Compile Include="Modules\VmProtectPatchesModule.cs"/>
+        <Compile Include="Properties\AssemblyInfo.cs"/>
+        <Compile Include="Structure\VmRuntimeAnalyzer.cs"/>
+        <Compile Include="Structure\VmRuntimeStructure.cs"/>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="packages.config"/>
+    </ItemGroup>
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
+    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
+
+</Project>
+
+```
+
+`VMUP/VMUnprotect.Runtime/packages.config`:
+
+```config
+<?xml version="1.0" encoding="utf-8"?>
+<packages>
+    <package id="Autofac" version="6.3.0" targetFramework="net48"/>
+    <package id="Autofac.Extensions.DependencyInjection" version="7.2.0" targetFramework="net48"/>
+    <package id="CommandLineParser" version="2.8.0" targetFramework="net48"/>
+    <package id="Lib.Harmony" version="2.1.1" targetFramework="net48"/>
+    <package id="Microsoft.Bcl.AsyncInterfaces" version="1.1.0" targetFramework="net48"/>
+    <package id="Microsoft.Extensions.DependencyInjection.Abstractions" version="2.1.0" targetFramework="net48"/>
+    <package id="System.Buffers" version="4.5.1" targetFramework="net48"/>
+    <package id="System.Diagnostics.DiagnosticSource" version="4.7.1" targetFramework="net48"/>
+    <package id="System.Memory" version="4.5.4" targetFramework="net48"/>
+    <package id="System.Numerics.Vectors" version="4.5.0" targetFramework="net48"/>
+    <package id="System.Runtime.CompilerServices.Unsafe" version="4.5.3" targetFramework="net48"/>
+    <package id="System.Threading.Tasks.Extensions" version="4.5.2" targetFramework="net48"/>
+    <package id="dnlib" version="3.3.5" targetFramework="net48"/>
+</packages>
+```
+
+`VMUP/VMUnprotect/FodyWeavers.xml`:
+
+```xml
+<Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
+  <Costura />
+</Weavers>
+```
+
+`VMUP/VMUnprotect/FodyWeavers.xsd`:
+
+```xsd
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <!-- This file was generated by Fody. Manual changes to this file will be lost when your project is rebuilt. -->
+  <xs:element name="Weavers">
+    <xs:complexType>
+      <xs:all>
+        <xs:element name="Costura" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:all>
+              <xs:element minOccurs="0" maxOccurs="1" name="ExcludeAssemblies" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>A list of assembly names to exclude from the default action of "embed all Copy Local references", delimited with line breaks</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" maxOccurs="1" name="IncludeAssemblies" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>A list of assembly names to include from the default action of "embed all Copy Local references", delimited with line breaks.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" maxOccurs="1" name="ExcludeRuntimeAssemblies" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>A list of runtime assembly names to exclude from the default action of "embed all Copy Local references", delimited with line breaks</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" maxOccurs="1" name="IncludeRuntimeAssemblies" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>A list of runtime assembly names to include from the default action of "embed all Copy Local references", delimited with line breaks.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" maxOccurs="1" name="Unmanaged32Assemblies" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>A list of unmanaged 32 bit assembly names to include, delimited with line breaks.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" maxOccurs="1" name="Unmanaged64Assemblies" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>A list of unmanaged 64 bit assembly names to include, delimited with line breaks.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element minOccurs="0" maxOccurs="1" name="PreloadOrder" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>The order of preloaded assemblies, delimited with line breaks.</xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:all>
+            <xs:attribute name="CreateTemporaryAssemblies" type="xs:boolean">
+              <xs:annotation>
+                <xs:documentation>This will copy embedded files to disk before loading them into memory. This is helpful for some scenarios that expected an assembly to be loaded from a physical file.</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="IncludeDebugSymbols" type="xs:boolean">
+              <xs:annotation>
+                <xs:documentation>Controls if .pdbs for reference assemblies are also embedded.</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="IncludeRuntimeReferences" type="xs:boolean">
+              <xs:annotation>
+                <xs:documentation>Controls if runtime assemblies are also embedded.</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="UseRuntimeReferencePaths" type="xs:boolean">
+              <xs:annotation>
+                <xs:documentation>Controls whether the runtime assemblies are embedded with their full path or only with their assembly name.</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="DisableCompression" type="xs:boolean">
+              <xs:annotation>
+                <xs:documentation>Embedded assemblies are compressed by default, and uncompressed when they are loaded. You can turn compression off with this option.</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="DisableCleanup" type="xs:boolean">
+              <xs:annotation>
+                <xs:documentation>As part of Costura, embedded assemblies are no longer included as part of the build. This cleanup can be turned off.</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="LoadAtModuleInit" type="xs:boolean">
+              <xs:annotation>
+                <xs:documentation>Costura by default will load as part of the module initialization. This flag disables that behavior. Make sure you call CosturaUtility.Initialize() somewhere in your code.</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="IgnoreSatelliteAssemblies" type="xs:boolean">
+              <xs:annotation>
+                <xs:documentation>Costura will by default use assemblies with a name like 'resources.dll' as a satellite resource and prepend the output path. This flag disables that behavior.</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="ExcludeAssemblies" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>A list of assembly names to exclude from the default action of "embed all Copy Local references", delimited with |</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="IncludeAssemblies" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>A list of assembly names to include from the default action of "embed all Copy Local references", delimited with |.</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="ExcludeRuntimeAssemblies" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>A list of runtime assembly names to exclude from the default action of "embed all Copy Local references", delimited with |</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="IncludeRuntimeAssemblies" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>A list of runtime assembly names to include from the default action of "embed all Copy Local references", delimited with |.</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="Unmanaged32Assemblies" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>A list of unmanaged 32 bit assembly names to include, delimited with |.</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="Unmanaged64Assemblies" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>A list of unmanaged 64 bit assembly names to include, delimited with |.</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="PreloadOrder" type="xs:string">
+              <xs:annotation>
+                <xs:documentation>The order of preloaded assemblies, delimited with |.</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+          </xs:complexType>
+        </xs:element>
+      </xs:all>
+      <xs:attribute name="VerifyAssembly" type="xs:boolean">
+        <xs:annotation>
+          <xs:documentation>'true' to run assembly verification (PEVerify) on the target assembly after all weavers have been executed.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="VerifyIgnoreCodes" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>A comma-separated list of error codes that can be safely ignored in assembly verification.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="GenerateXsd" type="xs:boolean">
+        <xs:annotation>
+          <xs:documentation>'false' to turn off automatic generation of the XML Schema file.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+```
+
+`VMUP/VMUnprotect/Program.cs`:
+
+```cs
+using CommandLine;
+using System;
+using System.IO;
+using System.Linq;
+using VMUnprotect.Runtime.General;
+using VMUnprotect.Utils;
+
+// https://open.spotify.com/playlist/4IeI5PQYePhXaezV9HRDIr
+// ^ Thanks for this banger soundtrack, without it the whole project wouldn't exist
+
+namespace VMUnprotect
+{
+    internal static class Program
+    {
+        private const string AsciiArt = @"
+       	 ____   ____  ____    ____  _____  _____  _______   
+       	|_  _| |_  _||_   \  /   _||_   _||_   _||_   __ \  
+       	 \ \   / /    |   \/   |    | |    | |    | |__) | 
+       	  \ \ / /     | |\  /| |    | '    ' |    |  ___/  
+       	   \ ' /     _| |_\/_| |_    \ \__/ /    _| |_     
+       	    \_/     |_____||_____|    `.__.'    |_____|
+             https://github.com/void-stack/VMUnprotect
+       	     VMUnprotect Ultimate v 3.6.0                     
+        ";
+
+        public static void Main(string[] args) {
+            Console.Title = "VMUnprotect Ultimate";
+            ConsoleLogger.Banner(AsciiArt);
+
+            if (args.Length > 0 && File.Exists(args[0]))
+                args[0] = $"-f {args[0]}";
+
+            Parser.Default.ParseArguments<CommandLineOptions>(args)
+                  .WithParsed(options => {
+                      var fileName = Path.GetFileNameWithoutExtension(options.FilePath);
+                      var fullPath = Path.GetFullPath(options.FilePath!);
+
+                      var logger = new ConsoleLogger(fileName);
+                      logger.Info(
+                          "Doesn't work? Make sure you dump the file before with: https://github.com/void-stack/VMUnprotect.Dumper");
+
+                      var project = new Project {
+                          TargetFilePath = fullPath
+                      };
+
+                      try {
+                          project.Run(logger, options);
+                      } catch (Exception ex) {
+                          // ignored
+                      }
+
+                      Console.ReadKey();
+                  })
+                  .WithNotParsed(errors => {
+                      Console.WriteLine("Errors: {0}", string.Join(", ", errors.Select(ex => ex.Tag)));
+                      Console.ReadKey();
+                  });
+
+            Environment.Exit(0);
+        }
+    }
+}
+```
+
+`VMUP/VMUnprotect/Properties/AssemblyInfo.cs`:
+
+```cs
+using System.Reflection;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("VMUnprotect")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("VMUnprotect")]
+[assembly: AssemblyCopyright("Copyright ©  2021")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("42C88429-9A67-4087-91BD-7D76383BC86D")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+```
+
+`VMUP/VMUnprotect/Utils/ConsoleLogger.cs`:
+
+```cs
+using Serilog;
+using Serilog.Core;
+using Serilog.Sinks.SystemConsole.Themes;
+using System;
+using System.IO;
+using ILogger = VMUnprotect.Runtime.General.ILogger;
+
+namespace VMUnprotect.Utils
+{
+    public class ConsoleLogger : ILogger
+    {
+        private readonly Logger _logger;
+
+        public ConsoleLogger(string filename) {
+            if (Directory.Exists("VMUP_Logs"))
+                Directory.CreateDirectory("VMUP_Logs");
+
+            _logger = new LoggerConfiguration().WriteTo.File($"VMUP_Logs\\{filename}_{DateTime.Now:HH-mm-ss}.vmuplog")
+                                               .WriteTo.Console(theme: AnsiConsoleTheme.Grayscale)
+                                               .MinimumLevel.Verbose()
+                                               .CreateLogger();
+        }
+
+        public void Debug(string m, params object[] f) {
+            _logger.Debug(m, f);
+        }
+
+        public void Error(string m, params object[] f) {
+            _logger.Error(m, f);
+        }
+
+        public void Info(string m, params object[] f) {
+            _logger.Information(m, f);
+        }
+
+        public void Warn(string m, params object[] f) {
+            _logger.Warning(m, f);
+        }
+
+        public void Print(string m, params object[] f) {
+            _logger.Verbose('\t' + m, f);
+        }
+
+        public static void Banner(string asciiArt) {
+            Console.Title = "VMUnprotect for Ultimate v3.5.1";
+            Console.WriteLine(asciiArt);
+            Console.WriteLine("Made with love by void-stack <3");
+        }
+    }
+}
+```
+
+`VMUP/VMUnprotect/VMUnprotect.csproj`:
+
+```csproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"/>
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProjectGuid>{42C88429-9A67-4087-91BD-7D76383BC86D}</ProjectGuid>
+        <OutputType>Exe</OutputType>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <RootNamespace>VMUnprotect</RootNamespace>
+        <AssemblyName>VMUnprotect</AssemblyName>
+        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+        <FileAlignment>512</FileAlignment>
+        <LangVersion>9</LangVersion>
+        <ApplicationIcon>vmup.ico</ApplicationIcon>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>false</Optimize>
+        <OutputPath>bin\Debug\</OutputPath>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>bin\Release\</OutputPath>
+        <DefineConstants>TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+        <DocumentationFile></DocumentationFile>
+    </PropertyGroup>
+    <PropertyGroup>
+        <ApplicationManifest>manifest.manifest</ApplicationManifest>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="0Harmony, Version=2.1.1.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\..\..\..\..\.nuget\packages\lib.harmony\2.1.1\lib\net45\0Harmony.dll</HintPath>
+        </Reference>
+        <Reference Include="CommandLine, Version=2.9.0.0, Culture=neutral, PublicKeyToken=5a870481e358d379">
+            <HintPath>..\packages\CommandLineParser.2.9.0-preview1\lib\net461\CommandLine.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+            <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.1.1.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Microsoft.CSharp"/>
+        <Reference Include="Microsoft.Win32.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\Microsoft.Win32.Primitives.4.3.0\lib\net46\Microsoft.Win32.Primitives.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="mscorlib"/>
+        <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
+            <HintPath>..\packages\Serilog.2.10.0\lib\net46\Serilog.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Serilog.Sinks.Console, Version=4.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
+            <HintPath>..\packages\Serilog.Sinks.Console.4.0.0\lib\net45\Serilog.Sinks.Console.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="Serilog.Sinks.File, Version=5.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
+            <HintPath>..\packages\Serilog.Sinks.File.5.0.0\lib\net45\Serilog.Sinks.File.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System"/>
+        <Reference Include="System.AppContext, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.AppContext.4.3.0\lib\net463\System.AppContext.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+            <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.ComponentModel.Composition"/>
+        <Reference Include="System.Console, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Console.4.3.0\lib\net46\System.Console.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Core"/>
+        <Reference Include="System.Data"/>
+        <Reference Include="System.Diagnostics.DiagnosticSource, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+            <HintPath>..\packages\System.Diagnostics.DiagnosticSource.4.7.1\lib\net46\System.Diagnostics.DiagnosticSource.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Diagnostics.Tracing, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Diagnostics.Tracing.4.3.0\lib\net462\System.Diagnostics.Tracing.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Globalization.Calendars, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Globalization.Calendars.4.3.0\lib\net46\System.Globalization.Calendars.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.IO, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.IO.4.3.0\lib\net462\System.IO.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.IO.Compression, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+            <HintPath>..\packages\System.IO.Compression.4.3.0\lib\net46\System.IO.Compression.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.IO.Compression.FileSystem"/>
+        <Reference Include="System.IO.Compression.ZipFile, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+            <HintPath>..\packages\System.IO.Compression.ZipFile.4.3.0\lib\net46\System.IO.Compression.ZipFile.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.IO.FileSystem, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.IO.FileSystem.4.3.0\lib\net46\System.IO.FileSystem.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.IO.FileSystem.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.IO.FileSystem.Primitives.4.3.0\lib\net46\System.IO.FileSystem.Primitives.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Linq, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Linq.4.3.0\lib\net463\System.Linq.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Linq.Expressions, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Linq.Expressions.4.3.0\lib\net463\System.Linq.Expressions.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+            <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Net.Http, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Net.Http.4.3.0\lib\net46\System.Net.Http.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Net.Sockets, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Net.Sockets.4.3.0\lib\net46\System.Net.Sockets.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Numerics"/>
+        <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Reflection, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Reflection.4.3.0\lib\net462\System.Reflection.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Runtime, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Runtime.4.3.0\lib\net462\System.Runtime.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Runtime.Extensions, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Runtime.Extensions.4.3.0\lib\net462\System.Runtime.Extensions.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Runtime.InteropServices, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Runtime.InteropServices.4.3.0\lib\net463\System.Runtime.InteropServices.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Security.Cryptography.Algorithms, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Security.Cryptography.Algorithms.4.3.0\lib\net463\System.Security.Cryptography.Algorithms.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Security.Cryptography.Encoding, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Security.Cryptography.Encoding.4.3.0\lib\net46\System.Security.Cryptography.Encoding.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Security.Cryptography.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Security.Cryptography.Primitives.4.3.0\lib\net46\System.Security.Cryptography.Primitives.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Security.Cryptography.X509Certificates, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Security.Cryptography.X509Certificates.4.3.0\lib\net461\System.Security.Cryptography.X509Certificates.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Text.RegularExpressions, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Text.RegularExpressions.4.3.0\lib\net463\System.Text.RegularExpressions.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+            <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.2\lib\netstandard2.0\System.Threading.Tasks.Extensions.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Windows.Forms"/>
+        <Reference Include="System.Xml"/>
+        <Reference Include="System.Xml.Linq"/>
+        <Reference Include="System.Xml.ReaderWriter, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <HintPath>..\packages\System.Xml.ReaderWriter.4.3.0\lib\net46\System.Xml.ReaderWriter.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="Program.cs"/>
+        <Compile Include="Properties\AssemblyInfo.cs"/>
+        <Compile Include="Utils\ConsoleLogger.cs"/>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="manifest.manifest"/>
+        <None Include="packages.config"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\VMUnprotect.Runtime\VMUnprotect.Runtime.csproj">
+            <Project>{3ee03c52-c17b-4771-bf5a-32d04a2d435e}</Project>
+            <Name>VMUnprotect.Runtime</Name>
+        </ProjectReference>
+    </ItemGroup>
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
+    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+           Other similar extension points exist, see Microsoft.Common.targets.
+      <Target Name="BeforeBuild">
+      </Target>
+      <Target Name="AfterBuild">
+      </Target>
+      -->
+</Project>
+```
+
+`VMUP/VMUnprotect/manifest.manifest`:
+
+```manifest
+<?xml version="1.0" encoding="utf-8"?>
+<assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
+    <assemblyIdentity version="1.0.0.0" name="MyApplication.app"/>
+    <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+        <security>
+            <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+                <!-- UAC Manifest Options
+                     If you want to change the Windows User Account Control level replace the 
+                     requestedExecutionLevel node with one of the following.
+        
+                <requestedExecutionLevel  level="asInvoker" uiAccess="false" />
+                <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
+                <requestedExecutionLevel  level="highestAvailable" uiAccess="false" />
+        
+                    Specifying requestedExecutionLevel element will disable file and registry virtualization. 
+                    Remove this element if your application requires this virtualization for backwards
+                    compatibility.
+                -->
+                <requestedExecutionLevel level="requireAdministrator" uiAccess="false"/>
+            </requestedPrivileges>
+        </security>
+    </trustInfo>
+
+    <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+        <application>
+            <!-- A list of the Windows versions that this application has been tested on
+                 and is designed to work with. Uncomment the appropriate elements
+                 and Windows will automatically select the most compatible environment. -->
+
+            <!-- Windows Vista -->
+            <!--<supportedOS Id="{e2011457-1546-43c5-a5fe-008deee3d3f0}" />-->
+
+            <!-- Windows 7 -->
+            <!--<supportedOS Id="{35138b9a-5d96-4fbd-8e2d-a2440225f93a}" />-->
+
+            <!-- Windows 8 -->
+            <!--<supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}" />-->
+
+            <!-- Windows 8.1 -->
+            <!--<supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}" />-->
+
+            <!-- Windows 10 -->
+            <!--<supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />-->
+
+        </application>
+    </compatibility>
+
+    <!-- Indicates that the application is DPI-aware and will not be automatically scaled by Windows at higher
+         DPIs. Windows Presentation Foundation (WPF) applications are automatically DPI-aware and do not need 
+         to opt in. Windows Forms applications targeting .NET Framework 4.6 that opt into this setting, should 
+         also set the 'EnableWindowsFormsHighDpiAutoResizing' setting to 'true' in their app.config. 
+         
+         Makes the application long-path aware. See https://docs.microsoft.com/windows/win32/fileio/maximum-file-path-limitation -->
+    <!--
+    <application xmlns="urn:schemas-microsoft-com:asm.v3">
+      <windowsSettings>
+        <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
+        <longPathAware xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">true</longPathAware>
+      </windowsSettings>
+    </application>
+    -->
+
+    <!-- Enable themes for Windows common controls and dialogs (Windows XP and later) -->
+    <!--
+    <dependency>
+      <dependentAssembly>
+        <assemblyIdentity
+            type="win32"
+            name="Microsoft.Windows.Common-Controls"
+            version="6.0.0.0"
+            processorArchitecture="*"
+            publicKeyToken="6595b64144ccf1df"
+            language="*"
+          />
+      </dependentAssembly>
+    </dependency>
+    -->
+
+</assembly>
+
+```
+
+`VMUP/VMUnprotect/packages.config`:
+
+```config
+<?xml version="1.0" encoding="utf-8"?>
+<packages>
+    <package id="CommandLineParser" version="2.9.0-preview1" targetFramework="net472"/>
+    <package id="Microsoft.Bcl.AsyncInterfaces" version="1.1.0" targetFramework="net48"/>
+    <package id="Microsoft.NETCore.Platforms" version="1.1.0" targetFramework="net48"/>
+    <package id="Microsoft.Win32.Primitives" version="4.3.0" targetFramework="net48"/>
+    <package id="NETStandard.Library" version="1.6.1" targetFramework="net48"/>
+    <package id="Serilog" version="2.10.0" targetFramework="net472"/>
+    <package id="Serilog.Sinks.Console" version="4.0.0" targetFramework="net472"/>
+    <package id="Serilog.Sinks.File" version="5.0.0" targetFramework="net48"/>
+    <package id="System.AppContext" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Buffers" version="4.5.1" targetFramework="net48"/>
+    <package id="System.Collections" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Collections.Concurrent" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Console" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Diagnostics.Debug" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Diagnostics.DiagnosticSource" version="4.7.1" targetFramework="net48"/>
+    <package id="System.Diagnostics.Tools" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Diagnostics.Tracing" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Globalization" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Globalization.Calendars" version="4.3.0" targetFramework="net48"/>
+    <package id="System.IO" version="4.3.0" targetFramework="net48"/>
+    <package id="System.IO.Compression" version="4.3.0" targetFramework="net48"/>
+    <package id="System.IO.Compression.ZipFile" version="4.3.0" targetFramework="net48"/>
+    <package id="System.IO.FileSystem" version="4.3.0" targetFramework="net48"/>
+    <package id="System.IO.FileSystem.Primitives" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Linq" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Linq.Expressions" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Memory" version="4.5.4" targetFramework="net48"/>
+    <package id="System.Net.Http" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Net.Primitives" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Net.Sockets" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Numerics.Vectors" version="4.5.0" targetFramework="net48"/>
+    <package id="System.ObjectModel" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Reflection" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Reflection.Extensions" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Reflection.Primitives" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Resources.ResourceManager" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Runtime" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Runtime.CompilerServices.Unsafe" version="4.5.3" targetFramework="net48"/>
+    <package id="System.Runtime.Extensions" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Runtime.Handles" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Runtime.InteropServices" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Runtime.InteropServices.RuntimeInformation" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Runtime.Numerics" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Security.Cryptography.Algorithms" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Security.Cryptography.Encoding" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Security.Cryptography.Primitives" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Security.Cryptography.X509Certificates" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Text.Encoding" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Text.Encoding.Extensions" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Text.RegularExpressions" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Threading" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Threading.Tasks" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Threading.Tasks.Extensions" version="4.5.2" targetFramework="net48"/>
+    <package id="System.Threading.Timer" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Xml.ReaderWriter" version="4.3.0" targetFramework="net48"/>
+    <package id="System.Xml.XDocument" version="4.3.0" targetFramework="net48"/>
+</packages>
+```
+
+`docs/desktop.ini`:
+
+```ini
+[LocalizedFileNames]
+rider64_GMFmpBmXIx.png=@rider64_GMFmpBmXIx.png,0
+
+```

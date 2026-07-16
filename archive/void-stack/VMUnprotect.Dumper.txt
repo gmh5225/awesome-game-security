@@ -1,0 +1,243 @@
+Project Path: arc_void-stack_VMUnprotect.Dumper_q0qif6lm
+
+Source Tree:
+
+```txt
+arc_void-stack_VMUnprotect.Dumper_q0qif6lm
+├── LICENSE
+├── README.md
+├── VMUnprotect.Dumper
+│   ├── Program.cs
+│   └── VMUnprotect.Dumper.csproj
+├── VMUnprotect.sln
+└── docs
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2022 void
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+<p align="center">
+  <img width="256" heigth="256" src="docs\vmup.png">
+<h1 align="center">VMUnprotect.Dumper</h1>
+<p align="center">
+  <strong>VMUnprotect.Dumper</strong> is a project engaged in hunting tampered <strong>VMProtect assemblies</strong>. It makes use of <a href="https://github.com/pardeike/Harmony">AsmResolver</a> to dynamically unpack <strong>VMP</strong> protected assembly. Works on <a href="https://vmpsoft.com/20220827/vmprotect-3-7/">VMProtect 3.7.0</a> (Latest) and few versions back.
+</p>
+</p>
+<p align="center">
+  <img src="https://forthebadge.com/images/badges/built-with-love.svg" alt="appveyor-ci" />
+  <img src="https://forthebadge.com/images/badges/made-with-c-sharp.svg" alt="appveyor-ci" />
+</p>
+</p>
+
+</br></br>
+# Before usage of VMUnprotect.Dumper
+<img src="docs/protected.png" >
+
+</br></br>
+
+# After usage of VMUnprotect.Dumper
+<img src="docs/decrypted.png" >
+
+# Usage
+```sh
+VMUnprotect.Dumper.exe example.vmp.exe
+```
+> If the target app has a different framework, it probably won't work. Compile it yourself for your needs. <br>
+
+### Checkout also:
+* [VMUnprotect](https://github.com/void-stack/VMUnprotect) - VMUnprotect can dynamically log and manipulate calls from virtualized methods by VMProtect.
+
+# Credits
+* [wwh1004](https://github.com/wwh1004) - Idea.
+* [(Discord) MrToms#1244]() - Resources
+
+This tool uses the following (open source) software:
+* [AsmResolver](https://github.com/Washi1337/AsmResolver) by [Washi](https://github.com/Washi1337), licensed under the MIT license, for reading/writing assemblies.
+
+## 💵 Want to buy me a Coffee?
+     - Donate BTC at `bc1q048wrqztka5x2syt9mtj68uuf73vqry60s38vf`
+     - Donate ETH at `0x86b2C17C94A1E6f35d498d17a37dc1f8A715139b`
+
+```
+
+`VMUnprotect.Dumper/Program.cs`:
+
+```cs
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using AsmResolver.DotNet;
+using AsmResolver.IO;
+using AsmResolver.PE.File;
+using Sharprompt;
+
+const string asciiArt = @"
+_________                __                 
+\_   ___ \  ____________/  |_  ____ ___  ___
+/    \  \/ /  _ \_  __ \   __\/ __ \\  \/  /
+\     \___(  <_> )  | \/|  | \  ___/ >    < 
+ \______  /\____/|__|   |__|  \___  >__/\_ \
+        \/                        \/      \/
+                VMUnprotect.Dumper
+          https://github.com/void-stack
+            Credits: wwh1004, MrToms
+";
+
+Console.Title = "VMUnprotect.Dumper";
+Console.WriteLine(asciiArt);
+
+string? target;
+
+if (args.Length > 0 && File.Exists(args[0]))
+    target = Prompt.Input<string>("Enter file path", args[0]);
+else
+    target = Prompt.Input<string>("Enter file path");
+
+if (File.Exists(target))
+{
+    var output = $"{Path.GetFileNameWithoutExtension(target)}-decrypted.exe";
+
+    // Try to load assembly and gather the ManifestModule
+    Assembly? assembly = null;
+
+    try
+    {
+        assembly = Assembly.LoadFile(target);
+    }
+    catch (BadImageFormatException)
+    {
+        Console.WriteLine("Target app probably has a different framework.");
+        return;
+    }
+
+    var manifestModule = assembly.ManifestModule;
+
+    // Quick load for .cctor search
+    var module = ModuleDefinition.FromFile(target);
+
+    // Resolve MethodBase of .cctor where vmp initializes itself
+    var cctor =
+        assembly.ManifestModule.ResolveMethod(module.TopLevelTypes[0].GetStaticConstructor()!.MetadataToken.ToInt32());
+
+    // Get Module Base Address from loaded assembly
+    var hInstance = Marshal.GetHINSTANCE(manifestModule);
+
+    // Make sure static constructor exists
+    if (cctor is not null)
+    {
+        // Force VMProtect to fix methods
+        RuntimeHelpers.PrepareMethod(cctor.MethodHandle);
+
+        // Load PEFile from disk
+        var diskImage = PEFile.FromFile(target);
+
+        // Get correct AddressOfEntrypoint and fix determining whether the image is a PE32 (32-bit) or a PE32+ (64-bit) image.
+        var epFromDisk = diskImage.OptionalHeader.AddressOfEntrypoint;
+        var magicDisk = diskImage.OptionalHeader.Magic;
+
+        // Load decrypted PEFile from module base
+        var runtimeImage = PEFile.FromModuleBaseAddress(hInstance, PEMappingMode.Mapped);
+
+        var optionalHeader = runtimeImage.OptionalHeader;
+        optionalHeader.Magic = magicDisk; // Fix the incorrect magic
+        optionalHeader.AddressOfEntrypoint = epFromDisk; // Fix the incorrect AddressOfEntrypoint
+
+        // Write fixed runtimeImage to disk
+        using (var fs = File.Create(output))
+        {
+            runtimeImage.Write(new BinaryStreamWriter(fs));
+        }
+
+        Console.WriteLine($"Saved as: {Path.GetFullPath(output)}");
+    }
+    else
+    {
+        Console.WriteLine("Failed to prepare .cctor");
+    }
+}
+else
+{
+    Console.WriteLine("File either doesn't exist or you didn't provide it (VMProtect.Dumper File.exe)");
+}
+
+Console.ReadKey();
+```
+
+`VMUnprotect.Dumper/VMUnprotect.Dumper.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net472</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>10</LangVersion>
+        <ApplicationIcon>vmup.ico</ApplicationIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Content Include="vmup.ico" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AsmResolver" Version="4.8.0" />
+      <PackageReference Include="AsmResolver.DotNet" Version="4.8.0" />
+      <PackageReference Include="AsmResolver.PE" Version="4.8.0" />
+      <PackageReference Include="Sharprompt" Version="2.4.4" />
+    </ItemGroup>
+
+</Project>
+
+```
+
+`VMUnprotect.sln`:
+
+```sln
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VMUnprotect.Dumper", "VMUnprotect.Dumper\VMUnprotect.Dumper.csproj", "{7E00C6C0-731D-4E9F-BDDE-BC805A525A0E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7E00C6C0-731D-4E9F-BDDE-BC805A525A0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E00C6C0-731D-4E9F-BDDE-BC805A525A0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E00C6C0-731D-4E9F-BDDE-BC805A525A0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E00C6C0-731D-4E9F-BDDE-BC805A525A0E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
+
+```
