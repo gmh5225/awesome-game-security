@@ -1,0 +1,4894 @@
+Project Path: arc_Washi1337_ghidra-nativeaot_t18kis00
+
+Source Tree:
+
+```txt
+arc_Washi1337_ghidra-nativeaot_t18kis00
+├── LICENSE.md
+├── Module.manifest
+├── README.md
+├── assets
+├── build.gradle
+├── data
+│   └── README.txt
+├── extension.properties
+├── ghidra_scripts
+│   └── README.txt
+└── src
+    └── main
+        ├── help
+        │   └── help
+        │       ├── TOC_Source.xml
+        │       └── topics
+        │           └── skeleton
+        │               └── help.html
+        ├── java
+        │   └── nativeaot
+        │       ├── Constants.java
+        │       ├── NativeAotAnalyzer.java
+        │       ├── NativeAotOptionsManager.java
+        │       ├── NativeAotPlugin.java
+        │       ├── browser
+        │       │   ├── AddressNode.java
+        │       │   ├── GenericNode.java
+        │       │   ├── MetadataBrowserIcon.java
+        │       │   ├── MetadataBrowserProvider.java
+        │       │   ├── MethodNode.java
+        │       │   ├── TypeNode.java
+        │       │   └── TypeReferenceNode.java
+        │       ├── objectmodel
+        │       │   ├── ElementType.java
+        │       │   ├── FrozenObjectAnnotator.java
+        │       │   ├── Method.java
+        │       │   ├── MethodTable.java
+        │       │   ├── MethodTableCrawler.java
+        │       │   ├── MethodTableManager.java
+        │       │   ├── VTableChunk.java
+        │       │   ├── net70
+        │       │   │   ├── MethodTableManagerNet70.java
+        │       │   │   └── MethodTableNet70.java
+        │       │   └── net80
+        │       │       ├── MethodTableManagerNet80.java
+        │       │       └── MethodTableNet80.java
+        │       ├── refactoring
+        │       │   ├── DataTypeRefactor.java
+        │       │   ├── MethodRefactor.java
+        │       │   ├── MethodTableRefactor.java
+        │       │   ├── Refactor.java
+        │       │   ├── RefactorDialog.java
+        │       │   ├── RefactorEngine.java
+        │       │   ├── RefactorTableModel.java
+        │       │   └── SymbolRefactor.java
+        │       ├── rehydration
+        │       │   ├── MetadataRehydrator.java
+        │       │   ├── MetadataRehydratorNet80.java
+        │       │   └── PointerScanResult.java
+        │       └── rtr
+        │           ├── ReadyToRunDirectory.java
+        │           ├── ReadyToRunLocator.java
+        │           ├── ReadyToRunSection.java
+        │           ├── SignatureReadyToRunLocator.java
+        │           └── SymbolReadyToRunLocator.java
+        └── resources
+            └── images
+                └── README.txt
+
+```
+
+`LICENSE.md`:
+
+```md
+The MIT License (MIT)
+=====================
+
+Copyright © `2023-2025` `Washi`
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the “Software”), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+```
+
+`README.md`:
+
+```md
+# Ghidra + .NET Native AOT
+
+This is a Ghidra analyzer and UI plugin that helps in reverse engineering binaries compiled using .NET Native AOT technology introduced in .NET 8.0 and above, for which the symbols are not available and thus no FunctionID (FID) databases can be made easily.
+
+See also the accompanied [blog post](https://blog.washi.dev/posts/recovering-nativeaot-metadata/) explaining how it works.
+
+<div style="text-align:center">
+    <img src="assets/ghidra00_light.png">
+</div>
+
+
+## Features
+
+- [x] Full Type Hierarchy (Method Table) Reconstruction
+- [x] Frozen Object Annotation (e.g. Strings)
+- [x] Interactive Metadata Browser
+- [x] Refactoring Engine
+
+
+## Screenshots
+
+Automatic Frozen object (e.g., string literal) annotations.
+![](assets/strings.png)
+
+Automatic VTable redirection detection.
+![](assets/vtable.png)
+
+Refactor virtual methods and related symbols.
+![](assets/refactor.png)
+
+
+
+## Building
+
+Run `gradle` in the root directory:
+
+```sh
+$ gradle
+```
+
+This will produce a plugin ZIP in the `dist/` folder.
+
+Running the above command assumes Ghidra to be installed under `/opt/ghidra`.
+If you have Ghidra installed somewhere else on your machine, you may need to specify the Ghidra installation directory for it to find the appropriate dependencies:
+
+```sh
+$ gradle -PGHIDRA_INSTALL_DIR=/path/to/ghidra
+```
+
+## Installing
+
+Install the plugin using `File > Install Extensions` menu in the main project window.
+
+
+## Quick Starters Guide
+
+Steps:
+
+- Make sure you have the plugin installed (see [Building](#building) and [Installing](#installing)).
+- Open a .NET NativeAOT binary in the code browser.
+- Optionally, if symbols are stripped, locate and markup the ReadyToRun header with the name `__ReadyToRunHeader` (see below).
+- Run the Native AOT Analyzer (Either as a One-Shot Analysis or part of Auto-Analysis).
+- Open the Native AOT Metadata Browser from the Windows Menu.
+
+
+## Locating the ReadyToRun Directory
+
+The ReadyToRun data directory is the root of all .NET Native AOT metadata.
+As the directory is not a normal PE data directory specified in its header, the plugin tries to heuristically find it in the following manner:
+- First, it will prefer using symbols `__ReadyToRunHeader` or the symbol pair `__modules_a` and `__modules_z` which mark a list of directories.
+- If no valid headers are found at these symbol names, it will heuristically scan all non-executable memory blocks for a known pattern (i.e., the `RTR\0` signature and a few expected fields in its header).
+
+If you find that this process does not work for you (e.g., no matches or too many matches), the RTR directory list (i.e., `__modules_a`) is also referenced in the startup code of any NativeAOT binary.
+Specifically it is referenced as **the second argument** in a call to `S_P_CoreLib_Internal_Runtime_CompilerHelpers_StartupCodeHelpers__InitializeModules` in `wmain`.
+
+You can find this call by e.g., compiling a simple Hello World application using Native AOT with symbols, and using Ghidra's Version Tracking Tool to compare functions.
+
+Left: Hello World app, Right: Unknown Native AOT Binary ([Challenge fullspeed.exe of Flare-On 11](https://washi1337.github.io/ctf-writeups/writeups/flare-on/2024/7/)):
+
+![](assets/compare.png)
+
+The second argument (`PTR_1401927b0` in the screenshot) of the `InitializeModules` call is an array of pointers:
+
+![](assets/modules.png)
+
+You can recognize the pointer is referencing the ReadyToRun directory when it points to data starting with `RTR\0`:
+
+![](assets/readytorun.png)
+
+Once you have this data with the label  `__ReadyToRunHeader`, you can use the analyzer.
+
+
+
+## Development
+
+Any editor supporting Gradle should work, including Eclipse, IntelliJ and Visual Studio Code.
+
+For quickly reinstalling the plugin as well as starting ghidra, use a command like the following (change file paths accordingly):
+
+Linux (Bash):
+```sh
+$ gradle && unzip -o dist/*.zip -d ~/.config/ghidra/ghidra_X.X_PUBLIC/Extensions/ && ghidra
+```
+
+Windows (Powershell):
+```pwsh
+gradle; Expand-Archive .\dist\*.zip -DestinationPath $env:APPDATA\ghidra\ghidra_X.X_PUBLIC\Extensions -Force; Z:\Path\To\Ghidra\ghidraRun.bat
+```
+
+## License
+
+MIT
+
+
+## Acknowledgements
+
+Browser icons from https://intellij-icons.jetbrains.design/ (Apache 2 Licensed)
+
+```
+
+`build.gradle`:
+
+```gradle
+/* ###
+ * IP: GHIDRA
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+// Builds a Ghidra Extension for a given Ghidra installation.
+//
+// An absolute path to the Ghidra installation directory must be supplied either by setting the 
+// GHIDRA_INSTALL_DIR environment variable or Gradle project property:
+//
+//     > export GHIDRA_INSTALL_DIR=<Absolute path to Ghidra> 
+//     > gradle
+//
+//         or
+//
+//     > gradle -PGHIDRA_INSTALL_DIR=<Absolute path to Ghidra>
+//
+// Gradle should be invoked from the directory of the project to build.  Please see the
+// application.gradle.version property in <GHIDRA_INSTALL_DIR>/Ghidra/application.properties
+// for the correction version of Gradle to use for the Ghidra installation you specify.
+
+//----------------------START "DO NOT MODIFY" SECTION------------------------------
+def ghidraInstallDir
+
+if (System.env.GHIDRA_INSTALL_DIR) {
+	ghidraInstallDir = System.env.GHIDRA_INSTALL_DIR
+}
+else if (project.hasProperty("GHIDRA_INSTALL_DIR")) {
+	ghidraInstallDir = project.getProperty("GHIDRA_INSTALL_DIR")
+}
+else {
+	ghidraInstallDir = "/opt/ghidra"
+}
+
+task distributeExtension {
+	group "Ghidra"
+
+	apply from: new File(ghidraInstallDir).getCanonicalPath() + "/support/buildExtension.gradle"
+	dependsOn ':buildExtension'
+}
+//----------------------END "DO NOT MODIFY" SECTION-------------------------------
+
+repositories {
+	// Declare dependency repositories here.  This is not needed if dependencies are manually 
+	// dropped into the lib/ directory.
+	// See https://docs.gradle.org/current/userguide/declaring_repositories.html for more info.
+	// Ex: mavenCentral()
+}
+
+dependencies {
+	// Any external dependencies added here will automatically be copied to the lib/ directory when
+	// this extension is built.	
+}
+
+// Exclude additional files from the built extension
+// Ex: buildExtension.exclude '.idea/**'
+
+```
+
+`data/README.txt`:
+
+```txt
+The "data" directory is intended to hold data files that will be used by this module and will
+not end up in the .jar file, but will be present in the zip or tar file.  Typically, data
+files are placed here rather than in the resources directory if the user may need to edit them.
+
+An optional data/languages directory can exist for the purpose of containing various Sleigh language
+specification files and importer opinion files.  
+
+The data/buildLanguage.xml is used for building the contents of the data/languages directory.
+
+The skel language definition has been commented-out within the skel.ldefs file so that the 
+skeleton language does not show-up within Ghidra.
+
+See the Sleigh language documentation (docs/languages/index.html) for details Sleigh language 
+specification syntax.
+ 
+```
+
+`extension.properties`:
+
+```properties
+name=@extname@
+description=Provides analyzers for binaries compiled using .NET NativeAOT technology.
+author=Washi
+createdOn=18/04/2025
+version=@extversion@
+
+```
+
+`ghidra_scripts/README.txt`:
+
+```txt
+Java source directory to hold module-specific Ghidra scripts.
+
+```
+
+`src/main/help/help/TOC_Source.xml`:
+
+```xml
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<!-- 
+
+	This is an XML file intended to be parsed by the Ghidra help system.  It is loosely based 
+	upon the JavaHelp table of contents document format.  The Ghidra help system uses a 
+	TOC_Source.xml file to allow a module with help to define how its contents appear in the 
+	Ghidra help viewer's table of contents.  The main document (in the Base module) 
+	defines a basic structure for the 
+	Ghidra table of contents system.  Other TOC_Source.xml files may use this structure to insert
+	their files directly into this structure (and optionally define a substructure).
+	
+	
+	In this document, a tag can be either a <tocdef> or a <tocref>.  The former is a definition
+	of an XML item that may have a link and may contain other <tocdef> and <tocref> children.  
+	<tocdef> items may be referred to in other documents by using a <tocref> tag with the 
+	appropriate id attribute value.  Using these two tags allows any module to define a place 
+	in the table of contents system (<tocdef>), which also provides a place for 
+	other TOC_Source.xml files to insert content (<tocref>).  
+	
+	During the help build time, all TOC_Source.xml files will be parsed and	validated to ensure
+	that all <tocref> tags point to valid <tocdef> tags.  From these files will be generated
+	<module name>_TOC.xml files, which are table of contents files written in the format 
+	desired by the JavaHelp system.   Additionally, the genated files will be merged together
+	as they are loaded by the JavaHelp system.  In the end, when displaying help in the Ghidra
+	help GUI, there will be on table of contents that has been created from the definitions in 
+	all of the modules' TOC_Source.xml files.
+
+	
+	Tags and Attributes
+	
+	<tocdef>
+	-id          - the name of the definition (this must be unique across all TOC_Source.xml files)	
+	-text        - the display text of the node, as seen in the help GUI
+	-target**    - the file to display when the node is clicked in the GUI
+	-sortgroup   - this is a string that defines where a given node should appear under a given
+	               parent.  The string values will be sorted by the JavaHelp system using
+	               a javax.text.RulesBasedCollator.  If this attribute is not specified, then
+	               the text of attribute will be used.
+
+	<tocref>
+	-id			 - The id of the <tocdef> that this reference points to 
+	
+	**The URL for the target is relative and should start with 'help/topics'.  This text is 
+	used by the Ghidra help system to provide a universal starting point for all links so that
+	they can be resolved at runtime, across modules.
+	
+	
+-->
+
+
+<tocroot>
+	<!-- Uncomment and adjust fields to add help topic to help system's Table of Contents
+	<tocref id="Ghidra Functionality">
+		<tocdef id="HelpAnchor" text="My Feature" target="help/topics/my_topic/help.html" />
+	</tocref>
+	-->
+</tocroot>
+
+```
+
+`src/main/help/help/topics/skeleton/help.html`:
+
+```html
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+  <HEAD>
+    <META name="generator" content=
+    "HTML Tidy for Java (vers. 2009-12-01), see jtidy.sourceforge.net">
+    <META http-equiv="Content-Language" content="en-us">
+    <META http-equiv="Content-Type" content="text/html; charset=windows-1252">
+    <META name="GENERATOR" content="Microsoft FrontPage 4.0">
+    <META name="ProgId" content="FrontPage.Editor.Document">
+
+    <TITLE>Skeleton Help File for a Module</TITLE>
+    <LINK rel="stylesheet" type="text/css" href="help/shared/DefaultStyle.css">
+  </HEAD>
+
+  <BODY>
+    <H1><a name="HelpAnchor"></a>Skeleton Help File for a Module</H1>
+
+    <P>This is a simple skeleton help topic. For a better description of what should and should not
+    go in here, see the "sample" Ghidra extension in the Extensions/Ghidra directory, or see your 
+    favorite help topic. In general, language modules do not have their own help topics.</P>
+  </BODY>
+</HTML>
+
+```
+
+`src/main/java/nativeaot/Constants.java`:
+
+```java
+package nativeaot;
+
+import ghidra.program.model.data.CategoryPath;
+
+public class Constants {
+    public static final String NAME = "Native AOT Analyzer";
+    public static final String TAG = "NativeAOT";
+
+    public static final CategoryPath CATEGORY_READYTORUN = new CategoryPath("/rtr");
+    public static final CategoryPath CATEGORY_NATIVEAOT = new CategoryPath("/NativeAOT");
+    public static final CategoryPath CATEGORY_METHOD_TABLES = new CategoryPath("/NativeAOT/MethodTables");
+
+    public static final String READY_TO_RUN_MODULES_START_SYMBOL_NAME = "__modules_a";
+    public static final String READY_TO_RUN_MODULES_END_SYMBOL_NAME = "__modules_z";
+    public static final String READY_TO_RUN_HEADER_SYMBOL_NAME = "__ReadyToRunHeader";
+    public static final String DEHYDRATED_DATA_SYMBOL_NAME = "__dehydrated_data";
+    public static final String HYDRATED_DATA_SYMBOL_NAME = "__hydrated_data";
+    public static final String FROZEN_SEGMENT_START_SYMBOL_NAME = "__FrozenSegmentStart";
+
+    public static final int READY_TO_RUN_SIGNATURE = 0x00525452;
+
+    public static final String SYSTEM_OBJECT_NAME = "System_Object";
+    public static final String SYSTEM_STRING_NAME = "System_String";
+}
+```
+
+`src/main/java/nativeaot/NativeAotAnalyzer.java`:
+
+```java
+/* ###
+ * IP: GHIDRA
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package nativeaot;
+
+import ghidra.app.services.AbstractAnalyzer;
+import ghidra.app.services.AnalysisPriority;
+import ghidra.app.services.AnalyzerType;
+import ghidra.app.util.bin.BinaryReader;
+import ghidra.app.util.bin.MemoryByteProvider;
+import ghidra.app.util.importer.MessageLog;
+import ghidra.framework.options.Options;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.address.AddressRangeImpl;
+import ghidra.program.model.address.AddressSet;
+import ghidra.program.model.address.AddressSetView;
+import ghidra.program.model.listing.Program;
+import ghidra.program.model.mem.MemoryAccessException;
+import ghidra.program.model.symbol.SourceType;
+import ghidra.util.exception.CancelledException;
+import ghidra.util.task.TaskMonitor;
+import nativeaot.objectmodel.FrozenObjectAnnotator;
+import nativeaot.objectmodel.MethodTableCrawler;
+import nativeaot.objectmodel.MethodTableManager;
+import nativeaot.objectmodel.net70.MethodTableManagerNet70;
+import nativeaot.objectmodel.net80.MethodTableManagerNet80;
+import nativeaot.rehydration.MetadataRehydrator;
+import nativeaot.rehydration.MetadataRehydratorNet80;
+import nativeaot.rehydration.PointerScanResult;
+import nativeaot.rtr.*;
+
+/**
+ * Provide class-level documentation that describes what this analyzer does.
+ */
+public class NativeAotAnalyzer extends AbstractAnalyzer {
+
+    public static final String MARKUP_REHYDRATION_CODE = "Markup rehydration code";
+    private static final ReadyToRunLocator[] READY_TO_RUN_LOCATORS = new ReadyToRunLocator[] {
+        SymbolReadyToRunLocator.instance,
+        SignatureReadyToRunLocator.instance,
+    };
+
+    private boolean _markupRehydrationCode = false;
+
+    public NativeAotAnalyzer() {
+        super(
+            Constants.NAME,
+            "Analyzes binaries compiled using .NET Native AOT technology.",
+            AnalyzerType.BYTE_ANALYZER
+        );
+        setSupportsOneTimeAnalysis();
+        setPriority(AnalysisPriority.LOW_PRIORITY);
+    }
+
+    @Override
+    public boolean getDefaultEnablement(Program program) {
+        return false;
+    }
+
+    @Override
+    public boolean canAnalyze(Program program) {
+        // We currently only support x86-64.
+        if (!program.getLanguageID().getIdAsString().startsWith("x86:LE:64")) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public void registerOptions(Options options, Program program) {
+        options.registerOption(
+            MARKUP_REHYDRATION_CODE,
+            false,
+            null,
+            "Label all opcodes in the program that is responsible for decompressing the hydrated metadata."
+        );
+    }
+
+    @Override
+    public void optionsChanged(Options options, Program program) {
+        _markupRehydrationCode = options.getBoolean(MARKUP_REHYDRATION_CODE, false);
+    }
+
+    @Override
+    public boolean added(Program program, AddressSetView set, TaskMonitor monitor, MessageLog log) throws CancelledException {
+        // Locate modules.
+        var moduleHeaders = locateModules(program, monitor, log);
+        if (moduleHeaders.length == 0) {
+            log.appendMsg(Constants.TAG, String.format(
+                "Symbols `%s` or `%s` and `%s` not found.",
+                Constants.READY_TO_RUN_HEADER_SYMBOL_NAME,
+                Constants.READY_TO_RUN_MODULES_START_SYMBOL_NAME,
+                Constants.READY_TO_RUN_MODULES_END_SYMBOL_NAME
+            ));
+            log.appendMsg(Constants.TAG, "A reference of these can be found as the second argument of the call to `StartupCodeHelpers__InitializeModules` in the main function.");
+            return false;
+        }
+
+        // Process all modules.
+        for (var moduleHeader : moduleHeaders) {
+            if (moduleHeader.getOffset() == 0) {
+                continue;
+            }
+
+            try {
+                processModule(program, moduleHeader, monitor, log);
+            } catch (Exception ex) {
+                log.appendMsg(Constants.TAG,"Failed to process module header " + moduleHeader);
+                log.appendException(ex);
+            }
+        }
+
+        return true;
+    }
+
+    private Address[] locateModules(Program program, TaskMonitor monitor, MessageLog log) throws CancelledException {
+        for (var locator : READY_TO_RUN_LOCATORS) {
+            var moduleHeaders = locator.locateModules(program, monitor, log);
+            if (moduleHeaders.length > 0) {
+                return moduleHeaders;
+            }
+        }
+
+        return new Address[0];
+    }
+
+    private void processModule(Program program, Address moduleHeader, TaskMonitor monitor, MessageLog log) throws Exception {
+        ReadyToRunDirectory directory;
+        try {
+            directory = readRtrDirectory(program, moduleHeader);
+        } catch (Exception ex) {
+            throw new Exception("Failed to read RTR directory at %s.".formatted(moduleHeader), ex);
+        }
+
+        var manager = MethodTableManager.createForDirectory(program, directory);
+        log.appendMsg(Constants.TAG, "Using manager %s".formatted(manager.getClass()));
+
+        // Restore first from DB to allow for the analyzer to be run multiple times.
+        manager.restoreFromDB();
+
+        // Find the dehydrated section (.NET 8.0+).
+        PointerScanResult pointerScan;
+        var section = directory.getSectionByType(ReadyToRunSection.DEHYDRATED_DATA);
+        if (section == null) {
+            // Fallback for .NET 7.0 / 10.0+ with dehydration disabled: Scan memory for pointers manually.
+            log.appendMsg(Constants.TAG, "No dehydrated data found. Attempting manual pointer scan.");
+            try {
+                pointerScan = scanForPointers(program, monitor, log);
+            } catch (Exception ex) {
+                throw new Exception("Manual scan failed.", ex);
+            }
+        } else {
+            try {
+                // NOTE: Metadata rehydrators should be changed if the file format changes per rtr version.
+                var rehydrator = new MetadataRehydratorNet80();
+                rehydrator.markupRehydrationCode(_markupRehydrationCode);
+                pointerScan = rehydrateData(program, section, rehydrator, monitor, log);
+                log.appendMsg(Constants.TAG, "Rehydrated " + pointerScan.getScanningRange());
+            } catch (Exception ex) {
+                throw new Exception("Rehydration failed.", ex);
+            }
+        }
+
+        // Find all method tables.
+        try {
+            var crawler = new MethodTableCrawler(manager, program, pointerScan);
+            crawler.analyze(monitor, log);
+        } catch (Exception ex) {
+            throw new Exception("Method Table crawling failed.", ex);
+        }
+
+        // Annotate all frozen objects.
+        try {
+            var annotator = new FrozenObjectAnnotator(program, manager);
+            annotator.analyze(directory, pointerScan.getPointerLocations(), monitor, log);
+        }
+        catch (Exception ex) {
+            throw new Exception("Frozen object crawling failed.", ex);
+        }
+    }
+
+    private ReadyToRunDirectory readRtrDirectory(Program program, Address moduleHeader) throws Exception {
+        // Read directory.
+        var directory = ReadyToRunDirectory.readAtAddress(program, moduleHeader);
+
+        // Assign label and data type in listing.
+        var listing = program.getListing();
+        var symbolTable = program.getSymbolTable();
+
+        var type = directory.toDataType();
+        listing.clearCodeUnits(moduleHeader, moduleHeader.add(type.getLength()), false);
+        listing.createData(moduleHeader, type);
+        symbolTable.createLabel(moduleHeader, Constants.READY_TO_RUN_HEADER_SYMBOL_NAME, SourceType.ANALYSIS);
+
+        return directory;
+    }
+
+    private PointerScanResult rehydrateData(Program program, ReadyToRunSection rehydratedData, MetadataRehydrator rehydrator, TaskMonitor monitor, MessageLog log) throws Exception {
+        var symbolTable = program.getSymbolTable();
+
+        // Rehydrate.
+        var space = program.getAddressFactory().getDefaultAddressSpace();
+        var start = space.getAddress(rehydratedData.getStart());
+        var end = space.getAddress(rehydratedData.getEnd());
+
+        symbolTable.createLabel(start, Constants.DEHYDRATED_DATA_SYMBOL_NAME, SourceType.ANALYSIS);
+
+        var result = rehydrator.rehydrate(program, new AddressSet(start, end).getFirstRange(), monitor, log);
+
+        symbolTable.createLabel(
+            result.getScanningRange().getMinAddress(),
+            Constants.HYDRATED_DATA_SYMBOL_NAME,
+            SourceType.ANALYSIS
+        );
+
+        return result;
+    }
+
+    private PointerScanResult scanForPointers(Program program, TaskMonitor monitor, MessageLog log) throws CancelledException {
+        var memory = program.getMemory();
+        var validAddresses = memory.getLoadedAndInitializedAddressSet();
+        var pointers = new java.util.ArrayList<Address>();
+
+        // We need a single contiguous range for the crawler to validate if a pointer points "inside" the module.
+        // We use the min/max of the loaded image.
+        var scanningRange = new AddressRangeImpl(
+            validAddresses.getMinAddress(), 
+            validAddresses.getMaxAddress()
+        );
+
+        monitor.setMessage(Constants.TAG + ": Scanning for pointers...");
+        monitor.setMaximum(validAddresses.getNumAddresses());
+        monitor.setProgress(0);
+
+        // Iterate over all initialized memory blocks
+        for (var block : memory.getBlocks()) {
+            if (!block.isInitialized() || block.isExecute()) continue;
+
+            var start = block.getStart();
+            var end = block.getEnd();
+            
+            // Align start to 8 bytes
+            long offset = start.getOffset();
+            if (offset % 8 != 0) {
+                start = start.add(8 - (offset % 8));
+            }
+
+            while (start.compareTo(end) <= 0) {
+                monitor.checkCancelled();
+                
+                // Read 64-bit value
+                try {
+                    long value = memory.getLong(start);
+                    
+                    // Simple heuristic: If the value is an address that exists in memory, it's a candidate pointer.
+                    // This includes pointers to code (VTable slots) and pointers to data (RelatedType, Interfaces).
+                    if (validAddresses.contains(start.getNewAddress(value))) {
+                        pointers.add(start);
+                    }
+                } catch (MemoryAccessException e) {
+                    // Ignore read errors
+                }
+                
+                try {
+                    start = start.add(8);
+                } catch(ghidra.program.model.address.AddressOutOfBoundsException e) {
+                    break; 
+                }
+            }
+        }
+
+        log.appendMsg(Constants.TAG, "Found " + pointers.size() + " candidate pointers.");
+        
+        return new PointerScanResult(
+            scanningRange,
+            pointers.toArray(Address[]::new)
+        );
+    }
+}
+
+```
+
+`src/main/java/nativeaot/NativeAotOptionsManager.java`:
+
+```java
+package nativeaot;
+
+import ghidra.framework.options.OptionsChangeListener;
+import ghidra.framework.options.ToolOptions;
+import ghidra.framework.plugintool.PluginTool;
+import ghidra.util.bean.opteditor.OptionsVetoException;
+
+public class NativeAotOptionsManager implements OptionsChangeListener {
+
+    public static final String OPTIONS_NAME = "NativeAOT";
+
+    private static final String ENABLE_REFACTORING_ENGINE_STRING = "Enable Refactoring Engine";
+    private static final String ENABLE_REFACTORING_ENGINE_DESC_STRING = "Enables the automatic refactoring engine that automatically determines related symbols and suggests renames (beta).";
+
+    private boolean _refactorEngineEnabled = false;
+
+    public NativeAotOptionsManager(PluginTool tool) {
+        var options = tool.getOptions(OPTIONS_NAME);
+        options.addOptionsChangeListener(this);
+
+        options.registerOption(ENABLE_REFACTORING_ENGINE_STRING, true, null, ENABLE_REFACTORING_ENGINE_DESC_STRING);
+
+        readOptions(options);
+    }
+
+    @Override
+    public void optionsChanged(ToolOptions toolOptions, String s, Object o, Object o1) throws OptionsVetoException {
+        readOptions(toolOptions);
+    }
+
+    private void readOptions(ToolOptions options) {
+        _refactorEngineEnabled = options.getBoolean(ENABLE_REFACTORING_ENGINE_STRING, true);
+    }
+
+    public boolean isRefactorEngineEnabled() {
+        return _refactorEngineEnabled;
+    }
+
+    public void setRefactorEngineEnabled(boolean enableRefactoringEngine) {
+        _refactorEngineEnabled = enableRefactoringEngine;
+    }
+}
+
+```
+
+`src/main/java/nativeaot/NativeAotPlugin.java`:
+
+```java
+/* ###
+ * IP: GHIDRA
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package nativeaot;
+
+import ghidra.app.ExamplesPluginPackage;
+import ghidra.app.plugin.PluginCategoryNames;
+import ghidra.app.plugin.ProgramPlugin;
+import ghidra.app.services.GoToService;
+import ghidra.framework.plugintool.PluginInfo;
+import ghidra.framework.plugintool.PluginTool;
+import ghidra.framework.plugintool.util.PluginStatus;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.listing.Program;
+import ghidra.util.exception.CancelledException;
+import nativeaot.browser.MetadataBrowserProvider;
+import nativeaot.objectmodel.MethodTableManager;
+import nativeaot.objectmodel.net80.MethodTableManagerNet80;
+import nativeaot.refactoring.*;
+import nativeaot.rtr.ReadyToRunDirectory;
+import nativeaot.rtr.SymbolReadyToRunLocator;
+
+//@formatter:off
+@PluginInfo(
+    status = PluginStatus.STABLE,
+    packageName = ExamplesPluginPackage.NAME,
+    category = PluginCategoryNames.ANALYSIS,
+    shortDescription = "Metadata Browser and Refactoring Engine for Native AOT Binaries",
+    description = "Metadata Browser and Refactoring Engine for Native AOT Binaries"
+)
+//@formatter:on
+public class NativeAotPlugin extends ProgramPlugin {
+
+    private final MetadataBrowserProvider _provider;
+    private final RefactorEngine _refactorEngine;
+    private final NativeAotOptionsManager _options;
+
+    private MethodTableManager _manager;
+    private GoToService _goToService;
+    private Program _program;
+
+    public NativeAotPlugin(PluginTool tool) {
+        super(tool);
+
+        _provider = new MetadataBrowserProvider(this);
+        _options = new NativeAotOptionsManager(tool);
+        _refactorEngine = new RefactorEngine(tool, _options);
+    }
+
+    @Override
+    public void init() {
+        super.init();
+
+        _goToService = tool.getService(GoToService.class);
+    }
+
+    public void navigate(Address address) {
+        _goToService.goTo(address);
+    }
+
+    @Override
+    protected void programActivated(Program program) {
+        _program = program;
+        tryInitMethodTableManager();
+    }
+
+    @Override
+    protected void programDeactivated(Program program) {
+        _refactorEngine.setManager(null);
+        _manager = null;
+        _program = null;
+        _provider.rebuildTree();
+    }
+
+    public MethodTableManager getMainMethodTableManager() {
+        return _manager;
+    }
+
+    public MethodTableManager getOrCreateMainMethodTableManager() {
+        if (_manager == null && _program != null) {
+            tryInitMethodTableManager();
+        }
+
+        return _manager;
+    }
+
+    private void tryInitMethodTableManager() {
+        // Try locate RTR header.
+        Address[] candidates;
+        try {
+            candidates = SymbolReadyToRunLocator.instance.locateModules(_program, null, null);
+        } catch (CancelledException e) {
+            return;
+        }
+
+        if (candidates.length == 0) {
+            return;
+        }
+
+        // Try read RTR header.
+        ReadyToRunDirectory directory;
+        try {
+            directory = ReadyToRunDirectory.readAtAddress(_program, candidates[0]);
+        } catch (Exception ex) {
+            return;
+        }
+
+        // Update global manager and refactoring engine.
+        _refactorEngine.suspend();
+
+        _manager = MethodTableManager.createForDirectory(_program, directory);
+        _refactorEngine.setManager(_manager);
+
+        _manager.restoreFromDB();
+        _provider.rebuildTree();
+
+        _refactorEngine.resume();
+    }
+}
+
+```
+
+`src/main/java/nativeaot/browser/AddressNode.java`:
+
+```java
+package nativeaot.browser;
+
+import javax.swing.Icon;
+
+import docking.widgets.tree.GTreeNode;
+import ghidra.program.model.address.Address;
+
+public abstract class AddressNode extends GTreeNode {
+
+    @Override
+    public Icon getIcon(boolean bln) {
+        return null;
+    }
+
+    @Override
+    public String getToolTip() {
+        return null;
+    }
+
+    public abstract Address getAddress();
+}
+
+```
+
+`src/main/java/nativeaot/browser/GenericNode.java`:
+
+```java
+package nativeaot.browser;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.Icon;
+
+import docking.widgets.tree.GTreeNode;
+
+class GenericNode extends GTreeNode {
+    private final String _header;
+    private final Icon _icon;
+
+    public GenericNode(String header, Icon icon) {
+        _header = header;
+        _icon = icon;
+    }
+
+    @Override
+    public String getName() {
+        return _header;
+    }
+
+    @Override
+    public Icon getIcon(boolean bln) {
+        return _icon;
+    }
+
+    @Override
+    public String getToolTip() {
+        return null;
+    }
+
+    @Override
+    public boolean isLeaf() {
+        return getChildCount() == 0;
+    }
+
+    @Override
+    protected List<GTreeNode> generateChildren() {
+        return new ArrayList<>();
+    }
+}
+
+```
+
+`src/main/java/nativeaot/browser/MetadataBrowserIcon.java`:
+
+```java
+package nativeaot.browser;
+
+import generic.theme.GIcon;
+import resources.ResourceManager;
+
+import javax.swing.*;
+
+public class MetadataBrowserIcon {
+    public static final Icon ROOT_TYPES_ICON = new GIcon("icon.plugin.symboltree.node.category.exports.closed");
+    public static final Icon BASE_TYPES_ICON = new GIcon("icon.plugin.symboltree.node.category.imports.closed");
+    public static final Icon CLASS_ICON = ResourceManager.loadImage("images/mdclass.png");
+    public static final Icon INTERFACE_ICON = ResourceManager.loadImage("images/interface.png");
+    public static final Icon STRUCT_ICON = ResourceManager.loadImage("images/struct.png");
+    public static final Icon ENUM_ICON = ResourceManager.loadImage("images/enum.png");
+    public static final Icon ARRAY_ICON = ResourceManager.loadImage("images/array.png");
+}
+
+```
+
+`src/main/java/nativeaot/browser/MetadataBrowserProvider.java`:
+
+```java
+package nativeaot.browser;
+
+import java.awt.BorderLayout;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+
+import docking.ActionContext;
+import docking.ComponentProvider;
+import docking.WindowPosition;
+import docking.action.builder.ActionBuilder;
+import docking.widgets.tree.GTree;
+import docking.widgets.tree.GTreeNode;
+import docking.widgets.tree.support.GTreeSelectionEvent;
+import ghidra.app.context.ProgramActionContext;
+import ghidra.program.model.listing.Program;
+import nativeaot.NativeAotPlugin;
+import nativeaot.objectmodel.MethodTable;
+import resources.Icons;
+
+public class MetadataBrowserProvider extends ComponentProvider {
+
+    private JPanel _panel;
+    private GTreeNode _rootNode;
+    private final NativeAotPlugin _plugin;
+    private GTree _tree;
+
+    public MetadataBrowserProvider(NativeAotPlugin plugin) {
+        super(plugin.getTool(), "Native AOT Metadata", plugin.getName());
+        _plugin = plugin;
+        setDefaultWindowPosition(WindowPosition.LEFT);
+
+        buildPanel();
+        buildActions();
+    }
+
+    private void buildPanel() {
+        _panel = new JPanel(new BorderLayout());
+
+        _rootNode = new GenericNode("Types", MetadataBrowserIcon.ROOT_TYPES_ICON);
+
+        _tree = new GTree(_rootNode);
+        _tree.addGTreeSelectionListener((GTreeSelectionEvent gtse) -> {
+            if (gtse.getPath() == null) {
+                return;
+            }
+
+            var last = gtse.getPath().getLastPathComponent();
+            if (last instanceof AddressNode node) {
+                if (node.getAddress().getOffset() != 0) {
+                    _plugin.navigate(node.getAddress());
+                }
+            }
+        });
+        _panel.add(_tree);
+
+        setVisible(true);
+    }
+
+    @Override
+    public JComponent getComponent() {
+        return _panel;
+    }
+
+    private void buildActions() {
+        buildRefreshAction();
+    }
+
+    private void buildRefreshAction() {
+        new ActionBuilder("Refresh", _plugin.getName())
+                .toolBarIcon(Icons.REFRESH_ICON)
+                .enabled(true)
+                .onAction(c -> {
+                    var manager = _plugin.getOrCreateMainMethodTableManager();
+                    if (manager == null) {
+                        return;
+                    }
+
+                    manager.restoreFromDB();
+                    rebuildTree();
+                })
+                .buildAndInstallLocal(this);
+
+        new ActionBuilder("Rename", _plugin.getName())
+                .enabled(true)
+                .withContext(Context.class)
+                .popupMenuPath(new String[] { "Rename" })
+                .popupMenuGroup("xxx", "1")
+                .enabledWhen(c -> {
+                    var path = c.getTree().getSelectionPath();
+                    if (path == null) {
+                        return false;
+                    }
+
+                    var last = path.getLastPathComponent();
+                    return last instanceof TypeNode
+                        || last instanceof MethodNode;
+                })
+                .onAction(c -> {
+                    c.getTree().startEditing(c.getTree().getSelectedNodes().getFirst());
+                })
+                .buildAndInstallLocal(this);
+    }
+
+    public void rebuildTree() {
+        boolean expanded = _rootNode.isExpanded();
+        _rootNode.removeAll();
+
+        var manager = _plugin.getMainMethodTableManager();
+        if (manager == null) {
+            return;
+        }
+
+        var sorted = new ArrayList<MethodTable>();
+        for (var mt : manager.getMethodTables()) {
+            sorted.add(mt);
+        }
+        sorted.sort((a, b) -> a.getName().compareTo(b.getName()));
+        
+        for (var mt : sorted) {
+            _rootNode.addNode(new TypeNode(mt));
+        }
+
+        if (expanded) {
+            _rootNode.expand();
+        }
+    }
+
+    @Override
+    public ActionContext getActionContext(MouseEvent event) {
+        return new Context(this, _plugin.getCurrentProgram(), _tree);
+    }
+
+    class Context extends ProgramActionContext {
+
+        private final GTree _tree;
+
+        public Context(ComponentProvider provider, Program program, GTree tree) {
+            super(provider, program);
+            _tree = tree;
+        }
+
+        public GTree getTree() {
+            return _tree;
+        }
+    }
+}
+
+```
+
+`src/main/java/nativeaot/browser/MethodNode.java`:
+
+```java
+package nativeaot.browser;
+
+import javax.swing.Icon;
+
+import ghidra.program.model.address.Address;
+import ghidra.util.Msg;
+import nativeaot.Constants;
+import nativeaot.objectmodel.Method;
+import nativeaot.objectmodel.MethodTable;
+import resources.ResourceManager;
+
+public class MethodNode extends AddressNode {
+
+    private static final Icon ICON = ResourceManager.loadImage("images/method.png");
+
+    private final MethodTable _mt;
+    private final Method _method;
+    private final Address _address;
+
+    public MethodNode(MethodTable mt, Method method, long address) {
+        _mt = mt;
+        _method = method;
+        _address = mt.getAddress().getNewAddress(address);
+    }
+
+    @Override
+    public String getName() {
+        var method = getMethod();
+
+        String suffix = getSuffix();
+        return suffix != null
+            ? "%s (%s)".formatted(method.getName(), suffix)
+            : method.getName();
+    }
+
+    private String getSuffix() {
+        // Abstract methods are methods with no entry point address assigned.
+        if (_address.getOffset() == 0) {
+            return "abstract";
+        }
+
+        // Check if this method was inherited from another class.
+        var function = _mt.getManager()
+            .getProgram()
+            .getFunctionManager()
+            .getFunctionAt(_address);
+
+        if (function != null && !function.getParentNamespace().getName().equals(_mt.getGhidraClass().getName())) {
+           return function.getParentNamespace().getName();
+        }
+
+        return null;
+    }
+
+    @Override
+    public void valueChanged(Object newValue) {
+        String name = newValue.toString();
+
+        // Strip off suffix if present.
+        String suffix = getSuffix();
+        if (suffix != null) {
+            String formattedSuffix = " (%s)".formatted(suffix);
+            if (name.endsWith(formattedSuffix)) {
+                name = name.substring(0, name.length() - formattedSuffix.length()).trim();
+            }
+        }
+
+        // Did we change at all?
+        if (getMethod().getName().equals(name)) {
+            return;
+        }
+
+        final String finalName = name;
+
+        try {
+            var program = getMethod().getParent().getDirectParent().getManager().getProgram();
+            program.withTransaction("Rename Method", () -> getMethod().setName(finalName));
+        } catch (Exception e) {
+            Msg.showError(Constants.TAG, null, "Rename failed", "Rename of method %s failed".formatted(getMethod().getName()), e);
+        } finally {
+            fireNodeChanged();
+        }
+    }
+
+    @Override
+    public boolean isEditable() {
+        return true;
+    }
+
+    @Override
+    public Icon getIcon(boolean bln) {
+        return ICON;
+    }
+
+    @Override
+    public String getToolTip() {
+        return null;
+    }
+
+    @Override
+    public boolean isLeaf() {
+        return true;
+    }
+
+    public Method getMethod() {
+        return _method;
+    }
+
+    @Override
+    public Address getAddress() {
+        return _address;
+    }
+}
+```
+
+`src/main/java/nativeaot/browser/TypeNode.java`:
+
+```java
+package nativeaot.browser;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.Icon;
+
+import docking.widgets.tree.GTreeNode;
+import ghidra.program.model.address.Address;
+import ghidra.util.Msg;
+import nativeaot.Constants;
+import nativeaot.objectmodel.ElementType;
+import nativeaot.objectmodel.MethodTable;
+
+public class TypeNode extends AddressNode {
+
+
+    private final MethodTable _mt;
+
+    public TypeNode(MethodTable mt) {
+        _mt = mt;
+    }
+
+    @Override
+    public String getName() {
+        return _mt.getName();
+    }
+
+    @Override
+    public void valueChanged(Object newValue) {
+        try {
+            var program = getMT().getManager().getProgram();
+            program.withTransaction("Rename Method Table", () -> {
+                getMT().setName(newValue.toString());
+            });
+        } catch (Exception e) {
+            Msg.showError(Constants.TAG, null, "Rename failed", "Rename of method table %s failed".formatted(getMT().getName()), e);
+        } finally {
+            fireNodeChanged();
+        }
+    }
+
+    @Override
+    public boolean isEditable() {
+        return true;
+    }
+
+    @Override
+    public Icon getIcon(boolean bln) {
+        int elementType = _mt.getElementType();
+        return switch (elementType) {
+            case ElementType.INTERFACE -> MetadataBrowserIcon.INTERFACE_ICON;
+            case ElementType.VALUETYPE -> MetadataBrowserIcon.STRUCT_ICON;
+            default -> ElementType.isPrimitive(elementType) ? MetadataBrowserIcon.ENUM_ICON
+                    : ElementType.isArrayInstance(elementType) ? MetadataBrowserIcon.ARRAY_ICON
+                    : MetadataBrowserIcon.CLASS_ICON;
+        };
+    }
+
+    @Override
+    public String getToolTip() {
+        return null;
+    }
+
+    @Override
+    public boolean isLeaf() {
+        return false;
+    }
+
+    public MethodTable getMT() {
+        return _mt;
+    }
+
+    @Override
+    protected List<GTreeNode> generateChildren() {
+        var result = new ArrayList<GTreeNode>();
+
+        var baseTypes = new GenericNode("Base Types", MetadataBrowserIcon.BASE_TYPES_ICON);
+        if (_mt.getRelatedType() != null) {
+            baseTypes.addNode(new TypeReferenceNode(_mt.getRelatedType()));
+        }
+
+        for (var iface: _mt.getInterfaces()) {
+            baseTypes.addNode(new TypeReferenceNode(iface));
+        }
+
+        result.add(baseTypes);
+
+        for (var chunk : _mt.getVTableChunks()) {
+            for (var method : chunk.getMethods()) {
+                var slotIndex = method.getSlotIndex();
+
+                // Safety check.
+                var address = slotIndex < _mt.getVTableSlotCount()
+                    ? _mt.getVTableSlot(slotIndex)
+                    : 0;
+
+                result.add(new MethodNode(_mt, method, address));
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public Address getAddress() {
+        return _mt.getAddress();
+    }
+}
+```
+
+`src/main/java/nativeaot/browser/TypeReferenceNode.java`:
+
+```java
+package nativeaot.browser;
+
+import docking.widgets.tree.GTreeNode;
+import ghidra.program.model.address.Address;
+import nativeaot.objectmodel.ElementType;
+import nativeaot.objectmodel.MethodTable;
+
+import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class TypeReferenceNode extends AddressNode {
+
+    private final MethodTable _mt;
+
+    public TypeReferenceNode(MethodTable mt) {
+        _mt = mt;
+    }
+
+    @Override
+    public Address getAddress() {
+        return _mt.getAddress();
+    }
+
+    @Override
+    public String getName() {
+        return _mt.getName();
+    }
+
+    @Override
+    public boolean isLeaf() {
+        return false;
+    }
+
+    @Override
+    public Icon getIcon(boolean bln) {
+        int elementType = _mt.getElementType();
+        return switch (elementType) {
+            case ElementType.INTERFACE -> MetadataBrowserIcon.INTERFACE_ICON;
+            case ElementType.VALUETYPE -> MetadataBrowserIcon.STRUCT_ICON;
+            default -> ElementType.isPrimitive(elementType) ? MetadataBrowserIcon.ENUM_ICON
+                    : ElementType.isArrayInstance(elementType) ? MetadataBrowserIcon.ARRAY_ICON
+                    : MetadataBrowserIcon.CLASS_ICON;
+        };
+    }
+
+    @Override
+    protected List<GTreeNode> generateChildren() {
+        var result = new ArrayList<GTreeNode>();
+
+        if (_mt.getRelatedType() != null) {
+            result.add(new TypeReferenceNode(_mt.getRelatedType()));
+        }
+
+        for (var iface: _mt.getInterfaces()) {
+            result.add(new TypeReferenceNode(iface));
+        }
+
+        return result;
+    }
+}
+
+```
+
+`src/main/java/nativeaot/objectmodel/ElementType.java`:
+
+```java
+package nativeaot.objectmodel;
+
+public class ElementType {
+    public static final int UNKNOWN = 0x00;
+    public static final int VOID = 0x01;
+    public static final int BOOLEAN = 0x02;
+    public static final int CHAR = 0x03;
+    public static final int SBYTE = 0x04;
+    public static final int BYTE = 0x05;
+    public static final int INT16 = 0x06;
+    public static final int UINT16 = 0x07;
+    public static final int INT32 = 0x08;
+    public static final int UINT32 = 0x09;
+    public static final int INT64 = 0x0A;
+    public static final int UINT64 = 0x0B;
+    public static final int INTPTR = 0x0C;
+    public static final int UINTPTR = 0x0D;
+    public static final int SINGLE = 0x0E;
+    public static final int DOUBLE = 0x0F;
+
+    public static final int VALUETYPE = 0x10;
+    // Enum = 0x11; // EETypes store enums as their underlying type
+    public static final int NULLABLE = 0x12;
+    // Unused 0x13;
+
+    public static final int CLASS = 0x14;
+    public static final int INTERFACE = 0x15;
+
+    public static final int SYSTEM_ARRAY = 0x16; // System.Array type
+
+    public static final int ARRAY = 0x17;
+    public static final int SZARRAY = 0x18;
+    public static final int BYREF = 0x19;
+    public static final int POINTER = 0x1A;
+    public static final int FUNCTION_POINTER = 0x1B;
+
+    public static boolean isValueType(int elementType) {
+        return elementType >= VOID && elementType <= VALUETYPE;
+    }
+
+    public static boolean isPrimitive(int elementType) {
+        return elementType >= VOID && elementType <= DOUBLE;
+    }
+
+    public static boolean isArrayInstance(int elementType) {
+        return elementType == ElementType.ARRAY || elementType == ElementType.SZARRAY;
+    }
+}
+```
+
+`src/main/java/nativeaot/objectmodel/FrozenObjectAnnotator.java`:
+
+```java
+package nativeaot.objectmodel;
+
+import ghidra.app.util.importer.MessageLog;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.data.*;
+import ghidra.program.model.listing.Program;
+import ghidra.program.model.mem.MemoryAccessException;
+import ghidra.program.model.symbol.SourceType;
+import ghidra.util.Msg;
+import ghidra.util.exception.InvalidInputException;
+import ghidra.util.task.TaskMonitor;
+import nativeaot.Constants;
+import nativeaot.rtr.ReadyToRunDirectory;
+import nativeaot.rtr.ReadyToRunSection;
+
+public class FrozenObjectAnnotator {
+    private static final int STRING_LENGTH_FIELD_OFFSET = 8;
+    private static final int ARRAY_LENGTH_FIELD_OFFSET = 8;
+    private static final int MAX_STRING_LENGTH = 0x1_0000;
+    private static final int MAX_ARRAY_LENGTH = 0x1_0000;
+
+    private final Program _program;
+    private final MethodTableManager _manager;
+
+    public FrozenObjectAnnotator(Program program, MethodTableManager manager) {
+        _program = program;
+        _manager = manager;
+    }
+
+    public void analyze(ReadyToRunDirectory directory, Address[] pointerLocations, TaskMonitor monitor, MessageLog log) throws Exception {
+        var section = directory.getSectionByType(ReadyToRunSection.FROZEN_OBJECT_REGION);
+        if (section == null) {
+            log.appendMsg(Constants.TAG, "No frozen object section present in ReadyToRun directory.");
+            return;
+        }
+
+        var sectionStart = pointerLocations[0].getNewAddress(section.getStart());
+        ensureSymbolAdded(sectionStart);
+
+        int count = annotateObjects(section, pointerLocations, monitor);
+
+        log.appendMsg(Constants.TAG, String.format("Found %d objects", count));
+    }
+
+    private void ensureSymbolAdded(Address sectionStart) throws InvalidInputException {
+        var symbolTable = _program.getSymbolTable();
+        var symbols = symbolTable.getSymbols(sectionStart);
+        
+        boolean hasSymbol = false;
+        for (int i = 0; i < symbols.length && !hasSymbol; i++) {
+            if (symbols[i].getName().equals(Constants.FROZEN_SEGMENT_START_SYMBOL_NAME)) {
+                hasSymbol = true;
+            }
+        }
+        
+        if (!hasSymbol) {
+            symbolTable.createLabel(sectionStart, Constants.FROZEN_SEGMENT_START_SYMBOL_NAME, SourceType.ANALYSIS);
+        }
+    }
+
+    private int annotateObjects(ReadyToRunSection section, Address[] pointerLocations, TaskMonitor monitor) {
+        var pointersInSection = section.getPointersInSection(pointerLocations);
+        monitor.setIndeterminate(false);
+        monitor.setProgress(0);
+        monitor.setMaximum(pointersInSection.length);
+        monitor.setMessage(String.format("%s: Finding frozen objects", Constants.TAG));
+        int count = 0;
+        for (int i = 0; i < pointersInSection.length; i++) {
+            monitor.setProgress(i);
+            var location = pointersInSection[i];
+            
+            // Read the pointer at the reference.
+            long dereferenced;
+            try {
+                dereferenced = _program.getMemory().getLong(location);
+            } catch (MemoryAccessException ex) {
+                // Broken reference, ignore.
+                continue;
+            }
+            
+            // Check if the pointer is referencing a MT.
+            var mt = _manager.getMethodTable(dereferenced);
+            if (mt == null) {
+                continue;
+            }
+            
+            boolean success = false;
+            
+            // Annotate object.
+            // TODO: Array values.
+            
+            if (mt.getAddress().getOffset() == _manager.getStringMT().getAddress().getOffset()) {
+                success = annotateString(location);
+            } else if (mt.isSzArray()) {
+                success = annotateSzArray(location, mt);
+            } else if (mt.isClass() || mt.isValueType()) {
+                success = annotateObject(location, mt);
+            }
+            
+            if (success) {
+                count += 1;
+            }
+        }
+        return count;
+    }
+
+    private boolean annotateString(Address location) {
+        try {
+            var instanceType = _manager.getStringMT().getOrCreateInstanceType();
+
+            var memory = _program.getMemory();
+            var listing = _program.getListing();
+            var symbolTable = _program.getSymbolTable();
+
+            // Check if the length makes any sense.
+            int length = memory.getInt(location.add(STRING_LENGTH_FIELD_OFFSET));
+            if (length < 0 || length >= MAX_STRING_LENGTH) {
+                throw new Exception("String size %d exceeded max size %d".formatted(length, MAX_STRING_LENGTH));
+            }
+
+            // Verify there is a zero-terminator.
+            var stringStart = location.add(instanceType.getLength());
+            var stringEnd = stringStart.add(length * 2);
+            if (memory.getByte(stringEnd) != 0) {
+                throw new Exception("No zero-terminator found at supposed string end %s".formatted(stringEnd));
+            }
+
+            // Replace any annotations with the string annotation.
+            listing.clearCodeUnits(location, stringEnd, true);
+            listing.createData(location, instanceType);
+
+            String literalName = length > 0
+                ? listing.createData(location.add(instanceType.getLength()), TerminatedUnicodeDataType.dataType).getPathName()
+                : "String_Empty_%s".formatted(location);
+
+            symbolTable.createLabel(location, "dn_%s".formatted(literalName), SourceType.ANALYSIS);
+
+            return true;
+        } catch (Exception ex) {
+            Msg.error(Constants.TAG, "Failed to create string literal at %s".formatted(location), ex);
+            return false;
+        }
+    }
+
+    private boolean annotateSzArray(Address location, MethodTable mt) {
+        var elementType = mt.getRelatedType();
+        if (elementType == null) {
+            return false;
+        }
+
+        try {
+            var instanceType = mt.getOrCreateInstanceType();
+
+            var memory = _program.getMemory();
+            var listing = _program.getListing();
+
+            // Check if the length makes any sense.
+            int length = memory.getInt(location.add(ARRAY_LENGTH_FIELD_OFFSET));
+            if (length < 0 || length >= MAX_ARRAY_LENGTH) {
+                throw new Exception("Array size %d exceeded max size %d".formatted(length, MAX_ARRAY_LENGTH));
+            }
+
+            var dataStart = location.add(instanceType.getLength());
+
+            // Replace object header.
+            listing.clearCodeUnits(location, dataStart, true);
+            listing.createData(location, instanceType);
+
+            // Set array data.
+            if (length > 0) {
+                // Determine element type to use for the inline array.
+                var elementInstanceType = switch (elementType.getElementType()) {
+                    case ElementType.BOOLEAN -> BooleanDataType.dataType;
+                    case ElementType.CHAR -> WideChar16DataType .dataType;
+                    case ElementType.SBYTE -> SignedByteDataType.dataType;
+                    case ElementType.BYTE -> ByteDataType.dataType;
+                    case ElementType.INT16 -> ShortDataType.dataType;
+                    case ElementType.UINT16 -> UnsignedShortDataType.dataType;
+                    case ElementType.INT32 -> IntegerDataType.dataType;
+                    case ElementType.UINT32 -> UnsignedIntegerDataType.dataType;
+                    case ElementType.INT64 -> LongLongDataType.dataType;
+                    case ElementType.UINT64 -> UnsignedLongLongDataType.dataType;
+                    case ElementType.INTPTR, ElementType.UINTPTR -> Pointer64DataType.dataType; // TODO: use program pointer type
+                    case ElementType.SINGLE -> FloatDataType.dataType;
+                    case ElementType.DOUBLE -> DoubleDataType.dataType;
+                    case ElementType.VALUETYPE -> throw new UnsupportedOperationException("Struct arrays not supported yet.");
+                    default -> elementType.getOrCreateInstanceType();
+                };
+
+                listing.createData(dataStart, new ArrayDataType(elementInstanceType, length));
+            }
+
+            return true;
+        } catch (Exception ex) {
+            Msg.error(Constants.TAG, "Failed to create SZ array at %s of type %s".formatted(location, mt), ex);
+            return false;
+        }
+    }
+
+    private boolean annotateObject(Address location, MethodTable mt) {
+        try {
+            _program.getListing().createData(location, mt.getOrCreateInstanceType());
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+}
+```
+
+`src/main/java/nativeaot/objectmodel/Method.java`:
+
+```java
+package nativeaot.objectmodel;
+
+import java.lang.Exception;
+
+import ghidra.program.model.data.DataTypeComponent;
+import ghidra.program.model.listing.Function;
+import ghidra.program.model.listing.Program;
+
+import java.util.ArrayList;
+import java.util.Stack;
+
+public class Method {
+    private final VTableChunk _parent;
+    private final int _slotIndex;
+
+    public Method(VTableChunk parent, int slotIndex) {
+        _parent = parent;
+        _slotIndex = slotIndex;
+    }
+
+    public VTableChunk getParent() {
+        return _parent;
+    }
+
+    public String getName() {
+        var component = getDataTypeComponent();
+        return component != null
+            ? component.getFieldName()
+            : String.format("DETACHED_Method_%d".formatted(_slotIndex));
+    }
+
+    public int getSlotIndex() {
+        return _slotIndex;
+    }
+
+    public void setName(String name) throws Exception {
+        getDataTypeComponent().setFieldName(name);
+    }
+
+    public DataTypeComponent getDataTypeComponent() {
+        int relativeIndex = _slotIndex - _parent.getBaseIndex();
+        return _parent.getDataType().getComponentAt(relativeIndex * 8);
+    }
+
+    public Iterable<Function> getImplementingFunctions(Program program) {
+        var result = new ArrayList<Function>();
+
+        var directParent = getParent().getDirectParent();
+
+        var agenda = new Stack<MethodTable>();
+        agenda.push(directParent);
+
+        while (!agenda.isEmpty()) {
+            var current = agenda.pop();
+
+            // Find the method stored in the vtable slot.
+            if (getSlotIndex() < current.getVTableSlotCount()) {
+                var methodAddress = current.getVTableSlot(getSlotIndex());
+                if (methodAddress != 0) {
+                    var function = program.getFunctionManager().getFunctionAt(current.getAddress().getNewAddress(methodAddress));
+                    if (function != null && !result.contains(function)) {
+                        result.add(function);
+                    }
+                }
+            }
+
+            // Crawl further down the type tree.
+            for (var mt : current.getDerivedTypes()) {
+                agenda.push(mt);
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
+}
+
+```
+
+`src/main/java/nativeaot/objectmodel/MethodTable.java`:
+
+```java
+package nativeaot.objectmodel;
+
+import java.lang.Exception;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+import ghidra.program.model.address.Address;
+import ghidra.program.model.data.*;
+import ghidra.program.model.listing.Data;
+import ghidra.program.model.listing.GhidraClass;
+import ghidra.program.model.symbol.SourceType;
+import ghidra.program.model.symbol.Symbol;
+import nativeaot.Constants;
+
+public abstract class MethodTable {
+
+    public static final String METHOD_TABLE_FORMAT = "%s_MT";
+    public static final String VTABLE_TABLE_FORMAT = "%s_vtbl";
+    public static final String VTABLE_MEMBER_PREFIX = "vtbl_";
+    public static final String VTABLE_MEMBER_FORMAT = "vtbl_%d";
+    public static final String VTABLE_SYMBOL_NAME = "`vftable'";
+
+    private final MethodTableManager _manager;
+    private final Address _address;
+
+    private GhidraClass _class;
+    private Symbol _mtSymbol;
+    private Data _mtData;
+    private ArrayList<VTableChunk> _vtableChunks;
+    private VTableChunk _ownChunk;
+
+    private MethodTable _relatedType;
+    private final List<MethodTable> _interfaces = new ArrayList<>();
+
+    private final HashSet<MethodTable> _derivedTypes = new HashSet<>();
+
+    public MethodTable(MethodTableManager manager, Address address) {
+        _manager = manager;
+        _address = address;
+    }
+
+    protected void assertHasClass() throws Exception {
+        if (_class == null) {
+            throw new Exception("Method table %s is not attached to a class.".formatted(_address));
+        }
+    }
+
+    public MethodTableManager getManager() {
+        return _manager;
+    }
+
+    public Address getAddress() {
+        return _address;
+    }
+
+    public String getName() {
+        return _class != null 
+            ? _class.getName()
+            : "Class_%s".formatted(_address);
+    }
+
+    public void setName(String name) throws Exception {
+        assertHasClass();
+
+        getOrCreateMTType().setName(getMTName(name));
+        getOrCreateInstanceType().setName(name);
+
+        if (_ownChunk != null) {
+            _ownChunk.propagateNameChange(name);
+        }
+
+        _class.getSymbol().setName(name, SourceType.ANALYSIS);
+    }
+
+    public abstract int getElementType();
+
+    public boolean isClass() {
+        return getElementType() == ElementType.CLASS;
+    }
+
+    public boolean isStruct() {
+        return getElementType() == ElementType.VALUETYPE;
+    }
+
+    public boolean isInterface() {
+        return getElementType() == ElementType.INTERFACE;
+    }
+
+    public boolean isSzArray() {
+        return getElementType() == ElementType.SZARRAY;
+    }
+
+    public boolean isValueType() {
+        return ElementType.isValueType(getElementType());
+    }
+
+    public boolean isArrayInstance() {
+        return ElementType.isArrayInstance(getElementType());
+    }
+
+    public abstract int getBaseSize();
+
+    public abstract int getDataSize();
+
+    public abstract long getRelatedTypeAddress();
+
+    public MethodTable getRelatedType() {
+        return _relatedType;
+    }
+
+    public void setRelatedType(MethodTable relatedType) {
+        if (_relatedType != null) {
+            _relatedType.removeDerivedType(this);
+        }
+
+        _relatedType = relatedType;
+
+        if (relatedType != null) {
+            relatedType.addDerivedType(this);
+        }
+    }
+
+    public Symbol getMTSymbol() {
+        return _mtSymbol;
+    }
+
+    public void setMTSymbol(Symbol mtSymbol) {
+        _mtSymbol = mtSymbol;
+    }
+
+    public Data getMTData() {
+        return _mtData;
+    }
+
+    public void setMTData(Data mtData) {
+        _mtData = mtData;
+    }
+
+    public abstract long[] getVTable();
+
+    public abstract int getVTableSlotCount();
+
+    public abstract long getVTableSlot(int index);
+
+    public Method getMethod(int slotIndex) {
+        for (var chunk : getVTableChunks()) {
+            if (slotIndex >= chunk.getBaseIndex() && slotIndex < chunk.getBaseIndex() + chunk.size()) {
+                return chunk.getMethod(slotIndex - chunk.getBaseIndex());
+            }
+        }
+
+        return null;
+    }
+
+    public abstract long[] getInterfaceAddresses();
+
+    public List<MethodTable> getInterfaces() {
+        return _interfaces;
+    }
+
+    protected void addDerivedType(MethodTable table) {
+        _derivedTypes.add(table);
+    }
+
+    protected void removeDerivedType(MethodTable table) {
+        _derivedTypes.remove(table);
+    }
+
+    public Iterable<MethodTable> getDerivedTypes() {
+        return _derivedTypes;
+    }
+
+    protected abstract Structure constructMTType() throws Exception;
+
+    protected String getMTName() {
+        return getMTName(getName());
+    }
+
+    public static String getMTName(String name) {
+        return String.format(METHOD_TABLE_FORMAT, name);
+    }
+
+    public DataType getMTType() throws Exception {
+        assertHasClass();
+
+        return _manager.getProgram()
+            .getDataTypeManager()
+            .getDataType(Constants.CATEGORY_METHOD_TABLES, getMTName());
+    }
+
+    public DataType getOrCreateMTType() throws Exception {
+        assertHasClass();
+        var mtType = getMTType();
+
+        if(!(mtType instanceof Structure)) {
+            var program = _manager.getProgram();
+            var dtManager = program.getDataTypeManager();
+
+            mtType = program.withTransaction("Create MT type for %s".formatted(getName()), () -> {
+                return dtManager.addDataType(
+                    constructMTType(),
+                    DataTypeConflictHandler.KEEP_HANDLER
+                );
+            });
+        }
+
+        return mtType;
+    }
+
+    protected Structure constructInstanceType() throws Exception {
+        var obj = new StructureDataType( getName(), 0);
+        obj.setCategoryPath(Constants.CATEGORY_NATIVEAOT);
+
+        // Add MT field.
+        obj.add(new Pointer64DataType(getOrCreateMTType()), "mt", null);
+
+        // TODO: Add other fields.
+        obj.growStructure(getDataSize());
+
+        return obj;
+    }
+
+    public Structure getInstanceType() throws Exception {
+        assertHasClass();
+
+        return (Structure) _manager.getProgram()
+            .getDataTypeManager()
+            .getDataType(Constants.CATEGORY_NATIVEAOT, getName());
+    }
+
+    public Structure getOrCreateInstanceType() throws Exception {
+        assertHasClass();
+        var instanceType = getInstanceType();
+
+        if (instanceType == null) {
+            var program = _manager.getProgram();
+            var dtManager = program.getDataTypeManager();
+
+            instanceType = program.withTransaction("Create instance type for %s".formatted(getName()), () -> {
+                return (Structure) dtManager.addDataType(
+                    constructInstanceType(),
+                    DataTypeConflictHandler.KEEP_HANDLER
+                );
+            });
+        }
+
+        return instanceType;
+    }
+
+    public VTableChunk getOwnVTableChunk() {
+        // Ensure chunks are created.
+        getVTableChunks();
+
+        return _ownChunk;
+    }
+
+    public Iterable<VTableChunk> getVTableChunks() {
+        if (_vtableChunks != null) {
+            return _vtableChunks;
+        }
+
+        var result = new ArrayList<VTableChunk>();
+
+        // If no slots, then there is nothing to do.
+        var vtable = getVTable();
+        if (vtable.length == 0) {
+            return result;
+        }
+
+        // Determine direct parent type.
+        MethodTable baseType;
+        if (isArrayInstance()) {
+            // TODO: use System.Array base mt instead.
+            baseType = _manager.getObjectMT();
+        } else {
+            baseType = getRelatedType();
+        }
+
+        // Embed all vtables of the parent type.
+        int inheritedCount = 0;
+        if (baseType != null) {
+            for (var chunk : baseType.getVTableChunks()) {
+                result.add(chunk);
+                inheritedCount += chunk.size();
+
+                if (inheritedCount >= vtable.length) {
+                    break;
+                }
+            }
+        }
+
+        // Bunch remainder together into a new vtable chunk.
+        if (inheritedCount < vtable.length) {
+            int remainder = vtable.length - inheritedCount;
+            _ownChunk = new VTableChunk(this, inheritedCount, remainder);
+            result.add(_ownChunk);
+        }
+
+        _vtableChunks = result;
+        return result;
+    }
+
+    public GhidraClass getGhidraClass() {
+        return _class;
+    }
+
+    public void setGhidraClass(GhidraClass clazz) {
+        _class = clazz;
+    }
+
+    public void commitToDB() throws Exception {
+        assertHasClass();
+
+        var address = getAddress();
+        var program = getManager().getProgram();
+        var listing = program.getListing();
+        var symbolTable = program.getSymbolTable();
+        var mtDataType = getOrCreateMTType();
+
+        int transaction = program.startTransaction("Commit type %s".formatted(getName()));
+        boolean changed = false;
+        try {
+            // Ensure method table structure is assigned at address.
+            if (getMTData() == null) {
+                var data = listing.getDataAt(address);
+                if (data == null || !data.getDataType().getPathName().equals(mtDataType.getPathName())) {
+                    listing.clearCodeUnits(address, address.add(mtDataType.getLength()), true);
+                    data = listing.createData(address, mtDataType);
+                }
+                setMTData(data);
+                changed = true;
+            }
+
+            // Introduce symbol for MT if there's none yet.
+            if (getMTSymbol() == null) {
+                for (var symbol: symbolTable.getSymbols(address)) {
+                    if (symbol.getParentNamespace() == getGhidraClass()
+                            && symbol.getName().equals(VTABLE_SYMBOL_NAME)) {
+                        setMTSymbol(symbol);
+                        changed = true;
+                        break;
+                    }
+                }
+
+                if (getMTSymbol() == null) {
+                    setMTSymbol(symbolTable.createLabel(
+                            address,
+                            VTABLE_SYMBOL_NAME,
+                            getGhidraClass(),
+                            SourceType.ANALYSIS
+                    ));
+                    changed = true;
+                }
+            }
+        } finally {
+            program.endTransaction(transaction, changed);
+        }
+    }
+
+    public abstract void initFromMemory() throws Exception;
+
+    @Override
+    public String toString() {
+        return String.format("%s (%s)", _address, getName());
+    }
+}
+
+```
+
+`src/main/java/nativeaot/objectmodel/MethodTableCrawler.java`:
+
+```java
+package nativeaot.objectmodel;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+
+import ghidra.app.cmd.function.CreateFunctionCmd;
+import static ghidra.app.util.bin.StructConverter.DWORD;
+import ghidra.app.util.importer.MessageLog;
+import ghidra.program.database.function.OverlappingFunctionException;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.data.ArrayDataType;
+import ghidra.program.model.data.ByteDataType;
+import ghidra.program.model.data.Pointer64DataType;
+import ghidra.program.model.data.WideChar16DataType;
+import ghidra.program.model.listing.Program;
+import ghidra.program.model.mem.MemoryAccessException;
+import ghidra.program.model.symbol.SourceType;
+import ghidra.util.exception.CancelledException;
+import ghidra.util.exception.InvalidInputException;
+import ghidra.util.task.TaskMonitor;
+import nativeaot.Constants;
+import nativeaot.rehydration.PointerScanResult;
+
+public class MethodTableCrawler {
+    private static final int RELATED_TYPE_OFFSET = 0x08; // TODO: make more generic
+    private static final int MAX_PASSES = 100;
+
+    private static final String[] OBJECT_METHOD_NAMES = {
+        "ToString",
+        "Equals",
+        "GetHashCode"
+    };
+
+    private final MethodTableManager _manager;
+    private final Program _program;
+    private final PointerScanResult _pointerScan;
+
+    public MethodTableCrawler(MethodTableManager manager, Program program, PointerScanResult pointerScan) {
+        _manager = manager;
+        _program = program;
+        _pointerScan = pointerScan;
+    }
+
+    public void analyze( TaskMonitor monitor, MessageLog log) throws Exception {
+        // Our algorithm is based on the induced inheritance graph from System.Object
+        if (_manager.getObjectMT() == null) {
+            var objectMT = findSystemObjectMT(monitor, log);
+            if (objectMT == null) {
+                return;
+            }
+
+            _manager.setObjectMT(objectMT);
+        }
+
+        log.appendMsg(Constants.TAG, String.format("Assuming %s is System.Object", _manager.getObjectMT().getAddress()));
+
+        // Find all method tables.
+        findAllMTs(monitor, log);
+        log.appendMsg(Constants.TAG, String.format("Found %d method tables", _manager.getMethodTableCount()));
+
+        // Annotate some special method tables.
+        assignSystemObjectNames(_manager.getObjectMT());
+
+        if (_manager.getStringMT() == null) {
+            var stringMT = findSystemStringMT(monitor, log);
+            if (stringMT != null) {
+                log.appendMsg(Constants.TAG, String.format("Assuming %s is System.String", stringMT.getAddress()));
+                assignSystemStringNames(stringMT);
+                _manager.setStringMT(stringMT);
+            }
+        }
+
+        for (var mt : _manager.getMethodTables()) {
+            if (mt.isSzArray()) {
+                assignSzArrayNames(mt);
+            }
+        }
+
+        // Create the actual data types and assign them to the method tables stored in memory.
+        createMTStructures(monitor, log);
+        assignMethods(monitor, log);
+    }
+
+    private MethodTable findSystemObjectMT(TaskMonitor monitor, MessageLog log) throws Exception {
+        var candidates = _manager.findCandidateSystemObjectMTs(_pointerScan, monitor);
+        if (candidates.length == 0) {
+            log.appendMsg(Constants.TAG, "No System.Object candidate found.");
+            return null;
+        } else if (candidates.length > 1) {
+            log.appendMsg(Constants.TAG, "Multiple System.Object candidates found.");
+            for (var candidate : candidates) {
+                log.appendMsg(Constants.TAG, " - " + candidate);
+            }
+            return null;
+        }
+
+        return getOrCreateMethodTable(candidates[0]);
+    }
+
+    private MethodTable getOrCreateMethodTable(Address address) throws Exception {
+        var mt = _manager.getMethodTable(address);
+        if (mt == null) {
+            mt = _manager.createMT(address);
+            mt.initFromMemory();
+            mt.setGhidraClass(_manager.getOrCreateGhidraClass(mt, null));
+            _manager.registerMT(mt);
+        }
+
+        return mt;
+    }
+
+    private void findAllMTs(TaskMonitor monitor, MessageLog log) throws CancelledException {
+        var scanningRange = _pointerScan.getScanningRange();
+
+        var unmatched = new ArrayList<>(Arrays.asList(_pointerScan.getPointerLocations()));
+        var agenda = new ArrayList<Address>(unmatched.size());
+
+        for (int pass = 1; pass < MAX_PASSES; pass++) {
+            monitor.checkCancelled();
+
+            agenda.clear();
+            agenda.addAll(unmatched);
+            unmatched.clear();
+
+            monitor.setMessage(String.format("%s: Analyzing %d pointers in hydrated data (pass %d)...",
+                Constants.TAG,
+                agenda.size(),
+                pass
+            ));
+            monitor.setIndeterminate(false);
+            monitor.setProgress(0);
+            monitor.setMaximum(agenda.size());
+            for (int i = 0; i < agenda.size(); i++) {
+                monitor.checkCancelled();
+                monitor.setProgress(i);
+
+                var current = agenda.get(i);
+
+                // Read the pointer at the reference.
+                long dereferenced;
+                try {
+                    dereferenced = _program.getMemory().getLong(current);
+                } catch (MemoryAccessException ex) {
+                    // Broken reference, ignore.
+                    continue;
+                }
+
+                // Check if it resides in the same range data.
+                if (scanningRange.getMinAddress().getOffset() > dereferenced 
+                    || dereferenced > scanningRange.getMaxAddress().getOffset()) {
+                    // This is not a pointer that resides in the hydrated data (could be code entry point pointer of a method).
+                    // This can therefore never be a method table reference.
+                    continue;
+                }
+
+                // Check if this is a known method table.
+                var relatedType = _manager.getMethodTable(dereferenced);
+                if (relatedType == null) {
+                    // Not known (yet), put it back in the potential method table refs queue.
+                    unmatched.add(current);
+                    continue;
+                }
+
+                MethodTable mt;
+                try {
+                    mt = getOrCreateMethodTable(current.subtract(RELATED_TYPE_OFFSET));
+                    mt.setRelatedType(relatedType);
+                } catch (Exception ex) {
+                    // This is not a valid method table.
+                    continue;
+                }
+
+                for (var iface: mt.getInterfaceAddresses()) {
+                    if (iface == 0) {
+                        continue;
+                    }
+                    try {
+                        var x = getOrCreateMethodTable(current.getNewAddress(iface));
+                        mt.getInterfaces().add(x);
+                    } catch (Exception ex) {
+                        // This is not a valid method table.
+                        continue;
+                    }
+                }
+            }
+
+            if (unmatched.size() >= agenda.size()) {
+                // log.appendMsg("No changes detected, breaking out of loop.");
+                break;
+            }
+        }
+
+        monitor.setProgress(monitor.getMaximum());
+    }
+
+
+    private MethodTable findSystemStringMT(TaskMonitor monitor, MessageLog log) {
+        var candidates = findSystemStringCandidates(monitor);
+
+        if (candidates.length == 0) {
+            log.appendMsg(Constants.TAG, "No System.String candidate found.");
+            return null;
+        } else if (candidates.length > 1) {
+            log.appendMsg(Constants.TAG, "Multiple System.String candidates found.");
+            for (var candidate : candidates) {
+                log.appendMsg(Constants.TAG, " - " + candidate.getAddress());
+            }
+            return null;
+        }
+
+        return candidates[0];
+    }
+
+    private MethodTable[] findSystemStringCandidates(TaskMonitor monitor) {
+        var candidates = new ArrayList<MethodTable>();
+
+        for (var mt: _manager.getMethodTables()) {
+            if (mt.getRelatedType() == _manager.getObjectMT() // Directly derived from System.Object
+                && mt.getElementType() == ElementType.CLASS   // class definition
+                && mt.getBaseSize() == 0x16)                  // Specific (smaller!) base size.
+            {
+                candidates.add(mt);
+            }
+        }
+
+        return candidates.toArray(MethodTable[]::new);
+    }
+
+    private void createMTStructures(TaskMonitor monitor, MessageLog log) throws Exception {
+        monitor.setMessage(String.format("%s: Processing %d method table structures...",
+            Constants.TAG,
+            _manager.getMethodTableCount()
+        ));
+
+        monitor.setProgress(0);
+        monitor.setIndeterminate(false);
+        monitor.setMaximum(_manager.getMethodTableCount());
+
+        for (var table : _manager.getMethodTables()) {
+            monitor.increment();
+
+            try {
+                table.commitToDB();
+            } catch (Exception ex) {
+                log.appendException(ex);
+            }
+
+            // HACK: if we don't do this, Ghidra's UI hangs...
+            Thread.yield();
+        }
+    }
+
+    private void assignMethods(TaskMonitor monitor, MessageLog log) throws Exception {
+        // Start at the object MT and crawl down the type hierarchy tree to ensure methods of base types are renamed first.
+        monitor.setMessage(String.format("%s: Assigning methods...", Constants.TAG));
+        monitor.setIndeterminate(true);
+
+        var space = _manager.getObjectMT().getAddress().getAddressSpace();
+        var listing = _program.getListing();
+
+        var visited = new HashSet<MethodTable>();
+        var agenda = new ArrayDeque<MethodTable>();
+        agenda.add(_manager.getObjectMT());
+
+        while (!agenda.isEmpty()) {
+            var currentMT = agenda.remove();
+
+            // Malicious type loops safeguard
+            if (!visited.add(currentMT)) {
+                continue;
+            }
+
+            // Schedule derived types.
+            for (var derivedMT: currentMT.getDerivedTypes()) {
+                agenda.add(derivedMT);
+            }
+
+            // Ensure object type is registered.
+            currentMT.getOrCreateInstanceType();
+
+            // Ensure methods are created at every executable vtable slot.
+            var vtable = currentMT.getVTable();
+            for (int i = 0; i < vtable.length; i++) {
+                var entryPoint = space.getAddress(vtable[i]);
+
+                // Ensure this is a label to some executable memory.
+                var block = _program.getMemory().getBlock(entryPoint);
+                if (block == null || !block.isExecute()) {
+                    continue;
+                }
+
+                // Get the function at the entry point or create a new one.
+                var function = listing.getFunctionAt(entryPoint);
+                if (function == null) {
+                    try {
+                        var body = CreateFunctionCmd.getFunctionBody(_program, entryPoint);
+                        function = listing.createFunction(null, entryPoint, body, SourceType.ANALYSIS);
+                    } catch (OverlappingFunctionException | InvalidInputException ex) {
+                        continue;
+                    }
+                }
+
+                // If we failed to get/make a function at the entry point, skip renaming.
+                if (function == null) {
+                    continue;
+                }
+
+                // Only rename if it wasn't renamed before.
+                if (function.getName().startsWith("FUN_")) {
+                    if (i < OBJECT_METHOD_NAMES.length) {
+                        function.setName(OBJECT_METHOD_NAMES[i], SourceType.ANALYSIS);
+                    } else {
+                        function.setName(String.format("Method_%d", i), SourceType.ANALYSIS);
+                    }
+                }
+
+                if (function.getParentNamespace() == _program.getGlobalNamespace()) {
+                    function.setParentNamespace(currentMT.getGhidraClass());
+                }
+
+                // Set parent class.
+                function.setCallingConvention("__thiscall");
+            }
+        }
+    }
+
+    private void assignSystemObjectNames(MethodTable objectMT) throws Exception {
+        objectMT.setName(Constants.SYSTEM_OBJECT_NAME);
+
+        var objectVTableChunk = objectMT.getVTableChunks().iterator().next();
+        objectVTableChunk.getMethod(0).setName("ToString");
+        objectVTableChunk.getMethod(1).setName("Equals");
+        objectVTableChunk.getMethod(2).setName("GetHashCode");
+    }
+
+    private void assignSystemStringNames(MethodTable stringMT) throws Exception {
+        // https://github.com/dotnet/runtime/blob/50c020e4f0f03a801c137fca5ba7f0f052f3c7e9/src/coreclr/nativeaot/Runtime.Base/src/System/String.cs#L56
+
+        stringMT.setName(Constants.SYSTEM_STRING_NAME);
+
+        var instanceType = stringMT.getOrCreateInstanceType();
+        instanceType.deleteAll();
+        instanceType.add(new Pointer64DataType(stringMT.getOrCreateMTType()), "mt", null);
+        instanceType.add(DWORD, "_length", null);
+        instanceType.add(new ArrayDataType(WideChar16DataType.dataType, 0), "_firstChar", null);
+    }
+
+    private void assignSzArrayNames(MethodTable szArrayMT) throws Exception  {
+        // https://github.com/dotnet/runtime/blob/50c020e4f0f03a801c137fca5ba7f0f052f3c7e9/src/coreclr/nativeaot/Runtime.Base/src/System/Array.cs#L31
+
+        var instanceType = szArrayMT.getOrCreateInstanceType();
+        instanceType.deleteAll();
+        instanceType.add(new Pointer64DataType(szArrayMT.getOrCreateMTType()), "mt", null);
+        instanceType.add(DWORD, "Length", null);
+        instanceType.add(DWORD, "Padding", null);
+        instanceType.add(new ArrayDataType(ByteDataType.dataType, 0), "Data", null);
+    }
+}
+```
+
+`src/main/java/nativeaot/objectmodel/MethodTableManager.java`:
+
+```java
+
+package nativeaot.objectmodel;
+
+import java.io.FileWriter;
+import java.util.HashMap;
+
+import ghidra.program.model.address.Address;
+import ghidra.program.model.listing.GhidraClass;
+import ghidra.program.model.listing.Program;
+import ghidra.program.model.symbol.SourceType;
+import ghidra.util.Msg;
+import ghidra.util.task.TaskMonitor;
+import nativeaot.Constants;
+import nativeaot.objectmodel.net70.MethodTableManagerNet70;
+import nativeaot.objectmodel.net80.MethodTableManagerNet80;
+import nativeaot.rehydration.PointerScanResult;
+import nativeaot.rtr.ReadyToRunDirectory;
+
+public abstract class MethodTableManager {
+
+    private final HashMap<Long, MethodTable> _methodTables = new HashMap<>();
+    private MethodTable _objectMT;
+    private MethodTable _stringMT;
+    private final Program _program;
+
+    public MethodTableManager(Program program) {
+        _program = program;
+    }
+
+    public static MethodTableManager createForDirectory(Program program, ReadyToRunDirectory directory) {
+        // NOTE: Method table managers should be changed if the file format changes per RTR version.
+
+        if (directory.getMajorVersion() <= 0x08) {
+            return new MethodTableManagerNet70(program);
+        }
+
+        return new MethodTableManagerNet80(program);
+    }
+
+    public Program getProgram() {
+        return _program;
+    }
+
+    public int getMethodTableCount() {
+        return _methodTables.size();
+    }
+
+    public Iterable<MethodTable> getMethodTables() {
+        return _methodTables.values();
+    }
+
+    public MethodTable getMethodTable(Address address) {
+        return getMethodTable(address.getOffset());
+    }
+
+    public MethodTable getMethodTable(long address) {
+        return _methodTables.getOrDefault(address, null);
+    }
+
+    public MethodTable getMethodTable(GhidraClass clazz) {
+        for (var mt : _methodTables.values()) {
+            if (mt.getGhidraClass() == clazz) {
+                return mt;
+            }
+        }
+        return null;
+    }
+
+    protected boolean isLikelyCodePointer(PointerScanResult pointerScan, long value) {
+        if (value == 0) {
+            return true;
+        }
+
+        var candidateAddress = pointerScan.getScanningRange().getMinAddress().getNewAddress(value);
+        var block = _program.getMemory().getBlock(candidateAddress);
+        return block != null && block.isExecute();
+    }
+
+    protected abstract Address[] findCandidateSystemObjectMTs(PointerScanResult pointerScan, TaskMonitor monitor) throws Exception;
+
+    public MethodTable getObjectMT() {
+        return _objectMT;
+    }
+
+    public void setObjectMT(MethodTable objectMT) {
+        assertIsRegistered(objectMT);
+        _objectMT = objectMT;
+    }
+
+    public MethodTable getStringMT() {
+        return _stringMT;
+    }
+
+    public void setStringMT(MethodTable stringMT) {
+        assertIsRegistered(stringMT);
+        _stringMT = stringMT;
+    }
+
+    public abstract MethodTable createMT(Address address);
+
+    public void registerMT(MethodTable table) {
+        _methodTables.put(table.getAddress().getOffset(), table);
+    }
+
+    public void restoreFromDB() {
+        clear();
+
+        var dataTypeManager = getProgram().getDataTypeManager();
+        var space = getProgram().getAddressFactory().getDefaultAddressSpace();
+        var naotCategory = dataTypeManager.getCategory(Constants.CATEGORY_NATIVEAOT);
+        var mtCategory = dataTypeManager.getCategory(Constants.CATEGORY_METHOD_TABLES);
+
+        if (naotCategory == null || mtCategory == null) {
+            return;
+        }
+
+        // Restore all MT types and addresses from DT manager.
+        for (var mtType: mtCategory.getDataTypes()) {
+            if (!mtType.getName().endsWith("_MT")) {
+                continue;
+            }
+            var name = mtType.getName().substring(0, mtType.getName().length() - 3);
+
+            Address address;
+            try {
+                address = space.getAddress(mtType.getDescription());
+            } catch (Exception ex) {
+                continue;
+            }
+
+            var mt = createMT(address);
+            try {
+                mt.initFromMemory();
+                mt.setGhidraClass(getOrCreateGhidraClass(mt, name));
+            } catch (Exception ex) {
+                continue;
+            }
+
+            registerMT(mt);
+
+            switch (name) {
+                case Constants.SYSTEM_OBJECT_NAME -> setObjectMT(mt);
+                case Constants.SYSTEM_STRING_NAME -> setStringMT(mt);
+            }
+        }
+
+        // Rebuild type inheritance graph.
+        for (var mt : getMethodTables()) {
+            mt.setRelatedType(getMethodTable(mt.getRelatedTypeAddress()));
+
+            mt.getInterfaces().clear();
+            for (var iface: mt.getInterfaceAddresses()) {
+                if (iface == 0) {
+                    continue;
+                }
+
+                var interfaceMT = getMethodTable(iface);
+                if (interfaceMT == null) {
+                    continue;
+                }
+
+                mt.getInterfaces().add(interfaceMT);
+            }
+        }
+
+        // Link all MTs to the database.
+        for (var mt : getMethodTables()) {
+            try {
+                mt.commitToDB();
+            } catch (Exception e) {
+                Msg.error(Constants.TAG, "Failed to commit %s".formatted(mt), e);
+            }
+        }
+    }
+
+    public void clear() {
+        _methodTables.clear();
+    }
+
+    private void assertIsRegistered(MethodTable mt) {
+        var existing = getMethodTable(mt.getAddress());
+        if (existing == null || existing != mt) {
+            throw new IllegalArgumentException(String.format("%s is not registered as a method table.", mt));
+        }
+    }
+
+    private void dumpMTs(TaskMonitor monitor) throws Exception {
+        try (var writer = new FileWriter("/tmp/output.txt")) {
+            for (var mt: getMethodTables()) {
+                writer.write(mt.getAddress().toString());
+                writer.write(": ");
+                for (var symbol: _program.getSymbolTable().getSymbols(mt.getAddress())) {
+                    writer.write(symbol.getName());
+                    writer.write(" ");
+                }
+                writer.write("\n");
+            }
+        }
+    }
+
+    public GhidraClass getOrCreateGhidraClass(MethodTable mt, String originalName) throws Exception {
+        var symbolTable = _program.getSymbolTable();
+
+        var ns = symbolTable.getOrCreateNameSpace(
+            _program.getGlobalNamespace(),
+            originalName == null ? getNewMTName(mt) : originalName,
+            SourceType.ANALYSIS
+        );
+
+        if (ns instanceof GhidraClass c) {
+            return c;
+        } else {
+            return symbolTable.convertNamespaceToClass(ns);
+        }
+    }
+
+    private String getNewMTName(MethodTable table) {
+        return switch (table.getElementType()) {
+            case ElementType.CLASS -> String.format("Class_%s", table.getAddress());
+            case ElementType.VALUETYPE -> String.format("Struct_%s", table.getAddress());
+            case ElementType.NULLABLE -> String.format("Nullable_%s", table.getAddress());
+            case ElementType.INTERFACE -> String.format("IInterface_%s", table.getAddress());
+            case ElementType.ARRAY -> String.format("Array_%s", table.getAddress());
+            case ElementType.SZARRAY -> String.format("SzArray_%s", table.getAddress());
+            case ElementType.BOOLEAN -> String.format("Enum_Boolean_%s", table.getAddress());
+            case ElementType.CHAR -> String.format("Enum_Char_%s", table.getAddress());
+            case ElementType.SBYTE -> String.format("Enum_Sbyte_%s", table.getAddress());
+            case ElementType.BYTE -> String.format("Enum_Byte_%s", table.getAddress());
+            case ElementType.INT16 -> String.format("Enum_Int16_%s", table.getAddress());
+            case ElementType.UINT16 -> String.format("Enum_Uint16_%s", table.getAddress());
+            case ElementType.INT32 -> String.format("Enum_Int32_%s", table.getAddress());
+            case ElementType.UINT32 -> String.format("Enum_Uint32_%s", table.getAddress());
+            case ElementType.INT64 -> String.format("Enum_Int64_%s", table.getAddress());
+            case ElementType.UINT64 -> String.format("Enum_Uint64_%s", table.getAddress());
+            case ElementType.INTPTR -> String.format("Enum_IntPtr_%s", table.getAddress());
+            case ElementType.UINTPTR -> String.format("Enum_UIntPtr_%s", table.getAddress());
+            case ElementType.SINGLE -> String.format("Enum_Single_%s", table.getAddress());
+            case ElementType.DOUBLE -> String.format("Enum_Double_%s", table.getAddress());
+            default -> String.format("Type_%s", table.getAddress());
+        };
+    }    
+}
+```
+
+`src/main/java/nativeaot/objectmodel/VTableChunk.java`:
+
+```java
+package nativeaot.objectmodel;
+
+import ghidra.program.model.data.DataTypeConflictHandler;
+import ghidra.program.model.data.Pointer64DataType;
+import ghidra.program.model.data.Structure;
+import ghidra.program.model.data.StructureDataType;
+import ghidra.util.InvalidNameException;
+import ghidra.util.exception.DuplicateNameException;
+import nativeaot.Constants;
+
+import java.util.ArrayList;
+
+public class VTableChunk {
+    private final MethodTable _directParent;
+    private final int _baseIndex;
+    private final ArrayList<Method> _methods = new ArrayList<>();
+    
+    public VTableChunk(MethodTable directParent, int baseIndex, int count) {
+        _directParent = directParent;
+        _baseIndex = baseIndex;
+        
+        for (int i = 0; i < count; i++) {
+            _methods.add(new Method(this, _baseIndex + i));
+        }
+    }
+
+    public MethodTable getDirectParent() {
+        return _directParent;
+    }
+
+    public int getBaseIndex() {
+        return _baseIndex;
+    }
+
+    public int size() {
+        return _methods.size();
+    }
+
+    public Method getMethod(int index) {
+        return _methods.get(index);
+    }
+
+    public Iterable<Method> getMethods() {
+        return _methods;
+    }
+
+    public void propagateNameChange(String s) throws Exception {
+        getDataType().setName(getDataTypeName(s));
+    }
+
+    private String getDataTypeName() {
+        return getDataTypeName(getDirectParent().getName());
+    }
+
+    public static String getDataTypeName(String name) {
+        return String.format(MethodTable.VTABLE_TABLE_FORMAT, name);
+    }
+
+    private StructureDataType constructDataType() {
+        var structure = new StructureDataType(getDataTypeName(), 0);
+        structure.setDescription(getDirectParent().getAddress().toString());
+        structure.setCategoryPath(Constants.CATEGORY_METHOD_TABLES);
+
+        for (var method : _methods) {
+            structure.add(
+                Pointer64DataType.dataType,
+                "Method_%d".formatted(method.getSlotIndex()),
+                null
+            );
+        }
+
+        return structure;
+    }
+
+    public Structure getDataType() {
+        var program = getDirectParent().getManager().getProgram();
+        var dtManager = program.getDataTypeManager();
+        return (Structure) dtManager.getDataType(Constants.CATEGORY_METHOD_TABLES, getDataTypeName());
+    }
+
+    public Structure getOrCreateDataType() {
+        var chunkType = getDataType();
+
+        if(chunkType == null) {
+            var program = getDirectParent().getManager().getProgram();
+            var dtManager = program.getDataTypeManager();
+
+            chunkType = program.withTransaction("Create VTable Chunk %s".formatted(getDirectParent().getAddress()), () -> {
+                return (Structure) dtManager.addDataType(
+                    constructDataType(),
+                    DataTypeConflictHandler.KEEP_HANDLER
+                );
+            });
+        }
+
+        return chunkType;
+    }
+}
+
+```
+
+`src/main/java/nativeaot/objectmodel/net70/MethodTableManagerNet70.java`:
+
+```java
+package nativeaot.objectmodel.net70;
+
+import ghidra.program.model.address.Address;
+import ghidra.program.model.listing.Program;
+import ghidra.program.model.mem.MemoryAccessException;
+import ghidra.util.task.TaskMonitor;
+import nativeaot.objectmodel.MethodTable;
+import nativeaot.objectmodel.MethodTableManager;
+import nativeaot.rehydration.PointerScanResult;
+
+import java.util.ArrayList;
+
+public class MethodTableManagerNet70 extends MethodTableManager {
+    public MethodTableManagerNet70(Program program) {
+        super(program);
+    }
+
+    @Override
+    public MethodTable createMT(Address address) {
+        return new MethodTableNet70(this, address);
+    }
+
+    @Override
+    protected Address[] findCandidateSystemObjectMTs(PointerScanResult pointerScan, TaskMonitor monitor) throws Exception {
+        // The System.Object method table has no base type, contains exactly 3 vtable slots (ToString, Equals, GetHashCode),
+        // does not reference interfaces, and sets flags to only ElementType.Class. This is a very specific signature
+        // that we can use as a heuristic.
+
+        var memory = getProgram().getMemory();
+        long[] candidateVTable = new long[4];
+
+        var result = new ArrayList<Address>();
+
+        var locations = pointerScan.getPointerLocations();
+        for (int i = 0; i < locations.length - 3; i++) {
+            monitor.checkCancelled();
+
+            // We're trying to match bytes relative to the pointer to Object.ToString in the vtable, as the
+            // Object.ToString pointer is very likely to be present in all binaries:
+            //  dOff    Type      Expected value                Descr
+            //  -0x18   dw        0000h                         usComponentSize
+            //  -0x16   dw        A100                          usFlags (== CLASS)
+            //  -0x14   ddw       18h                           uBaseSize
+            //  -0x10   addr      00000000                      relatedType
+            //  -0x08   dw        3h                            usNumVtableSlots
+            //  -0x06   dw        0h                            usNumInterfaces
+            //  -0x04   ddw       ????????h                     uHashCode
+            //  +0x00   addr      &System_Object::ToString      VTable[0]
+            //  +0x04   addr      &System_Object::Equals        VTable[1]
+            //  +0x08   addr      &System_Object::GetHashCode   VTable[2]
+            //  +0x10   ??        <not a pointer>               ??
+            try {
+                // Check if there are at least two subsequent pointers (Equals, GetHashCode) followed by a non-pointer.
+                // Note that we cannot use locations[i+1] etc. here because some vtable entries may be 0 if the method
+                // was trimmed away (e.g., this happens  with smaller binaries that do not use Object.Equals)
+                memory.getLongs(locations[i], candidateVTable);
+                if (!(isLikelyCodePointer(pointerScan, candidateVTable[0])
+                        && isLikelyCodePointer(pointerScan, candidateVTable[1])
+                        && isLikelyCodePointer(pointerScan, candidateVTable[2])
+                        && !isLikelyCodePointer(pointerScan, candidateVTable[3]))) {
+                    continue;
+                }
+
+                // Check vtable slot count == 3.
+                if (memory.getShort(locations[i].subtract(0x08)) != 3) {
+                    continue;
+                }
+
+                // Check interface count == 3.
+                if (memory.getShort(locations[i].subtract(0x06)) != 0) {
+                    continue;
+                }
+
+                // Check base type == 0 (no base type)
+                if (memory.getLong(locations[i].subtract(0x10)) != 0) {
+                    continue;
+                }
+
+                // Check base size == 0x18
+                if (memory.getInt(locations[i].subtract(0x14)) != 0x18) {
+                    continue;
+                }
+
+                // Check flags and component size for class bit only set.
+                if (memory.getInt(locations[i].subtract(0x18)) != 0xA100_0000) {
+                    continue;
+                }
+            } catch (MemoryAccessException ex) {
+                continue;
+            }
+
+            result.add(locations[i].subtract(0x18));
+        }
+
+        return result.toArray(Address[]::new);
+    }
+}
+
+```
+
+`src/main/java/nativeaot/objectmodel/net70/MethodTableNet70.java`:
+
+```java
+package nativeaot.objectmodel.net70;
+
+import ghidra.app.util.bin.BinaryReader;
+import ghidra.app.util.bin.MemoryByteProvider;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.data.ArrayDataType;
+import ghidra.program.model.data.Pointer64DataType;
+import ghidra.program.model.data.Structure;
+import ghidra.program.model.data.StructureDataType;
+import nativeaot.Constants;
+import nativeaot.objectmodel.ElementType;
+import nativeaot.objectmodel.MethodTable;
+
+import static ghidra.app.util.bin.StructConverter.DWORD;
+import static ghidra.app.util.bin.StructConverter.WORD;
+
+public class MethodTableNet70 extends MethodTable {
+    private static final int ELEMENT_TYPE_MASK = 0xf800;
+    private static final int ELEMENT_TYPE_SHIFT = 11;
+
+    private short _componentSize;
+    private short _flags;
+    private int _baseSize;
+    private long _relatedTypeAddress;
+    private int _hashCode;
+    private long[] _vtable;
+    private long[] _interfaceSlots;
+
+    public MethodTableNet70(MethodTableManagerNet70 manager, Address address) {
+        super(manager, address);
+    }
+
+    public short getComponentSize() {
+        return _componentSize;
+    }
+
+    public short getFlags() {
+        return _flags;
+    }
+
+    @Override
+    public int getElementType() {
+        return (_flags & ELEMENT_TYPE_MASK) >>> ELEMENT_TYPE_SHIFT;
+    }
+
+    @Override
+    public int getBaseSize() {
+        return _baseSize;
+    }
+
+    @Override
+    public int getDataSize() {
+        return _baseSize
+            - 0x8 /* obj header */
+            - 0x8 /* mt */;
+    }
+
+    @Override
+    public long getRelatedTypeAddress() {
+        return _relatedTypeAddress;
+    }
+
+    @Override
+    public long[] getVTable() {
+        return _vtable;
+    }
+
+    @Override
+    public int getVTableSlotCount() {
+        return _vtable.length;
+    }
+
+    @Override
+    public long getVTableSlot(int index) {
+        return _vtable[index];
+    }
+
+    @Override
+    public long[] getInterfaceAddresses() {
+        return _interfaceSlots;
+    }
+
+    @Override
+    protected Structure constructMTType() throws Exception {
+        var result = new StructureDataType(getMTName(), 0);
+        result.setCategoryPath(Constants.CATEGORY_METHOD_TABLES);
+        result.setDescription(getAddress().toString());
+
+        // https://github.com/dotnet/runtime/blob/b2dc37ba181a7fa4427e717eab819ba3543d0ae4/src/coreclr/nativeaot/Runtime/inc/MethodTable.h#L136-L142
+        result.add(WORD, "m_usComponentSize", null);
+        result.add(WORD, "uFlags", null);
+        result.add(DWORD, "uBaseSize", null);
+        result.add(Pointer64DataType.dataType, "relatedType", null);
+        result.add(WORD, "usNumVtableSlots", null);
+        result.add(WORD, "usNumInterfaces", null);
+        result.add(DWORD, "uHashCode", null);
+
+        int count = 0;
+        for (var chunk : getVTableChunks()) {
+            result.add(chunk.getOrCreateDataType(), String.format(VTABLE_MEMBER_FORMAT, count++), null);
+        }
+
+        if (_interfaceSlots.length > 0) {
+            result.add(new ArrayDataType(Pointer64DataType.dataType, _interfaceSlots.length), "Interfaces", null);
+        }
+
+        return result;
+    }
+
+    @Override
+    public void initFromMemory() throws Exception {
+        var address = getAddress();
+
+        var reader = new BinaryReader(
+                new MemoryByteProvider(
+                        getManager().getProgram().getMemory(),
+                        address.getAddressSpace()
+                ),
+                true
+        );
+        reader.setPointerIndex(address.getOffset());
+
+        _componentSize = reader.readNextShort();
+        _flags = reader.readNextShort();
+        _baseSize = reader.readNextInt();
+        _relatedTypeAddress = reader.readNextLong();
+        int vtableSlotCount = reader.readNextShort();
+        int interfacesCount = reader.readNextShort();
+        _hashCode = reader.readNextInt();
+
+        if (vtableSlotCount < 0 || vtableSlotCount >= 1000)
+            throw new IllegalArgumentException("Invalid VTable slot count");
+        if (interfacesCount < 0 || interfacesCount >= 1000)
+            throw new IllegalArgumentException("Invalid interface count");
+
+        _vtable = new long[vtableSlotCount];
+        for (int i = 0; i < vtableSlotCount; i++) {
+            _vtable[i] = reader.readNextLong();
+        }
+
+        _interfaceSlots = new long[interfacesCount];
+        for (int i = 0; i < interfacesCount; i++) {
+            _interfaceSlots[i] = reader.readNextLong();
+        }
+
+        // Do some validation to see if the MT makes sense.
+        var elementType = getElementType();
+        if (elementType == ElementType.INTERFACE) {
+            if (_baseSize != 0x00) {
+                throw new Exception("Unexpected non-zero interface base size.");
+            } else if (getRelatedTypeAddress() != 0) {
+                throw new Exception("Unexpected non-zero interface related type.");
+            }
+        } else if (_baseSize < 0x10) { // TODO: abstract away
+            throw new Exception("Unexpected base size.");
+        }
+    }
+}
+
+```
+
+`src/main/java/nativeaot/objectmodel/net80/MethodTableManagerNet80.java`:
+
+```java
+
+package nativeaot.objectmodel.net80;
+
+import ghidra.program.model.address.Address;
+import ghidra.program.model.listing.Program;
+import ghidra.program.model.mem.MemoryAccessException;
+import ghidra.util.Msg;
+import ghidra.util.task.TaskMonitor;
+import nativeaot.Constants;
+import nativeaot.objectmodel.MethodTable;
+import nativeaot.objectmodel.MethodTableManager;
+import nativeaot.rehydration.PointerScanResult;
+
+import java.util.ArrayList;
+
+public class MethodTableManagerNet80 extends MethodTableManager {
+
+    public MethodTableManagerNet80(Program program) {
+        super(program);
+    }
+
+    @Override
+    public MethodTable createMT(Address address) {
+        return new MethodTableNet80(this, address);
+    }
+
+    @Override
+    protected Address[] findCandidateSystemObjectMTs(PointerScanResult pointerScan, TaskMonitor monitor) throws Exception {
+        // The System.Object method table has no base type, contains exactly 3 vtable slots (ToString, Equals, GetHashCode),
+        // does not reference interfaces, and sets flags to only ElementType.Class. This is a very specific signature
+        // that we can use as a heuristic.
+
+        var memory = getProgram().getMemory();
+        long[] candidateVTable = new long[4];
+
+        var result = new ArrayList<Address>();
+
+        var locations = pointerScan.getPointerLocations();
+        for (int i = 0; i < locations.length - 3; i++) {
+            monitor.checkCancelled();
+
+            // We're trying to match bytes relative to the pointer to Object.ToString in the vtable, as the
+            // Object.ToString pointer is very likely to be present in all binaries:
+            //  dOff    Type      Expected value                Descr
+            //  -0x18   ddw       50000000h                     uFlags (== CLASS)
+            //  -0x14   ddw       18h                           uBaseSize
+            //  -0x10   addr      00000000                      relatedType
+            //  -0x08   dw        3h                            usNumVtableSlots
+            //  -0x06   dw        0h                            usNumInterfaces
+            //  -0x04   ddw       ????????h                     uHashCode
+            //  +0x00   addr      &System_Object::ToString      VTable[0]
+            //  +0x04   addr      &System_Object::Equals        VTable[1]
+            //  +0x08   addr      &System_Object::GetHashCode   VTable[2]
+            //  +0x10   ??        <not a pointer>               ??
+            try {
+                // Check if there are at least two subsequent pointers (Equals, GetHashCode) followed by a non-pointer.
+                // Note that we cannot use locations[i+1] etc. here because some vtable entries may be 0 if the method
+                // was trimmed away (e.g., this happens  with smaller binaries that do not use Object.Equals)
+                memory.getLongs(locations[i], candidateVTable);
+                if (!(isLikelyCodePointer(pointerScan, candidateVTable[0])
+                        && isLikelyCodePointer(pointerScan, candidateVTable[1])
+                        && isLikelyCodePointer(pointerScan, candidateVTable[2])
+                        && !isLikelyCodePointer(pointerScan, candidateVTable[3]))) {
+                    continue;
+                }
+
+                // Check vtable slot count == 3.
+                if (memory.getShort(locations[i].subtract(0x08)) != 3) {
+                    continue;
+                }
+
+                // Check interface count == 3.
+                if (memory.getShort(locations[i].subtract(0x06)) != 0) {
+                    continue;
+                }
+
+                // Check base type == 0 (no base type)
+                if (memory.getLong(locations[i].subtract(0x10)) != 0) {
+                    continue;
+                }
+
+                // Check base size == 0x18
+                if (memory.getInt(locations[i].subtract(0x14)) != 0x18) {
+                    continue;
+                }
+
+                // Check flags for class bit only set.
+                if (memory.getInt(locations[i].subtract(0x18)) != 0x5000_0000) {
+                    continue;
+                }
+            } catch (MemoryAccessException ex) {
+                continue;
+            }
+
+            result.add(locations[i].subtract(0x18));
+        }
+
+        return result.toArray(Address[]::new);
+    }
+
+}
+```
+
+`src/main/java/nativeaot/objectmodel/net80/MethodTableNet80.java`:
+
+```java
+package nativeaot.objectmodel.net80;
+
+import ghidra.app.util.bin.BinaryReader;
+import ghidra.app.util.bin.MemoryByteProvider;
+import static ghidra.app.util.bin.StructConverter.DWORD;
+import static ghidra.app.util.bin.StructConverter.WORD;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.data.*;
+import ghidra.program.model.listing.GhidraClass;
+import ghidra.program.model.symbol.SourceType;
+import nativeaot.Constants;
+import nativeaot.objectmodel.ElementType;
+import nativeaot.objectmodel.MethodTable;
+
+public class MethodTableNet80 extends MethodTable {
+    private static final int ELEMENT_TYPE_MASK = 0x7C000000;
+    private static final int ELEMENT_TYPE_SHIFT = 26;
+
+    private int _flags;
+    private int _baseSize;
+    private long _relatedTypeAddress;
+    private int _hashCode;
+    private long[] _vtable;
+    private long[] _interfaceSlots;
+
+    public MethodTableNet80(MethodTableManagerNet80 manager, Address address) {
+        super(manager, address);
+    }
+
+    public int getFlags() {
+        return _flags;
+    }
+
+    @Override
+    public int getElementType() {
+        return (_flags & ELEMENT_TYPE_MASK) >>> ELEMENT_TYPE_SHIFT;
+    }
+
+    @Override
+    public int getBaseSize() {
+        return _baseSize;
+    }
+
+    @Override
+    public int getDataSize() {
+        return _baseSize 
+            - 0x8 /* obj header */
+            - 0x8 /* mt */;
+    }
+
+    @Override
+    public long getRelatedTypeAddress() {
+        return _relatedTypeAddress;
+    }
+
+    public int getHashCode() {
+        return _hashCode;
+    }
+
+    @Override
+    public long[] getVTable() {
+        return _vtable;
+    }
+
+    @Override
+    public int getVTableSlotCount() {
+        return _vtable.length;
+    }
+
+    @Override
+    public long getVTableSlot(int index) {
+        return _vtable[index];
+    }
+
+    @Override
+    public long[] getInterfaceAddresses() {
+        return _interfaceSlots;
+    }
+    
+    @Override
+    protected Structure constructMTType() throws Exception {
+        var result = new StructureDataType(getMTName(), 0);
+        result.setCategoryPath(Constants.CATEGORY_METHOD_TABLES);
+        result.setDescription(getAddress().toString());
+
+        // https://github.com/dotnet/runtime/blob/a3b2d40328be0be3f8dd43f0e5cc925b8827b044/src/coreclr/nativeaot/Runtime/inc/MethodTable.h#L104-L115
+        result.add(DWORD, "uFlags", null);
+        result.add(DWORD, "uBaseSize", null);
+        result.add(Pointer64DataType.dataType, "relatedType", null);
+        result.add(WORD, "usNumVtableSlots", null);
+        result.add(WORD, "usNumInterfaces", null);
+        result.add(DWORD, "uHashCode", null);
+
+        int count = 0;
+        for (var chunk : getVTableChunks()) {
+            result.add(chunk.getOrCreateDataType(), String.format(VTABLE_MEMBER_FORMAT, count++), null);
+        }
+
+        if (_interfaceSlots.length > 0) {
+            result.add(new ArrayDataType(Pointer64DataType.dataType, _interfaceSlots.length), "Interfaces", null);
+        }
+
+        return result;
+    }
+
+    @Override
+    public void initFromMemory() throws Exception {
+        var address = getAddress();
+
+        var reader = new BinaryReader(
+            new MemoryByteProvider(
+                getManager().getProgram().getMemory(),
+                address.getAddressSpace()
+            ),
+            true
+        );
+        reader.setPointerIndex(address.getOffset());
+
+        _flags = reader.readNextInt();
+        _baseSize = reader.readNextInt();
+        _relatedTypeAddress = reader.readNextLong();
+        int vtableSlotCount = reader.readNextShort();
+        int interfacesCount = reader.readNextShort();
+        _hashCode = reader.readNextInt();
+
+        if (vtableSlotCount < 0 || vtableSlotCount >= 1000)
+            throw new IllegalArgumentException("Invalid VTable slot count");
+        if (interfacesCount < 0 || interfacesCount >= 1000)
+            throw new IllegalArgumentException("Invalid interface count");
+
+        _vtable = new long[vtableSlotCount];
+        for (int i = 0; i < vtableSlotCount; i++) {
+            _vtable[i] = reader.readNextLong();
+        }
+
+        _interfaceSlots = new long[interfacesCount];
+        for (int i = 0; i < interfacesCount; i++) {
+            _interfaceSlots[i] = reader.readNextLong();
+        }
+
+        // Do some validation to see if the MT makes sense.
+        var elementType = getElementType();
+        if (elementType == ElementType.INTERFACE) {
+            if (_baseSize != 0x00) {
+                throw new Exception("Unexpected non-zero interface base size.");
+            } else if (getRelatedTypeAddress() != 0) {
+                throw new Exception("Unexpected non-zero interface related type.");
+            }
+        } else if (_baseSize < 0x10) { // TODO: abstract away
+            throw new Exception("Unexpected base size.");
+        }
+    }
+}
+```
+
+`src/main/java/nativeaot/refactoring/DataTypeRefactor.java`:
+
+```java
+package nativeaot.refactoring;
+
+import ghidra.program.model.data.DataType;
+
+public class DataTypeRefactor extends Refactor {
+
+    public DataTypeRefactor(DataType dt, String newName) {
+        super(dt, newName);
+    }
+
+    private DataType getSymbol() {
+        return (DataType) getObject();
+    }
+
+    @Override
+    public String getRefactorType() {
+        return "Data Type";
+    }
+
+    @Override
+    public void apply() throws Exception {
+        getSymbol().setName(getSuggestedName());
+    }
+    
+}
+
+```
+
+`src/main/java/nativeaot/refactoring/MethodRefactor.java`:
+
+```java
+package nativeaot.refactoring;
+
+import nativeaot.objectmodel.Method;
+
+public class MethodRefactor extends Refactor {
+    public MethodRefactor(Method method, String suggestedName) {
+        super(method, suggestedName);
+    }
+
+    @Override
+    public String getRefactorType() {
+        return "VTable Member";
+    }
+
+    public Method getMethod() {
+        return (Method) getObject();
+    }
+
+    @Override
+    public String getObjectDisplayName() {
+        return "this->mt->%s".formatted(getMethod().getDataTypeComponent().getFieldName());
+    }
+
+    @Override
+    public String getSuggestedDisplayName() {
+        return "this->mt->%s".formatted(getSuggestedName());
+    }
+
+    @Override
+    public void apply() throws Exception {
+        getMethod().setName(getSuggestedName());
+    }
+}
+
+
+```
+
+`src/main/java/nativeaot/refactoring/MethodTableRefactor.java`:
+
+```java
+package nativeaot.refactoring;
+
+import nativeaot.objectmodel.MethodTable;
+
+public class MethodTableRefactor extends Refactor {
+
+    public MethodTableRefactor(MethodTable mt, String suggestedName) {
+        super(mt, suggestedName);
+    }
+
+    public MethodTable getMT() {
+        return (MethodTable) getObject();
+    }
+
+    @Override
+    public String getObjectDisplayName() {
+        return getMT().getName();
+    }
+
+    @Override
+    public String getRefactorType() {
+        return "Method Table";
+    }
+
+    @Override
+    public void apply() throws Exception {
+        getMT().setName(getSuggestedName());
+    }
+}
+
+```
+
+`src/main/java/nativeaot/refactoring/Refactor.java`:
+
+```java
+package nativeaot.refactoring;
+
+public abstract class Refactor {
+    private boolean _apply;
+    private Object _object;
+    private String _suggestedName;
+
+    protected Refactor(Object object, String suggestedName) {
+        _apply = true;
+        _object = object;
+        _suggestedName = suggestedName;
+    }
+
+    public boolean isApply() {
+        return _apply;
+    }
+
+    public void setApply(boolean apply) {
+        _apply = apply;
+    }
+
+    public abstract String getRefactorType();
+
+    public Object getObject() {
+        return _object;
+    }
+
+    public void setObject(Object object) {
+        _object = object;
+    }
+
+    public String getObjectDisplayName() {
+        return getObject().toString();
+    }
+
+    public String getSuggestedName() {
+        return _suggestedName;
+    }
+
+    public String getSuggestedDisplayName() {
+        return getSuggestedName();
+    };
+
+    public void setSuggestedName(String suggestedName) {
+        _suggestedName = suggestedName;
+    }
+
+    public abstract void apply() throws Exception;
+
+    @Override
+    public String toString() {
+        return String.format("%s -> %s", _object, _suggestedName);
+    }
+}
+
+```
+
+`src/main/java/nativeaot/refactoring/RefactorDialog.java`:
+
+```java
+package nativeaot.refactoring;
+
+import java.awt.BorderLayout;
+import java.awt.event.KeyEvent;
+import java.util.List;
+
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.EmptyBorder;
+
+import docking.DialogComponentProvider;
+import docking.widgets.table.GTable;
+import docking.widgets.table.TableSortState;
+import ghidra.framework.plugintool.PluginTool;
+
+public class RefactorDialog extends DialogComponentProvider {
+
+    private boolean _applyPressed;
+    private JCheckBox _checkBox;
+    private GTable _table;
+
+    public RefactorDialog(PluginTool tool, String header, List<Refactor> suggested) {
+        super("Refactor related symbols", true);
+
+        addWorkPanel(buildMainPanel(tool, header, suggested));
+        addApplyButton();
+        addCancelButton();
+    }
+
+    @Override
+    protected void applyCallback() {
+        _applyPressed = true;
+        closeDialog();
+    }
+
+    public boolean applyRelatedSymbols() {
+        return _applyPressed && _checkBox.isSelected();
+    }
+
+    private JComponent buildMainPanel(PluginTool tool, String header, List<Refactor> suggested) {
+        var mainPanel = new JPanel(new BorderLayout());
+
+        // Table.
+        var model = new RefactorTableModel(tool, suggested);
+        model.setTableSortState(TableSortState.createDefaultSortState(RefactorTableModel.TYPE));
+        _table = new GTable(model);
+
+        var scrollPane = new JScrollPane(_table);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // Top bar
+        var topPanel = new JPanel(new BorderLayout());
+        topPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        var label = new JLabel(header);
+        label.setBorder(new EmptyBorder(5, 0, 5, 0));
+        topPanel.add(label, BorderLayout.NORTH);
+
+        _checkBox = new JCheckBox("Rename related symbols.");
+        _checkBox.setBorder(new EmptyBorder(5, 0, 5, 0));
+        _checkBox.setMnemonic(KeyEvent.VK_R);
+        _checkBox.setDisplayedMnemonicIndex(0);
+        _checkBox.setSelected(true);
+        _checkBox.addChangeListener(e -> _table.setEnabled(_checkBox.isSelected()));
+        topPanel.add(_checkBox, BorderLayout.SOUTH);
+
+        mainPanel.add(topPanel, BorderLayout.NORTH);
+
+        return mainPanel;
+    }
+}
+```
+
+`src/main/java/nativeaot/refactoring/RefactorEngine.java`:
+
+```java
+package nativeaot.refactoring;
+
+import ghidra.app.plugin.core.analysis.AutoAnalysisManager;
+import ghidra.framework.model.DomainObjectListener;
+import ghidra.framework.model.DomainObjectListenerBuilder;
+import ghidra.framework.plugintool.PluginTool;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.data.*;
+import ghidra.program.model.listing.Function;
+import ghidra.program.model.listing.GhidraClass;
+import ghidra.program.model.symbol.Symbol;
+import ghidra.program.model.symbol.SymbolType;
+import ghidra.program.util.ProgramChangeRecord;
+import ghidra.program.util.ProgramEvent;
+import ghidra.util.Msg;
+import nativeaot.Constants;
+import nativeaot.NativeAotOptionsManager;
+import nativeaot.objectmodel.MethodTableManager;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
+import nativeaot.objectmodel.MethodTable;
+import nativeaot.objectmodel.VTableChunk;
+
+public class RefactorEngine
+    implements DataTypeManagerChangeListener {
+
+    private final PluginTool _tool;
+    private final NativeAotOptionsManager _options;
+    private final DomainObjectListener _domainObjectListener;
+
+    private MethodTableManager _manager;
+    private AutoAnalysisManager _analysisManager;
+    private boolean _suspended;
+
+    private int _symbolsRenamed = 0;
+
+    public RefactorEngine(PluginTool tool, NativeAotOptionsManager options) {
+        _tool = tool;
+        _options = options;
+
+        _domainObjectListener = new DomainObjectListenerBuilder(this)
+                .ignoreWhen(this::ignoreEvents)
+                .with(ProgramChangeRecord.class)
+                .each(ProgramEvent.SYMBOL_RENAMED).call(this::processSymbolRenamed)
+                .build();
+    }
+
+    private boolean ignoreEvents() {
+        return !(_options.isRefactorEngineEnabled() && !_suspended && !_analysisManager.isAnalyzing());
+    }
+
+    public void suspend() {
+        _suspended = true;
+    }
+
+    public void resume() {
+        _suspended = false;
+    }
+
+    public void setManager(MethodTableManager manager) {
+        if (_manager != null) {
+            _analysisManager = null;
+            var program = _manager.getProgram();
+            program.getDataTypeManager().removeDataTypeManagerListener(this);
+            program.removeListener(_domainObjectListener);
+        }
+
+        _manager = manager;
+
+        if (_manager != null) {
+            var program = _manager.getProgram();
+            _analysisManager = AutoAnalysisManager.getAnalysisManager(program);
+            program.getDataTypeManager().addDataTypeManagerListener(this);
+            program.addListener(_domainObjectListener);
+        }
+    }
+
+    private void doRefactors(String description, List<Refactor> refactors) {
+        if (refactors == null || refactors.isEmpty()) {
+            return;
+        }
+
+        var dialog = new RefactorDialog(_tool, description, refactors);
+        _tool.showDialog(dialog);
+        if (!dialog.applyRelatedSymbols()) {
+            return;
+        }
+
+        final var finalRefactors = new ArrayList<Refactor>();
+        for (var refactor : refactors) {
+            if (refactor.isApply()) {
+                finalRefactors.add(refactor);
+            }
+        }
+
+        if (finalRefactors.isEmpty()) {
+            return;
+        }
+
+        try {
+            _manager.getProgram().withTransaction("Refactor", () -> {
+                for (var refactor : finalRefactors) {
+                    // HACK: prevent recursion.
+                    if (refactor instanceof SymbolRefactor) {
+                        _symbolsRenamed++;
+                    }
+
+                    refactor.apply();
+                }
+            });
+        } catch (Exception e) {
+            Msg.showError(Constants.TAG, null, "Refactoring failed", "Refactoring failed", e);
+        } finally {
+            Msg.debug(Constants.TAG, "Applied %d refactorings".formatted(_symbolsRenamed));
+        }
+    }
+
+    private void processSymbolRenamed(ProgramChangeRecord record) {
+        var symbol = (Symbol) record.getObject();
+        var oldName = (String) record.getOldValue();
+
+        if (_symbolsRenamed > 0) {
+            _symbolsRenamed--;
+            return;
+        }
+
+        var refactors = getRefactorSuggestions(symbol, oldName);
+        doRefactors("%s has related symbols".formatted(oldName), refactors);
+    }
+
+    private List<Refactor> getRefactorSuggestions(Symbol symbol, String oldName) {
+        var symbolType = symbol.getSymbolType();
+
+        if (symbolType == SymbolType.CLASS) {
+            return getRefactorSuggestions((GhidraClass) symbol.getObject(), oldName);
+        } else if (symbolType == SymbolType.FUNCTION) {
+            return getRefactorSuggestions((Function) symbol.getObject());
+        }
+
+        return null;
+    }
+
+    private List<Refactor> getRefactorSuggestions(GhidraClass clazz, String oldName) {
+        var result = new ArrayList<Refactor>();
+
+        // Check if the class is part of a MT.
+        var mt = _manager.getMethodTable(clazz);
+        if (mt == null) {
+            return result;
+        }
+
+        var manager = _manager.getProgram().getDataTypeManager();
+
+        // Check if MT type should be changed.
+        try {
+            var mtType = mt.getMTType();
+            if (mtType == null) {
+                String original = MethodTable.getMTName(oldName);
+                mtType = manager.getDataType(Constants.CATEGORY_METHOD_TABLES, original);
+                if (mtType != null) {
+                    result.add(new DataTypeRefactor(mtType, MethodTable.getMTName(mt.getName())));
+                }
+            }
+        } catch (Exception ex) {
+        }
+
+        // Check if instance type should be changed.
+        try {
+            var instanceType = mt.getInstanceType();
+            if (instanceType == null) {
+                instanceType = (Structure) manager.getDataType(Constants.CATEGORY_NATIVEAOT, oldName);
+                if (instanceType != null) {
+                    result.add(new DataTypeRefactor(instanceType, mt.getName()));
+                }
+            }
+        } catch (Exception ex) {
+        }
+
+        // Check if vtable chunk type should be changed.
+        try {
+            var vtableType = mt.getOwnVTableChunk().getDataType();
+            if (vtableType == null) {
+                String original = VTableChunk.getDataTypeName(oldName);
+                vtableType = (Structure) manager.getDataType(Constants.CATEGORY_METHOD_TABLES, original);
+                if (vtableType != null) {
+                    result.add(new DataTypeRefactor(vtableType, VTableChunk.getDataTypeName(mt.getName())));
+                }
+            }
+        } catch (Exception ex) {
+        }
+
+        return result;
+    }
+
+    private List<Refactor> getRefactorSuggestions(Function function) {
+        var result = new ArrayList<Refactor>();
+
+        // Check if the function is part of a MT.
+        if (!(function.getSymbol().getParentNamespace() instanceof GhidraClass clazz)) {
+            return result;
+        }
+
+        var mt = _manager.getMethodTable(clazz);
+        if (mt == null) {
+            return result;
+        }
+
+        // Check if this function is related to a virtual method.
+        long[] vTable = mt.getVTable();
+        for (int i = 0; i < vTable.length; i++) {
+            if (vTable[i] == function.getEntryPoint().getOffset()) {
+                var method = mt.getMethod(i);
+                if (method == null) {
+                    continue;
+                }
+
+                // Found method, suggest the rename in the vtable.
+                result.add(new MethodRefactor(method, function.getName()));
+
+                // Check if there are any other functions that are the implementation of this method.
+                for (var impl : method.getImplementingFunctions(function.getProgram())) {
+                    if (impl != function) {
+                        result.add(new SymbolRefactor(impl.getSymbol(), function.getName()));
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public void categoryAdded(DataTypeManager dtm, CategoryPath cp) {
+    }
+
+    @Override
+    public void categoryRemoved(DataTypeManager dtm, CategoryPath cp) {
+    }
+
+    @Override
+    public void categoryRenamed(DataTypeManager dtm, CategoryPath cp, CategoryPath cp1) {
+    }
+
+    @Override
+    public void categoryMoved(DataTypeManager dtm, CategoryPath cp, CategoryPath cp1) {
+    }
+
+    @Override
+    public void dataTypeAdded(DataTypeManager dtm, DataTypePath dtp) {
+    }
+
+    @Override
+    public void dataTypeRemoved(DataTypeManager dtm, DataTypePath dtp) {
+    }
+
+    @Override
+    public void dataTypeRenamed(DataTypeManager dtm, DataTypePath dtp, DataTypePath dtp1) {
+    }
+
+    @Override
+    public void dataTypeMoved(DataTypeManager dtm, DataTypePath dtp, DataTypePath dtp1) {
+    }
+
+    @Override
+    public void dataTypeChanged(DataTypeManager dtm, DataTypePath dtp) {
+        if (ignoreEvents()) {
+            return;
+        }
+
+        if (!dtp.getCategoryPath().equals(Constants.CATEGORY_METHOD_TABLES)) {
+            return;
+        }
+
+        if (!(dtm.getDataType(dtp) instanceof Structure structure)) {
+            return;
+        }
+
+        var program = _manager.getProgram();
+
+        // Extract address from vtable chunk data type.
+        Address address;
+        try {
+            address = program
+                    .getAddressFactory()
+                    .getDefaultAddressSpace()
+                    .getAddress(structure.getDescription());
+        } catch (Exception ex) {
+            return;
+        }
+
+        // Resolve to MT.
+        var mt = _manager.getMethodTable(address);
+        if (mt == null) {
+            return;
+        }
+
+        var refactors = new ArrayList<Refactor>();
+
+        // Collect refactors that ensure all methods are synchronized with the vtable chunk data types.
+        for (var chunk : mt.getVTableChunks()) {
+            for (var method : chunk.getMethods()) {
+                String methodName = method.getName();
+                for (var function : method.getImplementingFunctions(program)) {
+                    if (!function.getName().equals(methodName)) {
+                        refactors.add(new SymbolRefactor(function.getSymbol(), methodName));
+                    }
+                }
+            }
+        }
+
+        doRefactors("Methods defined in %s are related with other symbols.".formatted(mt.getName()), refactors);
+    }
+
+    @Override
+    public void dataTypeReplaced(DataTypeManager dtm, DataTypePath dtp, DataTypePath dtp1, DataType dt) {
+    }
+
+    @Override
+    public void favoritesChanged(DataTypeManager dtm, DataTypePath dtp, boolean bln) {
+    }
+
+    @Override
+    public void sourceArchiveChanged(DataTypeManager dtm, SourceArchive sa) {
+    }
+
+    @Override
+    public void sourceArchiveAdded(DataTypeManager dtm, SourceArchive sa) {
+    }
+
+    @Override
+    public void programArchitectureChanged(DataTypeManager dtm) {
+    }
+
+    @Override
+    public void restored(DataTypeManager dtm) {
+    }
+}
+
+```
+
+`src/main/java/nativeaot/refactoring/RefactorTableModel.java`:
+
+```java
+package nativeaot.refactoring;
+
+import java.util.List;
+
+import docking.widgets.table.AbstractDynamicTableColumn;
+import docking.widgets.table.GDynamicColumnTableModel;
+import docking.widgets.table.TableColumnDescriptor;
+import ghidra.docking.settings.Settings;
+import ghidra.framework.plugintool.ServiceProvider;
+
+public class RefactorTableModel extends GDynamicColumnTableModel<Refactor, Object> {
+    public static final int APPLY = 0;
+    public static final int TYPE = 1;
+    public static final int SYMBOL = 2;
+    public static final int NEW_NAME = 3;
+
+    private final List<Refactor> _refactors;
+
+    public RefactorTableModel(ServiceProvider serviceProvider, List<Refactor> refactors) {
+        super(serviceProvider);
+        _refactors = refactors;
+    }
+
+    @Override
+    public Object getDataSource() {
+        return null;
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return columnIndex == APPLY;
+    }
+
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        if (columnIndex != APPLY) {
+            return;
+        }
+
+        _refactors.get(rowIndex).setApply((boolean) aValue);
+    }
+
+    @Override
+    protected TableColumnDescriptor<Refactor> createTableColumnDescriptor() {
+        TableColumnDescriptor<Refactor> descriptor = new TableColumnDescriptor<>();
+
+        descriptor.addVisibleColumn(new ApplyColumn());
+        descriptor.addVisibleColumn(new TypeColumn());
+        descriptor.addVisibleColumn(new OldNameColumn());
+        descriptor.addVisibleColumn(new NewNameColumn());
+
+        return descriptor;
+    }
+
+    @Override
+    public String getName() {
+        return "Refactors";
+    }
+
+    @Override
+    public List<Refactor> getModelData() {
+        return _refactors;
+    }
+
+    private class ApplyColumn extends AbstractDynamicTableColumn<Refactor, Boolean, Object> {
+        @Override
+        public String getColumnName() {
+            return "Apply";
+        }
+
+        @Override
+        public Boolean getValue(Refactor rwtp, Settings stngs, Object dtsrc, ServiceProvider sp) throws IllegalArgumentException {
+            return rwtp.isApply();
+        }
+    }
+
+    private class TypeColumn extends AbstractDynamicTableColumn<Refactor, String, Object> {
+        @Override
+        public String getColumnName() {
+            return "Type";
+        }
+
+        @Override
+        public String getValue(Refactor rwtp, Settings stngs, Object dtsrc, ServiceProvider sp) throws IllegalArgumentException {
+            return rwtp.getRefactorType();
+        }
+    }
+
+    private class OldNameColumn extends AbstractDynamicTableColumn<Refactor, String, Object> {
+        @Override
+        public String getColumnName() {
+            return "Old Name";
+        }
+
+        @Override
+        public String getValue(Refactor rwtp, Settings stngs, Object dtsrc, ServiceProvider sp) throws IllegalArgumentException {
+            return rwtp.getObjectDisplayName();
+        }
+    }
+
+    private class NewNameColumn extends AbstractDynamicTableColumn<Refactor, String, Object> {
+        @Override
+        public String getColumnName() {
+            return "New Name";
+        }
+
+        @Override
+        public String getValue(Refactor rwtp, Settings stngs, Object dtsrc, ServiceProvider sp) throws IllegalArgumentException {
+            return rwtp.getSuggestedDisplayName();
+        }
+    }
+
+}
+
+```
+
+`src/main/java/nativeaot/refactoring/SymbolRefactor.java`:
+
+```java
+package nativeaot.refactoring;
+
+import ghidra.program.model.symbol.SourceType;
+import ghidra.program.model.symbol.Symbol;
+
+public class SymbolRefactor extends Refactor {
+    public SymbolRefactor(Symbol symbol, String suggestedName) {
+        super(symbol, suggestedName);
+    }
+
+    private Symbol getSymbol() {
+        return (Symbol) getObject();
+    }
+
+    @Override
+    public String getObjectDisplayName() {
+        return "%s::%s".formatted(getSymbol().getParentNamespace().getName(), getSymbol().getName());
+    }
+
+    @Override
+    public String getSuggestedDisplayName() {
+        return "%s::%s".formatted(getSymbol().getParentNamespace().getName(), getSuggestedName());
+    }
+
+    @Override
+    public String getRefactorType() {
+        return "Symbol";
+    }
+
+    @Override
+    public void apply() throws Exception {
+        getSymbol().setName(getSuggestedName(), SourceType.USER_DEFINED);
+    }
+}
+
+```
+
+`src/main/java/nativeaot/rehydration/MetadataRehydrator.java`:
+
+```java
+
+package nativeaot.rehydration;
+
+import ghidra.app.util.importer.MessageLog;
+import ghidra.program.model.address.AddressRange;
+import ghidra.program.model.listing.Program;
+import ghidra.util.task.TaskMonitor;
+
+
+public abstract class MetadataRehydrator {
+
+    private boolean _markupRehydrationCode;
+
+    public abstract PointerScanResult rehydrate(Program program, AddressRange dehydrated, TaskMonitor monitor, MessageLog log) throws Exception;
+
+    public void markupRehydrationCode(boolean value) {
+        _markupRehydrationCode = value;
+    }
+
+    public boolean markupRehydrationCode() {
+        return _markupRehydrationCode;
+    }
+}
+```
+
+`src/main/java/nativeaot/rehydration/MetadataRehydratorNet80.java`:
+
+```java
+
+package nativeaot.rehydration;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import ghidra.app.util.bin.BinaryReader;
+import ghidra.app.util.bin.MemoryByteProvider;
+import ghidra.app.util.importer.MessageLog;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.address.AddressRange;
+import ghidra.program.model.address.AddressSet;
+import ghidra.program.model.address.AddressSpace;
+import ghidra.program.model.listing.CodeUnit;
+import ghidra.program.model.listing.CommentType;
+import ghidra.program.model.listing.Program;
+import ghidra.util.task.TaskMonitor;
+import nativeaot.Constants;
+
+public class MetadataRehydratorNet80 extends MetadataRehydrator {
+
+    @Override
+    public PointerScanResult rehydrate(Program program, AddressRange dehydrated, TaskMonitor monitor, MessageLog log) throws Exception {
+        var memory = program.getMemory();
+        var listing = program.getListing();
+        var space = dehydrated.getAddressSpace();
+
+        var reader = new BinaryReader(new MemoryByteProvider(memory, space), true);
+        reader.setPointerIndex(dehydrated.getMinAddress().getOffset());
+
+        var hydrationBase = readRelPtr32(space, reader);
+
+        // Initialize with zero bytes.
+        var block = memory.getBlock(hydrationBase);
+        try {
+            memory.convertToInitialized(block, (byte) 0x00);
+        } catch (IllegalArgumentException ex) {
+            // Memory block was already initialized. We can ignore this.
+        }
+
+        // Fixups table appears right after dehydrated data.
+        var fixupsStart = dehydrated.getMaxAddress();
+        
+        monitor.setShowProgressValue(true);
+        monitor.setIndeterminate(false);
+        monitor.setProgress(0);
+        monitor.setMaximum(dehydrated.getLength());
+        monitor.setMessage(String.format("%s: Rehydrating .NET metadata...", Constants.TAG));
+
+        // TODO: relocation registration.
+        var pointerLocations = new ArrayList<Address>();
+
+        try (var hydrated = new ByteArrayOutputStream()) {
+            var command = new DehydratedDataCommand();
+            while (reader.getPointerIndex() < dehydrated.getMaxAddress().getOffset()) {
+                // Update progress.
+                monitor.checkCancelled();
+                monitor.setProgress(reader.getPointerIndex() - dehydrated.getMinAddress().getOffset());
+
+                // Read next comment.
+                long offset = reader.getPointerIndex();
+                command.initFromReader(reader);
+
+                if (markupRehydrationCode()) {
+                    listing.setComment(space.getAddress(offset), CommentType.EOL, command.toString());
+                }
+
+                // Simulate next command.
+                int payload = command.getPayload();
+                switch (command.getCommand()) {
+                    case DehydratedDataCommand.COPY -> {
+                        hydrated.write(reader.readNextByteArray(payload));
+                    }
+
+                    case DehydratedDataCommand.ZERO_FILL -> {
+                        for (int i = 0; i < payload; i++) {
+                            hydrated.write(0);
+                        }
+                    }
+
+                    case DehydratedDataCommand.REL_PTR32_RELOC -> {
+                        var ptr = readRelPtr32(space, reader, fixupsStart.getOffset() + payload * 4L);
+                        writeRelPtr32(hydrated, ptr);
+                    }
+
+                    case DehydratedDataCommand.PTR_RELOC -> {
+                        var ptr = readRelPtr32(space, reader, fixupsStart.getOffset() + payload * 4L);
+                        pointerLocations.add(hydrationBase.add(hydrated.size()));
+                        writeInt64(hydrated, ptr.getOffset());
+                    }
+
+                    case DehydratedDataCommand.INLINE_REL_PTR32_RELOC -> {
+                        for (int i = 0; i < payload; i++) {
+                            monitor.checkCancelled();
+                            writeRelPtr32(hydrated, readRelPtr32(space, reader));
+                        }
+                    }
+
+                    case DehydratedDataCommand.INLINE_PTR_RELOC -> {
+                        for (int i = 0; i < payload; i++) {
+                            monitor.checkCancelled();
+                            pointerLocations.add(hydrationBase.add(hydrated.size()));
+                            writeInt64(hydrated, readRelPtr32(space, reader).getOffset());
+                        }
+                    }
+
+                    default -> throw new Exception(String.format("%x: %s", reader.getPointerIndex(), command));
+                }
+            }
+
+            memory.setBytes(hydrationBase, hydrated.toByteArray());
+            monitor.setProgress(monitor.getMaximum());
+            
+            var finalRange = new AddressSet(hydrationBase, hydrationBase.add(hydrated.size())).getFirstRange();
+            
+            return new PointerScanResult(
+                finalRange,
+                pointerLocations.toArray(Address[]::new)
+            );
+        }
+    }
+
+    private static Address readRelPtr32(AddressSpace space, BinaryReader reader) throws IOException {
+        long base = reader.getPointerIndex();
+        int offset = reader.readNextInt();
+        return space.getAddress(base + offset);
+    }
+
+    private static Address readRelPtr32(AddressSpace space, BinaryReader reader, long index) throws IOException {
+        long base = index;
+        int offset = reader.readInt(index);
+        return space.getAddress(base + offset);
+    }
+
+    private static void writeRelPtr32(ByteArrayOutputStream output, Address ptr) throws IOException {
+        int delta = (int) (ptr.getOffset() - output.size());
+        writeInt32(output, delta);
+    }
+
+    private static void writeInt32(ByteArrayOutputStream output, int value) throws IOException {
+        // No little-endian writer in ByteArrayOutputStream or DataOutputStream :(
+        output.write(value & 0xFF);
+        output.write((value >> 8) & 0xFF);
+        output.write((value >> 16) & 0xFF);
+        output.write((value >> 24) & 0xFF);
+    }
+
+    private static void writeInt64(ByteArrayOutputStream output, long value) throws IOException {
+        // No little-endian writer in ByteArrayOutputStream or DataOutputStream :(
+        output.write((int) (value & 0xFF));
+        output.write((int) ((value >> 8) & 0xFF));
+        output.write((int) ((value >> 16) & 0xFF));
+        output.write((int) ((value >> 24) & 0xFF));
+        output.write((int) ((value >> 32) & 0xFF));
+        output.write((int) ((value >> 40) & 0xFF));
+        output.write((int) ((value >> 48) & 0xFF));
+        output.write((int) ((value >> 56) & 0xFF));
+    }
+
+    static class DehydratedDataCommand {
+        public static final byte COPY = 0x00;
+        public static final byte ZERO_FILL = 0x01;
+        public static final byte REL_PTR32_RELOC = 0x02;
+        public static final byte PTR_RELOC = 0x03;
+        public static final byte INLINE_REL_PTR32_RELOC = 0x04;
+        public static final byte INLINE_PTR_RELOC = 0x05;
+
+        private static final byte DEHYDRATED_DATA_COMMAND_MASK = 0x07;
+        private static final int DEHYDRATED_DATA_COMMAND_PAYLOAD_SHIFT = 3;
+        private static final int MAX_RAW_SHORT_PAYLOAD = (1 << (8 - DEHYDRATED_DATA_COMMAND_PAYLOAD_SHIFT)) - 1;
+        private static final int MAX_EXTRA_PAYLOAD_BYTES = 3;
+        private static final int MAX_SHORT_PAYLOAD = MAX_RAW_SHORT_PAYLOAD - MAX_EXTRA_PAYLOAD_BYTES;
+
+        private byte _command;
+        private int _payload;
+
+        public DehydratedDataCommand() {
+        }
+
+        public DehydratedDataCommand(BinaryReader reader) throws Exception {
+            initFromReader(reader);
+        }
+
+        public byte getCommand() {
+            return _command;
+        }
+
+        public int getPayload() {
+            return _payload;
+        }
+
+        public final void initFromReader(BinaryReader reader) throws IOException {
+            int b = (int) reader.readNextByte() & 0xFF;
+            _command = (byte) (b & DEHYDRATED_DATA_COMMAND_MASK);
+            _payload = b >> DEHYDRATED_DATA_COMMAND_PAYLOAD_SHIFT;
+            int extraBytes = _payload - MAX_SHORT_PAYLOAD;
+            if (extraBytes > 0) {
+                _payload = ((int) reader.readNextByte() & 0xFF);
+                if (extraBytes > 1) {
+                    _payload += (((int) reader.readNextByte() & 0xFF) << 8);
+                    if (extraBytes > 2)
+                        _payload += ((int) reader.readNextByte() & 0xFF) << 16;
+                }
+
+                _payload += MAX_SHORT_PAYLOAD;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return switch (getCommand()) {
+                case DehydratedDataCommand.COPY -> String.format("COPY %x", getPayload());
+                case DehydratedDataCommand.ZERO_FILL -> String.format("ZERO_FILL %x", getPayload());
+                case DehydratedDataCommand.REL_PTR32_RELOC -> String.format("REL_PTR32_RELOC %x", getPayload());
+                case DehydratedDataCommand.PTR_RELOC -> String.format("PTR_RELOC %x", getPayload());
+                case DehydratedDataCommand.INLINE_REL_PTR32_RELOC -> String.format("INLINE_REL_PTR32_RELOC %x", getPayload());
+                case DehydratedDataCommand.INLINE_PTR_RELOC -> String.format("INLINE_PTR_RELOC %x", getPayload());
+                default -> "???";
+            };
+        }
+    }
+}
+```
+
+`src/main/java/nativeaot/rehydration/PointerScanResult.java`:
+
+```java
+package nativeaot.rehydration;
+
+import ghidra.program.model.address.Address;
+import ghidra.program.model.address.AddressRange;
+
+
+public class PointerScanResult {
+    private final AddressRange hydratedRange;
+    private final Address[] pointerLocations;
+
+    public PointerScanResult(AddressRange hydratedRange, Address[] pointerLocations) {
+        this.hydratedRange = hydratedRange;
+        this.pointerLocations = pointerLocations;
+    }
+
+    public AddressRange getScanningRange() {
+        return hydratedRange;
+    }
+
+    public Address[] getPointerLocations() {
+        return pointerLocations;
+    }    
+}
+```
+
+`src/main/java/nativeaot/rtr/ReadyToRunDirectory.java`:
+
+```java
+
+package nativeaot.rtr;
+
+import java.io.IOException;
+import java.util.Arrays;
+
+import ghidra.app.util.bin.BinaryReader;
+import ghidra.app.util.bin.MemoryByteProvider;
+import ghidra.app.util.bin.StructConverter;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.data.ArrayDataType;
+import ghidra.program.model.data.DataType;
+import ghidra.program.model.data.Pointer64DataType;
+import ghidra.program.model.data.StructureDataType;
+import ghidra.program.model.listing.Program;
+import ghidra.util.exception.DuplicateNameException;
+import nativeaot.Constants;
+
+public class ReadyToRunDirectory implements StructConverter {
+    private static final byte EXPECTED_NUMBER_OF_SECTIONS_UPPER_BOUND = 0x50;
+
+    private final short _majorVersion;
+    private final short _minorVersion;
+    private final int _attributes;
+    private final ReadyToRunSection[] _sections;
+
+    public ReadyToRunDirectory(BinaryReader reader) throws IOException {
+        if (reader.readNextInt() != Constants.READY_TO_RUN_SIGNATURE) {
+            throw new IOException("Reader does not start with the magic RTR\0");
+        }
+        _majorVersion = reader.readNextShort();
+        _minorVersion = reader.readNextShort();
+        _attributes = reader.readNextInt();
+
+        short sectionCount = reader.readNextShort();
+        byte entrySize = reader.readNextByte();
+        byte entryType = reader.readNextByte();
+
+        if (sectionCount > EXPECTED_NUMBER_OF_SECTIONS_UPPER_BOUND) {
+            throw new IOException("Unexpected number of sections %d".formatted(sectionCount));
+        }
+
+        _sections = new ReadyToRunSection[sectionCount];
+        for (int i = 0; i < sectionCount; i++) {
+            _sections[i] = new ReadyToRunSection(reader);
+        }
+    }
+
+    public static ReadyToRunDirectory readAtAddress(Program program, Address address) throws IOException {
+        var provider = new MemoryByteProvider(
+            program.getMemory(),
+            address.getAddressSpace()
+        );
+
+        var reader = new BinaryReader(provider, true);
+        reader.setPointerIndex(address.getOffset());
+
+        return new ReadyToRunDirectory(reader);
+    }
+
+    public ReadyToRunSection[] getSections() {
+        return Arrays.copyOf(_sections, _sections.length);
+    }
+
+    public ReadyToRunSection getSectionByType(int type) {
+        for (var section : _sections) {
+            if (section.getType() == type) {
+                return section;
+            }
+        }
+
+        return null;
+    }
+
+    public short getMajorVersion() {
+        return _majorVersion;
+    }
+
+    public short getMinorVersion() {
+        return _minorVersion;
+    }
+
+    public int getAttributes() {
+        return _attributes;
+    }
+
+    public int getSectionCount() {
+        return _sections.length;
+    }
+
+    @Override
+    public DataType toDataType() throws DuplicateNameException, IOException {
+        var row = new StructureDataType("ModuleInfoRow", 0);
+        row.add(DWORD, "Type", null);
+        row.add(DWORD, "Flags", null);
+        row.add(Pointer64DataType.dataType, "Start", null);
+        row.add(Pointer64DataType.dataType, "End", null);
+        row.setCategoryPath(Constants.CATEGORY_READYTORUN);
+
+        var result = new StructureDataType("ReadyToRunHeader", 0);
+        row.setCategoryPath(Constants.CATEGORY_READYTORUN);
+
+        result.add(DWORD, "Signature", null);
+        result.add(WORD, "MajorVersion", null);
+        result.add(WORD, "MinorVersion", null);
+        result.add(DWORD, "Flags", null);
+        result.add(WORD, "NumberOfSections", null);
+        result.add(BYTE, "EntrySize", null);
+        result.add(BYTE, "EntryType", null);
+
+        result.add(new ArrayDataType(row, _sections.length), "Sections", null);
+
+        return result;
+    }
+
+}
+```
+
+`src/main/java/nativeaot/rtr/ReadyToRunLocator.java`:
+
+```java
+
+package nativeaot.rtr;
+
+import ghidra.app.util.importer.MessageLog;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.listing.Program;
+import ghidra.util.exception.CancelledException;
+import ghidra.util.task.TaskMonitor;
+
+public interface ReadyToRunLocator {
+    Address[] locateModules(Program program, TaskMonitor monitor, MessageLog log) throws CancelledException;
+}
+```
+
+`src/main/java/nativeaot/rtr/ReadyToRunSection.java`:
+
+```java
+
+package nativeaot.rtr;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import ghidra.app.util.bin.BinaryReader;
+import ghidra.program.model.address.Address;
+
+public class ReadyToRunSection {
+    public static final int FROZEN_OBJECT_REGION = 206;
+    public static final int DEHYDRATED_DATA = 207;
+
+    private final int _type;
+    private final int _flags;
+    private final long _start;
+    private final long _end;
+
+    public ReadyToRunSection(BinaryReader reader) throws IOException {
+        _type = reader.readNextInt();
+        _flags = reader.readNextInt();
+        _start = reader.readNextLong();
+        _end = reader.readNextLong();
+    }
+
+    public int getType() {
+        return _type;
+    }
+
+    public int getFlags() {
+        return _flags;
+    }
+
+    public long getStart() {
+        return _start;
+    }
+
+    public long getEnd() {
+        return _end;
+    }
+
+    public Address[] getPointersInSection(Address[] addresses) {
+        var result = new ArrayList<Address>();
+        for (var address : addresses) {
+            if (address.getOffset() >= getStart()
+                && address.getOffset() < getEnd()) {
+                result.add(address);
+            }
+        }
+        return result.toArray(Address[]::new);
+    }
+}
+```
+
+`src/main/java/nativeaot/rtr/SignatureReadyToRunLocator.java`:
+
+```java
+package nativeaot.rtr;
+
+import ghidra.app.util.importer.MessageLog;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.listing.Program;
+import ghidra.program.model.mem.Memory;
+import ghidra.program.model.mem.MemoryAccessException;
+import ghidra.util.exception.CancelledException;
+import ghidra.util.task.TaskMonitor;
+import nativeaot.Constants;
+
+import java.util.ArrayList;
+
+public class SignatureReadyToRunLocator implements ReadyToRunLocator {
+
+    public static final SignatureReadyToRunLocator instance = new SignatureReadyToRunLocator();
+
+    private static final byte EXPECTED_ENTRY_SIZE = 0x18;
+    private static final byte EXPECTED_ENTRY_TYPE = 0x01;
+    private static final byte EXPECTED_NUMBER_OF_SECTIONS_UPPER_BOUND = 0x50;
+
+    @Override
+    public Address[] locateModules(Program program, TaskMonitor monitor, MessageLog log) throws CancelledException {
+        var result = new ArrayList<Address>();
+        var memory = program.getMemory();
+
+        monitor.setMessage(Constants.TAG + ": Scanning for RTR signatures...");
+        monitor.setMaximum(memory.getSize());
+        monitor.setIndeterminate(false);
+        monitor.setProgress(0);
+
+        for (var block : memory.getBlocks()) {
+            // We assume the modules are stored in an initialized data section.
+            if (!block.isRead() || !block.isInitialized() || block.isExecute()) {
+                continue;
+            }
+
+            var current = block.getStart();
+            var end = block.getEnd();
+
+            // Align start to 8 bytes
+            long offset = current.getOffset();
+            if (offset % 8 != 0) {
+                current = current.add(8 - (offset % 8));
+            }
+
+            try{
+                while (current.compareTo(end) <= 0) {
+                    monitor.checkCancelled();
+                    monitor.setProgress(current.getOffset() - block.getStart().getOffset());
+
+                    if (isLikelyValidRtrHeader(memory, current)) {
+                        result.add(current);
+                    }
+
+                    current = current.add(8);
+                }
+            } catch (MemoryAccessException e) {
+                continue;
+            }
+        }
+
+        return  result.toArray(new Address[0]);
+    }
+
+    private static boolean isLikelyValidRtrHeader(Memory memory, Address address) throws MemoryAccessException {
+        // Expected pattern:
+        // dOff     Type      Expected Value          Description
+        // +0x00    ddw       00525452h               Signature
+        // +0x04    dw        ??                      MajorVersion
+        // +0x06    dw        ??                      MinorVersion
+        // +0x08    ddw       ??                      Flags
+        // +0x0c    dw        < 50h                   NumberOfSections
+        // +0x0e    db        18h                     EntrySize
+        // +0x0f    db        1h                      EntryType
+
+        return memory.getInt(address) == Constants.READY_TO_RUN_SIGNATURE
+                && memory.getByte(address.add(0x0C)) < EXPECTED_NUMBER_OF_SECTIONS_UPPER_BOUND
+                && memory.getByte(address.add(0x0E)) == EXPECTED_ENTRY_SIZE
+                && memory.getByte(address.add(0x0F)) == EXPECTED_ENTRY_TYPE;
+    }
+}
+
+```
+
+`src/main/java/nativeaot/rtr/SymbolReadyToRunLocator.java`:
+
+```java
+
+package nativeaot.rtr;
+
+import java.lang.Exception;
+import java.util.ArrayList;
+
+import ghidra.app.util.importer.MessageLog;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.listing.Program;
+import ghidra.program.model.mem.MemoryAccessException;
+import ghidra.util.exception.CancelledException;
+import ghidra.util.task.TaskMonitor;
+import nativeaot.Constants;
+
+public class SymbolReadyToRunLocator implements ReadyToRunLocator {
+
+    public static final SymbolReadyToRunLocator instance = new SymbolReadyToRunLocator();
+
+    @Override
+    public Address[] locateModules(Program program, TaskMonitor monitor, MessageLog log) throws CancelledException {
+        var memory = program.getMemory();
+        try {
+            var candidates = findCandidates(program, monitor);
+            for (int i = 0; i < candidates.size(); i++) {
+                if (monitor != null)
+                    monitor.checkCancelled();
+
+                try {
+                    int signature = memory.getInt(candidates.get(i));
+                    if (signature != Constants.READY_TO_RUN_SIGNATURE) {
+                        candidates.remove(i);
+                        i--;
+                    }
+                } catch (MemoryAccessException ignored) {
+                }
+            }
+            return candidates.toArray(Address[]::new);
+        } catch (Exception ex) {
+            if (monitor != null) {
+                log.appendMsg("Failed to locate RTR roots using symbols.");
+                log.appendException(ex);
+            }
+
+            return new Address[0];
+        }        
+    }
+
+    private ArrayList<Address> findCandidates(Program program, TaskMonitor monitor) throws Exception {
+        var memory = program.getMemory();
+        var symbolTable = program.getSymbolTable();
+
+        var candidates = new ArrayList<Address>();
+
+        // Try finding an already annotated RTR directory header.
+        var directorySymbols = symbolTable.getSymbols(Constants.READY_TO_RUN_HEADER_SYMBOL_NAME);
+        for (var symbol : directorySymbols) {
+            candidates.add(symbol.getAddress());
+        }
+
+        // Try finding an already annotated RTR modules array.
+        var modulesStartSymbol = symbolTable.getSymbols(Constants.READY_TO_RUN_MODULES_START_SYMBOL_NAME);
+        if (!modulesStartSymbol.hasNext()) {
+            return candidates;
+        }
+
+        var modulesEndSymbol = symbolTable.getSymbols(Constants.READY_TO_RUN_MODULES_END_SYMBOL_NAME);
+        if (!modulesStartSymbol.hasNext()) {
+            return candidates;
+        }
+
+        // Read all module header pointers in array.
+        var start = modulesStartSymbol.next().getAddress();
+        var end = modulesEndSymbol.next().getAddress();
+        int count = (int) ((end.getOffset() - start.getOffset()) / 8);
+
+        for (int i = 0; i < count; i++) {
+            if (monitor != null) {
+                monitor.checkCancelled();
+            }
+
+            try {
+                long raw = memory.getLong(start.add(i * 8L));
+                if (raw == 0) {
+                    continue;
+                }
+
+                var address = start.getNewAddress(raw);
+                if (!candidates.contains(address)) {
+                    candidates.add(address);
+                }
+            } catch (MemoryAccessException ignored) {
+            }
+        }
+
+        return candidates;
+    }
+}
+```
+
+`src/main/resources/images/README.txt`:
+
+```txt
+The "src/resources/images" directory is intended to hold all image/icon files used by
+this module.
+
+```
