@@ -1,0 +1,4 @@
+本项目是一个内核与用户态通信示例：它劫持 dxgkrnl 中的 NtDxgkGetTrackedWorkloadStatistics，再通过同一通道完成简单的内存读写与绘制操作。
+驱动用一小段绝对跳转桩覆盖该 dxgkrnl 导出，基于 MmCopyVirtualMemory 与 KeStackAttachProcess 提供读写辅助，并解析 win32k 的 GDI 例程（如 NtUserGetDC、NtGdiPatBlt、NtGdiCreateSolidBrush），以便在内核上下文中绘制方框。
+用户态客户端通过 win32u.dll 调用 NtDxgkGetTrackedWorkloadStatistics，传入可请求模块基址或绘制矩形的 NULL_MEMORY 结构，并将该被挂钩的图形系统调用当作命令分发器。
+它主要适合研究图形相关通信挂钩、临时读写服务，以及通过 win32k 导出实现内核辅助覆盖层渲染的 Windows 内核研究者。
