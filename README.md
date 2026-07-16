@@ -157,6 +157,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/alliedmodders/hl2sdk [Half-Life SDK]
 - https://github.com/ezhangle/hlmaster [Half-Life Master Server]
 - https://github.com/MonoGame/MonoGame [.NET]
+- https://github.com/libgdx/libgdx [Cross-platform Java game development framework]
 - https://github.com/vchelaru/FlatRedBall [.NET 2D]
 - https://github.com/nCine/nCine [2D]
 - https://github.com/gameplay3d/gameplay [2D/3D]
@@ -168,6 +169,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/melonjs/melonJS [HTML5]
 - https://github.com/egret-labs/egret-core [HTML5]
 - https://github.com/pixijs/pixijs [HTML5]
+- https://github.com/BabylonJS/Babylon.js [HTML5/WebGL/WebGPU game and rendering engine]
 - https://github.com/playcanvas/engine [HTML5 3D]
 - https://github.com/TorqueGameEngines/Torque2D [2D]
 - https://github.com/TorqueGameEngines/Torque3D [3D]
@@ -210,6 +212,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/PanosK92/SpartanEngine [Research-focused game engine designed for real-time solutions]
 - https://github.com/OpenXRay/xray-16 [Improved version of the X-Ray Engine]
 - https://github.com/love2d/love [2D game framework for Lua]
+- https://github.com/4ian/GDevelop [Open-source cross-platform 2D/3D/multiplayer game engine]
 - https://github.com/PixelGuys/Cubyz [3D voxel sandbox game written by Zig language]
 - https://github.com/RSDKModding/RSDKv5-Decompilation [Retro Engine v5 / v5Ultimate decompilation]
 
@@ -616,6 +619,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/frostbone25/ShaderInjector [D3D12 shader injector for FF7 Rebirth PC — intercepts rendering API calls to inject/replace pixel shaders at runtime; minhook + ImGui; adaptable to other D3D12 titles]
 - https://github.com/niemand-sec/DirectX11Hook [DX11 Imgui]
 - https://github.com/guided-hacking/GH_D3D11_Hook [DX11]
+- https://github.com/justinstenning/Direct3DHook [Direct3D 9/10/11 API hooks for screen capture and in-game overlays]
+- https://github.com/nefarius/HydraHook [DirectX 9–12 API-hooking and overlay rendering framework for games]
 - https://github.com/gogo9211/Discord-Overlay-Hook [DX11]
 - https://github.com/ocornut/imgui/commit/923bd2fd217c1dc1e75fa92b0284d3817904988b [DX11/12 ResizeBuffers]
 - https://github.com/marlkiller/d3dhook_imgui [d3d opengl hook imgui x86/x64]
@@ -948,11 +953,14 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/JonathanSalwan/VMProtect-devirtualization [Experimental VMProtect 3.x pure-function deobfuscation via symbolic execution and LLVM]
 - https://github.com/gmh5225/VMP-Vmp3_64bit_disasm-prerelease-
 - https://github.com/gmh5225/Vmp3_utils
+- https://github.com/mike1k/VMPImportFixer [Resolves VMProtect 3.x import protection via emulation (x86/x64)]
 - https://github.com/archercreat/titan
 - https://github.com/NaC-L/Mergen
 - https://github.com/fjqisba/VmpHelper
 - https://github.com/xtremegamer1/vmdevirt-vtil
 - https://github.com/oureveryday/VMPUnpacker/tree/master [Unpacker]
+- https://github.com/void-stack/VMUnprotect.Dumper [Dynamically untamper/unpack VMProtect-protected .NET assemblies]
+- https://github.com/void-stack/VMUnprotect [Dynamically log/manipulate VMProtect-virtualized .NET methods via Harmony]
 - https://github.com/poppopjmp/VMDragonSlayer [Advanced Virtual Machine Detection and Analysis Framework]
 - https://github.com/notsnakesilent/VMPStatic [A static VMProtect unpacker for PE files, supports VMProtect 1.x–3.x and rebuilding unpacked PE images]
 
@@ -1818,6 +1826,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/FreeER/CE-Extensions [Lua Extensions]
 - https://github.com/Skyrimfus/CE-lua-extensions [Lua Extensions]
 - https://github.com/bbfox0703/Mydev-Cheat-Engine-Tables [CT]
+- https://github.com/Hexorg/CheatEngineTables [Collection of Cheat Engine tables curated from CE forums (offline-focused)]
 - https://github.com/inuNorii/Elden-Ring-CT-TGA [Elden Ring]
 - https://github.com/gmh5225/CE-remap-plugin [Remap]
 - https://github.com/gmh5225/overwatch-iat-fixer [Overwatch IAT Fixer]
@@ -1999,6 +2008,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/realquantumstealth-hub/PCILeech-DMA-Fullstealth [Quantumstealth open source Fullstealth firmware; Vivado build for M2/Squirrel/Captain 75T/Enigma X1]
 - https://github.com/NoviceLevel/Pcileech-QuantumStealth-Max [Pcileech QuantumStealth Max firmware; Vivado for M2/Squirrel/100T/Captain 75T/Enigma X1/Immortal 75T]
 - https://github.com/ekknod/pcileech-wifi [pcileech-fpga with wireless card emulation]
+- https://github.com/JOKOSAHS/DMA-Pcileech [pcileech-style DMA network-card firmware (AX200) for FPGA DMA research vs anti-cheat]
 - https://github.com/Cr4sh/pico_dma
 - https://github.com/Cr4sh/s6_pcie_microblaze [PCIe DIY DMA toolkit for Xilinx SP605 with TLP control, UEFI/Hyper-V backdoor PoCs]
 - https://github.com/kWAYTV/dma-cheat-base [Cheat base]
@@ -2664,6 +2674,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Explore AntiCheat System:VAC
 - https://github.com/danielkrupinski/VAC-Bypass-Loader
+- https://github.com/danielkrupinski/VAC-Bypass [User-mode VAC bypass (C) that aborts VAC scans so CE/cheats can attach without VAC Error]
 - https://github.com/danielkrupinski/vac-hooks
 - https://github.com/mdilai/Shtreeba [Injector]
 - https://github.com/zyhp/vac3_inhibitor
@@ -3206,6 +3217,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Astronaut00/apex-external
 - https://github.com/YMY1666527646/Phoenix-Valorant-Cheat
 - https://github.com/CasualX/apexbot
+- https://github.com/CasualX/apexdream [External Apex Legends cheat in Rust (aim assist, triggerbot, ESP); embeddable API]
 - https://github.com/TheCruZ/Apex_Legends_Driver_Cheat
 - https://github.com/Keyzp1337/Fortnite
 - https://github.com/Zurek0x/NuremX [AI]
@@ -3892,6 +3904,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Alcatraz
 - https://github.com/es3n1n/obfuscator
 - https://github.com/ykus4/kagura [LLVM pass plugin for CFG/string obfuscation, anti-tamper, and anti-debug across mobile/desktop/Wasm]
+- https://github.com/nkhmelni/Obscura [Hassle-free LLVM pass-plugin obfuscator for C/C++/ObjC/Swift]
 - https://github.com/jnastarot/furikuri
 - https://github.com/nickcano/RelocBonus [Attack Reloc]
 - https://github.com/maoabc/nmmp [Dex]
@@ -3900,6 +3913,11 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/nelfo/Milfuscator
 - https://github.com/romainthomas/the-poor-mans-obfuscator [elf/macho]
 - https://github.com/Guardsquare/proguard [Java]
+- https://github.com/javascript-obfuscator/javascript-obfuscator [JavaScript/Node.js obfuscator]
+- https://github.com/burrowers/garble [Go build-time obfuscator]
+- https://github.com/dashingsoft/pyarmor [Python script obfuscator with machine-binding and expiry options]
+- https://github.com/rockbruno/swiftshield [Swift identifier obfuscator for iOS apps against RE]
+- https://github.com/sfr-development/Lua-Obfuscator-Clyde-Protection [Luau/Lua VM-based obfuscator for Roblox script protection]
 - https://github.com/xiaoweime/WProtect
 - https://github.com/DeDf/WProtect
 - https://github.com/jokerNi/WProtectSDK
@@ -3913,6 +3931,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/EntropyReducer [Reduce Entropy]
 - https://github.com/Washi1337/AwaitFuscator [.NET]
 - https://github.com/obfuscar/obfuscar [Open-source .NET assembly obfuscator]
+- https://github.com/nak0823/ObfuscationMethods [C#/.NET assembly obfuscation technique demos using dnlib]
 - https://github.com/badhive/stitch [X86: Rewrite and obfuscate code in compiled binaries]
 - https://github.com/0xMohammedHassan/morphkatz [Polymorphic PE rewriter for Windows x64; semantically identical but byte-different binary variants]
 - https://github.com/keowu/Ryujin [X86 PE BIN2BIN]
