@@ -1,0 +1,4 @@
+本项目是一个精简的内核通信库，通过 HalPrivateDispatchTable 钩子路由读、写与进程查询请求，而不依赖传统的设备对象。
+驱动程序将 HalTimerQueryAuxiliaryCounterFrequency 替换为自定义处理程序，从调用方 trap frame 取出 c_packet，解码 read_process_memory、write_process_memory 与 query_process_data 请求，并通过目标进程的 CR3 将虚拟地址转换为物理页后完成服务。
+第二个钩子挂在 HalClearLastBranchRecordStack 上，用当前 CR3 刷新 DirectoryTableBase；用户态封装则通过 c_r69 类暴露该路径，该类包装了 NtQueryAuxiliaryCounterFrequency，并可按进程名附加到目标进程。
+它主要适合 Windows 内核研究者，用于研究接近系统调用的通信方式、HalPrivateDispatchTable 滥用，以及不依赖标准 IOCTL 接口、基于物理内存的进程访问。
