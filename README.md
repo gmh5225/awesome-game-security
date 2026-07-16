@@ -970,6 +970,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ergrelet/themida-unmutate
 - https://github.com/ergrelet/unlicense [Dynamic unpacker and import fixer for Themida/WinLicense 2.x and 3.x]
 - https://github.com/Hendi48/Magicmida [Themida auto-unpacker for 32/64-bit apps with dump and section restore helpers]
+- https://github.com/guoxing2024/magicmida-rs [Rust reimplementation of Magicmida Themida unpacker with IAT rebuild and OEP discovery]
 - https://github.com/bobalkkagi/bobalkkagi [Themida 3.x unpacking/unwrapping via API-hook emulation (Tiger red64)]
 - https://github.com/stuxnet147/Themida-Research [Themida 3.x research]
 - https://github.com/Marisa-Chan/GhidrOrean [Ghidra Python reimplementation of Deathway's Orean's Unvirtualizer — Oreans VM (Themida/Code Virtualizer) CISC/TIGER/RISC/FISH]
@@ -2862,6 +2863,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Game:Minecraft
 - [A minecraft server backend written in c++](https://github.com/gmh5225/minecpp)
+- https://github.com/AnarchDevelopment/aegledll [Internal Minecraft DX11 DLL client with ImGui overlay and MinHook hooks]
 
 > Game:Sword With Sauce
 - https://github.com/1hAck-0/UE4-Cheat-Source-Code
@@ -3119,6 +3121,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Vekor64/PythonCS2 [Python External]
 - https://github.com/maecry/asphyxia-cs2 [Internal]
 - https://github.com/Leksa667/YOLOv8-Overlay-CS2 [YOLOv8 in CS2]
+- https://github.com/ccsimplyspolit/CS2-P2C-TEMPLATES [CS2 security-research P2C templates: VMProtect FVA reconstruction, kernel drivers, and user-mode injectors]
   
 > Game:Assault Cube
 - https://github.com/gmh5225/external-esp-hack-assaultcube [GDI overlay]
@@ -3994,6 +3997,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/MrDiamond64/Scythe-AntiCheat [Minecraft]
 - https://github.com/GrimAnticheat/Grim [Minecraft]
 - https://github.com/NoCheatPlus/NoCheatPlus [Open-source anti-cheat plugin for Minecraft (Bukkit/Spigot)]
+- https://github.com/Visual1mpact/Paradox_AntiCheat [Open-source anti-cheat for Minecraft Bedrock (Realms/BDS)]
 - https://github.com/SLAUC91/AntiCheat [Windows rootkit and cheat scanner (hooks, handles, drivers, modules)]
 - https://github.com/gmh5225/AntiCheat
 - https://github.com/ComodoSecurity/openedr [EDR]
@@ -4195,6 +4199,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/apkunpacker/RootAppDetector [Small POC code that detects known root-related apps by attempting to launch their activities and monitoring security exception]
 - https://github.com/Rem01Gaming/meowna_detector [Prove of concept of detecting meowna module]
 - https://github.com/WsttXm/RiskEngine [Android risk-control SDK and management platform: device fingerprinting and runtime detection (root/hook/emulator/debug/sandbox)]
+- https://github.com/NoobDigital/react-native-shieldscan [React Native root/jailbreak, Frida, debugger, emulator, and hook-framework detection]
 - https://github.com/LSPosed/DirtySepolicy [Detect userspace su solutions via SELinux access checks from the App Zygote process]
 
 > Detection:Magisk
@@ -4254,6 +4259,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/GuidoBartoli/sherloq [An open-source digital image forensic toolset]
 - https://github.com/olafhartong/BamboozlEDR [A comprehensive ETW (Event Tracing for Windows) event generation tool designed for testing and research purposes]
 - https://github.com/artmih24/TeleParser [Simple parser for Telegram chats and channels with lemmatizer. Writes data in JSON, CSV and MongoDB]
+- https://github.com/Sutaigne/alibi [Read-only Windows forensic kit for game-cheat/DMA/BYOVD and console-rig aimbot evidence]
 
 > Dynamic Script
 - https://github.com/can1357/NtLua
