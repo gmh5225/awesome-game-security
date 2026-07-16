@@ -680,6 +680,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/wtsxDev/reverse-engineering
 - https://github.com/mytechnotalent/Hacking-Windows
 - https://github.com/kotae4/intro-to-gamehacking
+- https://github.com/ridpath/gamehacking-cheatsheet [Game-hacking cheatsheet covering memory RE, injection, and anti-cheat topics]
 - https://blog.can.ac/author/can1357
 - https://github.com/SinaKarvandi/Hypervisor-From-Scratch [Hypervisor]
 - https://secret.club
@@ -730,6 +731,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Debugging
 - https://github.com/stars/gmh5225/lists/debugger [List]
 - https://github.com/cheat-engine/cheat-engine
+- https://github.com/Squalr/Squalr-Sharp [C# game memory editor with scanning, pointers, and assembly injection]
 - https://github.com/SinaKarvandi/Hypervisor-From-Scratch [Hypervisor]
 - https://github.com/JasonGoemaat/CheatEngineMonoHelper [CE Mono Helper]
 - https://github.com/gmh5225/frida-ceserver [CE Server For IOS]
@@ -940,6 +942,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Fix VMP
 - https://github.com/gmh5225/VMProtect
 - https://github.com/wallds/NoVmpy
+- https://github.com/can1357/NoVmp [Static VMProtect x64 3.x devirtualizer powered by VTIL]
+- https://github.com/JonathanSalwan/VMProtect-devirtualization [Experimental VMProtect 3.x pure-function deobfuscation via symbolic execution and LLVM]
 - https://github.com/gmh5225/VMP-Vmp3_64bit_disasm-prerelease-
 - https://github.com/gmh5225/Vmp3_utils
 - https://github.com/archercreat/titan
@@ -1802,6 +1806,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/cycraft-corp/BinaryAnalysisMCPs [Binary analysis MCPs collections]
 - https://github.com/dariushoule/x64dbg-rippy [AI reverse engineering assistant for x64dbg]
 - https://github.com/dariushoule/x64dbg-automate-pyclient [Python client for scriptable and repeatable debug sessions; full RPC protocol + MCP server]
+- https://github.com/codecat/ClawSearch [x64dbg memory scanner plugin inspired by Cheat Engine]
 
 > Cheat Engine Plugins
 - https://github.com/FreeER/CE-Extensions [Lua Extensions]
@@ -1987,6 +1992,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/NoviceLevel/Pcileech-QuantumStealth-Max [Pcileech QuantumStealth Max firmware; Vivado for M2/Squirrel/100T/Captain 75T/Enigma X1/Immortal 75T]
 - https://github.com/ekknod/pcileech-wifi [pcileech-fpga with wireless card emulation]
 - https://github.com/Cr4sh/pico_dma
+- https://github.com/Cr4sh/s6_pcie_microblaze [PCIe DIY DMA toolkit for Xilinx SP605 with TLP control, UEFI/Hyper-V backdoor PoCs]
 - https://github.com/kWAYTV/dma-cheat-base [Cheat base]
 - https://github.com/Spuckwaffel/DMALib [DMA library]
 - https://github.com/Metick/DMALibrary [DMA library]
@@ -2762,6 +2768,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/H3d9/sguard_limit
 - https://github.com/rogxo/ReadPhys
 - https://github.com/libtersafe/dfm_android_unicorn [Coordinate Decryption (Android ARM64)]
+- https://github.com/wwweeeqqu/honor-of-kings-RE-research [Honor of Kings mobile RE: KernelPatch KPM reads, Tencent ACE analysis, IL2CPP/native notes]
 
 > Explore AntiCheat System:G-Presto
 - https://github.com/ARandomPerson7/G-Presto-Anti-Cheat-Reverse-Engineered/blob/main/Main.cpp
@@ -3666,6 +3673,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Anti Debugging
 - https://github.com/LordNoteworthy/al-khaser
+- https://github.com/guidedhacking/GH_AntiDebug_Bypass_Practice_Tool [Win32 practice app with common anti-debug checks for bypass training]
 - https://github.com/hfiref0x/WubbabooMark
 - https://github.com/samshine/ScyllaHideDetector2 
 - https://github.com/revsic/AntiDebugging
@@ -3874,6 +3882,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/weak1337/Alcatraz
 - https://github.com/gmh5225/Alcatraz
 - https://github.com/es3n1n/obfuscator
+- https://github.com/ykus4/kagura [LLVM pass plugin for CFG/string obfuscation, anti-tamper, and anti-debug across mobile/desktop/Wasm]
 - https://github.com/jnastarot/furikuri
 - https://github.com/nickcano/RelocBonus [Attack Reloc]
 - https://github.com/maoabc/nmmp [Dex]
@@ -3894,6 +3903,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/open-obfuscator/dProtect [Java/Kotlin]
 - https://github.com/gmh5225/EntropyReducer [Reduce Entropy]
 - https://github.com/Washi1337/AwaitFuscator [.NET]
+- https://github.com/obfuscar/obfuscar [Open-source .NET assembly obfuscator]
 - https://github.com/badhive/stitch [X86: Rewrite and obfuscate code in compiled binaries]
 - https://github.com/0xMohammedHassan/morphkatz [Polymorphic PE rewriter for Windows x64; semantically identical but byte-different binary variants]
 - https://github.com/keowu/Ryujin [X86 PE BIN2BIN]
@@ -3924,6 +3934,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Ether2023/Ether-Uprotector
 - https://github.com/badApple001/Il2cppEncrtypt
 - https://github.com/focus-creative-games/obfuz
+- https://github.com/talsec/Free-RASP-Unity-POC [Unity freeRASP plugin for mobile root/jailbreak, Frida, tamper, and integrity detection]
 
 > Game Engine Protection:Source
 - [Source Engine serverside anti-cheat plugin. (CS:S, CS:GO, CS:P, TF2)](https://github.com/kanekikun420/NoCheatZ-3)
@@ -4111,6 +4122,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Detection:Injection
 - https://github.com/mq1n/DLLThreadInjectionDetector
 - https://github.com/Nou4r/ModFinder [Mapped Dll]
+- https://github.com/svespalec/faultline [Usermode PoC detecting manual-map/shellcode via working-set page-fault monitoring]
 - https://github.com/gmh5225/Driver-WatchOwl [ImageNotify+Stack Trace]
 - https://github.com/xuanxuan0/TiEtwAgent [ETW]
 - https://github.com/JingMatrix/Demo [A demo app to detect (Zygisk) library injections]
