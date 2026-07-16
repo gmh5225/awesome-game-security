@@ -170,6 +170,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Discover + 2-pass review + commit to main
+        id: discover
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           GH_TOKEN: ${{ github.token }}
@@ -208,4 +209,54 @@ jobs:
             ARGS+=(--queries-env DISCOVER_QUERIES)
           fi
 
-          python3 scripts/discover-repos-cli.py "${ARGS[@]}"
+          LOG=/tmp/discover-repos.log
+          python3 scripts/discover-repos-cli.py "${ARGS[@]}" | tee "$LOG"
+
+          commit_sha="$(grep -E '^COMMIT_SHA=' "$LOG" | tail -n1 | cut -d= -f2- || true)"
+          approved="$(grep -E '^Final: approved=' "$LOG" | tail -n1 | sed -E 's/^Final: approved=([0-9]+).*/\1/' || true)"
+          {
+            echo "commit_sha=${commit_sha}"
+            echo "approved_count=${approved:-0}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Notify Discord
+        if: success()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          COMMIT_SHA: ${{ steps.discover.outputs.commit_sha }}
+          APPROVED_COUNT: ${{ steps.discover.outputs.approved_count }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
+            echo "DISCORD_WEBHOOK_URL secret not set — skipping Discord notify."
+            exit 0
+          fi
+
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          if [ -n "${COMMIT_SHA:-}" ]; then
+            COMMIT_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${COMMIT_SHA}"
+            CONTENT="$(printf '✅ **Discover Repos** finished — added **%s** repo(s) to main\ncommit: `%s` → %s\nrun: %s' \
+              "${APPROVED_COUNT:-?}" "${COMMIT_SHA:0:12}" "${COMMIT_URL}" "${RUN_URL}")"
+          else
+            CONTENT="$(printf 'ℹ️ **Discover Repos** finished — no README commit\napproved: %s\nrun: %s' \
+              "${APPROVED_COUNT:-0}" "${RUN_URL}")"
+          fi
+
+          # Discord/Cloudflare rejects Python-urllib's default User-Agent (403).
+          CONTENT="$CONTENT" python3 - <<'PY'
+          import json, os, urllib.request
+          content = os.environ["CONTENT"]
+          url = os.environ["DISCORD_WEBHOOK_URL"]
+          body = json.dumps({"content": content}).encode()
+          req = urllib.request.Request(
+              url,
+              data=body,
+              headers={
+                  "Content-Type": "application/json",
+                  "User-Agent": "awesome-game-security-ci (GitHub Actions)",
+              },
+              method="POST",
+          )
+          with urllib.request.urlopen(req, timeout=30) as resp:
+              print(f"Discord webhook status={resp.status}")
+          PY
