@@ -1,0 +1,3818 @@
+Project Path: arc_bobalkkagi_bobalkkagi_hm6gvigy
+
+Source Tree:
+
+```txt
+arc_bobalkkagi_bobalkkagi_hm6gvigy
+├── LICENSE
+├── README.md
+├── bobalkkagi
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── api_hook.py
+│   ├── application.py
+│   ├── constValue.py
+│   ├── debugger.py
+│   ├── globalValue.py
+│   ├── hookFuncs.py
+│   ├── kuserSharedData.py
+│   ├── loader.py
+│   ├── logger.py
+│   ├── peb.py
+│   ├── reflector.py
+│   ├── teb.py
+│   ├── unpacking.py
+│   ├── unwrapping.py
+│   ├── util.py
+│   └── util_unwrap.py
+├── bobalkkagi.spec
+├── docs
+├── poetry.lock
+├── pyproject.toml
+├── testfiles
+└── win10_v1903
+    └── downlevel
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) [2022] [Bobalkkagi]
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+`README.md`:
+
+```md
+# TEAM Bobalkkagi
+
+BOB11 project
+
+Unpacking & Unwrapping & Devirtualization(Not yet) of Themida 3.1.3 packed program(Tiger red64)
+
+### API Hook
+
+Hooking API based win10_v1903  
+
+## How to
+
+### Install
+
+```
+pip install bobalkkagi
+```
+**or**
+
+```
+pip install git+https://github.com/bobalkkagi/bobalkkagi.git
+```
+
+### Notes
+
+Need default Dll folder(win10_v1903) or you can give dll folder path
+
+win10_v1903 folder is in https://github.com/bobalkkagi/bobalkkagi
+
+### Use
+```
+NAME
+    bobalkkagi
+
+SYNOPSIS
+    bobalkkagi PROTECTEDFILE <flags>
+
+POSITIONAL ARGUMENTS
+    PROTECTEDFILE
+        Type: str
+
+FLAGS
+    --mode=MODE
+        Type: str
+        Default: 'f'
+    --verbose=VERBOSE
+        Type: str
+        Default: 'f'
+    --dllPath=DLLPATH
+        Type: str
+        Default: 'win10_v1903'
+    --oep=OEP
+        Type: str
+        Default: 't'
+    --debugger=DEBUGGER
+        Type: str
+        Default: 'f'
+
+NOTES
+    You can also use flags syntax for POSITIONAL ARGUMENTS
+
+```
+
+### Option Description
+---
+
+
+#### Mode: f[fast], c[hook_code], b[hook_block]
+--- 
+
+Description: Mean emulating mode, we implement necessary api to unpack protected excutables by themida 3.1.3. 
+
+Running on **fast mode** compare rip with only hook API function area size 32(0x20), but **hook_block mode** and **hook_code mode** compare rip with all mapped DLL memory (min 0x1000000) to check functions. block mode emulate block size(call, jmp) code mode do it opcode by opcode.
+
+#### verbose
+---
+
+**verbose** show Loaded DLL on memory, we will update it to turn on/off HOOKING API CALL info.
+
+#### dllPath
+---
+
+**dllPath** is directory where DLLs to load on memory exists. DLLs are different for each window version. 
+This tool may be not working with your window DLL path(C:\Windows\System32)
+
+#### oep
+---
+
+**oep** is option to find original entry point. If you turn off this option, you can emulate program after oep
+**(fast mode can't do it, it works on hook_block and hook_code)**
+
+#### debugger
+---
+
+If you want unpack another protector or different version of themida, you should add necessary hook_api functions(anti debugging, handle, syscall). you can analyze protected program hook_code mode or hook_block mode(more detail in https://github.com/unicorn-engine/unicorn) with **debugger option(working only hook_code mode!)**
+
+
+
+
+
+
+```
+
+`bobalkkagi.spec`:
+
+```spec
+# -*- mode: python ; coding: utf-8 -*-
+
+from PyInstaller.utils.hooks import collect_dynamic_libs
+
+dlls = collect_dynamic_libs("capstone") + collect_dynamic_libs("unicorn") + collect_dynamic_libs("fire")+collect_dynamic_libs("distorm3")
+resource_files = [('bobalkkagi/', 'bobalkkagi')]
+block_cipher = None
+
+
+a = Analysis(
+    ['bobalkkagi\\__main__.py'],
+    pathex=[],
+    binaries=dlls,
+    datas=resource_files,
+    hiddenimports=[],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+)
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+exe = EXE(
+    pyz,
+    a.scripts,
+    a.binaries,
+    a.zipfiles,
+    a.datas,[],
+    name='bobalkkagi',
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=False,
+    upx_exclude=[],
+    runtime_tmpdir=None,
+    console=True,
+    disable_windowed_traceback=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+)
+
+```
+
+`bobalkkagi/__main__.py`:
+
+```py
+from bobalkkagi.application import main
+
+if __name__ == '__main__':
+    main()
+```
+
+`bobalkkagi/api_hook.py`:
+
+```py
+from unicorn import *
+from unicorn.x86_const import *
+
+from .loader import PE_Loader
+from .reflector import REFLECTOR
+from .globalValue import DLL_SETTING, HEAP_HANDLE, InvDllDict, GLOBAL_VAR
+from .util import *
+
+import struct
+import os
+import random
+
+
+ThreadHandle=[]
+AllocChunk = {}
+Token=[]
+
+
+privilege = {
+        0x0: UC_PROT_EXEC | UC_PROT_READ, 
+        0x2: UC_PROT_READ, 
+        0x4: UC_PROT_READ | UC_PROT_WRITE,
+        0x10:UC_PROT_EXEC,
+        0x20:UC_PROT_EXEC | UC_PROT_READ, 
+        0x40:UC_PROT_ALL
+    }
+
+class REGS:
+    rax=None    
+    rbx=None
+    rcx=None
+    rdx=None
+    rdi=None
+    rsi=None
+    rsp=None
+    rbp=None
+    rip=None
+    r8=None
+    r9=None
+    r10=None
+    r11=None
+    r12=None
+    r13=None
+    r14=None
+    r15=None
+    rflags=None
+
+def set_register(register):
+    
+    REGS.rax=register["rax"]
+    REGS.rbx=register["rbx"]
+    REGS.rcx=register["rcx"]
+    REGS.rdx=register["rdx"]
+    REGS.rdi=register["rdi"]
+    REGS.rsi=register["rsi"]
+    REGS.rsp=register["rsp"]
+    REGS.rbp=register["rbp"]
+    REGS.rip=register["rip"]
+    REGS.r8=register["r8"]
+    REGS.r9=register["r9"]
+    REGS.r10=register["r10"]
+    REGS.r11=register["r11"]
+    REGS.r12=register["r12"]
+    REGS.r13=register["r13"]
+    REGS.r14=register["r14"]
+    REGS.r15=register["r15"]
+    REGS.rflags=register["rflags"]
+
+def ret(uc, rsp):
+    
+    ret=struct.unpack('<Q',uc.mem_read(rsp,8))[0]
+    uc.reg_write(UC_X86_REG_RIP, ret)
+    uc.reg_write(UC_X86_REG_RSP, rsp+8)
+    
+
+def hook_GetModuleFileNameW(uc, log, regs):
+    
+    set_register(regs)
+    if not REGS.rcx:
+        path = os.path.abspath(GLOBAL_VAR.ProtectedFile)
+    else:
+        try:
+            module_name = DLL_SETTING.LoadedDll[REGS.rcx]
+        except KeyError:
+            module_name = "somefakename.dll"
+        path = f"C:/Windows/System32/{module_name}"
+    
+    uc.reg_write(UC_X86_REG_R11,REGS.rdx)
+    
+    log.warning(f"HOOK_API_CALL : GetModuleFileNameW, RDX : {hex(REGS.rdx)}, path : {path}")
+    uc.mem_write(REGS.rsp+0x8,struct.pack('<Q',REGS.rbx))
+    uc.mem_write(REGS.rsp+0x10,struct.pack('<Q',REGS.rbp))
+    uc.mem_write(REGS.rsp+0x18,struct.pack('<Q',REGS.rsi))
+    uc.mem_write(REGS.rdx,path.encode("utf-16"))
+    uc.reg_write(UC_X86_REG_RAX,len(path))
+    uc.reg_write(UC_X86_REG_RDX,0x0)
+    uc.reg_write(UC_X86_REG_R8,0x0)
+    
+    ret(uc, REGS.rsp)
+    
+
+def hook_GetModuleHandleA(uc, log, regs):
+    
+    set_register(regs)
+    
+    d_address = 0
+    
+    handle = EndOfString(bytes(uc.mem_read(REGS.rcx, 0x50))).lower()
+    
+    if ".dll" not in handle: #nc load ws2_32
+        handle += ".dll" 
+    
+    if handle in REFLECTOR:
+        handle = REFLECTOR[handle]
+    
+    if handle in DLL_SETTING.LoadedDll:
+        d_address = DLL_SETTING.LoadedDll[handle]
+
+    log.warning(f"HOOK_API_CALL : GetModuleHandleA, Handle : {handle}, Address : {hex(d_address)}")   
+    if d_address:
+        uc.reg_write(UC_X86_REG_RAX, d_address)
+    
+    ret(uc, REGS.rsp)
+
+def hook_LoadLibraryA(uc, log, regs):
+    
+    set_register(regs)
+
+    d_address = 0
+    dllName = EndOfString(bytes(uc.mem_read(REGS.rcx, 0x20))) #byte string
+    
+    if dllName not in DLL_SETTING.LoadedDll:
+        PE_Loader(uc, dllName, GLOBAL_VAR.DllEnd)
+        InvDllDict()
+
+    d_address = DLL_SETTING.LoadedDll[dllName]
+    if d_address:
+        uc.reg_write(UC_X86_REG_RAX,d_address)
+    else:
+        print(f"[LOAD ERROR] {dllName}: {hex(d_address)}")
+
+
+    log.warning(f"HOOK_API_CALL : LoadLibraryA, {dllName}: {hex(d_address)}")
+    
+    uc.mem_write(REGS.rsp+0x8,struct.pack('<Q',REGS.rbx))
+    uc.mem_write(REGS.rsp+0x10,struct.pack('<Q',REGS.rsi))
+    
+    ret(uc, REGS.rsp)
+
+def hook_GetProcAddress(uc, log, regs):
+    
+    set_register(regs)
+  
+    f_address = 0
+
+    functionName=EndOfString(bytes(uc.mem_read(REGS.rdx, 0x20)))
+    functionName = DLL_SETTING.InverseLoadedDll[REGS.rcx]+"_" + functionName
+    f_address = DLL_SETTING.DllFuncs[functionName]
+
+    uc.mem_write(REGS.rsp+0x8,struct.pack('<Q',REGS.rbx))
+    uc.mem_write(REGS.rsp+0x18,struct.pack('<Q',REGS.rbp))
+    uc.mem_write(REGS.rsp+0x20,struct.pack('<Q',REGS.rsi))
+    uc.mem_write(REGS.rsp+0x10,struct.pack('<Q',f_address))
+    if f_address:
+        uc.reg_write(UC_X86_REG_RAX,f_address)
+    log.warning(f"HOOK_API_CALL : GetProcAddress, {functionName}: {hex(f_address)}")
+    
+    
+
+    ret(uc, REGS.rsp)
+    
+
+
+def hook_ZwOpenThread(uc, log, regs):
+    
+    set_register(regs)
+    
+    handle = random.randrange(1,0x200)
+    ThreadHandle.append(handle)
+    uc.mem_write(REGS.rsp+0x90,struct.pack('<Q',handle))
+
+    log.warning(f"HOOK_API_CALL : ZwOpenThread, handle : {hex(handle)}")    
+    
+    
+    ret(uc, REGS.rsp)
+    
+
+
+def hook_GetUserDefaultUILanguage(uc, log, regs):
+    
+    set_register(regs)
+    
+    uc.mem_write(REGS.rsp+0x8,struct.pack('<Q',0x409))
+    log.warning(f"HOOK_API_CALL : GetUserDefaultUILanguage, RCX : {hex(REGS.rcx)}")
+    
+    
+    uc.reg_write(UC_X86_REG_RAX,0x409)
+    ret(uc, REGS.rsp)
+    
+
+
+def hook_RtlAllocateHeap(uc, log, regs):
+    
+    set_register(regs)
+
+    HEAP_HANDLE.HeapHandle.append(HEAP_HANDLE.HeapHandle[HEAP_HANDLE.HeapHandleSize-1]+(align(REGS.r8)))
+    HEAP_HANDLE.HeapHandleSize+=1
+
+    uc.reg_write(UC_X86_REG_RAX,HEAP_HANDLE.HeapHandle[HEAP_HANDLE.HeapHandleSize-1])
+   
+    uc.mem_write(REGS.rsp+0x8,struct.pack('<Q',0x3))
+    uc.mem_write(REGS.rsp+0x10,struct.pack('<Q',REGS.rbx))
+    uc.mem_write(REGS.rsp+0x18,struct.pack('<Q',REGS.rsi))
+    uc.mem_write(REGS.rsp+0x20,struct.pack('<Q',REGS.rdi))
+
+    log.warning(f"HOOK_API_CALL : RtlAllocateHeap, handle : {hex(REGS.rcx)}, RAX : {hex(HEAP_HANDLE.HeapHandle[HEAP_HANDLE.HeapHandleSize-1])}")
+    
+    ret(uc, REGS.rsp)
+    
+
+def hook_GetCurrentDirectoryW(uc, log, regs):
+    
+    set_register(regs)
+    
+    cwd = os.getcwd()
+    cwd_len = len(cwd)
+    
+    log.warning(f"HOOK_API_CALL : GetCurrentDirectoryW, RCX : {hex(REGS.rcx)}, RDX : {hex(REGS.rdx)}, path : {cwd}, len : {hex(cwd_len)}")
+    
+    uc.mem_write(REGS.rdx,cwd.encode('utf-8'))
+    uc.reg_write(UC_X86_REG_RAX,cwd_len)
+    uc.reg_write(UC_X86_REG_RCX,REGS.rdx)
+    uc.reg_write(UC_X86_REG_R11,REGS.rdx)
+    
+    ret(uc, REGS.rsp)
+    
+
+def hook_SetCurrentDirectoryW(uc, log, regs):
+    
+    set_register(regs)
+    
+    log.warning(f"HOOK_API_CALL : SetCurrentDirectoryW")
+    
+    
+    uc.reg_write(UC_X86_REG_RAX, 0x1)
+    ret(uc, REGS.rsp)
+    
+
+def hook_GetCommandLineA(uc, log, regs):
+    
+    set_register(regs)
+
+    path = "\""+os.path.abspath(GLOBAL_VAR.ProtectedFile)+"\""
+    
+    log.warning(f"HOOK_API_CALL : GetCommandLineA, path : {path}")
+    
+    
+    uc.mem_write(0x000001E9E3900000,path.encode("utf-8"))
+    uc.reg_write(UC_X86_REG_RAX,0x000001E9E3900000) #임시포인터
+    ret(uc, REGS.rsp)
+    
+
+def hook_ZwAllocateVirtualMemory(uc, log, regs):
+    
+    set_register(regs)
+
+    REGS.rcx = struct.unpack('<Q',uc.mem_read(uc.reg_read(UC_X86_REG_RDX),8))[0]
+    REGS.rdx = struct.unpack('<Q',uc.mem_read(uc.reg_read(UC_X86_REG_R9),8))[0]
+    REGS.r9 = struct.unpack('<L',uc.mem_read(REGS.rsp+0x30,4))[0]
+    
+    page_size = 4 * 1024
+    if REGS.rcx == 0:
+        offset = GLOBAL_VAR.AllocateChunkEnd
+    else:
+        offset = REGS.rcx
+
+    aligned_size = align(REGS.rdx, page_size)
+    uc.mem_map(offset, aligned_size ,privilege[REGS.r9])
+    GLOBAL_VAR.AllocateChunkEnd = offset + aligned_size
+    AllocChunk[offset] = aligned_size
+    log.warning(f"HOOK_API_CALL : ZwAllocateVirtualMemory, Address : {hex(offset)}, Size : {hex(REGS.rdx)}, Privilege : {hex(REGS.r9)}")
+    uc.mem_write(uc.reg_read(UC_X86_REG_RDX),struct.pack('<Q',offset))
+    uc.mem_write(uc.reg_read(UC_X86_REG_RDX)+0x8,struct.pack('<Q',aligned_size))
+
+    
+    uc.reg_write(UC_X86_REG_RAX,0x0)
+    uc.reg_write(UC_X86_REG_RDX,0x0)
+    uc.reg_write(UC_X86_REG_R8,REGS.rsp)
+    uc.reg_write(UC_X86_REG_R9,REGS.rbp)
+    ret(uc, REGS.rsp)
+    
+
+
+
+def hook_VirtualFree(uc, log, regs):
+    
+    set_register(regs)
+    
+   
+    log.warning(f"HOOK_API_CALL : VirtualFree, Address : {hex(REGS.rcx)}")    
+    uc.mem_unmap(REGS.rcx, AllocChunk[REGS.rcx])
+
+    uc.mem_write(REGS.rsp+0x8,struct.pack('<Q',AllocChunk[REGS.rcx]))
+    uc.mem_write(REGS.rsp+0x10,struct.pack('<Q',REGS.rcx))
+    uc.mem_write(REGS.rsp+0x18,struct.pack('<Q',REGS.rbx))
+    uc.mem_write(REGS.rsp+0x20,struct.pack('<Q',REGS.rsi))
+
+    
+    uc.reg_write(UC_X86_REG_RAX,0x1)
+    ret(uc, REGS.rsp)
+    
+
+
+def hook_OpenThreadToken(uc, log, regs):
+    global Token
+    set_register(regs)
+    token = random.randrange(1,0x200)
+    Token.append(token)
+    log.warning(f"HOOK_API_CALL : OpenThreadToken")
+    uc.reg_write(UC_X86_REG_RAX,0x0)
+    ret(uc, REGS.rsp)
+    
+
+def hook_OpenProcessToken(uc, log, regs):
+    global Token
+    set_register(regs)
+    token = random.randrange(1, 0x200)
+    Token.append(token)
+    
+    log.warning(f"HOOK_API_CALL : OpenProcessToken, token : {hex(token)}")
+    uc.mem_write(REGS.r8,struct.pack('<Q',token))
+    
+    
+    uc.reg_write(UC_X86_REG_RAX,0x1)
+    ret(uc, REGS.rsp)
+    
+
+def hook_ZwOpenThreadTokenEx(uc, log, regs):
+    
+    set_register(regs)
+    
+    
+    log.warning(f"HOOK_API_CALL : ZwOpenThreadTokenEx")
+    
+    
+    uc.reg_write(UC_X86_REG_RAX, 0x00000000C000007C)
+    uc.reg_write(UC_X86_REG_RDX, 0x0)
+    uc.reg_write(UC_X86_REG_R8, REGS.rsp)
+    uc.reg_write(UC_X86_REG_R9, REGS.rbp)
+    uc.reg_write(UC_X86_REG_RCX, REGS.rip + 0x14)
+    ret(uc, REGS.rsp)
+    
+
+def hook_ZwOpenProcessTokenEx(uc, log, regs):
+    global Token
+    set_register(regs)
+     # tmp=ret
+
+    token = random.randrange(1,0x200)
+    Token.append(token)
+    
+    log.warning(f"HOOK_API_CALL : ZwOpenProcessTokenEx, token : {hex(token)}")
+    
+    uc.mem_write(REGS.r9,struct.pack('<Q',token))
+    uc.reg_write(UC_X86_REG_RAX, 0x0)
+    uc.reg_write(UC_X86_REG_RDX, 0x0)
+    uc.reg_write(UC_X86_REG_R8, REGS.rsp)
+    uc.reg_write(UC_X86_REG_R9, REGS.rbp)
+    uc.reg_write(UC_X86_REG_R10, 0x0)
+    uc.reg_write(UC_X86_REG_RCX, REGS.rip + 0x14)
+    ret(uc, REGS.rsp)
+    
+
+def hook_ZwDuplicateToken(uc, log, regs):
+    
+    set_register(regs)
+    
+    
+    log.warning(f"HOOK_API_CALL : ZwDuplicateToken")
+    
+    uc.reg_write(UC_X86_REG_RAX, 0x0)
+    uc.reg_write(UC_X86_REG_RDX, 0x0)
+    uc.reg_write(UC_X86_REG_R8, REGS.rsp)
+    uc.reg_write(UC_X86_REG_R9, REGS.rbp)
+    uc.reg_write(UC_X86_REG_R10, 0x0)
+    uc.reg_write(UC_X86_REG_RCX, REGS.rip+0x14)
+    ret(uc, REGS.rsp)
+    
+
+def hook_ZwQueryInformationToken(uc, log, regs):
+    global Token
+    set_register(regs)
+    
+    token = random.randrange(1,0x200)
+    Token.append(token)
+    log.warning(f"HOOK_API_CALL : ZwQueryInformationToken, token : {hex(token)}")
+    uc.mem_write(REGS.r10,struct.pack('<Q',token))
+    
+   
+    uc.reg_write(UC_X86_REG_RAX,0x23) # STATUS_BUFFER_TOO_SMALL
+    ret(uc, REGS.rsp)
+    
+
+def hook_ZwClose(uc, log, regs):
+    
+    set_register(regs)
+    
+    log.warning(f"HOOK_API_CALL : ZwClose, handle : {hex(REGS.rcx)}")
+    
+    
+    uc.reg_write(UC_X86_REG_RAX, 0x0)
+    uc.reg_write(UC_X86_REG_R8, REGS.rsp)
+    uc.reg_write(UC_X86_REG_R9, REGS.rbp)
+    uc.reg_write(UC_X86_REG_R10, 0x0)
+    uc.reg_write(UC_X86_REG_RCX, REGS.rip+0x14)
+    
+    ret(uc, REGS.rsp)
+    
+
+def hook_ZwAccessCheck(uc, log, regs):
+    
+    set_register(regs)
+    
+    log.warning(f"HOOK_API_CALL : ZwAccessCheck")
+    
+    
+    uc.reg_write(UC_X86_REG_RAX, 0x0)
+    uc.reg_write(UC_X86_REG_RDX, 0x0)
+    uc.reg_write(UC_X86_REG_R8, REGS.rsp)
+    uc.reg_write(UC_X86_REG_R9, REGS.rbp)
+    uc.reg_write(UC_X86_REG_R10, 0x0)
+    uc.reg_write(UC_X86_REG_RCX, REGS.rip+0x14)
+    
+    ret(uc, REGS.rsp)
+    
+
+
+def hook_VirtualProtect(uc, log, regs):
+    
+
+    set_register(regs)
+    REGS.r8 = uc.reg_read(UC_X86_REG_R8) & 0xffffffff
+
+    
+    
+    log.warning(f"HOOK_API_CALL : VirtualProtect, Address : {hex(REGS.rcx)}, Size : {hex(REGS.rdx)}, Privilege : {hex(REGS.r8)}")
+    
+    if align(REGS.rcx) > REGS.rcx:   
+        offset =  REGS.rcx - (align(REGS.rcx)- 0x1000)
+        uc.mem_protect(align(REGS.rcx)-0x1000, align(REGS.rdx+offset), privilege[REGS.r8])   
+    else:   
+        uc.mem_protect(align(REGS.rcx), align(REGS.rdx), privilege[REGS.r8])
+    
+    oldPriv=0
+    for section in GLOBAL_VAR.SectionInfo:
+        if (REGS.rcx - section[1]) >= 0 and (REGS.rcx - section[1]) < section[2] :
+            oldPriv = section[3]
+            break         
+    
+    uc.mem_write(REGS.rsp+8, struct.pack('<Q',REGS.rdx))
+    uc.mem_write(REGS.r9, struct.pack('<L',oldPriv))
+    uc.reg_write(UC_X86_REG_RAX,0x1)
+    uc.reg_write(UC_X86_REG_RDX,0x0)
+    uc.reg_write(UC_X86_REG_R8,REGS.rsp-0x50)
+    uc.reg_write(UC_X86_REG_R9,REGS.r8)
+    ret(uc, REGS.rsp)
+    
+
+def hook_NtUserGetForegroundWindow(uc, log, regs):
+    
+    set_register(regs)
+    
+    log.warning(f"HOOK_API_CALL : NtUserGetForegroundWindow")
+    
+    
+    uc.reg_write(UC_X86_REG_RAX, 0x0)
+    uc.reg_write(UC_X86_REG_R8, REGS.rsp)
+    uc.reg_write(UC_X86_REG_R9, REGS.rbp)
+    uc.reg_write(UC_X86_REG_R10, 0x0)
+    uc.reg_write(UC_X86_REG_RCX, REGS.rip+0x14)
+    
+    ret(uc, REGS.rsp)
+    
+
+def hook_GetWindowTextA(uc, log, regs):
+    
+    set_register(regs)
+    
+    
+    log.warning(f"HOOK_API_CALL : GetWindowTextA")
+    
+    
+    uc.reg_write(UC_X86_REG_RAX, 0x0)
+    uc.mem_write(REGS.rsp+0x8,struct.pack('<Q', REGS.rbx))
+    uc.mem_write(REGS.rsp+0x10,struct.pack('<Q', REGS.rsi))
+    ret(uc, REGS.rsp)
+    
+
+
+def hook_ZwRaiseException(uc, log, regs):
+    
+    set_register(regs)
+    log.warning(f"HOOK_API_CALL : ZwRaiseException")
+    
+    
+    uc.reg_write(UC_X86_REG_RAX,0x0)
+    
+    ret(uc, REGS.rsp)
+    
+'''
+'''
+def hook_RtlRaiseStatus(uc, log, regs):
+    
+    set_register(regs)
+    log.warning(f"HOOK_API_CALL : RtlRaiseStatus")
+    
+    
+    uc.reg_write(UC_X86_REG_RAX,0x0)
+    
+    ret(uc, REGS.rsp)
+    
+
+
+
+def hook_RtlFreeHeap(uc, log, regs):
+    
+    set_register(regs)
+    log.warning(f"HOOK_API_CALL : RtlFreeHeap, handle : {hex(REGS.rcx)},")
+    
+    
+    uc.reg_write(UC_X86_REG_RAX,0x1)
+    ret(uc, REGS.rsp)
+    
+
+def hook_ZwQueryInformationProcess(uc, log, regs):  # 안티디버깅
+    
+    set_register(regs)
+    
+    log.warning(f"HOOK_API_CALL : ZwQueryInformationProcess")
+    
+    
+    if REGS.rdx == 0x7:
+        uc.mem_write(REGS.r8,struct.pack('<Q',0x0))
+        uc.reg_write(UC_X86_REG_RAX, 0x0)
+    elif REGS.rdx == 0x1e:
+        uc.reg_write(UC_X86_REG_RAX, 0xC0000353)
+        uc.mem_write(REGS.r8,struct.pack('<Q',0x0))
+    elif REGS.rdx == 0x1f:
+        uc.reg_write(UC_X86_REG_RAX, 0x1)
+        uc.mem_write(REGS.r8,struct.pack('<Q',0x1))
+    else:
+        uc.reg_write(UC_X86_REG_RAX, 0x0)
+
+    uc.reg_write(UC_X86_REG_RDX, 0x0)
+    uc.reg_write(UC_X86_REG_RCX, REGS.rsi+0x14)
+    uc.reg_write(UC_X86_REG_R8, REGS.rsp)
+    uc.reg_write(UC_X86_REG_R9, REGS.rbp)
+    uc.reg_write(UC_X86_REG_R10, 0x0)
+    
+    ret(uc, REGS.rsp)
+    
+
+
+def hook_ZwQuerySystemInformation(uc, log, regs):  # 안티디버깅
+    
+    set_register(regs)
+    
+    
+    log.warning(f"HOOK_API_CALL : ZwQuerySystemInformation")
+    
+    
+
+    #uc.reg_write(UC_X86_REG_RAX, 0xC0000023)
+    uc.reg_write(UC_X86_REG_RAX, 0x0)
+    ret(uc, REGS.rsp)
+    
+
+def hook_ZwSetInformationThread(uc, log, regs):  # 안티디버깅
+    
+    set_register(regs)
+    
+    log.warning(f"HOOK_API_CALL : ZwSetInformationThread")
+    
+    
+    if REGS.rdx == 0x11:
+        uc.reg_write(UC_X86_REG_RDX, 0x0)
+
+    uc.reg_write(UC_X86_REG_RAX, 0x0)
+    #uc.reg_write(UC_X86_REG_RCX, rax+0x14)
+    #uc.reg_write(UC_X86_REG_R8, rsp)
+    #uc.reg_write(UC_X86_REG_R9, rdi)
+    
+    ret(uc, REGS.rsp)
+    
+
+def hook_ZwSetInformationProcess(uc, log, regs):  # 안티디버깅
+    
+    set_register(regs)
+    
+    
+    log.warning(f"HOOK_API_CALL : ZwSetInformationProcess")
+    
+    
+    if REGS.rdx == 0x11:
+        uc.reg_write(UC_X86_REG_RDX, 0x0)
+
+    uc.reg_write(UC_X86_REG_RAX, 0x0)
+    uc.reg_write(UC_X86_REG_RCX, REGS.rax+0x14)
+    uc.reg_write(UC_X86_REG_R8, REGS.rsp)
+    uc.reg_write(UC_X86_REG_R9, REGS.rdi)
+    ret(uc, REGS.rsp)
+    
+
+def hook_RegOpenKeyExA(uc, log, regs): 
+    
+    set_register(regs)
+    
+    
+    log.warning(f"HOOK_API_CALL : RegOpenKeyExA")
+    
+    text = EndOfString(bytes(uc.mem_read(REGS.rdx, 0x100)))
+    if text == "HARDWARE\ACPI\DSDT\VBOX__":
+        uc.reg_write(UC_X86_REG_RAX, 0x2)
+    else:
+        uc.reg_write(UC_X86_REG_RAX, 0x0)
+    
+    ret(uc, REGS.rsp)
+    
+
+def hook_RegQueryValueExA(uc, log, regs): 
+    
+    set_register(regs)
+    
+    log.warning(f"HOOK_API_CALL : RegQueryValueExA")
+    
+    uc.reg_write(UC_X86_REG_RAX, 0x0)
+    ret(uc, REGS.rsp)
+    
+
+def hook_RegCloseKey(uc, log, regs): 
+    
+    set_register(regs)
+    
+    
+    log.warning(f"HOOK_API_CALL : RegCloseKey")
+    
+
+    uc.reg_write(UC_X86_REG_RAX, 0x0)
+    ret(uc, REGS.rsp)
+    
+
+
+def hook_ZwGetContextThread(uc, log, regs): #안티디버깅
+    
+    set_register(regs)
+    log.warning(f"HOOK_API_CALL : ZwGetContextThread")
+    
+    
+    uc.reg_write(UC_X86_REG_RAX, 0)
+    ret(uc, REGS.rsp)
+    
+
+def hook_ZwOpenKeyEx(uc, log, regs): #안티디버깅
+    
+    set_register(regs)
+    
+    
+    log.warning(f"HOOK_API_CALL : ZwOpenKeyEx")
+    
+    
+    handle = random.randrange(1,0x200)
+
+    uc.mem_write(REGS.rcx, struct.pack('<Q',handle))
+    uc.reg_write(UC_X86_REG_RAX, 0)
+    uc.reg_write(UC_X86_REG_R8, REGS.rsp)
+    uc.reg_write(UC_X86_REG_R9, REGS.rbp)
+    uc.reg_write(UC_X86_REG_RDX, 0x0)
+    ret(uc, REGS.rsp)
+    
+def hook__set_fmode(uc, log, regs):
+    
+    set_register(regs)
+   
+    log.warning(f"HOOK_API_CALL : _set_fmode, mode: {hex(REGS.rcx)}")
+    
+    
+    ret(uc, REGS.rsp)
+
+def hook__crt_atexit(uc, log, regs):
+    
+    set_register(regs)
+   
+    log.warning(f"HOOK_API_CALL : _crt_atexit, func+address: {hex(REGS.rcx)}")
+    
+    uc.reg_write(UC_X86_REG_RAX, 0x0)
+    ret(uc, REGS.rsp)
+
+def hook__configure_narrow_argv(uc, log, regs):
+    
+    set_register(regs)
+   
+    log.warning(f"HOOK_API_CALL : _configure_narrow_argv ")
+    
+    uc.reg_write(UC_X86_REG_RAX, 0x0)
+    ret(uc, REGS.rsp)
+
+def hook__configthreadlocale(uc, log, regs):
+    
+    set_register(regs)
+   
+    log.warning(f"HOOK_API_CALL : _configthreadlocale ")
+    
+    uc.reg_write(UC_X86_REG_RAX, REGS.rcx+2)
+    ret(uc, REGS.rsp)
+
+def hook__initialize_narrow_environment(uc, log, regs):
+    
+    set_register(regs)
+   
+    log.warning(f"HOOK_API_CALL : _initialize_narrow_environment ")
+    
+    uc.reg_write(UC_X86_REG_RAX, 0)
+    ret(uc, REGS.rsp)
+
+def hook__get_initial_narrow_environment(uc, log, regs):
+    
+    set_register(regs)
+   
+    log.warning(f"HOOK_API_CALL : _get_initial_narrow_environment ")
+    
+    uc.reg_write(UC_X86_REG_RAX, 0)
+    ret(uc, REGS.rsp)
+    
+
+def hook__initterm(uc, log, regs):
+    
+    set_register(regs)
+   
+    log.warning(f"HOOK_API_CALL : _initterm, start : {hex(REGS.rcx)}, end : {hex(REGS.rdx)} ")
+    
+    uc.reg_write(UC_X86_REG_RAX, 0)
+    ret(uc, REGS.rsp)
+    
+def hook__isatty(uc, log, regs):
+    
+    set_register(regs)
+  
+    log.warning(f"HOOK_API_CALL : _isatty")
+    
+    uc.reg_write(UC_X86_REG_RAX,0x1)
+    ret(uc, REGS.rsp)
+    
+
+def hook___stdio_common_vfprintf(uc, log, regs):
+    
+    set_register(regs)
+    
+    uc.reg_write(UC_X86_REG_R11,REGS.rdx)
+    
+    string = EndOfString(bytes(uc.mem_read(REGS.r8, 0x50)))
+    log.warning(f"HOOK_API_CALL : __stdio_common_vfprintf")
+    uc.mem_write(REGS.rsp+0x10,struct.pack('<Q',REGS.rcx))
+    uc.mem_write(REGS.rsp+0x18,struct.pack('<Q',REGS.r8))
+    uc.mem_write(REGS.rsp+0x20,struct.pack('<Q',REGS.rsi))
+    uc.mem_write(REGS.rsp+0x28,struct.pack('<Q',REGS.rdx))
+    uc.reg_write(UC_X86_REG_RAX,len(string))
+    uc.reg_write(UC_X86_REG_RDX,0x0)
+    uc.reg_write(UC_X86_REG_R8,0x0)
+    
+    ret(uc, REGS.rsp)
+    
+
+def hook_MessageBoxExW(uc, log, regs):
+    
+    set_register(regs)
+  
+    text = bytes(uc.mem_read(REGS.rdx, 0x100)).decode('utf-16')
+    title = bytes(uc.mem_read(REGS.r8, 0x10)).decode('utf-16')
+    
+    log.warning(f"HOOK_API_CALL : MessageBoxExW, hadnle : {hex(REGS.rcx)}, TEXT : {text}, TITLE : {title}")
+    
+    uc.reg_write(UC_X86_REG_RAX,0x1)
+    ret(uc, REGS.rsp)
+    
+
+def hook_MessageBoxW(uc, log, regs):
+    
+    set_register(regs)
+  
+    text = bytes(uc.mem_read(REGS.rdx, 0x20)).decode('utf-16')
+    title = bytes(uc.mem_read(REGS.r8, 0x10)).decode('utf-16')
+    
+    log.warning(f"HOOK_API_CALL : MessageBoxW, hadnle : {hex(REGS.rcx)}, TEXT : {text}, TITLE : {title}")
+    
+    uc.reg_write(UC_X86_REG_RAX,0x1)
+    ret(uc, REGS.rsp)
+    
+
+def hook_exit(uc, log, regs):
+    
+    set_register(regs)
+    log.warning(f"HOOK_API_CALL : exit, Process Terminate.")
+
+    return 1
+```
+
+`bobalkkagi/application.py`:
+
+```py
+from pathlib import Path
+
+from .unpacking import unpack
+from .globalValue import GLOBAL_VAR
+from .unwrapping import unwrap
+from .util import checkInput
+
+#from unwrapping import unwrap
+import fire #type: ignore
+import sys
+
+
+def main() -> None:
+    fire.Fire(run_Bobalkkagi)
+
+def run_Bobalkkagi(
+    protectedFile:str,
+    mode:str = 'f', #fast
+    verbose:str = 'f',
+    dllPath:str = "win10_v1903",
+    oep:str = 't',
+    debugger:str = 'f'
+    ) -> None:
+
+    filePath = Path(protectedFile)
+    if not filePath.is_file():
+        print(f"{filePath} isn't a file or doesn't exist")
+        sys.exit(1)
+
+    if mode in ['f', 'c', 'b']:
+        pass
+    else:
+        print(f"{mode} isn't defined mode[f, c, b]")
+        sys.exit(1)
+
+    dllDirPath = Path(dllPath)
+    if not dllDirPath.is_dir():
+        print(f"{dllDirPath} isn't a directory or doesn't exist")
+        sys.exit(1)
+    
+
+    verbose = checkInput(verbose)
+    oep = checkInput(oep)
+    debugger =checkInput(debugger)
+    
+    GLOBAL_VAR.DebugOption = debugger
+    GLOBAL_VAR.ProtectedFile = protectedFile
+    GLOBAL_VAR.DirectoryPath = dllPath
+
+    dump, OrignalEntryPoint = unpack(protectedFile, verbose, mode, oep)
+    unwrap(dump, OrignalEntryPoint)
+
+
+
+
+```
+
+`bobalkkagi/constValue.py`:
+
+```py
+from unicorn import UC_PROT_NONE, UC_PROT_EXEC, UC_PROT_READ, UC_PROT_WRITE, UC_PROT_ALL
+
+TebBase = 0xff10000000000000 # Same GS
+PebBase = 0xff20000000000000
+LdrBase = 0x000001B54C810000
+ProcessHeapBase = 0x000001E9E3850000
+MB = 2**20 #Mega Byte 0x100000
+StackBase = 0x201000
+StackLimit = 0x100000
+KuserSharedDataBase = 0x000000007FFE0000
+PshimDataBase = 0x600000
+ActivationContextBase = 0x400000
+
+PRIVILEGE = {
+        0x0:UC_PROT_NONE,
+        0x2:UC_PROT_EXEC, 
+        0x4:UC_PROT_READ, 
+        0x8:UC_PROT_WRITE, 
+        0x6:UC_PROT_EXEC | UC_PROT_READ, 
+        0xa:UC_PROT_EXEC | UC_PROT_WRITE, 
+        0xc:UC_PROT_READ | UC_PROT_WRITE, 
+        0xe:UC_PROT_ALL
+    }
+
+RTL = {
+    "InitializeSListHead" : "RtlInitializeSListHead",
+    "QueryUnbiasedInterruptTime" : "RtlQueryUnbiasedInterruptTime",
+    "QueryPerformanceCounter" : "RtlQueryPerformanceCounter",
+}
+```
+
+`bobalkkagi/debugger.py`:
+
+```py
+from .globalValue import GLOBAL_VAR, DLL_SETTING
+from .logger import regis
+from .util import Devide8Bytes, ViewMemory
+
+import struct
+
+
+def Debugger(uc: object, BobLog: object) -> bool:
+    BobLog.debug("DEBUGING")
+
+    while True:
+        ud = input("UNICORN DEBUG > ").lower()
+
+        if ud == 'q': #quit 
+            GLOBAL_VAR.DebugOption = False
+            print("FINISHED DEBUG")
+            return False
+
+        elif ud == 'n': #next
+            return True
+
+        elif ud == 'c': #continue
+            return False
+
+        elif ud == 's': #search
+            while True:
+                try:
+                    addr = int(input("address : "), 16)
+                    break
+                except Exception as e:
+                    print(f"[Error] {e}")
+                    continue
+            try:
+                print(f"result: {DLL_SETTING.InverseDllFuncs[addr]}")
+            except Exception as e:
+                print(f"[Error] {e}")
+        
+        elif ud == 'sf': #search func
+            while True:
+                try:
+                    addr = DLL_SETTING.DllFuncs[input("dll_function: ")]
+                    break
+                except Exception as e:
+                    print(f"[Error] {e}")
+                    continue
+            
+            print(f"result: {hex(addr)}")
+
+        elif ud == 'w': #write memory
+            while True:
+                try:
+                    addr = int(input("address: "), 16)
+                    value = int(input("Value: "), 16)
+                    break
+                except Exception as e:
+                    print(f"[Error] {e}")
+                    continue
+            try:
+                print(f"before: {struct.unpack('<Q', uc.mem_read(addr, 0x8))[0]}")
+                uc.mem_write(addr, struct.pack('<Q', value))
+                print(f"Changed: {struct.unpack('<Q', uc.mem_read(addr, 0x8))[0]}")
+            except Exception as e:
+                print(f"[Error] {e}")
+
+        elif ud == 'set': #set register
+            while True:
+                try:
+                    reg = regis[input("regsister: ").upper()]
+                    value = int(input("hex value: "), 16)
+                    break
+                except Exception as e:
+                    print(f"[Error] {e}")
+                    continue
+            try:
+                uc.reg_write(reg, value)
+                BobLog.debug("Change register")
+            except Exception as e:
+                print(f"[Error] {e}")
+        
+        elif ud == 'view': #view memory
+            while True:
+                try:
+                    addr= int(input("address(64bit size): "), 16)
+                    value = int(input("size(ex. 0x1234): "), 16)
+                    break
+                except Exception as e:
+                    print(f"[Error] {e}")
+                    continue
+            try:
+                ViewMemory(addr, Devide8Bytes(uc.mem_read(addr, value)))
+            except Exception as e:
+                print(f"[Error] {e}")
+        
+        elif ud == 'bp':
+            while True:
+                try:
+                    addr = int(input("address: "), 16)
+                    break
+                except Exception as e:
+                    print(f"[Error] {e}")
+                    continue
+            GLOBAL_VAR.BreakPoint.append(addr)
+
+        elif ud == 'bl':
+            PrintBreakPoint(GLOBAL_VAR.BreakPoint)
+        
+        elif ud == 'd':
+            GLOBAL_VAR.BreakPoint.pop(0)
+
+        elif ud =='h':
+            PrintDbgHelp()
+        
+
+def PrintDbgHelp()-> None:
+
+    print("""
+    ========= help ========
+    q: quit
+    n: next
+    c: continue
+    s: search dll function by address
+    sf: search dll function by name
+    w: write memory
+    set: set register
+    bp: breakpoint
+    bl: breakpoint list
+    view: view memory
+    h: help
+    ======================
+    """)
+
+def PrintBreakPoint(bpList: list) -> None:
+    for idx, bp in enumerate(bpList):
+        print(f"bp{idx}: {bp:016x}")
+```
+
+`bobalkkagi/globalValue.py`:
+
+```py
+from .hookFuncs import HookFuncs
+
+class GLOBAL_VAR:
+    ImageBaseStart = 0x140000000
+    ImageBaseEnd = 0x140000000
+    DllStart = 0x7FF000000000
+    DllEnd = 0x7FF000000000
+    AllocateChunkStart=0x0000020000000000
+    AllocateChunkEnd=0x0000020000000000
+    HookRegion=0x7FF010000000
+    FindOEP = True
+    DebugOption = False
+    DebugFlag = False
+    BreakPoint = []
+    HookInt=0
+    SectionInfo=[]
+    InverseHookFuncs={}
+    ProtectedFile = None
+    DirectoryPath = None
+    a_queue=[] #to be updated another queue(not ArrayQueue)  
+    queue_size = 20
+    text = []
+    themida = []
+
+
+
+class DLL_SETTING:
+    DllFuncs = {}
+    LoadedDll = {} # {dll: address}
+    InverseDllFuncs ={}
+    InverseLoadedDll = {}
+    
+
+class HEAP_HANDLE:
+    HeapHandle=[0x000001E9E3850000]
+    HeapHandleSize=1
+
+def i_queue(data):
+    GLOBAL_VAR.a_queue.insert(0,data)
+def p_queue():
+    GLOBAL_VAR.a_queue.pop()
+def get_queue():
+    return GLOBAL_VAR.a_queue
+def get_len():
+    return len(GLOBAL_VAR.a_queue)
+def get_size():
+    return GLOBAL_VAR.queue_size
+
+def InvDllDict():
+    DLL_SETTING.InverseDllFuncs = {v: k for k, v in DLL_SETTING.DllFuncs.items()}
+    DLL_SETTING.InverseLoadedDll = {v: k for k, v in DLL_SETTING.LoadedDll.items()}
+   
+def InvHookFuncDict():
+    GLOBAL_VAR.InverseHookFuncs = {v: k for k, v in HookFuncs.items()}
+
+
+```
+
+`bobalkkagi/hookFuncs.py`:
+
+```py
+HookFuncs={
+    "kernel32.dll_GetModuleHandleA" : 0,
+    "kernel32.dll_LoadLibraryA" : 1,
+    "kernel32.dll_GetProcAddress" : 2,
+    "ntdll.dll_ZwOpenThread" : 3,
+    "kernel32.dll_GetUserDefaultUILanguage" : 4,
+    "ntdll.dll_RtlAllocateHeap" : 5,
+    "kernel32.dll_GetCurrentDirectoryW" : 6,
+    "kernel32.dll_GetModuleFileNameW" : 7,
+    "kernel32.dll_SetCurrentDirectoryW" : 8,
+    "kernel32.dll_GetCommandLineA" : 9,
+    "ntdll.dll_ZwQueryInformationProcess" : 10,
+    "ntdll.dll_ZwAllocateVirtualMemory" : 11,
+    "ntdll.dll_ZwGetContextThread" : 12,
+    "kernel32.dll_VirtualFree" : 13,
+    "ntdll.dll_ZwSetInformationThread" : 14,
+    "advapi32.dll_OpenThreadToken" : 15,
+    "advapi32.dll_OpenProcessToken" : 16,
+    "ntdll.dll_ZwQueryInformationToken" : 17,
+    "ntdll.dll_ZwSetInformationProcess" : 18,
+    "ntdll.dll_ZwClose" : 19,
+    "ntdll.dll_RtlFreeHeap" : 20,
+    "ntdll.dll_ZwOpenThreadTokenEx" : 21,
+    "ntdll.dll_ZwOpenProcessTokenEx" : 22,
+    "ntdll.dll_ZwDuplicateToken" : 23,
+    "ntdll.dll_ZwAccessCheck" : 24,
+    "kernel32.dll_VirtualProtect" : 25,
+    "win32u.dll_NtUserGetForegroundWindow" : 26,
+    "user32.dll_GetWindowTextA" : 27,
+    "ntdll.dll_ZwQuerySystemInformation" : 28,
+    "kernelbase.dll_RegOpenKeyExA" : 29,
+    "advapi32.dll_RegQueryValueExA" : 30,
+    "advapi32.dll_RegCloseKey" : 31,
+    "kernelbase.dll_VirtualProtect" : 32,
+}
+```
+
+`bobalkkagi/kuserSharedData.py`:
+
+```py
+from unicorn import *
+from ctypes import *
+
+class KSYSTEM_TIME(Structure):
+    _fields_=[
+        ("LowPart", c_uint32),
+        ("High1Time", c_int32),
+        ("High2Time", c_int32),
+    ]
+
+class XSTATE_FEATURE(Structure):
+    _fields_=[
+        ("Offset", c_uint32),
+        ("Size", c_uint32),
+    ]
+
+class XSTATE_CONFIGURATION(Structure):
+    _fields_=[
+        ("EnabledFeatures", c_uint64),
+        ("EnabledVolatileFeatures", c_int64),
+        ("Size", c_uint32),
+        ("ControlFlags", c_uint32),
+        ("Features", XSTATE_FEATURE * 64),
+        ("EnabledSupervisorFeatures", c_uint64),
+        ("AlignedFeatures", c_uint64),
+        ("AllFeatureSize", c_uint32),
+        ("AllFeatures", c_uint32 * 64),
+        ("EnabledUserVisibleSupervisorFeatures", c_uint64),
+    ]
+
+class LARGE_INTEGER(Structure):
+    _fields_=[
+        ("LowPart", c_uint32),
+        ("HighPart", c_int32),
+    ]
+
+
+class KUSER_SHARED_DATA(Structure):
+    _fields_=[
+        ("TickCountLowDeprecated", c_uint32),               # 0x000
+        ("TickCountMultiplier", c_uint32),                  # 0x004
+        ("InterruptTime", KSYSTEM_TIME),                    # 0x008
+        ("SystemTime", KSYSTEM_TIME),                       # 0x014
+        ("TimeZoneBias", KSYSTEM_TIME),                     # 0x020
+        ("ImageNumberLow", c_uint16),                       # 0x02c
+        ("ImageNumberHigh", c_uint16),                      # 0x02e
+        ("NtSystemRoot", c_uint16 * 260),                   # 0x030
+        ("MaxStackTraceDepth", c_uint32),                   # 0x238
+        ("CryptoExponent", c_uint32),                       # 0x23c
+        ("TimeZoneId", c_uint32),                           # 0x240
+        ("LargePageMinimum", c_uint32),                     # 0x244
+        ("AitSamplingValue", c_uint32),                     # 0x248
+        ("AppCompatFlag", c_uint32),                        # 0x24c
+        ("RNGSeedVersion", c_uint64),                       # 0x250
+        ("GlobalValidationRunlevel", c_uint32),             # 0x258
+        ("TimeZoneBiasStamp", c_int32),                     # 0x25c
+        ("NtBuildNumber", c_uint32),                        # 0x260
+        ("NtProductType", c_uint32),                        # 0x264
+        ("ProductTypeIsValid", c_char),                     # 0x268
+        ("Reserved0", c_char),                              # 0x269
+        ("NativeProcessorArchitecture", c_uint16),          # 0x26a
+        ("NtMajorVersion", c_uint32),                       # 0x26c
+        ("NtMinorVersion", c_uint32),                       # 0x270
+        ("ProcessorFeatures", c_char*64),                   # 0x274
+        ("Reserved1", c_uint32),                            # 0x2b4
+        ("Reserved3", c_uint32),                            # 0x2b8
+        ("TimeSlip", c_uint32),                             # 0x2bc
+        ("AlternativeArchitecture", c_uint32),              # 0x2c0
+        ("BootId", c_uint32),                               # 0x2c4
+        ("SystemExpirationDate", LARGE_INTEGER),            # 0x2c8
+        ("SuiteMask", c_uint32),                            # 0x2d0
+        ("KdDebuggerEnabled", c_char),                      # 0x2d4
+        ("MitigationPolicies", c_char),                     # 0x2d5
+        ("CyclesPerYield", c_uint16),                       # 0x2d6
+        ("ActiveConsoleId", c_uint32),                      # 0x2d8
+        ("DismountCount", c_uint32),                        # 0x2dc
+        ("ComPlusPackage", c_uint32),                       # 0x2e0
+        ("LastSystemRITEventTickCount", c_uint32),          # 0x2e4
+        ("NumberOfPhysicalPages", c_uint32),                # 0x2e8
+        ("SafeBootMode", c_char),                           # 0x2ec
+        ("VirtualizationFlags", c_char),                    # 0x2ed
+        ("Reserved12", c_char * 2),                         # 0x26e
+        ("SharedDataFlags", c_uint32),                      # 0x2f0
+        ("DataFlagsPad", c_uint32),                         # 0x2f4
+        ("TestRetInstruction", c_uint64),                   # 0x2f8
+        ("QpcFrequency", c_int64),                          # 0x300
+        ("SystemCall", c_uint32),                           # 0x308
+        ("Reserved2", c_uint32),                            # 0x30c
+        ("SystemCallPad", c_uint64 * 2),                    # 0x310
+        ("TickCount", KSYSTEM_TIME),                        # 0x320
+        ("TickCountPad", c_uint32),                         # 0x32c
+        ("Cookie", c_uint32),                               # 0x330
+        ("CookiePad", c_uint32),                            # 0x334
+        ("ConsoleSessionForegroundProcessId", c_int64),     # 0x338
+        ("TimeUpdateLock", c_uint64),                       # 0x340
+        ("BaselineSystemTimeQpc", c_uint64),                # 0x348
+        ("BaselineInterruptTimeQpc", c_uint64),             # 0x350
+        ("QpcSystemTimeIncrement", c_uint64),               # 0x358
+        ("QpcInterruptTimeIncrement", c_uint64),            # 0x360
+        ("QpcSystemTimeIncrementShift", c_char),            # 0x368
+        ("QpcInterruptTimeIncrementShift", c_char),         # 0x369
+        ("UnparkedProcessorCount", c_uint16),               # 0x36a
+        ("EnclaveFeatureMask", c_uint32 * 4),               # 0x36c
+        ("TelemetryCoverageRound", c_uint32),               # 0x37c
+        ("UserModeGlobalLogger", c_uint16 * 16),            # 0x380
+        ("ImageFileExecutionOptions", c_uint32),            # 0x3a0
+        ("LangGenerationCount", c_uint32),                  # 0x3a4
+        ("Reserved4", c_uint64),                            # 0x3a8
+        ("InterruptTimeBias", c_uint64),                    # 0x3b0
+        ("QpcBias", c_uint64),                              # 0x3b8
+        ("ActiveProcessorCount", c_uint32),                 # 0x3c0
+        ("ActiveGroupCount", c_char),                       # 0x3c4
+        ("Reserved9", c_char),                              # 0x3c5
+        ("QpcBypassEnabled", c_char),                       # 0x3c6
+        ("QpcShift", c_char),                               # 0x3c7
+        ("TimeZoneBiasEffectiveStart", LARGE_INTEGER),      # 0x3c8
+        ("TimeZoneBiasEffectiveEnd", LARGE_INTEGER),        # 0x3d0
+        ("XState", XSTATE_CONFIGURATION),                   # 0x3d8
+        ("FeatureConfigurationChangeStamp", KSYSTEM_TIME),  # 0x710
+        ("Spare", c_uint32),                                # 0x71c
+    ]
+
+
+def InitKuserSharedData():
+    kUserSharedData = KUSER_SHARED_DATA()
+    kUserSharedData.KdDebuggerEnabled = 0x01
+    kUserSharedData.MitigationPolicies = 0x0A
+    kUserSharedData.XState.EnabledFeatures = 0xE7
+    kUserSharedData.XState.ControlFlags = 0x3
+    kUserSharedData.XState.AllFeatureSize = 0x980
+    kUserSharedData.XState.AllFeatures[0] = 0xA0
+    kUserSharedData.XState.AllFeatures[1] = 0x100
+    kUserSharedData.XState.AllFeatures[2] = 0x100
+    kUserSharedData.XState.AllFeatures[5] = 0x40
+    kUserSharedData.XState.AllFeatures[6] = 0x200
+    kUserSharedData.XState.AllFeatures[7] = 0x400
+    kUserSharedData.XState.AllFeatures[9] = 0x8
+    return kUserSharedData
+```
+
+`bobalkkagi/loader.py`:
+
+```py
+from unicorn import *
+from unicorn.x86_const import *
+from pathlib import Path
+
+from .globalValue import DLL_SETTING, GLOBAL_VAR
+from .constValue import PRIVILEGE, RTL
+from .reflector import REFLECTOR
+from .util import align
+
+import struct
+import pefile
+import os
+
+
+def PE_Loader(uc, fileName, base, oep: bool = False) -> None: #
+  
+    originBase = base
+    dllFlag = False
+    sectionInfo=[]
+
+
+    if ".dll" in fileName:
+        if fileName in REFLECTOR:
+            fileName = REFLECTOR[fileName]
+        dllFlag = True
+        path = GetDLLPath(fileName)
+
+    else :
+        path = Path(fileName)
+
+
+    try :
+        pe = pefile.PE(path, fast_load=True)
+        imageBase = pe.OPTIONAL_HEADER.ImageBase
+        if dllFlag:
+            if fileName.lower() not in DLL_SETTING.LoadedDll:
+                DLL_SETTING.LoadedDll[fileName.lower()] = originBase
+            else:
+                return
+            fileName = fileName.lower()
+        alignHeaderSize = align(len(pe.header)) 
+        uc.mem_map(base, alignHeaderSize, UC_PROT_READ)
+        uc.mem_write(base, pe.header)
+        GLOBAL_VAR.SectionInfo.append(["header", base, 0x1000, 0x2]) # header
+        base += alignHeaderSize
+       
+        sectionSize, sectionInfo = Section(uc, pe, originBase, oep)
+
+        base += sectionSize
+        
+        DataFix(uc, sectionInfo, originBase, imageBase, base-originBase) #imagebase 기준으로 저장된 정보를 load한 base주소 기준으로 변경, 예외처리가 필요할 수 있다.
+
+        pe.parse_data_directories()
+        if dllFlag:
+            GLOBAL_VAR.DllEnd = base
+            for entry in pe.DIRECTORY_ENTRY_EXPORT.symbols:
+                if entry.name:
+                    dllFunction = entry.name.decode('utf-8')
+                try:
+                    if dllFunction not in DLL_SETTING.DllFuncs:
+                        DLL_SETTING.DllFuncs[fileName+"_"+dllFunction] = originBase+entry.address
+                    else:
+                        print(f"ERROR! {dllFunction} is in DllFuncs")
+                except:
+                    pass
+        else:
+            GLOBAL_VAR.ImageBaseEnd = base
+
+        Insert_IAT(uc, pe, originBase) #
+
+        if fileName == "ntdll.dll":
+            NtdllPatch(uc, originBase)
+
+        #print(f'[Load] {fileName:<80}: {originBase:016x}')
+    except FileNotFoundError:
+        pass
+
+
+def Insert_IAT(uc, pe, base):
+    
+    rva =pe.OPTIONAL_HEADER.DATA_DIRECTORY[1].VirtualAddress # DIRECTORY_ENTRY_IMPORT -> RVA
+    imageBase = pe.OPTIONAL_HEADER.ImageBase 
+    while True:
+        if not rva:
+            break
+        image_import_descriptor_size = pefile.Structure(pe.__IMAGE_IMPORT_DESCRIPTOR_format__).sizeof() # size of import_discriptor
+        data = pe.get_data(rva, image_import_descriptor_size) # rva 부터 image_import_descriptor_size만큼 데이터를 저장
+        file_offset = pe.get_offset_from_rva(rva) # rva값으로부터 file_offset값 구하기
+        
+        import_desc = pe.__unpack_data__( # format에 맞게 data 파싱
+                        pe.__IMAGE_IMPORT_DESCRIPTOR_format__, data, file_offset=file_offset)
+        if not import_desc or import_desc.all_zeroes():
+            break
+        
+        dll = pe.get_string_at_rva(import_desc.Name, pefile.MAX_DLL_LENGTH).decode('utf-8') # dll Name 가져오기
+
+        
+        if dll.lower() not in DLL_SETTING.LoadedDll:
+            PE_Loader(uc, dll, GLOBAL_VAR.DllEnd)
+    
+        peDataLen = len(pe.__data__) - file_offset
+        dllnames_only=False 
+        importData = [] # IAT에 저장되있는 함수들의 정보를 가져옴
+
+        if not dllnames_only:
+            try: #format에 맞게 파싱
+                importData = pe.parse_imports(
+                    import_desc.OriginalFirstThunk,
+                    import_desc.FirstThunk,
+                    import_desc.ForwarderChain,
+                    max_length = peDataLen,
+                )
+            except pefile.PEFormatError as e:
+                pe.__warnings.append(
+                "Error parsing the import directory. "
+                f"Invalid Import data at RVA: 0x{0x2000:x} ({e.value})"
+                )
+        origindll = dll
+
+        for funcs in importData: # Unicorn으로 할당한 IAT공간에 함수들의 정보를 저장
+            
+            try:
+                
+                if dll in REFLECTOR:
+                    dll = REFLECTOR[dll]
+                funcName = (funcs.name).decode('utf-8')
+                if funcName in RTL: # 특정함수는 rtl을 붙여 ntdll 내의 함수로 이동. 참고 https://overrun.tistory.com/27
+                    funcName = RTL[funcName]
+                    dll = "ntdll.dll"
+                
+                func_addr = DLL_SETTING.DllFuncs[dll.lower()+'_'+funcName]
+                dll = origindll
+            except:
+                continue
+            uc.mem_write(base+funcs.address-imageBase,struct.pack('<Q', func_addr))
+            
+        rva += import_desc.sizeof()
+
+
+def GetDLLPath(dll:str)->str:
+    dllPath = ""
+    for path, dirs, files in os.walk(GLOBAL_VAR.DirectoryPath):
+        for file in files:
+            if file.lower() == dll.lower():
+                dllPath = os.path.join(path, file)
+                    
+    return dllPath
+
+def PrivChange(privilege):
+    changeDic={0x2:0x10, 0x4:0x2, 0x6:0x20, 0xc:0x4, 0xe:0x40}
+    return changeDic[privilege]
+
+def Section(uc, pe, base, oep):
+    totalSize = 0
+    info=[]
+
+    for i, section in enumerate(pe.sections): 
+        code = section.get_data()
+        sectionName = str(section.Name, 'utf-8').replace(' ','').replace('\x00','')
+        if sectionName == ".themida":
+            GLOBAL_VAR.themida = [sectionName, base + section.VirtualAddress, section.Misc_VirtualSize, PrivChange(priv)]
+        if oep:
+            try:
+                priv, sectionName = RemoveEXEC(sectionName, section.Characteristics)
+                GLOBAL_VAR.text = [section.VirtualAddress, align(section.Misc_VirtualSize, pe.OPTIONAL_HEADER.SectionAlignment)]
+            except:
+                priv = RemoveEXEC(sectionName, section.Characteristics)
+            
+            info.append([section.Name,base+section.VirtualAddress, align(section.Misc_VirtualSize, pe.OPTIONAL_HEADER.SectionAlignment), PRIVILEGE[priv]])
+            uc.mem_map(base+section.VirtualAddress, align(section.Misc_VirtualSize, pe.OPTIONAL_HEADER.SectionAlignment) , PRIVILEGE[priv])
+            GLOBAL_VAR.SectionInfo.append([sectionName, base + section.VirtualAddress, section.Misc_VirtualSize, PrivChange(priv)])
+        else:
+            info.append([section.Name,base+section.VirtualAddress,align(section.Misc_VirtualSize, pe.OPTIONAL_HEADER.SectionAlignment),PRIVILEGE[section.Characteristics >>28]])
+            uc.mem_map(base+section.VirtualAddress, align(section.Misc_VirtualSize, pe.OPTIONAL_HEADER.SectionAlignment) , PRIVILEGE[section.Characteristics >>28])
+            GLOBAL_VAR.SectionInfo.append([sectionName, base + section.VirtualAddress, section.Misc_VirtualSize, PrivChange(section.Characteristics >>28)])
+
+        uc.mem_write(base+section.VirtualAddress, code)
+        totalSize += align(section.Misc_VirtualSize, pe.OPTIONAL_HEADER.SectionAlignment)
+        
+    return totalSize, info
+
+def DataFix(uc, sectionInfo, originbase, imagebase, offset):
+    for section in sectionInfo:
+        if section[3] <4:
+            TPrivileage = section[3]
+            uc.mem_protect(section[1],section[2],UC_PROT_READ | UC_PROT_WRITE)
+            count = 0
+            while count < section[2]:
+                
+                data = struct.unpack('<Q',uc.mem_read(section[1]+count,0x8))[0]
+                if (data -imagebase) > 0 and (data-imagebase) < offset :
+                    uc.mem_write(section[1]+count,struct.pack('<Q',data-imagebase+originbase))
+                count += 0x8
+            uc.mem_protect(section[1],section[2],TPrivileage)
+
+def NtdllPatch(uc,base):
+    uc.mem_write(base + 0x17A3F0,struct.pack('<Q',0x40000000006))
+    uc.mem_write(base + 0x17A3F0+0x8,struct.pack('<Q',base + 0x1d510))
+    uc.mem_write(base + 0x17A3F0+0x10,struct.pack('<Q',base + 0xA1215))
+    uc.mem_write(base + 0x17A3F0+0x18,struct.pack('<Q',base ))
+    uc.mem_write(base + 0x17A3F0+0x20,struct.pack('<Q',base + 0x16bdf8))
+    uc.mem_write(base + 0x17A3F0+0x28,struct.pack('<Q',base ))
+    uc.mem_write(base + 0x17A3F0+0x30,struct.pack('<Q',base + 0x170418)) 
+    uc.mem_write(base + 0x17A3F0+0x38,struct.pack('<Q',base ))
+    uc.mem_write(base + 0x17A3F0+0x40,struct.pack('<Q',base + 0x1728c0))
+    uc.mem_write(base + 0x17A3F0+0x48,struct.pack('<Q',base ))
+    uc.mem_write(base + 0x17A3F0+0x50,struct.pack('<Q',base + 0x16e828))
+    uc.mem_write(base + 0x17A3F0+0x58,struct.pack('<Q',base ))
+    uc.mem_write(base + 0x17A3F0+0x60,struct.pack('<Q',base + 0x16e81c))
+    uc.mem_write(base + 0x17A3F0+0x68,struct.pack('<Q',base ))
+    uc.mem_write(base + 0x17A3F0+0x70,struct.pack('<Q',base + 0x17277c))
+    uc.mem_write(base + 0x17A370+0x8,struct.pack('<Q',0x2000000000000000))
+   
+def RemoveEXEC(sectionName:str, Characteristics):
+    if len(sectionName) > 0 and sectionName != '.text':
+        return Characteristics >> 28
+    elif (Characteristics >> 28)&0x2:
+        #print(f"[Removed] No name section EXEC privilege!")
+        return (Characteristics >> 28)^0x2, '.text'
+    else:
+        return Characteristics >> 28
+```
+
+`bobalkkagi/logger.py`:
+
+```py
+from unicorn import *
+from unicorn.x86_const import *
+from capstone import Cs, CS_ARCH_X86, CS_MODE_64
+
+from .globalValue import get_queue, GLOBAL_VAR
+from .util import IsReadable
+
+import logging
+import struct
+import os
+
+regis = {
+    "RAX": UC_X86_REG_RAX,
+    "RBX": UC_X86_REG_RBX,
+    "RCX": UC_X86_REG_RCX,
+    "RDX": UC_X86_REG_RDX,
+    "RBP": UC_X86_REG_RBP,
+    "RSP": UC_X86_REG_RSP,
+    "RDI": UC_X86_REG_RDI,
+    "RSI": UC_X86_REG_RSI,
+    "R8": UC_X86_REG_R8, 
+    "R9": UC_X86_REG_R9,
+    "R10": UC_X86_REG_R10,
+    "R11": UC_X86_REG_R11,
+    "R12": UC_X86_REG_R12,
+    "R13": UC_X86_REG_R13,
+    "R14": UC_X86_REG_R14,
+    "R15": UC_X86_REG_R15,
+    "RIP": UC_X86_REG_RIP,
+    "RFLAG": UC_X86_REG_EFLAGS
+    }
+
+def disas(code, address):
+    md = Cs(CS_ARCH_X86, CS_MODE_64)
+    assem = md.disasm(code, address)
+    return assem
+
+
+def setup_logger(uc, logger: logging.Logger, verbose:bool) -> None:
+    
+    if verbose:
+        logLevel = logging.DEBUG
+    else:
+        logLevel = logging.INFO
+
+    logger.setLevel(logLevel)
+    # Create a console handler with a higher log level
+    streamHandler = logging.StreamHandler()
+    streamHandler.setLevel(logLevel)
+    streamHandler.setFormatter(CustomFormatter(uc))
+    logger.addHandler(streamHandler)
+    
+    # Save log file
+    if not os.path.isdir('log'):
+        os.mkdir('log')
+    logFile = GLOBAL_VAR.ProtectedFile.split('\\')[-1].split('.')[0] + '_log.txt'
+    fileHandler = logging.FileHandler(f"log\\{logFile}")
+    logger.addHandler(fileHandler)
+
+class CustomFormatter(logging.Formatter):
+    uc :int
+    reg= {}
+    FORMATS : dict
+    grey = "\x1b[38;20m"
+    green = "\x1b[1;32m"
+    yellow = "\x1b[33;20m"
+    red = "\x1b[31;20m"
+    bold_red = "\x1b[31;1m"
+    blue = "\x1b[34;40m"
+    sky_blue="\x1b[36;40m"
+    reset = "\x1b[0m"
+    format_problem_str = "%(levelname)s - %(message)s"
+    def __init__(self, uc):
+        self.uc=uc
+    
+    def format(self, record: logging.LogRecord) -> str:
+
+        for key in regis:
+            tmp = self.uc.reg_read(regis[key])
+            self.reg[key]=tmp
+        
+        d_format = self.blue+  "{0:=^80}\n".format("[ REGISTERS ]") + self.reset
+        for idx, key in enumerate(self.reg):
+            try:
+                string = str(self.uc.mem_read(self.reg[key], 0x50).split(b'\x00')[0],'utf-8').replace('\n','')
+                d_format += self.green+"%-10s" % (key+":")+self.reset+ "{:<016x}\t".format(self.reg[key])
+                if IsReadable(string):
+                    d_format += string + '\n'
+                else:
+                    d_format += '\n'
+            except:
+                d_format += self.green+"%-10s" % (key+":")+self.reset+ "0x%x\n" % self.reg[key]
+            if key == "RFLAG":
+                OF = (self.reg[key] & 0b100000000000) >> 11    #11 
+                DF = (self.reg[key] & 0b10000000000 ) >> 10    #10 
+                IF = (self.reg[key] & 0b1000000000  ) >> 9     #9 
+                TF = (self.reg[key] & 0b100000000   ) >> 8     #8 
+                SF = (self.reg[key] & 0b10000000    ) >> 7     #7 
+                ZF = (self.reg[key] & 0b1000000     ) >> 6     #6 
+                AF = (self.reg[key] & 0b10000       ) >> 4     #4 
+                PF = (self.reg[key] & 0b100         ) >> 2     #2
+                CF = (self.reg[key] & 0b1           )          #0
+                d_format += f"\n    ZF {ZF} PF {PF} AF {AF}\n    OF {OF} SF {SF} DF {DF}\n    CF {CF} TF {TF} IF {IF}\n"
+            if idx in [7, 15, 16]:
+                d_format += '\n'
+
+
+        d_format += self.reset
+        d_format += self.blue + "{0:=^80}\n".format("[ DISASM ]") + self.reset
+        
+        for instruction in reversed(get_queue()):
+            address = list(instruction.keys())[0]
+            size = instruction[address]
+            address = int(address,16)
+            if(address == self.reg["RIP"]):
+                d_format += self.green +"▶"+self.reset
+
+            code = self.uc.mem_read(address, size)
+            asm = disas(bytes(code), address)
+            for a in asm:
+                d_format +=" 0x%016x: " % a.address +self.green+"\t{0:<8}".format(a.mnemonic) + self.sky_blue+"\t{0:<}\n".format(a.op_str) + self.reset
+
+        d_format += self.blue + "{0:=^80}\n".format("[ STACK ]") + self.reset
+
+        
+        stack =struct.unpack('<Q',self.uc.mem_read(self.reg["RSP"],0x8))[0]
+        for i in range(-5,11):
+            if i == 0:
+                d_format += self.green +"▶"+self.yellow+"0x%x" % (self.reg["RSP"]) + self.green+"\t<==" \
+                    + self.reset+ "\t0x%x\n" % (struct.unpack('<Q',self.uc.mem_read(self.reg["RSP"],0x8))[0])
+            else:
+                d_format += self.yellow+"0x%x" % (self.reg["RSP"]+8*i) + self.green+"\t<==" \
+                    + self.reset+ "\t0x%x\n" % (struct.unpack('<Q',self.uc.mem_read(self.reg["RSP"]+8*i,0x8))[0])
+        
+        self.FORMATS = {
+            logging.DEBUG: self.green + "%(levelname)s - %(message)s\n"+d_format +self.reset,
+            logging.INFO: self.green + "%(levelname)s" + self.yellow + " - %(message)s"+self.reset,
+            logging.WARNING: self.green + "HOOKING" + self.yellow + " - %(message)s"+self.reset,
+            logging.ERROR: self.red + self.format_problem_str + self.reset,
+            logging.CRITICAL: self.bold_red + self.format_problem_str + self.reset
+        }
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
+```
+
+`bobalkkagi/peb.py`:
+
+```py
+from ctypes import *
+
+from .constValue import LdrBase, ProcessHeapBase, PshimDataBase
+
+
+class UNICODE_STRING(Structure):
+    _fields_ = [
+        ("Length", c_uint16),
+        ("MaximumLength", c_uint16),
+        ("Buffer", c_wchar_p)
+    ]
+
+class LIST_ENTRY(Structure):
+    _fields_ = [
+        ("Flink", c_void_p),
+        ("Blink", c_void_p)
+    ]
+
+class RTL_BALANCED_NODE(Structure):
+    _fields_=[
+        ("Left", c_void_p),
+        ("Right", c_void_p),
+        ("ParentValue", c_uint64)
+    ]
+
+class LARGE_INTEGER(Structure):
+    _fields_=[
+        ("LowPart", c_uint32),
+        ("HighPart", c_int32),
+    ]
+
+class LDR_DATA_TABLE_ENTRY(Structure):
+    _fields_ = [
+        ("InLoadOrderLinks", LIST_ENTRY),
+        ("InMemoryOrderLinks", LIST_ENTRY),
+        ("InInitializationOrderLinks", LIST_ENTRY),
+        ("DllBase", c_void_p),
+        ("EntryPoint", c_void_p),
+        ("SizeOfImage", c_uint32),
+        ("FullDllName", UNICODE_STRING), # _UNICODE_STRING
+        ("BaseDllName", UNICODE_STRING), # _UNICODE_STRING
+        ("FlagGroup", c_ubyte*4),
+        ("Flags", c_uint32),
+        ("ObsoleteLoadCount", c_uint16),
+        ("TlsIndex", c_uint16),
+        ("HashLinks", LIST_ENTRY),
+        ("TimeDateStamp", c_uint32),
+        ("EntryPointActivationContext", c_void_p), # Ptr64 _ACTIVATION_CONTEXT
+        ("Lock", c_void_p),
+        ("DdagNode", c_void_p), #_LDR_DDAG_NODE
+        ("NodeModuleLink", LIST_ENTRY),
+        ("LoadContext", c_void_p), # _LDRP_LOAD_CONTEXT
+        ("ParentDllBase", c_void_p),
+        ("SwitchBackContext", c_void_p),
+        ("BaseAddressIndexNode", RTL_BALANCED_NODE),
+        ("MappingInfoIndexNode", RTL_BALANCED_NODE),
+        ("OriginalBase", c_uint32),
+        ("LoadTime", LARGE_INTEGER),
+        ("BaseNameHashValue", c_uint32),
+        ("LoadReason", c_uint32), # _LDR_DLL_LOAD_REASON
+        ("ImplicitPathOptions", c_uint32),
+        ("ReferenceCount", c_uint32),
+        ("DependentLoadFlags", c_uint32),
+        ("SigningLevel", c_ubyte)
+    ]
+
+class PROCESS_HEAP(Structure):
+    _fields_=[
+        ("Segment",c_uint64),
+        ("Entry",c_uint64),
+        ("SegmentSignature",c_uint32),
+        ("SegmentFlags",c_uint32),
+        ("SegmentListEntry",c_void_p * 2),
+        ("Heap",c_void_p),
+        ("BaseAddress",c_void_p),
+        ("NumberOfPages",c_uint32),
+        ("Padding0",c_uint32),
+        ("FirstEntry",c_void_p),
+        ("LastValidEntry",c_void_p),
+        ("NumberOfUnCommittedPages",c_uint32),
+        ("NumberOfUnCommittedRanges",c_uint32),
+        ("SegmentAllocatorBackTraceIndex",c_uint16),
+        ("Reserved",c_uint16),
+        ("Padding1",c_uint8 * 4),
+        ("UCRSegmentList",c_void_p*2),
+        ("Flags",c_uint32),
+        ("ForceFlags",c_uint32),
+        ("CompatibilityFlags",c_uint32),
+        ("EncodeFlagMask",c_uint32),
+        ("Encoding",c_void_p * 2),
+        ("Interceptor",c_uint32),
+        ("VirtualMemoryThreshold",c_uint32),
+        ("Signature",c_uint32),
+        ("SegmentReserve",c_uint64),
+        ("SegmentCommit",c_uint64),
+        ("DeCommitFreeBlockThreshold",c_uint64),
+        ("DeCommitTotalFreeThreshold",c_uint64),
+        ("TotalFreeSize",c_uint64),
+        ("MaximumAllocationSize",c_uint64),
+        ("ProcessHeapsListIndex",c_uint16),
+        ("HeaderValidateLength",c_uint16),
+        ("HeaderValidateCopy",c_void_p),
+        ("NextAvailableTagIndex",c_uint16),
+        ("MaximumTagIndex",c_uint16),
+        ("TagEntries",c_void_p),
+        ("UCRList",c_void_p*2),
+        ("AlignRound",c_uint64),
+        ("AlignMask",c_uint64),
+        ("VirtualAllocdBlocks",c_void_p*2),
+        ("SegmentList",c_void_p*2),
+        ("AllocatorBackTraceIndex",c_uint16),
+        ("Padding2",c_uint8*2),
+        ("NonDedicatedListLength",c_uint32),
+        ("BlocksIndex",c_void_p),
+    ]
+
+class PEB(Structure):
+    _fields_ = [
+        ("InheritedAddressSpace", c_ubyte),             #+0x000
+        ("ReadImageFileExecOptions", c_ubyte),          #+0x001
+        ("BeingDebugged", c_ubyte),                     #+0x002
+        ("BitField", c_ubyte),                          #+0x003
+        ("Padding0", c_uint32),                         #+0x004
+        ("Mutant", c_uint64),                           #+0x008
+        ("ImageBaseAddress", c_void_p),                 #+0x010
+        ("Ldr", c_void_p ),                             #+0x018
+        ("ProcessParameters", c_void_p),                #+0x020
+        ("SubSystemData", c_void_p),                    #+0x028
+        ("ProcessHeap", c_void_p),                      #+0x030
+        ("FastPebLock", c_void_p),                      #+0x038
+        ("AtlThunkSListPtr", c_void_p),                 #+0x040
+        ("IFEOKey", c_void_p),                          #+0x048
+        ("CrossProcessFlags", c_uint32),                #+0x050
+        ("Padding1", c_uint32),                         #+0x054
+        ("KernelCallbackTable", c_void_p),              #+0x058
+        ("SystemReserved", c_uint32),                   #+0x060
+        ("AtlThunkSListPtr32", c_uint32),               #+0x064
+        ("ApiSetMap", c_void_p),                        #+0x068
+        ("TlsExpansionCounter", c_uint32),              #+0x070
+        ("Padding2", c_uint8 * 4),                      #+0x074
+        ("TlsBitmap", c_void_p),                        #+0x078
+        ("TlsBitmapBits", c_uint32 * 2),                #+0x080
+        ("ReadOnlySharedMemoryBase", c_void_p),         #+0x088
+        ("SharedData", c_void_p),                       #+0x090  
+        ("ReadOnlyStaticServerData", c_void_p),         #+0x098
+        ("AnsiCodePageData", c_void_p),                 #+0x0a0
+        ("OemCodePageData", c_void_p),                  #+0x0a8
+        ("UnicodeCaseTableData", c_void_p),             #+0x0b0
+        ("NumberOfProcessors", c_uint32),               #+0x0b8
+        ("NtGlobalFlag", c_uint32),                     #+0x0bc
+        ("CriticalSectionTimeout", c_void_p),           #+0x0c0
+        ("HeapSegmentReserve", c_uint64),               #+0x0c8
+        ("HeapSegmentCommit", c_uint64),                #+0x0d0
+        ("HeapDeCommitTotalFreeThreshold", c_uint64),   #+0x0d8
+        ("HeapDeCommitFreeBlockThreshold", c_uint64),   #+0x0e0
+        ("NumberOfHeaps", c_uint32),                    #+0x0e8
+        ("MaximumNumberOfHeaps", c_uint32),             #+0x0ec
+        ("ProcessHeaps", c_void_p),                     #+0x0f0
+        ("GdiSharedHandleTable", c_void_p),             #+0x0f8
+        ("ProcessStarterHelper", c_void_p),             #+0x100
+        ("GdiDCAttributeList", c_uint32),               #+0x108
+        ("Padding3", c_uint32),                         #+0x10c
+        ("LoaderLock", c_void_p),                       #+0x110
+        ("OSMajorVersion", c_uint32),                   #+0x118
+        ("OSMinorVersion", c_uint32),                   #+0x11c
+        ("OSBuildNumber", c_uint16),                    #+0x120
+        ("OSCSDVersion", c_uint16),                     #+0x122
+        ("OSPlatformId", c_uint32),                     #+0x124
+        ("ImageSubsystem", c_uint32),                   #+0x128
+        ("ImageSubsystemMajorVersion", c_uint32),       #+0x12c
+        ("ImageSubsystemMinorVersion", c_uint32),       #+0x130
+        ("Padding4", c_uint8 * 4),                      #+0x134
+        ("ActiveProcessAffinityMask", c_uint64),        #+0x138 
+        ("GdiHandleBuffer", c_uint32 * 60),             #+0x140
+        ("PostProcessInitRoutine", c_void_p),           #+0x230
+        ("TlsExpansionBitmap", c_void_p),               #+0x238
+        ("TlsExpansionBitmapBits", c_uint32 * 32),      #+0x240
+        ("SessionId", c_uint32),                        #+0x2c0
+        ("Padding5", c_uint8 * 4),                      #+0x2c4
+        ("AppCompatFlags", c_void_p),                   #+0x2c8
+        ("AppCompatFlagsUser", c_void_p),               #+0x2d0    
+        ("pShimData", c_void_p),                        #+0x2d8
+        ("AppCompatInfo", c_void_p),                    #+0x2e0
+        ("CSDVersion", c_void_p * 2),                   #+0x2e8
+        ("ActivationContextData", c_void_p),            #+0x2f8
+        ("ProcessAssemblyStorageMap", c_void_p),        #+0x300
+        ("SystemDefaultActivationContextData", c_void_p),   #+0x308
+        ("SystemAssemblyStorageMap", c_void_p),         #+0x310
+        ("MinimumStackCommit", c_uint64),               #+0x318
+        ("SparePointers", c_void_p * 4),                #+0x320
+        ("SpareUlongs", c_uint32 * 5),                  #+0x340
+        ("WerRegistrationData", c_void_p),              #+0x358
+        ("WerShipAssertPtr", c_void_p),                 #+0x360
+        ("pUnused", c_void_p),                          #+0x368
+        ("pImageHeaderHash", c_void_p),                 #+0x370
+        ("TracingFlags", c_uint32),                     #+0x378
+        ("Padding6", c_uint8 * 4),                      #+0x37c
+        ("CsrServerReadOnlySharedMemoryBase", c_uint64),#+0x380
+        ("TppWorkerpListLock", c_uint64),               #+0x388
+        ("TppWorkerpList", c_void_p * 2),               #+0x390
+        ("WaitOnAddressHashTable", c_void_p * 128),     #+0x3a0
+        ("TelemetryCoverageHeader", c_void_p),          #+0x7a0
+        ("CloudFileFlags", c_uint32),                   #+0x7a8
+        ("CloudFileDiagFlags", c_uint32),               #+0x7ac
+        ("PlaceholderCompatibilityMode", c_uint8),      #+0x7b0
+        ("PlaceholderCompatibilityModeReserved", c_uint8 * 7),  #+0x7b1
+        ("LeapSecondData", c_void_p),                   #+0x7b8
+        ("LeapSecondFlags", c_uint32),                  #+0x7c0
+        ("NtGlobalFlag2", c_uint32),                    #+0x7c4
+    ]
+
+class PEB_LDR_DATA(Structure):
+    _fields_ = [
+        ("Length", c_uint32),
+        ("Initialized", c_uint32),
+        ("SsHandle", c_void_p),
+        ("InLoadOrderModuleList", LIST_ENTRY),
+        ("InMemoryOrderModuleList", LIST_ENTRY),
+        ("InInitializationOrderModuleList", LIST_ENTRY),
+        ("EntryInProgress", c_void_p),
+        ("ShutdownInProgress", c_void_p),
+        ("ShutdownThreadId", c_void_p),
+    ]
+
+
+def Initpeb():
+    peb = PEB()
+    peb.InheritedAddressSpace = 0
+    peb.ReadImageFileExecOptions = 0
+    peb.BeingDebugged = 0
+    peb.BitField = 4
+    peb.Padding0 = 0
+    peb.Mutant = -1
+    peb.ImageBaseAddress = 0x140000000
+    peb.Ldr= LdrBase
+    peb.ProcessParameters =  ProcessHeapBase + 0x1d50# 채워줘야함
+    peb.SubSystemData = 0x0
+    peb.NtGlobalFlag = 0x0
+    peb.ProcessHeap = ProcessHeapBase
+    peb.CrossProcessFlags = 0x1
+    peb.ActivationContextData = 0x400000
+    return peb
+ 
+
+def InitProcessHeap():
+    procHeap = PROCESS_HEAP()
+    procHeap.Segment = 0x0
+    procHeap.Entry = 0x0 # 특정한 값으로 채워야함
+    procHeap.SegmentSignature = 0xffeeffee
+    procHeap.SegmentFlags = 0x2
+    procHeap.BlocksIndex = ProcessHeapBase + 0x2e8
+    procHeap.Flags = 0x2
+    procHeap.ForceFlags = 0x0
+    procHeap.pShimData = PshimDataBase
+    return procHeap
+
+'''
+# ======================================================== #
+# Not Used!
+# We will Update After..
+# ======================================================== #
+'''
+
+# def InitLdr():
+#     ldr = PEB_LDR_DATA()
+#     ldr.Length = 0x58
+#     ldr.Initialized = 0x1
+#     ldr.SsHandle = 0x0
+#     ldr.InLoadOrderModuleList_Flink = 0x500000
+#     ldr.InLoadOrderModuleList_Blink = 0x500000
+#     ldr.InMemoryOrderModuleList_Flink = 0x500000 + 0x10
+#     ldr.InMemoryOrderModuleList_Blink = 0x500000 + 0x10
+#     ldr.InInitializationOrderModuleList_Flink = 0x500000 + 0x20
+#     ldr.InInitializationOrderModuleList_Blink = 0x500000 + 0x20
+#     ldr.EntryInProgress = 0x0
+#     ldr.ShutdownInProgress = 0x0
+#     ldr.ShutdownThreadId = 0x0
+
+
+# def SetLdrTable(base, dllBase, Path, dll, ep, soi):
+#     lt  = LDR_DATA_TABLE_ENTRY()
+#     changeBase = base + 0x770
+#     lt.InLoadOrderLinks.Flink = 0x500000
+#     lt.InLoadOrderLinks.Blink = changeBase -0x770
+#     lt.InMemoryOrderLinks.Flink = 0x500000 + 0x10
+#     lt.InMemoryOrderLinks.Blink = changeBase + 0x10 -0x770
+#     lt.InInitializationOrderLinks.Flink = 0x500000 + 0x20
+#     lt.InInitializationOrderLinks.Blink = changeBase + 0x20 -0x770
+#     # if GLOBALVAR['LoadCnt'] == 0:
+#     #     lt.InLoadOrderLinks.Blink = 0x500000
+#     #     lt.InMemoryOrderLinks.Blink = 0x500000 + 0x10
+#     #     lt.InInitializationOrderLinks.Blink = 0x500000+ 0x20
+#     #     changeBase = base
+#     lt.DllBase = dllBase
+#     lenPath = len(Path)*2
+#     lenDll = len(dll)*2
+#     try:
+#         uc.mem_write(GLOBALVAR['dllNameSpace'], Path.encode('utf-16')+b'\x00\x00')
+        
+#     except:
+#         uc.mem_map(GLOBALVAR['dllNameSpace'], 0x10000)
+#         uc.mem_write(GLOBALVAR['dllNameSpace'], Path.encode('utf-16')+b'\x00\x00')
+#     lt.EntryPoint = ep
+#     lt.SizeOfImage = soi
+#     lt.FullDllName.Length = lenPath 
+#     lt.FullDllName.MaximumLength = lenDll+2
+#     lt.FullDllName.Buffer = GLOBALVAR['dllNameSpace']
+#     lt.BaseDllName.Length = lenDll
+#     lt.BaseDllName.MaximumLength = lenDll+2
+#     lt.BaseDllName.Buffer = GLOBALVAR['dllNameSpace'] + lenPath - lenDll
+#     GLOBALVAR['dllNameSpace'] += lenPath + 2
+#     uc.mem_write(changeBase, bytes(lt))
+#     ChagnePrevNodeFLink(uc, changeBase)
+#     return changeBase
+
+# def ChagnePrevNodeFLink(uc, addr):
+#     uc.mem_write(addr-0x770, struct.pack('<Q',  addr))
+#     uc.mem_write(addr+0x10-0x770, struct.pack('<Q', addr+0x10))
+#     uc.mem_write(addr+0x20-0x770, struct.pack('<Q', addr+0x20))
+```
+
+`bobalkkagi/reflector.py`:
+
+```py
+REFLECTOR = {
+        "api-ms-win-core-sysinfo-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-sysinfo-l1-2-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-sysinfo-l1-2-1.dll" : "kernelbase.dll",
+        "api-ms-win-core-libraryloader-l1-2-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-libraryloader-l1-2-1.dll" : "kernelbase.dll",
+        "api-ms-win-core-errorhandling-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-libraryloader-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-threadpool-legacy-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-threadpool-private-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-timezone-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-crt-math-l1-1-0.dll" : "ucrtbase.dll",
+        "api-ms-win-crt-time-l1-1-0.dll" : "ucrtbase.dll",
+        "api-ms-win-crt-runtime-l1-1-0.dll" : "ucrtbase.dll",
+        "api-ms-win-crt-heap-l1-1-0.dll" : "ucrtbase.dll",
+        "api-ms-win-crt-heap-l1-1-0.dll" : "ucrtbase.dll",
+        "api-ms-win-crt-utility-l1-1-0.dll": "ucrtbase.dll",
+        "api-ms-win-crt-stdio-l1-1-0.dll" : "ucrtbase.dll",
+        "api-ms-win-crt-locale-l1-1-0.dll" : "ucrtbase.dll",
+        "api-ms-win-core-synch-l1-1-0.dll" : "ntdll.dll",
+        "api-ms-win-core-heap-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-processthreads-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-processthreads-l1-1-1.dll" : "kernelbase.dll",
+        "api-ms-win-core-processthreads-l1-1-2.dll" : "kernelbase.dll",
+        "api-ms-win-core-xstate-l2-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-wow64-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-realtime-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-io-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-io-l1-1-1.dll" : "kernelbase.dll",
+        "api-ms-win-core-memory-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-memory-l1-1-1.dll" : "kernelbase.dll",
+        "api-ms-win-core-memory-l1-1-2.dll" : "kernelbase.dll",
+        "api-ms-win-core-file-l1-1-0.dll" : "kernel32.dll",
+        "api-ms-win-core-file-l1-2-0.dll" : "kernel32.dll",
+        "api-ms-win-core-file-l1-2-1.dll" : "kernel32.dll",
+        "api-ms-win-core-file-l2-1-0.dll" : "kernel32.dll",
+        "api-ms-win-core-file-l2-1-1.dll" : "kernel32.dll",
+        "api-ms-win-core-rtlsupport-l1-1-0.dll" : "kernel32.dll",
+        "api-ms-win-core-console-l1-1-0.dll" : "kernel32.dll",
+        "api-ms-win-eventing-provider-l1-1-0.dll" : "advapi32.dll",
+        "api-ms-win-core-console-l1-1-0.dll" : "kernel32.dll",
+        "api-ms-win-core-datetime-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-datetime-l1-1-1.dll" : "kernelbase.dll",
+        "api-ms-win-core-datetime-l1-1-2.dll" : "kernelbase.dll",
+        "api-ms-win-core-debug-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-debug-l1-1-1.dll" : "kernelbase.dll",
+        "api-ms-win-core-fibers-l1-1-0.dll" : "kernel32.dll",
+        "api-ms-win-core-handle-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-localization-l1-2-0.dll" : "kernel32.dll",
+        "api-ms-win-core-namedpipe-l1-1-0.dll" : "kernel32.dll",
+        "api-ms-win-core-processenvironment-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-processenvironment-l1-2-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-profile-l1-1-0.dll" : "kernel32.dll",
+        "api-ms-win-core-string-l1-1-0.dll" : "kernel32.dll",
+        "api-ms-win-core-synch-l1-2-0.dll" : "kernel32.dll",
+        "api-ms-win-core-util-l1-1-0.dll" : "kernel32.dll",
+        "api-ms-win-security-base-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-security-base-l1-2-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-registry-l1-1-0.dll" : "kernelbase.dll",
+        "api-ms-win-core-registry-l1-1-1.dll" : "kernelbase.dll",
+        "api-ms-win-core-registry-l1-1-2.dll" : "kernelbase.dll",
+        "api-ms-win-core-com-l1-1-0.dll" : "ole32.dll"
+    }
+```
+
+`bobalkkagi/teb.py`:
+
+```py
+from ctypes import *
+from .constValue import TebBase, PebBase, StackBase, StackLimit
+
+
+class LIST_ENTRY(Structure):
+    _fields_ = [
+        ("Flink", c_void_p),
+        ("Blink", c_void_p)
+    ]
+
+class NtTib(Structure):
+    _fields_ = [
+        ("ExceptionList", c_void_p),        #[+0x000]
+        ("StackBase", c_void_p),            #[+0x008]
+        ("StackLimit", c_void_p),           #[+0x010]
+        ("SubSystemTib", c_void_p),         #[+0x018]
+        ("FiberData", c_void_p),            #[+0x020] #Version [Type: unsigned long]
+        ("ArbitraryUserPointer", c_void_p), #[+0x028]
+        ("AddrOfTEB", c_void_p)                  #[+0x030]
+    ]
+
+class ClientId(Structure):
+    _fields_ = [
+        ("UniqueProcess", c_void_p),#[+0x000]
+        ("UniqueThread", c_void_p), #[+0x008]  
+    ]
+
+class ActivationStack(Structure):
+    _fields_ = [
+        ("ActiveFrame", c_void_p),              #[+0x000]
+        ("FrameListCache", LIST_ENTRY),         #[+0x008]
+        ("Flags", c_uint32),                    #[+0x018]
+        ("NextCookieSequenceNumber", c_uint32), #[+0x01c]
+        ("StackId", c_uint32),                  #[+0x020]
+    ]
+class GdiTebBatch(Structure):
+    _fields_ = [
+        ("Offset", c_uint32,31),                #[+0x000]
+        ("HasRenderingCommand", c_uint32,1),    #[+0x000]                
+        ("HDC", c_uint64),                      #[+0x008]
+        ("Buffer", c_uint*310)                  #[+0x010]
+    ]
+
+class UNICODE_STRING(Structure):
+    _fields_ = [
+        ("Length", c_uint16),           #[+0x000]
+        ("MaximumLength", c_uint16),    #[+0x002]
+        ("Buffer", c_wchar_p)           #[+0x008]
+    ]
+
+class GUID(Structure):
+    _fields_ = [
+        ("Data1", c_uint32),    #+0x000 
+        ("Data2", c_uint16),    #+0x004 
+        ("Data3", c_uint16),    #+0x006 
+        ("Data4", c_ubyte*8)    #+0x008 
+    ]
+
+class SameTebFlags(Structure):
+    _fields_ = [
+        ("SafeThunkCall", c_uint16, 1),         #+0x17ee : Pos 0, 1 Bit
+        ("InDebugPrint", c_uint16, 1),          #+0x17ee : Pos 1, 1 Bit
+        ("HasFiberData", c_uint16, 1),          #+0x17ee : Pos 2, 1 Bit
+        ("SkipThreadAttach", c_uint16, 1),      #+0x17ee : Pos 3, 1 Bit
+        ("WerInShipAssertCode", c_uint16, 1),   #+0x17ee : Pos 4, 1 Bit
+        ("RanProcessInit", c_uint16, 1),        #+0x17ee : Pos 5, 1 Bit
+        ("ClonedThread", c_uint16, 1),          #+0x17ee : Pos 6, 1 Bit
+        ("SuppressDebugMsg", c_uint16, 1),      #+0x17ee : Pos 7, 1 Bit
+        ("DisableUserStackWalk", c_uint16, 1),  #+0x17ee : Pos 8, 1 Bit
+        ("RtlExceptionAttached", c_uint16, 1),  #+0x17ee : Pos 9, 1 Bit
+        ("InitialThread", c_uint16, 1),         #+0x17ee : Pos 10, 1 Bit
+        ("SessionAware", c_uint16, 1),          #+0x17ee : Pos 11, 1 Bit
+        ("LoadOwner", c_uint16, 1),             #+0x17ee : Pos 12, 1 Bit
+        ("LoaderWorker", c_uint16, 1),          #+0x17ee : Pos 13, 1 Bit
+        ("SkipLoaderInit", c_uint16, 1),        #+0x17ee : Pos 14, 1 Bit
+        ("SkipFileAPIBrokering", c_uint16, 1),  #+0x17ee : Pos 15, 1 Bit
+    ]
+
+class TEB(Structure):
+    _fields_ = [
+        ("NtTib" , NtTib),                                      #+0x000
+        ("EnvironmentPointer", c_void_p),                       #+0x038  
+        ("ClientId", ClientId),                                 #+0x040   
+        ("ActiveRpcHandle", c_void_p),                          #+0x050
+        ("ThreadLocalStoragePointer", c_void_p),                #+0x058
+        ("ProcessEnvironmentBlock", c_void_p),                  #+0x060      
+        ("LastErrorValue", c_uint32),                           #+0x068       
+        ("countOfOwnedCriticalSections", c_uint32),             #+0x06c
+        ("CsrClientThread", c_void_p),                          #+0x070
+        ("Win32ThreadInfo", c_void_p),                          #+0x078
+        ("User32Reserved", c_uint32*26),                        #+0x080
+        ("UserReserved", c_uint32*5),                           #+0x0e8
+        ("WOW32Reserved", c_void_p),                            #+0x100
+        ("CurrentLocale", c_uint32),                            #+0x108
+        ("FpSoftwareStatusRegister", c_uint32),                 #+0x10c
+        ("ReservedForDebuggerInstrumentation", c_void_p*16),    #+0x110 
+        ("SystemReserved1", c_void_p*30),                       #+0x190 
+        ("PlaceholderCompatibilityMode", c_char),               #+0x280
+        ("PlaceholderHydrationAlwaysExplicit", c_ubyte),        #+0x281
+        ("PlaceholderReserved", c_char*10),                     #+0x282
+        ("ProxiedProcessId",  c_uint32),                        #+0x28c
+        ("ActivationStack", ActivationStack),                   #+0x290
+        ("WorkingOnBehalfTicket", c_ubyte*8),                   #+0x2b8 
+        ("ExceptionCode", c_int32),                             #+0x2c0
+        ("Padding0", c_ubyte*4),                                #+0x2c4
+        ("ActivationContextStackPointer", c_void_p),            #+0x2c8
+        ("InstrumentationCallbackSp", c_uint64),                #+0x2d0
+        ("InstrumentationCallbackPreviousPc", c_uint64),        #+0x2d8
+        ("InstrumentationCallbackPreviousSp", c_uint64),        #+0x2e0
+        ("TxFsContext", c_uint32),                              #+0x2e8
+        ("InstrumentationCallbackDisabled", c_ubyte),           #+0x2ec
+        ("UnalignedLoadStoreExceptions", c_ubyte),              #+0x2ed
+        ("Padding1", c_ubyte*2),                                #+0x2ee
+        ("GdiTebBatch", GdiTebBatch),                           #+0x2f0
+        ("RealClientId", ClientId),                             #+0x7d8
+        ("GdiCachedProcessHandle", c_void_p),                   #+0x7e8
+        ("GdiClientPID", c_uint32),                             #+0x7f0
+        ("GdiClientTID", c_uint32),                             #+0x7f4
+        ("GdiThreadLocalInfo", c_void_p),                       #+0x7f8
+        ("Win32ClientInfo", c_uint64*62),                       #+0x800
+        ("glDispatchTable", c_void_p*233),                      #+0x9f0
+        ("glReserved1", c_uint64*29),                           #+0x1138
+        ("glReserved2", c_void_p),                              #+0x1220
+        ("glSectionInfo", c_void_p),                            #+0x1228
+        ("glSection", c_void_p),                                #+0x1230
+        ("glTable", c_void_p),                                  #+0x1238
+        ("glCurrentRC", c_void_p),                              #+0x1240
+        ("glContext", c_void_p),                                #+0x1248
+        ("LastStatusValue", c_uint32),                          #+0x1250
+        ("Padding2", c_ubyte*4),                                #+0x1254
+        ("StaticUnicodeString", UNICODE_STRING),                #+0x1258 
+        ("StaticUnicodeBuffer", c_wchar*261),                   #+0x1268
+        ("Padding3", c_ubyte*6),                                #+0x1472
+        ("DeallocationStack", c_void_p),                        #+0x1478
+        ("TlsSlots", c_void_p*64),                              #+0x1480
+        ("TlsLinks", LIST_ENTRY),                               #+0x1680 
+        ("Vdm", c_void_p),                                      #+0x1690
+        ("ReservedForNtRpc", c_void_p),                         #+0x1698
+        ("DbgSsReserved", c_void_p*2),                          #+0x16a0
+        ("HardErrorMode", c_uint32),                            #+0x16b0
+        ("Padding4", c_ubyte*4),                                #+0x16b4
+        ("Instrumentation", c_void_p*11),                       #+0x16b8
+        ("ActivityId", GUID),                                   #+0x1710
+        ("SubProcessTag", c_void_p),                            #+0x1720
+        ("PerflibData", c_void_p),                              #+0x1728
+        ("EtwTraceData", c_void_p),                             #+0x1730
+        ("WinSockData", c_void_p),                              #+0x1738
+        ("GdiBatchCount", c_uint32),                            #+0x1740
+        ("IdealProcessorValue", c_uint32),                      #+0x1744
+        ("GuaranteedStackBytes", c_uint32),                     #+0x1748
+        ("Padding5", c_ubyte*4),                                #+0x174c
+        ("ReservedForPerf", c_void_p),                          #+0x1750
+        ("ReservedForOle", c_void_p),                           #+0x1758
+        ("WaitingOnLoaderLock", c_uint32),                      #+0x1760
+        ("Padding6", c_ubyte*4),                                #+0x1764
+        ("SavedPriorityState", c_void_p),                       #+0x1768
+        ("ReservedForCodeCoverage", c_uint64),                  #+0x1770
+        ("ThreadPoolData", c_void_p),                           #+0x1778
+        ("TlsExpansionSlots", c_void_p),                        #+0x1780 
+        ("DeallocationBStore", c_void_p),                       #+0x1788 
+        ("BStoreLimit", c_void_p),                              #+0x1790
+        ("MuiGeneration",c_uint32),                             #+0x1798
+        ("IsImpersonating",c_uint32),                           #+0x179c
+        ("NlsCache", c_void_p),                                 #+0x17a0
+        ("pShimData", c_void_p),                                #+0x17a8
+        ("HeapData", c_uint32),                                 #+0x17b0
+        ("Padding7", c_ubyte*4),                                #+0x17b4
+        ("CurrentTransactionHandle", c_void_p),                 #+0x17b8
+        ("ActiveFrame", c_void_p),                              #+0x17c0
+        ("FlsData", c_void_p),                                  #+0x17c8
+        ("PreferredLanguages", c_void_p),                       #+0x17d0
+        ("UserPrefLanguages", c_void_p),                        #+0x17d8
+        ("MergedPrefLanguages", c_void_p),                      #+0x17e0
+        ("MuiImpersonation", c_uint32),                         #+0x17e8
+        ("CrossTebFlags", c_uint16),                            #+0x17ec  
+        ("SameTebFlags", SameTebFlags),                         #+0x17ee
+        ("TxnScopeEnterCallback", c_void_p),                    #+0x17f0
+        ("TxnScopeExitCallback", c_void_p),                     #+0x17f8
+        ("TxnScopeContext", c_void_p),                          #+0x1800
+        ("LockCount", c_uint32),                                #+0x1808
+        ("WowTebOffset", c_int32),                              #+0x180c
+        ("ResourceRetValue", c_void_p),                         #+0x1810
+        ("ReservedForWdf", c_void_p),                           #+0x1818
+        ("ReservedForCrt", c_uint64),                           #+0x1820
+        ("EffectiveContainerId", GUID),                         #+0x1828
+    ]
+
+
+
+
+def InitTeb():
+    teb = TEB()
+    teb.NtTib.ExceptionList = -1    #Important
+    teb.NtTib.StackBase = StackBase
+    teb.NtTib.StackLimit = StackLimit
+    teb.NtTib.AddrOfTEB = TebBase
+    #teb.ClientId_UniqueProcess = pid
+    #teb.ClientId_UniqueThread = pid+0x4
+    teb.ProcessEnvironmentBlock = PebBase
+    #teb.Win32ThreadInfo =0xd30
+    #teb.CurrentLocale =0x412
+    #teb.ActivationStack.FrameListCache.Flink = TEB_BASE+0x298
+    #teb.ActivationStack.FrameListCache.Blink = TEB_BASE+0x298
+    #teb.ActivationStack.Flags = 0x2
+    #teb.ActivationStack.NextCookieSequenceNumber = 0x1
+    #teb.ActivationStack.StackId = 0x2147dee
+    #teb.ActivationContextStackPointer = TEB_BASE+0x290
+    #teb.TxFsContext = 0xfffe
+    #teb.GdiTebBatch.HDC = 0x160000
+    #teb.RealClientId.UniqueProcess = pid
+    #teb.RealClientId.UniqueThread = pid+0x4
+    #teb.StaticUnicodeString.Length = 0x0
+    #teb.StaticUnicodeString.MaximumLength = 0x20a
+    #teb.StaticUnicodeString.Buffer = TEB_BASE+0x1268
+    #teb.StaticUnicodeBuffer = u'ntdll.dll'
+    #teb.IdealProcessorValue = 0x2020000
+    #teb.SameTebFlags.RanProcessInit = 1
+    #teb.SameTebFlags.InitialThread = 1
+    #teb.SameTebFlags.LoadOwner = 1
+
+    return teb
+   
+
+```
+
+`bobalkkagi/unpacking.py`:
+
+```py
+from unicorn import *
+from unicorn.x86_const import *
+from datetime import datetime
+
+from .loader import PE_Loader
+from .logger import *
+from .api_hook import *
+from .globalValue import *
+from .peb import Initpeb, InitProcessHeap
+from .teb import InitTeb
+from .kuserSharedData import InitKuserSharedData
+from .hookFuncs import HookFuncs
+from .constValue import *
+from .debugger import Debugger
+
+import logging
+import struct
+import pefile
+
+
+# 64bit 맞게 수정
+
+
+BobLog = logging.getLogger("Bobalkkagi")
+
+def get_register(uc):
+    register={
+        "rax": uc.reg_read(UC_X86_REG_RAX),
+        "rbx": uc.reg_read(UC_X86_REG_RBX),
+        "rcx": uc.reg_read(UC_X86_REG_RCX),
+        "rdx": uc.reg_read(UC_X86_REG_RDX),
+        "rdi": uc.reg_read(UC_X86_REG_RDI),
+        "rsi": uc.reg_read(UC_X86_REG_RSI),
+        "rsp": uc.reg_read(UC_X86_REG_RSP),
+        "rbp": uc.reg_read(UC_X86_REG_RBP),
+        "rip": uc.reg_read(UC_X86_REG_RIP),
+        "r8": uc.reg_read(UC_X86_REG_R8),
+        "r9": uc.reg_read(UC_X86_REG_R9),
+        "r10": uc.reg_read(UC_X86_REG_R10),
+        "r11": uc.reg_read(UC_X86_REG_R11),
+        "r12": uc.reg_read(UC_X86_REG_R12),
+        "r13": uc.reg_read(UC_X86_REG_R13),
+        "r14": uc.reg_read(UC_X86_REG_R14),
+        "r15": uc.reg_read(UC_X86_REG_R15),
+        "rflags": uc.reg_read(UC_X86_REG_EFLAGS),
+    }
+
+    return register
+
+
+def hook_fetch(uc, access, address, size, value, user_data):
+    
+    print(hex(access),hex(address),hex(size),hex(value))
+    rip=uc.reg_read(UC_X86_REG_RIP)
+    print(hex(rip))
+
+def hook_mem_read_unmapped(uc, access, address, size, value, user_data):
+    print("unmapped")
+    print(hex(access), hex(address), hex(size), hex(value))
+    code = uc.mem_read(address, size)
+    asm=disas(bytes(code),address)
+    print(code)
+    print(asm)
+    
+    for a in asm:
+        print("  0x%x: " % a.address +"\t%s" % a.mnemonic +"\t%s\n" % a.op_str)
+        
+
+def hook_api(uc, address, size, user_data):
+    rsp=uc.reg_read(UC_X86_REG_RSP)
+    rip=uc.reg_read(UC_X86_REG_RIP)
+    try:
+        globals()["hook_"+GLOBAL_VAR.InverseHookFuncs[address-GLOBAL_VAR.HookRegion].split(".dll_")[1]](uc, BobLog, get_register(uc))
+    except KeyError as e:
+        BobLog.info("Not Found : "+str(e))
+        pass
+    
+
+def hook_block(uc, address, size, user_data):
+    exitFlag=0
+    rsp=uc.reg_read(UC_X86_REG_RSP)
+    rip=uc.reg_read(UC_X86_REG_RIP)
+
+    try :
+       if rip in DLL_SETTING.InverseDllFuncs:
+            BobLog.info(f"This Function is {DLL_SETTING.InverseDllFuncs[rip]}, RIP : {hex(rip)}")
+
+            if GLOBAL_VAR.DebugOption:
+                GLOBAL_VAR.DebugFlag = True
+                GLOBAL_VAR.DebugOption = False
+
+            if rip in GLOBAL_VAR.BreakPoint:
+                GLOBAL_VAR.DebugFlag = True
+
+            exitFlag = globals()["hook_"+DLL_SETTING.InverseDllFuncs[rip].split(".dll_")[1]](uc, BobLog, get_register(uc))
+            
+            if exitFlag == 1:
+                uc.emu_stop()
+    except KeyError as e:
+        #BobLog.info("Not Found : "+str(e))
+        pass
+
+    if GLOBAL_VAR.DebugFlag:
+        GLOBAL_VAR.DebugFlag = Debugger(uc, BobLog)
+    
+    
+def hook_code(uc, address, size, user_data):
+    exitFlag=0
+    rsp=uc.reg_read(UC_X86_REG_RSP)
+    rip=uc.reg_read(UC_X86_REG_RIP)
+
+    tmp = {hex(address):size}
+    
+    if get_len() >=get_size():
+        p_queue()
+    i_queue(tmp)
+    
+    try :
+       if rip in DLL_SETTING.InverseDllFuncs:
+            BobLog.info(f"This Function is {DLL_SETTING.InverseDllFuncs[rip]}, RIP : {hex(rip)}")
+            
+            if GLOBAL_VAR.DebugOption:
+                GLOBAL_VAR.DebugFlag = True
+                GLOBAL_VAR.DebugOption = False
+
+            if rip in GLOBAL_VAR.BreakPoint:
+                GLOBAL_VAR.DebugFlag = True
+
+            exitFlag=globals()['hook_'+DLL_SETTING.InverseDllFuncs[rip].split('.dll_')[1]](uc, BobLog, get_register(uc))
+        
+            if exitFlag ==1:
+                uc.emu_stop()
+    except KeyError as e:
+        #BobLog.info("Not Found : "+str(e))
+        pass
+
+    if GLOBAL_VAR.DebugFlag:
+        GLOBAL_VAR.DebugFlag = Debugger(uc, BobLog)
+    
+    
+
+def InsPatch(uc, address, size, user_data):
+    rip=uc.reg_read(UC_X86_REG_RIP)
+    rsp=uc.reg_read(UC_X86_REG_RSP)
+    if size ==0xf1f1f1f1 :
+        size = 0x3
+
+    code = uc.mem_read(address, size)
+    asm=disas(bytes(code),address)
+    for a in asm:
+        if a.mnemonic == "xrstor":
+            uc.reg_write(UC_X86_REG_RIP,rip+0x3)
+        if a.mnemonic == "iretq":
+            nrip=struct.unpack('<Q',uc.mem_read(rsp,8))[0]
+            nflags=struct.unpack('<Q',uc.mem_read(rsp+0x10,8))[0]
+            nrsp=struct.unpack('<Q',uc.mem_read(rsp+0x18,8))[0]
+            uc.reg_write(UC_X86_REG_RIP, nrip)
+            uc.reg_write(UC_X86_REG_RSP, nrsp)
+            uc.reg_write(UC_X86_REG_EFLAGS, nflags)
+            uc.hook_del(GLOBAL_VAR.HookInt)
+
+def InsertHookFlag(uc):
+    for key in HookFuncs:
+        address =DLL_SETTING.DllFuncs[key]
+        offset = GLOBAL_VAR.HookRegion-address-5 + HookFuncs[key]
+        byteOffset=struct.pack('<Q',offset)
+        jmp = struct.pack('<B',0xE9)
+        flagInstruction = (jmp+byteOffset)[:-1]
+        uc.mem_write(address,flagInstruction)
+
+def setUpStructure(uc: object) -> None: #Set up TEB, PEB, ProcessHeap, KuserSharedData Structure. If you Need More, you can add 
+    global TebBase
+    global PebBase
+    global LdrBase
+    global ProcessHeapBase
+    global KuserSharedDataBase
+    global PshimDataBase
+
+    teb = InitTeb()
+    peb = Initpeb()
+    procHeap = InitProcessHeap()
+    kuserSharedData = InitKuserSharedData()
+    tebPayload = bytes(teb)
+    pebPayload = bytes(peb)
+    procHeapPayload = bytes(procHeap)
+    kuserSharedDataPayload = bytes(kuserSharedData)
+
+    uc.mem_map(TebBase, MB, UC_PROT_READ | UC_PROT_WRITE)
+    uc.mem_map(PebBase, MB, UC_PROT_READ | UC_PROT_WRITE)
+    uc.mem_map(LdrBase, MB, UC_PROT_READ | UC_PROT_WRITE)
+    uc.mem_map(ProcessHeapBase, 10 * MB, UC_PROT_READ | UC_PROT_WRITE)
+    # uc.mem_map(ActivationContextBase, 0x1000, UC_PROT_ALL) # Not Used
+    uc.mem_map(KuserSharedDataBase, 0x1000, UC_PROT_READ)
+    uc.mem_map(PshimDataBase, 0x2000, UC_PROT_READ | UC_PROT_WRITE)
+
+    uc.mem_write(TebBase, tebPayload)
+    uc.mem_write(PebBase, pebPayload)
+    uc.mem_write(ProcessHeapBase, procHeapPayload)
+    uc.mem_write(KuserSharedDataBase, kuserSharedDataPayload)
+    uc.reg_write(UC_X86_REG_GS_BASE, TebBase)
+    uc.reg_write(UC_X86_REG_CS, 0x400000)
+
+def unpack(program: str,  verbose: bool, mode:str, oep: bool):
+    start = datetime.now()
+    print(f"\033[93m[{start}] Unpacking Start!\033[0m")
+
+    pe = pefile.PE(program) # 실행할 프로그램 pe포멧으로 가져오기
+    uc = Uc(UC_ARCH_X86, UC_MODE_64)
+
+    
+    EP = pe.OPTIONAL_HEADER.AddressOfEntryPoint #Entry Point
+    uc.mem_map(StackLimit, StackBase - StackLimit, UC_PROT_ALL) #스택 공간
+    
+    PE_Loader(uc, program, GLOBAL_VAR.ImageBaseStart, oep)
+    PE_Loader(uc, "user32.dll", GLOBAL_VAR.DllEnd, False)
+    setUpStructure(uc)
+    
+    uc.mem_map(GLOBAL_VAR.HookRegion, 0x1000, UC_PROT_ALL)
+    
+    InvDllDict() # 함수 이름 : 주소 , -> 주소 : 이름
+
+    #uc.reg_write(UC_X86_REG_RSP, STACK_BASE - pe.OPTIONAL_HEADER.SectionAlignment) #0x200000
+    uc.reg_write(UC_X86_REG_RSP, 0x14ff28) #0x200000
+    uc.reg_write(UC_X86_REG_RBP, 0x0) 
+    
+    InsertHookFlag(uc)
+    InvHookFuncDict()
+    
+    print("\033[96m{0:=^100}\033[0m".format("[ Hook START ]"))
+    
+    #uc.hook_add(UC_HOOK_MEM_READ_UNMAPPED, hook_mem_read_unmapped)
+    uc.hook_add(UC_HOOK_MEM_WRITE_PROT, hook_mem_read_unmapped)
+    uc.hook_add(UC_HOOK_CODE, InsPatch, None,  DLL_SETTING.LoadedDll["ntdll.dll"], DLL_SETTING.LoadedDll["kernelbase.dll"])
+    
+    if mode == 'c':
+        uc.hook_add(UC_HOOK_CODE, hook_code)
+        verbose = True
+    elif mode == 'b':
+        GLOBAL_VAR.DebugOption = False # hook block mode can't debug
+        verbose = True
+        uc.hook_add(UC_HOOK_BLOCK, hook_block) 
+    elif mode == 'f':
+        uc.hook_add(UC_HOOK_BLOCK, hook_api, None, GLOBAL_VAR.HookRegion, GLOBAL_VAR.HookRegion + 0x1000)
+    
+    
+    setup_logger(uc, BobLog, verbose)
+    
+    uc.reg_write(UC_X86_REG_RAX, GLOBAL_VAR.ImageBaseStart+EP)
+    uc.reg_write(UC_X86_REG_RBX, 0x0)
+    uc.reg_write(UC_X86_REG_RCX, PebBase)
+    uc.reg_write(UC_X86_REG_RDX, GLOBAL_VAR.ImageBaseStart+EP)
+    uc.reg_write(UC_X86_REG_R8, PebBase)
+    uc.reg_write(UC_X86_REG_R9, GLOBAL_VAR.ImageBaseStart+EP)
+    uc.reg_write(UC_X86_REG_EFLAGS, 0x244)
+    
+    try:
+        uc.emu_start(GLOBAL_VAR.ImageBaseStart + EP, GLOBAL_VAR.ImageBaseEnd)
+    except UcError as e:
+        print("\033[96m{0:=^100}\033[0m".format("[ Hook End ]"))
+        BobLog.error(f"{e}")
+        OEP = uc.reg_read(UC_X86_REG_RIP)
+        BobLog.info(f"Find OEP: {OEP:x}")
+
+
+    if verbose:
+        printDllMap(BobLog, DLL_SETTING.LoadedDll)
+        
+
+    end = datetime.now()
+    print(f"\033[93m[{end}] Unpacking done...\033[0m")
+    print(f"\033[93mUnpacking Runtime: [{end-start}]\033[0m")
+    
+    dump = uc.mem_read(GLOBAL_VAR.ImageBaseStart, GLOBAL_VAR.ImageBaseEnd - GLOBAL_VAR.ImageBaseStart)
+    filename = GLOBAL_VAR.ProtectedFile.split('\\')[-1].split('.')[0] + '.dump'
+    saveDumpfile(filename, dump)
+    return dump, OEP
+
+
+```
+
+`bobalkkagi/unwrapping.py`:
+
+```py
+from datetime import datetime
+
+from .util_unwrap import unwrapping
+
+def unwrap(dumps, OEP:int):
+    start = datetime.now()
+    print(f"\033[93m[{start}] Unwrapping Start...\033[0m")
+    unwrapping(dumps, OEP)
+    end = datetime.now()
+    print(f"\033[93m[{end}] Unwrapping End...\033[0m")
+    print(f"\033[93mUnwrapping Runtime: [{end-start}]\033[0m")
+```
+
+`bobalkkagi/util.py`:
+
+```py
+import sys
+import struct
+import os
+
+def EndOfString(ByteData: bytes) -> str:
+    byteString = ""
+    for i in ByteData:
+        if i == 0:
+            break
+        byteString += chr(i)
+    
+    return byteString
+
+def getVirtualMemorySize(pe):
+    sections = pe.sections
+    min_offset = sys.maxsize
+    total_size = 0
+    for sec in sections:
+        if sec.VirtualAddress < min_offset:
+            min_offset = sec.VirtualAddress
+        total_size += sec.Misc_VirtualSize
+    total_size += min_offset
+    return total_size
+
+def align(value, pageSize=0x1000):
+    m = value % pageSize
+    f = 0
+    if value % pageSize != 0:
+        f = pageSize - m
+    aligned_size = value + f
+    return aligned_size 
+
+def printDllMap(Log:object, LoadedDLL:dict):
+    sorted_dict = sorted(LoadedDLL.items(), key = lambda item: item[1])
+    print("{0:=^100}".format("[ LOADED DLL ]"))
+    for key, value in sorted_dict:
+        Log.info(f"{key:<80}: {value:016x}")
+    print("{0:=^100}".format("[ END ]"))
+    
+
+
+def IsReadable(string):
+    for ch in string:
+        if 31 < ord(ch) < 127:
+            pass
+        else:
+            return False
+    
+    return True
+
+def PrintDict(dict: dict) -> None: #Print key, Hex(Value)
+    for key in dict:
+        print("key : {0}, value : {1}".format(key, hex(dict[key])))
+    
+def Devide8Bytes(bytedata):
+    r = len(bytedata) % 8
+    result = []
+    if r != 0:
+        bytedata += b'\x00' * (8-r)
+    
+    for i in range(len(bytedata)//8):
+        result.append(struct.unpack('<Q', bytedata[i*8:(i+1)*8])[0])
+
+    return result
+
+def ViewMemory(addr, listdata):
+    for i in range(len(listdata)//2):
+        print(f'{addr+i*16:016x}: {listdata[i*2]:016x} {listdata[i*2+1]:016x}')
+
+
+TFdict= {'T':True, 'F':False, 't':True, 'f':False}
+
+def checkInput(userInput):
+    if userInput in ['T', 'F', 't', 'f']:
+        pass
+    else:
+        print("verbose isn't in [T/F, t/f]")
+        sys.exit(1)
+
+    if userInput in TFdict:
+        userInput = TFdict[userInput]
+
+    return userInput
+
+def saveDumpfile(fileName:str, data:bytes) -> None:
+    print("[Create] Dumpfile!")
+    if not os.path.isdir('dumpfiles'):
+        os.mkdir('dumpfiles')
+    if os.path.isfile('dumpfiles\\'+fileName):
+        fileName = fileName.split('.')[0] + '_new.dump'
+    path = '\\'.join(['dumpfiles', fileName])
+    f =open(path,'wb')
+    f.write(data)
+    f.close()
+
+
+```
+
+`bobalkkagi/util_unwrap.py`:
+
+```py
+from ctypes import *
+from capstone import *
+from unicorn import *
+from unicorn.x86_const import *
+from distorm3 import Decode, Decode64Bits
+from dataclasses import dataclass
+
+from .globalValue import DLL_SETTING, GLOBAL_VAR
+from .util import saveDumpfile, align
+from .constValue import *
+
+import copy
+import sys
+import string
+import struct
+import math
+
+
+origin_data = None
+
+api_dic = {}
+dll_dic ={}
+calloffset_pattern={}
+call_addrfunc = {}
+mov_addrfunc = {}
+jmp_addrfunc = {}
+
+dll_api=[]
+call_rip = []
+mov_offset = []
+jmp_offset = []
+
+address_size = 0
+hookint = 0
+hookint2 = 0
+count = 0
+
+@dataclass
+class _SECTION_MEMBER:
+    virtualsize:int = None
+    virtualaddress:int = None
+    rawsize:int = None
+    rawaddress:int = None
+
+class _IMAGE_IMPORT_DESCRIPTOR(Structure):
+    _fields_ = [
+        ("OriginalFirstThunk", c_uint32),
+        ("TimeDateStamp", c_uint32),
+        ("ForwarderChain", c_uint32),
+        ("Name", c_uint32),
+        ("FirstThunk", c_uint32)
+    ]
+
+def readByte(offset):
+    global origin_data
+    return struct.unpack("<B", origin_data[offset:offset+1])[0]
+
+def readBytes(offset,n):
+    global origin_data
+    return list(struct.unpack("<"+"B"*n, origin_data[offset:offset+n]))
+
+def readWord(offset):
+    global origin_data
+    return struct.unpack("<H", origin_data[offset:offset+2])[0]
+
+def readDword(offset):
+    global origin_data
+    return struct.unpack("<L", origin_data[offset:offset+4])[0]
+
+def readDwords(offset,n):
+    global origin_data
+    return struct.unpack("<"+"L"*n, origin_data[offset:offset+4*n])
+
+def readLword(offset):
+    global origin_data
+    return struct.unpack("<Q", origin_data[offset:offset+8])[0]
+
+def readLwords(offset,n):
+    global origin_data
+    return struct.unpack("<"+"Q"*n, origin_data[offset:offset+8*n])
+
+def readStringn(offset,n):
+    global origin_data
+    txt=""
+    for x in range(n):
+        char=struct.unpack("<B", origin_data[offset+x:offset+x+1])[0]
+        if char in map(ord,string.printable) and char!=0:
+            txt+=chr(char)
+        else:
+            break
+    return txt
+def writeByte(offset, data):
+    global origin_data
+    dat=struct.pack("<B",data)
+    origin_data=origin_data[:offset]+dat+origin_data[offset+1:]
+
+def writeWord(offset,data):
+    global origin_data
+    dat=struct.pack("<H",data)
+    origin_data=origin_data[:offset]+dat+origin_data[offset+2:]
+
+def writeDword(offset,data):
+    global origin_data
+    dat=struct.pack("<L",data)
+    origin_data=origin_data[:offset]+dat+origin_data[offset+4:]
+    
+def writeLword(offset,data):
+    global origin_data
+    dat=struct.pack("<Q",data)
+    origin_data=origin_data[:offset]+dat+origin_data[offset+8:]
+
+def writeData(offset,data):
+    global origin_data
+    l=len(data)
+    origin_data=origin_data[:offset]+data+origin_data[offset+l:] #data injection
+    return l+1 # dll addr , api addr 
+
+
+def PEinfo(func, variable):
+    mzsignature=readWord(0x00) # e_magic
+    peoffset=readDword(0x3c)   # e_lfanew
+    pesignature=readDword(peoffset+0x00) # PE signature
+
+    sections_num=readWord(peoffset+0x06) # File Hdr. sections count
+    imagebase = GLOBAL_VAR.ImageBaseStart
+    writeLword(peoffset+0x30,imagebase)
+    sectionAlignment=readDword(peoffset+0x38) # Optional Hdr. Section Alignment
+
+    fileAlignment=readDword(peoffset+0x3c)    # Optional Hdr. File Alignment 
+    optionalhdr_size=readWord(peoffset+0x14)    # File Hdr. Size of OptionalHeadr
+    Section_offset=peoffset+0x18+optionalhdr_size # Hdr. offset
+    
+    lastSection_offset=peoffset+0x18+optionalhdr_size+(sections_num-1)*0x28
+
+    if (func == "PEcompare"):
+        return mzsignature, pesignature
+    elif (func == "re"):
+        return peoffset, Section_offset, imagebase, sections_num
+    elif (func == "newSection"):
+        return peoffset, lastSection_offset, sectionAlignment, sections_num
+    elif (func == "FINDcall"):
+        return imagebase, Section_offset, sections_num
+    else:
+        pass
+    
+    if (variable == "Section_offset"):
+        return Section_offset
+    elif (variable == "peoffset"):
+        return peoffset
+    elif (variable == "imagebase"):
+        return imagebase
+    else:
+        pass
+
+
+def PEcompare():
+    mzsignature, pesignature = PEinfo("PEcompare", 0)
+    is_pefile=mzsignature==0x5a4d and pesignature==0x4550 # PE check
+    
+    return is_pefile
+
+
+def modifyDump(OEP):
+    # unicorn dump oep set
+    peoffset, Section_offset, imagebase, sections_num = PEinfo("re", 0)
+
+    Section_oepoffset = (peoffset + 0x28) 
+    writeDword(Section_oepoffset, (OEP - imagebase))
+
+    # unicorn dump file pe Virtual -> RA
+    re = _SECTION_MEMBER()
+    for n in range(sections_num):
+        re_offset = Section_offset + (n * 0x28)
+        re.virtualsize = readDword(re_offset+0x08)
+        re.virtualaddress = readDword(re_offset+0x0C)
+        writeDword(re_offset + 0x14, re.virtualaddress)
+        writeDword(re_offset + 0x10, re.virtualsize)
+        if n < (sections_num-1):
+            writeDword(re_offset + 0x8, (readDword(re_offset + 0x34) - readDword(re_offset+ 0xC)))
+
+
+def insertIAT(new_rawAddress):
+    global origin_data
+    # Data
+    dll_addr={} # dll_name : addr
+    api_addr={} # func_name : addr
+
+    peoffset = PEinfo(0, "peoffset")
+    nameRVA = new_rawAddress + align(address_size, 0x100) # nameRVA offset
+    
+    for dll in dll_dic:
+        for api in dll_dic[dll]:
+            api_addr[api]=nameRVA
+            nameRVA+=2
+            nameRVA +=writeData(nameRVA, api.encode("utf-8"))
+        dll_addr[dll]=nameRVA    
+        nameRVA +=writeData(nameRVA, dll.encode("utf-8"))   
+
+    new_offset = copy.deepcopy(new_rawAddress) # API OriginalFirstThunk
+    new_importaddress = align(nameRVA, 0x100) # IMAGE_IMPORT_DSCRIPTER struct
+    importaddress_base = copy.deepcopy(new_importaddress)
+    
+    dll_OriginalFT = align(new_importaddress + len(dll_dic)*20, 0x100) 
+    func_addrsize = 0x0
+    for dll in dll_dic:
+        Iid = _IMAGE_IMPORT_DESCRIPTOR()
+        Iid.FirstThunk = new_offset
+        Iid.Name = dll_addr[dll]
+        Iid.OriginalFirstThunk = dll_OriginalFT
+        for api in dll_dic[dll]:
+            writeLword(new_offset, api_addr[api])
+            new_offset+=0x8
+            writeLword(dll_OriginalFT, api_addr[api])
+            dll_OriginalFT+=0x8
+
+            api_dic[api]=func_addrsize # func name : func addr offset
+            func_addrsize += 0x8
+        
+        dll_OriginalFT+=0x8
+        origin_data=origin_data[:new_importaddress]+bytes(Iid)+origin_data[new_importaddress+0x14:]
+        new_importaddress += 0x14 #20byte
+    writeDword(peoffset+0x90, importaddress_base) #import address write
+
+
+def Injection_call(new_virtualAddress):
+    callnext_jmp={}
+    imagebase = PEinfo(0, "imagebase")
+    
+    for call_offset in call_addrfunc: # call_offset 
+        #call_virtualrip = imagebase + call_offset # Call offset + VA imagebase
+        
+        call_virtualrip = imagebase + call_offset
+        for compare_api in call_addrfunc[call_offset]: # func_name
+            call_virtualvia = imagebase + new_virtualAddress + api_dic[compare_api]
+      
+        #ff15
+        if (calloffset_pattern[call_offset] == 1):
+            writeDword(call_offset+0x2, call_virtualvia - call_virtualrip - 0x6)
+        #e8
+        elif (calloffset_pattern[call_offset] == 2):
+            operand = readDword(call_offset+0x1)
+            operand_virtualaddr = call_virtualrip + operand + 0x5
+            operand_offset = operand_virtualaddr - imagebase
+            if(GLOBAL_VAR.ImageBaseStart <= operand_virtualaddr and operand_virtualaddr <= GLOBAL_VAR.ImageBaseEnd):
+                callnext_jmp[operand_offset] = len(callnext_jmp)
+                writeWord(operand_offset, 0x15ff)
+                writeDword(operand_offset+0x2, call_virtualvia - operand_virtualaddr - 0x6)
+                print("success : call change", hex(operand_offset), hex(call_offset))
+            else:
+                print("error : call change False", hex(operand_offset), hex(call_offset))
+                for change in callnext_jmp:
+                    if hex(readLword(change+(0x06+callnext_jmp[change]))) == "0xcccccccccccccccc":
+                        callnext_jmp[change+(0x06+callnext_jmp[change])] = 0
+                        writeWord(change+(0x6+callnext_jmp[change]), 0x15ff)
+                        writeDword(change+((0x6+callnext_jmp[change])+0x2), call_virtualvia - (imagebase + (change+0x6+callnext_jmp[change])) - 0x6)
+                        print("retry : call change", hex(change+0x6+callnext_jmp[change]), hex(call_offset))
+                        break
+                    else:
+                        pass
+        else:
+            pass
+
+
+def Injection_mov(new_virtualAddress):
+    global mov_addrfunc
+
+    imagebase = PEinfo(0, "imagebase")
+
+    for mov_offset in mov_addrfunc: 
+        mov_virtualrip = imagebase + mov_offset
+        for compare_api in mov_addrfunc[mov_offset]: # func_name
+            mov_virtualvia = imagebase + new_virtualAddress + api_dic[compare_api]
+        
+        writeDword(mov_offset+0x3, mov_virtualvia - mov_virtualrip - 0x7)
+       
+
+def Injection_jmp(new_virtualAddress):
+    imagebase = PEinfo(0, "imagebase")
+    
+    for jmp_offset in jmp_addrfunc:        
+        jmp_virtualrip = imagebase + jmp_offset
+        if (jmp_addrfunc[jmp_offset] == None):
+            pass
+        else:
+            for compare_api in jmp_addrfunc[jmp_offset]: # func_name
+                # save api IAT addr find
+                jmp_virtualvia = imagebase + new_virtualAddress + api_dic[compare_api]
+            # jmp -> call change
+            writeWord(jmp_offset, 0x15ff)
+            writeDword(jmp_offset+0x2, jmp_virtualvia - jmp_virtualrip - 0x6)
+            writeByte(jmp_offset+0x6, 0xcc)
+
+
+def newSection():
+    global origin_data
+    
+    peoffset, lastSection_offset, sectionAlignment, sections_num = PEinfo("newSection", 0)
+    new_rawSize = 0x0
+    new_virtualSize = 0x0
+    new_virtualsize = readDword(lastSection_offset+0x08)
+    new_virtualaddress = readDword(lastSection_offset+0x0C)
+
+    new_virtualAddress=new_virtualaddress+math.ceil(new_virtualsize/sectionAlignment)*sectionAlignment
+    new_rawAddress=new_virtualaddress+math.ceil(new_virtualsize/sectionAlignment)*sectionAlignment
+    new_characterstics=0xe0000060
+
+    new_rawSize += 0x8000
+    new_virtualSize += 0x8000
+    new_name = ".alkkagi"
+
+    # new section data
+    print("New Section Name:",new_name)
+    print("Virtual address:",hex(new_virtualAddress),"\nVirtual Size:",hex(new_virtualSize),"\nRaw Size:",hex(new_rawSize))
+    print("Raw Address:",hex(new_rawAddress),"\nCharacterstics:",hex(new_characterstics))
+    
+    # header info insert
+    sectionheader=bytearray(new_name.encode("utf-8")+b"\x00"*(8-len(new_name)))+struct.pack("<LLLLLLLL",new_virtualSize,new_virtualAddress,new_rawSize,new_rawAddress,0,0,0,new_characterstics)
+    newsize=new_virtualAddress+new_virtualSize
+    sections_num += 1
+
+    print(f"Section Header:", " ".join([str(hex(x))[2:] for x in sectionheader]))
+    print(f"Section Header Length:",len(sectionheader),"( "+str(hex(len(sectionheader)))+" )")
+    print(f"New file size: {newsize} ,{hex(newsize)}")
+    print(f"Number of sections(updated): {sections_num}")
+    
+    print("=====================================================")
+
+    writeDword(peoffset+0x50,newsize) # Optional Hdr. Size of Image
+    writeWord(peoffset+0x06,sections_num) # File Hdr. Sections Count
+    writeData(lastSection_offset+0x28,sectionheader) # Header info insert
+    writeDword(peoffset+0x58,0) #checksum = 0
+    
+    new_data=b"\x00"*(new_rawSize)
+    origin_data=origin_data + new_data
+
+    return new_rawAddress
+
+def disas(code, address):
+    md = Cs(CS_ARCH_X86, CS_MODE_64)
+    assem = md.disasm(code, address)
+    return assem
+
+
+def hook_mem_write_unmapped(uc, access, address, size, value, user_data):
+    print("unmapped")
+    print(hex(access), hex(address), hex(size), hex(value))
+    code = uc.mem_read(address, size)
+    asm=disas(bytes(code),address)
+    print(code)
+    print(asm)
+    
+    for a in asm:
+        print("  0x%x: " % a.address +"\t%s" % a.mnemonic +"\t%s\n" % a.op_str)
+
+
+def hooking_code(uc, address, size, user_data):
+    global count
+    
+    if not (GLOBAL_VAR.themida[1] <= address and address < (GLOBAL_VAR.themida[1]+GLOBAL_VAR.themida[2])):
+        count += 1
+    elif count >= 1 and GLOBAL_VAR.themida[1] <= address and address < (GLOBAL_VAR.themida[1]+GLOBAL_VAR.themida[2]):
+        count = 0
+    if count >=4:
+        count = 0
+        uc.emu_stop()
+
+
+def call_find_api(uc, access, address, size, value, user_data):
+    global dll_api
+    global hookint
+    global hookint2
+    global address_size
+
+    #print("==================================")
+    #print("offset : ", hex(user_data))
+    #print("address : ", hex(address))
+    #print("size : ", hex(size))
+    
+    rsp = uc.reg_read(UC_X86_REG_RSP)
+    
+    try:
+        dll_api.append(DLL_SETTING.InverseDllFuncs[address])
+        funcName=DLL_SETTING.InverseDllFuncs[address].split('.dll_')[1]
+        call_addrfunc[user_data]=[funcName]
+        address_size += 0x8
+    except :
+        pass
+        #print("error")
+    #print("Find funcion : ", hex(struct.unpack('<Q',uc.mem_read(rsp-0x8,8))[0]))
+    uc.hook_del(hookint2)
+    uc.hook_del(hookint)
+    uc.emu_stop()
+
+
+def jmp_find_api(uc, access, address, size, value, user_data):
+    global dll_api
+    global hookint
+    global hookint2
+    global address_size
+
+    #print("==================================")
+    #print("offset : ", hex(user_data))
+    #print("address : ", hex(address))
+    #print("size : ", hex(size))
+    
+    rsp = uc.reg_read(UC_X86_REG_RSP)
+   
+    try:
+        dll_api.append(DLL_SETTING.InverseDllFuncs[address])
+        funcName=DLL_SETTING.InverseDllFuncs[address].split('.dll_')[1]
+        jmp_addrfunc[user_data]=[funcName]
+        address_size += 0x8
+    except :
+        pass
+        #print("error")
+    #print("Find funcion : ", hex(struct.unpack('<Q',uc.mem_read(rsp-0x8,8))[0]))
+    uc.hook_del(hookint2)
+    uc.hook_del(hookint)
+    uc.emu_stop()
+
+
+def call_emulate_rip(uc, rip):
+    global hookint
+    global hookint2
+    global count
+    #print("==================================")#
+    #print("call address :", hex(imagebase + rip))
+
+    uc.reg_write(UC_X86_REG_RAX, 0x0)
+    uc.reg_write(UC_X86_REG_RCX, 0x0)
+    uc.reg_write(UC_X86_REG_RDX, 0x0)
+    uc.reg_write(UC_X86_REG_RBX, 0x0)
+    uc.reg_write(UC_X86_REG_R8, 0x0)
+    uc.reg_write(UC_X86_REG_R9, 0x0)
+    uc.reg_write(UC_X86_REG_R10, 0x0)
+    uc.reg_write(UC_X86_REG_R11, 0x0)
+    uc.reg_write(UC_X86_REG_R12, 0x0)
+    uc.reg_write(UC_X86_REG_RSP, 0x14ff28)
+    uc.reg_write(UC_X86_REG_RBP, 0x0) 
+
+    #uc.hook_add(UC_HOOK_MEM_WRITE_UNMAPPED, hook_mem_write_unmapped)
+    hookint = uc.hook_add(UC_HOOK_MEM_FETCH_UNMAPPED, call_find_api, rip)
+    hookint2 = uc.hook_add(UC_HOOK_CODE, hooking_code)
+
+    try:
+        # imagebase + rip (call offset start)
+        uc.emu_start(GLOBAL_VAR.ImageBaseStart + rip, GLOBAL_VAR.ImageBaseStart +rip+ 0x20000)
+        uc.hook_del(hookint2)
+        uc.hook_del(hookint)
+    except UcError as e:
+        uc.hook_del(hookint)
+        uc.hook_del(hookint2)
+        uc.emu_stop()
+        pass
+
+def jmp_emulate_rip(uc, rip):
+    global hookint
+    global hookint2
+    #print("==================================")#
+    #print("call address :", hex(imagebase + rip))
+    
+    uc.reg_write(UC_X86_REG_RAX, 0x0)
+    uc.reg_write(UC_X86_REG_RCX, 0x0)
+    uc.reg_write(UC_X86_REG_RDX, 0x0)
+    uc.reg_write(UC_X86_REG_RBX, 0x0)
+    uc.reg_write(UC_X86_REG_R8, 0x0)
+    uc.reg_write(UC_X86_REG_R9, 0x0)
+    uc.reg_write(UC_X86_REG_R10, 0x0)
+    uc.reg_write(UC_X86_REG_R11, 0x0)
+    uc.reg_write(UC_X86_REG_R12, 0x0)
+    uc.reg_write(UC_X86_REG_RSP, 0x14ff28)
+    uc.reg_write(UC_X86_REG_RBP, 0x0) 
+
+    #uc.hook_add(UC_HOOK_MEM_WRITE_UNMAPPED, hook_mem_write_unmapped)
+    hookint = uc.hook_add(UC_HOOK_MEM_FETCH_UNMAPPED, jmp_find_api, rip)
+    hookint2 = uc.hook_add(UC_HOOK_CODE, hooking_code)
+
+    try:
+        # imagebase + rip (call rip start)
+        uc.emu_start(GLOBAL_VAR.ImageBaseStart + rip, GLOBAL_VAR.ImageBaseStart +rip+ 0x20000)
+        uc.hook_del(hookint2)
+        uc.hook_del(hookint)
+    except UcError as e:
+        uc.hook_del(hookint)
+        uc.hook_del(hookint2)
+        uc.emu_stop()
+        pass
+
+
+def check_mov_Instruction(rip):
+    global mov_addrfunc
+    global dll_api
+
+    try:
+        offset = readDword(rip +3)
+        address = readLword(offset + rip+ 7)
+        try:
+            #print(DLL_SETTING.InverseDllFuncs[address])
+            dll_api.append(DLL_SETTING.InverseDllFuncs[address])
+            funcName=DLL_SETTING.InverseDllFuncs[address].split('.dll_')[1]
+            mov_addrfunc[rip] = [funcName]
+        except:
+            pass
+    except :
+        pass
+
+def check_jmp_Instruction(rip):
+    global jmp_addrfunc
+    
+    try:
+        offset = readDword(rip + 3)
+        address = readLword(offset + rip+ 7)
+        if GLOBAL_VAR.themida[1] <= address and address < (GLOBAL_VAR.themida[1]+GLOBAL_VAR.themida[2]):
+            jmp_addrfunc[rip] = None
+    except :
+        pass
+
+    
+def emulate_start():
+    global origin_data
+
+    global dll_api
+
+    #uc.mem_map(0x140000000,0x850000, UC_PROT_ALL)
+    uc = Uc(UC_ARCH_X86, UC_MODE_64)
+    uc.mem_map(0x140000000, 0x1000000, UC_PROT_ALL)
+    uc.reg_write(UC_X86_REG_GS_BASE, TebBase)
+    StackBase = 0x201000
+    StackLimit = 0x100000
+    uc.mem_write(0x140000000, origin_data)
+        
+
+    for rip in calloffset_pattern:   
+        uc.mem_map(StackLimit, StackBase - StackLimit, UC_PROT_ALL)
+        call_emulate_rip(uc , rip)
+        uc.mem_unmap(StackLimit, StackBase - StackLimit)
+
+    for rip in jmp_offset:
+        check_jmp_Instruction(rip)
+
+    for rip in jmp_addrfunc:
+        uc.mem_map(StackLimit, StackBase - StackLimit, UC_PROT_ALL)
+        jmp_emulate_rip(uc , rip)
+        uc.mem_unmap(StackLimit, StackBase - StackLimit)
+
+    for rip in mov_offset:
+        check_mov_Instruction(rip)
+
+    dll_api=list(set(dll_api))
+
+    for info in dll_api:
+        dllName = info.split('_')[0]
+        funcName = info.split('.dll_')[1]
+        if dllName in dll_dic.keys():
+            dll_dic[dllName].append(funcName)
+            #api_count[dllName]+=1
+        else :
+            dll_dic[dllName]=[funcName]
+            #api_count[dllName]= 1
+
+def pattern_target():
+    assem = Decode(GLOBAL_VAR.text[0], origin_data[GLOBAL_VAR.text[0]:GLOBAL_VAR.text[0]+GLOBAL_VAR.text[1]], Decode64Bits)
+
+    for asm in assem:
+        if asm[2].split(" ")[0] == "CALL":
+            # instruction format
+            if(asm[1] == 6):
+                calloffset_pattern[asm[0]]=1
+            elif(asm[1] == 5):
+                calloffset_pattern[asm[0]]=2
+            else:
+                calloffset_pattern[asm[0]]=0
+
+        if asm[2].split(" ")[0] == "MOV":
+            mov_offset.append(asm[0])
+
+        if asm[2].split(" ")[0] == "JMP":
+            jmp_offset.append(asm[0])
+
+
+def unwrapping(dump, OEP:int):
+    global origin_data
+
+    origin_data = bytes(dump)
+
+    if not PEcompare():
+        sys.exit(0)
+    else:
+        modifyDump(OEP)
+        pattern_target()
+
+        emulate_start()
+        
+        new_rawAddress = newSection()
+
+        insertIAT(new_rawAddress)
+        # unwrapping target operand addr change
+        Injection_call(new_rawAddress)
+        Injection_mov(new_rawAddress)
+        Injection_jmp(new_rawAddress)
+
+        dumpFileName = 'unwrap_'+GLOBAL_VAR.ProtectedFile.split('\\')[-1].split('.')[0] + '.dump'
+        
+        saveDumpfile(dumpFileName, origin_data)
+        
+        print("success")
+```
+
+`poetry.lock`:
+
+```lock
+# This file is automatically @generated by Poetry and should not be changed by hand.
+
+[[package]]
+name = "altgraph"
+version = "0.17.3"
+description = "Python graph (network) package"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "altgraph-0.17.3-py2.py3-none-any.whl", hash = "sha256:c8ac1ca6772207179ed8003ce7687757c04b0b71536f81e2ac5755c6226458fe"},
+    {file = "altgraph-0.17.3.tar.gz", hash = "sha256:ad33358114df7c9416cdb8fa1eaa5852166c505118717021c6a8c7c7abbd03dd"},
+]
+
+[[package]]
+name = "capstone"
+version = "4.0.2"
+description = "Capstone disassembly engine"
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+files = [
+    {file = "capstone-4.0.2-py2.py3-none-manylinux1_i686.whl", hash = "sha256:da442f979414cf27e4621e70e835880878c858ea438c4f0e957e132593579e37"},
+    {file = "capstone-4.0.2-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:9d1a9096c5f875b11290317722ed44bb6e7c52e50cc79d791f142bce968c49aa"},
+    {file = "capstone-4.0.2-py2.py3-none-win32.whl", hash = "sha256:c3d9b443d1adb40ee2d9a4e7341169b76476ddcf3a54c03793b16cdc7cd35c5a"},
+    {file = "capstone-4.0.2-py2.py3-none-win_amd64.whl", hash = "sha256:0d65ffe8620920976ceadedc769f22318f6f150a592368d8a735612367ac8a1a"},
+    {file = "capstone-4.0.2.tar.gz", hash = "sha256:2842913092c9b69fd903744bc1b87488e1451625460baac173056e1808ec1c66"},
+]
+
+[[package]]
+name = "distorm3"
+version = "3.5.2"
+description = "The goal of diStorm3 is to decode x86/AMD64 binary streams and return a structure that describes each instruction."
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "distorm3-3.5.2-cp37-cp37m-win32.whl", hash = "sha256:42724d36b88d06fb72630e0790acca768b381d94e3ad0e720ba0181821643857"},
+    {file = "distorm3-3.5.2.tar.gz", hash = "sha256:7528228b905d128972205e9b6cb69f328dce0febaa7355b92fae101a8309e144"},
+]
+
+[[package]]
+name = "fire"
+version = "0.4.0"
+description = "A library for automatically generating command line interfaces."
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "fire-0.4.0.tar.gz", hash = "sha256:c5e2b8763699d1142393a46d0e3e790c5eb2f0706082df8f647878842c216a62"},
+]
+
+[package.dependencies]
+six = "*"
+termcolor = "*"
+
+[[package]]
+name = "future"
+version = "0.18.2"
+description = "Clean single-source support for Python 3 and 2"
+category = "main"
+optional = false
+python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+files = [
+    {file = "future-0.18.2.tar.gz", hash = "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"},
+]
+
+[[package]]
+name = "lief"
+version = "0.12.3"
+description = "Library to instrument executable formats"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "lief-0.12.3-cp310-cp310-macosx_10_14_arm64.whl", hash = "sha256:66724f337e6a36cea1a9380f13b59923f276c49ca837becae2e7be93a2e245d9"},
+    {file = "lief-0.12.3-cp310-cp310-macosx_10_14_x86_64.whl", hash = "sha256:6d18aafa2028587c98f6d4387bec94346e92f2b5a8a5002f70b1cf35b1c045cc"},
+    {file = "lief-0.12.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c078d6230279ffd3bca717c79664fb8368666f610b577deb24b374607936e9c1"},
+    {file = "lief-0.12.3-cp310-cp310-win32.whl", hash = "sha256:e3a6af926532d0aac9e7501946134513d63217bacba666e6f7f5a0b7e15ba236"},
+    {file = "lief-0.12.3-cp310-cp310-win_amd64.whl", hash = "sha256:0750b72e3aa161e1fb0e2e7f571121ae05d2428aafd742ff05a7656ad2288447"},
+    {file = "lief-0.12.3-cp311-cp311-macosx_10_14_arm64.whl", hash = "sha256:b5c123cb99a7879d754c059e299198b34e7e30e3b64cf22e8962013db0099f47"},
+    {file = "lief-0.12.3-cp311-cp311-macosx_10_14_x86_64.whl", hash = "sha256:8bc58fa26a830df6178e36f112cb2bbdd65deff593f066d2d51434ff78386ba5"},
+    {file = "lief-0.12.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:04eb6b70d646fb5bd6183575928ee23715550f161f2832cbcd8c6ff2071fb408"},
+    {file = "lief-0.12.3-cp311-cp311-win32.whl", hash = "sha256:7e2d0a53c403769b04adcf8df92e83c5e25f9103a052aa7f17b0a9cf057735fb"},
+    {file = "lief-0.12.3-cp311-cp311-win_amd64.whl", hash = "sha256:7f6395c12ee1bc4a5162f567cba96d0c72dfb660e7902e84d4f3029daf14fe33"},
+    {file = "lief-0.12.3-cp36-cp36m-macosx_10_14_x86_64.whl", hash = "sha256:71327fdc764fd2b1f3cd371d8ac5e0b801bde32b71cfcf7dccee506d46768539"},
+    {file = "lief-0.12.3-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d320fb80ed5b42b354b8e4f251ab05a51929c162c57c377b5e95ad4b1c1b415d"},
+    {file = "lief-0.12.3-cp36-cp36m-win32.whl", hash = "sha256:176fa6c342dd480195cda34a20f62ac76dfae103b22ca7583b762e0b434ee1f3"},
+    {file = "lief-0.12.3-cp36-cp36m-win_amd64.whl", hash = "sha256:3a18fe108fb82a2640864deef933731afe77413b1226551796ef2c373a1b3a2a"},
+    {file = "lief-0.12.3-cp37-cp37m-macosx_10_14_x86_64.whl", hash = "sha256:c73e990cd2737d1060b8c1e8edcc128832806995b69d1d6bf191409e2cea7bde"},
+    {file = "lief-0.12.3-cp37-cp37m-manylinux2014_aarch64.whl", hash = "sha256:5fa2b1c8ffe47ee66b2507c2bb4e3fd628965532b7888c0627d10e690b5ef20c"},
+    {file = "lief-0.12.3-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5f224e9a261e88099f86160f121d088d30894c2946e3e551cf11c678daadcf2b"},
+    {file = "lief-0.12.3-cp37-cp37m-win32.whl", hash = "sha256:3481d7c9fb3d3a1acff53851f40efd1a5a05d354312d367294bc2e310b736826"},
+    {file = "lief-0.12.3-cp37-cp37m-win_amd64.whl", hash = "sha256:4e5173e1be5ebf43594f4eb187cbcb04758761942bc0a1e685ea1cb9047dc0d9"},
+    {file = "lief-0.12.3-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:54d6a45e01260b9c8bf1c99f58257cff5338aee5c02eacfeee789f9d15cf38c6"},
+    {file = "lief-0.12.3-cp38-cp38-manylinux2014_aarch64.whl", hash = "sha256:4501dc399fb15dc7a3c8df4a76264a86be6d581d99098dafc3a67626149d8ff1"},
+    {file = "lief-0.12.3-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c848aadac0816268aeb9dde7cefdb54bf24f78e664a19e97e74c92d3be1bb147"},
+    {file = "lief-0.12.3-cp38-cp38-win32.whl", hash = "sha256:d7e35f9ee9dd6e79add3b343f83659b71c05189e5cb224e02a1902ddc7654e96"},
+    {file = "lief-0.12.3-cp38-cp38-win_amd64.whl", hash = "sha256:b00667257b43e93d94166c959055b6147d46d302598f3ee55c194b40414c89cc"},
+    {file = "lief-0.12.3-cp39-cp39-macosx_10_14_arm64.whl", hash = "sha256:e6a1b5b389090d524621c2455795e1262f62dc9381bedd96f0cd72b878c4066d"},
+    {file = "lief-0.12.3-cp39-cp39-macosx_10_14_x86_64.whl", hash = "sha256:ae773196df814202c0c51056163a1478941b299512b09660a3c37be3c7fac81e"},
+    {file = "lief-0.12.3-cp39-cp39-manylinux2014_aarch64.whl", hash = "sha256:4a47f410032c63ac3be051d963d0337d6b47f0e94bfe8e946ab4b6c428f4d0f8"},
+    {file = "lief-0.12.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:dbd11367c2259bd1131a6c8755dcde33314324de5ea029227bfbc7d3755871e6"},
+    {file = "lief-0.12.3-cp39-cp39-win32.whl", hash = "sha256:2ce53e311918c3e5b54c815ef420a747208d2a88200c41cd476f3dd1eb876bcf"},
+    {file = "lief-0.12.3-cp39-cp39-win_amd64.whl", hash = "sha256:446e53ccf0ebd1616c5d573470662ff71ca6df3cd62ec1764e303764f3f03cca"},
+    {file = "lief-0.12.3.zip", hash = "sha256:62e81d2f1a827d43152aed12446a604627e8833493a51dca027026eed0ce7128"},
+]
+
+[[package]]
+name = "macholib"
+version = "1.16.2"
+description = "Mach-O header analysis and editing"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "macholib-1.16.2-py2.py3-none-any.whl", hash = "sha256:44c40f2cd7d6726af8fa6fe22549178d3a4dfecc35a9cd15ea916d9c83a688e0"},
+    {file = "macholib-1.16.2.tar.gz", hash = "sha256:557bbfa1bb255c20e9abafe7ed6cd8046b48d9525db2f9b77d3122a63a2a8bf8"},
+]
+
+[package.dependencies]
+altgraph = ">=0.17"
+
+[[package]]
+name = "pefile"
+version = "2022.5.30"
+description = "Python PE parsing module"
+category = "main"
+optional = false
+python-versions = ">=3.6.0"
+files = [
+    {file = "pefile-2022.5.30.tar.gz", hash = "sha256:a5488a3dd1fd021ce33f969780b88fe0f7eebb76eb20996d7318f307612a045b"},
+]
+
+[package.dependencies]
+future = "*"
+
+[[package]]
+name = "pyinstaller"
+version = "5.7.0"
+description = "PyInstaller bundles a Python application and all its dependencies into a single package."
+category = "main"
+optional = false
+python-versions = "<3.12,>=3.7"
+files = [
+    {file = "pyinstaller-5.7.0-py3-none-macosx_10_13_universal2.whl", hash = "sha256:b967ae71ab7b05e18608dbb4518da5afa54f0835927cb7a5ce52ab8fffed03b6"},
+    {file = "pyinstaller-5.7.0-py3-none-manylinux2014_aarch64.whl", hash = "sha256:3180b9bf22263380adc5e2ee051b7c21463292877215bbe70c9155dc76f4b966"},
+    {file = "pyinstaller-5.7.0-py3-none-manylinux2014_i686.whl", hash = "sha256:0f80e2403e76630ad3392c71f09c1a4284e8d8a8a99fb55ff3a0aba0e06300ed"},
+    {file = "pyinstaller-5.7.0-py3-none-manylinux2014_ppc64le.whl", hash = "sha256:2c1dd9d11cfc48bab61eeb06de69a3d1ad742bbb2ef14716965ca0333dd43a5b"},
+    {file = "pyinstaller-5.7.0-py3-none-manylinux2014_s390x.whl", hash = "sha256:dfc12e92fe10ae645dd0dd1fcfa4cd7677b2e96119e3cd4980d742e09bb78925"},
+    {file = "pyinstaller-5.7.0-py3-none-manylinux2014_x86_64.whl", hash = "sha256:f35f06d48faea0ad738429c009941059beebaa306e9d9ead95f1df4b441de2aa"},
+    {file = "pyinstaller-5.7.0-py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:28a8a0da656493aa32d9665e2f6f84775da0f23174859ed8facaa4226fe77a17"},
+    {file = "pyinstaller-5.7.0-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:1ac3f09b838710c43e34b0a7ad003bd168a754b0b786c561b47baf1af9104354"},
+    {file = "pyinstaller-5.7.0-py3-none-win32.whl", hash = "sha256:9cdb8ee8622ee8d2c6cd67f001b610019d4371a8bf3f7850562640ce786894d7"},
+    {file = "pyinstaller-5.7.0-py3-none-win_amd64.whl", hash = "sha256:9b47c10fbefac6f6493266f8b1689109b2b14efa9142dbd2cd7549226a4568b7"},
+    {file = "pyinstaller-5.7.0-py3-none-win_arm64.whl", hash = "sha256:3e51e18a16dec0414079762843cf892a5d70749ad56ca7b3c7b5f8367dc50b1e"},
+    {file = "pyinstaller-5.7.0.tar.gz", hash = "sha256:0e5953937d35f0b37543cc6915dacaf3239bcbdf3fd3ecbb7866645468a16775"},
+]
+
+[package.dependencies]
+altgraph = "*"
+macholib = {version = ">=1.8", markers = "sys_platform == \"darwin\""}
+pefile = {version = ">=2022.5.30", markers = "sys_platform == \"win32\""}
+pyinstaller-hooks-contrib = ">=2021.4"
+pywin32-ctypes = {version = ">=0.2.0", markers = "sys_platform == \"win32\""}
+setuptools = ">=42.0.0"
+
+[package.extras]
+encryption = ["tinyaes (>=1.0.0)"]
+hook-testing = ["execnet (>=1.5.0)", "psutil", "pytest (>=2.7.3)"]
+
+[[package]]
+name = "pyinstaller-hooks-contrib"
+version = "2022.14"
+description = "Community maintained hooks for PyInstaller"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pyinstaller-hooks-contrib-2022.14.tar.gz", hash = "sha256:5ae8da3a92cf20e37b3e00604d0c3468896e7d746e5c1449473597a724331b0b"},
+    {file = "pyinstaller_hooks_contrib-2022.14-py2.py3-none-any.whl", hash = "sha256:1a125838a22d7b35a18993c6e56d3c5cc3ad7da00954f95bc5606523939203f2"},
+]
+
+[[package]]
+name = "pywin32-ctypes"
+version = "0.2.0"
+description = ""
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pywin32-ctypes-0.2.0.tar.gz", hash = "sha256:24ffc3b341d457d48e8922352130cf2644024a4ff09762a2261fd34c36ee5942"},
+    {file = "pywin32_ctypes-0.2.0-py2.py3-none-any.whl", hash = "sha256:9dc2d991b3479cc2df15930958b674a48a227d5361d413827a4cfd0b5876fc98"},
+]
+
+[[package]]
+name = "setuptools"
+version = "65.6.3"
+description = "Easily download, build, install, upgrade, and uninstall Python packages"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "setuptools-65.6.3-py3-none-any.whl", hash = "sha256:57f6f22bde4e042978bcd50176fdb381d7c21a9efa4041202288d3737a0c6a54"},
+    {file = "setuptools-65.6.3.tar.gz", hash = "sha256:a7620757bf984b58deaf32fc8a4577a9bbc0850cf92c20e1ce41c38c19e5fb75"},
+]
+
+[package.extras]
+docs = ["furo", "jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "pygments-github-lexers (==0.0.5)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-favicon", "sphinx-hoverxref (<2)", "sphinx-inline-tabs", "sphinx-notfound-page (==0.8.3)", "sphinx-reredirects", "sphinxcontrib-towncrier"]
+testing = ["build[virtualenv]", "filelock (>=3.4.0)", "flake8 (<5)", "flake8-2020", "ini2toml[lite] (>=0.9)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.2.0)", "pip (>=19.1)", "pip-run (>=8.8)", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)", "pytest-perf", "pytest-timeout", "pytest-xdist", "tomli-w (>=1.0.0)", "virtualenv (>=13.0.0)", "wheel"]
+testing-integration = ["build[virtualenv]", "filelock (>=3.4.0)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.2.0)", "pytest", "pytest-enabler", "pytest-xdist", "tomli", "virtualenv (>=13.0.0)", "wheel"]
+
+[[package]]
+name = "six"
+version = "1.16.0"
+description = "Python 2 and 3 compatibility utilities"
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
+files = [
+    {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
+    {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
+]
+
+[[package]]
+name = "termcolor"
+version = "2.1.1"
+description = "ANSI color formatting for output in terminal"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "termcolor-2.1.1-py3-none-any.whl", hash = "sha256:fa852e957f97252205e105dd55bbc23b419a70fec0085708fc0515e399f304fd"},
+    {file = "termcolor-2.1.1.tar.gz", hash = "sha256:67cee2009adc6449c650f6bcf3bdeed00c8ba53a8cda5362733c53e0a39fb70b"},
+]
+
+[package.extras]
+tests = ["pytest", "pytest-cov"]
+
+[[package]]
+name = "unicorn"
+version = "2.0.1.post1"
+description = "Unicorn CPU emulator engine"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "unicorn-2.0.1.post1-py2.py3-none-macosx_10_15_x86_64.whl", hash = "sha256:2d3eb3ec7eabbc4e66b4d853e11b27c426ce03072860c756139ed2191588751c"},
+    {file = "unicorn-2.0.1.post1-py2.py3-none-manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:2b3eba8848f3cfd43ed5f3128f01880ecc4e73e6b36c1e5e951177db0fb9c03b"},
+    {file = "unicorn-2.0.1.post1-py2.py3-none-manylinux1_i686.whl", hash = "sha256:4cf11d4883160dd3c4967bb3187dd886cdca4422884b315ace436af6047aae0d"},
+    {file = "unicorn-2.0.1.post1-py2.py3-none-manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:45be711d2bc8b82d07f2e0bdde128f3e9408c42978a3ed5edf709bce5350fcdf"},
+    {file = "unicorn-2.0.1.post1-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:5ed85a0b7bbfa47dd029272e071c814f21e9dacc2eefd63521f4d638ff1d6db9"},
+    {file = "unicorn-2.0.1.post1-py2.py3-none-manylinux2014_aarch64.whl", hash = "sha256:0bd05f9ae6b86b1326e6c3c1d1f3e51264b479cd1961388fd0da0ae674ec0195"},
+    {file = "unicorn-2.0.1.post1-py2.py3-none-win32.whl", hash = "sha256:9f0e3bbe207a6d2ddd3dff528bf3b2251c8e11d0fb4bab2338dff01475f6f41b"},
+    {file = "unicorn-2.0.1.post1-py2.py3-none-win_amd64.whl", hash = "sha256:7145fe448d17b2377b18e08e0521749cf0f94b9d3fe8b67c032bb4c932a21c29"},
+    {file = "unicorn-2.0.1.post1.tar.gz", hash = "sha256:7fc69523eb83b4c8abc7cb4410ca21875e066c34b7afe998f59481e830d28e56"},
+]
+
+[metadata]
+lock-version = "2.0"
+python-versions = ">=3.9, <3.11"
+content-hash = "96981c1959e0d3e265559c9855e348763117ef3cc764cb6bcec6c829e17376f2"
+
+```
+
+`pyproject.toml`:
+
+```toml
+[tool.poetry]
+name = "bobalkkagi"
+version = "0.2.4"
+description = "Unpack and unwrapping executables protected with Themida 3.1.3 by BOB11_Bobalkkagi"
+authors = ["hackerhoon <gkswlgns21@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9, <3.11"
+unicorn = "^2.0.1.post"
+lief = ">=0.12.2"
+fire = "^0.4"
+capstone = "^4.0.2"
+pefile = "^2022.5.30"
+pyinstaller = "^5.7.0"
+distorm3 = "^3.5.2"
+
+[tool.poetry.scripts]
+bobalkkagi = 'bobalkkagi.application:main'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+```
