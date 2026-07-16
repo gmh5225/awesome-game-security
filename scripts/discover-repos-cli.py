@@ -641,6 +641,10 @@ def search_repos(
     args = [
         "search",
         "repos",
+        "--sort",
+        "updated",
+        "--order",
+        "desc",
         "--limit",
         str(limit),
         "--json",
@@ -754,13 +758,13 @@ def discover_candidates(
                 if q not in mq:
                     mq.append(q)
 
-    def _rank_key(r: dict[str, Any]) -> tuple[int, int, int, str]:
+    def _rank_key(r: dict[str, Any]) -> tuple[int, int, str, int]:
         mq = r.get("matchedQueries") or []
         return (
             sum(1 for q in mq if is_core_query(q)),
             len(mq),
-            int(r["stargazersCount"]),
             r.get("updatedAt") or "",
+            int(r["stargazersCount"]),
         )
 
     core_ranked = sorted(
