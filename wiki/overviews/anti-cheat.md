@@ -6,6 +6,7 @@ sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/zyhp__vac3_inhibitor.md
+  - wiki/sources/descriptions/zxd1994__vt-debuuger.md
 updated: 2026-07-16
 confidence: high
 ---
@@ -28,13 +29,13 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 **Architecture:** user-mode scanners → kernel callbacks/VAD → optional hypervisor EPT protection → server-side replay/stats.
 
-**Threats defended against:** injected code, [[byovd]], hypervisor abuse, [[dma]] (PCIe fingerprinting + IOMMU + TPM attestation), AI visual cheats with hardware input.
+**Threats defended against:** injected code, [[byovd]], hypervisor abuse (stress/test refs such as [[vt-debuuger]] under hacked-hypervisor detection), [[dma]] (PCIe fingerprinting + IOMMU + TPM attestation), AI visual cheats with hardware input. (source: wiki/sources/descriptions/zxd1994__vt-debuuger.md)
 
 **Platform trust:** DSE, [[patchguard]], [[hvci]]/VBS, Secure Boot.
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vt-debuuger]]
 
 ## README map
 
