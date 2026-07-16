@@ -338,18 +338,48 @@ jobs:
             exit 1
           fi
 
-      - name: Checkout
+      # Full-tree + fetch-depth:0 of this ~2.5GB+ repo fills the runner disk;
+      # Cursor agent then dies with "database or disk is full". Keep the
+      # workspace tiny: scripts + description + only the target archive blobs.
+      - name: Checkout (sparse)
         uses: actions/checkout@v4
         with:
-          # Pick up archive commits pushed by the previous job.
           ref: main
-          fetch-depth: 0
+          fetch-depth: 1
           persist-credentials: true
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /scripts/
+            /description/
+            /.github/
 
       - name: Ensure latest main (post-archive)
         run: |
-          git fetch origin main
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin main
           git reset --hard origin/main
+
+      - name: Materialize target archive files only
+        env:
+          DESC_REPOS: ${{ needs.auto-archive.outputs.repos }}
+        run: |
+          set -euo pipefail
+          for slug in $DESC_REPOS; do
+            if [[ ! "$slug" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]]; then
+              echo "ERROR: invalid repo slug: $slug"
+              exit 1
+            fi
+            owner="${slug%%/*}"
+            repo="${slug#*/}"
+            path="archive/${owner}/${repo}.txt"
+            # Sparse-add so the blob is tracked (agent cleanup must not rm it).
+            git sparse-checkout add "/${path}"
+            git checkout HEAD -- "${path}"
+            ls -lh "${path}"
+          done
+          echo "Workspace disk after archive extract:"
+          df -h .
+          du -sh scripts description archive 2>/dev/null || true
 
       - name: Install Cursor CLI
         run: |
@@ -373,6 +403,12 @@ jobs:
           }
           EOF
           echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
+          # Prefer runner temp for agent scratch; wipe prior local agent DBs.
+          rm -rf "$HOME/.cursor/projects" "$HOME/.cursor/chats" \
+                 "$HOME/.cursor/ai-tracking" "$HOME/.cursor/agent-transcripts" \
+                 /tmp/cursor* 2>/dev/null || true
+          echo "TMPDIR=${RUNNER_TEMP:-/tmp}" >> "$GITHUB_ENV"
+          df -h
 
       - name: Configure git
         run: |
@@ -401,6 +437,7 @@ jobs:
           fi
 
           agent --version || true
+          df -h
 
           python3 scripts/generate-descriptions-cli.py \
             --model cursor-grok-4.5-high-fast \
@@ -490,17 +527,23 @@ jobs:
             exit 1
           fi
 
-      - name: Checkout
+      # Translate only needs description/ + scripts — never the archive tree.
+      - name: Checkout (sparse)
         uses: actions/checkout@v4
         with:
-          # Pick up description_en commits pushed by the previous job.
           ref: main
-          fetch-depth: 0
+          fetch-depth: 1
           persist-credentials: true
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /scripts/
+            /description/
+            /.github/
 
       - name: Ensure latest main (post-generate)
         run: |
-          git fetch origin main
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin main
           git reset --hard origin/main
 
       - name: Install Cursor CLI
@@ -525,6 +568,11 @@ jobs:
           }
           EOF
           echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
+          rm -rf "$HOME/.cursor/projects" "$HOME/.cursor/chats" \
+                 "$HOME/.cursor/ai-tracking" "$HOME/.cursor/agent-transcripts" \
+                 /tmp/cursor* 2>/dev/null || true
+          echo "TMPDIR=${RUNNER_TEMP:-/tmp}" >> "$GITHUB_ENV"
+          df -h
 
       - name: Configure git
         run: |
@@ -551,6 +599,7 @@ jobs:
           fi
 
           agent --version || true
+          df -h
 
           # Fill missing langs for the repos just archived/summarized.
           python3 scripts/translate-descriptions-cli.py \

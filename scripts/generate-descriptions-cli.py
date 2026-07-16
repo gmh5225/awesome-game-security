@@ -262,6 +262,9 @@ def discard_non_description_en(keep: list[Path] | None = None) -> None:
         rel = line.strip()
         if not rel:
             continue
+        # CI sparse checkouts materialize only target archives; never delete them.
+        if rel.startswith("archive/"):
+            continue
         if DESC_EN_KEEP_RE.match(rel):
             # Revert other repos' description edits; keep only this commit batch.
             if rel not in keep_set:
