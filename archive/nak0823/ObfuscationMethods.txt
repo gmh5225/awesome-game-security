@@ -1,0 +1,4004 @@
+Project Path: arc_nak0823_ObfuscationMethods_i0r77cdt
+
+Source Tree:
+
+```txt
+arc_nak0823_ObfuscationMethods_i0r77cdt
+├── Advanced Cflow Protection
+│   ├── Block.cs
+│   ├── BlockParser.cs
+│   ├── CflowObf.cs
+│   └── JumpCflow.cs
+├── Advanced Protection
+│   ├── Anti Dump
+│   │   ├── ADHelper.cs
+│   │   └── AntiDump.cs
+│   └── Injections
+│       ├── InjectHelper.cs
+│       └── MethodHider.cs
+├── Anti Protection
+│   ├── Anti De4dot
+│   │   └── AntiDe4dot.cs
+│   ├── Anti Dnspy
+│   │   └── AntiDnspy.cs
+│   └── Anti Ildasm
+│       └── AntiIldams.cs
+├── Context Example
+│   └── Context.cs
+├── Controlflow Protection
+│   ├── Version 1
+│   │   └── Cflow.cs
+│   └── Version 2
+│       └── CflowV2.cs
+├── Fake Attributes Protection
+│   └── FakeAttributes.cs
+├── Import Protection
+│   └── ImportProtection.cs
+├── Int Protection
+│   ├── Encoding
+│   │   └── IntEncoding.cs
+│   ├── Version 1
+│   │   └── Int.cs
+│   └── Version 2
+│       └── IntV2.cs
+├── Invalid Protection
+│   ├── Metadata
+│   │   └── InvalidMD.cs
+│   └── Opcodes
+│       └── InvalidOpcodes.cs
+├── Junk Protection
+│   └── Junk.cs
+├── L2F Protection
+│   └── Local2Field.cs
+├── LICENSE
+├── Melting Protection
+│   └── ConstMelting.cs
+├── Mutation Protection
+│   ├── Const Mutation
+│   │   └── ConstMelting.cs
+│   ├── Mutation.cs
+│   └── MutationHelper.cs
+├── Proxy Protection
+│   ├── Int Proxy
+│   │   └── IntProxy.cs
+│   ├── Many Proxy
+│   │   └── ManyProxy.cs
+│   └── String Proxy
+│       └── StringProxy.cs
+├── README.md
+├── Rename Protection
+│   ├── Version 1
+│   │   └── Renamer.cs
+│   └── Version 2
+│       └── RenamerV2.cs
+├── Stack Protection
+│   └── Stack.cs
+├── String Protection
+│   ├── Base64
+│   │   └── Base64.cs
+│   └── Cipher
+│       ├── Injection.cs
+│       └── StringEcnryption.cs
+├── Suf Protection
+│   └── SufConfusion.cs
+└── Watermark
+    ├── Credits
+    │   └── Credits.cs
+    └── Watermark.cs
+
+```
+
+`Advanced Cflow Protection/Block.cs`:
+
+```cs
+using dnlib.DotNet.Emit;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Protector.Protections.Controlflow
+{
+    internal class Block
+    {
+        public Block()
+        {
+            Instructions = new List<Instruction>();
+        }
+
+        public List<Instruction> Instructions { get; set; }
+
+        public int Number { get; set; }
+    }
+}
+
+```
+
+`Advanced Cflow Protection/BlockParser.cs`:
+
+```cs
+using dnlib.DotNet.Emit;
+using dnlib.DotNet;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Protector.Protections.Controlflow
+{
+    internal class BlockParser
+    {
+        public static List<Block> ParseMethod(MethodDef meth)
+        {
+            var blocks = new List<Block>();
+            var block = new Block();
+            var id = 0;
+            var usage = 0;
+            block.Number = id;
+            block.Instructions.Add(Instruction.Create(OpCodes.Nop));
+            blocks.Add(block);
+            block = new Block();
+            var handlers = new Stack<ExceptionHandler>();
+            foreach (var instruction in meth.Body.Instructions)
+            {
+                foreach (var eh in meth.Body.ExceptionHandlers)
+                {
+                    if (eh.HandlerStart == instruction || eh.TryStart == instruction || eh.FilterStart == instruction)
+                        handlers.Push(eh);
+                }
+                foreach (var eh in meth.Body.ExceptionHandlers)
+                {
+                    if (eh.HandlerEnd == instruction || eh.TryEnd == instruction)
+                        handlers.Pop();
+                }
+
+                instruction.CalculateStackUsage(out var stacks, out var pops);
+                block.Instructions.Add(instruction);
+                usage += stacks - pops;
+                if (stacks == 0)
+                {
+                    if (instruction.OpCode != OpCodes.Nop)
+                    {
+                        if ((usage == 0 || instruction.OpCode == OpCodes.Ret) && handlers.Count == 0)
+                        {
+                            block.Number = ++id;
+                            blocks.Add(block);
+                            block = new Block();
+                        }
+                    }
+                }
+            }
+            return blocks;
+        }
+    }
+}
+
+```
+
+`Advanced Cflow Protection/CflowObf.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Protector.Protections.Controlflow
+{
+    internal class CflowObf
+    {
+        public static void Execute(ModuleDefMD md)
+        {
+            foreach (var type in md.Types)
+            {
+                if (type == md.GlobalType) continue;
+                foreach (var meth in type.Methods)
+                {
+                    if (meth.Name.StartsWith("get_") || meth.Name.StartsWith("set_")) continue;
+                    if (!meth.HasBody || meth.IsConstructor) continue;
+                    meth.Body.SimplifyBranches();
+                    ExecuteMethod(meth);
+                }
+            }
+        }
+
+        private static void ExecuteMethod(MethodDef meth)
+        {
+            meth.Body.SimplifyMacros(meth.Parameters);
+            var blocks = BlockParser.ParseMethod(meth);
+            blocks = Randomize(blocks);
+            meth.Body.Instructions.Clear();
+            var local = new Local(meth.Module.CorLibTypes.Int32);
+            meth.Body.Variables.Add(local);
+            var target = Instruction.Create(OpCodes.Nop);
+            var instr = Instruction.Create(OpCodes.Br, target);
+            foreach (var instruction in Calc(0))
+                meth.Body.Instructions.Add(instruction);
+            meth.Body.Instructions.Add(Instruction.Create(OpCodes.Stloc, local));
+            meth.Body.Instructions.Add(Instruction.Create(OpCodes.Br, instr));
+            meth.Body.Instructions.Add(target);
+            foreach (var block in blocks.Where(block => block != blocks.Single(x => x.Number == blocks.Count - 1)))
+            {
+                meth.Body.Instructions.Add(Instruction.Create(OpCodes.Ldloc, local));
+                foreach (var instruction in Calc(block.Number))
+                    meth.Body.Instructions.Add(instruction);
+                meth.Body.Instructions.Add(Instruction.Create(OpCodes.Ceq));
+                var instruction4 = Instruction.Create(OpCodes.Nop);
+                meth.Body.Instructions.Add(Instruction.Create(OpCodes.Brfalse, instruction4));
+
+                foreach (var instruction in block.Instructions)
+                    meth.Body.Instructions.Add(instruction);
+
+                foreach (var instruction in Calc(block.Number + 1))
+                    meth.Body.Instructions.Add(instruction);
+
+                meth.Body.Instructions.Add(Instruction.Create(OpCodes.Stloc, local));
+                meth.Body.Instructions.Add(instruction4);
+            }
+            meth.Body.Instructions.Add(Instruction.Create(OpCodes.Ldloc, local));
+            foreach (var instruction in Calc(blocks.Count - 1))
+                meth.Body.Instructions.Add(instruction);
+            meth.Body.Instructions.Add(Instruction.Create(OpCodes.Ceq));
+            meth.Body.Instructions.Add(Instruction.Create(OpCodes.Brfalse, instr));
+            meth.Body.Instructions.Add(Instruction.Create(OpCodes.Br, blocks.Single(x => x.Number == blocks.Count - 1).Instructions[0]));
+            meth.Body.Instructions.Add(instr);
+
+            foreach (var lastBlock in blocks.Single(x => x.Number == blocks.Count - 1).Instructions)
+                meth.Body.Instructions.Add(lastBlock);
+        }
+
+        private static readonly Random Rnd = new Random();
+
+        private static List<Block> Randomize(List<Block> input)
+        {
+            var ret = new List<Block>();
+            foreach (var group in input)
+                ret.Insert(Rnd.Next(0, ret.Count), group);
+            return ret;
+        }
+
+        private static List<Instruction> Calc(int value)
+        {
+            var instructions = new List<Instruction> { Instruction.Create(OpCodes.Ldc_I4, value) };
+            return instructions;
+        }
+
+        public void AddJump(IList<Instruction> instrs, Instruction target)
+        {
+            instrs.Add(Instruction.Create(OpCodes.Br, target));
+        }
+    }
+}
+
+```
+
+`Advanced Cflow Protection/JumpCflow.cs`:
+
+```cs
+using dnlib.DotNet.Emit;
+using dnlib.DotNet;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Protector.Protections.Controlflow
+{
+    internal class JumpCflow
+    {
+        public static void Execute(ModuleDefMD module)
+        {
+            foreach (var type in module.Types)
+            {
+                foreach (var meth in type.Methods.ToArray())
+                {
+                    if (!meth.HasBody || !meth.Body.HasInstructions || meth.Body.HasExceptionHandlers) continue;
+                    for (var i = 0; i < meth.Body.Instructions.Count - 2; i++)
+                    {
+                        var inst = meth.Body.Instructions[i + 1];
+                        meth.Body.Instructions.Insert(i + 1, Instruction.Create(OpCodes.Ldstr, Renamer.GenerateName()));
+                        meth.Body.Instructions.Insert(i + 1, Instruction.Create(OpCodes.Br_S, inst));
+                        i += 2;
+                    }
+                }
+            }
+        }
+    }
+}
+
+```
+
+`Advanced Protection/Anti Dump/ADHelper.cs`:
+
+```cs
+using System;
+using System.Runtime.InteropServices;
+
+
+namespace Protector.Protections.Injections
+{
+    internal class anti_dump_runtime
+    {
+        [DllImport("kernel32.dll")]
+        public static extern unsafe bool VirtualProtect(
+          byte* lpAddress,
+          int dwSize,
+          uint flNewProtect,
+          out uint lpflOldProtect);
+
+        public static unsafe void Initialize()
+        {
+            byte* hinstance = (byte*)(void*)Marshal.GetHINSTANCE(typeof(anti_dump_runtime).Module);
+            byte* numPtr1 = hinstance + 60;
+            byte* numPtr2;
+            byte* numPtr3 = (numPtr2 = hinstance + *(uint*)numPtr1) + 6;
+            ushort num1 = *(ushort*)numPtr3;
+            byte* numPtr4 = numPtr3 + 14;
+            ushort num2 = *(ushort*)numPtr4;
+            byte* lpAddress1 = numPtr2 = numPtr4 + 4 + (int)num2;
+            byte* numPtr5 = stackalloc byte[11];
+            uint lpflOldProtect;
+            anti_dump_runtime.VirtualProtect(lpAddress1 - 16, 8, 64U, out lpflOldProtect);
+            *(int*)(lpAddress1 - 12) = 0;
+            byte* lpAddress2 = hinstance + *(uint*)(lpAddress1 - 16);
+            *(int*)(lpAddress1 - 16) = 0;
+            anti_dump_runtime.VirtualProtect(lpAddress2, 72, 64U, out lpflOldProtect);
+            byte* lpAddress3 = hinstance + *(uint*)(lpAddress2 + 8);
+            *(int*)lpAddress2 = 0;
+            *(int*)(lpAddress2 + 4) = 0;
+            //   *(int*)(lpAddress2 + (new IntPtr(2) * 4).ToInt64()) = 0;
+            //   *(int*)(lpAddress2 + (new IntPtr(3) * 4).ToInt64()) = 0;
+            anti_dump_runtime.VirtualProtect(lpAddress3, 4, 64U, out lpflOldProtect);
+            *(int*)lpAddress3 = 0;
+            for (int index = 0; index < (int)num1; ++index)
+            {
+                anti_dump_runtime.VirtualProtect(lpAddress1, 8, 64U, out lpflOldProtect);
+                Marshal.Copy(new byte[8], 0, (IntPtr)(void*)lpAddress1, 8);
+                lpAddress1 += 40;
+            }
+        }
+    }
+}
+
+```
+
+`Advanced Protection/Anti Dump/AntiDump.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Protector.Protections.Injections
+{
+    internal class AntiDump
+    {
+        public static void InjectClass(ModuleDef module)
+        {
+            ModuleDefMD moduleDefMD = ModuleDefMD.Load(typeof(anti_dump_runtime).Module);
+            TypeDef typeDef = moduleDefMD.ResolveTypeDef(MDToken.ToRID(typeof(anti_dump_runtime).MetadataToken));
+            IEnumerable<IDnlibDef> source = StringEcrypt.Injection.Inject(typeDef, module.GlobalType, module);
+            init = (MethodDef)source.Single((IDnlibDef method) => method.Name == "Initialize");
+            foreach (MethodDef methodDef in module.GlobalType.Methods)
+            {
+                bool flag = methodDef.Name == ".ctor";
+                if (flag)
+                {
+                    module.GlobalType.Remove(methodDef);
+                    break;
+                }
+            }
+        }
+
+        public static void Execute(ModuleDef module)
+        {
+            InjectClass(module);
+            MethodDef methodDef = module.GlobalType.FindOrCreateStaticConstructor();
+            methodDef.Body.Instructions.Insert(0, Instruction.Create(OpCodes.Call, init));
+        }
+
+        public static MethodDef init;
+    }
+}
+
+```
+
+`Advanced Protection/Injections/InjectHelper.cs`:
+
+```cs
+using dnlib.DotNet.Emit;
+using dnlib.DotNet;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.ComponentModel;
+using System.Numerics;
+
+namespace Protector.Protections.Injections
+{
+    internal class InjectHelper
+    {
+        private static TypeDefUser Clone(TypeDef origin)
+        {
+            TypeDefUser typeDefUser = new TypeDefUser(origin.Namespace, origin.Name);
+            typeDefUser.Attributes = origin.Attributes;
+            bool flag = origin.ClassLayout != null;
+            if (flag)
+            {
+                typeDefUser.ClassLayout = new ClassLayoutUser(origin.ClassLayout.PackingSize, origin.ClassSize);
+            }
+            foreach (GenericParam genericParam in origin.GenericParameters)
+            {
+                typeDefUser.GenericParameters.Add(new GenericParamUser(genericParam.Number, genericParam.Flags, "-"));
+            }
+            return typeDefUser;
+        }
+
+        private static MethodDefUser Clone(MethodDef origin)
+        {
+            MethodDefUser methodDefUser = new MethodDefUser(origin.Name, null, origin.ImplAttributes, origin.Attributes);
+            foreach (GenericParam genericParam in origin.GenericParameters)
+            {
+                methodDefUser.GenericParameters.Add(new GenericParamUser(genericParam.Number, genericParam.Flags, "-"));
+            }
+            return methodDefUser;
+        }
+
+        private static FieldDefUser Clone(FieldDef origin)
+        {
+            return new FieldDefUser(origin.Name, null, origin.Attributes);
+        }
+
+        private static TypeDef PopulateContext(TypeDef typeDef, InjectHelper.InjectContext ctx)
+        {
+            IDnlibDef dnlibDef;
+            bool flag = !ctx.map.TryGetValue(typeDef, out dnlibDef);
+            TypeDef typeDef2;
+            if (flag)
+            {
+                typeDef2 = InjectHelper.Clone(typeDef);
+                ctx.map[typeDef] = typeDef2;
+            }
+            else
+            {
+                typeDef2 = (TypeDef)dnlibDef;
+            }
+            foreach (TypeDef typeDef3 in typeDef.NestedTypes)
+            {
+                typeDef2.NestedTypes.Add(InjectHelper.PopulateContext(typeDef3, ctx));
+            }
+            foreach (MethodDef methodDef in typeDef.Methods)
+            {
+                typeDef2.Methods.Add((MethodDef)(ctx.map[methodDef] = InjectHelper.Clone(methodDef)));
+            }
+            foreach (FieldDef fieldDef in typeDef.Fields)
+            {
+                typeDef2.Fields.Add((FieldDef)(ctx.map[fieldDef] = InjectHelper.Clone(fieldDef)));
+            }
+            return typeDef2;
+        }
+
+        private static void CopyTypeDef(TypeDef typeDef, InjectHelper.InjectContext ctx)
+        {
+            TypeDef typeDef2 = (TypeDef)ctx.map[typeDef];
+            typeDef2.BaseType = ctx.Importer.Import(typeDef.BaseType);
+            foreach (InterfaceImpl interfaceImpl in typeDef.Interfaces)
+            {
+                typeDef2.Interfaces.Add(new InterfaceImplUser(ctx.Importer.Import(interfaceImpl.Interface)));
+            }
+        }
+
+        private static void CopyMethodDef(MethodDef methodDef, InjectHelper.InjectContext ctx)
+        {
+            MethodDef methodDef2 = (MethodDef)ctx.map[methodDef];
+            methodDef2.Signature = ctx.Importer.Import(methodDef.Signature);
+            methodDef2.Parameters.UpdateParameterTypes();
+            bool flag = methodDef.ImplMap != null;
+            if (flag)
+            {
+                methodDef2.ImplMap = new ImplMapUser(new ModuleRefUser(ctx.TargetModule, methodDef.ImplMap.Module.Name), methodDef.ImplMap.Name, methodDef.ImplMap.Attributes);
+            }
+            foreach (CustomAttribute customAttribute in methodDef.CustomAttributes)
+            {
+                methodDef2.CustomAttributes.Add(new CustomAttribute((ICustomAttributeType)ctx.Importer.Import(customAttribute.Constructor)));
+            }
+            bool hasBody = methodDef.HasBody;
+            if (hasBody)
+            {
+                methodDef2.Body = new CilBody(methodDef.Body.InitLocals, new List<Instruction>(), new List<ExceptionHandler>(), new List<Local>());
+                methodDef2.Body.MaxStack = methodDef.Body.MaxStack;
+                Dictionary<object, object> bodyMap = new Dictionary<object, object>();
+                foreach (Local local in methodDef.Body.Variables)
+                {
+                    Local local2 = new Local(ctx.Importer.Import(local.Type));
+                    methodDef2.Body.Variables.Add(local2);
+                    local2.Name = local.Name;
+                    bodyMap[local] = local2;
+                }
+                foreach (Instruction instruction in methodDef.Body.Instructions)
+                {
+                    Instruction instruction2 = new Instruction(instruction.OpCode, instruction.Operand);
+                    instruction2.SequencePoint = instruction.SequencePoint;
+                    bool flag2 = instruction2.Operand is IType;
+                    if (flag2)
+                    {
+                        instruction2.Operand = ctx.Importer.Import((IType)instruction2.Operand);
+                    }
+                    else
+                    {
+                        bool flag3 = instruction2.Operand is IMethod;
+                        if (flag3)
+                        {
+                            instruction2.Operand = ctx.Importer.Import((IMethod)instruction2.Operand);
+                        }
+                        else
+                        {
+                            bool flag4 = instruction2.Operand is IField;
+                            if (flag4)
+                            {
+                                instruction2.Operand = ctx.Importer.Import((IField)instruction2.Operand);
+                            }
+                        }
+                    }
+                    methodDef2.Body.Instructions.Add(instruction2);
+                    bodyMap[instruction] = instruction2;
+                }
+
+                Func<Instruction, Instruction> instructionSelector = null;
+                foreach (Instruction instruction3 in methodDef2.Body.Instructions)
+                {
+                    bool flag5 = instruction3.Operand != null && bodyMap.ContainsKey(instruction3.Operand);
+                    if (flag5)
+                    {
+                        instruction3.Operand = bodyMap[instruction3.Operand];
+                    }
+                    else
+                    {
+                        bool flag6 = instruction3.Operand is Instruction[];
+                        if (flag6)
+                        {
+                            Instruction instruction4 = instruction3;
+                            IEnumerable<Instruction> source = (Instruction[])instruction3.Operand;
+                            if (instructionSelector == null)
+                            {
+                                instructionSelector = (Instruction target) => (Instruction)bodyMap[target];
+                            }
+                            instruction4.Operand = source.Select(instructionSelector).ToArray<Instruction>();
+                        }
+                    }
+                }
+
+
+                foreach (ExceptionHandler exceptionHandler in methodDef.Body.ExceptionHandlers)
+                {
+                    methodDef2.Body.ExceptionHandlers.Add(new ExceptionHandler(exceptionHandler.HandlerType)
+                    {
+                        CatchType = ((exceptionHandler.CatchType == null) ? null : ctx.Importer.Import(exceptionHandler.CatchType)),
+                        TryStart = (Instruction)bodyMap[exceptionHandler.TryStart],
+                        TryEnd = (Instruction)bodyMap[exceptionHandler.TryEnd],
+                        HandlerStart = (Instruction)bodyMap[exceptionHandler.HandlerStart],
+                        HandlerEnd = (Instruction)bodyMap[exceptionHandler.HandlerEnd],
+                        FilterStart = ((exceptionHandler.FilterStart == null) ? null : ((Instruction)bodyMap[exceptionHandler.FilterStart]))
+                    });
+                }
+                methodDef2.Body.SimplifyMacros(methodDef2.Parameters);
+            }
+        }
+
+        private static void CopyFieldDef(FieldDef fieldDef, InjectHelper.InjectContext ctx)
+        {
+            FieldDef fieldDef2 = (FieldDef)ctx.map[fieldDef];
+            fieldDef2.Signature = ctx.Importer.Import(fieldDef.Signature);
+        }
+        private static void Copy(TypeDef typeDef, InjectHelper.InjectContext ctx, bool copySelf)
+        {
+            if (copySelf)
+            {
+                InjectHelper.CopyTypeDef(typeDef, ctx);
+            }
+            foreach (TypeDef typeDef2 in typeDef.NestedTypes)
+            {
+                InjectHelper.Copy(typeDef2, ctx, true);
+            }
+            foreach (MethodDef methodDef in typeDef.Methods)
+            {
+                InjectHelper.CopyMethodDef(methodDef, ctx);
+            }
+            foreach (FieldDef fieldDef in typeDef.Fields)
+            {
+                InjectHelper.CopyFieldDef(fieldDef, ctx);
+            }
+        }
+
+
+        public static TypeDef Inject(TypeDef typeDef, ModuleDef target)
+        {
+            InjectHelper.InjectContext injectContext = new InjectHelper.InjectContext(typeDef.Module, target);
+            InjectHelper.PopulateContext(typeDef, injectContext);
+            InjectHelper.Copy(typeDef, injectContext, true);
+            return (TypeDef)injectContext.map[typeDef];
+        }
+
+        public static MethodDef Inject(MethodDef methodDef, ModuleDef target)
+        {
+            InjectHelper.InjectContext injectContext = new InjectHelper.InjectContext(methodDef.Module, target);
+            injectContext.map[methodDef] = InjectHelper.Clone(methodDef);
+            InjectHelper.CopyMethodDef(methodDef, injectContext);
+            return (MethodDef)injectContext.map[methodDef];
+        }
+
+        public static IEnumerable<IDnlibDef> Inject(TypeDef typeDef, TypeDef newType, ModuleDef target)
+        {
+            InjectHelper.InjectContext injectContext = new InjectHelper.InjectContext(typeDef.Module, target);
+            injectContext.map[typeDef] = newType;
+            InjectHelper.PopulateContext(typeDef, injectContext);
+            InjectHelper.Copy(typeDef, injectContext, false);
+            return injectContext.map.Values.Except(new TypeDef[]
+            {
+                newType
+            });
+        }
+
+        private class InjectContext : ImportMapper
+        {
+            public InjectContext(ModuleDef module, ModuleDef target)
+            {
+                this.OriginModule = module;
+                this.TargetModule = target;
+                this.importer = new Importer(target, ImporterOptions.TryToUseTypeDefs, default(GenericParamContext), this);
+            }
+
+            public Importer Importer
+            {
+                get
+                {
+                    return this.importer;
+                }
+            }
+
+            public override ITypeDefOrRef Map(ITypeDefOrRef typeDefOrRef)
+            {
+                TypeDef typeDef = typeDefOrRef as TypeDef;
+                bool flag = typeDef != null;
+                if (flag)
+                {
+                    bool flag2 = this.map.ContainsKey(typeDef);
+                    if (flag2)
+                    {
+                        return (TypeDef)this.map[typeDef];
+                    }
+                }
+                return null;
+            }
+
+            public override IMethod Map(MethodDef methodDef)
+            {
+                bool flag = this.map.ContainsKey(methodDef);
+                IMethod result;
+                if (flag)
+                {
+                    result = (MethodDef)this.map[methodDef];
+                }
+                else
+                {
+                    result = null;
+                }
+                return result;
+            }
+
+            public override IField Map(FieldDef fieldDef)
+            {
+                bool flag = this.map.ContainsKey(fieldDef);
+                IField result;
+                if (flag)
+                {
+                    result = (FieldDef)this.map[fieldDef];
+                }
+                else
+                {
+                    result = null;
+                }
+                return result;
+            }
+
+           
+            public readonly Dictionary<IDnlibDef, IDnlibDef> map = new Dictionary<IDnlibDef, IDnlibDef>();
+
+            public readonly ModuleDef OriginModule;
+
+            public readonly ModuleDef TargetModule;
+
+            private readonly Importer importer;
+        }
+    }
+}
+
+```
+
+`Advanced Protection/Injections/MethodHider.cs`:
+
+```cs
+using dnlib.DotNet.Emit;
+using dnlib.DotNet;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Protector.Protections.Injections
+{
+    internal class MethodHider
+    {
+        public static void Execute(Context ctx)
+        {
+            ModuleDef moduleDef = ctx.moduleDef;
+            ModuleDefMD moduleDefMD = ModuleDefMD.Load(typeof(AntiDump).Module);
+            TypeDef typeDef = moduleDefMD.ResolveTypeDef(MDToken.ToRID(typeof(MethodHider).MetadataToken));
+            IEnumerable<IDnlibDef> source = InjectHelper.Inject(typeDef, moduleDef.GlobalType, moduleDef);
+            MethodDef method2 = (MethodDef)source.Single((IDnlibDef method) => method.Name == "MethodHiderInj");
+            foreach (TypeDef typeDef2 in moduleDef.GetTypes())
+            {
+                bool isGlobalModuleType = typeDef2.IsGlobalModuleType;
+                if (!isGlobalModuleType)
+                {
+                    foreach (MethodDef methodDef in typeDef2.Methods)
+                    {
+                        bool flag = !methodDef.HasBody || !methodDef.Body.HasInstructions;
+                        if (!flag)
+                        {
+                            int i = 0;
+                            while (i < methodDef.Body.Instructions.Count)
+                            {
+                                bool flag2 = methodDef.Body.Instructions[i].OpCode == OpCodes.Call;
+                                if (flag2)
+                                {
+                                    bool flag3 = methodDef.Body.Instructions[i].Operand is MethodDef;
+                                    if (flag3)
+                                    {
+                                        try
+                                        {
+                                            bool flag4 = methodDef.Name != "CopyAll";
+                                            if (!flag4)
+                                            {
+                                                MethodDef methodDef2 = (MethodDef)methodDef.Body.Instructions[i].Operand;
+                                                bool flag5 = methodDef2.Parameters.Count == 0;
+                                                if (!flag5)
+                                                {
+                                                    bool flag6 = methodDef2.DeclaringType == moduleDef.Import(typeof(void));
+                                                    if (!flag6)
+                                                    {
+                                                        bool isConstructor = methodDef2.IsConstructor;
+                                                        if (!isConstructor)
+                                                        {
+                                                            bool flag7 = !methodDef2.IsStatic;
+                                                            if (!flag7)
+                                                            {
+                                                                int num = 1;
+                                                                Local local = new Local(moduleDef.ImportAsTypeSig(typeof(object[])));
+                                                                methodDef.Body.Variables.Add(local);
+                                                                methodDef.Body.Instructions.Insert(i + num, OpCodes.Ldc_I4.ToInstruction(methodDef2.Parameters.Count));
+                                                                methodDef.Body.Instructions.Insert(i + ++num, OpCodes.Newarr.ToInstruction(moduleDef.CorLibTypes.Object));
+                                                                methodDef.Body.Instructions.Insert(i + ++num, OpCodes.Dup.ToInstruction());
+                                                                for (int j = 0; j < methodDef2.Parameters.Count; j++)
+                                                                {
+                                                                    bool flag8 = methodDef.Body.Instructions[i - j - 1].OpCode == OpCodes.Call;
+                                                                    if (flag8)
+                                                                    {
+                                                                        methodDef.Body.Instructions.RemoveAt(i + num);
+                                                                        methodDef.Body.Instructions.RemoveAt(i + --num);
+                                                                        methodDef.Body.Instructions.RemoveAt(i + --num);
+                                                                        break;
+                                                                    }
+                                                                    bool flag9 = methodDef.Body.Instructions[i - j - 1].OpCode == OpCodes.Nop;
+                                                                    if (!flag9)
+                                                                    {
+                                                                        methodDef.Body.Instructions.Insert(i + ++num, OpCodes.Ldc_I4.ToInstruction(j));
+                                                                        methodDef.Body.Instructions.Insert(i + ++num, methodDef.Body.Instructions[i - j - 1]);
+                                                                        methodDef.Body.Instructions.Insert(i + ++num, OpCodes.Stelem_Ref.ToInstruction());
+                                                                        bool flag10 = methodDef2.Parameters.Count - 1 != j;
+                                                                        if (flag10)
+                                                                        {
+                                                                            methodDef.Body.Instructions.Insert(i + ++num, OpCodes.Dup.ToInstruction());
+                                                                        }
+                                                                    }
+                                                                }
+                                                                methodDef.Body.Instructions.Insert(i + ++num, OpCodes.Ldc_I4.ToInstruction(methodDef2.MDToken.ToInt32()));
+                                                                methodDef.Body.Instructions.Insert(i + ++num, OpCodes.Call.ToInstruction(method2));
+                                                                i += num + 1;
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        catch
+                                        {
+                                        }
+                                    }
+                                }
+                            IL_4A0:
+                                i++;
+                                continue;
+                                goto IL_4A0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        public static void MethodHiderInj(object[] parameters, int token)
+        {
+            parameters.Reverse<object>();
+            Assembly executingAssembly = Assembly.GetExecutingAssembly();
+            Assembly callingAssembly = Assembly.GetCallingAssembly();
+            bool flag = executingAssembly == callingAssembly;
+            if (flag)
+            {
+                Module manifestModule = executingAssembly.ManifestModule;
+                MethodInfo methodInfo = (MethodInfo)manifestModule.ResolveMethod(token);
+                methodInfo.Invoke(null, parameters);
+            }
+        }
+    }
+}
+
+```
+
+`Anti Protection/Anti De4dot/AntiDe4dot.cs`:
+
+```cs
+using dnlib.DotNet;
+
+namespace Protector.Protections
+{
+    internal class AntiDe4dot
+    {
+        public static void Execute(Context context)
+        {
+            // Adds invalid interface implementations to crash De4dot
+
+            foreach (ModuleDef module in context.assemblyDef.Modules)
+            {
+                InterfaceImplUser invalidImpl = new InterfaceImplUser(module.GlobalType);
+
+                for (int i = 100; i < 150; i++)
+                {
+                    TypeDefUser invalidType = new TypeDefUser("", Renamer.GenerateName(), module.CorLibTypes.GetTypeRef("System", "Attribute"));
+                    InterfaceImplUser typeImpl = new InterfaceImplUser(invalidType);
+                    module.Types.Add(invalidType);
+                    invalidType.Interfaces.Add(typeImpl);
+                    invalidType.Interfaces.Add(invalidImpl);
+                }
+            }
+        }
+    }
+}
+```
+
+`Anti Protection/Anti Dnspy/AntiDnspy.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace Protector.Protections
+{
+    internal class AntiDnspy
+    {
+        public static void Execute(Context ctx)
+        {
+            // This code implements an obfuscation technique called "AntiDnspy" that adds a large number of NOP (no operation) instructions to the beginning of each method's body in the target assembly.
+            // This makes it more difficult for tools like dnSpy to decompile the code, as the extra NOP instructions will need to be removed before the decompiled code can be properly analyzed.
+            // The code loops through all the types and methods in the target assembly and adds 33333 NOP instructions to the start of each method's body.
+
+            foreach (TypeDef type in ctx.assemblyDef.ManifestModule.Types)
+            {
+                foreach (MethodDef method in type.Methods)
+                {
+                    if (method.Body == null) continue;
+                    for (int x = 0; x < 33333; x++)
+                    {
+                        method.Body.Instructions.Insert(x, new Instruction(OpCodes.Nop));
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+`Anti Protection/Anti Ildasm/AntiIldams.cs`:
+
+```cs
+using dnlib.DotNet;
+
+namespace Satfuscator.Protections
+{
+    internal class AntiIldasm
+    {
+        public static void Execute(Context ctx)
+        {
+            // The code is an implementation of the AntiIldasm protection, which prevents disassembly of .NET assemblies using tools like Ildasm. 
+            // This specific method is called when the protection is executed and it iterates over each module in the assembly to add a custom attribute that marks the module as SuppressIldasm
+
+            foreach (ModuleDefMD module in ctx.assemblyDef.Modules)
+            {
+                TypeRef attrRef = module.CorLibTypes.GetTypeRef("System.Runtime.CompilerServices", "SuppressIldasmAttribute");
+                var ctorRef = new MemberRefUser(module, ".ctor", MethodSig.CreateInstance(module.CorLibTypes.Void), attrRef);
+
+                var attr = new CustomAttribute(ctorRef);
+                module.CustomAttributes.Add(attr);
+            }
+        }
+    }
+}
+
+```
+
+`Context Example/Context.cs`:
+
+```cs
+using System;
+using dnlib.DotNet;
+
+namespace Protector
+{
+    public class Context
+    {
+        public AssemblyDef assemblyDef;
+        public ModuleDef moduleDef;
+        public ModuleDefMD moduleDefMD;
+        public TypeDef typeDef;
+        public Importer importer;
+        public MethodDef cctor;
+
+        public Context(AssemblyDef asm)
+        {
+            assemblyDef = asm;
+            moduleDef = asm.ManifestModule;
+            typeDef = moduleDef.GlobalType;
+            importer = new Importer(moduleDef);
+            cctor = typeDef.FindOrCreateStaticConstructor();
+        }
+    }
+}
+
+```
+
+`Controlflow Protection/Version 1/Cflow.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System.Globalization;
+using System.Linq;
+
+namespace Protector.Protections
+{
+    internal class Cflow
+    {
+        public static void Execute(ModuleDef module)
+        {
+            foreach (TypeDef typeDef in module.Types)
+            {
+                foreach (MethodDef methodDef in typeDef.Methods.ToArray<MethodDef>())
+                {
+                    if (methodDef.HasBody && methodDef.Body.HasInstructions && !methodDef.Body.HasExceptionHandlers)
+                    {
+                        for (int i = 0; i < methodDef.Body.Instructions.Count -2; i++)
+                        {
+                            Instruction t = methodDef.Body.Instructions[i + 1];
+                            methodDef.Body.Instructions.Insert(i + 1, Instruction.Create(OpCodes.Ldstr, "Satfuscator"));
+                            methodDef.Body.Instructions.Insert(i + 1, Instruction.Create(OpCodes.Br_S, t));
+                            i += 2;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+`Controlflow Protection/Version 2/CflowV2.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Linq;
+using System.Text;
+
+namespace Protector.Protections
+{
+    internal class CflowV2
+    {
+
+        public static void Execute(Context ctx)
+        {
+            int amount = 0;
+
+            for (int x = 0; x < ctx.moduleDef.Types.Count; x++)
+            {
+                TypeDef tDef = ctx.moduleDef.Types[x];
+
+                for (int i = 0; i < tDef.Methods.Count; i++)
+                {
+                    MethodDef mDef = tDef.Methods[i];
+
+                    if (!mDef.Name.StartsWith("get_") && !mDef.Name.StartsWith("set_"))
+                    {
+                        if (!mDef.HasBody || mDef.IsConstructor) continue;
+
+                        mDef.Body.SimplifyBranches();
+                        ExecuteMethod(mDef);
+
+                        amount++;
+                    }
+                }
+            }
+        }
+
+        public static void ExecuteMethod(MethodDef method)
+        {
+            for (int i = 0; i < method.Body.Instructions.Count; i++)
+                if (method.Body.Instructions[i].IsLdcI4())
+                {
+                    int numorig = IntEncoding.Next();
+                    int div = IntEncoding.Next();
+
+                    int num = numorig ^ div;
+
+                    int lastIndex = IntEncoding.Next(types.Length);
+                    Type randType = types[lastIndex];
+
+                    Instruction nop = OpCodes.Nop.ToInstruction();
+                    Local local = new Local(method.Module.ImportAsTypeSig(randType));
+                    Instruction localCode = OpCodes.Stloc.ToInstruction(local);
+
+                    method.Body.Variables.Add(local);
+
+                    method.Body.Instructions.Insert(i + 1, localCode);
+                    method.Body.Instructions.Insert(i + 2, Instruction.Create(OpCodes.Ldc_I4, method.Body.Instructions[i].GetLdcI4Value() - sizes[lastIndex]));
+                    method.Body.Instructions.Insert(i + 3, Instruction.Create(OpCodes.Ldc_I4, num));
+                    method.Body.Instructions.Insert(i + 4, Instruction.Create(OpCodes.Ldc_I4, div));
+                    method.Body.Instructions.Insert(i + 5, Instruction.Create(OpCodes.Xor));
+                    method.Body.Instructions.Insert(i + 6, Instruction.Create(OpCodes.Ldc_I4, numorig));
+                    method.Body.Instructions.Insert(i + 7, Instruction.Create(OpCodes.Bne_Un, nop));
+                    method.Body.Instructions.Insert(i + 8, Instruction.Create(OpCodes.Ldc_I4, 2));
+                    method.Body.Instructions.Insert(i + 9, localCode);
+                    method.Body.Instructions.Insert(i + 10, Instruction.Create(OpCodes.Sizeof, method.Module.Import(randType)));
+                    method.Body.Instructions.Insert(i + 11, Instruction.Create(OpCodes.Add));
+                    method.Body.Instructions.Insert(i + 12, nop);
+
+                    i += method.Body.Instructions.Count - i;
+                }
+        }
+
+        private static readonly Type[] types = new Type[]
+        {
+            typeof(uint),
+            typeof(int),
+            typeof(long),
+            typeof(ulong),
+            typeof(ushort),
+            typeof(short),
+            typeof(double)
+        };
+
+        private static readonly int[] sizes = new int[]
+        {
+            sizeof(uint),
+            sizeof(int),
+            sizeof(long),
+            sizeof(ulong),
+            sizeof(ushort),
+            sizeof(short),
+            sizeof(double)
+        };
+    }
+}
+```
+
+`Fake Attributes Protection/FakeAttributes.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Collections.Generic;
+
+namespace Protecter.Protections
+{
+    internal class FakeAttributes
+    {
+        public static void Execute(ModuleDef module)
+        {
+
+			List<string> list = new List<string>
+            {
+                "ZYXDNGuarder", // DnGuard
+                "HVMRuntm.dll", // DnGuard   	
+			};
+
+            foreach (string s in list)
+            {
+                TypeDef typeDef = new TypeDefUser("Attributes", s, module.Import(typeof(Attribute)));
+                typeDef.Attributes = TypeAttributes.NotPublic;
+                module.Types.Add(typeDef);
+            }
+            TypeDef typeDef2 = module.Types[new Random().Next(0, module.Types.Count)];
+        }
+    }
+}
+```
+
+`Import Protection/ImportProtection.cs`:
+
+```cs
+using dnlib.DotNet.Emit;
+using dnlib.DotNet;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Runtime.Remoting.Contexts;
+
+namespace Protector.Protections
+{
+    internal class ImportProtection
+    {
+        public static FieldDefUser CreateField(FieldSig sig)
+        {
+            return new FieldDefUser(Renamer.GenerateName(), sig, FieldAttributes.Public | FieldAttributes.Static);
+        }
+
+        public static void Execute(Context ctx)
+        {
+            var module = ctx.moduleDef;
+            var brigdes = new Dictionary<IMethod, MethodDef>();
+            var methods = new Dictionary<IMethod, TypeDef>();
+            var field = CreateField(new FieldSig(module.ImportAsTypeSig(typeof(object[]))));
+            var cctor = ctx.typeDef.FindOrCreateStaticConstructor();
+            foreach (TypeDef type in module.GetTypes().ToArray())
+            {
+                if (type.IsDelegate)
+                    continue;
+                if (type.IsGlobalModuleType)
+                    continue;
+                if (type.Namespace == "Costura")
+                    continue;
+                foreach (MethodDef method in type.Methods.ToArray())
+                {
+                    if (!method.HasBody)
+                        continue;
+                    if (!method.Body.HasInstructions)
+                        continue;
+                    if (method.IsConstructor)
+                        continue;
+
+                    var instrs = method.Body.Instructions;
+
+                    for (int i = 0; i < instrs.Count; i++)
+                    {
+                        if (instrs[i].OpCode != OpCodes.Call && instrs[i].OpCode == OpCodes.Callvirt)
+                            continue;
+                        if (instrs[i].Operand is IMethod idef)
+                        {
+                            if (!idef.IsMethodDef)
+                                continue;
+
+                            var def = idef.ResolveMethodDef();
+
+                            if (def == null)
+                                continue;
+                            if (def.HasThis)
+                                continue;
+
+                            if (brigdes.ContainsKey(idef))
+                            {
+                                instrs[i].OpCode = OpCodes.Call;
+                                instrs[i].Operand = brigdes[idef];
+                                continue;
+                            }
+
+                            var sig = CreateProxySignature(module, def);
+                            var delegateType = CreateDelegateType(module, sig);
+                            module.Types.Add(delegateType);
+
+                            var methImplFlags = MethodImplAttributes.IL | MethodImplAttributes.Managed;
+                            var methFlags = MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.ReuseSlot;
+                            var brigde = new MethodDefUser(Renamer.GenerateName(), sig, methImplFlags, methFlags);
+                            brigde.Body = new CilBody();
+
+                            brigde.Body.Instructions.Add(OpCodes.Ldsfld.ToInstruction(field));
+                            brigde.Body.Instructions.Add(OpCodes.Ldc_I4.ToInstruction(methods.Count));
+                            brigde.Body.Instructions.Add(OpCodes.Ldelem_Ref.ToInstruction());
+                            foreach (var parameter in brigde.Parameters)
+                            {
+                                parameter.Name = Renamer.GenerateName();
+                                brigde.Body.Instructions.Add(OpCodes.Ldarg.ToInstruction(parameter));
+                            }
+                            brigde.Body.Instructions.Add(OpCodes.Call.ToInstruction(delegateType.Methods[1]));
+                            brigde.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
+
+                            delegateType.Methods.Add(brigde);
+
+                            instrs[i].OpCode = OpCodes.Call;
+                            instrs[i].Operand = brigde;
+
+                            if (idef.IsMethodDef)
+                                methods.Add(def, delegateType);
+                            else if (idef.IsMemberRef)
+                                methods.Add(idef as MemberRef, delegateType);
+
+                            brigdes.Add(idef, brigde);
+                        }
+                    }
+                }
+            }
+
+            module.GlobalType.Fields.Add(field);
+
+            var instructions = new List<Instruction>();
+            var current = cctor.Body.Instructions.ToList();
+            cctor.Body.Instructions.Clear();
+
+            instructions.Add(OpCodes.Ldc_I4.ToInstruction(methods.Count));
+            instructions.Add(OpCodes.Newarr.ToInstruction(module.CorLibTypes.Object));
+            instructions.Add(OpCodes.Dup.ToInstruction());
+
+            var index = 0;
+
+            foreach (var entry in methods)
+            {
+                instructions.Add(OpCodes.Ldc_I4.ToInstruction(index));
+                instructions.Add(OpCodes.Ldnull.ToInstruction());
+                instructions.Add(OpCodes.Ldftn.ToInstruction(entry.Key));
+                instructions.Add(OpCodes.Newobj.ToInstruction(entry.Value.Methods[0]));
+                instructions.Add(OpCodes.Stelem_Ref.ToInstruction());
+                instructions.Add(OpCodes.Dup.ToInstruction());
+                index++;
+            }
+
+            instructions.Add(OpCodes.Pop.ToInstruction());
+            instructions.Add(OpCodes.Stsfld.ToInstruction(field));
+
+            foreach (var instr in instructions)
+                cctor.Body.Instructions.Add(instr);
+            foreach (var instr in current)
+                cctor.Body.Instructions.Add(instr);
+        }
+
+        public static TypeDef CreateDelegateType(ModuleDef module, MethodSig sig)
+        {
+            var ret = new TypeDefUser(Renamer.GenerateName(), module.CorLibTypes.GetTypeRef("System", "MulticastDelegate"));
+            ret.Attributes = TypeAttributes.Public | TypeAttributes.Sealed;
+
+            var ctor = new MethodDefUser(".ctor", MethodSig.CreateInstance(module.CorLibTypes.Void, module.CorLibTypes.Object, module.CorLibTypes.IntPtr));
+            ctor.Attributes = MethodAttributes.Assembly | MethodAttributes.HideBySig | MethodAttributes.RTSpecialName | MethodAttributes.SpecialName;
+            ctor.ImplAttributes = MethodImplAttributes.Runtime;
+            ret.Methods.Add(ctor);
+
+            var invoke = new MethodDefUser("Invoke", sig.Clone());
+            invoke.MethodSig.HasThis = true;
+            invoke.Attributes = MethodAttributes.Assembly | MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.NewSlot;
+            invoke.ImplAttributes = MethodImplAttributes.Runtime;
+            ret.Methods.Add(invoke);
+
+            return ret;
+        }
+
+        public static MethodSig CreateProxySignature(ModuleDef module, IMethod method)
+        {
+            IEnumerable<TypeSig> paramTypes = method.MethodSig.Params.Select(type => {
+                if (type.IsClassSig && method.MethodSig.HasThis)
+                    return module.CorLibTypes.Object;
+                return type;
+            });
+            if (method.MethodSig.HasThis && !method.MethodSig.ExplicitThis)
+            {
+                TypeDef declType = method.DeclaringType.ResolveTypeDefThrow();
+                if (!declType.IsValueType)
+                    paramTypes = new[] { module.CorLibTypes.Object }.Concat(paramTypes);
+                else
+                    paramTypes = new[] { declType.ToTypeSig() }.Concat(paramTypes);
+            }
+            TypeSig retType = method.MethodSig.RetType;
+            if (retType.IsClassSig)
+                retType = module.CorLibTypes.Object;
+            return MethodSig.CreateStatic(retType, paramTypes.ToArray());
+        }
+
+    }
+}
+
+```
+
+`Int Protection/Encoding/IntEncoding.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Security.Cryptography;
+using System.Text;
+
+namespace Protector.Protections
+{
+    internal static class IntEncoding
+    {
+        private static readonly RandomNumberGenerator csp = RandomNumberGenerator.Create();
+
+        public static int Next(int minValue = 0, int maxValue = int.MaxValue)
+        {
+            if (minValue >= maxValue)
+                throw new ArgumentOutOfRangeException(nameof(minValue));
+
+            long diff = (long)maxValue - minValue;
+            long upperBound = uint.MaxValue / diff * diff;
+            uint ui;
+            do { ui = RandomUInt(); } while (ui >= upperBound);
+            return (int)(minValue + (ui % diff));
+        }
+
+        public static string GenerateRandomString(int length)
+        {
+            byte[] randomBytes = RandomBytes(length);
+            return Encoding.UTF7.GetString(randomBytes)
+                .Replace("\0", ".")
+                .Replace("\n", ".")
+                .Replace("\r", ".");
+        }
+
+        public static int GetRandomStringLength()
+        {
+            return Next(30, 120);
+        }
+
+        public static int GetRandomInt32()
+        {
+            return BitConverter.ToInt32(RandomBytes(sizeof(int)), 0);
+        }
+
+        private static uint RandomUInt()
+        {
+            return BitConverter.ToUInt32(RandomBytes(sizeof(uint)), 0);
+        }
+
+        private static byte[] RandomBytes(int bytes)
+        {
+            byte[] buffer = new byte[bytes];
+            csp.GetBytes(buffer);
+            return buffer;
+        }
+
+        public static void Execute(Context context)
+        {
+            // // This code implements an obfuscation technique called "integer encoding", which is used to make reverse engineering more difficult.
+            // It works by replacing integer constants in the code with a series of instructions that encode the same value in a more complex way.
+            // This implementation uses a combination of bitwise operations, negation, and randomization to create the encoded instructions.
+            // The IntEncoding class contains a set of static methods that are used to generate random values and manipulate them in various ways, and the Execute method applies the encoding transformation to all integer literals in the code.
+
+            IMethod absMethod = context.moduleDef.Import(typeof(Math).GetMethod("Abs", new Type[] { typeof(int) }));
+            IMethod minMethod = context.moduleDef.Import(typeof(Math).GetMethod("Min", new Type[] { typeof(int), typeof(int) }));
+
+            foreach (TypeDef type in context.moduleDef.Types)
+            {
+                if (type.IsGlobalModuleType)
+                    continue;
+
+                foreach (MethodDef method in type.Methods)
+                {
+                    if (!method.HasBody)
+                        continue;
+
+                    for (int i = 0; i < method.Body.Instructions.Count; i++)
+                    {
+                        Instruction instruction = method.Body.Instructions[i];
+                        if (!(instruction.Operand is int operand) || operand <= 0)
+                            continue;
+
+                        method.Body.Instructions.Insert(i + 1, OpCodes.Call.ToInstruction(absMethod));
+
+                        int neg = Next(8, GetRandomStringLength());
+                        if (neg % 2 != 0)
+                            neg += 1;
+
+                        for (int j = 0; j < neg; j++)
+                            method.Body.Instructions.Insert(i + j + 1, Instruction.Create(OpCodes.Neg));
+
+                        if (operand < int.MaxValue)
+                        {
+                            method.Body.Instructions.Insert(i + 1, OpCodes.Ldc_I4.ToInstruction(int.MaxValue));
+                            method.Body.Instructions.Insert(i + 2, OpCodes.Call.ToInstruction(minMethod));
+                        }
+
+                        i += neg + 2;
+                    }
+
+                    method.Body.SimplifyBranches();
+                }
+            }
+        }
+    }
+}
+```
+
+`Int Protection/Version 1/Int.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+
+namespace Protector.Protections
+{
+    internal class Int
+    {
+        public static void Execute(Context context)
+        {
+		// The Int protection is a code obfuscation technique that modifies integer constant values in a .NET assembly to make it harder for reverse engineers to understand the code. 
+            // It replaces each integer constant with a series of instructions that perform an XOR operation on a random number and a mask value, and then adds the resulting value to the original constant value. 
+		// This makes it much more difficult for a reverse engineer to determine the original constant value and understand the code's functionality. 
+		// The protection also adds some additional instructions to make the code more difficult to analyze, such as inserting a nop instruction and simplifying branches.
+
+            foreach (TypeDef type in context.moduleDef.GetTypes())
+            {
+                if (type.IsGlobalModuleType) continue;
+                foreach (MethodDef method in type.Methods)
+                {
+                    if (!method.HasBody) continue;
+                    {
+                        for (var i = 0; i < method.Body.Instructions.Count; i++)
+                        {
+                            if (!method.Body.Instructions[i].IsLdcI4()) continue;
+                            var RndNumber = new Random(Guid.NewGuid().GetHashCode()).Next();
+                            var Mask = new Random(Guid.NewGuid().GetHashCode()).Next();
+                            var Num = RndNumber ^ Mask;
+
+                            var nop = OpCodes.Nop.ToInstruction();
+
+                            var local = new Local(method.Module.ImportAsTypeSig(typeof(int)));
+                            method.Body.Variables.Add(local);
+
+                            method.Body.Instructions.Insert(i + 1, OpCodes.Stloc.ToInstruction(local));
+                            method.Body.Instructions.Insert(i + 2, Instruction.Create(OpCodes.Ldc_I4, method.Body.Instructions[i].GetLdcI4Value() - sizeof(float)));
+                            method.Body.Instructions.Insert(i + 3, Instruction.Create(OpCodes.Ldc_I4, RndNumber));
+                            method.Body.Instructions.Insert(i + 4, Instruction.Create(OpCodes.Ldc_I4, Num));
+                            method.Body.Instructions.Insert(i + 5, Instruction.Create(OpCodes.Xor));
+                            method.Body.Instructions.Insert(i + 6, Instruction.Create(OpCodes.Ldc_I4, Mask));
+                            method.Body.Instructions.Insert(i + 7, Instruction.Create(OpCodes.Bne_Un, nop));
+                            method.Body.Instructions.Insert(i + 8, Instruction.Create(OpCodes.Ldc_I4, 2));
+                            method.Body.Instructions.Insert(i + 9, OpCodes.Stloc.ToInstruction(local));
+                            method.Body.Instructions.Insert(i + 10, Instruction.Create(OpCodes.Sizeof, method.Module.Import(typeof(float))));
+                            method.Body.Instructions.Insert(i + 11, Instruction.Create(OpCodes.Add));
+                            method.Body.Instructions.Insert(i + 12, nop);
+                            i += 12;
+                        }
+                        method.Body.SimplifyBranches();
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+`Int Protection/Version 2/IntV2.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Security.Cryptography;
+using System.Text;
+
+namespace Protector.Protections
+{
+    internal class IntV2
+    {
+        public static void Execute(Context ctx)
+        {
+            // This class implements an obfuscation technique that replaces all constant int values with a call to Math.Abs
+            // followed by a series of Neg instructions.
+
+            int Amount = 0;
+            IMethod absMethod = ctx.moduleDef.Import(typeof(Math).GetMethod("Abs", new Type[] { typeof(int) }));
+            IMethod minMethod = ctx.moduleDef.Import(typeof(Math).GetMethod("Min", new Type[] { typeof(int), typeof(int) }));
+
+            // Loop through all types and methods in the moduleDef
+            foreach (TypeDef type in ctx.moduleDef.Types)
+                foreach (MethodDef method in type.Methods)
+                {
+                    // If the method doesn't have a body, skip it
+                    if (!method.HasBody)
+                        continue;
+
+                    // Loop through all instructions in the method body
+                    for (int i = 0; i < method.Body.Instructions.Count; i++)
+                        if (method.Body.Instructions[i] != null && method.Body.Instructions[i].IsLdcI4())
+                        {
+                            // Get the constant int operand
+                            int operand = method.Body.Instructions[i].GetLdcI4Value();
+
+                            // If the operand is less than or equal to 0, skip it
+                            if (operand <= 0)
+                                continue;
+
+                            // Insert a call to Math.Abs after the ldc.i4 instruction
+                            method.Body.Instructions.Insert(i + 1, OpCodes.Call.ToInstruction(absMethod));
+
+                            // Generate a random number of Neg instructions to insert after the Math.Abs call
+                            int neg = Next(StringLength(), 8);
+                            if (neg % 2 != 0)
+                                neg += 1;
+
+                            for (var j = 0; j < neg; j++)
+                                method.Body.Instructions.Insert(i + j + 1, Instruction.Create(OpCodes.Neg));
+
+                            // If the operand is less than int.MaxValue, insert a call to Math.Min after the Neg instructions
+                            if (operand < int.MaxValue)
+                            {
+                                method.Body.Instructions.Insert(i + 1, OpCodes.Ldc_I4.ToInstruction(int.MaxValue));
+                                method.Body.Instructions.Insert(i + 2, OpCodes.Call.ToInstruction(minMethod));
+                            }
+
+                            ++Amount;
+                        }
+                }
+        }
+
+        private static readonly RandomNumberGenerator csp = RandomNumberGenerator.Create();
+
+        public static string String(int size)
+        {
+            return Encoding.UTF7.GetString(RandomBytes(size))
+                .Replace("\0", ".")
+                .Replace("\n", ".")
+                .Replace("\r", ".");
+        }
+
+        public static int Next()
+        {
+            return BitConverter.ToInt32(RandomBytes(sizeof(int)), 0);
+        }
+
+        private static uint RandomUInt()
+        {
+            return BitConverter.ToUInt32(RandomBytes(sizeof(uint)), 0);
+        }
+
+        private static byte[] RandomBytes(int bytes)
+        {
+            byte[] buffer = new byte[bytes];
+            csp.GetBytes(buffer);
+            return buffer;
+        }
+
+        public static int Next(int maxValue, int minValue = 0)
+        {
+            if (minValue >= maxValue)
+                throw new ArgumentOutOfRangeException(nameof(minValue));
+
+            long diff = (long)maxValue - minValue;
+            long upperBound = uint.MaxValue / diff * diff;
+            uint ui;
+            do { ui = RandomUInt(); } while (ui >= upperBound);
+            return (int)(minValue + (ui % diff));
+        }
+
+        public static int StringLength()
+        {
+            return Next(120, 30);
+        }
+    }
+}
+```
+
+`Invalid Protection/Metadata/InvalidMD.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+
+namespace Protector.Protections
+{
+    internal class InvalidMD
+    {
+        public static void Execute(Context asm)
+        {
+            var module = asm.moduleDef;
+            module.Mvid = null;
+            module.Name = Renamer.GenerateName();
+            asm.moduleDef.Import(new FieldDefUser(Renamer.GenerateName()));
+            foreach (var typeDef in module.Types)
+            {
+                TypeDef typeDef2 = new TypeDefUser(Renamer.GenerateName());
+                typeDef2.Methods.Add(new MethodDefUser());
+                typeDef2.NestedTypes.Add(new TypeDefUser(Renamer.GenerateName()));
+                MethodDef item = new MethodDefUser();
+                typeDef2.Methods.Add(item);
+                typeDef.NestedTypes.Add(typeDef2);
+                typeDef.Events.Add(new EventDefUser());
+                foreach (var meth in typeDef.Methods)
+                {
+                    if (meth.Body == null) continue;
+                    meth.Body.SimplifyBranches();
+                    if (string.Compare(meth.ReturnType.FullName, "System.Void", StringComparison.Ordinal) != 0 || !meth.HasBody ||
+                        meth.Body.Instructions.Count == 0) continue;
+                    var typeSig = asm.moduleDef.Import(typeof(int)).ToTypeSig();
+                    var local = new Local(typeSig);
+                    var typeSig2 = asm.moduleDef.Import(typeof(bool)).ToTypeSig();
+                    var local2 = new Local(typeSig2);
+                    meth.Body.Variables.Add(local);
+                    meth.Body.Variables.Add(local2);
+                    var operand = meth.Body.Instructions[meth.Body.Instructions.Count - 1];
+                    var instruction = new Instruction(OpCodes.Ret);
+                    var instruction2 = new Instruction(OpCodes.Ldc_I4_1);
+                    meth.Body.Instructions.Insert(0, new Instruction(OpCodes.Ldc_I4_0));
+                    meth.Body.Instructions.Insert(1, new Instruction(OpCodes.Stloc, local));
+                    meth.Body.Instructions.Insert(2, new Instruction(OpCodes.Br, instruction2));
+                    var instruction3 = new Instruction(OpCodes.Ldloc, local);
+                    meth.Body.Instructions.Insert(3, instruction3);
+                    meth.Body.Instructions.Insert(4, new Instruction(OpCodes.Ldc_I4_0));
+                    meth.Body.Instructions.Insert(5, new Instruction(OpCodes.Ceq));
+                    meth.Body.Instructions.Insert(6, new Instruction(OpCodes.Ldc_I4_1));
+                    meth.Body.Instructions.Insert(7, new Instruction(OpCodes.Ceq));
+                    meth.Body.Instructions.Insert(8, new Instruction(OpCodes.Stloc, local2));
+                    meth.Body.Instructions.Insert(9, new Instruction(OpCodes.Ldloc, local2));
+                    meth.Body.Instructions.Insert(10, new Instruction(OpCodes.Brtrue, meth.Body.Instructions[10]));
+                    meth.Body.Instructions.Insert(11, new Instruction(OpCodes.Ret));
+                    meth.Body.Instructions.Insert(12, new Instruction(OpCodes.Calli));
+                    meth.Body.Instructions.Insert(13, new Instruction(OpCodes.Sizeof, operand));
+                    meth.Body.Instructions.Insert(meth.Body.Instructions.Count, instruction2);
+                    meth.Body.Instructions.Insert(meth.Body.Instructions.Count, new Instruction(OpCodes.Stloc, local2));
+                    meth.Body.Instructions.Insert(meth.Body.Instructions.Count, new Instruction(OpCodes.Br, instruction3));
+                    meth.Body.Instructions.Insert(meth.Body.Instructions.Count, instruction);
+                    var exceptionHandler = new ExceptionHandler(ExceptionHandlerType.Finally)
+                    {
+                        HandlerStart = meth.Body.Instructions[10],
+                        HandlerEnd = meth.Body.Instructions[11],
+                        TryEnd = meth.Body.Instructions[14],
+                        TryStart = meth.Body.Instructions[12]
+                    };
+                    if (!meth.Body.HasExceptionHandlers)
+                    {
+                        meth.Body.ExceptionHandlers.Add(exceptionHandler);
+                    }
+                    meth.Body.OptimizeBranches();
+                    meth.Body.OptimizeMacros();
+                }
+            }
+            TypeDef typeDef3 = new TypeDefUser(Renamer.GenerateName());
+            FieldDef item2 = new FieldDefUser(Renamer.GenerateName(), new FieldSig(module.Import(typeof(void)).ToTypeSig()));
+            typeDef3.Fields.Add(item2);
+            typeDef3.BaseType = module.Import(typeof(void));
+            module.Types.Add(typeDef3);
+            TypeDef typeDef4 = new TypeDefUser(Renamer.GenerateName())
+            {
+                IsInterface = true,
+                IsSealed = true
+            };
+            module.Types.Add(typeDef4);
+            module.TablesHeaderVersion = 257;
+        }
+    }
+}
+```
+
+`Invalid Protection/Opcodes/InvalidOpcodes.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+
+namespace Protector.Protections
+{
+    internal class InvalidOpcodes
+    {
+        public static void Execute(ModuleDef module)
+        {
+            foreach (TypeDef typeDef in module.GetTypes())
+            {
+                foreach (MethodDef methodDef in typeDef.Methods)
+                {
+                    if (methodDef.HasBody || methodDef.Body.HasInstructions)
+                    {
+                        methodDef.Body.Instructions.Insert(0, Instruction.Create(OpCodes.Box, methodDef.Module.Import(typeof(Math))));
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+`Junk Protection/Junk.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+
+namespace Protector.Protections
+{
+    internal class Junk
+    {
+        public static Random rnd = new Random();
+
+        public static string[] animeNames = new string[] { "Naruto", "Luffy", "Goku", "Vegeta", "Sanji", "Zoro", "Jotaro", "Dio", "Gon", "Killua",
+                                         "Asuka", "Mikasa", "Rei", "Rem", "Emilia", "Ram", "Kagome", "Sango", "Misa", "Lain",
+                                         "Yui", "Rin", "Rikka", "Chitoge", "Onodera", "Aria", "Akane", "Kanade", "Kurisu", "Mayuri",
+                                         "Sakura", "Ino", "Kurenai", "Satsuki", "Ryuko", "Mako", "Nico", "Maki", "Kotori", "Chika",
+                                         "Taiga", "Mai", "Kanna", "Tohru", "Megumin", "Rem", "Ram", "Hifumi", "Raphiel", "Gabriel"
+            };
+        public static string RndBullshit(int length)
+        {
+            StringBuilder sb = new StringBuilder();
+
+    
+            string arabicCharacters = "ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσςΤτΥυΦφΧχΨψΩω";
+            for (int i = 1; i < length - 1; i++)
+            {
+                sb.Append(arabicCharacters[rnd.Next(arabicCharacters.Length)]);
+            }
+
+            // Return the generated random string
+            return sb.ToString();
+        }
+
+        public static void Execute(Context ctx)
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                TypeDef typeDef = new TypeDefUser(Renamer.GenerateName(), Renamer.GenerateName());
+                typeDef.Attributes = 0;
+                ctx.moduleDef.Types.Add(typeDef);
+
+                for (int j = 0; j < 5; j++)
+                {
+                    MethodDef method = new MethodDefUser(Renamer.GenerateName(), MethodSig.CreateStatic(ctx.moduleDef.CorLibTypes.Void));
+                    typeDef.Methods.Add(method);
+
+                    CilBody body = new CilBody();
+
+                    for (int k = 0; k < rnd.Next(5, 15); k++)
+                    {
+                        switch (rnd.Next(6))
+                        {
+                            case 0:
+                                body.Instructions.Add(OpCodes.Nop.ToInstruction());
+                                break;
+
+                            case 1:
+                                body.Instructions.Add(OpCodes.Ret.ToInstruction());
+                                break;
+
+                            case 2:
+                                body.Instructions.Add(OpCodes.Ldc_I4.ToInstruction(rnd.Next(int.MinValue, int.MaxValue)));
+                                break;
+
+                            case 3:
+                                body.Instructions.Add(OpCodes.Ldstr.ToInstruction(Renamer.GenerateName()));
+                                break;
+
+                            case 4:
+                                body.Instructions.Add(OpCodes.Ldfld.ToInstruction(new FieldDefUser(Renamer.GenerateName(), new FieldSig(ctx.moduleDef.CorLibTypes.Int32))));
+                                break;
+
+                            case 5:
+                                body.Instructions.Add(OpCodes.Ldsfld.ToInstruction(new FieldDefUser(Renamer.GenerateName(), new FieldSig(ctx.moduleDef.CorLibTypes.Int32))));
+                                break;
+                        }
+                    }
+                    method.Body = body;
+                }
+            }
+
+            var moduleType = ctx.moduleDef.Types.FirstOrDefault(t => t.IsGlobalModuleType);
+
+            if (moduleType == null)
+            {
+                throw new Exception("<Module> type not found");
+            }
+
+         
+
+            for (int i = 0; i < 10000; i++)
+            {
+                // Define a void method with the correct signature
+                var method = new MethodDefUser(
+                    animeNames[rnd.Next(0, 49)] + "_uses_" + RndBullshit(16),
+                    MethodSig.CreateStatic(ctx.moduleDef.CorLibTypes.Void),
+                    MethodImplAttributes.Managed,
+                    MethodAttributes.HideBySig | MethodAttributes.Public | MethodAttributes.Static)
+                {
+                    Body = new CilBody()
+                };
+
+                // Add instructions to perform the sum calculation and trigger an overflow exception
+                method.Body.Instructions.Add(OpCodes.Ldfld.ToInstruction(new FieldDefUser(animeNames[rnd.Next(0, 49)], new FieldSig(ctx.moduleDef.CorLibTypes.Int32))));
+
+                // Add the method to the <Module> class
+                moduleType.Methods.Add(method);
+            }
+
+        }
+    }
+}
+```
+
+`L2F Protection/Local2Field.cs`:
+
+```cs
+using dnlib.DotNet.Emit;
+using dnlib.DotNet;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Protection.Protections
+{
+    internal class Local2Field
+    {
+        private static Dictionary<Local, FieldDef> _convertedLocals = new Dictionary<Local, FieldDef>();
+
+        public static void Execute(Context ctx)
+        {
+            foreach (var type in ctx.moduleDef.Types.Where(x => x != ctx.moduleDef.GlobalType))
+            {
+                foreach (var meth in type.Methods.Where(x => x.HasBody && x.Body.HasInstructions && !x.IsConstructor))
+                {
+                    _convertedLocals = new Dictionary<Local, FieldDef>();
+                    Process(ctx.moduleDef, meth);
+                }
+            }
+        }
+
+        private static void Process(ModuleDef module, MethodDef meth)
+        {
+            meth.Body.SimplifyMacros(meth.Parameters);
+            var instructions = meth.Body.Instructions;
+            foreach (var t in instructions)
+            {
+                if (!(t.Operand is Local local)) continue;
+                FieldDef def;
+                if (!_convertedLocals.ContainsKey(local))
+                {
+                    def = new FieldDefUser(Renamer.GenerateName(), new FieldSig(local.Type), FieldAttributes.Public | FieldAttributes.Static);
+                    module.GlobalType.Fields.Add(def);
+                    _convertedLocals.Add(local, def);
+                }
+                else
+                {
+                    def = _convertedLocals[local];
+                }
+
+                var eq = t.OpCode?.Code;
+                switch (eq)
+                {
+                    case Code.Ldloc:
+                        t.OpCode = OpCodes.Ldsfld;
+                        break;
+                    case Code.Ldloca:
+                        t.OpCode = OpCodes.Ldsflda;
+                        break;
+                    case Code.Stloc:
+                        t.OpCode = OpCodes.Stsfld;
+                        break;
+                    default:
+                        t.OpCode = null;
+                        break;
+                }
+                t.Operand = def;
+
+            }
+            _convertedLocals.ToList().ForEach(x => meth.Body.Variables.Remove(x.Key));
+            _convertedLocals = new Dictionary<Local, FieldDef>();
+        }
+
+    }
+}
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2023 Nakateru
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`Melting Protection/ConstMelting.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System.Linq;
+
+namespace Protector.Protections
+{
+    internal class ConstMelting
+    {
+        public static void Execute(Context context)
+        {
+            foreach (TypeDef type in context.moduleDef.Types.ToArray())
+            {
+                foreach (MethodDef method in type.Methods.ToArray())
+                {
+                    ReplaceStringLiterals(method);
+                    ReplaceIntLiterals(method);
+                }
+            }
+        }
+
+        private static void ReplaceStringLiterals(MethodDef methodDef)
+        {
+            if (CanObfuscate(methodDef))
+            {
+                foreach (Instruction instruction in methodDef.Body.Instructions)
+                {
+                    if (instruction.OpCode != OpCodes.Ldstr) continue;
+                    MethodDef replacementMethod = new MethodDefUser(Renamer.GenerateName(), MethodSig.CreateStatic(methodDef.DeclaringType.Module.CorLibTypes.String), MethodImplAttributes.IL | MethodImplAttributes.Managed, MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig) { Body = new CilBody() };
+                    replacementMethod.Body.Instructions.Add(new Instruction(OpCodes.Ldstr, instruction.Operand.ToString()));
+                    replacementMethod.Body.Instructions.Add(new Instruction(OpCodes.Ret));
+                    methodDef.DeclaringType.Methods.Add(replacementMethod);
+                    instruction.OpCode = OpCodes.Call;
+                    instruction.Operand = replacementMethod;
+                }
+            }
+        }
+
+        private static void ReplaceIntLiterals(MethodDef methodDef)
+        {
+            if (CanObfuscate(methodDef))
+            {
+                foreach (Instruction instruction in methodDef.Body.Instructions)
+                {
+                    if (instruction.OpCode != OpCodes.Ldc_I4) continue;
+                    MethodDef replacementMethod = new MethodDefUser(Renamer.GenerateName(), MethodSig.CreateStatic(methodDef.DeclaringType.Module.CorLibTypes.Int32), MethodImplAttributes.IL | MethodImplAttributes.Managed, MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig) { Body = new CilBody() };
+                    replacementMethod.Body.Instructions.Add(new Instruction(OpCodes.Ldc_I4, instruction.GetLdcI4Value()));
+                    replacementMethod.Body.Instructions.Add(new Instruction(OpCodes.Ret));
+                    methodDef.DeclaringType.Methods.Add(replacementMethod);
+                    instruction.OpCode = OpCodes.Call;
+                    instruction.Operand = replacementMethod;
+                }
+            }
+        }
+
+        public static bool CanObfuscate(MethodDef methodDef)
+        {
+            if (!methodDef.HasBody)
+                return false;
+            if (!methodDef.Body.HasInstructions)
+                return false;
+            if (methodDef.DeclaringType.IsGlobalModuleType)
+                return false;
+            return true;
+        }
+    }
+}
+```
+
+`Mutation Protection/Const Mutation/ConstMelting.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System.Linq;
+
+namespace Protector.Protections
+{
+    internal class ConstMelting
+    {
+        public static void Execute(Context context)
+        {
+            foreach (TypeDef type in context.moduleDef.Types.ToArray())
+            {
+                foreach (MethodDef method in type.Methods.ToArray())
+                {
+                    ReplaceStringLiterals(method);
+                    ReplaceIntLiterals(method);
+                }
+            }
+        }
+
+        private static void ReplaceStringLiterals(MethodDef methodDef)
+        {
+            if (CanObfuscate(methodDef))
+            {
+                foreach (Instruction instruction in methodDef.Body.Instructions)
+                {
+                    if (instruction.OpCode != OpCodes.Ldstr) continue;
+                    MethodDef replacementMethod = new MethodDefUser(Renamer.GenerateName(), MethodSig.CreateStatic(methodDef.DeclaringType.Module.CorLibTypes.String), MethodImplAttributes.IL | MethodImplAttributes.Managed, MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig) { Body = new CilBody() };
+                    replacementMethod.Body.Instructions.Add(new Instruction(OpCodes.Ldstr, instruction.Operand.ToString()));
+                    replacementMethod.Body.Instructions.Add(new Instruction(OpCodes.Ret));
+                    methodDef.DeclaringType.Methods.Add(replacementMethod);
+                    instruction.OpCode = OpCodes.Call;
+                    instruction.Operand = replacementMethod;
+                }
+            }
+        }
+
+        private static void ReplaceIntLiterals(MethodDef methodDef)
+        {
+            if (CanObfuscate(methodDef))
+            {
+                foreach (Instruction instruction in methodDef.Body.Instructions)
+                {
+                    if (instruction.OpCode != OpCodes.Ldc_I4) continue;
+                    MethodDef replacementMethod = new MethodDefUser(Renamer.GenerateName(), MethodSig.CreateStatic(methodDef.DeclaringType.Module.CorLibTypes.Int32), MethodImplAttributes.IL | MethodImplAttributes.Managed, MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig) { Body = new CilBody() };
+                    replacementMethod.Body.Instructions.Add(new Instruction(OpCodes.Ldc_I4, instruction.GetLdcI4Value()));
+                    replacementMethod.Body.Instructions.Add(new Instruction(OpCodes.Ret));
+                    methodDef.DeclaringType.Methods.Add(replacementMethod);
+                    instruction.OpCode = OpCodes.Call;
+                    instruction.Operand = replacementMethod;
+                }
+            }
+        }
+
+        public static bool CanObfuscate(MethodDef methodDef)
+        {
+            if (!methodDef.HasBody)
+                return false;
+            if (!methodDef.Body.HasInstructions)
+                return false;
+            if (methodDef.DeclaringType.IsGlobalModuleType)
+                return false;
+            return true;
+        }
+    }
+}
+```
+
+`Mutation Protection/Mutation.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Protector.Protections
+{
+    internal class Mutation
+    {
+        private static ModuleDefMD _moduleDefMd;
+        public static void Execute(ModuleDefMD moduleDefMd)
+        {
+            _moduleDefMd = moduleDefMd;
+            var cryptoRandom = new MutationHelper.CryptoRandom();
+            foreach (var typeDef in moduleDefMd.GetTypes())
+            {
+                var listMethod = new List<MethodDef>(); 
+                foreach (var methodDef in typeDef.Methods.Where(x => x.HasBody))
+                {
+                    var instructions = methodDef.Body.Instructions;
+                    for (var i = 0; i < instructions.Count; i++)
+                    {
+                        if (instructions[i].IsLdcI4() && IsSafe(instructions.ToList(), i))
+                        {
+                            MethodDef refMethod = null;
+                            int operand = instructions[i].GetLdcI4Value();
+                            instructions[i].OpCode = OpCodes.Ldc_R8;
+                            switch (cryptoRandom.Next(0, 3))
+                            {
+                                case 0:
+                                    refMethod = GenerateRefMethod("Floor");
+                                    instructions[i].Operand = Convert.ToDouble(operand + cryptoRandom.NextDouble());
+                                    break;
+                                case 1:
+                                    refMethod = GenerateRefMethod("Sqrt");
+                                    instructions[i].Operand = Math.Pow(Convert.ToDouble(operand), 2);
+                                    break;
+                                case 2:
+                                    refMethod = GenerateRefMethod("Round");
+                                    instructions[i].Operand = Convert.ToDouble(operand);
+                                    break;
+                            }
+
+                            instructions.Insert(i + 1, OpCodes.Call.ToInstruction(refMethod));
+                            instructions.Insert(i + 2, OpCodes.Conv_I4.ToInstruction());
+                            i += 2;
+                            listMethod.Add(refMethod);
+                        }
+                    }
+
+                    methodDef.Body.SimplifyMacros(methodDef.Parameters);
+                }
+
+                foreach (var method in listMethod)
+                    typeDef.Methods.Add(method);
+            }
+        }
+
+
+        private static MethodDef GenerateRefMethod(string methodName)
+        {
+            var refMethod = new MethodDefUser(
+                "_" + Guid.NewGuid().ToString("D").ToUpper().Substring(2, 5),
+                MethodSig.CreateStatic(_moduleDefMd.ImportAsTypeSig(typeof(double))),
+                MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig)
+            {
+                Signature = new MethodSig
+                {
+                    Params = { _moduleDefMd.ImportAsTypeSig(typeof(double)) },
+                    RetType = _moduleDefMd.ImportAsTypeSig(typeof(double))
+                }
+            };
+
+            var cil = new CilBody
+            {
+                Instructions =
+                {
+                    OpCodes.Ldarg_0.ToInstruction(),
+                    OpCodes.Call.ToInstruction(GetMethod(typeof(Math),
+                        methodName, new[] {typeof(double)})),
+                    OpCodes.Stloc_0.ToInstruction(),
+                    OpCodes.Ldloc_0.ToInstruction(),
+                    OpCodes.Ret.ToInstruction()
+                }
+            };
+            refMethod.Body = cil;
+            refMethod.Body.Variables.Add(new Local(_moduleDefMd.ImportAsTypeSig(typeof(double))));
+            return refMethod.ResolveMethodDef();
+        }
+
+        private static bool IsSafe(List<Instruction> instructions, int i)
+        {
+            if (new[] { -2, -1, 0, 1, 2 }.Contains(instructions[i].GetLdcI4Value())) // Skipping min values
+                return false;
+            return true;
+        }
+
+        private static IMethod GetMethod(Type type, string methodName, Type[] types)
+        {
+            return _moduleDefMd.Import(type.GetMethod(methodName, types));
+        }
+
+    }
+}
+```
+
+`Mutation Protection/MutationHelper.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Satfuscator.Protections
+{
+    internal class MutationHelper
+    {
+        public sealed class CryptoRandom : Random, IDisposable
+        {
+            private RNGCryptoServiceProvider cryptoProvider = new RNGCryptoServiceProvider();
+            private byte[] uint32Buffer = new byte[sizeof(uint)];
+
+            /// <summary>
+            /// An implementation of System.Random used for cryptographically-strong random number generation.
+            /// </summary>
+            public CryptoRandom()
+            {
+            }
+
+            /// <summary>
+            /// An implementation of System.Random used for cryptographically-strong random number generation.
+            /// </summary>
+            public CryptoRandom(int seedIgnored)
+            {
+            }
+
+            /// <summary>
+            /// Returns a nonnegative random number.
+            /// </summary>
+            /// <returns>
+            /// A 32-bit signed integer greater than or equal to zero and less than <see cref="F:System.Int32.MaxValue"/>.
+            /// </returns>
+            public override int Next()
+            {
+                cryptoProvider.GetBytes(uint32Buffer);
+                return BitConverter.ToInt32(uint32Buffer, 0) & 0x7FFFFFFF;
+            }
+
+            /// <summary>
+            /// Returns a nonnegative random number less than the specified maximum.
+            /// </summary>
+            /// <returns>
+            /// A 32-bit signed integer greater than or equal to zero, and less than <paramref name="maxValue"/>; that is, the range of return values ordinarily includes zero but not <paramref name="maxValue"/>. However, if <paramref name="maxValue"/> equals zero, <paramref name="maxValue"/> is returned.
+            /// </returns>
+            /// <param name="maxValue">The exclusive upper bound of the random number to be generated. <paramref name="maxValue"/> must be greater than or equal to zero.</param>
+            /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="maxValue"/> is less than zero.</exception>
+            public override int Next(int maxValue)
+            {
+                if (maxValue < 0) throw new ArgumentOutOfRangeException("maxValue");
+                return Next(0, maxValue);
+            }
+
+            /// <summary>
+            /// Returns a random number within a specified range.
+            /// </summary>
+            /// <returns>
+            /// A 32-bit signed integer greater than or equal to <paramref name="minValue"/> and less than <paramref name="maxValue"/>; that is, the range of return values includes <paramref name="minValue"/> but not <paramref name="maxValue"/>. If <paramref name="minValue"/> equals <paramref name="maxValue"/>, <paramref name="minValue"/> is returned.
+            /// </returns>
+            /// <param name="minValue">The inclusive lower bound of the random number returned.</param>
+            /// <param name="maxValue">The exclusive upper bound of the random number returned. <paramref name="maxValue"/> must be greater than or equal to <paramref name="minValue"/>.</param>
+            /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="minValue"/> is greater than <paramref name="maxValue"/>.</exception>
+            public override int Next(int minValue, int maxValue)
+            {
+                if (minValue > maxValue) throw new ArgumentOutOfRangeException("minValue");
+                if (minValue == maxValue) return minValue;
+
+                long diff = maxValue - minValue;
+                long max = (1 + (long)uint.MaxValue);
+                long remainder = max % diff;
+
+                while (true)
+                {
+                    cryptoProvider.GetBytes(uint32Buffer);
+                    uint rand = BitConverter.ToUInt32(uint32Buffer, 0);
+                    if (rand < max - remainder)
+                    {
+                        return (int)(minValue + (rand % diff));
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Returns a random number between 0.0 and 1.0.
+            /// </summary>
+            /// <returns>
+            /// A double-precision floating point number greater than or equal to 0.0, and less than 1.0.
+            /// </returns>
+            public override double NextDouble()
+            {
+                cryptoProvider.GetBytes(uint32Buffer);
+                uint rand = BitConverter.ToUInt32(uint32Buffer, 0);
+                return rand / (1.0 + uint.MaxValue);
+            }
+
+            /// <summary>
+            /// Fills the elements of a specified array of bytes with random numbers.
+            /// </summary>
+            /// <param name="buffer">An array of bytes to contain random numbers.</param>
+            /// <exception cref="T:System.ArgumentNullException"><paramref name="buffer"/> is null.
+            public override void NextBytes(byte[] buffer)
+            {
+                if (buffer == null) throw new ArgumentNullException("buffer");
+                cryptoProvider.GetBytes(buffer);
+            }
+
+            public void Dispose()
+            {
+                InternalDispose();
+            }
+
+            ~CryptoRandom()
+            {
+                InternalDispose();
+            }
+
+            void InternalDispose()
+            {
+                if (cryptoProvider != null)
+                {
+                    cryptoProvider.Dispose();
+                    cryptoProvider = null;
+                }
+            }
+        }
+    }
+}
+
+```
+
+`Proxy Protection/Int Proxy/IntProxy.cs`:
+
+```cs
+using dnlib.DotNet.Emit;
+using dnlib.DotNet;
+using System;
+
+namespace Protector.Protections
+{
+    internal class IntProxy
+    {
+        // Executes the IntProxy protection on the specified module
+        public static void Execute(ModuleDef module)
+        {
+            // Loop through each type in the module
+            foreach (var type in module.GetTypes())
+            {
+                // Skip the global module type
+                if (type.IsGlobalModuleType) continue;
+
+                // Loop through each method in the type
+                foreach (var meth in type.Methods)
+                {
+                    // Skip methods without a body
+                    if (!meth.HasBody) continue;
+
+                    // Loop through each instruction in the method's body
+                    for (var i = 0; i < meth.Body.Instructions.Count; i++)
+                    {
+                        // Check if the instruction is loading an integer constant
+                        if (meth.Body.Instructions[i].IsLdcI4())
+                        {
+                            // Create a new method to replace the instruction
+                            var methImplFlags = MethodImplAttributes.IL | MethodImplAttributes.Managed;
+                            var methFlags = MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.ReuseSlot;
+                            var meth1 = new MethodDefUser(Renamer.GenerateName(),
+                                        MethodSig.CreateStatic(module.CorLibTypes.Int32),
+                                        methImplFlags, methFlags);
+                            module.GlobalType.Methods.Add(meth1);
+                            meth1.Body = new CilBody();
+                            meth1.Body.Variables.Add(new Local(module.CorLibTypes.Int32));
+                            meth1.Body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4, meth.Body.Instructions[i].GetLdcI4Value()));
+                            meth1.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+
+                            // Replace the instruction with a call to the new method
+                            meth.Body.Instructions[i].OpCode = OpCodes.Call;
+                            meth.Body.Instructions[i].Operand = meth1;
+                        }
+                        // Check if the instruction is loading a float constant
+                        else if (meth.Body.Instructions[i].OpCode == OpCodes.Ldc_R4)
+                        {
+                            // Create a new method to replace the instruction
+                            var methImplFlags = MethodImplAttributes.IL | MethodImplAttributes.Managed;
+                            var methFlags = MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.ReuseSlot;
+                            var meth1 = new MethodDefUser(Renamer.GenerateName(),
+                                        MethodSig.CreateStatic(module.CorLibTypes.Double),
+                                        methImplFlags, methFlags);
+                            module.GlobalType.Methods.Add(meth1);
+                            meth1.Body = new CilBody();
+                            meth1.Body.Variables.Add(new Local(module.CorLibTypes.Double));
+                            meth1.Body.Instructions.Add(Instruction.Create(OpCodes.Ldc_R4, (float)meth.Body.Instructions[i].Operand));
+                            meth1.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+
+                            // Replace the instruction with a call to the new method
+                            meth.Body.Instructions[i].OpCode = OpCodes.Call;
+                            meth.Body.Instructions[i].Operand = meth1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+```
+
+`Proxy Protection/Many Proxy/ManyProxy.cs`:
+
+```cs
+using dnlib.DotNet.Emit;
+using dnlib.DotNet;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Protector.Protections
+{
+    internal class ManyProxy
+    {
+        public static void Execute(ModuleDef module)
+        {
+            foreach (var type in module.GetTypes())
+            {
+                if (type.IsGlobalModuleType) continue;
+                foreach (var meth in type.Methods)
+                {
+                    if (!meth.HasBody) continue;
+                    var instr = meth.Body.Instructions;
+                    for (var i = 0; i < instr.Count; i++)
+                    {
+                        if (meth.Body.Instructions[i].IsLdcI4())
+                        {
+                            var methImplFlags = MethodImplAttributes.IL | MethodImplAttributes.Managed;
+                            var methFlags = MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.ReuseSlot;
+                            var meth1 = new MethodDefUser(Renamer.GenerateName(),
+                                        MethodSig.CreateStatic(module.CorLibTypes.Int32),
+                                        methImplFlags, methFlags);
+                            module.GlobalType.Methods.Add(meth1);
+                            meth1.Body = new CilBody();
+                            meth1.Body.Variables.Add(new Local(module.CorLibTypes.Int32));
+                            meth1.Body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4, instr[i].GetLdcI4Value()));
+                            meth1.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+                            instr[i].OpCode = OpCodes.Call;
+                            instr[i].Operand = meth1;
+                        }
+                        else if (meth.Body.Instructions[i].OpCode == OpCodes.Ldc_R4)
+                        {
+                            var methImplFlags = MethodImplAttributes.IL | MethodImplAttributes.Managed;
+                            var methFlags = MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.ReuseSlot;
+                            var meth1 = new MethodDefUser(Renamer.GenerateName(),
+                                        MethodSig.CreateStatic(module.CorLibTypes.Double),
+                                        methImplFlags, methFlags);
+                            module.GlobalType.Methods.Add(meth1);
+                            meth1.Body = new CilBody();
+                            meth1.Body.Variables.Add(new Local(module.CorLibTypes.Double));
+                            meth1.Body.Instructions.Add(Instruction.Create(OpCodes.Ldc_R4, (float)meth.Body.Instructions[i].Operand));
+                            meth1.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+                            instr[i].OpCode = OpCodes.Call;
+                            instr[i].Operand = meth1;
+                        }
+                        else if (meth.Body.Instructions[i].OpCode == OpCodes.Ldstr)
+                        {
+                            var methImplFlags = MethodImplAttributes.IL | MethodImplAttributes.Managed;
+                            var methFlags = MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.ReuseSlot;
+                            var meth1 = new MethodDefUser(Renamer.GenerateName(),
+                                        MethodSig.CreateStatic(module.CorLibTypes.String),
+                                        methImplFlags, methFlags);
+                            module.GlobalType.Methods.Add(meth1);
+                            meth1.Body = new CilBody();
+                            meth1.Body.Variables.Add(new Local(module.CorLibTypes.String));
+                            meth1.Body.Instructions.Add(Instruction.Create(OpCodes.Ldstr, (string)meth.Body.Instructions[i].Operand));
+                            meth1.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+                            instr[i].OpCode = OpCodes.Call;
+                            instr[i].Operand = meth1;
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+```
+
+`Proxy Protection/String Proxy/StringProxy.cs`:
+
+```cs
+using dnlib.DotNet.Emit;
+using dnlib.DotNet;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Protector.Protections
+{
+    internal class StringProxy
+    {
+        public static void Execute(ModuleDef module)
+        {
+            foreach (var type in module.GetTypes())
+            {
+                if (type.IsGlobalModuleType) continue;
+                foreach (var meth in type.Methods)
+                {
+                    if (!meth.HasBody) continue;
+                    var instr = meth.Body.Instructions;
+                    foreach (var t in instr)
+                    {
+                        if (t.OpCode != OpCodes.Ldstr) continue;
+                        var methImplFlags = MethodImplAttributes.IL | MethodImplAttributes.Managed;
+                        var methFlags = MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.ReuseSlot;
+                        var meth1 = new MethodDefUser(Renamer.GenerateName(),
+                            MethodSig.CreateStatic(module.CorLibTypes.String),
+                            methImplFlags, methFlags);
+                        module.GlobalType.Methods.Add(meth1);
+                        meth1.Body = new CilBody();
+                        meth1.Body.Variables.Add(new Local(module.CorLibTypes.String));
+                        meth1.Body.Instructions.Add(Instruction.Create(OpCodes.Ldstr, t.Operand.ToString()));
+                        meth1.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+
+                        t.OpCode = OpCodes.Call;
+                        t.Operand = meth1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+```
+
+`README.md`:
+
+```md
+# Obfuscation Methods
+
+C# obfuscation is the process of making source code difficult to understand or reverse-engineer by modifying its structure, function names, variable names, and other metadata. The purpose of obfuscation is to protect intellectual property and prevent malicious actors from analyzing and exploiting vulnerabilities in the code. Obfuscation can also help to reduce the size of the compiled code by removing unnecessary metadata, making the application more efficient.
+
+Here is an example of obfuscation in C#. The code snippet below demonstrates how the method and variable names can be obfuscated:
+
+**Before:**
+```cs
+public class ExampleClass
+{
+    private string _exampleVariable = "Hello, World!";
+
+    public void ExampleMethod(int exampleParameter)
+    {
+        int result = exampleParameter * 2;
+        Console.WriteLine(_exampleVariable + " " + result);
+    }
+}
+```
+
+**After:**
+```cs
+public class A
+{
+    private string a = "Hello, World!";
+
+    public void B(int a)
+    {
+        int b = a * 2;
+        Console.WriteLine(this.a + " " + b);
+    }
+}
+
+```
+
+## List of Available Protection Methods within this Repository
+
+### **Controlflow** [🌀]
+- Control Flow Obfuscation is a protection technique that alters the structure and order of instructions in a method's body to make it harder to understand and analyze the code flow. This can make it difficult for reverse engineers to understand the program's logic and make it harder to modify the code.
+
+### **Anti Dump** [🗑️]
+- Anti Dump is a protection method that aims to prevent attackers from dumping the assembly from the memory or disk, making it harder to analyze and reverse engineer the code. It can achieve this by decrypting parts of the code on the fly during runtime or by making it difficult to extract the original code from the binary file.
+
+### **Method Hider** [💉]
+- Method Hider is a code protection technique that obfuscates method names and their contents to make it harder for an attacker to reverse engineer and understand the code. It does this by renaming method names to random strings and inserting fake methods with similar names to confuse decompilers.
+
+### **Anti De4dot** [🚫]
+- This is a tool that can be used to deobfuscate .NET assemblies that have been obfuscated with de4dot. Anti-de4dot protections are intended to prevent this tool from successfully deobfuscating/renaming the code.
+
+### **Anti Dnspy** [🕵️‍♀️]
+- DnSpy is a popular .NET assembly editor and debugger. Anti-DnSpy protections are intended to prevent the use of DnSpy on the protected assembly, often by making the code difficult to read or by preventing the debugger from attaching to the process.
+
+### **Anti Ildasm** [🔒]
+-  Ildasm is a .NET disassembler that can be used to view the IL code of a .NET assembly. Anti-Ildasm protections are intended to prevent the use of Ildasm on the protected assembly, often by making the code difficult to read or by preventing the IL code from being generated in the first place.
+
+### **Fake Attributes** [🎭]
+- Adds fake attributes to confuse decompilers, DiE (Detect it Easy) and obfuscate code.
+
+### **Import Protection** [📦]
+- Modifies the import table to make it difficult for decompilers to resolve external dependencies.
+
+### **Int Protection** [🔢]
+- Replaces integers with expressions to make it harder for reverse engineers to read the code.
+
+### **Invalid Opcodes** [🔢]
+- Adds invalid opcodes to the IL code to confuse decompilers and make it harder to analyze the code.
+
+### **Invalid Metadata** [🤖]
+- Modifies the metadata of the assembly to make it harder for decompilers to read and analyze the code.
+
+### **Junk Protection** [📝]
+- Adds junk code to the assembly to increase its size and make it harder for reverse engineers to analyze the code.
+
+### **Local 2 Field (L2F)** [🔍]
+- Obfuscates local variables by converting them to fields.
+
+### **Melting** [🔥]
+- Disguises and hides the original program flow by merging it with other unrelated code.
+
+### **Mutation** [🧬]
+- Modifies the IL code to be functionally equivalent but harder to read and understand.
+
+### **Proxy** [🕵️]
+- Hides the original program by adding a proxy class and redirecting method calls to it.
+
+### **Rename** [🔄]
+- Hides the original program by adding a proxy class and redirecting method calls to it.
+
+### **String: Cipher** [🔒]
+- Encrypts strings to make it harder to read and modify. It works by encrypting the strings using an algorithm and storing the encrypted values in the assembly. When the program is executed, the encrypted strings are decrypted at runtime using the same algorithm.
+
+### **String: Base64** [🔐]
+- Encrypts strings to make it harder to read and modify.
+
+### **Suf** [🌪️]
+- Obfuscates the code by inserting confusing instructions and code paths.
+
+### **Watermark** [📝]
+- Adds a unique identifier or signature to the code to track it back to the original author or distributor.
+
+## How to apply these obfuscation techniques to your own program
+
+To apply these obfuscation methods to your own program, first load in your assembly using the `dnlib` library in C# as shown below:
+
+```cs
+using dnlib.DotNet;
+
+AssemblyDef assembly = AssemblyDef.Load(InputFile);
+Context context = new Context(assembly);
+context.moduleDefMD = ModuleDefMD.Load(InputFile);
+```
+
+Next, set up a Context object as shown in the code below:
+
+```cs
+public class Context
+{
+    public AssemblyDef assemblyDef;
+    public ModuleDef moduleDef;
+    public ModuleDefMD moduleDefMD;
+    public TypeDef typeDef;
+    public Importer importer;
+    public MethodDef cctor;
+
+    public Context(AssemblyDef asm)
+    {
+        assemblyDef = asm;
+        moduleDef = asm.ManifestModule;
+        typeDef = moduleDef.GlobalType;
+        importer = new Importer(moduleDef);
+        cctor = typeDef.FindOrCreateStaticConstructor();
+    }
+}
+```
+
+Finally, use the ModuleWriterOptions class to specify the options for writing the obfuscated assembly to an output file as shown below:
+```cs
+using dnlib.DotNet.Writer;
+
+var Options = new ModuleWriterOptions(assembly.ManifestModule);
+Options.Logger = DummyLogger.NoThrowInstance;
+assembly.Write(OutputFile, Options);
+```
+
+```
+
+`Rename Protection/Version 1/Renamer.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+using System.Drawing;
+using System.Globalization;
+using System.Linq;
+using System.Net;
+using System.Text;
+using static System.Net.Mime.MediaTypeNames;
+
+namespace Protector.Protections
+{
+    internal class Renamer
+    {
+        public static int SpamCount
+        {
+            get
+            {
+                return 4;
+            }
+        }
+        public static string InvisibleName
+        {
+            get
+            {
+                return GenerateName();
+            }
+        }
+
+        private static readonly string[] WordList = new string[] {
+            "AccessModifier",
+            "ArrayType",
+            "Assembly",
+            "Attribute",
+            "Boolean",
+            "Byte",
+            "Callback",
+            "Char",
+            "Checked",
+            "Class",
+            "Collection",
+            "Compilation",
+            "Constructor",
+            "Delegate",
+            "Derived",
+            "Disposable",
+            "Double",
+            "Dynamic",
+            "Enum",
+            "Equals",
+            "Event",
+            "Exception",
+            "Execute",
+            "False",
+            "Field",
+            "Float",
+            "Generic",
+            "Hashtable",
+            "Identity",
+            "Implement",
+            "Indexer",
+            "Inherit",
+            "Initialize",
+            "Instance",
+            "Interface",
+            "Invalid",
+            "Iterator",
+            "KeyValuePair",
+            "LinkedList",
+            "List",
+            "Literal",
+            "Lock",
+            "Long",
+            "Managed",
+            "Member",
+            "Metadata",
+            "Method",
+            "Module",
+            "Multicast",
+            "Namespace",
+            "Nested",
+            "Nullable",
+            "Object",
+            "Operator",
+            "Overload",
+            "Override",
+            "Parameter",
+            "Parse",
+            "Partial",
+            "Platform",
+            "Pointer",
+            "Predicate",
+            "Private",
+            "Property",
+            "Protected",
+            "Public",
+            "Query",
+            "Random",
+            "Readonly",
+            "Refactoring",
+            "Reflection",
+            "Register",
+            "Release",
+            "Remove",
+            "SafeHandle",
+            "Scalar",
+            "Sealed",
+            "Section",
+            "Serial",
+            "Serialize",
+            "Short",
+            "Signed",
+            "Single",
+            "SizeOf",
+            "Stack",
+            "Static",
+            "String",
+            "Struct",
+            "Subclass",
+            "Subroutine",
+            "Switch",
+            "Synchronized",
+            "Syntax",
+            "Thread",
+            "Throw",
+            "True",
+            "Type",
+            "Typecasting",
+            "Unbox",
+            "Unicode",
+            "Unchecked",
+            "Unit",
+            "Unsafe",
+            "Unwrap",
+            "Ushort",
+            "Using",
+            "Value",
+            "Variable",
+            "Variant",
+            "Virtual",
+            "Volatile",
+            "WebClient",
+            "While",
+            "Xor",
+            "Yield",
+            "Zone"
+        };
+        public static string GenerateName()
+        {
+            StringBuilder nameBuilder = new StringBuilder();
+            for (int i = 0; i < 4; i++)
+            {
+                int index = Renamer.rnd.Next(WordList.Length);
+                string word = WordList[index];
+                nameBuilder.Append(word);
+            }
+            return nameBuilder.ToString();
+        }
+
+        private static Random rnd = new Random();
+        public static void Execute(Context ctx)
+        {
+            string jName = null;
+            foreach(ModuleDef module in ctx.assemblyDef.Modules)
+            {
+                foreach (TypeDef typeDef in ctx.moduleDef.Types)
+                {
+                    if (typeDef.IsPublic)
+                        jName = typeDef.Name;
+
+                    if (CanRename(typeDef))
+                    {
+                        foreach(MethodDef methodDef in typeDef.Methods)
+                        {
+                            if (Renamer.CanRename(methodDef))
+                            {
+                                TypeRef typeRef = ctx.moduleDef.CorLibTypes.GetTypeRef("System.Runtime.CompilerServices", "CompilerGeneratedAttribute");
+                                MemberRefUser ctor = new MemberRefUser(ctx.moduleDef, ".ctor", MethodSig.CreateInstance(ctx.moduleDef.Import(typeof(void)).ToTypeSig(true)), typeRef);
+                                CustomAttribute item = new CustomAttribute(ctor);
+                                methodDef.CustomAttributes.Add(item);
+                                methodDef.Name = InvisibleName;
+                            }
+
+                            foreach (Parameter parameter in methodDef.Parameters)
+                            {
+                                parameter.Name = Renamer.InvisibleName;
+                            }
+                        }
+                        
+                    }
+
+                    foreach (FieldDef fieldDef in typeDef.Fields)
+                    {
+                        bool flag3 = Renamer.CanRename(fieldDef);
+                        if (flag3)
+                        {
+                            fieldDef.Name = Renamer.InvisibleName;
+                        }
+                    }
+                    foreach (EventDef eventDef in typeDef.Events)
+                    {
+                        bool flag4 = Renamer.CanRename(eventDef);
+                        if (flag4)
+                        {
+                            eventDef.Name = Renamer.InvisibleName;
+                        }
+                    }
+                    bool isPublic2 = typeDef.IsPublic;
+                    if (isPublic2)
+                    {
+                        foreach (Resource resource in ctx.moduleDef.Resources)
+                        {
+                            bool flag5 = resource.Name.Contains(jName);
+                            if (flag5)
+                            {
+                                resource.Name = resource.Name.Replace(jName, typeDef.Name);
+                            }
+                        }
+                    }
+
+
+                }
+            }
+        }
+
+        private static bool CanRename(TypeDef type)
+        {
+            if (type.IsGlobalModuleType)
+                return false;
+
+            try
+            {
+                if (type.Name.Contains("My"))
+                    return false;
+            }
+            catch (Exception ex)
+            {
+                Program.Logger(Color.Yellow, ex.Message);
+            }
+
+            if (type.Interfaces.Count > 0)
+                return false;
+
+            if (type.IsSpecialName)
+                return false;
+
+            if (type.IsRuntimeSpecialName)
+                return false;
+
+            bool isSat = type.Name.Contains("Sat");
+            return !isSat;
+
+
+        }
+
+        private static bool CanRename(EventDef ev)
+        {
+            bool isForwarder = ev.DeclaringType.IsForwarder;
+            bool result;
+            if (isForwarder)
+            {
+                result = false;
+            }
+            else
+            {
+                bool isRuntimeSpecialName = ev.IsRuntimeSpecialName;
+                result = !isRuntimeSpecialName;
+            }
+            return result;
+        }
+        private static bool CanRename(FieldDef field)
+        {
+            bool flag = field.IsLiteral && field.DeclaringType.IsEnum;
+            bool result;
+            if (flag)
+            {
+                result = false;
+            }
+            else
+            {
+                bool isForwarder = field.DeclaringType.IsForwarder;
+                if (isForwarder)
+                {
+                    result = false;
+                }
+                else
+                {
+                    bool isRuntimeSpecialName = field.IsRuntimeSpecialName;
+                    if (isRuntimeSpecialName)
+                    {
+                        result = false;
+                    }
+                    else
+                    {
+                        bool flag2 = field.IsLiteral && field.DeclaringType.IsEnum;
+                        if (flag2)
+                        {
+                            result = false;
+                        }
+                        else
+                        {
+                            bool flag3 = field.Name.Contains("Sugar");
+                            result = !flag3;
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+
+        private static bool CanRename(MethodDef method)
+        {
+            bool isConstructor = method.IsConstructor;
+            bool result;
+            if (isConstructor)
+            {
+                result = false;
+            }
+            else
+            {
+                bool isForwarder = method.DeclaringType.IsForwarder;
+                if (isForwarder)
+                {
+                    result = false;
+                }
+                else
+                {
+                    bool isFamily = method.IsFamily;
+                    if (isFamily)
+                    {
+                        result = false;
+                    }
+                    else
+                    {
+                        bool flag = method.IsConstructor || method.IsStaticConstructor;
+                        if (flag)
+                        {
+                            result = false;
+                        }
+                        else
+                        {
+                            bool isRuntimeSpecialName = method.IsRuntimeSpecialName;
+                            if (isRuntimeSpecialName)
+                            {
+                                result = false;
+                            }
+                            else
+                            {
+                                bool isForwarder2 = method.DeclaringType.IsForwarder;
+                                if (isForwarder2)
+                                {
+                                    result = false;
+                                }
+                                else
+                                {
+                                    bool isGlobalModuleType = method.DeclaringType.IsGlobalModuleType;
+                                    if (isGlobalModuleType)
+                                    {
+                                        result = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+    }
+}
+```
+
+`Rename Protection/Version 2/RenamerV2.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+
+namespace Protector.Protections
+{
+    internal class RenamerV2
+    {
+        public static void Execute(Context ctx)
+        {
+            foreach (TypeDef type in ctx.moduleDef.Types)
+            {
+                Rename(type);
+            }
+
+            foreach (TypeDef type in ctx.moduleDef.Types)
+            {
+                foreach (MethodDef method in type.Methods)
+                {
+                    Rename(type);
+
+                    foreach (Instruction instr in method.Body.Instructions)
+                    {
+                        if (instr.OpCode == OpCodes.Call || instr.OpCode == OpCodes.Callvirt)
+                        {
+                            MethodDef calledMethod = instr.Operand as MethodDef;
+                            if (calledMethod != null && calledMethod.DeclaringType != type)
+                            {
+                                Rename(calledMethod);
+                                instr.Operand = calledMethod;
+                            }
+                        }
+                        else if (instr.OpCode == OpCodes.Ldfld || instr.OpCode == OpCodes.Stfld || instr.OpCode == OpCodes.Ldsfld || instr.OpCode == OpCodes.Stsfld)
+                        {
+                            FieldDef field = instr.Operand as FieldDef;
+                            if (field != null && field.DeclaringType != type)
+                            {
+                                Rename(field);
+                                instr.Operand = field;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public static readonly Random _random = new Random();
+
+        public static void Rename(TypeDef type)
+        {
+            if (type.IsGlobalModuleType) return;
+
+            string newName = Renamer.GenerateName();
+            type.Namespace = newName;
+            type.Name = newName;
+        }
+
+        public static void Rename(MethodDef method)
+        {
+            if (method.IsConstructor || method.IsRuntimeSpecialName) return;
+
+            string newName = Renamer.GenerateName();
+            method.Name = newName;
+        }
+
+        public static void Rename(FieldDef field)
+        {
+            if (field.IsLiteral) return;
+
+            string newName = Renamer.GenerateName();
+            field.Name = newName;
+        }
+    }
+}
+```
+
+`Stack Protection/Stack.cs`:
+
+```cs
+using dnlib.DotNet.Emit;
+using dnlib.DotNet;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Protector.Protections
+{
+    internal class Stack
+    {
+        public static void Execute(ModuleDef mod)
+        {
+            foreach (var type in mod.Types)
+            {
+                foreach (var meth in type.Methods)
+                {
+                    if (!meth.HasBody)
+                    {
+                        break;
+                    }
+
+                    var body = meth.Body;
+                    var target = body.Instructions[0];
+                    var item = Instruction.Create(OpCodes.Br_S, target);
+                    var instruction3 = Instruction.Create(OpCodes.Pop);
+                    var random = new Random();
+                    var instruction4 = GetRandomInstruction(random);
+
+                    body.Instructions.Insert(0, instruction4);
+                    body.Instructions.Insert(1, instruction3);
+                    body.Instructions.Insert(2, item);
+
+                    if (body.ExceptionHandlers != null)
+                    {
+                        foreach (var handler in body.ExceptionHandlers)
+                        {
+                            if (handler.TryStart == target)
+                            {
+                                handler.TryStart = item;
+                            }
+                            else if (handler.HandlerStart == target)
+                            {
+                                handler.HandlerStart = item;
+                            }
+                            else if (handler.FilterStart == target)
+                            {
+                                handler.FilterStart = item;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private static Instruction GetRandomInstruction(Random random)
+        {
+            var opcode = random.Next(0, 5);
+
+            switch (opcode)
+            {
+                case 0:
+                    return Instruction.Create(OpCodes.Ldnull);
+                case 1:
+                    return Instruction.Create(OpCodes.Ldc_I4_0);
+                case 2:
+                    return Instruction.Create(OpCodes.Ldstr, "Isolator");
+                case 3:
+                    return Instruction.Create(OpCodes.Ldc_I8, (uint)random.Next());
+                default:
+                    return Instruction.Create(OpCodes.Ldc_I8, (long)random.Next());
+            }
+        }
+
+    }
+}
+
+```
+
+`String Protection/Base64/Base64.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using Microsoft.SqlServer.Server;
+using Satfuscator.Protections.Injections;
+using static Satfuscator.Protections.StringEcrypt.StringEcnryption;
+
+namespace Protector.Protections.StringEcrypt
+{
+    internal class Base64
+    {
+
+        public static void Execute(ModuleDef module)
+        {
+
+            int count_xxx = 0;
+            ModuleDefMD typeModule = ModuleDefMD.Load(typeof(DecryptCrypto).Module);
+            TypeDef typeDef = typeModule.ResolveTypeDef(MDToken.ToRID(typeof(DecryptCrypto).MetadataToken));
+            IEnumerable<IDnlibDef> members = InjectHelper.Inject(typeDef, module.GlobalType, module);
+            MethodDef init = (MethodDef)members.Single(method => method.Name == "Decrypt");
+            FieldDef finit = (FieldDef)members.Single(field => field.Name == "Key");
+            FieldDef finit2 = (FieldDef)members.Single(field => field.Name == "IV");
+            FieldDef finit4 = (FieldDef)members.Single(field => field.Name == "plaintext");
+            FieldDef finit5 = (FieldDef)members.Single(field => field.Name == "cipherText");
+
+
+            init.Name = Renamer.GenerateName();
+            finit.Name = Renamer.GenerateName(); ;
+            finit2.Name = Renamer.GenerateName();
+            finit4.Name = Renamer.GenerateName();
+            finit5.Name = Renamer.GenerateName();
+
+            foreach (TypeDef type in module.Types)
+            {
+                if (type.IsGlobalModuleType)
+                {
+                    foreach (MethodDef method in type.Methods)
+                    {
+                        for (int i = 0; i < method.Body.Instructions.Count; i++)
+                            if (method.Body.Instructions[i].OpCode == OpCodes.Ldstr)
+                            {
+                                string operand = method.Body.Instructions[i].Operand.ToString();
+                                if (operand == @"qwr{@^h`h&_`50/.a9!'dcmh3!uw<&=?")
+                                {
+                                    method.Body.Instructions[i].Operand = akey;
+                                }
+                                if (operand == @"9/\~V).A.lY&=t2b")
+                                {
+                                    method.Body.Instructions[i].Operand = aiv;
+                                }
+                            }
+                    }
+                }
+            }
+
+            /*for (var i = 0; i < 142; i++)//3285
+            {
+                TypeDef typeDef2 = typeModule.ResolveTypeDef(MDToken.ToRID(typeof(FloodEx).MetadataToken));
+                IEnumerable<IDnlibDef> members2 = InjectHelper.Inject(typeDef2, module.GlobalType, module);
+                MethodDef init2 = (MethodDef)members2.Single(method => method.Name == "Decrypt");
+                FieldDef finit42 = (FieldDef)members2.Single(field => field.Name == "plaintext");
+                FieldDef finit52 = (FieldDef)members2.Single(field => field.Name == "cipherText");
+                init2.Name = Undetected.RandomStringStrong(40);
+                finit42.Name = Undetected.RandomStringStrong(41);
+                finit52.Name = Undetected.RandomStringStrong(41);
+            }*/
+
+            foreach (MethodDef method in module.GlobalType.Methods)
+                if (method.Name.Equals(".ctor"))
+                {
+                    module.GlobalType.Remove(method);
+                    break;
+                }
+
+            foreach (TypeDef type in module.Types)
+            {
+                if (type.IsGlobalModuleType) continue;
+                foreach (MethodDef method in type.Methods)
+                {
+                    if (!method.HasBody) continue;
+                    for (int i = 0; i < method.Body.Instructions.Count; i++)
+                        if (method.Body.Instructions[i].OpCode == OpCodes.Ldstr)
+                        {
+                            string operand = method.Body.Instructions[i].Operand.ToString();
+                            method.Body.Instructions[i].Operand = Encrypt(operand);
+                            method.Body.Instructions.Insert(i + 1, OpCodes.Call.ToInstruction(init));
+                            count_xxx += 1;
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine("StringStrongerEnc: " + count_xxx);
+                        }
+                }
+            }
+        }
+
+        private static string akey = Renamer.GenerateName();
+        private static string aiv = Renamer.GenerateName();
+
+        private static byte[] Key = Encoding.ASCII.GetBytes(akey);//32
+        private static byte[] IV = Encoding.ASCII.GetBytes(aiv);//16
+
+
+        public static string Encrypt(string plainText)
+        {
+
+            byte[] encrypted;
+
+            using (AesCryptoServiceProvider aesAlg = new AesCryptoServiceProvider())
+            {
+                aesAlg.Key = Key;
+                aesAlg.IV = IV;
+                aesAlg.Mode = CipherMode.CBC;
+                aesAlg.Padding = PaddingMode.PKCS7;
+
+                ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
+
+                using (MemoryStream msEncrypt = new MemoryStream())
+                {
+                    using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                    {
+                        using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                        {
+                            swEncrypt.Write(plainText);
+                        }
+                        encrypted = msEncrypt.ToArray();
+                    }
+                }
+            }
+
+            return Convert.ToBase64String(encrypted);
+        }
+
+
+    }
+
+    public static class DecryptCrypto
+    {
+        private static byte[] Key = Encoding.ASCII.GetBytes(@"qwr{@^h`h&_`50/.a9!'dcmh3!uw<&=?");
+        private static byte[] IV = Encoding.ASCII.GetBytes(@"9/\~V).A.lY&=t2b");
+        //static AesCryptoServiceProvider aesAlg2 = new AesCryptoServiceProvider();
+        static string plaintext = null;
+        private static byte[] cipherText;
+        //private static ICryptoTransform decryptor;
+        //private static MemoryStream msDecrypt;
+        //private static CryptoStream csDecrypt;
+        //private static StreamReader srDecrypt;
+
+        public static string Decrypt(string Text)
+        {
+
+            plaintext = null;
+            cipherText = Convert.FromBase64String(Text.Replace(' ', '+'));
+
+            using (AesCryptoServiceProvider aesAlg2 = new AesCryptoServiceProvider())
+            {
+                aesAlg2.Key = Key;
+                aesAlg2.IV = IV;
+                aesAlg2.Mode = CipherMode.CBC;
+                aesAlg2.Padding = PaddingMode.PKCS7;
+
+
+                ICryptoTransform decryptor = aesAlg2.CreateDecryptor(aesAlg2.Key, aesAlg2.IV);
+
+                using (MemoryStream msDecrypt = new MemoryStream(cipherText))
+                {
+                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                    {
+                        using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                        {
+                            plaintext = srDecrypt.ReadToEnd();
+                        }
+                    }
+                }
+
+            }
+
+            return plaintext;
+        }
+    }
+}
+
+```
+
+`String Protection/Cipher/Injection.cs`:
+
+```cs
+using dnlib.DotNet.Emit;
+using dnlib.DotNet;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Protector.Protections.StringEcrypt
+{
+    internal class Injection
+    {
+        /// <summary>
+        ///     Clones the specified origin TypeDef.
+        /// </summary>
+        /// <param name="origin">The origin TypeDef.</param>
+        /// <returns>The cloned TypeDef.</returns>
+        static TypeDefUser Clone(TypeDef origin)
+        {
+            var ret = new TypeDefUser(origin.Namespace, origin.Name);
+            ret.Attributes = origin.Attributes;
+
+            if (origin.ClassLayout != null)
+                ret.ClassLayout = new ClassLayoutUser(origin.ClassLayout.PackingSize, origin.ClassSize);
+
+            foreach (GenericParam genericParam in origin.GenericParameters)
+                ret.GenericParameters.Add(new GenericParamUser(genericParam.Number, genericParam.Flags, "-"));
+
+            return ret;
+        }
+
+        /// <summary>
+        ///     Clones the specified origin MethodDef.
+        /// </summary>
+        /// <param name="origin">The origin MethodDef.</param>
+        /// <returns>The cloned MethodDef.</returns>
+        static MethodDefUser Clone(MethodDef origin)
+        {
+            var ret = new MethodDefUser(origin.Name, null, origin.ImplAttributes, origin.Attributes);
+
+            foreach (GenericParam genericParam in origin.GenericParameters)
+                ret.GenericParameters.Add(new GenericParamUser(genericParam.Number, genericParam.Flags, "-"));
+
+            return ret;
+        }
+
+        /// <summary>
+        ///     Clones the specified origin FieldDef.
+        /// </summary>
+        /// <param name="origin">The origin FieldDef.</param>
+        /// <returns>The cloned FieldDef.</returns>
+        static FieldDefUser Clone(FieldDef origin)
+        {
+            var ret = new FieldDefUser(origin.Name, null, origin.Attributes);
+            return ret;
+        }
+
+        /// <summary>
+        ///     Populates the context mappings.
+        /// </summary>
+        /// <param name="typeDef">The origin TypeDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        /// <returns>The new TypeDef.</returns>
+        static TypeDef PopulateContext(TypeDef typeDef, InjectContext ctx)
+        {
+            TypeDef ret;
+            IDnlibDef existing;
+            if (!ctx.map.TryGetValue(typeDef, out existing))
+            {
+                ret = Clone(typeDef);
+                ctx.map[typeDef] = ret;
+            }
+            else
+                ret = (TypeDef)existing;
+
+            foreach (TypeDef nestedType in typeDef.NestedTypes)
+                ret.NestedTypes.Add(PopulateContext(nestedType, ctx));
+
+            foreach (MethodDef method in typeDef.Methods)
+                ret.Methods.Add((MethodDef)(ctx.map[method] = Clone(method)));
+
+            foreach (FieldDef field in typeDef.Fields)
+                ret.Fields.Add((FieldDef)(ctx.map[field] = Clone(field)));
+
+            return ret;
+        }
+
+        /// <summary>
+        ///     Copies the information from the origin type to injected type.
+        /// </summary>
+        /// <param name="typeDef">The origin TypeDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        static void CopyTypeDef(TypeDef typeDef, InjectContext ctx)
+        {
+            var newTypeDef = (TypeDef)ctx.map[typeDef];
+
+            newTypeDef.BaseType = (ITypeDefOrRef)ctx.Importer.Import(typeDef.BaseType);
+
+            foreach (InterfaceImpl iface in typeDef.Interfaces)
+                newTypeDef.Interfaces.Add(new InterfaceImplUser((ITypeDefOrRef)ctx.Importer.Import(iface.Interface)));
+        }
+
+        /// <summary>
+        ///     Copies the information from the origin method to injected method.
+        /// </summary>
+        /// <param name="methodDef">The origin MethodDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        static void CopyMethodDef(MethodDef methodDef, InjectContext ctx)
+        {
+            var newMethodDef = (MethodDef)ctx.map[methodDef];
+
+            newMethodDef.Signature = ctx.Importer.Import(methodDef.Signature);
+            newMethodDef.Parameters.UpdateParameterTypes();
+
+            if (methodDef.ImplMap != null)
+                newMethodDef.ImplMap = new ImplMapUser(new ModuleRefUser(ctx.TargetModule, methodDef.ImplMap.Module.Name), methodDef.ImplMap.Name, methodDef.ImplMap.Attributes);
+
+            foreach (CustomAttribute ca in methodDef.CustomAttributes)
+                newMethodDef.CustomAttributes.Add(new CustomAttribute((ICustomAttributeType)ctx.Importer.Import(ca.Constructor)));
+
+            if (methodDef.HasBody)
+            {
+                newMethodDef.Body = new CilBody(methodDef.Body.InitLocals, new List<Instruction>(), new List<ExceptionHandler>(), new List<Local>());
+                newMethodDef.Body.MaxStack = methodDef.Body.MaxStack;
+
+                var bodyMap = new Dictionary<object, object>();
+
+                foreach (Local local in methodDef.Body.Variables)
+                {
+                    var newLocal = new Local(ctx.Importer.Import(local.Type));
+                    newMethodDef.Body.Variables.Add(newLocal);
+                    newLocal.Name = local.Name;
+
+                    bodyMap[local] = newLocal;
+                }
+
+                foreach (Instruction instr in methodDef.Body.Instructions)
+                {
+                    var newInstr = new Instruction(instr.OpCode, instr.Operand);
+                    newInstr.SequencePoint = instr.SequencePoint;
+
+                    if (newInstr.Operand is IType)
+                        newInstr.Operand = ctx.Importer.Import((IType)newInstr.Operand);
+
+                    else if (newInstr.Operand is IMethod)
+                        newInstr.Operand = ctx.Importer.Import((IMethod)newInstr.Operand);
+
+                    else if (newInstr.Operand is IField)
+                        newInstr.Operand = ctx.Importer.Import((IField)newInstr.Operand);
+
+                    newMethodDef.Body.Instructions.Add(newInstr);
+                    bodyMap[instr] = newInstr;
+                }
+
+                foreach (Instruction instr in newMethodDef.Body.Instructions)
+                {
+                    if (instr.Operand != null && bodyMap.ContainsKey(instr.Operand))
+                        instr.Operand = bodyMap[instr.Operand];
+
+                    else if (instr.Operand is Instruction[])
+                        instr.Operand = ((Instruction[])instr.Operand).Select(target => (Instruction)bodyMap[target]).ToArray();
+                }
+
+                foreach (ExceptionHandler eh in methodDef.Body.ExceptionHandlers)
+                    newMethodDef.Body.ExceptionHandlers.Add(new ExceptionHandler(eh.HandlerType)
+                    {
+                        CatchType = eh.CatchType == null ? null : (ITypeDefOrRef)ctx.Importer.Import(eh.CatchType),
+                        TryStart = (Instruction)bodyMap[eh.TryStart],
+                        TryEnd = (Instruction)bodyMap[eh.TryEnd],
+                        HandlerStart = (Instruction)bodyMap[eh.HandlerStart],
+                        HandlerEnd = (Instruction)bodyMap[eh.HandlerEnd],
+                        FilterStart = eh.FilterStart == null ? null : (Instruction)bodyMap[eh.FilterStart]
+                    });
+
+                newMethodDef.Body.SimplifyMacros(newMethodDef.Parameters);
+            }
+        }
+
+        /// <summary>
+        ///     Copies the information from the origin field to injected field.
+        /// </summary>
+        /// <param name="fieldDef">The origin FieldDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        static void CopyFieldDef(FieldDef fieldDef, InjectContext ctx)
+        {
+            var newFieldDef = (FieldDef)ctx.map[fieldDef];
+
+            newFieldDef.Signature = ctx.Importer.Import(fieldDef.Signature);
+        }
+
+        /// <summary>
+        ///     Copies the information to the injected definitions.
+        /// </summary>
+        /// <param name="typeDef">The origin TypeDef.</param>
+        /// <param name="ctx">The injection context.</param>
+        /// <param name="copySelf">if set to <c>true</c>, copy information of <paramref name="typeDef" />.</param>
+        static void Copy(TypeDef typeDef, InjectContext ctx, bool copySelf)
+        {
+            if (copySelf)
+                CopyTypeDef(typeDef, ctx);
+
+            foreach (TypeDef nestedType in typeDef.NestedTypes)
+                Copy(nestedType, ctx, true);
+
+            foreach (MethodDef method in typeDef.Methods)
+                CopyMethodDef(method, ctx);
+
+            foreach (FieldDef field in typeDef.Fields)
+                CopyFieldDef(field, ctx);
+        }
+
+        /// <summary>
+        ///     Injects the specified TypeDef to another module.
+        /// </summary>
+        /// <param name="typeDef">The source TypeDef.</param>
+        /// <param name="target">The target module.</param>
+        /// <returns>The injected TypeDef.</returns>
+        public static TypeDef Inject(TypeDef typeDef, ModuleDef target)
+        {
+            var ctx = new InjectContext(typeDef.Module, target);
+            PopulateContext(typeDef, ctx);
+            Copy(typeDef, ctx, true);
+            return (TypeDef)ctx.map[typeDef];
+        }
+
+        /// <summary>
+        ///     Injects the specified MethodDef to another module.
+        /// </summary>
+        /// <param name="methodDef">The source MethodDef.</param>
+        /// <param name="target">The target module.</param>
+        /// <returns>The injected MethodDef.</returns>
+        public static MethodDef Inject(MethodDef methodDef, ModuleDef target)
+        {
+            var ctx = new InjectContext(methodDef.Module, target);
+            ctx.map[methodDef] = Clone(methodDef);
+            CopyMethodDef(methodDef, ctx);
+            return (MethodDef)ctx.map[methodDef];
+        }
+
+        /// <summary>
+        ///     Injects the members of specified TypeDef to another module.
+        /// </summary>
+        /// <param name="typeDef">The source TypeDef.</param>
+        /// <param name="newType">The new type.</param>
+        /// <param name="target">The target module.</param>
+        /// <returns>Injected members.</returns>
+        public static IEnumerable<IDnlibDef> Inject(TypeDef typeDef, TypeDef newType, ModuleDef target)
+        {
+            var ctx = new InjectContext(typeDef.Module, target);
+            ctx.map[typeDef] = newType;
+            PopulateContext(typeDef, ctx);
+            Copy(typeDef, ctx, false);
+            return ctx.map.Values.Except(new[] { newType });
+        }
+
+        /// <summary>
+        ///     Context of the injection process.
+        /// </summary>
+        class InjectContext : ImportMapper
+        {
+            /// <summary>
+            ///     The mapping of origin definitions to injected definitions.
+            /// </summary>
+            public readonly Dictionary<IDnlibDef, IDnlibDef> map = new Dictionary<IDnlibDef, IDnlibDef>();
+
+            /// <summary>
+            ///     The module which source type originated from.
+            /// </summary>
+            public readonly ModuleDef OriginModule;
+
+            /// <summary>
+            ///     The module which source type is being injected to.
+            /// </summary>
+            public readonly ModuleDef TargetModule;
+
+            /// <summary>
+            ///     The importer.
+            /// </summary>
+            readonly Importer importer;
+
+            /// <summary>
+            ///     Initializes a new instance of the <see cref="InjectContext" /> class.
+            /// </summary>
+            /// <param name="module">The origin module.</param>
+            /// <param name="target">The target module.</param>
+            public InjectContext(ModuleDef module, ModuleDef target)
+            {
+                OriginModule = module;
+                TargetModule = target;
+                importer = new Importer(target, ImporterOptions.TryToUseTypeDefs, new GenericParamContext(), this);
+            }
+
+            /// <summary>
+            ///     Gets the importer.
+            /// </summary>
+            /// <value>The importer.</value>
+            public Importer Importer
+            {
+                get { return importer; }
+            }
+
+            /// <inheritdoc />
+            public override ITypeDefOrRef Map(ITypeDefOrRef typeDefOrRef)
+            {
+                if (typeDefOrRef is TypeDef typeDef)
+                {
+                    if (map.ContainsKey(typeDef))
+                        return (TypeDef)map[typeDef];
+                }
+                return null;
+            }
+
+            /// <inheritdoc />
+            public override IMethod Map(MethodDef methodDef)
+            {
+                if (map.ContainsKey(methodDef))
+                    return (MethodDef)map[methodDef];
+                return null;
+            }
+
+            /// <inheritdoc />
+            public override IField Map(FieldDef fieldDef)
+            {
+                if (map.ContainsKey(fieldDef))
+                    return (FieldDef)map[fieldDef];
+                return null;
+            }
+        }
+    }
+}
+
+```
+
+`String Protection/Cipher/StringEcnryption.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace Protector.Protections.StringEcrypt
+{
+    internal class StringEcnryption
+    {
+        public static void Execute(Context ctx)
+        {
+            int Amount = 0;
+            ModuleDefMD typeModule = ModuleDefMD.Load(typeof(StringDecoder).Module);
+            TypeDef typeDef = typeModule.ResolveTypeDef(MDToken.ToRID(typeof(StringDecoder).MetadataToken));
+            IEnumerable<IDnlibDef> members = Injection.Inject(typeDef, ctx.moduleDef.GlobalType, ctx.typeDef.Module);
+            MethodDef init = (MethodDef)members.Single(method => method.Name == "Decrypt");
+
+            foreach (MethodDef method in ctx.typeDef.Module.GlobalType.Methods)
+                if (method.Name.Equals(".ctor"))
+                {
+                    ctx.typeDef.Module.GlobalType.Remove(method);
+                    break;
+                }
+
+            foreach (TypeDef type in ctx.typeDef.Module.Types)
+                foreach (MethodDef method in type.Methods)
+                {
+                    if (!method.HasBody)
+                        continue;
+
+                    method.Body.SimplifyBranches();
+
+                    for (int i = 0; i < method.Body.Instructions.Count; i++)
+                        if (method.Body.Instructions[i] != null && method.Body.Instructions[i].OpCode == OpCodes.Ldstr)
+                        {
+                            int key = IntV2.Next();
+                            object op = method.Body.Instructions[i].Operand;
+
+                            if (op == null)
+                                continue;
+
+                            method.Body.Instructions[i].Operand = Encrypt(op.ToString(), key);
+                            method.Body.Instructions.Insert(i + 1, OpCodes.Ldc_I4.ToInstruction(IntV2.Next()));
+                            method.Body.Instructions.Insert(i + 2, OpCodes.Ldc_I4.ToInstruction(key));
+                            method.Body.Instructions.Insert(i + 3, OpCodes.Ldc_I4.ToInstruction(IntV2.Next()));
+                            method.Body.Instructions.Insert(i + 4, OpCodes.Ldc_I4.ToInstruction(IntV2.Next()));
+                            method.Body.Instructions.Insert(i + 5, OpCodes.Ldc_I4.ToInstruction(IntV2.Next()));
+                            method.Body.Instructions.Insert(i + 6, OpCodes.Call.ToInstruction(init));
+
+                            ++Amount;
+                        }
+
+                    method.Body.OptimizeBranches();
+                }
+        }
+        public static string Encrypt(string str, int key)
+        {
+            StringBuilder builder = new StringBuilder();
+            foreach (char c in str.ToCharArray())
+                builder.Append((char)(c + key));
+
+            return builder.ToString();
+        }
+
+        public static class StringDecoder
+        {
+            public static string Decrypt(string str, int min, int key, int hash, int length, int max)
+            {
+                if (max > 78787878) ;
+                if (length > 485941) ;
+
+                StringBuilder builder = new StringBuilder();
+                foreach (char c in str.ToCharArray())
+                    builder.Append((char)(c - key));
+
+                if (min < 14141) ;
+                if (length < 1548174) ;
+
+                return builder.ToString();
+            }
+        }
+
+
+    }
+}
+```
+
+`Suf Protection/SufConfusion.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+using System;
+
+namespace Protector.Protections
+{
+    internal class SufConfusionProtection
+    {
+        public static void Execute(Context context)
+        {
+            foreach (var type in context.ModuleDef.Types)
+            {
+                foreach (var method in type.Methods)
+                {
+                    if (!method.HasBody) continue;
+
+                    var body = method.Body;
+                    var target = body.Instructions[0];
+
+                    // Create new instructions to replace the original first instruction
+                    var newItem = Instruction.Create(OpCodes.Br_S, target);
+                    var popItem = Instruction.Create(OpCodes.Pop);
+                    var random = new Random();
+                    Instruction newTarget;
+                    switch (random.Next(0, 5))
+                    {
+                        case 0:
+                            newTarget = Instruction.Create(OpCodes.Ldnull);
+                            break;
+
+                        case 1:
+                            newTarget = Instruction.Create(OpCodes.Ldc_I4_0);
+                            break;
+
+                        case 2:
+                            newTarget = Instruction.Create(OpCodes.Ldstr, "Isolator");
+                            break;
+
+                        case 3:
+                            newTarget = Instruction.Create(OpCodes.Ldc_I8, (uint)random.Next());
+                            break;
+
+                        default:
+                            newTarget = Instruction.Create(OpCodes.Ldc_I8, (long)random.Next());
+                            break;
+                    }
+
+                    // Insert the new instructions at the beginning of the method
+                    body.Instructions.Insert(0, newTarget);
+                    body.Instructions.Insert(1, popItem);
+                    body.Instructions.Insert(2, newItem);
+
+                    // Update any exception handlers that target the original first instruction
+                    foreach (var handler in body.ExceptionHandlers)
+                    {
+                        if (handler.TryStart == target)
+                            handler.TryStart = newItem;
+
+                        if (handler.HandlerStart == target)
+                            handler.HandlerStart = newItem;
+
+                        if (handler.FilterStart == target)
+                            handler.FilterStart = newItem;
+                    }
+                }
+            }
+        }
+    }
+}
+
+```
+
+`Watermark/Credits/Credits.cs`:
+
+```cs
+using dnlib.DotNet;
+using dnlib.DotNet.Emit;
+
+namespace Protector.Protections
+{
+    internal class Credits
+    {
+        public static void Execute(Context ctx)
+        {
+            var cctor = ctx.typeDef.FindOrCreateStaticConstructor();
+
+            var field = new FieldDefUser("Arizona", new FieldSig(ctx.moduleDef.CorLibTypes.String), FieldAttributes.Static | FieldAttributes.Private);
+            ctx.moduleDef.GlobalType.Fields.Add(field);
+
+            var ldstr = new Instruction(OpCodes.Ldstr, "Protector by nak0823 ~ Today is a Beautiful Day");
+            var stsfld = new Instruction(OpCodes.Stsfld, field);
+
+            cctor.Body.Instructions.Insert(0, ldstr);
+            cctor.Body.Instructions.Insert(1, stsfld);
+        }
+    }
+}
+```
+
+`Watermark/Watermark.cs`:
+
+```cs
+using dnlib.DotNet;
+
+namespace Protector.Protections
+{
+    internal class Watermark
+    {
+        public static void Execute(Context ctx)
+        {
+            // The code modifies the metadata of the input assembly by changing the assembly name, module name, and assembly attributes, including the version number, title, description, company, product, and trademark.
+            // Specifically, it changes the assembly description, company name, and product name attributes to reflect the use of your assembly. This is achieved using the dnlib library to access and modify the metadata of the assembly.
+            // The purpose of this modification is to add a watermark to the assembly to indicate that it has been processed by an obfuscator.
+            // These changes will be reflected in the generated assembly file.
+
+
+            ctx.assemblyDef.Name = ""; // Assembly name
+            ctx.moduleDef.Name = ""; // Moduledef name
+
+            var asmAttribs = ctx.moduleDef.Assembly.CustomAttributes.Find("System.Reflection.AssemblyVersionAttribute");
+            asmAttribs.ConstructorArguments[0] = new CAArgument(ctx.moduleDef.CorLibTypes.String, new UTF8String("")); // Version
+
+            asmAttribs = ctx.moduleDef.Assembly.CustomAttributes.Find("System.Reflection.AssemblyTitleAttribute");
+            asmAttribs.ConstructorArguments[0] = new CAArgument(ctx.moduleDef.CorLibTypes.String, new UTF8String("")); // Assembly title
+
+            asmAttribs = ctx.moduleDef.Assembly.CustomAttributes.Find("System.Reflection.AssemblyDescriptionAttribute");
+            asmAttribs.ConstructorArguments[0] = new CAArgument(ctx.moduleDef.CorLibTypes.String, new UTF8String("")); // Assembly description
+
+            asmAttribs = ctx.moduleDef.Assembly.CustomAttributes.Find("System.Reflection.AssemblyConfigurationAttribute");
+            asmAttribs.ConstructorArguments[0] = new CAArgument(ctx.moduleDef.CorLibTypes.String, new UTF8String("")); // Build configuration
+
+            asmAttribs = ctx.moduleDef.Assembly.CustomAttributes.Find("System.Reflection.AssemblyCompanyAttribute");
+            asmAttribs.ConstructorArguments[0] = new CAArgument(ctx.moduleDef.CorLibTypes.String, new UTF8String("")); // Custom company name
+
+            asmAttribs = ctx.moduleDef.Assembly.CustomAttributes.Find("System.Reflection.AssemblyProductAttribute");
+            asmAttribs.ConstructorArguments[0] = new CAArgument(ctx.moduleDef.CorLibTypes.String, new UTF8String("")); // Product name
+
+            asmAttribs = ctx.moduleDef.Assembly.CustomAttributes.Find("System.Reflection.AssemblyTrademarkAttribute");
+            asmAttribs.ConstructorArguments[0] = new CAArgument(ctx.moduleDef.CorLibTypes.String, new UTF8String("")); // Trademark attribute
+        }
+    }
+}
+
+```
