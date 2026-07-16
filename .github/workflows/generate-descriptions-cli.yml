@@ -1,15 +1,23 @@
 name: Fill Missing Descriptions (Cursor CLI)
 
-# Manual trigger: scan archive/ for repos that lack description_en.txt, then
-# summarize them with Cursor CLI (cursor-grok-4.5-high-fast, max mode).
-# New README entries are still handled automatically by auto-archive-on-push.yml.
+# Scan archive/ for repos that lack description_en.txt, then summarize them
+# with Cursor CLI (cursor-grok-4.5-high-fast, max mode).
+# New README entries are still handled automatically by auto-archive-on-push.yml;
+# this workflow is the backfill / catch-up path.
+#
+# Triggers:
+# - schedule: every 3 hours (offset :30 from discover at :00)
+# - workflow_dispatch: optional repos / limit / model
 #
 # Secret safety:
-# - workflow_dispatch only (write access required on this repo to click Run).
-# - No pull_request / pull_request_target — fork PRs cannot start this job with
-#   our secrets. Forks never inherit repository secrets from upstream.
+# - Canonical repo only; forks never inherit CURSOR_API_KEY.
+# - No pull_request / pull_request_target.
 
 on:
+  schedule:
+    # Every 3 hours at minute 30 UTC — stagger from discover (`0 */3 * * *`).
+    - cron: "30 */3 * * *"
+
   workflow_dispatch:
     inputs:
       limit:
@@ -24,6 +32,10 @@ on:
         description: "Cursor CLI model id"
         required: false
         default: "cursor-grok-4.5-high-fast"
+
+concurrency:
+  group: fill-missing-descriptions
+  cancel-in-progress: true
 
 jobs:
   fill-missing:
@@ -46,38 +58,153 @@ jobs:
             echo "Refusing to run outside canonical repository."
             exit 1
           fi
-          if [ "${GITHUB_EVENT_NAME}" != "workflow_dispatch" ]; then
-            echo "Refusing unexpected event: ${GITHUB_EVENT_NAME}"
-            exit 1
-          fi
+          case "${GITHUB_EVENT_NAME}" in
+            schedule|workflow_dispatch) ;;
+            *)
+              echo "Refusing unexpected event: ${GITHUB_EVENT_NAME}"
+              exit 1
+              ;;
+          esac
 
-      - uses: actions/checkout@v4
-
-      - name: Scan archive/ for missing descriptions
-        id: scan
+      - name: Resolve inputs
+        id: opts
+        env:
+          # github.event.inputs is empty on schedule (safe); inputs context is not.
+          INPUT_LIMIT: ${{ github.event.inputs.limit }}
+          INPUT_REPOS: ${{ github.event.inputs.repos }}
+          INPUT_MODEL: ${{ github.event.inputs.model }}
         run: |
           set -euo pipefail
-          python3 scripts/generate-descriptions-cli.py --list-missing | tee /tmp/missing-scan.txt
-          MISSING=$(grep -E '^MISSING_COUNT=' /tmp/missing-scan.txt | tail -1 | cut -d= -f2 || true)
-          if ! [[ "${MISSING}" =~ ^[0-9]+$ ]]; then
-            echo "ERROR: failed to parse MISSING_COUNT from scan output."
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            LIMIT="${INPUT_LIMIT:-0}"
+            REPOS="${INPUT_REPOS:-}"
+            MODEL="${INPUT_MODEL:-cursor-grok-4.5-high-fast}"
+          else
+            # Scheduled catch-up: cap batch size so sparse archive extract stays small.
+            LIMIT="20"
+            REPOS=""
+            MODEL="cursor-grok-4.5-high-fast"
+          fi
+          if ! [[ "${LIMIT}" =~ ^[0-9]+$ ]]; then
+            echo "ERROR: limit must be an integer, got: ${LIMIT}"
             exit 1
           fi
-          echo "missing_count=$MISSING" >> "$GITHUB_OUTPUT"
-          echo "Found $MISSING archive(s) without description_en.txt"
+          {
+            echo "limit=${LIMIT}"
+            echo "model<<EOF"
+            printf '%s\n' "${MODEL}"
+            echo "EOF"
+            echo "repos<<EOF"
+            printf '%s\n' "${REPOS}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "limit=${LIMIT}"
+          echo "model=${MODEL}"
+          echo "repos=${REPOS:-"(scan missing)"}"
+
+      # Full checkout of archive/ is multi-GB and OOMs Cursor with disk-full.
+      - name: Checkout (sparse)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /scripts/
+            /description/
+            /.github/
+
+      - name: Scan / select repos needing descriptions
+        id: scan
+        env:
+          LIMIT: ${{ steps.opts.outputs.limit }}
+          REPOS_INPUT: ${{ steps.opts.outputs.repos }}
+        run: |
+          set -euo pipefail
+          REPOS_INPUT="${REPOS_INPUT:-}"
+          : > /tmp/work-repos.txt
+
+          if [ -n "${REPOS_INPUT//[[:space:]]/}" ]; then
+            # shellcheck disable=SC2086
+            for slug in $REPOS_INPUT; do
+              if [[ ! "$slug" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]]; then
+                echo "ERROR: invalid repo slug: $slug"
+                exit 1
+              fi
+              echo "$slug" >> /tmp/work-repos.txt
+            done
+          else
+            # List archive blobs via git (no full tree materialize).
+            while IFS= read -r path; do
+              [ -z "$path" ] && continue
+              owner="$(printf '%s' "$path" | cut -d/ -f2)"
+              repo="$(printf '%s' "$path" | cut -d/ -f3 | sed 's/\.txt$//')"
+              if [[ ! "${owner}/${repo}" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]]; then
+                continue
+              fi
+              if git cat-file -e "HEAD:description/${owner}/${repo}/description_en.txt" 2>/dev/null; then
+                continue
+              fi
+              echo "${owner}/${repo}" >> /tmp/work-repos.txt
+            done < <(
+              git ls-tree -r --name-only HEAD -- archive/ \
+                | grep -E '^archive/[^/]+/[^/]+\.txt$' \
+                || true
+            )
+          fi
+
+          MISSING=$(grep -c . /tmp/work-repos.txt || true)
+          echo "Found ${MISSING} repo(s) in work list (pre-limit)"
+
+          if [ "${LIMIT}" != "0" ] && [ "${MISSING}" -gt "${LIMIT}" ]; then
+            head -n "${LIMIT}" /tmp/work-repos.txt > /tmp/work-repos.limited.txt
+            mv /tmp/work-repos.limited.txt /tmp/work-repos.txt
+            MISSING=$(grep -c . /tmp/work-repos.txt || true)
+            echo "Limited to ${MISSING} repo(s)"
+          fi
+
+          REPOS_INLINE="$(tr '\n' ' ' < /tmp/work-repos.txt | xargs)"
+          {
+            echo "missing_count=${MISSING}"
+            echo "repos<<EOF"
+            printf '%s\n' "${REPOS_INLINE}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "Work list (${MISSING}): ${REPOS_INLINE}"
 
       - name: Skip if nothing missing
-        if: steps.scan.outputs.missing_count == '0' && inputs.repos == ''
-        run: echo "All archived repos already have descriptions — nothing to do."
+        if: steps.scan.outputs.missing_count == '0'
+        run: echo "Nothing to describe — done."
+
+      - name: Materialize target archive files only
+        if: steps.scan.outputs.missing_count != '0'
+        env:
+          DESC_REPOS: ${{ steps.scan.outputs.repos }}
+        run: |
+          set -euo pipefail
+          for slug in $DESC_REPOS; do
+            if [[ ! "$slug" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]]; then
+              echo "ERROR: invalid repo slug: $slug"
+              exit 1
+            fi
+            owner="${slug%%/*}"
+            repo="${slug#*/}"
+            path="archive/${owner}/${repo}.txt"
+            git sparse-checkout add "/${path}"
+            git checkout HEAD -- "${path}"
+            ls -lh "${path}"
+          done
+          df -h .
+          du -sh scripts description archive 2>/dev/null || true
 
       - name: Install Cursor CLI
-        if: steps.scan.outputs.missing_count != '0' || inputs.repos != ''
+        if: steps.scan.outputs.missing_count != '0'
         run: |
           curl https://cursor.com/install -fsS | bash
           echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
 
       - name: Enable Max Mode
-        if: steps.scan.outputs.missing_count != '0' || inputs.repos != ''
+        if: steps.scan.outputs.missing_count != '0'
         run: |
           mkdir -p "$HOME/.cursor"
           cat > "$HOME/.cursor/cli-config.json" <<'EOF'
@@ -94,22 +221,26 @@ jobs:
           }
           EOF
           echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
+          rm -rf "$HOME/.cursor/projects" "$HOME/.cursor/chats" \
+                 "$HOME/.cursor/ai-tracking" "$HOME/.cursor/agent-transcripts" \
+                 /tmp/cursor* 2>/dev/null || true
+          echo "TMPDIR=${RUNNER_TEMP:-/tmp}" >> "$GITHUB_ENV"
+          df -h
 
       - name: Configure git
-        if: steps.scan.outputs.missing_count != '0' || inputs.repos != ''
+        if: steps.scan.outputs.missing_count != '0'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Fill missing descriptions via Cursor CLI
         id: generate
-        if: steps.scan.outputs.missing_count != '0' || inputs.repos != ''
+        if: steps.scan.outputs.missing_count != '0'
         continue-on-error: true
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
-          DESC_REPOS: ${{ inputs.repos }}
-          DESC_MODEL: ${{ inputs.model }}
-          DESC_LIMIT: ${{ inputs.limit }}
+          DESC_REPOS: ${{ steps.scan.outputs.repos }}
+          DESC_MODEL: ${{ steps.opts.outputs.model }}
           GIT_PUSH_BRANCH: main
         run: |
           set -euo pipefail
@@ -124,22 +255,15 @@ jobs:
           fi
 
           agent --version || true
+          df -h
 
-          ARGS=(--model "$DESC_MODEL" --commit-every 1)
-
-          if [ "$DESC_LIMIT" != "0" ]; then
-            ARGS+=(--limit "$DESC_LIMIT")
-          fi
-
-          if [ -n "$DESC_REPOS" ]; then
-            ARGS+=(--repos-env DESC_REPOS)
-          fi
-
-          # No --repos-env ⇒ script scans archive/ and only fills missing descriptions.
-          python3 scripts/generate-descriptions-cli.py "${ARGS[@]}"
+          python3 scripts/generate-descriptions-cli.py \
+            --model "$DESC_MODEL" \
+            --commit-every 1 \
+            --repos-env DESC_REPOS
 
       - name: Final commit (any remainder)
-        if: steps.scan.outputs.missing_count != '0' || inputs.repos != ''
+        if: steps.scan.outputs.missing_count != '0'
         run: |
           set -euo pipefail
           # Per-repo commits already ran inside the script; this catches leftovers.
