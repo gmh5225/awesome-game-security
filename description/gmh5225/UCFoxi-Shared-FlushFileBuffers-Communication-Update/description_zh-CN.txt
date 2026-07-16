@@ -1,0 +1,4 @@
+本项目是一个内核与用户态通信示例，将 \Driver\PEAUTH 上的 IRP_MJ_FLUSH_BUFFERS 用作触发器，而真正的请求数据存放在共享用户缓冲区中。
+驱动入口会解析目标驱动对象，用 InterlockedExchangePointer 替换 MajorFunction[IRP_MJ_FLUSH_BUFFERS]，并从 \Registry\Machine\SOFTWARE\ucflash 下的注册表值重新加载共享缓冲区指针与客户端 PID。
+该 hook 通过 MmCopyVirtualMemory 复制 REQUEST_DATA 块，轮换 magic 值以保持会话同步，并经由基于物理内存访问代码的辅助回调分发读、写、保护、分配、释放、模块与主基址等操作。
+它主要面向 Windows 内核研究者，用于比较基于劫持 IRP 路径、由注册表初始化的共享缓冲区以及轻量级内核内存服务的替代驱动通信通道。
