@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Discover GitHub repos related to awesome-game-security themes, review them
-with Cursor CLI (two passes), edit README.md only when confirmed, and open a PR.
+with Cursor CLI (two passes), edit README.md only when confirmed, and commit
+directly to main (Contents API — no git push / no PR).
 
 Flow:
   1. Build gh search queries from README.md `##` / `>` headings (+ topic boosters)
@@ -9,7 +10,7 @@ Flow:
   3. Cursor CLI pass 1 — relevance screen → screen.json (no README edits kept)
   4. Cursor CLI pass 2 — independent confirm + place into existing section
   5. Script validation gate (section exists, URL in README, ⊆ shortlist)
-  6. Open PR only if validated approvals remain (never push main)
+  6. Commit validated README edits to main via Contents API
 
 Prerequisites:
     curl https://cursor.com/install -fsS | bash
@@ -19,7 +20,7 @@ Prerequisites:
 Usage:
     python3 scripts/discover-repos-cli.py --list-queries
     python3 scripts/discover-repos-cli.py --dry-run
-    python3 scripts/discover-repos-cli.py --create-pr
+    python3 scripts/discover-repos-cli.py --commit
 """
 
 from __future__ import annotations
@@ -1395,69 +1396,6 @@ def _unapproved_added_readme_urls(
     return extras
 
 
-def build_pr_body(decision: dict[str, Any], screen: dict[str, Any] | None) -> str:
-    approved = decision.get("approved") or []
-    rejected = decision.get("rejected") or []
-    screen_rejected = (screen or {}).get("rejected") or []
-    lines = [
-        "## Summary",
-        "",
-        f"Two-pass Cursor CLI review proposes **{len(approved)}** new repo(s).",
-        "",
-        "- Pass 1: relevance shortlist vs README taxonomy",
-        "- Pass 2: independent re-confirm + placement into an existing section",
-        "- Script gate: section must exist and URL must appear in README",
-        "",
-        "Please review each entry before merge.",
-        "",
-        "## Approved (pass 2 confirmed)",
-        "",
-    ]
-    if not approved:
-        lines.append("_None_")
-    else:
-        for item in approved:
-            if not isinstance(item, dict):
-                continue
-            url = item.get("url") or f"https://github.com/{item.get('fullName', '')}"
-            section = item.get("section") or "(unspecified section)"
-            reason = item.get("reason") or ""
-            desc = item.get("description") or ""
-            lines.append(f"- {url}")
-            if desc:
-                lines.append(f"  - description: {desc}")
-            lines.append(f"  - section: `{section}`")
-            if reason:
-                lines.append(f"  - reason: {reason}")
-    lines.extend(
-        ["", "<details>", "<summary>Rejected in pass 2 / validation</summary>", ""]
-    )
-    if not rejected:
-        lines.append("_None_")
-    else:
-        for item in rejected:
-            if not isinstance(item, dict):
-                continue
-            lines.append(
-                f"- `{item.get('fullName') or '?'}` — {item.get('reason') or ''}"
-            )
-    lines.extend(["", "</details>", ""])
-    lines.extend(
-        ["<details>", "<summary>Rejected in pass 1 (relevance screen)</summary>", ""]
-    )
-    if not screen_rejected:
-        lines.append("_None_")
-    else:
-        for item in screen_rejected:
-            if not isinstance(item, dict):
-                continue
-            lines.append(
-                f"- `{item.get('fullName') or '?'}` — {item.get('reason') or ''}"
-            )
-    lines.extend(["", "</details>", ""])
-    return "\n".join(lines)
-
-
 def _proc_err_text(proc: subprocess.CompletedProcess[Any]) -> str:
     err = proc.stderr or ""
     out = proc.stdout or ""
@@ -1495,6 +1433,10 @@ def _is_transient_git_remote_error(err: str) -> bool:
             "secondary rate",
             "rate limit",
             "abuse detection",
+            "http 409",
+            "error 409",
+            "sha does not match",
+            "sha wasn't supplied",
         )
     )
 
@@ -1560,47 +1502,6 @@ def _api_with_retries(label: str, fn: Any, *, attempts: int = 5) -> Any:
     sys.exit(f"ERROR: {label} failed: {last_err[:400]}")
 
 
-def ensure_remote_branch_from_main(repo: str, branch: str) -> str:
-    """
-    Point refs/heads/<branch> at current main (create or force-reset).
-    Avoids git push against this ~2.5GB repo (pack protocol HTTP 500s in Actions).
-    """
-    main = gh_api_json(f"repos/{repo}/git/ref/heads/main")
-    main_sha = (main or {}).get("object", {}).get("sha")
-    if not main_sha:
-        sys.exit("ERROR: cannot resolve main SHA via API")
-
-    ref_path = f"repos/{repo}/git/ref/heads/{branch}"
-    try:
-        existing = gh_api_json(ref_path)
-    except RuntimeError as e:
-        if "404" not in str(e) and "Not Found" not in str(e):
-            raise
-        existing = None
-
-    if existing is None:
-        print(f"Creating branch {branch} at main ({main_sha[:12]}) via API ...")
-        gh_api_json(
-            f"repos/{repo}/git/refs",
-            method="POST",
-            body={"ref": f"refs/heads/{branch}", "sha": main_sha},
-        )
-    else:
-        cur = (existing or {}).get("object", {}).get("sha")
-        if cur != main_sha:
-            print(
-                f"Resetting {branch} {str(cur)[:12]} → main {main_sha[:12]} via API ..."
-            )
-            gh_api_json(
-                f"repos/{repo}/git/refs/heads/{branch}",
-                method="PATCH",
-                body={"sha": main_sha, "force": True},
-            )
-        else:
-            print(f"Branch {branch} already at main ({main_sha[:12]}).")
-    return main_sha
-
-
 def commit_readme_via_contents_api(
     repo: str,
     branch: str,
@@ -1655,146 +1556,61 @@ def commit_readme_via_contents_api(
     return commit_sha
 
 
-def publish_readme_branch_via_api(
-    branch: str,
-    *,
-    commit_message: str,
-    readme_text: str,
-) -> None:
-    """Create/reset branch from main and commit README — no `git push`."""
-    repo = github_repo_slug()
-
-    def _publish() -> None:
-        ensure_remote_branch_from_main(repo, branch)
-        commit_readme_via_contents_api(
-            repo,
-            branch,
-            commit_message=commit_message,
-            readme_text=readme_text,
-        )
-
-    _api_with_retries(f"publish {branch}", _publish)
-
-
-def create_pr_on_github(
-    *,
-    title: str,
-    body: str,
-    branch: str,
-    attempts: int = 4,
-) -> str:
-    last_err = ""
-    for attempt in range(1, attempts + 1):
-        proc = _gh(
-            "pr",
-            "create",
-            "--title",
-            title,
-            "--body",
-            body,
-            "--base",
-            "main",
-            "--head",
-            branch,
-            check=False,
-            timeout=120,
-        )
-        if proc.returncode == 0:
-            url = (proc.stdout or "").strip().splitlines()[-1] if proc.stdout else ""
-            if url:
-                return url
-            last_err = "gh pr create succeeded but printed no URL"
-        else:
-            last_err = _proc_err_text(proc)
-            low = last_err.lower()
-            # Branch already has an open PR — recover its URL instead of failing.
-            if "already exists" in low or "pull request already exists" in low:
-                view = _gh(
-                    "pr",
-                    "view",
-                    branch,
-                    "--json",
-                    "url",
-                    "--jq",
-                    ".url",
-                    check=False,
-                    timeout=60,
-                )
-                existing = (view.stdout or "").strip()
-                if view.returncode == 0 and existing:
-                    print(f"PR already exists for {branch}: {existing}")
-                    return existing
-            print(
-                f"gh pr create failed (attempt {attempt}/{attempts}): "
-                f"{last_err[:300]}"
-            )
-            if attempt < attempts and _is_transient_git_remote_error(last_err):
-                delay = min(2**attempt, 20)
-                print(f"Transient API error — retrying in {delay}s ...")
-                time.sleep(delay)
-                continue
-            break
-    sys.exit(f"ERROR: gh pr create failed: {last_err[:400]}")
-
-
-def create_pr(
+def commit_to_main(
     decision: dict[str, Any],
-    run_id: str,
-    screen: dict[str, Any] | None = None,
+    *,
+    run_id: str = "",
 ) -> str | None:
     """
-    Open a PR with the working-tree README.md changes.
+    Commit validated README.md edits directly to main via the Contents API.
 
-    Uses GitHub Contents/Git Refs API (not `git push`). This repo is multi-GB;
-    Actions `git push` repeatedly hits HTTP 500 on the pack protocol even for a
-    one-file README commit.
+    Avoids `git push` (this repo is multi-GB; pack protocol 500s in Actions).
     """
     approved = [a for a in (decision.get("approved") or []) if isinstance(a, dict)]
     if not approved:
-        print("No validated approved repos — skipping PR.")
+        print("No validated approved repos — skipping commit.")
         return None
     if not decision.get("validated"):
-        print("Decision not script-validated — refusing PR.")
+        print("Decision not script-validated — refusing commit.")
         return None
     if not readme_has_diff():
-        print("README.md unchanged — skipping PR.")
+        print("README.md unchanged — skipping commit.")
         return None
 
     readme_text = README_PATH.read_text(encoding="utf-8", errors="replace")
     for item in approved:
         url = item_github_url(item)
         if not url or not readme_contains_url(url, readme_text):
-            print(f"Refusing PR: approved URL missing from README: {url}")
+            print(f"Refusing commit: approved URL missing from README: {url}")
             return None
 
-    day = date.today().strftime("%Y%m%d")
-    safe_run = re.sub(r"[^A-Za-z0-9._-]", "", run_id) or "local"
-    branch = f"discover/{day}-{safe_run}"
     n = len(approved)
-    msg = f"discover: propose {n} repo(s) via Cursor CLI (2-pass)"
-    title = f"discover: propose {n} new repo(s)"
-    body = build_pr_body(decision, screen)
+    safe_run = re.sub(r"[^A-Za-z0-9._-]", "", run_id) or "local"
+    msg = f"discover: add {n} repo(s) via Cursor CLI (2-pass) [{safe_run}]"
 
-    # Drop accidental agent side-effects before we snapshot README for the API.
     discard_side_effects()
     readme_text = README_PATH.read_text(encoding="utf-8", errors="replace")
     if not readme_has_diff():
-        print("README.md unchanged after cleanup — skipping PR.")
+        print("README.md unchanged after cleanup — skipping commit.")
         return None
 
-    try:
-        publish_readme_branch_via_api(
-            branch,
+    repo = github_repo_slug()
+
+    def _commit() -> str:
+        return commit_readme_via_contents_api(
+            repo,
+            "main",
             commit_message=msg,
             readme_text=readme_text,
         )
-        url = create_pr_on_github(title=title, body=body, branch=branch)
+
+    try:
+        sha = _api_with_retries("commit README to main", _commit)
     finally:
-        # Remote branch holds the change; keep the Actions workspace clean.
         revert_readme()
 
-    print(f"PR_URL={url}")
-    return url or None
+    print(f"COMMIT_SHA={sha}")
+    return sha or None
 
 
 def run_two_pass_review(
@@ -1974,7 +1790,7 @@ def main() -> None:
         "--dry-run",
         action="store_true",
         default=False,
-        help="Discovery + two-pass prompt preview; no agent / PR",
+        help="Discovery + two-pass prompt preview; no agent / commit",
     )
     parser.add_argument(
         "--discover-only",
@@ -1983,10 +1799,16 @@ def main() -> None:
         help="Write candidates.json and exit (no agent)",
     )
     parser.add_argument(
+        "--commit",
+        action="store_true",
+        default=False,
+        help="After 2-pass validation, commit README.md directly to main (Contents API)",
+    )
+    parser.add_argument(
         "--create-pr",
         action="store_true",
         default=False,
-        help="After 2-pass validation, commit README on a branch and open a PR",
+        help=argparse.SUPPRESS,  # deprecated alias for --commit
     )
     parser.add_argument("--run-id", type=str, default="")
     parser.add_argument(
@@ -2063,7 +1885,7 @@ def main() -> None:
     if args.dry_run:
         print("\nDiscovery complete — dry-run two-pass prompt preview.")
         run_two_pass_review("agent", args.model, candidates, dry_run=True)
-        print("[DRY-RUN] agents + PR skipped.")
+        print("[DRY-RUN] agents + commit skipped.")
         return
 
     if not candidates:
@@ -2074,7 +1896,7 @@ def main() -> None:
     get_api_key()
     agent_bin = find_agent_bin()
     print(f"\nModel: {args.model}")
-    screen, decision = run_two_pass_review(
+    _screen, decision = run_two_pass_review(
         agent_bin, args.model, candidates, dry_run=False
     )
     if decision is None:
@@ -2086,12 +1908,16 @@ def main() -> None:
         f"validated={bool(decision.get('validated'))}"
     )
 
-    if not args.create_pr:
-        print("README/decision left in working tree (--create-pr not set).")
+    do_commit = bool(args.commit or args.create_pr)
+    if args.create_pr and not args.commit:
+        print("note: --create-pr is deprecated; committing directly to main.")
+
+    if not do_commit:
+        print("README/decision left in working tree (--commit not set).")
         return
 
     if not approved or not decision.get("validated"):
-        print("No validated approvals — not opening PR.")
+        print("No validated approvals — not committing.")
         revert_readme()
         cleanup_runtime_files(keep_decision=False)
         return
@@ -2101,13 +1927,13 @@ def main() -> None:
         or os.environ.get("GITHUB_RUN_ID", "").strip()
         or "local"
     )
-    url = create_pr(decision, run_id, screen=screen)
+    sha = commit_to_main(decision, run_id=run_id)
     cleanup_runtime_files(keep_decision=False)
     discard_side_effects()
-    if url:
-        print(f"Opened PR: {url}")
+    if sha:
+        print(f"Committed to main: {sha}")
     else:
-        print("No PR opened.")
+        print("No commit created.")
         revert_readme()
 
 

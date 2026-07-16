@@ -1,12 +1,11 @@
 name: Discover Repos (Cursor CLI)
 
 # Scan GitHub for theme-related repos using README headings, then run TWO
-# Cursor CLI passes (relevance screen → confirm + placement). A PR is opened
-# only if both passes agree, the target section already exists, and the URL
-# is present in README.md. Human review still required before merge.
+# Cursor CLI passes (relevance screen → confirm + placement). Validated
+# approvals are committed directly to main via the Contents API.
 #
 # Triggers:
-# - schedule: daily 08:00 UTC
+# - schedule: every 3 hours
 # - workflow_dispatch: tunable lookback / limits / model / queries
 #
 # Secret safety:
@@ -15,15 +14,15 @@ name: Discover Repos (Cursor CLI)
 
 on:
   schedule:
-    # 08:00 UTC daily
-    - cron: "0 8 * * *"
+    # Every 3 hours at minute 0 UTC (00:00, 03:00, 06:00, ...)
+    - cron: "0 */3 * * *"
 
   workflow_dispatch:
     inputs:
       lookback_days:
         description: "Only repos pushed within this many days"
         required: false
-        default: "3"
+        default: "1"
       max_candidates:
         description: "Max candidates after merge/dedupe"
         required: false
@@ -47,7 +46,8 @@ on:
 
 concurrency:
   group: discover-repos
-  cancel-in-progress: false
+  # Runs can exceed the interval; cancel the older one if still going.
+  cancel-in-progress: true
 
 jobs:
   discover:
@@ -55,7 +55,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
 
     steps:
       - name: Assert canonical repository
@@ -77,7 +76,7 @@ jobs:
           esac
 
       # Shallow + sparse: this repo is multi-GB (archive/). Discover only needs
-      # README + scripts + skills. PR publish uses Contents API (no git push).
+      # README + scripts + skills. Commits use Contents API (no git push).
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
@@ -102,7 +101,8 @@ jobs:
             MODEL="${{ inputs.model }}"
             QUERIES="${{ inputs.queries }}"
           else
-            LOOKBACK="3"
+            # Scheduled cadence: short lookback is enough.
+            LOOKBACK="1"
             MAX_CAND="30"
             MIN_STARS="3"
             MAX_QUERIES="300"
@@ -165,11 +165,11 @@ jobs:
 
       - name: Configure git
         run: |
-          # Identity only — discover opens PRs via gh Contents/Refs API, not git push.
+          # Identity for local working-tree ops; remote commits use Contents API.
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Discover + 2-pass review + open PR
+      - name: Discover + 2-pass review + commit to main
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           GH_TOKEN: ${{ github.token }}
@@ -200,7 +200,7 @@ jobs:
             --min-stars "$MIN_STARS"
             --max-queries "$MAX_QUERIES"
             --model "$DESC_MODEL"
-            --create-pr
+            --commit
             --run-id "${GITHUB_RUN_ID}"
           )
 
