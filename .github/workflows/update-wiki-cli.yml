@@ -4,7 +4,7 @@ name: Update Wiki (Cursor CLI)
 # Modes: bootstrap | ingest | lint | skill-sync | auto
 #
 # Triggers:
-# - schedule: daily auto (bootstrap if empty, else ingest pending, else lint)
+# - schedule: every 3 hours (bootstrap if empty, else ingest pending, else lint)
 # - workflow_dispatch: manual mode / limit / topics / repos / sync_skills
 # - pull_request: same-repo only; README / description_en / skills path filters
 #   (orchestrator bootstraps first if wiki/overviews is empty)
@@ -16,8 +16,8 @@ name: Update Wiki (Cursor CLI)
 
 on:
   schedule:
-    # 06:00 UTC daily
-    - cron: "0 6 * * *"
+    # Every 3 hours at minute 0 UTC (00:00, 03:00, 06:00, ...)
+    - cron: "0 */3 * * *"
 
   workflow_dispatch:
     inputs:
@@ -55,7 +55,8 @@ on:
       - ".claude/skills/**"
 
 concurrency:
-  group: update-wiki-${{ github.event.pull_request.number || github.run_id }}
+  # PRs isolated per number; schedule/dispatch share one group so overlaps cancel.
+  group: update-wiki-${{ github.event.pull_request.number || 'scheduled' }}
   cancel-in-progress: true
 
 jobs:
