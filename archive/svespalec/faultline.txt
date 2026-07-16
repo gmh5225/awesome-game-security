@@ -1,0 +1,1845 @@
+Project Path: arc_svespalec_faultline_1ujqm_q2
+
+Source Tree:
+
+```txt
+arc_svespalec_faultline_1ujqm_q2
+├── CMakeLists.txt
+├── README.md
+├── anticheat
+│   ├── CMakeLists.txt
+│   ├── engine.hxx
+│   ├── faultline.cxx
+│   ├── faultline.hxx
+│   ├── main.cxx
+│   ├── module_checker.cxx
+│   ├── module_checker.hxx
+│   ├── stack_walk.cxx
+│   ├── stack_walk.hxx
+│   ├── working_set_engine.cxx
+│   └── working_set_engine.hxx
+├── host
+│   ├── CMakeLists.txt
+│   └── main.cxx
+├── injector
+│   ├── CMakeLists.txt
+│   └── main.cxx
+├── payload
+│   ├── CMakeLists.txt
+│   └── main.cxx
+└── shared
+    ├── CMakeLists.txt
+    ├── defines.hxx
+    ├── logger.hxx
+    ├── safe_handle.hxx
+    ├── stdafx.hxx
+    └── utils.hxx
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required( VERSION 4.1 )
+project( faultline LANGUAGES CXX )
+
+set( CMAKE_CXX_STANDARD 23 )
+set( CMAKE_CXX_STANDARD_REQUIRED ON )
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
+set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
+
+add_subdirectory( shared )
+add_subdirectory( anticheat )
+add_subdirectory( host )
+add_subdirectory( injector )
+add_subdirectory( payload )
+
+```
+
+`README.md`:
+
+```md
+# Faultline
+
+An anticheat proof of concept that detects execution from manually mapped memory by monitoring working set page faults and walking the call stack of suspicious threads.
+
+## How it works
+
+Windows tracks page faults per process through the working set watch API (`InitializeProcessForWsWatch` / `GetWsChangesEx`). Every time a page is brought into the working set, the OS records the instruction pointer (`FaultingPc`) that triggered the fault.
+
+Faultline polls these events, checks whether each `FaultingPc` falls within a known loaded module, and flags execution from memory regions that are executable but not backed by any module in the PEB. When a suspicious fault is detected, the faulting thread is suspended and its stack is walked to capture the full call chain.
+
+This catches code that was injected via manual mapping, shellcode injection, or similar techniques where the executable memory is never registered with the Windows loader.
+
+A naive mapper trips the event path on the first execute. A smarter mapper allocates `PAGE_READWRITE`, populates pages via `WriteProcessMemory` (kernel-serviced, no user-mode `FaultingPc`) and flips to `PAGE_EXECUTE_READ` afterward, so the first execute never soft-faults. Faultline also polls `QueryWorkingSet` -- sibling of `GetWsChangesEx` in the same working-set API -- and flags any resident executable page outside every loaded module. Private pre-paged regions show up here even though no fault event was ever recorded for them.
+
+
+```mermaid
+flowchart LR
+  subgraph Attacker["Attacker (external process)"]
+    A1[Manual map DLL]
+    A2[Write shellcode]
+    A3[SetThreadContext]
+    A4[APC injection]
+  end
+
+  subgraph Target["Target process"]
+    B[Execution from\nunregistered memory]
+    C[Page fault]
+    D[OS records FaultingPc\nin working set buffer]
+  end
+
+  subgraph Faultline
+    E[Poll GetWsChangesEx]
+    F{FaultingPc in\nknown module?}
+    G[Suspend thread\n+ stack walk]
+    H[Flagged]
+  end
+
+  A1 --> B
+  A2 --> B
+  A3 --> B
+  A4 --> B
+  B --> C --> D --> E --> F
+  F -- No --> G --> H
+  F -- Yes --> I[Ignore]
+```
+
+## Catching thread hijacks from usermode
+
+This also covers thread hijacking. If an external process redirects a thread via `SetThreadContext` / `NtSetContextThread`, APC injection, or similar into injected memory, the page fault still fires. The `FaultingPc` still lands outside any known module, and faultline catches it.
+
+What's actually being detected is the side effect: execution from memory that isn't backed by a loaded module, not the redirection itself. There's no kernel callback for context changes, and ETW can trace the relevant syscalls but that's indirect at best. Faultline skips the interception problem entirely and just watches where threads end up executing. If it's unregistered memory and it faults a page, it's visible.
+
+## Components
+
+| Directory  | Description |
+|------------|-------------|
+| `anticheat/`  | Core detection DLL. Monitors working set faults, classifies memory regions, walks stacks |
+| `host/`    | Minimal target process that loads the detection DLL |
+| `injector/`| Manual mapper that injects the test payload into the host process |
+| `payload/` | Test DLL that executes from manually mapped memory to trigger detection |
+| `shared/`  | Common headers (logger, RAII handles, utilities) |
+
+## Usage
+
+1. Start `host.exe`
+2. Run `injector.exe` in a separate terminal
+3. The host console will log any detected suspicious execution along with stack traces
+
+The injector supports two modes:
+
+- **Remote thread** (default): `injector.exe` creates a new thread in the host via `CreateRemoteThread`
+- **Thread hijack**: `injector.exe --hijack` redirects an existing host thread via `SetThreadContext`
+
+Both trigger detection, but the host runs a background game loop thread that serves as the hijack target
+
+## Demo
+
+https://github.com/user-attachments/assets/333cd0b7-32e7-4dbb-8cbe-7b2b7125527e
+
+## Limitations
+
+- The event path (`GetWsChangesEx`) only fires on in-process-instruction faults -- cross-process writes and other kernel-initiated page-ins don't appear in its buffer. The snapshot path (`QueryWorkingSet`) compensates, but it can only flag regions that are resident *and* currently executable at poll time.
+- Detection is reactive. By the time the fault is observed, the injected code has already run.
+- Code caves or patches within legitimate modules will not be caught since the `FaultingPc` resolves to a known module range.
+- The poll-based design means short lived threads may exit before a stack walk can be performed.
+- Module stomping (writing code into an unused section of a legitimately-loaded DLL) is not caught. The `FaultingPc` and the current per-page protection both resolve inside a known module range; Faultline trusts that range.
+- `EnumProcessModules` reads the PEB loader list. An injected payload that forges an `LDR_DATA_TABLE_ENTRY` for its own region makes itself look like a loaded module, and every subsequent check treats it as known.
+- Both paths run in the target's address space with the same privileges as the payload. An in-process attacker can unload the DLL, patch `Running`, hook `GetWsChangesEx` / `QueryWorkingSet`, or drain the WS buffer before Faultline polls.
+- Kernel-mode or hypervisor-resident cheats can dispatch without ever faulting a user-mode VA, or clear the `EPROCESS` working-set-watch state directly. Usermode working-set signals go dark.
+- The snapshot path intentionally skips `MEM_IMAGE` pages to avoid racing the loader during DLL load. Cheats that manually map via `NtCreateSection(SEC_IMAGE)` land as `MEM_IMAGE` and won't be flagged without hash or path verification of the backing file.
+
+```
+
+`anticheat/CMakeLists.txt`:
+
+```txt
+add_library( anticheat SHARED
+  main.cxx
+  faultline.cxx
+  module_checker.cxx
+  stack_walk.cxx
+  working_set_engine.cxx
+)
+
+target_link_libraries( anticheat PRIVATE shared )
+target_include_directories( anticheat PRIVATE ${CMAKE_SOURCE_DIR} )
+target_precompile_headers( anticheat PRIVATE ${CMAKE_SOURCE_DIR}/shared/stdafx.hxx )
+target_compile_definitions( anticheat PRIVATE FAULTLINE_EXPORT )
+target_compile_options( anticheat PRIVATE /W4 /WX )
+
+```
+
+`anticheat/engine.hxx`:
+
+```hxx
+#pragma once
+
+class IEngine {
+public:
+  virtual ~IEngine() = default;
+  virtual void Start() = 0;
+  virtual void Stop() = 0;
+};
+
+```
+
+`anticheat/faultline.cxx`:
+
+```cxx
+#include <shared/stdafx.hxx>
+#include "faultline.hxx"
+#include "working_set_engine.hxx"
+
+void Faultline::Start() {
+  if ( !Engines.empty() ) {
+    return;
+  }
+
+  //
+  // Set up the symbol engine for stack resolution
+  //
+  SymSetOptions( SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS );
+  SymInitialize( GetCurrentProcess(), nullptr, TRUE );
+
+  //
+  // Register and start all engines
+  //
+  Engines.push_back( std::make_unique<WorkingSetEngine>( Checker ) );
+
+  for ( auto& Engine : Engines ) {
+    Engine->Start();
+  }
+
+  LOG_OK( "Faultline started" );
+}
+
+void Faultline::Stop() {
+  //
+  // Stop engines in reverse order
+  //
+  for ( auto It = Engines.rbegin(); It != Engines.rend(); ++It ) {
+    ( *It )->Stop();
+  }
+
+  Engines.clear();
+
+  SymCleanup( GetCurrentProcess() );
+
+  LOG_INFO( "Faultline stopped" );
+}
+
+```
+
+`anticheat/faultline.hxx`:
+
+```hxx
+#pragma once
+
+#include "engine.hxx"
+#include "module_checker.hxx"
+
+class Faultline {
+public:
+  void Start();
+  void Stop();
+
+private:
+  ModuleChecker Checker;
+  std::vector<std::unique_ptr<IEngine>> Engines;
+};
+
+```
+
+`anticheat/main.cxx`:
+
+```cxx
+#include <shared/stdafx.hxx>
+#include "faultline.hxx"
+
+static Faultline Instance;
+
+ANTICHEAT_API void StartFaultline() {
+  Instance.Start();
+}
+
+ANTICHEAT_API void StopFaultline() {
+  Instance.Stop();
+}
+
+```
+
+`anticheat/module_checker.cxx`:
+
+```cxx
+#include <shared/stdafx.hxx>
+#include <shared/utils.hxx>
+#include "module_checker.hxx"
+
+std::string_view PcInfo::AllocationTypeName() const noexcept {
+  switch ( AllocationType ) {
+    case MEM_IMAGE:
+      return "MEM_IMAGE";
+    case MEM_MAPPED:
+      return "MEM_MAPPED";
+    case MEM_PRIVATE:
+      return "MEM_PRIVATE";
+    default:
+      return "MEM_UNKNOWN";
+  }
+}
+
+void ModuleChecker::Refresh() {
+  auto Process = GetCurrentProcess();
+  DWORD BytesNeeded = 0;
+
+  if ( !EnumProcessModules( Process, nullptr, 0, &BytesNeeded ) || BytesNeeded == 0 ) {
+    Ranges.clear();
+    return;
+  }
+
+  std::vector<HMODULE> Modules( BytesNeeded / sizeof( HMODULE ) );
+
+  if ( !EnumProcessModules( Process, Modules.data(),
+    static_cast<DWORD>( Modules.size() * sizeof( HMODULE ) ),
+    &BytesNeeded ) ) {
+    Ranges.clear();
+    return;
+  }
+
+  Modules.resize( BytesNeeded / sizeof( HMODULE ) );
+
+  std::vector<ModuleRange> Next;
+  Next.reserve( Modules.size() );
+
+  for ( auto Mod : Modules ) {
+    MODULEINFO Info{};
+
+    if ( !GetModuleInformation( Process, Mod, &Info, sizeof( Info ) ) ) {
+      continue;
+    }
+
+    auto Base = reinterpret_cast<std::uintptr_t>( Info.lpBaseOfDll );
+
+    Next.push_back( { Base, Base + Info.SizeOfImage } );
+  }
+
+  std::ranges::sort( Next, {}, &ModuleRange::Base );
+
+  Ranges = std::move( Next );
+}
+
+bool ModuleChecker::IsKnownPc( std::uintptr_t Pc ) const {
+  //
+  // If we have no modules, don't silently trust everything
+  //
+  if ( Ranges.empty() ) {
+    return false;
+  }
+
+  //
+  // Ranges are sorted by Base. upper_bound finds the first module that
+  // starts *after* Pc, then we step back one, if Pc is inside any
+  // module, it has to be that one. Then check Pc < End to confirm
+  //
+  auto It = std::ranges::upper_bound( Ranges, Pc, {}, &ModuleRange::Base );
+
+  if ( It == Ranges.begin() ) {
+    return false;
+  }
+
+  --It;
+
+  return Pc < It->End;
+}
+
+PcInfo ModuleChecker::Classify( std::uintptr_t Pc ) const {
+  PcInfo Result{
+    .Pc = Pc,
+    .WithinKnownModule = IsKnownPc( Pc ),
+  };
+
+  MEMORY_BASIC_INFORMATION PageInfo{};
+
+  if ( VirtualQuery( reinterpret_cast<void*>( Pc ), &PageInfo, sizeof( PageInfo ) ) == 0 ) {
+    return Result;
+  }
+
+  Result.RegionBase     = reinterpret_cast<std::uintptr_t>( PageInfo.BaseAddress );
+  Result.RegionEnd      = Result.RegionBase + PageInfo.RegionSize;
+  Result.AllocationBase = reinterpret_cast<std::uintptr_t>( PageInfo.AllocationBase );
+  Result.Protection     = PageInfo.Protect;
+  Result.AllocationType = PageInfo.Type;
+  Result.Executable     = PageInfo.State == MEM_COMMIT && IsExecutablePage( PageInfo.Protect );
+
+  return Result;
+}
+
+```
+
+`anticheat/module_checker.hxx`:
+
+```hxx
+#pragma once
+
+#include <psapi.h>
+
+#pragma comment( lib, "psapi.lib" )
+
+struct ModuleRange {
+  std::uintptr_t Base{};
+  std::uintptr_t End{}; // Base + SizeOfImage
+};
+
+struct PcInfo {
+  std::uintptr_t Pc{};
+
+  std::uintptr_t RegionBase{};
+  std::uintptr_t RegionEnd{};
+  std::uintptr_t AllocationBase{};
+
+  unsigned long Protection{};
+  unsigned long AllocationType{};
+
+  bool WithinKnownModule{};
+  bool Executable{};
+
+  [[nodiscard]] bool Suspicious() const noexcept {
+    return Executable && !WithinKnownModule;
+  }
+
+  [[nodiscard]] std::string_view AllocationTypeName() const noexcept;
+};
+
+class ModuleChecker {
+public:
+  // Rebuild the sorted range table from the current module list.
+  void Refresh();
+
+  // Classify the memory backing a PC against the current module snapshot.
+  [[nodiscard]] PcInfo Classify( std::uintptr_t Pc ) const;
+
+  // Check whether a PC falls within a known module range.
+  [[nodiscard]] bool IsKnownPc( std::uintptr_t Pc ) const;
+
+private:
+  std::vector<ModuleRange> Ranges; // sorted by Base
+};
+
+```
+
+`anticheat/stack_walk.cxx`:
+
+```cxx
+#include <shared/stdafx.hxx>
+#include <shared/utils.hxx>
+#include "stack_walk.hxx"
+
+constexpr std::size_t MaxFrames = 64;
+
+std::vector<StackFrame> CaptureStack( std::uintptr_t ThreadId, const ModuleChecker& Checker ) {
+  std::vector<StackFrame> Frames{};
+
+  //
+  // Open the target thread for stack inspection.
+  //
+  constexpr auto Access = THREAD_SUSPEND_RESUME
+                        | THREAD_GET_CONTEXT
+                        | THREAD_QUERY_INFORMATION;
+
+  SafeHandle Target( OpenThread( Access, FALSE, static_cast<DWORD>( ThreadId ) ) );
+
+  if ( !Target ) {
+    LOG_ERROR( "Failed to open thread {}", ThreadId );
+    return Frames;
+  }
+
+  //
+  // Freeze the thread so we can safely read its context.
+  //
+  if ( SuspendThread( Target ) == static_cast<DWORD>( -1 ) ) {
+    LOG_ERROR( "Failed to suspend thread {}", ThreadId );
+    return Frames;
+  }
+
+  CONTEXT Ctx{};
+  Ctx.ContextFlags = CONTEXT_FULL;
+
+  if ( !GetThreadContext( Target, &Ctx ) ) {
+    LOG_ERROR( "Failed to get context for thread {}", ThreadId );
+    ResumeThread( Target );
+    return Frames;
+  }
+
+  //
+  // Set up the initial stack frame from the thread's registers.
+  //
+  STACKFRAME64 Sf{};
+
+  Sf.AddrPC.Offset    = Ctx.Rip;
+  Sf.AddrPC.Mode      = AddrModeFlat;
+  Sf.AddrFrame.Offset = Ctx.Rbp;
+  Sf.AddrFrame.Mode   = AddrModeFlat;
+  Sf.AddrStack.Offset = Ctx.Rsp;
+  Sf.AddrStack.Mode   = AddrModeFlat;
+
+  auto Process = GetCurrentProcess();
+
+  Frames.reserve( MaxFrames );
+
+  //
+  // Walk the call stack frame by frame.
+  //
+  for ( std::size_t I = 0; I < MaxFrames; ++I ) {
+    if ( !StackWalk64(
+      IMAGE_FILE_MACHINE_AMD64,
+      Process,
+      Target,
+      &Sf, &Ctx, nullptr,
+      SymFunctionTableAccess64,
+      SymGetModuleBase64,
+      nullptr ) ) {
+      break;
+    }
+
+    if ( Sf.AddrPC.Offset == 0 ) {
+      break;
+    }
+
+    auto Pc = static_cast<std::uintptr_t>( Sf.AddrPC.Offset );
+
+    //
+    // Stop at obviously bogus frames from corrupted stacks (e.g. after thread hijack).
+    // Below 64K is never valid usermode code, above 0x7FFF'FFFFFFFF is kernel space,
+    // and 0xCCCCCCCC is just MSVC uninitialized stack fill.
+    //
+    if ( Pc < 0x10000 || Pc > 0x7FFF'FFFFFFFF || ( Pc & 0xFFFFFFFF ) == 0xCCCCCCCC ) {
+      break;
+    }
+
+    Frames.push_back( {
+      .Pc                = Pc,
+      .WithinKnownModule = Checker.IsKnownPc( Pc ),
+      .ModuleName        = ModuleNameFromAddress( Pc ),
+    } );
+  }
+
+  ResumeThread( Target );
+
+  return Frames;
+}
+
+```
+
+`anticheat/stack_walk.hxx`:
+
+```hxx
+#pragma once
+
+#include "module_checker.hxx"
+
+#include <dbghelp.h>
+
+#pragma comment( lib, "dbghelp.lib" )
+
+struct StackFrame {
+  std::uintptr_t Pc{};
+  bool WithinKnownModule{};
+  std::string ModuleName{};
+};
+
+[[nodiscard]] std::vector<StackFrame> CaptureStack( std::uintptr_t ThreadId, const ModuleChecker& Checker );
+
+```
+
+`anticheat/working_set_engine.cxx`:
+
+```cxx
+#include <shared/stdafx.hxx>
+#include <shared/utils.hxx>
+#include "working_set_engine.hxx"
+
+#include <tlhelp32.h>
+
+constexpr std::size_t BufferEntries = 4096;
+constexpr int RefreshEvery = 50; // Re-enumerate modules every N polls
+constexpr DWORD PollIntervalMs = 100;
+
+//
+// Static buffer to avoid large per-call stack allocations
+//
+static PSAPI_WS_WATCH_INFORMATION_EX WatchBuffer[ BufferEntries ]{};
+
+[[nodiscard]] static std::string_view ProtectionName( unsigned long Protection ) noexcept {
+  switch ( Protection & 0xFFu ) {
+    case PAGE_EXECUTE:
+      return "PAGE_EXECUTE";
+    case PAGE_EXECUTE_READ:
+      return "PAGE_EXECUTE_READ";
+    case PAGE_EXECUTE_READWRITE:
+      return "PAGE_EXECUTE_READWRITE";
+    case PAGE_EXECUTE_WRITECOPY:
+      return "PAGE_EXECUTE_WRITECOPY";
+    case PAGE_READONLY:
+      return "PAGE_READONLY";
+    case PAGE_READWRITE:
+      return "PAGE_READWRITE";
+    default:
+      return "PAGE_UNKNOWN";
+  }
+}
+
+WorkingSetEngine::WorkingSetEngine( ModuleChecker& Checker )
+  : Checker( Checker )
+{
+  //
+  // Required once per process before GetWsChangesEx reports entries
+  //
+  if ( !InitializeProcessForWsWatch( GetCurrentProcess() ) ) {
+    LOG_ERROR( "InitializeProcessForWsWatch failed: {}", GetLastError() );
+  }
+}
+
+void WorkingSetEngine::Start() {
+  if ( Thread ) {
+    return;
+  }
+
+  Running = true;
+
+  Thread.Handle = CreateThread( nullptr, 0, ThreadProc, this, 0, nullptr );
+
+  if ( !Thread ) {
+    LOG_ERROR( "WorkingSetEngine: failed to create thread: {}", GetLastError() );
+    Running = false;
+    return;
+  }
+
+  LOG_OK( "WorkingSetEngine started" );
+}
+
+void WorkingSetEngine::Stop() {
+  Running = false;
+
+  if ( Thread ) {
+    WaitForSingleObject( Thread, 2000 );
+  }
+
+  LOG_INFO( "WorkingSetEngine stopped" );
+}
+
+DWORD WINAPI WorkingSetEngine::ThreadProc( LPVOID Param ) {
+  auto* Self = static_cast<WorkingSetEngine*>( Param );
+
+  Self->Poll();
+
+  return 0;
+}
+
+void WorkingSetEngine::Poll() {
+  int Iteration = 0;
+
+  while ( Running ) {
+    if ( Iteration % RefreshEvery == 0 ) {
+      Checker.Refresh();
+    }
+
+    ++Iteration;
+
+    auto BufBytes = static_cast<DWORD>( BufferEntries * sizeof( PSAPI_WS_WATCH_INFORMATION_EX ) );
+
+    if ( GetWsChangesEx( GetCurrentProcess(), WatchBuffer, &BufBytes ) ) {
+      auto Count = static_cast<std::size_t>( BufBytes ) / sizeof( PSAPI_WS_WATCH_INFORMATION_EX );
+      ProcessEntries( Count );
+    } else if ( GetLastError() == ERROR_MORE_DATA ) {
+      //
+      // Buffer overflowed, some faults were lost. Process what we got
+      //
+      LOG_WARN( "Working set watch buffer overflow, some faults were lost" );
+
+      auto Count = static_cast<std::size_t>( BufBytes ) / sizeof( PSAPI_WS_WATCH_INFORMATION_EX );
+      ProcessEntries( Count );
+    }
+
+    Sleep( PollIntervalMs );
+  }
+}
+
+void WorkingSetEngine::ProcessEntries( std::size_t Count ) {
+  for ( std::size_t I = 0; I < Count; ++I ) {
+    const auto& Entry = WatchBuffer[ I ];
+    auto Pc = reinterpret_cast<std::uintptr_t>( Entry.BasicInfo.FaultingPc );
+    auto Va = reinterpret_cast<std::uintptr_t>( Entry.BasicInfo.FaultingVa );
+
+    if ( Pc == 0 && Va == 0 ) {
+      break;
+    }
+
+    if ( Pc == 0 ) {
+      continue; // no user-mode PC to classify
+    }
+
+    auto Info = Checker.Classify( Pc );
+
+    if ( Info.Suspicious() ) {
+      OnSuspiciousPc( Info, static_cast<std::uintptr_t>( Entry.FaultingThreadId ) );
+    }
+  }
+
+  ScanWorkingSet();
+}
+
+void WorkingSetEngine::OnSuspiciousPc(
+  const PcInfo& Info,
+  std::uintptr_t Tid
+) {
+  if ( FlaggedAllocBases.contains( Info.AllocationBase ) ) {
+    return;
+  }
+  FlaggedAllocBases.insert( Info.AllocationBase );
+
+  LOG_INFO( "---------------------- Detection ----------------------" );
+  LOG_ERROR( "Suspicious execution @ PC {:#018x}", Info.Pc );
+  LOG_INFO( "TID: {}", Tid );
+  LOG_INFO( "Region: [{:#018x} - {:#018x}]", Info.RegionBase, Info.RegionEnd );
+  LOG_INFO( "Alloc base: {:#018x}", Info.AllocationBase );
+  LOG_INFO( "Type: {}", Info.AllocationTypeName() );
+  LOG_INFO( "Protection: {} ({:#010x})", ProtectionName( Info.Protection ), Info.Protection );
+
+  auto Frames = CaptureStack( Tid, Checker );
+
+  if ( Frames.empty() ) {
+    LOG_INFO( "Stack: failed or thread already exited" );
+    LOG_INFO( "------------------------------------------------------" );
+    return;
+  }
+
+  LOG_INFO( "Stack ({} frames):", Frames.size() );
+
+  for ( std::size_t I = 0; I < Frames.size(); ++I ) {
+    const auto& F = Frames[ I ];
+    auto Label = F.ModuleName.empty() ? "???" : F.ModuleName;
+
+    LOG_INFO( " [{}] {:#018x} [{}]{}",
+      I, F.Pc, Label,
+      F.WithinKnownModule ? "" : " <-- OUTSIDE KNOWN MODULE"
+    );
+  }
+
+  LOG_INFO( "------------------------------------------------------" );
+}
+
+//
+// Find a thread with any stack frame inside the region. RIP alone misses
+// payloads blocked in Sleep / WaitForSingle / etc.
+//
+static DWORD FindThreadInRegion(
+  std::uintptr_t Begin,
+  std::uintptr_t End,
+  const ModuleChecker& Checker,
+  std::vector<StackFrame>& OutFrames
+) {
+  SafeHandle Snap( CreateToolhelp32Snapshot( TH32CS_SNAPTHREAD, 0 ) );
+
+  if ( !Snap ) {
+    return 0;
+  }
+
+  DWORD MyPid = GetCurrentProcessId();
+  DWORD MyTid = GetCurrentThreadId();
+
+  THREADENTRY32 Entry{};
+  Entry.dwSize = sizeof( Entry );
+
+  if ( !Thread32First( Snap, &Entry ) ) {
+    return 0;
+  }
+
+  do {
+    if ( Entry.th32OwnerProcessID != MyPid ) {
+      continue;
+    }
+
+    if ( Entry.th32ThreadID == MyTid ) {
+      continue;
+    }
+
+    auto Frames = CaptureStack(
+      static_cast<std::uintptr_t>( Entry.th32ThreadID ),
+      Checker
+    );
+
+    for ( const auto& F : Frames ) {
+      if ( F.Pc >= Begin && F.Pc < End ) {
+        OutFrames = std::move( Frames );
+        return Entry.th32ThreadID;
+      }
+    }
+  } while ( Thread32Next( Snap, &Entry ) );
+
+  return 0;
+}
+
+void WorkingSetEngine::ScanWorkingSet() {
+  //
+  // QueryWorkingSet covers pages the event stream doesn't report -- most
+  // notably cross-process writes for the RW -> RX manual-map flow. Buffer
+  // grows on ERROR_BAD_LENGTH, NumberOfEntries is the required count.
+  //
+  static std::vector<std::uint8_t> Buffer(
+    sizeof( ULONG_PTR ) + 16384 * sizeof( PSAPI_WORKING_SET_BLOCK )
+  );
+
+  auto Info = reinterpret_cast<PSAPI_WORKING_SET_INFORMATION*>( Buffer.data() );
+
+  while ( !QueryWorkingSet( GetCurrentProcess(), Info, static_cast<DWORD>( Buffer.size() ) ) ) {
+    if ( GetLastError() != ERROR_BAD_LENGTH ) {
+      LOG_ERROR( "QueryWorkingSet failed: {}", GetLastError() );
+      return;
+    }
+
+    auto Needed = sizeof( ULONG_PTR )
+                + ( Info->NumberOfEntries + 1024 ) * sizeof( PSAPI_WORKING_SET_BLOCK );
+    Buffer.resize( Needed );
+    Info = reinterpret_cast<PSAPI_WORKING_SET_INFORMATION*>( Buffer.data() );
+  }
+
+  for ( ULONG_PTR I = 0; I < Info->NumberOfEntries; ++I ) {
+    const auto& Block = Info->WorkingSetInfo[ I ];
+
+    //
+    // Bit 1 is the execute bit across every variant of the 5-bit PTE
+    // encoding (plain, guard, non-cacheable, and combinations).
+    //
+    if ( ( Block.Protection & 0x2u ) == 0 ) {
+      continue;
+    }
+
+    std::uintptr_t Page = static_cast<std::uintptr_t>( Block.VirtualPage ) << 12;
+
+    if ( Checker.IsKnownPc( Page ) ) {
+      continue;
+    }
+
+    //
+    // Cache miss may just mean a DLL mapped RX but not yet linked into
+    // PEB.Ldr -- GetModuleHandleEx can't see those either. Allocation
+    // type is stable across that window: legit modules are MEM_IMAGE,
+    // our VirtualAlloc'd target is MEM_PRIVATE.
+    //
+    MEMORY_BASIC_INFORMATION Mbi{};
+
+    if ( VirtualQuery( reinterpret_cast<void*>( Page ), &Mbi, sizeof( Mbi ) ) != sizeof( Mbi ) ) {
+      continue;
+    }
+
+    if ( Mbi.Type == MEM_IMAGE ) {
+      continue;
+    }
+
+    OnSuspiciousRegion( Page );
+  }
+}
+
+void WorkingSetEngine::OnSuspiciousRegion( std::uintptr_t Page ) {
+  auto Info = Checker.Classify( Page );
+
+  if ( FlaggedAllocBases.contains( Info.AllocationBase ) ) {
+    return;
+  }
+  FlaggedAllocBases.insert( Info.AllocationBase );
+
+  LOG_INFO( "---------------------- Detection ----------------------" );
+  LOG_ERROR( "Suspicious executable region @ {:#018x}", Page );
+  LOG_INFO( "Region: [{:#018x} - {:#018x}]", Info.RegionBase, Info.RegionEnd );
+  LOG_INFO( "Alloc base: {:#018x}", Info.AllocationBase );
+  LOG_INFO( "Type: {}", Info.AllocationTypeName() );
+  LOG_INFO( "Protection: {} ({:#010x})", ProtectionName( Info.Protection ), Info.Protection );
+  LOG_INFO( "Source: WS snapshot" );
+
+  std::vector<StackFrame> Frames;
+  auto Tid = FindThreadInRegion( Info.RegionBase, Info.RegionEnd, Checker, Frames );
+
+  if ( Tid == 0 ) {
+    LOG_INFO( "No thread currently in region (finished or not yet started)" );
+    LOG_INFO( "------------------------------------------------------" );
+    return;
+  }
+
+  LOG_INFO( "Executing thread: {}", Tid );
+
+  LOG_INFO( "Stack ({} frames):", Frames.size() );
+
+  for ( std::size_t I = 0; I < Frames.size(); ++I ) {
+    const auto& F = Frames[ I ];
+    auto Label = F.ModuleName.empty() ? "???" : F.ModuleName;
+
+    LOG_INFO( " [{}] {:#018x} [{}]{}",
+      I, F.Pc, Label,
+      F.WithinKnownModule ? "" : " <-- OUTSIDE KNOWN MODULE"
+    );
+  }
+
+  LOG_INFO( "------------------------------------------------------" );
+}
+
+```
+
+`anticheat/working_set_engine.hxx`:
+
+```hxx
+#pragma once
+
+#include "engine.hxx"
+#include "module_checker.hxx"
+#include "stack_walk.hxx"
+
+#include <unordered_set>
+
+class WorkingSetEngine : public IEngine {
+public:
+  explicit WorkingSetEngine( ModuleChecker& Checker );
+
+  void Start() override;
+  void Stop() override;
+
+private:
+  static DWORD WINAPI ThreadProc( LPVOID Param );
+
+  void Poll();
+  void ProcessEntries( std::size_t Count );
+  void OnSuspiciousPc( const PcInfo& Info, std::uintptr_t Tid );
+  void ScanWorkingSet();
+  void OnSuspiciousRegion( std::uintptr_t Page );
+
+  ModuleChecker& Checker;
+  SafeHandle Thread;
+  std::atomic<bool> Running = false;
+
+  //
+  // Allocation bases already reported, used to dedupe across both the
+  // Pc-based event path and the full-WS snapshot path.
+  //
+  std::unordered_set<std::uintptr_t> FlaggedAllocBases;
+};
+
+```
+
+`host/CMakeLists.txt`:
+
+```txt
+add_executable( host main.cxx )
+
+target_link_libraries( host PRIVATE shared )
+target_precompile_headers( host PRIVATE ${CMAKE_SOURCE_DIR}/shared/stdafx.hxx )
+
+```
+
+`host/main.cxx`:
+
+```cxx
+#include <shared/stdafx.hxx>
+
+using FaultlineFn = void( * )();
+
+//
+// Fake game loop that runs on its own thread.
+// Gives the injector a stable, long-lived thread to hijack.
+//
+static DWORD GameTid = 0;
+
+static DWORD WINAPI GameThread( LPVOID ) {
+  GameTid = GetCurrentThreadId();
+
+  LOG_STEP( "Game thread started (TID {})", GameTid );
+
+  while ( true ) {
+    Sleep( 16 ); // ~60 fps tick
+  }
+
+  return 0;
+}
+
+//
+// Publish the game thread TID via named shared memory so the injector can find the right thread to hijack
+//
+static SafeHandle SharedMapping;
+
+static void PublishGameTid() {
+  SharedMapping.Handle = CreateFileMappingA(
+    INVALID_HANDLE_VALUE,
+    nullptr,
+    PAGE_READWRITE,
+    0,
+    sizeof( DWORD ),
+    "FaultlineGameTid"
+  );
+
+  if ( !SharedMapping ) {
+    return;
+  }
+
+  auto* Ptr = static_cast<DWORD*>(
+    MapViewOfFile( SharedMapping, FILE_MAP_WRITE, 0, 0, sizeof( DWORD ) )
+  );
+
+  if ( Ptr ) {
+    *Ptr = GameTid;
+    UnmapViewOfFile( Ptr );
+
+    LOG_OK( "Published game thread TID {} via shared memory", GameTid );
+  }
+}
+
+int main() {
+  auto Dll = LoadLibraryA( "anticheat.dll" );
+
+  if ( !Dll ) {
+    std::printf( "Failed to load anticheat.dll: %lu\n", GetLastError() );
+    return 1;
+  }
+
+  auto Start = reinterpret_cast<FaultlineFn>( GetProcAddress( Dll, "StartFaultline" ) );
+  auto Stop = reinterpret_cast<FaultlineFn>( GetProcAddress( Dll, "StopFaultline" ) );
+
+  if ( !Start || !Stop ) {
+    std::printf( "Failed to resolve exports: %lu\n", GetLastError() );
+    return 1;
+  }
+
+  Start();
+
+  //
+  // Spin up a game thread for the injector to hijack
+  //
+  SafeHandle Game( CreateThread( nullptr, 0, GameThread, nullptr, 0, nullptr ) );
+
+  //
+  // Give the game thread time to start, then publish its TID
+  //
+  Sleep( 100 );
+
+  PublishGameTid();
+
+  //
+  // Keep the host alive while faultline runs
+  //
+  std::getchar();
+
+  Stop();
+
+  return 0;
+}
+
+```
+
+`injector/CMakeLists.txt`:
+
+```txt
+add_executable( injector main.cxx )
+
+target_link_libraries( injector PRIVATE shared )
+target_precompile_headers( injector PRIVATE ${CMAKE_SOURCE_DIR}/shared/stdafx.hxx )
+target_compile_options( injector PRIVATE /W4 /WX )
+
+```
+
+`injector/main.cxx`:
+
+```cxx
+#include <shared/stdafx.hxx>
+
+#include <tlhelp32.h>
+
+//
+// Find the PID of the first process matching a given name
+//
+static DWORD FindPid( const char* Name ) {
+  SafeHandle Snapshot( CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 ) );
+
+  if ( Snapshot.Handle == INVALID_HANDLE_VALUE ) {
+    return 0;
+  }
+
+  PROCESSENTRY32 Entry{};
+  Entry.dwSize = sizeof( Entry );
+
+  if ( !Process32First( Snapshot, &Entry ) ) {
+    return 0;
+  }
+
+  do {
+    if ( _stricmp( Entry.szExeFile, Name ) == 0 ) {
+      return Entry.th32ProcessID;
+    }
+  } while ( Process32Next( Snapshot, &Entry ) );
+
+  return 0;
+}
+
+//
+// Find a thread in the target process that we can hijack.
+// Skips the main thread (lowest TID) and picks the first other one,
+// which should be the game loop thread.
+//
+//
+// Read the game thread TID from the host's named shared memory section.
+//
+static DWORD FindHijackableThread() {
+  LOG_STEP( "Reading target thread ID from shared memory" );
+
+  SafeHandle Mapping( OpenFileMappingA( FILE_MAP_READ, FALSE, "FaultlineGameTid" ) );
+
+  if ( !Mapping ) {
+    LOG_ERROR( "Shared memory section not found (is the host running?)" );
+    return 0;
+  }
+
+  auto* Ptr = static_cast<DWORD*>(
+    MapViewOfFile( Mapping, FILE_MAP_READ, 0, 0, sizeof( DWORD ) )
+  );
+
+  if ( !Ptr ) {
+    return 0;
+  }
+
+  DWORD Tid = *Ptr;
+  UnmapViewOfFile( Ptr );
+
+  LOG_OK( "Resolved game thread TID {} from host", Tid );
+
+  return Tid;
+}
+
+struct MapResult {
+  BYTE* RemoteBase = nullptr;
+  DWORD ExportRva = 0;
+};
+
+static MapResult ManualMap( HANDLE Process, const char* DllPath ) {
+  MapResult Result{};
+
+  //
+  // Read the raw PE from disk
+  //
+  SafeHandle File( CreateFileA(
+    DllPath,
+    GENERIC_READ,
+    FILE_SHARE_READ,
+    nullptr,
+    OPEN_EXISTING,
+    0,
+    nullptr
+  ) );
+
+  if ( File.Handle == INVALID_HANDLE_VALUE ) {
+    LOG_ERROR( "CreateFileA failed: {}", GetLastError() );
+    return Result;
+  }
+
+  DWORD FileSize = GetFileSize( File, nullptr );
+  std::vector<BYTE> Raw( FileSize );
+  DWORD BytesRead = 0;
+
+  ReadFile( File, Raw.data(), FileSize, &BytesRead, nullptr );
+
+  //
+  // Validate PE signatures
+  //
+  auto* Dos = reinterpret_cast<IMAGE_DOS_HEADER*>( Raw.data() );
+
+  if ( Dos->e_magic != IMAGE_DOS_SIGNATURE ) {
+    LOG_ERROR( "Invalid DOS signature" );
+    return Result;
+  }
+
+  auto* Nt = reinterpret_cast<IMAGE_NT_HEADERS*>( Raw.data() + Dos->e_lfanew );
+
+  if ( Nt->Signature != IMAGE_NT_SIGNATURE ) {
+    LOG_ERROR( "Invalid NT signature" );
+    return Result;
+  }
+
+  //
+  // Allocate RW, write, then flip to RX. Kernel services the
+  // WriteProcessMemory fault so no user-mode FaultingPc is recorded.
+  //
+  auto* Remote = reinterpret_cast<BYTE*>( VirtualAllocEx(
+    Process,
+    nullptr,
+    Nt->OptionalHeader.SizeOfImage,
+    MEM_COMMIT | MEM_RESERVE,
+    PAGE_READWRITE
+  ) );
+
+  if ( !Remote ) {
+    LOG_ERROR( "VirtualAllocEx failed: {}", GetLastError() );
+    return Result;
+  }
+
+  LOG_INFO( "Remote allocation: {:#018x} ({} bytes)",
+    reinterpret_cast<std::uintptr_t>( Remote ),
+    Nt->OptionalHeader.SizeOfImage
+  );
+
+  //
+  // Build the in-memory image locally before copying it over
+  //
+  std::vector<BYTE> Image( Nt->OptionalHeader.SizeOfImage, 0 );
+
+  // PE headers
+  std::memcpy( Image.data(), Raw.data(), Nt->OptionalHeader.SizeOfHeaders );
+
+  // Sections
+  auto* Section = IMAGE_FIRST_SECTION( Nt );
+
+  for ( WORD I = 0; I < Nt->FileHeader.NumberOfSections; ++I, ++Section ) {
+    if ( Section->SizeOfRawData && Section->PointerToRawData ) {
+      std::memcpy(
+        Image.data() + Section->VirtualAddress,
+        Raw.data() + Section->PointerToRawData,
+        Section->SizeOfRawData
+      );
+    }
+  }
+
+  //
+  // Apply base relocations if we didn't land at the preferred base
+  //
+  auto Delta = reinterpret_cast<std::intptr_t>( Remote )
+             - static_cast<std::intptr_t>( Nt->OptionalHeader.ImageBase );
+
+  if ( Delta ) {
+    auto& Dir = Nt->OptionalHeader.DataDirectory[ IMAGE_DIRECTORY_ENTRY_BASERELOC ];
+
+    if ( Dir.VirtualAddress && Dir.Size ) {
+      auto* Block = reinterpret_cast<IMAGE_BASE_RELOCATION*>(
+        Image.data() + Dir.VirtualAddress
+      );
+
+      auto* End = reinterpret_cast<IMAGE_BASE_RELOCATION*>(
+        Image.data() + Dir.VirtualAddress + Dir.Size
+      );
+
+      while ( Block < End && Block->SizeOfBlock > 0 ) {
+        DWORD Count = ( Block->SizeOfBlock - sizeof( IMAGE_BASE_RELOCATION ) ) / sizeof( WORD );
+        auto* Entries = reinterpret_cast<WORD*>( Block + 1 );
+
+        for ( DWORD J = 0; J < Count; ++J ) {
+          if ( ( Entries[ J ] >> 12 ) == IMAGE_REL_BASED_DIR64 ) {
+            auto* Patch = reinterpret_cast<std::intptr_t*>(
+              Image.data() + Block->VirtualAddress + ( Entries[ J ] & 0x0FFF )
+            );
+
+            *Patch += Delta;
+          }
+        }
+
+        Block = reinterpret_cast<IMAGE_BASE_RELOCATION*>(
+          reinterpret_cast<BYTE*>( Block ) + Block->SizeOfBlock
+        );
+      }
+    }
+  }
+
+  //
+  // Resolve imports by looking up functions in our own process.
+  // System DLLs (kernel32, ntdll, etc.) are loaded at the same base
+  // address across all processes in a session, so the pointers we
+  // write into the IAT are valid in the target process too.
+  // This only works for system DLLs that share a base across processes.
+  // Non-system DLLs or DLLs not loaded in the target will produce bad pointers.
+  //
+  auto& ImportDir = Nt->OptionalHeader.DataDirectory[ IMAGE_DIRECTORY_ENTRY_IMPORT ];
+
+  if ( ImportDir.VirtualAddress && ImportDir.Size ) {
+    auto* Desc = reinterpret_cast<IMAGE_IMPORT_DESCRIPTOR*>(
+      Image.data() + ImportDir.VirtualAddress
+    );
+
+    for ( ; Desc->Name; ++Desc ) {
+      auto* DllName = reinterpret_cast<char*>( Image.data() + Desc->Name );
+
+      HMODULE Dll = LoadLibraryA( DllName );
+
+      if ( !Dll ) {
+        LOG_ERROR( "LoadLibraryA({}) failed: {}", DllName, GetLastError() );
+        continue;
+      }
+
+      LOG_STEP( "Resolving imports from {}", DllName );
+
+      // Prefer OriginalFirstThunk when present
+      DWORD OrigRva = Desc->OriginalFirstThunk
+                    ? Desc->OriginalFirstThunk
+                    : Desc->FirstThunk;
+
+      auto* Orig = reinterpret_cast<IMAGE_THUNK_DATA*>( Image.data() + OrigRva );
+      auto* Thunk = reinterpret_cast<IMAGE_THUNK_DATA*>( Image.data() + Desc->FirstThunk );
+
+      for ( ; Orig->u1.AddressOfData; ++Orig, ++Thunk ) {
+        FARPROC Fn = nullptr;
+
+        if ( IMAGE_SNAP_BY_ORDINAL( Orig->u1.Ordinal ) ) {
+          Fn = GetProcAddress( Dll, MAKEINTRESOURCEA( IMAGE_ORDINAL( Orig->u1.Ordinal ) ) );
+        } else {
+          auto* Ibn = reinterpret_cast<IMAGE_IMPORT_BY_NAME*>(
+            Image.data() + static_cast<std::size_t>( Orig->u1.AddressOfData & 0xFFFF'FFFFull )
+          );
+
+          Fn = GetProcAddress( Dll, Ibn->Name );
+
+          if ( !Fn ) {
+            LOG_ERROR( "Missing import: {}", Ibn->Name );
+          }
+        }
+
+        Thunk->u1.Function = reinterpret_cast<ULONGLONG>( Fn );
+      }
+    }
+  }
+
+  //
+  // Find the PayloadRun export in the images export table
+  //
+  auto& ExportDir = Nt->OptionalHeader.DataDirectory[ IMAGE_DIRECTORY_ENTRY_EXPORT ];
+
+  if ( ExportDir.VirtualAddress && ExportDir.Size ) {
+    auto* Exp = reinterpret_cast<IMAGE_EXPORT_DIRECTORY*>(
+      Image.data() + ExportDir.VirtualAddress
+    );
+
+    auto* Names = reinterpret_cast<DWORD*>( Image.data() + Exp->AddressOfNames );
+    auto* Ordinals = reinterpret_cast<WORD*>( Image.data() + Exp->AddressOfNameOrdinals );
+    auto* Functions = reinterpret_cast<DWORD*>( Image.data() + Exp->AddressOfFunctions );
+
+    for ( DWORD I = 0; I < Exp->NumberOfNames; ++I ) {
+      auto* Sym = reinterpret_cast<char*>( Image.data() + Names[ I ] );
+
+      if ( std::strcmp( Sym, "PayloadRun" ) == 0 ) {
+        Result.ExportRva = Functions[ Ordinals[ I ] ];
+        LOG_INFO( "PayloadRun RVA: {:#010x}", Result.ExportRva );
+        break;
+      }
+    }
+  }
+
+  if ( !Result.ExportRva ) {
+    LOG_ERROR( "Export PayloadRun not found" );
+    VirtualFreeEx( Process, Remote, 0, MEM_RELEASE );
+    return Result;
+  }
+
+  //
+  // Write the fully fixed-up image into the target!
+  //
+  SIZE_T Written = 0;
+
+  if ( !WriteProcessMemory( Process, Remote, Image.data(), Image.size(), &Written ) ) {
+    LOG_ERROR( "WriteProcessMemory failed: {}", GetLastError() );
+    VirtualFreeEx( Process, Remote, 0, MEM_RELEASE );
+    Result.ExportRva = 0;
+
+    return Result;
+  }
+
+  LOG_OK( "Wrote {} bytes to target", Written );
+
+  //
+  // Flip to RX. Pages are already resident so no execute-fault fires.
+  //
+  DWORD OldProtect = 0;
+
+  if ( !VirtualProtectEx(
+    Process,
+    Remote,
+    Nt->OptionalHeader.SizeOfImage,
+    PAGE_EXECUTE_READ,
+    &OldProtect
+  ) ) {
+    LOG_ERROR( "VirtualProtectEx (RX) failed: {}", GetLastError() );
+    VirtualFreeEx( Process, Remote, 0, MEM_RELEASE );
+    Result.ExportRva = 0;
+
+    return Result;
+  }
+
+  LOG_OK( "Protection flipped to PAGE_EXECUTE_READ" );
+
+  Result.RemoteBase = Remote;
+
+  return Result;
+}
+
+static bool HijackThread( HANDLE Process, DWORD Tid, BYTE* Entry ) {
+  constexpr auto Access = THREAD_SUSPEND_RESUME
+                        | THREAD_GET_CONTEXT
+                        | THREAD_SET_CONTEXT;
+
+  SafeHandle Thread( OpenThread( Access, FALSE, Tid ) );
+
+  if ( !Thread ) {
+    LOG_ERROR( "OpenThread failed: {}", GetLastError() );
+    return false;
+  }
+
+  if ( SuspendThread( Thread ) == static_cast<DWORD>( -1 ) ) {
+    LOG_ERROR( "SuspendThread failed: {}", GetLastError() );
+    return false;
+  }
+
+  //
+  // Save the original context so we can restore it later
+  //
+  CONTEXT Original{};
+  Original.ContextFlags = CONTEXT_FULL;
+
+  if ( !GetThreadContext( Thread, &Original ) ) {
+    LOG_ERROR( "GetThreadContext failed: {}", GetLastError() );
+    ResumeThread( Thread );
+    return false;
+  }
+
+  LOG_INFO( "Original RIP: {:#018x}", Original.Rip );
+
+  //
+  // Spin stub: same RW -> RX pattern as the main image.
+  //
+  auto* Stub = reinterpret_cast<BYTE*>( VirtualAllocEx(
+    Process, nullptr, 4096, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE
+  ) );
+
+  if ( !Stub ) {
+    LOG_ERROR( "Failed to allocate spin stub: {}", GetLastError() );
+    ResumeThread( Thread );
+    return false;
+  }
+
+  BYTE SpinCode[] = { 0xEB, 0xFE }; // jmp $
+
+  WriteProcessMemory( Process, Stub, SpinCode, sizeof( SpinCode ), nullptr );
+
+  DWORD StubOldProtect = 0;
+
+  if ( !VirtualProtectEx( Process, Stub, 4096, PAGE_EXECUTE_READ, &StubOldProtect ) ) {
+    LOG_ERROR( "VirtualProtectEx (stub) failed: {}", GetLastError() );
+    VirtualFreeEx( Process, Stub, 0, MEM_RELEASE );
+    ResumeThread( Thread );
+    return false;
+  }
+
+  //
+  // Redirect the thread to the payload entry point
+  //
+  // x64 ABI needs 16-byte alignment before the call and 32 bytes of
+  // shadow space above the return address for RCX/RDX/R8/R9 spills
+  //
+  //   RSP+0   return address (spin stub)
+  //   RSP+8   shadow[0..3]
+  //   RSP+32  ...
+  //
+  CONTEXT Hijacked = Original;
+
+  Hijacked.Rsp &= ~0xFull;
+  Hijacked.Rsp -= 40; // 8 (return addr) + 32 (shadow space)
+  Hijacked.Rip = reinterpret_cast<DWORD64>( Entry );
+  Hijacked.Rcx = 0; // LPVOID param
+
+  //
+  // Write the spin stub address onto the stack as the return address
+  //
+  auto StubAddr = reinterpret_cast<DWORD64>( Stub );
+
+  WriteProcessMemory( Process, reinterpret_cast<void*>( Hijacked.Rsp ), &StubAddr, 8, nullptr );
+
+  if ( !SetThreadContext( Thread, &Hijacked ) ) {
+    LOG_ERROR( "SetThreadContext failed: {}", GetLastError() );
+    ResumeThread( Thread );
+    return false;
+  }
+
+  LOG_OK( "Hijacked TID {} -> RIP {:#018x}", Tid,
+    reinterpret_cast<std::uintptr_t>( Entry )
+  );
+
+  ResumeThread( Thread );
+
+  //
+  // Let the payload run and give faultline time to detect it.
+  // The payload sleeps for 2s internally, so we'll wait a bit longer.
+  //
+  Sleep( 3000 );
+
+  //
+  // Restore the original context so the game thread can resume normally
+  //
+  SuspendThread( Thread );
+  SetThreadContext( Thread, &Original );
+  ResumeThread( Thread );
+
+  VirtualFreeEx( Process, Stub, 0, MEM_RELEASE );
+
+  LOG_OK( "Restored original context for TID {}", Tid );
+
+  return true;
+}
+
+int main( int Argc, char** Argv ) {
+  bool Hijack = false;
+  std::vector<const char*> Positional;
+
+  for ( int I = 1; I < Argc; ++I ) {
+    if ( std::strcmp( Argv[ I ], "--hijack" ) == 0 ) {
+      Hijack = true;
+    } else {
+      Positional.push_back( Argv[ I ] );
+    }
+  }
+
+  const char* TargetName = Positional.size() > 0 ? Positional[ 0 ] : "host.exe";
+  const char* PayloadPath = Positional.size() > 1 ? Positional[ 1 ] : "payload.dll";
+
+  LOG_STEP( "Looking for {}", TargetName );
+  LOG_STEP( "Mode: {}", Hijack ? "thread hijack" : "remote thread" );
+
+  DWORD Pid = FindPid( TargetName );
+
+  if ( !Pid ) {
+    LOG_ERROR( "Process not found" );
+    return 1;
+  }
+
+  LOG_OK( "Found {} with PID {}", TargetName, Pid );
+
+  SafeHandle Process( OpenProcess( PROCESS_ALL_ACCESS, FALSE, Pid ) );
+
+  if ( !Process ) {
+    LOG_ERROR( "OpenProcess failed: {}", GetLastError() );
+    return 1;
+  }
+
+  LOG_STEP( "Manual-mapping {}", PayloadPath );
+
+  auto [ RemoteBase, ExportRva ] = ManualMap( Process, PayloadPath );
+
+  if ( !RemoteBase ) {
+    return 1;
+  }
+
+  auto* Entry = RemoteBase + ExportRva;
+
+  if ( Hijack ) {
+    //
+    // Find and hijack an existing thread in the target
+    //
+    DWORD Tid = FindHijackableThread();
+
+    if ( !Tid ) {
+      LOG_ERROR( "No hijackable thread found" );
+      return 1;
+    }
+
+    LOG_STEP( "Hijacking TID {} -> {:#018x}", Tid,
+      reinterpret_cast<std::uintptr_t>( Entry )
+    );
+
+    if ( !HijackThread( Process, Tid, Entry ) ) {
+      return 1;
+    }
+  } else {
+    //
+    // Default: create a new remote thread
+    //
+    LOG_STEP( "Creating remote thread at {:#018x}",
+      reinterpret_cast<std::uintptr_t>( Entry )
+    );
+
+    SafeHandle Thread( CreateRemoteThread(
+      Process, nullptr, 0,
+      reinterpret_cast<LPTHREAD_START_ROUTINE>( Entry ),
+      nullptr, 0, nullptr
+    ) );
+
+    if ( !Thread ) {
+      LOG_ERROR( "CreateRemoteThread failed: {}", GetLastError() );
+      return 1;
+    }
+
+    LOG_OK( "Thread created, waiting for completion" );
+
+    WaitForSingleObject( Thread, 10'000 );
+  }
+
+  LOG_OK( "Done" );
+
+  return 0;
+}
+
+```
+
+`payload/CMakeLists.txt`:
+
+```txt
+add_library( payload SHARED main.cxx )
+
+target_link_libraries( payload PRIVATE shared )
+target_include_directories( payload PRIVATE ${CMAKE_SOURCE_DIR} )
+target_precompile_headers( payload PRIVATE ${CMAKE_SOURCE_DIR}/shared/stdafx.hxx )
+target_compile_definitions( payload PRIVATE FAULTLINE_EXPORT )
+target_compile_options( payload PRIVATE /W4 /WX )
+
+```
+
+`payload/main.cxx`:
+
+```cxx
+#include <shared/stdafx.hxx>
+
+//
+// Payload entrypoint called by the injector via CreateRemoteThread or thread hijack.
+// The image is manually mapped so it won't appear in PEB module lists.
+//
+extern "C" __declspec( dllexport ) DWORD WINAPI PayloadRun( LPVOID ) {
+  LOG_WARN( "Payload executing from manually-mapped memory" );
+
+  //
+  // Stay alive long enough for the WS monitor to poll and stackwalk this thread
+  //
+  Sleep( 2000 );
+
+  return 0;
+}
+
+BOOL WINAPI DllMain( HINSTANCE, DWORD, LPVOID ) {
+  return TRUE;
+}
+
+```
+
+`shared/CMakeLists.txt`:
+
+```txt
+add_library( shared INTERFACE )
+target_include_directories( shared INTERFACE ${CMAKE_SOURCE_DIR} )
+
+```
+
+`shared/defines.hxx`:
+
+```hxx
+#pragma once
+
+// DLL projects set FAULTLINE_EXPORT in their CMakeLists.txt
+#ifdef FAULTLINE_EXPORT
+  #define ANTICHEAT_API extern "C" __declspec(dllexport)
+#else
+  #define ANTICHEAT_API extern "C" __declspec(dllimport)
+#endif
+
+```
+
+`shared/logger.hxx`:
+
+```hxx
+#pragma once
+
+enum class LogLevel {
+  Success,
+  Step,
+  Info,
+  Warn,
+  Error,
+};
+
+namespace Detail {
+  inline WORD ColorFor( LogLevel Level ) noexcept {
+    switch ( Level ) {
+      case LogLevel::Success: return FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+      case LogLevel::Step:    return FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+      case LogLevel::Info:    return FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+      case LogLevel::Warn:    return FOREGROUND_RED | FOREGROUND_GREEN;
+      case LogLevel::Error:   return FOREGROUND_RED | FOREGROUND_INTENSITY;
+      default:                return FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
+    }
+  }
+
+  inline std::string_view PrefixFor( LogLevel Level ) noexcept {
+    switch ( Level ) {
+      case LogLevel::Success: return "[+]";
+      case LogLevel::Step:    return "[*]";
+      case LogLevel::Info:    return "[~]";
+      case LogLevel::Warn:    return "[!]";
+      case LogLevel::Error:   return "[-]";
+      default:                return "[?]";
+    }
+  }
+
+  inline void WriteBytes( HANDLE Out, std::string_view Text ) noexcept {
+    DWORD Written = 0;
+    WriteFile( Out, Text.data(), static_cast<DWORD>( Text.size() ), &Written, nullptr );
+  }
+
+  inline void WriteLine( LogLevel Level, std::string_view Message ) noexcept {
+    auto Out = GetStdHandle( STD_OUTPUT_HANDLE );
+
+    if ( Out == INVALID_HANDLE_VALUE ) {
+      return;
+    }
+
+    //
+    // Color the prefix if we're writing to a real console.
+    //
+    DWORD Mode = 0;
+
+    bool IsConsole = GetConsoleMode( Out, &Mode ) != 0;
+
+    if ( IsConsole ) {
+      CONSOLE_SCREEN_BUFFER_INFO Info{};
+      bool HaveInfo = GetConsoleScreenBufferInfo( Out, &Info ) != 0;
+
+      SetConsoleTextAttribute( Out, ColorFor( Level ) );
+      WriteBytes( Out, PrefixFor( Level ) );
+
+      if ( HaveInfo ) {
+        SetConsoleTextAttribute( Out, Info.wAttributes );
+      }
+    } else {
+      WriteBytes( Out, PrefixFor( Level ) );
+    }
+
+    WriteBytes( Out, " " );
+    WriteBytes( Out, Message );
+    WriteBytes( Out, "\n" );
+  }
+
+  template <typename... Args>
+  void Log( LogLevel Level, std::format_string<Args...> Fmt, Args&&... A ) {
+    WriteLine( Level, std::format( Fmt, std::forward<Args>( A )... ) );
+  }
+
+  inline void Log( LogLevel Level, std::string_view Message ) {
+    WriteLine( Level, Message );
+  }
+} // namespace Detail
+
+#define LOG_OK( ... )    ::Detail::Log( LogLevel::Success, __VA_ARGS__ )
+#define LOG_STEP( ... )  ::Detail::Log( LogLevel::Step, __VA_ARGS__ )
+#define LOG_INFO( ... )  ::Detail::Log( LogLevel::Info, __VA_ARGS__ )
+#define LOG_WARN( ... )  ::Detail::Log( LogLevel::Warn, __VA_ARGS__ )
+#define LOG_ERROR( ... ) ::Detail::Log( LogLevel::Error, __VA_ARGS__ )
+
+```
+
+`shared/safe_handle.hxx`:
+
+```hxx
+#pragma once
+
+struct SafeHandle {
+  HANDLE Handle = nullptr;
+
+  SafeHandle() = default;
+  SafeHandle( HANDLE Handle ) : Handle( Handle ) {}
+
+  ~SafeHandle() {
+    if ( Handle && Handle != INVALID_HANDLE_VALUE ) {
+      CloseHandle( Handle );
+    }
+  }
+
+  SafeHandle( const SafeHandle& ) = delete;
+  SafeHandle& operator=( const SafeHandle& ) = delete;
+
+  operator HANDLE() const {
+    return Handle;
+  }
+
+  explicit operator bool() const {
+    return Handle != nullptr && Handle != INVALID_HANDLE_VALUE;
+  }
+};
+
+```
+
+`shared/stdafx.hxx`:
+
+```hxx
+#pragma once
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+
+#include <windows.h>
+
+#include <algorithm>
+#include <atomic>
+#include <iostream>
+#include <memory>
+#include <print>
+#include <string>
+#include <thread>
+#include <vector>
+
+#include "defines.hxx"
+#include "logger.hxx"
+#include "safe_handle.hxx"
+
+```
+
+`shared/utils.hxx`:
+
+```hxx
+#pragma once
+
+//
+// Checks whether the specified page protection has any execute bit set
+//
+inline bool IsExecutablePage( unsigned long Protection ) noexcept {
+  constexpr auto Mask = PAGE_EXECUTE
+                      | PAGE_EXECUTE_READ
+                      | PAGE_EXECUTE_READWRITE
+                      | PAGE_EXECUTE_WRITECOPY;
+
+  return ( Protection & Mask ) != 0;
+}
+
+//
+// Extract filename from a full path
+// "C:\Windows\System32\ntdll.dll" -> "ntdll.dll"
+//
+inline std::string FilenameFromPath( const char* Path ) {
+  std::string_view View( Path );
+
+  auto Pos = View.find_last_of( "\\/" );
+
+  if ( Pos != std::string_view::npos ) {
+    View = View.substr( Pos + 1 );
+  }
+
+  return std::string( View );
+}
+
+//
+// Get the module name for an address
+//
+inline std::string ModuleNameFromAddress( std::uintptr_t Address ) {
+  HMODULE Module = nullptr;
+
+  constexpr auto Flags = GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS
+                       | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT;
+
+  if ( !GetModuleHandleExA( Flags, reinterpret_cast<LPCSTR>( Address ), &Module ) ) {
+    return {};
+  }
+
+  char Path[MAX_PATH]{};
+
+  if ( !GetModuleFileNameA( Module, Path, MAX_PATH ) ) {
+    return {};
+  }
+
+  return FilenameFromPath( Path );
+}
+
+```
