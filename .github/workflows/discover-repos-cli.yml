@@ -4,6 +4,11 @@ name: Discover Repos (Cursor CLI)
 # Cursor CLI passes (relevance screen → confirm + placement). Validated
 # approvals are committed directly to main via the Contents API.
 #
+# After a successful Contents-API commit, this workflow explicitly dispatches
+# Auto Archive New Repos on Push (archive → EN description → translate).
+# That handoff is required because GITHUB_TOKEN commits do not trigger push
+# workflows (GitHub recursion guard); PR merges still use the normal push path.
+#
 # Triggers:
 # - schedule: every 3 hours
 # - workflow_dispatch: tunable lookback / limits / model / queries
@@ -55,6 +60,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      # Needed to gh-workflow-run auto-archive after Contents API commit.
+      actions: write
 
     steps:
       - name: Assert canonical repository
@@ -221,6 +228,46 @@ jobs:
             grep -E '^APPROVED_REPO=' "$LOG" | sed 's/^APPROVED_REPO=//' || true
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
+
+      # GITHUB_TOKEN Contents-API commits do not fire push workflows. Handoff
+      # archive → describe → translate via workflow_dispatch (allowed exception).
+      - name: Trigger archive + describe + translate
+        if: success() && steps.discover.outputs.commit_sha != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT_SHA: ${{ steps.discover.outputs.commit_sha }}
+          APPROVED_REPOS: ${{ steps.discover.outputs.approved_repos }}
+        run: |
+          set -euo pipefail
+          REPOS=()
+          while IFS= read -r line; do
+            line="$(printf '%s' "$line" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+            [ -z "$line" ] && continue
+            slug="${line%%|*}"
+            if [[ ! "$slug" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]]; then
+              echo "WARNING: skipping invalid approved slug: $slug"
+              continue
+            fi
+            REPOS+=("$slug")
+          done <<< "${APPROVED_REPOS}"
+
+          if [ "${#REPOS[@]}" -eq 0 ]; then
+            echo "Commit exists but no parseable APPROVED_REPO lines — not dispatching."
+            exit 0
+          fi
+
+          REPOS_INLINE=$(printf '%s ' "${REPOS[@]}" | xargs)
+          echo "Dispatching auto-archive-on-push.yml"
+          echo "  after_sha=${COMMIT_SHA}"
+          echo "  repos=${REPOS_INLINE}"
+
+          gh workflow run auto-archive-on-push.yml \
+            --repo "${GITHUB_REPOSITORY}" \
+            --ref main \
+            -f "repos=${REPOS_INLINE}" \
+            -f "after_sha=${COMMIT_SHA}"
+
+          echo "Dispatched Auto Archive pipeline for ${#REPOS[@]} repo(s)."
 
       - name: Notify Discord
         if: success()

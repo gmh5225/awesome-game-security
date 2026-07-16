@@ -1,16 +1,27 @@
 name: Auto Archive New Repos on Push
 
-# Pipeline on README.md push to main:
+# Pipeline after new README repo URLs land on main:
 #   1) auto-archive           → archive/{owner}/{repo}.txt
 #   2) generate-descriptions  → description/.../description_en.txt
 #   3) translate-descriptions → description/.../description_{lang}.txt
+#
+# Triggers:
+# - push: README.md changes on main (human commits / PR merges)
+# - workflow_dispatch: explicit handoff from Discover (and manual backfill)
+#
+# Why workflow_dispatch exists:
+# Discover commits README via Contents API with GITHUB_TOKEN. GitHub does NOT
+# start new workflow runs from GITHUB_TOKEN push events (recursion guard), so
+# the push trigger never fires for that path. Discover therefore dispatches
+# this workflow after a successful commit. workflow_dispatch IS allowed from
+# GITHUB_TOKEN (documented exception).
 #
 # No-op pushes (merge / README doc tweak / already-archived URLs):
 #   sparse-checkout README only → empty repo list → success, no full tree,
 #   generate/translate skipped. Avoids checkout failures on huge merges.
 #
 # Secret safety:
-# - Triggers only on push to main (not pull_request / pull_request_target).
+# - No pull_request / pull_request_target.
 # - Fork PRs never receive this repo's Actions secrets (GitHub platform rule).
 # - Forks do not inherit CURSOR_API_KEY; jobs below also refuse to run outside
 #   the canonical repo so a forked workflow cannot usefully bind our secret.
@@ -20,6 +31,21 @@ on:
       - main
     paths:
       - README.md   # only run when README changes
+
+  workflow_dispatch:
+    inputs:
+      repos:
+        description: "Space-separated owner/repo list (preferred for Discover handoff; empty = README diff)"
+        required: false
+        default: ""
+      after_sha:
+        description: "Commit SHA with README changes (empty = current main tip / push SHA)"
+        required: false
+        default: ""
+      before_sha:
+        description: "Optional before SHA for README diff when repos is empty"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -52,10 +78,16 @@ jobs:
       - name: Extract newly added GitHub repo URLs
         id: diff
         env:
+          EVENT_NAME: ${{ github.event_name }}
           # Push range on the remote tip — correct for merge commits too.
           # (HEAD~1..HEAD is first-parent only and misses/misfires on merges.)
-          BEFORE_SHA: ${{ github.event.before }}
-          AFTER_SHA: ${{ github.sha }}
+          # Prefer github.event.inputs (null on push) over inputs context.
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+          PUSH_AFTER_SHA: ${{ github.sha }}
+          INPUT_BEFORE_SHA: ${{ github.event.inputs.before_sha }}
+          INPUT_AFTER_SHA: ${{ github.event.inputs.after_sha }}
+          # Discover handoff / manual backfill — skip README diff when set.
+          REPOS_INPUT: ${{ github.event.inputs.repos }}
         run: |
           set -euo pipefail
 
@@ -64,8 +96,82 @@ jobs:
             echo "archive_repos=" >> "$GITHUB_OUTPUT"
           }
 
-          BEFORE="$BEFORE_SHA"
-          AFTER="$AFTER_SHA"
+          BEFORE="${INPUT_BEFORE_SHA:-${PUSH_BEFORE_SHA:-}}"
+          AFTER="${INPUT_AFTER_SHA:-${PUSH_AFTER_SHA:-}}"
+          REPOS_INPUT="${REPOS_INPUT:-}"
+
+          queue_from_slugs() {
+            local -a raw=("$@")
+            local -a repos=()
+            local -a archive_repos=()
+            local slug owner repo has_archive has_en
+            # Existence checks against checked-out tip (usually origin/main), not
+            # the discover after_sha — a later commit may already have archives.
+            local tip
+            tip="$(git rev-parse HEAD)"
+
+            for slug in "${raw[@]+"${raw[@]}"}"; do
+              [ -z "$slug" ] && continue
+              if [[ ! "$slug" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]]; then
+                echo "WARNING: skipping invalid slug: $slug"
+                continue
+              fi
+              owner="${slug%%/*}"
+              repo="${slug#*/}"
+              # Tip already has archive + EN summary ⇒ merge/re-push noise, skip.
+              # (Translations for brand-new repos are handled later in this workflow.)
+              has_archive=0
+              has_en=0
+              git cat-file -e "${tip}:archive/${owner}/${repo}.txt" 2>/dev/null && has_archive=1
+              git cat-file -e "${tip}:description/${owner}/${repo}/description_en.txt" 2>/dev/null && has_en=1
+              if [ "$has_archive" = 1 ] && [ "$has_en" = 1 ]; then
+                echo "Already archived+described (skip): $slug"
+                continue
+              fi
+              repos+=("$slug")
+              if [ "$has_archive" != 1 ]; then
+                archive_repos+=("$slug")
+              else
+                echo "Archive present, EN missing — queue for generate only: $slug"
+              fi
+            done
+
+            if [ "${#repos[@]}" -eq 0 ]; then
+              echo "No GitHub repos needing work (already done / empty input)."
+              emit_empty
+              return 0
+            fi
+
+            echo "Repos needing generate/translate:"
+            printf '%s\n' "${repos[@]}"
+            echo "repos=$(printf '%s\n' "${repos[@]}" | tr '\n' ' ' | xargs)" >> "$GITHUB_OUTPUT"
+            if [ "${#archive_repos[@]}" -eq 0 ]; then
+              echo "archive_repos=" >> "$GITHUB_OUTPUT"
+            else
+              echo "Repos needing archive:"
+              printf '%s\n' "${archive_repos[@]}"
+              echo "archive_repos=$(printf '%s\n' "${archive_repos[@]}" | tr '\n' ' ' | xargs)" >> "$GITHUB_OUTPUT"
+            fi
+          }
+
+          # Explicit repo list (Discover Contents-API commit cannot fire push workflows).
+          if [ -n "${REPOS_INPUT//[[:space:]]/}" ]; then
+            if [ -z "$AFTER" ]; then
+              AFTER="$(git rev-parse HEAD)"
+            elif ! git cat-file -e "${AFTER}^{commit}" 2>/dev/null; then
+              echo "Fetching after SHA ${AFTER} ..."
+              git fetch --no-tags --depth=1 origin "$AFTER"
+            fi
+            echo "Using explicit repos input (event=${EVENT_NAME}, after=${AFTER:0:12})"
+            # shellcheck disable=SC2086
+            queue_from_slugs $REPOS_INPUT
+            exit 0
+          fi
+
+          if [ -z "$AFTER" ]; then
+            AFTER="$(git rev-parse HEAD)"
+          fi
+
           if [ -z "$BEFORE" ] || [[ "$BEFORE" =~ ^0+$ ]]; then
             # Branch creation / unknown before — deepen once for first parent.
             git fetch --no-tags --deepen=1 origin "${GITHUB_REF_NAME}" || true
@@ -73,6 +179,15 @@ jobs:
               BEFORE="$(git rev-parse "${AFTER}^")"
             else
               echo "No usable before SHA — nothing to diff."
+              emit_empty
+              exit 0
+            fi
+          fi
+
+          if ! git cat-file -e "${AFTER}^{commit}" 2>/dev/null; then
+            echo "Fetching after SHA ${AFTER} ..."
+            if ! git fetch --no-tags --depth=1 origin "$AFTER"; then
+              echo "WARNING: could not fetch after SHA ${AFTER}; treating as no-op."
               emit_empty
               exit 0
             fi
@@ -102,51 +217,7 @@ jobs:
               || true
           )
 
-          REPOS=()
-          ARCHIVE_REPOS=()
-          for slug in "${RAW[@]+"${RAW[@]}"}"; do
-            [ -z "$slug" ] && continue
-            if [[ ! "$slug" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]]; then
-              echo "WARNING: skipping invalid slug from README diff: $slug"
-              continue
-            fi
-            owner="${slug%%/*}"
-            repo="${slug#*/}"
-            # Tip already has archive + EN summary ⇒ merge/re-push noise, skip.
-            # (Translations for brand-new repos are handled later in this workflow.)
-            has_archive=0
-            has_en=0
-            git cat-file -e "${AFTER}:archive/${owner}/${repo}.txt" 2>/dev/null && has_archive=1
-            git cat-file -e "${AFTER}:description/${owner}/${repo}/description_en.txt" 2>/dev/null && has_en=1
-            if [ "$has_archive" = 1 ] && [ "$has_en" = 1 ]; then
-              echo "Already archived+described (skip): $slug"
-              continue
-            fi
-            REPOS+=("$slug")
-            if [ "$has_archive" != 1 ]; then
-              ARCHIVE_REPOS+=("$slug")
-            else
-              echo "Archive present, EN missing — queue for generate only: $slug"
-            fi
-          done
-
-          if [ "${#REPOS[@]}" -eq 0 ]; then
-            echo "No new GitHub repos needing work in this push (README tweak / merge / already done)."
-            emit_empty
-          else
-            echo "Repos needing generate/translate:"
-            printf '%s\n' "${REPOS[@]}"
-            REPOS_INLINE=$(printf '%s\n' "${REPOS[@]}" | tr '\n' ' ' | xargs)
-            echo "repos=${REPOS_INLINE}" >> "$GITHUB_OUTPUT"
-            if [ "${#ARCHIVE_REPOS[@]}" -eq 0 ]; then
-              echo "archive_repos=" >> "$GITHUB_OUTPUT"
-            else
-              echo "Repos needing archive:"
-              printf '%s\n' "${ARCHIVE_REPOS[@]}"
-              ARCHIVE_INLINE=$(printf '%s\n' "${ARCHIVE_REPOS[@]}" | tr '\n' ' ' | xargs)
-              echo "archive_repos=${ARCHIVE_INLINE}" >> "$GITHUB_OUTPUT"
-            fi
-          fi
+          queue_from_slugs "${RAW[@]+"${RAW[@]}"}"
 
       - name: Skip if nothing to do
         if: steps.diff.outputs.repos == ''
@@ -255,10 +326,13 @@ jobs:
             echo "Refusing to run outside canonical repository."
             exit 1
           fi
-          if [ "${GITHUB_EVENT_NAME}" != "push" ]; then
-            echo "Refusing unexpected event: ${GITHUB_EVENT_NAME}"
-            exit 1
-          fi
+          case "${GITHUB_EVENT_NAME}" in
+            push|workflow_dispatch) ;;
+            *)
+              echo "Refusing unexpected event: ${GITHUB_EVENT_NAME}"
+              exit 1
+              ;;
+          esac
           if [ "${GITHUB_REF}" != "refs/heads/main" ]; then
             echo "Refusing unexpected ref: ${GITHUB_REF}"
             exit 1
@@ -404,10 +478,13 @@ jobs:
             echo "Refusing to run outside canonical repository."
             exit 1
           fi
-          if [ "${GITHUB_EVENT_NAME}" != "push" ]; then
-            echo "Refusing unexpected event: ${GITHUB_EVENT_NAME}"
-            exit 1
-          fi
+          case "${GITHUB_EVENT_NAME}" in
+            push|workflow_dispatch) ;;
+            *)
+              echo "Refusing unexpected event: ${GITHUB_EVENT_NAME}"
+              exit 1
+              ;;
+          esac
           if [ "${GITHUB_REF}" != "refs/heads/main" ]; then
             echo "Refusing unexpected ref: ${GITHUB_REF}"
             exit 1
