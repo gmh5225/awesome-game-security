@@ -1,0 +1,30 @@
+---
+title: Game Engine
+kind: overview
+topics: [game-engine]
+sources:
+  - wiki/sources/skills/game-engine.md
+  - wiki/sources/README-categories.md
+updated: 2026-07-16
+confidence: high
+---
+
+# Game Engine
+
+Engine internals, plugins, detectors, and SDK workflows that underpin modding, reverse engineering, and anti-cheat integration points—especially Unreal, Unity ([[il2cpp]] / Mono), Source, Godot, and custom engines. (source: wiki/sources/skills/game-engine.md)
+
+## Key sub-areas
+
+**Engines:** Unreal (GObjects/GNames/GWorld, Dumper-7/UE4SS), Unity (IL2CPPDumper + metadata, Mono/dnSpy), Source (NetVars / CreateInterface), Godot/Lumix plugins.
+
+**Security-relevant surfaces:** object models and property offsets, rendering hooks ([[present-hook]]), network replication, engine-specific AC protection categories in the README.
+
+**SDK generation:** UE version signatures → dumpers; Unity `global-metadata.dat` + `GameAssembly.dll` / `libil2cpp.so`; Source ClientClass → RecvTable maps.
+
+## Related concepts
+
+[[il2cpp]] · [[present-hook]] · [[frida]] (mobile IL2CPP) · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+
+## README map
+
+`Game Engine` (~130 links: guides, source, Unreal/Unity/Godot/Lumix plugins, detectors), plus Cheat explorers/SDK CodeGen and Anti Cheat engine-protection subtrees. (source: wiki/sources/README-categories.md)
