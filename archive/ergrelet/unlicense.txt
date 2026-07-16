@@ -1,0 +1,4095 @@
+Project Path: arc_ergrelet_unlicense_j_vsnf51
+
+Source Tree:
+
+```txt
+arc_ergrelet_unlicense_j_vsnf51
+├── CHANGELOG.md
+├── LICENSE
+├── README.md
+├── assets
+├── poetry.lock
+├── pyproject.toml
+├── unlicense
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── application.py
+│   ├── dump_utils.py
+│   ├── emulation.py
+│   ├── frida_exec.py
+│   ├── function_hashing.py
+│   ├── imports.py
+│   ├── lief_utils.py
+│   ├── logger.py
+│   ├── process_control.py
+│   ├── resources
+│   │   ├── __init__.py
+│   │   └── frida.js
+│   ├── version_detection.py
+│   ├── winlicense2.py
+│   └── winlicense3.py
+└── unlicense.spec
+
+```
+
+`CHANGELOG.md`:
+
+```md
+# Changelog
+
+## [Unreleased]
+
+## [0.4.0] - 2023-08-14
+### Added
+- Add a `--no_imports` option that allows dumping PEs at the original entry point without fixing imports
+
+### Fixed
+- Fix a potential deadlock when dumping DLLs
+- Improve version detection for Themida/Winlicense 2.x
+- Improve version detection for Themida/Winlicense 3.x
+- Improve .text section detection for Themida/Winlicense 3.x
+- Fix `lief.not_found` exception happening when dumping certain MinGW EXEs
+- Fix TLS callback detection for some 32-bit EXEs
+- Handle wrapped imports from Themida/Winlicense 3.1.4.0
+- Improve IAT search algorithm for Themida/Winlicense 3.x
+- Allow unpacking EXEs that require admin privilege at medium integrity level
+- Properly skip DllMain invocations on thread creation/deletion when dumping DLLs
+
+### Changed
+- Silence some misleading "error" logs that were emitted
+
+## [0.3.0] - 2022-07-22
+### Fixed
+- Fix a couple of bugs with the IAT search and resolution for Themida/Winlicense 3.x
+- Fix potentially invalid IAT truncations for Themida/WinLicense 3.x
+- OEP detection now works in a runtime-agnostic manner (and handles virtualized entry points and Delphi executables)
+- TLS callbacks are now properly detected and skipped
+
+## [0.2.0] - 2022-05-31
+### Added
+- Handle unpacking of 32-bit and 64-bit DLLs
+- Handle unpacking of 32-bit and 64-bit .NET assembly PEs (EXE only)
+- OEP detection times out after 10 seconds by default. The duration can be
+  changed through the CLI.
+
+### Fixed
+- Improve .text section detection for Themida/Winlicense 2.x
+
+## [0.1.1] - 2022-04-06
+### Fixed
+- Fix IAT patching in some cases for Themida/Winlicense 3.x
+- Fix inability to read remote chunks of memory bigger than 128 MiB
+- Improve version detection to handle packed Delphi executables
+- Improve IAT search algorithm for Themida/Winlicense 3.x
+- Gracefully handle bitness mismatch between interpreter and target PEs
+- Fix IAT truncation issue for IATs bigger than 4 KiB
+
+## [0.1.0] - 2021-11-13
+
+Initial release with support for Themida/Winlicense 2.x and 3.x.  
+This release has been tested on Themida 2.4 and 3.0.
+
+```
+
+`LICENSE`:
+
+```
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+                            Preamble
+
+  The GNU General Public License is a free, copyleft license for
+software and other kinds of works.
+
+  The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works.  By contrast,
+the GNU General Public License is intended to guarantee your freedom to
+share and change all versions of a program--to make sure it remains free
+software for all its users.  We, the Free Software Foundation, use the
+GNU General Public License for most of our software; it applies also to
+any other work released this way by its authors.  You can apply it to
+your programs, too.
+
+  When we speak of free software, we are referring to freedom, not
+price.  Our General Public Licenses are designed to make sure that you
+have the freedom to distribute copies of free software (and charge for
+them if you wish), that you receive source code or can get it if you
+want it, that you can change the software or use pieces of it in new
+free programs, and that you know you can do these things.
+
+  To protect your rights, we need to prevent others from denying you
+these rights or asking you to surrender the rights.  Therefore, you have
+certain responsibilities if you distribute copies of the software, or if
+you modify it: responsibilities to respect the freedom of others.
+
+  For example, if you distribute copies of such a program, whether
+gratis or for a fee, you must pass on to the recipients the same
+freedoms that you received.  You must make sure that they, too, receive
+or can get the source code.  And you must show them these terms so they
+know their rights.
+
+  Developers that use the GNU GPL protect your rights with two steps:
+(1) assert copyright on the software, and (2) offer you this License
+giving you legal permission to copy, distribute and/or modify it.
+
+  For the developers' and authors' protection, the GPL clearly explains
+that there is no warranty for this free software.  For both users' and
+authors' sake, the GPL requires that modified versions be marked as
+changed, so that their problems will not be attributed erroneously to
+authors of previous versions.
+
+  Some devices are designed to deny users access to install or run
+modified versions of the software inside them, although the manufacturer
+can do so.  This is fundamentally incompatible with the aim of
+protecting users' freedom to change the software.  The systematic
+pattern of such abuse occurs in the area of products for individuals to
+use, which is precisely where it is most unacceptable.  Therefore, we
+have designed this version of the GPL to prohibit the practice for those
+products.  If such problems arise substantially in other domains, we
+stand ready to extend this provision to those domains in future versions
+of the GPL, as needed to protect the freedom of users.
+
+  Finally, every program is threatened constantly by software patents.
+States should not allow patents to restrict development and use of
+software on general-purpose computers, but in those that do, we wish to
+avoid the special danger that patents applied to a free program could
+make it effectively proprietary.  To prevent this, the GPL assures that
+patents cannot be used to render the program non-free.
+
+  The precise terms and conditions for copying, distribution and
+modification follow.
+
+                       TERMS AND CONDITIONS
+
+  0. Definitions.
+
+  "This License" refers to version 3 of the GNU General Public License.
+
+  "Copyright" also means copyright-like laws that apply to other kinds of
+works, such as semiconductor masks.
+
+  "The Program" refers to any copyrightable work licensed under this
+License.  Each licensee is addressed as "you".  "Licensees" and
+"recipients" may be individuals or organizations.
+
+  To "modify" a work means to copy from or adapt all or part of the work
+in a fashion requiring copyright permission, other than the making of an
+exact copy.  The resulting work is called a "modified version" of the
+earlier work or a work "based on" the earlier work.
+
+  A "covered work" means either the unmodified Program or a work based
+on the Program.
+
+  To "propagate" a work means to do anything with it that, without
+permission, would make you directly or secondarily liable for
+infringement under applicable copyright law, except executing it on a
+computer or modifying a private copy.  Propagation includes copying,
+distribution (with or without modification), making available to the
+public, and in some countries other activities as well.
+
+  To "convey" a work means any kind of propagation that enables other
+parties to make or receive copies.  Mere interaction with a user through
+a computer network, with no transfer of a copy, is not conveying.
+
+  An interactive user interface displays "Appropriate Legal Notices"
+to the extent that it includes a convenient and prominently visible
+feature that (1) displays an appropriate copyright notice, and (2)
+tells the user that there is no warranty for the work (except to the
+extent that warranties are provided), that licensees may convey the
+work under this License, and how to view a copy of this License.  If
+the interface presents a list of user commands or options, such as a
+menu, a prominent item in the list meets this criterion.
+
+  1. Source Code.
+
+  The "source code" for a work means the preferred form of the work
+for making modifications to it.  "Object code" means any non-source
+form of a work.
+
+  A "Standard Interface" means an interface that either is an official
+standard defined by a recognized standards body, or, in the case of
+interfaces specified for a particular programming language, one that
+is widely used among developers working in that language.
+
+  The "System Libraries" of an executable work include anything, other
+than the work as a whole, that (a) is included in the normal form of
+packaging a Major Component, but which is not part of that Major
+Component, and (b) serves only to enable use of the work with that
+Major Component, or to implement a Standard Interface for which an
+implementation is available to the public in source code form.  A
+"Major Component", in this context, means a major essential component
+(kernel, window system, and so on) of the specific operating system
+(if any) on which the executable work runs, or a compiler used to
+produce the work, or an object code interpreter used to run it.
+
+  The "Corresponding Source" for a work in object code form means all
+the source code needed to generate, install, and (for an executable
+work) run the object code and to modify the work, including scripts to
+control those activities.  However, it does not include the work's
+System Libraries, or general-purpose tools or generally available free
+programs which are used unmodified in performing those activities but
+which are not part of the work.  For example, Corresponding Source
+includes interface definition files associated with source files for
+the work, and the source code for shared libraries and dynamically
+linked subprograms that the work is specifically designed to require,
+such as by intimate data communication or control flow between those
+subprograms and other parts of the work.
+
+  The Corresponding Source need not include anything that users
+can regenerate automatically from other parts of the Corresponding
+Source.
+
+  The Corresponding Source for a work in source code form is that
+same work.
+
+  2. Basic Permissions.
+
+  All rights granted under this License are granted for the term of
+copyright on the Program, and are irrevocable provided the stated
+conditions are met.  This License explicitly affirms your unlimited
+permission to run the unmodified Program.  The output from running a
+covered work is covered by this License only if the output, given its
+content, constitutes a covered work.  This License acknowledges your
+rights of fair use or other equivalent, as provided by copyright law.
+
+  You may make, run and propagate covered works that you do not
+convey, without conditions so long as your license otherwise remains
+in force.  You may convey covered works to others for the sole purpose
+of having them make modifications exclusively for you, or provide you
+with facilities for running those works, provided that you comply with
+the terms of this License in conveying all material for which you do
+not control copyright.  Those thus making or running the covered works
+for you must do so exclusively on your behalf, under your direction
+and control, on terms that prohibit them from making any copies of
+your copyrighted material outside their relationship with you.
+
+  Conveying under any other circumstances is permitted solely under
+the conditions stated below.  Sublicensing is not allowed; section 10
+makes it unnecessary.
+
+  3. Protecting Users' Legal Rights From Anti-Circumvention Law.
+
+  No covered work shall be deemed part of an effective technological
+measure under any applicable law fulfilling obligations under article
+11 of the WIPO copyright treaty adopted on 20 December 1996, or
+similar laws prohibiting or restricting circumvention of such
+measures.
+
+  When you convey a covered work, you waive any legal power to forbid
+circumvention of technological measures to the extent such circumvention
+is effected by exercising rights under this License with respect to
+the covered work, and you disclaim any intention to limit operation or
+modification of the work as a means of enforcing, against the work's
+users, your or third parties' legal rights to forbid circumvention of
+technological measures.
+
+  4. Conveying Verbatim Copies.
+
+  You may convey verbatim copies of the Program's source code as you
+receive it, in any medium, provided that you conspicuously and
+appropriately publish on each copy an appropriate copyright notice;
+keep intact all notices stating that this License and any
+non-permissive terms added in accord with section 7 apply to the code;
+keep intact all notices of the absence of any warranty; and give all
+recipients a copy of this License along with the Program.
+
+  You may charge any price or no price for each copy that you convey,
+and you may offer support or warranty protection for a fee.
+
+  5. Conveying Modified Source Versions.
+
+  You may convey a work based on the Program, or the modifications to
+produce it from the Program, in the form of source code under the
+terms of section 4, provided that you also meet all of these conditions:
+
+    a) The work must carry prominent notices stating that you modified
+    it, and giving a relevant date.
+
+    b) The work must carry prominent notices stating that it is
+    released under this License and any conditions added under section
+    7.  This requirement modifies the requirement in section 4 to
+    "keep intact all notices".
+
+    c) You must license the entire work, as a whole, under this
+    License to anyone who comes into possession of a copy.  This
+    License will therefore apply, along with any applicable section 7
+    additional terms, to the whole of the work, and all its parts,
+    regardless of how they are packaged.  This License gives no
+    permission to license the work in any other way, but it does not
+    invalidate such permission if you have separately received it.
+
+    d) If the work has interactive user interfaces, each must display
+    Appropriate Legal Notices; however, if the Program has interactive
+    interfaces that do not display Appropriate Legal Notices, your
+    work need not make them do so.
+
+  A compilation of a covered work with other separate and independent
+works, which are not by their nature extensions of the covered work,
+and which are not combined with it such as to form a larger program,
+in or on a volume of a storage or distribution medium, is called an
+"aggregate" if the compilation and its resulting copyright are not
+used to limit the access or legal rights of the compilation's users
+beyond what the individual works permit.  Inclusion of a covered work
+in an aggregate does not cause this License to apply to the other
+parts of the aggregate.
+
+  6. Conveying Non-Source Forms.
+
+  You may convey a covered work in object code form under the terms
+of sections 4 and 5, provided that you also convey the
+machine-readable Corresponding Source under the terms of this License,
+in one of these ways:
+
+    a) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by the
+    Corresponding Source fixed on a durable physical medium
+    customarily used for software interchange.
+
+    b) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by a
+    written offer, valid for at least three years and valid for as
+    long as you offer spare parts or customer support for that product
+    model, to give anyone who possesses the object code either (1) a
+    copy of the Corresponding Source for all the software in the
+    product that is covered by this License, on a durable physical
+    medium customarily used for software interchange, for a price no
+    more than your reasonable cost of physically performing this
+    conveying of source, or (2) access to copy the
+    Corresponding Source from a network server at no charge.
+
+    c) Convey individual copies of the object code with a copy of the
+    written offer to provide the Corresponding Source.  This
+    alternative is allowed only occasionally and noncommercially, and
+    only if you received the object code with such an offer, in accord
+    with subsection 6b.
+
+    d) Convey the object code by offering access from a designated
+    place (gratis or for a charge), and offer equivalent access to the
+    Corresponding Source in the same way through the same place at no
+    further charge.  You need not require recipients to copy the
+    Corresponding Source along with the object code.  If the place to
+    copy the object code is a network server, the Corresponding Source
+    may be on a different server (operated by you or a third party)
+    that supports equivalent copying facilities, provided you maintain
+    clear directions next to the object code saying where to find the
+    Corresponding Source.  Regardless of what server hosts the
+    Corresponding Source, you remain obligated to ensure that it is
+    available for as long as needed to satisfy these requirements.
+
+    e) Convey the object code using peer-to-peer transmission, provided
+    you inform other peers where the object code and Corresponding
+    Source of the work are being offered to the general public at no
+    charge under subsection 6d.
+
+  A separable portion of the object code, whose source code is excluded
+from the Corresponding Source as a System Library, need not be
+included in conveying the object code work.
+
+  A "User Product" is either (1) a "consumer product", which means any
+tangible personal property which is normally used for personal, family,
+or household purposes, or (2) anything designed or sold for incorporation
+into a dwelling.  In determining whether a product is a consumer product,
+doubtful cases shall be resolved in favor of coverage.  For a particular
+product received by a particular user, "normally used" refers to a
+typical or common use of that class of product, regardless of the status
+of the particular user or of the way in which the particular user
+actually uses, or expects or is expected to use, the product.  A product
+is a consumer product regardless of whether the product has substantial
+commercial, industrial or non-consumer uses, unless such uses represent
+the only significant mode of use of the product.
+
+  "Installation Information" for a User Product means any methods,
+procedures, authorization keys, or other information required to install
+and execute modified versions of a covered work in that User Product from
+a modified version of its Corresponding Source.  The information must
+suffice to ensure that the continued functioning of the modified object
+code is in no case prevented or interfered with solely because
+modification has been made.
+
+  If you convey an object code work under this section in, or with, or
+specifically for use in, a User Product, and the conveying occurs as
+part of a transaction in which the right of possession and use of the
+User Product is transferred to the recipient in perpetuity or for a
+fixed term (regardless of how the transaction is characterized), the
+Corresponding Source conveyed under this section must be accompanied
+by the Installation Information.  But this requirement does not apply
+if neither you nor any third party retains the ability to install
+modified object code on the User Product (for example, the work has
+been installed in ROM).
+
+  The requirement to provide Installation Information does not include a
+requirement to continue to provide support service, warranty, or updates
+for a work that has been modified or installed by the recipient, or for
+the User Product in which it has been modified or installed.  Access to a
+network may be denied when the modification itself materially and
+adversely affects the operation of the network or violates the rules and
+protocols for communication across the network.
+
+  Corresponding Source conveyed, and Installation Information provided,
+in accord with this section must be in a format that is publicly
+documented (and with an implementation available to the public in
+source code form), and must require no special password or key for
+unpacking, reading or copying.
+
+  7. Additional Terms.
+
+  "Additional permissions" are terms that supplement the terms of this
+License by making exceptions from one or more of its conditions.
+Additional permissions that are applicable to the entire Program shall
+be treated as though they were included in this License, to the extent
+that they are valid under applicable law.  If additional permissions
+apply only to part of the Program, that part may be used separately
+under those permissions, but the entire Program remains governed by
+this License without regard to the additional permissions.
+
+  When you convey a copy of a covered work, you may at your option
+remove any additional permissions from that copy, or from any part of
+it.  (Additional permissions may be written to require their own
+removal in certain cases when you modify the work.)  You may place
+additional permissions on material, added by you to a covered work,
+for which you have or can give appropriate copyright permission.
+
+  Notwithstanding any other provision of this License, for material you
+add to a covered work, you may (if authorized by the copyright holders of
+that material) supplement the terms of this License with terms:
+
+    a) Disclaiming warranty or limiting liability differently from the
+    terms of sections 15 and 16 of this License; or
+
+    b) Requiring preservation of specified reasonable legal notices or
+    author attributions in that material or in the Appropriate Legal
+    Notices displayed by works containing it; or
+
+    c) Prohibiting misrepresentation of the origin of that material, or
+    requiring that modified versions of such material be marked in
+    reasonable ways as different from the original version; or
+
+    d) Limiting the use for publicity purposes of names of licensors or
+    authors of the material; or
+
+    e) Declining to grant rights under trademark law for use of some
+    trade names, trademarks, or service marks; or
+
+    f) Requiring indemnification of licensors and authors of that
+    material by anyone who conveys the material (or modified versions of
+    it) with contractual assumptions of liability to the recipient, for
+    any liability that these contractual assumptions directly impose on
+    those licensors and authors.
+
+  All other non-permissive additional terms are considered "further
+restrictions" within the meaning of section 10.  If the Program as you
+received it, or any part of it, contains a notice stating that it is
+governed by this License along with a term that is a further
+restriction, you may remove that term.  If a license document contains
+a further restriction but permits relicensing or conveying under this
+License, you may add to a covered work material governed by the terms
+of that license document, provided that the further restriction does
+not survive such relicensing or conveying.
+
+  If you add terms to a covered work in accord with this section, you
+must place, in the relevant source files, a statement of the
+additional terms that apply to those files, or a notice indicating
+where to find the applicable terms.
+
+  Additional terms, permissive or non-permissive, may be stated in the
+form of a separately written license, or stated as exceptions;
+the above requirements apply either way.
+
+  8. Termination.
+
+  You may not propagate or modify a covered work except as expressly
+provided under this License.  Any attempt otherwise to propagate or
+modify it is void, and will automatically terminate your rights under
+this License (including any patent licenses granted under the third
+paragraph of section 11).
+
+  However, if you cease all violation of this License, then your
+license from a particular copyright holder is reinstated (a)
+provisionally, unless and until the copyright holder explicitly and
+finally terminates your license, and (b) permanently, if the copyright
+holder fails to notify you of the violation by some reasonable means
+prior to 60 days after the cessation.
+
+  Moreover, your license from a particular copyright holder is
+reinstated permanently if the copyright holder notifies you of the
+violation by some reasonable means, this is the first time you have
+received notice of violation of this License (for any work) from that
+copyright holder, and you cure the violation prior to 30 days after
+your receipt of the notice.
+
+  Termination of your rights under this section does not terminate the
+licenses of parties who have received copies or rights from you under
+this License.  If your rights have been terminated and not permanently
+reinstated, you do not qualify to receive new licenses for the same
+material under section 10.
+
+  9. Acceptance Not Required for Having Copies.
+
+  You are not required to accept this License in order to receive or
+run a copy of the Program.  Ancillary propagation of a covered work
+occurring solely as a consequence of using peer-to-peer transmission
+to receive a copy likewise does not require acceptance.  However,
+nothing other than this License grants you permission to propagate or
+modify any covered work.  These actions infringe copyright if you do
+not accept this License.  Therefore, by modifying or propagating a
+covered work, you indicate your acceptance of this License to do so.
+
+  10. Automatic Licensing of Downstream Recipients.
+
+  Each time you convey a covered work, the recipient automatically
+receives a license from the original licensors, to run, modify and
+propagate that work, subject to this License.  You are not responsible
+for enforcing compliance by third parties with this License.
+
+  An "entity transaction" is a transaction transferring control of an
+organization, or substantially all assets of one, or subdividing an
+organization, or merging organizations.  If propagation of a covered
+work results from an entity transaction, each party to that
+transaction who receives a copy of the work also receives whatever
+licenses to the work the party's predecessor in interest had or could
+give under the previous paragraph, plus a right to possession of the
+Corresponding Source of the work from the predecessor in interest, if
+the predecessor has it or can get it with reasonable efforts.
+
+  You may not impose any further restrictions on the exercise of the
+rights granted or affirmed under this License.  For example, you may
+not impose a license fee, royalty, or other charge for exercise of
+rights granted under this License, and you may not initiate litigation
+(including a cross-claim or counterclaim in a lawsuit) alleging that
+any patent claim is infringed by making, using, selling, offering for
+sale, or importing the Program or any portion of it.
+
+  11. Patents.
+
+  A "contributor" is a copyright holder who authorizes use under this
+License of the Program or a work on which the Program is based.  The
+work thus licensed is called the contributor's "contributor version".
+
+  A contributor's "essential patent claims" are all patent claims
+owned or controlled by the contributor, whether already acquired or
+hereafter acquired, that would be infringed by some manner, permitted
+by this License, of making, using, or selling its contributor version,
+but do not include claims that would be infringed only as a
+consequence of further modification of the contributor version.  For
+purposes of this definition, "control" includes the right to grant
+patent sublicenses in a manner consistent with the requirements of
+this License.
+
+  Each contributor grants you a non-exclusive, worldwide, royalty-free
+patent license under the contributor's essential patent claims, to
+make, use, sell, offer for sale, import and otherwise run, modify and
+propagate the contents of its contributor version.
+
+  In the following three paragraphs, a "patent license" is any express
+agreement or commitment, however denominated, not to enforce a patent
+(such as an express permission to practice a patent or covenant not to
+sue for patent infringement).  To "grant" such a patent license to a
+party means to make such an agreement or commitment not to enforce a
+patent against the party.
+
+  If you convey a covered work, knowingly relying on a patent license,
+and the Corresponding Source of the work is not available for anyone
+to copy, free of charge and under the terms of this License, through a
+publicly available network server or other readily accessible means,
+then you must either (1) cause the Corresponding Source to be so
+available, or (2) arrange to deprive yourself of the benefit of the
+patent license for this particular work, or (3) arrange, in a manner
+consistent with the requirements of this License, to extend the patent
+license to downstream recipients.  "Knowingly relying" means you have
+actual knowledge that, but for the patent license, your conveying the
+covered work in a country, or your recipient's use of the covered work
+in a country, would infringe one or more identifiable patents in that
+country that you have reason to believe are valid.
+
+  If, pursuant to or in connection with a single transaction or
+arrangement, you convey, or propagate by procuring conveyance of, a
+covered work, and grant a patent license to some of the parties
+receiving the covered work authorizing them to use, propagate, modify
+or convey a specific copy of the covered work, then the patent license
+you grant is automatically extended to all recipients of the covered
+work and works based on it.
+
+  A patent license is "discriminatory" if it does not include within
+the scope of its coverage, prohibits the exercise of, or is
+conditioned on the non-exercise of one or more of the rights that are
+specifically granted under this License.  You may not convey a covered
+work if you are a party to an arrangement with a third party that is
+in the business of distributing software, under which you make payment
+to the third party based on the extent of your activity of conveying
+the work, and under which the third party grants, to any of the
+parties who would receive the covered work from you, a discriminatory
+patent license (a) in connection with copies of the covered work
+conveyed by you (or copies made from those copies), or (b) primarily
+for and in connection with specific products or compilations that
+contain the covered work, unless you entered into that arrangement,
+or that patent license was granted, prior to 28 March 2007.
+
+  Nothing in this License shall be construed as excluding or limiting
+any implied license or other defenses to infringement that may
+otherwise be available to you under applicable patent law.
+
+  12. No Surrender of Others' Freedom.
+
+  If conditions are imposed on you (whether by court order, agreement or
+otherwise) that contradict the conditions of this License, they do not
+excuse you from the conditions of this License.  If you cannot convey a
+covered work so as to satisfy simultaneously your obligations under this
+License and any other pertinent obligations, then as a consequence you may
+not convey it at all.  For example, if you agree to terms that obligate you
+to collect a royalty for further conveying from those to whom you convey
+the Program, the only way you could satisfy both those terms and this
+License would be to refrain entirely from conveying the Program.
+
+  13. Use with the GNU Affero General Public License.
+
+  Notwithstanding any other provision of this License, you have
+permission to link or combine any covered work with a work licensed
+under version 3 of the GNU Affero General Public License into a single
+combined work, and to convey the resulting work.  The terms of this
+License will continue to apply to the part which is the covered work,
+but the special requirements of the GNU Affero General Public License,
+section 13, concerning interaction through a network will apply to the
+combination as such.
+
+  14. Revised Versions of this License.
+
+  The Free Software Foundation may publish revised and/or new versions of
+the GNU General Public License from time to time.  Such new versions will
+be similar in spirit to the present version, but may differ in detail to
+address new problems or concerns.
+
+  Each version is given a distinguishing version number.  If the
+Program specifies that a certain numbered version of the GNU General
+Public License "or any later version" applies to it, you have the
+option of following the terms and conditions either of that numbered
+version or of any later version published by the Free Software
+Foundation.  If the Program does not specify a version number of the
+GNU General Public License, you may choose any version ever published
+by the Free Software Foundation.
+
+  If the Program specifies that a proxy can decide which future
+versions of the GNU General Public License can be used, that proxy's
+public statement of acceptance of a version permanently authorizes you
+to choose that version for the Program.
+
+  Later license versions may give you additional or different
+permissions.  However, no additional obligations are imposed on any
+author or copyright holder as a result of your choosing to follow a
+later version.
+
+  15. Disclaimer of Warranty.
+
+  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+  16. Limitation of Liability.
+
+  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
+THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
+GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
+USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
+DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
+PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
+EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+
+  17. Interpretation of Sections 15 and 16.
+
+  If the disclaimer of warranty and limitation of liability provided
+above cannot be given local legal effect according to their terms,
+reviewing courts shall apply local law that most closely approximates
+an absolute waiver of all civil liability in connection with the
+Program, unless a warranty or assumption of liability accompanies a
+copy of the Program in return for a fee.
+
+                     END OF TERMS AND CONDITIONS
+
+            How to Apply These Terms to Your New Programs
+
+  If you develop a new program, and you want it to be of the greatest
+possible use to the public, the best way to achieve this is to make it
+free software which everyone can redistribute and change under these terms.
+
+  To do so, attach the following notices to the program.  It is safest
+to attach them to the start of each source file to most effectively
+state the exclusion of warranty; and each file should have at least
+the "copyright" line and a pointer to where the full notice is found.
+
+    Unlicense
+    Copyright (C) 2021 Erwan Grelet
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+Also add information on how to contact you by electronic and paper mail.
+
+  If the program does terminal interaction, make it output a short
+notice like this when it starts in an interactive mode:
+
+    Unlicense Copyright (C) 2021 Erwan Grelet
+    This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
+    This is free software, and you are welcome to redistribute it
+    under certain conditions; type `show c' for details.
+
+The hypothetical commands `show w' and `show c' should show the appropriate
+parts of the General Public License.  Of course, your program's commands
+might be different; for a GUI interface, you would use an "about box".
+
+  You should also get your employer (if you work as a programmer) or school,
+if any, to sign a "copyright disclaimer" for the program, if necessary.
+For more information on this, and how to apply and follow the GNU GPL, see
+<https://www.gnu.org/licenses/>.
+
+  The GNU General Public License does not permit incorporating your program
+into proprietary programs.  If your program is a subroutine library, you
+may consider it more useful to permit linking proprietary applications with
+the library.  If this is what you want to do, use the GNU Lesser General
+Public License instead of this License.  But first, please read
+<https://www.gnu.org/licenses/why-not-lgpl.html>.
+
+```
+
+`README.md`:
+
+```md
+# Unlicense <img src="https://raw.githubusercontent.com/ergrelet/unlicense/dev/assets/unlicense.ico" width="40">
+
+[![GitHub release](https://img.shields.io/github/release/ergrelet/unlicense.svg)](https://github.com/ergrelet/unlicense/releases) [![Minimum Python version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/) ![CI status](https://github.com/ergrelet/unlicense/actions/workflows/check.yml/badge.svg?branch=main)
+
+A Python 3 tool to dynamically unpack executables protected with
+Themida/WinLicense 2.x and 3.x.
+
+Warning: This tool will execute the target executable. Make sure to use this
+tool in a VM if you're unsure about what the target executable does.
+
+Note: You need to use a 32-bit Python interpreter to dump 32-bit executables.
+
+## Features
+
+* Handles Themida/Winlicense 2.x and 3.x
+* Handles 32-bit and 64-bit PEs (EXEs and DLLs)
+* Handles 32-bit and 64-bit .NET assemblies (EXEs only)
+* Recovers the original entry point (OEP) automatically
+* Recovers the (obfuscated) import table automatically
+
+## Known Limitations
+
+* Doesn't handle .NET assembly DLLs
+* Doesn't produce runnable dumps in most cases
+* Resolving imports for 32-bit executables packed with Themida 2.x is pretty slow
+* Requires a valid license file to unpack WinLicense-protected executables that
+  require license files to start
+
+## How To
+
+### Download
+
+You can either download the PyInstaller-generated executables from the "Releases"
+section or fetch the project with `git` and install it with `pip`:
+```
+pip install git+https://github.com/ergrelet/unlicense.git
+```
+
+### Use
+
+If you don't want to deal the command-line interface (CLI) you can simply
+drag-and-drop the target binary on the appropriate (32-bit or 64-bit) `unlicense`
+executable (which is available in the "Releases" section).
+
+Otherwise here's what the CLI looks like:
+```
+unlicense --help
+NAME
+    unlicense.exe - Unpack executables protected with Themida/WinLicense 2.x and 3.x
+
+SYNOPSIS
+    unlicense.exe PE_TO_DUMP <flags>
+
+DESCRIPTION
+    Unpack executables protected with Themida/WinLicense 2.x and 3.x
+
+POSITIONAL ARGUMENTS
+    PE_TO_DUMP
+        Type: str
+
+FLAGS
+    --verbose=VERBOSE
+        Type: bool
+        Default: False
+    --pause_on_oep=PAUSE_ON_OEP
+        Type: bool
+        Default: False
+    --no_imports=NO_IMPORTS
+        Type: bool
+        Default: False
+    --force_oep=FORCE_OEP
+        Type: Optional[Optional]
+        Default: None
+    --target_version=TARGET_VERSION
+        Type: Optional[Optional]
+        Default: None
+    --timeout=TIMEOUT
+        Type: int
+        Default: 10
+
+NOTES
+    You can also use flags syntax for POSITIONAL ARGUMENTS
+```
+
+```
+
+`poetry.lock`:
+
+```lock
+# This file is automatically @generated by Poetry 1.5.1 and should not be changed by hand.
+
+[[package]]
+name = "altgraph"
+version = "0.17.3"
+description = "Python graph (network) package"
+optional = false
+python-versions = "*"
+files = [
+    {file = "altgraph-0.17.3-py2.py3-none-any.whl", hash = "sha256:c8ac1ca6772207179ed8003ce7687757c04b0b71536f81e2ac5755c6226458fe"},
+    {file = "altgraph-0.17.3.tar.gz", hash = "sha256:ad33358114df7c9416cdb8fa1eaa5852166c505118717021c6a8c7c7abbd03dd"},
+]
+
+[[package]]
+name = "astroid"
+version = "2.15.6"
+description = "An abstract syntax tree for Python with inference support."
+optional = false
+python-versions = ">=3.7.2"
+files = [
+    {file = "astroid-2.15.6-py3-none-any.whl", hash = "sha256:389656ca57b6108f939cf5d2f9a2a825a3be50ba9d589670f393236e0a03b91c"},
+    {file = "astroid-2.15.6.tar.gz", hash = "sha256:903f024859b7c7687d7a7f3a3f73b17301f8e42dfd9cc9df9d4418172d3e2dbd"},
+]
+
+[package.dependencies]
+lazy-object-proxy = ">=1.4.0"
+typing-extensions = {version = ">=4.0.0", markers = "python_version < \"3.11\""}
+wrapt = [
+    {version = ">=1.11,<2", markers = "python_version < \"3.11\""},
+    {version = ">=1.14,<2", markers = "python_version >= \"3.11\""},
+]
+
+[[package]]
+name = "capstone"
+version = "4.0.2"
+description = "Capstone disassembly engine"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+files = [
+    {file = "capstone-4.0.2-py2.py3-none-manylinux1_i686.whl", hash = "sha256:da442f979414cf27e4621e70e835880878c858ea438c4f0e957e132593579e37"},
+    {file = "capstone-4.0.2-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:9d1a9096c5f875b11290317722ed44bb6e7c52e50cc79d791f142bce968c49aa"},
+    {file = "capstone-4.0.2-py2.py3-none-win32.whl", hash = "sha256:c3d9b443d1adb40ee2d9a4e7341169b76476ddcf3a54c03793b16cdc7cd35c5a"},
+    {file = "capstone-4.0.2-py2.py3-none-win_amd64.whl", hash = "sha256:0d65ffe8620920976ceadedc769f22318f6f150a592368d8a735612367ac8a1a"},
+    {file = "capstone-4.0.2.tar.gz", hash = "sha256:2842913092c9b69fd903744bc1b87488e1451625460baac173056e1808ec1c66"},
+]
+
+[[package]]
+name = "colorama"
+version = "0.4.6"
+description = "Cross-platform colored terminal text."
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
+files = [
+    {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
+    {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
+]
+
+[[package]]
+name = "dill"
+version = "0.3.6"
+description = "serialize all of python"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "dill-0.3.6-py3-none-any.whl", hash = "sha256:a07ffd2351b8c678dfc4a856a3005f8067aea51d6ba6c700796a4d9e280f39f0"},
+    {file = "dill-0.3.6.tar.gz", hash = "sha256:e5db55f3687856d8fbdab002ed78544e1c4559a130302693d839dfe8f93f2373"},
+]
+
+[package.extras]
+graph = ["objgraph (>=1.7.2)"]
+
+[[package]]
+name = "fire"
+version = "0.4.0"
+description = "A library for automatically generating command line interfaces."
+optional = false
+python-versions = "*"
+files = [
+    {file = "fire-0.4.0.tar.gz", hash = "sha256:c5e2b8763699d1142393a46d0e3e790c5eb2f0706082df8f647878842c216a62"},
+]
+
+[package.dependencies]
+six = "*"
+termcolor = "*"
+
+[[package]]
+name = "frida"
+version = "16.1.3"
+description = "Dynamic instrumentation toolkit for developers, reverse-engineers, and security researchers"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "frida-16.1.3-cp37-abi3-macosx_10_9_x86_64.whl", hash = "sha256:ea1412e8f22d035fd709abfe8cbd98f6ca3b57c15505e88d290752288ea59814"},
+    {file = "frida-16.1.3-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:4a25d1593b5bda6688c63159636a1c124ebc2cc5ae28bfe2ebe7f12bb2f7ee71"},
+    {file = "frida-16.1.3-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1d0b9f14f79c0d8e3235edf232670177a5256ad197c8b9f563ac50dfb4bdb8aa"},
+    {file = "frida-16.1.3-cp37-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:aeea0c0d43ce8d5f64afeec6f364463cebb16cfbcd6a4a8c6465997e74d0aacd"},
+    {file = "frida-16.1.3-cp37-abi3-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:7de8ecf12db41e201a5ed99c9946a600c5607dd56ca95fb37c4ec029f476c9a2"},
+    {file = "frida-16.1.3-cp37-abi3-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:52e40b5af28f10119903c94bc9953153b4367e5dca965c7cacfcdd128e5d3e7c"},
+    {file = "frida-16.1.3-cp37-abi3-win32.whl", hash = "sha256:ddf9aa85b471f850edf2e2c6b9f53c50942dee2025c934687b72bde0a7983422"},
+    {file = "frida-16.1.3-cp37-abi3-win_amd64.whl", hash = "sha256:2ec0a3b3c6011872ab243f84c29ba4b7d28da5fc0a9d563b6ee4958392b6a853"},
+    {file = "frida-16.1.3.tar.gz", hash = "sha256:859a099f3e671259b86172268ccb74d84fc9b0758956fbe8a1f22d77cfd598a8"},
+]
+
+[package.dependencies]
+typing-extensions = {version = "*", markers = "python_version < \"3.11\""}
+
+[[package]]
+name = "isort"
+version = "5.12.0"
+description = "A Python utility / library to sort Python imports."
+optional = false
+python-versions = ">=3.8.0"
+files = [
+    {file = "isort-5.12.0-py3-none-any.whl", hash = "sha256:f84c2818376e66cf843d497486ea8fed8700b340f308f076c6fb1229dff318b6"},
+    {file = "isort-5.12.0.tar.gz", hash = "sha256:8bef7dde241278824a6d83f44a544709b065191b95b6e50894bdc722fcba0504"},
+]
+
+[package.extras]
+colors = ["colorama (>=0.4.3)"]
+pipfile-deprecated-finder = ["pip-shims (>=0.5.2)", "pipreqs", "requirementslib"]
+plugins = ["setuptools"]
+requirements-deprecated-finder = ["pip-api", "pipreqs"]
+
+[[package]]
+name = "lazy-object-proxy"
+version = "1.9.0"
+description = "A fast and thorough lazy object proxy."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "lazy-object-proxy-1.9.0.tar.gz", hash = "sha256:659fb5809fa4629b8a1ac5106f669cfc7bef26fbb389dda53b3e010d1ac4ebae"},
+    {file = "lazy_object_proxy-1.9.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:b40387277b0ed2d0602b8293b94d7257e17d1479e257b4de114ea11a8cb7f2d7"},
+    {file = "lazy_object_proxy-1.9.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e8c6cfb338b133fbdbc5cfaa10fe3c6aeea827db80c978dbd13bc9dd8526b7d4"},
+    {file = "lazy_object_proxy-1.9.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:721532711daa7db0d8b779b0bb0318fa87af1c10d7fe5e52ef30f8eff254d0cd"},
+    {file = "lazy_object_proxy-1.9.0-cp310-cp310-musllinux_1_1_aarch64.whl", hash = "sha256:66a3de4a3ec06cd8af3f61b8e1ec67614fbb7c995d02fa224813cb7afefee701"},
+    {file = "lazy_object_proxy-1.9.0-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:1aa3de4088c89a1b69f8ec0dcc169aa725b0ff017899ac568fe44ddc1396df46"},
+    {file = "lazy_object_proxy-1.9.0-cp310-cp310-win32.whl", hash = "sha256:f0705c376533ed2a9e5e97aacdbfe04cecd71e0aa84c7c0595d02ef93b6e4455"},
+    {file = "lazy_object_proxy-1.9.0-cp310-cp310-win_amd64.whl", hash = "sha256:ea806fd4c37bf7e7ad82537b0757999264d5f70c45468447bb2b91afdbe73a6e"},
+    {file = "lazy_object_proxy-1.9.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:946d27deaff6cf8452ed0dba83ba38839a87f4f7a9732e8f9fd4107b21e6ff07"},
+    {file = "lazy_object_proxy-1.9.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:79a31b086e7e68b24b99b23d57723ef7e2c6d81ed21007b6281ebcd1688acb0a"},
+    {file = "lazy_object_proxy-1.9.0-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f699ac1c768270c9e384e4cbd268d6e67aebcfae6cd623b4d7c3bfde5a35db59"},
+    {file = "lazy_object_proxy-1.9.0-cp311-cp311-musllinux_1_1_aarch64.whl", hash = "sha256:bfb38f9ffb53b942f2b5954e0f610f1e721ccebe9cce9025a38c8ccf4a5183a4"},
+    {file = "lazy_object_proxy-1.9.0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:189bbd5d41ae7a498397287c408617fe5c48633e7755287b21d741f7db2706a9"},
+    {file = "lazy_object_proxy-1.9.0-cp311-cp311-win32.whl", hash = "sha256:81fc4d08b062b535d95c9ea70dbe8a335c45c04029878e62d744bdced5141586"},
+    {file = "lazy_object_proxy-1.9.0-cp311-cp311-win_amd64.whl", hash = "sha256:f2457189d8257dd41ae9b434ba33298aec198e30adf2dcdaaa3a28b9994f6adb"},
+    {file = "lazy_object_proxy-1.9.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:d9e25ef10a39e8afe59a5c348a4dbf29b4868ab76269f81ce1674494e2565a6e"},
+    {file = "lazy_object_proxy-1.9.0-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:cbf9b082426036e19c6924a9ce90c740a9861e2bdc27a4834fd0a910742ac1e8"},
+    {file = "lazy_object_proxy-1.9.0-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9f5fa4a61ce2438267163891961cfd5e32ec97a2c444e5b842d574251ade27d2"},
+    {file = "lazy_object_proxy-1.9.0-cp37-cp37m-musllinux_1_1_aarch64.whl", hash = "sha256:8fa02eaab317b1e9e03f69aab1f91e120e7899b392c4fc19807a8278a07a97e8"},
+    {file = "lazy_object_proxy-1.9.0-cp37-cp37m-musllinux_1_1_x86_64.whl", hash = "sha256:e7c21c95cae3c05c14aafffe2865bbd5e377cfc1348c4f7751d9dc9a48ca4bda"},
+    {file = "lazy_object_proxy-1.9.0-cp37-cp37m-win32.whl", hash = "sha256:f12ad7126ae0c98d601a7ee504c1122bcef553d1d5e0c3bfa77b16b3968d2734"},
+    {file = "lazy_object_proxy-1.9.0-cp37-cp37m-win_amd64.whl", hash = "sha256:edd20c5a55acb67c7ed471fa2b5fb66cb17f61430b7a6b9c3b4a1e40293b1671"},
+    {file = "lazy_object_proxy-1.9.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:2d0daa332786cf3bb49e10dc6a17a52f6a8f9601b4cf5c295a4f85854d61de63"},
+    {file = "lazy_object_proxy-1.9.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:9cd077f3d04a58e83d04b20e334f678c2b0ff9879b9375ed107d5d07ff160171"},
+    {file = "lazy_object_proxy-1.9.0-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:660c94ea760b3ce47d1855a30984c78327500493d396eac4dfd8bd82041b22be"},
+    {file = "lazy_object_proxy-1.9.0-cp38-cp38-musllinux_1_1_aarch64.whl", hash = "sha256:212774e4dfa851e74d393a2370871e174d7ff0ebc980907723bb67d25c8a7c30"},
+    {file = "lazy_object_proxy-1.9.0-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:f0117049dd1d5635bbff65444496c90e0baa48ea405125c088e93d9cf4525b11"},
+    {file = "lazy_object_proxy-1.9.0-cp38-cp38-win32.whl", hash = "sha256:0a891e4e41b54fd5b8313b96399f8b0e173bbbfc03c7631f01efbe29bb0bcf82"},
+    {file = "lazy_object_proxy-1.9.0-cp38-cp38-win_amd64.whl", hash = "sha256:9990d8e71b9f6488e91ad25f322898c136b008d87bf852ff65391b004da5e17b"},
+    {file = "lazy_object_proxy-1.9.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:9e7551208b2aded9c1447453ee366f1c4070602b3d932ace044715d89666899b"},
+    {file = "lazy_object_proxy-1.9.0-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:5f83ac4d83ef0ab017683d715ed356e30dd48a93746309c8f3517e1287523ef4"},
+    {file = "lazy_object_proxy-1.9.0-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7322c3d6f1766d4ef1e51a465f47955f1e8123caee67dd641e67d539a534d006"},
+    {file = "lazy_object_proxy-1.9.0-cp39-cp39-musllinux_1_1_aarch64.whl", hash = "sha256:18b78ec83edbbeb69efdc0e9c1cb41a3b1b1ed11ddd8ded602464c3fc6020494"},
+    {file = "lazy_object_proxy-1.9.0-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:09763491ce220c0299688940f8dc2c5d05fd1f45af1e42e636b2e8b2303e4382"},
+    {file = "lazy_object_proxy-1.9.0-cp39-cp39-win32.whl", hash = "sha256:9090d8e53235aa280fc9239a86ae3ea8ac58eff66a705fa6aa2ec4968b95c821"},
+    {file = "lazy_object_proxy-1.9.0-cp39-cp39-win_amd64.whl", hash = "sha256:db1c1722726f47e10e0b5fdbf15ac3b8adb58c091d12b3ab713965795036985f"},
+]
+
+[[package]]
+name = "lief"
+version = "0.13.2"
+description = "Library to instrument executable formats"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "lief-0.13.2-cp310-cp310-macosx_10_14_x86_64.whl", hash = "sha256:0390cfaaf0e9aed46bebf26f00f34852768f76bc7f90abf7ceb384566200e5f5"},
+    {file = "lief-0.13.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:5581bf0072c1e7a9ea2fb2e2252b8582016e8b298804b5461e552b402c9cd4e9"},
+    {file = "lief-0.13.2-cp310-cp310-manylinux2014_aarch64.whl", hash = "sha256:dbbf2fb3d7807e815f345c77e287da162e081100f059ec03005995befc295d7f"},
+    {file = "lief-0.13.2-cp310-cp310-manylinux_2_24_x86_64.whl", hash = "sha256:d344d37334c2b488dc02f04cb13c22cd61aa065eeb9bca7424588e0c8c23bdfb"},
+    {file = "lief-0.13.2-cp310-cp310-win32.whl", hash = "sha256:bc041b28b94139843a33c014e355822a9276b35f3c5ae10d82da56bf572f8222"},
+    {file = "lief-0.13.2-cp310-cp310-win_amd64.whl", hash = "sha256:01d4075bbc3541e9dd3ef008045fa1eb128294a0c5b0c1f69ce60d8948d248c7"},
+    {file = "lief-0.13.2-cp311-cp311-macosx_10_14_x86_64.whl", hash = "sha256:6570dacebe107ad60c2ba0968d1a865d316009d43cc85af3719d3eeb0911abf3"},
+    {file = "lief-0.13.2-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:7ce2e3f7c791efba327c2bb3499dbef81e682027109045a9bae696c62e2aeeb0"},
+    {file = "lief-0.13.2-cp311-cp311-manylinux2014_aarch64.whl", hash = "sha256:11ab900e0644b6735ecdef2bbd04439b4866a527650fc054470c195d6cfe2917"},
+    {file = "lief-0.13.2-cp311-cp311-manylinux_2_24_x86_64.whl", hash = "sha256:042ad2105a136b11a7494b9af8178468e8cb32b8fa2a0a55cb659a5605aeb069"},
+    {file = "lief-0.13.2-cp311-cp311-win32.whl", hash = "sha256:1ce289b6ab3cf4be654270007e8a2c0d2e42116180418c29d3ce83762955de63"},
+    {file = "lief-0.13.2-cp311-cp311-win_amd64.whl", hash = "sha256:eccb248ffb598e410fd2ef7c1f171a3cde57a40c9bb8c4fa15d8e7b90eb4eb2d"},
+    {file = "lief-0.13.2-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:95731cadedd6ffc5fb48c147fcefe004624e436b75e8ee9fb2dbf2ae5f084342"},
+    {file = "lief-0.13.2-cp38-cp38-manylinux2014_aarch64.whl", hash = "sha256:8da75df0ea472557fcc37a27ba583bad5a8f3a256c186600d00a6dd0a57f718a"},
+    {file = "lief-0.13.2-cp38-cp38-manylinux_2_24_x86_64.whl", hash = "sha256:b99092f02c13f580c2d00b504af224b7e60e7c98a791e72ae8519f530b7687bb"},
+    {file = "lief-0.13.2-cp38-cp38-win32.whl", hash = "sha256:03db0138e4dbbdfa8bba74de312b0cebb30f504e44f38a9c8918b84022da340b"},
+    {file = "lief-0.13.2-cp38-cp38-win_amd64.whl", hash = "sha256:36c5bea3f8460dee3ebb75d35949f445638ec85d2871f31e293c47fb4a0a5af7"},
+    {file = "lief-0.13.2-cp39-cp39-macosx_10_14_x86_64.whl", hash = "sha256:eca8ecbcae1ad851ed7cf1e22ec8accd74f2267fa7375194559fb917523d8a92"},
+    {file = "lief-0.13.2-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:a8703cb5308b4828563badc6885ff07a3926ec3403d1caa3aa75f24fe9cbcf84"},
+    {file = "lief-0.13.2-cp39-cp39-manylinux2014_aarch64.whl", hash = "sha256:c60f2f79e7d0d1f18dec7dcdb4d4f35e6b126ac29e2f2f056d28ec50599d868a"},
+    {file = "lief-0.13.2-cp39-cp39-manylinux_2_24_x86_64.whl", hash = "sha256:e0f84a7443b7f1b02666fd16a9aa57f5d9027e60ba2885e0d76db8426d689707"},
+    {file = "lief-0.13.2-cp39-cp39-win32.whl", hash = "sha256:3f8f251de874929d9c9e94a35891621ab8c059149f8a1c24e543fd9cf0c2a31c"},
+    {file = "lief-0.13.2-cp39-cp39-win_amd64.whl", hash = "sha256:2bbe294385e629aa7206b2f39f0ca34e3948605a8db50b22091603053889a759"},
+]
+
+[[package]]
+name = "macholib"
+version = "1.16.2"
+description = "Mach-O header analysis and editing"
+optional = false
+python-versions = "*"
+files = [
+    {file = "macholib-1.16.2-py2.py3-none-any.whl", hash = "sha256:44c40f2cd7d6726af8fa6fe22549178d3a4dfecc35a9cd15ea916d9c83a688e0"},
+    {file = "macholib-1.16.2.tar.gz", hash = "sha256:557bbfa1bb255c20e9abafe7ed6cd8046b48d9525db2f9b77d3122a63a2a8bf8"},
+]
+
+[package.dependencies]
+altgraph = ">=0.17"
+
+[[package]]
+name = "mccabe"
+version = "0.7.0"
+description = "McCabe checker, plugin for flake8"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "mccabe-0.7.0-py2.py3-none-any.whl", hash = "sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e"},
+    {file = "mccabe-0.7.0.tar.gz", hash = "sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325"},
+]
+
+[[package]]
+name = "mypy"
+version = "0.910"
+description = "Optional static typing for Python"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "mypy-0.910-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:a155d80ea6cee511a3694b108c4494a39f42de11ee4e61e72bc424c490e46457"},
+    {file = "mypy-0.910-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:b94e4b785e304a04ea0828759172a15add27088520dc7e49ceade7834275bedb"},
+    {file = "mypy-0.910-cp35-cp35m-manylinux2010_x86_64.whl", hash = "sha256:088cd9c7904b4ad80bec811053272986611b84221835e079be5bcad029e79dd9"},
+    {file = "mypy-0.910-cp35-cp35m-win_amd64.whl", hash = "sha256:adaeee09bfde366d2c13fe6093a7df5df83c9a2ba98638c7d76b010694db760e"},
+    {file = "mypy-0.910-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:ecd2c3fe726758037234c93df7e98deb257fd15c24c9180dacf1ef829da5f921"},
+    {file = "mypy-0.910-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:d9dd839eb0dc1bbe866a288ba3c1afc33a202015d2ad83b31e875b5905a079b6"},
+    {file = "mypy-0.910-cp36-cp36m-manylinux2010_x86_64.whl", hash = "sha256:3e382b29f8e0ccf19a2df2b29a167591245df90c0b5a2542249873b5c1d78212"},
+    {file = "mypy-0.910-cp36-cp36m-win_amd64.whl", hash = "sha256:53fd2eb27a8ee2892614370896956af2ff61254c275aaee4c230ae771cadd885"},
+    {file = "mypy-0.910-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:b6fb13123aeef4a3abbcfd7e71773ff3ff1526a7d3dc538f3929a49b42be03f0"},
+    {file = "mypy-0.910-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:e4dab234478e3bd3ce83bac4193b2ecd9cf94e720ddd95ce69840273bf44f6de"},
+    {file = "mypy-0.910-cp37-cp37m-manylinux2010_x86_64.whl", hash = "sha256:7df1ead20c81371ccd6091fa3e2878559b5c4d4caadaf1a484cf88d93ca06703"},
+    {file = "mypy-0.910-cp37-cp37m-win_amd64.whl", hash = "sha256:0aadfb2d3935988ec3815952e44058a3100499f5be5b28c34ac9d79f002a4a9a"},
+    {file = "mypy-0.910-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:ec4e0cd079db280b6bdabdc807047ff3e199f334050db5cbb91ba3e959a67504"},
+    {file = "mypy-0.910-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:119bed3832d961f3a880787bf621634ba042cb8dc850a7429f643508eeac97b9"},
+    {file = "mypy-0.910-cp38-cp38-manylinux2010_x86_64.whl", hash = "sha256:866c41f28cee548475f146aa4d39a51cf3b6a84246969f3759cb3e9c742fc072"},
+    {file = "mypy-0.910-cp38-cp38-win_amd64.whl", hash = "sha256:ceb6e0a6e27fb364fb3853389607cf7eb3a126ad335790fa1e14ed02fba50811"},
+    {file = "mypy-0.910-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:1a85e280d4d217150ce8cb1a6dddffd14e753a4e0c3cf90baabb32cefa41b59e"},
+    {file = "mypy-0.910-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:42c266ced41b65ed40a282c575705325fa7991af370036d3f134518336636f5b"},
+    {file = "mypy-0.910-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:3c4b8ca36877fc75339253721f69603a9c7fdb5d4d5a95a1a1b899d8b86a4de2"},
+    {file = "mypy-0.910-cp39-cp39-manylinux2010_x86_64.whl", hash = "sha256:c0df2d30ed496a08de5daed2a9ea807d07c21ae0ab23acf541ab88c24b26ab97"},
+    {file = "mypy-0.910-cp39-cp39-win_amd64.whl", hash = "sha256:c6c2602dffb74867498f86e6129fd52a2770c48b7cd3ece77ada4fa38f94eba8"},
+    {file = "mypy-0.910-py3-none-any.whl", hash = "sha256:ef565033fa5a958e62796867b1df10c40263ea9ded87164d67572834e57a174d"},
+    {file = "mypy-0.910.tar.gz", hash = "sha256:704098302473cb31a218f1775a873b376b30b4c18229421e9e9dc8916fd16150"},
+]
+
+[package.dependencies]
+mypy-extensions = ">=0.4.3,<0.5.0"
+toml = "*"
+typing-extensions = ">=3.7.4"
+
+[package.extras]
+dmypy = ["psutil (>=4.0)"]
+python2 = ["typed-ast (>=1.4.0,<1.5.0)"]
+
+[[package]]
+name = "mypy-extensions"
+version = "0.4.4"
+description = "Experimental type system extensions for programs checked with the mypy typechecker."
+optional = false
+python-versions = ">=2.7"
+files = [
+    {file = "mypy_extensions-0.4.4.tar.gz", hash = "sha256:c8b707883a96efe9b4bb3aaf0dcc07e7e217d7d8368eec4db4049ee9e142f4fd"},
+]
+
+[[package]]
+name = "pefile"
+version = "2023.2.7"
+description = "Python PE parsing module"
+optional = false
+python-versions = ">=3.6.0"
+files = [
+    {file = "pefile-2023.2.7-py3-none-any.whl", hash = "sha256:da185cd2af68c08a6cd4481f7325ed600a88f6a813bad9dea07ab3ef73d8d8d6"},
+    {file = "pefile-2023.2.7.tar.gz", hash = "sha256:82e6114004b3d6911c77c3953e3838654b04511b8b66e8583db70c65998017dc"},
+]
+
+[[package]]
+name = "platformdirs"
+version = "3.9.1"
+description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "platformdirs-3.9.1-py3-none-any.whl", hash = "sha256:ad8291ae0ae5072f66c16945166cb11c63394c7a3ad1b1bc9828ca3162da8c2f"},
+    {file = "platformdirs-3.9.1.tar.gz", hash = "sha256:1b42b450ad933e981d56e59f1b97495428c9bd60698baab9f3eb3d00d5822421"},
+]
+
+[package.extras]
+docs = ["furo (>=2023.5.20)", "proselint (>=0.13)", "sphinx (>=7.0.1)", "sphinx-autodoc-typehints (>=1.23,!=1.23.4)"]
+test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.3.1)", "pytest-cov (>=4.1)", "pytest-mock (>=3.10)"]
+
+[[package]]
+name = "pyinstaller"
+version = "5.13.0"
+description = "PyInstaller bundles a Python application and all its dependencies into a single package."
+optional = false
+python-versions = "<3.13,>=3.7"
+files = [
+    {file = "pyinstaller-5.13.0-py3-none-macosx_10_13_universal2.whl", hash = "sha256:7fdd319828de679f9c5e381eff998ee9b4164bf4457e7fca56946701cf002c3f"},
+    {file = "pyinstaller-5.13.0-py3-none-manylinux2014_aarch64.whl", hash = "sha256:0df43697c4914285ecd333be968d2cd042ab9b2670124879ee87931d2344eaf5"},
+    {file = "pyinstaller-5.13.0-py3-none-manylinux2014_i686.whl", hash = "sha256:28d9742c37e9fb518444b12f8c8ab3cb4ba212d752693c34475c08009aa21ccf"},
+    {file = "pyinstaller-5.13.0-py3-none-manylinux2014_ppc64le.whl", hash = "sha256:e5fb17de6c325d3b2b4ceaeb55130ad7100a79096490e4c5b890224406fa42f4"},
+    {file = "pyinstaller-5.13.0-py3-none-manylinux2014_s390x.whl", hash = "sha256:78975043edeb628e23a73fb3ef0a273cda50e765f1716f75212ea3e91b09dede"},
+    {file = "pyinstaller-5.13.0-py3-none-manylinux2014_x86_64.whl", hash = "sha256:cd7d5c06f2847195a23d72ede17c60857d6f495d6f0727dc6c9bc1235f2eb79c"},
+    {file = "pyinstaller-5.13.0-py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:24009eba63cfdbcde6d2634e9c87f545eb67249ddf3b514e0cd3b2cdaa595828"},
+    {file = "pyinstaller-5.13.0-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:1fde4381155f21d6354dc450dcaa338cd8a40aaacf6bd22b987b0f3e1f96f3ee"},
+    {file = "pyinstaller-5.13.0-py3-none-win32.whl", hash = "sha256:2d03419904d1c25c8968b0ad21da0e0f33d8d65716e29481b5bd83f7f342b0c5"},
+    {file = "pyinstaller-5.13.0-py3-none-win_amd64.whl", hash = "sha256:9fc27c5a853b14a90d39c252707673c7a0efec921cd817169aff3af0fca8c127"},
+    {file = "pyinstaller-5.13.0-py3-none-win_arm64.whl", hash = "sha256:3a331951f9744bc2379ea5d65d36f3c828eaefe2785f15039592cdc08560b262"},
+    {file = "pyinstaller-5.13.0.tar.gz", hash = "sha256:5e446df41255e815017d96318e39f65a3eb807e74a796c7e7ff7f13b6366a2e9"},
+]
+
+[package.dependencies]
+altgraph = "*"
+macholib = {version = ">=1.8", markers = "sys_platform == \"darwin\""}
+pefile = {version = ">=2022.5.30", markers = "sys_platform == \"win32\""}
+pyinstaller-hooks-contrib = ">=2021.4"
+pywin32-ctypes = {version = ">=0.2.1", markers = "sys_platform == \"win32\""}
+setuptools = ">=42.0.0"
+
+[package.extras]
+encryption = ["tinyaes (>=1.0.0)"]
+hook-testing = ["execnet (>=1.5.0)", "psutil", "pytest (>=2.7.3)"]
+
+[[package]]
+name = "pyinstaller-hooks-contrib"
+version = "2023.6"
+description = "Community maintained hooks for PyInstaller"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pyinstaller-hooks-contrib-2023.6.tar.gz", hash = "sha256:596a72009d8692b043e0acbf5e1b476d93149900142ba01845dded91a0770cb5"},
+    {file = "pyinstaller_hooks_contrib-2023.6-py2.py3-none-any.whl", hash = "sha256:aa6d7d038814df6aa7bec7bdbebc7cb4c693d3398df858f6062957f0797d397b"},
+]
+
+[[package]]
+name = "pylint"
+version = "2.17.4"
+description = "python code static checker"
+optional = false
+python-versions = ">=3.7.2"
+files = [
+    {file = "pylint-2.17.4-py3-none-any.whl", hash = "sha256:7a1145fb08c251bdb5cca11739722ce64a63db479283d10ce718b2460e54123c"},
+    {file = "pylint-2.17.4.tar.gz", hash = "sha256:5dcf1d9e19f41f38e4e85d10f511e5b9c35e1aa74251bf95cdd8cb23584e2db1"},
+]
+
+[package.dependencies]
+astroid = ">=2.15.4,<=2.17.0-dev0"
+colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
+dill = [
+    {version = ">=0.2", markers = "python_version < \"3.11\""},
+    {version = ">=0.3.6", markers = "python_version >= \"3.11\""},
+]
+isort = ">=4.2.5,<6"
+mccabe = ">=0.6,<0.8"
+platformdirs = ">=2.2.0"
+tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
+tomlkit = ">=0.10.1"
+typing-extensions = {version = ">=3.10.0", markers = "python_version < \"3.10\""}
+
+[package.extras]
+spelling = ["pyenchant (>=3.2,<4.0)"]
+testutils = ["gitpython (>3)"]
+
+[[package]]
+name = "pyscylla"
+version = "0.11.1"
+description = "Python bindings for Scylla"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pyscylla-0.11.1-cp310-cp310-win32.whl", hash = "sha256:2c7e393ab364ce8c3199f94b36974f393b189e12b39fb0779b928414b247cfa6"},
+    {file = "pyscylla-0.11.1-cp310-cp310-win_amd64.whl", hash = "sha256:93e94d778bae927a74f82a07bec76a5dc47ab17e9a34f521e4aa92d40c62519c"},
+    {file = "pyscylla-0.11.1-cp311-cp311-win32.whl", hash = "sha256:6c229ee2f58ed2016859967cd48b780c5b4265c5c364a309c53c31e6cff9e077"},
+    {file = "pyscylla-0.11.1-cp311-cp311-win_amd64.whl", hash = "sha256:80a19b4aa9d4524de73a327b8c1b4803042e32e456e2b73e8130a56a057026b5"},
+    {file = "pyscylla-0.11.1-cp38-cp38-win32.whl", hash = "sha256:d8ddec37218d1421173b2bd9d6f86fa626b875abdf098ed252f3f67cdf57b162"},
+    {file = "pyscylla-0.11.1-cp38-cp38-win_amd64.whl", hash = "sha256:9ca3be51ebe7678084f2c6433e4e0a69bf80bbbabe533254d95beb01294fd0cc"},
+    {file = "pyscylla-0.11.1-cp39-cp39-win32.whl", hash = "sha256:3ce769f3cc5bd7514be7b4bcf0eb93e5769e9bd299756742ba2cbf2f455fa4ec"},
+    {file = "pyscylla-0.11.1-cp39-cp39-win_amd64.whl", hash = "sha256:4c299f744245404197eb12d4d4112c2235d5dd0310d54043ab19729aa2ba049f"},
+]
+
+[[package]]
+name = "pywin32-ctypes"
+version = "0.2.2"
+description = "A (partial) reimplementation of pywin32 using ctypes/cffi"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "pywin32-ctypes-0.2.2.tar.gz", hash = "sha256:3426e063bdd5fd4df74a14fa3cf80a0b42845a87e1d1e81f6549f9daec593a60"},
+    {file = "pywin32_ctypes-0.2.2-py3-none-any.whl", hash = "sha256:bf490a1a709baf35d688fe0ecf980ed4de11d2b3e37b51e5442587a75d9957e7"},
+]
+
+[[package]]
+name = "setuptools"
+version = "68.0.0"
+description = "Easily download, build, install, upgrade, and uninstall Python packages"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "setuptools-68.0.0-py3-none-any.whl", hash = "sha256:11e52c67415a381d10d6b462ced9cfb97066179f0e871399e006c4ab101fc85f"},
+    {file = "setuptools-68.0.0.tar.gz", hash = "sha256:baf1fdb41c6da4cd2eae722e135500da913332ab3f2f5c7d33af9b492acb5235"},
+]
+
+[package.extras]
+docs = ["furo", "jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "pygments-github-lexers (==0.0.5)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-favicon", "sphinx-hoverxref (<2)", "sphinx-inline-tabs", "sphinx-lint", "sphinx-notfound-page (==0.8.3)", "sphinx-reredirects", "sphinxcontrib-towncrier"]
+testing = ["build[virtualenv]", "filelock (>=3.4.0)", "flake8-2020", "ini2toml[lite] (>=0.9)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.2.0)", "pip (>=19.1)", "pip-run (>=8.8)", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-mypy (>=0.9.1)", "pytest-perf", "pytest-ruff", "pytest-timeout", "pytest-xdist", "tomli-w (>=1.0.0)", "virtualenv (>=13.0.0)", "wheel"]
+testing-integration = ["build[virtualenv]", "filelock (>=3.4.0)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.2.0)", "pytest", "pytest-enabler", "pytest-xdist", "tomli", "virtualenv (>=13.0.0)", "wheel"]
+
+[[package]]
+name = "six"
+version = "1.16.0"
+description = "Python 2 and 3 compatibility utilities"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
+files = [
+    {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
+    {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
+]
+
+[[package]]
+name = "termcolor"
+version = "2.3.0"
+description = "ANSI color formatting for output in terminal"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "termcolor-2.3.0-py3-none-any.whl", hash = "sha256:3afb05607b89aed0ffe25202399ee0867ad4d3cb4180d98aaf8eefa6a5f7d475"},
+    {file = "termcolor-2.3.0.tar.gz", hash = "sha256:b5b08f68937f138fe92f6c089b99f1e2da0ae56c52b78bf7075fd95420fd9a5a"},
+]
+
+[package.extras]
+tests = ["pytest", "pytest-cov"]
+
+[[package]]
+name = "toml"
+version = "0.10.2"
+description = "Python Library for Tom's Obvious, Minimal Language"
+optional = false
+python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+files = [
+    {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
+    {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
+]
+
+[[package]]
+name = "tomli"
+version = "2.0.1"
+description = "A lil' TOML parser"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
+    {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
+]
+
+[[package]]
+name = "tomlkit"
+version = "0.11.8"
+description = "Style preserving TOML library"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "tomlkit-0.11.8-py3-none-any.whl", hash = "sha256:8c726c4c202bdb148667835f68d68780b9a003a9ec34167b6c673b38eff2a171"},
+    {file = "tomlkit-0.11.8.tar.gz", hash = "sha256:9330fc7faa1db67b541b28e62018c17d20be733177d290a13b24c62d1614e0c3"},
+]
+
+[[package]]
+name = "typing-extensions"
+version = "4.7.1"
+description = "Backported and Experimental Type Hints for Python 3.7+"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "typing_extensions-4.7.1-py3-none-any.whl", hash = "sha256:440d5dd3af93b060174bf433bccd69b0babc3b15b1a8dca43789fd7f61514b36"},
+    {file = "typing_extensions-4.7.1.tar.gz", hash = "sha256:b75ddc264f0ba5615db7ba217daeb99701ad295353c45f9e95963337ceeeffb2"},
+]
+
+[[package]]
+name = "unicorn"
+version = "1.0.3"
+description = "Unicorn CPU emulator engine"
+optional = false
+python-versions = "*"
+files = [
+    {file = "unicorn-1.0.3-py2.py3-none-macosx_10_14_x86_64.whl", hash = "sha256:23f842ce919fcba1a1a1d54471951cf41a4fbf34fd64a09545ed0f1250f9919c"},
+    {file = "unicorn-1.0.3-py2.py3-none-manylinux1_i686.whl", hash = "sha256:bc98daeff337a8edfd2bc45d7712d105c35083c55c9a85970f0a237dd9ba226b"},
+    {file = "unicorn-1.0.3-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:9121ba837e7bb25ece2a93d115f87a8e53e243dc06c60d2e91c4302073068ad7"},
+    {file = "unicorn-1.0.3-py2.py3-none-win32.whl", hash = "sha256:7e63a87fe1d235a8a731baf06bc4dfd3615247af440f8ea54b34834835a55e77"},
+    {file = "unicorn-1.0.3-py2.py3-none-win_amd64.whl", hash = "sha256:1f719f86fe0d41a0c6b65de4fce17b6f06791cf5eff5b228b6c05de5c49162e8"},
+    {file = "unicorn-1.0.3.tar.gz", hash = "sha256:08fd3616de4ad97ffcbddd3c40d3afb0bd789956b5a1e8905be90042b9706541"},
+]
+
+[[package]]
+name = "wrapt"
+version = "1.15.0"
+description = "Module for decorators, wrappers and monkey patching."
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
+files = [
+    {file = "wrapt-1.15.0-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:ca1cccf838cd28d5a0883b342474c630ac48cac5df0ee6eacc9c7290f76b11c1"},
+    {file = "wrapt-1.15.0-cp27-cp27m-manylinux1_i686.whl", hash = "sha256:e826aadda3cae59295b95343db8f3d965fb31059da7de01ee8d1c40a60398b29"},
+    {file = "wrapt-1.15.0-cp27-cp27m-manylinux1_x86_64.whl", hash = "sha256:5fc8e02f5984a55d2c653f5fea93531e9836abbd84342c1d1e17abc4a15084c2"},
+    {file = "wrapt-1.15.0-cp27-cp27m-manylinux2010_i686.whl", hash = "sha256:96e25c8603a155559231c19c0349245eeb4ac0096fe3c1d0be5c47e075bd4f46"},
+    {file = "wrapt-1.15.0-cp27-cp27m-manylinux2010_x86_64.whl", hash = "sha256:40737a081d7497efea35ab9304b829b857f21558acfc7b3272f908d33b0d9d4c"},
+    {file = "wrapt-1.15.0-cp27-cp27mu-manylinux1_i686.whl", hash = "sha256:f87ec75864c37c4c6cb908d282e1969e79763e0d9becdfe9fe5473b7bb1e5f09"},
+    {file = "wrapt-1.15.0-cp27-cp27mu-manylinux1_x86_64.whl", hash = "sha256:1286eb30261894e4c70d124d44b7fd07825340869945c79d05bda53a40caa079"},
+    {file = "wrapt-1.15.0-cp27-cp27mu-manylinux2010_i686.whl", hash = "sha256:493d389a2b63c88ad56cdc35d0fa5752daac56ca755805b1b0c530f785767d5e"},
+    {file = "wrapt-1.15.0-cp27-cp27mu-manylinux2010_x86_64.whl", hash = "sha256:58d7a75d731e8c63614222bcb21dd992b4ab01a399f1f09dd82af17bbfc2368a"},
+    {file = "wrapt-1.15.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:21f6d9a0d5b3a207cdf7acf8e58d7d13d463e639f0c7e01d82cdb671e6cb7923"},
+    {file = "wrapt-1.15.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:ce42618f67741d4697684e501ef02f29e758a123aa2d669e2d964ff734ee00ee"},
+    {file = "wrapt-1.15.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:41d07d029dd4157ae27beab04d22b8e261eddfc6ecd64ff7000b10dc8b3a5727"},
+    {file = "wrapt-1.15.0-cp310-cp310-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:54accd4b8bc202966bafafd16e69da9d5640ff92389d33d28555c5fd4f25ccb7"},
+    {file = "wrapt-1.15.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2fbfbca668dd15b744418265a9607baa970c347eefd0db6a518aaf0cfbd153c0"},
+    {file = "wrapt-1.15.0-cp310-cp310-musllinux_1_1_aarch64.whl", hash = "sha256:76e9c727a874b4856d11a32fb0b389afc61ce8aaf281ada613713ddeadd1cfec"},
+    {file = "wrapt-1.15.0-cp310-cp310-musllinux_1_1_i686.whl", hash = "sha256:e20076a211cd6f9b44a6be58f7eeafa7ab5720eb796975d0c03f05b47d89eb90"},
+    {file = "wrapt-1.15.0-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:a74d56552ddbde46c246b5b89199cb3fd182f9c346c784e1a93e4dc3f5ec9975"},
+    {file = "wrapt-1.15.0-cp310-cp310-win32.whl", hash = "sha256:26458da5653aa5b3d8dc8b24192f574a58984c749401f98fff994d41d3f08da1"},
+    {file = "wrapt-1.15.0-cp310-cp310-win_amd64.whl", hash = "sha256:75760a47c06b5974aa5e01949bf7e66d2af4d08cb8c1d6516af5e39595397f5e"},
+    {file = "wrapt-1.15.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:ba1711cda2d30634a7e452fc79eabcadaffedf241ff206db2ee93dd2c89a60e7"},
+    {file = "wrapt-1.15.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:56374914b132c702aa9aa9959c550004b8847148f95e1b824772d453ac204a72"},
+    {file = "wrapt-1.15.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:a89ce3fd220ff144bd9d54da333ec0de0399b52c9ac3d2ce34b569cf1a5748fb"},
+    {file = "wrapt-1.15.0-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:3bbe623731d03b186b3d6b0d6f51865bf598587c38d6f7b0be2e27414f7f214e"},
+    {file = "wrapt-1.15.0-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3abbe948c3cbde2689370a262a8d04e32ec2dd4f27103669a45c6929bcdbfe7c"},
+    {file = "wrapt-1.15.0-cp311-cp311-musllinux_1_1_aarch64.whl", hash = "sha256:b67b819628e3b748fd3c2192c15fb951f549d0f47c0449af0764d7647302fda3"},
+    {file = "wrapt-1.15.0-cp311-cp311-musllinux_1_1_i686.whl", hash = "sha256:7eebcdbe3677e58dd4c0e03b4f2cfa346ed4049687d839adad68cc38bb559c92"},
+    {file = "wrapt-1.15.0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:74934ebd71950e3db69960a7da29204f89624dde411afbfb3b4858c1409b1e98"},
+    {file = "wrapt-1.15.0-cp311-cp311-win32.whl", hash = "sha256:bd84395aab8e4d36263cd1b9308cd504f6cf713b7d6d3ce25ea55670baec5416"},
+    {file = "wrapt-1.15.0-cp311-cp311-win_amd64.whl", hash = "sha256:a487f72a25904e2b4bbc0817ce7a8de94363bd7e79890510174da9d901c38705"},
+    {file = "wrapt-1.15.0-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:4ff0d20f2e670800d3ed2b220d40984162089a6e2c9646fdb09b85e6f9a8fc29"},
+    {file = "wrapt-1.15.0-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:9ed6aa0726b9b60911f4aed8ec5b8dd7bf3491476015819f56473ffaef8959bd"},
+    {file = "wrapt-1.15.0-cp35-cp35m-manylinux2010_i686.whl", hash = "sha256:896689fddba4f23ef7c718279e42f8834041a21342d95e56922e1c10c0cc7afb"},
+    {file = "wrapt-1.15.0-cp35-cp35m-manylinux2010_x86_64.whl", hash = "sha256:75669d77bb2c071333417617a235324a1618dba66f82a750362eccbe5b61d248"},
+    {file = "wrapt-1.15.0-cp35-cp35m-win32.whl", hash = "sha256:fbec11614dba0424ca72f4e8ba3c420dba07b4a7c206c8c8e4e73f2e98f4c559"},
+    {file = "wrapt-1.15.0-cp35-cp35m-win_amd64.whl", hash = "sha256:fd69666217b62fa5d7c6aa88e507493a34dec4fa20c5bd925e4bc12fce586639"},
+    {file = "wrapt-1.15.0-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:b0724f05c396b0a4c36a3226c31648385deb6a65d8992644c12a4963c70326ba"},
+    {file = "wrapt-1.15.0-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:bbeccb1aa40ab88cd29e6c7d8585582c99548f55f9b2581dfc5ba68c59a85752"},
+    {file = "wrapt-1.15.0-cp36-cp36m-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:38adf7198f8f154502883242f9fe7333ab05a5b02de7d83aa2d88ea621f13364"},
+    {file = "wrapt-1.15.0-cp36-cp36m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:578383d740457fa790fdf85e6d346fda1416a40549fe8db08e5e9bd281c6a475"},
+    {file = "wrapt-1.15.0-cp36-cp36m-musllinux_1_1_aarch64.whl", hash = "sha256:a4cbb9ff5795cd66f0066bdf5947f170f5d63a9274f99bdbca02fd973adcf2a8"},
+    {file = "wrapt-1.15.0-cp36-cp36m-musllinux_1_1_i686.whl", hash = "sha256:af5bd9ccb188f6a5fdda9f1f09d9f4c86cc8a539bd48a0bfdc97723970348418"},
+    {file = "wrapt-1.15.0-cp36-cp36m-musllinux_1_1_x86_64.whl", hash = "sha256:b56d5519e470d3f2fe4aa7585f0632b060d532d0696c5bdfb5e8319e1d0f69a2"},
+    {file = "wrapt-1.15.0-cp36-cp36m-win32.whl", hash = "sha256:77d4c1b881076c3ba173484dfa53d3582c1c8ff1f914c6461ab70c8428b796c1"},
+    {file = "wrapt-1.15.0-cp36-cp36m-win_amd64.whl", hash = "sha256:077ff0d1f9d9e4ce6476c1a924a3332452c1406e59d90a2cf24aeb29eeac9420"},
+    {file = "wrapt-1.15.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:5c5aa28df055697d7c37d2099a7bc09f559d5053c3349b1ad0c39000e611d317"},
+    {file = "wrapt-1.15.0-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:3a8564f283394634a7a7054b7983e47dbf39c07712d7b177b37e03f2467a024e"},
+    {file = "wrapt-1.15.0-cp37-cp37m-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:780c82a41dc493b62fc5884fb1d3a3b81106642c5c5c78d6a0d4cbe96d62ba7e"},
+    {file = "wrapt-1.15.0-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e169e957c33576f47e21864cf3fc9ff47c223a4ebca8960079b8bd36cb014fd0"},
+    {file = "wrapt-1.15.0-cp37-cp37m-musllinux_1_1_aarch64.whl", hash = "sha256:b02f21c1e2074943312d03d243ac4388319f2456576b2c6023041c4d57cd7019"},
+    {file = "wrapt-1.15.0-cp37-cp37m-musllinux_1_1_i686.whl", hash = "sha256:f2e69b3ed24544b0d3dbe2c5c0ba5153ce50dcebb576fdc4696d52aa22db6034"},
+    {file = "wrapt-1.15.0-cp37-cp37m-musllinux_1_1_x86_64.whl", hash = "sha256:d787272ed958a05b2c86311d3a4135d3c2aeea4fc655705f074130aa57d71653"},
+    {file = "wrapt-1.15.0-cp37-cp37m-win32.whl", hash = "sha256:02fce1852f755f44f95af51f69d22e45080102e9d00258053b79367d07af39c0"},
+    {file = "wrapt-1.15.0-cp37-cp37m-win_amd64.whl", hash = "sha256:abd52a09d03adf9c763d706df707c343293d5d106aea53483e0ec8d9e310ad5e"},
+    {file = "wrapt-1.15.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:cdb4f085756c96a3af04e6eca7f08b1345e94b53af8921b25c72f096e704e145"},
+    {file = "wrapt-1.15.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:230ae493696a371f1dbffaad3dafbb742a4d27a0afd2b1aecebe52b740167e7f"},
+    {file = "wrapt-1.15.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:63424c681923b9f3bfbc5e3205aafe790904053d42ddcc08542181a30a7a51bd"},
+    {file = "wrapt-1.15.0-cp38-cp38-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:d6bcbfc99f55655c3d93feb7ef3800bd5bbe963a755687cbf1f490a71fb7794b"},
+    {file = "wrapt-1.15.0-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c99f4309f5145b93eca6e35ac1a988f0dc0a7ccf9ccdcd78d3c0adf57224e62f"},
+    {file = "wrapt-1.15.0-cp38-cp38-musllinux_1_1_aarch64.whl", hash = "sha256:b130fe77361d6771ecf5a219d8e0817d61b236b7d8b37cc045172e574ed219e6"},
+    {file = "wrapt-1.15.0-cp38-cp38-musllinux_1_1_i686.whl", hash = "sha256:96177eb5645b1c6985f5c11d03fc2dbda9ad24ec0f3a46dcce91445747e15094"},
+    {file = "wrapt-1.15.0-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:d5fe3e099cf07d0fb5a1e23d399e5d4d1ca3e6dfcbe5c8570ccff3e9208274f7"},
+    {file = "wrapt-1.15.0-cp38-cp38-win32.whl", hash = "sha256:abd8f36c99512755b8456047b7be10372fca271bf1467a1caa88db991e7c421b"},
+    {file = "wrapt-1.15.0-cp38-cp38-win_amd64.whl", hash = "sha256:b06fa97478a5f478fb05e1980980a7cdf2712015493b44d0c87606c1513ed5b1"},
+    {file = "wrapt-1.15.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:2e51de54d4fb8fb50d6ee8327f9828306a959ae394d3e01a1ba8b2f937747d86"},
+    {file = "wrapt-1.15.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:0970ddb69bba00670e58955f8019bec4a42d1785db3faa043c33d81de2bf843c"},
+    {file = "wrapt-1.15.0-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:76407ab327158c510f44ded207e2f76b657303e17cb7a572ffe2f5a8a48aa04d"},
+    {file = "wrapt-1.15.0-cp39-cp39-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:cd525e0e52a5ff16653a3fc9e3dd827981917d34996600bbc34c05d048ca35cc"},
+    {file = "wrapt-1.15.0-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9d37ac69edc5614b90516807de32d08cb8e7b12260a285ee330955604ed9dd29"},
+    {file = "wrapt-1.15.0-cp39-cp39-musllinux_1_1_aarch64.whl", hash = "sha256:078e2a1a86544e644a68422f881c48b84fef6d18f8c7a957ffd3f2e0a74a0d4a"},
+    {file = "wrapt-1.15.0-cp39-cp39-musllinux_1_1_i686.whl", hash = "sha256:2cf56d0e237280baed46f0b5316661da892565ff58309d4d2ed7dba763d984b8"},
+    {file = "wrapt-1.15.0-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:7dc0713bf81287a00516ef43137273b23ee414fe41a3c14be10dd95ed98a2df9"},
+    {file = "wrapt-1.15.0-cp39-cp39-win32.whl", hash = "sha256:46ed616d5fb42f98630ed70c3529541408166c22cdfd4540b88d5f21006b0eff"},
+    {file = "wrapt-1.15.0-cp39-cp39-win_amd64.whl", hash = "sha256:eef4d64c650f33347c1f9266fa5ae001440b232ad9b98f1f43dfe7a79435c0a6"},
+    {file = "wrapt-1.15.0-py3-none-any.whl", hash = "sha256:64b1df0f83706b4ef4cfb4fb0e4c2669100fd7ecacfb59e091fad300d4e04640"},
+    {file = "wrapt-1.15.0.tar.gz", hash = "sha256:d06730c6aed78cee4126234cf2d071e01b44b915e725a6cb439a879ec9754a3a"},
+]
+
+[[package]]
+name = "xxhash"
+version = "2.0.2"
+description = "Python binding for xxHash"
+optional = false
+python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+files = [
+    {file = "xxhash-2.0.2-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:dac3b94881b943bbe418f5829128b9c48f69a66f816ef8b72ee0129d676dbd7c"},
+    {file = "xxhash-2.0.2-cp27-cp27m-manylinux1_i686.whl", hash = "sha256:43fd97f332bd581639bb99fe8f09f7e9113d49cad4d21bef0620867f92c802c6"},
+    {file = "xxhash-2.0.2-cp27-cp27m-manylinux1_x86_64.whl", hash = "sha256:6e5058c3fa5b42ded9a303f1a5a42d3ff732cb54c108424c63e993fc3379513c"},
+    {file = "xxhash-2.0.2-cp27-cp27m-manylinux2010_i686.whl", hash = "sha256:dfacce97a3ccb46089e358ceaeca9300298511673bf87596da66882af386f6c7"},
+    {file = "xxhash-2.0.2-cp27-cp27m-manylinux2010_x86_64.whl", hash = "sha256:1dfa115c8e07b3e1d94ebd60a6d6ee16ea692efb890e245addb0d33b47ee1dee"},
+    {file = "xxhash-2.0.2-cp27-cp27m-win32.whl", hash = "sha256:fb28b0313c7582225373f343635674231518452331a9bdea8261d0e27b48594f"},
+    {file = "xxhash-2.0.2-cp27-cp27m-win_amd64.whl", hash = "sha256:427851234a87bfe6636c90b89bd65b7ca913befff3c7bcd92a3568e635fccc92"},
+    {file = "xxhash-2.0.2-cp27-cp27mu-manylinux1_i686.whl", hash = "sha256:0b92a01dc8dcada8827de140a5df83c9e8e5c190ef8bf972c98ebbe0924ee044"},
+    {file = "xxhash-2.0.2-cp27-cp27mu-manylinux1_x86_64.whl", hash = "sha256:676d6964b8a9bdaf737ae6836b886ab53b2863c6aa00d43952b130a6130d1bdc"},
+    {file = "xxhash-2.0.2-cp27-cp27mu-manylinux2010_i686.whl", hash = "sha256:8362693a1ce5c1373f48f047470e7797ed17dfe5babc37ba7bef50d6e6f83a72"},
+    {file = "xxhash-2.0.2-cp27-cp27mu-manylinux2010_x86_64.whl", hash = "sha256:515747159fccd23fc9d1b7afeaa8bd7fc36884188b47491713d22032c5f9e502"},
+    {file = "xxhash-2.0.2-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:e1787b9cea43f256f8d06c8429999d386a9da9cb000c265a4dde48dd08242528"},
+    {file = "xxhash-2.0.2-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:d47ab1245ee4c7e6fc424ad990e4d7cfe0f206d617efe990fea34000a9242102"},
+    {file = "xxhash-2.0.2-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:81ec049f4936a49311e1fc58036d7d682b5c83d6d16ba1c852a981588c90e027"},
+    {file = "xxhash-2.0.2-cp35-cp35m-manylinux2010_i686.whl", hash = "sha256:df71aeedee74eaf670d1243b6722c8c77626f3b6e6cf2cd79f2e336b151749cd"},
+    {file = "xxhash-2.0.2-cp35-cp35m-manylinux2010_x86_64.whl", hash = "sha256:a922315c8e20dae0d35e54b49fd7ee348fe0a5e2fd8ec02f6a74140e063fcdb3"},
+    {file = "xxhash-2.0.2-cp35-cp35m-manylinux2014_aarch64.whl", hash = "sha256:22ddd484cd92d138feeec556387894b8ec529bab7f2feb3a177eb84baadee8c1"},
+    {file = "xxhash-2.0.2-cp35-cp35m-win32.whl", hash = "sha256:b4964e7ddca1ef9d7addef40a9f5eaa97aeda367c1d895e392533c0d2f9c3b8e"},
+    {file = "xxhash-2.0.2-cp35-cp35m-win_amd64.whl", hash = "sha256:6077fdb44f68920c4ac8e2f34b2a107c9a218f00a698253c824a0c6c1b9622a3"},
+    {file = "xxhash-2.0.2-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:04ae5706ddfe0fd2b46cd0b6487d3edae7e724e27d732b055ffd0f9539c4afc5"},
+    {file = "xxhash-2.0.2-cp36-cp36m-manylinux1_i686.whl", hash = "sha256:c4a892bc47b6ea92bbb82499a81882548ce990d62c1862b3834f1f70e8cf4423"},
+    {file = "xxhash-2.0.2-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:57d43ce9594676b503c0a0a383481cb4e5cf736f88970bd41849fe15a68a5d48"},
+    {file = "xxhash-2.0.2-cp36-cp36m-manylinux2010_i686.whl", hash = "sha256:c2e44d162c3361392dbde736ee8ba3d1a414f63e32be6c71186f2b0654559d26"},
+    {file = "xxhash-2.0.2-cp36-cp36m-manylinux2010_x86_64.whl", hash = "sha256:0beb79835ca47af257f8126fccd9d5e0ba56ba7d39dab6f6b5a7acea4d8ac4b5"},
+    {file = "xxhash-2.0.2-cp36-cp36m-manylinux2014_aarch64.whl", hash = "sha256:f2bef10c417c4667310cc240d49e521e6b5fc90c4ff77a1ec78649869685e8d3"},
+    {file = "xxhash-2.0.2-cp36-cp36m-win32.whl", hash = "sha256:9b6bb1bd34a6365c790c328a604ec5a628059fef6e4486380caa89bc12787a6e"},
+    {file = "xxhash-2.0.2-cp36-cp36m-win_amd64.whl", hash = "sha256:4243dbeb1ce09d359289844f0c54676343857fdc6a092184aea159fecdf6d9f3"},
+    {file = "xxhash-2.0.2-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:71b38300e1803ab32ee787f89cdbc032b46ac5834eca9109d8fb576ae1a31741"},
+    {file = "xxhash-2.0.2-cp37-cp37m-manylinux1_i686.whl", hash = "sha256:a8a68d117178f15c96cb9ae2613f53db94e0fdb34ffc69c7ab600c899c7a966c"},
+    {file = "xxhash-2.0.2-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:dd9c72520f790ce6eaa535cdad1a53ded22deab43766cfa7cef42834a9a65561"},
+    {file = "xxhash-2.0.2-cp37-cp37m-manylinux2010_i686.whl", hash = "sha256:f95adf6091fa13ce19fab21fadb8d07210822320568d24a6405d6b557afc0411"},
+    {file = "xxhash-2.0.2-cp37-cp37m-manylinux2010_x86_64.whl", hash = "sha256:00aaf882036d2a0fa7652cf9aeaaf2ad077b784c09ef8d60f5d97ebf0d47ffa1"},
+    {file = "xxhash-2.0.2-cp37-cp37m-manylinux2014_aarch64.whl", hash = "sha256:bb8c0efad20da40da1aa56f36b929b965d1adede8a1d5b37b702d378a683e0dd"},
+    {file = "xxhash-2.0.2-cp37-cp37m-win32.whl", hash = "sha256:6fc0b8c21a181b771e1f0c25eb8a0a241af0126f1fc19f4c3cde7233de91326f"},
+    {file = "xxhash-2.0.2-cp37-cp37m-win_amd64.whl", hash = "sha256:b232b47a3aa825e0df14b1bd3e051dd327c8539e382728ddb81997d26de5256a"},
+    {file = "xxhash-2.0.2-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:dc328d3d635ec851d6befdf6ced2134d587d3be973dbbbc489da24c0c88ecb01"},
+    {file = "xxhash-2.0.2-cp38-cp38-manylinux1_i686.whl", hash = "sha256:9e6e5e095417060bed45119c510d5bc846b62e2a8218cb3e5a19b3ccf12e4c18"},
+    {file = "xxhash-2.0.2-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:b4b7d4d19c125738c5fc48356505dfbd63b3cdf826dd868a1b80a73de48729b7"},
+    {file = "xxhash-2.0.2-cp38-cp38-manylinux2010_i686.whl", hash = "sha256:686fcf2aff041df65470eccc7dcea5e7e77cfad99efcaba0c6f58bbd81846e10"},
+    {file = "xxhash-2.0.2-cp38-cp38-manylinux2010_x86_64.whl", hash = "sha256:cb3a196fd1d55ce86b1123cbf3ef6603f80f4d0b46541412bb5056b0563ef384"},
+    {file = "xxhash-2.0.2-cp38-cp38-manylinux2014_aarch64.whl", hash = "sha256:68d067427f2c6f7b3014e28bf4794b0876ab5f6366b53e1d6f59d275b4f19a8d"},
+    {file = "xxhash-2.0.2-cp38-cp38-win32.whl", hash = "sha256:73649555656dd17e809b9b3c54855f4f72144024b0e6395cd37b5395fa0f48c3"},
+    {file = "xxhash-2.0.2-cp38-cp38-win_amd64.whl", hash = "sha256:dafd1066c99d448a7a1226f10766b61ff752aaad8a4392e4cae30aafefa6fff5"},
+    {file = "xxhash-2.0.2-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:eb1e9e347c9810a272154814cf5ce33a6c3ac7d0d7cbcb066e92dd5f9fa4db8f"},
+    {file = "xxhash-2.0.2-cp39-cp39-manylinux1_i686.whl", hash = "sha256:ebff22f1783f641c6c2b313bfc44d6cc620c17409ec512e67c7c6de809155880"},
+    {file = "xxhash-2.0.2-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:b7640e043ac6e0f503eadb108e6971d69b0c95c23fbcac3e5632578f9f906050"},
+    {file = "xxhash-2.0.2-cp39-cp39-manylinux2010_i686.whl", hash = "sha256:db2352d375e6594620c462c029d3c1a1b18ff7168e470657e354f1b8b332d9dd"},
+    {file = "xxhash-2.0.2-cp39-cp39-manylinux2010_x86_64.whl", hash = "sha256:f49dbd3b8e4cc13f2df92fb3db39204e3258105a212e23784cbb340e415ae8ed"},
+    {file = "xxhash-2.0.2-cp39-cp39-manylinux2014_aarch64.whl", hash = "sha256:e70059c5cc8f0cecd16d8cb0263de8f317239cabee3fa4af35c0a1ddaed2110e"},
+    {file = "xxhash-2.0.2-cp39-cp39-win32.whl", hash = "sha256:a0199a07a264be96ed658ba3b4e9ee58a3c678e51a18e134e2518cf1a8171e18"},
+    {file = "xxhash-2.0.2-cp39-cp39-win_amd64.whl", hash = "sha256:173d3f662dc88de734bd622e46a3bbac6fd00e957b3e098fa8b75b141aa4354e"},
+    {file = "xxhash-2.0.2-pp27-pypy_73-macosx_10_9_x86_64.whl", hash = "sha256:e94fdff9b102ca7c0969230d209f7ce17020db17a89d026ac45d8ffb9e4929ec"},
+    {file = "xxhash-2.0.2-pp27-pypy_73-manylinux1_x86_64.whl", hash = "sha256:d7175cd7f490aae742d18eb9b519e74180958f88fa8ff47091727b3efb57bfbf"},
+    {file = "xxhash-2.0.2-pp27-pypy_73-manylinux2010_x86_64.whl", hash = "sha256:d707d2a053a5d55ccd2e59d7a228636cafeebb44c9ac3ca1c088f4d384c8c3a9"},
+    {file = "xxhash-2.0.2-pp27-pypy_73-win32.whl", hash = "sha256:dad190caa293abbb39d96b4a09f121fc971d81eb19c96e4e0db89a99a7d59b93"},
+    {file = "xxhash-2.0.2-pp36-pypy36_pp73-macosx_10_9_x86_64.whl", hash = "sha256:5dc3da5fa855dd8e35f24d20fabfcd29c0b3ac85a14dc2c329c029971ae4eeb7"},
+    {file = "xxhash-2.0.2-pp36-pypy36_pp73-manylinux1_x86_64.whl", hash = "sha256:17a3b0a2ff20879ed5c9d9c178349e9c6257db11b193e4103282d7a78ef9cb08"},
+    {file = "xxhash-2.0.2-pp36-pypy36_pp73-manylinux2010_x86_64.whl", hash = "sha256:c75f8375c80c3815f49a744ef1a8303577757eb9a2dc53bed33d9318b760fec6"},
+    {file = "xxhash-2.0.2-pp36-pypy36_pp73-win32.whl", hash = "sha256:eb2670ed6c435189aeb479bfff990e00b849ae0ff49945632db74b2a2a08d192"},
+    {file = "xxhash-2.0.2-pp37-pypy37_pp73-macosx_10_9_x86_64.whl", hash = "sha256:ff518ec1bd7cc33218f8f3325848c56e9c73c5df30138a64a89dd65ab1e1ffb5"},
+    {file = "xxhash-2.0.2-pp37-pypy37_pp73-manylinux1_x86_64.whl", hash = "sha256:c4a0806ffb33c9d892b5565fa010c252c7e0f4d01ded901a637dfede624e4d0c"},
+    {file = "xxhash-2.0.2-pp37-pypy37_pp73-manylinux2010_x86_64.whl", hash = "sha256:fdfac2014301da79cebcd8f9535c875f63242fe404d741cec5f70f400cc6a561"},
+    {file = "xxhash-2.0.2-pp37-pypy37_pp73-win32.whl", hash = "sha256:357f6a52bd18a80635cf4c83f648c42fa0609713b4183929ed019f7627af4b68"},
+    {file = "xxhash-2.0.2.tar.gz", hash = "sha256:b7bead8cf6210eadf9cecf356e17af794f57c0939a3d420a00d87ea652f87b49"},
+]
+
+[[package]]
+name = "yapf"
+version = "0.32.0"
+description = "A formatter for Python code."
+optional = false
+python-versions = "*"
+files = [
+    {file = "yapf-0.32.0-py2.py3-none-any.whl", hash = "sha256:8fea849025584e486fd06d6ba2bed717f396080fd3cc236ba10cb97c4c51cf32"},
+    {file = "yapf-0.32.0.tar.gz", hash = "sha256:a3f5085d37ef7e3e004c4ba9f9b3e40c54ff1901cd111f05145ae313a7c67d1b"},
+]
+
+[metadata]
+lock-version = "2.0"
+python-versions = ">=3.9, <3.12"
+content-hash = "8e67216ad88ed384a913dcb7d6a8546ed3399d0365df9e9d43ce0115c95d699d"
+
+```
+
+`pyproject.toml`:
+
+```toml
+[tool.poetry]
+name = "unlicense"
+version = "0.4.0"
+description = "Unpack executables protected with Themida/WinLicense 2.x and 3.x"
+authors = ["Erwan Grelet"]
+license = "GPL-3.0-or-later"
+
+[tool.poetry.dependencies]
+python = ">=3.9, <3.12"
+frida = "^16.1"
+unicorn = "^1.0"
+lief = "^0.13"
+fire = "^0.4"
+capstone = "^4.0"
+xxhash = "^2.0"
+pyscylla = "^0.11"
+
+[tool.poetry.dev-dependencies]
+mypy = "^0.910"
+pylint = "^2.11"
+yapf = "^0.32.0"
+toml = "^0.10.2"
+pyinstaller = "^5.13"
+
+[tool.poetry.scripts]
+unlicense = 'unlicense.application:main'
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pylint.'MESSAGES CONTROL']
+max-line-length = 120
+disable = "C0114, C0115, C0116, I1101"
+
+```
+
+`unlicense.spec`:
+
+```spec
+# -*- mode: python ; coding: utf-8 -*-
+
+from PyInstaller.utils.hooks import collect_dynamic_libs
+
+dlls = collect_dynamic_libs("capstone") + collect_dynamic_libs("unicorn")
+resource_files = [('unlicense/', 'unlicense')]
+block_cipher = None
+
+a = Analysis(['unlicense\\__main__.py'],
+             pathex=[],
+             binaries=dlls,
+             datas=resource_files,
+             hiddenimports=[],
+             hookspath=[],
+             hooksconfig={},
+             runtime_hooks=[],
+             excludes=[],
+             win_no_prefer_redirects=False,
+             win_private_assemblies=False,
+             cipher=block_cipher,
+             noarchive=False)
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+exe = EXE(pyz,
+          a.scripts,
+          a.binaries,
+          a.zipfiles,
+          a.datas, [],
+          name='unlicense',
+          debug=False,
+          bootloader_ignore_signals=False,
+          strip=False,
+          upx=False,
+          upx_exclude=[],
+          runtime_tmpdir=None,
+          console=True,
+          icon='assets/unlicense.ico',
+          disable_windowed_traceback=False,
+          target_arch=None,
+          codesign_identity=None,
+          entitlements_file=None)
+
+```
+
+`unlicense/__main__.py`:
+
+```py
+from unlicense.application import main
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`unlicense/application.py`:
+
+```py
+import logging
+import os
+import sys
+import threading
+from pathlib import Path
+from typing import Optional
+
+import fire  # type: ignore
+
+from . import frida_exec, winlicense2, winlicense3
+from .dump_utils import dump_dotnet_assembly, dump_pe, get_section_ranges, interpreter_can_dump_pe, probe_text_sections
+from .logger import setup_logger
+from .version_detection import detect_winlicense_version
+
+# Supported Themida/WinLicense major versions
+SUPPORTED_VERSIONS = [2, 3]
+LOG = logging.getLogger("unlicense")
+
+
+def main() -> None:
+    fire.Fire(run_unlicense)
+
+
+def run_unlicense(
+    pe_to_dump: str,
+    verbose: bool = False,
+    pause_on_oep: bool = False,
+    no_imports: bool = False,
+    force_oep: Optional[int] = None,
+    target_version: Optional[int] = None,
+    timeout: int = 10,
+) -> None:
+    """
+    Unpack executables protected with Themida/WinLicense 2.x and 3.x
+    """
+    setup_logger(LOG, verbose)
+
+    # Make sure child processes won't try to run as administrator
+    _force_run_as_invoker()
+
+    pe_path = Path(pe_to_dump)
+    if not pe_path.is_file():
+        LOG.error("'%s' isn't a file or doesn't exist", pe_path)
+        sys.exit(1)
+
+    # Detect Themida/Winlicense version if needed
+    if target_version is None:
+        target_version = detect_winlicense_version(pe_to_dump)
+        if target_version is None:
+            LOG.error("Failed to automatically detect packer version")
+            sys.exit(2)
+    elif target_version not in SUPPORTED_VERSIONS:
+        LOG.error("Target version '%d' is not supported", target_version)
+        sys.exit(2)
+    LOG.info("Detected packer version: %d.x", target_version)
+
+    # Check PE architecture and bitness
+    if not interpreter_can_dump_pe(pe_to_dump):
+        LOG.error("Target PE cannot be dumped with this interpreter. "
+                  "This is most likely a 32 vs 64 bit mismatch.")
+        sys.exit(3)
+
+    section_ranges = get_section_ranges(pe_to_dump)
+    text_section_ranges = probe_text_sections(pe_to_dump)
+    if text_section_ranges is None:
+        LOG.error("Failed to automatically detect .text section")
+        sys.exit(4)
+
+    dumped_image_base = 0
+    dumped_oep = 0
+    is_dotnet = False
+    oep_reached = threading.Event()
+
+    def notify_oep_reached(image_base: int, oep: int, dotnet: bool) -> None:
+        nonlocal dumped_image_base
+        nonlocal dumped_oep
+        nonlocal is_dotnet
+        dumped_image_base = image_base
+        dumped_oep = oep
+        is_dotnet = dotnet
+        oep_reached.set()
+
+    # Spawn the packed executable and instrument it to find its OEP
+    process_controller = frida_exec.spawn_and_instrument(
+        pe_path, text_section_ranges, notify_oep_reached)
+    try:
+        # Block until OEP is reached
+        if not oep_reached.wait(float(timeout)):
+            LOG.error("Original entry point wasn't reached before timeout")
+            sys.exit(4)
+
+        LOG.info("OEP reached: OEP=%s BASE=%s DOTNET=%r", hex(dumped_oep),
+                 hex(dumped_image_base), is_dotnet)
+        if pause_on_oep:
+            input("Thread blocked, press ENTER to proceed with the dumping.")
+
+        if force_oep is not None:
+            dumped_oep = dumped_image_base + force_oep
+            LOG.info("Using given OEP RVA value instead (%s)", hex(force_oep))
+
+        # Pick the range that contains the OEP
+        text_section_range = text_section_ranges[0]
+        for range in text_section_ranges:
+            if range.contains(dumped_oep - dumped_image_base):
+                text_section_range = range
+
+        # .NET assembly dumping works the same way regardless of the version
+        if is_dotnet:
+            LOG.info("Dumping .NET assembly ...")
+            if not dump_dotnet_assembly(process_controller, dumped_image_base):
+                LOG.error(".NET assembly dump failed")
+        # Do not bother recovering imports and start dumping if requested
+        elif no_imports:
+            dump_pe(process_controller, pe_to_dump, dumped_image_base,
+                    dumped_oep, 0, 0, True)
+        # Fix imports and dump the executable
+        elif target_version == 2:
+            winlicense2.fix_and_dump_pe(process_controller, pe_to_dump,
+                                        dumped_image_base, dumped_oep,
+                                        text_section_range)
+        elif target_version == 3:
+            winlicense3.fix_and_dump_pe(process_controller, pe_to_dump,
+                                        dumped_image_base, dumped_oep,
+                                        section_ranges, text_section_range)
+    finally:
+        # Try to kill the process on exit
+        process_controller.terminate_process()
+
+
+def _force_run_as_invoker() -> None:
+    os.environ["__COMPAT_LAYER"] = "RUNASINVOKER"
+
+```
+
+`unlicense/dump_utils.py`:
+
+```py
+import gc
+import logging
+import os
+import platform
+import shutil
+import struct
+from tempfile import TemporaryDirectory
+from typing import List, Optional
+
+import lief
+import pyscylla  # type: ignore
+
+from unlicense.lief_utils import lief_pe_data_directories, lief_pe_sections
+
+from .process_control import MemoryRange, ProcessController
+
+LOG = logging.getLogger(__name__)
+
+
+def get_section_ranges(pe_file_path: str) -> List[MemoryRange]:
+    section_ranges: List[MemoryRange] = []
+    binary = lief.PE.parse(pe_file_path)
+    if binary is None:
+        LOG.error("Failed to parse PE '%s'", pe_file_path)
+        return section_ranges
+
+    for section in lief_pe_sections(binary):
+        section_ranges += [
+            MemoryRange(section.virtual_address, section.virtual_size, "r--")
+        ]
+
+    return section_ranges
+
+
+def probe_text_sections(pe_file_path: str) -> Optional[List[MemoryRange]]:
+    text_sections = []
+    binary = lief.PE.parse(pe_file_path)
+    if binary is None:
+        LOG.error("Failed to parse PE '%s'", pe_file_path)
+        return None
+
+    # Find the potential original text sections (i.e., executable sections with
+    # "empty" names or named '.text*').
+    # Note(ergrelet): we thus do not want to include Themida/WinLicense's
+    # sections in that list.
+    for section in lief_pe_sections(binary):
+        section_name = section.fullname
+        stripped_section_name = section_name.replace(' ',
+                                                     '').replace('\00', '')
+        if len(stripped_section_name) > 0 and \
+                stripped_section_name not in [".text", ".textbss", ".textidx"]:
+            break
+
+        if section.has_characteristic(
+                lief.PE.SECTION_CHARACTERISTICS.MEM_EXECUTE):
+            LOG.debug("Probed .text section at (0x%x, 0x%x)",
+                      section.virtual_address, section.virtual_size)
+            text_sections += [
+                MemoryRange(section.virtual_address, section.virtual_size,
+                            "r-x")
+            ]
+
+    return None if len(text_sections) == 0 else text_sections
+
+
+def dump_pe(
+    process_controller: ProcessController,
+    pe_file_path: str,
+    image_base: int,
+    oep: int,
+    iat_addr: int,
+    iat_size: int,
+    add_new_iat: bool,
+) -> bool:
+    # Reclaim as much memory as possible. This is kind of a hack for 32-bit
+    # interpreters not to run out of memory when dumping.
+    # Idea: `pefile` might be less memory hungry than `lief` for our use case?
+    process_controller.clear_cached_data()
+    gc.collect()
+
+    with TemporaryDirectory() as tmp_dir:
+        TMP_FILE_PATH1 = os.path.join(tmp_dir, "unlicense.tmp2")
+        TMP_FILE_PATH2 = os.path.join(tmp_dir, "unlicense.tmp2")
+        try:
+            pyscylla.dump_pe(process_controller.pid, image_base, oep,
+                             TMP_FILE_PATH1, pe_file_path)
+        except pyscylla.ScyllaException as scylla_exception:
+            LOG.error("Failed to dump PE: %s", str(scylla_exception))
+            return False
+
+        LOG.info("Fixing dump ...")
+        try:
+            pyscylla.fix_iat(process_controller.pid, image_base, iat_addr,
+                             iat_size, add_new_iat, TMP_FILE_PATH1,
+                             TMP_FILE_PATH2)
+        except pyscylla.ScyllaException as scylla_exception:
+            LOG.error("Failed to fix IAT: %s", str(scylla_exception))
+            return False
+
+        try:
+            pyscylla.rebuild_pe(TMP_FILE_PATH2, False, True, False)
+        except pyscylla.ScyllaException as scylla_exception:
+            LOG.error("Failed to rebuild PE: %s", str(scylla_exception))
+            return False
+
+        LOG.info("Rebuilding PE ...")
+        output_file_name = f"unpacked_{process_controller.main_module_name}"
+        _fix_pe(TMP_FILE_PATH2, output_file_name)
+
+        LOG.info("Output file has been saved at '%s'", output_file_name)
+
+    return True
+
+
+def dump_dotnet_assembly(
+    process_controller: ProcessController,
+    image_base: int,
+) -> bool:
+    output_file_name = f"unpacked_{process_controller.main_module_name}"
+    try:
+        pyscylla.dump_pe(process_controller.pid, image_base, image_base,
+                         output_file_name, None)
+    except pyscylla.ScyllaException as scylla_exception:
+        LOG.error("Failed to dump PE: %s", str(scylla_exception))
+        return False
+
+    LOG.info("Output file has been saved at '%s'", output_file_name)
+
+    return True
+
+
+def _fix_pe(pe_file_path: str, output_file_path: str) -> None:
+    with TemporaryDirectory() as tmp_dir:
+        TMP_FILE_PATH = os.path.join(tmp_dir, "unlicense.tmp")
+        _rebuild_pe(pe_file_path, TMP_FILE_PATH)
+        _resize_pe(TMP_FILE_PATH, output_file_path)
+
+
+def _rebuild_pe(pe_file_path: str, output_file_path: str) -> None:
+    binary = lief.PE.parse(pe_file_path)
+    if binary is None:
+        LOG.error("Failed to parse PE '%s'", pe_file_path)
+        return
+
+    # Rename sections
+    _resolve_section_names(binary)
+
+    # Disable ASLR
+    binary.header.add_characteristic(
+        lief.PE.HEADER_CHARACTERISTICS.RELOCS_STRIPPED)
+    binary.optional_header.remove(lief.PE.DLL_CHARACTERISTICS.DYNAMIC_BASE)
+    # Rebuild PE
+    builder = lief.PE.Builder(binary)
+    builder.build_dos_stub(True)
+    builder.build_overlay(True)
+    builder.build()
+    builder.write(output_file_path)
+
+
+def _resolve_section_names(binary: lief.PE.Binary) -> None:
+    for data_dir in lief_pe_data_directories(binary):
+        if data_dir.type == lief.PE.DATA_DIRECTORY.RESOURCE_TABLE and \
+           data_dir.section is not None:
+            LOG.debug(".rsrc section found (RVA=%s)",
+                      hex(data_dir.section.virtual_address))
+            data_dir.section.name = ".rsrc"
+
+    ep_address = binary.optional_header.addressof_entrypoint
+    for section in lief_pe_sections(binary):
+        if section.virtual_address + section.virtual_size > ep_address >= section.virtual_address:
+            LOG.debug(".text section found (RVA=%s)",
+                      hex(section.virtual_address))
+            section.name = ".text"
+
+
+def _resize_pe(pe_file_path: str, output_file_path: str) -> None:
+    pe_size = _get_pe_size(pe_file_path)
+    if pe_size is None:
+        return None
+
+    # Copy file
+    shutil.copy(pe_file_path, output_file_path)
+    # Truncate file
+    with open(output_file_path, "ab") as pe_file:
+        pe_file.truncate(pe_size)
+
+
+def _get_pe_size(pe_file_path: str) -> Optional[int]:
+    binary = lief.PE.parse(pe_file_path)
+    if binary is None:
+        LOG.error("Failed to parse PE '%s'", pe_file_path)
+        return None
+
+    number_of_sections = len(binary.sections)
+    if number_of_sections == 0:
+        # Shouldn't happen but hey
+        return None
+
+    # Determine the actual PE raw size
+    highest_section = binary.sections[0]
+    for section in lief_pe_sections(binary):
+        # Select section with the highest offset
+        if section.offset > highest_section.offset:
+            highest_section = section
+        # If sections have the same offset, select the one with the biggest size
+        elif section.offset == highest_section.offset and section.size > highest_section.size:
+            highest_section = section
+    pe_size = highest_section.offset + highest_section.size
+
+    return pe_size
+
+
+def pointer_size_to_fmt(pointer_size: int) -> str:
+    if pointer_size == 4:
+        return "<I"
+    if pointer_size == 8:
+        return "<Q"
+    raise NotImplementedError("Platform not supported")
+
+
+def interpreter_can_dump_pe(pe_file_path: str) -> bool:
+    current_platform = platform.machine()
+    binary = lief.parse(pe_file_path)
+    pe_architecture = binary.header.machine
+
+    # 64-bit OS on x86
+    if current_platform == "AMD64":
+        bitness = struct.calcsize("P") * 8
+        if bitness == 64:
+            # Only 64-bit PEs are supported
+            return bool(pe_architecture == lief.PE.MACHINE_TYPES.AMD64)
+        if bitness == 32:
+            # Only 32-bit PEs are supported
+            return bool(pe_architecture == lief.PE.MACHINE_TYPES.I386)
+        return False
+
+    # 32-bit OS on x86
+    if current_platform == "x86":
+        # Only 32-bit PEs are supported
+        return bool(pe_architecture == lief.PE.MACHINE_TYPES.I386)
+
+    return False
+
+```
+
+`unlicense/emulation.py`:
+
+```py
+import logging
+import struct
+from typing import Callable, Dict, Tuple, Any, Optional
+
+from unicorn import (  # type: ignore
+    Uc, UcError, UC_ARCH_X86, UC_MODE_32, UC_MODE_64, UC_PROT_READ,
+    UC_PROT_WRITE, UC_PROT_ALL, UC_HOOK_MEM_UNMAPPED, UC_HOOK_BLOCK)
+from unicorn.x86_const import (  # type: ignore
+    UC_X86_REG_ESP, UC_X86_REG_EBP, UC_X86_REG_EIP, UC_X86_REG_RSP,
+    UC_X86_REG_RBP, UC_X86_REG_RIP, UC_X86_REG_MSR, UC_X86_REG_EAX,
+    UC_X86_REG_RAX)
+
+from .dump_utils import pointer_size_to_fmt
+from .process_control import ProcessController, Architecture, ReadProcessMemoryError
+
+STACK_MAGIC_RET_ADDR = 0xdeadbeef
+LOG = logging.getLogger(__name__)
+
+
+def resolve_wrapped_api(
+        wrapper_start_addr: int,
+        process_controller: ProcessController,
+        expected_ret_addr: Optional[int] = None) -> Optional[int]:
+    arch = process_controller.architecture
+    if arch == Architecture.X86_32:
+        uc_arch = UC_ARCH_X86
+        uc_mode = UC_MODE_32
+        pc_register = UC_X86_REG_EIP
+        sp_register = UC_X86_REG_ESP
+        bp_register = UC_X86_REG_EBP
+        result_register = UC_X86_REG_EAX
+        stack_addr = 0xff000000
+        setup_teb = _setup_teb_x86
+    elif arch == Architecture.X86_64:
+        uc_arch = UC_ARCH_X86
+        uc_mode = UC_MODE_64
+        pc_register = UC_X86_REG_RIP
+        sp_register = UC_X86_REG_RSP
+        bp_register = UC_X86_REG_RBP
+        result_register = UC_X86_REG_RAX
+        stack_addr = 0xff00000000000000
+        setup_teb = _setup_teb_x64
+    else:
+        raise NotImplementedError(f"Architecture '{arch}' isn't supported")
+
+    uc = Uc(uc_arch, uc_mode)
+    try:
+        # Map fake return address's page in case wrappers try to access it
+        aligned_addr = STACK_MAGIC_RET_ADDR - (STACK_MAGIC_RET_ADDR %
+                                               process_controller.page_size)
+        uc.mem_map(aligned_addr, process_controller.page_size, UC_PROT_ALL)
+
+        # Setup a stack
+        stack_size = 3 * process_controller.page_size
+        stack_start = stack_addr + stack_size - process_controller.page_size
+        uc.mem_map(stack_addr, stack_size, UC_PROT_READ | UC_PROT_WRITE)
+        uc.mem_write(
+            stack_start,
+            struct.pack(pointer_size_to_fmt(process_controller.pointer_size),
+                        STACK_MAGIC_RET_ADDR))
+        uc.reg_write(sp_register, stack_start)
+        uc.reg_write(bp_register, stack_start)
+
+        # Setup FS/GSBASE
+        setup_teb(uc, process_controller)
+
+        # Setup hooks
+        if expected_ret_addr is None:
+            stop_on_ret_addr = STACK_MAGIC_RET_ADDR
+        else:
+            stop_on_ret_addr = expected_ret_addr
+        uc.hook_add(UC_HOOK_MEM_UNMAPPED,
+                    _unicorn_hook_unmapped,
+                    user_data=process_controller)
+        uc.hook_add(UC_HOOK_BLOCK,
+                    _unicorn_hook_block,
+                    user_data=(process_controller, stop_on_ret_addr))
+
+        uc.emu_start(wrapper_start_addr, wrapper_start_addr + 1024)
+
+        # Read and return PC
+        pc = uc.reg_read(result_register)
+        assert isinstance(pc, int)
+
+        return pc
+    except UcError as e:
+        LOG.debug("ERROR: %s", str(e))
+        pc = uc.reg_read(pc_register)
+        assert isinstance(pc, int)
+        sp = uc.reg_read(sp_register)
+        assert isinstance(sp, int)
+        bp = uc.reg_read(bp_register)
+        assert isinstance(bp, int)
+        LOG.debug("PC=%s", hex(pc))
+        LOG.debug("SP=%s", hex(sp))
+        LOG.debug("BP=%s", hex(bp))
+        return None
+
+
+def _setup_teb_x86(uc: Uc, process_info: ProcessController) -> None:
+    MSG_IA32_FS_BASE = 0xC0000100
+    teb_addr = 0xff100000
+    peb_addr = 0xff200000
+    # Map tables
+    uc.mem_map(teb_addr, process_info.page_size, UC_PROT_READ | UC_PROT_WRITE)
+    uc.mem_map(peb_addr, process_info.page_size, UC_PROT_READ | UC_PROT_WRITE)
+    uc.mem_write(teb_addr + 0x18, struct.pack(pointer_size_to_fmt(4),
+                                              teb_addr))
+    uc.mem_write(teb_addr + 0x30, struct.pack(pointer_size_to_fmt(4),
+                                              peb_addr))
+    uc.reg_write(UC_X86_REG_MSR, (MSG_IA32_FS_BASE, teb_addr))
+
+
+def _setup_teb_x64(uc: Uc, process_info: ProcessController) -> None:
+    MSG_IA32_GS_BASE = 0xC0000101
+    teb_addr = 0xff10000000000000
+    peb_addr = 0xff20000000000000
+    # Map tables
+    uc.mem_map(teb_addr, process_info.page_size, UC_PROT_READ | UC_PROT_WRITE)
+    uc.mem_map(peb_addr, process_info.page_size, UC_PROT_READ | UC_PROT_WRITE)
+    uc.mem_write(teb_addr + 0x30, struct.pack(pointer_size_to_fmt(8),
+                                              teb_addr))
+    uc.mem_write(teb_addr + 0x60, struct.pack(pointer_size_to_fmt(8),
+                                              peb_addr))
+    uc.reg_write(UC_X86_REG_MSR, (MSG_IA32_GS_BASE, teb_addr))
+
+
+def _unicorn_hook_unmapped(uc: Uc, _access: Any, address: int, _size: int,
+                           _value: int,
+                           process_controller: ProcessController) -> bool:
+    LOG.debug("Unmapped memory at %s", hex(address))
+    if address == 0:
+        return False
+
+    page_size = process_controller.page_size
+    aligned_addr = address - (address & (page_size - 1))
+    try:
+        in_process_data = process_controller.read_process_memory(
+            aligned_addr, page_size)
+        uc.mem_map(aligned_addr, len(in_process_data), UC_PROT_ALL)
+        uc.mem_write(aligned_addr, in_process_data)
+        LOG.debug("Mapped %d bytes at %s", len(in_process_data),
+                  hex(aligned_addr))
+        return True
+    except UcError as e:
+        LOG.error("ERROR: %s", str(e))
+        return False
+    except ReadProcessMemoryError as e:
+        # Log this error as debug as it's expected to happen in cases where we
+        # reach the end of the IAT.
+        LOG.debug("ERROR: %s", str(e))
+        return False
+    except Exception as e:
+        LOG.error("ERROR: %s", str(e))
+        return False
+
+
+def _unicorn_hook_block(uc: Uc, address: int, _size: int,
+                        user_data: Tuple[ProcessController, int]) -> None:
+    process_controller, stop_on_ret_addr = user_data
+    ptr_size = process_controller.pointer_size
+    arch = process_controller.architecture
+    if arch == Architecture.X86_32:
+        pc_register = UC_X86_REG_EIP
+        sp_register = UC_X86_REG_ESP
+        result_register = UC_X86_REG_EAX
+    elif arch == Architecture.X86_64:
+        pc_register = UC_X86_REG_RIP
+        sp_register = UC_X86_REG_RSP
+        result_register = UC_X86_REG_RAX
+    else:
+        raise NotImplementedError(f"Unsupported architecture: {arch}")
+
+    exports_dict = process_controller.enumerate_exported_functions()
+    if address in exports_dict:
+        # Reached an export or returned to the call site
+        sp = uc.reg_read(sp_register)
+        assert isinstance(sp, int)
+        ret_addr_data = uc.mem_read(sp, ptr_size)
+        ret_addr = struct.unpack(pointer_size_to_fmt(ptr_size),
+                                 ret_addr_data)[0]
+        api_name = exports_dict[address]['name']
+        LOG.debug("Reached API '%s'", api_name)
+        if ret_addr == stop_on_ret_addr or \
+            ret_addr == stop_on_ret_addr + 1 \
+                or ret_addr == STACK_MAGIC_RET_ADDR:
+            # Most wrappers should end up here directly
+            uc.reg_write(result_register, address)
+            uc.emu_stop()
+            return
+        if _is_no_return_api(api_name):
+            # Note: Dirty fix for ExitProcess-like wrappers on WinLicense 3.x
+            LOG.debug("Reached noreturn API, stopping emulation")
+            uc.reg_write(result_register, address)
+            uc.emu_stop()
+            return
+        if _is_bogus_api(api_name):
+            # Note: Starting with Themida 3.1.4.0, wrappers call some useless
+            # APIs to fool emulation-based unwrappers
+            LOG.debug("Reached bogus API call, skipping")
+            # "Simulate" bogus call
+            result, arg_count = _simulate_bogus_api(api_name)
+            # Set result
+            uc.reg_write(result_register, result)
+
+            # Fix the stack
+            if arch == Architecture.X86_32:
+                # Pop return address and arguments from the stack
+                uc.reg_write(sp_register, sp + ptr_size * (1 + arg_count))
+            elif arch == Architecture.X86_64:
+                # Pop return address and arguments from the stack
+                stack_arg_count = max(0, arg_count - 4)
+                uc.reg_write(sp_register,
+                             sp + ptr_size * (1 + stack_arg_count))
+
+            # Set next address
+            uc.reg_write(pc_register, ret_addr)
+            return
+
+
+def _is_no_return_api(api_name: str) -> bool:
+    NO_RETURN_APIS = ["ExitProcess", "FatalExit", "ExitThread"]
+    return api_name in NO_RETURN_APIS
+
+
+def _is_bogus_api(api_name: str) -> bool:
+    BOGUS_APIS = ["Sleep"]
+    return api_name in BOGUS_APIS
+
+
+def _simulate_bogus_api(api_name: str) -> Tuple[int, int]:
+    BOGUS_API_MAP: Dict[str, Tuple[int, int]] = {
+        "Sleep": (0, 1),
+    }
+    return BOGUS_API_MAP[api_name]
+
+```
+
+`unlicense/frida_exec.py`:
+
+```py
+import functools
+import logging
+from importlib import resources
+from pathlib import Path
+from typing import (List, Callable, Dict, Any, Optional)
+
+import frida
+import frida.core
+
+from .process_control import (ProcessController, Architecture, MemoryRange,
+                              QueryProcessMemoryError, ReadProcessMemoryError,
+                              WriteProcessMemoryError)
+
+LOG = logging.getLogger(__name__)
+# See issue #7: messages cannot exceed 128MiB
+MAX_DATA_CHUNK_SIZE = 64 * 1024 * 1024
+
+OepReachedCallback = Callable[[int, int, bool], None]
+
+
+class FridaProcessController(ProcessController):
+
+    def __init__(self, pid: int, main_module_name: str,
+                 frida_session: frida.core.Session,
+                 frida_script: frida.core.Script):
+        frida_rpc = frida_script.exports
+
+        # Initialize ProcessController
+        super().__init__(pid, main_module_name,
+                         _str_to_architecture(frida_rpc.get_architecture()),
+                         frida_rpc.get_pointer_size(),
+                         frida_rpc.get_page_size())
+
+        # Initialize FridaProcessController specifics
+        self._frida_rpc = frida_rpc
+        self._frida_session = frida_session
+        self._exported_functions_cache: Optional[Dict[int, Dict[str,
+                                                                Any]]] = None
+
+    def find_module_by_address(self, address: int) -> Optional[Dict[str, Any]]:
+        value: Optional[Dict[str,
+                             Any]] = self._frida_rpc.find_module_by_address(
+                                 hex(address))
+        return value
+
+    def find_range_by_address(
+            self,
+            address: int,
+            include_data: bool = False) -> Optional[MemoryRange]:
+        value: Optional[Dict[str,
+                             Any]] = self._frida_rpc.find_range_by_address(
+                                 hex(address))
+        if value is None:
+            return None
+        return self._frida_range_to_mem_range(value, include_data)
+
+    def find_export_by_name(self, module_name: str,
+                            export_name: str) -> Optional[int]:
+        export_address: Optional[str] = self._frida_rpc.find_export_by_name(
+            module_name, export_name)
+        if export_address is None:
+            return None
+        return int(export_address, 16)
+
+    def enumerate_modules(self) -> List[str]:
+        value: List[str] = self._frida_rpc.enumerate_modules()
+        return value
+
+    def enumerate_module_ranges(
+            self,
+            module_name: str,
+            include_data: bool = False) -> List[MemoryRange]:
+
+        def convert_range(dict_range: Dict[str, Any]) -> MemoryRange:
+            return self._frida_range_to_mem_range(dict_range, include_data)
+
+        value: List[Dict[str, Any]] = self._frida_rpc.enumerate_module_ranges(
+            module_name)
+        return list(map(convert_range, value))
+
+    def enumerate_exported_functions(self,
+                                     update_cache: bool = False
+                                     ) -> Dict[int, Dict[str, Any]]:
+        if self._exported_functions_cache is None or update_cache:
+            value: List[Dict[
+                str, Any]] = self._frida_rpc.enumerate_exported_functions(
+                    self.main_module_name)
+            exports_dict = {int(e["address"], 16): e for e in value}
+            self._exported_functions_cache = exports_dict
+            return exports_dict
+        return self._exported_functions_cache
+
+    def allocate_process_memory(self, size: int, near: int) -> int:
+        buffer_addr = self._frida_rpc.allocate_process_memory(size, near)
+        return int(buffer_addr, 16)
+
+    def query_memory_protection(self, address: int) -> str:
+        try:
+            protection: str = self._frida_rpc.query_memory_protection(
+                hex(address))
+            return protection
+        except frida.core.RPCException as rpc_exception:
+            raise QueryProcessMemoryError from rpc_exception
+
+    def set_memory_protection(self, address: int, size: int,
+                              protection: str) -> bool:
+        result: bool = self._frida_rpc.set_memory_protection(
+            hex(address), size, protection)
+        return result
+
+    def read_process_memory(self, address: int, size: int) -> bytes:
+        read_data = bytearray(size)
+        try:
+            for offset in range(0, size, MAX_DATA_CHUNK_SIZE):
+                chunk_size = min(MAX_DATA_CHUNK_SIZE, size - offset)
+                data = self._frida_rpc.read_process_memory(
+                    hex(address + offset), chunk_size)
+                if data is None:
+                    raise ReadProcessMemoryError(
+                        "read_process_memory failed (invalid parameters?)")
+                read_data[offset:offset + chunk_size] = data
+            return bytes(read_data)
+        except frida.core.RPCException as rpc_exception:
+            raise ReadProcessMemoryError from rpc_exception
+
+    def write_process_memory(self, address: int, data: List[int]) -> None:
+        try:
+            self._frida_rpc.write_process_memory(hex(address), data)
+        except frida.core.RPCException as rpc_exception:
+            raise WriteProcessMemoryError from rpc_exception
+
+    def terminate_process(self) -> None:
+        self._frida_rpc.notify_dumping_finished()
+        frida.kill(self.pid)
+        self._frida_session.detach()
+
+    def _frida_range_to_mem_range(self, dict_range: Dict[str, Any],
+                                  with_data: bool) -> MemoryRange:
+        base = int(dict_range["base"], 16)
+        size = dict_range["size"]
+        data = None
+        if with_data:
+            data = self.read_process_memory(base, size)
+        return MemoryRange(base=base,
+                           size=size,
+                           protection=dict_range["protection"],
+                           data=data)
+
+
+def _str_to_architecture(frida_arch: str) -> Architecture:
+    if frida_arch == "ia32":
+        return Architecture.X86_32
+    if frida_arch == "x64":
+        return Architecture.X86_64
+    raise ValueError
+
+
+def spawn_and_instrument(
+        pe_path: Path, text_section_ranges: List[MemoryRange],
+        notify_oep_reached: OepReachedCallback) -> ProcessController:
+    pid: int
+    if pe_path.suffix == ".dll":
+        # Use `rundll32` to load the DLL
+        rundll32_path = "C:\\Windows\\System32\\rundll32.exe"
+        pid = frida.spawn(
+            rundll32_path,
+            [rundll32_path, str(pe_path.absolute()), "#0"])
+    else:
+        pid = frida.spawn(str(pe_path))
+
+    main_module_name = pe_path.name
+    session = frida.attach(pid)
+    frida_js = resources.open_text("unlicense.resources", "frida.js").read()
+    script = session.create_script(frida_js)
+    on_message_callback = functools.partial(_frida_callback,
+                                            notify_oep_reached)
+    script.on('message', on_message_callback)
+    script.load()
+
+    frida_rpc = script.exports
+    process_controller = FridaProcessController(pid, main_module_name, session,
+                                                script)
+    frida_rpc.setup_oep_tracing(pe_path.name, [[r.base, r.size]
+                                               for r in text_section_ranges])
+    frida.resume(pid)
+
+    return process_controller
+
+
+def _frida_callback(notify_oep_reached: OepReachedCallback,
+                    message: Dict[str, Any], _data: Any) -> None:
+    msg_type = message['type']
+    if msg_type == 'error':
+        LOG.error(message)
+        LOG.error(message['stack'])
+        return
+
+    if msg_type == 'send':
+        payload = message['payload']
+        event = payload.get('event', '')
+        if event == 'oep_reached':
+            # Note: We cannot use RPCs in `on_message` callbacks, so we have to
+            # delay the actual dumping.
+            notify_oep_reached(int(payload['BASE'],
+                                   16), int(payload['OEP'], 16),
+                               bool(payload['DOTNET']))
+            return
+
+    raise NotImplementedError('Unknown message received')
+
+```
+
+`unlicense/function_hashing.py`:
+
+```py
+import logging
+from typing import Callable
+
+import xxhash  # type: ignore
+from capstone import (Cs, CsInsn)  # type: ignore
+from capstone.x86 import X86_OP_MEM, X86_OP_IMM  # type: ignore
+from unicorn.x86_const import UC_X86_REG_FS, UC_X86_REG_GS, UC_X86_REG_ESP  # type: ignore
+
+from .process_control import ProcessController
+
+LOG = logging.getLogger(__name__)
+EMPTY_FUNCTION_HASH = int(xxhash.xxh32().digest().hex(), 16)
+
+
+def compute_function_hash(md: Cs, function_start_addr: int,
+                          get_data: Callable[[int, int], bytes],
+                          process_controller: ProcessController) -> int:
+    """
+    Compute a function's hash with `xxhash` by iterating over all the
+    instructions and hashing them, without following JCC and `call` instructions
+    and until a `ret` instruction or a `jmp REG/MEM` is reached.
+    This function is used to generate function hashes that aren't modified by
+    Themida's mutations on "inlined" imports.
+    """
+    BB_MAX_SIZE = 0x600
+    x = xxhash.xxh32()
+
+    ret_reached = False
+    basic_block_addr = function_start_addr
+    prev_basic_block_addr = 0
+    visited_addresses = set()
+    while not ret_reached:
+        if prev_basic_block_addr == basic_block_addr:
+            LOG.debug("Not a new basic block, aborting")
+            break
+        prev_basic_block_addr = basic_block_addr
+        instructions = md.disasm(get_data(basic_block_addr, BB_MAX_SIZE),
+                                 basic_block_addr)
+
+        for instruction in instructions:
+            visited_addresses.add(instruction.address)
+            if instruction.mnemonic == "ret":
+                ret_reached = True
+                _hash_instruction(x, instruction, process_controller)
+                break
+            elif instruction.mnemonic == "call":
+                op = instruction.operands[0]
+                if op.type == X86_OP_IMM and not _is_in_file_mapping(
+                        op.value.imm, process_controller):
+                    basic_block_addr = op.value.imm
+                    break
+            elif instruction.mnemonic[0] == 'j':
+                op = instruction.operands[0]
+                if op.type == X86_OP_IMM:
+                    if instruction.mnemonic == "jmp":
+                        if op.value.imm in visited_addresses:
+                            LOG.debug("Loop detected, aborting")
+                            ret_reached = True
+                            _hash_instruction(x, instruction,
+                                              process_controller)
+                        else:
+                            basic_block_addr = op.value.imm
+                        break
+                else:
+                    ret_reached = True
+                    _hash_instruction(x, instruction, process_controller)
+                    break
+
+            _hash_instruction(x, instruction, process_controller)
+
+    return int(x.digest().hex(), 16)
+
+
+def _hash_instruction(x: xxhash.xxh32, instruction: CsInsn,
+                      process_controller: ProcessController) -> None:
+    """
+    Hashing function for x86 instructions. It is empirically built to only hash
+    instruction information that is not altered by Themida's code mutation. This
+    function only hashes a few very common instructions.
+    """
+    if instruction.mnemonic == "call":
+        op = instruction.operands[0]
+        if op.type == X86_OP_IMM and _is_in_file_mapping(
+                op.value.imm, process_controller):
+            val = f"{instruction.mnemonic},{op.value.imm:x}"
+            x.update(val)
+        elif op.type == X86_OP_MEM and _is_in_file_mapping(
+                op.value.mem.disp, process_controller):
+            val = f"{instruction.mnemonic}," \
+                    f"{op.value.mem.segment:x}," \
+                    f"{op.value.mem.base:x}," \
+                    f"{op.value.mem.index:x}," \
+                    f"{op.value.mem.disp:x}"
+            x.update(val)
+    elif instruction.mnemonic == "push":
+        op = instruction.operands[0]
+        if instruction.size == 2 and op.type == X86_OP_IMM:
+            val = f"{instruction.mnemonic},{op.value.imm:x}"
+            x.update(val)
+    elif instruction.mnemonic == "mov":
+        for i, op in enumerate(instruction.operands):
+            if op.type == X86_OP_MEM:
+                if op.value.mem.segment in [
+                        UC_X86_REG_FS, UC_X86_REG_GS
+                ] or (op.value.mem.base != UC_X86_REG_ESP
+                      and op.value.mem.disp != 0):
+                    val = f"{instruction.mnemonic},{i}," \
+                        f"{op.value.mem.segment:x}," \
+                        f"{op.value.mem.base:x}," \
+                        f"{op.value.mem.index:x}," \
+                        f"{op.value.mem.disp:x}"
+                    x.update(val)
+    elif instruction.mnemonic == 'jmp':
+        op = instruction.operands[0]
+        if op.type == X86_OP_MEM and _is_in_file_mapping(
+                op.value.mem.disp, process_controller):
+            val = f"{instruction.mnemonic},{op.value.mem.disp:x}"
+            x.update(val)
+    elif instruction.mnemonic in ["and", "cmp", "xor"]:
+        for i, op in enumerate(instruction.operands):
+            if op.type == X86_OP_MEM:
+                if op.value.mem.base != UC_X86_REG_ESP:
+                    val = f"{instruction.mnemonic},{i},{op.value.mem.base:x},{op.value.mem.disp:x}"
+                    x.update(val)
+    elif instruction.mnemonic in ["shl", "shr"]:
+        rop = instruction.operands[1]
+        if rop.type == X86_OP_IMM:
+            val = f"{instruction.mnemonic},{rop.value.imm:x}"
+            x.update(val)
+    elif instruction.mnemonic == "ret":
+        if len(instruction.operands) == 0:
+            val = f"{instruction.mnemonic}"
+        else:
+            op = instruction.operands[0]
+            val = f"{instruction.mnemonic},{op.value.imm:x}"
+        x.update(val)
+    elif instruction.mnemonic in [
+            "fld", "fldz", "fstp", "fcompp", "div", "mul"
+    ]:
+        val = f"{instruction.mnemonic},{instruction.op_str}"
+        x.update(val)
+
+
+def _is_in_file_mapping(address: int,
+                        process_controller: ProcessController) -> bool:
+    """
+    Check if an address is located in a mapped file.
+    """
+    # Filter out obviously invalid addresses without invoking an RPC
+    if address < 4096:
+        return False
+
+    module = process_controller.find_module_by_address(address)
+    return module is not None
+
+```
+
+`unlicense/imports.py`:
+
+```py
+import logging
+import struct
+from collections import defaultdict
+from typing import Any, Dict, List, Optional, Set, Tuple
+
+from capstone import Cs  # type: ignore
+from capstone.x86 import X86_OP_MEM, X86_OP_IMM  # type: ignore
+
+from .dump_utils import pointer_size_to_fmt
+from .process_control import Architecture, MemoryRange, ProcessController, ProcessControllerException
+
+LOG = logging.getLogger(__name__)
+
+# Describes a map of API addresses to every call site that should point to it
+# (instr_addr, call_size, instr_was_jmp)
+ImportCallSiteInfo = Tuple[int, int, bool]
+ImportToCallSiteDict = Dict[int, List[ImportCallSiteInfo]]
+# Describes a set of all found call sites
+# (instr_addr, call_size, instr_was_jmp, call_dest, ptr_addr)
+ImportWrapperInfo = Tuple[int, int, bool, int, Optional[int]]
+WrapperSet = Set[ImportWrapperInfo]
+
+
+def find_wrapped_imports(
+    text_section_range: MemoryRange,
+    exports_dict: Dict[int, Dict[str, Any]],  #
+    md: Cs,
+    process_controller: ProcessController
+) -> Tuple[ImportToCallSiteDict, WrapperSet]:
+    """
+    Go through a code section and try to find wrapped (or not) import calls
+    and jmps by disassembling instructions and using a few basic heuristics.
+    """
+    arch = process_controller.architecture
+    ptr_size = process_controller.pointer_size
+    ptr_format = pointer_size_to_fmt(ptr_size)
+
+    # Not supposed to be None
+    assert text_section_range.data is not None
+    text_section_data = text_section_range.data
+
+    wrapper_set: WrapperSet = set()
+    api_to_calls: ImportToCallSiteDict = defaultdict(list)
+    i = 0
+    while i < text_section_range.size:
+        # Quick pre-filter
+        if not _is_wrapped_thunk_jmp(text_section_data, i) and \
+                not _is_wrapped_call(text_section_data, i) and \
+                not _is_wrapped_tail_call(text_section_data, i) and \
+                not _is_indirect_call(text_section_data, i):
+            i += 1
+            continue
+
+        # Check if the instruction is a jmp or should be replaced with a jmp.
+        # This include checking for tail calls ("jmp X; int 3").
+        if text_section_data[i] == 0xE9 or \
+                text_section_data[i:i + 2] == bytes([0x90, 0xE9]) or \
+                text_section_data[i:i + 2] == bytes([0xFF, 0x25]) or \
+                _is_wrapped_tail_call(text_section_data, i):
+            instr_was_jmp = True
+        else:
+            instr_was_jmp = False
+
+        instr_addr = text_section_range.base + i
+        instrs = md.disasm(text_section_data[i:i + 6], instr_addr)
+
+        # Ensure the instructions are "call/jmp" or "nop; call/jmp"
+        instruction = next(instrs)
+        if instruction.mnemonic in ["call", "jmp"]:
+            call_size = instruction.size
+            op = instruction.operands[0]
+        elif instruction.mnemonic == "nop":
+            instruction = next(instrs)
+            if instruction.mnemonic in ["call", "jmp"]:
+                call_size = instruction.size
+                op = instruction.operands[0]
+            else:
+                i += 1
+                continue
+        else:
+            i += 1
+            continue
+
+        # Parse destination address or ignore in case of error
+        if op.type == X86_OP_IMM:
+            call_dest = op.value.imm
+            ptr_addr = None
+        elif op.type == X86_OP_MEM:
+            try:
+                if arch == Architecture.X86_32:
+                    ptr_addr = op.value.mem.disp
+                    data = process_controller.read_process_memory(
+                        ptr_addr, ptr_size)
+                    call_dest = struct.unpack(ptr_format, data)[0]
+                elif arch == Architecture.X86_64:
+                    ptr_addr = instruction.address + instruction.size + op.value.mem.disp
+                    data = process_controller.read_process_memory(
+                        ptr_addr, ptr_size)
+                    call_dest = struct.unpack(ptr_format, data)[0]
+                else:
+                    raise NotImplementedError(
+                        f"Unsupported architecture: {arch}")
+            except ProcessControllerException:
+                i += 1
+                continue
+        else:
+            i += 1
+            continue
+
+        # Verify that the destination is outside of the .text section
+        if not text_section_range.contains(call_dest):
+            # Not wrapped, add it to list of "resolved wrappers"
+            if call_dest in exports_dict:
+                api_to_calls[call_dest].append(
+                    (instr_addr, call_size, instr_was_jmp))
+                i += call_size + 1
+                continue
+            # Wrapped, add it to set of wrappers to resolve
+            if _is_in_executable_range(call_dest, process_controller):
+                wrapper_set.add((instr_addr, call_size, instr_was_jmp,
+                                 call_dest, ptr_addr))
+                i += call_size + 1
+                continue
+        i += 1
+
+    return api_to_calls, wrapper_set
+
+
+def _is_indirect_call(code_section_data: bytes, offset: int) -> bool:
+    """
+    Check if the instruction at `offset` is an `FF15` call.
+    """
+    return code_section_data[offset:offset + 2] == bytes([0xFF, 0x15])
+
+
+def _is_wrapped_thunk_jmp(code_section_data: bytes, offset: int) -> bool:
+    """
+    Check if the instruction at `offset` is a wrapped jmp from a thunk table.
+    """
+    if offset > len(code_section_data) - 6:
+        return False
+
+    is_e9_jmp = code_section_data[offset] == 0xE9
+    # Dirty trick to catch last elements of thunk tables
+    if offset > 6:
+        jmp_behind = code_section_data[offset - 5] == 0xE9 or \
+                     code_section_data[offset - 6] == 0xE9
+    else:
+        jmp_behind = False
+
+    return (is_e9_jmp and code_section_data[offset + 6] in [0xE9, 0x90]) or \
+           (is_e9_jmp and code_section_data[offset + 5] in [0xCC, 0x90, 0xE9]) or \
+           (code_section_data[offset:offset + 2] == bytes([0x90, 0xE9])) or \
+           (is_e9_jmp and jmp_behind) or \
+           (code_section_data[offset:offset + 2] == bytes([0xFF, 0x25]) and code_section_data[offset + 6] in [0x8B, 0xC0]) # Turbo delphi-style tuhnk
+
+
+def _is_wrapped_call(code_section_data: bytes, offset: int) -> bool:
+    """
+    Check if the instruction at `offset` is a wrapped import call. Themida 2.x
+    replaces `FF15` calls with `E8` calls followed or preceded by a `nop`.
+    """
+    return (code_section_data[offset] == 0xE8 and code_section_data[offset + 5] == 0x90) or \
+           (code_section_data[offset:offset + 2] == bytes([0x90, 0xE8]))
+
+
+def _is_wrapped_tail_call(code_section_data: bytes, offset: int) -> bool:
+    """
+    Check if the instruction at `offset` is a tail call (and thus should be
+    transformed into a `jmp`).
+    """
+    is_call = code_section_data[offset] == 0xE8
+    return (is_call and code_section_data[offset + 5] == 0xCC) or \
+            (is_call and code_section_data[offset + 6] == 0xCC) or \
+            (code_section_data[offset:offset + 2] == bytes([0x90, 0xE8])
+            and code_section_data[offset + 6] == 0xCC) or (
+                code_section_data[offset:offset + 2] == bytes([0xFF, 0x25])
+                and code_section_data[offset + 6] == 0xCC)
+
+
+def _is_in_executable_range(address: int,
+                            process_controller: ProcessController) -> bool:
+    """
+    Check if an address is located in an executable memory range.
+    """
+    mem_range = process_controller.find_range_by_address(address)
+    if mem_range is None:
+        return False
+
+    protection: str = mem_range.protection[2]
+    return protection == 'x'
+
+```
+
+`unlicense/lief_utils.py`:
+
+```py
+from typing import Iterator
+import lief
+
+
+# Note(ergrelet): this wrapper is a workaround for some bug in LIEF. We're not
+# iterating directly on `binary.sections` because it seems LIEF crashes for some
+# unkown reasons on certain executables
+def lief_pe_sections(binary: lief.PE.Binary) -> Iterator[lief.PE.Section]:
+    num_of_sections = len(binary.sections)
+    for i in range(num_of_sections):
+        yield binary.sections[i]
+
+
+# Note(ergrelet): same as above
+def lief_pe_data_directories(
+        binary: lief.PE.Binary) -> Iterator[lief.PE.DataDirectory]:
+    num_of_data_dirs = len(binary.data_directories)
+    for i in range(num_of_data_dirs):
+        yield binary.data_directories[i]
+```
+
+`unlicense/logger.py`:
+
+```py
+import logging
+
+import lief
+
+
+def setup_logger(logger: logging.Logger, verbose: bool) -> None:
+    lief.logging.disable()
+    if verbose:
+        log_level = logging.DEBUG
+    else:
+        log_level = logging.INFO
+
+    logger.setLevel(log_level)
+
+    # Create a console handler with a higher log level
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(log_level)
+
+    stream_handler.setFormatter(CustomFormatter())
+
+    logger.addHandler(stream_handler)
+
+
+class CustomFormatter(logging.Formatter):
+
+    grey = "\x1b[38;20m"
+    green = "\x1b[1;32m"
+    yellow = "\x1b[33;20m"
+    red = "\x1b[31;20m"
+    bold_red = "\x1b[31;1m"
+    reset = "\x1b[0m"
+    format_problem_str = "%(levelname)s - %(message)s"
+
+    FORMATS = {
+        logging.DEBUG: grey + "%(levelname)s - %(message)s" + reset,
+        logging.INFO: green + "%(levelname)s" + reset + " - %(message)s",
+        logging.WARNING: yellow + format_problem_str + reset,
+        logging.ERROR: red + format_problem_str + reset,
+        logging.CRITICAL: bold_red + format_problem_str + reset
+    }
+
+    def format(self, record: logging.LogRecord) -> str:
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
+
+```
+
+`unlicense/process_control.py`:
+
+```py
+import abc
+import enum
+from typing import Dict, List, Any, Optional
+
+
+class Architecture(enum.Enum):
+    X86_32 = 0
+    X86_64 = 1
+
+
+class MemoryRange:
+
+    def __init__(self,
+                 base: int,
+                 size: int,
+                 protection: str,
+                 data: Optional[bytes] = None):
+        self.base = base
+        self.size = size
+        self.protection = protection
+        self.data = data
+
+    def __str__(self) -> str:
+        return f"(base=0x{self.base:x}, size=0x{self.size:x}, prot={self.protection})"
+
+    def contains(self, addr: int) -> bool:
+        return self.base <= addr < self.base + self.size
+
+
+class ProcessController(abc.ABC):
+
+    def __init__(self, pid: int, main_module_name: str,
+                 architecture: Architecture, pointer_size: int,
+                 page_size: int):
+        self.pid = pid
+        self.main_module_name = main_module_name
+        self.architecture = architecture
+        self.pointer_size = pointer_size
+        self.page_size = page_size
+        self._main_module_ranges: Optional[List[MemoryRange]] = None
+
+    @abc.abstractmethod
+    def find_module_by_address(self, address: int) -> Optional[Dict[str, Any]]:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def find_range_by_address(
+            self,
+            address: int,
+            include_data: bool = False) -> Optional[MemoryRange]:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def find_export_by_name(self, module_name: str,
+                            export_name: str) -> Optional[int]:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def enumerate_modules(self) -> List[str]:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def enumerate_module_ranges(
+            self,
+            module_name: str,
+            include_data: bool = False) -> List[MemoryRange]:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def enumerate_exported_functions(self,
+                                     update_cache: bool = False
+                                     ) -> Dict[int, Dict[str, Any]]:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def allocate_process_memory(self, size: int, near: int) -> int:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def query_memory_protection(self, address: int) -> str:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def set_memory_protection(self, address: int, size: int,
+                              protection: str) -> bool:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def read_process_memory(self, address: int, size: int) -> bytes:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def write_process_memory(self, address: int, data: List[int]) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def terminate_process(self) -> None:
+        raise NotImplementedError
+
+    @property
+    def main_module_ranges(self) -> List[MemoryRange]:
+        # Lazily load ranges on first request (after OEP has been reached)
+        if self._main_module_ranges is None:
+            self._main_module_ranges = self.enumerate_module_ranges(
+                self.main_module_name, True)
+        return self._main_module_ranges
+
+    def clear_cached_data(self) -> None:
+        """
+        Can be used to better control memory consumption. This is useful for
+        32-bit interpreters.
+        """
+        self._main_module_ranges = None
+
+
+class ProcessControllerException(Exception):
+    pass
+
+
+class QueryProcessMemoryError(ProcessControllerException):
+    pass
+
+
+class ReadProcessMemoryError(ProcessControllerException):
+    pass
+
+
+class WriteProcessMemoryError(ProcessControllerException):
+    pass
+
+```
+
+`unlicense/resources/frida.js`:
+
+```js
+"use strict";
+
+const green = "\x1b[1;36m"
+const reset = "\x1b[0m"
+
+let allocatedBuffers = [];
+let originalPageProtections = new Map();
+let oepTracingListeners = [];
+let oepReached = false;
+
+// DLLs-related
+let skipDllOepInstr32 = null;
+let skipDllOepInstr64 = null;
+let dllOepCandidate = null;
+
+// TLS-related
+let skipTlsInstr32 = null;
+let skipTlsInstr64 = null;
+let tlsCallbackCount = 0;
+
+function log(message) {
+    console.log(`${green}frida-agent${reset}: ${message}`);
+}
+
+function initializeTrampolines() {
+    const instructionsBytes = new Uint8Array([
+        0xC3,                                          // ret
+        0xC2, 0x0C, 0x00,                              // ret 0x0C
+        0xB8, 0x01, 0x00, 0x00, 0x00, 0xC3,            // mov eax, 1; ret
+        0xB8, 0x01, 0x00, 0x00, 0x00, 0xC2, 0x0C, 0x00 // mov eax, 1; ret 0x0C
+    ]);
+
+    let bufferPointer = Memory.alloc(instructionsBytes.length);
+    Memory.protect(bufferPointer, instructionsBytes.length, 'rwx');
+    bufferPointer.writeByteArray(instructionsBytes.buffer);
+
+    skipTlsInstr64 = bufferPointer;
+    skipTlsInstr32 = bufferPointer.add(0x1);
+    skipDllOepInstr64 = bufferPointer.add(0x4);
+    skipDllOepInstr32 = bufferPointer.add(0xA);
+}
+
+function rangeContainsAddress(range, address) {
+    const rangeStart = range.base;
+    const rangeEnd = range.base.add(range.size);
+    return rangeStart.compare(address) <= 0 && rangeEnd.compare(address) > 0;
+}
+
+function notifyOepFound(dumpedModule, oepCandidate) {
+    oepReached = true;
+    
+    // Make OEP ranges readable and writeable during the dumping phase
+    setOepRangesProtection('rw-');
+    // Remove hooks used to find the OEP
+    removeOepTracingHooks();
+
+    let isDotNetInitialized = isDotNetProcess();
+    send({ 'event': 'oep_reached', 'OEP': oepCandidate, 'BASE': dumpedModule.base, 'DOTNET': isDotNetInitialized })
+    let sync_op = recv('block_on_oep', function (_value) { });
+    // Note: never returns
+    sync_op.wait();
+}
+
+function isDotNetProcess() {
+    return Process.findModuleByName("clr.dll") != null;
+}
+
+function makeOepRangesInaccessible(dumpedModule, expectedOepRanges) {
+    // Ensure potential OEP ranges are not accessible
+    expectedOepRanges.forEach((oepRange) => {
+        const sectionStart = dumpedModule.base.add(oepRange[0]);
+        const expectedSectionSize = oepRange[1];
+        Memory.protect(sectionStart, expectedSectionSize, '---');
+        originalPageProtections.set(sectionStart.toString(), expectedSectionSize);
+    });
+}
+
+function setOepRangesProtection(protection) {
+    // Set pages' protection
+    originalPageProtections.forEach((size, address_str, _map) => {
+        Memory.protect(ptr(address_str), size, protection);
+    });
+}
+
+function removeOepTracingHooks() {
+    oepTracingListeners.forEach(listener => {
+        listener.detach();
+    })
+    oepTracingListeners = [];
+}
+
+function registerExceptionHandler(dumpedModule, expectedOepRanges, moduleIsDll) {
+    // Register an exception handler that'll detect the OEP
+    Process.setExceptionHandler(exp => {
+        let oepCandidate = exp.context.pc;
+        let threadId = Process.getCurrentThreadId();
+
+        if (exp.memory != null) {
+            // Weird case where executing code actually only triggers a "read"
+            // access violation on inaccessible pages. This can happen on some
+            // 32-bit executables.
+            if (exp.memory.operation == "read" && exp.memory.address.equals(exp.context.pc)) {
+                // If we're in a TLS callback, the first argument is the
+                // module's base address
+                if (!moduleIsDll && isTlsCallback(exp.context, dumpedModule)) {
+                    log(`TLS callback #${tlsCallbackCount} detected (at ${exp.context.pc}), skipping ...`);
+                    tlsCallbackCount++;
+
+                    // Modify PC to skip the callback's execution and return
+                    skipTlsCallback(exp.context);
+                    return true;
+                }
+
+                log(`OEP found (thread #${threadId}): ${oepCandidate}`);
+                // Report the potential OEP
+                notifyOepFound(dumpedModule, oepCandidate);
+            }
+
+            // If the access violation is not an execution, "allow" the operation.
+            // Note: Pages will be reprotected on the next call to
+            // `NtProtectVirtualMemory`.
+            if (exp.memory.operation != "execute") {
+                Memory.protect(exp.memory.address, Process.pageSize, "rw-");
+                return true;
+            }
+        }
+
+        let expectionHandled = false;
+        expectedOepRanges.forEach((oepRange) => {
+            const sectionStart = dumpedModule.base.add(oepRange[0]);
+            const sectionSize = oepRange[1];
+            const sectionRange = { base: sectionStart, size: sectionSize };
+
+            if (rangeContainsAddress(sectionRange, oepCandidate)) {
+                // If we're in a TLS callback, the first argument is the
+                // module's base address
+                if (!moduleIsDll && isTlsCallback(exp.context, dumpedModule)) {
+                    log(`TLS callback #${tlsCallbackCount} detected (at ${exp.context.pc}), skipping ...`);
+                    tlsCallbackCount++;
+
+                    // Modify PC to skip the callback's execution and return
+                    skipTlsCallback(exp.context);
+                    expectionHandled = true;
+                    return;
+                }
+                
+                if (moduleIsDll) {
+                    // Save the potential OEP and and skip `DllMain` (`DLL_PROCESS_ATTACH`).
+                    // Note: When dumping DLLs we have to release the loader
+                    // lock before starting to dump.
+                    // Other threads might call `DllMain` with the `DLL_THREAD_ATTACH`
+                    // or `DLL_THREAD_DETACH` reasons later so we also skip the `DllMain`
+                    // even after the OEP has been reached.
+                    if (!oepReached) {
+                        log(`OEP found (thread #${threadId}): ${oepCandidate}`);
+                        dllOepCandidate = oepCandidate;
+                    } 
+
+                    skipDllEntryPoint(exp.context);
+                    expectionHandled = true;
+                    return;
+                }
+
+                // Report the potential OEP
+                log(`OEP found (thread #${threadId}): ${oepCandidate}`);
+                notifyOepFound(dumpedModule, oepCandidate);
+            }
+        });
+
+        return expectionHandled;
+    });
+    log("Exception handler registered");
+}
+
+function isTlsCallback(exceptionCtx, dumpedModule) {
+    if (Process.arch == "x64") {
+        // If we're in a TLS callback, the first argument is the
+        // module's base address
+        let moduleBase = exceptionCtx.rcx;
+        if (!moduleBase.equals(dumpedModule.base)) {
+            return false;
+        }
+        // If we're in a TLS callback, the second argument is the
+        // reason (from 0 to 3).
+        let reason = exceptionCtx.rdx;
+        if (reason.compare(ptr(4)) > 0) {
+            return false;
+        }
+    }
+    else if (Process.arch == "ia32") {
+        let sp = exceptionCtx.sp;
+
+        let moduleBase = sp.add(0x4).readPointer();
+        if (!moduleBase.equals(dumpedModule.base)) {
+            return false;
+        }
+        let reason = sp.add(0x8).readPointer();
+        if (reason.compare(ptr(4)) > 0) {
+            return false;
+        }
+    } else {
+        return false;
+    }
+
+    return true;
+}
+
+function skipTlsCallback(exceptionCtx) {
+    if (Process.arch == "x64") {
+        // Redirect to a `ret` instruction
+        exceptionCtx.rip = skipTlsInstr64;
+    }
+    else if (Process.arch == "ia32") {
+        // Redirect to a `ret 0xC` instruction
+        exceptionCtx.eip = skipTlsInstr32;
+    }
+}
+
+function skipDllEntryPoint(exceptionCtx) {
+    if (Process.arch == "x64") {
+        // Redirect to a `mov eax, 1; ret` instructions
+        exceptionCtx.rip = skipDllOepInstr64;
+    }
+    else if (Process.arch == "ia32") {
+        // Redirect to a `mov eax, 1; ret 0xC` instructions
+        exceptionCtx.eip = skipDllOepInstr32;
+    }
+}
+
+// Define available RPCs
+rpc.exports = {
+    setupOepTracing: function (moduleName, expectedOepRanges) {
+        log(`Setting up OEP tracing for "${moduleName}"`);
+
+        let targetIsDll = moduleName.endsWith(".dll");
+        let dumpedModule = null;
+
+        initializeTrampolines();
+
+        // If the target isn't a DLL, it should be loaded already
+        if (!targetIsDll) {
+            dumpedModule = Process.findModuleByName(moduleName);
+        }
+
+        // Hook `ntdll.LdrLoadDll` on exit to get called at a point where the
+        // loader lock is released. Needed to unpack (32-bit) DLLs.
+        const loadDll = Module.findExportByName('ntdll', 'LdrLoadDll');
+        const loadDllListener = Interceptor.attach(loadDll, {
+            onLeave: function (_args) {
+                // If `dllOepCandidate` is set, proceed with the dumping
+                // but only once (for our target). Then let other executions go
+                // through as it's not DLLs we're intersted in.
+                if (dllOepCandidate != null && !oepReached) {
+                    notifyOepFound(dumpedModule, dllOepCandidate);
+                }
+            }
+        });
+        oepTracingListeners.push(loadDllListener);
+
+        let exceptionHandlerRegistered = false;
+        const ntProtectVirtualMemory = Module.findExportByName('ntdll', 'NtProtectVirtualMemory');
+        if (ntProtectVirtualMemory != null) {
+            const ntProtectVirtualMemoryListener = Interceptor.attach(ntProtectVirtualMemory, {
+                onEnter: function (args) {
+                    let addr = args[1].readPointer();
+                    if (dumpedModule != null && addr.equals(dumpedModule.base)) {
+                        // Reset potential OEP ranges to not accessible to
+                        // (hopefully) catch the entry point next time.
+                        makeOepRangesInaccessible(dumpedModule, expectedOepRanges);
+                        if (!exceptionHandlerRegistered) {
+                            registerExceptionHandler(dumpedModule, expectedOepRanges, targetIsDll);
+                            exceptionHandlerRegistered = true;
+                        }
+                    }
+                }
+            });
+            oepTracingListeners.push(ntProtectVirtualMemoryListener);
+        }
+
+        // Hook `ntdll.RtlActivateActivationContextUnsafeFast` on exit as a mean
+        // to get called after new PE images are loaded and before their entry
+        // point is called. Needed to unpack DLLs.
+        let initializeFusionHooked = false;
+        const activateActivationContext = Module.findExportByName('ntdll', 'RtlActivateActivationContextUnsafeFast');
+        const activateActivationContextListener = Interceptor.attach(activateActivationContext, {
+            onLeave: function (_args) {
+                if (dumpedModule == null) {
+                    dumpedModule = Process.findModuleByName(moduleName);
+                    if (dumpedModule == null) {
+                        // Module isn't loaded yet
+                        return;
+                    }
+                    log(`Target module has been loaded (thread #${this.threadId}) ...`);
+                }
+                // After this, the target module is loaded.
+
+                if (targetIsDll) {
+                    if (!exceptionHandlerRegistered) {
+                        makeOepRangesInaccessible(dumpedModule, expectedOepRanges);
+                        registerExceptionHandler(dumpedModule, expectedOepRanges, targetIsDll);
+                        exceptionHandlerRegistered = true;
+                    }
+                }
+
+                // Hook `clr.InitializeFusion` if present.
+                // This is used to detect a good point during the CLR's
+                // initialization, to dump .NET EXE assemblies
+                const initializeFusion = Module.findExportByName('clr', 'InitializeFusion');
+                if (initializeFusion != null && !initializeFusionHooked) {
+                    const initializeFusionListener = Interceptor.attach(initializeFusion, {
+                        onEnter: function (_args) {
+                            log(`.NET assembly loaded (thread #${this.threadId})`);
+                            notifyOepFound(dumpedModule, '0');
+                        }
+                    });
+                    oepTracingListeners.push(initializeFusionListener);
+                    initializeFusionHooked = true;
+                }
+            }
+        });
+        oepTracingListeners.push(activateActivationContextListener);
+    },
+    notifyDumpingFinished: function () {
+        // Make OEP executable again once dumping is finished
+        setOepRangesProtection('rwx');
+    },
+    getArchitecture: function () { return Process.arch; },
+    getPointerSize: function () { return Process.pointerSize; },
+    getPageSize: function () { return Process.pageSize; },
+    findModuleByAddress: function (address) {
+        return Process.findModuleByAddress(ptr(address));
+    },
+    findRangeByAddress: function (address) {
+        return Process.findRangeByAddress(ptr(address));
+    },
+    findExportByName: function (moduleName, exportName) {
+        const mod = Process.findModuleByName(moduleName);
+        if (mod == null) {
+            return null;
+        }
+
+        return mod.findExportByName(exportName);
+    },
+    enumerateModules: function () {
+        const modules = Process.enumerateModules();
+        const moduleNames = modules.map(module => {
+            return module.name;
+        });
+        return moduleNames;
+    },
+    enumerateModuleRanges: function (moduleName) {
+        let ranges = Process.enumerateRangesSync("r--");
+        return ranges.filter(range => {
+            const module = Process.findModuleByAddress(range.base);
+            return module != null && module.name.toUpperCase() == moduleName.toUpperCase();
+        });
+    },
+    enumerateExportedFunctions: function (excludedModuleName) {
+        const modules = Process.enumerateModules();
+        const exports = modules.reduce((acc, m) => {
+            if (m.name != excludedModuleName) {
+                m.enumerateExports().forEach(e => {
+                    if (e.type == "function" && e.hasOwnProperty('address')) {           
+                        acc.push(e);
+                    }
+                });
+            }
+
+            return acc;
+        }, []);
+        return exports;
+    },
+    allocateProcessMemory: function (size, near) {
+        const sizeRounded = size + (Process.pageSize - size % Process.pageSize);
+        const addr = Memory.alloc(sizeRounded, { near: ptr(near), maxDistance: 0xff000000 });
+        allocatedBuffers.push(addr)
+        return addr;
+    },
+    queryMemoryProtection: function (address) {
+        return Process.getRangeByAddress(ptr(address))['protection'];
+    },
+    setMemoryProtection: function (address, size, protection) {
+        return Memory.protect(ptr(address), size, protection);
+    },
+    readProcessMemory: function (address, size) {
+        return Memory.readByteArray(ptr(address), size);
+    },
+    writeProcessMemory: function (address, bytes) {
+        return Memory.writeByteArray(ptr(address), bytes);
+    }
+};
+
+```
+
+`unlicense/version_detection.py`:
+
+```py
+from typing import Optional
+import logging
+
+import lief
+
+from unlicense.lief_utils import lief_pe_sections
+
+THEMIDA2_IMPORTED_MODS = ["kernel32.dll", "comctl32.dll"]
+THEMIDA2_IMPORTED_FUNCS = ["lstrcpy", "InitCommonControls"]
+LOG = logging.getLogger(__name__)
+
+
+def detect_winlicense_version(pe_file_path: str) -> Optional[int]:
+    binary = lief.PE.parse(pe_file_path)
+    if binary is None:
+        LOG.error("Failed to parse PE '%s'", pe_file_path)
+        return None
+
+    # Version 3.x
+    # Note: The '.boot' section might not always be present, so we do not check
+    # for it.
+    try:
+        if binary.get_section(".themida") is not None or \
+           binary.get_section(".winlice") is not None:
+            return 3
+    except lief.not_found:  # type: ignore
+        # Not Themida 3.x
+        pass
+
+    # Version 2.x
+    if len(binary.imports) == 2 and len(binary.imported_functions) == 2:
+        if binary.imports[0].name in THEMIDA2_IMPORTED_MODS and \
+           binary.imports[1].name in THEMIDA2_IMPORTED_MODS and \
+           binary.imported_functions[0].name in THEMIDA2_IMPORTED_FUNCS and \
+           binary.imported_functions[1].name in THEMIDA2_IMPORTED_FUNCS:
+            return 2
+
+    # These x86 instructions are always present at the beginning of a section
+    # in Themida/WinLicense 2.x
+    instr_patterns = [[
+        0x56, 0x50, 0x53, 0xE8, 0x01, 0x00, 0x00, 0x00, 0xCC, 0x58
+    ], [
+        0x83, 0xEC, 0x04, 0x50, 0x53, 0xE8, 0x01, 0x00, 0x00, 0x00, 0xCC, 0x58
+    ]]
+
+    for section in lief_pe_sections(binary):
+        for pattern in instr_patterns:
+            if pattern == list(section.content[:len(pattern)]):
+                return 2
+
+    # Failed to automatically detect version
+    return None
+
+```
+
+`unlicense/winlicense2.py`:
+
+```py
+import logging
+import struct
+from typing import Dict, Tuple, Any, Optional
+
+from capstone import (  # type: ignore
+    Cs, CS_ARCH_X86, CS_MODE_32, CS_MODE_64)
+
+from .imports import ImportToCallSiteDict, WrapperSet, find_wrapped_imports
+from .dump_utils import dump_pe, pointer_size_to_fmt
+from .emulation import resolve_wrapped_api
+from .function_hashing import compute_function_hash, EMPTY_FUNCTION_HASH
+from .process_control import (ProcessController, Architecture, MemoryRange,
+                              ReadProcessMemoryError)
+
+LOG = logging.getLogger(__name__)
+
+
+def fix_and_dump_pe(process_controller: ProcessController, pe_file_path: str,
+                    image_base: int, oep: int,
+                    text_section_range: MemoryRange) -> None:
+    """
+    Main dumping routine for Themida/WinLicense 2.x.
+    """
+    # Convert RVA range to VA range
+    section_virtual_addr = image_base + text_section_range.base
+    text_section_range = MemoryRange(
+        section_virtual_addr, text_section_range.size, "r-x",
+        process_controller.read_process_memory(section_virtual_addr,
+                                               text_section_range.size))
+    assert text_section_range.data is not None
+    LOG.debug(".text section: %s", str(text_section_range))
+
+    arch = process_controller.architecture
+    exports_dict = process_controller.enumerate_exported_functions()
+
+    # Instanciate the disassembler
+    if arch == Architecture.X86_32:
+        cs_mode = CS_MODE_32
+    elif arch == Architecture.X86_64:
+        cs_mode = CS_MODE_64
+    else:
+        raise NotImplementedError(f"Unsupported architecture: {arch}")
+    md = Cs(CS_ARCH_X86, cs_mode)
+    md.detail = True
+
+    LOG.info("Looking for wrapped imports ...")
+    api_to_calls, wrapper_set = find_wrapped_imports(text_section_range,
+                                                     exports_dict, md,
+                                                     process_controller)
+
+    LOG.info("Potential import wrappers found: %d", len(wrapper_set))
+    export_hashes = None
+    # Hash-matching strategy is only needed for 32-bit PEs
+    if arch == Architecture.X86_32:
+        LOG.info("Generating exports' hashes, this might take some time ...")
+        export_hashes = _generate_export_hashes(md, exports_dict,
+                                                process_controller)
+
+    LOG.info("Resolving imports ...")
+    _resolve_imports(api_to_calls, wrapper_set, export_hashes, md,
+                     process_controller)
+    LOG.info("Imports resolved: %d", len(api_to_calls))
+
+    iat_addr, iat_size = _generate_new_iat_in_process(api_to_calls,
+                                                      text_section_range.base,
+                                                      process_controller)
+    LOG.info("Generated the fake IAT at %s, size=%s", hex(iat_addr),
+             hex(iat_size))
+
+    # Ensure the range is writable
+    process_controller.set_memory_protection(text_section_range.base,
+                                             text_section_range.size, "rwx")
+    # Replace detected references to wrappers or imports
+    LOG.info("Patching call and jmp sites ...")
+    _fix_import_references_in_process(api_to_calls, iat_addr,
+                                      process_controller)
+    # Restore memory protection to RX
+    process_controller.set_memory_protection(text_section_range.base,
+                                             text_section_range.size, "r-x")
+
+    LOG.info("Dumping PE with OEP=%s ...", hex(oep))
+    dump_pe(process_controller, pe_file_path, image_base, oep, iat_addr,
+            iat_size, True)
+
+
+def _generate_export_hashes(
+        md: Cs, exports_dict: Dict[int, Dict[str, Any]],
+        process_controller: ProcessController) -> Dict[int, int]:
+    """
+    Go through the given export dictionary and produce a hash for each function
+    listed in it.
+    """
+    result = {}
+    modules = process_controller.enumerate_modules()
+    LOG.debug("Hashing exports for %s", str(modules))
+    ranges = []
+    for module_name in modules:
+        if module_name != process_controller.main_module_name:
+            ranges += process_controller.enumerate_module_ranges(
+                module_name, include_data=True)
+    ranges = list(
+        filter(lambda mem_range: mem_range.protection[2] == 'x', ranges))
+
+    def get_data(addr: int, size: int) -> bytes:
+        for mem_range in ranges:
+            if mem_range.data is None:
+                continue
+            if mem_range.contains(addr):
+                offset = addr - mem_range.base
+                return mem_range.data[offset:offset + size]
+        return bytes()
+
+    exports_count = len(exports_dict)
+    for i, (export_addr, _) in enumerate(exports_dict.items()):
+        export_hash = compute_function_hash(md, export_addr, get_data,
+                                            process_controller)
+        if export_hash != EMPTY_FUNCTION_HASH:
+            result[export_hash] = export_addr
+        else:
+            LOG.debug("Empty hash for %s", hex(export_addr))
+        LOG.debug("Exports hashed: %d/%d", i, exports_count)
+
+    return result
+
+
+def _resolve_imports(api_to_calls: ImportToCallSiteDict,
+                     wrapper_set: WrapperSet,
+                     export_hashes: Optional[Dict[int, int]], md: Cs,
+                     process_controller: ProcessController) -> None:
+    """
+    Resolve potential import wrappers by hash-matching or emulation.
+    """
+    arch = process_controller.architecture
+    page_size = process_controller.page_size
+
+    def get_data(addr: int, size: int) -> bytes:
+        try:
+            return process_controller.read_process_memory(addr, size)
+        except ReadProcessMemoryError:
+            # In case we crossed a page boundary and tried to read an invalid
+            # page, reduce size to stop at page boundary, and try again.
+            size = page_size - (addr % page_size)
+        return process_controller.read_process_memory(addr, size)
+
+    # Iterate over the set of potential import wrappers and try to resolve them
+    resolved_wrappers: Dict[int, int] = {}
+    problematic_wrappers = set()
+    for call_addr, call_size, instr_was_jmp, wrapper_addr, _ in wrapper_set:
+        resolved_addr = resolved_wrappers.get(wrapper_addr)
+        if resolved_addr is not None:
+            LOG.debug("Already resolved wrapper: %s -> %s", hex(wrapper_addr),
+                      hex(resolved_addr))
+            api_to_calls[resolved_addr].append(
+                (call_addr, call_size, instr_was_jmp))
+            continue
+
+        if wrapper_addr in problematic_wrappers:
+            # Already failed to resolve this one, ignore
+            LOG.debug("Skipping unresolved wrapper")
+            continue
+
+        # If 32-bit executable, try hash-matching
+        if export_hashes is not None and arch == Architecture.X86_32:
+            try:
+                import_hash = compute_function_hash(md, wrapper_addr, get_data,
+                                                    process_controller)
+            except Exception as ex:
+                LOG.debug("Failure for wrapper at %s: %s", hex(wrapper_addr),
+                          str(ex))
+                problematic_wrappers.add(wrapper_addr)
+                continue
+            if import_hash != EMPTY_FUNCTION_HASH:
+                LOG.debug("Hash: %s", hex(import_hash))
+                resolved_addr = export_hashes.get(import_hash)
+                if resolved_addr is not None:
+                    LOG.debug("Hash matched")
+                    LOG.debug("Resolved API: %s -> %s", hex(wrapper_addr),
+                              hex(resolved_addr))
+                    resolved_wrappers[wrapper_addr] = resolved_addr
+                    api_to_calls[resolved_addr].append(
+                        (call_addr, call_size, instr_was_jmp))
+                    continue
+
+        # Try to resolve the destination address by emulating the wrapper
+        resolved_addr = resolve_wrapped_api(call_addr, process_controller,
+                                            call_addr + call_size)
+        if resolved_addr is not None:
+            LOG.debug("Resolved API: %s -> %s", hex(wrapper_addr),
+                      hex(resolved_addr))
+            resolved_wrappers[wrapper_addr] = resolved_addr
+            api_to_calls[resolved_addr].append(
+                (call_addr, call_size, instr_was_jmp))
+        else:
+            problematic_wrappers.add(wrapper_addr)
+
+
+def _generate_new_iat_in_process(
+        imports_dict: ImportToCallSiteDict, near_to_ptr: int,
+        process_controller: ProcessController) -> Tuple[int, int]:
+    """
+    Generate a new IAT from a list of imported function addresses and write
+    it into a new buffer into the target process. `near_to_ptr` is used to
+    allocate the new IAT near the unpacked module (which is needed for 64-bit
+    processes).
+    """
+    ptr_size = process_controller.pointer_size
+    ptr_format = pointer_size_to_fmt(ptr_size)
+    iat_size = len(imports_dict) * ptr_size
+    # Allocate a new buffer in the target process
+    iat_addr = process_controller.allocate_process_memory(
+        iat_size, near_to_ptr)
+
+    # Generate the new IAT and write it into the buffer
+    new_iat_data = bytearray()
+    for import_addr in imports_dict:
+        new_iat_data += struct.pack(ptr_format, import_addr)
+    process_controller.write_process_memory(iat_addr, list(new_iat_data))
+
+    return iat_addr, iat_size
+
+
+def _fix_import_references_in_process(
+        api_to_calls: ImportToCallSiteDict, iat_addr: int,
+        process_controller: ProcessController) -> None:
+    """
+    Replace resolved wrapper call sites with call/jmp to the new IAT (that
+    contains resolved imports).
+    """
+    arch = process_controller.architecture
+    ptr_size = process_controller.pointer_size
+
+    for i, call_addrs in enumerate(api_to_calls.values()):
+        for call_addr, _, instr_was_jmp in call_addrs:
+            if arch == Architecture.X86_32:
+                # Absolute
+                operand = iat_addr + i * ptr_size
+                fmt = "<I"
+            elif arch == Architecture.X86_64:
+                # RIP-relative
+                operand = iat_addr + i * ptr_size - (call_addr + 6)
+                fmt = "<i"
+            else:
+                raise NotImplementedError(f"Unsupported architecture: {arch}")
+
+            if instr_was_jmp:
+                # jmp [iat_addr + i * ptr_size]
+                new_instr = bytes([0xFF, 0x25]) + struct.pack(fmt, operand)
+            else:
+                # call [iat_addr + i * ptr_size]
+                new_instr = bytes([0xFF, 0x15]) + struct.pack(fmt, operand)
+            process_controller.write_process_memory(call_addr, list(new_instr))
+
+```
+
+`unlicense/winlicense3.py`:
+
+```py
+import logging
+import struct
+from typing import List, Tuple, Dict, Any, Optional
+
+from capstone import CS_ARCH_X86, CS_MODE_32, CS_MODE_64, Cs  # type: ignore
+
+from .imports import find_wrapped_imports
+from .dump_utils import dump_pe, pointer_size_to_fmt
+from .emulation import resolve_wrapped_api
+from .process_control import Architecture, ProcessController, MemoryRange, QueryProcessMemoryError
+
+LOG = logging.getLogger(__name__)
+IAT_MAX_SUCCESSIVE_FAILURES = 2
+
+
+def fix_and_dump_pe(process_controller: ProcessController, pe_file_path: str,
+                    image_base: int, oep: int,
+                    section_ranges: List[MemoryRange],
+                    text_section_range: MemoryRange) -> None:
+    """
+    Main dumping routine for Themida/WinLicense 3.x.
+    """
+    LOG.info("Looking for the IAT...")
+    iat_range = _find_iat(process_controller, image_base, section_ranges,
+                          text_section_range)
+    if iat_range is None:
+        LOG.error("IAT not found")
+        return
+    iat_addr = iat_range.base
+    LOG.info("IAT found: %s-%s", hex(iat_addr), hex(iat_addr + iat_range.size))
+
+    LOG.info("Resolving imports ...")
+    unwrap_res = _unwrap_iat(iat_range, process_controller)
+    if unwrap_res is None:
+        LOG.error("IAT unwrapping failed")
+        return
+
+    iat_size, resolved_import_count = unwrap_res
+    LOG.info("Imports resolved: %d", resolved_import_count)
+    LOG.info("Fixed IAT at %s, size=%s", hex(iat_addr), hex(iat_size))
+
+    LOG.info("Dumping PE with OEP=%s ...", hex(oep))
+    dump_pe(process_controller, pe_file_path, image_base, oep, iat_addr,
+            iat_size, False)
+
+
+def _find_iat(process_controller: ProcessController, image_base: int,
+              section_ranges: List[MemoryRange],
+              text_section_range: MemoryRange) -> Optional[MemoryRange]:
+    """
+    Try to find the "obfuscated" IAT. It seems the start of the IAT is always
+    at the "start" of a memory range of the main module.
+    """
+    exports_dict = process_controller.enumerate_exported_functions()
+    LOG.debug("Exports count: %d", len(exports_dict))
+
+    # First way: look for "good-looking" memory pages in the main module
+    LOG.info("Performing linear scan in data sections...")
+    linear_scan_result = _find_iat_from_data_sections(process_controller,
+                                                      image_base,
+                                                      section_ranges,
+                                                      exports_dict)
+    if linear_scan_result is not None:
+        # Linear scan found something, return that
+        return linear_scan_result
+
+    # Second way: look for wrapped imports in the text section
+    LOG.info("Looking for wrapped imports in code sections...")
+    return _find_iat_from_code_sections(process_controller, image_base,
+                                        text_section_range, exports_dict)
+
+
+def _find_iat_from_data_sections(
+        process_controller: ProcessController, image_base: int,
+        section_ranges: List[MemoryRange],
+        exports_dict: Dict[int, Dict[str, Any]]) -> Optional[MemoryRange]:
+    """
+    Look for "good-looking" memory pages in the main module.
+    """
+    page_size = process_controller.page_size
+    # Look at the beginning of PE sections
+    for section_range in section_ranges:
+        page_addr = image_base + section_range.base
+        data = process_controller.read_process_memory(page_addr, page_size)
+        LOG.debug("Looking for the IAT at (%s, %s)", hex(page_addr),
+                  hex(page_size))
+        iat_start_offset = _find_iat_start(data, exports_dict,
+                                           process_controller)
+        if iat_start_offset is not None:
+            return MemoryRange(page_addr + iat_start_offset,
+                               section_range.size - iat_start_offset,
+                               section_range.protection)
+
+    # Look at memory ranges
+    for m_range in process_controller.main_module_ranges:
+        page_count = m_range.size // page_size
+        # Empirical choice: look at the first 4 pages of each memory range
+        for page_index in range(0, min(4, page_count)):
+            page_addr = m_range.base + page_index * page_size
+            data = process_controller.read_process_memory(page_addr, page_size)
+            LOG.debug("Looking for the IAT at (%s, %s)", hex(page_addr),
+                      hex(page_size))
+            iat_start_offset = _find_iat_start(data, exports_dict,
+                                               process_controller)
+            if iat_start_offset is not None:
+                return MemoryRange(
+                    page_addr + iat_start_offset,
+                    m_range.size - page_index * page_size - iat_start_offset,
+                    m_range.protection)
+
+    return None
+
+
+def _find_iat_from_code_sections(
+        process_controller: ProcessController, image_base: int,
+        text_section_range: MemoryRange,
+        exports_dict: Dict[int, Dict[str, Any]]) -> Optional[MemoryRange]:
+    """
+    Look for wrapper imports in the text section, similarly to what's done for
+    Themida 2.x.
+    """
+    # Convert RVA range to VA range and fetch data
+    section_virtual_addr = image_base + text_section_range.base
+    text_section_range = MemoryRange(
+        section_virtual_addr, text_section_range.size, "r-x",
+        process_controller.read_process_memory(section_virtual_addr,
+                                               text_section_range.size))
+    assert text_section_range.data is not None
+
+    # Instanciate the disassembler
+    arch = process_controller.architecture
+    if arch == Architecture.X86_32:
+        cs_mode = CS_MODE_32
+    elif arch == Architecture.X86_64:
+        cs_mode = CS_MODE_64
+    else:
+        raise NotImplementedError(f"Unsupported architecture: {arch}")
+    md = Cs(CS_ARCH_X86, cs_mode)
+    md.detail = True
+
+    _, wrapper_set = find_wrapped_imports(text_section_range, exports_dict, md,
+                                          process_controller)
+    if len(wrapper_set) == 0:
+        return None
+
+    # Find biggest contiguous chunk
+    ptr_it = map(lambda t: t[4], wrapper_set)
+    valid_ptr_it = filter(lambda v: v is not None, ptr_it)
+    ordered_ptr_list: List[int] = sorted(set(valid_ptr_it))  # type: ignore
+    if len(ordered_ptr_list) == 0:
+        return None
+
+    LOG.info("Potential import wrappers found: %d", len(ordered_ptr_list))
+    pointer_size = process_controller.pointer_size
+    biggest_chunk_index = 0
+    biggest_chunk_size = 0
+    current_chunk_index = 0
+    current_chunk_size = 0
+    for i in range(1, len(ordered_ptr_list)):
+        assert current_chunk_index + current_chunk_size == i - 1
+        prev_ptr = ordered_ptr_list[i - 1]
+        cur_ptr = ordered_ptr_list[i]
+
+        if cur_ptr == prev_ptr + pointer_size:
+            # Same chunk -> expand
+            current_chunk_size += 1
+        else:
+            # New chunk -> reset
+            current_chunk_index = i
+            current_chunk_size = 0
+
+        if current_chunk_size > biggest_chunk_size:
+            # Update biggest chunk
+            biggest_chunk_index = current_chunk_index
+            biggest_chunk_size = current_chunk_size
+
+    iat_candidate_addr = ordered_ptr_list[biggest_chunk_index]
+    iat_candidate_size = biggest_chunk_size
+    return MemoryRange(iat_candidate_addr, iat_candidate_size, "r--")
+
+
+def _find_iat_start(data: bytes, exports: Dict[int, Dict[str, Any]],
+                    process_controller: ProcessController) -> Optional[int]:
+    """
+    Check whether `data` looks like an "obfuscated" IAT. Themida 3.x wraps
+    most of the imports but not all of them (the threshold of 2% of valid
+    imports and 75% of pointers to R*X memory has been chosen empirically).
+    Returns `None` if this doesn't look like there's an obfuscated IAT in `data`.
+    """
+    ptr_format = pointer_size_to_fmt(process_controller.pointer_size)
+    elem_count = min(100, len(data) // process_controller.pointer_size)
+    LOG.debug("Scanning %d elements, pointer size is %d", elem_count,
+              process_controller.pointer_size)
+    data_size = elem_count * process_controller.pointer_size
+    # Look for beginning of IAT
+    start_offset = 0
+    for i in range(0,
+                   len(data) // process_controller.pointer_size,
+                   process_controller.pointer_size):
+        ptr = struct.unpack(ptr_format,
+                            data[i:i + process_controller.pointer_size])[0]
+        if ptr in exports:
+            start_offset = i
+            break
+        try:
+            if process_controller.query_memory_protection(ptr) == "rwx":
+                start_offset = i
+                break
+        except QueryProcessMemoryError:
+            # Ignore invalid pointers
+            pass
+
+    LOG.debug("Potential start offset %s for the IAT", hex(start_offset))
+    non_null_count = 0
+    valid_ptr_count = 0
+    rx_dest_count = 0
+    for i in range(start_offset, data_size, process_controller.pointer_size):
+        ptr = struct.unpack(ptr_format,
+                            data[i:i + process_controller.pointer_size])[0]
+        if ptr != 0:
+            non_null_count += 1
+        if ptr in exports:
+            valid_ptr_count += 1
+        try:
+            prot = process_controller.query_memory_protection(ptr)
+            if prot[0] == 'r' and prot[2] == 'x':
+                rx_dest_count += 1
+        except QueryProcessMemoryError:
+            pass
+
+    LOG.debug("Non-null pointer count: %d", non_null_count)
+    LOG.debug("Valid APIs count: %d", valid_ptr_count)
+    LOG.debug("R*X destination count: %d", rx_dest_count)
+    required_valid_elements = int(1 + (non_null_count * 0.02))
+    required_rx_elements = int(1 + (non_null_count * 0.75))
+    if valid_ptr_count >= required_valid_elements and rx_dest_count >= required_rx_elements:
+        return start_offset
+    return None
+
+
+def _unwrap_iat(
+        iat_range: MemoryRange,
+        process_controller: ProcessController) -> Optional[Tuple[int, int]]:
+    """
+    Resolve wrapped imports from the IAT and fix it in the target process.
+    """
+    ptr_format = pointer_size_to_fmt(process_controller.pointer_size)
+    ranges = process_controller.enumerate_module_ranges(
+        process_controller.main_module_name)
+
+    def in_main_module(address: int) -> bool:
+        for m_range in ranges:
+            if m_range.contains(address):
+                return True
+        return False
+
+    exports_dict = process_controller.enumerate_exported_functions()
+    exit_process_addr = process_controller.find_export_by_name(
+        "kernel32.dll", "ExitProcess")
+    new_iat_data = bytearray()
+    resolved_import_count = 0
+    successive_failures = 0
+    last_resolution_offset = 0
+    for current_addr in range(iat_range.base, iat_range.base + iat_range.size,
+                              process_controller.page_size):
+        data_size = process_controller.page_size - (
+            current_addr % process_controller.page_size)
+        page_data = process_controller.read_process_memory(
+            current_addr, data_size)
+        for i in range(0, len(page_data), process_controller.pointer_size):
+            wrapper_start = struct.unpack(
+                ptr_format,
+                page_data[i:i + process_controller.pointer_size])[0]
+            # Wrappers are located in one of the module's section
+            if in_main_module(wrapper_start):
+                resolved_api = resolve_wrapped_api(wrapper_start,
+                                                   process_controller)
+                if resolved_api not in exports_dict:
+                    successive_failures += 1
+                    # Note: When TLS callbacks are used, `kernel32.ExitProcess`
+                    # is hooked via the IAT and thus might not resolved properly.
+                    new_iat_data += struct.pack(ptr_format, exit_process_addr)
+                else:
+                    LOG.debug("Resolved API: %s -> %s", hex(wrapper_start),
+                              hex(resolved_api))
+                    new_iat_data += struct.pack(ptr_format, resolved_api)
+                    resolved_import_count += 1
+                    last_resolution_offset = len(new_iat_data)
+                    if successive_failures > 0:
+                        LOG.warning(
+                            "A resolved API wasn't an export, "
+                            "it's been replaced with 'kernel32.ExitProcess'.")
+                        successive_failures = 0
+
+                # Dumb check to detect the "end" of the IAT
+                if resolved_api is None and successive_failures >= IAT_MAX_SUCCESSIVE_FAILURES:
+                    # Remove the last elements
+                    new_iat_data = new_iat_data[:last_resolution_offset + 1]
+                    # Ensure the range is writable
+                    process_controller.set_memory_protection(
+                        iat_range.base, len(new_iat_data), "rw-")
+                    # Update IAT
+                    process_controller.write_process_memory(
+                        iat_range.base, list(new_iat_data))
+                    return len(new_iat_data), resolved_import_count
+            elif wrapper_start in exports_dict:
+                # Not wrapped, add as is
+                new_iat_data += struct.pack(ptr_format, wrapper_start)
+                resolved_import_count += 1
+                last_resolution_offset = len(new_iat_data)
+                if successive_failures > 0:
+                    LOG.warning(
+                        "A resolved API wasn't an export, "
+                        "it's been replaced with 'kernel32.ExitProcess'.")
+                    successive_failures = 0
+            else:
+                # Junk pointer (most likely null). Keep for alignment
+                new_iat_data += struct.pack(ptr_format, wrapper_start)
+
+    # Update IAT with the our newly computed IAT
+    if len(new_iat_data) > 0:
+        # Ensure the range is writable
+        process_controller.set_memory_protection(iat_range.base,
+                                                 len(new_iat_data), "rw-")
+        # Update IAT
+        process_controller.write_process_memory(iat_range.base,
+                                                list(new_iat_data))
+        return len(new_iat_data), resolved_import_count
+
+    return None
+
+```
