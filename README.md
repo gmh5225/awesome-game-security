@@ -1801,6 +1801,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/notpidgey/ManyTypes [x64dbg typeparsing plugin with Windows types]
 - https://github.com/cycraft-corp/BinaryAnalysisMCPs [Binary analysis MCPs collections]
 - https://github.com/dariushoule/x64dbg-rippy [AI reverse engineering assistant for x64dbg]
+- https://github.com/dariushoule/x64dbg-automate-pyclient [Python client for scriptable and repeatable debug sessions; full RPC protocol + MCP server]
 
 > Cheat Engine Plugins
 - https://github.com/FreeER/CE-Extensions [Lua Extensions]
