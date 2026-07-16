@@ -5,6 +5,7 @@ topics: [game-hacking]
 sources:
   - wiki/sources/skills/game-hacking.md
   - wiki/sources/README-categories.md
+  - wiki/sources/descriptions/zyhp__vac3_inhibitor.md
 updated: 2026-07-16
 confidence: high
 ---
@@ -26,10 +27,11 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Overlays via [[present-hook]] and external/DWM windows
 - HWID spoofing, stack spoofing, driver communication channels
 - EFI boot-time mappers; engine-specific paths (Unreal/Unity/Source)
+- AC-system exploration repos (e.g. [[vac3-inhibitor]] for VAC3 hooking/memory work) sit in the user-mode lane of cheat research. (source: wiki/sources/descriptions/zyhp__vac3_inhibitor.md)
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[vac3-inhibitor]] · [[overviews/anti-cheat]]
 
 ## README map
 

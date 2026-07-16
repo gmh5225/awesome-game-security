@@ -5,6 +5,7 @@ topics: [anti-cheat]
 sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/README-categories.md
+  - wiki/sources/descriptions/zyhp__vac3_inhibitor.md
 updated: 2026-07-16
 confidence: high
 ---
@@ -19,6 +20,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 - [[battleye]] — handle protection, process/memory scanning (PUBG, R6, DayZ)
 - [[vanguard]] — boot-start driver, early driver allowlisting (Valorant, LoL)
 - FACEIT AC, VAC (user-mode signatures), GameGuard, XIGNCODE3, ACE
+- [[vac3-inhibitor]] — C++ VAC3 exploration (hooking / memory analysis) under cheat → explore anticheat:vac (source: wiki/sources/descriptions/zyhp__vac3_inhibitor.md)
 
 ## Key sub-areas
 
@@ -32,7 +34,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]]
 
 ## README map
 
