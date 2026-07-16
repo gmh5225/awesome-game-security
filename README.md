@@ -205,6 +205,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/crownengine/crown [C++ 2D/3D]
 - https://github.com/FlaxEngine/FlaxEngine [C++/C# 3D]
 - https://github.com/stride3d/stride [C# 3D]
+- https://github.com/ProwlEngine/Prowl [Open-source C# 3D game engine with Unity-like editor (MIT)]
 - https://github.com/Net5F/AmalgamEngine
 - https://github.com/rxi/kit [pixels]
 - https://github.com/isadorasophia/murder [pixel]
@@ -1172,6 +1173,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Xposed
 - https://github.com/NPC2000/AppPealing-new [An Xposed module that disables Inka AppSealing, a popular anti-cheat and anti-root solution]
+- https://github.com/mabbcoll13/xposed-module-kit [Xposed/LSPosed module scaffold with hook templates and root-detection bypass example]
 
 > Frida
 - https://github.com/hackcatml/frida-watchpoint-tutorial [Frida's setHardwareWatchpoint tutorial]
@@ -3567,6 +3569,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/ExtendedCameraSettings [Extending functionality of the gameplay camera]
 - https://github.com/gmh5225/gta5cheat
 - https://github.com/gmh5225/gta5cheat_qt
+- https://github.com/fmc999/GTA5-DMA-CHEAT [DMA-based GTA5 / GTA5 Enhanced control tool using MemProcFS and ImGui]
 
 > Game:Geometry Dash
 - https://github.com/gmh5225/gd-internal
@@ -4012,6 +4015,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [Source Engine serverside anti-cheat plugin. (CS:S, CS:GO, CS:P, TF2)](https://github.com/kanekikun420/NoCheatZ-3)
 - [This is the Anti Cheat System for Knight Online Gamesoft vversion](https://github.com/luisfelipe18/GamesoftACS)
 - [User-mode C++ Anti-Cheat written for German Roleplay Server GVMP.de](https://github.com/divodeuxsevres/gvmp-anticheat)
+- https://github.com/adem-hosni/AtomicShieldClient [Multi-layered FiveM anti-cheat client with tray agent, manual-map loader, and runtime guards]
 - [Cheat developer platform](https://github.com/c4kef/UAC)
 - https://github.com/ekknod/Anti-Cheat-TestBench [TestBench]
 - https://github.com/gmh5225/Malicious-code-detection-bugu [Malicious code detection and obfuscation]
