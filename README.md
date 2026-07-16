@@ -891,6 +891,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/microsoft/pdb-rs [Tools and documents for working with Microsoft PDB files, in Rust]
 - https://github.com/roger1337/JDBG [Java Runtime Reverse Engineering and Debugging Tool]
 - https://github.com/atrexus/vulkan [A PE dumper for processes protected by user mode anti-tamper solutions (hyperion, theia, etc.)]
+- https://github.com/xxFURYWOLFxx/veh-dumper [Surgical x64 VEH/VCH dumper: walk vectored handler lists, extract each handler as a standalone PE64 for IDA with resolved imports]
 - https://github.com/diabloidyobane/PEReconstruct [Recover and statically analyze manually-mapped DLLs with runtime-wiped PE headers; pure-stdlib Python, no driver/debugger; Claude Code skill]
 - https://github.com/linuxboot/fiano [Go-based tools for modifying UEFI firmware]
 - https://github.com/leeqwind/PESignAnalyzer [A Simple PE File Signature information Extracting Tool]
