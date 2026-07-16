@@ -36,6 +36,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill <skill-n
 | `reverse-engineering-tools` | Reverse engineering protected games and anti-cheat components across user mode, kernel mode, debuggers, dump analysis, and anti-analysis workflows |
 | `windows-kernel-security` | Windows kernel internals for game security including callbacks, MMVAD, IOCTL paths, DSE, PatchGuard, PiDDBCache, and hostile-driver detection |
 
+**Compiled wiki:** agents can also browse [`wiki/`](wiki/) (see [`wiki/AGENTS.md`](wiki/AGENTS.md)) — a maintained knowledge layer over skills, README categories, and descriptions.
+
 **Example:**
 ```bash
 # Install anti-cheat systems skill

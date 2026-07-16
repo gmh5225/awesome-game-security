@@ -1,0 +1,360 @@
+name: Update Wiki (Cursor CLI)
+
+# Maintain wiki/ (Karpathy-style LLM wiki) via Cursor CLI.
+# Modes: bootstrap | ingest | lint | skill-sync | auto
+#
+# Triggers:
+# - schedule: daily auto (bootstrap if empty, else ingest pending, else lint)
+# - workflow_dispatch: manual mode / limit / topics / repos / sync_skills
+# - pull_request: same-repo only; README / description_en / skills path filters
+#   (orchestrator bootstraps first if wiki/overviews is empty)
+#
+# Secret safety:
+# - Canonical repo only; forks never inherit CURSOR_API_KEY.
+# - Fork PRs refused (head.repo must equal this repository).
+# - No pull_request_target.
+
+on:
+  schedule:
+    # 06:00 UTC daily
+    - cron: "0 6 * * *"
+
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Mode (auto|bootstrap|ingest|lint|skill-sync)"
+        required: false
+        default: "auto"
+      limit:
+        description: "Max items/topics (0 = all)"
+        required: false
+        default: "0"
+      repos:
+        description: "Optional space-separated owner/repo for description ingest"
+        required: false
+        default: ""
+      topics:
+        description: "Optional topics (ingest force / skill-sync)"
+        required: false
+        default: ""
+      sync_skills:
+        description: "After ingest/bootstrap/lint, also run skill-sync"
+        type: boolean
+        required: false
+        default: false
+      model:
+        description: "Cursor CLI model id"
+        required: false
+        default: "cursor-grok-4.5-high-fast"
+
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "README.md"
+      - "description/**/description_en.txt"
+      - ".claude/skills/**"
+
+concurrency:
+  group: update-wiki-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  update-wiki:
+    if: >-
+      github.repository == 'gmh5225/awesome-game-security' &&
+      github.event.repository.fork == false &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Assert canonical repository
+        run: |
+          set -euo pipefail
+          echo "repository=${GITHUB_REPOSITORY}"
+          echo "event_name=${GITHUB_EVENT_NAME}"
+          echo "actor=${GITHUB_ACTOR}"
+          if [ "${GITHUB_REPOSITORY}" != "gmh5225/awesome-game-security" ]; then
+            echo "Refusing to run outside canonical repository."
+            exit 1
+          fi
+          case "${GITHUB_EVENT_NAME}" in
+            schedule|workflow_dispatch|pull_request) ;;
+            *)
+              echo "Refusing unexpected event: ${GITHUB_EVENT_NAME}"
+              exit 1
+              ;;
+          esac
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            HEAD_REPO="${{ github.event.pull_request.head.repo.full_name }}"
+            if [ "${HEAD_REPO}" != "${GITHUB_REPOSITORY}" ]; then
+              echo "Refusing fork PR head: ${HEAD_REPO}"
+              exit 1
+            fi
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Collect PR deltas
+        id: pr_delta
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          mapfile -t FILES < <(
+            git diff --name-only --diff-filter=ACMR "${BASE_SHA}...${HEAD_SHA}" || true
+          )
+
+          REPOS=()
+          TOPICS=()
+          FORCE_README=0
+          for f in "${FILES[@]+"${FILES[@]}"}"; do
+            if [ "$f" = "README.md" ]; then
+              FORCE_README=1
+            fi
+            if [[ "$f" =~ ^description/([^/]+)/([^/]+)/description_en\.txt$ ]]; then
+              slug="${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
+              if [[ ! "$slug" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]]; then
+                echo "ERROR: invalid path derived slug: $slug (from $f)"
+                exit 1
+              fi
+              REPOS+=("$slug")
+            fi
+            if [[ "$f" =~ ^\.claude/skills/([a-z0-9-]+)/SKILL\.md$ ]]; then
+              TOPICS+=("${BASH_REMATCH[1]}")
+            fi
+          done
+
+          REPOS_INLINE=""
+          if [ "${#REPOS[@]}" -gt 0 ]; then
+            REPOS_INLINE=$(printf '%s\n' "${REPOS[@]}" | sort -u | tr '\n' ' ' | xargs)
+          fi
+          TOPICS_INLINE=""
+          if [ "${#TOPICS[@]}" -gt 0 ]; then
+            TOPICS_INLINE=$(printf '%s\n' "${TOPICS[@]}" | sort -u | tr '\n' ' ' | xargs)
+          fi
+          REPO_COUNT=0
+          if [ -n "$REPOS_INLINE" ]; then
+            REPO_COUNT=$(printf '%s\n' "${REPOS[@]}" | sort -u | wc -l | tr -d ' ')
+          fi
+          TOPIC_COUNT=0
+          if [ -n "$TOPICS_INLINE" ]; then
+            TOPIC_COUNT=$(printf '%s\n' "${TOPICS[@]}" | sort -u | wc -l | tr -d ' ')
+          fi
+
+          echo "repos=${REPOS_INLINE}" >> "$GITHUB_OUTPUT"
+          echo "topics=${TOPICS_INLINE}" >> "$GITHUB_OUTPUT"
+          echo "force_readme=${FORCE_README}" >> "$GITHUB_OUTPUT"
+          echo "repo_count=${REPO_COUNT}" >> "$GITHUB_OUTPUT"
+          echo "topic_count=${TOPIC_COUNT}" >> "$GITHUB_OUTPUT"
+          echo "PR repos=${REPOS_INLINE:-"(none)"} topics=${TOPICS_INLINE:-"(none)"} force_readme=${FORCE_README}"
+
+      - name: Decide whether to run
+        id: gate
+        run: |
+          set -euo pipefail
+          RUN=1
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            if [ "${{ steps.pr_delta.outputs.force_readme }}" != "1" ] \
+              && [ "${{ steps.pr_delta.outputs.repo_count }}" = "0" ] \
+              && [ "${{ steps.pr_delta.outputs.topic_count }}" = "0" ]; then
+              RUN=0
+            fi
+          fi
+          echo "run=${RUN}" >> "$GITHUB_OUTPUT"
+          if [ "$RUN" = "0" ]; then
+            echo "No wiki-relevant PR deltas — skipping."
+          fi
+
+      - name: Install Cursor CLI
+        if: steps.gate.outputs.run == '1'
+        run: |
+          curl https://cursor.com/install -fsS | bash
+          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
+
+      - name: Enable Max Mode
+        if: steps.gate.outputs.run == '1'
+        run: |
+          mkdir -p "$HOME/.cursor"
+          cat > "$HOME/.cursor/cli-config.json" <<'EOF'
+          {
+            "version": 1,
+            "editor": { "vimMode": false },
+            "permissions": { "allow": [], "deny": [] },
+            "maxMode": true,
+            "approvalMode": "unrestricted",
+            "attribution": {
+              "attributeCommitsToAgent": false,
+              "attributePRsToAgent": false
+            }
+          }
+          EOF
+          echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
+
+      - name: Configure git
+        if: steps.gate.outputs.run == '1'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update wiki via Cursor CLI
+        id: wiki
+        if: steps.gate.outputs.run == '1'
+        continue-on-error: true
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_MODE: ${{ inputs.mode }}
+          INPUT_LIMIT: ${{ inputs.limit }}
+          INPUT_REPOS: ${{ inputs.repos }}
+          INPUT_TOPICS: ${{ inputs.topics }}
+          INPUT_SYNC_SKILLS: ${{ inputs.sync_skills }}
+          INPUT_MODEL: ${{ inputs.model }}
+          PR_REPOS: ${{ steps.pr_delta.outputs.repos }}
+          PR_TOPICS: ${{ steps.pr_delta.outputs.topics }}
+          PR_FORCE_README: ${{ steps.pr_delta.outputs.force_readme }}
+          GIT_PUSH_BRANCH: ${{ github.event_name == 'pull_request' && github.head_ref || 'main' }}
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_REPOSITORY}" != "gmh5225/awesome-game-security" ]; then
+            echo "Refusing to use CURSOR_API_KEY outside canonical repository."
+            exit 1
+          fi
+          if [ -z "${CURSOR_API_KEY:-}" ]; then
+            echo "ERROR: CURSOR_API_KEY secret is not set."
+            echo "Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+          agent --version || true
+
+          MODEL="${INPUT_MODEL:-cursor-grok-4.5-high-fast}"
+          if [ -z "$MODEL" ]; then
+            MODEL="cursor-grok-4.5-high-fast"
+          fi
+
+          MODE="${INPUT_MODE:-auto}"
+          if [ "${EVENT_NAME}" = "schedule" ]; then
+            MODE="auto"
+          elif [ "${EVENT_NAME}" = "pull_request" ]; then
+            MODE="ingest"
+          elif [ -z "$MODE" ]; then
+            MODE="auto"
+          fi
+
+          ARGS=(--mode "$MODE" --model "$MODEL" --commit-every 1)
+
+          if [ "${EVENT_NAME}" = "pull_request" ]; then
+            if [ "${PR_FORCE_README:-0}" = "1" ]; then
+              ARGS+=(--force-readme)
+            fi
+            if [ -n "${PR_REPOS:-}" ]; then
+              export WIKI_REPOS="${PR_REPOS}"
+              ARGS+=(--repos-env WIKI_REPOS)
+            fi
+            if [ -n "${PR_TOPICS:-}" ]; then
+              ARGS+=(--topics "${PR_TOPICS}")
+            fi
+          else
+            if [ -n "${INPUT_LIMIT:-}" ] && [ "${INPUT_LIMIT}" != "0" ]; then
+              ARGS+=(--limit "${INPUT_LIMIT}")
+            fi
+            if [ -n "${INPUT_REPOS:-}" ]; then
+              export WIKI_REPOS="${INPUT_REPOS}"
+              ARGS+=(--repos-env WIKI_REPOS)
+            fi
+            if [ -n "${INPUT_TOPICS:-}" ]; then
+              ARGS+=(--topics "${INPUT_TOPICS}")
+            fi
+          fi
+
+          echo "Running: python3 scripts/update-wiki-cli.py ${ARGS[*]}"
+          python3 scripts/update-wiki-cli.py "${ARGS[@]}"
+
+          # Optional second stage: skill-sync (manual dispatch only by default)
+          SYNC="${INPUT_SYNC_SKILLS:-false}"
+          if [ "${EVENT_NAME}" = "workflow_dispatch" ] && [ "${SYNC}" = "true" ]; then
+            SYNC_ARGS=(--mode skill-sync --model "$MODEL" --commit-every 1)
+            if [ -n "${INPUT_TOPICS:-}" ]; then
+              SYNC_ARGS+=(--topics "${INPUT_TOPICS}")
+            fi
+            if [ -n "${INPUT_LIMIT:-}" ] && [ "${INPUT_LIMIT}" != "0" ]; then
+              SYNC_ARGS+=(--limit "${INPUT_LIMIT}")
+            fi
+            echo "Running skill-sync: python3 scripts/update-wiki-cli.py ${SYNC_ARGS[*]}"
+            python3 scripts/update-wiki-cli.py "${SYNC_ARGS[@]}"
+          fi
+
+      - name: Final commit (any remainder)
+        if: steps.gate.outputs.run == '1'
+        env:
+          INPUT_MODE: ${{ inputs.mode }}
+          INPUT_SYNC_SKILLS: ${{ inputs.sync_skills }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          # Only commit skill files when this run intentionally skill-synced.
+          ALLOW_SKILLS=0
+          MODE="${INPUT_MODE:-auto}"
+          if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then
+            if [ "${MODE}" = "skill-sync" ] || [ "${INPUT_SYNC_SKILLS:-false}" = "true" ]; then
+              ALLOW_SKILLS=1
+            fi
+          fi
+
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            case "$f" in
+              wiki/*) continue ;;
+            esac
+            if [ "$ALLOW_SKILLS" = "1" ] && [[ "$f" == .claude/skills/*/SKILL.md ]]; then
+              continue
+            fi
+            git checkout -- "$f" 2>/dev/null || rm -rf -- "$f"
+          done < <(git ls-files -m -o --exclude-standard || true)
+
+          git add -- wiki 2>/dev/null || true
+          if [ "$ALLOW_SKILLS" = "1" ]; then
+            git add -- ':(glob).claude/skills/*/SKILL.md' 2>/dev/null || true
+          fi
+
+          if git diff --cached --quiet; then
+            echo "No wiki/skill files left to commit."
+          else
+            COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
+            git commit -m "wiki: update ${COUNT} file(s) via Cursor CLI [skip ci]"
+
+            if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+              BRANCH="${{ github.head_ref }}"
+            else
+              BRANCH="main"
+            fi
+
+            PUSHED=0
+            for i in 1 2 3 4 5; do
+              if git push origin "HEAD:${BRANCH}"; then
+                echo "Pushed successfully to ${BRANCH}."
+                PUSHED=1
+                break
+              fi
+              echo "Push rejected (attempt $i/5), rebasing onto origin/${BRANCH} ..."
+              git pull --rebase origin "${BRANCH}" || { echo "Rebase failed — aborting."; exit 1; }
+            done
+            if [ "$PUSHED" != 1 ]; then
+              echo "Failed to push after 5 attempts."
+              exit 1
+            fi
+          fi
+
+          if [ "${{ steps.wiki.outcome }}" = "failure" ]; then
+            echo "Wiki update had failures — see the Update wiki step logs."
+            exit 1
+          fi

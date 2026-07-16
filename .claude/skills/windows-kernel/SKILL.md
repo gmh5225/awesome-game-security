@@ -1121,3 +1121,9 @@ https://raw.githubusercontent.com/gmh5225/awesome-game-security/refs/heads/main/
 1. Description (quick summary) — fetch first for concise context
 2. Archive (full code snapshot) — fetch when deeper implementation details are needed
 3. README entry — fallback when neither description nor archive is available
+
+---
+
+## Compiled wiki
+
+Prefer the compiled domain overview at `wiki/overviews/windows-kernel.md` (see `wiki/index.md` and `wiki/AGENTS.md`) before re-deriving synthesis from raw README/archive material.
