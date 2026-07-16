@@ -1,0 +1,1568 @@
+Project Path: arc_xxFURYWOLFxx_veh-dumper_pz1g8mah
+
+Source Tree:
+
+```txt
+arc_xxFURYWOLFxx_veh-dumper_pz1g8mah
+├── LICENSE
+├── README.md
+├── veh-dumper
+│   ├── chunks.hpp
+│   ├── dumper.hpp
+│   ├── imports.hpp
+│   ├── includes.hpp
+│   ├── main.cpp
+│   ├── pe.hpp
+│   ├── scanner.hpp
+│   ├── utils.hpp
+│   ├── veh-dumper.vcxproj
+│   ├── veh-dumper.vcxproj.filters
+│   └── walker.hpp
+└── veh-dumper.sln
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# veh-dumper
+
+Injectable x64 DLL that enumerates every registered `VectoredExceptionHandler`
+(and `VectoredContinueHandler`) in the target process and dumps each one as a
+standalone synthetic PE that IDA opens directly.
+
+Not a "dump the whole module" tool. For each handler it surgically extracts:
+
+- the handler function's own bytes, via `RtlLookupFunctionEntry` unwind info
+  when available, `C3`+padding heuristic scan otherwise
+- every RIP-relative reference the code makes, resolved to the exact byte
+  count the instruction actually loads (8 for `mov r64`, 16 for XMM, 4 for
+  `mov r32`, 64 for `lea` treated as a pointer sample)
+- every direct callee's function bytes (depth-capped BFS)
+- every indirect-call IAT slot AND the code the slot points at
+
+System-module callees (anything under `C:\Windows\`) aren't dumped. Their
+export name is resolved and emitted as an Export Directory entry on the
+synthetic PE, so IDA renders `call cs:kernel32_dll_IsDebuggerPresent` instead
+of `call cs:qword_XXX`.
+
+## Output
+
+Written next to the injected DLL on disk:
+
+```
+<DLL_DIR>\vehdump\veh_dump.log       master log
+<DLL_DIR>\vehdump\VEH_00\dump.dll    handler #0 as a PE64 IDA can open
+<DLL_DIR>\vehdump\VEH_00\info.txt    region list + resolved imports
+<DLL_DIR>\vehdump\VEH_01\dump.dll    handler #1
+...
+<DLL_DIR>\vehdump\VCH_00\dump.dll    continue handlers, same shape
+```
+
+Open `dump.dll` in IDA with `File > Open`. IDA auto-detects PE64, loads each
+section at its live VA, and jumps to the handler function via
+`AddressOfEntryPoint`. Every RIP-relative load inside the handler resolves to
+bytes that live at the correct address in the PE.
+
+## Build
+
+Open `veh-dumper.sln` in Visual Studio 2022 and build `Release|x64`. Output
+lands at `veh-dumper\bin\veh-dumper.dll`. Requires C++23 (v143 toolset with
+`/std:c++latest`).
+
+## Inject
+
+Any DLL injector works. Manual-map, LoadLibrary, SetWindowsHookExA
+(the DLL exports `NextHook` for the classic hook-injection convention). No
+argument parsing, no config file. The DLL kicks off a worker thread on
+`DLL_PROCESS_ATTACH`, waits 500 ms for the host to finish loading, then dumps.
+
+## How it walks the VEH list
+
+`RtlAddVectoredExceptionHandler` registers a foothold handler, then the entry
+Windows returns is followed as the head of the internal doubly-linked list.
+Each node's encoded handler pointer is passed through `RtlDecodePointer` to
+recover the real function VA. The handler offset inside a node
+(0x10..0x28 on Win10/11) is discovered dynamically by round-tripping the
+foothold: whichever offset decodes to the foothold's own address is the
+handler slot for this Windows build.
+
+## Compatibility
+
+Tested on Windows 11 25H2. The handler offset inside VEH list nodes is
+discovered dynamically (not hardcoded), so it should work on other x64
+Windows versions, but only 25H2 has been verified.
+
+## Limits
+
+Bounded so a runaway handler doesn't blow up:
+
+- max function size: 32 KB (`k_max_func_size`)
+- max chunks per handler: 128 (`k_max_chunks`)
+- max total bytes per handler: 1 MB (`k_max_total_bytes`)
+- max BFS depth: 2 (`k_max_call_depth`), enough to walk through IAT thunks
+- max queued work items: 512 (`k_max_queue`)
+
+Bump the constants in `dumper.hpp` if you need deeper coverage.
+
+## License
+
+MIT.
+
+```
+
+`veh-dumper.sln`:
+
+```sln
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37301.10 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "veh-dumper", "veh-dumper\veh-dumper.vcxproj", "{576AB35E-6FB8-41F2-A73B-F3EB6249A957}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{576AB35E-6FB8-41F2-A73B-F3EB6249A957}.Debug|x64.ActiveCfg = Debug|x64
+		{576AB35E-6FB8-41F2-A73B-F3EB6249A957}.Debug|x64.Build.0 = Debug|x64
+		{576AB35E-6FB8-41F2-A73B-F3EB6249A957}.Debug|x86.ActiveCfg = Debug|Win32
+		{576AB35E-6FB8-41F2-A73B-F3EB6249A957}.Debug|x86.Build.0 = Debug|Win32
+		{576AB35E-6FB8-41F2-A73B-F3EB6249A957}.Release|x64.ActiveCfg = Release|x64
+		{576AB35E-6FB8-41F2-A73B-F3EB6249A957}.Release|x64.Build.0 = Release|x64
+		{576AB35E-6FB8-41F2-A73B-F3EB6249A957}.Release|x86.ActiveCfg = Release|Win32
+		{576AB35E-6FB8-41F2-A73B-F3EB6249A957}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B75DA785-1F05-4935-8335-BC975EF8F8A6}
+	EndGlobalSection
+EndGlobal
+
+```
+
+`veh-dumper/chunks.hpp`:
+
+```hpp
+#pragma once
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+#include <span>
+#include <vector>
+
+#include "utils.hpp"
+
+enum class chunk_kind : uint8_t { func, data, fnptr };
+
+struct chunk_t {
+    uint64_t   base;
+    uint64_t   size;
+    chunk_kind kind;
+    std::vector<uint8_t> bytes;
+    char       label[80];
+};
+
+class chunk_store {
+public:
+    static constexpr size_t   k_max_count = 128;
+    static constexpr uint64_t k_max_bytes = 1ULL * 1024 * 1024;
+    static constexpr uint64_t k_stitch_gap = 0x40;
+
+    void clear() noexcept { chunks.clear(); total_bytes = 0; }
+
+    [[nodiscard]] std::span<const chunk_t> all() const noexcept {
+        return { chunks.data(), chunks.size() };
+    }
+
+    [[nodiscard]] uint64_t total() const noexcept { return total_bytes; }
+    [[nodiscard]] size_t   count() const noexcept { return chunks.size(); }
+
+    [[nodiscard]] bool full() const noexcept {
+        return chunks.size() >= k_max_count || total_bytes >= k_max_bytes;
+    }
+
+    [[nodiscard]] bool overlaps(uint64_t base, uint64_t size) const noexcept {
+        const uint64_t end = base + size;
+        for (const auto& c : chunks) {
+            const uint64_t c_end = c.base + c.size;
+            if (base < c_end && end > c.base) return true;
+        }
+        return false;
+    }
+
+    [[nodiscard]] bool add(uint64_t base, uint64_t size, chunk_kind kind,
+                           const char* label) noexcept {
+        if (size == 0) return false;
+        if (total_bytes + size > k_max_bytes) return false;
+        if (overlaps(base, size)) return false;
+        if (!mem::committed(base)) return false;
+
+        chunk_t c;
+        c.base = base;
+        c.size = size;
+        c.kind = kind;
+        c.bytes.resize((size_t)size, 0);
+        if (!mem::safe_copy(base, c.bytes.data(), (size_t)size)) return false;
+        strncpy(c.label, label, sizeof(c.label) - 1);
+        c.label[sizeof(c.label) - 1] = 0;
+        chunks.push_back(std::move(c));
+        total_bytes += size;
+        return true;
+    }
+
+    [[nodiscard]] const chunk_t& back() const noexcept { return chunks.back(); }
+
+    // Merge chunks whose ranges are within k_stitch_gap bytes so we produce
+    // fewer, larger sections in the emitted PE. Re-reads the merged range
+    // from live memory so the stitched chunk is a contiguous snapshot.
+    void consolidate() noexcept {
+        if (chunks.empty()) return;
+
+        struct range { uint64_t start, end; };
+        std::vector<range> ranges;
+        ranges.reserve(chunks.size());
+        for (const auto& c : chunks) ranges.push_back({ c.base, c.base + c.size });
+        std::sort(ranges.begin(), ranges.end(),
+                  [](const range& a, const range& b) { return a.start < b.start; });
+
+        std::vector<range> merged;
+        for (const auto& r : ranges) {
+            if (!merged.empty() && r.start <= merged.back().end + k_stitch_gap)
+                merged.back().end = std::max(merged.back().end, r.end);
+            else
+                merged.push_back(r);
+        }
+
+        std::vector<chunk_t> next;
+        uint64_t total = 0;
+        for (const auto& r : merged) {
+            const uint64_t size = r.end - r.start;
+            chunk_t c;
+            c.base = r.start;
+            c.size = size;
+            c.kind = chunk_kind::func;
+            c.bytes.assign((size_t)size, 0);
+            (void)mem::safe_copy(c.base, c.bytes.data(), (size_t)size);
+            snprintf(c.label, sizeof(c.label), "r_%016llX_%llX",
+                     (unsigned long long)c.base, (unsigned long long)c.size);
+            next.push_back(std::move(c));
+            total += size;
+        }
+        chunks = std::move(next);
+        total_bytes = total;
+    }
+
+private:
+    std::vector<chunk_t> chunks;
+    uint64_t             total_bytes = 0;
+};
+
+```
+
+`veh-dumper/dumper.hpp`:
+
+```hpp
+#pragma once
+#include <Windows.h>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <vector>
+
+#include "chunks.hpp"
+#include "imports.hpp"
+#include "pe.hpp"
+#include "scanner.hpp"
+#include "utils.hpp"
+
+// Extracts a single VEH handler as a synthetic PE. Owns the per-handler
+// chunk store, the import table, and the BFS work queue. Reset between
+// handlers via dump().
+class handler_dumper {
+public:
+    static constexpr int    k_max_depth = 2;
+    static constexpr size_t k_max_queue = 512;
+
+    void dump(uint64_t handler_va, int idx, const char* tag, const char* root_dir) noexcept {
+        char subdir[MAX_PATH];
+        snprintf(subdir, sizeof(subdir), "%s\\%s_%02d", root_dir, tag, idx);
+        CreateDirectoryA(subdir, NULL);
+        log::printf("\n    -- surgical dump for %s #%d @ 0x%016llX -> %s --\n",
+                    tag, idx, (unsigned long long)handler_va, subdir);
+
+        chunks.clear();
+        imports.clear();
+        queue.clear();
+
+        enqueue(handler_va, 0, k_max_depth, chunk_kind::func, "handler");
+        process_queue();
+        chunks.consolidate();
+
+        write_output(subdir, handler_va, tag, idx);
+    }
+
+private:
+    struct work_item {
+        uint64_t   addr;
+        uint64_t   size;
+        int        depth;
+        chunk_kind kind;
+        char       label[80];
+    };
+
+    void enqueue(uint64_t addr, uint64_t size, int depth, chunk_kind kind,
+                 const char* label) noexcept {
+        if (queue.size() >= k_max_queue) return;
+        if (depth < 0) return;
+        if (addr <= 0x10000) return;
+        if (chunks.overlaps(addr, size ? size : 8)) return;
+        work_item w{};
+        w.addr = addr; w.size = size; w.depth = depth; w.kind = kind;
+        strncpy(w.label, label, sizeof(w.label) - 1);
+        queue.push_back(w);
+    }
+
+    void process_queue() noexcept {
+        while (!queue.empty()) {
+            if (chunks.full()) break;
+            const work_item w = queue.front();
+            queue.erase(queue.begin());
+            if (chunks.overlaps(w.addr, w.size ? w.size : 8)) continue;
+
+            using enum chunk_kind;
+            switch (w.kind) {
+                case func:  process_func(w);  break;
+                case data:  process_data(w);  break;
+                case fnptr: process_fnptr(w); break;
+            }
+        }
+    }
+
+    void process_func(const work_item& w) noexcept {
+        func_extent fe = scanner::extent(w.addr);
+        if (fe.size > scanner::k_max_size) fe.size = scanner::k_max_size;
+        if (!chunks.add(fe.base, fe.size, chunk_kind::func, w.label)) return;
+
+        const auto& c = chunks.back();
+
+        // FF 25 XX XX XX XX  = jmp [rip+d]  -IAT thunk; follow at same depth.
+        if (c.bytes.size() >= 6 && c.bytes.size() <= 16 &&
+            c.bytes[0] == 0xFF && c.bytes[1] == 0x25) {
+            const int32_t disp = *(const int32_t*)&c.bytes[2];
+            const uint64_t slot = c.base + 6 + (int64_t)disp;
+            char lbl[80];
+            snprintf(lbl, sizeof(lbl), "thunk_ind_%016llX", (unsigned long long)slot);
+            enqueue(slot, 8, w.depth, chunk_kind::fnptr, lbl);
+            return;
+        }
+        // E9 XX XX XX XX     = jmp rel32   -ILT trampoline; follow at same depth.
+        if (c.bytes.size() >= 5 && c.bytes.size() <= 16 && c.bytes[0] == 0xE9) {
+            const int32_t disp = *(const int32_t*)&c.bytes[1];
+            const uint64_t tgt = c.base + 5 + (int64_t)disp;
+            if (!imports.record_call_target(tgt)) {
+                char lbl[80];
+                snprintf(lbl, sizeof(lbl), "thunk_rel_%016llX", (unsigned long long)tgt);
+                enqueue(tgt, 0, w.depth, chunk_kind::func, lbl);
+            }
+            return;
+        }
+
+        std::vector<ref_hit> hits;
+        scanner::scan({ c.bytes.data(), c.bytes.size() }, c.base, hits);
+        for (const auto& h : hits) {
+            if (h.target_va >= c.base && h.target_va < c.base + c.size) continue;
+            follow_ref(h, w.depth);
+        }
+    }
+
+    void follow_ref(const ref_hit& h, int depth) noexcept {
+        using enum ref_kind;
+        const uint64_t sz = scanner::data_size_for(h.kind);
+        char sub[80];
+        switch (h.kind) {
+            case data_r64:
+            case data_r32:
+            case data_xmm:
+            case lea:
+                snprintf(sub, sizeof(sub), "data_%016llX",
+                         (unsigned long long)h.target_va);
+                enqueue(h.target_va, sz, depth, chunk_kind::data, sub);
+                break;
+            case call_indirect:
+            case jmp_indirect:
+                snprintf(sub, sizeof(sub), "ind_%016llX",
+                         (unsigned long long)h.target_va);
+                enqueue(h.target_va, 8, depth, chunk_kind::fnptr, sub);
+                break;
+            case call_rel:
+            case jmp_rel:
+                if (imports.record_call_target(h.target_va)) break;
+                snprintf(sub, sizeof(sub), "callee_%016llX",
+                         (unsigned long long)h.target_va);
+                enqueue(h.target_va, 0, depth - 1, chunk_kind::func, sub);
+                break;
+        }
+    }
+
+    void process_data(const work_item& w) noexcept {
+        uint64_t sz = w.size ? w.size : 8;
+        if (sz > 4096) sz = 4096;
+        (void)chunks.add(w.addr, sz, chunk_kind::data, w.label);
+        // `mov rax,[rip+g_fn]; call rax` reads as an 8-byte data load to the
+        // scanner. Detect it here: any 8-byte data whose value lands in a
+        // system module is treated as an IAT slot and gets a label.
+        if (sz == 8) {
+            uint64_t fnptr = 0;
+            if (mem::safe_copy(w.addr, &fnptr, 8) && fnptr > 0x10000ULL)
+                imports.record_iat_slot(w.addr, fnptr);
+        }
+    }
+
+    void process_fnptr(const work_item& w) noexcept {
+        if (!chunks.add(w.addr, 8, chunk_kind::fnptr, w.label)) return;
+        uint64_t fnptr = 0;
+        if (!mem::safe_copy(w.addr, &fnptr, 8) || fnptr <= 0x10000ULL) return;
+
+        imports.record_iat_slot(w.addr, fnptr);
+        if (!imports.record_call_target(fnptr)) {
+            char lbl[80];
+            snprintf(lbl, sizeof(lbl), "%s.target", w.label);
+            enqueue(fnptr, 0, w.depth - 1, chunk_kind::func, lbl);
+        }
+    }
+
+    void write_output(const char* subdir, uint64_t handler_va,
+                      const char* tag, int idx) noexcept {
+        char pe_path[MAX_PATH];
+        snprintf(pe_path, sizeof(pe_path), "%s\\dump.dll", subdir);
+
+        std::vector<const chunk_t*> far_refs;
+        if (pe_writer::write(pe_path, chunks.all(), handler_va,
+                             imports.all(), &far_refs)) {
+            log::printf("      -> %s (%zu regions, %llu B%s)\n",
+                        pe_path, chunks.count(),
+                        (unsigned long long)chunks.total(),
+                        far_refs.empty() ? "" : ", far refs listed in info.txt");
+        } else {
+            log::printf("      [!] PE write failed for %s\n", pe_path);
+        }
+
+        char info_path[MAX_PATH];
+        snprintf(info_path, sizeof(info_path), "%s\\info.txt", subdir);
+        FILE* f = fopen(info_path, "w");
+        if (!f) return;
+
+        fprintf(f, "surgical veh dump -- %s handler #%d\n", tag, idx);
+        fprintf(f, "handler VA   : 0x%016llX\n", (unsigned long long)handler_va);
+        fprintf(f, "regions      : %zu\n", chunks.count());
+        fprintf(f, "total bytes  : 0x%llX\n\n", (unsigned long long)chunks.total());
+        fprintf(f, "Open dump.dll in IDA (File > Open). IDA auto-detects PE64,\n");
+        fprintf(f, "loads sections at their live VAs, and jumps to handler entry.\n\n");
+        size_t i = 0;
+        for (const auto& c : chunks.all()) {
+            fprintf(f, "  [%3zu] 0x%016llX  +0x%llX\n",
+                    i++, (unsigned long long)c.base, (unsigned long long)c.size);
+        }
+        if (imports.size()) {
+            fprintf(f, "\nresolved imports (label -> function; label gets an\n"
+                       "Export Directory entry so IDA names the reference):\n");
+            for (const auto& imp : imports.all()) {
+                fprintf(f, "  0x%016llX -> 0x%016llX  %s!%s\n",
+                        (unsigned long long)imp.label_va,
+                        (unsigned long long)imp.target_va,
+                        imp.module_name,
+                        imp.export_name[0] ? imp.export_name : "(no export match)");
+            }
+        }
+        if (!far_refs.empty()) {
+            fprintf(f, "\nRefs beyond 4 GB of ImageBase (not stageable in this PE):\n");
+            for (const auto* c : far_refs)
+                fprintf(f, "  0x%016llX  +0x%llX\n",
+                        (unsigned long long)c->base, (unsigned long long)c->size);
+        }
+        fclose(f);
+    }
+
+    chunk_store            chunks;
+    import_resolver        imports;
+    std::vector<work_item> queue;
+};
+
+```
+
+`veh-dumper/imports.hpp`:
+
+```hpp
+#pragma once
+#include <Windows.h>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <span>
+#include <vector>
+
+#include "utils.hpp"
+
+struct import_info {
+    uint64_t target_va;
+    uint64_t label_va;
+    char     module_name[64];
+    char     export_name[128];
+};
+
+class import_resolver {
+public:
+    void clear() noexcept { imports.clear(); }
+
+    [[nodiscard]] std::span<const import_info> all() const noexcept {
+        return { imports.data(), imports.size() };
+    }
+
+    [[nodiscard]] size_t size() const noexcept { return imports.size(); }
+
+    // Direct rel32 CALL target -record if system module, so the caller
+    // skips byte extraction. label_va == target_va here.
+    [[nodiscard]] bool record_call_target(uint64_t addr) noexcept {
+        MEMORY_BASIC_INFORMATION mbi{};
+        if (!VirtualQuery((LPCVOID)(uintptr_t)addr, &mbi, sizeof(mbi))) return false;
+        char full_path[MAX_PATH] = {};
+        if (!GetModuleFileNameA((HMODULE)mbi.AllocationBase, full_path, MAX_PATH))
+            return false;
+        if (!is_system_module(full_path)) return false;
+        for (const auto& x : imports) if (x.label_va == addr) return true;
+        import_info info{};
+        if (!resolve(addr, &info)) return true;
+        info.label_va = addr;
+        imports.push_back(info);
+        return true;
+    }
+
+    // Indirect CALL -an IAT slot inside the handler's module points at
+    // some target. Only record if target lands in a system module.
+    void record_iat_slot(uint64_t slot_va, uint64_t target_va) noexcept {
+        MEMORY_BASIC_INFORMATION mbi{};
+        if (!VirtualQuery((LPCVOID)(uintptr_t)target_va, &mbi, sizeof(mbi))) return;
+        char full_path[MAX_PATH] = {};
+        if (!GetModuleFileNameA((HMODULE)mbi.AllocationBase, full_path, MAX_PATH))
+            return;
+        if (!is_system_module(full_path)) return;
+        for (const auto& x : imports) if (x.label_va == slot_va) return;
+        import_info info{};
+        if (!resolve(target_va, &info)) return;
+        info.label_va = slot_va;
+        imports.push_back(info);
+    }
+
+private:
+    static bool is_system_module(const char* path) noexcept {
+        for (const char* p = path; *p; ++p) {
+            if ((p[0] == '\\' || p[0] == '/') &&
+                (p[1] | 0x20) == 'w' && (p[2] | 0x20) == 'i' &&
+                (p[3] | 0x20) == 'n' && (p[4] | 0x20) == 'd' &&
+                (p[5] | 0x20) == 'o' && (p[6] | 0x20) == 'w' &&
+                (p[7] | 0x20) == 's')
+                return true;
+        }
+        return false;
+    }
+
+    static bool resolve(uint64_t addr, import_info* out) noexcept {
+        MEMORY_BASIC_INFORMATION mbi{};
+        if (!VirtualQuery((LPCVOID)(uintptr_t)addr, &mbi, sizeof(mbi))) return false;
+        HMODULE mod = (HMODULE)mbi.AllocationBase;
+        if (!mod) return false;
+
+        char full_path[MAX_PATH] = {};
+        if (!GetModuleFileNameA(mod, full_path, MAX_PATH)) return false;
+        const char* base = strrchr(full_path, '\\');
+        base = base ? base + 1 : full_path;
+        strncpy(out->module_name, base, sizeof(out->module_name) - 1);
+        out->target_va = addr;
+
+        const auto* dos = (const IMAGE_DOS_HEADER*)mod;
+        IMAGE_DOS_HEADER dos_cp{};
+        if (!mem::safe_copy((uint64_t)(uintptr_t)dos, &dos_cp, sizeof(dos_cp)) ||
+            dos_cp.e_magic != IMAGE_DOS_SIGNATURE)
+            return true;
+
+        IMAGE_NT_HEADERS64 nt{};
+        if (!mem::safe_copy((uint64_t)(uintptr_t)mod + dos_cp.e_lfanew, &nt, sizeof(nt)) ||
+            nt.Signature != IMAGE_NT_SIGNATURE)
+            return true;
+
+        const auto& d = nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+        if (!d.VirtualAddress) return true;
+
+        IMAGE_EXPORT_DIRECTORY exp{};
+        if (!mem::safe_copy((uint64_t)(uintptr_t)mod + d.VirtualAddress, &exp, sizeof(exp)))
+            return true;
+
+        return match_export(mod, exp, addr, out);
+    }
+
+    static bool match_export(HMODULE mod, const IMAGE_EXPORT_DIRECTORY& exp,
+                             uint64_t addr, import_info* out) noexcept {
+        std::vector<DWORD> funcs(exp.NumberOfFunctions);
+        std::vector<DWORD> names(exp.NumberOfNames);
+        std::vector<WORD>  ords(exp.NumberOfNames);
+        const uint64_t base = (uint64_t)(uintptr_t)mod;
+        if (!mem::safe_copy(base + exp.AddressOfFunctions,     funcs.data(), funcs.size() * 4) ||
+            !mem::safe_copy(base + exp.AddressOfNames,         names.data(), names.size() * 4) ||
+            !mem::safe_copy(base + exp.AddressOfNameOrdinals,   ords.data(),  ords.size() * 2))
+            return true;
+
+        const DWORD target_rva = (DWORD)(addr - base);
+        char name_buf[128] = {};
+
+        for (DWORD i = 0; i < exp.NumberOfNames; ++i) {
+            const WORD o = ords[i];
+            if (o < exp.NumberOfFunctions && funcs[o] == target_rva) {
+                (void)mem::safe_copy(base + names[i], name_buf, sizeof(name_buf) - 1);
+                strncpy(out->export_name, name_buf, sizeof(out->export_name) - 1);
+                return true;
+            }
+        }
+
+        DWORD best_rva = 0, best_name_rva = 0;
+        for (DWORD i = 0; i < exp.NumberOfNames; ++i) {
+            const WORD o = ords[i];
+            if (o >= exp.NumberOfFunctions) continue;
+            const DWORD frva = funcs[o];
+            if (frva <= target_rva && frva > best_rva) {
+                best_rva = frva;
+                best_name_rva = names[i];
+            }
+        }
+        if (best_name_rva) {
+            (void)mem::safe_copy(base + best_name_rva, name_buf, sizeof(name_buf) - 1);
+            snprintf(out->export_name, sizeof(out->export_name),
+                     "%s+0x%X", name_buf, target_rva - best_rva);
+        }
+        return true;
+    }
+
+    std::vector<import_info> imports;
+};
+
+```
+
+`veh-dumper/includes.hpp`:
+
+```hpp
+#pragma once
+#define NOMINMAX
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <Windows.h>
+#include <cstdio>
+#include <cstdint>
+#include <cstring>
+#include <cstdarg>
+#include <algorithm>
+#include <span>
+#include <string>
+#include <thread>
+#include <vector>
+
+#include "utils.hpp"
+#include "imports.hpp"
+#include "chunks.hpp"
+#include "scanner.hpp"
+#include "pe.hpp"
+#include "dumper.hpp"
+#include "walker.hpp"
+
+```
+
+`veh-dumper/main.cpp`:
+
+```cpp
+#include "includes.hpp"
+#include <thread>
+
+BOOL WINAPI DllMain(HINSTANCE h, DWORD reason, LPVOID) {
+    if (reason == DLL_PROCESS_ATTACH) {
+        DisableThreadLibraryCalls(h);
+        std::thread([h] {
+            veh_walker w;
+            w.run(h);
+        }).detach();
+    }
+    return TRUE;
+}
+
+extern "C" __declspec(dllexport) int NextHook(int code, __int64 wParam, __int64 lParam) {
+    return (int)CallNextHookEx(nullptr, code, (WPARAM)wParam, (LPARAM)lParam);
+}
+
+```
+
+`veh-dumper/pe.hpp`:
+
+```hpp
+#pragma once
+#include <Windows.h>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+#include <span>
+#include <string>
+#include <vector>
+
+#include "chunks.hpp"
+#include "imports.hpp"
+
+// Synthetic x64 PE writer -takes a set of live-VA chunks + resolved imports
+// and produces a .dll IDA opens directly. Chunks land at their true VAs;
+// AddressOfEntryPoint points at the handler; every IAT slot inside the
+// handler's own module gets an Export Directory entry so IDA renders
+// `call cs:kernel32_dll_IsDebuggerPresent` instead of `call cs:qword_XXX`.
+class pe_writer {
+public:
+    [[nodiscard]] static bool write(const char* path,
+                                    std::span<const chunk_t> chunks,
+                                    uint64_t handler_va,
+                                    std::span<const import_info> imports,
+                                    std::vector<const chunk_t*>* out_far_refs) noexcept {
+        if (chunks.empty()) return false;
+
+        const uint64_t image_base = pick_image_base(chunks, handler_va);
+
+        std::vector<chunk_rva> in_range;
+        for (const auto& c : chunks) {
+            const uint64_t end = c.base + c.size;
+            if (end > image_base + 0xFFFFFFFFULL) {
+                if (out_far_refs) out_far_refs->push_back(&c);
+                continue;
+            }
+            in_range.push_back({ &c, c.base - image_base });
+        }
+        if (in_range.empty()) return false;
+
+        std::sort(in_range.begin(), in_range.end(),
+                  [](const chunk_rva& a, const chunk_rva& b) { return a.rva < b.rva; });
+
+        auto groups = group_by_page(in_range);
+        auto secs = build_sections(groups);
+
+        uint32_t exports_rva = 0;
+        uint32_t exports_size = 0;
+        emit_export_dir(secs, imports, image_base, exports_rva, exports_size);
+
+        return emit_file(path, secs, image_base, handler_va,
+                         exports_rva, exports_size);
+    }
+
+private:
+    static constexpr uint64_t k_sec_align  = 0x1000;
+    static constexpr uint32_t k_file_align = 0x200;
+
+#pragma pack(push, 1)
+    struct file_hdr {
+        uint16_t Machine;
+        uint16_t NumberOfSections;
+        uint32_t TimeDateStamp;
+        uint32_t PointerToSymbolTable;
+        uint32_t NumberOfSymbols;
+        uint16_t SizeOfOptionalHeader;
+        uint16_t Characteristics;
+    };
+    struct opt_hdr64 {
+        uint16_t Magic;
+        uint8_t  MajorLinkerVersion;
+        uint8_t  MinorLinkerVersion;
+        uint32_t SizeOfCode;
+        uint32_t SizeOfInitializedData;
+        uint32_t SizeOfUninitializedData;
+        uint32_t AddressOfEntryPoint;
+        uint32_t BaseOfCode;
+        uint64_t ImageBase;
+        uint32_t SectionAlignment;
+        uint32_t FileAlignment;
+        uint16_t MajorOperatingSystemVersion;
+        uint16_t MinorOperatingSystemVersion;
+        uint16_t MajorImageVersion;
+        uint16_t MinorImageVersion;
+        uint16_t MajorSubsystemVersion;
+        uint16_t MinorSubsystemVersion;
+        uint32_t Win32VersionValue;
+        uint32_t SizeOfImage;
+        uint32_t SizeOfHeaders;
+        uint32_t CheckSum;
+        uint16_t Subsystem;
+        uint16_t DllCharacteristics;
+        uint64_t SizeOfStackReserve;
+        uint64_t SizeOfStackCommit;
+        uint64_t SizeOfHeapReserve;
+        uint64_t SizeOfHeapCommit;
+        uint32_t LoaderFlags;
+        uint32_t NumberOfRvaAndSizes;
+        uint64_t DataDirectory[16];
+    };
+    struct section_hdr {
+        char     Name[8];
+        uint32_t VirtualSize;
+        uint32_t VirtualAddress;
+        uint32_t SizeOfRawData;
+        uint32_t PointerToRawData;
+        uint32_t PointerToRelocations;
+        uint32_t PointerToLineNumbers;
+        uint16_t NumberOfRelocations;
+        uint16_t NumberOfLineNumbers;
+        uint32_t Characteristics;
+    };
+#pragma pack(pop)
+
+    static_assert(sizeof(file_hdr)    == 20);
+    static_assert(sizeof(opt_hdr64)   == 240);
+    static_assert(sizeof(section_hdr) == 40);
+
+    struct chunk_rva { const chunk_t* c; uint64_t rva; };
+    struct sec_group { uint64_t va_start, va_end; std::vector<chunk_rva> chunks; };
+    struct sec_out {
+        uint32_t va, vsize, vsize_align, raw_size, raw_ptr;
+        std::vector<uint8_t> data;
+    };
+
+    static uint64_t pick_image_base(std::span<const chunk_t> chunks,
+                                    uint64_t handler_va) noexcept {
+        uint64_t min_base = ~0ULL;
+        for (const auto& c : chunks) if (c.base < min_base) min_base = c.base;
+        if (handler_va < min_base) min_base = handler_va;
+        return min_base & ~(k_sec_align - 1);
+    }
+
+    static std::vector<sec_group> group_by_page(std::span<const chunk_rva> in) noexcept {
+        std::vector<sec_group> out;
+        for (const auto& cr : in) {
+            const uint64_t page_va   = cr.rva & ~(k_sec_align - 1);
+            const uint64_t chunk_end = cr.rva + cr.c->size;
+            if (!out.empty() &&
+                page_va <= ((out.back().va_end + k_sec_align - 1) & ~(k_sec_align - 1))) {
+                out.back().va_end = std::max(out.back().va_end, chunk_end);
+                out.back().chunks.push_back(cr);
+            } else {
+                out.push_back({ page_va, chunk_end, { cr } });
+            }
+        }
+        return out;
+    }
+
+    static std::vector<sec_out> build_sections(std::span<const sec_group> groups) noexcept {
+        const uint32_t nsec = (uint32_t)groups.size();
+        const uint32_t hdrs_raw = 0x40 + 4 + 20 + 240 + nsec * 40;
+        uint32_t size_of_headers = (hdrs_raw + k_file_align - 1) & ~(k_file_align - 1);
+
+        std::vector<sec_out> secs;
+        uint32_t raw_cursor = size_of_headers;
+        for (const auto& g : groups) {
+            sec_out s{};
+            s.va = (uint32_t)g.va_start;
+            s.vsize = (uint32_t)(g.va_end - g.va_start);
+            s.vsize_align = (s.vsize + (uint32_t)k_sec_align - 1) & ~((uint32_t)k_sec_align - 1);
+            s.raw_size    = (s.vsize + k_file_align - 1) & ~(k_file_align - 1);
+            s.raw_ptr = raw_cursor;
+            s.data.assign(s.raw_size, 0);
+            for (const auto& cr : g.chunks) {
+                const uint64_t off = cr.rva - g.va_start;
+                memcpy(s.data.data() + off, cr.c->bytes.data(), cr.c->bytes.size());
+            }
+            secs.push_back(std::move(s));
+            raw_cursor += secs.back().raw_size;
+        }
+        return secs;
+    }
+
+    static void emit_export_dir(std::vector<sec_out>& secs,
+                                std::span<const import_info> imports,
+                                uint64_t image_base,
+                                uint32_t& exports_rva_out,
+                                uint32_t& exports_size_out) noexcept {
+        struct valid_imp { uint64_t label_va; char module[64]; char func[128]; };
+        std::vector<valid_imp> valid;
+        for (const auto& imp : imports) {
+            const uint64_t rva64 = imp.label_va - image_base;
+            if (rva64 > 0xFFFFFFFFULL) continue;
+            if (!imp.module_name[0] || !imp.export_name[0]) continue;
+            valid_imp v{};
+            v.label_va = imp.label_va;
+            strncpy(v.module, imp.module_name, sizeof(v.module) - 1);
+            strncpy(v.func,   imp.export_name, sizeof(v.func) - 1);
+            valid.push_back(v);
+        }
+        if (valid.empty()) return;
+
+        std::sort(valid.begin(), valid.end(),
+                  [](const valid_imp& a, const valid_imp& b) {
+                      char an[192], bn[192];
+                      snprintf(an, sizeof(an), "%s_%s", a.module, a.func);
+                      snprintf(bn, sizeof(bn), "%s_%s", b.module, b.func);
+                      return strcmp(an, bn) < 0;
+                  });
+
+        const uint32_t N = (uint32_t)valid.size();
+        const uint32_t funcs_off    = 40;
+        const uint32_t names_off    = funcs_off + N * 4;
+        const uint32_t ords_off     = names_off + N * 4;
+        const uint32_t dll_name_off = ords_off  + N * 2;
+
+        constexpr const char* dll_str = "vehdump.dll";
+        uint32_t str_cur = dll_name_off + (uint32_t)strlen(dll_str) + 1;
+        std::vector<uint32_t> name_offs;
+        std::vector<std::string> combined;
+        for (const auto& v : valid) {
+            char c[192];
+            snprintf(c, sizeof(c), "%s_%s", v.module, v.func);
+            for (char* p = c; *p; ++p) if (*p == '.') *p = '_';
+            combined.emplace_back(c);
+            name_offs.push_back(str_cur);
+            str_cur += (uint32_t)strlen(c) + 1;
+        }
+        std::vector<uint8_t> blob(str_cur, 0);
+
+        uint32_t last_end = 0;
+        for (const auto& s : secs) {
+            const uint32_t e = s.va + s.vsize_align;
+            if (e > last_end) last_end = e;
+        }
+        const uint32_t exports_rva  = (last_end + (uint32_t)k_sec_align - 1)
+                                      & ~((uint32_t)k_sec_align - 1);
+        const uint32_t exports_size = str_cur;
+
+        auto* p32 = (uint32_t*)blob.data();
+        p32[0] = 0; p32[1] = 0;
+        *(uint16_t*)((uint8_t*)&p32[2])     = 0;
+        *(uint16_t*)((uint8_t*)&p32[2] + 2) = 0;
+        p32[3] = exports_rva + dll_name_off;
+        p32[4] = 1;
+        p32[5] = N;
+        p32[6] = N;
+        p32[7] = exports_rva + funcs_off;
+        p32[8] = exports_rva + names_off;
+        p32[9] = exports_rva + ords_off;
+
+        auto* funcs = (uint32_t*)(blob.data() + funcs_off);
+        auto* names = (uint32_t*)(blob.data() + names_off);
+        auto* ords  = (uint16_t*)(blob.data() + ords_off);
+        for (uint32_t i = 0; i < N; ++i) {
+            funcs[i] = (uint32_t)(valid[i].label_va - image_base);
+            names[i] = exports_rva + name_offs[i];
+            ords[i]  = (uint16_t)i;
+        }
+        memcpy(blob.data() + dll_name_off, dll_str, strlen(dll_str) + 1);
+        for (uint32_t i = 0; i < N; ++i) {
+            const auto& s = combined[i];
+            memcpy(blob.data() + name_offs[i], s.c_str(), s.size() + 1);
+        }
+
+        // Append .edata section. Recompute raw offsets to include it.
+        uint32_t raw_cursor = 0;
+        for (const auto& s : secs) raw_cursor = std::max(raw_cursor, s.raw_ptr + s.raw_size);
+
+        sec_out es{};
+        es.va = exports_rva;
+        es.vsize = exports_size;
+        es.vsize_align = (es.vsize + (uint32_t)k_sec_align - 1) & ~((uint32_t)k_sec_align - 1);
+        es.raw_size    = (es.vsize + k_file_align - 1) & ~(k_file_align - 1);
+        es.raw_ptr = raw_cursor;
+        es.data.assign(es.raw_size, 0);
+        memcpy(es.data.data(), blob.data(), blob.size());
+        secs.push_back(std::move(es));
+
+        const uint32_t nsec = (uint32_t)secs.size();
+        const uint32_t hdrs_raw = 0x40 + 4 + 20 + 240 + nsec * 40;
+        const uint32_t new_hdrs = (hdrs_raw + k_file_align - 1) & ~(k_file_align - 1);
+        uint32_t rc = new_hdrs;
+        for (auto& s : secs) { s.raw_ptr = rc; rc += s.raw_size; }
+
+        exports_rva_out  = exports_rva;
+        exports_size_out = exports_size;
+    }
+
+    static bool emit_file(const char* path,
+                          std::span<const sec_out> secs,
+                          uint64_t image_base,
+                          uint64_t handler_va,
+                          uint32_t exports_rva,
+                          uint32_t exports_size) noexcept {
+        const uint32_t nsec = (uint32_t)secs.size();
+        const uint32_t hdrs_raw = 0x40 + 4 + 20 + 240 + nsec * 40;
+        const uint32_t size_of_headers = (hdrs_raw + k_file_align - 1) & ~(k_file_align - 1);
+
+        uint32_t size_of_image = size_of_headers;
+        for (const auto& s : secs) {
+            const uint32_t end = s.va + s.vsize_align;
+            if (end > size_of_image) size_of_image = end;
+        }
+        size_of_image = (size_of_image + (uint32_t)k_sec_align - 1) & ~((uint32_t)k_sec_align - 1);
+
+        FILE* f = fopen(path, "wb");
+        if (!f) return false;
+
+        uint8_t dos[64] = { 'M', 'Z' };
+        *(uint32_t*)(dos + 0x3C) = 0x40;
+        fwrite(dos, 1, 64, f);
+        const uint32_t pe_sig = 0x00004550;
+        fwrite(&pe_sig, 4, 1, f);
+
+        file_hdr fh{};
+        fh.Machine              = 0x8664;
+        fh.NumberOfSections     = (uint16_t)nsec;
+        fh.SizeOfOptionalHeader = 240;
+        fh.Characteristics      = 0x2022;
+        fwrite(&fh, sizeof(fh), 1, f);
+
+        opt_hdr64 oh{};
+        oh.Magic                       = 0x020B;
+        oh.MajorLinkerVersion          = 14;
+        oh.AddressOfEntryPoint         = (uint32_t)(handler_va - image_base);
+        oh.ImageBase                   = image_base;
+        oh.SectionAlignment            = (uint32_t)k_sec_align;
+        oh.FileAlignment               = k_file_align;
+        oh.MajorOperatingSystemVersion = 6;
+        oh.MajorSubsystemVersion       = 6;
+        oh.SizeOfImage                 = size_of_image;
+        oh.SizeOfHeaders               = size_of_headers;
+        oh.Subsystem                   = 3;
+        oh.DllCharacteristics          = 0x0120;
+        oh.SizeOfStackReserve          = 0x100000;
+        oh.SizeOfStackCommit           = 0x1000;
+        oh.SizeOfHeapReserve           = 0x100000;
+        oh.SizeOfHeapCommit            = 0x1000;
+        oh.NumberOfRvaAndSizes         = 16;
+        if (exports_size)
+            oh.DataDirectory[0] = (uint64_t)exports_rva | ((uint64_t)exports_size << 32);
+        fwrite(&oh, sizeof(oh), 1, f);
+
+        for (size_t i = 0; i < secs.size(); ++i) {
+            section_hdr sh{};
+            const bool is_edata = (exports_size && i == secs.size() - 1);
+            if (is_edata)      memcpy(sh.Name, ".edata", 7);
+            else if (i == 0)   memcpy(sh.Name, ".text",  6);
+            else               snprintf(sh.Name, 8, ".text%zu", i);
+            sh.VirtualSize      = secs[i].vsize;
+            sh.VirtualAddress   = secs[i].va;
+            sh.SizeOfRawData    = secs[i].raw_size;
+            sh.PointerToRawData = secs[i].raw_ptr;
+            sh.Characteristics  = is_edata ? 0x40000040 : 0x60000020;
+            fwrite(&sh, sizeof(sh), 1, f);
+        }
+
+        const long here = ftell(f);
+        if (here < (long)size_of_headers) {
+            std::vector<uint8_t> pad(size_of_headers - here, 0);
+            fwrite(pad.data(), 1, pad.size(), f);
+        }
+        for (const auto& s : secs) {
+            fseek(f, (long)s.raw_ptr, SEEK_SET);
+            fwrite(s.data.data(), 1, s.data.size(), f);
+        }
+        fclose(f);
+        return true;
+    }
+};
+
+```
+
+`veh-dumper/scanner.hpp`:
+
+```hpp
+#pragma once
+#include <Windows.h>
+#include <cstdint>
+#include <span>
+#include <vector>
+
+#include "utils.hpp"
+
+enum class ref_kind : uint8_t {
+    data_r64,       // mov r64,[rip+d]      -> 8 B load
+    data_r32,       // mov r32,[rip+d]      -> 4 B load
+    data_xmm,       // xmm/sse [rip+d]      -> 16 B load
+    lea,            // lea r*,[rip+d]       -> unknown; sample 64 B
+    call_indirect,  // call [rip+d]         -> 8 B fnptr + follow
+    jmp_indirect,   // jmp  [rip+d]         -> 8 B fnptr + follow
+    call_rel,       // call rel32           -> recurse into function
+    jmp_rel,        // jmp  rel32           -> recurse (tail jump)
+};
+
+struct ref_hit {
+    uint64_t site_va;
+    uint64_t target_va;
+    ref_kind kind;
+    const char* form;
+};
+
+struct func_extent {
+    uint64_t base;
+    uint64_t size;
+    bool     from_unwind;
+};
+
+class scanner {
+public:
+    static constexpr size_t k_fallback_size = 0x1000;
+    static constexpr size_t k_max_size      = 0x8000;
+
+    [[nodiscard]] static func_extent extent(uint64_t entry_va) noexcept {
+        func_extent fe = { entry_va, 0, false };
+        DWORD64 image_base = 0;
+        PRUNTIME_FUNCTION rf = RtlLookupFunctionEntry(entry_va, &image_base, nullptr);
+        if (rf && image_base) {
+            const uint64_t begin = image_base + rf->BeginAddress;
+            const uint64_t end   = image_base + rf->EndAddress;
+            if (end > begin && (end - begin) <= k_max_size) {
+                fe.base = begin;
+                fe.size = end - begin;
+                fe.from_unwind = true;
+                return fe;
+            }
+        }
+        const uint64_t heur = heuristic_end(entry_va);
+        fe.size = heur ? heur : k_fallback_size;
+        return fe;
+    }
+
+    static void scan(std::span<const uint8_t> buf, uint64_t base_va,
+                     std::vector<ref_hit>& out) noexcept {
+        if (buf.size() < 8) return;
+        for (size_t i = 0; i + 7 < buf.size(); ) {
+            const uint8_t b0 = buf[i], b1 = buf[i + 1], b2 = buf[i + 2];
+            int disp_pos = 0;
+            ref_kind kind = ref_kind::data_r64;
+            const char* form = nullptr;
+
+            if ((b0 == 0x48 || b0 == 0x4C) && b1 == 0x8B && (b2 & 0xC7) == 0x05) {
+                disp_pos = 3; kind = ref_kind::data_r64; form = "mov r64,[rip+d]";
+            } else if ((b0 == 0x48 || b0 == 0x4C) && b1 == 0x8D && (b2 & 0xC7) == 0x05) {
+                disp_pos = 3; kind = ref_kind::lea; form = "lea r64,[rip+d]";
+            } else if (b0 == 0x48 && b1 == 0x63 && (b2 & 0xC7) == 0x05) {
+                disp_pos = 3; kind = ref_kind::data_r32; form = "movsxd r64,[rip+d]";
+            } else if ((b0 == 0x8B || b0 == 0x89 || b0 == 0x8A) && (b1 & 0xC7) == 0x05) {
+                disp_pos = 2; kind = ref_kind::data_r32; form = "mov r32,[rip+d]";
+            } else if (b0 == 0x8D && (b1 & 0xC7) == 0x05) {
+                disp_pos = 2; kind = ref_kind::lea; form = "lea r32,[rip+d]";
+            } else if (b0 == 0xFF && b1 == 0x15) {
+                disp_pos = 2; kind = ref_kind::call_indirect; form = "call [rip+d]";
+            } else if (b0 == 0xFF && b1 == 0x25) {
+                disp_pos = 2; kind = ref_kind::jmp_indirect;  form = "jmp  [rip+d]";
+            } else if (b0 == 0xE8) {
+                disp_pos = 1; kind = ref_kind::call_rel; form = "call rel32";
+            } else if (b0 == 0xE9) {
+                disp_pos = 1; kind = ref_kind::jmp_rel;  form = "jmp  rel32";
+            } else if (b0 == 0x66 && b1 == 0x0F &&
+                       (b2 == 0x6F || b2 == 0x7F || b2 == 0x10 || b2 == 0x11 ||
+                        b2 == 0x28 || b2 == 0x29) &&
+                       i + 8 < buf.size() && (buf[i + 3] & 0xC7) == 0x05) {
+                disp_pos = 4; kind = ref_kind::data_xmm; form = "xmm [rip+d]";
+            } else if ((b0 == 0xF3 || b0 == 0xF2) && b1 == 0x0F &&
+                       (b2 == 0x10 || b2 == 0x11 || b2 == 0x7E) &&
+                       i + 8 < buf.size() && (buf[i + 3] & 0xC7) == 0x05) {
+                disp_pos = 4; kind = ref_kind::data_xmm; form = "sse [rip+d]";
+            }
+
+            if (!form) { ++i; continue; }
+            if (i + disp_pos + 4 > buf.size()) { ++i; continue; }
+
+            const int32_t disp = *(const int32_t*)(buf.data() + i + disp_pos);
+            const uint64_t inst_end = base_va + i + disp_pos + 4;
+            out.push_back({ base_va + i, inst_end + (int64_t)disp, kind, form });
+            i += disp_pos + 4;
+        }
+    }
+
+    [[nodiscard]] static uint64_t data_size_for(ref_kind k) noexcept {
+        using enum ref_kind;
+        switch (k) {
+            case data_r64:      return 8;
+            case data_r32:      return 4;
+            case data_xmm:      return 16;
+            case lea:           return 64;
+            case call_indirect: return 8;
+            case jmp_indirect:  return 8;
+            default:            return 0;
+        }
+    }
+
+private:
+    // Linear scan for the first C3 (RET) followed by MSVC/gcc pad bytes
+    // (INT3 / NOP / multi-byte NOP). Cap at k_fallback_size -never wander.
+    [[nodiscard]] static uint64_t heuristic_end(uint64_t entry_va) noexcept {
+        std::vector<uint8_t> buf(k_fallback_size);
+        if (!mem::safe_copy(entry_va, buf.data(), k_fallback_size)) return 0;
+        for (size_t i = 0; i + 4 < buf.size(); ++i) {
+            if (buf[i] != 0xC3) continue;
+            const uint8_t n1 = buf[i + 1], n2 = buf[i + 2];
+            const bool padded = n1 == 0xCC || n1 == 0x90 ||
+                                (n1 == 0x0F && n2 == 0x1F);
+            if (padded) return i + 1;
+        }
+        return 0;
+    }
+};
+
+```
+
+`veh-dumper/utils.hpp`:
+
+```hpp
+#pragma once
+#include <Windows.h>
+#include <cstdint>
+#include <cstdio>
+#include <cstdarg>
+#include <cstring>
+
+class mem {
+public:
+    [[nodiscard]] static bool safe_copy(uint64_t addr, void* dst, size_t n) noexcept {
+        __try {
+            memcpy(dst, (const void*)(uintptr_t)addr, n);
+            return true;
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER) {
+            return false;
+        }
+    }
+
+    [[nodiscard]] static bool committed(uint64_t va) noexcept {
+        MEMORY_BASIC_INFORMATION mbi{};
+        return VirtualQuery((LPCVOID)(uintptr_t)va, &mbi, sizeof(mbi)) &&
+               mbi.State == MEM_COMMIT;
+    }
+};
+
+class log {
+public:
+    static void open(const char* path) noexcept {
+        file = fopen(path, "w");
+    }
+
+    static void close() noexcept {
+        if (file) { fclose(file); file = nullptr; }
+    }
+
+    static void printf(const char* fmt, ...) noexcept {
+        va_list ap; va_start(ap, fmt);
+        if (file) { vfprintf(file, fmt, ap); fflush(file); }
+        va_end(ap);
+    }
+
+private:
+    static inline FILE* file = nullptr;
+};
+
+```
+
+`veh-dumper/veh-dumper.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{576ab35e-6fb8-41f2-a73b-f3eb6249a957}</ProjectGuid>
+    <RootNamespace>vehdumper</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>veh-dumper</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <OutDir>$(ProjectDir)..\bin\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\$(Configuration)\</IntDir>
+    <TargetName>veh-dumper</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="includes.hpp" />
+    <ClInclude Include="utils.hpp" />
+    <ClInclude Include="imports.hpp" />
+    <ClInclude Include="chunks.hpp" />
+    <ClInclude Include="scanner.hpp" />
+    <ClInclude Include="pe.hpp" />
+    <ClInclude Include="dumper.hpp" />
+    <ClInclude Include="walker.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>
+
+```
+
+`veh-dumper/veh-dumper.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="includes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imports.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="chunks.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scanner.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pe.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dumper.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="walker.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
+
+```
+
+`veh-dumper/walker.hpp`:
+
+```hpp
+#pragma once
+#include <Windows.h>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+
+#include "dumper.hpp"
+#include "utils.hpp"
+
+// Enumerates the target process's VectoredExceptionHandler and
+// VectoredContinueHandler lists, then dumps every real handler as a
+// synthetic PE via handler_dumper. The list-node handler offset is
+// discovered at runtime by round-tripping a foothold registration.
+class veh_walker {
+public:
+    void run(HINSTANCE self) noexcept {
+        Sleep(500);
+
+        char dll_path[MAX_PATH] = {};
+        if (!GetModuleFileNameA(self, dll_path, MAX_PATH)) return;
+        strncpy(dll_dir, dll_path, MAX_PATH - 1);
+        if (char* last = strrchr(dll_dir, '\\')) *last = 0;
+
+        snprintf(root_dir, sizeof(root_dir), "%s\\vehdump", dll_dir);
+        CreateDirectoryA(root_dir, NULL);
+
+        char log_path[MAX_PATH];
+        snprintf(log_path, sizeof(log_path), "%s\\veh_dump.log", root_dir);
+        log::open(log_path);
+
+        log::printf("[veh-dumper] pid=%lu  dll=%s\n", GetCurrentProcessId(), dll_path);
+        log::printf("[veh-dumper] output dir=%s\n\n", root_dir);
+
+        HMODULE ntdll = GetModuleHandleA("ntdll.dll");
+        if (!ntdll) { log::printf("no ntdll\n"); log::close(); return; }
+
+        auto add_veh = (add_veh_t)GetProcAddress(ntdll, "RtlAddVectoredExceptionHandler");
+        auto rm_veh  = (rm_veh_t) GetProcAddress(ntdll, "RtlRemoveVectoredExceptionHandler");
+        auto add_vch = (add_veh_t)GetProcAddress(ntdll, "RtlAddVectoredContinueHandler");
+        auto rm_vch  = (rm_veh_t) GetProcAddress(ntdll, "RtlRemoveVectoredContinueHandler");
+        auto decode  = (decode_t) GetProcAddress(ntdll, "RtlDecodePointer");
+        if (!add_veh || !rm_veh || !decode) {
+            log::printf("essential ntdll symbols missing\n");
+            log::close();
+            return;
+        }
+
+        enumerate_list(add_veh, rm_veh, decode, "VEH");
+        if (add_vch && rm_vch)
+            enumerate_list(add_vch, rm_vch, decode, "VCH");
+
+        log::printf("\n[veh-dumper] done.\n");
+        log::close();
+    }
+
+private:
+    using add_veh_t = PVOID (WINAPI*)(ULONG, PVECTORED_EXCEPTION_HANDLER);
+    using rm_veh_t  = ULONG (WINAPI*)(PVOID);
+    using decode_t  = PVOID (NTAPI*)(PVOID);
+
+    static LONG WINAPI foothold_handler(EXCEPTION_POINTERS*) {
+        return EXCEPTION_CONTINUE_SEARCH;
+    }
+
+    void enumerate_list(add_veh_t add_fn, rm_veh_t rm_fn,
+                        decode_t decode_fn, const char* tag) noexcept {
+        log::printf("\n================ %s handlers ================\n", tag);
+        PVOID our_entry = add_fn(1, foothold_handler);
+        if (!our_entry) { log::printf("  Add%s returned NULL\n", tag); return; }
+
+        uint8_t our_bytes[64] = {};
+        if (!mem::safe_copy((uint64_t)(uintptr_t)our_entry, our_bytes, sizeof(our_bytes))) {
+            rm_fn(our_entry); return;
+        }
+
+        uint32_t handler_off = 0;
+        for (uint32_t off = 0x10; off <= 0x28; off += 8) {
+            const uint64_t enc = *(const uint64_t*)(our_bytes + off);
+            const uint64_t dec = (uint64_t)(uintptr_t)decode_fn((PVOID)(uintptr_t)enc);
+            if (dec == (uint64_t)(uintptr_t)foothold_handler) { handler_off = off; break; }
+        }
+        if (!handler_off) {
+            log::printf("  couldn't find handler offset in entry\n");
+            rm_fn(our_entry);
+            return;
+        }
+        log::printf("  entry handler_off = 0x%X\n", handler_off);
+
+        uint64_t cursor = (uint64_t)(uintptr_t)our_entry;
+        int idx = 0, real_handlers = 0;
+        do {
+            uint8_t eb[64] = {};
+            if (!mem::safe_copy(cursor, eb, sizeof(eb))) break;
+            const uint64_t flink = *(const uint64_t*)(eb + 0);
+            const uint64_t enc   = *(const uint64_t*)(eb + handler_off);
+            const uint64_t real  = (uint64_t)(uintptr_t)decode_fn((PVOID)(uintptr_t)enc);
+
+            if (real > 0x10000ULL &&
+                real != (uint64_t)(uintptr_t)foothold_handler &&
+                mem::committed(real)) {
+                dumper.dump(real, real_handlers, tag, root_dir);
+                ++real_handlers;
+            }
+
+            cursor = flink;
+            ++idx;
+            if (idx > 128) { log::printf("  runaway; stopping\n"); break; }
+        } while (cursor != (uint64_t)(uintptr_t)our_entry);
+
+        log::printf("\n  %s: walked %d nodes; %d real handlers dumped\n",
+                    tag, idx, real_handlers);
+        rm_fn(our_entry);
+    }
+
+    handler_dumper dumper;
+    char           dll_dir[MAX_PATH]  = {};
+    char           root_dir[MAX_PATH] = {};
+};
+
+```
