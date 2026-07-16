@@ -25,6 +25,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import os
 import re
@@ -37,6 +38,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 README_PATH = ROOT_DIR / "README.md"
@@ -1456,12 +1458,6 @@ def build_pr_body(decision: dict[str, Any], screen: dict[str, Any] | None) -> st
     return "\n".join(lines)
 
 
-def _current_branch() -> str:
-    proc = _git("rev-parse", "--abbrev-ref", "HEAD", check=False)
-    name = (proc.stdout or b"").decode().strip()
-    return name if name and name != "HEAD" else "main"
-
-
 def _proc_err_text(proc: subprocess.CompletedProcess[Any]) -> str:
     err = proc.stderr or ""
     out = proc.stdout or ""
@@ -1496,64 +1492,188 @@ def _is_transient_git_remote_error(err: str) -> bool:
             "tls",
             "temporary failure",
             "internal server error",
+            "secondary rate",
+            "rate limit",
+            "abuse detection",
         )
     )
 
 
-def _remote_branch_sha(branch: str) -> str | None:
-    proc = _git("ls-remote", "--heads", "origin", branch, check=False)
+def github_repo_slug() -> str:
+    return (os.environ.get("GITHUB_REPOSITORY") or SELF_REPO).strip() or SELF_REPO
+
+
+def gh_api_json(
+    path: str,
+    *,
+    method: str = "GET",
+    body: dict[str, Any] | None = None,
+    timeout: int = 120,
+) -> Any:
+    """Call `gh api` and parse JSON. Returns None for empty 204-style bodies."""
+    cmd = [find_gh_bin(), "api", "--method", method, path]
+    if body is not None:
+        cmd.extend(["--input", "-"])
+        proc = subprocess.run(
+            cmd,
+            cwd=ROOT_DIR,
+            input=json.dumps(body),
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=timeout,
+        )
+    else:
+        proc = subprocess.run(
+            cmd,
+            cwd=ROOT_DIR,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=timeout,
+        )
     if proc.returncode != 0:
+        raise RuntimeError(_proc_err_text(proc)[:600] or f"gh api {method} {path} failed")
+    text = (proc.stdout or "").strip()
+    if not text:
         return None
-    for line in (proc.stdout or b"").decode("utf-8", errors="replace").splitlines():
-        parts = line.split()
-        if parts:
-            return parts[0]
-    return None
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"gh api returned non-JSON: {e}: {text[:200]}") from e
 
 
-def push_branch(branch: str, *, attempts: int = 5) -> None:
-    """
-    Push HEAD to origin/<branch> with retries for transient GitHub HTTP errors.
-    Also treats 'already on remote' as success (HTTP 500 after a successful
-    receive sometimes surfaces as a false failure + 'Everything up-to-date').
-    """
-    sha = (_git("rev-parse", "HEAD").stdout or b"").decode().strip()
-    if not sha:
-        sys.exit("ERROR: cannot resolve HEAD for push")
-
+def _api_with_retries(label: str, fn: Any, *, attempts: int = 5) -> Any:
     last_err = ""
     for attempt in range(1, attempts + 1):
-        remote_sha = _remote_branch_sha(branch)
-        if remote_sha == sha:
-            print(f"origin/{branch} already at {sha[:12]} — push not needed.")
-            return
+        try:
+            return fn()
+        except (RuntimeError, OSError, subprocess.TimeoutExpired) as e:
+            last_err = str(e)
+            print(f"{label} failed (attempt {attempt}/{attempts}): {last_err[:300]}")
+            if attempt < attempts and _is_transient_git_remote_error(last_err):
+                delay = min(2**attempt, 30)
+                print(f"Transient API error — retrying in {delay}s ...")
+                time.sleep(delay)
+                continue
+            break
+    sys.exit(f"ERROR: {label} failed: {last_err[:400]}")
 
-        push = _git("push", "-u", "origin", f"HEAD:{branch}", check=False)
-        if push.returncode == 0:
-            print(f"Pushed origin/{branch} ({sha[:12]}).")
-            return
 
-        last_err = _proc_err_text(push)
-        print(f"Push failed (attempt {attempt}/{attempts}): {last_err[:300]}")
+def ensure_remote_branch_from_main(repo: str, branch: str) -> str:
+    """
+    Point refs/heads/<branch> at current main (create or force-reset).
+    Avoids git push against this ~2.5GB repo (pack protocol HTTP 500s in Actions).
+    """
+    main = gh_api_json(f"repos/{repo}/git/ref/heads/main")
+    main_sha = (main or {}).get("object", {}).get("sha")
+    if not main_sha:
+        sys.exit("ERROR: cannot resolve main SHA via API")
 
-        # Server may have accepted the pack despite a broken sideband reply.
-        remote_sha = _remote_branch_sha(branch)
-        if remote_sha == sha or "everything up-to-date" in last_err.lower():
-            if remote_sha == sha:
-                print(
-                    f"origin/{branch} has {sha[:12]} after failed push — "
-                    "treating as success."
-                )
-                return
+    ref_path = f"repos/{repo}/git/ref/heads/{branch}"
+    try:
+        existing = gh_api_json(ref_path)
+    except RuntimeError as e:
+        if "404" not in str(e) and "Not Found" not in str(e):
+            raise
+        existing = None
 
-        if attempt < attempts and _is_transient_git_remote_error(last_err):
-            delay = min(2**attempt, 30)
-            print(f"Transient remote error — retrying in {delay}s ...")
-            time.sleep(delay)
-            continue
-        break
+    if existing is None:
+        print(f"Creating branch {branch} at main ({main_sha[:12]}) via API ...")
+        gh_api_json(
+            f"repos/{repo}/git/refs",
+            method="POST",
+            body={"ref": f"refs/heads/{branch}", "sha": main_sha},
+        )
+    else:
+        cur = (existing or {}).get("object", {}).get("sha")
+        if cur != main_sha:
+            print(
+                f"Resetting {branch} {str(cur)[:12]} → main {main_sha[:12]} via API ..."
+            )
+            gh_api_json(
+                f"repos/{repo}/git/refs/heads/{branch}",
+                method="PATCH",
+                body={"sha": main_sha, "force": True},
+            )
+        else:
+            print(f"Branch {branch} already at main ({main_sha[:12]}).")
+    return main_sha
 
-    sys.exit(f"ERROR: git push failed: {last_err[:400]}")
+
+def commit_readme_via_contents_api(
+    repo: str,
+    branch: str,
+    *,
+    commit_message: str,
+    readme_text: str,
+) -> str:
+    """
+    Commit working-tree README.md to <branch> through the Contents API.
+    Only uploads ~README size (hundreds of KB), never a git pack of the whole repo.
+    """
+    meta = gh_api_json(f"repos/{repo}/contents/README.md?ref={quote(branch, safe='')}")
+    file_sha = (meta or {}).get("sha")
+    if not file_sha:
+        sys.exit("ERROR: cannot resolve README.md blob sha on branch via API")
+
+    content_b64 = base64.b64encode(readme_text.encode("utf-8")).decode("ascii")
+    # Contents API hard-limits content to 1 MiB encoded payload guidance (~1MB file).
+    if len(content_b64) > 900_000:
+        sys.exit(
+            f"ERROR: README.md too large for Contents API "
+            f"({len(readme_text)} bytes)"
+        )
+
+    print(
+        f"Committing README.md on {branch} via Contents API "
+        f"({len(readme_text)} bytes) ..."
+    )
+    result = gh_api_json(
+        f"repos/{repo}/contents/README.md",
+        method="PUT",
+        body={
+            "message": commit_message,
+            "content": content_b64,
+            "branch": branch,
+            "sha": file_sha,
+            "committer": {
+                "name": "github-actions[bot]",
+                "email": "41898282+github-actions[bot]@users.noreply.github.com",
+            },
+            "author": {
+                "name": "github-actions[bot]",
+                "email": "41898282+github-actions[bot]@users.noreply.github.com",
+            },
+        },
+        timeout=180,
+    )
+    commit_sha = ((result or {}).get("commit") or {}).get("sha") or ""
+    if not commit_sha:
+        sys.exit("ERROR: Contents API commit returned no commit sha")
+    print(f"Committed {commit_sha[:12]} on {branch} via API.")
+    return commit_sha
+
+
+def publish_readme_branch_via_api(
+    branch: str,
+    *,
+    commit_message: str,
+    readme_text: str,
+) -> None:
+    """Create/reset branch from main and commit README — no `git push`."""
+    repo = github_repo_slug()
+
+    def _publish() -> None:
+        ensure_remote_branch_from_main(repo, branch)
+        commit_readme_via_contents_api(
+            repo,
+            branch,
+            commit_message=commit_message,
+            readme_text=readme_text,
+        )
+
+    _api_with_retries(f"publish {branch}", _publish)
 
 
 def create_pr_on_github(
@@ -1622,6 +1742,13 @@ def create_pr(
     run_id: str,
     screen: dict[str, Any] | None = None,
 ) -> str | None:
+    """
+    Open a PR with the working-tree README.md changes.
+
+    Uses GitHub Contents/Git Refs API (not `git push`). This repo is multi-GB;
+    Actions `git push` repeatedly hits HTTP 500 on the pack protocol even for a
+    one-file README commit.
+    """
     approved = [a for a in (decision.get("approved") or []) if isinstance(a, dict)]
     if not approved:
         print("No validated approved repos — skipping PR.")
@@ -1643,36 +1770,30 @@ def create_pr(
     day = date.today().strftime("%Y%m%d")
     safe_run = re.sub(r"[^A-Za-z0-9._-]", "", run_id) or "local"
     branch = f"discover/{day}-{safe_run}"
-    prev_branch = _current_branch()
-
-    _git("checkout", "-B", branch)
-    discard_side_effects()
-    _git("add", "--", "README.md")
-    if _git("diff", "--cached", "--quiet", check=False).returncode == 0:
-        print("Nothing staged — skipping PR.")
-        _git("checkout", prev_branch, check=False)
-        return None
-
     n = len(approved)
     msg = f"discover: propose {n} repo(s) via Cursor CLI (2-pass)"
-    try:
-        _git("commit", "-m", msg)
-    except subprocess.CalledProcessError as e:
-        err = (e.stderr or b"").decode().strip()[:300]
-        _git("checkout", prev_branch, check=False)
-        sys.exit(f"ERROR: git commit failed: {err}")
+    title = f"discover: propose {n} new repo(s)"
+    body = build_pr_body(decision, screen)
+
+    # Drop accidental agent side-effects before we snapshot README for the API.
+    discard_side_effects()
+    readme_text = README_PATH.read_text(encoding="utf-8", errors="replace")
+    if not readme_has_diff():
+        print("README.md unchanged after cleanup — skipping PR.")
+        return None
 
     try:
-        push_branch(branch)
-        title = f"discover: propose {n} new repo(s)"
-        body = build_pr_body(decision, screen)
+        publish_readme_branch_via_api(
+            branch,
+            commit_message=msg,
+            readme_text=readme_text,
+        )
         url = create_pr_on_github(title=title, body=body, branch=branch)
-    except SystemExit:
-        _git("checkout", prev_branch, check=False)
-        raise
+    finally:
+        # Remote branch holds the change; keep the Actions workspace clean.
+        revert_readme()
 
     print(f"PR_URL={url}")
-    _git("checkout", prev_branch, check=False)
     return url or None
 
 

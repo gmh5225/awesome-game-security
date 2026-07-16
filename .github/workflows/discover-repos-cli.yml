@@ -76,10 +76,19 @@ jobs:
               ;;
           esac
 
+      # Shallow + sparse: this repo is multi-GB (archive/). Discover only needs
+      # README + scripts + skills. PR publish uses Contents API (no git push).
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           persist-credentials: true
+          # Non-cone patterns so root README.md is included (cone mode is dirs-only).
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /README.md
+            /scripts/
+            /.claude/
+            /.github/
 
       - name: Resolve inputs
         id: opts
@@ -156,13 +165,9 @@ jobs:
 
       - name: Configure git
         run: |
+          # Identity only — discover opens PRs via gh Contents/Refs API, not git push.
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Mitigate intermittent HTTP/2 push 500 / RPC failures (same as archive jobs).
-          git config http.postBuffer    524288000
-          git config http.lowSpeedLimit 0
-          git config http.lowSpeedTime  999999
-          git config http.version       HTTP/1.1
 
       - name: Discover + 2-pass review + open PR
         env:
