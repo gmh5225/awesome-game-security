@@ -1,5 +1,10 @@
 name: Auto Archive New Repos on Push
 
+# Pipeline on README.md push to main:
+#   1) auto-archive          → archive/{owner}/{repo}.txt
+#   2) generate-descriptions → description/.../description_en.txt
+#   3) translate-descriptions → description/.../description_{lang}.txt
+#
 # Secret safety:
 # - Triggers only on push to main (not pull_request / pull_request_target).
 # - Fork PRs never receive this repo's Actions secrets (GitHub platform rule).
@@ -269,5 +274,164 @@ jobs:
 
           if [ "${{ steps.generate.outcome }}" = "failure" ]; then
             echo "Generation had failures — see the Generate step logs."
+            exit 1
+          fi
+
+  # After English summaries land on main, translate to zh-CN / zh-TW / ja / …
+  # Must be the same workflow: generate commits use [skip ci], so a separate
+  # push-triggered translate workflow would never start.
+  translate-descriptions:
+    needs: [auto-archive, generate-descriptions]
+    if: >-
+      always() &&
+      needs.auto-archive.result == 'success' &&
+      needs.auto-archive.outputs.repos != '' &&
+      (needs.generate-descriptions.result == 'success' ||
+       needs.generate-descriptions.result == 'failure') &&
+      github.repository == 'gmh5225/awesome-game-security' &&
+      github.event.repository.fork == false
+    runs-on: ubuntu-latest
+    # No job timeout: Cursor Max Mode can run a long time; progress is saved via
+    # --commit-every 1. (GitHub-hosted runners still enforce a platform max ~6h.)
+    permissions:
+      contents: write
+
+    steps:
+      - name: Assert canonical repository
+        run: |
+          set -euo pipefail
+          echo "repository=${GITHUB_REPOSITORY}"
+          echo "event_name=${GITHUB_EVENT_NAME}"
+          echo "ref=${GITHUB_REF}"
+          if [ "${GITHUB_REPOSITORY}" != "gmh5225/awesome-game-security" ]; then
+            echo "Refusing to run outside canonical repository."
+            exit 1
+          fi
+          if [ "${GITHUB_EVENT_NAME}" != "push" ]; then
+            echo "Refusing unexpected event: ${GITHUB_EVENT_NAME}"
+            exit 1
+          fi
+          if [ "${GITHUB_REF}" != "refs/heads/main" ]; then
+            echo "Refusing unexpected ref: ${GITHUB_REF}"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Pick up description_en commits pushed by the previous job.
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Ensure latest main (post-generate)
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Install Cursor CLI
+        run: |
+          curl https://cursor.com/install -fsS | bash
+          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
+
+      - name: Enable Max Mode
+        run: |
+          mkdir -p "$HOME/.cursor"
+          cat > "$HOME/.cursor/cli-config.json" <<'EOF'
+          {
+            "version": 1,
+            "editor": { "vimMode": false },
+            "permissions": { "allow": [], "deny": [] },
+            "maxMode": true,
+            "approvalMode": "unrestricted",
+            "attribution": {
+              "attributeCommitsToAgent": false,
+              "attributePRsToAgent": false
+            }
+          }
+          EOF
+          echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Translate descriptions via Cursor CLI
+        id: translate
+        continue-on-error: true
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          DESC_REPOS: ${{ needs.auto-archive.outputs.repos }}
+          GIT_PUSH_BRANCH: main
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_REPOSITORY}" != "gmh5225/awesome-game-security" ]; then
+            echo "Refusing to use CURSOR_API_KEY outside canonical repository."
+            exit 1
+          fi
+          if [ -z "${CURSOR_API_KEY:-}" ]; then
+            echo "ERROR: CURSOR_API_KEY secret is not set."
+            echo "Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+          agent --version || true
+
+          # Fill missing langs for the repos just archived/summarized.
+          python3 scripts/translate-descriptions-cli.py \
+            --model cursor-grok-4.5-high-fast \
+            --commit-every 1 \
+            --repos-env DESC_REPOS
+
+      - name: Final commit (any remainder)
+        run: |
+          set -euo pipefail
+          KEEP_RE='^description/[^/]+/[^/]+/description_(zh-CN|zh-TW|ja|ko|fr|de|es|it|ru)\.txt$'
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            git checkout -- "$f" 2>/dev/null || rm -rf -- "$f"
+          done < <(
+            git ls-files -m -o --exclude-standard \
+              | grep -v -E "$KEEP_RE" \
+              || true
+          )
+
+          git add -- \
+            ':(glob)description/**/description_zh-CN.txt' \
+            ':(glob)description/**/description_zh-TW.txt' \
+            ':(glob)description/**/description_ja.txt' \
+            ':(glob)description/**/description_ko.txt' \
+            ':(glob)description/**/description_fr.txt' \
+            ':(glob)description/**/description_de.txt' \
+            ':(glob)description/**/description_es.txt' \
+            ':(glob)description/**/description_it.txt' \
+            ':(glob)description/**/description_ru.txt' \
+            2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "No translation files left to commit."
+          else
+            COUNT=$(git diff --cached --name-only | grep -c 'description_' || true)
+            git commit -m "description: translate ${COUNT} file(s) via Cursor CLI [skip ci]"
+
+            PUSHED=0
+            for i in 1 2 3 4 5; do
+              if git push; then
+                echo "Pushed successfully."
+                PUSHED=1
+                break
+              fi
+              echo "Push rejected (attempt $i/5), rebasing ..."
+              git pull --rebase origin main || { echo "Rebase failed — aborting."; exit 1; }
+            done
+            if [ "$PUSHED" != 1 ]; then
+              echo "Failed to push after 5 attempts."
+              exit 1
+            fi
+          fi
+
+          if [ "${{ steps.translate.outcome }}" = "failure" ]; then
+            echo "Translation had failures — see the Translate step logs."
             exit 1
           fi
