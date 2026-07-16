@@ -33,7 +33,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Entities
 
-_No entity pages yet._
+- [PG1903](entities/pg1903.md) — Win10 1903 PatchGuard disable via context-page NX (Demo NX)
 
 ## Sources
 

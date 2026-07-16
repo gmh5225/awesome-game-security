@@ -5,6 +5,7 @@ topics: [windows-kernel]
 sources:
   - wiki/sources/skills/windows-kernel.md
   - wiki/sources/README-categories.md
+  - wiki/sources/descriptions/zzhouhe__PG1903.md
 updated: 2026-07-16
 confidence: high
 ---
@@ -23,9 +24,11 @@ Kernel internals that matter for game protection and low-level research: object/
 - **Hypervisor defense:** EPT-protected callback/ETW/AC pages; WHP research tracing
 - **EFI:** pre-kernel mappers that skip normal driver-load telemetry
 
+Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-page NX manipulation) illustrates how PG bypass studies map to the Demo NX / Cheat PatchGuard README lane. (source: wiki/sources/descriptions/zzhouhe__PG1903.md)
+
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[patchguard]] · [[dma]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[patchguard]] · [[pg1903]] · [[dma]] · [[overviews/anti-cheat]]
 
 ## README map
 
