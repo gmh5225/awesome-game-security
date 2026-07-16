@@ -7,6 +7,7 @@ sources:
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/zyhp__vac3_inhibitor.md
   - wiki/sources/descriptions/zxd1994__vt-debuuger.md
+  - wiki/sources/descriptions/zx0CF1__shredder-rs.md
 updated: 2026-07-16
 confidence: high
 ---
@@ -33,9 +34,11 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 **Platform trust:** DSE, [[patchguard]], [[hvci]]/VBS, Secure Boot.
 
+**Obfuscation tooling:** [[shredder-rs]] — x86_64 polymorphic instruction shredding (context-preserving) for AC/obfuscation-engine research. (source: wiki/sources/descriptions/zx0CF1__shredder-rs.md)
+
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vt-debuuger]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vt-debuuger]] · [[shredder-rs]]
 
 ## README map
 

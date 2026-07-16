@@ -16,3 +16,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-16** — ingest `description:zyhp/vac3_inhibitor`: entity [[vac3-inhibitor]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-07-16** — ingest `description:zxd1994/vt-debuuger`: entity [[vt-debuuger]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
+- **2026-07-16** — ingest `description:zx0CF1/shredder-rs`: entity [[shredder-rs]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
