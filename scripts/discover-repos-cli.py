@@ -1610,6 +1610,16 @@ def commit_to_main(
         revert_readme()
 
     print(f"COMMIT_SHA={sha}")
+    for item in approved:
+        url = item_github_url(item) or ""
+        slug = (item.get("fullName") or "").strip()
+        if not slug and url:
+            m = GITHUB_URL_RE.search(url)
+            if m:
+                slug = f"{m.group(1)}/{m.group(2)}"
+        section = (item.get("section") or "").strip()
+        # Machine-readable for CI Discord notify (slug|url|section).
+        print(f"APPROVED_REPO={slug}|{url}|{section}")
     return sha or None
 
 
