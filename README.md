@@ -3639,6 +3639,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/alt-V-Anticheat-Guide [GTA5 MP servers]
 - https://github.com/gmh5225/packer-tutorial [Packer]
 - https://github.com/gmh5225/ghostbusters [Senior Design: Anit-Cheat Detection system]
+- https://github.com/mishka-sit2002/CS2-Hybrid-AntiCheat-Proposal [CS2 hybrid anti-cheat proposal: Glicko-2 judge ratings, honeypot entities, and shadow monitoring with Python PoC]
 - https://github.com/Solaree/pairipcore [Public researchings of the Google's Android apps protection]
 - https://github.com/bad-antics/rce-shield [RCE Shield - Remote Code Execution hardening toolkit for PC gamers. Scans game launchers, anti-cheat, mods, overlays, peripherals & network for vulnerabilities]
 
