@@ -696,6 +696,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/guided-hacking
 - https://gamehacking.academy
 - https://github.com/GameHackingAcademy
+- https://github.com/GameHackingBook/GameHackingCode [Example code for the No Starch Press Game Hacking book]
 - https://areweanticheatyet.com [A list of games using anti-cheats]
 - https://github.com/aclist/aclist.github.io [Anti-cheat compatibility list]
 - https://github.com/imadr/Unity-game-hacking [Unity]
@@ -717,6 +718,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/rmusser01/Infosec_Reference/blob/master/Draft/Games.md [Game Hacking]
 - https://github.com/cragson/osmium [C++ Framework for external cheats]
 - https://github.com/april-ivy/Apwil [Rust Windows gamehacking library, internal & external; process/memory/module/scan/hook/render/syscall/input/window]
+- https://github.com/rdbo/libmem [Cross-platform game hacking library (memory, hooking, injection) for C/C++/Rust/Python]
 - https://github.com/WangXuan95/Xilinx-FPGA-PCIe-XDMA-Tutorial [DMA Tutorial]
 - https://github.com/NetKingJ/awesome-android-security [Android (Samsung) Security Research References]
 - https://github.com/shakevsky/keybuster [Samsung TrustZone Keymaster TA research client — send unfiltered requests via libkeymaster_helper; USENIX Security'22 supplemental; CVE-2021-25444/25490 PoC]
@@ -957,6 +959,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Fix Themida
 - https://github.com/sodareverse/TDE
 - https://github.com/ergrelet/themida-unmutate
+- https://github.com/ergrelet/unlicense [Dynamic unpacker and import fixer for Themida/WinLicense 2.x and 3.x]
+- https://github.com/Hendi48/Magicmida [Themida auto-unpacker for 32/64-bit apps with dump and section restore helpers]
 - https://github.com/stuxnet147/Themida-Research [Themida 3.x research]
 - https://github.com/Marisa-Chan/GhidrOrean [Ghidra Python reimplementation of Deathway's Orean's Unvirtualizer — Oreans VM (Themida/Code Virtualizer) CISC/TIGER/RISC/FISH]
 
@@ -1464,6 +1468,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > IDA Plugins
 - https://github.com/gmh5225/ida-plugins [List of IDA Plugins]
 - https://github.com/gmh5225/idaplugins-list [List of IDA Plugins]
+- https://github.com/fr0gger/awesome-ida-x64-olly-plugin [Curated list of IDA, x64dbg, Ghidra, GDB, and OllyDbg plugins]
 - https://github.com/gmh5225/idawilli [IDA Pro resources, scripts, and configurations]
 - https://github.com/gmh5225/idasdk-collection/tree/master [IDA SDK]
 - https://github.com/gmh5225/ida-sdk [IDA SDK]
@@ -1746,6 +1751,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 - https://github.com/Rantanen/ghidra-minidump-loader [Windows Minidump loader for Ghidra]
 - https://github.com/jtang613/GhidrAssistMCP [An MCP extension for Ghidra]
+- https://github.com/bethington/ghidra-mcp [Ghidra MCP server/plugin with 200+ tools for AI-assisted reverse engineering]
 - https://github.com/ant4g0nist/pyre [Ghidra decompiler in your browser]
 - https://github.com/poppopjmp/VMDragonSlayer [Advanced Virtual Machine Detection and Analysis Framework]
 - https://github.com/westfox-5/GhidraMetrics [A Ghidra plugin for native code metrics]
@@ -1983,11 +1989,13 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > DMA
 - https://github.com/JPShag/DMA-FW-Guide-2.0 [Guide]
+- https://github.com/Silverr12/DMA-CFW-Guide [Guide to building custom/modified DMA attack firmware based on pcileech-fpga]
 - https://github.com/Rakeshmonkee/DMA [Guide]
 - https://github.com/PacktPublishing/Learn-FPGA-Programming [Guide]
 - https://github.com/enjoy-digital/litepcie [Small footprint and configurable PCIe core]
 - https://github.com/cakehonolulu/pciem [A Linux framework for synthetic PCIe device emulation entirely in userspace]
 - https://github.com/ufrisk/pcileech
+- https://github.com/ufrisk/pcileech-fpga [FPGA HDL/firmware modules for PCILeech DMA attack hardware]
 - https://github.com/realquantumstealth-hub/PCILeech-DMA-Fullstealth [Quantumstealth open source Fullstealth firmware; Vivado build for M2/Squirrel/Captain 75T/Enigma X1]
 - https://github.com/NoviceLevel/Pcileech-QuantumStealth-Max [Pcileech QuantumStealth Max firmware; Vivado for M2/Squirrel/100T/Captain 75T/Enigma X1/Immortal 75T]
 - https://github.com/ekknod/pcileech-wifi [pcileech-fpga with wireless card emulation]
@@ -2047,7 +2055,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/3r4y/imgui-external-overlay [imgui overlay]
 - https://github.com/J0xna/Kernel-Overlay-Hider [Kernel Overlay Hider]
 - https://github.com/geeksonsecurity/android-overlay-malware-example [Android]
-- https://github.com/SamuelTulach/OverlayCord [Discord] 
+- https://github.com/SamuelTulach/OverlayCord [Discord]
+- https://github.com/hiitiger/goverlay [DirectX hook game overlay for Electron/Qt/CEF apps injected into games]
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
@@ -3959,6 +3968,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Lazenca/Lazenca-S [Android Platform]
 - https://github.com/MrDiamond64/Scythe-AntiCheat [Minecraft]
 - https://github.com/GrimAnticheat/Grim [Minecraft]
+- https://github.com/NoCheatPlus/NoCheatPlus [Open-source anti-cheat plugin for Minecraft (Bukkit/Spigot)]
+- https://github.com/SLAUC91/AntiCheat [Windows rootkit and cheat scanner (hooks, handles, drivers, modules)]
 - https://github.com/gmh5225/AntiCheat
 - https://github.com/ComodoSecurity/openedr [EDR]
 - https://github.com/0xrawsec/whids [EDR]
