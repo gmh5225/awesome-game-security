@@ -81,6 +81,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [simpleperf_demo](entities/simpleperf-demo.md) — Android simpleperf / Perf demo (app profiling)
 - [Static-Variables-Obfuscator-UE4](entities/static-variables-obfuscator-ue4.md) — UE4 static-variable obfuscation vs memory scanners
 - [SymlinkCallback](entities/symlink-callback.md) — symlink LinkTarget → access callback (Ring0 / AC research)
+- [TiEtwAgent](entities/tietwagent.md) — ETW Threat-Intelligence injection-detection agent (krabsetw / Yara / PPL)
 - [TotalPE2](entities/totalpe2.md) — WPF PE viewer (headers, imports/exports, .NET metadata)
 - [tiny-csgo-client](entities/tiny-csgo-client.md) — minimal CS:GO client for dedicated servers (modding / SDK)
 - [ts-ue4dumper](entities/ts-ue4dumper.md) — TypeScript + Frida UE4 dumper (modular; C++ offsets)
