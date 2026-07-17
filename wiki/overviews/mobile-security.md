@@ -31,4 +31,4 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 
 ## README map
 
-Cheat Magisk/Xposed/Frida/ART-syscall hooks/Android kernel*/Cellular-SIM/iOS jailbreak+network trees; Anti Cheat Detection:Android root; `WSA`, `Android Emulator`, `IOS Emulator` platform categories. (source: wiki/sources/README-categories.md)
+Cheat Magisk/Xposed/Frida/ART-syscall hooks/Android kernel*/bootloader bypass/ROM/root/Cellular-SIM/IoT trees; iOS jailbreak+network; Anti Cheat Detection:Android root; platform cats `WSA`, `Android Emulator` (incl. Snapdragon/Gunyah research), `IOS Emulator` (Virtualization.framework vphone tools). (source: wiki/sources/README-categories.md)

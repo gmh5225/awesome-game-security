@@ -35,4 +35,4 @@ Engine internals, plugins, detectors, and SDK workflows that underpin modding, r
 
 ## README map
 
-`Game Engine` (~134 links: guides, source, Unreal/Unity/Godot/Lumix plugins, detectors). Adjacent: `Game Assets` / `Game Hot Patch` (UE asset tools, HybridCLR/xLua), plus Cheat explorers/SDK CodeGen and Anti Cheat `Game Engine Protection:*` subtrees. (source: wiki/sources/README-categories.md)
+`Game Engine` (~134 links: guides, source, Unreal/Unity/Godot/Lumix plugins, detectors). Adjacent: `Game Assets` / `Game Hot Patch` (UE/glTF tools, HybridCLR/xLua), `Game Develop` (MCP server/security + AI Agents), `AI` image→3D/sprite pipelines, plus Cheat SDK CodeGen and Anti Cheat `Game Engine Protection:*` subtrees. (source: wiki/sources/README-categories.md)

@@ -51,4 +51,4 @@ Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-
 
 ## README map
 
-Cheat PatchGuard/DSE/Windows Kernel Explorer/Vulnerable Driver; Anti Cheat detection:attach/hide/vulnerable driver/hacked hypervisor; `Windows Security Features` (CET/shadow stack, TPM/IOMMU/HVCI attestation samples); `Some Tricks > Windows Ring0`; adjacent `Windows Emulator` / WHP research. (source: wiki/sources/README-categories.md)
+Cheat PatchGuard/DSE/Windows Kernel Explorer/Vulnerable Driver; Anti Cheat detection:attach/hide/vulnerable driver/hacked hypervisor; `Windows Security Features` (~9: CET/shadow stack, TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist); `Some Tricks > Windows Ring0`; adjacent `Windows Emulator` / WHP trap-driven guest research. (source: wiki/sources/README-categories.md)

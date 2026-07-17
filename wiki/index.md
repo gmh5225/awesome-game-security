@@ -6,15 +6,15 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Overviews
 
-- [Overview](overviews/overview.md) — project map; ~40 README sections → skill topics
-- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* + engine protection map
+- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2543 / Anti Cheat ~591)
+- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* + engine protection (~591)
 - [DMA Attack](overviews/dma-attack.md) — PCIe DMA threat model and defenses
-- [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot; assets & hot-patch
-- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2540 links) + Some Tricks
+- [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot; assets, hot-patch, MCP/AI gamedev
+- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2543) + Some Tricks (~112)
 - [Graphics API](overviews/graphics-api.md) — DirectX/GL/Vulkan hooks, overlays, capture
-- [Mobile Security](overviews/mobile-security.md) — Android / iOS; WSA & emulators
+- [Mobile Security](overviews/mobile-security.md) — Android / iOS; WSA, emulators, Cellular/SIM
 - [Reverse Engineering](overviews/reverse-engineering.md) — RE tools, DBI, deobfuscation
-- [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET, BYOVD, pool
+- [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation, BYOVD, pool
 
 ## Concepts
 
