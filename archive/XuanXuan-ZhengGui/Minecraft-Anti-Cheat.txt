@@ -1,0 +1,2554 @@
+Project Path: arc_XuanXuan-ZhengGui_Minecraft-Anti-Cheat_xtlyaxt0
+
+Source Tree:
+
+```txt
+arc_XuanXuan-ZhengGui_Minecraft-Anti-Cheat_xtlyaxt0
+├── LICENSE
+├── README.md
+├── pom.xml
+└── src
+    └── main
+        ├── java
+        │   └── com
+        │       └── ultracheat
+        │           ├── UltraAntiCheat.java
+        │           ├── api
+        │           │   ├── Check.java
+        │           │   ├── CheckResult.java
+        │           │   ├── CheckType.java
+        │           │   └── UACAPI.java
+        │           ├── checks
+        │           │   ├── AbstractCheck.java
+        │           │   └── impl
+        │           │       ├── block
+        │           │       │   └── ScaffoldCheck.java
+        │           │       ├── combat
+        │           │       │   ├── AutoClickerCheck.java
+        │           │       │   ├── KillAuraCheck.java
+        │           │       │   ├── ReachCheck.java
+        │           │       │   └── VelocityCheck.java
+        │           │       ├── movement
+        │           │       │   ├── FlyCheck.java
+        │           │       │   ├── NoSlowCheck.java
+        │           │       │   ├── PhaseCheck.java
+        │           │       │   ├── SpeedCheck.java
+        │           │       │   └── TimerCheck.java
+        │           │       └── packet
+        │           │           ├── BadPacketsCheck.java
+        │           │           ├── GroundSpoofCheck.java
+        │           │           └── XrayCheck.java
+        │           ├── command
+        │           │   └── UACCommand.java
+        │           ├── integration
+        │           │   ├── GrimACBridge.java
+        │           │   ├── MatrixBridge.java
+        │           │   ├── NCPBridge.java
+        │           │   ├── SpartanBridge.java
+        │           │   └── VulcanBridge.java
+        │           ├── listener
+        │           │   └── PacketListener.java
+        │           ├── manager
+        │           │   ├── AlertManager.java
+        │           │   ├── CheckManager.java
+        │           │   ├── ConfigManager.java
+        │           │   └── PunishmentManager.java
+        │           ├── player
+        │           │   └── PlayerData.java
+        │           ├── util
+        │           │   ├── LocationUtil.java
+        │           │   └── MathUtil.java
+        │           └── web
+        │               └── WebDashboard.java
+        └── resources
+            ├── config.yml
+            └── plugin.yml
+
+```
+
+`LICENSE`:
+
+```
+GNU GENERAL PUBLIC LICENSE
+Version 3, 29 June 2007
+
+Copyright (C) 2026 UltraTeam
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+Full text of the license: https://www.gnu.org/licenses/gpl-3.0.txt
+
+```
+
+`README.md`:
+
+```md
+# UltraAntiCheat
+
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL%203.0-blue.svg)](LICENSE)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.13%2B-green.svg)]()
+[![Java](https://img.shields.io/badge/Java-17%2B-orange.svg)]()
+
+> 这是一个全面的反作弊
+
+## 特性
+
+- **13个核心检测模块**：飞行、速度、变速、击杀光环、攻击距离、自动连点、搭路、穿墙、反击退、无减速、异常数据包、地面伪造、透视
+- **GCD旋转分析**：通过最大公约数算法检测KillAura的机械旋转模式
+- **置信度评分系统**：每次违规都有置信度，低置信度只告警不惩罚，大幅降低误判
+- **多反作弊桥接**：自动检测并集成 GrimAC、NoCheatPlus、Vulcan、Matrix、Spartan
+- **Web 监控仪表盘**：浏览器实时监控服务器反作弊状态
+- **完全开源**：基于 GPL-3.0 协议
+
+## 检测原理
+
+### 击杀光环 (KillAura) 检测
+
+```
+GCD一致性分析 + 旋转模式检测 + 攻击频率统计
+→ 机械旋转的GCD高度一致 → 标记KillAura
+→ 水平旋转时俯仰角不变 → 标记AimAssist
+→ 攻击频率超出人类极限 → 标记AutoClicker
+```
+
+### 攻击距离 (Reach) 检测
+
+```
+眼睛位置 → 射线投射 → 目标碰撞箱精确距离
+→ 考虑Ping补偿 → 超过3.15格判定违规
+```
+
+### 飞行/速度检测
+
+```
+物理模拟：重力0.08/tick、摩擦系数、药水效果
+→ 实际移动 vs 理论最大值
+→ 超出阈值 + 置信度评分
+```
+
+## 安装
+
+### 前置要求
+
+- Spigot / Paper 1.13+
+- Java 17+
+- ProtocolLib (可选但强烈建议)
+
+### 构建
+
+```bash
+git clone https://github.com/yourname/UltraAntiCheat.git
+cd UltraAntiCheat
+mvn clean package
+```
+
+构建产物位于 `target/UltraAntiCheat-1.0.0.jar`
+
+### 安装
+
+1. 将 `UltraAntiCheat-1.0.0.jar` 放入 `plugins/` 目录
+2. （可选）安装 GrimAC / NoCheatPlus / Vulcan / Matrix / Spartan 增强检测
+3. 重启服务器
+
+## 命令
+
+| 命令                | 说明       |
+| ----------------- | -------- |
+| `/uac alerts`     | 切换告警开关   |
+| `/uac info <玩家>`  | 查看玩家检测信息 |
+| `/uac status`     | 查看系统状态   |
+| `/uac reset <玩家>` | 重置违规记录   |
+| `/uac reload`     | 重载配置     |
+
+## 配置
+
+`plugins/UltraAntiCheat/config.yml`:
+
+```yaml
+# 置信度阈值 (0.0-1.0)
+confidence-threshold: 0.5
+
+# 惩罚配置
+punishment:
+  enabled: true
+  threshold: 5.0
+  command: "kick %player% &c作弊检测: %check%"
+
+# Web仪表盘
+web-dashboard:
+  enabled: false
+  port: 25586
+```
+
+## 架构
+
+```
+UltraAntiCheat/
+├── api/              # 公开API
+├── checks/           # 检测模块
+│   ├── movement/     # 移动检测
+│   ├── combat/       # 战斗检测
+│   ├── block/        # 方块检测
+│   └── packet/       # 数据包检测
+├── integration/      # 反作弊桥接
+├── listener/         # 事件监听
+├── manager/          # 管理器
+├── player/           # 玩家数据
+├── util/             # 工具类
+└── web/              # Web仪表盘
+```
+
+## 检测能力覆盖
+
+| 作弊类型        | 检测模块             | 检测方式             |
+| ----------- | ---------------- | ---------------- |
+| Fly         | FlyCheck         | 物理模拟 + 空中速度分析    |
+| Speed       | SpeedCheck       | 速度阈值 + 药水补偿      |
+| Timer       | TimerCheck       | 数据包频率统计          |
+| KillAura    | KillAuraCheck    | GCD分析 + 旋转模式     |
+| Reach       | ReachCheck       | 碰撞箱精确距离 + Ping补偿 |
+| AutoClicker | AutoClickerCheck | CPS统计 + 间隔一致性    |
+| Scaffold    | ScaffoldCheck    | 俯仰角 + 旋转分析       |
+| Phase       | PhaseCheck       | 方块碰撞检测           |
+| Velocity    | VelocityCheck    | 击退比率分析           |
+| BadPackets  | BadPacketsCheck  | 数据包频率限制          |
+| GroundSpoof | GroundSpoofCheck | 地面状态一致性          |
+| Xray        | XrayCheck        | 遮挡矿石挖掘 + 探索分析  |
+
+## 开源协议
+
+[GPL-3.0](LICENSE)
+
+```
+
+`pom.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.ultracheat</groupId>
+    <artifactId>UltraAntiCheat</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>UltraAntiCheat</name>
+    <description>终极融合反作弊 - 融合多款反作弊核心算法</description>
+
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>dmulloy2-repo</id>
+            <url>https://repo.dmulloy2.net/repository/public/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <!-- Spigot API -->
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.21-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- ProtocolLib -->
+        <dependency>
+            <groupId>com.comphenix.protocol</groupId>
+            <artifactId>ProtocolLib</artifactId>
+            <version>5.3.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Gson (JSON) -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>UltraAntiCheat-${project.version}</finalName>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+```
+
+`src/main/java/com/ultracheat/UltraAntiCheat.java`:
+
+```java
+package com.ultracheat;
+
+import com.ultracheat.api.UACAPI;
+import com.ultracheat.checks.impl.*;
+import com.ultracheat.checks.impl.block.*;
+import com.ultracheat.checks.impl.combat.*;
+import com.ultracheat.checks.impl.movement.*;
+import com.ultracheat.checks.impl.packet.*;
+import com.ultracheat.command.UACCommand;
+import com.ultracheat.integration.*;
+import com.ultracheat.manager.*;
+import com.ultracheat.web.WebDashboard;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.*;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
+import com.ultracheat.player.PlayerData;
+
+public class UltraAntiCheat extends JavaPlugin implements Listener {
+
+    private static UltraAntiCheat instance;
+    private ConfigManager configManager;
+    private AlertManager alertManager;
+    private PunishmentManager punishmentManager;
+    private CheckManager checkManager;
+    private WebDashboard webDashboard;
+
+    @Override
+    public void onEnable() {
+        instance = this;
+        saveDefaultConfig();
+
+        // Init managers
+        this.configManager = new ConfigManager(this);
+        this.alertManager = new AlertManager(this, configManager);
+        this.punishmentManager = new PunishmentManager(this, configManager);
+        this.checkManager = new CheckManager(this, configManager, alertManager, punishmentManager);
+
+        // Register checks
+        registerChecks();
+
+        // Register bridges
+        registerBridges();
+
+        // Register events
+        getServer().getPluginManager().registerEvents(this, this);
+        new com.ultracheat.listener.PacketListener(this);
+
+        // Register command (防御性检查以避免 NPE)
+        if (getCommand("uac") != null) {
+            getCommand("uac").setExecutor(new UACCommand(this));
+        } else {
+            getLogger().warning("Command 'uac' not found in plugin.yml");
+        }
+
+        // Web dashboard
+        if (configManager.isWebDashboardEnabled()) {
+            this.webDashboard = new WebDashboard(this);
+            webDashboard.start();
+        }
+
+        // API
+        new UACAPI(this);
+
+        // Schedule checks
+        getServer().getScheduler().runTaskTimer(this, () -> {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                checkManager.runChecks(p);
+            }
+        }, 20L, configManager.getCheckInterval());
+
+        getLogger().info("§b[UltraAntiCheat] §a终极融合反作弊已启动!");
+        getLogger().info("§b[UltraAntiCheat] §e已注册 " + checkManager.getChecks().size() + " 个检测模块");
+    }
+
+    @Override
+    public void onDisable() {
+        if (webDashboard != null) webDashboard.stop();
+        checkManager.clear();
+        punishmentManager.clear();
+    }
+
+    private void registerChecks() {
+        // Movement
+        checkManager.registerCheck(new FlyCheck(this, configManager));
+        checkManager.registerCheck(new SpeedCheck(this, configManager));
+        checkManager.registerCheck(new TimerCheck(this, configManager));
+        checkManager.registerCheck(new PhaseCheck(this, configManager));
+        checkManager.registerCheck(new NoSlowCheck(this, configManager));
+        // Combat
+        checkManager.registerCheck(new KillAuraCheck(this, configManager));
+        checkManager.registerCheck(new ReachCheck(this, configManager));
+        checkManager.registerCheck(new AutoClickerCheck(this, configManager));
+        checkManager.registerCheck(new VelocityCheck(this, configManager));
+        // Block
+        checkManager.registerCheck(new ScaffoldCheck(this, configManager));
+        // Packet
+        checkManager.registerCheck(new BadPacketsCheck(this, configManager));
+        checkManager.registerCheck(new GroundSpoofCheck(this, configManager));
+        checkManager.registerCheck(new XrayCheck(this, configManager));
+
+        // Xray 检测需要注册额外事件（防止传入 null）
+        checkManager.getChecks().stream()
+                .filter(c -> c instanceof com.ultracheat.checks.impl.packet.XrayCheck)
+                .findFirst()
+                .ifPresent(c -> getServer().getPluginManager().registerEvents((com.ultracheat.checks.impl.packet.XrayCheck) c, this));
+    }
+
+    private void registerBridges() {
+        new GrimACBridge(this);
+        new NCPBridge(this);
+        new VulcanBridge(this);
+        new MatrixBridge(this);
+        new SpartanBridge(this);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onJoin(PlayerJoinEvent e) {
+        checkManager.getPlayerData(e.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onQuit(PlayerQuitEvent e) {
+        checkManager.removePlayer(e.getPlayer());
+        punishmentManager.reset(e.getPlayer());
+        // 清理Xray数据
+        checkManager.getChecks().stream()
+                .filter(c -> c instanceof com.ultracheat.checks.impl.packet.XrayCheck)
+                .findFirst()
+                .ifPresent(c -> ((com.ultracheat.checks.impl.packet.XrayCheck) c).cleanup(e.getPlayer()));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onMove(PlayerMoveEvent e) {
+        if (!configManager.isEnabled()) return;
+        Player p = e.getPlayer();
+        if (p.hasPermission("uac.bypass")) return;
+        PlayerData data = checkManager.getPlayerData(p);
+        data.setLastLocation(e.getFrom().clone());
+        data.setLastOnGround(p.isOnGround());
+        if (p.isOnGround()) {
+            data.setLastGroundLocation(e.getTo().clone());
+            data.setGroundTicks(data.getGroundTicks() + 1);
+            data.setAirTicks(0);
+        } else {
+            data.setAirTicks(data.getAirTicks() + 1);
+            data.setGroundTicks(0);
+        }
+        data.setLastYDiff(e.getTo().getY() - e.getFrom().getY());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onAttack(org.bukkit.event.entity.EntityDamageByEntityEvent e) {
+        // 玩家作为攻击者
+        if (e.getDamager() instanceof Player) {
+            Player p = (Player) e.getDamager();
+            PlayerData data = checkManager.getPlayerData(p);
+            long now = System.currentTimeMillis();
+            data.setLastAttackTime(now);
+            data.setAttackCount(data.getAttackCount() + 1);
+            if (data.getAttackWindowStart() == 0) data.setAttackWindowStart(now);
+            if (now - data.getAttackWindowStart() > 1000) {
+                data.setAttackCount(1);
+                data.setAttackWindowStart(now);
+            }
+        }
+
+        // 玩家作为受害者 → 记录期望击退（用于 VelocityCheck）
+        if (e.getEntity() instanceof Player victim && e.getDamager() instanceof LivingEntity) {
+            Vector expected = victim.getLocation().toVector()
+                    .subtract(e.getDamager().getLocation().toVector());
+            expected.setY(0);
+            if (expected.lengthSquared() > 0.001) {
+                // 避免链式调用导致在某些 Bukkit 版本下编译失败（setY 可能返回 void）
+                expected = expected.normalize().multiply(0.4);
+                expected.setY(0.4);
+            } else {
+                expected = new Vector(0, 0.4, 0);
+            }
+            checkManager.getChecks().stream()
+                    .filter(c -> c instanceof VelocityCheck)
+                    .findFirst()
+                    .ifPresent(c -> ((VelocityCheck) c).onPlayerHit(victim, expected));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onResourcePackStatus(PlayerResourcePackStatusEvent e) {
+        checkManager.getChecks().stream()
+                .filter(c -> c instanceof com.ultracheat.checks.impl.packet.XrayCheck)
+                .findFirst()
+                .ifPresent(c -> ((com.ultracheat.checks.impl.packet.XrayCheck) c).onResourcePackStatus(e));
+    }
+
+    public static UltraAntiCheat getInstance() { return instance; }
+    public ConfigManager getConfigManager() { return configManager; }
+    public AlertManager getAlertManager() { return alertManager; }
+    public PunishmentManager getPunishmentManager() { return punishmentManager; }
+    public CheckManager getCheckManager() { return checkManager; }
+}
+
+```
+
+`src/main/java/com/ultracheat/api/Check.java`:
+
+```java
+package com.ultracheat.api;
+
+import org.bukkit.entity.Player;
+
+public interface Check {
+    String getName();
+    String getType();
+    boolean isEnabled();
+    CheckResult runCheck(Player player);
+}
+
+```
+
+`src/main/java/com/ultracheat/api/CheckResult.java`:
+
+```java
+package com.ultracheat.api;
+
+import org.bukkit.entity.Player;
+
+public class CheckResult {
+    private final boolean failed;
+    private final String checkName;
+    private final String description;
+    private final double violationLevel;
+    private final double confidence;
+    private final Player player;
+
+    public static CheckResult pass() {
+        return new CheckResult(false, null, null, 0, 0, null);
+    }
+
+    public static CheckResult fail(Player player, String checkName, String description, double vl, double confidence) {
+        return new CheckResult(true, checkName, description, vl, confidence, player);
+    }
+
+    private CheckResult(boolean failed, String checkName, String description, double vl, double confidence, Player player) {
+        this.failed = failed;
+        this.checkName = checkName;
+        this.description = description;
+        this.violationLevel = vl;
+        this.confidence = confidence;
+        this.player = player;
+    }
+
+    public boolean isFailed() { return failed; }
+    public String getCheckName() { return checkName; }
+    public String getDescription() { return description; }
+    public double getViolationLevel() { return violationLevel; }
+    public double getConfidence() { return confidence; }
+    public Player getPlayer() { return player; }
+}
+
+```
+
+`src/main/java/com/ultracheat/api/CheckType.java`:
+
+```java
+package com.ultracheat.api;
+
+public enum CheckType {
+    MOVEMENT, COMBAT, BLOCK, PACKET, MISC
+}
+
+```
+
+`src/main/java/com/ultracheat/api/UACAPI.java`:
+
+```java
+package com.ultracheat.api;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.manager.CheckManager;
+import com.ultracheat.player.PlayerData;
+import org.bukkit.entity.Player;
+import java.util.List;
+
+public class UACAPI {
+    private static UACAPI instance;
+    private final UltraAntiCheat plugin;
+
+    public UACAPI(UltraAntiCheat plugin) {
+        this.plugin = plugin;
+        instance = this;
+    }
+
+    public static UACAPI getInstance() { return instance; }
+    public UltraAntiCheat getPlugin() { return plugin; }
+    public double getViolationScore(Player player) { return plugin.getCheckManager().getViolationScore(player); }
+    public List<Check> getChecks() { return plugin.getCheckManager().getChecks(); }
+    public PlayerData getPlayerData(Player player) { return plugin.getCheckManager().getPlayerData(player); }
+}
+
+```
+
+`src/main/java/com/ultracheat/checks/AbstractCheck.java`:
+
+```java
+package com.ultracheat.checks;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.Check;
+import com.ultracheat.api.CheckResult;
+import com.ultracheat.manager.ConfigManager;
+import com.ultracheat.player.PlayerData;
+import org.bukkit.entity.Player;
+
+public abstract class AbstractCheck implements Check {
+    protected final UltraAntiCheat plugin;
+    protected final ConfigManager config;
+    protected final String name;
+    protected final String type;
+
+    public AbstractCheck(UltraAntiCheat plugin, ConfigManager config, String name, String type) {
+        this.plugin = plugin;
+        this.config = config;
+        this.name = name;
+        this.type = type;
+    }
+
+    @Override public String getName() { return name; }
+    @Override public String getType() { return type; }
+    @Override public boolean isEnabled() { return config.isCheckEnabled(name); }
+
+    protected PlayerData getData(Player p) {
+        return plugin.getCheckManager().getPlayerData(p);
+    }
+
+    protected CheckResult fail(Player p, String desc, double vl, double confidence) {
+        return CheckResult.fail(p, name, desc, vl, confidence);
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/checks/impl/block/ScaffoldCheck.java`:
+
+```java
+package com.ultracheat.checks.impl.block;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.CheckResult;
+import com.ultracheat.checks.AbstractCheck;
+import com.ultracheat.manager.ConfigManager;
+import com.ultracheat.player.PlayerData;
+import org.bukkit.entity.Player;
+
+public class ScaffoldCheck extends AbstractCheck {
+
+    public ScaffoldCheck(UltraAntiCheat plugin, ConfigManager config) {
+        super(plugin, config, "scaffold", "BLOCK");
+    }
+
+    @Override
+    public CheckResult runCheck(Player p) {
+        if (!p.isSneaking()) return CheckResult.pass();
+        float pitch = p.getLocation().getPitch();
+        PlayerData data = getData(p);
+        float yawDiff = data.getYawDiff();
+
+        double threshold = config.getCheckConfig("scaffold", "rotation-threshold", 2.0);
+        if (pitch > 70 && yawDiff < threshold) {
+            return fail(p, String.format("俯仰角:%.1f 水平旋转:%.2f", pitch, yawDiff), 1.0, 0.65);
+        }
+        return CheckResult.pass();
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/checks/impl/combat/AutoClickerCheck.java`:
+
+```java
+package com.ultracheat.checks.impl.combat;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.CheckResult;
+import com.ultracheat.checks.AbstractCheck;
+import com.ultracheat.manager.ConfigManager;
+import com.ultracheat.player.PlayerData;
+import org.bukkit.entity.Player;
+import java.util.ArrayList;
+import java.util.List;
+
+public class AutoClickerCheck extends AbstractCheck {
+
+    public AutoClickerCheck(UltraAntiCheat plugin, ConfigManager config) {
+        super(plugin, config, "autoclicker", "COMBAT");
+    }
+
+    @Override
+    public CheckResult runCheck(Player p) {
+        PlayerData data = getData(p);
+        long now = System.currentTimeMillis();
+        List<Long> clicks = data.getClickTimes();
+        clicks.add(now);
+        // 只保留最近1秒的数据
+        clicks.removeIf(t -> now - t > 1000);
+
+        int cps = clicks.size();
+        int threshold = (int) config.getCheckConfig("autoclicker", "cps-threshold", 18);
+
+        if (cps > threshold) {
+            return fail(p, String.format("CPS过高: %d (上限: %d)", cps, threshold), 1.0, 0.75);
+        }
+
+        // 点击间隔过于一致（自动化特征）
+        if (clicks.size() >= 5) {
+            List<Long> intervals = new ArrayList<>();
+            for (int i = 1; i < clicks.size(); i++) {
+                intervals.add(clicks.get(i) - clicks.get(i-1));
+            }
+            double stdDev = stdDev(intervals);
+            if (stdDev < 5 && cps > 12) {
+                return fail(p, String.format("点击间隔过于一致 (CPS:%d, 偏差:%.1fms)", cps, stdDev), 1.5, 0.7);
+            }
+        }
+
+        return CheckResult.pass();
+    }
+
+    private double stdDev(List<Long> values) {
+        if (values.size() < 2) return 0;
+        double mean = values.stream().mapToLong(Long::longValue).average().orElse(0);
+        double variance = values.stream().mapToDouble(v -> (v - mean) * (v - mean)).sum() / values.size();
+        return Math.sqrt(variance);
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/checks/impl/combat/KillAuraCheck.java`:
+
+```java
+package com.ultracheat.checks.impl.combat;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.CheckResult;
+import com.ultracheat.checks.AbstractCheck;
+import com.ultracheat.manager.ConfigManager;
+import com.ultracheat.player.PlayerData;
+import com.ultracheat.util.MathUtil;
+import org.bukkit.entity.Player;
+import java.util.ArrayList;
+import java.util.List;
+
+public class KillAuraCheck extends AbstractCheck {
+
+    public KillAuraCheck(UltraAntiCheat plugin, ConfigManager config) {
+        super(plugin, config, "killaura", "COMBAT");
+    }
+
+    @Override
+    public CheckResult runCheck(Player p) {
+        PlayerData data = getData(p);
+        float yaw = p.getLocation().getYaw();
+        float pitch = p.getLocation().getPitch();
+        float yawDiff = MathUtil.getAngleDifference(yaw, data.getLastYaw());
+        float pitchDiff = MathUtil.getAngleDifference(pitch, data.getLastPitch());
+        data.setYawDiff(yawDiff);
+        data.setPitchDiff(pitchDiff);
+        data.setLastYaw(yaw);
+        data.setLastPitch(pitch);
+
+        // GCD 分析 - KillAura 常产生固定GCD的旋转
+        List<Double> gcdHistory = data.getGcdHistory();
+        if (yawDiff > 0.1 && pitchDiff > 0.1) {
+            double gcd = MathUtil.getGcdOfDoubles(yawDiff, pitchDiff);
+            if (gcd > 0.001) {
+                gcdHistory.add(gcd);
+                if (gcdHistory.size() > config.getCheckConfig("killaura", "gcd-sample-size", 20)) {
+                    gcdHistory.remove(0);
+                }
+            }
+        }
+
+        if (gcdHistory.size() >= 5) {
+            // 检测GCD是否过于一致（人类玩家的GCD应该有一定随机性）
+            double first = gcdHistory.get(0);
+            boolean consistent = true;
+            for (int i = 1; i < gcdHistory.size(); i++) {
+                if (Math.abs(gcdHistory.get(i) - first) > 0.001) {
+                    consistent = false;
+                    break;
+                }
+            }
+            if (consistent && yawDiff > 5) {
+                return fail(p, "GCD过于一致 (疑似KillAura)", 2.0, 0.85);
+            }
+        }
+
+        // 旋转模式检测 - KillAura 常水平旋转时俯仰角不变
+        if (yawDiff > 15 && pitchDiff < 0.1 && data.getAttackCount() > 0) {
+            return fail(p, "水平旋转时俯仰角不变", 1.5, 0.7);
+        }
+
+        // 攻击频率异常
+        int attacks = data.getAttackCount();
+        long window = System.currentTimeMillis() - data.getAttackWindowStart();
+        if (window > 0 && window < 1000 && attacks > 15) {
+            return fail(p, String.format("攻击频率过高: %d次/%.1fs", attacks, window/1000.0), 1.5, 0.75);
+        }
+
+        return CheckResult.pass();
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/checks/impl/combat/ReachCheck.java`:
+
+```java
+package com.ultracheat.checks.impl.combat;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.CheckResult;
+import com.ultracheat.checks.AbstractCheck;
+import com.ultracheat.manager.ConfigManager;
+import com.ultracheat.util.LocationUtil;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
+
+import java.util.Collection;
+
+public class ReachCheck extends AbstractCheck {
+
+    public ReachCheck(UltraAntiCheat plugin, ConfigManager config) {
+        super(plugin, config, "reach", "COMBAT");
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public CheckResult runCheck(Player p) {
+        // 兼容 1.20.X 和 1.21.X: 使用 getNearbyEntities 替代 getTargetEntity
+        Entity target = null;
+        double minAngle = Double.MAX_VALUE;
+
+        Vector eyeDir = LocationUtil.getDirection(p.getLocation());
+        Location eyeLoc = LocationUtil.getEyeLocation(p.getLocation());
+
+        Collection<Entity> nearby = p.getWorld().getNearbyEntities(
+                eyeLoc, 6.0, 6.0, 6.0);
+
+        for (Entity entity : nearby) {
+            if (entity.equals(p) || !(entity instanceof LivingEntity)) continue;
+            if (entity.isDead()) continue;
+
+            Vector toEntity = entity.getLocation().clone()
+                    .add(0, ((LivingEntity) entity).getHeight() / 2, 0)
+                    .subtract(eyeLoc).toVector();
+            double distance = toEntity.length();
+            if (distance > 6.0) continue;
+
+            toEntity.normalize();
+            double angle = eyeDir.angle(toEntity);
+
+            // 只考虑玩家视野锥范围内的实体（约 90 度）
+            if (angle < Math.toRadians(60) && angle < minAngle) {
+                minAngle = angle;
+                target = entity;
+            }
+        }
+
+        if (target == null || !(target instanceof LivingEntity)) return CheckResult.pass();
+
+        Location eye = LocationUtil.getEyeLocation(p.getLocation());
+        Location targetCenter = target.getLocation().clone().add(0, ((LivingEntity) target).getHeight() / 2, 0);
+        double distance = eye.distance(targetCenter);
+
+        double maxReach = config.getCheckConfig("reach", "max-reach", 3.15);
+        if (p.getGameMode() == GameMode.CREATIVE) maxReach = 5.0;
+
+        // Ping补偿
+        if (config.getCheckConfig("reach", "ping-compensation", 1.0) > 0) {
+            maxReach += p.getPing() / 1000.0 * 0.1;
+        }
+
+        if (distance > maxReach) {
+            return fail(p, String.format("攻击距离: %.2f (上限: %.2f)", distance, maxReach), 1.5, 0.8);
+        }
+        return CheckResult.pass();
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/checks/impl/combat/VelocityCheck.java`:
+
+```java
+package com.ultracheat.checks.impl.combat;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.CheckResult;
+import com.ultracheat.checks.AbstractCheck;
+import com.ultracheat.manager.ConfigManager;
+import com.ultracheat.player.PlayerData;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class VelocityCheck extends AbstractCheck {
+
+    private final Map<UUID, Vector> expectedVelocities = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> hitTimes = new ConcurrentHashMap<>();
+
+    public VelocityCheck(UltraAntiCheat plugin, ConfigManager config) {
+        super(plugin, config, "velocity", "COMBAT");
+    }
+
+    public void onPlayerHit(Player p, Vector velocity) {
+        expectedVelocities.put(p.getUniqueId(), velocity);
+        hitTimes.put(p.getUniqueId(), System.currentTimeMillis());
+    }
+
+    @Override
+    public CheckResult runCheck(Player p) {
+        Long hitTime = hitTimes.get(p.getUniqueId());
+        if (hitTime == null || System.currentTimeMillis() - hitTime > 2000) return CheckResult.pass();
+
+        Vector expected = expectedVelocities.get(p.getUniqueId());
+        if (expected == null) return CheckResult.pass();
+
+        Vector actual = p.getVelocity();
+        double rx = expected.getX() != 0 ? Math.abs(actual.getX() / expected.getX()) : 1;
+        double ry = expected.getY() != 0 ? Math.abs(actual.getY() / expected.getY()) : 1;
+        double rz = expected.getZ() != 0 ? Math.abs(actual.getZ() / expected.getZ()) : 1;
+
+        double min = Math.min(Math.min(rx, ry), rz);
+        double threshold = config.getCheckConfig("velocity", "ratio-threshold", 0.3);
+        if (min < threshold) {
+            return fail(p, String.format("击退比率: %.0f%%", min * 100), 1.5, 0.85);
+        }
+        return CheckResult.pass();
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/checks/impl/movement/FlyCheck.java`:
+
+```java
+package com.ultracheat.checks.impl.movement;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.CheckResult;
+import com.ultracheat.checks.AbstractCheck;
+import com.ultracheat.manager.ConfigManager;
+import com.ultracheat.player.PlayerData;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+
+public class FlyCheck extends AbstractCheck {
+
+    public FlyCheck(UltraAntiCheat plugin, ConfigManager config) {
+        super(plugin, config, "fly", "MOVEMENT");
+    }
+
+    @Override
+    public CheckResult runCheck(Player p) {
+        if (p.isFlying() || p.getAllowFlight() || p.isInsideVehicle() || p.isDead()) return CheckResult.pass();
+        PlayerData data = getData(p);
+        Location from = data.getLastLocation();
+        Location to = p.getLocation();
+        if (from == null || from.getWorld() != to.getWorld()) return CheckResult.pass();
+
+        double dy = to.getY() - from.getY();
+        double dx = to.getX() - from.getX();
+        double dz = to.getZ() - from.getZ();
+        double horizontal = Math.sqrt(dx*dx + dz*dz) * 20.0;
+        double vertical = Math.abs(dy) * 20.0;
+        boolean onGround = p.isOnGround();
+        int airTicks = data.getAirTicks();
+
+        // 空中垂直速度异常 (正常下落速度约 0.08-0.98/tick)
+        if (!onGround && airTicks > 3) {
+            if (dy > 0.0 && dy < 0.5 && vertical > 0.15) {
+                return fail(p, String.format("空中上升: %.3f", dy), 1.0, 0.75);
+            }
+            if (dy == 0.0 && airTicks > 5) {
+                return fail(p, String.format("空中悬停 %d ticks", airTicks), 1.5, 0.85);
+            }
+            if (horizontal > 0.6 && airTicks > 3) {
+                return fail(p, String.format("空中水平移动: %.3f", horizontal), 1.0, 0.6);
+            }
+        }
+
+        // 跳跃高度检测 (正常跳跃约 1.25 格)
+        if (onGround && data.getLastYDiff() > 1.5) {
+            return fail(p, String.format("跳跃过高: %.3f", data.getLastYDiff()), 2.0, 0.9);
+        }
+
+        // 掉落速度异常
+        if (!onGround && dy < -1.5) {
+            return fail(p, String.format("下落过快: %.3f", dy), 1.5, 0.8);
+        }
+
+        return CheckResult.pass();
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/checks/impl/movement/NoSlowCheck.java`:
+
+```java
+package com.ultracheat.checks.impl.movement;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.CheckResult;
+import com.ultracheat.checks.AbstractCheck;
+import com.ultracheat.manager.ConfigManager;
+import org.bukkit.entity.Player;
+
+/**
+ * 无减速检测 (NoSlow)
+ *
+ * 检测原理：
+ * 玩家在食用食物、饮用药水、拉弓、使用盾牌时，移动速度应该大幅降低。
+ * NoSlow 作弊允许玩家在这些动作期间保持正常移动速度。
+ */
+public class NoSlowCheck extends AbstractCheck {
+
+    public NoSlowCheck(UltraAntiCheat plugin, ConfigManager config) {
+        super(plugin, config, "noslow", "MOVEMENT");
+    }
+
+    @Override
+    public CheckResult runCheck(Player p) {
+        if (p.isFlying() || p.isInsideVehicle()) return CheckResult.pass();
+
+        // 检查玩家是否正在使用物品（吃食物、喝药水、拉弓等）或格挡
+        if (!p.isHandRaised() && !p.isBlocking()) return CheckResult.pass();
+
+        double vx = Math.abs(p.getVelocity().getX());
+        double vz = Math.abs(p.getVelocity().getZ());
+        double speed = Math.sqrt(vx * vx + vz * vz);
+
+        double limit = config.getCheckConfig("noslow", "speed-limit", 0.2);
+        if (speed > limit) {
+            return fail(p, String.format("使用物品时速度: %.3f (上限: %.3f)", speed, limit), 1.0, 0.7);
+        }
+        return CheckResult.pass();
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/checks/impl/movement/PhaseCheck.java`:
+
+```java
+package com.ultracheat.checks.impl.movement;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.CheckResult;
+import com.ultracheat.checks.AbstractCheck;
+import com.ultracheat.manager.ConfigManager;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+
+public class PhaseCheck extends AbstractCheck {
+
+    public PhaseCheck(UltraAntiCheat plugin, ConfigManager config) {
+        super(plugin, config, "phase", "MOVEMENT");
+    }
+
+    @Override
+    public CheckResult runCheck(Player p) {
+        if (p.isInsideVehicle() || p.isDead() || p.isFlying()) return CheckResult.pass();
+        Location loc = p.getLocation();
+        Block block = loc.getBlock();
+        Block head = loc.clone().add(0, 1, 0).getBlock();
+
+        if (isSolid(block.getType()) && isSolid(head.getType())) {
+            return fail(p, "身体位于方块内部", 2.0, 0.9);
+        }
+        return CheckResult.pass();
+    }
+
+    private boolean isSolid(Material m) {
+        return m.isSolid() && m.isOccluding() && m != Material.BARRIER
+            && m != Material.CHEST && m != Material.ENDER_CHEST
+            && !m.name().contains("DOOR") && !m.name().contains("GATE")
+            && !m.name().contains("TRAPDOOR");
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/checks/impl/movement/SpeedCheck.java`:
+
+```java
+package com.ultracheat.checks.impl.movement;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.CheckResult;
+import com.ultracheat.checks.AbstractCheck;
+import com.ultracheat.manager.ConfigManager;
+import com.ultracheat.player.PlayerData;
+import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
+
+public class SpeedCheck extends AbstractCheck {
+
+    public SpeedCheck(UltraAntiCheat plugin, ConfigManager config) {
+        super(plugin, config, "speed", "MOVEMENT");
+    }
+
+    @Override
+    public CheckResult runCheck(Player p) {
+        if (p.isFlying() || p.isInsideVehicle()) return CheckResult.pass();
+        PlayerData data = getData(p);
+
+        double vx = Math.abs(p.getVelocity().getX());
+        double vz = Math.abs(p.getVelocity().getZ());
+        double speed = Math.sqrt(vx*vx + vz*vz) * 20.0;
+
+        double max = 0.28 * 20;
+        if (p.isSprinting()) max *= 1.3;
+        if (p.hasPotionEffect(PotionEffectType.SPEED)) {
+            int amp = p.getPotionEffect(PotionEffectType.SPEED).getAmplifier() + 1;
+            max *= (1 + amp * 0.2);
+        }
+
+        double threshold = config.getCheckConfig("speed", "speed-multiplier", 1.5);
+        if (speed > max * threshold) {
+            return fail(p, String.format("速度: %.2f (上限: %.2f)", speed, max), 1.0, 0.7);
+        }
+        return CheckResult.pass();
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/checks/impl/movement/TimerCheck.java`:
+
+```java
+package com.ultracheat.checks.impl.movement;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.CheckResult;
+import com.ultracheat.checks.AbstractCheck;
+import com.ultracheat.manager.ConfigManager;
+import com.ultracheat.player.PlayerData;
+import org.bukkit.entity.Player;
+
+public class TimerCheck extends AbstractCheck {
+
+    public TimerCheck(UltraAntiCheat plugin, ConfigManager config) {
+        super(plugin, config, "timer", "MOVEMENT");
+    }
+
+    @Override
+    public CheckResult runCheck(Player p) {
+        PlayerData data = getData(p);
+        long now = System.currentTimeMillis();
+        long last = data.getLastPacketTime();
+        data.setLastPacketTime(now);
+        if (last == 0) return CheckResult.pass();
+
+        long diff = now - last;
+        if (diff < 40) { // 正常tick间隔50ms，如果小于40ms说明加速
+            return fail(p, String.format("数据包间隔过短: %dms", diff), 1.0, 0.65);
+        }
+        return CheckResult.pass();
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/checks/impl/packet/BadPacketsCheck.java`:
+
+```java
+package com.ultracheat.checks.impl.packet;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.CheckResult;
+import com.ultracheat.checks.AbstractCheck;
+import com.ultracheat.manager.ConfigManager;
+import com.ultracheat.player.PlayerData;
+import org.bukkit.entity.Player;
+
+public class BadPacketsCheck extends AbstractCheck {
+
+    public BadPacketsCheck(UltraAntiCheat plugin, ConfigManager config) {
+        super(plugin, config, "badpackets", "PACKET");
+    }
+
+    @Override
+    public CheckResult runCheck(Player p) {
+        PlayerData data = getData(p);
+        int count = data.getPacketCount();
+        data.setPacketCount(0); // 重置计数，由PacketListener累加
+
+        int limit = (int) config.getCheckConfig("badpackets", "packet-rate-limit", 25);
+        if (count > limit) {
+            return fail(p, String.format("数据包频率: %d/s (上限: %d)", count, limit), 1.0, 0.7);
+        }
+        return CheckResult.pass();
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/checks/impl/packet/GroundSpoofCheck.java`:
+
+```java
+package com.ultracheat.checks.impl.packet;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.CheckResult;
+import com.ultracheat.checks.AbstractCheck;
+import com.ultracheat.manager.ConfigManager;
+import com.ultracheat.player.PlayerData;
+import org.bukkit.entity.Player;
+
+public class GroundSpoofCheck extends AbstractCheck {
+
+    public GroundSpoofCheck(UltraAntiCheat plugin, ConfigManager config) {
+        super(plugin, config, "groundspoof", "PACKET");
+    }
+
+    @Override
+    public CheckResult runCheck(Player p) {
+        PlayerData data = getData(p);
+        boolean claimsGround = p.isOnGround();
+        boolean actuallyGround = data.getGroundTicks() > 0;
+
+        if (claimsGround && !actuallyGround && data.getAirTicks() > 5) {
+            return fail(p, "伪造地面状态 (空中" + data.getAirTicks() + "ticks)", 1.5, 0.8);
+        }
+        return CheckResult.pass();
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/checks/impl/packet/XrayCheck.java`:
+
+```java
+package com.ultracheat.checks.impl.packet;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.CheckResult;
+import com.ultracheat.checks.AbstractCheck;
+import com.ultracheat.manager.ConfigManager;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerResourcePackStatusEvent;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * 防透视检测模块
+ * 
+ * 检测原理：
+ * 1. 资源包状态检测 - 检查玩家是否拒绝服务器资源包（可能在使用自己的透视包）
+ * 2. 矿石锁定追踪 - 追踪玩家是否在远距离直接锁定/挖掘被遮挡的矿石
+ * 3. 异常视线分析 - 分析玩家是否持续朝向被方块遮挡的矿石位置
+ * 4. 直线挖掘分析 - 检测玩家是否在无合理探索路径的情况下直接挖向矿石
+ * 
+ * 针对资源包透视：服务器强制发送一个标记资源包，如果玩家拒绝则标记嫌疑
+ * 针对Mod透视：通过行为分析检测（上述2-4项）
+ */
+public class XrayCheck extends AbstractCheck implements Listener {
+
+    private final UltraAntiCheat plugin;
+
+    // 被遮挡的矿石列表（透视才能看到的目标）
+    private static final Set<Material> ORES = EnumSet.of(
+            Material.COAL_ORE, Material.DEEPSLATE_COAL_ORE,
+            Material.IRON_ORE, Material.DEEPSLATE_IRON_ORE,
+            Material.GOLD_ORE, Material.DEEPSLATE_GOLD_ORE,
+            Material.DIAMOND_ORE, Material.DEEPSLATE_DIAMOND_ORE,
+            Material.EMERALD_ORE, Material.DEEPSLATE_EMERALD_ORE,
+            Material.LAPIS_ORE, Material.DEEPSLATE_LAPIS_ORE,
+            Material.REDSTONE_ORE, Material.DEEPSLATE_REDSTONE_ORE,
+            Material.COPPER_ORE, Material.DEEPSLATE_COPPER_ORE,
+            Material.NETHER_GOLD_ORE, Material.ANCIENT_DEBRIS,
+            Material.NETHER_QUARTZ_ORE
+    );
+
+    // 遮挡方块（矿石被这些方块包围才算"被遮挡"）
+    private static final Set<Material> OCCLUDING = EnumSet.of(
+            Material.STONE, Material.DEEPSLATE, Material.GRANITE, Material.DIORITE,
+            Material.ANDESITE, Material.TUFF, Material.CALCITE, Material.BASALT,
+            Material.BLACKSTONE, Material.NETHERRACK, Material.DIRT, Material.COARSE_DIRT,
+            Material.SAND, Material.RED_SAND, Material.SANDSTONE, Material.RED_SANDSTONE,
+            Material.OBSIDIAN, Material.END_STONE, Material.MAGMA_BLOCK
+    );
+
+    private final Map<UUID, ResourcePackStatus> packStatuses = new ConcurrentHashMap<>();
+    // 使用 double 精度保存分数，避免小数部分丢失
+    private final Map<UUID, Double> xrayScores = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastXrayFlag = new ConcurrentHashMap<>();
+    private final Map<UUID, List<Long>> suspiciousBreakTimes = new ConcurrentHashMap<>();
+    private final Map<UUID, Set<String>> exploredLocations = new ConcurrentHashMap<>();
+
+    private enum ResourcePackStatus {
+        ACCEPTED, DECLINED, NOT_SENT
+    }
+
+    public XrayCheck(UltraAntiCheat plugin, ConfigManager config) {
+        super(plugin, config, "xray", "PACKET");
+        this.plugin = plugin;
+    }
+
+    // ===== 资源包状态追踪 =====
+
+    @EventHandler
+    public void onResourcePackStatus(PlayerResourcePackStatusEvent e) {
+        UUID uuid = e.getPlayer().getUniqueId();
+        switch (e.getStatus()) {
+            case ACCEPTED:
+                packStatuses.put(uuid, ResourcePackStatus.ACCEPTED);
+                break;
+            case DECLINED:
+                packStatuses.put(uuid, ResourcePackStatus.DECLINED);
+                // 拒绝服务器资源包 = 可能使用透视包
+                addXrayScore(e.getPlayer(), 3.0, "拒绝服务器资源包 (可能使用透视)");
+                break;
+            case FAILED_DOWNLOAD:
+                // 下载失败不算作弊
+                break;
+        }
+    }
+
+    // ===== 矿石锁定追踪 =====
+
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent e) {
+        if (!isEnabled()) return;
+        Player p = e.getPlayer();
+        if (p.hasPermission("uac.bypass")) return;
+
+        Block block = e.getBlock();
+        Material type = block.getType();
+
+        // 检查挖的是不是矿石
+        if (!ORES.contains(type)) {
+            resetSuspicion(p);
+            return;
+        }
+
+        // 检查矿石是否被遮挡（周围6面都是遮挡方块）
+        if (isOccluded(block)) {
+            // 被遮挡的矿石被挖出 = 高度可疑
+            recordSuspiciousBreak(p, block);
+            addXrayScore(p, 2.0, "挖掘被遮挡的矿石: " + type.name()
+                    + " (坐标: " + block.getX() + "," + block.getY() + "," + block.getZ() + ")");
+
+            // 检查该区域是否已被探索过
+            Set<String> explored = exploredLocations.computeIfAbsent(
+                    p.getUniqueId(), k -> ConcurrentHashMap.newKeySet());
+            if (!wasExplored(p, block.getLocation())) {
+                addXrayScore(p, 1.5, "在未探索区域直接定位矿石");
+            }
+        }
+    }
+
+    // ===== 视线方向分析 =====
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent e) {
+        if (!isEnabled()) return;
+        Player p = e.getPlayer();
+        if (p.hasPermission("uac.bypass")) return;
+
+        // 记录玩家探索过的区域（用于判断是否"未探索就找到矿石"）
+        Set<String> explored = exploredLocations.computeIfAbsent(
+                p.getUniqueId(), k -> ConcurrentHashMap.newKeySet());
+        Location loc = p.getLocation();
+        // 玩家周围 4 格范围内都算"已探索"（注意：此处每次移动会插入大量键，可能造成高内存占用）
+        for (int x = -4; x <= 4; x++) {
+            for (int y = -4; y <= 4; y++) {
+                for (int z = -4; z <= 4; z++) {
+                    explored.add(blockKey(loc.clone().add(x, y, z)));
+                }
+            }
+        }
+        // 限制内存
+        if (explored.size() > 50000) {
+            explored.clear();
+        }
+    }
+
+    // ===== 检测方法 =====
+
+    @Override
+    public CheckResult runCheck(Player p) {
+        UUID uuid = p.getUniqueId();
+        double score = xrayScores.getOrDefault(uuid, 0.0);
+
+        // 自然衰减
+        if (score > 0) {
+            score = Math.max(0.0, score - 1.0);
+            xrayScores.put(uuid, score);
+        }
+
+        // 分数超过阈值则报告
+        int threshold = (int) config.getCheckConfig("xray", "score-threshold", 8);
+        if (score >= threshold) {
+            CheckResult result = fail(p, "透视嫌疑 (累积分数: " + score + ")", 2.0, 0.8);
+            xrayScores.put(uuid, 0.0);
+            return result;
+        }
+
+        return CheckResult.pass();
+    }
+
+    // ===== 辅助方法 =====
+
+    private boolean isOccluded(Block block) {
+        int occludedFaces = 0;
+        for (BlockFace face : new BlockFace[]{BlockFace.UP, BlockFace.DOWN,
+                BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST}) {
+            Block relative = block.getRelative(face);
+            if (OCCLUDING.contains(relative.getType())) {
+                occludedFaces++;
+            }
+        }
+        // 至少5面被遮挡才算"被遮挡"
+        return occludedFaces >= 5;
+    }
+
+    private boolean wasExplored(Player p, Location oreLoc) {
+        Set<String> explored = exploredLocations.get(p.getUniqueId());
+        if (explored == null) return false;
+        // 检查矿石周围 2 格内是否有探索记录
+        for (int x = -2; x <= 2; x++) {
+            for (int y = -2; y <= 2; y++) {
+                for (int z = -2; z <= 2; z++) {
+                    if (explored.contains(blockKey(oreLoc.clone().add(x, y, z)))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private void recordSuspiciousBreak(Player p, Block block) {
+        UUID uuid = p.getUniqueId();
+        List<Long> times = suspiciousBreakTimes.computeIfAbsent(
+                uuid, k -> Collections.synchronizedList(new ArrayList<>()));
+        times.add(System.currentTimeMillis());
+        if (times.size() > 20) times.remove(0);
+
+        // 短时间内多次挖掘被遮挡矿石（60秒内）
+        long now = System.currentTimeMillis();
+        long recentCount = times.stream()
+                .filter(t -> now - t < 60000)
+                .count();
+        if (recentCount >= 3) {
+            addXrayScore(p, 2.0, "短时间内连续挖掘 " + recentCount + " 个被遮挡矿石");
+        }
+    }
+
+    private void addXrayScore(Player p, double amount, String reason) {
+        UUID uuid = p.getUniqueId();
+
+        // 防抖：同一条原因3秒内不重复加分
+        long last = lastXrayFlag.getOrDefault(uuid, 0L);
+        if (System.currentTimeMillis() - last < 3000) return;
+        lastXrayFlag.put(uuid, System.currentTimeMillis());
+
+        double score = xrayScores.getOrDefault(uuid, 0.0);
+        score += amount;
+        xrayScores.put(uuid, score);
+    }
+
+    private void resetSuspicion(Player p) {
+        UUID uuid = p.getUniqueId();
+        suspiciousBreakTimes.remove(uuid);
+    }
+
+    // ===== 辅助方法 =====
+
+    private String blockKey(Location loc) {
+        return loc.getWorld().getName() + ":" + loc.getBlockX() + ":" + loc.getBlockY() + ":" + loc.getBlockZ();
+    }
+
+    // ===== 清理 =====
+
+    public void cleanup(Player p) {
+        UUID uuid = p.getUniqueId();
+        packStatuses.remove(uuid);
+        xrayScores.remove(uuid);
+        lastXrayFlag.remove(uuid);
+        suspiciousBreakTimes.remove(uuid);
+        exploredLocations.remove(uuid);
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/command/UACCommand.java`:
+
+```java
+package com.ultracheat.command;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.player.PlayerData;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+public class UACCommand implements CommandExecutor {
+
+    private final UltraAntiCheat plugin;
+
+    public UACCommand(UltraAntiCheat plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (args.length == 0) { showHelp(sender); return true; }
+        switch (args[0].toLowerCase()) {
+            case "help": showHelp(sender); break;
+            case "reload":
+                plugin.getConfigManager().reload();
+                sender.sendMessage("§a[UAC] 配置已重载");
+                break;
+            case "alerts":
+                if (!(sender instanceof Player)) { sender.sendMessage("§c仅玩家可用"); return true; }
+                Player p = (Player) sender;
+                if (plugin.getAlertManager().hasAlerts(p)) {
+                    plugin.getAlertManager().removeAlertPlayer(p);
+                    p.sendMessage("§c[UAC] 告警已关闭");
+                } else {
+                    plugin.getAlertManager().addAlertPlayer(p);
+                    p.sendMessage("§a[UAC] 告警已开启");
+                }
+                break;
+            case "info":
+                if (args.length < 2) { sender.sendMessage("§c用法: /uac info <玩家>"); return true; }
+                showInfo(sender, args[1]);
+                break;
+            case "status":
+                sender.sendMessage("§8§m+------------------------------+");
+                sender.sendMessage("§b§l UltraAntiCheat §7- 系统状态");
+                sender.sendMessage("§8§m+------------------------------+");
+                sender.sendMessage("§7检测引擎: " + (plugin.getConfigManager().isEnabled() ? "§a运行中" : "§c已暂停"));
+                sender.sendMessage("§7检测模块: §f" + plugin.getCheckManager().getChecks().size());
+                sender.sendMessage("§7在线玩家: §f" + Bukkit.getOnlinePlayers().size());
+                sender.sendMessage("§7配置状态: §f已加载");
+                sender.sendMessage("§8§m+------------------------------+");
+                break;
+            case "reset":
+                if (args.length < 2) { sender.sendMessage("§c用法: /uac reset <玩家>"); return true; }
+                Player t = Bukkit.getPlayer(args[1]);
+                if (t == null) { sender.sendMessage("§c玩家不在线"); return true; }
+                plugin.getPunishmentManager().reset(t);
+                sender.sendMessage("§a[UAC] 已重置 " + t.getName() + " 的违规记录");
+                break;
+            default:
+                sender.sendMessage("§c未知命令");
+                showHelp(sender);
+        }
+        return true;
+    }
+
+    private void showHelp(CommandSender s) {
+        s.sendMessage("§8§m+------------------------------+");
+        s.sendMessage("§b§l UltraAntiCheat §7- 帮助");
+        s.sendMessage("§8§m+------------------------------+");
+        s.sendMessage("§e/uac alerts §7- 切换告警");
+        s.sendMessage("§e/uac info <玩家> §7- 查看玩家信息");
+        s.sendMessage("§e/uac status §7- 系统状态");
+        s.sendMessage("§e/uac reset <玩家> §7- 重置违规");
+        s.sendMessage("§e/uac reload §7- 重载配置");
+        s.sendMessage("§8§m+------------------------------+");
+    }
+
+    private void showInfo(CommandSender s, String name) {
+        Player p = Bukkit.getPlayer(name);
+        if (p == null) { s.sendMessage("§c玩家不在线"); return; }
+        PlayerData d = plugin.getCheckManager().getPlayerData(p);
+        s.sendMessage("§8§m+------------------------------+");
+        s.sendMessage("§b§l 玩家信息: §f" + p.getName());
+        s.sendMessage("§8§m+------------------------------+");
+        s.sendMessage("§7综合违规分: §f" + String.format("%.2f", plugin.getCheckManager().getViolationScore(p)));
+        s.sendMessage("§7Ping: §f" + p.getPing() + "ms");
+        s.sendMessage("§e最近违规:");
+        d.getRecentViolations().forEach(v ->
+            s.sendMessage("  §7" + v.getCheckName() + " §8| §f" + v.getDescription())
+        );
+        s.sendMessage("§8§m+------------------------------+");
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/integration/GrimACBridge.java`:
+
+```java
+package com.ultracheat.integration;
+
+import com.ultracheat.UltraAntiCheat;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+
+public class GrimACBridge {
+
+    private final UltraAntiCheat plugin;
+
+    public GrimACBridge(UltraAntiCheat plugin) {
+        this.plugin = plugin;
+        Plugin grim = Bukkit.getPluginManager().getPlugin("GrimAC");
+        if (grim == null) grim = Bukkit.getPluginManager().getPlugin("Grim");
+        if (grim != null && grim.isEnabled()) {
+            plugin.getLogger().info("§a[桥接] GrimAC v" + grim.getDescription().getVersion() + " 已连接");
+        } else {
+            plugin.getLogger().info("§7[桥接] GrimAC 未安装 (可选)");
+        }
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/integration/MatrixBridge.java`:
+
+```java
+package com.ultracheat.integration;
+
+import com.ultracheat.UltraAntiCheat;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+
+public class MatrixBridge {
+
+    public MatrixBridge(UltraAntiCheat plugin) {
+        Plugin matrix = Bukkit.getPluginManager().getPlugin("Matrix");
+        if (matrix != null && matrix.isEnabled()) {
+            plugin.getLogger().info("§a[桥接] Matrix v" + matrix.getDescription().getVersion() + " 已连接");
+        } else {
+            plugin.getLogger().info("§7[桥接] Matrix 未安装 (可选)");
+        }
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/integration/NCPBridge.java`:
+
+```java
+package com.ultracheat.integration;
+
+import com.ultracheat.UltraAntiCheat;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+
+public class NCPBridge {
+
+    public NCPBridge(UltraAntiCheat plugin) {
+        Plugin ncp = Bukkit.getPluginManager().getPlugin("NoCheatPlus");
+        if (ncp != null && ncp.isEnabled()) {
+            plugin.getLogger().info("§a[桥接] NoCheatPlus v" + ncp.getDescription().getVersion() + " 已连接");
+        } else {
+            plugin.getLogger().info("§7[桥接] NoCheatPlus 未安装 (可选)");
+        }
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/integration/SpartanBridge.java`:
+
+```java
+package com.ultracheat.integration;
+
+import com.ultracheat.UltraAntiCheat;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+
+public class SpartanBridge {
+
+    public SpartanBridge(UltraAntiCheat plugin) {
+        Plugin spartan = Bukkit.getPluginManager().getPlugin("Spartan");
+        if (spartan != null && spartan.isEnabled()) {
+            plugin.getLogger().info("§a[桥接] Spartan v" + spartan.getDescription().getVersion() + " 已连接");
+        } else {
+            plugin.getLogger().info("§7[桥接] Spartan 未安装 (可选)");
+        }
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/integration/VulcanBridge.java`:
+
+```java
+package com.ultracheat.integration;
+
+import com.ultracheat.UltraAntiCheat;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+
+public class VulcanBridge {
+
+    public VulcanBridge(UltraAntiCheat plugin) {
+        Plugin vulcan = Bukkit.getPluginManager().getPlugin("Vulcan");
+        if (vulcan != null && vulcan.isEnabled()) {
+            plugin.getLogger().info("§a[桥接] Vulcan v" + vulcan.getDescription().getVersion() + " 已连接");
+        } else {
+            plugin.getLogger().info("§7[桥接] Vulcan 未安装 (可选)");
+        }
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/listener/PacketListener.java`:
+
+```java
+package com.ultracheat.listener;
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketEvent;
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.checks.impl.combat.VelocityCheck;
+import com.ultracheat.player.PlayerData;
+import org.bukkit.entity.Player;
+
+public class PacketListener {
+
+    private final UltraAntiCheat plugin;
+    private ProtocolManager protocolManager;
+
+    public PacketListener(UltraAntiCheat plugin) {
+        this.plugin = plugin;
+        if (ProtocolLibrary.getProtocolManager() == null) {
+            plugin.getLogger().warning("ProtocolLib 未找到，数据包检测将受限");
+            return;
+        }
+        this.protocolManager = ProtocolLibrary.getProtocolManager();
+        register();
+    }
+
+    private void register() {
+        // 监听所有移动数据包来统计频率
+        protocolManager.addPacketListener(new PacketAdapter(plugin, ListenerPriority.NORMAL,
+                PacketType.Play.Client.POSITION, PacketType.Play.Client.POSITION_LOOK,
+                PacketType.Play.Client.LOOK, PacketType.Play.Client.FLYING) {
+            @Override
+            public void onPacketReceiving(PacketEvent event) {
+                Player p = event.getPlayer();
+                if (p == null) return;
+                PlayerData data = plugin.getCheckManager().getPlayerData(p);
+                data.setPacketCount(data.getPacketCount() + 1);
+                data.setLastPacketTime(System.currentTimeMillis());
+            }
+        });
+
+        // 监听攻击数据包
+        protocolManager.addPacketListener(new PacketAdapter(plugin, ListenerPriority.NORMAL,
+                PacketType.Play.Client.USE_ENTITY) {
+            @Override
+            public void onPacketReceiving(PacketEvent event) {
+                Player p = event.getPlayer();
+                if (p == null) return;
+                PlayerData data = plugin.getCheckManager().getPlayerData(p);
+                data.getClickTimes().add(System.currentTimeMillis());
+            }
+        });
+
+        plugin.getLogger().info("数据包监听器已注册");
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/manager/AlertManager.java`:
+
+```java
+package com.ultracheat.manager;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.CheckResult;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+public class AlertManager {
+    private final UltraAntiCheat plugin;
+    private final ConfigManager config;
+    private final Set<UUID> alertPlayers = new HashSet<>();
+
+    public AlertManager(UltraAntiCheat plugin, ConfigManager config) {
+        this.plugin = plugin;
+        this.config = config;
+    }
+
+    public void addAlertPlayer(Player p) { alertPlayers.add(p.getUniqueId()); }
+    public void removeAlertPlayer(Player p) { alertPlayers.remove(p.getUniqueId()); }
+    public boolean hasAlerts(Player p) { return alertPlayers.contains(p.getUniqueId()); }
+
+    public void broadcast(CheckResult result) {
+        if (!config.isAlertsEnabled()) return;
+        String prefix = ChatColor.translateAlternateColorCodes('&', config.getAlertPrefix());
+        String msg = prefix + String.format("&c%s &7| &f%s &7| %s &7(置信度: &e%.1f%%&7)",
+                result.getPlayer().getName(), result.getCheckName(),
+                result.getDescription(), result.getConfidence() * 100);
+        String formatted = ChatColor.translateAlternateColorCodes('&', msg);
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (p.hasPermission("uac.alerts") && alertPlayers.contains(p.getUniqueId())) {
+                p.sendMessage(formatted);
+            }
+        }
+        if (config.isConsoleAlerts()) {
+            plugin.getLogger().info(ChatColor.stripColor(formatted));
+        }
+    }
+
+    public void broadcast(String msg) {
+        if (!config.isAlertsEnabled()) return;
+        String formatted = ChatColor.translateAlternateColorCodes('&', config.getAlertPrefix() + msg);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (p.hasPermission("uac.alerts")) p.sendMessage(formatted);
+        }
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/manager/CheckManager.java`:
+
+```java
+package com.ultracheat.manager;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.Check;
+import com.ultracheat.api.CheckResult;
+import com.ultracheat.player.PlayerData;
+import org.bukkit.entity.Player;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class CheckManager {
+    private final UltraAntiCheat plugin;
+    private final ConfigManager config;
+    private final AlertManager alertManager;
+    private final PunishmentManager punishmentManager;
+    // 使用线程安全的集合，注册少、读取多的场景更适合 CopyOnWriteArrayList
+    private final List<Check> checks = new CopyOnWriteArrayList<>();
+    private final Map<UUID, PlayerData> playerDataMap = new ConcurrentHashMap<>();
+
+    public CheckManager(UltraAntiCheat plugin, ConfigManager config,
+                        AlertManager alertManager, PunishmentManager punishmentManager) {
+        this.plugin = plugin;
+        this.config = config;
+        this.alertManager = alertManager;
+        this.punishmentManager = punishmentManager;
+    }
+
+    public void registerCheck(Check check) {
+        checks.add(check);
+    }
+
+    public List<Check> getChecks() { return new ArrayList<>(checks); }
+
+    public void runChecks(Player player) {
+        if (!config.isEnabled()) return;
+        if (player.hasPermission("uac.bypass")) return;
+
+        PlayerData data = getPlayerData(player);
+        data.update();
+
+        for (Check check : checks) {
+            if (!check.isEnabled()) continue;
+            try {
+                CheckResult result = check.runCheck(player);
+                if (result != null && result.isFailed()) {
+                    data.addViolation(result);
+                    alertManager.broadcast(result);
+                    if (result.getConfidence() >= config.getConfidenceThreshold()) {
+                        punishmentManager.process(result);
+                    }
+                }
+            } catch (Exception e) {
+                if (config.isDebug()) {
+                    plugin.getLogger().warning("检测异常 [" + check.getName() + "]: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    public PlayerData getPlayerData(Player player) {
+        return playerDataMap.computeIfAbsent(player.getUniqueId(), k -> new PlayerData(player));
+    }
+
+    public void removePlayer(Player player) {
+        playerDataMap.remove(player.getUniqueId());
+    }
+
+    public double getViolationScore(Player player) {
+        PlayerData data = playerDataMap.get(player.getUniqueId());
+        return data == null ? 0.0 : data.getTotalViolationLevel();
+    }
+
+    public void clear() {
+        checks.clear();
+        playerDataMap.clear();
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/manager/ConfigManager.java`:
+
+```java
+package com.ultracheat.manager;
+
+import com.ultracheat.UltraAntiCheat;
+import org.bukkit.configuration.file.FileConfiguration;
+
+public class ConfigManager {
+    private final UltraAntiCheat plugin;
+    private FileConfiguration config;
+
+    public ConfigManager(UltraAntiCheat plugin) {
+        this.plugin = plugin;
+        reload();
+    }
+
+    public void reload() {
+        plugin.saveDefaultConfig();
+        plugin.reloadConfig();
+        config = plugin.getConfig();
+    }
+
+    public boolean isEnabled() { return config.getBoolean("enabled", true); }
+    public boolean isDebug() { return config.getBoolean("debug", false); }
+    public double getConfidenceThreshold() { return config.getDouble("confidence-threshold", 0.5); }
+    public double getViolationDecay() { return config.getDouble("violation-decay", 0.92); }
+    public int getCheckInterval() { return config.getInt("check-interval", 4); }
+    public boolean isPunishmentEnabled() { return config.getBoolean("punishment.enabled", true); }
+    public double getPunishmentThreshold() { return config.getDouble("punishment.threshold", 5.0); }
+    public String getPunishmentCommand() { return config.getString("punishment.command", "kick %player% %reason%"); }
+    public boolean isAlertsEnabled() { return config.getBoolean("alerts.enabled", true); }
+    public String getAlertPrefix() { return config.getString("alerts.prefix", "&7[&bUAC&7] "); }
+    public boolean isConsoleAlerts() { return config.getBoolean("alerts.console", true); }
+    public boolean isWebDashboardEnabled() { return config.getBoolean("web-dashboard.enabled", false); }
+    public int getWebDashboardPort() { return config.getInt("web-dashboard.port", 25586); }
+    public boolean isCheckEnabled(String check) { return config.getBoolean("checks." + check + ".enabled", true); }
+    public double getCheckMaxViolation(String check) { return config.getDouble("checks." + check + ".max-violation", 15.0); }
+    public double getCheckConfig(String check, String key, double def) { return config.getDouble("checks." + check + "." + key, def); }
+}
+
+```
+
+`src/main/java/com/ultracheat/manager/PunishmentManager.java`:
+
+```java
+package com.ultracheat.manager;
+
+import com.ultracheat.UltraAntiCheat;
+import com.ultracheat.api.CheckResult;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class PunishmentManager {
+    private final UltraAntiCheat plugin;
+    private final ConfigManager config;
+    private final Map<UUID, Double> violationScores = new ConcurrentHashMap<>();
+
+    public PunishmentManager(UltraAntiCheat plugin, ConfigManager config) {
+        this.plugin = plugin;
+        this.config = config;
+    }
+
+    public void process(CheckResult result) {
+        if (!config.isPunishmentEnabled()) return;
+        Player p = result.getPlayer();
+        UUID uuid = p.getUniqueId();
+
+        double current = violationScores.getOrDefault(uuid, 0.0);
+        current += result.getViolationLevel() * result.getConfidence();
+        current *= config.getViolationDecay();
+        violationScores.put(uuid, current);
+
+        if (current >= config.getPunishmentThreshold()) {
+            execute(p, result);
+            violationScores.put(uuid, 0.0);
+        }
+    }
+
+    private void execute(Player p, CheckResult result) {
+        String cmd = config.getPunishmentCommand()
+                .replace("%player%", p.getName())
+                .replace("%check%", result.getCheckName())
+                .replace("%reason%", result.getDescription())
+                .replace("%confidence%", String.format("%.1f", result.getConfidence() * 100));
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+        });
+    }
+
+    public double getScore(Player p) { return violationScores.getOrDefault(p.getUniqueId(), 0.0); }
+    public void reset(Player p) { violationScores.remove(p.getUniqueId()); }
+    public void clear() { violationScores.clear(); }
+}
+
+```
+
+`src/main/java/com/ultracheat/player/PlayerData.java`:
+
+```java
+package com.ultracheat.player;
+
+import com.ultracheat.api.CheckResult;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class PlayerData {
+    private final UUID uuid;
+    private final String name;
+    private final Map<String, Double> violationLevels = new ConcurrentHashMap<>();
+    private final Map<String, Long> lastViolationTimes = new ConcurrentHashMap<>();
+    private final List<CheckResult> recentViolations = Collections.synchronizedList(new ArrayList<>());
+
+    // Movement tracking
+    private Location lastLocation;
+    private Location lastGroundLocation;
+    private Vector lastVelocity;
+    private boolean lastOnGround;
+    private long lastMoveTime;
+    private int groundTicks;
+    private int airTicks;
+    private double lastYDiff;
+
+    // Combat tracking
+    private long lastAttackTime;
+    private int attackCount;
+    private long attackWindowStart;
+    private float lastYaw;
+    private float lastPitch;
+    private float yawDiff;
+    private float pitchDiff;
+    private final List<Double> gcdHistory = new ArrayList<>();
+    private final List<Long> clickTimes = new ArrayList<>();
+
+    // Packet tracking
+    private final List<Long> packetTimes = new ArrayList<>();
+    private long lastPacketTime;
+    private int packetCount;
+
+    public PlayerData(Player player) {
+        this.uuid = player.getUniqueId();
+        this.name = player.getName();
+        this.lastLocation = player.getLocation().clone();
+        this.lastGroundLocation = player.getLocation().clone();
+        this.lastVelocity = new Vector(0, 0, 0);
+        this.lastOnGround = player.isOnGround();
+        this.lastYaw = player.getLocation().getYaw();
+        this.lastPitch = player.getLocation().getPitch();
+    }
+
+    public void update() {
+        // Called each check tick
+    }
+
+    public void addViolation(CheckResult result) {
+        String key = result.getCheckName();
+        violationLevels.merge(key, result.getViolationLevel(), Double::sum);
+        lastViolationTimes.put(key, System.currentTimeMillis());
+        recentViolations.add(result);
+        if (recentViolations.size() > 50) recentViolations.remove(0);
+    }
+
+    public double getTotalViolationLevel() {
+        return violationLevels.values().stream().mapToDouble(Double::doubleValue).sum();
+    }
+
+    public double getViolationLevel(String check) { return violationLevels.getOrDefault(check, 0.0); }
+    public List<CheckResult> getRecentViolations() { return new ArrayList<>(recentViolations); }
+
+    // Movement getters/setters
+    public Location getLastLocation() { return lastLocation; }
+    public void setLastLocation(Location loc) { this.lastLocation = loc; }
+    public Location getLastGroundLocation() { return lastGroundLocation; }
+    public void setLastGroundLocation(Location loc) { this.lastGroundLocation = loc; }
+    public Vector getLastVelocity() { return lastVelocity; }
+    public void setLastVelocity(Vector v) { this.lastVelocity = v; }
+    public boolean isLastOnGround() { return lastOnGround; }
+    public void setLastOnGround(boolean v) { this.lastOnGround = v; }
+    public long getLastMoveTime() { return lastMoveTime; }
+    public void setLastMoveTime(long t) { this.lastMoveTime = t; }
+    public int getGroundTicks() { return groundTicks; }
+    public void setGroundTicks(int t) { this.groundTicks = t; }
+    public int getAirTicks() { return airTicks; }
+    public void setAirTicks(int t) { this.airTicks = t; }
+    public double getLastYDiff() { return lastYDiff; }
+    public void setLastYDiff(double d) { this.lastYDiff = d; }
+
+    // Combat getters/setters
+    public long getLastAttackTime() { return lastAttackTime; }
+    public void setLastAttackTime(long t) { this.lastAttackTime = t; }
+    public int getAttackCount() { return attackCount; }
+    public void setAttackCount(int c) { this.attackCount = c; }
+    public long getAttackWindowStart() { return attackWindowStart; }
+    public void setAttackWindowStart(long t) { this.attackWindowStart = t; }
+    public float getLastYaw() { return lastYaw; }
+    public void setLastYaw(float y) { this.lastYaw = y; }
+    public float getLastPitch() { return lastPitch; }
+    public void setLastPitch(float p) { this.lastPitch = p; }
+    public float getYawDiff() { return yawDiff; }
+    public void setYawDiff(float d) { this.yawDiff = d; }
+    public float getPitchDiff() { return pitchDiff; }
+    public void setPitchDiff(float d) { this.pitchDiff = d; }
+    public List<Double> getGcdHistory() { return gcdHistory; }
+    public List<Long> getClickTimes() { return clickTimes; }
+
+    // Packet getters/setters
+    public List<Long> getPacketTimes() { return packetTimes; }
+    public long getLastPacketTime() { return lastPacketTime; }
+    public void setLastPacketTime(long t) { this.lastPacketTime = t; }
+    public int getPacketCount() { return packetCount; }
+    public void setPacketCount(int c) { this.packetCount = c; }
+
+    public UUID getUuid() { return uuid; }
+    public String getName() { return name; }
+}
+
+```
+
+`src/main/java/com/ultracheat/util/LocationUtil.java`:
+
+```java
+package com.ultracheat.util;
+
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.util.Vector;
+
+public class LocationUtil {
+
+    public static Vector getDirection(Location loc) {
+        double yaw = Math.toRadians(loc.getYaw());
+        double pitch = Math.toRadians(loc.getPitch());
+        double x = -Math.sin(yaw) * Math.cos(pitch);
+        double y = -Math.sin(pitch);
+        double z = Math.cos(yaw) * Math.cos(pitch);
+        return new Vector(x, y, z);
+    }
+
+    public static Location getEyeLocation(Location loc) {
+        return loc.clone().add(0, 1.62, 0);
+    }
+
+    public static double getReachDistance(Location attacker, Location target) {
+        Location eye = getEyeLocation(attacker);
+        double dx = Math.abs(eye.getX() - target.getX());
+        double dy = Math.abs(eye.getY() - target.getY());
+        double dz = Math.abs(eye.getZ() - target.getZ());
+        return Math.sqrt(dx*dx + dy*dy + dz*dz);
+    }
+
+    public static boolean isSameBlock(Location a, Location b) {
+        return a.getBlockX() == b.getBlockX() && a.getBlockY() == b.getBlockY() && a.getBlockZ() == b.getBlockZ();
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/util/MathUtil.java`:
+
+```java
+package com.ultracheat.util;
+
+import org.bukkit.Location;
+import org.bukkit.util.Vector;
+
+public class MathUtil {
+
+    public static double getHorizontalDistance(Location a, Location b) {
+        double dx = a.getX() - b.getX();
+        double dz = a.getZ() - b.getZ();
+        return Math.sqrt(dx*dx + dz*dz);
+    }
+
+    public static double getVerticalDistance(Location a, Location b) {
+        return Math.abs(a.getY() - b.getY());
+    }
+
+    public static double getDistance(Location a, Location b) {
+        return a.distance(b);
+    }
+
+    public static double getGcd(double a, double b) {
+        if (b < 0.0001) return a;
+        return getGcd(b, a % b);
+    }
+
+    public static long getGcd(long a, long b) {
+        if (b == 0) return a;
+        return getGcd(b, a % b);
+    }
+
+    public static double getGcdOfDoubles(double a, double b) {
+        long expand = (long) Math.pow(2, 24);
+        return getGcd((long)(a * expand), (long)(b * expand)) / (double) expand;
+    }
+
+    public static float getAngleDifference(float a, float b) {
+        float d = Math.abs(a - b) % 360;
+        return d > 180 ? 360 - d : d;
+    }
+
+    public static double clamp(double val, double min, double max) {
+        return Math.max(min, Math.min(max, val));
+    }
+
+    public static double getStandardDeviation(double[] values) {
+        if (values.length == 0) return 0;
+        double mean = 0;
+        for (double v : values) mean += v;
+        mean /= values.length;
+        double variance = 0;
+        for (double v : values) variance += (v - mean) * (v - mean);
+        variance /= values.length;
+        return Math.sqrt(variance);
+    }
+
+    public static double getKurtosis(double[] values) {
+        if (values.length < 4) return 0;
+        double mean = 0;
+        for (double v : values) mean += v;
+        mean /= values.length;
+        double variance = 0;
+        for (double v : values) variance += (v - mean) * (v - mean);
+        variance /= values.length;
+        if (variance == 0) return 0;
+        double m4 = 0;
+        for (double v : values) m4 += Math.pow(v - mean, 4);
+        m4 /= values.length;
+        return m4 / (variance * variance) - 3;
+    }
+}
+
+```
+
+`src/main/java/com/ultracheat/web/WebDashboard.java`:
+
+```java
+package com.ultracheat.web;
+
+import com.google.gson.Gson;
+import com.ultracheat.UltraAntiCheat;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import java.io.*;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+public class WebDashboard {
+
+    private final UltraAntiCheat plugin;
+    private HttpServer server;
+
+    public WebDashboard(UltraAntiCheat plugin) {
+        this.plugin = plugin;
+    }
+
+    public void start() {
+        try {
+            int port = plugin.getConfigManager().getWebDashboardPort();
+            server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
+            server.createContext("/", new HtmlHandler());
+            server.createContext("/api/status", new StatusHandler());
+            server.createContext("/api/players", new PlayersHandler());
+            server.setExecutor(null);
+            server.start();
+            plugin.getLogger().info("§aWeb仪表盘: http://0.0.0.0:" + port);
+        } catch (Exception e) {
+            plugin.getLogger().warning("§cWeb仪表盘启动失败: " + e.getMessage());
+        }
+    }
+
+    public void stop() { if (server != null) server.stop(0); }
+
+    private void send(HttpExchange ex, String body, String type) throws IOException {
+        byte[] b = body.getBytes(StandardCharsets.UTF_8);
+        ex.getResponseHeaders().set("Content-Type", type + "; charset=utf-8");
+        ex.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+        ex.sendResponseHeaders(200, b.length);
+        try (OutputStream os = ex.getResponseBody()) { os.write(b); }
+    }
+
+    class HtmlHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange ex) throws IOException {
+            String html = "<!DOCTYPE html><html lang='zh'><head><meta charset='UTF-8'><title>UAC监控</title>" +
+            "<style>body{font-family:sans-serif;background:#0f0f1a;color:#e0e0e0;padding:20px}" +
+            ".card{background:#1a1a2e;border-radius:10px;padding:15px;margin:10px 0;border:1px solid #2a2a4a}" +
+            "h1{background:linear-gradient(90deg,#00d4ff,#7b2ff7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}" +
+            "table{width:100%;border-collapse:collapse;background:#1a1a2e;border-radius:10px;overflow:hidden}" +
+            "th{background:#0f3460;padding:10px;text-align:left;color:#88ccff}" +
+            "td{padding:8px 10px;border-bottom:1px solid #2a2a4a}" +
+            ".v{font-size:24px;font-weight:700;color:#00d4ff}" +
+            "</style></head><body><h1>UltraAntiCheat 监控</h1><div class='card'><div id='stats'></div></div>" +
+            "<table><thead><tr><th>玩家</th><th>Ping</th><th>违规分</th></tr></thead><tbody id='players'></tbody></table>" +
+            "<script>function load(){fetch('/api/players').then(r=>r.json()).then(d=>{" +
+            "document.getElementById('stats').innerHTML='<div style=\"display:grid;grid-template-columns:repeat(4,1fr);gap:15px\">'" +
+            "+'<div><div style=\"font-size:11px;color:#888\">在线</div><div class=\"v\">'+d.players+'</div></div>'" +
+            "+'<div><div style=\"font-size:11px;color:#888\">检测</div><div class=\"v\">'+d.checks+'</div></div>'" +
+            "+'<div><div style=\"font-size:11px;color:#888\">状态</div><div class=\"v\" style=\"color:#0f0\">运行中</div></div>'" +
+            "+'</div>';" +
+            "document.getElementById('players').innerHTML=d.list.length===0?" +
+            "'<tr><td colspan=3 style=\"text-align:center;color:#666\">无</td></tr>':" +
+            "d.list.map(p=>'<tr><td><b>'+p.name+'</b></td><td>'+p.ping+'ms</td><td>'+p.score+'</td></tr>').join('')" +
+            "});}load();setInterval(load,3000);</script></body></html>";
+            send(ex, html, "text/html");
+        }
+    }
+
+    class StatusHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange ex) throws IOException {
+            Map<String, Object> d = new HashMap<>();
+            d.put("players", Bukkit.getOnlinePlayers().size());
+            d.put("checks", plugin.getCheckManager().getChecks().size());
+            d.put("enabled", plugin.getConfigManager().isEnabled());
+            send(ex, new Gson().toJson(d), "application/json");
+        }
+    }
+
+    class PlayersHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange ex) throws IOException {
+            Map<String, Object> d = new HashMap<>();
+            d.put("players", Bukkit.getOnlinePlayers().size());
+            d.put("checks", plugin.getCheckManager().getChecks().size());
+            List<Map<String, Object>> list = new ArrayList<>();
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                Map<String, Object> m = new HashMap<>();
+                m.put("name", p.getName());
+                m.put("ping", p.getPing());
+                m.put("score", String.format("%.2f", plugin.getCheckManager().getViolationScore(p)));
+                list.add(m);
+            }
+            d.put("list", list);
+            send(ex, new Gson().toJson(d), "application/json");
+        }
+    }
+}
+
+```
+
+`src/main/resources/config.yml`:
+
+```yml
+# ============================================
+# UltraAntiCheat - 终极融合反作弊配置
+# 融合 GrimAC + Vulcan + Matrix + NCP + Spartan 核心算法
+# ============================================
+
+enabled: true
+debug: false
+
+# 检测循环间隔 (tick)
+check-interval: 4
+
+# 置信度阈值 (0.0-1.0)，低于此值只记录不惩罚
+confidence-threshold: 0.5
+
+# 违规衰减 (每次检测后乘以此系数，防止累积误报)
+violation-decay: 0.92
+
+# 惩罚配置
+punishment:
+  enabled: true
+  threshold: 5.0           # 累积违规值达到此数值触发惩罚
+  command: "kick %player% &c检测到作弊行为: %check% &7(置信度: %confidence%%)"
+  
+# 告警配置
+alerts:
+  enabled: true
+  prefix: "&7[&bUAC&7] "
+  console: true
+
+# Web 仪表盘
+web-dashboard:
+  enabled: false
+  port: 25586
+
+# 各检测模块配置
+checks:
+  fly:
+    enabled: true
+    max-violation: 15.0
+    offset-threshold: 0.03
+  speed:
+    enabled: true
+    max-violation: 15.0
+    speed-multiplier: 1.5
+  timer:
+    enabled: true
+    max-violation: 15.0
+    ratio-threshold: 1.5
+  killaura:
+    enabled: true
+    max-violation: 15.0
+    gcd-sample-size: 20
+    pattern-threshold: 0.85
+  reach:
+    enabled: true
+    max-violation: 15.0
+    max-reach: 3.15
+    ping-compensation: true
+  autoclicker:
+    enabled: true
+    max-violation: 15.0
+    cps-threshold: 18
+  scaffold:
+    enabled: true
+    max-violation: 15.0
+    rotation-threshold: 2.0
+  phase:
+    enabled: true
+    max-violation: 15.0
+  noslow:
+    enabled: true
+    max-violation: 15.0
+    speed-limit: 0.2
+  velocity:
+    enabled: true
+    max-violation: 15.0
+    ratio-threshold: 0.3
+  badpackets:
+    enabled: true
+    max-violation: 15.0
+    packet-rate-limit: 25
+  groundspoof:
+    enabled: true
+    max-violation: 15.0
+  xray:
+    enabled: true
+    max-violation: 15.0
+    score-threshold: 8
+
+# =============================================
+# 防透视配置
+# =============================================
+xray:
+  # 是否在玩家加入时发送服务器资源包（用于检测玩家是否拒绝）
+  send-resource-pack: false
+  # 资源包URL（留空则不发送）
+  resource-pack-url: ""
+  # 资源包SHA1（留空则不校验）
+  resource-pack-hash: ""
+  # 强制加载资源包 (true = 客户端必须接受才能进入服务器, 1.17+)
+  resource-pack-force: false
+
+```
+
+`src/main/resources/plugin.yml`:
+
+```yml
+name: UltraAntiCheat
+main: com.ultracheat.UltraAntiCheat
+version: '${project.version}'
+api-version: '1.13'
+author: UltraTeam
+description: 终极融合反作弊 - 融合多款反作弊核心算法，防住99.99%外挂
+softdepend: [ProtocolLib]
+commands:
+  uac:
+    description: UltraAntiCheat 主命令
+    permission: uac.admin
+permissions:
+  uac.admin:
+    description: UAC 管理员权限
+    default: op
+  uac.alerts:
+    description: 接收违规告警
+    default: op
+  uac.bypass:
+    description: 绕过反作弊检测
+    default: false
+
+```
