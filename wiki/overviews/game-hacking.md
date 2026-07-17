@@ -7,9 +7,14 @@ sources:
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/zyhp__vac3_inhibitor.md
   - wiki/sources/descriptions/zodiacon__TotalPE2.md
+  - wiki/sources/descriptions/zodiacon__QuickAsm.md
+  - wiki/sources/descriptions/zoand__Injectors.md
+  - wiki/sources/descriptions/zoand__BOOM.md
+  - wiki/sources/descriptions/zinx-YT__Fortnite-Fltokens-and-offsets.md
 updated: 2026-07-17
 confidence: high
 ---
+
 
 # Game Hacking
 
@@ -23,17 +28,20 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Key sub-areas
 
-- Memory, injection, hooking (inline/IAT/VTable/HWBP)
+- Memory, injection, hooking (inline/IAT/VTable/HWBP); injection-testing samples such as [[injectors]] for AC stress evaluation. (source: wiki/sources/descriptions/zoand__Injectors.md)
 - Visual ESP / aim / movement cheats; AI visual pipelines (OBS + YOLO + HID)
 - Overlays via [[present-hook]] and external/DWM windows
-- HWID spoofing, stack spoofing, driver communication channels
+- HWID spoofing, stack spoofing, driver communication channels (e.g. [[boom]] hijacks `Beep.sys` and alters hide/comm paths). (source: wiki/sources/descriptions/zoand__BOOM.md)
 - EFI boot-time mappers; engine-specific paths (Unreal/Unity/Source)
 - AC-system exploration repos (e.g. [[vac3-inhibitor]] for VAC3 hooking/memory work) sit in the user-mode lane of cheat research. (source: wiki/sources/descriptions/zyhp__vac3_inhibitor.md)
 - PE triage of game/client modules (imports, TLS, .NET metadata) via viewers such as [[totalpe2]] before deeper RE. (source: wiki/sources/descriptions/zodiacon__TotalPE2.md)
+- Rapid x86/x64 shellcode/asm prototyping with [[quickasm]] (assemble via Keystone, execute in-process). (source: wiki/sources/descriptions/zodiacon__QuickAsm.md)
+- Title-specific offset/token dumps (e.g. Fortnite FLTokens via [[fortnite-fltokens-and-offsets]]) illustrate ephemeral cheat-research artifacts that rot quickly. (source: wiki/sources/descriptions/zinx-YT__Fortnite-Fltokens-and-offsets.md)
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[vac3-inhibitor]] · [[totalpe2]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[overviews/anti-cheat]]
+
 
 ## README map
 
