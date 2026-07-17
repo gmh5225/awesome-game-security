@@ -12,6 +12,7 @@ sources:
   - wiki/sources/descriptions/zoand__BOOM.md
   - wiki/sources/descriptions/zinx-YT__Fortnite-Fltokens-and-offsets.md
   - wiki/sources/descriptions/zhuzhu-Top__deobf.md
+  - wiki/sources/descriptions/zhuowei__cheese.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -39,10 +40,11 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Rapid x86/x64 shellcode/asm prototyping with [[quickasm]] (assemble via Keystone, execute in-process). (source: wiki/sources/descriptions/zodiacon__QuickAsm.md)
 - Title-specific offset/token dumps (e.g. Fortnite FLTokens via [[fortnite-fltokens-and-offsets]]) illustrate ephemeral cheat-research artifacts that rot quickly. (source: wiki/sources/descriptions/zinx-YT__Fortnite-Fltokens-and-offsets.md)
 - Fix OLLVM / deobfuscation plugins targeting `libtprt.so` (e.g. [[deobf]]) sit in the Cheat Fix OLLVM lane. (source: wiki/sources/descriptions/zhuzhu-Top__deobf.md)
+- Magisk-style root on Android VR (Quest 3/3S) via [[cheese]] (Adreno CVE-2025-21479; temporary root, no boot rewrite) sits in the Cheat Magisk lane. (source: wiki/sources/descriptions/zhuowei__cheese.md)
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[deobf]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[deobf]] · [[cheese]] · [[overviews/anti-cheat]]
 
 
 ## README map

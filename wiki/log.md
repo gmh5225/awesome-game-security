@@ -44,3 +44,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:zinja-coder/apktool-mcp-server`: entity [[apktool-mcp-server]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
 - **2026-07-17** — ingest `description:zhuzhu-Top/deobf`: entity [[deobf]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-17** — ingest `description:zhuowei/cheese`: entity [[cheese]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
