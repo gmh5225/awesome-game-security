@@ -4003,6 +4003,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/MrDiamond64/Scythe-AntiCheat [Minecraft]
 - https://github.com/GrimAnticheat/Grim [Minecraft]
 - https://github.com/NoCheatPlus/NoCheatPlus [Open-source anti-cheat plugin for Minecraft (Bukkit/Spigot)]
+- https://github.com/PalassCQ/GuardAC [AI-assisted open-source Minecraft anti-cheat plugin for Spigot/Paper/Folia]
 - https://github.com/enis1enis2/WindfallAntiCheatF [Minecraft Fabric packet-based anti-cheat with combat/movement checks and Geyser/Bedrock compatibility]
 - https://github.com/Visual1mpact/Paradox_AntiCheat [Open-source anti-cheat for Minecraft Bedrock (Realms/BDS)]
 - https://github.com/oomph-ac/oomph [Minecraft Bedrock MiTM anti-cheat proxy with server-authoritative movement and combat]
@@ -4283,6 +4284,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Fuzzer
 - https://github.com/0vercl0k/wtf
+- https://github.com/kernullist/kernforge [Go workbench for Windows/anti-cheat project analysis, fuzzing, and evidence-backed verification]
 
 > OpenCV
 - https://github.com/YouNeverKnow00/Rust-Auto-Weapon-Detection-OpenCV-Example
