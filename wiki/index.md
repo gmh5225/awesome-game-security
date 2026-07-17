@@ -34,6 +34,7 @@ Compiled knowledge catalog for awesome-game-security.
 ## Entities
 
 - [BlindEye](entities/blindeye.md) — BattlEye report-path pool-alloc drop (“Packet Fucker”)
+- [BOOM](entities/boom.md) — hijack Beep.sys; stealth driver communication
 - [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests
 - [Injectors](entities/injectors.md) — injection-testing harness (C/C++; AC stress)
 - [lsass-extend-mapper](entities/lsass-extend-mapper.md) — unsigned driver map via lsass address-space extend

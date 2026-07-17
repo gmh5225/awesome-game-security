@@ -36,3 +36,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:zodiacon/QuickAsm`: entity [[quickasm]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-17** — ingest `description:zoand/Injectors`: entity [[injectors]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-07-17** — ingest `description:zoand/BOOM`: entity [[boom]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
