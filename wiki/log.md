@@ -126,3 +126,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:yaxinsn/vermagic`: entity [[vermagic]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-17** — ingest `description:yardenshafir/cet-research`: entity [[cet-research]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-07-17** — ingest `description:yardenshafir/WinDbg_Scripts`: entity [[windbg-scripts]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
