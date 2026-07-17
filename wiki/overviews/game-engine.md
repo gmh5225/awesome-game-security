@@ -11,6 +11,7 @@ sources:
   - wiki/sources/descriptions/yucchiy__UniCli.md
   - wiki/sources/descriptions/yring-me__ts-ue4dumper.md
   - wiki/sources/descriptions/yrgo__awesome-educational-games.md
+  - wiki/sources/descriptions/yourmnbbn__tiny-csgo-client.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -29,11 +30,11 @@ Engine internals, plugins, detectors, and SDK workflows that underpin modding, r
 **Security-relevant surfaces:** object models and property offsets, rendering hooks ([[present-hook]]), network replication, engine-specific AC protection categories in the README. UE4 static-variable obfuscation (e.g. [[static-variables-obfuscator-ue4]]) raises the cost of memory scanners like Cheat Engine against non-dynamic game data. (source: wiki/sources/descriptions/zompi2__Static-Variables-Obfuscator-UE4.md) Per-title Unreal dumps such as Fortnite FLTokens/offsets ([[fortnite-fltokens-and-offsets]]) show how quickly build-bound token and offset maps go stale. (source: wiki/sources/descriptions/zinx-YT__Fortnite-Fltokens-and-offsets.md)
 
 
-**SDK generation:** UE version signatures → dumpers; Unity `global-metadata.dat` + `GameAssembly.dll` / `libil2cpp.so`; Source ClientClass → RecvTable maps. Modular TypeScript/Frida UE4 dumps (e.g. [[ts-ue4dumper]], C++ offset path) sit alongside Dumper-7/UE4SS-style explorers. (source: wiki/sources/descriptions/yring-me__ts-ue4dumper.md) Per-title DayZ SDK/modding workflows (e.g. [[dayzzz]]) sit in the same Cheat SDK CodeGen / overlay lane. (source: wiki/sources/descriptions/zhitkur__DayZzz.md)
+**SDK generation:** UE version signatures → dumpers; Unity `global-metadata.dat` + `GameAssembly.dll` / `libil2cpp.so`; Source ClientClass → RecvTable maps. Modular TypeScript/Frida UE4 dumps (e.g. [[ts-ue4dumper]], C++ offset path) sit alongside Dumper-7/UE4SS-style explorers. (source: wiki/sources/descriptions/yring-me__ts-ue4dumper.md) Per-title DayZ SDK/modding workflows (e.g. [[dayzzz]]) sit in the same Cheat SDK CodeGen / overlay lane. (source: wiki/sources/descriptions/zhitkur__DayZzz.md) Source/CS:GO-oriented minimal clients such as [[tiny-csgo-client]] (dedicated-server connect; modding / SDK generation) illustrate the Source-side end of that lane. (source: wiki/sources/descriptions/yourmnbbn__tiny-csgo-client.md)
 
 ## Related concepts
 
-[[il2cpp]] · [[present-hook]] · [[frida]] (mobile IL2CPP) · [[ts-ue4dumper]] · [[static-variables-obfuscator-ue4]] · [[fortnite-fltokens-and-offsets]] · [[dayzzz]] · [[unicli]] · [[awesome-educational-games]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[il2cpp]] · [[present-hook]] · [[frida]] (mobile IL2CPP) · [[ts-ue4dumper]] · [[static-variables-obfuscator-ue4]] · [[fortnite-fltokens-and-offsets]] · [[dayzzz]] · [[tiny-csgo-client]] · [[unicli]] · [[awesome-educational-games]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
 
 
 
