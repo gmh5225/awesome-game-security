@@ -11,9 +11,11 @@ sources:
   - wiki/sources/descriptions/zouxianyu__BlindEye.md
   - wiki/sources/descriptions/zorftw__revert-mapper.md
   - wiki/sources/descriptions/zorftw__lsass-extend-mapper.md
+  - wiki/sources/descriptions/zompi2__Static-Variables-Obfuscator-UE4.md
 updated: 2026-07-17
 confidence: high
 ---
+
 
 
 # Anti-Cheat
@@ -39,11 +41,12 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 **Platform trust:** DSE, [[patchguard]], [[hvci]]/VBS, Secure Boot.
 
-**Obfuscation tooling:** [[shredder-rs]] — x86_64 polymorphic instruction shredding (context-preserving) for AC/obfuscation-engine research. (source: wiki/sources/descriptions/zx0CF1__shredder-rs.md)
+**Obfuscation tooling:** [[shredder-rs]] — x86_64 polymorphic instruction shredding (context-preserving) for AC/obfuscation-engine research. (source: wiki/sources/descriptions/zx0CF1__shredder-rs.md) Engine-side data hiding: [[static-variables-obfuscator-ue4]] obfuscates UE4 static variables against Cheat Engine–style scans (`Game Engine Protection:Unreal`). (source: wiki/sources/descriptions/zompi2__Static-Variables-Obfuscator-UE4.md)
+
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vt-debuuger]] · [[shredder-rs]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vt-debuuger]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]]
 
 ## README map
 
