@@ -81,3 +81,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-17** — ingest `description:za233/IDADeflat`: entity [[idadeflat]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
+- **2026-07-17** — ingest `description:z1ko/mutaben`: entity [[mutaben]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
