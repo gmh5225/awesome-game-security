@@ -50,3 +50,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:zhizhuodemao/android_proxy_mcp`: entity [[android-proxy-mcp]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
 - **2026-07-17** — ingest `description:zhitkur/DayZzz`: entity [[dayzzz]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-17** — ingest `description:zhaodice/proxmox-ve-anti-detection`: entity [[proxmox-ve-anti-detection]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
