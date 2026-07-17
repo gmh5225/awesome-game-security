@@ -22,3 +22,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-16** — ingest `description:zouxianyu/BlindEye`: entity [[blindeye]]; cited on [[battleye]] and [[overviews/anti-cheat]].
 
 - **2026-07-17** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/game-engine]], [[overviews/graphics-api]], [[overviews/mobile-security]], [[overviews/windows-kernel]]; light `index.md` section notes (no per-category pages).
+
+- **2026-07-17** — ingest `description:zorftw/revert-mapper`: entity [[revert-mapper]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].

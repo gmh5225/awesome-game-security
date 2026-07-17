@@ -9,6 +9,7 @@ sources:
   - wiki/sources/descriptions/zxd1994__vt-debuuger.md
   - wiki/sources/descriptions/zx0CF1__shredder-rs.md
   - wiki/sources/descriptions/zouxianyu__BlindEye.md
+  - wiki/sources/descriptions/zorftw__revert-mapper.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -29,7 +30,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Key sub-areas
 
-**Detection:** memory hashing / manual-map detection; process handle stripping; [[kernel-callbacks]]; Segment Heap–aware pool scanning; behavioral/ML aimbot signals; screenshot + heartbeat.
+**Detection:** memory hashing / manual-map detection; process handle stripping; [[kernel-callbacks]]; Segment Heap–aware pool scanning; behavioral/ML aimbot signals; screenshot + heartbeat. Post-execution map cleanup (e.g. [[revert-mapper]] freeing mapped driver memory and pool-tag traces) is a common research counterpart to those scanners. (source: wiki/sources/descriptions/zorftw__revert-mapper.md)
 
 **Architecture:** user-mode scanners → kernel callbacks/VAD → optional hypervisor EPT protection → server-side replay/stats.
 
@@ -41,7 +42,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vt-debuuger]] · [[shredder-rs]] · [[blindeye]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vt-debuuger]] · [[shredder-rs]] · [[blindeye]] · [[revert-mapper]]
 
 ## README map
 
