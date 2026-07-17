@@ -6,15 +6,15 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Overviews
 
-- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2543 / Anti Cheat ~592)
+- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2543 / Anti Cheat ~592; Game Network ~25)
 - [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* + engine protection (~592)
-- [DMA Attack](overviews/dma-attack.md) — PCIe DMA threat model and defenses
-- [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~136); assets, hot-patch, MCP/AI gamedev
+- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat/Detection:DMA + WSF attestation
+- [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~136); assets, hot-patch, MCP/AI gamedev (~176)
 - [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2543) + Some Tricks (~112)
-- [Graphics API](overviews/graphics-api.md) — DirectX/GL/Vulkan hooks, overlays, capture
-- [Mobile Security](overviews/mobile-security.md) — Android / iOS; WSA, emulators, Cellular/SIM
-- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools, DBI, deobfuscation
-- [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation, BYOVD, pool
+- [Graphics API](overviews/graphics-api.md) — DirectX (~32) / GL / Vulkan hooks, overlays, capture
+- [Mobile Security](overviews/mobile-security.md) — Android / iOS; WSA (~9), emulators (~9/~3), Cellular/SIM
+- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools, MBA/DBI, deobfuscation, packers
+- [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation (~9), BYOVD, pool
 
 ## Concepts
 

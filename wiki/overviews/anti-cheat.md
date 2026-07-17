@@ -60,4 +60,4 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## README map
 
-`Anti Cheat` (~592 links): guides, stress/unit-test harnesses, packers, engine protection (Unreal/Unity/Source), and a wide `Detection:*` tree (hook, memory integrity, shellcode, attach, aimbot, hide, vulnerable driver, hacked hypervisor, virtual environments, HWID, speedhack, injection, stack spoof, ESP, DMA, wallhack, obfuscation, Android root). Cross-links `Windows Security Features` (CET/TPM/IOMMU/HVCI attestation samples) and Cheat PatchGuard/DSE lanes. (source: wiki/sources/README-categories.md)
+`Anti Cheat` (~592 links): guides, stress/unit-test harnesses, packers, obfuscation engines, engine protection (Unreal/Unity/Source), and a wide `Detection:*` tree (hook, memory integrity, shellcode, attach, aimbot, hide, vulnerable driver, hacked hypervisor, virtual environments, HWID, speedhack, injection, stack spoof, ESP, DMA, wallhack, obfuscation, Android root). Cross-links `Windows Security Features` (~9; CET/TPM/IOMMU/HVCI attestation) and Cheat PatchGuard/DSE lanes. (source: wiki/sources/README-categories.md)
