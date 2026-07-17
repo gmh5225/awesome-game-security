@@ -36,6 +36,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BlindEye](entities/blindeye.md) — BattlEye report-path pool-alloc drop (“Packet Fucker”)
 - [BOOM](entities/boom.md) — hijack Beep.sys; stealth driver communication
 - [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests
+- [Fortnite-Fltokens-and-offsets](entities/fortnite-fltokens-and-offsets.md) — Fortnite FLToken/offset grabber (stale / offline)
 - [Injectors](entities/injectors.md) — injection-testing harness (C/C++; AC stress)
 - [lsass-extend-mapper](entities/lsass-extend-mapper.md) — unsigned driver map via lsass address-space extend
 - [PG1903](entities/pg1903.md) — Win10 1903 PatchGuard disable via context-page NX (Demo NX)
@@ -46,6 +47,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [TotalPE2](entities/totalpe2.md) — WPF PE viewer (headers, imports/exports, .NET metadata)
 - [vac3_inhibitor](entities/vac3-inhibitor.md) — VAC3 exploration via hooking / memory analysis (C++)
 - [vt-debuuger](entities/vt-debuuger.md) — hacked hypervisor testing (C/C++ drivers / plugins)
+
 
 
 ## Sources
