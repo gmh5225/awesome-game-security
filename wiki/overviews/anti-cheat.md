@@ -25,6 +25,7 @@ sources:
   - wiki/sources/descriptions/yardenshafir__cet-research.md
   - wiki/sources/descriptions/xxFURYWOLFxx__veh-dumper.md
   - wiki/sources/descriptions/xuanxuan0__TiEtwAgent.md
+  - wiki/sources/descriptions/xsj3n__x64-EXE-Packer.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -54,7 +55,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 **Platform trust:** DSE, [[patchguard]], [[hvci]]/VBS, Secure Boot; CET/shadow-stack research such as [[cet-research]] in the Windows Security Features lane. (source: wiki/sources/descriptions/yardenshafir__cet-research.md)
 
-**Obfuscation tooling:** [[shredder-rs]] — x86_64 polymorphic instruction shredding (context-preserving) for AC/obfuscation-engine research. (source: wiki/sources/descriptions/zx0CF1__shredder-rs.md) Engine-side data hiding: [[static-variables-obfuscator-ue4]] obfuscates UE4 static variables against Cheat Engine–style scans (`Game Engine Protection:Unreal`). (source: wiki/sources/descriptions/zompi2__Static-Variables-Obfuscator-UE4.md) Binary Packer lane: [[pe32-password]] — C/C++ PE32 password packing for packed/modded client study. (source: wiki/sources/descriptions/ytk2128__pe32-password.md) LLVM pass-plugin obfuscation/anti-tamper: [[kagura]] (CFG/string/data passes + anti-debug runtime; NDK/iOS/Unity/Unreal). (source: wiki/sources/descriptions/ykus4__kagura.md)
+**Obfuscation tooling:** [[shredder-rs]] — x86_64 polymorphic instruction shredding (context-preserving) for AC/obfuscation-engine research. (source: wiki/sources/descriptions/zx0CF1__shredder-rs.md) Engine-side data hiding: [[static-variables-obfuscator-ue4]] obfuscates UE4 static variables against Cheat Engine–style scans (`Game Engine Protection:Unreal`). (source: wiki/sources/descriptions/zompi2__Static-Variables-Obfuscator-UE4.md) Binary Packer lane: [[pe32-password]] — C/C++ PE32 password packing for packed/modded client study. (source: wiki/sources/descriptions/ytk2128__pe32-password.md); [[x64-exe-packer]] — PE X64 packing. (source: wiki/sources/descriptions/xsj3n__x64-EXE-Packer.md) LLVM pass-plugin obfuscation/anti-tamper: [[kagura]] (CFG/string/data passes + anti-debug runtime; NDK/iOS/Unity/Unreal). (source: wiki/sources/descriptions/ykus4__kagura.md)
 
 **VEH-based protection RE:** [[veh-dumper]] surgically dumps VectoredException/Continue handlers as IDA-ready PE64 modules for studying VEH-backed AC / anti-tamper logic. (source: wiki/sources/descriptions/xxFURYWOLFxx__veh-dumper.md)
 
@@ -62,7 +63,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[veh-dumper]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[kagura]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[injectors]] · [[zero-thread-kernel]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[veh-dumper]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[kagura]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[injectors]] · [[zero-thread-kernel]]
 
 
 

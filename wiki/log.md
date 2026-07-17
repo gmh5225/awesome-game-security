@@ -146,3 +146,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:xtremegamer1/xigmapper`: entity [[xigmapper]]; cited on [[overviews/windows-kernel]] and [[vanguard]].
 
 - **2026-07-17** — ingest `description:xtremegamer1/vmdevirt-vtil`: entity [[vmdevirt-vtil]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-17** — ingest `description:xsj3n/x64-EXE-Packer`: entity [[x64-exe-packer]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
