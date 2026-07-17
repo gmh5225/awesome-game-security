@@ -16,6 +16,7 @@ sources:
   - wiki/sources/descriptions/zhitkur__DayZzz.md
   - wiki/sources/descriptions/zhaodice__proxmox-ve-anti-detection.md
   - wiki/sources/descriptions/zhaodice__qemu-anti-detection.md
+  - wiki/sources/descriptions/zer0condition__NTMemory.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -29,7 +30,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 ## Escalation model
 
 1. **User-mode** — RPM/WPM, DLL/shellcode injection, graphics/input hooks
-2. **Kernel-mode** — signed/vulnerable drivers ([[byovd]]), callback/page-table work
+2. **Kernel-mode** — signed/vulnerable drivers ([[byovd]]), callback/page-table work; cross-process R/W via MDL/CR3 helpers such as [[ntmemory]] (source: wiki/sources/descriptions/zer0condition__NTMemory.md)
 3. **Below the OS** — hypervisor, PCIe DMA, external devices / second machines
 
 ## Key sub-areas
@@ -50,7 +51,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[deobf]] · [[cheese]] · [[dayzzz]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ntmemory]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[deobf]] · [[cheese]] · [[dayzzz]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[overviews/anti-cheat]]
 
 
 

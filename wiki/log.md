@@ -63,3 +63,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-17** — ingest `description:zer0condition/BusterCall`: entity [[bustercall]]; cited on [[kernel-callbacks]] and [[hvci]].
 
+- **2026-07-17** — ingest `description:zer0condition/NTMemory`: entity [[ntmemory]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+

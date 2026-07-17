@@ -12,6 +12,7 @@ sources:
   - wiki/sources/descriptions/zodiacon__EtwExplorer.md
   - wiki/sources/descriptions/zoand__BOOM.md
   - wiki/sources/descriptions/zer0condition__Demystifying-PatchGuard.md
+  - wiki/sources/descriptions/zer0condition__NTMemory.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -23,6 +24,7 @@ Kernel internals that matter for game protection and low-level research: object/
 ## Key sub-areas
 
 - **Structures:** EPROCESS/ETHREAD, MMVAD, DRIVER_OBJECT, IRP; SSDT/IDT; pool tables
+- **Cross-process kernel R/W:** MDL map + physical translate + CR3 page-table walk libraries such as [[ntmemory]] (research for kernel cheat memory paths / AC evasion). (source: wiki/sources/descriptions/zer0condition__NTMemory.md)
 - **[[kernel-callbacks]]:** process/thread/image notify, ObRegisterCallbacks, Cm/Flt
 - **Trust features:** DSE, PatchGuard, VBS/HVCI, Secure Boot
 - **[[byovd]]:** signed vulnerable drivers → kernel R/W → unsigned load / blind AC
@@ -37,7 +39,7 @@ Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[boom]] · [[dma]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[ntmemory]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[boom]] · [[dma]] · [[overviews/anti-cheat]]
 
 ## README map
 
