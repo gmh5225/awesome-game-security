@@ -160,3 +160,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:xo1337/steam-overlay-x64`: entity [[steam-overlay-x64]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
 
 - **2026-07-17** — ingest `description:xmmword/dpatch`: entity [[dpatch]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-17** — ingest `description:xkp95175333/Thetan_ArenaSDK`: entity [[thetan-arenasdk]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
