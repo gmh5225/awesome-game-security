@@ -91,3 +91,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-17** — ingest `description:yucchiy/UniCli`: entity [[unicli]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
+- **2026-07-17** — ingest `description:yubie-re/ida-jm-xorstr-decrypt-plugin`: entity [[ida-jm-xorstr-decrypt-plugin]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
