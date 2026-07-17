@@ -5,9 +5,11 @@ topics: [dma-attack]
 sources:
   - wiki/sources/skills/dma-attack.md
   - wiki/sources/README-categories.md
-updated: 2026-07-16
+  - wiki/sources/descriptions/zer0condition__x670e-tomahawk-anticheat-update.md
+updated: 2026-07-17
 confidence: high
 ---
+
 
 # DMA Attack
 
@@ -30,10 +32,12 @@ Typical external DMA cheat: **cheat PC** + **DMA card** (Memory Read TLPs) + opt
 1. PCIe-layer fingerprinting (identity vs real silicon)
 2. IOMMU enforcement (out-of-domain DMA)
 3. External attestation (IOMMU/kernel/boot chain integrity)
+4. Firmware / pre-boot policy — e.g. BIOS DXE stripping PCI embedded option-ROM attributes and retuning NX ([[x670e-tomahawk-anticheat-update]]) (source: wiki/sources/descriptions/zer0condition__x670e-tomahawk-anticheat-update.md)
 
 ## Related concepts
 
-[[dma]] · [[iommu]] · [[hvci]] · [[byovd]] · [[overviews/anti-cheat]]
+[[dma]] · [[iommu]] · [[hvci]] · [[byovd]] · [[x670e-tomahawk-anticheat-update]] · [[overviews/anti-cheat]]
+
 
 ## README map
 

@@ -5,9 +5,11 @@ topics: [dma-attack, anti-cheat, game-hacking]
 sources:
   - wiki/sources/skills/dma-attack.md
   - wiki/sources/skills/anti-cheat.md
-updated: 2026-07-16
+  - wiki/sources/descriptions/zer0condition__x670e-tomahawk-anticheat-update.md
+updated: 2026-07-17
 confidence: high
 ---
+
 
 # DMA (Direct Memory Access)
 
@@ -15,7 +17,8 @@ Hardware-level memory access where a PCIe device issues Memory Read/Write TLPs a
 
 ## Why it matters
 
-Software anti-cheat sees a “normal” PCIe endpoint. Classic process/handle/injection signals may be absent. Defense shifts to PCIe fingerprinting, [[iommu]] policy, hypervisor containment, and TPM/measured-boot attestation.
+Software anti-cheat sees a “normal” PCIe endpoint. Classic process/handle/injection signals may be absent. Defense shifts to PCIe fingerprinting, [[iommu]] policy, hypervisor containment, TPM/measured-boot attestation, and occasionally firmware-level blocks (e.g. BIOS DXE option-ROM attribute stripping in [[x670e-tomahawk-anticheat-update]]). (source: wiki/sources/descriptions/zer0condition__x670e-tomahawk-anticheat-update.md)
+
 
 ## Typical stack
 
@@ -23,4 +26,5 @@ Cheat app → LeechCore/pcileech/MemProcFS → FPGA firmware → Memory Read TLP
 
 ## Related
 
-[[iommu]] · [[hvci]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
+[[iommu]] · [[hvci]] · [[x670e-tomahawk-anticheat-update]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
+
