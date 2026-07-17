@@ -52,9 +52,10 @@ on:
       - "description/**/description_en.txt"
 
 concurrency:
-  # PRs isolated; schedule/dispatch share one backfill group so overlaps cancel.
+  # PRs isolated. schedule + dispatch share one backfill group and queue
+  # (do NOT cancel) so a cron tick never kills an in-progress manual run.
   group: translate-descriptions-${{ github.event.pull_request.number || 'backfill' }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   translate:
@@ -442,7 +443,10 @@ jobs:
             fi
           fi
 
+          # Per-repo successes were already committed+pushed inside the script.
+          # A non-zero translate outcome means at least one repo still failed
+          # after retries (look for "FAILED langs" in the Translate step).
           if [ "${{ steps.translate.outcome }}" = "failure" ]; then
-            echo "Translation had failures — see the Translate step logs."
+            echo "::warning::Partial failure: some repos did not get translations written (agent may have exited 0 without files). Successful repos are already on the branch; re-run or wait for the next schedule for the rest. See Translate step logs for 'FAILED langs'."
             exit 1
           fi

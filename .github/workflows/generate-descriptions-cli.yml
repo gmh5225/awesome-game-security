@@ -34,8 +34,9 @@ on:
         default: "cursor-grok-4.5-high-fast"
 
 concurrency:
+  # Queue overlaps instead of cancelling — cron must not kill a manual run.
   group: fill-missing-descriptions
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   fill-missing:
@@ -339,7 +340,8 @@ jobs:
             fi
           fi
 
+          # Per-repo successes were already committed+pushed inside the script.
           if [ "${{ steps.generate.outcome }}" = "failure" ]; then
-            echo "Generation had failures — see the Fill step logs."
+            echo "::warning::Partial failure: some repos did not get descriptions. Successful ones are already on main; see the Fill step logs."
             exit 1
           fi
