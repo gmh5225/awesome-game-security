@@ -8,6 +8,7 @@ sources:
   - wiki/sources/descriptions/zyhp__vac3_inhibitor.md
   - wiki/sources/descriptions/zodiacon__TotalPE2.md
   - wiki/sources/descriptions/zodiacon__QuickAsm.md
+  - wiki/sources/descriptions/zoand__Injectors.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -24,7 +25,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Key sub-areas
 
-- Memory, injection, hooking (inline/IAT/VTable/HWBP)
+- Memory, injection, hooking (inline/IAT/VTable/HWBP); injection-testing samples such as [[injectors]] for AC stress evaluation. (source: wiki/sources/descriptions/zoand__Injectors.md)
 - Visual ESP / aim / movement cheats; AI visual pipelines (OBS + YOLO + HID)
 - Overlays via [[present-hook]] and external/DWM windows
 - HWID spoofing, stack spoofing, driver communication channels
@@ -35,7 +36,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[injectors]] · [[overviews/anti-cheat]]
 
 ## README map
 

@@ -13,11 +13,10 @@ sources:
   - wiki/sources/descriptions/zorftw__lsass-extend-mapper.md
   - wiki/sources/descriptions/zompi2__Static-Variables-Obfuscator-UE4.md
   - wiki/sources/descriptions/zodiacon__EtwExplorer.md
+  - wiki/sources/descriptions/zoand__Injectors.md
 updated: 2026-07-17
 confidence: high
 ---
-
-
 
 # Anti-Cheat
 
@@ -38,7 +37,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 **Architecture:** user-mode scanners → kernel callbacks/VAD → optional hypervisor EPT protection → server-side replay/stats.
 
-**Threats defended against:** injected code, [[byovd]], hypervisor abuse (stress/test refs such as [[vt-debuuger]] under hacked-hypervisor detection), [[dma]] (PCIe fingerprinting + IOMMU + TPM attestation), AI visual cheats with hardware input. (source: wiki/sources/descriptions/zxd1994__vt-debuuger.md)
+**Threats defended against:** injected code (stress/test harnesses such as [[injectors]] under Injection Testing), [[byovd]], hypervisor abuse (stress/test refs such as [[vt-debuuger]] under hacked-hypervisor detection), [[dma]] (PCIe fingerprinting + IOMMU + TPM attestation), AI visual cheats with hardware input. (source: wiki/sources/descriptions/zoand__Injectors.md) (source: wiki/sources/descriptions/zxd1994__vt-debuuger.md)
 
 **Platform trust:** DSE, [[patchguard]], [[hvci]]/VBS, Secure Boot.
 
@@ -47,7 +46,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vt-debuuger]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vt-debuuger]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[injectors]]
 
 ## README map
 

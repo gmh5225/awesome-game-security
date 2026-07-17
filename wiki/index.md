@@ -35,6 +35,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [BlindEye](entities/blindeye.md) — BattlEye report-path pool-alloc drop (“Packet Fucker”)
 - [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests
+- [Injectors](entities/injectors.md) — injection-testing harness (C/C++; AC stress)
 - [lsass-extend-mapper](entities/lsass-extend-mapper.md) — unsigned driver map via lsass address-space extend
 - [PG1903](entities/pg1903.md) — Win10 1903 PatchGuard disable via context-page NX (Demo NX)
 - [QuickAsm](entities/quickasm.md) — x86/x64 assemble-and-run GUI (Keystone)
