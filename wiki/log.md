@@ -104,3 +104,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:yourmnbbn/tiny-csgo-client`: entity [[tiny-csgo-client]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-17** — ingest `description:younasiqw/BattleField-1-Internal`: entity [[battlefield-1-internal]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
+- **2026-07-17** — ingest `description:yoshisaac/CounterStrikeSource-Linux-Trainer`: entity [[counterstrikesource-linux-trainer]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
