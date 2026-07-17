@@ -20,6 +20,7 @@ sources:
   - wiki/sources/descriptions/zer0condition__Ophion.md
   - wiki/sources/descriptions/zer0condition__ZeroThreadKernel.md
   - wiki/sources/descriptions/zer0condition__checkhv_um.md
+  - wiki/sources/descriptions/ytk2128__pe32-password.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -49,12 +50,12 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 **Platform trust:** DSE, [[patchguard]], [[hvci]]/VBS, Secure Boot.
 
-**Obfuscation tooling:** [[shredder-rs]] — x86_64 polymorphic instruction shredding (context-preserving) for AC/obfuscation-engine research. (source: wiki/sources/descriptions/zx0CF1__shredder-rs.md) Engine-side data hiding: [[static-variables-obfuscator-ue4]] obfuscates UE4 static variables against Cheat Engine–style scans (`Game Engine Protection:Unreal`). (source: wiki/sources/descriptions/zompi2__Static-Variables-Obfuscator-UE4.md)
+**Obfuscation tooling:** [[shredder-rs]] — x86_64 polymorphic instruction shredding (context-preserving) for AC/obfuscation-engine research. (source: wiki/sources/descriptions/zx0CF1__shredder-rs.md) Engine-side data hiding: [[static-variables-obfuscator-ue4]] obfuscates UE4 static variables against Cheat Engine–style scans (`Game Engine Protection:Unreal`). (source: wiki/sources/descriptions/zompi2__Static-Variables-Obfuscator-UE4.md) Binary Packer lane: [[pe32-password]] — C/C++ PE32 password packing for packed/modded client study. (source: wiki/sources/descriptions/ytk2128__pe32-password.md)
 
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[injectors]] · [[zero-thread-kernel]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[injectors]] · [[zero-thread-kernel]]
 
 
 ## README map

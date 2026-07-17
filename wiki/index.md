@@ -57,6 +57,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NTMemory](entities/ntmemory.md) — kernel cross-process R/W (MDL / CR3 walk / physical translate)
 - [OpenArk](entities/openark.md) — Qt anti-rootkit / kernel analysis (callbacks, SSDT, drivers)
 - [Ophion](entities/ophion.md) — stealth Intel VT-x Type-2 HV (EPT; CPUID/CR4/TSC anti-detect)
+- [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)
 - [PG1903](entities/pg1903.md) — Win10 1903 PatchGuard disable via context-page NX (Demo NX)
 - [proxmox-ve-anti-detection](entities/proxmox-ve-anti-detection.md) — Hidden PVE / QEMU-KVM anti-detection (kernel)
 - [qemu-anti-detection](entities/qemu-anti-detection.md) — Hidden QEMU (device-string / fingerprint spoof)
