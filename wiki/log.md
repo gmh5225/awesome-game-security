@@ -102,3 +102,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:yrgo/awesome-educational-games`: entity [[awesome-educational-games]]; cited on [[overviews/overview]] and [[overviews/game-engine]].
 
 - **2026-07-17** — ingest `description:yourmnbbn/tiny-csgo-client`: entity [[tiny-csgo-client]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-17** — ingest `description:younasiqw/BattleField-1-Internal`: entity [[battlefield-1-internal]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
