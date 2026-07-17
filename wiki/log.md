@@ -87,3 +87,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-17** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-engine]] (Anti Cheat ~592, Game Engine ~136 / Game Develop ~176); light `index.md` section notes (no per-category pages).
 
+- **2026-07-17** — ingest `description:yukiarrr/Il2cppSpy`: entity [[il2cpp-spy]]; cited on [[il2cpp]] and [[overviews/mobile-security]].
+

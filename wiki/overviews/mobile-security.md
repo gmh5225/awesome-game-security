@@ -10,9 +10,11 @@ sources:
   - wiki/sources/descriptions/zhizhuodemao__android_proxy_mcp.md
   - wiki/sources/descriptions/zeroxjf__lightsaber.md
   - wiki/sources/descriptions/zboralski__unflutter.md
+  - wiki/sources/descriptions/yukiarrr__Il2cppSpy.md
 updated: 2026-07-17
 confidence: high
 ---
+
 
 # Mobile Security
 
@@ -24,13 +26,14 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 
 **iOS:** jailbreak tooling, class-dump, Logos hooks, sideloading / AltStore for non-jailbreak paths; userland exploit chains such as [[lightsaber]] (iOS 18.4–18.6.2 JS injection into SpringBoard / other processes; derived from DarkSword) (source: wiki/sources/descriptions/zeroxjf__lightsaber.md).
 
-**Unity/Unreal mobile:** [[il2cpp]] (`libil2cpp.so` / UnityFramework + metadata), SDK dumps, memory editors (GameGuardian, H5GG).
+**Unity/Unreal mobile:** [[il2cpp]] (`libil2cpp.so` / UnityFramework + metadata), SDK dumps, memory editors (GameGuardian, H5GG); APK IL2CPP disassembly/diff via [[il2cpp-spy]] (select two APKs → show differences). (source: wiki/sources/descriptions/yukiarrr__Il2cppSpy.md)
+
 
 **Flutter/Dart:** AOT snapshot symbol recovery via [[unflutter]] (Dart VM snapshot metadata → class/function/type names from Flutter APKs/iOS apps) (source: wiki/sources/descriptions/zboralski__unflutter.md).
 
 ## Related concepts
 
-[[frida]] · [[il2cpp]] · [[unflutter]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[cheese]] · [[lightsaber]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[frida]] · [[il2cpp]] · [[il2cpp-spy]] · [[unflutter]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[cheese]] · [[lightsaber]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
 
 ## README map
 
