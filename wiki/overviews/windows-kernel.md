@@ -11,6 +11,7 @@ sources:
   - wiki/sources/descriptions/zorftw__lsass-extend-mapper.md
   - wiki/sources/descriptions/zodiacon__EtwExplorer.md
   - wiki/sources/descriptions/zoand__BOOM.md
+  - wiki/sources/descriptions/zer0condition__Demystifying-PatchGuard.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -32,11 +33,11 @@ Kernel internals that matter for game protection and low-level research: object/
 - **EFI:** pre-kernel mappers that skip normal driver-load telemetry
 - **Legitimate-driver hijack / stealth I/O:** research such as [[boom]] hijacks `Beep.sys` and changes communication so Ring0↔usermode paths are less obvious to AC telemetry. (source: wiki/sources/descriptions/zoand__BOOM.md)
 
-Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-page NX manipulation) illustrates how PG bypass studies map to the Demo NX / Cheat PatchGuard README lane. (source: wiki/sources/descriptions/zzhouhe__PG1903.md)
+Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-page NX manipulation) illustrates how PG bypass studies map to the Demo NX / Cheat PatchGuard README lane. (source: wiki/sources/descriptions/zzhouhe__PG1903.md) Educational demystification material such as [[demystifying-patchguard]] sits in the same lane for RE of [[patchguard]] internals. (source: wiki/sources/descriptions/zer0condition__Demystifying-PatchGuard.md)
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[patchguard]] · [[pg1903]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[boom]] · [[dma]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[boom]] · [[dma]] · [[overviews/anti-cheat]]
 
 ## README map
 

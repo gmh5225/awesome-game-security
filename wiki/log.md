@@ -59,3 +59,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-17** — ingest `description:zer0condition/x670e-tomahawk-anticheat-update`: entity [[x670e-tomahawk-anticheat-update]]; cited on [[overviews/dma-attack]] and [[dma]].
 
+- **2026-07-17** — ingest `description:zer0condition/Demystifying-PatchGuard`: entity [[demystifying-patchguard]]; cited on [[patchguard]] and [[overviews/windows-kernel]].
+

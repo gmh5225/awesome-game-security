@@ -6,7 +6,8 @@ sources:
   - wiki/sources/skills/windows-kernel.md
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/descriptions/zzhouhe__PG1903.md
-updated: 2026-07-16
+  - wiki/sources/descriptions/zer0condition__Demystifying-PatchGuard.md
+updated: 2026-07-17
 confidence: high
 ---
 
@@ -22,6 +23,8 @@ AC kernel components coexist with PatchGuard rather than replacing it. Research 
 
 [[pg1903]] demonstrates a Win10 1903-era approach: locate PatchGuard context pages, clear NX, and neutralize checks in real time (Demo NX). (source: wiki/sources/descriptions/zzhouhe__PG1903.md)
 
+[[demystifying-patchguard]] is a C/C++ educational walkthrough of PatchGuard for researchers in the cheat / PG-related lane. (source: wiki/sources/descriptions/zer0condition__Demystifying-PatchGuard.md)
+
 ## Related
 
-[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[pg1903]] · [[overviews/windows-kernel]]
+[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[pg1903]] · [[demystifying-patchguard]] · [[overviews/windows-kernel]]
