@@ -114,3 +114,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:yoavst/ida-ios-helper`: entity [[ida-ios-helper]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
 - **2026-07-17** — ingest `description:ymdzq/OFRP-device_xiaomi_mondrian`: entity [[ofrp-device-xiaomi-mondrian]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-17** — ingest `description:ykus4/kagura`: entity [[kagura]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
