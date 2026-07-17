@@ -150,3 +150,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:xsj3n/x64-EXE-Packer`: entity [[x64-exe-packer]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-17** — ingest `description:xqemu/xqemu`: entity [[xqemu]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-17** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]] and [[overviews/game-engine]] (Game Engine ~140; AI/Game Assets image→3D/sprite pipelines); light `index.md` section notes (no per-category pages).
