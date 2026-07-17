@@ -190,28 +190,60 @@ def print_scan_report(work: list[tuple[str, str, list[str]]], langs: list[str]) 
         print(f"  ... and {len(work) - 40} more")
 
 
+# Last "Done: owner/repo (...)" line in agent stdout (slug must match exactly).
+DONE_LINE_RE = re.compile(
+    r"^Done:\s*([A-Za-z0-9._-]+/[A-Za-z0-9._-]+)\s*\(([^)]*)\)\s*$",
+    re.MULTILINE,
+)
+# CSI color / style sequences that some CLI builds wrap around Done lines.
+ANSI_ESCAPE_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+
+
+def _strip_ansi(text: str) -> str:
+    return ANSI_ESCAPE_RE.sub("", text)
+
+
 def build_prompt(owner: str, repo: str, langs: list[str]) -> str:
+    slug = f"{owner}/{repo}"
     src = f"description/{owner}/{repo}/description_en.txt"
+    target_paths = [
+        f"description/{owner}/{repo}/description_{code}.txt" for code in langs
+    ]
     targets = "\n".join(
-        f"  - description/{owner}/{repo}/description_{code}.txt"
-        f"  ({LANGS[code]})"
-        for code in langs
+        f"  - {path}  ({LANGS[code]})"
+        for code, path in zip(langs, target_paths)
     )
+    # langs is never empty in normal runs; keep verify_cmd shell-safe anyway.
+    verify_cmd = (
+        " && ".join(f'test -s "{p}"' for p in target_paths) if target_paths else "true"
+    )
+    langs_csv = ", ".join(langs)
     return f"""\
 You are translating one English repository description for the
 awesome-game-security curated list.
 
-Repository: {owner}/{repo}
-Source file: {src}
+EXACT_SLUG (copy character-for-character; do NOT autocorrect or "fix"):
+  {slug}
 
-Target files (create/overwrite):
+Source file (read ONLY this):
+  {src}
+
+Target files (create/overwrite ONLY these paths):
 {targets}
+
+Slug discipline (critical — past failures):
+- The directory/repo name is exactly "{repo}" under owner "{owner}".
+- Do NOT invent lookalike names (e.g. KDtour ≠ KDmapper, tour ≠ mapper).
+- Do NOT substitute a different repo because the name "looks similar".
+- Every path you touch MUST contain /{owner}/{repo}/ exactly as written.
+- The final Done line MUST use EXACT_SLUG={slug} with no spelling changes.
 
 Follow these steps exactly:
 
-1. Read ONLY {src}. Do not read archives or other paths.
+1. Read ONLY {src}. Do not read archives, other description/*/*, or sibling repos.
 2. Translate the English text into each target language listed above.
-3. Write each translation to its target file (plain UTF-8 text).
+3. Write each translation to its target file (plain UTF-8 text). Create parent
+   dirs if needed. Paths must match the list above exactly.
 4. Translation rules:
    - Preserve meaning, technical terms, and tone
    - Keep roughly the same length (3–5 sentences when the source is)
@@ -222,15 +254,75 @@ Follow these steps exactly:
      in their common local form or original English when that is natural
 5. If the source is missing or empty, write a single line to each target:
    No description available.
+6. BEFORE printing Done, verify on disk (run a shell check), e.g.:
+   {verify_cmd}
+   If any test fails, write/fix the missing files — do NOT print Done yet.
 
 Hard constraints:
 - ONLY create/modify the target files listed above
 - Do NOT modify {src} or any other path
 - Do NOT run git, gh, push, or commit
 - You MUST actually write every target file to disk before finishing
-- Do NOT print Done until every target file exists and is non-empty
-- When finished, print one line: Done: {owner}/{repo} ({', '.join(langs)})
+- Printing Done without non-empty target files is a hard failure
+- When finished, print exactly one line (slug must match EXACT_SLUG):
+  Done: {slug} ({langs_csv})
 """
+
+
+def parse_done_slug(output: str) -> tuple[str | None, str | None]:
+    """Return (slug, langs_inside_parens) from the last Done: line, else (None, None)."""
+    cleaned = _strip_ansi(output or "").replace("\r\n", "\n").replace("\r", "\n")
+    matches = DONE_LINE_RE.findall(cleaned)
+    if not matches:
+        return None, None
+    slug, langs_part = matches[-1]
+    return slug, langs_part.strip()
+
+
+def check_done_line(
+    output: str, owner: str, repo: str
+) -> tuple[bool, str]:
+    """Validate agent claimed the correct EXACT_SLUG in Done:."""
+    expected = f"{owner}/{repo}"
+    slug, _langs = parse_done_slug(output)
+    if slug is None:
+        return False, "no Done: owner/repo (...) line in agent output"
+    if slug != expected:
+        return (
+            False,
+            f"Done slug mismatch: agent said {slug!r}, expected {expected!r} "
+            "(possible lookalike hallucination)",
+        )
+    return True, f"Done slug ok: {slug}"
+
+
+def _stream_agent(cmd: list[str]) -> tuple[int, str]:
+    """Run agent, stream stdout+stderr live, and return (exit_code, captured_text)."""
+    proc = subprocess.Popen(
+        cmd,
+        cwd=ROOT_DIR,
+        env=os.environ.copy(),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        bufsize=1,
+    )
+    chunks: list[str] = []
+    try:
+        if proc.stdout is None:
+            raise RuntimeError("agent subprocess has no stdout pipe")
+        for line in proc.stdout:
+            sys.stdout.write(line)
+            sys.stdout.flush()
+            chunks.append(line)
+        code = proc.wait()
+    except BaseException:
+        proc.kill()
+        proc.wait()
+        raise
+    return code if code is not None else 1, "".join(chunks)
 
 
 def run_agent(
@@ -238,7 +330,7 @@ def run_agent(
     model: str,
     prompt: str,
     dry_run: bool,
-) -> int:
+) -> tuple[int, str]:
     cmd = [
         agent_bin,
         "-p",
@@ -258,35 +350,23 @@ def run_agent(
         print("[DRY-RUN] would run:")
         print(" ", " ".join(cmd[:-1]), "... <prompt>")
         print("--- prompt preview ---")
-        print(prompt[:600])
+        print(prompt[:900])
         print("---")
-        return 0
+        return 0, ""
 
     print(f"  $ {agent_bin} -p --force --trust --sandbox disabled --model {model} ...")
     started = time.time()
-    proc = subprocess.run(
-        cmd,
-        cwd=ROOT_DIR,
-        env=os.environ.copy(),
-        timeout=None,
-        check=False,
-    )
+    code, output = _stream_agent(cmd)
 
     elapsed = time.time() - started
-    print(f"  exit={proc.returncode}  elapsed={elapsed:.1f}s")
-    if proc.returncode != 0 and "--trust" in cmd and elapsed < 2.0:
+    print(f"  exit={code}  elapsed={elapsed:.1f}s")
+    if code != 0 and "--trust" in cmd and elapsed < 2.0:
         print("  retrying without --trust (possible older CLI) ...")
         cmd_no_trust = [c for c in cmd if c != "--trust"]
-        proc = subprocess.run(
-            cmd_no_trust,
-            cwd=ROOT_DIR,
-            env=os.environ.copy(),
-            timeout=None,
-            check=False,
-        )
+        code, output = _stream_agent(cmd_no_trust)
         elapsed2 = time.time() - started
-        print(f"  exit={proc.returncode}  elapsed={elapsed2:.1f}s (no --trust)")
-    return proc.returncode
+        print(f"  exit={code}  elapsed={elapsed2:.1f}s (no --trust)")
+    return code, output
 
 
 def _git(*args: str, check: bool = True) -> subprocess.CompletedProcess[bytes]:
@@ -646,12 +726,18 @@ def main() -> None:
         repo_wrote_paths: list[Path] = []
 
         for attempt in range(1, max_attempts + 1):
-            code = run_agent(
+            code, agent_out = run_agent(
                 agent_bin,
                 args.model,
                 build_prompt(owner, repo, remaining),
                 False,
             )
+            done_ok, done_msg = check_done_line(agent_out, owner, repo)
+            if done_ok:
+                print(f"  {done_msg}")
+            else:
+                print(f"  WARNING: {done_msg}")
+
             wrote, bad = collect_results(
                 owner,
                 repo,
@@ -667,6 +753,19 @@ def main() -> None:
                     print(
                         f"  wrote {path.relative_to(ROOT_DIR)} "
                         f"({path.stat().st_size} bytes)"
+                    )
+            else:
+                # Empty run: wrong/missing Done, or echoed correct Done with
+                # no writes (same class of flake as Driver-KDtour).
+                if done_ok:
+                    print(
+                        "  note: Done slug matched but no target files "
+                        "written — treating as empty run"
+                    )
+                else:
+                    print(
+                        "  note: agent Done missing/wrong and wrote no "
+                        "target files — treating as empty run"
                     )
             # Drop agent side-effects; keep this run's outputs (+ unpushed batch).
             discard_non_translations(pending_commit + kept_outputs)
