@@ -11,6 +11,7 @@ sources:
   - wiki/sources/descriptions/zinja-coder__apktool-mcp-server.md
   - wiki/sources/descriptions/zhuzhu-Top__deobf.md
   - wiki/sources/descriptions/zhizhuodemao__android_proxy_mcp.md
+  - wiki/sources/descriptions/zeroxjf__lightsaber.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -26,10 +27,11 @@ Workflows for protected game clients and anti-cheat components across user mode,
 - **Obfuscation:** MBA, OLLVM CFF, opaque predicates, VMProtect/Themida virtualization; [[shredder-rs]] for x86_64 instruction-level polymorphic shredding vs static analysis (source: wiki/sources/descriptions/zx0CF1__shredder-rs.md); OLLVM fix / plugin-hook work on `libtprt.so` via [[deobf]] (source: wiki/sources/descriptions/zhuzhu-Top__deobf.md)
 - **Game engines:** [[il2cpp]] dumps, Unreal SDK generators, native PE/pattern workflows
 - **Anti-analysis:** ScyllaHide/TitanHide/HyperHide vs IsDebuggerPresent/Kd* / timing checks
+- **Mobile / iOS:** userland exploit-chain study via [[lightsaber]] (iOS 18.4–18.6.2 JS injection into SpringBoard and other processes) (source: wiki/sources/descriptions/zeroxjf__lightsaber.md)
 
 ## Related concepts
 
-[[il2cpp]] · [[frida]] · [[kernel-callbacks]] · [[patchguard]] · [[shredder-rs]] · [[deobf]] · [[totalpe2]] · [[quickasm]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]]
+[[il2cpp]] · [[frida]] · [[kernel-callbacks]] · [[patchguard]] · [[shredder-rs]] · [[deobf]] · [[totalpe2]] · [[quickasm]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[lightsaber]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[overviews/mobile-security]]
 
 ## README map
 

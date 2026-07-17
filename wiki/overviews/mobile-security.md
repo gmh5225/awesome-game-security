@@ -8,6 +8,7 @@ sources:
   - wiki/sources/descriptions/zinja-coder__apktool-mcp-server.md
   - wiki/sources/descriptions/zhuowei__cheese.md
   - wiki/sources/descriptions/zhizhuodemao__android_proxy_mcp.md
+  - wiki/sources/descriptions/zeroxjf__lightsaber.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -20,13 +21,13 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 
 **Android:** apktool/jadx (agent-facing apktool via [[apktool-mcp-server]] MCP tools) (source: wiki/sources/descriptions/zinja-coder__apktool-mcp-server.md), Magisk / KernelSU / APatch (e.g. [[cheese]] Magisk install on Quest 3/3S via Adreno CVE-2025-21479, no boot-partition rewrite) (source: wiki/sources/descriptions/zhuowei__cheese.md), Zygisk modules, ART/syscall hooks, eBPF tracers, kernel drivers, ACE/AppSealing-class protectors; agent-facing HTTP/HTTPS capture via [[android-proxy-mcp]] (mitmdump + SQLite + NL query) (source: wiki/sources/descriptions/zhizhuodemao__android_proxy_mcp.md).
 
-**iOS:** jailbreak tooling, class-dump, Logos hooks, sideloading / AltStore for non-jailbreak paths.
+**iOS:** jailbreak tooling, class-dump, Logos hooks, sideloading / AltStore for non-jailbreak paths; userland exploit chains such as [[lightsaber]] (iOS 18.4–18.6.2 JS injection into SpringBoard / other processes; derived from DarkSword) (source: wiki/sources/descriptions/zeroxjf__lightsaber.md).
 
 **Unity/Unreal mobile:** [[il2cpp]] (`libil2cpp.so` / UnityFramework + metadata), SDK dumps, memory editors (GameGuardian, H5GG).
 
 ## Related concepts
 
-[[frida]] · [[il2cpp]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[cheese]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[frida]] · [[il2cpp]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[cheese]] · [[lightsaber]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
 
 ## README map
 
