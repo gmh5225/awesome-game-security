@@ -152,3 +152,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:xqemu/xqemu`: entity [[xqemu]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-07-17** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]] and [[overviews/game-engine]] (Game Engine ~140; AI/Game Assets image→3D/sprite pipelines); light `index.md` section notes (no per-category pages).
+
+- **2026-07-17** — ingest `description:xp987/symbridge`: entity [[symbridge]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
