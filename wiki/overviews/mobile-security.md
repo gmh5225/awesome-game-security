@@ -18,6 +18,7 @@ sources:
   - wiki/sources/descriptions/yhnu__op7t.md
   - wiki/sources/descriptions/yabinc__simpleperf_demo.md
   - wiki/sources/descriptions/xmmword__dpatch.md
+  - wiki/sources/descriptions/xiaoxindada__magiskboot_ndk_on_linux.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -31,7 +32,7 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 
 ## Key sub-areas
 
-**Android:** apktool/jadx (agent-facing apktool via [[apktool-mcp-server]] MCP tools) (source: wiki/sources/descriptions/zinja-coder__apktool-mcp-server.md), Magisk / KernelSU / APatch (e.g. [[cheese]] Magisk install on Quest 3/3S via Adreno CVE-2025-21479, no boot-partition rewrite; [[move-certificate]] user→system CA module for Android 7–15) (source: wiki/sources/descriptions/zhuowei__cheese.md) (source: wiki/sources/descriptions/ys1231__MoveCertificate.md), custom recovery device trees such as [[ofrp-device-xiaomi-mondrian]] (OFRP/TWRP for Redmi K60 Pro / Snapdragon 8 Gen 2) (source: wiki/sources/descriptions/ymdzq__OFRP-device_xiaomi_mondrian.md), DIY Android kernel explorers such as [[op7t]] (source: wiki/sources/descriptions/yhnu__op7t.md), syscall dispatcher patching PoCs such as [[dpatch]] (writable syscall-table copy + dispatcher jump) (source: wiki/sources/descriptions/xmmword__dpatch.md), Android app perf profiling demos such as [[simpleperf-demo]] (simpleperf / Perf) (source: wiki/sources/descriptions/yabinc__simpleperf_demo.md), Zygisk modules, ART/syscall hooks, eBPF tracers, kernel drivers, ACE/AppSealing-class protectors; agent-facing HTTP/HTTPS capture via [[android-proxy-mcp]] (mitmdump + SQLite + NL query) (source: wiki/sources/descriptions/zhizhuodemao__android_proxy_mcp.md).
+**Android:** apktool/jadx (agent-facing apktool via [[apktool-mcp-server]] MCP tools) (source: wiki/sources/descriptions/zinja-coder__apktool-mcp-server.md), Magisk / KernelSU / APatch (e.g. [[cheese]] Magisk install on Quest 3/3S via Adreno CVE-2025-21479, no boot-partition rewrite; [[move-certificate]] user→system CA module for Android 7–15; NDK-on-Linux magiskboot builds via [[magiskboot-ndk-on-linux]] for boot-image unpack/repack) (source: wiki/sources/descriptions/zhuowei__cheese.md) (source: wiki/sources/descriptions/ys1231__MoveCertificate.md) (source: wiki/sources/descriptions/xiaoxindada__magiskboot_ndk_on_linux.md), custom recovery device trees such as [[ofrp-device-xiaomi-mondrian]] (OFRP/TWRP for Redmi K60 Pro / Snapdragon 8 Gen 2) (source: wiki/sources/descriptions/ymdzq__OFRP-device_xiaomi_mondrian.md), DIY Android kernel explorers such as [[op7t]] (source: wiki/sources/descriptions/yhnu__op7t.md), syscall dispatcher patching PoCs such as [[dpatch]] (writable syscall-table copy + dispatcher jump) (source: wiki/sources/descriptions/xmmword__dpatch.md), Android app perf profiling demos such as [[simpleperf-demo]] (simpleperf / Perf) (source: wiki/sources/descriptions/yabinc__simpleperf_demo.md), Zygisk modules, ART/syscall hooks, eBPF tracers, kernel drivers, ACE/AppSealing-class protectors; agent-facing HTTP/HTTPS capture via [[android-proxy-mcp]] (mitmdump + SQLite + NL query) (source: wiki/sources/descriptions/zhizhuodemao__android_proxy_mcp.md).
 
 **iOS:** jailbreak tooling, class-dump, Logos hooks, sideloading / AltStore for non-jailbreak paths; userland exploit chains such as [[lightsaber]] (iOS 18.4–18.6.2 JS injection into SpringBoard / other processes; derived from DarkSword) (source: wiki/sources/descriptions/zeroxjf__lightsaber.md); IDA iOS reversing helper [[ida-ios-helper]] (needs vtable symbols) (source: wiki/sources/descriptions/yoavst__ida-ios-helper.md).
 
@@ -43,7 +44,7 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 
 ## Related concepts
 
-[[frida]] · [[il2cpp]] · [[il2cpp-spy]] · [[unityspeedtools]] · [[unflutter]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[cheese]] · [[move-certificate]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[lightsaber]] · [[ida-ios-helper]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[frida]] · [[il2cpp]] · [[il2cpp-spy]] · [[unityspeedtools]] · [[unflutter]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[lightsaber]] · [[ida-ios-helper]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
 
 
 ## README map

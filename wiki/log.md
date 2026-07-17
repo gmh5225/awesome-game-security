@@ -166,3 +166,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:xkevio/kevboy`: entity [[kevboy]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-07-17** — ingest `description:xinyu-evolutruster/3D-Racing-Game`: entity [[3d-racing-game]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
+
+- **2026-07-17** — ingest `description:xiaoxindada/magiskboot_ndk_on_linux`: entity [[magiskboot-ndk-on-linux]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
