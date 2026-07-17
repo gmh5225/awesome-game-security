@@ -149,6 +149,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/bevyengine/bevy [Rust]
 - https://github.com/FyroxEngine/Fyrox [Rust]
 - https://github.com/AmbientRun/Ambient [Rust]
+- https://github.com/PrograMistV1/ursus [Rust Vulkan engine with render graph, ECS, asset pipeline, and deferred pipelines]
 - https://github.com/not-fl3/macroquad [Rust 2D]
 - https://github.com/AbyssEngine/AbyssEngine [ARPG]
 - https://github.com/skylicht-lab/skylicht-engine
@@ -218,6 +219,9 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/RSDKModding/RSDKv5-Decompilation [Retro Engine v5 / v5Ultimate decompilation]
 - https://github.com/koosoli/PoseidonVK [Vulkan modernization fork of the Poseidon/CWR-CE engine (Arma: Cold War Assault)]
 - https://github.com/udinmoInc/WindEffects [C++23 Vulkan game engine with ECS, editor, and asset pipeline]
+- https://github.com/goobz22/cat-annihilation [C++20/Vulkan/CUDA engine with render graph, clustered deferred PBR, ECS, and wave-survival test game]
+- https://github.com/orkitec/orkige [C++20 game engine with dual OGRE renderers, Lua scripting, and AI-native editor over MCP]
+- https://github.com/Bloom-Engine/engine [Native TypeScript game engine compiling to Metal, DirectX 12, Vulkan, OpenGL, and WebGPU]
 
 
 > Game Engine Plugins:Unreal
@@ -586,6 +590,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/DenuvoSoftwareSolutions/Onlooker [Tool to collect and visualize memory usage of a process tree]
 - https://github.com/milostosic/rprof [CPU scope based profiling library]
 - https://github.com/DarknessFX/DFoundryFX [UE Performance]
+- https://github.com/AitiX/Fastlogs [Unity/GameMaker debug engine that ships logs, device state, and screenshots from remote builds as short links]
 
 ## Game Tools
 - [Play your favorite games in a borderless window; no more time consuming alt-tabs](https://github.com/Codeusa/Borderless-Gaming)
