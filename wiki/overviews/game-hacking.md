@@ -27,6 +27,7 @@ sources:
   - wiki/sources/descriptions/yoshisaac__CounterStrikeSource-Linux-Trainer.md
   - wiki/sources/descriptions/yoshisaac__CounterStrike2-Linux-Cheat.md
   - wiki/sources/descriptions/ymdzq__OFRP-device_xiaomi_mondrian.md
+  - wiki/sources/descriptions/yinleiCoder__cs2-cheat-cpp.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -65,12 +66,13 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Minimal CS:GO dedicated-server clients such as [[tiny-csgo-client]] (C++; modding / SDK generation) sit in the cheat / game:csgo lane. (source: wiki/sources/descriptions/yourmnbbn__tiny-csgo-client.md)
 - Linux external CS:S trainers such as [[counterstrikesource-linux-trainer]] (movement automation + info display) sit in the cheat / game:css lane. (source: wiki/sources/descriptions/yoshisaac__CounterStrikeSource-Linux-Trainer.md)
 - Linux external CS2 cheats such as [[counterstrike2-linux-cheat]] (C++; memory analysis) sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/yoshisaac__CounterStrike2-Linux-Cheat.md)
+- External CS2 samples such as [[cs2-cheat-cpp]] (C++; rendering / asset pipelines / SDK generation) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/yinleiCoder__cs2-cheat-cpp.md)
 - Title-specific Battlefield 1 internals such as [[battlefield-1-internal]] (C++; DirectX / SDK generation / hooking) illustrate the cheat / game:battlefield 1 lane. (source: wiki/sources/descriptions/younasiqw__BattleField-1-Internal.md)
 - Hidden-PVE / QEMU-KVM anti-detection (e.g. [[proxmox-ve-anti-detection]], [[qemu-anti-detection]] device-string spoof such as QEMU→ASUS keyboard) sits in the `Cheat > QEMU/KVM/PVE/VBOX` lane. (source: wiki/sources/descriptions/zhaodice__proxmox-ve-anti-detection.md) (source: wiki/sources/descriptions/zhaodice__qemu-anti-detection.md)
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ntmemory]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[cheese]] · [[move-certificate]] · [[ofrp-device-xiaomi-mondrian]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[battlefield-1-internal]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ntmemory]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[cheese]] · [[move-certificate]] · [[ofrp-device-xiaomi-mondrian]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[battlefield-1-internal]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[overviews/anti-cheat]]
 
 
 
