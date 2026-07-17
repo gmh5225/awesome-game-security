@@ -71,3 +71,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-17** — ingest `description:zer0condition/Ophion`: entity [[ophion]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
+- **2026-07-17** — ingest `description:zer0condition/checkhv_um`: entity [[checkhv-um]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
