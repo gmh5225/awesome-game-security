@@ -39,4 +39,4 @@ The README organizes ~40 top-level sections: engines/rendering/`AI` asset toolin
 
 ## README category map (high-signal)
 
-Security-dense sections from the projected category map (40 top-level): **Cheat** (~2543 links), **Anti Cheat** (~591), **DirectX/OpenGL/Vulkan**, **Windows Security Features**, **Some Tricks** (~112), plus engine, WSA/emulator, and console (Switch/Xbox/PlayStation/3DS) categories. (source: wiki/sources/README-categories.md)
+Security-dense sections from the projected category map (40 top-level): **Cheat** (~2543 links), **Anti Cheat** (~592), **DirectX/OpenGL/Vulkan**, **Windows Security Features**, **Some Tricks** (~112), plus engine (`Game Engine` ~136), WSA/emulator, and console (Switch/Xbox/PlayStation/3DS) categories. (source: wiki/sources/README-categories.md)

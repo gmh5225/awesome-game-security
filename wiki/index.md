@@ -6,10 +6,10 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Overviews
 
-- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2543 / Anti Cheat ~591)
-- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* + engine protection (~591)
+- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2543 / Anti Cheat ~592)
+- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* + engine protection (~592)
 - [DMA Attack](overviews/dma-attack.md) — PCIe DMA threat model and defenses
-- [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot; assets, hot-patch, MCP/AI gamedev
+- [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~136); assets, hot-patch, MCP/AI gamedev
 - [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2543) + Some Tricks (~112)
 - [Graphics API](overviews/graphics-api.md) — DirectX/GL/Vulkan hooks, overlays, capture
 - [Mobile Security](overviews/mobile-security.md) — Android / iOS; WSA, emulators, Cellular/SIM

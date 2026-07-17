@@ -85,3 +85,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-17** — ingest `description:yyl-20020115/OpenArk`: entity [[openark]]; cited on [[overviews/windows-kernel]] and [[kernel-callbacks]].
 
+- **2026-07-17** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-engine]] (Anti Cheat ~592, Game Engine ~136 / Game Develop ~176); light `index.md` section notes (no per-category pages).
+
