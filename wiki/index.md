@@ -63,6 +63,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vac3_inhibitor](entities/vac3-inhibitor.md) — VAC3 exploration via hooking / memory analysis (C++)
 - [vt-debuuger](entities/vt-debuuger.md) — hacked hypervisor testing (C/C++ drivers / plugins)
 - [x670e-tomahawk-anticheat-update](entities/x670e-tomahawk-anticheat-update.md) — MSI X670E Tomahawk BIOS v1KB DXE anti-cheat (option-ROM strip / NX)
+- [XrefsExt](entities/xrefsext.md) — IDA Pro extended-xrefs plugin (cheat / IDA Plugins)
 - [ZeroThreadKernel](entities/zero-thread-kernel.md) — threadless kernel exec via existing contexts / timers (vs AC thread enum)
 
 

@@ -75,3 +75,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-17** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/game-engine]], [[overviews/graphics-api]], [[overviews/mobile-security]], [[overviews/windows-kernel]] (counts ~2543/~591; MCP/AI, Cellular/SIM, 3DS, TPM attestation notes); light `index.md` section notes (no per-category pages).
 
+- **2026-07-17** — ingest `description:zengfr/XrefsExt`: entity [[xrefsext]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+

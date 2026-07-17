@@ -12,6 +12,7 @@ sources:
   - wiki/sources/descriptions/zhuzhu-Top__deobf.md
   - wiki/sources/descriptions/zhizhuodemao__android_proxy_mcp.md
   - wiki/sources/descriptions/zeroxjf__lightsaber.md
+  - wiki/sources/descriptions/zengfr__XrefsExt.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -22,7 +23,7 @@ Workflows for protected game clients and anti-cheat components across user mode,
 
 ## Key sub-areas
 
-- **Tools:** IDA/Ghidra/Binary Ninja, x64dbg/WinDbg/HyperDbg, Cheat Engine, dnSpy, [[frida]]; PE triage viewers such as [[totalpe2]] (headers/imports/exports/.NET metadata) (source: wiki/sources/descriptions/zodiacon__TotalPE2.md); quick x86/x64 assemble-and-run via [[quickasm]] (Keystone) (source: wiki/sources/descriptions/zodiacon__QuickAsm.md); Android apktool via [[apktool-mcp-server]] (MCP suite) (source: wiki/sources/descriptions/zinja-coder__apktool-mcp-server.md); Android HTTP/HTTPS capture + NL query via [[android-proxy-mcp]] (mitmdump/SQLite) (source: wiki/sources/descriptions/zhizhuodemao__android_proxy_mcp.md)
+- **Tools:** IDA/Ghidra/Binary Ninja, x64dbg/WinDbg/HyperDbg, Cheat Engine, dnSpy, [[frida]]; PE triage viewers such as [[totalpe2]] (headers/imports/exports/.NET metadata) (source: wiki/sources/descriptions/zodiacon__TotalPE2.md); quick x86/x64 assemble-and-run via [[quickasm]] (Keystone) (source: wiki/sources/descriptions/zodiacon__QuickAsm.md); IDA xref-extension plugin [[xrefsext]] (source: wiki/sources/descriptions/zengfr__XrefsExt.md); Android apktool via [[apktool-mcp-server]] (MCP suite) (source: wiki/sources/descriptions/zinja-coder__apktool-mcp-server.md); Android HTTP/HTTPS capture + NL query via [[android-proxy-mcp]] (mitmdump/SQLite) (source: wiki/sources/descriptions/zhizhuodemao__android_proxy_mcp.md)
 - **DBI:** Frida, DynamoRIO, Pin; trap-and-emulate CFT; WHP user-mode hypervisor tracing
 - **Obfuscation:** MBA, OLLVM CFF, opaque predicates, VMProtect/Themida virtualization; [[shredder-rs]] for x86_64 instruction-level polymorphic shredding vs static analysis (source: wiki/sources/descriptions/zx0CF1__shredder-rs.md); OLLVM fix / plugin-hook work on `libtprt.so` via [[deobf]] (source: wiki/sources/descriptions/zhuzhu-Top__deobf.md)
 - **Game engines:** [[il2cpp]] dumps, Unreal SDK generators, native PE/pattern workflows
@@ -31,7 +32,7 @@ Workflows for protected game clients and anti-cheat components across user mode,
 
 ## Related concepts
 
-[[il2cpp]] · [[frida]] · [[kernel-callbacks]] · [[patchguard]] · [[shredder-rs]] · [[deobf]] · [[totalpe2]] · [[quickasm]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[lightsaber]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[overviews/mobile-security]]
+[[il2cpp]] · [[frida]] · [[kernel-callbacks]] · [[patchguard]] · [[shredder-rs]] · [[deobf]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[lightsaber]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[overviews/mobile-security]]
 
 ## README map
 
