@@ -7,6 +7,7 @@ sources:
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/zx0CF1__shredder-rs.md
   - wiki/sources/descriptions/zodiacon__TotalPE2.md
+  - wiki/sources/descriptions/zodiacon__QuickAsm.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -17,7 +18,7 @@ Workflows for protected game clients and anti-cheat components across user mode,
 
 ## Key sub-areas
 
-- **Tools:** IDA/Ghidra/Binary Ninja, x64dbg/WinDbg/HyperDbg, Cheat Engine, dnSpy, [[frida]]; PE triage viewers such as [[totalpe2]] (headers/imports/exports/.NET metadata) (source: wiki/sources/descriptions/zodiacon__TotalPE2.md)
+- **Tools:** IDA/Ghidra/Binary Ninja, x64dbg/WinDbg/HyperDbg, Cheat Engine, dnSpy, [[frida]]; PE triage viewers such as [[totalpe2]] (headers/imports/exports/.NET metadata) (source: wiki/sources/descriptions/zodiacon__TotalPE2.md); quick x86/x64 assemble-and-run via [[quickasm]] (Keystone) (source: wiki/sources/descriptions/zodiacon__QuickAsm.md)
 - **DBI:** Frida, DynamoRIO, Pin; trap-and-emulate CFT; WHP user-mode hypervisor tracing
 - **Obfuscation:** MBA, OLLVM CFF, opaque predicates, VMProtect/Themida virtualization; [[shredder-rs]] for x86_64 instruction-level polymorphic shredding vs static analysis (source: wiki/sources/descriptions/zx0CF1__shredder-rs.md)
 - **Game engines:** [[il2cpp]] dumps, Unreal SDK generators, native PE/pattern workflows
@@ -25,7 +26,7 @@ Workflows for protected game clients and anti-cheat components across user mode,
 
 ## Related concepts
 
-[[il2cpp]] · [[frida]] · [[kernel-callbacks]] · [[patchguard]] · [[shredder-rs]] · [[totalpe2]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]]
+[[il2cpp]] · [[frida]] · [[kernel-callbacks]] · [[patchguard]] · [[shredder-rs]] · [[totalpe2]] · [[quickasm]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]]
 
 ## README map
 
