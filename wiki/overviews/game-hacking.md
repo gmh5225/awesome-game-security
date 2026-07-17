@@ -42,6 +42,7 @@ sources:
   - wiki/sources/descriptions/xmmword__dpatch.md
   - wiki/sources/descriptions/xkp95175333__Thetan_ArenaSDK.md
   - wiki/sources/descriptions/xiaoxindada__magiskboot_ndk_on_linux.md
+  - wiki/sources/descriptions/xetzzy__Fortnite-External-Source.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -69,6 +70,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - PE triage of game/client modules (imports, TLS, .NET metadata) via viewers such as [[totalpe2]] before deeper RE. (source: wiki/sources/descriptions/zodiacon__TotalPE2.md)
 - Rapid x86/x64 shellcode/asm prototyping with [[quickasm]] (assemble via Keystone, execute in-process). (source: wiki/sources/descriptions/zodiacon__QuickAsm.md)
 - Title-specific offset/token dumps (e.g. Fortnite FLTokens via [[fortnite-fltokens-and-offsets]]) illustrate ephemeral cheat-research artifacts that rot quickly. (source: wiki/sources/descriptions/zinx-YT__Fortnite-Fltokens-and-offsets.md)
+- External Fortnite samples such as [[fortnite-external-source]] (C++; driver development / SDK generation) sit in the cheat / game:fortnite lane. (source: wiki/sources/descriptions/xetzzy__Fortnite-External-Source.md)
 - MBA expression generators such as [[mutaben]] (Python) sit in the Cheat Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/z1ko__mutaben.md)
 - Fix OLLVM / deobfuscation plugins targeting `libtprt.so` (e.g. [[deobf]]) sit in the Cheat Fix OLLVM lane. (source: wiki/sources/descriptions/zhuzhu-Top__deobf.md)
 - IDA CFF deflattening via [[idadeflat]] (angr-backed semi-auto CFG recover/patch) also sits in that Fix OLLVM / deflat lane. (source: wiki/sources/descriptions/za233__IDADeflat.md)
@@ -99,7 +101,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ntmemory]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[kevboy]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ntmemory]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[kevboy]] · [[overviews/anti-cheat]]
 
 
 

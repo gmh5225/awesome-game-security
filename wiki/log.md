@@ -170,3 +170,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:xiaoxindada/magiskboot_ndk_on_linux`: entity [[magiskboot-ndk-on-linux]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-17** — ingest `description:xiaoweime/WProtect`: entity [[wprotect]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-17** — ingest `description:xetzzy/Fortnite-External-Source`: entity [[fortnite-external-source]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
