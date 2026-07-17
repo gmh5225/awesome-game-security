@@ -38,6 +38,7 @@ sources:
   - wiki/sources/descriptions/xp987__symbridge.md
   - wiki/sources/descriptions/xoxor4d__gta4-rtx.md
   - wiki/sources/descriptions/xo1337__steam-overlay-x64.md
+  - wiki/sources/descriptions/xmmword__dpatch.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -76,6 +77,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Magisk/KernelSU/APatch modules such as [[move-certificate]] (user→system CA trust, Android 7–15) support MITM-oriented mobile cheat research. (source: wiki/sources/descriptions/ys1231__MoveCertificate.md)
 - Custom recovery / ROM device trees such as [[ofrp-device-xiaomi-mondrian]] (OFRP for Redmi K60 Pro / mondrian) sit in the Android bootloader/ROM/root lane. (source: wiki/sources/descriptions/ymdzq__OFRP-device_xiaomi_mondrian.md)
 - DIY Android kernel explorers such as [[op7t]] sit in the Cheat Android kernel explorer lane. (source: wiki/sources/descriptions/yhnu__op7t.md)
+- Syscall dispatcher patching PoCs such as [[dpatch]] (writable syscall-table copy + dispatcher jump to custom handler) sit in the Cheat Hook syscall / Android kernel explorer lane. (source: wiki/sources/descriptions/xmmword__dpatch.md)
 - Android app perf profiling demos such as [[simpleperf-demo]] (simpleperf / Perf) sit adjacent to that Android explorer / cheat research lane. (source: wiki/sources/descriptions/yabinc__simpleperf_demo.md)
 - Linux LKM vermagic/CRC rewriting via [[vermagic]] sits in the Cheat Linux / RE tools lane (load modules across mismatched kernel builds). (source: wiki/sources/descriptions/yaxinsn__vermagic.md)
 - Title-specific DayZ cheat/modding samples such as [[dayzzz]] (SDK generation + overlays) illustrate game:dayz offensive research surface. (source: wiki/sources/descriptions/zhitkur__DayZzz.md)
@@ -91,7 +93,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ntmemory]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ntmemory]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[overviews/anti-cheat]]
 
 
 

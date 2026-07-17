@@ -50,6 +50,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DayZzz](entities/dayzzz.md) — DayZ cheat/modding: SDK generation + overlays (C/C++)
 - [Demystifying-PatchGuard](entities/demystifying-patchguard.md) — educational C/C++ walkthrough of PatchGuard
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
+- [dpatch](entities/dpatch.md) — syscall dispatcher patching PoC (table copy + dispatcher jump)
 
 - [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests
 - [Fortnite-Fltokens-and-offsets](entities/fortnite-fltokens-and-offsets.md) — Fortnite FLToken/offset grabber (stale / offline)
