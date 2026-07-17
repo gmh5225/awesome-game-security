@@ -130,3 +130,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:yardenshafir/WinDbg_Scripts`: entity [[windbg-scripts]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
 - **2026-07-17** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/game-engine]], [[overviews/mobile-security]], [[overviews/windows-kernel]], [[overviews/reverse-engineering]] (Cheat ~2544; Game Network JWT/Location; Launcher Abuser / Android CVE+memory-loading; Windows Emulator hybrid AC analysis); light `index.md` section notes (no per-category pages).
+
+- **2026-07-17** — ingest `description:yardenshafir/SymlinkCallback`: entity [[symlink-callback]]; cited on [[kernel-callbacks]] and [[overviews/windows-kernel]].
