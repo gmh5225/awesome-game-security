@@ -227,6 +227,8 @@ Hard constraints:
 - ONLY create/modify the target files listed above
 - Do NOT modify {src} or any other path
 - Do NOT run git, gh, push, or commit
+- You MUST actually write every target file to disk before finishing
+- Do NOT print Done until every target file exists and is non-empty
 - When finished, print one line: Done: {owner}/{repo} ({', '.join(langs)})
 """
 
@@ -556,34 +558,69 @@ def main() -> None:
             kept_outputs = [p for p in kept_outputs if p not in committed_set]
         repos_since_commit = 0
 
+    # Agent occasionally prints Done without writing files (cold-start flake).
+    max_attempts = 3
+
     for i, (owner, repo, need) in enumerate(pending, start=1):
         print(f"\n[{i}/{len(pending)}] {owner}/{repo} → {', '.join(need)}")
-        prompt = build_prompt(owner, repo, need)
         before_hashes = (
             snapshot_lang_hashes(owner, repo, need)
             if args.force and not args.dry_run
             else {}
         )
-        code = run_agent(agent_bin, args.model, prompt, args.dry_run)
         if args.dry_run:
+            run_agent(
+                agent_bin, args.model, build_prompt(owner, repo, need), True
+            )
             ok += 1
             continue
-        wrote, bad = collect_results(
-            owner, repo, need, force=args.force, before_hashes=before_hashes
-        )
-        wrote_paths = [lang_path(owner, repo, c) for c in wrote]
-        if wrote_paths:
-            kept_outputs.extend(wrote_paths)
-        # Drop agent side-effects; keep this run's outputs (+ unpushed commit batch).
-        discard_non_translations(pending_commit + kept_outputs)
-        if wrote:
-            for path in wrote_paths:
-                print(f"  wrote {path.relative_to(ROOT_DIR)} ({path.stat().st_size} bytes)")
-            if args.commit_every:
-                pending_commit.extend(wrote_paths)
-                repos_since_commit += 1
-                if repos_since_commit >= args.commit_every:
-                    flush_commits()
+
+        remaining = list(need)
+        code = 0
+        bad: list[str] = list(need)
+        repo_wrote_paths: list[Path] = []
+
+        for attempt in range(1, max_attempts + 1):
+            code = run_agent(
+                agent_bin,
+                args.model,
+                build_prompt(owner, repo, remaining),
+                False,
+            )
+            wrote, bad = collect_results(
+                owner,
+                repo,
+                remaining,
+                force=args.force,
+                before_hashes=before_hashes,
+            )
+            wrote_paths = [lang_path(owner, repo, c) for c in wrote]
+            if wrote_paths:
+                kept_outputs.extend(wrote_paths)
+                repo_wrote_paths.extend(wrote_paths)
+                for path in wrote_paths:
+                    print(
+                        f"  wrote {path.relative_to(ROOT_DIR)} "
+                        f"({path.stat().st_size} bytes)"
+                    )
+            # Drop agent side-effects; keep this run's outputs (+ unpushed batch).
+            discard_non_translations(pending_commit + kept_outputs)
+            if not bad:
+                break
+            print(
+                f"  missing after attempt {attempt}/{max_attempts}: "
+                f"{', '.join(bad)} (agent exit={code})"
+            )
+            remaining = bad
+            if attempt < max_attempts:
+                print(f"  retrying {owner}/{repo} for missing langs ...")
+
+        if repo_wrote_paths and args.commit_every:
+            pending_commit.extend(repo_wrote_paths)
+            repos_since_commit += 1
+            if repos_since_commit >= args.commit_every:
+                flush_commits()
+
         if bad:
             print(f"  FAILED langs: {', '.join(bad)} (agent exit={code})")
             fail += 1
