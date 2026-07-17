@@ -61,3 +61,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-17** — ingest `description:zer0condition/Demystifying-PatchGuard`: entity [[demystifying-patchguard]]; cited on [[patchguard]] and [[overviews/windows-kernel]].
 
+- **2026-07-17** — ingest `description:zer0condition/BusterCall`: entity [[bustercall]]; cited on [[kernel-callbacks]] and [[hvci]].
+
