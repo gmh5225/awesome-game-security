@@ -216,6 +216,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/4ian/GDevelop [Open-source cross-platform 2D/3D/multiplayer game engine]
 - https://github.com/PixelGuys/Cubyz [3D voxel sandbox game written by Zig language]
 - https://github.com/RSDKModding/RSDKv5-Decompilation [Retro Engine v5 / v5Ultimate decompilation]
+- https://github.com/koosoli/PoseidonVK [Vulkan modernization fork of the Poseidon/CWR-CE engine (Arma: Cold War Assault)]
+- https://github.com/udinmoInc/WindEffects [C++23 Vulkan game engine with ECS, editor, and asset pipeline]
 
 
 > Game Engine Plugins:Unreal
@@ -4005,6 +4007,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/NoCheatPlus/NoCheatPlus [Open-source anti-cheat plugin for Minecraft (Bukkit/Spigot)]
 - https://github.com/PalassCQ/GuardAC [AI-assisted open-source Minecraft anti-cheat plugin for Spigot/Paper/Folia]
 - https://github.com/enis1enis2/WindfallAntiCheatF [Minecraft Fabric packet-based anti-cheat with combat/movement checks and Geyser/Bedrock compatibility]
+- https://github.com/XuanXuan-ZhengGui/Minecraft-Anti-Cheat [Open-source Minecraft Spigot/Paper anti-cheat with combat/movement detections and confidence scoring]
 - https://github.com/Visual1mpact/Paradox_AntiCheat [Open-source anti-cheat for Minecraft Bedrock (Realms/BDS)]
 - https://github.com/oomph-ac/oomph [Minecraft Bedrock MiTM anti-cheat proxy with server-authoritative movement and combat]
 - https://github.com/somewhatpublicacc/wellsanticheat [Among Us host-side BepInEx anti-cheat for RPC abuse, crashers, spam, and lobby cheats]
