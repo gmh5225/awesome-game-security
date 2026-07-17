@@ -99,3 +99,4 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-17** — ingest `description:yring-me/ts-ue4dumper`: entity [[ts-ue4dumper]]; cited on [[overviews/game-engine]] and [[frida]].
 
+- **2026-07-17** — ingest `description:yrgo/awesome-educational-games`: entity [[awesome-educational-games]]; cited on [[overviews/overview]] and [[overviews/game-engine]].

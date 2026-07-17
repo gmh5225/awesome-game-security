@@ -6,9 +6,11 @@ sources:
   - wiki/sources/skills/overview.md
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/yucchiy__UniCli.md
+  - wiki/sources/descriptions/yrgo__awesome-educational-games.md
 updated: 2026-07-17
 confidence: high
 ---
+
 
 # Awesome Game Security Overview
 
@@ -16,7 +18,7 @@ Curated resource list spanning offensive game hacking and defensive anti-cheat r
 
 ## What this domain covers
 
-The README organizes ~40 top-level sections: engines/rendering/`AI` asset tooling, offensive (`Cheat`), defensive (`Anti Cheat`), platform hardening (`Windows Security Features`), mobile/console/emulator ecosystems (incl. Switch/Xbox/PlayStation/3DS), and supporting gamedev infrastructure (`Game Develop` MCP server / MCP security / AI Agents—e.g. Unity Editor terminal CLI [[unicli]]). Prefer this wiki for synthesis; fall back to README → descriptions → archives for specific repos. (source: wiki/sources/descriptions/yucchiy__UniCli.md)
+The README organizes ~40 top-level sections: engines/rendering/`AI` asset tooling, offensive (`Cheat`), defensive (`Anti Cheat`), platform hardening (`Windows Security Features`), mobile/console/emulator ecosystems (incl. Switch/Xbox/PlayStation/3DS), and supporting gamedev infrastructure (`Game Develop` Guide / MCP / AI Agents—e.g. Unity Editor terminal CLI [[unicli]], educational-games list [[awesome-educational-games]]). Prefer this wiki for synthesis; fall back to README → descriptions → archives for specific repos. (source: wiki/sources/descriptions/yucchiy__UniCli.md) (source: wiki/sources/descriptions/yrgo__awesome-educational-games.md)
 
 ## Skill routing (primary topics)
 

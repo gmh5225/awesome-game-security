@@ -10,9 +10,11 @@ sources:
   - wiki/sources/descriptions/zhitkur__DayZzz.md
   - wiki/sources/descriptions/yucchiy__UniCli.md
   - wiki/sources/descriptions/yring-me__ts-ue4dumper.md
+  - wiki/sources/descriptions/yrgo__awesome-educational-games.md
 updated: 2026-07-17
 confidence: high
 ---
+
 
 
 
@@ -31,10 +33,10 @@ Engine internals, plugins, detectors, and SDK workflows that underpin modding, r
 
 ## Related concepts
 
-[[il2cpp]] · [[present-hook]] · [[frida]] (mobile IL2CPP) · [[ts-ue4dumper]] · [[static-variables-obfuscator-ue4]] · [[fortnite-fltokens-and-offsets]] · [[dayzzz]] · [[unicli]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[il2cpp]] · [[present-hook]] · [[frida]] (mobile IL2CPP) · [[ts-ue4dumper]] · [[static-variables-obfuscator-ue4]] · [[fortnite-fltokens-and-offsets]] · [[dayzzz]] · [[unicli]] · [[awesome-educational-games]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
 
 
 
 ## README map
 
-`Game Engine` (~136 links: guides, source, Unreal/Unity/Godot/Lumix plugins, detectors). Adjacent: `Game Assets` (~10; UE/glTF + AI sprite/asset pipelines), `Game Hot Patch` (HybridCLR/xLua), `Game Develop` (~176; MCP server/security + AI Agents), `AI` image→3D/sprite pipelines, plus Cheat SDK CodeGen and Anti Cheat `Game Engine Protection:*` subtrees. (source: wiki/sources/README-categories.md)
+`Game Engine` (~136 links: guides, source, Unreal/Unity/Godot/Lumix plugins, detectors). Adjacent: `Game Assets` (~10; UE/glTF + AI sprite/asset pipelines), `Game Hot Patch` (HybridCLR/xLua), `Game Develop` (~176; Guide lists such as [[awesome-educational-games]], MCP server/security + AI Agents), `AI` image→3D/sprite pipelines, plus Cheat SDK CodeGen and Anti Cheat `Game Engine Protection:*` subtrees. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/yrgo__awesome-educational-games.md)
