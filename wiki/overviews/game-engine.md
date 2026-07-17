@@ -17,6 +17,7 @@ sources:
   - wiki/sources/descriptions/yinleiCoder__cs2-cheat-cpp.md
   - wiki/sources/descriptions/xvorost__CS-2-Glow.md
   - wiki/sources/descriptions/xkp95175333__Thetan_ArenaSDK.md
+  - wiki/sources/descriptions/xinyu-evolutruster__3D-Racing-Game.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -39,10 +40,10 @@ Engine internals, plugins, detectors, and SDK workflows that underpin modding, r
 
 ## Related concepts
 
-[[il2cpp]] · [[present-hook]] · [[frida]] (mobile IL2CPP) · [[ts-ue4dumper]] · [[static-variables-obfuscator-ue4]] · [[fortnite-fltokens-and-offsets]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[thetan-arenasdk]] · [[unicli]] · [[awesome-educational-games]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[il2cpp]] · [[present-hook]] · [[frida]] (mobile IL2CPP) · [[ts-ue4dumper]] · [[static-variables-obfuscator-ue4]] · [[fortnite-fltokens-and-offsets]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[thetan-arenasdk]] · [[unicli]] · [[awesome-educational-games]] · [[3d-racing-game]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
 
 
 
 ## README map
 
-`Game Engine` (~140 links: guides, source, Unreal/Unity/Godot/Lumix plugins, detectors). Adjacent: `Game Assets` (~10; UE/glTF + AI sprite/YAML→3D asset pipelines), `Game Hot Patch` (~3; HybridCLR/xLua/InjectFix), `Game Develop` (~176; Guide lists such as [[awesome-educational-games]], MCP server/security + AI Agents), `Game Network` (~25; Guide/Source + JWT/Auth Token + Location/Geocoding), `AI` (~5; local/Claude image→3D, Gaussian splat, 2D sprite-sheet generators for Unity/Unreal/Godot), plus Cheat SDK CodeGen and Anti Cheat `Game Engine Protection:*` subtrees. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/yrgo__awesome-educational-games.md)
+`Game Engine` (~140 links: guides, source, Unreal/Unity/Godot/Lumix plugins, detectors). Adjacent: `Game Assets` (~10; UE/glTF + AI sprite/YAML→3D asset pipelines), `Game Hot Patch` (~3; HybridCLR/xLua/InjectFix), `Game Develop` (~176; Guide lists such as [[awesome-educational-games]], OpenGL source samples such as [[3d-racing-game]], MCP server/security + AI Agents), `Game Network` (~25; Guide/Source + JWT/Auth Token + Location/Geocoding), `AI` (~5; local/Claude image→3D, Gaussian splat, 2D sprite-sheet generators for Unity/Unreal/Godot), plus Cheat SDK CodeGen and Anti Cheat `Game Engine Protection:*` subtrees. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/yrgo__awesome-educational-games.md) (source: wiki/sources/descriptions/xinyu-evolutruster__3D-Racing-Game.md)
