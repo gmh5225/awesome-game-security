@@ -6,7 +6,7 @@ sources:
   - wiki/sources/skills/game-hacking.md
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/zyhp__vac3_inhibitor.md
-updated: 2026-07-16
+updated: 2026-07-17
 confidence: high
 ---
 
@@ -35,4 +35,4 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## README map
 
-`Cheat` is the largest category (~2500 links): debugging, injection, DMA, overlays, vulnerable drivers, EFI, HWID, game-specific trees, plus `Some Tricks` Ring0/Ring3. (source: wiki/sources/README-categories.md)
+`Cheat` is the largest category (~2543 links): guides, debugging, packet sniff/capture, speedhack, RE tools, MBA/VMP/Themida/OLLVM fix lanes, DBI, PatchGuard/DSE, Windows/Linux/Android kernel explorers, Magisk/Xposed/Frida/ART-syscall hooks, iOS jailbreak/network, plus `Some Tricks` (Ring0/Ring3/Linux/Android). (source: wiki/sources/README-categories.md)

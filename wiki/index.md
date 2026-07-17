@@ -6,15 +6,15 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Overviews
 
-- [Overview](overviews/overview.md) — project map, skill routing, README categories
-- [Anti-Cheat](overviews/anti-cheat.md) — layered AC architecture and detection
+- [Overview](overviews/overview.md) — project map; ~40 README sections → skill topics
+- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* + engine protection map
 - [DMA Attack](overviews/dma-attack.md) — PCIe DMA threat model and defenses
-- [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot surfaces
-- [Game Hacking](overviews/game-hacking.md) — offensive escalation taxonomy
-- [Graphics API](overviews/graphics-api.md) — Present hooks, overlays, capture
-- [Mobile Security](overviews/mobile-security.md) — Android / iOS game security
+- [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot; assets & hot-patch
+- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2540 links) + Some Tricks
+- [Graphics API](overviews/graphics-api.md) — DirectX/GL/Vulkan hooks, overlays, capture
+- [Mobile Security](overviews/mobile-security.md) — Android / iOS; WSA & emulators
 - [Reverse Engineering](overviews/reverse-engineering.md) — RE tools, DBI, deobfuscation
-- [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI, BYOVD, pool
+- [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET, BYOVD, pool
 
 ## Concepts
 
@@ -41,6 +41,6 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Sources
 
-- Projected category map: `sources/README-categories.md` (generated on scan)
+- Projected category map: `sources/README-categories.md` (generated on scan; 40 top-level sections)
 - Skill projections: `sources/skills/`
 - Description projections: `sources/descriptions/` (incremental only)

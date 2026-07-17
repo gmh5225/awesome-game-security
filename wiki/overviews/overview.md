@@ -5,7 +5,7 @@ topics: [overview]
 sources:
   - wiki/sources/skills/overview.md
   - wiki/sources/README-categories.md
-updated: 2026-07-16
+updated: 2026-07-17
 confidence: high
 ---
 
@@ -15,7 +15,7 @@ Curated resource list spanning offensive game hacking and defensive anti-cheat r
 
 ## What this domain covers
 
-The README organizes thousands of links into engines/rendering, offensive (`Cheat`), defensive (`Anti Cheat`), platform hardening (`Windows Security Features`), mobile/console ecosystems, and supporting gamedev infrastructure. Prefer this wiki for synthesis; fall back to README → descriptions → archives for specific repos.
+The README organizes ~40 top-level sections: engines/rendering, offensive (`Cheat`), defensive (`Anti Cheat`), platform hardening (`Windows Security Features`), mobile/console/emulator ecosystems, and supporting gamedev infrastructure (including MCP/AI-agent tooling under `Game Develop`). Prefer this wiki for synthesis; fall back to README → descriptions → archives for specific repos.
 
 ## Skill routing (primary topics)
 
@@ -39,4 +39,4 @@ The README organizes thousands of links into engines/rendering, offensive (`Chea
 
 ## README category map (high-signal)
 
-Security-dense sections from the projected category map: **Cheat** (~2500 links), **Anti Cheat** (~565), **DirectX/OpenGL/Vulkan**, **Windows Security Features**, **Some Tricks**, plus engine and emulator categories. (source: wiki/sources/README-categories.md)
+Security-dense sections from the projected category map (40 top-level): **Cheat** (~2540 links), **Anti Cheat** (~590), **DirectX/OpenGL/Vulkan**, **Windows Security Features**, **Some Tricks**, plus engine, WSA/emulator, and console (Switch/Xbox/PlayStation) categories. (source: wiki/sources/README-categories.md)

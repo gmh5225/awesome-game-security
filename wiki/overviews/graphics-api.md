@@ -5,7 +5,7 @@ topics: [graphics-api]
 sources:
   - wiki/sources/skills/graphics-api.md
   - wiki/sources/README-categories.md
-updated: 2026-07-16
+updated: 2026-07-17
 confidence: high
 ---
 
@@ -27,4 +27,4 @@ Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/
 
 ## README map
 
-`DirectX` (hooks/overlays/tools), `OpenGL`, `Vulkan`, plus Cheat Overlay/Render and Anti Cheat Screenshot / Detection:Overlay. (source: wiki/sources/README-categories.md)
+`DirectX` (~31: Guide/Hook/Tools/Emulation/Compatibility/Overlay), `OpenGL`, `Vulkan` (incl. runtime API locators like kiero/kiero2), plus broader `Renderer` / `3D Graphics`, Cheat Overlay/Render, and Anti Cheat Screenshot / Detection:Overlay. (source: wiki/sources/README-categories.md)

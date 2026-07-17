@@ -5,7 +5,7 @@ topics: [mobile-security]
 sources:
   - wiki/sources/skills/mobile-security.md
   - wiki/sources/README-categories.md
-updated: 2026-07-16
+updated: 2026-07-17
 confidence: high
 ---
 
@@ -27,4 +27,4 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 
 ## README map
 
-Cheat Magisk/Xposed/Frida/Android kernel*/iOS jailbreak trees; Anti Cheat Detection:Android root/Magisk/Frida; Android/IOS Emulator categories. (source: wiki/sources/README-categories.md)
+Cheat Magisk/Xposed/Frida/ART-syscall hooks/Android kernel*/Cellular-SIM/iOS jailbreak+network trees; Anti Cheat Detection:Android root; `WSA`, `Android Emulator`, `IOS Emulator` platform categories. (source: wiki/sources/README-categories.md)

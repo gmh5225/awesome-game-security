@@ -5,7 +5,7 @@ topics: [game-engine]
 sources:
   - wiki/sources/skills/game-engine.md
   - wiki/sources/README-categories.md
-updated: 2026-07-16
+updated: 2026-07-17
 confidence: high
 ---
 
@@ -27,4 +27,4 @@ Engine internals, plugins, detectors, and SDK workflows that underpin modding, r
 
 ## README map
 
-`Game Engine` (~130 links: guides, source, Unreal/Unity/Godot/Lumix plugins, detectors), plus Cheat explorers/SDK CodeGen and Anti Cheat engine-protection subtrees. (source: wiki/sources/README-categories.md)
+`Game Engine` (~134 links: guides, source, Unreal/Unity/Godot/Lumix plugins, detectors). Adjacent: `Game Assets` / `Game Hot Patch` (UE asset tools, HybridCLR/xLua), plus Cheat explorers/SDK CodeGen and Anti Cheat `Game Engine Protection:*` subtrees. (source: wiki/sources/README-categories.md)

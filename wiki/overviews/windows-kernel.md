@@ -7,7 +7,7 @@ sources:
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/zzhouhe__PG1903.md
   - wiki/sources/descriptions/zxd1994__vt-debuuger.md
-updated: 2026-07-16
+updated: 2026-07-17
 confidence: high
 ---
 
@@ -33,4 +33,4 @@ Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-
 
 ## README map
 
-Cheat PatchGuard/DSE/Windows Kernel Explorer/Vulnerable Driver; Anti Cheat Ring0 callbacks and detection:attach/hide/vulnerable driver; `Windows Security Features`; `Some Tricks > Windows Ring0`. (source: wiki/sources/README-categories.md)
+Cheat PatchGuard/DSE/Windows Kernel Explorer/Vulnerable Driver; Anti Cheat detection:attach/hide/vulnerable driver/hacked hypervisor; `Windows Security Features` (CET/shadow stack, TPM/IOMMU/HVCI attestation samples); `Some Tricks > Windows Ring0`; adjacent `Windows Emulator` / WHP research. (source: wiki/sources/README-categories.md)

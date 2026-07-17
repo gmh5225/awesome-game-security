@@ -9,7 +9,7 @@ sources:
   - wiki/sources/descriptions/zxd1994__vt-debuuger.md
   - wiki/sources/descriptions/zx0CF1__shredder-rs.md
   - wiki/sources/descriptions/zouxianyu__BlindEye.md
-updated: 2026-07-16
+updated: 2026-07-17
 confidence: high
 ---
 
@@ -45,4 +45,4 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## README map
 
-`Anti Cheat` (~565 links): guides, packers, engine protection, `Detection:*` (hook, DMA, injection, ESP, root, …), Ring0/Ring3 callbacks, forensics. Cross-links `Windows Security Features`. (source: wiki/sources/README-categories.md)
+`Anti Cheat` (~589 links): guides, stress/unit-test harnesses, packers, engine protection (Unreal/Unity/Source), and a wide `Detection:*` tree (hook, memory integrity, shellcode, attach, aimbot, hide, vulnerable driver, hacked hypervisor, virtual environments, HWID, speedhack, injection, stack spoof, ESP, DMA, wallhack, obfuscation, Android root). Cross-links `Windows Security Features` and Cheat PatchGuard/DSE lanes. (source: wiki/sources/README-categories.md)
