@@ -283,15 +283,55 @@ jobs:
             COUNT=$(git diff --cached --name-only | grep -c "description_en.txt" || true)
             git commit -m "description: fill ${COUNT} missing summary(ies) via Cursor CLI [skip ci]"
 
+            # Concurrent archive/fill jobs often add the same description_en.txt.
+            # On non-ff reject: undo commit, sync to origin/main, skip files
+            # already upstream, recommit only what is still missing.
             PUSHED=0
             for i in 1 2 3 4 5; do
-              if git push; then
+              if git push origin HEAD:main; then
                 echo "Pushed successfully."
                 PUSHED=1
                 break
               fi
-              echo "Push rejected (attempt $i/5), rebasing ..."
-              git pull --rebase origin main || { echo "Rebase failed — aborting."; exit 1; }
+              echo "Push rejected (attempt $i/5), syncing with origin/main ..."
+              mapfile -t PENDING < <(git show --name-only --pretty='' HEAD | grep -E '^description/[^/]+/[^/]+/description_en\.txt$' || true)
+              TMPDIR_SYNC=$(mktemp -d)
+              for f in "${PENDING[@]+"${PENDING[@]}"}"; do
+                [ -f "$f" ] || continue
+                mkdir -p "$TMPDIR_SYNC/$(dirname "$f")"
+                cp -f "$f" "$TMPDIR_SYNC/$f"
+              done
+              git rebase --abort 2>/dev/null || true
+              git reset --mixed HEAD~1
+              for f in "${PENDING[@]+"${PENDING[@]}"}"; do
+                rm -f -- "$f"
+              done
+              git fetch origin main
+              git merge --ff-only origin/main || git reset --hard origin/main
+
+              STILL=()
+              for f in "${PENDING[@]+"${PENDING[@]}"}"; do
+                if git cat-file -e "origin/main:$f" 2>/dev/null \
+                  && [ -n "$(git show "origin/main:$f" 2>/dev/null | tr -d '[:space:]')" ]; then
+                  echo "Already on origin/main, skipping $f"
+                  continue
+                fi
+                if [ -f "$TMPDIR_SYNC/$f" ] && [ -s "$TMPDIR_SYNC/$f" ]; then
+                  mkdir -p "$(dirname "$f")"
+                  cp -f "$TMPDIR_SYNC/$f" "$f"
+                  STILL+=("$f")
+                fi
+              done
+              rm -rf "$TMPDIR_SYNC"
+
+              if [ "${#STILL[@]}" -eq 0 ]; then
+                echo "Remote already has all leftover description files — ok."
+                PUSHED=1
+                break
+              fi
+              git add -- "${STILL[@]}"
+              COUNT=${#STILL[@]}
+              git commit -m "description: fill ${COUNT} missing summary(ies) via Cursor CLI [skip ci]"
             done
             if [ "$PUSHED" != 1 ]; then
               echo "Failed to push after 5 attempts."

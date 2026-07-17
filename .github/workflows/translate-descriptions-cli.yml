@@ -382,6 +382,8 @@ jobs:
               BRANCH="main"
             fi
 
+            # Concurrent jobs may land the same translation files first.
+            # On non-ff reject: sync to origin, skip files already upstream.
             PUSHED=0
             for i in 1 2 3 4 5; do
               if git push origin "HEAD:${BRANCH}"; then
@@ -389,8 +391,50 @@ jobs:
                 PUSHED=1
                 break
               fi
-              echo "Push rejected (attempt $i/5), rebasing onto origin/${BRANCH} ..."
-              git pull --rebase origin "${BRANCH}" || { echo "Rebase failed — aborting."; exit 1; }
+              echo "Push rejected (attempt $i/5), syncing with origin/${BRANCH} ..."
+              mapfile -t PENDING < <(
+                git show --name-only --pretty='' HEAD \
+                  | grep -E "$KEEP_RE" \
+                  || true
+              )
+              TMPDIR_SYNC=$(mktemp -d)
+              for f in "${PENDING[@]+"${PENDING[@]}"}"; do
+                [ -f "$f" ] || continue
+                mkdir -p "$TMPDIR_SYNC/$(dirname "$f")"
+                cp -f "$f" "$TMPDIR_SYNC/$f"
+              done
+              git rebase --abort 2>/dev/null || true
+              git reset --mixed HEAD~1
+              for f in "${PENDING[@]+"${PENDING[@]}"}"; do
+                rm -f -- "$f"
+              done
+              git fetch origin "${BRANCH}"
+              git merge --ff-only "origin/${BRANCH}" \
+                || git reset --hard "origin/${BRANCH}"
+
+              STILL=()
+              for f in "${PENDING[@]+"${PENDING[@]}"}"; do
+                if git cat-file -e "origin/${BRANCH}:$f" 2>/dev/null \
+                  && [ -n "$(git show "origin/${BRANCH}:$f" 2>/dev/null | tr -d '[:space:]')" ]; then
+                  echo "Already on origin/${BRANCH}, skipping $f"
+                  continue
+                fi
+                if [ -f "$TMPDIR_SYNC/$f" ] && [ -s "$TMPDIR_SYNC/$f" ]; then
+                  mkdir -p "$(dirname "$f")"
+                  cp -f "$TMPDIR_SYNC/$f" "$f"
+                  STILL+=("$f")
+                fi
+              done
+              rm -rf "$TMPDIR_SYNC"
+
+              if [ "${#STILL[@]}" -eq 0 ]; then
+                echo "Remote already has all leftover translation files — ok."
+                PUSHED=1
+                break
+              fi
+              git add -- "${STILL[@]}"
+              COUNT=${#STILL[@]}
+              git commit -m "description: translate ${COUNT} file(s) via Cursor CLI [skip ci]"
             done
             if [ "$PUSHED" != 1 ]; then
               echo "Failed to push after 5 attempts."

@@ -324,12 +324,15 @@ def discard_non_translations(keep: list[Path]) -> None:
         _discard_path(rel)
 
 
-def git_commit_and_push_translations(paths: list[Path], branch: str) -> bool:
-    """Commit+push translation files. False ⇒ caller should exit so CI Final can save."""
-    if not paths:
-        return True
-    discard_non_translations(paths)
-    rels = [str(p.relative_to(ROOT_DIR)) for p in paths if p.is_file()]
+def _origin_file_nonempty(branch: str, rel: str) -> bool:
+    """True if origin/<branch> already has a non-empty blob at rel."""
+    if _git("cat-file", "-e", f"origin/{branch}:{rel}", check=False).returncode != 0:
+        return False
+    shown = _git("show", f"origin/{branch}:{rel}", check=False)
+    return bool(shown.stdout.strip())
+
+
+def _commit_translation_rels(rels: list[str]) -> bool:
     if not rels:
         return True
     try:
@@ -338,9 +341,67 @@ def git_commit_and_push_translations(paths: list[Path], branch: str) -> bool:
             return True
         msg = f"description: translate {len(rels)} file(s) via Cursor CLI [skip ci]"
         _git("commit", "-m", msg)
+        return True
     except subprocess.CalledProcessError as e:
         err = (e.stderr or b"").decode().strip()[:200]
         print(f"  [GIT ERROR] commit: {err or e}")
+        return False
+
+
+def _sync_after_rejected_push(branch: str, rels: list[str]) -> list[str] | None:
+    """
+    Undo the just-failed commit, sync to origin/<branch>, return paths still
+    missing upstream. Concurrent translate jobs often race on the same files.
+    """
+    saved: dict[str, bytes] = {}
+    for rel in rels:
+        path = ROOT_DIR / rel
+        if path.is_file() and path.stat().st_size > 0:
+            saved[rel] = path.read_bytes()
+
+    _git("rebase", "--abort", check=False)
+    if _git("reset", "--mixed", "HEAD~1", check=False).returncode != 0:
+        print("  [GIT ERROR] could not undo local commit after rejected push")
+        return None
+
+    for rel in rels:
+        path = ROOT_DIR / rel
+        if path.is_file():
+            path.unlink()
+
+    if _git("fetch", "origin", branch, check=False).returncode != 0:
+        print(f"  [GIT ERROR] fetch origin/{branch} failed")
+        return None
+    if _git("merge", "--ff-only", f"origin/{branch}", check=False).returncode != 0:
+        if _git("reset", "--hard", f"origin/{branch}", check=False).returncode != 0:
+            print(f"  [GIT ERROR] could not sync to origin/{branch}")
+            return None
+
+    still: list[str] = []
+    for rel in rels:
+        if _origin_file_nonempty(branch, rel):
+            print(f"  [GIT] {rel} already on origin/{branch} — skip")
+            continue
+        content = saved.get(rel)
+        if not content or not content.strip():
+            print(f"  [GIT] {rel} missing after sync — drop")
+            continue
+        path = ROOT_DIR / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+        still.append(rel)
+    return still
+
+
+def git_commit_and_push_translations(paths: list[Path], branch: str) -> bool:
+    """Commit+push translation files. False ⇒ caller should exit so CI Final can save."""
+    if not paths:
+        return True
+    discard_non_translations(paths)
+    rels = [str(p.relative_to(ROOT_DIR)) for p in paths if p.is_file()]
+    if not rels:
+        return True
+    if not _commit_translation_rels(rels):
         return False
 
     for attempt in range(1, 6):
@@ -355,14 +416,18 @@ def git_commit_and_push_translations(paths: list[Path], branch: str) -> bool:
                 _git("reset", "HEAD~1", check=False)
                 return False
             if any(k in err for k in ("rejected", "fetch first", "non-fast-forward")):
-                print(f"  [GIT] push rejected (attempt {attempt}/5), rebasing ...")
-                try:
-                    _git("pull", "--rebase", "origin", branch)
-                except subprocess.CalledProcessError as re_err:
-                    re_msg = (re_err.stderr or b"").decode().strip()[:200]
-                    print(f"  [GIT ERROR] rebase failed: {re_msg}")
-                    _git("rebase", "--abort", check=False)
-                    _git("reset", "HEAD~1", check=False)
+                print(
+                    f"  [GIT] push rejected (attempt {attempt}/5), "
+                    f"syncing with origin/{branch} ..."
+                )
+                still = _sync_after_rejected_push(branch, rels)
+                if still is None:
+                    return False
+                if not still:
+                    print("  [GIT] remote already has all files — ok")
+                    return True
+                rels = still
+                if not _commit_translation_rels(rels):
                     return False
             elif any(
                 k in err
