@@ -67,3 +67,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-17** — ingest `description:zer0condition/hv`: entity [[hv]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
+- **2026-07-17** — ingest `description:zer0condition/ZeroThreadKernel`: entity [[zero-thread-kernel]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
