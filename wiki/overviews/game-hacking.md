@@ -11,6 +11,7 @@ sources:
   - wiki/sources/descriptions/zoand__Injectors.md
   - wiki/sources/descriptions/zoand__BOOM.md
   - wiki/sources/descriptions/zinx-YT__Fortnite-Fltokens-and-offsets.md
+  - wiki/sources/descriptions/zhuzhu-Top__deobf.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -37,10 +38,11 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - PE triage of game/client modules (imports, TLS, .NET metadata) via viewers such as [[totalpe2]] before deeper RE. (source: wiki/sources/descriptions/zodiacon__TotalPE2.md)
 - Rapid x86/x64 shellcode/asm prototyping with [[quickasm]] (assemble via Keystone, execute in-process). (source: wiki/sources/descriptions/zodiacon__QuickAsm.md)
 - Title-specific offset/token dumps (e.g. Fortnite FLTokens via [[fortnite-fltokens-and-offsets]]) illustrate ephemeral cheat-research artifacts that rot quickly. (source: wiki/sources/descriptions/zinx-YT__Fortnite-Fltokens-and-offsets.md)
+- Fix OLLVM / deobfuscation plugins targeting `libtprt.so` (e.g. [[deobf]]) sit in the Cheat Fix OLLVM lane. (source: wiki/sources/descriptions/zhuzhu-Top__deobf.md)
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[deobf]] · [[overviews/anti-cheat]]
 
 
 ## README map
