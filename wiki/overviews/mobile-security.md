@@ -9,6 +9,7 @@ sources:
   - wiki/sources/descriptions/zhuowei__cheese.md
   - wiki/sources/descriptions/zhizhuodemao__android_proxy_mcp.md
   - wiki/sources/descriptions/zeroxjf__lightsaber.md
+  - wiki/sources/descriptions/zboralski__unflutter.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -25,9 +26,11 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 
 **Unity/Unreal mobile:** [[il2cpp]] (`libil2cpp.so` / UnityFramework + metadata), SDK dumps, memory editors (GameGuardian, H5GG).
 
+**Flutter/Dart:** AOT snapshot symbol recovery via [[unflutter]] (Dart VM snapshot metadata → class/function/type names from Flutter APKs/iOS apps) (source: wiki/sources/descriptions/zboralski__unflutter.md).
+
 ## Related concepts
 
-[[frida]] · [[il2cpp]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[cheese]] · [[lightsaber]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[frida]] · [[il2cpp]] · [[unflutter]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[cheese]] · [[lightsaber]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
 
 ## README map
 
