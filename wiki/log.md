@@ -40,3 +40,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:zoand/BOOM`: entity [[boom]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-07-17** — ingest `description:zinx-YT/Fortnite-Fltokens-and-offsets`: entity [[fortnite-fltokens-and-offsets]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-17** — ingest `description:zinja-coder/apktool-mcp-server`: entity [[apktool-mcp-server]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].

@@ -33,6 +33,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Entities
 
+- [apktool-mcp-server](entities/apktool-mcp-server.md) — MCP server wrapping apktool (Android RE suite)
 - [BlindEye](entities/blindeye.md) — BattlEye report-path pool-alloc drop (“Packet Fucker”)
 - [BOOM](entities/boom.md) — hijack Beep.sys; stealth driver communication
 - [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests

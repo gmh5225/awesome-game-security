@@ -5,6 +5,7 @@ topics: [mobile-security]
 sources:
   - wiki/sources/skills/mobile-security.md
   - wiki/sources/README-categories.md
+  - wiki/sources/descriptions/zinja-coder__apktool-mcp-server.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -15,7 +16,7 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 
 ## Key sub-areas
 
-**Android:** apktool/jadx, Magisk / KernelSU / APatch, Zygisk modules, ART/syscall hooks, eBPF tracers, kernel drivers, ACE/AppSealing-class protectors.
+**Android:** apktool/jadx (agent-facing apktool via [[apktool-mcp-server]] MCP tools) (source: wiki/sources/descriptions/zinja-coder__apktool-mcp-server.md), Magisk / KernelSU / APatch, Zygisk modules, ART/syscall hooks, eBPF tracers, kernel drivers, ACE/AppSealing-class protectors.
 
 **iOS:** jailbreak tooling, class-dump, Logos hooks, sideloading / AltStore for non-jailbreak paths.
 
@@ -23,7 +24,7 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 
 ## Related concepts
 
-[[frida]] · [[il2cpp]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[frida]] · [[il2cpp]] · [[apktool-mcp-server]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
 
 ## README map
 
