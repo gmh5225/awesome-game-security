@@ -89,3 +89,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-17** — ingest `description:yukiarrr/Il2cppSpy`: entity [[il2cpp-spy]]; cited on [[il2cpp]] and [[overviews/mobile-security]].
 
+- **2026-07-17** — ingest `description:yucchiy/UniCli`: entity [[unicli]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+

@@ -5,6 +5,7 @@ topics: [overview]
 sources:
   - wiki/sources/skills/overview.md
   - wiki/sources/README-categories.md
+  - wiki/sources/descriptions/yucchiy__UniCli.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -15,7 +16,7 @@ Curated resource list spanning offensive game hacking and defensive anti-cheat r
 
 ## What this domain covers
 
-The README organizes ~40 top-level sections: engines/rendering/`AI` asset tooling, offensive (`Cheat`), defensive (`Anti Cheat`), platform hardening (`Windows Security Features`), mobile/console/emulator ecosystems (incl. Switch/Xbox/PlayStation/3DS), and supporting gamedev infrastructure (`Game Develop` MCP server / MCP security / AI Agents). Prefer this wiki for synthesis; fall back to README → descriptions → archives for specific repos.
+The README organizes ~40 top-level sections: engines/rendering/`AI` asset tooling, offensive (`Cheat`), defensive (`Anti Cheat`), platform hardening (`Windows Security Features`), mobile/console/emulator ecosystems (incl. Switch/Xbox/PlayStation/3DS), and supporting gamedev infrastructure (`Game Develop` MCP server / MCP security / AI Agents—e.g. Unity Editor terminal CLI [[unicli]]). Prefer this wiki for synthesis; fall back to README → descriptions → archives for specific repos. (source: wiki/sources/descriptions/yucchiy__UniCli.md)
 
 ## Skill routing (primary topics)
 
