@@ -22,6 +22,7 @@ sources:
   - wiki/sources/descriptions/zer0condition__checkhv_um.md
   - wiki/sources/descriptions/ytk2128__pe32-password.md
   - wiki/sources/descriptions/ykus4__kagura.md
+  - wiki/sources/descriptions/yardenshafir__cet-research.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -49,14 +50,14 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 **Threats defended against:** injected code (stress/test harnesses such as [[injectors]] under Injection Testing), [[byovd]], hypervisor abuse (stress/test refs such as [[vt-debuuger]]; minimal VT-x Type-2 learning stacks such as [[hv]]; stealth Type-2 stacks such as [[ophion]] with CPUID cache / CR4.VMXE hide / TSC compensation under hacked-hypervisor detection; user-mode detection probes such as [[checkhv-um]] via CPUID / RDTSC / VMCS artifacts / signature match), hidden/anti-detect PVE/QEMU guests (e.g. [[proxmox-ve-anti-detection]], [[qemu-anti-detection]] under virtual-environment detection), [[dma]] (PCIe fingerprinting + IOMMU + TPM attestation), AI visual cheats with hardware input. (source: wiki/sources/descriptions/zoand__Injectors.md) (source: wiki/sources/descriptions/zxd1994__vt-debuuger.md) (source: wiki/sources/descriptions/zer0condition__hv.md) (source: wiki/sources/descriptions/zer0condition__Ophion.md) (source: wiki/sources/descriptions/zer0condition__checkhv_um.md) (source: wiki/sources/descriptions/zhaodice__proxmox-ve-anti-detection.md) (source: wiki/sources/descriptions/zhaodice__qemu-anti-detection.md)
 
-**Platform trust:** DSE, [[patchguard]], [[hvci]]/VBS, Secure Boot.
+**Platform trust:** DSE, [[patchguard]], [[hvci]]/VBS, Secure Boot; CET/shadow-stack research such as [[cet-research]] in the Windows Security Features lane. (source: wiki/sources/descriptions/yardenshafir__cet-research.md)
 
 **Obfuscation tooling:** [[shredder-rs]] — x86_64 polymorphic instruction shredding (context-preserving) for AC/obfuscation-engine research. (source: wiki/sources/descriptions/zx0CF1__shredder-rs.md) Engine-side data hiding: [[static-variables-obfuscator-ue4]] obfuscates UE4 static variables against Cheat Engine–style scans (`Game Engine Protection:Unreal`). (source: wiki/sources/descriptions/zompi2__Static-Variables-Obfuscator-UE4.md) Binary Packer lane: [[pe32-password]] — C/C++ PE32 password packing for packed/modded client study. (source: wiki/sources/descriptions/ytk2128__pe32-password.md) LLVM pass-plugin obfuscation/anti-tamper: [[kagura]] (CFG/string/data passes + anti-debug runtime; NDK/iOS/Unity/Unreal). (source: wiki/sources/descriptions/ykus4__kagura.md)
 
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[kagura]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[injectors]] · [[zero-thread-kernel]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[kagura]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[injectors]] · [[zero-thread-kernel]]
 
 
 ## README map
