@@ -26,6 +26,7 @@ sources:
   - wiki/sources/descriptions/xxFURYWOLFxx__veh-dumper.md
   - wiki/sources/descriptions/xtremegamer1__vmdevirt-vtil.md
   - wiki/sources/descriptions/xsj3n__x64-EXE-Packer.md
+  - wiki/sources/descriptions/xqemu__xqemu.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -46,11 +47,12 @@ Workflows for protected game clients and anti-cheat components across user mode,
 
 - **Linux LKM metadata:** tools such as [[vermagic]] rewrite vermagic / CRC fields so a module can load across mismatched kernel builds (cheat / RE tools lane). (source: wiki/sources/descriptions/yaxinsn__vermagic.md)
 - **Mobile / iOS:** userland exploit-chain study via [[lightsaber]] (iOS 18.4–18.6.2 JS injection into SpringBoard and other processes) (source: wiki/sources/descriptions/zeroxjf__lightsaber.md); iOS project reversing in IDA via [[ida-ios-helper]] (vtable symbols required) (source: wiki/sources/descriptions/yoavst__ida-ios-helper.md)
+- **Console / QEMU:** original Xbox titles via [[xqemu]] (full-machine software emulation, no hardware VT) for RE in the QEMU/KVM/PVE/VBOX research lane. (source: wiki/sources/descriptions/xqemu__xqemu.md)
 
 
 ## Related concepts
 
-[[il2cpp]] · [[frida]] · [[unflutter]] · [[kernel-callbacks]] · [[patchguard]] · [[mutaben]] · [[shredder-rs]] · [[deobf]] · [[idadeflat]] · [[opaque-predicates-detective]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ida-ios-helper]] · [[pe32-password]] · [[x64-exe-packer]] · [[kagura]] · [[vmdevirt-vtil]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[lightsaber]] · [[vermagic]] · [[veh-dumper]] · [[windbg-scripts]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[overviews/mobile-security]]
+[[il2cpp]] · [[frida]] · [[unflutter]] · [[kernel-callbacks]] · [[patchguard]] · [[mutaben]] · [[shredder-rs]] · [[deobf]] · [[idadeflat]] · [[opaque-predicates-detective]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ida-ios-helper]] · [[pe32-password]] · [[x64-exe-packer]] · [[kagura]] · [[vmdevirt-vtil]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[lightsaber]] · [[vermagic]] · [[veh-dumper]] · [[windbg-scripts]] · [[xqemu]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[overviews/mobile-security]]
 
 
 
