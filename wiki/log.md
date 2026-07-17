@@ -156,3 +156,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:xp987/symbridge`: entity [[symbridge]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-17** — ingest `description:xoxor4d/gta4-rtx`: entity [[gta4-rtx]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
+
+- **2026-07-17** — ingest `description:xo1337/steam-overlay-x64`: entity [[steam-overlay-x64]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].

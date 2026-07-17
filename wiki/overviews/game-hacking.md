@@ -37,6 +37,7 @@ sources:
   - wiki/sources/descriptions/xtremegamer1__vmdevirt-vtil.md
   - wiki/sources/descriptions/xp987__symbridge.md
   - wiki/sources/descriptions/xoxor4d__gta4-rtx.md
+  - wiki/sources/descriptions/xo1337__steam-overlay-x64.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -57,7 +58,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 - Memory, injection, hooking (inline/IAT/VTable/HWBP); injection-testing samples such as [[injectors]] for AC stress evaluation. (source: wiki/sources/descriptions/zoand__Injectors.md)
 - Visual ESP / aim / movement cheats; AI visual pipelines (OBS + YOLO + HID)
-- Overlays via [[present-hook]] and external/DWM windows
+- Overlays via [[present-hook]] and external/DWM/Steam windows; Steam-overlay samples such as [[steam-overlay-x64]] (C; modding / memory analysis). (source: wiki/sources/descriptions/xo1337__steam-overlay-x64.md)
 - HWID spoofing, stack spoofing, driver communication channels (e.g. [[boom]] hijacks `Beep.sys` and alters hide/comm paths). (source: wiki/sources/descriptions/zoand__BOOM.md)
 - EFI boot-time mappers; engine-specific paths (Unreal/Unity/Source)
 - AC-system exploration repos (e.g. [[vac3-inhibitor]] for VAC3 hooking/memory work) sit in the user-mode lane of cheat research. (source: wiki/sources/descriptions/zyhp__vac3_inhibitor.md)
@@ -90,7 +91,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ntmemory]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[gta4-rtx]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ntmemory]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[overviews/anti-cheat]]
 
 
 

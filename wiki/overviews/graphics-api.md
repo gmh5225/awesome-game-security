@@ -7,6 +7,7 @@ sources:
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/younasiqw__BattleField-1-Internal.md
   - wiki/sources/descriptions/xoxor4d__gta4-rtx.md
+  - wiki/sources/descriptions/xo1337__steam-overlay-x64.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -19,7 +20,7 @@ Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/
 
 - **DirectX:** DX9 EndScene/Present; DX11/12 `IDXGISwapChain::Present`; draw-call hooks
 - **OpenGL / Vulkan:** `wglSwapBuffers`, `vkQueuePresentKHR`, custom layers
-- **Overlays:** internal ImGui-on-Present, external layered windows, DWM/Steam/NVIDIA hijacks
+- **Overlays:** internal ImGui-on-Present, external layered windows, DWM/Steam/NVIDIA hijacks; Steam-overlay samples such as [[steam-overlay-x64]] (C; modding / memory analysis). (source: wiki/sources/descriptions/xo1337__steam-overlay-x64.md)
 - **Anti-screenshot:** BitBlt / DXGI Desktop Duplication / Present interception vs evasion
 - **OBS capture:** Game Capture injects graphics-hook DLLs—detection-relevant for AC and AI cheats
 - Title-specific internals such as [[battlefield-1-internal]] (Battlefield 1; DirectX + hooking + SDK generation) illustrate in-process graphics/hook research samples. (source: wiki/sources/descriptions/younasiqw__BattleField-1-Internal.md)
@@ -27,7 +28,7 @@ Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/
 
 ## Related concepts
 
-[[present-hook]] · [[battlefield-1-internal]] · [[gta4-rtx]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[present-hook]] · [[battlefield-1-internal]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
 
 ## README map
 
