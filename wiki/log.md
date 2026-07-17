@@ -108,3 +108,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:yoshisaac/CounterStrikeSource-Linux-Trainer`: entity [[counterstrikesource-linux-trainer]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-17** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-engine]], [[overviews/graphics-api]] (DirectX ~32), [[overviews/mobile-security]], [[overviews/windows-kernel]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Game Network ~25, emulator counts, MBA/WSF notes); light `index.md` section notes (no per-category pages).
+
+- **2026-07-17** — ingest `description:yoshisaac/CounterStrike2-Linux-Cheat`: entity [[counterstrike2-linux-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
