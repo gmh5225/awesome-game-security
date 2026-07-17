@@ -67,6 +67,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [shredder-rs](entities/shredder-rs.md) — x86_64 polymorphic instruction shredding (Rust)
 - [Static-Variables-Obfuscator-UE4](entities/static-variables-obfuscator-ue4.md) — UE4 static-variable obfuscation vs memory scanners
 - [TotalPE2](entities/totalpe2.md) — WPF PE viewer (headers, imports/exports, .NET metadata)
+- [ts-ue4dumper](entities/ts-ue4dumper.md) — TypeScript + Frida UE4 dumper (modular; C++ offsets)
 - [UniCli](entities/unicli.md) — Unity Editor terminal CLI (compile/test/build/inspect; AI-agent ready)
 - [unflutter](entities/unflutter.md) — Flutter/Dart AOT snapshot static analyzer (symbol recovery)
 - [vac3_inhibitor](entities/vac3-inhibitor.md) — VAC3 exploration via hooking / memory analysis (C++)
