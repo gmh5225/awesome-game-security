@@ -34,6 +34,7 @@ Compiled knowledge catalog for awesome-game-security.
 ## Entities
 
 - [BlindEye](entities/blindeye.md) — BattlEye report-path pool-alloc drop (“Packet Fucker”)
+- [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests
 - [lsass-extend-mapper](entities/lsass-extend-mapper.md) — unsigned driver map via lsass address-space extend
 - [PG1903](entities/pg1903.md) — Win10 1903 PatchGuard disable via context-page NX (Demo NX)
 - [revert-mapper](entities/revert-mapper.md) — post-execution cleanup for manually mapped kernel drivers

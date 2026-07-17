@@ -9,6 +9,7 @@ sources:
   - wiki/sources/descriptions/zxd1994__vt-debuuger.md
   - wiki/sources/descriptions/zorftw__revert-mapper.md
   - wiki/sources/descriptions/zorftw__lsass-extend-mapper.md
+  - wiki/sources/descriptions/zodiacon__EtwExplorer.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -25,6 +26,7 @@ Kernel internals that matter for game protection and low-level research: object/
 - **[[byovd]]:** signed vulnerable drivers → kernel R/W → unsigned load / blind AC
 - **Trusted-process mappers:** extend a high-trust process (e.g. lsass) and map unsigned driver code in that context to skip normal load telemetry — research ref [[lsass-extend-mapper]] (source: wiki/sources/descriptions/zorftw__lsass-extend-mapper.md)
 - **Pool / Segment Heap:** HeapKey-aware scanning for hidden modules and shellcode; post-map cleanup research such as [[revert-mapper]] (free mapping + strip pool tags / refs after unsigned-driver entry) (source: wiki/sources/descriptions/zorftw__revert-mapper.md)
+- **ETW:** provider/event schema discovery (manifest + TraceLogging) via tools such as [[etw-explorer]]; ThreatIntel and related providers are common AC/EDR telemetry surfaces (source: wiki/sources/descriptions/zodiacon__EtwExplorer.md)
 - **Hypervisor defense:** EPT-protected callback/ETW/AC pages; WHP research tracing; hacked-hypervisor stress/test tooling such as [[vt-debuuger]] (source: wiki/sources/descriptions/zxd1994__vt-debuuger.md)
 - **EFI:** pre-kernel mappers that skip normal driver-load telemetry
 
@@ -32,7 +34,7 @@ Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[patchguard]] · [[pg1903]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[dma]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[patchguard]] · [[pg1903]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[dma]] · [[overviews/anti-cheat]]
 
 ## README map
 

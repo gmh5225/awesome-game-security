@@ -12,6 +12,7 @@ sources:
   - wiki/sources/descriptions/zorftw__revert-mapper.md
   - wiki/sources/descriptions/zorftw__lsass-extend-mapper.md
   - wiki/sources/descriptions/zompi2__Static-Variables-Obfuscator-UE4.md
+  - wiki/sources/descriptions/zodiacon__EtwExplorer.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -33,7 +34,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Key sub-areas
 
-**Detection:** memory hashing / manual-map detection; process handle stripping; [[kernel-callbacks]]; Segment Heap–aware pool scanning; behavioral/ML aimbot signals; screenshot + heartbeat. Trusted-process mapping (e.g. [[lsass-extend-mapper]] hosting unsigned drivers via lsass address-space extend) and post-execution map cleanup (e.g. [[revert-mapper]] freeing mapped driver memory and pool-tag traces) are common research counterparts to those scanners. (source: wiki/sources/descriptions/zorftw__lsass-extend-mapper.md) (source: wiki/sources/descriptions/zorftw__revert-mapper.md)
+**Detection:** memory hashing / manual-map detection; process handle stripping; [[kernel-callbacks]]; Segment Heap–aware pool scanning; behavioral/ML aimbot signals; screenshot + heartbeat; ETW provider/event discovery for telemetry design (e.g. [[etw-explorer]]). Trusted-process mapping (e.g. [[lsass-extend-mapper]] hosting unsigned drivers via lsass address-space extend) and post-execution map cleanup (e.g. [[revert-mapper]] freeing mapped driver memory and pool-tag traces) are common research counterparts to those scanners. (source: wiki/sources/descriptions/zorftw__lsass-extend-mapper.md) (source: wiki/sources/descriptions/zorftw__revert-mapper.md) (source: wiki/sources/descriptions/zodiacon__EtwExplorer.md)
 
 **Architecture:** user-mode scanners → kernel callbacks/VAD → optional hypervisor EPT protection → server-side replay/stats.
 
@@ -46,7 +47,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vt-debuuger]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vt-debuuger]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]]
 
 ## README map
 
