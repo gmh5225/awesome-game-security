@@ -2011,6 +2011,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > DMA
 - https://github.com/JPShag/DMA-FW-Guide-2.0 [Guide]
 - https://github.com/Silverr12/DMA-CFW-Guide [Guide to building custom/modified DMA attack firmware based on pcileech-fpga]
+- https://github.com/16SalomonArs/Pcileech-DMA-Firmware-Guide [Windows-first guide to building custom PCILeech FPGA DMA firmware (donor analysis, BAR/TLP, Vivado)]
 - https://github.com/Rakeshmonkee/DMA [Guide]
 - https://github.com/PacktPublishing/Learn-FPGA-Programming [Guide]
 - https://github.com/enjoy-digital/litepcie [Small footprint and configurable PCIe core]
