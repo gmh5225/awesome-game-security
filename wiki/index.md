@@ -77,6 +77,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [QuickAsm](entities/quickasm.md) — x86/x64 assemble-and-run GUI (Keystone)
 - [revert-mapper](entities/revert-mapper.md) — post-execution cleanup for manually mapped kernel drivers
 - [shredder-rs](entities/shredder-rs.md) — x86_64 polymorphic instruction shredding (Rust)
+- [simpleperf_demo](entities/simpleperf-demo.md) — Android simpleperf / Perf demo (app profiling)
 - [Static-Variables-Obfuscator-UE4](entities/static-variables-obfuscator-ue4.md) — UE4 static-variable obfuscation vs memory scanners
 - [SymlinkCallback](entities/symlink-callback.md) — symlink LinkTarget → access callback (Ring0 / AC research)
 - [TotalPE2](entities/totalpe2.md) — WPF PE viewer (headers, imports/exports, .NET metadata)
