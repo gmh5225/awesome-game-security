@@ -20,4 +20,4 @@ Useful for studying manual-map forensics (pool tags, residual mappings) and how 
 
 ## Related
 
-[[byovd]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[lsass-extend-mapper]] · [[byovd]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]

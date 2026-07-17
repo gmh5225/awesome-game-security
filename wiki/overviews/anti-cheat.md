@@ -10,6 +10,7 @@ sources:
   - wiki/sources/descriptions/zx0CF1__shredder-rs.md
   - wiki/sources/descriptions/zouxianyu__BlindEye.md
   - wiki/sources/descriptions/zorftw__revert-mapper.md
+  - wiki/sources/descriptions/zorftw__lsass-extend-mapper.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -30,7 +31,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Key sub-areas
 
-**Detection:** memory hashing / manual-map detection; process handle stripping; [[kernel-callbacks]]; Segment Heap–aware pool scanning; behavioral/ML aimbot signals; screenshot + heartbeat. Post-execution map cleanup (e.g. [[revert-mapper]] freeing mapped driver memory and pool-tag traces) is a common research counterpart to those scanners. (source: wiki/sources/descriptions/zorftw__revert-mapper.md)
+**Detection:** memory hashing / manual-map detection; process handle stripping; [[kernel-callbacks]]; Segment Heap–aware pool scanning; behavioral/ML aimbot signals; screenshot + heartbeat. Trusted-process mapping (e.g. [[lsass-extend-mapper]] hosting unsigned drivers via lsass address-space extend) and post-execution map cleanup (e.g. [[revert-mapper]] freeing mapped driver memory and pool-tag traces) are common research counterparts to those scanners. (source: wiki/sources/descriptions/zorftw__lsass-extend-mapper.md) (source: wiki/sources/descriptions/zorftw__revert-mapper.md)
 
 **Architecture:** user-mode scanners → kernel callbacks/VAD → optional hypervisor EPT protection → server-side replay/stats.
 
@@ -42,7 +43,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vt-debuuger]] · [[shredder-rs]] · [[blindeye]] · [[revert-mapper]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vt-debuuger]] · [[shredder-rs]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]]
 
 ## README map
 
