@@ -136,3 +136,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:yabinc/simpleperf_demo`: entity [[simpleperf-demo]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-17** — ingest `description:xxzzddxzd/unitySpeedTools`: entity [[unityspeedtools]]; cited on [[il2cpp]] and [[overviews/mobile-security]].
+
+- **2026-07-17** — ingest `description:xxFURYWOLFxx/veh-dumper`: entity [[veh-dumper]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
