@@ -48,3 +48,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:zhuowei/cheese`: entity [[cheese]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-17** — ingest `description:zhizhuodemao/android_proxy_mcp`: entity [[android-proxy-mcp]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
+- **2026-07-17** — ingest `description:zhitkur/DayZzz`: entity [[dayzzz]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].

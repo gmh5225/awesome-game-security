@@ -38,7 +38,9 @@ Compiled knowledge catalog for awesome-game-security.
 - [BlindEye](entities/blindeye.md) — BattlEye report-path pool-alloc drop (“Packet Fucker”)
 - [BOOM](entities/boom.md) — hijack Beep.sys; stealth driver communication
 - [cheese](entities/cheese.md) — Quest 3/3S root via Adreno CVE-2025-21479 (Magisk, no boot rewrite)
+- [DayZzz](entities/dayzzz.md) — DayZ cheat/modding: SDK generation + overlays (C/C++)
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
+
 - [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests
 - [Fortnite-Fltokens-and-offsets](entities/fortnite-fltokens-and-offsets.md) — Fortnite FLToken/offset grabber (stale / offline)
 - [Injectors](entities/injectors.md) — injection-testing harness (C/C++; AC stress)
