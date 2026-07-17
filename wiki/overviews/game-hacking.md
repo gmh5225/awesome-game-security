@@ -84,4 +84,4 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## README map
 
-`Cheat` is the largest category (~2543 links): guides, debugging, packet sniff/capture, speedhack, RE tools, MBA/VMP/Themida/OLLVM fix lanes, DBI, PatchGuard/DSE, Windows/Linux/Android kernel explorers, Magisk/Xposed/Frida/ART-syscall hooks, Android bootloader/ROM/root trees, Cellular/SIM + IoT device lanes, iOS jailbreak/network, plus `Some Tricks` (~112; Ring0/Ring3/Linux/Android). (source: wiki/sources/README-categories.md)
+`Cheat` is the largest category (~2544 links): guides, debugging, packet sniff/capture, speedhack, RE tools, MBA/VMP/Themida/OLLVM fix lanes, DBI, Launcher Abuser, PatchGuard/DSE, Windows/Linux/Android kernel explorers, Magisk/Xposed/Frida/ART-syscall hooks, Android memory loading + App/Kernel CVE lanes, bootloader/ROM/root trees, Cellular/SIM + IoT, iOS jailbreak/network, plus `Some Tricks` (~112; Ring0/Ring3/Linux/Android). (source: wiki/sources/README-categories.md)
