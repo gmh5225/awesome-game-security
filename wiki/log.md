@@ -120,3 +120,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:yinleiCoder/cs2-cheat-cpp`: entity [[cs2-cheat-cpp]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-17** — ingest `description:yhnu/op7t`: entity [[op7t]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-17** — ingest `description:yellowbyte/opaque-predicates-detective`: entity [[opaque-predicates-detective]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
