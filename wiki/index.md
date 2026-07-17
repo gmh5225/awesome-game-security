@@ -91,6 +91,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vac3_inhibitor](entities/vac3-inhibitor.md) — VAC3 exploration via hooking / memory analysis (C++)
 - [veh-dumper](entities/veh-dumper.md) — x64 VEH/VCH → synthetic PE64 dumps for IDA
 - [vermagic](entities/vermagic.md) — change Linux LKM vermagic / CRCs (cheat / RE tools)
+- [vmdevirt-vtil](entities/vmdevirt-vtil.md) — broken VTIL VMP devirt demo (Fix VMP / IDA jmp-around-vmenter)
 
 - [WinDbg_Scripts](entities/windbg-scripts.md) — JS WinDbg scripts for kernel debug/modding (WinDbg Plugins)
 - [vt-debuuger](entities/vt-debuuger.md) — hacked hypervisor testing (C/C++ drivers / plugins)

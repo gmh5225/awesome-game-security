@@ -144,3 +144,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:xuanxuan0/TiEtwAgent`: entity [[tietwagent]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-07-17** — ingest `description:xtremegamer1/xigmapper`: entity [[xigmapper]]; cited on [[overviews/windows-kernel]] and [[vanguard]].
+
+- **2026-07-17** — ingest `description:xtremegamer1/vmdevirt-vtil`: entity [[vmdevirt-vtil]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
