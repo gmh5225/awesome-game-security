@@ -142,3 +142,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:xvorost/CS-2-Glow`: entity [[cs-2-glow]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-17** — ingest `description:xuanxuan0/TiEtwAgent`: entity [[tietwagent]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
+- **2026-07-17** — ingest `description:xtremegamer1/xigmapper`: entity [[xigmapper]]; cited on [[overviews/windows-kernel]] and [[vanguard]].

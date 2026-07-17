@@ -22,6 +22,7 @@ sources:
   - wiki/sources/descriptions/yardenshafir__WinDbg_Scripts.md
   - wiki/sources/descriptions/yardenshafir__SymlinkCallback.md
   - wiki/sources/descriptions/xuanxuan0__TiEtwAgent.md
+  - wiki/sources/descriptions/xtremegamer1__xigmapper.md
 updated: 2026-07-17
 confidence: high
 ---
@@ -44,7 +45,7 @@ Kernel internals that matter for game protection and low-level research: object/
 - **Pool / Segment Heap:** HeapKey-aware scanning for hidden modules and shellcode; post-map cleanup research such as [[revert-mapper]] (free mapping + strip pool tags / refs after unsigned-driver entry) (source: wiki/sources/descriptions/zorftw__revert-mapper.md)
 - **ETW:** provider/event schema discovery (manifest + TraceLogging) via tools such as [[etw-explorer]]; ThreatIntel consumers such as [[tietwagent]] (Microsoft-Windows-Threat-Intelligence injection telemetry; krabsetw/Yara; ELAM/PPL) show how those providers feed AC/EDR detection without fragile userland hooks (source: wiki/sources/descriptions/zodiacon__EtwExplorer.md) (source: wiki/sources/descriptions/xuanxuan0__TiEtwAgent.md)
 - **Hypervisor defense:** EPT-protected callback/ETW/AC pages; WHP research tracing; hacked-hypervisor stress/test tooling such as [[vt-debuuger]]; minimal VT-x Type-2 learning drivers such as [[hv]] (VMX root / VMCS / CPUID-MSR-CR exits); stealth Type-2 research such as [[ophion]] (EPT, CPUID cache, CR4.VMXE hide, TSC compensation, private host CR3); user-mode HV presence checks such as [[checkhv-um]] (CPUID leaf / RDTSC timing / VMCS artifacts / signatures, no driver) (source: wiki/sources/descriptions/zxd1994__vt-debuuger.md) (source: wiki/sources/descriptions/zer0condition__hv.md) (source: wiki/sources/descriptions/zer0condition__Ophion.md) (source: wiki/sources/descriptions/zer0condition__checkhv_um.md)
-- **EFI:** pre-kernel mappers that skip normal driver-load telemetry
+- **EFI:** pre-kernel mappers that skip normal driver-load telemetry — e.g. [[xigmapper]] (EFI manual map; payload must not be USB-hosted when studying early-load AC such as [[vanguard]]) (source: wiki/sources/descriptions/xtremegamer1__xigmapper.md)
 - **Legitimate-driver hijack / stealth I/O:** research such as [[boom]] hijacks `Beep.sys` and changes communication so Ring0↔usermode paths are less obvious to AC telemetry. (source: wiki/sources/descriptions/zoand__BOOM.md)
 - **Threadless kernel execution:** PoCs such as [[zero-thread-kernel]] run code via existing thread contexts / timer callbacks instead of creating visible system threads (evasion research vs AC thread enumeration of manual maps). (source: wiki/sources/descriptions/zer0condition__ZeroThreadKernel.md)
 
@@ -53,7 +54,7 @@ Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[windbg-scripts]] · [[symlink-callback]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[ntmemory]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[openark]] · [[boom]] · [[zero-thread-kernel]] · [[dma]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[windbg-scripts]] · [[symlink-callback]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[ntmemory]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[xigmapper]] · [[etw-explorer]] · [[tietwagent]] · [[openark]] · [[boom]] · [[zero-thread-kernel]] · [[dma]] · [[overviews/anti-cheat]]
 
 
 
