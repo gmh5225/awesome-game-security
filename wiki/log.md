@@ -79,3 +79,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-17** — ingest `description:zboralski/unflutter`: entity [[unflutter]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
+- **2026-07-17** — ingest `description:za233/IDADeflat`: entity [[idadeflat]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
