@@ -30,3 +30,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:zompi2/Static-Variables-Obfuscator-UE4`: entity [[static-variables-obfuscator-ue4]]; cited on [[overviews/game-engine]] and [[overviews/anti-cheat]].
 
 - **2026-07-17** — ingest `description:zodiacon/EtwExplorer`: entity [[etw-explorer]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-07-17** — ingest `description:zodiacon/TotalPE2`: entity [[totalpe2]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
