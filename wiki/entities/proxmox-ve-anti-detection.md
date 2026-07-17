@@ -20,4 +20,4 @@ Useful for game-security researchers and reverse engineers studying offensive te
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[vt-debuuger]] · [[overviews/reverse-engineering]]
+[[qemu-anti-detection]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[vt-debuuger]] · [[overviews/reverse-engineering]]

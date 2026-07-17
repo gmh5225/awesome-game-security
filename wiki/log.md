@@ -52,3 +52,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:zhitkur/DayZzz`: entity [[dayzzz]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-17** — ingest `description:zhaodice/proxmox-ve-anti-detection`: entity [[proxmox-ve-anti-detection]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-07-17** — ingest `description:zhaodice/qemu-anti-detection`: entity [[qemu-anti-detection]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-link from [[proxmox-ve-anti-detection]].
