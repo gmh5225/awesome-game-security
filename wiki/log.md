@@ -176,3 +176,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:xenia-project/xenia`: entity [[xenia]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-07-18** — ingest `description:xemu-project/xemu`: entity [[xemu]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-18** — ingest `description:xehn1337/valorant-dumper`: entity [[valorant-dumper]]; cited on [[vanguard]] and [[overviews/game-engine]].
