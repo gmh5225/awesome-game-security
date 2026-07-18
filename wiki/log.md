@@ -212,3 +212,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:x86byte/sbox`: entity [[sbox]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-18** — ingest `description:x86byte/Obfusk8`: entity [[obfusk8]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; linked from [[sbox]].
+
+- **2026-07-18** — ingest `description:x64dbg/x64dbgbinja`: entity [[x64dbgbinja]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
