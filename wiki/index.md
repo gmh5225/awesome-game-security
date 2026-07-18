@@ -96,6 +96,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mutaben](entities/mutaben.md) — Python MBA (mixed-boolean-arithmetic) expression generator
 - [MoveCertificate](entities/move-certificate.md) — Magisk/KernelSU/APatch user→system CA module (Android 7–15)
 - [ndisapi](entities/ndisapi.md) — user-mode Windows Packet Filter / NDIS packet inspect-modify API
+- [NO_ACCESS_Protection](entities/no-access-protection.md) — PAGE_NOACCESS + VEH / single-step anti-tamper (vs external scanners)
 - [NvidiaApi](entities/nvidiaapi.md) — undocumented NvAPI GPU serial / board fingerprint (HWID research)
 - [NTMemory](entities/ntmemory.md) — kernel cross-process R/W (MDL / CR3 walk / physical translate)
 - [NTSleuth](entities/ntsleuth.md) — Windows syscall extractor (ntdll/win32u PDB + disasm → JSON/C headers)
