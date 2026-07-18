@@ -272,3 +272,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:wesmar/KvcForensic`: entity [[kvcforensic]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-link from [[kvc]].
 
 - **2026-07-18** — ingest `description:wesmar/KeyboardKit`: entity [[keyboardkit]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
+- **2026-07-18** — ingest `description:wesmar/KernelResearchKit`: entity [[kernel-research-kit]]; cited on [[overviews/windows-kernel]] and [[byovd]].

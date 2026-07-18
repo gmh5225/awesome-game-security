@@ -81,6 +81,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Kagura](entities/kagura.md) — LLVM pass plugin: CFG/string obfuscation, anti-tamper, anti-debug (mobile/desktop/Wasm)
 - [kevboy](entities/kevboy.md) — Rust Game Boy emulator (CPU / memory / graphics / input)
 - [KeyboardKit](entities/keyboardkit.md) — kernel keyboard IRP filter keylogger (UDP exfil; ExplorerFrame DLL hijack)
+- [KernelResearchKit](entities/kernel-research-kit.md) — Win11 25H2 boot-time DSE / SeCiCallbacks toolkit (manual map / IRP hijack / BYOVD)
 - [kvc](entities/kvc.md) — DSE bypass via signed MS driver (`g_CiOptions` / skci / SeCiCallbacks; PP/PPL→LSASS)
 - [KvcForensic](entities/kvcforensic.md) — LSASS credential forensics (MSV/WDigest/Kerberos/DPAPI; Win/Linux dumps)
 

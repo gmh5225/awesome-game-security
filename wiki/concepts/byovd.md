@@ -11,6 +11,7 @@ sources:
   - wiki/sources/descriptions/xM0kht4r__AV-EDR-Killer.md
   - wiki/sources/descriptions/wesmar__kvc.md
   - wiki/sources/descriptions/wesmar__WinDefCtl.md
+  - wiki/sources/descriptions/wesmar__KernelResearchKit.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -37,8 +38,10 @@ Process-terminate style killers such as [[av-edr-killer]] target `wsftprm.sys` v
 
 DSE-disable controllers such as [[kvc]] use a signed Microsoft driver to patch CI.dll (`g_CiOptions`), plus `skci.dll` hijack / `SeCiCallbacks` redirection loaders and PP/PPL paths for LSASS dumps under HVCI/VBS. (source: wiki/sources/descriptions/wesmar__kvc.md)
 
+Broader Win11 research kits such as [[kernel-research-kit]] combine boot-time `SeCiCallbacks` DSE bypass with multiple unsigned-load methods including BYOVD alongside manual map and IRP hijack (25H2; native subsystem; anti-loop dual-path). (source: wiki/sources/descriptions/wesmar__KernelResearchKit.md)
+
 Defender neutralization CLIs such as [[windefctl]] escalate via a kernel driver to disable real-time protection and Tamper Protection (Win11 26H1; UAC/GUI bypass, stealth execution)—same AV/EDR-control research lane as process-kill BYOVD samples. (source: wiki/sources/descriptions/wesmar__WinDefCtl.md)
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[kvc]] · [[windefctl]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[kvc]] · [[kernel-research-kit]] · [[windefctl]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
