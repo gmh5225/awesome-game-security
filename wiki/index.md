@@ -36,6 +36,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [2Pack](entities/2pack.md) — Rust PE & shellcode packer (EXE/DLL + raw; Anti Cheat → Binary Packer)
 - [3D-Racing-Game](entities/3d-racing-game.md) — OpenGL racing game (M/N scene switch; Game Develop / OpenGL source)
 - [BattleField-1-Internal](entities/battlefield-1-internal.md) — BF1 internal: DirectX / SDK generation / hooking (C++)
+- [BE-Shellcode](entities/be-shellcode.md) — BattlEye UM shellcode dump/disasm (thread scan / VEH / modules)
 - [android-proxy-mcp](entities/android-proxy-mcp.md) — Android HTTP/HTTPS capture MCP (mitmdump + SQLite + NL query)
 - [apktool-mcp-server](entities/apktool-mcp-server.md) — MCP server wrapping apktool (Android RE suite)
 - [AV-EDR-Killer](entities/av-edr-killer.md) — BYOVD via wsftprm.sys (IOCTL 0x22201C; PID kill)

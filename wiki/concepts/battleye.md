@@ -8,6 +8,7 @@ sources:
   - wiki/sources/descriptions/weak1337__SystemThreadFinder.md
   - wiki/sources/descriptions/weak1337__SkipHook.md
   - wiki/sources/descriptions/weak1337__PresentHookDetection.md
+  - wiki/sources/descriptions/weak1337__BE-Shellcode.md
 updated: 2026-07-18
 confidence: medium
 ---
@@ -28,6 +29,8 @@ User-mode prologue hooks (JMP / INT3 on WinAPI and game functions) are a common 
 
 Graphics Present integrity is another BE-linked lane: [[present-hook-detection]] recreates dummy-D3D11 swap-chain Present pointer + `dxgi.dll` prologue comparison against inline/vtable hooks used by overlay ESP. (source: wiki/sources/descriptions/weak1337__PresentHookDetection.md)
 
+User-mode shellcode injected into game processes is studied via [[be-shellcode]]: dump/disasm of BE detection modules covering system-thread scan, VEH enumeration, module walking, and signature-based integrity checks. (source: wiki/sources/descriptions/weak1337__BE-Shellcode.md)
+
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]

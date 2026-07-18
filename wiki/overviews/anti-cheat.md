@@ -46,6 +46,7 @@ sources:
   - wiki/sources/descriptions/weak1337__ModExMap.md
   - wiki/sources/descriptions/weak1337__DetectTpmSpoofing.md
   - wiki/sources/descriptions/weak1337__CEDetector.md
+  - wiki/sources/descriptions/weak1337__BE-Shellcode.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -60,7 +61,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 ## Major systems
 
 - [[easy-anti-cheat]] — service + driver + game-facing integrity (Fortnite, Apex, Rust)
-- [[battleye]] — handle protection, process/memory scanning (PUBG, R6, DayZ); research ref [[blindeye]] drops BE report-path pool allocs via hooked `ExAllocatePool*` (source: wiki/sources/descriptions/zouxianyu__BlindEye.md)
+- [[battleye]] — handle protection, process/memory scanning (PUBG, R6, DayZ); research ref [[blindeye]] drops BE report-path pool allocs via hooked `ExAllocatePool*` (source: wiki/sources/descriptions/zouxianyu__BlindEye.md); user-mode shellcode RE via [[be-shellcode]] (dump/disasm thread scan, VEH enum, module integrity) (source: wiki/sources/descriptions/weak1337__BE-Shellcode.md)
 - [[vanguard]] — boot-start driver, early driver allowlisting (Valorant, LoL)
 - FACEIT AC, VAC (user-mode signatures), GameGuard, XIGNCODE3, ACE, Warden (Blizzard / WoW)
 - [[vac3-inhibitor]] — C++ VAC3 exploration (hooking / memory analysis) under cheat → explore anticheat:vac (source: wiki/sources/descriptions/zyhp__vac3_inhibitor.md)
@@ -91,7 +92,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[ricochet-deobfuscator]] · [[x14-08-coverstory-blizzard]] · [[veh-dumper]] · [[no-access-protection]] · [[file-recovery-tool]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[lumina-cheat]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[kagura]] · [[wprotect]] · [[obfusk8]] · [[sbox]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[instrumentation-callback-syscall-logger]] · [[function-collections]] · [[injectors]] · [[modexmap]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[mini-launcher]] · [[zero-thread-kernel]] · [[wdutf]] · [[nvidiaapi]] · [[detect-tpm-spoofing]] · [[cedetector]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[ricochet-deobfuscator]] · [[x14-08-coverstory-blizzard]] · [[veh-dumper]] · [[no-access-protection]] · [[file-recovery-tool]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[lumina-cheat]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[kagura]] · [[wprotect]] · [[obfusk8]] · [[sbox]] · [[blindeye]] · [[be-shellcode]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[instrumentation-callback-syscall-logger]] · [[function-collections]] · [[injectors]] · [[modexmap]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[mini-launcher]] · [[zero-thread-kernel]] · [[wdutf]] · [[nvidiaapi]] · [[detect-tpm-spoofing]] · [[cedetector]]
 
 
 
