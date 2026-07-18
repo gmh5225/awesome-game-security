@@ -1564,6 +1564,7 @@ def commit_to_main(
     decision: dict[str, Any],
     *,
     run_id: str = "",
+    commit_label: str = "discover",
 ) -> str | None:
     """
     Commit validated README.md edits directly to main via the Contents API.
@@ -1590,7 +1591,8 @@ def commit_to_main(
 
     n = len(approved)
     safe_run = re.sub(r"[^A-Za-z0-9._-]", "", run_id) or "local"
-    msg = f"discover: add {n} repo(s) via Cursor CLI (2-pass) [{safe_run}]"
+    safe_label = re.sub(r"[^A-Za-z0-9._-]", "", commit_label) or "discover"
+    msg = f"{safe_label}: add {n} repo(s) via Cursor CLI (2-pass) [{safe_run}]"
 
     discard_side_effects()
     readme_text = README_PATH.read_text(encoding="utf-8", errors="replace")

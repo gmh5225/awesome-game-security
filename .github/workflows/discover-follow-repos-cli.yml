@@ -1,8 +1,11 @@
-name: Discover Repos (Cursor CLI)
+name: Discover Follow Repos (Cursor CLI)
 
-# Scan GitHub for theme-related repos using README headings, then run TWO
-# Cursor CLI passes (relevance screen → confirm + placement). Validated
-# approvals are committed directly to main via the Contents API.
+# Scan repos owned by users from github-follow-feed tracking sources:
+#   1) GitHub following list of gmh5225
+#   2) custom_users.txt in gmh5225/github-follow-feed
+# Shallow-clone candidates, then run TWO Cursor CLI passes (relevance screen
+# → confirm + placement). Validated approvals are committed directly to main
+# via the Contents API.
 #
 # After a successful Contents-API commit, this workflow explicitly dispatches
 # Auto Archive New Repos on Push (archive → EN description → translate).
@@ -10,8 +13,8 @@ name: Discover Repos (Cursor CLI)
 # workflows (GitHub recursion guard); PR merges still use the normal push path.
 #
 # Triggers:
-# - schedule: every 3 hours
-# - workflow_dispatch: tunable lookback / limits / model / queries
+# - schedule: every 6 hours (staggered from keyword discover)
+# - workflow_dispatch: tunable lookback / limits / model / source
 #
 # Secret safety:
 # - Canonical repo only; forks never inherit CURSOR_API_KEY.
@@ -19,44 +22,49 @@ name: Discover Repos (Cursor CLI)
 
 on:
   schedule:
-    # Every 3 hours at minute 0 UTC (00:00, 03:00, 06:00, ...)
-    - cron: "0 */3 * * *"
+    # Every 6 hours at minute 45 UTC — stagger from discover-repos (`0 */3 * * *`).
+    - cron: "45 */6 * * *"
 
   workflow_dispatch:
     inputs:
       lookback_days:
         description: "Only repos pushed within this many days"
         required: false
-        default: "1"
-      max_candidates:
-        description: "Max candidates after merge/dedupe"
-        required: false
-        default: "30"
-      min_stars:
-        description: "Minimum stars filter"
-        required: false
         default: "3"
-      max_queries:
-        description: "Cap README-derived search queries (0 = no cap)"
+      max_candidates:
+        description: "Max candidates after merge/dedupe/clone"
         required: false
-        default: "300"
+        default: "20"
+      min_stars:
+        description: "Minimum stars filter (0 = no floor)"
+        required: false
+        default: "0"
+      repos_per_user:
+        description: "Max recently-pushed repos considered per tracked user"
+        required: false
+        default: "5"
+      source_user:
+        description: "GitHub user whose following list is scanned"
+        required: false
+        default: "gmh5225"
+      follow_feed_repo:
+        description: "Repo hosting custom_users.txt (owner/name)"
+        required: false
+        default: "gmh5225/github-follow-feed"
       model:
         description: "Cursor CLI model id"
         required: false
         default: "cursor-grok-4.5-high-fast"
-      queries:
-        description: "Optional extra queries appended to README headings (newline or ||; empty = README-only)"
-        required: false
-        default: ""
 
 concurrency:
-  # Shared with discover-follow-repos-cli.yml (Contents API README writers).
+  # Share with discover-repos-cli.yml so two Contents-API README writers
+  # never race each other (conflict / lost update on main).
   group: discover-repos
   # Queue overlaps — cron must not kill an in-progress manual run.
   cancel-in-progress: false
 
 jobs:
-  discover:
+  discover-follow:
     if: github.repository == 'gmh5225/awesome-game-security' && github.event.repository.fork == false
     runs-on: ubuntu-latest
     permissions:
@@ -105,20 +113,21 @@ jobs:
             LOOKBACK="${{ inputs.lookback_days }}"
             MAX_CAND="${{ inputs.max_candidates }}"
             MIN_STARS="${{ inputs.min_stars }}"
-            MAX_QUERIES="${{ inputs.max_queries }}"
+            REPOS_PER_USER="${{ inputs.repos_per_user }}"
+            SOURCE_USER="${{ inputs.source_user }}"
+            FOLLOW_FEED_REPO="${{ inputs.follow_feed_repo }}"
             MODEL="${{ inputs.model }}"
-            QUERIES="${{ inputs.queries }}"
           else
-            # Scheduled cadence: short lookback is enough.
-            LOOKBACK="1"
-            MAX_CAND="30"
-            MIN_STARS="3"
-            MAX_QUERIES="300"
+            LOOKBACK="3"
+            MAX_CAND="20"
+            MIN_STARS="0"
+            REPOS_PER_USER="5"
+            SOURCE_USER="gmh5225"
+            FOLLOW_FEED_REPO="gmh5225/github-follow-feed"
             MODEL="cursor-grok-4.5-high-fast"
-            QUERIES=""
           fi
 
-          for name in LOOKBACK MAX_CAND MIN_STARS MAX_QUERIES; do
+          for name in LOOKBACK MAX_CAND MIN_STARS REPOS_PER_USER; do
             val="${!name}"
             if ! [[ "${val}" =~ ^[0-9]+$ ]]; then
               echo "ERROR: ${name} must be an integer, got: ${val}"
@@ -130,22 +139,20 @@ jobs:
             echo "lookback_days=${LOOKBACK}"
             echo "max_candidates=${MAX_CAND}"
             echo "min_stars=${MIN_STARS}"
-            echo "max_queries=${MAX_QUERIES}"
+            echo "repos_per_user=${REPOS_PER_USER}"
+            echo "source_user=${SOURCE_USER}"
+            echo "follow_feed_repo=${FOLLOW_FEED_REPO}"
             echo "model<<EOF"
             printf '%s\n' "${MODEL}"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-          {
-            echo "DISCOVER_QUERIES<<EOF"
-            printf '%s\n' "${QUERIES}"
-            echo "EOF"
-          } >> "$GITHUB_ENV"
-
           echo "lookback_days=${LOOKBACK}"
           echo "max_candidates=${MAX_CAND}"
           echo "min_stars=${MIN_STARS}"
-          echo "max_queries=${MAX_QUERIES}"
+          echo "repos_per_user=${REPOS_PER_USER}"
+          echo "source_user=${SOURCE_USER}"
+          echo "follow_feed_repo=${FOLLOW_FEED_REPO}"
           echo "model=${MODEL}"
 
       - name: Install Cursor CLI
@@ -177,7 +184,10 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Discover + 2-pass review + commit to main
+      - name: Keyword self-test
+        run: python3 scripts/discover-follow-repos-cli.py --self-test
+
+      - name: Discover follow-feed + clone + 2-pass review + commit
         id: discover
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
@@ -186,7 +196,9 @@ jobs:
           LOOKBACK: ${{ steps.opts.outputs.lookback_days }}
           MAX_CAND: ${{ steps.opts.outputs.max_candidates }}
           MIN_STARS: ${{ steps.opts.outputs.min_stars }}
-          MAX_QUERIES: ${{ steps.opts.outputs.max_queries }}
+          REPOS_PER_USER: ${{ steps.opts.outputs.repos_per_user }}
+          SOURCE_USER: ${{ steps.opts.outputs.source_user }}
+          FOLLOW_FEED_REPO: ${{ steps.opts.outputs.follow_feed_repo }}
           DESC_MODEL: ${{ steps.opts.outputs.model }}
         run: |
           set -euo pipefail
@@ -203,22 +215,18 @@ jobs:
           agent --version || true
           gh --version || true
 
-          ARGS=(
-            --lookback-days "$LOOKBACK"
-            --max-candidates "$MAX_CAND"
-            --min-stars "$MIN_STARS"
-            --max-queries "$MAX_QUERIES"
-            --model "$DESC_MODEL"
-            --commit
-            --run-id "${GITHUB_RUN_ID}"
-          )
-
-          if [ -n "${DISCOVER_QUERIES//[[:space:]]/}" ]; then
-            ARGS+=(--queries-env DISCOVER_QUERIES)
-          fi
-
-          LOG=/tmp/discover-repos.log
-          python3 scripts/discover-repos-cli.py "${ARGS[@]}" | tee "$LOG"
+          LOG=/tmp/discover-follow-repos.log
+          python3 scripts/discover-follow-repos-cli.py \
+            --source-user "$SOURCE_USER" \
+            --follow-feed-repo "$FOLLOW_FEED_REPO" \
+            --lookback-days "$LOOKBACK" \
+            --max-candidates "$MAX_CAND" \
+            --min-stars "$MIN_STARS" \
+            --repos-per-user "$REPOS_PER_USER" \
+            --model "$DESC_MODEL" \
+            --commit \
+            --run-id "${GITHUB_RUN_ID}" \
+            | tee "$LOG"
 
           commit_sha="$(grep -E '^COMMIT_SHA=' "$LOG" | tail -n1 | cut -d= -f2- || true)"
           approved="$(grep -E '^Final: approved=' "$LOG" | tail -n1 | sed -E 's/^Final: approved=([0-9]+).*/\1/' || true)"
@@ -308,7 +316,7 @@ jobs:
                   f"{os.environ['GITHUB_REPOSITORY']}/commit/{commit_sha}"
               )
               lines.append(
-                  f"✅ **Discover Repos** — added **{approved_count or '?'}** repo(s)"
+                  f"✅ **Discover Follow Repos** — added **{approved_count or '?'}** repo(s)"
               )
               for raw in approved_repos.splitlines():
                   raw = raw.strip()
@@ -329,7 +337,7 @@ jobs:
               lines.append(f"commit: `{commit_sha[:12]}` {no_embed(commit_url)}")
           else:
               lines.append(
-                  f"ℹ️ **Discover Repos** finished — no README commit "
+                  f"ℹ️ **Discover Follow Repos** finished — no README commit "
                   f"(approved: {approved_count or '0'})"
               )
           lines.append(f"run: {no_embed(run_url)}")
