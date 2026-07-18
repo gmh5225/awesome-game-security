@@ -12,6 +12,7 @@ sources:
   - wiki/sources/descriptions/wesmar__kvc.md
   - wiki/sources/descriptions/wesmar__WinDefCtl.md
   - wiki/sources/descriptions/wesmar__KernelResearchKit.md
+  - wiki/sources/descriptions/wavestone-cdt__EDRSandblast.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -42,6 +43,8 @@ Broader Win11 research kits such as [[kernel-research-kit]] combine boot-time `S
 
 Defender neutralization CLIs such as [[windefctl]] escalate via a kernel driver to disable real-time protection and Tamper Protection (Win11 26H1; UAC/GUI bypass, stealth execution)—same AV/EDR-control research lane as process-kill BYOVD samples. (source: wiki/sources/descriptions/wesmar__WinDefCtl.md)
 
+Full-stack EDR-blinding toolkits such as [[edrsandblast]] combine BYOVD with callback/ETW TI disable and ntdll unhook (offset automation + demo credential dump). (source: wiki/sources/descriptions/wavestone-cdt__EDRSandblast.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[kvc]] · [[kernel-research-kit]] · [[windefctl]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[kvc]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
