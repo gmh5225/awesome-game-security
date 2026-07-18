@@ -1291,6 +1291,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/zhuowei/cheese [CVE-2025-21479]
 - https://github.com/farazsth98/poc-CVE-2025-38352 [CVE-2025-38352]
 - https://github.com/x-spy/CVE-2026-43499-popsicle [CVE-2026-43499]
+- https://github.com/Colorful-glassblock/duchamp-root [CVE-2026-43499]
 
 > Android Bootloader Bypass
 - https://github.com/MlgmXyysd/Xiaomi-HyperOS-BootLoader-Bypass [Xiaomi HyperOS BootLoader Bypass]
