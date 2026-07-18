@@ -8,7 +8,8 @@ sources:
   - wiki/sources/skills/reverse-engineering.md
   - wiki/sources/descriptions/yukiarrr__Il2cppSpy.md
   - wiki/sources/descriptions/xxzzddxzd__unitySpeedTools.md
-updated: 2026-07-17
+  - wiki/sources/descriptions/wwweeeqqu__honor-of-kings-RE-research.md
+updated: 2026-07-18
 confidence: high
 ---
 
@@ -23,10 +24,10 @@ Unity’s ahead-of-time C++ compilation backend. Managed assemblies become nativ
 3. Import into IDA/Ghidra; resolve `Il2CppClass` / `MethodInfo` / invoke paths
 4. Hook via native hooks or [[frida]] on mobile
 
-For APK-oriented disassembly and two-build diffs, [[il2cpp-spy]] compares selected Unity IL2CPP APKs side by side. (source: wiki/sources/descriptions/yukiarrr__Il2cppSpy.md) On iOS, speed/modding tooling such as [[unityspeedtools]] (C/C++ / Objective-C) targets Unity IL2CPP analysis in the cheat / game engine explorer:Unity lane. (source: wiki/sources/descriptions/xxzzddxzd__unitySpeedTools.md)
+For APK-oriented disassembly and two-build diffs, [[il2cpp-spy]] compares selected Unity IL2CPP APKs side by side. (source: wiki/sources/descriptions/yukiarrr__Il2cppSpy.md) On iOS, speed/modding tooling such as [[unityspeedtools]] (C/C++ / Objective-C) targets Unity IL2CPP analysis in the cheat / game engine explorer:Unity lane. (source: wiki/sources/descriptions/xxzzddxzd__unitySpeedTools.md) Title-specific Android RE notes such as [[honor-of-kings-re-research]] pair Frida/Python IL2CPP parsing with native/`libtersafe` and ACE surfaces. (source: wiki/sources/descriptions/wwweeeqqu__honor-of-kings-RE-research.md)
 
 Mono builds instead use `Assembly-CSharp.dll` + dnSpy/ILSpy.
 
 ## Related
 
-[[frida]] · [[il2cpp-spy]] · [[unityspeedtools]] · [[overviews/game-engine]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]
+[[frida]] · [[il2cpp-spy]] · [[unityspeedtools]] · [[honor-of-kings-re-research]] · [[overviews/game-engine]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]
