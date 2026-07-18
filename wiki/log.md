@@ -204,3 +204,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:x90skysn3k/x260-lenovo-opencore`: entity [[x260-lenovo-opencore]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
 
 - **2026-07-18** — ingest `description:x86matthew/WinVisor`: entity [[winvisor]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
+- **2026-07-18** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/game-engine]], [[overviews/mobile-security]], [[overviews/windows-kernel]], [[overviews/reverse-engineering]] (Cheat ~2546; Game Tools/Testing; PS HV+BD-JB; WSL/Linux Emulator); light `index.md` section notes (no per-category pages).

@@ -6,15 +6,15 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Overviews
 
-- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2545 / Anti Cheat ~592; Game Engine ~140; console Switch/Xbox/PS)
-- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* + engine protection (~592); open-source/analysis + Windows Emulator AC
+- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2546 / Anti Cheat ~592; Game Engine ~140; Game Tools/Testing; console Switch/Xbox/PS HV)
+- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* + engine protection (~592); Game Tools RCE + Windows Emulator AC
 - [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat/Detection:DMA + WSF attestation
-- [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~140); assets, hot-patch, MCP/AI gamedev (~176); Game CI / Network JWT
-- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2545) + Some Tricks (~112); Launcher Abuser / console emulator lanes
+- [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~140); MCP/AI gamedev (~176); Testing/Tools/CI + Network JWT
+- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2546) + Some Tricks (~112); Launcher Abuser / console PS HV+BD-JB lanes
 - [Graphics API](overviews/graphics-api.md) — DirectX (~32) / GL / Vulkan hooks, overlays, capture
-- [Mobile Security](overviews/mobile-security.md) — Android / iOS; memory-loading + App/Kernel CVE; WSA (~9), emulators (~9/~3)
-- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools, MBA/DBI, deobfuscation, packers; Windows Emulator + console RE
-- [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation (~9), BYOVD, pool; Windows Emulator (~7)
+- [Mobile Security](overviews/mobile-security.md) — Android / iOS; memory-loading + App/Kernel CVE; WSA (~9), Gunyah/vphone emulators
+- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools, MBA/DBI, deobfuscation, packers; Windows Emulator + console/PS HV RE
+- [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation (~9), BYOVD, pool; Windows Emulator (~7) + WSL
 
 ## Concepts
 
