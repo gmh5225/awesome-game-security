@@ -6,9 +6,9 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Overviews
 
-- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2549 / Anti Cheat ~592; Game Engine ~141; Image Codec; console Switch/Xbox/PS HV)
-- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* + engine protection (~592); Game Tools RCE + Windows Emulator AC
-- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat/Detection:DMA + WSF attestation
+- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2549 / Anti Cheat ~593; Game Engine ~141; Image Codec; console Switch/Xbox/PS HV)
+- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* + engine protection (~593); hybrid OS AC samples; Game Tools RCE + Windows Emulator AC
+- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat/Detection:DMA (~593) + WSF attestation
 - [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~141); MCP/AI gamedev (~176); Image Codec + Testing/Tools/CI
 - [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2549) + Some Tricks (~112); Launcher Abuser / console PS HV+BD-JB lanes
 - [Graphics API](overviews/graphics-api.md) — DirectX (~33) / GL / Vulkan hooks, overlays, Image Codec

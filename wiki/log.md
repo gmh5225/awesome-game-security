@@ -280,3 +280,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:wesmar/EfiTool`: entity [[efitool]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-07-18** — ingest `description:wesmar/BootBypass`: entity [[bootbypass]]; cited on [[overviews/windows-kernel]] and [[hvci]].
+
+- **2026-07-18** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]] (Anti Cheat ~593; hybrid OS AC sample note); light `index.md` section notes (no per-category pages).
