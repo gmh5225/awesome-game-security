@@ -316,3 +316,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:wbenny/scfw`: entity [[scfw]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-07-18** — ingest `description:wbenny/injdrv`: entity [[injdrv]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-07-18** — ingest `description:wbenny/KSOCKET`: entity [[ksocket]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
