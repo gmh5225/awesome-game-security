@@ -248,3 +248,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:wiresock/ndisapi`: entity [[ndisapi]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-07-18** — ingest `description:winsiderss/systeminformer`: entity [[systeminformer]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
+- **2026-07-18** — ingest `description:wilszdev/SteamAntiAntiDebug`: entity [[steam-anti-anti-debug]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].

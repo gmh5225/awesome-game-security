@@ -58,6 +58,7 @@ sources:
   - wiki/sources/descriptions/x-spy__CVE-2026-43499-popsicle.md
   - wiki/sources/descriptions/wtsxDev__reverse-engineering.md
   - wiki/sources/descriptions/wiresock__ndisapi.md
+  - wiki/sources/descriptions/wilszdev__SteamAntiAntiDebug.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -98,6 +99,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Fix VMP / VTIL demos such as [[vmdevirt-vtil]] (broken VTIL compile path; multi-`vmenter` → jmp into compiled VTIL for IDA) sit in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/xtremegamer1__vmdevirt-vtil.md)
 - Opaque-predicate detection via [[opaque-predicates-detective]] (invariant-expression / BB-local damage) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/yellowbyte__opaque-predicates-detective.md)
 - Windows x86/x64 debugging via [[x64dbg]] (feature-rich debugger + plugin system) is a core Cheat Debugging lane tool for offensive RE. (source: wiki/sources/descriptions/x64dbg__x64dbg.md)
+- Steam anti-anti-debug helpers such as [[steam-anti-anti-debug]] (patch Steam debug detection so [[x64dbg]] can attach to protected game processes) sit in the Steam / Cheat Debugging research lane. (source: wiki/sources/descriptions/wilszdev__SteamAntiAntiDebug.md)
 - Binary Ninja ↔ x64dbg plugin work such as [[x64dbgbinja]] (Python BN plugin from the x64dbg org) sits in the Cheat Binary Ninja / x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__x64dbgbinja.md)
 - Collaborative breakpoint management via [[slothbp]] (x64dbg plugin; C/C++) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__SlothBP.md)
 - Managed .NET 6 / C# x64dbg plugin authoring via [[dotx64dbg]] (live edit/debug; custom commands/expressions) sits in the same Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__DotX64Dbg.md)
@@ -131,7 +133,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ndisapi]] · [[ntmemory]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[reverse-engineering]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[xenia]] · [[xenia-mac]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ndisapi]] · [[ntmemory]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[reverse-engineering]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[xenia]] · [[xenia-mac]] · [[overviews/anti-cheat]]
 
 
 
