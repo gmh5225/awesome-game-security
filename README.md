@@ -2039,6 +2039,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/kaijia2022/Cheat-Engine-DMA-Plugin [CheatEngine DMA]
 - https://github.com/un4ckn0wl3z/DMACheatEngineLoader [CheatEngine DMA, not open-source]
 - https://github.com/gmh5225/MemTools [Windows/Linux DMA testing tools]
+- https://github.com/sh1ftd/dma-speedtest-memflow-rs [Windows CLI/GUI for benchmarking DMA read/write throughput and latency via memflow (pcileech/native)]
 - https://github.com/sonodima/physpatch [Scanning and patching of the entire Windows Kernel using DMA]
 - https://github.com/gmh5225/DMA-PCIE-BOARD-75T [DMA-PCIE-BOARD-75T]
 - https://github.com/dom0ng/pcileech-wifi-v2 [pcileech-fpga with wireless card emulation]
