@@ -256,3 +256,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:wietze/HijackLibs`: entity [[hijacklibs]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-link from [[windows-dll-hijacking]].
 
 - **2026-07-18** — ingest `description:whx-prog/The-Seed-Link-Future`: entity [[the-seed-link-future]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-18** — ingest `description:whokilleddb/function-collections`: entity [[function-collections]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].

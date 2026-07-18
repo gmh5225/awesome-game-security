@@ -33,6 +33,7 @@ sources:
   - wiki/sources/descriptions/x86matthew__InstrumentationCallbackSyscallLogger.md
   - wiki/sources/descriptions/wpdk__wdutf.md
   - wiki/sources/descriptions/winsiderss__systeminformer.md
+  - wiki/sources/descriptions/whokilleddb__function-collections.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -46,7 +47,7 @@ Kernel internals that matter for game protection and low-level research: object/
 ## Key sub-areas
 
 - **Structures:** EPROCESS/ETHREAD, MMVAD, DRIVER_OBJECT, IRP; SSDT/IDT; pool tables
-- **Syscall tables:** extract `ntdll` / `win32u` SSNs via PDB + disassembly tools such as [[ntsleuth]] (JSON / C header dumps for direct-syscall research). (source: wiki/sources/descriptions/xaitax__NTSleuth.md) Runtime Ring3 inspection via Instrumentation Callback (fires on every kernel-syscall return) is covered by samples such as [[instrumentation-callback-syscall-logger]]. (source: wiki/sources/descriptions/x86matthew__InstrumentationCallbackSyscallLogger.md)
+- **Syscall tables:** extract `ntdll` / `win32u` SSNs via PDB + disassembly tools such as [[ntsleuth]] (JSON / C header dumps for direct-syscall research). (source: wiki/sources/descriptions/xaitax__NTSleuth.md) Runtime Ring3 inspection via Instrumentation Callback (fires on every kernel-syscall return) is covered by samples such as [[instrumentation-callback-syscall-logger]]. (source: wiki/sources/descriptions/x86matthew__InstrumentationCallbackSyscallLogger.md) Broader unconventional Ring3 PoCs (memory analysis / asset pipelines) appear in collections such as [[function-collections]]. (source: wiki/sources/descriptions/whokilleddb__function-collections.md)
 - **WinDbg automation:** JS WinDbg scripts such as [[windbg-scripts]] for kernel-level debug/modding workflows (Cheat → WinDbg Plugins). (source: wiki/sources/descriptions/yardenshafir__WinDbg_Scripts.md)
 - **Cross-process kernel R/W:** MDL map + physical translate + CR3 page-table walk libraries such as [[ntmemory]] (research for kernel cheat memory paths / AC evasion). (source: wiki/sources/descriptions/zer0condition__NTMemory.md)
 - **[[kernel-callbacks]]:** process/thread/image notify, ObRegisterCallbacks, Cm/Flt; defensive enumeration/inspection via anti-rootkit GUIs such as [[openark]] (SSDT/shadow SSDT, drivers, objects); object-symlink access callbacks such as [[symlink-callback]] (LinkTarget → callback) (source: wiki/sources/descriptions/yyl-20020115__OpenArk.md) (source: wiki/sources/descriptions/yardenshafir__SymlinkCallback.md)
@@ -67,7 +68,7 @@ Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[hvci]] · [[cet-research]] · [[windbg-scripts]] · [[symlink-callback]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[ntmemory]] · [[ntsleuth]] · [[instrumentation-callback-syscall-logger]] · [[winvisor]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[xigmapper]] · [[x260-lenovo-opencore]] · [[etw-explorer]] · [[tietwagent]] · [[openark]] · [[systeminformer]] · [[boom]] · [[data-ptr-swap]] · [[zero-thread-kernel]] · [[wdutf]] · [[dma]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[byovd]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[hvci]] · [[cet-research]] · [[windbg-scripts]] · [[symlink-callback]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[ntmemory]] · [[ntsleuth]] · [[instrumentation-callback-syscall-logger]] · [[function-collections]] · [[winvisor]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[xigmapper]] · [[x260-lenovo-opencore]] · [[etw-explorer]] · [[tietwagent]] · [[openark]] · [[systeminformer]] · [[boom]] · [[data-ptr-swap]] · [[zero-thread-kernel]] · [[wdutf]] · [[dma]] · [[overviews/anti-cheat]]
 
 
 
