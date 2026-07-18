@@ -8,7 +8,8 @@ sources:
   - wiki/sources/descriptions/zer0condition__BusterCall.md
   - wiki/sources/descriptions/yyl-20020115__OpenArk.md
   - wiki/sources/descriptions/yardenshafir__SymlinkCallback.md
-updated: 2026-07-17
+  - wiki/sources/descriptions/wesmar__VaultGuard.md
+updated: 2026-07-18
 confidence: high
 ---
 
@@ -25,8 +26,8 @@ Windows notify/object registration APIs used by anti-cheat and EDR to observe pr
 
 ## Attack / defense
 
-Attackers with kernel R/W ([[byovd]]) may try to unlink or patch callback lists; hypervisor EPT write-protection is a modern counter. EFI/bootkits can avoid some load-image signals entirely. Research tooling such as [[bustercall]] enumerates process/thread/image/registry callbacks by owning driver and can selectively remove or patch them. (source: wiki/sources/descriptions/zer0condition__BusterCall.md) Defensive anti-rootkit GUIs such as [[openark]] also enumerate callbacks (plus SSDT/drivers/objects) for rootkit hunting and system analysis. (source: wiki/sources/descriptions/yyl-20020115__OpenArk.md) Object-level research such as [[symlink-callback]] replaces a symlink `LinkTarget` with a callback fired on access—relevant to Ring0 callback / AC defensive study. (source: wiki/sources/descriptions/yardenshafir__SymlinkCallback.md)
+Attackers with kernel R/W ([[byovd]]) may try to unlink or patch callback lists; hypervisor EPT write-protection is a modern counter. EFI/bootkits can avoid some load-image signals entirely. Research tooling such as [[bustercall]] enumerates process/thread/image/registry callbacks by owning driver and can selectively remove or patch them. (source: wiki/sources/descriptions/zer0condition__BusterCall.md) Defensive anti-rootkit GUIs such as [[openark]] also enumerate callbacks (plus SSDT/drivers/objects) for rootkit hunting and system analysis. (source: wiki/sources/descriptions/yyl-20020115__OpenArk.md) Object-level research such as [[symlink-callback]] replaces a symlink `LinkTarget` with a callback fired on access—relevant to Ring0 callback / AC defensive study. (source: wiki/sources/descriptions/yardenshafir__SymlinkCallback.md) Defensive FSFilter / process-access blockers such as [[vaultguard]] (x64 MASM minifilter + driver; hide/lock/RO/block-exec; anti-debug) illustrate the same Flt/Ob surfaces from the protection side. (source: wiki/sources/descriptions/wesmar__VaultGuard.md)
 
 ## Related
 
-[[byovd]] · [[hvci]] · [[bustercall]] · [[openark]] · [[symlink-callback]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[hvci]] · [[bustercall]] · [[openark]] · [[symlink-callback]] · [[vaultguard]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

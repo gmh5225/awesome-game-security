@@ -128,6 +128,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vac3_inhibitor](entities/vac3-inhibitor.md) — VAC3 exploration via hooking / memory analysis (C++)
 - [vac3-dumper](entities/vac3-dumper.md) — VAC3 multi-module dumper (timed loads; explore anticheat:vac)
 - [valorant-dumper](entities/valorant-dumper.md) — Valorant UE offset/SDK dumper (GObjects/GNames; Vanguard research)
+- [VaultGuard](entities/vaultguard.md) — FSFilter minifilter + process access block (x64 MASM; anti-debug/tamper)
 - [veh-dumper](entities/veh-dumper.md) — x64 VEH/VCH → synthetic PE64 dumps for IDA
 - [VEN0m-Ransomware](entities/ven0m-ransomware.md) — BYOVD via iMFForceDelete.sys (IObit; AV/EDR evasion)
 - [vermagic](entities/vermagic.md) — change Linux LKM vermagic / CRCs (cheat / RE tools)

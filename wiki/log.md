@@ -266,3 +266,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:wesmar/kvc`: entity [[kvc]]; cited on [[overviews/windows-kernel]] and [[byovd]].
 
 - **2026-07-18** — ingest `description:wesmar/WinDefCtl`: entity [[windefctl]]; cited on [[overviews/windows-kernel]] and [[byovd]].
+
+- **2026-07-18** — ingest `description:wesmar/VaultGuard`: entity [[vaultguard]]; cited on [[overviews/windows-kernel]] and [[kernel-callbacks]].
