@@ -40,6 +40,7 @@ sources:
   - wiki/sources/descriptions/whokilleddb__function-collections.md
   - wiki/sources/descriptions/whereisr0da__Lumina-Cheat.md
   - wiki/sources/descriptions/wesmar__FileRecoveryTool.md
+  - wiki/sources/descriptions/weak1337__ricochet_deobfuscator.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -59,6 +60,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 - FACEIT AC, VAC (user-mode signatures), GameGuard, XIGNCODE3, ACE, Warden (Blizzard / WoW)
 - [[vac3-inhibitor]] — C++ VAC3 exploration (hooking / memory analysis) under cheat → explore anticheat:vac (source: wiki/sources/descriptions/zyhp__vac3_inhibitor.md)
 - [[vac3-dumper]] — dumps VAC3 modules loaded at different times for offline RE (Dump lane) (source: wiki/sources/descriptions/x1tan__vac3-dumper.md)
+- [[ricochet-deobfuscator]] — C/C++ Ricochet deobfuscator (driver / memory analysis; explore anticheat:ricochet) (source: wiki/sources/descriptions/weak1337__ricochet_deobfuscator.md)
 - [[x14-08-coverstory-blizzard]] — WoW cheat framework with Warden loader hooks / RunScript injection (research ref for Warden internals) (source: wiki/sources/descriptions/xakepru__x14.08-coverstory-blizzard.md)
 
 
@@ -84,7 +86,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[veh-dumper]] · [[file-recovery-tool]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[lumina-cheat]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[kagura]] · [[wprotect]] · [[obfusk8]] · [[sbox]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[instrumentation-callback-syscall-logger]] · [[function-collections]] · [[injectors]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[mini-launcher]] · [[zero-thread-kernel]] · [[wdutf]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[ricochet-deobfuscator]] · [[x14-08-coverstory-blizzard]] · [[veh-dumper]] · [[file-recovery-tool]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[lumina-cheat]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[kagura]] · [[wprotect]] · [[obfusk8]] · [[sbox]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[instrumentation-callback-syscall-logger]] · [[function-collections]] · [[injectors]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[mini-launcher]] · [[zero-thread-kernel]] · [[wdutf]]
 
 
 

@@ -112,6 +112,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [QuickAsm](entities/quickasm.md) — x86/x64 assemble-and-run GUI (Keystone)
 - [reverse-engineering](entities/reverse-engineering.md) — curated RE awesome list (networking / editors; Cheat guide lane)
 - [revert-mapper](entities/revert-mapper.md) — post-execution cleanup for manually mapped kernel drivers
+- [ricochet-deobfuscator](entities/ricochet-deobfuscator.md) — Ricochet AC deobfuscator (C/C++; driver / memory analysis)
 - [sbox](entities/sbox.md) — C++ compile-time AES-128 / S-box string obfuscation (Obfusk8 spin-off)
 - [shredder-rs](entities/shredder-rs.md) — x86_64 polymorphic instruction shredding (Rust)
 - [SlothBP](entities/slothbp.md) — x64dbg collaborative breakpoint manager (Cheat x64dbg Plugins)
