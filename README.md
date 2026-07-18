@@ -1314,6 +1314,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://sourceforge.net/projects/recovery-for-xiaomi-devices/files [TWRP for xiaomi]
 - https://github.com/cfig/Android_boot_image_editor [Android ROM tool]
 - https://github.com/badabing2005/PixelFlasher [Android ROM tool for Pixel]
+- https://github.com/Zenlua/Tool-Tree [Android ROM/APK unpack-repack toolkit for root and non-root ARM64 devices]
 - https://github.com/Ctapchuk/android_bootable_recovery-OFRP [OrangeFox Recovery]
 
 > Android Device Trees
@@ -2804,6 +2805,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/KernelSnippets/blob/main/VGK_SwapContextHk.h [VGK's SwapContextHk]
 - https://github.com/gmh5225/augur-riot [Riot Vanguard streamed module to PE converter. Resolves hashed imports, reconstructs sections, and writes valid DLLs from RITO format binaries]
 - https://github.com/luavmload/vanguard-update-notifier [Discord bot that polls Riot clientconfig, hashes Vanguard setup files, and alerts on anti-cheat updates]
+- https://github.com/Karwmam/Vanguard-Service-Manager-vGK-Control [Windows tools to check Riot Vanguard/vgk status and toggle auto-start]
 
 > Explore AntiCheat System:XignCode
 - https://github.com/gmh5225/XignCode-Dump
@@ -3994,6 +3996,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/badApple001/Il2cppEncrtypt
 - https://github.com/focus-creative-games/obfuz
 - https://github.com/talsec/Free-RASP-Unity-POC [Unity freeRASP plugin for mobile root/jailbreak, Frida, tamper, and integrity detection]
+- https://github.com/phajmvawnsix/com.sipvlib.anticheat [Unity UPM anti-cheat: server-verified GameTime plus root/jailbreak/emulator/debugger checks]
 
 > Game Engine Protection:Source
 - [Source Engine serverside anti-cheat plugin. (CS:S, CS:GO, CS:P, TF2)](https://github.com/kanekikun420/NoCheatZ-3)
@@ -4007,6 +4010,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Rycooop/Bloom-Anticheat
 - https://github.com/Vasieco/Kernel-Anticheat [Kernel Anticheat]
 - https://github.com/PatchRequest/PeregrineAntiCheat [Educational Windows anti-cheat: kernel minifilter, ObCallbacks, APC injection, MinHook API hooks, ETW-TI, YARA, Tauri GUI, cheat test suite]
+- https://github.com/violetweather/Certael [Server-authoritative open-source anti-cheat framework with Godot/Unity/Unreal adapters]
 - https://github.com/Abdelnour2/MiniAntiCheatV2 [Educational Windows kernel anti-cheat PoC: process blacklist plus ObCallbacks handle shield]
 - https://github.com/AvivShabtay/Stresser [Anti Virus in fact but also Anti Cheat]
 - https://github.com/D4stiny/PeaceMaker [Anti Virus in fact but also Anti Cheat]
