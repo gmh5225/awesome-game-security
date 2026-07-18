@@ -262,3 +262,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:whereisr0da/Lumina-Cheat`: entity [[lumina-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-07-18** — ingest `description:westfox-5/GhidraMetrics`: entity [[ghidrametrics]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-18** — ingest `description:wesmar/kvc`: entity [[kvc]]; cited on [[overviews/windows-kernel]] and [[byovd]].

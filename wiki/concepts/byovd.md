@@ -9,6 +9,7 @@ sources:
   - wiki/sources/descriptions/xct__windows-kernel-exploits.md
   - wiki/sources/descriptions/xM0kht4r__VEN0m-Ransomware.md
   - wiki/sources/descriptions/xM0kht4r__AV-EDR-Killer.md
+  - wiki/sources/descriptions/wesmar__kvc.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -33,6 +34,8 @@ Concrete AV/EDR-evasion research such as [[ven0m-ransomware]] abuses `iMFForceDe
 
 Process-terminate style killers such as [[av-edr-killer]] target `wsftprm.sys` via IOCTL `0x22201C` (1036-byte buffer; first DWORD = target PID). (source: wiki/sources/descriptions/xM0kht4r__AV-EDR-Killer.md)
 
+DSE-disable controllers such as [[kvc]] use a signed Microsoft driver to patch CI.dll (`g_CiOptions`), plus `skci.dll` hijack / `SeCiCallbacks` redirection loaders and PP/PPL paths for LSASS dumps under HVCI/VBS. (source: wiki/sources/descriptions/wesmar__kvc.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[kvc]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
