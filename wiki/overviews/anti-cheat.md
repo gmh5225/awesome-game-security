@@ -30,6 +30,7 @@ sources:
   - wiki/sources/descriptions/xiaoweime__WProtect.md
   - wiki/sources/descriptions/xan105__Mini-Launcher.md
   - wiki/sources/descriptions/xakepru__x14.08-coverstory-blizzard.md
+  - wiki/sources/descriptions/x86matthew__InstrumentationCallbackSyscallLogger.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -53,7 +54,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Key sub-areas
 
-**Detection:** memory hashing / manual-map detection; process handle stripping; [[kernel-callbacks]]; Segment Heap–aware pool scanning; behavioral/ML aimbot signals; screenshot + heartbeat; ETW provider/event discovery for telemetry design (e.g. [[etw-explorer]]); ThreatIntel injection consumers such as [[tietwagent]] (Microsoft-Windows-Threat-Intelligence + krabsetw/Yara; ELAM/PPL service path). Trusted-process mapping (e.g. [[lsass-extend-mapper]] hosting unsigned drivers via lsass address-space extend) and post-execution map cleanup (e.g. [[revert-mapper]] freeing mapped driver memory and pool-tag traces) are common research counterparts to those scanners. Thread-enumeration detectors (looking for manual-map worker threads) are studied against threadless Ring0 PoCs such as [[zero-thread-kernel]]. (source: wiki/sources/descriptions/zorftw__lsass-extend-mapper.md) (source: wiki/sources/descriptions/zorftw__revert-mapper.md) (source: wiki/sources/descriptions/zodiacon__EtwExplorer.md) (source: wiki/sources/descriptions/xuanxuan0__TiEtwAgent.md) (source: wiki/sources/descriptions/zer0condition__ZeroThreadKernel.md)
+**Detection:** memory hashing / manual-map detection; process handle stripping; [[kernel-callbacks]]; Segment Heap–aware pool scanning; behavioral/ML aimbot signals; screenshot + heartbeat; ETW provider/event discovery for telemetry design (e.g. [[etw-explorer]]); ThreatIntel injection consumers such as [[tietwagent]] (Microsoft-Windows-Threat-Intelligence + krabsetw/Yara; ELAM/PPL service path). Ring3 Instrumentation Callback research such as [[instrumentation-callback-syscall-logger]] inspects each syscall on kernel return before user-mode resumes. Trusted-process mapping (e.g. [[lsass-extend-mapper]] hosting unsigned drivers via lsass address-space extend) and post-execution map cleanup (e.g. [[revert-mapper]] freeing mapped driver memory and pool-tag traces) are common research counterparts to those scanners. Thread-enumeration detectors (looking for manual-map worker threads) are studied against threadless Ring0 PoCs such as [[zero-thread-kernel]]. (source: wiki/sources/descriptions/zorftw__lsass-extend-mapper.md) (source: wiki/sources/descriptions/zorftw__revert-mapper.md) (source: wiki/sources/descriptions/zodiacon__EtwExplorer.md) (source: wiki/sources/descriptions/xuanxuan0__TiEtwAgent.md) (source: wiki/sources/descriptions/zer0condition__ZeroThreadKernel.md) (source: wiki/sources/descriptions/x86matthew__InstrumentationCallbackSyscallLogger.md)
 
 
 **Architecture:** user-mode scanners → kernel callbacks/VAD → optional hypervisor EPT protection → server-side replay/stats.
@@ -70,7 +71,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[x14-08-coverstory-blizzard]] · [[veh-dumper]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[kagura]] · [[wprotect]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[injectors]] · [[mini-launcher]] · [[zero-thread-kernel]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[x14-08-coverstory-blizzard]] · [[veh-dumper]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[kagura]] · [[wprotect]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[instrumentation-callback-syscall-logger]] · [[injectors]] · [[mini-launcher]] · [[zero-thread-kernel]]
 
 
 
