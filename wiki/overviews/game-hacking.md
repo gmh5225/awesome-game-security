@@ -52,6 +52,7 @@ sources:
   - wiki/sources/descriptions/x64dbg__x64dbg.md
   - wiki/sources/descriptions/x64dbg__SlothBP.md
   - wiki/sources/descriptions/x64dbg__DotX64Dbg.md
+  - wiki/sources/descriptions/x64dbg__Classroom.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -93,6 +94,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Binary Ninja ↔ x64dbg plugin work such as [[x64dbgbinja]] (Python BN plugin from the x64dbg org) sits in the Cheat Binary Ninja / x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__x64dbgbinja.md)
 - Collaborative breakpoint management via [[slothbp]] (x64dbg plugin; C/C++) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__SlothBP.md)
 - Managed .NET 6 / C# x64dbg plugin authoring via [[dotx64dbg]] (live edit/debug; custom commands/expressions) sits in the same Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__DotX64Dbg.md)
+- OOP analysis via [[classroom]] (define member functions/variables while debugging; persisted class docs) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__Classroom.md)
 - IDA Plugins such as [[xrefsext]] (extended xrefs) and [[ida-jm-xorstr-decrypt-plugin]] (JM Xorstr decrypt on some x64 binaries) support cheat-side static RE workflows. (source: wiki/sources/descriptions/zengfr__XrefsExt.md) (source: wiki/sources/descriptions/yubie-re__ida-jm-xorstr-decrypt-plugin.md)
 - Live IDA ↔ x64dbg annotation/type sync via [[symbridge]] (names/comments/structs; module+RVA; Python broker) bridges static and dynamic RE on the same binary. (source: wiki/sources/descriptions/xp987__symbridge.md)
 - Magisk-style root on Android VR (Quest 3/3S) via [[cheese]] (Adreno CVE-2025-21479; temporary root, no boot rewrite) sits in the Cheat Magisk lane. (source: wiki/sources/descriptions/zhuowei__cheese.md)
@@ -120,7 +122,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ntmemory]] · [[vac3-inhibitor]] · [[x14-08-coverstory-blizzard]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[xenia]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ntmemory]] · [[vac3-inhibitor]] · [[x14-08-coverstory-blizzard]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[xenia]] · [[overviews/anti-cheat]]
 
 
 

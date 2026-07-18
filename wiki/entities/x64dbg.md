@@ -6,6 +6,7 @@ sources:
   - wiki/sources/descriptions/x64dbg__x64dbg.md
   - wiki/sources/descriptions/x64dbg__SlothBP.md
   - wiki/sources/descriptions/x64dbg__DotX64Dbg.md
+  - wiki/sources/descriptions/x64dbg__Classroom.md
 updated: 2026-07-18
 confidence: medium
 ---
@@ -14,7 +15,7 @@ confidence: medium
 
 Open-source Windows debugger for x86/x64 with a large feature set and a comprehensive plugin system for extensions. Widely used by game-security researchers and reverse engineers studying cheat / debugging workflows. (source: wiki/sources/descriptions/x64dbg__x64dbg.md)
 
-Core user-mode debugger—not a kernel debugger or static disassembler; plugin ecosystem bridges to tools such as [[x64dbgbinja]], [[symbridge]], collaborative breakpoint management via [[slothbp]] (source: wiki/sources/descriptions/x64dbg__SlothBP.md), and managed .NET/C# plugins via [[dotx64dbg]] (source: wiki/sources/descriptions/x64dbg__DotX64Dbg.md).
+Core user-mode debugger—not a kernel debugger or static disassembler; plugin ecosystem bridges to tools such as [[x64dbgbinja]], [[symbridge]], collaborative breakpoint management via [[slothbp]] (source: wiki/sources/descriptions/x64dbg__SlothBP.md), managed .NET/C# plugins via [[dotx64dbg]] (source: wiki/sources/descriptions/x64dbg__DotX64Dbg.md), and OOP class documentation via [[classroom]] (source: wiki/sources/descriptions/x64dbg__Classroom.md).
 
 ## Links
 
@@ -22,4 +23,4 @@ Core user-mode debugger—not a kernel debugger or static disassembler; plugin e
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[symbridge]] · [[quickasm]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[symbridge]] · [[quickasm]]

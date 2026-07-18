@@ -46,6 +46,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cet-research](entities/cet-research.md) — CET / shadow-stack research (C; Windows Security Features)
 - [checkhv_um](entities/checkhv-um.md) — user-mode HV detection (CPUID / RDTSC / VMCS / signatures)
 - [cheese](entities/cheese.md) — Quest 3/3S root via Adreno CVE-2025-21479 (Magisk, no boot rewrite)
+- [Classroom](entities/classroom.md) — x64dbg OOP class docs (member funcs/vars; Cheat x64dbg Plugins)
 - [CounterStrike2-Linux-Cheat](entities/counterstrike2-linux-cheat.md) — Linux external CS2 cheat (C++; memory analysis)
 - [CS-2-Glow](entities/cs-2-glow.md) — external CS2 glow ESP (C++; entity / offsets / memory)
 - [cs2-cheat-cpp](entities/cs2-cheat-cpp.md) — external CS2 cheat (C++; rendering / SDK generation)
