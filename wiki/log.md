@@ -186,3 +186,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/game-engine]], [[overviews/graphics-api]], [[overviews/mobile-security]], [[overviews/reverse-engineering]] (Cheat ~2545; console Switch/Xbox/PS lanes; Game CI); light `index.md` section notes (no per-category pages).
 
 - **2026-07-18** — ingest `description:xakepru/x14.08-coverstory-blizzard`: entity [[x14-08-coverstory-blizzard]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-07-18** — ingest `description:xaitax/NTSleuth`: entity [[ntsleuth]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
