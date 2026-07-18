@@ -343,3 +343,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-18** — ingest `description:walzer/game-engine-detector`: entity [[game-engine-detector]]; cited on [[overviews/game-engine]] and [[overviews/mobile-security]].
 
+- **2026-07-18** — ingest `description:wallds/NoVmpy`: entity [[novmpy]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
