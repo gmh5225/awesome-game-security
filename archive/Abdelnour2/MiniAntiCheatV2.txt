@@ -1,0 +1,525 @@
+Project Path: arc_Abdelnour2_MiniAntiCheatV2_b90q59ol
+
+Source Tree:
+
+```txt
+arc_Abdelnour2_MiniAntiCheatV2_b90q59ol
+├── Files
+├── Game.cpp
+├── MiniAntiCheat.cpp
+├── MiniAntiCheatCommon.h
+├── README.md
+└── documentation.md
+
+```
+
+`Game.cpp`:
+
+```cpp
+#include <stdio.h>
+#include <Windows.h>
+
+#include "..\P4 - Mini Anti Cheat\MiniAntiCheatCommon.h"
+
+int main(int argc, const char* argv[]) {
+	if (argc > 1) {
+		printf("Too many arguments\n");
+
+		return -1;
+	}
+
+	HANDLE hDevice = CreateFile(L"\\\\.\\MiniAntiCheat", GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
+
+	if (hDevice == INVALID_HANDLE_VALUE) {
+		printf("Couldn't Open a Handle - Error: %u\n", GetLastError());
+
+		return -1;
+	}
+
+	MiniAntiCheatOutput output;
+	DWORD bytes;
+	BOOL success = DeviceIoControl(hDevice, CHECK_BLACKLIST_TO_START, nullptr, 0, &output, sizeof(output), &bytes, nullptr);
+
+	if (!success) {
+		printf("Failed at DeviceIoControl - CHECK_BLACKLIST_TO_START - Error %u\n", GetLastError());
+
+		return -1;
+	}
+
+	if (!output.isSafeToStart) {
+		printf("You have Notepad.exe opened - Please close it to open the game!\n");
+
+		CloseHandle(hDevice);
+
+		return -1;
+	}
+
+	GameProcessIdInput input;
+	input.processID = (ULONG_PTR)GetCurrentProcessId();
+	success = DeviceIoControl(hDevice, GET_GAME_PROCESS_ID, &input, sizeof(input), nullptr, 0, &bytes, nullptr);
+
+	if (!success) {
+		printf("Failed at DeviceIoControl - GET_GAME_PROCESS_ID - Error %u\n", GetLastError());
+
+		return -1;
+	}
+
+	printf("Welcome to the Game\n");
+
+	int option = 0;
+	while (option != 1) {
+		printf("1. Exit\n\nExit or Wait: ");
+		if (scanf_s("%d", &option) == 1) {
+			break;
+		}
+		else {
+			printf("Wrong Input\n\n");
+			continue;
+		}
+	}
+
+	DeviceIoControl(hDevice, DISABLE_SHIELD, nullptr, 0, nullptr, 0, &bytes, nullptr);
+	printf("Protection disabled. Goodbye!\n");
+
+	printf("Exited!\n");
+
+	CloseHandle(hDevice);
+
+	return 0;
+}
+```
+
+`MiniAntiCheat.cpp`:
+
+```cpp
+#include <ntifs.h>
+#include <ntddk.h>
+
+#include "MiniAntiCheatCommon.h"
+
+void DriverUnload(PDRIVER_OBJECT DriverObject);
+
+NTSTATUS MiniAntiCheatCreate(PDEVICE_OBJECT, PIRP Irp);
+NTSTATUS MiniAntiCheatClose(PDEVICE_OBJECT, PIRP Irp);
+NTSTATUS MiniAntiCheatDeviceControl(PDEVICE_OBJECT, PIRP Irp);
+
+bool IsProcessRunning(const char* targetName);
+
+extern "C" NTKERNELAPI PEPROCESS PsInitialSystemProcess;
+extern "C" NTKERNELAPI PCHAR PsGetProcessImageFileName(PEPROCESS);
+
+void ProcessNotifyRoutine(PEPROCESS, HANDLE, PPS_CREATE_NOTIFY_INFO CreateInfo);
+
+OB_PREOP_CALLBACK_STATUS PreCallback(PVOID RegistrationContext, POB_PRE_OPERATION_INFORMATION OperationInformation);
+
+ULONG GameInstances = 0;
+HANDLE GameProcessId = NULL;
+PVOID RegistrationHandle = NULL;
+
+extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) {
+	UNREFERENCED_PARAMETER(RegistryPath);
+
+	KdPrint(("Mini Anti Cheat - DriverEntry\n"));
+
+	DriverObject->DriverUnload = DriverUnload;
+
+	DriverObject->MajorFunction[IRP_MJ_CREATE] = MiniAntiCheatCreate;
+	DriverObject->MajorFunction[IRP_MJ_CLOSE] = MiniAntiCheatClose;
+	DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = MiniAntiCheatDeviceControl;
+
+	UNICODE_STRING deviceName = RTL_CONSTANT_STRING(L"\\Device\\MiniAntiCheat");
+	PDEVICE_OBJECT deviceObject;
+	NTSTATUS status = IoCreateDevice(DriverObject, 0, &deviceName, FILE_DEVICE_UNKNOWN, 0, FALSE, &deviceObject);
+
+	if (!NT_SUCCESS(status)) {
+		KdPrint(("Failed at IoCreateDevice - Error 0x%X\n", status));
+
+		return status;
+	}
+
+	UNICODE_STRING symLink = RTL_CONSTANT_STRING(L"\\??\\MiniAntiCheat");
+	status = IoCreateSymbolicLink(&symLink, &deviceName);
+
+	if (!NT_SUCCESS(status)) {
+		KdPrint(("Failed at IoCreateSymbolicLink - Error 0x%X\n", status));
+
+		IoDeleteDevice(deviceObject);
+
+		return status;
+	}
+
+	status = PsSetCreateProcessNotifyRoutineEx(ProcessNotifyRoutine, FALSE);
+
+	if (!NT_SUCCESS(status)) {
+		KdPrint(("Failed at PsSetCreateProcessNotifyRoutineEx - Error 0x%X\n", status));
+
+		PsSetCreateProcessNotifyRoutineEx(ProcessNotifyRoutine, TRUE);
+		IoDeleteSymbolicLink(&symLink);
+		IoDeleteDevice(DriverObject->DeviceObject);
+
+		return status;
+	}
+
+	OB_OPERATION_REGISTRATION opReg = { 0 };
+    opReg.ObjectType = PsProcessType;
+    opReg.Operations = OB_OPERATION_HANDLE_CREATE | OB_OPERATION_HANDLE_DUPLICATE;
+    opReg.PreOperation = PreCallback;
+
+    OB_CALLBACK_REGISTRATION cbReg = { 0 };
+    cbReg.Version = OB_FLT_REGISTRATION_VERSION;
+    cbReg.OperationRegistrationCount = 1;
+    cbReg.OperationRegistration = &opReg;
+    cbReg.Altitude = RTL_CONSTANT_STRING(L"321000");
+
+	// 3. Register the Shield
+	status = ObRegisterCallbacks(&cbReg, &RegistrationHandle);
+	
+	if (!NT_SUCCESS(status)) {
+		KdPrint(("Failed to register Memory Shield: 0x%X\n", status));
+
+		ObUnRegisterCallbacks(RegistrationHandle);
+		PsSetCreateProcessNotifyRoutineEx(ProcessNotifyRoutine, TRUE);
+		IoDeleteSymbolicLink(&symLink);
+		IoDeleteDevice(DriverObject->DeviceObject);
+
+		return status;
+	}
+
+	return STATUS_SUCCESS;
+}
+
+void DriverUnload(PDRIVER_OBJECT DriverObject) {
+	KdPrint(("Mini Anti Cheat - Unloaded\n"));
+
+	if (RegistrationHandle) {
+		ObUnRegisterCallbacks(RegistrationHandle);
+	}
+
+	PsSetCreateProcessNotifyRoutineEx(ProcessNotifyRoutine, TRUE);
+
+	UNICODE_STRING symLink = RTL_CONSTANT_STRING(L"\\??\\MiniAntiCheat");
+	IoDeleteSymbolicLink(&symLink);
+
+	IoDeleteDevice(DriverObject->DeviceObject);
+}
+
+
+NTSTATUS MiniAntiCheatCreate(PDEVICE_OBJECT, PIRP Irp) {
+	GameInstances++;
+
+	Irp->IoStatus.Status = STATUS_SUCCESS;
+	Irp->IoStatus.Information = 0;
+	IoCompleteRequest(Irp, 0);
+
+	return STATUS_SUCCESS;
+}
+
+NTSTATUS MiniAntiCheatClose(PDEVICE_OBJECT, PIRP Irp) {
+	if (GameInstances > 0) {
+		GameInstances--;
+	}
+
+	GameProcessId = NULL;
+
+	KdPrint(("Mini Anti Cheat: Handle closed. Shield Deactivated. Remaining Instances: %lu\n", GameInstances));
+
+	Irp->IoStatus.Status = STATUS_SUCCESS;
+	Irp->IoStatus.Information = 0;
+	IoCompleteRequest(Irp, 0);
+
+	return STATUS_SUCCESS;
+}
+
+NTSTATUS MiniAntiCheatDeviceControl(PDEVICE_OBJECT, PIRP Irp) {
+	PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
+	NTSTATUS status = STATUS_INVALID_DEVICE_REQUEST;
+
+	switch (stack->Parameters.DeviceIoControl.IoControlCode) {
+		case CHECK_BLACKLIST_TO_START:
+		{
+			if (stack->Parameters.DeviceIoControl.OutputBufferLength < sizeof(MiniAntiCheatOutput)) {
+				status = STATUS_BUFFER_TOO_SMALL;
+
+				break;
+			}
+
+			auto output = (MiniAntiCheatOutput*)Irp->AssociatedIrp.SystemBuffer;
+
+			if (IsProcessRunning("Notepad.exe")) {
+				output->isSafeToStart = FALSE;
+
+				KdPrint(("Mini Anti Cheat: Notepad detected - The game will not start!\n"));
+			}
+			else {
+				output->isSafeToStart = TRUE;
+
+				KdPrint(("Mini Anti Cheat: Notepad wasn't detected - The game will start\n"));
+			}
+
+			status = STATUS_SUCCESS;
+			Irp->IoStatus.Information = sizeof(MiniAntiCheatOutput);
+
+			break;
+		}
+		case GET_GAME_PROCESS_ID:
+		{
+			if (stack->Parameters.DeviceIoControl.InputBufferLength < sizeof(GameProcessIdInput)) {
+				status = STATUS_BUFFER_TOO_SMALL;
+
+				break;
+			}
+
+			auto input = (GameProcessIdInput*)Irp->AssociatedIrp.SystemBuffer;
+
+			GameProcessId = (HANDLE)input->processID;
+
+			KdPrint(("Mini Anti Cheat: Registered Game PID: %p (Numeric: %llu)\n", GameProcessId, (ULONG64)GameProcessId));
+
+			status = STATUS_SUCCESS;
+			Irp->IoStatus.Information = 0;
+
+			break;
+		}
+		case DISABLE_SHIELD:
+		{
+			GameProcessId = NULL;
+			KdPrint(("Mini Anti Cheat: Shield manually disabled by request.\n"));
+			status = STATUS_SUCCESS;
+			break;
+		}
+	}
+
+	Irp->IoStatus.Status = status;
+	IoCompleteRequest(Irp, 0);
+
+	return status;
+}
+
+bool IsProcessRunning(const char* targetName) {
+	PEPROCESS sysProcess = PsInitialSystemProcess;
+
+	PLIST_ENTRY listHead = (PLIST_ENTRY)((PUCHAR)sysProcess + 0x1d8);
+	PLIST_ENTRY currentEntry = listHead->Flink;
+
+	while (currentEntry != listHead) {
+		PEPROCESS entryProcess = (PEPROCESS)((PUCHAR)currentEntry - 0x1d8);
+
+		PCHAR imageName = PsGetProcessImageFileName(entryProcess);
+		if (imageName != NULL) {
+			if (strstr(imageName, targetName) != NULL) {
+				return true;
+			}
+		}
+
+		currentEntry = currentEntry->Flink;
+	}
+
+	return false;
+}
+
+void ProcessNotifyRoutine(PEPROCESS, HANDLE, PPS_CREATE_NOTIFY_INFO CreateInfo) {
+	if (CreateInfo && GameInstances > 0) {
+		if (CreateInfo->ImageFileName != NULL && wcsstr(CreateInfo->ImageFileName->Buffer, L"Notepad.exe") != NULL) {
+			CreateInfo->CreationStatus = STATUS_ACCESS_DENIED;
+			KdPrint(("Mini Anti Cheat: Active Blocking - Cannot Open Notepad.exe While the Game is Running\n"));
+		}
+	}
+}
+
+OB_PREOP_CALLBACK_STATUS PreCallback(PVOID RegistrationContext, POB_PRE_OPERATION_INFORMATION OperationInformation) {
+	UNREFERENCED_PARAMETER(RegistrationContext);
+	
+	if (OperationInformation->ObjectType != *PsProcessType) {
+		return OB_PREOP_SUCCESS;
+	}
+
+	PEPROCESS targetProcess = (PEPROCESS)OperationInformation->Object;
+	HANDLE targetPid = PsGetProcessId(targetProcess);
+
+	if (targetPid == GameProcessId && GameProcessId != NULL) {
+		if (OperationInformation->KernelHandle == FALSE) {
+			ACCESS_MASK denyRights = PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_TERMINATE | PROCESS_VM_OPERATION;
+		
+			if (OperationInformation->Operation == OB_OPERATION_HANDLE_CREATE) {
+				OperationInformation->Parameters->CreateHandleInformation.DesiredAccess &= ~denyRights;
+			}
+			else if (OperationInformation->Operation == OB_OPERATION_HANDLE_DUPLICATE) {
+				OperationInformation->Parameters->DuplicateHandleInformation.DesiredAccess &= ~denyRights;
+			}
+
+			PEPROCESS sourceProcess = PsGetCurrentProcess();
+			PCHAR sourceName = PsGetProcessImageFileName(sourceProcess);
+
+			KdPrint(("Mini Anti Cheat: [%s] (PID: %llu) tried to touch the Game - ACCESS DENIED\n", sourceName, (ULONG64)PsGetCurrentProcessId()));
+		}
+	}
+
+	return OB_PREOP_SUCCESS;
+}
+```
+
+`MiniAntiCheatCommon.h`:
+
+```h
+#pragma once
+
+struct GameProcessIdInput {
+	ULONG_PTR processID;
+};
+
+struct MiniAntiCheatOutput {
+	bool isSafeToStart;
+};
+
+#define CHECK_BLACKLIST_TO_START CTL_CODE(0x8000, 0x800, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define GET_GAME_PROCESS_ID CTL_CODE(0x8000, 0x801, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define DISABLE_SHIELD CTL_CODE(0x8000, 0x802, METHOD_BUFFERED, FILE_ANY_ACCESS)
+
+#define PROCESS_TERMINATE         (0x0001)  
+#define PROCESS_VM_OPERATION      (0x0008)  
+#define PROCESS_VM_READ           (0x0010)  
+#define PROCESS_VM_WRITE          (0x0020)
+```
+
+`README.md`:
+
+```md
+# MiniAntiCheatV2
+An improvement of the previous project "Mini Anti Cheat" that represents a mini simple Anti-Cheat. Features included are:
+## Found in V1:
+There is a user mode app (representing a game), and a Driver (the Anti-Cheat). The Anti-Cheat scans for a blacklisted app (in this case Notepad.exe):
+
+If the game is opened, you can't open Notepad
+If the game is closed, you can
+If Notepad is opened, you can't open the game
+
+## Found in V2:
+In this version, a "shield" feature has been added, the shield basically prevent other process from having access to the game, this way another hack will be prevented, which is making a custom program that opens a handle to the game to write information in its memory
+
+
+# Files:
+## MiniAntiCheat.cpp
+This is the Driver
+
+## Game.cpp
+This is the Game
+
+## MiniAntiCheatCommon.h
+A header file that has data used by both the driver and the game
+
+```
+
+`documentation.md`:
+
+```md
+# Mini Anti Cheat V2 - Documentation
+## Date: Friday 2 January 2026
+
+### Note:
+A video preview of the project can be found in the Files folder
+
+### Documentation:
+After completing the last project “Mini Anti Cheat” I was researching on ways to improve it, since Anti Cheats have tons of features not just blocking blacklisted apps of course. I had multiple features in mind, I asked Gemini about what could be the best next step and it told me to add “Handle Stripping”. It said that cheats don't only rely on blacklisted apps, but they might use unknown apps or custom ones that request a handle to the game and have full access to its memory. So the Anti-Cheat needs to intercept those requests and prevent granting permissions to those cheats. And with that, I started with the feature.
+
+I divided the implementation of this feature into 2 parts: getting the game process ID, and actually shielding it.
+
+**Part 1 - Getting the Game's Process ID:**  
+I added these to the header:  
+<img alt="Image 1" src="./Files/Image-1.png" width="250">
+
+<img alt="Image 2" src="./Files/Image-2.png" width="800">
+
+These to the main driver:  
+<img alt="Image 3" src="./Files/Image-3.png" width="250">
+
+<img alt="Image 4" src="./Files/Image-4.png" width="800">
+
+And this to the main game:  
+<img alt="Image 5" src="./Files/Image-5.png" width="800">
+
+**Code Explanation:**  
+I needed to make the driver know the game's process ID to be able to protect it. So to do that, I need to get the process ID in user mode, and send it to the driver. So I started with defining a new IOCTL request in the header to send that ID, and a new struct to hold it from user mode to the driver.
+
+After that, in the driver, I defined a new global variable called GameProcessId to have the process ID. Then, I implemented a new case for the new request in the DeviceControl function. The case basically starts by checking the size of the input buffer and comparing it to the struct defined in the header. If the size is smaller than the struct, we return status buffer too small and break the execution. If the size is fine, I defined an input variable to store the data coming from the user mode app, and then I stored this data in the global variable GameProcessId, printed a statement to indicate that, and then completed the request.
+
+Finally, in user mode, I initialized a variable “input” of type GameProcessIdInput which I defined in the header to send the ID from user mode to the driver. I assigned the Process ID to it and called the new IOCTL request to send it to the driver. After that, I checked for the success of the request.
+
+**Part 2 - Shielding the Game:**  
+Added to the driver:  
+New Global Variable:  
+<img alt="Image 6" src="./Files/Image-6.png" width="300">
+
+In DriverEntry:  
+<img alt="Image 7" src="./Files/Image-7.png" width="650">
+
+New Function:  
+<img alt="Image 8" src="./Files/Image-8.png" width="850">
+
+<img alt="Image 9" src="./Files/Image-9.png" width="900">
+
+Added to the Header:  
+<img alt="Image 10" src="./Files/Image-10.png" width="400">
+
+**Code Explanation:**  
+This part was complicated for me, and still till now, I haven't fully understood the concept. The code is written after a long research and help from Gemini. The main idea of it is that we're intercepting any process that is requesting a handler to the game, making sure that the process ID they want is the same as the Game Process ID, if yes, then we take away rights so they don't mess with the game's memory. And then I printed a little statement to show which process was trying to request a handler.
+
+<hr>
+
+**!! UPDATE - Tuesday, January 6th 2026 !!**  
+I spent the time researching this algorithm more and I finally understand fully what it does and why it is the way it is.
+
+**The code in DriverEntry:**  
+First we are initializing a structure of type OB_OPERATION_REGISTRATION to define what specific actions we want to filter. Setting it to 0 is a safely measure to prevent junk data in memory from causing crashes.
+
+Then we are telling Windows that we are only interested in Process objects (so in this case, we are ignoring Threads, Files, or Registry Keys). Then we are defining what actions should trigger our function, in this case we want creation (Open Process) and duplication of our process. Then we specify the function that needs to run before the handle is granted.
+
+After that, we initialized a container that will hold all our registration sets (cbReg). Then we define the version of the callback system we are using, this is required for compatibility. Then we need to how many registrations we want, in this case it's only 1 which is the opReg we just made. Then we point to that structure, and finally we set the altitude which is basically the priority of the driver. 321000 is a very high priority, basically the same category as Anti-Viruses and File System drivers.
+
+Finally, calling ObRegisterCallbacks will basically activate everything we've set.
+
+**Now regarding the function itself:**  
+This function will run each time a process tries to touch any other process.
+
+First we told the compiler that we don't to use the RegistrationContext parameter.
+
+Then, we're doing let's call it a sanity check, basically if by any chance Windows sent something that isn't a process, we ignore it and return success we means to just carry on.
+
+Now if we have a process, if take it and assign it to targetProcess so the kernel knows that it's a process object, and we get its Process ID.
+
+Then, we need to check if this target process ID is the same as the game's process Id, if yes, then they are touching the game, if not then no and we don't have to do anything with. But if yes, then we proceed with the next step.
+
+Before doing anything, we need to check if this request is coming from user mode or kernel mode, since we don't want to intercept Windows since that will cause a BSOD. If it's not kernel mode which means it's a user mode app, we need to remove the permissions that app requested. So first, we define a list of permissions to remove. Then we check if the operation was create or duplicate, in either cases we will remove the permissions by using the NOT AND bitwise operator "~". This operator basically inverts the bits of something, if it is 1, it becomes 0 and the opposite. So if the app was requesting a write permission, not it will not have it and so on.
+
+After that, just for clarity, I got the name of the process trying to access the game and printed it.
+
+At the end, we return a success status.
+
+Now after I understood this function, I've notice something.. The function is skipping kernel mode and only preventing user mode, doesn't that mean that a hacker can make a custom made kernel mode driver and bypass this function? I think the answer is definitely yes.
+
+**!! END OF UPDATE !!**
+
+<hr>
+
+After that, I tested everything in the VM, but the test didn't go well. I tried closing the game using Task Manager, the CMD windows closed but the game itself didn't close since Task Manager got access denied. So now the game is still running but I can't close it since I don't have the CMD window open. And I can't close it in the Task Manager either. And as the game can't be closed, the driver itself can't be stopped since the game is still attached to it. And with that I had a game and a driver that can never be closed. I restarted the VM, and started thinking of a solution for that problem, after a short time, I came up with the solution.
+
+The solution was to basically break the shield if the game stops, crashes, or anything bad happens to it. So I started by making this new IOCTL request:
+<img alt="Image 11" src="./Files/Image-11.png" width="700">
+
+And added the logic in DeviceControl in the driver:  
+<img alt="Image 12" src="./Files/Image-12.png" width="600">
+
+Basically, drop the process ID to stop shielding it.
+
+I added this to the DriverUnload function to unregister the shield:  
+<img alt="Image 13" src="./Files/Image-13.png" width="350">
+
+And this to the MiniAntiCheatClose function to also drop the shield:  
+<img alt="Image 14" src="./Files/Image-14.png" width="800">
+
+And I added this to the Game to call the new request on closing the app:  
+<img alt="Image 15" src="./Files/Image-15.png" width="700">
+
+With these changes, the problem is now gone and the project works perfectly!
+
+This was the new version. Now, I'll just spend my time researching the shielding algorithm to fully comprehend it. When I'm done, I'll add some new features to the Anti-Cheat, and maybe even make an actual small game and connect it to the driver instead of relying on the dummy user mode app.
+```
