@@ -12,7 +12,7 @@ confidence: medium
 
 Windows kernel-mode DLL injector driver (C) that delivers injection via **APC** from Ring0. Registers a process-creation callback to catch target startup, then queues a user-mode APC that loads the DLL through `LdrLoadDll`. Kernel-originated APC injection avoids many user-mode inject APIs and hooks that anti-cheat scanners watch; useful for researchers studying kernel injection primitives and how AC detects them. (source: wiki/sources/descriptions/wbenny__injdrv.md)
 
-Contrasts with user-mode manual-map injectors such as [[modexmap]] and injection-testing harnesses such as [[injectors]].
+Contrasts with user-mode manual-map injectors such as [[modexmap]] and injection-testing harnesses such as [[injectors]]. The same author's [[detoursnt]] reuses the NTDLL-only adaptation pattern for Microsoft Detours.
 
 ## Links
 
@@ -20,4 +20,4 @@ Contrasts with user-mode manual-map injectors such as [[modexmap]] and injection
 
 ## Related
 
-[[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[kernel-callbacks]] · [[modexmap]] · [[injectors]] · [[scfw]]
+[[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[kernel-callbacks]] · [[modexmap]] · [[injectors]] · [[scfw]] · [[detoursnt]]
