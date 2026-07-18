@@ -63,6 +63,7 @@ sources:
   - wiki/sources/descriptions/wietze__windows-dll-hijacking.md
   - wiki/sources/descriptions/wietze__HijackLibs.md
   - wiki/sources/descriptions/westfox-5__GhidraMetrics.md
+  - wiki/sources/descriptions/wesmar__KeyboardKit.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -83,7 +84,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Key sub-areas
 
-- Memory, injection, hooking (inline/IAT/VTable/HWBP); injection-testing samples such as [[injectors]] for AC stress evaluation. (source: wiki/sources/descriptions/zoand__Injectors.md) DLL Hijack surface catalogs such as [[windows-dll-hijacking]] and [[hijacklibs]] map relative-path / sideload / phantom-DLL load paths and disclosed hijack opportunities (DLL names, required exports, conditions) across Windows binaries. (source: wiki/sources/descriptions/wietze__windows-dll-hijacking.md) (source: wiki/sources/descriptions/wietze__HijackLibs.md)
+- Memory, injection, hooking (inline/IAT/VTable/HWBP); injection-testing samples such as [[injectors]] for AC stress evaluation. (source: wiki/sources/descriptions/zoand__Injectors.md) DLL Hijack surface catalogs such as [[windows-dll-hijacking]] and [[hijacklibs]] map relative-path / sideload / phantom-DLL load paths and disclosed hijack opportunities (DLL names, required exports, conditions) across Windows binaries. (source: wiki/sources/descriptions/wietze__windows-dll-hijacking.md) (source: wiki/sources/descriptions/wietze__HijackLibs.md) Kernel keyboard-filter / IRP-hook keylog research such as [[keyboardkit]] (UDP log exfil + ExplorerFrame DLL-hijack persistence) sits in the input-filter and DLL Hijack persistence lanes. (source: wiki/sources/descriptions/wesmar__KeyboardKit.md)
 - Packet sniff/filter at NDIS via user-mode libs such as [[ndisapi]] (Windows Packet Filter driver interface; inspect/modify raw packets with low overhead). (source: wiki/sources/descriptions/wiresock__ndisapi.md)
 - Launcher Abuser / platform-bypass launchers such as [[mini-launcher]] (Steam API stub + env/SteamAppID setup; DLL injection + Lua scripting) for out-of-client game start. (source: wiki/sources/descriptions/xan105__Mini-Launcher.md)
 - Visual ESP / aim / movement cheats; AI visual pipelines (OBS + YOLO + HID)
@@ -140,7 +141,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ndisapi]] · [[ntmemory]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[reverse-engineering]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ghidrametrics]] · [[injectors]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[lumina-cheat]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[xenia]] · [[xenia-mac]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ndisapi]] · [[ntmemory]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[reverse-engineering]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ghidrametrics]] · [[injectors]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[keyboardkit]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[lumina-cheat]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[xenia]] · [[xenia-mac]] · [[overviews/anti-cheat]]
 
 
 

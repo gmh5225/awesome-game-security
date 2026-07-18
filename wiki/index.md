@@ -80,6 +80,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [InstrumentationCallbackSyscallLogger](entities/instrumentation-callback-syscall-logger.md) — Ring3 Instrumentation Callback on syscall return (AC / Windows)
 - [Kagura](entities/kagura.md) — LLVM pass plugin: CFG/string obfuscation, anti-tamper, anti-debug (mobile/desktop/Wasm)
 - [kevboy](entities/kevboy.md) — Rust Game Boy emulator (CPU / memory / graphics / input)
+- [KeyboardKit](entities/keyboardkit.md) — kernel keyboard IRP filter keylogger (UDP exfil; ExplorerFrame DLL hijack)
 - [kvc](entities/kvc.md) — DSE bypass via signed MS driver (`g_CiOptions` / skci / SeCiCallbacks; PP/PPL→LSASS)
 - [KvcForensic](entities/kvcforensic.md) — LSASS credential forensics (MSV/WDigest/Kerberos/DPAPI; Win/Linux dumps)
 
