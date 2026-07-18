@@ -39,6 +39,7 @@ sources:
   - wiki/sources/descriptions/yaxinsn__vermagic.md
   - wiki/sources/descriptions/xtremegamer1__vmdevirt-vtil.md
   - wiki/sources/descriptions/xp987__symbridge.md
+  - wiki/sources/descriptions/xsslize__idarem.md
   - wiki/sources/descriptions/xoxor4d__gta4-rtx.md
   - wiki/sources/descriptions/xo1337__steam-overlay-x64.md
   - wiki/sources/descriptions/xmmword__dpatch.md
@@ -126,6 +127,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - IDA Plugins such as [[xrefsext]] (extended xrefs) and [[ida-jm-xorstr-decrypt-plugin]] (JM Xorstr decrypt on some x64 binaries) support cheat-side static RE workflows. (source: wiki/sources/descriptions/zengfr__XrefsExt.md) (source: wiki/sources/descriptions/yubie-re__ida-jm-xorstr-decrypt-plugin.md)
 - Ghidra Plugins such as [[ghidrametrics]] (cyclomatic complexity / function size / call depth; headless + JSON) support native-code metric triage in the Cheat Ghidra Plugins lane. (source: wiki/sources/descriptions/westfox-5__GhidraMetrics.md)
 - Live IDA ↔ x64dbg annotation/type sync via [[symbridge]] (names/comments/structs; module+RVA; Python broker) bridges static and dynamic RE on the same binary. (source: wiki/sources/descriptions/xp987__symbridge.md)
+- Remote browser review of a live IDA database via [[idarem]] (Flask REST/SSE + React client; live follow / optional write-back; tunnel-friendly) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/xsslize__idarem.md)
 - Magisk-style root on Android VR (Quest 3/3S) via [[cheese]] (Adreno CVE-2025-21479; temporary root, no boot rewrite) sits in the Cheat Magisk lane. (source: wiki/sources/descriptions/zhuowei__cheese.md)
 - Magisk/KernelSU/APatch modules such as [[move-certificate]] (user→system CA trust, Android 7–15) support MITM-oriented mobile cheat research. (source: wiki/sources/descriptions/ys1231__MoveCertificate.md)
 - Boot-image tooling such as [[magiskboot-ndk-on-linux]] (standalone NDK-on-Linux magiskboot for unpack/repack/ramdisk) sits in the Cheat Magisk / Boot Image Modification Tool lane. (source: wiki/sources/descriptions/xiaoxindada__magiskboot_ndk_on_linux.md)
