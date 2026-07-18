@@ -6,7 +6,8 @@ sources:
   - wiki/sources/skills/windows-kernel.md
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/skills/game-hacking.md
-updated: 2026-07-16
+  - wiki/sources/descriptions/xct__windows-kernel-exploits.md
+updated: 2026-07-18
 confidence: high
 ---
 
@@ -24,6 +25,8 @@ Bring Your Own Vulnerable Driver: load a legitimately signed but vulnerable driv
 
 Microsoft vulnerable-driver blocklist, [[hvci]], AC driver allowlists ([[vanguard]]-style), PiDDBCache/MmUnloadedDrivers forensics, EPT-protected callback lists.
 
+Educational kernel-exploit reference material such as [[windows-kernel-exploits]] sits in the same cheat / vulnerable-driver documentation lane. (source: wiki/sources/descriptions/xct__windows-kernel-exploits.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[patchguard]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[patchguard]] · [[windows-kernel-exploits]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]

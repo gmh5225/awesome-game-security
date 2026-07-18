@@ -105,6 +105,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [WProtect](entities/wprotect.md) — C/C++ obfuscation engine (Anti Cheat → Obfuscation Engine)
 - [WinDbg_Scripts](entities/windbg-scripts.md) — JS WinDbg scripts for kernel debug/modding (WinDbg Plugins)
+- [windows-kernel-exploits](entities/windows-kernel-exploits.md) — kernel exploit guide (Cheat / vulnerable driver)
 - [vt-debuuger](entities/vt-debuuger.md) — hacked hypervisor testing (C/C++ drivers / plugins)
 
 - [x64-EXE-Packer](entities/x64-exe-packer.md) — PE X64 binary packer (Anti Cheat → Binary Packer)
