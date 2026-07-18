@@ -232,3 +232,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-engine]], [[overviews/graphics-api]], [[overviews/reverse-engineering]] (Cheat ~2549; DirectX ~33; Game Engine ~141; Image Codec adjacency); light `index.md` section notes (no per-category pages).
 
 - **2026-07-18** — ingest `description:wwweeeqqu/honor-of-kings-RE-research`: entity [[honor-of-kings-re-research]]; cited on [[overviews/mobile-security]] and [[il2cpp]].
+
+- **2026-07-18** — ingest `description:wtsxDev/reverse-engineering`: entity [[reverse-engineering]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
