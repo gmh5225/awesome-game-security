@@ -26,6 +26,7 @@ sources:
   - wiki/sources/descriptions/yubie-re__ida-jm-xorstr-decrypt-plugin.md
   - wiki/sources/descriptions/ys1231__MoveCertificate.md
   - wiki/sources/descriptions/yourmnbbn__tiny-csgo-client.md
+  - wiki/sources/descriptions/whereisr0da__Lumina-Cheat.md
   - wiki/sources/descriptions/younasiqw__BattleField-1-Internal.md
   - wiki/sources/descriptions/yoshisaac__CounterStrikeSource-Linux-Trainer.md
   - wiki/sources/descriptions/yoshisaac__CounterStrike2-Linux-Cheat.md
@@ -120,6 +121,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Linux LKM vermagic/CRC rewriting via [[vermagic]] sits in the Cheat Linux / RE tools lane (load modules across mismatched kernel builds). (source: wiki/sources/descriptions/yaxinsn__vermagic.md)
 - Title-specific DayZ cheat/modding samples such as [[dayzzz]] (SDK generation + overlays) illustrate game:dayz offensive research surface. (source: wiki/sources/descriptions/zhitkur__DayZzz.md)
 - Minimal CS:GO dedicated-server clients such as [[tiny-csgo-client]] (C++; modding / SDK generation) sit in the cheat / game:csgo lane. (source: wiki/sources/descriptions/yourmnbbn__tiny-csgo-client.md)
+- Internal CS:GO samples such as [[lumina-cheat]] emphasize mutation for a changing signature (Internal tag). (source: wiki/sources/descriptions/whereisr0da__Lumina-Cheat.md)
 - Linux external CS:S trainers such as [[counterstrikesource-linux-trainer]] (movement automation + info display) sit in the cheat / game:css lane. (source: wiki/sources/descriptions/yoshisaac__CounterStrikeSource-Linux-Trainer.md)
 - Linux external CS2 cheats such as [[counterstrike2-linux-cheat]] (C++; memory analysis) sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/yoshisaac__CounterStrike2-Linux-Cheat.md)
 - External CS2 samples such as [[cs2-cheat-cpp]] (C++; rendering / asset pipelines / SDK generation) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/yinleiCoder__cs2-cheat-cpp.md)
@@ -136,7 +138,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ndisapi]] · [[ntmemory]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[reverse-engineering]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[xenia]] · [[xenia-mac]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ndisapi]] · [[ntmemory]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[reverse-engineering]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[lumina-cheat]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[xenia]] · [[xenia-mac]] · [[overviews/anti-cheat]]
 
 
 

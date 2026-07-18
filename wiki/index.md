@@ -80,6 +80,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Kagura](entities/kagura.md) — LLVM pass plugin: CFG/string obfuscation, anti-tamper, anti-debug (mobile/desktop/Wasm)
 - [kevboy](entities/kevboy.md) — Rust Game Boy emulator (CPU / memory / graphics / input)
 - [lightsaber](entities/lightsaber.md) — iOS 18.4–18.6.2 userland exploit; JS inject SpringBoard (DarkSword-derived)
+- [Lumina-Cheat](entities/lumina-cheat.md) — internal CS:GO; mutation for changing signature (cheat / game:csgo)
 - [lsass-extend-mapper](entities/lsass-extend-mapper.md) — unsigned driver map via lsass address-space extend
 - [magiskboot_ndk_on_linux](entities/magiskboot-ndk-on-linux.md) — NDK-on-Linux magiskboot (boot unpack/repack/ramdisk)
 - [Mini-Launcher](entities/mini-launcher.md) — Steam-bypass game launcher (API stub / DLL inject / Lua; Launcher Abuser)
