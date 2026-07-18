@@ -310,3 +310,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:weak1337/CEDetector`: entity [[cedetector]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-07-18** — ingest `description:weak1337/BE-Shellcode`: entity [[be-shellcode]]; cited on [[battleye]] and [[overviews/anti-cheat]].
+
+- **2026-07-18** — ingest `description:weak1337/Alcatraz`: entity [[alcatraz]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
