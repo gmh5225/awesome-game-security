@@ -28,9 +28,10 @@ sources:
   - wiki/sources/descriptions/xsj3n__x64-EXE-Packer.md
   - wiki/sources/descriptions/xqemu__xqemu.md
   - wiki/sources/descriptions/xkevio__kevboy.md
+  - wiki/sources/descriptions/xenia-project__xenia.md
   - wiki/sources/descriptions/xp987__symbridge.md
   - wiki/sources/descriptions/xiaoweime__WProtect.md
-updated: 2026-07-17
+updated: 2026-07-18
 confidence: high
 ---
 
@@ -50,12 +51,12 @@ Workflows for protected game clients and anti-cheat components across user mode,
 
 - **Linux LKM metadata:** tools such as [[vermagic]] rewrite vermagic / CRC fields so a module can load across mismatched kernel builds (cheat / RE tools lane). (source: wiki/sources/descriptions/yaxinsn__vermagic.md)
 - **Mobile / iOS:** userland exploit-chain study via [[lightsaber]] (iOS 18.4–18.6.2 JS injection into SpringBoard and other processes) (source: wiki/sources/descriptions/zeroxjf__lightsaber.md); iOS project reversing in IDA via [[ida-ios-helper]] (vtable symbols required) (source: wiki/sources/descriptions/yoavst__ida-ios-helper.md)
-- **Console / QEMU:** original Xbox titles via [[xqemu]] (full-machine software emulation, no hardware VT) for RE in the QEMU/KVM/PVE/VBOX research lane. (source: wiki/sources/descriptions/xqemu__xqemu.md); Game Boy hardware study via [[kevboy]] (Rust CPU/memory/graphics/input emulator). (source: wiki/sources/descriptions/xkevio__kevboy.md)
+- **Console / QEMU:** original Xbox titles via [[xqemu]] (full-machine software emulation, no hardware VT) for RE in the QEMU/KVM/PVE/VBOX research lane. (source: wiki/sources/descriptions/xqemu__xqemu.md); Game Boy hardware study via [[kevboy]] (Rust CPU/memory/graphics/input emulator). (source: wiki/sources/descriptions/xkevio__kevboy.md); Xbox 360 HLE via [[xenia]] (PowerPC recompiler, D3D12/Vulkan GPU, XAM/kernel/XEX) for console binary-translation / hardware-abstraction study. (source: wiki/sources/descriptions/xenia-project__xenia.md)
 
 
 ## Related concepts
 
-[[il2cpp]] · [[frida]] · [[unflutter]] · [[kernel-callbacks]] · [[patchguard]] · [[mutaben]] · [[shredder-rs]] · [[deobf]] · [[idadeflat]] · [[opaque-predicates-detective]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ida-ios-helper]] · [[pe32-password]] · [[x64-exe-packer]] · [[kagura]] · [[wprotect]] · [[vmdevirt-vtil]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[lightsaber]] · [[vermagic]] · [[veh-dumper]] · [[windbg-scripts]] · [[xqemu]] · [[kevboy]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[overviews/mobile-security]]
+[[il2cpp]] · [[frida]] · [[unflutter]] · [[kernel-callbacks]] · [[patchguard]] · [[mutaben]] · [[shredder-rs]] · [[deobf]] · [[idadeflat]] · [[opaque-predicates-detective]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ida-ios-helper]] · [[pe32-password]] · [[x64-exe-packer]] · [[kagura]] · [[wprotect]] · [[vmdevirt-vtil]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[lightsaber]] · [[vermagic]] · [[veh-dumper]] · [[windbg-scripts]] · [[xqemu]] · [[kevboy]] · [[xenia]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[overviews/mobile-security]]
 
 
 

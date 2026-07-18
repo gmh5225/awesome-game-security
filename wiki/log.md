@@ -172,3 +172,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-17** — ingest `description:xiaoweime/WProtect`: entity [[wprotect]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-17** — ingest `description:xetzzy/Fortnite-External-Source`: entity [[fortnite-external-source]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-18** — ingest `description:xenia-project/xenia`: entity [[xenia]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
