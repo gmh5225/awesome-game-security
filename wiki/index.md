@@ -121,6 +121,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VEN0m-Ransomware](entities/ven0m-ransomware.md) — BYOVD via iMFForceDelete.sys (IObit; AV/EDR evasion)
 - [vermagic](entities/vermagic.md) — change Linux LKM vermagic / CRCs (cheat / RE tools)
 - [vmdevirt-vtil](entities/vmdevirt-vtil.md) — broken VTIL VMP devirt demo (Fix VMP / IDA jmp-around-vmenter)
+- [wda_monitor_trick](entities/wda-monitor-trick.md) — WDA/D3D9 monitor hook (display capture intercept; C++)
 
 - [WProtect](entities/wprotect.md) — C/C++ obfuscation engine (Anti Cheat → Obfuscation Engine)
 - [WDUTF](entities/wdutf.md) — Windows Driver Unit Test Framework (user-space MSTest for kernel drivers)

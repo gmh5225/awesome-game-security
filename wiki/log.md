@@ -236,3 +236,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:wtsxDev/reverse-engineering`: entity [[reverse-engineering]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-18** — ingest `description:wpdk/wdutf`: entity [[wdutf]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-07-18** — ingest `description:wongfei/wda_monitor_trick`: entity [[wda-monitor-trick]]; cited on [[overviews/graphics-api]] and [[present-hook]].
