@@ -328,3 +328,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:wavestone-cdt/EDRSandblast`: entity [[edrsandblast]]; cited on [[byovd]] and [[kernel-callbacks]].
 
 - **2026-07-18** — ingest `description:waryas/xign_poc_april_2026`: entity [[xign-poc-april-2026]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
+- **2026-07-18** — ingest `description:waryas/WaryasSWHE`: entity [[waryasswhe]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].

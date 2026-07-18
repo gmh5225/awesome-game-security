@@ -161,6 +161,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VEN0m-Ransomware](entities/ven0m-ransomware.md) — BYOVD via iMFForceDelete.sys (IObit; AV/EDR evasion)
 - [vermagic](entities/vermagic.md) — change Linux LKM vermagic / CRCs (cheat / RE tools)
 - [vmdevirt-vtil](entities/vmdevirt-vtil.md) — broken VTIL VMP devirt demo (Fix VMP / IDA jmp-around-vmenter)
+- [WaryasSWHE](entities/waryasswhe.md) — usermode shatter-attack AC bypass PoC (0day; cheat / RPM; C++)
 - [Wazuh](entities/wazuh.md) — open-source XDR / HIDS (agent–manager; FIM / log / vuln; Elasticsearch)
 - [wda_monitor_trick](entities/wda-monitor-trick.md) — WDA/D3D9 monitor hook (display capture intercept; C++)
 
