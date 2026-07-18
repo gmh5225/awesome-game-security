@@ -6,6 +6,7 @@ sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/descriptions/xtremegamer1__xigmapper.md
   - wiki/sources/descriptions/xehn1337__valorant-dumper.md
+  - wiki/sources/descriptions/weedeej__ValorantCC.md
 updated: 2026-07-18
 confidence: medium
 ---
@@ -22,6 +23,8 @@ EFI manual-map research such as [[xigmapper]] notes a practical consequence of t
 
 Per-title Valorant UE dump tooling such as [[valorant-dumper]] (GObjects/GNames, player/weapon layouts from the live process) is useful when modeling what cheat SDK generators probe under a Vanguard-protected title. (source: wiki/sources/descriptions/xehn1337__valorant-dumper.md)
 
+Client-side Valorant crosshair config samples such as [[valorantcc]] sit in the adjacent cheat / game:valorant utility lane (Riot-owned assets/endpoints; not an AC product). (source: wiki/sources/descriptions/weedeej__ValorantCC.md)
+
 ## Related
 
-[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[valorant-dumper]] · [[overviews/anti-cheat]]
+[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[valorant-dumper]] · [[valorantcc]] · [[overviews/anti-cheat]]
