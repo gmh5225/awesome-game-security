@@ -298,3 +298,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:weak1337/NvidiaApi`: entity [[nvidiaapi]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-07-18** — ingest `description:weak1337/NO_ACCESS_Protection`: entity [[no-access-protection]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-18** — ingest `description:weak1337/ModExMap`: entity [[modexmap]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
