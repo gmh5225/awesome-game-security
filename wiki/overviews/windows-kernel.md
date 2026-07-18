@@ -24,6 +24,7 @@ sources:
   - wiki/sources/descriptions/xuanxuan0__TiEtwAgent.md
   - wiki/sources/descriptions/xtremegamer1__xigmapper.md
   - wiki/sources/descriptions/xct__windows-kernel-exploits.md
+  - wiki/sources/descriptions/xM0kht4r__VEN0m-Ransomware.md
   - wiki/sources/descriptions/xaitax__NTSleuth.md
   - wiki/sources/descriptions/xPasters__.data-ptr-swap.md
 updated: 2026-07-18
@@ -44,7 +45,7 @@ Kernel internals that matter for game protection and low-level research: object/
 - **Cross-process kernel R/W:** MDL map + physical translate + CR3 page-table walk libraries such as [[ntmemory]] (research for kernel cheat memory paths / AC evasion). (source: wiki/sources/descriptions/zer0condition__NTMemory.md)
 - **[[kernel-callbacks]]:** process/thread/image notify, ObRegisterCallbacks, Cm/Flt; defensive enumeration/inspection via anti-rootkit GUIs such as [[openark]] (SSDT/shadow SSDT, drivers, objects); object-symlink access callbacks such as [[symlink-callback]] (LinkTarget → callback) (source: wiki/sources/descriptions/yyl-20020115__OpenArk.md) (source: wiki/sources/descriptions/yardenshafir__SymlinkCallback.md)
 - **Trust features:** DSE, PatchGuard, VBS/HVCI, Secure Boot; CET/shadow-stack research such as [[cet-research]] under `Windows Security Features` (source: wiki/sources/descriptions/yardenshafir__cet-research.md)
-- **[[byovd]]:** signed vulnerable drivers → kernel R/W → unsigned load / blind AC; educational kernel-exploit guides such as [[windows-kernel-exploits]] (Cheat Vulnerable Driver lane) (source: wiki/sources/descriptions/xct__windows-kernel-exploits.md)
+- **[[byovd]]:** signed vulnerable drivers → kernel R/W → unsigned load / blind AC; educational kernel-exploit guides such as [[windows-kernel-exploits]] (Cheat Vulnerable Driver lane); AV/EDR-evasion research such as [[ven0m-ransomware]] via `iMFForceDelete.sys` (IObit Malware Fighter) (source: wiki/sources/descriptions/xct__windows-kernel-exploits.md) (source: wiki/sources/descriptions/xM0kht4r__VEN0m-Ransomware.md)
 - **Trusted-process mappers:** extend a high-trust process (e.g. lsass) and map unsigned driver code in that context to skip normal load telemetry — research ref [[lsass-extend-mapper]] (source: wiki/sources/descriptions/zorftw__lsass-extend-mapper.md)
 - **Pool / Segment Heap:** HeapKey-aware scanning for hidden modules and shellcode; post-map cleanup research such as [[revert-mapper]] (free mapping + strip pool tags / refs after unsigned-driver entry) (source: wiki/sources/descriptions/zorftw__revert-mapper.md)
 - **ETW:** provider/event schema discovery (manifest + TraceLogging) via tools such as [[etw-explorer]]; ThreatIntel consumers such as [[tietwagent]] (Microsoft-Windows-Threat-Intelligence injection telemetry; krabsetw/Yara; ELAM/PPL) show how those providers feed AC/EDR detection without fragile userland hooks (source: wiki/sources/descriptions/zodiacon__EtwExplorer.md) (source: wiki/sources/descriptions/xuanxuan0__TiEtwAgent.md)
@@ -58,7 +59,7 @@ Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[windows-kernel-exploits]] · [[hvci]] · [[cet-research]] · [[windbg-scripts]] · [[symlink-callback]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[ntmemory]] · [[ntsleuth]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[xigmapper]] · [[etw-explorer]] · [[tietwagent]] · [[openark]] · [[boom]] · [[data-ptr-swap]] · [[zero-thread-kernel]] · [[dma]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[byovd]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[hvci]] · [[cet-research]] · [[windbg-scripts]] · [[symlink-callback]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[ntmemory]] · [[ntsleuth]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[xigmapper]] · [[etw-explorer]] · [[tietwagent]] · [[openark]] · [[boom]] · [[data-ptr-swap]] · [[zero-thread-kernel]] · [[dma]] · [[overviews/anti-cheat]]
 
 
 
