@@ -8,6 +8,7 @@ sources:
   - wiki/sources/skills/game-hacking.md
   - wiki/sources/descriptions/xct__windows-kernel-exploits.md
   - wiki/sources/descriptions/xM0kht4r__VEN0m-Ransomware.md
+  - wiki/sources/descriptions/xM0kht4r__AV-EDR-Killer.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -30,6 +31,8 @@ Educational kernel-exploit reference material such as [[windows-kernel-exploits]
 
 Concrete AV/EDR-evasion research such as [[ven0m-ransomware]] abuses `iMFForceDelete.sys` from IObit Malware Fighter (v12.1.0) rather than a classic ZwTerminateProcess-style killer driver. (source: wiki/sources/descriptions/xM0kht4r__VEN0m-Ransomware.md)
 
+Process-terminate style killers such as [[av-edr-killer]] target `wsftprm.sys` via IOCTL `0x22201C` (1036-byte buffer; first DWORD = target PID). (source: wiki/sources/descriptions/xM0kht4r__AV-EDR-Killer.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]

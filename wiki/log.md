@@ -194,3 +194,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:xPasters/.data-ptr-swap`: entity [[data-ptr-swap]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-07-18** — ingest `description:xM0kht4r/VEN0m-Ransomware`: entity [[ven0m-ransomware]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
+- **2026-07-18** — ingest `description:xM0kht4r/AV-EDR-Killer`: entity [[av-edr-killer]]; cited on [[byovd]] and [[overviews/windows-kernel]].
