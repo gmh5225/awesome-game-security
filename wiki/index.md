@@ -58,6 +58,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DayZzz](entities/dayzzz.md) — DayZ cheat/modding: SDK generation + overlays (C/C++)
 - [Demystifying-PatchGuard](entities/demystifying-patchguard.md) — educational C/C++ walkthrough of PatchGuard
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
+- [DetectTpmSpoofing](entities/detect-tpm-spoofing.md) — KMDF: TPM 2.0 EK spoof detect (IOCTL vs TPM.sys cache)
 - [DotX64Dbg](entities/dotx64dbg.md) — .NET 6 / C# x64dbg plugin framework (live edit; custom commands)
 - [dpatch](entities/dpatch.md) — syscall dispatcher patching PoC (table copy + dispatcher jump)
 - [eac-overlay](entities/eac-overlay.md) — EAC overlay PoC (ESP via alt surfaces / window manip; C++)
