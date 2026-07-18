@@ -78,6 +78,7 @@ sources:
   - wiki/sources/descriptions/wbenny__DetoursNT.md
   - wiki/sources/descriptions/waryas__WaryasSWHE.md
   - wiki/sources/descriptions/waryas__UMPMLib.md
+  - wiki/sources/descriptions/waryas__EUPMAccess.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -92,7 +93,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Escalation model
 
-1. **User-mode** — RPM/WPM, DLL/shellcode injection, graphics/input hooks; usermode memory-analysis libs such as [[umpmlib]] (C/C++; cheat / RPM lane) (source: wiki/sources/descriptions/waryas__UMPMLib.md); shatter-attack AC bypass research such as [[waryasswhe]] (usermode 0day shatter → AC bypass; cheat / RPM lane) (source: wiki/sources/descriptions/waryas__WaryasSWHE.md)
+1. **User-mode** — RPM/WPM, DLL/shellcode injection, graphics/input hooks; usermode memory-analysis libs such as [[umpmlib]] (C/C++; cheat / RPM lane) (source: wiki/sources/descriptions/waryas__UMPMLib.md); related RPM / memory-analysis samples such as [[eupmaccess]] (C/C++; cheat / RPM) (source: wiki/sources/descriptions/waryas__EUPMAccess.md); shatter-attack AC bypass research such as [[waryasswhe]] (usermode 0day shatter → AC bypass; cheat / RPM lane) (source: wiki/sources/descriptions/waryas__WaryasSWHE.md)
 2. **Kernel-mode** — signed/vulnerable drivers ([[byovd]]), callback/page-table work; cross-process R/W via MDL/CR3 helpers such as [[ntmemory]] (source: wiki/sources/descriptions/zer0condition__NTMemory.md)
 3. **Below the OS** — hypervisor, PCIe DMA, external devices / second machines
 
@@ -158,7 +159,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ndisapi]] · [[ksocket]] · [[nvidiaapi]] · [[ntmemory]] · [[umpmlib]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[waryasswhe]] · [[reverse-engineering]] · [[totalpe2]] · [[quickasm]] · [[scfw]] · [[xrefsext]] · [[symbridge]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ghidrametrics]] · [[injectors]] · [[modexmap]] · [[skiphook]] · [[detoursnt]] · [[cedetector]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[keyboardkit]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[efitool]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[palworldsaved]] · [[tiny-csgo-client]] · [[lumina-cheat]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[valorantcc]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[xenia]] · [[xenia-mac]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ndisapi]] · [[ksocket]] · [[nvidiaapi]] · [[ntmemory]] · [[umpmlib]] · [[eupmaccess]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[waryasswhe]] · [[reverse-engineering]] · [[totalpe2]] · [[quickasm]] · [[scfw]] · [[xrefsext]] · [[symbridge]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ghidrametrics]] · [[injectors]] · [[modexmap]] · [[skiphook]] · [[detoursnt]] · [[cedetector]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[keyboardkit]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[efitool]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[palworldsaved]] · [[tiny-csgo-client]] · [[lumina-cheat]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[valorantcc]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[xenia]] · [[xenia-mac]] · [[overviews/anti-cheat]]
 
 
 
