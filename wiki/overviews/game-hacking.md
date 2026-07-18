@@ -44,6 +44,7 @@ sources:
   - wiki/sources/descriptions/xiaoxindada__magiskboot_ndk_on_linux.md
   - wiki/sources/descriptions/xetzzy__Fortnite-External-Source.md
   - wiki/sources/descriptions/xenia-project__xenia.md
+  - wiki/sources/descriptions/xemu-project__xemu.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -98,12 +99,13 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - ASI Loader–based remaster bridges such as [[gta4-rtx]] (GTA IV Complete Edition → RTX Remix; custom runtime / light / wetness) illustrate DirectX compatibility tooling adjacent to graphics-mod research. (source: wiki/sources/descriptions/xoxor4d__gta4-rtx.md)
 - Hidden-PVE / QEMU-KVM anti-detection (e.g. [[proxmox-ve-anti-detection]], [[qemu-anti-detection]] device-string spoof such as QEMU→ASUS keyboard) sits in the `Cheat > QEMU/KVM/PVE/VBOX` lane. (source: wiki/sources/descriptions/zhaodice__proxmox-ve-anti-detection.md) (source: wiki/sources/descriptions/zhaodice__qemu-anti-detection.md)
 - Original Xbox software emulation via [[xqemu]] (full-machine QEMU, no hardware VT required) also sits in that QEMU/KVM research lane for title playback / RE. (source: wiki/sources/descriptions/xqemu__xqemu.md)
+- Original Xbox LLE via [[xemu]] (QEMU fork; NV2A/MCPX/NForce/Pentium III; OpenGL + SDL2; ISO/XISO) sits in the console `Xbox` lane for hardware-internals / preservation study. (source: wiki/sources/descriptions/xemu-project__xemu.md)
 - Game Boy hardware emulation via [[kevboy]] (Rust; CPU/memory/graphics/input + ROM formats) sits in the console `Game Boy` lane for emulator architecture study. (source: wiki/sources/descriptions/xkevio__kevboy.md)
 - Xbox 360 emulation via [[xenia]] (C++; PowerPC recompiler, D3D12/Vulkan GPU, XAM/kernel/XEX) sits in the console `Xbox` lane for hardware-abstraction / binary-translation research. (source: wiki/sources/descriptions/xenia-project__xenia.md)
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ntmemory]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[kevboy]] · [[xenia]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ntmemory]] · [[vac3-inhibitor]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[xenia]] · [[overviews/anti-cheat]]
 
 
 
