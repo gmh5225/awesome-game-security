@@ -294,3 +294,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:weak1337/SkipHook`: entity [[skiphook]]; cited on [[battleye]] and [[overviews/game-hacking]].
 
 - **2026-07-18** — ingest `description:weak1337/PresentHookDetection`: entity [[present-hook-detection]]; cited on [[present-hook]] and [[battleye]].
+
+- **2026-07-18** — ingest `description:weak1337/NvidiaApi`: entity [[nvidiaapi]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
