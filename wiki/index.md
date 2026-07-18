@@ -124,6 +124,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [x14.08-coverstory-blizzard](entities/x14-08-coverstory-blizzard.md) — WoW cheat / Warden bypass (loader hooks / RunScript; C++)
 - [x260-lenovo-opencore](entities/x260-lenovo-opencore.md) — ThinkPad X260 Hackintosh OpenCore EFI (macOS research host)
 - [x64-EXE-Packer](entities/x64-exe-packer.md) — PE X64 binary packer (Anti Cheat → Binary Packer)
+- [x64dbg](entities/x64dbg.md) — Windows x86/x64 debugger (plugins; Cheat Debugging)
 - [x64dbgbinja](entities/x64dbgbinja.md) — Binary Ninja plugin (Python; x64dbg org; BN ↔ x64dbg lane)
 
 - [x670e-tomahawk-anticheat-update](entities/x670e-tomahawk-anticheat-update.md) — MSI X670E Tomahawk BIOS v1KB DXE anti-cheat (option-ROM strip / NX)

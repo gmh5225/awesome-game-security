@@ -20,4 +20,4 @@ Not a standalone debugger—scoped to Binary Ninja plugin development in the Che
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[opaque-predicates-detective]] · [[symbridge]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[x64dbg]] · [[opaque-predicates-detective]] · [[symbridge]]
