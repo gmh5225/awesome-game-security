@@ -27,7 +27,8 @@ sources:
   - wiki/sources/descriptions/xuanxuan0__TiEtwAgent.md
   - wiki/sources/descriptions/xsj3n__x64-EXE-Packer.md
   - wiki/sources/descriptions/xiaoweime__WProtect.md
-updated: 2026-07-17
+  - wiki/sources/descriptions/xan105__Mini-Launcher.md
+updated: 2026-07-18
 confidence: high
 ---
 
@@ -52,7 +53,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 **Architecture:** user-mode scanners → kernel callbacks/VAD → optional hypervisor EPT protection → server-side replay/stats.
 
-**Threats defended against:** injected code (stress/test harnesses such as [[injectors]] under Injection Testing), [[byovd]], hypervisor abuse (stress/test refs such as [[vt-debuuger]]; minimal VT-x Type-2 learning stacks such as [[hv]]; stealth Type-2 stacks such as [[ophion]] with CPUID cache / CR4.VMXE hide / TSC compensation under hacked-hypervisor detection; user-mode detection probes such as [[checkhv-um]] via CPUID / RDTSC / VMCS artifacts / signature match), hidden/anti-detect PVE/QEMU guests (e.g. [[proxmox-ve-anti-detection]], [[qemu-anti-detection]] under virtual-environment detection), [[dma]] (PCIe fingerprinting + IOMMU + TPM attestation), AI visual cheats with hardware input. (source: wiki/sources/descriptions/zoand__Injectors.md) (source: wiki/sources/descriptions/zxd1994__vt-debuuger.md) (source: wiki/sources/descriptions/zer0condition__hv.md) (source: wiki/sources/descriptions/zer0condition__Ophion.md) (source: wiki/sources/descriptions/zer0condition__checkhv_um.md) (source: wiki/sources/descriptions/zhaodice__proxmox-ve-anti-detection.md) (source: wiki/sources/descriptions/zhaodice__qemu-anti-detection.md)
+**Threats defended against:** injected code (stress/test harnesses such as [[injectors]] under Injection Testing); platform-bypass launchers such as [[mini-launcher]] (Steam API stubs / SteamAppID + DLL/Lua inject without the full client) (source: wiki/sources/descriptions/xan105__Mini-Launcher.md); [[byovd]], hypervisor abuse (stress/test refs such as [[vt-debuuger]]; minimal VT-x Type-2 learning stacks such as [[hv]]; stealth Type-2 stacks such as [[ophion]] with CPUID cache / CR4.VMXE hide / TSC compensation under hacked-hypervisor detection; user-mode detection probes such as [[checkhv-um]] via CPUID / RDTSC / VMCS artifacts / signature match), hidden/anti-detect PVE/QEMU guests (e.g. [[proxmox-ve-anti-detection]], [[qemu-anti-detection]] under virtual-environment detection), [[dma]] (PCIe fingerprinting + IOMMU + TPM attestation), AI visual cheats with hardware input. (source: wiki/sources/descriptions/zoand__Injectors.md) (source: wiki/sources/descriptions/zxd1994__vt-debuuger.md) (source: wiki/sources/descriptions/zer0condition__hv.md) (source: wiki/sources/descriptions/zer0condition__Ophion.md) (source: wiki/sources/descriptions/zer0condition__checkhv_um.md) (source: wiki/sources/descriptions/zhaodice__proxmox-ve-anti-detection.md) (source: wiki/sources/descriptions/zhaodice__qemu-anti-detection.md)
 
 **Platform trust:** DSE, [[patchguard]], [[hvci]]/VBS, Secure Boot; CET/shadow-stack research such as [[cet-research]] in the Windows Security Features lane. (source: wiki/sources/descriptions/yardenshafir__cet-research.md)
 
@@ -64,7 +65,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[veh-dumper]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[kagura]] · [[wprotect]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[injectors]] · [[zero-thread-kernel]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[veh-dumper]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[kagura]] · [[wprotect]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[injectors]] · [[mini-launcher]] · [[zero-thread-kernel]]
 
 
 

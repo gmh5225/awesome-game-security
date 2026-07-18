@@ -180,3 +180,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:xehn1337/valorant-dumper`: entity [[valorant-dumper]]; cited on [[vanguard]] and [[overviews/game-engine]].
 
 - **2026-07-18** — ingest `description:xct/windows-kernel-exploits`: entity [[windows-kernel-exploits]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
+- **2026-07-18** — ingest `description:xan105/Mini-Launcher`: entity [[mini-launcher]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
