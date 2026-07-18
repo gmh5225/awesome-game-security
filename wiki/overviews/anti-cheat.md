@@ -28,9 +28,11 @@ sources:
   - wiki/sources/descriptions/xsj3n__x64-EXE-Packer.md
   - wiki/sources/descriptions/xiaoweime__WProtect.md
   - wiki/sources/descriptions/xan105__Mini-Launcher.md
+  - wiki/sources/descriptions/xakepru__x14.08-coverstory-blizzard.md
 updated: 2026-07-18
 confidence: high
 ---
+
 
 
 # Anti-Cheat
@@ -42,8 +44,10 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 - [[easy-anti-cheat]] — service + driver + game-facing integrity (Fortnite, Apex, Rust)
 - [[battleye]] — handle protection, process/memory scanning (PUBG, R6, DayZ); research ref [[blindeye]] drops BE report-path pool allocs via hooked `ExAllocatePool*` (source: wiki/sources/descriptions/zouxianyu__BlindEye.md)
 - [[vanguard]] — boot-start driver, early driver allowlisting (Valorant, LoL)
-- FACEIT AC, VAC (user-mode signatures), GameGuard, XIGNCODE3, ACE
+- FACEIT AC, VAC (user-mode signatures), GameGuard, XIGNCODE3, ACE, Warden (Blizzard / WoW)
 - [[vac3-inhibitor]] — C++ VAC3 exploration (hooking / memory analysis) under cheat → explore anticheat:vac (source: wiki/sources/descriptions/zyhp__vac3_inhibitor.md)
+- [[x14-08-coverstory-blizzard]] — WoW cheat framework with Warden loader hooks / RunScript injection (research ref for Warden internals) (source: wiki/sources/descriptions/xakepru__x14.08-coverstory-blizzard.md)
+
 
 
 ## Key sub-areas
@@ -65,7 +69,8 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[veh-dumper]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[kagura]] · [[wprotect]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[injectors]] · [[mini-launcher]] · [[zero-thread-kernel]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[x14-08-coverstory-blizzard]] · [[veh-dumper]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[kagura]] · [[wprotect]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[injectors]] · [[mini-launcher]] · [[zero-thread-kernel]]
+
 
 
 
