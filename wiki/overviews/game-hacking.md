@@ -70,6 +70,7 @@ sources:
   - wiki/sources/descriptions/weak1337__SkipHook.md
   - wiki/sources/descriptions/weak1337__NvidiaApi.md
   - wiki/sources/descriptions/weak1337__ModExMap.md
+  - wiki/sources/descriptions/weak1337__EvCommunication.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -95,7 +96,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Launcher Abuser / platform-bypass launchers such as [[mini-launcher]] (Steam API stub + env/SteamAppID setup; DLL injection + Lua scripting) for out-of-client game start. (source: wiki/sources/descriptions/xan105__Mini-Launcher.md)
 - Visual ESP / aim / movement cheats; AI visual pipelines (OBS + YOLO + HID)
 - Overlays via [[present-hook]] and external/DWM/Steam windows; Steam-overlay samples such as [[steam-overlay-x64]] (C; modding / memory analysis). (source: wiki/sources/descriptions/xo1337__steam-overlay-x64.md)
-- HWID spoofing, stack spoofing, driver communication channels (e.g. [[boom]] hijacks `Beep.sys` and alters hide/comm paths; [[data-ptr-swap]] studies `NtSetCompositionSurfaceAnalogExclusive` as a kernel-side channel). GPU serial / board fingerprinting via undocumented NvAPI is illustrated by [[nvidiaapi]] (`nvapi64.dll` + `NvAPI_QueryInterface`). (source: wiki/sources/descriptions/zoand__BOOM.md) (source: wiki/sources/descriptions/xPasters__.data-ptr-swap.md) (source: wiki/sources/descriptions/weak1337__NvidiaApi.md)
+- HWID spoofing, stack spoofing, driver communication channels (e.g. [[boom]] hijacks `Beep.sys` and alters hide/comm paths; [[data-ptr-swap]] studies `NtSetCompositionSurfaceAnalogExclusive` as a kernel-side channel; [[evcommunication]] uses named events + `NtTokenManager` hook instead of IOCTL). GPU serial / board fingerprinting via undocumented NvAPI is illustrated by [[nvidiaapi]] (`nvapi64.dll` + `NvAPI_QueryInterface`). (source: wiki/sources/descriptions/zoand__BOOM.md) (source: wiki/sources/descriptions/xPasters__.data-ptr-swap.md) (source: wiki/sources/descriptions/weak1337__EvCommunication.md) (source: wiki/sources/descriptions/weak1337__NvidiaApi.md)
 - EFI boot-time mappers and pre-kernel privilege demos such as [[efitool]] (`ExitBootServices` in-RAM `SYSTEM` hive patch → SYSTEM `cmd.exe`; no disk writes / no kernel driver); engine-specific paths (Unreal/Unity/Source). (source: wiki/sources/descriptions/wesmar__EfiTool.md)
 - AC-system exploration repos (e.g. [[vac3-inhibitor]] for VAC3 hooking/memory work; [[vac3-dumper]] for timed multi-module VAC dumps) sit in the user-mode lane of cheat research. (source: wiki/sources/descriptions/zyhp__vac3_inhibitor.md) (source: wiki/sources/descriptions/x1tan__vac3-dumper.md)
 - Blizzard / WoW Warden research samples such as [[x14-08-coverstory-blizzard]] (C++; memory scan / code patch / Warden loader hooks / RunScript via HacksController) sit in the same user-mode AC-exploration lane. (source: wiki/sources/descriptions/xakepru__x14.08-coverstory-blizzard.md)

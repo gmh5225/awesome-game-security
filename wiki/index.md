@@ -63,6 +63,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [eac-overlay](entities/eac-overlay.md) — EAC overlay PoC (ESP via alt surfaces / window manip; C++)
 - [EfiTool](entities/efitool.md) — UEFI ExitBootServices in-RAM SYSTEM hive patch (SYSTEM shell; no disk/driver)
 - [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests
+- [EvCommunication](entities/evcommunication.md) — named-event kernel↔UM channel (NtTokenManager; vs IOCTL)
 - [FileRecoveryTool](entities/file-recovery-tool.md) — NTFS/FAT32/ExFAT disk forensics (MFT/USN/carving; Win32)
 
 - [function-collections](entities/function-collections.md) — C PoCs for uncommon Ring3 paths (memory analysis; AC callback lane)
