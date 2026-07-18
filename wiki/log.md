@@ -306,3 +306,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2551 / Anti Cheat ~595); light `index.md` section notes (no per-category pages).
 
 - **2026-07-18** — ingest `description:weak1337/DetectTpmSpoofing`: entity [[detect-tpm-spoofing]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
+- **2026-07-18** — ingest `description:weak1337/CEDetector`: entity [[cedetector]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
