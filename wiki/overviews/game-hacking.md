@@ -47,6 +47,7 @@ sources:
   - wiki/sources/descriptions/xemu-project__xemu.md
   - wiki/sources/descriptions/xan105__Mini-Launcher.md
   - wiki/sources/descriptions/xakepru__x14.08-coverstory-blizzard.md
+  - wiki/sources/descriptions/xPasters__.data-ptr-swap.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -70,7 +71,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Launcher Abuser / platform-bypass launchers such as [[mini-launcher]] (Steam API stub + env/SteamAppID setup; DLL injection + Lua scripting) for out-of-client game start. (source: wiki/sources/descriptions/xan105__Mini-Launcher.md)
 - Visual ESP / aim / movement cheats; AI visual pipelines (OBS + YOLO + HID)
 - Overlays via [[present-hook]] and external/DWM/Steam windows; Steam-overlay samples such as [[steam-overlay-x64]] (C; modding / memory analysis). (source: wiki/sources/descriptions/xo1337__steam-overlay-x64.md)
-- HWID spoofing, stack spoofing, driver communication channels (e.g. [[boom]] hijacks `Beep.sys` and alters hide/comm paths). (source: wiki/sources/descriptions/zoand__BOOM.md)
+- HWID spoofing, stack spoofing, driver communication channels (e.g. [[boom]] hijacks `Beep.sys` and alters hide/comm paths; [[data-ptr-swap]] studies `NtSetCompositionSurfaceAnalogExclusive` as a kernel-side channel). (source: wiki/sources/descriptions/zoand__BOOM.md) (source: wiki/sources/descriptions/xPasters__.data-ptr-swap.md)
 - EFI boot-time mappers; engine-specific paths (Unreal/Unity/Source)
 - AC-system exploration repos (e.g. [[vac3-inhibitor]] for VAC3 hooking/memory work) sit in the user-mode lane of cheat research. (source: wiki/sources/descriptions/zyhp__vac3_inhibitor.md)
 - Blizzard / WoW Warden research samples such as [[x14-08-coverstory-blizzard]] (C++; memory scan / code patch / Warden loader hooks / RunScript via HacksController) sit in the same user-mode AC-exploration lane. (source: wiki/sources/descriptions/xakepru__x14.08-coverstory-blizzard.md)
@@ -111,7 +112,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ntmemory]] · [[vac3-inhibitor]] · [[x14-08-coverstory-blizzard]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[mini-launcher]] · [[boom]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[xenia]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ntmemory]] · [[vac3-inhibitor]] · [[x14-08-coverstory-blizzard]] · [[totalpe2]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[ida-jm-xorstr-decrypt-plugin]] · [[injectors]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[deobf]] · [[idadeflat]] · [[vmdevirt-vtil]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[battlefield-1-internal]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[xenia]] · [[overviews/anti-cheat]]
 
 
 

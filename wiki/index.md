@@ -48,6 +48,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CS-2-Glow](entities/cs-2-glow.md) — external CS2 glow ESP (C++; entity / offsets / memory)
 - [cs2-cheat-cpp](entities/cs2-cheat-cpp.md) — external CS2 cheat (C++; rendering / SDK generation)
 - [CounterStrikeSource-Linux-Trainer](entities/counterstrikesource-linux-trainer.md) — Linux external CS:S trainer (movement / info display)
+- [data-ptr-swap](entities/data-ptr-swap.md) — NtSetCompositionSurfaceAnalogExclusive kernel channel (C/C++)
 - [DayZzz](entities/dayzzz.md) — DayZ cheat/modding: SDK generation + overlays (C/C++)
 - [Demystifying-PatchGuard](entities/demystifying-patchguard.md) — educational C/C++ walkthrough of PatchGuard
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
