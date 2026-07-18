@@ -7,7 +7,7 @@ sources:
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/yucchiy__UniCli.md
   - wiki/sources/descriptions/yrgo__awesome-educational-games.md
-updated: 2026-07-17
+updated: 2026-07-18
 confidence: high
 ---
 
@@ -18,7 +18,7 @@ Curated resource list spanning offensive game hacking and defensive anti-cheat r
 
 ## What this domain covers
 
-The README organizes ~40 top-level sections: engines/rendering/`AI` asset tooling, offensive (`Cheat`), defensive (`Anti Cheat`), platform hardening (`Windows Security Features`), mobile/console/emulator ecosystems (incl. Switch/Xbox/PlayStation/3DS), and supporting gamedev infrastructure (`Game Develop` Guide / MCP / AI Agents—e.g. Unity Editor terminal CLI [[unicli]], educational-games list [[awesome-educational-games]]). Prefer this wiki for synthesis; fall back to README → descriptions → archives for specific repos. (source: wiki/sources/descriptions/yucchiy__UniCli.md) (source: wiki/sources/descriptions/yrgo__awesome-educational-games.md)
+The README organizes ~40 top-level sections: engines/rendering/`AI` asset tooling, offensive (`Cheat`), defensive (`Anti Cheat`), platform hardening (`Windows Security Features`), mobile/console/emulator ecosystems (Switch ~7 / Xbox ~7 / PlayStation ~5 / Game Boy ~3 / 3DS), and supporting gamedev infrastructure (`Game Develop` Guide / MCP / AI Agents—e.g. Unity Editor terminal CLI [[unicli]], educational-games list [[awesome-educational-games]]). Prefer this wiki for synthesis; fall back to README → descriptions → archives for specific repos. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/yucchiy__UniCli.md) (source: wiki/sources/descriptions/yrgo__awesome-educational-games.md)
 
 ## Skill routing (primary topics)
 
@@ -42,4 +42,4 @@ The README organizes ~40 top-level sections: engines/rendering/`AI` asset toolin
 
 ## README category map (high-signal)
 
-Security-dense sections from the projected category map (40 top-level): **Cheat** (~2544 links), **Anti Cheat** (~592), **DirectX** (~32) / OpenGL / Vulkan, **Windows Security Features** (~9), **Some Tricks** (~112), plus engine (`Game Engine` ~140; Unreal/Unity/Godot/Lumix plugins + detectors), gamedev infra (`Game Develop` ~176 MCP/AI Agents; `Game Network` ~25 JWT/Auth + Location/Geocoding; `AI`/`Game Assets` image→3D/sprite pipelines; `Game Tools` incl. RCE hardening; Testing/CI), WSA/emulator lanes (`Windows Emulator` ~7 hybrid kernel-driver AC analysis), and console (Switch/Xbox/PlayStation/3DS/Game Boy) categories. (source: wiki/sources/README-categories.md)
+Security-dense sections from the projected category map (40 top-level): **Cheat** (~2545 links), **Anti Cheat** (~592), **DirectX** (~32) / OpenGL / Vulkan, **Windows Security Features** (~9), **Some Tricks** (~112), plus engine (`Game Engine` ~140; Unreal/Unity/Godot/Lumix plugins + detectors), gamedev infra (`Game Develop` ~176 MCP/AI Agents; `Game Network` ~25 JWT/Auth + Location/Geocoding; `AI`/`Game Assets` image→3D/sprite pipelines; `Game Tools` incl. RCE hardening; Testing/`Game CI` ~3), WSA/emulator lanes (`Windows Emulator` ~7 hybrid kernel-driver AC analysis), and console (Switch/Xbox/PlayStation/3DS/Game Boy) categories. (source: wiki/sources/README-categories.md)

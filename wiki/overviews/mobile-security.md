@@ -19,7 +19,7 @@ sources:
   - wiki/sources/descriptions/yabinc__simpleperf_demo.md
   - wiki/sources/descriptions/xmmword__dpatch.md
   - wiki/sources/descriptions/xiaoxindada__magiskboot_ndk_on_linux.md
-updated: 2026-07-17
+updated: 2026-07-18
 confidence: high
 ---
 
@@ -49,4 +49,4 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 
 ## README map
 
-Cheat Magisk/Xposed/Frida/ART-syscall hooks/Android kernel*/bootloader bypass/ROM/root/memory-loading/App+Kernel CVE/Cellular-SIM/IoT trees; iOS jailbreak+network; Anti Cheat Detection:Android root; platform cats `WSA` (~9), `Android Emulator` (~9; incl. Snapdragon/Gunyah research), `IOS Emulator` (~3; Virtualization.framework vphone tools). (source: wiki/sources/README-categories.md)
+Cheat Magisk/Xposed/Frida/ART-syscall hooks/Android kernel*/driver/Network Explorer/bootloader bypass/ROM/root/memory-loading/App+Kernel CVE/Cellular-SIM/IoT trees; iOS jailbreak+network; Anti Cheat Detection:Android root; platform cats `WSA` (~9), `Android Emulator` (~9; incl. Snapdragon/Gunyah research), `IOS Emulator` (~3; Virtualization.framework vphone tools). (source: wiki/sources/README-categories.md)

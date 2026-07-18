@@ -64,4 +64,4 @@ Workflows for protected game clients and anti-cheat components across user mode,
 
 ## README map
 
-Cheat Debugging / RE Tools / Mixed boolean-arithmetic / DBI / Fix VMP|Themida|OLLVM (plus IDA/BN/Ghidra/x64dbg plugin ecosystems); Anti Cheat Anti Debugging / Disassembly / Dump Fix / Binary Packer; adjacent `Windows Emulator` (~7; WHP trap-driven guests + hybrid kernel-driver emulation for rootkit/AC RE). (source: wiki/sources/README-categories.md)
+Cheat Debugging / RE Tools / Mixed boolean-arithmetic / DBI / Fix VMP|Themida|OLLVM (plus IDA/BN/Ghidra/x64dbg plugin ecosystems); Anti Cheat Anti Debugging / Disassembly / Dump Fix / Binary Packer; adjacent `Windows Emulator` (~7; WHP trap-driven guests + hybrid kernel-driver emulation for rootkit/AC RE) and console emulator cats (`Xbox` ~7 / `Game Boy` ~3 / Switch) for binary-translation and hardware-abstraction RE. (source: wiki/sources/README-categories.md)

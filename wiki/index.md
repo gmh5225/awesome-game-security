@@ -6,14 +6,14 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Overviews
 
-- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2544 / Anti Cheat ~592; Game Engine ~140; AI/asset pipelines)
-- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* + engine protection (~592); Windows Emulator AC analysis
+- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2545 / Anti Cheat ~592; Game Engine ~140; console Switch/Xbox/PS)
+- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* + engine protection (~592); open-source/analysis + Windows Emulator AC
 - [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat/Detection:DMA + WSF attestation
-- [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~140); assets, hot-patch, MCP/AI gamedev (~176); Game Network JWT/Location
-- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2544) + Some Tricks (~112); Launcher Abuser / Android CVE lanes
+- [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~140); assets, hot-patch, MCP/AI gamedev (~176); Game CI / Network JWT
+- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2545) + Some Tricks (~112); Launcher Abuser / console emulator lanes
 - [Graphics API](overviews/graphics-api.md) — DirectX (~32) / GL / Vulkan hooks, overlays, capture
 - [Mobile Security](overviews/mobile-security.md) — Android / iOS; memory-loading + App/Kernel CVE; WSA (~9), emulators (~9/~3)
-- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools, MBA/DBI, deobfuscation, packers; Windows Emulator hybrid AC RE
+- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools, MBA/DBI, deobfuscation, packers; Windows Emulator + console RE
 - [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation (~9), BYOVD, pool; Windows Emulator (~7)
 
 ## Concepts

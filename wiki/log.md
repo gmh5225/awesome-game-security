@@ -182,3 +182,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:xct/windows-kernel-exploits`: entity [[windows-kernel-exploits]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-07-18** — ingest `description:xan105/Mini-Launcher`: entity [[mini-launcher]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-18** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/game-engine]], [[overviews/graphics-api]], [[overviews/mobile-security]], [[overviews/reverse-engineering]] (Cheat ~2545; console Switch/Xbox/PS lanes; Game CI); light `index.md` section notes (no per-category pages).
