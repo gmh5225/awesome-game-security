@@ -200,3 +200,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:xM0kht4r/2Pack`: entity [[2pack]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-18** — ingest `description:xBrunoMedeiros/eac-overlay`: entity [[eac-overlay]]; cited on [[easy-anti-cheat]] and [[overviews/graphics-api]].
+
+- **2026-07-18** — ingest `description:x90skysn3k/x260-lenovo-opencore`: entity [[x260-lenovo-opencore]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
