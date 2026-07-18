@@ -334,3 +334,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:waryas/UMPMLib`: entity [[umpmlib]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-07-18** — ingest `description:waryas/KACE`: entity [[kace]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
+- **2026-07-18** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2552 / Anti Cheat ~595); light `index.md` section notes (no per-category pages).
