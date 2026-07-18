@@ -188,3 +188,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:xakepru/x14.08-coverstory-blizzard`: entity [[x14-08-coverstory-blizzard]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-07-18** — ingest `description:xaitax/NTSleuth`: entity [[ntsleuth]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
+- **2026-07-18** — ingest `description:xProHackerx/imgui-ios-mod-menu`: entity [[imgui-ios-mod-menu]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]].
