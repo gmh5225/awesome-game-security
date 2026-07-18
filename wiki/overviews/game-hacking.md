@@ -54,6 +54,7 @@ sources:
   - wiki/sources/descriptions/x64dbg__SlothBP.md
   - wiki/sources/descriptions/x64dbg__DotX64Dbg.md
   - wiki/sources/descriptions/x64dbg__Classroom.md
+  - wiki/sources/descriptions/x-spy__CVE-2026-43499-popsicle.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -103,6 +104,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Boot-image tooling such as [[magiskboot-ndk-on-linux]] (standalone NDK-on-Linux magiskboot for unpack/repack/ramdisk) sits in the Cheat Magisk / Boot Image Modification Tool lane. (source: wiki/sources/descriptions/xiaoxindada__magiskboot_ndk_on_linux.md)
 - Custom recovery / ROM device trees such as [[ofrp-device-xiaomi-mondrian]] (OFRP for Redmi K60 Pro / mondrian) sit in the Android bootloader/ROM/root lane. (source: wiki/sources/descriptions/ymdzq__OFRP-device_xiaomi_mondrian.md)
 - DIY Android kernel explorers such as [[op7t]] sit in the Cheat Android kernel explorer lane. (source: wiki/sources/descriptions/yhnu__op7t.md)
+- Android Kernel CVE PoCs such as [[cve-2026-43499-popsicle]] (Xiaomi popsicle LPE via CVE-2026-43499; LD_PRELOAD; uid 0 + SELinux disabled) sit in the Cheat Android Kernel CVE lane. (source: wiki/sources/descriptions/x-spy__CVE-2026-43499-popsicle.md)
 - Syscall dispatcher patching PoCs such as [[dpatch]] (writable syscall-table copy + dispatcher jump to custom handler) sit in the Cheat Hook syscall / Android kernel explorer lane. (source: wiki/sources/descriptions/xmmword__dpatch.md)
 - Android app perf profiling demos such as [[simpleperf-demo]] (simpleperf / Perf) sit adjacent to that Android explorer / cheat research lane. (source: wiki/sources/descriptions/yabinc__simpleperf_demo.md)
 - Linux LKM vermagic/CRC rewriting via [[vermagic]] sits in the Cheat Linux / RE tools lane (load modules across mismatched kernel builds). (source: wiki/sources/descriptions/yaxinsn__vermagic.md)

@@ -226,3 +226,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:x64dbg/Classroom`: entity [[classroom]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].
 
 - **2026-07-18** — ingest `description:x1tan/vac3-dumper`: entity [[vac3-dumper]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-07-18** — ingest `description:x-spy/CVE-2026-43499-popsicle`: entity [[cve-2026-43499-popsicle]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
