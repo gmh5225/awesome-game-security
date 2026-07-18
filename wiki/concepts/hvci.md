@@ -7,7 +7,8 @@ sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/skills/dma-attack.md
   - wiki/sources/descriptions/zer0condition__BusterCall.md
-updated: 2026-07-17
+  - wiki/sources/descriptions/wesmar__BootBypass.md
+updated: 2026-07-18
 confidence: high
 ---
 
@@ -19,6 +20,8 @@ Hypervisor-Enforced Code Integrity (Memory Integrity): VBS feature where the Sec
 
 Raises the cost of classic kernel code patches and some [[byovd]] patterns; baseline assumption alongside Secure Boot/TPM in serious AC and [[dma]] threat models. Does not stop pure external DMA by itself—IOMMU/attestation still required. Research framed as HVCI bypass via PFN swapping (call arbitrary kernel functions from user mode) appears in [[bustercall]]. (source: wiki/sources/descriptions/zer0condition__BusterCall.md)
 
+Early-boot / native-subsystem research such as [[bootbypass]] targets DSE and Memory Integrity together via boot-manager checks, CI.dll validation, and `SeCiCallbacks` patching (`subsystem:native`). (source: wiki/sources/descriptions/wesmar__BootBypass.md)
+
 ## Related
 
-[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
