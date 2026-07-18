@@ -2186,6 +2186,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/CVE-2015-2291 [IQVW64.sys]
 - https://github.com/gmh5225/AsIO-Exploit [AsIO3.sys]
 - https://github.com/gmh5225/AsusDrv [AsusBiosIoDrv64.sys]
+- https://github.com/gmh5225/asus-bsitf-0-day-poc [CVE-2026-13585 bsitf.sys — IOCTL maps kernel contiguous memory to usermode + physical address disclosure]
 - https://github.com/gmh5225/OpenHardwareMonitor-PoC [OpenHardwareMonitorLib.sys]
 - https://github.com/gmh5225/PPLKiller [RTCore64.sys]
 - https://github.com/gmh5225/PsNotifRoutineUnloader [RTCore64.sys]
