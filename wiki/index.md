@@ -115,6 +115,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ricochet-deobfuscator](entities/ricochet-deobfuscator.md) — Ricochet AC deobfuscator (C/C++; driver / memory analysis)
 - [sbox](entities/sbox.md) — C++ compile-time AES-128 / S-box string obfuscation (Obfusk8 spin-off)
 - [shredder-rs](entities/shredder-rs.md) — x86_64 polymorphic instruction shredding (Rust)
+- [SkipHook](entities/skiphook.md) — trampoline skips first insn (bypass JMP/INT3 AC hooks; HDE)
 - [SlothBP](entities/slothbp.md) — x64dbg collaborative breakpoint manager (Cheat x64dbg Plugins)
 - [simpleperf_demo](entities/simpleperf-demo.md) — Android simpleperf / Perf demo (app profiling)
 - [Static-Variables-Obfuscator-UE4](entities/static-variables-obfuscator-ue4.md) — UE4 static-variable obfuscation vs memory scanners

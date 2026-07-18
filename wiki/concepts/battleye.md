@@ -6,6 +6,7 @@ sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/descriptions/zouxianyu__BlindEye.md
   - wiki/sources/descriptions/weak1337__SystemThreadFinder.md
+  - wiki/sources/descriptions/weak1337__SkipHook.md
 updated: 2026-07-18
 confidence: medium
 ---
@@ -22,6 +23,8 @@ Object callbacks and handle stripping, injected-module detection, pool/driver fo
 
 Thread-start heuristics (system threads whose start address is outside any loaded driver image) are reconstructed in tools such as [[system-thread-finder]], derived from BE’s thread-detection logic. (source: wiki/sources/descriptions/weak1337__SystemThreadFinder.md)
 
+User-mode prologue hooks (JMP / INT3 on WinAPI and game functions) are a common BE-style control surface; [[skiphook]] studies trampolines that skip the first instruction so those hooks are never hit while return-address checks still look legitimate. (source: wiki/sources/descriptions/weak1337__SkipHook.md)
+
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[system-thread-finder]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[system-thread-finder]] · [[skiphook]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
