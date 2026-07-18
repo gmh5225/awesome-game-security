@@ -12,7 +12,7 @@ confidence: medium
 
 Xbox 360 emulator for Windows (C++): PowerPC CPU recompiler, GPU via Direct3D 12 or Vulkan, audio, and XAM/kernel service emulation to run XEX executables on PC—plus memory, threading, FS virtualization, and controller input translation. (source: wiki/sources/descriptions/xenia-project__xenia.md)
 
-Useful for emulation developers and researchers studying console hardware abstraction / binary translation in the README `Xbox` lane—adjacent to original-Xbox full-machine playback via [[xqemu]] and handheld study via [[kevboy]], but focused on Xbox 360 title HLE rather than original Xbox or Game Boy.
+Useful for emulation developers and researchers studying console hardware abstraction / binary translation in the README `Xbox` lane—adjacent to original-Xbox full-machine playback via [[xqemu]], handheld study via [[kevboy]], and the macOS port [[xenia-mac]], but focused on Xbox 360 title HLE rather than original Xbox or Game Boy.
 
 ## Links
 
@@ -20,4 +20,4 @@ Useful for emulation developers and researchers studying console hardware abstra
 
 ## Related
 
-[[xqemu]] · [[kevboy]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]]
+[[xenia-mac]] · [[xqemu]] · [[kevboy]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]]
