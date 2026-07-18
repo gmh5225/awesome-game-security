@@ -332,3 +332,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:waryas/WaryasSWHE`: entity [[waryasswhe]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-07-18** — ingest `description:waryas/UMPMLib`: entity [[umpmlib]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-18** — ingest `description:waryas/KACE`: entity [[kace]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
