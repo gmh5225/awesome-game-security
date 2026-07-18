@@ -55,8 +55,10 @@ Compiled knowledge catalog for awesome-game-security.
 - [Demystifying-PatchGuard](entities/demystifying-patchguard.md) — educational C/C++ walkthrough of PatchGuard
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
 - [dpatch](entities/dpatch.md) — syscall dispatcher patching PoC (table copy + dispatcher jump)
+- [eac-overlay](entities/eac-overlay.md) — EAC overlay PoC (ESP via alt surfaces / window manip; C++)
 
 - [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests
+
 - [Fortnite-External-Source](entities/fortnite-external-source.md) — Fortnite external: driver / SDK generation (C++)
 - [Fortnite-Fltokens-and-offsets](entities/fortnite-fltokens-and-offsets.md) — Fortnite FLToken/offset grabber (stale / offline)
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)

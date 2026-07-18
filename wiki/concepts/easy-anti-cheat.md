@@ -4,7 +4,8 @@ kind: concept
 topics: [anti-cheat, windows-kernel]
 sources:
   - wiki/sources/skills/anti-cheat.md
-updated: 2026-07-16
+  - wiki/sources/descriptions/xBrunoMedeiros__eac-overlay.md
+updated: 2026-07-18
 confidence: medium
 ---
 
@@ -16,6 +17,8 @@ Epic’s Easy Anti-Cheat (EAC): multi-component architecture with service, kerne
 
 Callback/handle surfaces ([[kernel-callbacks]]), memory/manual-map detection, driver trust and [[byovd]] blocklists, interaction with [[hvci]]/DSE, and DMA detection pipelines shared with other modern ACs.
 
+Overlay / screenshot monitoring is another research surface: PoCs such as [[eac-overlay]] explore alternate rendering surfaces or window manipulation to draw ESP without tripping EAC overlay detection. (source: wiki/sources/descriptions/xBrunoMedeiros__eac-overlay.md)
+
 ## Related
 
-[[battleye]] · [[vanguard]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[battleye]] · [[vanguard]] · [[eac-overlay]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
