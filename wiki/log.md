@@ -240,3 +240,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:wongfei/wda_monitor_trick`: entity [[wda-monitor-trick]]; cited on [[overviews/graphics-api]] and [[present-hook]].
 
 - **2026-07-18** — ingest `description:wondeks/unity-mcp`: entity [[unity-mcp]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-18** — ingest `description:wolfpld/tracy`: entity [[tracy]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].

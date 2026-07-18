@@ -12,6 +12,7 @@ sources:
   - wiki/sources/descriptions/xProHackerx__imgui-ios-mod-menu.md
   - wiki/sources/descriptions/xBrunoMedeiros__eac-overlay.md
   - wiki/sources/descriptions/wongfei__wda_monitor_trick.md
+  - wiki/sources/descriptions/wolfpld__tracy.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -29,10 +30,11 @@ Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/
 - **OBS capture:** Game Capture injects graphics-hook DLLs—detection-relevant for AC and AI cheats
 - Title-specific internals such as [[battlefield-1-internal]] (Battlefield 1; DirectX + hooking + SDK generation) illustrate in-process graphics/hook research samples. (source: wiki/sources/descriptions/younasiqw__BattleField-1-Internal.md)
 - DirectX remaster / compatibility mods such as [[gta4-rtx]] (GTA IV → NVIDIA RTX Remix path-traced pipeline; custom Remix runtime + ASI Loader) sit in the DirectX Compatibility lane. (source: wiki/sources/descriptions/xoxor4d__gta4-rtx.md)
+- Frame profilers such as [[tracy]] (CPU zones + GPU timing for OpenGL / Vulkan / Direct3D; client + standalone viewer) sit in the adjacent Game Testing / graphics-performance lane. (source: wiki/sources/descriptions/wolfpld__tracy.md)
 
 ## Related concepts
 
-[[present-hook]] · [[battlefield-1-internal]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[eac-overlay]] · [[wda-monitor-trick]] · [[3d-racing-game]] · [[imgui-ios-mod-menu]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[present-hook]] · [[battlefield-1-internal]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[eac-overlay]] · [[wda-monitor-trick]] · [[3d-racing-game]] · [[imgui-ios-mod-menu]] · [[tracy]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
 
 ## README map
 
