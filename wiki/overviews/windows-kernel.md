@@ -16,6 +16,7 @@ sources:
   - wiki/sources/descriptions/zer0condition__hv.md
   - wiki/sources/descriptions/zer0condition__Ophion.md
   - wiki/sources/descriptions/zer0condition__ZeroThreadKernel.md
+  - wiki/sources/descriptions/weak1337__SystemThreadFinder.md
   - wiki/sources/descriptions/zer0condition__checkhv_um.md
   - wiki/sources/descriptions/yyl-20020115__OpenArk.md
   - wiki/sources/descriptions/yardenshafir__cet-research.md
@@ -71,7 +72,7 @@ Kernel internals that matter for game protection and low-level research: object/
 - **EFI:** pre-kernel mappers that skip normal driver-load telemetry — e.g. [[xigmapper]] (EFI manual map; payload must not be USB-hosted when studying early-load AC such as [[vanguard]]) (source: wiki/sources/descriptions/xtremegamer1__xigmapper.md); in-RAM `SYSTEM` hive patching at `ExitBootServices` such as [[efitool]] (SYSTEM shell before logon; no disk writes / no kernel driver; BitLocker PCR notes) (source: wiki/sources/descriptions/wesmar__EfiTool.md); Hackintosh OpenCore EFI packs such as [[x260-lenovo-opencore]] (ThinkPad X260) are a separate EFI lane for macOS-on-PC research hosts rather than cheat mapping. (source: wiki/sources/descriptions/x90skysn3k__x260-lenovo-opencore.md)
 - **Legitimate-driver hijack / stealth I/O:** research such as [[boom]] hijacks `Beep.sys` and changes communication so Ring0↔usermode paths are less obvious to AC telemetry; composition-surface channels such as [[data-ptr-swap]] (`NtSetCompositionSurfaceAnalogExclusive`) sit in the same cheat / driver-communication lane. (source: wiki/sources/descriptions/zoand__BOOM.md) (source: wiki/sources/descriptions/xPasters__.data-ptr-swap.md)
 - **Keyboard IRP filter / keylog research:** educational samples such as [[keyboardkit]] intercept keyboard IRPs in a filter driver, exfiltrate via UDP usermode, and demonstrate ExplorerFrame DLL-hijack persistence (offensive + defensive IRP-hook analysis). (source: wiki/sources/descriptions/wesmar__KeyboardKit.md)
-- **Threadless kernel execution:** PoCs such as [[zero-thread-kernel]] run code via existing thread contexts / timer callbacks instead of creating visible system threads (evasion research vs AC thread enumeration of manual maps). (source: wiki/sources/descriptions/zer0condition__ZeroThreadKernel.md)
+- **System / hidden threads:** detectors such as [[system-thread-finder]] enumerate threads (`NtQuerySystemInformation`) and flag start addresses outside loaded driver images (BE-style manual-map thread heuristics). (source: wiki/sources/descriptions/weak1337__SystemThreadFinder.md) PoCs such as [[zero-thread-kernel]] evade that lane by running via existing contexts / timers instead of new system threads. (source: wiki/sources/descriptions/zer0condition__ZeroThreadKernel.md)
 - **Driver unit testing:** frameworks such as [[wdutf]] host Microsoft C++ unit tests in user space against kernel-driver code (AC / defensive driver harness lane). (source: wiki/sources/descriptions/wpdk__wdutf.md)
 
 
@@ -79,7 +80,7 @@ Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[kvc]] · [[kernel-research-kit]] · [[bootbypass]] · [[kvcforensic]] · [[windefctl]] · [[vaultguard]] · [[keyboardkit]] · [[hvci]] · [[cet-research]] · [[windbg-scripts]] · [[symlink-callback]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[ntmemory]] · [[ntsleuth]] · [[instrumentation-callback-syscall-logger]] · [[function-collections]] · [[winvisor]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[xigmapper]] · [[efitool]] · [[x260-lenovo-opencore]] · [[etw-explorer]] · [[tietwagent]] · [[openark]] · [[systeminformer]] · [[boom]] · [[data-ptr-swap]] · [[zero-thread-kernel]] · [[wdutf]] · [[dma]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[byovd]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[kvc]] · [[kernel-research-kit]] · [[bootbypass]] · [[kvcforensic]] · [[windefctl]] · [[vaultguard]] · [[keyboardkit]] · [[hvci]] · [[cet-research]] · [[windbg-scripts]] · [[symlink-callback]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[ntmemory]] · [[ntsleuth]] · [[instrumentation-callback-syscall-logger]] · [[function-collections]] · [[winvisor]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[xigmapper]] · [[efitool]] · [[x260-lenovo-opencore]] · [[etw-explorer]] · [[tietwagent]] · [[openark]] · [[systeminformer]] · [[system-thread-finder]] · [[boom]] · [[data-ptr-swap]] · [[zero-thread-kernel]] · [[wdutf]] · [[dma]] · [[overviews/anti-cheat]]
 
 
 
