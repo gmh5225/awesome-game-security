@@ -6,6 +6,7 @@ sources:
   - wiki/sources/skills/overview.md
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/yucchiy__UniCli.md
+  - wiki/sources/descriptions/wondeks__unity-mcp.md
   - wiki/sources/descriptions/yrgo__awesome-educational-games.md
 updated: 2026-07-18
 confidence: high
@@ -18,7 +19,7 @@ Curated resource list spanning offensive game hacking and defensive anti-cheat r
 
 ## What this domain covers
 
-The README organizes ~40 top-level sections: engines/rendering/`AI` asset tooling, offensive (`Cheat` ~2549), defensive (`Anti Cheat` ~592), platform hardening (`Windows Security Features`), mobile/console/emulator ecosystems (Switch ~7 / Xbox ~7 / PlayStation ~5 HV+BD-JB / Game Boy ~3 / 3DS), and supporting gamedev infrastructure (`Game Develop` Guide / MCP / AI Agents—e.g. Unity Editor terminal CLI [[unicli]], educational-games list [[awesome-educational-games]]; `Game Tools`/`Testing`/`CI`). Prefer this wiki for synthesis; fall back to README → descriptions → archives for specific repos. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/yucchiy__UniCli.md) (source: wiki/sources/descriptions/yrgo__awesome-educational-games.md)
+The README organizes ~40 top-level sections: engines/rendering/`AI` asset tooling, offensive (`Cheat` ~2549), defensive (`Anti Cheat` ~592), platform hardening (`Windows Security Features`), mobile/console/emulator ecosystems (Switch ~7 / Xbox ~7 / PlayStation ~5 HV+BD-JB / Game Boy ~3 / 3DS), and supporting gamedev infrastructure (`Game Develop` Guide / MCP / AI Agents—e.g. Unity Editor terminal CLI [[unicli]], Unity MCP server [[unity-mcp]], educational-games list [[awesome-educational-games]]; `Game Tools`/`Testing`/`CI`). Prefer this wiki for synthesis; fall back to README → descriptions → archives for specific repos. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/yucchiy__UniCli.md) (source: wiki/sources/descriptions/wondeks__unity-mcp.md) (source: wiki/sources/descriptions/yrgo__awesome-educational-games.md)
 
 ## Skill routing (primary topics)
 
