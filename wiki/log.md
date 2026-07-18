@@ -234,3 +234,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:wwweeeqqu/honor-of-kings-RE-research`: entity [[honor-of-kings-re-research]]; cited on [[overviews/mobile-security]] and [[il2cpp]].
 
 - **2026-07-18** — ingest `description:wtsxDev/reverse-engineering`: entity [[reverse-engineering]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-18** — ingest `description:wpdk/wdutf`: entity [[wdutf]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].

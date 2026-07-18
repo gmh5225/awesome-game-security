@@ -123,6 +123,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vmdevirt-vtil](entities/vmdevirt-vtil.md) — broken VTIL VMP devirt demo (Fix VMP / IDA jmp-around-vmenter)
 
 - [WProtect](entities/wprotect.md) — C/C++ obfuscation engine (Anti Cheat → Obfuscation Engine)
+- [WDUTF](entities/wdutf.md) — Windows Driver Unit Test Framework (user-space MSTest for kernel drivers)
 - [WinDbg_Scripts](entities/windbg-scripts.md) — JS WinDbg scripts for kernel debug/modding (WinDbg Plugins)
 - [windows-kernel-exploits](entities/windows-kernel-exploits.md) — kernel exploit guide (Cheat / vulnerable driver)
 - [WinVisor](entities/winvisor.md) — WHP hypervisor emulator for Windows x64 user-mode PE (Windows Emulator)

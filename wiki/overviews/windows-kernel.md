@@ -31,6 +31,7 @@ sources:
   - wiki/sources/descriptions/x90skysn3k__x260-lenovo-opencore.md
   - wiki/sources/descriptions/x86matthew__WinVisor.md
   - wiki/sources/descriptions/x86matthew__InstrumentationCallbackSyscallLogger.md
+  - wiki/sources/descriptions/wpdk__wdutf.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -57,13 +58,14 @@ Kernel internals that matter for game protection and low-level research: object/
 - **EFI:** pre-kernel mappers that skip normal driver-load telemetry — e.g. [[xigmapper]] (EFI manual map; payload must not be USB-hosted when studying early-load AC such as [[vanguard]]) (source: wiki/sources/descriptions/xtremegamer1__xigmapper.md); Hackintosh OpenCore EFI packs such as [[x260-lenovo-opencore]] (ThinkPad X260) are a separate EFI lane for macOS-on-PC research hosts rather than cheat mapping. (source: wiki/sources/descriptions/x90skysn3k__x260-lenovo-opencore.md)
 - **Legitimate-driver hijack / stealth I/O:** research such as [[boom]] hijacks `Beep.sys` and changes communication so Ring0↔usermode paths are less obvious to AC telemetry; composition-surface channels such as [[data-ptr-swap]] (`NtSetCompositionSurfaceAnalogExclusive`) sit in the same cheat / driver-communication lane. (source: wiki/sources/descriptions/zoand__BOOM.md) (source: wiki/sources/descriptions/xPasters__.data-ptr-swap.md)
 - **Threadless kernel execution:** PoCs such as [[zero-thread-kernel]] run code via existing thread contexts / timer callbacks instead of creating visible system threads (evasion research vs AC thread enumeration of manual maps). (source: wiki/sources/descriptions/zer0condition__ZeroThreadKernel.md)
+- **Driver unit testing:** frameworks such as [[wdutf]] host Microsoft C++ unit tests in user space against kernel-driver code (AC / defensive driver harness lane). (source: wiki/sources/descriptions/wpdk__wdutf.md)
 
 
 Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-page NX manipulation) illustrates how PG bypass studies map to the Demo NX / Cheat PatchGuard README lane. (source: wiki/sources/descriptions/zzhouhe__PG1903.md) Educational demystification material such as [[demystifying-patchguard]] sits in the same lane for RE of [[patchguard]] internals. (source: wiki/sources/descriptions/zer0condition__Demystifying-PatchGuard.md)
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[hvci]] · [[cet-research]] · [[windbg-scripts]] · [[symlink-callback]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[ntmemory]] · [[ntsleuth]] · [[instrumentation-callback-syscall-logger]] · [[winvisor]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[xigmapper]] · [[x260-lenovo-opencore]] · [[etw-explorer]] · [[tietwagent]] · [[openark]] · [[boom]] · [[data-ptr-swap]] · [[zero-thread-kernel]] · [[dma]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[byovd]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[hvci]] · [[cet-research]] · [[windbg-scripts]] · [[symlink-callback]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[ntmemory]] · [[ntsleuth]] · [[instrumentation-callback-syscall-logger]] · [[winvisor]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[xigmapper]] · [[x260-lenovo-opencore]] · [[etw-explorer]] · [[tietwagent]] · [[openark]] · [[boom]] · [[data-ptr-swap]] · [[zero-thread-kernel]] · [[wdutf]] · [[dma]] · [[overviews/anti-cheat]]
 
 
 

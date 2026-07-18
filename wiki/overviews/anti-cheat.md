@@ -34,6 +34,7 @@ sources:
   - wiki/sources/descriptions/x86matthew__InstrumentationCallbackSyscallLogger.md
   - wiki/sources/descriptions/x86byte__sbox.md
   - wiki/sources/descriptions/x86byte__Obfusk8.md
+  - wiki/sources/descriptions/wpdk__wdutf.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -61,7 +62,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 **Detection:** memory hashing / manual-map detection; process handle stripping; [[kernel-callbacks]]; Segment Heap–aware pool scanning; behavioral/ML aimbot signals; screenshot + heartbeat; ETW provider/event discovery for telemetry design (e.g. [[etw-explorer]]); ThreatIntel injection consumers such as [[tietwagent]] (Microsoft-Windows-Threat-Intelligence + krabsetw/Yara; ELAM/PPL service path). Ring3 Instrumentation Callback research such as [[instrumentation-callback-syscall-logger]] inspects each syscall on kernel return before user-mode resumes. Trusted-process mapping (e.g. [[lsass-extend-mapper]] hosting unsigned drivers via lsass address-space extend) and post-execution map cleanup (e.g. [[revert-mapper]] freeing mapped driver memory and pool-tag traces) are common research counterparts to those scanners. Thread-enumeration detectors (looking for manual-map worker threads) are studied against threadless Ring0 PoCs such as [[zero-thread-kernel]]. (source: wiki/sources/descriptions/zorftw__lsass-extend-mapper.md) (source: wiki/sources/descriptions/zorftw__revert-mapper.md) (source: wiki/sources/descriptions/zodiacon__EtwExplorer.md) (source: wiki/sources/descriptions/xuanxuan0__TiEtwAgent.md) (source: wiki/sources/descriptions/zer0condition__ZeroThreadKernel.md) (source: wiki/sources/descriptions/x86matthew__InstrumentationCallbackSyscallLogger.md)
 
 
-**Architecture:** user-mode scanners → kernel callbacks/VAD → optional hypervisor EPT protection → server-side replay/stats.
+**Architecture:** user-mode scanners → kernel callbacks/VAD → optional hypervisor EPT protection → server-side replay/stats. Driver-side AC engineering can use user-space unit-test harnesses such as [[wdutf]] (Microsoft C++ unit tests against kernel-driver code). (source: wiki/sources/descriptions/wpdk__wdutf.md)
 
 **Threats defended against:** injected code (stress/test harnesses such as [[injectors]] under Injection Testing); platform-bypass launchers such as [[mini-launcher]] (Steam API stubs / SteamAppID + DLL/Lua inject without the full client) (source: wiki/sources/descriptions/xan105__Mini-Launcher.md); [[byovd]], hypervisor abuse (stress/test refs such as [[vt-debuuger]]; minimal VT-x Type-2 learning stacks such as [[hv]]; stealth Type-2 stacks such as [[ophion]] with CPUID cache / CR4.VMXE hide / TSC compensation under hacked-hypervisor detection; user-mode detection probes such as [[checkhv-um]] via CPUID / RDTSC / VMCS artifacts / signature match), hidden/anti-detect PVE/QEMU guests (e.g. [[proxmox-ve-anti-detection]], [[qemu-anti-detection]] under virtual-environment detection), [[dma]] (PCIe fingerprinting + IOMMU + TPM attestation), AI visual cheats with hardware input. (source: wiki/sources/descriptions/zoand__Injectors.md) (source: wiki/sources/descriptions/zxd1994__vt-debuuger.md) (source: wiki/sources/descriptions/zer0condition__hv.md) (source: wiki/sources/descriptions/zer0condition__Ophion.md) (source: wiki/sources/descriptions/zer0condition__checkhv_um.md) (source: wiki/sources/descriptions/zhaodice__proxmox-ve-anti-detection.md) (source: wiki/sources/descriptions/zhaodice__qemu-anti-detection.md)
 
@@ -75,7 +76,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[veh-dumper]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[kagura]] · [[wprotect]] · [[obfusk8]] · [[sbox]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[instrumentation-callback-syscall-logger]] · [[injectors]] · [[mini-launcher]] · [[zero-thread-kernel]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[veh-dumper]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[kagura]] · [[wprotect]] · [[obfusk8]] · [[sbox]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[instrumentation-callback-syscall-logger]] · [[injectors]] · [[mini-launcher]] · [[zero-thread-kernel]] · [[wdutf]]
 
 
 
