@@ -224,3 +224,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:x64dbg/DotX64Dbg`: entity [[dotx64dbg]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].
 
 - **2026-07-18** — ingest `description:x64dbg/Classroom`: entity [[classroom]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].
+
+- **2026-07-18** — ingest `description:x1tan/vac3-dumper`: entity [[vac3-dumper]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
