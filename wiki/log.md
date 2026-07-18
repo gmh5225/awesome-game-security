@@ -345,3 +345,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-18** — ingest `description:wallds/NoVmpy`: entity [[novmpy]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
+- **2026-07-18** — ingest `description:waldo-vision/waldo`: entity [[waldo]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
