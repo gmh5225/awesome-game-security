@@ -22,6 +22,7 @@ sources:
   - wiki/sources/descriptions/xProHackerx__imgui-ios-mod-menu.md
   - wiki/sources/descriptions/x-spy__CVE-2026-43499-popsicle.md
   - wiki/sources/descriptions/wwweeeqqu__honor-of-kings-RE-research.md
+  - wiki/sources/descriptions/walzer__game-engine-detector.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -40,14 +41,14 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 **iOS:** jailbreak tooling, class-dump, Logos hooks, sideloading / AltStore for non-jailbreak paths; userland exploit chains such as [[lightsaber]] (iOS 18.4–18.6.2 JS injection into SpringBoard / other processes; derived from DarkSword) (source: wiki/sources/descriptions/zeroxjf__lightsaber.md); IDA iOS reversing helper [[ida-ios-helper]] (needs vtable symbols) (source: wiki/sources/descriptions/yoavst__ida-ios-helper.md); ImGui mod-menu samples such as [[imgui-ios-mod-menu]] (cheat / render-draw research) (source: wiki/sources/descriptions/xProHackerx__imgui-ios-mod-menu.md).
 
 
-**Unity/Unreal mobile:** [[il2cpp]] (`libil2cpp.so` / UnityFramework + metadata), SDK dumps, memory editors (GameGuardian, H5GG); APK IL2CPP disassembly/diff via [[il2cpp-spy]] (select two APKs → show differences). (source: wiki/sources/descriptions/yukiarrr__Il2cppSpy.md) iOS Unity speed/modding tooling such as [[unityspeedtools]] (C/C++ / Objective-C; IL2CPP analysis) sits in the same explorer:Unity lane. (source: wiki/sources/descriptions/xxzzddxzd__unitySpeedTools.md)
+**Unity/Unreal mobile:** Engine triage for packages via [[game-engine-detector]] (Python; which engine an `.apk` / `.ipa` uses) before deeper dumps. (source: wiki/sources/descriptions/walzer__game-engine-detector.md) [[il2cpp]] (`libil2cpp.so` / UnityFramework + metadata), SDK dumps, memory editors (GameGuardian, H5GG); APK IL2CPP disassembly/diff via [[il2cpp-spy]] (select two APKs → show differences). (source: wiki/sources/descriptions/yukiarrr__Il2cppSpy.md) iOS Unity speed/modding tooling such as [[unityspeedtools]] (C/C++ / Objective-C; IL2CPP analysis) sits in the same explorer:Unity lane. (source: wiki/sources/descriptions/xxzzddxzd__unitySpeedTools.md)
 
 
 **Flutter/Dart:** AOT snapshot symbol recovery via [[unflutter]] (Dart VM snapshot metadata → class/function/type names from Flutter APKs/iOS apps) (source: wiki/sources/descriptions/zboralski__unflutter.md).
 
 ## Related concepts
 
-[[frida]] · [[il2cpp]] · [[il2cpp-spy]] · [[unityspeedtools]] · [[unflutter]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[honor-of-kings-re-research]] · [[cheese]] · [[cve-2026-43499-popsicle]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[lightsaber]] · [[ida-ios-helper]] · [[imgui-ios-mod-menu]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[frida]] · [[il2cpp]] · [[game-engine-detector]] · [[il2cpp-spy]] · [[unityspeedtools]] · [[unflutter]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[honor-of-kings-re-research]] · [[cheese]] · [[cve-2026-43499-popsicle]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[lightsaber]] · [[ida-ios-helper]] · [[imgui-ios-mod-menu]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
 
 
 ## README map

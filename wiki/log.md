@@ -341,3 +341,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-18** — ingest `description:waryas/EUPMAccess`: entity [[eupmaccess]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-link from [[umpmlib]].
 
+- **2026-07-18** — ingest `description:walzer/game-engine-detector`: entity [[game-engine-detector]]; cited on [[overviews/game-engine]] and [[overviews/mobile-security]].
+

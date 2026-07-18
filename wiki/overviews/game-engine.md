@@ -24,6 +24,7 @@ sources:
   - wiki/sources/descriptions/wolfpld__tracy.md
   - wiki/sources/descriptions/whx-prog__The-Seed-Link-Future.md
   - wiki/sources/descriptions/weizhking__PalworldSaved.md
+  - wiki/sources/descriptions/walzer__game-engine-detector.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -37,7 +38,7 @@ Engine internals, plugins, detectors, and SDK workflows that underpin modding, r
 
 ## Key sub-areas
 
-**Engines:** Unreal (GObjects/GNames/GWorld, Dumper-7/UE4SS), Unity (IL2CPPDumper + metadata, Mono/dnSpy), Source (NetVars / CreateInterface), Godot/Lumix plugins. Editor-side Unity automation such as [[unicli]] (terminal CLI: compile/test/build/inspect; AI-agent ready) and MCP bridges such as [[unity-mcp]] sit in Plugins:Unity / Game Develop rather than shipped-binary RE. (source: wiki/sources/descriptions/yucchiy__UniCli.md) (source: wiki/sources/descriptions/wondeks__unity-mcp.md) Unity VR samples such as [[the-seed-link-future]] (C#; OpenGL / shader / driver-dev focus) sit in the same Game Develop / engine-guide lane. (source: wiki/sources/descriptions/whx-prog__The-Seed-Link-Future.md)
+**Engines:** Unreal (GObjects/GNames/GWorld, Dumper-7/UE4SS), Unity (IL2CPPDumper + metadata, Mono/dnSpy), Source (NetVars / CreateInterface), Godot/Lumix plugins. Mobile package engine fingerprinting such as [[game-engine-detector]] (Python; APK/IPA) sits in the Game Engine detector / Mobile Game lane before deeper SDK dumps. (source: wiki/sources/descriptions/walzer__game-engine-detector.md) Editor-side Unity automation such as [[unicli]] (terminal CLI: compile/test/build/inspect; AI-agent ready) and MCP bridges such as [[unity-mcp]] sit in Plugins:Unity / Game Develop rather than shipped-binary RE. (source: wiki/sources/descriptions/yucchiy__UniCli.md) (source: wiki/sources/descriptions/wondeks__unity-mcp.md) Unity VR samples such as [[the-seed-link-future]] (C#; OpenGL / shader / driver-dev focus) sit in the same Game Develop / engine-guide lane. (source: wiki/sources/descriptions/whx-prog__The-Seed-Link-Future.md)
 
 **Security-relevant surfaces:** object models and property offsets, rendering hooks ([[present-hook]]), network replication, engine-specific AC protection categories in the README. UE4 static-variable obfuscation (e.g. [[static-variables-obfuscator-ue4]]) raises the cost of memory scanners like Cheat Engine against non-dynamic game data. (source: wiki/sources/descriptions/zompi2__Static-Variables-Obfuscator-UE4.md) Per-title Unreal dumps such as Fortnite FLTokens/offsets ([[fortnite-fltokens-and-offsets]]) show how quickly build-bound token and offset maps go stale. (source: wiki/sources/descriptions/zinx-YT__Fortnite-Fltokens-and-offsets.md) External Fortnite samples such as [[fortnite-external-source]] (driver development / SDK generation) sit in the same Unreal / game:fortnite lane. (source: wiki/sources/descriptions/xetzzy__Fortnite-External-Source.md)
 
@@ -46,7 +47,7 @@ Engine internals, plugins, detectors, and SDK workflows that underpin modding, r
 
 ## Related concepts
 
-[[il2cpp]] · [[present-hook]] · [[frida]] (mobile IL2CPP) · [[ts-ue4dumper]] · [[valorant-dumper]] · [[static-variables-obfuscator-ue4]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[dayzzz]] · [[palworldsaved]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[thetan-arenasdk]] · [[the-seed-link-future]] · [[unicli]] · [[unity-mcp]] · [[awesome-educational-games]] · [[3d-racing-game]] · [[tracy]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[il2cpp]] · [[present-hook]] · [[frida]] (mobile IL2CPP) · [[game-engine-detector]] · [[ts-ue4dumper]] · [[valorant-dumper]] · [[static-variables-obfuscator-ue4]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[dayzzz]] · [[palworldsaved]] · [[tiny-csgo-client]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[thetan-arenasdk]] · [[the-seed-link-future]] · [[unicli]] · [[unity-mcp]] · [[awesome-educational-games]] · [[3d-racing-game]] · [[tracy]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
 
 
 
