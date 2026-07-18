@@ -52,6 +52,7 @@ sources:
   - wiki/sources/descriptions/wbenny__injdrv.md
   - wiki/sources/descriptions/wbenny__DetoursNT.md
   - wiki/sources/descriptions/wazuh__wazuh.md
+  - wiki/sources/descriptions/waryas__xign_poc_april_2026.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -68,7 +69,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 - [[easy-anti-cheat]] — service + driver + game-facing integrity (Fortnite, Apex, Rust)
 - [[battleye]] — handle protection, process/memory scanning (PUBG, R6, DayZ); research ref [[blindeye]] drops BE report-path pool allocs via hooked `ExAllocatePool*` (source: wiki/sources/descriptions/zouxianyu__BlindEye.md); user-mode shellcode RE via [[be-shellcode]] (dump/disasm thread scan, VEH enum, module integrity) (source: wiki/sources/descriptions/weak1337__BE-Shellcode.md)
 - [[vanguard]] — boot-start driver, early driver allowlisting (Valorant, LoL)
-- FACEIT AC, VAC (user-mode signatures), GameGuard, XIGNCODE3, ACE, Warden (Blizzard / WoW)
+- FACEIT AC, VAC (user-mode signatures), GameGuard, XIGNCODE3 (vuln PoC [[xign-poc-april-2026]] on `xhunter64.sys` `IRP_MJ_WRITE` → phys R/W / kernel leak / process kill) (source: wiki/sources/descriptions/waryas__xign_poc_april_2026.md), ACE, Warden (Blizzard / WoW)
 - [[vac3-inhibitor]] — C++ VAC3 exploration (hooking / memory analysis) under cheat → explore anticheat:vac (source: wiki/sources/descriptions/zyhp__vac3_inhibitor.md)
 - [[vac3-dumper]] — dumps VAC3 modules loaded at different times for offline RE (Dump lane) (source: wiki/sources/descriptions/x1tan__vac3-dumper.md)
 - [[ricochet-deobfuscator]] — C/C++ Ricochet deobfuscator (driver / memory analysis; explore anticheat:ricochet) (source: wiki/sources/descriptions/weak1337__ricochet_deobfuscator.md)
@@ -97,7 +98,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[ricochet-deobfuscator]] · [[x14-08-coverstory-blizzard]] · [[veh-dumper]] · [[no-access-protection]] · [[file-recovery-tool]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[lumina-cheat]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[kagura]] · [[wprotect]] · [[alcatraz]] · [[obfusk8]] · [[sbox]] · [[blindeye]] · [[be-shellcode]] · [[scfw]] · [[injdrv]] · [[detoursnt]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[wazuh]] · [[instrumentation-callback-syscall-logger]] · [[function-collections]] · [[injectors]] · [[modexmap]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[mini-launcher]] · [[zero-thread-kernel]] · [[wdutf]] · [[nvidiaapi]] · [[detect-tpm-spoofing]] · [[cedetector]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[ricochet-deobfuscator]] · [[x14-08-coverstory-blizzard]] · [[xign-poc-april-2026]] · [[veh-dumper]] · [[no-access-protection]] · [[file-recovery-tool]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[lumina-cheat]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[kagura]] · [[wprotect]] · [[alcatraz]] · [[obfusk8]] · [[sbox]] · [[blindeye]] · [[be-shellcode]] · [[scfw]] · [[injdrv]] · [[detoursnt]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[wazuh]] · [[instrumentation-callback-syscall-logger]] · [[function-collections]] · [[injectors]] · [[modexmap]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[mini-launcher]] · [[zero-thread-kernel]] · [[wdutf]] · [[nvidiaapi]] · [[detect-tpm-spoofing]] · [[cedetector]]
 
 
 
