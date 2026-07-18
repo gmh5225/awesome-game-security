@@ -222,6 +222,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/goobz22/cat-annihilation [C++20/Vulkan/CUDA engine with render graph, clustered deferred PBR, ECS, and wave-survival test game]
 - https://github.com/orkitec/orkige [C++20 game engine with dual OGRE renderers, Lua scripting, and AI-native editor over MCP]
 - https://github.com/Bloom-Engine/engine [Native TypeScript game engine compiling to Metal, DirectX 12, Vulkan, OpenGL, and WebGPU]
+- https://github.com/Krilliac/SparkEngine [Open-source C++23 3D engine with DirectX 12/Vulkan RHI, ECS, Jolt Physics, and ImGui editor]
 
 
 > Game Engine Plugins:Unreal
@@ -647,6 +648,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Compatibility
 - https://github.com/CnCNet/cnc-ddraw [Old Game]
+- https://github.com/openeggbert/free-direct [DirectX 3 (DirectDraw/DirectSound) subset reimplemented on SDL3 for running legacy 2D games]
 - https://github.com/elishacloud/dxwrapper [DirectX DLL wrapper for older games on Win10/11; Dd7to9/d3d8to9, DDrawCompat, ASI loader]
 - https://github.com/REDPOWAR/D2GI [DirectDraw7/D3D7 to D3D9 wrapper for Hard Truck 2 (King of the Road) — modern resolutions, MSAA, anisotropic filtering, graphics fixes, widescreen hooks]
 - https://github.com/aleko2144/KoTR_Modern_Patch [King of the Road / Hard Truck 2 ASI patch — collision, camera, physics, AI traffic, trailer and UI fixes; complements D2GI; ModUtils + Ultimate ASI Loader]
@@ -2087,6 +2089,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/geeksonsecurity/android-overlay-malware-example [Android]
 - https://github.com/SamuelTulach/OverlayCord [Discord]
 - https://github.com/hiitiger/goverlay [DirectX hook game overlay for Electron/Qt/CEF apps injected into games]
+- https://github.com/gameplug-labs/gameplug [Multi-API (D3D9–12/Vulkan) proxy-DLL framework for ImGui overlays and game plugins on Windows]
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
@@ -2800,6 +2803,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/vgk-illegal-pf-logger [VGK's illegal PF]
 - https://github.com/gmh5225/KernelSnippets/blob/main/VGK_SwapContextHk.h [VGK's SwapContextHk]
 - https://github.com/gmh5225/augur-riot [Riot Vanguard streamed module to PE converter. Resolves hashed imports, reconstructs sections, and writes valid DLLs from RITO format binaries]
+- https://github.com/luavmload/vanguard-update-notifier [Discord bot that polls Riot clientconfig, hashes Vanguard setup files, and alerts on anti-cheat updates]
 
 > Explore AntiCheat System:XignCode
 - https://github.com/gmh5225/XignCode-Dump
