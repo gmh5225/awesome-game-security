@@ -32,6 +32,7 @@ sources:
   - wiki/sources/descriptions/x86matthew__WinVisor.md
   - wiki/sources/descriptions/x86matthew__InstrumentationCallbackSyscallLogger.md
   - wiki/sources/descriptions/wpdk__wdutf.md
+  - wiki/sources/descriptions/winsiderss__systeminformer.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -49,6 +50,7 @@ Kernel internals that matter for game protection and low-level research: object/
 - **WinDbg automation:** JS WinDbg scripts such as [[windbg-scripts]] for kernel-level debug/modding workflows (Cheat → WinDbg Plugins). (source: wiki/sources/descriptions/yardenshafir__WinDbg_Scripts.md)
 - **Cross-process kernel R/W:** MDL map + physical translate + CR3 page-table walk libraries such as [[ntmemory]] (research for kernel cheat memory paths / AC evasion). (source: wiki/sources/descriptions/zer0condition__NTMemory.md)
 - **[[kernel-callbacks]]:** process/thread/image notify, ObRegisterCallbacks, Cm/Flt; defensive enumeration/inspection via anti-rootkit GUIs such as [[openark]] (SSDT/shadow SSDT, drivers, objects); object-symlink access callbacks such as [[symlink-callback]] (LinkTarget → callback) (source: wiki/sources/descriptions/yyl-20020115__OpenArk.md) (source: wiki/sources/descriptions/yardenshafir__SymlinkCallback.md)
+- **Process / system explorers:** host inspection tools such as [[systeminformer]] (formerly Process Hacker) for process/handle/module analysis in the Cheat Windows kernel explorer lane. (source: wiki/sources/descriptions/winsiderss__systeminformer.md)
 - **Trust features:** DSE, PatchGuard, VBS/HVCI, Secure Boot; CET/shadow-stack research such as [[cet-research]] under `Windows Security Features` (source: wiki/sources/descriptions/yardenshafir__cet-research.md)
 - **[[byovd]]:** signed vulnerable drivers → kernel R/W → unsigned load / blind AC; educational kernel-exploit guides such as [[windows-kernel-exploits]] (Cheat Vulnerable Driver lane); AV/EDR-evasion research such as [[ven0m-ransomware]] via `iMFForceDelete.sys` (IObit Malware Fighter) and [[av-edr-killer]] via `wsftprm.sys` IOCTL `0x22201C` (PID in first DWORD of 1036-byte buffer) (source: wiki/sources/descriptions/xct__windows-kernel-exploits.md) (source: wiki/sources/descriptions/xM0kht4r__VEN0m-Ransomware.md) (source: wiki/sources/descriptions/xM0kht4r__AV-EDR-Killer.md)
 - **Trusted-process mappers:** extend a high-trust process (e.g. lsass) and map unsigned driver code in that context to skip normal load telemetry — research ref [[lsass-extend-mapper]] (source: wiki/sources/descriptions/zorftw__lsass-extend-mapper.md)
@@ -65,7 +67,7 @@ Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[hvci]] · [[cet-research]] · [[windbg-scripts]] · [[symlink-callback]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[ntmemory]] · [[ntsleuth]] · [[instrumentation-callback-syscall-logger]] · [[winvisor]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[xigmapper]] · [[x260-lenovo-opencore]] · [[etw-explorer]] · [[tietwagent]] · [[openark]] · [[boom]] · [[data-ptr-swap]] · [[zero-thread-kernel]] · [[wdutf]] · [[dma]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[byovd]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[hvci]] · [[cet-research]] · [[windbg-scripts]] · [[symlink-callback]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[ntmemory]] · [[ntsleuth]] · [[instrumentation-callback-syscall-logger]] · [[winvisor]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[xigmapper]] · [[x260-lenovo-opencore]] · [[etw-explorer]] · [[tietwagent]] · [[openark]] · [[systeminformer]] · [[boom]] · [[data-ptr-swap]] · [[zero-thread-kernel]] · [[wdutf]] · [[dma]] · [[overviews/anti-cheat]]
 
 
 

@@ -246,3 +246,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:wmarti/xenia-mac`: entity [[xenia-mac]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-link from [[xenia]].
 
 - **2026-07-18** — ingest `description:wiresock/ndisapi`: entity [[ndisapi]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-18** — ingest `description:winsiderss/systeminformer`: entity [[systeminformer]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
