@@ -1618,6 +1618,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Vis-Wing/Binoculars [Binoculars is an IDA PRO plugin with an integrated AI interface]
 - https://github.com/Reodus/CBS [IDA Plugin to set custom breakpoints on mnemonics]
 - https://github.com/matteyeux/IDArling [IDArling is a collaborative reverse engineering plugin for IDA Pro and Hex-Rays]
+- https://github.com/xsslize/idarem [IDA Pro plugin that serves disassembly, Hex-Rays pseudocode, graphs, and live sync over HTTP to a React browser client]
 - https://github.com/richor1042/IDAFuncOutline [optimize the readability of decompiled code for iOS ARM64 binaries]
 - https://github.com/Dump-GUY/IDA_PHNT_TYPES [Converted phnt to IDA TIL, IDC (Hex-Rays)]
 - https://github.com/Mrack/DeObfBR [libtprt.so]
