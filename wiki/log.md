@@ -216,3 +216,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:x64dbg/x64dbgbinja`: entity [[x64dbgbinja]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-18** — ingest `description:x64dbg/x64dbg`: entity [[x64dbg]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-18** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/game-engine]], [[overviews/graphics-api]], [[overviews/mobile-security]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2547; AI mesh/splat; emulator/vphone notes); light `index.md` section notes (no per-category pages).
