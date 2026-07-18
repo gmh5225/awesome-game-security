@@ -7,6 +7,7 @@ sources:
   - wiki/sources/descriptions/zouxianyu__BlindEye.md
   - wiki/sources/descriptions/weak1337__SystemThreadFinder.md
   - wiki/sources/descriptions/weak1337__SkipHook.md
+  - wiki/sources/descriptions/weak1337__PresentHookDetection.md
 updated: 2026-07-18
 confidence: medium
 ---
@@ -25,6 +26,8 @@ Thread-start heuristics (system threads whose start address is outside any loade
 
 User-mode prologue hooks (JMP / INT3 on WinAPI and game functions) are a common BE-style control surface; [[skiphook]] studies trampolines that skip the first instruction so those hooks are never hit while return-address checks still look legitimate. (source: wiki/sources/descriptions/weak1337__SkipHook.md)
 
+Graphics Present integrity is another BE-linked lane: [[present-hook-detection]] recreates dummy-D3D11 swap-chain Present pointer + `dxgi.dll` prologue comparison against inline/vtable hooks used by overlay ESP. (source: wiki/sources/descriptions/weak1337__PresentHookDetection.md)
+
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[system-thread-finder]] · [[skiphook]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]

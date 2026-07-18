@@ -292,3 +292,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:weak1337/SystemThreadFinder`: entity [[system-thread-finder]]; cited on [[battleye]] and [[overviews/windows-kernel]].
 
 - **2026-07-18** — ingest `description:weak1337/SkipHook`: entity [[skiphook]]; cited on [[battleye]] and [[overviews/game-hacking]].
+
+- **2026-07-18** — ingest `description:weak1337/PresentHookDetection`: entity [[present-hook-detection]]; cited on [[present-hook]] and [[battleye]].
