@@ -61,6 +61,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [eac-overlay](entities/eac-overlay.md) — EAC overlay PoC (ESP via alt surfaces / window manip; C++)
 
 - [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests
+- [FileRecoveryTool](entities/file-recovery-tool.md) — NTFS/FAT32/ExFAT disk forensics (MFT/USN/carving; Win32)
 
 - [function-collections](entities/function-collections.md) — C PoCs for uncommon Ring3 paths (memory analysis; AC callback lane)
 - [Fortnite-External-Source](entities/fortnite-external-source.md) — Fortnite external: driver / SDK generation (C++)

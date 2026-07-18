@@ -39,6 +39,7 @@ sources:
   - wiki/sources/descriptions/wietze__HijackLibs.md
   - wiki/sources/descriptions/whokilleddb__function-collections.md
   - wiki/sources/descriptions/whereisr0da__Lumina-Cheat.md
+  - wiki/sources/descriptions/wesmar__FileRecoveryTool.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -77,11 +78,13 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 **VEH-based protection RE:** [[veh-dumper]] surgically dumps VectoredException/Continue handlers as IDA-ready PE64 modules for studying VEH-backed AC / anti-tamper logic. (source: wiki/sources/descriptions/xxFURYWOLFxx__veh-dumper.md)
 
+**Disk / file forensics:** recover deleted on-disk artifacts (payloads, logs, dumps) via tools such as [[file-recovery-tool]] (NTFS/FAT32/ExFAT MFT/USN + carving; Information System & Forensics lane). (source: wiki/sources/descriptions/wesmar__FileRecoveryTool.md)
+
 
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[veh-dumper]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[lumina-cheat]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[kagura]] · [[wprotect]] · [[obfusk8]] · [[sbox]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[instrumentation-callback-syscall-logger]] · [[function-collections]] · [[injectors]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[mini-launcher]] · [[zero-thread-kernel]] · [[wdutf]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[veh-dumper]] · [[file-recovery-tool]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[vt-debuuger]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[lumina-cheat]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[kagura]] · [[wprotect]] · [[obfusk8]] · [[sbox]] · [[blindeye]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[instrumentation-callback-syscall-logger]] · [[function-collections]] · [[injectors]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[mini-launcher]] · [[zero-thread-kernel]] · [[wdutf]]
 
 
 

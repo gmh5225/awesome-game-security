@@ -50,6 +50,7 @@ sources:
   - wiki/sources/descriptions/wilszdev__SteamAntiAntiDebug.md
   - wiki/sources/descriptions/westfox-5__GhidraMetrics.md
   - wiki/sources/descriptions/wesmar__KvcForensic.md
+  - wiki/sources/descriptions/wesmar__FileRecoveryTool.md
 updated: 2026-07-18
 confidence: high
 ---
@@ -70,6 +71,7 @@ Workflows for protected game clients and anti-cheat components across user mode,
 - **Game engines:** [[il2cpp]] dumps, Unreal SDK generators, native PE/pattern workflows; Flutter/Dart AOT snapshot static analysis via [[unflutter]] (source: wiki/sources/descriptions/zboralski__unflutter.md)
 - **Anti-analysis:** ScyllaHide/TitanHide/HyperHide vs IsDebuggerPresent/Kd* / timing checks; Steam-specific anti-anti-debug via [[steam-anti-anti-debug]] (patch Steam debug detection so [[x64dbg]] can attach to protected game processes) (source: wiki/sources/descriptions/wilszdev__SteamAntiAntiDebug.md); VEH/VCH chain dump to IDA-ready PE64 via [[veh-dumper]] (foothold handler + `RtlDecodePointer` list walk) (source: wiki/sources/descriptions/xxFURYWOLFxx__veh-dumper.md)
 - **LSA / dump forensics:** cross-platform LSASS credential extractors such as [[kvcforensic]] recover MSV/WDigest/Kerberos/CredMan/DPAPI secrets from live memory or `lsass.dmp` via signature scan + BCrypt (Win11 24H2–26H1; Windows/Linux). (source: wiki/sources/descriptions/wesmar__KvcForensic.md)
+- **Disk / file forensics:** tools such as [[file-recovery-tool]] recover deleted files on NTFS/FAT32/ExFAT via MFT/USN scan, signature carving, and sector-level reassembly (pure Win32; direct disk). (source: wiki/sources/descriptions/wesmar__FileRecoveryTool.md)
 
 - **Linux LKM metadata:** tools such as [[vermagic]] rewrite vermagic / CRC fields so a module can load across mismatched kernel builds (cheat / RE tools lane). (source: wiki/sources/descriptions/yaxinsn__vermagic.md)
 - **Mobile / iOS:** userland exploit-chain study via [[lightsaber]] (iOS 18.4–18.6.2 JS injection into SpringBoard and other processes) (source: wiki/sources/descriptions/zeroxjf__lightsaber.md); iOS project reversing in IDA via [[ida-ios-helper]] (vtable symbols required) (source: wiki/sources/descriptions/yoavst__ida-ios-helper.md)
@@ -79,7 +81,7 @@ Workflows for protected game clients and anti-cheat components across user mode,
 
 ## Related concepts
 
-[[il2cpp]] · [[frida]] · [[unflutter]] · [[kernel-callbacks]] · [[patchguard]] · [[mutaben]] · [[ndisapi]] · [[shredder-rs]] · [[deobf]] · [[idadeflat]] · [[opaque-predicates-detective]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ida-ios-helper]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[kagura]] · [[wprotect]] · [[obfusk8]] · [[sbox]] · [[vmdevirt-vtil]] · [[totalpe2]] · [[ntsleuth]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[systeminformer]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ghidrametrics]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[lightsaber]] · [[vermagic]] · [[veh-dumper]] · [[kvcforensic]] · [[windbg-scripts]] · [[winvisor]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[xenia]] · [[xenia-mac]] · [[x260-lenovo-opencore]] · [[reverse-engineering]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[overviews/mobile-security]]
+[[il2cpp]] · [[frida]] · [[unflutter]] · [[kernel-callbacks]] · [[patchguard]] · [[mutaben]] · [[ndisapi]] · [[shredder-rs]] · [[deobf]] · [[idadeflat]] · [[opaque-predicates-detective]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ida-ios-helper]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[kagura]] · [[wprotect]] · [[obfusk8]] · [[sbox]] · [[vmdevirt-vtil]] · [[totalpe2]] · [[ntsleuth]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[systeminformer]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ghidrametrics]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[lightsaber]] · [[vermagic]] · [[veh-dumper]] · [[kvcforensic]] · [[file-recovery-tool]] · [[windbg-scripts]] · [[winvisor]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[xenia]] · [[xenia-mac]] · [[x260-lenovo-opencore]] · [[reverse-engineering]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[overviews/mobile-security]]
 
 
 
