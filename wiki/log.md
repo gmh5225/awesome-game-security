@@ -252,3 +252,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:wilszdev/SteamAntiAntiDebug`: entity [[steam-anti-anti-debug]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-18** — ingest `description:wietze/windows-dll-hijacking`: entity [[windows-dll-hijacking]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-18** — ingest `description:wietze/HijackLibs`: entity [[hijacklibs]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-link from [[windows-dll-hijacking]].

@@ -65,6 +65,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Fortnite-External-Source](entities/fortnite-external-source.md) — Fortnite external: driver / SDK generation (C++)
 - [Fortnite-Fltokens-and-offsets](entities/fortnite-fltokens-and-offsets.md) — Fortnite FLToken/offset grabber (stale / offline)
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)
+- [HijackLibs](entities/hijacklibs.md) — disclosed Windows DLL hijack DB (YAML + web UI; exports / conditions)
 - [honor-of-kings-RE-research](entities/honor-of-kings-re-research.md) — Honor of Kings Android RE (ACE / libtersafe / IL2CPP / KernelPatch KPMs)
 - [hv](entities/hv.md) — minimal Intel VT-x Type-2 hypervisor (VMX/VMCS learning)
 - [ida-ios-helper](entities/ida-ios-helper.md) — IDA plugin for iOS reversing (vtable symbols required)
