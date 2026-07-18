@@ -276,3 +276,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-18** — ingest `description:wesmar/KernelResearchKit`: entity [[kernel-research-kit]]; cited on [[overviews/windows-kernel]] and [[byovd]].
 
 - **2026-07-18** — ingest `description:wesmar/FileRecoveryTool`: entity [[file-recovery-tool]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
+
+- **2026-07-18** — ingest `description:wesmar/EfiTool`: entity [[efitool]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
