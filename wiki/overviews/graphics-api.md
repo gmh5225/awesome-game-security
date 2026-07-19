@@ -23,6 +23,7 @@ sources:
   - wiki/sources/descriptions/u3d-community__U3D.md
   - wiki/sources/descriptions/twohyjr__Metal-Game-Engine-Tutorial.md
   - wiki/sources/descriptions/turbulenz__turbulenz_engine.md
+  - wiki/sources/descriptions/tsoding__olive.c.md
 updated: 2026-07-19
 confidence: high
 ---
@@ -42,11 +43,12 @@ Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/
 - DirectX remaster / compatibility mods such as [[gta4-rtx]] (GTA IV → NVIDIA RTX Remix path-traced pipeline; custom Remix runtime + ASI Loader) sit in the DirectX Compatibility lane. (source: wiki/sources/descriptions/xoxor4d__gta4-rtx.md)
 - DX11 stereoscopic-fix tooling such as [[3d9]] (developer-oriented; broken stereo effects in DX11 games) sits in the DirectX Tools lane. (source: wiki/sources/descriptions/visotw__3d9.md)
 - Frame profilers such as [[tracy]] (CPU zones + GPU timing for OpenGL / Vulkan / Direct3D; client + standalone viewer) sit in the adjacent Game Testing / graphics-performance lane. (source: wiki/sources/descriptions/wolfpld__tracy.md)
+- Software-raster / Image Codec helpers such as [[olive-c]] (single-header C; lines/triangles/circles/text into raw pixel buffers; no deps) sit below GPU Present hooks as a minimal CPU raster study surface. (source: wiki/sources/descriptions/tsoding__olive.c.md)
 
 ## Related concepts
 
-[[present-hook]] · [[battlefield-1-internal]] · [[gta4-rtx]] · [[3d9]] · [[steam-overlay-x64]] · [[input-overlay]] · [[eac-overlay]] · [[double-callback]] · [[dxgkrnl-hook]] · [[wda-monitor-trick]] · [[3d-racing-game]] · [[the-seed-link-future]] · [[wind-effects]] · [[u3d]] · [[metal-game-engine-tutorial]] · [[turbulenz-engine]] · [[imgui-ios-mod-menu]] · [[android-native-app-imgui]] · [[tracy]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[present-hook]] · [[battlefield-1-internal]] · [[gta4-rtx]] · [[3d9]] · [[steam-overlay-x64]] · [[input-overlay]] · [[eac-overlay]] · [[double-callback]] · [[dxgkrnl-hook]] · [[wda-monitor-trick]] · [[3d-racing-game]] · [[the-seed-link-future]] · [[wind-effects]] · [[u3d]] · [[metal-game-engine-tutorial]] · [[turbulenz-engine]] · [[imgui-ios-mod-menu]] · [[android-native-app-imgui]] · [[tracy]] · [[olive-c]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
 
 ## README map
 
-`DirectX` (~33: Guide/Hook/Tools/Emulation/Compatibility/Overlay; incl. D3D12 Present/shader injectors for title-specific pixel-shader replace), `OpenGL` (~3), `Vulkan` (~9; cross-platform runtime API locators like kiero/kiero2), plus broader `Renderer` (~16) / `3D Graphics` (~4) / `Mathematics` (~7; gamedev math libs upstream of render math) / `Image Codec` (~5; stb + wgpu raster editors), Cheat Overlay/Render, and Anti Cheat Screenshot / Detection:ESP|Overlay. (source: wiki/sources/README-categories.md)
+`DirectX` (~33: Guide/Hook/Tools/Emulation/Compatibility/Overlay; incl. D3D12 Present/shader injectors for title-specific pixel-shader replace), `OpenGL` (~3), `Vulkan` (~9; cross-platform runtime API locators like kiero/kiero2), plus broader `Renderer` (~16) / `3D Graphics` (~4) / `Mathematics` (~7; gamedev math libs upstream of render math) / `Image Codec` (~5; stb + wgpu raster editors; soft-raster helpers such as [[olive-c]]), Cheat Overlay/Render, and Anti Cheat Screenshot / Detection:ESP|Overlay. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/tsoding__olive.c.md)
