@@ -7,7 +7,8 @@ sources:
   - wiki/sources/skills/game-hacking.md
   - wiki/sources/descriptions/wongfei__wda_monitor_trick.md
   - wiki/sources/descriptions/weak1337__PresentHookDetection.md
-updated: 2026-07-18
+  - wiki/sources/descriptions/vmcall__dxgkrnl_hook.md
+updated: 2026-07-19
 confidence: high
 ---
 
@@ -25,6 +26,8 @@ VTable/code integrity on Present, call-stack analysis, known hook DLLs (`obs-gra
 
 [[present-hook-detection]] reconstructs a [[battleye]]-style check: dummy D3D11 swap chain → Present vtable pointer → compare prologue bytes to clean `dxgi.dll` for JMP patches or vtable overwrite. (source: wiki/sources/descriptions/weak1337__PresentHookDetection.md)
 
+Kernel graphics-subsystem hooks such as [[dxgkrnl-hook]] manipulate the screen buffer below the user-mode Present path—another overlay/draw surface for ESP-style research. (source: wiki/sources/descriptions/vmcall__dxgkrnl_hook.md)
+
 ## Related
 
-[[overviews/graphics-api]] · [[present-hook-detection]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[overviews/graphics-api]] · [[present-hook-detection]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dxgkrnl-hook]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]

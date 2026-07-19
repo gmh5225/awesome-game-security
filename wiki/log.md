@@ -393,3 +393,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:vmcall/owned_alignment`: entity [[owned-alignment]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]].
 
+- **2026-07-19** — ingest `description:vmcall/dxgkrnl_hook`: entity [[dxgkrnl-hook]]; cited on [[overviews/graphics-api]] and [[present-hook]].
+
