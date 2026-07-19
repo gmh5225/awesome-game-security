@@ -473,3 +473,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `description:tym32167/arma3beclient`: entity [[arma3beclient]]; cited on [[battleye]] and [[overviews/anti-cheat]].
 
 - **2026-07-19** — ingest `description:twohyjr/Metal-Game-Engine-Tutorial`: entity [[metal-game-engine-tutorial]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-19** — ingest `description:turbulenz/turbulenz_engine`: entity [[turbulenz-engine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].

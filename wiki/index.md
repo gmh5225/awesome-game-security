@@ -198,6 +198,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Tracy](entities/tracy.md) — C++ real-time frame profiler (CPU/GPU; Game Testing)
 - [tiny-csgo-client](entities/tiny-csgo-client.md) — minimal CS:GO client for dedicated servers (modding / SDK)
 - [ts-ue4dumper](entities/ts-ue4dumper.md) — TypeScript + Frida UE4 dumper (modular; C++ offsets)
+- [Turbulenz Engine](entities/turbulenz-engine.md) — HTML5/TypeScript game engine (WebGL + server services; Game Engine)
 - [UTM](entities/utm.md) — QEMU VM host for iOS/macOS (Hypervisor.framework / JIT; IOS Emulator)
 - [uWebSockets](entities/uwebsockets.md) — C++ WebSocket/HTTP server (TLS / pub-sub; Game Network)
 - [UMPMLib](entities/umpmlib.md) — C/C++ usermode memory analysis (cheat / RPM)
