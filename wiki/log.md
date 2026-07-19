@@ -407,3 +407,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:veryboreddd/Return-address-spoofer`: entity [[return-address-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
+- **2026-07-19** — ingest `description:vergamota/KslKatz`: entity [[kslkatz]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+

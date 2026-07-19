@@ -13,7 +13,8 @@ sources:
   - wiki/sources/descriptions/wesmar__WinDefCtl.md
   - wiki/sources/descriptions/wesmar__KernelResearchKit.md
   - wiki/sources/descriptions/wavestone-cdt__EDRSandblast.md
-updated: 2026-07-18
+  - wiki/sources/descriptions/vergamota__KslKatz.md
+updated: 2026-07-19
 confidence: high
 ---
 
@@ -45,6 +46,8 @@ Defender neutralization CLIs such as [[windefctl]] escalate via a kernel driver 
 
 Full-stack EDR-blinding toolkits such as [[edrsandblast]] combine BYOVD with callback/ETW TI disable and ntdll unhook (offset automation + demo credential dump). (source: wiki/sources/descriptions/wavestone-cdt__EDRSandblast.md)
 
+LSASS credential extractors such as [[kslkatz]] abuse Microsoft Defender’s `KslD.sys` for kernel-mode reads of WDigest plaintext and encrypted LSA secrets past PPL/AV. (source: wiki/sources/descriptions/vergamota__KslKatz.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[kvc]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
