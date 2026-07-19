@@ -371,3 +371,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:vrolife/mypower`: entity [[mypower]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
+- **2026-07-19** — ingest `description:vrolife/android_native_app_imgui`: entity [[android-native-app-imgui]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]].
+
