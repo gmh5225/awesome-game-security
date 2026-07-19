@@ -186,6 +186,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WinDefCtl](entities/windefctl.md) — Defender / Tamper Protection control via kernel priv-esc (Win11 26H1)
 - [WinVisor](entities/winvisor.md) — WHP hypervisor emulator for Windows x64 user-mode PE (Windows Emulator)
 - [vt-debuuger](entities/vt-debuuger.md) — hacked hypervisor testing (C/C++ drivers / plugins)
+- [VxLang](entities/vxlang-page.md) — Windows x86-64/.NET binary protector (virtualization / flatten / anti-tamper; PE/DLL/SYS)
 
 - [x14.08-coverstory-blizzard](entities/x14-08-coverstory-blizzard.md) — WoW cheat / Warden bypass (loader hooks / RunScript; C++)
 - [x260-lenovo-opencore](entities/x260-lenovo-opencore.md) — ThinkPad X260 Hackintosh OpenCore EFI (macOS research host)

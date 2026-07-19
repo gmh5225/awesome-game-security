@@ -355,3 +355,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:w00tzenheimer/d810-ng`: entity [[d810-ng]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
+- **2026-07-19** — ingest `description:vxlang/vxlang-page`: entity [[vxlang-page]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
