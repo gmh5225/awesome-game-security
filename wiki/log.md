@@ -431,3 +431,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:user23333/veh`: entity [[veh]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
 
+- **2026-07-19** — ingest `description:user1342/Obfu-DE-Scate`: entity [[obfu-de-scate]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
