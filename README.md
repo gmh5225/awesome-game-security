@@ -1658,6 +1658,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/DennyDai/headless-ida [Run IDA scripts headlessly]
 - https://github.com/cpkt9762/ida-cli [Headless IDA Pro MCP server for AI-assisted binary analysis, powered by idalib]
 - https://github.com/trailofbits/idac [IDA Pro CLI for agents and humans: Unix socket to live GUI or headless idalib, structured JSON, batch/preview/dry-run, bundled agent skill; not MCP — early alpha]
+- https://github.com/P4nda0s/IDA-NO-MCP [IDA plugin + Rust/idalib CLI: export Hex-Rays decompilation, disasm fallback, strings/imports/exports/memory as files for AI IDEs without MCP]
 - https://github.com/JustasMasiulis/ida_buddy [Windbg-style idalib CLI (`idb`) for agents: persistent headless worker per database, compact stdout, disasm/decompile/xrefs/types and DB mutations with undo]
 - https://github.com/gilboz/ida_kernelcache_ng [An IDA Plugin for analyzing iOS kernelcaches]
 - https://github.com/mahmoudimus/ida-taskr [IDA Taskr is a pure Python library for IDA Pro related parallel computing]
