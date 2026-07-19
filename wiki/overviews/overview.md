@@ -9,6 +9,7 @@ sources:
   - wiki/sources/descriptions/wondeks__unity-mcp.md
   - wiki/sources/descriptions/yrgo__awesome-educational-games.md
   - wiki/sources/descriptions/uNetworking__uWebSockets.md
+  - wiki/sources/descriptions/traccar__traccar-geocoder.md
 updated: 2026-07-19
 confidence: high
 ---
@@ -44,4 +45,4 @@ The README organizes ~40 top-level sections: engines/rendering/`Mathematics` (~7
 
 ## README category map (high-signal)
 
-Security-dense sections from the projected category map (40 top-level / ~36 resource cats): **Cheat** (~2556 links), **Anti Cheat** (~597), **DirectX** (~33) / OpenGL / Vulkan, **Windows Security Features** (~9), **Some Tricks** (~113), plus engine (`Game Engine` ~142; Unreal/Unity/Godot/Lumix plugins + detectors; adjacent `Mathematics` ~7 / `PhysX SDK` ~3 / `Renderer` ~16), gamedev infra (`Game Develop` ~177 MCP/AI Agents; `Game Network` ~25 JWT/Auth + Location/Geocoding; WebSocket/HTTP stacks such as [[uwebsockets]]; `AI`/`Game Assets`/`Image Codec` image→3D/mesh/splat/sprite + wgpu raster editors; `Game Tools` ~8 incl. RCE hardening; `Game Testing` ~19; `Game CI` ~3 incl. content-addressed game VCS; `Game Manager` ~1), WSA/emulator lanes (`Windows Emulator` ~7 hybrid kernel-driver AC analysis; `WSL` ~4), and console (Switch/Xbox/PlayStation HV+BD-JB / 3DS LLE / GameCube·Wii / Game Boy) categories. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/uNetworking__uWebSockets.md)
+Security-dense sections from the projected category map (40 top-level / ~36 resource cats): **Cheat** (~2556 links), **Anti Cheat** (~597), **DirectX** (~33) / OpenGL / Vulkan, **Windows Security Features** (~9), **Some Tricks** (~113), plus engine (`Game Engine` ~142; Unreal/Unity/Godot/Lumix plugins + detectors; adjacent `Mathematics` ~7 / `PhysX SDK` ~3 / `Renderer` ~16), gamedev infra (`Game Develop` ~177 MCP/AI Agents; `Game Network` ~25 JWT/Auth + Location/Geocoding; WebSocket/HTTP stacks such as [[uwebsockets]]; self-hosted OSM reverse geocoders such as [[traccar-geocoder]]; `AI`/`Game Assets`/`Image Codec` image→3D/mesh/splat/sprite + wgpu raster editors; `Game Tools` ~8 incl. RCE hardening; `Game Testing` ~19; `Game CI` ~3 incl. content-addressed game VCS; `Game Manager` ~1), WSA/emulator lanes (`Windows Emulator` ~7 hybrid kernel-driver AC analysis; `WSL` ~4), and console (Switch/Xbox/PlayStation HV+BD-JB / 3DS LLE / GameCube·Wii / Game Boy) categories. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/uNetworking__uWebSockets.md) (source: wiki/sources/descriptions/traccar__traccar-geocoder.md)

@@ -203,6 +203,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Thetan_ArenaSDK](entities/thetan-arenasdk.md) — Thetan Arena SDK (rendering / audio / physics; cheat lane)
 - [TiEtwAgent](entities/tietwagent.md) — ETW Threat-Intelligence injection-detection agent (krabsetw / Yara / PPL)
 - [TotalPE2](entities/totalpe2.md) — WPF PE viewer (headers, imports/exports, .NET metadata)
+- [traccar-geocoder](entities/traccar-geocoder.md) — self-hosted OSM reverse geocoder (Rust + C++ PBF; Game Network / Location)
 - [Tracy](entities/tracy.md) — C++ real-time frame profiler (CPU/GPU; Game Testing)
 - [TrustDevice Android](entities/trustdevice-android.md) — TrustDecision Android fingerprint SDK (Kotlin/Java; integrity / risk signals)
 - [TrustDevice iOS](entities/trustdevice-ios.md) — TrustDecision iOS fingerprint SDK (CocoaPod; integrity / risk signals)
