@@ -409,3 +409,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:vergamota/KslKatz`: entity [[kslkatz]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
+- **2026-07-19** — ingest `description:venkata-ram/DroidShield`: entity [[droidshield]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
