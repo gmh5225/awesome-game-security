@@ -377,3 +377,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:volatilityfoundation/volatility`: entity [[volatility]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-link from [[volatility3]].
 
+- **2026-07-19** — ingest `description:vojty/feather-gb`: entity [[feather-gb]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-link from [[kevboy]].
+

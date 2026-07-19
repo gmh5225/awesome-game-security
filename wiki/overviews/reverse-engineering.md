@@ -29,6 +29,7 @@ sources:
   - wiki/sources/descriptions/xM0kht4r__2Pack.md
   - wiki/sources/descriptions/xqemu__xqemu.md
   - wiki/sources/descriptions/xkevio__kevboy.md
+  - wiki/sources/descriptions/vojty__feather-gb.md
   - wiki/sources/descriptions/xenia-project__xenia.md
   - wiki/sources/descriptions/wmarti__xenia-mac.md
   - wiki/sources/descriptions/xemu-project__xemu.md
@@ -93,14 +94,14 @@ Workflows for protected game clients and anti-cheat components across user mode,
 
 - **Linux LKM metadata:** tools such as [[vermagic]] rewrite vermagic / CRC fields so a module can load across mismatched kernel builds (cheat / RE tools lane). (source: wiki/sources/descriptions/yaxinsn__vermagic.md)
 - **Mobile / iOS:** userland exploit-chain study via [[lightsaber]] (iOS 18.4–18.6.2 JS injection into SpringBoard and other processes) (source: wiki/sources/descriptions/zeroxjf__lightsaber.md); iOS project reversing in IDA via [[ida-ios-helper]] (vtable symbols required) (source: wiki/sources/descriptions/yoavst__ida-ios-helper.md)
-- **Console / QEMU:** original Xbox titles via [[xqemu]] (full-machine software emulation, no hardware VT) for RE in the QEMU/KVM/PVE/VBOX research lane. (source: wiki/sources/descriptions/xqemu__xqemu.md); original Xbox LLE via [[xemu]] (QEMU fork; NV2A/MCPX/NForce/Pentium III; OpenGL + SDL2). (source: wiki/sources/descriptions/xemu-project__xemu.md); Game Boy hardware study via [[kevboy]] (Rust CPU/memory/graphics/input emulator). (source: wiki/sources/descriptions/xkevio__kevboy.md); Xbox 360 HLE via [[xenia]] (PowerPC recompiler, D3D12/Vulkan GPU, XAM/kernel/XEX) for console binary-translation / hardware-abstraction study. (source: wiki/sources/descriptions/xenia-project__xenia.md); macOS port [[xenia-mac]] for the same 360 stack on Apple hosts. (source: wiki/sources/descriptions/wmarti__xenia-mac.md)
+- **Console / QEMU:** original Xbox titles via [[xqemu]] (full-machine software emulation, no hardware VT) for RE in the QEMU/KVM/PVE/VBOX research lane. (source: wiki/sources/descriptions/xqemu__xqemu.md); original Xbox LLE via [[xemu]] (QEMU fork; NV2A/MCPX/NForce/Pentium III; OpenGL + SDL2). (source: wiki/sources/descriptions/xemu-project__xemu.md); Game Boy hardware study via [[kevboy]] (Rust CPU/memory/graphics/input emulator). (source: wiki/sources/descriptions/xkevio__kevboy.md); peer Rust GB emulator [[feather-gb]] for retro handheld / GB-area RE. (source: wiki/sources/descriptions/vojty__feather-gb.md); Xbox 360 HLE via [[xenia]] (PowerPC recompiler, D3D12/Vulkan GPU, XAM/kernel/XEX) for console binary-translation / hardware-abstraction study. (source: wiki/sources/descriptions/xenia-project__xenia.md); macOS port [[xenia-mac]] for the same 360 stack on Apple hosts. (source: wiki/sources/descriptions/wmarti__xenia-mac.md)
 - **macOS research hosts:** Hackintosh OpenCore EFI packs such as [[x260-lenovo-opencore]] (ThinkPad X260) give security researchers a non-Apple macOS lab for testing. (source: wiki/sources/descriptions/x90skysn3k__x260-lenovo-opencore.md)
 
 
 ## Related concepts
 
 [[il2cpp]] · [[frida]] · [[unflutter]] · [[kernel-callbacks]] · [[patchguard]] · [[mutaben]] · [[ndisapi]] · [[umpmlib]] · [[eupmaccess]] · [[shredder-rs]] · [[deobf]] · [[ricochet-deobfuscator]] · [[idadeflat]] · [[ida-easy-life]] · [[d810-ng]] · [[opaque-predicates-detective]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ida-ios-helper]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[woody-woodpacker]] · [[kagura]] · [[wprotect]] · [[alcatraz]] · [[vxlang-page]] · [[obfusk8]] · [[sbox]] · [[vmdevirt-vtil]] · [[novmpy]] · [[totalpe2]] · [[ntsleuth]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[idarem]] · [[systeminformer]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ghidrametrics]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[lightsaber]] · [[vermagic]] · [[veh-dumper]] · [[no-access-protection]] · [[voidmaw]] · [[kvcforensic]] · [[volatility]] · [[volatility3]] · [[file-recovery-tool]]
- · [[windbg-scripts]] · [[winvisor]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[xenia]] · [[xenia-mac]] · [[x260-lenovo-opencore]] · [[reverse-engineering]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[overviews/mobile-security]]
+ · [[windbg-scripts]] · [[winvisor]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[feather-gb]] · [[xenia]] · [[xenia-mac]] · [[x260-lenovo-opencore]] · [[reverse-engineering]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[overviews/mobile-security]]
 
 
 
