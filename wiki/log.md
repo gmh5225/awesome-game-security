@@ -435,3 +435,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 
 - **2026-07-19** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/game-engine]] (Cheat ~2554 / Game Develop ~177); light `index.md` section notes (no per-category pages).
+
+- **2026-07-19** — ingest `description:urho3d/Urho3D`: entity [[urho3d]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
