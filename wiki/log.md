@@ -427,3 +427,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:utoni/PastDSE`: entity [[pastdse]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
+- **2026-07-19** — ingest `description:utmapp/UTM`: entity [[utm]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
