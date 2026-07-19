@@ -449,3 +449,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `description:un4ckn0wl3z/dioprocess-private`: entity [[dioprocess-private]]; cited on [[overviews/windows-kernel]] and [[patchguard]].
 
 - **2026-07-19** — ingest `description:un4ckn0wl3z/MemMCP`: entity [[memmcp]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-19** — ingest `description:un4ckn0wl3z/DMAInvoker`: entity [[dma-invoker]]; cited on [[dma]] and [[overviews/dma-attack]].

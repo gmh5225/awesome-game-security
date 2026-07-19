@@ -6,6 +6,7 @@ sources:
   - wiki/sources/skills/dma-attack.md
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/zer0condition__x670e-tomahawk-anticheat-update.md
+  - wiki/sources/descriptions/un4ckn0wl3z__DMAInvoker.md
 updated: 2026-07-19
 confidence: high
 ---
@@ -17,7 +18,7 @@ PCIe Direct Memory Access threat modeling for game security: FPGA endpoints (oft
 
 ## Threat model
 
-Typical external DMA cheat: **cheat PC** + **DMA card** (Memory Read TLPs) + optional **HID actuator**. No attacker code need run on the gaming OS—the machine sees a PCIe device performing ordinary-looking DMA.
+Typical external DMA cheat: **cheat PC** + **DMA card** (Memory Read TLPs) + optional **HID actuator**. No attacker code need run on the gaming OS—the machine sees a PCIe device performing ordinary-looking DMA. Host tooling in the cheat / RPM lane includes DMALibrary wrappers such as [[dma-invoker]] (Windows DMA RPM). (source: wiki/sources/descriptions/un4ckn0wl3z__DMAInvoker.md)
 
 ## Key sub-areas
 
@@ -36,7 +37,7 @@ Typical external DMA cheat: **cheat PC** + **DMA card** (Memory Read TLPs) + opt
 
 ## Related concepts
 
-[[dma]] · [[iommu]] · [[hvci]] · [[byovd]] · [[x670e-tomahawk-anticheat-update]] · [[overviews/anti-cheat]]
+[[dma]] · [[iommu]] · [[hvci]] · [[byovd]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[overviews/anti-cheat]]
 
 
 ## README map
