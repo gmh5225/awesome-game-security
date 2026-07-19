@@ -367,3 +367,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:vsaint1/kernel-mouse`: entity [[kernel-mouse]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
+- **2026-07-19** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2553 / Anti Cheat ~595; Detection:aimbot/triggerbot note); light `index.md` section notes (no per-category pages).
+

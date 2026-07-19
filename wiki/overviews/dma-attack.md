@@ -6,7 +6,7 @@ sources:
   - wiki/sources/skills/dma-attack.md
   - wiki/sources/README-categories.md
   - wiki/sources/descriptions/zer0condition__x670e-tomahawk-anticheat-update.md
-updated: 2026-07-18
+updated: 2026-07-19
 confidence: high
 ---
 
@@ -41,4 +41,4 @@ Typical external DMA cheat: **cheat PC** + **DMA card** (Memory Read TLPs) + opt
 
 ## README map
 
-No top-level DMA section — maps via `Cheat` (~2552) DMA lanes and `Anti Cheat > Detection:DMA` (~595), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; TPM/IOMMU/VBS/HVCI attestation samples). (source: wiki/sources/README-categories.md)
+No top-level DMA section — maps via `Cheat` (~2553) DMA lanes and `Anti Cheat > Detection:DMA` (~595), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; TPM/IOMMU/VBS/HVCI attestation samples). (source: wiki/sources/README-categories.md)
