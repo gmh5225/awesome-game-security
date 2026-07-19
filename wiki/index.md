@@ -43,6 +43,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [aimbot-detection-prototype](entities/aimbot-detection-prototype.md) — deep-learning aimbot/triggerbot detection prototype (clips + live window; Detection:Aimbot)
 - [Alcatraz](entities/alcatraz.md) — x64 PE obfuscator (mutation / CFF / IAT; Zydis + AsmJit; ImGui)
 - [android-kernel-oneplus-sm8250](entities/android-kernel-oneplus-sm8250.md) — OnePlus 8/8T/8Pro/(9R?) SM8250 Android kernel source (cheat / Android Kernel Source)
+- [android-kernel-samsung-universal5433](entities/android-kernel-samsung-universal5433.md) — Samsung Exynos 5433 Android kernel (Note 4 / Alpha; cheat / Android Kernel Source)
 - [android-kernel-xiaomi-pipa](entities/android-kernel-xiaomi-pipa.md) — Xiaomi Pad 6 (pipa) Android kernel source (cheat / Android Kernel Source)
 - [android-native-app-imgui](entities/android-native-app-imgui.md) — Android ImGui native app (Java/C++; cheat / render-draw)
 - [android-proxy-mcp](entities/android-proxy-mcp.md) — Android HTTP/HTTPS capture MCP (mitmdump + SQLite + NL query)
