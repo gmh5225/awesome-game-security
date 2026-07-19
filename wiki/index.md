@@ -63,6 +63,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [checkhv_um](entities/checkhv-um.md) — user-mode HV detection (CPUID / RDTSC / VMCS / signatures)
 - [cheese](entities/cheese.md) — Quest 3/3S root via Adreno CVE-2025-21479 (Magisk, no boot rewrite)
 - [Classroom](entities/classroom.md) — x64dbg OOP class docs (member funcs/vars; Cheat x64dbg Plugins)
+- [CoBRA](entities/cobra.md) — Trail of Bits MBA expression simplifier (C++; Cheat Mixed boolean-arithmetic)
 - [CmdT](entities/cmdt.md) — TrustedInstaller token launcher (x86/x64 asm; TI ACL / RE forensics)
 - [CounterStrike2-Linux-Cheat](entities/counterstrike2-linux-cheat.md) — Linux external CS2 cheat (C++; memory analysis)
 - [CS-2-Glow](entities/cs-2-glow.md) — external CS2 glow ESP (C++; entity / offsets / memory)

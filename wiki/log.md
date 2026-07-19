@@ -497,3 +497,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `description:trailofbits/idac`: entity [[idac]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-19** — ingest `description:trailofbits/HVCI-loldrivers-check`: entity [[hvci-loldrivers-check]]; cited on [[hvci]] and [[byovd]].
+
+- **2026-07-19** — ingest `description:trailofbits/CoBRA`: entity [[cobra]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
