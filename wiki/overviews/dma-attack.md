@@ -8,6 +8,7 @@ sources:
   - wiki/sources/descriptions/zer0condition__x670e-tomahawk-anticheat-update.md
   - wiki/sources/descriptions/un4ckn0wl3z__DMAInvoker.md
   - wiki/sources/descriptions/un4ckn0wl3z__DMACheatEngineLoader.md
+  - wiki/sources/descriptions/ufrisk__pcileech.md
 updated: 2026-07-19
 confidence: high
 ---
@@ -15,11 +16,11 @@ confidence: high
 
 # DMA Attack
 
-PCIe Direct Memory Access threat modeling for game security: FPGA endpoints (often M.2), host tools like pcileech/MemProcFS, and defenses that software anti-cheat alone cannot fully cover once a hostile bus-master can read RAM. (source: wiki/sources/skills/dma-attack.md)
+PCIe Direct Memory Access threat modeling for game security: FPGA endpoints (often M.2), host tools like [[pcileech]]/MemProcFS, and defenses that software anti-cheat alone cannot fully cover once a hostile bus-master can read RAM. (source: wiki/sources/skills/dma-attack.md)
 
 ## Threat model
 
-Typical external DMA cheat: **cheat PC** + **DMA card** (Memory Read TLPs) + optional **HID actuator**. No attacker code need run on the gaming OS—the machine sees a PCIe device performing ordinary-looking DMA. Host tooling in the cheat / RPM lane includes DMALibrary wrappers such as [[dma-invoker]] (Windows DMA RPM). (source: wiki/sources/descriptions/un4ckn0wl3z__DMAInvoker.md) Cheat Engine DMA loaders such as [[dma-cheat-engine-loader]] (drop CE into `DMACE`; not open-source) sit in the same external CE/DMA research lane. (source: wiki/sources/descriptions/un4ckn0wl3z__DMACheatEngineLoader.md)
+Typical external DMA cheat: **cheat PC** + **DMA card** (Memory Read TLPs) + optional **HID actuator**. No attacker code need run on the gaming OS—the machine sees a PCIe device performing ordinary-looking DMA. [[pcileech]] is the common host app that drives PCIe hardware for target-memory R/W over DMA. (source: wiki/sources/descriptions/ufrisk__pcileech.md) Host tooling in the cheat / RPM lane includes DMALibrary wrappers such as [[dma-invoker]] (Windows DMA RPM). (source: wiki/sources/descriptions/un4ckn0wl3z__DMAInvoker.md) Cheat Engine DMA loaders such as [[dma-cheat-engine-loader]] (drop CE into `DMACE`; not open-source) sit in the same external CE/DMA research lane. (source: wiki/sources/descriptions/un4ckn0wl3z__DMACheatEngineLoader.md)
 
 ## Key sub-areas
 
@@ -38,7 +39,7 @@ Typical external DMA cheat: **cheat PC** + **DMA card** (Memory Read TLPs) + opt
 
 ## Related concepts
 
-[[dma]] · [[iommu]] · [[hvci]] · [[byovd]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[overviews/anti-cheat]]
+[[dma]] · [[iommu]] · [[hvci]] · [[byovd]] · [[pcileech]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[overviews/anti-cheat]]
 
 
 ## README map

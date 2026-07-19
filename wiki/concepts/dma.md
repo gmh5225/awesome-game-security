@@ -8,6 +8,7 @@ sources:
   - wiki/sources/descriptions/zer0condition__x670e-tomahawk-anticheat-update.md
   - wiki/sources/descriptions/un4ckn0wl3z__DMAInvoker.md
   - wiki/sources/descriptions/un4ckn0wl3z__DMACheatEngineLoader.md
+  - wiki/sources/descriptions/ufrisk__pcileech.md
 updated: 2026-07-19
 confidence: high
 ---
@@ -15,7 +16,7 @@ confidence: high
 
 # DMA (Direct Memory Access)
 
-Hardware-level memory access where a PCIe device issues Memory Read/Write TLPs against host RAM via Bus Master, without executing attacker code in the gaming OS. In game security this usually means an FPGA card (often M.2) linked to a separate cheat PC. (source: wiki/sources/skills/dma-attack.md)
+Hardware-level memory access where a PCIe device issues Memory Read/Write TLPs against host RAM via Bus Master, without executing attacker code in the gaming OS. In game security this usually means an FPGA card (often M.2) linked to a separate cheat PC. (source: wiki/sources/skills/dma-attack.md) Host tooling such as [[pcileech]] drives those PCIe devices for target-memory R/W over DMA. (source: wiki/sources/descriptions/ufrisk__pcileech.md)
 
 ## Why it matters
 
@@ -28,5 +29,5 @@ Cheat app → LeechCore/pcileech/MemProcFS → FPGA firmware → Memory Read TLP
 
 ## Related
 
-[[iommu]] · [[hvci]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
+[[iommu]] · [[hvci]] · [[pcileech]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
 
