@@ -349,3 +349,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:waldo-vision/aimbot-detection-prototype`: entity [[aimbot-detection-prototype]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-link from [[waldo]].
 
+- **2026-07-19** — ingest `description:wINfOG/IDA_Easy_Life`: entity [[ida-easy-life]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
