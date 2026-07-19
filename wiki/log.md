@@ -373,3 +373,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:vrolife/android_native_app_imgui`: entity [[android-native-app-imgui]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]].
 
+- **2026-07-19** — ingest `description:volatilityfoundation/volatility3`: entity [[volatility3]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
+
