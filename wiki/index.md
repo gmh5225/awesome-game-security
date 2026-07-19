@@ -161,6 +161,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [owned_alignment](entities/owned-alignment.md) — abusing Alignment (C++; kernel driver/hook; cheat / HWID)
 - [PalworldSaved](entities/palworldsaved.md) — Palworld UE5 save/editor tooling (cheat / game:palworld [Save])
 - [PastDSE](entities/pastdse.md) — DSE bypass via clock rollback + leaked VeriSign certs (BlackBone load)
+- [PatternSleuth](entities/patternsleuth.md) — Rust SIMD pattern/signature scan (file + process; Unreal address scanner)
 - [payload_dumper](entities/payload-dumper.md) — Android OTA payload.bin dumper (Python; Magisk / ROM RE)
 - [PCILeech](entities/pcileech.md) — PCIe DMA host tool: R/W target memory via hardware (ufrisk; cheat / DMA)
 - [PCILeech-FPGA](entities/pcileech-fpga.md) — FPGA HDL/firmware for PCILeech DMA boards (Vivado; TLP/BAR/config shadow)
