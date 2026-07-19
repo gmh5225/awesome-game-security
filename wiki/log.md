@@ -363,3 +363,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:vvb2060/KeyAttestation`: entity [[keyattestation]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]]; cross-link from [[magiskdetector]].
 
+- **2026-07-19** — ingest `description:vsteffen/woody_woodpacker`: entity [[woody-woodpacker]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+

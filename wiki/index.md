@@ -188,6 +188,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [windows-kernel-exploits](entities/windows-kernel-exploits.md) — kernel exploit guide (Cheat / vulnerable driver)
 - [WinDefCtl](entities/windefctl.md) — Defender / Tamper Protection control via kernel priv-esc (Win11 26H1)
 - [WinVisor](entities/winvisor.md) — WHP hypervisor emulator for Windows x64 user-mode PE (Windows Emulator)
+- [woody_woodpacker](entities/woody-woodpacker.md) — ELF binary packer (outputs “woody”; Anti Cheat → Binary Packer)
 - [vt-debuuger](entities/vt-debuuger.md) — hacked hypervisor testing (C/C++ drivers / plugins)
 - [VxLang](entities/vxlang-page.md) — Windows x86-64/.NET binary protector (virtualization / flatten / anti-tamper; PE/DLL/SYS)
 
