@@ -439,3 +439,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `description:urho3d/Urho3D`: entity [[urho3d]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
 
 - **2026-07-19** — ingest `description:unsafeblackcat/MapleStoryEx`: entity [[maplestoryex]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-19** — ingest `description:unkvolism/Solemn`: entity [[solemn]]; cited on [[hvci]] and [[overviews/windows-kernel]].

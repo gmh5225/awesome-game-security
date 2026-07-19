@@ -8,7 +8,8 @@ sources:
   - wiki/sources/skills/dma-attack.md
   - wiki/sources/descriptions/zer0condition__BusterCall.md
   - wiki/sources/descriptions/wesmar__BootBypass.md
-updated: 2026-07-18
+  - wiki/sources/descriptions/unkvolism__Solemn.md
+updated: 2026-07-19
 confidence: high
 ---
 
@@ -22,6 +23,8 @@ Raises the cost of classic kernel code patches and some [[byovd]] patterns; base
 
 Early-boot / native-subsystem research such as [[bootbypass]] targets DSE and Memory Integrity together via boot-manager checks, CI.dll validation, and `SeCiCallbacks` patching (`subsystem:native`). (source: wiki/sources/descriptions/wesmar__BootBypass.md)
 
+Operator tooling such as [[solemn]] automates adding drivers to the HVCI `HvciDisallowedImages` custom blocklist (Windows Security Features / Ring3 research lane). (source: wiki/sources/descriptions/unkvolism__Solemn.md)
+
 ## Related
 
-[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[solemn]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
