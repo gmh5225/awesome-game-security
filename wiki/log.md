@@ -467,3 +467,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `description:uNetworking/uWebSockets`: entity [[uwebsockets]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
 - **2026-07-19** — ingest `description:u3d-community/U3D`: entity [[u3d]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-19** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/windows-kernel]], [[overviews/mobile-security]] (Cheat ~2556; Windows Emulator KDemu / iOS vphone PCC notes); light `index.md` section notes (no per-category pages).
