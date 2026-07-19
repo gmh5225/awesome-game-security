@@ -8,6 +8,7 @@ sources:
   - wiki/sources/descriptions/wongfei__wda_monitor_trick.md
   - wiki/sources/descriptions/weak1337__PresentHookDetection.md
   - wiki/sources/descriptions/vmcall__dxgkrnl_hook.md
+  - wiki/sources/descriptions/visotw__3d9.md
 updated: 2026-07-19
 confidence: high
 ---
@@ -28,6 +29,8 @@ VTable/code integrity on Present, call-stack analysis, known hook DLLs (`obs-gra
 
 Kernel graphics-subsystem hooks such as [[dxgkrnl-hook]] manipulate the screen buffer below the user-mode Present path—another overlay/draw surface for ESP-style research. (source: wiki/sources/descriptions/vmcall__dxgkrnl_hook.md)
 
+DX11 stereoscopic-fix tooling such as [[3d9]] works in the same Present/swap-chain ecosystem (developer-oriented; not an end-user product). (source: wiki/sources/descriptions/visotw__3d9.md)
+
 ## Related
 
-[[overviews/graphics-api]] · [[present-hook-detection]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dxgkrnl-hook]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[overviews/graphics-api]] · [[present-hook-detection]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dxgkrnl-hook]] · [[3d9]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]

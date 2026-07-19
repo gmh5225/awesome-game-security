@@ -399,3 +399,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:vk-nom/Basic-Fortnite-Cheat-Source-Internal`: entity [[basic-fortnite-cheat-source-internal]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
+- **2026-07-19** — ingest `description:visotw/3d9`: entity [[3d9]]; cited on [[overviews/graphics-api]] and [[present-hook]].
+
