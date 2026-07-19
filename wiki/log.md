@@ -365,3 +365,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:vsteffen/woody_woodpacker`: entity [[woody-woodpacker]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
+- **2026-07-19** — ingest `description:vsaint1/kernel-mouse`: entity [[kernel-mouse]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
