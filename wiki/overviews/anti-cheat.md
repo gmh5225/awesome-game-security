@@ -70,6 +70,7 @@ sources:
   - wiki/sources/descriptions/umpolungfish__byvalver.md
   - wiki/sources/descriptions/utoni__PastDSE.md
   - wiki/sources/descriptions/user23333__veh.md
+  - wiki/sources/descriptions/tym32167__arma3beclient.md
 updated: 2026-07-19
 confidence: high
 ---
@@ -85,7 +86,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 ## Major systems
 
 - [[easy-anti-cheat]] — service + driver + game-facing integrity (Fortnite, Apex, Rust)
-- [[battleye]] — handle protection, process/memory scanning (PUBG, R6, DayZ); research ref [[blindeye]] drops BE report-path pool allocs via hooked `ExAllocatePool*` (source: wiki/sources/descriptions/zouxianyu__BlindEye.md); user-mode shellcode RE via [[be-shellcode]] (dump/disasm thread scan, VEH enum, module integrity) (source: wiki/sources/descriptions/weak1337__BE-Shellcode.md)
+- [[battleye]] — handle protection, process/memory scanning (PUBG, R6, DayZ); research ref [[blindeye]] drops BE report-path pool allocs via hooked `ExAllocatePool*` (source: wiki/sources/descriptions/zouxianyu__BlindEye.md); user-mode shellcode RE via [[be-shellcode]] (dump/disasm thread scan, VEH enum, module integrity) (source: wiki/sources/descriptions/weak1337__BE-Shellcode.md); title-specific BattlEye Tool [[arma3beclient]] (C# / PowerShell; Arma 3) (source: wiki/sources/descriptions/tym32167__arma3beclient.md)
 - [[vanguard]] — boot-start driver, early driver allowlisting (Valorant, LoL)
 - FACEIT AC, VAC (user-mode signatures), GameGuard, XIGNCODE3 (vuln PoC [[xign-poc-april-2026]] on `xhunter64.sys` `IRP_MJ_WRITE` → phys R/W / kernel leak / process kill) (source: wiki/sources/descriptions/waryas__xign_poc_april_2026.md), ACE, Warden (Blizzard / WoW)
 - [[vac3-inhibitor]] — C++ VAC3 exploration (hooking / memory analysis) under cheat → explore anticheat:vac (source: wiki/sources/descriptions/zyhp__vac3_inhibitor.md)
@@ -116,7 +117,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[pastdse]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[ricochet-deobfuscator]] · [[x14-08-coverstory-blizzard]] · [[xign-poc-april-2026]] · [[waryasswhe]] · [[veh]] · [[veh-dumper]] · [[no-access-protection]] · [[voidmaw]] · [[file-recovery-tool]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[hypervisor-detection]] · [[vt-debuuger]] · [[baresvm]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[lumina-cheat]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[woody-woodpacker]] · [[kagura]] · [[wprotect]] · [[alcatraz]] · [[vxlang-page]] · [[obfusk8]] · [[sbox]] · [[blindeye]] · [[be-shellcode]] · [[scfw]] · [[byvalver]] · [[injdrv]] · [[kinject]] · [[detoursnt]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[wazuh]] · [[certael]] · [[instrumentation-callback-syscall-logger]] · [[function-collections]] · [[injectors]] · [[modexmap]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[mini-launcher]] · [[zero-thread-kernel]] · [[wdutf]] · [[nvidiaapi]] · [[detect-tpm-spoofing]] · [[return-address-spoofer]] · [[cedetector]] · [[magiskdetector]] · [[keyattestation]] · [[droidshield]] · [[waldo]] · [[aimbot-detection-prototype]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[pastdse]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[ricochet-deobfuscator]] · [[x14-08-coverstory-blizzard]] · [[xign-poc-april-2026]] · [[waryasswhe]] · [[veh]] · [[veh-dumper]] · [[no-access-protection]] · [[voidmaw]] · [[file-recovery-tool]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[hypervisor-detection]] · [[vt-debuuger]] · [[baresvm]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[shredder-rs]] · [[lumina-cheat]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[woody-woodpacker]] · [[kagura]] · [[wprotect]] · [[alcatraz]] · [[vxlang-page]] · [[obfusk8]] · [[sbox]] · [[blindeye]] · [[be-shellcode]] · [[arma3beclient]] · [[scfw]] · [[byvalver]] · [[injdrv]] · [[kinject]] · [[detoursnt]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[wazuh]] · [[certael]] · [[instrumentation-callback-syscall-logger]] · [[function-collections]] · [[injectors]] · [[modexmap]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[mini-launcher]] · [[zero-thread-kernel]] · [[wdutf]] · [[nvidiaapi]] · [[detect-tpm-spoofing]] · [[return-address-spoofer]] · [[cedetector]] · [[magiskdetector]] · [[keyattestation]] · [[droidshield]] · [[waldo]] · [[aimbot-detection-prototype]]
 
 
 
