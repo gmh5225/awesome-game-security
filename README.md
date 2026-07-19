@@ -277,6 +277,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/milakov/int_fastdiv
 - https://github.com/freemint/fdlibm
 - https://github.com/Jaysmito101/cgl
+- https://github.com/orange-cpp/omath [C++23 constexpr math/physics framework for game, mod, and cheat development]
 
 ## Renderer
 - https://github.com/bkaradzic/bgfx [Rendering library]
