@@ -405,3 +405,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:vfsfitvnm/frida-il2cpp-bridge`: entity [[frida-il2cpp-bridge]]; cited on [[frida]] and [[il2cpp]].
 
+- **2026-07-19** — ingest `description:veryboreddd/Return-address-spoofer`: entity [[return-address-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
