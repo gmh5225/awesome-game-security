@@ -361,3 +361,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:vvb2060/MagiskDetector`: entity [[magiskdetector]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
 
+- **2026-07-19** — ingest `description:vvb2060/KeyAttestation`: entity [[keyattestation]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]]; cross-link from [[magiskdetector]].
+
