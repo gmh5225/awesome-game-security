@@ -229,6 +229,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [WProtect](entities/wprotect.md) — C/C++ obfuscation engine (Anti Cheat → Obfuscation Engine)
 - [WDUTF](entities/wdutf.md) — Windows Driver Unit Test Framework (user-space MSTest for kernel drivers)
+- [WindEffects](entities/wind-effects.md) — C++23 Vulkan/DX12 engine (ECS, editor, deferred/PBR; Game Engine)
 - [WinDbg_Scripts](entities/windbg-scripts.md) — JS WinDbg scripts for kernel debug/modding (WinDbg Plugins)
 - [windows-dll-hijacking](entities/windows-dll-hijacking.md) — Windows DLL hijack DB (sideload / search-order / phantom DLL)
 - [windows-kernel-exploits](entities/windows-kernel-exploits.md) — kernel exploit guide (Cheat / vulnerable driver)

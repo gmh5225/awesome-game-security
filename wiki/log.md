@@ -461,3 +461,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `description:ufrisk/pcileech`: entity [[pcileech]]; cited on [[dma]] and [[overviews/dma-attack]].
 
 - **2026-07-19** — ingest `description:ufrisk/pcileech-fpga`: entity [[pcileech-fpga]]; cited on [[dma]] and [[overviews/dma-attack]]; cross-link from [[pcileech]].
+
+- **2026-07-19** — ingest `description:udinmoInc/WindEffects`: entity [[wind-effects]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
