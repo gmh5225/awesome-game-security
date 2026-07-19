@@ -44,4 +44,4 @@ Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/
 
 ## README map
 
-`DirectX` (~33: Guide/Hook/Tools/Emulation/Compatibility/Overlay; incl. D3D12 Present/shader injectors for title-specific pixel-shader replace), `OpenGL` (~3), `Vulkan` (~9; cross-platform runtime API locators like kiero/kiero2), plus broader `Renderer` (~16) / `3D Graphics` (~4) / `Image Codec` (~5; stb + wgpu raster editors), Cheat Overlay/Render, and Anti Cheat Screenshot / Detection:ESP|Overlay. (source: wiki/sources/README-categories.md)
+`DirectX` (~33: Guide/Hook/Tools/Emulation/Compatibility/Overlay; incl. D3D12 Present/shader injectors for title-specific pixel-shader replace), `OpenGL` (~3), `Vulkan` (~9; cross-platform runtime API locators like kiero/kiero2), plus broader `Renderer` (~16) / `3D Graphics` (~4) / `Mathematics` (~7; gamedev math libs upstream of render math) / `Image Codec` (~5; stb + wgpu raster editors), Cheat Overlay/Render, and Anti Cheat Screenshot / Detection:ESP|Overlay. (source: wiki/sources/README-categories.md)
