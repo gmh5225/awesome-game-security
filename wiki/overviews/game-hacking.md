@@ -91,6 +91,7 @@ sources:
   - wiki/sources/descriptions/wINfOG__IDA_Easy_Life.md
   - wiki/sources/descriptions/w00tzenheimer__d810-ng.md
   - wiki/sources/descriptions/vrolife__mypower.md
+  - wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md
 updated: 2026-07-19
 confidence: high
 ---
@@ -128,6 +129,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Rapid x86/x64 shellcode/asm prototyping with [[quickasm]] (assemble via Keystone, execute in-process). (source: wiki/sources/descriptions/zodiacon__QuickAsm.md) Cross-platform C++ Windows shellcode frameworks such as [[scfw]] sit in the shellcode engine & tricks lane. (source: wiki/sources/descriptions/wbenny__scfw.md)
 - Title-specific offset/token dumps (e.g. Fortnite FLTokens via [[fortnite-fltokens-and-offsets]]) illustrate ephemeral cheat-research artifacts that rot quickly. (source: wiki/sources/descriptions/zinx-YT__Fortnite-Fltokens-and-offsets.md)
 - External Fortnite samples such as [[fortnite-external-source]] (C++; driver development / SDK generation) sit in the cheat / game:fortnite lane. (source: wiki/sources/descriptions/xetzzy__Fortnite-External-Source.md)
+- Internal Fortnite samples such as [[basic-fortnite-cheat-source-internal]] (C++; UE4 SDK / GObject/GNames / engine hooks; ESP + aimbot) sit in the same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md)
 - MBA expression generators such as [[mutaben]] (Python) sit in the Cheat Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/z1ko__mutaben.md)
 - Fix OLLVM / deobfuscation plugins targeting `libtprt.so` (e.g. [[deobf]]) sit in the Cheat Fix OLLVM lane. (source: wiki/sources/descriptions/zhuzhu-Top__deobf.md)
 - IDA CFF deflattening via [[idadeflat]] (angr-backed semi-auto CFG recover/patch) also sits in that Fix OLLVM / deflat lane. (source: wiki/sources/descriptions/za233__IDADeflat.md)
@@ -181,7 +183,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ndisapi]] · [[ksocket]] · [[nvidiaapi]] · [[owned-alignment]] · [[ntmemory]] · [[umpmlib]] · [[eupmaccess]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[waryasswhe]] · [[reverse-engineering]] · [[totalpe2]] · [[quickasm]] · [[scfw]] · [[xrefsext]] · [[symbridge]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ghidrametrics]] · [[injectors]] · [[modexmap]] · [[skiphook]] · [[detoursnt]] · [[cedetector]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[keyboardkit]] · [[kernel-mouse]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[efitool]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[mypower]] · [[deobf]] · [[idadeflat]] · [[ida-easy-life]] · [[d810-ng]] · [[vmdevirt-vtil]] · [[novmpy]] · [[vmunprotect]] · [[vmunprotect-dumper]] · [[opaque-predicates-detective]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ndisapi]] · [[ksocket]] · [[nvidiaapi]] · [[owned-alignment]] · [[ntmemory]] · [[umpmlib]] · [[eupmaccess]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[waryasswhe]] · [[reverse-engineering]] · [[totalpe2]] · [[quickasm]] · [[scfw]] · [[xrefsext]] · [[symbridge]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ghidrametrics]] · [[injectors]] · [[modexmap]] · [[skiphook]] · [[detoursnt]] · [[cedetector]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[keyboardkit]] · [[kernel-mouse]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[efitool]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[basic-fortnite-cheat-source-internal]] · [[mutaben]] · [[mypower]] · [[deobf]] · [[idadeflat]] · [[ida-easy-life]] · [[d810-ng]] · [[vmdevirt-vtil]] · [[novmpy]] · [[vmunprotect]] · [[vmunprotect-dumper]] · [[opaque-predicates-detective]]
  · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[palworldsaved]] · [[tiny-csgo-client]] · [[lumina-cheat]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[waldo]] · [[aimbot-detection-prototype]] · [[battlefield-1-internal]] · [[valorantcc]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[feather-gb]] · [[xenia]] · [[xenia-mac]] · [[overviews/anti-cheat]]
 
 

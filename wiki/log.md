@@ -397,3 +397,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:vm03/payload_dumper`: entity [[payload-dumper]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
+- **2026-07-19** — ingest `description:vk-nom/Basic-Fortnite-Cheat-Source-Internal`: entity [[basic-fortnite-cheat-source-internal]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
