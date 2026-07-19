@@ -1,0 +1,3284 @@
+Project Path: arc_IvanMurzak_GameDev-MCP-Server_mq02bpin
+
+Source Tree:
+
+```txt
+arc_IvanMurzak_GameDev-MCP-Server_mq02bpin
+├── CLAUDE.md
+├── Dockerfile
+├── LICENSE
+├── NLog.config
+├── README.md
+├── appsettings.json
+├── build
+│   ├── build-all.ps1
+│   ├── build-all.sh
+│   └── entitlements.mac.plist
+├── com.IvanMurzak.GameDev.MCP.Server.csproj
+├── docs
+│   ├── NUGET.md
+│   └── img
+│       └── mcp-clients
+├── server.json
+├── src
+│   ├── Configure
+│   │   └── ConfigureCommand.cs
+│   ├── Program.cs
+│   ├── SessionMigrationHandler.cs
+│   ├── Startup
+│   │   ├── HostAuthDefaults.cs
+│   │   └── OriginAllowList.cs
+│   └── Utils
+│       ├── NLogAdapter.cs
+│       └── NLogLoggerProvider.cs
+└── tests
+    └── GameDev.MCP.Server.Tests
+        ├── ConfigureCommandTests.cs
+        ├── GameDev.MCP.Server.Tests.csproj
+        ├── HostAuthDefaultsTests.cs
+        ├── OriginAllowListTests.cs
+        ├── SessionMigrationRestartResumeTests.cs
+        └── SessionMigrationTtlTests.cs
+
+```
+
+`CLAUDE.md`:
+
+```md
+# CLAUDE.md
+
+## What this is
+
+Engine-agnostic C# ASP.NET Core MCP server shared by the Unity-MCP, Godot-MCP and Unreal-MCP engine plugins. Thin host (`src/Program.cs`) over the NuGet packages `com.IvanMurzak.McpPlugin.Server` + `com.IvanMurzak.ReflectorNet` — ALL real server logic lives in those packages; this repo contains no engine-specific code. Distributed as standalone executables (`gamedev-mcp-server-<rid>.zip`), a Docker image (`aigamedeveloper/mcp-server`), and a global dotnet tool on NuGet (`com.IvanMurzak.GameDev.MCP.Server`, command `gamedev-mcp-server`).
+
+**NOT AI-Game-Dev-Server (the ai-game.dev cloud LLM/billing proxy) — this is the local MCP stdio/http proxy host shared by the engine plugins.**
+
+## Build / run
+
+```bash
+dotnet build com.IvanMurzak.GameDev.MCP.Server.csproj
+dotnet run --project com.IvanMurzak.GameDev.MCP.Server.csproj -- --client-transport stdio --port 8080
+```
+
+- All-platform self-contained publish: `./build/build-all.sh` / `./build/build-all.ps1` (`--no-zip` / `-NoZip` for CI signing flows). The scripts live in `build/` and anchor `publish/` to the repo root, so they work from any cwd.
+- Local cross-project dev against MCP-Plugin-dotnet/ReflectorNet source (sibling checkouts): `dotnet build -p:UseLocalMcpPlugin=true`.
+
+## Versioning / releases
+
+- `<Version>` in the csproj + `server.json` move together. Keep the McpPlugin.Server / ReflectorNet pins in lockstep with the engine plugins (see the Compatibility table in README.md).
+- **NuGet readme is `docs/NUGET.md`, NOT the root README.** The root `README.md` is GitHub-flavoured HTML (centered divs, raw `<img>` banners, logo rows) that NuGet's markdown sanitizer mangles into run-together text; the csproj packs the plain-markdown `docs/NUGET.md` as `README.md`. Keep its versions/compatibility table in sync with the root README on each release. (NuGet bakes the readme into the published `.nupkg` — a readme fix only shows on nuget.org once a **new version** is published.)
+- `.github/workflows/deploy_server_executables.yml` (release-published trigger) builds, code-signs (Azure Trusted Signing on Windows, codesign+notarytool on macOS — gracefully degrading when secrets are absent) and uploads the 7 zips.
+- `.github/workflows/deploy_docker.yml` pushes `aigamedeveloper/mcp-server:<version>` + `:latest` (secrets `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN`).
+- `.github/workflows/deploy_nuget.yml` (release-published trigger) packs the global dotnet tool and pushes `com.IvanMurzak.GameDev.MCP.Server` to NuGet via Trusted Publishing (OIDC, `NuGet/login@v1` as `IvanMurzak` — no stored API key). All three deploy workflows fire on the same published release, so the NuGet tool, Docker image, and zips ship together. **One-time setup**: the package id (or its `com.IvanMurzak.*` reserved prefix) needs a NuGet.org Trusted Publishing policy bound to `IvanMurzak/GameDev-MCP-Server` before the first release, exactly as the sibling library repos have.
+
+```
+
+`Dockerfile`:
+
+```
+# See https://docs.microsoft.com/aspnet/core/host-and-deploy/docker/building-net-docker-images
+# for more information about using .NET with Docker.
+
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+
+# Copy main project file
+COPY ["com.IvanMurzak.GameDev.MCP.Server.csproj", "."]
+
+# Restore dependencies
+RUN dotnet restore "com.IvanMurzak.GameDev.MCP.Server.csproj"
+
+# Copy the rest of the source code
+COPY . .
+
+# Publish
+RUN dotnet publish "com.IvanMurzak.GameDev.MCP.Server.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# Pre-create the writable logs dir so the non-root runtime user can write NLog
+# output — the chiseled rootfs has no shell to mkdir at runtime.
+RUN mkdir -p /app/publish/logs
+
+# Runtime stage — chiseled (distroless) base: no shell, no apt, no perl/pam/tar,
+# runs as a non-root user. This drops the debian-bookworm OS-package CVEs that the
+# full aspnet:9.0 base carried. The *-extra variant still ships ICU + tzdata, so
+# globalization keeps working with no application change.
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble-chiseled-extra AS final
+WORKDIR /app
+# The app user in the chiseled images is UID/GID 1654 (APP_UID). Own the app tree
+# (including logs/) so the non-root process can write NLog files.
+COPY --from=build --chown=1654:1654 /app/publish .
+
+# MCP server metadata
+LABEL io.modelcontextprotocol.server.name="io.github.IvanMurzak/GameDev-MCP-Server"
+
+# Expose the default plugin port and the HTTP client port so external scanners
+# (like Smithery) and platform port mappings can reach the server.
+EXPOSE 8080
+
+ENTRYPOINT ["dotnet", "gamedev-mcp-server.dll"]
+
+```
+
+`LICENSE`:
+
+```
+                                 Apache License
+                           Version 2.0, January 2004
+                        Copyright (c) 2026 Ivan Murzak
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+
+```
+
+`NLog.config`:
+
+```config
+<?xml version="1.0" encoding="utf-8" ?>
+<nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <targets>
+    <!-- Write logs to a file -->
+    <target
+      xsi:type="File"
+      name="logFile"
+      fileName="logs/server-log.txt"
+      archiveAboveSize="10485760"
+      archiveNumbering="Rolling"
+      maxArchiveFiles="5"
+      layout="${longdate} | ${level:uppercase=true:padding=-5} | ${logger} | ${message} ${exception:format=toString}" />
+    <target
+      xsi:type="File"
+      name="errorLogFile"
+      fileName="logs/server-log-error.txt"
+      archiveAboveSize="10485760"
+      archiveNumbering="Rolling"
+      maxArchiveFiles="5"
+      layout="${longdate} | ${level:uppercase=true:padding=-5} | ${callsite:className=true:includeNamespace=false} | ${message} ${exception:format=toString}" />
+    <!-- Write logs to console with Microsoft-style colors -->
+    <target
+      xsi:type="ColoredConsole"
+      name="console"
+      layout="[${time:HH:mm:ss:fff}] ${when:when=level==LogLevel.Trace:inner=trce}${when:when=level==LogLevel.Debug:inner=dbug}${when:when=level==LogLevel.Info:inner=info}${when:when=level==LogLevel.Warn:inner=warn}${when:when=level==LogLevel.Error:inner=fail}${when:when=level==LogLevel.Fatal:inner=crit}: ${logger}[${event-properties:item=EventId_Id:whenEmpty=0}]${newline}      ${message} ${exception:format=toString}">
+      <highlight-row condition="level == LogLevel.Fatal" foregroundColor="White" backgroundColor="Red" />
+      <highlight-row condition="level == LogLevel.Error" foregroundColor="Red" />
+      <highlight-row condition="level == LogLevel.Warn" foregroundColor="Yellow" />
+      <highlight-row condition="level == LogLevel.Info" foregroundColor="White" />
+      <highlight-row condition="level == LogLevel.Debug" foregroundColor="Gray" />
+      <highlight-row condition="level == LogLevel.Trace" foregroundColor="Gray" />
+      <highlight-word text="trce:" foregroundColor="Gray" />
+      <highlight-word text="dbug:" foregroundColor="Gray" />
+      <highlight-word text="info:" foregroundColor="DarkGreen" />
+      <highlight-word text="warn:" foregroundColor="Yellow" />
+      <highlight-word text="fail:" foregroundColor="Red" />
+      <highlight-word text="crit:" foregroundColor="White" backgroundColor="Red" />
+    </target>
+  </targets>
+
+  <rules>
+    <logger name="Microsoft.*"  maxlevel="Warn"   final="true" />
+    <logger name="*"            minlevel="Trace"  maxlevel="Warn" writeTo="logFile,console" />
+    <logger name="*"            minlevel="Error"  writeTo="logFile,console,errorLogFile" />
+  </rules>
+
+  <extensions>
+    <add assembly="NLog.Web.AspNetCore"/>
+  </extensions>
+</nlog>
+
+```
+
+`README.md`:
+
+```md
+<div align="center" width="100%">
+
+  <h1>✨ AI Game Developer — <i>GameDev MCP Server</i></h1>
+
+[![NuGet](https://img.shields.io/nuget/v/com.IvanMurzak.GameDev.MCP.Server?label=NuGet&labelColor=333A41)](https://www.nuget.org/packages/com.IvanMurzak.GameDev.MCP.Server/)
+[![MCP](https://badge.mcpx.dev 'MCP Server')](https://modelcontextprotocol.io/introduction)
+[![Unreal](https://img.shields.io/badge/Unreal-Engine-0E1128?style=flat&logo=unrealengine&logoColor=white&labelColor=333A41 'Unreal-MCP plugin')](https://github.com/IvanMurzak/Unreal-MCP)
+[![Unity](https://img.shields.io/badge/Unity-Engine-000000?style=flat&logo=unity&logoColor=white&labelColor=333A41 'Unity-MCP plugin')](https://github.com/IvanMurzak/Unity-MCP)
+[![Godot](https://img.shields.io/badge/Godot-Engine-478CBF?style=flat&logo=godotengine&logoColor=white&labelColor=333A41 'Godot-MCP plugin')](https://github.com/IvanMurzak/Godot-MCP)</br>
+[![Discord](https://img.shields.io/badge/Discord-Join-7289da?logo=discord&logoColor=white&labelColor=333A41 'Join')](https://discord.gg/cfbdMZX99G)
+[![Stars](https://img.shields.io/github/stars/IvanMurzak/GameDev-MCP-Server 'Stars')](https://github.com/IvanMurzak/GameDev-MCP-Server/stargazers)
+[![License](https://img.shields.io/github/license/IvanMurzak/GameDev-MCP-Server?label=License&labelColor=333A41)](https://github.com/IvanMurzak/GameDev-MCP-Server/blob/main/LICENSE)
+[![Docker Image](https://img.shields.io/docker/image-size/aigamedeveloper/mcp-server/latest?label=Docker%20Image&logo=docker&logoColor=white&labelColor=333A41 'Docker Image')](https://hub.docker.com/r/aigamedeveloper/mcp-server)
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
+
+  <img src="https://github.com/IvanMurzak/GameDev-MCP-Server/raw/main/docs/img/ai-developer-banner.jpg" alt="AI Game Developer" title="AI Game Developer" width="100%">
+
+  <p>
+    <a href="https://claude.ai/download"><img src="https://github.com/IvanMurzak/GameDev-MCP-Server/raw/main/docs/img/mcp-clients/claude-64.png" alt="Claude" title="Claude" height="36"></a>&nbsp;&nbsp;
+    <a href="https://openai.com/index/introducing-codex/"><img src="https://github.com/IvanMurzak/GameDev-MCP-Server/raw/main/docs/img/mcp-clients/codex-64.png" alt="Codex" title="Codex" height="36"></a>&nbsp;&nbsp;
+    <a href="https://www.cursor.com/"><img src="https://github.com/IvanMurzak/GameDev-MCP-Server/raw/main/docs/img/mcp-clients/cursor-64.png" alt="Cursor" title="Cursor" height="36"></a>&nbsp;&nbsp;
+    <a href="https://code.visualstudio.com/docs/copilot/overview"><img src="https://github.com/IvanMurzak/GameDev-MCP-Server/raw/main/docs/img/mcp-clients/github-copilot-64.png" alt="GitHub Copilot" title="GitHub Copilot" height="36"></a>&nbsp;&nbsp;
+    <a href="https://gemini.google.com/"><img src="https://github.com/IvanMurzak/GameDev-MCP-Server/raw/main/docs/img/mcp-clients/gemini-64.png" alt="Gemini" title="Gemini" height="36"></a>&nbsp;&nbsp;
+    <a href="https://antigravity.google/"><img src="https://github.com/IvanMurzak/GameDev-MCP-Server/raw/main/docs/img/mcp-clients/antigravity-64.png" alt="Antigravity" title="Antigravity" height="36"></a>&nbsp;&nbsp;
+    <a href="https://code.visualstudio.com/"><img src="https://github.com/IvanMurzak/GameDev-MCP-Server/raw/main/docs/img/mcp-clients/vs-code-64.png" alt="VS Code" title="VS Code" height="36"></a>&nbsp;&nbsp;
+    <a href="https://www.jetbrains.com/rider/"><img src="https://github.com/IvanMurzak/GameDev-MCP-Server/raw/main/docs/img/mcp-clients/rider-64.png" alt="Rider" title="Rider" height="36"></a>&nbsp;&nbsp;
+    <a href="https://visualstudio.microsoft.com/"><img src="https://github.com/IvanMurzak/GameDev-MCP-Server/raw/main/docs/img/mcp-clients/visual-studio-64.png" alt="Visual Studio" title="Visual Studio" height="36"></a>&nbsp;&nbsp;
+    <a href="https://github.com/anthropics/claude-code"><img src="https://github.com/IvanMurzak/GameDev-MCP-Server/raw/main/docs/img/mcp-clients/open-code-64.png" alt="Open Code" title="Open Code" height="36"></a>&nbsp;&nbsp;
+    <a href="https://github.com/cline/cline"><img src="https://github.com/IvanMurzak/GameDev-MCP-Server/raw/main/docs/img/mcp-clients/cline-64.png" alt="Cline" title="Cline" height="36"></a>&nbsp;&nbsp;
+    <a href="https://github.com/Kilo-Org/kilocode"><img src="https://github.com/IvanMurzak/GameDev-MCP-Server/raw/main/docs/img/mcp-clients/kilo-code-64.png" alt="Kilo Code" title="Kilo Code" height="36"></a>
+  </p>
+
+</div>
+
+Engine-agnostic [Model Context Protocol](https://modelcontextprotocol.io/) server shared by the game-engine MCP plugins:
+
+- [Unity-MCP](https://github.com/IvanMurzak/Unity-MCP) — Unity Editor & games
+- [Godot-MCP](https://github.com/IvanMurzak/Godot-MCP) — Godot Editor & games
+- [Unreal-MCP](https://github.com/IvanMurzak/Unreal-MCP) — Unreal Editor & games
+
+<div align="center" width="100%">
+
+  <img src="https://github.com/IvanMurzak/GameDev-MCP-Server/raw/main/docs/img/docker-launch.gif" alt="Launching gamedev-mcp-server in Docker" title="Launching gamedev-mcp-server in Docker" width="100%">
+
+</div>
+
+It is a thin host over the NuGet packages [`com.IvanMurzak.McpPlugin.Server`](https://www.nuget.org/packages/com.IvanMurzak.McpPlugin.Server) and [`com.IvanMurzak.ReflectorNet`](https://www.nuget.org/packages/com.IvanMurzak.ReflectorNet), where all the real server logic lives. The server bridges MCP clients (Claude, Cursor, Copilot, …) and an engine plugin over SignalR:
+
+```
+MCP client  ⇄  gamedev-mcp-server  ⇄ (SignalR) ⇄  engine plugin (Unity / Godot / Unreal)
+```
+
+There is **no engine-specific code** in this repository — one server binary serves all three engine plugins. Tools, resources and prompts are provided dynamically by whichever engine plugin connects.
+
+> **Not to be confused with** [AI-Game-Dev-Server](https://ai-game.dev) — the cloud LLM/billing proxy. This project is the **local** MCP stdio/http proxy host.
+
+## Install / Run
+
+### Pre-built executables
+
+Download the zip for your platform from [Releases](https://github.com/IvanMurzak/GameDev-MCP-Server/releases) (`gamedev-mcp-server-<rid>.zip` — `win-x64`, `win-x86`, `win-arm64`, `linux-x64`, `linux-arm64`, `osx-x64`, `osx-arm64`), unzip, and run:
+
+```bash
+./gamedev-mcp-server --port 8080 --client-transport stdio
+```
+
+Typical MCP client configuration (stdio):
+
+```json
+{
+  "mcpServers": {
+    "GameDev-MCP": {
+      "command": "path/to/gamedev-mcp-server",
+      "args": ["--port=8080", "--client-transport=stdio"]
+    }
+  }
+}
+```
+
+### Docker
+
+```bash
+docker run -i --rm -p 8080:8080 aigamedeveloper/mcp-server
+```
+
+### dotnet tool
+
+```bash
+dotnet tool install --global com.IvanMurzak.GameDev.MCP.Server
+gamedev-mcp-server --port 8080
+```
+
+### Build from source
+
+```bash
+dotnet build com.IvanMurzak.GameDev.MCP.Server.csproj
+dotnet run --project com.IvanMurzak.GameDev.MCP.Server.csproj -- --client-transport stdio --port 8080
+```
+
+Cross-platform self-contained executables for all 7 RIDs: `./build/build-all.sh` (bash) or `./build/build-all.ps1` (PowerShell). Outputs land in `publish/<rid>/` and are zipped as `gamedev-mcp-server-<rid>.zip` (skip zipping with `--no-zip` / `-NoZip`).
+
+## Configuration
+
+CLI arguments override environment variables.
+
+| Environment variable | CLI argument | Default | Description |
+| --- | --- | --- | --- |
+| `MCP_PLUGIN_PORT` | `--port` | `8080` | Client → Server ← Plugin connection port |
+| `MCP_PLUGIN_CLIENT_TIMEOUT` | `--plugin-timeout` | `10000` | Plugin → Server connection timeout (ms) |
+| `MCP_PLUGIN_CLIENT_TRANSPORT` | `--client-transport` | `stdio` | Client → Server transport: `stdio` or `streamableHttp` |
+| `MCP_PLUGIN_IDLE_TIMEOUT_SECONDS` | `--idle-timeout-seconds` | `21600` | streamableHttp idle-session eviction window (this host seeds 6h instead of the package default of 600s) |
+| `MCP_AUTH` | `--auth` | transport-dependent (see [Authentication](#authentication)) | Authentication mode: `none` or `oauth` |
+| `MCP_AUTH_ISSUER` | `--auth-issuer` | — | OAuth authorization-server URL (e.g. `https://ai-game.dev`). Required for `oauth` |
+| `MCP_PUBLIC_URL` | `--public-url` | — | This server's canonical public URL / token audience (e.g. `https://ai-game.dev/mcp`). Required for `oauth`; seeds the Origin allow-list |
+| `MCP_BIND` | `--bind` | `loopback` | Bind address: `loopback`, `any` (0.0.0.0), or a specific IP. Hosted deploys behind a proxy set `any`/`0.0.0.0` |
+| `MCP_ALLOWED_ORIGINS` | `--allowed-origins` | — | Comma/semicolon-separated additional allowed browser Origins (added to loopback + the `--public-url` origin) |
+
+Logs are written to `logs/server-log.txt` (and `logs/server-log-error.txt`); in stdio mode console logging is redirected to stderr so stdout stays clean for the MCP JSON stream.
+
+## Authentication
+
+The server is an OAuth 2.1 **resource server**. Two modes:
+
+| Mode | Auth | Default for | Use |
+| --- | --- | --- | --- |
+| `none` | none — single-instance, zero-config | **stdio** | offline / local dev / CI |
+| `oauth` | ES256 JWT validated locally via cached JWKS (with PAT introspection fallback); `401` + `resource_metadata` challenge | **streamableHttp** | signed-in localhost **and** hosted |
+
+- **Transport-conditional default:** `stdio` defaults to `none`. `streamableHttp` defaults to `oauth` **when both `--auth-issuer` and `--public-url` are configured**; otherwise it stays on `none` and logs a warning (so the zero-config `docker run` / `--port 8080` quickstart still works). An explicit `--auth` always wins.
+- **`oauth` requires** `--auth-issuer` (the authorization server, e.g. `https://ai-game.dev`) **and** `--public-url` (this server's canonical audience). Startup fails fast if either is missing while `--auth oauth` is set.
+- **Origin validation** (DNS-rebinding defense) runs in **all** modes: a request with a non-allowed `Origin` gets `403`. Loopback and the `--public-url` origin are allowed by default; add more with `MCP_ALLOWED_ORIGINS`.
+- **Bind** defaults to loopback. Set `--bind any` (or `0.0.0.0`) for a hosted deployment a reverse proxy must reach.
+
+```bash
+# Local, offline (stdio, none) — unchanged zero-config default:
+gamedev-mcp-server --client-transport stdio --port 8080
+
+# Hosted resource server (streamableHttp, oauth), reachable by nginx:
+gamedev-mcp-server --client-transport streamableHttp --port 8080 \
+  --auth oauth --auth-issuer https://ai-game.dev --public-url https://ai-game.dev/mcp \
+  --bind 0.0.0.0
+```
+
+## Configure an AI agent
+
+Write a project-scoped, pinned MCP client config for any supported AI agent from the terminal — no editor UI, no token copy/paste (native OAuth authorize):
+
+```bash
+# Local server, current project:
+gamedev-mcp-server configure --agent claude-code
+# Hosted server:
+gamedev-mcp-server configure --agent codex --url https://ai-game.dev/mcp
+# List agents:
+gamedev-mcp-server configure --help
+```
+
+Each written config is **URL-only** (credentials are never written into project files) and carries the project pin (`…/p/<pin>` path segment) plus, for local servers, the deterministic per-project port — so agent sessions launched in this project folder route strictly to this project's engine. `--agent <id>` accepts any id from `configure --help` (e.g. `claude-code`, `codex`, `cursor`, `vscode-copilot`, …); `--transport stdio` writes a stdio spawn config instead of an HTTP one; `--project <path>` targets a different project root (default: current directory).
+
+## Compatibility
+
+| GameDev-MCP-Server | McpPlugin.Server | ReflectorNet | Engine plugins |
+| --- | --- | --- | --- |
+| 8.0.3 (released) | 6.11.0 | 5.3.1 | engine plugins on McpPlugin **6.x** |
+| 9.0.0 (released) | 7.0.0-preview.1 | 5.3.2 | engine plugins on McpPlugin **7.x** (Phase 4) |
+
+> **Development snapshot.** The released `9.0.0` server line builds against **McpPlugin.Server 7.0.0-preview.1** (the mcp-authorize resource-server major). The `main` branch is now an in-development **`9.1.0`** snapshot building against **McpPlugin.Server 7.1.1** — its `<Version>` / `server.json` version bump and the Docker/zip/dotnet-tool publish are a separate, owner-gated release step. Any `9.x` server needs an engine plugin built on McpPlugin **7.x** (the instance-metadata handshake + `oauth` mode); older McpPlugin 6.x plugins pair with the released `8.0.3` server line.
+
+## License
+
+[Apache-2.0](LICENSE) — Copyright (c) 2026 Ivan Murzak
+
+```
+
+`appsettings.json`:
+
+```json
+{
+    "Logging": {
+        "LogLevel": {
+            "Default": "Trace",
+            "Microsoft": "Information",
+            "Microsoft.Hosting.Lifetime": "Information"
+        }
+    }
+}
+
+```
+
+`build/build-all.ps1`:
+
+```ps1
+#!/usr/bin/env pwsh
+# Universal PowerShell script to build self-contained executables for all platforms
+# Works on Windows, macOS, and Linux with PowerShell Core
+
+param(
+    [string]$Configuration = "Release",
+    [string]$ProjectFile = "com.IvanMurzak.GameDev.MCP.Server.csproj",
+    [string[]]$Platforms = @(),
+    # Build/publish only; skip the zip-archive phase. Used by CI when the
+    # executables must be code-signed AFTER publish and BEFORE zipping.
+    [switch]$NoZip
+)
+
+Write-Host "Building self-contained executables..." -ForegroundColor Green
+
+# This script lives in build/; the project + publish output are at the repo root,
+# one level up. Anchor both to $RepoRoot so the script works regardless of the
+# caller's working directory (CI invokes it as ./build/build-all.ps1 from root).
+$RepoRoot = Split-Path -Parent $PSScriptRoot
+if (-not [System.IO.Path]::IsPathRooted($ProjectFile)) {
+    $ProjectFile = Join-Path $RepoRoot $ProjectFile
+}
+
+# Root output directory (at the repo root, alongside the project)
+$PublishRoot = Join-Path $RepoRoot "publish"
+if (Test-Path $PublishRoot) {
+    Write-Host "Cleaning existing publish folder..." -ForegroundColor Cyan
+    try {
+        Remove-Item $PublishRoot -Recurse -Force -ErrorAction Stop
+    }
+    catch {
+        Write-Host "Failed to clean publish folder: $($_.Exception.Message)" -ForegroundColor Red
+        exit 1
+    }
+}
+New-Item -ItemType Directory -Path $PublishRoot | Out-Null
+
+$allRuntimes = @(
+    "win-x64",
+    "win-x86",
+    "win-arm64",
+    "linux-x64",
+    "linux-arm64",
+    "osx-x64",
+    "osx-arm64"
+)
+
+$runtimes = if ($Platforms.Count -gt 0) {
+    $allRuntimes | Where-Object { $_ -in $Platforms }
+} else {
+    $allRuntimes
+}
+
+if ($runtimes.Count -eq 0 -and $Platforms.Count -gt 0) {
+    Write-Host "No valid runtimes found matching: $($Platforms -join ', ')" -ForegroundColor Red
+    Write-Host "Available runtimes: $($allRuntimes -join ', ')" -ForegroundColor Cyan
+    exit 1
+}
+
+Write-Host "Target runtimes: $($runtimes -join ', ')" -ForegroundColor Cyan
+
+$success = 0
+$failed = 0
+
+foreach ($runtime in $runtimes) {
+    Write-Host "Building for $runtime..." -ForegroundColor Yellow
+
+    $outputPath = Join-Path $PublishRoot $runtime
+    if (-not (Test-Path $outputPath)) { New-Item -ItemType Directory -Path $outputPath | Out-Null }
+
+    $publishArgs = @(
+        "publish",
+        $ProjectFile,
+        "-c", $Configuration,
+        "-r", $runtime,
+        "--self-contained", "true",
+        "-p:PublishSingleFile=true",
+        "-o", $outputPath
+    )
+
+    Write-Host "Executing: dotnet $($publishArgs -join ' ')" -ForegroundColor DarkGray
+
+    try {
+        dotnet @publishArgs
+        $exitCode = $LASTEXITCODE
+    }
+    catch {
+        Write-Host "Error executing dotnet publish: $($_.Exception.Message)" -ForegroundColor Red
+        $exitCode = 1
+    }
+
+    if ($exitCode -eq 0) {
+        Write-Host "Successfully built $runtime" -ForegroundColor Green
+        $success++
+    }
+    else {
+        Write-Host "Failed to build $runtime (exit code: $exitCode)" -ForegroundColor Red
+        $failed++
+    }
+}
+
+Write-Host "`nBuild Summary:" -ForegroundColor Cyan
+Write-Host "Success: $success" -ForegroundColor Green
+Write-Host "Failed: $failed" -ForegroundColor Red
+
+if ($failed -gt 0) {
+    Write-Host "`nSome builds failed. Check the output above." -ForegroundColor Yellow
+    exit 1
+}
+
+Write-Host "`nAll builds completed successfully!" -ForegroundColor Green
+Write-Host "Executables are located in: $PublishRoot" -ForegroundColor Yellow
+Write-Host "Per-platform folders: ./publish/{runtime}/" -ForegroundColor Yellow
+
+if ($NoZip) {
+    Write-Host "`n-NoZip specified: skipping zip-archive phase (executables left unzipped in ./publish/{runtime}/)." -ForegroundColor Cyan
+    exit 0
+}
+
+Write-Host "`nCreating zip archives for each runtime..." -ForegroundColor Cyan
+
+$zipSuccess = 0
+$zipFailed = 0
+
+foreach ($runtime in $runtimes) {
+    $runtimePath = Join-Path $PublishRoot $runtime
+
+    if (Test-Path $runtimePath) {
+        Write-Host "Creating zip for $runtime..." -ForegroundColor Yellow
+
+        $zipName = "gamedev-mcp-server-$runtime.zip"
+        $zipPath = Join-Path $PublishRoot $zipName
+
+        try {
+            if (Test-Path $zipPath) {
+                Remove-Item $zipPath -Force
+            }
+
+            Add-Type -AssemblyName System.IO.Compression.FileSystem
+            [System.IO.Compression.ZipFile]::CreateFromDirectory($runtimePath, $zipPath)
+
+            Write-Host "Successfully created $zipName" -ForegroundColor Green
+            $zipSuccess++
+        }
+        catch {
+            Write-Host "Failed to create $zipName : $($_.Exception.Message)" -ForegroundColor Red
+            $zipFailed++
+        }
+    }
+    else {
+        Write-Host "Skipping $runtime - directory not found" -ForegroundColor Yellow
+        $zipFailed++
+    }
+}
+
+Write-Host "`nZip Creation Summary:" -ForegroundColor Cyan
+Write-Host "Success: $zipSuccess" -ForegroundColor Green
+Write-Host "Failed: $zipFailed" -ForegroundColor Red
+
+if ($zipFailed -eq 0) {
+    Write-Host "`nAll zip archives created successfully!" -ForegroundColor Green
+    Write-Host "Zip files are located in: $PublishRoot" -ForegroundColor Yellow
+    Write-Host "Created files:" -ForegroundColor Cyan
+
+    $zipFiles = Get-ChildItem -Path $PublishRoot -Filter "*.zip" -ErrorAction SilentlyContinue
+    if ($zipFiles) {
+        foreach ($zipFile in $zipFiles) {
+            $sizeKB = [math]::Round($zipFile.Length / 1KB, 2)
+            Write-Host "  $($zipFile.Name) ($sizeKB KB)" -ForegroundColor White
+        }
+    }
+} else {
+    Write-Host "`n$zipFailed zip archive(s) failed to create. See errors above." -ForegroundColor Red
+    exit 1
+}
+
+```
+
+`build/build-all.sh`:
+
+```sh
+#!/bin/bash
+# Universal bash script to build self-contained executables for all platforms
+# Works on macOS and Linux
+
+set -uo pipefail
+
+CONFIGURATION="Release"
+PROJECT_FILE="com.IvanMurzak.GameDev.MCP.Server.csproj"
+SPECIFIED_PLATFORMS=()
+NO_ZIP=false
+
+all_runtimes=(
+    "win-x64"
+    "win-x86"
+    "win-arm64"
+    "linux-x64"
+    "linux-arm64"
+    "osx-x64"
+    "osx-arm64"
+)
+
+# Argument parsing
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -c|--configuration)
+            CONFIGURATION="$2"
+            shift 2
+            ;;
+        --no-zip)
+            # Build/publish only; skip the zip-archive phase. Used by CI when
+            # executables must be code-signed AFTER publish and BEFORE zipping.
+            NO_ZIP=true
+            shift
+            ;;
+        Debug|Release)
+            CONFIGURATION="$1"
+            shift
+            ;;
+        *.csproj)
+            PROJECT_FILE="$1"
+            shift
+            ;;
+        *)
+            # Check if it's a known runtime
+            is_runtime=false
+            for runtime in "${all_runtimes[@]}"; do
+                if [ "$1" == "$runtime" ]; then
+                    SPECIFIED_PLATFORMS+=("$1")
+                    is_runtime=true
+                    break
+                fi
+            done
+            if [ "$is_runtime" = false ]; then
+                echo "Unknown argument: $1"
+                echo "Usage: $0 [Debug|Release] [-c|--configuration <config>] [--no-zip] [*.csproj] [runtime...]"
+                echo "Known runtimes: ${all_runtimes[*]}"
+                exit 1
+            fi
+            shift
+            ;;
+    esac
+done
+
+SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# This script lives in build/; the project + publish output are at the repo root,
+# one level up. Anchor both to REPO_ROOT so the script works regardless of the
+# caller's working directory (CI invokes it as ./build/build-all.sh from root).
+REPO_ROOT="$( cd -- "${SCRIPT_DIR}/.." &> /dev/null && pwd )"
+PUBLISH_ROOT="${REPO_ROOT}/publish"
+# Resolve a relative project file against the repo root (absolute paths untouched).
+case "${PROJECT_FILE}" in
+    /*) ;;
+    *)  PROJECT_FILE="${REPO_ROOT}/${PROJECT_FILE}" ;;
+esac
+
+echo "Building self-contained executables..."
+
+# Clean publish root
+if [ -d "${PUBLISH_ROOT}" ]; then
+    echo "Cleaning existing publish folder..."
+    rm -rf "${PUBLISH_ROOT}" || { echo "Failed to remove publish folder"; exit 1; }
+fi
+mkdir -p "${PUBLISH_ROOT}" || { echo "Failed to create publish folder"; exit 1; }
+
+# Filter runtimes if platforms are specified
+runtimes=()
+if [ ${#SPECIFIED_PLATFORMS[@]} -gt 0 ]; then
+    runtimes=("${SPECIFIED_PLATFORMS[@]}")
+else
+    runtimes=("${all_runtimes[@]}")
+fi
+
+echo "Configuration: ${CONFIGURATION}"
+echo "Project File: ${PROJECT_FILE}"
+echo "Target runtimes: ${runtimes[*]}"
+echo ""
+
+success=0
+failed=0
+
+for runtime in "${runtimes[@]}"; do
+    echo "Building for ${runtime}..."
+
+    OUTPUT_PATH="${PUBLISH_ROOT}/${runtime}"
+    mkdir -p "${OUTPUT_PATH}"
+
+    echo "Running: dotnet publish ${PROJECT_FILE} -c ${CONFIGURATION} -r ${runtime} --self-contained true -p:PublishSingleFile=true -o ${OUTPUT_PATH}"
+    if dotnet publish "${PROJECT_FILE}" \
+        -c "${CONFIGURATION}" \
+        -r "${runtime}" \
+        --self-contained true \
+        -p:PublishSingleFile=true \
+        -o "${OUTPUT_PATH}" 2>&1; then
+        echo "Successfully built ${runtime} -> ${OUTPUT_PATH}"
+        ((success++))
+    else
+        echo "Failed to build ${runtime}"
+        ((failed++))
+    fi
+    echo ""
+done
+
+echo "Build Summary:"
+echo "Success: $success"
+echo "Failed: $failed"
+
+if [ $failed -eq 0 ]; then
+    echo ""
+    echo "All builds completed successfully!"
+    echo "Executables are located in: ${PUBLISH_ROOT}/{runtime}/"
+
+    if [ "$NO_ZIP" = true ]; then
+        echo ""
+        echo "--no-zip specified: skipping zip-archive phase (executables left unzipped in ${PUBLISH_ROOT}/{runtime}/)."
+        exit 0
+    fi
+
+    echo ""
+    echo "Creating zip archives for each runtime..."
+
+    # Change to publish directory
+    cd "${PUBLISH_ROOT}"
+
+    zip_success=0
+    zip_failed=0
+
+    for runtime in "${runtimes[@]}"; do
+        if [ -d "${runtime}" ]; then
+            echo "Creating zip for ${runtime}..."
+
+            ZIP_NAME="gamedev-mcp-server-${runtime}.zip"
+
+            if zip -r "${ZIP_NAME}" "${runtime}/" > /dev/null 2>&1; then
+                echo "Successfully created ${ZIP_NAME}"
+                ((zip_success++))
+            else
+                echo "Failed to create ${ZIP_NAME}"
+                ((zip_failed++))
+            fi
+        else
+            echo "Skipping ${runtime} - directory not found"
+            ((zip_failed++))
+        fi
+    done
+
+    echo ""
+    echo "Zip Creation Summary:"
+    echo "Success: $zip_success"
+    echo "Failed: $zip_failed"
+
+    if [ $zip_failed -eq 0 ]; then
+        echo ""
+        echo "All zip archives created successfully!"
+        echo "Zip files are located in: ${PUBLISH_ROOT}/"
+        echo "Created files:"
+        ls -la *.zip 2>/dev/null || echo "No zip files found"
+    else
+        echo ""
+        echo "Some zip creations failed. Check the output above."
+    fi
+else
+    echo ""
+    echo "Some builds failed. Check the output above. Partial outputs: ${PUBLISH_ROOT}"
+    exit 1
+fi
+
+```
+
+`build/entitlements.mac.plist`:
+
+```plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!--
+    Hardened-runtime entitlements required for the self-contained .NET
+    (single-file) gamedev-mcp-server host to run under Gatekeeper AND pass
+    Apple notarization. The .NET runtime JITs managed code, so it needs
+    allow-jit; the single-file host extracts/loads native libraries that are
+    not all individually signed under this identity, so it needs
+    disable-library-validation. Trimmed to what the server host actually
+    requires.
+  -->
+  <key>com.apple.security.cs.allow-jit</key>
+  <true/>
+  <key>com.apple.security.cs.disable-library-validation</key>
+  <true/>
+</dict>
+</plist>
+
+```
+
+`com.IvanMurzak.GameDev.MCP.Server.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>com.IvanMurzak.GameDev.MCP.Server</RootNamespace>
+    <AssemblyName>gamedev-mcp-server</AssemblyName>
+
+    <!-- NuGet Package Properties -->
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>gamedev-mcp-server</ToolCommandName>
+    <PackageId>com.IvanMurzak.GameDev.MCP.Server</PackageId>
+    <Version>9.1.1</Version>
+    <Authors>Ivan Murzak</Authors>
+    <Company>Ivan Murzak</Company>
+    <Copyright>Copyright © 2026 Ivan Murzak</Copyright>
+    <Description>GameDev MCP Server - An engine-agnostic Model Context Protocol server that enables AI assistants to interact with game engine editors and games through the Unity-MCP, Godot-MCP and Unreal-MCP plugins</Description>
+    <PackageTags>gamedev;unity;godot;unreal;mcp;model-context-protocol;ai;assistant;signalr;dotnet-tool</PackageTags>
+    <RepositoryUrl>https://github.com/IvanMurzak/GameDev-MCP-Server</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/IvanMurzak/GameDev-MCP-Server</PackageProjectUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>First release of the shared GameDev MCP Server as a global dotnet tool</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <!-- Expose internal helpers (e.g. ConfigureCommand's pure resolvers) to the test project. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="GameDev.MCP.Server.Tests" />
+  </ItemGroup>
+
+  <!-- Disable static web assets manifests & strip debug symbols for lean Release output -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <GenerateStaticWebAssetsManifest>false</GenerateStaticWebAssetsManifest>
+    <GenerateStaticWebAssetsEndpointsManifest>false</GenerateStaticWebAssetsEndpointsManifest>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+  </PropertyGroup>
+
+  <!--
+    Local development toggle: build with /p:UseLocalMcpPlugin=true to reference
+    MCP-Plugin-dotnet source instead of NuGet packages (expects MCP-Plugin-dotnet
+    and ReflectorNet checked out as sibling folders, as in the infra workspace).
+    Useful for verifying cross-project changes before publishing.
+  -->
+  <PropertyGroup>
+    <UseLocalMcpPlugin Condition="'$(UseLocalMcpPlugin)' == ''">false</UseLocalMcpPlugin>
+  </PropertyGroup>
+
+  <!--
+    The server core lives entirely in the McpPlugin.Server package; there is no
+    engine-specific server code in this repository. Keep these pins in lockstep
+    with the engine plugins (Unity-MCP / Godot-MCP / Unreal-MCP).
+  -->
+  <ItemGroup Condition="'$(UseLocalMcpPlugin)' != 'true'">
+    <PackageReference Include="com.IvanMurzak.ReflectorNet" Version="5.3.2" />
+    <PackageReference Include="com.IvanMurzak.McpPlugin.Server" Version="7.2.0" />
+    <!--
+      Base McpPlugin package: the McpPlugin.Server package does NOT depend on it, but it hosts the
+      shared AI-agent configurator registry (AiAgentConfiguratorRegistry) + ProjectIdentity /
+      ProjectMarker primitives the `configure` subcommand consumes from the terminal. Pinned in
+      lockstep with McpPlugin.Server.
+    -->
+    <PackageReference Include="com.IvanMurzak.McpPlugin" Version="7.2.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseLocalMcpPlugin)' == 'true'">
+    <ProjectReference Include="./../MCP-Plugin-dotnet/McpPlugin.Server/McpPlugin.Server.csproj" />
+    <ProjectReference Include="./../MCP-Plugin-dotnet/McpPlugin/McpPlugin.csproj" />
+    <ProjectReference Include="./../ReflectorNet/ReflectorNet/ReflectorNet.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.15" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="6.1.2" />
+    <PackageReference Include="R3" Version="1.3.0" />
+  </ItemGroup>
+
+  <!--
+    Include package files. The NuGet readme is a dedicated, plain-markdown file
+    (docs/NUGET.md) packed as README.md — the GitHub root README.md is heavy HTML
+    (centered divs, raw <img> banners, logo rows) that NuGet's markdown sanitizer
+    mangles into run-together text. Keep docs/NUGET.md in sync when release facts
+    (versions, compatibility table) change.
+  -->
+  <ItemGroup>
+    <None Include="LICENSE" Pack="true" PackagePath="" />
+    <None Include="docs/NUGET.md" Pack="true" PackagePath="README.md" />
+  </ItemGroup>
+
+  <!-- Exclude the local publish output folder so successive publishes don't recursively include previous outputs -->
+  <ItemGroup>
+    <None Remove="publish/**" />
+    <Content Remove="publish/**" />
+    <EmbeddedResource Remove="publish/**" />
+  </ItemGroup>
+
+  <!--
+    This root Microsoft.NET.Sdk.Web project globs **/*.cs from the repo root, so it
+    would otherwise try to compile the xUnit test sources under tests/ (breaking both
+    `dotnet build` and the Dockerfile's `dotnet publish`). The test project builds on
+    its own via `dotnet test tests/.../*.csproj`. Exclude tests/ from the host project.
+  -->
+  <ItemGroup>
+    <Compile Remove="tests/**/*.cs" />
+    <Content Remove="tests/**/*" />
+    <EmbeddedResource Remove="tests/**/*" />
+    <None Remove="tests/**/*" />
+  </ItemGroup>
+
+</Project>
+
+```
+
+`docs/NUGET.md`:
+
+```md
+# AI Game Developer — GameDev MCP Server
+
+[![NuGet](https://img.shields.io/nuget/v/com.IvanMurzak.GameDev.MCP.Server?label=NuGet&labelColor=333A41)](https://www.nuget.org/packages/com.IvanMurzak.GameDev.MCP.Server/)
+[![Docker Image](https://img.shields.io/docker/image-size/aigamedeveloper/mcp-server/latest?label=Docker%20Image&logo=docker&logoColor=white&labelColor=333A41)](https://hub.docker.com/r/aigamedeveloper/mcp-server)
+[![License](https://img.shields.io/github/license/IvanMurzak/GameDev-MCP-Server?label=License&labelColor=333A41)](https://github.com/IvanMurzak/GameDev-MCP-Server/blob/main/LICENSE)
+
+Engine-agnostic [Model Context Protocol](https://modelcontextprotocol.io/) server shared by the game-engine MCP plugins:
+
+- [Unity-MCP](https://github.com/IvanMurzak/Unity-MCP) — Unity Editor & games
+- [Godot-MCP](https://github.com/IvanMurzak/Godot-MCP) — Godot Editor & games
+- [Unreal-MCP](https://github.com/IvanMurzak/Unreal-MCP) — Unreal Editor & games
+
+It is a thin host over the NuGet packages [`com.IvanMurzak.McpPlugin.Server`](https://www.nuget.org/packages/com.IvanMurzak.McpPlugin.Server) and [`com.IvanMurzak.ReflectorNet`](https://www.nuget.org/packages/com.IvanMurzak.ReflectorNet), where all the real server logic lives. The server bridges MCP clients (Claude, Cursor, Copilot, …) and an engine plugin over SignalR:
+
+```
+MCP client  <->  gamedev-mcp-server  <-> (SignalR) <->  engine plugin (Unity / Godot / Unreal)
+```
+
+There is **no engine-specific code** in this package — one server binary serves all three engine plugins. Tools, resources and prompts are provided dynamically by whichever engine plugin connects.
+
+> **Not to be confused with** [AI-Game-Dev-Server](https://ai-game.dev) — the cloud LLM/billing proxy. This project is the **local** MCP stdio/http proxy host.
+
+## Install
+
+### dotnet tool (this package)
+
+```bash
+dotnet tool install --global com.IvanMurzak.GameDev.MCP.Server
+gamedev-mcp-server --port 8080
+```
+
+Typical MCP client configuration (stdio):
+
+```json
+{
+  "mcpServers": {
+    "GameDev-MCP": {
+      "command": "gamedev-mcp-server",
+      "args": ["--port=8080", "--client-transport=stdio"]
+    }
+  }
+}
+```
+
+### Docker
+
+```bash
+docker run -i --rm -p 8080:8080 aigamedeveloper/mcp-server
+```
+
+### Pre-built executables
+
+Download the zip for your platform from [Releases](https://github.com/IvanMurzak/GameDev-MCP-Server/releases) — `gamedev-mcp-server-<rid>.zip` for `win-x64`, `win-x86`, `win-arm64`, `linux-x64`, `linux-arm64`, `osx-x64`, `osx-arm64` — unzip, and run:
+
+```bash
+./gamedev-mcp-server --port 8080 --client-transport stdio
+```
+
+## Configuration
+
+CLI arguments override environment variables.
+
+| Environment variable | CLI argument | Default | Description |
+| --- | --- | --- | --- |
+| `MCP_PLUGIN_PORT` | `--port` | `8080` | Client to Server to Plugin connection port |
+| `MCP_PLUGIN_CLIENT_TIMEOUT` | `--plugin-timeout` | `10000` | Plugin to Server connection timeout (ms) |
+| `MCP_PLUGIN_CLIENT_TRANSPORT` | `--client-transport` | `stdio` | Client to Server transport: `stdio` or `streamableHttp` |
+| `MCP_PLUGIN_IDLE_TIMEOUT_SECONDS` | `--idle-timeout-seconds` | `21600` | streamableHttp idle-session eviction window |
+| `MCP_AUTH` | `--auth` | transport-dependent | Authentication mode: `none` or `oauth` (stdio -> none; http -> oauth when issuer + public-url set) |
+| `MCP_AUTH_ISSUER` | `--auth-issuer` | — | OAuth authorization-server URL. Required for `oauth` |
+| `MCP_PUBLIC_URL` | `--public-url` | — | Canonical public URL / token audience. Required for `oauth` |
+| `MCP_BIND` | `--bind` | `loopback` | Bind address: `loopback`, `any` (0.0.0.0), or a specific IP |
+| `MCP_ALLOWED_ORIGINS` | `--allowed-origins` | — | Additional allowed browser Origins (comma/semicolon-separated) |
+
+In stdio mode console logging is redirected to stderr so stdout stays clean for the MCP JSON stream.
+
+Write a pinned, URL-only MCP client config for an AI agent from the terminal:
+`gamedev-mcp-server configure --agent claude-code` (or `--agent codex --url https://ai-game.dev/mcp`; `configure --help` lists all agents).
+
+## Compatibility
+
+| GameDev-MCP-Server | McpPlugin.Server | ReflectorNet | Engine plugins |
+| --- | --- | --- | --- |
+| 8.0.3 (released) | 6.11.0 | 5.3.1 | engine plugins on McpPlugin 6.x |
+| 9.0.0 (released) | 7.0.0-preview.1 | 5.3.2 | engine plugins on McpPlugin 7.x (Phase 4) |
+
+The released `9.0.0` server line builds against McpPlugin.Server 7.0.0-preview.1 (the OAuth resource-server major). The `main` branch is now an in-development `9.1.0` snapshot building against McpPlugin.Server 7.1.1; its version bump + publish is a separate owner-gated release step. Older McpPlugin 6.x engine plugins pair with the released `8.0.3` server line.
+
+## Links
+
+- **Source & full documentation:** [github.com/IvanMurzak/GameDev-MCP-Server](https://github.com/IvanMurzak/GameDev-MCP-Server)
+- **Discord:** [discord.gg/cfbdMZX99G](https://discord.gg/cfbdMZX99G)
+
+## License
+
+[Apache-2.0](https://github.com/IvanMurzak/GameDev-MCP-Server/blob/main/LICENSE) — Copyright © 2026 Ivan Murzak
+
+```
+
+`server.json`:
+
+```json
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.IvanMurzak/GameDev-MCP-Server",
+  "description": "Make games with AI. Engine-agnostic MCP server shared by the Unity-MCP, Godot-MCP and Unreal-MCP editor plugins.",
+  "status": "active",
+  "repository": {
+    "url": "https://github.com/IvanMurzak/GameDev-MCP-Server",
+    "source": "github"
+  },
+  "version": "9.1.1",
+  "packages": [
+    {
+      "registry_type": "oci",
+      "registry_base_url": "https://docker.io",
+      "identifier": "aigamedeveloper/mcp-server",
+      "version": "9.1.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environment_variables": [
+        {
+          "name": "MCP_PLUGIN_PORT",
+          "description": "Client -> Server <- Plugin connection port (default: 8080)",
+          "format": "number",
+          "is_required": false,
+          "is_secret": false
+        },
+        {
+          "name": "MCP_PLUGIN_CLIENT_TIMEOUT",
+          "description": "Plugin -> Server connection timeout (ms) (default: 10000)",
+          "format": "number",
+          "is_required": false,
+          "is_secret": false
+        },
+        {
+          "name": "MCP_PLUGIN_CLIENT_TRANSPORT",
+          "description": "Client -> Server transport type: stdio or streamableHttp (default: stdio)",
+          "format": "string",
+          "default": "stdio",
+          "enum": [
+            "streamableHttp",
+            "stdio"
+          ],
+          "is_required": false,
+          "is_secret": false
+        },
+        {
+          "name": "MCP_AUTH",
+          "description": "Authentication mode: none or oauth. Default depends on transport: stdio -> none (offline/local/CI), streamableHttp -> oauth when MCP_AUTH_ISSUER + MCP_PUBLIC_URL are set, otherwise none. oauth validates ES256 JWTs (via cached JWKS) issued by MCP_AUTH_ISSUER, audienced to MCP_PUBLIC_URL.",
+          "format": "string",
+          "default": "none",
+          "enum": [
+            "none",
+            "oauth"
+          ],
+          "is_required": false,
+          "is_secret": false
+        },
+        {
+          "name": "MCP_AUTH_ISSUER",
+          "description": "OAuth authorization-server URL (e.g. https://ai-game.dev). Required when MCP_AUTH=oauth.",
+          "format": "string",
+          "is_required": false,
+          "is_secret": false
+        },
+        {
+          "name": "MCP_PUBLIC_URL",
+          "description": "This server's canonical public resource URL (its token audience, e.g. https://ai-game.dev/mcp). Required when MCP_AUTH=oauth; also seeds the Origin allow-list.",
+          "format": "string",
+          "is_required": false,
+          "is_secret": false
+        },
+        {
+          "name": "MCP_BIND",
+          "description": "Network bind address: loopback (default), any (0.0.0.0), or a specific IP. Hosted deploys reachable by a reverse proxy set MCP_BIND=0.0.0.0.",
+          "format": "string",
+          "default": "loopback",
+          "is_required": false,
+          "is_secret": false
+        },
+        {
+          "name": "MCP_ALLOWED_ORIGINS",
+          "description": "Comma/semicolon-separated additional allowed Origins for browser clients (in addition to loopback + the MCP_PUBLIC_URL origin). Avoids a blanket wildcard on credentialed paths.",
+          "format": "string",
+          "is_required": false,
+          "is_secret": false
+        }
+      ]
+    }
+  ]
+}
+```
+
+`src/Configure/ConfigureCommand.cs`:
+
+```cs
+/*
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Author: Ivan Murzak (https://github.com/IvanMurzak)                      │
+│  Repository: GitHub (https://github.com/IvanMurzak/GameDev-MCP-Server)    │
+│  Copyright (c) 2026 Ivan Murzak                                           │
+│  Licensed under the Apache License, Version 2.0.                          │
+│  See the LICENSE file in the project root for more information.           │
+└───────────────────────────────────────────────────────────────────────────┘
+*/
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using com.IvanMurzak.McpPlugin.AgentConfig;  // AiAgentConfigurator(Registry|Settings), AiAgentConfig, ConnectionMode, ProjectIdentity, ProjectMarker
+using com.IvanMurzak.McpPlugin.Common;       // Consts (+ nested Consts.MCP.Server.AuthOption)
+using com.IvanMurzak.McpPlugin.Common.Utils; // ArgsUtils
+
+namespace com.IvanMurzak.GameDev.MCP.Server.Configure
+{
+    /// <summary>
+    /// Terminal subcommand: <c>gamedev-mcp-server configure --agent &lt;id&gt; [--url &lt;url&gt;]
+    /// [--transport stdio|http] [--project &lt;path&gt;]</c>.
+    /// <para>
+    /// Exposes the shared AI-agent configurator registry
+    /// (<see cref="AiAgentConfiguratorRegistry"/>) from the terminal (design 06 §"Engine CLIs become
+    /// full installers", D12) so agent-first users can write any of the shipped client configs with one
+    /// command without touching the editor UI. Every written config is <b>project-scoped and pinned</b>:
+    /// the URL carries the D14 <c>/p/&lt;pin&gt;</c> path segment and the D15 deterministic per-project
+    /// port, both derived by the shared <see cref="ProjectIdentity"/> from the (normalized) project root
+    /// plus the committable <see cref="ProjectMarker"/> (<c>.ai-game-dev/project.json</c>). Credentials
+    /// are never written into the config (URL-only default, D11).
+    /// </para>
+    /// The subcommand resolves and writes the config, then exits WITHOUT starting the server.
+    /// </summary>
+    public static class ConfigureCommand
+    {
+        public const string CommandName = "configure";
+
+        private const string DefaultLocalHost = "http://localhost";
+        private const string ServerExecutableName = "gamedev-mcp-server";
+        private const string DockerImage = "aigamedeveloper/mcp-server";
+        private const int DefaultPluginTimeoutMs = 10000;
+
+        /// <summary>True when the process was launched as <c>gamedev-mcp-server configure …</c>.</summary>
+        public static bool IsInvocation(string[]? args)
+            => args is { Length: > 0 }
+               && string.Equals(args[0], CommandName, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// The resolved, not-yet-written plan for one <c>configure</c> invocation. Splitting the
+        /// resolution from the on-disk write keeps the interesting logic (agent lookup, transport,
+        /// connection-mode, pinned URL) unit-testable without mutating any real config file.
+        /// </summary>
+        public sealed class Plan
+        {
+            public AiAgentConfigurator Configurator { get; }
+            public AgentConfiguratorSettings Settings { get; }
+            public AiAgentConfig Config { get; }
+            public Consts.MCP.Server.TransportMethod Transport { get; }
+
+            public Plan(
+                AiAgentConfigurator configurator,
+                AgentConfiguratorSettings settings,
+                AiAgentConfig config,
+                Consts.MCP.Server.TransportMethod transport)
+            {
+                Configurator = configurator;
+                Settings = settings;
+                Config = config;
+                Transport = transport;
+            }
+
+            public string AgentId => Configurator.AgentId;
+            public string AgentName => Configurator.AgentName;
+            public string ProjectPin => Settings.ProjectPin;
+            public int ResolvedPort => Settings.ResolvedPort;
+            public string ConfigPath => Config.ConfigPath;
+            public string ExpectedFileContent => Config.ExpectedFileContent;
+        }
+
+        /// <summary>Thrown for user-facing configuration errors (unknown agent, bad transport, …).</summary>
+        public sealed class ConfigureException : Exception
+        {
+            public ConfigureException(string message) : base(message) { }
+        }
+
+        /// <summary>
+        /// Resolve a <see cref="Plan"/> from parsed <c>configure</c> options. Reads the project marker
+        /// from disk (for a port override / server target) but writes nothing.
+        /// </summary>
+        public static Plan BuildPlan(IReadOnlyDictionary<string, string> options, string executableFullPath, string serverVersion)
+        {
+            var agentId = Get(options, "agent")?.Trim();
+            if (string.IsNullOrEmpty(agentId))
+                throw new ConfigureException(
+                    "configure requires --agent <id>. Available agents: " + string.Join(", ", AiAgentConfiguratorRegistry.GetAgentIds()));
+
+            var configurator = AiAgentConfiguratorRegistry.GetByAgentId(agentId);
+            if (configurator == null)
+                throw new ConfigureException(
+                    $"Unknown --agent '{agentId}'. Available agents: " + string.Join(", ", AiAgentConfiguratorRegistry.GetAgentIds()));
+
+            var transport = ResolveTransport(Get(options, "transport"));
+
+            var projectRoot = ResolveProjectRoot(Get(options, "project"));
+
+            var url = Get(options, "url")?.Trim();
+            var host = string.IsNullOrEmpty(url) ? DefaultLocalHost : url;
+            var connectionMode = ResolveConnectionMode(host);
+
+            // URL-only default (D11): the golden path never writes a credential into a project file.
+            // Local => none (offline), Cloud => oauth (native authorize). An explicit --auth overrides.
+            var authOption = ResolveAuthOption(Get(options, "auth"), connectionMode);
+
+            // The deterministic per-project port (D15) comes from ProjectIdentity, sourced from the
+            // committable project marker's optional portOverride. Pass it as `port` so the settings'
+            // Port matches its derived ResolvedPort/pin exactly.
+            var identity = ProjectIdentity.Derive(projectRoot, ProjectMarker.Read(projectRoot));
+
+            var settings = AgentConfiguratorSettings.CreateForHost(
+                projectRootPath: projectRoot,
+                executableFullPath: executableFullPath,
+                port: identity.Port,
+                timeoutMs: DefaultPluginTimeoutMs,
+                host: host,
+                token: null,
+                connectionMode: connectionMode,
+                authOption: authOption,
+                serverExecutableName: ServerExecutableName,
+                serverVersion: serverVersion,
+                dockerImage: DockerImage);
+
+            var config = transport == Consts.MCP.Server.TransportMethod.stdio
+                ? configurator.GetStdioConfig(settings)
+                : configurator.GetHttpConfig(settings);
+
+            return new Plan(configurator, settings, config, transport);
+        }
+
+        /// <summary>Entry point: parse args, build the plan, write the config, print a summary.</summary>
+        public static int Run(string[] args)
+        {
+            try
+            {
+                // Drop the leading "configure" token; parse the rest with the same parser DataArguments uses.
+                var rest = args.Skip(1).ToArray();
+                var options = ArgsUtils.ParseLineArguments(rest);
+
+                if (options.ContainsKey("help") || options.ContainsKey("h"))
+                {
+                    PrintUsage();
+                    return 0;
+                }
+
+                var plan = BuildPlan(options, ResolveExecutablePath(), ResolveServerVersion());
+
+                var ok = plan.Config.Configure();
+                if (!ok)
+                {
+                    Console.Error.WriteLine($"Failed to write {plan.AgentName} configuration to {plan.ConfigPath}.");
+                    return 1;
+                }
+
+                Console.WriteLine($"Configured {plan.AgentName} ({plan.AgentId}).");
+                Console.WriteLine($"  transport : {plan.Transport}");
+                Console.WriteLine($"  project   : {plan.Settings.ProjectRootPath}");
+                Console.WriteLine($"  pin       : {plan.ProjectPin}");
+                if (plan.Settings.ConnectionMode == ConnectionMode.Local)
+                    Console.WriteLine($"  port      : {plan.ResolvedPort}");
+                Console.WriteLine($"  config    : {plan.ConfigPath}");
+                return 0;
+            }
+            catch (ConfigureException ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+                return 2;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("configure failed: " + ex.Message);
+                return 1;
+            }
+        }
+
+        // --- helpers ------------------------------------------------------------------------------
+
+        private static string? Get(IReadOnlyDictionary<string, string> options, string key)
+            => options.TryGetValue(key, out var value) ? value : null;
+
+        internal static Consts.MCP.Server.TransportMethod ResolveTransport(string? raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                return Consts.MCP.Server.TransportMethod.streamableHttp; // http default
+
+            var trimmed = raw.Trim();
+            if (string.Equals(trimmed, "http", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(trimmed, "streamableHttp", StringComparison.OrdinalIgnoreCase))
+                return Consts.MCP.Server.TransportMethod.streamableHttp;
+            if (string.Equals(trimmed, "stdio", StringComparison.OrdinalIgnoreCase))
+                return Consts.MCP.Server.TransportMethod.stdio;
+
+            throw new ConfigureException($"Invalid --transport '{raw}'. Use 'http' or 'stdio'.");
+        }
+
+        internal static ConnectionMode ResolveConnectionMode(string host)
+        {
+            if (Uri.TryCreate(host, UriKind.Absolute, out var uri) && !uri.IsLoopback)
+                return ConnectionMode.Cloud;
+            return ConnectionMode.Local;
+        }
+
+        internal static Consts.MCP.Server.AuthOption ResolveAuthOption(string? rawAuth, ConnectionMode connectionMode)
+        {
+            if (!string.IsNullOrWhiteSpace(rawAuth)
+                && Enum.TryParse<Consts.MCP.Server.AuthOption>(rawAuth.Trim(), ignoreCase: true, out var explicitOption)
+                && Enum.IsDefined(typeof(Consts.MCP.Server.AuthOption), explicitOption)
+                && explicitOption != Consts.MCP.Server.AuthOption.unknown)
+                return explicitOption;
+
+            return connectionMode == ConnectionMode.Cloud
+                ? Consts.MCP.Server.AuthOption.oauth
+                : Consts.MCP.Server.AuthOption.none;
+        }
+
+        private static string ResolveProjectRoot(string? raw)
+        {
+            var root = string.IsNullOrWhiteSpace(raw) ? Environment.CurrentDirectory : raw.Trim();
+            return Path.GetFullPath(root);
+        }
+
+        private static string ResolveExecutablePath()
+            => Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, ServerExecutableName);
+
+        private static string ResolveServerVersion()
+        {
+            var informational = Assembly.GetExecutingAssembly()
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            if (!string.IsNullOrEmpty(informational))
+            {
+                // Strip any "+<git-sha>" build-metadata suffix.
+                var plus = informational.IndexOf('+');
+                return plus >= 0 ? informational.Substring(0, plus) : informational;
+            }
+            return Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "8.0.0";
+        }
+
+        private static void PrintUsage()
+        {
+            Console.WriteLine("Usage: gamedev-mcp-server configure --agent <id> [--url <url>] [--transport stdio|http] [--project <path>]");
+            Console.WriteLine();
+            Console.WriteLine("Writes a project-scoped, pinned MCP client config for the chosen AI agent.");
+            Console.WriteLine("Credentials are never written into the config (URL-only; native authorize).");
+            Console.WriteLine();
+            Console.WriteLine("Available agents:");
+            foreach (var configurator in AiAgentConfiguratorRegistry.All)
+                Console.WriteLine($"  {configurator.AgentId,-20} {configurator.AgentName}");
+        }
+    }
+}
+
+```
+
+`src/Program.cs`:
+
+```cs
+/*
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Author: Ivan Murzak (https://github.com/IvanMurzak)                      │
+│  Repository: GitHub (https://github.com/IvanMurzak/GameDev-MCP-Server)    │
+│  Copyright (c) 2026 Ivan Murzak                                           │
+│  Licensed under the Apache License, Version 2.0.                          │
+│  See the LICENSE file in the project root for more information.           │
+└───────────────────────────────────────────────────────────────────────────┘
+*/
+
+using System;
+using System.Text.Json;
+using System.Threading.Tasks;
+using com.IvanMurzak.GameDev.MCP.Server.Configure;
+using com.IvanMurzak.GameDev.MCP.Server.Startup;
+using com.IvanMurzak.McpPlugin.Common;
+using com.IvanMurzak.McpPlugin.Common.Utils;
+using com.IvanMurzak.McpPlugin.Server;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using ModelContextProtocol.AspNetCore;
+using NLog;
+using NLog.Extensions.Logging;
+using StackExchange.Redis;
+
+namespace com.IvanMurzak.GameDev.MCP.Server
+{
+    public class Program
+    {
+        public static async Task<int> Main(string[] args)
+        {
+            // Subcommand dispatch: `gamedev-mcp-server configure --agent <id> [--url ...]` writes an MCP
+            // client config from the terminal using the shared configurator registry, then exits WITHOUT
+            // starting the server. Handled first so it never boots Kestrel / NLog server logging.
+            if (ConfigureCommand.IsInvocation(args))
+                return ConfigureCommand.Run(args);
+
+            // Configure NLog
+            LogManager.Setup().LoadConfigurationFromFile("NLog.config");
+
+            // Default the streamableHttp idle-session window to 6 hours for this local server.
+            // The plugin's built-in default is 600s (10 min), which is too aggressive for a
+            // single-user local editor session and drops the MCP session mid-work. We only seed
+            // the env var when it is unset, and DataArguments parses CLI args after env vars, so an
+            // explicit MCP_PLUGIN_IDLE_TIMEOUT_SECONDS or --idle-timeout-seconds still overrides this.
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(Consts.MCP.Server.Env.IdleTimeoutSeconds)))
+                Environment.SetEnvironmentVariable(Consts.MCP.Server.Env.IdleTimeoutSeconds, "21600"); // 6 hours
+
+            // Transport-conditional authentication default (mcp-authorize, design 02 §"modes"):
+            // stdio => none, streamableHttp => oauth. DataArguments defaults auth to `none` for BOTH
+            // transports (it cannot know the host policy), so the host seeds the http default here.
+            // Mirroring the idle-timeout seed above, we only SEED the env var — never override an
+            // explicit choice — and DataArguments re-parses it below. oauth mode REQUIRES --auth-issuer
+            // AND --public-url (the shared AccountMcpStrategy.Validate throws otherwise), so http only
+            // defaults to oauth when both are configured; without them it stays on `none` with a loud
+            // warning rather than crashing the documented bare-run quickstart. See HostAuthDefaults.
+            var authProbe = new DataArguments(args);
+            var authDecision = HostAuthDefaults.Decide(
+                authProbe.ClientTransport,
+                HostAuthDefaults.IsAuthExplicitlySet(args),
+                hasAuthIssuer: !string.IsNullOrWhiteSpace(authProbe.AuthIssuer),
+                hasPublicUrl: !string.IsNullOrWhiteSpace(authProbe.PublicUrl));
+
+            if (authDecision == HostAuthDefaults.Decision.DefaultHttpToOauth)
+                Environment.SetEnvironmentVariable(
+                    Consts.MCP.Server.Env.Auth,
+                    Consts.MCP.Server.AuthOption.oauth.ToString());
+
+            var httpUnauthenticatedFallback = authDecision == HostAuthDefaults.Decision.DefaultHttpToNoneWithWarning;
+
+            var dataArguments = new DataArguments(args);
+
+            // In STDIO mode, redirect console logs to stderr to avoid polluting stdout with non-JSON content
+            if (dataArguments.ClientTransport == Consts.MCP.Server.TransportMethod.stdio)
+            {
+                var consoleTarget = LogManager.Configuration?.FindTargetByName("console") as NLog.Targets.ColoredConsoleTarget;
+                if (consoleTarget != null)
+                {
+                    consoleTarget.StdErr = true;
+                }
+                LogManager.ReconfigExistingLoggers();
+            }
+
+            var logger = LogManager.GetCurrentClassLogger();
+            try
+            {
+                var consoleWriteLine = dataArguments.ClientTransport switch
+                {
+                    Consts.MCP.Server.TransportMethod.stdio => (Action<string>)(message => { /* ignore console output */ }),
+                    Consts.MCP.Server.TransportMethod.streamableHttp => (Action<string>)(message => Console.WriteLine(message)),
+                    _ => throw new ArgumentException($"Unsupported transport method: {dataArguments.ClientTransport}. " +
+                        $"Supported methods are: {Consts.MCP.Server.TransportMethod.stdio}, {Consts.MCP.Server.TransportMethod.streamableHttp}")
+                };
+
+                consoleWriteLine("Location: " + Environment.CurrentDirectory);
+                consoleWriteLine($"Launch arguments: {string.Join(" ", args)}");
+                consoleWriteLine($"Parsed arguments: {JsonSerializer.Serialize(dataArguments, JsonOptions.Pretty)}");
+
+                var builder = WebApplication.CreateBuilder(args);
+
+                // Replace default logging with NLog
+                builder.Logging.ClearProviders();
+                builder.Logging.AddNLog();
+
+                // Setup MCP Plugin ---------------------------------------------------------------
+
+                var mcpServerBuilder = builder.Services
+                    .WithMcpServer(dataArguments, logger)
+                    .WithMcpPluginServer(dataArguments);
+
+                // Additional configurable Origin allow-list (b2 carry-forward / design 02 §Origin
+                // validation). The library default admits loopback + the --public-url origin only. When
+                // MCP_ALLOWED_ORIGINS (or --allowed-origins) is set, REPLACE the default
+                // OriginValidationOptions singleton with one that also admits the configured origins, so
+                // a hosted browser client on a different origin works without a blanket `*` on
+                // credentialed paths. Registered AFTER WithMcpPluginServer so this instance wins on
+                // resolution. Unset => the library default (already registered) stands untouched.
+                var rawAllowedOrigins = Environment.GetEnvironmentVariable(OriginAllowList.EnvVar);
+                var parsedArgs = ArgsUtils.ParseLineArguments(args);
+                if (parsedArgs.TryGetValue(OriginAllowList.ArgName, out var argAllowedOrigins)
+                    && !string.IsNullOrWhiteSpace(argAllowedOrigins))
+                    rawAllowedOrigins = argAllowedOrigins;
+
+                if (OriginAllowList.TryBuildOptions(dataArguments, rawAllowedOrigins, out var originOptions)
+                    && originOptions != null)
+                {
+                    builder.Services.AddSingleton(originOptions);
+                    logger.Info($"Origin allow-list extended with {originOptions.AllowedOrigins.Count} configured origin(s) (plus loopback).");
+                }
+
+                // Issue #70 — Option B: when REDIS_URL is set, plug Redis into the SDK's
+                // session-migration + SSE event-store hooks so sessions survive a restart.
+                // When unset, the server skips the registrations and behaves as before
+                // (sessions are lost on restart) — a startup warning is logged below.
+                var redisUrl = builder.Configuration["REDIS_URL"];
+                var streamableHttp = dataArguments.ClientTransport == Consts.MCP.Server.TransportMethod.streamableHttp;
+                var sessionPersistenceEnabled = streamableHttp && !string.IsNullOrWhiteSpace(redisUrl);
+
+                if (sessionPersistenceEnabled)
+                {
+                    // StackExchange.Redis's ConfigurationOptions.Parse expects "host:port[,opt=val,...]"
+                    // form, NOT a URI like "redis://host:port/db". The rest of the stack uses the URI
+                    // form (.env.example, docker-compose, the Python backend's redis-py), so normalize
+                    // here before parsing — otherwise Parse keeps "redis://host" as the host name and
+                    // the connection target becomes "redis://host:port/db:6379", which never resolves.
+                    var redisConfigString = NormalizeRedisUrlForStackExchange(redisUrl!);
+
+                    builder.Services.AddStackExchangeRedisCache(options =>
+                    {
+                        var redisConfig = ConfigurationOptions.Parse(redisConfigString);
+                        redisConfig.AbortOnConnectFail = false;
+                        redisConfig.ConnectRetry = 3;
+                        redisConfig.ConnectTimeout = 2000;
+                        redisConfig.SyncTimeout = 2000;
+                        options.ConfigurationOptions = redisConfig;
+                        // MCP_REDIS_KEY_PREFIX namespaces this server's cache entries in Redis so
+                        // multiple stacks (parallel worktrees, blue/green deployments, multi-tenant
+                        // shared-Redis hosts) can share one Redis instance without colliding on keys.
+                        // Defaults to "mcp-server:" to preserve historical behaviour.
+                        options.InstanceName = builder.Configuration["MCP_REDIS_KEY_PREFIX"] ?? "mcp-server:";
+                    });
+
+                    // Resolve the migration-record TTL from config (issue #209). The previous
+                    // hardcoded 2h sliding window expired recovery records long before the
+                    // in-memory idle window (up to 10h in prod) released the session, so any
+                    // session older than 2h was lost on restart. ResolveTtl sources an explicit
+                    // MCP_SESSION_MIGRATION_TTL_SECONDS override, else falls back to the in-memory
+                    // idle window (MCP_PLUGIN_IDLE_TIMEOUT_SECONDS), else a 10h default — always
+                    // floored at the idle timeout so the recovery window can never be shorter than
+                    // the in-memory session lifetime.
+                    var sessionMigrationTtl = SessionMigrationHandler.ResolveTtl(
+                        builder.Configuration[SessionMigrationHandler.MigrationTtlEnvVar],
+                        builder.Configuration[SessionMigrationHandler.IdleTimeoutEnvVar]);
+
+                    builder.Services.AddSingleton<ISessionMigrationHandler>(sp =>
+                        new SessionMigrationHandler(
+                            sp.GetRequiredService<IDistributedCache>(),
+                            sp.GetRequiredService<ILogger<SessionMigrationHandler>>(),
+                            sessionMigrationTtl));
+                    mcpServerBuilder.WithDistributedCacheEventStreamStore();
+                }
+
+                // builder.WebHost.UseUrls(Consts.Hub.DefaultEndpoint);
+
+                logger.Info($"Start listening on port: {dataArguments.Port} (bind: {dataArguments.Bind ?? "loopback"})");
+
+                // Bind IPv4 and IPv6 separately to avoid dual-stack socket issues on macOS. The bind
+                // address (D8: default loopback; --bind/MCP_BIND=any|0.0.0.0|<ip> for LAN/hosted deploys
+                // that nginx must reach) is forwarded to the library's bind-aware Kestrel overload.
+                builder.WebHost.UseKestrelForMcpPlugin(dataArguments.Port, dataArguments.Bind);
+
+                var app = builder.Build();
+
+                if (streamableHttp && !sessionPersistenceEnabled)
+                {
+                    app.Logger.LogWarning(
+                        "REDIS_URL is not set — MCP sessions will NOT survive a server restart. "
+                        + "Configure Redis to enable Option B (issue #70).");
+                }
+
+                if (httpUnauthenticatedFallback)
+                {
+                    app.Logger.LogWarning(
+                        "streamableHttp is running WITHOUT authentication (auth=none) because --auth-issuer/--public-url "
+                        + "were not configured. For a network-exposed deployment set --auth oauth with --auth-issuer and "
+                        + "--public-url (see README § Authentication). Pass --auth none explicitly to silence this warning.");
+                }
+
+                app.Logger.LogInformation(
+                    "MCP auth mode: {AuthMode} (transport: {Transport}, bind: {Bind}).",
+                    dataArguments.Authorization, dataArguments.ClientTransport, dataArguments.Bind ?? "loopback");
+
+                // Middleware ----------------------------------------------------------------
+                // ---------------------------------------------------------------------------
+
+                // Setup SignalR ----------------------------------------------------
+                app.UseMcpPluginServer(dataArguments);
+
+                // Setup MCP client -------------------------------------------------
+                if (dataArguments.ClientTransport == Consts.MCP.Server.TransportMethod.streamableHttp)
+                {
+                    // Add a GET /help endpoint for informational message
+                    app.MapGet("/help", () =>
+                    {
+                        var header =
+                            "Author: Ivan Murzak (https://github.com/IvanMurzak)\n" +
+                            "Repository: GitHub (https://github.com/IvanMurzak/GameDev-MCP-Server)\n" +
+                            "Copyright (c) 2026 Ivan Murzak\n" +
+                            "Licensed under the Apache License, Version 2.0.\n" +
+                            "See the LICENSE file in the project root for more information.\n" +
+                            "\n" +
+                            "Use \"/\" endpoint to get connected to MCP server\n";
+                        return Results.Text(header, Consts.MimeType.TextPlain);
+                    });
+                }
+
+                #region Print Logs
+                if (logger.IsEnabled(NLog.LogLevel.Debug))
+                {
+                    var endpointDataSource = app.Services.GetRequiredService<Microsoft.AspNetCore.Routing.EndpointDataSource>();
+                    foreach (var endpoint in endpointDataSource.Endpoints)
+                        logger.Debug($"Configured endpoint: {endpoint.DisplayName}");
+
+                    app.Use(async (context, next) =>
+                    {
+                        logger.Debug($"Request: {context.Request.Method} {context.Request.Path}");
+                        try
+                        {
+                            await next.Invoke();
+                            logger.Debug($"Response: {context.Response.StatusCode} ({context.Request.Method} {context.Request.Path})");
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            // Optionally log as debug or ignore
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.Error(ex, $"Error occurred while processing request: {context.Request.Method} {context.Request.Path}");
+                            return;
+                        }
+                    });
+                }
+                #endregion
+
+                await app.RunAsync();
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Application stopped due to an exception.");
+                throw;
+            }
+            finally
+            {
+                LogManager.Shutdown();
+            }
+        }
+
+        /// <summary>
+        /// Convert a redis-URI-style connection string (redis://[user:pass@]host:port[/db])
+        /// into the host:port[,password=...,defaultDatabase=N,ssl=True] form that
+        /// StackExchange.Redis's ConfigurationOptions.Parse understands. Strings that
+        /// already use the host:port form are returned unchanged.
+        /// </summary>
+        internal static string NormalizeRedisUrlForStackExchange(string redisUrl)
+        {
+            if (string.IsNullOrWhiteSpace(redisUrl))
+                return redisUrl;
+
+            var trimmed = redisUrl.Trim();
+            var lower = trimmed.ToLowerInvariant();
+            if (!lower.StartsWith("redis://") && !lower.StartsWith("rediss://"))
+                return trimmed; // already in StackExchange.Redis form (host:port,...)
+
+            if (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri))
+                return trimmed; // fall through; let Parse surface the error
+
+            var host = string.IsNullOrEmpty(uri.Host) ? "localhost" : uri.Host;
+            var port = uri.Port > 0 ? uri.Port : 6379;
+            var sb = new System.Text.StringBuilder();
+            sb.Append(host).Append(':').Append(port);
+
+            // userinfo -> password=...,user=...
+            if (!string.IsNullOrEmpty(uri.UserInfo))
+            {
+                var userInfo = uri.UserInfo;
+                var colonIdx = userInfo.IndexOf(':');
+                string user = colonIdx >= 0 ? userInfo.Substring(0, colonIdx) : string.Empty;
+                string password = colonIdx >= 0 ? userInfo.Substring(colonIdx + 1) : userInfo;
+                if (!string.IsNullOrEmpty(password))
+                    sb.Append(",password=").Append(Uri.UnescapeDataString(password));
+                if (!string.IsNullOrEmpty(user))
+                    sb.Append(",user=").Append(Uri.UnescapeDataString(user));
+            }
+
+            // path -> /<db>
+            var path = uri.AbsolutePath;
+            if (!string.IsNullOrEmpty(path) && path.Length > 1)
+            {
+                var dbStr = path.TrimStart('/');
+                if (int.TryParse(dbStr, out var db) && db >= 0)
+                    sb.Append(",defaultDatabase=").Append(db);
+            }
+
+            // rediss:// -> ssl=True
+            if (lower.StartsWith("rediss://"))
+                sb.Append(",ssl=True");
+
+            return sb.ToString();
+        }
+    }
+}
+
+```
+
+`src/SessionMigrationHandler.cs`:
+
+```cs
+/*
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Author: Ivan Murzak (https://github.com/IvanMurzak)                      │
+│  Repository: GitHub (https://github.com/IvanMurzak/GameDev-MCP-Server)    │
+│  Copyright (c) 2026 Ivan Murzak                                           │
+│  Licensed under the Apache License, Version 2.0.                          │
+│  See the LICENSE file in the project root for more information.           │
+└───────────────────────────────────────────────────────────────────────────┘
+*/
+
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
+using ModelContextProtocol;
+using ModelContextProtocol.AspNetCore;
+using ModelContextProtocol.Protocol;
+
+namespace com.IvanMurzak.GameDev.MCP.Server
+{
+    /// <summary>
+    /// Persists MCP session <see cref="InitializeRequestParams"/> to a shared
+    /// <see cref="IDistributedCache"/> so a fresh server process can rehydrate a session
+    /// whose ID it has never seen in memory. Closes the "lose session on restart" gap.
+    /// See https://github.com/IvanMurzak/AI-Game-Dev-Server/issues/70 (Option B).
+    /// Final Redis key is <c>{InstanceName}{KeyPrefix}{sessionId}</c>, e.g.
+    /// <c>mcp-server:mcp:session:&lt;sessionId&gt;</c>.
+    /// </summary>
+    public sealed class SessionMigrationHandler : ISessionMigrationHandler
+    {
+        // Floor for the migration-record TTL when neither env var is set. Chosen to be >=
+        // the in-memory idle window deployed in prod (MCP_PLUGIN_IDLE_TIMEOUT_SECONDS=36000
+        // = 10h on the VPS). A recovery record that outlives the in-memory session by a
+        // comfortable margin guarantees a restart can always rehydrate any session the
+        // in-memory layer still considers live. See issue #209.
+        public static readonly TimeSpan DefaultSessionTtl = TimeSpan.FromHours(10);
+
+        // Sane ceiling for a configured TTL. A pathological value (e.g. 1e15 seconds)
+        // would overflow TimeSpan.FromSeconds and throw OverflowException, which is NOT
+        // caught here and would crash startup — violating the fail-open contract. Any
+        // value above this cap is clamped down to it instead of throwing. 30 days is far
+        // longer than any plausible continuous session yet well inside TimeSpan's range.
+        public static readonly TimeSpan MaxSessionTtl = TimeSpan.FromDays(30);
+
+        // Env var names this handler resolves its TTL from. Kept here (rather than only in
+        // Program.cs) so the resolution helper and its tests share one source of truth.
+        public const string MigrationTtlEnvVar = "MCP_SESSION_MIGRATION_TTL_SECONDS";
+        public const string IdleTimeoutEnvVar = "MCP_PLUGIN_IDLE_TIMEOUT_SECONDS";
+
+        private const string KeyPrefix = "mcp:session:";
+
+        // Defence-in-depth: validate Mcp-Session-Id format ourselves before using it as
+        // a Redis key suffix, instead of trusting the upstream MCP SDK alone (issue #72).
+        // Pattern intentionally narrower than the SDK accepts — covers Guid.NewGuid()
+        // ("N" = 32 hex chars; "D" = 36 with hyphens) and base64url-style IDs, blocks
+        // separators, control chars, and oversized payloads that could bloat Redis or
+        // confuse namespace-scanning tooling (KEYS / SCAN / dashboards).
+        [StringSyntax(StringSyntaxAttribute.Regex)]
+        private const string SessionIdPatternText = @"^[A-Za-z0-9_\-]{1,128}$";
+
+        // Explicit ReDoS belt: the current charset class is linear, but a small timeout
+        // keeps the contract intact if the pattern is ever broadened.
+        private static readonly Regex SessionIdPattern = new(
+            SessionIdPatternText,
+            RegexOptions.Compiled,
+            TimeSpan.FromMilliseconds(50));
+
+        // Canonical log message for failed defensive session-ID validation. Distinguished
+        // per call site by the structured {Phase} property (Init|Migration) so a single
+        // alert/grep query covers both paths.
+        private const string SessionIdValidationFailedMessage =
+            "Rejecting MCP session: session ID failed defensive format validation. Phase={Phase}, SessionIdLength={SessionIdLength}";
+
+        private static bool IsValidSessionId(string? sessionId)
+            => !string.IsNullOrEmpty(sessionId) && SessionIdPattern.IsMatch(sessionId);
+
+        private readonly IDistributedCache _cache;
+        private readonly ILogger<SessionMigrationHandler> _logger;
+        private readonly TimeSpan _sessionTtl;
+        private readonly DistributedCacheEntryOptions _cacheEntryOptions;
+
+        public SessionMigrationHandler(
+            IDistributedCache cache,
+            ILogger<SessionMigrationHandler> logger)
+            : this(cache, logger, DefaultSessionTtl)
+        {
+        }
+
+        public SessionMigrationHandler(
+            IDistributedCache cache,
+            ILogger<SessionMigrationHandler> logger,
+            TimeSpan sessionTtl)
+        {
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _sessionTtl = sessionTtl > TimeSpan.Zero ? sessionTtl : DefaultSessionTtl;
+            // ABSOLUTE (relative-to-now) expiration, deliberately NOT sliding. The previous
+            // implementation used SlidingExpiration on the assumption that an active client
+            // would refresh the window on every reconnect — that assumption was FALSE for this
+            // access pattern (issue #209). The hot path keeps the session in memory and never
+            // calls IDistributedCache.GetAsync for a live session, so the sliding window never
+            // rolled; it just counted down from `initialize`. A 2h sliding window therefore
+            // expired the recovery record while the in-memory session (idle window up to 10h)
+            // was still alive, so a restart 404'd every session older than 2h.
+            //
+            // The fix: a single absolute TTL sized to cover the longest expected continuous
+            // session (>= the in-memory idle window, see ResolveTtl). The record is written
+            // once at `initialize` and lives for the full window regardless of reconnect
+            // traffic — simpler and correct, because rolling the window on the hot path would
+            // require a redundant cache read we deliberately avoid.
+            _cacheEntryOptions = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = _sessionTtl,
+            };
+        }
+
+        /// <summary>
+        /// Pure resolution of the migration-record TTL from raw env-var string values, so the
+        /// policy is unit-testable without Redis or a live <see cref="IConfiguration"/>.
+        /// Precedence:
+        /// <list type="number">
+        ///   <item><see cref="MigrationTtlEnvVar"/> (<c>MCP_SESSION_MIGRATION_TTL_SECONDS</c>), if a positive integer — it wins outright.</item>
+        ///   <item>else <see cref="IdleTimeoutEnvVar"/> (<c>MCP_PLUGIN_IDLE_TIMEOUT_SECONDS</c>), if a positive integer — the recovery window then tracks the in-memory idle window.</item>
+        ///   <item>else <see cref="DefaultSessionTtl"/> (10h).</item>
+        /// </list>
+        /// In all cases the result is floored at the resolved idle timeout (when that is a
+        /// positive integer) so the recovery window can NEVER be shorter than the in-memory
+        /// session lifetime — that shorter-window state is exactly the bug in issue #209.
+        /// Malformed / non-positive values are ignored (treated as unset) rather than throwing,
+        /// to fail open: a bad override must not crash startup. A pathologically large value is
+        /// clamped to <see cref="MaxSessionTtl"/> for the same reason (the raw conversion would
+        /// otherwise overflow <see cref="TimeSpan"/> and throw).
+        /// </summary>
+        /// <param name="migrationTtlRaw">Raw value of <c>MCP_SESSION_MIGRATION_TTL_SECONDS</c> (may be null/empty/garbage).</param>
+        /// <param name="idleTimeoutRaw">Raw value of <c>MCP_PLUGIN_IDLE_TIMEOUT_SECONDS</c> (may be null/empty/garbage).</param>
+        public static TimeSpan ResolveTtl(string? migrationTtlRaw, string? idleTimeoutRaw)
+        {
+            var explicitTtl = ParsePositiveSeconds(migrationTtlRaw);
+            var idleTimeout = ParsePositiveSeconds(idleTimeoutRaw);
+
+            // Base TTL: explicit override > idle-timeout fallback > hard default.
+            var ttl = explicitTtl ?? idleTimeout ?? DefaultSessionTtl;
+
+            // Floor at the idle timeout (when known) so the recovery window can never be
+            // shorter than the in-memory session lifetime — the issue #209 regression.
+            if (idleTimeout is { } floor && ttl < floor)
+                ttl = floor;
+
+            return ttl;
+        }
+
+        /// <summary>
+        /// Parse a string as a strictly-positive whole number of seconds into a
+        /// <see cref="TimeSpan"/>. Returns null for null/empty/non-numeric/&lt;=0 input so the
+        /// caller can treat any malformed value as "unset" and fall through to the next source.
+        /// </summary>
+        private static TimeSpan? ParsePositiveSeconds(string? raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                return null;
+            if (!long.TryParse(raw.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var seconds))
+                return null;
+            if (seconds <= 0)
+                return null;
+            // Clamp before converting: TimeSpan.FromSeconds overflows (and throws) for very
+            // large inputs, so cap at MaxSessionTtl to keep the parse fail-open and total.
+            if (seconds >= (long)MaxSessionTtl.TotalSeconds)
+                return MaxSessionTtl;
+            return TimeSpan.FromSeconds(seconds);
+        }
+
+        public async ValueTask OnSessionInitializedAsync(
+            HttpContext context,
+            string sessionId,
+            InitializeRequestParams initializeParams,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(sessionId))
+                return;
+
+            if (!IsValidSessionId(sessionId))
+            {
+                // Length-only log — never echo the raw ID, per issue #72 acceptance criteria.
+                _logger.LogWarning(
+                    SessionIdValidationFailedMessage,
+                    "Init",
+                    sessionId.Length);
+                return;
+            }
+
+            try
+            {
+                var payload = JsonSerializer.SerializeToUtf8Bytes(
+                    initializeParams,
+                    McpJsonUtilities.DefaultOptions);
+
+                await _cache.SetAsync(BuildKey(sessionId), payload, _cacheEntryOptions, cancellationToken)
+                    .ConfigureAwait(false);
+
+                _logger.LogDebug(
+                    "Persisted MCP session init params to distributed cache. SessionId={SessionId}, TtlSeconds={TtlSeconds}, Bytes={Bytes}",
+                    sessionId, (long)_sessionTtl.TotalSeconds, payload.Length);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // Persistence failure must NOT break the live session — worst case is this
+                // session can't migrate after a restart (same as before this handler existed).
+                _logger.LogWarning(ex,
+                    "Failed to persist MCP session init params for migration. SessionId={SessionId}",
+                    sessionId);
+            }
+        }
+
+        public async ValueTask<InitializeRequestParams?> AllowSessionMigrationAsync(
+            HttpContext context,
+            string sessionId,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(sessionId))
+                return null;
+
+            if (!IsValidSessionId(sessionId))
+            {
+                _logger.LogWarning(
+                    SessionIdValidationFailedMessage,
+                    "Migration",
+                    sessionId.Length);
+                return null;
+            }
+
+            byte[]? payload;
+            try
+            {
+                // Read the persisted init params. The TTL is absolute (see ctor) — this read
+                // does NOT extend it, and intentionally so: the record is sized to outlive the
+                // longest expected session, so there is no window to refresh here.
+                payload = await _cache.GetAsync(BuildKey(sessionId), cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // Cache outage: we can't tell real from forged, so reject migration.
+                // Client gets 404 and re-initializes — same as if no handler existed.
+                _logger.LogWarning(ex,
+                    "Distributed cache lookup failed during MCP session migration; rejecting reconnect. SessionId={SessionId}",
+                    sessionId);
+                return null;
+            }
+
+            if (payload == null || payload.Length == 0)
+            {
+                _logger.LogDebug(
+                    "No persisted init params found for unrecognised MCP session ID. SessionId={SessionId}",
+                    sessionId);
+                return null;
+            }
+
+            try
+            {
+                var initializeParams = JsonSerializer.Deserialize<InitializeRequestParams>(
+                    payload,
+                    McpJsonUtilities.DefaultOptions);
+                if (initializeParams == null)
+                {
+                    _logger.LogWarning(
+                        "Deserialised init params were null; rejecting MCP session migration. SessionId={SessionId}",
+                        sessionId);
+                    return null;
+                }
+
+                _logger.LogInformation(
+                    "Rehydrated MCP session from distributed cache after process restart. SessionId={SessionId}",
+                    sessionId);
+                return initializeParams;
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogWarning(ex,
+                    "Failed to deserialise persisted MCP init params; rejecting migration. SessionId={SessionId}",
+                    sessionId);
+                return null;
+            }
+        }
+
+        private static string BuildKey(string sessionId)
+            => KeyPrefix + sessionId;
+    }
+}
+
+```
+
+`src/Startup/HostAuthDefaults.cs`:
+
+```cs
+/*
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Author: Ivan Murzak (https://github.com/IvanMurzak)                      │
+│  Repository: GitHub (https://github.com/IvanMurzak/GameDev-MCP-Server)    │
+│  Copyright (c) 2026 Ivan Murzak                                           │
+│  Licensed under the Apache License, Version 2.0.                          │
+│  See the LICENSE file in the project root for more information.           │
+└───────────────────────────────────────────────────────────────────────────┘
+*/
+
+using System;
+using com.IvanMurzak.McpPlugin.Common;
+using com.IvanMurzak.McpPlugin.Common.Utils;
+
+namespace com.IvanMurzak.GameDev.MCP.Server.Startup
+{
+    /// <summary>
+    /// Host-level policy for the transport-conditional authentication default introduced with the
+    /// mcp-authorize redesign (design 02 §"GameDev-MCP-Server modes"): <b>stdio defaults to
+    /// <c>none</c></b> (offline / local dev / CI) and <b>streamableHttp defaults to <c>oauth</c></b>
+    /// (the authenticated resource-server path).
+    /// <para>
+    /// The shared <see cref="DataArguments"/> parser defaults <see cref="DataArguments.Authorization"/>
+    /// to <see cref="Consts.MCP.Server.AuthOption.none"/> for BOTH transports (it cannot know the
+    /// host's default policy), so this class decides whether the host should upgrade an unset http auth
+    /// to <c>oauth</c>. It is a pure decision so the policy is unit-testable without booting Kestrel.
+    /// </para>
+    /// <para>
+    /// Guard rail: <c>oauth</c> mode requires <c>--auth-issuer</c> AND <c>--public-url</c> — the shared
+    /// library's <c>AccountMcpStrategy.Validate</c> throws at startup when either is missing. So the
+    /// host defaults http to <c>oauth</c> ONLY when both are present; otherwise it leaves http on
+    /// <c>none</c> and emits a loud warning rather than crashing the documented bare-run quickstart
+    /// (<c>docker run … aigamedeveloper/mcp-server</c> / <c>gamedev-mcp-server --port 8080</c>). An
+    /// explicit <c>--auth</c>/<c>--authorization</c> (or <c>MCP_AUTH</c>/<c>MCP_AUTHORIZATION</c>) always
+    /// wins and is left untouched.
+    /// </para>
+    /// </summary>
+    public static class HostAuthDefaults
+    {
+        public enum Decision
+        {
+            /// <summary>Explicit auth was given, or transport is stdio — leave DataArguments' value as-is.</summary>
+            LeaveAsConfigured,
+
+            /// <summary>Http with issuer + public-url present — seed the http default of <c>oauth</c>.</summary>
+            DefaultHttpToOauth,
+
+            /// <summary>Http but oauth is not configurable — stay on <c>none</c> and warn the operator.</summary>
+            DefaultHttpToNoneWithWarning
+        }
+
+        /// <summary>
+        /// True when the operator explicitly chose an auth mode via env (<c>MCP_AUTH</c> /
+        /// <c>MCP_AUTHORIZATION</c>) or CLI (<c>--auth</c> / <c>--authorization</c>). The library
+        /// arg parser (<see cref="ArgsUtils.ParseLineArguments"/>) is reused so key detection matches
+        /// exactly how <see cref="DataArguments"/> itself reads the args.
+        /// </summary>
+        public static bool IsAuthExplicitlySet(string[] args)
+        {
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(Consts.MCP.Server.Env.Auth)))
+                return true;
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(Consts.MCP.Server.Env.Authorization)))
+                return true;
+
+            var parsed = ArgsUtils.ParseLineArguments(args ?? Array.Empty<string>());
+            return parsed.ContainsKey(Consts.MCP.Server.Args.Auth)
+                || parsed.ContainsKey(Consts.MCP.Server.Args.Authorization);
+        }
+
+        /// <summary>
+        /// Decide the host's auth default for the resolved transport. See the class remarks for the
+        /// full policy. Pure — no side effects.
+        /// </summary>
+        public static Decision Decide(
+            Consts.MCP.Server.TransportMethod transport,
+            bool authExplicitlySet,
+            bool hasAuthIssuer,
+            bool hasPublicUrl)
+        {
+            if (authExplicitlySet)
+                return Decision.LeaveAsConfigured;
+
+            // stdio (and the defensive unknown case) keep DataArguments' `none` default.
+            if (transport != Consts.MCP.Server.TransportMethod.streamableHttp)
+                return Decision.LeaveAsConfigured;
+
+            return (hasAuthIssuer && hasPublicUrl)
+                ? Decision.DefaultHttpToOauth
+                : Decision.DefaultHttpToNoneWithWarning;
+        }
+    }
+}
+
+```
+
+`src/Startup/OriginAllowList.cs`:
+
+```cs
+/*
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Author: Ivan Murzak (https://github.com/IvanMurzak)                      │
+│  Repository: GitHub (https://github.com/IvanMurzak/GameDev-MCP-Server)    │
+│  Copyright (c) 2026 Ivan Murzak                                           │
+│  Licensed under the Apache License, Version 2.0.                          │
+│  See the LICENSE file in the project root for more information.           │
+└───────────────────────────────────────────────────────────────────────────┘
+*/
+
+using System;
+using System.Collections.Generic;
+using com.IvanMurzak.McpPlugin.Common.Utils;      // DataArguments
+using com.IvanMurzak.McpPlugin.Server.Auth.OAuth; // UrlNormalization
+using com.IvanMurzak.McpPlugin.Server.Security;    // OriginValidationOptions
+
+namespace com.IvanMurzak.GameDev.MCP.Server.Startup
+{
+    /// <summary>
+    /// Host surface for an <b>additional, configurable Origin allow-list</b> (carry-forward from b2 /
+    /// design 02 §"Origin validation"). The shared library's default admits only loopback origins plus
+    /// the <c>--public-url</c> origin (<c>OriginValidationOptions.FromArguments</c>) — correct for the
+    /// hosted API and same-origin browser clients, but a hosted deployment that serves a browser client
+    /// from a DIFFERENT origin (e.g. a first-party web console) needs to allow that origin WITHOUT
+    /// weakening the guard to a blanket <c>*</c> on credentialed paths.
+    /// <para>
+    /// The host reads <c>MCP_ALLOWED_ORIGINS</c> / <c>--allowed-origins</c> (comma- or
+    /// semicolon-separated) and, when set, registers a replacement <see cref="OriginValidationOptions"/>
+    /// that keeps loopback + the public-url origin and ADDS the configured origins. Origins are
+    /// normalized with the library's own <see cref="UrlNormalization.NormalizeOrigin"/> so they match
+    /// the middleware's ordinal comparison exactly. When unset, the library default is left untouched.
+    /// </para>
+    /// </summary>
+    public static class OriginAllowList
+    {
+        public const string EnvVar = "MCP_ALLOWED_ORIGINS";
+        public const string ArgName = "allowed-origins";
+
+        /// <summary>
+        /// Parse a comma/semicolon-separated origin list into the normalized, de-duplicated set the
+        /// middleware compares against. Malformed entries are dropped (they could never match anyway).
+        /// </summary>
+        public static IReadOnlyList<string> ParseOrigins(string? raw)
+        {
+            var result = new List<string>();
+            if (string.IsNullOrWhiteSpace(raw))
+                return result;
+
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var part in raw.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                var normalized = UrlNormalization.NormalizeOrigin(part);
+                if (!string.IsNullOrEmpty(normalized) && seen.Add(normalized))
+                    result.Add(normalized);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// The merged allow-list = normalized public-url origin (if any) + the configured extra origins.
+        /// Loopback is handled separately by <see cref="OriginValidationOptions.AllowLoopback"/>.
+        /// </summary>
+        public static IReadOnlyCollection<string> BuildAllowedOrigins(string? publicUrl, string? rawAllowedOrigins)
+            => Merge(publicUrl, ParseOrigins(rawAllowedOrigins));
+
+        /// <summary>
+        /// Merge the normalized public-url origin (if any) with an already-parsed set of extra origins.
+        /// Shared by <see cref="BuildAllowedOrigins"/> and <see cref="TryBuildOptions"/> so the raw list
+        /// is parsed exactly once per invocation.
+        /// </summary>
+        private static IReadOnlyCollection<string> Merge(string? publicUrl, IReadOnlyList<string> extraOrigins)
+        {
+            var set = new HashSet<string>(StringComparer.Ordinal);
+
+            var publicOrigin = UrlNormalization.NormalizeOrigin(publicUrl);
+            if (!string.IsNullOrEmpty(publicOrigin))
+                set.Add(publicOrigin);
+
+            foreach (var origin in extraOrigins)
+                set.Add(origin);
+
+            return set;
+        }
+
+        /// <summary>
+        /// Build a replacement <see cref="OriginValidationOptions"/> when extra origins are configured;
+        /// returns false (and null) when <paramref name="rawAllowedOrigins"/> yields nothing, so the
+        /// caller can leave the library's default registration in place.
+        /// </summary>
+        public static bool TryBuildOptions(DataArguments dataArguments, string? rawAllowedOrigins, out OriginValidationOptions? options)
+        {
+            options = null;
+            var extraOrigins = ParseOrigins(rawAllowedOrigins);
+            if (extraOrigins.Count == 0)
+                return false;
+
+            options = new OriginValidationOptions(
+                Merge(dataArguments.PublicUrl, extraOrigins),
+                allowLoopback: true);
+            return true;
+        }
+    }
+}
+
+```
+
+`src/Utils/NLogAdapter.cs`:
+
+```cs
+/*
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Author: Ivan Murzak (https://github.com/IvanMurzak)                      │
+│  Repository: GitHub (https://github.com/IvanMurzak/GameDev-MCP-Server)    │
+│  Copyright (c) 2026 Ivan Murzak                                           │
+│  Licensed under the Apache License, Version 2.0.                          │
+│  See the LICENSE file in the project root for more information.           │
+└───────────────────────────────────────────────────────────────────────────┘
+*/
+
+using System;
+using Microsoft.Extensions.Logging;
+using NLog;
+
+namespace com.IvanMurzak.GameDev.MCP.Server
+{
+    internal class NLogAdapter : Microsoft.Extensions.Logging.ILogger
+    {
+        private readonly Logger _nLogLogger;
+
+        public NLogAdapter(string categoryName)
+        {
+            _nLogLogger = LogManager.GetLogger(categoryName);
+        }
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+            => null;
+
+        public bool IsEnabled(Microsoft.Extensions.Logging.LogLevel logLevel)
+            => _nLogLogger.IsEnabled(ConvertLogLevel(logLevel));
+
+        public void Log<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+            if (formatter == null) return;
+
+            var nLogLevel = ConvertLogLevel(logLevel);
+            if (!_nLogLogger.IsEnabled(nLogLevel)) return;
+
+            var message = formatter(state, exception);
+            _nLogLogger.Log(nLogLevel, exception, message);
+        }
+
+        private static NLog.LogLevel ConvertLogLevel(Microsoft.Extensions.Logging.LogLevel logLevel)
+        {
+            return logLevel switch
+            {
+                Microsoft.Extensions.Logging.LogLevel.Trace => NLog.LogLevel.Trace,
+                Microsoft.Extensions.Logging.LogLevel.Debug => NLog.LogLevel.Debug,
+                Microsoft.Extensions.Logging.LogLevel.Information => NLog.LogLevel.Info,
+                Microsoft.Extensions.Logging.LogLevel.Warning => NLog.LogLevel.Warn,
+                Microsoft.Extensions.Logging.LogLevel.Error => NLog.LogLevel.Error,
+                Microsoft.Extensions.Logging.LogLevel.Critical => NLog.LogLevel.Fatal,
+                Microsoft.Extensions.Logging.LogLevel.None => NLog.LogLevel.Off,
+                _ => NLog.LogLevel.Info
+            };
+        }
+    }
+}
+
+```
+
+`src/Utils/NLogLoggerProvider.cs`:
+
+```cs
+/*
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Author: Ivan Murzak (https://github.com/IvanMurzak)                      │
+│  Repository: GitHub (https://github.com/IvanMurzak/GameDev-MCP-Server)    │
+│  Copyright (c) 2026 Ivan Murzak                                           │
+│  Licensed under the Apache License, Version 2.0.                          │
+│  See the LICENSE file in the project root for more information.           │
+└───────────────────────────────────────────────────────────────────────────┘
+*/
+
+using Microsoft.Extensions.Logging;
+
+namespace com.IvanMurzak.GameDev.MCP.Server
+{
+    internal class NLogLoggerProvider : ILoggerProvider
+    {
+        public ILogger CreateLogger(string categoryName)
+        {
+            return new NLogAdapter(categoryName);
+        }
+
+        public void Dispose()
+        {
+            NLog.LogManager.Shutdown();
+        }
+    }
+}
+
+```
+
+`tests/GameDev.MCP.Server.Tests/ConfigureCommandTests.cs`:
+
+```cs
+/*
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Author: Ivan Murzak (https://github.com/IvanMurzak)                      │
+│  Repository: GitHub (https://github.com/IvanMurzak/GameDev-MCP-Server)    │
+│  Copyright (c) 2026 Ivan Murzak                                           │
+│  Licensed under the Apache License, Version 2.0.                          │
+│  See the LICENSE file in the project root for more information.           │
+└───────────────────────────────────────────────────────────────────────────┘
+*/
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using com.IvanMurzak.GameDev.MCP.Server.Configure;
+using com.IvanMurzak.McpPlugin.AgentConfig;
+using com.IvanMurzak.McpPlugin.Common;
+using Xunit;
+
+namespace com.IvanMurzak.GameDev.MCP.Server.Tests
+{
+    /// <summary>
+    /// Covers the `configure --agent &lt;id&gt;` subcommand (design 06 D12): it resolves a configurator
+    /// from the shared registry, derives the D14 pin + D15 port, and writes a project-scoped, pinned,
+    /// URL-only config. Claude Code (<c>.mcp.json</c>) and Codex (<c>.codex/config.toml</c>) are both
+    /// project-scoped, so the write tests are sandboxed to a temp project root.
+    /// </summary>
+    public class ConfigureCommandTests
+    {
+        private const string FakeExe = "/opt/gamedev-mcp-server/gamedev-mcp-server";
+        private const string FakeVersion = "9.0.0";
+
+        [Fact]
+        public void IsInvocation_ConfigureFirst_True()
+        {
+            Assert.True(ConfigureCommand.IsInvocation(new[] { "configure", "--agent", "claude-code" }));
+            Assert.True(ConfigureCommand.IsInvocation(new[] { "CONFIGURE" }));
+        }
+
+        [Fact]
+        public void IsInvocation_NotConfigure_False()
+        {
+            Assert.False(ConfigureCommand.IsInvocation(Array.Empty<string>()));
+            Assert.False(ConfigureCommand.IsInvocation(new[] { "--port", "8080" }));
+        }
+
+        [Fact]
+        public void BuildPlan_ClaudeCodeHttpLocal_WritesPinnedProjectScopedConfig()
+        {
+            RunInTempProject(projectRoot =>
+            {
+                var plan = ConfigureCommand.BuildPlan(
+                    new Dictionary<string, string> { ["agent"] = "claude-code", ["project"] = projectRoot },
+                    FakeExe, FakeVersion);
+
+                Assert.Equal("claude-code", plan.AgentId);
+                Assert.Equal(Consts.MCP.Server.TransportMethod.streamableHttp, plan.Transport);
+                Assert.Equal(ConnectionMode.Local, plan.Settings.ConnectionMode);
+
+                // D14 pin = 8 hex chars; D15 port in the deterministic 20000-29999 range.
+                Assert.Equal(8, plan.ProjectPin.Length);
+                Assert.InRange(plan.ResolvedPort, ProjectIdentity.MinPort, ProjectIdentity.MaxPort);
+
+                // Config is project-scoped (.mcp.json under the project root) and carries the pinned URL.
+                Assert.Equal(Path.Combine(projectRoot, ".mcp.json"), plan.ConfigPath);
+                Assert.Contains("/p/" + plan.ProjectPin, plan.ExpectedFileContent);
+
+                // The write lands in the temp project root (safe) — assert it actually happened.
+                Assert.True(plan.Config.Configure());
+                Assert.True(File.Exists(plan.ConfigPath));
+                Assert.Contains(plan.ProjectPin, File.ReadAllText(plan.ConfigPath));
+            });
+        }
+
+        [Fact]
+        public void BuildPlan_CodexHttpLocal_UsesPinnedTomlConfig()
+        {
+            RunInTempProject(projectRoot =>
+            {
+                var plan = ConfigureCommand.BuildPlan(
+                    new Dictionary<string, string> { ["agent"] = "codex", ["project"] = projectRoot },
+                    FakeExe, FakeVersion);
+
+                Assert.Equal("codex", plan.AgentId);
+                Assert.Equal(Path.Combine(projectRoot, ".codex", "config.toml"), plan.ConfigPath);
+                Assert.Contains("/p/" + plan.ProjectPin, plan.ExpectedFileContent);
+
+                Assert.True(plan.Config.Configure());
+                Assert.True(File.Exists(plan.ConfigPath));
+            });
+        }
+
+        [Fact]
+        public void BuildPlan_RemoteUrl_UsesCloudModeAndPinnedHostedUrl()
+        {
+            RunInTempProject(projectRoot =>
+            {
+                var plan = ConfigureCommand.BuildPlan(
+                    new Dictionary<string, string> { ["agent"] = "claude-code", ["url"] = "https://ai-game.dev/mcp", ["project"] = projectRoot },
+                    FakeExe, FakeVersion);
+
+                Assert.Equal(ConnectionMode.Cloud, plan.Settings.ConnectionMode);
+                Assert.Contains("ai-game.dev/mcp/p/" + plan.ProjectPin, plan.ExpectedFileContent);
+            });
+        }
+
+        [Fact]
+        public void BuildPlan_StdioTransport_UsesStdioConfig()
+        {
+            RunInTempProject(projectRoot =>
+            {
+                var plan = ConfigureCommand.BuildPlan(
+                    new Dictionary<string, string> { ["agent"] = "claude-code", ["transport"] = "stdio", ["project"] = projectRoot },
+                    FakeExe, FakeVersion);
+
+                Assert.Equal(Consts.MCP.Server.TransportMethod.stdio, plan.Transport);
+            });
+        }
+
+        [Fact]
+        public void BuildPlan_UnknownAgent_Throws()
+        {
+            var ex = Assert.Throws<ConfigureCommand.ConfigureException>(() =>
+                ConfigureCommand.BuildPlan(
+                    new Dictionary<string, string> { ["agent"] = "definitely-not-an-agent" },
+                    FakeExe, FakeVersion));
+            Assert.Contains("Unknown --agent", ex.Message);
+        }
+
+        [Fact]
+        public void BuildPlan_MissingAgent_Throws()
+        {
+            Assert.Throws<ConfigureCommand.ConfigureException>(() =>
+                ConfigureCommand.BuildPlan(new Dictionary<string, string>(), FakeExe, FakeVersion));
+        }
+
+        // ── pure resolver units ──────────────────────────────────────────────────────────
+
+        [Theory]
+        [InlineData(null, Consts.MCP.Server.TransportMethod.streamableHttp)]
+        [InlineData("http", Consts.MCP.Server.TransportMethod.streamableHttp)]
+        [InlineData("streamableHttp", Consts.MCP.Server.TransportMethod.streamableHttp)]
+        [InlineData("stdio", Consts.MCP.Server.TransportMethod.stdio)]
+        public void ResolveTransport_Valid(string? raw, Consts.MCP.Server.TransportMethod expected)
+        {
+            Assert.Equal(expected, ConfigureCommand.ResolveTransport(raw));
+        }
+
+        [Fact]
+        public void ResolveTransport_Invalid_Throws()
+        {
+            Assert.Throws<ConfigureCommand.ConfigureException>(() => ConfigureCommand.ResolveTransport("carrier-pigeon"));
+        }
+
+        [Theory]
+        [InlineData("http://localhost", ConnectionMode.Local)]
+        [InlineData("http://127.0.0.1:8080", ConnectionMode.Local)]
+        [InlineData("https://ai-game.dev/mcp", ConnectionMode.Cloud)]
+        public void ResolveConnectionMode_Works(string host, ConnectionMode expected)
+        {
+            Assert.Equal(expected, ConfigureCommand.ResolveConnectionMode(host));
+        }
+
+        [Fact]
+        public void ResolveAuthOption_DefaultsByMode_ExplicitWins()
+        {
+            Assert.Equal(Consts.MCP.Server.AuthOption.oauth, ConfigureCommand.ResolveAuthOption(null, ConnectionMode.Cloud));
+            Assert.Equal(Consts.MCP.Server.AuthOption.none, ConfigureCommand.ResolveAuthOption(null, ConnectionMode.Local));
+            Assert.Equal(Consts.MCP.Server.AuthOption.none, ConfigureCommand.ResolveAuthOption("none", ConnectionMode.Cloud));
+        }
+
+        // ── helper: sandbox the process cwd + writes to a throwaway project dir ────────────
+
+        private static void RunInTempProject(Action<string> body)
+        {
+            var projectRoot = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "gdmcp-configure-" + Guid.NewGuid().ToString("N")));
+            Directory.CreateDirectory(projectRoot);
+            try
+            {
+                body(projectRoot);
+            }
+            finally
+            {
+                try { Directory.Delete(projectRoot, recursive: true); } catch { /* best-effort cleanup */ }
+            }
+        }
+    }
+}
+
+```
+
+`tests/GameDev.MCP.Server.Tests/GameDev.MCP.Server.Tests.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Matches the TFM of the host project (com.IvanMurzak.GameDev.MCP.Server.csproj). -->
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>com.IvanMurzak.GameDev.MCP.Server.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Reference the host project under test. ASP.NET Core (Microsoft.AspNetCore.App)
+         + the ModelContextProtocol / Microsoft.Extensions.Caching.Abstractions types the
+         tests use (DefaultHttpContext, InitializeRequestParams, IDistributedCache) flow
+         in transitively through this reference, so no explicit FrameworkReference or
+         extra package pins are needed. -->
+    <ProjectReference Include="..\..\com.IvanMurzak.GameDev.MCP.Server.csproj" />
+  </ItemGroup>
+
+</Project>
+
+```
+
+`tests/GameDev.MCP.Server.Tests/HostAuthDefaultsTests.cs`:
+
+```cs
+/*
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Author: Ivan Murzak (https://github.com/IvanMurzak)                      │
+│  Repository: GitHub (https://github.com/IvanMurzak/GameDev-MCP-Server)    │
+│  Copyright (c) 2026 Ivan Murzak                                           │
+│  Licensed under the Apache License, Version 2.0.                          │
+│  See the LICENSE file in the project root for more information.           │
+└───────────────────────────────────────────────────────────────────────────┘
+*/
+
+using System;
+using com.IvanMurzak.GameDev.MCP.Server.Startup;
+using com.IvanMurzak.McpPlugin.Common;
+using Xunit;
+
+namespace com.IvanMurzak.GameDev.MCP.Server.Tests
+{
+    /// <summary>
+    /// Covers the transport-conditional auth default policy (mcp-authorize, design 02 §"modes"):
+    /// stdio → none, streamableHttp → oauth-when-configurable-else-none-with-warning, and explicit
+    /// choices are always left untouched.
+    /// </summary>
+    public class HostAuthDefaultsTests
+    {
+        [Fact]
+        public void Stdio_NoExplicitAuth_LeavesAsConfigured()
+        {
+            var decision = HostAuthDefaults.Decide(
+                Consts.MCP.Server.TransportMethod.stdio,
+                authExplicitlySet: false,
+                hasAuthIssuer: false,
+                hasPublicUrl: false);
+
+            Assert.Equal(HostAuthDefaults.Decision.LeaveAsConfigured, decision);
+        }
+
+        [Fact]
+        public void Http_NoExplicitAuth_IssuerAndPublicUrl_DefaultsToOauth()
+        {
+            var decision = HostAuthDefaults.Decide(
+                Consts.MCP.Server.TransportMethod.streamableHttp,
+                authExplicitlySet: false,
+                hasAuthIssuer: true,
+                hasPublicUrl: true);
+
+            Assert.Equal(HostAuthDefaults.Decision.DefaultHttpToOauth, decision);
+        }
+
+        [Theory]
+        [InlineData(true, false)]  // issuer only
+        [InlineData(false, true)]  // public-url only
+        [InlineData(false, false)] // neither
+        public void Http_NoExplicitAuth_MissingIssuerOrPublicUrl_FallsBackToNoneWithWarning(bool hasIssuer, bool hasPublicUrl)
+        {
+            var decision = HostAuthDefaults.Decide(
+                Consts.MCP.Server.TransportMethod.streamableHttp,
+                authExplicitlySet: false,
+                hasAuthIssuer: hasIssuer,
+                hasPublicUrl: hasPublicUrl);
+
+            Assert.Equal(HostAuthDefaults.Decision.DefaultHttpToNoneWithWarning, decision);
+        }
+
+        [Fact]
+        public void Http_ExplicitAuth_LeavesAsConfigured_EvenWithIssuer()
+        {
+            var decision = HostAuthDefaults.Decide(
+                Consts.MCP.Server.TransportMethod.streamableHttp,
+                authExplicitlySet: true,
+                hasAuthIssuer: true,
+                hasPublicUrl: true);
+
+            Assert.Equal(HostAuthDefaults.Decision.LeaveAsConfigured, decision);
+        }
+
+        [Fact]
+        public void IsAuthExplicitlySet_AuthArg_True()
+        {
+            Assert.True(HostAuthDefaults.IsAuthExplicitlySet(new[] { "--auth", "oauth" }));
+            Assert.True(HostAuthDefaults.IsAuthExplicitlySet(new[] { "--auth=none" }));
+            Assert.True(HostAuthDefaults.IsAuthExplicitlySet(new[] { "--authorization", "none" }));
+        }
+
+        [Fact]
+        public void IsAuthExplicitlySet_NoAuthSignal_False()
+        {
+            // Guard: no MCP_AUTH / MCP_AUTHORIZATION env leaking in from the test host.
+            var savedAuth = Environment.GetEnvironmentVariable(Consts.MCP.Server.Env.Auth);
+            var savedAuthorization = Environment.GetEnvironmentVariable(Consts.MCP.Server.Env.Authorization);
+            try
+            {
+                Environment.SetEnvironmentVariable(Consts.MCP.Server.Env.Auth, null);
+                Environment.SetEnvironmentVariable(Consts.MCP.Server.Env.Authorization, null);
+
+                Assert.False(HostAuthDefaults.IsAuthExplicitlySet(new[] { "--client-transport", "streamableHttp", "--port", "8080" }));
+                Assert.False(HostAuthDefaults.IsAuthExplicitlySet(Array.Empty<string>()));
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(Consts.MCP.Server.Env.Auth, savedAuth);
+                Environment.SetEnvironmentVariable(Consts.MCP.Server.Env.Authorization, savedAuthorization);
+            }
+        }
+
+        [Fact]
+        public void IsAuthExplicitlySet_AuthEnv_True()
+        {
+            var saved = Environment.GetEnvironmentVariable(Consts.MCP.Server.Env.Auth);
+            try
+            {
+                Environment.SetEnvironmentVariable(Consts.MCP.Server.Env.Auth, "oauth");
+                Assert.True(HostAuthDefaults.IsAuthExplicitlySet(Array.Empty<string>()));
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(Consts.MCP.Server.Env.Auth, saved);
+            }
+        }
+    }
+}
+
+```
+
+`tests/GameDev.MCP.Server.Tests/OriginAllowListTests.cs`:
+
+```cs
+/*
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Author: Ivan Murzak (https://github.com/IvanMurzak)                      │
+│  Repository: GitHub (https://github.com/IvanMurzak/GameDev-MCP-Server)    │
+│  Copyright (c) 2026 Ivan Murzak                                           │
+│  Licensed under the Apache License, Version 2.0.                          │
+│  See the LICENSE file in the project root for more information.           │
+└───────────────────────────────────────────────────────────────────────────┘
+*/
+
+using System.Linq;
+using com.IvanMurzak.GameDev.MCP.Server.Startup;
+using com.IvanMurzak.McpPlugin.Common.Utils;
+using Xunit;
+
+namespace com.IvanMurzak.GameDev.MCP.Server.Tests
+{
+    /// <summary>
+    /// Covers the configurable Origin allow-list host surface (b2 carry-forward): parsing +
+    /// normalization + merge with the public-url origin, and that the replacement options are only
+    /// built when there is something to add.
+    /// </summary>
+    public class OriginAllowListTests
+    {
+        [Fact]
+        public void ParseOrigins_NullOrEmpty_ReturnsEmpty()
+        {
+            Assert.Empty(OriginAllowList.ParseOrigins(null));
+            Assert.Empty(OriginAllowList.ParseOrigins("   "));
+        }
+
+        [Fact]
+        public void ParseOrigins_SplitsCommaAndSemicolon_Normalizes_Dedups()
+        {
+            var origins = OriginAllowList.ParseOrigins("https://Console.Example.com/ , https://console.example.com ; https://b.example.com");
+
+            // Library normalization: scheme+host lowercased, path stripped, explicit port always appended
+            // ({scheme}://{host}:{port}). The two Console.Example variants dedup to one.
+            Assert.Equal(2, origins.Count);
+            Assert.Contains("https://console.example.com:443", origins);
+            Assert.Contains("https://b.example.com:443", origins);
+        }
+
+        [Fact]
+        public void BuildAllowedOrigins_MergesPublicUrlOriginAndExtras()
+        {
+            var merged = OriginAllowList.BuildAllowedOrigins(
+                publicUrl: "https://ai-game.dev/mcp",
+                rawAllowedOrigins: "https://console.example.com");
+
+            Assert.Contains("https://ai-game.dev:443", merged);
+            Assert.Contains("https://console.example.com:443", merged);
+        }
+
+        [Fact]
+        public void TryBuildOptions_NoExtraOrigins_ReturnsFalse()
+        {
+            var args = new DataArguments(new[] { "--public-url=https://ai-game.dev" });
+            Assert.False(OriginAllowList.TryBuildOptions(args, rawAllowedOrigins: null, out var options));
+            Assert.Null(options);
+        }
+
+        [Fact]
+        public void TryBuildOptions_WithExtraOrigins_BuildsOptions_KeepsLoopback()
+        {
+            var args = new DataArguments(new[] { "--public-url=https://ai-game.dev" });
+            Assert.True(OriginAllowList.TryBuildOptions(args, "https://console.example.com", out var options));
+
+            Assert.NotNull(options);
+            Assert.True(options!.AllowLoopback);
+            Assert.Contains("https://console.example.com:443", options.AllowedOrigins);
+            Assert.Contains("https://ai-game.dev:443", options.AllowedOrigins);
+        }
+    }
+}
+
+```
+
+`tests/GameDev.MCP.Server.Tests/SessionMigrationRestartResumeTests.cs`:
+
+```cs
+/*
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Author: Ivan Murzak (https://github.com/IvanMurzak)                      │
+│  Repository: GitHub (https://github.com/IvanMurzak/GameDev-MCP-Server)    │
+│  Copyright (c) 2026 Ivan Murzak                                           │
+│  Licensed under the Apache License, Version 2.0.                          │
+│  See the LICENSE file in the project root for more information.           │
+└───────────────────────────────────────────────────────────────────────────┘
+*/
+
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using com.IvanMurzak.GameDev.MCP.Server;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging.Abstractions;
+using ModelContextProtocol.Protocol;
+using Xunit;
+
+namespace com.IvanMurzak.GameDev.MCP.Server.Tests
+{
+    /// <summary>
+    /// Restart-resume gate for the Redis session-migration path (design 07 risk row "Session-migration
+    /// (Redis) interplay"; issue #70). Models a server-process restart: the durable distributed cache
+    /// (Redis in prod) survives, so a FRESH <see cref="SessionMigrationHandler"/> instance — a stand-in
+    /// for the restarted process, which has never seen the session in memory — must rehydrate the
+    /// session's <see cref="InitializeRequestParams"/> from the shared cache.
+    /// </summary>
+    public class SessionMigrationRestartResumeTests
+    {
+        [Fact]
+        public async Task PersistThenNewHandlerOnSameCache_RehydratesSession()
+        {
+            // One cache instance shared by both handlers == the Redis store surviving a restart.
+            var sharedCache = new SharedDistributedCache();
+            const string sessionId = "session-abc-123";
+            var original = NewInitializeParams();
+
+            // Process 1 persists on `initialize`.
+            var before = new SessionMigrationHandler(sharedCache, NullLogger<SessionMigrationHandler>.Instance);
+            await before.OnSessionInitializedAsync(new DefaultHttpContext(), sessionId, original, CancellationToken.None);
+
+            // Process 2 (restarted — brand-new handler, empty in-memory state) resumes from the cache.
+            var afterRestart = new SessionMigrationHandler(sharedCache, NullLogger<SessionMigrationHandler>.Instance);
+            var rehydrated = await afterRestart.AllowSessionMigrationAsync(new DefaultHttpContext(), sessionId, CancellationToken.None);
+
+            Assert.NotNull(rehydrated);
+            Assert.Equal(original.ProtocolVersion, rehydrated!.ProtocolVersion);
+            Assert.Equal(original.ClientInfo!.Name, rehydrated.ClientInfo!.Name);
+            Assert.Equal(original.ClientInfo.Version, rehydrated.ClientInfo.Version);
+        }
+
+        [Fact]
+        public async Task UnknownSessionAfterRestart_ReturnsNull()
+        {
+            var sharedCache = new SharedDistributedCache();
+            var afterRestart = new SessionMigrationHandler(sharedCache, NullLogger<SessionMigrationHandler>.Instance);
+
+            var result = await afterRestart.AllowSessionMigrationAsync(
+                new DefaultHttpContext(), sessionId: "never-persisted", CancellationToken.None);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task MalformedSessionId_RejectedDefensively()
+        {
+            // Defensive session-ID validation (issue #72): a value outside the accepted charset is never
+            // used as a cache key on either the persist or the migrate path.
+            var sharedCache = new SharedDistributedCache();
+            var handler = new SessionMigrationHandler(sharedCache, NullLogger<SessionMigrationHandler>.Instance);
+            const string badSessionId = "../../etc/passwd";
+
+            await handler.OnSessionInitializedAsync(new DefaultHttpContext(), badSessionId, NewInitializeParams(), CancellationToken.None);
+            Assert.Equal(0, sharedCache.Count); // nothing persisted for an invalid id
+
+            var result = await handler.AllowSessionMigrationAsync(new DefaultHttpContext(), badSessionId, CancellationToken.None);
+            Assert.Null(result);
+        }
+
+        private static InitializeRequestParams NewInitializeParams() => new()
+        {
+            ProtocolVersion = "2024-11-05",
+            Capabilities = new ClientCapabilities(),
+            ClientInfo = new Implementation { Name = "restart-resume-client", Version = "9.0.0" },
+        };
+
+        /// <summary>
+        /// Dictionary-backed <see cref="IDistributedCache"/> whose contents persist across handler
+        /// instances — the test stand-in for a Redis store that outlives a server-process restart.
+        /// </summary>
+        private sealed class SharedDistributedCache : IDistributedCache
+        {
+            private readonly Dictionary<string, byte[]> _store = new();
+
+            public int Count => _store.Count;
+
+            public byte[]? Get(string key) => _store.TryGetValue(key, out var v) ? v : null;
+
+            public Task<byte[]?> GetAsync(string key, CancellationToken token = default) => Task.FromResult(Get(key));
+
+            public void Set(string key, byte[] value, DistributedCacheEntryOptions options) => _store[key] = value;
+
+            public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
+            {
+                Set(key, value, options);
+                return Task.CompletedTask;
+            }
+
+            public void Refresh(string key) { }
+
+            public Task RefreshAsync(string key, CancellationToken token = default) => Task.CompletedTask;
+
+            public void Remove(string key) => _store.Remove(key);
+
+            public Task RemoveAsync(string key, CancellationToken token = default)
+            {
+                _store.Remove(key);
+                return Task.CompletedTask;
+            }
+        }
+    }
+}
+
+```
+
+`tests/GameDev.MCP.Server.Tests/SessionMigrationTtlTests.cs`:
+
+```cs
+/*
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Author: Ivan Murzak (https://github.com/IvanMurzak)                      │
+│  Repository: GitHub (https://github.com/IvanMurzak/GameDev-MCP-Server)    │
+│  Copyright (c) 2026 Ivan Murzak                                           │
+│  Licensed under the Apache License, Version 2.0.                          │
+│  See the LICENSE file in the project root for more information.           │
+└───────────────────────────────────────────────────────────────────────────┘
+*/
+
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using com.IvanMurzak.GameDev.MCP.Server;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging.Abstractions;
+using ModelContextProtocol.Protocol;
+using Xunit;
+
+namespace com.IvanMurzak.GameDev.MCP.Server.Tests
+{
+    /// <summary>
+    /// Covers the issue #209 fix: the migration-record TTL is configurable, defaults to a
+    /// window >= the in-memory idle timeout, and is actually applied to the cache entry as an
+    /// absolute (not sliding) expiration.
+    /// </summary>
+    public class SessionMigrationTtlTests
+    {
+        // ── ResolveTtl: precedence + clamp/floor ────────────────────────────────────────
+
+        [Fact]
+        public void ResolveTtl_NeitherEnvSet_UsesTenHourDefault()
+        {
+            var ttl = SessionMigrationHandler.ResolveTtl(migrationTtlRaw: null, idleTimeoutRaw: null);
+            Assert.Equal(SessionMigrationHandler.DefaultSessionTtl, ttl);
+            Assert.Equal(TimeSpan.FromHours(10), ttl);
+        }
+
+        [Fact]
+        public void ResolveTtl_ExplicitOverride_Wins()
+        {
+            // Explicit override above the idle window wins outright.
+            var ttl = SessionMigrationHandler.ResolveTtl(
+                migrationTtlRaw: "50000",
+                idleTimeoutRaw: "36000");
+            Assert.Equal(TimeSpan.FromSeconds(50000), ttl);
+        }
+
+        [Fact]
+        public void ResolveTtl_NoOverride_FallsBackToIdleTimeout()
+        {
+            // No explicit override → track the in-memory idle window (10h prod value).
+            var ttl = SessionMigrationHandler.ResolveTtl(
+                migrationTtlRaw: null,
+                idleTimeoutRaw: "36000");
+            Assert.Equal(TimeSpan.FromSeconds(36000), ttl);
+        }
+
+        [Fact]
+        public void ResolveTtl_ExplicitBelowIdleTimeout_IsFlooredAtIdleTimeout()
+        {
+            // The core issue #209 guard: a too-short explicit override is raised to the idle
+            // window so the recovery record can never expire before the in-memory session.
+            var ttl = SessionMigrationHandler.ResolveTtl(
+                migrationTtlRaw: "7200",   // the old buggy 2h value
+                idleTimeoutRaw: "36000");  // 10h in-memory window
+            Assert.Equal(TimeSpan.FromSeconds(36000), ttl);
+        }
+
+        [Theory]
+        [InlineData("", "")]
+        [InlineData("   ", null)]
+        [InlineData("not-a-number", "also-bad")]
+        [InlineData("0", "0")]
+        [InlineData("-5", "-100")]
+        public void ResolveTtl_MalformedOrNonPositive_TreatedAsUnset(string? migration, string? idle)
+        {
+            // Garbage / non-positive values fail open to the hard default rather than throwing.
+            var ttl = SessionMigrationHandler.ResolveTtl(migration, idle);
+            Assert.Equal(SessionMigrationHandler.DefaultSessionTtl, ttl);
+        }
+
+        [Fact]
+        public void ResolveTtl_MalformedOverride_FallsThroughToIdleTimeout()
+        {
+            var ttl = SessionMigrationHandler.ResolveTtl(
+                migrationTtlRaw: "garbage",
+                idleTimeoutRaw: "36000");
+            Assert.Equal(TimeSpan.FromSeconds(36000), ttl);
+        }
+
+        [Fact]
+        public void ResolveTtl_OverrideAboveIdle_NotClampedDown()
+        {
+            // The floor never lowers a deliberately-larger TTL.
+            var ttl = SessionMigrationHandler.ResolveTtl(
+                migrationTtlRaw: "72000", // 20h
+                idleTimeoutRaw: "36000"); // 10h
+            Assert.Equal(TimeSpan.FromSeconds(72000), ttl);
+        }
+
+        [Fact]
+        public void ResolveTtl_ExplicitEqualsIdleExactly_StaysAtThatValue()
+        {
+            // Boundary: explicit == idle. The floor uses `<` so an exactly-equal value is not
+            // raised; it passes through unchanged (and is not double-counted by the clamp).
+            var ttl = SessionMigrationHandler.ResolveTtl(
+                migrationTtlRaw: "36000",
+                idleTimeoutRaw: "36000");
+            Assert.Equal(TimeSpan.FromSeconds(36000), ttl);
+        }
+
+        [Fact]
+        public void ResolveTtl_PathologicallyLargeOverride_FailsOpenToCeiling()
+        {
+            // A value that would overflow TimeSpan.FromSeconds must NOT throw (fail-open
+            // contract). It is clamped to MaxSessionTtl instead of crashing startup.
+            var ttl = SessionMigrationHandler.ResolveTtl(
+                migrationTtlRaw: "1000000000000000", // 1e15 s — overflows TimeSpan ticks
+                idleTimeoutRaw: "36000");
+            Assert.Equal(SessionMigrationHandler.MaxSessionTtl, ttl);
+        }
+
+        // ── Handler applies the resolved TTL to its cache entry (absolute, not sliding) ──
+
+        [Fact]
+        public async Task OnSessionInitialized_AppliesResolvedTtl_AsAbsoluteExpiration()
+        {
+            var resolved = SessionMigrationHandler.ResolveTtl(
+                migrationTtlRaw: "36000",
+                idleTimeoutRaw: "600");
+            var recordingCache = new RecordingDistributedCache();
+            var handler = new SessionMigrationHandler(
+                recordingCache,
+                NullLogger<SessionMigrationHandler>.Instance,
+                resolved);
+
+            await handler.OnSessionInitializedAsync(
+                new DefaultHttpContext(),
+                sessionId: "abc123",
+                initializeParams: NewInitializeParams(),
+                CancellationToken.None);
+
+            Assert.NotNull(recordingCache.LastOptions);
+            // Absolute relative TTL is set to exactly the resolved value …
+            Assert.Equal(resolved, recordingCache.LastOptions!.AbsoluteExpirationRelativeToNow);
+            // … and sliding expiration is NOT used (the issue #209 regression source).
+            Assert.Null(recordingCache.LastOptions.SlidingExpiration);
+        }
+
+        [Fact]
+        public async Task OnSessionInitialized_NonPositiveTtl_FallsBackToDefault()
+        {
+            // The 3-arg ctor guards against a non-positive TimeSpan by using the default.
+            var recordingCache = new RecordingDistributedCache();
+            var handler = new SessionMigrationHandler(
+                recordingCache,
+                NullLogger<SessionMigrationHandler>.Instance,
+                TimeSpan.Zero);
+
+            await handler.OnSessionInitializedAsync(
+                new DefaultHttpContext(),
+                sessionId: "abc123",
+                initializeParams: NewInitializeParams(),
+                CancellationToken.None);
+
+            Assert.NotNull(recordingCache.LastOptions);
+            Assert.Equal(
+                SessionMigrationHandler.DefaultSessionTtl,
+                recordingCache.LastOptions!.AbsoluteExpirationRelativeToNow);
+        }
+
+        private static InitializeRequestParams NewInitializeParams() => new()
+        {
+            ProtocolVersion = "2024-11-05",
+            Capabilities = new ClientCapabilities(),
+            ClientInfo = new Implementation { Name = "test-client", Version = "1.0.0" },
+        };
+
+        /// <summary>
+        /// Minimal in-memory <see cref="IDistributedCache"/> test double that records the
+        /// <see cref="DistributedCacheEntryOptions"/> passed to <c>SetAsync</c> so the test can
+        /// assert the expiration policy without a live Redis.
+        /// </summary>
+        private sealed class RecordingDistributedCache : IDistributedCache
+        {
+            private readonly Dictionary<string, byte[]> _store = new();
+
+            public DistributedCacheEntryOptions? LastOptions { get; private set; }
+
+            public byte[]? Get(string key) => _store.TryGetValue(key, out var v) ? v : null;
+
+            public Task<byte[]?> GetAsync(string key, CancellationToken token = default)
+                => Task.FromResult(Get(key));
+
+            public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
+            {
+                LastOptions = options;
+                _store[key] = value;
+            }
+
+            public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
+            {
+                Set(key, value, options);
+                return Task.CompletedTask;
+            }
+
+            public void Refresh(string key) { }
+
+            public Task RefreshAsync(string key, CancellationToken token = default) => Task.CompletedTask;
+
+            public void Remove(string key) => _store.Remove(key);
+
+            public Task RemoveAsync(string key, CancellationToken token = default)
+            {
+                _store.Remove(key);
+                return Task.CompletedTask;
+            }
+        }
+    }
+}
+
+```
