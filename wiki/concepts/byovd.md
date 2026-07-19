@@ -14,6 +14,7 @@ sources:
   - wiki/sources/descriptions/wesmar__KernelResearchKit.md
   - wiki/sources/descriptions/wavestone-cdt__EDRSandblast.md
   - wiki/sources/descriptions/vergamota__KslKatz.md
+  - wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md
 updated: 2026-07-19
 confidence: high
 ---
@@ -30,7 +31,7 @@ Bring Your Own Vulnerable Driver: load a legitimately signed but vulnerable driv
 
 ## Mitigations
 
-Microsoft vulnerable-driver blocklist, [[hvci]], AC driver allowlists ([[vanguard]]-style), PiDDBCache/MmUnloadedDrivers forensics, EPT-protected callback lists.
+Microsoft vulnerable-driver blocklist, [[hvci]], AC driver allowlists ([[vanguard]]-style), PiDDBCache/MmUnloadedDrivers forensics, EPT-protected callback lists. HVCI-oriented LOLdriver checks such as [[hvci-loldrivers-check]] help inventory known-abused signed drivers against Memory Integrity constraints. (source: wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md)
 
 Educational kernel-exploit reference material such as [[windows-kernel-exploits]] sits in the same cheat / vulnerable-driver documentation lane. (source: wiki/sources/descriptions/xct__windows-kernel-exploits.md)
 
@@ -50,4 +51,5 @@ LSASS credential extractors such as [[kslkatz]] abuse Microsoft Defender’s `Ks
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+
