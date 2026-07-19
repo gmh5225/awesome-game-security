@@ -4026,6 +4026,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/MrDiamond64/Scythe-AntiCheat [Minecraft]
 - https://github.com/GrimAnticheat/Grim [Minecraft]
 - https://github.com/NoCheatPlus/NoCheatPlus [Open-source anti-cheat plugin for Minecraft (Bukkit/Spigot)]
+- https://github.com/Hexze/anticheat [Starfish Minecraft-style cheater detector with NoSlow/scaffold/combat heuristics]
 - https://github.com/PalassCQ/GuardAC [AI-assisted open-source Minecraft anti-cheat plugin for Spigot/Paper/Folia]
 - https://github.com/enis1enis2/WindfallAntiCheatF [Minecraft Fabric packet-based anti-cheat with combat/movement checks and Geyser/Bedrock compatibility]
 - https://github.com/XuanXuan-ZhengGui/Minecraft-Anti-Cheat [Open-source Minecraft Spigot/Paper anti-cheat with combat/movement detections and confidence scoring]
@@ -4235,6 +4236,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/apkunpacker/RootAppDetector [Small POC code that detects known root-related apps by attempting to launch their activities and monitoring security exception]
 - https://github.com/Rem01Gaming/meowna_detector [Prove of concept of detecting meowna module]
 - https://github.com/WsttXm/RiskEngine [Android risk-control SDK and management platform: device fingerprinting and runtime detection (root/hook/emulator/debug/sandbox)]
+- https://github.com/venkata-ram/DroidShield [Android RASP SDK with root/debugger/hook/emulator/tamper checks and polymorphic per-build ordering]
 - https://github.com/NoobDigital/react-native-shieldscan [React Native root/jailbreak, Frida, debugger, emulator, and hook-framework detection]
 - https://github.com/LSPosed/DirtySepolicy [Detect userspace su solutions via SELinux access checks from the App Zygote process]
 
