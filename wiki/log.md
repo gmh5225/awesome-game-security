@@ -353,3 +353,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:w1u0u1/kinject`: entity [[kinject]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-link from [[injdrv]].
 
+- **2026-07-19** — ingest `description:w00tzenheimer/d810-ng`: entity [[d810-ng]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
