@@ -117,6 +117,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [injdrv](entities/injdrv.md) — kernel APC DLL injector (process notify → LdrLoadDll; C)
 - [input-overlay](entities/input-overlay.md) — OBS plugin: keyboard/mouse/gamepad livestream overlay (C++; Keyboard Mapper)
 - [InstrumentationCallbackSyscallLogger](entities/instrumentation-callback-syscall-logger.md) — Ring3 Instrumentation Callback on syscall return (AC / Windows)
+- [jmap](entities/jmap.md) — UE4/UE5 .uasset/.umap dependency graphs (reflection data / asset structure)
 - [KACE](entities/kace.md) — RING3 Windows kernel-driver emulator (self context / Unicorn; AC analysis)
 - [Kagura](entities/kagura.md) — LLVM pass plugin: CFG/string obfuscation, anti-tamper, anti-debug (mobile/desktop/Wasm)
 - [kevboy](entities/kevboy.md) — Rust Game Boy emulator (CPU / memory / graphics / input)

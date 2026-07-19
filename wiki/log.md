@@ -487,3 +487,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `description:trustdecision/trustdevice-android`: entity [[trustdevice-android]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]]; cross-link from [[trustdevice-ios]].
 
 - **2026-07-19** — ingest `description:trumank/patternsleuth`: entity [[patternsleuth]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
+
+- **2026-07-19** — ingest `description:trumank/jmap`: entity [[jmap]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
