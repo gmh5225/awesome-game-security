@@ -391,3 +391,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:vmi-rs/ephemera`: entity [[ephemera]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
+- **2026-07-19** — ingest `description:vmcall/owned_alignment`: entity [[owned-alignment]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]].
+
