@@ -217,6 +217,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/4ian/GDevelop [Open-source cross-platform 2D/3D/multiplayer game engine]
 - https://github.com/PixelGuys/Cubyz [3D voxel sandbox game written by Zig language]
 - https://github.com/RSDKModding/RSDKv5-Decompilation [Retro Engine v5 / v5Ultimate decompilation]
+- https://github.com/InfiniteC0re/OpenBarnyard [WIP decompilation of Barnyard and the proprietary TOSHI 2.0 engine, with Ghidra RE workflow]
 - https://github.com/koosoli/PoseidonVK [Vulkan modernization fork of the Poseidon/CWR-CE engine (Arma: Cold War Assault)]
 - https://github.com/udinmoInc/WindEffects [C++23 Vulkan game engine with ECS, editor, and asset pipeline]
 - https://github.com/goobz22/cat-annihilation [C++20/Vulkan/CUDA engine with render graph, clustered deferred PBR, ECS, and wave-survival test game]
