@@ -197,6 +197,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [tiny-csgo-client](entities/tiny-csgo-client.md) — minimal CS:GO client for dedicated servers (modding / SDK)
 - [ts-ue4dumper](entities/ts-ue4dumper.md) — TypeScript + Frida UE4 dumper (modular; C++ offsets)
 - [UTM](entities/utm.md) — QEMU VM host for iOS/macOS (Hypervisor.framework / JIT; IOS Emulator)
+- [uWebSockets](entities/uwebsockets.md) — C++ WebSocket/HTTP server (TLS / pub-sub; Game Network)
 - [UMPMLib](entities/umpmlib.md) — C/C++ usermode memory analysis (cheat / RPM)
 - [UniCli](entities/unicli.md) — Unity Editor terminal CLI (compile/test/build/inspect; AI-agent ready)
 - [unity-mcp](entities/unity-mcp.md) — MCP server for Unity (Game Develop / MCP workflow)
