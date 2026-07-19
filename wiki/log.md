@@ -471,3 +471,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/windows-kernel]], [[overviews/mobile-security]] (Cheat ~2556; Windows Emulator KDemu / iOS vphone PCC notes); light `index.md` section notes (no per-category pages).
 
 - **2026-07-19** — ingest `description:tym32167/arma3beclient`: entity [[arma3beclient]]; cited on [[battleye]] and [[overviews/anti-cheat]].
+
+- **2026-07-19** — ingest `description:twohyjr/Metal-Game-Engine-Tutorial`: entity [[metal-game-engine-tutorial]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
