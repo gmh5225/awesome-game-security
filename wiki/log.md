@@ -483,3 +483,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `description:tsoding/olive.c`: entity [[olive-c]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
 
 - **2026-07-19** — ingest `description:trustdecision/trustdevice-ios`: entity [[trustdevice-ios]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
+- **2026-07-19** — ingest `description:trustdecision/trustdevice-android`: entity [[trustdevice-android]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]]; cross-link from [[trustdevice-ios]].

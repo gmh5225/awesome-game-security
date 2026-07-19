@@ -12,7 +12,7 @@ confidence: medium
 
 TrustDecision device-fingerprinting SDK for iOS, distributed as a CocoaPod. Collects device-specific attributes for fraud detection and device-integrity assessment, exposing unique device identifiers and risk signals through a native Objective-C/Swift interface. Useful for anti-cheat engineers and mobile security researchers studying iOS device fingerprinting and integrity-verification techniques. (source: wiki/sources/descriptions/trustdecision__trustdevice-ios.md)
 
-README lane: `[IOS]`. Complements Android RASP / attestation samples such as [[droidshield]] and [[keyattestation]] with an iOS commercial-style fingerprint SDK surface.
+README lane: `[IOS]`. Sibling to [[trustdevice-android]]; complements Android RASP / attestation samples such as [[droidshield]] and [[keyattestation]] with an iOS commercial-style fingerprint SDK surface.
 
 ## Links
 
@@ -20,4 +20,4 @@ README lane: `[IOS]`. Complements Android RASP / attestation samples such as [[d
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/anti-cheat]] · [[droidshield]] · [[keyattestation]]
+[[overviews/mobile-security]] · [[overviews/anti-cheat]] · [[trustdevice-android]] · [[droidshield]] · [[keyattestation]]
