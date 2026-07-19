@@ -477,3 +477,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `description:turbulenz/turbulenz_engine`: entity [[turbulenz-engine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-07-19** — ingest `description:turanszkij/WickedEngine`: entity [[wickedengine]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
+
+- **2026-07-19** — ingest `description:tteck/Proxmox`: entity [[proxmox]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-link from [[proxmox-ve-anti-detection]].

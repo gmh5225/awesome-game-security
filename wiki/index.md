@@ -167,6 +167,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PresentHookDetection](entities/present-hook-detection.md) — BE-style IDXGISwapChain::Present hook check (dummy D3D11 + dxgi prologue)
 - [PG1903](entities/pg1903.md) — Win10 1903 PatchGuard disable via context-page NX (Demo NX)
 
+- [Proxmox](entities/proxmox.md) — PVE Helper Scripts (dialog installers; Cheat QEMU/KVM/PVE lab)
 - [proxmox-ve-anti-detection](entities/proxmox-ve-anti-detection.md) — Hidden PVE / QEMU-KVM anti-detection (kernel)
 - [qemu-anti-detection](entities/qemu-anti-detection.md) — Hidden QEMU (device-string / fingerprint spoof)
 - [QuickAsm](entities/quickasm.md) — x86/x64 assemble-and-run GUI (Keystone)

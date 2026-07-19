@@ -4,7 +4,7 @@ kind: entity
 topics: [anti-cheat, game-hacking, reverse-engineering]
 sources:
   - wiki/sources/descriptions/zhaodice__proxmox-ve-anti-detection.md
-updated: 2026-07-17
+updated: 2026-07-19
 confidence: medium
 ---
 
@@ -20,4 +20,4 @@ Useful for game-security researchers and reverse engineers studying offensive te
 
 ## Related
 
-[[qemu-anti-detection]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[vt-debuuger]] · [[overviews/reverse-engineering]]
+[[qemu-anti-detection]] · [[proxmox]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[vt-debuuger]] · [[overviews/reverse-engineering]]
