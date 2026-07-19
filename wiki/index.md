@@ -6,15 +6,15 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Overviews
 
-- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2553 / Anti Cheat ~595; Game Engine ~141; Image Codec; console Switch/Xbox/PS HV)
-- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* (aimbot/triggerbot) + engine protection (~595); hybrid OS AC; Game Tools RCE + Windows Emulator AC
-- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2553) / Detection:DMA (~595) + WSF attestation
+- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2553 / Anti Cheat ~597; Game Engine ~141; Image Codec; console Switch/Xbox/PS HV)
+- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* (aimbot/triggerbot) + engine protection (~597); hybrid OS AC; Game Tools RCE + Windows Emulator AC
+- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2553) / Detection:DMA (~597) + WSF attestation
 - [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~141); MCP/AI gamedev (~176); Image Codec + Testing/Tools/CI
-- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2553) + Some Tricks (~112); Launcher Abuser / console PS HV+BD-JB lanes
+- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2553) + Some Tricks (~113); Launcher Abuser / console PS HV+BD-JB lanes
 - [Graphics API](overviews/graphics-api.md) — DirectX (~33) / GL / Vulkan hooks, overlays, Image Codec
 - [Mobile Security](overviews/mobile-security.md) — Android / iOS; memory-loading + App/Kernel CVE; WSA (~9), Gunyah/vphone emulators
 - [Reverse Engineering](overviews/reverse-engineering.md) — RE tools, MBA/DBI, deobfuscation, packers; Windows Emulator + console/PS HV RE (~2553 Cheat lane)
-- [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation (~9), BYOVD, pool; Windows Emulator (~7) + WSL
+- [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation (~9), BYOVD, pool; Some Tricks Ring0 (~113); Windows Emulator (~7) + WSL
 
 ## Concepts
 

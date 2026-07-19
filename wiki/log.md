@@ -379,3 +379,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:vojty/feather-gb`: entity [[feather-gb]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-link from [[kevboy]].
 
+- **2026-07-19** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/windows-kernel]] (Anti Cheat ~597 / Some Tricks ~113); light `index.md` section notes (no per-category pages).
+
