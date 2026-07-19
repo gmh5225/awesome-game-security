@@ -109,6 +109,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [imgui-ios-mod-menu](entities/imgui-ios-mod-menu.md) — iOS ImGui mod menu (cheat / render-draw)
 - [Injectors](entities/injectors.md) — injection-testing harness (C/C++; AC stress)
 - [injdrv](entities/injdrv.md) — kernel APC DLL injector (process notify → LdrLoadDll; C)
+- [input-overlay](entities/input-overlay.md) — OBS plugin: keyboard/mouse/gamepad livestream overlay (C++; Keyboard Mapper)
 - [InstrumentationCallbackSyscallLogger](entities/instrumentation-callback-syscall-logger.md) — Ring3 Instrumentation Callback on syscall return (AC / Windows)
 - [KACE](entities/kace.md) — RING3 Windows kernel-driver emulator (self context / Unicorn; AC analysis)
 - [Kagura](entities/kagura.md) — LLVM pass plugin: CFG/string obfuscation, anti-tamper, anti-debug (mobile/desktop/Wasm)

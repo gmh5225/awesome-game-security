@@ -441,3 +441,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `description:unsafeblackcat/MapleStoryEx`: entity [[maplestoryex]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-19** — ingest `description:unkvolism/Solemn`: entity [[solemn]]; cited on [[hvci]] and [[overviews/windows-kernel]].
+
+- **2026-07-19** — ingest `description:univrsal/input-overlay`: entity [[input-overlay]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
