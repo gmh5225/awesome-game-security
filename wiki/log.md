@@ -419,3 +419,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:valium007/BareSVM`: entity [[baresvm]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
+- **2026-07-19** — ingest `description:uuksu/RPGMakerDecrypter`: entity [[rpgmakerdecrypter]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
+
