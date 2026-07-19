@@ -445,3 +445,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `description:univrsal/input-overlay`: entity [[input-overlay]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
 
 - **2026-07-19** — ingest `description:universal5433/android_kernel_samsung_universal5433`: entity [[android-kernel-samsung-universal5433]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-19** — ingest `description:un4ckn0wl3z/dioprocess-private`: entity [[dioprocess-private]]; cited on [[overviews/windows-kernel]] and [[patchguard]].
