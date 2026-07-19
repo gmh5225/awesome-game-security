@@ -383,3 +383,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:wesmar/CmdT`: entity [[cmdt]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
+- **2026-07-19** — ingest `description:void-stack/VMUnprotect`: entity [[vmunprotect]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
