@@ -395,3 +395,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:vmcall/dxgkrnl_hook`: entity [[dxgkrnl-hook]]; cited on [[overviews/graphics-api]] and [[present-hook]].
 
+- **2026-07-19** — ingest `description:vm03/payload_dumper`: entity [[payload-dumper]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
