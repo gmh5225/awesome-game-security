@@ -497,6 +497,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/justinpbarnett/unity-mcp [MCP for unity]
 - https://github.com/wondeks/unity-mcp [MCP for unity]
 - https://github.com/gmh5225/mcpup [MCP for unity]
+- https://github.com/IvanMurzak/GameDev-MCP-Server [Engine-agnostic MCP server shared by Unity-MCP, Godot-MCP, and Unreal-MCP]
 - https://github.com/gmh5225/vibe-blocks-mcp [MCP for Roblox Studio]
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 - https://github.com/jtang613/GhidrAssistMCP [MCP for Ghidra]
@@ -3524,6 +3525,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/hualuoo/palworld-helper [Helper]
 - https://github.com/shalzuth/PalWorldAntiCheat [Anti Cheat]
 - https://github.com/g91/PalAntiCheat-poc [Anti Cheat]
+- https://github.com/CoderYiXin/PalOpsWeb [Palworld dedicated-server ops workbench with PalDefender anti-cheat integration (config, bans, whitelist, REST/RCON)]
 
 > Game:Genshin Impact
 - https://github.com/khang06/mhynot2
