@@ -403,3 +403,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:violetweather/Certael`: entity [[certael]]; cited on [[overviews/anti-cheat]] and [[overviews/game-engine]].
 
+- **2026-07-19** — ingest `description:vfsfitvnm/frida-il2cpp-bridge`: entity [[frida-il2cpp-bridge]]; cited on [[frida]] and [[il2cpp]].
+
