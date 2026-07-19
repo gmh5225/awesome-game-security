@@ -51,6 +51,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BootBypass](entities/bootbypass.md) — Secure Boot / DSE / HVCI bypass (native; SeCiCallbacks / CI.dll)
 - [BusterCall](entities/bustercall.md) — enumerate/patch kernel callbacks; HVCI PFN-swap research
 - [CEDetector](entities/cedetector.md) — Cheat Engine detector (window/process/driver/debug; CE stealth test)
+- [Certael](entities/certael.md) — server-authoritative OSS AC (Rust C ABI; Godot/Unity/Unreal; .NET control plane)
 
 - [cet-research](entities/cet-research.md) — CET / shadow-stack research (C; Windows Security Features)
 - [checkhv_um](entities/checkhv-um.md) — user-mode HV detection (CPUID / RDTSC / VMCS / signatures)
