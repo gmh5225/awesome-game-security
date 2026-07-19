@@ -415,3 +415,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:vctr74/R6-Internal-V3`: entity [[r6-internal-v3]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
+- **2026-07-19** — ingest `description:vchelaru/FlatRedBall`: entity [[flatredball]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
+
