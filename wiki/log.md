@@ -385,3 +385,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:void-stack/VMUnprotect`: entity [[vmunprotect]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
+- **2026-07-19** — ingest `description:void-stack/VMUnprotect.Dumper`: entity [[vmunprotect-dumper]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-link from [[vmunprotect]].
+

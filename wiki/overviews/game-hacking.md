@@ -41,7 +41,9 @@ sources:
   - wiki/sources/descriptions/xtremegamer1__vmdevirt-vtil.md
   - wiki/sources/descriptions/wallds__NoVmpy.md
   - wiki/sources/descriptions/void-stack__VMUnprotect.md
+  - wiki/sources/descriptions/void-stack__VMUnprotect.Dumper.md
   - wiki/sources/descriptions/xp987__symbridge.md
+
   - wiki/sources/descriptions/xsslize__idarem.md
   - wiki/sources/descriptions/xoxor4d__gta4-rtx.md
   - wiki/sources/descriptions/xo1337__steam-overlay-x64.md
@@ -133,6 +135,8 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Fix VMP / VTIL demos such as [[vmdevirt-vtil]] (broken VTIL compile path; multi-`vmenter` → jmp into compiled VTIL for IDA) sit in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/xtremegamer1__vmdevirt-vtil.md)
 - Python VMProtect deobfuscation via [[novmpy]] (symbolic exec of handler chains; reconstruct original insn sequence; Triton) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/wallds__NoVmpy.md)
 - .NET Harmony instrumentation of VMProtect-virtualized methods via [[vmunprotect]] (trace invokes / manipulate params; anti-debug bypass; VMP 3.6.0) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/void-stack__VMUnprotect.md)
+- Dynamic .NET VMProtect unpack/dump via [[vmunprotect-dumper]] (force static ctor restore → AsmResolver PE dump; VMP 3.7.0) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/void-stack__VMUnprotect.Dumper.md)
+
 - Opaque-predicate detection via [[opaque-predicates-detective]] (invariant-expression / BB-local damage) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/yellowbyte__opaque-predicates-detective.md)
 - Windows x86/x64 debugging via [[x64dbg]] (feature-rich debugger + plugin system) is a core Cheat Debugging lane tool for offensive RE. (source: wiki/sources/descriptions/x64dbg__x64dbg.md)
 - Steam anti-anti-debug helpers such as [[steam-anti-anti-debug]] (patch Steam debug detection so [[x64dbg]] can attach to protected game processes) sit in the Steam / Cheat Debugging research lane. (source: wiki/sources/descriptions/wilszdev__SteamAntiAntiDebug.md)
@@ -176,7 +180,8 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Related concepts
 
-[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ndisapi]] · [[ksocket]] · [[nvidiaapi]] · [[ntmemory]] · [[umpmlib]] · [[eupmaccess]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[waryasswhe]] · [[reverse-engineering]] · [[totalpe2]] · [[quickasm]] · [[scfw]] · [[xrefsext]] · [[symbridge]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ghidrametrics]] · [[injectors]] · [[modexmap]] · [[skiphook]] · [[detoursnt]] · [[cedetector]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[keyboardkit]] · [[kernel-mouse]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[efitool]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[mypower]] · [[deobf]] · [[idadeflat]] · [[ida-easy-life]] · [[d810-ng]] · [[vmdevirt-vtil]] · [[novmpy]] · [[vmunprotect]] · [[opaque-predicates-detective]] · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[palworldsaved]] · [[tiny-csgo-client]] · [[lumina-cheat]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[waldo]] · [[aimbot-detection-prototype]] · [[battlefield-1-internal]] · [[valorantcc]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[feather-gb]] · [[xenia]] · [[xenia-mac]] · [[overviews/anti-cheat]]
+[[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ndisapi]] · [[ksocket]] · [[nvidiaapi]] · [[ntmemory]] · [[umpmlib]] · [[eupmaccess]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[waryasswhe]] · [[reverse-engineering]] · [[totalpe2]] · [[quickasm]] · [[scfw]] · [[xrefsext]] · [[symbridge]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ghidrametrics]] · [[injectors]] · [[modexmap]] · [[skiphook]] · [[detoursnt]] · [[cedetector]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[keyboardkit]] · [[kernel-mouse]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[efitool]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[mutaben]] · [[mypower]] · [[deobf]] · [[idadeflat]] · [[ida-easy-life]] · [[d810-ng]] · [[vmdevirt-vtil]] · [[novmpy]] · [[vmunprotect]] · [[vmunprotect-dumper]] · [[opaque-predicates-detective]]
+ · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[palworldsaved]] · [[tiny-csgo-client]] · [[lumina-cheat]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[waldo]] · [[aimbot-detection-prototype]] · [[battlefield-1-internal]] · [[valorantcc]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[feather-gb]] · [[xenia]] · [[xenia-mac]] · [[overviews/anti-cheat]]
 
 
 
