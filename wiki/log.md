@@ -465,3 +465,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `description:udinmoInc/WindEffects`: entity [[wind-effects]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-07-19** — ingest `description:uNetworking/uWebSockets`: entity [[uwebsockets]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-19** — ingest `description:u3d-community/U3D`: entity [[u3d]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].

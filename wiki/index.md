@@ -199,6 +199,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UTM](entities/utm.md) — QEMU VM host for iOS/macOS (Hypervisor.framework / JIT; IOS Emulator)
 - [uWebSockets](entities/uwebsockets.md) — C++ WebSocket/HTTP server (TLS / pub-sub; Game Network)
 - [UMPMLib](entities/umpmlib.md) — C/C++ usermode memory analysis (cheat / RPM)
+- [U3D](entities/u3d.md) — Unity-centered C++ 2D/3D community tree (Game Engine / source)
 - [UniCli](entities/unicli.md) — Unity Editor terminal CLI (compile/test/build/inspect; AI-agent ready)
 - [unity-mcp](entities/unity-mcp.md) — MCP server for Unity (Game Develop / MCP workflow)
 - [unitySpeedTools](entities/unityspeedtools.md) — iOS Unity IL2CPP speed/modding tools (C/C++ / ObjC)
