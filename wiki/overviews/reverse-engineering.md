@@ -54,6 +54,7 @@ sources:
   - wiki/sources/descriptions/westfox-5__GhidraMetrics.md
   - wiki/sources/descriptions/wesmar__KvcForensic.md
   - wiki/sources/descriptions/wesmar__FileRecoveryTool.md
+  - wiki/sources/descriptions/wesmar__CmdT.md
   - wiki/sources/descriptions/weak1337__ricochet_deobfuscator.md
   - wiki/sources/descriptions/weak1337__NO_ACCESS_Protection.md
   - wiki/sources/descriptions/weak1337__Alcatraz.md
@@ -90,7 +91,7 @@ Workflows for protected game clients and anti-cheat components across user mode,
 - **LSA / dump forensics:** cross-platform LSASS credential extractors such as [[kvcforensic]] recover MSV/WDigest/Kerberos/CredMan/DPAPI secrets from live memory or `lsass.dmp` via signature scan + BCrypt (Win11 24H2–26H1; Windows/Linux). (source: wiki/sources/descriptions/wesmar__KvcForensic.md)
 - **Memory forensics (RAM):** frameworks such as [[volatility]] (original Python 2; profile-based; pslist/psscan, modules, rootkit/malware plugins) and [[volatility3]] (Python 3 rewrite; layer translation + automagic profiles) extract process/network/registry/kernel artifacts from offline memory images for IR and malware RE. (source: wiki/sources/descriptions/volatilityfoundation__volatility.md) (source: wiki/sources/descriptions/volatilityfoundation__volatility3.md)
 
-- **Disk / file forensics:** tools such as [[file-recovery-tool]] recover deleted files on NTFS/FAT32/ExFAT via MFT/USN scan, signature carving, and sector-level reassembly (pure Win32; direct disk). (source: wiki/sources/descriptions/wesmar__FileRecoveryTool.md)
+- **Disk / file forensics:** tools such as [[file-recovery-tool]] recover deleted files on NTFS/FAT32/ExFAT via MFT/USN scan, signature carving, and sector-level reassembly (pure Win32; direct disk). (source: wiki/sources/descriptions/wesmar__FileRecoveryTool.md) TrustedInstaller-token launchers such as [[cmdt]] (asm GUI/CLI; TI token duplication) help RE/forensics workflows reach TI-ACL–protected OS components without taking ownership. (source: wiki/sources/descriptions/wesmar__CmdT.md)
 
 - **Linux LKM metadata:** tools such as [[vermagic]] rewrite vermagic / CRC fields so a module can load across mismatched kernel builds (cheat / RE tools lane). (source: wiki/sources/descriptions/yaxinsn__vermagic.md)
 - **Mobile / iOS:** userland exploit-chain study via [[lightsaber]] (iOS 18.4–18.6.2 JS injection into SpringBoard and other processes) (source: wiki/sources/descriptions/zeroxjf__lightsaber.md); iOS project reversing in IDA via [[ida-ios-helper]] (vtable symbols required) (source: wiki/sources/descriptions/yoavst__ida-ios-helper.md)
@@ -100,7 +101,7 @@ Workflows for protected game clients and anti-cheat components across user mode,
 
 ## Related concepts
 
-[[il2cpp]] · [[frida]] · [[unflutter]] · [[kernel-callbacks]] · [[patchguard]] · [[mutaben]] · [[ndisapi]] · [[umpmlib]] · [[eupmaccess]] · [[shredder-rs]] · [[deobf]] · [[ricochet-deobfuscator]] · [[idadeflat]] · [[ida-easy-life]] · [[d810-ng]] · [[opaque-predicates-detective]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ida-ios-helper]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[woody-woodpacker]] · [[kagura]] · [[wprotect]] · [[alcatraz]] · [[vxlang-page]] · [[obfusk8]] · [[sbox]] · [[vmdevirt-vtil]] · [[novmpy]] · [[totalpe2]] · [[ntsleuth]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[idarem]] · [[systeminformer]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ghidrametrics]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[lightsaber]] · [[vermagic]] · [[veh-dumper]] · [[no-access-protection]] · [[voidmaw]] · [[kvcforensic]] · [[volatility]] · [[volatility3]] · [[file-recovery-tool]]
+[[il2cpp]] · [[frida]] · [[unflutter]] · [[kernel-callbacks]] · [[patchguard]] · [[mutaben]] · [[ndisapi]] · [[umpmlib]] · [[eupmaccess]] · [[shredder-rs]] · [[deobf]] · [[ricochet-deobfuscator]] · [[idadeflat]] · [[ida-easy-life]] · [[d810-ng]] · [[opaque-predicates-detective]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ida-ios-helper]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[woody-woodpacker]] · [[kagura]] · [[wprotect]] · [[alcatraz]] · [[vxlang-page]] · [[obfusk8]] · [[sbox]] · [[vmdevirt-vtil]] · [[novmpy]] · [[totalpe2]] · [[ntsleuth]] · [[quickasm]] · [[xrefsext]] · [[symbridge]] · [[idarem]] · [[systeminformer]] · [[cmdt]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ghidrametrics]] · [[apktool-mcp-server]] · [[android-proxy-mcp]] · [[lightsaber]] · [[vermagic]] · [[veh-dumper]] · [[no-access-protection]] · [[voidmaw]] · [[kvcforensic]] · [[volatility]] · [[volatility3]] · [[file-recovery-tool]]
  · [[windbg-scripts]] · [[winvisor]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[feather-gb]] · [[xenia]] · [[xenia-mac]] · [[x260-lenovo-opencore]] · [[reverse-engineering]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[overviews/mobile-security]]
 
 

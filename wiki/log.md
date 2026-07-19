@@ -381,3 +381,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/windows-kernel]] (Anti Cheat ~597 / Some Tricks ~113); light `index.md` section notes (no per-category pages).
 
+- **2026-07-19** — ingest `description:wesmar/CmdT`: entity [[cmdt]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
