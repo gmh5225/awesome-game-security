@@ -387,3 +387,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:void-stack/VMUnprotect.Dumper`: entity [[vmunprotect-dumper]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-link from [[vmunprotect]].
 
+- **2026-07-19** — ingest `description:void-stack/Hypervisor-Detection`: entity [[hypervisor-detection]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+

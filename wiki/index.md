@@ -85,6 +85,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GhidraMetrics](entities/ghidrametrics.md) — Ghidra native-code metrics (cyclomatic / size / call depth; headless JSON)
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)
 - [HijackLibs](entities/hijacklibs.md) — disclosed Windows DLL hijack DB (YAML + web UI; exports / conditions)
+- [Hypervisor-Detection](entities/hypervisor-detection.md) — C++ hacked-hypervisor detection (four techniques; Detection:HV)
 - [honor-of-kings-RE-research](entities/honor-of-kings-re-research.md) — Honor of Kings Android RE (ACE / libtersafe / IL2CPP / KernelPatch KPMs)
 - [hv](entities/hv.md) — minimal Intel VT-x Type-2 hypervisor (VMX/VMCS learning)
 - [IDA Easy Life](entities/ida-easy-life.md) — IDA Pro deobfuscation plugin (Python; cheat / IDA Plugins)
