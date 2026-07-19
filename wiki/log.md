@@ -347,3 +347,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-18** — ingest `description:waldo-vision/waldo`: entity [[waldo]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
+- **2026-07-19** — ingest `description:waldo-vision/aimbot-detection-prototype`: entity [[aimbot-detection-prototype]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-link from [[waldo]].
+
