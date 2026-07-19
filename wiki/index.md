@@ -42,6 +42,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BE-Shellcode](entities/be-shellcode.md) — BattlEye UM shellcode dump/disasm (thread scan / VEH / modules)
 - [aimbot-detection-prototype](entities/aimbot-detection-prototype.md) — deep-learning aimbot/triggerbot detection prototype (clips + live window; Detection:Aimbot)
 - [Alcatraz](entities/alcatraz.md) — x64 PE obfuscator (mutation / CFF / IAT; Zydis + AsmJit; ImGui)
+- [android-kernel-xiaomi-pipa](entities/android-kernel-xiaomi-pipa.md) — Xiaomi Pad 6 (pipa) Android kernel source (cheat / Android Kernel Source)
 - [android-native-app-imgui](entities/android-native-app-imgui.md) — Android ImGui native app (Java/C++; cheat / render-draw)
 - [android-proxy-mcp](entities/android-proxy-mcp.md) — Android HTTP/HTTPS capture MCP (mitmdump + SQLite + NL query)
 - [apktool-mcp-server](entities/apktool-mcp-server.md) — MCP server wrapping apktool (Android RE suite)

@@ -421,3 +421,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:uuksu/RPGMakerDecrypter`: entity [[rpgmakerdecrypter]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
 
+- **2026-07-19** — ingest `description:utziacre/android_kernel_xiaomi_pipa`: entity [[android-kernel-xiaomi-pipa]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
