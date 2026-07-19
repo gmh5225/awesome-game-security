@@ -173,7 +173,9 @@ Compiled knowledge catalog for awesome-game-security.
 - [ValorantCC](entities/valorantcc.md) — Valorant crosshair setting (cheat / game:valorant)
 - [VaultGuard](entities/vaultguard.md) — FSFilter minifilter + process access block (x64 MASM; anti-debug/tamper)
 - [veh-dumper](entities/veh-dumper.md) — x64 VEH/VCH → synthetic PE64 dumps for IDA
+- [Volatility](entities/volatility.md) — original Python 2 memory forensics (profiles; pslist/modules/rootkit)
 - [Volatility 3](entities/volatility3.md) — Python 3 memory forensics (RAM images; Win/Linux/macOS plugins)
+
 - [Voidmaw](entities/voidmaw.md) — VEH + PAGE_GUARD code-hiding (AV/AC page-protection research)
 - [VEN0m-Ransomware](entities/ven0m-ransomware.md) — BYOVD via iMFForceDelete.sys (IObit; AV/EDR evasion)
 - [vermagic](entities/vermagic.md) — change Linux LKM vermagic / CRCs (cheat / RE tools)

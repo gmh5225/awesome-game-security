@@ -375,3 +375,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:volatilityfoundation/volatility3`: entity [[volatility3]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
 
+- **2026-07-19** — ingest `description:volatilityfoundation/volatility`: entity [[volatility]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-link from [[volatility3]].
+
