@@ -423,3 +423,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:utziacre/android_kernel_xiaomi_pipa`: entity [[android-kernel-xiaomi-pipa]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
+- **2026-07-19** — ingest `description:utziacre/android_kernel_oneplus_sm8250`: entity [[android-kernel-oneplus-sm8250]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
