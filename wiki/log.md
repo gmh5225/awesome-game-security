@@ -453,3 +453,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `description:un4ckn0wl3z/DMAInvoker`: entity [[dma-invoker]]; cited on [[dma]] and [[overviews/dma-attack]].
 
 - **2026-07-19** — ingest `description:un4ckn0wl3z/DMACheatEngineLoader`: entity [[dma-cheat-engine-loader]]; cited on [[dma]] and [[overviews/dma-attack]].
+
+- **2026-07-19** — ingest `description:umpolungfish/byvalver`: entity [[byvalver]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
