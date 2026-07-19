@@ -429,3 +429,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:utmapp/UTM`: entity [[utm]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
+- **2026-07-19** — ingest `description:user23333/veh`: entity [[veh]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
+
