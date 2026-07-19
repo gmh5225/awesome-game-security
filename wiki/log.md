@@ -433,3 +433,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:user1342/Obfu-DE-Scate`: entity [[obfu-de-scate]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
+
+- **2026-07-19** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/game-engine]] (Cheat ~2554 / Game Develop ~177); light `index.md` section notes (no per-category pages).
