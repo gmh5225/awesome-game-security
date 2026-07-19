@@ -413,3 +413,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/game-engine]], [[overviews/game-hacking]], [[overviews/graphics-api]], [[overviews/anti-cheat]] (Mathematics ~7 incl. constexpr math/physics for mod/cheat; PhysX/Renderer adjacency; page/CLR protection note); light `index.md` section notes (no per-category pages).
 
+- **2026-07-19** — ingest `description:vctr74/R6-Internal-V3`: entity [[r6-internal-v3]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+

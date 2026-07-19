@@ -92,6 +92,7 @@ sources:
   - wiki/sources/descriptions/w00tzenheimer__d810-ng.md
   - wiki/sources/descriptions/vrolife__mypower.md
   - wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md
+  - wiki/sources/descriptions/vctr74__R6-Internal-V3.md
   - wiki/sources/descriptions/veryboreddd__Return-address-spoofer.md
 updated: 2026-07-19
 confidence: high
@@ -171,6 +172,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - External CS2 samples such as [[cs2-cheat-cpp]] (C++; rendering / asset pipelines / SDK generation) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/yinleiCoder__cs2-cheat-cpp.md)
 - External CS2 glow ESP such as [[cs-2-glow]] (C++; entity parse / offsets / external memory glow) sits in the same cheat / game:cs2 visual lane. (source: wiki/sources/descriptions/xvorost__CS-2-Glow.md)
 - Title-specific Battlefield 1 internals such as [[battlefield-1-internal]] (C++; DirectX / SDK generation / hooking) illustrate the cheat / game:battlefield 1 lane. (source: wiki/sources/descriptions/younasiqw__BattleField-1-Internal.md)
+- Title-specific R6 internals such as [[r6-internal-v3]] (C/C++; modding / SDK generation / memory analysis) illustrate the cheat / game:r6 lane. (source: wiki/sources/descriptions/vctr74__R6-Internal-V3.md)
 - Valorant crosshair-setting utilities such as [[valorantcc]] sit in the cheat / game:valorant lane (client config; Riot-owned assets/endpoints). (source: wiki/sources/descriptions/weedeej__ValorantCC.md)
 - Title-specific Thetan Arena SDKs such as [[thetan-arenasdk]] (rendering / audio / physics) illustrate the cheat / game:thetan lane. (source: wiki/sources/descriptions/xkp95175333__Thetan_ArenaSDK.md)
 - ASI Loader–based remaster bridges such as [[gta4-rtx]] (GTA IV Complete Edition → RTX Remix; custom runtime / light / wetness) illustrate DirectX compatibility tooling adjacent to graphics-mod research. (source: wiki/sources/descriptions/xoxor4d__gta4-rtx.md)
@@ -185,7 +187,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 ## Related concepts
 
 [[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ndisapi]] · [[ksocket]] · [[nvidiaapi]] · [[owned-alignment]] · [[return-address-spoofer]] · [[ntmemory]] · [[umpmlib]] · [[eupmaccess]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[waryasswhe]] · [[reverse-engineering]] · [[totalpe2]] · [[quickasm]] · [[scfw]] · [[xrefsext]] · [[symbridge]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ghidrametrics]] · [[injectors]] · [[modexmap]] · [[skiphook]] · [[detoursnt]] · [[cedetector]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[keyboardkit]] · [[kernel-mouse]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[efitool]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[basic-fortnite-cheat-source-internal]] · [[mutaben]] · [[mypower]] · [[deobf]] · [[idadeflat]] · [[ida-easy-life]] · [[d810-ng]] · [[vmdevirt-vtil]] · [[novmpy]] · [[vmunprotect]] · [[vmunprotect-dumper]] · [[opaque-predicates-detective]]
- · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[palworldsaved]] · [[tiny-csgo-client]] · [[lumina-cheat]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[waldo]] · [[aimbot-detection-prototype]] · [[battlefield-1-internal]] · [[valorantcc]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[feather-gb]] · [[xenia]] · [[xenia-mac]] · [[overviews/anti-cheat]]
+ · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[palworldsaved]] · [[tiny-csgo-client]] · [[lumina-cheat]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[waldo]] · [[aimbot-detection-prototype]] · [[battlefield-1-internal]] · [[r6-internal-v3]] · [[valorantcc]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[feather-gb]] · [[xenia]] · [[xenia-mac]] · [[overviews/anti-cheat]]
 
 
 
