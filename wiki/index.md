@@ -116,6 +116,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Mini-Launcher](entities/mini-launcher.md) — Steam-bypass game launcher (API stub / DLL inject / Lua; Launcher Abuser)
 - [ModExMap](entities/modexmap.md) — user-mode PE manual-map DLL injector (x86/x64; TLS; Extend Manual Map)
 - [mutaben](entities/mutaben.md) — Python MBA (mixed-boolean-arithmetic) expression generator
+- [mypower](entities/mypower.md) — Android/Linux CLI memory scanner (SLJIT / pointer chains / Unity U3D)
 - [MoveCertificate](entities/move-certificate.md) — Magisk/KernelSU/APatch user→system CA module (Android 7–15)
 - [ndisapi](entities/ndisapi.md) — user-mode Windows Packet Filter / NDIS packet inspect-modify API
 - [NO_ACCESS_Protection](entities/no-access-protection.md) — PAGE_NOACCESS + VEH / single-step anti-tamper (vs external scanners)
