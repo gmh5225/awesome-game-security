@@ -459,3 +459,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/mobile-security]] (Cheat ~2555; Android Terminal/File/Memory Explorer + iOS network/location notes); light `index.md` section notes (no per-category pages).
 
 - **2026-07-19** — ingest `description:ufrisk/pcileech`: entity [[pcileech]]; cited on [[dma]] and [[overviews/dma-attack]].
+
+- **2026-07-19** — ingest `description:ufrisk/pcileech-fpga`: entity [[pcileech-fpga]]; cited on [[dma]] and [[overviews/dma-attack]]; cross-link from [[pcileech]].
