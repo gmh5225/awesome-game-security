@@ -417,3 +417,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-19** — ingest `description:vchelaru/FlatRedBall`: entity [[flatredball]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
 
+- **2026-07-19** — ingest `description:valium007/BareSVM`: entity [[baresvm]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
