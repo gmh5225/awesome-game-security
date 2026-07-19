@@ -4475,6 +4475,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [open-source windows defender manager can disable windows defender permanently](https://github.com/qtkite/defender-control)
 - [Read Memory without ReadProcessMemory for Current Process](https://github.com/gmh5225/CReadMemory)
 - [get process token whose integrity level is system and manipulate it to get privilege escalation](https://github.com/gmh5225/manipulating_token)
+- https://github.com/wesmar/CmdT [Tiny x86/x64 asm TrustedInstaller launcher: token duplication, privilege enablement, Sticky Keys IFEO, Defender exclusions]
 - [A library that meant to perform evasive communication using stolen browser socket](https://github.com/Idov31/Venom)
 - https://github.com/cpz/trinity [Fully disables & removes Windows Defender]
 - https://github.com/gmh5225/Disable-Windows-Defender- [Disable Windows Defender]
