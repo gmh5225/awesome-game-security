@@ -148,6 +148,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ophion](entities/ophion.md) — stealth Intel VT-x Type-2 HV (EPT; CPUID/CR4/TSC anti-detect)
 - [owned_alignment](entities/owned-alignment.md) — abusing Alignment (C++; kernel driver/hook; cheat / HWID)
 - [PalworldSaved](entities/palworldsaved.md) — Palworld UE5 save/editor tooling (cheat / game:palworld [Save])
+- [PastDSE](entities/pastdse.md) — DSE bypass via clock rollback + leaked VeriSign certs (BlackBone load)
 - [payload_dumper](entities/payload-dumper.md) — Android OTA payload.bin dumper (Python; Magisk / ROM RE)
 - [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)
 - [PresentHookDetection](entities/present-hook-detection.md) — BE-style IDXGISwapChain::Present hook check (dummy D3D11 + dxgi prologue)
