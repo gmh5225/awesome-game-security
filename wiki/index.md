@@ -74,6 +74,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [d810-ng](entities/d810-ng.md) — d810 next-gen; deobfuscate at decompilation time (Fix OLLVM)
 - [Demystifying-PatchGuard](entities/demystifying-patchguard.md) — educational C/C++ walkthrough of PatchGuard
 - [DetoursNT](entities/detoursnt.md) — NTDLL-only Microsoft Detours (no Win32; cheat / hook research)
+- [DFIRTriage](entities/dfirtriage.md) — Python Windows DFIR triage (process/network/registry/event logs/prefetch)
 - [DioProcess](entities/dioprocess-private.md) — Windows internals research (Rust/Dioxus + KM + UEFI; DSE/KPP)
 - [DMACheatEngineLoader](entities/dma-cheat-engine-loader.md) — Cheat Engine DMA loader (copy CE → DMACE; closed-source)
 - [DMAInvoker](entities/dma-invoker.md) — Windows DMA RPM via DMALibrary (cheat / RPM)
