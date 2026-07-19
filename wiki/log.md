@@ -493,3 +493,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/game-engine]], [[overviews/graphics-api]], [[overviews/game-hacking]], [[overviews/reverse-engineering]] (Game Engine ~142; Game Manager / 3DS LLE / GC·Wii gecko; Image Codec wgpu + AI mesh/splat notes); light `index.md` section notes (no per-category pages).
 
 - **2026-07-19** — ingest `description:travisfoley/dfirtriage`: entity [[dfirtriage]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
+
+- **2026-07-19** — ingest `description:trailofbits/idac`: entity [[idac]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
