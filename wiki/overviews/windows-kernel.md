@@ -69,6 +69,7 @@ sources:
   - wiki/sources/descriptions/thesecretclub__window_hijack.md
   - wiki/sources/descriptions/thesecretclub__callout-poc.md
   - wiki/sources/descriptions/thalium__ida_kmdf.md
+  - wiki/sources/descriptions/tandasat__Sushi.md
 updated: 2026-07-20
 confidence: high
 ---
@@ -111,12 +112,12 @@ Kernel internals that matter for game protection and low-level research: object/
 - **Driver unit testing:** frameworks such as [[wdutf]] host Microsoft C++ unit tests in user space against kernel-driver code (AC / defensive driver harness lane). (source: wiki/sources/descriptions/wpdk__wdutf.md)
 
 
-Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-page NX manipulation) illustrates how PG bypass studies map to the Demo NX / Cheat PatchGuard README lane. (source: wiki/sources/descriptions/zzhouhe__PG1903.md) Educational demystification material such as [[demystifying-patchguard]] sits in the same lane for RE of [[patchguard]] internals. (source: wiki/sources/descriptions/zer0condition__Demystifying-PatchGuard.md)
+Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-page NX manipulation) illustrates how PG bypass studies map to the Demo NX / Cheat PatchGuard README lane. (source: wiki/sources/descriptions/zzhouhe__PG1903.md) Educational demystification material such as [[demystifying-patchguard]] sits in the same lane for RE of [[patchguard]] internals. (source: wiki/sources/descriptions/zer0condition__Demystifying-PatchGuard.md) PG monitoring tooling such as [[sushi]] targets the same cheat / PatchGuard-related area. (source: wiki/sources/descriptions/tandasat__Sushi.md)
 
 ## Related concepts
 
 [[kernel-callbacks]] · [[callout-poc]] · [[byovd]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[xign-poc-april-2026]] · [[kvc]] · [[kernel-research-kit]] · [[bootbypass]] · [[solemn]] · [[pastdse]] · [[kvcforensic]] · [[windefctl]] · [[vaultguard]] · [[keyboardkit]] · [[kernel-mouse]] · [[ksocket]] · [[hvci]] · [[cet-research]]
- · [[windbg-scripts]] · [[symlink-callback]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[ntmemory]] · [[ntsleuth]] · [[instrumentation-callback-syscall-logger]] · [[anticheat-poc]] · [[function-collections]] · [[winvisor]] · [[kace]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[hypervisor-detection]] · [[vt-debuuger]] · [[baresvm]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[xigmapper]] · [[efitool]] · [[cmdt]] · [[x260-lenovo-opencore]] · [[etw-explorer]] · [[tietwagent]] · [[wazuh]] · [[openark]] · [[systeminformer]] · [[dioprocess-private]] · [[volatility]] · [[volatility3]] · [[ephemera]] · [[system-thread-finder]]
+ · [[windbg-scripts]] · [[symlink-callback]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[sushi]] · [[ntmemory]] · [[ntsleuth]] · [[instrumentation-callback-syscall-logger]] · [[anticheat-poc]] · [[function-collections]] · [[winvisor]] · [[kace]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[hypervisor-detection]] · [[vt-debuuger]] · [[baresvm]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[xigmapper]] · [[efitool]] · [[cmdt]] · [[x260-lenovo-opencore]] · [[etw-explorer]] · [[tietwagent]] · [[wazuh]] · [[openark]] · [[systeminformer]] · [[dioprocess-private]] · [[volatility]] · [[volatility3]] · [[ephemera]] · [[system-thread-finder]]
  · [[boom]] · [[data-ptr-swap]] · [[double-callback]] · [[window-hijack]] · [[owned-alignment]] · [[injdrv]] · [[kinject]] · [[zero-thread-kernel]] · [[wdutf]] · [[ida-kmdf]] · [[dma]] · [[overviews/anti-cheat]]
 
 
