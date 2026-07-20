@@ -572,3 +572,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:thefLink/DeepSleep`: entity [[deepsleep]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-20** — ingest `description:the-dise/EasyPixel`: entity [[easypixel]]; cited on [[magisk]] and [[overviews/mobile-security]].
+
+- **2026-07-20** — ingest `description:thalium/symless`: entity [[symless]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
