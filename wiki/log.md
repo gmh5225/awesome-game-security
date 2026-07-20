@@ -590,3 +590,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:termux/termux-app`: entity [[termux-app]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-20** — ingest `description:tenclass/mvisor`: entity [[mvisor]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-20** — ingest `description:teemu-l/execution-trace-viewer`: entity [[execution-trace-viewer]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
