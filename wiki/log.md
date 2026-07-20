@@ -507,3 +507,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:topjohnwu/Magisk`: entity [[magisk]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]]; cross-link from [[magiskdetector]].
 
 - **2026-07-20** — ingest `description:topfreegames/pitaya`: entity [[pitaya]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-20** — ingest `description:toneillcodes/windows-process-injection`: entity [[windows-process-injection]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
