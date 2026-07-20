@@ -203,6 +203,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Static-Variables-Obfuscator-UE4](entities/static-variables-obfuscator-ue4.md) — UE4 static-variable obfuscation vs memory scanners
 - [SteamAntiAntiDebug](entities/steam-anti-anti-debug.md) — bypass Steam anti-debug for debugger attach (x64dbg; Steam)
 - [steam-overlay-x64](entities/steam-overlay-x64.md) — Steam overlay / modding research (C; memory analysis)
+- [swsim](entities/swsim.md) — pure-software USIM/UICC SIM simulator (APDU/MILENAGE; SIMtrace2; Cellular/SIM)
 - [Symbridge](entities/symbridge.md) — live IDA ↔ x64dbg annotation/type sync (module+RVA; Python broker)
 - [SymlinkCallback](entities/symlink-callback.md) — symlink LinkTarget → access callback (Ring0 / AC research)
 - [System Informer](entities/systeminformer.md) — Process Hacker successor; Windows process/system explorer (kernel explorer lane)

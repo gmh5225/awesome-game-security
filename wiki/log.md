@@ -525,3 +525,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:tomlooman/ActionRoguelike`: entity [[action-roguelike]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
 - **2026-07-20** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/game-engine]], [[overviews/graphics-api]] (Game Engine ~143 / Renderer ~17; MCP server/security + Linux Emulator notes); light `index.md` section notes (no per-category pages).
+
+- **2026-07-20** — ingest `description:tomasz-lisowski/swsim`: entity [[swsim]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
