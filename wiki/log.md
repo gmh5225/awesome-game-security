@@ -602,3 +602,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:tangsilian/android-vuln`: entity [[android-vuln]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-20** — ingest `description:tandasat/Sushi`: entity [[sushi]]; cited on [[patchguard]] and [[overviews/windows-kernel]].
+
+- **2026-07-20** — ingest `description:tandasat/MiniVisorPkg`: entity [[minivisorpkg]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].

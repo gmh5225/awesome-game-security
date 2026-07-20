@@ -174,6 +174,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Metal-Game-Engine-Tutorial](entities/metal-game-engine-tutorial.md) — Apple Metal engine tutorial (open project; Game Engine / guide)
 - [miniDumpReader](entities/minidumpreader.md) — Python minidump / memory analysis (AC / Windows kernel dump)
 - [Mini-Launcher](entities/mini-launcher.md) — Steam-bypass game launcher (API stub / DLL inject / Lua; Launcher Abuser)
+- [MiniVisorPkg](entities/minivisorpkg.md) — educational Intel VT-x HV (UEFI + Windows driver; WinDbg; Detection:HV / EFI)
 - [ModExMap](entities/modexmap.md) — user-mode PE manual-map DLL injector (x86/x64; TLS; Extend Manual Map)
 - [mutaben](entities/mutaben.md) — Python MBA (mixed-boolean-arithmetic) expression generator
 - [mvisor](entities/mvisor.md) — C++ remake (kernel/render/audio; Cheat QEMU/KVM/PVE/VBOX)
