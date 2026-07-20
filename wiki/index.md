@@ -183,6 +183,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PCILeech](entities/pcileech.md) — PCIe DMA host tool: R/W target memory via hardware (ufrisk; cheat / DMA)
 - [PCILeech-FPGA](entities/pcileech-fpga.md) — FPGA HDL/firmware for PCILeech DMA boards (Vivado; TLP/BAR/config shadow)
 - [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)
+- [pikabot-deobfuscator](entities/pikabot-deobfuscator.md) — Pikabot RC4/AES string decrypt (IDA Hex-Rays; cheat / IDA Plugins)
 - [Pitaya](entities/pitaya.md) — distributed multiplayer game server framework (Game Network / Server framework)
 - [PresentHookDetection](entities/present-hook-detection.md) — BE-style IDXGISwapChain::Present hook check (dummy D3D11 + dxgi prologue)
 - [PG1903](entities/pg1903.md) — Win10 1903 PatchGuard disable via context-page NX (Demo NX)
