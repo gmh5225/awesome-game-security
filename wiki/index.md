@@ -98,6 +98,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DroidShield](entities/droidshield.md) — Android RASP SDK (root/debugger/Frida-Xposed/emulator/tamper; polymorphic checks)
 - [dxgkrnl_hook](entities/dxgkrnl-hook.md) — dxgkrnl screen-buffer hook (kernel overlay / render-draw)
 - [eac-overlay](entities/eac-overlay.md) — EAC overlay PoC (ESP via alt surfaces / window manip; C++)
+- [EldenRingMods](entities/eldenringmods.md) — Elden Ring animation/modding (C++ / C/C++; cheat / game:eldenring [Mod])
 - [EasyPixel](entities/easypixel.md) — Magisk module: disguise device as Google Pixel (Cheat Magisk)
 - [EDRSandblast](entities/edrsandblast.md) — BYOVD EDR/ETW blind (callbacks / ETW TI / ntdll unhook; C)
 - [elfuck](entities/elfuck.md) — ELF packer/protector (NRV2E / password / anti-debug; Anti Cheat → Binary Packer)
