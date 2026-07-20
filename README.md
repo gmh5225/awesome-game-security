@@ -344,6 +344,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Unit-X/kcp-cpp [KCP]
 - https://github.com/TLeonardUK/ds3os [Dark Souls 3]
 - https://github.com/TLeonardUK/ds2os [Dark Souls 2]
+- https://github.com/Bratah123/Spirit-PTCGO [Pokemon TCG Online private server emulator]
 - https://github.com/rathena/rathena [MMORPG]
 - https://github.com/TrinityCore/TrinityCore [Server for WOW]
 - https://github.com/uNetworking/uWebSockets [WebSockets]
