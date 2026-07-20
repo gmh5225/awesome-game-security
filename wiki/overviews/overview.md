@@ -12,6 +12,7 @@ sources:
   - wiki/sources/descriptions/traccar__traccar-geocoder.md
   - wiki/sources/descriptions/topfreegames__pitaya.md
   - wiki/sources/descriptions/tomlooman__ue4-tutorials.md
+  - wiki/sources/descriptions/tomlooman__SimpleFPSTemplate.md
 updated: 2026-07-20
 confidence: high
 ---
@@ -23,7 +24,7 @@ Curated resource list spanning offensive game hacking and defensive anti-cheat r
 
 ## What this domain covers
 
-The README organizes ~40 top-level sections: engines/rendering/`Mathematics` (~7; constexpr math/physics for gamedev+cheat)/`AI` asset tooling, offensive (`Cheat` ~2556), defensive (`Anti Cheat` ~598), platform hardening (`Windows Security Features`), mobile/console/emulator ecosystems (Switch ~7 / Xbox ~7 / PlayStation ~5 HV+BD-JB / Game Boy ~3 / 3DS LLE / GameCube·Wii), and supporting gamedev infrastructure (`Game Develop` Guide / MCP / AI Agents—e.g. Unity Editor terminal CLI [[unicli]], Unity MCP server [[unity-mcp]], educational-games list [[awesome-educational-games]], UE4 C++ tutorials [[ue4-tutorials]] (audio/physics/animation); `Game Tools`/`Testing`/`CI`/`Manager`). Prefer this wiki for synthesis; fall back to README → descriptions → archives for specific repos. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/yucchiy__UniCli.md) (source: wiki/sources/descriptions/wondeks__unity-mcp.md) (source: wiki/sources/descriptions/yrgo__awesome-educational-games.md) (source: wiki/sources/descriptions/tomlooman__ue4-tutorials.md)
+The README organizes ~40 top-level sections: engines/rendering/`Mathematics` (~7; constexpr math/physics for gamedev+cheat)/`AI` asset tooling, offensive (`Cheat` ~2556), defensive (`Anti Cheat` ~598), platform hardening (`Windows Security Features`), mobile/console/emulator ecosystems (Switch ~7 / Xbox ~7 / PlayStation ~5 HV+BD-JB / Game Boy ~3 / 3DS LLE / GameCube·Wii), and supporting gamedev infrastructure (`Game Develop` Guide / MCP / AI Agents—e.g. Unity Editor terminal CLI [[unicli]], Unity MCP server [[unity-mcp]], educational-games list [[awesome-educational-games]], UE4 C++ tutorials [[ue4-tutorials]] (audio/physics/animation), UE4 FPS demo [[simple-fps-template]]; `Game Tools`/`Testing`/`CI`/`Manager`). Prefer this wiki for synthesis; fall back to README → descriptions → archives for specific repos. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/yucchiy__UniCli.md) (source: wiki/sources/descriptions/wondeks__unity-mcp.md) (source: wiki/sources/descriptions/yrgo__awesome-educational-games.md) (source: wiki/sources/descriptions/tomlooman__ue4-tutorials.md) (source: wiki/sources/descriptions/tomlooman__SimpleFPSTemplate.md)
 
 ## Skill routing (primary topics)
 
