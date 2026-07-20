@@ -578,3 +578,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:thalium/rumba`: entity [[rumba]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-20** — ingest `description:thalium/ida_kmdf`: entity [[ida-kmdf]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
+
+- **2026-07-20** — ingest `description:tgillam/HumanMouseMovement`: entity [[human-mouse-movement]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].

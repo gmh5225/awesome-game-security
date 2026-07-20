@@ -120,6 +120,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HijackLibs](entities/hijacklibs.md) — disclosed Windows DLL hijack DB (YAML + web UI; exports / conditions)
 - [Hypervisor-Detection](entities/hypervisor-detection.md) — C++ hacked-hypervisor detection (four techniques; Detection:HV)
 - [honor-of-kings-RE-research](entities/honor-of-kings-re-research.md) — Honor of Kings Android RE (ACE / libtersafe / IL2CPP / KernelPatch KPMs)
+- [HumanMouseMovement](entities/human-mouse-movement.md) — human-like mouse movement (C/C++; cheat / triggerbot & aimbot)
 - [hv](entities/hv.md) — minimal Intel VT-x Type-2 hypervisor (VMX/VMCS learning)
 - [HVCI-loldrivers-check](entities/hvci-loldrivers-check.md) — PowerShell HVCI LOLdrivers check (Trail of Bits; vulnerable-driver lane)
 - [IDA Easy Life](entities/ida-easy-life.md) — IDA Pro deobfuscation plugin (Python; cheat / IDA Plugins)
