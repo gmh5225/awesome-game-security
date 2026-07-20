@@ -562,3 +562,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-20** — ingest `description:thesecretclub/callout-poc`: entity [[callout-poc]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
+- **2026-07-20** — ingest `description:thesecretclub/CVEAC-2020`: entity [[cveac-2020]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
+
