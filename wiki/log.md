@@ -582,3 +582,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:tgillam/HumanMouseMovement`: entity [[human-mouse-movement]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-07-20** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-engine]], [[overviews/game-hacking]], [[overviews/reverse-engineering]] (Anti Cheat ~600 / Game Network ~26; PS BD-JB RemoteJarLoader note); light `index.md` section notes (no per-category pages).
+
+- **2026-07-20** — ingest `description:vul-os/magnetite`: entity [[magnetite]]; cited on [[overviews/anti-cheat]] and [[overviews/game-engine]].
