@@ -515,3 +515,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]] (Anti Cheat ~598); light `index.md` section notes (no per-category pages).
 
 - **2026-07-20** — ingest `description:tomrus88/OpenLumina`: entity [[openlumina]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-20** — ingest `description:tomlooman/ue4-tutorials`: entity [[ue4-tutorials]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
