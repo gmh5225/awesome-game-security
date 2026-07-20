@@ -521,3 +521,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:tomlooman/SimpleFPSTemplate`: entity [[simple-fps-template]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
 - **2026-07-20** — ingest `description:tomlooman/EpicSurvivalGame`: entity [[epic-survival-game]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-20** — ingest `description:tomlooman/ActionRoguelike`: entity [[action-roguelike]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
