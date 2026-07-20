@@ -3346,6 +3346,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/ZeroGui-Fortnite-Internal [Internal]
 - https://github.com/gmh5225/Fortnite-VoyagerTF [Voyager]
 - https://github.com/gmh5225/Fortnite-External-4 [External]
+- https://github.com/Saxmason/Interic-Fortnite-External-Cheat [Fortnite external cheat source with aimbot, ESP, and ImGui overlay]
+- https://github.com/Saxmason/Subzero-Fortnite-Cheat [Fortnite external cheat source with aimbot, overlay, and driver comms]
 - https://github.com/lauralex/fn-dma-cheat [DMA]
 
 > Game:Bloodhunt
@@ -4037,6 +4039,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/NoCheatPlus/NoCheatPlus [Open-source anti-cheat plugin for Minecraft (Bukkit/Spigot)]
 - https://github.com/Hexze/anticheat [Starfish Minecraft-style cheater detector with NoSlow/scaffold/combat heuristics]
 - https://github.com/PalassCQ/GuardAC [AI-assisted open-source Minecraft anti-cheat plugin for Spigot/Paper/Folia]
+- https://github.com/KaelusAI/Shard [AI-powered open-source Minecraft Paper/Folia anti-cheat plugin]
 - https://github.com/enis1enis2/WindfallAntiCheatF [Minecraft Fabric packet-based anti-cheat with combat/movement checks and Geyser/Bedrock compatibility]
 - https://github.com/enis1enis2/Windfall-AntiCheat [Open-source Minecraft Spigot/Paper/Folia packet-based anti-cheat with combat/movement/inventory checks]
 - https://github.com/XuanXuan-ZhengGui/Minecraft-Anti-Cheat [Open-source Minecraft Spigot/Paper anti-cheat with combat/movement detections and confidence scoring]
