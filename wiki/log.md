@@ -545,3 +545,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:tiann/KernelSU`: entity [[kernelsu]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-link from [[magisk]].
 
 - **2026-07-20** — ingest `description:tiann/DirtyPipeRoot`: entity [[dirtypiperoot]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-20** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2557); light `index.md` section notes (no per-category pages).
