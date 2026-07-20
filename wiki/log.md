@@ -501,3 +501,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-19** — ingest `description:trailofbits/CoBRA`: entity [[cobra]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-19** — ingest `description:traccar/traccar-geocoder`: entity [[traccar-geocoder]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-20** — ingest `description:tr1xxx/battleye-region-walking`: entity [[battleye-region-walking]]; cited on [[battleye]] and [[overviews/anti-cheat]].

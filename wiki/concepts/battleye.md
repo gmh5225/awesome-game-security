@@ -10,7 +10,8 @@ sources:
   - wiki/sources/descriptions/weak1337__PresentHookDetection.md
   - wiki/sources/descriptions/weak1337__BE-Shellcode.md
   - wiki/sources/descriptions/tym32167__arma3beclient.md
-updated: 2026-07-19
+  - wiki/sources/descriptions/tr1xxx__battleye-region-walking.md
+updated: 2026-07-20
 confidence: medium
 ---
 
@@ -32,8 +33,10 @@ Graphics Present integrity is another BE-linked lane: [[present-hook-detection]]
 
 User-mode shellcode injected into game processes is studied via [[be-shellcode]]: dump/disasm of BE detection modules covering system-thread scan, VEH enumeration, module walking, and signature-based integrity checks. (source: wiki/sources/descriptions/weak1337__BE-Shellcode.md)
 
+VAS region enumeration for injected/shellcode and manual-mapped modules is reconstructed in [[battleye-region-walking]]: VirtualQuery walk plus BE-style filters on protection, size, `MEM_PRIVATE`/`MEM_MAPPED`, and address heuristics. (source: wiki/sources/descriptions/tr1xxx__battleye-region-walking.md)
+
 Title-specific client tooling such as [[arma3beclient]] (C# / PowerShell; Arma 3 / `game:arma3`) sits in the BattlEye Tool lane for modding and BE-protected client debugging. (source: wiki/sources/descriptions/tym32167__arma3beclient.md)
 
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[arma3beclient]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[battleye-region-walking]] · [[arma3beclient]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
