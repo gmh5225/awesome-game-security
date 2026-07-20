@@ -69,6 +69,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CmdT](entities/cmdt.md) — TrustedInstaller token launcher (x86/x64 asm; TI ACL / RE forensics)
 - [CounterStrike2-Linux-Cheat](entities/counterstrike2-linux-cheat.md) — Linux external CS2 cheat (C++; memory analysis)
 - [CS-2-Glow](entities/cs-2-glow.md) — external CS2 glow ESP (C++; entity / offsets / memory)
+- [cs16-client](entities/cs16-client.md) — rewrote CS1.6 client (Game Develop / Source; Android ADB)
 - [cs2-cheat-cpp](entities/cs2-cheat-cpp.md) — external CS2 cheat (C++; rendering / SDK generation)
 - [CounterStrikeSource-Linux-Trainer](entities/counterstrikesource-linux-trainer.md) — Linux external CS:S trainer (movement / info display)
 - [CVE-2026-43499-popsicle](entities/cve-2026-43499-popsicle.md) — Xiaomi popsicle Android 16 LPE (CVE-2026-43499; LD_PRELOAD; uid 0)
