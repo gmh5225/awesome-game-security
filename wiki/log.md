@@ -610,3 +610,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:tamirzb/CVE-2021-1961`: entity [[cve-2021-1961]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-20** — ingest `description:talsec/Free-RASP-Unity-POC`: entity [[free-rasp-unity-poc]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
+- **2026-07-20** — ingest `description:taida957789/ida-mcp-server-plugin`: entity [[ida-mcp-server-plugin]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
