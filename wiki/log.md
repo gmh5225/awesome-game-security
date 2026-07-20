@@ -551,3 +551,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:threatlabz/pikabot-deobfuscator`: entity [[pikabot-deobfuscator]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-20** — ingest `description:thomaseichhorn/cs16-client`: entity [[cs16-client]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-20** — ingest `description:thewhiteninja/ntfstool`: entity [[ntfstool]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-link from [[file-recovery-tool]].

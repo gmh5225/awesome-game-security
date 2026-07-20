@@ -4,7 +4,7 @@ kind: entity
 topics: [reverse-engineering, anti-cheat]
 sources:
   - wiki/sources/descriptions/wesmar__FileRecoveryTool.md
-updated: 2026-07-18
+updated: 2026-07-20
 confidence: medium
 ---
 
@@ -20,4 +20,4 @@ Useful lab reference for recovering deleted artifacts (cheat payloads, logs, dum
 
 ## Related
 
-[[kvcforensic]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[kvcforensic]] · [[ntfstool]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
