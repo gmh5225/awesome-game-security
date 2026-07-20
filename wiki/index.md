@@ -263,6 +263,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 
 - [WaryasSWHE](entities/waryasswhe.md) — usermode shatter-attack AC bypass PoC (0day; cheat / RPM; C++)
+- [window_hijack](entities/window-hijack.md) — KM window-handle hijack for covert KM↔UM I/O (thread contexts)
 - [Wazuh](entities/wazuh.md) — open-source XDR / HIDS (agent–manager; FIM / log / vuln; Elasticsearch)
 - [WickedEngine](entities/wickedengine.md) — open C++ 3D engine (`WickedEngine_Windows` static lib; Game Engine source)
 - [wda_monitor_trick](entities/wda-monitor-trick.md) — WDA/D3D9 monitor hook (display capture intercept; C++)
