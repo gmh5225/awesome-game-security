@@ -4,7 +4,8 @@ kind: concept
 topics: [dma-attack, anti-cheat, windows-kernel]
 sources:
   - wiki/sources/skills/dma-attack.md
-updated: 2026-07-16
+  - wiki/sources/descriptions/tandasat__HelloIommuPkg.md
+updated: 2026-07-20
 confidence: high
 ---
 
@@ -19,6 +20,7 @@ I/O Memory Management Unit (Intel VT-d / AMD-Vi) that translates device IOVAs us
 - Interrupt Remapping for MSI/MSI-X
 - Fault-rate monitoring; containment via sandbox remapping, BME clear, or DPC
 - ATS-untrusted policy for untrusted endpoints
+- Learning / sample programming of DMA remapping via UEFI DXE runtime drivers such as [[helloiommupkg]] (simplified; not production). (source: wiki/sources/descriptions/tandasat__HelloIommuPkg.md)
 
 ## Limits
 
@@ -26,4 +28,4 @@ Misconfigured BIOS, pre-boot DMA, ACS holes, ATS abuse, over-mapped pages, or ke
 
 ## Related
 
-[[dma]] · [[overviews/dma-attack]] · [[hvci]]
+[[dma]] · [[helloiommupkg]] · [[overviews/dma-attack]] · [[hvci]]

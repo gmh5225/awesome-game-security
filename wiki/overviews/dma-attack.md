@@ -10,6 +10,7 @@ sources:
   - wiki/sources/descriptions/un4ckn0wl3z__DMACheatEngineLoader.md
   - wiki/sources/descriptions/ufrisk__pcileech.md
   - wiki/sources/descriptions/ufrisk__pcileech-fpga.md
+  - wiki/sources/descriptions/tandasat__HelloIommuPkg.md
 updated: 2026-07-20
 confidence: high
 ---
@@ -34,13 +35,13 @@ Typical external DMA cheat: **cheat PC** + **DMA card** (Memory Read TLPs) + opt
 ## Defense layers
 
 1. PCIe-layer fingerprinting (identity vs real silicon)
-2. IOMMU enforcement (out-of-domain DMA)
+2. IOMMU enforcement (out-of-domain DMA) — sample DXE remapping programming in [[helloiommupkg]] (learning-only). (source: wiki/sources/descriptions/tandasat__HelloIommuPkg.md)
 3. External attestation (IOMMU/kernel/boot chain integrity)
 4. Firmware / pre-boot policy — e.g. BIOS DXE stripping PCI embedded option-ROM attributes and retuning NX ([[x670e-tomahawk-anticheat-update]]) (source: wiki/sources/descriptions/zer0condition__x670e-tomahawk-anticheat-update.md)
 
 ## Related concepts
 
-[[dma]] · [[iommu]] · [[hvci]] · [[byovd]] · [[pcileech]] · [[pcileech-fpga]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[overviews/anti-cheat]]
+[[dma]] · [[iommu]] · [[helloiommupkg]] · [[hvci]] · [[byovd]] · [[pcileech]] · [[pcileech-fpga]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[overviews/anti-cheat]]
 
 
 ## README map
