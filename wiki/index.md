@@ -145,6 +145,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Magisk](entities/magisk.md) — Android systemless root (su daemon / modules / MagiskHide)
 - [magiskboot_ndk_on_linux](entities/magiskboot-ndk-on-linux.md) — NDK-on-Linux magiskboot (boot unpack/repack/ramdisk)
 - [MagiskDetector](entities/magiskdetector.md) — archived Android Magisk detector (AppZygote/AIDL; Detection:Magisk)
+- [MapleStory Worlds Automation](entities/maplestory-worlds-automation.md) — YOLO automation for MapleStory Worlds / Artale (Python; cheat / game:maplestory)
 - [MapleStoryEx](entities/maplestoryex.md) — MapleStory private server (CMS-079; custom content / server logic)
 - [MemMCP](entities/memmcp.md) — Cheat Engine–like MCP server (Python; Game Develop / MCP)
 - [Metal-Game-Engine-Tutorial](entities/metal-game-engine-tutorial.md) — Apple Metal engine tutorial (open project; Game Engine / guide)
