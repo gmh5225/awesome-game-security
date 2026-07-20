@@ -77,6 +77,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cs16-client](entities/cs16-client.md) — rewrote CS1.6 client (Game Develop / Source; Android ADB)
 - [cs2-cheat-cpp](entities/cs2-cheat-cpp.md) — external CS2 cheat (C++; rendering / SDK generation)
 - [CounterStrikeSource-Linux-Trainer](entities/counterstrikesource-linux-trainer.md) — Linux external CS:S trainer (movement / info display)
+- [CVE-2021-1961](entities/cve-2021-1961.md) — Qualcomm QSEECOM/TrustZone kernel R/W (Widevine ION; Pixel 3; SELinux off)
 - [CVE-2026-43499-popsicle](entities/cve-2026-43499-popsicle.md) — Xiaomi popsicle Android 16 LPE (CVE-2026-43499; LD_PRELOAD; uid 0)
 - [CVEAC-2020](entities/cveac-2020.md) — EAC kernel-module vuln PoC (WDK; Integrity Checks)
 - [data-ptr-swap](entities/data-ptr-swap.md) — NtSetCompositionSurfaceAnalogExclusive kernel channel (C/C++)
