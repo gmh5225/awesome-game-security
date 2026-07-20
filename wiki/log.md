@@ -586,3 +586,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:vul-os/magnetite`: entity [[magnetite]]; cited on [[overviews/anti-cheat]] and [[overviews/game-engine]].
 
 - **2026-07-20** — ingest `description:tgfrerer/island`: entity [[island]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
+
+- **2026-07-20** — ingest `description:termux/termux-app`: entity [[termux-app]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
