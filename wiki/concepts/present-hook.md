@@ -9,7 +9,8 @@ sources:
   - wiki/sources/descriptions/weak1337__PresentHookDetection.md
   - wiki/sources/descriptions/vmcall__dxgkrnl_hook.md
   - wiki/sources/descriptions/visotw__3d9.md
-updated: 2026-07-19
+  - wiki/sources/descriptions/techiew__DirectXHook.md
+updated: 2026-07-20
 confidence: high
 ---
 
@@ -19,7 +20,7 @@ Intercepting the graphics present/swap path (e.g. `IDXGISwapChain::Present`, DX9
 
 ## Uses
 
-Internal ESP/menus (often Dear ImGui), wallhack/chams via draw/shader hooks, OBS Game Capture–style backbuffer sharing for streaming or AI visual pipelines.
+Internal ESP/menus (often Dear ImGui), wallhack/chams via draw/shader hooks, OBS Game Capture–style backbuffer sharing for streaming or AI visual pipelines. DX11/12 libraries such as [[directxhook]] provide an integrated in-process overlay framework (boxes/textures/text; dinput8 DLL load) on the Present path. (source: wiki/sources/descriptions/techiew__DirectXHook.md)
 
 ## Detection surface
 
@@ -33,4 +34,4 @@ DX11 stereoscopic-fix tooling such as [[3d9]] works in the same Present/swap-cha
 
 ## Related
 
-[[overviews/graphics-api]] · [[present-hook-detection]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dxgkrnl-hook]] · [[3d9]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[overviews/graphics-api]] · [[directxhook]] · [[present-hook-detection]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dxgkrnl-hook]] · [[3d9]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]

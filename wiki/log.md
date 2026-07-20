@@ -594,3 +594,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:teemu-l/execution-trace-viewer`: entity [[execution-trace-viewer]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-20** — ingest `description:techiew/EldenRingMods`: entity [[eldenringmods]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-20** — ingest `description:techiew/DirectXHook`: entity [[directxhook]]; cited on [[overviews/graphics-api]] and [[present-hook]].
