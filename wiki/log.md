@@ -566,3 +566,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-20** — ingest `description:therealdreg/anticuckoo`: entity [[anticuckoo]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
+
+- **2026-07-20** — ingest `description:theo-abel/awesome-anti-virtualization`: entity [[awesome-anti-virtualization]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
