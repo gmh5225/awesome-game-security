@@ -511,3 +511,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:toneillcodes/windows-process-injection`: entity [[windows-process-injection]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-07-20** — ingest `description:tomvita/SE-tools`: entity [[se-tools]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-20** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]] (Anti Cheat ~598); light `index.md` section notes (no per-category pages).

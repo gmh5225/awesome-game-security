@@ -6,9 +6,9 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Overviews
 
-- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2556 / Anti Cheat ~597; Game Engine ~142 + Mathematics ~7; Game Develop ~177; console Switch/Xbox/PS + 3DS/GC·Wii)
-- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* (aimbot/triggerbot/wallhack) + page/CLR protection (~597); hybrid OS AC; Game Tools RCE + Windows Emulator AC
-- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2556) / Detection:DMA (~597) + WSF attestation
+- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2556 / Anti Cheat ~598; Game Engine ~142 + Mathematics ~7; Game Develop ~177; console Switch/Xbox/PS + 3DS/GC·Wii)
+- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* (aimbot/triggerbot/wallhack) + page/CLR protection (~598); hybrid OS AC; Game Tools RCE + Windows Emulator AC
+- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2556) / Detection:DMA (~598) + WSF attestation
 - [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~142); Mathematics/PhysX adjacency; MCP/AI gamedev (~177); Image Codec + Manager/Testing/Tools/CI
 - [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2556) + Some Tricks (~113); Android Terminal/File/Memory Explorer; console PS HV+BD-JB / 3DS LLE / GC·Wii
 - [Graphics API](overviews/graphics-api.md) — DirectX (~33) / GL / Vulkan hooks, overlays; Renderer + Mathematics adjacency; Image Codec + AI mesh/splat
