@@ -541,3 +541,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:timetravelthree/IDARustDemangler`: entity [[ida-rust-demangler]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-20** — ingest `description:ticarpi/jwt_tool`: entity [[jwt-tool]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-20** — ingest `description:tiann/KernelSU`: entity [[kernelsu]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-link from [[magisk]].
