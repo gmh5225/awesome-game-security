@@ -509,3 +509,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:topfreegames/pitaya`: entity [[pitaya]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
 - **2026-07-20** — ingest `description:toneillcodes/windows-process-injection`: entity [[windows-process-injection]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-20** — ingest `description:tomvita/SE-tools`: entity [[se-tools]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].

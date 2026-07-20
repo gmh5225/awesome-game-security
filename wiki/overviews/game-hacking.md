@@ -105,6 +105,7 @@ sources:
   - wiki/sources/descriptions/unsafeblackcat__MapleStoryEx.md
   - wiki/sources/descriptions/un4ckn0wl3z__MemMCP.md
   - wiki/sources/descriptions/toneillcodes__windows-process-injection.md
+  - wiki/sources/descriptions/tomvita__SE-tools.md
 updated: 2026-07-20
 confidence: high
 ---
@@ -201,11 +202,12 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Peer Rust Game Boy emulator [[feather-gb]] targets retro handheld emulator developers and GB-area reverse engineers. (source: wiki/sources/descriptions/vojty__feather-gb.md)
 - Xbox 360 emulation via [[xenia]] (C++; PowerPC recompiler, D3D12/Vulkan GPU, XAM/kernel/XEX) sits in the console `Xbox` lane for hardware-abstraction / binary-translation research. (source: wiki/sources/descriptions/xenia-project__xenia.md)
 - macOS port [[xenia-mac]] extends that Xbox 360 HLE stack to Apple hosts for emulator / Xbox research. (source: wiki/sources/descriptions/wmarti__xenia-mac.md)
+- Nintendo Switch homebrew memory/cheat tooling such as [[se-tools]] (scanner / pointer search / cheat manager / live viewer via Atmosphere `dmnt:cht`) sits in the console `Nintendo Switch` lane. (source: wiki/sources/descriptions/tomvita__SE-tools.md)
 
 ## Related concepts
 
 [[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ndisapi]] · [[ksocket]] · [[nvidiaapi]] · [[owned-alignment]] · [[return-address-spoofer]] · [[ntmemory]] · [[umpmlib]] · [[eupmaccess]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[waryasswhe]] · [[reverse-engineering]] · [[totalpe2]] · [[quickasm]] · [[scfw]] · [[byvalver]] · [[xrefsext]] · [[symbridge]] · [[idarem]] · [[idac]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ghidrametrics]] · [[injectors]] · [[windows-process-injection]] · [[modexmap]] · [[skiphook]] · [[detoursnt]] · [[cedetector]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[keyboardkit]] · [[kernel-mouse]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[efitool]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[basic-fortnite-cheat-source-internal]] · [[mutaben]] · [[cobra]] · [[mypower]] · [[memmcp]] · [[deobf]] · [[idadeflat]] · [[ida-easy-life]] · [[d810-ng]] · [[vmdevirt-vtil]] · [[novmpy]] · [[vmunprotect]] · [[vmunprotect-dumper]] · [[opaque-predicates-detective]]
- · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[android-kernel-xiaomi-pipa]] · [[android-kernel-oneplus-sm8250]] · [[android-kernel-samsung-universal5433]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[palworldsaved]] · [[tiny-csgo-client]] · [[maplestoryex]] · [[lumina-cheat]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[waldo]] · [[aimbot-detection-prototype]] · [[battlefield-1-internal]] · [[r6-internal-v3]] · [[valorantcc]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[input-overlay]] · [[proxmox]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[feather-gb]] · [[xenia]] · [[xenia-mac]] · [[overviews/anti-cheat]]
+ · [[cheese]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[android-kernel-xiaomi-pipa]] · [[android-kernel-oneplus-sm8250]] · [[android-kernel-samsung-universal5433]] · [[dpatch]] · [[simpleperf-demo]] · [[vermagic]] · [[dayzzz]] · [[palworldsaved]] · [[tiny-csgo-client]] · [[maplestoryex]] · [[lumina-cheat]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[waldo]] · [[aimbot-detection-prototype]] · [[battlefield-1-internal]] · [[r6-internal-v3]] · [[valorantcc]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[input-overlay]] · [[proxmox]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[feather-gb]] · [[xenia]] · [[xenia-mac]] · [[se-tools]] · [[overviews/anti-cheat]]
 
 
 
