@@ -559,3 +559,6 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:thesecretclub/window_hijack`: entity [[window-hijack]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-07-20** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2559 / Anti Cheat ~599); light `index.md` section notes (no per-category pages).
+
+- **2026-07-20** — ingest `description:thesecretclub/callout-poc`: entity [[callout-poc]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
