@@ -539,3 +539,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:timhsutw/elfuck`: entity [[elfuck]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-20** — ingest `description:timetravelthree/IDARustDemangler`: entity [[ida-rust-demangler]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-20** — ingest `description:ticarpi/jwt_tool`: entity [[jwt-tool]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
