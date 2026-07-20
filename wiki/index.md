@@ -82,6 +82,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [DayZzz](entities/dayzzz.md) — DayZ cheat/modding: SDK generation + overlays (C/C++)
 - [d810-ng](entities/d810-ng.md) — d810 next-gen; deobfuscate at decompilation time (Fix OLLVM)
+- [DeepSleep](entities/deepsleep.md) — x64 Gargoyle variant; ROP-only + PIC sleep-hide (no APCs; page protection)
 - [Demystifying-PatchGuard](entities/demystifying-patchguard.md) — educational C/C++ walkthrough of PatchGuard
 - [DetoursNT](entities/detoursnt.md) — NTDLL-only Microsoft Detours (no Win32; cheat / hook research)
 - [DFIRTriage](entities/dfirtriage.md) — Python Windows DFIR triage (process/network/registry/event logs/prefetch)
