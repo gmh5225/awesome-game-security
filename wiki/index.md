@@ -208,6 +208,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [revert-mapper](entities/revert-mapper.md) — post-execution cleanup for manually mapped kernel drivers
 - [Return-address-spoofer](entities/return-address-spoofer.md) — return-address / stack spoof illustration (C/C++; Cheat Spoof Stack)
 - [ricochet-deobfuscator](entities/ricochet-deobfuscator.md) — Ricochet AC deobfuscator (C/C++; driver / memory analysis)
+- [Rumba](entities/rumba.md) — Python VMProtect analysis (symbolic exec / traces; Fix VMP / MBA-tagged)
 - [Sark](entities/sark.md) — IDAPython Made Easy (IDA plugins / older IDA-6.x branch)
 - [sbox](entities/sbox.md) — C++ compile-time AES-128 / S-box string obfuscation (Obfusk8 spin-off)
 - [scfw](entities/scfw.md) — cross-platform C++ Windows shellcode framework (AC shellcode engine & tricks)
