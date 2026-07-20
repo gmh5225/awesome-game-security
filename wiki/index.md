@@ -138,6 +138,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [injdrv](entities/injdrv.md) — kernel APC DLL injector (process notify → LdrLoadDll; C)
 - [input-overlay](entities/input-overlay.md) — OBS plugin: keyboard/mouse/gamepad livestream overlay (C++; Keyboard Mapper)
 - [InstrumentationCallbackSyscallLogger](entities/instrumentation-callback-syscall-logger.md) — Ring3 Instrumentation Callback on syscall return (AC / Windows)
+- [Island](entities/island.md) — experimental hot-reloading Vulkan renderer (C/C++; Linux+Windows; Renderer / Vulkan)
 - [jmap](entities/jmap.md) — UE4/UE5 .uasset/.umap dependency graphs (reflection data / asset structure)
 - [jwt_tool](entities/jwt-tool.md) — Python JWT toolkit (validate/forge/scan; Game Network / JWT Auth)
 - [KACE](entities/kace.md) — RING3 Windows kernel-driver emulator (self context / Unicorn; AC analysis)
