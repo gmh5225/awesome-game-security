@@ -564,3 +564,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-20** — ingest `description:thesecretclub/CVEAC-2020`: entity [[cveac-2020]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
 
+- **2026-07-20** — ingest `description:therealdreg/anticuckoo`: entity [[anticuckoo]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
