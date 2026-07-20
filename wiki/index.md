@@ -171,6 +171,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MapleStoryEx](entities/maplestoryex.md) — MapleStory private server (CMS-079; custom content / server logic)
 - [MemMCP](entities/memmcp.md) — Cheat Engine–like MCP server (Python; Game Develop / MCP)
 - [Metal-Game-Engine-Tutorial](entities/metal-game-engine-tutorial.md) — Apple Metal engine tutorial (open project; Game Engine / guide)
+- [miniDumpReader](entities/minidumpreader.md) — Python minidump / memory analysis (AC / Windows kernel dump)
 - [Mini-Launcher](entities/mini-launcher.md) — Steam-bypass game launcher (API stub / DLL inject / Lua; Launcher Abuser)
 - [ModExMap](entities/modexmap.md) — user-mode PE manual-map DLL injector (x86/x64; TLS; Extend Manual Map)
 - [mutaben](entities/mutaben.md) — Python MBA (mixed-boolean-arithmetic) expression generator
