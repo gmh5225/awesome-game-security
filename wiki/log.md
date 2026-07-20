@@ -598,3 +598,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:techiew/DirectXHook`: entity [[directxhook]]; cited on [[overviews/graphics-api]] and [[present-hook]].
 
 - **2026-07-20** — ingest `description:tasox/miniDumpReader`: entity [[minidumpreader]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
+- **2026-07-20** — ingest `description:tangsilian/android-vuln`: entity [[android-vuln]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
