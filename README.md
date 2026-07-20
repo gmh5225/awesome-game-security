@@ -2895,6 +2895,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Game:Minecraft
 - [A minecraft server backend written in c++](https://github.com/gmh5225/minecpp)
 - https://github.com/AnarchDevelopment/aegledll [Internal Minecraft DX11 DLL client with ImGui overlay and MinHook hooks]
+- https://github.com/adanainv3-creator/OxClient [Minecraft Bedrock/PE MITM cheat client with protocol relay, combat/movement modules, and ESP]
 
 > Game:Sword With Sauce
 - https://github.com/1hAck-0/UE4-Cheat-Source-Code
