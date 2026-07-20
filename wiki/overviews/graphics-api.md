@@ -24,7 +24,7 @@ sources:
   - wiki/sources/descriptions/twohyjr__Metal-Game-Engine-Tutorial.md
   - wiki/sources/descriptions/turbulenz__turbulenz_engine.md
   - wiki/sources/descriptions/tsoding__olive.c.md
-updated: 2026-07-19
+updated: 2026-07-20
 confidence: high
 ---
 
@@ -51,4 +51,4 @@ Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/
 
 ## README map
 
-`DirectX` (~33: Guide/Hook/Tools/Emulation/Compatibility/Overlay; incl. D3D12 Present/shader injectors for title-specific pixel-shader replace), `OpenGL` (~3), `Vulkan` (~9; cross-platform runtime API locators like kiero/kiero2), plus broader `Renderer` (~16) / `3D Graphics` (~4; Metal/DX12/Vulkan kits + WebGL/splat editors) / `Mathematics` (~7; gamedev math libs upstream of render math) / `Image Codec` (~5; stb + portable wgpu/Rhai raster editors + GIF/APNG; soft-raster helpers such as [[olive-c]]), adjacent `AI` (~5; image→mesh/splat for engine import), Cheat Overlay/Render, and Anti Cheat Screenshot / Detection:ESP|Overlay. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/tsoding__olive.c.md)
+`DirectX` (~33: Guide/Hook/Tools/Emulation/Compatibility/Overlay; incl. D3D12 Present/shader injectors for title-specific pixel-shader replace), `OpenGL` (~3), `Vulkan` (~9; cross-platform runtime API locators like kiero/kiero2), plus broader `Renderer` (~17) / `3D Graphics` (~4; Metal/DX12/Vulkan kits + WebGL/splat editors) / `Mathematics` (~7; gamedev math libs upstream of render math) / `Image Codec` (~5; stb + portable wgpu/Rhai raster editors + GIF/APNG; soft-raster helpers such as [[olive-c]]), adjacent `AI` (~5; image→mesh/splat/sprite for engine import), Cheat Overlay/Render, and Anti Cheat Screenshot / Detection:ESP|Overlay. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/tsoding__olive.c.md)
