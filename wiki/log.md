@@ -608,3 +608,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:tandasat/HelloIommuPkg`: entity [[helloiommupkg]]; cited on [[iommu]] and [[overviews/dma-attack]].
 
 - **2026-07-20** — ingest `description:tamirzb/CVE-2021-1961`: entity [[cve-2021-1961]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-20** — ingest `description:talsec/Free-RASP-Unity-POC`: entity [[free-rasp-unity-poc]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
