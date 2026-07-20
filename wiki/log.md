@@ -537,3 +537,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:tingwei1111/MapleStory-YOLOv8-Training`: entity [[maplestory-yolov8-training]]; cited on [[overviews/game-hacking]] and [[maplestory-worlds-automation]].
 
 - **2026-07-20** — ingest `description:timhsutw/elfuck`: entity [[elfuck]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-20** — ingest `description:timetravelthree/IDARustDemangler`: entity [[ida-rust-demangler]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
