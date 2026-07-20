@@ -125,6 +125,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IDA Easy Life](entities/ida-easy-life.md) — IDA Pro deobfuscation plugin (Python; cheat / IDA Plugins)
 - [ida-ios-helper](entities/ida-ios-helper.md) — IDA plugin for iOS reversing (vtable symbols required)
 - [ida-jm-xorstr-decrypt-plugin](entities/ida-jm-xorstr-decrypt-plugin.md) — IDA Pro JM Xorstr decrypt (x64; Python)
+- [IDA KMDF](entities/ida-kmdf.md) — IDA Pro KMDF/WDF driver annotator (structures / callbacks / queues; Python)
 - [IDARustDemangler](entities/ida-rust-demangler.md) — IDA Rust demangler & normalizer (`rs-dml`; cheat / IDA Plugins)
 - [idac](entities/idac.md) — Trail of Bits IDA Pro CLI/client (Unix socket → GUI/idalib; JSON; agents; not MCP)
 - [idarem](entities/idarem.md) — IDA Pro remote browser UI (Flask REST/SSE + React; live IDB sync)

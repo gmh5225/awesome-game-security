@@ -67,6 +67,7 @@ sources:
   - wiki/sources/descriptions/thetuh__anticheat-poc.md
   - wiki/sources/descriptions/thesecretclub__window_hijack.md
   - wiki/sources/descriptions/thesecretclub__callout-poc.md
+  - wiki/sources/descriptions/thalium__ida_kmdf.md
 updated: 2026-07-20
 confidence: high
 ---
@@ -83,6 +84,7 @@ Kernel internals that matter for game protection and low-level research: object/
 ## Key sub-areas
 
 - **Structures:** EPROCESS/ETHREAD, MMVAD, DRIVER_OBJECT, IRP; SSDT/IDT; pool tables
+- **KMDF framework RE:** IDA Pro plugin [[ida-kmdf]] annotates WDF structures, callback registrations, I/O queues, and device-init patterns in KMDF driver binaries (type defs + named framework calls). (source: wiki/sources/descriptions/thalium__ida_kmdf.md)
 - **Syscall tables:** extract `ntdll` / `win32u` SSNs via PDB + disassembly tools such as [[ntsleuth]] (JSON / C header dumps for direct-syscall research). (source: wiki/sources/descriptions/xaitax__NTSleuth.md) Runtime Ring3 inspection via Instrumentation Callback (fires on every kernel-syscall return) is covered by samples such as [[instrumentation-callback-syscall-logger]]. (source: wiki/sources/descriptions/x86matthew__InstrumentationCallbackSyscallLogger.md) Educational Windows AC PoCs tagged Instrumentation Callback such as [[anticheat-poc]] (debugger / integrity / signature-scan / process enum) sit in the same lane. (source: wiki/sources/descriptions/thetuh__anticheat-poc.md) Broader unconventional Ring3 PoCs (memory analysis / asset pipelines) appear in collections such as [[function-collections]]. (source: wiki/sources/descriptions/whokilleddb__function-collections.md)
 - **WinDbg automation:** JS WinDbg scripts such as [[windbg-scripts]] for kernel-level debug/modding workflows (Cheat → WinDbg Plugins). (source: wiki/sources/descriptions/yardenshafir__WinDbg_Scripts.md)
 - **Cross-process kernel R/W:** MDL map + physical translate + CR3 page-table walk libraries such as [[ntmemory]] (research for kernel cheat memory paths / AC evasion). (source: wiki/sources/descriptions/zer0condition__NTMemory.md)
@@ -114,7 +116,7 @@ Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-
 
 [[kernel-callbacks]] · [[callout-poc]] · [[byovd]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[xign-poc-april-2026]] · [[kvc]] · [[kernel-research-kit]] · [[bootbypass]] · [[solemn]] · [[pastdse]] · [[kvcforensic]] · [[windefctl]] · [[vaultguard]] · [[keyboardkit]] · [[kernel-mouse]] · [[ksocket]] · [[hvci]] · [[cet-research]]
  · [[windbg-scripts]] · [[symlink-callback]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[ntmemory]] · [[ntsleuth]] · [[instrumentation-callback-syscall-logger]] · [[anticheat-poc]] · [[function-collections]] · [[winvisor]] · [[kace]] · [[hv]] · [[ophion]] · [[checkhv-um]] · [[hypervisor-detection]] · [[vt-debuuger]] · [[baresvm]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[xigmapper]] · [[efitool]] · [[cmdt]] · [[x260-lenovo-opencore]] · [[etw-explorer]] · [[tietwagent]] · [[wazuh]] · [[openark]] · [[systeminformer]] · [[dioprocess-private]] · [[volatility]] · [[volatility3]] · [[ephemera]] · [[system-thread-finder]]
- · [[boom]] · [[data-ptr-swap]] · [[double-callback]] · [[window-hijack]] · [[owned-alignment]] · [[injdrv]] · [[kinject]] · [[zero-thread-kernel]] · [[wdutf]] · [[dma]] · [[overviews/anti-cheat]]
+ · [[boom]] · [[data-ptr-swap]] · [[double-callback]] · [[window-hijack]] · [[owned-alignment]] · [[injdrv]] · [[kinject]] · [[zero-thread-kernel]] · [[wdutf]] · [[ida-kmdf]] · [[dma]] · [[overviews/anti-cheat]]
 
 
 

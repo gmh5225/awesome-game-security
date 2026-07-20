@@ -576,3 +576,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-20** — ingest `description:thalium/symless`: entity [[symless]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-20** — ingest `description:thalium/rumba`: entity [[rumba]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-20** — ingest `description:thalium/ida_kmdf`: entity [[ida-kmdf]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
