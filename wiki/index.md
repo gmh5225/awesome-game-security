@@ -218,6 +218,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [TrustDevice Android](entities/trustdevice-android.md) — TrustDecision Android fingerprint SDK (Kotlin/Java; integrity / risk signals)
 - [TrustDevice iOS](entities/trustdevice-ios.md) — TrustDecision iOS fingerprint SDK (CocoaPod; integrity / risk signals)
 - [tiny-csgo-client](entities/tiny-csgo-client.md) — minimal CS:GO client for dedicated servers (modding / SDK)
+- [tinyobjloader](entities/tinyobjloader.md) — single-header C++ Wavefront OBJ loader (verts/MTL; Wavefront Obj)
 - [ts-ue4dumper](entities/ts-ue4dumper.md) — TypeScript + Frida UE4 dumper (modular; C++ offsets)
 - [Turbulenz Engine](entities/turbulenz-engine.md) — HTML5/TypeScript game engine (WebGL + server services; Game Engine)
 - [UTM](entities/utm.md) — QEMU VM host for iOS/macOS (Hypervisor.framework / JIT; IOS Emulator)

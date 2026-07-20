@@ -24,6 +24,7 @@ sources:
   - wiki/sources/descriptions/twohyjr__Metal-Game-Engine-Tutorial.md
   - wiki/sources/descriptions/turbulenz__turbulenz_engine.md
   - wiki/sources/descriptions/tsoding__olive.c.md
+  - wiki/sources/descriptions/tinyobjloader__tinyobjloader.md
 updated: 2026-07-20
 confidence: high
 ---
@@ -44,11 +45,12 @@ Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/
 - DX11 stereoscopic-fix tooling such as [[3d9]] (developer-oriented; broken stereo effects in DX11 games) sits in the DirectX Tools lane. (source: wiki/sources/descriptions/visotw__3d9.md)
 - Frame profilers such as [[tracy]] (CPU zones + GPU timing for OpenGL / Vulkan / Direct3D; client + standalone viewer) sit in the adjacent Game Testing / graphics-performance lane. (source: wiki/sources/descriptions/wolfpld__tracy.md)
 - Software-raster / Image Codec helpers such as [[olive-c]] (single-header C; lines/triangles/circles/text into raw pixel buffers; no deps) sit below GPU Present hooks as a minimal CPU raster study surface. (source: wiki/sources/descriptions/tsoding__olive.c.md)
+- Wavefront OBJ mesh parsers such as [[tinyobjloader]] (single-header C++; verts/normals/UVs/MTL) sit in the adjacent Wavefront Obj / asset-ingest lane upstream of GPU draw paths. (source: wiki/sources/descriptions/tinyobjloader__tinyobjloader.md)
 
 ## Related concepts
 
-[[present-hook]] · [[battlefield-1-internal]] · [[gta4-rtx]] · [[3d9]] · [[steam-overlay-x64]] · [[input-overlay]] · [[eac-overlay]] · [[double-callback]] · [[dxgkrnl-hook]] · [[wda-monitor-trick]] · [[3d-racing-game]] · [[the-seed-link-future]] · [[wind-effects]] · [[u3d]] · [[metal-game-engine-tutorial]] · [[turbulenz-engine]] · [[imgui-ios-mod-menu]] · [[android-native-app-imgui]] · [[tracy]] · [[olive-c]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[present-hook]] · [[battlefield-1-internal]] · [[gta4-rtx]] · [[3d9]] · [[steam-overlay-x64]] · [[input-overlay]] · [[eac-overlay]] · [[double-callback]] · [[dxgkrnl-hook]] · [[wda-monitor-trick]] · [[3d-racing-game]] · [[the-seed-link-future]] · [[wind-effects]] · [[u3d]] · [[metal-game-engine-tutorial]] · [[turbulenz-engine]] · [[imgui-ios-mod-menu]] · [[android-native-app-imgui]] · [[tracy]] · [[olive-c]] · [[tinyobjloader]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
 
 ## README map
 
-`DirectX` (~33: Guide/Hook/Tools/Emulation/Compatibility/Overlay; incl. D3D12 Present/shader injectors for title-specific pixel-shader replace), `OpenGL` (~3), `Vulkan` (~9; cross-platform runtime API locators like kiero/kiero2), plus broader `Renderer` (~17) / `3D Graphics` (~4; Metal/DX12/Vulkan kits + WebGL/splat editors) / `Mathematics` (~7; gamedev math libs upstream of render math) / `Image Codec` (~5; stb + portable wgpu/Rhai raster editors + GIF/APNG; soft-raster helpers such as [[olive-c]]), adjacent `AI` (~5; image→mesh/splat/sprite for engine import), Cheat Overlay/Render, and Anti Cheat Screenshot / Detection:ESP|Overlay. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/tsoding__olive.c.md)
+`DirectX` (~33: Guide/Hook/Tools/Emulation/Compatibility/Overlay; incl. D3D12 Present/shader injectors for title-specific pixel-shader replace), `OpenGL` (~3), `Vulkan` (~9; cross-platform runtime API locators like kiero/kiero2), plus broader `Renderer` (~17) / `3D Graphics` (~4; Metal/DX12/Vulkan kits + WebGL/splat editors) / `Mathematics` (~7; gamedev math libs upstream of render math) / `Image Codec` (~5; stb + portable wgpu/Rhai raster editors + GIF/APNG; soft-raster helpers such as [[olive-c]]), adjacent `Wavefront Obj` (~2; [[tinyobjloader]]) / `AI` (~5; image→mesh/splat/sprite for engine import), Cheat Overlay/Render, and Anti Cheat Screenshot / Detection:ESP|Overlay. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/tsoding__olive.c.md) (source: wiki/sources/descriptions/tinyobjloader__tinyobjloader.md)
