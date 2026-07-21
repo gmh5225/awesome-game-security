@@ -1223,6 +1223,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/kkkbbb/rustFrida [Frida-like Android ARM64 hook — QuickJS, Java/native/stealth hook, QBDI; pairs with wxshadow (mkpms)]
 - https://github.com/dreamland-blog/KSU-Rust-Frida [Android ARM64 dynamic instrumentation module workflow for KernelSU/Magisk: single-binary engine, attach/spawn/watch-so, HTTP RPC control plane, and multi-mode stealth (normal/wxshadow/recomp)]
 - https://github.com/TheQmaks/phantom-frida [Build anti-detection Frida server from source]
+- https://github.com/astra1dev/MalumMenu-Android [Among Us Android cheat menu using Frida and frida-il2cpp-bridge]
 
 > Hook ART(android)
 - https://github.com/PAGalaxyLab/YAHFA
@@ -4320,6 +4321,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/olafhartong/BamboozlEDR [A comprehensive ETW (Event Tracing for Windows) event generation tool designed for testing and research purposes]
 - https://github.com/artmih24/TeleParser [Simple parser for Telegram chats and channels with lemmatizer. Writes data in JSON, CSV and MongoDB]
 - https://github.com/Sutaigne/alibi [Read-only Windows forensic kit for game-cheat/DMA/BYOVD and console-rig aimbot evidence]
+- https://github.com/PickAngE/AntiCheat-Scanner [Windows forensic scanner for ACE, EAC, BattlEye, EA AC, and HoYoProtect via drivers, services, BAM, Prefetch, and PE metadata]
 
 > Dynamic Script
 - https://github.com/can1357/NtLua
