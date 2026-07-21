@@ -717,3 +717,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:staturnzz/oob_entry`: entity [[oob-entry]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
 - **2026-07-21** — ingest `description:stars-one/ASCTool`: entity [[asctool]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
+- **2026-07-21** — ingest `description:stackOverflower92/FightingGame-UE5`: entity [[fightinggame-ue5]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
