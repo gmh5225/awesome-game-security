@@ -126,6 +126,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FlatRedBall](entities/flatredball.md) — C# / .NET 2D engine (editor + runtime; Game Engine)
 - [frida-il2cpp-bridge](entities/frida-il2cpp-bridge.md) — Frida dump Il2Cpp (Unity 5.3–6000.1.x; game engine explorer:Unity)
 - [fridare](entities/fridare.md) — Frida repackaging / anti-detection (iOS+Android; string/symbol hex-replace)
+- [Free-RASP-ReactNative](entities/free-rasp-reactnative.md) — React Native freeRASP plugin (Talsec; Magisk/KernelSU/Frida/tamper/integrity; Android+iOS)
 - [Free-RASP-Unity-POC](entities/free-rasp-unity-poc.md) — Unity freeRASP plugin (Talsec; root/jailbreak/Frida/tamper/integrity; Android+iOS)
 
 - [function-collections](entities/function-collections.md) — C PoCs for uncommon Ring3 paths (memory analysis; AC callback lane)
