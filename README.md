@@ -1787,6 +1787,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/danielplohmann/gui-plugin-template [A template for cross-compatible GUI plugins]
 - https://github.com/astrelsky/GhidraGradlePlugin [Gradle]
 - https://github.com/jtang613/GhidrAssist [An LLM extension for Ghidra to enable AI assistance in RE]
+- https://github.com/RevEngAI/plugin-ghidra [RevEng.AI Ghidra plugin for binary similarity, function renaming, and AI-assisted reverse engineering]
 - https://github.com/DSecurity/efiSeek [Ghidra analyzer for UEFI firmware]
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 - https://github.com/Rantanen/ghidra-minidump-loader [Windows Minidump loader for Ghidra]
