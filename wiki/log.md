@@ -634,3 +634,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:synacktiv/thats_no_pipe`: entity [[thats-no-pipe]]; cited on [[frida]] and [[overviews/reverse-engineering]].
 
 - **2026-07-21** — ingest `description:synacktiv/dotNIET`: entity [[dotniet]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-21** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-engine]] (Anti Cheat ~601 / Game Develop ~178); light `index.md` section notes (no per-category pages).
