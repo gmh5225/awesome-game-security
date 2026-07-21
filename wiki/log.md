@@ -660,3 +660,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2562 / Anti Cheat ~601); light `index.md` section notes (no per-category pages).
 
 - **2026-07-21** — ingest `description:sultim-t/xash-rt`: entity [[xash-rt]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
+
+- **2026-07-21** — ingest `description:suifei/fridare`: entity [[fridare]]; cited on [[frida]] and [[overviews/mobile-security]].
