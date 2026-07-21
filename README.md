@@ -1856,6 +1856,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Cheat Engine Plugins
 - https://github.com/FreeER/CE-Extensions [Lua Extensions]
 - https://github.com/Skyrimfus/CE-lua-extensions [Lua Extensions]
+- https://github.com/cheat-engine/UnrealEngineTools [Official CE Lua tools to scan Unreal Engine games (UObject/UClass/FProperty)]
 - https://github.com/bbfox0703/Mydev-Cheat-Engine-Tables [CT]
 - https://github.com/Hexorg/CheatEngineTables [Collection of Cheat Engine tables curated from CE forums (offline-focused)]
 - https://github.com/inuNorii/Elden-Ring-CT-TGA [Elden Ring]
