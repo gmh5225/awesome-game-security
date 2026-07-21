@@ -25,6 +25,7 @@ sources:
   - wiki/sources/descriptions/ykus4__kagura.md
   - wiki/sources/descriptions/yardenshafir__cet-research.md
   - wiki/sources/descriptions/xxFURYWOLFxx__veh-dumper.md
+  - wiki/sources/descriptions/t3ssellate__unmapper.md
   - wiki/sources/descriptions/xuanxuan0__TiEtwAgent.md
   - wiki/sources/descriptions/xsj3n__x64-EXE-Packer.md
   - wiki/sources/descriptions/xM0kht4r__2Pack.md
@@ -89,7 +90,7 @@ sources:
   - wiki/sources/descriptions/tingwei1111__maplestory-worlds-automation.md
   - wiki/sources/descriptions/thesecretclub__CVEAC-2020.md
   - wiki/sources/descriptions/vul-os__magnetite.md
-updated: 2026-07-20
+updated: 2026-07-21
 confidence: high
 ---
 
@@ -111,6 +112,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 - FACEIT AC, VAC (user-mode signatures), GameGuard, XIGNCODE3 (vuln PoC [[xign-poc-april-2026]] on `xhunter64.sys` `IRP_MJ_WRITE` → phys R/W / kernel leak / process kill) (source: wiki/sources/descriptions/waryas__xign_poc_april_2026.md), ACE, Warden (Blizzard / WoW)
 - [[vac3-inhibitor]] — C++ VAC3 exploration (hooking / memory analysis) under cheat → explore anticheat:vac (source: wiki/sources/descriptions/zyhp__vac3_inhibitor.md)
 - [[vac3-dumper]] — dumps VAC3 modules loaded at different times for offline RE (Dump lane) (source: wiki/sources/descriptions/x1tan__vac3-dumper.md)
+- [[unmapper]] — automatic dumped-PE header repair so decompilers load cleanly (Dump Fix) (source: wiki/sources/descriptions/t3ssellate__unmapper.md)
 - [[ricochet-deobfuscator]] — C/C++ Ricochet deobfuscator (driver / memory analysis; explore anticheat:ricochet) (source: wiki/sources/descriptions/weak1337__ricochet_deobfuscator.md)
 - [[x14-08-coverstory-blizzard]] — WoW cheat framework with Warden loader hooks / RunScript injection (research ref for Warden internals) (source: wiki/sources/descriptions/xakepru__x14.08-coverstory-blizzard.md)
 
@@ -137,7 +139,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## Related concepts
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[pastdse]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[ricochet-deobfuscator]] · [[x14-08-coverstory-blizzard]] · [[xign-poc-april-2026]] · [[waryasswhe]] · [[veh]] · [[veh-dumper]] · [[no-access-protection]] · [[voidmaw]] · [[deepsleep]] · [[file-recovery-tool]] · [[ntfstool]] · [[dfirtriage]] · [[hv]] · [[ophion]] · [[minivisorpkg]] · [[checkhv-um]] · [[hypervisor-detection]] · [[vt-debuuger]] · [[baresvm]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[anticuckoo]] · [[awesome-anti-virtualization]] · [[shredder-rs]] · [[lumina-cheat]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[woody-woodpacker]] · [[elfuck]] · [[kagura]] · [[wprotect]] · [[alcatraz]] · [[vxlang-page]] · [[obfusk8]] · [[sbox]] · [[blindeye]] · [[be-shellcode]] · [[battleye-region-walking]] · [[arma3beclient]] · [[scfw]] · [[byvalver]] · [[injdrv]] · [[kinject]] · [[detoursnt]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[wazuh]] · [[certael]] · [[magnetite]] · [[anticheat-poc]] · [[cveac-2020]] · [[instrumentation-callback-syscall-logger]] · [[function-collections]] · [[injectors]] · [[windows-process-injection]] · [[modexmap]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[mini-launcher]] · [[zero-thread-kernel]] · [[wdutf]] · [[nvidiaapi]] · [[detect-tpm-spoofing]] · [[return-address-spoofer]] · [[cedetector]] · [[magisk]] · [[magiskdetector]] · [[keyattestation]] · [[droidshield]] · [[free-rasp-unity-poc]] · [[trustdevice-android]] · [[trustdevice-ios]] · [[waldo]] · [[aimbot-detection-prototype]] · [[human-mouse-movement]] · [[maplestory-worlds-automation]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[pastdse]] · [[cet-research]] · [[dma]] · [[iommu]] · [[present-hook]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[unmapper]] · [[ricochet-deobfuscator]] · [[x14-08-coverstory-blizzard]] · [[xign-poc-april-2026]] · [[waryasswhe]] · [[veh]] · [[veh-dumper]] · [[no-access-protection]] · [[voidmaw]] · [[deepsleep]] · [[file-recovery-tool]] · [[ntfstool]] · [[dfirtriage]] · [[hv]] · [[ophion]] · [[minivisorpkg]] · [[checkhv-um]] · [[hypervisor-detection]] · [[vt-debuuger]] · [[baresvm]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[anticuckoo]] · [[awesome-anti-virtualization]] · [[shredder-rs]] · [[lumina-cheat]] · [[static-variables-obfuscator-ue4]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[woody-woodpacker]] · [[elfuck]] · [[kagura]] · [[wprotect]] · [[alcatraz]] · [[vxlang-page]] · [[obfusk8]] · [[sbox]] · [[blindeye]] · [[be-shellcode]] · [[battleye-region-walking]] · [[arma3beclient]] · [[scfw]] · [[byvalver]] · [[injdrv]] · [[kinject]] · [[detoursnt]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[etw-explorer]] · [[tietwagent]] · [[wazuh]] · [[certael]] · [[magnetite]] · [[anticheat-poc]] · [[cveac-2020]] · [[instrumentation-callback-syscall-logger]] · [[function-collections]] · [[injectors]] · [[windows-process-injection]] · [[modexmap]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[mini-launcher]] · [[zero-thread-kernel]] · [[wdutf]] · [[nvidiaapi]] · [[detect-tpm-spoofing]] · [[return-address-spoofer]] · [[cedetector]] · [[magisk]] · [[magiskdetector]] · [[keyattestation]] · [[droidshield]] · [[free-rasp-unity-poc]] · [[trustdevice-android]] · [[trustdevice-ios]] · [[waldo]] · [[aimbot-detection-prototype]] · [[human-mouse-movement]] · [[maplestory-worlds-automation]]
 
 
 
