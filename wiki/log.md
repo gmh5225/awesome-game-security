@@ -685,3 +685,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2563 / Anti Cheat ~603); light `index.md` section notes (no per-category pages).
 
 - **2026-07-21** — ingest `description:strozfriedberg/ntfs-linker`: entity [[ntfs-linker]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-link from [[ntfstool]].
+
+- **2026-07-21** — ingest `description:stride3d/stride`: entity [[stride]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
