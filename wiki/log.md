@@ -664,3 +664,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:suifei/fridare`: entity [[fridare]]; cited on [[frida]] and [[overviews/mobile-security]].
 
 - **2026-07-21** — ingest `description:su-vikas/conbeerlib`: entity [[conbeerlib]]; cited on [[overviews/anti-cheat]] and [[overviews/mobile-security]].
+
+- **2026-07-21** — ingest `description:stuxnet147/Themida-Research`: entity [[themida-research]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
