@@ -709,3 +709,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:stevemk14ebr/PolyHook`: entity [[polyhook]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-link from [[polyhook-2-0]].
 
 - **2026-07-21** — ingest `description:sterrasec/genpatch`: entity [[genpatch]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-21** — ingest `description:steffalon/battleye-rust`: entity [[battleye-rust]]; cited on [[battleye]] and [[overviews/anti-cheat]].

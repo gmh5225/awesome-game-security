@@ -11,7 +11,8 @@ sources:
   - wiki/sources/descriptions/weak1337__BE-Shellcode.md
   - wiki/sources/descriptions/tym32167__arma3beclient.md
   - wiki/sources/descriptions/tr1xxx__battleye-region-walking.md
-updated: 2026-07-20
+  - wiki/sources/descriptions/steffalon__battleye-rust.md
+updated: 2026-07-21
 confidence: medium
 ---
 
@@ -37,6 +38,8 @@ VAS region enumeration for injected/shellcode and manual-mapped modules is recon
 
 Title-specific client tooling such as [[arma3beclient]] (C# / PowerShell; Arma 3 / `game:arma3`) sits in the BattlEye Tool lane for modding and BE-protected client debugging. (source: wiki/sources/descriptions/tym32167__arma3beclient.md)
 
+Server-side RCON is covered by [[battleye-rust]]: Rust packet encode/checksum + UDP socket I/O for BattlEye remote-console listen/read/write (admin / protocol research). (source: wiki/sources/descriptions/steffalon__battleye-rust.md)
+
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[battleye-region-walking]] · [[arma3beclient]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[battleye-region-walking]] · [[battleye-rust]] · [[arma3beclient]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]

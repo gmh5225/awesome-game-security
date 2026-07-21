@@ -103,6 +103,7 @@ sources:
   - wiki/sources/descriptions/synctop__tpm-mmio.md
   - wiki/sources/descriptions/svespalec__faultline.md
   - wiki/sources/descriptions/stuxnet147__Known-Driver-Mappers.md
+  - wiki/sources/descriptions/steffalon__battleye-rust.md
 updated: 2026-07-21
 confidence: high
 ---
@@ -120,7 +121,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 - [[easy-anti-cheat]] — service + driver + game-facing integrity (Fortnite, Apex, Rust); Integrity Checks PoC [[cveac-2020]] (WDK driver vs EAC kernel-module vuln; enum / PE / hooks) (source: wiki/sources/descriptions/thesecretclub__CVEAC-2020.md)
 
-- [[battleye]] — handle protection, process/memory scanning (PUBG, R6, DayZ); research ref [[blindeye]] drops BE report-path pool allocs via hooked `ExAllocatePool*` (source: wiki/sources/descriptions/zouxianyu__BlindEye.md); user-mode shellcode RE via [[be-shellcode]] (dump/disasm thread scan, VEH enum, module integrity) (source: wiki/sources/descriptions/weak1337__BE-Shellcode.md); VirtualQuery region-walk heuristics for shellcode/manual-map via [[battleye-region-walking]] (source: wiki/sources/descriptions/tr1xxx__battleye-region-walking.md); title-specific BattlEye Tool [[arma3beclient]] (C# / PowerShell; Arma 3) (source: wiki/sources/descriptions/tym32167__arma3beclient.md)
+- [[battleye]] — handle protection, process/memory scanning (PUBG, R6, DayZ); research ref [[blindeye]] drops BE report-path pool allocs via hooked `ExAllocatePool*` (source: wiki/sources/descriptions/zouxianyu__BlindEye.md); user-mode shellcode RE via [[be-shellcode]] (dump/disasm thread scan, VEH enum, module integrity) (source: wiki/sources/descriptions/weak1337__BE-Shellcode.md); VirtualQuery region-walk heuristics for shellcode/manual-map via [[battleye-region-walking]] (source: wiki/sources/descriptions/tr1xxx__battleye-region-walking.md); title-specific BattlEye Tool [[arma3beclient]] (C# / PowerShell; Arma 3) (source: wiki/sources/descriptions/tym32167__arma3beclient.md); RCON UDP protocol lib [[battleye-rust]] (Rust; packet checksum + socket I/O) (source: wiki/sources/descriptions/steffalon__battleye-rust.md)
 - [[vanguard]] — boot-start driver, early driver allowlisting (Valorant, LoL)
 - FACEIT AC, VAC (user-mode signatures), GameGuard, XIGNCODE3 (vuln PoC [[xign-poc-april-2026]] on `xhunter64.sys` `IRP_MJ_WRITE` → phys R/W / kernel leak / process kill) (source: wiki/sources/descriptions/waryas__xign_poc_april_2026.md), ACE, Warden (Blizzard / WoW)
 - [[vac3-inhibitor]] — C++ VAC3 exploration (hooking / memory analysis) under cheat → explore anticheat:vac (source: wiki/sources/descriptions/zyhp__vac3_inhibitor.md)
