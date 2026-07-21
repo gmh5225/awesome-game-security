@@ -711,3 +711,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:sterrasec/genpatch`: entity [[genpatch]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-21** — ingest `description:steffalon/battleye-rust`: entity [[battleye-rust]]; cited on [[battleye]] and [[overviews/anti-cheat]].
+
+- **2026-07-21** — ingest `description:stdhu/windows-kernel-pagehook`: entity [[windows-kernel-pagehook]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
