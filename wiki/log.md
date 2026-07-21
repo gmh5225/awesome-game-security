@@ -662,3 +662,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:sultim-t/xash-rt`: entity [[xash-rt]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
 
 - **2026-07-21** — ingest `description:suifei/fridare`: entity [[fridare]]; cited on [[frida]] and [[overviews/mobile-security]].
+
+- **2026-07-21** — ingest `description:su-vikas/conbeerlib`: entity [[conbeerlib]]; cited on [[overviews/anti-cheat]] and [[overviews/mobile-security]].

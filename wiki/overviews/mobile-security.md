@@ -50,6 +50,7 @@ sources:
   - wiki/sources/descriptions/systemnb__android-kernel-hacking-toolkit.md
   - wiki/sources/descriptions/systemnb__RootSocketKit.md
   - wiki/sources/descriptions/suifei__fridare.md
+  - wiki/sources/descriptions/su-vikas__conbeerlib.md
 updated: 2026-07-21
 confidence: high
 ---
@@ -61,7 +62,7 @@ confidence: high
 
 # Mobile Security
 
-Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/jailbreak ecosystems, dynamic instrumentation ([[frida]]), and mobile anti-cheat (root/Frida/emulator detection). (source: wiki/sources/skills/mobile-security.md) Stealth Frida server repackaging (string/symbol/artifact hex-replace; rooted and rootless iOS installs) via [[fridare]] sits in the same anti-Frida / instrumentation lane. (source: wiki/sources/descriptions/suifei__fridare.md)
+Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/jailbreak ecosystems, dynamic instrumentation ([[frida]]), and mobile anti-cheat (root/Frida/emulator detection). (source: wiki/sources/skills/mobile-security.md) Android virtual-container / Linux VE probes such as [[conbeerlib]] (cgroup / fs / env / hardware; Docker/LXC/K8s/WSL) sit in the same emulator·container detection lane. (source: wiki/sources/descriptions/su-vikas__conbeerlib.md) Stealth Frida server repackaging (string/symbol/artifact hex-replace; rooted and rootless iOS installs) via [[fridare]] sits in the same anti-Frida / instrumentation lane. (source: wiki/sources/descriptions/suifei__fridare.md)
 
 
 ## Key sub-areas
@@ -79,7 +80,7 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 
 ## Related concepts
 
-[[frida]] · [[fridare]] · [[il2cpp]] · [[game-engine-detector]] · [[il2cpp-spy]] · [[mypower]] · [[root-socket-kit]] · [[termux-app]] · [[unityspeedtools]] · [[unflutter]] · [[apktool-mcp-server]] · [[obfu-de-scate]] · [[android-proxy-mcp]] · [[android-vuln]] · [[honor-of-kings-re-research]] · [[magisk]] · [[kernelsu]] · [[dirtypiperoot]] · [[cheese]] · [[magiskdetector]] · [[easypixel]] · [[keyattestation]] · [[droidshield]] · [[free-rasp-unity-poc]] · [[trustdevice-android]] · [[trustdevice-ios]] · [[swsim]] · [[cve-2026-43499-popsicle]] · [[cve-2021-1961]] · [[move-certificate]] · [[magiskboot]] · [[magiskboot-ndk-on-linux]] · [[payload-dumper]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[compile-android-driver]] · [[android-kernel-hacking-toolkit]] · [[android-kernel-xiaomi-pipa]] · [[android-kernel-oneplus-sm8250]] · [[android-kernel-samsung-universal5433]] · [[dpatch]] · [[simpleperf-demo]] · [[lightsaber]] · [[ida-ios-helper]] · [[imgui-ios-mod-menu]] · [[android-native-app-imgui]] · [[utm]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[frida]] · [[fridare]] · [[il2cpp]] · [[game-engine-detector]] · [[il2cpp-spy]] · [[mypower]] · [[root-socket-kit]] · [[termux-app]] · [[unityspeedtools]] · [[unflutter]] · [[apktool-mcp-server]] · [[obfu-de-scate]] · [[android-proxy-mcp]] · [[android-vuln]] · [[honor-of-kings-re-research]] · [[magisk]] · [[kernelsu]] · [[dirtypiperoot]] · [[cheese]] · [[magiskdetector]] · [[easypixel]] · [[keyattestation]] · [[droidshield]] · [[conbeerlib]] · [[free-rasp-unity-poc]] · [[trustdevice-android]] · [[trustdevice-ios]] · [[swsim]] · [[cve-2026-43499-popsicle]] · [[cve-2021-1961]] · [[move-certificate]] · [[magiskboot]] · [[magiskboot-ndk-on-linux]] · [[payload-dumper]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[compile-android-driver]] · [[android-kernel-hacking-toolkit]] · [[android-kernel-xiaomi-pipa]] · [[android-kernel-oneplus-sm8250]] · [[android-kernel-samsung-universal5433]] · [[dpatch]] · [[simpleperf-demo]] · [[lightsaber]] · [[ida-ios-helper]] · [[imgui-ios-mod-menu]] · [[android-native-app-imgui]] · [[utm]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
 
 
 ## README map
