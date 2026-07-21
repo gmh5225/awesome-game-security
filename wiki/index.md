@@ -223,6 +223,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Obfu-DE-Scate](entities/obfu-de-scate.md) — Python APK ProGuard/R8 deobf (name maps + HTML hierarchy; [Apk])
 - [Obfusk8](entities/obfusk8.md) — C++17 compile-time/runtime obfuscation library (AC Compile Time)
 - [Olive.c](entities/olive-c.md) — single-header C 2D soft-raster (lines/tris/circles/text; Image Codec)
+- [oob_entry](entities/oob-entry.md) — iOS 3.0–10.3.4 tfp0 kernel exploit (C/C++; cheat / iOS jailbreak)
 - [opaque-predicates-detective](entities/opaque-predicates-detective.md) — Binary Ninja opaque-predicate detection (invariant / BB-local)
 - [op7t](entities/op7t.md) — DIY Android kernel (cheat / Android kernel explorer)
 - [OpenArk](entities/openark.md) — Qt anti-rootkit / kernel analysis (callbacks, SSDT, drivers)
