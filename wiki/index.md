@@ -263,6 +263,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Static-Variables-Obfuscator-UE4](entities/static-variables-obfuscator-ue4.md) — UE4 static-variable obfuscation vs memory scanners
 - [SteamAntiAntiDebug](entities/steam-anti-anti-debug.md) — bypass Steam anti-debug for debugger attach (x64dbg; Steam)
 - [steam-overlay-x64](entities/steam-overlay-x64.md) — Steam overlay / modding research (C; memory analysis)
+- [Storm Engine](entities/storm-engine.md) — Akella Sea Dogs/PotC C++ engine (DX9 / physics / scripting; Game Engine source)
 - [Stride](entities/stride.md) — open-source C# 3D engine (formerly Xenko; PBR / Vulkan+D3D+GL; Game Engine)
 - [STP](entities/stp.md) — Simple Theorem Prover (bitvector/array SMT; MiniSat/CryptoMiniSat; MBA lane)
 - [swsim](entities/swsim.md) — pure-software USIM/UICC SIM simulator (APDU/MILENAGE; SIMtrace2; Cellular/SIM)

@@ -693,3 +693,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:strazzere/android-unpacker`: entity [[android-unpacker]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
 
 - **2026-07-21** — ingest `description:stp/stp`: entity [[stp]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-21** — ingest `description:storm-devs/storm-engine`: entity [[storm-engine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
