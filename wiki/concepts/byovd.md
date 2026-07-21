@@ -15,7 +15,8 @@ sources:
   - wiki/sources/descriptions/wavestone-cdt__EDRSandblast.md
   - wiki/sources/descriptions/vergamota__KslKatz.md
   - wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md
-updated: 2026-07-19
+  - wiki/sources/descriptions/symeonp__Lenovo-CVE-2025-8061.md
+updated: 2026-07-21
 confidence: high
 ---
 
@@ -49,7 +50,9 @@ Full-stack EDR-blinding toolkits such as [[edrsandblast]] combine BYOVD with cal
 
 LSASS credential extractors such as [[kslkatz]] abuse Microsoft Defender’s `KslD.sys` for kernel-mode reads of WDigest plaintext and encrypted LSA secrets past PPL/AV. (source: wiki/sources/descriptions/vergamota__KslKatz.md)
 
+OEM-driver LPE PoCs such as [[lenovo-cve-2025-8061]] target Lenovo `LnvMSRIO.sys` (CVE-2025-8061) via IOCTL abuse for kernel R/W and a SYSTEM shell. (source: wiki/sources/descriptions/symeonp__Lenovo-CVE-2025-8061.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[lenovo-cve-2025-8061]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 

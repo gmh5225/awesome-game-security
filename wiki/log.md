@@ -636,3 +636,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:synacktiv/dotNIET`: entity [[dotniet]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-21** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-engine]] (Anti Cheat ~601 / Game Develop ~178); light `index.md` section notes (no per-category pages).
+
+- **2026-07-21** — ingest `description:symeonp/Lenovo-CVE-2025-8061`: entity [[lenovo-cve-2025-8061]]; cited on [[byovd]] and [[overviews/windows-kernel]].
