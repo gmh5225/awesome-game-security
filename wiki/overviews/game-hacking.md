@@ -144,6 +144,7 @@ sources:
   - wiki/sources/descriptions/stevemk14ebr__RETools.md
   - wiki/sources/descriptions/stevemk14ebr__PolyHook_2_0.md
   - wiki/sources/descriptions/stevemk14ebr__PolyHook.md
+  - wiki/sources/descriptions/sterrasec__genpatch.md
 updated: 2026-07-21
 confidence: high
 ---
@@ -217,6 +218,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Third-party Lumina server connectivity via [[openlumina]] (IDA plugin; Hex-Rays `.crt` into IDA install dir) sits in the Cheat IDA Plugins / Lumina lane. (source: wiki/sources/descriptions/tomrus88__OpenLumina.md)
 - IDAPython convenience via [[sark]] (“IDAPython Made Easy”; older-IDA support on IDA-6.x) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/tmr232__Sark.md)
 - Rust symbol demangle/normalize in IDA via [[ida-rust-demangler]] (`rs-dml`-backed) also sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/timetravelthree__IDARustDemangler.md)
+- Binary patch script generation via [[genpatch]] (Python; dialog when patch script succeeds; cheat / IDA Plugins) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/sterrasec__genpatch.md)
 - Magisk-style root on Android VR (Quest 3/3S) via [[cheese]] (Adreno CVE-2025-21479; temporary root, no boot rewrite) sits in the Cheat Magisk lane. (source: wiki/sources/descriptions/zhuowei__cheese.md)
 - Kernel-level Android root via [[kernelsu]] (kernel su; Kotlin/Rust) sits in the Cheat / Android root lane alongside Magisk/APatch. (source: wiki/sources/descriptions/tiann__KernelSU.md)
 - Magisk/[[kernelsu]]/APatch modules such as [[move-certificate]] (user→system CA trust, Android 7–15) support MITM-oriented mobile cheat research. (source: wiki/sources/descriptions/ys1231__MoveCertificate.md)
