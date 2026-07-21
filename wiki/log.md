@@ -721,3 +721,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:stackOverflower92/FightingGame-UE5`: entity [[fightinggame-ue5]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
 - **2026-07-21** — ingest `description:st4ckh0und/hook-buster`: entity [[hook-buster]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-07-21** — ingest `description:ssyuqixe/obfCoder`: entity [[obfcoder]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
