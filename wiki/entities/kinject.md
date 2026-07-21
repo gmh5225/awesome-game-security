@@ -4,7 +4,7 @@ kind: entity
 topics: [windows-kernel, anti-cheat, game-hacking]
 sources:
   - wiki/sources/descriptions/w1u0u1__kinject.md
-updated: 2026-07-19
+updated: 2026-07-21
 confidence: medium
 ---
 
@@ -12,7 +12,7 @@ confidence: medium
 
 Kernel-oriented Windows injection sample (C/C++) focused on **map + APC** in the cheat / injection:windows lane. Combines mapping with APC delivery so researchers can study how Ring0-originated inject paths differ from classic user-mode CreateRemoteThread / LoadLibrary flows that anti-cheat scanners watch. (source: wiki/sources/descriptions/w1u0u1__kinject.md)
 
-Related kernel APC injectors include [[injdrv]] (process-create notify → user APC → `LdrLoadDll`). Contrasts with user-mode PE manual-map tools such as [[modexmap]] and injection-testing harnesses such as [[injectors]].
+Related kernel APC injectors include [[injdrv]] (process-create notify → user APC → `LdrLoadDll`). Related system-wide KM inject + hook research: [[kptnhook]]. Contrasts with user-mode PE manual-map tools such as [[modexmap]] and injection-testing harnesses such as [[injectors]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Related kernel APC injectors include [[injdrv]] (process-create notify → user 
 
 ## Related
 
-[[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[injdrv]] · [[modexmap]] · [[injectors]] · [[kernel-callbacks]]
+[[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[injdrv]] · [[kptnhook]] · [[modexmap]] · [[injectors]] · [[kernel-callbacks]]
