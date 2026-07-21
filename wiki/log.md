@@ -632,3 +632,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:synacktiv/windows_kernel_shadow_stack`: entity [[windows-kernel-shadow-stack]]; cited on [[overviews/windows-kernel]] and [[patchguard]].
 
 - **2026-07-21** — ingest `description:synacktiv/thats_no_pipe`: entity [[thats-no-pipe]]; cited on [[frida]] and [[overviews/reverse-engineering]].
+
+- **2026-07-21** — ingest `description:synacktiv/dotNIET`: entity [[dotniet]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
