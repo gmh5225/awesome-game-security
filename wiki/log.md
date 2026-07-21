@@ -642,3 +642,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:sxlmnwb/windows-subsystem-linux`: entity [[windows-subsystem-linux]]; cited on [[overviews/windows-kernel]] and [[overviews/overview]].
 
 - **2026-07-21** — ingest `description:swordjoinmagic/MoBaDemo`: entity [[mobademo]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-21** — ingest `description:svoboda18/magiskboot`: entity [[magiskboot]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-links from [[magisk]] / [[magiskboot-ndk-on-linux]].

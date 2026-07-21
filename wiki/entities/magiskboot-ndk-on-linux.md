@@ -20,4 +20,4 @@ Relevant as a Boot Image Modification Tool in the Cheat Magisk / Android ROM–r
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[cheese]] · [[move-certificate]] · [[ofrp-device-xiaomi-mondrian]]
+[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[magiskboot]] · [[magisk]] · [[cheese]] · [[move-certificate]] · [[ofrp-device-xiaomi-mondrian]]
