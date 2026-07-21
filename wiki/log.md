@@ -699,3 +699,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:stolevchristian/LUDA`: entity [[luda]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-21** — ingest `description:stijnherfst/HiveWE`: entity [[hivewe]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-21** — ingest `description:stevinz/awesome-game-engine-dev`: entity [[awesome-game-engine-dev]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
