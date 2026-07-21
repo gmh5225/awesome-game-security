@@ -656,3 +656,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:sunnamed434/UnityVulnerableEntryPoint`: entity [[unity-vulnerable-entrypoint]]; cited on [[il2cpp]] and [[overviews/game-engine]].
 
 - **2026-07-21** — ingest `description:sum-catnip/kptnhook`: entity [[kptnhook]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-07-21** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2562 / Anti Cheat ~601); light `index.md` section notes (no per-category pages).
