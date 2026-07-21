@@ -97,6 +97,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DirtyPipeRoot](entities/dirtypiperoot.md) — Pixel 6 Dirty Pipe (CVE-2022-0847) one-click temporary root
 - [DMACheatEngineLoader](entities/dma-cheat-engine-loader.md) — Cheat Engine DMA loader (copy CE → DMACE; closed-source)
 - [DMAInvoker](entities/dma-invoker.md) — Windows DMA RPM via DMALibrary (cheat / RPM)
+- [Document](entities/document.md) — Windows Driver Development guide (Cheat / Windows kernel explorer)
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
 - [DetectTpmSpoofing](entities/detect-tpm-spoofing.md) — KMDF: TPM 2.0 EK spoof detect (IOCTL vs TPM.sys cache)
 - [dotNIET](entities/dotniet.md) — IDA plugin: .NET NativeAOT type/method symbol recovery (Import .NET Symbol)
