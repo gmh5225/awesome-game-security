@@ -145,6 +145,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HelloIommuPkg](entities/helloiommupkg.md) — sample DXE DMA-remapping (IOMMU) driver (tandasat; Detection:DMA)
 - [HijackLibs](entities/hijacklibs.md) — disclosed Windows DLL hijack DB (YAML + web UI; exports / conditions)
 - [HiveWE](entities/hivewe.md) — WC3 World Editor alternative (large-map editor; cheat / game:warcraft iii)
+- [hook-buster](entities/hook-buster.md) — C/Python Detection:hook research (hook integrity / bust; Anti Cheat)
 - [Hypervisor-Detection](entities/hypervisor-detection.md) — C++ hacked-hypervisor detection (four techniques; Detection:HV)
 - [honor-of-kings-RE-research](entities/honor-of-kings-re-research.md) — Honor of Kings Android RE (ACE / libtersafe / IL2CPP / KernelPatch KPMs)
 - [HumanMouseMovement](entities/human-mouse-movement.md) — human-like mouse movement (C/C++; cheat / triggerbot & aimbot)
