@@ -681,3 +681,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:stuxnet147/IDA-Assistant`: entity [[ida-assistant]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-21** — ingest `description:stungeye/UE5-With-Dear-ImGui`: entity [[ue5-with-dear-imgui]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-21** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2563 / Anti Cheat ~603); light `index.md` section notes (no per-category pages).
