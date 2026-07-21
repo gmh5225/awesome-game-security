@@ -689,3 +689,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:stride3d/stride`: entity [[stride]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
 
 - **2026-07-21** — ingest `description:strazzere/anti-emulator`: entity [[anti-emulator]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
+- **2026-07-21** — ingest `description:strazzere/android-unpacker`: entity [[android-unpacker]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
