@@ -669,3 +669,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-21** — ingest `description:stuxnet147/PiDqSerializationWrite-Example`: entity [[pidqserializationwrite-example]]; cited on [[overviews/windows-kernel]] and [[overviews/game-engine]].
 
+- **2026-07-21** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-engine]] (Anti Cheat ~602 / Game Develop ~179); light `index.md` section notes (no per-category pages).
+
