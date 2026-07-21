@@ -2041,6 +2041,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/NoviceLevel/Pcileech-QuantumStealth-Max [Pcileech QuantumStealth Max firmware; Vivado for M2/Squirrel/100T/Captain 75T/Enigma X1/Immortal 75T]
 - https://github.com/ekknod/pcileech-wifi [pcileech-fpga with wireless card emulation]
 - https://github.com/JOKOSAHS/DMA-Pcileech [pcileech-style DMA network-card firmware (AX200) for FPGA DMA research vs anti-cheat]
+- https://github.com/12i192i1043/pcileech-cmedia-cmi8738 [PCILeech FPGA firmware emulating C-Media CMI8738/PCI-SX sound card on Artix-7 DMA boards]
 - https://github.com/Cr4sh/pico_dma
 - https://github.com/Cr4sh/s6_pcie_microblaze [PCIe DIY DMA toolkit for Xilinx SP605 with TLP control, UEFI/Hyper-V backdoor PoCs]
 - https://github.com/kWAYTV/dma-cheat-base [Cheat base]
