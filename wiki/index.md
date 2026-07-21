@@ -168,6 +168,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [feather-gb](entities/feather-gb.md) — Rust Game Boy emulator (retro handheld / GB RE)
 - [KeyAttestation](entities/keyattestation.md) — Android HW key attestation (Keymaster/KeyMint; bootloader / verified boot)
 - [kinject](entities/kinject.md) — kernel map + APC inject (C/C++; cheat / injection:windows)
+- [Known-Driver-Mappers](entities/known-driver-mappers.md) — catalog of known Driver Mappers (AC / stress-testing)
 - [KeyboardKit](entities/keyboardkit.md) — kernel keyboard IRP filter keylogger (UDP exfil; ExplorerFrame DLL hijack)
 - [kernel-mouse](entities/kernel-mouse.md) — MouClass kernel mouse driver (Win10/11; triggerbot/aimbot input research)
 - [KernelResearchKit](entities/kernel-research-kit.md) — Win11 25H2 boot-time DSE / SeCiCallbacks toolkit (manual map / IRP hijack / BYOVD)

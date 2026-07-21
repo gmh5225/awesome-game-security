@@ -675,3 +675,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 
 - **2026-07-21** — ingest `description:talsec/Free-RASP-ReactNative`: entity [[free-rasp-reactnative]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
+- **2026-07-21** — ingest `description:stuxnet147/Known-Driver-Mappers`: entity [[known-driver-mappers]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
