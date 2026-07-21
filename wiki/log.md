@@ -715,3 +715,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:stdhu/windows-kernel-pagehook`: entity [[windows-kernel-pagehook]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-07-21** — ingest `description:staturnzz/oob_entry`: entity [[oob-entry]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
+- **2026-07-21** — ingest `description:stars-one/ASCTool`: entity [[asctool]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
