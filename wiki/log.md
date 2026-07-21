@@ -622,3 +622,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:systemnb/android-kernel-hacking-toolkit`: entity [[android-kernel-hacking-toolkit]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-21** — ingest `description:systemnb/RootSocketKit`: entity [[root-socket-kit]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-21** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2561 / Anti Cheat ~600); light `index.md` section notes (no per-category pages).
