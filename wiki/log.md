@@ -679,3 +679,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:stuxnet147/Known-Driver-Mappers`: entity [[known-driver-mappers]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-07-21** — ingest `description:stuxnet147/IDA-Assistant`: entity [[ida-assistant]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-21** — ingest `description:stungeye/UE5-With-Dear-ImGui`: entity [[ue5-with-dear-imgui]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
