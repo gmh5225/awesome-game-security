@@ -264,6 +264,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SteamAntiAntiDebug](entities/steam-anti-anti-debug.md) — bypass Steam anti-debug for debugger attach (x64dbg; Steam)
 - [steam-overlay-x64](entities/steam-overlay-x64.md) — Steam overlay / modding research (C; memory analysis)
 - [Stride](entities/stride.md) — open-source C# 3D engine (formerly Xenko; PBR / Vulkan+D3D+GL; Game Engine)
+- [STP](entities/stp.md) — Simple Theorem Prover (bitvector/array SMT; MiniSat/CryptoMiniSat; MBA lane)
 - [swsim](entities/swsim.md) — pure-software USIM/UICC SIM simulator (APDU/MILENAGE; SIMtrace2; Cellular/SIM)
 - [Sushi](entities/sushi.md) — PatchGuard (PG) monitoring (tandasat; cheat / PatchGuard-related)
 - [Symbridge](entities/symbridge.md) — live IDA ↔ x64dbg annotation/type sync (module+RVA; Python broker)
