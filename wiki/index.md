@@ -313,6 +313,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [windows-process-injection](entities/windows-process-injection.md) — Windows injection techniques (shellcode / syscalls / stomping / stack spoof)
 - [windows-kernel-exploits](entities/windows-kernel-exploits.md) — kernel exploit guide (Cheat / vulnerable driver)
 - [windows-kernel-shadow-stack](entities/windows-kernel-shadow-stack.md) — Synacktiv KM CET/shadow-stack research (KVAS / PG; Windows Security Features)
+- [windows-subsystem-linux](entities/windows-subsystem-linux.md) — WSL Linux kernel source tree (full layout; WSL research hosts)
 
 - [WinDefCtl](entities/windefctl.md) — Defender / Tamper Protection control via kernel priv-esc (Win11 26H1)
 - [WinVisor](entities/winvisor.md) — WHP hypervisor emulator for Windows x64 user-mode PE (Windows Emulator)

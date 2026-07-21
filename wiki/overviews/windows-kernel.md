@@ -74,6 +74,7 @@ sources:
   - wiki/sources/descriptions/tandasat__MiniVisorPkg.md
   - wiki/sources/descriptions/synacktiv__windows_kernel_shadow_stack.md
   - wiki/sources/descriptions/symeonp__Lenovo-CVE-2025-8061.md
+  - wiki/sources/descriptions/sxlmnwb__windows-subsystem-linux.md
 updated: 2026-07-21
 confidence: high
 ---
@@ -122,11 +123,11 @@ Version-specific PatchGuard research (e.g. [[pg1903]] on Win10 1903 via context-
 
 [[kernel-callbacks]] · [[callout-poc]] · [[byovd]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[xign-poc-april-2026]] · [[lenovo-cve-2025-8061]] · [[kvc]] · [[kernel-research-kit]] · [[bootbypass]] · [[solemn]] · [[pastdse]] · [[kvcforensic]] · [[windefctl]] · [[vaultguard]] · [[keyboardkit]] · [[kernel-mouse]] · [[ksocket]] · [[hvci]] · [[cet-research]] · [[windows-kernel-shadow-stack]] · [[detect-tpm-spoofing]] · [[tpm-mmio]]
  · [[windbg-scripts]] · [[symlink-callback]] · [[patchguard]] · [[pg1903]] · [[demystifying-patchguard]] · [[sushi]] · [[ntmemory]] · [[ntsleuth]] · [[instrumentation-callback-syscall-logger]] · [[anticheat-poc]] · [[function-collections]] · [[winvisor]] · [[kace]] · [[hv]] · [[ophion]] · [[minivisorpkg]] · [[checkhv-um]] · [[hypervisor-detection]] · [[vt-debuuger]] · [[baresvm]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[xigmapper]] · [[efitool]] · [[cmdt]] · [[x260-lenovo-opencore]] · [[etw-explorer]] · [[tietwagent]] · [[wazuh]] · [[openark]] · [[systeminformer]] · [[dioprocess-private]] · [[volatility]] · [[volatility3]] · [[ephemera]] · [[system-thread-finder]]
- · [[boom]] · [[data-ptr-swap]] · [[double-callback]] · [[window-hijack]] · [[owned-alignment]] · [[injdrv]] · [[kinject]] · [[zero-thread-kernel]] · [[wdutf]] · [[ida-kmdf]] · [[dma]] · [[overviews/anti-cheat]]
+ · [[boom]] · [[data-ptr-swap]] · [[double-callback]] · [[window-hijack]] · [[owned-alignment]] · [[injdrv]] · [[kinject]] · [[zero-thread-kernel]] · [[wdutf]] · [[ida-kmdf]] · [[windows-subsystem-linux]] · [[dma]] · [[overviews/anti-cheat]]
 
 
 
 
 ## README map
 
-Cheat PatchGuard/DSE/Windows Kernel Explorer/Vulnerable Driver; Anti Cheat Detection:Attach|Hide|Vulnerable Driver|Hacked Hypervisor; `Windows Security Features` (~9: CET/shadow stack, TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist); `Some Tricks` (~113) `> Windows Ring0`; adjacent `Windows Emulator` (~7; WHP trap-driven guests + hybrid semi-emulated/semi-native kernel-driver stacks such as KDemu for rootkit/AC analysis) and `WSL` (~4; WSL2 Linux-kernel research hosts). (source: wiki/sources/README-categories.md)
+Cheat PatchGuard/DSE/Windows Kernel Explorer/Vulnerable Driver; Anti Cheat Detection:Attach|Hide|Vulnerable Driver|Hacked Hypervisor; `Windows Security Features` (~9: CET/shadow stack, TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist); `Some Tricks` (~113) `> Windows Ring0`; adjacent `Windows Emulator` (~7; WHP trap-driven guests + hybrid semi-emulated/semi-native kernel-driver stacks such as KDemu for rootkit/AC analysis) and `WSL` (~4; WSL2 Linux-kernel research hosts such as [[windows-subsystem-linux]]). (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/sxlmnwb__windows-subsystem-linux.md)
