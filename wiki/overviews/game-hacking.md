@@ -43,6 +43,7 @@ sources:
   - wiki/sources/descriptions/yabinc__simpleperf_demo.md
   - wiki/sources/descriptions/yellowbyte__opaque-predicates-detective.md
   - wiki/sources/descriptions/yaxinsn__vermagic.md
+  - wiki/sources/descriptions/systemnb__compile_android_driver.md
   - wiki/sources/descriptions/xtremegamer1__vmdevirt-vtil.md
   - wiki/sources/descriptions/wallds__NoVmpy.md
   - wiki/sources/descriptions/void-stack__VMUnprotect.md
@@ -127,7 +128,7 @@ sources:
   - wiki/sources/descriptions/tmr232__Sark.md
   - wiki/sources/descriptions/tingwei1111__maplestory-worlds-automation.md
   - wiki/sources/descriptions/tingwei1111__MapleStory-YOLOv8-Training.md
-updated: 2026-07-20
+updated: 2026-07-21
 confidence: high
 ---
 
@@ -201,6 +202,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Boot-image tooling such as [[magiskboot-ndk-on-linux]] (standalone NDK-on-Linux magiskboot for unpack/repack/ramdisk) sits in the Cheat Magisk / Boot Image Modification Tool lane. (source: wiki/sources/descriptions/xiaoxindada__magiskboot_ndk_on_linux.md)
 - Custom recovery / ROM device trees such as [[ofrp-device-xiaomi-mondrian]] (OFRP for Redmi K60 Pro / mondrian) sit in the Android bootloader/ROM/root lane. (source: wiki/sources/descriptions/ymdzq__OFRP-device_xiaomi_mondrian.md)
 - DIY Android kernel explorers such as [[op7t]] sit in the Cheat Android kernel explorer lane. (source: wiki/sources/descriptions/yhnu__op7t.md)
+- Out-of-tree Android kernel driver build/ABI automation such as [[compile-android-driver]] (kade / Kadeflow; GKI and non-GKI via `kadeflow.yaml`) sits in the Cheat Android kernel / driver lane. (source: wiki/sources/descriptions/systemnb__compile_android_driver.md)
 - Device kernel sources such as [[android-kernel-xiaomi-pipa]] (Xiaomi Pad 6 / pipa) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/utziacre__android_kernel_xiaomi_pipa.md)
 - Device kernel sources such as [[android-kernel-oneplus-sm8250]] (OnePlus 8/8T/8Pro/(9R?) / SM8250) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/utziacre__android_kernel_oneplus_sm8250.md)
 - Device kernel sources such as [[android-kernel-samsung-universal5433]] (Samsung Exynos 5433 / Note 4 / Alpha) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/universal5433__android_kernel_samsung_universal5433.md)
@@ -242,7 +244,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 ## Related concepts
 
 [[dma]] · [[byovd]] · [[present-hook]] · [[il2cpp]] · [[kernel-callbacks]] · [[ndisapi]] · [[ksocket]] · [[nvidiaapi]] · [[owned-alignment]] · [[return-address-spoofer]] · [[callout-poc]] · [[ntmemory]] · [[umpmlib]] · [[eupmaccess]] · [[vac3-inhibitor]] · [[vac3-dumper]] · [[x14-08-coverstory-blizzard]] · [[waryasswhe]] · [[reverse-engineering]] · [[totalpe2]] · [[quickasm]] · [[scfw]] · [[byvalver]] · [[xrefsext]] · [[symbridge]] · [[symless]] · [[idarem]] · [[idac]] · [[ida-mcp-server-plugin]] · [[openlumina]] · [[sark]] · [[ida-rust-demangler]] · [[x64dbg]] · [[x64dbgbinja]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[steam-anti-anti-debug]] · [[ida-jm-xorstr-decrypt-plugin]] · [[pikabot-deobfuscator]] · [[ghidrametrics]] · [[injectors]] · [[windows-process-injection]] · [[modexmap]] · [[skiphook]] · [[detoursnt]] · [[cedetector]] · [[windows-dll-hijacking]] · [[hijacklibs]] · [[keyboardkit]] · [[kernel-mouse]] · [[mini-launcher]] · [[boom]] · [[data-ptr-swap]] · [[window-hijack]] · [[efitool]] · [[fortnite-fltokens-and-offsets]] · [[fortnite-external-source]] · [[basic-fortnite-cheat-source-internal]] · [[mutaben]] · [[cobra]] · [[mypower]] · [[memmcp]] · [[deobf]] · [[idadeflat]] · [[ida-easy-life]] · [[d810-ng]] · [[vmdevirt-vtil]] · [[novmpy]] · [[rumba]] · [[execution-trace-viewer]] · [[vmunprotect]] · [[vmunprotect-dumper]] · [[opaque-predicates-detective]]
- · [[cheese]] · [[kernelsu]] · [[dirtypiperoot]] · [[android-vuln]] · [[cve-2021-1961]] · [[magisk]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[android-kernel-xiaomi-pipa]] · [[android-kernel-oneplus-sm8250]] · [[android-kernel-samsung-universal5433]] · [[dpatch]] · [[simpleperf-demo]] · [[termux-app]] · [[vermagic]] · [[dayzzz]] · [[eldenringmods]] · [[palworldsaved]] · [[tiny-csgo-client]] · [[maplestoryex]] · [[maplestory-worlds-automation]] · [[lumina-cheat]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[waldo]] · [[aimbot-detection-prototype]] · [[human-mouse-movement]] · [[battlefield-1-internal]] · [[r6-internal-v3]] · [[valorantcc]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[input-overlay]] · [[proxmox]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[mvisor]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[feather-gb]] · [[xenia]] · [[xenia-mac]] · [[se-tools]] · [[swsim]] · [[overviews/anti-cheat]]
+ · [[cheese]] · [[kernelsu]] · [[dirtypiperoot]] · [[android-vuln]] · [[cve-2021-1961]] · [[magisk]] · [[move-certificate]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]] · [[op7t]] · [[compile-android-driver]] · [[android-kernel-xiaomi-pipa]] · [[android-kernel-oneplus-sm8250]] · [[android-kernel-samsung-universal5433]] · [[dpatch]] · [[simpleperf-demo]] · [[termux-app]] · [[vermagic]] · [[dayzzz]] · [[eldenringmods]] · [[palworldsaved]] · [[tiny-csgo-client]] · [[maplestoryex]] · [[maplestory-worlds-automation]] · [[lumina-cheat]] · [[counterstrikesource-linux-trainer]] · [[counterstrike2-linux-cheat]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[waldo]] · [[aimbot-detection-prototype]] · [[human-mouse-movement]] · [[battlefield-1-internal]] · [[r6-internal-v3]] · [[valorantcc]] · [[thetan-arenasdk]] · [[gta4-rtx]] · [[steam-overlay-x64]] · [[input-overlay]] · [[proxmox]] · [[proxmox-ve-anti-detection]] · [[qemu-anti-detection]] · [[mvisor]] · [[xqemu]] · [[xemu]] · [[kevboy]] · [[feather-gb]] · [[xenia]] · [[xenia-mac]] · [[se-tools]] · [[swsim]] · [[overviews/anti-cheat]]
 
 
 

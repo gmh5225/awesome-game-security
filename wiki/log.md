@@ -616,3 +616,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:t3ssellate/unmapper`: entity [[unmapper]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
 
 - **2026-07-21** — ingest `description:t0asts/DIE-engine-web`: entity [[die-engine-web]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
+
+- **2026-07-21** — ingest `description:systemnb/compile_android_driver`: entity [[compile-android-driver]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
