@@ -640,3 +640,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:symeonp/Lenovo-CVE-2025-8061`: entity [[lenovo-cve-2025-8061]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-07-21** — ingest `description:sxlmnwb/windows-subsystem-linux`: entity [[windows-subsystem-linux]]; cited on [[overviews/windows-kernel]] and [[overviews/overview]].
+
+- **2026-07-21** — ingest `description:swordjoinmagic/MoBaDemo`: entity [[mobademo]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
