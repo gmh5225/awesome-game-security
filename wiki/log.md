@@ -648,3 +648,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:svnscha/mcp-windbg`: entity [[mcp-windbg]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
 - **2026-07-21** — ingest `description:svespalec/faultline`: entity [[faultline]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-07-21** — ingest `description:susMdT/LoudSunRun`: entity [[loudsunrun]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
