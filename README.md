@@ -538,6 +538,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/beamstar/cheatengine-mcp-bridge [MCP for Cheat Engine]
 - https://github.com/illegal-instruction-co/processhacker-mcp [MCP for runtime analysis and process hacking; ProcessHacker for AI agents, extensible with DLL plugins]
 - https://github.com/zinja-coder/apktool-mcp-server [A MCP Server for APK Tool (Part of Android Reverse Engineering MCP Suites)]
+- https://github.com/xjoker/delamain [Headless JADX MCP server for AI-driven Android APK/DEX/AAB reverse engineering]
 - https://github.com/azw413/Glass [Built-in MCP for mobile RE — CLI verbs (disasm, search, cfg-of, dex-callers, bin-search, insn-search, etc.) as MCP tools on APK/IPA/AArch64; `glass mcp`]
 - https://github.com/zhizhuodemao/android_proxy_mcp [Android Proxy MCP — HTTP/HTTPS packet capture for AI assistants, mitmdump + SQLite + natural language query]
 - https://github.com/regenrek/deepwiki-mcp [MCP for deepwiki]
@@ -4258,6 +4259,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/WsttXm/RiskEngine [Android risk-control SDK and management platform: device fingerprinting and runtime detection (root/hook/emulator/debug/sandbox)]
 - https://github.com/venkata-ram/DroidShield [Android RASP SDK with root/debugger/hook/emulator/tamper checks and polymorphic per-build ordering]
 - https://github.com/NoobDigital/react-native-shieldscan [React Native root/jailbreak, Frida, debugger, emulator, and hook-framework detection]
+- https://github.com/talsec/Free-RASP-ReactNative [React Native freeRASP plugin for root/jailbreak, Frida, tamper, and integrity detection]
 - https://github.com/LSPosed/DirtySepolicy [Detect userspace su solutions via SELinux access checks from the App Zygote process]
 
 > Detection:Magisk
