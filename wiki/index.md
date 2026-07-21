@@ -53,6 +53,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-proxy-mcp](entities/android-proxy-mcp.md) — Android HTTP/HTTPS capture MCP (mitmdump + SQLite + NL query)
 - [android-vuln](entities/android-vuln.md) — Android Kernel CVE reference list (cheat / Android Kernel CVE)
 - [anticheat-poc](entities/anticheat-poc.md) — Windows AC PoC (debugger / integrity / signature scan / process enum; Instrumentation Callback)
+- [anti-emulator](entities/anti-emulator.md) — Android emulator detection (QEMU props / fingerprints / sensors; Java)
 - [anticuckoo](entities/anticuckoo.md) — Cuckoo sandbox / VE detection demos (Detection:Virtual Environments)
 - [apktool-mcp-server](entities/apktool-mcp-server.md) — MCP server wrapping apktool (Android RE suite)
 - [arma3beclient](entities/arma3beclient.md) — Arma 3 BattlEye Tool (C# / PowerShell; cheat / game:arma3)
