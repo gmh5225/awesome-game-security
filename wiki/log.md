@@ -824,3 +824,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:signal-slot/mcp-gdb`: entity [[mcp-gdb]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-22** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2569 / Anti Cheat ~607); light `index.md` section notes (no per-category pages).
+
+- **2026-07-22** — ingest `description:sideeffects/HoudiniEngineForUnreal`: entity [[houdini-engine-for-unreal]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
