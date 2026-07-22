@@ -130,6 +130,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EUPMAccess](entities/eupmaccess.md) — C/C++ memory analysis (cheat / RPM; waryas)
 - [EvCommunication](entities/evcommunication.md) — named-event kernel↔UM channel (NtTokenManager; vs IOCTL)
 - [Execution Trace Viewer](entities/execution-trace-viewer.md) — view/edit/analyze execution traces (obfuscated-code RE; cheat / debugging)
+- [exengine](entities/exengine.md) — minimal C99 OpenGL 3D engine (IQM / lighting / scene; Game Engine source)
 - [Faultline](entities/faultline.md) — usermode WS page-fault AC PoC (manual-map/shellcode; C++23)
 - [FightingGame-UE5](entities/fightinggame-ue5.md) — UE5 fighting game (root motion / anim BP / montage combat; Game Develop / Unreal source)
 - [FileRecoveryTool](entities/file-recovery-tool.md) — NTFS/FAT32/ExFAT disk forensics (MFT/USN/carving; Win32)
