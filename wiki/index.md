@@ -304,6 +304,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [tiny-csgo-client](entities/tiny-csgo-client.md) — minimal CS:GO client for dedicated servers (modding / SDK)
 - [tinygltf](entities/tinygltf.md) — header-only C++11 glTF 2.0 loader/saver (JSON/GLB; Game Assets)
 - [tinyrenderer](entities/tinyrenderer.md) — ~500-line bare-C++ soft 3D renderer (pipeline course; Renderer)
+- [tinyraytracer](entities/tinyraytracer.md) — brief CG/ray-tracing course (ssloy; Renderer)
 - [tinyobjloader](entities/tinyobjloader.md) — single-header C++ Wavefront OBJ loader (verts/MTL; Wavefront Obj)
 - [ts-ue4dumper](entities/ts-ue4dumper.md) — TypeScript + Frida UE4 dumper (modular; C++ offsets)
 - [Turbulenz Engine](entities/turbulenz-engine.md) — HTML5/TypeScript game engine (WebGL + server services; Game Engine)
