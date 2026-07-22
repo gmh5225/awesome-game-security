@@ -783,3 +783,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:sneakyevil/ida_functioncolor`: entity [[ida-functioncolor]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-22** — ingest `description:snare/ida-efiutils`: entity [[ida-efiutils]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
+
+- **2026-07-22** — ingest `description:smartdone/Frida-Scripts`: entity [[frida-scripts]]; cited on [[frida]] and [[overviews/reverse-engineering]].
