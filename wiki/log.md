@@ -799,3 +799,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:skylot/jadx`: entity [[jadx]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; linked from [[delamain]].
 
 - **2026-07-22** — ingest `description:skylicht-lab/skylicht-engine`: entity [[skylicht-engine]]; cited on [[overviews/game-engine]] and [[overviews/mobile-security]].
+
+- **2026-07-22** — ingest `description:skrixx68/Dota2-Overlay-2.0`: entity [[dota2-overlay-2-0]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
