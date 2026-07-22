@@ -147,6 +147,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GhidraMetrics](entities/ghidrametrics.md) — Ghidra native-code metrics (cyclomatic / size / call depth; headless JSON)
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)
 - [HelloIommuPkg](entities/helloiommupkg.md) — sample DXE DMA-remapping (IOMMU) driver (tandasat; Detection:DMA)
+- [heck_csgo_external](entities/heck-csgo-external.md) — external CS:GO; SDK generation / memory analysis (C++; cheat / game:csgo)
 - [HijackLibs](entities/hijacklibs.md) — disclosed Windows DLL hijack DB (YAML + web UI; exports / conditions)
 - [HiveWE](entities/hivewe.md) — WC3 World Editor alternative (large-map editor; cheat / game:warcraft iii)
 - [hidden_syscall_monitoring](entities/hidden-syscall-monitoring.md) — monitor hidden syscalls from COD anticheat (C/C++; hooking / memory)
