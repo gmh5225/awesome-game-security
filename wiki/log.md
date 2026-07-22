@@ -753,3 +753,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:spirthack/CSGOSimple`: entity [[csgosimple]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-07-22** — ingest `description:soyware/heck_csgo_external`: entity [[heck-csgo-external]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-22** — ingest `description:sonyps5201314/pdb`: entity [[pdb]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
