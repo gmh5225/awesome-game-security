@@ -246,6 +246,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mvisor](entities/mvisor.md) — C++ remake (kernel/render/audio; Cheat QEMU/KVM/PVE/VBOX)
 - [mypower](entities/mypower.md) — Android/Linux CLI memory scanner (SLJIT / pointer chains / Unity U3D)
 - [MoveCertificate](entities/move-certificate.md) — Magisk/KernelSU/APatch user→system CA module (Android 7–15)
+- [NativeNetSharp](entities/nativenetsharp.md) — C# code injection (managed/.NET; cheat / guide)
 - [ndisapi](entities/ndisapi.md) — user-mode Windows Packet Filter / NDIS packet inspect-modify API
 - [Non-Newtonian New York](entities/non-newtonian-new-york.md) — Spider-Man Remastered non-Newtonian fluid/physics mod (urban destruction; [Mod])
 - [NO_ACCESS_Protection](entities/no-access-protection.md) — PAGE_NOACCESS + VEH / single-step anti-tamper (vs external scanners)

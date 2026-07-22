@@ -837,3 +837,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 
 - **2026-07-22** — ingest `description:shalzuth/PalWorldAntiCheat`: entity [[palworld-anti-cheat]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-07-22** — ingest `description:shalzuth/NativeNetSharp`: entity [[nativenetsharp]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
