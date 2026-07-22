@@ -761,3 +761,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:sonodima/physpatch`: entity [[physpatch]]; cited on [[dma]] and [[overviews/dma-attack]].
 
 - **2026-07-22** — ingest `description:somewhatpublicacc/wellsanticheat`: entity [[wellsanticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-07-22** — ingest `description:solidi/hl-mods`: entity [[hl-mods]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
