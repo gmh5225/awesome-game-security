@@ -773,3 +773,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:socketio/socket.io`: entity [[socket-io]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
 - **2026-07-22** — ingest `description:snipcola/ProExt`: entity [[proext]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-22** — ingest `description:snesrev/zelda3`: entity [[zelda3]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
