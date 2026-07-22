@@ -729,3 +729,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:ssnob/hidden_syscall_monitoring`: entity [[hidden-syscall-monitoring]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-07-22** — ingest `description:ssmugabi/IDAPlugins`: entity [[idaplugins]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-22** — ingest `description:ssloy/tinyrenderer`: entity [[tinyrenderer]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
