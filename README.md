@@ -911,6 +911,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/binsnake/fARM64 [Pure-Rust no_std AArch64 disassembler and encoder — iced-x86-shaped API, zero-heap decode path, SVE/SME/SIMD/FP coverage, semantic round-trip encode; wasm and bare-metal friendly]
 - https://github.com/iofomo/abyss [Android system call hook]
 - https://github.com/uuksu/RPGMakerDecrypter [Tool for extracting RPG Maker XP, VX and VX Ace encrypted archives]
+- https://github.com/VelocityRa/awesome-game-file-format-reversing [Curated docs/tools for reverse engineering video game file formats and assets]
 - https://github.com/gmh5225/compiler-binary-richprint [Print compiler information stored in Rich Header of PE executable]
 - https://github.com/mandiant/GoReSym [Go symbol recovery tool]
 - https://github.com/PartialVolume/shredos.x86_64 [Disk Eraser]
@@ -942,6 +943,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/glmcdona/strings2 [strings2 - Extract strings from binary files and process memory]
 - https://github.com/nico/demumble [Itanium + MSVC symbol demangler; D/Rust/Swift; cross-platform replacement for c++filt / undname.exe]
 - https://github.com/amruth-sn/kong [Kong - agentic reverse engineer, LLM-orchestrated binary RE via in-process Ghidra, call-graph analysis, agentic deobfuscation]
+- https://github.com/alexbevi/ghidra-manager [CLI to install Ghidra, manage plugins (incl. GhidraMCP), launch projects, and compare binaries]
 - https://github.com/LaurieWired/Malimite [iOS and macOS Decompiler]
 - https://github.com/azw413/Glass [Rust mobile-first disassembler for APK/DEX/smali and AArch64 .so/.dylib; CFG, xref, CLI/MCP automation]
 - https://github.com/0xbigshaq/apatchy [Fuzzing Framework for Apache HTTPD Server]
@@ -1234,6 +1236,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Android Terminal Emulator
 - https://github.com/termux/termux-app
+- https://github.com/DP-Hridayan/aShellYou [Material You Android ADB/root/shell utility (Shizuku, OTG, wireless debugging)]
 - https://github.com/gmh5225/neotty
 - https://github.com/jackpal/Android-Terminal-Emulator
 - https://github.com/NeoTerrm/NeoTerm
