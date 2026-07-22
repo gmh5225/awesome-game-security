@@ -853,3 +853,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:sfr-development/Lua-Obfuscator-Clyde-Protection`: entity [[lua-obfuscator-clyde-protection]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-22** — ingest `description:sezzyaep/CS2-OFFSETS`: entity [[cs2-offsets]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-22** — ingest `description:sevaa/dwex`: entity [[dwex]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
