@@ -723,3 +723,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:st4ckh0und/hook-buster`: entity [[hook-buster]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-07-21** — ingest `description:ssyuqixe/obfCoder`: entity [[obfcoder]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-22** — ingest `description:ssut/payload-dumper-go`: entity [[payload-dumper-go]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-link from [[payload-dumper]].

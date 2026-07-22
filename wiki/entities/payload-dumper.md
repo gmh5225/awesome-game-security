@@ -4,7 +4,7 @@ kind: entity
 topics: [mobile-security, reverse-engineering]
 sources:
   - wiki/sources/descriptions/vm03__payload_dumper.md
-updated: 2026-07-19
+updated: 2026-07-22
 confidence: medium
 ---
 
@@ -12,7 +12,7 @@ confidence: medium
 
 Python tool that dumps partitions from Android OTA `payload.bin` images. Useful for ROM/root and mobile RE workflows that need system/vendor/product images extracted from full or incremental OTA packages before boot-image or filesystem analysis. (source: wiki/sources/descriptions/vm03__payload_dumper.md)
 
-Sits in the Cheat Magisk / Android ROM–root / RE-tools lane alongside boot-image tooling such as [[magiskboot-ndk-on-linux]] and recovery device trees such as [[ofrp-device-xiaomi-mondrian]].
+Sits in the Cheat Magisk / Android ROM–root / RE-tools lane alongside boot-image tooling such as [[magiskboot-ndk-on-linux]] and recovery device trees such as [[ofrp-device-xiaomi-mondrian]]. High-perf Go sibling: [[payload-dumper-go]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits in the Cheat Magisk / Android ROM–root / RE-tools lane alongside boot-ima
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]]
+[[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[payload-dumper-go]] · [[magiskboot-ndk-on-linux]] · [[ofrp-device-xiaomi-mondrian]]
