@@ -747,3 +747,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:springmusk026/ImGui-Unity-With-Layout`: entity [[imgui-unity-with-layout]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]].
 
 - **2026-07-22** — ingest `description:springmusk026/Android-ModMenu-SemiJni`: entity [[android-modmenu-semijni]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]].
+
+- **2026-07-22** — ingest `description:springmusk026/Android-Mod-Menu-Kotlin`: entity [[android-mod-menu-kotlin]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]].
