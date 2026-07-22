@@ -735,3 +735,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:ssloy/tinyraytracer`: entity [[tinyraytracer]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
 
 - **2026-07-22** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]] (Anti Cheat ~604); light `index.md` section notes (no per-category pages).
+
+- **2026-07-22** — ingest `description:wufhex/Mystic-xorstr`: entity [[mystic-xorstr]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
