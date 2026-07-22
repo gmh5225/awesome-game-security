@@ -1686,6 +1686,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/kweatherman/yara4ida [Unofficial YARA IDA Pro plugin]
 - https://github.com/Berk000x/BinaryLens [An IDA plugin that uses LLM to speed up binary analysis]
 - https://github.com/jtang613/IDAssist [AI-powered RE plugin for IDA Pro: LLM function explanation, semantic knowledge graph, RAG, MCP integration]
+- https://github.com/pgarba/ida-llm-explainer [Local llama.cpp IDA plugin for function explain/rename/struct inference with human-in-the-loop accept]
 - https://github.com/CyberSecurityUP/DriverVuln-Analyzer-IDA-Plugin [Driver Vuln Analyzer]
 - https://github.com/ssmugabi/IDAPlugins [Integrate essential IDA Pro plugins for enhanced functionality, including deobfuscation, binary diffing, and custom cryptography support]
 - https://github.com/momo5502/patch-finder [IDA plugin to find patched memory]
@@ -4073,6 +4074,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [Source Engine serverside anti-cheat plugin. (CS:S, CS:GO, CS:P, TF2)](https://github.com/kanekikun420/NoCheatZ-3)
 - [This is the Anti Cheat System for Knight Online Gamesoft vversion](https://github.com/luisfelipe18/GamesoftACS)
 - [User-mode C++ Anti-Cheat written for German Roleplay Server GVMP.de](https://github.com/divodeuxsevres/gvmp-anticheat)
+- https://github.com/ricardoofnl/open.mp-anticheat [Native open.mp C++ component that detects client mods via self-memory reads vs known cheat signatures]
 - https://github.com/adem-hosni/AtomicShieldClient [Multi-layered FiveM anti-cheat client with tray agent, manual-map loader, and runtime guards]
 - [Cheat developer platform](https://github.com/c4kef/UAC)
 - https://github.com/ekknod/Anti-Cheat-TestBench [TestBench]
