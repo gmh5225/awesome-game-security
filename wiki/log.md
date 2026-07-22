@@ -816,3 +816,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-22** — ingest `description:sina85/hide-file`: entity [[hide-file]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
+
+- **2026-07-22** — ingest `description:simply-codes/Fortnite-External-P2C`: entity [[fortnite-external-p2c]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].

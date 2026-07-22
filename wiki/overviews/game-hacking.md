@@ -136,6 +136,7 @@ sources:
   - wiki/sources/descriptions/w00tzenheimer__d810-ng.md
   - wiki/sources/descriptions/vrolife__mypower.md
   - wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md
+  - wiki/sources/descriptions/simply-codes__Fortnite-External-P2C.md
   - wiki/sources/descriptions/vctr74__R6-Internal-V3.md
   - wiki/sources/descriptions/veryboreddd__Return-address-spoofer.md
   - wiki/sources/descriptions/susMdT__LoudSunRun.md
@@ -201,6 +202,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Rapid x86/x64 shellcode/asm prototyping with [[quickasm]] (assemble via Keystone, execute in-process). (source: wiki/sources/descriptions/zodiacon__QuickAsm.md) Early-stage Java bytecode assemble/disassemble via [[raung]] for cheat / RE-tools bytecode experiments (syntax still unstable). (source: wiki/sources/descriptions/skylot__raung.md) Cross-platform C++ Windows shellcode frameworks such as [[scfw]] sit in the shellcode engine & tricks lane. (source: wiki/sources/descriptions/wbenny__scfw.md) Bad-byte banishment with preserved functionality such as [[byvalver]] (two usage modes) sits in the same lane. (source: wiki/sources/descriptions/umpolungfish__byvalver.md)
 - Title-specific offset/token dumps (e.g. Fortnite FLTokens via [[fortnite-fltokens-and-offsets]]) illustrate ephemeral cheat-research artifacts that rot quickly. (source: wiki/sources/descriptions/zinx-YT__Fortnite-Fltokens-and-offsets.md)
 - External Fortnite samples such as [[fortnite-external-source]] (C++; driver development / SDK generation) sit in the cheat / game:fortnite lane. (source: wiki/sources/descriptions/xetzzy__Fortnite-External-Source.md)
+- Shader-oriented external Fortnite samples such as [[fortnite-external-p2c]] (C++; shader work; [External]) sit in the same cheat / game:fortnite external lane. (source: wiki/sources/descriptions/simply-codes__Fortnite-External-P2C.md)
 - Internal Fortnite samples such as [[basic-fortnite-cheat-source-internal]] (C++; UE4 SDK / GObject/GNames / engine hooks; ESP + aimbot) sit in the same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md)
 - UE4 SDK View explorers such as [[unrealengine4-swissknife]] (UObjects under `GEngine` World Actors) sit in the Cheat / Game Engine Explorer:Unreal lane. (source: wiki/sources/descriptions/spudgy__UnrealEngine4-SwissKnife.md)
 - MBA expression generators such as [[mutaben]] (Python) sit in the Cheat Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/z1ko__mutaben.md)
