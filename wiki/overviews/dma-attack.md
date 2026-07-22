@@ -13,6 +13,7 @@ sources:
   - wiki/sources/descriptions/tandasat__HelloIommuPkg.md
   - wiki/sources/descriptions/sonodima__physpatch.md
   - wiki/sources/descriptions/slack69__csgo-dma-overlay.md
+  - wiki/sources/descriptions/sh1ftd__dma-speedtest-memflow-rs.md
 updated: 2026-07-22
 confidence: high
 ---
@@ -24,7 +25,7 @@ PCIe Direct Memory Access threat modeling for game security: FPGA endpoints (oft
 
 ## Threat model
 
-Typical external DMA cheat: **cheat PC** + **DMA card** (Memory Read TLPs) + optional **HID actuator**. No attacker code need run on the gaming OS—the machine sees a PCIe device performing ordinary-looking DMA. [[pcileech]] is the common host app that drives PCIe hardware for target-memory R/W over DMA. (source: wiki/sources/descriptions/ufrisk__pcileech.md) FPGA HDL/firmware for those devices is [[pcileech-fpga]] (Vivado builds, TLP/BAR/config shadow across CaptainDMA, ScreamerM2, and related boards). (source: wiki/sources/descriptions/ufrisk__pcileech-fpga.md) Host tooling in the cheat / RPM lane includes DMALibrary wrappers such as [[dma-invoker]] (Windows DMA RPM). (source: wiki/sources/descriptions/un4ckn0wl3z__DMAInvoker.md) Cheat Engine DMA loaders such as [[dma-cheat-engine-loader]] (drop CE into `DMACE`; not open-source) sit in the same external CE/DMA research lane. (source: wiki/sources/descriptions/un4ckn0wl3z__DMACheatEngineLoader.md) Kernel-scan/patch research such as [[physpatch]] (page-table walk → physical-page write) shows the same physical-memory path used to alter Windows kernel memory while bypassing software hooks. (source: wiki/sources/descriptions/sonodima__physpatch.md) Title-specific DMA+overlay samples such as [[csgo-dma-overlay]] illustrate the cheat-app visualization layer for CS:GO. (source: wiki/sources/descriptions/slack69__csgo-dma-overlay.md)
+Typical external DMA cheat: **cheat PC** + **DMA card** (Memory Read TLPs) + optional **HID actuator**. No attacker code need run on the gaming OS—the machine sees a PCIe device performing ordinary-looking DMA. [[pcileech]] is the common host app that drives PCIe hardware for target-memory R/W over DMA. (source: wiki/sources/descriptions/ufrisk__pcileech.md) FPGA HDL/firmware for those devices is [[pcileech-fpga]] (Vivado builds, TLP/BAR/config shadow across CaptainDMA, ScreamerM2, and related boards). (source: wiki/sources/descriptions/ufrisk__pcileech-fpga.md) Host tooling in the cheat / RPM lane includes DMALibrary wrappers such as [[dma-invoker]] (Windows DMA RPM). (source: wiki/sources/descriptions/un4ckn0wl3z__DMAInvoker.md) Hardware/throughput evaluation tools such as [[dma-speedtest-memflow-rs]] (Rust memflow CLI/GUI; PCILeech/native connectors; MiB/s + latency) sit in the same DMA measurement lane. (source: wiki/sources/descriptions/sh1ftd__dma-speedtest-memflow-rs.md) Cheat Engine DMA loaders such as [[dma-cheat-engine-loader]] (drop CE into `DMACE`; not open-source) sit in the same external CE/DMA research lane. (source: wiki/sources/descriptions/un4ckn0wl3z__DMACheatEngineLoader.md) Kernel-scan/patch research such as [[physpatch]] (page-table walk → physical-page write) shows the same physical-memory path used to alter Windows kernel memory while bypassing software hooks. (source: wiki/sources/descriptions/sonodima__physpatch.md) Title-specific DMA+overlay samples such as [[csgo-dma-overlay]] illustrate the cheat-app visualization layer for CS:GO. (source: wiki/sources/descriptions/slack69__csgo-dma-overlay.md)
 
 
 ## Key sub-areas
@@ -44,7 +45,7 @@ Typical external DMA cheat: **cheat PC** + **DMA card** (Memory Read TLPs) + opt
 
 ## Related concepts
 
-[[dma]] · [[iommu]] · [[helloiommupkg]] · [[hvci]] · [[byovd]] · [[pcileech]] · [[pcileech-fpga]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[csgo-dma-overlay]] · [[overviews/anti-cheat]]
+[[dma]] · [[iommu]] · [[helloiommupkg]] · [[hvci]] · [[byovd]] · [[pcileech]] · [[pcileech-fpga]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[csgo-dma-overlay]] · [[overviews/anti-cheat]]
 
 
 ## README map

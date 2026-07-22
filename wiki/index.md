@@ -116,6 +116,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DirtyPipeRoot](entities/dirtypiperoot.md) — Pixel 6 Dirty Pipe (CVE-2022-0847) one-click temporary root
 - [DMACheatEngineLoader](entities/dma-cheat-engine-loader.md) — Cheat Engine DMA loader (copy CE → DMACE; closed-source)
 - [DMAInvoker](entities/dma-invoker.md) — Windows DMA RPM via DMALibrary (cheat / RPM)
+- [dma-speedtest-memflow-rs](entities/dma-speedtest-memflow-rs.md) — Windows DMA R/W speedtest via memflow (Rust CLI/GUI; pcileech/native)
 - [Document](entities/document.md) — Windows Driver Development guide (Cheat / Windows kernel explorer)
 - [Dota2-Overlay-2.0](entities/dota2-overlay-2-0.md) — Dota 2 overlay sample (C/C++; cheat / game:dota2)
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
