@@ -725,3 +725,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-21** — ingest `description:ssyuqixe/obfCoder`: entity [[obfcoder]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-22** — ingest `description:ssut/payload-dumper-go`: entity [[payload-dumper-go]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-link from [[payload-dumper]].
+
+- **2026-07-22** — ingest `description:ssnob/hidden_syscall_monitoring`: entity [[hidden-syscall-monitoring]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
