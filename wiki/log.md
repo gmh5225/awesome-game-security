@@ -797,3 +797,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:skylot/raung`: entity [[raung]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-22** — ingest `description:skylot/jadx`: entity [[jadx]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; linked from [[delamain]].
+
+- **2026-07-22** — ingest `description:skylicht-lab/skylicht-engine`: entity [[skylicht-engine]]; cited on [[overviews/game-engine]] and [[overviews/mobile-security]].
