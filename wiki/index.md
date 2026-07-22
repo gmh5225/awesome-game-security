@@ -187,6 +187,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [IDADeflat](entities/idadeflat.md) — IDA Pro CFF deflatten (angr; OLLVM-style)
 - [IL2CPP_Resolver](entities/il2cpp-resolver.md) — C++ Unity IL2CPP resolver (cheat / game engine explorer:Unity)
+- [Il2CppRuntimeDumper](entities/il2cpp-runtime-dumper.md) — IL2CPP runtime dump via reflection (reconstruct DLLs; cheat / game engine explorer:Unity)
 - [Il2cppSpy](entities/il2cpp-spy.md) — Unity IL2CPP APK disassembler / two-APK diff
 - [imgui-ios-mod-menu](entities/imgui-ios-mod-menu.md) — iOS ImGui mod menu (cheat / render-draw)
 - [Imgui-Unity](entities/imgui-unity.md) — Android Unity ImGui mod menu (OpenGL ES + IL2CPP/Mono; cheat / render-draw)
