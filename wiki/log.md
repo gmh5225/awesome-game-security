@@ -789,3 +789,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:smallworld-re/smallworld`: entity [[smallworld]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-22** — ingest `description:slack69/csgo-dma-overlay`: entity [[csgo-dma-overlay]]; cited on [[dma]] and [[overviews/dma-attack]].
+
+- **2026-07-22** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2568 / Anti Cheat ~606); light `index.md` section notes (no per-category pages).
