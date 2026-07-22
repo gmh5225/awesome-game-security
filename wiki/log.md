@@ -820,3 +820,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:simply-codes/Fortnite-External-P2C`: entity [[fortnite-external-p2c]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
 
 - **2026-07-22** — ingest `description:sigwl/AiDA`: entity [[aida]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-22** — ingest `description:signal-slot/mcp-gdb`: entity [[mcp-gdb]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
