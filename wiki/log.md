@@ -849,3 +849,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2570 / Anti Cheat ~607); light `index.md` section notes (no per-category pages).
 
 - **2026-07-22** — ingest `description:sh1ftd/dma-speedtest-memflow-rs`: entity [[dma-speedtest-memflow-rs]]; cited on [[dma]] and [[overviews/dma-attack]].
+
+- **2026-07-22** — ingest `description:sfr-development/Lua-Obfuscator-Clyde-Protection`: entity [[lua-obfuscator-clyde-protection]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
