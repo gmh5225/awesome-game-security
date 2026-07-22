@@ -805,3 +805,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:skr0x1c0/binja_kc`: entity [[binja-kc]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-22** — ingest `description:skelsec/minidump`: entity [[minidump]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
+- **2026-07-22** — ingest `description:skadro-official/skCrypter`: entity [[skcrypter]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
