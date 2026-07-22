@@ -807,3 +807,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:skelsec/minidump`: entity [[minidump]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
 - **2026-07-22** — ingest `description:skadro-official/skCrypter`: entity [[skcrypter]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-22** — ingest `description:skMetinek/Non-Newtonian-New-York`: entity [[non-newtonian-new-york]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
