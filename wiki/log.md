@@ -771,3 +771,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/mobile-security]] (Cheat ~2567; RE Tools file-format/asset lists + Ghidra managers; Android Terminal ADB/root/shell); light `index.md` section notes (no per-category pages).
 
 - **2026-07-22** — ingest `description:socketio/socket.io`: entity [[socket-io]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-22** — ingest `description:snipcola/ProExt`: entity [[proext]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
