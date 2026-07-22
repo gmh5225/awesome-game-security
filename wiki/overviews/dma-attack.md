@@ -11,7 +11,7 @@ sources:
   - wiki/sources/descriptions/ufrisk__pcileech.md
   - wiki/sources/descriptions/ufrisk__pcileech-fpga.md
   - wiki/sources/descriptions/tandasat__HelloIommuPkg.md
-updated: 2026-07-21
+updated: 2026-07-22
 confidence: high
 ---
 
@@ -46,4 +46,4 @@ Typical external DMA cheat: **cheat PC** + **DMA card** (Memory Read TLPs) + opt
 
 ## README map
 
-No top-level DMA section — maps via `Cheat` (~2563) DMA lanes and `Anti Cheat > Detection:DMA` (~603), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; TPM/IOMMU/VBS/HVCI attestation samples). (source: wiki/sources/README-categories.md)
+No top-level DMA section — maps via `Cheat` (~2563) DMA lanes and `Anti Cheat > Detection:DMA` (~604), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; TPM/IOMMU/VBS/HVCI attestation samples). (source: wiki/sources/README-categories.md)

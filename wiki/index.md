@@ -6,9 +6,9 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Overviews
 
-- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2563 / Anti Cheat ~603; Game Engine ~143 + Mathematics ~7 / Renderer ~17; Game Develop ~179 MCP/security; Game Network ~26; console Switch/Xbox/PS + 3DS/GC·Wii)
-- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* (triggerbot & aimbot/wallhack) + page/CLR protection (~603); hybrid OS AC; Game Tools RCE + Windows Emulator AC
-- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2563) / Detection:DMA (~603) + WSF attestation
+- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2563 / Anti Cheat ~604; Game Engine ~143 + Mathematics ~7 / Renderer ~17; Game Develop ~179 MCP/security; Game Network ~26; console Switch/Xbox/PS + 3DS/GC·Wii)
+- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* (triggerbot & aimbot/wallhack) + page/CLR protection (~604); hybrid OS AC; Game Tools RCE + Windows Emulator AC
+- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2563) / Detection:DMA (~604) + WSF attestation
 - [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~143); Mathematics/PhysX/Renderer (~17) adjacency; MCP server/security + AI gamedev (~179); Game Network ~26; Image Codec + Manager/Testing/Tools/CI
 - [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2563) + Some Tricks (~113); Android Terminal/File/Memory Explorer; console PS HV+BD-JB RemoteJarLoader / 3DS LLE / GC·Wii
 - [Graphics API](overviews/graphics-api.md) — DirectX (~33) / GL / Vulkan hooks, overlays; Renderer (~17) + Mathematics adjacency; Image Codec + AI mesh/splat/sprite
@@ -387,6 +387,6 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Sources
 
-- Projected category map: `sources/README-categories.md` (generated on scan; 40 top-level sections; Game Engine ~143 / Renderer ~17 / Cheat ~2563 / Anti Cheat ~603 / Game Develop ~179 / Game Network ~26)
+- Projected category map: `sources/README-categories.md` (generated on scan; 40 top-level sections; Game Engine ~143 / Renderer ~17 / Cheat ~2563 / Anti Cheat ~604 / Game Develop ~179 / Game Network ~26)
 - Skill projections: `sources/skills/`
 - Description projections: `sources/descriptions/` (incremental only)
