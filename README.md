@@ -2788,6 +2788,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/masterpastaa/BattlEye-Handler-BYPASS
 - https://github.com/dllcrt0/battleye-decryption
 - https://github.com/dllcrt0/bedaisy-reversal
+- https://github.com/experienceds/battleye-re [BEDaisy.sys RE reference: IOCTL/API/anti-DMA]
 - https://github.com/dllcrt0/battleye-shellcode [shellcode]
 - https://github.com/gmh5225/BE-BattlEye_shellcode [shellcode]
 - https://github.com/Compiled-Code/be-injector [Attack COW]
