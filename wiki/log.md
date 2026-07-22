@@ -765,3 +765,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:solidi/hl-mods`: entity [[hl-mods]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
 - **2026-07-22** — ingest `description:solenum/exengine`: entity [[exengine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-22** — ingest `description:sodareverse/TDE`: entity [[tde]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
