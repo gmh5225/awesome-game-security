@@ -833,3 +833,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-22** — ingest `description:shareef12/cpuz`: entity [[cpuz]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
+- **2026-07-22** — ingest `description:shalzuth/UnrealSharp`: entity [[unrealsharp]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
+

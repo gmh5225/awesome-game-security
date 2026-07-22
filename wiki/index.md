@@ -364,6 +364,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [unflutter](entities/unflutter.md) — Flutter/Dart AOT snapshot static analyzer (symbol recovery)
 - [unmapper](entities/unmapper.md) — automatic dumped-PE header repair for decompilers (Dump Fix)
 - [UnrealEngine4-SwissKnife](entities/unrealengine4-swissknife.md) — UE4 SDK View (UObjects under GEngine World Actors; Game Engine Explorer:Unreal)
+- [UnrealSharp](entities/unrealsharp.md) — Unreal SDK View (Cheat / Game Engine Explorer:Unreal)
 - [Urho3D](entities/urho3d.md) — lightweight cross-platform 2D/3D engine (Game Engine source)
 - [vac3_inhibitor](entities/vac3-inhibitor.md) — VAC3 exploration via hooking / memory analysis (C++)
 - [vac3-dumper](entities/vac3-dumper.md) — VAC3 multi-module dumper (timed loads; explore anticheat:vac)

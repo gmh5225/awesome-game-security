@@ -166,6 +166,7 @@ sources:
   - wiki/sources/descriptions/stdhu__windows-kernel-pagehook.md
   - wiki/sources/descriptions/spyder1g__a-pasted-rust-script.md
   - wiki/sources/descriptions/spudgy__UnrealEngine4-SwissKnife.md
+  - wiki/sources/descriptions/shalzuth__UnrealSharp.md
   - wiki/sources/descriptions/singhhdev__Spoofer-AMIDEWIN.md
   - wiki/sources/descriptions/sina85__hide-file.md
   - wiki/sources/descriptions/signal-slot__mcp-gdb.md
@@ -208,7 +209,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - External Fortnite samples such as [[fortnite-external-source]] (C++; driver development / SDK generation) sit in the cheat / game:fortnite lane. (source: wiki/sources/descriptions/xetzzy__Fortnite-External-Source.md)
 - Shader-oriented external Fortnite samples such as [[fortnite-external-p2c]] (C++; shader work; [External]) sit in the same cheat / game:fortnite external lane. (source: wiki/sources/descriptions/simply-codes__Fortnite-External-P2C.md)
 - Internal Fortnite samples such as [[basic-fortnite-cheat-source-internal]] (C++; UE4 SDK / GObject/GNames / engine hooks; ESP + aimbot) sit in the same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md)
-- UE4 SDK View explorers such as [[unrealengine4-swissknife]] (UObjects under `GEngine` World Actors) sit in the Cheat / Game Engine Explorer:Unreal lane. (source: wiki/sources/descriptions/spudgy__UnrealEngine4-SwissKnife.md)
+- UE4 SDK View explorers such as [[unrealengine4-swissknife]] (UObjects under `GEngine` World Actors) and [[unrealsharp]] sit in the Cheat / Game Engine Explorer:Unreal lane. (source: wiki/sources/descriptions/spudgy__UnrealEngine4-SwissKnife.md) (source: wiki/sources/descriptions/shalzuth__UnrealSharp.md)
 - MBA expression generators such as [[mutaben]] (Python) sit in the Cheat Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/z1ko__mutaben.md)
 - MBA expression simplification via [[cobra]] (Trail of Bits CoBRA; C++ coefficient-based reconstruction) sits in the same Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/trailofbits__CoBRA.md)
 - Bitvector/array SMT solving via [[stp]] (Simple Theorem Prover; MiniSat/CryptoMiniSat; SMT-LIB 2) sits in the same Mixed boolean-arithmetic / constraint-solver lane. (source: wiki/sources/descriptions/stp__stp.md)
