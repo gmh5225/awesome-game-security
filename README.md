@@ -1826,6 +1826,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > X64DBG Plugins
 - https://github.com/x64dbg/x64dbg/wiki/Plugins
 - https://github.com/horsicq/x64dbg-Plugin-Manager
+- https://github.com/horsicq/nfdx64dbg [x64dbg plugin for Nauz File Detector (linker/compiler/tool detection)]
 - https://github.com/m417z/Multiline-Ultimate-Assembler
 - https://github.com/x64dbg/Classroom
 - https://github.com/VenTaz/Themidie
@@ -3894,6 +3895,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/kli-ex
 - https://github.com/1hAck-0/zeroimport
 - https://github.com/emlinhax/blitz
+- https://github.com/alfarom256/rs-ldr [Rust no_std hash-based WinAPI resolution via PEB walk, LdrLoadDll, and compile-time string obfuscation]
 
 > Anti-Cheat Programming
 - https://github.com/m417z/thread-call-stack-scanner [Safely manage the unloading of DLLs that have been hooked into a process. Context]
