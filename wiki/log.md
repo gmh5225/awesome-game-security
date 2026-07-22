@@ -831,3 +831,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-22** — ingest `description:shuruk421/VACKeyRetrieval`: entity [[vackeyretrieval]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
+- **2026-07-22** — ingest `description:shareef12/cpuz`: entity [[cpuz]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+

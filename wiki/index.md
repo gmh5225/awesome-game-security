@@ -97,6 +97,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CSGOSimple](entities/csgosimple.md) — spirthack Internal CS:GO baseline (MarkHC fork; cheat / game:csgo)
 
 - [CounterStrikeSource-Linux-Trainer](entities/counterstrikesource-linux-trainer.md) — Linux external CS:S trainer (movement / info display)
+- [cpuz](entities/cpuz.md) — CPU-Z vulnerable-driver exploit (XP–Win10 1607; Cheat Vulnerable Driver)
 - [CVE-2021-1961](entities/cve-2021-1961.md) — Qualcomm QSEECOM/TrustZone kernel R/W (Widevine ION; Pixel 3; SELinux off)
 - [CVE-2026-43499-popsicle](entities/cve-2026-43499-popsicle.md) — Xiaomi popsicle Android 16 LPE (CVE-2026-43499; LD_PRELOAD; uid 0)
 - [CVEAC-2020](entities/cveac-2020.md) — EAC kernel-module vuln PoC (WDK; Integrity Checks)

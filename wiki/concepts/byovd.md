@@ -16,7 +16,8 @@ sources:
   - wiki/sources/descriptions/vergamota__KslKatz.md
   - wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md
   - wiki/sources/descriptions/symeonp__Lenovo-CVE-2025-8061.md
-updated: 2026-07-21
+  - wiki/sources/descriptions/shareef12__cpuz.md
+updated: 2026-07-22
 confidence: high
 ---
 
@@ -52,7 +53,9 @@ LSASS credential extractors such as [[kslkatz]] abuse Microsoft Defender’s `Ks
 
 OEM-driver LPE PoCs such as [[lenovo-cve-2025-8061]] target Lenovo `LnvMSRIO.sys` (CVE-2025-8061) via IOCTL abuse for kernel R/W and a SYSTEM shell. (source: wiki/sources/descriptions/symeonp__Lenovo-CVE-2025-8061.md)
 
+Classic signed-utility driver abuse such as [[cpuz]] (CPU-Z; XP–Win10 1607) sits in the same cheat / vulnerable-driver research lane. (source: wiki/sources/descriptions/shareef12__cpuz.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[lenovo-cve-2025-8061]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[lenovo-cve-2025-8061]] · [[cpuz]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
