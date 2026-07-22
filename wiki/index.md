@@ -351,6 +351,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [U3D](entities/u3d.md) — Unity-centered C++ 2D/3D community tree (Game Engine / source)
 - [UniCli](entities/unicli.md) — Unity Editor terminal CLI (compile/test/build/inspect; AI-agent ready)
 - [unity-mcp](entities/unity-mcp.md) — MCP server for Unity (Game Develop / MCP workflow)
+- [UnityExplorer](entities/unityexplorer.md) — runtime Unity inspector (BepInEx/MelonLoader; hierarchy/REPL; Mono+IL2CPP)
 - [UnityVulnerableEntryPoint](entities/unity-vulnerable-entrypoint.md) — Unity Mono vulnerable entry points (Assembly-CSharp / MonoBehaviour inject demos)
 - [unitySpeedTools](entities/unityspeedtools.md) — iOS Unity IL2CPP speed/modding tools (C/C++ / ObjC)
 - [unflutter](entities/unflutter.md) — Flutter/Dart AOT snapshot static analyzer (symbol recovery)

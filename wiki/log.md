@@ -812,3 +812,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-22** — ingest `description:singhhdev/Spoofer-AMIDEWIN`: entity [[spoofer-amidewin]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
+- **2026-07-22** — ingest `description:sinai-dev/UnityExplorer`: entity [[unityexplorer]]; cited on [[il2cpp]] and [[overviews/game-engine]].
+
