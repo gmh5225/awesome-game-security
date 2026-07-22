@@ -855,3 +855,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:sezzyaep/CS2-OFFSETS`: entity [[cs2-offsets]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-22** — ingest `description:sevaa/dwex`: entity [[dwex]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-22** — ingest `description:serjam/mwclap`: entity [[mwclap]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
