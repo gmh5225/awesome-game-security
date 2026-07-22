@@ -9,6 +9,7 @@ sources:
   - wiki/sources/descriptions/x1tan__vac3-dumper.md
   - wiki/sources/descriptions/zodiacon__TotalPE2.md
   - wiki/sources/descriptions/zodiacon__QuickAsm.md
+  - wiki/sources/descriptions/skylot__raung.md
   - wiki/sources/descriptions/zoand__Injectors.md
   - wiki/sources/descriptions/zoand__BOOM.md
   - wiki/sources/descriptions/zinx-YT__Fortnite-Fltokens-and-offsets.md
@@ -192,7 +193,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 - Curated RE learning indexes such as [[reverse-engineering]] (reversing / networking / editors) sit in the Cheat guide lane for offensive technique study. (source: wiki/sources/descriptions/wtsxDev__reverse-engineering.md) Category-organized RE/security tool catalogs such as [[retools]] (disasm / debug / decompiler / hex / network / sandbox) help select a binary-analysis toolkit. (source: wiki/sources/descriptions/stevemk14ebr__RETools.md)
 - PE triage of game/client modules (imports, TLS, .NET metadata) via viewers such as [[totalpe2]] before deeper RE. (source: wiki/sources/descriptions/zodiacon__TotalPE2.md)
-- Rapid x86/x64 shellcode/asm prototyping with [[quickasm]] (assemble via Keystone, execute in-process). (source: wiki/sources/descriptions/zodiacon__QuickAsm.md) Cross-platform C++ Windows shellcode frameworks such as [[scfw]] sit in the shellcode engine & tricks lane. (source: wiki/sources/descriptions/wbenny__scfw.md) Bad-byte banishment with preserved functionality such as [[byvalver]] (two usage modes) sits in the same lane. (source: wiki/sources/descriptions/umpolungfish__byvalver.md)
+- Rapid x86/x64 shellcode/asm prototyping with [[quickasm]] (assemble via Keystone, execute in-process). (source: wiki/sources/descriptions/zodiacon__QuickAsm.md) Early-stage Java bytecode assemble/disassemble via [[raung]] for cheat / RE-tools bytecode experiments (syntax still unstable). (source: wiki/sources/descriptions/skylot__raung.md) Cross-platform C++ Windows shellcode frameworks such as [[scfw]] sit in the shellcode engine & tricks lane. (source: wiki/sources/descriptions/wbenny__scfw.md) Bad-byte banishment with preserved functionality such as [[byvalver]] (two usage modes) sits in the same lane. (source: wiki/sources/descriptions/umpolungfish__byvalver.md)
 - Title-specific offset/token dumps (e.g. Fortnite FLTokens via [[fortnite-fltokens-and-offsets]]) illustrate ephemeral cheat-research artifacts that rot quickly. (source: wiki/sources/descriptions/zinx-YT__Fortnite-Fltokens-and-offsets.md)
 - External Fortnite samples such as [[fortnite-external-source]] (C++; driver development / SDK generation) sit in the cheat / game:fortnite lane. (source: wiki/sources/descriptions/xetzzy__Fortnite-External-Source.md)
 - Internal Fortnite samples such as [[basic-fortnite-cheat-source-internal]] (C++; UE4 SDK / GObject/GNames / engine hooks; ESP + aimbot) sit in the same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md)
