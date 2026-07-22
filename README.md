@@ -2347,6 +2347,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/560809-firmwaretablehandler.html [FirmwareTableHandler]
 - https://github.com/oakboat/DataPtrHookWin11 [NtUserSetGestureConfig]
 - https://github.com/GetRektBoy724/Win32kHooker [.data ptr swapper for newer win32k versions]
+- https://github.com/bootmgfw/lithium-kernel [Windows kernel driver + usermode client: physical/virtual memory R/W, page-table walk, pattern scan, MouClass mouse IOCTL]
 
 > EFI Driver
 - https://github.com/mrexodia/EfiCMake
@@ -4091,6 +4092,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/J-Tanzanite/Little-Anti-Cheat [For Source Games]
 - https://github.com/noahware/darken-anticheat [Kernel anti-cheat for protecting software]
 - https://github.com/TOSTcRa/vigil [Open-source Linux-native anti-cheat powered by eBPF]
+- https://github.com/TuncorReUnion/TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED [Linux user-space anti-cheat with eBPF, signature scanning, HWID bans, and AI anomaly detection]
 
 > Analysis Framework
 - https://github.com/pandora-analysis/pandora
