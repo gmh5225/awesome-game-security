@@ -743,3 +743,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:spudgy/UnrealEngine4-SwissKnife`: entity [[unrealengine4-swissknife]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
 
 - **2026-07-22** — ingest `description:springmusk026/Imgui-Unity`: entity [[imgui-unity]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]].
+
+- **2026-07-22** — ingest `description:springmusk026/ImGui-Unity-With-Layout`: entity [[imgui-unity-with-layout]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]].

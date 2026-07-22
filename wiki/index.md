@@ -168,6 +168,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Il2cppSpy](entities/il2cpp-spy.md) — Unity IL2CPP APK disassembler / two-APK diff
 - [imgui-ios-mod-menu](entities/imgui-ios-mod-menu.md) — iOS ImGui mod menu (cheat / render-draw)
 - [Imgui-Unity](entities/imgui-unity.md) — Android Unity ImGui mod menu (OpenGL ES + IL2CPP/Mono; cheat / render-draw)
+- [ImGui-Unity-With-Layout](entities/imgui-unity-with-layout.md) — Android Unity ImGui mod menu + layout tabs/save-load (C++; cheat / render-draw)
 - [Injectors](entities/injectors.md) — injection-testing harness (C/C++; AC stress)
 - [injdrv](entities/injdrv.md) — kernel APC DLL injector (process notify → LdrLoadDll; C)
 - [input-overlay](entities/input-overlay.md) — OBS plugin: keyboard/mouse/gamepad livestream overlay (C++; Keyboard Mapper)

@@ -17,8 +17,8 @@ Complements Android native ImGui apps ([[android-native-app-imgui]]), iOS ImGui 
 ## Links
 
 - Repo: https://github.com/springmusk026/Imgui-Unity
-- Related layout template (README link): https://github.com/springmusk026/ImGui-Unity-With-Layout
+- Layout-enhanced sibling: [[imgui-unity-with-layout]] (https://github.com/springmusk026/ImGui-Unity-With-Layout)
 
 ## Related
 
-[[android-native-app-imgui]] · [[imgui-ios-mod-menu]] · [[il2cpp]] · [[present-hook]] · [[unityspeedtools]] · [[overviews/mobile-security]] · [[overviews/graphics-api]] · [[overviews/game-engine]]
+[[imgui-unity-with-layout]] · [[android-native-app-imgui]] · [[imgui-ios-mod-menu]] · [[il2cpp]] · [[present-hook]] · [[unityspeedtools]] · [[overviews/mobile-security]] · [[overviews/graphics-api]] · [[overviews/game-engine]]
