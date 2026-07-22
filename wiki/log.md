@@ -779,3 +779,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:sneakyevilSK/IL2CPP_Resolver`: entity [[il2cpp-resolver]]; cited on [[il2cpp]] and [[overviews/game-engine]].
 
 - **2026-07-22** — ingest `description:sneakyevilSK/CSGO_BacktrackPatch`: entity [[csgo-backtrack-patch]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-22** — ingest `description:sneakyevil/ida_functioncolor`: entity [[ida-functioncolor]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
