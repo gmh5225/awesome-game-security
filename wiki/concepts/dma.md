@@ -10,7 +10,8 @@ sources:
   - wiki/sources/descriptions/un4ckn0wl3z__DMACheatEngineLoader.md
   - wiki/sources/descriptions/ufrisk__pcileech.md
   - wiki/sources/descriptions/ufrisk__pcileech-fpga.md
-updated: 2026-07-19
+  - wiki/sources/descriptions/sonodima__physpatch.md
+updated: 2026-07-22
 confidence: high
 ---
 
@@ -21,7 +22,7 @@ Hardware-level memory access where a PCIe device issues Memory Read/Write TLPs a
 
 ## Why it matters
 
-Software anti-cheat sees a “normal” PCIe endpoint. Classic process/handle/injection signals may be absent. Defense shifts to PCIe fingerprinting, [[iommu]] policy, hypervisor containment, TPM/measured-boot attestation, and occasionally firmware-level blocks (e.g. BIOS DXE option-ROM attribute stripping in [[x670e-tomahawk-anticheat-update]]). (source: wiki/sources/descriptions/zer0condition__x670e-tomahawk-anticheat-update.md)
+Software anti-cheat sees a “normal” PCIe endpoint. Classic process/handle/injection signals may be absent. Defense shifts to PCIe fingerprinting, [[iommu]] policy, hypervisor containment, TPM/measured-boot attestation, and occasionally firmware-level blocks (e.g. BIOS DXE option-ROM attribute stripping in [[x670e-tomahawk-anticheat-update]]). (source: wiki/sources/descriptions/zer0condition__x670e-tomahawk-anticheat-update.md) Physical-page patching tools such as [[physpatch]] (VA→PA walk then direct physical write) illustrate how DMA-class access can alter kernel memory while bypassing software hooks and access monitors. (source: wiki/sources/descriptions/sonodima__physpatch.md)
 
 
 ## Typical stack
@@ -30,5 +31,5 @@ Cheat app → LeechCore/pcileech/MemProcFS → FPGA firmware → Memory Read TLP
 
 ## Related
 
-[[iommu]] · [[hvci]] · [[pcileech]] · [[pcileech-fpga]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
+[[iommu]] · [[hvci]] · [[pcileech]] · [[pcileech-fpga]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
 
