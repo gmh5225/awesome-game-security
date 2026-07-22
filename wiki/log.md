@@ -843,3 +843,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:shalzuth/Il2CppRuntimeDumper`: entity [[il2cpp-runtime-dumper]]; cited on [[il2cpp]] and [[overviews/game-engine]].
 
 - **2026-07-22** — ingest `description:shakevsky/keybuster`: entity [[keybuster]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
+- **2026-07-22** — ingest `description:shadirvan/Unity-Cheat-Sheet`: entity [[unity-cheat-sheet]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
