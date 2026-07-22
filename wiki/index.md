@@ -89,6 +89,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CS-2-Glow](entities/cs-2-glow.md) — external CS2 glow ESP (C++; entity / offsets / memory)
 - [cs16-client](entities/cs16-client.md) — rewrote CS1.6 client (Game Develop / Source; Android ADB)
 - [cs2-cheat-cpp](entities/cs2-cheat-cpp.md) — external CS2 cheat (C++; rendering / SDK generation)
+- [CSGO_BacktrackPatch](entities/csgo-backtrack-patch.md) — CS:GO backtrack patch (hooking / memory analysis; cheat / game:csgo)
 - [CSGOSimple](entities/csgosimple.md) — spirthack Internal CS:GO baseline (MarkHC fork; cheat / game:csgo)
 - [CounterStrikeSource-Linux-Trainer](entities/counterstrikesource-linux-trainer.md) — Linux external CS:S trainer (movement / info display)
 - [CVE-2021-1961](entities/cve-2021-1961.md) — Qualcomm QSEECOM/TrustZone kernel R/W (Widevine ION; Pixel 3; SELinux off)
