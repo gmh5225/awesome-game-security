@@ -3921,6 +3921,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/adamyaxley/Obfuscate [String Crypter]
 - https://github.com/igozdev/xorlit [String Crypter]
 - https://github.com/JustasMasiulis/xorstr [String Crypter]
+- https://github.com/wufhex/Mystic-xorstr [C++17 header-only compile-time string/integer encryption with SIMD decrypt and junk-code decompiler-breaking tricks]
 - https://github.com/skadro-official/skCrypter [String Crypter]
 - https://github.com/rad9800/BloatedHammer [API Hammering with C++20 by folding (avoiding loops)]
 - https://github.com/obama-gaming/xor-float [xor float]
