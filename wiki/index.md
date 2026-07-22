@@ -353,6 +353,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 
 - [WaryasSWHE](entities/waryasswhe.md) — usermode shatter-attack AC bypass PoC (0day; cheat / RPM; C++)
+- [Wells Anti Cheat](entities/wellsanticheat.md) — Among Us host-side BepInEx AC (RPC abuse / crashers / spam; Harmony)
 - [window_hijack](entities/window-hijack.md) — KM window-handle hijack for covert KM↔UM I/O (thread contexts)
 - [Wazuh](entities/wazuh.md) — open-source XDR / HIDS (agent–manager; FIM / log / vuln; Elasticsearch)
 - [WickedEngine](entities/wickedengine.md) — open C++ 3D engine (`WickedEngine_Windows` static lib; Game Engine source)
