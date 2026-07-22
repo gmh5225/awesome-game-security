@@ -1,0 +1,3438 @@
+Project Path: arc_ricardoofnl_open.mp-anticheat_4o1fvr9n
+
+Source Tree:
+
+```txt
+arc_ricardoofnl_open.mp-anticheat_4o1fvr9n
+├── CMakeLists.txt
+├── LICENSE
+├── README.md
+├── anticheat.cfg
+├── bootstrap.sh
+├── lib
+│   └── .gitkeep
+├── pawn
+│   └── anticheat.inc
+├── pawn.json
+├── src
+│   ├── ac_types.hpp
+│   ├── anticheat_component.cpp
+│   ├── anticheat_component.hpp
+│   ├── config.cpp
+│   ├── config.hpp
+│   ├── detection
+│   │   ├── faker5_check.cpp
+│   │   ├── faker5_check.hpp
+│   │   ├── memory_check.cpp
+│   │   ├── memory_check.hpp
+│   │   ├── mobile_check.cpp
+│   │   ├── mobile_check.hpp
+│   │   ├── module.hpp
+│   │   ├── poison_check.cpp
+│   │   ├── poison_check.hpp
+│   │   ├── raknet_check.cpp
+│   │   ├── raknet_check.hpp
+│   │   ├── scc_check.cpp
+│   │   ├── scc_check.hpp
+│   │   ├── signatures.hpp
+│   │   ├── version_check.cpp
+│   │   └── version_check.hpp
+│   ├── enforcement.cpp
+│   ├── enforcement.hpp
+│   ├── main.cpp
+│   ├── natives.cpp
+│   ├── natives.hpp
+│   ├── player_data.hpp
+│   ├── scheduler.cpp
+│   └── scheduler.hpp
+└── test
+    └── ac_test.pwn
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.19)
+project(omp-anticheat LANGUAGES C CXX VERSION 1.0.0)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# the pawn api (natives + onplayercheatdetected) needs the pawn + pawn-natives
+# submodules. turn it off to build a lean, self-contained detection core that
+# still kicks/bans via config but exposes nothing to gamemodes.
+option(AC_ENABLE_PAWN "Build the Pawn natives + callback module" ON)
+# real builds must be 32-bit (see below). turn this off only for a host
+# syntax/type check of the code on a 64-bit machine - the result won't load.
+option(AC_BUILD_32BIT "Build a 32-bit binary (required to actually load in open.mp)" ON)
+
+# open.mp sa-mp clients (and therefore the open.mp server and every component it
+# loads) are 32-bit. a 64-bit build will not load. on gcc/clang we force -m32;
+# on msvc pass -a win32 to the generator instead.
+if(AC_BUILD_32BIT AND NOT MSVC)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -m32")
+	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -m32")
+endif()
+
+# open.mp sdk (interface lib) + network lib (networkbitstream, only forward
+# declared by the sdk) live in git submodules under lib/.
+add_subdirectory(lib/sdk)
+add_subdirectory(lib/network)
+
+set(AC_SOURCES
+	src/main.cpp
+	src/anticheat_component.cpp
+	src/config.cpp
+	src/scheduler.cpp
+	src/enforcement.cpp
+	src/detection/memory_check.cpp
+	src/detection/version_check.cpp
+	src/detection/poison_check.cpp
+	src/detection/mobile_check.cpp
+	src/detection/raknet_check.cpp
+	src/detection/faker5_check.cpp
+	src/detection/scc_check.cpp
+)
+
+if(AC_ENABLE_PAWN)
+	list(APPEND AC_SOURCES src/natives.cpp)
+endif()
+
+add_library(${PROJECT_NAME} SHARED ${AC_SOURCES})
+
+target_include_directories(${PROJECT_NAME} PRIVATE src)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE OMP-SDK OMP-Network)
+
+if(AC_ENABLE_PAWN)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE
+		AC_ENABLE_PAWN
+		HAVE_STDINT_H=1
+		PAWN_CELL_SIZE=32
+	)
+	target_include_directories(${PROJECT_NAME} PRIVATE
+		lib # for <pawn-natives/...> pulled in by the sdk pawn headers
+		lib/pawn/source # for <amx/amx.h> and <linux/getch.c>
+		lib/pawn/source/linux
+	)
+endif()
+
+# open.mp loads "anticheat.dll" / "anticheat.so" (no "lib" prefix) from the
+# server's components/ folder.
+set_target_properties(${PROJECT_NAME} PROPERTIES
+	PREFIX ""
+	OUTPUT_NAME "anticheat"
+	C_VISIBILITY_PRESET hidden
+	CXX_VISIBILITY_PRESET hidden
+)
+
+```
+
+`LICENSE`:
+
+```
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+                            Preamble
+
+  The GNU General Public License is a free, copyleft license for
+software and other kinds of works.
+
+  The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works.  By contrast,
+the GNU General Public License is intended to guarantee your freedom to
+share and change all versions of a program--to make sure it remains free
+software for all its users.  We, the Free Software Foundation, use the
+GNU General Public License for most of our software; it applies also to
+any other work released this way by its authors.  You can apply it to
+your programs, too.
+
+  When we speak of free software, we are referring to freedom, not
+price.  Our General Public Licenses are designed to make sure that you
+have the freedom to distribute copies of free software (and charge for
+them if you wish), that you receive source code or can get it if you
+want it, that you can change the software or use pieces of it in new
+free programs, and that you know you can do these things.
+
+  To protect your rights, we need to prevent others from denying you
+these rights or asking you to surrender the rights.  Therefore, you have
+certain responsibilities if you distribute copies of the software, or if
+you modify it: responsibilities to respect the freedom of others.
+
+  For example, if you distribute copies of such a program, whether
+gratis or for a fee, you must pass on to the recipients the same
+freedoms that you received.  You must make sure that they, too, receive
+or can get the source code.  And you must show them these terms so they
+know their rights.
+
+  Developers that use the GNU GPL protect your rights with two steps:
+(1) assert copyright on the software, and (2) offer you this License
+giving you legal permission to copy, distribute and/or modify it.
+
+  For the developers' and authors' protection, the GPL clearly explains
+that there is no warranty for this free software.  For both users' and
+authors' sake, the GPL requires that modified versions be marked as
+changed, so that their problems will not be attributed erroneously to
+authors of previous versions.
+
+  Some devices are designed to deny users access to install or run
+modified versions of the software inside them, although the manufacturer
+can do so.  This is fundamentally incompatible with the aim of
+protecting users' freedom to change the software.  The systematic
+pattern of such abuse occurs in the area of products for individuals to
+use, which is precisely where it is most unacceptable.  Therefore, we
+have designed this version of the GPL to prohibit the practice for those
+products.  If such problems arise substantially in other domains, we
+stand ready to extend this provision to those domains in future versions
+of the GPL, as needed to protect the freedom of users.
+
+  Finally, every program is threatened constantly by software patents.
+States should not allow patents to restrict development and use of
+software on general-purpose computers, but in those that do, we wish to
+avoid the special danger that patents applied to a free program could
+make it effectively proprietary.  To prevent this, the GPL assures that
+patents cannot be used to render the program non-free.
+
+  The precise terms and conditions for copying, distribution and
+modification follow.
+
+                       TERMS AND CONDITIONS
+
+  0. Definitions.
+
+  "This License" refers to version 3 of the GNU General Public License.
+
+  "Copyright" also means copyright-like laws that apply to other kinds of
+works, such as semiconductor masks.
+
+  "The Program" refers to any copyrightable work licensed under this
+License.  Each licensee is addressed as "you".  "Licensees" and
+"recipients" may be individuals or organizations.
+
+  To "modify" a work means to copy from or adapt all or part of the work
+in a fashion requiring copyright permission, other than the making of an
+exact copy.  The resulting work is called a "modified version" of the
+earlier work or a work "based on" the earlier work.
+
+  A "covered work" means either the unmodified Program or a work based
+on the Program.
+
+  To "propagate" a work means to do anything with it that, without
+permission, would make you directly or secondarily liable for
+infringement under applicable copyright law, except executing it on a
+computer or modifying a private copy.  Propagation includes copying,
+distribution (with or without modification), making available to the
+public, and in some countries other activities as well.
+
+  To "convey" a work means any kind of propagation that enables other
+parties to make or receive copies.  Mere interaction with a user through
+a computer network, with no transfer of a copy, is not conveying.
+
+  An interactive user interface displays "Appropriate Legal Notices"
+to the extent that it includes a convenient and prominently visible
+feature that (1) displays an appropriate copyright notice, and (2)
+tells the user that there is no warranty for the work (except to the
+extent that warranties are provided), that licensees may convey the
+work under this License, and how to view a copy of this License.  If
+the interface presents a list of user commands or options, such as a
+menu, a prominent item in the list meets this criterion.
+
+  1. Source Code.
+
+  The "source code" for a work means the preferred form of the work
+for making modifications to it.  "Object code" means any non-source
+form of a work.
+
+  A "Standard Interface" means an interface that either is an official
+standard defined by a recognized standards body, or, in the case of
+interfaces specified for a particular programming language, one that
+is widely used among developers working in that language.
+
+  The "System Libraries" of an executable work include anything, other
+than the work as a whole, that (a) is included in the normal form of
+packaging a Major Component, but which is not part of that Major
+Component, and (b) serves only to enable use of the work with that
+Major Component, or to implement a Standard Interface for which an
+implementation is available to the public in source code form.  A
+"Major Component", in this context, means a major essential component
+(kernel, window system, and so on) of the specific operating system
+(if any) on which the executable work runs, or a compiler used to
+produce the work, or an object code interpreter used to run it.
+
+  The "Corresponding Source" for a work in object code form means all
+the source code needed to generate, install, and (for an executable
+work) run the object code and to modify the work, including scripts to
+control those activities.  However, it does not include the work's
+System Libraries, or general-purpose tools or generally available free
+programs which are used unmodified in performing those activities but
+which are not part of the work.  For example, Corresponding Source
+includes interface definition files associated with source files for
+the work, and the source code for shared libraries and dynamically
+linked subprograms that the work is specifically designed to require,
+such as by intimate data communication or control flow between those
+subprograms and other parts of the work.
+
+  The Corresponding Source need not include anything that users
+can regenerate automatically from other parts of the Corresponding
+Source.
+
+  The Corresponding Source for a work in source code form is that
+same work.
+
+  2. Basic Permissions.
+
+  All rights granted under this License are granted for the term of
+copyright on the Program, and are irrevocable provided the stated
+conditions are met.  This License explicitly affirms your unlimited
+permission to run the unmodified Program.  The output from running a
+covered work is covered by this License only if the output, given its
+content, constitutes a covered work.  This License acknowledges your
+rights of fair use or other equivalent, as provided by copyright law.
+
+  You may make, run and propagate covered works that you do not
+convey, without conditions so long as your license otherwise remains
+in force.  You may convey covered works to others for the sole purpose
+of having them make modifications exclusively for you, or provide you
+with facilities for running those works, provided that you comply with
+the terms of this License in conveying all material for which you do
+not control copyright.  Those thus making or running the covered works
+for you must do so exclusively on your behalf, under your direction
+and control, on terms that prohibit them from making any copies of
+your copyrighted material outside their relationship with you.
+
+  Conveying under any other circumstances is permitted solely under
+the conditions stated below.  Sublicensing is not allowed; section 10
+makes it unnecessary.
+
+  3. Protecting Users' Legal Rights From Anti-Circumvention Law.
+
+  No covered work shall be deemed part of an effective technological
+measure under any applicable law fulfilling obligations under article
+11 of the WIPO copyright treaty adopted on 20 December 1996, or
+similar laws prohibiting or restricting circumvention of such
+measures.
+
+  When you convey a covered work, you waive any legal power to forbid
+circumvention of technological measures to the extent such circumvention
+is effected by exercising rights under this License with respect to
+the covered work, and you disclaim any intention to limit operation or
+modification of the work as a means of enforcing, against the work's
+users, your or third parties' legal rights to forbid circumvention of
+technological measures.
+
+  4. Conveying Verbatim Copies.
+
+  You may convey verbatim copies of the Program's source code as you
+receive it, in any medium, provided that you conspicuously and
+appropriately publish on each copy an appropriate copyright notice;
+keep intact all notices stating that this License and any
+non-permissive terms added in accord with section 7 apply to the code;
+keep intact all notices of the absence of any warranty; and give all
+recipients a copy of this License along with the Program.
+
+  You may charge any price or no price for each copy that you convey,
+and you may offer support or warranty protection for a fee.
+
+  5. Conveying Modified Source Versions.
+
+  You may convey a work based on the Program, or the modifications to
+produce it from the Program, in the form of source code under the
+terms of section 4, provided that you also meet all of these conditions:
+
+    a) The work must carry prominent notices stating that you modified
+    it, and giving a relevant date.
+
+    b) The work must carry prominent notices stating that it is
+    released under this License and any conditions added under section
+    7.  This requirement modifies the requirement in section 4 to
+    "keep intact all notices".
+
+    c) You must license the entire work, as a whole, under this
+    License to anyone who comes into possession of a copy.  This
+    License will therefore apply, along with any applicable section 7
+    additional terms, to the whole of the work, and all its parts,
+    regardless of how they are packaged.  This License gives no
+    permission to license the work in any other way, but it does not
+    invalidate such permission if you have separately received it.
+
+    d) If the work has interactive user interfaces, each must display
+    Appropriate Legal Notices; however, if the Program has interactive
+    interfaces that do not display Appropriate Legal Notices, your
+    work need not make them do so.
+
+  A compilation of a covered work with other separate and independent
+works, which are not by their nature extensions of the covered work,
+and which are not combined with it such as to form a larger program,
+in or on a volume of a storage or distribution medium, is called an
+"aggregate" if the compilation and its resulting copyright are not
+used to limit the access or legal rights of the compilation's users
+beyond what the individual works permit.  Inclusion of a covered work
+in an aggregate does not cause this License to apply to the other
+parts of the aggregate.
+
+  6. Conveying Non-Source Forms.
+
+  You may convey a covered work in object code form under the terms
+of sections 4 and 5, provided that you also convey the
+machine-readable Corresponding Source under the terms of this License,
+in one of these ways:
+
+    a) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by the
+    Corresponding Source fixed on a durable physical medium
+    customarily used for software interchange.
+
+    b) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by a
+    written offer, valid for at least three years and valid for as
+    long as you offer spare parts or customer support for that product
+    model, to give anyone who possesses the object code either (1) a
+    copy of the Corresponding Source for all the software in the
+    product that is covered by this License, on a durable physical
+    medium customarily used for software interchange, for a price no
+    more than your reasonable cost of physically performing this
+    conveying of source, or (2) access to copy the
+    Corresponding Source from a network server at no charge.
+
+    c) Convey individual copies of the object code with a copy of the
+    written offer to provide the Corresponding Source.  This
+    alternative is allowed only occasionally and noncommercially, and
+    only if you received the object code with such an offer, in accord
+    with subsection 6b.
+
+    d) Convey the object code by offering access from a designated
+    place (gratis or for a charge), and offer equivalent access to the
+    Corresponding Source in the same way through the same place at no
+    further charge.  You need not require recipients to copy the
+    Corresponding Source along with the object code.  If the place to
+    copy the object code is a network server, the Corresponding Source
+    may be on a different server (operated by you or a third party)
+    that supports equivalent copying facilities, provided you maintain
+    clear directions next to the object code saying where to find the
+    Corresponding Source.  Regardless of what server hosts the
+    Corresponding Source, you remain obligated to ensure that it is
+    available for as long as needed to satisfy these requirements.
+
+    e) Convey the object code using peer-to-peer transmission, provided
+    you inform other peers where the object code and Corresponding
+    Source of the work are being offered to the general public at no
+    charge under subsection 6d.
+
+  A separable portion of the object code, whose source code is excluded
+from the Corresponding Source as a System Library, need not be
+included in conveying the object code work.
+
+  A "User Product" is either (1) a "consumer product", which means any
+tangible personal property which is normally used for personal, family,
+or household purposes, or (2) anything designed or sold for incorporation
+into a dwelling.  In determining whether a product is a consumer product,
+doubtful cases shall be resolved in favor of coverage.  For a particular
+product received by a particular user, "normally used" refers to a
+typical or common use of that class of product, regardless of the status
+of the particular user or of the way in which the particular user
+actually uses, or expects or is expected to use, the product.  A product
+is a consumer product regardless of whether the product has substantial
+commercial, industrial or non-consumer uses, unless such uses represent
+the only significant mode of use of the product.
+
+  "Installation Information" for a User Product means any methods,
+procedures, authorization keys, or other information required to install
+and execute modified versions of a covered work in that User Product from
+a modified version of its Corresponding Source.  The information must
+suffice to ensure that the continued functioning of the modified object
+code is in no case prevented or interfered with solely because
+modification has been made.
+
+  If you convey an object code work under this section in, or with, or
+specifically for use in, a User Product, and the conveying occurs as
+part of a transaction in which the right of possession and use of the
+User Product is transferred to the recipient in perpetuity or for a
+fixed term (regardless of how the transaction is characterized), the
+Corresponding Source conveyed under this section must be accompanied
+by the Installation Information.  But this requirement does not apply
+if neither you nor any third party retains the ability to install
+modified object code on the User Product (for example, the work has
+been installed in ROM).
+
+  The requirement to provide Installation Information does not include a
+requirement to continue to provide support service, warranty, or updates
+for a work that has been modified or installed by the recipient, or for
+the User Product in which it has been modified or installed.  Access to a
+network may be denied when the modification itself materially and
+adversely affects the operation of the network or violates the rules and
+protocols for communication across the network.
+
+  Corresponding Source conveyed, and Installation Information provided,
+in accord with this section must be in a format that is publicly
+documented (and with an implementation available to the public in
+source code form), and must require no special password or key for
+unpacking, reading or copying.
+
+  7. Additional Terms.
+
+  "Additional permissions" are terms that supplement the terms of this
+License by making exceptions from one or more of its conditions.
+Additional permissions that are applicable to the entire Program shall
+be treated as though they were included in this License, to the extent
+that they are valid under applicable law.  If additional permissions
+apply only to part of the Program, that part may be used separately
+under those permissions, but the entire Program remains governed by
+this License without regard to the additional permissions.
+
+  When you convey a copy of a covered work, you may at your option
+remove any additional permissions from that copy, or from any part of
+it.  (Additional permissions may be written to require their own
+removal in certain cases when you modify the work.)  You may place
+additional permissions on material, added by you to a covered work,
+for which you have or can give appropriate copyright permission.
+
+  Notwithstanding any other provision of this License, for material you
+add to a covered work, you may (if authorized by the copyright holders of
+that material) supplement the terms of this License with terms:
+
+    a) Disclaiming warranty or limiting liability differently from the
+    terms of sections 15 and 16 of this License; or
+
+    b) Requiring preservation of specified reasonable legal notices or
+    author attributions in that material or in the Appropriate Legal
+    Notices displayed by works containing it; or
+
+    c) Prohibiting misrepresentation of the origin of that material, or
+    requiring that modified versions of such material be marked in
+    reasonable ways as different from the original version; or
+
+    d) Limiting the use for publicity purposes of names of licensors or
+    authors of the material; or
+
+    e) Declining to grant rights under trademark law for use of some
+    trade names, trademarks, or service marks; or
+
+    f) Requiring indemnification of licensors and authors of that
+    material by anyone who conveys the material (or modified versions of
+    it) with contractual assumptions of liability to the recipient, for
+    any liability that these contractual assumptions directly impose on
+    those licensors and authors.
+
+  All other non-permissive additional terms are considered "further
+restrictions" within the meaning of section 10.  If the Program as you
+received it, or any part of it, contains a notice stating that it is
+governed by this License along with a term that is a further
+restriction, you may remove that term.  If a license document contains
+a further restriction but permits relicensing or conveying under this
+License, you may add to a covered work material governed by the terms
+of that license document, provided that the further restriction does
+not survive such relicensing or conveying.
+
+  If you add terms to a covered work in accord with this section, you
+must place, in the relevant source files, a statement of the
+additional terms that apply to those files, or a notice indicating
+where to find the applicable terms.
+
+  Additional terms, permissive or non-permissive, may be stated in the
+form of a separately written license, or stated as exceptions;
+the above requirements apply either way.
+
+  8. Termination.
+
+  You may not propagate or modify a covered work except as expressly
+provided under this License.  Any attempt otherwise to propagate or
+modify it is void, and will automatically terminate your rights under
+this License (including any patent licenses granted under the third
+paragraph of section 11).
+
+  However, if you cease all violation of this License, then your
+license from a particular copyright holder is reinstated (a)
+provisionally, unless and until the copyright holder explicitly and
+finally terminates your license, and (b) permanently, if the copyright
+holder fails to notify you of the violation by some reasonable means
+prior to 60 days after the cessation.
+
+  Moreover, your license from a particular copyright holder is
+reinstated permanently if the copyright holder notifies you of the
+violation by some reasonable means, this is the first time you have
+received notice of violation of this License (for any work) from that
+copyright holder, and you cure the violation prior to 30 days after
+your receipt of the notice.
+
+  Termination of your rights under this section does not terminate the
+licenses of parties who have received copies or rights from you under
+this License.  If your rights have been terminated and not permanently
+reinstated, you do not qualify to receive new licenses for the same
+material under section 10.
+
+  9. Acceptance Not Required for Having Copies.
+
+  You are not required to accept this License in order to receive or
+run a copy of the Program.  Ancillary propagation of a covered work
+occurring solely as a consequence of using peer-to-peer transmission
+to receive a copy likewise does not require acceptance.  However,
+nothing other than this License grants you permission to propagate or
+modify any covered work.  These actions infringe copyright if you do
+not accept this License.  Therefore, by modifying or propagating a
+covered work, you indicate your acceptance of this License to do so.
+
+  10. Automatic Licensing of Downstream Recipients.
+
+  Each time you convey a covered work, the recipient automatically
+receives a license from the original licensors, to run, modify and
+propagate that work, subject to this License.  You are not responsible
+for enforcing compliance by third parties with this License.
+
+  An "entity transaction" is a transaction transferring control of an
+organization, or substantially all assets of one, or subdividing an
+organization, or merging organizations.  If propagation of a covered
+work results from an entity transaction, each party to that
+transaction who receives a copy of the work also receives whatever
+licenses to the work the party's predecessor in interest had or could
+give under the previous paragraph, plus a right to possession of the
+Corresponding Source of the work from the predecessor in interest, if
+the predecessor has it or can get it with reasonable efforts.
+
+  You may not impose any further restrictions on the exercise of the
+rights granted or affirmed under this License.  For example, you may
+not impose a license fee, royalty, or other charge for exercise of
+rights granted under this License, and you may not initiate litigation
+(including a cross-claim or counterclaim in a lawsuit) alleging that
+any patent claim is infringed by making, using, selling, offering for
+sale, or importing the Program or any portion of it.
+
+  11. Patents.
+
+  A "contributor" is a copyright holder who authorizes use under this
+License of the Program or a work on which the Program is based.  The
+work thus licensed is called the contributor's "contributor version".
+
+  A contributor's "essential patent claims" are all patent claims
+owned or controlled by the contributor, whether already acquired or
+hereafter acquired, that would be infringed by some manner, permitted
+by this License, of making, using, or selling its contributor version,
+but do not include claims that would be infringed only as a
+consequence of further modification of the contributor version.  For
+purposes of this definition, "control" includes the right to grant
+patent sublicenses in a manner consistent with the requirements of
+this License.
+
+  Each contributor grants you a non-exclusive, worldwide, royalty-free
+patent license under the contributor's essential patent claims, to
+make, use, sell, offer for sale, import and otherwise run, modify and
+propagate the contents of its contributor version.
+
+  In the following three paragraphs, a "patent license" is any express
+agreement or commitment, however denominated, not to enforce a patent
+(such as an express permission to practice a patent or covenant not to
+sue for patent infringement).  To "grant" such a patent license to a
+party means to make such an agreement or commitment not to enforce a
+patent against the party.
+
+  If you convey a covered work, knowingly relying on a patent license,
+and the Corresponding Source of the work is not available for anyone
+to copy, free of charge and under the terms of this License, through a
+publicly available network server or other readily accessible means,
+then you must either (1) cause the Corresponding Source to be so
+available, or (2) arrange to deprive yourself of the benefit of the
+patent license for this particular work, or (3) arrange, in a manner
+consistent with the requirements of this License, to extend the patent
+license to downstream recipients.  "Knowingly relying" means you have
+actual knowledge that, but for the patent license, your conveying the
+covered work in a country, or your recipient's use of the covered work
+in a country, would infringe one or more identifiable patents in that
+country that you have reason to believe are valid.
+
+  If, pursuant to or in connection with a single transaction or
+arrangement, you convey, or propagate by procuring conveyance of, a
+covered work, and grant a patent license to some of the parties
+receiving the covered work authorizing them to use, propagate, modify
+or convey a specific copy of the covered work, then the patent license
+you grant is automatically extended to all recipients of the covered
+work and works based on it.
+
+  A patent license is "discriminatory" if it does not include within
+the scope of its coverage, prohibits the exercise of, or is
+conditioned on the non-exercise of one or more of the rights that are
+specifically granted under this License.  You may not convey a covered
+work if you are a party to an arrangement with a third party that is
+in the business of distributing software, under which you make payment
+to the third party based on the extent of your activity of conveying
+the work, and under which the third party grants, to any of the
+parties who would receive the covered work from you, a discriminatory
+patent license (a) in connection with copies of the covered work
+conveyed by you (or copies made from those copies), or (b) primarily
+for and in connection with specific products or compilations that
+contain the covered work, unless you entered into that arrangement,
+or that patent license was granted, prior to 28 March 2007.
+
+  Nothing in this License shall be construed as excluding or limiting
+any implied license or other defenses to infringement that may
+otherwise be available to you under applicable patent law.
+
+  12. No Surrender of Others' Freedom.
+
+  If conditions are imposed on you (whether by court order, agreement or
+otherwise) that contradict the conditions of this License, they do not
+excuse you from the conditions of this License.  If you cannot convey a
+covered work so as to satisfy simultaneously your obligations under this
+License and any other pertinent obligations, then as a consequence you may
+not convey it at all.  For example, if you agree to terms that obligate you
+to collect a royalty for further conveying from those to whom you convey
+the Program, the only way you could satisfy both those terms and this
+License would be to refrain entirely from conveying the Program.
+
+  13. Use with the GNU Affero General Public License.
+
+  Notwithstanding any other provision of this License, you have
+permission to link or combine any covered work with a work licensed
+under version 3 of the GNU Affero General Public License into a single
+combined work, and to convey the resulting work.  The terms of this
+License will continue to apply to the part which is the covered work,
+but the special requirements of the GNU Affero General Public License,
+section 13, concerning interaction through a network will apply to the
+combination as such.
+
+  14. Revised Versions of this License.
+
+  The Free Software Foundation may publish revised and/or new versions of
+the GNU General Public License from time to time.  Such new versions will
+be similar in spirit to the present version, but may differ in detail to
+address new problems or concerns.
+
+  Each version is given a distinguishing version number.  If the
+Program specifies that a certain numbered version of the GNU General
+Public License "or any later version" applies to it, you have the
+option of following the terms and conditions either of that numbered
+version or of any later version published by the Free Software
+Foundation.  If the Program does not specify a version number of the
+GNU General Public License, you may choose any version ever published
+by the Free Software Foundation.
+
+  If the Program specifies that a proxy can decide which future
+versions of the GNU General Public License can be used, that proxy's
+public statement of acceptance of a version permanently authorizes you
+to choose that version for the Program.
+
+  Later license versions may give you additional or different
+permissions.  However, no additional obligations are imposed on any
+author or copyright holder as a result of your choosing to follow a
+later version.
+
+  15. Disclaimer of Warranty.
+
+  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+  16. Limitation of Liability.
+
+  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
+THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
+GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
+USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
+DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
+PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
+EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+
+  17. Interpretation of Sections 15 and 16.
+
+  If the disclaimer of warranty and limitation of liability provided
+above cannot be given local legal effect according to their terms,
+reviewing courts shall apply local law that most closely approximates
+an absolute waiver of all civil liability in connection with the
+Program, unless a warranty or assumption of liability accompanies a
+copy of the Program in return for a fee.
+
+                     END OF TERMS AND CONDITIONS
+
+            How to Apply These Terms to Your New Programs
+
+  If you develop a new program, and you want it to be of the greatest
+possible use to the public, the best way to achieve this is to make it
+free software which everyone can redistribute and change under these terms.
+
+  To do so, attach the following notices to the program.  It is safest
+to attach them to the start of each source file to most effectively
+state the exclusion of warranty; and each file should have at least
+the "copyright" line and a pointer to where the full notice is found.
+
+    {one line to give the program's name and a brief idea of what it does.}
+    Copyright (C) {year}  {name of author}
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Also add information on how to contact you by electronic and paper mail.
+
+  If the program does terminal interaction, make it output a short
+notice like this when it starts in an interactive mode:
+
+    {project}  Copyright (C) {year}  {fullname}
+    This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
+    This is free software, and you are welcome to redistribute it
+    under certain conditions; type `show c' for details.
+
+The hypothetical commands `show w' and `show c' should show the appropriate
+parts of the General Public License.  Of course, your program's commands
+might be different; for a GUI interface, you would use an "about box".
+
+  You should also get your employer (if you work as a programmer) or school,
+if any, to sign a "copyright disclaimer" for the program, if necessary.
+For more information on this, and how to apply and follow the GNU GPL, see
+<http://www.gnu.org/licenses/>.
+
+  The GNU General Public License does not permit incorporating your program
+into proprietary programs.  If your program is a subroutine library, you
+may consider it more useful to permit linking proprietary applications with
+the library.  If this is what you want to do, use the GNU Lesser General
+Public License instead of this License.  But first, please read
+<http://www.gnu.org/philosophy/why-not-lgpl.html>.
+
+```
+
+`README.md`:
+
+```md
+# open.mp anti-cheat
+
+a native open.mp component (c++) that detects client modifications by asking the client to read its own memory and comparing the result against known cheat signatures
+
+it detects s0beit, sobfox, cleo 4 / cleo 5, moonloader, silentpatch, sampfuncs, modified vorbisfile.dll, ultrawh, improved deagle, stealthremastered, sensfix, silentaim, fakemobile, [faker5-style clientcheck spoofers](#countering-faker5), [scc_ac_bypass-style clientcheck spoofers](#countering-scc_ac_bypass), and disallowed client versions.
+
+## how it works
+
+each detection lives in its own module under `src/detection/` (memory, version, poison, mobile, raknet, faker5, scc). the component receives player/network/tick events, fans them to the modules, and each module reports hits through one path that applies the configured action. the mobile and raknet modules read raw packets and are off by default.
+
+needs cmake 3.19+ and a 32-bit c/c++ toolchain. open.mp is 32-bit, so a 64-bit build will not load.
+
+```
+./bootstrap.sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+output is `anticheat.so` (linux) or `anticheat.dll` (windows). on fedora the 32-bit libs are `glibc-devel.i686 libstdc++-devel.i686 libgcc.i686`. on cmake 4.x add `-DCMAKE_POLICY_VERSION_MINIMUM=3.5`. to build without the pawn api pass `-DAC_ENABLE_PAWN=OFF`.
+
+## install with sampctl
+
+with [sampctl](https://github.com/Southclaws/sampctl), add it to your server's `pawn.json`:
+
+```json
+"dependencies": [
+  "ricardoofnl/open.mp-anticheat"
+]
+```
+
+or run:
+
+```
+sampctl install ricardoofnl/open.mp-anticheat
+```
+
+sampctl fetches the latest release and extracts `anticheat.so` / `anticheat.dll` and `anticheat.cfg` into `components/`, and `anticheat.inc` onto the compiler include path. `sampctl ensure` / `sampctl run` then picks it up.
+
+## install manually
+
+copy `anticheat.so` (linux) or `anticheat.dll` (windows) plus `anticheat.cfg` into your server's `components/` folder, and put `pawn/anticheat.inc` on your compiler include path. then `#include <anticheat>` in your gamemode.
+
+## config
+
+`components/anticheat.cfg` uses `key = value` with `#` comments. set `log_only = 1` first on a live server to watch for false positives before enforcing. toggle detectors with `module.memory|version|poison|mobile|raknet|faker5|scc`, set the version whitelist with `allowed_versions`, and set per-cheat responses with `action.<cheat> = ignore|warn|kick|ban`.
+
+## pawn api
+
+```
+forward OnPlayerCheatDetected(playerid, cheatid, action); // return 0 to suppress the built-in action
+
+native AC_SetEnabled(bool:toggle);
+native bool:AC_IsEnabled();
+native bool:AC_AddException(playerid, cheatid);
+native bool:AC_RemoveException(playerid, cheatid);
+native bool:AC_IsPlayerMobile(playerid);
+native AC_GetLastCheat(playerid);
+native bool:AC_GetCheatName(cheatid, name[], len = sizeof(name));
+```
+
+## notes
+
+detection by memory signature is heuristic and can false-positive across game builds, so use `log_only`, per-cheat actions and exceptions to tune it. silentpatch and modified vorbisfile default to `warn` because they are common and often benign. this is a defensive tool for a server operator's own server.
+
+```
+
+`anticheat.cfg`:
+
+```cfg
+# open.mp anti-cheat configuration.
+# copy this file to your server's components/anticheat.cfg (next to the
+# anticheat.so / anticheat.dll). every setting is optional; the values shown
+# are the defaults. lines starting with # are comments.
+
+# master switch.
+enabled = 1
+
+# detect and log everything but never kick/ban. use this first on a live server
+# to check for false positives before you start enforcing.
+log_only = 0
+
+# announce detections to admins (reserved; currently logs to console).
+announce = 1
+
+# timing.
+ban_duration_minutes   = 180    # 0 = permanent
+kick_delay_ms          = 1500   # grace before the kick, so the message shows
+evaluate_delay_ms      = 2500    # after connect, when collected checks are judged
+spawn_recheck_delay_ms = 1800    # after spawn, second wave of checks
+
+# detection modules. the two raw-raknet ones are off by default because they
+# peek at raw packets; enable them only after testing on your setup.
+module.memory  = 1
+module.version = 1
+module.poison  = 1
+module.mobile  = 0     # rpc 25 join checksum: legit-mobile whitelist + fakemobile
+module.raknet  = 0     # rpc 103 serialization anomaly (s0beit)
+module.faker5  = 1     # detect faker5-style clientcheck spoofers (clean disk image vs live memory)
+module.scc     = 1     # detect scc_ac_bypass-style static clientcheck spoofers (constant reply, blind to offset/count)
+
+# allowed client versions (comma separated). empty = the built-in list.
+allowed_versions = 0.3.7-R3,0.3.7-R4,0.3.7-R5,0.3.DL-R1
+
+# legit mobile client identity.
+mobile_gpci     = ED40ED0E8089CC44C08EE9580F4C8C44EE8EE990
+mobile_checksum = 0xBEEF
+
+# per-cheat actions: ignore | warn | kick | ban
+# (omit a line to use the built-in default shown here)
+action.s0beit             = kick
+action.cleo               = kick
+action.cleo_moonloader    = kick
+action.silentpatch        = warn
+action.sampfuncs          = kick
+action.vorbisfile         = warn
+action.ultrawh            = kick
+action.silentaim          = kick
+action.improved_deagle    = kick
+action.stealth_remastered = kick
+action.sensfix            = kick
+action.s0beit_raknet      = kick
+action.fakemobile         = ban
+action.modded_client      = kick
+action.faker5             = kick
+action.scc                = kick
+
+```
+
+`bootstrap.sh`:
+
+```sh
+#!/usr/bin/env bash
+#
+# Fetch the open.mp SDK + network + pawn dependencies into lib/. Run once after
+# cloning this repo (or instead of `git submodule update --init --recursive` if
+# you didn't clone with submodules).
+#
+set -e
+cd "$(dirname "$0")"
+mkdir -p lib
+
+clone() {
+	url="$1"
+	dst="$2"
+	if [ -e "$dst/CMakeLists.txt" ] || [ -d "$dst/.git" ]; then
+		echo "== $dst already present, skipping"
+	else
+		echo "== cloning $url -> $dst"
+		git clone --recursive --depth 1 "$url" "$dst"
+	fi
+}
+
+# --recursive matters for the SDK (it pulls glm / robin-hood / span-lite /
+# string-view-lite as its own submodules).
+clone https://github.com/openmultiplayer/open.mp-sdk      lib/sdk
+clone https://github.com/openmultiplayer/open.mp-network  lib/network
+clone https://github.com/openmultiplayer/compiler         lib/pawn
+clone https://github.com/openmultiplayer/pawn-natives      lib/pawn-natives
+# legacy sa-mp plugin sdk (for the plugins/ build)
+clone https://github.com/AmyrAhmady/samp-plugin-sdk        lib/samp-plugin-sdk
+
+echo
+echo "Done. Configure & build with:"
+echo "  cmake -S . -B build -DCMAKE_BUILD_TYPE=Release"
+echo "  cmake --build build --config Release"
+
+```
+
+`pawn.json`:
+
+```json
+{
+	"user": "ricardoofnl",
+	"repo": "open.mp-anticheat",
+	"resources": [
+		{
+			"name": "^anticheat-.*-linux\\.zip$",
+			"platform": "linux",
+			"archive": true,
+			"includes": ["includes"],
+			"files": {
+				"components/anticheat.so": "components/",
+				"components/anticheat.cfg": "components/"
+			}
+		},
+		{
+			"name": "^anticheat-.*-windows\\.zip$",
+			"platform": "windows",
+			"archive": true,
+			"includes": ["includes"],
+			"files": {
+				"components/anticheat.dll": "components/",
+				"components/anticheat.cfg": "components/"
+			}
+		}
+	]
+}
+
+```
+
+`pawn/anticheat.inc`:
+
+```inc
+// anticheat.inc - pawn api for the open.mp anti-cheat component (#include <anticheat>; needs the component built with ac_enable_pawn).
+
+#if defined _INC_anticheat
+	#endinput
+#endif
+#define _INC_anticheat
+
+// cheat ids (mirror the component's cheatid enum)
+#define AC_CHEAT_NONE                (0)
+#define AC_CHEAT_S0BEIT              (1)
+#define AC_CHEAT_CLEO_2              (2)
+#define AC_CHEAT_CLEO_3              (3)
+#define AC_CHEAT_CLEO_4              (4)
+#define AC_CHEAT_CLEO_MOONLOADER_5   (5)
+#define AC_CHEAT_CLEO_MOONLOADER_6   (6)
+#define AC_CHEAT_CLEO_7              (7)
+#define AC_CHEAT_SILENTPATCH         (8)
+#define AC_CHEAT_SAMPFUNCS           (9)
+#define AC_CHEAT_SAMPFUNCS_2         (10)
+#define AC_CHEAT_S0BEIT_2            (11)
+#define AC_CHEAT_MOD_VORBISFILE      (12)
+#define AC_CHEAT_ULTRAWH             (13)
+#define AC_CHEAT_SILENTAIM           (14)
+#define AC_CHEAT_IMPROVED_DEAGLE     (15)
+#define AC_CHEAT_STEALTH_REMASTERED  (16)
+#define AC_CHEAT_SENSFIX             (17)
+#define AC_CHEAT_S0BEIT_RAKNET       (18)
+#define AC_CHEAT_FAKEMOBILE          (19)
+#define AC_CHEAT_MODDED_CLIENT       (20)
+#define AC_CHEAT_FAKER5              (21)
+#define AC_CHEAT_SCC_BYPASS          (22)
+
+// actions (as configured per cheat)
+#define AC_ACTION_IGNORE             (0)
+#define AC_ACTION_WARN               (1)
+#define AC_ACTION_KICK               (2)
+#define AC_ACTION_BAN                (3)
+
+// natives
+native AC_SetEnabled(bool:toggle);
+native bool:AC_IsEnabled();
+native bool:AC_AddException(playerid, cheatid);
+native bool:AC_RemoveException(playerid, cheatid);
+native bool:AC_IsPlayerMobile(playerid);
+native AC_GetLastCheat(playerid);
+native bool:AC_GetCheatName(cheatid, name[], len = sizeof(name));
+
+// called before the built-in action; return 0 to suppress it, 1 (default) to apply the configured action.
+forward OnPlayerCheatDetected(playerid, cheatid, action);
+
+```
+
+`src/ac_types.hpp`:
+
+```hpp
+#pragma once
+
+// shared types used across the anti-cheat modules. sdk-free so the legacy plugin can share it.
+
+// what to do when a module reports a detection; mapped per cheat in the config.
+enum class CheatAction
+{
+	Ignore = 0, // do nothing (tolerated/benign mods like silentpatch)
+	Warn = 1, // log + message the player, let them keep playing
+	Kick = 2, // log + message + kick
+	Ban = 3, // log + message + timed ban (config: ban_duration_minutes)
+};
+
+// stable id per detectable cheat; values match the reference filterscript's cheatvalues.
+enum CheatId
+{
+	Cheat_None = 0,
+	Cheat_S0beit = 1,
+	Cheat_CLEO_2 = 2,
+	Cheat_CLEO_3 = 3,
+	Cheat_CLEO_4 = 4,
+	Cheat_CLEO_MoonLoader_5 = 5,
+	Cheat_CLEO_MoonLoader_6 = 6,
+	Cheat_CLEO_7 = 7,
+	Cheat_SilentPatch = 8,
+	Cheat_SampFuncs = 9,
+	Cheat_SampFuncs_2 = 10,
+	Cheat_S0beit_2 = 11,
+	Cheat_ModVorbisFile = 12,
+	Cheat_UltraWH = 13,
+	Cheat_SilentAim = 14,
+	Cheat_ImprovedDeagle = 15,
+	Cheat_StealthRemastered = 16,
+	Cheat_Sensfix = 17,
+	Cheat_S0beit_RakNet = 18,
+	Cheat_FakeMobile = 19, // mobile module (not in the reference's numeric table)
+	Cheat_ModdedClient = 20, // generic modified-client flag (samp.dll mismatch)
+	Cheat_FakeR5 = 21, // faker5-style clientcheck spoofer (answers memory reads from a clean disk image)
+	Cheat_SccBypass = 22, // scc_ac_bypass-style static clientcheck-response spoofer (replays a baked constant)
+
+	Cheat_Max
+};
+
+// one memory signature: read a byte at `address` (obfuscated) and compare to `expected`; mismatch flags `cheat`.
+struct MemorySignature
+{
+	int address;
+	int expected;
+	CheatId cheat;
+};
+
+```
+
+`src/anticheat_component.cpp`:
+
+```cpp
+#include "anticheat_component.hpp"
+
+#include <chrono>
+#include <cstdarg>
+#include <cstdio>
+#include <string>
+#include <utility>
+
+#include "detection/faker5_check.hpp"
+#include "detection/memory_check.hpp"
+#include "detection/mobile_check.hpp"
+#include "detection/poison_check.hpp"
+#include "detection/raknet_check.hpp"
+#include "detection/scc_check.hpp"
+#include "detection/signatures.hpp"
+#include "detection/version_check.hpp"
+#include "player_data.hpp"
+
+#ifdef AC_ENABLE_PAWN
+#include "natives.hpp"
+#endif
+
+using std::chrono::milliseconds;
+
+AntiCheatComponent* AntiCheatComponent::getInstance()
+{
+	if (instance_ == nullptr)
+		instance_ = new AntiCheatComponent();
+	return instance_;
+}
+
+// lifecycle
+
+void AntiCheatComponent::onLoad(ICore* c)
+{
+	core_ = c;
+
+	config_.load("components/anticheat.cfg");
+
+	// per-session random offset range for the memory checks (reference goffset): two bytes >= 32 apart, aligned to 4.
+	{
+		std::uniform_int_distribution<int> d(0, 255);
+		int a, b;
+		do
+		{
+			a = d(rng_);
+			b = d(rng_);
+			if (a > b)
+				std::swap(a, b);
+		} while (b - a < 32);
+		offLo_ = a & 0xFC;
+		offHi_ = b & 0xFC;
+		// keep every memory-check offset past the 0x10 window a static clientcheck
+		// spoofer (scc_ac_bypass) uses to recognise a signature address: outside it the
+		// spoofer passes the real read through and the cheat it was hiding surfaces.
+		if (offLo_ < 0x14)
+			offLo_ = 0x14;
+		if (offHi_ <= offLo_)
+			offHi_ = offLo_ + 4;
+	}
+
+	enforcement_.reset(new Enforcement(core_, config_, scheduler_));
+	buildModules();
+
+	IPlayerPool& players = core_->getPlayers();
+	players.getPlayerConnectDispatcher().addEventHandler(this);
+	players.getPlayerSpawnDispatcher().addEventHandler(this);
+	players.getPlayerCheckDispatcher().addEventHandler(this);
+	core_->getEventDispatcher().addEventHandler(this); // ontick
+
+	log("Anti-Cheat v1.0.0 loaded. modules: memory=%d version=%d poison=%d mobile=%d raknet=%d faker5=%d scc=%d | log_only=%d",
+		config_.moduleMemory(), config_.moduleVersion(), config_.modulePoison(),
+		config_.moduleMobile(), config_.moduleRaknet(), config_.moduleFaker5(), config_.moduleScc(), config_.logOnly());
+}
+
+void AntiCheatComponent::buildModules()
+{
+	modules_.clear();
+
+	// mobile first: it sets the mobile-whitelist flag during onconnect so the other modules skip verified mobile clients.
+	MobileCheck* mobile = new MobileCheck(*this);
+	mobileModule_ = mobile;
+	modules_.push_back(std::unique_ptr<IDetectionModule>(mobile));
+
+	modules_.push_back(std::unique_ptr<IDetectionModule>(new MemoryCheck(*this)));
+	modules_.push_back(std::unique_ptr<IDetectionModule>(new VersionCheck(*this)));
+	modules_.push_back(std::unique_ptr<IDetectionModule>(new PoisonCheck(*this)));
+	modules_.push_back(std::unique_ptr<IDetectionModule>(new FakeR5Check(*this)));
+	modules_.push_back(std::unique_ptr<IDetectionModule>(new SccCheck(*this)));
+
+	RaknetCheck* raknet = new RaknetCheck(*this);
+	raknetModule_ = raknet;
+	modules_.push_back(std::unique_ptr<IDetectionModule>(raknet));
+}
+
+void AntiCheatComponent::onInit(IComponentList* components)
+{
+#ifdef AC_ENABLE_PAWN
+	pawn_ = components->queryComponent<IPawnComponent>();
+	if (pawn_)
+	{
+		ac_pawn::onInit(components, pawn_);
+		pawn_->getEventDispatcher().addEventHandler(this);
+	}
+#else
+	(void)components;
+#endif
+}
+
+void AntiCheatComponent::onReady()
+{
+	if (rpcRegistered_)
+		return;
+	// register the raw-raknet handlers only if enabled: rpc 25 (join checksum) and rpc 103 (check-response anomaly) on every network.
+	if (config_.moduleMobile() && mobileModule_)
+		core_->addPerRPCInEventHandler<25>(mobileModule_);
+	if (config_.moduleRaknet() && raknetModule_)
+		core_->addPerRPCInEventHandler<103>(raknetModule_);
+	rpcRegistered_ = true;
+}
+
+void AntiCheatComponent::onFree(IComponent* component)
+{
+#ifdef AC_ENABLE_PAWN
+	if (component == pawn_)
+		pawn_ = nullptr;
+#else
+	(void)component;
+#endif
+}
+
+void AntiCheatComponent::free()
+{
+	delete this;
+}
+
+void AntiCheatComponent::reset()
+{
+	scheduler_.clear();
+}
+
+AntiCheatComponent::~AntiCheatComponent()
+{
+	if (!core_)
+		return;
+
+	if (rpcRegistered_)
+	{
+		if (mobileModule_)
+			core_->removePerRPCInEventHandler<25>(mobileModule_);
+		if (raknetModule_)
+			core_->removePerRPCInEventHandler<103>(raknetModule_);
+	}
+
+	IPlayerPool& players = core_->getPlayers();
+	players.getPlayerConnectDispatcher().removeEventHandler(this);
+	players.getPlayerSpawnDispatcher().removeEventHandler(this);
+	players.getPlayerCheckDispatcher().removeEventHandler(this);
+	core_->getEventDispatcher().removeEventHandler(this);
+#ifdef AC_ENABLE_PAWN
+	if (pawn_)
+		pawn_->getEventDispatcher().removeEventHandler(this);
+#endif
+}
+
+// player events
+
+void AntiCheatComponent::onPlayerConnect(IPlayer& player)
+{
+	if (!enabled() || player.isBot())
+		return;
+
+	PlayerACData* data = dataOf(player);
+	if (!data)
+	{
+		data = new PlayerACData();
+		if (!player.addExtension(data, true))
+		{
+			delete data;
+			data = dataOf(player);
+		}
+	}
+	else
+	{
+		data->reset();
+	}
+	if (!data)
+		return;
+
+	for (auto& m : modules_)
+	{
+		if (m->enabled(config_))
+			m->onConnect(player, *data);
+	}
+
+	// schedule the "evaluate everything collected" pass, like the reference's checkplayer timer.
+	const int id = player.getID();
+	scheduler_.after(id, milliseconds(config_.evaluateDelayMs()), [this, id]()
+		{
+			IPlayer* p = core_->getPlayers().get(id);
+			if (!p)
+				return;
+			PlayerACData* d = dataOf(*p);
+			if (d && !d->evaluated)
+			{
+				d->evaluated = true;
+				evaluatePlayer(*p, *d);
+			}
+		});
+}
+
+void AntiCheatComponent::onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason)
+{
+	(void)reason;
+	scheduler_.cancelOwner(player.getID());
+	// the extension is auto-freed by the player pool (addextension autodelete).
+}
+
+void AntiCheatComponent::onPlayerSpawn(IPlayer& player)
+{
+	if (!enabled())
+		return;
+	PlayerACData* data = dataOf(player);
+	if (!data || data->spawnChecked)
+		return;
+	data->spawnChecked = true;
+
+	const int id = player.getID();
+	std::uniform_int_distribution<int> jitter(0, 400);
+	const int delay = config_.spawnRecheckDelayMs() + jitter(rng_);
+	scheduler_.after(id, milliseconds(delay), [this, id]()
+		{
+			IPlayer* p = core_->getPlayers().get(id);
+			if (!p)
+				return;
+			PlayerACData* d = dataOf(*p);
+			if (!d)
+				return;
+			for (auto& m : modules_)
+			{
+				if (m->enabled(config_))
+					m->onSpawn(*p, *d);
+			}
+		});
+}
+
+void AntiCheatComponent::onClientCheckResponse(IPlayer& player, int actionType, int address, int results)
+{
+	if (!enabled())
+		return;
+	PlayerACData* data = dataOf(player);
+	if (!data)
+		return;
+	for (auto& m : modules_)
+	{
+		if (m->enabled(config_))
+			m->onCheckResponse(player, *data, actionType, address, results);
+	}
+}
+
+void AntiCheatComponent::onTick(Microseconds elapsed, TimePoint now)
+{
+	(void)elapsed;
+	(void)now;
+	scheduler_.process();
+}
+
+// evaluation
+
+void AntiCheatComponent::evaluatePlayer(IPlayer& player, PlayerACData& data)
+{
+	const StringView version = player.getClientVersionName();
+	const std::string versionStr(version.data(), version.size());
+	const bool allowed = data.mobilePlayer || config_.isAllowedVersion(versionStr.c_str());
+	if (!allowed)
+	{
+		rejectVersion(player, version);
+		return;
+	}
+	for (auto& m : modules_)
+	{
+		if (m->enabled(config_))
+			m->onEvaluate(player, data);
+	}
+
+	// everything the modules flagged gets reported once, here.
+	for (int c = Cheat_None + 1; c < Cheat_Max; ++c)
+	{
+		if (data.pending[c])
+			report(player, data, static_cast<CheatId>(c));
+	}
+}
+
+void AntiCheatComponent::rejectVersion(IPlayer& player, StringView version)
+{
+	const StringView name = player.getName();
+	log("player %.*s uses disallowed client version '%.*s' - rejecting", PRINT_VIEW(name), PRINT_VIEW(version));
+	if (config_.logOnly())
+		return;
+
+	std::string list;
+	for (const std::string& v : config_.allowedVersions())
+	{
+		if (!list.empty())
+			list += ", ";
+		list += v;
+	}
+	std::string msg = "[Anti-Cheat] Your client version is not allowed. Allowed: " + list;
+	player.sendClientMessage(Colour::FromRGBA(0xFF0000AA), msg);
+
+	const int id = player.getID();
+	scheduler_.after(id, milliseconds(config_.kickDelayMs()), [this, id]()
+		{
+			if (IPlayer* p = core_->getPlayers().get(id))
+				p->kick();
+		});
+}
+
+// report policy
+
+void AntiCheatComponent::report(IPlayer& player, PlayerACData& data, CheatId cheat)
+{
+	if (cheat <= Cheat_None || cheat >= Cheat_Max)
+		return;
+	if (data.exception[cheat] || data.reported[cheat])
+		return;
+	data.reported[cheat] = true;
+	data.lastCheat = cheat;
+
+	const signatures::CheatInfo& info = signatures::cheatInfo(cheat);
+	const CheatAction action = config_.actionFor(cheat);
+	const StringView name = player.getName();
+	const int pid = player.getID();
+
+#ifdef AC_ENABLE_PAWN
+	// let the gamemode see it first and optionally suppress the built-in action.
+	if (firePawnDetected(pid, static_cast<int>(cheat), static_cast<int>(action)) == 0)
+	{
+		log("detected %s on %.*s (id %d) - handled by script", info.name, PRINT_VIEW(name), pid);
+		return;
+	}
+#endif
+
+	log("detected %s on %.*s (id %d)", info.name, PRINT_VIEW(name), pid);
+
+	if (config_.logOnly())
+		return;
+
+	switch (action)
+	{
+	case CheatAction::Ignore:
+		break;
+	case CheatAction::Warn:
+		enforcement_->warn(player, info.name);
+		break;
+	case CheatAction::Kick:
+		enforcement_->kick(player, info.name);
+		break;
+	case CheatAction::Ban:
+		enforcement_->ban(player, info.name);
+		break;
+	}
+}
+
+// helpers
+
+int AntiCheatComponent::nextMemOffset()
+{
+	const int span = (offHi_ - offLo_) / 4 + 1;
+	std::uniform_int_distribution<int> d(0, span > 0 ? span - 1 : 0);
+	return d(rng_) * 4 + offLo_;
+}
+
+PlayerACData* AntiCheatComponent::dataOf(IPlayer& player)
+{
+	return queryExtension<PlayerACData>(player);
+}
+
+PlayerACData* AntiCheatComponent::dataOf(int playerid)
+{
+	IPlayer* p = core_ ? core_->getPlayers().get(playerid) : nullptr;
+	return p ? dataOf(*p) : nullptr;
+}
+
+void AntiCheatComponent::log(const char* fmt, ...)
+{
+	if (!core_)
+		return;
+	char buf[512];
+	va_list ap;
+	va_start(ap, fmt);
+	vsnprintf(buf, sizeof(buf), fmt, ap);
+	va_end(ap);
+	core_->printLn("[AC] %s", buf);
+}
+
+// native helpers
+
+bool AntiCheatComponent::addException(int playerid, int cheatid)
+{
+	if (cheatid <= Cheat_None || cheatid >= Cheat_Max)
+		return false;
+	PlayerACData* d = dataOf(playerid);
+	if (!d)
+		return false;
+	d->exception[cheatid] = true;
+	return true;
+}
+
+bool AntiCheatComponent::removeException(int playerid, int cheatid)
+{
+	if (cheatid <= Cheat_None || cheatid >= Cheat_Max)
+		return false;
+	PlayerACData* d = dataOf(playerid);
+	if (!d)
+		return false;
+	d->exception[cheatid] = false;
+	return true;
+}
+
+bool AntiCheatComponent::isMobile(int playerid)
+{
+	PlayerACData* d = dataOf(playerid);
+	return d && d->mobilePlayer;
+}
+
+int AntiCheatComponent::lastCheat(int playerid)
+{
+	PlayerACData* d = dataOf(playerid);
+	return d ? static_cast<int>(d->lastCheat) : 0;
+}
+
+#ifdef AC_ENABLE_PAWN
+void AntiCheatComponent::onAmxLoad(IPawnScript& script)
+{
+	ac_pawn::onAmxLoad(script);
+}
+
+void AntiCheatComponent::onAmxUnload(IPawnScript& script)
+{
+	(void)script;
+}
+
+int AntiCheatComponent::firePawnDetected(int playerid, int cheatid, int action)
+{
+	return pawn_ ? ac_pawn::fireDetected(pawn_, playerid, cheatid, action) : 1;
+}
+#endif
+
+```
+
+`src/anticheat_component.hpp`:
+
+```hpp
+#pragma once
+
+// the anti-cheat component: owns config/scheduler/enforcement/modules, receives player/network/tick events, and turns detections into actions via report().
+
+#include <memory>
+#include <random>
+#include <vector>
+
+#include <sdk.hpp>
+
+#ifdef AC_ENABLE_PAWN
+#include <Server/Components/Pawn/pawn.hpp>
+#endif
+
+#include "config.hpp"
+#include "detection/module.hpp"
+#include "enforcement.hpp"
+#include "scheduler.hpp"
+
+class PlayerACData;
+class MobileCheck;
+class RaknetCheck;
+
+class AntiCheatComponent final
+	: public IComponent
+	, public PlayerConnectEventHandler
+	, public PlayerSpawnEventHandler
+	, public PlayerCheckEventHandler
+	, public CoreEventHandler
+	, public IACContext
+#ifdef AC_ENABLE_PAWN
+	, public PawnEventHandler
+#endif
+{
+public:
+	PROVIDE_UID(0xAC12CEA7C0DE0001);
+
+	static AntiCheatComponent* getInstance();
+
+	// icomponent
+	StringView componentName() const override { return "Anti-Cheat"; }
+	SemanticVersion componentVersion() const override { return SemanticVersion(1, 0, 0, 0); }
+	void onLoad(ICore* c) override;
+	void onInit(IComponentList* components) override;
+	void onReady() override;
+	void onFree(IComponent* component) override;
+	void free() override;
+	void reset() override;
+
+	// player events
+	void onPlayerConnect(IPlayer& player) override;
+	void onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason) override;
+	void onPlayerSpawn(IPlayer& player) override;
+	void onClientCheckResponse(IPlayer& player, int actionType, int address, int results) override;
+
+	// core tick
+	void onTick(Microseconds elapsed, TimePoint now) override;
+
+	// iaccontext
+	ICore* core() override { return core_; }
+	const Config& config() const override { return config_; }
+	Scheduler& scheduler() override { return scheduler_; }
+	int nextMemOffset() override;
+	void report(IPlayer& player, PlayerACData& data, CheatId cheat) override;
+
+#ifdef AC_ENABLE_PAWN
+	// pawn script (dis)loads
+	void onAmxLoad(IPawnScript& script) override;
+	void onAmxUnload(IPawnScript& script) override;
+#endif
+
+	// helpers used by the pawn natives
+	bool addException(int playerid, int cheatid);
+	bool removeException(int playerid, int cheatid);
+	bool isMobile(int playerid);
+	int lastCheat(int playerid);
+	void setEnabled(bool on) { runtimeEnabled_ = on; }
+	bool enabled() const { return runtimeEnabled_ && config_.enabled(); }
+
+	~AntiCheatComponent();
+
+private:
+	void buildModules();
+	void evaluatePlayer(IPlayer& player, PlayerACData& data);
+	void rejectVersion(IPlayer& player, StringView version);
+	PlayerACData* dataOf(IPlayer& player);
+	PlayerACData* dataOf(int playerid);
+	void log(const char* fmt, ...);
+
+	ICore* core_ = nullptr;
+	Config config_;
+	Scheduler scheduler_;
+	std::unique_ptr<Enforcement> enforcement_;
+
+	std::vector<std::unique_ptr<IDetectionModule>> modules_;
+	// non-owning views of the two raw-raknet modules (also held in modules_);
+	// needed to register their per-rpc handlers.
+	MobileCheck* mobileModule_ = nullptr;
+	RaknetCheck* raknetModule_ = nullptr;
+
+	std::mt19937 rng_ { std::random_device {}() };
+	int offLo_ = 0;
+	int offHi_ = 4;
+
+	bool runtimeEnabled_ = true;
+	bool rpcRegistered_ = false;
+
+#ifdef AC_ENABLE_PAWN
+	IPawnComponent* pawn_ = nullptr;
+	// fire onplayercheatdetected in every script; returns 0 if a script asked to suppress the built-in action, 1 otherwise.
+	int firePawnDetected(int playerid, int cheatid, int action);
+#endif
+
+	inline static AntiCheatComponent* instance_ = nullptr;
+};
+
+```
+
+`src/config.cpp`:
+
+```cpp
+#include "config.hpp"
+
+#include <algorithm>
+#include <cctype>
+#include <cstdlib>
+#include <fstream>
+#include <sstream>
+
+#include "detection/signatures.hpp"
+
+namespace
+{
+
+std::string trim(const std::string& s)
+{
+	size_t a = 0, b = s.size();
+	while (a < b && std::isspace(static_cast<unsigned char>(s[a])))
+		++a;
+	while (b > a && std::isspace(static_cast<unsigned char>(s[b - 1])))
+		--b;
+	return s.substr(a, b - a);
+}
+
+std::string lower(std::string s)
+{
+	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c)
+		{ return static_cast<char>(std::tolower(c)); });
+	return s;
+}
+
+std::vector<std::string> splitCsv(const std::string& s)
+{
+	std::vector<std::string> out;
+	std::stringstream ss(s);
+	std::string item;
+	while (std::getline(ss, item, ','))
+	{
+		item = trim(item);
+		if (!item.empty())
+			out.push_back(item);
+	}
+	return out;
+}
+
+CheatAction parseAction(const std::string& v, CheatAction def)
+{
+	std::string s = lower(trim(v));
+	if (s == "ignore" || s == "off" || s == "0")
+		return CheatAction::Ignore;
+	if (s == "warn" || s == "allow" || s == "log")
+		return CheatAction::Warn;
+	if (s == "kick")
+		return CheatAction::Kick;
+	if (s == "ban")
+		return CheatAction::Ban;
+	return def;
+}
+
+} // namespace
+
+void Config::load(const std::string& path)
+{
+	std::ifstream f(path);
+	if (f)
+	{
+		std::string line;
+		while (std::getline(f, line))
+		{
+			// strip inline comments and surrounding whitespace.
+			size_t hash = line.find('#');
+			if (hash != std::string::npos)
+				line = line.substr(0, hash);
+			line = trim(line);
+			if (line.empty())
+				continue;
+			size_t eq = line.find('=');
+			if (eq == std::string::npos)
+				continue;
+			std::string key = lower(trim(line.substr(0, eq)));
+			std::string val = trim(line.substr(eq + 1));
+			if (!key.empty())
+				kv_[key] = val;
+		}
+	}
+
+	applyKnownKeys();
+}
+
+void Config::applyKnownKeys()
+{
+	enabled_ = getBool("enabled", enabled_);
+	logOnly_ = getBool("log_only", logOnly_);
+	announce_ = getBool("announce", announce_);
+	banMinutes_ = getInt("ban_duration_minutes", banMinutes_);
+	kickDelayMs_ = getInt("kick_delay_ms", kickDelayMs_);
+	evalDelayMs_ = getInt("evaluate_delay_ms", evalDelayMs_);
+	spawnDelayMs_ = getInt("spawn_recheck_delay_ms", spawnDelayMs_);
+
+	modMemory_ = getBool("module.memory", modMemory_);
+	modVersion_ = getBool("module.version", modVersion_);
+	modPoison_ = getBool("module.poison", modPoison_);
+	modMobile_ = getBool("module.mobile", modMobile_);
+	modRaknet_ = getBool("module.raknet", modRaknet_);
+	modFaker5_ = getBool("module.faker5", modFaker5_);
+	modScc_ = getBool("module.scc", modScc_);
+
+	// allowed client versions: config override, else the reference whitelist.
+	auto it = kv_.find("allowed_versions");
+	if (it != kv_.end() && !it->second.empty())
+		allowedVersions_ = splitCsv(it->second);
+	if (allowedVersions_.empty())
+	{
+		for (int i = 0; i < signatures::kAllowedClientCount; ++i)
+			allowedVersions_.emplace_back(signatures::kAllowedClients[i]);
+	}
+
+	mobileGpci_ = get("mobile_gpci", signatures::kMobileGpci);
+	// mobile_checksum may be given as decimal or 0x-prefixed hex.
+	{
+		std::string cs = get("mobile_checksum", "");
+		if (!cs.empty())
+			mobileChecksum_ = static_cast<uint16_t>(std::strtoul(cs.c_str(), nullptr, 0));
+		else
+			mobileChecksum_ = signatures::kMobileChecksum;
+	}
+}
+
+std::string Config::get(const std::string& key, const std::string& def) const
+{
+	auto it = kv_.find(key);
+	return it != kv_.end() ? it->second : def;
+}
+
+bool Config::getBool(const std::string& key, bool def) const
+{
+	auto it = kv_.find(key);
+	if (it == kv_.end())
+		return def;
+	std::string v = lower(trim(it->second));
+	return v == "1" || v == "true" || v == "yes" || v == "on";
+}
+
+int Config::getInt(const std::string& key, int def) const
+{
+	auto it = kv_.find(key);
+	if (it == kv_.end())
+		return def;
+	try
+	{
+		return std::stoi(it->second, nullptr, 0);
+	}
+	catch (...)
+	{
+		return def;
+	}
+}
+
+CheatAction Config::actionFor(CheatId id) const
+{
+	const signatures::CheatInfo& info = signatures::cheatInfo(id);
+	auto it = kv_.find(std::string("action.") + info.configKey);
+	if (it != kv_.end())
+		return parseAction(it->second, info.defaultAction);
+	return info.defaultAction;
+}
+
+bool Config::isAllowedVersion(const char* version) const
+{
+	for (const std::string& v : allowedVersions_)
+	{
+		if (v == version)
+			return true;
+	}
+	return false;
+}
+
+```
+
+`src/config.hpp`:
+
+```hpp
+#pragma once
+
+// config loaded from a key=value file (components/anticheat.cfg); every key is optional.
+
+#include <cstdint>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include "ac_types.hpp"
+
+class Config
+{
+public:
+	// parse `path` if it exists; otherwise keep defaults.
+	void load(const std::string& path);
+
+	bool enabled() const { return enabled_; }
+	bool logOnly() const { return logOnly_; } // detect + log but never punish
+	bool announceToAdmins() const { return announce_; }
+
+	int banDurationMinutes() const { return banMinutes_; }
+	int kickDelayMs() const { return kickDelayMs_; }
+	int evaluateDelayMs() const { return evalDelayMs_; }
+	int spawnRecheckDelayMs() const { return spawnDelayMs_; }
+
+	bool moduleMemory() const { return modMemory_; }
+	bool moduleVersion() const { return modVersion_; }
+	bool modulePoison() const { return modPoison_; }
+	bool moduleMobile() const { return modMobile_; } // raw raknet, off by default
+	bool moduleRaknet() const { return modRaknet_; } // raw raknet, off by default
+	bool moduleFaker5() const { return modFaker5_; } // faker5 / clientcheck-spoofer detector
+	bool moduleScc() const { return modScc_; } // scc_ac_bypass / static clientcheck-spoofer detector
+
+	// resolve the configured action for a cheat (per-cheat override, else the
+	// signature's built-in default).
+	CheatAction actionFor(CheatId id) const;
+
+	bool isAllowedVersion(const char* version) const;
+	const std::vector<std::string>& allowedVersions() const { return allowedVersions_; }
+	const std::string& mobileGpci() const { return mobileGpci_; }
+	uint16_t mobileChecksum() const { return mobileChecksum_; }
+
+private:
+	std::string get(const std::string& key, const std::string& def) const;
+	bool getBool(const std::string& key, bool def) const;
+	int getInt(const std::string& key, int def) const;
+	void applyKnownKeys();
+
+	std::unordered_map<std::string, std::string> kv_;
+
+	bool enabled_ = true;
+	bool logOnly_ = false;
+	bool announce_ = true;
+	int banMinutes_ = 180;
+	int kickDelayMs_ = 1500;
+	int evalDelayMs_ = 2500;
+	int spawnDelayMs_ = 1800;
+	bool modMemory_ = true;
+	bool modVersion_ = true;
+	bool modPoison_ = true;
+	bool modMobile_ = false;
+	bool modRaknet_ = false;
+	bool modFaker5_ = true;
+	bool modScc_ = true;
+	std::vector<std::string> allowedVersions_;
+	std::string mobileGpci_;
+	uint16_t mobileChecksum_ = 0xBEEF;
+};
+
+```
+
+`src/detection/faker5_check.cpp`:
+
+```cpp
+#include "faker5_check.hpp"
+
+#include "../config.hpp"
+#include "../player_data.hpp"
+#include "signatures.hpp"
+
+bool FakeR5Check::enabled(const Config& cfg) const
+{
+	return cfg.moduleFaker5();
+}
+
+void FakeR5Check::onConnect(IPlayer& player, PlayerACData& data)
+{
+	// faker5 only runs inside a classic samp.dll client; the omp client and verified
+	// mobile clients lay memory out differently and would false-positive on header reads.
+	if (data.mobilePlayer || player.isUsingOmp())
+		return;
+
+	// read the pe-header of samp.dll (0x45) and gta_sa.exe (0x5): a real client answers
+	// from the live image (non-zero), faker5 resolves the header rva to file-offset 0.
+	for (int i = 0; i < signatures::kHeaderProbeCount; ++i)
+	{
+		data.faker5SampHeader[i] = signatures::kSampHeaderProbe[i];
+		player.sendClientCheck(0x45, signatures::kSampHeaderProbe[i], 0x0, 0x4);
+
+		data.faker5GtaHeader[i] = signatures::kGtaHeaderProbe[i];
+		player.sendClientCheck(0x5, signatures::kGtaHeaderProbe[i], 0x0, 0x4);
+	}
+
+	// in-section canaries: real data for both a genuine client and faker5; confirm the
+	// client answers checks with real bytes at all before we trust an all-zero header.
+	data.faker5SampCanaryAddr = signatures::kSampCanaryAddr;
+	player.sendClientCheck(0x45, signatures::kSampCanaryAddr, 0x0, 0x4);
+
+	data.faker5GtaCanaryAddr = signatures::kGtaCanaryAddr;
+	player.sendClientCheck(0x5, signatures::kGtaCanaryAddr, 0x0, 0x4);
+}
+
+void FakeR5Check::onCheckResponse(IPlayer& player, PlayerACData& data, int actionType, int address, int results)
+{
+	(void)player;
+	if (actionType != 0x45 && actionType != 0x5)
+		return;
+
+	const int value = results & 0xFF;
+
+	// canaries: any non-zero answer proves the client reads real bytes for this module.
+	if (actionType == 0x45 && address == data.faker5SampCanaryAddr)
+	{
+		if (value != 0)
+			data.faker5SampCanaryLive = true;
+		return;
+	}
+	if (actionType == 0x5 && address == data.faker5GtaCanaryAddr)
+	{
+		if (value != 0)
+			data.faker5GtaCanaryLive = true;
+		return;
+	}
+
+	for (int i = 0; i < signatures::kHeaderProbeCount; ++i)
+	{
+		if (actionType == 0x45 && address == data.faker5SampHeader[i])
+		{
+			value == 0 ? ++data.faker5SampZero : ++data.faker5SampNonZero;
+			return;
+		}
+		if (actionType == 0x5 && address == data.faker5GtaHeader[i])
+		{
+			value == 0 ? ++data.faker5GtaZero : ++data.faker5GtaNonZero;
+			return;
+		}
+	}
+}
+
+void FakeR5Check::onEvaluate(IPlayer& player, PlayerACData& data)
+{
+	(void)player;
+	if (data.mobilePlayer)
+		return;
+
+	// a live canary but only-zero header answers means the module was read from a clean
+	// disk image, not live memory - the faker5 signature. evaluate samp and gta apart so
+	// a spoofer that only ships one clean file (e.g. no r5.dll) is still caught on the other.
+	const bool sampSpoof = data.faker5SampCanaryLive && data.faker5SampNonZero == 0 && data.faker5SampZero >= 2;
+	const bool gtaSpoof = data.faker5GtaCanaryLive && data.faker5GtaNonZero == 0 && data.faker5GtaZero >= 2;
+	if (sampSpoof || gtaSpoof)
+		data.pending[Cheat_FakeR5] = true;
+}
+
+```
+
+`src/detection/faker5_check.hpp`:
+
+```hpp
+#pragma once
+
+// module 6: counters faker5-style clientcheck spoofers. faker5 hooks the memory
+// query (0x5/0x45) and answers from a clean gta_sa.exe / r5.dll on disk instead
+// of live memory, hiding every in-memory cheat. it reads via file offset, so a
+// pe-header address resolves to file-offset 0 and comes back 0 - where a real
+// client returns live header bytes. that mismatch is the detection.
+
+#include "module.hpp"
+
+class FakeR5Check final : public IDetectionModule
+{
+public:
+	explicit FakeR5Check(IACContext& ctx)
+		: ctx_(ctx)
+	{
+	}
+
+	const char* name() const override { return "faker5"; }
+	bool enabled(const Config& cfg) const override;
+
+	void onConnect(IPlayer& player, PlayerACData& data) override;
+	void onCheckResponse(IPlayer& player, PlayerACData& data, int actionType, int address, int results) override;
+	void onEvaluate(IPlayer& player, PlayerACData& data) override;
+
+private:
+	IACContext& ctx_;
+};
+
+```
+
+`src/detection/memory_check.cpp`:
+
+```cpp
+#include "memory_check.hpp"
+
+#include "../config.hpp"
+#include "../player_data.hpp"
+#include "signatures.hpp"
+
+bool MemoryCheck::enabled(const Config& cfg) const
+{
+	return cfg.moduleMemory();
+}
+
+void MemoryCheck::onConnect(IPlayer& player, PlayerACData& data)
+{
+	for (int i = 0; i < signatures::kMemorySignatureCount; ++i)
+	{
+		const int base = signatures::unscramble(signatures::kMemorySignatures[i].address);
+		const int off = ctx_.nextMemOffset();
+		// send base-off with the offset added back client-side: effective read is `base`, but a cheat can't key off a fixed value.
+		data.memBase[i] = base - off;
+		player.sendClientCheck(0x5, base - off, off, 0x4);
+	}
+	// one extra 0x5 probe (as in the reference) just to confirm the client answers 0x5 checks at all (see onevaluate).
+	player.sendClientCheck(0x5, 0x53EA05, 0x0, 0x4);
+}
+
+void MemoryCheck::onCheckResponse(IPlayer& player, PlayerACData& data, int actionType, int address, int results)
+{
+	(void)player;
+	if (actionType != 0x5)
+		return;
+
+	if (!data.mobilePlayer)
+		data.responded = true;
+
+	for (int i = 0; i < signatures::kMemorySignatureCount; ++i)
+	{
+		if (address == data.memBase[i])
+		{
+			if ((results & 0xFF) != (signatures::kMemorySignatures[i].expected & 0xFF))
+				data.pending[signatures::kMemorySignatures[i].cheat] = true;
+			break;
+		}
+	}
+}
+
+void MemoryCheck::onEvaluate(IPlayer& player, PlayerACData& data)
+{
+	(void)player;
+	// a client that never answered any 0x5 check (and isn't verified mobile) is blocking the memory query - treat it as modded.
+	if (!data.responded && !data.mobilePlayer)
+		data.pending[Cheat_ModdedClient] = true;
+}
+
+```
+
+`src/detection/memory_check.hpp`:
+
+```hpp
+#pragma once
+
+// module 1: byte-signature memory scan (0x5); on connect reads every kmemorysignatures address, a mismatch flags the cheat.
+
+#include "module.hpp"
+
+class MemoryCheck final : public IDetectionModule
+{
+public:
+	explicit MemoryCheck(IACContext& ctx)
+		: ctx_(ctx)
+	{
+	}
+
+	const char* name() const override { return "memory"; }
+	bool enabled(const Config& cfg) const override;
+
+	void onConnect(IPlayer& player, PlayerACData& data) override;
+	void onCheckResponse(IPlayer& player, PlayerACData& data, int actionType, int address, int results) override;
+	void onEvaluate(IPlayer& player, PlayerACData& data) override;
+
+private:
+	IACContext& ctx_;
+};
+
+```
+
+`src/detection/mobile_check.cpp`:
+
+```cpp
+#include "mobile_check.hpp"
+
+#include <cctype>
+
+#include <bitstream.hpp>
+
+#include "../config.hpp"
+#include "../player_data.hpp"
+
+namespace
+{
+bool equalsIgnoreCase(StringView a, StringView b)
+{
+	if (a.size() != b.size())
+		return false;
+	for (size_t i = 0; i < a.size(); ++i)
+	{
+		if (std::tolower(static_cast<unsigned char>(a[i])) != std::tolower(static_cast<unsigned char>(b[i])))
+			return false;
+	}
+	return true;
+}
+}
+
+bool MobileCheck::enabled(const Config& cfg) const
+{
+	return cfg.moduleMobile();
+}
+
+bool MobileCheck::onReceive(IPlayer& peer, NetworkBitStream& bs)
+{
+	// peek the trailing uint16 checksum, then restore the read pointer so the server processes the join normally. never block
+	const int startOffset = bs.GetReadOffset();
+
+	uint32_t version = 0, challenge = 0;
+	uint8_t mod = 0, nickLen = 0, authLen = 0, cverLen = 0;
+	uint16_t checksum = 0;
+
+	bool ok = bs.readUINT32(version) && bs.readUINT8(mod) && bs.readUINT8(nickLen);
+	if (ok)
+	{
+		bs.IgnoreBits(int(nickLen) * 8);
+		ok = bs.readUINT32(challenge) && bs.readUINT8(authLen);
+	}
+	if (ok)
+	{
+		bs.IgnoreBits(int(authLen) * 8);
+		ok = bs.readUINT8(cverLen);
+	}
+	if (ok)
+	{
+		bs.IgnoreBits(int(cverLen) * 8);
+		ok = bs.readUINT16(checksum);
+	}
+
+	bs.SetReadOffset(startOffset);
+
+	if (ok)
+		pendingChecksum_[&peer] = checksum;
+	return true;
+}
+
+void MobileCheck::onConnect(IPlayer& player, PlayerACData& data)
+{
+	uint16_t checksum = 0;
+	auto it = pendingChecksum_.find(&player);
+	if (it != pendingChecksum_.end())
+	{
+		checksum = it->second;
+		pendingChecksum_.erase(it);
+	}
+	data.joinChecksum = checksum;
+
+	const std::string& gpci = ctx_.config().mobileGpci();
+	if (!equalsIgnoreCase(player.getSerial(), StringView(gpci.c_str())))
+		return; // not a mobile serial - nothing to decide
+
+	if (checksum == ctx_.config().mobileChecksum())
+		data.mobilePlayer = true; // verified legit mobile client
+	else
+		ctx_.report(player, data, Cheat_FakeMobile); // mobile serial, wrong checksum
+}
+
+```
+
+`src/detection/mobile_check.hpp`:
+
+```hpp
+#pragma once
+
+// module 4: mobile / fakemobile (raw raknet) - hooks join rpc 25 for the checksum, whitelists legit mobile and flags fakemobile. off by default.
+
+#include <cstdint>
+#include <unordered_map>
+
+#include "module.hpp"
+
+class MobileCheck final : public IDetectionModule, public SingleNetworkInEventHandler
+{
+public:
+	explicit MobileCheck(IACContext& ctx)
+		: ctx_(ctx)
+	{
+	}
+
+	const char* name() const override { return "mobile"; }
+	bool enabled(const Config& cfg) const override;
+
+	void onConnect(IPlayer& player, PlayerACData& data) override;
+
+	// singlenetworkineventhandler: incoming join rpc (id 25).
+	bool onReceive(IPlayer& peer, NetworkBitStream& bs) override;
+
+private:
+	IACContext& ctx_;
+	// checksum from the join rpc, keyed by player, consumed on connect (the extension doesn't exist yet when the join rpc arrives).
+	std::unordered_map<const IPlayer*, uint16_t> pendingChecksum_;
+};
+
+```
+
+`src/detection/module.hpp`:
+
+```hpp
+#pragma once
+
+// the interface every detection technique implements; the component fans events to modules and each reports via iaccontext::report.
+
+#include <sdk.hpp>
+
+#include "../ac_types.hpp"
+
+class PlayerACData;
+class Config;
+class Scheduler;
+
+// shared services handed to every module, plus the single reporting path.
+struct IACContext
+{
+	virtual ~IACContext() { }
+
+	virtual ICore* core() = 0;
+	virtual const Config& config() const = 0;
+	virtual Scheduler& scheduler() = 0;
+
+	// a fresh randomised 4-aligned offset for a memory check (reference setmemoffset), shared by memory and version modules.
+	virtual int nextMemOffset() = 0;
+
+	// report a detection: applies exceptions/dedup/config action/logging/pawn callback/enforcement. modules never kick directly.
+	virtual void report(IPlayer& player, PlayerACData& data, CheatId cheat) = 0;
+};
+
+struct IDetectionModule
+{
+	virtual ~IDetectionModule() { }
+
+	virtual const char* name() const = 0;
+
+	// whether this module runs, given the config.
+	virtual bool enabled(const Config& cfg) const = 0;
+
+	// a player connected: (re)set per-module state and fire any client checks.
+	virtual void onConnect(IPlayer& player, PlayerACData& data) { }
+
+	// a player spawned: used for the second wave of checks in the reference.
+	virtual void onSpawn(IPlayer& player, PlayerACData& data) { }
+
+	// the client answered a sendclientcheck; modules ignore action types that aren't theirs (0x5=memory, 0x45=version, 0x47/0x48=poison).
+	virtual void onCheckResponse(IPlayer& player, PlayerACData& data, int actionType, int address, int results) { }
+
+	// deadline reached (~evaluate_delay_ms after connect): inspect collected responses and flag anything found.
+	virtual void onEvaluate(IPlayer& player, PlayerACData& data) { }
+};
+
+```
+
+`src/detection/poison_check.cpp`:
+
+```cpp
+#include "poison_check.hpp"
+
+#include "../config.hpp"
+#include "../player_data.hpp"
+
+bool PoisonCheck::enabled(const Config& cfg) const
+{
+	return cfg.modulePoison();
+}
+
+void PoisonCheck::onConnect(IPlayer& player, PlayerACData& data)
+{
+	if (data.mobilePlayer)
+		return;
+
+	// seed suspicion, then send the real 0x47/0x48 reads of address 0; a clean client's answer (address 0) clears it in oncheckresponse.
+	data.suspicious = true;
+	player.sendClientCheck(0x47, 0x0, 0x0, 0x4);
+	player.sendClientCheck(0x48, 0x0, 0x0, 0x4);
+}
+
+void PoisonCheck::onCheckResponse(IPlayer& player, PlayerACData& data, int actionType, int address, int results)
+{
+	(void)player;
+	// only a client that reflects the poisoned address/value keeps suspicion.
+	if (actionType == 0x47)
+		data.suspicious = (address == 0xCECECE && (results & 0xFF) == 255);
+	else if (actionType == 0x48)
+		data.suspicious = (address == 0xDEDEDE && (results & 0xFF) == 255);
+}
+
+void PoisonCheck::onEvaluate(IPlayer& player, PlayerACData& data)
+{
+	(void)player;
+	if (data.suspicious && !data.mobilePlayer)
+		data.pending[Cheat_ModdedClient] = true;
+}
+
+```
+
+`src/detection/poison_check.hpp`:
+
+```hpp
+#pragma once
+
+// module 3: anti-tamper poison check (0x47/0x48); a clean client clears suspicion, one that echoes the poisoned rpc keeps it (reference 0xcecece/0xdedede trick).
+
+#include "module.hpp"
+
+class PoisonCheck final : public IDetectionModule
+{
+public:
+	explicit PoisonCheck(IACContext& ctx)
+		: ctx_(ctx)
+	{
+	}
+
+	const char* name() const override { return "poison"; }
+	bool enabled(const Config& cfg) const override;
+
+	void onConnect(IPlayer& player, PlayerACData& data) override;
+	void onCheckResponse(IPlayer& player, PlayerACData& data, int actionType, int address, int results) override;
+	void onEvaluate(IPlayer& player, PlayerACData& data) override;
+
+private:
+	IACContext& ctx_;
+};
+
+```
+
+`src/detection/raknet_check.cpp`:
+
+```cpp
+#include "raknet_check.hpp"
+
+#include <cstdint>
+
+#include <bitstream.hpp>
+
+#include "../config.hpp"
+#include "../player_data.hpp"
+
+bool RaknetCheck::enabled(const Config& cfg) const
+{
+	return cfg.moduleRaknet();
+}
+
+bool RaknetCheck::onReceive(IPlayer& peer, NetworkBitStream& bs)
+{
+	PlayerACData* data = queryExtension<PlayerACData>(peer);
+	if (!data)
+		return true;
+
+	// peek actionid / memaddr / retndata, then restore the read pointer for the server's own handler. never block.
+	const int startOffset = bs.GetReadOffset();
+
+	uint8_t actionid = 0;
+	int32_t memaddr = 0;
+	uint8_t retndata = 0;
+	const bool ok = bs.readUINT8(actionid) && bs.readINT32(memaddr) && bs.readUINT8(retndata);
+
+	bs.SetReadOffset(startOffset);
+
+	// the clean samp.dll check value is 192; a raw response that differs means the high-level path was tampered with (s0beit).
+	if (ok && actionid == 0x45 && data->sampCheckAddr != 0 && memaddr == data->sampCheckAddr && (retndata & 0xFF) != 192)
+		data->pending[Cheat_S0beit_RakNet] = true;
+
+	return true;
+}
+
+```
+
+`src/detection/raknet_check.hpp`:
+
+```hpp
+#pragma once
+
+// module 5: raknet serialization anomaly (raw raknet) - reads the samp.dll check off rpc 103 (bypassing the s0beit-hooked path); off by default, needs the version module's sampcheckaddr.
+
+#include "module.hpp"
+
+class RaknetCheck final : public IDetectionModule, public SingleNetworkInEventHandler
+{
+public:
+	explicit RaknetCheck(IACContext& ctx)
+		: ctx_(ctx)
+	{
+	}
+
+	const char* name() const override { return "raknet"; }
+	bool enabled(const Config& cfg) const override;
+
+	// singlenetworkineventhandler: incoming client-check response rpc (id 103).
+	bool onReceive(IPlayer& peer, NetworkBitStream& bs) override;
+
+private:
+	IACContext& ctx_;
+};
+
+```
+
+`src/detection/scc_check.cpp`:
+
+```cpp
+#include "scc_check.hpp"
+
+#include "../config.hpp"
+#include "../player_data.hpp"
+#include "signatures.hpp"
+
+bool SccCheck::enabled(const Config& cfg) const
+{
+	return cfg.moduleScc();
+}
+
+void SccCheck::onConnect(IPlayer& player, PlayerACData& data)
+{
+	// the spoofer is a classic-client samp.dll asi; the omp client and verified mobile
+	// clients answer 0x5 reads differently and are out of its reach anyway.
+	if (data.mobilePlayer || player.isUsingOmp())
+		return;
+
+	// canary: a read the spoofer does not recognise. a real (non-zero) answer proves the
+	// client answers live reads, so all-constant bait answers mean spoofing, not a dead client.
+	data.sccCanaryAddr = signatures::kSccCanaryAddr;
+	player.sendClientCheck(0x5, signatures::kSccCanaryAddr, 0x0, 0x4);
+
+	for (int i = 0; i < signatures::kSccBaseCount; ++i)
+	{
+		// wire address sits inside the spoofer's [base-0x10, base) window, so it rewrites
+		// every one of these; the three reads differ only in offset/count, which it ignores.
+		const int wire = signatures::kSccBases[i] - signatures::kSccWindowOffset;
+		data.sccProbeAddr[i] = wire;
+		player.sendClientCheck(0x5, wire, signatures::kSccWindowOffset, 0x4); // effective read = base
+		player.sendClientCheck(0x5, wire, 0x0, 0x4);                          // effective read = base - 0x08
+		player.sendClientCheck(0x5, wire, signatures::kSccWindowOffset, 0x1); // effective read = base, 1 byte
+	}
+}
+
+void SccCheck::onCheckResponse(IPlayer& player, PlayerACData& data, int actionType, int address, int results)
+{
+	(void)player;
+	if (actionType != 0x5)
+		return;
+
+	const int value = results & 0xFF;
+
+	if (address == data.sccCanaryAddr)
+	{
+		if (value != 0)
+			data.sccCanaryLive = true;
+		return;
+	}
+
+	for (int i = 0; i < signatures::kSccBaseCount; ++i)
+	{
+		if (address == data.sccProbeAddr[i])
+		{
+			++data.sccCount[i];
+			if (data.sccFirst[i] < 0)
+				data.sccFirst[i] = value;
+			else if (value != data.sccFirst[i])
+				data.sccVaried[i] = true;
+			return;
+		}
+	}
+}
+
+void SccCheck::onEvaluate(IPlayer& player, PlayerACData& data)
+{
+	(void)player;
+	if (data.mobilePlayer)
+		return;
+
+	// a base is "static" if it answered but never varied as we moved the read offset/count.
+	int evaluated = 0, staticBases = 0;
+	for (int i = 0; i < signatures::kSccBaseCount; ++i)
+	{
+		if (data.sccCount[i] >= 2)
+		{
+			++evaluated;
+			if (!data.sccVaried[i])
+				++staticBases;
+		}
+	}
+
+	// enough bases answered, every one of them replayed a constant, and the client
+	// otherwise answers live reads (canary): a static clientcheck-response spoofer.
+	if (data.sccCanaryLive && evaluated >= 3 && staticBases == evaluated)
+		data.pending[Cheat_SccBypass] = true;
+}
+```
+
+`src/detection/scc_check.hpp`:
+
+```hpp
+#pragma once
+
+// module 7: counters scc_ac_bypass-style static clientcheck-response spoofers.
+// the spoofer hooks rpc 103 and, for signature addresses it recognises (a narrow
+// [base-0x10, base) window), replays one hardcoded clean byte - ignoring the read's
+// offset and count. we bait those bases from inside the window, then read the same
+// wire address with different offset/count: a genuine client answers a checksum that
+// moves with the read, the spoofer replays the same constant every time. no variation
+// (plus a live canary proving the client answers real reads) is the detection.
+
+#include "module.hpp"
+
+class SccCheck final : public IDetectionModule
+{
+public:
+	explicit SccCheck(IACContext& ctx)
+		: ctx_(ctx)
+	{
+	}
+
+	const char* name() const override { return "scc"; }
+	bool enabled(const Config& cfg) const override;
+
+	void onConnect(IPlayer& player, PlayerACData& data) override;
+	void onCheckResponse(IPlayer& player, PlayerACData& data, int actionType, int address, int results) override;
+	void onEvaluate(IPlayer& player, PlayerACData& data) override;
+
+private:
+	IACContext& ctx_;
+};
+```
+
+`src/detection/signatures.hpp`:
+
+```hpp
+#pragma once
+
+// the detection database: memory addresses, expected bytes, per-version samp.dll addresses and cheat<->name mapping (from antycheat.pwn).
+
+#include <cstdint>
+#include "../ac_types.hpp"
+
+namespace signatures
+{
+
+// rraddress() in the reference: memory[] addresses have byte 0 and byte 2 swapped (obfuscation); swap them back to get the real address.
+inline int unscramble(int input)
+{
+	return ((input & 0xFF) << 16) + (input & 0xFF00) + ((input & 0xFF0000) >> 16);
+}
+
+// 17 single-byte signatures; addresses are stored scrambled (call unscramble() before sending), a read != `expected` flags `cheat`.
+static const MemorySignature kMemorySignatures[] = {
+	{ 0x06865E, 192, Cheat_S0beit },
+	{ 0xA88774, 72, Cheat_CLEO_2 },
+	{ 0xDB6746, 192, Cheat_CLEO_3 },
+	{ 0xFDB957, 68, Cheat_CLEO_4 },
+	{ 0x52D558, 196, Cheat_CLEO_MoonLoader_5 },
+	{ 0xE4FC58, 64, Cheat_CLEO_MoonLoader_6 },
+	{ 0x1BA246, 8, Cheat_CLEO_7 },
+	{ 0xB0C56F, 200, Cheat_SilentPatch },
+	{ 0xF9855E, 200, Cheat_SampFuncs },
+	{ 0x910152, 204, Cheat_SampFuncs_2 },
+	{ 0xC7FB6E, 196, Cheat_S0beit_2 },
+	{ 0xF4C853, 132, Cheat_ModVorbisFile },
+	{ 0xB47E74, 132, Cheat_UltraWH },
+	{ 0x242C52, 192, Cheat_SilentAim },
+	{ 0x603C74, 200, Cheat_ImprovedDeagle },
+	{ 0x004D58, 132, Cheat_StealthRemastered },
+	{ 0x682252, 132, Cheat_Sensfix },
+};
+static constexpr int kMemorySignatureCount = int(sizeof(kMemorySignatures) / sizeof(kMemorySignatures[0]));
+
+// read repeatedly; a value that changes between reads => raknet/s0beit anomaly.
+static const int kClientAddr[4] = { 0x3A9EB, 0x3AEB9, 0x3AD8D, 0x3A7F2 };
+
+// samp.dll base checks. index: 0=0.3.dl-r1, 1=0.3.7-r5, 2=0.3.7-r4, 3=0.3.7-r3.
+static const int kSampAddr[4] = { 0x41B04, 0x42044, 0x41FF4, 0x41904 };
+
+// faker5 counter: pe-header reads. a real client answers these from the live
+// module image (dos-stub bytes, non-zero); faker5 maps the module from disk and
+// resolves a header rva to file-offset 0, then answers 0 - that is the tell.
+static const int kSampHeaderProbe[] = { 0x40, 0x54, 0x68 }; // samp.dll dos-stub rvas (0x45)
+static const int kGtaHeaderProbe[] = { 0x400040, 0x400054, 0x400068 }; // gta_sa.exe dos-stub addrs (0x5)
+static constexpr int kHeaderProbeCount = int(sizeof(kSampHeaderProbe) / sizeof(kSampHeaderProbe[0]));
+
+// in-section canaries: real data for both a genuine client and faker5; used only
+// to confirm the client actually answers checks (guards against clients that reply 0 to everything).
+static const int kSampCanaryAddr = 0x1000; // samp.dll .text start (0x45)
+static const int kGtaCanaryAddr = 0x401000; // gta_sa.exe .text (0x5)
+
+// scc counter: static-clientcheck-response spoofers (scc_ac_bypass) recognise a
+// signature only inside a [base-0x10, base) window and replay one baked constant,
+// blind to the read's offset/count. bait a few known bases inside that window, then
+// read the same wire address with different offset/count: a genuine client's checksum
+// moves with the read, the spoofer's answer never does. bases must be ones the spoofer
+// knows, i.e. the standard cheat-signature addresses.
+static const int kSccBases[] = { 0x5E8606, 0x4667DB, 0x6FC5B0, 0x5E85F9 };
+static constexpr int kSccBaseCount = int(sizeof(kSccBases) / sizeof(kSccBases[0]));
+static constexpr int kSccWindowOffset = 0x08; // wire = base - 0x08, inside the spoofer's [base-0x10, base) window
+static const int kSccCanaryAddr = 0x401000; // gta_sa.exe .text; the spoofer ignores it, so a real (non-zero) answer proves live reads
+
+// extra per-version samp.dll checks (0x45); each address is two addends (obfuscation) summed then offset-subtracted at send time. same order as ksampaddr.
+static const int kAddCheckConnect[4][2] = {
+	{ 0x6B4D, 0x33D53 }, // 0.3.dl-r1
+	{ 0x247A, 0x38966 }, // 0.3.7-r5
+	{ 0x2B414, 0xF97C }, // 0.3.7-r4
+	{ 0x62EB, 0x343B5 }, // 0.3.7-r3
+};
+static const int kAddCheckSpawn[4][2] = {
+	{ 0x75EA2, 0x2782E }, // 0.3.dl-r1
+	{ 0x3A65F, 0x63231 }, // 0.3.7-r5
+	{ 0x74674, 0x2924C }, // 0.3.7-r4
+	{ 0x3AB43, 0x6263D }, // 0.3.7-r3
+};
+
+// client versions allowed to play (anything else is kicked unless mobile).
+static const char* const kAllowedClients[] = {
+	"0.3.7-R3", "0.3.7-R4", "0.3.7-R5", "0.3.DL-R1"
+};
+static constexpr int kAllowedClientCount = int(sizeof(kAllowedClients) / sizeof(kAllowedClients[0]));
+
+// a legit mobile client has this exact gpci (serial) and sends this checksum in the join rpc; same gpci without it => fakemobile.
+static const char kMobileGpci[] = "ED40ED0E8089CC44C08EE9580F4C8C44EE8EE990";
+static const uint16_t kMobileChecksum = 0xBEEF;
+
+// case-insensitive C-string compare (self-contained; keeps this header sdk-free).
+inline bool ieq(const char* a, const char* b)
+{
+	while (*a && *b)
+	{
+		char ca = *a, cb = *b;
+		if (ca >= 'a' && ca <= 'z')
+			ca -= 32;
+		if (cb >= 'a' && cb <= 'z')
+			cb -= 32;
+		if (ca != cb)
+			return false;
+		++a;
+		++b;
+	}
+	return *a == *b;
+}
+
+// map a client version name to an index into ksampaddr / kaddcheck*, or -1.
+inline int versionIndex(const char* v)
+{
+	if (ieq(v, "0.3.DL-R1"))
+		return 0;
+	if (ieq(v, "0.3.7-R5"))
+		return 1;
+	if (ieq(v, "0.3.7-R4"))
+		return 2;
+	if (ieq(v, "0.3.7-R3"))
+		return 3;
+	return -1;
+}
+
+inline bool isAllowedClient(const char* v)
+{
+	for (int i = 0; i < kAllowedClientCount; ++i)
+	{
+		if (ieq(v, kAllowedClients[i]))
+			return true;
+	}
+	return false;
+}
+
+// name + config key + default action per cheat id; ids for the same logical cheat share a config key (one action per real cheat).
+struct CheatInfo
+{
+	CheatId id;
+	const char* name;
+	const char* configKey;
+	CheatAction defaultAction;
+};
+
+static const CheatInfo kCheatInfo[] = {
+	{ Cheat_S0beit, "S0beit", "s0beit", CheatAction::Kick },
+	{ Cheat_CLEO_2, "CLEO", "cleo", CheatAction::Kick },
+	{ Cheat_CLEO_3, "CLEO", "cleo", CheatAction::Kick },
+	{ Cheat_CLEO_4, "CLEO", "cleo", CheatAction::Kick },
+	{ Cheat_CLEO_MoonLoader_5, "CLEO / MoonLoader", "cleo_moonloader", CheatAction::Kick },
+	{ Cheat_CLEO_MoonLoader_6, "CLEO / MoonLoader", "cleo_moonloader", CheatAction::Kick },
+	{ Cheat_CLEO_7, "CLEO", "cleo", CheatAction::Kick },
+	{ Cheat_SilentPatch, "SilentPatch", "silentpatch", CheatAction::Warn },
+	{ Cheat_SampFuncs, "SampFuncs", "sampfuncs", CheatAction::Kick },
+	{ Cheat_SampFuncs_2, "SampFuncs", "sampfuncs", CheatAction::Kick },
+	{ Cheat_S0beit_2, "S0beit", "s0beit", CheatAction::Kick },
+	{ Cheat_ModVorbisFile, "Modified VorbisFile.dll", "vorbisfile", CheatAction::Warn },
+	{ Cheat_UltraWH, "UltraWH", "ultrawh", CheatAction::Kick },
+	{ Cheat_SilentAim, "Silent Aim", "silentaim", CheatAction::Kick },
+	{ Cheat_ImprovedDeagle, "Improved Deagle", "improved_deagle", CheatAction::Kick },
+	{ Cheat_StealthRemastered, "StealthRemastered", "stealth_remastered", CheatAction::Kick },
+	{ Cheat_Sensfix, "Sensfix.asi", "sensfix", CheatAction::Kick },
+	{ Cheat_S0beit_RakNet, "S0beit / RakNet anomaly", "s0beit_raknet", CheatAction::Kick },
+	{ Cheat_FakeMobile, "FakeMobile", "fakemobile", CheatAction::Ban },
+	{ Cheat_ModdedClient, "Modded client", "modded_client", CheatAction::Kick },
+	{ Cheat_FakeR5, "FakeR5 / ClientCheck spoofer", "faker5", CheatAction::Kick },
+	{ Cheat_SccBypass, "SCC ClientCheck spoofer", "scc", CheatAction::Kick },
+};
+static constexpr int kCheatInfoCount = int(sizeof(kCheatInfo) / sizeof(kCheatInfo[0]));
+
+inline const CheatInfo& cheatInfo(CheatId id)
+{
+	for (int i = 0; i < kCheatInfoCount; ++i)
+	{
+		if (kCheatInfo[i].id == id)
+			return kCheatInfo[i];
+	}
+	static const CheatInfo unknown { Cheat_None, "Unknown", "unknown", CheatAction::Kick };
+	return unknown;
+}
+
+} // namespace signatures
+
+```
+
+`src/detection/version_check.cpp`:
+
+```cpp
+#include "version_check.hpp"
+
+#include <string>
+
+#include "../config.hpp"
+#include "../player_data.hpp"
+#include "signatures.hpp"
+
+// signatures::versionIndex wants a null-terminated string; the SDK StringView isn't guaranteed to be.
+static std::string verName(IPlayer& player)
+{
+	StringView v = player.getClientVersionName();
+	return std::string(v.data(), v.size());
+}
+
+bool VersionCheck::enabled(const Config& cfg) const
+{
+	return cfg.moduleVersion();
+}
+
+void VersionCheck::onConnect(IPlayer& player, PlayerACData& data)
+{
+	// read the four client addresses; they must stay constant across reads.
+	for (int i = 0; i < 4; ++i)
+	{
+		data.clientAddrSent[i] = signatures::kClientAddr[i];
+		data.lastClientRetn[i] = 0;
+		player.sendClientCheck(0x45, signatures::kClientAddr[i], 0x0, 0x4);
+	}
+
+	const int idx = signatures::versionIndex(verName(player).c_str());
+	if (idx < 0)
+		return;
+
+	data.sampCheckAddr = signatures::kSampAddr[idx];
+	for (int k = 0; k < 3; ++k)
+		player.sendClientCheck(0x45, data.sampCheckAddr, 0x0, 0x4);
+
+	// extra connect-wave samp.dll check - non-omp clients only (reference !isplayerusingomp guard; the omp client would false-positive).
+	if (!player.isUsingOmp())
+	{
+		const int off = ctx_.nextMemOffset();
+		const int base = signatures::kAddCheckConnect[idx][0] + signatures::kAddCheckConnect[idx][1];
+		data.addCheckConnectAddr = base - off;
+		player.sendClientCheck(0x45, base - off, off, 0x4);
+	}
+}
+
+void VersionCheck::onSpawn(IPlayer& player, PlayerACData& data)
+{
+	const int idx = signatures::versionIndex(verName(player).c_str());
+	if (idx < 0 || player.isUsingOmp())
+		return;
+
+	const int off = ctx_.nextMemOffset();
+	const int base = signatures::kAddCheckSpawn[idx][0] + signatures::kAddCheckSpawn[idx][1];
+	data.addCheckSpawnAddr = base - off;
+	player.sendClientCheck(0x45, base - off, off, 0x4);
+}
+
+void VersionCheck::onCheckResponse(IPlayer& player, PlayerACData& data, int actionType, int address, int results)
+{
+	(void)player;
+	if (actionType != 0x45)
+		return;
+
+	// connect-wave extra check: a clean client answers 128.
+	if (data.addCheckConnectAddr != 0 && address == data.addCheckConnectAddr && (results & 0xFF) != 128)
+		data.pending[Cheat_CLEO_7] = true;
+
+	// spawn-wave extra check: a clean client answers 192.
+	if (data.addCheckSpawnAddr != 0 && address == data.addCheckSpawnAddr && (results & 0xFF) != 192)
+		data.pending[Cheat_ModdedClient] = true;
+
+	// repeated client-address reads must return the same value every time.
+	for (int i = 0; i < 4; ++i)
+	{
+		if (address == data.clientAddrSent[i])
+		{
+			if (data.lastClientRetn[i] == 0)
+				data.lastClientRetn[i] = results;
+			else if (data.lastClientRetn[i] != results)
+				data.clientAnomaly = true;
+			break;
+		}
+	}
+}
+
+void VersionCheck::onEvaluate(IPlayer& player, PlayerACData& data)
+{
+	(void)player;
+	if (data.clientAnomaly)
+		data.pending[Cheat_S0beit_RakNet] = true;
+}
+
+```
+
+`src/detection/version_check.hpp`:
+
+```hpp
+#pragma once
+
+// module 2: client-version + samp.dll checks (0x45) - per-version probes, repeated-read anomaly, and connect/spawn extra checks for non-omp clients.
+
+#include "module.hpp"
+
+class VersionCheck final : public IDetectionModule
+{
+public:
+	explicit VersionCheck(IACContext& ctx)
+		: ctx_(ctx)
+	{
+	}
+
+	const char* name() const override { return "version"; }
+	bool enabled(const Config& cfg) const override;
+
+	void onConnect(IPlayer& player, PlayerACData& data) override;
+	void onSpawn(IPlayer& player, PlayerACData& data) override;
+	void onCheckResponse(IPlayer& player, PlayerACData& data, int actionType, int address, int results) override;
+	void onEvaluate(IPlayer& player, PlayerACData& data) override;
+
+private:
+	IACContext& ctx_;
+};
+
+```
+
+`src/enforcement.cpp`:
+
+```cpp
+#include "enforcement.hpp"
+
+#include <chrono>
+#include <string>
+
+#include "config.hpp"
+#include "scheduler.hpp"
+
+namespace
+{
+// colours from the reference filterscript.
+const Colour kColError = Colour::FromRGBA(0xA01616FF);
+const Colour kColOk = Colour::FromRGBA(0x20DD6AFF);
+}
+
+void Enforcement::warn(IPlayer& player, const char* cheatName)
+{
+	std::string msg = std::string("[Anti-Cheat] Notice: ") + cheatName + " was detected on your client.";
+	player.sendClientMessage(kColOk, msg);
+}
+
+void Enforcement::kick(IPlayer& player, const char* cheatName)
+{
+	std::string msg = std::string("[Anti-Cheat] Detected: ") + cheatName + ". Remove it and reconnect.";
+	player.sendClientMessage(kColError, msg);
+	scheduleKick(player);
+}
+
+void Enforcement::ban(IPlayer& player, const char* cheatName)
+{
+	std::string msg = std::string("[Anti-Cheat] You have been banned for: ") + cheatName + ".";
+	player.sendClientMessage(kColError, msg);
+
+	const PeerNetworkData& nd = player.getNetworkData();
+	if (nd.network)
+	{
+		PeerAddress::AddressString ip;
+		if (PeerAddress::ToString(nd.networkID.address, ip))
+		{
+			std::string reason = std::string("Anti-Cheat: ") + cheatName;
+			BanEntry entry(ip, player.getName(), StringView(reason.c_str(), reason.size()));
+			const int minutes = cfg_.banDurationMinutes();
+			nd.network->ban(entry, minutes > 0 ? Milliseconds(minutes * 60000) : Milliseconds(0));
+		}
+	}
+
+	scheduleKick(player);
+}
+
+void Enforcement::scheduleKick(IPlayer& player)
+{
+	const int id = player.getID();
+	// look the player back up by id when the timer fires - the iplayer& may be gone by then.
+	sched_.after(id, std::chrono::milliseconds(cfg_.kickDelayMs()), [this, id]()
+		{
+			if (IPlayer* p = core_->getPlayers().get(id))
+				p->kick();
+		});
+}
+
+```
+
+`src/enforcement.hpp`:
+
+```hpp
+#pragma once
+
+// punishment mechanics (messages, delayed kicks, timed bans); policy lives in anticheatcomponent::report.
+
+#include <sdk.hpp>
+
+class Config;
+class Scheduler;
+
+class Enforcement
+{
+public:
+	Enforcement(ICore* core, const Config& cfg, Scheduler& sched)
+		: core_(core)
+		, cfg_(cfg)
+		, sched_(sched)
+	{
+	}
+
+	// log + tell the player, but let them keep playing.
+	void warn(IPlayer& player, const char* cheatName);
+
+	// message the player then kick after the configured delay.
+	void kick(IPlayer& player, const char* cheatName);
+
+	// message the player, add a timed ban on their address, then kick.
+	void ban(IPlayer& player, const char* cheatName);
+
+private:
+	void scheduleKick(IPlayer& player);
+
+	ICore* core_;
+	const Config& cfg_;
+	Scheduler& sched_;
+};
+
+```
+
+`src/main.cpp`:
+
+```cpp
+// open.mp anti-cheat component - c++ port of pevenaider/antycheat on the open.mp sdk.
+
+#include <sdk.hpp>
+
+#include "anticheat_component.hpp"
+
+// called by the server when it loads the binary; returns the component singleton.
+COMPONENT_ENTRY_POINT()
+{
+	return AntiCheatComponent::getInstance();
+}
+
+```
+
+`src/natives.cpp`:
+
+```cpp
+// pawn natives + the onplayercheatdetected callback; the single tu that includes pawn_impl.hpp. compiled only when ac_enable_pawn is defined.
+
+#ifdef AC_ENABLE_PAWN
+
+#include <Server/Components/Pawn/Impl/pawn_natives.hpp>
+#include <Server/Components/Pawn/Impl/pawn_impl.hpp>
+
+#include "anticheat_component.hpp"
+#include "detection/signatures.hpp"
+#include "natives.hpp"
+
+// natives
+
+// ac_setenabled(bool:toggle) - turn detection on/off at runtime.
+SCRIPT_API(AC_SetEnabled, bool(bool toggle))
+{
+	AntiCheatComponent::getInstance()->setEnabled(toggle);
+	return true;
+}
+
+// ac_isenabled() - whether detection is currently running.
+SCRIPT_API(AC_IsEnabled, bool())
+{
+	return AntiCheatComponent::getInstance()->enabled();
+}
+
+// ac_addexception(playerid, cheatid) - stop reporting `cheatid` for this player.
+SCRIPT_API(AC_AddException, bool(int playerid, int cheatid))
+{
+	return AntiCheatComponent::getInstance()->addException(playerid, cheatid);
+}
+
+// ac_removeexception(playerid, cheatid) - undo ac_addexception.
+SCRIPT_API(AC_RemoveException, bool(int playerid, int cheatid))
+{
+	return AntiCheatComponent::getInstance()->removeException(playerid, cheatid);
+}
+
+// ac_isplayermobile(playerid) - true if verified as a legit mobile client.
+SCRIPT_API(AC_IsPlayerMobile, bool(int playerid))
+{
+	return AntiCheatComponent::getInstance()->isMobile(playerid);
+}
+
+// ac_getlastcheat(playerid) - id of the last cheat detected for this player.
+SCRIPT_API(AC_GetLastCheat, int(int playerid))
+{
+	return AntiCheatComponent::getInstance()->lastCheat(playerid);
+}
+
+// ac_getcheatname(cheatid, name[], len) - human name for a cheat id.
+SCRIPT_API(AC_GetCheatName, bool(int cheatid, OutputOnlyString& name))
+{
+	name = StringView(signatures::cheatInfo(static_cast<CheatId>(cheatid)).name);
+	return true;
+}
+
+// component <-> pawn
+
+namespace ac_pawn
+{
+void onInit(IComponentList* components, IPawnComponent* pawn)
+{
+	setAmxFunctions(pawn->getAmxFunctions());
+	setAmxLookups(components);
+}
+
+void onAmxLoad(IPawnScript& script)
+{
+	pawn_natives::AmxLoad(script.GetAMX());
+}
+
+int fireDetected(IPawnComponent* pawn, int playerid, int cheatid, int action)
+{
+	int result = 1;
+	// filterscripts first, then the gamemode - a 0 return from any suppresses the built-in action.
+	for (IPawnScript* script : pawn->sideScripts())
+	{
+		if (script->Call("OnPlayerCheatDetected", DefaultReturnValue_True, playerid, cheatid, action) == 0)
+			result = 0;
+	}
+	if (IPawnScript* main = pawn->mainScript())
+	{
+		if (main->Call("OnPlayerCheatDetected", DefaultReturnValue_True, playerid, cheatid, action) == 0)
+			result = 0;
+	}
+	return result;
+}
+}
+
+#endif // ac_enable_pawn
+
+```
+
+`src/natives.hpp`:
+
+```hpp
+#pragma once
+
+// thin bridge to the pawn layer; the pawn-natives machinery lives in natives.cpp. compiled only when ac_enable_pawn is defined.
+
+#ifdef AC_ENABLE_PAWN
+
+#include <sdk.hpp>
+#include <Server/Components/Pawn/pawn.hpp>
+
+namespace ac_pawn
+{
+// set up the amx function pointers + parameter lookups (call from oninit).
+void onInit(IComponentList* components, IPawnComponent* pawn);
+
+// register this component's natives with a newly loaded script.
+void onAmxLoad(IPawnScript& script);
+
+// fire onplayercheatdetected(playerid, cheatid, action) in every script; returns 0 if any script returned 0 (suppress), else 1.
+int fireDetected(IPawnComponent* pawn, int playerid, int cheatid, int action);
+}
+
+#endif // ac_enable_pawn
+
+```
+
+`src/player_data.hpp`:
+
+```hpp
+#pragma once
+
+// per-player anti-cheat state, attached to each iplayer as an extension (queryextension<playeracdata>).
+
+#include <array>
+#include <cstdint>
+
+#include <sdk.hpp>
+
+#include "ac_types.hpp"
+#include "detection/signatures.hpp"
+
+class PlayerACData final : public IExtension
+{
+public:
+	// unique per-extension id used by queryextension.
+	PROVIDE_EXT_UID(0xAC12CEA7DA7A0001);
+
+	PlayerACData() { resetState(); }
+
+	void reset() override { resetState(); }
+	void freeExtension() override { delete this; }
+
+	// shared flags
+	bool mobilePlayer = false; // verified legit mobile client
+	bool responded = false; // answered at least one 0x5 check
+	bool suspicious = false; // poison module tripped
+	bool spawnChecked = false; // spawn wave already scheduled
+	bool evaluated = false; // evaluate wave already run
+	uint16_t joinChecksum = 0; // trailing checksum from the join rpc (mobile)
+
+	// memory module (0x5)
+	// base address sent for each signature (offset randomised per check); a match is recorded in `pending` below.
+	std::array<int, signatures::kMemorySignatureCount> memBase {};
+
+	// version module (0x45)
+	int sampCheckAddr = 0;
+	std::array<int, 4> clientAddrSent {};
+	std::array<int, 4> lastClientRetn {};
+	int addCheckConnectAddr = 0;
+	int addCheckSpawnAddr = 0;
+	bool clientAnomaly = false;
+
+	// faker5 module (0x45 samp / 0x5 gta pe-header reads)
+	// header probe addresses sent; a spoofer answers them 0 (file-offset resolves to 0).
+	std::array<int, signatures::kHeaderProbeCount> faker5SampHeader {};
+	std::array<int, signatures::kHeaderProbeCount> faker5GtaHeader {};
+	int faker5SampCanaryAddr = 0;
+	int faker5GtaCanaryAddr = 0;
+	int faker5SampZero = 0, faker5SampNonZero = 0;
+	int faker5GtaZero = 0, faker5GtaNonZero = 0;
+	bool faker5SampCanaryLive = false; // an in-section samp read returned real data
+	bool faker5GtaCanaryLive = false; // an in-section gta read returned real data
+
+	// scc module (static clientcheck-response spoofer)
+	// per bait base: wire address probed, first answer seen (-1 = none), answer count,
+	// and whether any answer differed. a spoofer replays one constant, so varied stays false.
+	std::array<int, signatures::kSccBaseCount> sccProbeAddr {};
+	std::array<int, signatures::kSccBaseCount> sccFirst {};
+	std::array<int, signatures::kSccBaseCount> sccCount {};
+	std::array<bool, signatures::kSccBaseCount> sccVaried {};
+	int sccCanaryAddr = 0;
+	bool sccCanaryLive = false; // a live gta read returned real data (the spoofer leaves it alone)
+
+	// reporting bookkeeping
+	// modules record hits here; the component reports every pending cheat once, at the evaluate deadline.
+	std::array<bool, Cheat_Max> pending {}; // detected, awaiting report
+	std::array<bool, Cheat_Max> exception {}; // suppressed via ac_addexception
+	std::array<bool, Cheat_Max> reported {}; // already acted on (dedup)
+	CheatId lastCheat = Cheat_None;
+
+private:
+	void resetState()
+	{
+		mobilePlayer = responded = suspicious = false;
+		spawnChecked = evaluated = clientAnomaly = false;
+		joinChecksum = 0;
+		sampCheckAddr = addCheckConnectAddr = addCheckSpawnAddr = 0;
+		lastCheat = Cheat_None;
+		faker5SampCanaryAddr = faker5GtaCanaryAddr = 0;
+		faker5SampZero = faker5SampNonZero = faker5GtaZero = faker5GtaNonZero = 0;
+		faker5SampCanaryLive = faker5GtaCanaryLive = false;
+		sccCanaryAddr = 0;
+		sccCanaryLive = false;
+		memBase.fill(0);
+		faker5SampHeader.fill(0);
+		faker5GtaHeader.fill(0);
+		sccProbeAddr.fill(0);
+		sccFirst.fill(-1);
+		sccCount.fill(0);
+		sccVaried.fill(false);
+		clientAddrSent.fill(0);
+		lastClientRetn.fill(0);
+		pending.fill(false);
+		exception.fill(false);
+		reported.fill(false);
+	}
+};
+
+```
+
+`src/scheduler.cpp`:
+
+```cpp
+#include "scheduler.hpp"
+
+#include <utility>
+
+void Scheduler::after(int ownerId, std::chrono::milliseconds delay, Task task)
+{
+	entries_.push_back(Entry { Clock::now() + delay, ownerId, std::move(task) });
+}
+
+void Scheduler::process()
+{
+	if (entries_.empty())
+		return;
+
+	const Clock::time_point now = Clock::now();
+
+	// move due tasks out first so a task that schedules more work (or cancels an owner) can't invalidate the container.
+	std::vector<Task> due;
+	for (size_t i = 0; i < entries_.size();)
+	{
+		if (entries_[i].when <= now)
+		{
+			due.push_back(std::move(entries_[i].task));
+			if (i != entries_.size() - 1)
+				entries_[i] = std::move(entries_.back());
+			entries_.pop_back();
+		}
+		else
+		{
+			++i;
+		}
+	}
+
+	for (Task& t : due)
+	{
+		if (t)
+			t();
+	}
+}
+
+void Scheduler::cancelOwner(int ownerId)
+{
+	for (size_t i = 0; i < entries_.size();)
+	{
+		if (entries_[i].ownerId == ownerId)
+		{
+			if (i != entries_.size() - 1)
+				entries_[i] = std::move(entries_.back());
+			entries_.pop_back();
+		}
+		else
+		{
+			++i;
+		}
+	}
+}
+
+```
+
+`src/scheduler.hpp`:
+
+```hpp
+#pragma once
+
+// ontick-driven deferred-task scheduler (replaces settimerex); tasks tagged by owner id (player id) for cancel-on-disconnect.
+
+#include <chrono>
+#include <functional>
+#include <vector>
+
+class Scheduler
+{
+public:
+	using Clock = std::chrono::steady_clock;
+	using Task = std::function<void()>;
+
+	// run `task` after `delay`. `ownerid` lets us cancel it if that player
+	// disconnects before it fires.
+	void after(int ownerId, std::chrono::milliseconds delay, Task task);
+
+	// fire every task whose deadline has passed. call once per server tick.
+	void process();
+
+	// drop all pending tasks belonging to `ownerid`.
+	void cancelOwner(int ownerId);
+
+	void clear() { entries_.clear(); }
+
+private:
+	struct Entry
+	{
+		Clock::time_point when;
+		int ownerId;
+		Task task;
+	};
+
+	std::vector<Entry> entries_;
+};
+
+```
+
+`test/ac_test.pwn`:
+
+```pwn
+// ac_test.pwn - minimal gamemode to exercise the anti-cheat pawn api (compile with the open.mp compiler).
+
+#include <open.mp>
+#include <anticheat>
+
+public OnPlayerCheatDetected(playerid, cheatid, action)
+{
+	new name[48];
+	AC_GetCheatName(cheatid, name);
+
+	new pname[MAX_PLAYER_NAME];
+	GetPlayerName(playerid, pname, sizeof(pname));
+
+	printf("[AC-TEST] %s (id %d) -> cheat %d '%s', action %d", pname, playerid, cheatid, name, action);
+
+	// example policy: let rcon admins bypass everything.
+	if (IsPlayerAdmin(playerid))
+	{
+		printf("[AC-TEST] %s is admin - suppressing action", pname);
+		return 0; // suppress the built-in kick/ban
+	}
+	return 1; // let the component do its thing
+}
+
+public OnPlayerConnect(playerid)
+{
+	// example: this server tolerates silentpatch, so never report it here.
+	AC_AddException(playerid, AC_CHEAT_SILENTPATCH);
+
+	if (AC_IsPlayerMobile(playerid))
+	{
+		SendClientMessage(playerid, 0x20DD6AFF, "Welcome, mobile player!");
+	}
+	return 1;
+}
+
+```
