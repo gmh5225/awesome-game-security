@@ -1,0 +1,1569 @@
+Project Path: arc_alfarom256_rs-ldr_1uvkugjm
+
+Source Tree:
+
+```txt
+arc_alfarom256_rs-ldr_1uvkugjm
+├── Cargo.toml
+├── README.md
+├── build.rs
+├── examples
+│   ├── demo.rs
+│   ├── global_demo.rs
+│   ├── quiet_demo.rs
+│   └── syscall_demo.rs
+└── src
+    └── lib.rs
+
+```
+
+`Cargo.toml`:
+
+```toml
+[package]
+name = "rs-ldr"
+version = "0.2.0"
+edition = "2021"
+build = "build.rs"
+description = "Hash-based dynamic WinAPI resolver (no imports, no strings, salted hashes)"
+
+[lib]
+name = "rs_ldr"
+path = "src/lib.rs"
+
+[[example]]
+name = "demo"
+path = "examples/demo.rs"
+
+[[example]]
+name = "quiet_demo"
+path = "examples/quiet_demo.rs"
+
+[[example]]
+name = "syscall_demo"
+path = "examples/syscall_demo.rs"
+required-features = ["syscalls"]
+
+[[example]]
+name = "global_demo"
+path = "examples/global_demo.rs"
+required-features = ["global"]
+
+[features]
+default = []
+# Per-build salt mixed into djb2. Without it hashes are classic unsalted
+# djb2 (interoperable with existing tools that already know them).
+salt = []
+# Ship the SyscallResolver trait + a reference DirectResolver impl.
+# Consumers can plug in their own (HellsGate, HalosGate, TartarusGate…).
+syscalls = []
+# Lazy global DynApi behind a hand-rolled spinlock. Cross-thread safe.
+global = []
+# Pure-Rust memcpy/memmove/memset/memcmp under #[no_mangle].
+# Enable ONLY under /NODEFAULTLIB (double-definition against vcruntime otherwise).
+intrinsics = []
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
+debug = false
+overflow-checks = false
+
+```
+
+`README.md`:
+
+```md
+# rs-ldr
+
+Hash-based dynamic WinAPI resolution for Rust. No import table, no visible
+strings, no kernel32 dependency for loading.
+
+- **PEB walk** finds loaded modules by hashed name.
+- **Export directory parser** resolves exports by hashed name or ordinal;
+  forwarded exports followed transparently.
+- **`DynApi::load()`** widens an ASCII name and calls `ntdll!LdrLoadDll` —
+  no kernel32 needed.
+- **`obf!` / `obf_str!`** compile-time XOR-obfuscated string literals;
+  decode to zero-on-drop stack buffers.
+- **Optional syscall SSN resolver** — pluggable `SyscallResolver` trait
+  with a reference `DirectResolver` impl (Hell's Gate / Halo's Gate /
+  Tartarus Gate authors slot in their own).
+- **Optional process-wide `DynApi`** behind a hand-rolled spinlock.
+- **Optional `#[no_mangle]` mem intrinsics** for `/NODEFAULTLIB` builds.
+- **`no_std`**, x86_64 only (uses `gs:[0x60]` for PEB access).
+
+## Cargo features
+
+| feature      | effect                                                     |
+|--------------|------------------------------------------------------------|
+| `salt`       | Per-build random `u32` mixed into djb2 + obf keystream.    |
+| `syscalls`   | `SyscallResolver` trait + `DirectResolver` reference impl. |
+| `global`     | Process-wide `DynApi` behind a spinlock (`resolve_global!`)|
+| `intrinsics` | Pure-Rust `memcpy`/`memmove`/`memset`/`memcmp`.            |
+
+## Usage
+
+```rust
+use rs_ldr::{resolve_api, winapi_type, DynApi};
+
+winapi_type!(GetTickCount_t = fn() -> u32);
+
+fn main() {
+    let mut api = DynApi::new();
+    unsafe {
+        let f: GetTickCount_t =
+            resolve_api!(api, "kernel32.dll" :: "GetTickCount" as GetTickCount_t)
+                .expect("resolve");
+        println!("{}", f());
+    }
+}
+```
+
+### String obfuscation
+
+```rust
+use rs_ldr::{obf, obf_str, DynApi};
+
+// Bytes — DynApi::load takes &[u8]:
+let mut api = DynApi::new();
+let name = obf!("kernel32.dll").decoded();
+let k32 = unsafe { api.load(&name) }.unwrap();
+
+// Scoped &str, zeroized at block end:
+obf_str!(path = "C:\\Windows\\System32\\ntdll.dll", {
+    open_it(path);
+});
+```
+
+Encoded bytes live in `.rodata`; decoded plaintext lives on the stack
+inside an `ObfBuf<N>` that `write_volatile`-zeroes itself on `Drop`.
+This defeats `strings` / IDA string window / YARA text signatures — it
+does not defend against a live debugger or memory dump.
+
+### Syscalls
+
+```rust
+use rs_ldr::{hash_ci, ssn, DynApi};
+use rs_ldr::syscalls::{DirectResolver, SyscallResolver};
+
+let mut api = DynApi::new();
+let ntdll = api.get(hash_ci!("ntdll.dll")).unwrap();
+
+let mut r = DirectResolver::new();
+unsafe { r.extract(ntdll); }
+
+let ssn = ssn!(r, "NtOpenProcess").expect("resolve");
+```
+
+## Examples
+
+```
+cargo run --example demo
+cargo run --example quiet_demo
+cargo run --example syscall_demo --features syscalls
+cargo run --example global_demo --features global
+```
+
+## Target
+
+Windows x86_64 only. The PEB walk uses `gs:[0x60]`; adding x86 or ARM64
+support means replacing that block and the LDR offsets. PRs welcome.
+
+```
+
+`build.rs`:
+
+```rs
+use std::time::{SystemTime, UNIX_EPOCH};
+
+fn main() {
+    println!("cargo:rerun-if-changed=build.rs");
+
+    // Per-build salt for djb2 (only relevant when the `salt` feature is
+    // on; still emitted so a rebuild with the feature toggled picks up a
+    // real value). Regenerated every time build.rs runs.
+    let d = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default();
+    let salt: u32 = (d.as_nanos() as u32)
+        .wrapping_mul(0x9E3779B9)
+        .wrapping_add((d.as_secs() as u32).wrapping_mul(0xCC9E2D51));
+    let salt = if salt == 0 { 0xDEADBEEF } else { salt };
+    println!("cargo:rustc-env=RS_LDR_SALT={:08X}", salt);
+
+    // Suppress the CV_INFO_PDB70 debug-directory entry in release —
+    // otherwise the linker embeds the string "<crate>.pdb" as a path
+    // reference in the output binary.
+    let profile = std::env::var("PROFILE").unwrap_or_default();
+    if profile == "release" {
+        println!("cargo:rustc-link-arg=/DEBUG:NONE");
+    }
+}
+
+```
+
+`examples/demo.rs`:
+
+```rs
+//! Full-feature std demo:
+//!   * ntdll pre-cached in `new()`
+//!   * `load()` via LdrLoadDll (no kernel32 dependency)
+//!   * Forwarded-export follow (kernel32!HeapAlloc → KernelBase.HeapAlloc)
+//!   * Compile-time salted hashes (SALT printed for inspection)
+//!   * Ordinal lookup shown too
+
+#![allow(non_camel_case_types)]
+
+use rs_ldr::{resolve_api, winapi_type, DynApi, SALT};
+
+winapi_type!(GetTickCount_t = fn() -> u32);
+winapi_type!(GetCurrentProcessId_t = fn() -> u32);
+winapi_type!(HeapAlloc_t = fn(heap: *mut core::ffi::c_void, flags: u32, sz: usize) -> *mut u8);
+winapi_type!(GetProcessHeap_t = fn() -> *mut core::ffi::c_void);
+winapi_type!(HeapFree_t = fn(heap: *mut core::ffi::c_void, flags: u32, mem: *mut u8) -> i32);
+
+fn main() {
+    println!("SALT = 0x{SALT:08X}");
+
+    unsafe {
+        let mut api = DynApi::new();
+        println!("after new():           {} module(s)", api.len());
+
+        // load() bootstraps LdrLoadDll from ntdll on first call. Zero
+        // touch of kernel32.dll — the module is brought into the cache
+        // through ntdll's own loader.
+        let k32 = api
+            .load(b"kernel32.dll")
+            .expect("LdrLoadDll of kernel32 failed");
+        println!("kernel32.dll (via LdrLoadDll) = 0x{:016X}", k32 as usize);
+        println!("after load(k32):       {} module(s)", api.len());
+
+        // Direct exports.
+        let get_tick: GetTickCount_t =
+            resolve_api!(api, "kernel32.dll" :: "GetTickCount" as GetTickCount_t)
+                .expect("GetTickCount");
+        let get_pid: GetCurrentProcessId_t =
+            resolve_api!(api, "kernel32.dll" :: "GetCurrentProcessId" as GetCurrentProcessId_t)
+                .expect("GetCurrentProcessId");
+        println!("GetTickCount()               = {}", get_tick());
+        println!("GetCurrentProcessId()        = {}", get_pid());
+
+        // ==== FORWARDED EXPORTS ====
+        // Modern kernel32!HeapAlloc / HeapFree are ASCII forwarders into
+        // KERNELBASE.dll. resolve_in() detects the RVA-inside-export-dir
+        // marker, parses "KERNELBASE.HeapAlloc", auto-loads KERNELBASE
+        // via PEB (already mapped as a k32 dependency), then resolves.
+        let heap_alloc: HeapAlloc_t =
+            resolve_api!(api, "kernel32.dll" :: "HeapAlloc" as HeapAlloc_t)
+                .expect("HeapAlloc (forwarded)");
+        let heap_free: HeapFree_t =
+            resolve_api!(api, "kernel32.dll" :: "HeapFree" as HeapFree_t)
+                .expect("HeapFree (forwarded)");
+        let get_heap: GetProcessHeap_t =
+            resolve_api!(api, "kernel32.dll" :: "GetProcessHeap" as GetProcessHeap_t)
+                .expect("GetProcessHeap");
+        println!("HeapAlloc      (forwarded)   = 0x{:016X}", heap_alloc as usize);
+        println!("HeapFree       (forwarded)   = 0x{:016X}", heap_free as usize);
+
+        // Execute the forwarded chain.
+        let heap = get_heap();
+        let mem = heap_alloc(heap, 0, 128);
+        let freed = heap_free(heap, 0, mem);
+        println!("  heap=0x{:X}  alloc(128)=0x{:X}  free={}",
+                 heap as usize, mem as usize, freed);
+
+        println!("\nfinal cache ({} modules):", api.len());
+        for (h, base) in api.iter() {
+            println!("    hash=0x{h:08X}  base=0x{:016X}", base as usize);
+        }
+    }
+}
+
+```
+
+`examples/global_demo.rs`:
+
+```rs
+//! Process-wide `DynApi` behind a spinlock.
+//!
+//! Build: cargo build --release --example global_demo --features global
+
+#![allow(non_camel_case_types)]
+
+use rs_ldr::{resolve_global, winapi_type};
+
+winapi_type!(GetTickCount_t = fn() -> u32);
+winapi_type!(GetCurrentThreadId_t = fn() -> u32);
+
+fn main() {
+    unsafe {
+        // Prime the global — load() is optional since the resolve_global!
+        // macro's chain would end up calling load() lazily anyway.
+        rs_ldr::global::with(|api| {
+            api.load(b"kernel32.dll").expect("k32");
+        });
+
+        // Resolve from 3 threads in parallel.
+        let handles: Vec<_> = (0..3)
+            .map(|i| {
+                std::thread::spawn(move || {
+                    let get_tick: GetTickCount_t =
+                        resolve_global!("kernel32.dll" :: "GetTickCount" as GetTickCount_t)
+                            .expect("GetTickCount");
+                    let get_tid: GetCurrentThreadId_t =
+                        resolve_global!("kernel32.dll" :: "GetCurrentThreadId" as GetCurrentThreadId_t)
+                            .expect("GetCurrentThreadId");
+                    println!("thread {i}:  tid={}  tick={}", get_tid(), get_tick());
+                })
+            })
+            .collect();
+        for h in handles {
+            h.join().unwrap();
+        }
+
+        rs_ldr::global::with(|api| {
+            println!("\nshared cache ({} modules):", api.len());
+            for (h, base) in api.iter() {
+                println!("    hash=0x{h:08X}  base=0x{:016X}", base as usize);
+            }
+        });
+    }
+}
+
+```
+
+`examples/quiet_demo.rs`:
+
+```rs
+//! Silent consumer. No printed API names — proves the library itself
+//! doesn't leak strings.
+
+#![allow(non_camel_case_types)]
+
+use rs_ldr::{resolve_api, winapi_type, DynApi};
+
+winapi_type!(GetTickCount_t = fn() -> u32);
+winapi_type!(GetCurrentProcessId_t = fn() -> u32);
+
+fn main() {
+    unsafe {
+        let mut api = DynApi::new();
+        let _ = api.load(b"kernel32.dll");
+
+        let get_tick: GetTickCount_t =
+            match resolve_api!(api, "kernel32.dll" :: "GetTickCount" as GetTickCount_t) {
+                Some(f) => f,
+                None => std::process::exit(101),
+            };
+        let get_pid: GetCurrentProcessId_t =
+            match resolve_api!(api, "kernel32.dll" :: "GetCurrentProcessId" as GetCurrentProcessId_t) {
+                Some(f) => f,
+                None => std::process::exit(102),
+            };
+        std::process::exit(((get_tick() ^ get_pid()) & 0x7FFF_FFFF) as i32);
+    }
+}
+
+```
+
+`examples/syscall_demo.rs`:
+
+```rs
+//! Trait-based syscall resolution. Ship one impl (`DirectResolver`);
+//! write your own `HellsGate` / `HalosGate` and swap in.
+//!
+//! Build: cargo build --release --example syscall_demo --features syscalls
+
+use rs_ldr::syscalls::{DirectResolver, SyscallResolver};
+use rs_ldr::{hash_ci, ssn, DynApi};
+
+fn main() {
+    unsafe {
+        let api = DynApi::new();
+        let ntdll = api.get(hash_ci!("ntdll.dll")).expect("ntdll");
+
+        // ---- swappable resolver: pick DirectResolver here; a HellsGate
+        //      impl would just replace this line.
+        let mut resolver = DirectResolver::new();
+        let n = resolver.extract(ntdll);
+        println!("DirectResolver populated {n} entries (of {} total)", resolver.len());
+
+        for name in [
+            "NtOpenProcess",
+            "NtReadVirtualMemory",
+            "NtWriteVirtualMemory",
+            "NtAllocateVirtualMemory",
+            "NtProtectVirtualMemory",
+            "NtCreateThreadEx",
+            "NtQuerySystemInformation",
+            "NtClose",
+            "ZwOpenProcess",
+        ] {
+            let h = rs_ldr::hash_ascii(name.as_bytes());
+            match resolver.get(h) {
+                Some(ssn) => println!("  {name:<28} SSN=0x{ssn:04X}  ({ssn})"),
+                None => println!("  {name:<28} <not found>"),
+            }
+        }
+
+        // Compile-time-hashed lookup via ssn!() macro.
+        if let Some(ssn) = ssn!(resolver, "NtQueryInformationProcess") {
+            println!("\nvia ssn!() macro:  NtQueryInformationProcess = 0x{ssn:04X}");
+        }
+
+        // Indirect-syscall pattern: grab the stub pointer so you can
+        // `jmp qword ptr [addr_of_syscall_insn]` into ntdll's own
+        // syscall instruction from within your gadget.
+        if let Some(stub) = rs_ldr::syscall_stub!(resolver, "NtOpenProcess") {
+            println!("NtOpenProcess stub @ 0x{:016X}  (bytes: {:02X} {:02X} {:02X} {:02X} {:02X})",
+                     stub as usize,
+                     *stub, *stub.add(1), *stub.add(2), *stub.add(3), *stub.add(4));
+        }
+    }
+}
+
+```
+
+`src/lib.rs`:
+
+```rs
+//! `rs-ldr` — hash-based dynamic WinAPI resolution.
+//!
+//! - Salted djb2 (build-time random `u32`); classic unsalted if the
+//!   `salt` feature is off.
+//! - PEB walk + export directory parse. Forwarded exports followed
+//!   transparently. By-ordinal lookup supported.
+//! - `DynApi::load()` uses `ntdll!LdrLoadDll` — no kernel32 dependency.
+//! - `obf!` / `obf_str!` — compile-time XOR obfuscation of string
+//!   literals, decoded to zero-on-drop stack buffers.
+//! - Optional features:
+//!   - `salt`      — per-build hash constants + per-build obf keystream
+//!   - `syscalls`  — `SyscallResolver` trait + `DirectResolver` impl
+//!   - `global`    — process-wide `DynApi` behind a hand-rolled spinlock
+//!   - `intrinsics`— memcpy/memmove/memset/memcmp for `/NODEFAULTLIB`
+
+#![no_std]
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
+
+use core::arch::asm;
+use core::ffi::c_void;
+use core::ptr;
+
+pub type HMODULE = *mut c_void;
+pub type FARPROC = *mut c_void;
+pub type NTSTATUS = i32;
+
+// ---------------------------------------------------------------------------
+// Salt
+// ---------------------------------------------------------------------------
+
+#[cfg(feature = "salt")]
+pub const SALT: u32 = parse_hex_u32(env!("RS_LDR_SALT").as_bytes());
+
+#[cfg(not(feature = "salt"))]
+pub const SALT: u32 = 0;
+
+#[cfg(feature = "salt")]
+const fn parse_hex_u32(s: &[u8]) -> u32 {
+    let mut acc: u32 = 0;
+    let mut i = 0;
+    while i < s.len() {
+        let c = s[i];
+        let d = match c {
+            b'0'..=b'9' => c - b'0',
+            b'a'..=b'f' => c - b'a' + 10,
+            b'A'..=b'F' => c - b'A' + 10,
+            _ => 0,
+        };
+        acc = (acc << 4) | d as u32;
+        i += 1;
+    }
+    acc
+}
+
+// ---------------------------------------------------------------------------
+// Hashing
+// ---------------------------------------------------------------------------
+
+pub const fn hash_ascii(s: &[u8]) -> u32 {
+    let mut h: u32 = 5381 ^ SALT;
+    let mut i = 0;
+    while i < s.len() {
+        h = h.wrapping_mul(33).wrapping_add(s[i] as u32);
+        i += 1;
+    }
+    h ^ SALT
+}
+
+pub const fn hash_ascii_ci(s: &[u8]) -> u32 {
+    let mut h: u32 = 5381 ^ SALT;
+    let mut i = 0;
+    while i < s.len() {
+        let mut c = s[i];
+        if c >= b'A' && c <= b'Z' {
+            c += 0x20;
+        }
+        h = h.wrapping_mul(33).wrapping_add(c as u32);
+        i += 1;
+    }
+    h ^ SALT
+}
+
+/// # Safety
+/// `ptr..ptr.add(len_chars)` must be readable.
+pub unsafe fn hash_wide_ci(ptr: *const u16, len_chars: usize) -> u32 {
+    let mut h: u32 = 5381 ^ SALT;
+    let mut i = 0;
+    while i < len_chars {
+        let mut c = *ptr.add(i);
+        if (b'A' as u16..=b'Z' as u16).contains(&c) {
+            c += 0x20;
+        }
+        h = h.wrapping_mul(33).wrapping_add(c as u32);
+        i += 1;
+    }
+    h ^ SALT
+}
+
+// ---------------------------------------------------------------------------
+// String obfuscation
+//
+// Purpose: keep string literals out of the compiled binary in plain UTF-8.
+// The encoded bytes live in `.rodata`; decoding runs a per-byte XOR against
+// a cheap keystream seeded by SALT + byte position. With the `salt`
+// feature enabled every build produces a different encoding.
+//
+// The macros return an owned `ObfBuf<N>` on the stack, which zeroizes
+// itself in `Drop` via `write_volatile`. Plaintext never sits in a static.
+//
+// This is defense against static analysis (`strings`, IDA string window,
+// YARA text signatures) — not against a live debugger or memory dump.
+// ---------------------------------------------------------------------------
+
+/// Per-position keystream byte. PCG-like step, salted with the crate SALT.
+#[inline]
+pub const fn obf_key_byte(pos: usize) -> u8 {
+    let mut s: u32 = SALT ^ 0xB5297A4D_u32;
+    s = s.wrapping_add((pos as u32).wrapping_mul(0x68E31DA4_u32));
+    s ^= s >> 16;
+    s = s.wrapping_mul(0x1B873593_u32);
+    s ^= s >> 15;
+    ((s >> 8) & 0xFF) as u8
+}
+
+/// XOR each byte against the keystream. Same function encodes and decodes.
+pub const fn obf_xform<const N: usize>(input: &[u8]) -> [u8; N] {
+    let mut out = [0u8; N];
+    let mut i = 0;
+    while i < N {
+        out[i] = input[i] ^ obf_key_byte(i);
+        i += 1;
+    }
+    out
+}
+
+/// Encoded-at-compile-time byte buffer. `.decoded()` returns a zero-on-drop
+/// stack buffer holding the plaintext.
+#[derive(Copy, Clone)]
+#[repr(transparent)]
+pub struct ObfBytes<const N: usize> {
+    encoded: [u8; N],
+}
+
+impl<const N: usize> ObfBytes<N> {
+    #[inline]
+    pub const fn from_encoded(encoded: [u8; N]) -> Self {
+        Self { encoded }
+    }
+
+    /// Decode into a stack buffer that zeroes itself on drop.
+    #[inline]
+    pub fn decoded(&self) -> ObfBuf<N> {
+        let mut out = [0u8; N];
+        let mut i = 0;
+        while i < N {
+            out[i] = self.encoded[i] ^ obf_key_byte(i);
+            i += 1;
+        }
+        ObfBuf { data: out }
+    }
+
+    #[inline]
+    pub const fn len(&self) -> usize {
+        N
+    }
+    #[inline]
+    pub const fn is_empty(&self) -> bool {
+        N == 0
+    }
+    /// Raw encoded bytes (for hex-dumping / equality checks in tests).
+    #[inline]
+    pub const fn encoded(&self) -> &[u8; N] {
+        &self.encoded
+    }
+}
+
+/// Decoded plaintext buffer. Zeroized on `Drop` via `write_volatile`.
+///
+/// Best-effort defense-in-depth: a sufficiently clever optimizer *could*
+/// still elide the writes; volatile makes that unlikely without a
+/// compiler-visible dead-store proof.
+pub struct ObfBuf<const N: usize> {
+    data: [u8; N],
+}
+
+impl<const N: usize> ObfBuf<N> {
+    #[inline]
+    pub fn as_bytes(&self) -> &[u8] {
+        &self.data
+    }
+    /// # Safety
+    /// Caller must know the source literal was valid UTF-8.
+    #[inline]
+    pub unsafe fn as_str(&self) -> &str {
+        core::str::from_utf8_unchecked(&self.data)
+    }
+}
+
+impl<const N: usize> core::ops::Deref for ObfBuf<N> {
+    type Target = [u8];
+    #[inline]
+    fn deref(&self) -> &[u8] {
+        &self.data
+    }
+}
+
+impl<const N: usize> Drop for ObfBuf<N> {
+    #[inline]
+    fn drop(&mut self) {
+        let p = self.data.as_mut_ptr();
+        let mut i = 0;
+        while i < N {
+            unsafe {
+                core::ptr::write_volatile(p.add(i), 0);
+            }
+            i += 1;
+        }
+    }
+}
+
+/// Obfuscate a string literal at compile time.
+///
+/// Expands to an `ObfBytes<N>` value. Call `.decoded()` to get the
+/// plaintext as a zero-on-drop `ObfBuf<N>`.
+///
+/// ```ignore
+/// let name = obf!("kernel32.dll").decoded();
+/// api.load(&name).unwrap();
+/// // `name` drops here; the stack bytes are volatile-zeroed.
+/// ```
+#[macro_export]
+macro_rules! obf {
+    ($s:literal) => {{
+        const B: &[u8] = $s.as_bytes();
+        const N: usize = B.len();
+        const ENC: [u8; N] = $crate::obf_xform::<N>(B);
+        $crate::ObfBytes::<N>::from_encoded(ENC)
+    }};
+}
+
+/// Obfuscate a literal, decode it into a scoped `&str`, run a block, and
+/// zeroize the buffer at scope end. Convenient one-shot binding.
+///
+/// ```ignore
+/// obf_str!(path = "C:\\Windows\\System32\\ntdll.dll", {
+///     open_it(path);
+/// });
+/// ```
+#[macro_export]
+macro_rules! obf_str {
+    ($name:ident = $s:literal, $body:block) => {{
+        let __obf_buf = $crate::obf!($s).decoded();
+        // SAFETY: source was a valid `str` literal, so the decoded bytes
+        // are valid UTF-8.
+        let $name: &str = unsafe { __obf_buf.as_str() };
+        $body
+    }};
+}
+
+// ---------------------------------------------------------------------------
+// Macros
+// ---------------------------------------------------------------------------
+
+#[macro_export]
+macro_rules! winapi_type {
+    ($alias:ident = extern "C" fn($($arg:ident: $argty:ty),* $(,)?) -> $ret:ty) => {
+        pub type $alias = unsafe extern "C" fn($($arg: $argty),*) -> $ret;
+    };
+    ($alias:ident = extern "C" fn($($arg:ident: $argty:ty),* $(,)?)) => {
+        pub type $alias = unsafe extern "C" fn($($arg: $argty),*);
+    };
+    ($alias:ident = fn($($arg:ident: $argty:ty),* $(,)?) -> $ret:ty) => {
+        pub type $alias = unsafe extern "system" fn($($arg: $argty),*) -> $ret;
+    };
+    ($alias:ident = fn($($arg:ident: $argty:ty),* $(,)?)) => {
+        pub type $alias = unsafe extern "system" fn($($arg: $argty),*);
+    };
+}
+
+#[macro_export]
+macro_rules! hash {
+    ($s:literal) => {{
+        const H: u32 = $crate::hash_ascii($s.as_bytes());
+        H
+    }};
+}
+
+#[macro_export]
+macro_rules! hash_ci {
+    ($s:literal) => {{
+        const H: u32 = $crate::hash_ascii_ci($s.as_bytes());
+        H
+    }};
+}
+
+#[macro_export]
+macro_rules! resolve_api {
+    ($api:expr, $module:literal :: $sym:literal as $ty:ty) => {{
+        const MH: u32 = $crate::hash_ascii_ci($module.as_bytes());
+        const FH: u32 = $crate::hash_ascii($sym.as_bytes());
+        $api.resolve(MH, FH)
+            .map(|p| ::core::mem::transmute::<$crate::FARPROC, $ty>(p))
+    }};
+}
+
+// ---------------------------------------------------------------------------
+// PEB walk (x64)
+// ---------------------------------------------------------------------------
+
+#[cfg(not(target_arch = "x86_64"))]
+compile_error!("rs-ldr currently supports only x86_64 (gs:[0x60] PEB access)");
+
+#[inline(always)]
+pub unsafe fn peb() -> *const u8 {
+    let p: usize;
+    asm!("mov {out}, gs:[0x60]",
+         out = out(reg) p,
+         options(nostack, preserves_flags, readonly));
+    p as *const u8
+}
+
+const LDR_OFF_IN_PEB: usize = 0x18;
+const IN_LOAD_ORDER_LIST_OFF: usize = 0x10;
+const DLL_BASE_OFF: usize = 0x30;
+const BASE_DLL_NAME_OFF: usize = 0x58;
+
+pub unsafe fn find_loaded_module(name_hash_ci: u32) -> Option<HMODULE> {
+    let peb_p = peb();
+    let ldr = *(peb_p.add(LDR_OFF_IN_PEB) as *const *const u8);
+    if ldr.is_null() {
+        return None;
+    }
+    let list_head = ldr.add(IN_LOAD_ORDER_LIST_OFF);
+    let mut cur = *(list_head as *const *const u8);
+    while !cur.is_null() && cur != list_head {
+        let name_len_bytes = *(cur.add(BASE_DLL_NAME_OFF) as *const u16) as usize;
+        let name_buf = *(cur.add(BASE_DLL_NAME_OFF + 8) as *const *const u16);
+        if !name_buf.is_null() && name_len_bytes > 0 {
+            if hash_wide_ci(name_buf, name_len_bytes / 2) == name_hash_ci {
+                return Some(*(cur.add(DLL_BASE_OFF) as *const *mut c_void));
+            }
+        }
+        cur = *(cur as *const *const u8);
+    }
+    None
+}
+
+pub unsafe fn module_slice(module: HMODULE) -> &'static [u8] {
+    let base = module as *const u8;
+    let e_lfanew = *(base.add(0x3C) as *const u32) as usize;
+    let size_of_image = *(base.add(e_lfanew + 0x50) as *const u32) as usize;
+    core::slice::from_raw_parts(base, size_of_image)
+}
+
+// ---------------------------------------------------------------------------
+// Export directory — public because SyscallResolver impls need it
+// ---------------------------------------------------------------------------
+
+#[derive(Clone, Copy)]
+pub struct ExportDir {
+    pub base: *const u8,
+    pub export_rva: usize,
+    pub export_size: usize,
+    pub num_functions: usize,
+    pub num_names: usize,
+    pub ordinal_base: u32,
+    pub funcs: *const u32,
+    pub names: *const u32,
+    pub ords: *const u16,
+}
+
+/// Parse the export directory of a loaded module.
+///
+/// # Safety
+/// `module` must be a valid loaded HMODULE.
+pub unsafe fn export_dir(module: HMODULE) -> Option<ExportDir> {
+    if module.is_null() {
+        return None;
+    }
+    let base = module as *const u8;
+    let e_lfanew = *(base.add(0x3C) as *const u32) as usize;
+    let nt = base.add(e_lfanew);
+    let export_rva = *(nt.add(0x88) as *const u32) as usize;
+    let export_size = *(nt.add(0x8C) as *const u32) as usize;
+    if export_rva == 0 || export_size == 0 {
+        return None;
+    }
+    let exp = base.add(export_rva);
+    Some(ExportDir {
+        base,
+        export_rva,
+        export_size,
+        ordinal_base: *(exp.add(0x10) as *const u32),
+        num_functions: *(exp.add(0x14) as *const u32) as usize,
+        num_names: *(exp.add(0x18) as *const u32) as usize,
+        funcs: base.add(*(exp.add(0x1C) as *const u32) as usize) as *const u32,
+        names: base.add(*(exp.add(0x20) as *const u32) as usize) as *const u32,
+        ords: base.add(*(exp.add(0x24) as *const u32) as usize) as *const u16,
+    })
+}
+
+#[inline]
+pub fn is_forwarder(rva: usize, ed: &ExportDir) -> bool {
+    rva >= ed.export_rva && rva < ed.export_rva + ed.export_size
+}
+
+/// djb2 hash a NUL-terminated ASCII string. Used by resolvers walking
+/// export tables at runtime.
+///
+/// # Safety
+/// `ptr` must point to NUL-terminated readable memory.
+pub unsafe fn hash_export_name(ptr: *const u8) -> u32 {
+    let mut h: u32 = 5381 ^ SALT;
+    let mut j = 0;
+    loop {
+        let c = *ptr.add(j);
+        if c == 0 {
+            break;
+        }
+        h = h.wrapping_mul(33).wrapping_add(c as u32);
+        j += 1;
+    }
+    h ^ SALT
+}
+
+// ---------------------------------------------------------------------------
+// Forwarder parsing
+// ---------------------------------------------------------------------------
+
+enum Forwarded {
+    Name(u32),
+    Ordinal(u16),
+}
+
+/// Parse `TargetDll.TargetSym` or `TargetDll.#Ordinal` into
+/// (hash_ci(TargetDll[.dll]), Name(hash(Sym)) | Ordinal(N)).
+unsafe fn parse_forwarder(s: *const u8) -> Option<(u32, Forwarded)> {
+    let mut len = 0usize;
+    let mut last_dot: Option<usize> = None;
+    while len < 512 {
+        let c = *s.add(len);
+        if c == 0 {
+            break;
+        }
+        if c == b'.' {
+            last_dot = Some(len);
+        }
+        len += 1;
+    }
+    let dot = last_dot?;
+    if dot == 0 || dot + 1 >= len {
+        return None;
+    }
+
+    let mut dll_hash: u32 = 5381 ^ SALT;
+    let mut i = 0usize;
+    while i < dot {
+        let mut c = *s.add(i);
+        if c >= b'A' && c <= b'Z' {
+            c += 0x20;
+        }
+        dll_hash = dll_hash.wrapping_mul(33).wrapping_add(c as u32);
+        i += 1;
+    }
+    // Append ".dll" if the DLL portion doesn't already end with it.
+    let has_dll = dot >= 4 && {
+        let a = *s.add(dot - 4);
+        let b_ = *s.add(dot - 3) | 0x20;
+        let c_ = *s.add(dot - 2) | 0x20;
+        let d_ = *s.add(dot - 1) | 0x20;
+        a == b'.' && b_ == b'd' && c_ == b'l' && d_ == b'l'
+    };
+    if !has_dll {
+        for &c in b".dll" {
+            dll_hash = dll_hash.wrapping_mul(33).wrapping_add(c as u32);
+        }
+    }
+    dll_hash ^= SALT;
+
+    let sym_start = dot + 1;
+    if *s.add(sym_start) == b'#' {
+        let mut ord: u32 = 0;
+        let mut j = sym_start + 1;
+        while j < len {
+            let c = *s.add(j);
+            if !(b'0'..=b'9').contains(&c) {
+                return None;
+            }
+            ord = ord.wrapping_mul(10).wrapping_add((c - b'0') as u32);
+            j += 1;
+        }
+        if ord > u16::MAX as u32 {
+            return None;
+        }
+        Some((dll_hash, Forwarded::Ordinal(ord as u16)))
+    } else {
+        let mut h: u32 = 5381 ^ SALT;
+        let mut j = sym_start;
+        while j < len {
+            h = h.wrapping_mul(33).wrapping_add(*s.add(j) as u32);
+            j += 1;
+        }
+        Some((dll_hash, Forwarded::Name(h ^ SALT)))
+    }
+}
+
+// ---------------------------------------------------------------------------
+// DynApi — the cache
+// ---------------------------------------------------------------------------
+
+#[derive(Clone, Copy)]
+struct ModEntry {
+    name_hash: u32,
+    base: HMODULE,
+}
+
+/// Windows `UNICODE_STRING`. Exposed because `LdrLoadDll_t`'s
+/// signature references it.
+#[repr(C)]
+pub struct UNICODE_STRING {
+    pub length: u16,
+    pub max_length: u16,
+    pub buffer: *const u16,
+}
+
+winapi_type!(LdrLoadDll_t = fn(
+    path: *const u16,
+    flags: *mut u32,
+    dll_name: *const UNICODE_STRING,
+    handle_out: *mut HMODULE,
+) -> NTSTATUS);
+
+/// Fixed-capacity module cache. `CAP` defaults to 32.
+pub struct DynApi<const CAP: usize = 32> {
+    modules: [ModEntry; CAP],
+    len: usize,
+    ldr_load_dll: Option<LdrLoadDll_t>,
+}
+
+impl DynApi<32> {
+    pub fn new() -> Self {
+        DynApi::<32>::new_sized()
+    }
+}
+
+impl<const CAP: usize> DynApi<CAP> {
+    pub fn new_sized() -> Self {
+        let mut me = Self {
+            modules: [ModEntry {
+                name_hash: 0,
+                base: ptr::null_mut(),
+            }; CAP],
+            len: 0,
+            ldr_load_dll: None,
+        };
+        let ntdll_hash = hash_ascii_ci(b"ntdll.dll");
+        if let Some(b) = unsafe { find_loaded_module(ntdll_hash) } {
+            me.insert(ntdll_hash, b);
+        }
+        me
+    }
+
+    pub fn get(&self, name_hash_ci: u32) -> Option<HMODULE> {
+        for i in 0..self.len {
+            let m = self.modules[i];
+            if m.name_hash == name_hash_ci {
+                return Some(m.base);
+            }
+        }
+        None
+    }
+
+    /// Cache lookup, falling back to PEB walk. Does NOT LoadLibrary.
+    pub fn get_or_resolve(&mut self, name_hash_ci: u32) -> Option<HMODULE> {
+        if let Some(b) = self.get(name_hash_ci) {
+            return Some(b);
+        }
+        let base = unsafe { find_loaded_module(name_hash_ci)? };
+        self.insert(name_hash_ci, base);
+        Some(base)
+    }
+
+    pub fn insert(&mut self, name_hash_ci: u32, base: HMODULE) -> bool {
+        if base.is_null() || name_hash_ci == 0 {
+            return false;
+        }
+        for i in 0..self.len {
+            if self.modules[i].name_hash == name_hash_ci {
+                self.modules[i].base = base;
+                return true;
+            }
+        }
+        if self.len >= CAP {
+            return false;
+        }
+        self.modules[self.len] = ModEntry {
+            name_hash: name_hash_ci,
+            base,
+        };
+        self.len += 1;
+        true
+    }
+
+    /// Resolve an export by hashed name in a specific module. Follows
+    /// forwarded exports transparently.
+    ///
+    /// # Safety
+    /// `module` must be a valid loaded HMODULE.
+    pub unsafe fn resolve_in(&mut self, module: HMODULE, fn_hash: u32) -> Option<FARPROC> {
+        let ed = export_dir(module)?;
+        let mut hit: Option<usize> = None;
+        let mut i = 0;
+        while i < ed.num_names {
+            let name_ptr = ed.base.add(*ed.names.add(i) as usize);
+            if hash_export_name(name_ptr) == fn_hash {
+                let ord = *ed.ords.add(i) as usize;
+                hit = Some(*ed.funcs.add(ord) as usize);
+                break;
+            }
+            i += 1;
+        }
+        self.resolve_rva_or_forward(module, hit?)
+    }
+
+    /// Resolve an export by ordinal.
+    ///
+    /// # Safety
+    /// `module` must be a valid loaded HMODULE.
+    pub unsafe fn resolve_in_ordinal(&mut self, module: HMODULE, ordinal: u16) -> Option<FARPROC> {
+        let ed = export_dir(module)?;
+        let idx = (ordinal as u32).wrapping_sub(ed.ordinal_base) as usize;
+        if idx >= ed.num_functions {
+            return None;
+        }
+        let fn_rva = *ed.funcs.add(idx) as usize;
+        self.resolve_rva_or_forward(module, fn_rva)
+    }
+
+    /// Auto-resolve module then find symbol. Cache-first, PEB fallback,
+    /// forwarder-following.
+    pub fn resolve(&mut self, module_hash_ci: u32, fn_hash: u32) -> Option<FARPROC> {
+        let m = self.get_or_resolve(module_hash_ci)?;
+        unsafe { self.resolve_in(m, fn_hash) }
+    }
+
+    /// LoadLibrary equivalent via `ntdll!LdrLoadDll`. Zero kernel32
+    /// dependency. Accepts an ASCII byte string; widens to UTF-16 in a
+    /// stack buffer.
+    pub fn load(&mut self, name_ascii: &[u8]) -> Option<HMODULE> {
+        let mut hash: u32 = 5381 ^ SALT;
+        for &c in name_ascii {
+            let mut cc = c;
+            if cc >= b'A' && cc <= b'Z' {
+                cc += 0x20;
+            }
+            hash = hash.wrapping_mul(33).wrapping_add(cc as u32);
+        }
+        hash ^= SALT;
+
+        if let Some(b) = self.get(hash) {
+            return Some(b);
+        }
+        if let Some(b) = unsafe { find_loaded_module(hash) } {
+            self.insert(hash, b);
+            return Some(b);
+        }
+
+        let ldr = match self.ldr_load_dll {
+            Some(f) => f,
+            None => {
+                let ntdll = self.get_or_resolve(hash_ci!("ntdll.dll"))?;
+                let raw = unsafe { self.resolve_in(ntdll, hash!("LdrLoadDll"))? };
+                let f: LdrLoadDll_t = unsafe { core::mem::transmute(raw) };
+                self.ldr_load_dll = Some(f);
+                f
+            }
+        };
+
+        if name_ascii.len() > 255 {
+            return None;
+        }
+        let mut wbuf = [0u16; 256];
+        for (i, &b) in name_ascii.iter().enumerate() {
+            wbuf[i] = b as u16;
+        }
+        let ustr = UNICODE_STRING {
+            length: (name_ascii.len() * 2) as u16,
+            max_length: (name_ascii.len() * 2) as u16,
+            buffer: wbuf.as_ptr(),
+        };
+        let mut handle: HMODULE = ptr::null_mut();
+        let status = unsafe { ldr(ptr::null(), ptr::null_mut(), &ustr, &mut handle) };
+        if status < 0 || handle.is_null() {
+            return None;
+        }
+        self.insert(hash, handle);
+        Some(handle)
+    }
+
+    unsafe fn resolve_rva_or_forward(&mut self, module: HMODULE, fn_rva: usize) -> Option<FARPROC> {
+        let ed = export_dir(module)?;
+        if !is_forwarder(fn_rva, &ed) {
+            return Some(ed.base.add(fn_rva) as FARPROC);
+        }
+        let (dll_hash, sym) = parse_forwarder(ed.base.add(fn_rva))?;
+        // PEB-only lookup — if the forwarded target isn't already loaded
+        // the consumer has to load() it first.
+        let target = self.get_or_resolve(dll_hash)?;
+        match sym {
+            Forwarded::Name(h) => self.resolve_in(target, h),
+            Forwarded::Ordinal(o) => self.resolve_in_ordinal(target, o),
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        self.len
+    }
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+    pub fn iter(&self) -> impl Iterator<Item = (u32, HMODULE)> + '_ {
+        self.modules[..self.len].iter().map(|m| (m.name_hash, m.base))
+    }
+}
+
+impl Default for DynApi<32> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Syscalls (feature = "syscalls")
+// ---------------------------------------------------------------------------
+
+#[cfg(feature = "syscalls")]
+pub mod syscalls {
+    //! Pluggable syscall-number resolution.
+    //!
+    //! [`SyscallResolver`] is a trait — the reference implementation
+    //! [`DirectResolver`] reads `mov eax, imm32` from the first 32 bytes
+    //! of each `Nt*`/`Zw*` stub. Consumers implement Hell's Gate,
+    //! Halo's Gate, Tartarus Gate, etc. against the same trait and swap
+    //! them in without touching call sites.
+    //!
+    //! ```ignore
+    //! let mut api = DynApi::new();
+    //! let ntdll = api.get(hash_ci!("ntdll.dll")).unwrap();
+    //!
+    //! let mut resolver = DirectResolver::new();
+    //! unsafe { resolver.extract(ntdll); }
+    //!
+    //! let ssn = ssn!(resolver, "NtOpenProcess").expect("...");
+    //! ```
+
+    use super::*;
+
+    /// Every resolver returns SSNs by (case-sensitive) hashed name.
+    ///
+    /// The `extract` step is separated from lookup so consumers can
+    /// pre-populate at process start (fast lookups later) or defer
+    /// (extract just before making a call).
+    pub trait SyscallResolver {
+        /// Walk `module`'s exports and populate this resolver's cache.
+        /// Returns the number of entries added.
+        ///
+        /// # Safety
+        /// `module` must be a valid loaded HMODULE.
+        unsafe fn extract(&mut self, module: HMODULE) -> usize;
+
+        /// Look up an SSN by hashed name. `None` if unknown.
+        fn get(&self, name_hash: u32) -> Option<u32>;
+
+        /// Get the raw stub pointer (used for indirect-syscall patterns
+        /// where you jump into ntdll's own `syscall` instruction).
+        fn stub(&self, name_hash: u32) -> Option<*const u8>;
+
+        fn len(&self) -> usize;
+        fn is_empty(&self) -> bool {
+            self.len() == 0
+        }
+    }
+
+    /// Look up a syscall by literal name — hashed at compile time.
+    /// Works with any `SyscallResolver` impl.
+    #[macro_export]
+    macro_rules! ssn {
+        ($resolver:expr, $sym:literal) => {{
+            const H: u32 = $crate::hash_ascii($sym.as_bytes());
+            $resolver.get(H)
+        }};
+    }
+
+    #[macro_export]
+    macro_rules! syscall_stub {
+        ($resolver:expr, $sym:literal) => {{
+            const H: u32 = $crate::hash_ascii($sym.as_bytes());
+            $resolver.stub(H)
+        }};
+    }
+
+    // 1024 covers both Nt* and their Zw* aliases on modern Windows
+    // (~450 of each on Win11 24H2).
+    const SSN_CAP: usize = 1024;
+
+    #[derive(Clone, Copy)]
+    struct SsnEntry {
+        name_hash: u32,
+        ssn: u32,
+        stub: *const u8,
+    }
+
+    /// Reference resolver: reads `mov eax, imm32` from the first 32
+    /// bytes of each `Nt*`/`Zw*` stub. Works on an unhooked ntdll; a
+    /// hook that clobbers the prologue will make the SSN read return
+    /// garbage or fail — write your own Hell's Gate `SyscallResolver`
+    /// impl and slot it in.
+    pub struct DirectResolver {
+        entries: [SsnEntry; SSN_CAP],
+        len: usize,
+    }
+
+    impl DirectResolver {
+        pub const fn new() -> Self {
+            Self {
+                entries: [SsnEntry {
+                    name_hash: 0,
+                    ssn: 0,
+                    stub: ptr::null(),
+                }; SSN_CAP],
+                len: 0,
+            }
+        }
+    }
+
+    impl Default for DirectResolver {
+        fn default() -> Self {
+            Self::new()
+        }
+    }
+
+    /// Scan up to 32 bytes for `B8 <u32>` (mov eax, imm32) — the SSN
+    /// operand. Tolerant of stubs that got a `jmp` inserted before the
+    /// mov (common obfuscation) as long as the mov is within 32 bytes.
+    unsafe fn ssn_from_stub(stub: *const u8) -> Option<u32> {
+        for i in 0..32 {
+            if *stub.add(i) == 0xB8 {
+                let ssn = core::ptr::read_unaligned(stub.add(i + 1) as *const u32);
+                if ssn < 0x10000 {
+                    return Some(ssn);
+                }
+            }
+        }
+        None
+    }
+
+    impl SyscallResolver for DirectResolver {
+        unsafe fn extract(&mut self, module: HMODULE) -> usize {
+            let ed = match export_dir(module) {
+                Some(e) => e,
+                None => return 0,
+            };
+            let mut added = 0;
+            let mut i = 0;
+            while i < ed.num_names {
+                let name_ptr = ed.base.add(*ed.names.add(i) as usize);
+                let first = *name_ptr;
+                let second = *name_ptr.add(1);
+                if (first == b'N' && second == b't') || (first == b'Z' && second == b'w') {
+                    let ord = *ed.ords.add(i) as usize;
+                    let fn_rva = *ed.funcs.add(ord) as usize;
+                    if !is_forwarder(fn_rva, &ed) {
+                        let stub = ed.base.add(fn_rva);
+                        if let Some(ssn) = ssn_from_stub(stub) {
+                            if self.len < SSN_CAP {
+                                self.entries[self.len] = SsnEntry {
+                                    name_hash: hash_export_name(name_ptr),
+                                    ssn,
+                                    stub,
+                                };
+                                self.len += 1;
+                                added += 1;
+                            }
+                        }
+                    }
+                }
+                i += 1;
+            }
+            added
+        }
+
+        fn get(&self, name_hash: u32) -> Option<u32> {
+            for i in 0..self.len {
+                if self.entries[i].name_hash == name_hash {
+                    return Some(self.entries[i].ssn);
+                }
+            }
+            None
+        }
+
+        fn stub(&self, name_hash: u32) -> Option<*const u8> {
+            for i in 0..self.len {
+                if self.entries[i].name_hash == name_hash {
+                    return Some(self.entries[i].stub);
+                }
+            }
+            None
+        }
+
+        fn len(&self) -> usize {
+            self.len
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Global (feature = "global")
+// ---------------------------------------------------------------------------
+
+#[cfg(feature = "global")]
+pub mod global {
+    //! Process-wide `DynApi` behind a hand-rolled spinlock.
+    //!
+    //! `with(|api| ...)` grabs the lock, runs the closure, releases.
+    //! Init is lazy on first access.
+
+    use super::*;
+    use core::cell::UnsafeCell;
+    use core::mem::MaybeUninit;
+    use core::sync::atomic::{AtomicU8, Ordering};
+
+    const UNINIT: u8 = 0;
+    const INITIALIZING: u8 = 1;
+    const READY: u8 = 2;
+    const LOCKED: u8 = 3;
+
+    pub struct Global {
+        state: AtomicU8,
+        data: UnsafeCell<MaybeUninit<DynApi<32>>>,
+    }
+
+    unsafe impl Sync for Global {}
+
+    impl Global {
+        pub const fn new() -> Self {
+            Self {
+                state: AtomicU8::new(UNINIT),
+                data: UnsafeCell::new(MaybeUninit::uninit()),
+            }
+        }
+    }
+
+    static GLOBAL: Global = Global::new();
+
+    pub fn with<F, R>(f: F) -> R
+    where
+        F: FnOnce(&mut DynApi<32>) -> R,
+    {
+        // Lazy init.
+        if GLOBAL.state.load(Ordering::Acquire) == UNINIT {
+            match GLOBAL.state.compare_exchange(
+                UNINIT,
+                INITIALIZING,
+                Ordering::AcqRel,
+                Ordering::Acquire,
+            ) {
+                Ok(_) => {
+                    unsafe {
+                        (*GLOBAL.data.get()).write(DynApi::new());
+                    }
+                    GLOBAL.state.store(READY, Ordering::Release);
+                }
+                Err(_) => {
+                    while GLOBAL.state.load(Ordering::Acquire) == INITIALIZING {
+                        core::hint::spin_loop();
+                    }
+                }
+            }
+        }
+        // Acquire lock.
+        loop {
+            if GLOBAL
+                .state
+                .compare_exchange(READY, LOCKED, Ordering::AcqRel, Ordering::Acquire)
+                .is_ok()
+            {
+                break;
+            }
+            core::hint::spin_loop();
+        }
+        let api = unsafe { (*GLOBAL.data.get()).assume_init_mut() };
+        let out = f(api);
+        GLOBAL.state.store(READY, Ordering::Release);
+        out
+    }
+
+    #[macro_export]
+    macro_rules! resolve_global {
+        ($module:literal :: $sym:literal as $ty:ty) => {{
+            const MH: u32 = $crate::hash_ascii_ci($module.as_bytes());
+            const FH: u32 = $crate::hash_ascii($sym.as_bytes());
+            $crate::global::with(|api| {
+                api.resolve(MH, FH)
+                    .map(|p| ::core::mem::transmute::<$crate::FARPROC, $ty>(p))
+            })
+        }};
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Intrinsics (feature = "intrinsics")
+// ---------------------------------------------------------------------------
+
+#[cfg(feature = "intrinsics")]
+pub mod intrinsics {
+    #[no_mangle]
+    pub unsafe extern "C" fn memcpy(dst: *mut u8, src: *const u8, n: usize) -> *mut u8 {
+        let mut i = 0;
+        while i < n {
+            *dst.add(i) = *src.add(i);
+            i += 1;
+        }
+        dst
+    }
+    #[no_mangle]
+    pub unsafe extern "C" fn memmove(dst: *mut u8, src: *const u8, n: usize) -> *mut u8 {
+        if (dst as usize) < (src as usize) {
+            let mut i = 0;
+            while i < n {
+                *dst.add(i) = *src.add(i);
+                i += 1;
+            }
+        } else {
+            let mut i = n;
+            while i > 0 {
+                i -= 1;
+                *dst.add(i) = *src.add(i);
+            }
+        }
+        dst
+    }
+    #[no_mangle]
+    pub unsafe extern "C" fn memset(dst: *mut u8, c: i32, n: usize) -> *mut u8 {
+        let b = c as u8;
+        let mut i = 0;
+        while i < n {
+            *dst.add(i) = b;
+            i += 1;
+        }
+        dst
+    }
+    #[no_mangle]
+    pub unsafe extern "C" fn memcmp(a: *const u8, b: *const u8, n: usize) -> i32 {
+        let mut i = 0;
+        while i < n {
+            let av = *a.add(i);
+            let bv = *b.add(i);
+            if av != bv {
+                return av as i32 - bv as i32;
+            }
+            i += 1;
+        }
+        0
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn hash_const_matches_runtime() {
+        const H: u32 = hash_ascii(b"NtOpenProcess");
+        assert_eq!(H, hash_ascii(b"NtOpenProcess"));
+    }
+
+    #[test]
+    fn hash_ci_folds_case() {
+        assert_eq!(hash_ascii_ci(b"NTDLL.DLL"), hash_ascii_ci(b"ntdll.dll"));
+        assert_eq!(hash_ascii_ci(b"Kernel32.Dll"), hash_ascii_ci(b"KERNEL32.DLL"));
+    }
+
+    #[test]
+    fn djb2_reference_when_unsalted() {
+        if SALT == 0 {
+            // djb2("hi") = 5381*33 + 'h' = 177677, *33 + 'i' = 5863446
+            assert_eq!(hash_ascii(b"hi"), 5863446);
+        }
+    }
+
+    #[test]
+    fn obf_round_trip() {
+        let o = obf!("kernel32.dll");
+        let dec = o.decoded();
+        assert_eq!(&*dec, b"kernel32.dll");
+    }
+
+    #[test]
+    fn obf_encoded_is_not_plaintext() {
+        // The encoded bytes must not equal the original — otherwise
+        // static analysis would still find the string.
+        let o = obf!("NtOpenProcess");
+        assert_ne!(o.encoded(), b"NtOpenProcess");
+    }
+
+    #[test]
+    fn obf_str_macro_binds_str() {
+        obf_str!(name = "ntdll.dll", {
+            assert_eq!(name, "ntdll.dll");
+            assert_eq!(name.len(), 9);
+        });
+    }
+
+    #[test]
+    fn obf_empty_string() {
+        let o = obf!("");
+        let dec = o.decoded();
+        assert_eq!(&*dec, b"");
+    }
+
+    #[test]
+    fn obf_multiple_calls_produce_independent_bufs() {
+        let o = obf!("hello");
+        let a = o.decoded();
+        let b = o.decoded();
+        assert_eq!(&*a, b"hello");
+        assert_eq!(&*b, b"hello");
+        // Different backing arrays.
+        assert_ne!(a.as_bytes().as_ptr(), b.as_bytes().as_ptr());
+    }
+}
+
+```
