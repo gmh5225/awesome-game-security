@@ -1,0 +1,1522 @@
+Project Path: arc_wufhex_Mystic-xorstr_fu0ulbpj
+
+Source Tree:
+
+```txt
+arc_wufhex_Mystic-xorstr_fu0ulbpj
+├── LICENSE
+├── README.md
+├── img
+├── include
+│   └── mystic
+│       └── mystic.hh
+└── tests
+    ├── CMakeLists.txt
+    └── example.cpp
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2024 WolfHex
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+<div align="center">
+	<img src="img/mystic.png" width="200" height="200">
+	<h1>Mystic</h1>
+	<p>
+		<b>A C++17 header-only library that provides compile-time string and integer encryption using SIMD instructions, obfuscation via junk code injection and some "tricks" to break decompilers.</b>
+	</p>
+	<p>
+	<b>v5 Release!</b>
+	</p>
+	<br>
+</div>
+
+## Features
+* **Compile-Time Encryption:** Encrypts strings and integers at compile-time.
+* **SIMD Decryption:** Decrypts encrypted strings and integers at runtime using SIMD operations.
+* **Vectorized Operations:** Utilizes AVX SSE and ARM NEON instructions to process data.
+* **Random Key Generation:** Generates encryption keys and initialization vectors (IV) using constexpr computations based on a compile-time seed derived from compiler defined macro. Each pair of keys is unique to a string or integer.
+* **Disassembly Bloating:** Add junk code to the executable, slightly impacts compile performance and executable size (depending on compiler) but makes the disassembly a mess.
+* **Minimal Environment Support:** Mystic supports CRT-less or minimal C++ environments by defining `_MYSTIC_MINIMAL`.
+
+## TODO:
+- [ ] **Macro to enable or disable specific features such as junk code injection or extra features unrelated to xorstr.**
+
+## Example
+Check [this](./tests/example.cpp) source file to see a full example and docs!
+
+## Support
+
+Tested on MSVC and GCC but should work correctly on most compilers. To enable AVX support you have to define `AVX_AVAILABLE`. If your target CPU doesn't support AVX define `SSE_AVAILABLE` or `NEON_AVAILABLE` if you're targetting ARM.
+
+## Results
+
+### Runtime Result:
+
+| ![PE Image](./img/runtime_pe.png) | ![ELF Image](./img/runtime_elf.png) |
+|:----------------------------------:|:-----------------------------------:|
+| Windows Executable (MSVC v143)     | ELF Executable (GCC v11)    |
+
+Part of IDA64 disassembly of `MYSTIFY("Hello World, This is a string!");` using AVX from the ELF executable, WITHOUT bloating.
+
+```asm
+endbr64
+push    rbp
+mov     r10d, 0Fh
+mov     rdx, 22CA7CFB7668F832h
+vmovq   xmm5, rdx
+mov     rbp, rsp
+push    r15
+push    r14
+push    r13
+xor     r13d, r13d
+push    r12
+push    rbx
+mov     ebx, 1
+and     rsp, 0FFFFFFFFFFFFFFE0h
+add     rsp, 0FFFFFFFFFFFFFF80h
+mov     rax, fs:28h
+mov     [rsp+0B0h+var_38], rax
+xor     eax, eax
+lea     r14, [rsp+0B0h+var_80]
+lea     r12, [rsp+0B0h+var_6F]
+mov     rax, 2650EF3C78B6EF2h
+vmovq   xmm3, rax
+lea     r9, [rsp+0B0h+var_51]
+mov     [rsp+0B0h+var_90], r14
+mov     rax, 0E3446A6AAC5F1D6Eh
+vmovq   xmm4, rax
+vpbroadcastq ymm1, xmm3
+mov     rax, r14
+mov     byte ptr [rsp+0B0h+var_80], 0
+vpbroadcastq ymm0, xmm4
+vpsllq  ymm2, ymm1, 6
+vpsllq  ymm0, ymm0, 3
+vpand   ymm0, ymm0, ymm2
+vpbroadcastq ymm2, xmm5
+vpxor   ymm0, ymm0, cs:ymmword_2020
+vpxor   ymm1, ymm1, ymm2
+vpxor   ymm0, ymm0, ymm1
+vpextrb r15d, xmm0, 0
+vmovdqa ymmword ptr [rsp+40h], ymm0
+vzeroupper
+nop     dword ptr [rax+00h]
+```
+
+### Obfuscated Disassembly:
+This is what the compiled obfuscated version of the Mystic test looks like in Ida Pro (MSVC compiled, PE64 executable, Release).
+
+| ![Image](./img/ida_graph_msvc_a.png) | ![Image](./img/ida_graph_msvc_b.png) |
+|:----------------------------------:|:-----------------------------------:|
+| `main` function    | `__DecryptString` function (very hard to find) |
+
+
+And none of the injected code gets executed at runtime! So once compiled, your program will be almost as quick as non-obfuscated.
+
+The obfuscated code can be injected by definining `M_ENABLE_BLOAT` to enable it for all Mystic decryptions, and/or it can be manually injected into any function by calling the `M_APPLY_STACK_BLOAT` macro. Be aware that over-using it will cause large binaries and slow compile times since everything gets injected at compile-time.
+
+Let's see how GCC compiles the `main` function, (GCC compiled, ELF64 executable, Release):
+<div align="center">
+<img src="img/ida_graph_gcc_a.png">
+</div>
+
+### "Decompilation failure: Stack frame too big":
+Mystic also attempts to cause a failure in the decompiler by constructing an invalid function pointer cast. Since the code is skipped at runtime, it won't crash the application at runtime, but it will cause some decompilers to fail.
+
+One of them is IDA Pro, this is what happens when we try to generate C pseudocode:
+<div align="center">
+<img src="img/ida_bigstack_fail.png">
+</div>
+
+This can be triggered by defining `M_ENABLE_BIGSTACK` to enable it for every Mystic decryptions, and/or it can be manually enabled for a function using the `M_APPLY_BIG_STACK` macro. 
+
+## Related Projects
+Similar libraries I found helpful:
+
+* [JustasMasiulis's xorstr](https://github.com/JustasMasiulis/xorstr)
+* [qis's xorstr](https://github.com/qis/xorstr)
+* [adamyaxley's Obfuscate](https://github.com/adamyaxley/Obfuscate)
+
+### Donating
+MetaMask wallet address: `0x1E5a982BD1E54d3CD4EcD7A74642ed808783D506`
+
+<a href='https://ko-fi.com/D1D3NTABI' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi2.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+Thank you!
+```
+
+`include/mystic/mystic.hh`:
+
+```hh
+/**
+ * @file mystic.hh
+ * @brief Compile-time string encryption/decryption library with advanced obfuscation and bloat features.
+ *
+ * @author wufhex
+ *
+ * @note Requires a C++17 compliant compiler.
+ *
+ * This library provides compile-time string encryption and decryption using constexpr computations,
+ * supporting both AVX and SSE architectures. It features a template-based random number generator
+ * for key/IV generation, and a multi-layered XOR-based encryption scheme.
+ *
+ * New features and improvements:
+ * - Improved CString and added array support.
+ * - Integers can now also be obfuscated using the MYSTIFY_NUM(x) macro. Integers are packed into an array, shuffled and then encrypted.
+ * - Mystic no longer depends on string, basic_string, or wstring. String encryption now works in no-CRT environments. 
+ * - Added dynamically generated keys for each string.
+ * - Added ARM NEON and Native operators support. Improved RNG
+ * - Added a _MYSTIC_MINIMAL definition that strips any CRT related code.
+ *   as of today but it keeps features like bloating available for minimal environments like embedded systems.
+ * - Multiple AVX/SSE/NEON-based logic bloat functions.
+ * - Stack bloat and control flow flattening with opaque predicates and fake call indirection.
+ * - Standard library bloat via dummy string/vector operations.
+ * - Compile-time random selection of bloat variants for each use.
+ * - Macros for easy application of stack bloat and decompiler crash logic.
+ * - Improved compile-time key/IV generation using compiler defined macros.
+ * - Decompiler crash stack logic for anti-reverse engineering.
+ * - Configurable via macros (M_ENABLE_BLOAT, M_ENABLE_BIGSTACK).
+ *
+ * The encryption divides strings into 8-byte chunks, applies XOR with generated keys and IV,
+ * and decrypts using AVX/SSE/NEON SIMD instructions for performance and obfuscation.
+ *
+ * The library is designed to make reverse engineering and static analysis significantly harder
+ * by injecting junk code, complex control flow, and unpredictable bloat.
+ *
+ * --- MIT License ---
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
+#pragma once
+
+#if defined(_MSC_VER)
+#if !defined(__cplusplus) || (__cplusplus < 201703L)
+#error "C++17 or higher is required. Use /std:c++17 and /Zc:__cplusplus with MSVC."
+#endif
+#else
+static_assert(__cplusplus >= 201703L, "C++17 or higher is required");
+#endif
+
+#include <stdint.h>
+using M_SizeT = uint64_t;
+
+// Used in StdBloat obfuscation
+#ifndef _MYSTIC_MINIMAL 
+#include <string>
+#include <string_view>
+#include <sstream>
+#include <vector>
+#include <utility>
+#include <functional>
+#include <iomanip>
+#endif
+
+#if defined(AVX_AVAILABLE)
+#include <immintrin.h>
+#elif defined(SSE_AVAILABLE)
+#include <emmintrin.h>
+#elif defined(NEON_AVAILABLE)
+#include <arm_neon.h>
+#else
+#error "No SIMD support defined. Define AVX_AVAILABLE, SSE_AVAILABLE, or NEON_AVAILABLE, or define _MYSTIC_NO_SIMD to disable SIMD features."
+#endif // AVX_AVAILABLE / SSE_AVAILABLE / NEON_AVAILABLE
+
+// ---------------VERSION----------------
+
+#ifndef M_VER
+#define M_VER_MAJ 5
+#define M_VER_MIN 1
+#define M_VER_PTC 3
+
+#define M_VER ( (M_VER_MAJ << 16) \
+              | (M_VER_MIN << 8)  \
+              | (M_VER_PTC))
+#else
+#error "Multiple version of Mystic have been included. M_VER already defined." 
+#endif
+
+// --------------------------------------
+
+#ifdef _MSC_VER
+#define INLINE_FUNCTION __forceinline
+#else
+#define INLINE_FUNCTION __attribute__((always_inline)) inline
+#endif
+
+/**
+ * @brief Macro to apply stack bloat, can be used outside the mystic library.
+ */
+#define M_APPLY_STACK_BLOAT \
+    Mystic::Obfuscation::Apply<static_cast<int>(Mystic::Random::GetSeed())>()
+
+
+/**
+ * @brief Macro to apply big stack. This macro will trigger a failure in the decompilation of some decompilers,
+ * (ex. IDA) mostly when generating pseudo-C code.
+ */
+#define M_APPLY_BIG_STACK \
+    Mystic::Obfuscation::DecompilerCrashStack<static_cast<int>(Mystic::Random::GetSeed())>()
+
+/**
+ * @namespace Mystic
+ * @brief Namespace containing encryption and decryption utilities.
+ * @note Yeah... good luck.
+ */
+namespace Mystic {
+    /**
+     * @brief Load a value from register using inline assembly (GCC) or volatile variable (MSVC).
+     * @note This function is used to avoid compiler optimization.
+     * @param value The value to load.
+     * @return The loaded value.
+     */
+    INLINE_FUNCTION uint64_t __LoadFromRegister(uint64_t value) noexcept {
+#if defined(__clang__) || defined(__GNUC__)
+        asm("" : "=r"(value) : "0"(value) : "memory");
+        return value;
+#else
+        volatile uint64_t reg = value;
+        return reg;
+#endif
+    }
+    
+    // m_check is compared to 0, it'll always be true
+    // because n^n is always 0. This will prevent the junk code from
+    // executing at runtime but will still bloat the stack, because
+    // the compiler will not optimize it out.
+    template<int N>
+    INLINE_FUNCTION bool __AlwaysTrue() {
+        volatile int n = N;
+        return (__LoadFromRegister(n) ^ __LoadFromRegister(n)) == 0;
+    }
+
+    /**
+     * @namespace Hash
+     * @brief Namespace for compile-time string hashing utilities, using FNV-1a algorithm.
+     */
+    namespace Hash {
+        constexpr uint64_t String(const char* str, uint64_t hash = 14695981039346656037ULL) {
+            return (*str) ? String(str + 1, (hash ^ static_cast<uint64_t>(*str)) * 1099511628211ULL) : hash;
+        }
+    }
+
+    /**
+     * @namespace Types
+     * @brief Namespace that recreates some C++ std types.
+     */
+    namespace Types {
+        template <typename CharT, M_SizeT N>
+        struct CString {
+            CharT data_buf[N]{}; 
+
+            INLINE_FUNCTION operator const CharT*() const & noexcept { return data_buf; }
+            INLINE_FUNCTION operator CharT*() & noexcept { return data_buf; }
+
+            INLINE_FUNCTION const CharT* c_str() const & noexcept { return data_buf; }
+
+            INLINE_FUNCTION const CharT* data() const & noexcept { return data_buf; }
+            INLINE_FUNCTION CharT* data() & noexcept { return data_buf; }
+
+            INLINE_FUNCTION CharT& operator[](M_SizeT idx) noexcept { 
+                return data_buf[idx]; 
+            }
+
+            INLINE_FUNCTION const CharT& operator[](M_SizeT idx) const noexcept { 
+                return data_buf[idx]; 
+            }
+
+            INLINE_FUNCTION CharT& at(M_SizeT idx) noexcept {
+                if (idx >= N) {
+                    return data_buf[N - 1]; 
+                }
+                return data_buf[idx];
+            }
+
+            INLINE_FUNCTION const CharT& at(M_SizeT idx) const noexcept {
+                if (idx >= N) {
+                    return data_buf[N - 1];
+                }
+                return data_buf[idx];
+            }
+
+            INLINE_FUNCTION M_SizeT length() const noexcept {
+                M_SizeT len = 0;
+                while (len < N && data_buf[len] != CharT(0)) {
+                    ++len;
+                }
+                return len;
+            }
+
+            INLINE_FUNCTION constexpr M_SizeT capacity() const noexcept {
+                return N;
+            }
+
+            // operator+= for appending another CString of any size
+            template <M_SizeT OtherN>
+            INLINE_FUNCTION CString& operator+=(const CString<CharT, OtherN>& other) noexcept {
+                M_SizeT current_len = length();
+                M_SizeT write_idx = current_len;
+
+                for (M_SizeT i = 0; i < OtherN && write_idx < (N - 1); ++i) {
+                    CharT val = other[i];
+                    if (val == CharT(0)) {
+                        break;
+                    }
+                    data_buf[write_idx++] = val;
+                }
+                
+                if (write_idx < N) {
+                    data_buf[write_idx] = CharT(0);
+                }
+                return *this;
+            }
+
+            // operator+= for appending raw null terminated strings
+            INLINE_FUNCTION CString& operator+=(const CharT* other) noexcept {
+                if (!other) return *this;
+
+                M_SizeT current_len = length();
+                M_SizeT write_idx = current_len;
+
+                for (M_SizeT i = 0; other[i] != CharT(0) && write_idx < (N - 1); ++i) {
+                    data_buf[write_idx++] = other[i];
+                }
+
+                if (write_idx < N) {
+                    data_buf[write_idx] = CharT(0);
+                }
+                return *this;
+            }
+
+            // operator+= for appending a single character
+            INLINE_FUNCTION CString& operator+=(CharT ch) noexcept {
+                M_SizeT current_len = length();
+                if (current_len < (N - 1)) {
+                    data_buf[current_len] = ch;
+                    data_buf[current_len + 1] = CharT(0);
+                }
+                return *this;
+            }
+
+            // Assignment from another CString of any size
+            template <M_SizeT OtherN>
+            INLINE_FUNCTION CString& operator=(const CString<CharT, OtherN>& other) noexcept {
+                M_SizeT write_idx = 0;
+
+                for (; write_idx < (N - 1) && write_idx < OtherN; ++write_idx) {
+                    CharT val = other[write_idx];
+                    if (val == CharT(0)) {
+                        break;
+                    }
+                    data_buf[write_idx] = val;
+                }
+
+                if (write_idx < N) {
+                    data_buf[write_idx] = CharT(0);
+                }
+
+                // Clear remaining buffer
+                for (++write_idx; write_idx < N; ++write_idx) {
+                    data_buf[write_idx] = CharT(0);
+                }
+
+                return *this;
+            }
+
+            // Assignment from raw null terminated string
+            INLINE_FUNCTION CString& operator=(const CharT* other) noexcept {
+                if (!other) {
+                    data_buf[0] = CharT(0);
+                    return *this;
+                }
+
+                M_SizeT write_idx = 0;
+
+                while (write_idx < (N - 1) && other[write_idx] != CharT(0)) {
+                    data_buf[write_idx] = other[write_idx];
+                    ++write_idx;
+                }
+
+                data_buf[write_idx] = CharT(0);
+
+                // Clear remaining buffer
+                for (++write_idx; write_idx < N; ++write_idx) {
+                    data_buf[write_idx] = CharT(0);
+                }
+
+                return *this;
+            }
+
+            // Assignment from a single character
+            INLINE_FUNCTION CString& operator=(CharT ch) noexcept {
+                if (N > 1) {
+                    data_buf[0] = ch;
+                    data_buf[1] = CharT(0);
+
+                    for (M_SizeT i = 2; i < N; ++i) {
+                        data_buf[i] = CharT(0);
+                    }
+                }
+                else if (N == 1) {
+                    data_buf[0] = CharT(0);
+                }
+
+                return *this;
+            }
+
+            #ifndef _MYSTIC_MINIMAL
+            INLINE_FUNCTION std::basic_string<CharT> ToStdString() const {
+                return std::basic_string<CharT>(data_buf);
+            }
+            
+            INLINE_FUNCTION operator std::basic_string<CharT>() const {
+                return std::basic_string<CharT>(data_buf);
+            }
+
+            INLINE_FUNCTION operator std::basic_string_view<CharT>() const {
+                return std::basic_string_view<CharT>(data_buf, length());
+            }
+            #endif
+                    
+            // Clear the string from the stack when it goes out of scope
+            INLINE_FUNCTION ~CString() noexcept {
+                volatile CharT* p = data_buf;
+                for (M_SizeT i = 0; i < N; ++i) {
+                    p[i] = 0;
+                }
+            }
+        };
+
+        template <typename OStream, typename CharT, M_SizeT N>
+        INLINE_FUNCTION OStream& operator<<(OStream& os, const CString<CharT, N>& str) noexcept {
+            os << str.c_str();
+            return os;
+        }
+
+        template <typename T, M_SizeT Size>
+        struct CArray {
+            T data[Size];
+            
+            constexpr const T& operator[](M_SizeT index) const noexcept { return data[index]; }
+            constexpr T& operator[](M_SizeT index) noexcept { return data[index]; }
+            constexpr M_SizeT size() const noexcept { return Size; }
+        };
+    }
+
+    /**
+     * @namespace Random
+     * @brief Namespace for random number generation utilities.
+     */
+    namespace Random {
+        /** 
+         * @brief A constexpr implementation of the SplitMix64 algorithm for generating pseudo-random numbers at compile time.
+         */
+        constexpr uint64_t SplitMix64(uint64_t x) {
+            x += 0x9E3779B97F4A7C15ULL;
+            x = (x ^ (x >> 30)) * 0xBF58476D1CE4E5B9ULL;
+            x = (x ^ (x >> 27)) * 0x94D049BB133111EBULL;
+            return x ^ (x >> 31);
+        }
+
+        /**
+         * @brief Template meta-programming structure to generate random numbers based on seed and index.
+         * @tparam Seed The seed value for random number generation.
+         * @tparam Index The index of the random number in the sequence.
+         */
+        template<uint64_t Seed, M_SizeT Index>
+        struct Random {
+            static constexpr uint64_t value = SplitMix64(Random<Seed, Index-1>::value);
+        };
+
+        /**
+         * @brief Specialization of Random structure for index 0, returning the seed itself.
+         * @tparam Seed The seed value.
+         */
+        template<uint64_t Seed>
+        struct Random<Seed, 0> {
+            static constexpr uint64_t value = SplitMix64(Seed);
+        };
+
+        constexpr uint64_t GetSeed() {
+            uint64_t h = Hash::String(__TIME__);
+            h ^= Hash::String(__DATE__) + 0x9E3779B9 + (h << 6) + (h >> 2);
+            h ^= Hash::String(__FILE__) + 0x9E3779B9 + (h << 6) + (h >> 2);
+            return h * 0x5DEECE66DULL;
+        }
+
+        static constexpr uint8_t SVarSeed = static_cast<uint8_t>(
+            GetSeed() % 0xFF
+        );
+
+        /**
+         * @brief Generate encryption keys and initialization vector (IV) using compile-time seed from time.
+         * @return An array of three uint64_t values representing keys and IV.
+         */
+        template<uint64_t Seed = GetSeed()>
+        INLINE_FUNCTION constexpr auto GenerateKeysAndIV() noexcept {
+            constexpr uint64_t key1 = Random<Seed, 1>::value;
+            constexpr uint64_t key2 = Random<Seed, 2>::value;
+            constexpr uint64_t iv   = Random<Seed, 3>::value;
+            return Types::CArray<uint64_t, 3>{ key1, key2, iv };
+        }
+    }
+
+    /**
+     * @namespace Obfuscation
+     * @brief Namespace containing functions with code that'll be added to the executable to mess with the disassembly.
+     */
+    namespace Obfuscation {
+        namespace SeedCache {
+            static constexpr uint64_t Seed = Random::GetSeed();
+            constexpr uint64_t Get() noexcept {
+                return Seed;
+            }
+        };
+
+        /**
+         * @brief Adds significant stack bloat and complex control flow to hinder static analysis and decompilation.
+         * This function creates a large, obfuscated control-flow graph consisting of 10 distinct labeled blocks,
+         * each containing volatile operations and nested conditional statements designed to prevent compiler optimizations.
+         * @tparam N Compile-time integer param used to initialize x.
+         */
+        template<int N>
+        INLINE_FUNCTION void StackBloat() noexcept {
+            volatile int      x       = N;
+            volatile uint64_t dummy   = SeedCache::Get();
+
+            // Fake call indirection system to confuse call graph
+            auto confuse_branch = [](int v) -> int {
+                volatile uint64_t scramble = (v * (SeedCache::Get() | 0x7F2E3D1C5A9B8F07UL)) ^ (SeedCache::Get() | 0xC4D3E2F1A0B9C8D7ULL);
+                return scramble % 21;
+            };
+
+            // Multi-hop jumps
+            switch (confuse_branch(x)) {
+            #define DISPATCH(i) \
+                case i: goto hop1_##i; \
+                hop1_##i: goto hop2_##i; \
+                hop2_##i: goto label##i;
+
+            // MOD: Dispatch
+            DISPATCH(0)   DISPATCH(1)   DISPATCH(2)   DISPATCH(3)   DISPATCH(4)
+            DISPATCH(5)
+
+            #undef DISPATCH
+            default: goto end;
+            }
+
+            // Label implementation — fake math, volatile ops, lambdas
+            #define LABEL(i) \
+                label##i: { \
+                    volatile uint64_t x = (uint64_t)(i * 2); \
+                    volatile uint64_t y = x + 1; \
+                    volatile uint64_t z = y + 3; \
+                    for (int j = 0; j < 5; ++j) { \
+                        volatile uint64_t a = SeedCache::Get() ^ (x + j); \
+                        if ((a & 1) == 0) { \
+                            if ((a ^ y) % 3 == 0) { \
+                                if (((a + z) & 7) != 4) { \
+                                    dummy ^= a & y; \
+                                    dummy ^= __LoadFromRegister(a); \
+                                } else { \
+                                    dummy ^= x | z; \
+                                } \
+                            } else { \
+                                dummy ^= y | a; \
+                            } \
+                        } else { \
+                            if ((a | x) % 5 == 1) { \
+                                if (((z ^ a) & 0xF) == 2) { \
+                                    dummy ^= z & y; \
+                                } else { \
+                                    dummy ^= x | x; \
+                                } \
+                            } else { \
+                                dummy ^= a | z; \
+                            } \
+                        } \
+                    } \
+                    \
+                    dummy ^= __LoadFromRegister(x); \
+                    dummy ^= __LoadFromRegister(y); \
+                    dummy ^= __LoadFromRegister(z); \
+                    goto end; \
+                }
+
+            // MOD: Label
+            LABEL(0)   LABEL(1)   LABEL(2)   LABEL(3)   LABEL(4)
+            LABEL(5)
+
+            #undef LABEL
+        end:;
+            (void)dummy;
+        }
+
+        /**
+         * @brief Adds AVX/SSE-based logic bloat using SIMD instructions and dummy register loads (variant A).
+         * @tparam N The parameter to influence the dummy computation (not buffer size).
+         */
+        template<int N>
+        INLINE_FUNCTION void LogicBloatAVXSSEA() noexcept {
+            volatile  int      x    = 0;
+            constexpr uint64_t val1 = SeedCache::Get() ^ 0x6D24B3A58F7E1C90ULL;
+
+#if defined(AVX_AVAILABLE)
+            alignas(32) uint64_t data[8] = {};
+            __m256i vec = _mm256_set1_epi64x(val1);
+            for (int i = 0; i < 8; i += 4) {
+                _mm256_store_si256(reinterpret_cast<__m256i*>(&data[i]), vec);
+                vec = _mm256_xor_si256(vec, _mm256_set1_epi64x(i ^ N));
+            }
+            volatile uint64_t sink = __LoadFromRegister(data[0]);
+#elif defined(SSE_AVAILABLE)
+            alignas(16) uint64_t data[4] = {};
+            __m128i vec = _mm_set1_epi64x(val1);
+            for (int i = 0; i < 4; i += 2) {
+                _mm_store_si128(reinterpret_cast<__m128i*>(&data[i]), vec);
+                vec = _mm_xor_si128(vec, _mm_set1_epi64x(i ^ N));
+            }
+            volatile uint64_t sink = __LoadFromRegister(data[0]);
+#elif defined(NEON_AVAILABLE)
+            alignas(16) uint64_t data[4] = {};
+            uint64x2_t vec = vdupq_n_u64(val1);
+            for (int i = 0; i < 4; i += 2) {
+                vst1q_u64(&data[i], vec);
+                vec = veorq_u64(vec, vdupq_n_u64(i ^ N));
+            }
+            volatile uint64_t sink = __LoadFromRegister(data[0]);
+#endif
+            x = static_cast<int>(__LoadFromRegister(sink));
+            (void)x;
+        }
+
+        /**
+         * @brief Adds AVX/SSE-based logic bloat using SIMD instructions and dummy register loads (variant B).
+         * @tparam N The parameter to influence the dummy computation (not buffer size).
+         */
+        template<int N>
+        INLINE_FUNCTION void LogicBloatAVXSSEB() noexcept {
+            volatile  int      x    = 0;
+            constexpr uint64_t val1 = SeedCache::Get() ^ 0x8A3E6B59247D1C0FULL;
+
+#if defined(AVX_AVAILABLE)
+            alignas(32) uint64_t arr[8] = {};
+            __m256i v = _mm256_set1_epi64x(val1);
+            for (int i = 0; i < 8; i += 4) {
+                v = _mm256_add_epi64(v, _mm256_set1_epi64x(i));
+                _mm256_store_si256(reinterpret_cast<__m256i*>(&arr[i]), v);
+            }
+            volatile uint64_t sink = __LoadFromRegister(arr[7]);
+#elif defined(SSE_AVAILABLE)
+            alignas(16) uint64_t arr[4] = {};
+            __m128i v = _mm_set1_epi64x(val1);
+            for (int i = 0; i < 4; i += 2) {
+                v = _mm_add_epi64(v, _mm_set1_epi64x(i));
+                _mm_store_si128(reinterpret_cast<__m128i*>(&arr[i]), v);
+            }
+            volatile uint64_t sink = __LoadFromRegister(arr[3]);
+#elif defined(NEON_AVAILABLE)
+            alignas(16) uint64_t arr[4] = {};
+            uint64x2_t v = vdupq_n_u64(val1);
+            for (int i = 0; i < 4; i += 2) {
+                v = vaddq_u64(v, vdupq_n_u64(i));
+                vst1q_u64(&arr[i], v);
+            }
+            volatile uint64_t sink = __LoadFromRegister(arr[3]);
+#endif
+            x = static_cast<int>(__LoadFromRegister(sink));
+            (void)x;
+        }
+
+        /**
+         * @brief Adds AVX/SSE-based logic bloat using SIMD instructions and dummy register loads (variant C).
+         * @tparam N The parameter to influence the dummy computation (not buffer size).
+         */
+        template<int N>
+        INLINE_FUNCTION void LogicBloatAVXSSEC() noexcept {
+            volatile int x = 0;
+#if defined(AVX_AVAILABLE)
+            alignas(32) uint64_t buf[8] = {};
+            __m256i v = _mm256_setzero_si256();
+            int toggle = 0;
+            for (int i = 0; i < 8; i += 4) {
+                if (toggle) {
+                    v = _mm256_or_si256(v, _mm256_set1_epi64x(i));
+                } else {
+                    v = _mm256_and_si256(v, _mm256_set1_epi64x(~i));
+                }
+                _mm256_store_si256(reinterpret_cast<__m256i*>(&buf[i]), v);
+                toggle = !toggle;
+            }
+            volatile uint64_t sink = __LoadFromRegister(buf[0]);
+#elif defined(SSE_AVAILABLE)
+            alignas(16) uint64_t buf[4] = {};
+            __m128i v = _mm_setzero_si128();
+            int toggle = 0;
+            for (int i = 0; i < 4; i += 2) {
+                if (toggle) {
+                    v = _mm_or_si128(v, _mm_set1_epi64x(i));
+                } else {
+                    v = _mm_and_si128(v, _mm_set1_epi64x(~i));
+                }
+                _mm_store_si128(reinterpret_cast<__m128i*>(&buf[i]), v);
+                toggle = !toggle;
+            }
+            volatile uint64_t sink = __LoadFromRegister(buf[0]);
+#elif defined(NEON_AVAILABLE)
+            alignas(16) uint64_t buf[4] = {};
+            uint64x2_t v = vdupq_n_u64(0);
+            int toggle = 0;
+            for (int i = 0; i < 4; i += 2) {
+                if (toggle) {
+                    v = vorrq_u64(v, vdupq_n_u64(i));
+                } else {
+                    v = vandq_u64(v, vdupq_n_u64(~i));
+                }
+                vst1q_u64(&buf[i], v);
+                toggle = !toggle;
+            }
+            volatile uint64_t sink = __LoadFromRegister(buf[0]);
+#endif
+            x = static_cast<int>(__LoadFromRegister(sink));
+            (void)x;
+        }
+
+        /**
+         * @brief Adds standard library bloat by performing dummy string and vector operations.
+         */
+#ifndef _MYSTIC_MINIMAL
+        INLINE_FUNCTION void StdBloat() noexcept {
+            std::vector<std::pair<std::string, int>> data;
+            std::stringstream ss;
+
+            for (int i = 0; i < 16; ++i) {
+                ss.str({});
+                ss.clear();
+                ss << std::hex << std::setw(4) << std::setfill('0') << (i * 1337);
+                data.emplace_back(ss.str(), i);
+            }
+
+            std::function<int(const std::pair<std::string, int>&)> converter =
+                std::bind([](const std::pair<std::string, int>& p) -> int {
+                    std::stringstream inner;
+                    inner << p.first;
+                    int out;
+                    inner >> std::hex >> out;
+                    return out ^ (p.second << 2);
+                }, std::placeholders::_1);
+
+            volatile int dummy = 0;
+            for (const auto& entry : data) {
+                dummy += converter(entry) & 0xFF;
+            }
+
+            (void)dummy;
+        }
+#endif
+
+        /**
+         * @brief Helper to select a random bloat function at compile time.
+         * @tparam Key The key used for selection.
+         * @return An integer in [0,2] to select the bloat variant.
+         */
+        template<int Key>
+        INLINE_FUNCTION constexpr int RandomSelector() noexcept {
+            return Key % 3;
+        }
+
+        /**
+         * @brief Randomly calls one of the AVX/SSE bloat functions based on the compile-time key.
+         * @tparam Key The key used for selection.
+         */
+        template<int Key>
+        INLINE_FUNCTION void BloatRandomAVXSSE() noexcept {
+            constexpr int choice = RandomSelector<Key>();
+
+            if constexpr (choice == 0) {
+                LogicBloatAVXSSEA<(Key % 24) + 8>();
+            } else if constexpr (choice == 1) {
+                LogicBloatAVXSSEB<(Key % 21) + 4>();
+            } else {
+                LogicBloatAVXSSEC<(Key % 24) + 8>();
+            }
+        }
+
+        /**
+         * @brief Applies a sequence of bloat functions for obfuscation.
+         * @tparam Key The key used to parameterize the bloat functions.
+         */
+        template<int Key>
+        INLINE_FUNCTION void Apply() noexcept {
+            if (__AlwaysTrue<Key>()) return;
+
+            constexpr int stack_size = (Key % 24) + 12;
+            constexpr uint64_t val1  = SeedCache::Get() & 0xFEA2C4F4830ULL;
+
+            StackBloat<stack_size>();
+            BloatRandomAVXSSE<Key>();
+            StackBloat<stack_size>();
+#ifndef _MYSTIC_MINIMAL
+            StdBloat();
+#endif
+            StackBloat<stack_size>();
+            BloatRandomAVXSSE<Key>();
+            StackBloat<stack_size>();
+
+            __LoadFromRegister(val1);
+        }
+
+        /**
+         * This function introduces a small amount of stack bloat and constructs an invalid function pointer cast.
+         * This leads to decompilers failing to decompile the part of code where this function is called.
+         *
+         * @tparam Value Any numeric value.
+         */
+        template<int Value>
+        INLINE_FUNCTION void DecompilerCrashStack() {
+            if (__AlwaysTrue<Value>()) return;
+            volatile uint64_t crash_buffer[2];
+
+            using Fn = int(*)(int);
+            // switched to C cast to avoid C++ cast problems in LLVM/Clang
+            Fn unreachable_fn = (Fn)(
+                crash_buffer + ((Value % 0x400000) + 0x4000000)
+            );
+            __LoadFromRegister(
+                reinterpret_cast<uint64_t>(unreachable_fn)
+            );
+        }
+    } // namespace Obfuscation
+
+    namespace Types {
+        template<typename T, uint64_t Seed>
+        struct CryptoNumber {
+#ifndef _MYSTIC_MINIMAL
+            static_assert(std::is_integral_v<T> || std::is_enum_v<T>);
+#endif
+
+            constexpr static auto keys = Random::GenerateKeysAndIV<Seed>();
+            constexpr static uint64_t key1 = keys[0];
+            constexpr static uint64_t key2 = keys[1];
+            constexpr static uint64_t iv   = keys[2];
+
+        private:
+            CArray<uint8_t, sizeof(T)> encrypted{};
+
+            INLINE_FUNCTION constexpr CArray<size_t, sizeof(T)> GetPermutation() const {
+                CArray<size_t, sizeof(T)> perm{};
+                for (size_t i = 0; i < sizeof(T); ++i) {
+                    perm[i] = i;
+                }
+
+                uint64_t seed = Seed;
+                for (size_t i = sizeof(T) - 1; i > 0; --i) {
+                    seed = Random::SplitMix64(seed);
+                    size_t j = seed % (i + 1);
+
+                    size_t tmp = perm[i];
+                    perm[i] = perm[j];
+                    perm[j] = tmp;
+                }
+
+                return perm;
+            }
+
+            INLINE_FUNCTION constexpr CArray<uint8_t, sizeof(T)> Encrypt(T value) {
+                uint64_t x = static_cast<uint64_t>(value);
+                x ^= key1;
+                x += iv;
+                x ^= key2;
+
+                CArray<uint8_t, sizeof(T)> out{};
+
+                const auto perm = GetPermutation();
+                for (size_t i = 0; i < sizeof(T); ++i) {
+                    out[perm[i]] = static_cast<uint8_t>(x >> (i * 8));
+                }
+
+                return out;
+            }
+
+            INLINE_FUNCTION T Decrypt(const CArray<uint8_t, sizeof(T)>& bytes) const {
+#ifdef M_ENABLE_BIGSTACK
+                M_APPLY_BIG_STACK;
+#endif
+
+                uint64_t x = 0;
+                const auto perm = GetPermutation();
+
+                for (size_t i = 0; i < sizeof(T); ++i) {
+                    size_t idx = __LoadFromRegister(perm[i]);
+                    uint64_t b = static_cast<uint64_t>(bytes[idx]);
+                    x |= __LoadFromRegister(b) << (i * 8);
+                }
+
+#if defined(AVX_AVAILABLE)
+                __m128i vx  = _mm_cvtsi64_si128(static_cast<int64_t>(__LoadFromRegister(x)));
+                __m128i vk2 = _mm_cvtsi64_si128(static_cast<int64_t>(__LoadFromRegister(key2)));
+                __m128i viv = _mm_cvtsi64_si128(static_cast<int64_t>(__LoadFromRegister(iv)));
+                __m128i vk1 = _mm_cvtsi64_si128(static_cast<int64_t>(__LoadFromRegister(key1)));
+
+#ifdef M_ENABLE_BLOAT
+                M_APPLY_STACK_BLOAT;
+#endif
+
+                vx = _mm_xor_si128(vx, vk2);
+                vx = _mm_sub_epi64(vx, viv);
+                vx = _mm_xor_si128(vx, vk1);
+
+                x = static_cast<uint64_t>(_mm_cvtsi128_si64(vx));
+#elif defined(SSE_AVAILABLE)
+                __m128i vx  = _mm_cvtsi64_si128(static_cast<int64_t>(__LoadFromRegister(x)));
+                __m128i vk2 = _mm_cvtsi64_si128(static_cast<int64_t>(__LoadFromRegister(key2)));
+                __m128i viv = _mm_cvtsi64_si128(static_cast<int64_t>(__LoadFromRegister(iv)));
+                __m128i vk1 = _mm_cvtsi64_si128(static_cast<int64_t>(__LoadFromRegister(key1)));
+
+#ifdef M_ENABLE_BLOAT
+                M_APPLY_STACK_BLOAT;
+#endif
+
+                vx = _mm_xor_si128(vx, vk2);
+                vx = _mm_sub_epi64(vx, viv);
+                vx = _mm_xor_si128(vx, vk1);
+
+                x = static_cast<uint64_t>(_mm_cvtsi128_si64(vx));
+#elif defined(NEON_AVAILABLE)
+                uint64x1_t vx  = vcreate_u64(__LoadFromRegister(x));
+                uint64x1_t vk2 = vcreate_u64(__LoadFromRegister(key2));
+                uint64x1_t viv = vcreate_u64(__LoadFromRegister(iv));
+                uint64x1_t vk1 = vcreate_u64(__LoadFromRegister(key1));
+
+#ifdef M_ENABLE_BLOAT
+                M_APPLY_STACK_BLOAT;
+#endif
+
+                vx = veor_u64(vx, vk2);
+                vx = vsub_u64(vx, viv);
+                vx = veor_u64(vx, vk1);
+
+                x = vget_lane_u64(vx, 0);
+#endif
+
+                return static_cast<T>(__LoadFromRegister(x));
+            }
+
+        public:
+            constexpr CryptoNumber() = default;
+
+            constexpr CryptoNumber(T value) 
+                : encrypted(Encrypt(value)) { }
+
+            constexpr CryptoNumber& operator=(T value) {
+                encrypted = Encrypt(value);
+                return *this;
+            }
+
+            [[nodiscard]]
+            T Get() const {
+                return Decrypt(encrypted);
+            }
+
+            constexpr operator T() const {
+                return Get();
+            }
+        };
+    }
+
+    constexpr uint64_t SEED_MUL_CONST_A = 0x9E3779B97F4A7C15ULL;
+    constexpr uint64_t SEED_MUL_CONST_B = 0xBF58476D1CE4E5B9ULL;
+
+#define __MYSTIFY_NUM(value) ([]() {                                         \
+        constexpr uint64_t uSeed = Mystic::Random::SplitMix64(             \
+            Mystic::Random::GetSeed() ^                                    \
+            (__LINE__ * Mystic::SEED_MUL_CONST_A) ^                        \
+            (__COUNTER__ * Mystic::SEED_MUL_CONST_B));                     \
+                                                                           \
+        return Mystic::Types::CryptoNumber<decltype(value), uSeed>(value); \
+}())
+
+    /**
+     * @brief Encrypt a string using specified keys and IV.
+     * @tparam CharT The character type to work with.
+     * @tparam N The size of the input string.
+     * @tparam Seed The unique crypto seed.
+     * @param str The input string to be encrypted.
+     * @return An array of uint64_t values representing the encrypted string.
+     */
+    template<typename CharT, M_SizeT N, uint64_t Seed>
+    INLINE_FUNCTION constexpr auto __EncryptString(const CharT(&str)[N]) noexcept {
+        constexpr M_SizeT ChunkSize = 8 / sizeof(CharT);
+        constexpr M_SizeT ArraySize = (N + ChunkSize - 1) / ChunkSize;
+        
+        Types::CArray<uint64_t, ArraySize> encrypted{};
+
+        constexpr auto keys = Random::GenerateKeysAndIV<Seed>();
+        constexpr uint64_t key1 = keys[0];
+        constexpr uint64_t key2 = keys[1];
+        constexpr uint64_t iv   = keys[2];
+
+        for (M_SizeT i = 0; i < N; i += ChunkSize) {
+            uint64_t chunk = 0;
+            for (M_SizeT j = 0; j < ChunkSize && i + j < N; ++j) { 
+                chunk |= static_cast<uint64_t>(str[i + j]) << (j * sizeof(CharT) * 8);
+            }
+            chunk ^= (key1) ^ ((key2 << 3) & (key1 << 6)) ^ (iv ^ 0xFC11ULL);
+            encrypted.data[i / ChunkSize] = chunk;
+        }
+
+        return encrypted;
+    }
+
+    /**
+     * @brief Decrypt an encrypted string using specified keys and IV.
+     * @tparam CharT The character type to work with.
+     * @tparam N The size of the encrypted data array.
+     * @tparam Seed The unique crypto seed.
+     * @param encrypted The array of encrypted uint64_t values.
+     * @return The decrypted string.
+     */
+    template<typename CharT, M_SizeT N, uint64_t Seed, M_SizeT ArraySize>
+    INLINE_FUNCTION auto __DecryptString(const Types::CArray<uint64_t, ArraySize>& encrypted) noexcept {
+#ifdef M_ENABLE_BIGSTACK
+        M_APPLY_BIG_STACK;
+#endif
+
+        Types::CString<CharT, N> decrypted{};
+
+        constexpr M_SizeT BitsPerChar = sizeof(CharT) * 8;
+        constexpr M_SizeT CharsPerU64 = 8 / sizeof(CharT);
+#if defined(AVX_AVAILABLE)
+        constexpr M_SizeT U64sPerSIMD = 4;
+#elif defined(SSE_AVAILABLE)
+        constexpr M_SizeT U64sPerSIMD = 2;
+#elif defined(NEON_AVAILABLE)
+        constexpr M_SizeT U64sPerSIMD = 2;
+#endif
+        constexpr M_SizeT CharsPerSIMD = CharsPerU64 * U64sPerSIMD;
+
+        constexpr auto keys = Random::GenerateKeysAndIV<Seed>();
+
+#if defined(AVX_AVAILABLE)
+        __m256i key1 = _mm256_set1_epi64x(__LoadFromRegister(keys[0]));
+        __m256i key2 = _mm256_set1_epi64x(__LoadFromRegister(keys[1]));
+        __m256i iv   = _mm256_set1_epi64x(__LoadFromRegister(keys[2]));
+
+        for (M_SizeT i = 0; i < N; i += CharsPerSIMD) {
+            __m256i chunk = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(&encrypted[i / CharsPerU64]));
+            chunk = _mm256_xor_si256(chunk, key1);
+
+#ifdef M_ENABLE_BLOAT
+            M_APPLY_STACK_BLOAT;
+#endif
+
+            __m256i k2_ls_3 = _mm256_slli_epi64(key2, 3);
+            __m256i k1_ls_6 = _mm256_slli_epi64(key1, 6);
+            __m256i kl3_kr6 = _mm256_and_si256(k2_ls_3, k1_ls_6);
+            chunk = _mm256_xor_si256(chunk, kl3_kr6);
+
+            __m256i k1_ls_i = _mm256_xor_si256(iv, _mm256_set1_epi64x(__MYSTIFY_NUM(0xFC11ULL)));
+            chunk = _mm256_xor_si256(chunk, k1_ls_i);
+
+#ifdef M_ENABLE_BLOAT
+            M_APPLY_STACK_BLOAT;
+#endif
+
+            alignas(32) uint64_t out[U64sPerSIMD];
+            _mm256_store_si256(reinterpret_cast<__m256i*>(out), chunk);
+
+            for (M_SizeT u = 0; u < U64sPerSIMD; ++u) {
+                uint64_t v = out[u];
+                for (M_SizeT c = 0; c < CharsPerU64; ++c) {
+                    M_SizeT idx = i + u * CharsPerU64 + c;
+                    if (idx < N) {
+                        decrypted += static_cast<CharT>((v >> (c * BitsPerChar)) & ((1ULL << BitsPerChar) - 1));
+                    }
+                }
+            }
+        }
+
+#elif defined(SSE_AVAILABLE)
+        __m128i key1 = _mm_set1_epi64x(__LoadFromRegister(keys[0]));
+        __m128i key2 = _mm_set1_epi64x(__LoadFromRegister(keys[1]));
+        __m128i iv   = _mm_set1_epi64x(__LoadFromRegister(keys[2]));
+
+        for (M_SizeT i = 0; i < N; i += CharsPerSIMD) {
+            __m128i chunk = _mm_loadu_si128(reinterpret_cast<const __m128i*>(&encrypted[i / CharsPerU64]));
+            chunk = _mm_xor_si128(chunk, key1);
+
+#ifdef M_ENABLE_BLOAT
+            M_APPLY_STACK_BLOAT;
+#endif
+
+            __m128i k2_ls_3 = _mm_slli_epi64(key2, 3);
+            __m128i k1_ls_6 = _mm_slli_epi64(key1, 6);
+            __m128i kl3_kr6 = _mm_and_si128(k2_ls_3, k1_ls_6);
+            chunk = _mm_xor_si128(chunk, kl3_kr6);
+
+            __m128i k1_ls_i = _mm_xor_si128(iv, _mm_set1_epi64x(__MYSTIFY_NUM(0xFC11ULL)));
+            chunk = _mm_xor_si128(chunk, k1_ls_i);
+
+#ifdef M_ENABLE_BLOAT
+            M_APPLY_STACK_BLOAT;
+#endif
+
+            alignas(16) uint64_t out[U64sPerSIMD];
+            _mm_store_si128(reinterpret_cast<__m128i*>(out), chunk);
+
+            for (M_SizeT u = 0; u < U64sPerSIMD; ++u) {
+                uint64_t v = out[u];
+                for (M_SizeT c = 0; c < CharsPerU64; ++c) {
+                    M_SizeT idx = i + u * CharsPerU64 + c;
+                    if (idx < N) {
+                        decrypted += static_cast<CharT>((v >> (c * BitsPerChar)) & ((1ULL << BitsPerChar) - 1));
+                    }
+                }
+            }
+        }
+#elif defined(NEON_AVAILABLE)
+        uint64x2_t key1 = vdupq_n_u64(__LoadFromRegister(keys[0]));
+        uint64x2_t key2 = vdupq_n_u64(__LoadFromRegister(keys[1]));
+        uint64x2_t iv   = vdupq_n_u64(__LoadFromRegister(keys[2]));
+
+        for (M_SizeT i = 0; i < N; i += CharsPerSIMD) {
+            uint64x2_t chunk = vld1q_u64(&encrypted[i / CharsPerU64]);
+            chunk = veorq_u64(chunk, key1);
+
+#ifdef M_ENABLE_BLOAT
+            M_APPLY_STACK_BLOAT;
+#endif
+
+            uint64x2_t k2_ls_3 = vshlq_n_u64(key2, 3);
+            uint64x2_t k1_ls_6 = vshlq_n_u64(key1, 6);
+            uint64x2_t kl3_kr6 = vandq_u64(k2_ls_3, k1_ls_6);
+            chunk = veorq_u64(chunk, kl3_kr6);
+
+            uint64x2_t k1_ls_i = veorq_u64(iv, vdupq_n_u64(__MYSTIFY_NUM(0xFC11ULL)));
+            chunk = veorq_u64(chunk, k1_ls_i);
+
+#ifdef M_ENABLE_BLOAT
+            M_APPLY_STACK_BLOAT;
+#endif
+
+            alignas(16) uint64_t out[U64sPerSIMD];
+            vst1q_u64(out, chunk);
+
+            for (M_SizeT u = 0; u < U64sPerSIMD; ++u) {
+                uint64_t v = out[u];
+                for (M_SizeT c = 0; c < CharsPerU64; ++c) {
+                    M_SizeT idx = i + u * CharsPerU64 + c;
+                    if (idx < N) {
+                        decrypted += static_cast<CharT>((v >> (c * BitsPerChar)) & ((1ULL << BitsPerChar) - 1));
+                    }
+                }
+            }
+        }
+#endif
+
+        return decrypted;
+    }
+
+    /**
+     * @brief A struct representing an encrypted string.
+     * @tparam CharT The character type to work with.
+     * @tparam N The size of the encrypted data array.
+     * @tparam Seed The unique crypto seed.
+     */
+    template<typename CharT, M_SizeT N, uint64_t Seed>
+    struct EncryptedString {
+        constexpr static M_SizeT ChunkSize = 8 / sizeof(CharT);
+        constexpr static M_SizeT ArraySize = (N + ChunkSize - 1) / ChunkSize;
+        
+        Types::CArray<uint64_t, ArraySize> data;
+
+        INLINE_FUNCTION auto DecryptString() const noexcept {
+            return __DecryptString<CharT, N, Seed, ArraySize>(data);
+        }
+    };
+
+    /**
+     * @brief Encrypt a string and return an EncryptedString object.
+     * @tparam N The size of the input string.
+     * @param str The input string to be encrypted.
+     * @return An EncryptedString object containing the encrypted data.
+     */
+    template<typename CharT, M_SizeT N, uint64_t Seed>
+    INLINE_FUNCTION constexpr auto EncryptString(const CharT(&str)[N]) noexcept {
+        return EncryptedString<CharT, N, Seed>{__EncryptString<CharT, N, Seed>(str)};
+    }
+} // namespace Mystic
+
+/**
+ * @brief Macro to encrypt a char string at compile-time and decrypt it a runtime.
+ * @param str The input string to be encrypted.
+ * @return The decrypted string at runtime.
+ */
+#define MYSTIFY(str) ([] { \
+    constexpr uint64_t uSeed = Mystic::Random::SplitMix64( \
+        Mystic::Random::GetSeed() ^ \
+        (__LINE__ * Mystic::SEED_MUL_CONST_A) ^ \
+        (__COUNTER__ * Mystic::SEED_MUL_CONST_B) \
+    ); \
+    constexpr auto encrypted = Mystic::EncryptString<char, sizeof(str)/sizeof(str[0]), uSeed>(str); \
+    return encrypted.DecryptString(); \
+}())
+
+/**
+ * @brief Macro to encrypt a char string at compile-time keeping the null terminator and decrypt it a runtime.
+ * @param str The input string to be encrypted.
+ * @return The decrypted string including '\0' at runtime.
+ */
+#define MYSTIFY_KEEPNULL(str) ([] { \
+    constexpr uint64_t uSeed = Mystic::Random::SplitMix64( \
+        Mystic::Random::GetSeed() ^ \
+        (__LINE__ * Mystic::SEED_MUL_CONST_A) ^ \
+        (__COUNTER__ * Mystic::SEED_MUL_CONST_B) \
+    ); \
+    constexpr auto encrypted = Mystic::EncryptString<char, sizeof(str)/sizeof(str[0]), uSeed>(str); \
+    return encrypted.DecryptString(false); \
+}())
+
+/**
+ * @brief Macro to encrypt a wchar_t string at compile-time and decrypt it a runtime.
+ * @param wstr The input wide string to be encrypted.
+ * @return The decrypted string at runtime.
+ */
+#define MYSTIFYW(wstr) ([] { \
+    constexpr uint64_t uSeed = Mystic::Random::SplitMix64( \
+        Mystic::Random::GetSeed() ^ \
+        (__LINE__ * Mystic::SEED_MUL_CONST_A) ^ \
+        (__COUNTER__ * Mystic::SEED_MUL_CONST_B) \
+    ); \
+    constexpr auto encrypted = Mystic::EncryptString<wchar_t, sizeof(wstr)/sizeof(wstr[0]), uSeed>(wstr); \
+    return encrypted.DecryptString(); \
+}())
+
+/**
+ * @brief Macro to encrypt a wchar_t string at compile-time keeping the null terminator and decrypt it a runtime.
+ * @param wstr The input wide string to be encrypted.
+ * @return The decrypted string including L'\0' at runtime.
+ */
+#define MYSTIFYW_KEEPNULL(wstr) ([] { \
+    constexpr uint64_t uSeed = Mystic::Random::SplitMix64( \
+        Mystic::Random::GetSeed() ^ \
+        (__LINE__ * Mystic::SEED_MUL_CONST_A) ^ \
+        (__COUNTER__ * Mystic::SEED_MUL_CONST_B) \
+    ); \
+    constexpr auto encrypted = Mystic::EncryptString<wchar_t, sizeof(wstr)/sizeof(wstr[0]), uSeed>(wstr); \
+    return encrypted.DecryptString(false); \
+}())
+
+/**
+ * @brief Macro to encrypt an integer or enum value at compile-time and decrypt it a runtime.
+ * @param value The input integer.
+ * @return The decrypted integer at runtime.
+ */
+#define MYSTIFY_NUM(value) __MYSTIFY_NUM(value)
+
+```
+
+`tests/CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.10)
+project(MysticXorstrTests)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+
+# Set the project root 
+get_filename_component(PROJ_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
+
+# Add the executable
+add_executable(example example.cpp)
+
+# Include the project's include directory
+target_include_directories(example PRIVATE "${PROJ_ROOT}/include")
+
+# Detect architecture and configure target flags
+string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" PROC_ARCH)
+
+if (PROC_ARCH MATCHES "x86_64|amd64|i386|i686")
+    message(STATUS "Configuring for x86 Architecture with AVX")
+    
+    target_compile_definitions(example PRIVATE AVX_AVAILABLE=1)
+
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+        target_compile_options(example PRIVATE -mavx2)
+    elseif (MSVC)
+        target_compile_options(example PRIVATE /arch:AVX2)
+    endif()
+
+elseif (PROC_ARCH MATCHES "arm|aarch64")
+    message(STATUS "Configuring for ARM Architecture with NEON")
+
+    target_compile_definitions(example PRIVATE NEON_AVAILABLE=1)
+else()
+    message(WARNING "Unknown processor architecture: ${CMAKE_SYSTEM_PROCESSOR}. Neither AVX nor NEON enabled.")
+endif()
+
+# Additional definitions
+target_compile_definitions(example PRIVATE M_ENABLE_BLOAT=1 M_ENABLE_BIGSTACK=1)
+
+# Compiler-specific flags
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    target_compile_options(example PRIVATE -Wall -Wextra)
+elseif (MSVC)
+    target_compile_options(example PRIVATE /Zc:__cplusplus)
+endif()
+
+```
+
+`tests/example.cpp`:
+
+```cpp
+/* 
+ * AVX_AVAILABLE M_ENABLE_BLOAT and M_ENABLE_BIGSTACK defined in Cmake file
+ * You can also define it somewhere in the code and undefine them later if 
+ * you want control over which MYSTIC calls inject junk code or enable big stack.
+ * 
+ *  Example:
+ * -------------------------------------------------------
+ *  #define M_ENABLE_BLOAT
+ *  std::cout << MYSTIFY("Hello World!") << std::endl;
+ *  #undef  M_ENABLE_BLOAT
+ * -------------------------------------------------------
+ * 
+ */
+#include <mystic/mystic.hh>
+#include <iostream>
+
+int main() {
+    std::cout << MYSTIFY("Hello World!") << std::endl;
+    // You can add M_APPLY_STACK_BLOAT wherever you want to make the code more obfuscated
+    // But DO NOT overuse it, especially if M_ENABLE_BLOAT is defined.
+    //
+    // If you want more nested graphs but slower compile times, you can: 
+    // 1. Add/remove DISPATCH and LABEL macros in mystic.hpp. Search for `MOD:` to find them.
+    // 2. Add/remove StackBloat calls in mystic.hpp.
+    M_APPLY_STACK_BLOAT;
+    // Same for M_APPLY_BIG_STACK, using it once per function is enough to cause the "Stack frame too big" error in decompilers.
+    // If M_ENABLE_BIGSTACK is defined, MYSTIFY will automatically implement it in each decryption.
+    M_APPLY_BIG_STACK;
+    std::cout << MYSTIFY("Today is a beautiful day.") << std::endl;
+    std::wcout << MYSTIFYW(L"And this executable is totally not obfuscated...") << std::endl;
+
+    // !! DANGLING POINTER !! - Will not compile.
+    // const char* bad = MYSTIFY("MEMORY TEST.");
+    // std::cout << bad << std::endl;
+
+    // Good - Keeps stack memory alive.
+    auto good = MYSTIFY("MEMORY TEST.");
+    std::cout << good << std::endl;
+    good = MYSTIFY("ASSIGN TEST.");
+    std::cout << good << std::endl;
+
+    // If _MYSTIC_MINIMAL is not defined
+    // you can also turn a Mystic CString into a std string
+    // which is less limited.
+    std::cout << "This is a " << MYSTIFY("std string").ToStdString() << "." << std::endl;
+    std::wcout << L"This is a " << MYSTIFYW(L"std wide string").ToStdString() << "." << std::endl;
+
+    // Similarly to strings, using MYSTIFY_NUM you can encrypt a number at compile time
+    // to then be decrypted at runtime. The number wont appear in the disassembly.
+    // This only supports integer numbers (not float/double).
+    uint32_t num = MYSTIFY_NUM(0xE3248DFF);
+    std::cout << "This is our secret number: " << "0x" << std::hex << num << std::endl;
+
+    // Converting to const char*
+    auto mystified_char = MYSTIFY("const char* TEST.");
+    const char* good_use_for_char = mystified_char.c_str();
+    std::cout << good_use_for_char << std::endl;
+
+    auto mystified_wchar = MYSTIFYW(L"const wchar_t* TEST.");
+    const wchar_t* good_use_for_wchar = mystified_wchar.c_str();
+    std::wcout << good_use_for_wchar << std::endl;
+
+    // GOOD: Inline use of c_str()
+    std::cout << MYSTIFY("Inline use of c_str()").c_str() << std::endl;
+
+    // Array of CStrings
+    std::array menu_options_cs = {
+        MYSTIFY("1. A"),
+        MYSTIFY("2. B"),
+        MYSTIFY("3. C"),
+        MYSTIFY("4. D")
+    };
+    // Or without array:
+    Mystic::Types::CString<char, 5> menu_options_cs2[] = {
+        MYSTIFY("1. A"),
+        MYSTIFY("2. B"),
+        MYSTIFY("3. C"),
+        MYSTIFY("4. D")
+    };
+
+    std::cout << "CString:" << std::endl;
+    for (auto& option : menu_options_cs) {
+        std::cout << "  -> " << option.c_str() << std::endl;
+    }
+
+    std::cout << "CString without array:" << std::endl;
+    for (auto& option : menu_options_cs2) {
+        std::cout << "  -> " << option.c_str() << std::endl;
+    }
+
+    // BAD! Again this creates a dangling pointer.
+    // const char* menu_options_cc[] = {
+    //     MYSTIFY("1. A").c_str(),
+    //     MYSTIFY("2. B").c_str(),
+    //     MYSTIFY("3. C").c_str(),
+    //     MYSTIFY("4. D").c_str()
+    // };
+
+    // std::cout << "const char*:" << std::endl;
+    // for (const char* option : menu_options_cc) {
+    //     std::cout << "  -> " << option << std::endl;
+    // }
+
+    return 0;
+}
+```
