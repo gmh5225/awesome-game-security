@@ -828,3 +828,6 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:sideeffects/HoudiniEngineForUnreal`: entity [[houdini-engine-for-unreal]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
 
 - **2026-07-22** — ingest `description:si1kyyy/csgo_cheat_external`: entity [[csgo-cheat-external]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-22** — ingest `description:shuruk421/VACKeyRetrieval`: entity [[vackeyretrieval]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
