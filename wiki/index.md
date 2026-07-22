@@ -156,6 +156,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)
 - [HelloIommuPkg](entities/helloiommupkg.md) — sample DXE DMA-remapping (IOMMU) driver (tandasat; Detection:DMA)
 - [heck_csgo_external](entities/heck-csgo-external.md) — external CS:GO; SDK generation / memory analysis (C++; cheat / game:csgo)
+- [hide-file](entities/hide-file.md) — C kernel file-hide driver (cheat / hide; Detection:Hide-adjacent)
 - [HijackLibs](entities/hijacklibs.md) — disclosed Windows DLL hijack DB (YAML + web UI; exports / conditions)
 - [HiveWE](entities/hivewe.md) — WC3 World Editor alternative (large-map editor; cheat / game:warcraft iii)
 - [hl-mods](entities/hl-mods.md) — Half-Life / GoldSrc mods (Cold Ice Remastered + historical; Modification For Half-Life)
