@@ -841,3 +841,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:shalzuth/NativeNetSharp`: entity [[nativenetsharp]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-07-22** — ingest `description:shalzuth/Il2CppRuntimeDumper`: entity [[il2cpp-runtime-dumper]]; cited on [[il2cpp]] and [[overviews/game-engine]].
+
+- **2026-07-22** — ingest `description:shakevsky/keybuster`: entity [[keybuster]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].

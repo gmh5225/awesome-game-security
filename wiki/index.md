@@ -207,6 +207,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kevboy](entities/kevboy.md) — Rust Game Boy emulator (CPU / memory / graphics / input)
 - [feather-gb](entities/feather-gb.md) — Rust Game Boy emulator (retro handheld / GB RE)
 - [KeyAttestation](entities/keyattestation.md) — Android HW key attestation (Keymaster/KeyMint; bootloader / verified boot)
+- [Keybuster](entities/keybuster.md) — Samsung TrustZone S-Keymaster TA key extract (CVE-2021-25444/25490; TEE)
 - [kinject](entities/kinject.md) — kernel map + APC inject (C/C++; cheat / injection:windows)
 - [Known-Driver-Mappers](entities/known-driver-mappers.md) — catalog of known Driver Mappers (AC / stress-testing)
 - [KeyboardKit](entities/keyboardkit.md) — kernel keyboard IRP filter keylogger (UDP exfil; ExplorerFrame DLL hijack)
