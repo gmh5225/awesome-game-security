@@ -18,4 +18,4 @@ Rainbow Six Siege internal cheat research repo (C/C++) focused on modding, SDK g
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[battleye]] · [[battlefield-1-internal]] · [[basic-fortnite-cheat-source-internal]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[battleye]] · [[r6-external]] · [[battlefield-1-internal]] · [[basic-fortnite-cheat-source-internal]]

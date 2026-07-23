@@ -955,3 +955,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:ryan-weil/ReadWriteDriver`: entity [[read-write-driver]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-07-23** — ingest `description:rxi/kit`: entity [[kit]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-23** — ingest `description:rushzzz-max/r6-external`: entity [[r6-external]]; cited on [[overviews/game-hacking]] and [[battleye]].

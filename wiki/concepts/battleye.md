@@ -12,7 +12,8 @@ sources:
   - wiki/sources/descriptions/tym32167__arma3beclient.md
   - wiki/sources/descriptions/tr1xxx__battleye-region-walking.md
   - wiki/sources/descriptions/steffalon__battleye-rust.md
-updated: 2026-07-21
+  - wiki/sources/descriptions/rushzzz-max__r6-external.md
+updated: 2026-07-23
 confidence: medium
 ---
 
@@ -40,6 +41,8 @@ Title-specific client tooling such as [[arma3beclient]] (C# / PowerShell; Arma 3
 
 Server-side RCON is covered by [[battleye-rust]]: Rust packet encode/checksum + UDP socket I/O for BattlEye remote-console listen/read/write (admin / protocol research). (source: wiki/sources/descriptions/steffalon__battleye-rust.md)
 
+Title-specific R6 external samples such as [[r6-external]] (C/C++; driver development; External tag) illustrate out-of-process / driver-backed research against BattlEye-protected Siege clients. (source: wiki/sources/descriptions/rushzzz-max__r6-external.md)
+
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[battleye-region-walking]] · [[battleye-rust]] · [[arma3beclient]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[battleye-region-walking]] · [[battleye-rust]] · [[arma3beclient]] · [[r6-external]] · [[r6-internal-v3]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
