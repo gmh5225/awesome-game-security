@@ -354,6 +354,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [The-Seed-Link-Future](entities/the-seed-link-future.md) — Unity VR (C#; OpenGL / shader / driver-dev; Game Develop)
 - [Themida-Research](entities/themida-research.md) — Themida/WinLicense 3.x VM research (`VM_CONTEXT` / handlers / Triton; Fix Themida)
 - [Thetan_ArenaSDK](entities/thetan-arenasdk.md) — Thetan Arena SDK (rendering / audio / physics; cheat lane)
+- [ThreatResearch](entities/threatresearch.md) — Security Joes Ghidra/IDA plugins + malware RE scripts / YARA (Cheat Ghidra)
 - [TiEtwAgent](entities/tietwagent.md) — ETW Threat-Intelligence injection-detection agent (krabsetw / Yara / PPL)
 - [TotalPE2](entities/totalpe2.md) — WPF PE viewer (headers, imports/exports, .NET metadata)
 - [tpm-mmio](entities/tpm-mmio.md) — MMIO TPM 2.0 public EK read (bypass OS hooks; Detection:HWID)
