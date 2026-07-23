@@ -635,6 +635,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/rdbo/DX11-BaseHook [DX11 Imgui]
 - https://github.com/DrNseven/D3D12-Hook-ImGui [DX12 Imgui]
 - https://github.com/frostbone25/ShaderInjector [D3D12 shader injector for FF7 Rebirth PC — intercepts rendering API calls to inject/replace pixel shaders at runtime; minhook + ImGui; adaptable to other D3D12 titles]
+- https://github.com/baobao1044/GameLagReducer [Launcher + native DLL that hooks D3D11/OpenGL/Vulkan to capture and flatten/replace shaders at runtime for FPS]
 - https://github.com/niemand-sec/DirectX11Hook [DX11 Imgui]
 - https://github.com/guided-hacking/GH_D3D11_Hook [DX11]
 - https://github.com/justinstenning/Direct3DHook [Direct3D 9/10/11 API hooks for screen capture and in-game overlays]
@@ -1226,6 +1227,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/kkkbbb/rustFrida [Frida-like Android ARM64 hook — QuickJS, Java/native/stealth hook, QBDI; pairs with wxshadow (mkpms)]
 - https://github.com/dreamland-blog/KSU-Rust-Frida [Android ARM64 dynamic instrumentation module workflow for KernelSU/Magisk: single-binary engine, attach/spawn/watch-so, HTTP RPC control plane, and multi-mode stealth (normal/wxshadow/recomp)]
 - https://github.com/TheQmaks/phantom-frida [Build anti-detection Frida server from source]
+- https://github.com/1013503897/Morphida [Polymorphic anti-detection Android arm64 frida-server builds that morph static fingerprints per release]
 - https://github.com/astra1dev/MalumMenu-Android [Among Us Android cheat menu using Frida and frida-il2cpp-bridge]
 
 > Hook ART(android)
