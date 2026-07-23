@@ -503,6 +503,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/wondeks/unity-mcp [MCP for unity]
 - https://github.com/gmh5225/mcpup [MCP for unity]
 - https://github.com/IvanMurzak/GameDev-MCP-Server [Engine-agnostic MCP server shared by Unity-MCP, Godot-MCP, and Unreal-MCP]
+- https://github.com/n24q02m/better-godot-mcp [Composite MCP server for Godot Engine AI-assisted game development]
 - https://github.com/gmh5225/vibe-blocks-mcp [MCP for Roblox Studio]
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 - https://github.com/jtang613/GhidrAssistMCP [MCP for Ghidra]
@@ -1572,6 +1573,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/deadeert/EWS [Emulation]
 - https://github.com/patois/genmc [Display Hex-Rays Microcode]
 - https://github.com/RolfRolles/HexRaysDeob [Hex-Rays Microcode]
+- https://github.com/KasperskyLab/hrtng [IDA Pro plugin for decryption, deobfuscation, patching, and Hex-Rays transforms]
 - https://github.com/HexRaysSA/goomba [Simplify MBA]
 - https://github.com/es3n1n/ida-wakatime-py [WakaTime integration for IDA Pro]
 - https://github.com/senator715/IDA-Fusion [Fast Signature scanner & creator]
@@ -3181,6 +3183,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/AssaultCubeCheat
 - https://github.com/201580ag/AssaultCube_Cheat
 - https://github.com/kotae4/lab-esp-and-aimbot [Walkthrough of an ESP and aimbot cheat from scratch]
+- https://github.com/s7shvets7s/simple_ac_internal_cheat [Educational C++20 AssaultCube internal: hooks, ESP, aimbot, ImGui overlay]
 
 > Game:Valorant
 - https://github.com/apekros/valorant_offsets [Offset]
