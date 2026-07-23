@@ -258,6 +258,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Mini-Launcher](entities/mini-launcher.md) — Steam-bypass game launcher (API stub / DLL inject / Lua; Launcher Abuser)
 - [MiniVisorPkg](entities/minivisorpkg.md) — educational Intel VT-x HV (UEFI + Windows driver; WinDbg; Detection:HV / EFI)
 - [MoBaDemo](entities/mobademo.md) — Unity MOBA demo (Game Develop / Unity source)
+- [Mojoc](entities/mojoc.md) — C99 OpenGLES3 mobile game engine (cross-platform; Game Engine source)
 - [ModExMap](entities/modexmap.md) — user-mode PE manual-map DLL injector (x86/x64; TLS; Extend Manual Map)
 - [mutaben](entities/mutaben.md) — Python MBA (mixed-boolean-arithmetic) expression generator
 - [mwclap](entities/mwclap.md) — COD Warzone NVIDIA GeForce Experience overlay hijack (cheat / game:cod warzone)
