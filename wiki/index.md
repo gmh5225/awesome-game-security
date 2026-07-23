@@ -134,6 +134,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EasyPixel](entities/easypixel.md) — Magisk module: disguise device as Google Pixel (Cheat Magisk)
 - [EDRSandblast](entities/edrsandblast.md) — BYOVD EDR/ETW blind (callbacks / ETW TI / ntdll unhook; C)
 - [elfuck](entities/elfuck.md) — ELF packer/protector (NRV2E / password / anti-debug; Anti Cheat → Binary Packer)
+- [encrypted_value](entities/encrypted-value.md) — C++ header-only scalar value encrypt (Anti Cheat → Encrypt Variable)
 - [Ephemera](entities/ephemera.md) — multiplatform MEMORY.DMP analysis (WinDbg flavor; AC / kernel dump)
 - [EpicSurvivalGame](entities/epic-survival-game.md) — UE4 FPS course (action system / event-driven C++; Game Develop / Unreal source)
 - [EfiTool](entities/efitool.md) — UEFI ExitBootServices in-RAM SYSTEM hive patch (SYSTEM shell; no disk/driver)

@@ -859,3 +859,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-22** — ingest `description:serjam/mwclap`: entity [[mwclap]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
 
 - **2026-07-23** — ingest `description:sergiovillaverde/win11_apk_installer`: entity [[win11-apk-installer]]; cited on [[overviews/mobile-security]] and [[overviews/overview]].
+
+- **2026-07-23** — ingest `description:serge-14/encrypted_value`: entity [[encrypted-value]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
