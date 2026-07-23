@@ -235,6 +235,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KeyAttestation](entities/keyattestation.md) — Android HW key attestation (Keymaster/KeyMint; bootloader / verified boot)
 - [Keybuster](entities/keybuster.md) — Samsung TrustZone S-Keymaster TA key extract (CVE-2021-25444/25490; TEE)
 - [kinject](entities/kinject.md) — kernel map + APC inject (C/C++; cheat / injection:windows)
+- [kit](entities/kit.md) — C/C++ pixels tooling + asset pipelines (Game Engine / Image Codec)
 - [Known-Driver-Mappers](entities/known-driver-mappers.md) — catalog of known Driver Mappers (AC / stress-testing)
 - [KeyboardKit](entities/keyboardkit.md) — kernel keyboard IRP filter keylogger (UDP exfil; ExplorerFrame DLL hijack)
 - [kernel-mouse](entities/kernel-mouse.md) — MouClass kernel mouse driver (Win10/11; triggerbot/aimbot input research)
