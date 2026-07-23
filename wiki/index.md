@@ -42,6 +42,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BE-Shellcode](entities/be-shellcode.md) — BattlEye UM shellcode dump/disasm (thread scan / VEH / modules)
 - [battleye-region-walking](entities/battleye-region-walking.md) — BE VirtualQuery region walk (MEM_PRIVATE/MAPPED; shellcode/manual-map)
 - [battleye-rust](entities/battleye-rust.md) — BattlEye RCON UDP (Rust; packet checksum + socket I/O)
+- [big5-decode-ida](entities/big5-decode-ida.md) — IDA plugin: decode bytes as Big5 (Python; cheat / IDA Plugins)
 - [a-pasted-rust-script](entities/a-pasted-rust-script.md) — Rust/C++ ImGui cheat loader (anti-debug + feature modules)
 - [ActionRoguelike](entities/action-roguelike.md) — UE Roguelike sample (gameplay systems; Game Develop / Unreal source)
 - [AiDA](entities/aida.md) — AI-powered IDA 9.0+ assistant for C++ game RE (cheat / IDA Plugins)
