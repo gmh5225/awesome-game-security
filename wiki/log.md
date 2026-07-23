@@ -951,3 +951,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:ryanjon2040/UnrealNetworkProfiler`: entity [[unreal-network-profiler]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
 - **2026-07-23** — ingest `description:ryanjon2040/Unreal-Binary-Builder`: entity [[unreal-binary-builder]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-23** — ingest `description:ryan-weil/ReadWriteDriver`: entity [[read-write-driver]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
