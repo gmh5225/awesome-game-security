@@ -867,3 +867,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:senator715/IDA-Fusion`: entity [[ida-fusion]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-23** — ingest `description:semihcevik/hwidspoofer`: entity [[hwidspoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-23** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/game-engine]] (Cheat ~2571 / Anti Cheat ~607 / Game Engine ~144); light `index.md` section notes (no per-category pages).
