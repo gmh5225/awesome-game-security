@@ -62,6 +62,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [anti-emulator](entities/anti-emulator.md) — Android emulator detection (QEMU props / fingerprints / sensors; Java)
 - [anticuckoo](entities/anticuckoo.md) — Cuckoo sandbox / VE detection demos (Detection:Virtual Environments)
 - [apktool-mcp-server](entities/apktool-mcp-server.md) — MCP server wrapping apktool (Android RE suite)
+- [Ariadne](entities/ariadne.md) — Binary Ninja graph analysis (call graph + block coverage; Cheat Binary Ninja Plugins)
 - [arma3beclient](entities/arma3beclient.md) — Arma 3 BattlEye Tool (C# / PowerShell; cheat / game:arma3)
 - [ASCTool](entities/asctool.md) — Kotlin APK Signature Crack Tool (Some Tricks / Android; [Apk])
 - [AV-EDR-Killer](entities/av-edr-killer.md) — BYOVD via wsftprm.sys (IOCTL 0x22201C; PID kill)
