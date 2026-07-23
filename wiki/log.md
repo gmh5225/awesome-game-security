@@ -943,3 +943,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:s3rg0x/AIMachDec`: entity [[aimachdec]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]].
 
 - **2026-07-23** — ingest `description:s3pt3mb3r/Dainsleif`: entity [[dainsleif]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-23** — ingest `description:s1lentq/ReGameDLL_CS`: entity [[regamedll-cs]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
