@@ -1,0 +1,1680 @@
+Project Path: arc_ocornut_imgui_club_acks1yzr
+
+Source Tree:
+
+```txt
+arc_ocornut_imgui_club_acks1yzr
+├── LICENSE.txt
+├── README.md
+├── imgui_memory_editor
+│   └── imgui_memory_editor.h
+├── imgui_multicontext_compositor
+│   ├── imgui_multicontext_compositor.cpp
+│   └── imgui_multicontext_compositor.h
+└── imgui_threaded_rendering
+    └── imgui_threaded_rendering.h
+
+```
+
+`LICENSE.txt`:
+
+```txt
+The MIT License (MIT)
+
+Copyright (c) 2017-2024 Omar Cornut
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Index
+
+Officially maintained small extensions for Dear ImGui:
+- [Memory Editor](#imgui_memory_editor)
+- [Multi-Context Compositor](#imgui_multicontext_compositor)
+- [Threaded Rendering](#imgui_threaded_rendering)
+
+<BR>You also can find many useful third-party snippets here: https://github.com/ocornut/imgui/wiki/Useful-Extensions
+
+# imgui_memory_editor
+
+https://github.com/ocornut/imgui_club/tree/main/imgui_memory_editor
+
+Mini hexadecimal editor! Right-click for option menu.
+Features: Keyboard controls. Read-only mode. Optional Ascii display. Optional HexII display. Goto address. Highlight range/function. Read/Write handlers.
+
+**Usage**
+```cpp
+static MemoryEditor mem_edit;
+mem_edit.DrawWindow("Memory Editor", data, data_size);
+```
+![memory editor](https://raw.githubusercontent.com/wiki/ocornut/imgui_club/images/memory_editor_v19.gif)
+
+![memory editor](https://raw.githubusercontent.com/wiki/ocornut/imgui_club/images/memory_editor_v32.png)
+
+# imgui_multicontext_compositor
+
+https://github.com/ocornut/imgui_club/tree/main/imgui_multicontext_compositor
+
+When using and displaying multiple contexts simultaneously (e.g. Update vs Rendering domains):
+- Manage z-order of contexts
+- Manage input routing
+- Allow drag and drop between contexts
+
+![multi_context_compositor.gif](https://github.com/user-attachments/assets/220a9469-db15-419a-8f29-3e0bf7025c84)
+
+# imgui_threaded_rendering
+
+https://github.com/ocornut/imgui_club/tree/main/imgui_threaded_rendering
+
+Helper to take a snapshot of ImDrawData in order to render it later.
+
+```
+
+`imgui_memory_editor/imgui_memory_editor.h`:
+
+```h
+// Mini memory editor for Dear ImGui (to embed in your game/tools)
+// Get latest version at http://www.github.com/ocornut/imgui_club
+// Licensed under The MIT License (MIT)
+
+// Right-click anywhere to access the Options menu!
+// You can adjust the keyboard repeat delay/rate in ImGuiIO.
+// The code assume a mono-space font for simplicity!
+// If you don't use the default font, use ImGui::PushFont()/PopFont() to switch to a mono-space font before calling this.
+//
+// Usage:
+//   // Create a window and draw memory editor inside it:
+//   static MemoryEditor mem_edit_1;
+//   static char data[0x10000];
+//   size_t data_size = 0x10000;
+//   mem_edit_1.DrawWindow("Memory Editor", data, data_size);
+//
+// Usage:
+//   // If you already have a window, use DrawContents() instead:
+//   static MemoryEditor mem_edit_2;
+//   ImGui::Begin("MyWindow")
+//   mem_edit_2.DrawContents(this, sizeof(*this), (size_t)this);
+//   ImGui::End();
+//
+// Changelog:
+// - v0.10: initial version
+// - v0.23 (2017/08/17): added to github. fixed right-arrow triggering a byte write.
+// - v0.24 (2018/06/02): changed DragInt("Rows" to use a %d data format (which is desirable since imgui 1.61).
+// - v0.25 (2018/07/11): fixed wording: all occurrences of "Rows" renamed to "Columns".
+// - v0.26 (2018/08/02): fixed clicking on hex region
+// - v0.30 (2018/08/02): added data preview for common data types
+// - v0.31 (2018/10/10): added OptUpperCaseHex option to select lower/upper casing display [@samhocevar]
+// - v0.32 (2018/10/10): changed signatures to use void* instead of unsigned char*
+// - v0.33 (2018/10/10): added OptShowOptions option to hide all the interactive option setting.
+// - v0.34 (2019/05/07): binary preview now applies endianness setting [@nicolasnoble]
+// - v0.35 (2020/01/29): using ImGuiDataType available since Dear ImGui 1.69.
+// - v0.36 (2020/05/05): minor tweaks, minor refactor.
+// - v0.40 (2020/10/04): fix misuse of ImGuiListClipper API, broke with Dear ImGui 1.79. made cursor position appears on left-side of edit box. option popup appears on mouse release. fix MSVC warnings where _CRT_SECURE_NO_WARNINGS wasn't working in recent versions.
+// - v0.41 (2020/10/05): fix when using with keyboard/gamepad navigation enabled.
+// - v0.42 (2020/10/14): fix for . character in ASCII view always being greyed out.
+// - v0.43 (2021/03/12): added OptFooterExtraHeight to allow for custom drawing at the bottom of the editor [@leiradel]
+// - v0.44 (2021/03/12): use ImGuiInputTextFlags_AlwaysOverwrite in 1.82 + fix hardcoded width.
+// - v0.50 (2021/11/12): various fixes for recent dear imgui versions (fixed misuse of clipper, relying on SetKeyboardFocusHere() handling scrolling from 1.85). added default size.
+// - v0.51 (2024/02/22): fix for layout change in 1.89 when using IMGUI_DISABLE_OBSOLETE_FUNCTIONS. (#34)
+// - v0.52 (2024/03/08): removed unnecessary GetKeyIndex() calls, they are a no-op since 1.87.
+// - v0.53 (2024/05/27): fixed right-click popup from not appearing when using DrawContents(). warning fixes. (#35)
+// - v0.54 (2024/07/29): allow ReadOnly mode to still select and preview data. (#46) [@DeltaGW2])
+// - v0.55 (2024/08/19): added BgColorFn to allow setting background colors independently from highlighted selection. (#27) [@StrikerX3]
+//                       added MouseHoveredAddr public readable field. (#47, #27) [@StrikerX3]
+//                       fixed a data preview crash with 1.91.0 WIP. fixed contiguous highlight color when using data preview.
+//                       *BREAKING* added UserData field passed to all optional function handlers: ReadFn, WriteFn, HighlightFn, BgColorFn. (#50) [@silverweed]
+// - v0.56 (2024/11/04): fixed MouseHovered, MouseHoveredAddr not being set when hovering a byte being edited. (#54)
+// - v0.57 (2025/03/26): fixed warnings. using ImGui's ImSXX/ImUXX types instead of e.g. int32_t/uint32_t. (#56)
+// - v0.58 (2025/03/31): fixed extraneous footer spacing (added in 0.51) breaking vertical auto-resize. (#53)
+// - v0.59 (2025/04/08): fixed GotoAddrAndHighlight() not working if OptShowOptions is disabled.
+//
+// TODO:
+// - This is generally old/crappy code, it should work but isn't very good.. to be rewritten some day.
+// - PageUp/PageDown are not supported because we use _NoNav. This is a good test scenario for working out idioms of how to mix natural nav and our own...
+// - Arrows are being sent to the InputText() about to disappear which for LeftArrow makes the text cursor appear at position 1 for one frame.
+// - Using InputText() is awkward and maybe overkill here, consider implementing something custom.
+
+#pragma once
+
+#include <stdio.h>      // sprintf, scanf
+#include <stdint.h>     // uint8_t, etc.
+
+#if defined(_MSC_VER) && !defined(snprintf)
+#define ImSnprintf  _snprintf
+#else
+#define ImSnprintf  snprintf
+#endif
+#if defined(_MSC_VER) && !defined(__clang__)
+#define _PRISizeT   "I"
+#else
+#define _PRISizeT   "z"
+#endif
+
+#if defined(_MSC_VER) || defined(_UCRT)
+#pragma warning (push)
+#pragma warning (disable: 4996) // warning C4996: 'sprintf': This function or variable may be unsafe.
+#endif
+
+struct MemoryEditor
+{
+    enum DataFormat
+    {
+        DataFormat_Bin = 0,
+        DataFormat_Dec = 1,
+        DataFormat_Hex = 2,
+        DataFormat_COUNT
+    };
+
+    // Settings
+    bool            Open;                                       // = true   // set to false when DrawWindow() was closed. ignore if not using DrawWindow().
+    bool            ReadOnly;                                   // = false  // disable any editing.
+    int             Cols;                                       // = 16     // number of columns to display.
+    bool            OptShowOptions;                             // = true   // display options button/context menu. when disabled, options will be locked unless you provide your own UI for them.
+    bool            OptShowDataPreview;                         // = false  // display a footer previewing the decimal/binary/hex/float representation of the currently selected bytes.
+    bool            OptShowHexII;                               // = false  // display values in HexII representation instead of regular hexadecimal: hide null/zero bytes, ascii values as ".X".
+    bool            OptShowAscii;                               // = true   // display ASCII representation on the right side.
+    bool            OptGreyOutZeroes;                           // = true   // display null/zero bytes using the TextDisabled color.
+    bool            OptUpperCaseHex;                            // = true   // display hexadecimal values as "FF" instead of "ff".
+    int             OptMidColsCount;                            // = 8      // set to 0 to disable extra spacing between every mid-cols.
+    int             OptAddrDigitsCount;                         // = 0      // number of addr digits to display (default calculated based on maximum displayed addr).
+    float           OptFooterExtraHeight;                       // = 0      // space to reserve at the bottom of the widget to add custom widgets
+    ImU32           HighlightColor;                             //          // background color of highlighted bytes.
+
+    // Function handlers
+    ImU8            (*ReadFn)(const ImU8* mem, size_t off, void* user_data);      // = 0      // optional handler to read bytes.
+    void            (*WriteFn)(ImU8* mem, size_t off, ImU8 d, void* user_data);   // = 0      // optional handler to write bytes.
+    bool            (*HighlightFn)(const ImU8* mem, size_t off, void* user_data); // = 0      // optional handler to return Highlight property (to support non-contiguous highlighting).
+    ImU32           (*BgColorFn)(const ImU8* mem, size_t off, void* user_data);   // = 0      // optional handler to return custom background color of individual bytes.
+    void*           UserData;                                                     // = NULL   // user data forwarded to the function handlers
+
+    // Public read-only data
+    bool            MouseHovered;                               // set when mouse is hovering a value.
+    size_t          MouseHoveredAddr;                           // the address currently being hovered if MouseHovered is set.
+
+    // [Internal State]
+    bool            ContentsWidthChanged;
+    size_t          DataPreviewAddr;
+    size_t          DataEditingAddr;
+    bool            DataEditingTakeFocus;
+    char            DataInputBuf[32];
+    char            AddrInputBuf[32];
+    size_t          GotoAddr;
+    size_t          HighlightMin, HighlightMax;
+    int             PreviewEndianness;
+    ImGuiDataType   PreviewDataType;
+
+    MemoryEditor()
+    {
+        // Settings
+        Open = true;
+        ReadOnly = false;
+        Cols = 16;
+        OptShowOptions = true;
+        OptShowDataPreview = false;
+        OptShowHexII = false;
+        OptShowAscii = true;
+        OptGreyOutZeroes = true;
+        OptUpperCaseHex = true;
+        OptMidColsCount = 8;
+        OptAddrDigitsCount = 0;
+        OptFooterExtraHeight = 0.0f;
+        HighlightColor = IM_COL32(255, 255, 255, 50);
+        ReadFn = nullptr;
+        WriteFn = nullptr;
+        HighlightFn = nullptr;
+        BgColorFn = nullptr;
+        UserData = nullptr;
+
+        // State/Internals
+        ContentsWidthChanged = false;
+        DataPreviewAddr = DataEditingAddr = (size_t)-1;
+        DataEditingTakeFocus = false;
+        memset(DataInputBuf, 0, sizeof(DataInputBuf));
+        memset(AddrInputBuf, 0, sizeof(AddrInputBuf));
+        GotoAddr = (size_t)-1;
+        MouseHovered = false;
+        MouseHoveredAddr = 0;
+        HighlightMin = HighlightMax = (size_t)-1;
+        PreviewEndianness = 0;
+        PreviewDataType = ImGuiDataType_S32;
+    }
+
+    void GotoAddrAndHighlight(size_t addr_min, size_t addr_max)
+    {
+        GotoAddr = addr_min;
+        HighlightMin = addr_min;
+        HighlightMax = addr_max;
+    }
+
+    struct Sizes
+    {
+        int     AddrDigitsCount;            // Number of digits required to represent maximum address.
+        float   LineHeight;                 // Height of each line (no spacing).
+        float   GlyphWidth;                 // Glyph width (assume mono-space).
+        float   HexCellWidth;               // Width of a hex edit cell ~2.5f * GlypHWidth.
+        float   SpacingBetweenMidCols;      // Spacing between each columns section (OptMidColsCount).
+        float   OffsetHexMinX;
+        float   OffsetHexMaxX;
+        float   OffsetAsciiMinX;
+        float   OffsetAsciiMaxX;
+        float   WindowWidth;                // Ideal window width.
+
+        Sizes() { memset(this, 0, sizeof(*this)); }
+    };
+
+    void CalcSizes(Sizes& s, size_t mem_size, size_t base_display_addr)
+    {
+        ImGuiStyle& style = ImGui::GetStyle();
+        s.AddrDigitsCount = OptAddrDigitsCount;
+        if (s.AddrDigitsCount == 0)
+            for (size_t n = base_display_addr + mem_size - 1; n > 0; n >>= 4)
+                s.AddrDigitsCount++;
+        s.LineHeight = ImGui::GetTextLineHeight();
+        s.GlyphWidth = ImGui::CalcTextSize("F").x + 1;                  // We assume the font is mono-space
+        s.HexCellWidth = (float)(int)(s.GlyphWidth * 2.5f);             // "FF " we include trailing space in the width to easily catch clicks everywhere
+        s.SpacingBetweenMidCols = (float)(int)(s.HexCellWidth * 0.25f); // Every OptMidColsCount columns we add a bit of extra spacing
+        s.OffsetHexMinX = (s.AddrDigitsCount + 2) * s.GlyphWidth;
+        s.OffsetHexMaxX = s.OffsetHexMinX + (s.HexCellWidth * Cols);
+        s.OffsetAsciiMinX = s.OffsetAsciiMaxX = s.OffsetHexMaxX;
+        if (OptShowAscii)
+        {
+            s.OffsetAsciiMinX = s.OffsetHexMaxX + s.GlyphWidth * 1;
+            if (OptMidColsCount > 0)
+                s.OffsetAsciiMinX += (float)((Cols + OptMidColsCount - 1) / OptMidColsCount) * s.SpacingBetweenMidCols;
+            s.OffsetAsciiMaxX = s.OffsetAsciiMinX + Cols * s.GlyphWidth;
+        }
+        s.WindowWidth = s.OffsetAsciiMaxX + style.ScrollbarSize + style.WindowPadding.x * 2 + s.GlyphWidth;
+    }
+
+    // Standalone Memory Editor window
+    void DrawWindow(const char* title, void* mem_data, size_t mem_size, size_t base_display_addr = 0x0000)
+    {
+        Sizes s;
+        CalcSizes(s, mem_size, base_display_addr);
+        ImGui::SetNextWindowSize(ImVec2(s.WindowWidth, s.WindowWidth * 0.60f), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSizeConstraints(ImVec2(0.0f, 0.0f), ImVec2(s.WindowWidth, FLT_MAX));
+
+        Open = true;
+        if (ImGui::Begin(title, &Open, ImGuiWindowFlags_NoScrollbar))
+        {
+            DrawContents(mem_data, mem_size, base_display_addr);
+            if (ContentsWidthChanged)
+            {
+                CalcSizes(s, mem_size, base_display_addr);
+                ImGui::SetWindowSize(ImVec2(s.WindowWidth, ImGui::GetWindowSize().y));
+            }
+        }
+        ImGui::End();
+    }
+
+    // Memory Editor contents only
+    void DrawContents(void* mem_data_void, size_t mem_size, size_t base_display_addr = 0x0000)
+    {
+        if (Cols < 1)
+            Cols = 1;
+
+        ImU8* mem_data = (ImU8*)mem_data_void;
+        Sizes s;
+        CalcSizes(s, mem_size, base_display_addr);
+        ImGuiStyle& style = ImGui::GetStyle();
+
+        const ImVec2 contents_pos_start = ImGui::GetCursorScreenPos();
+
+        // We begin into our scrolling region with the 'ImGuiWindowFlags_NoMove' in order to prevent click from moving the window.
+        // This is used as a facility since our main click detection code doesn't assign an ActiveId so the click would normally be caught as a window-move.
+        const float height_separator = style.ItemSpacing.y;
+        float footer_height = OptFooterExtraHeight;
+        if (OptShowOptions)
+            footer_height += height_separator + ImGui::GetFrameHeightWithSpacing() * 1;
+        if (OptShowDataPreview)
+            footer_height += height_separator + ImGui::GetFrameHeightWithSpacing() * 1 + ImGui::GetTextLineHeightWithSpacing() * 3;
+        ImGui::BeginChild("##scrolling", ImVec2(-FLT_MIN, -footer_height), ImGuiChildFlags_None, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav);
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+
+        // We are not really using the clipper API correctly here, because we rely on visible_start_addr/visible_end_addr for our scrolling function.
+        const ImVec2 avail_size = ImGui::GetContentRegionAvail();
+        const int line_total_count = (int)((mem_size + Cols - 1) / Cols);
+        ImGuiListClipper clipper;
+        clipper.Begin(line_total_count, s.LineHeight);
+
+        bool data_next = false;
+
+        if (DataEditingAddr >= mem_size)
+            DataEditingAddr = (size_t)-1;
+        if (DataPreviewAddr >= mem_size)
+            DataPreviewAddr = (size_t)-1;
+
+        size_t preview_data_type_size = OptShowDataPreview ? DataTypeGetSize(PreviewDataType) : 0;
+
+        size_t data_editing_addr_next = (size_t)-1;
+        if (DataEditingAddr != (size_t)-1)
+        {
+            // Move cursor but only apply on next frame so scrolling with be synchronized (because currently we can't change the scrolling while the window is being rendered)
+            if (ImGui::IsKeyPressed(ImGuiKey_UpArrow) && (ptrdiff_t)DataEditingAddr >= (ptrdiff_t)Cols)                 { data_editing_addr_next = DataEditingAddr - Cols; }
+            else if (ImGui::IsKeyPressed(ImGuiKey_DownArrow) && (ptrdiff_t)DataEditingAddr < (ptrdiff_t)mem_size - Cols){ data_editing_addr_next = DataEditingAddr + Cols; }
+            else if (ImGui::IsKeyPressed(ImGuiKey_LeftArrow) && (ptrdiff_t)DataEditingAddr > (ptrdiff_t)0)              { data_editing_addr_next = DataEditingAddr - 1; }
+            else if (ImGui::IsKeyPressed(ImGuiKey_RightArrow) && (ptrdiff_t)DataEditingAddr < (ptrdiff_t)mem_size - 1)  { data_editing_addr_next = DataEditingAddr + 1; }
+        }
+
+        // Draw vertical separator
+        ImVec2 window_pos = ImGui::GetWindowPos();
+        if (OptShowAscii)
+            draw_list->AddLine(ImVec2(window_pos.x + s.OffsetAsciiMinX - s.GlyphWidth, window_pos.y), ImVec2(window_pos.x + s.OffsetAsciiMinX - s.GlyphWidth, window_pos.y + 9999), ImGui::GetColorU32(ImGuiCol_Border));
+
+        const ImU32 color_text = ImGui::GetColorU32(ImGuiCol_Text);
+        const ImU32 color_disabled = OptGreyOutZeroes ? ImGui::GetColorU32(ImGuiCol_TextDisabled) : color_text;
+
+        const char* format_address = OptUpperCaseHex ? "%0*" _PRISizeT "X: " : "%0*" _PRISizeT "x: ";
+        const char* format_data = OptUpperCaseHex ? "%0*" _PRISizeT "X" : "%0*" _PRISizeT "x";
+        const char* format_byte = OptUpperCaseHex ? "%02X" : "%02x";
+        const char* format_byte_space = OptUpperCaseHex ? "%02X " : "%02x ";
+
+        MouseHovered = false;
+        MouseHoveredAddr = 0;
+
+        while (clipper.Step())
+            for (int line_i = clipper.DisplayStart; line_i < clipper.DisplayEnd; line_i++) // display only visible lines
+            {
+                size_t addr = (size_t)line_i * Cols;
+                ImGui::Text(format_address, s.AddrDigitsCount, base_display_addr + addr);
+
+                // Draw Hexadecimal
+                for (int n = 0; n < Cols && addr < mem_size; n++, addr++)
+                {
+                    float byte_pos_x = s.OffsetHexMinX + s.HexCellWidth * n;
+                    if (OptMidColsCount > 0)
+                        byte_pos_x += (float)(n / OptMidColsCount) * s.SpacingBetweenMidCols;
+                    ImGui::SameLine(byte_pos_x);
+
+                    // Draw highlight or custom background color
+                    const bool is_highlight_from_user_range = (addr >= HighlightMin && addr < HighlightMax);
+                    const bool is_highlight_from_user_func = (HighlightFn && HighlightFn(mem_data, addr, UserData));
+                    const bool is_highlight_from_preview = (addr >= DataPreviewAddr && addr < DataPreviewAddr + preview_data_type_size);
+
+                    ImU32 bg_color = 0;
+                    bool is_next_byte_highlighted = false;
+                    if (is_highlight_from_user_range || is_highlight_from_user_func || is_highlight_from_preview)
+                    {
+                        is_next_byte_highlighted = (addr + 1 < mem_size) && ((HighlightMax != (size_t)-1 && addr + 1 < HighlightMax) || (HighlightFn && HighlightFn(mem_data, addr + 1, UserData)) || (addr + 1 < DataPreviewAddr + preview_data_type_size));
+                        bg_color = HighlightColor;
+                    }
+                    else if (BgColorFn != nullptr)
+                    {
+                        is_next_byte_highlighted = (addr + 1 < mem_size) && ((BgColorFn(mem_data, addr + 1, UserData) & IM_COL32_A_MASK) != 0);
+                        bg_color = BgColorFn(mem_data, addr, UserData);
+                    }
+                    if (bg_color != 0)
+                    {
+                        float bg_width = s.GlyphWidth * 2;
+                        if (is_next_byte_highlighted || (n + 1 == Cols))
+                        {
+                            bg_width = s.HexCellWidth;
+                            if (OptMidColsCount > 0 && n > 0 && (n + 1) < Cols && ((n + 1) % OptMidColsCount) == 0)
+                                bg_width += s.SpacingBetweenMidCols;
+                        }
+                        ImVec2 pos = ImGui::GetCursorScreenPos();
+                        draw_list->AddRectFilled(pos, ImVec2(pos.x + bg_width, pos.y + s.LineHeight), bg_color);
+                    }
+
+                    if (DataEditingAddr == addr)
+                    {
+                        // Display text input on current byte
+                        bool data_write = false;
+                        ImGui::PushID((void*)addr);
+                        if (DataEditingTakeFocus)
+                        {
+                            ImGui::SetKeyboardFocusHere(0);
+                            ImSnprintf(AddrInputBuf, 32, format_data, s.AddrDigitsCount, base_display_addr + addr);
+                            ImSnprintf(DataInputBuf, 32, format_byte, ReadFn ? ReadFn(mem_data, addr, UserData) : mem_data[addr]);
+                        }
+                        struct InputTextUserData
+                        {
+                            // FIXME: We should have a way to retrieve the text edit cursor position more easily in the API, this is rather tedious. This is such a ugly mess we may be better off not using InputText() at all here.
+                            static int Callback(ImGuiInputTextCallbackData* data)
+                            {
+                                InputTextUserData* user_data = (InputTextUserData*)data->UserData;
+                                if (!data->HasSelection())
+                                    user_data->CursorPos = data->CursorPos;
+#if IMGUI_VERSION_NUM < 19102
+                                if (data->Flags & ImGuiInputTextFlags_ReadOnly)
+                                    return 0;
+#endif
+                                if (data->SelectionStart == 0 && data->SelectionEnd == data->BufTextLen)
+                                {
+                                    // When not editing a byte, always refresh its InputText content pulled from underlying memory data
+                                    // (this is a bit tricky, since InputText technically "owns" the master copy of the buffer we edit it in there)
+                                    data->DeleteChars(0, data->BufTextLen);
+                                    data->InsertChars(0, user_data->CurrentBufOverwrite);
+                                    data->SelectionStart = 0;
+                                    data->SelectionEnd = 2;
+                                    data->CursorPos = 0;
+                                }
+                                return 0;
+                            }
+                            char   CurrentBufOverwrite[3];  // Input
+                            int    CursorPos;               // Output
+                        };
+                        InputTextUserData input_text_user_data;
+                        input_text_user_data.CursorPos = -1;
+                        ImSnprintf(input_text_user_data.CurrentBufOverwrite, 3, format_byte, ReadFn ? ReadFn(mem_data, addr, UserData) : mem_data[addr]);
+                        ImGuiInputTextFlags flags = ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_NoHorizontalScroll | ImGuiInputTextFlags_CallbackAlways;
+                        if (ReadOnly)
+                            flags |= ImGuiInputTextFlags_ReadOnly;
+                        flags |= ImGuiInputTextFlags_AlwaysOverwrite; // was ImGuiInputTextFlags_AlwaysInsertMode
+                        ImGui::SetNextItemWidth(s.GlyphWidth * 2);
+                        if (ImGui::InputText("##data", DataInputBuf, IM_ARRAYSIZE(DataInputBuf), flags, InputTextUserData::Callback, &input_text_user_data))
+                            data_write = data_next = true;
+                        else if (!DataEditingTakeFocus && !ImGui::IsItemActive())
+                            DataEditingAddr = data_editing_addr_next = (size_t)-1;
+                        DataEditingTakeFocus = false;
+                        if (input_text_user_data.CursorPos >= 2)
+                            data_write = data_next = true;
+                        if (data_editing_addr_next != (size_t)-1)
+                            data_write = data_next = false;
+                        unsigned int data_input_value = 0;
+                        if (!ReadOnly && data_write && sscanf(DataInputBuf, "%X", &data_input_value) == 1)
+                        {
+                            if (WriteFn)
+                                WriteFn(mem_data, addr, (ImU8)data_input_value, UserData);
+                            else
+                                mem_data[addr] = (ImU8)data_input_value;
+                        }
+                        if (ImGui::IsItemHovered())
+                        {
+                            MouseHovered = true;
+                            MouseHoveredAddr = addr;
+                        }
+                        ImGui::PopID();
+                    }
+                    else
+                    {
+                        // NB: The trailing space is not visible but ensure there's no gap that the mouse cannot click on.
+                        ImU8 b = ReadFn ? ReadFn(mem_data, addr, UserData) : mem_data[addr];
+
+                        if (OptShowHexII)
+                        {
+                            if ((b >= 32 && b < 128))
+                                ImGui::Text(".%c ", b);
+                            else if (b == 0xFF && OptGreyOutZeroes)
+                                ImGui::TextDisabled("## ");
+                            else if (b == 0x00)
+                                ImGui::Text("   ");
+                            else
+                                ImGui::Text(format_byte_space, b);
+                        }
+                        else
+                        {
+                            if (b == 0 && OptGreyOutZeroes)
+                                ImGui::TextDisabled("00 ");
+                            else
+                                ImGui::Text(format_byte_space, b);
+                        }
+                        if (ImGui::IsItemHovered())
+                        {
+                            MouseHovered = true;
+                            MouseHoveredAddr = addr;
+                            if (ImGui::IsMouseClicked(0))
+                            {
+                                DataEditingTakeFocus = true;
+                                data_editing_addr_next = addr;
+                            }
+                        }
+                    }
+                }
+
+                if (OptShowAscii)
+                {
+                    // Draw ASCII values
+                    ImGui::SameLine(s.OffsetAsciiMinX);
+                    ImVec2 pos = ImGui::GetCursorScreenPos();
+                    addr = (size_t)line_i * Cols;
+
+                    const float mouse_off_x = ImGui::GetIO().MousePos.x - pos.x;
+                    const size_t mouse_addr = (mouse_off_x >= 0.0f && mouse_off_x < s.OffsetAsciiMaxX - s.OffsetAsciiMinX) ? addr + (size_t)(mouse_off_x / s.GlyphWidth) : (size_t)-1;
+
+                    ImGui::PushID(line_i);
+                    if (ImGui::InvisibleButton("ascii", ImVec2(s.OffsetAsciiMaxX - s.OffsetAsciiMinX, s.LineHeight)))
+                    {
+                        DataEditingAddr = DataPreviewAddr = mouse_addr;
+                        DataEditingTakeFocus = true;
+                    }
+                    if (ImGui::IsItemHovered())
+                    {
+                        MouseHovered = true;
+                        MouseHoveredAddr = mouse_addr;
+                    }
+                    ImGui::PopID();
+                    for (int n = 0; n < Cols && addr < mem_size; n++, addr++)
+                    {
+                        if (addr == DataEditingAddr)
+                        {
+                            draw_list->AddRectFilled(pos, ImVec2(pos.x + s.GlyphWidth, pos.y + s.LineHeight), ImGui::GetColorU32(ImGuiCol_FrameBg));
+                            draw_list->AddRectFilled(pos, ImVec2(pos.x + s.GlyphWidth, pos.y + s.LineHeight), ImGui::GetColorU32(ImGuiCol_TextSelectedBg));
+                        }
+                        else if (BgColorFn)
+                        {
+                            draw_list->AddRectFilled(pos, ImVec2(pos.x + s.GlyphWidth, pos.y + s.LineHeight), BgColorFn(mem_data, addr, UserData));
+                        }
+                        unsigned char c = ReadFn ? ReadFn(mem_data, addr, UserData) : mem_data[addr];
+                        char display_c = (c < 32 || c >= 128) ? '.' : c;
+                        draw_list->AddText(pos, (display_c == c) ? color_text : color_disabled, &display_c, &display_c + 1);
+                        pos.x += s.GlyphWidth;
+                    }
+                }
+            }
+        ImGui::PopStyleVar(2);
+        const float child_width = ImGui::GetWindowSize().x;
+        ImGui::EndChild();
+
+        // Notify the main window of our ideal child content size (FIXME: we are missing an API to get the contents size from the child)
+        ImVec2 backup_pos = ImGui::GetCursorScreenPos();
+        ImGui::SetCursorPosX(s.WindowWidth);
+        ImGui::Dummy(ImVec2(0.0f, 0.0f));
+        ImGui::SetCursorScreenPos(backup_pos);
+
+        if (data_next && DataEditingAddr + 1 < mem_size)
+        {
+            DataEditingAddr = DataPreviewAddr = DataEditingAddr + 1;
+            DataEditingTakeFocus = true;
+        }
+        else if (data_editing_addr_next != (size_t)-1)
+        {
+            DataEditingAddr = DataPreviewAddr = data_editing_addr_next;
+            DataEditingTakeFocus = true;
+        }
+
+        const bool lock_show_data_preview = OptShowDataPreview;
+        if (OptShowOptions)
+        {
+            ImGui::Separator();
+            DrawOptionsLine(s, mem_data, mem_size, base_display_addr);
+        }
+
+        if (lock_show_data_preview)
+        {
+            ImGui::Separator();
+            DrawPreviewLine(s, mem_data, mem_size, base_display_addr);
+        }
+
+        if (GotoAddr != (size_t)-1)
+        {
+            if (GotoAddr < mem_size)
+            {
+                ImGui::BeginChild("##scrolling");
+                ImGui::SetScrollY((GotoAddr / Cols) * ImGui::GetTextLineHeight() - avail_size.y * 0.5f);
+                ImGui::EndChild();
+                DataEditingAddr = DataPreviewAddr = GotoAddr;
+                DataEditingTakeFocus = true;
+            }
+            GotoAddr = (size_t)-1;
+        }
+
+        const ImVec2 contents_pos_end(contents_pos_start.x + child_width, ImGui::GetCursorScreenPos().y);
+        //ImGui::GetForegroundDrawList()->AddRect(contents_pos_start, contents_pos_end, IM_COL32(255, 0, 0, 255));
+        if (OptShowOptions)
+            if (ImGui::IsMouseHoveringRect(contents_pos_start, contents_pos_end))
+                if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows) && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+                    ImGui::OpenPopup("OptionsPopup");
+
+        if (ImGui::BeginPopup("OptionsPopup"))
+        {
+            ImGui::SetNextItemWidth(s.GlyphWidth * 7 + style.FramePadding.x * 2.0f);
+            if (ImGui::DragInt("##cols", &Cols, 0.2f, 4, 32, "%d cols")) { ContentsWidthChanged = true; if (Cols < 1) Cols = 1; }
+            ImGui::Checkbox("Show Data Preview", &OptShowDataPreview);
+            ImGui::Checkbox("Show HexII", &OptShowHexII);
+            if (ImGui::Checkbox("Show Ascii", &OptShowAscii)) { ContentsWidthChanged = true; }
+            ImGui::Checkbox("Grey out zeroes", &OptGreyOutZeroes);
+            ImGui::Checkbox("Uppercase Hex", &OptUpperCaseHex);
+
+            ImGui::EndPopup();
+        }
+    }
+
+    void DrawOptionsLine(const Sizes& s, void* mem_data, size_t mem_size, size_t base_display_addr)
+    {
+        IM_UNUSED(mem_data);
+        ImGuiStyle& style = ImGui::GetStyle();
+        const char* format_range = OptUpperCaseHex ? "Range %0*" _PRISizeT "X..%0*" _PRISizeT "X" : "Range %0*" _PRISizeT "x..%0*" _PRISizeT "x";
+
+        // Options menu
+        if (ImGui::Button("Options"))
+            ImGui::OpenPopup("OptionsPopup");
+
+        ImGui::SameLine();
+        ImGui::Text(format_range, s.AddrDigitsCount, base_display_addr, s.AddrDigitsCount, base_display_addr + mem_size - 1);
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth((s.AddrDigitsCount + 1) * s.GlyphWidth + style.FramePadding.x * 2.0f);
+        if (ImGui::InputText("##addr", AddrInputBuf, IM_ARRAYSIZE(AddrInputBuf), ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_EnterReturnsTrue))
+        {
+            size_t goto_addr;
+            if (sscanf(AddrInputBuf, "%" _PRISizeT "X", &goto_addr) == 1)
+            {
+                GotoAddr = goto_addr - base_display_addr;
+                HighlightMin = HighlightMax = (size_t)-1;
+            }
+        }
+
+        //if (MouseHovered)
+        //{
+        //    ImGui::SameLine();
+        //    ImGui::Text("Hovered: %p", MouseHoveredAddr);
+        //}
+    }
+
+    void DrawPreviewLine(const Sizes& s, void* mem_data_void, size_t mem_size, size_t base_display_addr)
+    {
+        IM_UNUSED(base_display_addr);
+        ImU8* mem_data = (ImU8*)mem_data_void;
+        ImGuiStyle& style = ImGui::GetStyle();
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Preview as:");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth((s.GlyphWidth * 10.0f) + style.FramePadding.x * 2.0f + style.ItemInnerSpacing.x);
+
+        static const ImGuiDataType supported_data_types[] = { ImGuiDataType_S8, ImGuiDataType_U8, ImGuiDataType_S16, ImGuiDataType_U16, ImGuiDataType_S32, ImGuiDataType_U32, ImGuiDataType_S64, ImGuiDataType_U64, ImGuiDataType_Float, ImGuiDataType_Double };
+        if (ImGui::BeginCombo("##combo_type", DataTypeGetDesc(PreviewDataType), ImGuiComboFlags_HeightLargest))
+        {
+            for (int n = 0; n < IM_ARRAYSIZE(supported_data_types); n++)
+            {
+                ImGuiDataType data_type = supported_data_types[n];
+                if (ImGui::Selectable(DataTypeGetDesc(data_type), PreviewDataType == data_type))
+                    PreviewDataType = data_type;
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth((s.GlyphWidth * 6.0f) + style.FramePadding.x * 2.0f + style.ItemInnerSpacing.x);
+        ImGui::Combo("##combo_endianness", &PreviewEndianness, "LE\0BE\0\0");
+
+        char buf[128] = "";
+        float x = s.GlyphWidth * 6.0f;
+        bool has_value = DataPreviewAddr != (size_t)-1;
+        if (has_value)
+            DrawPreviewData(DataPreviewAddr, mem_data, mem_size, PreviewDataType, DataFormat_Dec, buf, (size_t)IM_ARRAYSIZE(buf));
+        ImGui::Text("Dec"); ImGui::SameLine(x); ImGui::TextUnformatted(has_value ? buf : "N/A");
+        if (has_value)
+            DrawPreviewData(DataPreviewAddr, mem_data, mem_size, PreviewDataType, DataFormat_Hex, buf, (size_t)IM_ARRAYSIZE(buf));
+        ImGui::Text("Hex"); ImGui::SameLine(x); ImGui::TextUnformatted(has_value ? buf : "N/A");
+        if (has_value)
+            DrawPreviewData(DataPreviewAddr, mem_data, mem_size, PreviewDataType, DataFormat_Bin, buf, (size_t)IM_ARRAYSIZE(buf));
+        buf[IM_ARRAYSIZE(buf) - 1] = 0;
+        ImGui::Text("Bin"); ImGui::SameLine(x); ImGui::TextUnformatted(has_value ? buf : "N/A");
+    }
+
+    // Utilities for Data Preview (since we don't access imgui_internal.h)
+    // FIXME: This technically depends on ImGuiDataType order.
+    const char* DataTypeGetDesc(ImGuiDataType data_type) const
+    {
+        const char* descs[] = { "Int8", "Uint8", "Int16", "Uint16", "Int32", "Uint32", "Int64", "Uint64", "Float", "Double" };
+        IM_ASSERT(data_type >= 0 && data_type < IM_ARRAYSIZE(descs));
+        return descs[data_type];
+    }
+
+    size_t DataTypeGetSize(ImGuiDataType data_type) const
+    {
+        const size_t sizes[] = { 1, 1, 2, 2, 4, 4, 8, 8, sizeof(float), sizeof(double) };
+        IM_ASSERT(data_type >= 0 && data_type < IM_ARRAYSIZE(sizes));
+        return sizes[data_type];
+    }
+
+    const char* DataFormatGetDesc(DataFormat data_format) const
+    {
+        const char* descs[] = { "Bin", "Dec", "Hex" };
+        IM_ASSERT(data_format >= 0 && data_format < DataFormat_COUNT);
+        return descs[data_format];
+    }
+
+    bool IsBigEndian() const
+    {
+        ImU16 x = 1;
+        char c[2];
+        memcpy(c, &x, 2);
+        return c[0] != 0;
+    }
+
+    static void* EndiannessCopyBigEndian(void* _dst, void* _src, size_t s, int is_little_endian)
+    {
+        if (is_little_endian)
+        {
+            ImU8* dst = (ImU8*)_dst;
+            ImU8* src = (ImU8*)_src + s - 1;
+            for (int i = 0, n = (int)s; i < n; ++i)
+                memcpy(dst++, src--, 1);
+            return _dst;
+        }
+        else
+        {
+            return memcpy(_dst, _src, s);
+        }
+    }
+
+    static void* EndiannessCopyLittleEndian(void* _dst, void* _src, size_t s, int is_little_endian)
+    {
+        if (is_little_endian)
+        {
+            return memcpy(_dst, _src, s);
+        }
+        else
+        {
+            ImU8* dst = (ImU8*)_dst;
+            ImU8* src = (ImU8*)_src + s - 1;
+            for (int i = 0, n = (int)s; i < n; ++i)
+                memcpy(dst++, src--, 1);
+            return _dst;
+        }
+    }
+
+    void* EndiannessCopy(void* dst, void* src, size_t size) const
+    {
+        static void* (*fp)(void*, void*, size_t, int) = nullptr;
+        if (fp == nullptr)
+            fp = IsBigEndian() ? EndiannessCopyBigEndian : EndiannessCopyLittleEndian;
+        return fp(dst, src, size, PreviewEndianness);
+    }
+
+    const char* FormatBinary(const ImU8* buf, int width) const
+    {
+        IM_ASSERT(width <= 64);
+        size_t out_n = 0;
+        static char out_buf[64 + 8 + 1];
+        int n = width / 8;
+        for (int j = n - 1; j >= 0; --j)
+        {
+            for (int i = 0; i < 8; ++i)
+                out_buf[out_n++] = (buf[j] & (1 << (7 - i))) ? '1' : '0';
+            out_buf[out_n++] = ' ';
+        }
+        IM_ASSERT(out_n < IM_ARRAYSIZE(out_buf));
+        out_buf[out_n] = 0;
+        return out_buf;
+    }
+
+    // [Internal]
+    void DrawPreviewData(size_t addr, const ImU8* mem_data, size_t mem_size, ImGuiDataType data_type, DataFormat data_format, char* out_buf, size_t out_buf_size) const
+    {
+        ImU8 buf[8];
+        size_t elem_size = DataTypeGetSize(data_type);
+        size_t size = addr + elem_size > mem_size ? mem_size - addr : elem_size;
+        if (ReadFn)
+            for (int i = 0, n = (int)size; i < n; ++i)
+                buf[i] = ReadFn(mem_data, addr + i, UserData);
+        else
+            memcpy(buf, mem_data + addr, size);
+
+        if (data_format == DataFormat_Bin)
+        {
+            ImU8 binbuf[8];
+            EndiannessCopy(binbuf, buf, size);
+            ImSnprintf(out_buf, out_buf_size, "%s", FormatBinary(binbuf, (int)size * 8));
+            return;
+        }
+
+        out_buf[0] = 0;
+        switch (data_type)
+        {
+        case ImGuiDataType_S8:
+        {
+            ImS8 data = 0;
+            EndiannessCopy(&data, buf, size);
+            if (data_format == DataFormat_Dec) { ImSnprintf(out_buf, out_buf_size, "%hhd", data); return; }
+            if (data_format == DataFormat_Hex) { ImSnprintf(out_buf, out_buf_size, "0x%02x", data & 0xFF); return; }
+            break;
+        }
+        case ImGuiDataType_U8:
+        {
+            ImU8 data = 0;
+            EndiannessCopy(&data, buf, size);
+            if (data_format == DataFormat_Dec) { ImSnprintf(out_buf, out_buf_size, "%hhu", data); return; }
+            if (data_format == DataFormat_Hex) { ImSnprintf(out_buf, out_buf_size, "0x%02x", data & 0XFF); return; }
+            break;
+        }
+        case ImGuiDataType_S16:
+        {
+            ImS16 data = 0;
+            EndiannessCopy(&data, buf, size);
+            if (data_format == DataFormat_Dec) { ImSnprintf(out_buf, out_buf_size, "%hd", data); return; }
+            if (data_format == DataFormat_Hex) { ImSnprintf(out_buf, out_buf_size, "0x%04x", data & 0xFFFF); return; }
+            break;
+        }
+        case ImGuiDataType_U16:
+        {
+            ImU16 data = 0;
+            EndiannessCopy(&data, buf, size);
+            if (data_format == DataFormat_Dec) { ImSnprintf(out_buf, out_buf_size, "%hu", data); return; }
+            if (data_format == DataFormat_Hex) { ImSnprintf(out_buf, out_buf_size, "0x%04x", data & 0xFFFF); return; }
+            break;
+        }
+        case ImGuiDataType_S32:
+        {
+            ImS32 data = 0;
+            EndiannessCopy(&data, buf, size);
+            if (data_format == DataFormat_Dec) { ImSnprintf(out_buf, out_buf_size, "%d", data); return; }
+            if (data_format == DataFormat_Hex) { ImSnprintf(out_buf, out_buf_size, "0x%08x", data); return; }
+            break;
+        }
+        case ImGuiDataType_U32:
+        {
+            ImU32 data = 0;
+            EndiannessCopy(&data, buf, size);
+            if (data_format == DataFormat_Dec) { ImSnprintf(out_buf, out_buf_size, "%u", data); return; }
+            if (data_format == DataFormat_Hex) { ImSnprintf(out_buf, out_buf_size, "0x%08x", data); return; }
+            break;
+        }
+        case ImGuiDataType_S64:
+        {
+            ImS64 data = 0;
+            EndiannessCopy(&data, buf, size);
+            if (data_format == DataFormat_Dec) { ImSnprintf(out_buf, out_buf_size, "%lld", (long long)data); return; }
+            if (data_format == DataFormat_Hex) { ImSnprintf(out_buf, out_buf_size, "0x%016llx", (long long)data); return; }
+            break;
+        }
+        case ImGuiDataType_U64:
+        {
+            ImU64 data = 0;
+            EndiannessCopy(&data, buf, size);
+            if (data_format == DataFormat_Dec) { ImSnprintf(out_buf, out_buf_size, "%llu", (long long)data); return; }
+            if (data_format == DataFormat_Hex) { ImSnprintf(out_buf, out_buf_size, "0x%016llx", (long long)data); return; }
+            break;
+        }
+        case ImGuiDataType_Float:
+        {
+            float data = 0.0f;
+            EndiannessCopy(&data, buf, size);
+            if (data_format == DataFormat_Dec) { ImSnprintf(out_buf, out_buf_size, "%f", data); return; }
+            if (data_format == DataFormat_Hex) { ImSnprintf(out_buf, out_buf_size, "%a", data); return; }
+            break;
+        }
+        case ImGuiDataType_Double:
+        {
+            double data = 0.0;
+            EndiannessCopy(&data, buf, size);
+            if (data_format == DataFormat_Dec) { ImSnprintf(out_buf, out_buf_size, "%f", data); return; }
+            if (data_format == DataFormat_Hex) { ImSnprintf(out_buf, out_buf_size, "%a", data); return; }
+            break;
+        }
+        default:
+        case ImGuiDataType_COUNT:
+            break;
+        } // Switch
+        IM_ASSERT(0); // Shouldn't reach
+    }
+};
+
+#undef _PRISizeT
+#undef ImSnprintf
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
+```
+
+`imgui_multicontext_compositor/imgui_multicontext_compositor.cpp`:
+
+```cpp
+// Multi-Context Compositor v0.11, for Dear ImGui
+// Get latest version at http://www.github.com/ocornut/imgui_club
+// Licensed under The MIT License (MIT)
+
+// Read header files for changelog, API usage and details.
+
+#include "imgui_multicontext_compositor.h"
+#include "imgui_internal.h" // ImGuiContext
+
+//-----------------------------------------------------------------------------
+// ImGuiMultiContextCompositor Implementation
+//-----------------------------------------------------------------------------
+
+void ImGuiMultiContextCompositor_AddContext(ImGuiMultiContextCompositor* mcc, ImGuiContext* ctx)
+{
+    IM_ASSERT(mcc->Contexts.contains(ctx) == false);
+    mcc->Contexts.push_back(ctx);
+    mcc->ContextsFrontToBack.push_back(ctx);
+}
+
+void ImGuiMultiContextCompositor_RemoveContext(ImGuiMultiContextCompositor* mcc, ImGuiContext* ctx)
+{
+    mcc->Contexts.find_erase(ctx);
+    mcc->ContextsFrontToBack.find_erase(ctx);
+}
+
+static void ImGuiMultiContextCompositor_BringContextToFront(ImGuiMultiContextCompositor* mcc, ImGuiContext* ctx, ImGuiContext* ctx_to_keep_inputs_for)
+{
+    mcc->ContextsFrontToBack.find_erase(ctx);
+    mcc->ContextsFrontToBack.push_front(ctx);
+
+    for (ImGuiContext* other_ctx : mcc->ContextsFrontToBack)
+        if (other_ctx != ctx && other_ctx != ctx_to_keep_inputs_for)
+            other_ctx->IO.ClearInputKeys();
+}
+
+static bool ImGuiMultiContextCompositor_DragDropGetPayloadFromSourceContext(ImGuiMultiContextCompositor* mcc)
+{
+    ImGuiContext* src_ctx = mcc->CtxDragDropSrc;
+    ImGuiPayload* dst_payload = &mcc->DragDropPayload;
+
+    if (!src_ctx->DragDropActive)
+        return false;
+    if (src_ctx->DragDropSourceFlags & ImGuiDragDropFlags_PayloadNoCrossContext)
+        return false;
+    ImGuiPayload* src_payload = &src_ctx->DragDropPayload;
+    *dst_payload = *src_payload;
+    dst_payload->Data = ImGui::MemAlloc(src_payload->DataSize);
+    memcpy(dst_payload->Data, src_payload->Data, src_payload->DataSize);
+    return true;
+}
+
+static void MultiContext_DragDropSetPayloadToDestContext(ImGuiMultiContextCompositor* mcc, ImGuiContext* dst_ctx)
+{
+    IM_ASSERT(dst_ctx == ImGui::GetCurrentContext());
+    ImGuiPayload* src_payload = &mcc->DragDropPayload;
+    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceExtern | ImGuiDragDropFlags_SourceNoPreviewTooltip))
+    {
+        ImGui::SetDragDropPayload(src_payload->DataType, src_payload->Data, src_payload->DataSize);
+        ImGui::EndDragDropSource();
+    }
+}
+
+static void MultiContext_DragDropFreePayload(ImGuiPayload* src_payload)
+{
+    ImGui::MemFree(src_payload->Data);
+    src_payload->Data = NULL;
+}
+
+void ImGuiMultiContextCompositor_PreNewFrameUpdateAll(ImGuiMultiContextCompositor* mcc)
+{
+    // Clear transient data
+    mcc->CtxMouseFirst = NULL;
+    mcc->CtxMouseExclusive = NULL;
+    mcc->CtxMouseShape = NULL;
+    mcc->CtxKeyboardExclusive = NULL;
+    mcc->CtxDragDropSrc = NULL;
+    mcc->CtxDragDropDst = NULL;
+    mcc->DragDropPayload.Clear();
+
+    // Sync point (before NewFrame calls)
+    // PASS 1:
+    // - Find out who will receive mouse position (one or multiple contexts)
+    // - FInd out who will change mouse cursor (one context)
+    // - Find out who has an active drag and drop
+    for (ImGuiContext* ctx : mcc->ContextsFrontToBack)
+    {
+#ifdef IMGUI_HAS_DOCK
+        // When hovering a secondary viewport, only enable mouse for the context owning it
+        // We specifically use 'ctx->IO.MouseHoveredViewport' (current, submitted by backend) and not 'ctx->MouseLastHoveredViewport' (last valid one)
+        if (mcc->CtxMouseExclusive == NULL && ctx->IO.MouseHoveredViewport != 0)
+        {
+            ImGuiViewport* hovered_viewport = NULL;
+            for (ImGuiViewport* viewport : ctx->PlatformIO.Viewports)
+                if (viewport->ID == ctx->IO.MouseHoveredViewport)
+                    hovered_viewport = viewport;
+            if (hovered_viewport != NULL && (hovered_viewport->Flags & ImGuiViewportFlags_CanHostOtherWindows) == 0)
+                mcc->CtxMouseExclusive = ctx;
+        }
+
+        // When a secondary viewport is focused, only enable keyboard for the context owning it.
+        if (mcc->CtxKeyboardExclusive == NULL && ctx->NavWindow != NULL)
+            if (ImGuiViewport* viewport = ctx->NavWindow->Viewport)
+                if ((viewport->Flags & ImGuiViewportFlags_IsFocused) && (viewport->Flags & ImGuiViewportFlags_CanHostOtherWindows) == 0)
+                    mcc->CtxKeyboardExclusive = ctx;
+#endif
+
+        // When hovering a main/shared viewport,
+        // - feed mouse front-to-back until reaching context that has io.WantCaptureMouse.
+        // - track second context to pass drag and drop payload
+        if (ctx->IO.WantCaptureMouse && mcc->CtxMouseFirst == NULL)
+            mcc->CtxMouseFirst = ctx;
+        if (ctx->HoveredWindowBeforeClear != NULL && mcc->CtxDragDropDst == NULL)
+            mcc->CtxDragDropDst = ctx;
+
+        // Who owns mouse shape?
+        if (mcc->CtxMouseShape == NULL && ctx->MouseCursor != ImGuiMouseCursor_Arrow)
+            mcc->CtxMouseShape = ctx;
+
+        // Who owns drag and drop source?
+        if (ctx->DragDropActive == true && (ctx->DragDropSourceFlags & ImGuiDragDropFlags_SourceExtern) == 0 && mcc->CtxDragDropSrc == NULL)
+            mcc->CtxDragDropSrc = ctx;
+        else if (ctx->DragDropActive == false && mcc->CtxDragDropSrc == ctx)
+            mcc->CtxDragDropSrc = NULL;
+    }
+
+    // If no secondary viewport are focused, we'll keep keyboard to top-most context
+    if (mcc->CtxKeyboardExclusive == NULL)
+        mcc->CtxKeyboardExclusive = mcc->ContextsFrontToBack.front();
+
+    // Deep copy payload for replication
+    if (mcc->CtxDragDropSrc)
+        ImGuiMultiContextCompositor_DragDropGetPayloadFromSourceContext(mcc);
+    if (mcc->CtxDragDropDst && mcc->DragDropPayload.Data == NULL)
+        mcc->CtxDragDropDst = NULL;
+
+    // Bring drag target context to front when using DragDropHold press
+    // FIXME-MULTICONTEXT: Works but change of order means source tooltip not visible anymore...
+    // - Solution 1 ? if user code always submitted drag and drop tooltip derived from payload data
+    //   instead of submitting at drag source location, this wouldn't be a problem at the front
+    //   most context could always display the tooltip. But it's a constraint.
+    // - Solution 2 ? would be a more elaborate composited rendering, where top layer (tooltip)
+    //   of one ImDrawData would be moved to another ImDrawData.
+    // - Solution 3 ? somehow find a way to enforce tooltip always on own viewport, always on top?
+    // Ultimately this is not so important, it's already quite a fun luxury to have cross context DND.
+#if 0
+    if (mcc->CtxDragDropDst && mcc->CtxDragDropDst != mcc->ContextsFrontToBack.front())
+        if (mcc->CtxDragDropDst->DragDropHoldJustPressedId != 0)
+            ImGuiMultiContextCompositor_BringContextToFront(mcc, mcc->CtxDragDropDst, mcc->ContextsFrontToBack.front());
+#endif
+
+    // PASS 2:
+    // - Enable/disable mouse interactions on selected contexts.
+    // - Enable/disable mouse cursor change so only 1 context can do it.
+    // - Bring a context to front whenever clicked any of its windows.
+    bool is_above_ctx_with_mouse_first = true;
+    for (ImGuiContext* ctx : mcc->ContextsFrontToBack)
+    {
+        ImGuiIO& io = ctx->IO;
+        const bool ctx_is_front = (ctx == mcc->ContextsFrontToBack.front());
+
+        // Focused secondary viewport or top-most context in shared viewport gets keyboard
+        if (mcc->CtxKeyboardExclusive == ctx)
+            io.ConfigFlags &= ~ImGuiConfigFlags_NoKeyboard; // Allow keyboard interactions
+        else
+            io.ConfigFlags |= ImGuiConfigFlags_NoKeyboard; // Disable keyboard interactions
+
+        // Top-most context with MouseCursor shape request gets it
+        if (mcc->CtxMouseShape == NULL || mcc->CtxMouseShape == ctx)
+            io.ConfigFlags &= ~ImGuiConfigFlags_NoMouseCursorChange; // Allow mouse cursor changes
+        else
+            io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange; // Disable mouse cursor changes
+
+        if (mcc->CtxMouseExclusive != NULL)
+        {
+            // Single context gets mouse interactions
+            if (mcc->CtxMouseExclusive == ctx)
+                io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse; // Allow mouse interactions
+            else
+                io.ConfigFlags |= ImGuiConfigFlags_NoMouse; // Disable mouse interactions
+        }
+        else
+        {
+            // Top-most io.WantCaptureMouse context & anything above it gets mouse interactions
+            if (is_above_ctx_with_mouse_first || mcc->CtxDragDropDst == ctx)
+                io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse; // Allow mouse interactions
+            else
+                io.ConfigFlags |= ImGuiConfigFlags_NoMouse; // Disable mouse interactions
+        }
+
+        // Bring to front on click
+        if ((mcc->CtxMouseExclusive == ctx || mcc->CtxMouseFirst == ctx) && !ctx_is_front)
+        {
+            bool any_mouse_clicked = false; // conceptually a ~ImGui::IsAnyMouseClicked(), not worth adding to API.
+            for (bool clicked : io.MouseClicked)
+                any_mouse_clicked |= clicked;
+            if (any_mouse_clicked)
+                ImGuiMultiContextCompositor_BringContextToFront(mcc, ctx, NULL);
+        }
+
+        if (mcc->CtxMouseFirst == ctx)
+            is_above_ctx_with_mouse_first = false;
+    }
+}
+
+// This could technically be registered as a hook, but it would make things too magical.
+void ImGuiMultiContextCompositor_PostNewFrameUpdateOne(ImGuiMultiContextCompositor* mcc, ImGuiContext* ctx)
+{
+    // Propagate drag and drop
+    // (against all odds since we are only READING from 'mcc' and writing to our target
+    // context this should be parallel/threading friendly)
+    if (mcc->CtxDragDropDst == ctx && mcc->CtxDragDropDst != mcc->CtxDragDropSrc)
+        MultiContext_DragDropSetPayloadToDestContext(mcc, ctx);
+}
+
+void ImGuiMultiContextCompositor_PostEndFrameUpdateAll(ImGuiMultiContextCompositor* mcc)
+{
+    // Clear drag and drop payload
+    if (mcc->DragDropPayload.Data != NULL)
+        MultiContext_DragDropFreePayload(&mcc->DragDropPayload);
+}
+
+void ImGuiMultiContextCompositor_ShowDebugWindow(ImGuiMultiContextCompositor* mcc)
+{
+    ImGui::SetNextWindowPos(ImGui::GetMainViewport()->Pos);
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1.0f, 1.0f, 1.0f, 0.5f));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+    ImGui::Begin("Multi-Context Compositor Overlay", NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoInputs);
+    ImGui::SeparatorText("Multi-Context Compositor");
+    ImGui::Text("Front: %s", mcc->ContextsFrontToBack.front()->ContextName);
+    ImGui::Text("MousePos first: %s", mcc->CtxMouseFirst ? mcc->CtxMouseFirst->ContextName : "");
+    ImGui::Text("MousePos excl.: %s", mcc->CtxMouseExclusive ? mcc->CtxMouseExclusive->ContextName : "");
+    ImGui::Text("Keyboard excl.: %s", mcc->CtxKeyboardExclusive ? mcc->CtxKeyboardExclusive->ContextName : "");
+    ImGui::Text("DragDrop src: %s", mcc->CtxDragDropSrc ? mcc->CtxDragDropSrc->ContextName : "");
+    ImGui::Text("DragDrop dst: %s", mcc->CtxDragDropDst ? mcc->CtxDragDropDst->ContextName : "");
+    ImGui::End();
+    ImGui::PopStyleColor(2);
+}
+
+```
+
+`imgui_multicontext_compositor/imgui_multicontext_compositor.h`:
+
+```h
+// Multi-Context Compositor v0.11, for Dear ImGui
+// Get latest version at http://www.github.com/ocornut/imgui_club
+// Licensed under The MIT License (MIT)
+
+// When using and displaying multiple contexts simultaneously:
+// - Manage z-order of contexts.
+// - Manage input routing.
+// - Allow drag and drop between contexts.
+//
+// Tips for using multiple contexts simultaneously:
+// - Give each of them unique title bar colors.
+// - Make sure they each have their individual .ini file.
+
+// CHANGELOG:
+// - v0.10: (2024/07/16): initial version. Requires dear imgui 1.90.9+.
+// - v0.11: (2024/08/01): fixed an issue clicking between two secondary viewport of different contexts.
+//                        fixed an issue routing keyboard to secondary viewports. [tom bui]
+
+// TODO:
+// - Ctrl+Tab could be multi-context aware
+// - Focusing a context optionally shouldn't unfocus windows in other context
+
+// USAGE:
+/*
+    // Store persistent state somewhere
+    static ImGuiMultiContextCompositor g_mcc_instance;
+    ...
+    // Add your contexts
+    ImGuiMultiContextCompositor_AddContext(mcc, ctx1); // Add update context
+    ImGuiMultiContextCompositor_AddContext(mcc, ctx2); // Add rendering context
+    ...
+    // New Frame
+    ImGuiMultiContextCompositor_PreNewFrameUpdateAll(mcc);
+    ImGui::SetCurrentContext(ctx1);
+    ImGui::NewFrame();
+    ImGuiMultiContextCompositor_PostNewFrameUpdateOne(mcc);
+    ...
+    ImGui::SetCurrentContext(ctx2);
+    ImGui::NewFrame();
+    ImGuiMultiContextCompositor_PostNewFrameUpdateOne(mcc);
+    ...
+    // End of frame
+    ImGui::Render()/ImGui::EndFrame();
+    ImGuiMultiContextCompositor_PostEndFrameUpdateAll(mcc);
+*/
+
+#pragma once
+
+#include "imgui.h"
+
+struct ImGuiMultiContextCompositor
+{
+    // List of context + sorted front to back
+    ImVector<ImGuiContext*> Contexts;
+    ImVector<ImGuiContext*> ContextsFrontToBack;
+
+    // [Internal]
+    ImGuiContext*   CtxMouseFirst = NULL;       // When hovering a main/shared viewport, first context with io.WantCaptureMouse
+    ImGuiContext*   CtxMouseExclusive = NULL;   // When hovering a secondary viewport
+    ImGuiContext*   CtxMouseShape = NULL;       // Context owning mouse cursor shape
+    ImGuiContext*   CtxKeyboardExclusive = NULL;// When focusing a secondary viewport
+    ImGuiContext*   CtxDragDropSrc = NULL;      // Source context for drag and drop
+    ImGuiContext*   CtxDragDropDst = NULL;      // When hovering a main/shared viewport, second context with io.WantCaptureMouse for Drag Drop target
+    ImGuiPayload    DragDropPayload;            // Deep copy of drag and drop payload.
+};
+
+//-----------------------------------------------------------------------------
+// ImGuiMultiContextCompositor Interface
+//-----------------------------------------------------------------------------
+
+// Add/remove context.
+void ImGuiMultiContextCompositor_AddContext(ImGuiMultiContextCompositor* mcc, ImGuiContext* ctx);
+void ImGuiMultiContextCompositor_RemoveContext(ImGuiMultiContextCompositor* mcc, ImGuiContext* ctx);
+
+// Call at a shared sync point before calling NewFrame() on any context.
+void ImGuiMultiContextCompositor_PreNewFrameUpdateAll(ImGuiMultiContextCompositor* mcc);
+
+// Call after caling NewFrame() on a given context.
+void ImGuiMultiContextCompositor_PostNewFrameUpdateOne(ImGuiMultiContextCompositor* mcc, ImGuiContext* ctx);
+
+// Call at a shared sync point after calling EndFrame() on all contexts.
+void ImGuiMultiContextCompositor_PostEndFrameUpdateAll(ImGuiMultiContextCompositor* mcc);
+
+// Debug display
+void ImGuiMultiContextCompositor_ShowDebugWindow(ImGuiMultiContextCompositor* mcc);
+
+```
+
+`imgui_threaded_rendering/imgui_threaded_rendering.h`:
+
+```h
+// Helper for staged/multi-threaded rendering v0.20, for Dear ImGui
+// Get latest version at http://www.github.com/ocornut/imgui_club
+// Licensed under The MIT License (MIT)
+
+// Based on a discussion at https://github.com/ocornut/imgui/issues/1860#issuecomment-1927630727
+// Since 1.92.0, textures also needs to be updated. See discussion at https://github.com/ocornut/imgui/issues/8597
+
+
+/*
+
+Index of this file:
+// CHANGELOG
+// USAGE
+// ImDrawDataSnapshot - HEADERS
+// ImDrawDataSnapshot - IMPLEMENTATION
+// ImTextureQueue - HEADERS
+// ImTextureQueue - IMPLEMENTATION
+
+*/
+
+//-----------------------------------------------------------------------------
+// CHANGELOG
+//-----------------------------------------------------------------------------
+
+// - v0.20: (2026/07/22): added ImTextureQueue support.
+// - v0.10: (2025/04/30): initial version. Not well tested.
+
+//-----------------------------------------------------------------------------
+// USAGE
+//-----------------------------------------------------------------------------
+
+/*
+
+    // [Storage]
+    ImDrawDataSnapshot  g_Snapshots[2];         // Keep snapshots persistent as we reuse buffers across frames.
+    ImTextureQueue      g_TexQueue;
+    std::mutex          g_TexQueueMutex;        // All calls to ImTextureQueue must be protected by a same mutex.
+
+    // [Init]
+    g_TexQueue.UpdateTexFunc = ImGui_ImplDX11_UpdateTexture;
+    g_TexQueue.InFlightFrames = 3;
+
+    // [Update thread] Acknowledge retired texture destroys.
+    g_TexQueueMutex.lock();
+    g_TexQueue.PreNewFrame();
+    g_TexQueueMutex.unlock();
+    ImGui::NewFrame();
+    [...]
+    ImGui::EndFrame();
+    ImGui::Render();
+
+    // [Update thread] Queue texture requests, then take/publish a snapshot of the ImDrawData
+    // This ordering guarantees the render thread processes requests before rendering the snapshot referencing them.
+    ImDrawData* draw_data = ImGui::GetDrawData();
+    g_TexQueueMutex.lock();
+    g_TexQueue.QueueRequests(draw_data);
+    g_TexQueueMutex.unlock();
+    ImDrawDataSnapshot* snapshot = &g_Snapshots[g_FrameIndex % 2];
+    snapshot->SnapUsingSwap(draw_data, ImGui::GetTime());
+    g_FrameIndex++;
+
+    // [Render thread] After adopting the latest snapshot, before rendering it: process texture requests.
+    // This also clears snapshot->DrawData.Textures so the backend render function won't process them.
+    g_TexQueueMutex.lock();
+    g_TexQueue.ProcessRequests(&snapshot->DrawData);
+    g_TexQueueMutex.unlock();
+    ImGui_ImplDX11_RenderDrawData(&snapshot->DrawData);
+
+    // [Shutdown] After joining/stopping both threads
+    g_TexQueue.Shutdown();
+    for (ImDrawDataSnapshot& snapshot : g_Snapshots)
+        snapshot.Clear(); // otherwise context will assert since 1.92.0
+    ImGui_ImplDX11_Shutdown();
+    ImGui::DestroyContext();
+
+*/
+
+// Multi-Viewport Support (Untested)
+// - Generally tricky because of handling of ImGuiPlatformWindow.
+//   - e.g. any interaction with viewports (e.g pos/size) are queued both ways and expected to process immediately.
+// - ImTextureQueue: should work fine, as the texture queue is effectively associated to a context.
+//   - Each function should be called only once.
+//   - Each ImDrawData::Textures pointer MUST be nulled before passing to the backend Render function.
+// - ImDrawDataSnapshot: app should package one snapshot per viewport.
+
+#pragma once
+#include "imgui_internal.h" // ImPool<>, ImHashData
+
+//-----------------------------------------------------------------------------
+// ImDrawDataSnapshot - HEADERS
+//-----------------------------------------------------------------------------
+
+struct ImDrawDataSnapshotEntry
+{
+    ImDrawList*     SrcCopy = NULL;     // Drawlist owned by main context
+    ImDrawList*     OurCopy = NULL;     // Our copy
+    double          LastUsedTime = 0.0;
+};
+
+struct ImDrawDataSnapshot
+{
+    // Members
+    ImDrawData                      DrawData;
+    ImPool<ImDrawDataSnapshotEntry> Cache;
+    float                           MemoryCompactTimer = 20.0f; // Discard unused data after 20 seconds
+
+    // Functions
+    ~ImDrawDataSnapshot()           { Clear(); }
+    void                            Clear();
+    void                            SnapUsingSwap(ImDrawData* src, double current_time); // Efficient snapshot by swapping data, meaning "src" is unusable.
+    //void                          SnapUsingCopy(ImDrawData* src, double current_time); // Deep-copy snapshot. Probably not needed.
+
+    // Internals
+    // FIXME: Could store an ID in ImDrawList to make this easier for user.
+    ImGuiID                         GetDrawListID(ImDrawList* src_list) { return ImHashData(&src_list, sizeof(src_list)); }     // Hash pointer
+    ImDrawDataSnapshotEntry*        GetOrAddEntry(ImDrawList* src_list) { return Cache.GetOrAddByKey(GetDrawListID(src_list)); }
+};
+
+//-----------------------------------------------------------------------------
+// ImDrawDataSnapshot - IMPLEMENTATION
+//-----------------------------------------------------------------------------
+
+inline void ImDrawDataSnapshot::Clear()
+{
+    for (int n = 0; n < Cache.GetMapSize(); n++)
+        if (ImDrawDataSnapshotEntry* entry = Cache.TryGetMapData(n))
+            IM_DELETE(entry->OurCopy);
+    Cache.Clear();
+    DrawData.Clear();
+}
+
+inline void ImDrawDataSnapshot::SnapUsingSwap(ImDrawData* src, double current_time)
+{
+    ImDrawData* dst = &DrawData;
+    IM_ASSERT(src != dst && src->Valid);
+
+    // Copy all fields except CmdLists[]
+    ImVector<ImDrawList*> backup_draw_list;
+    backup_draw_list.swap(src->CmdLists);
+    IM_ASSERT(src->CmdLists.Data == NULL);
+    *dst = *src;
+    backup_draw_list.swap(src->CmdLists);
+
+    // Swap and mark as used
+    for (ImDrawList* src_list : src->CmdLists)
+    {
+        ImDrawDataSnapshotEntry* entry = GetOrAddEntry(src_list);
+        if (entry->OurCopy == NULL)
+        {
+            entry->SrcCopy = src_list;
+            entry->OurCopy = IM_NEW(ImDrawList)(src_list->_Data);
+        }
+        IM_ASSERT(entry->SrcCopy == src_list);
+        entry->SrcCopy->CmdBuffer.swap(entry->OurCopy->CmdBuffer); // Cheap swap
+        entry->SrcCopy->IdxBuffer.swap(entry->OurCopy->IdxBuffer);
+        entry->SrcCopy->VtxBuffer.swap(entry->OurCopy->VtxBuffer);
+        entry->SrcCopy->CmdBuffer.reserve(entry->OurCopy->CmdBuffer.Capacity); // Preserve bigger size to avoid reallocs for two consecutive frames
+        entry->SrcCopy->IdxBuffer.reserve(entry->OurCopy->IdxBuffer.Capacity);
+        entry->SrcCopy->VtxBuffer.reserve(entry->OurCopy->VtxBuffer.Capacity);
+        entry->LastUsedTime = current_time;
+        dst->CmdLists.push_back(entry->OurCopy);
+    }
+
+    // Cleanup unused data
+    const double gc_threshold = current_time - MemoryCompactTimer;
+    for (int n = 0; n < Cache.GetMapSize(); n++)
+        if (ImDrawDataSnapshotEntry* entry = Cache.TryGetMapData(n))
+        {
+            if (entry->LastUsedTime > gc_threshold)
+                continue;
+            IM_DELETE(entry->OurCopy);
+            Cache.Remove(GetDrawListID(entry->SrcCopy), entry);
+        }
+};
+
+//-----------------------------------------------------------------------------
+// ImTextureQueue - HEADERS
+//-----------------------------------------------------------------------------
+
+// The update thread acts as a proxy backend: it acknowledges all texture requests immediately,
+// so core lib effectively runs against a regular lock-step backend.
+// Each texture gets a persistent record holding a staging mirror.
+//
+// Important: all calls needs to be protected by the same mutex. We don't provide the mutex for portability reasons.
+// 
+// (1) Update thread: ImTextureQueue::PreNewFrame()
+//  - Call before ImGui::NewFrame()
+//  - Acknowledges destroys retired by the render thread, so that core can destroy ImTextureData
+//    during the NewFrame() call that follows.
+//
+// (2) Update thread: ImTextureQueue::QueueRequests()
+//  - Call after ImGui::Render() and before publishing the ImDrawData snapshot.
+//    Merges pending work into each texture's staging mirror, acknowledging immediately for core lib.
+//  - WantCreate: initialize record + mirror, set tex->Status = OK immediately.
+//  - WantUpdates: merge rects + union bounding box over the pending ones.
+//  - WantDestroy: two steps:
+//    - stamps our record but do not acknowledge yet. The mirror is not yet touched.
+//    - a pending create/update is processed first, and the destroy executes once the mirror is idle.
+//    - later, when the render thread reports the GPU destroy done, the next ImTextureQueue::PreNewFrame()
+//      call can acknowledge, and the next ImGui::NewFrame() can destroy ImTextureData.
+//    - makes ImDrawCmd::GetTexID() safe on the render thread: a texture referenced by any live snapshot is never destroyed.
+//
+// (3) Render thread: ImTextureQueue::ProcessRequests()
+//  - Call after adopting the latest ImDrawData snapshot and before rendering it.
+//    This ordering guarantees every texture referenced by a snapshot is created/updated before drawing.
+//  - This calls the backend ImGui_ImplXXXX_UpdateTexture() provided in ImTextureQueue::UpdateTexFunc.
+//  - Destroys use a consumer-side retirement clock, NOT tex->UnusedFrames (as update rate can be != render rate).
+//
+// Zero pixel copies: the mirror shares tex->Pixels with the live texture. This is safe because:
+//  - Pixels storage never moves nor resizes during a texture lifetime (a resize allocates a new texture),
+//  - Updates only ever write to virgin regions, so rects captured at queue time are immutable,
+//  - We keep the ImTextureData alive until the render thread is done with it.
+//
+// Known limitations:
+//  - Assumes a single Dear ImGui context per atlas, and that all textures go through the queue.
+//    - ProcessRequests() clears draw_data->Textures so the backend render function won't process textures itself.
+//    - Using multi-contexts currently require their own atlas.
+//  - tex->TexID is written once by the render thread (on create) while the update thread may read it
+//    in NewFrame() asserts/debug logs: formally a data race, benign in practice (single transition
+//    from ImTextureID_Invalid, and behavior cannot be affected because tex->QueueUserData != NULL).
+//  - tex->BackendUserData is not published to main thread (could be useful for debugging).
+//  - If your app keeps submitting frames but does not render them: prefer still publishing/adopting
+//    ImDrawData snapshots, and calling  ProcessRequests() on it in order for requests to not accumulate.
+//    Or better: stop submitting Dear ImGui frames if you can't render them.
+//  - Doesn't handle mid-run ImGui_ImplXXXX_InvalidateDeviceObjects() (device loss).
+
+// Signature for e.g. ImGui_ImplDX11_UpdateTexture
+typedef void (*ImGui_ImplUpdateTextureFunc)(ImTextureData* tex);
+struct ImTextureQueueEntry;
+
+// All calls should be guarded by caller's mutex.
+struct ImTextureQueue
+{
+    // Members
+    int                             InFlightFrames = 2;     // Number of extra in-flight frames.
+    ImGui_ImplUpdateTextureFunc     UpdateTexFunc = nullptr;// Pointer to backend function (e.g. ImGui_ImplDX11_UpdateTexture)
+
+    // Internal Members
+    ImVector<ImTextureQueueEntry*>  Textures;               // [Internal] All per-texture records. List modified by update thread only (+ Shutdown); record/mirror fields are written by both threads under caller's mutex.
+    int                             RenderFrame = 0;        // [Internal] Number of ProcessRequests() calls (~Presents)
+
+    // Functions
+    void    PreNewFrame();                                  // (Update thread) Call before NewFrame()
+    void    QueueRequests(ImDrawData* draw_data);           // (Update thread) Call after Render(). Queue + acknowledge requests for textures referenced by this frame's draw data.
+    void    ProcessRequests(ImDrawData* draw_data);         // (Render thread) Process staged requests. Call once per render frame, before rendering any viewports.
+    void    Shutdown();                                     // Shutdown. Call after joining threads.
+};
+
+// Persistent per-texture state + staging mirror. Pointed to by ImTextureData::QueueUserData in live textures.
+struct ImTextureQueueEntry
+{
+    ImTextureData*      TexLive = NULL;                     // Live texture owned by core.
+    ImTextureData       TexCopy;                            // Staging mirror.
+    int                 DestroyFrameCount = -1;             // ImDrawData::FrameCount of the frame which queued the destroy (-1 = none queued).
+    int                 DestroyArmedAtRenderFrame = -1;     // Value of RenderFrame when the retirement countdown started.
+
+    ~ImTextureQueueEntry() { TexCopy.Pixels = NULL; TexCopy.Updates.clear(); } // Pixels are owned by the live texture.
+};
+
+//-----------------------------------------------------------------------------
+// ImTextureQueue - IMPLEMENTATION
+//-----------------------------------------------------------------------------
+
+// (Update thread)
+inline void ImTextureQueue::PreNewFrame()
+{
+    for (int entry_n = 0; entry_n < Textures.Size; entry_n++)
+    {
+        ImTextureQueueEntry* entry = Textures[entry_n];
+        if (entry->TexCopy.Status != ImTextureStatus_Destroyed)
+            continue;
+
+        // Render thread fully retired the texture: acknowledge so core can destroy the texture in NewFrame().
+        ImTextureData* tex_live = entry->TexLive;
+        IM_ASSERT(tex_live->Status == ImTextureStatus_WantDestroy);
+        tex_live->WantDestroyNextFrame = true; // As UserTextures[] may SetStatus(ImTextureStatus_WantDestroy) directly.
+        tex_live->SetStatus(ImTextureStatus_Destroyed);
+        tex_live->SetTexID(ImTextureID_Invalid);
+        tex_live->QueueUserData = NULL;
+        Textures.erase(Textures.Data + entry_n--);
+        IM_DELETE(entry);
+    }
+}
+
+// (Update thread)
+inline void ImTextureQueue::QueueRequests(ImDrawData* draw_data)
+{
+    IM_ASSERT(draw_data->Valid && draw_data->Textures != NULL);
+    const int frame_count = draw_data->FrameCount;
+    for (ImTextureData* tex_live : *draw_data->Textures)
+    {
+        if (tex_live->Status == ImTextureStatus_OK)
+            continue;
+        ImTextureQueueEntry* entry = (ImTextureQueueEntry*)tex_live->QueueUserData;
+        if (tex_live->Status == ImTextureStatus_WantCreate)
+        {
+            // Initialize record + staging mirror.
+            IM_ASSERT(entry == NULL && tex_live->TexID == ImTextureID_Invalid && tex_live->BackendUserData == NULL); // What the backend expects to see on a create request.
+            entry = IM_NEW(ImTextureQueueEntry)();
+            entry->TexLive = tex_live;
+            entry->TexCopy = *tex_live; // Copy main struct. Pixels are pointing to original source.
+            Textures.push_back(entry);
+            tex_live->QueueUserData = entry; // Mark texture as referenced by our queue. This prevents core from deleting it when BackendUserData is not set.
+            tex_live->Status = ImTextureStatus_OK;
+        }
+        else if (tex_live->Status == ImTextureStatus_WantUpdates)
+        {
+            IM_ASSERT(entry != NULL && "Texture was not created through this queue?");
+            ImTextureData* tex_copy = &entry->TexCopy;
+            if (tex_copy->Updates.Size == 0)
+            {
+                tex_copy->UpdateRect.x = tex_copy->UpdateRect.y = (unsigned short)~0;
+                tex_copy->UpdateRect.w = tex_copy->UpdateRect.h = 0;
+            }
+            for (const ImTextureRect& r : tex_live->Updates)
+                ImTextureDataQueueUpload(tex_copy, r.x, r.y, r.w, r.h);
+            tex_copy->UseColors = tex_live->UseColors;
+            tex_live->Status = ImTextureStatus_OK;
+        }
+        else if (tex_live->Status == ImTextureStatus_WantDestroy)
+        {
+            if (entry == NULL)
+            {
+                tex_live->Status = ImTextureStatus_Destroyed; // Never seen in WantCreate state. No snapshot can reference it, core can delete it fine.
+                continue;
+            }
+            if (entry->DestroyFrameCount >= 0)
+                continue; // Already tracked: either waiting for render thread, or retired (TexCopy.Status == Destroyed) waiting for PreNewFrame() to acknowledge.
+
+            // Stamp the record, but do not acknowledge yet. The mirror is intentionally not touched here:
+            // a pending create/update is processed first, and the destroy executes once the mirror is idle.
+            // It stays correct for apps rendering every published snapshots. Avoids assuming the app only renders the latest snapshot!
+            entry->DestroyFrameCount = frame_count;
+        }
+    }
+}
+
+// (Render thread)
+inline void ImTextureQueue::ProcessRequests(ImDrawData* draw_data)
+{
+    IM_ASSERT(InFlightFrames >= 0);
+    IM_ASSERT(UpdateTexFunc != NULL);
+
+    const int adopted_frame_count = (draw_data != NULL) ? draw_data->FrameCount : INT_MAX; // NULL = shutdown drain: nothing will be rendered anymore.
+    if (draw_data != NULL)
+        draw_data->Textures = NULL; // We handle texture processing: make sure the backend's RenderDrawData() doesn't. Also this pointer aliases the update thread's live list, it must not be dereferenced on this thread.
+    RenderFrame++;
+
+    // Process each record's pending state.
+    for (ImTextureQueueEntry* entry : Textures)
+    {
+        ImTextureData* tex_copy = &entry->TexCopy;
+
+        // Process pending create/update. Call backend function on the mirror.
+        if (tex_copy->Status == ImTextureStatus_WantCreate || tex_copy->Status == ImTextureStatus_WantUpdates)
+        {
+            ImTextureStatus status_request = tex_copy->Status;
+            //IMGUI_DEBUG_PRINTF("Render [%05d]:\n", adopted_frame_count);
+            UpdateTexFunc(tex_copy);
+            IM_ASSERT(tex_copy->Status == ImTextureStatus_OK && "Backend must honor WantCreate/WantUpdates immediately!");
+            if (status_request == ImTextureStatus_WantCreate)
+                entry->TexLive->SetTexID(tex_copy->TexID); // Publish TexID: the only render-thread write to a live ImTextureData. ImDrawCmd::GetTexID() reads are done on this thread, always after this point.
+            tex_copy->Updates.resize(0);
+        }
+
+        // Execute pending destroy once the mirror is idle, on the consumer-side retirement clock (see notes above).
+        // (a Destroyed mirror doesn't re-enter here: it fails the == OK check until PreNewFrame() deletes the record)
+        if (tex_copy->Status == ImTextureStatus_OK && entry->DestroyFrameCount >= 0)
+        {
+            if (adopted_frame_count < entry->DestroyFrameCount)
+                continue; // A snapshot which may still reference this texture is or may become active.
+            if (entry->DestroyArmedAtRenderFrame < 0)
+                entry->DestroyArmedAtRenderFrame = RenderFrame;
+            if (RenderFrame < entry->DestroyArmedAtRenderFrame + InFlightFrames)
+                continue; // Wait for in-flight GPU frames to retire.
+
+            tex_copy->Status = ImTextureStatus_WantDestroy;
+            tex_copy->WantDestroyNextFrame = true;    // Make the SetStatus(_Destroyed) call in backend stick.
+            tex_copy->UnusedFrames = 99;              // Deferring is our job: pass any backend-side UnusedFrames check.
+            //IMGUI_DEBUG_PRINTF("Render [%05d]:\n", adopted_frame_count);
+            UpdateTexFunc(tex_copy);
+            IM_ASSERT(tex_copy->Status == ImTextureStatus_Destroyed && "Backend must honor WantDestroy immediately!");
+        }
+    }
+}
+
+inline void ImTextureQueue::Shutdown()
+{
+    InFlightFrames = 0;
+    if (UpdateTexFunc != NULL)
+        ProcessRequests(NULL);  // Process all pending work, executing deferred destroys immediately.
+    PreNewFrame();              // Acknowledge retired destroys + delete their records.
+
+    for (ImTextureQueueEntry* entry : Textures)
+    {
+        // Remaining textures are live and idle: hand the backend user data back to the live texture,
+        // so that e.g. ImGui_ImplDX11_Shutdown() can destroy them through the regular single-threaded path.
+        ImTextureData* tex_live = entry->TexLive;
+        IM_ASSERT(entry->TexCopy.Status == ImTextureStatus_OK);
+        tex_live->BackendUserData = entry->TexCopy.BackendUserData;
+        tex_live->QueueUserData = NULL;
+    }
+    Textures.clear_delete();
+}
+
+//-----------------------------------------------------------------------------
+
+```
