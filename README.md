@@ -225,6 +225,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/orkitec/orkige [C++20 game engine with dual OGRE renderers, Lua scripting, and AI-native editor over MCP]
 - https://github.com/Bloom-Engine/engine [Native TypeScript game engine compiling to Metal, DirectX 12, Vulkan, OpenGL, and WebGPU]
 - https://github.com/Krilliac/SparkEngine [Open-source C++23 3D engine with DirectX 12/Vulkan RHI, ECS, Jolt Physics, and ImGui editor]
+- https://github.com/doriaxengine/doriax [Cross-platform C++ ECS game engine with editor, Lua/C++ scripting, and DirectX/OpenGL/Metal/Vulkan backends]
 
 
 > Game Engine Plugins:Unreal
@@ -3162,6 +3163,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/W1lliam1337/cstrike2-hack [Rust-based internal]
 - https://github.com/eden13378/CS2-DMA-Cheat [DMA]
 - https://github.com/gmh5225/CS2-Dma-Radar [DMA]
+- https://github.com/chao-shushu/CS2-DMA [Open-source CS2 DMA external (FPGA/LeechCore) with ESP, radar, and grenade helper on a second machine]
 - https://github.com/atombottle/cs2_kvm_dma [KVM] 
 - https://github.com/M3351AN/Samidare [External Ring3/Ring0]
 - https://github.com/Vekor64/PythonCS2 [Python External]
