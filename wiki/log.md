@@ -964,3 +964,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:rtfmkiesel/loldrivers-client`: entity [[loldrivers-client]]; cited on [[byovd]] and [[hvci]].
 
 - **2026-07-23** — ingest `description:rrpvm/csgo-external-cheat`: entity [[csgo-external-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-23** — ingest `description:rrbranco/blackhat2012`: entity [[blackhat2012]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
