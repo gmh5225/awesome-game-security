@@ -919,3 +919,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/game-engine]] (Cheat ~2578 / Anti Cheat ~607 / Game Develop ~180); light `index.md` section notes (no per-category pages).
 
 - **2026-07-23** — ingest `description:samuelgr/Xidi`: entity [[xidi]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
+
+- **2026-07-23** — ingest `description:samshine/ScyllaHideDetector2`: entity [[scyllahidedetector2]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
