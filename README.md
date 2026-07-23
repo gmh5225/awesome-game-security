@@ -104,6 +104,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/revan1611/UE-Interview-Cheat-Sheet [Unreal]
 - https://github.com/tomlooman/ue4-tutorials [Unreal]
 - https://github.com/JaredP94/Unreal-Development-Guides-and-Tips [Unreal]
+- https://github.com/ikrima/gamedevguide [Unreal Engine / game development programming guide]
 - https://github.com/lettier/3d-game-shaders-for-beginners [Shader]
 - https://github.com/PardCode/OpenGL-3D-Game-Tutorial-Series [OpenGL]
 - https://github.com/PardCode/CPP-3D-Game-Tutorial-Series [DirectX]
