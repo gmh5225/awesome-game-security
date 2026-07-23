@@ -42,7 +42,7 @@ sources:
   - wiki/sources/descriptions/skrixx68__Dota2-Overlay-2.0.md
   - wiki/sources/descriptions/simply-codes__Fortnite-External-P2C.md
   - wiki/sources/descriptions/serjam__mwclap.md
-updated: 2026-07-22
+updated: 2026-07-23
 confidence: high
 ---
 
@@ -72,4 +72,4 @@ Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/
 
 ## README map
 
-`DirectX` (~33: Guide/Hook/Tools/Emulation/Compatibility/Overlay; incl. D3D12 Present/shader injectors for title-specific pixel-shader replace), `OpenGL` (~3), `Vulkan` (~9; cross-platform runtime API locators like kiero/kiero2), plus broader `Renderer` (~17; educational soft-3D / ray-tracing courses such as [[tinyrenderer]] / [[tinyraytracer]]) / `3D Graphics` (~4; Metal/DX12/Vulkan kits + WebGL/splat editors) / `Mathematics` (~7; gamedev math libs upstream of render math) / `Image Codec` (~5; stb + portable wgpu/Rhai raster editors + GIF/APNG; soft-raster helpers such as [[olive-c]]), adjacent `Wavefront Obj` (~2; [[tinyobjloader]]) / `Game Assets` glTF helpers such as [[tinygltf]] / `AI` (~5; image→mesh/splat/sprite for engine import), Cheat Overlay/Render, and Anti Cheat Screenshot / Detection:ESP|Overlay. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/tsoding__olive.c.md) (source: wiki/sources/descriptions/ssloy__tinyrenderer.md) (source: wiki/sources/descriptions/ssloy__tinyraytracer.md) (source: wiki/sources/descriptions/tinyobjloader__tinyobjloader.md) (source: wiki/sources/descriptions/syoyo__tinygltf.md)
+`DirectX` (~34: Guide/Hook/Tools/Emulation/Compatibility/Overlay; incl. D3D12 Present/shader injectors + cross-API DX/GL/Vulkan runtime shader capture/flatten/replace), `OpenGL` (~3), `Vulkan` (~9; cross-platform runtime API locators like kiero/kiero2), plus broader `Renderer` (~17; educational soft-3D / ray-tracing courses such as [[tinyrenderer]] / [[tinyraytracer]]) / `3D Graphics` (~4; Metal/DX12/Vulkan kits + WebGL/splat editors) / `Mathematics` (~7; gamedev math libs upstream of render math) / `Image Codec` (~5; stb + portable wgpu/Rhai raster editors + GIF/APNG; soft-raster helpers such as [[olive-c]]), adjacent `Wavefront Obj` (~2; [[tinyobjloader]]) / `Game Assets` glTF helpers such as [[tinygltf]] / `AI` (~5; image→mesh/splat/sprite for engine import), Cheat Overlay/Render, and Anti Cheat Screenshot / Detection:ESP|Overlay. (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/tsoding__olive.c.md) (source: wiki/sources/descriptions/ssloy__tinyrenderer.md) (source: wiki/sources/descriptions/ssloy__tinyraytracer.md) (source: wiki/sources/descriptions/tinyobjloader__tinyobjloader.md) (source: wiki/sources/descriptions/syoyo__tinygltf.md)

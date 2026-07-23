@@ -879,3 +879,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:sefcom/oxidizer`: entity [[oxidizer]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-23** — ingest `description:seekbytes/ptxNinja`: entity [[ptxninja]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-23** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/graphics-api]] (Cheat ~2572 / Anti Cheat ~607 / DirectX ~34; cross-API shader capture/flatten note); light `index.md` section notes (no per-category pages).
