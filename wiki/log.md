@@ -937,3 +937,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:sFIsAnExpert/CS2-External-Cheat`: entity [[cs2-external-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
 
 - **2026-07-23** — ingest `description:s4m33r89/Imgui-Native-ModMenu`: entity [[imgui-native-modmenu]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]].
+
+- **2026-07-23** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/game-engine]] (Game Engine ~145; Cheat ~2578 / Anti Cheat ~607 / Game Develop ~180 stable); light `index.md` section notes (no per-category pages).
