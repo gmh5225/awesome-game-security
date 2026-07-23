@@ -877,3 +877,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:seifreed/r2morph`: entity [[r2morph]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-23** — ingest `description:sefcom/oxidizer`: entity [[oxidizer]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-23** — ingest `description:seekbytes/ptxNinja`: entity [[ptxninja]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
