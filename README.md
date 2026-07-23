@@ -2974,6 +2974,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/TFT-OCR-BOT [TFT]
 - https://github.com/gmh5225/VanderLeague [Hypervisor-assisted]
 - https://github.com/gmh5225/League-DirectX11-Internal [Internal]
+- https://github.com/Vatrials/League-of-Legends-Visuals-Cheat [C++ internal with orbwalker, zoomhack, skin changer, and injector]
 - https://github.com/gmh5225/league-base [External]
 - https://github.com/gmh5225/lol_patcher
 
@@ -3170,6 +3171,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/atombottle/cs2_kvm_dma [KVM] 
 - https://github.com/M3351AN/Samidare [External Ring3/Ring0]
 - https://github.com/Vekor64/PythonCS2 [Python External]
+- https://github.com/Jesewe/VioletWing [Python external with triggerbot, ESP, bunnyhop, and auto offset dump via cs2-dumper]
 - https://github.com/maecry/asphyxia-cs2 [Internal]
 - https://github.com/Leksa667/YOLOv8-Overlay-CS2 [YOLOv8 in CS2]
 - https://github.com/ccsimplyspolit/CS2-P2C-TEMPLATES [CS2 security-research P2C templates: VMProtect FVA reconstruction, kernel drivers, and user-mode injectors]
