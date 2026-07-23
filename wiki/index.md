@@ -132,6 +132,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Dota2-Overlay-2.0](entities/dota2-overlay-2-0.md) — Dota 2 overlay sample (C/C++; cheat / game:dota2)
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
 - [DetectTpmSpoofing](entities/detect-tpm-spoofing.md) — KMDF: TPM 2.0 EK spoof detect (IOCTL vs TPM.sys cache)
+- [detection](entities/detection.md) — Android root/Xposed/Frida/VPN/dev-options multi-check collection (Java; Detection:Android root)
 - [dotNIET](entities/dotniet.md) — IDA plugin: .NET NativeAOT type/method symbol recovery (Import .NET Symbol)
 - [DotX64Dbg](entities/dotx64dbg.md) — .NET 6 / C# x64dbg plugin framework (live edit; custom commands)
 - [DoubleCallBack](entities/double-callback.md) — DWM in kernel (C/C++; cheat render/draw)
