@@ -899,3 +899,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:secrary/Hooking-via-InstrumentationCallback`: entity [[hooking-via-instrumentation-callback]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-07-23** — ingest `description:sean2077/big5-decode-ida`: entity [[big5-decode-ida]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-23** — ingest `description:scrt/avdebugger`: entity [[avdebugger]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
