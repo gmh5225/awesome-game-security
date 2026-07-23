@@ -909,3 +909,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:sbsbsbssbsbs/boundcallback`: entity [[boundcallback]]; cited on [[kernel-callbacks]] and [[overviews/windows-kernel]].
 
 - **2026-07-23** — ingest `description:saveme712/BinCon`: entity [[bincon]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-23** — ingest `description:sapdragon/syscalls-cpp`: entity [[syscalls-cpp]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].

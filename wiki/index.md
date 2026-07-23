@@ -358,6 +358,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Symbridge](entities/symbridge.md) — live IDA ↔ x64dbg annotation/type sync (module+RVA; Python broker)
 - [Symless](entities/symless.md) — IDA structure/type recovery on stripped binaries (data-flow; Hex-Rays)
 - [SymlinkCallback](entities/symlink-callback.md) — symlink LinkTarget → access callback (Ring0 / AC research)
+- [syscalls-cpp](entities/syscalls-cpp.md) — C++20 header-only direct syscall invocation (AC Compile Time)
 - [System Informer](entities/systeminformer.md) — Process Hacker successor; Windows process/system explorer (kernel explorer lane)
 - [SystemThreadFinder](entities/system-thread-finder.md) — detect hidden/manual-map system threads (NtQuerySystemInformation; BE-style)
 - [TDE](entities/tde.md) — Themida IDA plugin / Fix Themida (devirtualization engine; sodareverse)
