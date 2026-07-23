@@ -865,3 +865,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:senko37/yarascan-ida`: entity [[yarascan-ida]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-23** — ingest `description:senator715/IDA-Fusion`: entity [[ida-fusion]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-23** — ingest `description:semihcevik/hwidspoofer`: entity [[hwidspoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
