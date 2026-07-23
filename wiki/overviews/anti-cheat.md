@@ -55,6 +55,7 @@ sources:
   - wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md
   - wiki/sources/descriptions/soyware__heck_csgo_external.md
   - wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md
+  - wiki/sources/descriptions/rrpvm__csgo-external-cheat.md
   - wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md
   - wiki/sources/descriptions/wesmar__FileRecoveryTool.md
   - wiki/sources/descriptions/thewhiteninja__ntfstool.md
@@ -163,6 +164,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 - [[gamesneeze]] — Linux CS:GO sample (seksea) for studying non-Windows cheat surface against VAC (source: wiki/sources/descriptions/seksea__gamesneeze.md)
 - [[heck-csgo-external]] — External CS:GO sample (C++; SDK generation / memory analysis) for studying out-of-process cheat surface against VAC (source: wiki/sources/descriptions/soyware__heck_csgo_external.md)
 - [[csgo-cheat-external]] — External CS:GO sample (C++; driver development) for studying driver-backed out-of-process cheat surface against VAC (source: wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md)
+- [[csgo-external-cheat]] — External CS:GO sample (C++; RPM or kernel-driver reads; ESP / aimbot / radar; no inject) for studying out-of-process cheat surface against VAC (source: wiki/sources/descriptions/rrpvm__csgo-external-cheat.md)
 - [[csgo-backtrack-patch]] — CS:GO backtrack patch sample (C/C++; hooking / memory analysis) for studying lag-compensation / tick-history cheat surface against VAC (source: wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md)
 - [[unmapper]] — automatic dumped-PE header repair so decompilers load cleanly (Dump Fix) (source: wiki/sources/descriptions/t3ssellate__unmapper.md)
 - [[android-unpacker]] — Android packed-sample unpack tooling for malware RE (Sample Unpacker; handle samples carefully) (source: wiki/sources/descriptions/strazzere__android-unpacker.md)

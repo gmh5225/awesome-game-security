@@ -962,3 +962,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]] (Anti Cheat ~608; Cheat ~2578 / Game Engine ~145 / Game Develop ~180 stable); light `index.md` section notes (no per-category pages).
 
 - **2026-07-23** — ingest `description:rtfmkiesel/loldrivers-client`: entity [[loldrivers-client]]; cited on [[byovd]] and [[hvci]].
+
+- **2026-07-23** — ingest `description:rrpvm/csgo-external-cheat`: entity [[csgo-external-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].

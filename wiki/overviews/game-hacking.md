@@ -42,6 +42,7 @@ sources:
   - wiki/sources/descriptions/soyware__heck_csgo_external.md
 
   - wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md
+  - wiki/sources/descriptions/rrpvm__csgo-external-cheat.md
   - wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md
   - wiki/sources/descriptions/sneakyevil__ida_functioncolor.md
   - wiki/sources/descriptions/sean2077__big5-decode-ida.md
@@ -326,6 +327,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Linux CS:GO samples such as [[gamesneeze]] (seksea; Linux tag) sit in the same cheat / game:csgo lane for non-Windows offensive research. (source: wiki/sources/descriptions/seksea__gamesneeze.md)
 - External CS:GO samples such as [[heck-csgo-external]] (C++; modding / SDK generation / memory analysis; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/soyware__heck_csgo_external.md)
 - Driver-backed external CS:GO samples such as [[csgo-cheat-external]] (C++; driver development; External tag) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md)
+- External CS:GO samples such as [[csgo-external-cheat]] (C++; RPM or kernel-driver reads; ESP / aimbot / radar; no inject) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/rrpvm__csgo-external-cheat.md)
 - CS:GO backtrack patch samples such as [[csgo-backtrack-patch]] (C/C++; hooking / memory analysis; Backtrack Patch tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md)
 - Internal CS:GO samples such as [[lumina-cheat]] emphasize mutation for a changing signature (Internal tag). (source: wiki/sources/descriptions/whereisr0da__Lumina-Cheat.md)
 - Linux external CS:S trainers such as [[counterstrikesource-linux-trainer]] (movement automation + info display) sit in the cheat / game:css lane. (source: wiki/sources/descriptions/yoshisaac__CounterStrikeSource-Linux-Trainer.md)
