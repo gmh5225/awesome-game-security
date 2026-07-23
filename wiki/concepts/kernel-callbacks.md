@@ -10,7 +10,8 @@ sources:
   - wiki/sources/descriptions/yardenshafir__SymlinkCallback.md
   - wiki/sources/descriptions/wesmar__VaultGuard.md
   - wiki/sources/descriptions/wavestone-cdt__EDRSandblast.md
-updated: 2026-07-18
+  - wiki/sources/descriptions/sbsbsbssbsbs__boundcallback.md
+updated: 2026-07-23
 confidence: high
 ---
 
@@ -24,6 +25,7 @@ Windows notify/object registration APIs used by anti-cheat and EDR to observe pr
 - `PsSetLoadImageNotifyRoutine(Ex)`
 - `ObRegisterCallbacks` (handle create/duplicate)
 - `CmRegisterCallback(Ex)`, minifilter `FltRegisterFilter`
+- `KeRegisterBoundCallback` — research sample [[boundcallback]] (cheat / driver-communication lane) (source: wiki/sources/descriptions/sbsbsbssbsbs__boundcallback.md)
 
 ## Attack / defense
 
@@ -31,4 +33,4 @@ Attackers with kernel R/W ([[byovd]]) may try to unlink or patch callback lists;
 
 ## Related
 
-[[byovd]] · [[hvci]] · [[bustercall]] · [[edrsandblast]] · [[openark]] · [[symlink-callback]] · [[vaultguard]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[hvci]] · [[bustercall]] · [[boundcallback]] · [[edrsandblast]] · [[openark]] · [[symlink-callback]] · [[vaultguard]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

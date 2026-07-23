@@ -75,7 +75,9 @@ Compiled knowledge catalog for awesome-game-security.
 - [binja-kc](entities/binja-kc.md) — Binary Ninja MachO kernelcache / KDK dSYM loader
 - [BOOM](entities/boom.md) — hijack Beep.sys; stealth driver communication
 - [BootBypass](entities/bootbypass.md) — Secure Boot / DSE / HVCI bypass (native; SeCiCallbacks / CI.dll)
+- [boundcallback](entities/boundcallback.md) — KeRegisterBoundCallback research (C++; cheat / driver communication)
 - [BusterCall](entities/bustercall.md) — enumerate/patch kernel callbacks; HVCI PFN-swap research
+
 - [byvalver](entities/byvalver.md) — shellcode bad-byte banisher (2 modes; AC shellcode engine & tricks)
 - [callout-poc](entities/callout-poc.md) — kernel callout / spoof-stack PoC (C/C++; Cheat Spoof Stack)
 - [CEDetector](entities/cedetector.md) — Cheat Engine detector (window/process/driver/debug; CE stealth test)

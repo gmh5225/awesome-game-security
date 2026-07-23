@@ -905,3 +905,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:scottcgi/Mojoc`: entity [[mojoc]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-07-23** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2575 / Anti Cheat ~607); light `index.md` section notes (no per-category pages).
+
+- **2026-07-23** — ingest `description:sbsbsbssbsbs/boundcallback`: entity [[boundcallback]]; cited on [[kernel-callbacks]] and [[overviews/windows-kernel]].
