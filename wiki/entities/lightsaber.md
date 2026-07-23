@@ -20,4 +20,4 @@ Useful for mobile game-security and reverse-engineering research on offensive iO
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[frida]]
+[[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[lara]] · [[frida]]
