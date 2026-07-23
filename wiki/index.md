@@ -144,6 +144,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [encrypted_value](entities/encrypted-value.md) — C++ header-only scalar value encrypt (Anti Cheat → Encrypt Variable)
 - [Ephemera](entities/ephemera.md) — multiplatform MEMORY.DMP analysis (WinDbg flavor; AC / kernel dump)
 - [EpicSurvivalGame](entities/epic-survival-game.md) — UE4 FPS course (action system / event-driven C++; Game Develop / Unreal source)
+- [EscapeFromTarkov-Trainer](entities/escapefromtarkov-trainer.md) — discontinued EFT internal trainer (Mono era; IL2CPP 1.0 pivot; cheat / game:eft)
 - [EfiTool](entities/efitool.md) — UEFI ExitBootServices in-RAM SYSTEM hive patch (SYSTEM shell; no disk/driver)
 - [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests
 - [EUPMAccess](entities/eupmaccess.md) — C/C++ memory analysis (cheat / RPM; waryas)
