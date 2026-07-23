@@ -873,3 +873,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:seladb/PcapPlusPlus`: entity [[pcapplusplus]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-07-23** — ingest `description:seksea/gamesneeze`: entity [[gamesneeze]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-23** — ingest `description:seifreed/r2morph`: entity [[r2morph]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].

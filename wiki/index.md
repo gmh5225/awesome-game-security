@@ -306,6 +306,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [QuickAsm](entities/quickasm.md) — x86/x64 assemble-and-run GUI (Keystone)
 - [Raung](entities/raung.md) — Java bytecode assembler/disassembler (early-stage; cheat / RE tools)
 - [R6-Internal-V3](entities/r6-internal-v3.md) — R6 internal: modding / SDK generation / memory analysis (C/C++)
+- [r2morph](entities/r2morph.md) — radare2/r2pipe metamorphic binary transform (Python+C; Cheat Radare Plugins)
 - [RPGMakerDecrypter](entities/rpgmakerdecrypter.md) — RPG Maker XP/VX/VX Ace encrypted-archive extractor (CLI; RE tools)
 - [RETools](entities/retools.md) — curated RE/security tool catalog (disasm/debug/decompiler; toolkit guide)
 - [reverse-engineering](entities/reverse-engineering.md) — curated RE awesome list (networking / editors; Cheat guide lane)
