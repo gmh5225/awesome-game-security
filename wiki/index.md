@@ -192,7 +192,9 @@ Compiled knowledge catalog for awesome-game-security.
 - [idac](entities/idac.md) — Trail of Bits IDA Pro CLI/client (Unix socket → GUI/idalib; JSON; agents; not MCP)
 - [ida-mcp-server-plugin](entities/ida-mcp-server-plugin.md) — IDA Pro MCP server plugin (disasm/decompile/xrefs/types for LLM clients)
 - [idarem](entities/idarem.md) — IDA Pro remote browser UI (Flask REST/SSE + React; live IDB sync)
+- [idenLib](entities/idenlib.md) — IDA plugin: static library function ID (VC++/STL sigs; FLIRT-adjacent; Cheat IDA Plugins)
 - [idenLibX](entities/idenlibx.md) — x64dbg plugin: static library function ID (signatures → live names; Cheat x64dbg Plugins)
+
 
 - [IDADeflat](entities/idadeflat.md) — IDA Pro CFF deflatten (angr; OLLVM-style)
 - [IL2CPP_Resolver](entities/il2cpp-resolver.md) — C++ Unity IL2CPP resolver (cheat / game engine explorer:Unity)
