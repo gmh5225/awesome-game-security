@@ -945,3 +945,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:s3pt3mb3r/Dainsleif`: entity [[dainsleif]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-07-23** — ingest `description:s1lentq/ReGameDLL_CS`: entity [[regamedll-cs]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
+
+- **2026-07-23** — ingest `description:s0ngidong3/TPM-SPOOFER`: entity [[tpm-spoofer]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].

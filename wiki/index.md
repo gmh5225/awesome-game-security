@@ -383,6 +383,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [TiEtwAgent](entities/tietwagent.md) — ETW Threat-Intelligence injection-detection agent (krabsetw / Yara / PPL)
 - [TotalPE2](entities/totalpe2.md) — WPF PE viewer (headers, imports/exports, .NET metadata)
 - [tpm-mmio](entities/tpm-mmio.md) — MMIO TPM 2.0 public EK read (bypass OS hooks; Detection:HWID)
+- [TPM-SPOOFER](entities/tpm-spoofer.md) — KM TPM serial spoof via IOCTL hook (Cheat [TPM])
 - [traccar-geocoder](entities/traccar-geocoder.md) — self-hosted OSM reverse geocoder (Rust + C++ PBF; Game Network / Location)
 - [Tracy](entities/tracy.md) — C++ real-time frame profiler (CPU/GPU; Game Testing)
 - [TrustDevice Android](entities/trustdevice-android.md) — TrustDecision Android fingerprint SDK (Kotlin/Java; integrity / risk signals)
