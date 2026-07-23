@@ -2154,6 +2154,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > UI Interface
 - https://github.com/adamhlt/ImGui-Standalone
+- https://github.com/ocornut/imgui_club [Official Dear ImGui extensions including a hex memory editor widget]
 
 > Vulnerable Driver 
 - https://www.loldrivers.io/drivers [Living Off The Land Drivers]
