@@ -458,6 +458,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [xemu](entities/xemu.md) — original Xbox LLE emulator (QEMU fork; NV2A/OpenGL; ISO/XISO)
 - [xenia](entities/xenia.md) — Xbox 360 emulator (PowerPC recompiler; D3D12/Vulkan; XEX)
 - [xenia-mac](entities/xenia-mac.md) — macOS port of Xbox 360 emulator Xenia
+- [Xidi](entities/xidi.md) — DirectInput↔XInput proxy DLL (virtual map / deadzone / FFB; DirectX Compatibility)
 - [xigmapper](entities/xigmapper.md) — EFI manual map (non-USB payload; Vanguard early-load research)
 - [xign_poc_april_2026](entities/xign-poc-april-2026.md) — XIGNCODE3/xhunter64.sys IRP_MJ_WRITE vuln PoC (phys R/W / leak / kill)
 - [xqemu](entities/xqemu.md) — original Xbox via QEMU (software full-machine; Cheat QEMU/KVM lane)

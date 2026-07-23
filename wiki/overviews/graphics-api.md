@@ -44,6 +44,7 @@ sources:
   - wiki/sources/descriptions/skrixx68__Dota2-Overlay-2.0.md
   - wiki/sources/descriptions/simply-codes__Fortnite-External-P2C.md
   - wiki/sources/descriptions/serjam__mwclap.md
+  - wiki/sources/descriptions/samuelgr__Xidi.md
 updated: 2026-07-23
 confidence: high
 ---
@@ -60,7 +61,7 @@ Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/
 - **Anti-screenshot:** BitBlt / DXGI Desktop Duplication / Present interception vs evasion; WDA/monitor-hook samples such as [[wda-monitor-trick]] (C++; D3D9 display intercept / capture helpers) illustrate monitor-level capture research. (source: wiki/sources/descriptions/wongfei__wda_monitor_trick.md)
 - **OBS capture:** Game Capture injects graphics-hook DLLs—detection-relevant for AC and AI cheats; streamer-facing Keyboard Mapper plugins such as [[input-overlay]] (C++; keyboard/mouse/gamepad indicators in the OBS render path) sit in the same OBS overlay/plugin surface. (source: wiki/sources/descriptions/univrsal__input-overlay.md)
 - Title-specific internals such as [[battlefield-1-internal]] (Battlefield 1; DirectX + hooking + SDK generation) illustrate in-process graphics/hook research samples. (source: wiki/sources/descriptions/younasiqw__BattleField-1-Internal.md)
-- DirectX remaster / compatibility mods such as [[gta4-rtx]] (GTA IV → NVIDIA RTX Remix path-traced pipeline; custom Remix runtime + ASI Loader) sit in the DirectX Compatibility lane. (source: wiki/sources/descriptions/xoxor4d__gta4-rtx.md)
+- DirectX remaster / compatibility mods such as [[gta4-rtx]] (GTA IV → NVIDIA RTX Remix path-traced pipeline; custom Remix runtime + ASI Loader) sit in the DirectX Compatibility lane. (source: wiki/sources/descriptions/xoxor4d__gta4-rtx.md) DirectInput↔XInput controller proxy DLLs such as [[xidi]] (C++; virtual mapping / deadzone / force-feedback translation) extend the same Compatibility lane. (source: wiki/sources/descriptions/samuelgr__Xidi.md)
 - DX11 stereoscopic-fix tooling such as [[3d9]] (developer-oriented; broken stereo effects in DX11 games) sits in the DirectX Tools lane. (source: wiki/sources/descriptions/visotw__3d9.md)
 - Frame profilers such as [[tracy]] (CPU zones + GPU timing for OpenGL / Vulkan / Direct3D; client + standalone viewer) sit in the adjacent Game Testing / graphics-performance lane. (source: wiki/sources/descriptions/wolfpld__tracy.md)
 - Software-raster / Image Codec helpers such as [[olive-c]] (single-header C; lines/triangles/circles/text into raw pixel buffers; no deps) sit below GPU Present hooks as a minimal CPU raster study surface. (source: wiki/sources/descriptions/tsoding__olive.c.md)
@@ -70,7 +71,7 @@ Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/
 
 ## Related concepts
 
-[[present-hook]] · [[directxhook]] · [[battlefield-1-internal]] · [[gta4-rtx]] · [[xash-rt]] · [[3d9]] · [[storm-engine]] · [[steam-overlay-x64]] · [[mwclap]] · [[dota2-overlay-2-0]] · [[fortnite-external-p2c]] · [[input-overlay]] · [[eac-overlay]] · [[double-callback]] · [[dxgkrnl-hook]] · [[wda-monitor-trick]] · [[3d-racing-game]] · [[exengine]] · [[mojoc]] · [[the-seed-link-future]] · [[wind-effects]] · [[island]] · [[u3d]] · [[metal-game-engine-tutorial]] · [[awesome-game-engine-dev]] · [[turbulenz-engine]] · [[imgui-ios-mod-menu]] · [[imgui-unity]] · [[imgui-unity-with-layout]] · [[android-modmenu-semijni]] · [[android-mod-menu-kotlin]] · [[android-cheat-template]] · [[android-native-app-imgui]] · [[ue5-with-dear-imgui]] · [[tracy]] · [[olive-c]] · [[tinyrenderer]] · [[tinyraytracer]] · [[tinygltf]] · [[tinyobjloader]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[present-hook]] · [[directxhook]] · [[battlefield-1-internal]] · [[gta4-rtx]] · [[xidi]] · [[xash-rt]] · [[3d9]] · [[storm-engine]] · [[steam-overlay-x64]] · [[mwclap]] · [[dota2-overlay-2-0]] · [[fortnite-external-p2c]] · [[input-overlay]] · [[eac-overlay]] · [[double-callback]] · [[dxgkrnl-hook]] · [[wda-monitor-trick]] · [[3d-racing-game]] · [[exengine]] · [[mojoc]] · [[the-seed-link-future]] · [[wind-effects]] · [[island]] · [[u3d]] · [[metal-game-engine-tutorial]] · [[awesome-game-engine-dev]] · [[turbulenz-engine]] · [[imgui-ios-mod-menu]] · [[imgui-unity]] · [[imgui-unity-with-layout]] · [[android-modmenu-semijni]] · [[android-mod-menu-kotlin]] · [[android-cheat-template]] · [[android-native-app-imgui]] · [[ue5-with-dear-imgui]] · [[tracy]] · [[olive-c]] · [[tinyrenderer]] · [[tinyraytracer]] · [[tinygltf]] · [[tinyobjloader]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
 
 ## README map
 
