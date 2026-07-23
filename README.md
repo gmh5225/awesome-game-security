@@ -1071,6 +1071,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/NullArray/WinKernel-Resources [Guide]
 - https://github.com/supermanc88/Document/tree/master/Windows%20Driver%20Development [Guide]
 - https://windiff.vercel.app [Diff]
+- https://github.com/ergrelet/windiff [Web/CLI tool to browse and diff Windows PE symbols, types, and syscalls across OS versions]
 - https://github.com/cristeigabriela/bb [Benowin Blanc — parse Windows SDK/PHNT via libclang; struct layouts, enums, constants like dt without WinDbg; CLI + TUI, JSON export]
 - https://github.com/cristeigabriela/bb-viewer [Web explorer for bb output: browse Windows SDK/PHNT functions, types, typedefs, constants, and type graphs; user/kernel, amd64/x86/arm/arm64]
 - https://github.com/gmh5225/ntoskrnl_file_collection [Various versions of ntoskrnl files]
