@@ -885,3 +885,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:seeinglogic/ariadne`: entity [[ariadne]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-23** — ingest `description:securityjoes/ThreatResearch`: entity [[threatresearch]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-23** — ingest `description:secretsquirrel/SigThief`: entity [[sigthief]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].

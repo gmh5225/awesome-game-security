@@ -323,6 +323,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [scfw](entities/scfw.md) — cross-platform C++ Windows shellcode framework (AC shellcode engine & tricks)
 - [SE-tools](entities/se-tools.md) — Switch homebrew memory/cheat toolkit (Atmosphere dmnt:cht; scanner / pointer / viewer)
 - [shredder-rs](entities/shredder-rs.md) — x86_64 polymorphic instruction shredding (Rust)
+- [SigThief](entities/sigthief.md) — steal PE Authenticode signatures (certTable transplant; Some Tricks / Ring3)
 - [SkipHook](entities/skiphook.md) — trampoline skips first insn (bypass JMP/INT3 AC hooks; HDE)
 - [skCrypter](entities/skcrypter.md) — C++ header-only compile-time XOR string crypter (constexpr; AC Compile Time / String Crypter)
 - [Skylicht Engine](entities/skylicht-engine.md) — lightweight Irrlicht-evolved engine (Android/iOS; Game Engine source)
