@@ -131,6 +131,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DMAInvoker](entities/dma-invoker.md) — Windows DMA RPM via DMALibrary (cheat / RPM)
 - [dma-speedtest-memflow-rs](entities/dma-speedtest-memflow-rs.md) — Windows DMA R/W speedtest via memflow (Rust CLI/GUI; pcileech/native)
 - [Document](entities/document.md) — Windows Driver Development guide (Cheat / Windows kernel explorer)
+- [Dopamine2-roothide](entities/dopamine2-roothide.md) — iOS 15/16 RootHide Dopamine 2 (C/C++/ObjC; cheat / iOS jailbreak)
 - [Dota2-Overlay-2.0](entities/dota2-overlay-2-0.md) — Dota 2 overlay sample (C/C++; cheat / game:dota2)
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
 - [DetectTpmSpoofing](entities/detect-tpm-spoofing.md) — KMDF: TPM 2.0 EK spoof detect (IOCTL vs TPM.sys cache)

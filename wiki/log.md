@@ -966,3 +966,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:rrpvm/csgo-external-cheat`: entity [[csgo-external-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-07-23** — ingest `description:rrbranco/blackhat2012`: entity [[blackhat2012]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-23** — ingest `description:roothide/Dopamine2-roothide`: entity [[dopamine2-roothide]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
