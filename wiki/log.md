@@ -958,3 +958,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-23** — ingest `description:rushzzz-max/r6-external`: entity [[r6-external]]; cited on [[overviews/game-hacking]] and [[battleye]].
 - **2026-07-23** — ingest `description:rushiranpise/detection`: entity [[detection]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
+- **2026-07-23** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]] (Anti Cheat ~608; Cheat ~2578 / Game Engine ~145 / Game Develop ~180 stable); light `index.md` section notes (no per-category pages).
