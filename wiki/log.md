@@ -913,3 +913,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:sapdragon/syscalls-cpp`: entity [[syscalls-cpp]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-07-23** — ingest `description:sapdragon/hint-break`: entity [[hint-break]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-23** — ingest `description:sanqiuu/AndroidCheatTemplate`: entity [[android-cheat-template]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]].

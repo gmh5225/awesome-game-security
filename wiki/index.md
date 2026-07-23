@@ -56,6 +56,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-native-app-imgui](entities/android-native-app-imgui.md) — Android ImGui native app (Java/C++; cheat / render-draw)
 - [android-modmenu-semijni](entities/android-modmenu-semijni.md) — Android Java WindowManager + semi-JNI mod menu (native hooks; cheat / Menu for imgui)
 - [Android-Mod-Menu-Kotlin](entities/android-mod-menu-kotlin.md) — Android Kotlin floating-view + C++/JNI IL2CPP mod menu (cheat / IL2CPP Menu)
+- [AndroidCheatTemplate](entities/android-cheat-template.md) — Android Unity cheat framework (C/C++; OpenGL / Unity / hooking)
 - [android-proxy-mcp](entities/android-proxy-mcp.md) — Android HTTP/HTTPS capture MCP (mitmdump + SQLite + NL query)
 - [android-unpacker](entities/android-unpacker.md) — Android packed-sample unpacker (malware RE; Anti Cheat → Sample Unpacker)
 - [android-vuln](entities/android-vuln.md) — Android Kernel CVE reference list (cheat / Android Kernel CVE)
