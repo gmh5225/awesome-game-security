@@ -419,6 +419,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [Voidmaw](entities/voidmaw.md) — VEH + PAGE_GUARD code-hiding (AV/AC page-protection research)
 - [VEN0m-Ransomware](entities/ven0m-ransomware.md) — BYOVD via iMFForceDelete.sys (IObit; AV/EDR evasion)
+- [venom](entities/venom.md) — Linux kernel rootkit hooking (LKM hooks; cheat / linux kernel explorer)
 - [vermagic](entities/vermagic.md) — change Linux LKM vermagic / CRCs (cheat / RE tools)
 - [vmdevirt-vtil](entities/vmdevirt-vtil.md) — broken VTIL VMP devirt demo (Fix VMP / IDA jmp-around-vmenter)
 - [VMUnprotect](entities/vmunprotect.md) — .NET Harmony instrument VMProtect methods (trace / anti-debug; Fix VMP)

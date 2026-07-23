@@ -929,3 +929,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:saileaxh/iida-mcp`: entity [[iida-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
 
 - **2026-07-23** — ingest `description:sai2fast/DsArk64`: entity [[dsark64]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
+- **2026-07-23** — ingest `description:sad0p/venom`: entity [[venom]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
