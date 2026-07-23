@@ -941,3 +941,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/game-engine]] (Game Engine ~145; Cheat ~2578 / Anti Cheat ~607 / Game Develop ~180 stable); light `index.md` section notes (no per-category pages).
 
 - **2026-07-23** — ingest `description:s3rg0x/AIMachDec`: entity [[aimachdec]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]].
+
+- **2026-07-23** — ingest `description:s3pt3mb3r/Dainsleif`: entity [[dainsleif]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
