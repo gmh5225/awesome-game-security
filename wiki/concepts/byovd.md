@@ -17,7 +17,8 @@ sources:
   - wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md
   - wiki/sources/descriptions/symeonp__Lenovo-CVE-2025-8061.md
   - wiki/sources/descriptions/shareef12__cpuz.md
-updated: 2026-07-22
+  - wiki/sources/descriptions/sai2fast__DsArk64.md
+updated: 2026-07-23
 confidence: high
 ---
 
@@ -55,7 +56,9 @@ OEM-driver LPE PoCs such as [[lenovo-cve-2025-8061]] target Lenovo `LnvMSRIO.sys
 
 Classic signed-utility driver abuse such as [[cpuz]] (CPU-Z; XP–Win10 1607) sits in the same cheat / vulnerable-driver research lane. (source: wiki/sources/descriptions/shareef12__cpuz.md)
 
+Security-product handle-donor abuse such as [[dsark64]] targets Qihoo 360’s WHQL-signed `DsArk64.sys` (suspended installer + shellcode open `\\.\DsArk`, then `DuplicateHandle` → ring-0 process kill + kernel R/W). (source: wiki/sources/descriptions/sai2fast__DsArk64.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[lenovo-cve-2025-8061]] · [[cpuz]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[dsark64]] · [[lenovo-cve-2025-8061]] · [[cpuz]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 

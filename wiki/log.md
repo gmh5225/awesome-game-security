@@ -927,3 +927,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:sailro/EscapeFromTarkov-Trainer`: entity [[escapefromtarkov-trainer]]; cited on [[il2cpp]] and [[overviews/game-hacking]].
 
 - **2026-07-23** — ingest `description:saileaxh/iida-mcp`: entity [[iida-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
+
+- **2026-07-23** — ingest `description:sai2fast/DsArk64`: entity [[dsark64]]; cited on [[byovd]] and [[overviews/windows-kernel]].
