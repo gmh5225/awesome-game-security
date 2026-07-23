@@ -949,3 +949,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:s0ngidong3/TPM-SPOOFER`: entity [[tpm-spoofer]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-07-23** — ingest `description:ryanjon2040/UnrealNetworkProfiler`: entity [[unreal-network-profiler]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-23** — ingest `description:ryanjon2040/Unreal-Binary-Builder`: entity [[unreal-binary-builder]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
