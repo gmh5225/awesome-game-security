@@ -284,6 +284,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PatternSleuth](entities/patternsleuth.md) — Rust SIMD pattern/signature scan (file + process; Unreal address scanner)
 - [payload_dumper](entities/payload-dumper.md) — Android OTA payload.bin dumper (Python; Magisk / ROM RE)
 - [payload-dumper-go](entities/payload-dumper-go.md) — Android OTA payload.bin dumper (Go; parallel xz / checksum / zip)
+- [PcapPlusPlus](entities/pcapplusplus.md) — multiplatform C++ packet capture/parse/craft (100+ protocols; libpcap/Npcap; Packet Capture&Parse)
 - [PCILeech](entities/pcileech.md) — PCIe DMA host tool: R/W target memory via hardware (ufrisk; cheat / DMA)
 - [PCILeech-FPGA](entities/pcileech-fpga.md) — FPGA HDL/firmware for PCILeech DMA boards (Vivado; TLP/BAR/config shadow)
 - [pdb](entities/pdb.md) — Windows PDB parse/merge (C++ DIA SDK; old formats + pdb.cfg; RE / debugger symbols)
