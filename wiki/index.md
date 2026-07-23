@@ -200,6 +200,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IDARustDemangler](entities/ida-rust-demangler.md) — IDA Rust demangler & normalizer (`rs-dml`; cheat / IDA Plugins)
 - [idac](entities/idac.md) — Trail of Bits IDA Pro CLI/client (Unix socket → GUI/idalib; JSON; agents; not MCP)
 - [ida-mcp-server-plugin](entities/ida-mcp-server-plugin.md) — IDA Pro MCP server plugin (disasm/decompile/xrefs/types for LLM clients)
+- [iida-mcp](entities/iida-mcp.md) — faster IDA Pro MCP (77 tools; multi-instance; optional KM mem via iida-mcp-ioctl)
 - [idarem](entities/idarem.md) — IDA Pro remote browser UI (Flask REST/SSE + React; live IDB sync)
 - [idenLib](entities/idenlib.md) — IDA plugin: static library function ID (VC++/STL sigs; FLIRT-adjacent; Cheat IDA Plugins)
 - [idenLibX](entities/idenlibx.md) — x64dbg plugin: static library function ID (signatures → live names; Cheat x64dbg Plugins)

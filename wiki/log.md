@@ -925,3 +925,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:sammyfreg/netImgui`: entity [[netimgui]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
 
 - **2026-07-23** — ingest `description:sailro/EscapeFromTarkov-Trainer`: entity [[escapefromtarkov-trainer]]; cited on [[il2cpp]] and [[overviews/game-hacking]].
+
+- **2026-07-23** — ingest `description:saileaxh/iida-mcp`: entity [[iida-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
