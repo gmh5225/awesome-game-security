@@ -168,6 +168,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [heck_csgo_external](entities/heck-csgo-external.md) — external CS:GO; SDK generation / memory analysis (C++; cheat / game:csgo)
 - [hide-file](entities/hide-file.md) — C kernel file-hide driver (cheat / hide; Detection:Hide-adjacent)
 - [HijackLibs](entities/hijacklibs.md) — disclosed Windows DLL hijack DB (YAML + web UI; exports / conditions)
+- [Hooking-via-InstrumentationCallback](entities/hooking-via-instrumentation-callback.md) — Ring3 Instrumentation Callback hook (NtSetInformationProcess; no ntdll patch)
 - [HiveWE](entities/hivewe.md) — WC3 World Editor alternative (large-map editor; cheat / game:warcraft iii)
 - [hl-mods](entities/hl-mods.md) — Half-Life / GoldSrc mods (Cold Ice Remastered + historical; Modification For Half-Life)
 - [hidden_syscall_monitoring](entities/hidden-syscall-monitoring.md) — monitor hidden syscalls from COD anticheat (C/C++; hooking / memory)
