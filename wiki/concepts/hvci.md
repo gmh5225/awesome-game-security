@@ -10,7 +10,8 @@ sources:
   - wiki/sources/descriptions/wesmar__BootBypass.md
   - wiki/sources/descriptions/unkvolism__Solemn.md
   - wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md
-updated: 2026-07-19
+  - wiki/sources/descriptions/rtfmkiesel__loldrivers-client.md
+updated: 2026-07-23
 confidence: high
 ---
 
@@ -26,9 +27,9 @@ Early-boot / native-subsystem research such as [[bootbypass]] targets DSE and Me
 
 Operator tooling such as [[solemn]] automates adding drivers to the HVCI `HvciDisallowedImages` custom blocklist (Windows Security Features / Ring3 research lane). (source: wiki/sources/descriptions/unkvolism__Solemn.md)
 
-LOLdriver / vulnerable-driver inventory checks under HVCI appear in PowerShell research such as [[hvci-loldrivers-check]] (Trail of Bits; cheat / vulnerable-driver lane). (source: wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md)
+LOLdriver / vulnerable-driver inventory checks under HVCI appear in PowerShell research such as [[hvci-loldrivers-check]] (Trail of Bits; cheat / vulnerable-driver lane). (source: wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md) General LOLdriver scan clients such as [[loldrivers-client]] (Go/PowerShell) cover the same inventory lane without an HVCI-specific framing. (source: wiki/sources/descriptions/rtfmkiesel__loldrivers-client.md)
 
 ## Related
 
-[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[solemn]] · [[hvci-loldrivers-check]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[solemn]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
 

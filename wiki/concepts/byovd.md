@@ -15,6 +15,7 @@ sources:
   - wiki/sources/descriptions/wavestone-cdt__EDRSandblast.md
   - wiki/sources/descriptions/vergamota__KslKatz.md
   - wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md
+  - wiki/sources/descriptions/rtfmkiesel__loldrivers-client.md
   - wiki/sources/descriptions/symeonp__Lenovo-CVE-2025-8061.md
   - wiki/sources/descriptions/shareef12__cpuz.md
   - wiki/sources/descriptions/sai2fast__DsArk64.md
@@ -34,7 +35,7 @@ Bring Your Own Vulnerable Driver: load a legitimately signed but vulnerable driv
 
 ## Mitigations
 
-Microsoft vulnerable-driver blocklist, [[hvci]], AC driver allowlists ([[vanguard]]-style), PiDDBCache/MmUnloadedDrivers forensics, EPT-protected callback lists. HVCI-oriented LOLdriver checks such as [[hvci-loldrivers-check]] help inventory known-abused signed drivers against Memory Integrity constraints. (source: wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md)
+Microsoft vulnerable-driver blocklist, [[hvci]], AC driver allowlists ([[vanguard]]-style), PiDDBCache/MmUnloadedDrivers forensics, EPT-protected callback lists. HVCI-oriented LOLdriver checks such as [[hvci-loldrivers-check]] help inventory known-abused signed drivers against Memory Integrity constraints. (source: wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md) Broader LOLdriver scan clients such as [[loldrivers-client]] (Go/PowerShell) sit in the same cheat / vulnerable-driver research lane. (source: wiki/sources/descriptions/rtfmkiesel__loldrivers-client.md)
 
 Educational kernel-exploit reference material such as [[windows-kernel-exploits]] sits in the same cheat / vulnerable-driver documentation lane. (source: wiki/sources/descriptions/xct__windows-kernel-exploits.md)
 
@@ -60,5 +61,5 @@ Security-product handle-donor abuse such as [[dsark64]] targets Qihoo 360’s WH
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[dsark64]] · [[lenovo-cve-2025-8061]] · [[cpuz]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[dsark64]] · [[lenovo-cve-2025-8061]] · [[cpuz]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
