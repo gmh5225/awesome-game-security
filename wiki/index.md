@@ -273,6 +273,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MoveCertificate](entities/move-certificate.md) — Magisk/KernelSU/APatch user→system CA module (Android 7–15)
 - [NativeNetSharp](entities/nativenetsharp.md) — C# code injection (managed/.NET; cheat / guide)
 - [ndisapi](entities/ndisapi.md) — user-mode Windows Packet Filter / NDIS packet inspect-modify API
+- [netImgui](entities/netimgui.md) — Dear ImGui remote access (input + draw-command forward; engine/plugin UI)
 - [Non-Newtonian New York](entities/non-newtonian-new-york.md) — Spider-Man Remastered non-Newtonian fluid/physics mod (urban destruction; [Mod])
 - [NO_ACCESS_Protection](entities/no-access-protection.md) — PAGE_NOACCESS + VEH / single-step anti-tamper (vs external scanners)
 - [NoVmpy](entities/novmpy.md) — Python VMProtect deobf (symbolic exec / Triton; Fix VMP)

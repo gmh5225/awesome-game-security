@@ -921,3 +921,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:samuelgr/Xidi`: entity [[xidi]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
 
 - **2026-07-23** — ingest `description:samshine/ScyllaHideDetector2`: entity [[scyllahidedetector2]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-23** — ingest `description:sammyfreg/netImgui`: entity [[netimgui]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
