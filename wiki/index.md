@@ -239,6 +239,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [magiskboot](entities/magiskboot.md) — Boot Image Modification Tool (C/C++; Cheat Magisk)
 - [magiskboot_ndk_on_linux](entities/magiskboot-ndk-on-linux.md) — NDK-on-Linux magiskboot (boot unpack/repack/ramdisk)
 - [MagiskDetector](entities/magiskdetector.md) — archived Android Magisk detector (AppZygote/AIDL; Detection:Magisk)
+- [makin](entities/makin.md) — Windows anti-debug/anti-VM probe (30+ checks; C; Anti Debugging)
 - [MapleStory Worlds Automation](entities/maplestory-worlds-automation.md) — YOLO automation for MapleStory Worlds / Artale (Python; cheat / game:maplestory)
 - [MapleStory-YOLOv8-Training](entities/maplestory-yolov8-training.md) — YOLOv8 MapleStory object-detection training (Apple MPS; Python; cheat / game:maplestory)
 - [MapleStoryEx](entities/maplestoryex.md) — MapleStory private server (CMS-079; custom content / server logic)
