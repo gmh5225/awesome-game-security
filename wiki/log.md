@@ -871,3 +871,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/game-engine]] (Cheat ~2571 / Anti Cheat ~607 / Game Engine ~144); light `index.md` section notes (no per-category pages).
 
 - **2026-07-23** — ingest `description:seladb/PcapPlusPlus`: entity [[pcapplusplus]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-23** — ingest `description:seksea/gamesneeze`: entity [[gamesneeze]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
