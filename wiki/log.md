@@ -935,3 +935,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:sa413x/UEFI-Bootloader`: entity [[uefi-bootloader]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-07-23** — ingest `description:sFIsAnExpert/CS2-External-Cheat`: entity [[cs2-external-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
+- **2026-07-23** — ingest `description:s4m33r89/Imgui-Native-ModMenu`: entity [[imgui-native-modmenu]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]].
