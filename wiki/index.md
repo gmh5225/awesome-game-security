@@ -438,6 +438,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [xign_poc_april_2026](entities/xign-poc-april-2026.md) — XIGNCODE3/xhunter64.sys IRP_MJ_WRITE vuln PoC (phys R/W / leak / kill)
 - [xqemu](entities/xqemu.md) — original Xbox via QEMU (software full-machine; Cheat QEMU/KVM lane)
 - [XrefsExt](entities/xrefsext.md) — IDA Pro extended-xrefs plugin (cheat / IDA Plugins)
+- [yarascan-ida](entities/yarascan-ida.md) — IDA Yara file scan plugin (Python; cheat / IDA Plugins)
 - [zelda3](entities/zelda3.md) — Zelda 3 reimplementation (playable start-to-end; Game Develop / source)
 - [ZeroThreadKernel](entities/zero-thread-kernel.md) — threadless kernel exec via existing contexts / timers (vs AC thread enum)
 

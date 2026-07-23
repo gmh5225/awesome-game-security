@@ -861,3 +861,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:sergiovillaverde/win11_apk_installer`: entity [[win11-apk-installer]]; cited on [[overviews/mobile-security]] and [[overviews/overview]].
 
 - **2026-07-23** — ingest `description:serge-14/encrypted_value`: entity [[encrypted-value]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-23** — ingest `description:senko37/yarascan-ida`: entity [[yarascan-ida]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
