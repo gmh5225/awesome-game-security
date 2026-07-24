@@ -1060,3 +1060,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-24** — ingest `description:regomne/ilhook-rs`: entity [[ilhook-rs]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-07-24** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2582; Anti Cheat ~610 / Game Engine ~147 / Game Develop ~181 stable); light `index.md` section notes (no per-category pages).
+
+- **2026-07-24** — ingest `description:regenrek/deepwiki-mcp`: entity [[deepwiki-mcp]]; cited on [[overviews/overview]] and [[overviews/game-engine]].
