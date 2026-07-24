@@ -978,3 +978,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-24** — ingest `description:romainthomas/the-poor-mans-obfuscator`: entity [[the-poor-mans-obfuscator]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-24** — ingest `description:rogxo/kernel_hack`: entity [[kernel-hack]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `description:rogxo/ReadPhys`: entity [[readphys]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
