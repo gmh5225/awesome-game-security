@@ -996,3 +996,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-24** — ingest `description:rmccrystal/kdmapper-rs`: entity [[kdmapper-rs]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-07-24** — ingest `description:rlybasic/DWM_Hook`: entity [[dwm-hook]]; cited on [[overviews/graphics-api]] and [[present-hook]].
+
+- **2026-07-24** — ingest `description:ritz-1337/fortnite-external-evo.gj`: entity [[fortnite-external-evo-gj]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
