@@ -579,6 +579,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/atenfyr/UAssetGUI [Viewing and modifying UE4 game assets]
 - https://github.com/UETools/UETools [Accessing, reading and deserializing UE4 assets]
 - https://github.com/atenfyr/UAssetAPI [A low-level .NET library for reading and writing Unreal Engine game assets]
+- https://github.com/r6e/paksmith [Rust cross-platform Unreal Engine pak/UAsset explorer and extractor (pak v3–v11, textures/meshes/audio export)]
 
 ## Game Hot Patch
 - https://github.com/Tencent/xLua
@@ -4060,6 +4061,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/PatchRequest/PeregrineAntiCheat [Educational Windows anti-cheat: kernel minifilter, ObCallbacks, APC injection, MinHook API hooks, ETW-TI, YARA, Tauri GUI, cheat test suite]
 - https://github.com/violetweather/Certael [Server-authoritative open-source anti-cheat framework with Godot/Unity/Unreal adapters]
 - https://github.com/vul-os/magnetite [Rust self-hostable game platform with magnetite-anticheat: server-authoritative deterministic replay verification and composable cheat validators]
+- https://github.com/ConWan30/QorTroller [Cryptographic console anti-cheat proving human controller presence via attested inputs and verifiable match receipts]
 - https://github.com/Abdelnour2/MiniAntiCheatV2 [Educational Windows kernel anti-cheat PoC: process blacklist plus ObCallbacks handle shield]
 - https://github.com/vovasicidk/sentinelac [Open-source anti-cheat skeleton with usermode SDK, ObRegisterCallbacks kernel stub, overlay isolation, and stack-walk injection detection]
 - https://github.com/AvivShabtay/Stresser [Anti Virus in fact but also Anti Cheat]
