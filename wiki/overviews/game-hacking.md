@@ -199,7 +199,7 @@ sources:
   - wiki/sources/descriptions/sevaa__dwex.md
   - wiki/sources/descriptions/serjam__mwclap.md
   - wiki/sources/descriptions/sailro__EscapeFromTarkov-Trainer.md
-updated: 2026-07-23
+updated: 2026-07-24
 confidence: high
 ---
 
@@ -364,4 +364,4 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## README map
 
-`Cheat` is the largest category (~2578 links): guides, debugging, packet sniff/capture, speedhack, RE tools (incl. game file-format/asset reversing), MBA/VMP/Themida/OLLVM fix lanes, DBI, Launcher Abuser, PatchGuard/DSE, Windows/Linux/Android kernel explorers, Magisk/Xposed/Frida/ART-syscall hooks, Android Terminal (ADB/root/shell utilities)/File/Memory Explorer + memory loading + App/Kernel CVE lanes, bootloader/ROM/root/device-tree trees, Cellular/SIM + IoT (e.g. [[swsim]] pure-software USIM/UICC APDU simulator) (source: wiki/sources/descriptions/tomasz-lisowski__swsim.md), iOS jailbreak/network/location, plus `Some Tricks` (~113; Ring0/Ring3/Linux/Android). Adjacent: `Mathematics` (~7; constexpr math/physics frameworks for mod/cheat code) and console/emulator cats `Nintendo Switch` (~7), `Xbox` (~7), `PlayStation` (~5; PS5 HV exploit / BD-JB RemoteJarLoader / drive-clone research), `Game Boy` (~3), `Nintendo 3DS` (~1; LLE boot9/boot11/nand), `GameCube/Wii` (~1; Rust gecko emulator/debugger), plus `Linux Emulator` (~1). (source: wiki/sources/README-categories.md)
+`Cheat` is the largest category (~2580 links): guides, debugging, packet sniff/capture, speedhack, RE tools (incl. game file-format/asset reversing), MBA/VMP/Themida/OLLVM fix lanes, DBI, Launcher Abuser, PatchGuard/DSE, Windows/Linux/Android kernel explorers, Magisk/Xposed/Frida/ART-syscall hooks, Android Terminal (ADB/root/shell utilities)/File/Memory Explorer + memory loading + App/Kernel CVE lanes, bootloader/ROM/root/device-tree trees, Cellular/SIM + IoT (e.g. [[swsim]] pure-software USIM/UICC APDU simulator) (source: wiki/sources/descriptions/tomasz-lisowski__swsim.md), iOS jailbreak/network/location, plus `Some Tricks` (~113; Ring0/Ring3/Linux/Android). Adjacent: `Mathematics` (~7; constexpr math/physics frameworks for mod/cheat code) and console/emulator cats `Nintendo Switch` (~7), `Xbox` (~7), `PlayStation` (~5; PS5 HV exploit / BD-JB RemoteJarLoader / drive-clone research), `Game Boy` (~3), `Nintendo 3DS` (~1; LLE boot9/boot11/nand), `GameCube/Wii` (~1; Rust gecko emulator/debugger), plus `Linux Emulator` (~1). (source: wiki/sources/README-categories.md)

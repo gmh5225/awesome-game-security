@@ -6,14 +6,14 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Overviews
 
-- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2578 / Anti Cheat ~608; Game Engine ~145 + Mathematics ~7 / Renderer ~17; Game Develop ~180 MCP/security; Game Network ~26; console Switch/Xbox/PS + 3DS/GC·Wii)
+- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2580 / Anti Cheat ~608; Game Engine ~145 + Mathematics ~7 / Renderer ~17; Game Develop ~180 MCP/security; Game Network ~26; console Switch/Xbox/PS + 3DS/GC·Wii)
 - [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* (triggerbot & aimbot/wallhack) + page/CLR protection (~608); hybrid OS AC; Game Tools RCE + Windows Emulator AC
-- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2578) / Detection:DMA (~608) + WSF attestation
+- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2580) / Detection:DMA (~608) + WSF attestation
 - [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~145); Mathematics/PhysX/Renderer (~17) adjacency; MCP server/security + AI gamedev (~180); Game Network ~26; Image Codec + Manager/Testing/Tools/CI
-- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2578) + Some Tricks (~113); Android Terminal (ADB/root/shell)/File/Memory Explorer; console PS HV+BD-JB RemoteJarLoader / 3DS LLE / GC·Wii
+- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2580) + Some Tricks (~113); Android Terminal (ADB/root/shell)/File/Memory Explorer; console PS HV+BD-JB RemoteJarLoader / 3DS LLE / GC·Wii
 - [Graphics API](overviews/graphics-api.md) — DirectX (~34) / GL / Vulkan hooks, overlays + shader capture/flatten; Renderer (~17) + Mathematics adjacency; Image Codec + AI mesh/splat/sprite
 - [Mobile Security](overviews/mobile-security.md) — Android / iOS; Terminal (ADB/root/shell)/File/Memory Explorer + App/Kernel CVE; WSA (~9), Gunyah/vphone emulators
-- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools (file-format/asset lists + Ghidra managers), MBA/DBI, deobfuscation, packers; Windows Emulator + console/PS BD-JB RemoteJarLoader / 3DS/GC·Wii RE (~2578 Cheat lane)
+- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools (file-format/asset lists + Ghidra managers), MBA/DBI, deobfuscation, packers; Windows Emulator + console/PS BD-JB RemoteJarLoader / 3DS/GC·Wii RE (~2580 Cheat lane)
 - [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation (~9), BYOVD, pool; Some Tricks Ring0 (~113); Windows Emulator (~7) + WSL
 
 ## Concepts
@@ -498,6 +498,6 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Sources
 
-- Projected category map: `sources/README-categories.md` (generated on scan; 40 top-level sections; Game Engine ~145 / Renderer ~17 / Cheat ~2578 / Anti Cheat ~608 / DirectX ~34 / Game Develop ~180 / Game Network ~26)
+- Projected category map: `sources/README-categories.md` (generated on scan; 40 top-level sections; Game Engine ~145 / Renderer ~17 / Cheat ~2580 / Anti Cheat ~608 / DirectX ~34 / Game Develop ~180 / Game Network ~26)
 - Skill projections: `sources/skills/`
 - Description projections: `sources/descriptions/` (incremental only)

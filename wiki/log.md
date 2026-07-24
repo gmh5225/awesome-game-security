@@ -970,3 +970,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:roothide/Dopamine2-roothide`: entity [[dopamine2-roothide]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
 - **2026-07-23** — ingest `description:rooootdev/lara`: entity [[lara]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
+- **2026-07-24** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2580; Anti Cheat ~608 / Game Engine ~145 / Game Develop ~180 stable); light `index.md` section notes (no per-category pages).

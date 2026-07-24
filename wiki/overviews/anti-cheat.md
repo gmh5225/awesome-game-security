@@ -137,7 +137,7 @@ sources:
   - wiki/sources/descriptions/shalzuth__NativeNetSharp.md
   - wiki/sources/descriptions/samshine__ScyllaHideDetector2.md
   - wiki/sources/descriptions/rrbranco__blackhat2012.md
-updated: 2026-07-23
+updated: 2026-07-24
 confidence: high
 ---
 
@@ -204,4 +204,4 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 ## README map
 
-`Anti Cheat` (~608 links): guides, stress/unit-test harnesses, packers, page/CLR protection, encrypt-variable / lazy-importer tricks, obfuscation engines, open-source / analysis-framework AC samples (incl. hybrid CS2-style proposals with judge ratings, honeypot entities, and shadow monitoring), engine protection (Unreal/Unity/Source), and a wide `Detection:*` tree (hook, memory integrity, shellcode, attach, triggerbot & aimbot, hide, vulnerable driver, hacked hypervisor, virtual environments, HWID, speedhack, injection, stack spoof, ESP, DMA, wall hack, obfuscation, Android root). Cross-links `Windows Security Features` (~9; CET/TPM/IOMMU/HVCI attestation), Cheat (~2578) PatchGuard/DSE + Launcher Abuser lanes, adjacent `Game Tools` (~8; RCE hardening for PC gamers), and `Windows Emulator` (~7; WHP trap-driven guests + hybrid kernel-driver stacks for AC analysis). (source: wiki/sources/README-categories.md)
+`Anti Cheat` (~608 links): guides, stress/unit-test harnesses, packers, page/CLR protection, encrypt-variable / lazy-importer tricks, obfuscation engines, open-source / analysis-framework AC samples (incl. hybrid CS2-style proposals with judge ratings, honeypot entities, and shadow monitoring), engine protection (Unreal/Unity/Source), and a wide `Detection:*` tree (hook, memory integrity, shellcode, attach, triggerbot & aimbot, hide, vulnerable driver, hacked hypervisor, virtual environments, HWID, speedhack, injection, stack spoof, ESP, DMA, wall hack, obfuscation, Android root). Cross-links `Windows Security Features` (~9; CET/TPM/IOMMU/HVCI attestation), Cheat (~2580) PatchGuard/DSE + Launcher Abuser lanes, adjacent `Game Tools` (~8; RCE hardening for PC gamers), and `Windows Emulator` (~7; WHP trap-driven guests + hybrid kernel-driver stacks for AC analysis). (source: wiki/sources/README-categories.md)

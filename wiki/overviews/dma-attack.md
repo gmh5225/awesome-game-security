@@ -14,7 +14,7 @@ sources:
   - wiki/sources/descriptions/sonodima__physpatch.md
   - wiki/sources/descriptions/slack69__csgo-dma-overlay.md
   - wiki/sources/descriptions/sh1ftd__dma-speedtest-memflow-rs.md
-updated: 2026-07-23
+updated: 2026-07-24
 confidence: high
 ---
 
@@ -50,4 +50,4 @@ Typical external DMA cheat: **cheat PC** + **DMA card** (Memory Read TLPs) + opt
 
 ## README map
 
-No top-level DMA section — maps via `Cheat` (~2578) DMA lanes and `Anti Cheat > Detection:DMA` (~608), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; TPM/IOMMU/VBS/HVCI attestation samples). (source: wiki/sources/README-categories.md)
+No top-level DMA section — maps via `Cheat` (~2580) DMA lanes and `Anti Cheat > Detection:DMA` (~608), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; TPM/IOMMU/VBS/HVCI attestation samples). (source: wiki/sources/README-categories.md)
