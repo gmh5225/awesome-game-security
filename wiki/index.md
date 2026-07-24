@@ -486,6 +486,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VMUnprotect](entities/vmunprotect.md) — .NET Harmony instrument VMProtect methods (trace / anti-debug; Fix VMP)
 - [VMUnprotect.Dumper](entities/vmunprotect-dumper.md) — dynamic .NET VMProtect unpack/dump (AsmResolver; Fix VMP)
 
+- [w1tn3ss](entities/w1tn3ss.md) — C++/C DBI / analysis / patching framework (modding / hooking / memory; Cheat DBI)
 - [Waldo](entities/waldo.md) — CS2 deep-learning triggerbot/aimbot detection (user-trained model; Detection:Aimbot)
 
 
