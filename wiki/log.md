@@ -1072,3 +1072,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-24** — ingest `description:redskal/obfuscatxor`: entity [[obfuscatxor]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-24** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-engine]] (Anti Cheat ~611; Game Assets ~11; Cheat ~2582 / Game Engine ~147 / Game Develop ~181 stable); light `index.md` section notes (no per-category pages).
+
+- **2026-07-24** — ingest `description:rednaga/frida-stack`: entity [[frida-stack]]; cited on [[frida]] and [[overviews/reverse-engineering]].
