@@ -228,6 +228,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [InstrumentationCallbackSyscallLogger](entities/instrumentation-callback-syscall-logger.md) — Ring3 Instrumentation Callback on syscall return (AC / Windows)
 - [Island](entities/island.md) — experimental hot-reloading Vulkan renderer (C/C++; Linux+Windows; Renderer / Vulkan)
 - [JADX](entities/jadx.md) — DEX→Java decompiler (APK/DEX/AAR; CLI+GUI; mobile RE)
+- [JDBG](entities/jdbg.md) — Java/JVM attach debugger (JDWP; method hooks / breakpoints; cheat RE)
 - [jmap](entities/jmap.md) — UE4/UE5 .uasset/.umap dependency graphs (reflection data / asset structure)
 - [jwt_tool](entities/jwt-tool.md) — Python JWT toolkit (validate/forge/scan; Game Network / JWT Auth)
 - [KACE](entities/kace.md) — RING3 Windows kernel-driver emulator (self context / Unicorn; AC analysis)

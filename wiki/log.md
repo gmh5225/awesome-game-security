@@ -982,3 +982,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-24** — ingest `description:rogxo/ReadPhys`: entity [[readphys]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-07-24** — ingest `description:rogerxiii/kernel-codecave-poc`: entity [[kernel-codecave-poc]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-07-24** — ingest `description:roger1337/JDBG`: entity [[jdbg]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
