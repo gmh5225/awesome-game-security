@@ -986,3 +986,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-24** — ingest `description:roger1337/JDBG`: entity [[jdbg]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-24** — ingest `description:rockbruno/swiftshield`: entity [[swiftshield]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
+- **2026-07-24** — ingest `description:robert-yates/gdbserver9x`: entity [[gdbserver9x]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
