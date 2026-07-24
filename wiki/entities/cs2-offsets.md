@@ -20,4 +20,4 @@ Treat as a live offset feed that must track CS2 patches—stale dumps break exte
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[counterstrike2-linux-cheat]] · [[proext]] · [[fortnite-fltokens-and-offsets]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[cs2-offsets-ro0ti]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[counterstrike2-linux-cheat]] · [[proext]] · [[fortnite-fltokens-and-offsets]]
