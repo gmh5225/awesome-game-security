@@ -1064,3 +1064,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-24** — ingest `description:regenrek/deepwiki-mcp`: entity [[deepwiki-mcp]]; cited on [[overviews/overview]] and [[overviews/game-engine]].
 
 - **2026-07-24** — ingest `description:redthing1/w1tn3ss`: entity [[w1tn3ss]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `description:redteamsocietegenerale/DLLirant`: entity [[dllirant]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-link from [[windows-dll-hijacking]] and [[hijacklibs]].

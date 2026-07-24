@@ -12,7 +12,7 @@ confidence: medium
 
 Curated, searchable database of publicly disclosed Windows DLL hijacking opportunities: executables paired with exploitable DLL dependencies, required exports, and exploitation conditions. Ships YAML vulnerability data plus a web UI for red-team / pen-test persistence and privilege-escalation research. (source: wiki/sources/descriptions/wietze__HijackLibs.md)
 
-Companion catalog to [[windows-dll-hijacking]] for Cheat → DLL Hijack lanes and for AC/EDR researchers mapping image-load / search-order abuse (not a game-specific cheat).
+Companion catalog to [[windows-dll-hijacking]] for Cheat → DLL Hijack lanes and for AC/EDR researchers mapping image-load / search-order abuse (not a game-specific cheat). Automated discovery tooling: [[dllirant]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Companion catalog to [[windows-dll-hijacking]] for Cheat → DLL Hijack lanes an
 
 ## Related
 
-[[windows-dll-hijacking]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[injectors]]
+[[windows-dll-hijacking]] · [[dllirant]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[injectors]]
