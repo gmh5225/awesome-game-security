@@ -179,6 +179,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Fortnite-External-Source](entities/fortnite-external-source.md) — Fortnite external: driver / SDK generation (C++)
 - [Fortnite-Fltokens-and-offsets](entities/fortnite-fltokens-and-offsets.md) — Fortnite FLToken/offset grabber (stale / offline)
 - [game-engine-detector](entities/game-engine-detector.md) — Python APK/IPA game-engine detector (Mobile Game)
+- [gamehacking-cheatsheet](entities/gamehacking-cheatsheet.md) — game-hacking RE cheatsheet (memory / injection / AC; cheat / guide)
 - [gamesneeze](entities/gamesneeze.md) — Linux CS:GO cheat research (seksea; cheat / game:csgo)
 - [gdbserver9x](entities/gdbserver9x.md) — GDB RSP stub for 32-bit Win98SE/XP (VC6; Binary Ninja adapter)
 - [genpatch](entities/genpatch.md) — Python binary-patch script generator (dialog on success; cheat / IDA Plugins)
