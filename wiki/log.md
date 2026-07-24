@@ -1068,3 +1068,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-24** — ingest `description:redteamsocietegenerale/DLLirant`: entity [[dllirant]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-link from [[windows-dll-hijacking]] and [[hijacklibs]].
 
 - **2026-07-24** — ingest `description:redteamfortress/PhantomKiller`: entity [[phantomkiller]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
+- **2026-07-24** — ingest `description:redskal/obfuscatxor`: entity [[obfuscatxor]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
