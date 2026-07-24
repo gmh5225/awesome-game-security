@@ -143,7 +143,9 @@ Compiled knowledge catalog for awesome-game-security.
 - [dpatch](entities/dpatch.md) — syscall dispatcher patching PoC (table copy + dispatcher jump)
 - [DsArk64](entities/dsark64.md) — BYOVD via Qihoo 360 `DsArk64.sys` (handle donor; ring-0 kill + kernel R/W)
 - [DWEX](entities/dwex.md) — DWARF Explorer GUI (ELF/debug files; pyelftools; RE tools)
+- [DWM_Hook](entities/dwm-hook.md) — DWM hook / overlay research (C++; cheat / overlay)
 - [DroidShield](entities/droidshield.md) — Android RASP SDK (root/debugger/Frida-Xposed/emulator/tamper; polymorphic checks)
+
 - [dxgkrnl_hook](entities/dxgkrnl-hook.md) — dxgkrnl screen-buffer hook (kernel overlay / render-draw)
 - [eac-overlay](entities/eac-overlay.md) — EAC overlay PoC (ESP via alt surfaces / window manip; C++)
 - [EldenRingMods](entities/eldenringmods.md) — Elden Ring animation/modding (C++ / C/C++; cheat / game:eldenring [Mod])
