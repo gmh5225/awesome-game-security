@@ -382,6 +382,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [r2morph](entities/r2morph.md) — radare2/r2pipe metamorphic binary transform (Python+C; Cheat Radare Plugins)
 - [ReadPhys](entities/readphys.md) — phys mem via manual PTE map (no MmCopyMemory/MmMapIoSpace; AXE-BASE.sys; ACE)
 - [ReadWriteDriver](entities/read-write-driver.md) — `ntUserSetSysColors` KM↔UM channel (Win11 22000.376; cheat / driver communication)
+- [Recast Navigation](entities/recastnavigation.md) — Recast & Detour navmesh toolset (voxelize → pathfind/steer; Game Tools)
 - [recompiler](entities/recompiler.md) — Xbox360→Windows executable porting (console emulator / Xbox RE)
 - [ReGameDLL_CS](entities/regamedll-cs.md) — reversed CS1.6 server `mp.dll` (GoldSrc; plugin API; Game Engine / RE)
 - [RPGMakerDecrypter](entities/rpgmakerdecrypter.md) — RPG Maker XP/VX/VX Ace encrypted-archive extractor (CLI; RE tools)

@@ -1078,3 +1078,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-24** — ingest `description:rednaga/APKiD`: entity [[apkid]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
 - **2026-07-24** — ingest `description:redbg/CS2-Internal`: entity [[cs2-internal]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-24** — ingest `description:recastnavigation/recastnavigation`: entity [[recastnavigation]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
