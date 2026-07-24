@@ -13,14 +13,15 @@ sources:
   - wiki/sources/descriptions/sonodima__physpatch.md
   - wiki/sources/descriptions/slack69__csgo-dma-overlay.md
   - wiki/sources/descriptions/sh1ftd__dma-speedtest-memflow-rs.md
-updated: 2026-07-22
+  - wiki/sources/descriptions/realquantumstealth-hub__PCILeech-DMA-Fullstealth.md
+updated: 2026-07-24
 confidence: high
 ---
 
 
 # DMA (Direct Memory Access)
 
-Hardware-level memory access where a PCIe device issues Memory Read/Write TLPs against host RAM via Bus Master, without executing attacker code in the gaming OS. In game security this usually means an FPGA card (often M.2) linked to a separate cheat PC. (source: wiki/sources/skills/dma-attack.md) Host tooling such as [[pcileech]] drives those PCIe devices for target-memory R/W over DMA. (source: wiki/sources/descriptions/ufrisk__pcileech.md) Device firmware/HDL for those endpoints lives in [[pcileech-fpga]] (Vivado flows, TLP/BAR/config-space shadow across many boards). (source: wiki/sources/descriptions/ufrisk__pcileech-fpga.md)
+Hardware-level memory access where a PCIe device issues Memory Read/Write TLPs against host RAM via Bus Master, without executing attacker code in the gaming OS. In game security this usually means an FPGA card (often M.2) linked to a separate cheat PC. (source: wiki/sources/skills/dma-attack.md) Host tooling such as [[pcileech]] drives those PCIe devices for target-memory R/W over DMA. (source: wiki/sources/descriptions/ufrisk__pcileech.md) Device firmware/HDL for those endpoints lives in [[pcileech-fpga]] (Vivado flows, TLP/BAR/config-space shadow across many boards). (source: wiki/sources/descriptions/ufrisk__pcileech-fpga.md) Fullstealth-oriented builds such as [[pcileech-dma-fullstealth]] (Quantumstealth; M2/Squirrel/Captain 75T/Enigma X1) extend that firmware lane for stealth/threat-modeling research. (source: wiki/sources/descriptions/realquantumstealth-hub__PCILeech-DMA-Fullstealth.md)
 
 ## Why it matters
 
@@ -33,5 +34,5 @@ Cheat app → LeechCore/pcileech/MemProcFS → FPGA firmware → Memory Read TLP
 
 ## Related
 
-[[iommu]] · [[hvci]] · [[pcileech]] · [[pcileech-fpga]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[csgo-dma-overlay]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
+[[iommu]] · [[hvci]] · [[pcileech]] · [[pcileech-fpga]] · [[pcileech-dma-fullstealth]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[csgo-dma-overlay]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
 

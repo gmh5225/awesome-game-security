@@ -355,6 +355,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [payload-dumper-go](entities/payload-dumper-go.md) — Android OTA payload.bin dumper (Go; parallel xz / checksum / zip)
 - [PcapPlusPlus](entities/pcapplusplus.md) — multiplatform C++ packet capture/parse/craft (100+ protocols; libpcap/Npcap; Packet Capture&Parse)
 - [PCILeech](entities/pcileech.md) — PCIe DMA host tool: R/W target memory via hardware (ufrisk; cheat / DMA)
+- [PCILeech-DMA-Fullstealth](entities/pcileech-dma-fullstealth.md) — Quantumstealth Fullstealth PCILeech DMA FPGA firmware (Vivado; M2/Squirrel/Captain 75T/Enigma X1)
 - [PCILeech-FPGA](entities/pcileech-fpga.md) — FPGA HDL/firmware for PCILeech DMA boards (Vivado; TLP/BAR/config shadow)
 - [pdb](entities/pdb.md) — Windows PDB parse/merge (C++ DIA SDK; old formats + pdb.cfg; RE / debugger symbols)
 - [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)

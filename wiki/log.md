@@ -1080,3 +1080,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-24** — ingest `description:redbg/CS2-Internal`: entity [[cs2-internal]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-24** — ingest `description:recastnavigation/recastnavigation`: entity [[recastnavigation]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-24** — ingest `description:realquantumstealth-hub/PCILeech-DMA-Fullstealth`: entity [[pcileech-dma-fullstealth]]; cited on [[dma]] and [[overviews/dma-attack]]; cross-link from [[pcileech-fpga]].
