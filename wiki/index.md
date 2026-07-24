@@ -292,6 +292,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NO_ACCESS_Protection](entities/no-access-protection.md) — PAGE_NOACCESS + VEH / single-step anti-tamper (vs external scanners)
 - [NoVmpy](entities/novmpy.md) — Python VMProtect deobf (symbolic exec / Triton; Fix VMP)
 - [NvidiaApi](entities/nvidiaapi.md) — undocumented NvAPI GPU serial / board fingerprint (HWID research)
+- [Nvidia-GPU-Spoof](entities/nvidia-gpu-spoof.md) — NVIDIA GPU UUID spoof via `nvlddmkm.sys` (Cheat HWID)
 - [ntfs-linker](entities/ntfs-linker.md) — NTFS $MFT/$UsnJrnl/$LogFile timeline correlator (C++; DFIR)
 - [NTFSTool](entities/ntfstool.md) — NTFS forensics (MFT/USN/BitLocker/EFS; AC / IS forensics)
 - [NTMemory](entities/ntmemory.md) — kernel cross-process R/W (MDL / CR3 walk / physical translate)
