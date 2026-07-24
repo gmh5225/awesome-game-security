@@ -974,3 +974,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-24** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2580; Anti Cheat ~608 / Game Engine ~145 / Game Develop ~180 stable); light `index.md` section notes (no per-category pages).
 
 - **2026-07-24** — ingest `description:roomyoni/Nvidia-GPU-Spoof`: entity [[nvidia-gpu-spoof]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-24** — ingest `description:romainthomas/the-poor-mans-obfuscator`: entity [[the-poor-mans-obfuscator]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
