@@ -3145,6 +3145,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/vscript_lua51 [VScript]
 - https://github.com/gmh5225/cs2_things [VScript]
 - https://github.com/IMXNOOBX/cs2-external-esp [External]
+- https://github.com/tiansongyu/cs2_cheat [Educational CS2 external ESP (SDL2 + ImGui) with auto-updating offsets via cs2-dumper]
 - https://github.com/UnnamedZ03/CS2-external-base [External]
 - https://github.com/Tokyodidit/cs2External [External]
 - https://github.com/TKazer/CS2_External [External]
@@ -4287,6 +4288,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/venkata-ram/DroidShield [Android RASP SDK with root/debugger/hook/emulator/tamper checks and polymorphic per-build ordering]
 - https://github.com/NoobDigital/react-native-shieldscan [React Native root/jailbreak, Frida, debugger, emulator, and hook-framework detection]
 - https://github.com/talsec/Free-RASP-ReactNative [React Native freeRASP plugin for root/jailbreak, Frida, tamper, and integrity detection]
+- https://github.com/AfanasievN/react-native-device-risk-signals [React Native device-intel TurboModule: root/jailbreak, emulator, Frida, and tamper signals without vendor backend]
 - https://github.com/LSPosed/DirtySepolicy [Detect userspace su solutions via SELinux access checks from the App Zygote process]
 
 > Detection:Magisk
