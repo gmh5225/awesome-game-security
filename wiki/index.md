@@ -206,6 +206,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IDA-Fusion](entities/ida-fusion.md) — Fast Signature scanner & creator (cheat / IDA Plugins)
 - [ida-efiutils](entities/ida-efiutils.md) — IDA UEFI firmware annotator (GUIDs / Boot·Runtime Services / PEI·DXE; Python)
 - [ida_functioncolor](entities/ida-functioncolor.md) — IDA plugin: colorize function defs in pseudocode (Python; cheat / IDA Plugins)
+- [IDAFuncOutline](entities/ida-func-outline.md) — IDA plugin: function outline / call hierarchy (iOS ARM64 decomp; cheat / IDA Plugins)
 - [IDA-Assistant](entities/ida-assistant.md) — IDA Pro Claude-3 chat assistant (cheat / IDA Plugins)
 - [ida-ios-helper](entities/ida-ios-helper.md) — IDA plugin for iOS reversing (vtable symbols required)
 - [ida-jm-xorstr-decrypt-plugin](entities/ida-jm-xorstr-decrypt-plugin.md) — IDA Pro JM Xorstr decrypt (x64; Python)
