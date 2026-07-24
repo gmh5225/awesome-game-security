@@ -990,3 +990,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-24** — ingest `description:robert-yates/gdbserver9x`: entity [[gdbserver9x]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-24** — ingest `description:ro0ti/CS2-Offsets`: entity [[cs2-offsets-ro0ti]] (slug disambiguated from [[cs2-offsets]]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-24** — ingest `description:rmusser01/Infosec_Reference`: entity [[infosec-reference]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].

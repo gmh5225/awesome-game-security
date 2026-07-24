@@ -226,6 +226,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ImGui-Unity-With-Layout](entities/imgui-unity-with-layout.md) — Android Unity ImGui mod menu + layout tabs/save-load (C++; cheat / render-draw)
 - [Injectors](entities/injectors.md) — injection-testing harness (C/C++; AC stress)
 - [injdrv](entities/injdrv.md) — kernel APC DLL injector (process notify → LdrLoadDll; C)
+- [Infosec_Reference](entities/infosec-reference.md) — infosec wiki with Games / Game Hacking draft (cheat / guide)
 - [input-overlay](entities/input-overlay.md) — OBS plugin: keyboard/mouse/gamepad livestream overlay (C++; Keyboard Mapper)
 - [InstrumentationCallbackSyscallLogger](entities/instrumentation-callback-syscall-logger.md) — Ring3 Instrumentation Callback on syscall return (AC / Windows)
 - [Island](entities/island.md) — experimental hot-reloading Vulkan renderer (C/C++; Linux+Windows; Renderer / Vulkan)
