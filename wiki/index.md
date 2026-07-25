@@ -444,6 +444,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SE-tools](entities/se-tools.md) — Switch homebrew memory/cheat toolkit (Atmosphere dmnt:cht; scanner / pointer / viewer)
 - [SentinelAC](entities/sentinelac.md) — OSS Windows AC skeleton (SDK + UM service + ObRegisterCallbacks; overlay / stack-walk)
 - [shredder-rs](entities/shredder-rs.md) — x86_64 polymorphic instruction shredding (Rust)
+- [sig-database](entities/sig-database.md) — IDA FLIRT sigs for Linux libs (OpenSSL/Ubuntu amd64·i386; RE / library ID)
 - [SigThief](entities/sigthief.md) — steal PE Authenticode signatures (certTable transplant; Some Tricks / Ring3)
 - [SkipHook](entities/skiphook.md) — trampoline skips first insn (bypass JMP/INT3 AC hooks; HDE)
 - [skCrypter](entities/skcrypter.md) — C++ header-only compile-time XOR string crypter (constexpr; AC Compile Time / String Crypter)
