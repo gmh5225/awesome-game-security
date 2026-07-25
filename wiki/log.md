@@ -1100,3 +1100,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:rbmm/LockFile-Poc`: entity [[lockfile-poc]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-07-25** — ingest `description:rbmm/KPDB`: entity [[kpdb]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-link from [[pdb]].
+
+- **2026-07-25** — ingest `description:rbfx/rbfx`: entity [[rbfx]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-link from [[urho3d]].
