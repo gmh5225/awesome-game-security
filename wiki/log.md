@@ -1128,3 +1128,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2586 / Anti Cheat ~612; Game Engine ~147 / Game Develop ~181 / DirectX ~34 stable); light `index.md` section notes (no per-category pages).
 
 - **2026-07-25** — ingest `description:wh1te4ever/darksword-kexploit-fun`: entity [[darksword-kexploit-fun]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
+- **2026-07-25** — ingest `description:wh1te4ever/xnu_1day_practice`: entity [[xnu-1day-practice]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
