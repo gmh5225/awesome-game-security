@@ -1104,3 +1104,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:rbfx/rbfx`: entity [[rbfx]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-link from [[urho3d]].
 
 - **2026-07-25** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2583; Anti Cheat ~611 / Game Engine ~147 / Game Develop ~181 stable); light `index.md` section notes (no per-category pages).
+
+- **2026-07-25** — ingest `description:razixNew/CompiledProtection`: entity [[compiled-protection]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
