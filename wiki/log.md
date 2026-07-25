@@ -1116,3 +1116,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:raskolnikov90/Beatrice.py`: entity [[beatrice-py]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-25** — ingest `description:rand-tech/pcm`: entity [[pcm]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-25** — ingest `description:raizam/gamedev_libraries`: entity [[gamedev-libraries]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
