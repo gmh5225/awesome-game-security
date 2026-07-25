@@ -1160,3 +1160,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:qwqdanchun/Pillager`: entity [[pillager]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
 
 - **2026-07-25** — ingest `description:quickemu-project/quickemu`: entity [[quickemu]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-25** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2587; PlayStation ~6 WebKit CSSFontFace; Anti Cheat ~613 / Game Engine ~149 / Game Develop ~182 stable); light `index.md` section notes (no per-category pages).
