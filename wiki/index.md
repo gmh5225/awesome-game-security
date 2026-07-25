@@ -73,7 +73,9 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-vuln](entities/android-vuln.md) — Android Kernel CVE reference list (cheat / Android Kernel CVE)
 - [anticheat-poc](entities/anticheat-poc.md) — Windows AC PoC (debugger / integrity / signature scan / process enum; Instrumentation Callback)
 - [AntiDebugging](entities/anti-debugging.md) — C++ anti-debugging techniques (Anti Cheat → Anti Debugging)
+- [AntiFrida](entities/antifrida.md) — Java/C++ Detection:Frida sample (Anti Cheat → Detection:Frida)
 - [anti-emulator](entities/anti-emulator.md) — Android emulator detection (QEMU props / fingerprints / sensors; Java)
+
 - [anticuckoo](entities/anticuckoo.md) — Cuckoo sandbox / VE detection demos (Detection:Virtual Environments)
 - [apc-research](entities/apc-research.md) — APC internals research samples + lib (cheat / windows kernel explorer)
 - [APKiD](entities/apkid.md) — Android APK/DEX packer·obfuscator·anti-analysis ID (YARA; PEiD for Android)

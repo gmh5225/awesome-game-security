@@ -1170,3 +1170,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:quarkslab/AERoot`: entity [[aeroot]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-25** — ingest `description:qtkite/defender-control`: entity [[defender-control]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-07-25** — ingest `description:qtfreet00/AntiFrida`: entity [[antifrida]]; cited on [[frida]] and [[overviews/anti-cheat]].
