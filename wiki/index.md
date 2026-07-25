@@ -383,6 +383,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PhysPatch](entities/physpatch.md) — DMA scan/patch Windows kernel via physical memory (VA→PA walk; sonodima)
 - [PiDqSerializationWrite-Example](entities/pidqserializationwrite-example.md) — Unity-centered `PiDqSerializationWrite` C++ example (Some Tricks / Windows Ring0)
 - [pikabot-deobfuscator](entities/pikabot-deobfuscator.md) — Pikabot RC4/AES string decrypt (IDA Hex-Rays; cheat / IDA Plugins)
+- [Pillager](entities/pillager.md) — Go Windows credential harvest (browser/Wi-Fi/chat decrypt-export; post-ex)
 - [Pitaya](entities/pitaya.md) — distributed multiplayer game server framework (Game Network / Server framework)
 - [PolyHook](entities/polyhook.md) — x86/x64 C++11 multi-method hooking lib (cheat / hook research)
 - [PolyHook 2.0](entities/polyhook-2-0.md) — C++ PolyHook2 hooking lib (vcpkg; cheat / hook research)
