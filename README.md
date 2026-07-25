@@ -1985,6 +1985,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/microsoft/Detours
 - https://github.com/wbenny/DetoursNT
 - https://github.com/gmh5225/ntminhook [A modified version of MinHook that only uses the Windows Native API]
+- https://github.com/mrexodia/AppInitHook [Global user-mode hooking framework via AppInit_DLLs (MinHook-based)]
 - https://github.com/stevemk14ebr/PolyHook
 - https://github.com/stevemk14ebr/PolyHook_2_0
 - https://github.com/WopsS/RenHook
