@@ -395,6 +395,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Pitaya](entities/pitaya.md) — distributed multiplayer game server framework (Game Network / Server framework)
 - [PolyHook](entities/polyhook.md) — x86/x64 C++11 multi-method hooking lib (cheat / hook research)
 - [PolyHook 2.0](entities/polyhook-2-0.md) — C++ PolyHook2 hooking lib (vcpkg; cheat / hook research)
+- [Positron](entities/positron.md) — JS runtime inject via manual-map DLL (QuickJS/Electron; named-pipe IPC; REPL/SDK)
 - [PresentHookDetection](entities/present-hook-detection.md) — BE-style IDXGISwapChain::Present hook check (dummy D3D11 + dxgi prologue)
 - [PG1903](entities/pg1903.md) — Win10 1903 PatchGuard disable via context-page NX (Demo NX)
 - [ProExt](entities/proext.md) — Rust external CS2 cheat (ESP / aimbot / triggerbot / radar / RCS; egui UI)
