@@ -20,7 +20,8 @@ sources:
   - wiki/sources/descriptions/shareef12__cpuz.md
   - wiki/sources/descriptions/sai2fast__DsArk64.md
   - wiki/sources/descriptions/redteamfortress__PhantomKiller.md
-updated: 2026-07-24
+  - wiki/sources/descriptions/r0keb__Smep-Bypass.md
+updated: 2026-07-25
 confidence: high
 ---
 
@@ -62,7 +63,9 @@ Classic signed-utility driver abuse such as [[cpuz]] (CPU-Z; XP–Win10 1607) si
 
 Security-product handle-donor abuse such as [[dsark64]] targets Qihoo 360’s WHQL-signed `DsArk64.sys` (suspended installer + shellcode open `\\.\DsArk`, then `DuplicateHandle` → ring-0 process kill + kernel R/W). (source: wiki/sources/descriptions/sai2fast__DsArk64.md)
 
+Hardware-feature bypass PoCs such as [[smep-bypass]] use vulnerable-driver primitives (or ROP) to clear CR4.SMEP so the kernel can execute user-mode shellcode. (source: wiki/sources/descriptions/r0keb__Smep-Bypass.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[lenovo-cve-2025-8061]] · [[cpuz]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[patchguard]] · [[windows-kernel-exploits]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[lenovo-cve-2025-8061]] · [[cpuz]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
