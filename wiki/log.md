@@ -1189,3 +1189,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-25** — ingest `description:push0ebp/sig-database`: entity [[sig-database]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
+- **2026-07-25** — ingest `description:pudii/gba-ghidra-loader`: entity [[gba-ghidra-loader]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
