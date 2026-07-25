@@ -4080,6 +4080,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Hexze/anticheat [Starfish Minecraft-style cheater detector with NoSlow/scaffold/combat heuristics]
 - https://github.com/PalassCQ/GuardAC [AI-assisted open-source Minecraft anti-cheat plugin for Spigot/Paper/Folia]
 - https://github.com/KaelusAI/Shard [AI-powered open-source Minecraft Paper/Folia anti-cheat plugin]
+- https://github.com/llsgllsg/Minecraft_AntiCheatAI [DeepGuard: Paper Minecraft anti-cheat with ONNX scaffold AI detection, behavior recorder, and training pipeline]
 - https://github.com/enis1enis2/WindfallAntiCheatF [Minecraft Fabric packet-based anti-cheat with combat/movement checks and Geyser/Bedrock compatibility]
 - https://github.com/enis1enis2/Windfall-AntiCheat [Open-source Minecraft Spigot/Paper/Folia packet-based anti-cheat with combat/movement/inventory checks]
 - https://github.com/StelGR/ArrowAntiCheat [Open-source Minecraft Java/Bedrock packet-based anti-cheat with combat and movement checks]
