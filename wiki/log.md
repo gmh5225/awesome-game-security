@@ -1225,3 +1225,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 
 - **2026-07-25** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2588; Anti Cheat ~613 / Game Engine ~149 / Game Develop ~182 / DirectX ~34 stable); light `index.md` section notes (no per-category pages).
+
+- **2026-07-25** — ingest `description:redecorate/Holodori-Kernel-Bypass`: entity [[holodori-kernel-bypass]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
