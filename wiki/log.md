@@ -970,3 +970,157 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-23** — ingest `description:roothide/Dopamine2-roothide`: entity [[dopamine2-roothide]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
 - **2026-07-23** — ingest `description:rooootdev/lara`: entity [[lara]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
+- **2026-07-24** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2580; Anti Cheat ~608 / Game Engine ~145 / Game Develop ~180 stable); light `index.md` section notes (no per-category pages).
+
+- **2026-07-24** — ingest `description:roomyoni/Nvidia-GPU-Spoof`: entity [[nvidia-gpu-spoof]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-24** — ingest `description:romainthomas/the-poor-mans-obfuscator`: entity [[the-poor-mans-obfuscator]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-24** — ingest `description:rogxo/kernel_hack`: entity [[kernel-hack]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `description:rogxo/ReadPhys`: entity [[readphys]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `description:rogerxiii/kernel-codecave-poc`: entity [[kernel-codecave-poc]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-07-24** — ingest `description:roger1337/JDBG`: entity [[jdbg]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `description:rockbruno/swiftshield`: entity [[swiftshield]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
+- **2026-07-24** — ingest `description:robert-yates/gdbserver9x`: entity [[gdbserver9x]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `description:ro0ti/CS2-Offsets`: entity [[cs2-offsets-ro0ti]] (slug disambiguated from [[cs2-offsets]]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-24** — ingest `description:rmusser01/Infosec_Reference`: entity [[infosec-reference]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-24** — ingest `description:rmccrystal/kdmapper-rs`: entity [[kdmapper-rs]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-07-24** — ingest `description:rlybasic/DWM_Hook`: entity [[dwm-hook]]; cited on [[overviews/graphics-api]] and [[present-hook]].
+
+- **2026-07-24** — ingest `description:ritz-1337/fortnite-external-evo.gj`: entity [[fortnite-external-evo-gj]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-24** — ingest `description:ridpath/gamehacking-cheatsheet`: entity [[gamehacking-cheatsheet]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-24** — ingest `description:richor1042/IDAFuncOutline`: entity [[ida-func-outline]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2581; Anti Cheat ~609 / Game Engine ~145 / Game Develop ~180 stable); light `index.md` section notes (no per-category pages).
+
+- **2026-07-24** — ingest `description:tiansongyu/cs2_cheat`: entity [[cs2-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
+- **2026-07-24** — ingest `description:ricencheese/csgo-bot`: entity [[csgo-bot]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
+- **2026-07-24** — ingest `description:ricardoofnl/open.mp-anticheat`: entity [[open.mp-anticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `description:ri-char/zygisk-dump-dex`: entity [[zygisk-dump-dex]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-link from [[magisk]].
+
+- **2026-07-24** — ingest `description:ri-char/rwMem`: entity [[rwmem]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-engine]], [[overviews/windows-kernel]], [[overviews/reverse-engineering]] (Anti Cheat ~610 / Game Engine ~146 / Game Develop ~181; Cheat ~2581 stable; Windows Emulator user-space note); light `index.md` section notes (no per-category pages).
+
+- **2026-07-24** — ingest `description:wh1t3lord/kotek`: entity [[kotek]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-24** — ingest `description:ri-char/pwatch`: entity [[pwatch]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
+- **2026-07-24** — ingest `description:rhboot/pesign`: entity [[pesign]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-07-24** — ingest `description:rexdex/recompiler`: entity [[recompiler]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-24** — ingest `description:revsic/cpp-veh-dbi`: entity [[cpp-veh-dbi]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `description:vovasicidk/sentinelac`: entity [[sentinelac]]; cited on [[overviews/anti-cheat]] and [[kernel-callbacks]].
+
+- **2026-07-24** — ingest `description:revsic/AntiDebugging`: entity [[anti-debugging]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-24** — ingest `description:reveny/Zygisk-ImGui-Mod-Menu`: entity [[zygisk-imgui-mod-menu]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]].
+
+- **2026-07-24** — ingest `description:reveny/Android-Virtual-Inject`: entity [[android-virtual-inject]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `description:reveny/Android-Ptrace-Injector`: entity [[android-ptrace-injector]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/game-engine]] (Game Engine ~147; Cheat ~2581 / Anti Cheat ~610 / Game Develop ~181 stable); light `index.md` section notes (no per-category pages).
+
+- **2026-07-24** — ingest `description:reveny/Android-Native-Root-Detector`: entity [[android-native-root-detector]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
+- **2026-07-24** — ingest `description:reveny/Android-Native-Import-Hide`: entity [[android-native-import-hide]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
+- **2026-07-24** — ingest `description:reveny/Android-Library-Remap-Hide`: entity [[android-library-remap-hide]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `description:reveny/Android-LD-Preload-Injector`: entity [[android-ld-preload-injector]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `description:reveny/Android-Emulator-Detection`: entity [[android-emulator-detection]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
+- **2026-07-24** — ingest `description:revan1611/UE-Interview-Cheat-Sheet`: entity [[ue-interview-cheat-sheet]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-24** — ingest `description:repnz/ida-plugins`: entity [[ida-plugins]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `description:repnz/apc-research`: entity [[apc-research]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `description:rem0obb/rtti-parser`: entity [[rtti-parser]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `description:regomne/ilhook-rs`: entity [[ilhook-rs]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-24** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2582; Anti Cheat ~610 / Game Engine ~147 / Game Develop ~181 stable); light `index.md` section notes (no per-category pages).
+
+- **2026-07-24** — ingest `description:regenrek/deepwiki-mcp`: entity [[deepwiki-mcp]]; cited on [[overviews/overview]] and [[overviews/game-engine]].
+
+- **2026-07-24** — ingest `description:redthing1/w1tn3ss`: entity [[w1tn3ss]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-24** — ingest `description:redteamsocietegenerale/DLLirant`: entity [[dllirant]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-link from [[windows-dll-hijacking]] and [[hijacklibs]].
+
+- **2026-07-24** — ingest `description:redteamfortress/PhantomKiller`: entity [[phantomkiller]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
+- **2026-07-24** — ingest `description:redskal/obfuscatxor`: entity [[obfuscatxor]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-24** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-engine]] (Anti Cheat ~611; Game Assets ~11; Cheat ~2582 / Game Engine ~147 / Game Develop ~181 stable); light `index.md` section notes (no per-category pages).
+
+- **2026-07-24** — ingest `description:rednaga/frida-stack`: entity [[frida-stack]]; cited on [[frida]] and [[overviews/reverse-engineering]].
+
+- **2026-07-24** — ingest `description:rednaga/APKiD`: entity [[apkid]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
+- **2026-07-24** — ingest `description:redbg/CS2-Internal`: entity [[cs2-internal]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-24** — ingest `description:recastnavigation/recastnavigation`: entity [[recastnavigation]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-24** — ingest `description:realquantumstealth-hub/PCILeech-DMA-Fullstealth`: entity [[pcileech-dma-fullstealth]]; cited on [[dma]] and [[overviews/dma-attack]]; cross-link from [[pcileech-fpga]].
+
+- **2026-07-25** — ingest `description:realTristan/Reborn`: entity [[reborn]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-25** — ingest `description:reahly/mono-external-lib`: entity [[mono-external-lib]]; cited on [[il2cpp]] and [[overviews/game-engine]].
+
+- **2026-07-25** — ingest `description:rdeioris/LuaMachine`: entity [[luamachine]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
+
+- **2026-07-25** — ingest `description:rdbo/libmem`: entity [[libmem]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-25** — ingest `description:rdbo/DX11-BaseHook`: entity [[dx11-basehook]]; cited on [[present-hook]] and [[overviews/graphics-api]].
+
+- **2026-07-25** — ingest `description:rbmm/USN`: entity [[usn]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-25** — ingest `description:rbmm/SearchEx`: entity [[searchex]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-25** — ingest `description:rbmm/LockFile-Poc`: entity [[lockfile-poc]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-07-25** — ingest `description:rbmm/KPDB`: entity [[kpdb]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-link from [[pdb]].
+
+- **2026-07-25** — ingest `description:rbfx/rbfx`: entity [[rbfx]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-link from [[urho3d]].
+
+- **2026-07-25** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2583; Anti Cheat ~611 / Game Engine ~147 / Game Develop ~181 stable); light `index.md` section notes (no per-category pages).
+
+- **2026-07-25** — ingest `description:razixNew/CompiledProtection`: entity [[compiled-protection]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-07-25** — ingest `description:raysan5/raylib`: entity [[raylib]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-25** — ingest `description:raysan5/custom_game_engines`: entity [[custom-game-engines]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-25** — ingest `description:rathena/rathena`: entity [[rathena]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-25** — ingest `description:raskolnikov90/Beatrice.py`: entity [[beatrice-py]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-25** — ingest `description:rand-tech/pcm`: entity [[pcm]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-25** — ingest `description:raizam/gamedev_libraries`: entity [[gamedev-libraries]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-25** — ingest `description:radareorg/radius2`: entity [[radius2]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-25** — ingest `description:radareorg/r2garlic`: entity [[r2garlic]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]].
+
+- **2026-07-25** — ingest `description:radareorg/r2ai`: entity [[r2ai]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].

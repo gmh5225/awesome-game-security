@@ -222,11 +222,13 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/InfiniteC0re/OpenBarnyard [WIP decompilation of Barnyard and the proprietary TOSHI 2.0 engine, with Ghidra RE workflow]
 - https://github.com/koosoli/PoseidonVK [Vulkan modernization fork of the Poseidon/CWR-CE engine (Arma: Cold War Assault)]
 - https://github.com/udinmoInc/WindEffects [C++23 Vulkan game engine with ECS, editor, and asset pipeline]
+- https://github.com/MasterLaplace/LplPlugin [Experimental C++23 engine with Vulkan, ECS, Linux kernel IPC module, and Morton spatial partitioning]
 - https://github.com/goobz22/cat-annihilation [C++20/Vulkan/CUDA engine with render graph, clustered deferred PBR, ECS, and wave-survival test game]
 - https://github.com/orkitec/orkige [C++20 game engine with dual OGRE renderers, Lua scripting, and AI-native editor over MCP]
 - https://github.com/Bloom-Engine/engine [Native TypeScript game engine compiling to Metal, DirectX 12, Vulkan, OpenGL, and WebGPU]
 - https://github.com/Krilliac/SparkEngine [Open-source C++23 3D engine with DirectX 12/Vulkan RHI, ECS, Jolt Physics, and ImGui editor]
 - https://github.com/doriaxengine/doriax [Cross-platform C++ ECS game engine with editor, Lua/C++ scripting, and DirectX/OpenGL/Metal/Vulkan backends]
+- https://github.com/wh1t3lord/kotek [Modular C++20 game/application framework with OpenGL ES, Vulkan, DirectX, and BGFX backends]
 
 
 > Game Engine Plugins:Unreal
@@ -563,6 +565,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/0x0funky/agent-sprite-forge [Codex skills for game-ready 2D sprites, layered maps, and engine-ready prototypes (Godot/Unity)]
 - https://github.com/dreiachse-cyber/image-cockpit-for-codex-workflows [Local cockpit for Codex imagegen workflows — pixel art, region-based editing, animation frames and sprite sheets via codex-handoff inbox/outbox; no direct OpenAI API calls]
 - https://github.com/htdt/godogen [Autonomous game development for Godot, Bevy, and Babylon.js with Claude Code and Codex; plans, generates assets, screenshot-guided self-repair]
+- https://github.com/MRCalderon3D/everything-game-dev-code [Multi-engine AI agent scaffold for Unity/Unreal/Godot/HTML with Claude, Codex, Cursor, OpenCode, and Kiro harnesses]
 
 
 ## Game Assets
@@ -576,6 +579,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/atenfyr/UAssetGUI [Viewing and modifying UE4 game assets]
 - https://github.com/UETools/UETools [Accessing, reading and deserializing UE4 assets]
 - https://github.com/atenfyr/UAssetAPI [A low-level .NET library for reading and writing Unreal Engine game assets]
+- https://github.com/r6e/paksmith [Rust cross-platform Unreal Engine pak/UAsset explorer and extractor (pak v3–v11, textures/meshes/audio export)]
 
 ## Game Hot Patch
 - https://github.com/Tencent/xLua
@@ -1837,6 +1841,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/x64dbg/x64dbg/wiki/Plugins
 - https://github.com/horsicq/x64dbg-Plugin-Manager
 - https://github.com/horsicq/nfdx64dbg [x64dbg plugin for Nauz File Detector (linker/compiler/tool detection)]
+- https://github.com/horsicq/stringsx64dbg [Strings plugin for x64dbg]
 - https://github.com/m417z/Multiline-Ultimate-Assembler
 - https://github.com/x64dbg/Classroom
 - https://github.com/VenTaz/Themidie
@@ -3146,6 +3151,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/vscript_lua51 [VScript]
 - https://github.com/gmh5225/cs2_things [VScript]
 - https://github.com/IMXNOOBX/cs2-external-esp [External]
+- https://github.com/tiansongyu/cs2_cheat [Educational CS2 external ESP (SDL2 + ImGui) with auto-updating offsets via cs2-dumper]
 - https://github.com/UnnamedZ03/CS2-external-base [External]
 - https://github.com/Tokyodidit/cs2External [External]
 - https://github.com/TKazer/CS2_External [External]
@@ -3185,6 +3191,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
   
 > Game:Assault Cube
 - https://github.com/gmh5225/external-esp-hack-assaultcube [GDI overlay]
+- https://github.com/TheHeadphonesAreNeeded/VoltClient [Educational AssaultCube external: DX11 ImGui overlay, ESP, tracers, aimbot via ReadProcessMemory]
 - https://github.com/gmh5225/AssaultCubeCheat
 - https://github.com/201580ag/AssaultCube_Cheat
 - https://github.com/kotae4/lab-esp-and-aimbot [Walkthrough of an ESP and aimbot cheat from scratch]
@@ -4056,7 +4063,9 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/PatchRequest/PeregrineAntiCheat [Educational Windows anti-cheat: kernel minifilter, ObCallbacks, APC injection, MinHook API hooks, ETW-TI, YARA, Tauri GUI, cheat test suite]
 - https://github.com/violetweather/Certael [Server-authoritative open-source anti-cheat framework with Godot/Unity/Unreal adapters]
 - https://github.com/vul-os/magnetite [Rust self-hostable game platform with magnetite-anticheat: server-authoritative deterministic replay verification and composable cheat validators]
+- https://github.com/ConWan30/QorTroller [Cryptographic console anti-cheat proving human controller presence via attested inputs and verifiable match receipts]
 - https://github.com/Abdelnour2/MiniAntiCheatV2 [Educational Windows kernel anti-cheat PoC: process blacklist plus ObCallbacks handle shield]
+- https://github.com/vovasicidk/sentinelac [Open-source anti-cheat skeleton with usermode SDK, ObRegisterCallbacks kernel stub, overlay isolation, and stack-walk injection detection]
 - https://github.com/AvivShabtay/Stresser [Anti Virus in fact but also Anti Cheat]
 - https://github.com/D4stiny/PeaceMaker [Anti Virus in fact but also Anti Cheat]
 - https://github.com/danielkrupinski/VAC [Reversed VAC]
@@ -4072,6 +4081,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Hexze/anticheat [Starfish Minecraft-style cheater detector with NoSlow/scaffold/combat heuristics]
 - https://github.com/PalassCQ/GuardAC [AI-assisted open-source Minecraft anti-cheat plugin for Spigot/Paper/Folia]
 - https://github.com/KaelusAI/Shard [AI-powered open-source Minecraft Paper/Folia anti-cheat plugin]
+- https://github.com/llsgllsg/Minecraft_AntiCheatAI [DeepGuard: Paper Minecraft anti-cheat with ONNX scaffold AI detection, behavior recorder, and training pipeline]
 - https://github.com/enis1enis2/WindfallAntiCheatF [Minecraft Fabric packet-based anti-cheat with combat/movement checks and Geyser/Bedrock compatibility]
 - https://github.com/enis1enis2/Windfall-AntiCheat [Open-source Minecraft Spigot/Paper/Folia packet-based anti-cheat with combat/movement/inventory checks]
 - https://github.com/StelGR/ArrowAntiCheat [Open-source Minecraft Java/Bedrock packet-based anti-cheat with combat and movement checks]
@@ -4288,6 +4298,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/venkata-ram/DroidShield [Android RASP SDK with root/debugger/hook/emulator/tamper checks and polymorphic per-build ordering]
 - https://github.com/NoobDigital/react-native-shieldscan [React Native root/jailbreak, Frida, debugger, emulator, and hook-framework detection]
 - https://github.com/talsec/Free-RASP-ReactNative [React Native freeRASP plugin for root/jailbreak, Frida, tamper, and integrity detection]
+- https://github.com/AfanasievN/react-native-device-risk-signals [React Native device-intel TurboModule: root/jailbreak, emulator, Frida, and tamper signals without vendor backend]
 - https://github.com/LSPosed/DirtySepolicy [Detect userspace su solutions via SELinux access checks from the App Zygote process]
 
 > Detection:Magisk

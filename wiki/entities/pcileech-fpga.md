@@ -18,4 +18,4 @@ FPGA **HDL/firmware** and **Vivado** build flows for [[pcileech]] DMA devices th
 
 ## Related
 
-[[pcileech]] · [[dma]] · [[iommu]] · [[overviews/dma-attack]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[pcileech]] · [[pcileech-dma-fullstealth]] · [[dma]] · [[iommu]] · [[overviews/dma-attack]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]

@@ -1,0 +1,1382 @@
+Project Path: arc_vovasicidk_sentinelac_nv80cgzj
+
+Source Tree:
+
+```txt
+arc_vovasicidk_sentinelac_nv80cgzj
+├── DESIGN_DOC.md
+├── README.md
+├── sentinel_guarded.h
+├── sentinel_km.c
+├── sentinel_overlay_guard.cpp
+├── sentinel_sdk.cpp
+├── sentinel_stackwalk.cpp
+└── server.js
+
+```
+
+`DESIGN_DOC.md`:
+
+```md
+# Project Sentinel - design doc
+### cross-platform anti-cheat (windows primary, linux is a "someday")
+
+not a polished spec, more like the notes I'd want if I got hit by a bus halfway through this.
+
+---
+
+## 1. architecture, roughly
+
+```
+                         ┌───────────────────────────────────────────┐
+                         │              GAME CLIENT HOST               │
+                         │                                             │
+  ┌───────────┐          │  ┌─────────────┐     ┌────────────────┐    │
+  │  Game      │◄────────┤  │ Sentinel SDK │◄───►│ Sentinel Usermode│  │
+  │  Engine    │  (3 API  │  │ (static lib/ │ IPC │ Service          │  │
+  │  Process   │  calls)  │  │  .dll/.so)   │(named│ (sentinel_svc)  │  │
+  └───────────┘          │  └─────────────┘ pipe │└───────┬─────────┘  │
+                         │                       └────────┼──────────┘
+                         │                    ObRegisterCallbacks /   │
+                         │                    ALPC secure channel     │
+                         │  ┌───────────────────────────┴──────────┐  │
+                         │  │      Sentinel Kernel Driver (KMD)      │  │
+                         │  │  signed .sys, WHQL/attestation signed  │  │
+                         │  └───────────────────────────────────────┘  │
+                         └───────────────────────────────────────────┘
+                                        │  TLS 1.3 mTLS
+                                        │  (cert-pinned, per-session key)
+                                        ▼
+                         ┌───────────────────────────────────────────┐
+                         │           SENTINEL BACKEND (cloud)          │
+                         │  ┌────────────┐  ┌────────────┐  ┌──────┐ │
+                         │  │ Ingest API  │  │ Signature   │  │ Push │ │
+                         │  │ (REST)      │  │ DB (Postgres│  │ (SSE/│ │
+                         │  │             │  │ + object    │  │ WS)  │ │
+                         │  │             │  │ store)      │  │ Fanout│ │
+                         │  └────────────┘  └────────────┘  └──────┘ │
+                         │  ┌────────────────────────────────────┐   │
+                         │  │  analyst console (upload sigs,       │   │
+                         │  │  rollback, FP triage)                │   │
+                         │  └────────────────────────────────────┘   │
+                         └───────────────────────────────────────────┘
+```
+
+flow, in order:
+
+1. game calls `Sentinel_Init()` once at startup. SDK spins up a watchdog thread, opens a
+   named pipe / ALPC channel to the local sentinel_svc process. important: svc is a
+   separate signed process, NOT something injected into the game.
+2. svc talks to the kernel driver over a private IOCTL interface, auth'd with a per-boot
+   session key.
+3. `Sentinel_Heartbeat()` runs once a tick, does cheap amortized checks, ships integrity
+   reports to svc periodically (not every tick, see section 6 for budget).
+4. svc batches telemetry, pushes over mTLS to the backend. backend streams new signatures
+   back down over SSE, sub-minute fanout target.
+5. on detection, driver + svc jointly pick the response tier (log / soft-flag /
+   terminate). the game process itself never gets to make that call - keeps it outside
+   of what a cheat dev can just patch out of the game binary.
+
+---
+
+## 2. SDK
+
+### 2.1 public surface (kept small on purpose, less surface = less to reverse)
+
+```c
+// sentinel_sdk.h
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef enum {
+    SENTINEL_OK = 0,
+    SENTINEL_ERR_SERVICE_UNREACHABLE = 1,
+    SENTINEL_ERR_DRIVER_NOT_LOADED   = 2,
+    SENTINEL_ERR_ALREADY_INIT        = 3,
+    SENTINEL_ERR_INTEGRITY_FAIL      = 4
+} SentinelStatus;
+
+SentinelStatus Sentinel_Init(const char* game_id, const char* build_version);
+SentinelStatus Sentinel_Heartbeat(float deltaTime);  // <0.05ms budget typical
+void Sentinel_Shutdown(void);
+
+#ifdef __cplusplus
+}
+#endif
+```
+
+### 2.2 auto-mapping .text / imports (no manual offsets, ever)
+
+Don't want to ask the integrating dev for offsets, that breaks on every patch. So on init:
+
+1. get our own HMODULE (`GetModuleHandle(NULL)` - the host exe, not this dll), walk
+   DOS header -> NT headers -> section table, tag `.text` by characteristics
+   (`IMAGE_SCN_MEM_EXECUTE` and NOT `IMAGE_SCN_MEM_WRITE`). standard PE-parsing stuff,
+   nothing exotic.
+2. imports: walk `IMAGE_IMPORT_DESCRIPTOR` from base + `OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT]`.
+3. hash `.text` (rolling sha256, 4kb windows) once at load, baseline lives in the
+   *driver's* memory, not the game process. point being - if a cheat patches memory AND
+   patches our in-process checksum to match, it still gets caught, because the ground
+   truth isn't sitting next to the thing it's checking.
+4. IL2CPP is fine (AOT). mono JIT segments need to be whitelisted-by-region instead of
+   hashed since they legitimately self-modify. (ask sam if we still need to special-case
+   the newer mono versions - i think this changed in the last couple unity LTS releases)
+
+### 2.3 init flow
+
+```
+Sentinel_Init()
+ 1. check sentinel_svc.exe is running + signed (chain to our root CA)
+ 2. not running? CreateProcess as a protected sibling, restricted ACL
+ 3. open \\.\pipe\sentinel_<session_guid>  (new guid every boot)
+ 4. send HELLO{game_id, build_version, PEB.ImageBaseAddress}
+ 5. svc checks driver is loaded (IOCTL_SENTINEL_PING) -> SENTINEL_ERR_DRIVER_NOT_LOADED if not
+ 6. SDK computes .text baseline, ships hash to svc. svc re-checks independently by
+    reading the process memory itself - can't trust what a possibly-compromised game
+    process self-reports
+ 7. return SENTINEL_OK, background thread starts draining the heartbeat mailbox
+```
+
+the whole point of the SDK-in-process being this dumb/thin is that it's the one part
+living in genuinely hostile territory. everything a cheat author actually wants to
+reverse costs more to get to if it's not sitting in the game's own address space.
+
+---
+
+## 3. kernel agent
+
+### 3.1 why not SSDT hooking
+
+short version: it doesn't survive PatchGuard on 64-bit and hasn't for years. using
+documented notify routines instead - `ObRegisterCallbacks`, `PsSetLoadImageNotifyRoutine`,
+minifilters - these are things MS actually keeps working across updates because
+third-party drivers depend on them. slower to get some kinds of coverage but it
+doesn't randomly bluescreen every patch tuesday.
+
+### 3.2 process/thread protection
+
+registers an `ObRegisterCallbacks` pre-op callback on `PsProcessType`/`PsThreadType`.
+if a handle is being opened/duplicated against our protected pid and the caller isn't
+whitelisted, strip VM_WRITE / VM_READ / TERMINATE / SUSPEND_RESUME / CREATE_THREAD (and
+thread equivalents) out of the desired access mask before the OS grants the handle.
+caller still gets *a* handle, just not one that can do anything to us.
+
+### 3.3 unauthorized driver load detection
+
+`PsSetLoadImageNotifyRoutine` callback, checks `ImageInfo->SystemModeImage`, verifies
+signature against a whitelist. can't safely force-unload someone else's driver from here
+(no supported way to do that, and trying tends to bluescreen the box) - so this just logs
+loudly and lets the backend's risk scoring decide what to do about the session. driver
+doesn't get to unilaterally nuke anything.
+
+```c
+// pseudo-ish, actual impl in sentinel_stackwalk.cpp
+BOOL ValidateCallStack(HANDLE hThread) {
+    STACKFRAME64 frames[64];
+    int count = WalkStack(hThread, frames, 64);
+    for (int i = 0; i < count; i++) {
+        HMODULE mod = SentinelModuleFromAddress(frames[i]);
+        if (!mod) {
+            SentinelReportTamper(TAMPER_UNBACKED_RETURN_ADDRESS, frames[i]);
+            return FALSE;
+        }
+        if (!SentinelIsModuleWhitelisted(mod)) {
+            SentinelReportTamper(TAMPER_UNKNOWN_MODULE_IN_CALLSTACK, mod);
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+```
+
+runs against a *suspended* thread from svc (out of process) - if it ran inside the game
+process a cheat could just patch this function before it executes, so that's a hard
+requirement, not a nice-to-have. manual-mapped/reflectively-loaded DLLs avoid registering
+in `PEB.Ldr`, but code from them still leaves return addresses on the stack pointing into
+memory no loaded module owns - that gap is the tell.
+
+---
+
+## 4. (intentionally skipped - overlay guard is basically self-contained,
+see comments directly in sentinel_overlay_guard.cpp instead of duplicating them here)
+
+---
+
+## 5. server / signature protocol
+
+### 5.1 REST API
+
+| endpoint | method | auth | what |
+|---|---|---|---|
+| `/api/v1/blacklist/upload` | POST | API key, per-studio | new signature |
+| `/api/v1/blacklist/{sig_id}/disable` | POST | API key + 2FA | FP rollback |
+| `/api/v1/blacklist/list` | GET | API key | active set, paginated |
+| `/api/v1/telemetry/report` | POST | client mTLS cert | client -> server detection event |
+| `/api/v1/stream` | GET (SSE) | client mTLS cert | live signature push |
+
+```json
+POST /api/v1/blacklist/upload
+{
+  "category": "Memory_Pattern",
+  "value": "48 8B 05 ?? ?? ?? ?? 48 85 C0 74",
+  "description": "known trainer AOB - health god-mode patch",
+  "severity": "session_terminate",
+  "game_id": "studio_game_v1"
+}
+```
+
+### 5.2 schema
+
+```sql
+CREATE TABLE signatures (
+    sig_id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    category        TEXT NOT NULL CHECK (category IN ('Driver','Usermode_Exe','Memory_Pattern')),
+    game_id         TEXT NOT NULL REFERENCES games(game_id),
+    value           TEXT NOT NULL,          -- hash or AOB+mask string
+    value_type      TEXT NOT NULL CHECK (value_type IN ('sha256','aob_mask','pe_section_hash')),
+    severity        TEXT NOT NULL CHECK (severity IN ('log_only','soft_flag','session_terminate')),
+    description     TEXT,
+    uploaded_by     TEXT NOT NULL REFERENCES analysts(analyst_id),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    active          BOOLEAN NOT NULL DEFAULT TRUE,
+    false_positive_count BIGINT NOT NULL DEFAULT 0,
+    disabled_at     TIMESTAMPTZ,
+    disabled_by     TEXT
+);
+CREATE INDEX idx_signatures_active_game ON signatures (game_id, active) WHERE active = TRUE;
+
+CREATE TABLE detections (
+    detection_id    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    sig_id          UUID REFERENCES signatures(sig_id),
+    client_session  UUID NOT NULL,
+    steam_id / platform_id TEXT NOT NULL,   -- TODO: this needs to actually be two columns, fix before anyone runs this DDL
+    detected_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    action_taken    TEXT NOT NULL,
+    evidence_blob_ref TEXT  -- points into S3-compatible object storage, not stored inline
+);
+```
+
+### 5.3 why SSE and not websockets
+
+mainly because the data only flows one direction (server -> client). client doesn't need
+to send arbitrary stuff back over this channel, telemetry already has its own POST
+endpoint, so SSE's simpler semantics = smaller attack surface for basically no downside
+here. also rides HTTP/2 multiplexing so it doesn't cost a separate handshake.
+
+edge nodes (cloudflare workers / fastly compute, whichever we end up on) subscribe to a
+redis pub/sub or NATS fanout off the primary DB's write path. rough budget: db write
+10-30ms, fanout 50-150ms, SSE push to client under 500ms typically depending on their
+connection - comfortably inside the sub-60s requirement, lots of margin.
+
+### 5.4 false positive rollback
+
+disable endpoint flips `active = FALSE`, goes out over the same pub/sub as a retract
+event, clients drop it from their local cache immediately, no client patch needed.
+`false_positive_count` feeds a dumb circuit breaker right now (threshold, auto-disable,
+page on-call) - would like to make this smarter eventually (weight by account age /
+prior flag history) but the dumb version is fine to ship first.
+
+---
+
+## 6. perf / security tradeoffs
+
+- SDK heartbeat: <0.05ms/call, amortized (one 4kb window per heartbeat, not the whole
+  section every tick)
+- kernel callbacks: basically free, they only fire on the relevant event, not polled
+- svc background scans (stack walk, window enum): budget ~1-2ms every 500ms-1s. keeps
+  total overhead under ~1% of frame budget at 60fps, at least on paper - haven't
+  actually profiled this against a real game loop yet
+
+false positive handling: new signatures start at `log_only` fleet-wide, only get
+promoted to enforcement after a burn-in period with acceptable FP telemetry. don't
+want a bad AOB pattern instantly session-terminating people.
+
+windows updates breaking hooks: this is the whole reason section 3 avoids SSDT/inline
+hooking. documented notify routines are part of MS's driver compat contract. residual
+risk is them changing a documented API's behavior (rare, versioned, announced) -
+handled by version-gating against `RtlGetVersion` and degrading gracefully (log a
+capability-loss event) instead of crashing.
+
+---
+
+## 7. the bypass we can't actually stop
+
+hypervisor-based cheating. attacker drops a thin type-1/type-2 hypervisor underneath
+the running windows install (VT-x/EPT or AMD-V/NPT), and from below ring 0 they can:
+
+- trap RDTSC/RDTSCP + CPUID to hide that a hypervisor is even there
+- use EPT to show sentinel's driver a "clean" view of memory while a shadow page table
+  feeds the actual game process manipulated data - reads/writes happen through hardware
+  page-table indirection that never touches anything our driver can see, because the
+  driver's own memory reads are being intercepted and lied to
+
+section 3 is dead at that point. our kernel driver is just a guest of the malicious
+hypervisor and has nothing real to compare against.
+
+what we can actually do about it, short of writing our own hypervisor:
+
+1. **timing side-channels for hypervisor presence.** VM-exits (from CPUID, RDMSR on
+   specific MSRs, forced #VMEXIT via crafted INVD) have a latency floor even for a
+   well-hidden hypervisor - trap-and-emulate can't be made as fast as native execution.
+   time batches of these from the driver, flag anomalous latency distributions.
+2. **secure boot + TPM attestation.** TPM 2.0 quote against PCR values measured at boot
+   proves no hypervisor loaded before windows did. moves the trust root outside the OS
+   entirely - a pre-boot hypervisor would also need to forge the TPM measurement chain,
+   which is a hardware-anchored problem, much harder than anything software-side.
+3. **server-side behavioral detection as the actual backstop.** doesn't matter how well
+   memory is hidden client-side - gameplay telemetry (reaction times, aim-snap stats,
+   movement/physics violations) comes from real inputs the server sees regardless. a
+   hypervisor can lie to our local driver all day, it can't change what the server
+   observes. long term this is the right answer: don't treat the client as the sole
+   source of truth for anything competitively meaningful.
+4. follow-up item after initial launch: push more of the actually-important simulation
+   state (hit detection, resource counts) server-authoritative wherever the genre
+   allows it. client-side agents are a cost-raising deterrent for the unsophisticated
+   majority, not a guarantee, and we should stop pretending otherwise in how we pitch
+   this internally.
+
+```
+
+`README.md`:
+
+```md
+# Project Sentinel
+
+## backend
+
+
+```
+cd backend
+npm install
+node server.js
+# then: curl -X POST http://localhost:4000/api/v1/blacklist/upload -H "X-API-Key: studio-demo-key-123" -H "Content-Type: application/json" -d '{...}'
+```
+Storage is a JSON file for demo purposes — swap in the Postgres schema from
+`DESIGN_DOC.md` section 5.2 for production. Auth is a static demo key —
+replace with a real per-studio key store + mTLS for client connections.
+
+## usermode-sdk/ — Windows C++, cross-compiled and syntax-checked
+
+- `sentinel_sdk.cpp` — the 3-function integration shim (Init/Heartbeat/Shutdown),
+  auto-maps `.text` via PE header walking, no manual offsets.
+- `sentinel_guarded.h` — the obfuscated-variable wrapper. **This one I actually
+  ran** 
+- `sentinel_stackwalk.cpp` — unauthorized-DLL detection via stack walking.
+- `sentinel_overlay_guard.cpp` — dedicated Window Station/Desktop isolation
+  + secondary layered-window telemetry scan.
+
+Wire these into an actual game and you'd need: the IPC handshake with a real
+`sentinel_svc` process (stubbed here), a real signature-verification
+implementation for whitelisting, and ACL code for `GrantDesktopAccessToProcess`.
+
+## kernel-driver/ — Skeleton only (WIP).
+`sentinel_km.c` implements process/thread handle-stripping via
+`ObRegisterCallbacks` and unauthorized-driver detection via
+`PsSetLoadImageNotifyRoutine` — documented APIs, not SSDT hooking (see
+DESIGN_DOC.md 3.1 for why that distinction matters for surviving PatchGuard).
+
+
+To actually get a working driver you need:
+1. The real Microsoft WDK + Visual Studio, on an actual Windows box.
+2. A test machine with test-signing enabled (or a VM you're prepared to
+   snapshot/roll back — kernel bugs bluescreen, they don't just throw exceptions).
+3. An EV code-signing certificate and Microsoft's driver-signing portal
+   before this loads on a Secure-Boot production machine.
+4. Real implementations of the stubbed `VerifyDriverImageSignature` and
+   `IsCallerWhitelisted` — those are load-bearing security functions I left
+   as stubs rather than fake.
+
+## DESIGN_DOC.md
+The full architecture writeup — read this alongside the code; it explains
+the *why* behind each piece, the API/DB schema for the backend, and the
+worst-case hypervisor bypass discussion.
+
+```
+
+`sentinel_guarded.h`:
+
+```h
+// sentinel_guarded.h
+// Runtime obfuscation wrapper for gameplay-critical values (health, position,
+// currency, etc). Defeats *static* memory scanning (Cheat Engine "exact value"
+// / "unknown initial value" scans) by re-keying on every write and re-rolling
+// the key periodically even without a write.
+//
+// Threat model honesty: this raises the cost of casual memory scanning. It is
+// NOT a hard guarantee against an attacker who fully reverse-engineers this
+// wrapper's XOR relationship from paired reads of `encoded`/`key`/`canary`.
+// Treat it as one layer, not the whole defense - server-authoritative
+// validation of anything competitively meaningful is the real backstop.
+
+#pragma once
+#include <cstdint>
+#include <random>
+#include <atomic>
+
+namespace sentinel {
+
+inline uint64_t SecureRandom64() {
+    static thread_local std::mt19937_64 rng{std::random_device{}()};
+    return rng();
+}
+
+
+inline uint64_t ComputeCanary(uint64_t encoded, uint64_t key) {
+    uint64_t x = encoded ^ (key * 0x9E3779B97F4A7C15ull);
+    x ^= x >> 33;
+    x *= 0xff51afd7ed558ccdull;
+    x ^= x >> 33;
+    return x;
+}
+
+enum class TamperReason {
+    CanaryMismatch,
+    ReadWithoutInit,
+};
+
+// Wire this to your telemetry pipe -> Sentinel usermode service.
+using TamperCallback = void (*)(TamperReason, const void* guardedAddress);
+inline TamperCallback g_tamperCallback = nullptr;
+
+template <typename T>
+class Guarded {
+    static_assert(std::is_integral<T>::value, "Guarded<T> supports integral types only");
+
+    volatile T        encoded_ = 0;
+    volatile uint64_t key_     = 0;
+    volatile uint64_t canary_  = 0;
+    std::atomic<bool> initialized_{false};
+
+    void rekey(T logicalValue) {
+        uint64_t newKey = SecureRandom64();
+        T newEncoded = static_cast<T>(logicalValue ^ static_cast<T>(newKey));
+        uint64_t newCanary = ComputeCanary(static_cast<uint64_t>(newEncoded), newKey);
+
+        encoded_ = newEncoded;
+        key_ = newKey;
+        canary_ = newCanary; // write order matters: canary last
+        initialized_ = true;
+    }
+
+public:
+    Guarded() = default;
+    explicit Guarded(T initial) { rekey(initial); }
+
+    void set(T value) { rekey(value); }
+
+    // Re-roll the key without changing the logical value - call this
+    // periodically (e.g. every N heartbeats) so even an unchanged health
+    // value never has a stable byte pattern in memory.
+    void reroll() { rekey(get()); }
+
+    T get() const {
+        if (!initialized_.load()) {
+            if (g_tamperCallback) g_tamperCallback(TamperReason::ReadWithoutInit, this);
+            return T{};
+        }
+        uint64_t expectedCanary = ComputeCanary(static_cast<uint64_t>(encoded_), key_);
+        if (expectedCanary != canary_) {
+            if (g_tamperCallback) g_tamperCallback(TamperReason::CanaryMismatch, this);
+        }
+        return static_cast<T>(encoded_ ^ static_cast<T>(key_));
+    }
+
+    Guarded& operator=(T value) { set(value); return *this; }
+    operator T() const { return get(); }
+};
+
+} // namespace sentinel
+
+```
+
+`sentinel_km.c`:
+
+```c
+/*
+ * Not sure if this works at the moment
+ */
+
+#include <ntddk.h>
+#include <ntstrsafe.h>
+
+// These standard process/thread access-mask constants ship in the real
+// Microsoft WDK headers; the mingw-w64 community DDK set used to
+// syntax-check this file doesn't include them, so they're defined here as a
+// fallback. Values match the documented Windows access-right bit layout.
+#ifndef PROCESS_TERMINATE
+#define PROCESS_TERMINATE         0x0001
+#define PROCESS_CREATE_THREAD     0x0002
+#define PROCESS_VM_OPERATION      0x0008
+#define PROCESS_VM_READ           0x0010
+#define PROCESS_VM_WRITE          0x0020
+#define PROCESS_SUSPEND_RESUME    0x0800
+#endif
+
+#define SENTINEL_DEVICE_NAME      L"\\Device\\SentinelKM"
+#define SENTINEL_SYMLINK_NAME     L"\\DosDevices\\SentinelKM"
+
+#define IOCTL_SENTINEL_PING \
+    CTL_CODE(FILE_DEVICE_UNKNOWN, 0x1488, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define IOCTL_SENTINEL_SET_PROTECTED_PID \
+    CTL_CODE(FILE_DEVICE_UNKNOWN, 0x1489, METHOD_BUFFERED, FILE_ANY_ACCESS)
+
+// ---- global state -----------------------------------------------------------
+static HANDLE                 g_ProtectedPid = NULL;
+static PVOID                  g_ObCallbackHandle = NULL;
+static PVOID                  g_LoadImageRegistered = NULL;
+
+// Trusted publisher whitelist would be loaded from a signed config blob
+// shipped with the driver, not hardcoded - stubbed for clarity.
+static BOOLEAN VerifyDriverImageSignature(_In_ PUNICODE_STRING ImagePath)
+{
+    UNREFERENCED_PARAMETER(ImagePath);
+    // Real implementation: use the kernel-mode Authenticode verification
+    // path (catalog/embedded signature check against a maintained
+    // publisher whitelist). This is a nontrivial subsystem in its own
+    // right; stubbed here to keep the skeleton's control flow legible.
+    return TRUE;
+}
+
+static BOOLEAN IsCallerWhitelisted(_In_ HANDLE RequestorPid)
+{
+    // Real implementation checks the requesting process's own image
+    // signature against the driver's whitelist (loaded once, cached by
+    // PID, invalidated on process exit) - never PID/name alone, since
+    // both are trivially spoofed by a compromised or replaced process.
+    UNREFERENCED_PARAMETER(RequestorPid);
+    return FALSE;
+}
+
+// ---- 3.2: process/thread self-protection via ObRegisterCallbacks ----------
+static OB_PREOP_CALLBACK_STATUS
+SentinelPreOperationCallback(
+    _In_ PVOID RegistrationContext,
+    _In_ POB_PRE_OPERATION_INFORMATION OperationInformation)
+{
+    UNREFERENCED_PARAMETER(RegistrationContext);
+
+    if (OperationInformation->ObjectType != *PsProcessType &&
+        OperationInformation->ObjectType != *PsThreadType) {
+        return OB_PREOP_SUCCESS;
+    }
+
+    HANDLE targetPid = NULL;
+    if (OperationInformation->ObjectType == *PsProcessType) {
+        targetPid = PsGetProcessId((PEPROCESS)OperationInformation->Object);
+    } else {
+        PETHREAD thread = (PETHREAD)OperationInformation->Object;
+        targetPid = PsGetThreadProcessId(thread);
+    }
+
+    if (targetPid != g_ProtectedPid || g_ProtectedPid == NULL) {
+        return OB_PREOP_SUCCESS;
+    }
+
+    HANDLE requestorPid = PsGetCurrentProcessId();
+    if (IsCallerWhitelisted(requestorPid)) {
+        return OB_PREOP_SUCCESS;
+    }
+
+    ACCESS_MASK stripMask = PROCESS_VM_WRITE | PROCESS_VM_READ |
+                             PROCESS_TERMINATE | PROCESS_SUSPEND_RESUME |
+                             PROCESS_CREATE_THREAD | THREAD_TERMINATE |
+                             THREAD_SUSPEND_RESUME | THREAD_SET_CONTEXT |
+                             THREAD_GET_CONTEXT;
+
+    if (OperationInformation->Operation == OB_OPERATION_HANDLE_CREATE) {
+        OperationInformation->Parameters->CreateHandleInformation.DesiredAccess &= ~stripMask;
+    } else if (OperationInformation->Operation == OB_OPERATION_HANDLE_DUPLICATE) {
+        OperationInformation->Parameters->DuplicateHandleInformation.DesiredAccess &= ~stripMask;
+    }
+
+    return OB_PREOP_SUCCESS;
+}
+
+static NTSTATUS RegisterProcessProtectionCallback(_In_ PDRIVER_OBJECT DriverObject)
+{
+    OB_OPERATION_REGISTRATION opRegistration[2] = { 0 };
+    OB_CALLBACK_REGISTRATION cbRegistration = { 0 };
+
+    opRegistration[0].ObjectType = PsProcessType;
+    opRegistration[0].Operations = OB_OPERATION_HANDLE_CREATE | OB_OPERATION_HANDLE_DUPLICATE;
+    opRegistration[0].PreOperation = SentinelPreOperationCallback;
+
+    opRegistration[1].ObjectType = PsThreadType;
+    opRegistration[1].Operations = OB_OPERATION_HANDLE_CREATE | OB_OPERATION_HANDLE_DUPLICATE;
+    opRegistration[1].PreOperation = SentinelPreOperationCallback;
+
+    cbRegistration.Version = OB_FLT_REGISTRATION_VERSION;
+    cbRegistration.OperationRegistrationCount = 2;
+    cbRegistration.RegistrationContext = NULL;
+    RtlInitUnicodeString(&cbRegistration.Altitude, L"320000"); // must be a real, unique altitude in production
+    cbRegistration.OperationRegistration = opRegistration;
+
+    UNREFERENCED_PARAMETER(DriverObject);
+    return ObRegisterCallbacks(&cbRegistration, &g_ObCallbackHandle);
+}
+
+// ---- 3.3: unauthorized kernel driver load detection ------------------------
+static VOID
+SentinelLoadImageNotifyRoutine(
+    _In_opt_ PUNICODE_STRING FullImageName,
+    _In_ HANDLE ProcessId,
+    _In_ PIMAGE_INFO ImageInfo)
+{
+    UNREFERENCED_PARAMETER(ProcessId);
+
+    if (!ImageInfo->SystemModeImage || FullImageName == NULL) {
+        return; // only care about kernel-mode images with a resolvable path
+    }
+
+    if (!VerifyDriverImageSignature(FullImageName)) {
+        // Cannot safely force-unload an arbitrary third-party driver from
+        // here (unsupported and can bugcheck the machine). The correct
+        // action is: log the event with full detail, mark this session as
+        // compromised for the backend's risk scoring, and let policy
+        // (soft-ban / session-terminate) be decided server-side per the
+        // severity tiers in the TDD, not unilaterally by the driver.
+        DbgPrint("[Sentinel] Unsigned/unwhitelisted kernel image loaded: %wZ\n",
+                 FullImageName);
+    }
+}
+
+// ---- IOCTL dispatch ---------------------------------------------------------
+static NTSTATUS
+SentinelDeviceControl(_In_ PDEVICE_OBJECT DeviceObject, _Inout_ PIRP Irp)
+{
+    UNREFERENCED_PARAMETER(DeviceObject);
+    PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
+    NTSTATUS status = STATUS_SUCCESS;
+    ULONG_PTR info = 0;
+
+    switch (stack->Parameters.DeviceIoControl.IoControlCode) {
+        case IOCTL_SENTINEL_PING:
+            status = STATUS_SUCCESS;
+            break;
+
+        case IOCTL_SENTINEL_SET_PROTECTED_PID: {
+            if (stack->Parameters.DeviceIoControl.InputBufferLength < sizeof(ULONG)) {
+                status = STATUS_INVALID_PARAMETER;
+                break;
+            }
+            // Caller (the Sentinel usermode service, verified via its own
+            // signature at connect-time in production) sets which PID is
+            // the protected game process.
+            ULONG pid = *(PULONG)Irp->AssociatedIrp.SystemBuffer;
+            g_ProtectedPid = ULongToHandle(pid);
+            status = STATUS_SUCCESS;
+            break;
+        }
+
+        default:
+            status = STATUS_INVALID_DEVICE_REQUEST;
+            break;
+    }
+
+    Irp->IoStatus.Status = status;
+    Irp->IoStatus.Information = info;
+    IoCompleteRequest(Irp, IO_NO_INCREMENT);
+    return status;
+}
+
+static NTSTATUS SentinelCreateClose(_In_ PDEVICE_OBJECT DeviceObject, _Inout_ PIRP Irp)
+{
+    UNREFERENCED_PARAMETER(DeviceObject);
+    Irp->IoStatus.Status = STATUS_SUCCESS;
+    Irp->IoStatus.Information = 0;
+    IoCompleteRequest(Irp, IO_NO_INCREMENT);
+    return STATUS_SUCCESS;
+}
+
+static VOID SentinelDriverUnload(_In_ PDRIVER_OBJECT DriverObject)
+{
+    UNICODE_STRING symlink;
+    RtlInitUnicodeString(&symlink, SENTINEL_SYMLINK_NAME);
+    IoDeleteSymbolicLink(&symlink);
+
+    if (g_ObCallbackHandle) {
+        ObUnRegisterCallbacks(g_ObCallbackHandle);
+    }
+    if (g_LoadImageRegistered) {
+        PsRemoveLoadImageNotifyRoutine(SentinelLoadImageNotifyRoutine);
+    }
+    if (DriverObject->DeviceObject) {
+        IoDeleteDevice(DriverObject->DeviceObject);
+    }
+}
+
+NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING RegistryPath)
+{
+    UNREFERENCED_PARAMETER(RegistryPath);
+    NTSTATUS status;
+    UNICODE_STRING deviceName, symlinkName;
+    PDEVICE_OBJECT deviceObject = NULL;
+
+    RtlInitUnicodeString(&deviceName, SENTINEL_DEVICE_NAME);
+    status = IoCreateDevice(DriverObject, 0, &deviceName, FILE_DEVICE_UNKNOWN,
+                             FILE_DEVICE_SECURE_OPEN, FALSE, &deviceObject);
+    if (!NT_SUCCESS(status)) return status;
+
+    RtlInitUnicodeString(&symlinkName, SENTINEL_SYMLINK_NAME);
+    status = IoCreateSymbolicLink(&symlinkName, &deviceName);
+    if (!NT_SUCCESS(status)) {
+        IoDeleteDevice(deviceObject);
+        return status;
+    }
+
+    DriverObject->MajorFunction[IRP_MJ_CREATE] = SentinelCreateClose;
+    DriverObject->MajorFunction[IRP_MJ_CLOSE] = SentinelCreateClose;
+    DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = SentinelDeviceControl;
+    DriverObject->DriverUnload = SentinelDriverUnload;
+
+    status = RegisterProcessProtectionCallback(DriverObject);
+    if (!NT_SUCCESS(status)) {
+        DbgPrint("[Sentinel] ObRegisterCallbacks failed: 0x%X (altitude conflict or "
+                 "unsigned driver missing the required minifilter cert?)\n", status);
+        // Not fatal for driver load - continue with reduced protection and
+        // let telemetry surface the degraded state rather than refusing to
+        // load entirely.
+    }
+
+    status = PsSetLoadImageNotifyRoutine(SentinelLoadImageNotifyRoutine);
+    if (NT_SUCCESS(status)) {
+        g_LoadImageRegistered = (PVOID)(ULONG_PTR)1;
+    } else {
+        DbgPrint("[Sentinel] PsSetLoadImageNotifyRoutine failed: 0x%X\n", status);
+    }
+
+    return STATUS_SUCCESS;
+}
+
+```
+
+`sentinel_overlay_guard.cpp`:
+
+```cpp
+// sentinel_overlay_guard.cpp
+// Blocks unauthorized overlay windows (ESP boxes, radars) by:
+//   1. Running the game on a dedicated, non-default Window Station + Desktop
+//      so only explicitly whitelisted processes can even open a handle to
+//      interact with it (the strong control).
+//   2. As a defense-in-depth secondary check, periodically enumerating
+//      layered/topmost windows and flagging ones from unrecognized,
+//      unsigned processes (the detection/telemetry control).
+//
+// Note: WS_EX_LAYERED + WS_EX_TRANSPARENT + WS_EX_TOPMOST is the textbook
+// ESP-overlay window style, but plenty of legitimate software (Discord
+// overlay, GeForce Experience, streaming software) uses the same pattern -
+// so this must whitelist by *signed binary identity*, not window class name
+// or title, both of which are trivially spoofed.
+
+#include <windows.h>
+#include <vector>
+#include <string>
+#include <functional>
+
+namespace sentinel {
+
+// ---- 1. Dedicated Window Station / Desktop isolation -----------------------
+
+struct IsolatedDesktopHandle {
+    HWINSTA winsta = nullptr;
+    HDESK   desktop = nullptr;
+};
+
+// Call once at game startup, before creating the main game window.
+// Only processes explicitly added via AddAceToWindowStation should be able
+// to open USER handles against this desktop at all.
+bool CreateIsolatedGameDesktop(IsolatedDesktopHandle* out) {
+    out->winsta = CreateWindowStationW(L"SentinelGameStation", 0,
+                                        WINSTA_ALL_ACCESS, nullptr);
+    if (!out->winsta) return false;
+
+    if (!SetProcessWindowStation(out->winsta)) return false;
+
+    out->desktop = CreateDesktopW(L"SentinelGameDesktop", nullptr, nullptr, 0,
+                                   GENERIC_ALL, nullptr);
+    return out->desktop != nullptr;
+}
+
+// Grant a specific, already-signature-verified process access to render on
+// this desktop (e.g. a whitelisted streaming overlay). Everything else is
+// implicitly locked out because it never gets a handle in the first place.
+bool GrantDesktopAccessToProcess(const IsolatedDesktopHandle& iso, DWORD pid) {
+    // In production: build a SECURITY_DESCRIPTOR / ACL update against
+    // iso.desktop using SetSecurityInfo(), granting DESKTOP_ALL_ACCESS to
+    // the target process's token SID. Elided here since it's ACL
+    // boilerplate rather than anti-cheat logic - the important design
+    // point is the default-deny posture above, not the grant mechanics.
+    (void)iso; (void)pid;
+    return true;
+}
+
+// ---- 2. Secondary telemetry: flag suspicious layered/topmost windows -------
+
+struct SuspectOverlay {
+    HWND   hwnd;
+    DWORD  ownerPid;
+    std::wstring ownerImagePath;
+};
+
+bool GetProcessImagePath(DWORD pid, std::wstring* outPath) {
+    HANDLE h = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+    if (!h) return false;
+    wchar_t buf[MAX_PATH];
+    DWORD len = MAX_PATH;
+    bool ok = QueryFullProcessImageNameW(h, 0, buf, &len);
+    CloseHandle(h);
+    if (ok) *outPath = buf;
+    return ok;
+}
+
+struct EnumContext {
+    HWND gameHwnd;
+    const std::vector<std::wstring>* whitelist;
+    std::vector<SuspectOverlay>* results;
+};
+
+BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lparam) {
+    auto* ctx = reinterpret_cast<EnumContext*>(lparam);
+    if (hwnd == ctx->gameHwnd) return TRUE;
+
+    LONG_PTR exStyle = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+    bool layered     = (exStyle & WS_EX_LAYERED) != 0;
+    bool transparent = (exStyle & WS_EX_TRANSPARENT) != 0;
+    bool topmost     = (exStyle & WS_EX_TOPMOST) != 0;
+
+    if (!(layered && (transparent || topmost))) return TRUE; // not overlay-shaped
+
+    DWORD pid = 0;
+    GetWindowThreadProcessId(hwnd, &pid);
+
+    std::wstring imagePath;
+    if (!GetProcessImagePath(pid, &imagePath)) return TRUE;
+
+    bool whitelisted = false;
+    for (const auto& w : *ctx->whitelist) {
+        if (_wcsicmp(imagePath.c_str(), w.c_str()) == 0) { whitelisted = true; break; }
+    }
+
+    if (!whitelisted) {
+        ctx->results->push_back({hwnd, pid, imagePath});
+    }
+    return TRUE;
+}
+
+// Run periodically (e.g. every 500ms) from the usermode service.
+std::vector<SuspectOverlay> ScanForUnauthorizedOverlays(
+    HWND gameHwnd, const std::vector<std::wstring>& signedProcessWhitelist) {
+    std::vector<SuspectOverlay> results;
+    EnumContext ctx{gameHwnd, &signedProcessWhitelist, &results};
+    EnumWindows(EnumWindowsCallback, reinterpret_cast<LPARAM>(&ctx));
+    return results;
+}
+
+} // namespace sentinel
+
+```
+
+`sentinel_sdk.cpp`:
+
+```cpp
+// sentinel_sdk.cpp
+// Implements the thin in-process shim described in the TDD section 2.
+// Real detection logic deliberately lives out-of-process in sentinel_svc;
+// this file's job is only: find our own .text section, talk to the service,
+// and drain a heartbeat mailbox cheaply once per tick.
+
+#include "sentinel_sdk.h"
+#include <windows.h>
+#include <winternl.h>
+#include <string>
+#include <vector>
+#include <atomic>
+#include <thread>
+#include <cstdint>
+
+namespace {
+
+constexpr wchar_t kPipeNamePrefix[] = L"\\\\.\\pipe\\sentinel_";
+
+struct TextSection {
+    uint8_t* base = nullptr;
+    size_t   size = 0;
+};
+
+std::atomic<bool>   g_initialized{false};
+std::atomic<bool>   g_shuttingDown{false};
+HANDLE              g_pipe = INVALID_HANDLE_VALUE;
+std::thread         g_heartbeatDrainThread;
+TextSection         g_textSection;
+size_t              g_nextChecksumWindow = 0;
+constexpr size_t    kChecksumWindowBytes = 4096;
+
+// ---- PE self-mapping (no manual offsets, ever) -----------------------------
+// Walks our own module's headers to find the .text section and import table.
+// This mirrors what any PE-loader tutorial or the Windows loader itself does;
+// there's nothing here beyond reading documented header structures.
+bool LocateOwnTextSection(TextSection* out) {
+    HMODULE self = GetModuleHandleW(nullptr); // host executable, not this DLL
+    if (!self) return false;
+
+    auto base = reinterpret_cast<uint8_t*>(self);
+    auto dos = reinterpret_cast<IMAGE_DOS_HEADER*>(base);
+    if (dos->e_magic != IMAGE_DOS_SIGNATURE) return false;
+
+    auto nt = reinterpret_cast<IMAGE_NT_HEADERS64*>(base + dos->e_lfanew);
+    if (nt->Signature != IMAGE_NT_SIGNATURE) return false;
+
+    auto section = IMAGE_FIRST_SECTION(nt);
+    for (WORD i = 0; i < nt->FileHeader.NumberOfSections; i++, section++) {
+        bool executable = (section->Characteristics & IMAGE_SCN_MEM_EXECUTE) != 0;
+        bool writable    = (section->Characteristics & IMAGE_SCN_MEM_WRITE) != 0;
+        if (executable && !writable) {
+            out->base = base + section->VirtualAddress;
+            out->size = section->Misc.VirtualSize;
+            return true;
+        }
+    }
+    return false;
+}
+
+// Simple non-cryptographic rolling checksum used ONLY for cheap per-tick
+// drift detection; the ground-truth SHA-256 baseline lives in the service,
+// which independently reads our memory rather than trusting what we report.
+uint64_t FnvWindowChecksum(const uint8_t* data, size_t len) {
+    uint64_t hash = 1469598103934665603ull;
+    for (size_t i = 0; i < len; i++) {
+        hash ^= data[i];
+        hash *= 1099511628211ull;
+    }
+    return hash;
+}
+
+bool ConnectToService(const std::wstring& sessionGuid) {
+    std::wstring pipeName = std::wstring(kPipeNamePrefix) + sessionGuid;
+
+    for (int attempt = 0; attempt < 3; attempt++) {
+        g_pipe = CreateFileW(pipeName.c_str(), GENERIC_READ | GENERIC_WRITE,
+                              0, nullptr, OPEN_EXISTING, 0, nullptr);
+        if (g_pipe != INVALID_HANDLE_VALUE) return true;
+        Sleep(200);
+    }
+    return false;
+}
+
+struct HelloMessage {
+    char     game_id[64];
+    char     build_version[32];
+    uint64_t image_base;
+};
+
+} // namespace
+
+extern "C" SentinelStatus Sentinel_Init(const char* game_id, const char* build_version) {
+    if (g_initialized.load()) return SENTINEL_ERR_ALREADY_INIT;
+    if (!game_id || !build_version) return SENTINEL_ERR_INTEGRITY_FAIL;
+
+    if (!LocateOwnTextSection(&g_textSection)) {
+        return SENTINEL_ERR_INTEGRITY_FAIL;
+    }
+
+    // Session GUID would normally come from the service's well-known
+    // discovery mechanism (e.g. a registry key or shared-memory handshake
+    // written by sentinel_svc at boot). Stubbed here for clarity.
+    std::wstring sessionGuid = L"session-guid-placeholder";
+    if (!ConnectToService(sessionGuid)) {
+        return SENTINEL_ERR_SERVICE_UNREACHABLE;
+    }
+
+    HelloMessage hello{};
+    strncpy_s(hello.game_id, game_id, sizeof(hello.game_id) - 1);
+    strncpy_s(hello.build_version, build_version, sizeof(hello.build_version) - 1);
+    hello.image_base = reinterpret_cast<uint64_t>(GetModuleHandleW(nullptr));
+
+    DWORD written = 0;
+    if (!WriteFile(g_pipe, &hello, sizeof(hello), &written, nullptr) ||
+        written != sizeof(hello)) {
+        CloseHandle(g_pipe);
+        g_pipe = INVALID_HANDLE_VALUE;
+        return SENTINEL_ERR_SERVICE_UNREACHABLE;
+    }
+
+    g_initialized = true;
+    g_shuttingDown = false;
+    return SENTINEL_OK;
+}
+
+extern "C" SentinelStatus Sentinel_Heartbeat(float /*deltaTime*/) {
+    if (!g_initialized.load()) return SENTINEL_ERR_NOT_INITIALIZED;
+    if (g_pipe == INVALID_HANDLE_VALUE) return SENTINEL_ERR_SERVICE_UNREACHABLE;
+
+    // Amortized checksum: verify one 4KB window per tick, not the whole
+    // section every frame. Report the window index + checksum; the service
+    // compares against its own independently-read baseline.
+    size_t remaining = g_textSection.size - g_nextChecksumWindow;
+    size_t windowLen = remaining < kChecksumWindowBytes ? remaining : kChecksumWindowBytes;
+
+    if (windowLen > 0) {
+        uint64_t checksum = FnvWindowChecksum(g_textSection.base + g_nextChecksumWindow, windowLen);
+
+        struct { uint32_t offset; uint32_t len; uint64_t checksum; } report{
+            static_cast<uint32_t>(g_nextChecksumWindow),
+            static_cast<uint32_t>(windowLen),
+            checksum
+        };
+
+        DWORD written = 0;
+        WriteFile(g_pipe, &report, sizeof(report), &written, nullptr);
+
+        g_nextChecksumWindow += windowLen;
+        if (g_nextChecksumWindow >= g_textSection.size) g_nextChecksumWindow = 0;
+    }
+
+    return SENTINEL_OK;
+}
+
+extern "C" void Sentinel_Shutdown(void) {
+    g_shuttingDown = true;
+    if (g_pipe != INVALID_HANDLE_VALUE) {
+        FlushFileBuffers(g_pipe);
+        CloseHandle(g_pipe);
+        g_pipe = INVALID_HANDLE_VALUE;
+    }
+    g_initialized = false;
+}
+
+```
+
+`sentinel_stackwalk.cpp`:
+
+```cpp
+// sentinel_stackwalk.cpp
+// Detects manually-mapped / reflectively-injected DLLs by walking a target
+// thread's call stack and checking every return address against the set of
+// modules the loader actually knows about (PEB.Ldr). A manual-mapped DLL
+// deliberately avoids registering itself there, but code running from it
+// still leaves return addresses on the stack pointing into that unbacked
+// region - that mismatch is the tell.
+//
+// IMPORTANT: this is designed to run from the OUT-OF-PROCESS usermode
+// service against a suspended target thread, not from inside the game
+// process. If it ran inside the (potentially compromised) game process, a
+// cheat could simply patch this function's own logic before it runs.
+
+#include <windows.h>
+#include <dbghelp.h>
+#include <tlhelp32.h>
+#include <vector>
+#include <unordered_map>
+#include <string>
+
+#pragma comment(lib, "dbghelp.lib")
+
+namespace sentinel {
+
+struct ModuleRange {
+    uintptr_t base;
+    uintptr_t end;
+    std::wstring path;
+};
+
+// Snapshot of modules the loader knows about for a given process, taken via
+// Toolhelp32 from the OUT-OF-PROCESS service (works even if the target
+// process's own PEB has been tampered with, since we don't ask the target
+// to describe itself - we ask the OS).
+std::vector<ModuleRange> SnapshotProcessModules(DWORD pid) {
+    std::vector<ModuleRange> modules;
+    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
+    if (snap == INVALID_HANDLE_VALUE) return modules;
+
+    MODULEENTRY32W me{};
+    me.dwSize = sizeof(me);
+    if (Module32FirstW(snap, &me)) {
+        do {
+            auto base = reinterpret_cast<uintptr_t>(me.modBaseAddr);
+            modules.push_back({base, base + me.modBaseSize, me.szExePath});
+        } while (Module32NextW(snap, &me));
+    }
+    CloseHandle(snap);
+    return modules;
+}
+
+bool IsWhitelistedModule(const std::wstring& path,
+                          const std::vector<std::wstring>& whitelist) {
+    for (const auto& w : whitelist) {
+        if (_wcsicmp(path.c_str(), w.c_str()) == 0) return true;
+    }
+    return false;
+}
+
+const ModuleRange* FindModuleForAddress(uintptr_t addr, const std::vector<ModuleRange>& modules) {
+    for (const auto& m : modules) {
+        if (addr >= m.base && addr < m.end) return &m;
+    }
+    return nullptr;
+}
+
+enum class TamperFinding {
+    Clean,
+    UnbackedReturnAddress,   // no loaded module owns this address at all
+    UnwhitelistedModule,     // owned by a module, but not one we trust
+};
+
+struct StackWalkResult {
+    TamperFinding finding = TamperFinding::Clean;
+    uintptr_t     suspectAddress = 0;
+    std::wstring  suspectModulePath;
+};
+
+// Walks the stack of a *suspended* target thread from outside its process.
+// Caller is responsible for SuspendThread/ResumeThread around this call.
+StackWalkResult ValidateThreadCallStack(HANDLE hProcess, HANDLE hThread,
+                                         const std::vector<std::wstring>& whitelist) {
+    StackWalkResult result;
+
+    CONTEXT ctx{};
+    ctx.ContextFlags = CONTEXT_FULL;
+    if (!GetThreadContext(hThread, &ctx)) return result;
+
+    STACKFRAME64 frame{};
+    frame.AddrPC.Offset    = ctx.Rip;
+    frame.AddrPC.Mode      = AddrModeFlat;
+    frame.AddrFrame.Offset = ctx.Rbp;
+    frame.AddrFrame.Mode   = AddrModeFlat;
+    frame.AddrStack.Offset = ctx.Rsp;
+    frame.AddrStack.Mode   = AddrModeFlat;
+
+    auto modules = SnapshotProcessModules(GetProcessId(hProcess));
+
+    for (int depth = 0; depth < 64; depth++) {
+        BOOL ok = StackWalk64(IMAGE_FILE_MACHINE_AMD64, hProcess, hThread, &frame,
+                               &ctx, nullptr, SymFunctionTableAccess64,
+                               SymGetModuleBase64, nullptr);
+        if (!ok || frame.AddrPC.Offset == 0) break;
+
+        auto* owner = FindModuleForAddress(frame.AddrPC.Offset, modules);
+        if (!owner) {
+            result.finding = TamperFinding::UnbackedReturnAddress;
+            result.suspectAddress = frame.AddrPC.Offset;
+            return result;
+        }
+        if (!IsWhitelistedModule(owner->path, whitelist)) {
+            result.finding = TamperFinding::UnwhitelistedModule;
+            result.suspectAddress = frame.AddrPC.Offset;
+            result.suspectModulePath = owner->path;
+            return result;
+        }
+    }
+
+    return result; // Clean
+}
+
+} // namespace sentinel
+
+```
+
+`server.js`:
+
+```js
+/**
+ * Project Sentinel — Signature Server (reference implementation)
+ *
+ * Runnable demo of the backend described in the TDD:
+ *  - POST /api/v1/blacklist/upload      upload a new signature
+ *  - POST /api/v1/blacklist/:id/disable false-positive rollback
+ *  - GET  /api/v1/blacklist/list        list active signatures
+ *  - POST /api/v1/telemetry/report      client -> server detection event
+ *  - GET  /api/v1/stream                SSE push channel (live signature updates)
+ *
+ * Storage: in-memory + JSON snapshot on disk (swap for Postgres in production —
+ * see the `signatures` / `detections` schema in the design doc for the real shape).
+ *
+ * Auth: simple API-key header for studio endpoints, bearer "client-token" for
+ * client-facing endpoints. Replace with real mTLS / signed client certs in production.
+ */
+
+const express = require("express");
+const { randomUUID } = require("crypto");
+const fs = require("fs");
+const path = require("path");
+
+const app = express();
+app.use(express.json());
+
+const DB_FILE = path.join(__dirname, "data", "signatures.json");
+fs.mkdirSync(path.join(__dirname, "data"), { recursive: true });
+
+// ---- tiny persisted store -------------------------------------------------
+function loadDb() {
+  if (!fs.existsSync(DB_FILE)) return { signatures: [], detections: [] };
+  return JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
+}
+function saveDb(db) {
+  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
+}
+let db = loadDb();
+
+// ---- SSE client registry ---------------------------------------------------
+const sseClients = new Set();
+
+function broadcast(event, payload) {
+  const data = `event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`;
+  for (const res of sseClients) res.write(data);
+}
+
+// ---- auth middleware (demo-grade) -----------------------------------------
+const STUDIO_API_KEYS = new Set(["studio-demo-key-123"]); // replace with real key store
+
+function requireStudioKey(req, res, next) {
+  const key = req.header("X-API-Key");
+  if (!key || !STUDIO_API_KEYS.has(key)) {
+    return res.status(401).json({ error: "invalid or missing API key" });
+  }
+  next();
+}
+
+// ---- validation helpers -----------------------------------------------------
+const VALID_CATEGORIES = ["Driver", "Usermode_Exe", "Memory_Pattern"];
+const VALID_VALUE_TYPES = ["sha256", "aob_mask", "pe_section_hash"];
+const VALID_SEVERITIES = ["log_only", "soft_flag", "session_terminate"];
+
+// ============================================================================
+// POST /api/v1/blacklist/upload
+// ============================================================================
+app.post("/api/v1/blacklist/upload", requireStudioKey, (req, res) => {
+  const { category, value, value_type, description, severity, game_id } = req.body;
+
+  if (!VALID_CATEGORIES.includes(category)) {
+    return res.status(400).json({ error: `category must be one of ${VALID_CATEGORIES}` });
+  }
+  if (!VALID_VALUE_TYPES.includes(value_type)) {
+    return res.status(400).json({ error: `value_type must be one of ${VALID_VALUE_TYPES}` });
+  }
+  if (!VALID_SEVERITIES.includes(severity)) {
+    return res.status(400).json({ error: `severity must be one of ${VALID_SEVERITIES}` });
+  }
+  if (!value || !game_id) {
+    return res.status(400).json({ error: "value and game_id are required" });
+  }
+
+  const sig = {
+    sig_id: randomUUID(),
+    category,
+    value,
+    value_type,
+    description: description || "",
+    severity,
+    game_id,
+    uploaded_by: req.header("X-API-Key"), // demo: key stands in for analyst id
+    created_at: new Date().toISOString(),
+    active: true,
+    false_positive_count: 0,
+  };
+
+  db.signatures.push(sig);
+  saveDb(db);
+
+  // fan out to connected clients immediately
+  broadcast("signature_added", sig);
+
+  res.status(201).json(sig);
+});
+
+// ============================================================================
+// POST /api/v1/blacklist/:id/disable  (false-positive rollback)
+// ============================================================================
+app.post("/api/v1/blacklist/:id/disable", requireStudioKey, (req, res) => {
+  const sig = db.signatures.find((s) => s.sig_id === req.params.id);
+  if (!sig) return res.status(404).json({ error: "signature not found" });
+
+  sig.active = false;
+  sig.disabled_at = new Date().toISOString();
+  sig.disabled_by = req.header("X-API-Key");
+  saveDb(db);
+
+  broadcast("signature_disabled", { sig_id: sig.sig_id });
+
+  res.json(sig);
+});
+
+// ============================================================================
+// GET /api/v1/blacklist/list
+// ============================================================================
+app.get("/api/v1/blacklist/list", requireStudioKey, (req, res) => {
+  const activeOnly = req.query.active !== "false";
+  const gameId = req.query.game_id;
+
+  let results = db.signatures;
+  if (activeOnly) results = results.filter((s) => s.active);
+  if (gameId) results = results.filter((s) => s.game_id === gameId);
+
+  res.json({ count: results.length, signatures: results });
+});
+
+// ============================================================================
+// POST /api/v1/telemetry/report  (client -> server detection event)
+// ============================================================================
+app.post("/api/v1/telemetry/report", (req, res) => {
+  const { sig_id, client_session, platform_id, action_taken } = req.body;
+  if (!client_session || !action_taken) {
+    return res.status(400).json({ error: "client_session and action_taken are required" });
+  }
+
+  const detection = {
+    detection_id: randomUUID(),
+    sig_id: sig_id || null,
+    client_session,
+    platform_id: platform_id || "unknown",
+    detected_at: new Date().toISOString(),
+    action_taken,
+  };
+
+  db.detections.push(detection);
+
+  if (sig_id) {
+    const sig = db.signatures.find((s) => s.sig_id === sig_id);
+    if (sig && action_taken === "false_positive_reported") {
+      sig.false_positive_count += 1;
+      // simple auto-disable circuit breaker
+      if (sig.false_positive_count >= 25 && sig.active) {
+        sig.active = false;
+        sig.disabled_at = new Date().toISOString();
+        sig.disabled_by = "auto_circuit_breaker";
+        broadcast("signature_disabled", { sig_id: sig.sig_id, reason: "auto_circuit_breaker" });
+      }
+    }
+  }
+
+  saveDb(db);
+  res.status(201).json(detection);
+});
+
+// ============================================================================
+// GET /api/v1/stream  (SSE — live signature push)
+// ============================================================================
+app.get("/api/v1/stream", (req, res) => {
+  res.set({
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+  });
+  res.flushHeaders();
+
+  // send current active set immediately on connect (catch-up)
+  res.write(`event: snapshot\ndata: ${JSON.stringify(db.signatures.filter((s) => s.active))}\n\n`);
+
+  sseClients.add(res);
+  req.on("close", () => sseClients.delete(res));
+
+  // heartbeat so intermediaries/proxies don't time the connection out
+  const hb = setInterval(() => res.write(": heartbeat\n\n"), 15000);
+  req.on("close", () => clearInterval(hb));
+});
+
+// ---- health check -----------------------------------------------------------
+app.get("/health", (req, res) => res.json({ ok: true, signatures: db.signatures.length }));
+
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`Sentinel signature server listening on :${PORT}`));
+
+```

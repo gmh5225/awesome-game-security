@@ -19,7 +19,8 @@ sources:
   - wiki/sources/descriptions/symeonp__Lenovo-CVE-2025-8061.md
   - wiki/sources/descriptions/shareef12__cpuz.md
   - wiki/sources/descriptions/sai2fast__DsArk64.md
-updated: 2026-07-23
+  - wiki/sources/descriptions/redteamfortress__PhantomKiller.md
+updated: 2026-07-24
 confidence: high
 ---
 
@@ -43,6 +44,8 @@ Concrete AV/EDR-evasion research such as [[ven0m-ransomware]] abuses `iMFForceDe
 
 Process-terminate style killers such as [[av-edr-killer]] target `wsftprm.sys` via IOCTL `0x22201C` (1036-byte buffer; first DWORD = target PID). (source: wiki/sources/descriptions/xM0kht4r__AV-EDR-Killer.md)
 
+OEM BootRepair terminate primitives such as [[phantomkiller]] abuse signed Lenovo `BootRepair.sys` via IOCTL `0x222014` → `ZwTerminateProcess` to kill PPL-protected AV/EDR. (source: wiki/sources/descriptions/redteamfortress__PhantomKiller.md)
+
 DSE-disable controllers such as [[kvc]] use a signed Microsoft driver to patch CI.dll (`g_CiOptions`), plus `skci.dll` hijack / `SeCiCallbacks` redirection loaders and PP/PPL paths for LSASS dumps under HVCI/VBS. (source: wiki/sources/descriptions/wesmar__kvc.md)
 
 Broader Win11 research kits such as [[kernel-research-kit]] combine boot-time `SeCiCallbacks` DSE bypass with multiple unsigned-load methods including BYOVD alongside manual map and IRP hijack (25H2; native subsystem; anti-loop dual-path). (source: wiki/sources/descriptions/wesmar__KernelResearchKit.md)
@@ -61,5 +64,5 @@ Security-product handle-donor abuse such as [[dsark64]] targets Qihoo 360’s WH
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[dsark64]] · [[lenovo-cve-2025-8061]] · [[cpuz]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[patchguard]] · [[windows-kernel-exploits]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[lenovo-cve-2025-8061]] · [[cpuz]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 

@@ -11,7 +11,8 @@ sources:
   - wiki/sources/descriptions/wesmar__VaultGuard.md
   - wiki/sources/descriptions/wavestone-cdt__EDRSandblast.md
   - wiki/sources/descriptions/sbsbsbssbsbs__boundcallback.md
-updated: 2026-07-23
+  - wiki/sources/descriptions/vovasicidk__sentinelac.md
+updated: 2026-07-24
 confidence: high
 ---
 
@@ -23,7 +24,7 @@ Windows notify/object registration APIs used by anti-cheat and EDR to observe pr
 
 - `PsSetCreateProcessNotifyRoutine(Ex/2)`, `PsSetCreateThreadNotifyRoutine(Ex)`
 - `PsSetLoadImageNotifyRoutine(Ex)`
-- `ObRegisterCallbacks` (handle create/duplicate)
+- `ObRegisterCallbacks` (handle create/duplicate) — defensive AC skeletons such as [[sentinelac]] use Ob + load-image notify for process protection and unauthorized-driver detection (source: wiki/sources/descriptions/vovasicidk__sentinelac.md)
 - `CmRegisterCallback(Ex)`, minifilter `FltRegisterFilter`
 - `KeRegisterBoundCallback` — research sample [[boundcallback]] (cheat / driver-communication lane) (source: wiki/sources/descriptions/sbsbsbssbsbs__boundcallback.md)
 
@@ -33,4 +34,4 @@ Attackers with kernel R/W ([[byovd]]) may try to unlink or patch callback lists;
 
 ## Related
 
-[[byovd]] · [[hvci]] · [[bustercall]] · [[boundcallback]] · [[edrsandblast]] · [[openark]] · [[symlink-callback]] · [[vaultguard]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[hvci]] · [[bustercall]] · [[boundcallback]] · [[edrsandblast]] · [[openark]] · [[symlink-callback]] · [[vaultguard]] · [[sentinelac]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

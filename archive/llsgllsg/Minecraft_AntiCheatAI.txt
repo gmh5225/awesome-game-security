@@ -1,0 +1,1810 @@
+Project Path: arc_llsgllsg_Minecraft_AntiCheatAI_hgl9womd
+
+Source Tree:
+
+```txt
+arc_llsgllsg_Minecraft_AntiCheatAI_hgl9womd
+├── AntiCheat
+│   ├── pom.xml
+│   └── src
+│       └── main
+│           ├── java
+│           │   └── com
+│           │       └── gfish
+│           │           └── anticheat
+│           │               ├── AIInferenceEngine.java
+│           │               ├── AntiCheatPlugin.java
+│           │               ├── BehaviorImageBuilder.java
+│           │               └── BehaviorRecorder.java
+│           └── resources
+│               ├── config.yml
+│               └── plugin.yml
+├── LICENSE
+├── README.md
+├── crate.py
+├── predict_one.py
+├── prepare_data.py
+├── recorder-plugin
+│   ├── pom.xml
+│   └── src
+│       └── main
+│           ├── java
+│           │   └── com
+│           │       └── example
+│           │           └── recorder
+│           │               └── BehaviorRecorderPlugin.java
+│           └── resources
+│               ├── config.yml
+│               └── plugin.yml
+└── train_model.py
+
+```
+
+`AntiCheat/pom.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.gfish</groupId>
+    <artifactId>DeepGuard</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.21.1-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.onnxruntime</groupId>
+            <artifactId>onnxruntime</artifactId>
+            <version>1.17.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.11.6</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>DeepGuard</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+```
+
+`AntiCheat/src/main/java/com/gfish/anticheat/AIInferenceEngine.java`:
+
+```java
+package com.gfish.anticheat;
+
+import ai.onnxruntime.*;
+import java.nio.FloatBuffer;
+import java.util.Collections;
+
+public class AIInferenceEngine {
+    private OrtEnvironment env;
+    private OrtSession session;
+    private boolean loaded = false;
+
+    public boolean loadModel(String modelPath) {
+        try {
+            env = OrtEnvironment.getEnvironment();
+            OrtSession.SessionOptions opts = new OrtSession.SessionOptions();
+            opts.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.BASIC_OPT);
+            session = env.createSession(modelPath, opts);
+            loaded = true;
+            return true;
+        } catch (OrtException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public float[] infer(float[][][] input) {
+        if (!loaded) return new float[]{1.0f, 0.0f};
+        try {
+            int c = input.length;
+            int t = input[0].length;
+            float[] flat = new float[c * t];
+            for (int i = 0; i < c; i++) {
+                for (int j = 0; j < t; j++) {
+                    flat[i * t + j] = input[i][j][0];
+                }
+            }
+            OnnxTensor tensor = OnnxTensor.createTensor(env, FloatBuffer.wrap(flat), new long[]{1, c, t});
+            OrtSession.Result result = session.run(Collections.singletonMap("behavior_sequence", tensor));
+            float[][] output = (float[][]) result.get(0).getValue();
+            return output[0];
+        } catch (OrtException e) {
+            e.printStackTrace();
+            return new float[]{1.0f, 0.0f};
+        }
+    }
+}
+```
+
+`AntiCheat/src/main/java/com/gfish/anticheat/AntiCheatPlugin.java`:
+
+```java
+package com.gfish.anticheat;
+
+import me.clip.placeholderapi.PlaceholderAPI;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Boat;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+
+public class AntiCheatPlugin extends JavaPlugin implements Listener {
+
+    private final Map<UUID, BehaviorRecorder> recorders = new HashMap<>();
+    private final Map<UUID, Integer> flyWarnings = new HashMap<>();
+    private final Map<UUID, List<Long>> cheatTimestamps = new HashMap<>();
+    private final Map<UUID, Location> lastSpeedLocations = new HashMap<>();
+
+    private AIInferenceEngine aiEngine;
+    private double autoPunishThreshold, alertThreshold;
+    private int analysisSeconds;
+    private String punishCmd, banCmd;
+    private boolean aiEnabled;
+    private boolean flyCheck, boatSpeedCheck, speedCheckEnabled;
+    private double maxBoatSpeed, maxSpeed;
+    private String apPlaceholder, speedPunishCommand;
+    private File violationsFolder;
+    private boolean papiEnabled = false;
+    private boolean geyserBypassEnabled;
+
+    private static final long VIOLATION_WINDOW_MS = 5 * 60 * 1000;
+    private static final int MAX_KICKS = 3;
+
+    @Override
+    public void onEnable() {
+        saveDefaultConfig();
+        loadConfigValues();
+
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            papiEnabled = true;
+            getLogger().info("PlaceholderAPI 已挂接，速度检测将动态计算属性加成。");
+        } else {
+            getLogger().warning("PlaceholderAPI 未安装，属性加成将始终为 0。");
+        }
+
+        violationsFolder = new File(getDataFolder(), "violations");
+        if (!violationsFolder.exists()) violationsFolder.mkdirs();
+
+        if (aiEnabled) {
+            aiEngine = new AIInferenceEngine();
+            File modelFile = new File(getDataFolder(), getConfig().getString("ai.model-path", "scaffold_detector.onnx"));
+            if (modelFile.exists()) {
+                if (aiEngine.loadModel(modelFile.getAbsolutePath())) {
+                    getLogger().info("AI 模型加载成功");
+                } else {
+                    getLogger().warning("AI 模型加载失败");
+                }
+            } else {
+                getLogger().warning("找不到 AI 模型文件: " + modelFile.getAbsolutePath());
+            }
+        }
+
+        getServer().getPluginManager().registerEvents(this, this);
+
+        // 每 tick 记录行为
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Player player : getServer().getOnlinePlayers()) {
+                    recorders.computeIfAbsent(player.getUniqueId(), k -> new BehaviorRecorder())
+                            .record(captureTick(player));
+                }
+            }
+        }.runTaskTimer(this, 0L, 1L);
+
+        // 每秒速度检测
+        if (speedCheckEnabled) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    for (Player player : getServer().getOnlinePlayers()) {
+                        if (isExempted(player)) continue;
+                        if (player.hasPermission("deepguard.bypass")) continue;
+                        checkPlayerSpeed(player);
+                    }
+                }
+            }.runTaskTimer(this, 20L, 20L);
+        }
+
+        // 每分钟 AI 自动分析
+        if (aiEnabled) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    for (Player player : getServer().getOnlinePlayers()) {
+                        if (isExempted(player)) continue;
+                        analyzePlayerAsync(player);
+                    }
+                }
+            }.runTaskTimer(this, 1200L, 1200L);
+        }
+
+        getLogger().info("DeepGuard (Gfish) 已启用");
+    }
+
+    private void loadConfigValues() {
+        aiEnabled = getConfig().getBoolean("ai.enabled", true);
+        autoPunishThreshold = getConfig().getDouble("ai.auto-punish-threshold", 0.85);
+        alertThreshold = getConfig().getDouble("ai.alert-threshold", 0.5);
+        analysisSeconds = getConfig().getInt("ai.analysis-seconds", 30);
+        punishCmd = getConfig().getString("punish-command",
+                "kick %player% §c[DeepGuard] 检测到异常行为 [封禁码: %code%]");
+        banCmd = getConfig().getString("ban-command",
+                "ban %player% §c[DeepGuard] 多次作弊行为 [封禁码: %code%]");
+
+        flyCheck = getConfig().getBoolean("movement.fly", true);
+        boatSpeedCheck = getConfig().getBoolean("movement.boat-speed", true);
+        maxBoatSpeed = getConfig().getDouble("movement.max-boat-speed", 12.0);
+
+        speedCheckEnabled = getConfig().getBoolean("movement.speed.enabled", false);
+        maxSpeed = getConfig().getDouble("movement.speed.max-speed", 5.0);
+        apPlaceholder = getConfig().getString("movement.speed.ap-placeholder", "%ap_moving:max%");
+        speedPunishCommand = getConfig().getString("movement.speed.command", "kick %player% §c你移动速度过快！");
+
+        geyserBypassEnabled = getConfig().getBoolean("geyser-bypass.enabled", true);
+    }
+
+    /**
+     * 判断玩家是否豁免（Geyser 基岩版玩家），通过 UUID 版本检测
+     */
+    private boolean isExempted(Player player) {
+        if (!geyserBypassEnabled) return false;
+        // UUID version 3 = 基岩版，4 = Java版
+        return player.getUniqueId().version() == 3;
+    }
+
+    private BehaviorRecorder.BehaviorTick captureTick(Player player) {
+        BehaviorRecorder.BehaviorTick tick = new BehaviorRecorder.BehaviorTick();
+        Location loc = player.getLocation();
+        tick.timestamp = System.currentTimeMillis();
+        tick.pitch = loc.getPitch();
+        tick.yaw = loc.getYaw();
+        tick.posX = loc.getX();
+        tick.posY = loc.getY();
+        tick.posZ = loc.getZ();
+        tick.placing = false;
+        tick.sprinting = player.isSprinting();
+        tick.onGround = player.isOnGround();
+        tick.jumping = !player.isOnGround();
+        tick.moveSpeed = player.getVelocity().length();
+        tick.vertSpeed = player.getVelocity().getY();
+        return tick;
+    }
+
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent e) {
+        BehaviorRecorder rec = recorders.get(e.getPlayer().getUniqueId());
+        if (rec != null) {
+            BehaviorRecorder.BehaviorTick[] recent = rec.getRecentTicks(1);
+            if (recent.length > 0) {
+                recent[0].placing = true;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        UUID uuid = e.getPlayer().getUniqueId();
+        recorders.remove(uuid);
+        flyWarnings.remove(uuid);
+        cheatTimestamps.remove(uuid);
+        lastSpeedLocations.remove(uuid);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onMove(PlayerMoveEvent e) {
+        Player player = e.getPlayer();
+        if (isExempted(player)) return;
+        if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) return;
+
+        Location to = e.getTo();
+        if (to == null) return;
+
+        if (flyCheck) checkFly(player, to);
+        if (boatSpeedCheck) checkBoatSpeed(player, e.getFrom(), to);
+    }
+
+    private void checkFly(Player player, Location to) {
+        boolean legal = player.isFlying() || player.isGliding() ||
+                player.isInsideVehicle() ||
+                player.isInWater() || player.isInLava() ||
+                player.isOnGround() ||
+                player.hasPotionEffect(PotionEffectType.LEVITATION) ||
+                player.hasPotionEffect(PotionEffectType.SLOW_FALLING);
+
+        Block below = to.clone().subtract(0, 0.1, 0).getBlock();
+        if (!below.getType().isAir() && below.getType().isSolid()) {
+            legal = true;
+        }
+
+        if (!legal) {
+            UUID uuid = player.getUniqueId();
+            int warnings = flyWarnings.getOrDefault(uuid, 0) + 1;
+            flyWarnings.put(uuid, warnings);
+            if (warnings >= 60) {
+                flyWarnings.put(uuid, 0);
+                smartPunish(player, "飞行/悬空");
+            }
+        } else {
+            flyWarnings.put(player.getUniqueId(), 0);
+        }
+    }
+
+    private void checkBoatSpeed(Player player, Location from, Location to) {
+        if (!player.isInsideVehicle()) return;
+        Entity vehicle = player.getVehicle();
+        if (!(vehicle instanceof Boat)) return;
+
+        double dx = to.getX() - from.getX();
+        double dz = to.getZ() - from.getZ();
+        double dist = Math.sqrt(dx * dx + dz * dz);
+        double speed = dist / 0.05;
+
+        if (speed > maxBoatSpeed) {
+            smartPunish(player, String.format("异常船速 (%.1f m/s)", speed));
+        }
+    }
+
+    // 速度检测
+    private void checkPlayerSpeed(Player player) {
+        UUID uuid = player.getUniqueId();
+        Location current = player.getLocation().clone();
+        Location last = lastSpeedLocations.get(uuid);
+
+        if (last == null || !current.getWorld().equals(last.getWorld())) {
+            lastSpeedLocations.put(uuid, current);
+            return;
+        }
+
+        double dx = current.getX() - last.getX();
+        double dz = current.getZ() - last.getZ();
+        double distance = Math.sqrt(dx * dx + dz * dz);
+        double speed = distance; // 格/秒
+
+        double allowed = getMaxAllowedSpeed(player);
+        if (speed > allowed) {
+            executeSpeedPunish(player, speed, allowed);
+        }
+
+        lastSpeedLocations.put(uuid, current);
+    }
+
+    private double getMaxAllowedSpeed(Player player) {
+        double apBonus = 0.0;
+        if (papiEnabled) {
+            String result = PlaceholderAPI.setPlaceholders(player, apPlaceholder);
+            try {
+                apBonus = Double.parseDouble(result);
+            } catch (NumberFormatException ignored) { }
+        }
+        return maxSpeed * (1.0 + apBonus / 100.0);
+    }
+
+    private void executeSpeedPunish(Player player, double actual, double allowed) {
+        String cmd = speedPunishCommand.replace("%player%", player.getName());
+        getServer().dispatchCommand(getServer().getConsoleSender(), cmd);
+        getLogger().info(String.format("玩家 %s 速度过快 (%.2f > %.2f)，已执行速度处罚",
+                player.getName(), actual, allowed));
+    }
+
+    // 累进处罚 + 封禁码
+    private void smartPunish(Player player, String reason) {
+        if (isExempted(player)) return;
+        UUID uuid = player.getUniqueId();
+        long now = System.currentTimeMillis();
+
+        cheatTimestamps.computeIfAbsent(uuid, k -> new ArrayList<>()).add(now);
+
+        String code = UUID.randomUUID().toString().substring(0, 8);
+        saveViolationRecord(player, code);
+
+        int recentViolations = countRecentViolations(uuid, now, VIOLATION_WINDOW_MS);
+        String fullReason = reason + " [封禁码: " + code + "]";
+
+        if (recentViolations > MAX_KICKS) {
+            executeBan(player, fullReason, code);
+        } else {
+            executeKick(player, fullReason, code);
+        }
+
+        cleanupOldTimestamps(uuid, now, VIOLATION_WINDOW_MS);
+    }
+
+    private int countRecentViolations(UUID uuid, long now, long windowMs) {
+        List<Long> timestamps = cheatTimestamps.getOrDefault(uuid, Collections.emptyList());
+        long cutoff = now - windowMs;
+        return (int) timestamps.stream().filter(t -> t >= cutoff).count();
+    }
+
+    private void cleanupOldTimestamps(UUID uuid, long now, long windowMs) {
+        List<Long> timestamps = cheatTimestamps.get(uuid);
+        if (timestamps != null) {
+            long cutoff = now - windowMs;
+            timestamps.removeIf(t -> t < cutoff);
+            if (timestamps.isEmpty()) cheatTimestamps.remove(uuid);
+        }
+    }
+
+    private void saveViolationRecord(Player player, String code) {
+        BehaviorRecorder rec = recorders.get(player.getUniqueId());
+        if (rec == null) return;
+        BehaviorRecorder.BehaviorTick[] ticks = rec.getRecentTicks(analysisSeconds * 20);
+        if (ticks.length == 0) return;
+
+        File file = new File(violationsFolder, code + ".jsonl");
+        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(),
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+            for (BehaviorRecorder.BehaviorTick tick : ticks) {
+                writer.write(toJsonLine(tick));
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            getLogger().warning("无法保存违规记录文件: " + e.getMessage());
+        }
+    }
+
+    private String toJsonLine(BehaviorRecorder.BehaviorTick t) {
+        return String.format(
+                "{\"ts\":%d,\"pitch\":%.2f,\"yaw\":%.2f," +
+                        "\"posX\":%.2f,\"posY\":%.2f,\"posZ\":%.2f," +
+                        "\"placing\":%b,\"sprinting\":%b,\"jumping\":%b," +
+                        "\"onGround\":%b,\"moveSpeed\":%.3f,\"vertSpeed\":%.3f}",
+                t.timestamp, t.pitch, t.yaw,
+                t.posX, t.posY, t.posZ,
+                t.placing, t.sprinting, t.jumping,
+                t.onGround, t.moveSpeed, t.vertSpeed);
+    }
+
+    private void executeKick(Player player, String reason, String code) {
+        String cmd = punishCmd.replace("%player%", player.getName()).replace("%code%", code);
+        getServer().dispatchCommand(getServer().getConsoleSender(), cmd);
+        getLogger().info("踢出 " + player.getName() + " 封禁码: " + code + " 原因: " + reason);
+    }
+
+    private void executeBan(Player player, String reason, String code) {
+        String cmd = banCmd.replace("%player%", player.getName()).replace("%code%", code);
+        getServer().dispatchCommand(getServer().getConsoleSender(), cmd);
+        getLogger().info("封禁 " + player.getName() + " 封禁码: " + code + " 原因: " + reason);
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (!sender.hasPermission("deepguard.admin")) {
+            sender.sendMessage("§c权限不足。");
+            return true;
+        }
+        if (args.length == 0) {
+            sender.sendMessage("§e/ac report <玩家> §7- AI 分析玩家行为");
+            sender.sendMessage("§e/ac lookup <封禁码> §7- 查看违规记录详情");
+            sender.sendMessage("§e/ac reload §7- 重载配置");
+            return true;
+        }
+        switch (args[0].toLowerCase()) {
+            case "reload":
+                reloadConfig();
+                loadConfigValues();
+                sender.sendMessage("§a配置已重载。");
+                break;
+            case "report":
+                if (args.length < 2) {
+                    sender.sendMessage("§c请指定玩家名。");
+                    return true;
+                }
+                Player target = getServer().getPlayer(args[1]);
+                if (target == null) {
+                    sender.sendMessage("§c玩家不在线。");
+                    return true;
+                }
+                handleReport(sender, target);
+                break;
+            case "lookup":
+                if (args.length < 2) {
+                    sender.sendMessage("§c请提供封禁码。");
+                    return true;
+                }
+                handleLookup(sender, args[1]);
+                break;
+            default:
+                sender.sendMessage("§c未知子命令。");
+        }
+        return true;
+    }
+
+    private void handleReport(CommandSender sender, Player target) {
+        if (!aiEnabled || aiEngine == null) {
+            sender.sendMessage("§cAI 引擎未启用。");
+            return;
+        }
+        BehaviorRecorder rec = recorders.get(target.getUniqueId());
+        if (rec == null) {
+            sender.sendMessage("§c该玩家尚无足够数据。");
+            return;
+        }
+        sender.sendMessage("§6正在分析 " + target.getName() + " 的最近 " + analysisSeconds + " 秒行为...");
+        analyzePlayerAsync(target, probs -> {
+            float cheatProb = probs[1];
+            sender.sendMessage("§6===== AI 分析结果 =====");
+            sender.sendMessage("§a正常概率: §f" + String.format("%.1f%%", probs[0] * 100));
+            sender.sendMessage("§c作弊概率: §f" + String.format("%.1f%%", cheatProb * 100));
+            if (cheatProb >= autoPunishThreshold) {
+                sender.sendMessage("§c⚠ 高度疑似作弊，已自动处理。");
+                smartPunish(target, "AI举报分析：高度疑似作弊");
+            } else if (cheatProb >= alertThreshold) {
+                sender.sendMessage("§e⚠ 可疑行为，请管理员人工观察。");
+            } else {
+                sender.sendMessage("§a✓ 未检测到明显作弊行为。");
+            }
+        });
+    }
+
+    private void handleLookup(CommandSender sender, String code) {
+        File file = new File(violationsFolder, code + ".jsonl");
+        if (!file.exists()) {
+            sender.sendMessage("§c未找到封禁码 " + code + " 的记录文件。");
+            return;
+        }
+        try {
+            List<String> lines = Files.readAllLines(file.toPath());
+            int totalTicks = lines.size();
+            int placingCount = 0;
+            double maxPitch = -90, minPitch = 90;
+            double maxSpeed = 0;
+            for (String line : lines) {
+                if (line.isEmpty()) continue;
+                if (line.contains("\"placing\":true")) placingCount++;
+                int pitchIdx = line.indexOf("\"pitch\":");
+                if (pitchIdx != -1) {
+                    int start = pitchIdx + 8;
+                    int end = line.indexOf(',', start);
+                    if (end == -1) end = line.indexOf('}', start);
+                    double pitch = Double.parseDouble(line.substring(start, end));
+                    if (pitch > maxPitch) maxPitch = pitch;
+                    if (pitch < minPitch) minPitch = pitch;
+                }
+                int speedIdx = line.indexOf("\"moveSpeed\":");
+                if (speedIdx != -1) {
+                    int start = speedIdx + 12;
+                    int end = line.indexOf(',', start);
+                    if (end == -1) end = line.indexOf('}', start);
+                    double speed = Double.parseDouble(line.substring(start, end));
+                    if (speed > maxSpeed) maxSpeed = speed;
+                }
+            }
+            sender.sendMessage("§6===== 违规记录 " + code + " =====");
+            sender.sendMessage("§7总 tick 数: §f" + totalTicks);
+            sender.sendMessage("§7放置方块次数: §f" + placingCount);
+            sender.sendMessage("§7最大俯仰角: §f" + String.format("%.1f", maxPitch) + "°");
+            sender.sendMessage("§7最小俯仰角: §f" + String.format("%.1f", minPitch) + "°");
+            sender.sendMessage("§7最大水平速度: §f" + String.format("%.2f", maxSpeed) + " m/s");
+            sender.sendMessage("§7文件路径: §f" + file.getAbsolutePath());
+        } catch (IOException e) {
+            sender.sendMessage("§c读取记录文件时出错: " + e.getMessage());
+        }
+    }
+
+    private void analyzePlayerAsync(Player player) {
+        analyzePlayerAsync(player, probs -> {
+            float cheatProb = probs[1];
+            if (cheatProb >= autoPunishThreshold) {
+                smartPunish(player, "AI 定时检测：高度疑似作弊");
+            } else if (cheatProb >= alertThreshold) {
+                String msg = String.format("§e[AC] §c%s §7AI 定时检测：可疑行为 (%.1f%%)",
+                        player.getName(), cheatProb * 100);
+                for (Player p : getServer().getOnlinePlayers()) {
+                    if (p.hasPermission("deepguard.admin")) p.sendMessage(msg);
+                }
+                getLogger().info(ChatColor.stripColor(msg));
+            }
+        });
+    }
+
+    private void analyzePlayerAsync(Player player, java.util.function.Consumer<float[]> callback) {
+        BehaviorRecorder rec = recorders.get(player.getUniqueId());
+        if (rec == null) return;
+        BehaviorRecorder.BehaviorTick[] ticks = rec.getRecentTicks(analysisSeconds * 20);
+        if (ticks.length < 100) return;
+        float[][][] image = BehaviorImageBuilder.buildImage(ticks);
+        CompletableFuture.supplyAsync(() -> aiEngine.infer(image))
+                .thenAccept(probs -> {
+                    Bukkit.getScheduler().runTask(this, () -> callback.accept(probs));
+                });
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
+        if (args.length == 1) {
+            return Arrays.asList("report", "lookup", "reload");
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("report")) {
+            return null;
+        }
+        return Collections.emptyList();
+    }
+}
+
+```
+
+`AntiCheat/src/main/java/com/gfish/anticheat/BehaviorImageBuilder.java`:
+
+```java
+package com.gfish.anticheat;
+
+public class BehaviorImageBuilder {
+    private static final int CHANNELS = 12;
+    private static final int TIME_STEPS = 128;
+
+    public static float[][][] buildImage(BehaviorRecorder.BehaviorTick[] ticks) {
+        float[][][] image = new float[CHANNELS][TIME_STEPS][1];
+        int len = Math.min(ticks.length, TIME_STEPS);
+        int offset = TIME_STEPS - len;
+
+        for (int i = 0; i < len; i++) {
+            int idx = offset + i;
+            BehaviorRecorder.BehaviorTick t = ticks[ticks.length - len + i];
+            float pitch = t.pitch;
+            float yaw = t.yaw;
+            float moveSpeed = (float) t.moveSpeed;
+            float vertSpeed = (float) t.vertSpeed;
+            float placing = t.placing ? 1.0f : 0.0f;
+            float sprinting = t.sprinting ? 1.0f : 0.0f;
+            float jumping = t.jumping ? 1.0f : 0.0f;
+
+            float pitchChange = 0.0f;
+            if (i > 0) {
+                pitchChange = Math.abs(pitch - ticks[ticks.length - len + i - 1].pitch);
+            }
+
+            image[0][idx][0] = (pitch + 90.0f) / 180.0f;
+            image[1][idx][0] = (yaw + 180.0f) / 360.0f;
+            image[2][idx][0] = Math.min(moveSpeed / 10.0f, 1.0f);
+            image[3][idx][0] = (vertSpeed + 1.0f) / 2.0f;
+            image[4][idx][0] = placing;
+            image[5][idx][0] = sprinting;
+            image[6][idx][0] = jumping;
+            image[7][idx][0] = Math.min(pitchChange / 90.0f, 1.0f);
+            image[8][idx][0] = (pitchChange / 0.05f > 500) ? 1.0f : 0.0f;
+            image[9][idx][0] = (sprinting == 1.0f && placing == 1.0f) ? 1.0f : 0.0f;
+            int placeCount = 0;
+            for (int j = Math.max(0, i - 19); j <= i; j++) {
+                if (ticks[ticks.length - len + j].placing) placeCount++;
+            }
+            image[10][idx][0] = Math.min(placeCount / 10.0f, 1.0f);
+            image[11][idx][0] = 0.0f;
+        }
+        return image;
+    }
+}
+```
+
+`AntiCheat/src/main/java/com/gfish/anticheat/BehaviorRecorder.java`:
+
+```java
+package com.gfish.anticheat;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class BehaviorRecorder {
+    private final List<BehaviorTick> ticks = new ArrayList<>();
+    private static final int MAX_TICKS = 600;
+
+    public void record(BehaviorTick tick) {
+        ticks.add(tick);
+        if (ticks.size() > MAX_TICKS) {
+            ticks.remove(0);
+        }
+    }
+
+    public BehaviorTick[] getRecentTicks(int n) {
+        if (ticks.isEmpty()) return new BehaviorTick[0];
+        int from = Math.max(0, ticks.size() - n);
+        return ticks.subList(from, ticks.size()).toArray(new BehaviorTick[0]);
+    }
+
+    public static class BehaviorTick {
+        public long timestamp;
+        public float pitch;
+        public float yaw;
+        public double posX, posY, posZ;
+        public boolean placing;
+        public boolean sprinting;
+        public boolean jumping;
+        public boolean onGround;
+        public double moveSpeed;
+        public double vertSpeed;
+    }
+}
+```
+
+`AntiCheat/src/main/resources/config.yml`:
+
+```yml
+# 处罚命令
+punish-command: "kick %player% §c[DeepGuard] 检测到异常行为 [封禁码: %code%]"
+ban-command: "ban %player% §c[DeepGuard] 多次作弊行为 [封禁码: %code%]"
+
+# Geyser 玩家豁免
+geyser-bypass:
+  enabled: true
+
+
+movement:
+  fly: true
+  boat-speed: true
+  max-boat-speed: 12.0
+  speed:
+    enabled: true
+    max-speed: 5.0
+    ap-placeholder: "%ap_moving:max%"
+    command: "kick %player% §c你移动速度过快！"
+
+ai:
+  enabled: true
+  model-path: "scaffold_detector.onnx"
+  auto-punish-threshold: 0.85
+  alert-threshold: 0.5
+  analysis-seconds: 30
+
+```
+
+`AntiCheat/src/main/resources/plugin.yml`:
+
+```yml
+name: DeepGuard
+version: 1.0
+main: com.gfish.anticheat.AntiCheatPlugin
+api-version: '1.21'
+author: Gfish
+description: AI-powered anti-cheat with basic movement checks
+softdepend: [PlaceholderAPI, Floodgate]
+commands:
+  anticheat:
+    description: DeepGuard admin commands
+    aliases: [ac]
+    permission: deepguard.admin
+permissions:
+  deepguard.admin:
+    default: op
+  deepguard.bypass:
+    default: false
+libraries:
+  - "com.microsoft.onnxruntime:onnxruntime:1.17.1"
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 llsgllsg
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+
+# DeepGuard.jar
+---
+
+## 功能
+
+- **传统反作弊**
+- **AI 智能检测**：通过分析玩家视角旋转与放置方块的协同模式，识别机械式搭路外挂
+- **自动定时扫描**：每 5 分钟对所有在线玩家进行静默 AI 分析，发现可疑行为自动通知或处罚
+- **举报推理**：管理员使用 `/ac report <玩家>` 手动触发 AI 分析，输出详细概率
+- **数据录制**：可独立运行的录制插件，自动采集玩家行为数据用于训练新模型
+
+---
+
+命令	说明
+/ac report <玩家>	分析该玩家最近 30 秒行为，返回正常/作弊概率
+/ac reload	重载配置
+
+---
+
+训练自定义模型
+如果您希望用自己的数据训练更精准的模型：
+
+1. 采集数据
+使用录制插件 recorder-plugin：
+自动录制所有玩家正常行为（标签 0）
+使用 /record cheat / /record normal 手动采集作弊/正常样本（标签 1 / 0）
+数据保存在 plugins/BehaviorRecorder/recordings/
+
+2. 预处理数据
+bash
+pip install -r python/requirements.txt
+python python/prepare_data.py data/   # data/ 下包含 normal/ 和 cheat/ 文件夹
+3. 训练模型
+bash
+python python/train_model.py
+训练完成后会生成 scaffold_detector.onnx，替换到服务器 plugins/AntiCheat/ 下并重载。
+
+本插件仅供学习与研究使用。请遵守服务器所在地区法规及 Minecraft EULA。
+
+```
+
+`crate.py`:
+
+```py
+import json
+import os
+import random
+import time
+
+def generate_cheat_file(output_dir, file_id, length=128):
+    """
+    生成一个模拟暴力 Scaffold 的 jsonl 文件。
+    pitch 在 75-85 度（低头放）和 0-10 度（抬头）之间快速切换，
+    伴随 placing 在低头时为 true。
+    """
+    ticks = []
+    base_time = int(time.time() * 1000)
+    state = "look_down"
+    pitch_down = 80.0
+    pitch_up = 5.0
+    yaw = 0.0
+    sprinting = True
+    for i in range(length):
+        ts = base_time + i * 50
+        if state == "look_down":
+            pitch = pitch_down + random.uniform(-3, 3)
+            placing = False
+            state = "place"
+        elif state == "place":
+            pitch = pitch_down + random.uniform(-3, 3)
+            placing = True
+            state = "look_up"
+        elif state == "look_up":
+            pitch = pitch_up + random.uniform(-3, 3)
+            placing = False
+            state = "wait"
+        else:
+            pitch = pitch_up + random.uniform(-3, 3)
+            placing = False
+            state = "look_down"
+
+        tick = {
+            "ts": ts,
+            "pitch": round(pitch, 2),
+            "yaw": round(yaw, 2),
+            "posX": 0.0,
+            "posY": 64.0,
+            "posZ": 0.0,
+            "placing": placing,
+            "sprinting": sprinting,
+            "jumping": False,
+            "onGround": True,
+            "moveSpeed": 4.3 if sprinting else 0.0,
+            "vertSpeed": 0.0
+        }
+        ticks.append(tick)
+
+    os.makedirs(output_dir, exist_ok=True)
+    filepath = os.path.join(output_dir, f"fake_cheat_{file_id}_1.jsonl")
+    with open(filepath, 'w') as f:
+        for tick in ticks:
+            f.write(json.dumps(tick) + '\n')
+
+if __name__ == "__main__":
+    output = "fake_cheat_data"
+    print(f"生成 100 个假作弊文件到 {output}/")
+    for i in range(100):
+        generate_cheat_file(output, i)
+    print("完成。")
+```
+
+`predict_one.py`:
+
+```py
+import json
+import sys
+import numpy as np
+import torch
+import torch.nn as nn
+
+# ================= 模型定义（必须与训练时完全一致） =================
+class ScaffoldDetector(nn.Module):
+    def __init__(self, in_channels=12, num_classes=2):
+        super().__init__()
+        self.conv1 = nn.Conv1d(in_channels, 32, 5, padding=2)
+        self.bn1 = nn.BatchNorm1d(32)
+        self.pool1 = nn.MaxPool1d(2)
+        self.conv2 = nn.Conv1d(32, 64, 5, padding=2)
+        self.bn2 = nn.BatchNorm1d(64)
+        self.pool2 = nn.MaxPool1d(2)
+        self.conv3 = nn.Conv1d(64, 128, 3, padding=1)
+        self.bn3 = nn.BatchNorm1d(128)
+        self.pool3 = nn.AdaptiveAvgPool1d(1)
+        self.fc1 = nn.Linear(128, 32)
+        self.dropout = nn.Dropout(0.3)
+        self.fc2 = nn.Linear(32, num_classes)
+
+    def forward(self, x):
+        x = self.pool1(torch.relu(self.bn1(self.conv1(x))))
+        x = self.pool2(torch.relu(self.bn2(self.conv2(x))))
+        x = self.pool3(torch.relu(self.bn3(self.conv3(x))))
+        x = x.squeeze(-1)
+        x = torch.relu(self.fc1(x))
+        x = self.dropout(x)
+        x = self.fc2(x)
+        return x
+
+# ================= 特征工程（与训练时完全一致） =================
+def build_behavior_image(ticks, time_steps=128):
+    channels = 12
+    img = np.zeros((channels, time_steps), dtype=np.float32)
+    if len(ticks) < time_steps:
+        offset = time_steps - len(ticks)
+    else:
+        offset = 0
+        ticks = ticks[-time_steps:]
+
+    for i, tick in enumerate(ticks):
+        idx = offset + i
+        if idx >= time_steps:
+            break
+        pitch = tick.get('pitch', 0.0)
+        yaw = tick.get('yaw', 0.0)
+        move_speed = tick.get('moveSpeed', 0.0)
+        vert_speed = tick.get('vertSpeed', 0.0)
+        placing = tick.get('placing', False)
+        sprinting = tick.get('sprinting', False)
+        jumping = tick.get('jumping', False)
+        on_ground = tick.get('onGround', False)
+
+        if i > 0:
+            prev_pitch = ticks[i-1].get('pitch', pitch)
+            pitch_change = abs(pitch - prev_pitch)
+        else:
+            pitch_change = 0.0
+
+        img[0, idx] = (pitch + 90) / 180.0
+        img[1, idx] = (yaw + 180) / 360.0
+        img[2, idx] = min(move_speed / 10.0, 1.0)
+        img[3, idx] = (vert_speed + 1) / 2.0
+        img[4, idx] = 1.0 if placing else 0.0
+        img[5, idx] = 1.0 if sprinting else 0.0
+        img[6, idx] = 1.0 if jumping else 0.0
+        img[7, idx] = min(pitch_change / 90.0, 1.0)
+        img[8, idx] = 1.0 if pitch_change / 0.05 > 500 else 0.0
+        img[9, idx] = 1.0 if (sprinting and placing) else 0.0
+        start_idx = max(0, i - 19)
+        place_count = sum(1 for t in ticks[start_idx:i+1] if t.get('placing', False))
+        img[10, idx] = min(place_count / 10.0, 1.0)
+        if i >= 5:
+            intervals = []
+            last_time = None
+            for t in ticks[max(0, i-19):i+1]:
+                if t.get('placing', False):
+                    ts_val = t.get('ts') or t.get('timestamp')
+                    if last_time is not None and ts_val is not None:
+                        intervals.append(ts_val - last_time)
+                    last_time = ts_val
+            if len(intervals) >= 5:
+                variance = np.var(intervals)
+                img[11, idx] = max(0, 1.0 - variance / 1000.0)
+        else:
+            img[11, idx] = 0.0
+    return img
+
+# ================= 主程序 =================
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("用法: python predict_one.py <jsonl文件路径>")
+        sys.exit(1)
+
+    file_path = sys.argv[1]
+
+    # 读取 JSONL 数据
+    with open(file_path, 'r') as f:
+        lines = f.readlines()
+    ticks = [json.loads(line) for line in lines]
+
+    if len(ticks) < 100:
+        print(f"警告: 数据只有 {len(ticks)} 行，少于100行，模型可能不准确")
+
+    # 构造输入
+    img = build_behavior_image(ticks)  # shape (12, 128)
+    input_tensor = torch.tensor(img).unsqueeze(0)  # 增加 batch 维度 -> (1, 12, 128)
+
+    # 加载模型
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = ScaffoldDetector().to(device)
+    model.load_state_dict(torch.load("best_model.pth", map_location=device))
+    model.eval()
+
+    # 推理
+    with torch.no_grad():
+        output = model(input_tensor.to(device))
+        probs = torch.softmax(output, dim=1).cpu().numpy()[0]
+
+    normal_prob = probs[0]
+    cheat_prob = probs[1]
+    prediction = "作弊" if cheat_prob >= 0.5 else "正常"
+
+    print(f"文件: {file_path}")
+    print(f"正常概率: {normal_prob:.4f} ({normal_prob*100:.1f}%)")
+    print(f"作弊概率: {cheat_prob:.4f} ({cheat_prob*100:.1f}%)")
+    print(f"判定结果: {prediction}")
+```
+
+`prepare_data.py`:
+
+```py
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader, TensorDataset
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
+import time
+import matplotlib.pyplot as plt
+import onnx  # 用于修改 IR 版本
+
+print("加载数据...")
+X = np.load("X.npy")
+y = np.load("y.npy")
+print(f"总样本: {len(X)}, 作弊样本: {np.sum(y==1)}")
+
+X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, stratify=y, random_state=42)
+X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, stratify=y_temp, random_state=42)
+
+train_dataset = TensorDataset(torch.tensor(X_train), torch.tensor(y_train, dtype=torch.long))
+val_dataset = TensorDataset(torch.tensor(X_val), torch.tensor(y_val, dtype=torch.long))
+test_dataset = TensorDataset(torch.tensor(X_test), torch.tensor(y_test, dtype=torch.long))
+
+batch_size = 32
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=batch_size)
+test_loader = DataLoader(test_dataset, batch_size=batch_size)
+
+class ScaffoldDetector(nn.Module):
+    def __init__(self, in_channels=12, num_classes=2):
+        super().__init__()
+        self.conv1 = nn.Conv1d(in_channels, 32, 5, padding=2)
+        self.bn1 = nn.BatchNorm1d(32)
+        self.pool1 = nn.MaxPool1d(2)
+        self.conv2 = nn.Conv1d(32, 64, 5, padding=2)
+        self.bn2 = nn.BatchNorm1d(64)
+        self.pool2 = nn.MaxPool1d(2)
+        self.conv3 = nn.Conv1d(64, 128, 3, padding=1)
+        self.bn3 = nn.BatchNorm1d(128)
+        self.pool3 = nn.AdaptiveAvgPool1d(1)
+        self.fc1 = nn.Linear(128, 32)
+        self.dropout = nn.Dropout(0.3)
+        self.fc2 = nn.Linear(32, num_classes)
+
+    def forward(self, x):
+        x = self.pool1(torch.relu(self.bn1(self.conv1(x))))
+        x = self.pool2(torch.relu(self.bn2(self.conv2(x))))
+        x = self.pool3(torch.relu(self.bn3(self.conv3(x))))
+        x = x.squeeze(-1)
+        x = torch.relu(self.fc1(x))
+        x = self.dropout(x)
+        x = self.fc2(x)
+        return x
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"使用设备: {device}")
+model = ScaffoldDetector().to(device)
+
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=0.000008)
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, factor=0.5)
+
+best_val_loss = float('inf')
+patience = 10
+epochs = 5000
+train_losses, val_losses = [], []
+
+print("开始训练...")
+start_time = time.time()
+for epoch in range(epochs):
+    model.train()
+    train_loss = 0.0
+    for inputs, labels in train_loader:
+        inputs, labels = inputs.to(device), labels.to(device)
+        optimizer.zero_grad()
+        outputs = model(inputs)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+        train_loss += loss.item()
+
+    val_loss = 0.0
+    correct = 0
+    total = 0
+    model.eval()
+    with torch.no_grad():
+        for inputs, labels in val_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            val_loss += loss.item()
+            _, predicted = torch.max(outputs, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+    train_loss /= len(train_loader)
+    val_loss /= len(val_loader)
+    val_acc = correct / total
+    train_losses.append(train_loss)
+    val_losses.append(val_loss)
+    scheduler.step(val_loss)
+
+    print(f"Epoch {epoch+1:3d}: Train Loss {train_loss:.4f}, Val Loss {val_loss:.4f}, Val Acc {val_acc:.4f}")
+
+    if val_loss < best_val_loss:
+        best_val_loss = val_loss
+        torch.save(model.state_dict(), "best_model.pth")
+        patience = 10
+    else:
+        patience -= 1
+        if patience == 0:
+            print("Early stopping")
+            break
+
+print(f"训练完成，耗时 {time.time()-start_time:.1f} 秒")
+model.load_state_dict(torch.load("best_model.pth"))
+
+model.eval()
+all_preds, all_probs, all_labels = [], [], []
+with torch.no_grad():
+    for inputs, labels in test_loader:
+        inputs, labels = inputs.to(device), labels.to(device)
+        outputs = model(inputs)
+        probs = torch.softmax(outputs, dim=1)
+        _, preds = torch.max(outputs, 1)
+        all_preds.extend(preds.cpu().numpy())
+        all_probs.extend(probs.cpu().numpy())
+        all_labels.extend(labels.cpu().numpy())
+
+y_pred = np.array(all_preds)
+y_prob = np.array(all_probs)[:, 1]
+y_true = np.array(all_labels)
+print("\n测试集报告:")
+print(classification_report(y_true, y_pred, target_names=['Normal', 'Cheat']))
+print("AUC:", roc_auc_score(y_true, y_prob))
+
+plt.figure(figsize=(12,4))
+plt.subplot(1,2,1)
+plt.plot(train_losses, label='Train Loss')
+plt.plot(val_losses, label='Val Loss')
+plt.legend()
+plt.title('Loss Curves')
+plt.savefig('training_curves.png')
+plt.show()
+
+# 导出 ONNX 模型，并修改 IR 版本为 9
+dummy_input = torch.randn(1, 12, 128).to(device)
+torch.onnx.export(model, dummy_input, "scaffold_detector_temp.onnx",
+                  input_names=['behavior_sequence'], output_names=['output'],
+                  dynamic_axes={'behavior_sequence': {0: 'batch_size'}},
+                  opset_version=12)
+
+# 加载并修改 IR 版本
+model_onnx = onnx.load("scaffold_detector_temp.onnx")
+model_onnx.ir_version = 9
+onnx.save(model_onnx, "scaffold_detector.onnx")
+print("ONNX 模型已保存为 scaffold_detector.onnx (IR version 9)")
+
+```
+
+`recorder-plugin/pom.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.example</groupId>
+        <artifactId>AntiCheatAI</artifactId>
+        <version>1.0</version>
+    </parent>
+
+    <artifactId>BehaviorRecorder</artifactId>
+    <packaging>jar</packaging>
+
+    <repositories>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.21.1-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>BehaviorRecorder</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.google.gson</pattern>
+                                    <shadedPattern>com.example.recorder.libs.gson</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+```
+
+`recorder-plugin/src/main/java/com/example/recorder/BehaviorRecorderPlugin.java`:
+
+```java
+package com.example.recorder;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class BehaviorRecorderPlugin extends JavaPlugin implements Listener {
+
+    private final Gson gson = new GsonBuilder().serializeNulls().create();
+    private final Map<UUID, Recorder> recorders = new ConcurrentHashMap<>();
+    private File saveFolder;
+    private boolean autoRecord;
+    private int bufferSize;
+
+    @Override
+    public void onEnable() {
+        saveDefaultConfig();
+        autoRecord = getConfig().getBoolean("auto-record", true);
+        bufferSize = getConfig().getInt("buffer-size", 256);
+        saveFolder = new File(getDataFolder(), getConfig().getString("save-dir", "recordings"));
+        if (!saveFolder.exists()) saveFolder.mkdirs();
+
+        getServer().getPluginManager().registerEvents(this, this);
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Player player : getServer().getOnlinePlayers()) {
+                    Recorder recorder = recorders.get(player.getUniqueId());
+                    if (recorder == null) continue;
+                    if (recorder.isRecording()) {
+                        recorder.recordTick(player);
+                    }
+                }
+            }
+        }.runTaskTimer(this, 0L, 1L);
+    }
+
+    @Override
+    public void onDisable() {
+        for (Recorder recorder : recorders.values()) {
+            recorder.stopAndFlush();
+        }
+        recorders.clear();
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        Player player = e.getPlayer();
+        recorders.put(player.getUniqueId(), new Recorder(player, this));
+        if (autoRecord) {
+            recorders.get(player.getUniqueId()).startAuto();
+        }
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        UUID uuid = e.getPlayer().getUniqueId();
+        Recorder recorder = recorders.remove(uuid);
+        if (recorder != null) {
+            recorder.stopAndFlush();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockPlace(BlockPlaceEvent e) {
+        Recorder recorder = recorders.get(e.getPlayer().getUniqueId());
+        if (recorder != null) {
+            recorder.markPlaced();
+        }
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("§c该命令只能由玩家执行。");
+            return true;
+        }
+        if (!sender.hasPermission("recorder.admin")) {
+            sender.sendMessage("§c你没有权限。");
+            return true;
+        }
+        if (args.length == 0) {
+            sender.sendMessage("§e用法: /record <normal|cheat|stop>");
+            return true;
+        }
+
+        Player player = (Player) sender;
+        Recorder recorder = recorders.get(player.getUniqueId());
+        if (recorder == null) {
+            sender.sendMessage("§c内部错误：没有找到你的录制器。");
+            return true;
+        }
+
+        switch (args[0].toLowerCase()) {
+            case "normal":
+                recorder.startManual(0);
+                sender.sendMessage("§a开始录制 §e正常行为 §a(标签 0)");
+                break;
+            case "cheat":
+                recorder.startManual(1);
+                sender.sendMessage("§c开始录制 §e作弊行为 §c(标签 1)");
+                break;
+            case "stop":
+                recorder.stopManual();
+                sender.sendMessage("§7手动录制已停止。数据已保存。");
+                break;
+            default:
+                sender.sendMessage("§c无效参数。请使用 normal/cheat/stop");
+        }
+        return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
+        if (args.length == 1) {
+            return Arrays.asList("normal", "cheat", "stop");
+        }
+        return Collections.emptyList();
+    }
+
+    private static class Recorder {
+        private final Player player;
+        private final BehaviorRecorderPlugin plugin;
+        private final List<BehaviorTick> buffer = new ArrayList<>();
+        private int currentLabel = 0;
+        private boolean autoRecording = false;
+        private boolean manualRecording = false;
+        private long sessionStartTime;
+        private boolean placedFlag = false;
+
+        public Recorder(Player player, BehaviorRecorderPlugin plugin) {
+            this.player = player;
+            this.plugin = plugin;
+        }
+
+        public boolean isRecording() {
+            return autoRecording || manualRecording;
+        }
+
+        public void startAuto() {
+            if (manualRecording) return;
+            autoRecording = true;
+            currentLabel = 0;
+            sessionStartTime = System.currentTimeMillis();
+            buffer.clear();
+            placedFlag = false;
+        }
+
+        public void startManual(int label) {
+            if (autoRecording) {
+                saveBufferToFile();
+                autoRecording = false;
+            }
+            if (manualRecording) {
+                saveBufferToFile();
+            }
+            manualRecording = true;
+            currentLabel = label;
+            sessionStartTime = System.currentTimeMillis();
+            buffer.clear();
+            placedFlag = false;
+        }
+
+        public void stopManual() {
+            if (manualRecording) {
+                saveBufferToFile();
+                manualRecording = false;
+                if (plugin.autoRecord) {
+                    startAuto();
+                }
+            }
+        }
+
+        public void stopAndFlush() {
+            if (autoRecording || manualRecording) {
+                saveBufferToFile();
+            }
+            autoRecording = false;
+            manualRecording = false;
+            buffer.clear();
+        }
+
+        public void markPlaced() {
+            placedFlag = true;
+        }
+
+        public void recordTick(Player player) {
+            if (player.getGameMode() == GameMode.SPECTATOR) return;
+
+            Location loc = player.getLocation();
+            BehaviorTick tick = new BehaviorTick();
+            tick.timestamp = System.currentTimeMillis();
+            tick.pitch = loc.getPitch();
+            tick.yaw = loc.getYaw();
+            tick.posX = loc.getX();
+            tick.posY = loc.getY();
+            tick.posZ = loc.getZ();
+            tick.placing = placedFlag;
+            tick.sprinting = player.isSprinting();
+            tick.onGround = player.isOnGround();
+            tick.jumping = !player.isOnGround();
+            org.bukkit.util.Vector vel = player.getVelocity();
+            tick.moveSpeed = Math.sqrt(vel.getX() * vel.getX() + vel.getZ() * vel.getZ());
+            tick.vertSpeed = vel.getY();
+
+            buffer.add(tick);
+            placedFlag = false;
+
+            if (buffer.size() >= plugin.bufferSize) {
+                saveBufferToFile();
+                buffer.clear();
+                sessionStartTime = System.currentTimeMillis();
+            }
+        }
+
+        private void saveBufferToFile() {
+            if (buffer.isEmpty()) return;
+
+            String fileName = String.format("%s_%d_%d.jsonl",
+                    player.getUniqueId(),
+                    sessionStartTime,
+                    currentLabel);
+            File file = new File(plugin.saveFolder, fileName);
+
+            try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(),
+                    StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
+                for (BehaviorTick tick : buffer) {
+                    writer.write(plugin.gson.toJson(tick));
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                plugin.getLogger().warning("保存录制文件失败: " + e.getMessage());
+            }
+        }
+    }
+
+    public static class BehaviorTick {
+        public long timestamp;
+        public float pitch;
+        public float yaw;
+        public double posX;
+        public double posY;
+        public double posZ;
+        public boolean placing;
+        public boolean sprinting;
+        public boolean jumping;
+        public boolean onGround;
+        public double moveSpeed;
+        public double vertSpeed;
+    }
+}
+```
+
+`recorder-plugin/src/main/resources/config.yml`:
+
+```yml
+# 是否自动录制所有玩家（标签 0）
+auto-record: true
+
+# 数据保存目录（相对于插件文件夹）
+save-dir: "recordings"
+
+# 每个文件包含的 tick 数（达到后自动保存并清空缓冲区）
+buffer-size: 256
+```
+
+`recorder-plugin/src/main/resources/plugin.yml`:
+
+```yml
+name: BehaviorRecorder
+version: 1.0
+main: com.example.recorder.BehaviorRecorderPlugin
+api-version: '1.21'
+description: 行为录制插件，用于训练反作弊AI
+commands:
+  record:
+    description: 控制行为录制
+    usage: /record <normal|cheat|stop>
+    permission: recorder.admin
+permissions:
+  recorder.admin:
+    default: op
+```
+
+`train_model.py`:
+
+```py
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader, TensorDataset
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
+import time
+import matplotlib.pyplot as plt
+import onnx  # 用于修改 IR 版本
+
+print("加载数据...")
+X = np.load("X.npy")
+y = np.load("y.npy")
+print(f"总样本: {len(X)}, 作弊样本: {np.sum(y==1)}")
+
+X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, stratify=y, random_state=42)
+X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, stratify=y_temp, random_state=42)
+
+train_dataset = TensorDataset(torch.tensor(X_train), torch.tensor(y_train, dtype=torch.long))
+val_dataset = TensorDataset(torch.tensor(X_val), torch.tensor(y_val, dtype=torch.long))
+test_dataset = TensorDataset(torch.tensor(X_test), torch.tensor(y_test, dtype=torch.long))
+
+batch_size = 32
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=batch_size)
+test_loader = DataLoader(test_dataset, batch_size=batch_size)
+
+class ScaffoldDetector(nn.Module):
+    def __init__(self, in_channels=12, num_classes=2):
+        super().__init__()
+        self.conv1 = nn.Conv1d(in_channels, 32, 5, padding=2)
+        self.bn1 = nn.BatchNorm1d(32)
+        self.pool1 = nn.MaxPool1d(2)
+        self.conv2 = nn.Conv1d(32, 64, 5, padding=2)
+        self.bn2 = nn.BatchNorm1d(64)
+        self.pool2 = nn.MaxPool1d(2)
+        self.conv3 = nn.Conv1d(64, 128, 3, padding=1)
+        self.bn3 = nn.BatchNorm1d(128)
+        self.pool3 = nn.AdaptiveAvgPool1d(1)
+        self.fc1 = nn.Linear(128, 32)
+        self.dropout = nn.Dropout(0.3)
+        self.fc2 = nn.Linear(32, num_classes)
+
+    def forward(self, x):
+        x = self.pool1(torch.relu(self.bn1(self.conv1(x))))
+        x = self.pool2(torch.relu(self.bn2(self.conv2(x))))
+        x = self.pool3(torch.relu(self.bn3(self.conv3(x))))
+        x = x.squeeze(-1)
+        x = torch.relu(self.fc1(x))
+        x = self.dropout(x)
+        x = self.fc2(x)
+        return x
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"使用设备: {device}")
+model = ScaffoldDetector().to(device)
+
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, factor=0.5)
+
+best_val_loss = float('inf')
+patience = 10
+epochs = 50
+train_losses, val_losses = [], []
+
+print("开始训练...")
+start_time = time.time()
+for epoch in range(epochs):
+    model.train()
+    train_loss = 0.0
+    for inputs, labels in train_loader:
+        inputs, labels = inputs.to(device), labels.to(device)
+        optimizer.zero_grad()
+        outputs = model(inputs)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+        train_loss += loss.item()
+
+    val_loss = 0.0
+    correct = 0
+    total = 0
+    model.eval()
+    with torch.no_grad():
+        for inputs, labels in val_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            val_loss += loss.item()
+            _, predicted = torch.max(outputs, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+    train_loss /= len(train_loader)
+    val_loss /= len(val_loader)
+    val_acc = correct / total
+    train_losses.append(train_loss)
+    val_losses.append(val_loss)
+    scheduler.step(val_loss)
+
+    print(f"Epoch {epoch+1:3d}: Train Loss {train_loss:.4f}, Val Loss {val_loss:.4f}, Val Acc {val_acc:.4f}")
+
+    if val_loss < best_val_loss:
+        best_val_loss = val_loss
+        torch.save(model.state_dict(), "best_model.pth")
+        patience = 10
+    else:
+        patience -= 1
+        if patience == 0:
+            print("Early stopping")
+            break
+
+print(f"训练完成，耗时 {time.time()-start_time:.1f} 秒")
+model.load_state_dict(torch.load("best_model.pth"))
+
+model.eval()
+all_preds, all_probs, all_labels = [], [], []
+with torch.no_grad():
+    for inputs, labels in test_loader:
+        inputs, labels = inputs.to(device), labels.to(device)
+        outputs = model(inputs)
+        probs = torch.softmax(outputs, dim=1)
+        _, preds = torch.max(outputs, 1)
+        all_preds.extend(preds.cpu().numpy())
+        all_probs.extend(probs.cpu().numpy())
+        all_labels.extend(labels.cpu().numpy())
+
+y_pred = np.array(all_preds)
+y_prob = np.array(all_probs)[:, 1]
+y_true = np.array(all_labels)
+print("\n测试集报告:")
+print(classification_report(y_true, y_pred, target_names=['Normal', 'Cheat']))
+print("AUC:", roc_auc_score(y_true, y_prob))
+
+plt.figure(figsize=(12,4))
+plt.subplot(1,2,1)
+plt.plot(train_losses, label='Train Loss')
+plt.plot(val_losses, label='Val Loss')
+plt.legend()
+plt.title('Loss Curves')
+plt.savefig('training_curves.png')
+plt.show()
+
+# 导出 ONNX 模型，并修改 IR 版本为 9
+dummy_input = torch.randn(1, 12, 128).to(device)
+torch.onnx.export(model, dummy_input, "scaffold_detector_temp.onnx",
+                  input_names=['behavior_sequence'], output_names=['output'],
+                  dynamic_axes={'behavior_sequence': {0: 'batch_size'}},
+                  opset_version=12)
+
+# 加载并修改 IR 版本
+model_onnx = onnx.load("scaffold_detector_temp.onnx")
+model_onnx.ir_version = 9
+onnx.save(model_onnx, "scaffold_detector.onnx")
+print("ONNX 模型已保存为 scaffold_detector.onnx (IR version 9)")
+```
