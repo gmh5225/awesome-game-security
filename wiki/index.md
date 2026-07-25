@@ -386,6 +386,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [qemu-anti-detection](entities/qemu-anti-detection.md) — Hidden QEMU (device-string / fingerprint spoof)
 - [QuickAsm](entities/quickasm.md) — x86/x64 assemble-and-run GUI (Keystone)
 - [Raung](entities/raung.md) — Java bytecode assembler/disassembler (early-stage; cheat / RE tools)
+- [rAthena](entities/rathena.md) — Ragnarok Online server emulator (login/char/map; NPC/WoE/MySQL; [MMORPG])
 - [raylib](entities/raylib.md) — simple C/C++ videogame library (OpenGL / Vulkan; Game Develop / source)
 - [R6-Internal-V3](entities/r6-internal-v3.md) — R6 internal: modding / SDK generation / memory analysis (C/C++)
 - [r6-external](entities/r6-external.md) — R6 external: driver development (C/C++; External)
