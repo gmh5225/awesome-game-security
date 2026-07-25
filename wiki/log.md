@@ -1084,3 +1084,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-24** — ingest `description:realquantumstealth-hub/PCILeech-DMA-Fullstealth`: entity [[pcileech-dma-fullstealth]]; cited on [[dma]] and [[overviews/dma-attack]]; cross-link from [[pcileech-fpga]].
 
 - **2026-07-25** — ingest `description:realTristan/Reborn`: entity [[reborn]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-25** — ingest `description:reahly/mono-external-lib`: entity [[mono-external-lib]]; cited on [[il2cpp]] and [[overviews/game-engine]].

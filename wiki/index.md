@@ -314,6 +314,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MoBaDemo](entities/mobademo.md) — Unity MOBA demo (Game Develop / Unity source)
 - [Mojoc](entities/mojoc.md) — C99 OpenGLES3 mobile game engine (cross-platform; Game Engine source)
 - [ModExMap](entities/modexmap.md) — user-mode PE manual-map DLL injector (x86/x64; TLS; Extend Manual Map)
+- [mono-external-lib](entities/mono-external-lib.md) — external Unity/Mono metadata reader (classes/methods/fields; no inject; C++)
 - [mutaben](entities/mutaben.md) — Python MBA (mixed-boolean-arithmetic) expression generator
 - [mwclap](entities/mwclap.md) — COD Warzone NVIDIA GeForce Experience overlay hijack (cheat / game:cod warzone)
 - [Mystic-xorstr](entities/mystic-xorstr.md) — C++17 header-only compile-time string/integer encrypt (SIMD decrypt; AC Compile Time)
