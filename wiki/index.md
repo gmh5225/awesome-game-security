@@ -135,6 +135,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CVEAC-2020](entities/cveac-2020.md) — EAC kernel-module vuln PoC (WDK; Integrity Checks)
 - [data-ptr-swap](entities/data-ptr-swap.md) — NtSetCompositionSurfaceAnalogExclusive kernel channel (C/C++)
 - [Dainsleif](entities/dainsleif.md) — simple internal CS:GO cheat (RE training; cheat / game:csgo)
+- [darksword-kexploit-fun](entities/darksword-kexploit-fun.md) — DarkSword kernel r/w playground (iOS 17.0–26.0.1; sandbox/SSV/PAC; ObjC/C)
 
 - [DayZzz](entities/dayzzz.md) — DayZ cheat/modding: SDK generation + overlays (C/C++)
 - [d810-ng](entities/d810-ng.md) — d810 next-gen; deobfuscate at decompilation time (Fix OLLVM)
