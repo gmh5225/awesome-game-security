@@ -1219,3 +1219,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-25** — ingest `description:plibither8/2048.cpp`: entity [[2048-cpp]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
+- **2026-07-25** — ingest `description:playgameservices/cpp-android-basic-samples`: entity [[cpp-android-basic-samples]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
