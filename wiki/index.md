@@ -394,6 +394,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [R6-Internal-V3](entities/r6-internal-v3.md) — R6 internal: modding / SDK generation / memory analysis (C/C++)
 - [r6-external](entities/r6-external.md) — R6 external: driver development (C/C++; External)
 - [rbfx](entities/rbfx.md) — Urho3D fork: C# support + WYSIWYG editor (Game Engine source)
+- [r2ai](entities/r2ai.md) — LLM-based reversing assistant for radare2 (interactive LLM↔r2; Cheat Radare Plugins)
 - [r2garlic](entities/r2garlic.md) — radare2 Garlic DEX/Dalvik decompiler plugin (DEX/APK/ELF/PE/Mach-O; Cheat Radare Plugins)
 - [r2morph](entities/r2morph.md) — radare2/r2pipe metamorphic binary transform (Python+C; Cheat Radare Plugins)
 - [radius2](entities/radius2.md) — radare2 fast binary emulation + symbolic execution (Rust/C; Cheat Radare Plugins)
