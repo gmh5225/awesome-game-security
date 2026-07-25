@@ -1,0 +1,1930 @@
+Project Path: arc_Binuka97_cordova-plugin-rootguard_nar4uzkz
+
+Source Tree:
+
+```txt
+arc_Binuka97_cordova-plugin-rootguard_nar4uzkz
+├── CHANGELOG.md
+├── ENTERPRISE-INTEGRATION.md
+├── LICENSE
+├── README.md
+├── RELEASE.md
+├── SECURITY.md
+├── package.json
+├── plugin.xml
+├── src
+│   ├── android
+│   │   └── RootGuard.java
+│   └── ios
+│       ├── RootGuard.h
+│       └── RootGuard.m
+├── test
+│   └── rootguard.test.js
+├── types
+│   └── index.d.ts
+└── www
+    └── rootguard.js
+
+```
+
+`CHANGELOG.md`:
+
+```md
+# Changelog
+
+All notable changes are documented here. Versions follow Semantic Versioning.
+
+## 2.1.0 - 2026-07-24
+
+### Added
+
+- Added `checkSecurityStatus()` with `SAFE` (0), `COMPROMISED` (1), and
+  `UNKNOWN` (2) results.
+- Added `checkSecurityDetailed()` with evidence and unavailable-check metadata.
+- Added bounded Frida D-Bus protocol probes instead of treating any open default
+  port as conclusive.
+- Added bounded Android thread-name inspection and discovery of non-default
+  listening ports through process-visible TCP tables.
+- Added automated API, packaging, version-consistency, and regression tests.
+- Added CI builds against Cordova Android 15.1 and Cordova iOS 8.1.
+- Added TypeScript declarations, an enterprise/trading integration profile, and
+  a controlled npm release checklist.
+
+### Changed
+
+- Android detection no longer starts shell processes. File, process-local memory,
+  file-descriptor, build-provenance, and bounded protocol checks are combined by
+  evidence strength.
+- Android 13 and newer return `UNKNOWN` from the new APIs when no strong local
+  evidence exists. Use server-verified Play Integrity for an authoritative
+  production policy.
+- iOS checks run off the UI thread and combine jailbreak artifacts, sandbox
+  escape, loaded images, symbols, thread names, descriptors, debugger state, and
+  a bounded protocol probe.
+- Errors, unavailable capabilities, and timeouts now produce `UNKNOWN`, never
+  `COMPROMISED`.
+- The legacy `checkSecurity()` API remains binary and maps `UNKNOWN` to 0 to
+  prevent upgrade-induced user lockouts.
+
+### Fixed
+
+- Removed generic `/private/preboot` detection, which can exist on stock iOS.
+- Removed unbounded and false-positive-prone Android shell checks.
+- Fixed the case mismatch between `plugin.xml` and `www/rootguard.js`.
+- Synchronized versions in `plugin.xml` and `package.json`.
+- Removed the iOS `libproc` link and URL-scheme allowlist requirements.
+
+### Security
+
+- Documented why client-side checks cannot guarantee detection against Magisk
+  DenyList, renamed Frida Gadget, runtime hooks, repackaging, or iOS Shadow.
+- Added guidance for layered, server-side Play Integrity and App Attest policies.
+
+## 2.0.3 - 2025-10-02
+
+- Replaced the unavailable `/system/xbin/which` path.
+
+## 2.0.2 - 2025-10-02
+
+- Added process timeouts and background Android execution.
+
+## 2.0.0 - 2025-04-17
+
+- Added iOS jailbreak and Frida checks.
+
+## 1.0.0
+
+- Initial Android release.
+
+```
+
+`ENTERPRISE-INTEGRATION.md`:
+
+```md
+# Enterprise integration profile
+
+This profile is intended for regulated or financially sensitive Cordova
+applications, including trading applications.
+
+## Mandatory policy
+
+RootGuard is local risk telemetry. It must not be the component that authorizes
+orders, withdrawals, beneficiary changes, credential recovery, device
+enrollment, or other high-value actions.
+
+For every sensitive operation:
+
+1. Authenticate the user and authorize the operation on the backend.
+2. Bind a fresh server challenge to the exact operation and material request
+   fields.
+3. Verify platform attestation on the backend:
+   - Android: [Play Integrity](https://developer.android.com/google/play/integrity/overview)
+     app recognition, licensing, request binding, and an appropriate
+     device-integrity tier.
+   - iOS: [App Attest](https://developer.apple.com/documentation/devicecheck/validating-apps-that-connect-to-your-server)
+     key attestation followed by per-request assertions and monotonic-counter
+     validation.
+4. Add RootGuard status and coarse evidence as risk telemetry.
+5. Apply rate, velocity, behavioral, account, and transaction controls.
+6. Keep a recoverable step-up and support route for legitimate customers.
+
+Never trust an attestation token decoded, validated, or asserted only by the
+client.
+
+## Required API
+
+High-risk applications must use `checkSecurityStatus()` or
+`checkSecurityDetailed()`. The legacy `checkSecurity()` method maps `UNKNOWN` to
+0 for compatibility and is not suitable as the sole enforcement input.
+
+```js
+RootGuard.checkSecurityDetailed(function (localRisk) {
+    sendRiskTelemetry(localRisk);
+
+    if (localRisk.status === RootGuard.COMPROMISED) {
+        requestServerRiskDecision({ localRisk: "compromised" });
+        return;
+    }
+
+    if (localRisk.status === RootGuard.UNKNOWN) {
+        requestFreshPlatformAttestation({ stepUp: true });
+        return;
+    }
+
+    // SAFE means only that no local indicator was found. A sensitive action
+    // still requires the normal server-side authorization and attestation.
+    requestFreshPlatformAttestation({ stepUp: false });
+}, function () {
+    // Plugin errors are operationally inconclusive, not proof of compromise.
+    requestFreshPlatformAttestation({ stepUp: true });
+});
+```
+
+## Suggested server decision tiers
+
+| Local status | Valid attestation | Suggested handling |
+|---|---|---|
+| `SAFE` | Strong/accepted | Continue under normal transaction controls |
+| `UNKNOWN` | Strong/accepted | Continue or step up according to transaction risk |
+| `COMPROMISED` | Strong/accepted | Step up, restrict high-risk operations, and investigate signal disagreement |
+| Any | Missing, invalid, replayed, or mismatched | Reject the sensitive request or require remediation |
+
+Do not permanently lock an account solely because one device is
+`COMPROMISED`. Device compromise and account ownership are different questions.
+
+## Mobile build controls
+
+- Build a release artifact from a protected CI environment.
+- Keep signing keys outside the repository.
+- Enable Android release shrinking/obfuscation in the host application and test
+  all Cordova bridge calls afterward.
+- Disable WebView debugging in production.
+- Store no trading secrets, backend authorization rules, or reusable privileged
+  credentials in JavaScript or native client code.
+- Use TLS and independently maintained certificate/key-management controls.
+- Require supported app versions and maintain an emergency revocation path.
+- Verify the packaged plugin version and source after Cordova platform
+  regeneration; never patch generated `platforms/` code directly.
+
+## Rollout
+
+1. Deploy in observe-only mode.
+2. Measure outcomes by app version, platform, OS, OEM/model, and distribution
+   channel without collecting unnecessary personal data.
+3. Exercise stock, rooted/jailbroken, Magisk/Zygisk, Frida Server, Frida Gadget,
+   Shadow, offline, degraded-service, and timeout cases.
+4. Review false positives and false negatives with the fraud and support teams.
+5. Introduce step-up controls before denials.
+6. Roll back enforcement independently from the mobile binary when possible.
+
+## Residual risk
+
+Client-side detection can be hooked, patched, hidden, or replaced. A determined
+attacker with control of the device can eventually bypass local checks. RootGuard
+raises cost and produces useful telemetry; it does not create a trusted execution
+environment.
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2025 Binuka Kamesh
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Cordova Plugin - RootGuard
+
+![RootGuard](https://img.shields.io/badge/Cordova%20Plugin-RootGuard-blue.svg)
+![npm](https://img.shields.io/badge/npm-v2.1.0-CB3837.svg)
+![Android](https://img.shields.io/badge/Android-API%2021%2B-3DDC84.svg)
+![iOS](https://img.shields.io/badge/iOS-Cordova%20iOS-lightgrey.svg)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/Binuka97/cordova-plugin-rootguard/main/LICENSE)
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/c26f452a-1430-468d-a653-98ffa464898e" alt="RootGuard" />
+</p>
+
+`cordova-plugin-rootguard` provides best-effort root, jailbreak, and runtime
+instrumentation detection for Cordova applications on Android and iOS.
+
+Version 2.1.0 introduces capability-aware checks and a three-state result model
+to reduce false positives on modern Android devices. Errors, restricted
+operating-system capabilities, and timeouts are reported as `UNKNOWN`; they are
+not treated as proof that a device is compromised.
+
+## Features
+
+### Android
+
+- Detects accessible root, `su`, Magisk, KernelSU, and APatch artifacts.
+- Inspects the current process for Frida, Frida Gadget, Gum, and related markers.
+- Checks memory maps, file descriptors, thread names, and bounded local ports.
+- Probes default and discoverable custom ports for a Frida-compatible protocol.
+- Does not execute `su`, `mount`, `which`, `pidof`, `getprop`, or shell commands.
+- Returns `UNKNOWN` when modern Android restrictions prevent a reliable local
+  conclusion.
+
+### iOS
+
+- Detects common rootful and rootless jailbreak artifacts.
+- Performs a sandbox write-escape test.
+- Checks loaded images, exported Frida symbols, thread names, open descriptors,
+  injected loader state, debugger state, and bounded Frida ports.
+- Avoids generic paths such as `/private/preboot` that can exist on stock iOS.
+- Runs checks outside the Cordova WebView/UI thread.
+
+> [!IMPORTANT]
+> RootGuard is a local risk sensor, not a trust anchor. An attacker who controls
+> a device can hide artifacts, hook these checks, or replace their result. Do
+> not use this plugin as the only control for login, trading, payments,
+> withdrawals, account recovery, or other sensitive operations. Read
+> [SECURITY.md](SECURITY.md) and
+> [ENTERPRISE-INTEGRATION.md](ENTERPRISE-INTEGRATION.md).
+
+## Installation
+
+### Install the published npm version
+
+```sh
+cordova plugin add cordova-plugin-rootguard@2.1.0
+```
+
+To follow the latest compatible published release:
+
+```sh
+cordova plugin add cordova-plugin-rootguard
+```
+
+### Install from GitHub
+
+Use a release tag for reproducible builds:
+
+```sh
+cordova plugin add https://github.com/Binuka97/cordova-plugin-rootguard.git#v2.1.0
+```
+
+### Install from a local clone
+
+```sh
+git clone https://github.com/Binuka97/cordova-plugin-rootguard.git
+cordova plugin add ./cordova-plugin-rootguard
+```
+
+### Upgrade an existing installation
+
+```sh
+cordova plugin remove cordova-plugin-rootguard
+cordova plugin add cordova-plugin-rootguard@2.1.0
+```
+
+After adding or upgrading the plugin, rebuild the native platforms:
+
+```sh
+cordova prepare
+cordova build android
+cordova build ios
+```
+
+Do not manually copy plugin files into the generated `platforms/` directory.
+Cordova regenerates that directory and can overwrite manual changes.
+
+## Requirements
+
+- Cordova 9.0.0 or newer
+- Android API 21 or newer
+- A `cordova-ios` version supporting the target iOS/Xcode release
+
+The project CI currently exercises Cordova Android 15.1 and Cordova iOS 8.1,
+along with JavaScript, TypeScript, metadata, and package tests.
+
+No JavaScript import is required in a normal Cordova application. The plugin
+exposes the global `RootGuard` object after Cordova fires `deviceready`.
+
+## Quick start
+
+Use `checkSecurityStatus()` for all new integrations:
+
+```js
+document.addEventListener("deviceready", function () {
+    RootGuard.checkSecurityStatus(function (status) {
+        switch (status) {
+        case RootGuard.SAFE:
+            // No local compromise indicator was found.
+            // Continue with the application's normal server-side controls.
+            console.log("RootGuard status: SAFE");
+            break;
+
+        case RootGuard.COMPROMISED:
+            // Strong or corroborated local evidence was found.
+            // Apply a proportionate risk policy or request server-side step-up.
+            console.warn("RootGuard status: COMPROMISED");
+            break;
+
+        case RootGuard.UNKNOWN:
+            // The result is inconclusive. Do not label the user as rooted.
+            // Request platform attestation or another server-side verification.
+            console.warn("RootGuard status: UNKNOWN");
+            break;
+        }
+    }, function (error) {
+        // A bridge/plugin error is inconclusive, not proof of compromise.
+        console.error("RootGuard check failed", error);
+    });
+}, false);
+```
+
+## Result values
+
+| Constant | Value | Meaning |
+|---|---:|---|
+| `RootGuard.SAFE` | `0` | Checks completed and no local indicator was found |
+| `RootGuard.COMPROMISED` | `1` | Strong evidence, or corroborated independent evidence, was detected |
+| `RootGuard.UNKNOWN` | `2` | A capability was unavailable or the local result is inconclusive |
+
+`SAFE` means only that the plugin found no local indicator. It does not prove
+that the device or application is trustworthy.
+
+On Android 13 and newer, a result with no strong local compromise evidence is
+intentionally `UNKNOWN`, because local absence checks cannot establish verified
+boot or application integrity. Use backend-verified Play Integrity for that
+purpose.
+
+## Detailed result
+
+Use `checkSecurityDetailed()` when the application needs coarse diagnostic
+telemetry:
+
+```js
+document.addEventListener("deviceready", function () {
+    RootGuard.checkSecurityDetailed(function (result) {
+        console.log(result.status);            // 0, 1, or 2
+        console.log(result.statusName);        // SAFE, COMPROMISED, or UNKNOWN
+        console.log(result.platform);          // android or ios
+        console.log(result.osVersion);
+        console.log(result.apiLevel);          // Android only
+        console.log(result.evidence);
+        console.log(result.unavailableChecks);
+        console.log(result.unknownReasons);
+        console.log(result.localOnly);         // always true
+    }, function (error) {
+        console.error("RootGuard check failed", error);
+    });
+}, false);
+```
+
+Example response:
+
+```json
+{
+  "status": 2,
+  "statusName": "UNKNOWN",
+  "platform": "android",
+  "osVersion": "16",
+  "apiLevel": 36,
+  "evidence": [],
+  "unavailableChecks": [],
+  "unknownReasons": [
+    "modern_android_local_integrity_unverifiable"
+  ],
+  "localOnly": true
+}
+```
+
+The detailed result contains:
+
+| Property | Type | Description |
+|---|---|---|
+| `status` | `0 \| 1 \| 2` | Stable numeric status |
+| `statusName` | `string` | `SAFE`, `COMPROMISED`, or `UNKNOWN` |
+| `platform` | `string` | `android` or `ios` |
+| `osVersion` | `string` | Device operating-system version |
+| `apiLevel` | `number` | Android API level; absent on iOS |
+| `evidence` | `string[]` | Coarse categories detected locally |
+| `unavailableChecks` | `string[]` | Checks unavailable in the environment |
+| `unknownReasons` | `string[]` | Stable reason codes explaining an `UNKNOWN` result |
+| `localOnly` | `true` | Indicates that this is not a server attestation |
+
+`unknownReasons` is additive and is present in RootGuard 2.1.0 detailed native
+results. Clients should still use `result.unknownReasons || []` when supporting
+older installed versions.
+
+### Possible `UNKNOWN` scenarios
+
+| Reason code | Scenario | Recommended handling |
+|---|---|---|
+| `modern_android_local_integrity_unverifiable` | Android 13 or newer has no conclusive local compromise evidence, but local absence checks cannot prove device integrity | Request backend-verified Play Integrity or apply proportionate step-up |
+| `single_medium_signal` | Exactly one ambiguous indicator was detected, such as a non-production build, generic GLib thread, open local port, or debugger state | Review `evidence`; do not label the device rooted without corroboration |
+| `critical_check_unavailable` | A critical inspection capability, such as process maps, root checks, or iOS thread enumeration, was unavailable | Review `unavailableChecks` and use platform attestation |
+| `assessment_exception` | The native assessment encountered an unexpected internal exception | Treat as an operationally inconclusive result and collect non-sensitive diagnostics |
+| `ios_simulator` | The application is running in the iOS Simulator, where a physical-device jailbreak conclusion is not meaningful | Use a physical device for security validation |
+| `assessment_deadline` | Reserved for a future overall assessment deadline | Treat as inconclusive; never as proof of compromise |
+
+More than one reason may be returned. For example, a modern Android device can
+report both `critical_check_unavailable` and
+`modern_android_local_integrity_unverifiable`.
+
+Client-side inspection example:
+
+```js
+RootGuard.checkSecurityDetailed(function (result) {
+    if (result.status !== RootGuard.UNKNOWN) {
+        return;
+    }
+
+    var reasons = result.unknownReasons || [];
+    console.warn("RootGuard UNKNOWN reasons:", reasons);
+    console.warn("Unconfirmed evidence:", result.evidence);
+    console.warn("Unavailable checks:", result.unavailableChecks);
+
+    // UNKNOWN is inconclusive. Do not classify the device as rooted solely
+    // because this array contains a reason.
+}, function (error) {
+    console.error("RootGuard check failed", error);
+});
+```
+
+Treat `evidence`, `unavailableChecks`, and `unknownReasons` as internal security
+telemetry. Do not display exact detection information to end users.
+
+## Promise wrapper
+
+The Cordova API is callback-based. Applications that prefer promises can wrap
+it without changing the plugin:
+
+```js
+function getRootGuardStatus() {
+    return new Promise(function (resolve, reject) {
+        RootGuard.checkSecurityStatus(resolve, reject);
+    });
+}
+
+document.addEventListener("deviceready", async function () {
+    try {
+        const status = await getRootGuardStatus();
+
+        if (status === RootGuard.COMPROMISED) {
+            console.warn("Local compromise evidence detected");
+        } else if (status === RootGuard.UNKNOWN) {
+            console.warn("Local security status is inconclusive");
+        }
+    } catch (error) {
+        console.error("RootGuard check failed", error);
+    }
+}, false);
+```
+
+## Legacy API and migration
+
+The original `checkSecurity()` API remains available for applications upgrading
+from version 1.x or 2.0.x:
+
+```js
+document.addEventListener("deviceready", function () {
+    RootGuard.checkSecurity(function (compromised) {
+        if (compromised === 1) {
+            console.warn("Local compromise evidence detected");
+        }
+    }, function (error) {
+        console.error("RootGuard check failed", error);
+    });
+}, false);
+```
+
+The legacy method returns only:
+
+- `0`: no confirmed compromise evidence
+- `1`: compromise evidence detected
+
+For backward compatibility, native `UNKNOWN` results map to `0`. This prevents
+an upgrade from unexpectedly locking out existing users, but it also means the
+legacy method cannot distinguish `SAFE` from `UNKNOWN`.
+
+New and security-sensitive integrations must use `checkSecurityStatus()` or
+`checkSecurityDetailed()`.
+
+## TypeScript
+
+Type declarations are included in the npm package:
+
+```ts
+document.addEventListener("deviceready", () => {
+    RootGuard.checkSecurityStatus((status: RootGuard.Status) => {
+        if (status === RootGuard.COMPROMISED) {
+            console.warn("Local compromise evidence detected");
+        }
+    }, console.error);
+});
+```
+
+The declaration exposes `RootGuard.Status`, `RootGuard.DetailedResult`, the
+three constants, and all three API methods.
+
+## Recommended production policy
+
+For financial, trading, payment, identity, or regulated applications:
+
+1. Use RootGuard as one local risk signal.
+2. Verify Google Play Integrity or Apple App Attest on a trusted backend.
+3. Bind fresh attestation challenges to the sensitive request.
+4. Keep authentication, authorization, limits, and transaction validation on
+   the server.
+5. Observe status rates by OS and device model before enabling enforcement.
+6. Prefer step-up verification and recoverable restrictions over permanent
+   account lockouts.
+
+Suggested handling:
+
+| RootGuard result | Suggested application behavior |
+|---|---|
+| `SAFE` | Continue with normal backend authorization and attestation |
+| `UNKNOWN` | Request fresh attestation or proportionate step-up verification |
+| `COMPROMISED` | Restrict or step up sensitive operations according to server policy |
+| Plugin error | Treat as inconclusive and request server-side verification |
+
+Never authorize or reject a sensitive transaction solely from a value returned
+by JavaScript or native client code.
+
+## Detection limitations
+
+RootGuard raises the cost of common attacks but cannot provide guaranteed
+detection:
+
+- Magisk DenyList, Zygisk modules, and customized root solutions can hide
+  artifacts from an application.
+- Frida Server can be renamed or use a custom port.
+- Frida Gadget can be renamed, embedded, or modified to remove common markers.
+- iOS Shadow and similar tweaks can hook filesystem, loader, socket, process,
+  and Cordova APIs.
+- An attacker can patch the application or force a different plugin response.
+
+See [SECURITY.md](SECURITY.md) for the threat model and primary references.
+
+## Troubleshooting
+
+### `RootGuard` is undefined
+
+Call the plugin only after Cordova's `deviceready` event. Confirm that the plugin
+is installed:
+
+```sh
+cordova plugin list
+```
+
+If necessary, remove and add the plugin again, then run `cordova prepare`.
+
+### Native changes are not appearing
+
+Remove and regenerate the affected Cordova platform:
+
+```sh
+cordova platform remove android
+cordova platform add android
+```
+
+For iOS, replace `android` with `ios`. Commit or back up any intentional host
+application platform changes before removing a platform.
+
+### A stock device returns `UNKNOWN`
+
+This can be expected on Android 13 and newer or whenever a required local
+capability is restricted. `UNKNOWN` does not mean rooted. Use backend
+attestation or step-up verification.
+
+### A rooted or jailbroken device returns `SAFE` or `UNKNOWN`
+
+Local checks can be concealed or hooked. Confirm that you are testing a release
+build, review `checkSecurityDetailed()` internally, test platform attestation,
+and do not depend on RootGuard as the sole security boundary.
+
+### The app becomes slow during a check
+
+Version 2.1.0 does not execute shell commands and uses bounded network probes on
+Cordova background workers. If a device remains slow, collect the platform, OS,
+device model, plugin result, and timing without exposing sensitive user data,
+then open an issue.
+
+## Testing your integration
+
+Before production rollout, test:
+
+- Stock Android devices across Android 12, 13, 14, 15, and 16, including
+  relevant OEM ROMs.
+- Rooted Android test devices with the root frameworks supported by your threat
+  model.
+- Frida Server using default and non-default configurations.
+- Frida Gadget injection in a controlled test build.
+- Stock and jailbroken physical iOS devices.
+- iOS runtime-hooking and jailbreak-hiding tools included in your threat model.
+- Offline, degraded-service, plugin-error, and `UNKNOWN` handling.
+- Debug and release application builds.
+
+Run the plugin's package tests:
+
+```sh
+npm test
+npm pack --dry-run
+```
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release history and migration notes.
+
+## Security
+
+Please report vulnerabilities privately to the maintainer address in
+`package.json`. Do not post credentials, customer information, or proprietary
+assessment reports in a public issue.
+
+## Support and contributing
+
+Bug reports and contributions are welcome through
+[GitHub Issues](https://github.com/Binuka97/cordova-plugin-rootguard/issues).
+Include the plugin version, Cordova platform version, operating-system version,
+device model, and a minimal reproduction when possible.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+## Author
+
+**Binuka Kamesh**<br>
+Email: [binukakamesh97@gmail.com](mailto:binukakamesh97@gmail.com)<br>
+GitHub: [Binuka97](https://github.com/Binuka97)
+
+---
+
+Maintained by Binuka Kamesh.
+
+```
+
+`RELEASE.md`:
+
+```md
+# Release procedure
+
+## 2.1.0 release gates
+
+- [ ] Review every source and documentation change.
+- [ ] Confirm `package.json` and `plugin.xml` both contain `2.1.0`.
+- [ ] Run `npm test`.
+- [ ] Compile `types/index.d.ts` with the pinned CI TypeScript version.
+- [ ] Run `npm pack --dry-run` and inspect every included path.
+- [ ] Run `npm publish --dry-run`.
+- [ ] Build a clean Cordova Android application with Cordova Android 15.1,
+      JDK 17, compile SDK 36, and target SDK 36.
+- [ ] Build a clean Cordova iOS application with Cordova iOS 8.1 and a supported
+      current Xcode/iPhoneOS SDK.
+- [ ] Test stock physical devices before modified-device scenarios.
+- [ ] Complete the VAPT retest matrix in the remediation response.
+- [ ] Verify the host trading application uses the three-state API and
+      server-side attestation.
+- [ ] Tag the exact reviewed commit as `v2.1.0`.
+- [ ] Publish from that tag using npm trusted publishing and provenance.
+- [ ] Require strong npm publishing authentication and remove obsolete tokens.
+- [ ] Install `cordova-plugin-rootguard@2.1.0` from npm into clean Android and
+      iOS sample applications and repeat smoke tests.
+- [ ] Roll out to production gradually with monitoring and rollback controls.
+
+## Packaging commands
+
+```sh
+npm test
+npm pack --dry-run
+npm publish --dry-run
+```
+
+Do not run the real `npm publish` command until the native CI jobs, VAPT retest,
+release review, tag, npm authentication, and rollout approvals are complete.
+
+Prefer [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) from
+the protected release workflow. It avoids long-lived publish tokens and
+automatically generates provenance for eligible public packages. Configure the
+package's npm settings to require strong publishing authentication.
+
+An npm version cannot be reused after publication. If 2.1.0 is already present
+in the registry or the artifact changes after approval, increment the version and
+repeat the gates.
+
+```
+
+`SECURITY.md`:
+
+```md
+# Security model and limitations
+
+RootGuard is a local risk sensor, not a trust anchor. Code executing on a
+compromised device can inspect, hook, patch, or replace every client-side check
+and its return value. No open-source Cordova plugin can promise 100% detection.
+
+## Result policy
+
+| Status | Value | Meaning | Recommended action |
+|---|---:|---|---|
+| `SAFE` | 0 | Checks completed and found no local indicator | Continue; apply normal server controls |
+| `COMPROMISED` | 1 | Strong evidence, or two independent medium indicators | Step up, restrict sensitive actions, or block according to risk |
+| `UNKNOWN` | 2 | A capability was unavailable, one weak indicator exists, or local checks cannot establish trust | Do not automatically label the user rooted; request attestation or step up |
+
+An exception, permission denial, connection timeout, or inaccessible file is
+never evidence of compromise.
+
+## Android
+
+Magisk DenyList and Zygisk modules can selectively hide files, mounts, processes,
+properties, and injected code from this app. Frida Server can use a different
+port, and Frida Gadget can be renamed and configured without a listening socket.
+These are fundamental limits of in-process heuristics.
+
+For sensitive server operations, use Play Integrity standard requests with a
+fresh request hash, decrypt and verify the token on a trusted backend, validate
+app recognition and licensing, and apply a tiered policy to device-integrity
+labels. Do not accept a verdict decoded or asserted only by the client.
+
+RootGuard intentionally reports `UNKNOWN` on Android 13+ when it finds no strong
+local evidence. This is not a claim that `/proc/self` is universally unreadable;
+it means local absence checks cannot prove a certified boot state.
+
+## iOS
+
+Shadow and similar tweaks can hook filesystem, dynamic-loader, process, socket,
+and Cordova result APIs. A renamed payload can evade string indicators, while a
+patched application can simply force a safe return. RootGuard adds independent
+checks to raise bypass cost, but cannot guarantee Shadow detection.
+
+Use App Attest for sensitive backend requests. Generate and attest a per-install
+key, validate attestations on the server, bind assertions to one-time challenges
+and request payloads, and enforce monotonic counters. Apple explicitly describes
+App Attest as one signal in a broader risk assessment, not definitive jailbreak
+detection. Roll out enforcement gradually and handle unsupported or transient
+service states.
+
+## Operational guidance
+
+- Never exit or permanently lock an account based only on this plugin.
+- Keep security decisions and valuable data on the server.
+- Treat diagnostic `evidence` as telemetry; do not display exact checks to users.
+- Test stock and modified physical devices across OEMs and OS updates.
+- Maintain an allow/observe phase before changing enforcement.
+- Rate-limit sensitive operations and retain a recoverable support path.
+
+Please report vulnerabilities privately to the maintainer contact in
+`package.json`. Do not include user data, live credentials, or proprietary
+assessment material in a public issue.
+
+## Primary references
+
+- [Google Play Integrity overview](https://developer.android.com/google/play/integrity/overview)
+- [Google Play Integrity verdicts](https://developer.android.com/google/play/integrity/verdicts)
+- [Apple: Validating apps that connect to your server](https://developer.apple.com/documentation/devicecheck/validating-apps-that-connect-to-your-server)
+- [Apple DeviceCheck and App Attest](https://developer.apple.com/documentation/devicecheck)
+- [Apache Cordova Android plugin threading](https://cordova.apache.org/docs/en/latest/guide/platforms/android/plugin.html)
+- [Apache Cordova iOS plugin threading](https://cordova.apache.org/docs/en/latest/guide/platforms/ios/plugin.html)
+- [Frida modes of operation](https://frida.re/docs/modes/)
+- [Frida Gadget configuration and renaming](https://frida.re/docs/gadget/)
+- [OWASP reverse-engineering tool detection](https://mas.owasp.org/MASTG-KNOW-0030/)
+- [OWASP Android anti-reversing limitations](https://mas.owasp.org/MASTG/0x05j-Testing-Resiliency-Against-Reverse-Engineering/)
+- [Magisk source and documentation](https://github.com/topjohnwu/Magisk)
+- [Shadow jailbreak-detection bypass](https://github.com/jjolano/shadow)
+
+```
+
+`package.json`:
+
+```json
+{
+    "name": "cordova-plugin-rootguard",
+    "version": "2.1.0",
+    "description": "Best-effort root, jailbreak, and runtime instrumentation risk detection for Cordova.",
+    "types": "types/index.d.ts",
+    "files": [
+        "CHANGELOG.md",
+        "ENTERPRISE-INTEGRATION.md",
+        "LICENSE",
+        "README.md",
+        "RELEASE.md",
+        "SECURITY.md",
+        "plugin.xml",
+        "src/",
+        "types/",
+        "www/"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "test": "node --test"
+    },
+    "cordova": {
+        "id": "cordova-plugin-rootguard",
+        "platforms": [
+            "android",
+            "ios"
+        ]
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Binuka97/cordova-plugin-rootguard.git"
+    },
+    "keywords": [
+        "cordova",
+        "plugin",
+        "root-detection",
+        "frida-detection",
+        "security",
+        "cydia",
+        "detection",
+        "cordova-plugin",
+        "cordova-plugin-rootguard",
+        "cordova-ios",
+        "cordova-android",
+        "cordova-ios-plugin",
+        "root",
+        "rooted",
+        "rootBeer",
+        "android",
+        "rootguard",
+        "rootguard-plugin",
+        "rootguard-cordova-plugin",
+        "rootguard-cordova",
+        "frida",
+        "frida-detection",
+        "frida-detection-plugin",
+        "frida-detection-cordova-plugin",
+        "frida-bypass",
+        "frida-bypass-detection"
+    ],
+    "author": {
+        "name": "Binuka Kamesh",
+        "email": "binukakamesh97@gmail.com",
+        "url": "https://github.com/Binuka97"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Binuka97/cordova-plugin-rootguard/issues"
+    },
+    "homepage": "https://github.com/Binuka97/cordova-plugin-rootguard/blob/main/README.md"
+}
+
+```
+
+`plugin.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="cordova-plugin-rootguard" version="2.1.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>RootGuard</name>
+    <description>Root and Frida detection plugin for Cordova</description>
+    <license>MIT</license>
+    <keywords>cordova, root detection, frida detection, security</keywords>
+    
+    <engines>
+        <engine name="cordova" version=">=9.0.0"/>
+    </engines>
+
+    <js-module src="www/rootguard.js" name="RootGuard">
+        <clobbers target="RootGuard"/>
+    </js-module>
+
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="RootGuard">
+                <param name="android-package" value="com.rootguard.detection.RootGuard"/>
+            </feature>
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.INTERNET"/>
+        </config-file>
+        
+        <source-file src="src/android/RootGuard.java" target-dir="src/com/rootguard/detection/"/>
+    </platform>
+
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="RootGuard">
+                <param name="ios-package" value="RootGuard" />
+            </feature>
+        </config-file>
+
+        <header-file src="src/ios/RootGuard.h" />
+        <source-file src="src/ios/RootGuard.m" />
+    </platform>
+</plugin>
+
+```
+
+`src/android/RootGuard.java`:
+
+```java
+package com.rootguard.detection;
+
+import android.os.Build;
+
+import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaPlugin;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
+/**
+ * Local, best-effort compromise detection.
+ *
+ * This class deliberately avoids shell commands. A command failure or timeout is
+ * a capability failure, never evidence of compromise. High-assurance enforcement
+ * belongs on a backend using Play Integrity; see SECURITY.md.
+ */
+public final class RootGuard extends CordovaPlugin {
+    private static final int SAFE = 0;
+    private static final int COMPROMISED = 1;
+    private static final int UNKNOWN = 2;
+    private static final int ANDROID_13 = 33;
+    private static final int SOCKET_TIMEOUT_MS = 60;
+    private static final int MAX_MAP_LINES = 20000;
+    private static final int MAX_FDS = 512;
+    private static final int MAX_TASKS = 512;
+    private static final int MAX_TCP_LINES = 256;
+    private static final int MAX_PROTOCOL_PORTS = 8;
+
+    private enum State { DETECTED, CLEAR, UNAVAILABLE }
+    private enum Strength { HIGH, MEDIUM }
+
+    private static final class Signal {
+        final String id;
+        final String category;
+        final State state;
+        final Strength strength;
+
+        Signal(String id, String category, State state, Strength strength) {
+            this.id = id;
+            this.category = category;
+            this.state = state;
+            this.strength = strength;
+        }
+    }
+
+    private static final class Assessment {
+        final int status;
+        final List<Signal> signals;
+        final List<String> unknownReasons;
+
+        Assessment(int status, List<Signal> signals, List<String> unknownReasons) {
+            this.status = status;
+            this.signals = signals;
+            this.unknownReasons = unknownReasons;
+        }
+    }
+
+    @Override
+    public boolean execute(String action, JSONArray args, CallbackContext callback) throws JSONException {
+        if (!"checkSecurity".equals(action)
+                && !"checkSecurityStatus".equals(action)
+                && !"checkSecurityDetailed".equals(action)) {
+            return false;
+        }
+
+        cordova.getThreadPool().execute(() -> {
+            Assessment assessment;
+            try {
+                assessment = assess();
+            } catch (Throwable ignored) {
+                List<String> unknownReasons = new ArrayList<>();
+                unknownReasons.add("assessment_exception");
+                assessment = new Assessment(UNKNOWN, new ArrayList<>(), unknownReasons);
+            }
+
+            if ("checkSecurity".equals(action)) {
+                // Backward compatibility: the legacy API remains binary and UNKNOWN
+                // must not lock out existing users.
+                callback.success(assessment.status == COMPROMISED ? 1 : 0);
+            } else if ("checkSecurityStatus".equals(action)) {
+                callback.success(assessment.status);
+            } else {
+                callback.success(toJson(assessment));
+            }
+        });
+        return true;
+    }
+
+    private Assessment assess() {
+        List<Signal> signals = new ArrayList<>();
+        signals.add(checkRootArtifacts());
+        signals.add(checkSuOnPath());
+        signals.add(checkBuildProvenance());
+        signals.add(checkProcessMaps());
+        signals.add(checkFileDescriptors());
+        signals.add(checkThreadNames());
+        signals.add(checkFridaProtocol());
+
+        int high = countDetected(signals, Strength.HIGH);
+        int medium = countDetected(signals, Strength.MEDIUM);
+        boolean criticalUnavailable = criticalChecksUnavailable(signals);
+        List<String> unknownReasons = new ArrayList<>();
+        int status;
+        if (high > 0 || medium >= 2) {
+            status = COMPROMISED;
+        } else {
+            if (medium == 1) {
+                unknownReasons.add("single_medium_signal");
+            }
+            if (criticalUnavailable) {
+                unknownReasons.add("critical_check_unavailable");
+            }
+            if (Build.VERSION.SDK_INT >= ANDROID_13) {
+                // Local absence checks cannot establish device integrity on modern
+                // Android. A server-verified Play Integrity verdict is required.
+                unknownReasons.add("modern_android_local_integrity_unverifiable");
+            }
+            status = unknownReasons.isEmpty() ? SAFE : UNKNOWN;
+        }
+        return new Assessment(status, signals, unknownReasons);
+    }
+
+    private Signal checkRootArtifacts() {
+        String[] paths = {
+                "/system/app/Superuser.apk",
+                "/system/bin/su",
+                "/system/xbin/su",
+                "/system/bin/.ext/.su",
+                "/system/usr/we-need-root/su-backup",
+                "/sbin/su",
+                "/su/bin/su",
+                "/sbin/.magisk",
+                "/cache/magisk.log",
+                "/data/adb/magisk",
+                "/data/adb/ksu",
+                "/data/adb/ap"
+        };
+        try {
+            for (String path : paths) {
+                if (new File(path).exists()) {
+                    return new Signal("root_artifact", "root", State.DETECTED, Strength.HIGH);
+                }
+            }
+            return new Signal("root_artifact", "root", State.CLEAR, Strength.HIGH);
+        } catch (SecurityException ignored) {
+            return new Signal("root_artifact", "root", State.UNAVAILABLE, Strength.HIGH);
+        }
+    }
+
+    private Signal checkSuOnPath() {
+        String path = System.getenv("PATH");
+        if (path == null || path.length() == 0) {
+            return new Signal("su_path", "root", State.UNAVAILABLE, Strength.HIGH);
+        }
+        try {
+            for (String directory : path.split(":")) {
+                File candidate = new File(directory, "su");
+                if (candidate.isFile() && candidate.canExecute()) {
+                    return new Signal("su_path", "root", State.DETECTED, Strength.HIGH);
+                }
+            }
+            return new Signal("su_path", "root", State.CLEAR, Strength.HIGH);
+        } catch (SecurityException ignored) {
+            return new Signal("su_path", "root", State.UNAVAILABLE, Strength.HIGH);
+        }
+    }
+
+    private Signal checkBuildProvenance() {
+        String tags = Build.TAGS == null ? "" : Build.TAGS.toLowerCase(Locale.US);
+        String type = Build.TYPE == null ? "" : Build.TYPE.toLowerCase(Locale.US);
+        boolean nonProduction = tags.contains("test-keys") || "eng".equals(type) || "userdebug".equals(type);
+        return new Signal("non_production_build", "root", nonProduction ? State.DETECTED : State.CLEAR,
+                Strength.MEDIUM);
+    }
+
+    private Signal checkProcessMaps() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("/proc/self/maps"))) {
+            String line;
+            int count = 0;
+            while ((line = reader.readLine()) != null && count++ < MAX_MAP_LINES) {
+                String value = line.toLowerCase(Locale.US);
+                if (containsInstrumentationMarker(value)) {
+                    return new Signal("instrumentation_map", "instrumentation", State.DETECTED, Strength.HIGH);
+                }
+            }
+            return new Signal("instrumentation_map", "instrumentation", State.CLEAR, Strength.HIGH);
+        } catch (Exception ignored) {
+            return new Signal("instrumentation_map", "instrumentation", State.UNAVAILABLE, Strength.HIGH);
+        }
+    }
+
+    private Signal checkFileDescriptors() {
+        File directory = new File("/proc/self/fd");
+        File[] descriptors;
+        try {
+            descriptors = directory.listFiles();
+        } catch (SecurityException ignored) {
+            descriptors = null;
+        }
+        if (descriptors == null) {
+            return new Signal("instrumentation_fd", "instrumentation", State.UNAVAILABLE, Strength.HIGH);
+        }
+
+        int count = 0;
+        for (File descriptor : descriptors) {
+            if (count++ >= MAX_FDS) break;
+            try {
+                if (containsInstrumentationMarker(descriptor.getCanonicalPath().toLowerCase(Locale.US))) {
+                    return new Signal("instrumentation_fd", "instrumentation", State.DETECTED, Strength.HIGH);
+                }
+            } catch (Exception ignored) {
+                // Individual descriptors can disappear while being enumerated.
+            }
+        }
+        return new Signal("instrumentation_fd", "instrumentation", State.CLEAR, Strength.HIGH);
+    }
+
+    private Signal checkThreadNames() {
+        File directory = new File("/proc/self/task");
+        File[] tasks;
+        try {
+            tasks = directory.listFiles();
+        } catch (SecurityException ignored) {
+            tasks = null;
+        }
+        if (tasks == null) {
+            return new Signal("instrumentation_thread", "instrumentation", State.UNAVAILABLE, Strength.HIGH);
+        }
+
+        boolean genericGlibThread = false;
+        int count = 0;
+        for (File task : tasks) {
+            if (count++ >= MAX_TASKS) break;
+            try (BufferedReader reader = new BufferedReader(new FileReader(new File(task, "comm")))) {
+                String name = reader.readLine();
+                if (name == null) continue;
+                String value = name.trim().toLowerCase(Locale.US);
+                if (containsInstrumentationMarker(value)
+                        || value.contains("pool-frida")
+                        || value.contains("gmain-frida")) {
+                    return new Signal("instrumentation_thread", "instrumentation",
+                            State.DETECTED, Strength.HIGH);
+                }
+                // gmain/gdbus are associated with Frida's GLib runtime, but
+                // legitimate software can use them too. Never treat either as
+                // conclusive without a second independent signal.
+                if ("gmain".equals(value) || "gdbus".equals(value)) {
+                    genericGlibThread = true;
+                }
+            } catch (Exception ignored) {
+                // Threads can exit while /proc/self/task is being enumerated.
+            }
+        }
+        return new Signal("instrumentation_thread", "instrumentation",
+                genericGlibThread ? State.DETECTED : State.CLEAR,
+                genericGlibThread ? Strength.MEDIUM : Strength.HIGH);
+    }
+
+    private Signal checkFridaProtocol() {
+        Set<Integer> ports = new LinkedHashSet<>();
+        ports.add(27042);
+        ports.add(27043);
+        ports.add(27044);
+        ports.add(27045);
+        addListeningPorts("/proc/self/net/tcp", ports);
+        addListeningPorts("/proc/self/net/tcp6", ports);
+
+        boolean portOpen = false;
+        for (int port : ports) {
+            boolean knownFridaPort = port >= 27042 && port <= 27045;
+            try (Socket socket = new Socket()) {
+                socket.connect(new InetSocketAddress("127.0.0.1", port), SOCKET_TIMEOUT_MS);
+                socket.setSoTimeout(SOCKET_TIMEOUT_MS);
+                portOpen = true;
+
+                OutputStream output = socket.getOutputStream();
+                output.write(new byte[]{0});
+                output.write("AUTH\r\n".getBytes(StandardCharsets.US_ASCII));
+                output.flush();
+
+                InputStream input = socket.getInputStream();
+                byte[] response = new byte[96];
+                int length = input.read(response);
+                if (length > 0) {
+                    String banner = new String(response, 0, length, StandardCharsets.US_ASCII)
+                            .toUpperCase(Locale.US);
+                    if (banner.contains("REJECTED") || banner.contains("OK") || banner.contains("AGREE")) {
+                        // D-Bus authentication is Frida-compatible but not unique
+                        // to Frida. It is conclusive only on its known ports; a
+                        // custom port must be corroborated by another signal.
+                        return new Signal("frida_protocol", "instrumentation", State.DETECTED,
+                                knownFridaPort ? Strength.HIGH : Strength.MEDIUM);
+                    }
+                }
+            } catch (Exception ignored) {
+                // A refused connection or protocol timeout is not evidence.
+            }
+        }
+        return new Signal("frida_protocol", "instrumentation",
+                portOpen ? State.DETECTED : State.CLEAR, Strength.MEDIUM);
+    }
+
+    private void addListeningPorts(String path, Set<Integer> ports) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+            String line;
+            int count = 0;
+            while ((line = reader.readLine()) != null && count++ < MAX_TCP_LINES
+                    && ports.size() < MAX_PROTOCOL_PORTS) {
+                String[] columns = line.trim().split("\\s+");
+                if (columns.length < 4 || !"0A".equals(columns[3])) continue;
+                String[] address = columns[1].split(":");
+                if (address.length != 2) continue;
+                int port = Integer.parseInt(address[1], 16);
+                if (port > 1024 && port <= 65535) ports.add(port);
+            }
+        } catch (Exception ignored) {
+            // Procfs visibility varies. Default/common ports are still checked.
+        }
+    }
+
+    private boolean containsInstrumentationMarker(String value) {
+        return value.contains("frida")
+                || value.contains("gum-js")
+                || value.contains("linjector")
+                || value.contains("/re.frida.")
+                || value.contains("zygisk");
+    }
+
+    private int countDetected(List<Signal> signals, Strength strength) {
+        int count = 0;
+        for (Signal signal : signals) {
+            if (signal.state == State.DETECTED && signal.strength == strength) count++;
+        }
+        return count;
+    }
+
+    private boolean criticalChecksUnavailable(List<Signal> signals) {
+        boolean mapsUnavailable = false;
+        boolean rootChecksUnavailable = true;
+        for (Signal signal : signals) {
+            if ("instrumentation_map".equals(signal.id) && signal.state == State.UNAVAILABLE) {
+                mapsUnavailable = true;
+            }
+            if ("root".equals(signal.category) && signal.strength == Strength.HIGH
+                    && signal.state != State.UNAVAILABLE) {
+                rootChecksUnavailable = false;
+            }
+        }
+        return mapsUnavailable || rootChecksUnavailable;
+    }
+
+    private JSONObject toJson(Assessment assessment) {
+        JSONObject result = new JSONObject();
+        JSONArray evidence = new JSONArray();
+        JSONArray unavailable = new JSONArray();
+        JSONArray unknownReasons = new JSONArray();
+        try {
+            for (String reason : assessment.unknownReasons) unknownReasons.put(reason);
+            for (Signal signal : assessment.signals) {
+                if (signal.state == State.DETECTED) evidence.put(signal.id);
+                if (signal.state == State.UNAVAILABLE) unavailable.put(signal.id);
+            }
+            result.put("status", assessment.status);
+            result.put("statusName", statusName(assessment.status));
+            result.put("platform", "android");
+            result.put("osVersion", Build.VERSION.RELEASE);
+            result.put("apiLevel", Build.VERSION.SDK_INT);
+            result.put("evidence", evidence);
+            result.put("unavailableChecks", unavailable);
+            result.put("unknownReasons", unknownReasons);
+            result.put("localOnly", true);
+        } catch (JSONException ignored) {
+            // All keys and values above are JSON-compatible.
+        }
+        return result;
+    }
+
+    private String statusName(int status) {
+        if (status == COMPROMISED) return "COMPROMISED";
+        if (status == UNKNOWN) return "UNKNOWN";
+        return "SAFE";
+    }
+}
+
+```
+
+`src/ios/RootGuard.h`:
+
+```h
+#import <Cordova/CDV.h>
+
+@interface RootGuard : CDVPlugin
+
+- (void)checkSecurity:(CDVInvokedUrlCommand*)command;
+- (void)checkSecurityStatus:(CDVInvokedUrlCommand*)command;
+- (void)checkSecurityDetailed:(CDVInvokedUrlCommand*)command;
+
+@end
+
+```
+
+`src/ios/RootGuard.m`:
+
+```m
+#import "RootGuard.h"
+
+#import <Cordova/CDV.h>
+#import <TargetConditionals.h>
+#import <UIKit/UIKit.h>
+#import <arpa/inet.h>
+#import <dlfcn.h>
+#import <fcntl.h>
+#import <mach/mach.h>
+#import <mach-o/dyld.h>
+#import <netinet/in.h>
+#import <pthread.h>
+#import <limits.h>
+#import <string.h>
+#import <sys/proc.h>
+#import <sys/select.h>
+#import <sys/socket.h>
+#import <sys/stat.h>
+#import <sys/sysctl.h>
+#import <unistd.h>
+
+static const NSInteger RGStatusSafe = 0;
+static const NSInteger RGStatusCompromised = 1;
+static const NSInteger RGStatusUnknown = 2;
+
+typedef NS_ENUM(NSInteger, RGSignalState) {
+    RGSignalClear,
+    RGSignalDetected,
+    RGSignalUnavailable
+};
+
+typedef NS_ENUM(NSInteger, RGSignalStrength) {
+    RGSignalMedium,
+    RGSignalHigh
+};
+
+@implementation RootGuard
+
+- (void)checkSecurity:(CDVInvokedUrlCommand *)command {
+    [self runAssessmentForAction:@"checkSecurity" command:command];
+}
+
+- (void)checkSecurityStatus:(CDVInvokedUrlCommand *)command {
+    [self runAssessmentForAction:@"checkSecurityStatus" command:command];
+}
+
+- (void)checkSecurityDetailed:(CDVInvokedUrlCommand *)command {
+    [self runAssessmentForAction:@"checkSecurityDetailed" command:command];
+}
+
+- (void)runAssessmentForAction:(NSString *)action command:(CDVInvokedUrlCommand *)command {
+    [self.commandDelegate runInBackground:^{
+        NSDictionary *assessment;
+        @try {
+            assessment = [self assessment];
+        } @catch (__unused NSException *exception) {
+            assessment = @{
+                @"status": @(RGStatusUnknown),
+                @"statusName": @"UNKNOWN",
+                @"platform": @"ios",
+                @"osVersion": [UIDevice currentDevice].systemVersion ?: @"",
+                @"evidence": @[],
+                @"unavailableChecks": @[@"assessment"],
+                @"unknownReasons": @[@"assessment_exception"],
+                @"localOnly": @YES
+            };
+        }
+
+        NSInteger status = [assessment[@"status"] integerValue];
+        CDVPluginResult *result;
+        if ([action isEqualToString:@"checkSecurity"]) {
+            // Preserve the historical binary contract. UNKNOWN is not a reason to
+            // lock out an existing application after a plugin upgrade.
+            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                          messageAsInt:(status == RGStatusCompromised ? 1 : 0)];
+        } else if ([action isEqualToString:@"checkSecurityStatus"]) {
+            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:(int)status];
+        } else {
+            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                   messageAsDictionary:assessment];
+        }
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    }];
+}
+
+- (NSDictionary *)assessment {
+    NSMutableArray<NSDictionary *> *signals = [NSMutableArray array];
+
+#if TARGET_OS_SIMULATOR
+    [signals addObject:[self signal:@"simulator" category:@"environment"
+                                state:RGSignalUnavailable strength:RGSignalHigh]];
+#else
+    [signals addObject:[self checkJailbreakArtifacts]];
+    [signals addObject:[self checkSandboxEscape]];
+    [signals addObject:[self checkInjectedEnvironment]];
+    [signals addObject:[self checkLoadedImages]];
+    [signals addObject:[self checkFridaSymbols]];
+    [signals addObject:[self checkSuspiciousThreads]];
+    [signals addObject:[self checkSuspiciousFileDescriptors]];
+    [signals addObject:[self checkDebugger]];
+    [signals addObject:[self checkFridaProtocol]];
+#endif
+
+    NSInteger high = 0;
+    NSInteger medium = 0;
+    BOOL criticalUnavailable = NO;
+    NSMutableArray<NSString *> *evidence = [NSMutableArray array];
+    NSMutableArray<NSString *> *unavailable = [NSMutableArray array];
+    NSMutableArray<NSString *> *unknownReasons = [NSMutableArray array];
+
+    for (NSDictionary *signal in signals) {
+        RGSignalState state = [signal[@"state"] integerValue];
+        if (state == RGSignalDetected) {
+            [evidence addObject:signal[@"id"]];
+            if ([signal[@"strength"] integerValue] == RGSignalHigh) high++;
+            else medium++;
+        } else if (state == RGSignalUnavailable) {
+            [unavailable addObject:signal[@"id"]];
+            if ([signal[@"id"] isEqualToString:@"simulator"]) {
+                [unknownReasons addObject:@"ios_simulator"];
+            } else if ([signal[@"strength"] integerValue] == RGSignalHigh) {
+                criticalUnavailable = YES;
+            }
+        }
+    }
+
+    NSInteger status;
+    if (high > 0 || medium >= 2) {
+        status = RGStatusCompromised;
+        [unknownReasons removeAllObjects];
+    } else {
+        if (medium == 1) {
+            [unknownReasons addObject:@"single_medium_signal"];
+        }
+        if (criticalUnavailable) {
+            [unknownReasons addObject:@"critical_check_unavailable"];
+        }
+        status = unknownReasons.count > 0 ? RGStatusUnknown : RGStatusSafe;
+    }
+
+    return @{
+        @"status": @(status),
+        @"statusName": [self statusName:status],
+        @"platform": @"ios",
+        @"osVersion": [UIDevice currentDevice].systemVersion ?: @"",
+        @"evidence": evidence,
+        @"unavailableChecks": unavailable,
+        @"unknownReasons": unknownReasons,
+        @"localOnly": @YES
+    };
+}
+
+- (NSDictionary *)checkJailbreakArtifacts {
+    // Do not check generic /private/preboot: it exists on stock modern iOS.
+    const char *paths[] = {
+        "/Applications/Cydia.app",
+        "/Applications/Sileo.app",
+        "/Applications/Zebra.app",
+        "/Library/MobileSubstrate/MobileSubstrate.dylib",
+        "/usr/lib/TweakInject",
+        "/usr/lib/libsubstrate.dylib",
+        "/usr/sbin/sshd",
+        "/var/jb/usr/bin/su",
+        "/var/jb/Library/MobileSubstrate/MobileSubstrate.dylib",
+        "/var/jb/basebin/jbctl",
+        "/opt/procursus/bin/apt",
+        "/private/var/lib/apt"
+    };
+
+    for (NSUInteger index = 0; index < sizeof(paths) / sizeof(paths[0]); index++) {
+        if (access(paths[index], F_OK) == 0) {
+            return [self signal:@"jailbreak_artifact" category:@"jailbreak"
+                          state:RGSignalDetected strength:RGSignalHigh];
+        }
+    }
+    return [self signal:@"jailbreak_artifact" category:@"jailbreak"
+                  state:RGSignalClear strength:RGSignalHigh];
+}
+
+- (NSDictionary *)checkSandboxEscape {
+    const char *path = "/private/.rootguard-sandbox-test";
+    int descriptor = open(path, O_WRONLY | O_CREAT | O_EXCL, 0600);
+    if (descriptor >= 0) {
+        close(descriptor);
+        unlink(path);
+        return [self signal:@"sandbox_escape" category:@"jailbreak"
+                      state:RGSignalDetected strength:RGSignalHigh];
+    }
+    return [self signal:@"sandbox_escape" category:@"jailbreak"
+                  state:RGSignalClear strength:RGSignalHigh];
+}
+
+- (NSDictionary *)checkInjectedEnvironment {
+    const char *value = getenv("DYLD_INSERT_LIBRARIES");
+    BOOL detected = value != NULL && strlen(value) > 0;
+    return [self signal:@"dyld_environment" category:@"instrumentation"
+                  state:(detected ? RGSignalDetected : RGSignalClear)
+               strength:RGSignalHigh];
+}
+
+- (NSDictionary *)checkLoadedImages {
+    uint32_t count = _dyld_image_count();
+    for (uint32_t index = 0; index < count; index++) {
+        const char *name = _dyld_get_image_name(index);
+        if (name && [self containsInstrumentationMarker:name]) {
+            return [self signal:@"instrumentation_image" category:@"instrumentation"
+                          state:RGSignalDetected strength:RGSignalHigh];
+        }
+    }
+    return [self signal:@"instrumentation_image" category:@"instrumentation"
+                  state:RGSignalClear strength:RGSignalHigh];
+}
+
+- (NSDictionary *)checkFridaSymbols {
+    const char *symbols[] = {
+        "frida_agent_main",
+        "frida_gadget_load",
+        "gum_init_embedded",
+        "gum_script_backend_create_sync"
+    };
+    for (NSUInteger index = 0; index < sizeof(symbols) / sizeof(symbols[0]); index++) {
+        if (dlsym(RTLD_DEFAULT, symbols[index]) != NULL) {
+            return [self signal:@"instrumentation_symbol" category:@"instrumentation"
+                          state:RGSignalDetected strength:RGSignalHigh];
+        }
+    }
+    return [self signal:@"instrumentation_symbol" category:@"instrumentation"
+                  state:RGSignalClear strength:RGSignalHigh];
+}
+
+- (NSDictionary *)checkSuspiciousThreads {
+    thread_act_array_t threads = NULL;
+    mach_msg_type_number_t count = 0;
+    if (task_threads(mach_task_self(), &threads, &count) != KERN_SUCCESS) {
+        return [self signal:@"instrumentation_thread" category:@"instrumentation"
+                      state:RGSignalUnavailable strength:RGSignalHigh];
+    }
+
+    BOOL detected = NO;
+    for (mach_msg_type_number_t index = 0; index < count; index++) {
+        pthread_t thread = pthread_from_mach_thread_np(threads[index]);
+        char name[128] = {0};
+        if (thread && pthread_getname_np(thread, name, sizeof(name)) == 0
+                && [self containsInstrumentationMarker:name]) {
+            detected = YES;
+        }
+        mach_port_deallocate(mach_task_self(), threads[index]);
+    }
+    vm_deallocate(mach_task_self(), (vm_address_t)threads, count * sizeof(thread_t));
+
+    return [self signal:@"instrumentation_thread" category:@"instrumentation"
+                  state:(detected ? RGSignalDetected : RGSignalClear)
+               strength:RGSignalHigh];
+}
+
+- (NSDictionary *)checkSuspiciousFileDescriptors {
+    for (int descriptor = 0; descriptor < 256; descriptor++) {
+        char path[PATH_MAX] = {0};
+        if (fcntl(descriptor, F_GETPATH, path) == 0 && [self containsInstrumentationMarker:path]) {
+            return [self signal:@"instrumentation_fd" category:@"instrumentation"
+                          state:RGSignalDetected strength:RGSignalHigh];
+        }
+    }
+    return [self signal:@"instrumentation_fd" category:@"instrumentation"
+                  state:RGSignalClear strength:RGSignalHigh];
+}
+
+- (NSDictionary *)checkDebugger {
+    int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()};
+    struct kinfo_proc processInfo;
+    memset(&processInfo, 0, sizeof(processInfo));
+    size_t size = sizeof(processInfo);
+    if (sysctl(mib, 4, &processInfo, &size, NULL, 0) != 0) {
+        return [self signal:@"debugger" category:@"instrumentation"
+                      state:RGSignalUnavailable strength:RGSignalMedium];
+    }
+    BOOL traced = (processInfo.kp_proc.p_flag & P_TRACED) != 0;
+    return [self signal:@"debugger" category:@"instrumentation"
+                  state:(traced ? RGSignalDetected : RGSignalClear)
+               strength:RGSignalMedium];
+}
+
+- (NSDictionary *)checkFridaProtocol {
+    int ports[] = {27042, 27043};
+    BOOL openPort = NO;
+    for (NSUInteger index = 0; index < sizeof(ports) / sizeof(ports[0]); index++) {
+        int socketFd = socket(AF_INET, SOCK_STREAM, 0);
+        if (socketFd < 0) continue;
+
+        int flags = fcntl(socketFd, F_GETFL, 0);
+        if (flags < 0 || fcntl(socketFd, F_SETFL, flags | O_NONBLOCK) < 0) {
+            close(socketFd);
+            continue;
+        }
+
+        struct sockaddr_in address;
+        memset(&address, 0, sizeof(address));
+        address.sin_family = AF_INET;
+        address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        address.sin_port = htons((uint16_t)ports[index]);
+        connect(socketFd, (struct sockaddr *)&address, sizeof(address));
+
+        fd_set writeSet;
+        FD_ZERO(&writeSet);
+        FD_SET(socketFd, &writeSet);
+        struct timeval timeout = {.tv_sec = 0, .tv_usec = 100000};
+        if (select(socketFd + 1, NULL, &writeSet, NULL, &timeout) > 0) {
+            int error = 0;
+            socklen_t errorLength = sizeof(error);
+            if (getsockopt(socketFd, SOL_SOCKET, SO_ERROR, &error, &errorLength) == 0 && error == 0) {
+                openPort = YES;
+                const char probe[] = "\0AUTH\r\n";
+                send(socketFd, probe, sizeof(probe) - 1, 0);
+
+                fd_set readSet;
+                FD_ZERO(&readSet);
+                FD_SET(socketFd, &readSet);
+                timeout.tv_sec = 0;
+                timeout.tv_usec = 100000;
+                if (select(socketFd + 1, &readSet, NULL, NULL, &timeout) > 0) {
+                    char response[96] = {0};
+                    ssize_t length = recv(socketFd, response, sizeof(response) - 1, 0);
+                    if (length > 0) {
+                        NSString *banner = [[[NSString alloc] initWithBytes:response
+                                                                    length:(NSUInteger)length
+                                                                  encoding:NSASCIIStringEncoding] uppercaseString];
+                        if ([banner containsString:@"REJECTED"] || [banner containsString:@"OK"]
+                                || [banner containsString:@"AGREE"]) {
+                            close(socketFd);
+                            return [self signal:@"frida_protocol" category:@"instrumentation"
+                                          state:RGSignalDetected strength:RGSignalHigh];
+                        }
+                    }
+                }
+            }
+        }
+        close(socketFd);
+    }
+    return [self signal:@"frida_protocol" category:@"instrumentation"
+                  state:(openPort ? RGSignalDetected : RGSignalClear)
+               strength:RGSignalMedium];
+}
+
+- (BOOL)containsInstrumentationMarker:(const char *)value {
+    if (value == NULL) return NO;
+    NSString *text = [[[NSString alloc] initWithUTF8String:value] lowercaseString];
+    return [text containsString:@"frida"]
+        || [text containsString:@"gum-js"]
+        || [text containsString:@"linjector"]
+        || [text containsString:@"/re.frida."];
+}
+
+- (NSDictionary *)signal:(NSString *)identifier
+                category:(NSString *)category
+                   state:(RGSignalState)state
+                strength:(RGSignalStrength)strength {
+    return @{
+        @"id": identifier,
+        @"category": category,
+        @"state": @(state),
+        @"strength": @(strength)
+    };
+}
+
+- (NSString *)statusName:(NSInteger)status {
+    if (status == RGStatusCompromised) return @"COMPROMISED";
+    if (status == RGStatusUnknown) return @"UNKNOWN";
+    return @"SAFE";
+}
+
+@end
+
+```
+
+`test/rootguard.test.js`:
+
+```js
+"use strict";
+
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const test = require("node:test");
+
+const root = path.resolve(__dirname, "..");
+
+function loadPlugin() {
+    const calls = [];
+    global.cordova = {
+        exec(success, error, service, action, args) {
+            calls.push({ success, error, service, action, args });
+        }
+    };
+    const modulePath = path.join(root, "www", "rootguard.js");
+    delete require.cache[require.resolve(modulePath)];
+    return { plugin: require(modulePath), calls };
+}
+
+test("exports stable status constants", () => {
+    const { plugin } = loadPlugin();
+    assert.equal(plugin.SAFE, 0);
+    assert.equal(plugin.COMPROMISED, 1);
+    assert.equal(plugin.UNKNOWN, 2);
+});
+
+test("legacy and three-state actions call the native RootGuard service", () => {
+    const { plugin, calls } = loadPlugin();
+    const success = () => {};
+    const error = () => {};
+
+    plugin.checkSecurity(success, error);
+    plugin.checkSecurityStatus(success, error);
+    plugin.checkSecurityDetailed(success, error);
+
+    assert.deepEqual(calls.map(({ service, action, args }) => ({ service, action, args })), [
+        { service: "RootGuard", action: "checkSecurity", args: [] },
+        { service: "RootGuard", action: "checkSecurityStatus", args: [] },
+        { service: "RootGuard", action: "checkSecurityDetailed", args: [] }
+    ]);
+});
+
+test("plugin metadata versions agree and JavaScript source exists with exact casing", () => {
+    const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+    const pluginXml = fs.readFileSync(path.join(root, "plugin.xml"), "utf8");
+    const match = pluginXml.match(/<plugin[^>]+version="([^"]+)"/);
+
+    assert.ok(match);
+    assert.equal(match[1], packageJson.version);
+    assert.match(pluginXml, /src="www\/rootguard\.js"/);
+    assert.ok(fs.existsSync(path.join(root, "www", "rootguard.js")));
+    assert.equal(packageJson.types, "types/index.d.ts");
+    assert.ok(fs.existsSync(path.join(root, packageJson.types)));
+    assert.equal(packageJson.publishConfig.access, "public");
+});
+
+test("Android implementation does not execute shell commands or fail closed on exceptions", () => {
+    const source = fs.readFileSync(path.join(root, "src", "android", "RootGuard.java"), "utf8");
+    assert.doesNotMatch(source, /Runtime\.getRuntime\(\)\.exec|ProcessBuilder/);
+    assert.match(source, /new Assessment\(UNKNOWN/);
+    assert.match(source, /assessment\.status == COMPROMISED \? 1 : 0/);
+    assert.match(source, /\/proc\/self\/maps/);
+    assert.match(source, /\/proc\/self\/fd/);
+    assert.match(source, /\/proc\/self\/task/);
+    assert.match(source, /\/proc\/self\/net\/tcp6?/);
+    assert.match(source, /AUTH\\r\\n/);
+    assert.match(source, /modern_android_local_integrity_unverifiable/);
+    assert.match(source, /single_medium_signal/);
+    assert.match(source, /critical_check_unavailable/);
+    assert.match(source, /assessment_exception/);
+    assert.match(source, /result\.put\("unknownReasons", unknownReasons\)/);
+});
+
+test("iOS does not use the stock /private/preboot directory as an indicator", () => {
+    const source = fs.readFileSync(path.join(root, "src", "ios", "RootGuard.m"), "utf8");
+    assert.doesNotMatch(source, /^\s*"\/private\/preboot",?$/m);
+    assert.match(source, /@"unknownReasons"/);
+    assert.match(source, /@"assessment_exception"/);
+    assert.match(source, /@"ios_simulator"/);
+    assert.match(source, /@"single_medium_signal"/);
+    assert.match(source, /@"critical_check_unavailable"/);
+});
+
+```
+
+`types/index.d.ts`:
+
+```ts
+declare namespace RootGuard {
+    type Status = 0 | 1 | 2;
+    type UnknownReason =
+        | "modern_android_local_integrity_unverifiable"
+        | "single_medium_signal"
+        | "critical_check_unavailable"
+        | "assessment_exception"
+        | "ios_simulator"
+        | "assessment_deadline";
+
+    interface DetailedResult {
+        status: Status;
+        statusName: "SAFE" | "COMPROMISED" | "UNKNOWN";
+        platform: "android" | "ios";
+        osVersion: string;
+        apiLevel?: number;
+        evidence: string[];
+        unavailableChecks: string[];
+        unknownReasons?: UnknownReason[];
+        localOnly: true;
+    }
+
+    interface Plugin {
+        readonly SAFE: 0;
+        readonly COMPROMISED: 1;
+        readonly UNKNOWN: 2;
+
+        checkSecurity(
+            success: (compromised: 0 | 1) => void,
+            error?: (error: unknown) => void
+        ): void;
+
+        checkSecurityStatus(
+            success: (status: Status) => void,
+            error?: (error: unknown) => void
+        ): void;
+
+        checkSecurityDetailed(
+            success: (result: DetailedResult) => void,
+            error?: (error: unknown) => void
+        ): void;
+    }
+}
+
+declare const RootGuard: RootGuard.Plugin;
+export = RootGuard;
+export as namespace RootGuard;
+
+```
+
+`www/rootguard.js`:
+
+```js
+/* global cordova, module */
+
+var RootGuard = {
+    SAFE: 0,
+    COMPROMISED: 1,
+    UNKNOWN: 2,
+
+    /**
+     * Backward-compatible binary API. Returns 1 only for COMPROMISED.
+     * SAFE and UNKNOWN both return 0 so upgrades cannot create new lockouts.
+     */
+    checkSecurity: function(success, error) {
+        cordova.exec(success, error, "RootGuard", "checkSecurity", []);
+    },
+
+    /** Returns one of SAFE (0), COMPROMISED (1), or UNKNOWN (2). */
+    checkSecurityStatus: function(success, error) {
+        cordova.exec(success, error, "RootGuard", "checkSecurityStatus", []);
+    },
+
+    /** Returns status plus non-sensitive diagnostic categories. */
+    checkSecurityDetailed: function(success, error) {
+        cordova.exec(success, error, "RootGuard", "checkSecurityDetailed", []);
+    }
+};
+
+module.exports = RootGuard;
+
+```
