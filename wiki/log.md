@@ -1114,3 +1114,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:rathena/rathena`: entity [[rathena]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-25** — ingest `description:raskolnikov90/Beatrice.py`: entity [[beatrice-py]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-25** — ingest `description:rand-tech/pcm`: entity [[pcm]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
