@@ -371,6 +371,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [open.mp-anticheat](entities/open.mp-anticheat.md) — open.mp/SA-MP server AC (client self-memory sigs + RakNet; C++)
 - [OpenArk](entities/openark.md) — Qt anti-rootkit / kernel analysis (callbacks, SSDT, drivers)
 - [OpenLumina](entities/openlumina.md) — IDA plugin for third-party Lumina servers (Hex-Rays `.crt`; IDA Plugins)
+- [OpenProcmon](entities/openprocmon.md) — OSS Procmon-style monitor (ETW + minifilter; process/file/registry/network/DLL)
 - [Ophion](entities/ophion.md) — stealth Intel VT-x Type-2 HV (EPT; CPUID/CR4/TSC anti-detect)
 - [owned_alignment](entities/owned-alignment.md) — abusing Alignment (C++; kernel driver/hook; cheat / HWID)
 - [Oxidizer](entities/oxidizer.md) — Rust-accelerated angr / Rust decompiler (stripped-binary pseudocode; enum/match/? recovery)

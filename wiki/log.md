@@ -1195,3 +1195,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-25** — ingest `description:ps5-linux/ps5-linux-loader`: entity [[ps5-linux-loader]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
+- **2026-07-25** — ingest `description:progmboy/openprocmon`: entity [[openprocmon]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
