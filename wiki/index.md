@@ -481,6 +481,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UnrealNetworkProfiler](entities/unreal-network-profiler.md) — C# UE network profiler (Game Tools; networking / asset pipeline)
 - [UnrealSharp](entities/unrealsharp.md) — Unreal SDK View (Cheat / Game Engine Explorer:Unreal)
 - [Urho3D](entities/urho3d.md) — lightweight cross-platform 2D/3D engine (Game Engine source)
+- [USN](entities/usn.md) — NTFS USN / change-journal tooling (C++; AC / IS forensics)
 - [vac3_inhibitor](entities/vac3-inhibitor.md) — VAC3 exploration via hooking / memory analysis (C++)
 - [vac3-dumper](entities/vac3-dumper.md) — VAC3 multi-module dumper (timed loads; explore anticheat:vac)
 - [VACKeyRetrieval](entities/vackeyretrieval.md) — VAC module ICE encryption key retrieval (C++; explore anticheat:vac)

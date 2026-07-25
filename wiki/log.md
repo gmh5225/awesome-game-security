@@ -1092,3 +1092,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:rdbo/libmem`: entity [[libmem]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-07-25** — ingest `description:rdbo/DX11-BaseHook`: entity [[dx11-basehook]]; cited on [[present-hook]] and [[overviews/graphics-api]].
+
+- **2026-07-25** — ingest `description:rbmm/USN`: entity [[usn]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
