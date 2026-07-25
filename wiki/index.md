@@ -380,6 +380,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [op7t](entities/op7t.md) — DIY Android kernel (cheat / Android kernel explorer)
 - [open.mp-anticheat](entities/open.mp-anticheat.md) — open.mp/SA-MP server AC (client self-memory sigs + RakNet; C++)
 - [OpenArk](entities/openark.md) — Qt anti-rootkit / kernel analysis (callbacks, SSDT, drivers)
+- [OpenClaw](entities/openclaw.md) — C++ Captain Claw reimplementation (Box2D; CMake/Android; Game Develop / source)
 - [OpenLumina](entities/openlumina.md) — IDA plugin for third-party Lumina servers (Hex-Rays `.crt`; IDA Plugins)
 - [OpenProcmon](entities/openprocmon.md) — OSS Procmon-style monitor (ETW + minifilter; process/file/registry/network/DLL)
 - [Ophion](entities/ophion.md) — stealth Intel VT-x Type-2 HV (EPT; CPUID/CR4/TSC anti-detect)
