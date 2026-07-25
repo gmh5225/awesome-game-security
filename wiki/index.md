@@ -385,6 +385,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ReadWriteDriver](entities/read-write-driver.md) — `ntUserSetSysColors` KM↔UM channel (Win11 22000.376; cheat / driver communication)
 - [Recast Navigation](entities/recastnavigation.md) — Recast & Detour navmesh toolset (voxelize → pathfind/steer; Game Tools)
 - [recompiler](entities/recompiler.md) — Xbox360→Windows executable porting (console emulator / Xbox RE)
+- [Reborn](entities/reborn.md) — Rust Fortnite cheat framework (web server / SQLite / Discord bot; modular crates)
 - [ReGameDLL_CS](entities/regamedll-cs.md) — reversed CS1.6 server `mp.dll` (GoldSrc; plugin API; Game Engine / RE)
 - [RPGMakerDecrypter](entities/rpgmakerdecrypter.md) — RPG Maker XP/VX/VX Ace encrypted-archive extractor (CLI; RE tools)
 - [RETools](entities/retools.md) — curated RE/security tool catalog (disasm/debug/decompiler; toolkit guide)
