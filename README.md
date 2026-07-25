@@ -1840,6 +1840,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/x64dbg/x64dbg/wiki/Plugins
 - https://github.com/horsicq/x64dbg-Plugin-Manager
 - https://github.com/horsicq/nfdx64dbg [x64dbg plugin for Nauz File Detector (linker/compiler/tool detection)]
+- https://github.com/horsicq/stringsx64dbg [Strings plugin for x64dbg]
 - https://github.com/m417z/Multiline-Ultimate-Assembler
 - https://github.com/x64dbg/Classroom
 - https://github.com/VenTaz/Themidie
