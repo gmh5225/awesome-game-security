@@ -1182,3 +1182,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:qemu-gvm/qemu-gvm`: entity [[qemu-gvm]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-25** — ingest `description:pykaso/Swift-String-Obfuscator`: entity [[swift-string-obfuscator]]; cited on [[overviews/anti-cheat]] and [[overviews/mobile-security]].
+
+- **2026-07-25** — ingest `description:pxb1988/dex2jar`: entity [[dex2jar]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
