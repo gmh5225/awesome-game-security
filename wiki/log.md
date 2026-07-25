@@ -1230,3 +1230,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:redecorate/Holodori-Kernel-Bypass`: entity [[holodori-kernel-bypass]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-07-25** — ingest `description:planetchili/hw3d`: entity [[hw3d]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
+
+- **2026-07-25** — ingest `description:pkurth/D3D12Renderer`: entity [[d3d12renderer]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].

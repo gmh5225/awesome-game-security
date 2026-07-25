@@ -148,6 +148,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [darksword-kexploit-fun](entities/darksword-kexploit-fun.md) — DarkSword kernel r/w playground (iOS 17.0–26.0.1; sandbox/SSV/PAC; ObjC/C)
 
 - [DayZzz](entities/dayzzz.md) — DayZ cheat/modding: SDK generation + overlays (C/C++)
+- [D3D12Renderer](entities/d3d12renderer.md) — DX12 renderer sample (raytracing / mesh shaders; DirectX / guide)
 - [d810-ng](entities/d810-ng.md) — d810 next-gen; deobfuscate at decompilation time (Fix OLLVM)
 - [DeepSleep](entities/deepsleep.md) — x64 Gargoyle variant; ROP-only + PIC sleep-hide (no APCs; page protection)
 - [deepwiki-mcp](entities/deepwiki-mcp.md) — DeepWiki docs MCP server (query/retrieve wikis for AI agents; Game Develop / MCP)
