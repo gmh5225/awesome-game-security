@@ -1460,6 +1460,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/staturnzz/oob_entry [iOS 3.0-10.3.4 tfp0 kernel exploit]
 - https://github.com/khanhduytran0/coruna [Leaked iOS exploit toolkit — WebKit chains for multiple iOS versions, partially deobfuscated]
 - https://github.com/crazymind90/CVE-2026-XNU-AIO-KEVENT-UAF [XNU kern_aio.c AIO+kevent UAF; sandbox app, no entitlements; panic/double-free; iOS 26.2, patched 26.3]
+- https://github.com/34306/usbliter8-fun [iOS 27.0 beta CFW jailbreak via usbliter8 SecureROM exploit; iPhone 11 Pro only; RP2350 PWN DFU; destructive (breaks SEP/WiFi/baseband/Apple services)]
 
 > IOS Network / Location
 - https://github.com/Yu9191/wloc [Spoof Apple WiFi/cell network location (gs-loc WLOC) — MITM protobuf patch via Surge/Quantumult X/Loon/Stash/Shadowrocket; online picker + Shortcuts; GCJ-02→WGS84; no jailbreak; indoor/WiFi positioning only]
