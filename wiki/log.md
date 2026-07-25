@@ -1086,3 +1086,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:realTristan/Reborn`: entity [[reborn]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-25** — ingest `description:reahly/mono-external-lib`: entity [[mono-external-lib]]; cited on [[il2cpp]] and [[overviews/game-engine]].
+
+- **2026-07-25** — ingest `description:rdeioris/LuaMachine`: entity [[luamachine]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
