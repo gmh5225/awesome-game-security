@@ -481,6 +481,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Storm Engine](entities/storm-engine.md) — Akella Sea Dogs/PotC C++ engine (DX9 / physics / scripting; Game Engine source)
 - [Stride](entities/stride.md) — open-source C# 3D engine (formerly Xenko; PBR / Vulkan+D3D+GL; Game Engine)
 - [STP](entities/stp.md) — Simple Theorem Prover (bitvector/array SMT; MiniSat/CryptoMiniSat; MBA lane)
+- [SuperSplat](entities/supersplat.md) — PlayCanvas web 3D Gaussian Splat editor (PLY/splat export; 3D Graphics / AI splat)
 - [swsim](entities/swsim.md) — pure-software USIM/UICC SIM simulator (APDU/MILENAGE; SIMtrace2; Cellular/SIM)
 - [Sushi](entities/sushi.md) — PatchGuard (PG) monitoring (tandasat; cheat / PatchGuard-related)
 - [Swift-String-Obfuscator](entities/swift-string-obfuscator.md) — Swift string crypter (AC Compile Time / String Crypter)

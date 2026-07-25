@@ -1221,3 +1221,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-25** — ingest `description:playgameservices/cpp-android-basic-samples`: entity [[cpp-android-basic-samples]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
+- **2026-07-25** — ingest `description:playcanvas/supersplat`: entity [[supersplat]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
+
