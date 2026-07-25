@@ -1140,3 +1140,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/game-engine]] (Game Engine ~149 / Game Develop ~182; Cheat ~2586 / Anti Cheat ~612 / DirectX ~34 stable); light `index.md` section notes (no per-category pages).
 
 - **2026-07-25** — ingest `description:rad9800/BootExecuteEDR`: entity [[bootexecute-edr]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-07-25** — ingest `description:rad9800/BloatedHammer`: entity [[bloatedhammer]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
