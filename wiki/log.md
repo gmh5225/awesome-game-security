@@ -1201,3 +1201,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-25** — ingest `description:praydog/luagenny`: entity [[luagenny]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
 
+- **2026-07-25** — ingest `description:praydog/UEVR`: entity [[uevr]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
