@@ -2460,6 +2460,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Wine
 - https://github.com/ValveSoftware/Proton [Steam]
 - https://github.com/pgarba/ptrace_read_teb [use ptrace to read the TEB of a process on Linux]
+- https://github.com/redecorate/Holodori-Kernel-Bypass [Userspace emulation of Hololive Dreams usrdrv017964 kernel anti-cheat for Wine/Proton]
 
 > Anti Screenshot
 - https://github.com/KANKOSHEV/NoScreen [Hide Window]
