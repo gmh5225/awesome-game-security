@@ -1152,3 +1152,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]] (Anti Cheat ~613; Cheat ~2586 / Game Engine ~149 / Game Develop ~182 / DirectX ~34 stable); light `index.md` section notes (no per-category pages).
 
 - **2026-07-25** — ingest `description:r1cky33/krnl-gdi-render`: entity [[krnl-gdi-render]]; cited on [[overviews/graphics-api]] and [[present-hook]].
+
+- **2026-07-25** — ingest `description:r0ngwe1/petoy`: entity [[petoy]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
