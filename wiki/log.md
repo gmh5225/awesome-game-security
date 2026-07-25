@@ -1134,3 +1134,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:wh1te4ever/xnu_1day_practice`: entity [[xnu-1day-practice]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
 - **2026-07-25** — ingest `description:s7shvets7s/simple_ac_internal_cheat`: entity [[simple-ac-internal-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
+- **2026-07-25** — ingest `description:radareorg/iaito`: entity [[iaito]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
