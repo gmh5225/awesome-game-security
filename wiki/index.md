@@ -214,6 +214,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [genpatch](entities/genpatch.md) — Python binary-patch script generator (dialog on success; cheat / IDA Plugins)
 - [GhidraMetrics](entities/ghidrametrics.md) — Ghidra native-code metrics (cyclomatic / size / call depth; headless JSON)
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)
+- [gunyah-hypervisor](entities/gunyah-hypervisor.md) — Qualcomm Type-1 ARM64 HV (trusted/dependent VMs; Cheat QEMU/KVM + Android Emulator)
 - [HelloIommuPkg](entities/helloiommupkg.md) — sample DXE DMA-remapping (IOMMU) driver (tandasat; Detection:DMA)
 - [heck_csgo_external](entities/heck-csgo-external.md) — external CS:GO; SDK generation / memory analysis (C++; cheat / game:csgo)
 - [hide-file](entities/hide-file.md) — C kernel file-hide driver (cheat / hide; Detection:Hide-adjacent)
