@@ -51,4 +51,4 @@ Typical external DMA cheat: **cheat PC** + **DMA card** (Memory Read TLPs) + opt
 
 ## README map
 
-No top-level DMA section — maps via `Cheat` (~2583) DMA lanes and `Anti Cheat > Detection:DMA` (~611), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; TPM/IOMMU/VBS/HVCI attestation samples). (source: wiki/sources/README-categories.md)
+No top-level DMA section — maps via `Cheat` (~2586) DMA lanes and `Anti Cheat > Detection:DMA` (~612), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; TPM/IOMMU/VBS/HVCI attestation samples). (source: wiki/sources/README-categories.md)

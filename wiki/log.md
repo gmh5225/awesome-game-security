@@ -1124,3 +1124,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:radareorg/r2garlic`: entity [[r2garlic]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]].
 
 - **2026-07-25** — ingest `description:radareorg/r2ai`: entity [[r2ai]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-25** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2586 / Anti Cheat ~612; Game Engine ~147 / Game Develop ~181 / DirectX ~34 stable); light `index.md` section notes (no per-category pages).
