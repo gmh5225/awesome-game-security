@@ -460,6 +460,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Smep-Bypass](entities/smep-bypass.md) — Windows SMEP bypass PoC (CR4 / ROP / vuln-driver; kernel exec user shellcode)
 - [Socket.IO](entities/socket-io.md) — Node.js/browser real-time event I/O (WS + long-poll; Game Network)
 - [Solemn](entities/solemn.md) — HVCI HvciDisallowedImages blocklist CLI (Windows Security Features)
+- [Source2Gen](entities/source2gen.md) — Source 2 SDK generator (C++ class/enum headers; game engine explorer:source)
 - [Spoofer-AMIDEWIN](entities/spoofer-amidewin.md) — AMIDEWIN HWID / system-identifier spoof research (C/C++; Cheat HWID)
 
 - [SimpleFPSTemplate](entities/simple-fps-template.md) — UE4 FPS demo template (bloated C++ starter; Game Develop / Unreal source)
