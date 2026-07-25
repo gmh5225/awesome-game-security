@@ -1164,3 +1164,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2587; PlayStation ~6 WebKit CSSFontFace; Anti Cheat ~613 / Game Engine ~149 / Game Develop ~182 stable); light `index.md` section notes (no per-category pages).
 
 - **2026-07-25** — ingest `description:quic/gunyah-hypervisor`: entity [[gunyah-hypervisor]]; cited on [[overviews/game-hacking]] and [[overviews/mobile-security]].
+
+- **2026-07-25** — ingest `description:quarkslab/peetch`: entity [[peetch]]; cited on [[overviews/game-hacking]] and [[overviews/mobile-security]].

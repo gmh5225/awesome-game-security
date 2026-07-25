@@ -378,6 +378,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PCILeech-FPGA](entities/pcileech-fpga.md) — FPGA HDL/firmware for PCILeech DMA boards (Vivado; TLP/BAR/config shadow)
 - [pdb](entities/pdb.md) — Windows PDB parse/merge (C++ DIA SDK; old formats + pdb.cfg; RE / debugger symbols)
 - [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)
+- [peetch](entities/peetch.md) — eBPF dump/tls/proxy (PID sniff + OpenSSL keys; PCAPng; cheat / android kernel explorer)
 - [pesign](entities/pesign.md) — Linux UEFI Secure Boot PE-COFF Authenticode/PKCS#7 sign/verify (NSS)
 - [petoy](entities/petoy.md) — PE-focused binary packer (C/C++ + JS; Anti Cheat → Binary Packer `[PE]`)
 - [PhantomKiller](entities/phantomkiller.md) — BYOVD via Lenovo BootRepair.sys (IOCTL 0x222014 ZwTerminateProcess; PPL AV/EDR)
