@@ -1213,3 +1213,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-25** — ingest `description:ppy/osu-framework`: entity [[osu-framework]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; linked from [[osu]].
 
+- **2026-07-25** — ingest `description:poppopjmp/VMDragonSlayer`: entity [[vmdragonslayer]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+

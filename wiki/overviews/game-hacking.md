@@ -91,6 +91,7 @@ sources:
   - wiki/sources/descriptions/stijnherfst__HiveWE.md
 
   - wiki/sources/descriptions/wallds__NoVmpy.md
+  - wiki/sources/descriptions/poppopjmp__VMDragonSlayer.md
   - wiki/sources/descriptions/void-stack__VMUnprotect.md
   - wiki/sources/descriptions/void-stack__VMUnprotect.Dumper.md
   - wiki/sources/descriptions/xp987__symbridge.md
@@ -309,6 +310,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Decompilation-time deobfuscation via [[d810-ng]] (d810 next-gen) also sits in the Cheat Fix OLLVM lane. (source: wiki/sources/descriptions/w00tzenheimer__d810-ng.md)
 - Fix VMP / VTIL demos such as [[vmdevirt-vtil]] (broken VTIL compile path; multi-`vmenter` → jmp into compiled VTIL for IDA) sit in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/xtremegamer1__vmdevirt-vtil.md)
 - Python VMProtect deobfuscation via [[novmpy]] (symbolic exec of handler chains; reconstruct original insn sequence; Triton) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/wallds__NoVmpy.md)
+- Multi-engine VM detection/analysis via [[vmdragonslayer]] (DTT / SE / pattern classification / ML) sits in the Cheat RE Tools / Fix VMP-adjacent lane. (source: wiki/sources/descriptions/poppopjmp__VMDragonSlayer.md)
 - Python VMProtect trace/symbolic-exec handler recovery via [[rumba]] (virtual opcode handlers → original CFG/semantics; MBA-tagged README) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/thalium__rumba.md)
 - Execution-trace view/edit/analyze via [[execution-trace-viewer]] (originally for obfuscated-code RE; any-trace analysis) sits in the Cheat Debugging / RE Tools lane. (source: wiki/sources/descriptions/teemu-l__execution-trace-viewer.md)
 - Multi-emulator binary harnessing via [[smallworld]] (angr / Ghidra / PANDA / Unicorn; coverage, crash triage, firmware testing) sits in the Cheat RE Tools / DBI dynamic-analysis lane. (source: wiki/sources/descriptions/smallworld-re__smallworld.md)
