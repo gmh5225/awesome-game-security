@@ -1207,3 +1207,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-25** — ingest `description:praydog/AutomataMP`: entity [[automatamp]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
+- **2026-07-25** — ingest `description:pr701/fix-arxan`: entity [[fix-arxan]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+

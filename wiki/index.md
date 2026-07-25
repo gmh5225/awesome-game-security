@@ -200,6 +200,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FightingGame-UE5](entities/fightinggame-ue5.md) — UE5 fighting game (root motion / anim BP / montage combat; Game Develop / Unreal source)
 - [FileRecoveryTool](entities/file-recovery-tool.md) — NTFS/FAT32/ExFAT disk forensics (MFT/USN/carving; Win32)
 - [Fibratus](entities/fibratus.md) — Go Windows kernel ETW observability (rules / Elasticsearch; exploration & tracing)
+- [fix-arxan](entities/fix-arxan.md) — Arxan PE protector dump/decrypt (loader info + working image; Dump Fix)
 - [FlatRedBall](entities/flatredball.md) — C# / .NET 2D engine (editor + runtime; Game Engine)
 - [frida-il2cpp-bridge](entities/frida-il2cpp-bridge.md) — Frida dump Il2Cpp (Unity 5.3–6000.1.x; game engine explorer:Unity)
 - [Frida-Scripts](entities/frida-scripts.md) — Frida JS/Python scripts (editor tooling / hooking; cheat / Frida)
