@@ -6,14 +6,14 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Overviews
 
-- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2587 / Anti Cheat ~613; Game Engine ~149 + Mathematics ~7 / Renderer ~17; Game Develop ~182 MCP/security; Game Network ~26; console Switch/Xbox/PS ~6 + 3DS/GC·Wii)
+- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2588 / Anti Cheat ~613; Game Engine ~149 + Mathematics ~7 / Renderer ~17; Game Develop ~182 MCP/security; Game Network ~26; console Switch/Xbox/PS ~6 + 3DS/GC·Wii)
 - [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* (triggerbot & aimbot/wallhack) + page/CLR protection (~613); hybrid OS AC; Game Tools RCE + Windows Emulator AC
-- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2587) / Detection:DMA (~613) + WSF attestation
+- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2588) / Detection:DMA (~613) + WSF attestation
 - [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~149); Mathematics/PhysX/Renderer (~17) adjacency; MCP server/security + AI gamedev (~182); Game Network ~26; Game Assets ~11 + Image Codec + Manager/Testing/Tools/CI
-- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2587) + Some Tricks (~113); Android Terminal (ADB/root/shell)/File/Memory Explorer; console PS HV+BD-JB / WebKit CSSFontFace / 3DS LLE / GC·Wii
+- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2588) + Some Tricks (~113); Android Terminal (ADB/root/shell)/File/Memory Explorer; console PS HV+BD-JB / WebKit CSSFontFace / 3DS LLE / GC·Wii
 - [Graphics API](overviews/graphics-api.md) — DirectX (~34) / GL / Vulkan hooks, overlays + shader capture/flatten; Renderer (~17) + Mathematics adjacency; Image Codec + AI mesh/splat/sprite
 - [Mobile Security](overviews/mobile-security.md) — Android / iOS; Terminal (ADB/root/shell)/File/Memory Explorer + App/Kernel CVE; WSA (~9), Gunyah/vphone emulators
-- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools (file-format/asset lists + Ghidra managers), MBA/DBI, deobfuscation, packers; Windows Emulator + console/PS BD-JB+WebKit / 3DS/GC·Wii RE (~2587 Cheat lane)
+- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools (file-format/asset lists + Ghidra managers), MBA/DBI, deobfuscation, packers; Windows Emulator + console/PS BD-JB+WebKit / 3DS/GC·Wii RE (~2588 Cheat lane)
 - [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation (~9), BYOVD, pool; Some Tricks Ring0 (~113); Windows Emulator (~7) + WSL
 
 ## Concepts
@@ -620,6 +620,6 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Sources
 
-- Projected category map: `sources/README-categories.md` (generated on scan; 40 top-level sections; Game Engine ~149 / Renderer ~17 / Cheat ~2587 / Anti Cheat ~613 / DirectX ~34 / Game Develop ~182 / Game Network ~26 / PlayStation ~6)
+- Projected category map: `sources/README-categories.md` (generated on scan; 40 top-level sections; Game Engine ~149 / Renderer ~17 / Cheat ~2588 / Anti Cheat ~613 / DirectX ~34 / Game Develop ~182 / Game Network ~26 / PlayStation ~6)
 - Skill projections: `sources/skills/`
 - Description projections: `sources/descriptions/` (incremental only)
