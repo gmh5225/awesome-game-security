@@ -40,6 +40,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BattleField-1-Internal](entities/battlefield-1-internal.md) — BF1 internal: DirectX / SDK generation / hooking (C++)
 - [Basic-Fortnite-Cheat-Source-Internal](entities/basic-fortnite-cheat-source-internal.md) — Fortnite internal: UE4 SDK / GObject/GNames / hooks (ESP + aimbot; C++)
 - [BE-Shellcode](entities/be-shellcode.md) — BattlEye UM shellcode dump/disasm (thread scan / VEH / modules)
+- [Beatrice.py](entities/beatrice-py.md) — Python x64 opcode-equivalent mutation (AV/AC signature evasion)
 - [battleye-region-walking](entities/battleye-region-walking.md) — BE VirtualQuery region walk (MEM_PRIVATE/MAPPED; shellcode/manual-map)
 - [battleye-rust](entities/battleye-rust.md) — BattlEye RCON UDP (Rust; packet checksum + socket I/O)
 - [big5-decode-ida](entities/big5-decode-ida.md) — IDA plugin: decode bytes as Big5 (Python; cheat / IDA Plugins)
