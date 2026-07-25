@@ -1215,3 +1215,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-25** — ingest `description:poppopjmp/VMDragonSlayer`: entity [[vmdragonslayer]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
+- **2026-07-25** — ingest `description:polygraphene/DirtyPipe-Android`: entity [[dirtypipe-android]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-link from [[dirtypiperoot]].
+

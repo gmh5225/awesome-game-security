@@ -157,7 +157,9 @@ Compiled knowledge catalog for awesome-game-security.
 - [DFIRTriage](entities/dfirtriage.md) — Python Windows DFIR triage (process/network/registry/event logs/prefetch)
 - [DioProcess](entities/dioprocess-private.md) — Windows internals research (Rust/Dioxus + KM + UEFI; DSE/KPP)
 - [DirectXHook](entities/directxhook.md) — DX11/12 Present hook + in-game overlay framework (C++; dinput8 DLL)
+- [DirtyPipe-Android](entities/dirtypipe-android.md) — Pixel 6 Dirty Pipe (CVE-2022-0847) permanent Magisk v24.3 root
 - [DirtyPipeRoot](entities/dirtypiperoot.md) — Pixel 6 Dirty Pipe (CVE-2022-0847) one-click temporary root
+
 - [DLLirant](entities/dllirant.md) — automated Windows DLL search-order hijack discovery (proxy DLL + load monitor)
 - [DMACheatEngineLoader](entities/dma-cheat-engine-loader.md) — Cheat Engine DMA loader (copy CE → DMACE; closed-source)
 - [DMAInvoker](entities/dma-invoker.md) — Windows DMA RPM via DMALibrary (cheat / RPM)
