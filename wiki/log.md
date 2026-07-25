@@ -1178,3 +1178,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:qq703048949/event_replay`: entity [[event-replay]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-25** — ingest `description:qiufuyu123/Positron`: entity [[positron]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-25** — ingest `description:qemu-gvm/qemu-gvm`: entity [[qemu-gvm]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
