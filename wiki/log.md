@@ -1193,3 +1193,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-25** — ingest `description:psavarmattas/android_kernel_oneplus_sm7250-WKSU`: entity [[android-kernel-oneplus-sm7250-wksu]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
+- **2026-07-25** — ingest `description:ps5-linux/ps5-linux-loader`: entity [[ps5-linux-loader]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
