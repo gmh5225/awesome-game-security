@@ -46,6 +46,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [big5-decode-ida](entities/big5-decode-ida.md) — IDA plugin: decode bytes as Big5 (Python; cheat / IDA Plugins)
 - [a-pasted-rust-script](entities/a-pasted-rust-script.md) — Rust/C++ ImGui cheat loader (anti-debug + feature modules)
 - [ActionRoguelike](entities/action-roguelike.md) — UE Roguelike sample (gameplay systems; Game Develop / Unreal source)
+- [AERoot](entities/aeroot.md) — Quarkslab Android Emulator runtime root (debug pipe/ADB; custom su; no system-image rewrite)
 - [AiDA](entities/aida.md) — AI-powered IDA 9.0+ assistant for C++ game RE (cheat / IDA Plugins)
 - [AIMachDec](entities/aimachdec.md) — IDA LLM ARM64→C/ObjC/Swift for Mach-O (apps/kernelcache/DSC; cheat / IDA Plugins)
 - [aimbot-detection-prototype](entities/aimbot-detection-prototype.md) — deep-learning aimbot/triggerbot detection prototype (clips + live window; Detection:Aimbot)

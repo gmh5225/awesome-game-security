@@ -1166,3 +1166,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:quic/gunyah-hypervisor`: entity [[gunyah-hypervisor]]; cited on [[overviews/game-hacking]] and [[overviews/mobile-security]].
 
 - **2026-07-25** — ingest `description:quarkslab/peetch`: entity [[peetch]]; cited on [[overviews/game-hacking]] and [[overviews/mobile-security]].
+
+- **2026-07-25** — ingest `description:quarkslab/AERoot`: entity [[aeroot]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
