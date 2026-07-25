@@ -291,6 +291,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Kotek](entities/kotek.md) — modular C++20 engine core (ktkI* backends; GLES/Vulkan/DX/BGFX; Game Engine)
 - [KPDB](entities/kpdb.md) — parse PDB in driver (C++; Some Tricks / Windows Ring0)
 - [kptnhook](entities/kptnhook.md) — system-wide KM DLL inject + function hook (every process; cheat / injection:windows)
+- [krnl-gdi-render](entities/krnl-gdi-render.md) — KM GDI overlay framework (WDK; GDI hooks + sigscan; Dxgkrnl + GDI)
 - [KSOCKET](entities/ksocket.md) — kernel WSK BSD-socket lib (TCP/UDP from ring 0; no UM)
 - [KslKatz](entities/kslkatz.md) — BYOVD LSASS dumper via Defender `KslD.sys` (WDigest/LSA; PPL/AV bypass)
 - [kvc](entities/kvc.md) — DSE bypass via signed MS driver (`g_CiOptions` / skci / SeCiCallbacks; PP/PPL→LSASS)

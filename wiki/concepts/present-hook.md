@@ -8,6 +8,7 @@ sources:
   - wiki/sources/descriptions/wongfei__wda_monitor_trick.md
   - wiki/sources/descriptions/weak1337__PresentHookDetection.md
   - wiki/sources/descriptions/vmcall__dxgkrnl_hook.md
+  - wiki/sources/descriptions/r1cky33__krnl-gdi-render.md
   - wiki/sources/descriptions/visotw__3d9.md
   - wiki/sources/descriptions/techiew__DirectXHook.md
   - wiki/sources/descriptions/rlybasic__DWM_Hook.md
@@ -33,10 +34,12 @@ VTable/code integrity on Present, call-stack analysis, known hook DLLs (`obs-gra
 
 Kernel graphics-subsystem hooks such as [[dxgkrnl-hook]] manipulate the screen buffer below the user-mode Present path—another overlay/draw surface for ESP-style research. (source: wiki/sources/descriptions/vmcall__dxgkrnl_hook.md)
 
+Kernel-mode GDI render frameworks such as [[krnl-gdi-render]] hook GDI drawing from Ring0 for overlays outside typical user-mode Present paths. (source: wiki/sources/descriptions/r1cky33__krnl-gdi-render.md)
+
 User-mode DWM hook samples such as [[dwm-hook]] (C++; rendering / hooking / overlays) draw via Desktop Window Manager composition rather than a single game swap-chain Present. (source: wiki/sources/descriptions/rlybasic__DWM_Hook.md)
 
 DX11 stereoscopic-fix tooling such as [[3d9]] works in the same Present/swap-chain ecosystem (developer-oriented; not an end-user product). (source: wiki/sources/descriptions/visotw__3d9.md)
 
 ## Related
 
-[[overviews/graphics-api]] · [[directxhook]] · [[dx11-basehook]] · [[present-hook-detection]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dwm-hook]] · [[dxgkrnl-hook]] · [[3d9]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[overviews/graphics-api]] · [[directxhook]] · [[dx11-basehook]] · [[present-hook-detection]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dwm-hook]] · [[dxgkrnl-hook]] · [[krnl-gdi-render]] · [[3d9]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
