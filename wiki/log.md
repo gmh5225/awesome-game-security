@@ -1158,3 +1158,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:r0keb/Smep-Bypass`: entity [[smep-bypass]]; cited on [[overviews/windows-kernel]] and [[byovd]].
 
 - **2026-07-25** — ingest `description:qwqdanchun/Pillager`: entity [[pillager]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
+
+- **2026-07-25** — ingest `description:quickemu-project/quickemu`: entity [[quickemu]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
