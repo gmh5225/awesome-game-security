@@ -1096,3 +1096,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:rbmm/USN`: entity [[usn]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-25** — ingest `description:rbmm/SearchEx`: entity [[searchex]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-25** — ingest `description:rbmm/LockFile-Poc`: entity [[lockfile-poc]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
