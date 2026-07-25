@@ -1108,3 +1108,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:razixNew/CompiledProtection`: entity [[compiled-protection]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-07-25** — ingest `description:raysan5/raylib`: entity [[raylib]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-25** — ingest `description:raysan5/custom_game_engines`: entity [[custom-game-engines]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
