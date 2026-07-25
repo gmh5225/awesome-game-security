@@ -1191,3 +1191,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-25** — ingest `description:pudii/gba-ghidra-loader`: entity [[gba-ghidra-loader]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
+- **2026-07-25** — ingest `description:psavarmattas/android_kernel_oneplus_sm7250-WKSU`: entity [[android-kernel-oneplus-sm7250-wksu]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+

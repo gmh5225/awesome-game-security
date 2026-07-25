@@ -53,6 +53,8 @@ Compiled knowledge catalog for awesome-game-security.
 - [Alcatraz](entities/alcatraz.md) — x64 PE obfuscator (mutation / CFF / IAT; Zydis + AsmJit; ImGui)
 - [android-kernel-hacking-toolkit](entities/android-kernel-hacking-toolkit.md) — Android aarch64 LKM toolkit (filecopy / hideproc / propedit / syscall_hijack)
 - [android-kernel-oneplus-sm8250](entities/android-kernel-oneplus-sm8250.md) — OnePlus 8/8T/8Pro/(9R?) SM8250 Android kernel source (cheat / Android Kernel Source)
+- [android-kernel-oneplus-sm7250-wksu](entities/android-kernel-oneplus-sm7250-wksu.md) — OnePlus Nord SM7250 Android kernel + KernelSU (cheat / Android Kernel Source)
+
 - [android-kernel-samsung-universal5433](entities/android-kernel-samsung-universal5433.md) — Samsung Exynos 5433 Android kernel (Note 4 / Alpha; cheat / Android Kernel Source)
 - [android-kernel-xiaomi-pipa](entities/android-kernel-xiaomi-pipa.md) — Xiaomi Pad 6 (pipa) Android kernel source (cheat / Android Kernel Source)
 
