@@ -1205,3 +1205,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-25** — ingest `description:praydog/Source2Gen`: entity [[source2gen]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
 
+- **2026-07-25** — ingest `description:praydog/AutomataMP`: entity [[automatamp]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
