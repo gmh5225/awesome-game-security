@@ -4,7 +4,7 @@ kind: entity
 topics: [anti-cheat, windows-kernel]
 sources:
   - wiki/sources/descriptions/xuanxuan0__TiEtwAgent.md
-updated: 2026-07-17
+updated: 2026-07-25
 confidence: medium
 ---
 
@@ -12,7 +12,7 @@ confidence: medium
 
 ETW-based process-injection detection agent that consumes `Microsoft-Windows-Threat-Intelligence` events for kernel-visible injection telemetry. Uses krabsetw for session setup, includes Yara-assisted detection logic, and is designed to run as a protected service with ELAM/PPL considerations. (source: wiki/sources/descriptions/xuanxuan0__TiEtwAgent.md)
 
-Useful for anti-cheat and defensive researchers studying injection detection without fragile userland hooks—complements provider/schema browsers such as [[etw-explorer]] and injection-test harnesses such as [[injectors]].
+Useful for anti-cheat and defensive researchers studying injection detection without fragile userland hooks—complements provider/schema browsers such as [[etw-explorer]], no-driver/non-PPL ThreatIntel consume PoCs such as [[threat-intelligence-consumer]], and injection-test harnesses such as [[injectors]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Useful for anti-cheat and defensive researchers studying injection detection wit
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[etw-explorer]] · [[injectors]]
+[[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[etw-explorer]] · [[threat-intelligence-consumer]] · [[injectors]]
