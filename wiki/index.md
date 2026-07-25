@@ -280,6 +280,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kernel-mouse](entities/kernel-mouse.md) — MouClass kernel mouse driver (Win10/11; triggerbot/aimbot input research)
 - [KernelResearchKit](entities/kernel-research-kit.md) — Win11 25H2 boot-time DSE / SeCiCallbacks toolkit (manual map / IRP hijack / BYOVD)
 - [Kotek](entities/kotek.md) — modular C++20 engine core (ktkI* backends; GLES/Vulkan/DX/BGFX; Game Engine)
+- [KPDB](entities/kpdb.md) — parse PDB in driver (C++; Some Tricks / Windows Ring0)
 - [kptnhook](entities/kptnhook.md) — system-wide KM DLL inject + function hook (every process; cheat / injection:windows)
 - [KSOCKET](entities/ksocket.md) — kernel WSK BSD-socket lib (TCP/UDP from ring 0; no UM)
 - [KslKatz](entities/kslkatz.md) — BYOVD LSASS dumper via Defender `KslD.sys` (WDigest/LSA; PPL/AV bypass)
