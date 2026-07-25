@@ -1184,3 +1184,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:pykaso/Swift-String-Obfuscator`: entity [[swift-string-obfuscator]]; cited on [[overviews/anti-cheat]] and [[overviews/mobile-security]].
 
 - **2026-07-25** — ingest `description:pxb1988/dex2jar`: entity [[dex2jar]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
+- **2026-07-25** — ingest `description:push0ebp/xMalHunter`: entity [[xmalhunter]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
