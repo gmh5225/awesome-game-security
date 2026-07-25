@@ -362,6 +362,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ophion](entities/ophion.md) — stealth Intel VT-x Type-2 HV (EPT; CPUID/CR4/TSC anti-detect)
 - [owned_alignment](entities/owned-alignment.md) — abusing Alignment (C++; kernel driver/hook; cheat / HWID)
 - [Oxidizer](entities/oxidizer.md) — Rust-accelerated angr / Rust decompiler (stripped-binary pseudocode; enum/match/? recovery)
+- [Paksmith](entities/paksmith.md) — Rust UE pak/UAsset explorer (FModel rewrite; pak v3–v11; Game Assets)
 - [PalWorldAntiCheat](entities/palworld-anti-cheat.md) — Palworld UE5 AC research (C#; shader/render/audio; Anti Cheat)
 - [PalworldSaved](entities/palworldsaved.md) — Palworld UE5 save/editor tooling (cheat / game:palworld [Save])
 - [PastDSE](entities/pastdse.md) — DSE bypass via clock rollback + leaked VeriSign certs (BlackBone load)

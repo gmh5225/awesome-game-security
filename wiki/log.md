@@ -1146,3 +1146,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:rabbitstack/fibratus`: entity [[fibratus]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-07-25** — ingest `description:rabbitfishy/sdk`: entity [[sdk]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
+
+- **2026-07-25** — ingest `description:r6e/paksmith`: entity [[paksmith]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
