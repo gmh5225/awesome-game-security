@@ -227,6 +227,7 @@ sources:
   - wiki/sources/descriptions/repnz__apc-research.md
   - wiki/sources/descriptions/rem0obb__rtti-parser.md
   - wiki/sources/descriptions/realTristan__Reborn.md
+  - wiki/sources/descriptions/rdbo__libmem.md
 updated: 2026-07-25
 confidence: high
 ---
@@ -243,7 +244,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Escalation model
 
-1. **User-mode** — RPM/WPM, DLL/shellcode injection, graphics/input hooks; usermode memory-analysis libs such as [[umpmlib]] (C/C++; cheat / RPM lane) (source: wiki/sources/descriptions/waryas__UMPMLib.md); related RPM / memory-analysis samples such as [[eupmaccess]] (C/C++; cheat / RPM) (source: wiki/sources/descriptions/waryas__EUPMAccess.md); shatter-attack AC bypass research such as [[waryasswhe]] (usermode 0day shatter → AC bypass; cheat / RPM lane) (source: wiki/sources/descriptions/waryas__WaryasSWHE.md)
+1. **User-mode** — RPM/WPM, DLL/shellcode injection, graphics/input hooks; usermode memory-analysis libs such as [[umpmlib]] (C/C++; cheat / RPM lane) (source: wiki/sources/descriptions/waryas__UMPMLib.md); related RPM / memory-analysis samples such as [[eupmaccess]] (C/C++; cheat / RPM) (source: wiki/sources/descriptions/waryas__EUPMAccess.md); cross-platform memory/hook libraries such as [[libmem]] (Win/Linux/FreeBSD; C/C++ + Rust/Python/Lua; scan / VMT hook / Capstone·Keystone) (source: wiki/sources/descriptions/rdbo__libmem.md); shatter-attack AC bypass research such as [[waryasswhe]] (usermode 0day shatter → AC bypass; cheat / RPM lane) (source: wiki/sources/descriptions/waryas__WaryasSWHE.md)
 2. **Kernel-mode** — signed/vulnerable drivers ([[byovd]]), callback/page-table work; cross-process R/W via MDL/CR3 helpers such as [[ntmemory]] (source: wiki/sources/descriptions/zer0condition__NTMemory.md); per-process PTE hooks such as [[windows-kernel-pagehook]] (shared kernel VA, distinct CR3; Some Tricks / Ring0) (source: wiki/sources/descriptions/stdhu__windows-kernel-pagehook.md); physical reads via manual PTE map without `MmCopyMemory`/`MmMapIoSpace` such as [[readphys]] (reversed from `AXE-BASE.sys`; ACE explore) (source: wiki/sources/descriptions/rogxo__ReadPhys.md); Windows Driver Development learning docs such as [[document]] in the Cheat / Windows kernel explorer lane (source: wiki/sources/descriptions/supermanc88__Document.md)
 3. **Below the OS** — hypervisor, PCIe DMA, external devices / second machines
 
