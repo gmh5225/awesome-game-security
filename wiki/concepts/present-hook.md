@@ -11,7 +11,8 @@ sources:
   - wiki/sources/descriptions/visotw__3d9.md
   - wiki/sources/descriptions/techiew__DirectXHook.md
   - wiki/sources/descriptions/rlybasic__DWM_Hook.md
-updated: 2026-07-24
+  - wiki/sources/descriptions/rdbo__DX11-BaseHook.md
+updated: 2026-07-25
 confidence: high
 ---
 
@@ -22,7 +23,7 @@ Intercepting the graphics present/swap path (e.g. `IDXGISwapChain::Present`, DX9
 
 ## Uses
 
-Internal ESP/menus (often Dear ImGui), wallhack/chams via draw/shader hooks, OBS Game Capture–style backbuffer sharing for streaming or AI visual pipelines. DX11/12 libraries such as [[directxhook]] provide an integrated in-process overlay framework (boxes/textures/text; dinput8 DLL load) on the Present path. (source: wiki/sources/descriptions/techiew__DirectXHook.md)
+Internal ESP/menus (often Dear ImGui), wallhack/chams via draw/shader hooks, OBS Game Capture–style backbuffer sharing for streaming or AI visual pipelines. DX11/12 libraries such as [[directxhook]] provide an integrated in-process overlay framework (boxes/textures/text; dinput8 DLL load) on the Present path. (source: wiki/sources/descriptions/techiew__DirectXHook.md) Minimal DX11 Present trampoline + ImGui templates such as [[dx11-basehook]] (dummy device → vtable → hooked-frame menu) serve as learning starters for the same internal-overlay path. (source: wiki/sources/descriptions/rdbo__DX11-BaseHook.md)
 
 ## Detection surface
 
@@ -38,4 +39,4 @@ DX11 stereoscopic-fix tooling such as [[3d9]] works in the same Present/swap-cha
 
 ## Related
 
-[[overviews/graphics-api]] · [[directxhook]] · [[present-hook-detection]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dwm-hook]] · [[dxgkrnl-hook]] · [[3d9]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[overviews/graphics-api]] · [[directxhook]] · [[dx11-basehook]] · [[present-hook-detection]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dwm-hook]] · [[dxgkrnl-hook]] · [[3d9]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]

@@ -1090,3 +1090,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:rdeioris/LuaMachine`: entity [[luamachine]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
 
 - **2026-07-25** — ingest `description:rdbo/libmem`: entity [[libmem]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-25** — ingest `description:rdbo/DX11-BaseHook`: entity [[dx11-basehook]]; cited on [[present-hook]] and [[overviews/graphics-api]].

@@ -163,6 +163,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DWEX](entities/dwex.md) — DWARF Explorer GUI (ELF/debug files; pyelftools; RE tools)
 - [DWM_Hook](entities/dwm-hook.md) — DWM hook / overlay research (C++; cheat / overlay)
 - [DroidShield](entities/droidshield.md) — Android RASP SDK (root/debugger/Frida-Xposed/emulator/tamper; polymorphic checks)
+- [DX11-BaseHook](entities/dx11-basehook.md) — minimal DX11 Present trampoline + ImGui overlay base (C++; DirectX Hook)
 
 - [dxgkrnl_hook](entities/dxgkrnl-hook.md) — dxgkrnl screen-buffer hook (kernel overlay / render-draw)
 - [eac-overlay](entities/eac-overlay.md) — EAC overlay PoC (ESP via alt surfaces / window manip; C++)
