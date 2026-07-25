@@ -1144,3 +1144,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:rad9800/BloatedHammer`: entity [[bloatedhammer]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-25** — ingest `description:rabbitstack/fibratus`: entity [[fibratus]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-07-25** — ingest `description:rabbitfishy/sdk`: entity [[sdk]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
