@@ -33,6 +33,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Entities
 
+- [2048.cpp](entities/2048-cpp.md) — terminal C++ 2048 (console board / merge scoring; Game Develop / source)
 - [2Pack](entities/2pack.md) — Rust PE & shellcode packer (EXE/DLL + raw; Anti Cheat → Binary Packer)
 - [3D-Racing-Game](entities/3d-racing-game.md) — OpenGL racing game (M/N scene switch; Game Develop / OpenGL source)
 - [3d9](entities/3d9.md) — DX11 stereoscopic-fix tooling (developer-oriented; DirectX Tools)

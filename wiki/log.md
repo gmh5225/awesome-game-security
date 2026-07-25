@@ -1217,3 +1217,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-25** — ingest `description:polygraphene/DirtyPipe-Android`: entity [[dirtypipe-android]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-link from [[dirtypiperoot]].
 
+- **2026-07-25** — ingest `description:plibither8/2048.cpp`: entity [[2048-cpp]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
