@@ -20,4 +20,4 @@ Sits in the README 3D Graphics / AI mesh-splat lane—a browser splat-authoring 
 
 ## Related
 
-[[overviews/graphics-api]] · [[overviews/game-engine]] · [[turbulenz-engine]] · [[tinygltf]] · [[kit]] · [[olive-c]]
+[[overviews/graphics-api]] · [[overviews/game-engine]] · [[engine]] · [[turbulenz-engine]] · [[tinygltf]] · [[kit]] · [[olive-c]]

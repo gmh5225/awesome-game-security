@@ -408,6 +408,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pikabot-deobfuscator](entities/pikabot-deobfuscator.md) — Pikabot RC4/AES string decrypt (IDA Hex-Rays; cheat / IDA Plugins)
 - [Pillager](entities/pillager.md) — Go Windows credential harvest (browser/Wi-Fi/chat decrypt-export; post-ex)
 - [Pitaya](entities/pitaya.md) — distributed multiplayer game server framework (Game Network / Server framework)
+- [PlayCanvas Engine](entities/engine.md) — open-source WebGL/WebGPU JS engine (PBR / Ammo.js / XR; HTML5 3D)
 - [PolyHook](entities/polyhook.md) — x86/x64 C++11 multi-method hooking lib (cheat / hook research)
 - [PolyHook 2.0](entities/polyhook-2-0.md) — C++ PolyHook2 hooking lib (vcpkg; cheat / hook research)
 - [Positron](entities/positron.md) — JS runtime inject via manual-map DLL (QuickJS/Electron; named-pipe IPC; REPL/SDK)
