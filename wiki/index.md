@@ -189,6 +189,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests
 - [EUPMAccess](entities/eupmaccess.md) — C/C++ memory analysis (cheat / RPM; waryas)
 - [EvCommunication](entities/evcommunication.md) — named-event kernel↔UM channel (NtTokenManager; vs IOCTL)
+- [event_replay](entities/event-replay.md) — Android `/dev/input` touch/key record-replay Magisk module (game input sim)
 - [Execution Trace Viewer](entities/execution-trace-viewer.md) — view/edit/analyze execution traces (obfuscated-code RE; cheat / debugging)
 - [exengine](entities/exengine.md) — minimal C99 OpenGL 3D engine (IQM / lighting / scene; Game Engine source)
 - [Faultline](entities/faultline.md) — usermode WS page-fault AC PoC (manual-map/shellcode; C++23)
