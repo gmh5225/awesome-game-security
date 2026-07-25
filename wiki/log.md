@@ -1136,3 +1136,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-25** — ingest `description:s7shvets7s/simple_ac_internal_cheat`: entity [[simple-ac-internal-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
 
 - **2026-07-25** — ingest `description:radareorg/iaito`: entity [[iaito]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-25** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/game-engine]] (Game Engine ~149 / Game Develop ~182; Cheat ~2586 / Anti Cheat ~612 / DirectX ~34 stable); light `index.md` section notes (no per-category pages).
