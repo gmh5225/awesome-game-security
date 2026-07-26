@@ -403,6 +403,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [OpenLumina](entities/openlumina.md) — IDA plugin for third-party Lumina servers (Hex-Rays `.crt`; IDA Plugins)
 - [OpenProcmon](entities/openprocmon.md) — OSS Procmon-style monitor (ETW + minifilter; process/file/registry/network/DLL)
 - [Ophion](entities/ophion.md) — stealth Intel VT-x Type-2 HV (EPT; CPUID/CR4/TSC anti-detect)
+- [orx](entities/orx.md) — portable data-driven 2D C/C++ engine (Game Engine / source)
 - [osu!](entities/osu.md) — open-source C# rhythm game (osu!framework; Game Develop / source)
 - [osu!framework](entities/osu-framework.md) — C# 2D game framework (drawable / OpenGL / input·audio·UI; Game Engine)
 - [owned_alignment](entities/owned-alignment.md) — abusing Alignment (C++; kernel driver/hook; cheat / HWID)

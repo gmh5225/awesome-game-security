@@ -1329,3 +1329,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:otter-sec/bn-ebpf-solana`: entity [[bn-ebpf-solana]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-26** — ingest `description:ostef/Vk-Engine`: entity [[vk-engine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-26** — ingest `description:orx/orx`: entity [[orx]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
