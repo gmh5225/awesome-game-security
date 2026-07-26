@@ -1210,6 +1210,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Frida
 - https://github.com/hackcatml/frida-watchpoint-tutorial [Frida's setHardwareWatchpoint tutorial]
 - https://github.com/ChiChou/grapefruit [Runtime mobile instrumentation toolkit for iOS/Android, web UI]
+- https://github.com/firerpa/lamda [Android full-stack device control with built-in Frida, MITM, UI automation, and reverse-engineering APIs]
 - https://github.com/ChiChou/vscode-frida [Unofficial Frida extension for VSCode]
 - https://github.com/ChiChou/bagbak [iOS Frida app decrypt / dump to IPA; extensions; jailbreak; bagbak@5 needs frida@17; deprecated]
 - https://github.com/CrackerCat/strongR-frida-android
