@@ -1260,3 +1260,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:perilouswithadollarsign/cstrike15_src`: entity [[cstrike15-src]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
 
 - **2026-07-26** — ingest `description:perfect-hand/ue5-cardgame`: entity [[ue5-cardgame]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-26** — ingest `description:percpopper/VX-It`: entity [[vx-it]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
