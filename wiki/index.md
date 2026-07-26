@@ -628,6 +628,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WinVisor](entities/winvisor.md) — WHP hypervisor emulator for Windows x64 user-mode PE (Windows Emulator)
 - [woody_woodpacker](entities/woody-woodpacker.md) — ELF binary packer (outputs “woody”; Anti Cheat → Binary Packer)
 - [vt-debuuger](entities/vt-debuuger.md) — hacked hypervisor testing (C/C++ drivers / plugins)
+- [VTuberWithUE4](entities/vtuber-with-ue4.md) — UE4 VTuber (physics / animation / asset pipelines; Game Develop / Unreal source)
 - [VX-It](entities/vx-it.md) — Unreal decrypt for Veiled Experts (C/C++; cheat / game:veiled experts `[Decrypt]`)
 - [VxLang](entities/vxlang-page.md) — Windows x86-64/.NET binary protector (virtualization / flatten / anti-tamper; PE/DLL/SYS)
 
