@@ -443,6 +443,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Pitaya](entities/pitaya.md) — distributed multiplayer game server framework (Game Network / Server framework)
 - [PixiJS](entities/pixijs.md) — lightweight 2D WebGL/WebGPU JS/TS library (shaders/render; Game Engine / HTML5)
 - [PlayCanvas Engine](entities/engine.md) — open-source WebGL/WebGPU JS engine (PBR / Ammo.js / XR; HTML5 3D)
+- [PoCsmith](entities/pocsmith.md) — AI Windows PoC gen (Claude + MCP Hyper-V/kd/Ghidra; patchwatch → verify VMs)
 - [PolyHook](entities/polyhook.md) — x86/x64 C++11 multi-method hooking lib (cheat / hook research)
 - [PolyHook 2.0](entities/polyhook-2-0.md) — C++ PolyHook2 hooking lib (vcpkg; cheat / hook research)
 - [Poseidon](entities/poseidon.md) — NtConvertBetweenAuxiliaryCounterAndPerformanceCounter KM↔UM channel (BE/EAC notes)
