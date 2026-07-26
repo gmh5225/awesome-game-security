@@ -116,6 +116,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CmdT](entities/cmdt.md) — TrustedInstaller token launcher (x86/x64 asm; TI ACL / RE forensics)
 - [ConBeerLib](entities/conbeerlib.md) — Linux/Android container·VM detect (cgroup/fs/env; Docker/LXC/K8s/WSL)
 
+- [com.sipvlib.anticheat](entities/com-sipvlib-anticheat.md) — Unity UPM soft AC (server-verified GameTime + root/jailbreak/emulator/debugger)
 - [compile_android_driver](entities/compile-android-driver.md) — out-of-tree Android kernel driver build/ABI (kade / Kadeflow; GKI)
 - [CompiledProtection](entities/compiled-protection.md) — C/C++ cheat compiler (CS:GO-adjacent; Cheat Compiler)
 - [CounterStrike2-Linux-Cheat](entities/counterstrike2-linux-cheat.md) — Linux external CS2 cheat (C++; memory analysis)
