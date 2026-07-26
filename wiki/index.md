@@ -464,6 +464,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [revert-mapper](entities/revert-mapper.md) — post-execution cleanup for manually mapped kernel drivers
 - [Return-address-spoofer](entities/return-address-spoofer.md) — return-address / stack spoof illustration (C/C++; Cheat Spoof Stack)
 - [ricochet-deobfuscator](entities/ricochet-deobfuscator.md) — Ricochet AC deobfuscator (C/C++; driver / memory analysis)
+- [ripr](entities/ripr.md) — IDA/BN function rip → Python/Unicorn harness (r2pipe; Cheat IDA/BN Plugins)
 - [RootSocketKit](entities/root-socket-kit.md) — Android LKM + Unix-socket root memory R/W (Magisk/KernelSU/APatch JNI; GUI)
 - [rtti-parser](entities/rtti-parser.md) — IDA script: parse RTTI (IDA 9.2; cheat / IDA Plugins)
 - [rwMem](entities/rwmem.md) — rwProcMem33 fork; Android process-memory R/W (Cheat Memory Explorer)
