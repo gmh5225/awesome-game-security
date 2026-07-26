@@ -57,6 +57,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-kernel-oneplus-sm7250-wksu](entities/android-kernel-oneplus-sm7250-wksu.md) — OnePlus Nord SM7250 Android kernel + KernelSU (cheat / Android Kernel Source)
 
 - [android-kernel-samsung-universal5433](entities/android-kernel-samsung-universal5433.md) — Samsung Exynos 5433 Android kernel (Note 4 / Alpha; cheat / Android Kernel Source)
+- [android-kernel-samsung-sm7150](entities/android-kernel-samsung-sm7150.md) — Samsung SM7150 Android kernel source (cheat / Android Kernel Source)
 - [android-kernel-xiaomi-pipa](entities/android-kernel-xiaomi-pipa.md) — Xiaomi Pad 6 (pipa) Android kernel source (cheat / Android Kernel Source)
 
 - [Android-Emulator-Detection](entities/android-emulator-detection.md) — Android Anti-Emulator (Java/C++; Detection:Virtual Environments)
