@@ -1309,3 +1309,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:panda3d/panda3d`: entity [[panda3d]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
 
 - **2026-07-26** — ingest `description:panda-re/panda`: entity [[panda]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-26** — ingest `description:palera1n/palera1n`: entity [[palera1n]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].

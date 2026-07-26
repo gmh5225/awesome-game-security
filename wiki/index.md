@@ -406,6 +406,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Paksmith](entities/paksmith.md) — Rust UE pak/UAsset explorer (FModel rewrite; pak v3–v11; Game Assets)
 - [PalWorldAntiCheat](entities/palworld-anti-cheat.md) — Palworld UE5 AC research (C#; shader/render/audio; Anti Cheat)
 - [PalworldSaved](entities/palworldsaved.md) — Palworld UE5 save/editor tooling (cheat / game:palworld [Save])
+- [palera1n](entities/palera1n.md) — iOS 15+ checkm8 jailbreak (A8–A11; rootful/rootless; Sileo bootstrap)
 - [PANDA](entities/panda.md) — Platform for Architecture-Neutral Dynamic Analysis (QEMU-based; Cheat QEMU/KVM / DBI)
 - [Panda3D](entities/panda3d.md) — Python/C++ 3D engine framework (liberal license; Game Engine / source)
 - [Pandora](entities/pandora.md) — file-suspicion analysis framework (convenient UI; Anti Cheat → Analysis Framework)
