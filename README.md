@@ -3391,6 +3391,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/Fortnite-External-4 [External]
 - https://github.com/Saxmason/Interic-Fortnite-External-Cheat [Fortnite external cheat source with aimbot, ESP, and ImGui overlay]
 - https://github.com/Saxmason/Subzero-Fortnite-Cheat [Fortnite external cheat source with aimbot, overlay, and driver comms]
+- https://github.com/raivoansa/fortnite-external-base-source [Fortnite external base with IOCTL RPM, CR3 bypass stub, offsets, and ImGui DX11 overlay]
 - https://github.com/lauralex/fn-dma-cheat [DMA]
 
 > Game:Bloodhunt
