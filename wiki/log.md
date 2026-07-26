@@ -1355,3 +1355,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:opa334/Dopamine`: entity [[dopamine]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; linked from [[dopamine2-roothide]].
 
 - **2026-07-26** — ingest `description:oomph-ac/oomph`: entity [[oomph]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-07-26** — ingest `description:ookiineko/magiskboot_build`: entity [[magiskboot-build]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-link from [[magiskboot]].
