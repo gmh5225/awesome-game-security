@@ -99,6 +99,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [binja-kc](entities/binja-kc.md) — Binary Ninja MachO kernelcache / KDK dSYM loader
 - [BinCon](entities/bincon.md) — VEH + PAGE_NOACCESS hardened console sample (AC page protection)
 - [BloatedHammer](entities/bloatedhammer.md) — C++20 fold API hammering (no loops; AC Compile Time)
+- [bn-ebpf-solana](entities/bn-ebpf-solana.md) — Binary Ninja Solana eBPF/SBF disasm + decompile (Cheat Binary Ninja Plugins)
 - [BOOM](entities/boom.md) — hijack Beep.sys; stealth driver communication
 - [BootBypass](entities/bootbypass.md) — Secure Boot / DSE / HVCI bypass (native; SeCiCallbacks / CI.dll)
 - [BootExecuteEDR](entities/bootexecute-edr.md) — bootExecute EDR bypass (pre-service; cheat / hide)
