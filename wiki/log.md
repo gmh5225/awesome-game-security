@@ -1238,3 +1238,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:pixijs/pixijs`: entity [[pixijs]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-07-26** — ingest `description:piotrbania/frida_usb_dump`: entity [[frida-usb-dump]]; cited on [[frida]] and [[overviews/reverse-engineering]].
+
+- **2026-07-26** — ingest `description:phra/PEzor`: entity [[pezor]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].

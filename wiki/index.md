@@ -406,6 +406,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [peetch](entities/peetch.md) — eBPF dump/tls/proxy (PID sniff + OpenSSL keys; PCAPng; cheat / android kernel explorer)
 - [pesign](entities/pesign.md) — Linux UEFI Secure Boot PE-COFF Authenticode/PKCS#7 sign/verify (NSS)
 - [petoy](entities/petoy.md) — PE-focused binary packer (C/C++ + JS; Anti Cheat → Binary Packer `[PE]`)
+- [PEzor](entities/pezor.md) — C++/C PE packer (hooking-oriented; Anti Cheat → Binary Packer)
 - [PhantomKiller](entities/phantomkiller.md) — BYOVD via Lenovo BootRepair.sys (IOCTL 0x222014 ZwTerminateProcess; PPL AV/EDR)
 - [PhysPatch](entities/physpatch.md) — DMA scan/patch Windows kernel via physical memory (VA→PA walk; sonodima)
 - [PiDqSerializationWrite-Example](entities/pidqserializationwrite-example.md) — Unity-centered `PiDqSerializationWrite` C++ example (Some Tricks / Windows Ring0)
