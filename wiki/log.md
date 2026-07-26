@@ -1323,3 +1323,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:oxiKKK/ida-vtable-tools`: entity [[ida-vtable-tools]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-26** — ingest `description:oureveryday/VMPUnpacker`: entity [[vmpunpacker]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-26** — ingest `description:otvv/csgo-linux-cheat-sdk`: entity [[csgo-linux-cheat-sdk]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].

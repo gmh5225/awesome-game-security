@@ -137,6 +137,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [csgo-external-cheat](entities/csgo-external-cheat.md) — external CS:GO; RPM/driver reads; ESP / aimbot / radar (C++; cheat / game:csgo)
 - [csgo-dma-overlay](entities/csgo-dma-overlay.md) — CS:GO DMA + overlay sample (cheat / game:csgo [DMA])
+- [csgo-linux-cheat-sdk](entities/csgo-linux-cheat-sdk.md) — Linux CS:GO cheat SDK (C++; render/net/mod; cheat / game:csgo)
 - [CSGOSimple](entities/csgosimple.md) — spirthack Internal CS:GO baseline (MarkHC fork; cheat / game:csgo)
 - [cstrike15_src](entities/cstrike15-src.md) — leaked partial CS:GO Source tree (client/server / weapons / net; Game Engine)
 - [custom-game-engines](entities/custom-game-engines.md) — curated custom game engines list (2020 study; Game Engine / guide)
