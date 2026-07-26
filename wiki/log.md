@@ -1341,3 +1341,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:orangeduck/Corange`: entity [[corange]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-07-26** — ingest `description:orange-cpp/omath`: entity [[omath]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
+
+- **2026-07-26** — ingest `description:openhardwaremonitor/openhardwaremonitor`: entity [[openhardwaremonitor]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
