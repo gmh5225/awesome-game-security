@@ -1301,3 +1301,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:papstuc/counterstrike2`: entity [[counterstrike2]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-26** — ingest `description:panzi/rust-u4pak`: entity [[rust-u4pak]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
+
+- **2026-07-26** — ingest `description:pandora-analysis/pandora`: entity [[pandora]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
