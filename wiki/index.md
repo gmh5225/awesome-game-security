@@ -224,6 +224,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fortnite-external-evo.gj](entities/fortnite-external-evo-gj.md) — Fortnite external: kernel-driver RPM / ESP / aimbot (C++; [External])
 - [fortnite-external-base-source](entities/fortnite-external-base-source.md) — Fortnite external: IOCTL RPM / CR3 stub / ImGui DX11 Discord Overlay (C++; [External])
 - [Fortnite-External-Source](entities/fortnite-external-source.md) — Fortnite external: driver / SDK generation (C++)
+- [Fortnite-FNameEntry](entities/fortnite-fnameentry.md) — Fortnite FName/FNameEntry sample (C++; cheat / game:fortnite)
 - [Fortnite-Fltokens-and-offsets](entities/fortnite-fltokens-and-offsets.md) — Fortnite FLToken/offset grabber (stale / offline)
 - [game-engine-detector](entities/game-engine-detector.md) — Python APK/IPA game-engine detector (Mobile Game)
 - [gamedev_libraries](entities/gamedev-libraries.md) — data-oriented C/C++ gamedev library collection (POD/flat arrays; Game Develop / guide)
