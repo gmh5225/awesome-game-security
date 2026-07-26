@@ -594,6 +594,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VaultGuard](entities/vaultguard.md) — FSFilter minifilter + process access block (x64 MASM; anti-debug/tamper)
 - [veh](entities/veh.md) — VEH software debugger (no Debug API; CE plugin / manualmap VEH DLL)
 - [veh-dumper](entities/veh-dumper.md) — x64 VEH/VCH → synthetic PE64 dumps for IDA
+- [Vk-Engine](entities/vk-engine.md) — WIP Jai Vulkan engine (clustered forward / PBR / ImGui + Jolt; Game Engine)
 - [Volatility](entities/volatility.md) — original Python 2 memory forensics (profiles; pslist/modules/rootkit)
 - [Volatility 3](entities/volatility3.md) — Python 3 memory forensics (RAM images; Win/Linux/macOS plugins)
 
