@@ -187,6 +187,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DotX64Dbg](entities/dotx64dbg.md) — .NET 6 / C# x64dbg plugin framework (live edit; custom commands)
 - [DoubleCallBack](entities/double-callback.md) — DWM in kernel (C/C++; cheat render/draw)
 - [dpatch](entities/dpatch.md) — syscall dispatcher patching PoC (table copy + dispatcher jump)
+- [dProtect](entities/dprotect.md) — Android/iOS LLVM native obfuscator (CFF / MBA / string encrypt; AC Obfuscation Engine)
 - [DsArk64](entities/dsark64.md) — BYOVD via Qihoo 360 `DsArk64.sys` (handle donor; ring-0 kill + kernel R/W)
 - [DWEX](entities/dwex.md) — DWARF Explorer GUI (ELF/debug files; pyelftools; RE tools)
 - [DWM_Hook](entities/dwm-hook.md) — DWM hook / overlay research (C++; cheat / overlay)

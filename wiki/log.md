@@ -1345,3 +1345,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:openhardwaremonitor/openhardwaremonitor`: entity [[openhardwaremonitor]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-07-26** — ingest `description:openeggbert/free-direct`: entity [[free-direct]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
+
+- **2026-07-26** — ingest `description:open-obfuscator/dProtect`: entity [[dprotect]]; cited on [[overviews/anti-cheat]] and [[overviews/mobile-security]].
