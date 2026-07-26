@@ -121,6 +121,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [com.sipvlib.anticheat](entities/com-sipvlib-anticheat.md) — Unity UPM soft AC (server-verified GameTime + root/jailbreak/emulator/debugger)
 - [compile_android_driver](entities/compile-android-driver.md) — out-of-tree Android kernel driver build/ABI (kade / Kadeflow; GKI)
 - [CompiledProtection](entities/compiled-protection.md) — C/C++ cheat compiler (CS:GO-adjacent; Cheat Compiler)
+- [counterstrike2](entities/counterstrike2.md) — CS2 cheat: rendering / SDK generation / hooking (C++; cheat / game:cs2)
 - [CounterStrike2-Linux-Cheat](entities/counterstrike2-linux-cheat.md) — Linux external CS2 cheat (C++; memory analysis)
 - [CS-2-Glow](entities/cs-2-glow.md) — external CS2 glow ESP (C++; entity / offsets / memory)
 - [cs16-client](entities/cs16-client.md) — rewrote CS1.6 client (Game Develop / Source; Android ADB)
