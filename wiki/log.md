@@ -1270,3 +1270,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:percpopper/Splitgate-Internal`: entity [[splitgate-internal]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-07-26** — ingest `description:percpopper/Fortnite-FNameEntry`: entity [[fortnite-fnameentry]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
+
+- **2026-07-26** — ingest `description:percpopper/Fortnite-CameraCachePOV`: entity [[fortnite-camera-cache-pov]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
