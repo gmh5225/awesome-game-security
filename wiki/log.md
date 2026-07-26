@@ -1284,3 +1284,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:patrickcjk/TOG`: entity [[tog]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-26** — ingest `description:patois/genmc`: entity [[genmc]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-26** — ingest `description:pastor-ritz/ritz-amazing-fortnite-internal`: entity [[ritz-amazing-fortnite-internal]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
