@@ -6,8 +6,9 @@ sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/descriptions/xtremegamer1__xigmapper.md
   - wiki/sources/descriptions/xehn1337__valorant-dumper.md
+  - wiki/sources/descriptions/percpopper__VALORANT-FNamePool.md
   - wiki/sources/descriptions/weedeej__ValorantCC.md
-updated: 2026-07-18
+updated: 2026-07-26
 confidence: medium
 ---
 
@@ -21,10 +22,10 @@ Early load timing changes the BYOVD/test-sign window relative to runtime-loaded 
 
 EFI manual-map research such as [[xigmapper]] notes a practical consequence of that early load: USB-hosted driver images are discovered by Windows *after* Vanguard, so payloads intended for pre-OS map paths cannot rely on USB media. (source: wiki/sources/descriptions/xtremegamer1__xigmapper.md)
 
-Per-title Valorant UE dump tooling such as [[valorant-dumper]] (GObjects/GNames, player/weapon layouts from the live process) is useful when modeling what cheat SDK generators probe under a Vanguard-protected title. (source: wiki/sources/descriptions/xehn1337__valorant-dumper.md)
+Per-title Valorant UE dump tooling such as [[valorant-dumper]] (GObjects/GNames, player/weapon layouts from the live process) is useful when modeling what cheat SDK generators probe under a Vanguard-protected title. (source: wiki/sources/descriptions/xehn1337__valorant-dumper.md) Narrower FNamePool walk/decrypt samples such as [[valorant-fnamepool]] (iterate and decrypt `FNamePool->Entries`) sit in the same Valorant UE name-pool research lane. (source: wiki/sources/descriptions/percpopper__VALORANT-FNamePool.md)
 
 Client-side Valorant crosshair config samples such as [[valorantcc]] sit in the adjacent cheat / game:valorant utility lane (Riot-owned assets/endpoints; not an AC product). (source: wiki/sources/descriptions/weedeej__ValorantCC.md)
 
 ## Related
 
-[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[valorant-dumper]] · [[valorantcc]] · [[overviews/anti-cheat]]
+[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorantcc]] · [[overviews/anti-cheat]]

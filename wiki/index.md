@@ -561,6 +561,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vac3-dumper](entities/vac3-dumper.md) — VAC3 multi-module dumper (timed loads; explore anticheat:vac)
 - [VACKeyRetrieval](entities/vackeyretrieval.md) — VAC module ICE encryption key retrieval (C++; explore anticheat:vac)
 - [valorant-dumper](entities/valorant-dumper.md) — Valorant UE offset/SDK dumper (GObjects/GNames; Vanguard research)
+- [VALORANT-FNamePool](entities/valorant-fnamepool.md) — iterate/decrypt Valorant FNamePool->Entries (C/C++; cheat / game:valorant)
 - [ValorantCC](entities/valorantcc.md) — Valorant crosshair setting (cheat / game:valorant)
 - [VaultGuard](entities/vaultguard.md) — FSFilter minifilter + process access block (x64 MASM; anti-debug/tamper)
 - [veh](entities/veh.md) — VEH software debugger (no Debug API; CE plugin / manualmap VEH DLL)
