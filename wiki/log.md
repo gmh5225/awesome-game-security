@@ -1293,3 +1293,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-26** — ingest `description:paranoidninja/EtwTi-Syscall-Hook`: entity [[etwti-syscall-hook]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 - **2026-07-26** — ingest `description:paradoxwastaken/WindowsHardwareInfo`: entity [[windows-hardware-info]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-07-26** — ingest `description:paradoxwastaken/Poseidon`: entity [[poseidon]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
