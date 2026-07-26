@@ -1337,3 +1337,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:orinimron123/CVE-2026-40369-EXPLOIT`: entity [[cve-2026-40369-exploit]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-07-26** — ingest `description:originsec/pocsmith`: entity [[pocsmith]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
+
+- **2026-07-26** — ingest `description:orangeduck/Corange`: entity [[corange]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].

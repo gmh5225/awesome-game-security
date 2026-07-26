@@ -118,6 +118,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CoBRA](entities/cobra.md) — Trail of Bits MBA expression simplifier (C++; Cheat Mixed boolean-arithmetic)
 - [CmdT](entities/cmdt.md) — TrustedInstaller token launcher (x86/x64 asm; TI ACL / RE forensics)
 - [ConBeerLib](entities/conbeerlib.md) — Linux/Android container·VM detect (cgroup/fs/env; Docker/LXC/K8s/WSL)
+- [Corange](entities/corange.md) — pure C game engine (Game Engine / source)
 
 - [com.sipvlib.anticheat](entities/com-sipvlib-anticheat.md) — Unity UPM soft AC (server-verified GameTime + root/jailbreak/emulator/debugger)
 - [compile_android_driver](entities/compile-android-driver.md) — out-of-tree Android kernel driver build/ABI (kade / Kadeflow; GKI)
