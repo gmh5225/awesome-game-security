@@ -536,6 +536,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UMPMLib](entities/umpmlib.md) — C/C++ usermode memory analysis (cheat / RPM)
 - [UE-Interview-Cheat-Sheet](entities/ue-interview-cheat-sheet.md) — Unreal Engine interview cheat sheet (Game Engine / Unreal guide)
 - [ue4-tutorials](entities/ue4-tutorials.md) — UE4 C++ tutorials (audio / physics / animation; Game Engine / Unreal guide)
+- [ue5-cardgame](entities/ue5-cardgame.md) — UE5 card game (deck / turn-based / UMG / replication; Game Develop / Unreal source)
 - [UE5-With-Dear-ImGui](entities/ue5-with-dear-imgui.md) — UE 5.0.1 C++ Dear ImGui sample (Game Engine Plugins:Unreal)
 - [UEFI-Bootloader](entities/uefi-bootloader.md) — simple UEFI runtime-driver mmapper (C/C++; cheat / EFI driver)
 - [UEVR](entities/uevr.md) — universal UE4/UE5 VR inject mod (stereo / OpenXR·OpenVR; reflection + pattern scan)
