@@ -1250,3 +1250,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:raivoansa/fortnite-external-base-source`: entity [[fortnite-external-base-source]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-26** — ingest `description:pgp/XFiles`: entity [[xfiles]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-26** — ingest `description:pgarba/ptrace_read_teb`: entity [[ptrace-read-teb]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].

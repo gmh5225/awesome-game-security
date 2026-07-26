@@ -428,6 +428,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Proxmox](entities/proxmox.md) — PVE Helper Scripts (dialog installers; Cheat QEMU/KVM/PVE lab)
 - [proxmox-ve-anti-detection](entities/proxmox-ve-anti-detection.md) — Hidden PVE / QEMU-KVM anti-detection (kernel)
 - [ps5-linux-loader](entities/ps5-linux-loader.md) — PS5 Linux loader (kernel/HV exploits, IOMMU/GPU/TMR; PlayStation)
+- [ptrace_read_teb](entities/ptrace-read-teb.md) — Linux ptrace TEB reader (C++; Cheat / Wine)
 - [ptxNinja](entities/ptxninja.md) — Binary Ninja PTX / CUDA GPU virtual ISA RE (plugin manager; Binary Ninja Plugins)
 - [pwatch](entities/pwatch.md) — Linux/Android HWBP process watch (debug without attach; cheat / debugging)
 - [qemu-anti-detection](entities/qemu-anti-detection.md) — Hidden QEMU (device-string / fingerprint spoof)
