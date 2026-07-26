@@ -404,6 +404,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [osu!framework](entities/osu-framework.md) — C# 2D game framework (drawable / OpenGL / input·audio·UI; Game Engine)
 - [owned_alignment](entities/owned-alignment.md) — abusing Alignment (C++; kernel driver/hook; cheat / HWID)
 - [Oxidizer](entities/oxidizer.md) — Rust-accelerated angr / Rust decompiler (stripped-binary pseudocode; enum/match/? recovery)
+- [Oxylus](entities/oxylus.md) — data-driven C++ engine (Vulkan/vuk/Slang; Flecs ECS; Lua; ImGui editor; Game Engine)
 - [Paksmith](entities/paksmith.md) — Rust UE pak/UAsset explorer (FModel rewrite; pak v3–v11; Game Assets)
 - [PalWorldAntiCheat](entities/palworld-anti-cheat.md) — Palworld UE5 AC research (C#; shader/render/audio; Anti Cheat)
 - [PalworldSaved](entities/palworldsaved.md) — Palworld UE5 save/editor tooling (cheat / game:palworld [Save])
