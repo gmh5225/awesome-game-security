@@ -470,6 +470,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rwMem](entities/rwmem.md) — rwProcMem33 fork; Android process-memory R/W (Cheat Memory Explorer)
 - [Rumba](entities/rumba.md) — Python VMProtect analysis (symbolic exec / traces; Fix VMP / MBA-tagged)
 - [Sark](entities/sark.md) — IDAPython Made Easy (IDA plugins / older IDA-6.x branch)
+- [saturn-mapper](entities/saturn-mapper.md) — Windows kernel PE manual mapper (iqvw64e.sys; BYOVD / unsigned map)
 - [sbox](entities/sbox.md) — C++ compile-time AES-128 / S-box string obfuscation (Obfusk8 spin-off)
 - [scfw](entities/scfw.md) — cross-platform C++ Windows shellcode framework (AC shellcode engine & tricks)
 - [ScyllaHideDetector2](entities/scyllahidedetector2.md) — ScyllaHide Detector V2 (C/C++; debug hide / byte restore; Anti Debugging)

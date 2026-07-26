@@ -1278,3 +1278,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:pbiernat/ripr`: entity [[ripr]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-26** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2590; Anti Cheat ~613 / Game Engine ~149 / Game Develop ~182 / DirectX ~34 stable); light `index.md` section notes (no per-category pages).
+
+- **2026-07-26** — ingest `description:paysonism/saturn-mapper`: entity [[saturn-mapper]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
