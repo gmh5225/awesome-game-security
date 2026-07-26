@@ -1264,3 +1264,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:percpopper/VX-It`: entity [[vx-it]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
 
 - **2026-07-26** — ingest `description:percpopper/VALORANT-FNamePool`: entity [[valorant-fnamepool]]; cited on [[vanguard]] and [[overviews/game-engine]].
+
+- **2026-07-26** — ingest `description:percpopper/UE4-Freecam`: entity [[ue4-freecam]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
