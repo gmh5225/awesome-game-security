@@ -1288,3 +1288,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:pastor-ritz/ritz-amazing-fortnite-internal`: entity [[ritz-amazing-fortnite-internal]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-26** — ingest `description:pascua28/android_kernel_samsung_sm7150`: entity [[android-kernel-samsung-sm7150]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-26** — ingest `description:paroj/gltut`: entity [[gltut]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
