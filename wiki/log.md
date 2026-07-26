@@ -1244,3 +1244,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:phonowell/genshin-impact-script`: entity [[genshin-impact-script]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-07-26** — ingest `description:phajmvawnsix/com.sipvlib.anticheat`: entity [[com-sipvlib-anticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/mobile-security]].
+
+- **2026-07-26** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2589; Anti Cheat ~613 / Game Engine ~149 / Game Develop ~182 / DirectX ~34 stable); light `index.md` section notes (no per-category pages).
