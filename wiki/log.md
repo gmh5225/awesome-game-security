@@ -1333,3 +1333,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:orx/orx`: entity [[orx]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-07-26** — ingest `description:orkitec/orkige`: entity [[orkige]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-26** — ingest `description:orinimron123/CVE-2026-40369-EXPLOIT`: entity [[cve-2026-40369-exploit]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
