@@ -401,6 +401,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Olive.c](entities/olive-c.md) — single-header C 2D soft-raster (lines/tris/circles/text; Image Codec)
 - [OMath](entities/omath.md) — C++23 constexpr math/physics (W2S / projectile / GJK; Mathematics)
 - [oob_entry](entities/oob-entry.md) — iOS 3.0–10.3.4 tfp0 kernel exploit (C/C++; cheat / iOS jailbreak)
+- [Oomph](entities/oomph.md) — Minecraft Bedrock MiTM AC proxy (Go; server-auth movement/combat; Dragonfly/PocketMine)
 - [opaque-predicates-detective](entities/opaque-predicates-detective.md) — Binary Ninja opaque-predicate detection (invariant / BB-local)
 - [op7t](entities/op7t.md) — DIY Android kernel (cheat / Android kernel explorer)
 - [opainject](entities/opainject.md) — iOS/macOS runtime dylib inject (task_for_pid / Mach; jailbreak + tfp0)
