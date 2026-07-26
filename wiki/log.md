@@ -1349,3 +1349,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:open-obfuscator/dProtect`: entity [[dprotect]]; cited on [[overviews/anti-cheat]] and [[overviews/mobile-security]].
 
 - **2026-07-26** — ingest `description:opa334/opainject`: entity [[opainject]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-26** — ingest `description:opa334/TrollStore`: entity [[trollstore]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].

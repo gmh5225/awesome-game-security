@@ -559,6 +559,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [TPM-SPOOFER](entities/tpm-spoofer.md) — KM TPM serial spoof via IOCTL hook (Cheat [TPM])
 - [traccar-geocoder](entities/traccar-geocoder.md) — self-hosted OSM reverse geocoder (Rust + C++ PBF; Game Network / Location)
 - [Tracy](entities/tracy.md) — C++ real-time frame profiler (CPU/GPU; Game Testing)
+- [TrollStore](entities/trollstore.md) — iOS perma-signed jailed IPA installer (CoreTrust/AMFI; arbitrary entitlements)
 - [TrustDevice Android](entities/trustdevice-android.md) — TrustDecision Android fingerprint SDK (Kotlin/Java; integrity / risk signals)
 - [TrustDevice iOS](entities/trustdevice-ios.md) — TrustDecision iOS fingerprint SDK (CocoaPod; integrity / risk signals)
 - [tiny-csgo-client](entities/tiny-csgo-client.md) — minimal CS:GO client for dedicated servers (modding / SDK)
