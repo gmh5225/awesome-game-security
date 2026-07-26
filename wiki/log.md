@@ -1254,3 +1254,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:pgarba/ptrace_read_teb`: entity [[ptrace-read-teb]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-07-26** — ingest `description:pgarba/ida-llm-explainer`: entity [[ida-llm-explainer]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-26** — ingest `description:petercunha/Pine`: entity [[pine]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].

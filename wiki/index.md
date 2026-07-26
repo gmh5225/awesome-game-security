@@ -416,6 +416,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PiDqSerializationWrite-Example](entities/pidqserializationwrite-example.md) — Unity-centered `PiDqSerializationWrite` C++ example (Some Tricks / Windows Ring0)
 - [pikabot-deobfuscator](entities/pikabot-deobfuscator.md) — Pikabot RC4/AES string decrypt (IDA Hex-Rays; cheat / IDA Plugins)
 - [Pillager](entities/pillager.md) — Go Windows credential harvest (browser/Wi-Fi/chat decrypt-export; post-ex)
+- [Pine](entities/pine.md) — neural-network aim/trigger research (CS:GO / Fortnite / Overwatch; cheat / triggerbot & aimbot)
 - [Pitaya](entities/pitaya.md) — distributed multiplayer game server framework (Game Network / Server framework)
 - [PixiJS](entities/pixijs.md) — lightweight 2D WebGL/WebGPU JS/TS library (shaders/render; Game Engine / HTML5)
 - [PlayCanvas Engine](entities/engine.md) — open-source WebGL/WebGPU JS engine (PBR / Ammo.js / XR; HTML5 3D)
