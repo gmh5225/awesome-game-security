@@ -402,6 +402,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [oob_entry](entities/oob-entry.md) — iOS 3.0–10.3.4 tfp0 kernel exploit (C/C++; cheat / iOS jailbreak)
 - [opaque-predicates-detective](entities/opaque-predicates-detective.md) — Binary Ninja opaque-predicate detection (invariant / BB-local)
 - [op7t](entities/op7t.md) — DIY Android kernel (cheat / Android kernel explorer)
+- [opainject](entities/opainject.md) — iOS/macOS runtime dylib inject (task_for_pid / Mach; jailbreak + tfp0)
 - [open.mp-anticheat](entities/open.mp-anticheat.md) — open.mp/SA-MP server AC (client self-memory sigs + RakNet; C++)
 - [OpenArk](entities/openark.md) — Qt anti-rootkit / kernel analysis (callbacks, SSDT, drivers)
 - [OpenClaw](entities/openclaw.md) — C++ Captain Claw reimplementation (Box2D; CMake/Android; Game Develop / source)
