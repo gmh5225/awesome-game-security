@@ -482,6 +482,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SmallWorld](entities/smallworld.md) — multi-emulator binary harness (angr/Ghidra/PANDA/Unicorn; coverage/crash/firmware)
 - [Smep-Bypass](entities/smep-bypass.md) — Windows SMEP bypass PoC (CR4 / ROP / vuln-driver; kernel exec user shellcode)
 - [Socket.IO](entities/socket-io.md) — Node.js/browser real-time event I/O (WS + long-poll; Game Network)
+- [Splitgate-Internal](entities/splitgate-internal.md) — Splitgate internal (C/C++; cheat / game:splitgate)
 - [Solemn](entities/solemn.md) — HVCI HvciDisallowedImages blocklist CLI (Windows Security Features)
 - [Source2Gen](entities/source2gen.md) — Source 2 SDK generator (C++ class/enum headers; game engine explorer:source)
 - [Spoofer-AMIDEWIN](entities/spoofer-amidewin.md) — AMIDEWIN HWID / system-identifier spoof research (C/C++; Cheat HWID)
