@@ -1317,3 +1317,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:pafuhana1213/KawaiiPhysics`: entity [[kawaii-physics]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
 - **2026-07-26** — ingest `description:oxylusengine/Oxylus`: entity [[oxylus]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-26** — ingest `description:oxiKKK/oxware`: entity [[oxware]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
