@@ -224,6 +224,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fridare](entities/fridare.md) — Frida repackaging / anti-detection (iOS+Android; string/symbol hex-replace)
 
 
+- [FreeDirect](entities/free-direct.md) — DX3 DirectDraw/DirectSound/DirectPlay subset on SDL3 (legacy 2D; DirectX Compatibility)
 - [Free-RASP-ReactNative](entities/free-rasp-reactnative.md) — React Native freeRASP plugin (Talsec; Magisk/KernelSU/Frida/tamper/integrity; Android+iOS)
 - [Free-RASP-Unity-POC](entities/free-rasp-unity-poc.md) — Unity freeRASP plugin (Talsec; root/jailbreak/Frida/tamper/integrity; Android+iOS)
 
