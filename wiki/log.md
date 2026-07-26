@@ -1272,3 +1272,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:percpopper/Fortnite-FNameEntry`: entity [[fortnite-fnameentry]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
 
 - **2026-07-26** — ingest `description:percpopper/Fortnite-CameraCachePOV`: entity [[fortnite-camera-cache-pov]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
+
+- **2026-07-26** — ingest `description:pd0wm/binaryninja-pcode`: entity [[binaryninja-pcode]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].

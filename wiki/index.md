@@ -94,6 +94,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [awesome-game-engine-dev](entities/awesome-game-engine-dev.md) — curated game-engine-dev resources (DirectX/OpenGL; Game Engine / guide)
 - [blackhat2012](entities/blackhat2012.md) — BH2012 anti-debug / anti-disasm / obfuscation / Anti-VM PoCs (C/C++ + FASM)
 - [BlindEye](entities/blindeye.md) — BattlEye report-path pool-alloc drop (“Packet Fucker”)
+- [binaryninja-pcode](entities/binaryninja-pcode.md) — BN ↔ Ghidra Sleigh/p-code bridge (experimental LLIL; Binary Ninja Plugins)
 - [binja-kc](entities/binja-kc.md) — Binary Ninja MachO kernelcache / KDK dSYM loader
 - [BinCon](entities/bincon.md) — VEH + PAGE_NOACCESS hardened console sample (AC page protection)
 - [BloatedHammer](entities/bloatedhammer.md) — C++20 fold API hammering (no loops; AC Compile Time)
