@@ -264,6 +264,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-ios-helper](entities/ida-ios-helper.md) — IDA plugin for iOS reversing (vtable symbols required)
 - [ida-jm-xorstr-decrypt-plugin](entities/ida-jm-xorstr-decrypt-plugin.md) — IDA Pro JM Xorstr decrypt (x64; Python)
 - [IDA KMDF](entities/ida-kmdf.md) — IDA Pro KMDF/WDF driver annotator (structures / callbacks / queues; Python)
+- [ida-llm-explainer](entities/ida-llm-explainer.md) — local llama.cpp IDA plugin: explain/rename/struct inference + HITL accept (cheat / IDA Plugins)
 - [ida-plugins](entities/ida-plugins.md) — IDA register cross-references (vs Oregami value-use; cheat / IDA Plugins)
 - [IDAPlugins](entities/idaplugins.md) — curated IDA Pro plugin pack (deobf / bin-diff / crypto; cheat / IDA Plugins)
 - [IDARustDemangler](entities/ida-rust-demangler.md) — IDA Rust demangler & normalizer (`rs-dml`; cheat / IDA Plugins)
