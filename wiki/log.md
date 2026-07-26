@@ -1313,3 +1313,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:palera1n/palera1n`: entity [[palera1n]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
 - **2026-07-26** — ingest `description:pafuhana1213/VTuberWithUE4`: entity [[vtuber-with-ue4]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-26** — ingest `description:pafuhana1213/KawaiiPhysics`: entity [[kawaii-physics]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
