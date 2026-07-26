@@ -1248,3 +1248,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2589; Anti Cheat ~613 / Game Engine ~149 / Game Develop ~182 / DirectX ~34 stable); light `index.md` section notes (no per-category pages).
 
 - **2026-07-26** — ingest `description:raivoansa/fortnite-external-base-source`: entity [[fortnite-external-base-source]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-26** — ingest `description:pgp/XFiles`: entity [[xfiles]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].

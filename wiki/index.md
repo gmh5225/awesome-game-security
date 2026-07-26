@@ -612,6 +612,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [xemu](entities/xemu.md) — original Xbox LLE emulator (QEMU fork; NV2A/OpenGL; ISO/XISO)
 - [xenia](entities/xenia.md) — Xbox 360 emulator (PowerPC recompiler; D3D12/Vulkan; XEX)
 - [xenia-mac](entities/xenia-mac.md) — macOS port of Xbox 360 emulator Xenia
+- [XFiles](entities/xfiles.md) — rooted Android file explorer (prebuilt APKs; Cheat Android File Explorer)
 - [Xidi](entities/xidi.md) — DirectInput↔XInput proxy DLL (virtual map / deadzone / FFB; DirectX Compatibility)
 - [xMalHunter](entities/xmalhunter.md) — pe-sieve live process scan (inject/hooks/hollow; Detect malicious materials)
 - [xigmapper](entities/xigmapper.md) — EFI manual map (non-USB payload; Vanguard early-load research)
