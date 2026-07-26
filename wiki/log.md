@@ -1295,3 +1295,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-26** — ingest `description:paradoxwastaken/WindowsHardwareInfo`: entity [[windows-hardware-info]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-07-26** — ingest `description:paradoxwastaken/Poseidon`: entity [[poseidon]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
+- **2026-07-26** — ingest `description:paradiseduo/IPAPatch`: entity [[ipapatch]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
