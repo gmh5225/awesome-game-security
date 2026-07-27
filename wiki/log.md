@@ -1431,3 +1431,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:not-matthias/Nemesis`: entity [[nemesis]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-07-27** — ingest `description:not-fl3/macroquad`: entity [[macroquad]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-27** — ingest `description:noopstudios/interactive-feedback-mcp`: entity [[interactive-feedback-mcp]]; cited on [[overviews/overview]] and [[overviews/game-engine]].
