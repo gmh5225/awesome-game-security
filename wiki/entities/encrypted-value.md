@@ -4,7 +4,7 @@ kind: entity
 topics: [anti-cheat, reverse-engineering]
 sources:
   - wiki/sources/descriptions/serge-14__encrypted_value.md
-updated: 2026-07-23
+updated: 2026-07-27
 confidence: medium
 ---
 
@@ -12,7 +12,7 @@ confidence: medium
 
 Simple header-only C++ library for encrypting scalar values in-process so plaintext integers/floats are harder to find with memory scanners. Aimed at anti-cheat engineers and defensive researchers in the Anti Cheat → Encrypt Variable lane. (source: wiki/sources/descriptions/serge-14__encrypted_value.md)
 
-Complements compile-time string/integer crypters such as [[skcrypter]] / [[mystic-xorstr]] / [[sbox]] (those focus more on literals at compile time); pairs with engine-side static hiding like [[static-variables-obfuscator-ue4]]. Not a full obfuscation engine or packer.
+Complements compile-time string/integer crypters such as [[skcrypter]] / [[mystic-xorstr]] / [[sbox]] (those focus more on literals at compile time) and float-oriented XOR samples such as [[xor-float]]; pairs with engine-side static hiding like [[static-variables-obfuscator-ue4]]. Not a full obfuscation engine or packer.
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements compile-time string/integer crypters such as [[skcrypter]] / [[mysti
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[skcrypter]] · [[mystic-xorstr]] · [[sbox]] · [[obfusk8]] · [[static-variables-obfuscator-ue4]]
+[[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[xor-float]] · [[skcrypter]] · [[mystic-xorstr]] · [[sbox]] · [[obfusk8]] · [[static-variables-obfuscator-ue4]]

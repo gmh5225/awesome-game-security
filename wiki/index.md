@@ -680,6 +680,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [xigmapper](entities/xigmapper.md) — EFI manual map (non-USB payload; Vanguard early-load research)
 - [xign_poc_april_2026](entities/xign-poc-april-2026.md) — XIGNCODE3/xhunter64.sys IRP_MJ_WRITE vuln PoC (phys R/W / leak / kill)
 - [xnu_1day_practice](entities/xnu-1day-practice.md) — XNU (macOS/iOS) 1-day kernel exploit practice (Mach/IOSurface/KRW; C/ObjC)
+- [xor-float](entities/xor-float.md) — C++ XOR float/value encrypt (Anti Cheat → Encrypt Variable)
 - [xqemu](entities/xqemu.md) — original Xbox via QEMU (software full-machine; Cheat QEMU/KVM lane)
 - [XrefsExt](entities/xrefsext.md) — IDA Pro extended-xrefs plugin (cheat / IDA Plugins)
 - [yarascan-ida](entities/yarascan-ida.md) — IDA Yara file scan plugin (Python; cheat / IDA Plugins)
