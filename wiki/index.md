@@ -37,6 +37,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [2Pack](entities/2pack.md) — Rust PE & shellcode packer (EXE/DLL + raw; Anti Cheat → Binary Packer)
 - [3D-Racing-Game](entities/3d-racing-game.md) — OpenGL racing game (M/N scene switch; Game Develop / OpenGL source)
 - [3d9](entities/3d9.md) — DX11 stereoscopic-fix tooling (developer-oriented; DirectX Tools)
+- [BamboozlEDR](entities/bamboozledr.md) — ETW event generator TUI (multi-provider; EDR/detection lab; AC/IS forensics)
 - [BareSVM](entities/baresvm.md) — Rust AMD SVM hacked-hypervisor testing (Detection:HV)
 - [BattleField-1-Internal](entities/battlefield-1-internal.md) — BF1 internal: DirectX / SDK generation / hooking (C++)
 - [Basic-Fortnite-Cheat-Source-Internal](entities/basic-fortnite-cheat-source-internal.md) — Fortnite internal: UE4 SDK / GObject/GNames / hooks (ESP + aimbot; C++)
