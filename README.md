@@ -678,6 +678,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Overlay
 - https://github.com/SeanPesce/Direct3D9-Overlay
+- https://github.com/dantebuilds/swapchain-bottleneck [Architecture analysis of DXGI swapchain/MPO overlay injection, Present-hook collisions, TDR cascades, and anti-cheat whitelist friction]
 
 ## OpenGL
 > Guide
