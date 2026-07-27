@@ -149,6 +149,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CSGOSimple](entities/csgosimple.md) — spirthack Internal CS:GO baseline (MarkHC fork; cheat / game:csgo)
 - [CSSFontFace-Exploit](entities/cssfontface-exploit.md) — WebKit CSSFontFace UAF (PS4/PS5 browser; jailbreak / PlayStation)
 - [cstrike15_src](entities/cstrike15-src.md) — leaked partial CS:GO Source tree (client/server / weapons / net; Game Engine)
+- [CTRComposer](entities/ctr-composer.md) — raw Luma3DS .3gx overlay/cheat engine (self-rendered UI; any Title ID template)
 - [custom-game-engines](entities/custom-game-engines.md) — curated custom game engines list (2020 study; Game Engine / guide)
 
 - [CounterStrikeSource-Linux-Trainer](entities/counterstrikesource-linux-trainer.md) — Linux external CS:S trainer (movement / info display)
@@ -434,7 +435,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [obfuscatxor](entities/obfuscatxor.md) — Go string crypter (encrypted string vars; AC Compile Time / String Crypter)
 - [Obfusk8](entities/obfusk8.md) — C++17 compile-time/runtime obfuscation library (AC Compile Time)
 - [obpo-plugin](entities/obpo-plugin.md) — IDA client + Go OBPO backend (closed core; open plugin; Fix OLLVM)
-- [OcarinaCTRComposer](entities/ocarina-ctr-composer.md) — OoT3D Luma3DS .3gx cheat/tools overlay (CTRComposer; search/hex/RAM dump)
+- [OcarinaCTRComposer](entities/ocarina-ctr-composer.md) — OoT3D Luma3DS .3gx cheat/tools overlay (on CTRComposer; search/hex/RAM dump)
 - [offsets](entities/offsets.md) — C++ CS:GO offset dump (`[Offset]`; cheat / game:csgo)
 - [Olive.c](entities/olive-c.md) — single-header C 2D soft-raster (lines/tris/circles/text; Image Codec)
 - [OMath](entities/omath.md) — C++23 constexpr math/physics (W2S / projectile / GJK; Mathematics)
