@@ -1,0 +1,572 @@
+Project Path: arc_dantebuilds_swapchain-bottleneck_bg11b8wh
+
+Source Tree:
+
+```txt
+arc_dantebuilds_swapchain-bottleneck_bg11b8wh
+├── README.md
+└── swapchain-architecture-vision_v7.md
+
+```
+
+`README.md`:
+
+```md
+# The Swapchain Bottleneck: Why Modern Gaming Still Stutters on Modern Hardware
+
+**Author:** Dante  
+**Date:** July 27, 2026 (v7)  
+**Document type:** Architecture observation & problem analysis  
+**Status:** Public prior art — this document establishes the origin of the ideas described herein.
+
+---
+
+**In short:** A wide range of seemingly unrelated PC gaming problems — persistent stuttering and framepacing issues, overlay crashes, monitoring tool conflicts, TDR driver resets, and BSODs — may share a single architectural root: the Windows presentation layer offers no officially supported, coordinated channel for software that wants to draw alongside a game. Overlays therefore inject into the game's process and hook its frame presentation, colliding with the game, with each other, and with the driver. This document assembles that pattern, traces one full cascade from overlay race condition to kernel bugcheck against official documentation, and proposes architectural directions — including a parallel swapchain architecture behind an official overlay API.
+
+---
+
+## A Pattern Across Thousands of Forum Posts
+
+Across gaming forums, hardware communities, and support threads, a consistent category of problems appears:
+
+- Framepacing and stuttering that persists regardless of hardware upgrades
+- Overlay conflicts — Steam, Discord, GOG Galaxy, NZXT CAM, RivaTuner, and other overlays causing crashes, visual artifacts, or degraded performance
+- Monitoring tool interference — FPS counters, temperature monitors, and hardware management tools disrupting game performance
+- Random TDR events (Timeout Detection and Recovery) — the GPU driver resetting mid-session
+- Black screens and BSOD (Blue Screen of Death) crashes triggered by seemingly unrelated software combinations
+
+These are consistently treated as separate issues. Users report them on separate forums, blame separate software, and search for separate fixes. Developers patch them individually.
+
+What I've come to observe is that they may not be separate issues at all — but symptoms of the same architectural limitation.
+
+---
+
+## An Aging Foundation — What Changed and What Didn't
+
+The DXGI (DirectX Graphics Infrastructure) swapchain — the mechanism through which every frame reaches your display — was originally designed with WDDM (Windows Display Driver Model) 1.0 in 2006. Its core model: one application presents frames through its own swapchain, and the fast path — exclusive fullscreen — assumed nothing else competed for the display. The model itself is older still: swap chains and exclusive-fullscreen page flipping date back to DirectDraw in the mid-1990s — 2006 modernized the plumbing, but inherited the single-presenter assumption.
+
+Since then, the architecture has seen real modernization. WDDM has evolved through versions 2.0 to 3.2 (the latter shipping with Windows 11 24H2). The Flip Presentation Model replaced the older BitBlt copy model, allowing games to hand buffers directly to the compositor instead of copying frames — faster, less overhead. Hardware-Accelerated GPU Scheduling (HAGS) moved scheduling responsibility from CPU to GPU, reducing input lag. These are meaningful improvements to how frames move through the pipeline.
+
+It is telling what the most recent WDDM revision prioritizes: WDDM 3.2 introduced improved TDR debugging (via the new `DxgkddiCollectDbgInfo2` callback), giving drivers a way to report more detailed context when the GPU stops responding. In other words, the newest display driver model invests in *diagnosing the symptom* — driver timeouts — rather than restructuring the coordination that produces them.
+
+These changes improved *how* frames flow through the system — not the structural question of *who gets access* to the presentation layer and *how that access is coordinated*. The fundamental architecture still assumes one primary application presenting frames through one swapchain via DXGI. There is no officially supported, isolated channel for secondary consumers like overlays and monitoring tools to safely draw on screen alongside a game.
+
+This is the gap. The water moves faster through the pipe, but the pipe was never redesigned for multiple users — and there is no gate preventing uninvited users from forcing their way in.
+
+---
+
+## The Real Problem: No Front Door for Overlays
+
+Windows does have a coordination layer for graphics presentation: the Desktop Window Manager (DWM) in combination with the WDDM GPU Scheduler. DWM is the "traffic controller" — it determines which application's frame gets composited and presented to the display, and in what order.
+
+The problem is not that this traffic controller doesn't exist. The problem is that overlay applications routinely bypass it — not out of malice, but out of necessity.
+
+When Steam, Discord, NZXT CAM, or ReShade want to draw something on top of a game, they have no official, supported API to do so. Windows provides no sanctioned "overlay door" — no system where an application can say: "I'd like to draw a small FPS counter in the corner, please coordinate this with the game's frame presentation."
+
+To be precise about what *does* exist: an application can create a transparent topmost window and let DWM composite it over a game, using APIs like DirectComposition. But this path is inadequate for what overlays actually need. It provides no access to the game's frame presentation — so an FPS counter cannot measure frametimes, an overlay cannot synchronize its content to the game's frames, and the approach fails entirely over exclusive fullscreen. Some overlays work partially cooperatively — Steam's overlay, for example, integrates with games through the Steamworks SDK that the game itself links against — but this opt-in model only works within one vendor's own ecosystem. For the general case, no supported mechanism exists.
+
+Because this door doesn't exist, overlay developers resort to the only method that gives them what they need: DLL injection and API hooking.
+
+Using techniques like Microsoft Detours or MinHook, overlays inject code directly into the game's process memory. They intercept the game's DirectX and DXGI function calls — specifically the present call that submits each frame — and insert their own rendering logic. The overlay draws its content directly into the game's frame buffer before it reaches the display.
+
+This means the game and every overlay are operating within the same memory space, modifying the same function calls, without any awareness of each other and without the traffic controller (DWM) knowing they are there. When their operations collide — when two overlays try to hook the same function, or an overlay tries to write to a buffer the game is still using — the consequences range from visual artifacts to driver timeouts to system crashes.
+
+The absence of a front door has a second-order consequence: because legitimate overlays are technically indistinguishable from cheats — both use DLL injection and API hooking to insert code into the game's process — anti-cheat systems must maintain ad-hoc whitelists of "known good" injectors. Every overlay update risks tripping anti-cheat detection; every anti-cheat update risks breaking legitimate overlays. This entire category of friction exists only because there is no sanctioned channel that would let anti-cheat systems distinguish a coordinated overlay from an intruder.
+
+The overlays are not breaking in through the back door because they want to cause problems. They are breaking in because there is no front door.
+
+```mermaid
+flowchart TD
+    subgraph GP["Game Process (single memory space)"]
+        G[Game Engine] --> P["DXGI Present call"]
+        O1[Steam Overlay DLL] -. "hooks" .-> P
+        O2[Discord Overlay DLL] -. "hooks" .-> P
+        O3[Monitoring Tool DLL] -. "hooks" .-> P
+    end
+    P --> SC[Single Swapchain]
+    SC --> DWM["DWM + WDDM GPU Scheduler<br/>(unaware of the injected hooks)"]
+    DWM --> D[Display]
+    O1 -.-x O2
+    O2 -.-x O3
+    style GP fill:none,stroke:#c0392b,stroke-dasharray: 5 5
+```
+
+*Current architecture: every overlay injects into the game's process and hooks the same present call. The coordination layer (DWM) never sees them. The dashed red boundary marks the shared memory space where collisions occur.*
+
+---
+
+## What I Observed: A Cascade From Artifact to BSOD
+
+The following incident history from my own system (RTX 3090, driver 546.01) illustrates how these presentation-layer conflicts can manifest and escalate across different scenarios:
+
+| Date | Incident | Surface Symptom |
+|------|----------|-----------------|
+| April 2026 | Rage 2: TDR during rapid ReShade shader toggling (Vulkan) | Game freeze, driver recovery |
+| June 2026 | Sniper Elite 5: TDR during heavy texture streaming with ReShade active | Game crash |
+| June 2026 | Boot: TDR during HDMI handshake, display went black | Required power cycle |
+| July 2026 | Boot: NZXT CAM overlay artifacts → TDR → BSOD | Full system crash |
+| Ongoing | Silent nvlddmkm Event ID 0 errors every 1.5–6 months | No visible symptoms |
+| Ongoing | NZXT CAM BrokenPipe errors at every reboot | Background errors |
+
+Each incident appeared unrelated — different games, different triggers, different symptoms. But looking at them together, the observed pattern is consistent with a common underlying cause: software competing for the presentation layer without coordination, causing state conflicts that escalate.
+
+The July 2026 BSOD is worth examining in detail because it illustrates how a seemingly minor overlay conflict can cascade into a full system crash:
+
+1. **The collision:** During early Windows startup, NZXT CAM (running 3–4 sub-processes) attempted to access a GPU resource for its overlay while the display driver was still initializing. This is a classic race condition — two pieces of software trying to use the same resource at the same time, with neither aware of the other.
+
+2. **Visual corruption:** The race condition produced blue-black blocks on screen — visual artifacts indicating that buffer contents were being corrupted or read in an invalid state.
+
+3. **Driver timeout (TDR):** The corrupted state triggered a Timeout Detection and Recovery event — Windows detected that the GPU driver had stopped responding and attempted to reset it.
+
+4. **GPU-side exception:** The Windows event log recorded an ILLEGAL_OPCODE error with an ESR (Error Status Register) reference. This is important to read correctly: this is not a CPU error. It is the NVIDIA driver's own GPU exception reporting — one of the GPU's engines encountered an invalid instruction or state, consistent with executing against corrupted buffer contents after the failed recovery.
+
+5. **Illegal memory access, intercepted:** In the corrupted state, the GPU attempted a Direct Memory Access (DMA) operation on memory it was not permitted to touch. The IOMMU (Input/Output Memory Management Unit) — the hardware unit that polices which memory regions devices are allowed to access — intercepted the illegal access, and the Windows kernel halted the system with a bugcheck to prevent silent data corruption.
+
+Post-mortem analysis of the crash dump using BlueScreenView revealed the bugcheck as DRIVER_VERIFIER_DMA_VIOLATION (0xE6) with Parameter 1 = 0x26. [Microsoft's bugcheck reference](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/bug-check-0xe6--driver-verifier-dma-violation) documents this parameter value as **"IOMMU detected DMA violation"** — with Parameter 3 carrying the faulting physical address. Notably, this bugcheck code is named after Driver Verifier, yet Microsoft's documentation explicitly states it can occur *without* Driver Verifier enabled, through the system's built-in DMA verification — which was the case here (`verifier /query` confirmed no drivers were being verified). The same 0xE6/0x26 combination appears in reports from multiple users experiencing GPU-related crashes in overlay and presentation-layer conflict scenarios.
+
+The documented meaning strengthens the interpretation rather than weakening it: this was not a mystery code, but the memory-protection hardware itself catching the GPU in the act — a DMA access to a memory region it had no valid mapping for, consistent with an overlay releasing a buffer while the GPU's display path was still reading from it. The crash was raised by the Windows kernel (ntoskrnl.exe), not by the GPU driver — the driver's operation triggered the violation; the kernel stopped the system.
+
+This sequence is important to understand correctly: none of it indicates a hardware fault. The observed chain — overlay race condition, buffer corruption, driver timeout, GPU exception, IOMMU-intercepted illegal DMA — is a software cascade from beginning to end. The root trigger was the uncoordinated software collision; everything downstream was consequence.
+
+```mermaid
+flowchart LR
+    A["Boot race condition:<br/>overlay claims GPU resource<br/>while driver initializes"] --> B["Buffer corruption<br/>(visual artifacts)"]
+    B --> C["TDR<br/>driver timeout & reset attempt"]
+    C --> D["GPU exception<br/>ILLEGAL_OPCODE / ESR<br/>(GPU-side, not CPU)"]
+    D --> E["Illegal DMA access<br/>intercepted by IOMMU"]
+    E --> F["Kernel bugcheck 0xE6 (0x26)<br/>BSOD"]
+    style A fill:none,stroke:#c0392b
+    style F fill:none,stroke:#c0392b
+```
+
+*The July 2026 cascade: a timing conflict at the presentation layer escalating step by step into a kernel-halted system. Each stage is a documented mechanism; the chain between them is what forum threads never assemble.*
+
+To keep the epistemic status of this analysis explicit, three levels of certainty should be kept apart. The individual mechanisms are **documented** — TDR, the driver's GPU exception reporting, IOMMU DMA interception, and bugcheck 0xE6 with parameter 0x26 are all described in official documentation. The sequence of events on this system was **observed** — event log timestamps and the crash dump record what happened and in what order. The model connecting them — uncoordinated presentation-layer access as the root trigger — is **proposed**. Documented mechanism, observed sequence, proposed connecting model: a reader who collapses these three into one level of certainty is reading more into this document than it claims.
+
+**A refined observation on the common trigger:** Across all incidents in the table above, the trigger was not high GPU load but rapid GPU state transitions — moments when GPU resources are allocated, deallocated, or reallocated in quick succession. Heavy shader workloads running for hours produced no issues; overlay initialization at boot, Vulkan pipeline rebuilds, HDMI handshakes, and texture streaming bursts all did. The common factor is not how hard the GPU is working, but how frequently its resource state is changing. This distinction matters because it explains why more powerful hardware does not prevent these failures — the bottleneck is not compute capacity but coordination during state changes.
+
+This is confirmed by the fact that after resolving the overlay conflict — switching NZXT CAM's renderer from Vulkan to DX12, disabling its overlay, and configuring it to start minimized — the issue has not recurred. The hardware is healthy; it was the software coordination that failed.
+
+The workaround was pragmatic but illustrative. The solution was not to fix NZXT CAM, not to fix the driver, not to fix Windows — it was to prevent them from colliding in the first place. This suggests a structural gap: there is currently no mechanism to prevent these collisions by design.
+
+---
+
+## The Gap Between Users and Engineers
+
+What struck me when looking at this pattern is the disconnect between two groups — and the absence of a third:
+
+**Users** experience symptoms and search for fixes. They look forward — "how do I stop the stuttering" — but not down to the source. Forum solutions involve disabling overlays, rolling back drivers, changing Windows settings. Each fix addresses one symptom.
+
+**Technical specialists** work within their domain. GPU driver engineers optimize the driver's present path. OS engineers optimize DWM compositing. Application developers optimize their swapchain usage. Overlay developers optimize their hooks. Each solves their piece within their layer.
+
+**The missing third group** would sit between these layers: those who connect them. What that perspective would recognize is that the stuttering, the overlay crash, the TDR event, and the BSOD are all consistent with the same structural limitation — not a bug in any one component, but a failure of arbitrative isolation when multiple consumers bypass the intended coordination layer through asynchronous DLL hooking, because no official alternative exists.
+
+I don't have the technical depth to verify this at the kernel level. What I do have is a pattern observed across my own system, across multiple games and tools, and across thousands of forum reports describing the same category of problems.
+
+---
+
+## Technical Context: Why Overlays Hack Instead of Asking
+
+Several technical mechanisms are relevant to understanding why this pattern persists:
+
+**The absence of an official overlay API:** This is the root of the problem. Windows provides no supported, isolated channel for third-party applications to draw frame-synchronized content on top of a game. The paths that do exist — topmost composited windows, DirectComposition — lack access to the game's presentation timing and fail over exclusive fullscreen, which is precisely why no major overlay uses them as its primary mechanism. Until an official "front door" exists, DLL injection will remain the standard approach — and the conflicts that come with it will continue.
+
+**API Hooking and DLL Injection:** Without an official API, overlays intercept DirectX/DXGI function calls by injecting code into the game's process memory. Multiple injectors operating in the same memory space, modifying the same function calls, without awareness of each other — the resulting conflicts appear to be not bugs in individual overlays but an inherent consequence of the only method available.
+
+**Hardware-Accelerated GPU Scheduling (HAGS):** Introduced in Windows 10 2004, HAGS moved GPU scheduling from the CPU to the GPU itself, reducing input lag. However, on certain driver versions and hardware combinations, HAGS can exacerbate race conditions during boot or when multiple consumers compete for GPU resources simultaneously — precisely the scenarios described in the incident history above.
+
+**Multiplane Overlays (MPO):** MPO was introduced by Microsoft to address part of this problem — it allows GPU hardware to composite multiple planes (such as a game layer and a UI layer) directly at the display controller without full DWM composition overhead. In theory, this is the right architectural direction: separate planes for separate content. In practice, implementation inconsistencies across GPU vendors and driver versions, combined with the DLL-injection overlay ecosystem that bypasses MPO entirely, limit its effectiveness. MPO solves the compositing problem but not the access problem — overlays still have no official way to request their own plane.
+
+**The MPO workaround as evidence:** A widely circulated registry hack — setting `OverlayTestMode` to `5` under `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\Dwm` — disables MPO entirely, forcing DWM to composite all layers through the GPU's shader engine into a single framebuffer instead of using separate hardware overlay planes. This eliminates the synchronization failures between planes that cause flickering, black screens, and TDR events. NVIDIA has maintained an [official Knowledge Base article (a_id/5157)](https://nvidia.custhelp.com/app/answers/detail/a_id/5157) since early 2021 — originally published alongside driver 461.09 — distributing downloadable .reg files to disable and restore MPO. The article remains live in 2026, updated for Windows 11: for over five years, the GPU vendor itself has been the distributor of a workaround for an OS-level architectural feature.
+
+This workaround is revealing: it resolves the compositing failures by removing the multi-plane architecture altogether, but it does not address the access problem. Overlays still have no official channel to present their content — they still inject into the game's process via DLL hooks. The collisions between overlays and the game's swapchain persist; only the secondary collisions between overlay planes at the compositor level are eliminated. The workaround closes the kitchen to prevent accidents, but it does not build the extra doors that would let each cook work safely in their own station.
+
+**Cross-vendor confirmation:** The MPO problem is not vendor-specific. AMD Radeon users report identical symptoms — flickering, black screens, stuttering — resolved by the same MPO disable workaround, and AMD went as far as adding an MPO toggle to its own Radeon Setup Tool. When both major GPU vendors independently ship user-facing switches to turn off the same Windows compositing feature, the issue is architectural (rooted in the Windows presentation layer) rather than a bug in any specific vendor's driver implementation.
+
+---
+
+## Possible Directions
+
+The following are architectural concepts — not implementation blueprints. They describe directions that might address the structural problem, proposed by someone who identified the pattern from the user side rather than the engineering side.
+
+### 1. Parallel Swapchain Architecture
+
+The core design principle here is: **separate the presentation of game content from the presentation of overlay content.** One possible architectural expression of this principle: instead of all consumers competing within a single swapchain via DLL injection, a secondary presentation chain could provide a dedicated, officially supported path for overlay and monitoring content:
+
+- **Chain 1 (Game):** The primary swapchain, used exclusively by the game engine and tightly coupled post-processing (e.g., ReShade)
+- **Chain 2 (Overlay):** A separate, officially supported chain for Steam overlay, Discord overlay, NZXT CAM, FPS counters, and other non-game visual content
+
+The display controller would composite both chains via MPO hardware planes. This would separate concerns architecturally: game presentation and overlay presentation would no longer operate in the same memory space through unsanctioned hooks, but through isolated, coordinated channels.
+
+This is essentially building the "front door" that currently doesn't exist. Overlays would have an official, supported API to present their content through their own dedicated chain, eliminating the need for DLL injection into the game's process.
+
+```mermaid
+flowchart TD
+    G[Game Engine + ReShade] --> C1["Chain 1: Game Swapchain<br/>(exclusive)"]
+    O1[Steam Overlay] --> API["Official Overlay API<br/>(the front door)"]
+    O2[Discord Overlay] --> API
+    O3[Monitoring Tools] --> API
+    API --> C2["Chain 2: Overlay Swapchain<br/>(coordinated, isolated)"]
+    C1 --> MPO["Display Controller<br/>MPO hardware plane composition"]
+    C2 --> MPO
+    MPO --> D[Display]
+    style API fill:none,stroke:#27ae60,stroke-width:2px
+```
+
+*Proposed parallel architecture: game and overlay content travel through isolated chains and only meet at the hardware composition stage. No shared memory space, no hooks, no collisions — and anti-cheat systems can finally distinguish a coordinated overlay from an injected intruder.*
+
+This approach has practical limitations: current MPO implementations typically expose 2–4 hardware planes (dxdiag reports "MPO MaxPlanes: 4" on typical NVIDIA hardware and 3 on common Intel iGPUs), behavior varies across GPU vendors and driver versions, and MPO can silently fall back to a single plane depending on configuration — 10-bit output, certain scaling features, and multi-monitor setups are known to disable it entirely. The existing overlay ecosystem would also need to adopt the new API. A robust implementation would likely require industry-wide standardization of both the API and the MPO behavior — and could not depend on hardware planes alone, falling back to coordinated GPU composition where planes are unavailable.
+
+### 2. Adaptive Swapchain Controller
+
+An intelligent scheduling layer — functioning as an "air traffic controller" — that dynamically manages swapchain configuration based on application context.
+
+The concept: rather than every application independently deciding how it accesses the presentation layer (or bypassing the coordination layer entirely), a controller would recognize what's running and enforce appropriate access:
+
+- **Detect application context:** Recognize whether the running application is a legacy game, a modern title, or an ultra-demanding workload
+- **Adapt presentation parameters:** Adjust buffer count, flip model, timing, and priority allocation based on detected needs
+- **Enforce coordinated access:** Manage which consumers can access the presentation layer and when, replacing the current situation where DLL-injected overlays operate outside the arbiter's control
+- **Tiered profiles:** Legacy applications get a configuration optimized for their expected behavior; modern games get a different profile; heavy workloads like path tracing get maximum resource allocation with aggressive overlay management
+
+This doesn't necessarily require AI in the deep learning sense — it could be an adaptive, context-aware scheduler. The key improvement would be moving from a situation where the coordination layer can be freely bypassed to one where access is managed and enforced.
+
+### 3. Overlay-Side Coordination Protocol
+
+A lighter, intermediate approach: rather than waiting for Microsoft to build the official front door, major overlay developers (Valve, Discord, NZXT, Rivatuner) could agree on an informal coordination protocol — a set of shared rules for how their DLL hooks interact with each other and with the game's present calls.
+
+This could include timing conventions (waiting a set number of frames after boot before hooking), mutual awareness signals (checking if another overlay has already hooked a function), and priority hierarchies (monitoring tools yield to game overlays, which yield to the game itself).
+
+This would not solve the structural problem — DLL injection would remain the method, and rogue overlays that ignore the protocol could still cause conflicts. But it would significantly reduce the collision frequency among the major players that cause most of the issues users experience. A practical improvement while the architectural solution is developed.
+
+### 4. Combined Approach
+
+The most robust long-term solution likely combines all three concepts: an official parallel swapchain architecture providing the front door, managed by an adaptive controller that coordinates access and enforces isolation, with an interim coordination protocol bridging the gap during the transition period.
+
+---
+
+## Why This May Matter Increasingly
+
+If the observation is correct, the problem is likely intensifying rather than resolving. Each generation adds more complexity to the presentation layer: frame generation technologies (DLSS, FSR, AFMF) add synthetic frames to the swapchain, HDR (High Dynamic Range) requires tone mapping in the display pipeline, VRR (Variable Refresh Rate) requires dynamic timing negotiation, ray tracing and path tracing increase GPU load and reduce the margin for software conflicts, and the overlay ecosystem continues to grow with each new launcher, monitoring tool, and communication platform.
+
+More powerful hardware provides more headroom but does not address a structural coordination problem. If the issue is that consumers bypass the arbiter because no official channel exists, faster hardware only delays the collision — it doesn't prevent it. The pipe is faster, but it still has no gate.
+
+Technologies like DLSS, Frame Generation, and Reflex optimize performance within the existing presentation architecture — they make frames render faster, add synthetic frames to the pipeline, and reduce input latency. These are valuable engineering achievements. But they operate above the coordination layer, not within it. They make the water flow faster through the pipe; they do not add gates to manage who accesses the pipe. The structural gap remains, masked by headroom rather than resolved by design.
+
+---
+
+## About This Document
+
+This analysis originates from pattern recognition applied to real-world experience. I am not a kernel developer, driver engineer, or OS architect. I am someone who experienced these problems firsthand, noticed they weren't as unrelated as they appeared, and traced what seems to be their common source.
+
+The swapchain bottleneck hypothesis emerged in April 2026 during analysis of unexplainable frame-halving in Rage 2. It was reinforced in July 2026 when an overlay race condition produced a cascade failure that crashed the system — tracing back to the same presentation layer I had identified months earlier as a likely source of problems. The analysis was subsequently refined through technical peer review, which strengthened the precision of the claims and added context about the existing coordination mechanisms and their limitations. The DMA violation data, state transition analysis, MPO workaround connection, and cross-vendor confirmation were added in v6 based on crash dump forensics and continued investigation. In v7, every external claim was re-verified against primary sources: the crash-dump interpretation was corrected against Microsoft's official bugcheck documentation (Parameter 0x26 is documented as an IOMMU-detected DMA violation — a finding that strengthens the buffer-lifetime interpretation), the GPU-side nature of the ILLEGAL_OPCODE exception was clarified, and version numbers, dates, and hardware capabilities were corrected where the record required it.
+
+The proposed directions were conceived as architectural concepts — starting points for those with the technical capability to evaluate and potentially implement them.
+
+This document is published as prior art. The ideas and observations described herein are placed in the public record with the date above.
+
+---
+
+## Sources
+
+**Microsoft documentation:**
+- [Bug Check 0xE6: DRIVER_VERIFIER_DMA_VIOLATION](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/bug-check-0xe6--driver-verifier-dma-violation) — parameter table including 0x26 ("IOMMU detected DMA violation") and the note that 0xE6 can occur without Driver Verifier enabled
+- [DMA Verification](https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/dma-verification) — the built-in DMA verification mechanism behind Verifier-less 0xE6 bugchecks
+- [What's new for Windows 11 display and graphics drivers](https://learn.microsoft.com/en-us/windows-hardware/drivers/display/what-s-new-for-windows-11-display-and-graphics-drivers) — WDDM version history (3.0 → 3.2)
+- [Multiplane overlay support](https://learn.microsoft.com/en-us/windows-hardware/drivers/display/multiplane-overlay-support) — official MPO driver documentation
+
+**Vendor material:**
+- [NVIDIA Knowledge Base a_id/5157](https://nvidia.custhelp.com/app/answers/detail/a_id/5157) — official .reg files to disable/restore MPO, published early 2021 alongside driver 461.09, still maintained in 2026
+- [Linux kernel amdgpu documentation: Multiplane Overlay](https://docs.kernel.org/gpu/amdgpu/display/mpo-overview.html) — AMD's own description of MPO mechanics and hardware plane limits
+
+**Community documentation & technical analysis:**
+- [guru3D: Disabling MPO can improve flicker/stutter issues](https://forums.guru3d.com/threads/disabling-mpo-multiplace-overlay-can-improve-some-desktop-apps-flicker-or-stutter-issues.445266/) — AMD-posted thread confirming cross-vendor symptoms and the Radeon Setup Tool MPO toggle
+- [guru3D: Multiplane overlay issues](https://forums.guru3d.com/threads/multiplane-overlay-issues.443121/) — user reports of MPO MaxPlanes values (dxdiag) and silent MPO fallback conditions
+- [Neowin: WDDM 3.2 may bring fewer graphics driver crashes](https://www.neowin.net/news/thanks-to-microsofts-wddm-32-windows-11-24h2-may-get-fewer-graphics-driver-crashes/) — WDDM 3.2's improved TDR debugging
+- [Fred Emmott: In-Game Overlays — How They Work](https://fredemmott.com/blog/2022/05/31/in-game-overlays.html) — technical breakdown of overlay injection and hooking mechanisms
+
+---
+
+*© 2026 Dante. Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) — free to distribute and reference with attribution.*
+
+```
+
+`swapchain-architecture-vision_v7.md`:
+
+```md
+# The Swapchain Bottleneck: Why Modern Gaming Still Stutters on Modern Hardware
+
+**Author:** Dante  
+**Date:** July 27, 2026 (v7)  
+**Document type:** Architecture observation & problem analysis  
+**Status:** Public prior art — this document establishes the origin of the ideas described herein.
+
+---
+
+**In short:** A wide range of seemingly unrelated PC gaming problems — persistent stuttering and framepacing issues, overlay crashes, monitoring tool conflicts, TDR driver resets, and BSODs — may share a single architectural root: the Windows presentation layer offers no officially supported, coordinated channel for software that wants to draw alongside a game. Overlays therefore inject into the game's process and hook its frame presentation, colliding with the game, with each other, and with the driver. This document assembles that pattern, traces one full cascade from overlay race condition to kernel bugcheck against official documentation, and proposes architectural directions — including a parallel swapchain architecture behind an official overlay API.
+
+---
+
+## A Pattern Across Thousands of Forum Posts
+
+Across gaming forums, hardware communities, and support threads, a consistent category of problems appears:
+
+- Framepacing and stuttering that persists regardless of hardware upgrades
+- Overlay conflicts — Steam, Discord, GOG Galaxy, NZXT CAM, RivaTuner, and other overlays causing crashes, visual artifacts, or degraded performance
+- Monitoring tool interference — FPS counters, temperature monitors, and hardware management tools disrupting game performance
+- Random TDR events (Timeout Detection and Recovery) — the GPU driver resetting mid-session
+- Black screens and BSOD (Blue Screen of Death) crashes triggered by seemingly unrelated software combinations
+
+These are consistently treated as separate issues. Users report them on separate forums, blame separate software, and search for separate fixes. Developers patch them individually.
+
+What I've come to observe is that they may not be separate issues at all — but symptoms of the same architectural limitation.
+
+---
+
+## An Aging Foundation — What Changed and What Didn't
+
+The DXGI (DirectX Graphics Infrastructure) swapchain — the mechanism through which every frame reaches your display — was originally designed with WDDM (Windows Display Driver Model) 1.0 in 2006. Its core model: one application presents frames through its own swapchain, and the fast path — exclusive fullscreen — assumed nothing else competed for the display. The model itself is older still: swap chains and exclusive-fullscreen page flipping date back to DirectDraw in the mid-1990s — 2006 modernized the plumbing, but inherited the single-presenter assumption.
+
+Since then, the architecture has seen real modernization. WDDM has evolved through versions 2.0 to 3.2 (the latter shipping with Windows 11 24H2). The Flip Presentation Model replaced the older BitBlt copy model, allowing games to hand buffers directly to the compositor instead of copying frames — faster, less overhead. Hardware-Accelerated GPU Scheduling (HAGS) moved scheduling responsibility from CPU to GPU, reducing input lag. These are meaningful improvements to how frames move through the pipeline.
+
+It is telling what the most recent WDDM revision prioritizes: WDDM 3.2 introduced improved TDR debugging (via the new `DxgkddiCollectDbgInfo2` callback), giving drivers a way to report more detailed context when the GPU stops responding. In other words, the newest display driver model invests in *diagnosing the symptom* — driver timeouts — rather than restructuring the coordination that produces them.
+
+These changes improved *how* frames flow through the system — not the structural question of *who gets access* to the presentation layer and *how that access is coordinated*. The fundamental architecture still assumes one primary application presenting frames through one swapchain via DXGI. There is no officially supported, isolated channel for secondary consumers like overlays and monitoring tools to safely draw on screen alongside a game.
+
+This is the gap. The water moves faster through the pipe, but the pipe was never redesigned for multiple users — and there is no gate preventing uninvited users from forcing their way in.
+
+---
+
+## The Real Problem: No Front Door for Overlays
+
+Windows does have a coordination layer for graphics presentation: the Desktop Window Manager (DWM) in combination with the WDDM GPU Scheduler. DWM is the "traffic controller" — it determines which application's frame gets composited and presented to the display, and in what order.
+
+The problem is not that this traffic controller doesn't exist. The problem is that overlay applications routinely bypass it — not out of malice, but out of necessity.
+
+When Steam, Discord, NZXT CAM, or ReShade want to draw something on top of a game, they have no official, supported API to do so. Windows provides no sanctioned "overlay door" — no system where an application can say: "I'd like to draw a small FPS counter in the corner, please coordinate this with the game's frame presentation."
+
+To be precise about what *does* exist: an application can create a transparent topmost window and let DWM composite it over a game, using APIs like DirectComposition. But this path is inadequate for what overlays actually need. It provides no access to the game's frame presentation — so an FPS counter cannot measure frametimes, an overlay cannot synchronize its content to the game's frames, and the approach fails entirely over exclusive fullscreen. Some overlays work partially cooperatively — Steam's overlay, for example, integrates with games through the Steamworks SDK that the game itself links against — but this opt-in model only works within one vendor's own ecosystem. For the general case, no supported mechanism exists.
+
+Because this door doesn't exist, overlay developers resort to the only method that gives them what they need: DLL injection and API hooking.
+
+Using techniques like Microsoft Detours or MinHook, overlays inject code directly into the game's process memory. They intercept the game's DirectX and DXGI function calls — specifically the present call that submits each frame — and insert their own rendering logic. The overlay draws its content directly into the game's frame buffer before it reaches the display.
+
+This means the game and every overlay are operating within the same memory space, modifying the same function calls, without any awareness of each other and without the traffic controller (DWM) knowing they are there. When their operations collide — when two overlays try to hook the same function, or an overlay tries to write to a buffer the game is still using — the consequences range from visual artifacts to driver timeouts to system crashes.
+
+The absence of a front door has a second-order consequence: because legitimate overlays are technically indistinguishable from cheats — both use DLL injection and API hooking to insert code into the game's process — anti-cheat systems must maintain ad-hoc whitelists of "known good" injectors. Every overlay update risks tripping anti-cheat detection; every anti-cheat update risks breaking legitimate overlays. This entire category of friction exists only because there is no sanctioned channel that would let anti-cheat systems distinguish a coordinated overlay from an intruder.
+
+The overlays are not breaking in through the back door because they want to cause problems. They are breaking in because there is no front door.
+
+```mermaid
+flowchart TD
+    subgraph GP["Game Process (single memory space)"]
+        G[Game Engine] --> P["DXGI Present call"]
+        O1[Steam Overlay DLL] -. "hooks" .-> P
+        O2[Discord Overlay DLL] -. "hooks" .-> P
+        O3[Monitoring Tool DLL] -. "hooks" .-> P
+    end
+    P --> SC[Single Swapchain]
+    SC --> DWM["DWM + WDDM GPU Scheduler<br/>(unaware of the injected hooks)"]
+    DWM --> D[Display]
+    O1 -.-x O2
+    O2 -.-x O3
+    style GP fill:none,stroke:#c0392b,stroke-dasharray: 5 5
+```
+
+*Current architecture: every overlay injects into the game's process and hooks the same present call. The coordination layer (DWM) never sees them. The dashed red boundary marks the shared memory space where collisions occur.*
+
+---
+
+## What I Observed: A Cascade From Artifact to BSOD
+
+The following incident history from my own system (RTX 3090, driver 546.01) illustrates how these presentation-layer conflicts can manifest and escalate across different scenarios:
+
+| Date | Incident | Surface Symptom |
+|------|----------|-----------------|
+| April 2026 | Rage 2: TDR during rapid ReShade shader toggling (Vulkan) | Game freeze, driver recovery |
+| June 2026 | Sniper Elite 5: TDR during heavy texture streaming with ReShade active | Game crash |
+| June 2026 | Boot: TDR during HDMI handshake, display went black | Required power cycle |
+| July 2026 | Boot: NZXT CAM overlay artifacts → TDR → BSOD | Full system crash |
+| Ongoing | Silent nvlddmkm Event ID 0 errors every 1.5–6 months | No visible symptoms |
+| Ongoing | NZXT CAM BrokenPipe errors at every reboot | Background errors |
+
+Each incident appeared unrelated — different games, different triggers, different symptoms. But looking at them together, the observed pattern is consistent with a common underlying cause: software competing for the presentation layer without coordination, causing state conflicts that escalate.
+
+The July 2026 BSOD is worth examining in detail because it illustrates how a seemingly minor overlay conflict can cascade into a full system crash:
+
+1. **The collision:** During early Windows startup, NZXT CAM (running 3–4 sub-processes) attempted to access a GPU resource for its overlay while the display driver was still initializing. This is a classic race condition — two pieces of software trying to use the same resource at the same time, with neither aware of the other.
+
+2. **Visual corruption:** The race condition produced blue-black blocks on screen — visual artifacts indicating that buffer contents were being corrupted or read in an invalid state.
+
+3. **Driver timeout (TDR):** The corrupted state triggered a Timeout Detection and Recovery event — Windows detected that the GPU driver had stopped responding and attempted to reset it.
+
+4. **GPU-side exception:** The Windows event log recorded an ILLEGAL_OPCODE error with an ESR (Error Status Register) reference. This is important to read correctly: this is not a CPU error. It is the NVIDIA driver's own GPU exception reporting — one of the GPU's engines encountered an invalid instruction or state, consistent with executing against corrupted buffer contents after the failed recovery.
+
+5. **Illegal memory access, intercepted:** In the corrupted state, the GPU attempted a Direct Memory Access (DMA) operation on memory it was not permitted to touch. The IOMMU (Input/Output Memory Management Unit) — the hardware unit that polices which memory regions devices are allowed to access — intercepted the illegal access, and the Windows kernel halted the system with a bugcheck to prevent silent data corruption.
+
+Post-mortem analysis of the crash dump using BlueScreenView revealed the bugcheck as DRIVER_VERIFIER_DMA_VIOLATION (0xE6) with Parameter 1 = 0x26. [Microsoft's bugcheck reference](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/bug-check-0xe6--driver-verifier-dma-violation) documents this parameter value as **"IOMMU detected DMA violation"** — with Parameter 3 carrying the faulting physical address. Notably, this bugcheck code is named after Driver Verifier, yet Microsoft's documentation explicitly states it can occur *without* Driver Verifier enabled, through the system's built-in DMA verification — which was the case here (`verifier /query` confirmed no drivers were being verified). The same 0xE6/0x26 combination appears in reports from multiple users experiencing GPU-related crashes in overlay and presentation-layer conflict scenarios.
+
+The documented meaning strengthens the interpretation rather than weakening it: this was not a mystery code, but the memory-protection hardware itself catching the GPU in the act — a DMA access to a memory region it had no valid mapping for, consistent with an overlay releasing a buffer while the GPU's display path was still reading from it. The crash was raised by the Windows kernel (ntoskrnl.exe), not by the GPU driver — the driver's operation triggered the violation; the kernel stopped the system.
+
+This sequence is important to understand correctly: none of it indicates a hardware fault. The observed chain — overlay race condition, buffer corruption, driver timeout, GPU exception, IOMMU-intercepted illegal DMA — is a software cascade from beginning to end. The root trigger was the uncoordinated software collision; everything downstream was consequence.
+
+```mermaid
+flowchart LR
+    A["Boot race condition:<br/>overlay claims GPU resource<br/>while driver initializes"] --> B["Buffer corruption<br/>(visual artifacts)"]
+    B --> C["TDR<br/>driver timeout & reset attempt"]
+    C --> D["GPU exception<br/>ILLEGAL_OPCODE / ESR<br/>(GPU-side, not CPU)"]
+    D --> E["Illegal DMA access<br/>intercepted by IOMMU"]
+    E --> F["Kernel bugcheck 0xE6 (0x26)<br/>BSOD"]
+    style A fill:none,stroke:#c0392b
+    style F fill:none,stroke:#c0392b
+```
+
+*The July 2026 cascade: a timing conflict at the presentation layer escalating step by step into a kernel-halted system. Each stage is a documented mechanism; the chain between them is what forum threads never assemble.*
+
+To keep the epistemic status of this analysis explicit, three levels of certainty should be kept apart. The individual mechanisms are **documented** — TDR, the driver's GPU exception reporting, IOMMU DMA interception, and bugcheck 0xE6 with parameter 0x26 are all described in official documentation. The sequence of events on this system was **observed** — event log timestamps and the crash dump record what happened and in what order. The model connecting them — uncoordinated presentation-layer access as the root trigger — is **proposed**. Documented mechanism, observed sequence, proposed connecting model: a reader who collapses these three into one level of certainty is reading more into this document than it claims.
+
+**A refined observation on the common trigger:** Across all incidents in the table above, the trigger was not high GPU load but rapid GPU state transitions — moments when GPU resources are allocated, deallocated, or reallocated in quick succession. Heavy shader workloads running for hours produced no issues; overlay initialization at boot, Vulkan pipeline rebuilds, HDMI handshakes, and texture streaming bursts all did. The common factor is not how hard the GPU is working, but how frequently its resource state is changing. This distinction matters because it explains why more powerful hardware does not prevent these failures — the bottleneck is not compute capacity but coordination during state changes.
+
+This is confirmed by the fact that after resolving the overlay conflict — switching NZXT CAM's renderer from Vulkan to DX12, disabling its overlay, and configuring it to start minimized — the issue has not recurred. The hardware is healthy; it was the software coordination that failed.
+
+The workaround was pragmatic but illustrative. The solution was not to fix NZXT CAM, not to fix the driver, not to fix Windows — it was to prevent them from colliding in the first place. This suggests a structural gap: there is currently no mechanism to prevent these collisions by design.
+
+---
+
+## The Gap Between Users and Engineers
+
+What struck me when looking at this pattern is the disconnect between two groups — and the absence of a third:
+
+**Users** experience symptoms and search for fixes. They look forward — "how do I stop the stuttering" — but not down to the source. Forum solutions involve disabling overlays, rolling back drivers, changing Windows settings. Each fix addresses one symptom.
+
+**Technical specialists** work within their domain. GPU driver engineers optimize the driver's present path. OS engineers optimize DWM compositing. Application developers optimize their swapchain usage. Overlay developers optimize their hooks. Each solves their piece within their layer.
+
+**The missing third group** would sit between these layers: those who connect them. What that perspective would recognize is that the stuttering, the overlay crash, the TDR event, and the BSOD are all consistent with the same structural limitation — not a bug in any one component, but a failure of arbitrative isolation when multiple consumers bypass the intended coordination layer through asynchronous DLL hooking, because no official alternative exists.
+
+I don't have the technical depth to verify this at the kernel level. What I do have is a pattern observed across my own system, across multiple games and tools, and across thousands of forum reports describing the same category of problems.
+
+---
+
+## Technical Context: Why Overlays Hack Instead of Asking
+
+Several technical mechanisms are relevant to understanding why this pattern persists:
+
+**The absence of an official overlay API:** This is the root of the problem. Windows provides no supported, isolated channel for third-party applications to draw frame-synchronized content on top of a game. The paths that do exist — topmost composited windows, DirectComposition — lack access to the game's presentation timing and fail over exclusive fullscreen, which is precisely why no major overlay uses them as its primary mechanism. Until an official "front door" exists, DLL injection will remain the standard approach — and the conflicts that come with it will continue.
+
+**API Hooking and DLL Injection:** Without an official API, overlays intercept DirectX/DXGI function calls by injecting code into the game's process memory. Multiple injectors operating in the same memory space, modifying the same function calls, without awareness of each other — the resulting conflicts appear to be not bugs in individual overlays but an inherent consequence of the only method available.
+
+**Hardware-Accelerated GPU Scheduling (HAGS):** Introduced in Windows 10 2004, HAGS moved GPU scheduling from the CPU to the GPU itself, reducing input lag. However, on certain driver versions and hardware combinations, HAGS can exacerbate race conditions during boot or when multiple consumers compete for GPU resources simultaneously — precisely the scenarios described in the incident history above.
+
+**Multiplane Overlays (MPO):** MPO was introduced by Microsoft to address part of this problem — it allows GPU hardware to composite multiple planes (such as a game layer and a UI layer) directly at the display controller without full DWM composition overhead. In theory, this is the right architectural direction: separate planes for separate content. In practice, implementation inconsistencies across GPU vendors and driver versions, combined with the DLL-injection overlay ecosystem that bypasses MPO entirely, limit its effectiveness. MPO solves the compositing problem but not the access problem — overlays still have no official way to request their own plane.
+
+**The MPO workaround as evidence:** A widely circulated registry hack — setting `OverlayTestMode` to `5` under `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\Dwm` — disables MPO entirely, forcing DWM to composite all layers through the GPU's shader engine into a single framebuffer instead of using separate hardware overlay planes. This eliminates the synchronization failures between planes that cause flickering, black screens, and TDR events. NVIDIA has maintained an [official Knowledge Base article (a_id/5157)](https://nvidia.custhelp.com/app/answers/detail/a_id/5157) since early 2021 — originally published alongside driver 461.09 — distributing downloadable .reg files to disable and restore MPO. The article remains live in 2026, updated for Windows 11: for over five years, the GPU vendor itself has been the distributor of a workaround for an OS-level architectural feature.
+
+This workaround is revealing: it resolves the compositing failures by removing the multi-plane architecture altogether, but it does not address the access problem. Overlays still have no official channel to present their content — they still inject into the game's process via DLL hooks. The collisions between overlays and the game's swapchain persist; only the secondary collisions between overlay planes at the compositor level are eliminated. The workaround closes the kitchen to prevent accidents, but it does not build the extra doors that would let each cook work safely in their own station.
+
+**Cross-vendor confirmation:** The MPO problem is not vendor-specific. AMD Radeon users report identical symptoms — flickering, black screens, stuttering — resolved by the same MPO disable workaround, and AMD went as far as adding an MPO toggle to its own Radeon Setup Tool. When both major GPU vendors independently ship user-facing switches to turn off the same Windows compositing feature, the issue is architectural (rooted in the Windows presentation layer) rather than a bug in any specific vendor's driver implementation.
+
+---
+
+## Possible Directions
+
+The following are architectural concepts — not implementation blueprints. They describe directions that might address the structural problem, proposed by someone who identified the pattern from the user side rather than the engineering side.
+
+### 1. Parallel Swapchain Architecture
+
+The core design principle here is: **separate the presentation of game content from the presentation of overlay content.** One possible architectural expression of this principle: instead of all consumers competing within a single swapchain via DLL injection, a secondary presentation chain could provide a dedicated, officially supported path for overlay and monitoring content:
+
+- **Chain 1 (Game):** The primary swapchain, used exclusively by the game engine and tightly coupled post-processing (e.g., ReShade)
+- **Chain 2 (Overlay):** A separate, officially supported chain for Steam overlay, Discord overlay, NZXT CAM, FPS counters, and other non-game visual content
+
+The display controller would composite both chains via MPO hardware planes. This would separate concerns architecturally: game presentation and overlay presentation would no longer operate in the same memory space through unsanctioned hooks, but through isolated, coordinated channels.
+
+This is essentially building the "front door" that currently doesn't exist. Overlays would have an official, supported API to present their content through their own dedicated chain, eliminating the need for DLL injection into the game's process.
+
+```mermaid
+flowchart TD
+    G[Game Engine + ReShade] --> C1["Chain 1: Game Swapchain<br/>(exclusive)"]
+    O1[Steam Overlay] --> API["Official Overlay API<br/>(the front door)"]
+    O2[Discord Overlay] --> API
+    O3[Monitoring Tools] --> API
+    API --> C2["Chain 2: Overlay Swapchain<br/>(coordinated, isolated)"]
+    C1 --> MPO["Display Controller<br/>MPO hardware plane composition"]
+    C2 --> MPO
+    MPO --> D[Display]
+    style API fill:none,stroke:#27ae60,stroke-width:2px
+```
+
+*Proposed parallel architecture: game and overlay content travel through isolated chains and only meet at the hardware composition stage. No shared memory space, no hooks, no collisions — and anti-cheat systems can finally distinguish a coordinated overlay from an injected intruder.*
+
+This approach has practical limitations: current MPO implementations typically expose 2–4 hardware planes (dxdiag reports "MPO MaxPlanes: 4" on typical NVIDIA hardware and 3 on common Intel iGPUs), behavior varies across GPU vendors and driver versions, and MPO can silently fall back to a single plane depending on configuration — 10-bit output, certain scaling features, and multi-monitor setups are known to disable it entirely. The existing overlay ecosystem would also need to adopt the new API. A robust implementation would likely require industry-wide standardization of both the API and the MPO behavior — and could not depend on hardware planes alone, falling back to coordinated GPU composition where planes are unavailable.
+
+### 2. Adaptive Swapchain Controller
+
+An intelligent scheduling layer — functioning as an "air traffic controller" — that dynamically manages swapchain configuration based on application context.
+
+The concept: rather than every application independently deciding how it accesses the presentation layer (or bypassing the coordination layer entirely), a controller would recognize what's running and enforce appropriate access:
+
+- **Detect application context:** Recognize whether the running application is a legacy game, a modern title, or an ultra-demanding workload
+- **Adapt presentation parameters:** Adjust buffer count, flip model, timing, and priority allocation based on detected needs
+- **Enforce coordinated access:** Manage which consumers can access the presentation layer and when, replacing the current situation where DLL-injected overlays operate outside the arbiter's control
+- **Tiered profiles:** Legacy applications get a configuration optimized for their expected behavior; modern games get a different profile; heavy workloads like path tracing get maximum resource allocation with aggressive overlay management
+
+This doesn't necessarily require AI in the deep learning sense — it could be an adaptive, context-aware scheduler. The key improvement would be moving from a situation where the coordination layer can be freely bypassed to one where access is managed and enforced.
+
+### 3. Overlay-Side Coordination Protocol
+
+A lighter, intermediate approach: rather than waiting for Microsoft to build the official front door, major overlay developers (Valve, Discord, NZXT, Rivatuner) could agree on an informal coordination protocol — a set of shared rules for how their DLL hooks interact with each other and with the game's present calls.
+
+This could include timing conventions (waiting a set number of frames after boot before hooking), mutual awareness signals (checking if another overlay has already hooked a function), and priority hierarchies (monitoring tools yield to game overlays, which yield to the game itself).
+
+This would not solve the structural problem — DLL injection would remain the method, and rogue overlays that ignore the protocol could still cause conflicts. But it would significantly reduce the collision frequency among the major players that cause most of the issues users experience. A practical improvement while the architectural solution is developed.
+
+### 4. Combined Approach
+
+The most robust long-term solution likely combines all three concepts: an official parallel swapchain architecture providing the front door, managed by an adaptive controller that coordinates access and enforces isolation, with an interim coordination protocol bridging the gap during the transition period.
+
+---
+
+## Why This May Matter Increasingly
+
+If the observation is correct, the problem is likely intensifying rather than resolving. Each generation adds more complexity to the presentation layer: frame generation technologies (DLSS, FSR, AFMF) add synthetic frames to the swapchain, HDR (High Dynamic Range) requires tone mapping in the display pipeline, VRR (Variable Refresh Rate) requires dynamic timing negotiation, ray tracing and path tracing increase GPU load and reduce the margin for software conflicts, and the overlay ecosystem continues to grow with each new launcher, monitoring tool, and communication platform.
+
+More powerful hardware provides more headroom but does not address a structural coordination problem. If the issue is that consumers bypass the arbiter because no official channel exists, faster hardware only delays the collision — it doesn't prevent it. The pipe is faster, but it still has no gate.
+
+Technologies like DLSS, Frame Generation, and Reflex optimize performance within the existing presentation architecture — they make frames render faster, add synthetic frames to the pipeline, and reduce input latency. These are valuable engineering achievements. But they operate above the coordination layer, not within it. They make the water flow faster through the pipe; they do not add gates to manage who accesses the pipe. The structural gap remains, masked by headroom rather than resolved by design.
+
+---
+
+## About This Document
+
+This analysis originates from pattern recognition applied to real-world experience. I am not a kernel developer, driver engineer, or OS architect. I am someone who experienced these problems firsthand, noticed they weren't as unrelated as they appeared, and traced what seems to be their common source.
+
+The swapchain bottleneck hypothesis emerged in April 2026 during analysis of unexplainable frame-halving in Rage 2. It was reinforced in July 2026 when an overlay race condition produced a cascade failure that crashed the system — tracing back to the same presentation layer I had identified months earlier as a likely source of problems. The analysis was subsequently refined through technical peer review, which strengthened the precision of the claims and added context about the existing coordination mechanisms and their limitations. The DMA violation data, state transition analysis, MPO workaround connection, and cross-vendor confirmation were added in v6 based on crash dump forensics and continued investigation. In v7, every external claim was re-verified against primary sources: the crash-dump interpretation was corrected against Microsoft's official bugcheck documentation (Parameter 0x26 is documented as an IOMMU-detected DMA violation — a finding that strengthens the buffer-lifetime interpretation), the GPU-side nature of the ILLEGAL_OPCODE exception was clarified, and version numbers, dates, and hardware capabilities were corrected where the record required it.
+
+The proposed directions were conceived as architectural concepts — starting points for those with the technical capability to evaluate and potentially implement them.
+
+This document is published as prior art. The ideas and observations described herein are placed in the public record with the date above.
+
+---
+
+## Sources
+
+**Microsoft documentation:**
+- [Bug Check 0xE6: DRIVER_VERIFIER_DMA_VIOLATION](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/bug-check-0xe6--driver-verifier-dma-violation) — parameter table including 0x26 ("IOMMU detected DMA violation") and the note that 0xE6 can occur without Driver Verifier enabled
+- [DMA Verification](https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/dma-verification) — the built-in DMA verification mechanism behind Verifier-less 0xE6 bugchecks
+- [What's new for Windows 11 display and graphics drivers](https://learn.microsoft.com/en-us/windows-hardware/drivers/display/what-s-new-for-windows-11-display-and-graphics-drivers) — WDDM version history (3.0 → 3.2)
+- [Multiplane overlay support](https://learn.microsoft.com/en-us/windows-hardware/drivers/display/multiplane-overlay-support) — official MPO driver documentation
+
+**Vendor material:**
+- [NVIDIA Knowledge Base a_id/5157](https://nvidia.custhelp.com/app/answers/detail/a_id/5157) — official .reg files to disable/restore MPO, published early 2021 alongside driver 461.09, still maintained in 2026
+- [Linux kernel amdgpu documentation: Multiplane Overlay](https://docs.kernel.org/gpu/amdgpu/display/mpo-overview.html) — AMD's own description of MPO mechanics and hardware plane limits
+
+**Community documentation & technical analysis:**
+- [guru3D: Disabling MPO can improve flicker/stutter issues](https://forums.guru3d.com/threads/disabling-mpo-multiplace-overlay-can-improve-some-desktop-apps-flicker-or-stutter-issues.445266/) — AMD-posted thread confirming cross-vendor symptoms and the Radeon Setup Tool MPO toggle
+- [guru3D: Multiplane overlay issues](https://forums.guru3d.com/threads/multiplane-overlay-issues.443121/) — user reports of MPO MaxPlanes values (dxdiag) and silent MPO fallback conditions
+- [Neowin: WDDM 3.2 may bring fewer graphics driver crashes](https://www.neowin.net/news/thanks-to-microsofts-wddm-32-windows-11-24h2-may-get-fewer-graphics-driver-crashes/) — WDDM 3.2's improved TDR debugging
+- [Fred Emmott: In-Game Overlays — How They Work](https://fredemmott.com/blog/2022/05/31/in-game-overlays.html) — technical breakdown of overlay injection and hooking mechanisms
+
+---
+
+*© 2026 Dante. Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) — free to distribute and reference with attribution.*
+
+```
