@@ -101,6 +101,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [binaryninja-pcode](entities/binaryninja-pcode.md) — BN ↔ Ghidra Sleigh/p-code bridge (experimental LLIL; Binary Ninja Plugins)
 - [binja-kc](entities/binja-kc.md) — Binary Ninja MachO kernelcache / KDK dSYM loader
 - [BinCon](entities/bincon.md) — VEH + PAGE_NOACCESS hardened console sample (AC page protection)
+- [binprotect](entities/binprotect.md) — x64 PE bin2bin obfuscator (no new section; BB rewrite; AC Obfuscation Engine)
 - [BloatedHammer](entities/bloatedhammer.md) — C++20 fold API hammering (no loops; AC Compile Time)
 - [bn-ebpf-solana](entities/bn-ebpf-solana.md) — Binary Ninja Solana eBPF/SBF disasm + decompile (Cheat Binary Ninja Plugins)
 - [BOOM](entities/boom.md) — hijack Beep.sys; stealth driver communication

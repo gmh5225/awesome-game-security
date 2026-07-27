@@ -1448,3 +1448,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-27** — ingest `description:noahware/darken-anticheat`: entity [[darken-anticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
+- **2026-07-27** — ingest `description:noahware/binprotect`: entity [[binprotect]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
