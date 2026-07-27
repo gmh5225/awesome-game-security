@@ -120,6 +120,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cet-research](entities/cet-research.md) — CET / shadow-stack research (C; Windows Security Features)
 - [checkhv_um](entities/checkhv-um.md) — user-mode HV detection (CPUID / RDTSC / VMCS / signatures)
 - [cheese](entities/cheese.md) — Quest 3/3S root via Adreno CVE-2025-21479 (Magisk, no boot rewrite)
+- [cheat-driver](entities/cheat-driver.md) — MmCopyVirtualMemory KM test driver (AC stress / cross-process R/W)
 - [Classroom](entities/classroom.md) — x64dbg OOP class docs (member funcs/vars; Cheat x64dbg Plugins)
 - [CoBRA](entities/cobra.md) — Trail of Bits MBA expression simplifier (C++; Cheat Mixed boolean-arithmetic)
 - [CmdT](entities/cmdt.md) — TrustedInstaller token launcher (x86/x64 asm; TI ACL / RE forensics)
