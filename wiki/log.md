@@ -1450,3 +1450,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-27** — ingest `description:noahware/binprotect`: entity [[binprotect]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
+- **2026-07-27** — ingest `description:noahware/apic`: entity [[apic]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
