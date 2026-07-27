@@ -1417,3 +1417,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/reverse-engineering]] (Cheat ~2593 / Anti Cheat ~616; OpenGL/Vulkan counts + platform emulator cats on game-hacking); light `index.md` section notes (no per-category pages).
 
 - **2026-07-27** — ingest `description:notpresident35/learn-awesome-gamedev`: entity [[learn-awesome-gamedev]]; cited on [[overviews/overview]] and [[overviews/game-engine]].
+
+- **2026-07-27** — ingest `description:notpidgey/ManyTypes`: entity [[manytypes]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].
