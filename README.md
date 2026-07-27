@@ -1810,6 +1810,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/advanced-threat-research/GhidraScripts [Some scripts]
 - https://github.com/fuzzypickles14/BetterStringAnalyzer [A better string analyzer for Ghidra]
 - https://github.com/clearbluejar/ghidriff [Python Command-Line Ghidra Binary Diffing Engine]
+- https://github.com/MISP/bsimvis [Ghidra BSim-based binary similarity, function diffing, and family clustering with API and web UI]
 - https://github.com/Katharsas/ghidra-struct-importer [Struct Importer]
 - https://github.com/danielplohmann/gui-plugin-template [A template for cross-compatible GUI plugins]
 - https://github.com/astrelsky/GhidraGradlePlugin [Gradle]
@@ -4097,6 +4098,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/enis1enis2/Windfall-AntiCheat [Open-source Minecraft Spigot/Paper/Folia packet-based anti-cheat with combat/movement/inventory checks]
 - https://github.com/StelGR/ArrowAntiCheat [Open-source Minecraft Java/Bedrock packet-based anti-cheat with combat and movement checks]
 - https://github.com/XuanXuan-ZhengGui/Minecraft-Anti-Cheat [Open-source Minecraft Spigot/Paper anti-cheat with combat/movement detections and confidence scoring]
+- https://github.com/cklsit/AdvancedAntiCheat [Minecraft Spigot/Paper anti-cheat plugin with flight/speed checks, client inspection, and ban sync]
 - https://github.com/Visual1mpact/Paradox_AntiCheat [Open-source anti-cheat for Minecraft Bedrock (Realms/BDS)]
 - https://github.com/oomph-ac/oomph [Minecraft Bedrock MiTM anti-cheat proxy with server-authoritative movement and combat]
 - https://github.com/somewhatpublicacc/wellsanticheat [Among Us host-side BepInEx anti-cheat for RPC abuse, crashers, spam, and lobby cheats]
@@ -4123,6 +4125,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Anticheat-android-cheap-engine [Sample implementation of anti-cheat in android]
 - [Proof of concept Anti-Cheat plugin for CS:GO](https://github.com/ekknod/CSGO-AC)
 - https://github.com/Pintuzoft/OSAntiCheat [Server-side CS2 CounterStrikeSharp heuristic anti-cheat (spinbot/aimbot/triggerbot/wallhack detectors, log-only)]
+- https://github.com/karola3vax/CS2AC [Open-source server-side CS2 anti-cheat Metamod:Source plugin with aimbot/aimlock/silentaim and related detections]
 - [Deep Learning Anti-Cheat For CSGO](https://github.com/LaihoE/DLAC)
 - [Deep Learning Anti-Cheat For CSGO](https://github.com/gmh5225/anti-cheat)
 - https://github.com/jnastarot/anti-cheat
