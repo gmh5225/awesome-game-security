@@ -161,6 +161,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [data-ptr-swap](entities/data-ptr-swap.md) — NtSetCompositionSurfaceAnalogExclusive kernel channel (C/C++)
 - [DataPtrHookWin11](entities/dataptrhookwin11.md) — NtUserSetGestureConfig Win11 data-ptr hook (driver communication)
 - [Dainsleif](entities/dainsleif.md) — simple internal CS:GO cheat (RE training; cheat / game:csgo)
+- [Darken Anti-Cheat](entities/darken-anticheat.md) — kernel AC PoC (driver comm / integrity / sigscan / debugger / overlay; C/C++)
 - [darksword-kexploit-fun](entities/darksword-kexploit-fun.md) — DarkSword kernel r/w playground (iOS 17.0–26.0.1; sandbox/SSV/PAC; ObjC/C)
 
 - [DayZzz](entities/dayzzz.md) — DayZ cheat/modding: SDK generation + overlays (C/C++)

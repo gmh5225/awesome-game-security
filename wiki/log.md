@@ -1446,3 +1446,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-27** — ingest `description:noahware/hyper-reV`: entity [[hyper-rev]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
+- **2026-07-27** — ingest `description:noahware/darken-anticheat`: entity [[darken-anticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
