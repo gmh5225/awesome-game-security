@@ -1425,3 +1425,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:notgoodusename/OsirisAndExtra`: entity [[osiris-and-extra]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-07-27** — ingest `description:not1cyyy/Kiroshi`: entity [[kiroshi]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
+
+- **2026-07-27** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/graphics-api]], [[overviews/reverse-engineering]] (Cheat ~2594 / DirectX ~35; Anti Cheat ~616 / Game Engine ~149 / Game Develop ~182 stable); light `index.md` section notes (no per-category pages).
