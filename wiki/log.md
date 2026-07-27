@@ -1391,3 +1391,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:nzcv/note`: entity [[note]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-27** — ingest `description:nyx-fuzz/QEMU-Nyx`: entity [[qemu-nyx]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-27** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]] (Anti Cheat ~614; Cheat ~2592 / Game Engine ~149 / Game Develop ~182 / DirectX ~34 stable); light `index.md` section notes (no per-category pages).
