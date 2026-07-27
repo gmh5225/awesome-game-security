@@ -1395,3 +1395,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]] (Anti Cheat ~614; Cheat ~2592 / Game Engine ~149 / Game Develop ~182 / DirectX ~34 stable); light `index.md` section notes (no per-category pages).
 
 - **2026-07-27** — ingest `description:talsec/Free-RASP-Capacitor`: entity [[free-rasp-capacitor]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
+- **2026-07-27** — ingest `description:nxrighthere/UnrealCLR`: entity [[unrealclr]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
