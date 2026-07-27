@@ -301,6 +301,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Il2CppRuntimeDumper](entities/il2cpp-runtime-dumper.md) — IL2CPP runtime dump via reflection (reconstruct DLLs; cheat / game engine explorer:Unity)
 - [Il2cppSpy](entities/il2cpp-spy.md) — Unity IL2CPP APK disassembler / two-APK diff
 - [ilhook-rs](entities/ilhook-rs.md) — Rust x86 HOOK (function intercept → user handlers; cheat / hook)
+- [Dear ImGui](entities/imgui.md) — bloat-free immediate-mode C++ GUI (DX/GL/Vulkan/Metal; overlays / tool UIs / cheat menus)
 - [imgui_club](entities/imgui-club.md) — official Dear ImGui extensions (hex mem editor / multi-context / threaded draw)
 - [imgui-ios-mod-menu](entities/imgui-ios-mod-menu.md) — iOS ImGui mod menu (cheat / render-draw)
 - [Imgui-Native-ModMenu](entities/imgui-native-modmenu.md) — Android native ImGui mod menu (OpenGL ES + JNI; cheat / Menu for Android)
