@@ -394,6 +394,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [netImgui](entities/netimgui.md) — Dear ImGui remote access (input + draw-command forward; engine/plugin UI)
 - [Non-Newtonian New York](entities/non-newtonian-new-york.md) — Spider-Man Remastered non-Newtonian fluid/physics mod (urban destruction; [Mod])
 - [NO_ACCESS_Protection](entities/no-access-protection.md) — PAGE_NOACCESS + VEH / single-step anti-tamper (vs external scanners)
+- [note](entities/note.md) — Chinese Android File Explorer guide (Guide-zh; Cheat Android File Explorer)
 - [NoVmpy](entities/novmpy.md) — Python VMProtect deobf (symbolic exec / Triton; Fix VMP)
 - [NvidiaApi](entities/nvidiaapi.md) — undocumented NvAPI GPU serial / board fingerprint (HWID research)
 - [Nvidia-GPU-Spoof](entities/nvidia-gpu-spoof.md) — NVIDIA GPU UUID spoof via `nvlddmkm.sys` (Cheat HWID)
