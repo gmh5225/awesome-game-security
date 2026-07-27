@@ -436,6 +436,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ophion](entities/ophion.md) — stealth Intel VT-x Type-2 HV (EPT; CPUID/CR4/TSC anti-detect)
 - [Orkige](entities/orkige.md) — C++20 OGRE/Ogre-Next engine (Lua hot-reload; ImGui; desktop/mobile/Wasm; Game Engine)
 - [orx](entities/orx.md) — portable data-driven 2D C/C++ engine (Game Engine / source)
+- [OsirisAndExtra](entities/osiris-and-extra.md) — Internal CS:GO: driver / OpenGL / rendering (C/C++; cheat / game:csgo)
 - [osu!](entities/osu.md) — open-source C# rhythm game (osu!framework; Game Develop / source)
 - [osu!framework](entities/osu-framework.md) — C# 2D game framework (drawable / OpenGL / input·audio·UI; Game Engine)
 - [owned_alignment](entities/owned-alignment.md) — abusing Alignment (C++; kernel driver/hook; cheat / HWID)
