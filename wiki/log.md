@@ -1397,3 +1397,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:talsec/Free-RASP-Capacitor`: entity [[free-rasp-capacitor]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
 
 - **2026-07-27** — ingest `description:nxrighthere/UnrealCLR`: entity [[unrealclr]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
+
+- **2026-07-27** — ingest `description:null-luo/btrace`: entity [[btrace]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].

@@ -107,6 +107,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BootBypass](entities/bootbypass.md) — Secure Boot / DSE / HVCI bypass (native; SeCiCallbacks / CI.dll)
 - [BootExecuteEDR](entities/bootexecute-edr.md) — bootExecute EDR bypass (pre-service; cheat / hide)
 - [boundcallback](entities/boundcallback.md) — KeRegisterBoundCallback research (C++; cheat / driver communication)
+- [btrace](entities/btrace.md) — Android app dynamic behavior tracking via eBPF (C/C++/Go; cheat / RE tools)
 - [BusterCall](entities/bustercall.md) — enumerate/patch kernel callbacks; HVCI PFN-swap research
 
 - [byvalver](entities/byvalver.md) — shellcode bad-byte banisher (2 modes; AC shellcode engine & tricks)
