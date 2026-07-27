@@ -131,6 +131,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/SourceEngine2007
 - https://github.com/nillerusr/source-engine
 - https://github.com/gmh5225/GoldSourceRebuild [GoldSource engine rebuild]
+- https://github.com/K0bin/SourceRenderer [Rust toy engine/renderer with Valve Source format loaders (bsp/mdl/vpk/vtf) and Vulkan/Metal/WebGPU backends]
 - https://github.com/adriengivry/Overload
 - https://github.com/gmh5225/GameEngine-MapleEngine
 - https://github.com/inanevin/LinaEngine
@@ -151,6 +152,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/FyroxEngine/Fyrox [Rust]
 - https://github.com/AmbientRun/Ambient [Rust]
 - https://github.com/PrograMistV1/ursus [Rust Vulkan engine with render graph, ECS, asset pipeline, and deferred pipelines]
+- https://github.com/matthewjberger/nightshade [Rust data-oriented game engine with custom ECS and wgpu PBR renderer (native/web/VR)]
 - https://github.com/not-fl3/macroquad [Rust 2D]
 - https://github.com/AbyssEngine/AbyssEngine [ARPG]
 - https://github.com/skylicht-lab/skylicht-engine
@@ -4667,6 +4669,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 ## Nintendo 3DS
 - https://github.com/Hydr8gon/3Beans [Low-level (LLE) 3DS emulator: full OS boot, boot9/boot11/nand dumps, software/hardware GPU rendering]
+- https://github.com/samaBR85/CTRComposer [Raw .3gx overlay/cheat plugin engine for Luma3DS with self-rendered UI and cheat-search template]
+- https://github.com/samaBR85/OcarinaCTRComposer [OoT3D cheat/tools overlay on CTRComposer with memory search, hex editor, and RAM dump]
 
 ## Nintendo Switch
 - https://github.com/yuzu-mirror
