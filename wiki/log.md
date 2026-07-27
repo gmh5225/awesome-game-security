@@ -1423,3 +1423,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:nothings/stb`: entity [[stb]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
 
 - **2026-07-27** — ingest `description:notgoodusename/OsirisAndExtra`: entity [[osiris-and-extra]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-27** — ingest `description:not1cyyy/Kiroshi`: entity [[kiroshi]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
