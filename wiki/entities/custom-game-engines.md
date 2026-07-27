@@ -4,7 +4,7 @@ kind: entity
 topics: [game-engine, graphics-api]
 sources:
   - wiki/sources/descriptions/raysan5__custom_game_engines.md
-updated: 2026-07-25
+updated: 2026-07-27
 confidence: medium
 ---
 
@@ -20,4 +20,4 @@ Useful survey index beside other engine-dev guides and OSS engine trees elsewher
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/graphics-api]] · [[awesome-game-engine-dev]] · [[raylib]] · [[metal-game-engine-tutorial]] · [[exengine]]
+[[overviews/game-engine]] · [[overviews/graphics-api]] · [[awesome-game-engine-dev]] · [[raylib]] · [[metal-game-engine-tutorial]] · [[exengine]] · [[engine-showcase]]
