@@ -1452,3 +1452,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-27** — ingest `description:noahware/apic`: entity [[apic]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
+- **2026-07-27** — ingest `description:nneonneo/Il2CppVersions`: entity [[il2cpp-versions]]; cited on [[il2cpp]] and [[overviews/game-engine]].
+
