@@ -1405,3 +1405,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:ntfargo/CSSFontFace-Exploit`: entity [[cssfontface-exploit]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-07-27** — ingest `description:nqntmqmqmb/xorPacker`: entity [[xorpacker]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-27** — ingest `description:nowsprinting/UnityAutomatedQAExamples`: entity [[unity-automated-qa-examples]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
