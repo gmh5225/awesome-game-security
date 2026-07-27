@@ -1429,3 +1429,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/graphics-api]], [[overviews/reverse-engineering]] (Cheat ~2594 / DirectX ~35; Anti Cheat ~616 / Game Engine ~149 / Game Develop ~182 stable); light `index.md` section notes (no per-category pages).
 
 - **2026-07-27** — ingest `description:not-matthias/Nemesis`: entity [[nemesis]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
+- **2026-07-27** — ingest `description:not-fl3/macroquad`: entity [[macroquad]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].

@@ -370,6 +370,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [luagenny](entities/luagenny.md) — C++ Lua SDK codegen (cheat / sdk codegen; RE)
 - [LuaMachine](entities/luamachine.md) — UE4 Lua gameplay scripting plugin (Blueprint assets / metatables; Plugins:Unreal)
 - [Lua-Obfuscator-Clyde-Protection](entities/lua-obfuscator-clyde-protection.md) — Luau/Lua VM obfuscator (AST + stack/register VM; Roblox script protection)
+- [macroquad](entities/macroquad.md) — Rust 2D game lib (shaders / render / audio; Game Engine / source)
 - [Magnetite](entities/magnetite.md) — Rust self-hostable Wasm game platform (deterministic replay AC / magnetite-anticheat)
 - [Magisk](entities/magisk.md) — Android systemless root (su daemon / modules / MagiskHide)
 - [magiskboot](entities/magiskboot.md) — Boot Image Modification Tool (C/C++; Cheat Magisk)
