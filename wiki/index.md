@@ -639,6 +639,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vermagic](entities/vermagic.md) — change Linux LKM vermagic / CRCs (cheat / RE tools)
 - [vmdevirt-vtil](entities/vmdevirt-vtil.md) — broken VTIL VMP devirt demo (Fix VMP / IDA jmp-around-vmenter)
 - [VMDragonSlayer](entities/vmdragonslayer.md) — VM detection/analysis framework (DTT / SE / ML; Cheat RE Tools)
+- [VMPStatic](entities/vmpstatic.md) — static Go VMProtect PE unpacker (VMP 1.x–3.x rebuild; Fix VMP / Unpacker)
 - [VMPUnpacker](entities/vmpunpacker.md) — VMProtect PE unpacker (C++/Python; LZMA → sections/IAT; Fix VMP / Unpacker)
 - [VMUnprotect](entities/vmunprotect.md) — .NET Harmony instrument VMProtect methods (trace / anti-debug; Fix VMP)
 - [VMUnprotect.Dumper](entities/vmunprotect-dumper.md) — dynamic .NET VMProtect unpack/dump (AsmResolver; Fix VMP)
