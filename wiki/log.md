@@ -1389,3 +1389,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:oakboat/DataPtrHookWin11`: entity [[dataptrhookwin11]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-07-27** — ingest `description:nzcv/note`: entity [[note]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-27** — ingest `description:nyx-fuzz/QEMU-Nyx`: entity [[qemu-nyx]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
