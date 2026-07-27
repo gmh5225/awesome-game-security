@@ -1443,3 +1443,6 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:nodiuus/nocturne`: entity [[nocturne]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-27** — ingest `description:noahware/winbo`: entity [[winbo]]; cited on [[present-hook]] and [[overviews/graphics-api]].
+
+- **2026-07-27** — ingest `description:noahware/hyper-reV`: entity [[hyper-rev]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+

@@ -275,6 +275,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hl-mods](entities/hl-mods.md) — Half-Life / GoldSrc mods (Cold Ice Remastered + historical; Modification For Half-Life)
 - [hidden_syscall_monitoring](entities/hidden-syscall-monitoring.md) — monitor hidden syscalls from COD anticheat (C/C++; hooking / memory)
 - [hook-buster](entities/hook-buster.md) — C/Python Detection:hook research (hook integrity / bust; Anti Cheat)
+- [hyper-reV](entities/hyper-rev.md) — Hyper-V memory introspection / RE (structures / hypercalls / partitions)
 - [Hypervisor-Detection](entities/hypervisor-detection.md) — C++ hacked-hypervisor detection (four techniques; Detection:HV)
 - [honor-of-kings-RE-research](entities/honor-of-kings-re-research.md) — Honor of Kings Android RE (ACE / libtersafe / IL2CPP / KernelPatch KPMs)
 - [HoudiniEngineForUnreal](entities/houdini-engine-for-unreal.md) — SideFX Houdini Engine UE plugin (HDAs / procedural workflow; Plugins:Unreal)
