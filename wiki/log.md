@@ -1439,3 +1439,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:nologic/idaref`: entity [[idaref]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-27** — ingest `description:xec412/NocturneLdr`: entity [[nocturneldr]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-27** — ingest `description:nodiuus/nocturne`: entity [[nocturne]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
