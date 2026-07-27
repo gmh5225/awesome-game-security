@@ -1456,3 +1456,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-27** — ingest `description:nmap/npcap`: entity [[npcap]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
+
+- **2026-07-27** — ingest `description:nlepleux/MappedCallback`: entity [[mapped-callback]]; cited on [[kernel-callbacks]] and [[overviews/windows-kernel]].

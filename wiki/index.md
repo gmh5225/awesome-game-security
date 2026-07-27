@@ -390,6 +390,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MapleStory Worlds Automation](entities/maplestory-worlds-automation.md) — YOLO automation for MapleStory Worlds / Artale (Python; cheat / game:maplestory)
 - [MapleStory-YOLOv8-Training](entities/maplestory-yolov8-training.md) — YOLOv8 MapleStory object-detection training (Apple MPS; Python; cheat / game:maplestory)
 - [MapleStoryEx](entities/maplestoryex.md) — MapleStory private server (CMS-079; custom content / server logic)
+- [MappedCallback](entities/mapped-callback.md) — hide kernel callback via APCI codecave JMP (cheat / Hide Callback)
 - [mcp-gdb](entities/mcp-gdb.md) — GDB MCP server (breakpoints / memory / registers / step; AI debug)
 - [mcp-windbg](entities/mcp-windbg.md) — CDB/WinDbg MCP server (dump triage + remote debug; Python)
 - [MemMCP](entities/memmcp.md) — Cheat Engine–like MCP server (Python; Game Develop / MCP)
