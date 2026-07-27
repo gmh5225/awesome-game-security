@@ -1407,3 +1407,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:nqntmqmqmb/xorPacker`: entity [[xorpacker]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-27** — ingest `description:nowsprinting/UnityAutomatedQAExamples`: entity [[unity-automated-qa-examples]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-27** — ingest `description:noword/GDB-Windows-Binaries`: entity [[gdb-windows-binaries]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].

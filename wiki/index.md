@@ -254,6 +254,8 @@ Compiled knowledge catalog for awesome-game-security.
 - [gamesneeze](entities/gamesneeze.md) — Linux CS:GO cheat research (seksea; cheat / game:csgo)
 - [gba-ghidra-loader](entities/gba-ghidra-loader.md) — Ghidra GBA ROM loader (memory/IO map + cartridge header; GameBoy)
 - [gdbserver9x](entities/gdbserver9x.md) — GDB RSP stub for 32-bit Win98SE/XP (VC6; Binary Ninja adapter)
+- [GDB-Windows-Binaries](entities/gdb-windows-binaries.md) — portable Windows GDB (mingw-w64; TUI/Python; Cheat Debugging)
+
 - [genmc](entities/genmc.md) — IDAPython Hex-Rays microcode IR viewer (decompiler-plugin debug; cheat / IDA Plugins)
 - [genpatch](entities/genpatch.md) — Python binary-patch script generator (dialog on success; cheat / IDA Plugins)
 - [genshin-impact-script](entities/genshin-impact-script.md) — TypeScript Genshin Impact script (cheat / game:genshin impact)
