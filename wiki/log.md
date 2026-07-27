@@ -1464,3 +1464,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:samaBR85/OcarinaCTRComposer`: entity [[ocarina-ctr-composer]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-07-27** — ingest `description:samaBR85/CTRComposer`: entity [[ctr-composer]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-link from [[ocarina-ctr-composer]].
+
+- **2026-07-27** — ingest `description:nkhmelni/Obscura`: entity [[obscura]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
