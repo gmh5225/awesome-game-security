@@ -1375,3 +1375,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:ocornut/imgui`: entity [[imgui]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
 
 - **2026-07-27** — ingest `description:obpo-project/obpo-plugin`: entity [[obpo-plugin]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-27** — ingest `description:obfusk/apksigcopier`: entity [[apksigcopier]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
