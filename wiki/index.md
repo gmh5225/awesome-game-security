@@ -228,6 +228,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fix-arxan](entities/fix-arxan.md) — Arxan PE protector dump/decrypt (loader info + working image; Dump Fix)
 - [FlatRedBall](entities/flatredball.md) — C# / .NET 2D engine (editor + runtime; Game Engine)
 - [FPGA DMA Multi Tool](entities/fpga-dma-multi-tool.md) — Artix-7 FPGA DMA board detect/flash/speedtest (Go/Fyne; openFPGALoader)
+- [frida-android-hook](entities/frida-android-hook.md) — Frida class/function trace + return-value modify (cheat / Frida)
 - [frida-il2cpp-bridge](entities/frida-il2cpp-bridge.md) — Frida dump Il2Cpp (Unity 5.3–6000.1.x; game engine explorer:Unity)
 - [Frida-Scripts](entities/frida-scripts.md) — Frida JS/Python scripts (editor tooling / hooking; cheat / Frida)
 - [frida-stack](entities/frida-stack.md) — Frida stack/backtrace helpers (cheat / Frida)
