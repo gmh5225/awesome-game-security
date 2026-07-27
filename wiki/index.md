@@ -552,6 +552,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [simpleperf_demo](entities/simpleperf-demo.md) — Android simpleperf / Perf demo (app profiling)
 
 - [Static-Variables-Obfuscator-UE4](entities/static-variables-obfuscator-ue4.md) — UE4 static-variable obfuscation vs memory scanners
+- [stb](entities/stb.md) — single-header public-domain C libs (stb_image / truetype / vorbis; Image Codec)
 - [SteamAntiAntiDebug](entities/steam-anti-anti-debug.md) — bypass Steam anti-debug for debugger attach (x64dbg; Steam)
 - [steam-overlay-x64](entities/steam-overlay-x64.md) — Steam overlay / modding research (C; memory analysis)
 - [Storm Engine](entities/storm-engine.md) — Akella Sea Dogs/PotC C++ engine (DX9 / physics / scripting; Game Engine source)

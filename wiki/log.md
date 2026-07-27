@@ -1419,3 +1419,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:notpresident35/learn-awesome-gamedev`: entity [[learn-awesome-gamedev]]; cited on [[overviews/overview]] and [[overviews/game-engine]].
 
 - **2026-07-27** — ingest `description:notpidgey/ManyTypes`: entity [[manytypes]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].
+
+- **2026-07-27** — ingest `description:nothings/stb`: entity [[stb]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
