@@ -418,6 +418,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NocturneLdr](entities/nocturneldr.md) — CET-compatible Win x64 shellcode loader (fully backed stacks; Spoof Stack)
 - [note](entities/note.md) — Chinese Android File Explorer guide (Guide-zh; Cheat Android File Explorer)
 - [NoVmpy](entities/novmpy.md) — Python VMProtect deobf (symbolic exec / Triton; Fix VMP)
+- [Npcap](entities/npcap.md) — Windows packet capture/inject (Nmap; WinPcap successor; Packet Capture&Parse)
 - [NvidiaApi](entities/nvidiaapi.md) — undocumented NvAPI GPU serial / board fingerprint (HWID research)
 - [Nvidia-GPU-Spoof](entities/nvidia-gpu-spoof.md) — NVIDIA GPU UUID spoof via `nvlddmkm.sys` (Cheat HWID)
 - [ntfs-linker](entities/ntfs-linker.md) — NTFS $MFT/$UsnJrnl/$LogFile timeline correlator (C++; DFIR)

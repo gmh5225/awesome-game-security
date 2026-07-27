@@ -1454,3 +1454,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-27** — ingest `description:nneonneo/Il2CppVersions`: entity [[il2cpp-versions]]; cited on [[il2cpp]] and [[overviews/game-engine]].
 
+- **2026-07-27** — ingest `description:nmap/npcap`: entity [[npcap]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
