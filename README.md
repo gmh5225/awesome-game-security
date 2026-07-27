@@ -1430,6 +1430,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Poko-Apps/MemKernel [RPM]
 - https://github.com/libtersafe/KPM-MemReader [KPM kernel module, cross-process memory read via ioctl hook; KernelPatch/APatch]
 - https://github.com/kkkbbb/mkpms [wxshadow — KPM stealth probe/hook, R^X page split so read sees original code while exec uses shadow; KernelPatch/APatch]
+- https://github.com/Dispa1r/Integrated_kernel_module [Android ARM64 kernel module (lsdriver + wxshadow) + Zygisk injector for game RE — PTE-remap/AT S1E0R memory R/W, W^X shadow-page stealth breakpoints, HW/PTE/single-step breakpoints, do_el0_svc syscall monitor, virtual touch/gyro/GNSS; ptrace-less ELF-linker injection]
 
 > Android Network Explorer
 - https://github.com/emanuele-f/PCAPdroid
