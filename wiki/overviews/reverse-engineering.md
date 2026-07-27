@@ -236,7 +236,7 @@ sources:
   - wiki/sources/descriptions/oxiKKK__ida-vtable-tools.md
   - wiki/sources/descriptions/oxiKKK__oxware.md
   - wiki/sources/descriptions/originsec__pocsmith.md
-updated: 2026-07-26
+updated: 2026-07-27
 confidence: high
 ---
 
@@ -286,4 +286,4 @@ Workflows for protected game clients and anti-cheat components across user mode,
 
 ## README map
 
-Cheat (~2590) Debugging / RE Tools (game file-format/asset reversing lists + Ghidra install/plugin managers) / Mixed boolean-arithmetic / DBI / Fix VMP|Themida|OLLVM (plus IDA/BN/Ghidra/x64dbg plugin ecosystems); Anti Cheat Anti Debugging / Disassembly / Dump Fix / Binary Packer; adjacent `Windows Emulator` (~7; user-space + WHP trap-driven guests + hybrid kernel-driver emulation for rootkit/AC RE), `Linux Emulator` (~1), and console cats (`Xbox` ~7 / `Game Boy` ~3 / Switch ~7 / `PlayStation` ~6 HV+BD-JB RemoteJarLoader / WebKit CSSFontFace / `Nintendo 3DS` ~1 LLE / `GameCube/Wii` ~1 Rust gecko) for binary-translation, hypervisor, and hardware-abstraction RE. (source: wiki/sources/README-categories.md)
+Cheat (~2591) Debugging / RE Tools (game file-format/asset reversing lists + Ghidra install/plugin managers) / Mixed boolean-arithmetic / DBI / Fix VMP|Themida|OLLVM (plus IDA/BN/Ghidra/x64dbg plugin ecosystems); Anti Cheat Anti Debugging / Disassembly / Dump Fix / Binary Packer; adjacent `Windows Emulator` (~7; user-space + WHP trap-driven guests + hybrid kernel-driver emulation for rootkit/AC RE), `Linux Emulator` (~1), and console cats (`Xbox` ~7 / `Game Boy` ~3 / Switch ~7 / `PlayStation` ~6 HV+BD-JB RemoteJarLoader / WebKit CSSFontFace / `Nintendo 3DS` ~1 LLE / `GameCube/Wii` ~1 Rust gecko) for binary-translation, hypervisor, and hardware-abstraction RE. (source: wiki/sources/README-categories.md)

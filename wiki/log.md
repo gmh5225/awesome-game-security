@@ -1367,3 +1367,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:ofDataa/offsets`: entity [[offsets]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-27** — ingest `description:ocornut/imgui_club`: entity [[imgui-club]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
+
+- **2026-07-27** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2591; Anti Cheat ~613 / Game Engine ~149 / Game Develop ~182 / DirectX ~34 stable); light `index.md` section notes (no per-category pages).
