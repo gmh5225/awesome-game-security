@@ -1458,3 +1458,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 
 - **2026-07-27** — ingest `description:nlepleux/MappedCallback`: entity [[mapped-callback]]; cited on [[kernel-callbacks]] and [[overviews/windows-kernel]].
+
+- **2026-07-27** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/game-engine]], [[overviews/game-hacking]], [[overviews/reverse-engineering]] (Game Engine ~151; Nintendo 3DS ~3 LLE + Luma overlays; Cheat ~2594 / Anti Cheat ~616 / Game Develop ~182 / DirectX ~35 stable); light `index.md` section notes (no per-category pages).

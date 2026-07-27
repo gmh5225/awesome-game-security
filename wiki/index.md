@@ -6,14 +6,14 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Overviews
 
-- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2594 / Anti Cheat ~616; Game Engine ~149 + Mathematics ~7 / Renderer ~17; DirectX ~35 / OpenGL ~3 / Vulkan ~9; Game Develop ~182 MCP/security; Game Network ~26; console Switch~7/Xbox~7/PS~7 + 3DS/GC·Wii)
+- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2594 / Anti Cheat ~616; Game Engine ~151 + Mathematics ~7 / Renderer ~17; DirectX ~35 / OpenGL ~3 / Vulkan ~9; Game Develop ~182 MCP/security; Game Network ~26; console Switch~7/Xbox~7/PS~7 + 3DS~3/GC·Wii)
 - [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* (triggerbot & aimbot/wallhack) + page/CLR protection (~616); hybrid OS AC; Game Tools RCE + Windows Emulator AC
 - [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2594) / Detection:DMA (~616) + WSF attestation
-- [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~149); Mathematics/PhysX/Renderer (~17) adjacency; MCP server/security + AI gamedev (~182); Game Network ~26; Game Assets ~11 + Image Codec + Manager/Testing/Tools/CI
-- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2594) + Some Tricks (~113); Android Terminal (ADB/root/shell)/File/Memory Explorer; WSA/Android/iOS/Windows Emulator lanes; console PS HV+BD-JB / WebKit CSSFontFace / PSFree / 3DS LLE / GC·Wii
+- [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~151); Mathematics/PhysX/Renderer (~17) adjacency; MCP server/security + AI gamedev (~182); Game Network ~26; Game Assets ~11 + Image Codec + Manager/Testing/Tools/CI
+- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2594) + Some Tricks (~113); Android Terminal (ADB/root/shell)/File/Memory Explorer; WSA/Android/iOS/Windows Emulator lanes; console PS HV+BD-JB / WebKit CSSFontFace / PSFree / 3DS~3 LLE+Luma overlays / GC·Wii
 - [Graphics API](overviews/graphics-api.md) — DirectX (~35) / GL / Vulkan hooks, overlays + shader capture/flatten; Renderer (~17) + Mathematics adjacency; Image Codec + AI mesh/splat/sprite
 - [Mobile Security](overviews/mobile-security.md) — Android / iOS; Terminal (ADB/root/shell)/File/Memory Explorer + App/Kernel CVE; WSA (~9), Gunyah/vphone emulators
-- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools (file-format/asset lists + Ghidra managers), MBA/DBI, deobfuscation, packers; Windows Emulator + console/PS BD-JB+WebKit/PSFree / 3DS/GC·Wii RE (~2594 Cheat / ~616 AC lanes)
+- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools (file-format/asset lists + Ghidra managers), MBA/DBI, deobfuscation, packers; Windows Emulator + console/PS BD-JB+WebKit/PSFree / 3DS~3/GC·Wii RE (~2594 Cheat / ~616 AC lanes)
 - [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation (~9), BYOVD, pool; Some Tricks Ring0 (~113); Windows Emulator (~7) + WSL
 
 ## Concepts
@@ -731,6 +731,6 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Sources
 
-- Projected category map: `sources/README-categories.md` (generated on scan; 40 top-level sections; Game Engine ~149 / Renderer ~17 / Cheat ~2594 / Anti Cheat ~616 / DirectX ~35 / Game Develop ~182 / Game Network ~26 / PlayStation ~7)
+- Projected category map: `sources/README-categories.md` (generated on scan; 40 top-level sections; Game Engine ~151 / Renderer ~17 / Cheat ~2594 / Anti Cheat ~616 / DirectX ~35 / Game Develop ~182 / Game Network ~26 / PlayStation ~7 / Nintendo 3DS ~3)
 - Skill projections: `sources/skills/`
 - Description projections: `sources/descriptions/` (incremental only)
