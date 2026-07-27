@@ -4687,6 +4687,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/cragson/a53-code-exec [PoC for code execution on a53 used by PS5 on fw 02.00]
 - https://github.com/Gezine/BD-UN-JB [BD-JB RemoteJarLoader for already-jailbroken PS5 (≤12.00); unpatch BD-J, ISO, network JAR load / logging]
 - https://github.com/ntfargo/CSSFontFace-Exploit [WebKit CSSFontFace UAF for PS4/PS5; PS4 6.00-11.02 (kernel chain 7.00-11.02); PS5 needs separate ASLR/vtable defeat; writeup: linearfox.com]
+- https://github.com/ArabPixel/PSFree-Enhanced [Feature-rich PS4 WebKit jailbreak exploit host — chains PSFree/Bad Hoist/CSSFontFace userland with Lapse/NetCtrl/sleirsgoevy kernel exploits (FW 6.00-11.02), auto fw/console detection, GoldHEN/HEN selector, payload loader on port 9020]
 
 
 ## Donate
