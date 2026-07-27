@@ -2499,6 +2499,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/HulkOperator/Spoof-RetAddr [Spoofing the return address of a WinAPI call by modifying the stack]
 - https://github.com/klezVirus/BYOUD [BYOUD is a framework for x64 stack spoofing on Windows. It tackles a complete opposite approach from classic stack spoofing, manipulating unwind metadata to hide arbitrary chunks of the call chain in debuggers and EDRs]
 - https://github.com/Sizeable-Bingus/BingusLdr [Crystal Palace DLL loader with CET-compatible stack spoofing, EAF-compatible API resolution, heap/image masking]
+- https://github.com/xec412/NocturneLdr [CET-compatible Windows x64 shellcode loader — fully backed call stacks via code-cave injection into signed module .text, RtlAddFunctionTable + inverted function table collapse, donor unwind metadata; CRT-free, DJB2 API hash, EAF/ShieldedRead, Zilean sleep obfuscation]
 
 > Hide
 - https://github.com/JKornev/hidden
