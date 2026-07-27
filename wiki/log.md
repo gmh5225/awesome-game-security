@@ -1411,3 +1411,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:noword/GDB-Windows-Binaries`: entity [[gdb-windows-binaries]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-27** — ingest `description:notsnakesilent/VMPStatic`: entity [[vmpstatic]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-27** — ingest `description:notscimmy/libelevate`: entity [[libelevate]]; cited on [[kernel-callbacks]] and [[overviews/anti-cheat]].
