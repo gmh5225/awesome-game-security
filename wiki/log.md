@@ -1365,3 +1365,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:ohchase/yaui`: entity [[yaui]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-27** — ingest `description:ofDataa/offsets`: entity [[offsets]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-27** — ingest `description:ocornut/imgui_club`: entity [[imgui-club]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
