@@ -14,9 +14,11 @@ sources:
   - wiki/sources/descriptions/rlybasic__DWM_Hook.md
   - wiki/sources/descriptions/oakboat__DisableNvidiaScreenshot.md
   - wiki/sources/descriptions/rdbo__DX11-BaseHook.md
+  - wiki/sources/descriptions/noahware__winbo.md
 updated: 2026-07-27
 confidence: high
 ---
+
 
 
 # Present Hook
@@ -33,6 +35,9 @@ VTable/code integrity on Present, call-stack analysis, known hook DLLs (`obs-gra
 
 [[present-hook-detection]] reconstructs a [[battleye]]-style check: dummy D3D11 swap chain → Present vtable pointer → compare prologue bytes to clean `dxgi.dll` for JMP patches or vtable overwrite. (source: wiki/sources/descriptions/weak1337__PresentHookDetection.md)
 
+Overlay-hijack detectors such as [[winbo]] parse dxgkrnl ETW Present events (caller PID vs window-owner PID) and scan the shared GDI handle table for foreign DCs—defensive Detection:Overlay research rather than Present prologue integrity. (source: wiki/sources/descriptions/noahware__winbo.md)
+
+
 Kernel graphics-subsystem hooks such as [[dxgkrnl-hook]] manipulate the screen buffer below the user-mode Present path—another overlay/draw surface for ESP-style research. (source: wiki/sources/descriptions/vmcall__dxgkrnl_hook.md)
 
 Kernel-mode GDI render frameworks such as [[krnl-gdi-render]] hook GDI drawing from Ring0 for overlays outside typical user-mode Present paths. (source: wiki/sources/descriptions/r1cky33__krnl-gdi-render.md)
@@ -43,4 +48,5 @@ DX11 stereoscopic-fix tooling such as [[3d9]] works in the same Present/swap-cha
 
 ## Related
 
-[[overviews/graphics-api]] · [[directxhook]] · [[dx11-basehook]] · [[present-hook-detection]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dwm-hook]] · [[disablenvidiascreenshot]] · [[dxgkrnl-hook]] · [[krnl-gdi-render]] · [[3d9]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[overviews/graphics-api]] · [[directxhook]] · [[dx11-basehook]] · [[present-hook-detection]] · [[winbo]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dwm-hook]] · [[disablenvidiascreenshot]] · [[dxgkrnl-hook]] · [[krnl-gdi-render]] · [[3d9]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+
