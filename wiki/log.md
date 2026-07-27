@@ -1435,3 +1435,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:noopstudios/interactive-feedback-mcp`: entity [[interactive-feedback-mcp]]; cited on [[overviews/overview]] and [[overviews/game-engine]].
 
 - **2026-07-27** — ingest `description:noobpk/frida-android-hook`: entity [[frida-android-hook]]; cited on [[frida]] and [[overviews/mobile-security]].
+
+- **2026-07-27** — ingest `description:nologic/idaref`: entity [[idaref]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
