@@ -1361,3 +1361,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:oobbb/android-il2cpp-modspeed`: entity [[android-il2cpp-modspeed]]; cited on [[il2cpp]] and [[overviews/mobile-security]].
 
 - **2026-07-27** — ingest `description:olafhartong/BamboozlEDR`: entity [[bamboozledr]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
+- **2026-07-27** — ingest `description:ohchase/yaui`: entity [[yaui]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].

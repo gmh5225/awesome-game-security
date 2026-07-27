@@ -676,6 +676,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [xqemu](entities/xqemu.md) — original Xbox via QEMU (software full-machine; Cheat QEMU/KVM lane)
 - [XrefsExt](entities/xrefsext.md) — IDA Pro extended-xrefs plugin (cheat / IDA Plugins)
 - [yarascan-ida](entities/yarascan-ida.md) — IDA Yara file scan plugin (Python; cheat / IDA Plugins)
+- [yaui](entities/yaui.md) — Rust Android inject / emulation research (cheat / injection:android)
 - [zelda3](entities/zelda3.md) — Zelda 3 reimplementation (playable start-to-end; Game Develop / source)
 - [ZeroThreadKernel](entities/zero-thread-kernel.md) — threadless kernel exec via existing contexts / timers (vs AC thread enum)
 - [zygisk-dump-dex](entities/zygisk-dump-dex.md) — Zygisk `libdexfile.so` DEX dump (Android 14/15; Cheat Magisk)
