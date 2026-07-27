@@ -403,6 +403,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [OFRP-device_xiaomi_mondrian](entities/ofrp-device-xiaomi-mondrian.md) — OFRP/TWRP device tree for Redmi K60 Pro (mondrian)
 - [Obfu-DE-Scate](entities/obfu-de-scate.md) — Python APK ProGuard/R8 deobf (name maps + HTML hierarchy; [Apk])
 - [obfCoder](entities/obfcoder.md) — C++ source/binary obfuscation tool (CMake / OpenSSL demos; AC Obfuscation Engine)
+- [Obfuscar](entities/obfuscar.md) — open-source .NET assembly obfuscator (rename/string hide; AC Obfuscation Engine)
 - [obfuscatxor](entities/obfuscatxor.md) — Go string crypter (encrypted string vars; AC Compile Time / String Crypter)
 - [Obfusk8](entities/obfusk8.md) — C++17 compile-time/runtime obfuscation library (AC Compile Time)
 - [obpo-plugin](entities/obpo-plugin.md) — IDA client + Go OBPO backend (closed core; open plugin; Fix OLLVM)
