@@ -1383,3 +1383,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2592; PlayStation ~7 PSFree host; Anti Cheat ~613 / Game Engine ~149 / Game Develop ~182 / DirectX ~34 stable); light `index.md` section notes (no per-category pages).
 
 - **2026-07-27** — ingest `description:obama-gaming/xor-float`: entity [[xor-float]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-link from [[encrypted-value]].
+
+- **2026-07-27** — ingest `description:oakboat/DisableNvidiaScreenshot`: entity [[disablenvidiascreenshot]]; cited on [[overviews/graphics-api]] and [[present-hook]].
