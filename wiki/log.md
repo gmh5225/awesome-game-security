@@ -1474,3 +1474,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nillerusr/source-engine`: entity [[source-engine]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
 
 - **2026-07-28** — ingest `description:nikaiw/VMkatz`: entity [[vmkatz]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-28** — ingest `description:nikaera/Unity-GameCI-Sample`: entity [[unity-gameci-sample]]; cited on [[overviews/game-engine]] and [[overviews/overview]].

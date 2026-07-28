@@ -631,6 +631,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [UniCli](entities/unicli.md) — Unity Editor terminal CLI (compile/test/build/inspect; AI-agent ready)
 - [UnityAutomatedQAExamples](entities/unity-automated-qa-examples.md) — Unity Automated QA Guidebook (docs/reference; Game Testing)
+- [Unity-GameCI-Sample](entities/unity-gameci-sample.md) — Unity Game CI sample (C#; build/release automation; Game CI)
 - [unity-mcp](entities/unity-mcp.md) — MCP server for Unity (Game Develop / MCP workflow)
 - [Unity-Cheat-Sheet](entities/unity-cheat-sheet.md) — Unity engine/API cheat sheet (Game Engine / guide)
 - [UnityExplorer](entities/unityexplorer.md) — runtime Unity inspector (BepInEx/MelonLoader; hierarchy/REPL; Mono+IL2CPP)
