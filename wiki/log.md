@@ -1516,3 +1516,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nettitude/Tartarus-TpAllocInject`: entity [[tartarus-tp-alloc-inject]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-07-28** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2597 / Anti Cheat ~617; Game Engine ~153 / DirectX ~35 / Game Develop ~182 stable); light `index.md` section notes (no per-category pages).
+
+- **2026-07-28** — ingest `description:nsharp-collab/AvAAntiCheat`: entity [[avaanticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
