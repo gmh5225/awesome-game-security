@@ -1490,3 +1490,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nico/demumble`: entity [[demumble]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-28** — ingest `description:nickcano/RelocBonus`: entity [[relocbonus]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-28** — ingest `description:nice-sprite/COD7-Tools`: entity [[cod7-tools]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
