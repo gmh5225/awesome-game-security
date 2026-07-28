@@ -12,7 +12,7 @@ confidence: medium
 
 Lumix Engine map-downloader plugin. Reads OpenStreetMap (OSM) data and places roads, buildings, and other objects into the engine—aimed at game developers, engine programmers, and graphics researchers in the Game Engine Plugins:Lumix lane, not a cheat or anti-cheat artifact. (source: wiki/sources/descriptions/nem0__lumixengine_maps.md)
 
-Sits beside other engine plugin / content-pipeline samples ([[houdini-engine-for-unreal]], [[luamachine]]): those cover Unreal DCC/scripting bridges; this repo is the OSM→scene map-import surface for Lumix. Adjacent OSM tooling such as [[traccar-geocoder]] is network/geocoding rather than engine world-gen.
+Sits beside other engine plugin / content-pipeline samples ([[houdini-engine-for-unreal]], [[luamachine]]): those cover Unreal DCC/scripting bridges; this repo is the OSM→scene map-import surface for Lumix ([[lumixengine]]). Adjacent OSM tooling such as [[traccar-geocoder]] is network/geocoding rather than engine world-gen.
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits beside other engine plugin / content-pipeline samples ([[houdini-engine-for
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/overview]] · [[houdini-engine-for-unreal]] · [[luamachine]] · [[traccar-geocoder]] · [[gddumper]]
+[[overviews/game-engine]] · [[overviews/overview]] · [[lumixengine]] · [[houdini-engine-for-unreal]] · [[luamachine]] · [[traccar-geocoder]] · [[gddumper]]

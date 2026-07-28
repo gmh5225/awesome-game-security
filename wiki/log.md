@@ -1524,3 +1524,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:neocanable/garlic`: entity [[garlic]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-link from [[r2garlic]].
 
 - **2026-07-28** — ingest `description:nem0/lumixengine_maps`: entity [[lumixengine-maps]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-28** — ingest `description:nem0/LumixEngine`: entity [[lumixengine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-link from [[lumixengine-maps]].

@@ -386,6 +386,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [LoudSunRun](entities/loudsunrun.md) — stack spoofing with synthetic frames (namazso / SilentMoonWalk / VulcanRaven; Cheat Spoof Stack)
 - [loldrivers-client](entities/loldrivers-client.md) — Go/PowerShell LOLdrivers scan client (cheat / vulnerable driver)
 - [Lumina-Cheat](entities/lumina-cheat.md) — internal CS:GO; mutation for changing signature (cheat / game:csgo)
+- [LumixEngine](entities/lumixengine.md) — C/C++ Lumix Engine (shader/render samples; Game Engine / source)
 - [lumixengine_maps](entities/lumixengine-maps.md) — Lumix OSM map downloader (roads/buildings; Plugins:Lumix)
 - [lsass-extend-mapper](entities/lsass-extend-mapper.md) — unsigned driver map via lsass address-space extend
 - [LUDA](entities/luda.md) — Lua IDA Pro scripting plugin (direct SDK access; cheat / IDA Plugins)
