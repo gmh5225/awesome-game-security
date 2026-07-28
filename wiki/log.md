@@ -1472,3 +1472,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:nitaigao/engine-showcase`: entity [[engine-showcase]]; cited on [[overviews/game-engine]]; related link on [[custom-game-engines]].
 
 - **2026-07-28** — ingest `description:nillerusr/source-engine`: entity [[source-engine]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
+
+- **2026-07-28** — ingest `description:nikaiw/VMkatz`: entity [[vmkatz]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
