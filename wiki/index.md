@@ -367,6 +367,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Known-Driver-Mappers](entities/known-driver-mappers.md) — catalog of known Driver Mappers (AC / stress-testing)
 - [KeyboardKit](entities/keyboardkit.md) — kernel keyboard IRP filter keylogger (UDP exfil; ExplorerFrame DLL hijack)
 - [kernel-codecave-poc](entities/kernel-codecave-poc.md) — KM shellcode in driver .text caves (Find Codecave; vs pool/exec alloc scans)
+- [kernel-csgo](entities/kernel-csgo.md) — simple kernel CS:GO cheat (hook KM↔UM comm; C++; cheat / game:csgo)
 - [kernel_hack](entities/kernel-hack.md) — Android/Linux LKM game-memory R/W (process mgmt / verification; Kconfig)
 - [kernel-mouse](entities/kernel-mouse.md) — MouClass kernel mouse driver (Win10/11; triggerbot/aimbot input research)
 - [KernelResearchKit](entities/kernel-research-kit.md) — Win11 25H2 boot-time DSE / SeCiCallbacks toolkit (manual map / IRP hijack / BYOVD)
