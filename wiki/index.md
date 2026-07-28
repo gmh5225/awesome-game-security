@@ -261,6 +261,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Fortnite-FNameEntry](entities/fortnite-fnameentry.md) — Fortnite FName/FNameEntry sample (C++; cheat / game:fortnite)
 - [Fortnite-Fltokens-and-offsets](entities/fortnite-fltokens-and-offsets.md) — Fortnite FLToken/offset grabber (stale / offline)
 - [game-engine-detector](entities/game-engine-detector.md) — Python APK/IPA game-engine detector (Mobile Game)
+- [GameEngineFromScratch](entities/game-engine-from-scratch.md) — Zhihu from-scratch next-gen engine sample (DirectX/OpenGL; Game Engine / guide)
 - [gamedev_libraries](entities/gamedev-libraries.md) — data-oriented C/C++ gamedev library collection (POD/flat arrays; Game Develop / guide)
 - [gamehacking-cheatsheet](entities/gamehacking-cheatsheet.md) — game-hacking RE cheatsheet (memory / injection / AC; cheat / guide)
 - [gamesneeze](entities/gamesneeze.md) — Linux CS:GO cheat research (seksea; cheat / game:csgo)
