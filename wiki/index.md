@@ -344,6 +344,8 @@ Compiled knowledge catalog for awesome-game-security.
 - [Injectors](entities/injectors.md) — injection-testing harness (C/C++; AC stress)
 - [injdrv](entities/injdrv.md) — kernel APC DLL injector (process notify → LdrLoadDll; C)
 - [IPAPatch](entities/ipapatch.md) — patch iOS apps without jailbreak (C/C++/ObjC; cheat / IOS jailbreak)
+- [irql](entities/irql.md) — Rust compile-time IRQL safety / pool Box·Vec (Windows KM drivers)
+
 - [Infosec_Reference](entities/infosec-reference.md) — infosec wiki with Games / Game Hacking draft (cheat / guide)
 - [input-overlay](entities/input-overlay.md) — OBS plugin: keyboard/mouse/gamepad livestream overlay (C++; Keyboard Mapper)
 - [interactive-feedback-mcp](entities/interactive-feedback-mcp.md) — HITL user-feedback MCP (input/confirm/select prompts; Game Develop / MCP)

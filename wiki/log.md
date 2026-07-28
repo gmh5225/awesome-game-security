@@ -1549,3 +1549,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-28** — ingest `description:narumii/Deobfuscator`: entity [[deobfuscator]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
+- **2026-07-28** — ingest `description:naorhaziz/irql`: entity [[irql]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
