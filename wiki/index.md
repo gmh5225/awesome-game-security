@@ -437,6 +437,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NO_ACCESS_Protection](entities/no-access-protection.md) — PAGE_NOACCESS + VEH / single-step anti-tamper (vs external scanners)
 - [Nocturne](entities/nocturne.md) — bin2bin x86-64 PE code virtualizer (SDK markers / VM handlers / junk; AC Obfuscation Engine)
 - [NocturneLdr](entities/nocturneldr.md) — CET-compatible Win x64 shellcode loader (fully backed stacks; Spoof Stack)
+- [Norsefire](entities/norsefire.md) — kernel-mode W/RPM + mouse_event (C++; cheat / RPM)
 - [note](entities/note.md) — Chinese Android File Explorer guide (Guide-zh; Cheat Android File Explorer)
 - [NoVmpy](entities/novmpy.md) — Python VMProtect deobf (symbolic exec / Triton; Fix VMP)
 - [Npcap](entities/npcap.md) — Windows packet capture/inject (Nmap; WinPcap successor; Packet Capture&Parse)
