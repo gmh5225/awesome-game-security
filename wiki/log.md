@@ -1470,3 +1470,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-27** — ingest `description:nkga/cheat-driver`: entity [[cheat-driver]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-07-27** — ingest `description:nitaigao/engine-showcase`: entity [[engine-showcase]]; cited on [[overviews/game-engine]]; related link on [[custom-game-engines]].
+
+- **2026-07-28** — ingest `description:nillerusr/source-engine`: entity [[source-engine]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
