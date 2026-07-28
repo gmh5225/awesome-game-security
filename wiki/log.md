@@ -1573,3 +1573,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:n24q02m/better-godot-mcp`: entity [[better-godot-mcp]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
 - **2026-07-28** — ingest `description:mytechnotalent/Reverse-Engineering`: entity [[mytechnotalent-reverse-engineering]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-28** — ingest `description:mytechnotalent/Hacking-Windows`: entity [[hacking-windows]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
