@@ -201,6 +201,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Dopamine2-roothide](entities/dopamine2-roothide.md) — iOS 15/16 RootHide Dopamine 2 (C/C++/ObjC; cheat / iOS jailbreak)
 - [Dota2-Overlay-2.0](entities/dota2-overlay-2-0.md) — Dota 2 overlay sample (C/C++; cheat / game:dota2)
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
+- [Deobfuscator](entities/deobfuscator.md) — Java bytecode deobfuscator (narumii; cheat / RE tools)
 - [DetectTpmSpoofing](entities/detect-tpm-spoofing.md) — KMDF: TPM 2.0 EK spoof detect (IOCTL vs TPM.sys cache)
 - [detection](entities/detection.md) — Android root/Xposed/Frida/VPN/dev-options multi-check collection (Java; Detection:Android root)
 - [dex2jar](entities/dex2jar.md) — DEX↔JAR toolset (d2j-baksmali / APK sign / DEX manip; mobile RE)

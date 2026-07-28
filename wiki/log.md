@@ -1546,3 +1546,6 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nbqofficial/kernel-csgo`: entity [[kernel-csgo]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-07-28** — ingest `description:nbqofficial/HideDriver`: entity [[hide-driver]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
+- **2026-07-28** — ingest `description:narumii/Deobfuscator`: entity [[deobfuscator]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
