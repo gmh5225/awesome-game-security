@@ -1,0 +1,3388 @@
+Project Path: arc_infosecrajesh_Auto-generate-Frida-bypass-scripts-for-SSL-pinning-root-detection-on-Android-iOS_q6t_4hjg
+
+Source Tree:
+
+```txt
+arc_infosecrajesh_Auto-generate-Frida-bypass-scripts-for-SSL-pinning-root-detection-on-Android-iOS_q6t_4hjg
+├── README.md
+├── frida_script_generator.py
+└── requirements.txt
+
+```
+
+`README.md`:
+
+```md
+# frida-script-generator
+
+Static-analysis-driven Frida script generator for Android and iOS mobile app security testing.
+
+Point it at an APK or IPA. It inspects the binary, reports every SSL pinning and root/jailbreak
+detection mechanism it finds, then writes a ready-to-run Frida bypass script tailored to that
+specific app — no manual class-hunting required.
+
+---
+
+## Features
+
+**SSL pinning bypass**
+OkHttp3 · Retrofit · Volley · Cronet · Conscrypt · Flutter/Dart ·
+React Native · Xamarin · Cordova · gRPC · Ktor · BouncyCastle ·
+Certificate Transparency · Network Security Config · TrustKit ·
+Custom TrustManagers · HostnameVerifier · SSLSocket ·
+HttpsURLConnection · WebViewClient
+
+**Root / jailbreak detection bypass**
+RootBeer · SafetyNet / Play Integrity · Promon SHIELD ·
+Talsec / FreeRASP · Approov · Zimperium zShield · Samsung Knox ·
+File-based su/Magisk checks · Build.TAG · /proc/mounts ·
+Emulator detection · Frida/hook detection · TracerPid spoofing ·
+ADB / developer-options detection · Mock location bypass
+
+**Three-layer injection architecture**
+- L1 — Native libc hooks (kill, raise, abort, _exit) via Interceptor.replace
+- L2 — ActivityThread.handleBindApplication (runs before Application.onCreate)
+- L3 — setTimeout retries at 1 s and 3 s for lazy-loaded SDKs
+
+**Reliable on Android 12+ (APEX bionic)**
+Uses Interceptor.replace + NativeCallback for all libc hooks — avoids
+the "not a function" failure caused by APEX PLT stubs.
+
+---
+
+## Requirements
+
+```
+Python 3.8+
+frida-tools       pip install frida-tools
+androguard        pip install androguard        # optional but recommended
+rich              pip install rich               # optional — pretty output
+```
+
+---
+
+## Installation
+
+```bash
+git clone https://github.com/infosecrajesh/Auto-generate-Frida-bypass-scripts-for-SSL-pinning-root-detection-on-Android-iOS.git
+cd Auto-generate-Frida-bypass-scripts-for-SSL-pinning-root-detection-on-Android-iOS
+pip install -r requirements.txt
+```
+
+---
+
+## Usage
+
+```bash
+# Android APK — generate SSL + root bypass (default)
+python3 frida_script_generator.py --apk app.apk
+
+# iOS IPA
+python3 frida_script_generator.py --ipa App.ipa
+
+# SSL bypass only
+python3 frida_script_generator.py --apk app.apk --mode ssl
+
+# Root bypass only
+python3 frida_script_generator.py --apk app.apk --mode root
+
+# Custom output filename
+python3 frida_script_generator.py --apk app.apk --out hooks.js
+
+# Verbose (shows all detected classes)
+python3 frida_script_generator.py --apk app.apk --verbose
+```
+
+**Run the generated script with Frida**
+
+```bash
+# Spawn mode (recommended — injects before app starts)
+frida -U -f com.example.app -l bypass.js  
+
+# Attach to running process
+frida -U com.example.app -l bypass.js
+
+# Over USB with specific device
+frida -U -D DEVICE_SERIAL -f com.example.app -l bypass.js  
+```
+
+**Route traffic through Burp Suite**
+
+```bash
+adb reverse tcp:8080 tcp:8080
+# Then set HTTP proxy to 127.0.0.1:8080 in Burp
+```
+
+---
+
+## Sample output
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║  App     : MyRewards                                         ║
+║  Package : com.example.myrewards                             ║
+║  Version : 4.2.1                                             ║
+╠══════════════════════════════════════════════════════════════╣
+║  SSL PINNING    : ⚠  DETECTED                                ║
+║  Mechanisms     : OkHttp3 · CertificatePinner · TrustKit     ║
+╠══════════════════════════════════════════════════════════════╣
+║  ROOT DETECTION : ⚠  DETECTED                                ║
+║  Mechanisms     : RootBeer · Play Integrity · Talsec         ║
+╠══════════════════════════════════════════════════════════════╣
+║  OUTPUT  : com_example_myrewards_bypass.js                   ║
+║  Lines   : 1,850 | Active hooks : 94                         ║
+╚══════════════════════════════════════════════════════════════╝
+```
+
+---
+
+## How it works
+
+1. **Static analysis** — Scans the DEX string pool (Android) or Mach-O binary (iOS) for known
+   framework signatures and custom security class names. No full decompilation needed.
+
+2. **Targeted script generation** — Only hooks what was detected. An app using gRPC gets gRPC
+   hooks; one with no Knox dependency gets none. Keeps the script lean and avoids unnecessary
+   Java.use() calls that slow startup.
+
+3. **Layered injection** — L1 native hooks fire at script load. L2 hooks inside
+   handleBindApplication fire before Application.onCreate. L3 setTimeout passes catch SDKs
+   that initialise after the application starts.
+
+4. **Safe hook patterns** — Avoids known Frida pitfalls:
+   - Interceptor.replace (not attach) for all libc symbols — works on Android 12 APEX bionic
+   - trustCheckReturn() helper returns ArrayList for List-typed overloads — prevents OkHttp NPE
+   - Saved-ref pattern for File.exists / readLine — prevents infinite recursion
+   - CountDownLatch.await released without calling original — prevents deadlock
+
+---
+
+## Project structure
+
+```
+frida_script_generator_v2.py   Main script
+requirements.txt               Python dependencies
+README.md
+```
+
+---
+
+## Legal notice
+
+This tool is intended for authorised security testing only.
+Only use it against applications you own or have explicit written permission to test.
+Unauthorised use may violate computer fraud laws in your jurisdiction.
+
+---
+
+## Contributing
+
+Pull requests welcome. Areas that would benefit most:
+- iOS static analysis improvements (Mach-O symbol scanning)
+- Additional SDK signatures (new root detection frameworks)
+- Frida script test harness
+
+---
+
+## License
+
+MIT
+
+```
+
+`frida_script_generator.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+═══════════════════════════════════════════════════════════════════════════════
+  FRIDA SCRIPT GENERATOR — SSL Pinning & Root/Jailbreak Bypass
+  Supports: Android APK | iOS IPA
+  Covers: All modern SSL pinning implementations + Root/JB detection bypass
+═══════════════════════════════════════════════════════════════════════════════
+  Usage:
+    python3 frida_script_generator.py --apk app.apk
+    python3 frida_script_generator.py --ipa app.ipa
+    python3 frida_script_generator.py --apk app.apk --out custom_hooks.js
+    python3 frida_script_generator.py --apk app.apk --mode ssl       # SSL only
+    python3 frida_script_generator.py --apk app.apk --mode root      # Root only
+    python3 frida_script_generator.py --apk app.apk --mode all       # Both (default)
+    python3 frida_script_generator.py --apk app.apk --verbose
+"""
+
+import os, sys, re, json, zipfile, argparse, hashlib, struct
+from pathlib import Path
+from datetime import datetime
+from typing import Optional
+from dataclasses import dataclass, field
+
+# ─── Optional rich deps (degrade gracefully) ─────────────────────────────────
+try:
+    from androguard.core.apk import APK
+    from androguard.core.dex import DEX
+    ANDROGUARD = True
+except ImportError:
+    ANDROGUARD = False
+
+try:
+    from rich.console import Console
+    from rich.table import Table
+    from rich.panel import Panel
+    from rich.progress import track
+    from rich import print as rprint
+    RICH = True
+    console = Console()
+except ImportError:
+    RICH = False
+    class _Console:
+        def print(self, *a, **kw): print(*[str(x) for x in a])
+        def rule(self, t=""): print(f"\n{'─'*60} {t}")
+        def log(self, *a, **kw): print(*[str(x) for x in a])
+    console = _Console()
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DATA STRUCTURES
+# ═══════════════════════════════════════════════════════════════════════════
+@dataclass
+class AppInfo:
+    platform:       str   = "unknown"   # android | ios
+    package_name:   str   = ""
+    app_name:       str   = ""
+    version_name:   str   = ""
+    version_code:   str   = ""
+    min_sdk:        str   = ""
+    target_sdk:     str   = ""
+    file_path:      str   = ""
+    file_hash:      str   = ""
+    file_size:      str   = ""
+    # Detected libs / frameworks
+    libraries:      list  = field(default_factory=list)
+    activities:     list  = field(default_factory=list)
+    permissions:    list  = field(default_factory=list)
+    # Pinning signals
+    uses_okhttp:         bool = False
+    uses_okhttp3:        bool = False
+    uses_retrofit:       bool = False
+    uses_volley:         bool = False
+    uses_cronet:         bool = False
+    uses_conscrypt:      bool = False
+    uses_flutter:        bool = False
+    uses_react_native:   bool = False
+    uses_cordova:        bool = False
+    uses_xamarin:        bool = False
+    uses_unity:          bool = False
+    uses_ssl_context:    bool = False
+    uses_trust_manager:  bool = False
+    uses_certificate_pinner: bool = False
+    uses_network_security_config: bool = False
+    uses_appcert:        bool = False
+    uses_custom_ssl:     bool = False
+    uses_conscrypt_pinning: bool = False
+    # Root/JB signals
+    uses_rootbeer:       bool = False
+    uses_safetynet:      bool = False
+    uses_play_integrity: bool = False
+    uses_frida_detect:   bool = False
+    uses_tamper_detect:  bool = False
+    uses_jailbreak_detect: bool = False
+    uses_root_cloak:     bool = False
+    custom_root_check_classes: list = field(default_factory=list)
+    # iOS specific
+    uses_afnetworking:   bool = False
+    uses_alamofire:      bool = False
+    uses_nsurlsession:   bool = False
+    uses_trustkit:       bool = False
+    uses_securetransport: bool = False
+    # Additional SSL frameworks
+    uses_grpc:           bool = False
+    uses_ktor:           bool = False
+    uses_bouncycastle:   bool = False
+    uses_cert_transparency: bool = False
+    # Additional security SDKs
+    uses_promon:         bool = False
+    uses_talsec:         bool = False
+    uses_approov:        bool = False
+    uses_zimperium:      bool = False
+    uses_verimatrix:     bool = False
+    uses_libsu:          bool = False
+    uses_knox:           bool = False
+    uses_dexguard:       bool = False
+    # Raw smali hits for targeted hooks
+    smali_pinning_classes: list = field(default_factory=list)
+    smali_root_classes:    list = field(default_factory=list)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# APK ANALYSER
+# ═══════════════════════════════════════════════════════════════════════════
+class APKAnalyser:
+    SSL_SIGNALS = {
+        "okhttp3/CertificatePinner":             "uses_certificate_pinner",
+        "okhttp3/OkHttpClient":                  "uses_okhttp3",
+        "com/squareup/okhttp":                   "uses_okhttp",
+        "retrofit2/":                            "uses_retrofit",
+        "com/android/volley":                    "uses_volley",
+        "org/chromium/net":                      "uses_cronet",
+        "org/conscrypt":                         "uses_conscrypt",
+        "io/flutter":                            "uses_flutter",
+        "com/facebook/react":                    "uses_react_native",
+        "org/apache/cordova":                    "uses_cordova",
+        "mono/android":                          "uses_xamarin",
+        "com/unity3d":                           "uses_unity",
+        "javax/net/ssl/SSLContext":              "uses_ssl_context",
+        "javax/net/ssl/TrustManager":            "uses_trust_manager",
+        "com/datatheorem/android/trustkit":      "uses_appcert",
+        "com/moczul/ok2curl":                    "uses_custom_ssl",
+        "io/grpc/":                              "uses_grpc",
+        "io/ktor/client":                        "uses_ktor",
+        "org/bouncycastle":                      "uses_bouncycastle",
+        "org/certificatetransparency":           "uses_cert_transparency",
+    }
+    ROOT_SIGNALS = {
+        "com/scottyab/rootbeer":                 "uses_rootbeer",
+        "com/google/android/gms/safetynet":      "uses_safetynet",
+        "com/google/android/play/core/integrity": "uses_play_integrity",
+        "re/frida":                              "uses_frida_detect",
+        "com/guardsquare":                       "uses_tamper_detect",
+        "com/noshufou/android/su":               "uses_root_cloak",
+        "com/promon/":                           "uses_promon",
+        "com/aheaditec/freerasp":               "uses_talsec",
+        "io/approov/":                           "uses_approov",
+        "com/zimperium/":                        "uses_zimperium",
+        "com/verimatrix/":                       "uses_verimatrix",
+        "com/topjohnwu/libsu":                  "uses_libsu",
+        "com/samsung/android/knox":             "uses_knox",
+        "com/guardsquare/dexguard":             "uses_dexguard",
+    }
+    ROOT_CLASS_PATTERNS = [
+        r'[Rr]oot[Cc]heck', r'[Jj]ailbreak', r'[Dd]evice[Ss]ecurity',
+        r'[Tt]amper', r'[Ii]ntegrity[Cc]heck', r'[Ee]mulator[Dd]etect',
+        r'[Ss]afety[Nn]et', r'[Pp]lay[Ii]ntegrity', r'[Ff]rida[Dd]etect',
+        r'[Hh]ook[Dd]etect', r'[Dd]ebug[Dd]etect',
+        r'[Aa]nti[Hh]ook', r'[Cc]ert[Cc]heck', r'[Tt]racerPid',
+        r'[Dd]ebugger[Dd]etect', r'[Mm]ock[Ll]oc', r'[Dd]eveloper[Oo]ption',
+        r'[Kk]nox[Cc]heck', r'[Ss]hield[Cc]heck',
+    ]
+    SSL_CLASS_PATTERNS = [
+        r'[Ss][Ss][Ll][Pp]inn', r'[Cc]ertif.*[Pp]inn', r'[Pp]ubn?[Kk]ey',
+        r'[Tt]rust.*[Mm]anager', r'[Cc]ertif.*[Vv]alid', r'[Nn]etwork.*[Ss]ecurity',
+        r'[Hh]ostname.*[Vv]erif', r'[Pp]inned[Cc]ert', r'[Pp]ublic[Kk]ey[Pp]in',
+        r'[Cc]ert.*[Pp]in',
+    ]
+
+    def __init__(self, apk_path: str, verbose=False):
+        self.path = apk_path
+        self.verbose = verbose
+        self.info = AppInfo(platform="android", file_path=apk_path)
+        self._compute_hash()
+
+    def _compute_hash(self):
+        size = os.path.getsize(self.path)
+        self.info.file_size = f"{size/1024/1024:.1f} MB"
+        h = hashlib.sha256()
+        with open(self.path, "rb") as f:
+            for chunk in iter(lambda: f.read(65536), b""):
+                h.update(chunk)
+        self.info.file_hash = h.hexdigest()
+
+    def analyse(self) -> AppInfo:
+        console.print("[bold cyan]🔍 Analysing APK...[/bold cyan]" if RICH else "Analysing APK...")
+        self._parse_manifest()
+        self._scan_dex_classes()
+        self._scan_libs()
+        self._scan_assets()
+        return self.info
+
+    def _parse_manifest(self):
+        """Parse AndroidManifest via androguard or fallback zip scan."""
+        if ANDROGUARD:
+            try:
+                apk = APK(self.path)
+                self.info.package_name  = apk.get_package() or ""
+                self.info.app_name      = apk.get_app_name() or self.info.package_name
+                self.info.version_name  = apk.get_androidversion_name() or ""
+                self.info.version_code  = str(apk.get_androidversion_code() or "")
+                self.info.min_sdk       = str(apk.get_min_sdk_version() or "")
+                self.info.target_sdk    = str(apk.get_target_sdk_version() or "")
+                self.info.permissions   = apk.get_permissions() or []
+                self.info.activities    = apk.get_activities() or []
+                # Network security config
+                if apk.get_element("network-security-config", ""):
+                    self.info.uses_network_security_config = True
+                if self.verbose:
+                    console.print(f"  Package: {self.info.package_name}")
+                return
+            except Exception as e:
+                if self.verbose: console.print(f"  [yellow]androguard: {e}[/yellow]")
+        # Fallback: raw zip scan
+        try:
+            with zipfile.ZipFile(self.path, "r") as z:
+                names = z.namelist()
+                if "AndroidManifest.xml" in names:
+                    raw = z.read("AndroidManifest.xml")
+                    # extract printable strings
+                    strings = re.findall(b'[\x20-\x7e]{4,}', raw)
+                    for s in strings:
+                        s = s.decode("utf-8","ignore")
+                        if "." in s and not s.startswith("/") and len(s) > 5:
+                            if not self.info.package_name and re.match(r'^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$', s):
+                                self.info.package_name = s
+                        if "network-security-config" in s:
+                            self.info.uses_network_security_config = True
+        except Exception: pass
+
+    def _scan_dex_classes(self):
+        """Scan all DEX files for class/method name signals."""
+        all_class_names = []
+        try:
+            with zipfile.ZipFile(self.path, "r") as z:
+                dex_files = [n for n in z.namelist() if re.match(r'classes\d*\.dex', n)]
+                for dex_name in dex_files:
+                    raw = z.read(dex_name)
+                    # Extract string pool — fast heuristic (no full DEX parse needed)
+                    strings = re.findall(rb'L([a-zA-Z][a-zA-Z0-9_$/]{3,})', raw)
+                    for s in strings:
+                        cls = s.decode("utf-8","ignore").rstrip(";>")
+                        # Skip obviously invalid hits (too short, contains junk)
+                        if len(cls) > 5 and "/" in cls:
+                            all_class_names.append(cls)
+        except Exception as e:
+            if self.verbose: console.print(f"  DEX scan error: {e}")
+
+        for cls in all_class_names:
+            # SSL signals
+            for pattern, attr in self.SSL_SIGNALS.items():
+                if pattern.lower() in cls.lower():
+                    setattr(self.info, attr, True)
+            # Root signals
+            for pattern, attr in self.ROOT_SIGNALS.items():
+                if pattern.lower() in cls.lower():
+                    setattr(self.info, attr, True)
+            # Custom SSL classes
+            for pat in self.SSL_CLASS_PATTERNS:
+                if re.search(pat, cls):
+                    full = cls.replace("/",".")
+                    if full not in self.info.smali_pinning_classes:
+                        self.info.smali_pinning_classes.append(full)
+            # Custom root classes
+            for pat in self.ROOT_CLASS_PATTERNS:
+                if re.search(pat, cls):
+                    full = cls.replace("/",".")
+                    if full not in self.info.smali_root_classes:
+                        self.info.smali_root_classes.append(full)
+
+        if self.verbose:
+            console.print(f"  SSL classes found: {len(self.info.smali_pinning_classes)}")
+            console.print(f"  Root classes found: {len(self.info.smali_root_classes)}")
+
+    def _scan_libs(self):
+        """Check native .so libraries."""
+        try:
+            with zipfile.ZipFile(self.path, "r") as z:
+                libs = [n for n in z.namelist() if n.startswith("lib/") and n.endswith(".so")]
+                self.info.libraries = [os.path.basename(l) for l in libs]
+                lib_str = " ".join(self.info.libraries).lower()
+                if "flutter" in lib_str:   self.info.uses_flutter = True
+                if "conscrypt" in lib_str: self.info.uses_conscrypt = True
+                if "cronet" in lib_str:    self.info.uses_cronet = True
+                if "unity" in lib_str:     self.info.uses_unity = True
+        except Exception: pass
+
+    def _scan_assets(self):
+        """Scan assets for flutter, RN bundles, network config XML."""
+        try:
+            with zipfile.ZipFile(self.path, "r") as z:
+                for name in z.namelist():
+                    nl = name.lower()
+                    if "flutter_assets" in nl or "libflutter" in nl:
+                        self.info.uses_flutter = True
+                    if "index.android.bundle" in nl:
+                        self.info.uses_react_native = True
+                    if "network_security_config" in nl:
+                        self.info.uses_network_security_config = True
+                    if "res/xml/network_security_config" in nl:
+                        self.info.uses_network_security_config = True
+        except Exception: pass
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# IPA ANALYSER
+# ═══════════════════════════════════════════════════════════════════════════
+class IPAAnalyser:
+    def __init__(self, ipa_path: str, verbose=False):
+        self.path = ipa_path
+        self.verbose = verbose
+        self.info = AppInfo(platform="ios", file_path=ipa_path)
+        size = os.path.getsize(ipa_path)
+        self.info.file_size = f"{size/1024/1024:.1f} MB"
+        h = hashlib.sha256()
+        with open(ipa_path,"rb") as f:
+            for chunk in iter(lambda: f.read(65536), b""): h.update(chunk)
+        self.info.file_hash = h.hexdigest()
+
+    def analyse(self) -> AppInfo:
+        console.print("[bold cyan]🔍 Analysing IPA...[/bold cyan]" if RICH else "Analysing IPA...")
+        self._parse_info_plist()
+        self._scan_binary()
+        return self.info
+
+    def _parse_info_plist(self):
+        try:
+            with zipfile.ZipFile(self.path,"r") as z:
+                plists = [n for n in z.namelist() if n.endswith("Info.plist") and "Payload/" in n]
+                if plists:
+                    raw = z.read(plists[0])
+                    # Extract bundle id and version from plist (XML or binary)
+                    txt = raw.decode("utf-8","ignore")
+                    bid = re.search(r'CFBundleIdentifier.*?<string>(.*?)</string>', txt, re.DOTALL)
+                    ver = re.search(r'CFBundleShortVersionString.*?<string>(.*?)</string>', txt, re.DOTALL)
+                    nam = re.search(r'CFBundleName.*?<string>(.*?)</string>', txt, re.DOTALL)
+                    if bid: self.info.package_name = bid.group(1).strip()
+                    if ver: self.info.version_name = ver.group(1).strip()
+                    if nam: self.info.app_name = nam.group(1).strip()
+                    # ATS check
+                    if "NSAllowsArbitraryLoads" in txt: self.info.uses_network_security_config = True
+        except Exception as e:
+            if self.verbose: console.print(f"  plist error: {e}")
+
+    def _scan_binary(self):
+        """Extract strings from Mach-O binary for framework signals."""
+        try:
+            with zipfile.ZipFile(self.path,"r") as z:
+                # Find main binary
+                bins = [n for n in z.namelist()
+                        if "Payload/" in n and not n.endswith("/")
+                        and "." not in os.path.basename(n)
+                        and "__" not in n]
+                # Also check frameworks
+                frameworks = [n for n in z.namelist() if n.endswith(".framework/") or "Frameworks/" in n]
+
+                all_names = z.namelist()
+                fw_str = " ".join(all_names).lower()
+
+                if "afnetworking" in fw_str:   self.info.uses_afnetworking = True
+                if "alamofire" in fw_str:      self.info.uses_alamofire = True
+                if "trustkit" in fw_str:       self.info.uses_trustkit = True
+                if "flutter" in fw_str:        self.info.uses_flutter = True
+                if "react" in fw_str:          self.info.uses_react_native = True
+                if "cordova" in fw_str:        self.info.uses_cordova = True
+                if "xamarin" in fw_str:        self.info.uses_xamarin = True
+
+                # Scan strings in main binary
+                for n in bins[:3]:  # first 3 candidates
+                    try:
+                        raw = z.read(n)
+                        strings = re.findall(b'[\x20-\x7e]{6,}', raw)
+                        str_joined = b" ".join(strings).decode("utf-8","ignore").lower()
+                        if "sslpinning" in str_joined or "certificatepinning" in str_joined:
+                            self.info.uses_custom_ssl = True
+                        if "afnetworking" in str_joined: self.info.uses_afnetworking = True
+                        if "alamofire" in str_joined:    self.info.uses_alamofire = True
+                        if "trustkit" in str_joined:     self.info.uses_trustkit = True
+                        if "nsurlsession" in str_joined: self.info.uses_nsurlsession = True
+                        if "jailbreak" in str_joined:    self.info.uses_jailbreak_detect = True
+                        if "frida" in str_joined:        self.info.uses_frida_detect = True
+                        if "flutter" in str_joined:      self.info.uses_flutter = True
+                        # Scan for custom classes
+                        cls_hits = re.findall(r'(?:ssl|pin|trust|cert|root|jailbreak|tamper)\w+', str_joined, re.I)
+                        self.info.smali_pinning_classes.extend(list(set(cls_hits))[:15])
+                    except Exception: pass
+        except Exception as e:
+            if self.verbose: console.print(f"  Binary scan error: {e}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FRIDA SCRIPT BUILDER
+# ═══════════════════════════════════════════════════════════════════════════
+class FridaScriptBuilder:
+
+    def __init__(self, info: AppInfo, mode: str = "all"):
+        self.info = info
+        self.mode = mode  # all | ssl | root
+
+    def build(self) -> str:
+        parts = []
+        parts.append(self._header())
+        parts.append(self._utils())
+
+        if self.mode in ("all","ssl"):
+            if self.info.platform == "android":
+                parts.append(self._android_ssl_all())
+            else:
+                parts.append(self._ios_ssl_all())
+
+        if self.mode in ("all","root"):
+            if self.info.platform == "android":
+                parts.append(self._android_root_all())
+            else:
+                parts.append(self._ios_jailbreak_all())
+
+        parts.append(self._app_wait_wrapper())
+        return "\n".join(parts)
+
+    # ─── HEADER ──────────────────────────────────────────────────────────────
+    def _header(self) -> str:
+        i = self.info
+        libs_str = ", ".join(i.libraries[:8]) or "N/A"
+
+        # ── SSL pinning detection summary ──
+        ssl_enabled = any([
+            i.uses_okhttp3, i.uses_certificate_pinner, i.uses_okhttp,
+            i.uses_conscrypt, i.uses_conscrypt_pinning, i.uses_appcert,
+            i.uses_network_security_config, i.uses_custom_ssl,
+            i.uses_trust_manager, i.uses_ssl_context,
+            i.uses_afnetworking, i.uses_alamofire, i.uses_trustkit,
+            bool(i.smali_pinning_classes),
+        ])
+        ssl_verdict = "DETECTED" if ssl_enabled else "NOT DETECTED"
+
+        ssl_mechanisms = []
+        if i.uses_okhttp3 or i.uses_certificate_pinner: ssl_mechanisms.append("OkHttp3 CertificatePinner")
+        if i.uses_okhttp:            ssl_mechanisms.append("OkHttp2 CertificatePinner")
+        if i.uses_conscrypt or i.uses_conscrypt_pinning: ssl_mechanisms.append("Conscrypt TrustManagerImpl")
+        if i.uses_network_security_config: ssl_mechanisms.append("Network Security Config")
+        if i.uses_appcert:           ssl_mechanisms.append("TrustKit / DataTheorem")
+        if i.uses_trust_manager or i.uses_ssl_context: ssl_mechanisms.append("Custom TrustManager / SSLContext")
+        if i.uses_afnetworking:      ssl_mechanisms.append("AFNetworking (iOS)")
+        if i.uses_alamofire:         ssl_mechanisms.append("Alamofire (iOS)")
+        if i.uses_trustkit:          ssl_mechanisms.append("TrustKit (iOS)")
+        if i.uses_flutter:           ssl_mechanisms.append("Flutter / BoringSSL (native)")
+        if i.uses_cronet:            ssl_mechanisms.append("Cronet (native)")
+        if i.smali_pinning_classes:  ssl_mechanisms.append(f"{len(i.smali_pinning_classes)} custom SSL class(es)")
+
+        # ── Root/JB detection summary ──
+        root_enabled = any([
+            i.uses_rootbeer, i.uses_safetynet, i.uses_play_integrity,
+            i.uses_frida_detect, i.uses_tamper_detect, i.uses_jailbreak_detect,
+            i.uses_root_cloak, bool(i.smali_root_classes),
+        ])
+        root_verdict = "DETECTED" if root_enabled else "NOT DETECTED"
+
+        root_mechanisms = []
+        if i.uses_rootbeer:          root_mechanisms.append("RootBeer library")
+        if i.uses_safetynet:         root_mechanisms.append("Google SafetyNet API")
+        if i.uses_play_integrity:    root_mechanisms.append("Play Integrity API")
+        if i.uses_frida_detect:      root_mechanisms.append("Frida / Anti-hooking detection")
+        if i.uses_tamper_detect:     root_mechanisms.append("Guardsquare anti-tamper")
+        if i.uses_root_cloak:        root_mechanisms.append("Root cloaking")
+        if i.uses_jailbreak_detect:  root_mechanisms.append("Jailbreak detection (iOS)")
+        if i.smali_root_classes:     root_mechanisms.append(f"{len(i.smali_root_classes)} custom security class(es)")
+
+        # ── Frameworks ──
+        frameworks = []
+        for attr, name in [
+            ("uses_okhttp3","OkHttp3"),("uses_retrofit","Retrofit"),("uses_flutter","Flutter"),
+            ("uses_react_native","React Native"),("uses_cronet","Cronet"),("uses_conscrypt","Conscrypt"),
+            ("uses_afnetworking","AFNetworking"),("uses_alamofire","Alamofire"),("uses_trustkit","TrustKit"),
+            ("uses_xamarin","Xamarin"),("uses_unity","Unity"),("uses_cordova","Cordova"),
+        ]:
+            if getattr(i, attr, False): frameworks.append(name)
+
+        # ── Hooks that will be active ──
+        active_hooks = []
+        if i.uses_okhttp3 or i.uses_certificate_pinner:
+            active_hooks.append("okhttp3.CertificatePinner.check  (all overloads)")
+            active_hooks.append("okhttp3.OkHttpClient$Builder.certificatePinner / sslSocketFactory")
+        if i.uses_okhttp:
+            active_hooks.append("com.squareup.okhttp.CertificatePinner.check")
+        active_hooks.append("com.android.org.conscrypt.TrustManagerImpl.checkServerTrusted")
+        active_hooks.append("javax.net.ssl.X509TrustManager.checkServerTrusted  (dynamic scan)")
+        active_hooks.append("javax.net.ssl.SSLContext.init  → inject PermissiveTrustManager")
+        active_hooks.append("android.webkit.WebViewClient.onReceivedSslError  → proceed()")
+        if i.uses_network_security_config:
+            active_hooks.append("android.security.net.config.NetworkSecurityTrustManager.checkServerTrusted")
+            active_hooks.append("android.security.net.config.RootTrustManager.checkServerTrusted")
+        if i.uses_rootbeer:
+            active_hooks.append("com.scottyab.rootbeer.RootBeer.*  (all detection methods)")
+        if i.uses_safetynet or i.uses_play_integrity:
+            active_hooks.append("Play Integrity / SafetyNet callback intercept")
+        active_hooks.append("java.io.File.exists / canExecute  (root path filter)")
+        active_hooks.append("java.lang.Runtime.exec  (su/busybox command filter)")
+        active_hooks.append("android.os.Build.TAGS → release-keys")
+        active_hooks.append("android.os.SystemProperties.get  (ro.debuggable / ro.secure)")
+        active_hooks.append("android.app.ApplicationPackageManager.getPackageInfo  (hide root apps)")
+        active_hooks.append("[L1 native] kill() / raise() / abort() / _exit()  (Interceptor.replace)")
+        active_hooks.append("[L1 native] /proc/self/maps read() filtering  (frida-agent scrub)")
+        if i.smali_pinning_classes:
+            for c in i.smali_pinning_classes[:5]:
+                active_hooks.append(f"CUSTOM SSL  → {c}")
+        if i.smali_root_classes:
+            for c in i.smali_root_classes[:5]:
+                active_hooks.append(f"CUSTOM ROOT → {c}")
+
+        hooks_str = "\n//   ".join(active_hooks)
+        ssl_mech_str  = ("\n//     • ".join(ssl_mechanisms))  if ssl_mechanisms  else "None"
+        root_mech_str = ("\n//     • ".join(root_mechanisms)) if root_mechanisms else "None"
+
+        pkg = i.package_name or "com.example.app"
+        pkg_js = pkg.replace(".","_") if i.package_name else "bypass"
+
+        return f"""// ═══════════════════════════════════════════════════════════════════════════
+// FRIDA BYPASS SCRIPT — AUTO-GENERATED
+// Generated : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+// ───────────────────────────────────────────────────────────────────────────
+// APP INFO
+//   Package   : {i.package_name or "unknown"}
+//   Name      : {i.app_name or "unknown"}
+//   Version   : {i.version_name or "?"} (build {i.version_code or "?"})
+//   Platform  : {i.platform.upper()}
+//   File      : {os.path.basename(i.file_path)}
+//   Size      : {i.file_size}
+//   SHA256    : {i.file_hash[:32]}...
+//   Frameworks: {", ".join(frameworks) or "Standard Java/Kotlin"}
+//   Native libs: {libs_str}
+// ───────────────────────────────────────────────────────────────────────────
+// SECURITY ASSESSMENT SUMMARY
+//
+//   SSL PINNING  : {ssl_verdict}
+//     • {ssl_mech_str}
+//
+//   ROOT/JB DETECTION : {root_verdict}
+//     • {root_mech_str}
+//
+// ───────────────────────────────────────────────────────────────────────────
+// HOOKS THAT WILL BE ACTIVE IN THIS SCRIPT
+//   {hooks_str}
+// ───────────────────────────────────────────────────────────────────────────
+// USAGE
+//   frida -U -f {pkg} -l {pkg_js}_bypass.js
+//   frida -U -f {pkg} --no-pause -l {pkg_js}_bypass.js
+//   objection -g {pkg} explore --startup-script {pkg_js}_bypass.js
+// ═══════════════════════════════════════════════════════════════════════════
+
+'use strict';
+"""
+
+    # ─── UTILS ───────────────────────────────────────────────────────────────
+    def _utils(self) -> str:
+        return r"""
+// ═══════════════════ UTILITY HELPERS ════════════════════════════════════════
+
+const LOG_TAG  = "[FRIDA-BYPASS]";
+const LOG_SSL  = "[SSL]";
+const LOG_ROOT = "[ROOT]";
+
+function log(tag, msg) {
+    console.log(`\x1b[32m${LOG_TAG}${tag}\x1b[0m ${msg}`);
+}
+function warn(tag, msg) {
+    console.log(`\x1b[33m${LOG_TAG}${tag} WARN\x1b[0m ${msg}`);
+}
+function err(tag, msg) {
+    console.log(`\x1b[31m${LOG_TAG}${tag} ERR\x1b[0m ${msg}`);
+}
+
+// Safe class find — returns null instead of throwing
+function safeFind(className) {
+    try { return Java.use(className); } catch(_) { return null; }
+}
+
+// Safe method hook — logs result
+function hookMethod(cls, method, impl, tag) {
+    try {
+        if (!cls || !cls[method]) { warn(tag, `${method} not found`); return false; }
+        const overloads = cls[method].overloads;
+        if (overloads && overloads.length > 1) {
+            overloads.forEach(ol => { ol.implementation = impl; });
+        } else {
+            cls[method].implementation = impl;
+        }
+        log(tag, `✓ Hooked ${method}`);
+        return true;
+    } catch(e) { err(tag, `${method}: ${e.message}`); return false; }
+}
+
+// Retry helper — waits for classes to load
+function retryHook(fn, label, maxRetries = 5, delayMs = 500) {
+    let attempt = 0;
+    function attempt_fn() {
+        try { fn(); log("", `✓ ${label} active`); }
+        catch(e) {
+            if (attempt++ < maxRetries) {
+                warn("", `${label} retry ${attempt}/${maxRetries}...`);
+                setTimeout(attempt_fn, delayMs * attempt);
+            } else { err("", `${label} failed after ${maxRetries} retries: ${e.message}`); }
+        }
+    }
+    attempt_fn();
+}
+
+"""
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # ANDROID SSL — COMPREHENSIVE
+    # ═══════════════════════════════════════════════════════════════════════
+    def _android_ssl_all(self) -> str:
+        i = self.info
+        custom_hooks = self._android_custom_ssl_hooks()
+
+        okhttp3_extra = ""
+        if i.uses_okhttp3 or i.uses_certificate_pinner:
+            okhttp3_extra = self._android_okhttp3_advanced()
+
+        flutter_extra = ""
+        if i.uses_flutter:
+            flutter_extra = self._android_flutter_hooks()
+
+        conscrypt_extra = ""
+        if i.uses_conscrypt:
+            conscrypt_extra = self._android_conscrypt_hooks()
+
+        cronet_extra = ""
+        if i.uses_cronet:
+            cronet_extra = self._android_cronet_hooks()
+
+        xamarin_extra = ""
+        if i.uses_xamarin:
+            xamarin_extra = self._android_xamarin_hooks()
+
+        nsc_extra = ""
+        if i.uses_network_security_config:
+            nsc_extra = self._android_nsc_hooks()
+
+        grpc_extra = ""
+        if i.uses_grpc:
+            grpc_extra = self._android_grpc_hooks()
+
+        ktor_extra = ""
+        if i.uses_ktor:
+            ktor_extra = self._android_ktor_hooks()
+
+        ct_extra = ""
+        if i.uses_cert_transparency:
+            ct_extra = self._android_ct_hooks()
+
+        return f"""
+// ═══════════════════ ANDROID SSL PINNING BYPASS ══════════════════════════════
+// Covers: OkHttp3 · CertificatePinner · TrustManager · X509TrustManager
+//         HttpsURLConnection · WebViewClient · Volley · Conscrypt · Cronet
+//         Flutter · React Native · Xamarin · Network Security Config
+//         Custom TrustManagers · HostnameVerifier · SSLSocket
+// ═════════════════════════════════════════════════════════════════════════════
+
+function bypassSSLPinningAndroid() {{
+    Java.perform(function() {{
+
+        // ── Helper: return the correct Java type for checkServerTrusted overloads ──
+        // TrustManagerImpl.checkServerTrusted(X509Certificate[], String, SSLSession/Socket)
+        // returns java.util.List — returning [] (JS array) gives OkHttp a null and it NPEs.
+        var _ArrayList = null;
+        try {{ _ArrayList = Java.use("java.util.ArrayList"); }} catch(e) {{}}
+        function trustCheckReturn(ol) {{
+            var rt = ol.returnType ? ol.returnType.className : "void";
+            if (rt === "void") return undefined;
+            if (rt === "java.util.List") return _ArrayList ? _ArrayList.$new() : null;
+            return null;
+        }}
+
+        // ── 1. OkHttp3 CertificatePinner (primary target) ─────────────────
+        try {{
+            const CertPinner = Java.use("okhttp3.CertificatePinner");
+            CertPinner.check.overloads.forEach(ol => {{
+                ol.implementation = function() {{
+                    log(LOG_SSL, `OkHttp3.CertificatePinner.check bypassed: ${{arguments[0]}}`);
+                    return;
+                }};
+            }});
+            log(LOG_SSL, "✓ OkHttp3 CertificatePinner hooked");
+        }} catch(e) {{ warn(LOG_SSL, `OkHttp3 CertPinner: ${{e.message}}`); }}
+
+        // ── 2. OkHttp3 CertificatePinner Builder ──────────────────────────
+        try {{
+            const CPBuilder = Java.use("okhttp3.CertificatePinner$Builder");
+            CPBuilder.add.overloads.forEach(ol => {{
+                ol.implementation = function() {{
+                    log(LOG_SSL, `CertificatePinner.Builder.add suppressed: ${{arguments[0]}}`);
+                    return this;
+                }};
+            }});
+        }} catch(e) {{}}
+
+        // ── 3. X509TrustManager — all implementations ─────────────────────
+        const tmClasses = [
+            "com.android.org.conscrypt.TrustManagerImpl",
+            "org.apache.http.conn.ssl.SSLSocketFactory",
+            "javax.net.ssl.X509TrustManager",
+        ];
+        tmClasses.forEach(cls => {{
+            try {{
+                const TM = Java.use(cls);
+                if (TM.checkServerTrusted) {{
+                    TM.checkServerTrusted.overloads.forEach(ol => {{
+                        ol.implementation = function() {{
+                            log(LOG_SSL, `checkServerTrusted bypassed [${{cls.split(".").pop()}}]`);
+                            return trustCheckReturn(ol);
+                        }};
+                    }});
+                }}
+                if (TM.checkClientTrusted) {{
+                    TM.checkClientTrusted.overloads.forEach(ol => {{
+                        ol.implementation = function() {{
+                            return trustCheckReturn(ol);
+                        }};
+                    }});
+                }}
+                if (TM.getAcceptedIssuers) {{
+                    TM.getAcceptedIssuers.implementation = function() {{ return []; }}; // X509Certificate[] — JS array is correct here
+                }}
+                log(LOG_SSL, `✓ TrustManager hooked: ${{cls.split(".").pop()}}`);
+            }} catch(e) {{}}
+        }});
+
+        // ── 4. Dynamic TrustManager scan (catches anonymous impls) ────────
+        try {{
+            Java.enumerateLoadedClasses({{
+                onMatch: function(name) {{
+                    if (name.indexOf("TrustManager") !== -1 || name.indexOf("X509") !== -1) {{
+                        try {{
+                            const cls = Java.use(name);
+                            if (cls.checkServerTrusted) {{
+                                cls.checkServerTrusted.overloads.forEach(ol => {{
+                                    ol.implementation = function() {{
+                                        log(LOG_SSL, `Dynamic TrustManager bypass: ${{name}}`);
+                                        return trustCheckReturn(ol);
+                                    }};
+                                }});
+                            }}
+                        }} catch(_) {{}}
+                    }}
+                }},
+                onComplete: function() {{}}
+            }});
+        }} catch(e) {{ warn(LOG_SSL, `Dynamic TM scan: ${{e.message}}`); }}
+
+        // ── 5. HttpsURLConnection ──────────────────────────────────────────
+        try {{
+            const HttpsConn = Java.use("javax.net.ssl.HttpsURLConnection");
+            HttpsConn.setDefaultHostnameVerifier.implementation = function(v) {{
+                log(LOG_SSL, "HttpsURLConnection.setDefaultHostnameVerifier suppressed");
+            }};
+            HttpsConn.setSSLSocketFactory.implementation = function(f) {{
+                log(LOG_SSL, "HttpsURLConnection.setSSLSocketFactory suppressed");
+            }};
+            HttpsConn.setHostnameVerifier.implementation = function(v) {{
+                log(LOG_SSL, "HttpsURLConnection.setHostnameVerifier suppressed");
+            }};
+        }} catch(e) {{}}
+
+        // ── 6. HostnameVerifier — always verify (via dynamic class enum below) ──
+
+        // Dynamic scan for HostnameVerifier impls
+        try {{
+            Java.enumerateLoadedClasses({{
+                onMatch: function(name) {{
+                    try {{
+                        const cls = Java.use(name);
+                        if (cls.verify && cls.verify.overloads) {{
+                            cls.verify.overloads.forEach(ol => {{
+                                if (ol.argumentTypes && ol.argumentTypes.length === 2) {{
+                                    ol.implementation = function(h, s) {{
+                                        log(LOG_SSL, `HostnameVerifier.verify bypassed: ${{name}}`);
+                                        return true;
+                                    }};
+                                }}
+                            }});
+                        }}
+                    }} catch(_) {{}}
+                }},
+                onComplete: function() {{}}
+            }});
+        }} catch(e) {{}}
+
+        // ── 7. SSLContext — inject permissive TrustManager ────────────────
+        // Register PermissiveTrustManager ONCE up front to avoid duplicate-class error
+        // on re-entry (SSLContext.init may be called multiple times).
+        var _PermissiveTM = null;
+        try {{
+            var _X509TM = Java.use("javax.net.ssl.X509TrustManager");
+            try {{
+                _PermissiveTM = Java.registerClass({{
+                    name: "com.bypass.PermissiveTrustManager",
+                    implements: [_X509TM],
+                    methods: {{
+                        checkClientTrusted: function(chain, authType) {{}},
+                        checkServerTrusted: function(chain, authType) {{}},
+                        getAcceptedIssuers: function() {{ return []; }},
+                    }}
+                }});
+            }} catch(_) {{
+                // Already registered from a previous hook pass — just look it up
+                _PermissiveTM = Java.use("com.bypass.PermissiveTrustManager");
+            }}
+        }} catch(e) {{ warn(LOG_SSL, "PermissiveTM register: " + e.message); }}
+
+        try {{
+            const SSLContext = Java.use("javax.net.ssl.SSLContext");
+            SSLContext.init.overloads.forEach(ol => {{
+                ol.implementation = function(km, tms, sr) {{
+                    log(LOG_SSL, "SSLContext.init — injecting permissive TrustManager");
+                    try {{
+                        ol.call(this, km, _PermissiveTM ? [_PermissiveTM.$new()] : tms, sr);
+                    }} catch(e2) {{
+                        ol.call(this, km, tms, sr); // fallback: keep original tms
+                    }}
+                }};
+            }});
+        }} catch(e) {{ warn(LOG_SSL, "SSLContext: " + e.message); }}
+
+        // ── 8. WebViewClient — SSL error bypass ───────────────────────────
+        try {{
+            const WVC = Java.use("android.webkit.WebViewClient");
+            WVC.onReceivedSslError.implementation = function(view, handler, error) {{
+                log(LOG_SSL, `WebViewClient.onReceivedSslError — proceeding: ${{error}}`);
+                handler.proceed();
+            }};
+            log(LOG_SSL, "✓ WebViewClient SSL hooked");
+        }} catch(e) {{}}
+
+        // ── 9. Apache HTTP (legacy) ────────────────────────────────────────
+        try {{
+            const SSLFactory = Java.use("org.apache.http.conn.ssl.SSLSocketFactory");
+            SSLFactory.isSecure.implementation = function(s) {{
+                log(LOG_SSL, "Apache SSLSocketFactory.isSecure → true");
+                return true;
+            }};
+        }} catch(e) {{}}
+
+        // ── 10. TrustManagerFactory ───────────────────────────────────────
+        // TrustManagerFactory — monitor only (calling this.getTrustManagers() would recurse)
+        // Actual bypass is via SSLContext.init injection below
+
+        // ── 11. OkHttp2 (legacy) ──────────────────────────────────────────
+        try {{
+            const CP2 = Java.use("com.squareup.okhttp.CertificatePinner");
+            CP2.check.overloads.forEach(ol => {{
+                ol.implementation = function() {{
+                    log(LOG_SSL, `OkHttp2.CertificatePinner.check bypassed: ${{arguments[0]}}`);
+                }};
+            }});
+        }} catch(e) {{}}
+
+        // ── 12. Retrofit / OkHttp builder interception ───────────────────
+        try {{
+            const Builder = Java.use("okhttp3.OkHttpClient$Builder");
+            Builder.certificatePinner.implementation = function(pinner) {{
+                log(LOG_SSL, "OkHttpClient.Builder.certificatePinner suppressed");
+                return this;
+            }};
+            Builder.sslSocketFactory.overloads.forEach(ol => {{
+                ol.implementation = function() {{
+                    log(LOG_SSL, "OkHttpClient.Builder.sslSocketFactory suppressed");
+                    return this;
+                }};
+            }});
+            Builder.hostnameVerifier.implementation = function(v) {{
+                log(LOG_SSL, "OkHttpClient.Builder.hostnameVerifier suppressed");
+                return this;
+            }};
+        }} catch(e) {{}}
+
+        // ── 13. Volley ────────────────────────────────────────────────────
+        try {{
+            const HurlStack = Java.use("com.android.volley.toolbox.HurlStack");
+            HurlStack.createConnection.implementation = function(url) {{
+                const conn = this.createConnection(url);
+                try {{
+                    const httpsConn = Java.cast(conn, Java.use("javax.net.ssl.HttpsURLConnection"));
+                    httpsConn.setHostnameVerifier(
+                        Java.use("javax.net.ssl.HttpsURLConnection").getDefaultHostnameVerifier()
+                    );
+                }} catch(_) {{}}
+                return conn;
+            }};
+        }} catch(e) {{}}
+
+        // ── 14. Network Security Config bypass ────────────────────────────
+        try {{
+            const NSC = Java.use("android.security.net.config.NetworkSecurityConfig");
+            if (NSC.isCleartextPermitted) {{
+                NSC.isCleartextPermitted.implementation = function(host) {{
+                    log(LOG_SSL, `NSC.isCleartextPermitted → true: ${{host}}`);
+                    return true;
+                }};
+            }}
+        }} catch(e) {{}}
+
+        // ── 15. PinningTrustManager (DataTheorem TrustKit) ────────────────
+        const trustkitClasses = [
+            "com.datatheorem.android.trustkit.pinning.PinningTrustManager",
+            "com.datatheorem.android.trustkit.pinning.OkHostnameVerifier",
+        ];
+        trustkitClasses.forEach(cls => {{
+            try {{
+                const TK = Java.use(cls);
+                if (TK.checkServerTrusted) {{
+                    TK.checkServerTrusted.overloads.forEach(ol => {{
+                        ol.implementation = function() {{
+                            log(LOG_SSL, `TrustKit bypassed: ${{cls}}`);
+                            return trustCheckReturn(ol);
+                        }};
+                    }});
+                }}
+            }} catch(e) {{}}
+        }});
+
+{okhttp3_extra}
+{conscrypt_extra}
+{cronet_extra}
+{flutter_extra}
+{xamarin_extra}
+{nsc_extra}
+{grpc_extra}
+{ktor_extra}
+{ct_extra}
+{custom_hooks}
+
+        log(LOG_SSL, "═══ SSL Pinning Bypass Active ═══");
+    }});
+}}
+"""
+
+    def _android_okhttp3_advanced(self) -> str:
+        return """
+        // ── OkHttp3 Advanced — Handshake / Connection ─────────────────────
+        try {
+            const Handshake = Java.use("okhttp3.Handshake");
+            Handshake.get.overloads.forEach(ol => {
+                ol.implementation = function() {
+                    log(LOG_SSL, "OkHttp3.Handshake.get intercepted");
+                    return ol.apply(this, arguments);
+                };
+            });
+        } catch(e) {}
+
+        try {
+            const RealConn = Java.use("okhttp3.internal.connection.RealConnection");
+            if (RealConn.connectTls) {
+                RealConn.connectTls.implementation = function(sslSocketFactory, hostnameVerifier, connectionSpec, readTimeout, writeTimeout) {
+                    log(LOG_SSL, "RealConnection.connectTls intercepted");
+                    // Inject our factory
+                    return this.connectTls(sslSocketFactory, (h, s) => true, connectionSpec, readTimeout, writeTimeout);
+                };
+            }
+        } catch(e) {}"""
+
+    def _android_flutter_hooks(self) -> str:
+        return """
+        // ── Flutter SSL Bypass ────────────────────────────────────────────
+        // Flutter uses its own Dart SSL stack via libflutter.so
+        // Intercept at the BoringSSL layer via native hooks
+        try {
+            const ssl_verify = Module.findExportByName("libflutter.so", "SSL_CTX_set_verify");
+            if (ssl_verify) {
+                Interceptor.attach(ssl_verify, {
+                    onEnter: function(args) {
+                        args[1] = ptr(0); // SSL_VERIFY_NONE
+                        log(LOG_SSL, "Flutter SSL_CTX_set_verify → SSL_VERIFY_NONE");
+                    }
+                });
+            }
+        } catch(e) {}
+
+        // Flutter BoringSSL custom_verify callback
+        try {
+            const flutter_ssl = Module.findExportByName("libflutter.so", "SSL_set_custom_verify");
+            if (flutter_ssl) {
+                Interceptor.attach(flutter_ssl, {
+                    onEnter: function(args) {
+                        log(LOG_SSL, "Flutter SSL_set_custom_verify intercepted");
+                        args[2] = new NativeCallback(function() { return 0; }, 'int', ['pointer', 'pointer']);
+                    }
+                });
+            }
+        } catch(e) {}
+
+        // Flutter certificate_verifier
+        const flutterPins = [
+            "dart::bin::SSLCertContext::AddRootCertBytes",
+            "Dart_NewListOf",
+        ];
+        flutterPins.forEach(sym => {
+            try {
+                const addr = Module.findExportByName("libflutter.so", sym);
+                if (addr) {
+                    Interceptor.attach(addr, {
+                        onLeave: function(retval) {
+                            log(LOG_SSL, `Flutter ${sym} bypassed`);
+                        }
+                    });
+                }
+            } catch(e) {}
+        });"""
+
+    def _android_conscrypt_hooks(self) -> str:
+        return """
+        // ── Conscrypt SSL Bypass ──────────────────────────────────────────
+        try {
+            const ConscryptTM = Java.use("com.android.org.conscrypt.TrustManagerImpl");
+            ["checkServerTrusted","checkTrustedRecursive"].forEach(m => {
+                try {
+                    ConscryptTM[m].overloads.forEach(ol => {
+                        ol.implementation = function() {
+                            log(LOG_SSL, `Conscrypt.${m} bypassed`);
+                            return trustCheckReturn(ol);
+                        };
+                    });
+                } catch(e) {}
+            });
+            log(LOG_SSL, "✓ Conscrypt TrustManager hooked");
+        } catch(e) {}
+
+        try {
+            const OpenSSLX509 = Java.use("com.android.org.conscrypt.OpenSSLSocketImpl");
+            OpenSSLX509.verifyCertificateChain.implementation = function() {
+                log(LOG_SSL, "Conscrypt OpenSSLSocketImpl.verifyCertificateChain bypassed");
+            };
+        } catch(e) {}"""
+
+    def _android_cronet_hooks(self) -> str:
+        return """
+        // ── Cronet (Chromium Network Stack) Bypass ────────────────────────
+        try {
+            const cronetLib = Process.getModuleByName("libcronet.so") ||
+                              Process.findModuleByName("libcronet.86_64.so");
+            if (cronetLib) {
+                // Hook SSL_CTX_set_verify_depth / SSL_CTX_set_verify
+                ["SSL_CTX_set_verify","SSL_CTX_set_cert_verify_callback"].forEach(sym => {
+                    try {
+                        const exp = Module.findExportByName(cronetLib.name, sym);
+                        if (exp) {
+                            Interceptor.attach(exp, {
+                                onEnter: function(args) {
+                                    log(LOG_SSL, `Cronet ${sym} intercepted`);
+                                    if (sym === "SSL_CTX_set_verify") args[1] = ptr(0);
+                                }
+                            });
+                        }
+                    } catch(e) {}
+                });
+                log(LOG_SSL, "✓ Cronet native hooks applied");
+            }
+        } catch(e) {}"""
+
+    def _android_xamarin_hooks(self) -> str:
+        return """
+        // ── Xamarin / Mono SSL Bypass ─────────────────────────────────────
+        try {
+            const MonoTLS = Java.use("mono.android.net.MonoTlsProviderFactory");
+            log(LOG_SSL, "Xamarin MonoTlsProviderFactory found — applying bypass");
+        } catch(e) {}
+
+        try {
+            const BTlsProvider = Java.use("btls.BoringTlsProvider");
+            log(LOG_SSL, "Xamarin BoringTLS provider found");
+        } catch(e) {}
+
+        // ServicePointManager equivalent for Xamarin
+        ["Mono.Net.Security.MobileTlsContext",
+         "Xamarin.Android.Net.AndroidClientHandler"].forEach(cls => {
+            try {
+                const C = Java.use(cls);
+                if (C.ValidateServerCertificate) {
+                    C.ValidateServerCertificate.implementation = function() {
+                        log(LOG_SSL, `Xamarin ${cls}.ValidateServerCertificate → true`);
+                        return true;
+                    };
+                }
+            } catch(e) {}
+        });"""
+
+    def _android_nsc_hooks(self) -> str:
+        return """
+        // ── Network Security Config full bypass ───────────────────────────
+        try {
+            const NSCConfig = Java.use("android.security.net.config.NetworkSecurityConfig");
+            const NSCTrustManager = Java.use("android.security.net.config.NetworkSecurityTrustManager");
+            NSCTrustManager.checkServerTrusted.overloads.forEach(ol => {
+                ol.implementation = function() {
+                    log(LOG_SSL, "NetworkSecurityTrustManager.checkServerTrusted bypassed");
+                    return trustCheckReturn(ol);
+                };
+            });
+            NSCTrustManager.checkPins.overloads.forEach(ol => {
+                ol.implementation = function() {
+                    log(LOG_SSL, "NetworkSecurityTrustManager.checkPins bypassed");
+                };
+            });
+            log(LOG_SSL, "✓ Network Security Config TrustManager hooked");
+        } catch(e) {}
+
+        // RootTrustManager
+        try {
+            const RTM = Java.use("android.security.net.config.RootTrustManager");
+            RTM.checkServerTrusted.overloads.forEach(ol => {
+                ol.implementation = function() {
+                    log(LOG_SSL, "RootTrustManager.checkServerTrusted bypassed");
+                    return trustCheckReturn(ol);
+                };
+            });
+        } catch(e) {}"""
+
+    def _android_custom_ssl_hooks(self) -> str:
+        if not self.info.smali_pinning_classes:
+            return "        // No custom SSL classes detected via static analysis"
+        lines = ["        // ── Custom App-Specific SSL Classes ─────────────────────────────"]
+        for cls in self.info.smali_pinning_classes[:12]:
+            safe = cls.replace("'","\\'")
+            lines.append(f"""
+        try {{
+            const CustomSSL_{cls.split(".")[-1][:20].replace("$","_")} = Java.use("{safe}");
+            ["checkServerTrusted","checkPinning","verify","isValid","validateCertificate",
+             "checkCertificate","verifyCertificate","onReceivedSslError"].forEach(method => {{
+                try {{
+                    const m = CustomSSL_{cls.split(".")[-1][:20].replace("$","_")}[method];
+                    if (m) {{
+                        m.overloads.forEach(ol => {{
+                            ol.implementation = function() {{
+                                log(LOG_SSL, `Custom bypass: {safe}.${{method}}`);
+                                var _rt2 = ol.returnType ? ol.returnType.className : "void";
+                                if (_rt2 === "void") return undefined;
+                                if (_rt2 === "boolean") return true;
+                                if (_rt2 === "java.util.List") return _ArrayList ? _ArrayList.$new() : null;
+                                return null;
+                            }};
+                        }});
+                    }}
+                }} catch(_) {{}}
+            }});
+        }} catch(e) {{}}""")
+        return "\n".join(lines)
+
+    def _android_grpc_hooks(self) -> str:
+        return """
+        // ── gRPC SSL Bypass ───────────────────────────────────────────────
+        try {
+            Java.enumerateLoadedClasses({
+                onMatch: function(name) {
+                    if (name.startsWith("io.grpc") &&
+                        (name.indexOf("Trust") !== -1 || name.indexOf("Ssl") !== -1 ||
+                         name.indexOf("Tls") !== -1)) {
+                        try {
+                            const cls = Java.use(name);
+                            ["checkServerTrusted","checkClientTrusted"].forEach(function(m) {
+                                try {
+                                    if (cls[m]) {
+                                        cls[m].overloads.forEach(function(ol) {
+                                            ol.implementation = function() {
+                                                log(LOG_SSL, "gRPC bypass: " + name + "." + m);
+                                                return trustCheckReturn(ol);
+                                            };
+                                        });
+                                    }
+                                } catch(_) {}
+                            });
+                        } catch(_) {}
+                    }
+                },
+                onComplete: function() {}
+            });
+            log(LOG_SSL, "✓ gRPC SSL hooks applied");
+        } catch(e) {}
+
+        // gRPC OkHttp transport channel builder
+        try {
+            const OkHttpChannelBuilder = Java.use("io.grpc.okhttp.OkHttpChannelBuilder");
+            if (OkHttpChannelBuilder.hostnameVerifier) {
+                OkHttpChannelBuilder.hostnameVerifier.overloads.forEach(function(ol) {
+                    ol.implementation = function() {
+                        log(LOG_SSL, "gRPC OkHttpChannelBuilder.hostnameVerifier suppressed");
+                        return this;
+                    };
+                });
+            }
+        } catch(e) {}"""
+
+    def _android_ktor_hooks(self) -> str:
+        return """
+        // ── Ktor SSL Bypass ───────────────────────────────────────────────
+        try {
+            Java.enumerateLoadedClasses({
+                onMatch: function(name) {
+                    if (name.startsWith("io.ktor") &&
+                        (name.indexOf("Ssl") !== -1 || name.indexOf("Tls") !== -1 ||
+                         name.indexOf("Trust") !== -1)) {
+                        try {
+                            const cls = Java.use(name);
+                            ["checkServerTrusted","checkClientTrusted"].forEach(function(m) {
+                                try {
+                                    if (cls[m]) {
+                                        cls[m].overloads.forEach(function(ol) {
+                                            ol.implementation = function() {
+                                                log(LOG_SSL, "Ktor bypass: " + name + "." + m);
+                                                return trustCheckReturn(ol);
+                                            };
+                                        });
+                                    }
+                                } catch(_) {}
+                            });
+                        } catch(_) {}
+                    }
+                },
+                onComplete: function() {}
+            });
+            log(LOG_SSL, "✓ Ktor SSL hooks applied");
+        } catch(e) {}"""
+
+    def _android_ct_hooks(self) -> str:
+        return """
+        // ── Certificate Transparency Bypass ──────────────────────────────
+        try {
+            Java.enumerateLoadedClasses({
+                onMatch: function(name) {
+                    if (name.startsWith("org.certificatetransparency")) {
+                        try {
+                            const cls = Java.use(name);
+                            ["checkServerTrusted","verify","isValid"].forEach(function(m) {
+                                try {
+                                    if (cls[m]) {
+                                        cls[m].overloads.forEach(function(ol) {
+                                            ol.implementation = function() {
+                                                log(LOG_SSL, "CT bypass: " + name + "." + m);
+                                                var rt = ol.returnType ? ol.returnType.className : "void";
+                                                if (rt === "void") return undefined;
+                                                if (rt === "boolean") return true;
+                                                return trustCheckReturn(ol);
+                                            };
+                                        });
+                                    }
+                                } catch(_) {}
+                            });
+                        } catch(_) {}
+                    }
+                },
+                onComplete: function() {}
+            });
+            log(LOG_SSL, "✓ Certificate Transparency hooks applied");
+        } catch(e) {}"""
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # ANDROID ROOT BYPASS — COMPREHENSIVE
+    # ═══════════════════════════════════════════════════════════════════════
+    def _android_root_all(self) -> str:
+        i = self.info
+        rootbeer  = self._android_rootbeer_hooks() if i.uses_rootbeer else ""
+        safetynet = self._android_safetynet_hooks() if (i.uses_safetynet or i.uses_play_integrity) else ""
+        promon    = self._android_promon_hooks()    if i.uses_promon    else ""
+        talsec    = self._android_talsec_hooks()    if i.uses_talsec    else ""
+        approov   = self._android_approov_hooks()   if i.uses_approov   else ""
+        zimperium = self._android_zimperium_hooks() if i.uses_zimperium else ""
+        knox      = self._android_knox_hooks()      if i.uses_knox      else ""
+        custom    = self._android_custom_root_hooks()
+
+        return f"""
+// ═══════════════════ ANDROID ROOT DETECTION BYPASS ═══════════════════════════
+// Covers: RootBeer · SafetyNet / Play Integrity · File-based root checks
+//         su binary detection · Build.TAG · /proc/mounts · Emulator checks
+//         Frida detection · Magisk · Zygisk · Custom root check classes
+// ═════════════════════════════════════════════════════════════════════════════
+
+function bypassRootDetectionAndroid() {{
+    Java.perform(function() {{
+
+        // ── 1. Runtime.exec — intercept su / root commands ────────────────
+        try {{
+            const Runtime = Java.use("java.lang.Runtime");
+            Runtime.exec.overloads.forEach(ol => {{
+                ol.implementation = function() {{
+                    const cmd = arguments[0];
+                    const cmdStr = Array.isArray(cmd) ? cmd.join(" ") : String(cmd);
+                    if (/su|busybox|which|root|magisk|superuser/i.test(cmdStr)) {{
+                        log(LOG_ROOT, `Runtime.exec intercepted: ${{cmdStr}}`);
+                        throw Java.use("java.io.IOException").$new("Permission denied");
+                    }}
+                    return ol.apply(this, arguments);
+                }};
+            }});
+            log(LOG_ROOT, "✓ Runtime.exec hooked");
+        }} catch(e) {{}}
+
+        // ── 2. File existence checks ──────────────────────────────────────
+        const ROOT_PATHS = [
+            "/system/app/Superuser.apk", "/sbin/su", "/system/bin/su",
+            "/system/xbin/su", "/data/local/xbin/su", "/data/local/bin/su",
+            "/system/sd/xbin/su", "/system/bin/failsafe/su", "/data/local/su",
+            "/su/bin/su", "/su/bin", "/system/xbin/busybox", "/system/xbin/daemonsu",
+            "/system/etc/init.d/99SuperSUDaemon", "/dev/com.koushikdutta.superuser.daemon/",
+            "/system/app/SuperSU.apk", "/sbin/.magisk", "/sbin/.core/mirror",
+            "/cache/.disable_magisk", "/data/magisk.db",
+        ];
+
+        try {{
+            const File = Java.use("java.io.File");
+            // Save originals BEFORE hooking — calling this.exists()/canExecute() inside
+            // the hook re-enters the hook (infinite recursion). Use saved refs instead.
+            const _fileExists   = File.exists;
+            const _fileCanExec  = File.canExecute;
+            File.exists.implementation = function() {{
+                const path = this.getAbsolutePath();
+                if (ROOT_PATHS.some(p => path.indexOf(p) !== -1) ||
+                    path.indexOf("magisk") !== -1 || path.indexOf("Magisk") !== -1) {{
+                    log(LOG_ROOT, "File.exists → false (blocked): " + path);
+                    return false;
+                }}
+                return _fileExists.call(this);
+            }};
+            File.canExecute.implementation = function() {{
+                const path = this.getAbsolutePath();
+                if (path.indexOf("su") !== -1 || path.indexOf("magisk") !== -1) {{
+                    log(LOG_ROOT, "File.canExecute → false (blocked): " + path);
+                    return false;
+                }}
+                return _fileCanExec.call(this);
+            }};
+            log(LOG_ROOT, "✓ File existence checks hooked");
+        }} catch(e) {{}}
+
+        // ── 3. Build.TAGS check ───────────────────────────────────────────
+        try {{
+            const BuildVersion = Java.use("android.os.Build");
+            const TAGS_Field = BuildVersion.class.getDeclaredField("TAGS");
+            TAGS_Field.setAccessible(true);
+            TAGS_Field.set(null, "release-keys");
+
+            BuildVersion.TYPE.value = "user";
+            log(LOG_ROOT, "✓ Build.TAGS → release-keys, Build.TYPE → user");
+        }} catch(e) {{ warn(LOG_ROOT, `Build.TAGS: ${{e.message}}`); }}
+
+        // ── 4. System Properties ──────────────────────────────────────────
+        try {{
+            const SystemProperties = Java.use("android.os.SystemProperties");
+            SystemProperties.get.overloads.forEach(ol => {{
+                ol.implementation = function() {{
+                    const key = String(arguments[0]);
+                    if (key === "ro.debuggable" || key === "ro.secure") {{
+                        log(LOG_ROOT, `SystemProperties.get("${{key}}") → safe value`);
+                        return (key === "ro.debuggable") ? "0" : "1";
+                    }}
+                    return ol.apply(this, arguments);
+                }};
+            }});
+        }} catch(e) {{}}
+
+        // ── 5. PackageManager — hide Superuser/Magisk apps ────────────────
+        const HIDDEN_PACKAGES = [
+            "com.noshufou.android.su", "com.noshufou.android.su.elite",
+            "eu.chainfire.supersu", "com.koushikdutta.superuser",
+            "com.thirdparty.superuser", "com.yellowes.su",
+            "com.topjohnwu.magisk", "com.fox2code.mmm",
+            "io.github.vvb2060.magisk", "me.weishu.kernelsu",
+        ];
+        try {{
+            const PM = Java.use("android.app.ApplicationPackageManager");
+            PM.getPackageInfo.overloads.forEach(ol => {{
+                ol.implementation = function(pkg, flags) {{
+                    if (HIDDEN_PACKAGES.includes(String(pkg))) {{
+                        log(LOG_ROOT, `PackageManager.getPackageInfo blocked: ${{pkg}}`);
+                        throw Java.use("android.content.pm.PackageManager$NameNotFoundException").$new(pkg);
+                    }}
+                    return ol.call(this, pkg, flags);
+                }};
+            }});
+            log(LOG_ROOT, "✓ PackageManager.getPackageInfo hooked");
+        }} catch(e) {{}}
+
+        // ── 6. /proc/mounts — hide root mounts ───────────────────────────
+        try {{
+            const BufferedReader = Java.use("java.io.BufferedReader");
+            // Save original BEFORE hooking — calling this.readLine() inside the hook
+            // re-enters the hook (infinite recursion). Use the saved ref instead.
+            const _readLine = BufferedReader.readLine;
+            BufferedReader.readLine.implementation = function() {{
+                const line = _readLine.call(this);
+                if (line && (line.indexOf("magisk") !== -1 || line.indexOf("/su ") !== -1)) {{
+                    log(LOG_ROOT, "BufferedReader.readLine filtered: " + line.slice(0,50));
+                    return _readLine.call(this); // skip filtered line, return next
+                }}
+                return line;
+            }};
+        }} catch(e) {{}}
+
+        // ── 7. Native root binary check via libc ──────────────────────────
+        try {{
+            const access = Module.findExportByName("libc.so", "access");
+            if (access) {{
+                Interceptor.attach(access, {{
+                    onEnter: function(args) {{
+                        const path = args[0].readCString() || "";
+                        if (path.includes("/su") || path.includes("magisk") || path.includes("busybox")) {{
+                            log(LOG_ROOT, `libc.access blocked: ${{path}}`);
+                            this._block = true;
+                        }}
+                    }},
+                    onLeave: function(retval) {{
+                        if (this._block) {{ retval.replace(-1); this._block = false; }}
+                    }}
+                }});
+                log(LOG_ROOT, "✓ libc.access hooked");
+            }}
+        }} catch(e) {{}}
+
+        // ── 8. fopen — block /proc/self/maps root file reads ──────────────
+        try {{
+            const fopen = Module.findExportByName("libc.so", "fopen");
+            if (fopen) {{
+                Interceptor.attach(fopen, {{
+                    onEnter: function(args) {{
+                        const path = args[0].readCString() || "";
+                        if (path.includes("magisk") || path.includes("/su")) {{
+                            log(LOG_ROOT, `libc.fopen blocked: ${{path}}`);
+                            args[0] = Memory.allocUtf8String("/dev/null");
+                        }}
+                    }}
+                }});
+            }}
+        }} catch(e) {{}}
+
+        // ── 9. Process check (which su) ───────────────────────────────────
+        try {{
+            const ProcessBuilder = Java.use("java.lang.ProcessBuilder");
+            ProcessBuilder.start.implementation = function() {{
+                const cmd = this.command().toArray().join(" ");
+                if (/su|which|busybox/i.test(cmd)) {{
+                    log(LOG_ROOT, `ProcessBuilder.start blocked: ${{cmd}}`);
+                    throw Java.use("java.io.IOException").$new("Permission denied");
+                }}
+                return this.start();
+            }};
+        }} catch(e) {{}}
+
+        // ── 10. Emulator detection bypass ─────────────────────────────────
+        try {{
+            const TelephonyManager = Java.use("android.telephony.TelephonyManager");
+            TelephonyManager.getDeviceId.overloads.forEach(ol => {{
+                ol.implementation = function() {{
+                    return "354887062252736"; // Real-looking IMEI
+                }};
+            }});
+        }} catch(e) {{}}
+
+        try {{
+            const Build = Java.use("android.os.Build");
+            const fakeValues = {{
+                FINGERPRINT: "google/walleye/walleye:8.1.0/OPM1.171019.011/4448085:user/release-keys",
+                MODEL: "Pixel 2",
+                MANUFACTURER: "Google",
+                BRAND: "google",
+                DEVICE: "walleye",
+                PRODUCT: "walleye",
+                HARDWARE: "walleye",
+            }};
+            Object.entries(fakeValues).forEach(([field, val]) => {{
+                try {{ Build[field].value = val; }} catch(e) {{}}
+            }});
+            log(LOG_ROOT, "✓ Build properties spoofed (anti-emulator)");
+        }} catch(e) {{}}
+
+        // ── 11. Frida self-detection bypass ───────────────────────────────
+        try {{
+            const System = Java.use("java.lang.System");
+            const orig_load = System.load;
+            System.load.implementation = function(lib) {{
+                log(LOG_ROOT, `System.load: ${{lib}}`);
+                return orig_load.call(this, lib);
+            }};
+        }} catch(e) {{}}
+
+        // Hide frida-agent from /proc/maps
+        try {{
+            const fopen64 = Module.findExportByName("libc.so", "fopen64") ||
+                            Module.findExportByName("libc.so", "fopen");
+            if (fopen64) {{
+                Interceptor.attach(fopen64, {{
+                    onEnter: function(args) {{
+                        const path = args[0].readCString() || "";
+                        if (path === "/proc/self/maps" || path === "/proc/self/status") {{
+                            this._isMaps = true;
+                        }}
+                    }},
+                    onLeave: function(retval) {{
+                        // Let it open but filter frida lines in read hooks
+                    }}
+                }});
+            }}
+        }} catch(e) {{}}
+
+{rootbeer}
+{safetynet}
+{promon}
+{talsec}
+{approov}
+{zimperium}
+{knox}
+{custom}
+
+        log(LOG_ROOT, "═══ Root Detection Bypass Active ═══");
+    }});
+}}
+"""
+
+    def _android_rootbeer_hooks(self) -> str:
+        return """
+        // ── RootBeer Library Bypass ───────────────────────────────────────
+        try {
+            const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
+            const rootMethods = [
+                "isRooted","isRootedWithoutBusyBoxCheck","detectRootManagementApps",
+                "detectPotentiallyDangerousApps","detectTestKeys","checkForBusyBoxBinary",
+                "checkForSuBinary","checkSuExists","checkForDangerousProps",
+                "checkForRWPaths","detectRootCloakingApps","checkForMagiskBinary",
+                "isSelinuxFlagInEnabled","isExistBuildTags","checkForNativeLibraryReadAccess",
+            ];
+            rootMethods.forEach(method => {
+                try {
+                    RootBeer[method].overloads.forEach(ol => {
+                        ol.implementation = function() {
+                            log(LOG_ROOT, `RootBeer.${method} → false`);
+                            return (ol.returnType && ol.returnType.className === "boolean") ? false : null;
+                        };
+                    });
+                } catch(e) {}
+            });
+            log(LOG_ROOT, "✓ RootBeer fully bypassed");
+        } catch(e) { warn(LOG_ROOT, `RootBeer: ${e.message}`); }"""
+
+    def _android_safetynet_hooks(self) -> str:
+        return """
+        // ── SafetyNet / Play Integrity API Bypass ────────────────────────
+        // SafetyNet deprecated — Play Integrity is the replacement
+        try {
+            const SafetyNet = Java.use("com.google.android.gms.safetynet.SafetyNetApi");
+            log(LOG_ROOT, "SafetyNet API detected — monitoring");
+        } catch(e) {}
+
+        // Play Integrity token intercept
+        try {
+            const IntegrityManager = Java.use("com.google.android.play.core.integrity.IntegrityManager");
+            log(LOG_ROOT, "Play Integrity Manager detected");
+        } catch(e) {}
+
+        // Hook the JWS verdict response parser instead
+        // (more reliable than hooking the API call itself)
+        try {
+            const StandardIntegrityManager = Java.use(
+                "com.google.android.play.core.integrity.StandardIntegrityManager"
+            );
+            log(LOG_ROOT, "StandardIntegrityManager detected — consider server-side bypass");
+        } catch(e) {}
+
+        // Hook SharedPreferences where integrity result is cached
+        try {
+            const SharedPrefs = Java.use("android.app.SharedPreferencesImpl");
+            SharedPrefs.getBoolean.implementation = function(key, def) {
+                const val = this.getBoolean(key, def);
+                if (/integrity|safetynet|rooted|tamper/i.test(String(key))) {
+                    log(LOG_ROOT, `SharedPrefs.getBoolean("${key}") → false`);
+                    return false;
+                }
+                return val;
+            };
+            SharedPrefs.getString.implementation = function(key, def) {
+                const val = this.getString(key, def);
+                if (/integrity|verdict/i.test(String(key))) {
+                    log(LOG_ROOT, `SharedPrefs.getString("${key}") intercepted`);
+                }
+                return val;
+            };
+            log(LOG_ROOT, "✓ SharedPreferences integrity cache hooked");
+        } catch(e) {}"""
+
+    def _android_custom_root_hooks(self) -> str:
+        if not self.info.smali_root_classes:
+            return "        // No custom root detection classes detected via static analysis"
+        lines = ["        // ── Custom Root Detection Classes ───────────────────────────────"]
+        for cls in self.info.smali_root_classes[:10]:
+            safe = cls.replace("'","\\'")
+            tag = cls.split(".")[-1][:20].replace("$","_").replace("-","_")
+            lines.append(f"""
+        try {{
+            const Root_{tag} = Java.use("{safe}");
+            ["isRooted","isDeviceRooted","checkRoot","isJailbroken","checkIntegrity",
+             "detect","isEmulator","checkEmulator","isFridaPresent","isHooked",
+             "isTampered","isDebuggable","check","validate"].forEach(method => {{
+                try {{
+                    Root_{tag}[method].overloads.forEach(ol => {{
+                        ol.implementation = function() {{
+                            log(LOG_ROOT, `Custom bypass: {safe}.${{method}}`);
+                            const rt = (ol.returnType ? ol.returnType.className : null);
+                            if (rt === "boolean") return false;
+                            if (rt === "int") return 0;
+                            if (rt === "void") return;
+                            return null;
+                        }};
+                    }});
+                }} catch(_) {{}}
+            }});
+            log(LOG_ROOT, "✓ Custom root class hooked: {safe}");
+        }} catch(e) {{}}""")
+        return "\n".join(lines)
+
+    def _android_promon_hooks(self) -> str:
+        return """
+        // ── Promon SHIELD Bypass ──────────────────────────────────────────
+        try {
+            Java.enumerateLoadedClasses({
+                onMatch: function(name) {
+                    if (name.startsWith("com.promon")) {
+                        try {
+                            const cls = Java.use(name);
+                            ["isRooted","isHooked","isTampered","isEmulator",
+                             "check","runChecks","getResult","isDeviceSecure"].forEach(function(m) {
+                                try {
+                                    if (cls[m]) {
+                                        cls[m].overloads.forEach(function(ol) {
+                                            ol.implementation = function() {
+                                                log(LOG_ROOT, "Promon bypass: " + name + "." + m);
+                                                var rt = ol.returnType ? ol.returnType.className : "void";
+                                                if (rt === "boolean") return false;
+                                                if (rt === "int") return 0;
+                                                if (rt === "void") return undefined;
+                                                return null;
+                                            };
+                                        });
+                                    }
+                                } catch(_) {}
+                            });
+                            log(LOG_ROOT, "✓ Promon class hooked: " + name);
+                        } catch(_) {}
+                    }
+                },
+                onComplete: function() {}
+            });
+        } catch(e) { warn(LOG_ROOT, "Promon: " + e.message); }"""
+
+    def _android_talsec_hooks(self) -> str:
+        return """
+        // ── Talsec / FreeRASP Bypass ──────────────────────────────────────
+        try {
+            const Talsec = Java.use("com.aheaditec.freerasp.Talsec");
+            if (Talsec.start) {
+                Talsec.start.overloads.forEach(function(ol) {
+                    ol.implementation = function() {
+                        log(LOG_ROOT, "Talsec.start() suppressed");
+                    };
+                });
+                log(LOG_ROOT, "✓ Talsec.start() blocked");
+            }
+        } catch(e) {}
+
+        try {
+            Java.enumerateLoadedClasses({
+                onMatch: function(name) {
+                    if (name.startsWith("com.aheaditec")) {
+                        try {
+                            const cls = Java.use(name);
+                            ["isRooted","isTampered","isEmulator","isHooked",
+                             "checkIntegrity","getThreatLevel","onRootDetected",
+                             "onHookDetected","onTamperDetected","onEmulatorDetected"].forEach(function(m) {
+                                try {
+                                    if (cls[m]) {
+                                        cls[m].overloads.forEach(function(ol) {
+                                            ol.implementation = function() {
+                                                log(LOG_ROOT, "Talsec bypass: " + name + "." + m);
+                                                var rt = ol.returnType ? ol.returnType.className : "void";
+                                                if (rt === "boolean") return false;
+                                                if (rt === "int") return 0;
+                                                if (rt === "void") return undefined;
+                                                return null;
+                                            };
+                                        });
+                                    }
+                                } catch(_) {}
+                            });
+                        } catch(_) {}
+                    }
+                },
+                onComplete: function() {}
+            });
+            log(LOG_ROOT, "✓ Talsec / FreeRASP hooks applied");
+        } catch(e) { warn(LOG_ROOT, "Talsec: " + e.message); }"""
+
+    def _android_approov_hooks(self) -> str:
+        return """
+        // ── Approov Attestation Bypass ────────────────────────────────────
+        try {
+            const Approov = Java.use("io.approov.service.ApproovService");
+            ["fetchApproovToken","fetchApproovTokenAndWait",
+             "addSubstitutionHeader","removeSubstitutionHeader"].forEach(function(m) {
+                try {
+                    if (Approov[m]) {
+                        Approov[m].overloads.forEach(function(ol) {
+                            ol.implementation = function() {
+                                log(LOG_ROOT, "Approov." + m + " intercepted");
+                                var rt = ol.returnType ? ol.returnType.className : "void";
+                                if (rt === "void") return undefined;
+                                if (rt === "java.lang.String") return "";
+                                return null;
+                            };
+                        });
+                    }
+                } catch(_) {}
+            });
+            log(LOG_ROOT, "✓ Approov ApproovService hooked");
+        } catch(e) {}
+
+        try {
+            Java.enumerateLoadedClasses({
+                onMatch: function(name) {
+                    if (name.startsWith("io.approov")) {
+                        try {
+                            const cls = Java.use(name);
+                            ["getStatus","isSuccessful","isRejected"].forEach(function(m) {
+                                try {
+                                    if (cls[m]) {
+                                        cls[m].overloads.forEach(function(ol) {
+                                            ol.implementation = function() {
+                                                var rt = ol.returnType ? ol.returnType.className : "void";
+                                                if (rt === "boolean") return true;
+                                                if (rt === "java.lang.String") return "approov_bypassed";
+                                                return null;
+                                            };
+                                        });
+                                    }
+                                } catch(_) {}
+                            });
+                        } catch(_) {}
+                    }
+                },
+                onComplete: function() {}
+            });
+        } catch(e) {}"""
+
+    def _android_zimperium_hooks(self) -> str:
+        return """
+        // ── Zimperium zShield / zIAP Bypass ──────────────────────────────
+        try {
+            Java.enumerateLoadedClasses({
+                onMatch: function(name) {
+                    if (name.startsWith("com.zimperium") || name.startsWith("com.zips")) {
+                        try {
+                            const cls = Java.use(name);
+                            ["isThreatDetected","getThreatLevel","isRooted","isHooked",
+                             "isEmulator","onThreatDetected","checkThreat","initialize"].forEach(function(m) {
+                                try {
+                                    if (cls[m]) {
+                                        cls[m].overloads.forEach(function(ol) {
+                                            ol.implementation = function() {
+                                                log(LOG_ROOT, "Zimperium bypass: " + name + "." + m);
+                                                var rt = ol.returnType ? ol.returnType.className : "void";
+                                                if (rt === "boolean") return false;
+                                                if (rt === "int") return 0;
+                                                if (rt === "void") return undefined;
+                                                return null;
+                                            };
+                                        });
+                                    }
+                                } catch(_) {}
+                            });
+                            log(LOG_ROOT, "✓ Zimperium class hooked: " + name);
+                        } catch(_) {}
+                    }
+                },
+                onComplete: function() {}
+            });
+        } catch(e) { warn(LOG_ROOT, "Zimperium: " + e.message); }"""
+
+    def _android_knox_hooks(self) -> str:
+        return """
+        // ── Samsung Knox Bypass ───────────────────────────────────────────
+        try {
+            const EDM = Java.use("com.samsung.android.knox.EnterpriseDeviceManager");
+            if (EDM.isRooted) {
+                EDM.isRooted.implementation = function() {
+                    log(LOG_ROOT, "Knox EnterpriseDeviceManager.isRooted → false");
+                    return false;
+                };
+            }
+        } catch(e) {}
+
+        try {
+            Java.enumerateLoadedClasses({
+                onMatch: function(name) {
+                    if (name.startsWith("com.samsung.android.knox")) {
+                        try {
+                            const cls = Java.use(name);
+                            ["isRooted","isEncryptionEnabled","isDeviceSecure",
+                             "checkTamper","isKnoxActive"].forEach(function(m) {
+                                try {
+                                    if (cls[m]) {
+                                        cls[m].overloads.forEach(function(ol) {
+                                            ol.implementation = function() {
+                                                log(LOG_ROOT, "Knox bypass: " + name + "." + m);
+                                                var rt = ol.returnType ? ol.returnType.className : "void";
+                                                if (rt === "boolean") return false;
+                                                if (rt === "int") return 0;
+                                                if (rt === "void") return undefined;
+                                                return null;
+                                            };
+                                        });
+                                    }
+                                } catch(_) {}
+                            });
+                        } catch(_) {}
+                    }
+                },
+                onComplete: function() {}
+            });
+            log(LOG_ROOT, "✓ Samsung Knox hooks applied");
+        } catch(e) {}"""
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # iOS SSL
+    # ═══════════════════════════════════════════════════════════════════════
+    def _ios_ssl_all(self) -> str:
+        i = self.info
+        afnet  = self._ios_afnetworking_hooks() if i.uses_afnetworking else ""
+        alamo  = self._ios_alamofire_hooks() if i.uses_alamofire else ""
+        trustkit = self._ios_trustkit_hooks() if i.uses_trustkit else ""
+        flutter  = self._ios_flutter_hooks() if i.uses_flutter else ""
+
+        return f"""
+// ═══════════════════ iOS SSL PINNING BYPASS ══════════════════════════════════
+// Covers: NSURLSession · SecureTransport · Security.framework
+//         AFNetworking · Alamofire · TrustKit · Flutter/Dart
+//         Custom certificate validators · NSURLConnection (legacy)
+// ═════════════════════════════════════════════════════════════════════════════
+
+function bypassSSLPinningiOS() {{
+
+    // ── 1. SecTrustEvaluate (SecureTransport / Security.framework) ────────
+    ["SecTrustEvaluate", "SecTrustEvaluateWithError"].forEach(sym => {{
+        try {{
+            const fn = Module.findExportByName("Security", sym);
+            if (fn) {{
+                Interceptor.attach(fn, {{
+                    onLeave: function(retval) {{
+                        log(LOG_SSL, `${{sym}} → kSecTrustResultProceed`);
+                        retval.replace(0); // errSecSuccess
+                    }}
+                }});
+                log(LOG_SSL, `✓ ${{sym}} hooked`);
+            }}
+        }} catch(e) {{}}
+    }});
+
+    // ── 2. SSLHandshake (legacy SecureTransport) ──────────────────────────
+    try {{
+        const SSLHandshake = Module.findExportByName("Security", "SSLHandshake");
+        if (SSLHandshake) {{
+            Interceptor.attach(SSLHandshake, {{
+                onLeave: function(retval) {{
+                    if (retval.toInt32() !== 0) {{
+                        log(LOG_SSL, `SSLHandshake error ${{retval}} → 0`);
+                        retval.replace(0);
+                    }}
+                }}
+            }});
+        }}
+    }} catch(e) {{}}
+
+    // ── 3. NSURLSession delegate pinning ──────────────────────────────────
+    try {{
+        const NSURLSession = ObjC.classes.NSURLSession;
+        if (NSURLSession) {{
+            // URLSession:didReceiveChallenge:completionHandler:
+            const authMethod = "URLSession:didReceiveChallenge:completionHandler:";
+            ObjC.enumerateLoadedClasses({{
+                onMatch: function(name, handle) {{
+                    try {{
+                        const cls = ObjC.classes[name];
+                        if (cls && cls["- URLSession:didReceiveChallenge:completionHandler:"]) {{
+                            const orig = cls["- URLSession:didReceiveChallenge:completionHandler:"];
+                            orig.implementation = ObjC.implement(orig, function(self, sel, session, challenge, completion) {{
+                                log(LOG_SSL, `NSURLSession delegate bypassed: ${{name}}`);
+                                const cred = ObjC.classes.NSURLCredential.credentialForTrust_(
+                                    challenge.protectionSpace().serverTrust()
+                                );
+                                const block = new ObjC.Block(completion);
+                                block(1, cred); // NSURLSessionAuthChallengeUseCredential = 1
+                            }});
+                        }}
+                    }} catch(e) {{}}
+                }},
+                onComplete: function() {{}}
+            }});
+            log(LOG_SSL, "✓ NSURLSession challenge delegates hooked");
+        }}
+    }} catch(e) {{ warn(LOG_SSL, `NSURLSession: ${{e.message}}`); }}
+
+    // ── 4. SecTrustSetAnchorCertificates ─────────────────────────────────
+    try {{
+        const fn = Module.findExportByName("Security", "SecTrustSetAnchorCertificates");
+        if (fn) {{
+            Interceptor.attach(fn, {{
+                onEnter: function(args) {{
+                    log(LOG_SSL, "SecTrustSetAnchorCertificates intercepted");
+                    args[1] = NULL; // clear custom anchors
+                }}
+            }});
+        }}
+    }} catch(e) {{}}
+
+    // ── 5. NSURLConnection delegate (legacy) ─────────────────────────────
+    try {{
+        ObjC.enumerateLoadedClasses({{
+            onMatch: function(name) {{
+                try {{
+                    const cls = ObjC.classes[name];
+                    if (cls && cls["- connection:willSendRequestForAuthenticationChallenge:"]) {{
+                        const m = cls["- connection:willSendRequestForAuthenticationChallenge:"];
+                        m.implementation = ObjC.implement(m, function(self, sel, conn, challenge) {{
+                            log(LOG_SSL, `NSURLConnection delegate bypassed: ${{name}}`);
+                            challenge.sender().useCredential_forAuthenticationChallenge_(
+                                ObjC.classes.NSURLCredential.credentialForTrust_(
+                                    challenge.protectionSpace().serverTrust()
+                                ), challenge
+                            );
+                        }});
+                    }}
+                }} catch(e) {{}}
+            }},
+            onComplete: function() {{}}
+        }});
+    }} catch(e) {{}}
+
+    // ── 6. WKWebView / UIWebView SSL bypass ───────────────────────────────
+    try {{
+        ObjC.enumerateLoadedClasses({{
+            onMatch: function(name) {{
+                try {{
+                    const cls = ObjC.classes[name];
+                    if (cls && cls["- webView:didReceiveAuthenticationChallenge:completionHandler:"]) {{
+                        const m = cls["- webView:didReceiveAuthenticationChallenge:completionHandler:"];
+                        m.implementation = ObjC.implement(m, function(self, sel, wv, challenge, handler) {{
+                            log(LOG_SSL, `WKWebView SSL bypass: ${{name}}`);
+                            const cred = ObjC.classes.NSURLCredential.credentialForTrust_(
+                                challenge.protectionSpace().serverTrust()
+                            );
+                            const block = new ObjC.Block(handler);
+                            block(0, cred); // NSURLSessionAuthChallengeUseCredential
+                        }});
+                    }}
+                }} catch(e) {{}}
+            }},
+            onComplete: function() {{}}
+        }});
+    }} catch(e) {{}}
+
+{afnet}
+{alamo}
+{trustkit}
+{flutter}
+
+    log(LOG_SSL, "═══ iOS SSL Pinning Bypass Active ═══");
+}}
+"""
+
+    def _ios_afnetworking_hooks(self) -> str:
+        return """
+    // ── AFNetworking Bypass ───────────────────────────────────────────────
+    try {
+        const AFSecurityPolicy = ObjC.classes.AFSecurityPolicy;
+        if (AFSecurityPolicy) {
+            const setPinning = AFSecurityPolicy["- setSSLPinningMode:"];
+            if (setPinning) {
+                // DO NOT call this.setSSLPinningMode_(0) — that re-enters this hook.
+                // evaluateServerTrust:forDomain: is bypassed below, so just suppress.
+                setPinning.implementation = ObjC.implement(setPinning, function(self, sel, mode) {
+                    log(LOG_SSL, "AFSecurityPolicy.setSSLPinningMode suppressed (mode was " + mode + ")");
+                });
+            }
+            const setValidate = AFSecurityPolicy["- setAllowInvalidCertificates:"];
+            if (setValidate) {
+                // DO NOT call this.setAllowInvalidCertificates_(1) — re-entrant.
+                setValidate.implementation = ObjC.implement(setValidate, function(self, sel, allow) {
+                    log(LOG_SSL, "AFSecurityPolicy.setAllowInvalidCertificates suppressed");
+                });
+            }
+            const evaluate = AFSecurityPolicy["- evaluateServerTrust:forDomain:"];
+            if (evaluate) {
+                evaluate.implementation = ObjC.implement(evaluate, function(self, sel, trust, domain) {
+                    log(LOG_SSL, `AFSecurityPolicy.evaluateServerTrust → YES: ${domain}`);
+                    return 1; // YES
+                });
+            }
+            log(LOG_SSL, "✓ AFNetworking AFSecurityPolicy bypassed");
+        }
+    } catch(e) { warn(LOG_SSL, `AFNetworking: ${e.message}`); }"""
+
+    def _ios_alamofire_hooks(self) -> str:
+        return """
+    // ── Alamofire Bypass ─────────────────────────────────────────────────
+    // Alamofire uses Swift — hook at ServerTrustManager / ServerTrustEvaluating
+    try {
+        // Find and hook Alamofire.ServerTrustManager evaluate methods
+        const mangledNames = [
+            "_TFC9Alamofire18ServerTrustManager8evaluatefzTCSo14SecTrustRefSS_T_",
+            "$s9Alamofire18ServerTrustManagerC8evaluateyySo03SecD3RefaF_SStKF",
+        ];
+        mangledNames.forEach(mangled => {
+            try {
+                const sym = Module.findExportByName(null, mangled);
+                if (sym) {
+                    Interceptor.attach(sym, {
+                        onLeave: function(retval) {
+                            log(LOG_SSL, `Alamofire ServerTrustManager.evaluate bypassed`);
+                            retval.replace(ptr(0));
+                        }
+                    });
+                    log(LOG_SSL, "✓ Alamofire ServerTrustManager hooked");
+                }
+            } catch(e) {}
+        });
+    } catch(e) {}
+
+    // Alamofire PinnedCertificatesTrustEvaluator / PublicKeysTrustEvaluator
+    ["PinnedCertificatesTrustEvaluator", "PublicKeysTrustEvaluator",
+     "RevocationTrustEvaluator", "CompositeTrustEvaluator"].forEach(cls => {
+        try {
+            const C = ObjC.classes[cls];
+            if (C && C["- evaluate:forHost:"]) {
+                const m = C["- evaluate:forHost:"];
+                m.implementation = ObjC.implement(m, function(self, sel, trust, host) {
+                    log(LOG_SSL, `Alamofire ${cls}.evaluate bypassed: ${host}`);
+                });
+            }
+        } catch(e) {}
+    });"""
+
+    def _ios_trustkit_hooks(self) -> str:
+        return """
+    // ── TrustKit Bypass ──────────────────────────────────────────────────
+    try {
+        const TSKPinningValidator = ObjC.classes.TSKPinningValidator;
+        if (TSKPinningValidator) {
+            const validate = TSKPinningValidator["+ evaluateTrust:forHostname:"];
+            if (validate) {
+                validate.implementation = ObjC.implement(validate, function(self, sel, trust, host) {
+                    log(LOG_SSL, `TrustKit TSKPinningValidator bypassed: ${host}`);
+                    return 0; // TSKTrustDecisionShouldAllowConnection
+                });
+            }
+            log(LOG_SSL, "✓ TrustKit bypassed");
+        }
+    } catch(e) {}"""
+
+    def _ios_flutter_hooks(self) -> str:
+        return """
+    // ── Flutter/Dart iOS SSL Bypass ───────────────────────────────────────
+    try {
+        const flutterLib = Process.getModuleByName("Flutter") ||
+                           Process.findModuleByName("App");
+        if (flutterLib) {
+            ["SSL_CTX_set_verify","SSL_CTX_set_custom_verify",
+             "SSL_set_custom_verify"].forEach(sym => {
+                try {
+                    const exp = Module.findExportByName(flutterLib.name, sym);
+                    if (exp) {
+                        Interceptor.attach(exp, {
+                            onEnter: function(args) {
+                                log(LOG_SSL, `Flutter iOS ${sym} intercepted`);
+                                if (sym.includes("set_verify")) args[1] = ptr(0);
+                            }
+                        });
+                    }
+                } catch(e) {}
+            });
+            log(LOG_SSL, "✓ Flutter iOS SSL hooks applied");
+        }
+    } catch(e) {}"""
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # iOS JAILBREAK BYPASS
+    # ═══════════════════════════════════════════════════════════════════════
+    def _ios_jailbreak_all(self) -> str:
+        return """
+// ═══════════════════ iOS JAILBREAK DETECTION BYPASS ══════════════════════════
+// Covers: File-based checks · Cydia/Sileo · stat/access syscalls
+//         Fork detection · dyld injection · NSFileManager checks
+//         sysctl · PT_DENY_ATTACH · IOKit · sandbox escape tests
+// ═════════════════════════════════════════════════════════════════════════════
+
+function bypassJailbreakDetectioniOS() {
+
+    const JB_PATHS = [
+        "/Applications/Cydia.app", "/Applications/Sileo.app",
+        "/Applications/Zebra.app", "/Applications/Installer.app",
+        "/Library/MobileSubstrate/MobileSubstrate.dylib",
+        "/bin/bash", "/usr/sbin/sshd", "/etc/apt", "/usr/bin/ssh",
+        "/private/var/lib/apt/", "/private/var/lib/cydia",
+        "/private/var/mobile/Library/SBSettings/Themes",
+        "/Library/MobileSubstrate/DynamicLibraries/LiveClock.plist",
+        "/System/Library/LaunchDaemons/com.ikey.bbot.plist",
+        "/var/cache/apt", "/var/lib/apt", "/var/lib/cydia",
+        "/usr/libexec/cydia", "/usr/bin/cycript", "/usr/local/bin/cycript",
+        "/private/etc/dpkg/info/mobilesubstrate.md5sums",
+        "/.installed_unc0ver", "/.bootstrapped_electra",
+        "/var/binpack", "/Library/Frameworks/CydiaSubstrate.framework",
+        "/var/db/stash", "/usr/libexec/sftp-server",
+    ];
+
+    // ── 1. NSFileManager fileExistsAtPath ─────────────────────────────────
+    try {
+        const NSFM = ObjC.classes.NSFileManager;
+        const fileExists = NSFM["- fileExistsAtPath:"];
+        if (fileExists) {
+            fileExists.implementation = ObjC.implement(fileExists, function(self, sel, path) {
+                const p = String(path);
+                if (JB_PATHS.some(jp => p.includes(jp))) {
+                    log(LOG_ROOT, `NSFileManager.fileExistsAtPath → NO: ${p}`);
+                    return 0;
+                }
+                return fileExists.call(this, sel, path);
+            });
+            log(LOG_ROOT, "✓ NSFileManager.fileExistsAtPath hooked");
+        }
+    } catch(e) {}
+
+    // ── 2. stat / lstat syscall ───────────────────────────────────────────
+    ["stat", "lstat", "stat64"].forEach(sym => {
+        try {
+            const fn = Module.findExportByName("libSystem.B.dylib", sym);
+            if (fn) {
+                Interceptor.attach(fn, {
+                    onEnter: function(args) {
+                        this._path = args[0].readCString() || "";
+                    },
+                    onLeave: function(retval) {
+                        if (JB_PATHS.some(p => this._path.includes(p))) {
+                            log(LOG_ROOT, `${sym} blocked: ${this._path}`);
+                            retval.replace(-1);
+                        }
+                    }
+                });
+            }
+        } catch(e) {}
+    });
+    log(LOG_ROOT, "✓ stat/lstat hooks applied");
+
+    // ── 3. access() syscall ───────────────────────────────────────────────
+    try {
+        const access = Module.findExportByName("libSystem.B.dylib", "access");
+        if (access) {
+            Interceptor.attach(access, {
+                onEnter: function(args) {
+                    this._path = args[0].readCString() || "";
+                },
+                onLeave: function(retval) {
+                    if (JB_PATHS.some(p => this._path.includes(p))) {
+                        log(LOG_ROOT, `access blocked: ${this._path}`);
+                        retval.replace(-1);
+                    }
+                }
+            });
+        }
+    } catch(e) {}
+
+    // ── 4. fopen ─────────────────────────────────────────────────────────
+    try {
+        const fopen = Module.findExportByName("libSystem.B.dylib", "fopen");
+        if (fopen) {
+            Interceptor.attach(fopen, {
+                onEnter: function(args) {
+                    const path = args[0].readCString() || "";
+                    if (JB_PATHS.some(p => path.includes(p))) {
+                        log(LOG_ROOT, `fopen blocked: ${path}`);
+                        args[0] = Memory.allocUtf8String("/dev/null");
+                    }
+                }
+            });
+        }
+    } catch(e) {}
+
+    // ── 5. fork() detection ───────────────────────────────────────────────
+    try {
+        const fork = Module.findExportByName("libSystem.B.dylib", "fork");
+        if (fork) {
+            Interceptor.attach(fork, {
+                onLeave: function(retval) {
+                    log(LOG_ROOT, "fork() called — returning -1 to child");
+                    retval.replace(-1);
+                }
+            });
+        }
+    } catch(e) {}
+
+    // ── 6. sysctl — PT_DENY_ATTACH debug detection ────────────────────────
+    try {
+        const sysctl = Module.findExportByName("libSystem.B.dylib", "sysctl");
+        if (sysctl) {
+            Interceptor.attach(sysctl, {
+                onLeave: function(retval) {
+                    // Block KERN_PROC / PT_DENY_ATTACH results
+                }
+            });
+        }
+    } catch(e) {}
+
+    // ── 7. NSBundle paths check ───────────────────────────────────────────
+    try {
+        const NSBundle = ObjC.classes.NSBundle;
+        const bundlePath = NSBundle["- bundlePath"];
+        if (bundlePath) {
+            bundlePath.implementation = ObjC.implement(bundlePath, function(self, sel) {
+                const path = bundlePath.call(this, sel);
+                log(LOG_ROOT, `NSBundle.bundlePath: ${path}`);
+                return path;
+            });
+        }
+    } catch(e) {}
+
+    // ── 8. canOpenURL — hide Cydia/Sileo URL schemes ──────────────────────
+    try {
+        const UIApp = ObjC.classes.UIApplication;
+        const canOpen = UIApp["- canOpenURL:"];
+        if (canOpen) {
+            canOpen.implementation = ObjC.implement(canOpen, function(self, sel, url) {
+                const urlStr = String(url.absoluteString());
+                if (/cydia|sileo|undecimus|filza|unc0ver/i.test(urlStr)) {
+                    log(LOG_ROOT, `canOpenURL blocked: ${urlStr}`);
+                    return 0;
+                }
+                return canOpen.call(this, sel, url);
+            });
+        }
+    } catch(e) {}
+
+    // ── 9. Swift jailbreak detection classes ─────────────────────────────
+    ["JailbreakDetection", "RootDetection", "DeviceSecurity",
+     "TamperDetection", "IntegrityCheck"].forEach(cls => {
+        try {
+            const C = ObjC.classes[cls];
+            if (C) {
+                ["isJailbroken", "isRooted", "check", "detect", "isTampered"].forEach(m => {
+                    try {
+                        const method = C[`+ ${m}`] || C[`- ${m}`];
+                        if (method) {
+                            method.implementation = ObjC.implement(method, function() {
+                                log(LOG_ROOT, `${cls}.${m} → false/NO`);
+                                return 0;
+                            });
+                        }
+                    } catch(e) {}
+                });
+            }
+        } catch(e) {}
+    });
+
+    log(LOG_ROOT, "═══ iOS Jailbreak Bypass Active ═══");
+}
+"""
+
+    # ─── MAIN WRAPPER ─────────────────────────────────────────────────────
+    def _app_wait_wrapper(self) -> str:
+        i = self.info
+        ssl_call  = ""
+        root_call = ""
+        if self.mode in ("all","ssl"):
+            ssl_call  = "bypassSSLPinningAndroid();" if i.platform=="android" else "bypassSSLPinningiOS();"
+        if self.mode in ("all","root"):
+            root_call = "bypassRootDetectionAndroid();" if i.platform=="android" else "bypassJailbreakDetectioniOS();"
+
+        if i.platform == "android":
+            return f"""
+// ═══════════════════ ENTRY POINT — EARLY HOOK ARCHITECTURE ══════════════════
+//
+// PROBLEM SOLVED: App stuck on splash / white screen after SSL hooks fire.
+// ROOT CAUSE:     Integrity/root checks run inside Application.onCreate()
+//                 BEFORE any Activity loads — they block the main thread.
+// SOLUTION:       Three-layer hook strategy:
+//   Layer 1 — Instant (t=0ms):  Native libc hooks (access, fopen, stat)
+//                                No Java needed — blocks file-based checks
+//   Layer 2 — Pre-Application:  Hook ActivityThread.handleBindApplication()
+//                                Fires before Application.onCreate() — injects
+//                                all Java bypasses at the earliest possible point
+//   Layer 3 — Post-load retry:  Java.perform() with classLoader retries for
+//                                lazy-loaded SDK classes (RootBeer, SafetyNet etc)
+// ═════════════════════════════════════════════════════════════════════════════
+
+// ── LAYER 1: Instant native hooks (no Java.perform needed) ───────────────────
+// These run at script load time — before ANY app code executes
+
+// ── LAYER 1: Instant native hooks ─────────────────────────────────────────────
+// Each hook in its own try/catch — a null export on one symbol never kills others
+// safeNativeAttach: finds export safely, guards attach, guards readCString
+
+(function installNativeHooks() {{
+    // Resolve libc symbol — searches APEX bionic path too
+    function findLibcAddr(sym) {{
+        var addr = null;
+        try {{ addr = Module.findExportByName("libc.so", sym); }} catch(e) {{}}
+        if (addr && !addr.isNull()) return addr;
+        // Android 12+: bionic is in APEX overlay at a different path
+        try {{
+            Process.enumerateModules().forEach(function(m) {{
+                if (!addr && m.path && m.path.indexOf("libc.so") !== -1) {{
+                    try {{ var a = Module.findExportByName(m.name, sym); if (a && !a.isNull()) addr = a; }} catch(e) {{}}
+                }}
+            }});
+        }} catch(e) {{}}
+        if (addr && !addr.isNull()) return addr;
+        try {{ addr = Module.findExportByName(null, sym); }} catch(e) {{}}
+        return (addr && !addr.isNull()) ? addr : null;
+    }}
+
+    function safeNativeAttach(sym, argIndex, callbacks) {{
+        try {{
+            var addr = findLibcAddr(sym);
+            if (!addr) {{ return; }}
+            Interceptor.attach(addr, callbacks);
+            log(LOG_ROOT, "[L1] ✓ hooked: " + sym);
+        }} catch(e) {{
+            // "not a function" on Android 12+ APEX bionic = PLT stub, can't attach
+            // Critical hooks (kill/raise/abort/_exit) are handled via Interceptor.replace below
+            warn(LOG_ROOT, "[L1] " + sym + ": " + e.message);
+        }}
+    }}
+
+    function safeReadPath(args, idx) {{
+        try {{ return args[idx].readCString() || ""; }} catch(e) {{ return ""; }}
+    }}
+
+    var ROOT_PATHS = [
+        "/sbin/su", "/system/bin/su", "/system/xbin/su", "/su/bin/su",
+        "/system/xbin/busybox", "/sbin/.magisk", "/data/magisk.db",
+        "/system/app/Superuser.apk", "/system/app/SuperSU.apk",
+    ];
+    function isRootPath(p) {{
+        if (!p) return false;
+        for (var i = 0; i < ROOT_PATHS.length; i++) {{
+            if (p.indexOf(ROOT_PATHS[i]) !== -1) return true;
+        }}
+        return p.indexOf("magisk") !== -1 || p.indexOf("frida-agent") !== -1;
+    }}
+
+    // access(path, mode)
+    safeNativeAttach("access", 0, {{
+        onEnter: function(a) {{ this.p = safeReadPath(a, 0); }},
+        onLeave: function(r) {{
+            if (isRootPath(this.p)) {{ log(LOG_ROOT, "[L1] access blocked: " + this.p); r.replace(-1); }}
+        }}
+    }});
+
+    // faccessat(dirfd, path, mode, flags)
+    safeNativeAttach("faccessat", 1, {{
+        onEnter: function(a) {{ this.p = safeReadPath(a, 1); }},
+        onLeave: function(r) {{
+            if (isRootPath(this.p)) {{ log(LOG_ROOT, "[L1] faccessat blocked: " + this.p); r.replace(-1); }}
+        }}
+    }});
+
+    // fopen(path, mode)
+    safeNativeAttach("fopen", 0, {{
+        onEnter: function(a) {{
+            try {{
+                var p = safeReadPath(a, 0);
+                if (isRootPath(p)) {{
+                    log(LOG_ROOT, "[L1] fopen redirected: " + p);
+                    a[0] = Memory.allocUtf8String("/dev/null");
+                }}
+            }} catch(e) {{}}
+        }}
+    }});
+
+    // fopen64 — same signature
+    safeNativeAttach("fopen64", 0, {{
+        onEnter: function(a) {{
+            try {{
+                var p = safeReadPath(a, 0);
+                if (isRootPath(p)) {{
+                    log(LOG_ROOT, "[L1] fopen64 redirected: " + p);
+                    a[0] = Memory.allocUtf8String("/dev/null");
+                }}
+            }} catch(e) {{}}
+        }}
+    }});
+
+    // stat(path, buf)
+    safeNativeAttach("stat", 0, {{
+        onEnter: function(a) {{ this.p = safeReadPath(a, 0); }},
+        onLeave: function(r) {{
+            if (isRootPath(this.p)) {{ log(LOG_ROOT, "[L1] stat blocked: " + this.p); r.replace(-1); }}
+        }}
+    }});
+
+    // lstat(path, buf)
+    safeNativeAttach("lstat", 0, {{
+        onEnter: function(a) {{ this.p = safeReadPath(a, 0); }},
+        onLeave: function(r) {{
+            if (isRootPath(this.p)) {{ log(LOG_ROOT, "[L1] lstat blocked: " + this.p); r.replace(-1); }}
+        }}
+    }});
+
+    // fork — JB test: can we spawn a process?
+    safeNativeAttach("fork", 0, {{
+        onLeave: function(r) {{
+            if (r.toInt32() > 0) {{ log(LOG_ROOT, "[L1] fork() → -1"); r.replace(-1); }}
+        }}
+    }});
+
+    // ─── ANTI-TAMPER SELF-TERMINATION BLOCK ───────────────────────────────
+    // Root cause of bypass failure: native anti-tamper threads scan /proc/self/maps
+    // for "frida-agent" then call kill(getpid(), 9). All three paths must be blocked.
+    //
+    // IMPORTANT: Use Interceptor.replace + NativeCallback here — NOT Interceptor.attach.
+    // On Android 12+ (APEX bionic), Interceptor.attach fails with "not a function" for
+    // syscall wrappers (PLT stubs). Also, Memory.patchCode on abort() corrupts the PLT
+    // entry which ART's exception handler also uses → SIGSEGV at pc=0x0.
+
+    var MY_PID = Process.id;
+
+    // kill(pid, sig) — block SIGKILL/SIGTERM/SIGABRT to self via full replacement
+    try {{
+        var _killAddr = findLibcAddr("kill");
+        if (_killAddr) {{
+            var _killOrig = new NativeFunction(_killAddr, 'int', ['int', 'int']);
+            Interceptor.replace(_killAddr, new NativeCallback(function(pid, sig) {{
+                if (pid === MY_PID && (sig === 9 || sig === 15 || sig === 6)) {{
+                    log(LOG_ROOT, "[L1] kill(" + pid + ", " + sig + ") BLOCKED");
+                    return 0;
+                }}
+                return _killOrig(pid, sig);
+            }}, 'int', ['int', 'int']));
+            log(LOG_ROOT, "[L1] ✓ kill() replaced");
+        }}
+    }} catch(e) {{ warn(LOG_ROOT, "[L1] kill: " + e.message); }}
+
+    // raise(sig) — block self-signals
+    try {{
+        var _raiseAddr = findLibcAddr("raise");
+        if (_raiseAddr) {{
+            var _raiseOrig = new NativeFunction(_raiseAddr, 'int', ['int']);
+            Interceptor.replace(_raiseAddr, new NativeCallback(function(sig) {{
+                if (sig === 9 || sig === 15 || sig === 6) {{
+                    log(LOG_ROOT, "[L1] raise(" + sig + ") BLOCKED");
+                    return 0;
+                }}
+                return _raiseOrig(sig);
+            }}, 'int', ['int']));
+            log(LOG_ROOT, "[L1] ✓ raise() replaced");
+        }}
+    }} catch(e) {{ warn(LOG_ROOT, "[L1] raise: " + e.message); }}
+
+    // abort() — replace with NativeCallback that just returns.
+    // DO NOT use Memory.patchCode — on Android 12 this corrupts the PLT entry
+    // that ART's exception handler also uses, causing SIGSEGV at pc=0x0.
+    try {{
+        var _abortAddr = findLibcAddr("abort");
+        if (_abortAddr) {{
+            Interceptor.replace(_abortAddr, new NativeCallback(function() {{
+                log(LOG_ROOT, "[L1] abort() BLOCKED");
+                // Return without crashing — anti-tamper check silently fails
+            }}, 'void', []));
+            log(LOG_ROOT, "[L1] ✓ abort() replaced");
+        }}
+    }} catch(e) {{ warn(LOG_ROOT, "[L1] abort: " + e.message); }}
+
+    // _exit(code) — replace, swallowing non-zero exit codes
+    try {{
+        var _exitAddr = findLibcAddr("_exit");
+        if (_exitAddr) {{
+            var _exitOrig = new NativeFunction(_exitAddr, 'void', ['int']);
+            Interceptor.replace(_exitAddr, new NativeCallback(function(code) {{
+                if (code !== 0) {{
+                    log(LOG_ROOT, "[L1] _exit(" + code + ") BLOCKED");
+                    return; // don't call original
+                }}
+                _exitOrig(code);
+            }}, 'void', ['int']));
+            log(LOG_ROOT, "[L1] ✓ _exit() replaced");
+        }}
+    }} catch(e) {{ warn(LOG_ROOT, "[L1] _exit: " + e.message); }}
+
+    // ─── /proc/self/maps CONTENT FILTERING ────────────────────────────────
+    // The anti-tamper thread opens /proc/self/maps and reads it looking for
+    // "frida-agent" in the output. We track the fd and scrub those lines
+    // from read() calls on that fd.
+
+    var MAPS_FDS   = {{}};
+    var STATUS_FDS = {{}};
+    var MY_PID_STR = "" + Process.id;
+    var FRIDA_STRINGS = ["frida-agent", "frida-gadget", "linjector", "gum-js-loop"];
+
+    // Track fds for /proc/self/maps via openat()
+    safeNativeAttach("openat", 1, {{
+        onEnter: function(a) {{
+            try {{ this.p = a[1].readCString() || ""; }} catch(e) {{ this.p = ""; }}
+        }},
+        onLeave: function(r) {{
+            if (this.p) {{
+                var fd = r.toInt32();
+                if (fd >= 0) {{
+                    if (this.p.indexOf("/proc/self/maps") !== -1 ||
+                        this.p.indexOf("/proc/" + MY_PID_STR + "/maps") !== -1) {{
+                        MAPS_FDS[fd] = true; log(LOG_ROOT, "[L1] maps fd tracked: " + fd);
+                    }}
+                    if (this.p.indexOf("/proc/self/status") !== -1 ||
+                        this.p.indexOf("/proc/" + MY_PID_STR + "/status") !== -1) {{
+                        STATUS_FDS[fd] = true; log(LOG_ROOT, "[L1] status fd tracked: " + fd);
+                    }}
+                }}
+            }}
+        }}
+    }});
+
+    // Also track via open()
+    safeNativeAttach("open", 0, {{
+        onEnter: function(a) {{
+            try {{ this.p = a[0].readCString() || ""; }} catch(e) {{ this.p = ""; }}
+        }},
+        onLeave: function(r) {{
+            if (this.p) {{
+                var fd = r.toInt32();
+                if (fd >= 0) {{
+                    if (this.p.indexOf("/proc/self/maps") !== -1) {{ MAPS_FDS[fd] = true; }}
+                    if (this.p.indexOf("/proc/self/status") !== -1) {{ STATUS_FDS[fd] = true; }}
+                }}
+            }}
+        }}
+    }});
+
+    // Remove fd on close()
+    safeNativeAttach("close", 0, {{
+        onEnter: function(a) {{
+            try {{ var fd = a[0].toInt32(); if (MAPS_FDS[fd]) {{ delete MAPS_FDS[fd]; }} if (STATUS_FDS[fd]) {{ delete STATUS_FDS[fd]; }} }} catch(e) {{}}
+        }}
+    }});
+
+    // Filter frida strings from read() on tracked fds
+    safeNativeAttach("read", 0, {{
+        onEnter: function(a) {{
+            try {{ this.fd = a[0].toInt32(); this.buf = a[1]; }} catch(e) {{ this.fd = -1; }}
+        }},
+        onLeave: function(r) {{
+            try {{
+                var n = r.toInt32();
+                if (n <= 0 || !this.buf || this.fd < 0) {{ return; }}
+
+                // /proc/self/maps — scrub frida entries
+                if (MAPS_FDS[this.fd]) {{
+                    var content = this.buf.readUtf8String(n);
+                    if (!content) {{ return; }}
+                    var lines = content.split("\\n");
+                    var changed = false;
+                    var filtered = lines.filter(function(line) {{
+                        for (var i = 0; i < FRIDA_STRINGS.length; i++) {{
+                            if (line.indexOf(FRIDA_STRINGS[i]) !== -1) {{
+                                changed = true; return false;
+                            }}
+                        }}
+                        return true;
+                    }});
+                    if (changed) {{
+                        var newContent = filtered.join("\\n");
+                        var newBuf = Memory.allocUtf8String(newContent);
+                        Memory.copy(this.buf, newBuf, newContent.length + 1);
+                        r.replace(ptr(newContent.length));
+                        log(LOG_ROOT, "[L1] /proc/self/maps: frida entries scrubbed");
+                    }}
+                }}
+
+                // /proc/self/status — spoof TracerPid to 0 (hides debugger/frida)
+                if (STATUS_FDS[this.fd]) {{
+                    try {{
+                        var statusContent = this.buf.readUtf8String(n);
+                        if (statusContent && statusContent.indexOf("TracerPid:") !== -1) {{
+                            var spoofed = statusContent.replace(/TracerPid:\\t[1-9][0-9]*/g, "TracerPid:\\t0");
+                            if (spoofed !== statusContent) {{
+                                var spoofBuf = Memory.allocUtf8String(spoofed);
+                                Memory.copy(this.buf, spoofBuf, spoofed.length + 1);
+                                r.replace(ptr(spoofed.length));
+                                log(LOG_ROOT, "[L1] /proc/self/status: TracerPid spoofed to 0");
+                            }}
+                        }}
+                    }} catch(e) {{}}
+                }}
+            }} catch(e) {{}}
+        }}
+    }});
+    // strstr() — return NULL when needle is a frida string (some apps use this)
+    safeNativeAttach("strstr", 0, {{
+        onEnter: function(a) {{
+            try {{ this.needle = a[1].readCString() || ""; }} catch(e) {{ this.needle = ""; }}
+        }},
+        onLeave: function(r) {{
+            if (this.needle) {{
+                for (var i = 0; i < FRIDA_STRINGS.length; i++) {{
+                    if (this.needle.indexOf(FRIDA_STRINGS[i]) !== -1) {{
+                        r.replace(ptr(0));
+                        return;
+                    }}
+                }}
+            }}
+        }}
+    }});
+
+    log("", "[L1] ✓ Native libc hooks installed");
+}})();
+
+
+// ── LAYER 2: Pre-Application hook via ActivityThread ─────────────────────────
+// handleBindApplication fires BEFORE Application.onCreate()
+// This is the earliest Java hook point possible
+
+Java.perform(function() {{
+    log("", "Script loaded for: {i.package_name or 'app'}");
+    log("", "Platform: Android | Mode: {self.mode}");
+
+    try {{
+        const ActivityThread = Java.use("android.app.ActivityThread");
+
+        ActivityThread.handleBindApplication.implementation = function(appBindData) {{
+            log("", "[L2] handleBindApplication intercepted — injecting bypasses BEFORE onCreate()");
+
+            // Install all Java-layer bypasses NOW before Application.onCreate runs
+            try {{ {ssl_call}  }} catch(e) {{ err("", "[L2] SSL: " + e.message); }}
+            try {{ {root_call} }} catch(e) {{ err("", "[L2] Root: " + e.message); }}
+
+            // Additional startup-blocker bypasses
+            installStartupBlockerBypasses();
+
+            log("", "[L2] ✓ All bypasses injected — resuming handleBindApplication");
+            return this.handleBindApplication(appBindData);
+        }};
+
+        log("", "[L2] ✓ ActivityThread.handleBindApplication hooked");
+    }} catch(e) {{
+        warn("", "[L2] ActivityThread hook failed — falling back to Layer 3: " + e.message);
+        // Fallback: immediate Java.perform (may miss early checks)
+        try {{ {ssl_call}  }} catch(ex) {{ err("", "SSL: " + ex.message); }}
+        try {{ {root_call} }} catch(ex) {{ err("", "Root: " + ex.message); }}
+        installStartupBlockerBypasses();
+    }}
+}});
+
+
+// ── LAYER 3: Post-load retry for lazy SDK classes ─────────────────────────────
+// Some SDKs (RootBeer, Play Integrity) load after Application.onCreate
+// Re-run hooks 1s and 3s after start to catch them
+
+setTimeout(function() {{
+    Java.perform(function() {{
+        log("", "[L3] Retry hook pass (t=1s) — catching lazy-loaded SDKs...");
+        try {{ {ssl_call}  }} catch(e) {{}}
+        try {{ {root_call} }} catch(e) {{}}
+        hookPlayIntegrityCallback();
+    }});
+}}, 1000);
+
+setTimeout(function() {{
+    Java.perform(function() {{
+        log("", "[L3] Retry hook pass (t=3s) — final sweep...");
+        try {{ {ssl_call}  }} catch(e) {{}}
+        try {{ {root_call} }} catch(e) {{}}
+        log("", "✅ All hook passes complete");
+        log("", "   Burp proxy: adb reverse tcp:8080 tcp:8080");
+    }});
+}}, 3000);
+
+
+// ── STARTUP BLOCKER BYPASSES ──────────────────────────────────────────────────
+// Patterns that block the app at splash screen before main activity
+
+function installStartupBlockerBypasses() {{
+    Java.perform(function() {{
+
+        // 1. Application.onCreate — hook all Application subclasses
+        //    Some apps run checks in their own Application.onCreate()
+        try {{
+            Java.enumerateLoadedClasses({{
+                onMatch: function(name) {{
+                    if (name.endsWith("Application") || name.endsWith("App")) {{
+                        try {{
+                            const AppCls = Java.use(name);
+                            if (AppCls.onCreate) {{
+                                const orig = AppCls.onCreate.implementation;
+                                AppCls.onCreate.implementation = function() {{
+                                    log("", `[STARTUP] ${{name}}.onCreate — bypasses pre-injected ✓`);
+                                    return this.onCreate();
+                                }};
+                            }}
+                        }} catch(e) {{}}
+                    }}
+                }},
+                onComplete: function() {{}}
+            }});
+        }} catch(e) {{}}
+
+        // 2. Block blocking dialog / finish() calls triggered by integrity fail
+        try {{
+            const Activity = Java.use("android.app.Activity");
+            Activity.finish.implementation = function() {{
+                // Check if we're being finished by a security check (no user action)
+                const stack = Java.use("java.lang.Thread").currentThread().getStackTrace();
+                const trace = Array.from(stack).map(f => f.getClassName() + "." + f.getMethodName()).join(",");
+                if (/root|integrity|security|tamper|safetynet|detect/i.test(trace)) {{
+                    log(LOG_ROOT, `[STARTUP] Activity.finish() blocked (security trigger): ${{this.getClass().getName()}}`);
+                    return; // Don't finish
+                }}
+                return this.finish();
+            }};
+            log("", "[STARTUP] ✓ Activity.finish() guarded");
+        }} catch(e) {{}}
+
+        // 3. AlertDialog — block security warning dialogs that lock the UI
+        try {{
+            const AlertDialog = Java.use("android.app.AlertDialog");
+            AlertDialog.show.implementation = function() {{
+                // Intercept and check title/message for security-related dialogs
+                try {{
+                    var _w = this.getWindow(); var title = (_w && _w.getDecorView()) ? _w.getDecorView().toString() : "";
+                    log("", `[STARTUP] AlertDialog.show intercepted — check if security dialog`);
+                }} catch(e) {{}}
+                return this.show();
+            }};
+        }} catch(e) {{}}
+
+        // 4. System.exit — prevent app killing itself on integrity failure
+        try {{
+            const System = Java.use("java.lang.System");
+            System.exit.implementation = function(code) {{
+                log(LOG_ROOT, `[STARTUP] System.exit(${{code}}) BLOCKED — integrity check tried to kill app`);
+                // Don't call exit — let the app continue
+            }};
+            log("", "[STARTUP] ✓ System.exit() blocked");
+        }} catch(e) {{}}
+
+        // 5. Process.killProcess — same as above
+        try {{
+            const Process = Java.use("android.os.Process");
+            Process.killProcess.implementation = function(pid) {{
+                log(LOG_ROOT, `[STARTUP] Process.killProcess(${{pid}}) BLOCKED`);
+            }};
+            Process.myPid.implementation = function() {{
+                const real = this.myPid();
+                return real; // Return real but block kill
+            }};
+        }} catch(e) {{}}
+
+        // 6. CountDownLatch — many integrity checks use latch.await() to block
+        //    the main thread waiting for SafetyNet/Play Integrity response.
+        //    DO NOT call this.await() or ol.call() inside the hook — that
+        //    re-enters the hook and deadlocks. Count down to zero and return.
+        try {{
+            const CountDownLatch = Java.use("java.util.concurrent.CountDownLatch");
+            CountDownLatch.await.overloads.forEach(ol => {{
+                ol.implementation = function() {{
+                    log("", "[STARTUP] CountDownLatch.await() — releasing immediately (count: " + this.getCount() + ")");
+                    while (this.getCount() > 0) {{ this.countDown(); }}
+                    // void await() → return undefined; await(long,TimeUnit) → return true
+                    return ol.argumentTypes.length === 0 ? undefined : true;
+                }};
+            }});
+            log("", "[STARTUP] ✓ CountDownLatch.await() hooked — no more blocking waits");
+        }} catch(e) {{ warn("", "[STARTUP] CountDownLatch: " + e.message); }}
+
+        // 7. Handler.post / postDelayed — intercept deferred integrity dialogs
+        try {{
+            const Handler = Java.use("android.os.Handler");
+            Handler.post.implementation = function(runnable) {{
+                return this.post(runnable);
+            }};
+        }} catch(e) {{}}
+
+        // 8. SharedPreferences — block reading cached integrity/root results
+        try {{
+            const SharedPrefsImpl = Java.use("android.app.SharedPreferencesImpl");
+            SharedPrefsImpl.getBoolean.implementation = function(key, def) {{
+                const k = String(key);
+                if (/root|integrity|safetynet|tamper|jailbreak|device.*trust|trust.*device/i.test(k)) {{
+                    log(LOG_ROOT, `[STARTUP] SharedPrefs.getBoolean("${{k}}") → false`);
+                    return false;
+                }}
+                return this.getBoolean(key, def);
+            }};
+            SharedPrefsImpl.getInt.implementation = function(key, def) {{
+                const k = String(key);
+                if (/integrity.*result|safety.*status|root.*status/i.test(k)) {{
+                    log(LOG_ROOT, `[STARTUP] SharedPrefs.getInt("${{k}}") → 0`);
+                    return 0;
+                }}
+                return this.getInt(key, def);
+            }};
+            log("", "[STARTUP] ✓ SharedPreferences integrity cache hooked");
+        }} catch(e) {{}}
+
+        // 9. App-specific security class scan — hooks any security/root/integrity
+        //    classes under the app's own package prefix (generic, works for any app)
+        const APP_PKG_PREFIX = "{i.package_name.rsplit(".", 1)[0] if i.package_name and "." in i.package_name else i.package_name or ""}";
+        if (APP_PKG_PREFIX) {{
+            try {{
+                Java.enumerateLoadedClasses({{
+                    onMatch: function(name) {{
+                        if (name.startsWith(APP_PKG_PREFIX) &&
+                            /security|root|integrity|tamper|detect|check|verif|trust|pinning/i.test(name)) {{
+                            try {{
+                                const Cls = Java.use(name);
+                                ["isRooted","isDeviceRooted","checkRoot","check","detect",
+                                 "isIntegrityValid","isTampered","isEmulator","verify",
+                                 "checkServerTrusted","checkPinning","isValid"].forEach(m => {{
+                                    try {{
+                                        Cls[m].overloads.forEach(ol => {{
+                                            ol.implementation = function() {{
+                                                log(LOG_ROOT, "[STARTUP] " + name + "." + m + " bypassed");
+                                                const rt = (ol.returnType ? ol.returnType.className : null);
+                                                if (rt === "boolean") return false;
+                                                if (rt === "int")     return 0;
+                                                if (rt === "void")    return undefined;
+                                                if (rt === "java.util.List") return _ArrayList ? _ArrayList.$new() : null;
+                                                return null;
+                                            }};
+                                        }});
+                                    }} catch(e) {{}}
+                                }});
+                                log("", "[STARTUP] ✓ App security class hooked: " + name);
+                            }} catch(e) {{}}
+                        }}
+                    }},
+                    onComplete: function() {{}}
+                }});
+            }} catch(e) {{}}
+        }}
+
+        // 10. Developer options / ADB detection bypass
+        try {{
+            const Settings = Java.use("android.provider.Settings$Secure");
+            const _secureGetInt = Settings.getInt.overload(
+                "android.content.ContentResolver","java.lang.String","int");
+            _secureGetInt.implementation = function(cr, key, def) {{
+                const k = String(key);
+                if (k === "adb_enabled" || k === "mock_location" ||
+                    k === "install_non_market_apps") {{
+                    log(LOG_ROOT, "[STARTUP] Settings.Secure.getInt(\\"" + k + "\\") → 0");
+                    return 0;
+                }}
+                return _secureGetInt.call(this, cr, key, def);
+            }};
+        }} catch(e) {{}}
+
+        try {{
+            const SettingsGlobal = Java.use("android.provider.Settings$Global");
+            const _globalGetInt = SettingsGlobal.getInt.overload(
+                "android.content.ContentResolver","java.lang.String","int");
+            _globalGetInt.implementation = function(cr, key, def) {{
+                const k = String(key);
+                if (k === "development_settings_enabled" || k === "adb_enabled") {{
+                    log(LOG_ROOT, "[STARTUP] Settings.Global.getInt(\\"" + k + "\\") → 0");
+                    return 0;
+                }}
+                return _globalGetInt.call(this, cr, key, def);
+            }};
+        }} catch(e) {{}}
+
+        // 11. Mock location detection bypass
+        try {{
+            const Location = Java.use("android.location.Location");
+            if (Location.isFromMockProvider) {{
+                Location.isFromMockProvider.implementation = function() {{
+                    log(LOG_ROOT, "[STARTUP] Location.isFromMockProvider → false");
+                    return false;
+                }};
+            }}
+        }} catch(e) {{}}
+
+        log("", "[STARTUP] ✓ Startup blocker bypasses installed");
+    }});
+}}
+
+
+// ── PLAY INTEGRITY CALLBACK BYPASS ───────────────────────────────────────────
+// Intercepts the async result callback — works even when API call is real
+
+function hookPlayIntegrityCallback() {{
+    Java.perform(function() {{
+
+        // IntegrityTokenResponse parser — spoof verdict
+        try {{
+            const IntegrityTokenResponse = Java.use(
+                "com.google.android.play.core.integrity.IntegrityTokenResponse"
+            );
+            if (IntegrityTokenResponse.token) {{
+                IntegrityTokenResponse.token.implementation = function() {{
+                    log(LOG_ROOT, "[PI] IntegrityTokenResponse.token intercepted");
+                    return this.token(); // Let it through — intercept parsing instead
+                }};
+            }}
+        }} catch(e) {{}}
+
+        // Hook Task onSuccess listeners for integrity
+        try {{
+            Java.enumerateLoadedClasses({{
+                onMatch: function(name) {{
+                    if (/IntegrityResult|VerdictResult|IntegrityResponse/i.test(name)) {{
+                        try {{
+                            const Cls = Java.use(name);
+                            ["getDeviceIntegrity","getAppIntegrity","getAccountDetails",
+                             "isDeviceRecognized","getMeetsSdkVersionRequirement"].forEach(m => {{
+                                try {{
+                                    Cls[m].overloads.forEach(ol => {{
+                                        ol.implementation = function() {{
+                                            log(LOG_ROOT, `[PI] ${{name}}.${{m}} → safe value`);
+                                            const rt = (ol.returnType ? ol.returnType.className : null);
+                                            return rt==="boolean"?true : rt==="int"?3 : null;
+                                        }};
+                                    }});
+                                }} catch(e) {{}}
+                            }});
+                        }} catch(e) {{}}
+                    }}
+                }},
+                onComplete: function() {{}}
+            }});
+        }} catch(e) {{}}
+    }});
+}}
+
+
+// Hot-reload RPC exports
+rpc.exports = {{
+    reloadSSL: function() {{
+        Java.perform(() => {{ try {{ {ssl_call} }} catch(e) {{}} }});
+        return "SSL hooks reloaded";
+    }},
+    reloadRoot: function() {{
+        Java.perform(() => {{ try {{ {root_call} }} catch(e) {{}} }});
+        return "Root hooks reloaded";
+    }},
+    unblockApp: function() {{
+        Java.perform(() => {{ installStartupBlockerBypasses(); }});
+        return "Startup blocker bypasses re-applied";
+    }},
+    status: function() {{
+        return {{
+            app: "{i.package_name}",
+            version: "{i.version_name}",
+            mode: "{self.mode}",
+            timestamp: new Date().toISOString(),
+            layers: ["L1:native","L2:pre-onCreate","L3:retry"],
+        }};
+    }}
+}};
+"""
+        else:
+            return f"""
+// ═══════════════════ ENTRY POINT (iOS) ═══════════════════════════════════════
+
+if (ObjC.available) {{
+    log("", "Script loaded for: {i.package_name or 'app'}");
+    log("", "Platform: iOS | Mode: {self.mode}");
+
+    try {{ {ssl_call}  }} catch(e) {{ err("", "SSL bypass: " + e.message); }}
+    try {{ {root_call} }} catch(e) {{ err("", "JB bypass: " + e.message); }}
+
+    log("", "✅ All hooks active");
+    log("", "   Set iOS proxy to Burp: Settings → Wi-Fi → HTTP Proxy → Manual");
+}} else {{
+    err("", "ObjC runtime not available — is this an iOS process?");
+}}
+
+rpc.exports = {{
+    status: function() {{
+        return {{
+            app: "{i.package_name}",
+            version: "{i.version_name}",
+            mode: "{self.mode}",
+        }};
+    }}
+}};
+"""
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# REPORT PRINTER
+# ═══════════════════════════════════════════════════════════════════════════
+def print_report(info: AppInfo, out_path: str):
+    # Build detection verdicts
+    ssl_enabled = any([
+        info.uses_okhttp3, info.uses_certificate_pinner, info.uses_okhttp,
+        info.uses_conscrypt, info.uses_appcert, info.uses_network_security_config,
+        info.uses_custom_ssl, info.uses_trust_manager, info.uses_ssl_context,
+        info.uses_afnetworking, info.uses_alamofire, info.uses_trustkit,
+        bool(info.smali_pinning_classes),
+    ])
+    root_enabled = any([
+        info.uses_rootbeer, info.uses_safetynet, info.uses_play_integrity,
+        info.uses_frida_detect, info.uses_tamper_detect, info.uses_jailbreak_detect,
+        info.uses_root_cloak, bool(info.smali_root_classes),
+    ])
+
+    if RICH:
+        console.rule("[bold green]Frida Script Generator — Analysis Report[/bold green]")
+
+        # App info table
+        t = Table(title=f"[bold]{info.app_name or info.package_name}[/bold]", show_header=False, box=None)
+        t.add_column("Field", style="cyan", width=22)
+        t.add_column("Value", style="white")
+        for row in [
+            ("Package",    info.package_name or "N/A"),
+            ("Platform",   info.platform.upper()),
+            ("Version",    f"{info.version_name} ({info.version_code})"),
+            ("Min SDK",    info.min_sdk or "N/A"),
+            ("Target SDK", info.target_sdk or "N/A"),
+            ("File Size",  info.file_size),
+            ("SHA256",     info.file_hash[:40]+"..."),
+        ]: t.add_row(*row)
+        console.print(t)
+
+        # Security verdicts
+        ssl_color  = "red"   if ssl_enabled  else "green"
+        root_color = "red"   if root_enabled else "green"
+        ssl_label  = "⚠  DETECTED"  if ssl_enabled  else "✓  NOT DETECTED"
+        root_label = "⚠  DETECTED"  if root_enabled else "✓  NOT DETECTED"
+        console.print(f"\n  SSL Pinning        : [{ssl_color}]{ssl_label}[/{ssl_color}]")
+        console.print(f"  Root/JB Detection  : [{root_color}]{root_label}[/{root_color}]\n")
+
+        # Detected frameworks / mechanisms
+        mechanisms = []
+        for attr, name, category in [
+            ("uses_okhttp3",            "OkHttp3 CertificatePinner",     "SSL"),
+            ("uses_okhttp",             "OkHttp2 CertificatePinner",     "SSL"),
+            ("uses_conscrypt",          "Conscrypt TrustManagerImpl",    "SSL"),
+            ("uses_network_security_config", "Network Security Config",  "SSL"),
+            ("uses_appcert",            "TrustKit / DataTheorem",        "SSL"),
+            ("uses_flutter",            "Flutter / BoringSSL (native)",  "SSL"),
+            ("uses_cronet",             "Cronet (native)",               "SSL"),
+            ("uses_afnetworking",       "AFNetworking (iOS)",            "SSL"),
+            ("uses_alamofire",          "Alamofire (iOS)",               "SSL"),
+            ("uses_trustkit",           "TrustKit (iOS)",                "SSL"),
+            ("uses_rootbeer",           "RootBeer library",              "ROOT"),
+            ("uses_safetynet",          "Google SafetyNet API",          "ROOT"),
+            ("uses_play_integrity",     "Play Integrity API",            "ROOT"),
+            ("uses_frida_detect",       "Frida / Anti-hooking detect",   "ROOT"),
+            ("uses_tamper_detect",      "Guardsquare anti-tamper",       "ROOT"),
+            ("uses_jailbreak_detect",   "Jailbreak detection (iOS)",     "ROOT"),
+        ]:
+            if getattr(info, attr, False):
+                color = "yellow" if category == "SSL" else "magenta"
+                mechanisms.append(f"[{color}]{category}[/{color}]  {name}")
+
+        if info.smali_pinning_classes:
+            mechanisms.append(f"[yellow]SSL[/yellow]  {len(info.smali_pinning_classes)} custom pinning class(es) — will be hooked")
+        if info.smali_root_classes:
+            mechanisms.append(f"[magenta]ROOT[/magenta] {len(info.smali_root_classes)} custom security class(es) — will be hooked")
+
+        if mechanisms:
+            console.print(Panel("\n".join(mechanisms), title="[bold]Detected Mechanisms → Hooks Active[/bold]"))
+
+        # Custom class details
+        if info.smali_pinning_classes:
+            console.print(Panel(
+                "\n".join(f"[cyan]hook →[/cyan] {c}" for c in info.smali_pinning_classes[:10]),
+                title="[bold red]Custom SSL Classes to Hook[/bold red]"))
+        if info.smali_root_classes:
+            console.print(Panel(
+                "\n".join(f"[cyan]hook →[/cyan] {c}" for c in info.smali_root_classes[:10]),
+                title="[bold red]Custom Root Detection Classes to Hook[/bold red]"))
+
+        console.print(Panel(f"[bold green]{out_path}[/bold green]", title="[bold]Output Script[/bold]"))
+    else:
+        w = 64
+        print(f"\n{'═'*w}")
+        print(f"  FRIDA BYPASS SCRIPT GENERATED")
+        print(f"  App      : {info.app_name or info.package_name}")
+        print(f"  Package  : {info.package_name}")
+        print(f"  Platform : {info.platform.upper()}")
+        print(f"  Version  : {info.version_name}")
+        print(f"{'─'*w}")
+        print(f"  SSL PINNING       : {'⚠  DETECTED' if ssl_enabled else '✓  NOT DETECTED'}")
+        if info.uses_okhttp3 or info.uses_certificate_pinner:
+            print(f"    → OkHttp3 CertificatePinner")
+        if info.uses_conscrypt:
+            print(f"    → Conscrypt TrustManagerImpl")
+        if info.uses_network_security_config:
+            print(f"    → Network Security Config")
+        if info.uses_flutter:
+            print(f"    → Flutter / BoringSSL (native)")
+        if info.smali_pinning_classes:
+            print(f"    → {len(info.smali_pinning_classes)} custom SSL class(es):")
+            for c in info.smali_pinning_classes[:8]:
+                print(f"        hook → {c}")
+        print(f"{'─'*w}")
+        print(f"  ROOT DETECTION    : {'⚠  DETECTED' if root_enabled else '✓  NOT DETECTED'}")
+        if info.uses_rootbeer:
+            print(f"    → RootBeer library")
+        if info.uses_safetynet:
+            print(f"    → Google SafetyNet API")
+        if info.uses_play_integrity:
+            print(f"    → Play Integrity API")
+        if info.uses_frida_detect:
+            print(f"    → Frida / anti-hooking detection")
+        if info.smali_root_classes:
+            print(f"    → {len(info.smali_root_classes)} custom security class(es):")
+            for c in info.smali_root_classes[:8]:
+                print(f"        hook → {c}")
+        print(f"{'─'*w}")
+        print(f"  OUTPUT   : {out_path}")
+        print(f"{'═'*w}\n")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# MAIN
+# ═══════════════════════════════════════════════════════════════════════════
+def main():
+    parser = argparse.ArgumentParser(
+        description="Generate customized Frida SSL pinning & root bypass scripts",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python3 frida_script_generator.py --apk app.apk
+  python3 frida_script_generator.py --ipa App.ipa --mode ssl
+  python3 frida_script_generator.py --apk app.apk --mode root --out root_bypass.js
+  python3 frida_script_generator.py --apk app.apk --verbose
+  frida -U -f com.example.app -l <generated_script.js>
+"""
+    )
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--apk", help="Path to Android APK file")
+    group.add_argument("--ipa", help="Path to iOS IPA file")
+    parser.add_argument("--out",     "-o", default=None,      help="Output .js filename")
+    parser.add_argument("--mode",    "-m", default="all",     choices=["all","ssl","root"], help="Bypass mode (default: all)")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
+    args = parser.parse_args()
+
+    # Determine file
+    app_path = args.apk or args.ipa
+    if not os.path.exists(app_path):
+        print(f"[ERROR] File not found: {app_path}"); sys.exit(1)
+
+    # Analyse
+    if args.apk:
+        analyser = APKAnalyser(args.apk, verbose=args.verbose)
+    else:
+        analyser = IPAAnalyser(args.ipa, verbose=args.verbose)
+
+    info = analyser.analyse()
+
+    # Generate script
+    builder = FridaScriptBuilder(info, mode=args.mode)
+    script = builder.build()
+
+    # Output path
+    pkg = info.package_name.replace(".","_") if info.package_name else Path(app_path).stem
+    out_path = args.out or f"{pkg}_{args.mode}_bypass.js"
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(script)
+
+    print_report(info, out_path)
+
+    lines = script.count("\n")
+    hooks = script.count("log(LOG_SSL") + script.count("log(LOG_ROOT")
+    print(f"\n✅  Script written → {out_path}")
+    print(f"   Lines : {lines:,} | Active log hooks : {hooks}")
+    print(f"\n🚀  Run with Frida:")
+    print(f"   frida -U -f {info.package_name or 'com.example.app'} -l {out_path}")
+    print(f"   frida -U -f {info.package_name or 'com.example.app'} --no-pause -l {out_path}\n")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`requirements.txt`:
+
+```txt
+frida-tools>=12.0.0
+androguard>=3.3.5
+rich>=13.0.0
+
+```
