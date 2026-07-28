@@ -1532,3 +1532,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nelfo/PGHooker`: entity [[pghooker]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-07-28** — ingest `description:nelfo/Milfuscator`: entity [[milfuscator]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-28** — ingest `description:neilsonnn/image-blaster`: entity [[image-blaster]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].

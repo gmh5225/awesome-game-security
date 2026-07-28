@@ -330,6 +330,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Il2CppVersions](entities/il2cpp-versions.md) — multi-version Unity IL2CPP headers/metadata (structure/API drift; game engine explorer:Unity)
 - [Il2cppSpy](entities/il2cpp-spy.md) — Unity IL2CPP APK disassembler / two-APK diff
 - [ilhook-rs](entities/ilhook-rs.md) — Rust x86 HOOK (function intercept → user handlers; cheat / hook)
+- [image-blaster](entities/image-blaster.md) — image→3D mesh/splat/SFX skillset (World Labs+FAL; React/Three.js; AI / 3D Graphics)
 - [Dear ImGui](entities/imgui.md) — bloat-free immediate-mode C++ GUI (DX/GL/Vulkan/Metal; overlays / tool UIs / cheat menus)
 - [imgui_club](entities/imgui-club.md) — official Dear ImGui extensions (hex mem editor / multi-context / threaded draw)
 - [imgui-ios-mod-menu](entities/imgui-ios-mod-menu.md) — iOS ImGui mod menu (cheat / render-draw)
