@@ -6,14 +6,14 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Overviews
 
-- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2596 / Anti Cheat ~616; Game Engine ~153 + Mathematics ~7 / Renderer ~17; DirectX ~35 / OpenGL ~3 / Vulkan ~10; Game Develop ~182 MCP/security; Game Network ~26; console Switch~7/Xbox~8/PS~7 + 3DS~3/GC·Wii)
-- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* (triggerbot & aimbot/wallhack) + page/CLR protection (~616); hybrid OS AC; Game Tools RCE + Windows Emulator AC
-- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2596) / Detection:DMA (~616) + WSF attestation
+- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2597 / Anti Cheat ~617; Game Engine ~153 + Mathematics ~7 / Renderer ~17; DirectX ~35 / OpenGL ~3 / Vulkan ~10; Game Develop ~182 MCP/security; Game Network ~26; console Switch~7/Xbox~8/PS~7 + 3DS~3/GC·Wii)
+- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* (triggerbot & aimbot/wallhack) + page/CLR protection (~617); hybrid OS AC; Game Tools RCE + Windows Emulator AC
+- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2597) / Detection:DMA (~617) + WSF attestation
 - [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~153); Mathematics/PhysX/Renderer (~17) adjacency; MCP server/security + AI gamedev (~182); Game Network ~26; Game Assets ~11 + Image Codec + Manager/Testing/Tools/CI
-- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2596) + Some Tricks (~113); Android Terminal (ADB/root/shell)/File/Memory Explorer; WSA/Android/iOS/Windows Emulator lanes; console Xbox~8 LLE/HLE+patch+SystemOS / PS HV+BD-JB / WebKit CSSFontFace / PSFree / 3DS~3 LLE+Luma overlays / GC·Wii
+- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2597) + Some Tricks (~113); Android Terminal (ADB/root/shell)/File/Memory Explorer; WSA/Android/iOS/Windows Emulator lanes; console Xbox~8 LLE/HLE+patch+SystemOS / PS HV+BD-JB / WebKit CSSFontFace / PSFree / 3DS~3 LLE+Luma overlays / GC·Wii
 - [Graphics API](overviews/graphics-api.md) — DirectX (~35) / GL / Vulkan (~10) hooks, overlays + shader capture/flatten; Renderer (~17) + Mathematics adjacency; Image Codec + AI mesh/splat/sprite
 - [Mobile Security](overviews/mobile-security.md) — Android / iOS; Terminal (ADB/root/shell)/File/Memory Explorer + App/Kernel CVE; WSA (~9), Gunyah/vphone emulators
-- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools (file-format/asset lists + Ghidra managers), MBA/DBI, deobfuscation, packers; Windows Emulator + console/Xbox~8 / PS BD-JB+WebKit/PSFree / 3DS~3/GC·Wii RE (~2596 Cheat / ~616 AC lanes)
+- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools (file-format/asset lists + Ghidra managers), MBA/DBI, deobfuscation, packers; Windows Emulator + console/Xbox~8 / PS BD-JB+WebKit/PSFree / 3DS~3/GC·Wii RE (~2597 Cheat / ~617 AC lanes)
 - [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation (~9), BYOVD, pool; Some Tricks Ring0 (~113); Windows Emulator (~7) + WSL
 
 ## Concepts
@@ -755,6 +755,6 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Sources
 
-- Projected category map: `sources/README-categories.md` (generated on scan; 40 top-level sections; Game Engine ~153 / Renderer ~17 / Cheat ~2596 / Anti Cheat ~616 / DirectX ~35 / Vulkan ~10 / Game Develop ~182 / Game Network ~26 / Xbox ~8 / PlayStation ~7 / Nintendo 3DS ~3)
+- Projected category map: `sources/README-categories.md` (generated on scan; 40 top-level sections; Game Engine ~153 / Renderer ~17 / Cheat ~2597 / Anti Cheat ~617 / DirectX ~35 / Vulkan ~10 / Game Develop ~182 / Game Network ~26 / Xbox ~8 / PlayStation ~7 / Nintendo 3DS ~3)
 - Skill projections: `sources/skills/`
 - Description projections: `sources/descriptions/` (incremental only)
