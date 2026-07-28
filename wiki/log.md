@@ -1500,3 +1500,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nezu-cc/BakaWare4`: entity [[bakaware4]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-28** — ingest `description:newbit1/rootAVD`: entity [[rootavd]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-28** — ingest `description:nevioo1337/VAC-ModuleDumper`: entity [[vac-module-dumper]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
