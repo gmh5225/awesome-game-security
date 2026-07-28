@@ -1504,3 +1504,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nevioo1337/VAC-ModuleDumper`: entity [[vac-module-dumper]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-07-28** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/game-engine]], [[overviews/graphics-api]], [[overviews/game-hacking]], [[overviews/reverse-engineering]] (Game Engine ~153 / Vulkan ~10 / Xbox ~8; Cheat ~2596 / Anti Cheat ~616 / DirectX ~35 / Game Develop ~182 stable); light `index.md` section notes (no per-category pages).
+
+- **2026-07-28** — ingest `description:neverlosecc/source2sdk`: entity [[source2sdk]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].

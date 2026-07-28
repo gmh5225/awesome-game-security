@@ -578,6 +578,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Solemn](entities/solemn.md) — HVCI HvciDisallowedImages blocklist CLI (Windows Security Features)
 - [source-engine](entities/source-engine.md) — open TF2-era Source Engine tree (CI / cross-platform; Game Engine / source)
 - [Source2Gen](entities/source2gen.md) — Source 2 SDK generator (C++ class/enum headers; game engine explorer:source)
+- [source2sdk](entities/source2sdk.md) — generated Source 2 SDKs for multiple games (C++; game engine explorer:source)
 - [Spoofer-AMIDEWIN](entities/spoofer-amidewin.md) — AMIDEWIN HWID / system-identifier spoof research (C/C++; Cheat HWID)
 
 - [SimpleFPSTemplate](entities/simple-fps-template.md) — UE4 FPS demo template (bloated C++ starter; Game Develop / Unreal source)
