@@ -1486,3 +1486,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:palepine/GDDumper`: entity [[gddumper]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
 
 - **2026-07-28** — ingest `description:niemand-sec/AntiCheat-Testing-Framework`: entity [[anti-cheat-testing-framework]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-07-28** — ingest `description:nico/demumble`: entity [[demumble]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
