@@ -1498,3 +1498,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nfrechette/rtm`: entity [[rtm]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-07-28** — ingest `description:nezu-cc/BakaWare4`: entity [[bakaware4]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-28** — ingest `description:newbit1/rootAVD`: entity [[rootavd]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
