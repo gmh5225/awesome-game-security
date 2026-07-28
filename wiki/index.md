@@ -438,6 +438,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Mystic-xorstr](entities/mystic-xorstr.md) — C++17 header-only compile-time string/integer encrypt (SIMD decrypt; AC Compile Time)
 - [mvisor](entities/mvisor.md) — C++ remake (kernel/render/audio; Cheat QEMU/KVM/PVE/VBOX)
 - [mypower](entities/mypower.md) — Android/Linux CLI memory scanner (SLJIT / pointer chains / Unity U3D)
+- [mytechnotalent/Reverse-Engineering](entities/mytechnotalent-reverse-engineering.md) — free multi-arch RE tutorial (x86/x64/ARM/AVR/RISC-V; static+dynamic; cheat / guide)
 - [MoveCertificate](entities/move-certificate.md) — Magisk/KernelSU/APatch user→system CA module (Android 7–15)
 - [NativeNetSharp](entities/nativenetsharp.md) — C# code injection (managed/.NET; cheat / guide)
 - [nCine](entities/ncine.md) — C++11 2D engine (optional Lua; MIT; Game Engine / source)
