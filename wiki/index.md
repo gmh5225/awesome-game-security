@@ -263,6 +263,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gba-ghidra-loader](entities/gba-ghidra-loader.md) — Ghidra GBA ROM loader (memory/IO map + cartridge header; GameBoy)
 - [gdbserver9x](entities/gdbserver9x.md) — GDB RSP stub for 32-bit Win98SE/XP (VC6; Binary Ninja adapter)
 - [GDB-Windows-Binaries](entities/gdb-windows-binaries.md) — portable Windows GDB (mingw-w64; TUI/Python; Cheat Debugging)
+- [GDDumper](entities/gddumper.md) — Cheat Engine Lua: Godot 3.x/4.x SceneTree / GDScript runtime dump (Win x86/x64)
 
 - [genmc](entities/genmc.md) — IDAPython Hex-Rays microcode IR viewer (decompiler-plugin debug; cheat / IDA Plugins)
 - [genpatch](entities/genpatch.md) — Python binary-patch script generator (dialog on success; cheat / IDA Plugins)
