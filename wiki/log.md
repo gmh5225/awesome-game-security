@@ -1565,3 +1565,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nak0823/ObfuscationMethods`: entity [[obfuscation-methods]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-28** — ingest `description:nahid0x1/CVE-2024-0044`: entity [[cve-2024-0044]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-28** — ingest `description:nCine/nCine`: entity [[ncine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
