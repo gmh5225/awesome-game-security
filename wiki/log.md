@@ -1555,3 +1555,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-28** — ingest `description:namazso/hdd_serial_spoofer`: entity [[hdd-serial-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
+- **2026-07-28** — ingest `description:namazso/MagicSigner`: entity [[magic-signer]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
