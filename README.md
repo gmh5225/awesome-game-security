@@ -233,6 +233,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/wh1t3lord/kotek [Modular C++20 game/application framework with OpenGL ES, Vulkan, DirectX, and BGFX backends]
 - https://github.com/oxylusengine/Oxylus [Data-driven C++ game engine with modular Vulkan renderer, flecs ECS, Lua scripting, and ImGui editor]
 - https://github.com/ostef/Vk-Engine [WIP Vulkan game engine with hot-reloadable modules, clustered forward rendering, PBR, and editor viewports]
+- https://github.com/RuqoomTech/Pyramid-Engine [C++ Windows OpenGL game engine with deferred/forward rendering, tests, and CI (pre-alpha)]
 
 
 > Game Engine Plugins:Unreal
@@ -255,6 +256,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - [Unreal Engine 4 Plugin for Lua APIs implementation](https://github.com/rdeioris/LuaMachine)
 - [Copies the argument string to the clipboard and outputs the characters copied to the clipboard](https://github.com/aoharudesu/Clipboard_Tools-UE4)
 - [Generic graph data structure plugin for ue4](https://github.com/jinyuliao/GenericGraph)
+- https://github.com/TheGeebus/SimpleQuest [Unreal Engine 5.6+ event-driven progression/quest framework with visual graph authoring]
 - [A quick implementation of modular game features for the 'BTS' test](https://github.com/gmh5225/BT_ModularGameFeatures)
 - https://github.com/Natfii/UnrealClaude [Claude Code CLI integration for Unreal Engine 5.7; AI coding assistance with built-in UE5.7 documentation context in the editor]
 
@@ -699,6 +701,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > API
 - https://github.com/liblava/liblava [Modern and easy-to-use library for Vulkan]
 - https://github.com/corporateshark/lightweightvk
+- https://github.com/BeRo1985/pasvulkan [Object Pascal Vulkan header generator, OOP API wrapper, and Vulkan-based engine framework]
 
 > Hook
 - https://github.com/Rebzzel/kiero [X86/64 Windows]
@@ -4688,6 +4691,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/xenia-project/xenia [Xbox 360 Emulator Research Project]
 - https://github.com/wmarti/xenia-mac [MacOS Port of the Xbox 360 Emulator]
 - https://github.com/rexdex/recompiler [Porting Xbox360 executables to Windows]
+- https://github.com/IcyModz420/X360GameHack2025 [Xbox 360/OG Xbox all-in-one XEX/XBE/XISO/PKG/GOD patching tool for RGH/JTAG and Bad Update]
 - https://github.com/exploits-forsale/collateral-damage [Kernel exploit for Xbox SystemOS using CVE-2024-30088]
 - https://github.com/Byrom90/XenonDumper [Dumps files & data required to use the Xenon Xbox 360 Low Level Emulator]
 - https://github.com/exjam/xbox360-emu [A xbox 360 emulator]
