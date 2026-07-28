@@ -837,6 +837,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/basil00/Divert [Packet Divert]
 - https://github.com/fksvs/inject
 - https://github.com/hercul3s/Packet-Sniffer [Packet Logger/Decryptor]
+- https://github.com/airvzxf/sniparinject [Python Scapy game packet sniffer/parser with YAML action maps]
 
 > Packet Capture&Parse
 - https://github.com/seladb/PcapPlusPlus [Pcap]
@@ -1892,6 +1893,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/FreeER/CE-Extensions [Lua Extensions]
 - https://github.com/Skyrimfus/CE-lua-extensions [Lua Extensions]
 - https://github.com/cheat-engine/UnrealEngineTools [Official CE Lua tools to scan Unreal Engine games (UObject/UClass/FProperty)]
+- https://github.com/palepine/GDDumper [Cheat Engine script to dump/inspect Godot 3.x/4.x runtime SceneTree and GDScript]
 - https://github.com/bbfox0703/Mydev-Cheat-Engine-Tables [CT]
 - https://github.com/Hexorg/CheatEngineTables [Collection of Cheat Engine tables curated from CE forums (offline-focused)]
 - https://github.com/inuNorii/Elden-Ring-CT-TGA [Elden Ring]
