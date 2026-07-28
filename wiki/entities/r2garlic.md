@@ -4,7 +4,7 @@ kind: entity
 topics: [reverse-engineering, mobile-security]
 sources:
   - wiki/sources/descriptions/radareorg__r2garlic.md
-updated: 2026-07-25
+updated: 2026-07-28
 confidence: medium
 ---
 
@@ -12,7 +12,7 @@ confidence: medium
 
 radare2 plugin that integrates the garlic binary format parser / Garlic DEX/Dalvik decompiler. Enables analysis of Android DEX, APK, ELF, PE, and Mach-O through r2's IO and analysis framework with in-memory stream support. (source: wiki/sources/descriptions/radareorg__r2garlic.md)
 
-Useful as an r2-native DEX/Dalvik and multi-format parse lane beside [[jadx]] / apktool workflows and other Cheat → Radare Plugins such as [[radius2]] / [[r2morph]]—not a standalone APK GUI decompiler.
+Useful as an r2-native DEX/Dalvik and multi-format parse lane beside [[jadx]] / apktool workflows and other Cheat → Radare Plugins such as [[radius2]] / [[r2morph]]—wraps the standalone [[garlic]] C tool rather than shipping a GUI decompiler.
 
 ## Links
 
@@ -20,4 +20,4 @@ Useful as an r2-native DEX/Dalvik and multi-format parse lane beside [[jadx]] / 
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/mobile-security]] · [[radius2]] · [[r2morph]] · [[jadx]] · [[apktool-mcp-server]]
+[[overviews/reverse-engineering]] · [[overviews/mobile-security]] · [[garlic]] · [[radius2]] · [[r2morph]] · [[jadx]] · [[apktool-mcp-server]]

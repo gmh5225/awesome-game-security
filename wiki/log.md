@@ -1520,3 +1520,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nsharp-collab/AvAAntiCheat`: entity [[avaanticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-07-28** — ingest `description:neogeek/get-unity`: entity [[get-unity]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-07-28** — ingest `description:neocanable/garlic`: entity [[garlic]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-link from [[r2garlic]].
