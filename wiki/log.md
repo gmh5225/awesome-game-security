@@ -1494,3 +1494,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nice-sprite/COD7-Tools`: entity [[cod7-tools]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-07-28** — ingest `description:nhpcc502/MBA-Obfuscator`: entity [[mba-obfuscator]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-28** — ingest `description:nfrechette/rtm`: entity [[rtm]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
