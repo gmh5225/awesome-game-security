@@ -1579,3 +1579,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:mylove90/pc_ginkgo`: entity [[pc-ginkgo]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-28** — ingest `description:muturikaranja/overlay`: entity [[overlay]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
+
+- **2026-07-28** — ingest `description:muturikaranja/disable-threat-tracing`: entity [[disable-threat-tracing]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].

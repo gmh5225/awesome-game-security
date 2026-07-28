@@ -192,6 +192,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DirectX11Hook](entities/directx11hook.md) — DX11 Present + DeviceContext hook + ImGui overlay base (C++; DirectX Hook)
 - [DirtyPipe-Android](entities/dirtypipe-android.md) — Pixel 6 Dirty Pipe (CVE-2022-0847) permanent Magisk v24.3 root
 - [DirtyPipeRoot](entities/dirtypiperoot.md) — Pixel 6 Dirty Pipe (CVE-2022-0847) one-click temporary root
+- [disable-threat-tracing](entities/disable-threat-tracing.md) — C ETW Testing / threat-tracing disable (AC stress-testing)
 - [DisableNvidiaScreenshot](entities/disablenvidiascreenshot.md) — DWM anti-screenshot (C++; NVIDIA / capture lane; Cheat Anti Screenshot)
 
 - [DLLirant](entities/dllirant.md) — automated Windows DLL search-order hijack discovery (proxy DLL + load monitor)
