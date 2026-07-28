@@ -1478,3 +1478,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nikaera/Unity-GameCI-Sample`: entity [[unity-gameci-sample]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
 - **2026-07-28** — ingest `description:niemand-sec/ReClass.NET-DriverReader`: entity [[reclass-net-driverreader]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-28** — ingest `description:niemand-sec/DirectX11Hook`: entity [[directx11hook]]; cited on [[present-hook]] and [[overviews/graphics-api]].
