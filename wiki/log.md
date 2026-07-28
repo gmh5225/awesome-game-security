@@ -1557,3 +1557,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-28** — ingest `description:namazso/MagicSigner`: entity [[magic-signer]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
+- **2026-07-28** — ingest `description:nakdeyes/UnrealImGuiTools`: entity [[unreal-imgui-tools]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+

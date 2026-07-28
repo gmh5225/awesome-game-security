@@ -675,6 +675,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [unflutter](entities/unflutter.md) — Flutter/Dart AOT snapshot static analyzer (symbol recovery)
 - [unmapper](entities/unmapper.md) — automatic dumped-PE header repair for decompilers (Dump Fix)
 - [UnrealCLR](entities/unrealclr.md) — UE CoreCLR / .NET 6 C# gameplay plugin (actors/components/Blueprints; Plugins:Unreal)
+- [UnrealImGuiTools](entities/unreal-imgui-tools.md) — UE ImGui tools + game-specific tool-window framework (Plugins:Unreal)
 - [UnrealEngine4-SwissKnife](entities/unrealengine4-swissknife.md) — UE4 SDK View (UObjects under GEngine World Actors; Game Engine Explorer:Unreal)
 - [Unreal-Binary-Builder](entities/unreal-binary-builder.md) — C# UE source builder (Game Tools; Build UE Source)
 - [UnrealNetworkProfiler](entities/unreal-network-profiler.md) — C# UE network profiler (Game Tools; networking / asset pipeline)
