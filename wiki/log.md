@@ -1575,3 +1575,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:mytechnotalent/Reverse-Engineering`: entity [[mytechnotalent-reverse-engineering]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-28** — ingest `description:mytechnotalent/Hacking-Windows`: entity [[hacking-windows]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-28** — ingest `description:mylove90/pc_ginkgo`: entity [[pc-ginkgo]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
