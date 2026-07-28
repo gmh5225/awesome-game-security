@@ -16,12 +16,13 @@ sources:
   - wiki/sources/descriptions/vergamota__KslKatz.md
   - wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md
   - wiki/sources/descriptions/rtfmkiesel__loldrivers-client.md
+  - wiki/sources/descriptions/namazso__physmem_drivers.md
   - wiki/sources/descriptions/symeonp__Lenovo-CVE-2025-8061.md
   - wiki/sources/descriptions/shareef12__cpuz.md
   - wiki/sources/descriptions/sai2fast__DsArk64.md
   - wiki/sources/descriptions/redteamfortress__PhantomKiller.md
   - wiki/sources/descriptions/r0keb__Smep-Bypass.md
-updated: 2026-07-25
+updated: 2026-07-28
 confidence: high
 ---
 
@@ -38,6 +39,8 @@ Bring Your Own Vulnerable Driver: load a legitimately signed but vulnerable driv
 ## Mitigations
 
 Microsoft vulnerable-driver blocklist, [[hvci]], AC driver allowlists ([[vanguard]]-style), PiDDBCache/MmUnloadedDrivers forensics, EPT-protected callback lists. HVCI-oriented LOLdriver checks such as [[hvci-loldrivers-check]] help inventory known-abused signed drivers against Memory Integrity constraints. (source: wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md) Broader LOLdriver scan clients such as [[loldrivers-client]] (Go/PowerShell) sit in the same cheat / vulnerable-driver research lane. (source: wiki/sources/descriptions/rtfmkiesel__loldrivers-client.md)
+
+Physical-memory–oriented vulnerable-driver inventories such as [[physmem-drivers]] (namazso; list only, no PoC) help catalog signed drivers that expose physmem primitives commonly abused in BYOVD chains. (source: wiki/sources/descriptions/namazso__physmem_drivers.md)
 
 Educational kernel-exploit reference material such as [[windows-kernel-exploits]] sits in the same cheat / vulnerable-driver documentation lane. (source: wiki/sources/descriptions/xct__windows-kernel-exploits.md)
 
@@ -67,5 +70,5 @@ Hardware-feature bypass PoCs such as [[smep-bypass]] use vulnerable-driver primi
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[patchguard]] · [[windows-kernel-exploits]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[lenovo-cve-2025-8061]] · [[cpuz]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[lenovo-cve-2025-8061]] · [[cpuz]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 

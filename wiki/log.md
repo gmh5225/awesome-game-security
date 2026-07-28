@@ -1551,3 +1551,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-28** — ingest `description:naorhaziz/irql`: entity [[irql]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
+- **2026-07-28** — ingest `description:namazso/physmem_drivers`: entity [[physmem-drivers]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
