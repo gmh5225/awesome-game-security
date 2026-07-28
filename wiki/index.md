@@ -284,6 +284,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HelloIommuPkg](entities/helloiommupkg.md) — sample DXE DMA-remapping (IOMMU) driver (tandasat; Detection:DMA)
 - [heck_csgo_external](entities/heck-csgo-external.md) — external CS:GO; SDK generation / memory analysis (C++; cheat / game:csgo)
 - [hide-file](entities/hide-file.md) — C kernel file-hide driver (cheat / hide; Detection:Hide-adjacent)
+- [HideDriver](entities/hide-driver.md) — hide driver via Flink/Blink unlink (cheat / hide; AC enum evasion)
 - [HijackLibs](entities/hijacklibs.md) — disclosed Windows DLL hijack DB (YAML + web UI; exports / conditions)
 - [hint-break](entities/hint-break.md) — RE-tool ghost opcodes `0F 1A`/`0F 1B` (Anti Debugging / anti-disasm)
 - [Hooking-via-InstrumentationCallback](entities/hooking-via-instrumentation-callback.md) — Ring3 Instrumentation Callback hook (NtSetInformationProcess; no ntdll patch)
