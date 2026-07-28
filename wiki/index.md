@@ -274,6 +274,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [genmc](entities/genmc.md) — IDAPython Hex-Rays microcode IR viewer (decompiler-plugin debug; cheat / IDA Plugins)
 - [genpatch](entities/genpatch.md) — Python binary-patch script generator (dialog on success; cheat / IDA Plugins)
 - [genshin-impact-script](entities/genshin-impact-script.md) — TypeScript Genshin Impact script (cheat / game:genshin impact)
+- [get-unity](entities/get-unity.md) — JS CLI: Unity Editor download URL (latest/pinned; Game Tools)
 - [GhidraMetrics](entities/ghidrametrics.md) — Ghidra native-code metrics (cyclomatic / size / call depth; headless JSON)
 - [gltut](entities/gltut.md) — OpenGL tutorial (C++ / XML docs; Renderer / OpenGL Render)
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)
