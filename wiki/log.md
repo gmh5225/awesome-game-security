@@ -1512,3 +1512,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nevergiveup-c/obfuscxx`: entity [[obfuscxx]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-28** — ingest `description:netwarm007/GameEngineFromScratch`: entity [[game-engine-from-scratch]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-28** — ingest `description:nettitude/Tartarus-TpAllocInject`: entity [[tartarus-tp-alloc-inject]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].

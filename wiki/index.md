@@ -605,6 +605,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [syscalls-cpp](entities/syscalls-cpp.md) — C++20 header-only direct syscall invocation (AC Compile Time)
 - [System Informer](entities/systeminformer.md) — Process Hacker successor; Windows process/system explorer (kernel explorer lane)
 - [SystemThreadFinder](entities/system-thread-finder.md) — detect hidden/manual-map system threads (NtQuerySystemInformation; BE-style)
+- [Tartarus-TpAllocInject](entities/tartarus-tp-alloc-inject.md) — TpAllocInject loader + Tartarus' Gate indirect syscalls (cheat / injection:windows)
 - [TDE](entities/tde.md) — Themida IDA plugin / Fix Themida (devirtualization engine; sodareverse)
 - [Termux](entities/termux-app.md) — Android terminal / Linux env (no-root; pkg+apt / proot; Cheat Terminal Emulator)
 - [thats_no_pipe](entities/thats-no-pipe.md) — Frida Windows named-pipe interceptor (NtRead/WriteFile; IPC → HTTP/WS proxy)
