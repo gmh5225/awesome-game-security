@@ -953,6 +953,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Byrom90/XenonDumper [Dumps files & data required to use the Xenon Xbox 360 Low Level Emulator]
 - https://github.com/WenzWenzWenz/DelphiReSym [A Delphi symbol name recovery tool for reverse engineers]
 - https://github.com/Hexorg/Ouroboros [A Symbolic-Execution Decompiler written in Rust]
+- https://github.com/JonathanSalwan/Triton [Dynamic binary analysis library: symbolic execution, taint analysis, and SMT-backed RE automation]
 - https://github.com/pandaadir05/re-architect [RE-Architect is an advanced automated reverse engineering platform that utilizes binary analysis techniques and machine learning to understand binary files and extract meaningful information]
 - https://github.com/gmh5225/js-debugger-bypass-script [JS Debugger Bypass UserScript]
 - https://github.com/diversenok/DiaSymbolView [PDB file inspection tool]
