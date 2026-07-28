@@ -289,6 +289,7 @@ sources:
   - wiki/sources/descriptions/ps5-linux__ps5-linux-loader.md
   - wiki/sources/descriptions/praydog__luagenny.md
   - wiki/sources/descriptions/praydog__Source2Gen.md
+  - wiki/sources/descriptions/neverlosecc__source2gen.md
   - wiki/sources/descriptions/neverlosecc__source2sdk.md
   - wiki/sources/descriptions/praydog__AutomataMP.md
   - wiki/sources/descriptions/phonowell__genshin-impact-script.md
@@ -375,7 +376,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Rust Fortnite frameworks such as [[reborn]] (web server + SQLite + Discord bot; modular crates for server/bot/client) illustrate web-controlled cheat architectures in the same game:fortnite lane. (source: wiki/sources/descriptions/realTristan__Reborn.md)
 - UE4 SDK View explorers such as [[unrealengine4-swissknife]] (UObjects under `GEngine` World Actors) and [[unrealsharp]] sit in the Cheat / Game Engine Explorer:Unreal lane. (source: wiki/sources/descriptions/spudgy__UnrealEngine4-SwissKnife.md) (source: wiki/sources/descriptions/shalzuth__UnrealSharp.md) UE4 FOV/freecam hook+overlay samples such as [[ue4-freecam]] (C/C++; FOV Changer) sit in the same Unreal explorer / camera-hook lane. (source: wiki/sources/descriptions/percpopper__UE4-Freecam.md)
 - SDK codegen tooling such as [[luagenny]] (C++; reverse engineering / SDK generation; cheat / sdk codegen) sits in the Cheat SDK CodeGen lane. (source: wiki/sources/descriptions/praydog__luagenny.md)
-- Source 2 SDK generators such as [[source2gen]] (C++ headers for exposed classes/enums; cheat / game engine explorer:source) sit in the same Cheat SDK CodeGen / Source 2 lane. (source: wiki/sources/descriptions/praydog__Source2Gen.md) Generated multi-game Source 2 SDK dumps such as [[source2sdk]] (neverlosecc; C++) sit beside them as consumed SDK output. (source: wiki/sources/descriptions/neverlosecc__source2sdk.md)
+- Source 2 SDK generators such as [[source2gen]] (neverlosecc / praydog; C++ SDK generation + memory analysis; cheat / game engine explorer:source) sit in the same Cheat SDK CodeGen / Source 2 lane. (source: wiki/sources/descriptions/neverlosecc__source2gen.md) (source: wiki/sources/descriptions/praydog__Source2Gen.md) Generated multi-game Source 2 SDK dumps such as [[source2sdk]] (neverlosecc; C++) sit beside them as consumed SDK output. (source: wiki/sources/descriptions/neverlosecc__source2sdk.md)
 - Cheat Engine Godot runtime dumpers such as [[gddumper]] (Lua; Godot 3.x/4.x SceneTree / GDScript on Win x86/x64; Address List dump + experimental hot-reload) sit in the Cheat Engine Plugins / game engine explorer:Godot lane. (source: wiki/sources/descriptions/palepine__GDDumper.md)
 - MBA expression generators such as [[mutaben]] (Python) sit in the Cheat Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/z1ko__mutaben.md)
 - Non-linear MBA obfuscation via [[mba-obfuscator]] (`mba_obfuscator/` + `samples/`) sits in the same Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/nhpcc502__MBA-Obfuscator.md)
