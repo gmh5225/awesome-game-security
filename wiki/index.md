@@ -283,6 +283,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)
 - [gunyah-hypervisor](entities/gunyah-hypervisor.md) — Qualcomm Type-1 ARM64 HV (trusted/dependent VMs; Cheat QEMU/KVM + Android Emulator)
 - [HelloIommuPkg](entities/helloiommupkg.md) — sample DXE DMA-remapping (IOMMU) driver (tandasat; Detection:DMA)
+- [hdd_serial_spoofer](entities/hdd-serial-spoofer.md) — HDD serial spoof (C/C++; cheat / HWID; namazso)
 - [heck_csgo_external](entities/heck-csgo-external.md) — external CS:GO; SDK generation / memory analysis (C++; cheat / game:csgo)
 - [hide-file](entities/hide-file.md) — C kernel file-hide driver (cheat / hide; Detection:Hide-adjacent)
 - [HideDriver](entities/hide-driver.md) — hide driver via Flink/Blink unlink (cheat / hide; AC enum evasion)

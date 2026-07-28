@@ -1553,3 +1553,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-28** — ingest `description:namazso/physmem_drivers`: entity [[physmem-drivers]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
+- **2026-07-28** — ingest `description:namazso/hdd_serial_spoofer`: entity [[hdd-serial-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
