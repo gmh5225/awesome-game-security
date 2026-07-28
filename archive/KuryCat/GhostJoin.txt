@@ -1,0 +1,401 @@
+Project Path: arc_KuryCat_GhostJoin_h89jehui
+
+Source Tree:
+
+```txt
+arc_KuryCat_GhostJoin_h89jehui
+├── LICENSE
+├── README.md
+└── ghostjoin.py
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 mc-afk-bot-tester contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to
+deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE SOFTWARE.
+
+---
+
+Additional notice (non-binding, for clarity):
+
+This project is intended for testing anti-bot / anti-cheat systems on
+Minecraft servers that you own or are explicitly authorized to test against.
+The authors and contributors take no responsibility for any misuse of this
+software, including but not limited to unauthorized access, denial-of-
+service activity, fake player-count manipulation, or violation of any
+server's terms of service. Users are solely responsible for ensuring their
+use of this software complies with applicable laws and with the policies of
+any server they connect to.
+
+```
+
+`README.md`:
+
+```md
+# GhostJoin
+
+Một Minecraft (Java Edition) protocol client tối giản viết bằng Python thuần
+(chỉ dùng thư viện chuẩn: `socket`, `struct`, `hashlib`, `zlib`) — kết nối vào
+server, đi hết luồng Handshake → Login → Configuration → Play, và giữ kết nối
+sống bằng cách phản hồi Keep Alive.
+
+## Mục đích
+
+Repo này được viết ra để **kiểm thử hệ thống chống bot (anti-bot) của một
+server Minecraft do chính bạn quản lý, hoặc server mà bạn đã được chủ sở hữu
+cho phép rõ ràng**. Nó mô phỏng một kết nối client ở mức protocol (không có
+logic render, vật lý, hay tương tác trong game) — hữu ích để kiểm tra xem hệ
+thống chống bot của server có phát hiện và chặn được các kết nối "trần"
+kiểu này hay không.
+
+Trong quá trình phát triển, script này từng bị một server thật chặn đúng ở
+bước cuối của Configuration state (server chỉ lặp lại Keep Alive, không bao
+giờ gửi Finish Configuration) — đây là ví dụ thực tế của việc một hệ thống
+anti-bot phát hiện và giữ kết nối "nghi ngờ" ở trạng thái lấp lửng thay vì từ
+chối thẳng. Ghi lại ở đây để làm tài liệu tham khảo khi bạn kiểm thử.
+
+## Giới hạn
+
+- **Chỉ hoạt động với server offline-mode** (`online-mode=false`). Server bật
+  xác thực Mojang/Microsoft cần Encryption Request + session token hợp lệ,
+  không nằm trong phạm vi script này.
+- Packet ID trong Minecraft Protocol thay đổi khá thường xuyên giữa các bản.
+  ID trong script này lấy theo protocol ~773–776 (gần bản 26.1.2 tại thời
+  điểm viết). Bật `DEBUG = True` trong file để in ra mọi packet ID nhận được
+  và tự đối chiếu tại
+  [minecraft.wiki/w/Java_Edition_protocol/Packets](https://minecraft.wiki/w/Java_Edition_protocol/Packets)
+  nếu server bạn dùng bản khác.
+- Không có logic render/vật lý/tương tác — client chỉ "đứng yên" ở Play
+  state. Nếu bạn cần mô phỏng hành vi di chuyển/hành động để kiểm thử kỹ hơn,
+  cần tự bổ sung thêm.
+
+## Cách dùng
+
+```bash
+python ghostjoin.py <host> <port> <username> [protocol_version]
+```
+
+Ví dụ:
+
+```bash
+python ghostjoin.py 127.0.0.1 25565 TestBot 775
+```
+
+## Lưu ý sử dụng có trách nhiệm
+
+- Chỉ chạy trên server của bạn, hoặc server mà chủ sở hữu **đã đồng ý rõ
+  ràng** cho việc kiểm thử này.
+- Không dùng để tạo số lượng lớn kết nối giả nhằm gây quá tải server (DoS),
+  thao túng số liệu người chơi hiển thị công khai, hay né tránh các biện
+  pháp bảo vệ mà bạn không có quyền vượt qua.
+- Nếu hệ thống chống bot của server chặn được script này — đó là kết quả
+  kiểm thử mong muốn, không phải lỗi cần "vá" để vượt qua bằng mọi giá.
+
+## Giấy phép
+
+Xem file [LICENSE](./LICENSE). Được phép tự do sử dụng, sao chép, chỉnh sửa,
+phân phối lại; phần mềm được cung cấp "nguyên trạng", tác giả không chịu
+trách nhiệm cho bất kỳ hậu quả nào phát sinh từ việc sử dụng hoặc lạm dụng.
+
+```
+
+`ghostjoin.py`:
+
+```py
+"""
+ghostjoin.py
+-------------
+Script kết nối vào server Minecraft (chế độ OFFLINE / cracked, không cần đăng nhập Mojang)
+và giữ kết nối sống để server hiển thị người chơi đã vào.
+
+Hỗ trợ đầy đủ luồng hiện đại: Handshake -> Login -> Configuration -> Play
+(Mojang thêm Configuration state bắt buộc từ bản 1.20.2 trở đi).
+
+LƯU Ý QUAN TRỌNG:
+- Chỉ hoạt động với server OFFLINE-MODE (online-mode=false). Server bật xác thực
+  Mojang/Microsoft cần Encryption Request + session token hợp lệ, không nằm trong
+  phạm vi script này.
+- Packet ID trong Minecraft Protocol đổi khá thường xuyên giữa các bản (kể cả các
+  thư viện lớn như mineflayer cũng chưa theo kịp bản rất mới). ID trong script này
+  lấy theo bảng protocol ~773-776 (gần nhất với 775 / bản 26.1.2 tại thời điểm viết).
+  Nếu vẫn lỗi, bật DEBUG=True bên dưới để in ra mọi packet ID nhận được và tự đối
+  chiếu với https://minecraft.wiki/w/Java_Edition_protocol/Packets
+
+Cách dùng:
+    python ghostjoin.py <host> <port> <username> [protocol_version]
+"""
+
+import hashlib
+import socket
+import struct
+import sys
+import zlib
+
+DEBUG = True  # In ra mọi packet ID nhận được để dễ dò lỗi
+
+
+# ---------- UUID offline-mode ----------
+
+def offline_uuid_bytes(username: str) -> bytes:
+    data = ("OfflinePlayer:" + username).encode("utf-8")
+    digest = bytearray(hashlib.md5(data).digest())
+    digest[6] = (digest[6] & 0x0F) | 0x30
+    digest[8] = (digest[8] & 0x3F) | 0x80
+    return bytes(digest)
+
+
+# ---------- Đóng gói / giải mã VarInt, String ----------
+
+def pack_varint(value: int) -> bytes:
+    out = b""
+    value &= 0xFFFFFFFF
+    while True:
+        temp = value & 0x7F
+        value >>= 7
+        if value != 0:
+            temp |= 0x80
+        out += struct.pack("B", temp)
+        if value == 0:
+            break
+    return out
+
+
+def pack_string(s: str) -> bytes:
+    data = s.encode("utf-8")
+    return pack_varint(len(data)) + data
+
+
+def pack_ushort(value: int) -> bytes:
+    return struct.pack(">H", value)
+
+
+def pack_bool(value: bool) -> bytes:
+    return b"\x01" if value else b"\x00"
+
+
+def varint_from_bytes(data: bytes, offset: int):
+    num = 0
+    shift = 0
+    while True:
+        byte = data[offset]
+        offset += 1
+        num |= (byte & 0x7F) << shift
+        if not (byte & 0x80):
+            break
+        shift += 7
+    return num, offset
+
+
+# ---------- Đọc socket ----------
+
+def read_n_bytes(sock: socket.socket, n: int) -> bytes:
+    data = b""
+    while len(data) < n:
+        chunk = sock.recv(n - len(data))
+        if not chunk:
+            raise ConnectionError("Server đã đóng kết nối.")
+        data += chunk
+    return data
+
+
+def read_varint_sock(sock: socket.socket) -> int:
+    num = 0
+    shift = 0
+    while True:
+        byte = read_n_bytes(sock, 1)[0]
+        num |= (byte & 0x7F) << shift
+        if not (byte & 0x80):
+            break
+        shift += 7
+    return num
+
+
+# ---------- Lớp quản lý kết nối (có hỗ trợ nén) ----------
+
+class MCConnection:
+    def __init__(self, sock: socket.socket):
+        self.sock = sock
+        self.compression_threshold = -1  # -1 = chưa bật nén
+
+    def send_packet(self, packet_id: int, payload: bytes):
+        body = pack_varint(packet_id) + payload
+
+        if self.compression_threshold >= 0:
+            if len(body) >= self.compression_threshold:
+                compressed = zlib.compress(body)
+                packet_data = pack_varint(len(body)) + compressed
+            else:
+                packet_data = pack_varint(0) + body
+            self.sock.sendall(pack_varint(len(packet_data)) + packet_data)
+        else:
+            self.sock.sendall(pack_varint(len(body)) + body)
+
+    def read_packet(self):
+        length = read_varint_sock(self.sock)
+        raw = read_n_bytes(self.sock, length)
+
+        if self.compression_threshold >= 0:
+            data_length, offset = varint_from_bytes(raw, 0)
+            body = raw[offset:]
+            if data_length != 0:
+                body = zlib.decompress(body)
+        else:
+            body = raw
+
+        packet_id, offset = varint_from_bytes(body, 0)
+        return packet_id, body[offset:]
+
+
+# ---------- Logic chính ----------
+
+def connect_and_join(host: str, port: int, username: str, protocol_version: int):
+    raw_sock = socket.create_connection((host, port), timeout=10)
+    conn = MCConnection(raw_sock)
+    print(f"[+] Đã kết nối TCP tới {host}:{port}")
+
+    # 1. Handshake -> next_state = 2 (login)
+    handshake_payload = (
+        pack_varint(protocol_version)
+        + pack_string(host)
+        + pack_ushort(port)
+        + pack_varint(2)
+    )
+    conn.send_packet(0x00, handshake_payload)
+
+    # 2. Login Start (= "hello" serverbound, id 0x00): name + UUID (16 byte thô)
+    player_uuid = offline_uuid_bytes(username)
+    conn.send_packet(0x00, pack_string(username) + player_uuid)
+    print(f"[+] Đã gửi Login Start: {username} (UUID: {player_uuid.hex()})")
+
+    # ---- Login state loop ----
+    state = "login"
+    while state == "login":
+        packet_id, payload = conn.read_packet()
+        if DEBUG:
+            print(f"[debug] (login) packet_id=0x{packet_id:02X} len={len(payload)}")
+
+        if packet_id == 0x00:
+            reason = payload[1:].decode("utf-8", errors="replace") if payload else ""
+            print(f"[-] Bị từ chối: {reason}")
+            return
+        elif packet_id == 0x01:
+            print("[-] Server yêu cầu Encryption Request -> server đang bật online-mode "
+                  "(cần xác thực Mojang/Microsoft), script này không hỗ trợ trường hợp đó.")
+            return
+        elif packet_id == 0x02:
+            print("[+] Login Success nhận được.")
+            conn.send_packet(0x03, b"")  # Login Acknowledged
+            state = "configuration"
+        elif packet_id == 0x03:
+            threshold, _ = varint_from_bytes(payload, 0)
+            conn.compression_threshold = threshold
+            print(f"[+] Bật nén, threshold={threshold}")
+        elif packet_id == 0x04:
+            message_id, offset = varint_from_bytes(payload, 0)
+            response = pack_varint(message_id) + b"\x00"
+            conn.send_packet(0x02, response)
+        else:
+            pass
+
+    # ---- Configuration state loop ----
+    print("[+] Đang ở Configuration state...")
+
+    # Client thật luôn TỰ gửi Client Information ngay khi vào Configuration,
+    # không đợi server hỏi - thiếu bước này server sẽ đứng im chỉ gửi Keep Alive.
+    client_info_payload = (
+        pack_string("en_US")           # locale
+        + struct.pack("b", 10)         # view distance
+        + pack_varint(0)               # chat mode: enabled
+        + pack_bool(True)              # chat colors
+        + struct.pack("B", 0x7F)       # displayed skin parts: tất cả
+        + pack_varint(1)               # main hand: phải
+        + pack_bool(False)             # enable text filtering
+        + pack_bool(True)              # allow server listings
+        + pack_varint(0)               # particle status: all
+    )
+    conn.send_packet(0x00, client_info_payload)
+    print("[+] Đã gửi Client Information.")
+
+    # Client thật luôn tự gửi Plugin Message channel "minecraft:brand" để giới thiệu
+    # tên client. Nhiều server (đặc biệt có plugin/anti-bot) chờ gói này mới cho qua
+    # Configuration - thiếu bước này server có thể "treo" ở Keep Alive vô thời hạn.
+    brand_payload = pack_string("minecraft:brand") + pack_string("vanilla")
+    conn.send_packet(0x02, brand_payload)
+    print("[+] Đã gửi Plugin Message (minecraft:brand).")
+
+    state = "configuration"
+    while state == "configuration":
+        packet_id, payload = conn.read_packet()
+        if DEBUG:
+            print(f"[debug] (config) packet_id=0x{packet_id:02X} len={len(payload)}")
+
+        if packet_id == 0x02:
+            print("[-] Bị ngắt kết nối trong Configuration state.")
+            return
+        elif packet_id == 0x03:
+            conn.send_packet(0x03, b"")  # Acknowledge Finish Configuration
+            print("[+] Configuration hoàn tất, chuyển sang Play state.")
+            state = "play"
+        elif packet_id == 0x04:
+            conn.send_packet(0x04, payload)  # Keep Alive echo
+        elif packet_id == 0x0E:
+            conn.send_packet(0x07, pack_varint(0))  # Known Packs rỗng
+        else:
+            pass
+
+    # ---- Play state ----
+    print("[+] Đã vào Play state. Giữ kết nối để duy trì trạng thái online...")
+    raw_sock.settimeout(30)
+
+    while True:
+        try:
+            packet_id, payload = conn.read_packet()
+            if DEBUG:
+                print(f"[debug] (play) packet_id=0x{packet_id:02X} len={len(payload)}")
+
+            if packet_id == 0x2C and len(payload) == 8:
+                conn.send_packet(0x1A, payload)
+                print("[i] Đã phản hồi Keep Alive.")
+
+        except socket.timeout:
+            print("[i] Không có gói tin mới, vẫn giữ kết nối...")
+            continue
+        except (ConnectionError, OSError) as e:
+            print(f"[-] Mất kết nối: {e}")
+            break
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 4:
+        print("Cách dùng: python ghostjoin <host> <port> <username> [protocol_version]")
+        sys.exit(1)
+
+    host_arg = sys.argv[1]
+    port_arg = int(sys.argv[2])
+    username_arg = sys.argv[3]
+    protocol_arg = int(sys.argv[4]) if len(sys.argv) > 4 else 775
+
+    connect_and_join(host_arg, port_arg, username_arg, protocol_arg)
+
+```
