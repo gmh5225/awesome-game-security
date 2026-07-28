@@ -1484,3 +1484,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2596; Anti Cheat ~616 / Game Engine ~151 / DirectX ~35 / Game Develop ~182 stable); light `index.md` section notes (no per-category pages).
 
 - **2026-07-28** — ingest `description:palepine/GDDumper`: entity [[gddumper]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
+
+- **2026-07-28** — ingest `description:niemand-sec/AntiCheat-Testing-Framework`: entity [[anti-cheat-testing-framework]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
