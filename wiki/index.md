@@ -46,6 +46,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Beatrice.py](entities/beatrice-py.md) — Python x64 opcode-equivalent mutation (AV/AC signature evasion)
 - [battleye-region-walking](entities/battleye-region-walking.md) — BE VirtualQuery region walk (MEM_PRIVATE/MAPPED; shellcode/manual-map)
 - [battleye-rust](entities/battleye-rust.md) — BattlEye RCON UDP (Rust; packet checksum + socket I/O)
+- [better-godot-mcp](entities/better-godot-mcp.md) — Godot 4.x composite MCP (TS; scenes/GDScript; Game Develop / MCP)
 - [big5-decode-ida](entities/big5-decode-ida.md) — IDA plugin: decode bytes as Big5 (Python; cheat / IDA Plugins)
 - [a-pasted-rust-script](entities/a-pasted-rust-script.md) — Rust/C++ ImGui cheat loader (anti-debug + feature modules)
 - [ActionRoguelike](entities/action-roguelike.md) — UE Roguelike sample (gameplay systems; Game Develop / Unreal source)

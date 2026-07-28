@@ -1569,3 +1569,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nCine/nCine`: entity [[ncine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-07-28** — ingest `description:n4sm/m0dern_p4cker`: entity [[m0dern-p4cker]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-28** — ingest `description:n24q02m/better-godot-mcp`: entity [[better-godot-mcp]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
