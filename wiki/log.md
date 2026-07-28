@@ -1538,3 +1538,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nefarius/HydraHook`: entity [[hydrahook]]; cited on [[present-hook]] and [[overviews/graphics-api]].
 
 - **2026-07-28** — ingest `description:ndrewh/pyda`: entity [[pyda]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-28** — ingest `description:nbulsi/cirsat`: entity [[cirsat]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
