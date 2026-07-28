@@ -442,6 +442,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [obfCoder](entities/obfcoder.md) — C++ source/binary obfuscation tool (CMake / OpenSSL demos; AC Obfuscation Engine)
 - [Obfuscar](entities/obfuscar.md) — open-source .NET assembly obfuscator (rename/string hide; AC Obfuscation Engine)
 - [obfuscatxor](entities/obfuscatxor.md) — Go string crypter (encrypted string vars; AC Compile Time / String Crypter)
+- [obfuscxx](entities/obfuscxx.md) — C++20 header-only compile-time variable obfuscation (SIMD decrypt; AC Encrypt Variable)
 - [Obfusk8](entities/obfusk8.md) — C++17 compile-time/runtime obfuscation library (AC Compile Time)
 - [obpo-plugin](entities/obpo-plugin.md) — IDA client + Go OBPO backend (closed core; open plugin; Fix OLLVM)
 - [Obscura](entities/obscura.md) — LLVM pass-plugin obfuscator (C/C++/ObjC/Swift; 13 passes; Darwin-strong; AC Obfuscation Engine)

@@ -1508,3 +1508,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:neverlosecc/source2sdk`: entity [[source2sdk]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
 
 - **2026-07-28** — ingest `description:neverlosecc/source2gen`: updated entity [[source2gen]] (neverlosecc + praydog); cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
+
+- **2026-07-28** — ingest `description:nevergiveup-c/obfuscxx`: entity [[obfuscxx]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
