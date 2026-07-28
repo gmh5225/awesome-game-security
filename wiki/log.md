@@ -1559,3 +1559,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-28** — ingest `description:nakdeyes/UnrealImGuiTools`: entity [[unreal-imgui-tools]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
+
+- **2026-07-28** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Anti Cheat ~618; Cheat ~2598 / Game Engine ~153 / DirectX ~35 / Game Develop ~182 stable); light `index.md` section notes (no per-category pages).
