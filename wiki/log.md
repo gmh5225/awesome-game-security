@@ -1480,3 +1480,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:niemand-sec/ReClass.NET-DriverReader`: entity [[reclass-net-driverreader]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-28** — ingest `description:niemand-sec/DirectX11Hook`: entity [[directx11hook]]; cited on [[present-hook]] and [[overviews/graphics-api]].
+
+- **2026-07-28** — ingest `readme:categories`: refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] (Cheat ~2596; Anti Cheat ~616 / Game Engine ~151 / DirectX ~35 / Game Develop ~182 stable); light `index.md` section notes (no per-category pages).
