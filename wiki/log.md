@@ -1496,3 +1496,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nhpcc502/MBA-Obfuscator`: entity [[mba-obfuscator]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-28** — ingest `description:nfrechette/rtm`: entity [[rtm]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-28** — ingest `description:nezu-cc/BakaWare4`: entity [[bakaware4]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
