@@ -403,6 +403,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [luagenny](entities/luagenny.md) — C++ Lua SDK codegen (cheat / sdk codegen; RE)
 - [LuaMachine](entities/luamachine.md) — UE4 Lua gameplay scripting plugin (Blueprint assets / metatables; Plugins:Unreal)
 - [Lua-Obfuscator-Clyde-Protection](entities/lua-obfuscator-clyde-protection.md) — Luau/Lua VM obfuscator (AST + stack/register VM; Roblox script protection)
+- [m0dern_p4cker](entities/m0dern-p4cker.md) — C/C++ ELF binary packer (`[ELF]`; Anti Cheat → Binary Packer)
 - [macroquad](entities/macroquad.md) — Rust 2D game lib (shaders / render / audio; Game Engine / source)
 - [MagicSigner](entities/magic-signer.md) — sign with leaked certs (admin; TLS side effects; AC sign tools)
 - [Magnetite](entities/magnetite.md) — Rust self-hostable Wasm game platform (deterministic replay AC / magnetite-anticheat)

@@ -1567,3 +1567,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:nahid0x1/CVE-2024-0044`: entity [[cve-2024-0044]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-28** — ingest `description:nCine/nCine`: entity [[ncine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-28** — ingest `description:n4sm/m0dern_p4cker`: entity [[m0dern-p4cker]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
