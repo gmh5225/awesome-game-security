@@ -12,7 +12,7 @@ confidence: medium
 
 Free comprehensive reverse-engineering tutorial covering x86, x64, 32-bit/64-bit ARM, 8-bit AVR, and 32-bit RISC-V, with tracks for static analysis and dynamic analysis. Aimed at game-security researchers and reverse engineers studying offensive techniques in the Cheat guide lane. (source: wiki/sources/descriptions/mytechnotalent__Reverse-Engineering.md)
 
-Hands-on architecture/lab curriculum rather than a curated link index; complements awesome lists such as [[reverse-engineering]], tool catalogs such as [[retools]], practical cheatsheets such as [[gamehacking-cheatsheet]], and the same author's Windows RE/debugging guide [[hacking-windows]].
+Hands-on architecture/lab curriculum rather than a curated link index; complements awesome lists such as [[reverse-engineering]], tool catalogs such as [[retools]], practical cheatsheets such as [[gamehacking-cheatsheet]], the same author's Windows RE/debugging guide [[hacking-windows]], and Rust-specific RE course [[hacking-rust]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Hands-on architecture/lab curriculum rather than a curated link index; complemen
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[hacking-windows]] · [[reverse-engineering]] · [[retools]] · [[gamehacking-cheatsheet]] · [[infosec-reference]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[hacking-windows]] · [[hacking-rust]] · [[reverse-engineering]] · [[retools]] · [[gamehacking-cheatsheet]] · [[infosec-reference]]
