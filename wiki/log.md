@@ -1633,3 +1633,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:mrexodia/RiscyWorkshop`: entity [[riscy-workshop]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
 
 - **2026-07-29** — ingest `description:mrexodia/NtPhp`: entity [[ntphp]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
+- **2026-07-29** — ingest `description:mrexodia/EfiCMake`: entity [[eficmake]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].

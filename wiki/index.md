@@ -232,6 +232,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EDRSandblast](entities/edrsandblast.md) — BYOVD EDR/ETW blind (callbacks / ETW TI / ntdll unhook; C)
 - [elfuck](entities/elfuck.md) — ELF packer/protector (NRV2E / password / anti-debug; Anti Cheat → Binary Packer)
 - [encrypted_value](entities/encrypted-value.md) — C++ header-only scalar value encrypt (Anti Cheat → Encrypt Variable)
+- [EfiCMake](entities/eficmake.md) — minimal CMake UEFI app scaffold (EDK2 headers; MSVC `.efi`; boot services)
 - [engine-showcase](entities/engine-showcase.md) — older custom C++ engine showcase (Lua/UI/levels/net; Game Engine / [Old engine])
 - [Ephemera](entities/ephemera.md) — multiplatform MEMORY.DMP analysis (WinDbg flavor; AC / kernel dump)
 - [EpicSurvivalGame](entities/epic-survival-game.md) — UE4 FPS course (action system / event-driven C++; Game Develop / Unreal source)
