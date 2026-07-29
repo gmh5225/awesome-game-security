@@ -2877,6 +2877,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/XignCode-Dump
 - https://github.com/gmh5225/XignCode3-bypass-alternative
 - https://github.com/gmh5225/XignCode3-bypass
+- https://github.com/miyakejima/xigncode3-blackdesert [Full-pipeline static reconstruction and security-property analysis of XIGNCODE3 on Black Desert]
 
 > Explore AntiCheat System:ACE
 - https://github.com/H3d9/sguard_limit
@@ -4204,6 +4205,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/chrisgdt/DELBOT-Mouse [Deep learning to distinguish human and bot from mouse movements]
 - https://github.com/Oliver-1-1/EtwKeyboardDetection [ETW]
 - https://github.com/wesmar/KeyboardKit [Educational kernel-mode keylogger rootkit — intercepts keyboard IRPs for UDP logging; demonstrates stealth persistence, privilege escalation and IRP hooking for offensive security research and defensive analysis]
+- https://github.com/dungnotnull/game-cheating-exploit-detection-agent-skill [Python anti-cheat detection engine with statistical aimbot, wallhack, macro, memory-tamper, and exploit detectors plus CI-tested harness]
 
 > Detection:Hide
 - https://github.com/KANKOSHEV/Detect-HiddenThread-via-KPRCB
