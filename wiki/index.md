@@ -253,6 +253,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EasyPixel](entities/easypixel.md) — Magisk module: disguise device as Google Pixel (Cheat Magisk)
 - [EDRSandblast](entities/edrsandblast.md) — BYOVD EDR/ETW blind (callbacks / ETW TI / ntdll unhook; C)
 - [elfuck](entities/elfuck.md) — ELF packer/protector (NRV2E / password / anti-debug; Anti Cheat → Binary Packer)
+- [emulator](entities/emulator.md) — Unicorn+Capstone debugger-emulator hybrid (PE load; dbghelp imports; API hooking; instruction logging; Windows User Space Emulator)
 - [encrypted_value](entities/encrypted-value.md) — C++ header-only scalar value encrypt (Anti Cheat → Encrypt Variable)
 - [EfiCMake](entities/eficmake.md) — minimal CMake UEFI app scaffold (EDK2 headers; MSVC `.efi`; boot services)
 - [engine-showcase](entities/engine-showcase.md) — older custom C++ engine showcase (Lua/UI/levels/net; Game Engine / [Old engine])
