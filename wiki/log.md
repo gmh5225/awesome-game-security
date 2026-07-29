@@ -1643,3 +1643,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:rajssinde/rs-native-kit-security`: entity [[rs-native-kit-security]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
 
 - **2026-07-29** — ingest `description:mrexodia/AppInitHook`: entity [[appinithook]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-29** — ingest `description:mrdoob/three.js`: entity [[three-js]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].

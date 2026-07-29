@@ -669,6 +669,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [The-Seed-Link-Future](entities/the-seed-link-future.md) — Unity VR (C#; OpenGL / shader / driver-dev; Game Develop)
 - [Themida-Research](entities/themida-research.md) — Themida/WinLicense 3.x VM research (`VM_CONTEXT` / handlers / Triton; Fix Themida)
 - [Thetan_ArenaSDK](entities/thetan-arenasdk.md) — Thetan Arena SDK (rendering / audio / physics; cheat lane)
+- [Three.js](entities/three-js.md) — JavaScript 3D library (WebGL/WebGPU; scene graph / PBR / glTF / XR; Game Engine / HTML5)
 - [ThreatResearch](entities/threatresearch.md) — Security Joes Ghidra/IDA plugins + malware RE scripts / YARA (Cheat Ghidra)
 - [TiEtwAgent](entities/tietwagent.md) — ETW Threat-Intelligence injection-detection agent (krabsetw / Yara / PPL)
 - [ThreatIntelligenceConsumer](entities/threat-intelligence-consumer.md) — Threat-Intelligence ETW consume without driver/PPL (Win11 24H2/25H2)
