@@ -1216,6 +1216,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Xposed
 - https://github.com/NPC2000/AppPealing-new [An Xposed module that disables Inka AppSealing, a popular anti-cheat and anti-root solution]
 - https://github.com/mabbcoll13/xposed-module-kit [Xposed/LSPosed module scaffold with hook templates and root-detection bypass example]
+- https://github.com/wchunlin1006/LocusMimic [LSPosed/Xposed Android GPS spoof module with map picker, saved locations, and app/system/mock-provider modes]
 
 > Frida
 - https://github.com/hackcatml/frida-watchpoint-tutorial [Frida's setHardwareWatchpoint tutorial]
