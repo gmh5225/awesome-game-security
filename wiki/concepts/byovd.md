@@ -22,7 +22,8 @@ sources:
   - wiki/sources/descriptions/sai2fast__DsArk64.md
   - wiki/sources/descriptions/redteamfortress__PhantomKiller.md
   - wiki/sources/descriptions/r0keb__Smep-Bypass.md
-updated: 2026-07-28
+  - wiki/sources/descriptions/moiz-2x__CVE-2025-24990_POC.md
+updated: 2026-07-29
 confidence: high
 ---
 
@@ -68,7 +69,9 @@ Security-product handle-donor abuse such as [[dsark64]] targets Qihoo 360’s WH
 
 Hardware-feature bypass PoCs such as [[smep-bypass]] use vulnerable-driver primitives (or ROP) to clear CR4.SMEP so the kernel can execute user-mode shellcode. (source: wiki/sources/descriptions/r0keb__Smep-Bypass.md)
 
+Agere Modem driver LPE such as [[cve-2025-24990-poc]] abuses `ltmdm64.sys` `METHOD_NEITHER` IOCTLs (missing user/kernel boundary checks) → 4-byte write via `IOCTL_GET_VERSION` + null-deref fixup via `VirtualAlloc` → arbitrary kernel R/W, with an IoRing LPE variant. (source: wiki/sources/descriptions/moiz-2x__CVE-2025-24990_POC.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[lenovo-cve-2025-8061]] · [[cpuz]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 

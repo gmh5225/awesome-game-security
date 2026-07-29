@@ -1699,3 +1699,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:momalab/e3`: entity [[e3]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-29** — ingest `readme:categories`: bumped Cheat ~2607 (was ~2606) and Anti Cheat ~622 (was ~621) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
+- **2026-07-29** — ingest `description:moiz-2x/CVE-2025-24990_POC`: entity [[cve-2025-24990-poc]]; cited on [[byovd]] and [[overviews/windows-kernel]].
