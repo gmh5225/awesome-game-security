@@ -20,4 +20,4 @@ Useful for low-level Windows / Linux / mobile researchers in the Some Tricks / W
 
 ## Related
 
-[[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[ntmemory]] · [[pg1903]]
+[[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[ntmemory]] · [[pteditor]] · [[pg1903]]

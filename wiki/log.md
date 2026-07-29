@@ -1719,3 +1719,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:mischasan/aho-corasick`: entity [[aho-corasick]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
 
 - **2026-07-29** — ingest `description:miscusi-peek/cheatengine-mcp-bridge`: entity [[cheatengine-mcp-bridge]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-29** — ingest `description:misc0110/PTEditor`: entity [[pteditor]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
