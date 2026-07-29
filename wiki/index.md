@@ -478,6 +478,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Obfu-DE-Scate](entities/obfu-de-scate.md) — Python APK ProGuard/R8 deobf (name maps + HTML hierarchy; [Apk])
 - [obfCoder](entities/obfcoder.md) — C++ source/binary obfuscation tool (CMake / OpenSSL demos; AC Obfuscation Engine)
 - [Obfuscar](entities/obfuscar.md) — open-source .NET assembly obfuscator (rename/string hide; AC Obfuscation Engine)
+- [obfuscation-analysis](entities/obfuscation-analysis.md) — Binary Ninja obfuscation analyze/simplify (MBA msynth / opaque-predicate dataflow / Z3 BNIL verify; Cheat Binary Ninja Plugins)
 - [obfuscation-detection](entities/obfuscation-detection.md) — Binary Ninja obfuscated-region heuristics (CFF / insn complexity / n-gram BB DB; batch scripts; Cheat Binary Ninja Plugins)
 - [ObfuscationMethods](entities/obfuscation-methods.md) — C#/dnlib .NET obfuscation technique demos (CFF / anti-dump / anti-de4dot; AC Obfuscation Engine)
 - [obfuscatxor](entities/obfuscatxor.md) — Go string crypter (encrypted string vars; AC Compile Time / String Crypter)

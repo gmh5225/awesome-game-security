@@ -78,6 +78,7 @@ sources:
   - wiki/sources/descriptions/psavarmattas__android_kernel_oneplus_sm7250-WKSU.md
   - wiki/sources/descriptions/mylove90__pc_ginkgo.md
   - wiki/sources/descriptions/mrphrazer__obfuscation_detection.md
+  - wiki/sources/descriptions/mrphrazer__obfuscation_analysis.md
   - wiki/sources/descriptions/msnx__KernelSU-Pixel4XL.md
   - wiki/sources/descriptions/msd0pe-1__cve-maker.md
   - wiki/sources/descriptions/universal5433__android_kernel_samsung_universal5433.md
@@ -437,6 +438,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 - Opaque-predicate detection via [[opaque-predicates-detective]] (invariant-expression / BB-local damage) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/yellowbyte__opaque-predicates-detective.md)
 - Obfuscated-region pinpointing via [[obfuscation-detection]] (CFF / insn-complexity / n-gram BB outliers; batch scripts) sits in the same Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/mrphrazer__obfuscation_detection.md)
+- Obfuscated-code analysis and simplification via [[obfuscation-analysis]] (MBA backward-slice + msynth oracle; opaque-predicate dataflow; Z3-verified BNIL deobfuscation) sits in the same Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/mrphrazer__obfuscation_analysis.md)
 - Windows x86/x64 debugging via [[x64dbg]] (feature-rich debugger + plugin system) is a core Cheat Debugging lane tool for offensive RE. (source: wiki/sources/descriptions/x64dbg__x64dbg.md)
 - Lightweight Java/JVM attach debugging via [[jdbg]] (JDWP; method hooks / breakpoints / variable inspect / class enum) supports runtime RE of Java game clients and obfuscated JVM apps. (source: wiki/sources/descriptions/roger1337__JDBG.md)
 - Java bytecode deobfuscation via [[deobfuscator]] (narumii; cheat / RE tools) recovers readable class structure from obfuscated JVM clients alongside [[raung]]/[[jdbg]]. (source: wiki/sources/descriptions/narumii__Deobfuscator.md)
