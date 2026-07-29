@@ -1675,3 +1675,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `skill:reverse-engineering`: refreshed [[overviews/reverse-engineering]] (workflow, DBI trap-and-emulate/WHP tracing, obfuscation taxonomy, MCP RE, binary diffing, anti-debug catalog); concepts [[mixed-boolean-arithmetic]], [[dynamic-binary-instrumentation]], [[control-flow-flattening]]; expanded [[research-rigor]] RE row; updated `index.md`.
 
 - **2026-07-29** — ingest `skill:windows-kernel`: refreshed [[overviews/windows-kernel]] (symbol walking, VBS/HVCI, Segment Heap forensics, ETW TI, hypervisor EPT defense, research-rigor); concepts [[kernel-pool-scanning]], [[hvci]], [[etw-threat-intelligence]]; updated `index.md`.
+
+- **2026-07-29** — ingest `description:mytechnotalent/hacking-rust`: confirmed entity [[hacking-rust]] (PDF + Cargo labs; x64/ARM64/ARM32; write/debug/disassemble); cross-linked [[go-hacking]]; cites already on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
