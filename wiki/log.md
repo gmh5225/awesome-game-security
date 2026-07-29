@@ -1582,4 +1582,6 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-28** — ingest `description:muturikaranja/disable-threat-tracing`: entity [[disable-threat-tracing]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
+- **2026-07-29** — ingest `description:mut1234/BYPASS-PUBG-MOBILE-IMGUI`: entity [[bypass-pubg-mobile-imgui]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
 - **2026-07-29** — ingest `description:muturikaranja/AfdIrpCallDispatch`: entity [[afd-irp-call-dispatch]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].

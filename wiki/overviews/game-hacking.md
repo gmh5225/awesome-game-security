@@ -151,6 +151,7 @@ sources:
   - wiki/sources/descriptions/xPasters__.data-ptr-swap.md
   - wiki/sources/descriptions/oakboat__DataPtrHookWin11.md
   - wiki/sources/descriptions/muturikaranja__AfdIrpCallDispatch.md
+  - wiki/sources/descriptions/mut1234__BYPASS-PUBG-MOBILE-IMGUI.md
   - wiki/sources/descriptions/x64dbg__x64dbgbinja.md
   - wiki/sources/descriptions/skr0x1c0__binja_kc.md
   - wiki/sources/descriptions/seekbytes__ptxNinja.md
@@ -343,7 +344,7 @@ sources:
   - wiki/sources/descriptions/nbqofficial__norsefire.md
   - wiki/sources/descriptions/nbqofficial__kernel-csgo.md
   - wiki/sources/descriptions/narumii__Deobfuscator.md
-updated: 2026-07-28
+updated: 2026-07-29
 confidence: high
 ---
 
@@ -528,6 +529,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - Leaked partial CS:GO Source trees such as [[cstrike15-src]] (client/server / weapons / movement / networking / UI; Leaked CSGO With CI) sit in the same cheat / game:csgo internals lane for AC and engine-vulnerability study. (source: wiki/sources/descriptions/perilouswithadollarsign__cstrike15_src.md)
 - MapleStory private-server emulators such as [[maplestoryex]] (CMS-079; custom quests/items/maps; combat/inventory/party/scripted events) sit in the Private Server lane for authoritative server / custom-content study. (source: wiki/sources/descriptions/unsafeblackcat__MapleStoryEx.md) Client-side MapleStory Worlds YOLO automation such as [[maplestory-worlds-automation]] (Artale; Python) and YOLOv8 training such as [[maplestory-yolov8-training]] (Apple MPS) sit in the adjacent cheat / game:maplestory CV lane. (source: wiki/sources/descriptions/tingwei1111__maplestory-worlds-automation.md) (source: wiki/sources/descriptions/tingwei1111__MapleStory-YOLOv8-Training.md)
 - TypeScript Genshin Impact scripts such as [[genshin-impact-script]] sit in the cheat / game:genshin impact automation lane. (source: wiki/sources/descriptions/phonowell__genshin-impact-script.md)
+- PUBG Mobile bypass + ImGui mod-menu samples such as [[bypass-pubg-mobile-imgui]] (C/C++; hooking / memory analysis; cheat / game:pubgm) sit in the mobile battle-royale offensive lane. (source: wiki/sources/descriptions/mut1234__BYPASS-PUBG-MOBILE-IMGUI.md)
 - Unreal decrypt samples for Veiled Experts such as [[vx-it]] (C/C++; `[Decrypt]`) sit in the cheat / game:veiled experts lane. (source: wiki/sources/descriptions/percpopper__VX-It.md)
 - Classic MMORPG server emulators such as [[rathena]] (Ragnarok Online; login/char/map; NPC scripts / WoE / MySQL multi-zone) sit in the same Private Server lane for authoritative MMO server-pattern study. (source: wiki/sources/descriptions/rathena__rathena.md)
 - Internal CS:GO baseline [[csgosimple]] (spirthack fork after MarkHC; Internal tag) sits in the cheat / game:csgo lane. (source: wiki/sources/descriptions/spirthack__CSGOSimple.md)
