@@ -90,6 +90,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [anticuckoo](entities/anticuckoo.md) — Cuckoo sandbox / VE detection demos (Detection:Virtual Environments)
 - [apc-research](entities/apc-research.md) — APC internals research samples + lib (cheat / windows kernel explorer)
+- [AppInitHook](entities/appinithook.md) — AppInit_DLLs registry startup inject + MinHook hooking (INI dispatch; CMake/cmkr; cheat / hook)
 - [apic](entities/apic.md) — local APIC R/W + xAPIC/x2APIC IPI (KM; timing/detection research)
 - [APKiD](entities/apkid.md) — Android APK/DEX packer·obfuscator·anti-analysis ID (YARA; PEiD for Android)
 - [apksigcopier](entities/apksigcopier.md) — copy/extract/patch Android APK v1/v2/v3 signatures (Python; Signing Block)
