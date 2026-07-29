@@ -1683,3 +1683,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:moyix/gpt-wpre`: entity [[gpt-wpre]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-29** — ingest `description:morsisko/xFindOut`: entity [[xfindout]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].
+
+- **2026-07-29** — ingest `description:mono/mono`: entity [[mono]]; cited on [[il2cpp]] and [[overviews/game-engine]].
