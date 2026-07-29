@@ -2956,6 +2956,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - [A minecraft server backend written in c++](https://github.com/gmh5225/minecpp)
 - https://github.com/AnarchDevelopment/aegledll [Internal Minecraft DX11 DLL client with ImGui overlay and MinHook hooks]
 - https://github.com/adanainv3-creator/OxClient [Minecraft Bedrock/PE MITM cheat client with protocol relay, combat/movement modules, and ESP]
+- https://github.com/eksses/EAFE [Mineflayer elytra autopilot with vanilla physics, FSM navigation, and anti-cheat-aware Bézier flight paths]
 
 > Game:Sword With Sauce
 - https://github.com/1hAck-0/UE4-Cheat-Source-Code
@@ -4098,6 +4099,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ConWan30/QorTroller [Cryptographic console anti-cheat proving human controller presence via attested inputs and verifiable match receipts]
 - https://github.com/Abdelnour2/MiniAntiCheatV2 [Educational Windows kernel anti-cheat PoC: process blacklist plus ObCallbacks handle shield]
 - https://github.com/vovasicidk/sentinelac [Open-source anti-cheat skeleton with usermode SDK, ObRegisterCallbacks kernel stub, overlay isolation, and stack-walk injection detection]
+- https://github.com/g8tsz/deadlock-anti-cheat [User-mode Deadlock anti-cheat client: process logging, game-window screenshots, key input, cheat-process matching, and Discord webhook upload]
 - https://github.com/AvivShabtay/Stresser [Anti Virus in fact but also Anti Cheat]
 - https://github.com/D4stiny/PeaceMaker [Anti Virus in fact but also Anti Cheat]
 - https://github.com/danielkrupinski/VAC [Reversed VAC]
