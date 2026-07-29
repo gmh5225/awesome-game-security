@@ -78,6 +78,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-rom-list](entities/android-rom-list.md) — curated Android custom ROM reference list (cheat / Android ROM)
 - [android-unpacker](entities/android-unpacker.md) — Android packed-sample unpacker (malware RE; Anti Cheat → Sample Unpacker)
 - [Android-LD-Preload-Injector](entities/android-ld-preload-injector.md) — Android LD_PRELOAD inject (dead; cheat / injection:android)
+- [Android-Mem-Edit](entities/android-mem-edit.md) — C++ Android process memory editor (cheat / Android Memory Explorer)
 - [Android-Ptrace-Injector](entities/android-ptrace-injector.md) — Android ptrace injector (C/C++; cheat / injection:android)
 - [Android-Virtual-Inject](entities/android-virtual-inject.md) — no-root Virtual Space inject (not for AC games; cheat / injection:android)
 - [android_virtualTouch](entities/android-virtual-touch.md) — ARM64 NDK uinput virtual touch (tap/swipe/multi-touch; rooted; game automation)
