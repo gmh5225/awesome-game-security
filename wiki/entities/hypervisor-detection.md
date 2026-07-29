@@ -12,7 +12,7 @@ confidence: medium
 
 C++ research project that currently implements four techniques for detecting hacked / abusive hypervisors. Aimed at anti-cheat engineers and defensive researchers working the `Detection: Hacked Hypervisor` lane. (source: wiki/sources/descriptions/void-stack__Hypervisor-Detection.md)
 
-Sits alongside user-mode HV probes such as [[checkhv-um]], HV construction / stealth stacks such as [[hv]] and [[ophion]], and hacked-hypervisor stress tooling such as [[vt-debuuger]].
+Sits alongside user-mode HV probes such as [[checkhv-um]], EPT hook detectors such as [[ept-hook-detection]] (timing / write-compare / cross-core consistency), HV construction / stealth stacks such as [[hv]] and [[ophion]], and hacked-hypervisor stress tooling such as [[vt-debuuger]].
 
 ## Links
 

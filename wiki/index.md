@@ -333,6 +333,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hook-buster](entities/hook-buster.md) — C/Python Detection:hook research (hook integrity / bust; Anti Cheat)
 - [hyper-reV](entities/hyper-rev.md) — Hyper-V memory introspection / RE (structures / hypercalls / partitions)
 - [Hypervisor-Detection](entities/hypervisor-detection.md) — C++ hacked-hypervisor detection (four techniques; Detection:HV)
+- [ept-hook-detection](entities/ept-hook-detection.md) — usermode EPT hook detector (timing / write-compare / cross-core consistency; Detect EPT)
 - [honor-of-kings-RE-research](entities/honor-of-kings-re-research.md) — Honor of Kings Android RE (ACE / libtersafe / IL2CPP / KernelPatch KPMs)
 - [HoudiniEngineForUnreal](entities/houdini-engine-for-unreal.md) — SideFX Houdini Engine UE plugin (HDAs / procedural workflow; Plugins:Unreal)
 - [HydraHook](entities/hydrahook.md) — DX9–12 API-hook + overlay framework (Detours; ImGui/DirectXTK/OpenCV samples)
