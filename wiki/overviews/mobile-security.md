@@ -140,7 +140,56 @@ confidence: high
 
 # Mobile Security
 
-Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/jailbreak ecosystems, dynamic instrumentation ([[frida]]), and mobile anti-cheat (root/Frida/emulator detection). (source: wiki/sources/skills/mobile-security.md) Android virtual-container / Linux VE probes such as [[conbeerlib]] (cgroup / fs / env / hardware; Docker/LXC/K8s/WSL) sit in the same emulator·container detection lane. (source: wiki/sources/descriptions/su-vikas__conbeerlib.md) Classic Android emulator artifact checks via [[anti-emulator]] (QEMU props / build fingerprints / sensors / FS signatures; per-heuristic Java API) sit in the same Anti-Emulator lane. (source: wiki/sources/descriptions/strazzere__anti-emulator.md) Java/C++ Anti-Emulator plugin research via [[android-emulator-detection]] sits beside those VE probes. (source: wiki/sources/descriptions/reveny__Android-Emulator-Detection.md) Stealth Frida server repackaging (string/symbol/artifact hex-replace; rooted and rootless iOS installs) via [[fridare]] sits in the same anti-Frida / instrumentation lane. (source: wiki/sources/descriptions/suifei__fridare.md) Class/function-trace and return-value-modify helpers such as [[frida-android-hook]] (iOS-oriented scripts noted) sit in the cheat / Frida instrumentation lane. (source: wiki/sources/descriptions/noobpk__frida-android-hook.md)
+Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/jailbreak ecosystems, dynamic instrumentation ([[frida]]), and mobile anti-cheat (root/Frida/emulator detection). Apply [[research-rigor]] before treating root, hook, emulator, or integrity signals as attribution—behavior is strongly version-, OEM-, entitlement-, signing-, kernel-, and policy-dependent. (source: wiki/sources/skills/mobile-security.md)
+
+## Root frameworks
+
+| Solution | Level | Stealth | GKI | Module system |
+|----------|-------|---------|-----|---------------|
+| [[magisk]] | User/init | Medium | Yes | Mature (DenyList / Shamiko root-hide) |
+| [[kernelsu]] | Kernel | High | Yes | Growing (Magisk-module API compat) |
+| APatch | Kernel (KernelPatch boot patch) | High | Yes | Growing (stock GKI without custom kernel source) |
+
+Kernel-level roots avoid a filesystem `su` binary and can hide from mount-namespace / package-manager probes that target classic Magisk artifacts—detectors such as [[magiskdetector]], [[detection]], and [[keyattestation]] still combine FS, process, property, attestation, and behavioral checks. (source: wiki/sources/skills/mobile-security.md)
+
+## APK & native analysis
+
+Static lane: apktool decompile/recompile → [[jadx]] DEX→Java → [[apkid]] packer/protector ID → native `.so` RE in IDA/Ghidra. Unity IL2CPP: extract `libil2cpp.so` + `global-metadata.dat` → dumper/headers → hook via [[frida]] or inline hooks (see [[il2cpp]]). Managed Mono builds use extracted DLLs + dnSpy/ILSpy or runtime hooks.
+
+## Instrumentation & hooking
+
+- **[[frida]]** — attach/spawn, Java/ObjC/native intercept; mobile ACs probe Frida artifacts ([[antifrida]], [[frida-detection]]); stealth repacks such as [[fridare]].
+- **Native hooks** — Substrate, And64InlineHook, xHook, Dobby (PLT/inline on ARM64 `.so`).
+- **[[zygisk]]** — Magisk Zygisk modules inject at `preAppSpecialize` / `postAppSpecialize` before `Application.onCreate` (DEX dump, ImGui menus, early native load).
+- **Managed DI (rooted)** — single ARM64 injector+agent binary, localhost HTTP RPC for script/session control, delayed start after `boot_completed` (avoid zygote contention). Modes: **Attach** (ptrace → dlopen agent), **Spawn** (zygote pause at fork), **Watch-SO** (eBPF dlopen trigger). Stealth tiers: NORMAL (RWX patch), WXSHADOW (shadow pages), RECOMP (minimal inline + recompile).
+
+Operational pattern: lifecycle `start/stop/restart/status`; analysis mode may disable conflicting Zygisk modules, reboot, instrument, then restore.
+
+## Memory manipulation
+
+Root paths: `/proc/<pid>/mem` pread/pwrite, GameGuardian-style editors, ceserver remote debug, custom `/dev` drivers ([[root-socket-kit]], [[rwmem]], [[android-mem-edit]]). iOS jailbroken: H5GG, Flex, ceserver-ios.
+
+## Mobile anti-cheat
+
+Layered client checks (root/jailbreak, [[frida]], emulator, integrity, debugger, hooks) plus regional stacks (Tencent ACE, NetEase, per-title SDKs)—see [[mobile-anti-cheat]]. Client RASP/fingerprint SDKs include [[droidshield]], freeRASP family, [[trustdevice-android]] / [[trustdevice-ios]], and Unity soft-AC [[com-sipvlib-anticheat]]. Title research such as [[honor-of-kings-re-research]] pairs IL2CPP/`libtersafe` with ACE surfaces.
+
+## eBPF tracing
+
+User/kernel probes without custom LKM on compatible GKI (BTF, SELinux, lockdown, attach points permitting): stackplz, eDBG, tracee; corpus includes [[btrace]] (app behavior) and [[peetch]] (TLS/sniff). Programs/maps/links remain observable; CO-RE improves portability but does not guarantee run-everywhere.
+
+## Network & SSL pinning
+
+Traffic capture via mitmproxy / Charles; agent MCP [[android-proxy-mcp]]; Frida universal TrustManager hooks for pinning bypass. Certificate user→system modules such as [[move-certificate]] support MITM on rooted devices.
+
+## Kernel drivers & CVE lanes
+
+LKM / GKI `vendor_dlkm` patterns for process memory R/W, syscall hook, Binder IPC intercept ([[android-kernel-hacking-toolkit]], [[kernel-hack]], [[compile-android-driver]]). CVE catalogs [[android-vuln]]; application PoCs [[cve-2024-0044]]; kernel/TEE PoCs [[cve-2021-1961]], [[cve-2026-43499-popsicle]], Dirty Pipe [[dirtypiperoot]] / [[dirtypipe-android]].
+
+## HarmonyOS / OpenHarmony
+
+Huawei HarmonyOS uses abc bytecode (arkdecompiler); OpenHarmony differs from Android IPC/capability model—separate RE surface from standard APK/DEX workflows.
+
+Android virtual-container / Linux VE probes such as [[conbeerlib]] (cgroup / fs / env / hardware; Docker/LXC/K8s/WSL) sit in the same emulator·container detection lane. (source: wiki/sources/descriptions/su-vikas__conbeerlib.md) Classic Android emulator artifact checks via [[anti-emulator]] (QEMU props / build fingerprints / sensors / FS signatures; per-heuristic Java API) sit in the same Anti-Emulator lane. (source: wiki/sources/descriptions/strazzere__anti-emulator.md) Java/C++ Anti-Emulator plugin research via [[android-emulator-detection]] sits beside those VE probes. (source: wiki/sources/descriptions/reveny__Android-Emulator-Detection.md) Stealth Frida server repackaging (string/symbol/artifact hex-replace; rooted and rootless iOS installs) via [[fridare]] sits in the same anti-Frida / instrumentation lane. (source: wiki/sources/descriptions/suifei__fridare.md) Class/function-trace and return-value-modify helpers such as [[frida-android-hook]] (iOS-oriented scripts noted) sit in the cheat / Frida instrumentation lane. (source: wiki/sources/descriptions/noobpk__frida-android-hook.md)
 
 
 ## Key sub-areas
@@ -158,7 +207,7 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 
 ## Related concepts
 
-[[frida]] · [[frida-android-hook]] · [[fridare]] · [[il2cpp]] · [[locusmimic]] · [[game-engine-detector]] · [[skylicht-engine]] · [[il2cpp-spy]] · [[mypower]] · [[root-socket-kit]] · [[rwmem]] · [[android-mem-edit]] · [[pwatch]] · [[termux-app]] · [[xfiles]] · [[note]] · [[unityspeedtools]] · [[android-il2cpp-modspeed]] · [[unflutter]] · [[jadx]] · [[dex2jar]] · [[garlic]] · [[r2garlic]] · [[apktool-mcp-server]] · [[delamain]] · [[obfu-de-scate]] · [[android-unpacker]] · [[apkid]] · [[android-native-import-hide]] · [[android-library-remap-hide]] · [[asctool]] · [[apksigcopier]] · [[android-proxy-mcp]] · [[peetch]] · [[btrace]] · [[android-vuln]] · [[honor-of-kings-re-research]] · [[magisk]] · [[zygisk-dump-dex]] · [[zygisk-imgui-mod-menu]] · [[android-virtual-inject]] · [[android-ptrace-injector]] · [[android-ld-preload-injector]] · [[yaui]] · [[kernelsu]] · [[dirtypiperoot]] · [[dirtypipe-android]] · [[cheese]] · [[magiskdetector]] · [[detection]] · [[android-native-root-detector]] · [[easypixel]] · [[event-replay]] · [[android-virtual-touch]] · [[keyattestation]] · [[keybuster]] · [[droidshield]] · [[conbeerlib]] · [[anti-emulator]] · [[android-emulator-detection]] · [[free-rasp-unity-poc]] · [[com-sipvlib-anticheat]] · [[free-rasp-reactnative]] · [[free-rasp-capacitor]] · [[rs-native-kit-security]] · [[trustdevice-android]] · [[trustdevice-ios]] · [[swsim]] · [[swift-string-obfuscator]] · [[swiftshield]] · [[dprotect]] · [[cve-2026-43499-popsicle]] · [[cve-2024-0044]] · [[cve-2021-1961]] · [[move-certificate]] · [[magiskboot]] · [[magiskboot-ndk-on-linux]] · [[magiskboot-build]] · [[payload-dumper]] · [[payload-dumper-go]] · [[ofrp-device-xiaomi-mondrian]] · [[android-rom-list]] · [[op7t]] · [[compile-android-driver]] · [[android-kernel-hacking-toolkit]] · [[kernel-hack]] · [[android-kernel-xiaomi-pipa]] · [[android-kernel-oneplus-sm8250]] · [[android-kernel-oneplus-sm7250-wksu]] · [[pc-ginkgo]] · [[kernelsu-pixel4xl]] · [[android-kernel-samsung-universal5433]] · [[android-kernel-samsung-sm7150]] · [[dpatch]] · [[simpleperf-demo]] · [[oob-entry]] · [[dopamine]] · [[dopamine2-roothide]] · [[palera1n]] · [[lightsaber]] · [[lara]] · [[darksword-kexploit-fun]] · [[xnu-1day-practice]] · [[ida-ios-helper]] · [[aimachdec]] · [[ipapatch]] · [[trollstore]] · [[opainject]] · [[imgui-ios-mod-menu]] · [[imgui-unity]] · [[imgui-unity-with-layout]] · [[android-modmenu-semijni]] · [[android-mod-menu-kotlin]] · [[android-cheat-template]] · [[android-native-app-imgui]] · [[imgui-native-modmenu]] · [[bypass-pubg-mobile-imgui]] · [[utm]] · [[gunyah-hypervisor]] · [[qemu-gvm]] · [[aeroot]] · [[rootavd]] · [[win11-apk-installer]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[research-rigor]] · [[mobile-anti-cheat]] · [[zygisk]] · [[frida]] · [[frida-android-hook]] · [[fridare]] · [[il2cpp]] · [[locusmimic]] · [[game-engine-detector]] · [[skylicht-engine]] · [[il2cpp-spy]] · [[mypower]] · [[root-socket-kit]] · [[rwmem]] · [[android-mem-edit]] · [[pwatch]] · [[termux-app]] · [[xfiles]] · [[note]] · [[unityspeedtools]] · [[android-il2cpp-modspeed]] · [[unflutter]] · [[jadx]] · [[dex2jar]] · [[garlic]] · [[r2garlic]] · [[apktool-mcp-server]] · [[delamain]] · [[obfu-de-scate]] · [[android-unpacker]] · [[apkid]] · [[android-native-import-hide]] · [[android-library-remap-hide]] · [[asctool]] · [[apksigcopier]] · [[android-proxy-mcp]] · [[peetch]] · [[btrace]] · [[android-vuln]] · [[honor-of-kings-re-research]] · [[magisk]] · [[zygisk-dump-dex]] · [[zygisk-imgui-mod-menu]] · [[android-virtual-inject]] · [[android-ptrace-injector]] · [[android-ld-preload-injector]] · [[yaui]] · [[kernelsu]] · [[dirtypiperoot]] · [[dirtypipe-android]] · [[cheese]] · [[magiskdetector]] · [[detection]] · [[android-native-root-detector]] · [[easypixel]] · [[event-replay]] · [[android-virtual-touch]] · [[keyattestation]] · [[keybuster]] · [[droidshield]] · [[conbeerlib]] · [[anti-emulator]] · [[android-emulator-detection]] · [[free-rasp-unity-poc]] · [[com-sipvlib-anticheat]] · [[free-rasp-reactnative]] · [[free-rasp-capacitor]] · [[rs-native-kit-security]] · [[trustdevice-android]] · [[trustdevice-ios]] · [[swsim]] · [[swift-string-obfuscator]] · [[swiftshield]] · [[dprotect]] · [[cve-2026-43499-popsicle]] · [[cve-2024-0044]] · [[cve-2021-1961]] · [[move-certificate]] · [[magiskboot]] · [[magiskboot-ndk-on-linux]] · [[magiskboot-build]] · [[payload-dumper]] · [[payload-dumper-go]] · [[ofrp-device-xiaomi-mondrian]] · [[android-rom-list]] · [[op7t]] · [[compile-android-driver]] · [[android-kernel-hacking-toolkit]] · [[kernel-hack]] · [[android-kernel-xiaomi-pipa]] · [[android-kernel-oneplus-sm8250]] · [[android-kernel-oneplus-sm7250-wksu]] · [[pc-ginkgo]] · [[kernelsu-pixel4xl]] · [[android-kernel-samsung-universal5433]] · [[android-kernel-samsung-sm7150]] · [[dpatch]] · [[simpleperf-demo]] · [[oob-entry]] · [[dopamine]] · [[dopamine2-roothide]] · [[palera1n]] · [[lightsaber]] · [[lara]] · [[darksword-kexploit-fun]] · [[xnu-1day-practice]] · [[ida-ios-helper]] · [[aimachdec]] · [[ipapatch]] · [[trollstore]] · [[opainject]] · [[imgui-ios-mod-menu]] · [[imgui-unity]] · [[imgui-unity-with-layout]] · [[android-modmenu-semijni]] · [[android-mod-menu-kotlin]] · [[android-cheat-template]] · [[android-native-app-imgui]] · [[imgui-native-modmenu]] · [[bypass-pubg-mobile-imgui]] · [[utm]] · [[gunyah-hypervisor]] · [[qemu-gvm]] · [[aeroot]] · [[rootavd]] · [[win11-apk-installer]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
 
 
 ## README map

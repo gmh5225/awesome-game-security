@@ -5,6 +5,7 @@ topics: [overview]
 sources:
   - wiki/sources/skills/overview.md
   - wiki/sources/skills/game-engine.md
+  - wiki/sources/skills/mobile-security.md
 updated: 2026-07-29
 confidence: high
 ---
@@ -28,10 +29,13 @@ Cross-cutting evidence discipline for factual synthesis, detector assessment, an
 | Claim validation, citation checks | matching domain overview |
 | Detector evaluation, false-positive rates | [[overviews/anti-cheat]] or relevant detection lane |
 | Engine globals, offsets, SDK dumps | [[overviews/game-engine]] + [[unreal-object-model]] / [[il2cpp]] / [[source-netvars]] |
+| Mobile root/hook/emulator/integrity claims | [[overviews/mobile-security]] + [[mobile-anti-cheat]] |
 | Evidence conflicts across sources | domain skill + this page |
 
 Engine globals, object layouts, metadata formats, and helper APIs vary by engine branch, build configuration, platform, and game modifications—verify the exact version and binary artifacts before generalizing signatures or offsets. (source: wiki/sources/skills/game-engine.md)
 
+Mobile root visibility, hook detection, emulator heuristics, and attestation outcomes vary by Android/iOS version, OEM policy, GKI kernel, signing, and entitlement state—verify device/build before generalizing detector or bypass conclusions. (source: wiki/sources/skills/mobile-security.md)
+
 ## Related
 
-[[compiled-wiki]] · [[overviews/overview]] · [[AGENTS]]
+[[compiled-wiki]] · [[mobile-anti-cheat]] · [[overviews/overview]] · [[overviews/mobile-security]] · [[AGENTS]]

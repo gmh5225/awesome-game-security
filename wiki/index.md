@@ -12,7 +12,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source SDK workflows + [[unreal-object-model]] / [[il2cpp]] / [[source-netvars]]; Godot / Lumix (~153); MCP + AI gamedev (~182); Game Network ~26; Game Assets ~11
 - [Game Hacking](overviews/game-hacking.md) — escalation taxonomy + [[stack-spoofing]] / [[hardware-input-injection]] / [[world-to-screen]] / [[ai-aimbot-detection]]; Cheat (~2606) + Some Tricks (~113); mytechnotalent Rust/Go RE courses; Android Terminal (ADB/root/shell)/File/Memory Explorer; WSA/Android/iOS/Windows Emulator KDemu lanes; console Xbox~8 X360 patch+SystemOS / PS HV+BD-UN-JB+PSFree-Enhanced / WebKit CSSFontFace / 3DS~3 3Beans LLE+Luma / GC·Wii~1 gecko
 - [Graphics API](overviews/graphics-api.md) — DX/GL/Vulkan hook points; [[present-hook]] / [[draw-call-hook]]; overlays + [[obs-game-capture]] / [[anti-screenshot-capture]]; Kiero/kiero2; DirectX (~35) shader inject/flatten; Renderer (~17) + AI mesh/splat adjacency
-- [Mobile Security](overviews/mobile-security.md) — Android / iOS; Terminal (ADB/root/shell)/File/Memory Explorer + App/Kernel CVE; WSA (~9), Droid-VM/Gunyah Snapdragon emulators
+- [Mobile Security](overviews/mobile-security.md) — Android/iOS; root frameworks (Magisk/KernelSU/APatch), [[zygisk]]/Frida hooking, [[mobile-anti-cheat]]; Terminal/File/Memory Explorer + App/Kernel CVE; WSA (~9), Droid-VM/Gunyah emulators
 - [Reverse Engineering](overviews/reverse-engineering.md) — RE tools (file-format/asset lists + Ghidra managers), MBA/DBI, deobfuscation, packers; Windows Emulator KDemu + console/Xbox~8 / PS BD-UN-JB+PSFree-Enhanced / 3DS 3Beans LLE / GC·Wii gecko RE (~2606 Cheat / ~621 AC lanes)
 - [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation (~9; SEWindows PCR), BYOVD, pool; Some Tricks Ring0 (~113); Windows Emulator (~7) + WSL
 
@@ -33,15 +33,17 @@ Compiled knowledge catalog for awesome-game-security.
 - [IOMMU](concepts/iommu.md) — VT-d/AMD-Vi translation; six out-of-domain paths; ACS/ATS-untrusted; bypass catalog + containment
 - [Kernel Callbacks](concepts/kernel-callbacks.md)
 - [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; KDP rule tables
+- [Mobile Anti-Cheat](concepts/mobile-anti-cheat.md) — mobile root/Frida/emulator/integrity detection; ACE/RASP SDKs; bypass research framing
 - [OBS Game Capture](concepts/obs-game-capture.md) — OBS Game/Window/Display/Virtual Camera modes; AI visual pipeline + detection signals
 - [PatchGuard](concepts/patchguard.md)
 - [Present Hook](concepts/present-hook.md) — IDXGISwapChain::Present / wglSwapBuffers / vkQueuePresentKHR overlay path; links [[obs-game-capture]], [[draw-call-hook]]
-- [Research Rigor](concepts/research-rigor.md) — evidence discipline; pair with domain overviews; engine offset/SDK verification
+- [Research Rigor](concepts/research-rigor.md) — evidence discipline; pair with domain overviews; engine/mobile offset verification
 - [Source NetVars](concepts/source-netvars.md) — ClientClass/RecvTable offset maps; CreateInterface exports (Source 1/2)
 - [Stack Spoofing](concepts/stack-spoofing.md) — synthetic return stacks vs RtlWalkFrameChain / unwind validation
 - [Unreal Object Model](concepts/unreal-object-model.md) — UObject hierarchy; GObjects/GNames/GWorld; Dumper-7 SDK workflow
 - [Vanguard](concepts/vanguard.md)
 - [World-to-Screen](concepts/world-to-screen.md) — 3D view-matrix projection for ESP and aim FOV math
+- [Zygisk](concepts/zygisk.md) — Magisk zygote specialization hooks; early inject before Application.onCreate
 
 ## Entities
 
@@ -439,7 +441,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [macroquad](entities/macroquad.md) — Rust 2D game lib (shaders / render / audio; Game Engine / source)
 - [MagicSigner](entities/magic-signer.md) — sign with leaked certs (admin; TLS side effects; AC sign tools)
 - [Magnetite](entities/magnetite.md) — Rust self-hostable Wasm game platform (deterministic replay AC / magnetite-anticheat)
-- [Magisk](entities/magisk.md) — Android systemless root (su daemon / modules / MagiskHide)
+- [Magisk](entities/magisk.md) — Android systemless root (su daemon / modules / DenyList·Shamiko / Zygisk)
 - [magiskboot](entities/magiskboot.md) — Boot Image Modification Tool (C/C++; Cheat Magisk)
 - [magiskboot_build](entities/magiskboot-build.md) — POSIX standalone magiskboot build scripts (Cheat Magisk / Boot Image)
 - [magiskboot_ndk_on_linux](entities/magiskboot-ndk-on-linux.md) — NDK-on-Linux magiskboot (boot unpack/repack/ramdisk)
