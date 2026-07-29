@@ -1587,3 +1587,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:muturikaranja/AfdIrpCallDispatch`: entity [[afd-irp-call-dispatch]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-07-29** — ingest `description:musabcel/android_rom_list`: entity [[android-rom-list]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-29** — ingest `description:multitheftauto/mtasa-blue`: entity [[mtasa-blue]]; cited on [[overviews/game-engine]] and [[overviews/anti-cheat]].
