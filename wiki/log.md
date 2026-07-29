@@ -1609,3 +1609,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:msd0pe-1/cve-maker`: entity [[cve-maker]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-29** — ingest `description:mrzhqiang/ms079`: entity [[ms079]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-29** — ingest `description:mrphrazer/obfuscation_detection`: entity [[obfuscation-detection]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
