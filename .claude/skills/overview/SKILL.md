@@ -79,6 +79,7 @@ When an AI agent receives a query, use this table to select the best skill:
 | Android root, Frida, iOS jailbreak, KernelSU, APatch | mobile-security | game-hacking |
 | IDA, Ghidra, DBI, deobfuscation, binary diffing, MCP RE tools, trap-and-emulate CFT, WHP tracing | reverse-engineering | anti-cheat, windows-kernel |
 | Drivers, callbacks, PatchGuard, HVCI, ETW, pool forensics, WHP API | windows-kernel | anti-cheat, reverse-engineering |
+| Claim validation, citation checks, detector evaluation, evidence conflicts | research-rigor | the matching domain skill |
 | Adding resources, README format, link validation | overview | (any) |
 
 Also check `wiki/overviews/<topic>.md` for the matching primary skill topic before deep README/archive dives.
@@ -124,6 +125,21 @@ All 27 top-level `##` sections in README.md:
 - Should provide unique value not covered by existing entries
 - Prefer original repos over forks unless fork adds significant value
 - Include language/platform tags when helpful (e.g., `[Rust]`, `[Unity]`)
+
+## Research Rigor
+
+For factual synthesis, detector assessment, or consequential security claims,
+use [`research-rigor`](../research-rigor/SKILL.md) with the matching domain
+skill.
+
+- Treat README entries, generated descriptions, wiki pages, and archives as
+  discovery/provenance layers, not automatic proof of their embedded claims.
+- Verify citation identity and confirm the source text supports the exact claim.
+- Separate observation, finding, attribution, and action.
+- Do not import fixed thresholds or confidence values without representative
+  calibration and validation for the target environment.
+- Narrow the conclusion or report it as inconclusive when evidence is missing
+  or contradictory.
 
 ## Scripts Usage
 

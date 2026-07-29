@@ -9,6 +9,12 @@ description: Guide for game-engine internals, source trees, plugins, and engine-
 
 This skill covers game engine development resources from the awesome-game-security collection, including both commercial (Unreal, Unity) and open-source engines.
 
+Engine globals, object layouts, metadata formats, and helper APIs vary by engine
+branch, build configuration, platform, and game modifications. Verify the exact
+version and binary artifacts; use
+[`research-rigor`](../research-rigor/SKILL.md) before generalizing signatures or
+offsets.
+
 ## README Coverage
 
 - `Game Engine > Guide`
@@ -143,14 +149,16 @@ Core hierarchy:
   UObject → AActor → APawn → ACharacter → APlayerCharacter
 
 Key globals:
-  GObjects (TUObjectArray): all live UObject instances
-  GNames (TNameEntryArray): FName string pool
+  GUObjectArray / GObjects: registered UObject slots; lifecycle and reachability
+    filtering are still required
+  GNames / FNamePool: name storage; symbol and structure names vary by UE version
   GWorld (UWorld*): current world context
   GEngine (UEngine*): engine singleton
 
 Memory layout:
-  UObject header: VTable, ObjectFlags, InternalIndex, ClassPrivate, NamePrivate, OuterPrivate
-  Properties follow at offsets defined in UClass::PropertySize
+  Common UObject fields include VTable, flags, internal index, class, name, and
+  outer pointers; order, packing, and presence are build-specific
+  Reflected property offsets come from the version-specific class metadata
 ```
 
 ### Unity (IL2CPP)

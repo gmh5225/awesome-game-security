@@ -75,15 +75,17 @@ Physical           Ordered Sets        Link training, equalization,
                                        clock recovery
 
 A real device's behavior is shaped by all three layers.
-An FPGA emulating a real device only fully controls the Transaction Layer;
-the Physical and Data Link layers leak fingerprints that
-BRAM-based emulation cannot fully hide.
+Many FPGA designs primarily customize Transaction-Layer behavior; Physical and
+Data Link behavior may retain implementation fingerprints unless the selected
+IP, configuration, and surrounding behavior closely match the claimed device.
+Whether a fingerprint is usable must be validated on the actual link.
 ```
 
 ### TLP (Transaction Layer Packet) Format
 ```
-Every TLP begins with a 3 DW (12-byte) or 4 DW (16-byte) header.
-4 DW headers are used for 64-bit addresses and certain message types.
+Every TLP contains a 3 DW (12-byte) or 4 DW (16-byte) base header; optional
+TLP Prefixes may precede it. 4 DW headers are used for 64-bit addresses and
+certain message types.
 
 First DWord (DW0) encoding:
 Bits       Field         Notes
@@ -122,8 +124,9 @@ Fmt  Type     TLP
 
 ### Detection-Relevant DW0 Fields
 ```
-TC[2:0] — Traffic Class. Default 0; real silicon rarely uses non-zero TC.
-A spoofed device generating non-zero TC is anomalous.
+TC[2:0] — Traffic Class. Default traffic commonly uses TC0, but non-zero TC is
+valid when platform and device policy configure it. Compare usage with the
+claimed device, driver, and workload rather than flagging it in isolation.
 
 Attr[2:0] — RO/NS/IDO. A device emulating a NIC must follow that NIC's
 typical NS/RO usage pattern; mismatches are visible.
@@ -148,10 +151,10 @@ Three routing modes:
 DW1 carries the Requester ID (16 bits = Bus:Device:Function, "BDF")
 and an 8-bit Tag for matching completions to requests.
 
-The Requester ID is the entire input to per-device security policy:
-IOMMU translation lookup, ACS source validation, AER source ID,
-MSI/MSI-X routing. Anything that lets a device send TLPs with a
-different Requester ID fundamentally compromises isolation.
+Requester ID is a key input to IOMMU lookup, ACS source validation, AER source
+identification, and interrupt-remapping policy. If spoofed IDs are accepted
+without topology or source validation, per-function isolation can be
+undermined; the exact effect depends on the platform and remapping path.
 
 Transaction categories:
 - Posted (P) — fire-and-forget (Memory Writes, Messages)
@@ -253,16 +256,17 @@ LTSSM (Link Training and Status State Machine):
 
 Detection-relevant:
 - Negotiated Link Width (Link Status[9:4]):
-  Device advertising x16 but negotiating x1 is a tell
+  Compare with slot wiring, platform policy, signal quality, and matched donor
+  deployments; devices can legitimately train below maximum width
 - Current Link Speed (Link Status[3:0]):
-  Capability claims Gen4 but stays Gen2/Gen3 is anomalous
+  A lower negotiated generation is contextual, not a contradiction by itself
 - Recovery cycle frequency:
   Comparative signal; materially different from donor reference is anomalous
 
 ASPM (Active State Power Management):
 - L0s and L1 are link-level low-power states
-- A device claiming ASPM support in Link Capabilities but
-  never transitioning out of L0 contradicts its class
+- Capability does not imply the platform enabled ASPM; evaluate transitions only
+  under verified policy and workload conditions that should exercise them
 ```
 
 ### Configuration Access Mechanisms
@@ -364,14 +368,15 @@ Detection leverage per field:
 - MPS Supported (+0x04[2:0]): hard-IP ceiling contradicts donor
 - FLR support (+0x04[28]): verify FLR changes same sticky/non-sticky
   state as claimed donor; naive firmware acknowledges FLR but continues
-  unchanged, preserving impossible internal state
+  unchanged, producing state inconsistent with donor-defined reset semantics
 - Link Status (+0x12): Width/Speed are negotiated, observable, hard to
   lie about — hard IP reports what LTSSM actually achieved
 - Slot Clock Config (+0x12[12]): must match real platform behavior
 - Completion Timeout ranges (+0x24): selecting outside claimed ranges
   is a discriminator
 - AtomicOp (+0x24[6-9]): server-class GPUs/NICs may support; FPGA
-  hard IP almost never does. Mismatch is detectable.
+  support depends on IP generation and configuration; compare advertised and
+  exercised behavior with the claimed donor
 ```
 
 ### MSI and MSI-X Capabilities
@@ -401,7 +406,8 @@ Naive MSI-X emulation failures:
 - Doesn't retire pending interrupts when masks clear
 Detection probe: mask vector → induce interrupt condition →
 observe PBA bit → unmask → observe interrupt firing.
-Real silicon satisfies this round trip; spoofed firmware rarely does.
+A conforming implementation should satisfy the relevant MSI-X semantics;
+incomplete emulations may fail, while sophisticated emulations can pass.
 ```
 
 ### AER Extended Capability (ID 0x0001)
@@ -558,9 +564,10 @@ On Windows, some IOMMU violations observable through WHEA/bug-check
 paths and Driver Verifier DMA-violation telemetry.
 
 Per-device fault rate is one of the most operationally useful
-IOMMU-layer signals. Legitimate devices with correct drivers
-rarely produce faults; sustained nonzero rate is direct evidence
-of out-of-domain access attempts.
+IOMMU-layer signals, but its baseline is platform-, device-, driver-, firmware-,
+and workload-specific. Sustained faults show failed or invalid DMA requests;
+driver bugs, resets, stale mappings, or hardware faults must be excluded before
+attributing malicious out-of-domain access.
 
 RMRR/IVMD:
 ACPI DMAR table contains RMRR (Reserved Memory Region Reporting)
@@ -612,7 +619,9 @@ switch to DMA directly to each other without IOMMU involvement.
 ```
 Devices on the same PCIe tree can send Memory TLPs directly to
 each other's BAR ranges without involving system memory.
-Without ACS forcing redirection, P2P TLPs never reach the IOMMU.
+Without ACS redirection, peer traffic may remain below the root complex and
+bypass the host IOMMU translation path. Routing behavior is topology- and
+platform-specific, so confirm it with the actual root complex and switches.
 
 Plausible P2P DMA targets for cheat:
 - GPU framebuffer — rendered game state
@@ -897,30 +906,32 @@ M:\
     ├── timeline\
     └── registry\
 
-Cheat development pattern:
+One possible development/use pattern:
 1. Development phase: MemProcFS, signature search, cross-references
    → slow, broad scanning to find entity manager / player array / view matrix
 2. Execution phase: custom app via vmm.dll/LeechCore,
-   periodic reads of known offsets at 60–240 Hz
-This split is fundamental to detection — behavioral analysis
-targets the execution phase's statistical signature.
+   narrower periodic or batched reads of known offsets
+Behavioral analysis can test for this pattern, but implementations may cache,
+randomize, or use different access strategies.
 ```
 
 ### Stock Firmware Fingerprints
 ```
-Vanilla pcileech-fpga build exhibits:
+Common or older vanilla pcileech-fpga configurations may exhibit the following;
+verify the exact commit, FPGA IP configuration, and synthesized design:
 - VID/DID 10EE:0666 (Xilinx placeholder)
 - Xilinx 7-series PCIe IP signature bytes at characteristic offsets
 - DSN Extended Capability absent or default
 - No AER, LTR, ARI, ATS, or SR-IOV capabilities
 - BAR0 mapped (DMA window); BAR1–5 disabled or all-ones
 - BAR reads return zero (zerowrite4k) or echo address (loopaddr)
-- MSI capability present but no interrupts ever fire
+- MSI capability present but expected interrupts are not generated
 - Config reads complete in deterministically uniform time
   (BRAM lookup with fixed pipeline depth, near-zero variance)
-- LTSSM never leaves L0 after training; no ASPM transitions
+- no observed ASPM transitions under a workload and policy that should enter
+  lower-power states
 - AER correctable-error count stays at zero
-- Power management never leaves D0
+- power state remains D0 under tested conditions
 - Class Code matches donor placeholder but no class-specific behavior
 ```
 
@@ -938,7 +949,7 @@ Emulated (1:1) firmware:
   Implements complete shadow Configuration Space in BRAM.
   Entire 4 KB extended config space initialized from real donor device hex dump.
   When OS issues CfgRd TLP, firmware responds from BRAM.
-  IP Core's default registers never appear on the bus.
+  The design attempts to prevent IP-core defaults from appearing on the bus.
 
   Common bugs in emulated firmware:
   - First 16 bytes still come from IP block (mux priority)
@@ -987,10 +998,9 @@ then write known-1 patterns, verify read-back semantics.
 
 ### Donor Card Extraction
 ```
-Every serious emulated firmware starts with a donor — a physical
-PCIe card whose complete identity is cloned. Not just VID/DID —
-entire 4 KB config space, all capabilities, BAR size masks,
-MSI/MSI-X table layouts, all extended capabilities, DSN.
+A common emulation strategy starts with a donor device and clones more than
+VID/DID: configuration-space layout, capabilities, BAR masks, interrupt-table
+layout, and device serial behavior where present. Completeness varies by design.
 
 Extraction tools:
 - lspci -d [VID:DID] -vvv -xxxx (full ECAM dump)
@@ -1073,7 +1083,8 @@ Server-class accel.    Physically implausible on consumer boards
 - Signature-residue scanning: Xilinx 7-series default byte patterns at
   known relative offsets (Device Capabilities field bits, reserved bits,
   VSEC vendor IDs)
-- Capability presence consistency: donor model's known caps must all be present
+- Capability presence consistency: expected capabilities must match the donor's
+  exact SKU, firmware, function, and configuration
 - BAR mask verification: write 0xFFFFFFFF, compare size mask against donor
 ```
 
@@ -1089,8 +1100,9 @@ NVMe donor BAR0: NVMe controller registers — CAP (MQES, DSTRD,
 
 USB XHCI donor BAR0: Capability Registers (CAPLENGTH, HCSPARAMS, HCCPARAMS).
 
-zerowrite4k returns all-zeros; loopaddr echoes address. Both are
-trivially distinguishable from real content.
+zerowrite4k returns all-zeros; loopaddr echoes address. These patterns are
+conspicuous under donor-specific functional probes, although individual real
+register ranges can legitimately contain zeros.
 Tier-4 firmwares implement donor-class responders but usually only
 cover registers checked at probe time, leaving others divergent.
 ```
@@ -1114,7 +1126,9 @@ Sample PCIe Express Capability Link Status over time:
 - Negotiated Width (Link Status[9:4]): consistent with donor deployment
   and FPGA hard block capability
 - Current Link Speed (Link Status[3:0]): track slot's actual speed
-- Gen4 x8 capability but Gen2 x1 Link Status = contradiction in one read
+- A device can legitimately train below its maximum capability; compare the
+  result with slot topology, platform policy, signal quality, and matched donor
+  deployments
 - DLL Active (Link Status[13]): should be 1 during operation
 - Slot Clock Config (Link Status[12]): match real common-clock state
 ```
@@ -1124,9 +1138,11 @@ Sample PCIe Express Capability Link Status over time:
 Real devices claiming ASPM exhibit characteristic L0 ↔ L1 transitions.
 
 Spoofed device anomalies:
-- Claims ASPM capability but never transitions out of L0
+- Claims and enables ASPM but shows no expected transition under a workload,
+  policy, and observation window known to exercise it
 - Transitions with exit latency inconsistent with claimed value
-- Never reaches L1.1 / L1.2 when donor and platform both support
+- Does not reach L1.1/L1.2 when donor, platform, firmware policy, and workload
+  are verified to enable those substates
 
 Sample Link Status "DLL Active" bit over time + PMC counters.
 ```
@@ -1142,37 +1158,33 @@ Sample Link Status "DLL Active" bit over time + PMC counters.
 
 ### Completion Latency Fingerprinting
 ```
-Real silicon: completion latency shaped by DRAM contention,
-internal arbiters, PCIe pipeline depth → heavy-tailed distributions.
-
-BRAM-backed emulators: fixed FPGA clock cycles + PCIe transit
-→ much lower variance, even if mean is similar.
+Completion latency can reflect memory, arbitration, buffering, power state,
+link, driver, and workload behavior. A simplistic BRAM-backed emulator may show
+lower variance, but real and emulated distributions can overlap.
 
 Detection signal is distribution shape, not absolute mean.
 
 Statistical methods:
 - Kolmogorov–Smirnov test: compare empirical CDFs
-- Hill estimator: estimate tail index (real silicon has non-trivial tail;
-  emulated firmware without stochastic jitter has no tail)
+- Tail estimators where sample size and distributional assumptions support them
 - Anderson-Darling test: sensitive to tail differences
 
-Collect N latency samples (Memory Reads to BAR), compare against
-per-donor reference distribution, flag devices deviating
-beyond per-test-statistic threshold.
+Choose the sample size from power/variance analysis, collect under controlled
+conditions, compare with a matched donor reference, and validate any decision
+threshold on held-out devices.
 
-Tier-5 firmwares add LFSR-based jitter generators, but matching
-real distribution shape (mean, variance, tail index, mode count)
-requires modeling donor's DRAM access pattern.
+Random jitter alone need not reproduce donor behavior. Compare mean, variance,
+tails, modes, autocorrelation, and responses to condition changes.
 ```
 
 ### MSI/MSI-X Behavioral Validation
 ```
-A device with MSI Enable, Address/Data programmed, and attached driver
-should produce interrupts:
+A device with MSI enabled, programmed Address/Data, an attached driver, and a
+verified interrupt-producing condition should produce interrupts:
 
 - Zero interrupts when driver should exercise device = anomalous
-- Implausibly uniform arrival times (exact 60 Hz heartbeat)
-  = timer-driven generator, not event-driven
+- Uniform arrival times may indicate a timer-driven generator, but legitimate
+  periodic workloads must be excluded
 - Implausibly bursty patterns not matching donor class
 
 Monitor via OS interrupt accounting, ETW/performance telemetry,
@@ -1181,19 +1193,13 @@ driver counters, kernel instrumentation.
 
 ### Cheat-Phase Access Pattern Recognition
 ```
-Two distinct patterns:
+One possible workflow has a broad discovery phase followed by narrower,
+periodic reads during use. Implementations can cache, randomize, batch, or avoid
+these phases, and legitimate devices can also show periodic access.
 
-Development phase:
-  Slow, broad scanning, signature search, MemProcFS walking.
-  Rare during live competitive play.
-
-Execution phase:
-  Narrow, periodic reads (60–240 Hz) of small offset set
-  (player positions, entity arrays, view matrices).
-
-Execution phase statistical signature:
-  High temporal periodicity, low address-space breadth,
-  alignment to game-frame intervals.
+Candidate execution features:
+  Temporal periodicity, address-space breadth, and alignment to game-frame
+  intervals, calibrated against matched benign device/workload behavior.
 
 Distinguishing features:
 - Fano factor
@@ -1257,8 +1263,9 @@ For each bridge with ACS Capability:
 - Verify Translation Blocking (TB) enabled
 - Verify P2P Request Redirect (RR) and Completion Redirect (CR) enabled
 
-Bridges without ACS at all = isolation holes by topology.
-Bridges with ACS Capability but Control bits not set = misconfiguration.
+Missing or disabled ACS can limit isolation where peer routing is possible.
+Assess the complete topology, root-complex behavior, firmware policy, and actual
+IOMMU grouping before calling it an exploitable isolation hole.
 ```
 
 ### IOMMU as Containment Primitive
@@ -1267,18 +1274,18 @@ Active containment when suspect device is identified:
 
 1. IOMMU domain re-remapping:
    Reprogram device's domain to sandbox memory instead of revoking access.
-   Cheat keeps "reading" but receives garbage data.
+   Requests may receive sandbox data or fault depending on mappings and device
+   behavior; validate OS/driver stability before using this response.
 
 2. Bus Master Enable clearance:
-   Toggle Command[2] to 0. Effective for tier-0 through tier-3.
-   Cheats monitoring BME can race; may need repeated clearance.
+   Toggle Command[2] to 0. Effectiveness depends on platform enforcement,
+   device behavior, and alternate paths; monitor for restoration or races.
 
 3. Downstream Port Containment (DPC):
    When DPC is enabled on root port (Extended Cap ID 0x001D),
-   triggers cause port to enter Contained state — all TLPs dropped,
-   completions blocked, link logically isolated.
-   Enforced at upstream port, no race against firmware-side BME restore.
-   Not universal on all chipsets.
+   supported trigger conditions can place the downstream hierarchy into
+   containment. Verify the port status, traffic blocking, link recovery, and
+   platform-specific behavior; support is not universal.
 
 4. Anti-cheat-owned device domain:
    For device owned by AC driver, allocate and map only sandbox IOVAs,
@@ -1324,8 +1331,9 @@ serious anti-cheat threat models.
 ### SMM Considerations
 ```
 System Management Mode (Ring -2) runs in SMRAM, isolated from
-OS and hypervisor. SMM handlers can read all physical memory
-and are exempt from IOMMU enforcement.
+the OS. SMM CPU memory accesses are not mediated by the device IOMMU, but
+accessible data still depends on platform protections, memory encryption,
+firmware design, and virtualization context.
 
 A vulnerable SMI handler = path to arbitrary memory access
 without IOMMU mediation.
@@ -1333,7 +1341,7 @@ without IOMMU mediation.
 Mitigations:
 - Intel Boot Guard / AMD Platform Secure Boot (firmware signatures)
 - SMI Transfer Monitor (STM): hypervisor-resident, treats SMM as
-  constrained guest. Rarely implemented by board vendors.
+  constrained guest; availability and deployment are platform-specific
 - Runtime verification of SMM lockdown registers
 ```
 
@@ -1381,7 +1389,8 @@ PCR   Measured Content
 
 ### Remote Attestation Cryptography
 ```
-Trust property: compromised local kernel cannot forge PCR values.
+Trust property: without the attestation key or a break in the TPM/verification
+chain, local software cannot forge a quote over arbitrary PCR values.
 
 Flow:
 1. Server sends nonce
@@ -1395,8 +1404,10 @@ Flow:
    - Nonce matches (freshness, replay protection)
    - PCR composite matches known-good value
 
-A rootkit loading after measured boot cannot alter PCRs.
-A software simulator cannot produce valid Quote without TPM private key.
+A rootkit loading after measured boot cannot normally reset extend-only PCRs to
+an arbitrary prior value through the standard TPM interface. A software
+simulator cannot produce a quote verifiable under a trusted hardware-backed
+attestation key, but a valid quote still covers only the selected measurements.
 ```
 
 ### DRTM and Secure Launch
@@ -1496,8 +1507,8 @@ attestation ties local claims to remote-verified known-good policy.
 ```
 Each detection produces evidence, not a verdict.
 Verdict informed by:
-- Multi-signal correlation (single signals can false-positive;
-  combinations rarely do)
+- Multi-signal correlation with measured joint error rates; correlated
+  signals can share the same false-positive cause
 - Server-side aggregation across sessions
 - Behavioral verification (input timing, gameplay statistics)
 
@@ -1505,6 +1516,11 @@ While verdict accumulates, containment protects the live match:
 IOMMU re-remapping to sandbox, BME clearance, or EPT-level
 game-process protection degrades cheat effectiveness in real time.
 ```
+
+Apply [`research-rigor`](../research-rigor/SKILL.md) when converting these
+signals into a claim or response. Validate baselines per device, firmware,
+platform, topology, driver, and power state; preserve raw captures and test
+benign alternatives before attribution.
 
 ### Realistic Limits
 ```
@@ -1518,18 +1534,23 @@ A firmware that:
 - Operates only within driver-mapped IOMMU domains (legitimate-path exfil)
 - Avoids honeypot regions through gameplay-aware address whitelisting
 
-...can defeat every PCIe-layer and IOMMU-layer signature in isolation.
+...can evade the listed PCIe-layer and IOMMU-layer signatures when each is used
+in isolation and the emulation matches the defender's tested dimensions.
 
 This is why external trust anchors are required:
 TPM attestation, measured boot, and server-side correlation operate
 outside the "spoof a PCIe endpoint" problem.
 
-A perfectly emulated DMA card cannot forge a TPM Quote.
-But the verifier must bind Quote to allowlist/blocklist of BIOS versions,
-DMA-protection events, Secure Boot state, VBS/HVCI, and IOMMU policy.
+A device cannot forge a TPM Quote signature without the attestation key, but a
+valid Quote attests only the selected PCR values and nonce. It does not by
+itself prove the absence of a runtime DMA device or the current IOMMU mapping.
+The verifier must validate the event log and a policy covering measured
+firmware, DMA-protection events, Secure Boot, VBS/HVCI, and IOMMU configuration,
+then obtain separate evidence for unmeasured runtime state.
 
-The cost of defeating all four layers simultaneously
-(PCIe + IOMMU + hypervisor + attestation) exceeds typical cheat value.
+Layering PCIe, IOMMU, hypervisor, and attestation controls raises attacker cost;
+whether it exceeds attacker value is an environment-specific economic claim,
+not a technical guarantee.
 ```
 
 ## Forensic Evidence Capture
@@ -1540,12 +1561,12 @@ Artifact                     Source                          Purpose
 ──────────────────────────────────────────────────────────────────────────────
 Full 4 KB config dump        Bus interface / ECAM            Donor ID post-hoc
 Capability chain walk        Parsed from config              Capability presence
-PCIe link state history      Link Status over session        LTSSM anomaly proof
+PCIe link state history      Link Status over session        LTSSM anomaly evidence
 MSI/MSI-X arrival timeline   OS interrupt telemetry          Rate claim refutation
-AER correctable counts       AER capability registers        Baseline outlier proof
-IOMMU fault log entries      WHEA/ETW, Driver Verifier       DMA-violation proof
+AER correctable counts       AER capability registers        Baseline outlier evidence
+IOMMU fault log entries      WHEA/ETW, Driver Verifier       Invalid-DMA evidence
 IOMMU domain assignments     IOMMU manager state walk        Passthrough anomaly
-ACS bridge state             Bridge enumeration              Isolation proof
+ACS bridge state             Bridge enumeration              Isolation assessment
 Honeypot access record       Hypervisor EPT trap log         Unauthorized read evidence
 TPM PCR snapshot             TPM Quote API                   Boot-chain attestation
 MCFG / DMAR / IVRS tables   ACPI subsystem                  Platform config baseline
@@ -1561,21 +1582,23 @@ Strongest evidence packages combine:
 2. Behavioral-layer signal (interrupt distribution, IOMMU fault rate, honeypot)
 3. Temporal correlation (hardware signal preceded behavioral by plausible interval)
 
-Three independent signals push false-positive rates below threshold
-where appeals become a practical workload.
+No signal count guarantees a target false-positive rate. Establish independence
+or model dependence, validate the joint decision rule on representative benign
+systems, and report confidence bounds plus expected appeal volume.
 ```
 
 ### PCIe Protocol Captures
 ```
-A PCIe protocol analyzer (interposer) produces the strongest forensic evidence:
-full TLP-level captures with byte-exact accuracy and nanosecond timestamps.
+A PCIe protocol analyzer (interposer) can provide high-fidelity evidence at its
+observation point: TLP-level captures with analyzer-specific timestamp accuracy.
 
 Commercial analyzers capture every TLP, DLLP, and physical-layer ordered set.
 Traces can be replayed to confirm fingerprinting findings.
 
-Cost (tens to hundreds of thousands USD) limits routine use, but for
-high-profile cases (competitive integrity, tournament, prosecution),
-protocol-level captures by independent labs are the unambiguous reference.
+Cost and deployment complexity limit routine use. For high-impact cases,
+protocol-level captures from an independent lab can materially strengthen the
+record, but capture coverage, analyzer configuration, and interpretation still
+need validation.
 ```
 
 ## Thunderbolt / USB4 DMA

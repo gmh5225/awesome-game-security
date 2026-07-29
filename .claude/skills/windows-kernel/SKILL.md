@@ -9,6 +9,11 @@ description: Guide for Windows kernel internals and security mechanisms used in 
 
 This skill covers Windows kernel internals that matter for game security research: object callbacks, process and image notifications, APC behavior, driver loading, trust enforcement, memory manager structures, and the bookkeeping anti-cheats inspect to detect hostile drivers or hidden executable code.
 
+Treat undocumented structures, offsets, globals, and allocator internals as
+build-specific. Verify them against symbols and runtime observations for the
+exact Windows build; use [`research-rigor`](../research-rigor/SKILL.md) before
+generalizing a PoC or forensic heuristic.
+
 ## README Coverage
 
 - `Cheat > PatchGuard-related`
@@ -101,7 +106,8 @@ Architecture:
 - Splits the system into Virtual Trust Levels (VTLs)
   - VTL0: Normal world — standard Windows kernel and user-mode processes
   - VTL1: Secure world — Secure Kernel, security policy enforcement
-- Even if VTL0 kernel is fully compromised, VTL1 remains isolated
+- VTL1 is designed to remain isolated from a compromised VTL0, assuming the
+  hypervisor, secure kernel, hardware, and configuration path remain trustworthy
 - Three main buckets:
   - Memory-protection features (HVCI)
   - Virtual Trust Levels (VTL0/VTL1 separation)
@@ -114,8 +120,8 @@ Architecture:
 - Ensures only trusted, validated code executes in kernel mode
 - Combines Windows hypervisor + Secure Kernel (VTL1) for enforcement
 - Key mechanism: W→X transition restriction
-  - Executable kernel pages cannot become writable
-  - Writable pages cannot become executable without re-validation
+  - Enforced code pages are not intended to be writable from VTL0
+  - Executability is granted only after the configured code-integrity checks
 - Enforcement pipeline:
   - Code integrity policy defines what is trusted
   - Hypervisor memory enforcement via second-stage address translation (EPT/SLAT)
@@ -338,9 +344,9 @@ Windows 8 partial mitigation:
 ```
 Each pool type is managed by its own independent _SEGMENT_HEAP instance.
 
-_SEGMENT_HEAP (kernel offsets, based on 20H2):
+_SEGMENT_HEAP (illustrative kernel offsets observed for 20H2; verify symbols):
 0x000   EnvHandle (10 B)     — heap environment handle
-0x010   Signature (4 B)      — always 0xDDEEDDEE
+0x010   Signature (4 B)      — commonly 0xDDEEDDEE on this layout
 0x028   UserContext (8 B)
 0x048   AllocatedBase (8 B)  — LFH structure allocation base
 0x058   SegContexts[2] (0x180 B) — segment context array
@@ -574,10 +580,11 @@ Down-level compatibility:
 ### Kernel Data Protection (KDP) and Secure Pool
 ```
 KDP leverages Segment Heap's Secure Pool feature to allocate
-read-only kernel memory that cannot be modified from VTL0.
+kernel memory whose ordinary VTL0 writes are blocked while the VTL1 policy,
+hypervisor, and configuration path remain trustworthy.
 
-Virtual address space layout:
-  Dedicated 512 GB Secure Pool region (1 PML4 entry)
+Illustrative implementation layout (verify on the target build):
+  Dedicated Secure Pool region (reported as one PML4 entry on relevant builds)
   Base address: randomized at boot
   Managed by: Secure Kernel (VTL1)
   VTL0 writes: blocked via NAR (Node Address Range)
@@ -602,7 +609,7 @@ Anti-cheat usage:
   };
   g_DetectionRules = ExAllocatePool3(POOL_FLAG_NON_PAGED,
       sizeof(detectionRuleTable), 'DRul', &extParams, 1);
-  // g_DetectionRules is now immutable — no VTL0 code can modify it
+  // Protected from ordinary VTL0 writes while KDP policy remains intact
 ```
 
 ### Attack Technique Evolution (Segment Heap Era)
@@ -610,8 +617,8 @@ Anti-cheat usage:
 Technique comparison:
 Technique                    NT Pool (pre-19H1)    Segment Heap (19H1+)
 ─────────────────────────────────────────────────────────────────────────
-Adjacent header overwrite    Easy                  Blocked by encoding
-Pool Walking                 Possible              Impossible (metadata isolation)
+Adjacent header overwrite    Direct metadata       Encoding/cookies complicate use
+Pool Walking                 Legacy linear walk    Path-specific metadata/symbols needed
 ProcessBilled overwrite      Requires Win8+ cookie Requires cookie + HeapKey
 kLFH pool spray              Predictable           Possible but needs precise control
 VS FreeChunkTree corruption  N/A                   Requires HeapKey bypass
@@ -957,7 +964,9 @@ Key capability:
 - Enables hypervisor-assisted analysis from user mode (no kernel driver)
 - Page-level trap handling: set R/W/X permissions per guest page
 - VM exit reasons: memory access violation, CPUID, MSR access, I/O port, syscall
-- Deterministic execution: host controls all guest state and memory
+- Controlled execution: the host controls modeled guest CPU state and mapped
+  memory; external timing, devices, concurrency, and unmodeled dependencies
+  still need explicit handling
 
 Prerequisites:
 - Enable Windows features: Microsoft-Hyper-V-Hypervisor + HypervisorPlatform
@@ -1001,9 +1010,12 @@ Example: Watching writes to a sensitive region
 
 Advantages over traditional kernel hooks:
 - Operate outside the guest OS
-- Remain effective even if guest kernel is compromised
-- Transparent to guest-level detection
-- Cannot be removed by kernel-level rootkits
+- Can remain effective after guest-kernel compromise if the hypervisor and
+  policy/configuration channel remain trustworthy
+- Avoid guest-kernel patching, although hypervisor presence and effects may be
+  observable
+- Ordinary guest-kernel writes cannot directly remove correctly enforced
+  second-stage permissions
 ```
 
 ### Protectable Assets via EPT
@@ -1029,7 +1041,9 @@ Assumes kernel compromise has already happened:
 Hypervisor advantage:
 - Sits above the guest kernel in privilege hierarchy
 - Enforces policies from a higher privilege layer
-- Kernel-level rootkits cannot disable hypervisor-level enforcement
+- Guest-kernel rootkits cannot directly rewrite hypervisor policy under the
+  stated threat model; hypervisor vulnerabilities, DMA/SMM, configuration
+  weaknesses, and hardware compromise remain separate attack paths
 ```
 
 ### Attack Scenario: BYOVD vs EPT Protection

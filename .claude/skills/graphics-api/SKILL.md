@@ -9,6 +9,11 @@ description: Guide for graphics API interception, overlay rendering, and render-
 
 This skill covers graphics API resources from the awesome-game-security collection, including DirectX, OpenGL, and Vulkan hooking techniques, overlay rendering, and graphics debugging.
 
+Capture paths, hook points, synchronization, latency, and observable artifacts
+vary by API, driver, compositor, application, and tool version. Verify the
+active path and use [`research-rigor`](../research-rigor/SKILL.md) before
+attributing a capture or overlay signal.
+
 ## README Coverage
 
 - `DirectX > Guide`
@@ -295,33 +300,40 @@ D3DXVECTOR3 WorldToScreen(D3DXVECTOR3 pos, D3DXMATRIX viewProjection) {
 
 ### OBS Frame Capture Modes
 ```
-OBS (Open Broadcaster Software) is the primary frame source for
-AI visual cheats. Its capture modes have distinct detection profiles:
+OBS is one possible frame source for AI visual systems. Capture implementation
+varies by OBS, Windows, graphics API, and source settings, so identify the
+active path before inferring artifacts:
 
-Game Capture (most common for cheats):
-- Injects obs-graphics-hook64.dll into game process
-- Hooks IDXGISwapChain::Present (D3D11/12) or SwapBuffers (OpenGL)
-  or vkQueuePresentKHR (Vulkan) inside the game process
-- Copies backbuffer to shared texture/memory each frame
-- Lowest latency, highest quality (pre-composition, native resolution)
-- Detection: DLL appears in game process module list;
-  shared texture handle creation visible to kernel callbacks
+Game Capture:
+- On supported Windows paths, commonly injects an OBS graphics-capture hook into
+  the game and intercepts API-specific presentation/capture points
+- Commonly transfers frames through shared graphics resources rather than
+  requiring a full CPU readback for every frame
+- Often offers low-latency pre-composition capture, but performance and quality
+  depend on API, synchronization, settings, and version
+- The hook module and resource-sharing behavior may be observable, but they are
+  also legitimate OBS activity and are not attribution by themselves
 
 Window Capture:
-- Uses DXGI Desktop Duplication API (no injection into game)
-- Captures composited window output from DWM
-- Slightly higher latency (post-composition)
-- Detection: IDXGIOutputDuplication usage from non-game process
+- May use Windows Graphics Capture, BitBlt, or another version/settings-specific
+  backend without injecting a game-capture hook
+- Captures a window/composited path; occlusion, cursor, HDR, and latency behavior
+  depend on the selected backend
+- Attribute the actual API and owning process rather than assuming Desktop
+  Duplication
 
 Display Capture:
-- Captures entire monitor output
-- Highest latency, captures everything including overlays
+- Captures a monitor/output through a platform-specific backend such as Desktop
+  Duplication or Windows Graphics Capture
+- Composition coverage and latency vary; protected content and hardware overlays
+  can create exceptions
 - No per-process interaction
 
 OBS Virtual Camera:
 - Outputs captured frames as a virtual camera device
 - Can feed AI model running in separate process or machine
-- Detectable via virtual camera driver enumeration
+- May be discoverable through virtual-camera device registration and media
+  pipeline activity, depending on platform and OBS version
 ```
 
 ### Frame Pipeline for AI Aimbot
@@ -346,28 +358,31 @@ Dual-machine pipeline:
   → Cheat PC receives video stream
   → AI inference on cheat PC GPU
   → Mouse commands sent via network to KMBox on game PC
-  Latency: +5-15 ms for NDI, +2-5 ms for hardware capture card
+  Added latency depends on capture hardware, buffering, transport, encoding,
+  network, synchronization, and receiver configuration
 
-Performance targets:
-  Capture: < 5 ms (GPU shared texture copy)
-  Crop + preprocess: < 2 ms
-  YOLO inference: 5-15 ms (TensorRT FP16 on RTX 3060+)
-  Coordinate calc + smoothing: < 1 ms
-  Hardware input transmission: < 2 ms (USB) or < 5 ms (network)
-  Total pipeline: 15-40 ms end-to-end
+Performance measurement:
+  Measure capture, synchronization, transfer/readback, preprocessing, inference,
+  postprocessing, transport, and input stages separately on the deployed setup.
+  Report percentile end-to-end latency and dropped/stale frames; fixed latency
+  budgets do not transfer across hardware and configurations.
 ```
 
 ### Detection-Relevant Graphics Signals
 ```
 - obs-graphics-hook64.dll in game process module list
 - IDXGISwapChain::Present hook or detour in game process
-- Staging texture creation at frame rate (ID3D11Texture2D with
-  D3D11_USAGE_STAGING + CPU_ACCESS_READ created per frame)
+- Repeated readback/copy behavior involving staging resources, shared textures,
+  or API-specific capture objects; efficient pipelines may reuse resources
 - GPU-to-CPU memory copy bandwidth anomaly (Map/Unmap calls
-  at 60+ FPS on backbuffer-sized resources)
+  or equivalent synchronization/readback patterns)
 - DXGI shared handle creation from game process to external process
 - NDI SDK DLLs loaded (Processing.NDI.Lib.*.dll)
 - Virtual camera driver (obs-virtualcam) registered
+
+These are collection signals, not proof of a visual cheat. Correlate them with
+plugin provenance, process behavior, trusted gameplay telemetry, and the
+legitimate streaming/accessibility context.
 ```
 
 ## Anti-Detection Considerations

@@ -9,6 +9,11 @@ description: Guide for reverse engineering protected games and anti-cheat compon
 
 This skill covers reverse engineering workflows for game security research, including protected game clients, anti-cheat user-mode modules, kernel drivers, memory artifacts, and debugging environments that must survive anti-analysis checks.
 
+Treat performance, stealth, coverage, and compatibility claims as
+target/version-specific. Record the binary hash, tool version, configuration,
+environment, and observed evidence; use
+[`research-rigor`](../research-rigor/SKILL.md) for consequential conclusions.
+
 ## README Coverage
 
 - `Cheat > Debugging`
@@ -120,7 +125,9 @@ Sentinel Selection:
 - Different sentinels can multiplex branch types
 
 Exception Capture:
-- Hook KiUserExceptionDispatcher (not VEH/SEH) for lowest-latency interception
+- Hooking KiUserExceptionDispatcher can avoid some higher-level VEH/SEH
+  dispatch overhead, but latency, stability, and detectability must be measured
+  on the target Windows build
 - Assembly stub tail-calls into RtlDispatchException
 - Handler dispatches by exception code to custom emulation logic
 
@@ -136,14 +143,15 @@ Instrumentation Strategies:
 - Bounded Bulk Patching: scan a window from seed address, patch all branches
   → Simple but detectable by integrity checks
 - Branch Chasing: patch only current branch, re-instrument at target on fault
-  → Minimal memory footprint, highest stealth, best for unknown binaries
+  → Smaller patch footprint, with coverage, race, and detectability tradeoffs
 - CFG-Guided Patching: recursive-descent static CFG + chasing for unreached edges
   → Best coverage/safety balance
 
 Integrity Check Evasion:
 - PAGE_GUARD + Trap Flag (single-step) instead of direct code patching
 - Trigger guard page exception → set TF → single-step through original instruction
-- Avoids modifying .text section (defeats hash-based integrity checks)
+- Avoids directly modifying `.text`, but guard state, exception rate, debug
+  state, and timing can still be detected
 ```
 
 ### Control Flow Tracing (CFT) Applications
@@ -151,10 +159,11 @@ Integrity Check Evasion:
 - Runtime call graph generation with register context at each edge
 - Divergence testing: compare traces across different inputs/environments
   → Quickly locates input validation, anti-debug, anti-tamper trigger points
-- Deobfuscation: resolve all indirect branches in virtualized code
+- Deobfuscation: resolve indirect branches observed under covered executions;
+  completeness requires additional path exploration or proof
 - Hot path analysis, branch coverage measurement
-- Performance: ~600x slowdown (exception per branch), not suitable for
-  timing-sensitive targets (rdtsc checks, session timeouts)
+- Exception-per-branch designs can be orders of magnitude slower; benchmark the
+  exact target and account for timing checks and session timeouts
 - Portable to other architectures: ARM (UDF), RISC-V (illegal instruction)
 ```
 
@@ -185,14 +194,17 @@ Workflow:
 
 Advantages:
 - Pure user-mode: no driver signing, no PatchGuard concerns
-- Deterministic: full control over guest memory and execution
+- Controlled: host controls modeled guest memory and CPU state; external timing,
+  concurrency, devices, and unmodeled OS behavior can introduce nondeterminism
 - Composable: combine with disassemblers/emulators for hybrid analysis
 - Debuggable: host process can be debugged normally
 
 Limitations:
 - Requires hardware virtualization support (VT-x/AMD-V)
 - Windows-specific (WHP API is Windows 10+)
-- Cannot run full OS — suited for code snippets and function-level analysis
+- The lightweight workflow described here is suited to snippets/functions;
+  booting a full OS is possible only with substantially more platform and device
+  modeling
 - Nested virtualization considerations when host is already a VM
 ```
 
@@ -259,7 +271,7 @@ Limitations:
 
 ### Control Flow Flattening (CFF)
 ```
-- OLLVM-style: all basic blocks behind a dispatcher switch
+- OLLVM-style: many protected basic blocks routed through a dispatcher loop
 - Recovery: symbolic execution, pattern matching, deobfuscation passes
 - Tools: D-810 (IDA), de-ollvm scripts, SATURN
 - Variants: nested dispatchers, encrypted state variables

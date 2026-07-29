@@ -9,6 +9,11 @@ description: Guide for Android and iOS game security, reversing, and anti-cheat-
 
 This skill covers mobile security resources from the awesome-game-security collection, focusing on Android and iOS game security research, reverse engineering, and protection bypass techniques.
 
+Mobile behavior is strongly version-, OEM-, entitlement-, signing-, kernel-,
+and policy-dependent. Verify the exact device/build and use
+[`research-rigor`](../research-rigor/SKILL.md) before treating a root, hook,
+emulator, or integrity signal as attribution.
+
 ## README Coverage
 
 - `Cheat > Magisk`
@@ -374,10 +379,14 @@ Java.perform(function() {
 ### Advantages Over Traditional Approaches
 ```
 - No kernel module compilation required (runs in eBPF VM)
-- Works on stock GKI kernels with BTF support
-- Lower detection surface than kernel driver injection
-- CO-RE (Compile Once, Run Everywhere) portability
-- Safe: eBPF verifier prevents kernel crashes
+- May work on compatible GKI kernels when BPF features, BTF, privileges,
+  SELinux policy, lockdown state, and required attach points permit it
+- Can avoid a custom kernel module, but programs, maps, links, helpers, and
+  privileged loader activity still create an observable surface
+- CO-RE improves portability across kernels with compatible BTF/type changes;
+  it does not guarantee run-everywhere behavior
+- The verifier rejects many unsafe programs and reduces risk, but verifier,
+  helper, JIT, driver, and kernel bugs can still cause failures
 ```
 
 ## Android Kernel Driver Development
@@ -401,7 +410,8 @@ Java.perform(function() {
 ### Android Kernel Source
 ```
 - AOSP Common Kernel (ACK): google/common branch
-- GKI: Generic Kernel Image for Android 12+
+- GKI: versioned Generic Kernel Image model; capabilities and module rules vary
+  across Android releases and OEM implementations
 - Vendor-specific: Qualcomm (CodeAurora), MediaTek, Samsung Exynos
 - Build system: build/build.sh or Bazel-based (newer)
 ```

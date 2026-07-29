@@ -9,6 +9,11 @@ description: Guide for game-hacking technique taxonomy and threat modeling relev
 
 This skill covers game-hacking techniques documented in the awesome-game-security collection, with emphasis on how cheats move from user mode to kernel mode, hypervisors, and DMA when defenders raise the bar. It is best used to understand the offensive side of the threat model that anti-cheat systems are designed to detect.
 
+Treat implementations, performance numbers, stealth rankings, and detection
+claims as versioned threat-model examples rather than guarantees. Use
+[`research-rigor`](../research-rigor/SKILL.md) when converting them into a
+factual claim or defensive decision.
+
 ## README Coverage
 
 - `Cheat > Debugging`
@@ -119,9 +124,9 @@ This skill covers game-hacking techniques documented in the awesome-game-securit
 ### AI Visual Cheats (Computer Vision Aimbot)
 ```
 Architecture overview:
-"Zero memory, zero driver injection" paradigm — uses screen capture +
-AI object detection + hardware input injection. No process attachment,
-no kernel driver, no game memory reading.
+Screen-capture paradigm — uses frame capture, object detection, and input
+injection. Some implementations can avoid process attachment, a cheat driver,
+and direct game-memory reads; that does not make the full pipeline artifact-free.
 
 Typical setup:
 ┌─────────────────┐     screen capture      ┌──────────────────┐
@@ -136,7 +141,8 @@ Dual-machine variant (maximum isolation):
 - Machine A (game): only runs game + OBS, sends frames via NDI/capture card
 - Machine B (cheat): runs AI model, sends mouse commands via USB/network
   to hardware input device on Machine A
-- Game machine has zero cheat code/process
+- Game machine need not run the model or decision logic, though capture,
+  transport, and input-device artifacts can remain
 
 Single-machine variant:
 - OBS + AI model run on the same PC
@@ -160,7 +166,8 @@ Pipeline stages:
      to reduce inference cost
    - Output: bounding boxes with class (head/body/enemy) + confidence score
    - Acceleration: TensorRT (NVIDIA), CUDA, DirectML, OpenVINO
-   - Target latency: < 20–30 ms per frame for competitive play
+   - Set and measure the latency budget on the target capture path, model,
+     hardware, frame rate, and input transport
 
 3. Coordinate Transform and Aiming Logic:
    - Convert pixel coordinates to mouse movement delta:
@@ -171,25 +178,30 @@ Pipeline stages:
    - FOV (Field of View) lock: only engage targets within
      configurable pixel radius from crosshair center
 
-4. Human-like Trajectory Smoothing:
-   - Not instant snap — gradual movement with acceleration curve
-   - Micro-jitter injection (simulates hand tremor)
+4. Attempts to mask automated trajectories:
+   - Gradual movement with an acceleration curve instead of an instant snap
+   - Synthetic jitter
    - Bézier curve or cubic interpolation for path
    - End-point correction (overshoot then settle)
-   - Random engagement probability (e.g., 85-90% lock rate)
+   - Configurable engagement probability
    - Slight intentional offset (not pixel-perfect center-mass)
-   - Variable reaction delay (50-200 ms simulated human response)
+   - Variable reaction delay
+   These transformations do not establish human equivalence; repeated
+   parametric behavior can itself become a feature.
 
 5. Mouse Movement Execution:
    - Hardware input devices (see Input Simulation section below)
    - Movement commands sent as physical HID reports
-   - Game sees genuine hardware mouse input, not API calls
+   - The host receives protocol-conformant HID input rather than a user-mode
+     injection API call; device provenance and behavior may still be observable
 
 Why OBS specifically:
 - Legitimate streaming software, used by millions of streamers
-- Anti-cheat cannot ban OBS-related processes without collateral damage
+- Blanket action against OBS-related processes would create substantial
+  collateral impact; process presence alone is not attribution
 - Game Capture provides fast, low-latency frame access
-- Plugin system allows embedding AI as a filter (invisible to AC)
+- Plugin system can host filters inside OBS, but loaded plugins, behavior, and
+  surrounding telemetry may still be inspected
 - Supports D3D11, D3D12, Vulkan, OpenGL capture paths
 ```
 
@@ -201,7 +213,8 @@ End-to-end workflow from raw game screenshots to deployed TensorRT model.
    - Capture game screenshots during actual gameplay (OBS recording or replay)
    - Capture diverse scenarios: different maps, lighting, character skins,
      distances, poses, partial occlusion, smoke/flash effects
-   - Aim for 2,000-10,000+ labeled images for robust detection
+   - Determine dataset size from coverage and learning curves; image count alone
+     does not guarantee robustness
    - Include negative samples (empty scenes, friendlies, environment objects)
 
 2. Annotation / Labeling:
@@ -239,18 +252,17 @@ End-to-end workflow from raw game screenshots to deployed TensorRT model.
      train: images/train
      val: images/val
      names: {0: enemy_body, 1: enemy_head, 2: friendly}
-   - Key hyperparameters to tune:
-     - imgsz: 320 (fastest) or 640 (more accurate)
-     - lr0: initial learning rate (default 0.01)
-     - conf: confidence threshold for inference (typically 0.4-0.6)
-     - iou: IoU threshold for NMS (typically 0.45-0.7)
-   - Training time: 1-4 hours on RTX 3060+ for nano model
+   - Key hyperparameters to tune include input size, learning rate, confidence
+     threshold, NMS IoU threshold, batch size, and augmentation policy
+   - Measure training and inference cost on the exact model, software stack,
+     precision, and target hardware
 
 5. Validation and Testing:
    - Evaluate mAP@0.5 and mAP@0.5:0.95 on validation set
-   - Target: mAP@0.5 > 0.85 for reliable game detection
-   - Test inference speed on target hardware
-   - Visual inspection on held-out game screenshots
+   - Choose operating thresholds from precision/recall and downstream error
+     costs; no single mAP cutoff establishes reliable deployment
+   - Test inference speed on target hardware and evaluate held-out maps, skins,
+     patches, capture paths, and hard negatives
 
 6. Export to TensorRT (deployment):
    - Step 1: Export to ONNX
@@ -261,15 +273,16 @@ End-to-end workflow from raw game screenshots to deployed TensorRT model.
    - Or use trtexec directly:
      trtexec --onnx=best.onnx --saveEngine=best.engine
        --fp16 --workspace=4096
-   - FP16 performance: ~17 ms latency, ~57 FPS throughput,
-     ~0.9% mAP drop vs FP32 (acceptable trade-off)
-   - INT8 quantization: even faster but requires calibration dataset
-     and careful accuracy validation
+   - Benchmark FP16 against FP32 on the exported model; latency, throughput, and
+     accuracy changes are hardware- and graph-specific
+   - INT8 can improve throughput but requires representative calibration data
+     and accuracy validation
 
 7. Runtime Integration:
    - Load TensorRT engine in C++/Python inference loop
    - Input: preprocessed frame (resize, normalize, HWC→CHW, float32/16)
-   - Output: [N, 6] tensor (x1, y1, x2, y2, confidence, class_id)
+   - Decode the exporter/version-specific output tensor; shapes and NMS
+     placement vary across model and runtime versions
    - Apply NMS (Non-Maximum Suppression) to deduplicate detections
    - Select target based on: closest to crosshair + highest confidence
    - Convert pixel coordinates to mouse delta
@@ -360,8 +373,10 @@ Alternative acceleration backends:
 
 ### Detection Challenges
 ```
-- No driver load event (PsSetLoadImageNotifyRoutine never fires)
-- Not visible in MmUnloadedDrivers or PiDDBCacheTable
+- Pre-OS or manually mapped payloads may avoid the normal Windows image-load
+  path, so a corresponding driver image callback need not occur
+- Artifacts depend on later payload stages; absence from MmUnloadedDrivers or
+  PiDDBCacheTable is not guaranteed
 - Secure Boot + TPM attestation is primary defense
 - Firmware integrity measurement (UEFI capsule verification)
 ```
@@ -521,8 +536,9 @@ Vector2 WorldToScreen(Vector3 worldPos, Matrix viewMatrix) {
 ### Hardware Input Devices (for AI Visual Cheats)
 ```
 Hardware input devices produce genuine HID reports indistinguishable
-from real mouse/keyboard at the USB protocol level. This is the
-critical stealth layer for AI visual aimbot setups.
+from ordinary input in the fields of an individual protocol-conformant report.
+Descriptors, timing, topology, firmware, and gameplay behavior can still
+provide imperfect signals.
 
 KMBox series (KMBox Net, KMBox B Pro, KMBox B+):
 - Standalone hardware device connected via USB or network
@@ -557,16 +573,17 @@ Interception driver (interception.sys):
 HDMI/DP KVM-style middleman:
 - Hardware device sitting between mouse and PC
 - Intercepts real mouse data, injects AI-calculated deltas
-- Transparent to both the mouse and the PC
-- Highest stealth but most complex hardware setup
+- Can preserve much of the expected interface behavior, depending on its USB
+  descriptors, timing, topology, and electrical implementation
+- Potentially low software footprint but complex hardware setup
 
-Detection difficulty ranking:
-1. Dedicated hardware (KMBox, Arduino HID) — hardest to detect
-   (genuine USB HID, no driver anomaly)
-2. KVM middleman — very hard (transparent hardware interposer)
-3. Logitech driver method — moderate (known driver versions)
-4. Interception driver — easier (known driver signature)
-5. SendInput / mouse_event — easiest (API-level, trivially detected)
+Illustrative detection-surface ordering, not a universal ranking:
+1. Dedicated hardware — fewer software artifacts, but device and behavior
+   signals remain
+2. KVM middleman — limited host software footprint if protocol behavior matches
+3. Vendor-driver abuse — version and process/module artifacts may be available
+4. Known filter driver — driver identity and behavior may be available
+5. User-mode injection API — API/call-path telemetry may be available
 ```
 
 ### KMBox Protocol Details
@@ -581,6 +598,8 @@ Offset  Field      Size   Description
 0x0C    CMD        4 B    Command code
 
 Key command codes:
+The values below are firmware/API-version examples; verify them against the
+exact device implementation before analysis.
 Code          Command          Description
 0xAF3C2828    connect          Establish connection with device
 0xAEDE7345    mouse_move       Direct mouse movement (dx, dy)
@@ -594,8 +613,7 @@ Code          Command          Description
 
 Mouse API functions:
 - move(x, y):                 Direct relative movement, no interpolation
-- move_auto(x, y, ms):        Human-like movement over ms milliseconds,
-                               built-in Bézier curve interpolation
+- move_auto(x, y, ms):        Interpolated movement over ms milliseconds
 - move_beizer(x, y, ms,       Second-order Bézier curve with custom
     x1, y1, x2, y2):          control points for trajectory shaping
 
@@ -603,15 +621,15 @@ Encrypted variants (enc_*):   Same functions with packet-level encryption
                                to resist network packet analysis
 
 Performance:
-- Network (UDP): ~1,000 commands/second
-- Serial (KMBox B/B+, 115200 baud): ~300 commands/second
-- Network latency: < 2 ms per command (LAN)
+- Measure command rate, latency distribution, loss, buffering, and jitter on
+  the exact firmware, transport, host, and network; fixed figures do not
+  transfer across setups
 
 KMBox B / B Pro (serial variant):
 - USB CDC serial communication (COM port)
-- Baud rate: 115200 or higher
+- Baud rate is firmware/configuration-specific (115200 is one common setting)
 - Simpler protocol: ASCII or binary command frames
-- move(x, y) over serial: ~3 ms round trip
+- Benchmark round-trip timing on the deployed serial stack
 
 Physical keyboard/mouse monitoring:
 - monitor() function reads real user input from the device

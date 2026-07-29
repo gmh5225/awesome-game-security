@@ -86,6 +86,45 @@ This skill covers layered anti-cheat design across kernel drivers, privileged se
 
 ## Detection Mechanisms
 
+### Detection Decision Methodology
+
+Use [`research-rigor`](../research-rigor/SKILL.md) for source verification and
+empirical validation. Numeric values elsewhere in this skill are examples or
+research hypotheses unless they are tied to a representative, versioned
+calibration study for the target game.
+
+1. **Define the decision unit:** player, engagement, session, account, device,
+   or build; state the game mode, patch, platform, input method, and timeframe.
+2. **Establish telemetry trust:** record whether each field is server-observed,
+   server-derived, client-reported, or reconstructed. Client reports are
+   adversarial inputs; server authority improves trust but does not eliminate
+   clock, replication, schema, or game-logic errors.
+3. **Keep layers separate:** observation -> finding -> attribution -> action.
+   A detector hit is not itself proof of cheating or actor intent.
+4. **Calibrate locally:** derive features, sample floors, and operating
+   thresholds from representative data. Hold out players/sessions and time
+   periods; segment results by relevant populations.
+5. **Measure deployment risk:** report prevalence, FPR, FNR, precision, recall,
+   calibration, uncertainty, and the expected review volume. A score in
+   `[0, 1]` is not a probability unless calibrated as one.
+6. **Corroborate correctly:** combine causally distinct signals and evaluate
+   their joint errors. Correlated signals, maximum-score aggregation, or a
+   fixed signal count do not guarantee a lower false-positive rate.
+7. **Review high-impact actions:** preserve counterevidence and an appeal path;
+   use human review or independently trusted evidence before punitive action
+   when false positives remain plausible.
+
+For invariant findings, first verify that the invariant is guaranteed in the
+observed state and exclude rollback, retry, reconnect, replication delay,
+legitimate transitions, administrator/test paths, stale baselines, and game
+bugs. Describe the result as a state-integrity violation until exploitation and
+attribution are separately supported.
+
+Every evidence package should retain the raw artifact or immutable reference,
+timestamps and ordering, schema/game/detector versions, feature transforms,
+threshold/model version, sample counts, provenance, contradictory evidence,
+limitations, and the exact rule that fired.
+
 ### Memory Detection
 ```
 - Code section hashing and integrity verification
@@ -155,7 +194,8 @@ Detection targets:
      specific syscall stub patterns
 
 6. Segment Heap integrity checks:
-   - Validate _SEGMENT_HEAP.Signature == 0xDDEEDDEE
+   - Validate the build-specific `_SEGMENT_HEAP` signature/layout using symbols
+     and runtime checks (0xDDEEDDEE is observed on relevant layouts)
    - Verify VS chunk header encoding consistency
    - Detect tampered heap metadata (indicates heap exploitation attempt)
 
@@ -167,8 +207,9 @@ Required knowledge for scanner:
 
 Anti-cheat KDP integration:
 - Store detection rule tables in Secure Pool (ExAllocatePool3 + KDP)
-- Rules become VTL0-immutable — cheat drivers cannot modify
-  detection signatures even with kernel R/W primitives
+- Correctly configured KDP can protect selected pages from ordinary VTL0 writes,
+  including kernel R/W primitives, while the hypervisor and policy path remain
+  trustworthy
 ```
 
 ### Behavioral Analysis
@@ -182,82 +223,80 @@ Anti-cheat KDP integration:
 
 ### AI Visual Aimbot Detection
 ```
-AI visual cheats (OBS capture + YOLO + hardware input) are the hardest
-class to detect because they involve no memory access, no code injection,
-no kernel driver on the gaming PC. Detection must move to behavioral
-analysis and environmental signals.
+AI visual cheats (screen capture + computer vision + hardware input) can be
+among the harder classes to detect because some designs avoid game-memory
+access, code injection, and a cheat driver on the gaming PC. Detection then
+leans more heavily on trusted behavioral telemetry and contextual signals.
 
 Input Pattern Analysis:
-- Mouse movement micro-signature: AI-generated trajectories have
-  characteristic acceleration profiles distinct from human muscle control
-  even with smoothing and jitter injection
-- Engagement timing: AI reacts within a narrow, consistent latency band
-  (capture → inference → output, typically 20-50 ms total) that lacks
-  the variance of human reaction time distributions
-- Sub-pixel precision: hardware input devices report integer deltas,
-  but AI-calculated movements exhibit systematic rounding patterns
-  that differ from natural hand movement
-- Correction patterns: AI trajectories show characteristic overshoot-and-settle
-  patterns at consistent magnitudes; human correction is more variable
-- Target switching: AI switches between targets with machine-like
-  priority ordering (closest-to-crosshair or highest-confidence);
-  humans exhibit attention bias and tunnel vision
+- Mouse movement micro-signature: a particular automation pipeline may retain
+  acceleration or correction patterns distinguishable from a matched human
+  baseline; this must be demonstrated rather than assumed
+- Engagement timing: a given automation pipeline may produce a narrower
+  latency distribution than a matched human baseline, but capture, inference,
+  transport, smoothing, frame rate, and input hardware make absolute latency
+  ranges setup-specific
+- Quantization: a specific coordinate-to-HID conversion may leave repeated
+  rounding patterns, but integer deltas also occur in legitimate input
+- Correction patterns: some smoothing configurations produce repeated
+  overshoot-and-settle shapes; compare them with matched legitimate behavior
+- Target switching: an explicit automated scoring objective may produce more
+  consistent ordering than a matched baseline, but implementations vary
 
 Gameplay Behavioral Signals:
 - Anomalous K/D ratio combined with other statistical outliers
 - "Snap" engagement pattern: rapid crosshair movement to target
   followed by immediate fire, repeated consistently
-- FOV-limited engagement: AI only engages targets within a specific
-  pixel radius (the configured FOV), creating an unnatural engagement
-  boundary visible in replay analysis
+- FOV-boundary effect: some configured systems produce a sharper engagement
+  cutoff near a chosen radius; estimate it statistically and test alternatives
 - Consistent headshot angle distribution that doesn't match
   the player's ranked skill bracket
-- Engagement rate: AI engages available targets at a higher percentage
-  than human players who miss, ignore, or react slowly to some targets
+- Engagement rate: compare visible-target engagement with a matched population;
+  high or stable rates are contextual signals, not class rules
 
 Environmental Detection:
-- OBS process detection: Game Capture mode injects a graphics hook DLL
-  (obs-graphics-hook64.dll) into the game process; detectable via
-  loaded module enumeration, though banning it risks false-positive
-  on legitimate streamers
-- Window Capture detection: DXGI Desktop Duplication creates detectable
-  API state (IDXGIOutputDuplication usage patterns)
-- Frame readback detection: unusual GPU-to-CPU copy patterns
-  (ReadbackTexture / staging resource creation at frame rate)
+- OBS Game Capture may load a graphics-capture hook into the game on supported
+  paths; this is legitimate capture evidence, not cheat attribution
+- Window/Display Capture backends vary across Windows Graphics Capture,
+  BitBlt, Desktop Duplication, OBS version, and source settings
+- Frame-transfer detection should account for shared GPU resources, reusable
+  staging resources, readback, synchronization, and legitimate capture tools
 - Known hardware input device USB VID/PID signatures
   (KMBox, certain Arduino/Teensy boards)
 - USB device enumeration anomalies: input device appearing/changing
   mid-session
 - Logitech driver version detection: known exploitable G HUB versions
-- Interception driver (interception.sys) loaded = high-risk signal
+- A known input-filter driver is a contextual signal; legitimate use and actual
+  behavior must be established before assigning risk
 
 Server-Side Statistical Analysis:
 - Aim trajectory reconstruction from server-received input deltas
 - Compare aim distribution against player population at same rank
 - Detect systematic per-frame aim correction vectors
-  (AI produces consistent delta sequences)
-- Cross-session pattern analysis: AI users show unnaturally stable
-  performance metrics across sessions (low variance in accuracy)
+  that deviate from matched legitimate distributions
+- Cross-session pattern analysis: test whether unusually stable metrics remain
+  discriminative after controlling for skill, hardware, and play style
 - Replay-based ML classifiers trained on confirmed AI aimbot cases
 
 Anti-AI Countermeasures (Game Design):
-- Visual disruption: flashbang/smoke effects that confuse CV models
-- Character skin variety and camouflage that reduce YOLO confidence
-- Dynamic UI elements overlapping character models
+- Evaluate ordinary gameplay effects, visual variety, and UI composition for
+  model robustness without degrading accessibility or legitimate play
 - Server-side aim validation: reject physically impossible aim transitions
-- Randomized character proportions or outline disruption to break
-  trained model assumptions
+- Treat model-targeted visual changes as experiments; adaptive models can
+  retrain, and game-design costs may outweigh temporary detection gains
 ```
 
 ### Server-Side Replay Analysis for AI Aimbot Detection
 ```
-Server-side detection operates on input telemetry data uploaded
-from the client, independent of what runs on the gaming PC.
-This is the strongest layer against zero-memory AI cheats.
+Server-side detection can analyze gameplay and input telemetry without relying
+on local process-scanning hits. It is a strong complementary layer against
+zero-memory AI cheats when telemetry provenance and integrity are trustworthy;
+client-uploaded fields remain untrusted until validated.
 
 Input Telemetry Collection:
 - Record raw mouse delta (dx, dy) per tick at server tick rate
-- Record timestamps of each input event (sub-millisecond precision)
+- Record timestamps at the highest reliable precision supported by the input,
+  engine, transport, and clock-synchronization pipeline
 - Record crosshair angle / view angle per tick
 - Record fire events with corresponding view angle at fire time
 - Record damage events with hit location (head/body/limb)
@@ -278,28 +317,29 @@ Statistical Features for AI Detection:
 Temporal features:
 - Reaction time distribution: time from target visibility to
   first crosshair movement toward target
-  → AI: narrow, consistent band (30-80 ms capture+inference+output)
-  → Human: wide, right-skewed distribution (150-400 ms typical)
+  → Compare automation and human distributions only within a matched,
+    versioned setup; target-visibility definition, tick rate, latency, skill,
+    and input method materially change the result
 - Time-to-lock distribution: time from engagement start to
   crosshair on target
   → AI: consistent, speed-limited by smoothing algorithm
   → Human: highly variable, depends on initial angular distance
 
 Spatial features:
-- Trajectory curvature: AI Bézier curves have characteristic
-  smooth, parametric curvature; human paths are more erratic
-  with micro-corrections and random deviations
-- Overshoot-correction ratio: AI smoothing algorithms produce
-  predictable overshoot magnitudes; humans vary wildly
-- End-point precision: AI consistently lands on bounding box
-  center or specific offset; humans show scatter distribution
-- Angular velocity profile: AI ramps up/down smoothly;
-  humans have irregular acceleration spikes
+- Trajectory curvature: some smoothing algorithms produce repeated parametric
+  shapes, but both automation and human trajectories vary by configuration,
+  device, sensitivity, and task
+- Overshoot-correction ratio: compare distributions within matched conditions;
+  neither automation nor human behavior has a universal shape
+- End-point precision: test for repeated offsets or concentration relative to a
+  skill- and context-matched baseline
+- Angular velocity profile: treat smoothness and acceleration as measured
+  features, not class-defining rules
 
 Engagement pattern features:
-- Target selection consistency: AI always picks closest-to-crosshair
-  or highest-confidence target; humans show attention bias, tunnel
-  vision, and suboptimal target priority
+- Target selection consistency: automation configured with an explicit scoring
+  objective may select targets more consistently than a matched human baseline;
+  implementations need not use closest-to-crosshair or confidence ordering
 - FOV boundary effect: AI shows sharp engagement cutoff at
   configured pixel radius; humans have gradual falloff
 - Engagement rate: percentage of visible targets engaged;
@@ -343,15 +383,15 @@ Session-level aggregate features:
 
 Model architecture options:
 - Gradient Boosted Trees (XGBoost/LightGBM):
-  Best for tabular feature vectors, interpretable feature importance,
-  fast inference on server. Preferred for production deployment.
-- Random Forest: simpler, less prone to overfitting on small datasets
+  Strong candidate for tabular feature vectors, with fast inference and useful
+  diagnostics; validate explanations and deployment fit
+- Random Forest: useful baseline; overfitting depends on data and tuning
 - 1D-CNN / LSTM on raw delta sequences:
   Operates on raw (dx, dy, dt) sequences instead of engineered features.
   Can capture patterns human engineers might miss.
   Higher compute cost; suitable for batch/offline analysis.
-- Ensemble: combine tree-based (tabular features) + sequence model
-  (raw deltas) for highest accuracy
+- Ensemble: combine tree-based features and sequence models only when held-out
+  evaluation shows a worthwhile gain after calibration and complexity costs
 
 Training data:
 - Positive samples: confirmed AI aimbot users (manual review, honeypot,
@@ -362,12 +402,12 @@ Training data:
   players using legitimate accessibility tools
 
 Evaluation metrics:
-- False Positive Rate (FPR): must be extremely low (< 0.01%)
-  for production deployment — banning legitimate players is catastrophic
-- True Positive Rate (TPR): secondary to FPR; 70-85% TPR is acceptable
-  if FPR is near-zero
-- Use session-level aggregation: flag a player only if multiple
-  sessions show consistent AI patterns (reduces both FP and FN)
+- Choose an operating point from prevalence, error costs, enforcement policy,
+  and review capacity; there is no universal acceptable FPR or TPR
+- Report FPR, FNR, precision, recall, calibration and confidence intervals on
+  representative held-out data, including population slices
+- Session-level aggregation can reduce transient noise, but only after
+  validating cross-session dependence, drift, and its effect on both FP and FN
 
 Deployment pipeline:
   Client → input telemetry upload (per tick) → server telemetry DB
@@ -380,10 +420,10 @@ Adversarial robustness:
 - Cheat developers tune smoothing parameters to evade specific features
 - Defense: retrain model periodically on newly confirmed samples
 - Use feature combinations rather than single-feature thresholds
-- Ensemble across multiple sessions reduces evasion success
-- Raw sequence models (CNN/LSTM) are harder to evade than
-  hand-crafted feature thresholds because the evasion space
-  is higher-dimensional
+- Aggregate across sessions only after validating dependence, drift, and
+  attacker adaptation
+- Evaluate both raw-sequence and engineered-feature models adversarially;
+  neither architecture is inherently harder to evade
 ```
 
 ### Hardware Input Device Detection
@@ -401,15 +441,12 @@ USB Enumeration Signals:
 
 USB HID Report Analysis:
 - Hardware input devices generate genuine HID reports, but:
-  - Report rate: KMBox/Arduino typically report at exactly the
-    programmed rate (e.g., every 1ms or 8ms); real mice have
-    polling rate jitter tied to USB microframe scheduling
-  - Report timing: AI-injected movements arrive in bursts
-    (idle → sudden burst of calculated deltas → idle),
-    while human movement is continuous with natural pauses
-  - Delta distribution: AI deltas cluster around computed values
-    with optional noise; human deltas follow characteristic
-    distributions per movement speed
+  - Report rate: a simplistic injector may expose programmed periodicity, but
+    real devices and sophisticated injectors can both show jitter
+  - Report timing: some automation pipelines create burst patterns; human and
+    legitimate software-assisted input can also be bursty
+  - Delta distribution: compare against matched devices, polling rates,
+    sensitivity, and movement tasks before drawing conclusions
 
 Network Traffic Indicators (KMBox Net):
 - KMBox Net uses UDP communication on the local network
@@ -426,12 +463,14 @@ Driver-Level Detection:
   via file version checking
 
 Limitations:
-- Pure hardware HID injection (KMBox, Arduino) is fundamentally
-  indistinguishable from real mouse input at the HID protocol level
-- Detection must rely on statistical input analysis rather than
-  driver/device-level signatures
-- Dual-machine setups with capture cards leave zero footprint
-  on the gaming PC beyond the hardware input device
+- Protocol-conformant hardware injection may be indistinguishable from a normal
+  mouse from an individual HID report alone; descriptors, timing, provenance,
+  and gameplay behavior can still provide imperfect signals
+- Device signatures can identify known implementations but are not durable
+  attribution; statistical input analysis also requires calibration
+- Dual-machine capture can avoid a cheat process on the gaming PC, but still
+  leaves ordinary capture/input-device effects and may leave network or device
+  telemetry depending on the design
 ```
 
 ## Anti-Cheat Architecture
@@ -517,11 +556,11 @@ R/W Consistency:
 - Per-register writable masks must match donor model exactly
 
 Link-State Validation:
-- Negotiated Width/Speed vs claimed capabilities (Gen4 x8 claim
-  but Gen2 x1 reality = one-read contradiction)
+- Compare negotiated Width/Speed with slot topology, platform policy, signal
+  integrity, and the claimed device; capable devices can legitimately train down
 - DLL Active, Slot Clock Config consistency
-- ASPM behavioral validation: L0 ↔ L1 transition patterns must
-  match donor class; never leaving L0 when ASPM is claimed = anomalous
+- ASPM behavioral validation only when ASPM is enabled and the workload,
+  observation window, firmware, and platform policy should exercise it
 
 AER Baselining:
 - Compare correctable-error rates against per-silicon baseline
@@ -532,34 +571,38 @@ AER Baselining:
 
 ### Completion Latency Fingerprinting
 ```
-Real silicon: DRAM contention + internal arbiters → heavy-tailed
-latency distributions. BRAM-backed emulators: fixed clock cycles
-→ much lower variance.
+Completion-latency distributions can reflect memory, arbitration, buffering,
+power state, link, driver, and workload behavior. A simplistic BRAM-backed
+emulator may show unusually low variance, but neither distribution shape is
+universal.
 
 Statistical methods:
 - Kolmogorov–Smirnov test: compare empirical CDFs vs reference
 - Hill estimator: tail index (real silicon has non-trivial tail)
 - Anderson-Darling test: sensitive to tail differences
 
-Tier-5 firmwares add LFSR-based jitter, but matching real
-distribution shape (mean, variance, tail index, mode count)
-requires modeling donor DRAM access patterns.
+Added random jitter is not equivalent to reproducing a donor distribution.
+Validate mean, variance, tails, modes, autocorrelation, and condition changes
+against matched hardware.
 ```
 
 ### MSI/MSI-X Behavioral Validation
 ```
 - Device with MSI Enable + programmed Address/Data + attached driver
-  should produce interrupts
+  should produce interrupts when a verified device condition triggers them
 - Zero interrupts when driver should exercise device = anomalous
-- Implausibly uniform arrival times (60 Hz heartbeat) = timer-driven
+- Uniform arrival times may indicate timer-driven emulation, but legitimate
+  periodic workloads must be excluded
 - MSI-X probe: mask vector → induce condition → observe PBA bit →
-  unmask → observe interrupt firing. Real silicon passes; spoofed rarely does.
+  unmask → observe interrupt firing. Conforming implementations should preserve
+  the expected state transition; incomplete emulations may fail.
 ```
 
 ### Cheat-Phase Access Pattern Recognition
 ```
-Development phase: slow, broad scanning (MemProcFS signature search)
-Execution phase: narrow, periodic reads (60–240 Hz) of small offset set
+One possible pattern is a slow, broad discovery phase followed by narrower,
+periodic reads of a smaller offset set during use. Rates and phases vary by
+implementation and can be randomized.
 
 Execution phase statistical signature:
 - High temporal periodicity
@@ -576,8 +619,11 @@ hypervisor EPT traps, decoy IOVA mappings, or server-side behavioral traps.
 ```
 Fault-Rate Monitoring:
 - Per-device fault rate from IOMMU fault-recording / WHEA
-- Legitimate devices with correct drivers rarely fault
-- Sustained nonzero rate = direct evidence of out-of-domain access
+- Establish a platform-, device-, driver-, and workload-specific benign
+  baseline; legitimate bugs, resets, firmware issues, and mapping races can
+  produce faults
+- A sustained nonzero rate is evidence of failed or invalid DMA requests, not
+  by itself evidence of cheating or actor intent
 
 Domain Assignment Audit:
 - Flag devices on passthrough/identity domains under strict mode
@@ -587,7 +633,8 @@ Domain Assignment Audit:
 ACS Topology Verification:
 - Walk bridge topology, verify Source Validation, Translation Blocking,
   P2P Request/Completion Redirect on every relevant bridge
-- Bridges without ACS = isolation holes
+- Missing/disabled ACS is a potential isolation gap where peer routing is
+  possible; confirm the full topology, root-complex behavior, and IOMMU grouping
 ```
 
 ### IOMMU Containment Primitives
@@ -602,7 +649,8 @@ Before ban verdict, containment protects the live match:
 
 3. Downstream Port Containment (DPC): if upstream port supports
    DPC Extended Capability (0x001D), trigger Contained state —
-   all TLPs dropped, no firmware-side BME race
+   contain downstream traffic according to the port/platform implementation;
+   verify the resulting link and device state
 
 4. Anti-cheat-owned device domain: map only sandbox IOVAs
 ```
@@ -615,7 +663,9 @@ TPM Remote Attestation:
 - Server sends nonce → client requests TPM2_Quote(AIK, PCR_selection, nonce)
 - Verifier checks: AIK signature, certificate chain, EK binding,
   nonce freshness, PCR composite matches known-good policy
-- Compromised kernel cannot retroactively alter extend-only PCRs
+- A compromised kernel cannot normally set extend-only PCRs back to an
+  arbitrary prior value, but a valid quote still covers only selected
+  measurements and not all runtime state
 
 Measured Boot PCR Relevance:
 - PCR[0]: UEFI firmware code
@@ -650,8 +700,9 @@ No single signature is durable. Production pipeline layers:
 6. Cheat-phase: honeypot access, access pattern classifiers
 
 Verdict requires multi-signal correlation — single signals can
-false-positive; combinations rarely do. Three independent signals
-push false-positive rates below practical threshold.
+false-positive. Use causally distinct signals and measure the joint error rate;
+correlated detectors can fail together, and no fixed signal count guarantees a
+practical false-positive rate.
 ```
 
 ### Firmware Sophistication Tiers (Detection Mapping)
@@ -680,8 +731,9 @@ Capture on detection:
 - SMBIOS slot inventory + BIOS version
 - Completion latency distribution histograms
 
-Strongest evidence: hardware signal + behavioral signal + temporal correlation.
-Three independent signals make false-positive appeals manageable.
+A useful evidence package combines hardware, behavioral, and temporal signals.
+The combined package is stronger only when provenance is trusted, alternative
+causes are tested, and the joint false-positive behavior is validated.
 ```
 
 ### Code Execution
@@ -744,9 +796,12 @@ Hypervisor vs Kernel-Level Threats:
   4. AC callbacks and telemetry remain intact
 
 Advantages:
-- Higher privilege than kernel — cannot be disabled by kernel rootkits
-- Transparent to guest: no kernel patches needed
-- Effective even after full kernel compromise
+- Higher privilege than the guest kernel under the stated hypervisor threat
+  model; ordinary VTL0 writes cannot directly change protected EPT policy
+- No guest-kernel patch is required, although hypervisor presence and effects
+  may still be observable
+- Can remain effective after guest-kernel compromise if the hypervisor,
+  configuration path, hardware, and protected policy remain trustworthy
 - Complements existing kernel-mode detection (callbacks, signatures, scans)
 
 Limitations:
