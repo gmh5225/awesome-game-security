@@ -75,6 +75,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AndroidCheatTemplate](entities/android-cheat-template.md) — Android Unity cheat framework (C/C++; OpenGL / Unity / hooking)
 - [android-il2cpp-modspeed](entities/android-il2cpp-modspeed.md) — Android IL2CPP Unity Time speed hack (deltaTime/timeScale; C++)
 - [android-proxy-mcp](entities/android-proxy-mcp.md) — Android HTTP/HTTPS capture MCP (mitmdump + SQLite + NL query)
+- [android-rom-list](entities/android-rom-list.md) — curated Android custom ROM reference list (cheat / Android ROM)
 - [android-unpacker](entities/android-unpacker.md) — Android packed-sample unpacker (malware RE; Anti Cheat → Sample Unpacker)
 - [Android-LD-Preload-Injector](entities/android-ld-preload-injector.md) — Android LD_PRELOAD inject (dead; cheat / injection:android)
 - [Android-Ptrace-Injector](entities/android-ptrace-injector.md) — Android ptrace injector (C/C++; cheat / injection:android)
