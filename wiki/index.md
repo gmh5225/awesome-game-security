@@ -205,6 +205,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DMAInvoker](entities/dma-invoker.md) — Windows DMA RPM via DMALibrary (cheat / RPM)
 - [dma-speedtest-memflow-rs](entities/dma-speedtest-memflow-rs.md) — Windows DMA R/W speedtest via memflow (Rust CLI/GUI; pcileech/native)
 - [Document](entities/document.md) — Windows Driver Development guide (Cheat / Windows kernel explorer)
+- [dumpulator](entities/dumpulator.md) — Python minidump → Unicorn x86/x64 emulation (memory/modules/threads; NT stubs / PEB·TEB / API hooks)
 - [Dopamine](entities/dopamine.md) — iOS 15.0–15.4.1 rootless jailbreak (PAC/PPL/AMFI; Sileo/procursus `/var/jb`)
 - [Dopamine2-roothide](entities/dopamine2-roothide.md) — iOS 15/16 RootHide Dopamine 2 (C/C++/ObjC; cheat / iOS jailbreak)
 - [Dota2-Overlay-2.0](entities/dota2-overlay-2-0.md) — Dota 2 overlay sample (C/C++; cheat / game:dota2)
