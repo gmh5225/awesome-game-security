@@ -1613,3 +1613,33 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:mrphrazer/obfuscation_detection`: entity [[obfuscation-detection]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-29** — ingest `description:mrphrazer/obfuscation_analysis`: entity [[obfuscation-analysis]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-29** — ingest `readme:categories`: refreshed Cheat ~2604 / Anti Cheat ~620 counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]]; SEWindows TPM PCR attestation scope on [[overviews/windows-kernel]] and [[overviews/dma-attack]].
+
+- **2026-07-29** — ingest `description:mrphrazer/ghidra-headless-mcp`: entity [[ghidra-headless-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-29** — ingest `description:mrexodia/lldbext-dump`: entity [[lldbext-dump]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
+- **2026-07-29** — ingest `description:mrexodia/ida-pro-mcp`: entity [[ida-pro-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-29** — ingest `description:mrexodia/dumpulator`: entity [[dumpulator]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; updated [[lldbext-dump]] and [[minidump]] cross-links.
+
+- **2026-07-29** — ingest `description:mrexodia/TitanHide`: entity [[titanhide]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
+
+- **2026-07-29** — ingest `readme:categories`: bumped Cheat ~2605 (was ~2604); noted felix86 in `Linux Emulator` (~1) on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; refreshed counts on [[overviews/anti-cheat]], [[overviews/dma-attack]]; light `index.md` notes (no per-category pages).
+
+- **2026-07-29** — ingest `description:wchunlin1006/LocusMimic`: entity [[locusmimic]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-29** — ingest `description:mrexodia/RiscyWorkshop`: entity [[riscy-workshop]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
+
+- **2026-07-29** — ingest `description:mrexodia/NtPhp`: entity [[ntphp]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
+- **2026-07-29** — ingest `description:mrexodia/EfiCMake`: entity [[eficmake]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
+- **2026-07-29** — ingest `description:mrexodia/DisableParallelLoader`: entity [[disable-parallel-loader]]; cited on [[overviews/reverse-engineering]] and [[x64dbg]].
+
+- **2026-07-29** — ingest `readme:categories`: bumped Anti Cheat ~621 (was ~620); refreshed counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
+- **2026-07-29** — ingest `description:rajssinde/rs-native-kit-security`: entity [[rs-native-kit-security]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
+- **2026-07-29** — ingest `description:mrexodia/AppInitHook`: entity [[appinithook]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].

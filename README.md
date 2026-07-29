@@ -1216,6 +1216,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Xposed
 - https://github.com/NPC2000/AppPealing-new [An Xposed module that disables Inka AppSealing, a popular anti-cheat and anti-root solution]
 - https://github.com/mabbcoll13/xposed-module-kit [Xposed/LSPosed module scaffold with hook templates and root-detection bypass example]
+- https://github.com/wchunlin1006/LocusMimic [LSPosed/Xposed Android GPS spoof module with map picker, saved locations, and app/system/mock-provider modes]
 
 > Frida
 - https://github.com/hackcatml/frida-watchpoint-tutorial [Frida's setHardwareWatchpoint tutorial]
@@ -2878,6 +2879,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/XignCode-Dump
 - https://github.com/gmh5225/XignCode3-bypass-alternative
 - https://github.com/gmh5225/XignCode3-bypass
+- https://github.com/miyakejima/xigncode3-blackdesert [Full-pipeline static reconstruction and security-property analysis of XIGNCODE3 on Black Desert]
 
 > Explore AntiCheat System:ACE
 - https://github.com/H3d9/sguard_limit
@@ -4205,6 +4207,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/chrisgdt/DELBOT-Mouse [Deep learning to distinguish human and bot from mouse movements]
 - https://github.com/Oliver-1-1/EtwKeyboardDetection [ETW]
 - https://github.com/wesmar/KeyboardKit [Educational kernel-mode keylogger rootkit — intercepts keyboard IRPs for UDP logging; demonstrates stealth persistence, privilege escalation and IRP hooking for offensive security research and defensive analysis]
+- https://github.com/dungnotnull/game-cheating-exploit-detection-agent-skill [Python anti-cheat detection engine with statistical aimbot, wallhack, macro, memory-tamper, and exploit detectors plus CI-tested harness]
 
 > Detection:Hide
 - https://github.com/KANKOSHEV/Detect-HiddenThread-via-KPRCB
@@ -4332,6 +4335,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/venkata-ram/DroidShield [Android RASP SDK with root/debugger/hook/emulator/tamper checks and polymorphic per-build ordering]
 - https://github.com/NoobDigital/react-native-shieldscan [React Native root/jailbreak, Frida, debugger, emulator, and hook-framework detection]
 - https://github.com/talsec/Free-RASP-ReactNative [React Native freeRASP plugin for root/jailbreak, Frida, tamper, and integrity detection]
+- https://github.com/rajssinde/rs-native-kit-security [React Native Nitro Modules RASP SDK for root/jailbreak, Frida/Xposed hook, tamper/integrity, VPN/proxy, and device risk scoring]
 - https://github.com/talsec/Free-RASP-Capacitor [Capacitor freeRASP plugin for mobile root/jailbreak, Frida, tamper, and integrity detection]
 - https://github.com/AfanasievN/react-native-device-risk-signals [React Native device-intel TurboModule: root/jailbreak, emulator, Frida, and tamper signals without vendor backend]
 - https://github.com/Binuka97/cordova-plugin-rootguard [Cordova plugin detecting Android root (Magisk/KernelSU/APatch), Frida, and iOS jailbreak/Frida]

@@ -6,15 +6,15 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Overviews
 
-- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2603 / Anti Cheat ~619; Game Engine ~153 + Mathematics ~7 / Renderer ~17; DirectX ~35 shader inject/flatten / OpenGL ~3 / Vulkan ~10 kiero2; Game Develop ~182 MCP/security; Game Network ~26; console Switch~7/Xbox~8/PS~7 BD-UN-JB+PSFree-Enhanced / 3DS~3 3Beans LLE+Luma / GC·Wii~1 gecko / Game Boy ~3)
-- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* (triggerbot & aimbot/wallhack) + Screenshot + page/CLR protection (~619); hybrid CS2 judge/honeypot proposals; Game Tools RCE + Windows Emulator KDemu AC
-- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2603) / Detection:DMA (~619) + WSF attestation
+- [Overview](overviews/overview.md) — project map; 40 README sections → skill topics (Cheat ~2605 / Anti Cheat ~621; Game Engine ~153 + Mathematics ~7 / Renderer ~17; DirectX ~35 shader inject/flatten / OpenGL ~3 / Vulkan ~10 kiero2; Game Develop ~182 MCP/security; Game Network ~26; console Switch~7/Xbox~8/PS~7 BD-UN-JB+PSFree-Enhanced / 3DS~3 3Beans LLE+Luma / GC·Wii~1 gecko / Game Boy ~3)
+- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* (triggerbot & aimbot/wallhack) + Screenshot + page/CLR protection (~621); hybrid CS2 judge/honeypot proposals; Game Tools RCE + Windows Emulator KDemu AC
+- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2605) / Detection:DMA (~621) + WSF attestation (SEWindows PCR)
 - [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~153); Mathematics/PhysX/Renderer (~17) adjacency; MCP server/security + AI gamedev (~182); Game Hot Patch HybridCLR/xLua; Game Network ~26; Game Assets ~11 + AI YAML→GLB/sprite + Image Codec PaintFE + Manager/Testing/Tools/CI
-- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2603) + Some Tricks (~113); mytechnotalent Rust/Go RE courses; Android Terminal (ADB/root/shell)/File/Memory Explorer; WSA/Android/iOS/Windows Emulator KDemu lanes; console Xbox~8 X360 patch+SystemOS / PS HV+BD-UN-JB+PSFree-Enhanced / WebKit CSSFontFace / 3DS~3 3Beans LLE+Luma / GC·Wii~1 gecko
+- [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2605) + Some Tricks (~113); mytechnotalent Rust/Go RE courses; Android Terminal (ADB/root/shell)/File/Memory Explorer; WSA/Android/iOS/Windows Emulator KDemu lanes; console Xbox~8 X360 patch+SystemOS / PS HV+BD-UN-JB+PSFree-Enhanced / WebKit CSSFontFace / 3DS~3 3Beans LLE+Luma / GC·Wii~1 gecko
 - [Graphics API](overviews/graphics-api.md) — DirectX (~35) D3D12 shader inject + cross-API flatten / GL / Vulkan (~10) kiero2; Renderer (~17) + Mathematics adjacency; Image Codec PaintFE + AI mesh/splat/sprite
 - [Mobile Security](overviews/mobile-security.md) — Android / iOS; Terminal (ADB/root/shell)/File/Memory Explorer + App/Kernel CVE; WSA (~9), Droid-VM/Gunyah Snapdragon emulators
-- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools (file-format/asset lists + Ghidra managers), MBA/DBI, deobfuscation, packers; Windows Emulator KDemu + console/Xbox~8 / PS BD-UN-JB+PSFree-Enhanced / 3DS 3Beans LLE / GC·Wii gecko RE (~2603 Cheat / ~619 AC lanes)
-- [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation (~9), BYOVD, pool; Some Tricks Ring0 (~113); Windows Emulator (~7) + WSL
+- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools (file-format/asset lists + Ghidra managers), MBA/DBI, deobfuscation, packers; Windows Emulator KDemu + console/Xbox~8 / PS BD-UN-JB+PSFree-Enhanced / 3DS 3Beans LLE / GC·Wii gecko RE (~2605 Cheat / ~621 AC lanes)
+- [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation (~9; SEWindows PCR), BYOVD, pool; Some Tricks Ring0 (~113); Windows Emulator (~7) + WSL
 
 ## Concepts
 
@@ -90,6 +90,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [anticuckoo](entities/anticuckoo.md) — Cuckoo sandbox / VE detection demos (Detection:Virtual Environments)
 - [apc-research](entities/apc-research.md) — APC internals research samples + lib (cheat / windows kernel explorer)
+- [AppInitHook](entities/appinithook.md) — AppInit_DLLs registry startup inject + MinHook hooking (INI dispatch; CMake/cmkr; cheat / hook)
 - [apic](entities/apic.md) — local APIC R/W + xAPIC/x2APIC IPI (KM; timing/detection research)
 - [APKiD](entities/apkid.md) — Android APK/DEX packer·obfuscator·anti-analysis ID (YARA; PEiD for Android)
 - [apksigcopier](entities/apksigcopier.md) — copy/extract/patch Android APK v1/v2/v3 signatures (Python; Signing Block)
@@ -198,6 +199,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DirtyPipe-Android](entities/dirtypipe-android.md) — Pixel 6 Dirty Pipe (CVE-2022-0847) permanent Magisk v24.3 root
 - [DirtyPipeRoot](entities/dirtypiperoot.md) — Pixel 6 Dirty Pipe (CVE-2022-0847) one-click temporary root
 - [disable-threat-tracing](entities/disable-threat-tracing.md) — C ETW Testing / threat-tracing disable (AC stress-testing)
+- [DisableParallelLoader](entities/disable-parallel-loader.md) — x64dbg plugin: disable Win10+ parallel DLL loader (`LdrpMapAndSnapWork`; phnt; sequential load order)
 - [DisableNvidiaScreenshot](entities/disablenvidiascreenshot.md) — DWM anti-screenshot (C++; NVIDIA / capture lane; Cheat Anti Screenshot)
 
 - [DLLirant](entities/dllirant.md) — automated Windows DLL search-order hijack discovery (proxy DLL + load monitor)
@@ -205,6 +207,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DMAInvoker](entities/dma-invoker.md) — Windows DMA RPM via DMALibrary (cheat / RPM)
 - [dma-speedtest-memflow-rs](entities/dma-speedtest-memflow-rs.md) — Windows DMA R/W speedtest via memflow (Rust CLI/GUI; pcileech/native)
 - [Document](entities/document.md) — Windows Driver Development guide (Cheat / Windows kernel explorer)
+- [dumpulator](entities/dumpulator.md) — Python minidump → Unicorn x86/x64 emulation (memory/modules/threads; NT stubs / PEB·TEB / API hooks)
 - [Dopamine](entities/dopamine.md) — iOS 15.0–15.4.1 rootless jailbreak (PAC/PPL/AMFI; Sileo/procursus `/var/jb`)
 - [Dopamine2-roothide](entities/dopamine2-roothide.md) — iOS 15/16 RootHide Dopamine 2 (C/C++/ObjC; cheat / iOS jailbreak)
 - [Dota2-Overlay-2.0](entities/dota2-overlay-2-0.md) — Dota 2 overlay sample (C/C++; cheat / game:dota2)
@@ -231,6 +234,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EDRSandblast](entities/edrsandblast.md) — BYOVD EDR/ETW blind (callbacks / ETW TI / ntdll unhook; C)
 - [elfuck](entities/elfuck.md) — ELF packer/protector (NRV2E / password / anti-debug; Anti Cheat → Binary Packer)
 - [encrypted_value](entities/encrypted-value.md) — C++ header-only scalar value encrypt (Anti Cheat → Encrypt Variable)
+- [EfiCMake](entities/eficmake.md) — minimal CMake UEFI app scaffold (EDK2 headers; MSVC `.efi`; boot services)
 - [engine-showcase](entities/engine-showcase.md) — older custom C++ engine showcase (Lua/UI/levels/net; Game Engine / [Old engine])
 - [Ephemera](entities/ephemera.md) — multiplatform MEMORY.DMP analysis (WinDbg flavor; AC / kernel dump)
 - [EpicSurvivalGame](entities/epic-survival-game.md) — UE4 FPS course (action system / event-driven C++; Game Develop / Unreal source)
@@ -279,6 +283,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gamesneeze](entities/gamesneeze.md) — Linux CS:GO cheat research (seksea; cheat / game:csgo)
 - [garlic](entities/garlic.md) — C multi-format binary analysis / Fast APK/DEX/JAR Java decompiler (PE/ELF/Mach-O/DEX/APK + ARM)
 - [gba-ghidra-loader](entities/gba-ghidra-loader.md) — Ghidra GBA ROM loader (memory/IO map + cartridge header; GameBoy)
+- [ghidra-headless-mcp](entities/ghidra-headless-mcp.md) — headless Ghidra MCP server (40+ RE tools; fake backend + CLI; Cursor/Claude agents)
 - [gdbserver9x](entities/gdbserver9x.md) — GDB RSP stub for 32-bit Win98SE/XP (VC6; Binary Ninja adapter)
 - [GDB-Windows-Binaries](entities/gdb-windows-binaries.md) — portable Windows GDB (mingw-w64; TUI/Python; Cheat Debugging)
 - [GDDumper](entities/gddumper.md) — Cheat Engine Lua: Godot 3.x/4.x SceneTree / GDScript runtime dump (Win x86/x64)
@@ -331,6 +336,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-vtable-tools](entities/ida-vtable-tools.md) — IDA 9.X vtable ops: `.hpp` skeleton / rename / `this` type / slot index (Python; IDA Plugins)
 - [idac](entities/idac.md) — Trail of Bits IDA Pro CLI/client (Unix socket → GUI/idalib; JSON; agents; not MCP)
 - [ida-mcp-server-plugin](entities/ida-mcp-server-plugin.md) — IDA Pro MCP server plugin (disasm/decompile/xrefs/types for LLM clients)
+- [ida-pro-mcp](entities/ida-pro-mcp.md) — IDA Pro MCP: full IDAPython API for agents (rename/types/xrefs/decompile/structs; plugin + test harness)
 - [iida-mcp](entities/iida-mcp.md) — faster IDA Pro MCP (77 tools; multi-instance; optional KM mem via iida-mcp-ioctl)
 - [idarem](entities/idarem.md) — IDA Pro remote browser UI (Flask REST/SSE + React; live IDB sync)
 - [IdaRef](entities/idaref.md) — IDA plugin: full x86-64/ARM/MIPS/Xtensa insn docs at cursor (SQLite; cheat / IDA Plugins)
@@ -401,6 +407,8 @@ Compiled knowledge catalog for awesome-game-security.
 - [Lenovo-CVE-2025-8061](entities/lenovo-cve-2025-8061.md) — LnvMSRIO.sys LPE PoC (CVE-2025-8061; IOCTL → SYSTEM; BYOVD)
 - [libelevate](entities/libelevate.md) — C++ elevating-handle lib (KM/driver primitives → full-access process handles; AC handle protection)
 - [libmem](entities/libmem.md) — cross-platform game-hacking lib (memory / hook / scan; Win/Linux/FreeBSD; C/C++/Rust/Python/Lua)
+- [lldbext-dump](entities/lldbext-dump.md) — LLDB Python extension: Android live session → Windows minidump + Unicorn replay (mobile RE / dump)
+- [LocusMimic](entities/locusmimic.md) — LSPosed/Xposed Android GPS spoof (map picker, saved locations, app/system/mock-provider modes; Kotlin/Compose)
 - [LockFile-Poc](entities/lockfile-poc.md) — C++ Windows file-lock PoC (AC Stress Testing / Some Tricks Ring3)
 - [LoudSunRun](entities/loudsunrun.md) — stack spoofing with synthetic frames (namazso / SilentMoonWalk / VulcanRaven; Cheat Spoof Stack)
 - [loldrivers-client](entities/loldrivers-client.md) — Go/PowerShell LOLdrivers scan client (cheat / vulnerable driver)
@@ -473,6 +481,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NTFSTool](entities/ntfstool.md) — NTFS forensics (MFT/USN/BitLocker/EFS; AC / IS forensics)
 - [NTMemory](entities/ntmemory.md) — kernel cross-process R/W (MDL / CR3 walk / physical translate)
 - [NTSleuth](entities/ntsleuth.md) — Windows syscall extractor (ntdll/win32u PDB + disasm → JSON/C headers)
+- [NtPhp](entities/ntphp.md) — PHP interpreter embedded in WDK kernel drivers (Anti Cheat → Dynamic Script)
 - [nuzu](entities/nuzu.md) — yuzu-based Switch emulator mirror (unofficial fork; Nintendo Switch lane)
 - [OFRP-device_xiaomi_mondrian](entities/ofrp-device-xiaomi-mondrian.md) — OFRP/TWRP device tree for Redmi K60 Pro (mondrian)
 - [Obfu-DE-Scate](entities/obfu-de-scate.md) — Python APK ProGuard/R8 deobf (name maps + HTML hierarchy; [Apk])
@@ -594,10 +603,12 @@ Compiled knowledge catalog for awesome-game-security.
 - [revert-mapper](entities/revert-mapper.md) — post-execution cleanup for manually mapped kernel drivers
 - [Return-address-spoofer](entities/return-address-spoofer.md) — return-address / stack spoof illustration (C/C++; Cheat Spoof Stack)
 - [ricochet-deobfuscator](entities/ricochet-deobfuscator.md) — Ricochet AC deobfuscator (C/C++; driver / memory analysis)
+- [RiscyWorkshop](entities/riscy-workshop.md) — RISC-V payload obfuscation workshop (riscvm VM + llvm-mingw + insn mutation; red-team exercises)
 - [ripr](entities/ripr.md) — IDA/BN function rip → Python/Unicorn harness (r2pipe; Cheat IDA/BN Plugins)
 - [ritz-amazing-fortnite-internal](entities/ritz-amazing-fortnite-internal.md) — Fortnite internal: from-scratch hook + x64 injector (cheat / game:fortnite)
 - [rootAVD](entities/rootavd.md) — root Android Virtual Devices (Magisk/AVD; Cheat Magisk / Android Emulator)
 - [RootSocketKit](entities/root-socket-kit.md) — Android LKM + Unix-socket root memory R/W (Magisk/KernelSU/APatch JNI; GUI)
+- [rs-native-kit-security](entities/rs-native-kit-security.md) — React Native Nitro RASP SDK (root/jailbreak, Frida/Xposed/Magisk hook, tamper/integrity, VPN/proxy, device risk scoring; Android+iOS)
 - [rtti-parser](entities/rtti-parser.md) — IDA script: parse RTTI (IDA 9.2; cheat / IDA Plugins)
 - [RTM](entities/rtm.md) — realtime 3D/4D math lib (fast arithmetic; Mathematics)
 - [rwMem](entities/rwmem.md) — rwProcMem33 fork; Android process-memory R/W (Cheat Memory Explorer)
@@ -661,6 +672,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ThreatResearch](entities/threatresearch.md) — Security Joes Ghidra/IDA plugins + malware RE scripts / YARA (Cheat Ghidra)
 - [TiEtwAgent](entities/tietwagent.md) — ETW Threat-Intelligence injection-detection agent (krabsetw / Yara / PPL)
 - [ThreatIntelligenceConsumer](entities/threat-intelligence-consumer.md) — Threat-Intelligence ETW consume without driver/PPL (Win11 24H2/25H2)
+- [TitanHide](entities/titanhide.md) — SSDT-hook kernel driver: hide debuggers from selected processes (Nt* return tamper; cheat / debugging)
 - [TOG](entities/tog.md) — The Online Gamer offsets generator (online-game cheat tooling; Offsets Generator)
 - [TotalPE2](entities/totalpe2.md) — WPF PE viewer (headers, imports/exports, .NET metadata)
 - [tpm-mmio](entities/tpm-mmio.md) — MMIO TPM 2.0 public EK read (bypass OS hooks; Detection:HWID)
@@ -801,6 +813,6 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Sources
 
-- Projected category map: `sources/README-categories.md` (generated on scan; 40 top-level sections; Game Engine ~153 / Renderer ~17 / Cheat ~2603 / Anti Cheat ~619 / DirectX ~35 shader inject+flatten / Vulkan ~10 kiero2 / Game Develop ~182 / Game Network ~26 / Xbox ~8 / PlayStation ~7 / Nintendo 3DS ~3 3Beans LLE / GameCube/Wii ~1 gecko)
+- Projected category map: `sources/README-categories.md` (generated on scan; 40 top-level sections; Game Engine ~153 / Renderer ~17 / Cheat ~2605 / Anti Cheat ~621 / DirectX ~35 shader inject+flatten / Vulkan ~10 kiero2 / Game Develop ~182 / Game Network ~26 / Xbox ~8 / PlayStation ~7 / Nintendo 3DS ~3 3Beans LLE / GameCube/Wii ~1 gecko)
 - Skill projections: `sources/skills/`
 - Description projections: `sources/descriptions/` (incremental only)
