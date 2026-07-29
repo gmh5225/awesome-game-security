@@ -1694,4 +1694,4 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-29** — ingest `description:momo5502/levo`: entity [[levo]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
-- **2026-07-29** — ingest `description:momo5502/ept-hook-detection`: entity [[ept-hook-detection]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[hypervisor-detection]].
+- **2026-07-29** — ingest `description:momalab/e3`: entity [[e3]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
