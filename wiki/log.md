@@ -1703,3 +1703,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:moiz-2x/CVE-2025-24990_POC`: entity [[cve-2025-24990-poc]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-07-29** — ingest `description:mltpig/PCILeech-FPGA-DMA_VMD`: entity [[pcileech-fpga-dma-vmd]]; cited on [[dma]] and [[overviews/dma-attack]]; cross-link from [[pcileech-fpga]].
+
+- **2026-07-29** — ingest `description:mkaring/ConfuserEx`: entity [[confuserex]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
