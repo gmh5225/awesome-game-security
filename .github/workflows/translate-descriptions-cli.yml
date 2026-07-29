@@ -1,7 +1,7 @@
 name: Translate Descriptions (Cursor CLI)
 
 # Translate description_en.txt → zh-CN / zh-TW / ja / ko / fr / de / es / it / ru
-# using Cursor CLI (cursor-grok-4.5-high-fast, max mode).
+# using Cursor CLI (auto, max mode).
 #
 # Triggers:
 # - schedule: every 6 hours at minute 20 UTC (catch-up missing translations)
@@ -44,7 +44,7 @@ on:
       model:
         description: "Cursor CLI model id"
         required: false
-        default: "cursor-grok-4.5-high-fast"
+        default: "auto"
 
   pull_request:
     types: [opened, synchronize, reopened]
@@ -112,14 +112,14 @@ jobs:
             REPOS="${INPUT_REPOS:-}"
             LANGS="${INPUT_LANGS:-}"
             FORCE="${INPUT_FORCE:-false}"
-            MODEL="${INPUT_MODEL:-cursor-grok-4.5-high-fast}"
+            MODEL="${INPUT_MODEL:-auto}"
           else
             # Scheduled catch-up: scan missing, cap batch size.
             LIMIT="20"
             REPOS=""
             LANGS=""
             FORCE="false"
-            MODEL="cursor-grok-4.5-high-fast"
+            MODEL="auto"
           fi
           if ! [[ "${LIMIT}" =~ ^[0-9]+$ ]]; then
             echo "ERROR: limit must be an integer, got: ${LIMIT}"
@@ -315,9 +315,9 @@ jobs:
           agent --version || true
           df -h
 
-          MODEL="${INPUT_MODEL:-cursor-grok-4.5-high-fast}"
+          MODEL="${INPUT_MODEL:-auto}"
           if [ -z "$MODEL" ]; then
-            MODEL="cursor-grok-4.5-high-fast"
+            MODEL="auto"
           fi
           ARGS=(--model "$MODEL" --commit-every 1)
 
