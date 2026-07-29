@@ -16,6 +16,7 @@ sources:
   - wiki/sources/descriptions/zer0condition__hv.md
   - wiki/sources/descriptions/zer0condition__Ophion.md
   - wiki/sources/descriptions/zer0condition__ZeroThreadKernel.md
+  - wiki/sources/descriptions/mq1n__HiddenModuleDetector.md
   - wiki/sources/descriptions/weak1337__SystemThreadFinder.md
   - wiki/sources/descriptions/zer0condition__checkhv_um.md
   - wiki/sources/descriptions/void-stack__Hypervisor-Detection.md
@@ -177,7 +178,7 @@ Kernel internals that matter for game protection and low-level research: object/
 - **Keyboard IRP filter / keylog research:** educational samples such as [[keyboardkit]] intercept keyboard IRPs in a filter driver, exfiltrate via UDP usermode, and demonstrate ExplorerFrame DLL-hijack persistence (offensive + defensive IRP-hook analysis). (source: wiki/sources/descriptions/wesmar__KeyboardKit.md)
 - **MouClass / kernel mouse input:** research drivers such as [[kernel-mouse]] target mouClass on Windows 10/11 for cheat / triggerbot & aimbot input-path study. (source: wiki/sources/descriptions/vsaint1__kernel-mouse.md)
 - **Kernel-mode sockets (WSK):** BSD-style wrappers such as [[ksocket]] expose TCP/UDP from ring 0 via Windows Sockets Kernel with no user-mode component—covert kernel network-channel research. (source: wiki/sources/descriptions/wbenny__KSOCKET.md)
-- **System / hidden threads:** detectors such as [[system-thread-finder]] enumerate threads (`NtQuerySystemInformation`) and flag start addresses outside loaded driver images (BE-style manual-map thread heuristics). (source: wiki/sources/descriptions/weak1337__SystemThreadFinder.md) PoCs such as [[zero-thread-kernel]] evade that lane by running via existing contexts / timers instead of new system threads. (source: wiki/sources/descriptions/zer0condition__ZeroThreadKernel.md)
+- **System / hidden threads:** hidden module/DLL detectors such as [[hidden-module-detector]] (mq1n; C/C++; Detection:Hide) complement thread-based hide scans; detectors such as [[system-thread-finder]] enumerate threads (`NtQuerySystemInformation`) and flag start addresses outside loaded driver images (BE-style manual-map thread heuristics). (source: wiki/sources/descriptions/mq1n__HiddenModuleDetector.md) (source: wiki/sources/descriptions/weak1337__SystemThreadFinder.md) PoCs such as [[zero-thread-kernel]] evade that lane by running via existing contexts / timers instead of new system threads. (source: wiki/sources/descriptions/zer0condition__ZeroThreadKernel.md)
 - **OS LPE / sandbox escape:** first-party Windows LPE PoCs such as [[cve-2026-40369-exploit]] abuse `NtQuerySystemInformation` class 253 for arbitrary kernel address increment on Win11 24H2–25H2 (Chrome-sandbox reachable). (source: wiki/sources/descriptions/orinimron123__CVE-2026-40369-EXPLOIT.md) Hyper-V virtualization-stack heap overflow LPE such as [[cve-2025-21333]] (`vskrnlintvsp.sys` integer truncation → IoRing pool spray / pipe-attribute arbitrary R/W). (source: wiki/sources/descriptions/nu1lptr0__CVE-2025-21333.md)
 - **Driver unit testing:** frameworks such as [[wdutf]] host Microsoft C++ unit tests in user space against kernel-driver code (AC / defensive driver harness lane). (source: wiki/sources/descriptions/wpdk__wdutf.md)
 

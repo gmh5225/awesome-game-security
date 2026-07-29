@@ -1652,4 +1652,6 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-29** — ingest `description:mq1n/NoMercy`: entity [[no-mercy]]; cited on [[overviews/anti-cheat]].
 
+- **2026-07-29** — ingest `description:mq1n/HiddenModuleDetector`: entity [[hidden-module-detector]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
 - **2026-07-29** — ingest `readme:categories`: bumped Cheat ~2606 (was ~2605) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
