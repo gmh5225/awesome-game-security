@@ -4,6 +4,7 @@ kind: concept
 topics: [reverse-engineering, anti-cheat]
 sources:
   - wiki/sources/skills/reverse-engineering.md
+  - wiki/sources/descriptions/mizt0__mixed-boolean-transform.md
 updated: 2026-07-29
 confidence: high
 ---
@@ -22,7 +23,7 @@ confidence: high
 1. **Algebraic simplification** — coefficient reconstruction and term cancellation ([[cobra]]; SSPAM, MBA-Blast, SiMBA in the broader corpus).
 2. **Backward slicing + oracle lookup** — slice MBA regions, query msynth-style tables ([[obfuscation-analysis]]).
 3. **SMT/bitvector solvers** — prove equivalence or find simplifying substitutions ([[stp]], Z3 backends).
-4. **Sample generation for testing** — synthesize MBA expressions to validate simplifier pipelines ([[mutaben]], [[mba-obfuscator]]).
+4. **Sample generation for testing** — synthesize MBA expressions to validate simplifier pipelines ([[mutaben]], [[mba-obfuscator]]); source-level constant/arithmetic replacement with Z3-verified polynomial MBA via [[mixed-boolean-transform]] (C++; Eigen3 + GMP) (source: wiki/sources/descriptions/mizt0__mixed-boolean-transform.md).
 
 ## Detection context
 
@@ -30,4 +31,4 @@ MBA-heavy regions often co-occur with [[control-flow-flattening]] and opaque pre
 
 ## Related
 
-[[cobra]] · [[mutaben]] · [[mba-obfuscator]] · [[obfuscation-analysis]] · [[stp]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[cobra]] · [[mutaben]] · [[mba-obfuscator]] · [[mixed-boolean-transform]] · [[obfuscation-analysis]] · [[stp]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]

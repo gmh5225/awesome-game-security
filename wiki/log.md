@@ -1704,4 +1704,6 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-29** — ingest `description:mltpig/PCILeech-FPGA-DMA_VMD`: entity [[pcileech-fpga-dma-vmd]]; cited on [[dma]] and [[overviews/dma-attack]]; cross-link from [[pcileech-fpga]].
 
+- **2026-07-29** — ingest `description:mizt0/mixed-boolean-transform`: entity [[mixed-boolean-transform]]; cited on [[mixed-boolean-arithmetic]] and [[overviews/reverse-engineering]].
+
 - **2026-07-29** — ingest `description:mkaring/ConfuserEx`: entity [[confuserex]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
