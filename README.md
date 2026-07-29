@@ -1528,6 +1528,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/ethersplay [EVM dissassembler]
 - https://github.com/Hexorg/Ouroboros [A Symbolic-Execution Decompiler written in Rust]
 - https://github.com/sefcom/oxidizer [Rust decompiler on angr — high-fidelity pseudocode from stripped binaries, enum/match/? recovery, Rust 1.39–1.93]
+- https://github.com/Noelo-Lab/kuna [Agent-first decompiler in Rust, originally ported from Ghidra; CLI, WASM, and Ghidra integration; tunable for LLM-driven autonomous refinement]
 - https://github.com/Noelo-Lab/decbench [DecBench — benchmark for exact decompilation: structural CFG (GED), type recovery, recompilation bytematch; angr/Ghidra/IDA/Binja + LLMs; https://decbench.com]
 - https://github.com/QuesmaOrg/BinaryAudit [BinaryAudit — open-source Harbor benchmark for AI agents finding injected backdoors in stripped binaries (Ghidra/Radare2); lighttpd/dnsmasq/Dropbear/Sozu/Caddy]
 
