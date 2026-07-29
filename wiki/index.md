@@ -607,6 +607,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ritz-amazing-fortnite-internal](entities/ritz-amazing-fortnite-internal.md) — Fortnite internal: from-scratch hook + x64 injector (cheat / game:fortnite)
 - [rootAVD](entities/rootavd.md) — root Android Virtual Devices (Magisk/AVD; Cheat Magisk / Android Emulator)
 - [RootSocketKit](entities/root-socket-kit.md) — Android LKM + Unix-socket root memory R/W (Magisk/KernelSU/APatch JNI; GUI)
+- [rs-native-kit-security](entities/rs-native-kit-security.md) — React Native Nitro RASP SDK (root/jailbreak, Frida/Xposed/Magisk hook, tamper/integrity, VPN/proxy, device risk scoring; Android+iOS)
 - [rtti-parser](entities/rtti-parser.md) — IDA script: parse RTTI (IDA 9.2; cheat / IDA Plugins)
 - [RTM](entities/rtm.md) — realtime 3D/4D math lib (fast arithmetic; Mathematics)
 - [rwMem](entities/rwmem.md) — rwProcMem33 fork; Android process-memory R/W (Cheat Memory Explorer)

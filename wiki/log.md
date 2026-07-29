@@ -1639,3 +1639,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:mrexodia/DisableParallelLoader`: entity [[disable-parallel-loader]]; cited on [[overviews/reverse-engineering]] and [[x64dbg]].
 
 - **2026-07-29** — ingest `readme:categories`: bumped Anti Cheat ~621 (was ~620); refreshed counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
+- **2026-07-29** — ingest `description:rajssinde/rs-native-kit-security`: entity [[rs-native-kit-security]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
