@@ -1,0 +1,3921 @@
+Project Path: arc_g8tsz_deadlock-anti-cheat_par8ayd1
+
+Source Tree:
+
+```txt
+arc_g8tsz_deadlock-anti-cheat_par8ayd1
+├── README.md
+└── UrnItAnticheat-main
+    ├── ROADMAP.md
+    ├── UrnItAnticheat
+    │   ├── UrnItAnticheat.cpp
+    │   ├── UrnItAnticheat.sln
+    │   ├── UrnItAnticheat.vcxproj
+    │   ├── UrnItAnticheat.vcxproj.filters
+    │   ├── cheat_list.txt.example
+    │   ├── config.txt.example
+    │   ├── debug_libs
+    │   ├── include
+    │   │   └── cpu_info
+    │   │       ├── cpu_features_cache_info.h
+    │   │       ├── cpu_features_macros.h
+    │   │       ├── cpuinfo_aarch64.h
+    │   │       ├── cpuinfo_arm.h
+    │   │       ├── cpuinfo_loongarch.h
+    │   │       ├── cpuinfo_mips.h
+    │   │       ├── cpuinfo_ppc.h
+    │   │       ├── cpuinfo_riscv.h
+    │   │       ├── cpuinfo_s390x.h
+    │   │       ├── cpuinfo_x86.h
+    │   │       └── internal
+    │   │           ├── bit_utils.h
+    │   │           ├── cpuid_x86.h
+    │   │           ├── filesystem.h
+    │   │           ├── hwcaps.h
+    │   │           ├── stack_line_reader.h
+    │   │           ├── string_view.h
+    │   │           └── windows_utils.h
+    │   ├── player_id.txt.example
+    │   └── webhook.txt.example
+    └── scripts
+        └── scrape_deadlock_cheats.py
+
+```
+
+`README.md`:
+
+```md
+# Deadlock AC (UrnIt Anticheat)
+
+Anticheat client for **Deadlock**: logs tasks, PNG screenshots (game window), key input (only when Deadlock is focused), and hardware info (OS, CPU, GPU), then **uploads the session to your Discord** when the player ends the session (automatically on game exit or manually with **F12**). Supports a **config file** and **cheat list from file** (including a script to scrape current cheats from the Deadlock trading forum), **macro/bot hint** in the report, and optional **session folder cleanup** after upload.
+
+## Requirements
+
+- **Windows** 10/11 (x64)
+- **Visual Studio 2022** (or 2019) with C++ desktop workload and **Windows 10/11 SDK**
+- Build for **x64** (Debug or Release); the project is configured for x64
+
+## How it works
+
+- **Run** the .exe next to the game (or on the same PC). It creates a timestamped folder and writes:
+  - `REPORT.TXT` – OS, CPU, **GPU**, session summary, cheat/performance flags, optional **"Possible macro/bot"** line (when key interval variance is very low), and Discord upload status
+  - `TASK.TXT` – process list (name, PID, session)
+  - `KEY_LOG.TXT` – key down/up with timestamps (only while the "Deadlock" window is focused)
+  - `*.png` – screenshots (game window when found, else full screen) every 5 seconds (PNG for smaller size and faster upload)
+- **End session** (automatic or manual):
+  - **Automatic**: When the Deadlock process exits (player closes the game), the client writes the session summary, uploads to Discord in the **background** (console shows "Uploading…"), and exits. No F12 needed.
+  - **Manual**: Player can still press **F12** anytime to end the session early and upload.
+- **Optional**: If `config.txt` has `CLEANUP_AFTER_UPLOAD=1`, the session folder is deleted after a successful upload so no local copy remains.
+
+No manual file upload: everything is sent automatically to **your** Discord.
+
+## Setup
+
+1. **Clone** the repo and open `UrnItAnticheat-main\UrnItAnticheat\UrnItAnticheat.sln` in Visual Studio. Select **x64** (Debug or Release) and build. The `.exe` is in `UrnItAnticheat-main\UrnItAnticheat\x64\Debug\` or `...\x64\Release\`.
+
+2. **Place these files next to the built `.exe`** (same folder as the exe):
+
+   | File | Required? | Description |
+   |------|-----------|-------------|
+   | `webhook.txt` | **Yes** (for upload) | One line: your Discord webhook URL. See `webhook.txt.example`. |
+   | `player_id.txt` | No | One line: tournament tag or Discord ID; included in report and Discord messages. |
+   | `config.txt` | No | Overrides intervals and options (see **Config** below). Copy from `config.txt.example`. |
+   | `cheat_list.txt` | No | List of process names to flag as cheat/performance. If missing, built-in list in code is used. See **Cheat list** below. |
+
+3. **Discord webhook**: In Discord: Channel → Integrations → Webhooks → New Webhook. Copy the URL into `webhook.txt`.
+
+4. **Cheat list** (optional): Format of `cheat_list.txt`: first line `cheats`, then one process name per line (e.g. `syntheticskill.exe`), then line `performance`, then tool names. Lines starting with `#` are ignored. To **generate a list from current Deadlock cheats**, run:
+   ```bash
+   python UrnItAnticheat-main/scripts/scrape_deadlock_cheats.py
+   ```
+   This scrapes the [elitepvpers Deadlock trading](https://www.elitepvpers.com/forum/deadlock-trading/) forum and writes `UrnItAnticheat-main/UrnItAnticheat/cheat_list.txt`. Copy that file next to the exe (or use `--output` to write directly to the exe folder). If `cheat_list.txt` is missing, the built-in list in code is used.
+
+## Config (config.txt)
+
+If `config.txt` is present next to the exe, these keys are loaded (one per line, `KEY=value`); otherwise defaults apply. Copy `config.txt.example` and edit.
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `TASK_SCAN_INTERVAL_SEC` | 3 | Seconds between process list scans. |
+| `SCREENSHOT_INTERVAL_SEC` | 5 | Seconds between PNG screenshots. |
+| `KEYLOG_INTERVAL_SEC` | 0.05 | Key sampling interval (seconds). |
+| `LOOP_SLEEP_MS` | 20 | Main loop sleep (ms). |
+| `AUTO_UPLOAD_ON_GAME_EXIT` | 1 | If 1/true/yes, session ends and uploads when Deadlock process exits; else F12 only. |
+| `UPLOAD_WAIT_TIMEOUT_SEC` | 30 | Max seconds to wait for Discord upload (upload runs in background; console shows "Uploading…"). |
+| `CLEANUP_AFTER_UPLOAD` | 0 | If 1/true/yes, delete the session folder after a successful upload. |
+| `MACRO_VARIANCE_THRESHOLD_MS2` | 500 | If key interval variance (ms²) is below this, report adds "Possible macro/bot" for human review. |
+
+The report includes **GPU** (via DXGI) and, when key timings show very low variance, a **macro/bot hint** line.
+
+## Upload to Discord
+
+With `webhook.txt` set, ending the session (game exit or F12) uploads REPORT, TASK, KEY_LOG, and PNG screenshots to the Discord channel. Upload runs in the background (max wait from config). The report gets a final line: Discord upload completed, failed, or timed out. Do **not** commit `webhook.txt`, `config.txt`, or `cheat_list.txt`.
+
+## Releases
+
+No pre-built releases yet. Build from source (see **Setup**). When releases are published, they will appear at [Releases](https://github.com/lorddummy/deadlock-anti-cheat/releases). To create a release: **Releases → Create a new release**, choose a tag (e.g. `v1.0`), add notes, attach the built `UrnItAnticheat.exe` from `x64\Release\` or `x64\Debug\`. Do not include `webhook.txt`.
+
+## Privacy / data collected
+
+The client collects and sends to your Discord: Windows username, OS version, CPU and **GPU** info, process list, key timings (only while the Deadlock window is focused), and PNG screenshots (game window or full screen). The report may include a **"Possible macro/bot"** line when key interval variance is very low. Use only for anticheat review; inform players what is collected.
+
+## Tips for staff
+
+- Use a **private** Discord channel for the webhook so only staff see reports.
+- Use one webhook per tournament or tier so reports are easy to sort.
+- Some antivirus may flag the .exe (keyboard/screenshot behavior); players may need to allow or whitelist it.
+
+## Summary
+
+- **Config** and **cheat list** load from `config.txt` and `cheat_list.txt` next to the exe (optional); use the Python scraper to build the cheat list from the Deadlock trading forum.
+- Intervals use **seconds** (tunable via config: task scan, screenshots, keylog).
+- Keylog and game-window screenshots only when the **Deadlock** window is focused.
+- **PNG** screenshots; **GPU** in report; **macro/bot hint** when key variance is very low.
+- Session ends when the **game exits** (auto-upload) or when the player presses **F12**; upload runs in the **background**; optional **session folder cleanup** after successful upload.
+
+```
+
+`UrnItAnticheat-main/ROADMAP.md`:
+
+```md
+# UrnIt Anticheat – Roadmap
+
+**Canonical roadmap:** [Wiki → Roadmap](https://github.com/lorddummy/deadlock-anti-cheat/wiki). This file is a copy for the repo.
+
+## Current state
+
+| Feature | Status | Notes |
+|--------|--------|--------|
+| **Screenshots** | ✅ | Game window or full desktop PNG every 5 s (WIC); partial window title match (e.g. "Deadlock - …"). |
+| **Task list** | ✅ | Process name, PID, SessionID to TASK.TXT every 3 s. |
+| **PC/Hardware** | ✅ | OS user, Windows build from registry, CPU (brand, cores, vendor, cache, microarch), GPU (DXGI). |
+| **Keylogger** | ✅ | KeyDown/KeyUp to KEY_LOG.TXT (only when Deadlock window focused); timestamps in ms. |
+| **Discord upload** | ✅ | Webhook upload of REPORT, KEY_LOG, TASK, screenshots at session end. Upload status written to report. |
+| **Session end** | ✅ | Auto when Deadlock process exits; F12 still ends manually. Config: `AUTO_UPLOAD_ON_GAME_EXIT`. |
+| **Cheat list** | ✅ | Load from `cheat_list.txt` next to exe (or built-in list). Use `scripts/scrape_deadlock_cheats.py` to generate from elitepvpers. |
+
+---
+
+## Known issues
+
+**Fixed:** Task loop variable, duplicate flagged programs, null process name, invalid log handles, OS version from registry, log handles closed after upload.
+
+**Still known (low priority):** CPU block is x64-only (`#ifdef CPU_FEATURES_ARCH_X86_64`); on 32-bit/ARM no CPU details. `ConvertWideToString` can throw on invalid UTF-16 in process names (rare).
+
+---
+
+## Roadmap / next steps
+
+- **Config** – Intervals and options load from `config.txt` next to exe; no recompile needed.
+- **Macro hint** – Report includes "Possible macro/bot" when key interval variance is very low (configurable threshold).
+- **Session cleanup** – Optional: delete session folder after successful upload (`CLEANUP_AFTER_UPLOAD=1` in config.txt).
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/UrnItAnticheat.cpp`:
+
+```cpp
+
+#define BUILD_WINDOWS
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <Lmcons.h>
+#include <wtsapi32.h>
+#include <winhttp.h>
+#include <wincodec.h>
+#include <dxgi.h>
+
+#include <iostream>
+#include <vector>
+#include <chrono>
+#include <string>
+#include <thread>
+#include <future>
+#include <codecvt>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+
+#include <cpu_info/cpuinfo_x86.h>
+
+#pragma comment(lib, "Wtsapi32.lib")
+#pragma comment(lib, "winhttp.lib")
+#pragma comment(lib, "windowscodecs.lib")
+#pragma comment(lib, "dxgi.lib")
+
+// Tunable constants; load from config.txt next to exe if present, else these defaults.
+namespace Config {
+  float TASK_SCAN_INTERVAL_SEC    = 3.f;
+  float SCREENSHOT_INTERVAL_SEC  = 5.f;
+  float CPU_LOG_INTERVAL_SEC     = 0.5f;
+  float KEYLOG_INTERVAL_SEC      = 0.05f;
+  DWORD LOOP_SLEEP_MS            = 20;
+  size_t WEBHOOK_BATCH_SIZE      = 10;
+  DWORD WEBHOOK_RATE_LIMIT_MS    = 500;
+  DWORD UPLOAD_TIMEOUT_MS        = 30000;
+  size_t MAX_UPLOAD_FILE_BYTES   = 25u * 1024 * 1024;
+  size_t MAX_SCREENSHOT_UPLOAD_BYTES = 8u * 1024 * 1024;
+  bool   AUTO_UPLOAD_ON_GAME_EXIT = true;
+  unsigned UPLOAD_WAIT_TIMEOUT_SEC = 30;
+  bool   CLEANUP_AFTER_UPLOAD    = false;
+  float  MACRO_VARIANCE_THRESHOLD_MS2 = 500.f;  // below this variance of inter-key intervals (ms^2), report "possible macro"
+}
+
+static void LoadConfig(const std::string& exe_dir) {
+  std::ifstream f(exe_dir + "\\config.txt");
+  if (!f) return;
+  std::string line, key, val;
+  while (std::getline(f, line)) {
+    size_t eq = line.find('=');
+    if (eq == std::string::npos) continue;
+    key = line.substr(0, eq);
+    val = line.substr(eq + 1);
+    while (!key.empty() && (key.back() == ' ' || key.back() == '\t')) key.pop_back();
+    while (!val.empty() && (val.back() == ' ' || val.back() == '\r' || val.back() == '\n')) val.pop_back();
+    if (key == "TASK_SCAN_INTERVAL_SEC") Config::TASK_SCAN_INTERVAL_SEC = (float)atof(val.c_str());
+    else if (key == "SCREENSHOT_INTERVAL_SEC") Config::SCREENSHOT_INTERVAL_SEC = (float)atof(val.c_str());
+    else if (key == "CPU_LOG_INTERVAL_SEC") Config::CPU_LOG_INTERVAL_SEC = (float)atof(val.c_str());
+    else if (key == "KEYLOG_INTERVAL_SEC") Config::KEYLOG_INTERVAL_SEC = (float)atof(val.c_str());
+    else if (key == "LOOP_SLEEP_MS") Config::LOOP_SLEEP_MS = (DWORD)atoi(val.c_str());
+    else if (key == "AUTO_UPLOAD_ON_GAME_EXIT") Config::AUTO_UPLOAD_ON_GAME_EXIT = (val == "1" || val == "true" || val == "yes");
+    else if (key == "UPLOAD_WAIT_TIMEOUT_SEC") Config::UPLOAD_WAIT_TIMEOUT_SEC = (unsigned)atoi(val.c_str());
+    else if (key == "CLEANUP_AFTER_UPLOAD") Config::CLEANUP_AFTER_UPLOAD = (val == "1" || val == "true" || val == "yes");
+    else if (key == "MACRO_VARIANCE_THRESHOLD_MS2") Config::MACRO_VARIANCE_THRESHOLD_MS2 = (float)atof(val.c_str());
+  }
+}
+
+static bool LoadCheatList(const std::string& exe_dir, std::vector<std::string>& out) {
+  std::ifstream f(exe_dir + "\\cheat_list.txt");
+  if (!f) return false;
+  out.clear();
+  std::string line;
+  while (std::getline(f, line)) {
+    while (!line.empty() && (line.back() == '\r' || line.back() == '\n')) line.pop_back();
+    size_t i = 0; while (i < line.size() && (line[i] == ' ' || line[i] == '\t')) i++;
+    if (i >= line.size() || line[i] == '#') continue;
+    line = line.substr(i);
+    for (auto& c : line) c = (char)tolower((unsigned char)c);
+    out.push_back(line);
+  }
+  return out.size() >= 2;  // at least "cheats" and "performance"
+}
+
+// Format: category name ("cheats" or "performance") then one or more process names (e.g. "cheat.exe").
+// Matching is case-insensitive. Add known cheat/overlay exe names after "cheats", tools after "performance".
+std::vector<std::string> all_programs_list{
+  "cheats",
+  // "example_cheat.exe",
+  "performance",
+  // "msi afterburner.exe",
+};
+
+std::vector<std::string> found_cheating_programs;
+std::vector<std::string> found_performance_programs;
+
+// Returns elapsed time in seconds (matches Config::*_SEC intervals).
+inline float GetTimeDifference(std::chrono::high_resolution_clock::time_point time) {
+  return std::chrono::duration<float, std::ratio<1>>(
+    std::chrono::high_resolution_clock::now() - time).count();
+}
+
+inline std::string ConvertWideToString(std::wstring w_str) {
+  std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+  return converter.to_bytes(w_str);
+}; //ConvertWideToString
+
+// Keylogger: human-readable name for a virtual key (only keys we log).
+inline std::string VkToKeyName(int vk) {
+  if (vk >= VK_A && vk <= VK_Z) return std::string(1, (char)('A' + (vk - VK_A)));
+  if (vk >= VK_0 && vk <= VK_9) return std::string(1, (char)('0' + (vk - VK_0)));
+  switch (vk) {
+    case VK_SPACE:   return "Space";
+    case VK_RETURN:  return "Enter";
+    case VK_BACK:    return "Backspace";
+    case VK_TAB:     return "Tab";
+    case VK_ESCAPE:  return "Escape";
+    case VK_SHIFT:   return "Shift";
+    case VK_CONTROL: return "Ctrl";
+    case VK_MENU:    return "Alt";
+    case VK_LBUTTON: return "LMB";
+    case VK_RBUTTON: return "RMB";
+    case VK_MBUTTON: return "MMB";
+    default:         return "VK" + std::to_string(vk);
+  }
+}
+
+// Anticheat: only log input when game window is focused (evidence is in-game only, less privacy surface).
+// Set to empty string to log regardless of focus. Partial match so "Deadlock - Main Menu" or "Deadlock | 60 FPS" works.
+static const wchar_t* GAME_WINDOW_TITLE = L"Deadlock";
+
+static BOOL CALLBACK EnumFindWindowByTitleProc(HWND hwnd, LPARAM lParam) {
+  HWND* out = (HWND*)lParam;
+  wchar_t title[256] = {};
+  if (GetWindowTextW(hwnd, title, 256) > 0 && wcsstr(title, GAME_WINDOW_TITLE)) {
+    *out = hwnd;
+    return FALSE;  // stop enumeration
+  }
+  return TRUE;
+}
+
+// Finds game window: exact title match first, then any window whose title contains GAME_WINDOW_TITLE.
+static HWND FindGameWindow() {
+  if (!GAME_WINDOW_TITLE || GAME_WINDOW_TITLE[0] == L'\0') return NULL;
+  HWND h = FindWindowW(NULL, GAME_WINDOW_TITLE);
+  if (h) return h;
+  HWND found = NULL;
+  EnumWindows(EnumFindWindowByTitleProc, (LPARAM)&found);
+  return found;
+}
+
+inline bool IsGameWindowFocused() {
+  HWND game = FindGameWindow();
+  if (!game) return true;  // game not running: still log (e.g. launcher) or set title to match launcher
+  return GetForegroundWindow() == game;
+}
+
+// Accurate Windows version (GetVersionEx is deprecated and wrong on Win10/11). Returns e.g. "10 22H2 (build 19045)".
+static std::string GetWindowsVersionFromRegistry() {
+  HKEY key = NULL;
+  if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", 0, KEY_READ, &key) != ERROR_SUCCESS)
+    return "unknown";
+  char buf[256] = {};
+  DWORD sz = sizeof(buf) - 1;
+  std::string build = "unknown", display = "";
+  if (RegQueryValueExA(key, "CurrentBuild", NULL, NULL, (LPBYTE)buf, &sz) == ERROR_SUCCESS) build = buf;
+  sz = sizeof(buf) - 1; buf[0] = '\0';
+  if (RegQueryValueExA(key, "DisplayVersion", NULL, NULL, (LPBYTE)buf, &sz) == ERROR_SUCCESS) display = buf;
+  RegCloseKey(key);
+  if (display.empty()) return "build " + build;
+  return "build " + build + " (" + display + ")";
+}
+
+// --- Discord webhook upload (no server; players don't submit files manually) ---
+// Webhook URL is read from <exe_dir>/webhook.txt (first line). Create in Discord: Channel → Integrations → Webhooks.
+
+struct FilePart {
+  std::string filename;
+  std::vector<char> data;
+};
+
+static bool ReadWebhookUrl(const std::string& exe_dir, std::string& out_url) {
+  std::string path = exe_dir + "\\webhook.txt";
+  std::ifstream f(path);
+  if (!f) return false;
+  out_url.clear();
+  if (!std::getline(f, out_url)) return false;
+  while (!out_url.empty() && (out_url.back() == '\r' || out_url.back() == '\n')) out_url.pop_back();
+  return out_url.size() > 20 && out_url.find("discord.com") != std::string::npos;
+}
+
+static bool ReadFileToVector(const std::string& path, std::vector<char>& out) {
+  std::ifstream f(path, std::ios::binary | std::ios::ate);
+  if (!f) return false;
+  auto sz = f.tellg();
+  if (sz <= 0 || sz > (std::streamsize)Config::MAX_UPLOAD_FILE_BYTES) return false;
+  out.resize((size_t)sz);
+  f.seekg(0);
+  return (bool)f.read(out.data(), sz);
+}
+
+static void AppendMultipartField(std::vector<char>& body, const char* boundary,
+  const char* name, const void* data, size_t len) {
+  std::ostringstream head;
+  head << "\r\n--" << boundary << "\r\n"
+       << "Content-Disposition: form-data; name=\"" << name << "\"\r\n\r\n";
+  std::string h = head.str();
+  body.insert(body.end(), h.begin(), h.end());
+  const char* p = (const char*)data;
+  body.insert(body.end(), p, p + len);
+}
+
+static void AppendMultipartFile(std::vector<char>& body, const char* boundary,
+  const char* name, const std::string& filename, const void* data, size_t len, const char* content_type) {
+  std::ostringstream head;
+  head << "\r\n--" << boundary << "\r\n"
+       << "Content-Disposition: form-data; name=\"" << name << "\"; filename=\"" << filename << "\"\r\n"
+       << "Content-Type: " << content_type << "\r\n\r\n";
+  std::string h = head.str();
+  body.insert(body.end(), h.begin(), h.end());
+  const char* p = (const char*)data;
+  body.insert(body.end(), p, p + len);
+}
+
+static bool SendWebhookBatch(const std::string& webhook_url, const std::string& message_content,
+  const std::vector<FilePart>& files) {
+  std::string host, path;
+  {
+    size_t start = 0;
+    if (webhook_url.find("https://") == 0) start = 8;
+    else if (webhook_url.find("http://") == 0) start = 7;
+    size_t slash = webhook_url.find('/', start);
+    if (slash == std::string::npos) return false;
+    host = webhook_url.substr(start, slash - start);
+    path = webhook_url.substr(slash);
+  }
+  const char* boundary = "----UrnItWebhookBoundary";
+  std::vector<char> body;
+  std::string escaped;
+  for (char c : message_content) {
+    if (c == '"') escaped += "\\\"";
+    else if (c == '\\') escaped += "\\\\";
+    else escaped += c;
+  }
+  std::string payload_json = "{\"content\":\"" + escaped + "\"}";
+  AppendMultipartField(body, boundary, "payload_json", payload_json.data(), payload_json.size());
+  for (size_t i = 0; i < files.size(); i++) {
+    std::string name = "file" + std::to_string(i + 1);
+    const char* ct = "application/octet-stream";
+    if (files[i].filename.size() >= 4) {
+      size_t pos = files[i].filename.size() - 4;
+      if (files[i].filename.compare(pos, 4, ".png") == 0) ct = "image/png";
+      else if (files[i].filename.compare(pos, 4, ".bmp") == 0) ct = "image/bmp";
+    }
+    AppendMultipartFile(body, boundary, name.c_str(), files[i].filename, files[i].data.data(), files[i].data.size(), ct);
+  }
+  {
+    std::string tail = "\r\n--";
+    tail += boundary;
+    tail += "--\r\n";
+    body.insert(body.end(), tail.begin(), tail.end());
+  }
+  std::wstring whost(host.begin(), host.end());
+  std::wstring wpath(path.begin(), path.end());
+  HINTERNET session = WinHttpOpen(L"UrnItAnticheat/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, NULL, NULL, 0);
+  if (!session) return false;
+  WinHttpSetTimeouts(session, Config::UPLOAD_TIMEOUT_MS, Config::UPLOAD_TIMEOUT_MS, Config::UPLOAD_TIMEOUT_MS, Config::UPLOAD_TIMEOUT_MS);
+  HINTERNET connect = WinHttpConnect(session, whost.c_str(), INTERNET_DEFAULT_HTTPS_PORT, 0);
+  if (!connect) { WinHttpCloseHandle(session); return false; }
+  HINTERNET request = WinHttpOpenRequest(connect, L"POST", wpath.c_str(), NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_SECURE);
+  if (!request) { WinHttpCloseHandle(connect); WinHttpCloseHandle(session); return false; }
+  std::wstring ctheader = L"Content-Type: multipart/form-data; boundary=";
+  std::wstring wboundary(boundary, boundary + strlen(boundary));
+  ctheader += wboundary;
+  WinHttpAddRequestHeaders(request, ctheader.c_str(), (DWORD)ctheader.size(), WINHTTP_ADDREQ_FLAG_ADD);
+  BOOL sent = WinHttpSendRequest(request, WINHTTP_NO_ADDITIONAL_HEADERS, 0, body.data(), (DWORD)body.size(), (DWORD)body.size(), 0);
+  if (!sent) { WinHttpCloseHandle(request); WinHttpCloseHandle(connect); WinHttpCloseHandle(session); return false; }
+  BOOL recv = WinHttpReceiveResponse(request, NULL);
+  if (!recv) { WinHttpCloseHandle(request); WinHttpCloseHandle(connect); WinHttpCloseHandle(session); return false; }
+  DWORD status = 0, len = sizeof(status);
+  WinHttpQueryHeaders(request, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER, NULL, &status, &len, NULL);
+  WinHttpCloseHandle(request);
+  WinHttpCloseHandle(connect);
+  WinHttpCloseHandle(session);
+  return (status >= 200 && status < 300);
+}
+
+static std::string ReadPlayerId(const std::string& exe_dir) {
+  std::string path = exe_dir + "\\player_id.txt";
+  std::ifstream f(path);
+  if (!f) return "";
+  std::string line;
+  if (!std::getline(f, line)) return "";
+  while (!line.empty() && (line.back() == '\r' || line.back() == '\n')) line.pop_back();
+  return line;
+}
+
+// Save 24-bit BGR DIB (bottom-up) as PNG via WIC. Reduces size vs BMP for faster upload.
+static bool SaveDibAsPng(UINT width, UINT height, UINT stride_src, const BYTE* bgr_data, const std::string& filepath) {
+  static bool co_init = false;
+  if (!co_init) {
+    if (FAILED(CoInitializeEx(NULL, COINIT_MULTITHREADED))) return false;
+    co_init = true;
+  }
+  IWICImagingFactory* factory = NULL;
+  if (FAILED(CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory)))) return false;
+  IWICBitmap* bitmap = NULL;
+  HRESULT hr = factory->CreateBitmap(width, height, GUID_WICPixelFormat24bppBGR, WICBitmapCacheOnLoad, &bitmap);
+  if (FAILED(hr)) { factory->Release(); return false; }
+  WICRect rect = { 0, 0, (INT)width, (INT)height };
+  IWICBitmapLock* lock = NULL;
+  hr = bitmap->Lock(&rect, WICBitmapLockWrite, &lock);
+  if (FAILED(hr)) { bitmap->Release(); factory->Release(); return false; }
+  UINT stride_dst = 0;
+  BYTE* dst = NULL;
+  UINT buf_size = 0;
+  hr = lock->GetStride(&stride_dst);
+  if (SUCCEEDED(hr)) hr = lock->GetDataPointer(&buf_size, &dst);
+  lock->Release();
+  if (FAILED(hr) || !dst) { bitmap->Release(); factory->Release(); return false; }
+  for (UINT y = 0; y < height; y++) {
+    const BYTE* src_row = bgr_data + (height - 1 - y) * stride_src;
+    memcpy(dst + y * stride_dst, src_row, (size_t)width * 3);
+  }
+  std::wstring wpath;
+  int n = MultiByteToWideChar(CP_ACP, 0, filepath.c_str(), (int)filepath.size(), NULL, 0);
+  if (n <= 0) { bitmap->Release(); factory->Release(); return false; }
+  wpath.resize(n);
+  MultiByteToWideChar(CP_ACP, 0, filepath.c_str(), (int)filepath.size(), &wpath[0], n);
+  IWICStream* stream = NULL;
+  hr = factory->CreateStream(&stream);
+  if (FAILED(hr)) { bitmap->Release(); factory->Release(); return false; }
+  hr = stream->InitializeFromFilename(wpath.c_str(), GENERIC_WRITE);
+  if (FAILED(hr)) { stream->Release(); bitmap->Release(); factory->Release(); return false; }
+  IWICBitmapEncoder* encoder = NULL;
+  hr = factory->CreateEncoder(GUID_ContainerFormatPng, NULL, &encoder);
+  if (FAILED(hr)) { stream->Release(); bitmap->Release(); factory->Release(); return false; }
+  hr = encoder->Initialize(stream, WICBitmapEncoderNoCache);
+  if (FAILED(hr)) { encoder->Release(); stream->Release(); bitmap->Release(); factory->Release(); return false; }
+  IWICBitmapFrameEncode* frame = NULL;
+  IPropertyBag2* props = NULL;
+  hr = encoder->CreateNewFrame(&frame, &props);
+  if (FAILED(hr)) { encoder->Release(); stream->Release(); bitmap->Release(); factory->Release(); return false; }
+  if (props) props->Release();
+  hr = frame->Initialize(NULL);
+  if (FAILED(hr)) { frame->Release(); encoder->Release(); stream->Release(); bitmap->Release(); factory->Release(); return false; }
+  hr = frame->SetSize(width, height);
+  if (SUCCEEDED(hr)) hr = frame->WriteSource(bitmap, NULL);
+  if (SUCCEEDED(hr)) hr = frame->Commit();
+  frame->Release();
+  if (SUCCEEDED(hr)) hr = encoder->Commit();
+  encoder->Release();
+  stream->Release();
+  bitmap->Release();
+  factory->Release();
+  return SUCCEEDED(hr);
+}
+
+// Returns true if all batches uploaded successfully. Sends a final status message to Discord.
+static bool UploadSessionToDiscord(const std::string& exe_dir, const std::string& session_dir) {
+  std::string webhook_url;
+  if (!ReadWebhookUrl(exe_dir, webhook_url)) return false;
+  std::string player_label = ReadPlayerId(exe_dir);
+  std::vector<FilePart> all;
+  const std::string names[] = { "REPORT.TXT", "KEY_LOG.TXT", "TASK.TXT" };
+  for (const auto& n : names) {
+    FilePart fp;
+    fp.filename = n;
+    if (ReadFileToVector(session_dir + n, fp.data)) all.push_back(std::move(fp));
+  }
+  WIN32_FIND_DATAA fd;
+  for (const char* ext : { "*.png", "*.bmp" }) {
+    HANDLE h = FindFirstFileA((session_dir + ext).c_str(), &fd);
+    if (h != INVALID_HANDLE_VALUE) {
+      do {
+        if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+          FilePart fp;
+          fp.filename = fd.cFileName;
+          if (ReadFileToVector(session_dir + fd.cFileName, fp.data)) {
+            if (fp.data.size() <= Config::MAX_SCREENSHOT_UPLOAD_BYTES)
+              all.push_back(std::move(fp));
+          }
+        }
+      } while (FindNextFileA(h, &fd));
+      FindClose(h);
+    }
+  }
+  bool all_ok = true;
+  for (size_t i = 0; i < all.size(); i += Config::WEBHOOK_BATCH_SIZE) {
+    if (i > 0) Sleep(Config::WEBHOOK_RATE_LIMIT_MS);
+    size_t end = (std::min)(i + Config::WEBHOOK_BATCH_SIZE, all.size());
+    std::vector<FilePart> batch(all.begin() + i, all.begin() + end);
+    std::string msg = "UrnIt Anticheat session (part " + std::to_string((i / Config::WEBHOOK_BATCH_SIZE) + 1) + ")";
+    if (!player_label.empty()) msg = "Player: " + player_label + " – " + msg;
+    bool ok = SendWebhookBatch(webhook_url, msg, batch);
+    if (!ok) { Sleep(1000); ok = SendWebhookBatch(webhook_url, msg, batch); }
+    if (!ok) all_ok = false;
+  }
+  std::string status_msg = all_ok ? "UrnIt upload: completed" : "UrnIt upload: one or more batches failed";
+  if (!player_label.empty()) status_msg = "Player: " + player_label + " – " + status_msg;
+  SendWebhookBatch(webhook_url, status_msg, {});  // no files; just the status line
+  return all_ok;
+}
+
+struct Program_Flags {
+  enum CHEATING_POTENTIAL : uint8_t {
+    VERY_UNLIKELY = 0,
+    UNLIKELY,
+    MODERATE,
+    LIKELY,
+    VERY_LIKELY
+  }; //CHEATING_POTENTIAL ENUM
+
+  uint8_t cheating_potential    : 3;
+  uint8_t deadlock_repeat_flag  : 1;
+}; //program_flags
+
+time_t tt;
+std::string local_time;
+std::string file_time;
+
+void UpdateTime() {
+  time(&tt);
+  local_time = asctime(localtime(&tt));
+  local_time.erase(local_time.end()-1);
+
+  file_time = local_time;
+  for (auto& c : file_time) {
+    if (c == ':') c = ';';
+  }; //For every char
+}; //UpdateTime
+
+inline int64_t FileTimeToInt64(FILETIME& ft) {
+  ULARGE_INTEGER foo;
+  foo.LowPart = ft.dwLowDateTime;
+  foo.HighPart = ft.dwHighDateTime;
+  return (foo.QuadPart);
+}; //FileTimeToInt64
+
+int main()
+{
+  Program_Flags prgrm_flags{};
+
+  std::string task_str;
+  std::string keylog_str;
+  std::string report_str;
+  std::string urn_acii;
+
+  HANDLE task_log_file   = INVALID_HANDLE_VALUE;
+  HANDLE report_log_file = INVALID_HANDLE_VALUE;
+  HANDLE key_log_file    = INVALID_HANDLE_VALUE;
+
+  std::string file_directory;
+  std::string exe_directory;  // folder containing .exe (for webhook.txt)
+
+  uint8_t cpu_cores;
+
+  bool session_ok = true;
+  {
+    char dir_path[MAX_PATH];
+    GetModuleFileNameA(NULL, dir_path, MAX_PATH);
+    auto dir_str = std::string(dir_path);
+    file_directory = dir_str.substr(0, dir_str.find_last_of('\\'));
+    exe_directory = file_directory;
+
+    LoadConfig(exe_directory);
+    std::vector<std::string> loaded_cheats;
+    if (LoadCheatList(exe_directory, loaded_cheats))
+      all_programs_list = std::move(loaded_cheats);
+
+    UpdateTime();
+
+    file_directory += '\\';
+    file_directory += file_time;
+    file_directory += '\\';
+    if (!CreateDirectoryA(file_directory.c_str(), NULL) && GetLastError() != ERROR_ALREADY_EXISTS)
+      session_ok = false;
+    if (session_ok) {
+      task_log_file   = CreateFileA((file_directory + "TASK.TXT").c_str(), GENERIC_WRITE | GENERIC_READ, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+      report_log_file = CreateFileA((file_directory + "REPORT.TXT").c_str(), GENERIC_WRITE | GENERIC_READ, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+      key_log_file    = CreateFileA((file_directory + "KEY_LOG.TXT").c_str(), GENERIC_WRITE | GENERIC_READ, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+      if (task_log_file == INVALID_HANDLE_VALUE || report_log_file == INVALID_HANDLE_VALUE || key_log_file == INVALID_HANDLE_VALUE)
+        session_ok = false;
+    }
+
+    if (session_ok) {
+    urn_acii = R"(
+                                 _   _                               
+                     _ x_ ._____.._t_                          
+                    + ,,AJNNNXbqbLG._ u                        
+                  :_,EHNNNNNNNNNXro7OA___                      
+                 . GHHNNNNNNNNNNELeA+..,_q                     
+                z_eHHHMMMLCGMSBHHKQ1QKHD_n                     
+                 _HHIHCEMNMIBACCCFMVX5y__q                     
+          ______t.  ,ACCCCHHNMSVXYXXXQHHX y.                   
+        _t         BBABBAABFHGDAGMMEBVadZ-_.                   
+        _p       __CCCCCDHHINMMMMGAPenaBFA_                    
+          _+ _    .AAAAAAABOCCCCVCCCCREPKC,     :              
+           t_      CICCCCCCCGOCDGCCCPCCLLE.  _  .              
+            :_.__  CCCCCCCCSCCCCCHCFCCCKNK_. ____ k            
+            p     _BJCCCCCCCGCCCCMCNCCCMNE. +__ _,x            
+           _,_.._+.,NCCCCCDGCCCCCCFCCCGRMC,    _r              
+             qfjihxxCDDDDDDIDDDDCCDPBCH2KE_     ._             
+          _ :rvvxvq_.OCCCCDCCDCCCDCCDCHcH+ ttttty_             
+         _:___  __ ._,CDCCECCOFCKCCCCHJSJ_ _ ___._j            
+           :          -CKCJICHCCCCGKJJ0A_        l.            
+          ___     ._____BOCCCCCDCCCBH5K,__ . __ ..             
+         _          _   .ACCCCCCCCHECHt  D. ,_ _+              
+         ;__        _._.__,KHAAAAJ97JK2._ABMI__;               
+         __ . vwvww __+____.8ALJC__ _.HWE89j___                
+           t        __.BHAWWB,_    _  ,98A. l.                 
+          _+.      _f .DW__            _h__+_                  
+              _     ,._JF_we9SRRRRRRSWdu..___,                 
+                    _+-SBCASSSSSSSSSSSSSSSSx, ,                
+                    _v. __             __  .i_                 
+                              _______                          
+
+                                                               
+    )"; //urn_acii
+
+
+    report_str += urn_acii;
+    task_str += urn_acii;
+    keylog_str += urn_acii;
+
+    report_str += "\n";
+    task_str += "\n";
+    keylog_str += "\n";
+
+    report_str += "URN YOUR WINS - EAT THE APPLE\n";
+    task_str += "URN YOUR WINS - EAT THE APPLE\n";
+    keylog_str += "URN YOUR WINS - EAT THE APPLE\n";
+
+    report_str += "PERSONNEL LOGGING BEGIN\n";
+    keylog_str += "Format: +<ms_since_session_start> KeyDown|KeyUp <key> (for anticheat timing analysis)\n";
+
+    WriteFile(report_log_file, report_str.c_str(), report_str.size(), NULL, NULL);
+    WriteFile(key_log_file, keylog_str.c_str(), keylog_str.size(), NULL, NULL);
+    WriteFile(task_log_file, task_str.c_str(), task_str.size(), NULL, NULL);
+    }
+  }; //Library Initialization
+
+  if (session_ok) {
+  GetDiscordInformation: {
+    report_str = "\n";
+    report_str += "\n";
+  }; //GetDiscordInformation
+
+  GetSteamInformation: {
+    report_str = "\n";
+    report_str += "\n";
+  }; //GetSteamInformation
+
+  GetOSInformation: {
+    report_str = "\n";
+
+    CHAR username[256] = {};
+    DWORD username_len = 256;
+    GetUserNameA(username, &username_len);
+
+    report_str += "Client Version: UrnItAnticheat 1.0\n";
+    std::string player_id = ReadPlayerId(exe_directory);
+    if (!player_id.empty()) report_str += "Player ID: " + player_id + "\n";
+    report_str += "Operating System Information: \n";
+    report_str += "User Name: " + std::string(username) + "\n";
+    report_str += "Windows: " + GetWindowsVersionFromRegistry() + "\n";
+    report_str += "\n";
+
+    WriteFile(report_log_file, report_str.c_str(), report_str.size(), NULL, NULL);
+  }; //GetOSInformation
+
+  GetCPUInformation: {
+    report_str = "\n";
+
+    #ifdef CPU_FEATURES_ARCH_X86_64
+      auto cpu_info              = cpu_features::GetX86Info();
+      auto cpu_cache_info        = cpu_features::GetX86CacheInfo();
+      auto cpu_microarchitecture = cpu_features::GetX86Microarchitecture(&cpu_info);
+      cpu_cores                  = std::thread::hardware_concurrency();
+
+      report_str +="CPU Model: " + std::string(cpu_info.brand_string) + "\n";
+      report_str +="Logical Core Count: " + std::to_string(cpu_cores) + "\n";
+      report_str +="Vendor: " + std::string(cpu_info.vendor) + "\n";
+      report_str +="Cache Count: " + std::to_string(cpu_cache_info.size) + "\n";
+
+      switch (cpu_microarchitecture) {
+        using namespace cpu_features;
+      case INTEL_CORE: report_str +="Microarchitecture: INTEL CORE"; break;
+      case INTEL_ADL: report_str +="Microarchitecture: Alder Lake"; break;
+      case INTEL_ATOM_BNL: report_str +="Microarchitecture: Bonnel"; break;
+      case INTEL_ATOM_GMT: report_str +="Microarchitecture: Goldmont"; break;
+      case INTEL_ATOM_GMT_PLUS: report_str +="Microarchitecture: Goldmont Plus"; break;
+      case INTEL_ATOM_SMT: report_str +="Microarchitecture: Silvermont"; break;
+      case INTEL_ATOM_TMT: report_str +="Microarchitecture: Tremont"; break;
+      case INTEL_BDW: report_str +="Microarchitecture: Broadwell"; break;
+      case INTEL_CCL: report_str +="Microarchitecture: Cascade Lake"; break;
+      case INTEL_CFL: report_str +="Microarchitecture: Coffee Lake"; break;
+      case INTEL_CML: report_str +="Microarchitecture: Comet Lake"; break;
+      case INTEL_CNL: report_str +="Microarchitecture: Cannon Lake"; break;
+      case INTEL_HSW: report_str +="Microarchitecture: Haswell"; break;
+      case INTEL_ICL: report_str +="Microarchitecture: Ice Lake"; break;
+      case INTEL_IVB: report_str +="Microarchitecture: Ivy Bridge"; break;
+      case INTEL_KBL: report_str +="Microarchitecture: Kirby Lake"; break;
+      case INTEL_NHM: report_str +="Microarchitecture: Nahelem"; break;
+      case INTEL_RCL: report_str +="Microarchitecture: Rocket Lake"; break;
+      case INTEL_RPL: report_str +="Microarchitecture: Raptor_Lake"; break;
+      case INTEL_SKL: report_str +="Microarchitecture: Sky Lake"; break;
+      case INTEL_SNB: report_str +="Microarchitecture: Sandy Bridge"; break;
+      case INTEL_SPR: report_str +="Microarchitecture: Saphire Rapids"; break;
+      case INTEL_TGL: report_str +="Microarchitecture: Tiger Lake"; break;
+      case INTEL_WHL: report_str +="Microarchitecture: Whiskey Lake"; break;
+      case INTEL_WSM: report_str +="Microarchitecture: Westmere"; break;
+
+      case ZHAOXIN_LUJIAZUI: report_str +="Microarchitecture: LUJIAZUI"; break;
+      case ZHAOXIN_WUDAOKOU: report_str +="Microarchitecture: WUDAOKOU"; break;
+      case ZHAOXIN_YONGFENG: report_str +="Microarchitecture: YONGFENG"; break;
+      case ZHAOXIN_ZHANGJIANG: report_str +="Microarchitecture: ZHANGJIANG"; break;
+
+      case AMD_K12: report_str +="Microarchitecture: K12"; break;
+      case AMD_BOBCAT: report_str +="Microarchitecture: Bobcat"; break;
+      case AMD_BULLDOZER: report_str +="Microarchitecture: Bulldozer"; break;
+      case AMD_EXCAVATOR: report_str +="Microarchitecture: Excavator"; break;
+      case AMD_HAMMER: report_str +="Microarchitecture: Hammer"; break;
+      case AMD_JAGUAR: report_str +="Microarchitecture: Jaguar"; break;
+      case AMD_PILEDRIVER: report_str +="Microarchitecture: Piledriver"; break;
+      case AMD_PUMA: report_str +="Microarchitecture: Puma"; break;
+      case AMD_STREAMROLLER: report_str +="Microarchitecture: Steamroller"; break;
+      case AMD_ZEN: report_str +="Microarchitecture: Zen"; break;
+      case AMD_ZEN2: report_str +="Microarchitecture: Zen 2"; break;
+      case AMD_ZEN3: report_str +="Microarchitecture: Zen 3"; break;
+      case AMD_ZEN4: report_str +="Microarchitecture: Zen 4"; break;
+      case AMD_ZEN_PLUS: report_str +="Microarchitecture: Zen Plus"; break;
+      case X86_UNKNOWN: report_str += "Microarchitecture: Unknown"; break;
+      }; //Microarchitecture
+      report_str += "\n";
+    #endif  
+
+    WriteFile(report_log_file, report_str.c_str(), report_str.size(), NULL, NULL);
+  }; //GetCPUInformation
+
+  GetGPUInformation: {
+    report_str = "\n";
+    IDXGIFactory* dxgi_factory = NULL;
+    if (SUCCEEDED(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&dxgi_factory)) && dxgi_factory) {
+      IDXGIAdapter* adapter = NULL;
+      if (SUCCEEDED(dxgi_factory->EnumAdapters(0, &adapter)) && adapter) {
+        DXGI_ADAPTER_DESC desc = {};
+        if (SUCCEEDED(adapter->GetDesc(&desc))) {
+          char gpu_name[128] = {};
+          WideCharToMultiByte(CP_UTF8, 0, desc.Description, -1, gpu_name, sizeof(gpu_name), NULL, NULL);
+          report_str += "GPU: ";
+          report_str += gpu_name;
+          report_str += "\n";
+        }
+        adapter->Release();
+      }
+      dxgi_factory->Release();
+    }
+    if (report_log_file != INVALID_HANDLE_VALUE)
+      WriteFile(report_log_file, report_str.c_str(), (DWORD)report_str.size(), NULL, NULL);
+  }; //GetGPUInformation
+
+  GetMonitorInformation: {
+
+  }; //GetMonitorInformation
+
+  FlushFileBuffers(report_log_file);
+  FlushFileBuffers(task_log_file);
+  FlushFileBuffers(key_log_file);
+
+  report_str = "\n";
+  report_str += "BEGINNING GAME LOGGING\n";
+  WriteFile(report_log_file, report_str.c_str(), report_str.size(), NULL, NULL);
+
+  // Anticheat keylog: high-res timestamps (ms since session) for macro/bot analysis; KeyDown+KeyUp for hold duration.
+  const auto session_start = std::chrono::high_resolution_clock::now();
+  static std::vector<int64_t> key_down_timestamps;  // for macro variance check at session end
+  static const int LOGGED_KEYS[] = {
+    VK_A, VK_B, VK_C, VK_D, VK_E, VK_F, VK_G, VK_H, VK_I, VK_J, VK_K, VK_L, VK_M,
+    VK_N, VK_O, VK_P, VK_Q, VK_R, VK_S, VK_T, VK_U, VK_V, VK_W, VK_X, VK_Y, VK_Z,
+    VK_0, VK_1, VK_2, VK_3, VK_4, VK_5, VK_6, VK_7, VK_8, VK_9,
+    VK_SPACE, VK_RETURN, VK_BACK, VK_TAB, VK_ESCAPE,
+    VK_SHIFT, VK_CONTROL, VK_MENU,
+    VK_LBUTTON, VK_RBUTTON, VK_MBUTTON
+  };
+  while (true) {
+    static std::chrono::high_resolution_clock::time_point last_time_point_task_scan = std::chrono::high_resolution_clock::now();
+    static std::chrono::high_resolution_clock::time_point last_time_point_screenshot = std::chrono::high_resolution_clock::now();
+    static std::chrono::high_resolution_clock::time_point last_time_point_cpu = std::chrono::high_resolution_clock::now();
+    static std::chrono::high_resolution_clock::time_point last_time_point_keylog = std::chrono::high_resolution_clock::now();
+    static bool key_was_down[256] = {};
+
+    UpdateTime();
+
+    KeyLogging: {
+      if (GetAsyncKeyState(VK_F12) & 0x8000) {
+        break;
+      }
+      // Only log while game window is focused (in-game evidence only).
+      if (!IsGameWindowFocused()) {
+        last_time_point_keylog = std::chrono::high_resolution_clock::now();
+        /* skip keylog this tick */
+      }
+      else if (GetTimeDifference(last_time_point_keylog) >= Config::KEYLOG_INTERVAL_SEC) {
+        auto now = std::chrono::high_resolution_clock::now();
+        int64_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - session_start).count();
+        keylog_str.clear();
+        for (int vk : LOGGED_KEYS) {
+          bool down = (GetAsyncKeyState(vk) & 0x8000) != 0;
+          if (down && !key_was_down[vk]) {
+            keylog_str += "+" + std::to_string(ms) + " KeyDown " + VkToKeyName(vk) + "\n";
+            key_was_down[vk] = true;
+            key_down_timestamps.push_back(ms);
+          }
+          else if (!down && key_was_down[vk]) {
+            keylog_str += "+" + std::to_string(ms) + " KeyUp " + VkToKeyName(vk) + "\n";
+            key_was_down[vk] = false;
+          }
+          else if (!down)
+            key_was_down[vk] = false;
+        }
+        if (!keylog_str.empty()) {
+          WriteFile(key_log_file, keylog_str.c_str(), (DWORD)keylog_str.size(), NULL, NULL);
+        }
+        last_time_point_keylog = now;
+      }
+    }; //KeyLogging
+
+    CPULoadScanning: 
+    if (GetTimeDifference(last_time_point_cpu) >= Config::CPU_LOG_INTERVAL_SEC) {
+      FILETIME idle_time, kernel_time, user_time;
+      static uint64_t prev_total = 0;
+      static uint64_t prev_idle = 0;
+      static uint64_t prev_user = 0;
+
+      GetSystemTimes(&idle_time, &kernel_time, &user_time);
+
+      uint64_t int_idle = FileTimeToInt64(idle_time);
+      uint64_t int_kernel = FileTimeToInt64(kernel_time);
+      uint64_t int_user = FileTimeToInt64(user_time);
+      uint64_t int_total = int_kernel + int_user;
+
+      if (int_total != prev_total && prev_total != 0) {
+        double headroom = (double)(int_idle - prev_idle) / (double)(int_total - prev_total);
+        double load = (1.0 - headroom) * 100.0;
+        report_str = "\n";
+        report_str += local_time;
+        report_str += " CPU Load Logged at " + std::to_string(load) + "%\n";
+        WriteFile(report_log_file, report_str.c_str(), report_str.size(), NULL, NULL);
+      }
+
+      prev_total = int_total;
+      prev_idle = int_idle;
+      prev_user = int_user;
+      last_time_point_cpu = std::chrono::high_resolution_clock::now();
+    }
+
+    TaskManagerScanning: 
+    if (GetTimeDifference(last_time_point_task_scan) >= Config::TASK_SCAN_INTERVAL_SEC) {
+      report_str = "\n";
+      task_str = "\n";
+      task_str +=   local_time;
+      task_str += " Tasks Logged \n";
+      task_str += " Process | ProcessID | SessionID \n\n";
+      
+      WTS_PROCESS_INFO* wpi_ptr = NULL;
+      DWORD dwProcCount = 0;
+
+      if (WTSEnumerateProcesses(WTS_CURRENT_SERVER_HANDLE, NULL, 1, &wpi_ptr, &dwProcCount)) {
+        uint8_t deadlock_flag = 0;
+
+        for (DWORD i = 0; i < dwProcCount; i++) {
+          if (!wpi_ptr[i].pProcessName) continue;
+          std::wstring process_wstr(wpi_ptr[i].pProcessName);
+          task_str += ConvertWideToString(process_wstr) + " | ";
+          for (auto& wc : process_wstr) wc = towlower(wc);
+          std::string process_str = ConvertWideToString(process_wstr);
+          task_str += std::to_string(wpi_ptr[i].ProcessId) + " | ";
+          task_str += std::to_string(wpi_ptr[i].SessionId) + "\n";
+
+          uint8_t prgrm_flag = 0;
+          if (process_str == "deadlock.exe") ++deadlock_flag;
+          for (const auto& prgrm : all_programs_list) {
+            if (prgrm == "cheats") { ++prgrm_flag; continue; }
+            if (prgrm == "performance") { ++prgrm_flag; continue; }
+            if (prgrm_flag == 1 && prgrm == process_str) {
+              if (std::find(found_cheating_programs.begin(), found_cheating_programs.end(), prgrm) == found_cheating_programs.end())
+                found_cheating_programs.push_back(prgrm);
+            }
+            if (prgrm_flag == 2 && prgrm == process_str) {
+              if (std::find(found_performance_programs.begin(), found_performance_programs.end(), prgrm) == found_performance_programs.end())
+                found_performance_programs.push_back(prgrm);
+            }
+          }
+        }
+
+        if (deadlock_flag > 1) prgrm_flags.deadlock_repeat_flag = 1;
+        // Auto-end session when game process exits (upload runs without needing F12)
+        if (Config::AUTO_UPLOAD_ON_GAME_EXIT) {
+          static bool game_running_prev = false;
+          bool game_running_now = (deadlock_flag > 0);
+          if (game_running_prev && !game_running_now)
+            break;
+          game_running_prev = game_running_now;
+        }
+        last_time_point_task_scan = std::chrono::high_resolution_clock::now();
+      }; //If Process Search Successful
+
+      if (wpi_ptr) WTSFreeMemory(wpi_ptr);
+
+      report_str += local_time;
+      report_str += " Tasks Logged \n";
+
+      WriteFile(report_log_file, report_str.c_str(), report_str.size(), NULL, NULL);
+      WriteFile(task_log_file, task_str.c_str(), task_str.size(), NULL, NULL);
+    }; //TaskManagerScanning
+
+    Screenshots: 
+    if (GetTimeDifference(last_time_point_screenshot) >= Config::SCREENSHOT_INTERVAL_SEC) {
+      report_str = "\n";
+      
+      static BITMAPINFOHEADER bitmap_info_header;
+      static BITMAPINFO bitmap_info;
+      static HGDIOBJ temporary_bitmap;
+      static HBITMAP final_bitmap;
+      static BITMAP desktop_bitmap;
+      static HDC desktop_handle, desktop_memory_handle;
+      static LONG width, height;
+      static BYTE* bitmap_data = NULL;
+      static DWORD bitmap_size;
+      INT x, y;
+
+      desktop_handle = GetDC(NULL);
+      HWND game_hwnd = FindGameWindow();
+      if (game_hwnd) {
+        RECT r = {};
+        if (GetWindowRect(game_hwnd, &r) && (r.right > r.left) && (r.bottom > r.top)) {
+          x = r.left;
+          y = r.top;
+          width = r.right - r.left;
+          height = r.bottom - r.top;
+          report_str += "Screen Shot (game window) at " + file_time + "\n";
+        } else {
+          x = GetSystemMetrics(SM_XVIRTUALSCREEN);
+          y = GetSystemMetrics(SM_YVIRTUALSCREEN);
+          temporary_bitmap = GetCurrentObject(desktop_handle, OBJ_BITMAP);
+          GetObjectW(temporary_bitmap, sizeof(BITMAP), &desktop_bitmap);
+          width = desktop_bitmap.bmWidth;
+          height = desktop_bitmap.bmHeight;
+          DeleteObject(temporary_bitmap);
+          report_str += "Screen Shot Taken at " + file_time + "\n";
+        }
+      } else {
+        x = GetSystemMetrics(SM_XVIRTUALSCREEN);
+        y = GetSystemMetrics(SM_YVIRTUALSCREEN);
+        temporary_bitmap = GetCurrentObject(desktop_handle, OBJ_BITMAP);
+        GetObjectW(temporary_bitmap, sizeof(BITMAP), &desktop_bitmap);
+        width = desktop_bitmap.bmWidth;
+        height = desktop_bitmap.bmHeight;
+        DeleteObject(temporary_bitmap);
+        report_str += "Screen Shot Taken at " + file_time + "\n";
+      }
+
+      ZeroMemory(&bitmap_info_header, sizeof(BITMAPINFOHEADER));
+      ZeroMemory(&bitmap_info, sizeof(BITMAPINFO));
+
+      bitmap_info_header.biSize = sizeof(BITMAPINFOHEADER);
+      bitmap_info_header.biBitCount = 24;
+      bitmap_info_header.biCompression = BI_RGB;
+      bitmap_info_header.biPlanes = 1;
+      bitmap_info_header.biWidth = width;
+      bitmap_info_header.biHeight = height;
+      bitmap_info.bmiHeader = bitmap_info_header;
+      UINT stride_src = ((width * 3 + 31) & ~31) / 8;
+      bitmap_size = stride_src * height;
+
+      desktop_memory_handle = CreateCompatibleDC(desktop_handle);
+      final_bitmap = CreateDIBSection(desktop_handle, &bitmap_info, DIB_RGB_COLORS, (VOID**)&bitmap_data, NULL, 0);
+      SelectObject(desktop_memory_handle, final_bitmap);
+      BitBlt(desktop_memory_handle, 0, 0, width, height, desktop_handle, x, y, SRCCOPY);
+
+      std::string png_path = file_directory + file_time + ".png";
+      if (!SaveDibAsPng((UINT)width, (UINT)height, stride_src, bitmap_data, png_path)) {
+        report_str += "Screenshot Error: PNG encode failed\n";
+        WriteFile(report_log_file, report_str.c_str(), report_str.size(), NULL, NULL);
+
+        DeleteDC(desktop_memory_handle);
+        ReleaseDC(NULL, desktop_handle);
+        DeleteObject(final_bitmap);
+
+        last_time_point_screenshot = std::chrono::high_resolution_clock::now();
+        continue;
+      }
+
+      DeleteDC(desktop_memory_handle);
+      ReleaseDC(NULL, desktop_handle);
+      DeleteObject(final_bitmap);
+
+      last_time_point_screenshot = std::chrono::high_resolution_clock::now();
+      WriteFile(report_log_file, report_str.c_str(), report_str.size(), NULL, NULL);
+    }; //Screenshots
+
+    Sleep(Config::LOOP_SLEEP_MS);
+  }; //while true
+
+  } // session_ok
+
+  {
+    if (report_log_file != INVALID_HANDLE_VALUE) FlushFileBuffers(report_log_file);
+    if (task_log_file != INVALID_HANDLE_VALUE) FlushFileBuffers(task_log_file);
+    if (key_log_file != INVALID_HANDLE_VALUE) FlushFileBuffers(key_log_file);
+
+    report_str = "\nSESSION SUMMARY\n";
+    report_str += "Multiple Deadlock instances: ";
+    report_str += (prgrm_flags.deadlock_repeat_flag ? "Yes\n" : "No\n");
+    {  // Macro/bot hint from key interval variance
+      if (key_down_timestamps.size() >= 10) {
+        std::vector<double> intervals;
+        for (size_t i = 1; i < key_down_timestamps.size(); i++)
+          intervals.push_back((double)(key_down_timestamps[i] - key_down_timestamps[i - 1]));
+        double sum = 0, sum2 = 0;
+        for (double d : intervals) { sum += d; sum2 += d * d; }
+        double n = (double)intervals.size();
+        double mean = sum / n;
+        double variance = (sum2 / n) - (mean * mean);
+        if (variance >= 0 && variance < (double)Config::MACRO_VARIANCE_THRESHOLD_MS2) {
+          report_str += "Possible macro/bot: very low key interval variance (";
+          report_str += std::to_string((int)(variance + 0.5));
+          report_str += " ms^2) – review keylog.\n";
+        }
+      }
+    }
+    report_str += "Flagged (cheat list): ";
+    if (found_cheating_programs.empty()) report_str += "none\n";
+    else { for (const auto& p : found_cheating_programs) report_str += p + " "; report_str += "\n"; }
+    report_str += "Flagged (performance list): ";
+    if (found_performance_programs.empty()) report_str += "none\n";
+    else { for (const auto& p : found_performance_programs) report_str += p + " "; report_str += "\n"; }
+    if (report_log_file != INVALID_HANDLE_VALUE)
+      WriteFile(report_log_file, report_str.c_str(), (DWORD)report_str.size(), NULL, NULL);
+
+    report_str  = "\n";
+    report_str  += urn_acii;
+    report_str  += "ENDING GAME LOGGING\n";
+    task_str    = "\n";
+    task_str    += urn_acii;
+    task_str    += "ENDING GAME LOGGING\n";
+    keylog_str  = "\n";
+    keylog_str  += urn_acii;
+    keylog_str  += "ENDING GAME LOGGING\n";
+
+    if (report_log_file != INVALID_HANDLE_VALUE) WriteFile(report_log_file, report_str.c_str(), (DWORD)report_str.size(), NULL, NULL);
+    if (task_log_file != INVALID_HANDLE_VALUE) WriteFile(task_log_file, task_str.c_str(), (DWORD)task_str.size(), NULL, NULL);
+    if (key_log_file != INVALID_HANDLE_VALUE) WriteFile(key_log_file, keylog_str.c_str(), (DWORD)keylog_str.size(), NULL, NULL);
+    if (report_log_file != INVALID_HANDLE_VALUE) FlushFileBuffers(report_log_file);
+    if (task_log_file != INVALID_HANDLE_VALUE) FlushFileBuffers(task_log_file);
+    if (key_log_file != INVALID_HANDLE_VALUE) FlushFileBuffers(key_log_file);
+
+    // Run upload in background so session end doesn't block; wait up to UPLOAD_WAIT_TIMEOUT_SEC.
+    std::cout << "Uploading…\n";
+    std::future<bool> upload_future = std::async(std::launch::async, UploadSessionToDiscord, exe_directory, file_directory);
+    bool upload_ok = false;
+    bool upload_done = (upload_future.wait_for(std::chrono::seconds(Config::UPLOAD_WAIT_TIMEOUT_SEC)) == std::future_status::ready);
+    if (upload_done)
+      upload_ok = upload_future.get();
+    if (report_log_file != INVALID_HANDLE_VALUE) {
+      report_str = "\nDiscord upload: ";
+      if (upload_done)
+        report_str += upload_ok ? "completed\n" : "failed (no webhook or network error)\n";
+      else
+        report_str += "timed out (may be incomplete)\n";
+      WriteFile(report_log_file, report_str.c_str(), (DWORD)report_str.size(), NULL, NULL);
+      FlushFileBuffers(report_log_file);
+    }
+
+    if (report_log_file != INVALID_HANDLE_VALUE) { CloseHandle(report_log_file); report_log_file = INVALID_HANDLE_VALUE; }
+    if (task_log_file != INVALID_HANDLE_VALUE)   { CloseHandle(task_log_file);   task_log_file = INVALID_HANDLE_VALUE; }
+    if (key_log_file != INVALID_HANDLE_VALUE)   { CloseHandle(key_log_file);   key_log_file = INVALID_HANDLE_VALUE; }
+
+    if (upload_ok && Config::CLEANUP_AFTER_UPLOAD && !file_directory.empty()) {
+      WIN32_FIND_DATAA fd = {};
+      HANDLE h = FindFirstFileA((file_directory + "*").c_str(), &fd);
+      if (h != INVALID_HANDLE_VALUE) {
+        do {
+          if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+            std::string path = file_directory + fd.cFileName;
+            DeleteFileA(path.c_str());
+          }
+        } while (FindNextFileA(h, &fd));
+        FindClose(h);
+      }
+      std::string dir_no_slash = file_directory;
+      while (!dir_no_slash.empty() && (dir_no_slash.back() == '\\' || dir_no_slash.back() == '/')) dir_no_slash.pop_back();
+      if (!dir_no_slash.empty()) RemoveDirectoryA(dir_no_slash.c_str());
+    }
+  }
+
+}
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/UrnItAnticheat.sln`:
+
+```sln
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UrnItAnticheat", "UrnItAnticheat.vcxproj", "{A2C6F823-789E-4688-88E8-9AEE8ADD7FA5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A2C6F823-789E-4688-88E8-9AEE8ADD7FA5}.Debug|x64.ActiveCfg = Debug|x64
+		{A2C6F823-789E-4688-88E8-9AEE8ADD7FA5}.Debug|x64.Build.0 = Debug|x64
+		{A2C6F823-789E-4688-88E8-9AEE8ADD7FA5}.Debug|x86.ActiveCfg = Debug|Win32
+		{A2C6F823-789E-4688-88E8-9AEE8ADD7FA5}.Debug|x86.Build.0 = Debug|Win32
+		{A2C6F823-789E-4688-88E8-9AEE8ADD7FA5}.Release|x64.ActiveCfg = Release|x64
+		{A2C6F823-789E-4688-88E8-9AEE8ADD7FA5}.Release|x64.Build.0 = Release|x64
+		{A2C6F823-789E-4688-88E8-9AEE8ADD7FA5}.Release|x86.ActiveCfg = Release|Win32
+		{A2C6F823-789E-4688-88E8-9AEE8ADD7FA5}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {157A1CF0-DC78-46C2-A756-2B3FDC4F7F02}
+	EndGlobalSection
+EndGlobal
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/UrnItAnticheat.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{a2c6f823-789e-4688-88e8-9aee8add7fa5}</ProjectGuid>
+    <RootNamespace>UrnItAnticheat</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <DiagnosticsFormat>Classic</DiagnosticsFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="UrnItAnticheat.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="debug_libs\cpu_features.lib" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/UrnItAnticheat.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="UrnItAnticheat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="debug_libs\cpu_features.lib" />
+  </ItemGroup>
+</Project>
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/cheat_list.txt.example`:
+
+```example
+# Cheat list: one entry per line. Load from cheat_list.txt next to the exe.
+# Format: first line "cheats", then process names (e.g. cheat.exe), then "performance", then tool names.
+# Run scripts/scrape_deadlock_cheats.py to generate from elitepvpers forum (or edit manually).
+
+cheats
+# example_cheat.exe
+performance
+# msi afterburner.exe
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/config.txt.example`:
+
+```example
+# Optional: place as config.txt next to the exe to tune without recompiling.
+# Remove the # from lines you want to change.
+
+# TASK_SCAN_INTERVAL_SEC=3
+# SCREENSHOT_INTERVAL_SEC=5
+# CPU_LOG_INTERVAL_SEC=0.5
+# KEYLOG_INTERVAL_SEC=0.05
+# LOOP_SLEEP_MS=20
+# AUTO_UPLOAD_ON_GAME_EXIT=1
+# UPLOAD_WAIT_TIMEOUT_SEC=30
+# CLEANUP_AFTER_UPLOAD=0
+# MACRO_VARIANCE_THRESHOLD_MS2=500
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/cpu_features_cache_info.h`:
+
+```h
+// Copyright 2017 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef CPU_FEATURES_INCLUDE_CPUINFO_COMMON_H_
+#define CPU_FEATURES_INCLUDE_CPUINFO_COMMON_H_
+
+#include "cpu_features_macros.h"
+
+CPU_FEATURES_START_CPP_NAMESPACE
+
+typedef enum {
+  CPU_FEATURE_CACHE_NULL = 0,
+  CPU_FEATURE_CACHE_DATA = 1,
+  CPU_FEATURE_CACHE_INSTRUCTION = 2,
+  CPU_FEATURE_CACHE_UNIFIED = 3,
+  CPU_FEATURE_CACHE_TLB = 4,
+  CPU_FEATURE_CACHE_DTLB = 5,
+  CPU_FEATURE_CACHE_STLB = 6,
+  CPU_FEATURE_CACHE_PREFETCH = 7
+} CacheType;
+
+typedef struct {
+  int level;
+  CacheType cache_type;
+  int cache_size;    // Cache size in bytes
+  int ways;          // Associativity, 0 undefined, 0xFF fully associative
+  int line_size;     // Cache line size in bytes
+  int tlb_entries;   // number of entries for TLB
+  int partitioning;  // number of lines per sector
+} CacheLevelInfo;
+
+// Increase this value if more cache levels are needed.
+#ifndef CPU_FEATURES_MAX_CACHE_LEVEL
+#define CPU_FEATURES_MAX_CACHE_LEVEL 10
+#endif
+typedef struct {
+  int size;
+  CacheLevelInfo levels[CPU_FEATURES_MAX_CACHE_LEVEL];
+} CacheInfo;
+
+CPU_FEATURES_END_CPP_NAMESPACE
+
+#endif  // CPU_FEATURES_INCLUDE_CPUINFO_COMMON_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/cpu_features_macros.h`:
+
+```h
+// Copyright 2017 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef CPU_FEATURES_INCLUDE_CPU_FEATURES_MACROS_H_
+#define CPU_FEATURES_INCLUDE_CPU_FEATURES_MACROS_H_
+
+////////////////////////////////////////////////////////////////////////////////
+// Architectures
+////////////////////////////////////////////////////////////////////////////////
+
+#if defined(__pnacl__) || defined(__CLR_VER)
+#define CPU_FEATURES_ARCH_VM
+#endif
+
+#if (defined(_M_IX86) || defined(__i386__)) && !defined(CPU_FEATURES_ARCH_VM)
+#define CPU_FEATURES_ARCH_X86_32
+#endif
+
+#if (defined(_M_X64) || defined(__x86_64__)) && !defined(CPU_FEATURES_ARCH_VM)
+#define CPU_FEATURES_ARCH_X86_64
+#endif
+
+#if defined(CPU_FEATURES_ARCH_X86_32) || defined(CPU_FEATURES_ARCH_X86_64)
+#define CPU_FEATURES_ARCH_X86
+#endif
+
+#if (defined(__arm__) || defined(_M_ARM))
+#define CPU_FEATURES_ARCH_ARM
+#endif
+
+#if (defined(__aarch64__) || defined(_M_ARM64))
+#define CPU_FEATURES_ARCH_AARCH64
+#endif
+
+#if (defined(CPU_FEATURES_ARCH_AARCH64) || defined(CPU_FEATURES_ARCH_ARM))
+#define CPU_FEATURES_ARCH_ANY_ARM
+#endif
+
+#if defined(__mips64)
+#define CPU_FEATURES_ARCH_MIPS64
+#endif
+
+#if defined(__mips__) && !defined(__mips64)  // mips64 also declares __mips__
+#define CPU_FEATURES_ARCH_MIPS32
+#endif
+
+#if defined(CPU_FEATURES_ARCH_MIPS32) || defined(CPU_FEATURES_ARCH_MIPS64)
+#define CPU_FEATURES_ARCH_MIPS
+#endif
+
+#if defined(__powerpc__)
+#define CPU_FEATURES_ARCH_PPC
+#endif
+
+#if defined(__s390x__)
+#define CPU_FEATURES_ARCH_S390X
+#endif
+
+#if defined(__riscv)
+#define CPU_FEATURES_ARCH_RISCV
+#endif
+
+#if defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 32
+#define CPU_FEATURES_ARCH_RISCV32
+#endif
+
+#if defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 64
+#define CPU_FEATURES_ARCH_RISCV64
+#endif
+
+#if defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 128
+#define CPU_FEATURES_ARCH_RISCV128
+#endif
+
+#if defined(__loongarch64)
+#define CPU_FEATURES_ARCH_LOONGARCH
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
+// Os
+////////////////////////////////////////////////////////////////////////////////
+
+#if (defined(__freebsd__) || defined(__FreeBSD__))
+#define CPU_FEATURES_OS_FREEBSD
+#endif
+
+#if defined(__ANDROID__)
+#define CPU_FEATURES_OS_ANDROID
+#endif
+
+#if defined(__linux__) && !defined(CPU_FEATURES_OS_FREEBSD) && \
+    !defined(CPU_FEATURES_OS_ANDROID)
+#define CPU_FEATURES_OS_LINUX
+#endif
+
+#if (defined(_WIN64) || defined(_WIN32))
+#define CPU_FEATURES_OS_WINDOWS
+#endif
+
+#if (defined(__apple__) || defined(__APPLE__) || defined(__MACH__))
+// From https://stackoverflow.com/a/49560690
+#include "TargetConditionals.h"
+#if defined(TARGET_OS_OSX)
+#define CPU_FEATURES_OS_MACOS
+#endif
+#if defined(TARGET_OS_IPHONE)
+// This is set for any non-Mac Apple products (IOS, TV, WATCH)
+#define CPU_FEATURES_OS_IPHONE
+#endif
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
+// Compilers
+////////////////////////////////////////////////////////////////////////////////
+
+#if defined(__clang__)
+#define CPU_FEATURES_COMPILER_CLANG
+#endif
+
+#if defined(__GNUC__) && !defined(__clang__)
+#define CPU_FEATURES_COMPILER_GCC
+#endif
+
+#if defined(_MSC_VER)
+#define CPU_FEATURES_COMPILER_MSC
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
+// Cpp
+////////////////////////////////////////////////////////////////////////////////
+
+#if defined(__cplusplus)
+#define CPU_FEATURES_START_CPP_NAMESPACE \
+  namespace cpu_features {               \
+  extern "C" {
+#define CPU_FEATURES_END_CPP_NAMESPACE \
+  }                                    \
+  }
+#else
+#define CPU_FEATURES_START_CPP_NAMESPACE
+#define CPU_FEATURES_END_CPP_NAMESPACE
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
+// Compiler flags
+////////////////////////////////////////////////////////////////////////////////
+
+// Use the following to check if a feature is known to be available at
+// compile time. See README.md for an example.
+#if defined(CPU_FEATURES_ARCH_X86)
+
+#if defined(__AES__)
+#define CPU_FEATURES_COMPILED_X86_AES 1
+#else
+#define CPU_FEATURES_COMPILED_X86_AES 0
+#endif  //  defined(__AES__)
+
+#if defined(__F16C__)
+#define CPU_FEATURES_COMPILED_X86_F16C 1
+#else
+#define CPU_FEATURES_COMPILED_X86_F16C 0
+#endif  //  defined(__F16C__)
+
+#if defined(__BMI__)
+#define CPU_FEATURES_COMPILED_X86_BMI 1
+#else
+#define CPU_FEATURES_COMPILED_X86_BMI 0
+#endif  //  defined(__BMI__)
+
+#if defined(__BMI2__)
+#define CPU_FEATURES_COMPILED_X86_BMI2 1
+#else
+#define CPU_FEATURES_COMPILED_X86_BMI2 0
+#endif  //  defined(__BMI2__)
+
+#if (defined(__SSE__) || (_M_IX86_FP >= 1))
+#define CPU_FEATURES_COMPILED_X86_SSE 1
+#else
+#define CPU_FEATURES_COMPILED_X86_SSE 0
+#endif
+
+#if (defined(__SSE2__) || (_M_IX86_FP >= 2))
+#define CPU_FEATURES_COMPILED_X86_SSE2 1
+#else
+#define CPU_FEATURES_COMPILED_X86_SSE2 0
+#endif
+
+#if defined(__SSE3__)
+#define CPU_FEATURES_COMPILED_X86_SSE3 1
+#else
+#define CPU_FEATURES_COMPILED_X86_SSE3 0
+#endif  //  defined(__SSE3__)
+
+#if defined(__SSSE3__)
+#define CPU_FEATURES_COMPILED_X86_SSSE3 1
+#else
+#define CPU_FEATURES_COMPILED_X86_SSSE3 0
+#endif  //  defined(__SSSE3__)
+
+#if defined(__SSE4_1__)
+#define CPU_FEATURES_COMPILED_X86_SSE4_1 1
+#else
+#define CPU_FEATURES_COMPILED_X86_SSE4_1 0
+#endif  //  defined(__SSE4_1__)
+
+#if defined(__SSE4_2__)
+#define CPU_FEATURES_COMPILED_X86_SSE4_2 1
+#else
+#define CPU_FEATURES_COMPILED_X86_SSE4_2 0
+#endif  //  defined(__SSE4_2__)
+
+#if defined(__AVX__)
+#define CPU_FEATURES_COMPILED_X86_AVX 1
+#else
+#define CPU_FEATURES_COMPILED_X86_AVX 0
+#endif  //  defined(__AVX__)
+
+#if defined(__AVX2__)
+#define CPU_FEATURES_COMPILED_X86_AVX2 1
+#else
+#define CPU_FEATURES_COMPILED_X86_AVX2 0
+#endif  //  defined(__AVX2__)
+
+#endif  // defined(CPU_FEATURES_ARCH_X86)
+
+#if defined(CPU_FEATURES_ARCH_ANY_ARM)
+#if defined(__ARM_NEON__)
+#define CPU_FEATURES_COMPILED_ANY_ARM_NEON 1
+#else
+#define CPU_FEATURES_COMPILED_ANY_ARM_NEON 0
+#endif  //  defined(__ARM_NEON__)
+#endif  //  defined(CPU_FEATURES_ARCH_ANY_ARM)
+
+#if defined(CPU_FEATURES_ARCH_MIPS)
+#if defined(__mips_msa)
+#define CPU_FEATURES_COMPILED_MIPS_MSA 1
+#else
+#define CPU_FEATURES_COMPILED_MIPS_MSA 0
+#endif  //  defined(__mips_msa)
+#if defined(__mips3d)
+#define CPU_FEATURES_COMPILED_MIPS_MIPS3D 1
+#else
+#define CPU_FEATURES_COMPILED_MIPS_MIPS3D 0
+#endif
+#endif  //  defined(CPU_FEATURES_ARCH_MIPS)
+
+#if defined(CPU_FEATURES_ARCH_RISCV)
+#if defined(__riscv_e)
+#define CPU_FEATURES_COMPILED_RISCV_E 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_E 0
+#endif
+#if defined(__riscv_i)
+#define CPU_FEATURES_COMPILED_RISCV_I 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_I 0
+#endif
+#if defined(__riscv_m)
+#define CPU_FEATURES_COMPILED_RISCV_M 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_M 0
+#endif
+#if defined(__riscv_a)
+#define CPU_FEATURES_COMPILED_RISCV_A 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_A 0
+#endif
+#if defined(__riscv_f)
+#define CPU_FEATURES_COMPILED_RISCV_F 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_F 0
+#endif
+#if defined(__riscv_d)
+#define CPU_FEATURES_COMPILED_RISCV_D 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_D 0
+#endif
+#if defined(__riscv_q)
+#define CPU_FEATURES_COMPILED_RISCV_Q 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_Q 0
+#endif
+#if defined(__riscv_c)
+#define CPU_FEATURES_COMPILED_RISCV_C 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_C 0
+#endif
+#if defined(__riscv_v)
+#define CPU_FEATURES_COMPILED_RISCV_V 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_V 0
+#endif
+#if defined(__riscv_zba)
+#define CPU_FEATURES_COMPILED_RISCV_ZBA 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_ZBA 0
+#endif
+#if defined(__riscv_zbb)
+#define CPU_FEATURES_COMPILED_RISCV_ZBB 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_ZBB 0
+#endif
+#if defined(__riscv_zbc)
+#define CPU_FEATURES_COMPILED_RISCV_ZBC 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_ZBC 0
+#endif
+#if defined(__riscv_zbs)
+#define CPU_FEATURES_COMPILED_RISCV_ZBS 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_ZBS 0
+#endif
+#if defined(__riscv_zfh)
+#define CPU_FEATURES_COMPILED_RISCV_ZFH 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_ZFH 0
+#endif
+#if defined(__riscv_zfhmin)
+#define CPU_FEATURES_COMPILED_RISCV_ZFHMIN 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_ZFHMIN 0
+#endif
+#if defined(__riscv_zknd)
+#define CPU_FEATURES_COMPILED_RISCV_ZKND 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_ZKND 0
+#endif
+#if defined(__riscv_zkne)
+#define CPU_FEATURES_COMPILED_RISCV_ZKNE 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_ZKNE 0
+#endif
+#if defined(__riscv_zknh)
+#define CPU_FEATURES_COMPILED_RISCV_ZKNH 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_ZKNH 0
+#endif
+#if defined(__riscv_zksed)
+#define CPU_FEATURES_COMPILED_RISCV_ZKSED 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_ZKSED 0
+#endif
+#if defined(__riscv_zksh)
+#define CPU_FEATURES_COMPILED_RISCV_ZKSH 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_ZKSH 0
+#endif
+#if defined(__riscv_zkr)
+#define CPU_FEATURES_COMPILED_RISCV_ZKR 1
+#else
+#define CPU_FEATURES_COMPILED_RISCV_ZKR 0
+#endif
+#endif  //  defined(CPU_FEATURES_ARCH_RISCV)
+
+////////////////////////////////////////////////////////////////////////////////
+// Utils
+////////////////////////////////////////////////////////////////////////////////
+
+// Communicates to the compiler that the block is unreachable
+#if defined(CPU_FEATURES_COMPILER_CLANG) || defined(CPU_FEATURES_COMPILER_GCC)
+#define CPU_FEATURES_UNREACHABLE() __builtin_unreachable()
+#elif defined(CPU_FEATURES_COMPILER_MSC)
+#define CPU_FEATURES_UNREACHABLE() __assume(0)
+#else
+#define CPU_FEATURES_UNREACHABLE()
+#endif
+
+// Communicates to the compiler that the function is now deprecated
+#if defined(CPU_FEATURES_COMPILER_CLANG) || defined(CPU_FEATURES_COMPILER_GCC)
+#define CPU_FEATURES_DEPRECATED(message) __attribute__((deprecated(message)))
+#elif defined(CPU_FEATURES_COMPILER_MSC)
+#define CPU_FEATURES_DEPRECATED(message) __declspec(deprecated(message))
+#else
+#define CPU_FEATURES_DEPRECATED(message)
+#endif
+
+#endif  // CPU_FEATURES_INCLUDE_CPU_FEATURES_MACROS_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/cpuinfo_aarch64.h`:
+
+```h
+// Copyright 2017 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+////////////////////////////////////////////////////////////////////////////////
+// A note on Windows AArch64 implementation
+////////////////////////////////////////////////////////////////////////////////
+
+// Getting cpu info via EL1 system registers is not possible, so we delegate it
+// to the Windows API (i.e., IsProcessorFeaturePresent and GetNativeSystemInfo).
+// The `implementer`, `variant` and `part` fields of the `Aarch64Info` struct
+// are not used, so they are set to 0. To get `revision` we use
+// `wProcessorRevision` from `SYSTEM_INFO`.
+//
+// Cryptographic Extension:
+// -----------------------------------------------------------------------------
+// According to documentation Arm Architecture Reference Manual for
+// A-profile architecture. A2.3 The Armv8 Cryptographic Extension. The Armv8.0
+// Cryptographic Extension provides instructions for the acceleration of
+// encryption and decryption, and includes the following features: FEAT_AES,
+// FEAT_PMULL, FEAT_SHA1, FEAT_SHA256.
+// see: https://developer.arm.com/documentation/ddi0487/latest
+//
+// We use `PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE` to detect all Armv8.0 crypto
+// features. This value reports all features or nothing, so even if you only
+// have support FEAT_AES and FEAT_PMULL, it will still return false.
+//
+// From Armv8.2, an implementation of the Armv8.0 Cryptographic Extension can
+// include either or both of:
+//
+// • The AES functionality, including support for multiplication of 64-bit
+//   polynomials. The ID_AA64ISAR0_EL1.AES field indicates whether this
+//   functionality is supported.
+// • The SHA1 and SHA2-256 functionality. The ID_AA64ISAR0_EL1.{SHA2, SHA1}
+//   fields indicate whether this functionality is supported.
+//
+// ID_AA64ISAR0_EL1.AES, bits [7:4]:
+// Indicates support for AES instructions in AArch64 state. Defined values are:
+// - 0b0000 No AES instructions implemented.
+// - 0b0001 AESE, AESD, AESMC, and AESIMC instructions implemented.
+// - 0b0010 As for 0b0001, plus PMULL/PMULL2 instructions operating on 64-bit
+//   data quantities.
+//
+// FEAT_AES implements the functionality identified by the value 0b0001.
+// FEAT_PMULL implements the functionality identified by the value 0b0010.
+// From Armv8, the permitted values are 0b0000 and 0b0010.
+//
+// ID_AA64ISAR0_EL1.SHA1, bits [11:8]:
+// Indicates support for SHA1 instructions in AArch64 state. Defined values are:
+// - 0b0000 No SHA1 instructions implemented.
+// - 0b0001 SHA1C, SHA1P, SHA1M, SHA1H, SHA1SU0, and SHA1SU1 instructions
+//   implemented.
+//
+// FEAT_SHA1 implements the functionality identified by the value 0b0001.
+// From Armv8, the permitted values are 0b0000 and 0b0001.
+// If the value of ID_AA64ISAR0_EL1.SHA2 is 0b0000, this field must have the
+// value 0b0000.
+//
+// ID_AA64ISAR0_EL1.SHA2, bits [15:12]:
+// Indicates support for SHA2 instructions in AArch64 state. Defined values are:
+// - 0b0000 No SHA2 instructions implemented.
+// - 0b0001 Implements instructions: SHA256H, SHA256H2, SHA256SU0, and
+//   SHA256SU1.
+// - 0b0010 Implements instructions:
+//          • SHA256H, SHA256H2, SHA256SU0, and SHA256SU1.
+//          • SHA512H, SHA512H2, SHA512SU0, and SHA512SU1.
+//
+// FEAT_SHA256 implements the functionality identified by the value 0b0001.
+// FEAT_SHA512 implements the functionality identified by the value 0b0010.
+//
+// In Armv8, the permitted values are 0b0000 and 0b0001.
+// From Armv8.2, the permitted values are 0b0000, 0b0001, and 0b0010.
+//
+// If the value of ID_AA64ISAR0_EL1.SHA1 is 0b0000, this field must have the
+// value 0b0000.
+//
+// If the value of this field is 0b0010, ID_AA64ISAR0_EL1.SHA3
+// must have the value 0b0001.
+//
+// Other cryptographic features that we cannot detect such as sha512, sha3, sm3,
+// sm4, sveaes, svepmull, svesha3, svesm4 we set to 0.
+//
+// FP/SIMD:
+// -----------------------------------------------------------------------------
+// FP/SIMD must be implemented on all Armv8.0 implementations, but
+// implementations targeting specialized markets may support the following
+// combinations:
+//
+// • No NEON or floating-point.
+// • Full floating-point and SIMD support with exception trapping.
+// • Full floating-point and SIMD support without exception trapping.
+//
+// ref:
+// https://developer.arm.com/documentation/den0024/a/AArch64-Floating-point-and-NEON
+//
+// So, we use `PF_ARM_VFP_32_REGISTERS_AVAILABLE`,
+// `PF_ARM_NEON_INSTRUCTIONS_AVAILABLE` to detect `asimd` and `fp`
+
+#ifndef CPU_FEATURES_INCLUDE_CPUINFO_AARCH64_H_
+#define CPU_FEATURES_INCLUDE_CPUINFO_AARCH64_H_
+
+#include "cpu_features_cache_info.h"
+#include "cpu_features_macros.h"
+
+CPU_FEATURES_START_CPP_NAMESPACE
+
+typedef struct {
+  int fp : 1;          // Floating-point.
+  int asimd : 1;       // Advanced SIMD.
+  int evtstrm : 1;     // Generic timer generated events.
+  int aes : 1;         // Hardware-accelerated Advanced Encryption Standard.
+  int pmull : 1;       // Polynomial multiply long.
+  int sha1 : 1;        // Hardware-accelerated SHA1.
+  int sha2 : 1;        // Hardware-accelerated SHA2-256.
+  int crc32 : 1;       // Hardware-accelerated CRC-32.
+  int atomics : 1;     // Armv8.1 atomic instructions.
+  int fphp : 1;        // Half-precision floating point support.
+  int asimdhp : 1;     // Advanced SIMD half-precision support.
+  int cpuid : 1;       // Access to certain ID registers.
+  int asimdrdm : 1;    // Rounding Double Multiply Accumulate/Subtract.
+  int jscvt : 1;       // Support for JavaScript conversion.
+  int fcma : 1;        // Floating point complex numbers.
+  int lrcpc : 1;       // Support for weaker release consistency.
+  int dcpop : 1;       // Data persistence writeback.
+  int sha3 : 1;        // Hardware-accelerated SHA3.
+  int sm3 : 1;         // Hardware-accelerated SM3.
+  int sm4 : 1;         // Hardware-accelerated SM4.
+  int asimddp : 1;     // Dot product instruction.
+  int sha512 : 1;      // Hardware-accelerated SHA512.
+  int sve : 1;         // Scalable Vector Extension.
+  int asimdfhm : 1;    // Additional half-precision instructions.
+  int dit : 1;         // Data independent timing.
+  int uscat : 1;       // Unaligned atomics support.
+  int ilrcpc : 1;      // Additional support for weaker release consistency.
+  int flagm : 1;       // Flag manipulation instructions.
+  int ssbs : 1;        // Speculative Store Bypass Safe PSTATE bit.
+  int sb : 1;          // Speculation barrier.
+  int paca : 1;        // Address authentication.
+  int pacg : 1;        // Generic authentication.
+  int dcpodp : 1;      // Data cache clean to point of persistence.
+  int sve2 : 1;        // Scalable Vector Extension (version 2).
+  int sveaes : 1;      // SVE AES instructions.
+  int svepmull : 1;    // SVE polynomial multiply long instructions.
+  int svebitperm : 1;  // SVE bit permute instructions.
+  int svesha3 : 1;     // SVE SHA3 instructions.
+  int svesm4 : 1;      // SVE SM4 instructions.
+  int flagm2 : 1;      // Additional flag manipulation instructions.
+  int frint : 1;       // Floating point to integer rounding.
+  int svei8mm : 1;     // SVE Int8 matrix multiplication instructions.
+  int svef32mm : 1;    // SVE FP32 matrix multiplication instruction.
+  int svef64mm : 1;    // SVE FP64 matrix multiplication instructions.
+  int svebf16 : 1;     // SVE BFloat16 instructions.
+  int i8mm : 1;        // Int8 matrix multiplication instructions.
+  int bf16 : 1;        // BFloat16 instructions.
+  int dgh : 1;         // Data Gathering Hint instruction.
+  int rng : 1;         // True random number generator support.
+  int bti : 1;         // Branch target identification.
+  int mte : 1;         // Memory tagging extension.
+  int ecv : 1;         // Enhanced counter virtualization.
+  int afp : 1;         // Alternate floating-point behaviour.
+  int rpres : 1;       // 12-bit reciprocal (square root) estimate precision.
+  int mte3 : 1;        // MTE asymmetric fault handling.
+  int sme : 1;         // Scalable Matrix Extension.
+  int smei16i64 : 1;   // 16-bit to 64-bit integer widening outer product.
+  int smef64f64 : 1;   // FP64 to FP64 outer product.
+  int smei8i32 : 1;    // 8-bit to 32-bit integer widening outer product.
+  int smef16f32 : 1;   // FP16 to FP32 outer product.
+  int smeb16f32 : 1;   // BFloat16 to FP32 outper product.
+  int smef32f32 : 1;   // FP32 to FP32 outer product.
+  int smefa64 : 1;     // Full A64 support for SME in streaming mode.
+  int wfxt : 1;        // WFE and WFI with timeout.
+  int ebf16 : 1;       // Extended BFloat16 instructions.
+  int sveebf16 : 1;    // SVE BFloat16 instructions.
+  int cssc : 1;        // Common short sequence compression instructions.
+  int rprfm : 1;       // Range Prefetch Memory hint instruction.
+  int sve2p1 : 1;      // Scalable Vector Extension (version 2.1).
+  int sme2 : 1;        // Scalable Matrix Extension (version 2).
+  int sme2p1 : 1;      // Scalable Matrix Extension (version 2.1).
+  int smei16i32 : 1;   // 16-bit to 64-bit integer widening outer product.
+  int smebi32i32 : 1;  // 1-bit binary to 32-bit integer outer product.
+  int smeb16b16 : 1;   // SME2.1 BFloat16 instructions.
+  int smef16f16 : 1;   // FP16 to FP16 outer product.
+
+  // Make sure to update Aarch64FeaturesEnum below if you add a field here.
+} Aarch64Features;
+
+typedef struct {
+  Aarch64Features features;
+  int implementer;  // We set 0 for Windows.
+  int variant;      // We set 0 for Windows.
+  int part;         // We set 0 for Windows.
+  int revision;     // We use GetNativeSystemInfo to get processor revision for
+                    // Windows.
+} Aarch64Info;
+
+Aarch64Info GetAarch64Info(void);
+
+////////////////////////////////////////////////////////////////////////////////
+// Introspection functions
+
+typedef enum {
+  AARCH64_FP,
+  AARCH64_ASIMD,
+  AARCH64_EVTSTRM,
+  AARCH64_AES,
+  AARCH64_PMULL,
+  AARCH64_SHA1,
+  AARCH64_SHA2,
+  AARCH64_CRC32,
+  AARCH64_ATOMICS,
+  AARCH64_FPHP,
+  AARCH64_ASIMDHP,
+  AARCH64_CPUID,
+  AARCH64_ASIMDRDM,
+  AARCH64_JSCVT,
+  AARCH64_FCMA,
+  AARCH64_LRCPC,
+  AARCH64_DCPOP,
+  AARCH64_SHA3,
+  AARCH64_SM3,
+  AARCH64_SM4,
+  AARCH64_ASIMDDP,
+  AARCH64_SHA512,
+  AARCH64_SVE,
+  AARCH64_ASIMDFHM,
+  AARCH64_DIT,
+  AARCH64_USCAT,
+  AARCH64_ILRCPC,
+  AARCH64_FLAGM,
+  AARCH64_SSBS,
+  AARCH64_SB,
+  AARCH64_PACA,
+  AARCH64_PACG,
+  AARCH64_DCPODP,
+  AARCH64_SVE2,
+  AARCH64_SVEAES,
+  AARCH64_SVEPMULL,
+  AARCH64_SVEBITPERM,
+  AARCH64_SVESHA3,
+  AARCH64_SVESM4,
+  AARCH64_FLAGM2,
+  AARCH64_FRINT,
+  AARCH64_SVEI8MM,
+  AARCH64_SVEF32MM,
+  AARCH64_SVEF64MM,
+  AARCH64_SVEBF16,
+  AARCH64_I8MM,
+  AARCH64_BF16,
+  AARCH64_DGH,
+  AARCH64_RNG,
+  AARCH64_BTI,
+  AARCH64_MTE,
+  AARCH64_ECV,
+  AARCH64_AFP,
+  AARCH64_RPRES,
+  AARCH64_MTE3,
+  AARCH64_SME,
+  AARCH64_SME_I16I64,
+  AARCH64_SME_F64F64,
+  AARCH64_SME_I8I32,
+  AARCH64_SME_F16F32,
+  AARCH64_SME_B16F32,
+  AARCH64_SME_F32F32,
+  AARCH64_SME_FA64,
+  AARCH64_WFXT,
+  AARCH64_EBF16,
+  AARCH64_SVE_EBF16,
+  AARCH64_CSSC,
+  AARCH64_RPRFM,
+  AARCH64_SVE2P1,
+  AARCH64_SME2,
+  AARCH64_SME2P1,
+  AARCH64_SME_I16I32,
+  AARCH64_SME_BI32I32,
+  AARCH64_SME_B16B16,
+  AARCH64_SME_F16F16,
+  AARCH64_LAST_,
+} Aarch64FeaturesEnum;
+
+int GetAarch64FeaturesEnumValue(const Aarch64Features* features,
+                                Aarch64FeaturesEnum value);
+
+const char* GetAarch64FeaturesEnumName(Aarch64FeaturesEnum);
+
+CPU_FEATURES_END_CPP_NAMESPACE
+
+#if !defined(CPU_FEATURES_ARCH_AARCH64)
+#error "Including cpuinfo_aarch64.h from a non-aarch64 target."
+#endif
+
+#endif  // CPU_FEATURES_INCLUDE_CPUINFO_AARCH64_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/cpuinfo_arm.h`:
+
+```h
+// Copyright 2017 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef CPU_FEATURES_INCLUDE_CPUINFO_ARM_H_
+#define CPU_FEATURES_INCLUDE_CPUINFO_ARM_H_
+
+#include <stdint.h>  // uint32_t
+
+#include "cpu_features_cache_info.h"
+#include "cpu_features_macros.h"
+
+CPU_FEATURES_START_CPP_NAMESPACE
+
+typedef struct {
+  int swp : 1;       // SWP instruction (atomic read-modify-write)
+  int half : 1;      // Half-word loads and stores
+  int thumb : 1;     // Thumb (16-bit instruction set)
+  int _26bit : 1;    // "26 Bit" Model (Processor status register folded into
+                     // program counter)
+  int fastmult : 1;  // 32x32->64-bit multiplication
+  int fpa : 1;       // Floating point accelerator
+  int vfp : 1;       // Vector Floating Point.
+  int edsp : 1;     // DSP extensions (the 'e' variant of the ARM9 CPUs, and all
+                    // others above)
+  int java : 1;     // Jazelle (Java bytecode accelerator)
+  int iwmmxt : 1;   // Intel Wireless MMX Technology.
+  int crunch : 1;   // MaverickCrunch coprocessor
+  int thumbee : 1;  // ThumbEE
+  int neon : 1;     // Advanced SIMD.
+  int vfpv3 : 1;    // VFP version 3
+  int vfpv3d16 : 1;  // VFP version 3 with 16 D-registers
+  int tls : 1;       // TLS register
+  int vfpv4 : 1;     // VFP version 4 with fast context switching
+  int idiva : 1;     // SDIV and UDIV hardware division in ARM mode.
+  int idivt : 1;     // SDIV and UDIV hardware division in Thumb mode.
+  int vfpd32 : 1;    // VFP with 32 D-registers
+  int lpae : 1;     // Large Physical Address Extension (>4GB physical memory on
+                    // 32-bit architecture)
+  int evtstrm : 1;  // kernel event stream using generic architected timer
+  int aes : 1;      // Hardware-accelerated Advanced Encryption Standard.
+  int pmull : 1;    // Polynomial multiply long.
+  int sha1 : 1;     // Hardware-accelerated SHA1.
+  int sha2 : 1;     // Hardware-accelerated SHA2-256.
+  int crc32 : 1;    // Hardware-accelerated CRC-32.
+
+  // Make sure to update ArmFeaturesEnum below if you add a field here.
+} ArmFeatures;
+
+typedef struct {
+  ArmFeatures features;
+  int implementer;
+  int architecture;
+  int variant;
+  int part;
+  int revision;
+} ArmInfo;
+
+// TODO(user): Add macros to know which features are present at compile
+// time.
+
+ArmInfo GetArmInfo(void);
+
+// Compute CpuId from ArmInfo.
+uint32_t GetArmCpuId(const ArmInfo* const info);
+
+////////////////////////////////////////////////////////////////////////////////
+// Introspection functions
+
+typedef enum {
+  ARM_SWP,
+  ARM_HALF,
+  ARM_THUMB,
+  ARM_26BIT,
+  ARM_FASTMULT,
+  ARM_FPA,
+  ARM_VFP,
+  ARM_EDSP,
+  ARM_JAVA,
+  ARM_IWMMXT,
+  ARM_CRUNCH,
+  ARM_THUMBEE,
+  ARM_NEON,
+  ARM_VFPV3,
+  ARM_VFPV3D16,
+  ARM_TLS,
+  ARM_VFPV4,
+  ARM_IDIVA,
+  ARM_IDIVT,
+  ARM_VFPD32,
+  ARM_LPAE,
+  ARM_EVTSTRM,
+  ARM_AES,
+  ARM_PMULL,
+  ARM_SHA1,
+  ARM_SHA2,
+  ARM_CRC32,
+  ARM_LAST_,
+} ArmFeaturesEnum;
+
+int GetArmFeaturesEnumValue(const ArmFeatures* features, ArmFeaturesEnum value);
+
+const char* GetArmFeaturesEnumName(ArmFeaturesEnum);
+
+CPU_FEATURES_END_CPP_NAMESPACE
+
+#if !defined(CPU_FEATURES_ARCH_ARM)
+#error "Including cpuinfo_arm.h from a non-arm target."
+#endif
+
+#endif  // CPU_FEATURES_INCLUDE_CPUINFO_ARM_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/cpuinfo_loongarch.h`:
+
+```h
+// Copyright 2023 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef CPU_FEATURES_INCLUDE_CPUINFO_LOONGARCH_H_
+#define CPU_FEATURES_INCLUDE_CPUINFO_LOONGARCH_H_
+
+#include "cpu_features_cache_info.h"
+#include "cpu_features_macros.h"
+
+#if !defined(CPU_FEATURES_ARCH_LOONGARCH)
+#error "Including cpuinfo_loongarch.h from a non-loongarch target."
+#endif
+
+CPU_FEATURES_START_CPP_NAMESPACE
+
+typedef struct {
+  // Base
+  int CPUCFG : 1;    // Instruction for Identify CPU Features 
+
+  // Extension
+  int LAM : 1;       // Extension for Atomic Memory Access Instructions
+  int UAL : 1;       // Extension for Non-Aligned Memory Access
+  int FPU : 1;       // Extension for Basic Floating-Point Instructions
+  int LSX : 1;       // Extension for Loongson SIMD eXtension
+  int LASX : 1;      // Extension for Loongson Advanced SIMD eXtension
+  int CRC32 : 1;     // Extension for Cyclic Redundancy Check Instructions
+  int COMPLEX : 1;   // Extension for Complex Vector Operation Instructions
+  int CRYPTO : 1;    // Extension for Encryption And Decryption Vector Instructions
+  int LVZ : 1;       // Extension for Virtualization
+  int LBT_X86 : 1;   // Extension for X86 Binary Translation Extension
+  int LBT_ARM : 1;   // Extension for ARM Binary Translation Extension
+  int LBT_MIPS : 1;  // Extension for MIPS Binary Translation Extension
+  int PTW : 1;       // Extension for Page Table Walker
+
+} LoongArchFeatures;
+
+typedef struct {
+  LoongArchFeatures features;
+} LoongArchInfo;
+
+typedef enum {
+  LOONGARCH_CPUCFG,
+  LOONGARCH_LAM,
+  LOONGARCH_UAL,
+  LOONGARCH_FPU,
+  LOONGARCH_LSX,
+  LOONGARCH_LASX,
+  LOONGARCH_CRC32,
+  LOONGARCH_COMPLEX,
+  LOONGARCH_CRYPTO,
+  LOONGARCH_LVZ,
+  LOONGARCH_LBT_X86,
+  LOONGARCH_LBT_ARM,
+  LOONGARCH_LBT_MIPS,
+  LOONGARCH_PTW,
+  LOONGARCH_LAST_,
+} LoongArchFeaturesEnum;
+
+LoongArchInfo GetLoongArchInfo(void);
+int GetLoongArchFeaturesEnumValue(const LoongArchFeatures* features,
+                              LoongArchFeaturesEnum value);
+const char* GetLoongArchFeaturesEnumName(LoongArchFeaturesEnum);
+
+CPU_FEATURES_END_CPP_NAMESPACE
+
+#endif  // CPU_FEATURES_INCLUDE_CPUINFO_LOONGARCH_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/cpuinfo_mips.h`:
+
+```h
+// Copyright 2017 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef CPU_FEATURES_INCLUDE_CPUINFO_MIPS_H_
+#define CPU_FEATURES_INCLUDE_CPUINFO_MIPS_H_
+
+#include "cpu_features_cache_info.h"
+#include "cpu_features_macros.h"
+
+CPU_FEATURES_START_CPP_NAMESPACE
+
+typedef struct {
+  int msa : 1;    // MIPS SIMD Architecture
+                  // https://www.mips.com/products/architectures/ase/simd/
+  int eva : 1;    // Enhanced Virtual Addressing
+                  // https://www.mips.com/products/architectures/mips64/
+  int r6 : 1;     // True if is release 6 of the processor.
+  int mips16 : 1; // Compressed instructions
+  int mdmx : 1;   // MIPS Digital Media Extension
+  int mips3d : 1; // 3D graphics acceleration
+                  // MIPS(r) Architecture for Programmers, Volume IV-c
+  int smart : 1;  // Smart-card cryptography
+                  // MIPS(r) Architecture for Programmers, Volume IV-d
+  int dsp : 1;    // Digital Signal Processing
+                  // MIPS(r) Architecture for Programmers, Volume IV-e
+                  // https://www.mips.com/products/architectures/ase/dsp/
+
+  // Make sure to update MipsFeaturesEnum below if you add a field here.
+} MipsFeatures;
+
+typedef struct {
+  MipsFeatures features;
+} MipsInfo;
+
+MipsInfo GetMipsInfo(void);
+
+////////////////////////////////////////////////////////////////////////////////
+// Introspection functions
+
+typedef enum {
+  MIPS_MSA,
+  MIPS_EVA,
+  MIPS_R6,
+  MIPS_MIPS16,
+  MIPS_MDMX,
+  MIPS_MIPS3D,
+  MIPS_SMART,
+  MIPS_DSP,
+  MIPS_LAST_,
+} MipsFeaturesEnum;
+
+int GetMipsFeaturesEnumValue(const MipsFeatures* features,
+                             MipsFeaturesEnum value);
+
+const char* GetMipsFeaturesEnumName(MipsFeaturesEnum);
+
+CPU_FEATURES_END_CPP_NAMESPACE
+
+#if !defined(CPU_FEATURES_ARCH_MIPS)
+#error "Including cpuinfo_mips.h from a non-mips target."
+#endif
+
+#endif  // CPU_FEATURES_INCLUDE_CPUINFO_MIPS_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/cpuinfo_ppc.h`:
+
+```h
+// Copyright 2018 IBM
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef CPU_FEATURES_INCLUDE_CPUINFO_PPC_H_
+#define CPU_FEATURES_INCLUDE_CPUINFO_PPC_H_
+
+#include "cpu_features_cache_info.h"
+#include "cpu_features_macros.h"
+
+CPU_FEATURES_START_CPP_NAMESPACE
+
+typedef struct {
+  int ppc32 : 1;
+  int ppc64 : 1;
+  int ppc601 : 1;
+  int altivec : 1;
+  int fpu : 1;
+  int mmu : 1;
+  int mac_4xx : 1;
+  int unifiedcache : 1;
+  int spe : 1;
+  int efpsingle : 1;
+  int efpdouble : 1;
+  int no_tb : 1;
+  int power4 : 1;
+  int power5 : 1;
+  int power5plus : 1;
+  int cell : 1;
+  int booke : 1;
+  int smt : 1;
+  int icachesnoop : 1;
+  int arch205 : 1;
+  int pa6t : 1;
+  int dfp : 1;
+  int power6ext : 1;
+  int arch206 : 1;
+  int vsx : 1;
+  int pseries_perfmon_compat : 1;
+  int truele : 1;
+  int ppcle : 1;
+  int arch207 : 1;
+  int htm : 1;
+  int dscr : 1;
+  int ebb : 1;
+  int isel : 1;
+  int tar : 1;
+  int vcrypto : 1;
+  int htm_nosc : 1;
+  int arch300 : 1;
+  int ieee128 : 1;
+  int darn : 1;
+  int scv : 1;
+  int htm_no_suspend : 1;
+
+  // Make sure to update PPCFeaturesEnum below if you add a field here.
+} PPCFeatures;
+
+typedef struct {
+  PPCFeatures features;
+} PPCInfo;
+
+PPCInfo GetPPCInfo(void);
+
+typedef struct {
+  char platform[64];       // 0 terminated string
+  char base_platform[64];  // 0 terminated string
+} PPCPlatformTypeStrings;
+
+typedef struct {
+  char platform[64];  // 0 terminated string
+  char model[64];     // 0 terminated string
+  char machine[64];   // 0 terminated string
+  char cpu[64];       // 0 terminated string
+  PPCPlatformTypeStrings type;
+} PPCPlatformStrings;
+
+PPCPlatformStrings GetPPCPlatformStrings(void);
+
+////////////////////////////////////////////////////////////////////////////////
+// Introspection functions
+
+typedef enum {
+  PPC_32,          /* 32 bit mode execution */
+  PPC_64,          /* 64 bit mode execution */
+  PPC_601_INSTR,   /* Old POWER ISA */
+  PPC_HAS_ALTIVEC, /* SIMD Unit*/
+  PPC_HAS_FPU,     /* Floating Point Unit */
+  PPC_HAS_MMU,     /* Memory management unit */
+  PPC_HAS_4xxMAC,
+  PPC_UNIFIED_CACHE,  /* Unified instruction and data cache */
+  PPC_HAS_SPE,        /* Signal processing extention unit */
+  PPC_HAS_EFP_SINGLE, /* SPE single precision fpu */
+  PPC_HAS_EFP_DOUBLE, /* SPE double precision fpu */
+  PPC_NO_TB,          /* No timebase */
+  PPC_POWER4,
+  PPC_POWER5,
+  PPC_POWER5_PLUS,
+  PPC_CELL,  /* Cell broadband engine */
+  PPC_BOOKE, /* Embedded ISA */
+  PPC_SMT,   /* Simultaneous multi-threading */
+  PPC_ICACHE_SNOOP,
+  PPC_ARCH_2_05, /* ISA 2.05 - POWER6 */
+  PPC_PA6T,      /* PA Semi 6T core ISA */
+  PPC_HAS_DFP,   /* Decimal floating point unit */
+  PPC_POWER6_EXT,
+  PPC_ARCH_2_06,              /* ISA 2.06 - POWER7 */
+  PPC_HAS_VSX,                /* Vector-scalar extension */
+  PPC_PSERIES_PERFMON_COMPAT, /* Set of backwards compatibile performance
+                                 monitoring events */
+  PPC_TRUE_LE,
+  PPC_PPC_LE,
+  PPC_ARCH_2_07,      /* ISA 2.07 - POWER8 */
+  PPC_HTM,            /* Hardware Transactional Memory */
+  PPC_DSCR,           /* Data stream control register */
+  PPC_EBB,            /* Event base branching */
+  PPC_ISEL,           /* Integer select instructions */
+  PPC_TAR,            /* Target address register */
+  PPC_VEC_CRYPTO,     /* Vector cryptography instructions */
+  PPC_HTM_NOSC,       /* Transactions aborted when syscall made*/
+  PPC_ARCH_3_00,      /* ISA 3.00 - POWER9 */
+  PPC_HAS_IEEE128,    /* VSX IEEE Binary Float 128-bit */
+  PPC_DARN,           /* Deliver a random number instruction */
+  PPC_SCV,            /* scv syscall */
+  PPC_HTM_NO_SUSPEND, /* TM w/out suspended state */
+  PPC_LAST_,
+} PPCFeaturesEnum;
+
+int GetPPCFeaturesEnumValue(const PPCFeatures* features, PPCFeaturesEnum value);
+
+const char* GetPPCFeaturesEnumName(PPCFeaturesEnum);
+
+CPU_FEATURES_END_CPP_NAMESPACE
+
+#if !defined(CPU_FEATURES_ARCH_PPC)
+#error "Including cpuinfo_ppc.h from a non-ppc target."
+#endif
+
+#endif  // CPU_FEATURES_INCLUDE_CPUINFO_PPC_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/cpuinfo_riscv.h`:
+
+```h
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef CPU_FEATURES_INCLUDE_CPUINFO_RISCV_H_
+#define CPU_FEATURES_INCLUDE_CPUINFO_RISCV_H_
+
+#include "cpu_features_cache_info.h"
+#include "cpu_features_macros.h"
+
+#if !defined(CPU_FEATURES_ARCH_RISCV)
+#error "Including cpuinfo_riscv.h from a non-riscv target."
+#endif
+
+CPU_FEATURES_START_CPP_NAMESPACE
+
+typedef struct {
+  // Base
+  int RV32I : 1;  // Base Integer Instruction Set, 32-bit
+  int RV64I : 1;  // Base Integer Instruction Set, 64-bit
+
+  // Extension
+  int M : 1;         // Standard Extension for Integer Multiplication/Division
+  int A : 1;         // Standard Extension for Atomic Instructions
+  int F : 1;         // Standard Extension for Single-Precision Floating-Point
+  int D : 1;         // Standard Extension for Double-Precision Floating-Point
+  int Q : 1;         // Standard Extension for Quad-Precision Floating-Point
+  int C : 1;         // Standard Extension for Compressed Instructions
+  int V : 1;         // Standard Extension for Vector Instructions
+  int Zicsr : 1;     // Control and Status Register (CSR)
+  int Zifencei : 1;  // Instruction-Fetch Fence
+} RiscvFeatures;
+
+typedef struct {
+  RiscvFeatures features;
+  char uarch[64];   // 0 terminated string
+  char vendor[64];  // 0 terminated string
+} RiscvInfo;
+
+typedef enum {
+  RISCV_RV32I,
+  RISCV_RV64I,
+  RISCV_M,
+  RISCV_A,
+  RISCV_F,
+  RISCV_D,
+  RISCV_Q,
+  RISCV_C,
+  RISCV_V,
+  RISCV_Zicsr,
+  RISCV_Zifencei,
+  RISCV_LAST_,
+} RiscvFeaturesEnum;
+
+RiscvInfo GetRiscvInfo(void);
+int GetRiscvFeaturesEnumValue(const RiscvFeatures* features,
+                              RiscvFeaturesEnum value);
+const char* GetRiscvFeaturesEnumName(RiscvFeaturesEnum);
+
+CPU_FEATURES_END_CPP_NAMESPACE
+
+#endif  // CPU_FEATURES_INCLUDE_CPUINFO_RISCV_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/cpuinfo_s390x.h`:
+
+```h
+// Copyright 2022 IBM
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef CPU_FEATURES_INCLUDE_CPUINFO_S390X_H_
+#define CPU_FEATURES_INCLUDE_CPUINFO_S390X_H_
+
+#include "cpu_features_cache_info.h"
+#include "cpu_features_macros.h"
+
+CPU_FEATURES_START_CPP_NAMESPACE
+
+typedef struct {
+  int esan3: 1;     // instructions named N3, "backported" to esa-mode
+  int zarch: 1;     // z/Architecture mode active
+  int stfle: 1;     // store-facility-list-extended
+  int msa: 1;       // message-security assist
+  int ldisp: 1;     // long-displacement
+  int eimm: 1;      // extended-immediate
+  int dfp: 1;       // decimal floating point & perform floating point operation
+  int edat: 1;      // huge page support
+  int etf3eh: 1;    // extended-translation facility 3 enhancement
+  int highgprs: 1;  // 64-bit register support for 31-bit processes
+  int te: 1;        // transactional execution
+  int vx: 1;        // vector extension facility
+  int vxd: 1;       // vector-packed-decimal facility
+  int vxe: 1;       // vector-enhancement facility 1
+  int gs: 1;        // guarded-storage facility
+  int vxe2: 1;      // vector-enhancements facility 2
+  int vxp: 1;       // vector-packed-decimal-enhancement facility
+  int sort: 1;      // enhanced-sort facility
+  int dflt: 1;      // deflate-conversion facility
+  int vxp2: 1;      // vector-packed-decimal-enhancement facility 2
+  int nnpa: 1;      // neural network processing assist facility
+  int pcimio: 1;    // PCI mio facility
+  int sie: 1;       // virtualization support
+
+  // Make sure to update S390XFeaturesEnum below if you add a field here.
+} S390XFeatures;
+
+typedef struct {
+  S390XFeatures features;
+} S390XInfo;
+
+S390XInfo GetS390XInfo(void);
+
+typedef struct {
+  char platform[64];       // 0 terminated string
+} S390XPlatformTypeStrings;
+
+typedef struct {
+  int num_processors;      // -1 if N/A
+  S390XPlatformTypeStrings type;
+} S390XPlatformStrings;
+
+S390XPlatformStrings GetS390XPlatformStrings(void);
+
+////////////////////////////////////////////////////////////////////////////////
+// Introspection functions
+
+typedef enum {
+  S390_ESAN3,
+  S390_ZARCH,
+  S390_STFLE,
+  S390_MSA,
+  S390_LDISP,
+  S390_EIMM,
+  S390_DFP,
+  S390_EDAT,
+  S390_ETF3EH,
+  S390_HIGHGPRS,
+  S390_TE,
+  S390_VX,
+  S390_VXD,
+  S390_VXE,
+  S390_GS,
+  S390_VXE2,
+  S390_VXP,
+  S390_SORT,
+  S390_DFLT,
+  S390_VXP2,
+  S390_NNPA,
+  S390_PCIMIO,
+  S390_SIE,
+  S390X_LAST_,
+} S390XFeaturesEnum;
+
+int GetS390XFeaturesEnumValue(const S390XFeatures* features, S390XFeaturesEnum value);
+
+const char* GetS390XFeaturesEnumName(S390XFeaturesEnum);
+
+CPU_FEATURES_END_CPP_NAMESPACE
+
+#if !defined(CPU_FEATURES_ARCH_S390X)
+#error "Including cpuinfo_s390x.h from a non-s390x target."
+#endif
+
+#endif  // CPU_FEATURES_INCLUDE_CPUINFO_S390X_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/cpuinfo_x86.h`:
+
+```h
+// Copyright 2017 Google LLC
+// Copyright 2020 Intel Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef CPU_FEATURES_INCLUDE_CPUINFO_X86_H_
+#define CPU_FEATURES_INCLUDE_CPUINFO_X86_H_
+
+#include "cpu_features_cache_info.h"
+#include "cpu_features_macros.h"
+
+CPU_FEATURES_START_CPP_NAMESPACE
+
+// CPUID Vendors
+#define CPU_FEATURES_VENDOR_GENUINE_INTEL "GenuineIntel"
+#define CPU_FEATURES_VENDOR_AUTHENTIC_AMD "AuthenticAMD"
+#define CPU_FEATURES_VENDOR_HYGON_GENUINE "HygonGenuine"
+#define CPU_FEATURES_VENDOR_CENTAUR_HAULS "CentaurHauls"
+#define CPU_FEATURES_VENDOR_SHANGHAI "  Shanghai  "
+
+// See https://en.wikipedia.org/wiki/CPUID for a list of x86 cpu features.
+// The field names are based on the short name provided in the wikipedia tables.
+typedef struct {
+  int fpu : 1;
+  int tsc : 1;
+  int cx8 : 1;
+  int clfsh : 1;
+  int mmx : 1;
+  int aes : 1;
+  int erms : 1;
+  int f16c : 1;
+  int fma4 : 1;
+  int fma3 : 1;
+  int vaes : 1;
+  int vpclmulqdq : 1;
+  int bmi1 : 1;
+  int hle : 1;
+  int bmi2 : 1;
+  int rtm : 1;
+  int rdseed : 1;
+  int clflushopt : 1;
+  int clwb : 1;
+
+  int sse : 1;
+  int sse2 : 1;
+  int sse3 : 1;
+  int ssse3 : 1;
+  int sse4_1 : 1;
+  int sse4_2 : 1;
+  int sse4a : 1;
+
+  int avx : 1;
+  int avx_vnni : 1;
+  int avx2 : 1;
+
+  int avx512f : 1;
+  int avx512cd : 1;
+  int avx512er : 1;
+  int avx512pf : 1;
+  int avx512bw : 1;
+  int avx512dq : 1;
+  int avx512vl : 1;
+  int avx512ifma : 1;
+  int avx512vbmi : 1;
+  int avx512vbmi2 : 1;
+  int avx512vnni : 1;
+  int avx512bitalg : 1;
+  int avx512vpopcntdq : 1;
+  int avx512_4vnniw : 1;
+  int avx512_4vbmi2 : 1;  // Note: this is an alias to avx512_4fmaps.
+  int avx512_second_fma : 1;
+  int avx512_4fmaps : 1;
+  int avx512_bf16 : 1;
+  int avx512_vp2intersect : 1;
+  int avx512_fp16 : 1;
+  int amx_bf16 : 1;
+  int amx_tile : 1;
+  int amx_int8 : 1;
+  int amx_fp16 : 1;
+
+  int pclmulqdq : 1;
+  int smx : 1;
+  int sgx : 1;
+  int cx16 : 1;  // aka. CMPXCHG16B
+  int sha : 1;
+  int popcnt : 1;
+  int movbe : 1;
+  int rdrnd : 1;
+
+  int dca : 1;
+  int ss : 1;
+  int adx : 1;
+  int lzcnt : 1;  // Note: this flag is called ABM for AMD, LZCNT for Intel.
+  int gfni : 1;
+  int movdiri : 1;
+  int movdir64b : 1;
+  int fs_rep_mov : 1;          // Fast short REP MOV
+  int fz_rep_movsb : 1;        // Fast zero-length REP MOVSB
+  int fs_rep_stosb : 1;        // Fast short REP STOSB
+  int fs_rep_cmpsb_scasb : 1;  // Fast short REP CMPSB/SCASB
+
+  int lam: 1; // Intel Linear Address Mask
+  int uai: 1; // AMD Upper Address Ignore
+  // Make sure to update X86FeaturesEnum below if you add a field here.
+} X86Features;
+
+typedef struct {
+  X86Features features;
+  int family;
+  int model;
+  int stepping;
+  char vendor[13];        // 0 terminated string
+  char brand_string[49];  // 0 terminated string
+} X86Info;
+
+// Calls cpuid and returns an initialized X86info.
+X86Info GetX86Info(void);
+
+// Returns cache hierarchy informations.
+// Can call cpuid multiple times.
+CacheInfo GetX86CacheInfo(void);
+
+typedef enum {
+  X86_UNKNOWN,
+  ZHAOXIN_ZHANGJIANG,   // ZhangJiang
+  ZHAOXIN_WUDAOKOU,     // WuDaoKou
+  ZHAOXIN_LUJIAZUI,     // LuJiaZui
+  ZHAOXIN_YONGFENG,     // YongFeng
+  INTEL_80486,          // 80486
+  INTEL_P5,             // P5
+  INTEL_LAKEMONT,       // LAKEMONT
+  INTEL_CORE,           // CORE
+  INTEL_PNR,            // PENRYN
+  INTEL_NHM,            // NEHALEM
+  INTEL_ATOM_BNL,       // BONNELL
+  INTEL_WSM,            // WESTMERE
+  INTEL_SNB,            // SANDYBRIDGE
+  INTEL_IVB,            // IVYBRIDGE
+  INTEL_ATOM_SMT,       // SILVERMONT
+  INTEL_HSW,            // HASWELL
+  INTEL_BDW,            // BROADWELL
+  INTEL_SKL,            // SKYLAKE
+  INTEL_CCL,            // CASCADELAKE
+  INTEL_ATOM_GMT,       // GOLDMONT
+  INTEL_ATOM_GMT_PLUS,  // GOLDMONT+
+  INTEL_ATOM_TMT,       // TREMONT
+  INTEL_KBL,            // KABY LAKE
+  INTEL_CFL,            // COFFEE LAKE
+  INTEL_WHL,            // WHISKEY LAKE
+  INTEL_CML,            // COMET LAKE
+  INTEL_CNL,            // CANNON LAKE
+  INTEL_ICL,            // ICE LAKE
+  INTEL_TGL,            // TIGER LAKE
+  INTEL_SPR,            // SAPPHIRE RAPIDS
+  INTEL_ADL,            // ALDER LAKE
+  INTEL_RCL,            // ROCKET LAKE
+  INTEL_RPL,            // RAPTOR LAKE
+  INTEL_KNIGHTS_M,      // KNIGHTS MILL
+  INTEL_KNIGHTS_L,      // KNIGHTS LANDING
+  INTEL_KNIGHTS_F,      // KNIGHTS FERRY
+  INTEL_KNIGHTS_C,      // KNIGHTS CORNER
+  INTEL_NETBURST,       // NETBURST
+  AMD_HAMMER,           // K8  HAMMER
+  AMD_K10,              // K10
+  AMD_K11,              // K11
+  AMD_K12,              // K12 LLANO
+  AMD_BOBCAT,           // K14 BOBCAT
+  AMD_PILEDRIVER,       // K15 PILEDRIVER
+  AMD_STREAMROLLER,     // K15 STREAMROLLER
+  AMD_EXCAVATOR,        // K15 EXCAVATOR
+  AMD_BULLDOZER,        // K15 BULLDOZER
+  AMD_JAGUAR,           // K16 JAGUAR
+  AMD_PUMA,             // K16 PUMA
+  AMD_ZEN,              // K17 ZEN
+  AMD_ZEN_PLUS,         // K17 ZEN+
+  AMD_ZEN2,             // K17 ZEN 2
+  AMD_ZEN3,             // K19 ZEN 3
+  AMD_ZEN4,             // K19 ZEN 4
+  X86_MICROARCHITECTURE_LAST_,
+} X86Microarchitecture;
+
+// Returns the underlying microarchitecture by looking at X86Info's vendor,
+// family and model.
+X86Microarchitecture GetX86Microarchitecture(const X86Info* info);
+
+// Calls cpuid and fills the brand_string.
+// - brand_string *must* be of size 49 (beware of array decaying).
+// - brand_string will be zero terminated.
+CPU_FEATURES_DEPRECATED("brand_string is now embedded in X86Info by default")
+void FillX86BrandString(char brand_string[49]);
+
+////////////////////////////////////////////////////////////////////////////////
+// Introspection functions
+
+typedef enum {
+  X86_FPU,
+  X86_TSC,
+  X86_CX8,
+  X86_CLFSH,
+  X86_MMX,
+  X86_AES,
+  X86_ERMS,
+  X86_F16C,
+  X86_FMA4,
+  X86_FMA3,
+  X86_VAES,
+  X86_VPCLMULQDQ,
+  X86_BMI1,
+  X86_HLE,
+  X86_BMI2,
+  X86_RTM,
+  X86_RDSEED,
+  X86_CLFLUSHOPT,
+  X86_CLWB,
+  X86_SSE,
+  X86_SSE2,
+  X86_SSE3,
+  X86_SSSE3,
+  X86_SSE4_1,
+  X86_SSE4_2,
+  X86_SSE4A,
+  X86_AVX,
+  X86_AVX_VNNI,
+  X86_AVX2,
+  X86_AVX512F,
+  X86_AVX512CD,
+  X86_AVX512ER,
+  X86_AVX512PF,
+  X86_AVX512BW,
+  X86_AVX512DQ,
+  X86_AVX512VL,
+  X86_AVX512IFMA,
+  X86_AVX512VBMI,
+  X86_AVX512VBMI2,
+  X86_AVX512VNNI,
+  X86_AVX512BITALG,
+  X86_AVX512VPOPCNTDQ,
+  X86_AVX512_4VNNIW,
+  X86_AVX512_4VBMI2,  // Note: this is an alias to X86_AVX512_4FMAPS.
+  X86_AVX512_SECOND_FMA,
+  X86_AVX512_4FMAPS,
+  X86_AVX512_BF16,
+  X86_AVX512_VP2INTERSECT,
+  X86_AVX512_FP16,
+  X86_AMX_BF16,
+  X86_AMX_TILE,
+  X86_AMX_INT8,
+  X86_AMX_FP16,
+  X86_PCLMULQDQ,
+  X86_SMX,
+  X86_SGX,
+  X86_CX16,
+  X86_SHA,
+  X86_POPCNT,
+  X86_MOVBE,
+  X86_RDRND,
+  X86_DCA,
+  X86_SS,
+  X86_ADX,
+  X86_LZCNT,
+  X86_GFNI,
+  X86_MOVDIRI,
+  X86_MOVDIR64B,
+  X86_FS_REP_MOV,
+  X86_FZ_REP_MOVSB,
+  X86_FS_REP_STOSB,
+  X86_FS_REP_CMPSB_SCASB,
+  X86_LAM,
+  X86_UAI,
+  X86_LAST_,
+} X86FeaturesEnum;
+
+int GetX86FeaturesEnumValue(const X86Features* features, X86FeaturesEnum value);
+
+const char* GetX86FeaturesEnumName(X86FeaturesEnum);
+
+const char* GetX86MicroarchitectureName(X86Microarchitecture);
+
+CPU_FEATURES_END_CPP_NAMESPACE
+
+#if !defined(CPU_FEATURES_ARCH_X86)
+#error "Including cpuinfo_x86.h from a non-x86 target."
+#endif
+
+#endif  // CPU_FEATURES_INCLUDE_CPUINFO_X86_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/internal/bit_utils.h`:
+
+```h
+// Copyright 2017 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef CPU_FEATURES_INCLUDE_INTERNAL_BIT_UTILS_H_
+#define CPU_FEATURES_INCLUDE_INTERNAL_BIT_UTILS_H_
+
+#include <assert.h>
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "cpu_features_macros.h"
+
+CPU_FEATURES_START_CPP_NAMESPACE
+
+inline static bool IsBitSet(uint32_t reg, uint32_t bit) {
+  return (reg >> bit) & 0x1;
+}
+
+inline static uint32_t ExtractBitRange(uint32_t reg, uint32_t msb,
+                                       uint32_t lsb) {
+  const uint64_t bits = msb - lsb + 1ULL;
+  const uint64_t mask = (1ULL << bits) - 1ULL;
+  assert(msb >= lsb);
+  return (reg >> lsb) & mask;
+}
+
+CPU_FEATURES_END_CPP_NAMESPACE
+
+#endif  // CPU_FEATURES_INCLUDE_INTERNAL_BIT_UTILS_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/internal/cpuid_x86.h`:
+
+```h
+// Copyright 2017 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef CPU_FEATURES_INCLUDE_INTERNAL_CPUID_X86_H_
+#define CPU_FEATURES_INCLUDE_INTERNAL_CPUID_X86_H_
+
+#include <stdint.h>
+
+#include "cpu_features_macros.h"
+
+CPU_FEATURES_START_CPP_NAMESPACE
+
+// A struct to hold the result of a call to cpuid.
+typedef struct {
+  uint32_t eax, ebx, ecx, edx;
+} Leaf;
+
+// Returns the result of a call to the cpuid instruction.
+Leaf GetCpuidLeaf(uint32_t leaf_id, int ecx);
+
+// Returns the eax value of the XCR0 register.
+uint32_t GetXCR0Eax(void);
+
+CPU_FEATURES_END_CPP_NAMESPACE
+
+#endif  // CPU_FEATURES_INCLUDE_INTERNAL_CPUID_X86_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/internal/filesystem.h`:
+
+```h
+// Copyright 2017 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// An interface for the filesystem that allows mocking the filesystem in
+// unittests.
+#ifndef CPU_FEATURES_INCLUDE_INTERNAL_FILESYSTEM_H_
+#define CPU_FEATURES_INCLUDE_INTERNAL_FILESYSTEM_H_
+
+#include <stddef.h>
+#include <stdint.h>
+
+#include "cpu_features_macros.h"
+
+CPU_FEATURES_START_CPP_NAMESPACE
+
+// Same as linux "open(filename, O_RDONLY)", retries automatically on EINTR.
+int CpuFeatures_OpenFile(const char* filename);
+
+// Same as linux "read(file_descriptor, buffer, buffer_size)", retries
+// automatically on EINTR.
+int CpuFeatures_ReadFile(int file_descriptor, void* buffer, size_t buffer_size);
+
+// Same as linux "close(file_descriptor)".
+void CpuFeatures_CloseFile(int file_descriptor);
+
+CPU_FEATURES_END_CPP_NAMESPACE
+
+#endif  // CPU_FEATURES_INCLUDE_INTERNAL_FILESYSTEM_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/internal/hwcaps.h`:
+
+```h
+// Copyright 2017 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Interface to retrieve hardware capabilities. It relies on Linux's getauxval
+// or `/proc/self/auxval` under the hood.
+#ifndef CPU_FEATURES_INCLUDE_INTERNAL_HWCAPS_H_
+#define CPU_FEATURES_INCLUDE_INTERNAL_HWCAPS_H_
+
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "cpu_features_macros.h"
+
+CPU_FEATURES_START_CPP_NAMESPACE
+
+// To avoid depending on the linux kernel we reproduce the architecture specific
+// constants here.
+
+// http://elixir.free-electrons.com/linux/latest/source/arch/arm64/include/uapi/asm/hwcap.h
+#define AARCH64_HWCAP_FP (1UL << 0)
+#define AARCH64_HWCAP_ASIMD (1UL << 1)
+#define AARCH64_HWCAP_EVTSTRM (1UL << 2)
+#define AARCH64_HWCAP_AES (1UL << 3)
+#define AARCH64_HWCAP_PMULL (1UL << 4)
+#define AARCH64_HWCAP_SHA1 (1UL << 5)
+#define AARCH64_HWCAP_SHA2 (1UL << 6)
+#define AARCH64_HWCAP_CRC32 (1UL << 7)
+#define AARCH64_HWCAP_ATOMICS (1UL << 8)
+#define AARCH64_HWCAP_FPHP (1UL << 9)
+#define AARCH64_HWCAP_ASIMDHP (1UL << 10)
+#define AARCH64_HWCAP_CPUID (1UL << 11)
+#define AARCH64_HWCAP_ASIMDRDM (1UL << 12)
+#define AARCH64_HWCAP_JSCVT (1UL << 13)
+#define AARCH64_HWCAP_FCMA (1UL << 14)
+#define AARCH64_HWCAP_LRCPC (1UL << 15)
+#define AARCH64_HWCAP_DCPOP (1UL << 16)
+#define AARCH64_HWCAP_SHA3 (1UL << 17)
+#define AARCH64_HWCAP_SM3 (1UL << 18)
+#define AARCH64_HWCAP_SM4 (1UL << 19)
+#define AARCH64_HWCAP_ASIMDDP (1UL << 20)
+#define AARCH64_HWCAP_SHA512 (1UL << 21)
+#define AARCH64_HWCAP_SVE (1UL << 22)
+#define AARCH64_HWCAP_ASIMDFHM (1UL << 23)
+#define AARCH64_HWCAP_DIT (1UL << 24)
+#define AARCH64_HWCAP_USCAT (1UL << 25)
+#define AARCH64_HWCAP_ILRCPC (1UL << 26)
+#define AARCH64_HWCAP_FLAGM (1UL << 27)
+#define AARCH64_HWCAP_SSBS (1UL << 28)
+#define AARCH64_HWCAP_SB (1UL << 29)
+#define AARCH64_HWCAP_PACA (1UL << 30)
+#define AARCH64_HWCAP_PACG (1UL << 31)
+
+#define AARCH64_HWCAP2_DCPODP (1UL << 0)
+#define AARCH64_HWCAP2_SVE2 (1UL << 1)
+#define AARCH64_HWCAP2_SVEAES (1UL << 2)
+#define AARCH64_HWCAP2_SVEPMULL (1UL << 3)
+#define AARCH64_HWCAP2_SVEBITPERM (1UL << 4)
+#define AARCH64_HWCAP2_SVESHA3 (1UL << 5)
+#define AARCH64_HWCAP2_SVESM4 (1UL << 6)
+#define AARCH64_HWCAP2_FLAGM2 (1UL << 7)
+#define AARCH64_HWCAP2_FRINT (1UL << 8)
+#define AARCH64_HWCAP2_SVEI8MM (1UL << 9)
+#define AARCH64_HWCAP2_SVEF32MM (1UL << 10)
+#define AARCH64_HWCAP2_SVEF64MM (1UL << 11)
+#define AARCH64_HWCAP2_SVEBF16 (1UL << 12)
+#define AARCH64_HWCAP2_I8MM (1UL << 13)
+#define AARCH64_HWCAP2_BF16 (1UL << 14)
+#define AARCH64_HWCAP2_DGH (1UL << 15)
+#define AARCH64_HWCAP2_RNG (1UL << 16)
+#define AARCH64_HWCAP2_BTI (1UL << 17)
+#define AARCH64_HWCAP2_MTE (1UL << 18)
+#define AARCH64_HWCAP2_ECV (1UL << 19)
+#define AARCH64_HWCAP2_AFP (1UL << 20)
+#define AARCH64_HWCAP2_RPRES (1UL << 21)
+#define AARCH64_HWCAP2_MTE3 (1UL << 22)
+#define AARCH64_HWCAP2_SME (1UL << 23)
+#define AARCH64_HWCAP2_SME_I16I64 (1UL << 24)
+#define AARCH64_HWCAP2_SME_F64F64 (1UL << 25)
+#define AARCH64_HWCAP2_SME_I8I32 (1UL << 26)
+#define AARCH64_HWCAP2_SME_F16F32 (1UL << 27)
+#define AARCH64_HWCAP2_SME_B16F32 (1UL << 28)
+#define AARCH64_HWCAP2_SME_F32F32 (1UL << 29)
+#define AARCH64_HWCAP2_SME_FA64 (1UL << 30)
+#define AARCH64_HWCAP2_WFXT (1UL << 31)
+#define AARCH64_HWCAP2_EBF16 (1UL << 32)
+#define AARCH64_HWCAP2_SVE_EBF16 (1UL << 33)
+#define AARCH64_HWCAP2_CSSC (1UL << 34)
+#define AARCH64_HWCAP2_RPRFM (1UL << 35)
+#define AARCH64_HWCAP2_SVE2P1 (1UL << 36)
+#define AARCH64_HWCAP2_SME2 (1UL << 37)
+#define AARCH64_HWCAP2_SME2P1 (1UL << 38)
+#define AARCH64_HWCAP2_SME_I16I32 (1UL << 39)
+#define AARCH64_HWCAP2_SME_BI32I32 (1UL << 40)
+#define AARCH64_HWCAP2_SME_B16B16 (1UL << 41)
+#define AARCH64_HWCAP2_SME_F16F16 (1UL << 42)
+
+// http://elixir.free-electrons.com/linux/latest/source/arch/arm/include/uapi/asm/hwcap.h
+#define ARM_HWCAP_SWP (1UL << 0)
+#define ARM_HWCAP_HALF (1UL << 1)
+#define ARM_HWCAP_THUMB (1UL << 2)
+#define ARM_HWCAP_26BIT (1UL << 3)
+#define ARM_HWCAP_FAST_MULT (1UL << 4)
+#define ARM_HWCAP_FPA (1UL << 5)
+#define ARM_HWCAP_VFP (1UL << 6)
+#define ARM_HWCAP_EDSP (1UL << 7)
+#define ARM_HWCAP_JAVA (1UL << 8)
+#define ARM_HWCAP_IWMMXT (1UL << 9)
+#define ARM_HWCAP_CRUNCH (1UL << 10)
+#define ARM_HWCAP_THUMBEE (1UL << 11)
+#define ARM_HWCAP_NEON (1UL << 12)
+#define ARM_HWCAP_VFPV3 (1UL << 13)
+#define ARM_HWCAP_VFPV3D16 (1UL << 14)
+#define ARM_HWCAP_TLS (1UL << 15)
+#define ARM_HWCAP_VFPV4 (1UL << 16)
+#define ARM_HWCAP_IDIVA (1UL << 17)
+#define ARM_HWCAP_IDIVT (1UL << 18)
+#define ARM_HWCAP_VFPD32 (1UL << 19)
+#define ARM_HWCAP_LPAE (1UL << 20)
+#define ARM_HWCAP_EVTSTRM (1UL << 21)
+#define ARM_HWCAP2_AES (1UL << 0)
+#define ARM_HWCAP2_PMULL (1UL << 1)
+#define ARM_HWCAP2_SHA1 (1UL << 2)
+#define ARM_HWCAP2_SHA2 (1UL << 3)
+#define ARM_HWCAP2_CRC32 (1UL << 4)
+
+// http://elixir.free-electrons.com/linux/latest/source/arch/mips/include/uapi/asm/hwcap.h
+#define MIPS_HWCAP_R6 (1UL << 0)
+#define MIPS_HWCAP_MSA (1UL << 1)
+#define MIPS_HWCAP_CRC32 (1UL << 2)
+#define MIPS_HWCAP_MIPS16 (1UL << 3)
+#define MIPS_HWCAP_MDMX (1UL << 4)
+#define MIPS_HWCAP_MIPS3D (1UL << 5)
+#define MIPS_HWCAP_SMARTMIPS (1UL << 6)
+#define MIPS_HWCAP_DSP (1UL << 7)
+#define MIPS_HWCAP_DSP2 (1UL << 8)
+#define MIPS_HWCAP_DSP3 (1UL << 9)
+
+// http://elixir.free-electrons.com/linux/latest/source/arch/powerpc/include/uapi/asm/cputable.h
+#ifndef _UAPI__ASM_POWERPC_CPUTABLE_H
+/* in AT_HWCAP */
+#define PPC_FEATURE_32 0x80000000
+#define PPC_FEATURE_64 0x40000000
+#define PPC_FEATURE_601_INSTR 0x20000000
+#define PPC_FEATURE_HAS_ALTIVEC 0x10000000
+#define PPC_FEATURE_HAS_FPU 0x08000000
+#define PPC_FEATURE_HAS_MMU 0x04000000
+#define PPC_FEATURE_HAS_4xxMAC 0x02000000
+#define PPC_FEATURE_UNIFIED_CACHE 0x01000000
+#define PPC_FEATURE_HAS_SPE 0x00800000
+#define PPC_FEATURE_HAS_EFP_SINGLE 0x00400000
+#define PPC_FEATURE_HAS_EFP_DOUBLE 0x00200000
+#define PPC_FEATURE_NO_TB 0x00100000
+#define PPC_FEATURE_POWER4 0x00080000
+#define PPC_FEATURE_POWER5 0x00040000
+#define PPC_FEATURE_POWER5_PLUS 0x00020000
+#define PPC_FEATURE_CELL 0x00010000
+#define PPC_FEATURE_BOOKE 0x00008000
+#define PPC_FEATURE_SMT 0x00004000
+#define PPC_FEATURE_ICACHE_SNOOP 0x00002000
+#define PPC_FEATURE_ARCH_2_05 0x00001000
+#define PPC_FEATURE_PA6T 0x00000800
+#define PPC_FEATURE_HAS_DFP 0x00000400
+#define PPC_FEATURE_POWER6_EXT 0x00000200
+#define PPC_FEATURE_ARCH_2_06 0x00000100
+#define PPC_FEATURE_HAS_VSX 0x00000080
+
+#define PPC_FEATURE_PSERIES_PERFMON_COMPAT 0x00000040
+
+/* Reserved - do not use                0x00000004 */
+#define PPC_FEATURE_TRUE_LE 0x00000002
+#define PPC_FEATURE_PPC_LE 0x00000001
+
+/* in AT_HWCAP2 */
+#define PPC_FEATURE2_ARCH_2_07 0x80000000
+#define PPC_FEATURE2_HTM 0x40000000
+#define PPC_FEATURE2_DSCR 0x20000000
+#define PPC_FEATURE2_EBB 0x10000000
+#define PPC_FEATURE2_ISEL 0x08000000
+#define PPC_FEATURE2_TAR 0x04000000
+#define PPC_FEATURE2_VEC_CRYPTO 0x02000000
+#define PPC_FEATURE2_HTM_NOSC 0x01000000
+#define PPC_FEATURE2_ARCH_3_00 0x00800000
+#define PPC_FEATURE2_HAS_IEEE128 0x00400000
+#define PPC_FEATURE2_DARN 0x00200000
+#define PPC_FEATURE2_SCV 0x00100000
+#define PPC_FEATURE2_HTM_NO_SUSPEND 0x00080000
+#endif
+
+// https://elixir.bootlin.com/linux/v6.0-rc6/source/arch/s390/include/asm/elf.h
+#define HWCAP_S390_ESAN3        1
+#define HWCAP_S390_ZARCH        2
+#define HWCAP_S390_STFLE        4
+#define HWCAP_S390_MSA          8
+#define HWCAP_S390_LDISP        16
+#define HWCAP_S390_EIMM         32
+#define HWCAP_S390_DFP          64
+#define HWCAP_S390_HPAGE        128
+#define HWCAP_S390_ETF3EH       256
+#define HWCAP_S390_HIGH_GPRS    512
+#define HWCAP_S390_TE           1024
+#define HWCAP_S390_VX           2048
+#define HWCAP_S390_VXRS         HWCAP_S390_VX
+#define HWCAP_S390_VXD          4096
+#define HWCAP_S390_VXRS_BCD     HWCAP_S390_VXD
+#define HWCAP_S390_VXE          8192
+#define HWCAP_S390_VXRS_EXT     HWCAP_S390_VXE
+#define HWCAP_S390_GS           16384
+#define HWCAP_S390_VXRS_EXT2    32768
+#define HWCAP_S390_VXRS_PDE     65536
+#define HWCAP_S390_SORT         131072
+#define HWCAP_S390_DFLT         262144
+#define HWCAP_S390_VXRS_PDE2    524288
+#define HWCAP_S390_NNPA         1048576
+#define HWCAP_S390_PCI_MIO      2097152
+#define HWCAP_S390_SIE          4194304
+
+// https://elixir.bootlin.com/linux/latest/source/arch/riscv/include/uapi/asm/hwcap.h
+#define RISCV_HWCAP_32 0x32
+#define RISCV_HWCAP_64 0x64
+#define RISCV_HWCAP_128 0x128
+#define RISCV_HWCAP_M (1UL << ('M' - 'A'))
+#define RISCV_HWCAP_A (1UL << ('A' - 'A'))
+#define RISCV_HWCAP_F (1UL << ('F' - 'A'))
+#define RISCV_HWCAP_D (1UL << ('D' - 'A'))
+#define RISCV_HWCAP_Q (1UL << ('Q' - 'A'))
+#define RISCV_HWCAP_C (1UL << ('C' - 'A'))
+#define RISCV_HWCAP_V (1UL << ('V' - 'A'))
+
+// https://github.com/torvalds/linux/blob/master/arch/loongarch/include/uapi/asm/hwcap.h
+#define HWCAP_LOONGARCH_CPUCFG   (1 << 0)
+#define HWCAP_LOONGARCH_LAM      (1 << 1)
+#define HWCAP_LOONGARCH_UAL      (1 << 2)
+#define HWCAP_LOONGARCH_FPU      (1 << 3)
+#define HWCAP_LOONGARCH_LSX      (1 << 4)
+#define HWCAP_LOONGARCH_LASX     (1 << 5)
+#define HWCAP_LOONGARCH_CRC32    (1 << 6)
+#define HWCAP_LOONGARCH_COMPLEX  (1 << 7)
+#define HWCAP_LOONGARCH_CRYPTO   (1 << 8)
+#define HWCAP_LOONGARCH_LVZ      (1 << 9)
+#define HWCAP_LOONGARCH_LBT_X86  (1 << 10)
+#define HWCAP_LOONGARCH_LBT_ARM  (1 << 11)
+#define HWCAP_LOONGARCH_LBT_MIPS (1 << 12)
+#define HWCAP_LOONGARCH_PTW      (1 << 13)
+
+typedef struct {
+  unsigned long hwcaps;
+  unsigned long hwcaps2;
+} HardwareCapabilities;
+
+// Retrieves values from auxiliary vector for types AT_HWCAP and AT_HWCAP2.
+// First tries to call getauxval(), if not available falls back to reading
+// "/proc/self/auxv".
+HardwareCapabilities CpuFeatures_GetHardwareCapabilities(void);
+
+// Checks whether value for AT_HWCAP (or AT_HWCAP2) match hwcaps_mask.
+bool CpuFeatures_IsHwCapsSet(const HardwareCapabilities hwcaps_mask,
+                             const HardwareCapabilities hwcaps);
+
+// Get pointer for the AT_PLATFORM type.
+const char* CpuFeatures_GetPlatformPointer(void);
+// Get pointer for the AT_BASE_PLATFORM type.
+const char* CpuFeatures_GetBasePlatformPointer(void);
+
+CPU_FEATURES_END_CPP_NAMESPACE
+
+#endif  // CPU_FEATURES_INCLUDE_INTERNAL_HWCAPS_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/internal/stack_line_reader.h`:
+
+```h
+// Copyright 2017 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Reads a file line by line and stores the data on the stack. This allows
+// parsing files in one go without allocating.
+#ifndef CPU_FEATURES_INCLUDE_INTERNAL_STACK_LINE_READER_H_
+#define CPU_FEATURES_INCLUDE_INTERNAL_STACK_LINE_READER_H_
+
+#include <stdbool.h>
+
+#include "cpu_features_macros.h"
+#include "internal/string_view.h"
+
+CPU_FEATURES_START_CPP_NAMESPACE
+
+typedef struct {
+  char buffer[STACK_LINE_READER_BUFFER_SIZE];
+  StringView view;
+  int fd;
+  bool skip_mode;
+} StackLineReader;
+
+// Initializes a StackLineReader.
+void StackLineReader_Initialize(StackLineReader* reader, int fd);
+
+typedef struct {
+  StringView line;  // A view of the line.
+  bool eof;         // Nothing more to read, we reached EOF.
+  bool full_line;   // If false the line was truncated to
+                    // STACK_LINE_READER_BUFFER_SIZE.
+} LineResult;
+
+// Reads the file pointed to by fd and tries to read a full line.
+LineResult StackLineReader_NextLine(StackLineReader* reader);
+
+CPU_FEATURES_END_CPP_NAMESPACE
+
+#endif  // CPU_FEATURES_INCLUDE_INTERNAL_STACK_LINE_READER_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/internal/string_view.h`:
+
+```h
+// Copyright 2017 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// A view over a piece of string. The view is not 0 terminated.
+#ifndef CPU_FEATURES_INCLUDE_INTERNAL_STRING_VIEW_H_
+#define CPU_FEATURES_INCLUDE_INTERNAL_STRING_VIEW_H_
+
+#include <stdbool.h>
+#include <stddef.h>
+#include <string.h>
+
+#include "cpu_features_macros.h"
+
+CPU_FEATURES_START_CPP_NAMESPACE
+
+typedef struct {
+  const char* ptr;
+  size_t size;
+} StringView;
+
+#ifdef __cplusplus
+static const StringView kEmptyStringView = {NULL, 0};
+#else
+static const StringView kEmptyStringView;
+#endif
+
+// Returns a StringView from the provided string.
+// Passing NULL is valid only if size is 0.
+static inline StringView view(const char* str, const size_t size) {
+  StringView view;
+  view.ptr = str;
+  view.size = size;
+  return view;
+}
+
+static inline StringView str(const char* str) { return view(str, strlen(str)); }
+
+// Returns the index of the first occurrence of c in view or -1 if not found.
+int CpuFeatures_StringView_IndexOfChar(const StringView view, char c);
+
+// Returns the index of the first occurrence of sub_view in view or -1 if not
+// found.
+int CpuFeatures_StringView_IndexOf(const StringView view,
+                                   const StringView sub_view);
+
+// Returns whether a is equal to b (same content).
+bool CpuFeatures_StringView_IsEquals(const StringView a, const StringView b);
+
+// Returns whether a starts with b.
+bool CpuFeatures_StringView_StartsWith(const StringView a, const StringView b);
+
+// Removes count characters from the beginning of view or kEmptyStringView if
+// count if greater than view.size.
+StringView CpuFeatures_StringView_PopFront(const StringView str_view,
+                                           size_t count);
+
+// Removes count characters from the end of view or kEmptyStringView if count if
+// greater than view.size.
+StringView CpuFeatures_StringView_PopBack(const StringView str_view,
+                                          size_t count);
+
+// Keeps the count first characters of view or view if count if greater than
+// view.size.
+StringView CpuFeatures_StringView_KeepFront(const StringView str_view,
+                                            size_t count);
+
+// Retrieves the first character of view. If view is empty the behavior is
+// undefined.
+char CpuFeatures_StringView_Front(const StringView view);
+
+// Retrieves the last character of view. If view is empty the behavior is
+// undefined.
+char CpuFeatures_StringView_Back(const StringView view);
+
+// Removes leading and tailing space characters.
+StringView CpuFeatures_StringView_TrimWhitespace(StringView view);
+
+// Convert StringView to positive integer. e.g. "42", "0x2a".
+// Returns -1 on error.
+int CpuFeatures_StringView_ParsePositiveNumber(const StringView view);
+
+// Copies src StringView to dst buffer.
+void CpuFeatures_StringView_CopyString(const StringView src, char* dst,
+                                       size_t dst_size);
+
+// Checks if line contains the specified whitespace separated word.
+bool CpuFeatures_StringView_HasWord(const StringView line,
+                                    const char* const word,
+                                    const char separator);
+
+// Get key/value from line. key and value are separated by ": ".
+// key and value are cleaned up from leading and trailing whitespaces.
+bool CpuFeatures_StringView_GetAttributeKeyValue(const StringView line,
+                                                 StringView* key,
+                                                 StringView* value);
+
+CPU_FEATURES_END_CPP_NAMESPACE
+
+#endif  // CPU_FEATURES_INCLUDE_INTERNAL_STRING_VIEW_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/include/cpu_info/internal/windows_utils.h`:
+
+```h
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef CPU_FEATURES_INCLUDE_INTERNAL_WINDOWS_UTILS_H_
+#define CPU_FEATURES_INCLUDE_INTERNAL_WINDOWS_UTILS_H_
+
+#include "cpu_features_macros.h"
+
+#ifdef CPU_FEATURES_OS_WINDOWS
+
+#include <windows.h>  // IsProcessorFeaturePresent
+
+// modern WinSDK winnt.h contains newer features detection definitions
+#if !defined(PF_SSSE3_INSTRUCTIONS_AVAILABLE)
+#define PF_SSSE3_INSTRUCTIONS_AVAILABLE 36
+#endif
+
+#if !defined(PF_SSE4_1_INSTRUCTIONS_AVAILABLE)
+#define PF_SSE4_1_INSTRUCTIONS_AVAILABLE 37
+#endif
+
+#if !defined(PF_SSE4_2_INSTRUCTIONS_AVAILABLE)
+#define PF_SSE4_2_INSTRUCTIONS_AVAILABLE 38
+#endif
+
+#if !defined(PF_ARM_VFP_32_REGISTERS_AVAILABLE)
+#define PF_ARM_VFP_32_REGISTERS_AVAILABLE 18
+#endif
+
+#if !defined(PF_ARM_NEON_INSTRUCTIONS_AVAILABLE)
+#define PF_ARM_NEON_INSTRUCTIONS_AVAILABLE 19
+#endif
+
+#if !defined(PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE)
+#define PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE 30
+#endif
+
+#if !defined(PF_ARM_V8_CRC32_INSTRUCTIONS_AVAILABLE)
+#define PF_ARM_V8_CRC32_INSTRUCTIONS_AVAILABLE 31
+#endif
+
+#if !defined(PF_ARM_V81_ATOMIC_INSTRUCTIONS_AVAILABLE)
+#define PF_ARM_V81_ATOMIC_INSTRUCTIONS_AVAILABLE 34
+#endif
+
+#if !defined(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE)
+#define PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE 43
+#endif
+
+#if !defined(PF_ARM_V83_JSCVT_INSTRUCTIONS_AVAILABLE)
+#define PF_ARM_V83_JSCVT_INSTRUCTIONS_AVAILABLE 44
+#endif
+
+#if !defined(PF_ARM_V83_LRCPC_INSTRUCTIONS_AVAILABLE)
+#define PF_ARM_V83_LRCPC_INSTRUCTIONS_AVAILABLE 45
+#endif
+
+#endif  // CPU_FEATURES_OS_WINDOWS
+#endif  // CPU_FEATURES_INCLUDE_INTERNAL_WINDOWS_UTILS_H_
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/player_id.txt.example`:
+
+```example
+TournamentTagOrDiscordId
+
+```
+
+`UrnItAnticheat-main/UrnItAnticheat/webhook.txt.example`:
+
+```example
+https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN
+
+```
+
+`UrnItAnticheat-main/scripts/scrape_deadlock_cheats.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+Scrape Deadlock cheat names from elitepvpers forum and write cheat_list.txt
+for use with the anticheat. Run from repo root or pass --output path.
+Usage: python scrape_deadlock_cheats.py [--output path/to/cheat_list.txt]
+"""
+import re
+import sys
+import argparse
+from urllib.request import Request, urlopen
+from urllib.error import URLError, HTTPError
+
+# Target: https://www.elitepvpers.com/forum/deadlock-trading/
+URL = "https://www.elitepvpers.com/forum/deadlock-trading/"
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+# Map known product names from thread titles to plausible process names (.exe).
+# Thread titles look like "[Selling][Synthetic Skill - Deadlock |External|...]"
+# We extract the first part and convert to exe name, or use this map for known ones.
+KNOWN_MAPPING = {
+    "synthetic skill": "syntheticskill.exe",
+    "foxyz": "foxyz.exe",
+    "eshub": "eshub.exe",
+    "coconut": "coconut.exe",
+    "medusa": "medusa.exe",
+    "predator": "predator.exe",
+    "umbrella": "umbrella.exe",
+    "deadlockml": "deadlockml.exe",
+    "phoenix": "phoenix.exe",
+    "storm": "storm.exe",
+    "obstruct": "obstruct.exe",
+    "pussycat": "pussycat.exe",
+    "mason": "mason.exe",
+    "byster": "byster.exe",
+    "belltower": "belltower.exe",
+    "spyderrz": "spyderrz.exe",
+    "unlockcheat": "unlockcheat.exe",
+    "dmaperk": "dmaperk.exe",
+    "cocon": "cocon.exe",
+    "medus": "medus.exe",
+    "yyhacks": "yyhacks.exe",
+    "dexaim": "dexaimdma.exe",
+}
+
+
+def slug_to_exe(slug: str) -> str:
+    """Turn a product slug into a plausible .exe name."""
+    s = re.sub(r"[^a-z0-9]", "", slug.lower())
+    if not s:
+        return ""
+    return s + ".exe"
+
+
+def extract_cheat_names(html: str) -> set:
+    """Parse forum listing HTML for thread titles and extract cheat/product names."""
+    names = set()
+    # Thread titles: [Selling][Product Name - Deadlock |...] or [Selling][Product Name ...]
+    for m in re.finditer(r"\[Selling\]\s*\[([^\]]+?)(?:\s*[-|]\s*|\])", html, re.IGNORECASE):
+        title_part = m.group(1).strip()
+        # Strip trailing "Deadlock" and common suffixes
+        title_part = re.sub(r"\s*-\s*Deadlock.*$", "", title_part, flags=re.IGNORECASE)
+        # First meaningful token(s): "Synthetic Skill" -> syntheticskill, "FOXYZ.NET" -> foxyz
+        parts = re.split(r"[\s\-–—|]+", title_part)
+        first = parts[0] if parts else ""
+        first = re.sub(r"\.(net|com|xyz|org)$", "", first, flags=re.IGNORECASE)
+        slug = first.lower().replace(" ", "").replace(".", "")
+        if len(slug) >= 2 and slug not in ("deadlock", "selling", "buy", "cheat", "hack"):
+            names.add(slug)
+    for name in re.findall(r"(?i)(synthetic\s*skill|foxyz|coconut|medusa|predator|umbrella|deadlock\s*ml|phoenix|storm|obstruct|pussycat|mason|belltower|spyderrz|dma\s*perk|eshub|dmaperk)", html):
+        names.add(name.lower().replace(" ", ""))
+    return names
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Scrape Deadlock cheats from elitepvpers and write cheat_list.txt")
+    ap.add_argument("--output", "-o", default=None, help="Output path for cheat_list.txt")
+    args = ap.parse_args()
+
+    out_path = args.output
+    if not out_path:
+        # Default: next to script's repo, UrnItAnticheat/cheat_list.txt
+        import os
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        repo_root = os.path.dirname(script_dir)
+        out_path = os.path.join(repo_root, "UrnItAnticheat", "cheat_list.txt")
+
+    print("Fetching", URL, "...")
+    req = Request(URL, headers={"User-Agent": USER_AGENT})
+    try:
+        with urlopen(req, timeout=15) as r:
+            html = r.read().decode("utf-8", errors="replace")
+    except (URLError, HTTPError, OSError) as e:
+        print("Error fetching page:", e, file=sys.stderr)
+        sys.exit(1)
+
+    names = extract_cheat_names(html)
+    exes = set()
+    for n in names:
+        if n in KNOWN_MAPPING:
+            exes.add(KNOWN_MAPPING[n])
+        else:
+            exe = slug_to_exe(n)
+            if exe:
+                exes.add(exe)
+
+    lines = ["cheats"] + sorted(exes) + ["performance", "# msi afterburner.exe"]
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+    print("Wrote", len(exes), "entries to", out_path)
+
+
+if __name__ == "__main__":
+    main()
+
+```
