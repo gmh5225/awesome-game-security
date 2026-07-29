@@ -1691,3 +1691,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:momo5502/sogen`: entity [[sogen]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
 
 - **2026-07-29** — ingest `description:momo5502/patch-finder`: entity [[patch-finder]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
+
+- **2026-07-29** — ingest `description:momo5502/levo`: entity [[levo]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
