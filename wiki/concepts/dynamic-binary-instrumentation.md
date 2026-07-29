@@ -4,6 +4,7 @@ kind: concept
 topics: [reverse-engineering, game-hacking]
 sources:
   - wiki/sources/skills/reverse-engineering.md
+  - wiki/sources/descriptions/momo5502__vmtrace.md
 updated: 2026-07-29
 confidence: high
 ---
@@ -38,8 +39,8 @@ Illustrative: [[cpp-veh-dbi]]. Exception-per-branch designs can be orders of mag
 
 ## User-mode hypervisor-assisted tracing
 
-WHP API runs guest code snippets with EPT-equivalent page traps (R/W/X), CPUID interception, and syscall emulation — pure user mode, no driver signing. Composable with disassemblers; limited to snippet/function scope unless full OS modeling is added. Illustrative: [[winvisor]].
+WHP API runs guest code snippets with EPT-equivalent page traps (R/W/X), CPUID interception, and syscall emulation — pure user mode, no driver signing. Composable with disassemblers; limited to snippet/function scope unless full OS modeling is added. WHP trap libraries such as [[vmtrace]] (host-backed guest memory, page traps, VM-exit single-step tracing; asmjit codegen) complement full PE emulators like [[winvisor]]. (source: wiki/sources/descriptions/momo5502__vmtrace.md)
 
 ## Related
 
-[[frida]] · [[cpp-veh-dbi]] · [[w1tn3ss]] · [[pyda]] · [[panda]] · [[winvisor]] · [[hyper-rev]] · [[ripr]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[frida]] · [[cpp-veh-dbi]] · [[w1tn3ss]] · [[pyda]] · [[panda]] · [[vmtrace]] · [[winvisor]] · [[hyper-rev]] · [[ripr]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]

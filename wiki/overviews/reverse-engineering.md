@@ -88,6 +88,7 @@ sources:
   - wiki/sources/descriptions/x64dbg__SlothBP.md
   - wiki/sources/descriptions/x64dbg__DotX64Dbg.md
   - wiki/sources/descriptions/x64dbg__Classroom.md
+  - wiki/sources/descriptions/momo5502__vmtrace.md
   - wiki/sources/descriptions/morsisko__xFindOut.md
   - wiki/sources/descriptions/notpidgey__ManyTypes.md
   - wiki/sources/descriptions/wtsxDev__reverse-engineering.md
@@ -315,7 +316,7 @@ Full DBI frameworks — [[frida]], DynamoRIO, Pin, TinyInst, QBDI — support AP
 
 **Trap-and-emulate control-flow tracing (CFT):** patch branch sites with fault-generating sentinels (e.g. HLT/SALC, avoiding INT3 integrity scans), catch exceptions, emulate the original branch, log context, restore, and continue. Strategies range from bounded bulk patching (simple, integrity-detectable) through branch chasing and CFG-guided patching (better coverage/safety tradeoff). PAGE_GUARD + trap-flag single-steping avoids direct `.text` patches but remains timing- and guard-state detectable. Illustrative corpus: [[cpp-veh-dbi]], [[w1tn3ss]].
 
-**User-mode hypervisor-assisted tracing:** Windows Hypervisor Platform (WHP) hosts guest snippets with per-page R/W/X traps, CPUID interception, and syscall emulation — no kernel driver, composable with disassemblers/emulators. Illustrative: [[winvisor]], [[hyper-rev]]; benchmark latency and nested-VT constraints on the target build.
+**User-mode hypervisor-assisted tracing:** Windows Hypervisor Platform (WHP) hosts guest snippets with per-page R/W/X traps, CPUID interception, and syscall emulation — no kernel driver, composable with disassemblers/emulators. WHP trap libraries such as [[vmtrace]] (host-backed guest memory, page traps, VM-exit single-step tracing; asmjit) sit beside full x64 PE emulators like [[winvisor]] and Hyper-V introspection such as [[hyper-rev]]; benchmark latency and nested-VT constraints on the target build. (source: wiki/sources/descriptions/momo5502__vmtrace.md)
 
 ## Obfuscation recovery
 
