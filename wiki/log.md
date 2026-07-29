@@ -1589,3 +1589,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:musabcel/android_rom_list`: entity [[android-rom-list]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-29** — ingest `description:multitheftauto/mtasa-blue`: entity [[mtasa-blue]]; cited on [[overviews/game-engine]] and [[overviews/anti-cheat]].
+
+- **2026-07-29** — ingest `description:muellerberndt/frida-detection`: entity [[frida-detection]]; cited on [[frida]] and [[overviews/anti-cheat]].
