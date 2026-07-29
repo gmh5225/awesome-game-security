@@ -1713,3 +1713,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:mix64/ELFpacker`: entity [[elfpacker]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-29** — ingest `description:miticollo/xpc-tracer`: entity [[xpc-tracer]]; cited on [[frida]] and [[overviews/mobile-security]].
+
+- **2026-07-29** — ingest `description:mishka-sit2002/CS2-Hybrid-AntiCheat-Proposal`: entity [[cs2-hybrid-anticheat-proposal]]; cited on [[overviews/anti-cheat]] and [[ai-aimbot-detection]].

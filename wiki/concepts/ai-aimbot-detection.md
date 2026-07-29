@@ -4,6 +4,7 @@ kind: concept
 topics: [anti-cheat, game-hacking]
 sources:
   - wiki/sources/skills/anti-cheat.md
+  - wiki/sources/descriptions/mishka-sit2002__CS2-Hybrid-AntiCheat-Proposal.md
 updated: 2026-07-29
 confidence: medium
 ---
@@ -39,6 +40,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 ## Corpus examples
 
 - [[waldo]] — CS2 deep-learning triggerbot/aimbot detection (user-trained model)
+- [[cs2-hybrid-anticheat-proposal]] — CS2 hybrid AC proposal (ML + Glicko-2 Overwatch judges, honeypot entities, shadow monitoring; Python PoC)
 - [[aimbot-detection-prototype]] — clip + live-window prototype
 - [[pine]] — neural-network aim/trigger research (CS:GO / Fortnite / Overwatch)
 - [[human-mouse-movement]] — offensive human-like movement (informs baseline design)
