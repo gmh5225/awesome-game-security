@@ -555,6 +555,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Panda3D](entities/panda3d.md) — Python/C++ 3D engine framework (liberal license; Game Engine / source)
 - [Pandora](entities/pandora.md) — file-suspicion analysis framework (convenient UI; Anti Cheat → Analysis Framework)
 - [PastDSE](entities/pastdse.md) — DSE bypass via clock rollback + leaked VeriSign certs (BlackBone load)
+- [patch-finder](entities/patch-finder.md) — IDA plugin: detect in-memory patches/hooks via executable-region vs on-disk PE byte compare (custom PE parser; highlight diffs in disasm; cheat / IDA Plugins)
 - [PatternSleuth](entities/patternsleuth.md) — Rust SIMD pattern/signature scan (file + process; Unreal address scanner)
 - [pc_ginkgo](entities/pc-ginkgo.md) — Redmi Note 8/8T (ginkgo) Android kernel + KernelSU (cheat / Android Kernel Source)
 - [payload_dumper](entities/payload-dumper.md) — Android OTA payload.bin dumper (Python; Magisk / ROM RE)
