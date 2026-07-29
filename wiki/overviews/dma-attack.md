@@ -16,7 +16,7 @@ sources:
   - wiki/sources/descriptions/sh1ftd__dma-speedtest-memflow-rs.md
   - wiki/sources/descriptions/realquantumstealth-hub__PCILeech-DMA-Fullstealth.md
   - wiki/sources/descriptions/sercanarga__fpga-dma-multi-tool.md
-updated: 2026-07-28
+updated: 2026-07-29
 confidence: high
 ---
 
@@ -52,4 +52,4 @@ Typical external DMA cheat: **cheat PC** + **DMA card** (Memory Read TLPs) + opt
 
 ## README map
 
-No top-level DMA section — maps via `Cheat` (~2598) DMA lanes and `Anti Cheat > Detection:DMA` (~618), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; TPM/IOMMU/VBS/HVCI attestation samples). (source: wiki/sources/README-categories.md)
+No top-level DMA section — maps via `Cheat` (~2603) DMA lanes and `Anti Cheat > Detection:DMA` (~619), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; TPM/IOMMU/VBS/HVCI attestation samples). (source: wiki/sources/README-categories.md)

@@ -1590,4 +1590,6 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-29** — ingest `description:multitheftauto/mtasa-blue`: entity [[mtasa-blue]]; cited on [[overviews/game-engine]] and [[overviews/anti-cheat]].
 
+- **2026-07-29** — ingest `readme:categories`: refreshed README map on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/graphics-api]], [[overviews/reverse-engineering]], [[overviews/mobile-security]], [[overviews/dma-attack]] (Cheat ~2603 / Anti Cheat ~619; 3Beans LLE, gecko, BD-UN-JB, PSFree-Enhanced, Droid-VM, shader inject/flatten, Rust/Go RE courses).
+
 - **2026-07-29** — ingest `description:muellerberndt/frida-detection`: entity [[frida-detection]]; cited on [[frida]] and [[overviews/anti-cheat]].

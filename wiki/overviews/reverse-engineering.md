@@ -274,7 +274,7 @@ sources:
   - wiki/sources/descriptions/nice-sprite__COD7-Tools.md
   - wiki/sources/descriptions/ndrewh__pyda.md
   - wiki/sources/descriptions/narumii__Deobfuscator.md
-updated: 2026-07-28
+updated: 2026-07-29
 confidence: high
 ---
 
@@ -324,4 +324,4 @@ Workflows for protected game clients and anti-cheat components across user mode,
 
 ## README map
 
-Cheat (~2598) Debugging / RE Tools (game file-format/asset reversing lists + Ghidra install/plugin managers) / Mixed boolean-arithmetic / DBI / Fix VMP|Themida|OLLVM (plus IDA/BN/Ghidra/x64dbg plugin ecosystems); Anti Cheat (~618) Anti Debugging / Disassembly / Dump Fix / Binary Packer; adjacent `Windows Emulator` (~7; user-space + WHP trap-driven guests + hybrid kernel-driver emulation for rootkit/AC RE), `Linux Emulator` (~1), and console cats (`Xbox` ~8 LLE/HLE + XEX/XBE patch + SystemOS kernel exploit / `Game Boy` ~3 / Switch ~7 / `PlayStation` ~7 HV+BD-JB RemoteJarLoader / WebKit CSSFontFace / PSFree host / `Nintendo 3DS` ~3 LLE + Luma `.3gx` overlays / `GameCube/Wii` ~1 Rust gecko) for binary-translation, hypervisor, and hardware-abstraction RE. (source: wiki/sources/README-categories.md)
+Cheat (~2603) Debugging / RE Tools (game file-format/asset reversing lists + Ghidra install/plugin managers; mytechnotalent Rust/Go RE course lanes) / Mixed boolean-arithmetic / DBI / Fix VMP|Themida|OLLVM (plus IDA/BN/Ghidra/x64dbg plugin ecosystems); Anti Cheat (~619) Anti Debugging / Disassembly / Dump Fix / Binary Packer; adjacent `Windows Emulator` (~7; user-space + WHP trap-driven guests + hybrid KDemu kernel-driver emulation for rootkit/AC RE), `Linux Emulator` (~1), and console cats (`Xbox` ~8 LLE/HLE + X360 patch + SystemOS kernel exploit / `Game Boy` ~3 / Switch ~7 / `PlayStation` ~7 HV+BD-UN-JB / PSFree-Enhanced / WebKit CSSFontFace / `Nintendo 3DS` ~3 incl. 3Beans LLE + Luma `.3gx` overlays / `GameCube/Wii` ~1 ioncodes/gecko) for binary-translation, hypervisor, and hardware-abstraction RE. (source: wiki/sources/README-categories.md)

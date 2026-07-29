@@ -87,7 +87,7 @@ sources:
   - wiki/sources/descriptions/noahware__winbo.md
   - wiki/sources/descriptions/netwarm007__GameEngineFromScratch.md
   - wiki/sources/descriptions/nem0__LumixEngine.md
-updated: 2026-07-28
+updated: 2026-07-29
 confidence: high
 ---
 
