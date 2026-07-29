@@ -570,6 +570,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PCILeech](entities/pcileech.md) — PCIe DMA host tool (LeechCore → PCILeech/MemProcFS/vmm); stock firmware fingerprints; ufrisk / cheat / DMA
 - [PCILeech-DMA-Fullstealth](entities/pcileech-dma-fullstealth.md) — Quantumstealth Fullstealth PCILeech DMA FPGA firmware (Vivado; M2/Squirrel/Captain 75T/Enigma X1)
 - [PCILeech-FPGA](entities/pcileech-fpga.md) — FPGA HDL/firmware (Vivado; shadow config, BAR impls); firmware sophistication tiers 0–6
+- [PCILeech-FPGA-DMA-VMD](entities/pcileech-fpga-dma-vmd.md) — Artix-7 75T Intel RST VMD `9A0B` emulation (MSI-X, NVMe, BAR shadow; SystemVerilog)
 - [pdb](entities/pdb.md) — Windows PDB parse/merge (C++ DIA SDK; old formats + pdb.cfg; RE / debugger symbols)
 - [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)
 - [peetch](entities/peetch.md) — eBPF dump/tls/proxy (PID sniff + OpenSSL keys; PCAPng; cheat / android kernel explorer)

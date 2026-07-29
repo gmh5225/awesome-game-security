@@ -15,6 +15,7 @@ sources:
   - wiki/sources/descriptions/slack69__csgo-dma-overlay.md
   - wiki/sources/descriptions/sh1ftd__dma-speedtest-memflow-rs.md
   - wiki/sources/descriptions/realquantumstealth-hub__PCILeech-DMA-Fullstealth.md
+  - wiki/sources/descriptions/mltpig__PCILeech-FPGA-DMA_VMD.md
   - wiki/sources/descriptions/sercanarga__fpga-dma-multi-tool.md
 updated: 2026-07-29
 confidence: high
@@ -28,7 +29,7 @@ PCIe Direct Memory Access threat modeling for game security: FPGA endpoints (oft
 
 Typical external DMA cheat: **cheat PC** (signatures, ESP, aim logic) + **DMA card** (FPGA in an M.2 or add-in slot issuing Memory Read TLPs) + optional **HID actuator** (USB keyboard/mouse emulator). No attacker code need run on the gaming OS—the machine sees a PCIe device performing ordinary-looking DMA mediated by chipset and (when configured) the [[iommu]]. (source: wiki/sources/skills/dma-attack.md)
 
-Host stack in the curated list: [[pcileech]] → LeechCore → [[pcileech-fpga]] firmware; wrappers ([[dma-invoker]], [[dma-cheat-engine-loader]]), benchmarks ([[dma-speedtest-memflow-rs]]), board utilities ([[fpga-dma-multi-tool]]), stealth forks ([[pcileech-dma-fullstealth]]), kernel physical patches ([[physpatch]]), and title samples ([[csgo-dma-overlay]]).
+Host stack in the curated list: [[pcileech]] → LeechCore → [[pcileech-fpga]] firmware; wrappers ([[dma-invoker]], [[dma-cheat-engine-loader]]), benchmarks ([[dma-speedtest-memflow-rs]]), board utilities ([[fpga-dma-multi-tool]]), stealth forks ([[pcileech-dma-fullstealth]]), class-emulation firmware such as [[pcileech-fpga-dma-vmd]] (Intel RST VMD `9A0B`; MSI-X/NVMe/BAR shadow on Artix-7 75T), kernel physical patches ([[physpatch]]), and title samples ([[csgo-dma-overlay]]). (source: wiki/sources/descriptions/mltpig__PCILeech-FPGA-DMA_VMD.md)
 
 ## Three defense layers
 
@@ -73,7 +74,7 @@ Tier-6 firmware operating only within driver-mapped domains and matching donor b
 
 ## Related concepts
 
-[[dma]] · [[iommu]] · [[helloiommupkg]] · [[hvci]] · [[byovd]] · [[research-rigor]] · [[pcileech]] · [[pcileech-fpga]] · [[pcileech-dma-fullstealth]] · [[fpga-dma-multi-tool]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[csgo-dma-overlay]] · [[overviews/anti-cheat]]
+[[dma]] · [[iommu]] · [[helloiommupkg]] · [[hvci]] · [[byovd]] · [[research-rigor]] · [[pcileech]] · [[pcileech-fpga]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[fpga-dma-multi-tool]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[csgo-dma-overlay]] · [[overviews/anti-cheat]]
 
 ## README map
 

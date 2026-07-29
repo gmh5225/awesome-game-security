@@ -37,4 +37,4 @@ Artix-7 (T35–T200) dominates consumer boards; BRAM/LUT budgets constrain how m
 
 ## Related
 
-[[pcileech]] · [[pcileech-dma-fullstealth]] · [[fpga-dma-multi-tool]] · [[dma]] · [[iommu]] · [[overviews/dma-attack]] · [[overviews/reverse-engineering]]
+[[pcileech]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[fpga-dma-multi-tool]] · [[dma]] · [[iommu]] · [[overviews/dma-attack]] · [[overviews/reverse-engineering]]
