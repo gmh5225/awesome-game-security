@@ -46,4 +46,4 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 
 ## Related
 
-[[research-rigor]] · [[present-hook]] · [[kernel-mouse]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[hardware-input-injection]] · [[research-rigor]] · [[present-hook]] · [[kernel-mouse]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]

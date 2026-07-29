@@ -1,0 +1,30 @@
+---
+title: World-to-Screen
+kind: concept
+topics: [game-hacking, graphics-api]
+sources:
+  - wiki/sources/skills/game-hacking.md
+updated: 2026-07-29
+confidence: high
+---
+
+# World-to-Screen
+
+Project a **3D world-space point** (entity bone, item, waypoint) onto **2D screen pixels** using the active view/projection matrix—core math for ESP boxes, aim FOV checks, and radar overlays. Invalid when the point is behind the camera (`w < threshold`). (source: wiki/sources/skills/game-hacking.md)
+
+## Pipeline
+
+1. Multiply world position by view matrix → clip coordinates `(x, y, w)`.
+2. Reject if `w` below near-plane cutoff (behind camera).
+3. Perspective divide → NDC `(-1…1)`.
+4. Map NDC to pixel space: `screen_x = (width/2) * (ndc_x + 1)`; flip Y for top-left origin.
+
+Matrix layout and row/column convention vary by engine and hook point—verify against the game's `ViewMatrix` / `ViewProjection` dump, not a generic snippet.
+
+## Engine helpers
+
+Cross-engine constexpr libraries such as [[omath]] ship W2S, projectile prediction, and engine-specific camera helpers (Source, Unity, Unreal, Frostbite, etc.). Educational internals with explicit W2S: [[simple-ac-internal-cheat]].
+
+## Related
+
+[[present-hook]] · [[unreal-object-model]] · [[source-netvars]] · [[omath]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
