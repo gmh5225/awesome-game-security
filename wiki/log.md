@@ -1657,3 +1657,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:mq1n/DLLThreadInjectionDetector`: entity [[dll-thread-injection-detector]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[hidden-module-detector]].
 
 - **2026-07-29** — ingest `readme:categories`: bumped Cheat ~2606 (was ~2605) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
+- **2026-07-29** — ingest `skill:overview`: refreshed [[overviews/overview]] (skill routing + answer-priority layers + contributing/README format); concepts [[compiled-wiki]], [[research-rigor]]; updated `index.md`.

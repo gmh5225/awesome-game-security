@@ -69,11 +69,33 @@ The README organizes ~40 top-level sections: engines/rendering/`Mathematics` (~7
 | Game hacking | [[overviews/game-hacking]] | memory, injection, overlays |
 | Graphics API | [[overviews/graphics-api]] | Present hooks, DXGI, Vulkan |
 | Mobile | [[overviews/mobile-security]] | Frida, Magisk, jailbreak |
-| Reverse engineering | [[overviews/reverse-engineering]] | IDA, DBI, deobfuscation |
+| Reverse engineering | [[overviews/reverse-engineering]] | IDA, DBI, deobfuscation, MCP RE tools |
 | Windows kernel | [[overviews/windows-kernel]] | callbacks, HVCI, PatchGuard |
+| Research rigor | [[research-rigor]] | claim validation, citation checks, detector evaluation |
+| Project maintenance | (this page) | adding resources, README format, link validation |
+
+Also check `wiki/overviews/<topic>.md` for the matching primary skill topic before deep README or archive dives. (source: wiki/sources/skills/overview.md)
+
+## Answer priority (data layers)
+
+Prefer the [[compiled-wiki]] layer for cross-cutting synthesis; fall back in order when a repo-specific answer is needed: (source: wiki/sources/skills/overview.md)
+
+1. Wiki entity/concept/overview (if present)
+2. `description/{owner}/{repo}/description_en.txt` (concise English summary)
+3. `archive/{owner}/{repo}.txt` (full code snapshot; avoid for high-level questions)
+4. README category entry
+
+Treat README entries, generated descriptions, wiki pages, and archives as **discovery/provenance** layers—not automatic proof of embedded claims. Pair domain skills with [[research-rigor]] for consequential security conclusions.
+
+## Contributing & README format
+
+Each README category uses `## Category Name`, optional `> Subcategory`, and bullet links with full URLs plus `[brief description]`. Before adding entries: check duplicates, verify links, place by primary function, and tag language/platform when helpful (e.g. `[Rust]`, `[Unity]`). Quality bar: actively maintained or historically significant, unique value, prefer original repos over forks unless the fork adds substantial work. (source: wiki/sources/skills/overview.md)
+
+Maintenance scripts under `scripts/`: `generate-toc.py` (TOC generation), `remove-forks.py` (fork cleanup).
 
 ## Core concepts
 
+- [[compiled-wiki]], [[research-rigor]] — synthesis layer and evidence discipline
 - [[easy-anti-cheat]], [[battleye]], [[vanguard]] — major AC products
 - [[dma]], [[iommu]] — external memory access threat/defense
 - [[hvci]], [[patchguard]], [[kernel-callbacks]], [[byovd]] — Windows trust stack
