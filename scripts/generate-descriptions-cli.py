@@ -13,8 +13,8 @@ Unlike generate-descriptions.py (Cloud Agents API), this drives the local
 Prerequisites:
     curl https://cursor.com/install -fsS | bash
     export CURSOR_API_KEY=<your key from https://cursor.com/settings>
-    # Max Mode (required for some models) — set in ~/.cursor/cli-config.json:
-    #   {"version":1,"editor":{"vimMode":false},"permissions":{"allow":[],"deny":[]},"maxMode":true,"approvalMode":"unrestricted"}
+    # Cursor CLI config — set in ~/.cursor/cli-config.json (maxMode disabled):
+    #   {"version":1,"editor":{"vimMode":false},"permissions":{"allow":[],"deny":[]},"maxMode":false,"approvalMode":"unrestricted"}
     # and export CURSOR_CONFIG_DIR=$HOME/.cursor on GitHub Actions runners.
 
 Usage:
@@ -23,7 +23,7 @@ Usage:
     python scripts/generate-descriptions-cli.py --repos owner/repo other/repo
     DESC_REPOS="owner/repo" python scripts/generate-descriptions-cli.py --repos-env DESC_REPOS
     python scripts/generate-descriptions-cli.py --limit 5
-    python scripts/generate-descriptions-cli.py --model cursor-grok-4.5-high-fast
+    python scripts/generate-descriptions-cli.py --model composer-2.5-fast
     python scripts/generate-descriptions-cli.py --dry-run
 """
 
@@ -42,7 +42,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 ARCHIVE_DIR = ROOT_DIR / "archive"
 DESC_DIR = ROOT_DIR / "description"
 
-DEFAULT_MODEL = "cursor-grok-4.5-high-fast"
+DEFAULT_MODEL = "composer-2.5-fast"
 # Archives can be tens of MB; only ask the agent to read a bounded prefix.
 ARCHIVE_READ_BYTES = 200_000
 # No per-agent wall clock — long Max Mode runs must not be killed mid-write.

@@ -31,7 +31,7 @@ on:
       model:
         description: "Cursor CLI model id"
         required: false
-        default: "auto"
+        default: "composer-2.5-fast"
 
 concurrency:
   # Queue overlaps instead of cancelling — cron must not kill a manual run.
@@ -79,12 +79,12 @@ jobs:
           if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
             LIMIT="${INPUT_LIMIT:-0}"
             REPOS="${INPUT_REPOS:-}"
-            MODEL="${INPUT_MODEL:-auto}"
+            MODEL="${INPUT_MODEL:-composer-2.5-fast}"
           else
             # Scheduled catch-up: cap batch size so sparse archive extract stays small.
             LIMIT="20"
             REPOS=""
-            MODEL="auto"
+            MODEL="composer-2.5-fast"
           fi
           if ! [[ "${LIMIT}" =~ ^[0-9]+$ ]]; then
             echo "ERROR: limit must be an integer, got: ${LIMIT}"
@@ -204,7 +204,7 @@ jobs:
           curl https://cursor.com/install -fsS | bash
           echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
 
-      - name: Enable Max Mode
+      - name: Configure Cursor CLI
         if: steps.scan.outputs.missing_count != '0'
         run: |
           mkdir -p "$HOME/.cursor"
@@ -213,7 +213,7 @@ jobs:
             "version": 1,
             "editor": { "vimMode": false },
             "permissions": { "allow": [], "deny": [] },
-            "maxMode": true,
+            "maxMode": false,
             "approvalMode": "unrestricted",
             "attribution": {
               "attributeCommitsToAgent": false,

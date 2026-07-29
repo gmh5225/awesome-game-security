@@ -48,7 +48,7 @@ CANDIDATES_PATH = DISCOVER_DIR / "candidates.json"
 SCREEN_PATH = DISCOVER_DIR / "screen.json"
 DECISION_PATH = DISCOVER_DIR / "decision.json"
 
-DEFAULT_MODEL = "cursor-grok-4.5-high-fast"
+DEFAULT_MODEL = "composer-2.5-fast"
 SELF_REPO = "gmh5225/awesome-game-security"
 _GH_BIN: str | None = None
 

@@ -48,7 +48,7 @@ README_PATH = ROOT_DIR / "README.md"
 DESC_DIR = ROOT_DIR / "description"
 STATE_PATH = WIKI_DIR / ".state.json"
 
-DEFAULT_MODEL = "cursor-grok-4.5-high-fast"
+DEFAULT_MODEL = "composer-2.5-fast"
 REPO_SLUG_RE = re.compile(r"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$")
 TOPIC_RE = re.compile(r"^[a-z0-9-]+$")
 

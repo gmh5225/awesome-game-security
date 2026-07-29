@@ -44,7 +44,7 @@ on:
       model:
         description: "Cursor CLI model id"
         required: false
-        default: "auto"
+        default: "composer-2.5-fast"
 
   pull_request:
     types: [opened, synchronize, reopened]
@@ -112,14 +112,14 @@ jobs:
             REPOS="${INPUT_REPOS:-}"
             LANGS="${INPUT_LANGS:-}"
             FORCE="${INPUT_FORCE:-false}"
-            MODEL="${INPUT_MODEL:-auto}"
+            MODEL="${INPUT_MODEL:-composer-2.5-fast}"
           else
             # Scheduled catch-up: scan missing, cap batch size.
             LIMIT="20"
             REPOS=""
             LANGS=""
             FORCE="false"
-            MODEL="auto"
+            MODEL="composer-2.5-fast"
           fi
           if ! [[ "${LIMIT}" =~ ^[0-9]+$ ]]; then
             echo "ERROR: limit must be an integer, got: ${LIMIT}"
@@ -255,7 +255,7 @@ jobs:
           curl https://cursor.com/install -fsS | bash
           echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
 
-      - name: Enable Max Mode
+      - name: Configure Cursor CLI
         if: steps.gate.outputs.run == '1'
         run: |
           mkdir -p "$HOME/.cursor"
@@ -264,7 +264,7 @@ jobs:
             "version": 1,
             "editor": { "vimMode": false },
             "permissions": { "allow": [], "deny": [] },
-            "maxMode": true,
+            "maxMode": false,
             "approvalMode": "unrestricted",
             "attribution": {
               "attributeCommitsToAgent": false,
@@ -315,9 +315,9 @@ jobs:
           agent --version || true
           df -h
 
-          MODEL="${INPUT_MODEL:-auto}"
+          MODEL="${INPUT_MODEL:-composer-2.5-fast}"
           if [ -z "$MODEL" ]; then
-            MODEL="auto"
+            MODEL="composer-2.5-fast"
           fi
           ARGS=(--model "$MODEL" --commit-every 1)
 

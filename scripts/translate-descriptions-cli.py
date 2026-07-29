@@ -39,7 +39,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DESC_DIR = ROOT_DIR / "description"
 
-DEFAULT_MODEL = "cursor-grok-4.5-high-fast"
+DEFAULT_MODEL = "composer-2.5-fast"
 # No per-agent wall clock — long Max Mode runs must not be killed mid-write.
 # GitHub-hosted jobs still have a platform cap (~6h); --commit-every saves progress.
 REPO_SLUG_RE = re.compile(r"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$")
