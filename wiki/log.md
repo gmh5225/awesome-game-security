@@ -1615,3 +1615,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:mrphrazer/obfuscation_analysis`: entity [[obfuscation-analysis]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-29** — ingest `readme:categories`: refreshed Cheat ~2604 / Anti Cheat ~620 counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]]; SEWindows TPM PCR attestation scope on [[overviews/windows-kernel]] and [[overviews/dma-attack]].
+
+- **2026-07-29** — ingest `description:mrphrazer/ghidra-headless-mcp`: entity [[ghidra-headless-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
