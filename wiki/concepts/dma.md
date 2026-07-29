@@ -15,7 +15,7 @@ sources:
   - wiki/sources/descriptions/sh1ftd__dma-speedtest-memflow-rs.md
   - wiki/sources/descriptions/realquantumstealth-hub__PCILeech-DMA-Fullstealth.md
   - wiki/sources/descriptions/sercanarga__fpga-dma-multi-tool.md
-updated: 2026-07-27
+updated: 2026-07-29
 confidence: high
 ---
 
@@ -32,6 +32,22 @@ Software anti-cheat sees a “normal” PCIe endpoint. Classic process/handle/in
 ## Typical stack
 
 Cheat app → LeechCore/pcileech/MemProcFS → FPGA firmware → Memory Read TLPs → walk CR3/page tables → game state; optional HID actuator for input. Host-side DMA RPM wrappers such as [[dma-invoker]] (DMALibrary-backed) sit in the cheat-app layer for Windows process-memory reads. (source: wiki/sources/descriptions/un4ckn0wl3z__DMAInvoker.md) Benchmarks such as [[dma-speedtest-memflow-rs]] (memflow; PCILeech/native; throughput/latency) help characterize that hardware path. (source: wiki/sources/descriptions/sh1ftd__dma-speedtest-memflow-rs.md) Windows board utilities such as [[fpga-dma-multi-tool]] (Artix-7 detect/flash via openFPGALoader + DMA R/W speedtest) sit in the FPGA bring-up layer before host DMA apps. (source: wiki/sources/descriptions/sercanarga__fpga-dma-multi-tool.md) CE-facing DMA loaders such as [[dma-cheat-engine-loader]] (copy CE into `DMACE`; closed-source) bridge classic Cheat Engine installs onto that external DMA path. (source: wiki/sources/descriptions/un4ckn0wl3z__DMACheatEngineLoader.md) Game-facing samples such as [[csgo-dma-overlay]] pair DMA reads with an overlay for CS:GO research. (source: wiki/sources/descriptions/slack69__csgo-dma-overlay.md)
+
+## Anti-cheat detection pipeline
+
+No single PCIe or IOMMU signal is durable; production AC layers **causally distinct** evidence and validates joint false-positive rates. (source: wiki/sources/skills/anti-cheat.md)
+
+**Pre-game / inventory:** IOMMU active, interrupt remapping, Secure Boot, VBS/[[hvci]], TPM provisioned, ACS topology verified; full 4 KB config dump per device cross-checked with SMBIOS slots.
+
+**PCIe-layer checks:** VID/DID/SVID/SDID allowlists; capability-chain integrity; Xilinx/signature-residue patterns; BAR mask vs donor model; BAR memory probes (register layouts for NIC/NVMe/XHCI classes); R/W consistency on writable and W1C bits; link-state and AER baselining; completion-latency distribution tests (KS, Anderson–Darling, Hill tail index).
+
+**Behavioral / cheat-phase:** slow broad discovery then narrow periodic reads; honeypot regions with [[iommu]] fault logging or hypervisor EPT traps; frame-aligned access autocorrelation.
+
+**IOMMU containment (live match):** sandbox domain remapping, Bus Master Enable clear, Downstream Port Containment, AC-owned device domains—containment before attribution.
+
+**External trust anchors:** TPM2_Quote with fresh nonce when local kernel trust fails; PCR[7] DMA Protection Disabled; UEFI DMAR/IVRS and BIOS CVE cross-check.
+
+**Firmware sophistication tiers (detection mapping):** Tier 0 stock VID/DID blacklist → Tier 6 private firmware requiring attestation. Verdicts should require multi-signal correlation, not a fixed signal count.
 
 ## Related
 

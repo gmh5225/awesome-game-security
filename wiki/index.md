@@ -7,7 +7,7 @@ Compiled knowledge catalog for awesome-game-security.
 ## Overviews
 
 - [Overview](overviews/overview.md) — project map; compiled-wiki + research-rigor layers; 40 README sections → skill topics (Cheat ~2606 / Anti Cheat ~621; Game Engine ~153 + Mathematics ~7 / Renderer ~17; DirectX ~35 shader inject/flatten / OpenGL ~3 / Vulkan ~10 kiero2; Game Develop ~182 MCP/security; Game Network ~26; console Switch~7/Xbox~8/PS~7 BD-UN-JB+PSFree-Enhanced / 3DS~3 3Beans LLE+Luma / GC·Wii~1 gecko / Game Boy ~3)
-- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; Detection:* (triggerbot & aimbot/wallhack) + Screenshot + page/CLR protection (~621); hybrid CS2 judge/honeypot proposals; Game Tools RCE + Windows Emulator KDemu AC
+- [Anti-Cheat](overviews/anti-cheat.md) — layered AC; detection methodology + [[kernel-pool-scanning]] / [[ai-aimbot-detection]]; Detection:* (triggerbot & aimbot/wallhack) + Screenshot + page/CLR protection (~621); hybrid CS2 judge/honeypot proposals; Game Tools RCE + Windows Emulator KDemu AC
 - [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2606) / Detection:DMA (~621) + WSF attestation (SEWindows PCR)
 - [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~153); Mathematics/PhysX/Renderer (~17) adjacency; MCP server/security + AI gamedev (~182); Game Hot Patch HybridCLR/xLua; Game Network ~26; Game Assets ~11 + AI YAML→GLB/sprite + Image Codec PaintFE + Manager/Testing/Tools/CI
 - [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2606) + Some Tricks (~113); mytechnotalent Rust/Go RE courses; Android Terminal (ADB/root/shell)/File/Memory Explorer; WSA/Android/iOS/Windows Emulator KDemu lanes; console Xbox~8 X360 patch+SystemOS / PS HV+BD-UN-JB+PSFree-Enhanced / WebKit CSSFontFace / 3DS~3 3Beans LLE+Luma / GC·Wii~1 gecko
@@ -18,16 +18,18 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Concepts
 
+- [AI Aimbot Detection](concepts/ai-aimbot-detection.md) — server-side replay + ML + hardware-input signals for zero-memory visual cheats
 - [BattlEye](concepts/battleye.md)
 - [BYOVD](concepts/byovd.md)
 - [Compiled Wiki](concepts/compiled-wiki.md)
-- [DMA](concepts/dma.md)
+- [DMA](concepts/dma.md) — PCIe host R/W; AC detection pipeline (config integrity, latency fingerprinting, IOMMU containment, TPM attestation)
 - [Easy Anti-Cheat](concepts/easy-anti-cheat.md)
 - [Frida](concepts/frida.md)
 - [HVCI](concepts/hvci.md)
 - [IL2CPP](concepts/il2cpp.md)
 - [IOMMU](concepts/iommu.md)
 - [Kernel Callbacks](concepts/kernel-callbacks.md)
+- [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; KDP rule tables
 - [PatchGuard](concepts/patchguard.md)
 - [Present Hook](concepts/present-hook.md)
 - [Research Rigor](concepts/research-rigor.md)

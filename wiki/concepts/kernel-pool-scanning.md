@@ -1,0 +1,42 @@
+---
+title: Kernel Pool Scanning
+kind: concept
+topics: [anti-cheat, windows-kernel]
+sources:
+  - wiki/sources/skills/anti-cheat.md
+  - wiki/sources/skills/windows-kernel.md
+updated: 2026-07-29
+confidence: high
+---
+
+# Kernel Pool Scanning
+
+Anti-cheat and EDR techniques that walk kernel pool allocators to find hidden drivers, shellcode, and executable memory without a matching loaded module. Windows 10 19H1+ **Segment Heap** pool internals materially changed scanner design. (source: wiki/sources/skills/anti-cheat.md)
+
+## Why Segment Heap matters
+
+Cheat drivers often allocate in **NonPagedPool** for shellcode, hook tables, and manually mapped images. Segment Heap (19H1+) split allocation paths (kLFH, VS, Segment, Large), XOR-encoded headers via **HeapKey**, and isolated metadata. Scanners must decode chunk headers and traverse allocator structures or risk false positives. (source: wiki/sources/skills/anti-cheat.md)
+
+## Scan targets
+
+1. **BigPool / large allocations** — walk `nt!PoolBigPageTable`; flag large chunks with no corresponding `DRIVER_OBJECT` or loaded module (common manual-map driver footprint).
+2. **VS allocator chunks** — traverse `_SEGMENT_HEAP → VsContext → SubsegmentList`; decode `_HEAP_VS_CHUNK_HEADER` with `real_sizes = encoded_header ^ chunk_address ^ HeapKey`; inspect PoolTag and executable content.
+3. **kLFH buckets** — `_SEGMENT_HEAP → LfhContext → Buckets[]`; randomized block placement and LfhKey-encoded FreeHint complicate adjacency heuristics; size-bucket grooming patterns can still be anomalous.
+4. **Suspicious PoolTag** — cross-reference tags against known-good databases (`pooltag.txt`); tags present in pool but absent from any loaded module are suspicious.
+5. **Executable NonPagedPool** — X-permission chunks without a backing module; content scan for cheat signatures, ROP gadgets, syscall stubs.
+6. **Heap integrity** — validate build-specific `_SEGMENT_HEAP` layout/signature; verify VS header encoding consistency; tampered metadata may indicate heap exploitation.
+
+## Scanner prerequisites
+
+- `nt!RtlpHpHeapGlobals` (HeapKey, LfhKey) — often via pattern scan
+- `nt!ExpPoolQuotaCookie` — ProcessBilled decoding
+- Per-pool-type `_SEGMENT_HEAP` instances via `nt!PoolVector`
+- Allocation-path routing (size → kLFH / VS / Segment / Large)
+
+## KDP integration
+
+Detection rule tables can live in **Kernel Data Protection (KDP) Secure Pool** (`ExAllocatePool3` + KDP). Correctly configured KDP can protect selected pages from ordinary VTL0 writes—including kernel R/W primitives—while hypervisor and policy paths remain trustworthy. (source: wiki/sources/skills/anti-cheat.md)
+
+## Related
+
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
