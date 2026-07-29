@@ -1198,6 +1198,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ookiineko/magiskboot_build [Boot Image Modification Tool]
 - https://github.com/gmh5225/magiskboot-linux [Use GitHub Actions to build magiskboot]
 - https://github.com/the-dise/EasyPixel [Magisk module that disguises a device under Google Pixel]
+- https://github.com/AlirezaParsi/COPG [Zygisk module for per-app Android device, CPU, and GPU spoofing via KernelSU/Magisk/APatch with on-device WebUI]
 - https://github.com/gmh5225/MagiskHide [Portable MagiskHide]
 - https://github.com/lico-n/ZygiskFrida [Injects frida gadget using zygisk]
 - https://github.com/Admirepowered/Zygisk_mod [Standalone implementation of Zygisk]
@@ -3578,6 +3579,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/Palworld-Server-Modding
 - https://github.com/gmh5225/PalWorld-ServerInjector
 - https://github.com/gmh5225/PalWorld-NetCrack
+- https://github.com/byPreaZy/.palmods [Palworld UE4SS Lua mods plus C++ ImGui trainer overlay with ESP, minimap, and 50+ gameplay cheats]
 - https://github.com/luciouskami/palworld_rcon [Server on Windows]
 - https://github.com/luciouskami/palworld_rcon [Server on Windows]
 - https://github.com/A1RM4X/HowTo-Palworld [Server on Linux]
