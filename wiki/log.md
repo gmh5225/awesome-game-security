@@ -1619,3 +1619,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:mrphrazer/ghidra-headless-mcp`: entity [[ghidra-headless-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-29** — ingest `description:mrexodia/lldbext-dump`: entity [[lldbext-dump]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
+- **2026-07-29** — ingest `description:mrexodia/ida-pro-mcp`: entity [[ida-pro-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
