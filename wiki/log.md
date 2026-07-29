@@ -1581,3 +1581,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-28** — ingest `description:muturikaranja/overlay`: entity [[overlay]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
 
 - **2026-07-28** — ingest `description:muturikaranja/disable-threat-tracing`: entity [[disable-threat-tracing]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
+- **2026-07-29** — ingest `description:muturikaranja/AfdIrpCallDispatch`: entity [[afd-irp-call-dispatch]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
