@@ -303,6 +303,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hide-file](entities/hide-file.md) — C kernel file-hide driver (cheat / hide; Detection:Hide-adjacent)
 - [HideDriver](entities/hide-driver.md) — hide driver via Flink/Blink unlink (cheat / hide; AC enum evasion)
 - [HiddenModuleDetector](entities/hidden-module-detector.md) — hidden module/DLL detector for Windows apps (C/C++; Detection:Hide; mq1n)
+- [DLLThreadInjectionDetector](entities/dll-thread-injection-detector.md) — kernel-level DLL thread injection detector (C/C++; Detection:Injection; mq1n)
 - [HijackLibs](entities/hijacklibs.md) — disclosed Windows DLL hijack DB (YAML + web UI; exports / conditions)
 - [hint-break](entities/hint-break.md) — RE-tool ghost opcodes `0F 1A`/`0F 1B` (Anti Debugging / anti-disasm)
 - [Hooking-via-InstrumentationCallback](entities/hooking-via-instrumentation-callback.md) — Ring3 Instrumentation Callback hook (NtSetInformationProcess; no ntdll patch)
