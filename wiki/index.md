@@ -629,6 +629,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [r2garlic](entities/r2garlic.md) — radare2 Garlic DEX/Dalvik decompiler plugin (DEX/APK/ELF/PE/Mach-O; Cheat Radare Plugins)
 - [r2morph](entities/r2morph.md) — radare2/r2pipe metamorphic binary transform (Python+C; Cheat Radare Plugins)
 - [radius2](entities/radius2.md) — radare2 fast binary emulation + symbolic execution (Rust/C; Cheat Radare Plugins)
+- [rprof](entities/rprof.md) — lightweight CPU scope profiler (TLS timing; ImGui/ImPlot flame graphs; LZ4 captures; Game Testing)
 - [ReadPhys](entities/readphys.md) — phys mem via manual PTE map (no MmCopyMemory/MmMapIoSpace; AXE-BASE.sys; ACE)
 - [ReadWriteDriver](entities/read-write-driver.md) — `ntUserSetSysColors` KM↔UM channel (Win11 22000.376; cheat / driver communication)
 - [Recast Navigation](entities/recastnavigation.md) — Recast & Detour navmesh toolset (voxelize → pathfind/steer; Game Tools)

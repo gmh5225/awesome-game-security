@@ -1725,3 +1725,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:mimilewis/MapleStory143`: entity [[maplestory143]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-29** — ingest `description:minetest/minetest`: entity [[minetest]]; cited on [[overviews/game-engine]].
+
+- **2026-07-29** — ingest `description:milostosic/rprof`: entity [[rprof]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
