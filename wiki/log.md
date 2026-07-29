@@ -1727,3 +1727,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:minetest/minetest`: entity [[minetest]]; cited on [[overviews/game-engine]].
 
 - **2026-07-29** — ingest `description:milostosic/rprof`: entity [[rprof]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-29** — ingest `description:milcert/ExpoMon`: entity [[expomon]]; cited on [[overviews/reverse-engineering]]; cross-link from [[x64dbg]].

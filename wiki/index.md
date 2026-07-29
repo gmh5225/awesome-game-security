@@ -273,6 +273,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EvCommunication](entities/evcommunication.md) — named-event kernel↔UM channel (NtTokenManager; vs IOCTL)
 - [event_replay](entities/event-replay.md) — Android `/dev/input` touch/key record-replay Magisk module (game input sim)
 - [Execution Trace Viewer](entities/execution-trace-viewer.md) — view/edit/analyze execution traces (obfuscated-code RE; cheat / debugging)
+- [ExpoMon](entities/expomon.md) — x64dbg Qt GUI: live DLL export-table monitor (names/ordinals/addresses; Cheat x64dbg Plugins / Exports monitoring)
 - [exengine](entities/exengine.md) — minimal C99 OpenGL 3D engine (IQM / lighting / scene; Game Engine source)
 - [Faultline](entities/faultline.md) — usermode WS page-fault AC PoC (manual-map/shellcode; C++23)
 - [FightingGame-UE5](entities/fightinggame-ue5.md) — UE5 fighting game (root motion / anim BP / montage combat; Game Develop / Unreal source)
