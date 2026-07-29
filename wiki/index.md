@@ -148,6 +148,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cet-research](entities/cet-research.md) — CET / shadow-stack research (C; Windows Security Features)
 - [checkhv_um](entities/checkhv-um.md) — user-mode HV detection (CPUID / RDTSC / VMCS / signatures)
 - [cheese](entities/cheese.md) — Quest 3/3S root via Adreno CVE-2025-21479 (Magisk, no boot rewrite)
+- [cheatengine-mcp-bridge](entities/cheatengine-mcp-bridge.md) — MCP bridge: CE named pipe + Lua/FastMCP; 40+ tools (scan/read/pointers/RTTI/HWBP/DBVM); sub-2ms
 - [cheat-driver](entities/cheat-driver.md) — MmCopyVirtualMemory KM test driver (AC stress / cross-process R/W)
 - [CirSAT](entities/cirsat.md) — circuit-based AIG SAT (DAG/AIGER; verification / equivalence; MBA constraint lane)
 - [Classroom](entities/classroom.md) — x64dbg OOP class docs (member funcs/vars; Cheat x64dbg Plugins)
