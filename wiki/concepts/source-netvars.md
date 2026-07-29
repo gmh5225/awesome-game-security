@@ -1,0 +1,42 @@
+---
+title: Source NetVars
+kind: concept
+topics: [game-engine, game-hacking, reverse-engineering]
+sources:
+  - wiki/sources/skills/game-engine.md
+updated: 2026-07-29
+confidence: high
+---
+
+# Source NetVars
+
+Valve **Source 1** and **Source 2** games expose replicated entity state through **ClientClass → RecvTable → RecvProp** chains and **CreateInterface**-exported engine interfaces. Cheat SDK and offset tooling walks these structures to map class names to network property offsets. (source: wiki/sources/skills/game-engine.md)
+
+## NetVar parsing workflow (Source 1)
+
+1. Locate `CHLClient` and walk the **ClientClass** linked list
+2. For each class, enumerate **RecvTable → RecvProp** entries
+3. Build offset map: `class name → property name → offset` (e.g. `CCSPlayer → m_iHealth → 0x100`)
+4. Tools: hazedumper-style dumps, maintained headers such as [[offsets]], generated SDKs such as [[sdk]]
+
+Source 2 extends the model with schema-driven layouts; generators such as [[source2gen]] and multi-game dumps such as [[source2sdk]] produce C++ class/enum headers from exposed schema.
+
+## Key interfaces (CreateInterface export)
+
+| Interface | Typical use |
+|-----------|-------------|
+| `IVEngineClient` | Engine client services |
+| `IClientEntityList` | `GetClientEntity(index)` entity list |
+| `IEngineTrace` | Ray/world traces |
+| `ICvar` | `FindVar("sv_cheats")` and console variables |
+| `ISurface` / `IPanel` | Overlay rendering (Source 1 HUD/ESP lane) |
+
+Interface vtables and netvar tables drift per game build—verify against the target binary. Pair with [[research-rigor]] when porting offsets across patches.
+
+## Ground-truth sources
+
+Open or leaked trees such as [[source-engine]] and [[cstrike15-src]] help validate ClientClass/RecvTable layouts. CS2 offset dumps such as [[cs2-offsets]] illustrate the Source 2 netvar/entity-layout lane.
+
+## Related
+
+[[unreal-object-model]] · [[il2cpp]] · [[sdk]] · [[offsets]] · [[source2gen]] · [[source2sdk]] · [[source-engine]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]

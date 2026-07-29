@@ -9,7 +9,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Overview](overviews/overview.md) — project map; compiled-wiki + research-rigor layers; 40 README sections → skill topics (Cheat ~2606 / Anti Cheat ~621; Game Engine ~153 + Mathematics ~7 / Renderer ~17; DirectX ~35 shader inject/flatten / OpenGL ~3 / Vulkan ~10 kiero2; Game Develop ~182 MCP/security; Game Network ~26; console Switch~7/Xbox~8/PS~7 BD-UN-JB+PSFree-Enhanced / 3DS~3 3Beans LLE+Luma / GC·Wii~1 gecko / Game Boy ~3)
 - [Anti-Cheat](overviews/anti-cheat.md) — layered AC; detection methodology + [[kernel-pool-scanning]] / [[ai-aimbot-detection]]; Detection:* (triggerbot & aimbot/wallhack) + Screenshot + page/CLR protection (~621); hybrid CS2 judge/honeypot proposals; Game Tools RCE + Windows Emulator KDemu AC
 - [DMA Attack](overviews/dma-attack.md) — PCIe DMA threat model (cheat PC + FPGA + HID); three defense layers; firmware tiers 0–6; layered detection + TPM attestation; Cheat (~2606) / Detection:DMA (~621) + WSF PCR
-- [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~153); Mathematics/PhysX/Renderer (~17) adjacency; MCP server/security + AI gamedev (~182); Game Hot Patch HybridCLR/xLua; Game Network ~26; Game Assets ~11 + AI YAML→GLB/sprite + Image Codec PaintFE + Manager/Testing/Tools/CI
+- [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source SDK workflows + [[unreal-object-model]] / [[il2cpp]] / [[source-netvars]]; Godot / Lumix (~153); MCP + AI gamedev (~182); Game Network ~26; Game Assets ~11
 - [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2606) + Some Tricks (~113); mytechnotalent Rust/Go RE courses; Android Terminal (ADB/root/shell)/File/Memory Explorer; WSA/Android/iOS/Windows Emulator KDemu lanes; console Xbox~8 X360 patch+SystemOS / PS HV+BD-UN-JB+PSFree-Enhanced / WebKit CSSFontFace / 3DS~3 3Beans LLE+Luma / GC·Wii~1 gecko
 - [Graphics API](overviews/graphics-api.md) — DirectX (~35) D3D12 shader inject + cross-API flatten / GL / Vulkan (~10) kiero2; Renderer (~17) + Mathematics adjacency; Image Codec PaintFE + AI mesh/splat/sprite
 - [Mobile Security](overviews/mobile-security.md) — Android / iOS; Terminal (ADB/root/shell)/File/Memory Explorer + App/Kernel CVE; WSA (~9), Droid-VM/Gunyah Snapdragon emulators
@@ -26,13 +26,15 @@ Compiled knowledge catalog for awesome-game-security.
 - [Easy Anti-Cheat](concepts/easy-anti-cheat.md)
 - [Frida](concepts/frida.md)
 - [HVCI](concepts/hvci.md)
-- [IL2CPP](concepts/il2cpp.md)
+- [IL2CPP](concepts/il2cpp.md) — Unity AOT backend; Il2CppDomain hierarchy; metadata + dumpers
 - [IOMMU](concepts/iommu.md) — VT-d/AMD-Vi translation; six out-of-domain paths; ACS/ATS-untrusted; bypass catalog + containment
 - [Kernel Callbacks](concepts/kernel-callbacks.md)
 - [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; KDP rule tables
 - [PatchGuard](concepts/patchguard.md)
 - [Present Hook](concepts/present-hook.md)
-- [Research Rigor](concepts/research-rigor.md)
+- [Research Rigor](concepts/research-rigor.md) — evidence discipline; pair with domain overviews; engine offset/SDK verification
+- [Source NetVars](concepts/source-netvars.md) — ClientClass/RecvTable offset maps; CreateInterface exports (Source 1/2)
+- [Unreal Object Model](concepts/unreal-object-model.md) — UObject hierarchy; GObjects/GNames/GWorld; Dumper-7 SDK workflow
 - [Vanguard](concepts/vanguard.md)
 
 ## Entities

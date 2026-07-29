@@ -4,6 +4,7 @@ kind: concept
 topics: [overview]
 sources:
   - wiki/sources/skills/overview.md
+  - wiki/sources/skills/game-engine.md
 updated: 2026-07-29
 confidence: high
 ---
@@ -26,7 +27,10 @@ Cross-cutting evidence discipline for factual synthesis, detector assessment, an
 |------------|-----------|
 | Claim validation, citation checks | matching domain overview |
 | Detector evaluation, false-positive rates | [[overviews/anti-cheat]] or relevant detection lane |
+| Engine globals, offsets, SDK dumps | [[overviews/game-engine]] + [[unreal-object-model]] / [[il2cpp]] / [[source-netvars]] |
 | Evidence conflicts across sources | domain skill + this page |
+
+Engine globals, object layouts, metadata formats, and helper APIs vary by engine branch, build configuration, platform, and game modifications—verify the exact version and binary artifacts before generalizing signatures or offsets. (source: wiki/sources/skills/game-engine.md)
 
 ## Related
 

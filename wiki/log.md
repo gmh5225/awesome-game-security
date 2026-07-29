@@ -1663,3 +1663,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `skill:anti-cheat`: refreshed [[overviews/anti-cheat]] (detection methodology, hypervisor EPT defense); concepts [[kernel-pool-scanning]], [[ai-aimbot-detection]]; expanded [[dma]] AC detection pipeline; updated `index.md`.
 
 - **2026-07-29** — ingest `skill:dma-attack`: refreshed [[overviews/dma-attack]] (three defense layers, PCIe stack, firmware tiers, layered detection pipeline, attestation limits); expanded [[iommu]] (six bypass paths, ACS/ATS, bypass catalog); entities [[pcileech]], [[pcileech-fpga]] (LeechCore/MemProcFS lineage, stock fingerprints, tier table); updated `index.md`.
+
+- **2026-07-29** — ingest `skill:game-engine`: refreshed [[overviews/game-engine]] (SDK workflows, object models, MCP servers, research-rigor); concepts [[unreal-object-model]], [[source-netvars]]; expanded [[il2cpp]] object model + [[research-rigor]] engine row; updated `index.md`.

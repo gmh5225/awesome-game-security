@@ -18,13 +18,28 @@ sources:
   - wiki/sources/descriptions/reahly__mono-external-lib.md
   - wiki/sources/descriptions/oobbb__android-il2cpp-modspeed.md
   - wiki/sources/descriptions/nneonneo__Il2CppVersions.md
-updated: 2026-07-27
+updated: 2026-07-29
 confidence: high
 ---
 
 # IL2CPP
 
 Unity’s ahead-of-time C++ compilation backend. Managed assemblies become native code (`GameAssembly.dll` / `libil2cpp.so`) plus `global-metadata.dat` describing types, methods, and strings. (source: wiki/sources/skills/game-engine.md)
+
+## Object model
+
+```
+Il2CppDomain → Il2CppAssembly → Il2CppImage → Il2CppClass
+Il2CppClass: fields, methods, vtable, static_fields pointer
+```
+
+Key native API patterns (names/signatures drift by Unity version):
+
+- `il2cpp_domain_get()` — domain singleton
+- `il2cpp_class_from_name()` — class lookup by namespace + name
+- `il2cpp_runtime_invoke()` — call managed methods from native code
+
+`global-metadata.dat` holds the string pool, type definitions, and method signatures. Some protected titles encrypt metadata and require custom decryptors before IL2CPPDumper or [[frida-il2cpp-bridge]] can run.
 
 ## Research workflow
 
@@ -39,4 +54,4 @@ Mono builds instead use `Assembly-CSharp.dll` + dnSpy/ILSpy. Educational vulnera
 
 ## Related
 
-[[frida]] · [[frida-il2cpp-bridge]] · [[il2cpp-versions]] · [[il2cpp-resolver]] · [[il2cpp-runtime-dumper]] · [[il2cpp-spy]] · [[unityexplorer]] · [[unityspeedtools]] · [[android-il2cpp-modspeed]] · [[unity-vulnerable-entrypoint]] · [[mono-external-lib]] · [[escapefromtarkov-trainer]] · [[honor-of-kings-re-research]] · [[overviews/game-engine]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]
+[[unreal-object-model]] · [[source-netvars]] · [[frida]] · [[frida-il2cpp-bridge]] · [[il2cpp-versions]] · [[il2cpp-resolver]] · [[il2cpp-runtime-dumper]] · [[il2cpp-spy]] · [[unityexplorer]] · [[unityspeedtools]] · [[android-il2cpp-modspeed]] · [[unity-vulnerable-entrypoint]] · [[mono-external-lib]] · [[escapefromtarkov-trainer]] · [[honor-of-kings-re-research]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]
