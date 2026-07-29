@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """
 Discover GitHub repos related to awesome-game-security themes, review them
-with Cursor CLI (two passes), edit README.md only when confirmed, and commit
+with Cursor SDK (two passes), edit README.md only when confirmed, and commit
 directly to main (Contents API — no git push / no PR).
 
 Flow:
   1. Build gh search queries from README.md `##` / `>` headings (+ topic boosters)
   2. Dedupe against README, rank/cap candidates
-  3. Cursor CLI pass 1 — relevance screen → screen.json (no README edits kept)
-  4. Cursor CLI pass 2 — independent confirm + place into existing section
+  3. Cursor SDK pass 1 — relevance screen → screen.json (no README edits kept)
+  4. Cursor SDK pass 2 — independent confirm + place into existing section
   5. Script validation gate (section exists, URL in README, ⊆ shortlist)
   6. Commit validated README edits to main via Contents API
 
 Prerequisites:
-    curl https://cursor.com/install -fsS | bash
+    python3 -m pip install 'cursor-sdk>=1.0.26'
     export CURSOR_API_KEY=<your key from https://cursor.com/settings>
     gh auth status
 
@@ -41,6 +41,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
+from cursor_sdk_agent import DEFAULT_MODEL, get_api_key, run_agent
+
 ROOT_DIR = Path(__file__).resolve().parent.parent
 README_PATH = ROOT_DIR / "README.md"
 DISCOVER_DIR = ROOT_DIR / ".github" / "discover"
@@ -48,7 +50,6 @@ CANDIDATES_PATH = DISCOVER_DIR / "candidates.json"
 SCREEN_PATH = DISCOVER_DIR / "screen.json"
 DECISION_PATH = DISCOVER_DIR / "decision.json"
 
-DEFAULT_MODEL = "composer-2.5-fast"
 SELF_REPO = "gmh5225/awesome-game-security"
 _GH_BIN: str | None = None
 
@@ -514,30 +515,6 @@ def prioritize_queries(queries: list[str], max_queries: int) -> list[str]:
 # ---------------------------------------------------------------------------
 
 
-def get_api_key() -> str:
-    key = os.environ.get("CURSOR_API_KEY", "").strip()
-    if not key:
-        sys.exit(
-            "ERROR: CURSOR_API_KEY environment variable is not set.\n"
-            "Obtain a key from https://cursor.com/settings"
-        )
-    return key
-
-
-def find_agent_bin() -> str:
-    home_bin = Path.home() / ".cursor" / "bin" / "agent"
-    if home_bin.is_file():
-        return str(home_bin)
-    for name in ("cursor-agent", "agent"):
-        path = shutil.which(name)
-        if path:
-            return path
-    sys.exit(
-        "ERROR: Cursor CLI `agent` not found on PATH.\n"
-        "Install with: curl https://cursor.com/install -fsS | bash"
-    )
-
-
 def find_gh_bin() -> str:
     global _GH_BIN
     if _GH_BIN:
@@ -881,7 +858,7 @@ def section_exists_in_readme(
 
 
 # ---------------------------------------------------------------------------
-# Cursor CLI two-pass review
+# Cursor SDK two-pass review
 # ---------------------------------------------------------------------------
 
 
@@ -1015,63 +992,6 @@ Hard constraints:
 - Do NOT include {SELF_REPO}
 - When finished, print: Done: confirm N approved
 """
-
-
-def run_agent(
-    agent_bin: str,
-    model: str,
-    prompt: str,
-    dry_run: bool,
-) -> int:
-    cmd = [
-        agent_bin,
-        "-p",
-        "--force",
-        "--trust",
-        "--sandbox",
-        "disabled",
-        "--workspace",
-        str(ROOT_DIR),
-        "--model",
-        model,
-        "--output-format",
-        "text",
-        prompt,
-    ]
-    if dry_run:
-        print("[DRY-RUN] would run:")
-        print(" ", " ".join(cmd[:-1]), "... <prompt>")
-        print("--- prompt preview ---")
-        print(prompt[:800])
-        print("---")
-        return 0
-
-    print(f"  $ {agent_bin} -p --force --trust --sandbox disabled --model {model} ...")
-    started = time.time()
-    proc = subprocess.run(
-        cmd,
-        cwd=ROOT_DIR,
-        env=os.environ.copy(),
-        timeout=None,
-        check=False,
-    )
-    elapsed = time.time() - started
-    print(f"  exit={proc.returncode}  elapsed={elapsed:.1f}s")
-    if proc.returncode != 0 and "--trust" in cmd and elapsed < 2.0:
-        print("  retrying without --trust (possible older CLI) ...")
-        cmd_no_trust = [c for c in cmd if c != "--trust"]
-        proc = subprocess.run(
-            cmd_no_trust,
-            cwd=ROOT_DIR,
-            env=os.environ.copy(),
-            timeout=None,
-            check=False,
-        )
-        print(
-            f"  exit={proc.returncode}  "
-            f"elapsed={time.time() - started:.1f}s (no --trust)"
-        )
-    return proc.returncode
 
 
 def _discard_path(rel: str) -> None:
@@ -1592,7 +1512,7 @@ def commit_to_main(
     n = len(approved)
     safe_run = re.sub(r"[^A-Za-z0-9._-]", "", run_id) or "local"
     safe_label = re.sub(r"[^A-Za-z0-9._-]", "", commit_label) or "discover"
-    msg = f"{safe_label}: add {n} repo(s) via Cursor CLI (2-pass) [{safe_run}]"
+    msg = f"{safe_label}: add {n} repo(s) via Cursor SDK (2-pass) [{safe_run}]"
 
     discard_side_effects()
     readme_text = README_PATH.read_text(encoding="utf-8", errors="replace")
@@ -1630,7 +1550,6 @@ def commit_to_main(
 
 
 def run_two_pass_review(
-    agent_bin: str,
     model: str,
     candidates: list[dict[str, Any]],
     *,
@@ -1638,7 +1557,10 @@ def run_two_pass_review(
 ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
     print("\n=== Pass 1/2: relevance screen (no README edits) ===")
     code1 = run_agent(
-        agent_bin, model, build_screen_prompt(len(candidates)), dry_run=dry_run
+        build_screen_prompt(len(candidates)),
+        model=model,
+        dry_run=dry_run,
+        cwd=ROOT_DIR,
     )
     revert_readme()
     discard_side_effects()
@@ -1683,10 +1605,10 @@ def run_two_pass_review(
 
     print("\n=== Pass 2/2: confirm relevance + README placement ===")
     code2 = run_agent(
-        agent_bin,
-        model,
         build_confirm_prompt(len(shortlisted)),
+        model=model,
         dry_run=False,
+        cwd=ROOT_DIR,
     )
     discard_side_effects()
 
@@ -1763,7 +1685,7 @@ def cleanup_runtime_files(*, keep_decision: bool = False) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Discover theme-related GitHub repos via gh + 2-pass Cursor CLI"
+        description="Discover theme-related GitHub repos via gh + 2-pass Cursor SDK"
     )
     parser.add_argument("--lookback-days", type=int, default=3)
     parser.add_argument("--max-candidates", type=int, default=30)
@@ -1900,7 +1822,7 @@ def main() -> None:
 
     if args.dry_run:
         print("\nDiscovery complete — dry-run two-pass prompt preview.")
-        run_two_pass_review("agent", args.model, candidates, dry_run=True)
+        run_two_pass_review(args.model, candidates, dry_run=True)
         print("[DRY-RUN] agents + commit skipped.")
         return
 
@@ -1910,10 +1832,9 @@ def main() -> None:
         return
 
     get_api_key()
-    agent_bin = find_agent_bin()
     print(f"\nModel: {args.model}")
     _screen, decision = run_two_pass_review(
-        agent_bin, args.model, candidates, dry_run=False
+        args.model, candidates, dry_run=False
     )
     if decision is None:
         sys.exit("ERROR: two-pass review returned no decision")

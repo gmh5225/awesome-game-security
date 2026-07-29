@@ -1,7 +1,7 @@
-name: Discover Repos (Cursor CLI)
+name: Discover Repos (Cursor SDK)
 
 # Scan GitHub for theme-related repos using README headings, then run TWO
-# Cursor CLI passes (relevance screen → confirm + placement). Validated
+# Cursor SDK passes (relevance screen → confirm + placement). Validated
 # approvals are committed directly to main via the Contents API.
 #
 # After a successful Contents-API commit, this workflow explicitly dispatches
@@ -41,7 +41,7 @@ on:
         required: false
         default: "300"
       model:
-        description: "Cursor CLI model id"
+        description: "Cursor SDK model id (composer-2.5-fast = Composer 2.5 fast)"
         required: false
         default: "composer-2.5-fast"
       queries:
@@ -148,28 +148,8 @@ jobs:
           echo "max_queries=${MAX_QUERIES}"
           echo "model=${MODEL}"
 
-      - name: Install Cursor CLI
-        run: |
-          curl https://cursor.com/install -fsS | bash
-          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
-
-      - name: Configure Cursor CLI
-        run: |
-          mkdir -p "$HOME/.cursor"
-          cat > "$HOME/.cursor/cli-config.json" <<'EOF'
-          {
-            "version": 1,
-            "editor": { "vimMode": false },
-            "permissions": { "allow": [], "deny": [] },
-            "maxMode": false,
-            "approvalMode": "unrestricted",
-            "attribution": {
-              "attributeCommitsToAgent": false,
-              "attributePRsToAgent": false
-            }
-          }
-          EOF
-          echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
+      - name: Install Cursor SDK
+        run: python3 -m pip install 'cursor-sdk>=1.0.26'
 
       - name: Configure git
         run: |
@@ -200,7 +180,6 @@ jobs:
             exit 1
           fi
 
-          agent --version || true
           gh --version || true
 
           ARGS=(

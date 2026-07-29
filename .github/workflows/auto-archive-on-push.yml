@@ -300,7 +300,7 @@ jobs:
             exit 1
           fi
 
-  # After archives land on main, summarize each new repo with Cursor CLI.
+  # After archives land on main, summarize each new repo with Cursor SDK.
   generate-descriptions:
     needs: auto-archive
     # Hard gate: canonical repo only + not a fork + archive job found work.
@@ -310,7 +310,7 @@ jobs:
       github.repository == 'gmh5225/awesome-game-security' &&
       github.event.repository.fork == false
     runs-on: ubuntu-latest
-    # No job timeout: Cursor Max Mode can run a long time; progress is saved via
+    # No job timeout: SDK agent runs can take a while; progress is saved via
     # --commit-every 1. (GitHub-hosted runners still enforce a platform max ~6h.)
     permissions:
       contents: write
@@ -381,41 +381,15 @@ jobs:
           df -h .
           du -sh scripts description archive 2>/dev/null || true
 
-      - name: Install Cursor CLI
-        run: |
-          curl https://cursor.com/install -fsS | bash
-          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
-
-      - name: Configure Cursor CLI
-        run: |
-          mkdir -p "$HOME/.cursor"
-          cat > "$HOME/.cursor/cli-config.json" <<'EOF'
-          {
-            "version": 1,
-            "editor": { "vimMode": false },
-            "permissions": { "allow": [], "deny": [] },
-            "maxMode": false,
-            "approvalMode": "unrestricted",
-            "attribution": {
-              "attributeCommitsToAgent": false,
-              "attributePRsToAgent": false
-            }
-          }
-          EOF
-          echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
-          # Prefer runner temp for agent scratch; wipe prior local agent DBs.
-          rm -rf "$HOME/.cursor/projects" "$HOME/.cursor/chats" \
-                 "$HOME/.cursor/ai-tracking" "$HOME/.cursor/agent-transcripts" \
-                 /tmp/cursor* 2>/dev/null || true
-          echo "TMPDIR=${RUNNER_TEMP:-/tmp}" >> "$GITHUB_ENV"
-          df -h
+      - name: Install Cursor SDK
+        run: python3 -m pip install 'cursor-sdk>=1.0.26'
 
       - name: Configure git
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Generate descriptions via Cursor CLI
+      - name: Generate descriptions via Cursor SDK
         id: generate
         continue-on-error: true
         env:
@@ -436,7 +410,6 @@ jobs:
             exit 1
           fi
 
-          agent --version || true
           df -h
 
           python3 scripts/generate-descriptions-cli.py \
@@ -462,7 +435,7 @@ jobs:
             echo "No description files left to commit."
           else
             COUNT=$(git diff --cached --name-only | grep -c "description_en.txt" || true)
-            git commit -m "description: add ${COUNT} summary(ies) via Cursor CLI [skip ci]"
+            git commit -m "description: add ${COUNT} summary(ies) via Cursor SDK [skip ci]"
 
             PUSHED=0
             for i in 1 2 3 4 5; do
@@ -499,7 +472,7 @@ jobs:
       github.repository == 'gmh5225/awesome-game-security' &&
       github.event.repository.fork == false
     runs-on: ubuntu-latest
-    # No job timeout: Cursor Max Mode can run a long time; progress is saved via
+    # No job timeout: SDK agent runs can take a while; progress is saved via
     # --commit-every 1. (GitHub-hosted runners still enforce a platform max ~6h.)
     permissions:
       contents: write
@@ -546,40 +519,15 @@ jobs:
           git fetch --no-tags --depth=1 origin main
           git reset --hard origin/main
 
-      - name: Install Cursor CLI
-        run: |
-          curl https://cursor.com/install -fsS | bash
-          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
-
-      - name: Configure Cursor CLI
-        run: |
-          mkdir -p "$HOME/.cursor"
-          cat > "$HOME/.cursor/cli-config.json" <<'EOF'
-          {
-            "version": 1,
-            "editor": { "vimMode": false },
-            "permissions": { "allow": [], "deny": [] },
-            "maxMode": false,
-            "approvalMode": "unrestricted",
-            "attribution": {
-              "attributeCommitsToAgent": false,
-              "attributePRsToAgent": false
-            }
-          }
-          EOF
-          echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
-          rm -rf "$HOME/.cursor/projects" "$HOME/.cursor/chats" \
-                 "$HOME/.cursor/ai-tracking" "$HOME/.cursor/agent-transcripts" \
-                 /tmp/cursor* 2>/dev/null || true
-          echo "TMPDIR=${RUNNER_TEMP:-/tmp}" >> "$GITHUB_ENV"
-          df -h
+      - name: Install Cursor SDK
+        run: python3 -m pip install 'cursor-sdk>=1.0.26'
 
       - name: Configure git
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Translate descriptions via Cursor CLI
+      - name: Translate descriptions via Cursor SDK
         id: translate
         continue-on-error: true
         env:
@@ -598,7 +546,6 @@ jobs:
             exit 1
           fi
 
-          agent --version || true
           df -h
 
           # Fill missing langs for the repos just archived/summarized.
@@ -636,7 +583,7 @@ jobs:
             echo "No translation files left to commit."
           else
             COUNT=$(git diff --cached --name-only | grep -c 'description_' || true)
-            git commit -m "description: translate ${COUNT} file(s) via Cursor CLI [skip ci]"
+            git commit -m "description: translate ${COUNT} file(s) via Cursor SDK [skip ci]"
 
             PUSHED=0
             for i in 1 2 3 4 5; do

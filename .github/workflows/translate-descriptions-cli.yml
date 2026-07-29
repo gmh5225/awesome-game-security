@@ -1,7 +1,7 @@
-name: Translate Descriptions (Cursor CLI)
+name: Translate Descriptions (Cursor SDK)
 
 # Translate description_en.txt → zh-CN / zh-TW / ja / ko / fr / de / es / it / ru
-# using Cursor CLI (auto, max mode).
+# using Cursor SDK (Composer 2.5 fast by default).
 #
 # Triggers:
 # - schedule: every 6 hours at minute 20 UTC (catch-up missing translations)
@@ -42,7 +42,7 @@ on:
         required: false
         default: false
       model:
-        description: "Cursor CLI model id"
+        description: "Cursor SDK model id (composer-2.5-fast = Composer 2.5 fast)"
         required: false
         default: "composer-2.5-fast"
 
@@ -249,35 +249,9 @@ jobs:
             echo "Nothing to translate — skipping agent steps."
           fi
 
-      - name: Install Cursor CLI
+      - name: Install Cursor SDK
         if: steps.gate.outputs.run == '1'
-        run: |
-          curl https://cursor.com/install -fsS | bash
-          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
-
-      - name: Configure Cursor CLI
-        if: steps.gate.outputs.run == '1'
-        run: |
-          mkdir -p "$HOME/.cursor"
-          cat > "$HOME/.cursor/cli-config.json" <<'EOF'
-          {
-            "version": 1,
-            "editor": { "vimMode": false },
-            "permissions": { "allow": [], "deny": [] },
-            "maxMode": false,
-            "approvalMode": "unrestricted",
-            "attribution": {
-              "attributeCommitsToAgent": false,
-              "attributePRsToAgent": false
-            }
-          }
-          EOF
-          echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
-          rm -rf "$HOME/.cursor/projects" "$HOME/.cursor/chats" \
-                 "$HOME/.cursor/ai-tracking" "$HOME/.cursor/agent-transcripts" \
-                 /tmp/cursor* 2>/dev/null || true
-          echo "TMPDIR=${RUNNER_TEMP:-/tmp}" >> "$GITHUB_ENV"
-          df -h
+        run: python3 -m pip install 'cursor-sdk>=1.0.26'
 
       - name: Configure git
         if: steps.gate.outputs.run == '1'
@@ -285,7 +259,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Translate via Cursor CLI
+      - name: Translate via Cursor SDK
         id: translate
         if: steps.gate.outputs.run == '1'
         continue-on-error: true
@@ -312,7 +286,6 @@ jobs:
             exit 1
           fi
 
-          agent --version || true
           df -h
 
           MODEL="${INPUT_MODEL:-composer-2.5-fast}"
@@ -375,7 +348,7 @@ jobs:
             echo "No translation files left to commit."
           else
             COUNT=$(git diff --cached --name-only | grep -c 'description_' || true)
-            git commit -m "description: translate ${COUNT} file(s) via Cursor CLI [skip ci]"
+            git commit -m "description: translate ${COUNT} file(s) via Cursor SDK [skip ci]"
 
             if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
               BRANCH="${{ github.head_ref }}"
@@ -435,7 +408,7 @@ jobs:
               fi
               git add -- "${STILL[@]}"
               COUNT=${#STILL[@]}
-              git commit -m "description: translate ${COUNT} file(s) via Cursor CLI [skip ci]"
+              git commit -m "description: translate ${COUNT} file(s) via Cursor SDK [skip ci]"
             done
             if [ "$PUSHED" != 1 ]; then
               echo "Failed to push after 5 attempts."

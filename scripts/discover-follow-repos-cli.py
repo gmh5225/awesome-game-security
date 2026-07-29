@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """
 Discover repos from GitHub users tracked by github-follow-feed (following +
-custom_users.txt), shallow-clone candidates, review with Cursor CLI (two
-passes), and commit validated README additions to main via Contents API.
+custom_users.txt), shallow-clone candidates, review with Cursor SDK (two passes), and commit
+validated README additions to main via Contents API.
 
 Flow:
   1. Load tracked logins: users/{source}/following + custom_users.txt
   2. List recently pushed non-fork repos owned by those users
   3. Dedupe against README, topic-prefilter, rank/cap
   4. Shallow-clone each candidate outside the workspace
-  5. Cursor CLI pass 1 — relevance screen via local clone → screen.json
-  6. Cursor CLI pass 2 — confirm + place into existing README section
+  5. Cursor SDK pass 1 — relevance screen via local clone → screen.json
+  6. Cursor SDK pass 2 — confirm + place into existing README section
   7. Script validation gate; commit via Contents API
 
 Prerequisites:
-    curl https://cursor.com/install -fsS | bash
+    python3 -m pip install 'cursor-sdk>=1.0.26'
     export CURSOR_API_KEY=<your key from https://cursor.com/settings>
     gh auth status
 
@@ -746,7 +746,6 @@ Hard constraints:
 
 
 def run_follow_two_pass_review(
-    agent_bin: str,
     model: str,
     candidates: list[dict[str, Any]],
     *,
@@ -754,10 +753,10 @@ def run_follow_two_pass_review(
 ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
     print("\n=== Pass 1/2: relevance screen via local clones (no README edits) ===")
     code1 = dr.run_agent(
-        agent_bin,
-        model,
         build_follow_screen_prompt(len(candidates)),
+        model=model,
         dry_run=dry_run,
+        cwd=dr.ROOT_DIR,
     )
     dr.revert_readme()
     dr.discard_side_effects()
@@ -802,10 +801,10 @@ def run_follow_two_pass_review(
 
     print("\n=== Pass 2/2: confirm via clones + README placement ===")
     code2 = dr.run_agent(
-        agent_bin,
-        model,
         build_follow_confirm_prompt(len(shortlisted)),
+        model=model,
         dry_run=False,
+        cwd=dr.ROOT_DIR,
     )
     dr.discard_side_effects()
 
@@ -946,7 +945,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
             "Discover theme-related repos from GitHub following + "
-            "custom_users.txt, clone, and 2-pass Cursor CLI review"
+            "custom_users.txt, clone, and 2-pass Cursor SDK review"
         )
     )
     parser.add_argument(
@@ -1109,7 +1108,7 @@ def main() -> None:
 
         if args.dry_run:
             print("\nDiscovery complete — dry-run two-pass prompt preview.")
-            run_follow_two_pass_review("agent", args.model, candidates, dry_run=True)
+            run_follow_two_pass_review(args.model, candidates, dry_run=True)
             print("[DRY-RUN] agents + commit skipped.")
             return
 
@@ -1119,10 +1118,9 @@ def main() -> None:
             return
 
         dr.get_api_key()
-        agent_bin = dr.find_agent_bin()
         print(f"\nModel: {args.model}")
         _screen, decision = run_follow_two_pass_review(
-            agent_bin, args.model, candidates, dry_run=False
+            args.model, candidates, dry_run=False
         )
         if decision is None:
             sys.exit("ERROR: two-pass review returned no decision")

@@ -1,7 +1,7 @@
-name: Fill Missing Descriptions (Cursor CLI)
+name: Fill Missing Descriptions (Cursor SDK)
 
 # Scan archive/ for repos that lack description_en.txt, then summarize them
-# with Cursor CLI (auto, max mode).
+# with Cursor SDK (Composer 2.5 fast by default).
 # New README entries are still handled automatically by auto-archive-on-push.yml;
 # this workflow is the backfill / catch-up path.
 #
@@ -29,7 +29,7 @@ on:
         required: false
         default: ""
       model:
-        description: "Cursor CLI model id"
+        description: "Cursor SDK model id (composer-2.5-fast = Composer 2.5 fast)"
         required: false
         default: "composer-2.5-fast"
 
@@ -198,35 +198,9 @@ jobs:
           df -h .
           du -sh scripts description archive 2>/dev/null || true
 
-      - name: Install Cursor CLI
+      - name: Install Cursor SDK
         if: steps.scan.outputs.missing_count != '0'
-        run: |
-          curl https://cursor.com/install -fsS | bash
-          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
-
-      - name: Configure Cursor CLI
-        if: steps.scan.outputs.missing_count != '0'
-        run: |
-          mkdir -p "$HOME/.cursor"
-          cat > "$HOME/.cursor/cli-config.json" <<'EOF'
-          {
-            "version": 1,
-            "editor": { "vimMode": false },
-            "permissions": { "allow": [], "deny": [] },
-            "maxMode": false,
-            "approvalMode": "unrestricted",
-            "attribution": {
-              "attributeCommitsToAgent": false,
-              "attributePRsToAgent": false
-            }
-          }
-          EOF
-          echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
-          rm -rf "$HOME/.cursor/projects" "$HOME/.cursor/chats" \
-                 "$HOME/.cursor/ai-tracking" "$HOME/.cursor/agent-transcripts" \
-                 /tmp/cursor* 2>/dev/null || true
-          echo "TMPDIR=${RUNNER_TEMP:-/tmp}" >> "$GITHUB_ENV"
-          df -h
+        run: python3 -m pip install 'cursor-sdk>=1.0.26'
 
       - name: Configure git
         if: steps.scan.outputs.missing_count != '0'
@@ -234,7 +208,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Fill missing descriptions via Cursor CLI
+      - name: Fill missing descriptions via Cursor SDK
         id: generate
         if: steps.scan.outputs.missing_count != '0'
         continue-on-error: true
@@ -255,7 +229,6 @@ jobs:
             exit 1
           fi
 
-          agent --version || true
           df -h
 
           python3 scripts/generate-descriptions-cli.py \
@@ -282,7 +255,7 @@ jobs:
             echo "No description files left to commit."
           else
             COUNT=$(git diff --cached --name-only | grep -c "description_en.txt" || true)
-            git commit -m "description: fill ${COUNT} missing summary(ies) via Cursor CLI [skip ci]"
+            git commit -m "description: fill ${COUNT} missing summary(ies) via Cursor SDK [skip ci]"
 
             # Concurrent archive/fill jobs often add the same description_en.txt.
             # On non-ff reject: undo commit, sync to origin/main, skip files
@@ -332,7 +305,7 @@ jobs:
               fi
               git add -- "${STILL[@]}"
               COUNT=${#STILL[@]}
-              git commit -m "description: fill ${COUNT} missing summary(ies) via Cursor CLI [skip ci]"
+              git commit -m "description: fill ${COUNT} missing summary(ies) via Cursor SDK [skip ci]"
             done
             if [ "$PUSHED" != 1 ]; then
               echo "Failed to push after 5 attempts."

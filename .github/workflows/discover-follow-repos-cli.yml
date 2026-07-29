@@ -1,9 +1,9 @@
-name: Discover Follow Repos (Cursor CLI)
+name: Discover Follow Repos (Cursor SDK)
 
 # Scan repos owned by users from github-follow-feed tracking sources:
 #   1) GitHub following list of gmh5225
 #   2) custom_users.txt in gmh5225/github-follow-feed
-# Shallow-clone candidates, then run TWO Cursor CLI passes (relevance screen
+# Shallow-clone candidates, then run TWO Cursor SDK passes (relevance screen
 # → confirm + placement). Validated approvals are committed directly to main
 # via the Contents API.
 #
@@ -52,7 +52,7 @@ on:
         required: false
         default: "gmh5225/github-follow-feed"
       model:
-        description: "Cursor CLI model id"
+        description: "Cursor SDK model id (composer-2.5-fast = Composer 2.5 fast)"
         required: false
         default: "composer-2.5-fast"
 
@@ -155,28 +155,8 @@ jobs:
           echo "follow_feed_repo=${FOLLOW_FEED_REPO}"
           echo "model=${MODEL}"
 
-      - name: Install Cursor CLI
-        run: |
-          curl https://cursor.com/install -fsS | bash
-          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
-
-      - name: Configure Cursor CLI
-        run: |
-          mkdir -p "$HOME/.cursor"
-          cat > "$HOME/.cursor/cli-config.json" <<'EOF'
-          {
-            "version": 1,
-            "editor": { "vimMode": false },
-            "permissions": { "allow": [], "deny": [] },
-            "maxMode": false,
-            "approvalMode": "unrestricted",
-            "attribution": {
-              "attributeCommitsToAgent": false,
-              "attributePRsToAgent": false
-            }
-          }
-          EOF
-          echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
+      - name: Install Cursor SDK
+        run: python3 -m pip install 'cursor-sdk>=1.0.26'
 
       - name: Configure git
         run: |
@@ -212,7 +192,6 @@ jobs:
             exit 1
           fi
 
-          agent --version || true
           gh --version || true
 
           LOG=/tmp/discover-follow-repos.log

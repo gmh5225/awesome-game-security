@@ -1,6 +1,6 @@
-name: Update Wiki (Cursor CLI)
+name: Update Wiki (Cursor SDK)
 
-# Maintain wiki/ (Karpathy-style LLM wiki) via Cursor CLI.
+# Maintain wiki/ (Karpathy-style LLM wiki) via Cursor SDK.
 # Modes: bootstrap | ingest | lint | skill-sync | auto
 #
 # Triggers:
@@ -43,7 +43,7 @@ on:
         required: false
         default: false
       model:
-        description: "Cursor CLI model id"
+        description: "Cursor SDK model id (composer-2.5-fast = Composer 2.5 fast)"
         required: false
         default: "composer-2.5-fast"
 
@@ -176,30 +176,9 @@ jobs:
             echo "No wiki-relevant PR deltas — skipping."
           fi
 
-      - name: Install Cursor CLI
+      - name: Install Cursor SDK
         if: steps.gate.outputs.run == '1'
-        run: |
-          curl https://cursor.com/install -fsS | bash
-          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
-
-      - name: Configure Cursor CLI
-        if: steps.gate.outputs.run == '1'
-        run: |
-          mkdir -p "$HOME/.cursor"
-          cat > "$HOME/.cursor/cli-config.json" <<'EOF'
-          {
-            "version": 1,
-            "editor": { "vimMode": false },
-            "permissions": { "allow": [], "deny": [] },
-            "maxMode": false,
-            "approvalMode": "unrestricted",
-            "attribution": {
-              "attributeCommitsToAgent": false,
-              "attributePRsToAgent": false
-            }
-          }
-          EOF
-          echo "CURSOR_CONFIG_DIR=$HOME/.cursor" >> "$GITHUB_ENV"
+        run: python3 -m pip install 'cursor-sdk>=1.0.26'
 
       - name: Configure git
         if: steps.gate.outputs.run == '1'
@@ -207,7 +186,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Update wiki via Cursor CLI
+      - name: Update wiki via Cursor SDK
         id: wiki
         if: steps.gate.outputs.run == '1'
         continue-on-error: true
@@ -235,8 +214,6 @@ jobs:
             echo "Add it under Settings → Secrets and variables → Actions."
             exit 1
           fi
-
-          agent --version || true
 
           MODEL="${INPUT_MODEL:-composer-2.5-fast}"
           if [ -z "$MODEL" ]; then
@@ -332,7 +309,7 @@ jobs:
             echo "No wiki/skill files left to commit."
           else
             COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
-            git commit -m "wiki: update ${COUNT} file(s) via Cursor CLI [skip ci]"
+            git commit -m "wiki: update ${COUNT} file(s) via Cursor SDK [skip ci]"
 
             if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
               BRANCH="${{ github.head_ref }}"

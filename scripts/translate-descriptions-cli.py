@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Translate English repo descriptions via the Cursor CLI.
+Translate English repo descriptions via the Cursor SDK.
 
 For each description/{owner}/{repo}/description_en.txt, the agent writes:
   description/{owner}/{repo}/description_{lang}.txt
@@ -10,9 +10,8 @@ Languages (default):
   fr Français | de Deutsch | es Español | it Italiano | ru Русский
 
 Prerequisites:
-    curl https://cursor.com/install -fsS | bash
+    python3 -m pip install 'cursor-sdk>=1.0.26'
     export CURSOR_API_KEY=<your key from https://cursor.com/settings>
-    # Max Mode in ~/.cursor/cli-config.json + CURSOR_CONFIG_DIR on CI.
 
 Usage:
     python scripts/translate-descriptions-cli.py                  # fill all missing
@@ -30,18 +29,17 @@ import argparse
 import hashlib
 import os
 import re
-import shutil
 import subprocess
 import sys
 import time
 from pathlib import Path
 
+from cursor_sdk_agent import DEFAULT_MODEL, get_api_key, run_agent_with_output
+
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DESC_DIR = ROOT_DIR / "description"
 
-DEFAULT_MODEL = "composer-2.5-fast"
-# No per-agent wall clock — long Max Mode runs must not be killed mid-write.
-# GitHub-hosted jobs still have a platform cap (~6h); --commit-every saves progress.
+# GitHub-hosted jobs still cap at ~6h; --commit-every saves progress.
 REPO_SLUG_RE = re.compile(r"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$")
 LANG_CODE_RE = re.compile(r"^[A-Za-z]{2}(-[A-Za-z]{2})?$")
 
@@ -63,30 +61,6 @@ TRANSLATION_KEEP_RE = re.compile(
     + "|".join(re.escape(c) for c in LANGS)
     + r")\.txt$"
 )
-
-
-def get_api_key() -> str:
-    key = os.environ.get("CURSOR_API_KEY", "").strip()
-    if not key:
-        sys.exit(
-            "ERROR: CURSOR_API_KEY environment variable is not set.\n"
-            "Obtain a key from https://cursor.com/settings"
-        )
-    return key
-
-
-def find_agent_bin() -> str:
-    home_bin = Path.home() / ".cursor" / "bin" / "agent"
-    if home_bin.is_file():
-        return str(home_bin)
-    for name in ("cursor-agent", "agent"):
-        path = shutil.which(name)
-        if path:
-            return path
-    sys.exit(
-        "ERROR: Cursor CLI `agent` not found on PATH.\n"
-        "Install with: curl https://cursor.com/install -fsS | bash"
-    )
 
 
 def parse_repo_slug(slug: str) -> tuple[str, str]:
@@ -296,79 +270,6 @@ def check_done_line(
     return True, f"Done slug ok: {slug}"
 
 
-def _stream_agent(cmd: list[str]) -> tuple[int, str]:
-    """Run agent, stream stdout+stderr live, and return (exit_code, captured_text)."""
-    proc = subprocess.Popen(
-        cmd,
-        cwd=ROOT_DIR,
-        env=os.environ.copy(),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        bufsize=1,
-    )
-    chunks: list[str] = []
-    try:
-        if proc.stdout is None:
-            raise RuntimeError("agent subprocess has no stdout pipe")
-        for line in proc.stdout:
-            sys.stdout.write(line)
-            sys.stdout.flush()
-            chunks.append(line)
-        code = proc.wait()
-    except BaseException:
-        proc.kill()
-        proc.wait()
-        raise
-    return code if code is not None else 1, "".join(chunks)
-
-
-def run_agent(
-    agent_bin: str,
-    model: str,
-    prompt: str,
-    dry_run: bool,
-) -> tuple[int, str]:
-    cmd = [
-        agent_bin,
-        "-p",
-        "--force",
-        "--trust",
-        "--sandbox",
-        "disabled",
-        "--workspace",
-        str(ROOT_DIR),
-        "--model",
-        model,
-        "--output-format",
-        "text",
-        prompt,
-    ]
-    if dry_run:
-        print("[DRY-RUN] would run:")
-        print(" ", " ".join(cmd[:-1]), "... <prompt>")
-        print("--- prompt preview ---")
-        print(prompt[:900])
-        print("---")
-        return 0, ""
-
-    print(f"  $ {agent_bin} -p --force --trust --sandbox disabled --model {model} ...")
-    started = time.time()
-    code, output = _stream_agent(cmd)
-
-    elapsed = time.time() - started
-    print(f"  exit={code}  elapsed={elapsed:.1f}s")
-    if code != 0 and "--trust" in cmd and elapsed < 2.0:
-        print("  retrying without --trust (possible older CLI) ...")
-        cmd_no_trust = [c for c in cmd if c != "--trust"]
-        code, output = _stream_agent(cmd_no_trust)
-        elapsed2 = time.time() - started
-        print(f"  exit={code}  elapsed={elapsed2:.1f}s (no --trust)")
-    return code, output
-
-
 def _git(*args: str, check: bool = True) -> subprocess.CompletedProcess[bytes]:
     return subprocess.run(
         ["git", *args],
@@ -419,7 +320,7 @@ def _commit_translation_rels(rels: list[str]) -> bool:
         _git("add", "--", *rels)
         if _git("diff", "--cached", "--quiet", check=False).returncode == 0:
             return True
-        msg = f"description: translate {len(rels)} file(s) via Cursor CLI [skip ci]"
+        msg = f"description: translate {len(rels)} file(s) via Cursor SDK [skip ci]"
         _git("commit", "-m", msg)
         return True
     except subprocess.CalledProcessError as e:
@@ -573,7 +474,7 @@ def collect_results(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Translate description_en.txt via Cursor CLI (agent)"
+        description="Translate description_en.txt via Cursor SDK (agent)"
     )
     parser.add_argument(
         "--repos",
@@ -615,7 +516,7 @@ def main() -> None:
         "--model",
         type=str,
         default=DEFAULT_MODEL,
-        help=f"Cursor CLI model id (default: {DEFAULT_MODEL})",
+        help=f"Cursor SDK model id (default: {DEFAULT_MODEL})",
     )
     parser.add_argument(
         "--dry-run",
@@ -644,7 +545,6 @@ def main() -> None:
 
     if not args.dry_run:
         get_api_key()
-    agent_bin = "agent" if args.dry_run else find_agent_bin()
 
     explicit_repos = args.repos is not None or bool(args.repos_env)
     if args.repos_env:
@@ -714,8 +614,11 @@ def main() -> None:
             else {}
         )
         if args.dry_run:
-            run_agent(
-                agent_bin, args.model, build_prompt(owner, repo, need), True
+            run_agent_with_output(
+                build_prompt(owner, repo, need),
+                model=args.model,
+                dry_run=True,
+                cwd=ROOT_DIR,
             )
             ok += 1
             continue
@@ -726,11 +629,11 @@ def main() -> None:
         repo_wrote_paths: list[Path] = []
 
         for attempt in range(1, max_attempts + 1):
-            code, agent_out = run_agent(
-                agent_bin,
-                args.model,
+            code, agent_out = run_agent_with_output(
                 build_prompt(owner, repo, remaining),
-                False,
+                model=args.model,
+                dry_run=False,
+                cwd=ROOT_DIR,
             )
             done_ok, done_msg = check_done_line(agent_out, owner, repo)
             if done_ok:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate English descriptions for archived repositories using the Cursor CLI.
+Generate English descriptions for archived repositories using the Cursor SDK.
 
 For each archive/{owner}/{repo}.txt, the Cursor agent:
   1. Reads a bounded prefix of the local archive (README / tree / top sources)
@@ -8,14 +8,11 @@ For each archive/{owner}/{repo}.txt, the Cursor agent:
   3. Writes description/{owner}/{repo}/description_en.txt
 
 Unlike generate-descriptions.py (Cloud Agents API), this drives the local
-`agent` binary installed by https://cursor.com/install.
+Cursor SDK runtime (``cursor-sdk`` Python package).
 
 Prerequisites:
-    curl https://cursor.com/install -fsS | bash
+    python3 -m pip install 'cursor-sdk>=1.0.26'
     export CURSOR_API_KEY=<your key from https://cursor.com/settings>
-    # Cursor CLI config — set in ~/.cursor/cli-config.json (maxMode disabled):
-    #   {"version":1,"editor":{"vimMode":false},"permissions":{"allow":[],"deny":[]},"maxMode":false,"approvalMode":"unrestricted"}
-    # and export CURSOR_CONFIG_DIR=$HOME/.cursor on GitHub Actions runners.
 
 Usage:
     python scripts/generate-descriptions-cli.py                  # fill all missing
@@ -38,46 +35,17 @@ import sys
 import time
 from pathlib import Path
 
+from cursor_sdk_agent import DEFAULT_MODEL, get_api_key, run_agent
 ROOT_DIR = Path(__file__).resolve().parent.parent
 ARCHIVE_DIR = ROOT_DIR / "archive"
 DESC_DIR = ROOT_DIR / "description"
 
-DEFAULT_MODEL = "composer-2.5-fast"
 # Archives can be tens of MB; only ask the agent to read a bounded prefix.
 ARCHIVE_READ_BYTES = 200_000
-# No per-agent wall clock — long Max Mode runs must not be killed mid-write.
-# GitHub-hosted jobs still have a platform cap (~6h); --commit-every saves progress.
+# Per-agent wall clock is unbounded; GitHub-hosted jobs still cap at ~6h.
 # GitHub owner/repo character set (reject shell metacharacters early).
 REPO_SLUG_RE = re.compile(r"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$")
 DESC_EN_KEEP_RE = re.compile(r"^description/[^/]+/[^/]+/description_en\.txt$")
-
-
-def get_api_key() -> str:
-    key = os.environ.get("CURSOR_API_KEY", "").strip()
-    if not key:
-        sys.exit(
-            "ERROR: CURSOR_API_KEY environment variable is not set.\n"
-            "Obtain a key from https://cursor.com/settings"
-        )
-    return key
-
-
-def find_agent_bin() -> str:
-    # Prefer the Cursor install path so a differently named `agent` on PATH
-    # (e.g. Grok's `agent`, unrelated CLIs) cannot shadow the intended binary.
-    home_bin = Path.home() / ".cursor" / "bin" / "agent"
-    if home_bin.is_file():
-        return str(home_bin)
-    # Prefer cursor-agent before bare `agent` — many machines have a non-Cursor
-    # `agent` earlier on PATH.
-    for name in ("cursor-agent", "agent"):
-        path = shutil.which(name)
-        if path:
-            return path
-    sys.exit(
-        "ERROR: Cursor CLI `agent` not found on PATH.\n"
-        "Install with: curl https://cursor.com/install -fsS | bash"
-    )
 
 
 def list_archived_repos() -> list[tuple[str, str]]:
@@ -174,67 +142,6 @@ Hard constraints:
 """
 
 
-def run_agent(
-    agent_bin: str,
-    model: str,
-    prompt: str,
-    dry_run: bool,
-) -> int:
-    # Headless CI: --trust skips the workspace-trust prompt (otherwise hangs until
-    # timeout). --force + cli-config approvalMode=unrestricted allow writes.
-    # See https://cursor.com/docs/cli/reference/parameters
-    cmd = [
-        agent_bin,
-        "-p",
-        "--force",
-        "--trust",
-        "--sandbox",
-        "disabled",
-        "--workspace",
-        str(ROOT_DIR),
-        "--model",
-        model,
-        "--output-format",
-        "text",
-        prompt,
-    ]
-    if dry_run:
-        print("[DRY-RUN] would run:")
-        print(" ", " ".join(cmd[:-1]), "... <prompt>")
-        print("--- prompt preview ---")
-        print(prompt[:500])
-        print("---")
-        return 0
-
-    print(f"  $ {agent_bin} -p --force --trust --sandbox disabled --model {model} ...")
-    started = time.time()
-    proc = subprocess.run(
-        cmd,
-        cwd=ROOT_DIR,
-        env=os.environ.copy(),
-        timeout=None,
-        check=False,
-    )
-
-    elapsed = time.time() - started
-    print(f"  exit={proc.returncode}  elapsed={elapsed:.1f}s")
-    # Older CLI builds may reject --trust as an unknown option (instant fail).
-    # Retry once without it; real agent work is never <2s.
-    if proc.returncode != 0 and "--trust" in cmd and elapsed < 2.0:
-        print("  retrying without --trust (possible older CLI) ...")
-        cmd_no_trust = [c for c in cmd if c != "--trust"]
-        proc = subprocess.run(
-            cmd_no_trust,
-            cwd=ROOT_DIR,
-            env=os.environ.copy(),
-            timeout=None,
-            check=False,
-        )
-        elapsed2 = time.time() - started
-        print(f"  exit={proc.returncode}  elapsed={elapsed2:.1f}s (no --trust)")
-    return proc.returncode
-
-
 def _git(*args: str, check: bool = True) -> subprocess.CompletedProcess[bytes]:
     return subprocess.run(
         ["git", *args],
@@ -288,7 +195,7 @@ def _commit_en_rels(rels: list[str]) -> bool:
         _git("add", "--", *rels)
         if _git("diff", "--cached", "--quiet", check=False).returncode == 0:
             return True
-        msg = f"description: add {len(rels)} summary(ies) via Cursor CLI [skip ci]"
+        msg = f"description: add {len(rels)} summary(ies) via Cursor SDK [skip ci]"
         _git("commit", "-m", msg)
         return True
     except subprocess.CalledProcessError as e:
@@ -400,7 +307,7 @@ def git_commit_and_push_en(paths: list[Path], branch: str) -> bool:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Generate repo descriptions via Cursor CLI (agent)"
+        description="Generate repo descriptions via Cursor SDK (agent)"
     )
     parser.add_argument(
         "--repos",
@@ -442,7 +349,7 @@ def main() -> None:
         "--model",
         type=str,
         default=DEFAULT_MODEL,
-        help=f"Cursor CLI model id (default: {DEFAULT_MODEL})",
+        help=f"Cursor SDK model id (default: {DEFAULT_MODEL})",
     )
     parser.add_argument(
         "--dry-run",
@@ -471,7 +378,6 @@ def main() -> None:
 
     if not args.dry_run:
         get_api_key()  # fail fast if missing
-    agent_bin = "agent" if args.dry_run else find_agent_bin()
 
     # Explicit repo list (CLI args or CI env) must NOT fall back to "all missing".
     # Empty --repos / empty env ⇒ nothing to do (avoids accidental full backfill).
@@ -534,7 +440,7 @@ def main() -> None:
     for i, (owner, repo) in enumerate(pending, start=1):
         print(f"\n[{i}/{len(pending)}] {owner}/{repo}")
         prompt = build_prompt(owner, repo)
-        code = run_agent(agent_bin, args.model, prompt, args.dry_run)
+        code = run_agent(prompt, model=args.model, dry_run=args.dry_run, cwd=ROOT_DIR)
         out = DESC_DIR / owner / repo / "description_en.txt"
         if args.dry_run:
             ok += 1

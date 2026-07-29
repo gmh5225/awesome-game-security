@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Maintain the awesome-game-security LLM wiki via Cursor CLI.
+Maintain the awesome-game-security LLM wiki via Cursor SDK.
 
 Karpathy-style compiled wiki under wiki/: sources → concepts/entities/overviews.
-Does NOT use llm-wiki-compiler; drives the local `agent` binary like
+Does NOT use llm-wiki-compiler; drives the local ``cursor-sdk`` runtime like
 generate-descriptions-cli.py / translate-descriptions-cli.py.
 
 Modes:
@@ -40,6 +40,8 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from cursor_sdk_agent import DEFAULT_MODEL, get_api_key, run_agent
+
 ROOT_DIR = Path(__file__).resolve().parent.parent
 WIKI_DIR = ROOT_DIR / "wiki"
 SOURCES_DIR = WIKI_DIR / "sources"
@@ -48,7 +50,6 @@ README_PATH = ROOT_DIR / "README.md"
 DESC_DIR = ROOT_DIR / "description"
 STATE_PATH = WIKI_DIR / ".state.json"
 
-DEFAULT_MODEL = "composer-2.5-fast"
 REPO_SLUG_RE = re.compile(r"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$")
 TOPIC_RE = re.compile(r"^[a-z0-9-]+$")
 
@@ -91,32 +92,6 @@ SKILL_KEEP_RE = re.compile(r"^\.claude/skills/[a-z0-9-]+/SKILL\.md$")
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
-
-def get_api_key() -> str:
-    key = os.environ.get("CURSOR_API_KEY", "").strip()
-    if not key:
-        sys.exit(
-            "ERROR: CURSOR_API_KEY environment variable is not set.\n"
-            "Obtain a key from https://cursor.com/settings"
-        )
-    return key
-
-
-def find_agent_bin() -> str:
-    # Prefer the Cursor install path so a differently named `agent` on PATH
-    # (e.g. Grok's `agent`) cannot shadow the intended binary.
-    home_bin = Path.home() / ".cursor" / "bin" / "agent"
-    if home_bin.is_file():
-        return str(home_bin)
-    for name in ("cursor-agent", "agent"):
-        path = shutil.which(name)
-        if path:
-            return path
-    sys.exit(
-        "ERROR: Cursor CLI `agent` not found on PATH.\n"
-        "Install with: curl https://cursor.com/install -fsS | bash"
-    )
 
 
 def file_sha256(path: Path) -> str:
@@ -579,64 +554,8 @@ def print_pending_report(pending: list[dict[str, Any]]) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Agent
+# Agent (Cursor SDK)
 # ---------------------------------------------------------------------------
-
-
-def run_agent(
-    agent_bin: str,
-    model: str,
-    prompt: str,
-    dry_run: bool,
-) -> int:
-    cmd = [
-        agent_bin,
-        "-p",
-        "--force",
-        "--trust",
-        "--sandbox",
-        "disabled",
-        "--workspace",
-        str(ROOT_DIR),
-        "--model",
-        model,
-        "--output-format",
-        "text",
-        prompt,
-    ]
-    if dry_run:
-        print("[DRY-RUN] would run:")
-        print(" ", " ".join(cmd[:-1]), "... <prompt>")
-        print("--- prompt preview ---")
-        print(prompt[:1200])
-        if len(prompt) > 1200:
-            print(f"... ({len(prompt)} chars total)")
-        print("---")
-        return 0
-
-    print(f"  $ {agent_bin} -p --force --trust --sandbox disabled --model {model} ...")
-    started = time.time()
-    proc = subprocess.run(
-        cmd,
-        cwd=ROOT_DIR,
-        env=os.environ.copy(),
-        timeout=None,
-        check=False,
-    )
-    elapsed = time.time() - started
-    print(f"  exit={proc.returncode}  elapsed={elapsed:.1f}s")
-    if proc.returncode != 0 and "--trust" in cmd and elapsed < 2.0:
-        print("  retrying without --trust (possible older CLI) ...")
-        cmd_no_trust = [c for c in cmd if c != "--trust"]
-        proc = subprocess.run(
-            cmd_no_trust,
-            cwd=ROOT_DIR,
-            env=os.environ.copy(),
-            timeout=None,
-            check=False,
-        )
-        print(f"  exit={proc.returncode}  elapsed={time.time() - started:.1f}s (no --trust)")
-    return proc.returncode
 
 
 def build_bootstrap_prompt() -> str:
@@ -941,10 +860,9 @@ def mode_bootstrap(args: argparse.Namespace) -> int:
 
     if not args.dry_run:
         get_api_key()
-    agent_bin = "agent" if args.dry_run else find_agent_bin()
     prompt = build_bootstrap_prompt()
     print(f"Mode: bootstrap  model={args.model}")
-    code = run_agent(agent_bin, args.model, prompt, args.dry_run)
+    code = run_agent(prompt, model=args.model, dry_run=args.dry_run, cwd=ROOT_DIR)
     if args.dry_run:
         return 0
 
@@ -989,7 +907,7 @@ def mode_bootstrap(args: argparse.Namespace) -> int:
         ok = git_commit_and_push(
             wiki_paths,
             branch,
-            "wiki: bootstrap overviews and concepts via Cursor CLI [skip ci]",
+            "wiki: bootstrap overviews and concepts via Cursor SDK [skip ci]",
         )
         if not ok:
             return 1
@@ -1037,7 +955,6 @@ def mode_ingest(args: argparse.Namespace) -> int:
 
     if not args.dry_run:
         get_api_key()
-    agent_bin = "agent" if args.dry_run else find_agent_bin()
     push_branch = os.environ.get("GIT_PUSH_BRANCH", "main").strip() or "main"
 
     ok = fail = 0
@@ -1054,7 +971,7 @@ def mode_ingest(args: argparse.Namespace) -> int:
             project_description(item["owner"], item["repo"])
 
         prompt = build_ingest_prompt(item)
-        code = run_agent(agent_bin, args.model, prompt, args.dry_run)
+        code = run_agent(prompt, model=args.model, dry_run=args.dry_run, cwd=ROOT_DIR)
         if args.dry_run:
             ok += 1
             continue
@@ -1081,7 +998,7 @@ def mode_ingest(args: argparse.Namespace) -> int:
 
         ok += 1
         if args.commit_every:
-            msg = f"wiki: ingest {item['id']} via Cursor CLI [skip ci]"
+            msg = f"wiki: ingest {item['id']} via Cursor SDK [skip ci]"
             if not git_commit_and_push(wiki_paths, push_branch, msg):
                 return 1
 
@@ -1093,9 +1010,13 @@ def mode_lint(args: argparse.Namespace) -> int:
     ensure_wiki_dirs()
     if not args.dry_run:
         get_api_key()
-    agent_bin = "agent" if args.dry_run else find_agent_bin()
     print(f"Mode: lint  model={args.model}")
-    code = run_agent(agent_bin, args.model, build_lint_prompt(), args.dry_run)
+    code = run_agent(
+        build_lint_prompt(),
+        model=args.model,
+        dry_run=args.dry_run,
+        cwd=ROOT_DIR,
+    )
     if args.dry_run:
         return 0
 
@@ -1114,7 +1035,7 @@ def mode_lint(args: argparse.Namespace) -> int:
             if not git_commit_and_push(
                 wiki_paths,
                 branch,
-                "wiki: lint index and links via Cursor CLI [skip ci]",
+                "wiki: lint index and links via Cursor SDK [skip ci]",
             ):
                 return 1
         else:
@@ -1150,14 +1071,16 @@ def mode_skill_sync(args: argparse.Namespace) -> int:
 
     if not args.dry_run:
         get_api_key()
-    agent_bin = "agent" if args.dry_run else find_agent_bin()
     push_branch = os.environ.get("GIT_PUSH_BRANCH", "main").strip() or "main"
 
     ok = fail = 0
     for i, topic in enumerate(runnable, start=1):
         print(f"\n[{i}/{len(runnable)}] skill-sync {topic}")
         code = run_agent(
-            agent_bin, args.model, build_skill_sync_prompt(topic), args.dry_run
+            build_skill_sync_prompt(topic),
+            model=args.model,
+            dry_run=args.dry_run,
+            cwd=ROOT_DIR,
         )
         if args.dry_run:
             ok += 1
@@ -1182,7 +1105,7 @@ def mode_skill_sync(args: argparse.Namespace) -> int:
             ok += 1
             if args.commit_every:
                 msg = (
-                    f"skills: sync {topic} from wiki via Cursor CLI [skip ci]"
+                    f"skills: sync {topic} from wiki via Cursor SDK [skip ci]"
                 )
                 if not git_commit_and_push(skill_paths, push_branch, msg):
                     return 1
@@ -1225,7 +1148,7 @@ def mode_auto(args: argparse.Namespace) -> int:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Maintain wiki/ via Cursor CLI (LLM Wiki pattern)"
+        description="Maintain wiki/ via Cursor SDK (LLM Wiki pattern)"
     )
     parser.add_argument(
         "--mode",
@@ -1277,7 +1200,7 @@ def main() -> None:
         "--model",
         type=str,
         default=DEFAULT_MODEL,
-        help=f"Cursor CLI model id (default: {DEFAULT_MODEL})",
+        help=f"Cursor SDK model id (default: {DEFAULT_MODEL})",
     )
     parser.add_argument(
         "--dry-run",
