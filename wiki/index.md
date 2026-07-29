@@ -405,6 +405,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [libelevate](entities/libelevate.md) — C++ elevating-handle lib (KM/driver primitives → full-access process handles; AC handle protection)
 - [libmem](entities/libmem.md) — cross-platform game-hacking lib (memory / hook / scan; Win/Linux/FreeBSD; C/C++/Rust/Python/Lua)
 - [lldbext-dump](entities/lldbext-dump.md) — LLDB Python extension: Android live session → Windows minidump + Unicorn replay (mobile RE / dump)
+- [LocusMimic](entities/locusmimic.md) — LSPosed/Xposed Android GPS spoof (map picker, saved locations, app/system/mock-provider modes; Kotlin/Compose)
 - [LockFile-Poc](entities/lockfile-poc.md) — C++ Windows file-lock PoC (AC Stress Testing / Some Tricks Ring3)
 - [LoudSunRun](entities/loudsunrun.md) — stack spoofing with synthetic frames (namazso / SilentMoonWalk / VulcanRaven; Cheat Spoof Stack)
 - [loldrivers-client](entities/loldrivers-client.md) — Go/PowerShell LOLdrivers scan client (cheat / vulnerable driver)

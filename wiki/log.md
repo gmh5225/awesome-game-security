@@ -1627,3 +1627,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:mrexodia/TitanHide`: entity [[titanhide]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
 
 - **2026-07-29** — ingest `readme:categories`: bumped Cheat ~2605 (was ~2604); noted felix86 in `Linux Emulator` (~1) on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; refreshed counts on [[overviews/anti-cheat]], [[overviews/dma-attack]]; light `index.md` notes (no per-category pages).
+
+- **2026-07-29** — ingest `description:wchunlin1006/LocusMimic`: entity [[locusmimic]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
