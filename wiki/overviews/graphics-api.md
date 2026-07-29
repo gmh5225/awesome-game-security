@@ -96,7 +96,33 @@ confidence: high
 
 # Graphics API
 
-Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/SwapBuffers hooks, DXGI swap chains, shader/draw interception, screenshot surfaces, and capture pipelines used by both overlays and AI visual cheats. (source: wiki/sources/skills/graphics-api.md)
+Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/SwapBuffers hooks, DXGI swap chains, shader/draw interception, screenshot surfaces, and capture pipelines used by both overlays and AI visual cheats. Capture path, hook point, compositor behavior, and observable artifacts vary by API, driver, game, and tool version—verify the active path with [[research-rigor]] before attributing a capture or overlay signal. (source: wiki/sources/skills/graphics-api.md)
+
+## Hook points by API
+
+| API | Primary present/swap | Draw / pipeline hooks |
+|-----|----------------------|------------------------|
+| DirectX 9 | `IDirect3DDevice9::Present`, `EndScene`, `Reset` | Device draw/state |
+| DirectX 11 | `IDXGISwapChain::Present` (vtable ~index 8) | `ID3D11DeviceContext::Draw` / `DrawIndexed` |
+| DirectX 12 | `IDXGISwapChain::Present` | `ID3D12CommandQueue::ExecuteCommandLists` |
+| OpenGL | `wglSwapBuffers` | `glDrawElements`, `glDrawArrays` |
+| Vulkan | `vkQueuePresentKHR`, `vkCreateSwapchainKHR` | `vkCmdDraw`, `vkCmdDrawIndexed`; instance/device layers |
+
+Vtable trampolines on swap chains remain the dominant internal-overlay pattern; cross-API helpers such as **Kiero** / **kiero2** (README Vulkan lane) auto-detect DX9–12, OpenGL, and Vulkan at runtime. Dear ImGui backends wire through the Present hook with a `WndProc` forward for input.
+
+## Overlay taxonomy
+
+- **Internal (Present hook)** — ImGui or custom draw in `Present` / swap path; highest integration, highest in-process detect surface ([[present-hook]]).
+- **External layered window** — `WS_EX_LAYERED | WS_EX_TRANSPARENT`, GDI+/D2D over game HWND; no game inject, separate window affinity concerns.
+- **DWM / kernel draw** — composition or Ring0 GDI/dxgkrnl paths ([[dwm-hook]], [[krnl-gdi-render]], [[dxgkrnl-hook]]); different screenshot and ETW surfaces.
+- **Third-party overlay hijack** — Steam, NVIDIA GeForce Experience, Discord samples ([[steam-overlay-x64]], [[mwclap]]); reuse existing overlay infrastructure.
+- **Shader / draw interception** — depth-state or pixel-shader swaps for wallhack/chams without a full menu overlay ([[draw-call-hook]]).
+
+## Capture, AI visual cheats, and AC screenshots
+
+- **OBS and frame export** — Game Capture (injected graphics hook + shared GPU resources), Window/Display Capture (compositor backends), Virtual Camera (downstream AI or streaming). Modes differ in inject footprint, latency, and what compositors include—see [[obs-game-capture]].
+- **AI visual pipeline** — Present/backbuffer copy → staging readback → ROI crop → inference → HID via [[hardware-input-injection]]; dual-PC NDI/capture-card paths add transport latency. Measure each stage on deployed hardware; correlate graphics signals with behavior ([[ai-aimbot-detection]]).
+- **Anti-screenshot** — AC may BitBlt, Desktop Duplication, hook Present, or read back render targets; cheats evade via overlay suppression, `WDA_EXCLUDEFROMCAPTURE`, DWM tricks, or hardware overlay planes—see [[anti-screenshot-capture]].
 
 ## Key sub-areas
 
@@ -120,7 +146,7 @@ Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/
 
 ## Related concepts
 
-[[present-hook]] · [[directxhook]] · [[dx11-basehook]] · [[directx11hook]] · [[hydrahook]] · [[simple-ac-internal-cheat]] · [[battlefield-1-internal]] · [[gta4-rtx]] · [[xidi]] · [[free-direct]] · [[xash-rt]] · [[3d9]] · [[uevr]] · [[storm-engine]] · [[hw3d]] · [[d3d12renderer]] · [[steam-overlay-x64]] · [[mwclap]] · [[dota2-overlay-2-0]] · [[fortnite-external-p2c]] · [[cs2-external-cheat]] · [[cs2-cheat]] · [[csgo-bot]] · [[input-overlay]] · [[eac-overlay]] · [[overlay]] · [[winbo]] · [[dwm-hook]] · [[disablenvidiascreenshot]] · [[double-callback]] · [[dxgkrnl-hook]] · [[krnl-gdi-render]] · [[wda-monitor-trick]] · [[3d-racing-game]] · [[gltut]] · [[rtm]] · [[exengine]] · [[raylib]] · [[macroquad]] · [[orx]] · [[corange]] · [[ncine]] · [[lumixengine]] · [[mojoc]] · [[the-seed-link-future]] · [[wind-effects]] · [[oxylus]] · [[orkige]] · [[kotek]] · [[island]] · [[vk-engine]] · [[u3d]] · [[metal-game-engine-tutorial]] · [[game-engine-from-scratch]] · [[awesome-game-engine-dev]] · [[custom-game-engines]] · [[turbulenz-engine]] · [[engine]] · [[pixijs]] · [[three-js]] · [[supersplat]] · [[image-blaster]] · [[imgui-ios-mod-menu]] · [[imgui-unity]] · [[imgui-unity-with-layout]] · [[android-modmenu-semijni]] · [[android-mod-menu-kotlin]] · [[android-cheat-template]] · [[android-native-app-imgui]] · [[imgui-native-modmenu]] · [[zygisk-imgui-mod-menu]] · [[ue5-with-dear-imgui]] · [[netimgui]] · [[unreal-imgui-tools]] · [[imgui]] · [[imgui-club]] · [[tracy]] · [[stb]] · [[olive-c]] · [[kit]] · [[tinyrenderer]] · [[tinyraytracer]] · [[tinygltf]] · [[tinyobjloader]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[present-hook]] · [[draw-call-hook]] · [[obs-game-capture]] · [[anti-screenshot-capture]] · [[world-to-screen]] · [[research-rigor]] · [[ai-aimbot-detection]] · [[hardware-input-injection]] · [[directxhook]] · [[dx11-basehook]] · [[directx11hook]] · [[hydrahook]] · [[simple-ac-internal-cheat]] · [[battlefield-1-internal]] · [[gta4-rtx]] · [[xidi]] · [[free-direct]] · [[xash-rt]] · [[3d9]] · [[uevr]] · [[storm-engine]] · [[hw3d]] · [[d3d12renderer]] · [[steam-overlay-x64]] · [[mwclap]] · [[dota2-overlay-2-0]] · [[fortnite-external-p2c]] · [[cs2-external-cheat]] · [[cs2-cheat]] · [[csgo-bot]] · [[input-overlay]] · [[eac-overlay]] · [[overlay]] · [[winbo]] · [[dwm-hook]] · [[disablenvidiascreenshot]] · [[double-callback]] · [[dxgkrnl-hook]] · [[krnl-gdi-render]] · [[wda-monitor-trick]] · [[3d-racing-game]] · [[gltut]] · [[rtm]] · [[exengine]] · [[raylib]] · [[macroquad]] · [[orx]] · [[corange]] · [[ncine]] · [[lumixengine]] · [[mojoc]] · [[the-seed-link-future]] · [[wind-effects]] · [[oxylus]] · [[orkige]] · [[kotek]] · [[island]] · [[vk-engine]] · [[u3d]] · [[metal-game-engine-tutorial]] · [[game-engine-from-scratch]] · [[awesome-game-engine-dev]] · [[custom-game-engines]] · [[turbulenz-engine]] · [[engine]] · [[pixijs]] · [[three-js]] · [[supersplat]] · [[image-blaster]] · [[imgui-ios-mod-menu]] · [[imgui-unity]] · [[imgui-unity-with-layout]] · [[android-modmenu-semijni]] · [[android-mod-menu-kotlin]] · [[android-cheat-template]] · [[android-native-app-imgui]] · [[imgui-native-modmenu]] · [[zygisk-imgui-mod-menu]] · [[ue5-with-dear-imgui]] · [[netimgui]] · [[unreal-imgui-tools]] · [[imgui]] · [[imgui-club]] · [[tracy]] · [[stb]] · [[olive-c]] · [[kit]] · [[tinyrenderer]] · [[tinyraytracer]] · [[tinygltf]] · [[tinyobjloader]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
 
 
 ## README map

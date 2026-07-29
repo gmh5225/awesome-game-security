@@ -17,7 +17,8 @@ sources:
   - wiki/sources/descriptions/niemand-sec__DirectX11Hook.md
   - wiki/sources/descriptions/nefarius__HydraHook.md
   - wiki/sources/descriptions/noahware__winbo.md
-updated: 2026-07-28
+  - wiki/sources/skills/graphics-api.md
+updated: 2026-07-29
 confidence: high
 ---
 
@@ -29,7 +30,7 @@ Intercepting the graphics present/swap path (e.g. `IDXGISwapChain::Present`, DX9
 
 ## Uses
 
-Internal ESP/menus (often Dear ImGui), wallhack/chams via draw/shader hooks, OBS Game Capture–style backbuffer sharing for streaming or AI visual pipelines. DX11/12 libraries such as [[directxhook]] provide an integrated in-process overlay framework (boxes/textures/text; dinput8 DLL load) on the Present path. (source: wiki/sources/descriptions/techiew__DirectXHook.md) Minimal DX11 Present trampoline + ImGui templates such as [[dx11-basehook]] (dummy device → vtable → hooked-frame menu) serve as learning starters for the same internal-overlay path. (source: wiki/sources/descriptions/rdbo__DX11-BaseHook.md) Related DX11 Present + `ID3D11DeviceContext` hook libraries such as [[directx11hook]] (dummy device → vtable → ImGui in hooked loop; README `[DX11 Imgui]`) sit in the same internal-overlay base lane. (source: wiki/sources/descriptions/niemand-sec__DirectX11Hook.md) DX9–12 multi-version overlay frameworks such as [[hydrahook]] (runtime DX detect; Detours; ImGui/DirectXTK/OpenCV samples; inject/eject) sit in the same DirectX Hook / Overlay lane. (source: wiki/sources/descriptions/nefarius__HydraHook.md)
+Internal ESP/menus (often Dear ImGui), backbuffer copy for OBS Game Capture–style sharing or AI visual pipelines ([[obs-game-capture]]), and cross-API bootstrap via Kiero/kiero2. Wallhack/chams that alter geometry rather than overlay menus use [[draw-call-hook]] instead of or alongside Present. DX11/12 libraries such as [[directxhook]] provide an integrated in-process overlay framework (boxes/textures/text; dinput8 DLL load) on the Present path. (source: wiki/sources/descriptions/techiew__DirectXHook.md) Minimal DX11 Present trampoline + ImGui templates such as [[dx11-basehook]] (dummy device → vtable → hooked-frame menu) serve as learning starters for the same internal-overlay path. (source: wiki/sources/descriptions/rdbo__DX11-BaseHook.md) Related DX11 Present + `ID3D11DeviceContext` hook libraries such as [[directx11hook]] (dummy device → vtable → ImGui in hooked loop; README `[DX11 Imgui]`) sit in the same internal-overlay base lane. (source: wiki/sources/descriptions/niemand-sec__DirectX11Hook.md) DX9–12 multi-version overlay frameworks such as [[hydrahook]] (runtime DX detect; Detours; ImGui/DirectXTK/OpenCV samples; inject/eject) sit in the same DirectX Hook / Overlay lane. (source: wiki/sources/descriptions/nefarius__HydraHook.md)
 
 ## Detection surface
 
@@ -50,5 +51,5 @@ DX11 stereoscopic-fix tooling such as [[3d9]] works in the same Present/swap-cha
 
 ## Related
 
-[[overviews/graphics-api]] · [[directxhook]] · [[dx11-basehook]] · [[directx11hook]] · [[hydrahook]] · [[present-hook-detection]] · [[winbo]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dwm-hook]] · [[disablenvidiascreenshot]] · [[dxgkrnl-hook]] · [[krnl-gdi-render]] · [[3d9]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[overviews/graphics-api]] · [[obs-game-capture]] · [[draw-call-hook]] · [[anti-screenshot-capture]] · [[directxhook]] · [[dx11-basehook]] · [[directx11hook]] · [[hydrahook]] · [[present-hook-detection]] · [[winbo]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dwm-hook]] · [[disablenvidiascreenshot]] · [[dxgkrnl-hook]] · [[krnl-gdi-render]] · [[3d9]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
 
