@@ -297,7 +297,49 @@ confidence: high
 
 # Reverse Engineering
 
-Workflows for protected game clients and anti-cheat components across user mode, kernel, and hypervisor-aware environments: debug/disassemble, DBI, deobfuscation, dump analysis, and IOCTL/callback mapping. (source: wiki/sources/skills/reverse-engineering.md)
+Workflows for protected game clients and anti-cheat components across user mode, kernel, and hypervisor-aware environments: debug/disassemble, DBI, deobfuscation, dump analysis, and IOCTL/callback mapping. Pair [[research-rigor]] when converting tool claims or detector observations into consequential conclusions—record binary hash, tool version, configuration, environment, and observed evidence. (source: wiki/sources/skills/reverse-engineering.md)
+
+## Workflow
+
+**Initial analysis:** identify protections (packer, obfuscator, anti-cheat), game engine and version, available symbols, and key modules with their callbacks and trust boundaries.
+
+**Deep analysis:** locate target functionality, trace execution flow, document structures and memory artifacts, and correlate IOCTLs, kernel callbacks, and runtime integrity checks.
+
+Engine-specific paths: Unity ([[il2cpp]] / Mono via dnSpy), Unreal (SDK generators, UObject/UFunction hooks), native PE (imports, pattern scan, runtime memory).
+
+## Dynamic binary instrumentation
+
+Full DBI frameworks — [[frida]], DynamoRIO, Pin, TinyInst, QBDI — support API hooking, coverage, fuzz harnesses, and driver IOCTL/callback tracing. See [[dynamic-binary-instrumentation]] for the full taxonomy.
+
+**Trap-and-emulate control-flow tracing (CFT):** patch branch sites with fault-generating sentinels (e.g. HLT/SALC, avoiding INT3 integrity scans), catch exceptions, emulate the original branch, log context, restore, and continue. Strategies range from bounded bulk patching (simple, integrity-detectable) through branch chasing and CFG-guided patching (better coverage/safety tradeoff). PAGE_GUARD + trap-flag single-steping avoids direct `.text` patches but remains timing- and guard-state detectable. Illustrative corpus: [[cpp-veh-dbi]], [[w1tn3ss]].
+
+**User-mode hypervisor-assisted tracing:** Windows Hypervisor Platform (WHP) hosts guest snippets with per-page R/W/X traps, CPUID interception, and syscall emulation — no kernel driver, composable with disassemblers/emulators. Illustrative: [[winvisor]], [[hyper-rev]]; benchmark latency and nested-VT constraints on the target build.
+
+## Obfuscation recovery
+
+| Layer | Concept | Recovery tools (corpus) |
+|-------|---------|-------------------------|
+| MBA | [[mixed-boolean-arithmetic]] | [[cobra]], [[mutaben]], [[mba-obfuscator]], [[obfuscation-analysis]] |
+| CFF | [[control-flow-flattening]] | [[idadeflat]], [[d810-ng]], [[obpo-plugin]], [[obfuscation-detection]] |
+| Opaque predicates | invariant injection | [[opaque-predicates-detective]], Z3/SMT backends ([[stp]]) |
+| VM virtualization | VMProtect / Themida handlers | [[novmpy]], [[tde]], [[rumba]], [[vmpunpacker]], [[themida-research]] |
+| Binary lifting | machine code → compiler IR | McSema, remill, RetDec; BN MLIL/HLIL |
+
+## Anti-analysis & debugging
+
+**User-mode anti-debug:** `IsDebuggerPresent`, `NtQueryInformationProcess` (DebugPort/Flags/ObjectHandle), PEB.BeingDebugged/NtGlobalFlag, INT 2D/3 scans, RDTSC/QPC timing, TLS early callbacks, VEH chain inspection, parent-process checks.
+
+**Kernel-mode anti-debug:** `KdDebuggerEnabled`, DR0–DR7 monitoring, `KPROCESS.DebugPort` zeroing, NMI callbacks.
+
+**Bypass/hide tooling:** [[titanhide]] (kernel SSDT tamper), ScyllaHide/HyperHide plugins for x64dbg/IDA; defensive detection via [[scyllahidedetector2]], [[makin]]. Ghost opcodes (`0F 1A`/`0F 1B`) blind some disassemblers — [[hint-break]].
+
+## AI-assisted RE (MCP)
+
+Model Context Protocol servers expose RE tools to LLM agents: [[ida-pro-mcp]] / [[iida-mcp]] / [[ida-mcp-server-plugin]] (IDA), [[ghidra-headless-mcp]] (Ghidra), Binary Ninja MCP peers, radare2 MCP, x64dbg MCP. Workflow: natural-language queries → rename, annotate, navigate, decompile — pair with [[research-rigor]] when acting on agent output.
+
+## Binary diffing
+
+Graph- and structure-based differencing (BinDiff, Diaphora, ghidriff, DarunGrim) for patch analysis: track anti-cheat driver updates between builds, isolate logic changes in obfuscated clients, and compare patched vulnerability fixes.
 
 ## Key sub-areas
 
@@ -326,7 +368,7 @@ Workflows for protected game clients and anti-cheat components across user mode,
 
 ## Related concepts
 
-[[il2cpp]] · [[frida]] · [[frida-scripts]] · [[frida-stack]] · [[frida-usb-dump]] · [[thats-no-pipe]] · [[unflutter]]
+[[research-rigor]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[control-flow-flattening]] · [[il2cpp]] · [[frida]] · [[frida-scripts]] · [[frida-stack]] · [[frida-usb-dump]] · [[thats-no-pipe]] · [[unflutter]]
 
  · [[flatredball]] · [[stride]] · [[rbfx]] · [[panda3d]] · [[rpgmakerdecrypter]] · [[hivewe]] · [[jmap]] · [[paksmith]] · [[rust-u4pak]] · [[houdini-engine-for-unreal]] · [[luamachine]] · [[unrealclr]] · [[patternsleuth]] · [[kernel-callbacks]] · [[patchguard]] · [[mutaben]] · [[mba-obfuscator]] · [[cobra]] · [[stp]] · [[cirsat]] · [[ndisapi]] · [[pcapplusplus]] · [[npcap]] · [[umpmlib]] · [[eupmaccess]] · [[reclass-net-driverreader]] · [[shredder-rs]] · [[beatrice-py]] · [[r2morph]] · [[deobf]] · [[deobfuscator]] · [[ricochet-deobfuscator]] · [[idadeflat]] · [[ida-easy-life]] · [[pikabot-deobfuscator]] · [[d810-ng]] · [[obpo-plugin]] · [[opaque-predicates-detective]] · [[obfuscation-detection]] · [[obfuscation-analysis]] · [[ida-jm-xorstr-decrypt-plugin]] · [[ida-ios-helper]] · [[aimachdec]] · [[pe32-password]] · [[x64-exe-packer]] · [[2pack]] · [[woody-woodpacker]] · [[elfuck]] · [[m0dern-p4cker]] · [[petoy]] · [[pezor]] · [[xorpacker]] · [[kagura]] · [[the-poor-mans-obfuscator]] · [[obscura]] · [[swiftshield]] · [[wprotect]] · [[relocbonus]] · [[obfuscar]] · [[obfuscation-methods]] · [[alcatraz]] · [[milfuscator]] · [[vxlang-page]] · [[nocturne]] · [[riscy-workshop]] · [[binprotect]] · [[obfusk8]] · [[sbox]] · [[mystic-xorstr]] · [[obfuscxx]] · [[skcrypter]] · [[obfuscatxor]] · [[bloatedhammer]] · [[encrypted-value]] · [[xor-float]] · [[obfcoder]] · [[lua-obfuscator-clyde-protection]] · [[vmdevirt-vtil]] · [[novmpy]] · [[vmdragonslayer]] · [[rumba]] · [[themida-research]] · [[tde]] · [[execution-trace-viewer]] · [[vmunprotect]] · [[vmunprotect-dumper]] · [[vmpunpacker]] · [[vmpstatic]] · [[totalpe2]] · [[dotniet]] · [[die-engine-web]] · [[pandora]] · [[apkid]] · [[unmapper]] · [[fix-arxan]]
  · [[pdb]] · [[kpdb]] · [[dwex]] · [[ntsleuth]] · [[quickasm]] · [[raung]] · [[jdbg]] · [[xrefsext]] · [[ida-plugins]] · [[symbridge]] · [[symless]] · [[ida-kmdf]] · [[ida-efiutils]] · [[idarem]] · [[idaref]] · [[idac]] · [[ida-mcp-server-plugin]] · [[ida-pro-mcp]] · [[iida-mcp]] · [[pcm]] · [[ida-assistant]] · [[aida]] · [[ida-llm-explainer]] · [[luda]] · [[openlumina]] · [[sark]] · [[ida-rust-demangler]] · [[demumble]] · [[rtti-parser]] · [[ida-vtable-tools]] · [[genpatch]] · [[genmc]] · [[idaplugins]] · [[ida-functioncolor]] · [[ida-func-outline]] · [[yarascan-ida]] · [[kiroshi]] · [[ida-fusion]] · [[avdebugger]] · [[big5-decode-ida]] · [[systeminformer]] · [[cmdt]] · [[x64dbg]] · [[x64dbgbinja]] · [[binja-kc]] · [[ptxninja]] · [[ariadne]] · [[binaryninja-pcode]] · [[bn-ebpf-solana]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[idenlib]] · [[sig-database]] · [[idenlibx]] · [[manytypes]] · [[steam-anti-anti-debug]] · [[titanhide]] · [[scyllahidedetector2]] · [[makin]] · [[anti-debugging]] · [[blackhat2012]] · [[hint-break]] · [[anticuckoo]] · [[awesome-anti-virtualization]] · [[ghidrametrics]] · [[ghidra-headless-mcp]] · [[gba-ghidra-loader]] · [[threatresearch]] · [[jadx]] · [[dex2jar]] · [[zygisk-dump-dex]] · [[pwatch]] · [[btrace]] · [[ptrace-read-teb]] · [[apktool-mcp-server]] · [[delamain]] · [[memmcp]] · [[obfu-de-scate]] · [[asctool]] · [[apksigcopier]] · [[payload-dumper]] · [[payload-dumper-go]] · [[android-proxy-mcp]] · [[oob-entry]] · [[dopamine]] · [[dopamine2-roothide]] · [[palera1n]] · [[lightsaber]] · [[lara]] · [[darksword-kexploit-fun]] · [[xnu-1day-practice]] · [[vermagic]] · [[venom]] · [[veh]] · [[veh-dumper]] · [[no-access-protection]] · [[bincon]] · [[voidmaw]] · [[deepsleep]] · [[kvcforensic]] · [[vmkatz]] · [[volatility]] · [[volatility3]] · [[xmalhunter]] · [[ephemera]] · [[file-recovery-tool]] · [[ntfstool]] · [[ntfs-linker]] · [[usn]] · [[searchex]] · [[dfirtriage]] · [[pillager]]

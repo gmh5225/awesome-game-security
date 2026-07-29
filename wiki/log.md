@@ -1671,3 +1671,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `skill:graphics-api`: refreshed [[overviews/graphics-api]] (API hook points, overlay taxonomy, OBS/AI capture synthesis, research-rigor); concepts [[anti-screenshot-capture]], [[obs-game-capture]], [[draw-call-hook]]; expanded [[present-hook]]; updated `index.md`.
 
 - **2026-07-29** — ingest `skill:mobile-security`: refreshed [[overviews/mobile-security]] (root frameworks, instrumentation/eBPF/network synthesis, research-rigor); concepts [[zygisk]], [[mobile-anti-cheat]]; expanded [[research-rigor]] mobile row + [[magisk]] DenyList/APatch notes; updated `index.md`.
+
+- **2026-07-29** — ingest `skill:reverse-engineering`: refreshed [[overviews/reverse-engineering]] (workflow, DBI trap-and-emulate/WHP tracing, obfuscation taxonomy, MCP RE, binary diffing, anti-debug catalog); concepts [[mixed-boolean-arithmetic]], [[dynamic-binary-instrumentation]], [[control-flow-flattening]]; expanded [[research-rigor]] RE row; updated `index.md`.

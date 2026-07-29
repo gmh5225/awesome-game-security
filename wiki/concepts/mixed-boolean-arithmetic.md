@@ -1,0 +1,33 @@
+---
+title: Mixed Boolean-Arithmetic
+kind: concept
+topics: [reverse-engineering, anti-cheat]
+sources:
+  - wiki/sources/skills/reverse-engineering.md
+updated: 2026-07-29
+confidence: high
+---
+
+# Mixed Boolean-Arithmetic
+
+**MBA** obfuscation replaces simple arithmetic with equivalent expressions mixing bitwise (`&`, `|`, `^`, `~`) and integer (`+`, `-`, `*`) operators. Common in VMProtect, Themida, custom LLVM passes, and AC compile-time obfuscators. Static decompilers often emit unreadable pseudocode until expressions are simplified. (source: wiki/sources/skills/reverse-engineering.md)
+
+## Variants
+
+- **Linear MBA:** e.g. `x + y = (x ^ y) + 2*(x & y)` — single-degree boolean/arithmetic mix.
+- **Polynomial MBA:** higher-degree expressions over the same operator set — harder for pattern matchers.
+
+## Recovery approaches
+
+1. **Algebraic simplification** — coefficient reconstruction and term cancellation ([[cobra]]; SSPAM, MBA-Blast, SiMBA in the broader corpus).
+2. **Backward slicing + oracle lookup** — slice MBA regions, query msynth-style tables ([[obfuscation-analysis]]).
+3. **SMT/bitvector solvers** — prove equivalence or find simplifying substitutions ([[stp]], Z3 backends).
+4. **Sample generation for testing** — synthesize MBA expressions to validate simplifier pipelines ([[mutaben]], [[mba-obfuscator]]).
+
+## Detection context
+
+MBA-heavy regions often co-occur with [[control-flow-flattening]] and opaque predicates. Binary Ninja heuristics in [[obfuscation-detection]] and analysis passes in [[obfuscation-analysis]] help locate MBA blocks before manual simplification.
+
+## Related
+
+[[cobra]] · [[mutaben]] · [[mba-obfuscator]] · [[obfuscation-analysis]] · [[stp]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]

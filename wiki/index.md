@@ -13,7 +13,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Game Hacking](overviews/game-hacking.md) — escalation taxonomy + [[stack-spoofing]] / [[hardware-input-injection]] / [[world-to-screen]] / [[ai-aimbot-detection]]; Cheat (~2606) + Some Tricks (~113); mytechnotalent Rust/Go RE courses; Android Terminal (ADB/root/shell)/File/Memory Explorer; WSA/Android/iOS/Windows Emulator KDemu lanes; console Xbox~8 X360 patch+SystemOS / PS HV+BD-UN-JB+PSFree-Enhanced / WebKit CSSFontFace / 3DS~3 3Beans LLE+Luma / GC·Wii~1 gecko
 - [Graphics API](overviews/graphics-api.md) — DX/GL/Vulkan hook points; [[present-hook]] / [[draw-call-hook]]; overlays + [[obs-game-capture]] / [[anti-screenshot-capture]]; Kiero/kiero2; DirectX (~35) shader inject/flatten; Renderer (~17) + AI mesh/splat adjacency
 - [Mobile Security](overviews/mobile-security.md) — Android/iOS; root frameworks (Magisk/KernelSU/APatch), [[zygisk]]/Frida hooking, [[mobile-anti-cheat]]; Terminal/File/Memory Explorer + App/Kernel CVE; WSA (~9), Droid-VM/Gunyah emulators
-- [Reverse Engineering](overviews/reverse-engineering.md) — RE tools (file-format/asset lists + Ghidra managers), MBA/DBI, deobfuscation, packers; Windows Emulator KDemu + console/Xbox~8 / PS BD-UN-JB+PSFree-Enhanced / 3DS 3Beans LLE / GC·Wii gecko RE (~2606 Cheat / ~621 AC lanes)
+- [Reverse Engineering](overviews/reverse-engineering.md) — RE workflow + [[research-rigor]]; [[dynamic-binary-instrumentation]] trap-and-emulate/WHP tracing; [[mixed-boolean-arithmetic]] / [[control-flow-flattening]] deobfuscation; MCP-assisted RE; binary diffing; anti-debug catalog; tools (Ghidra managers, MBA/DBI, packers); Windows Emulator KDemu + console/Xbox~8 / PS BD-UN-JB+PSFree-Enhanced / 3DS 3Beans LLE / GC·Wii gecko RE (~2606 Cheat / ~621 AC lanes)
 - [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation (~9; SEWindows PCR), BYOVD, pool; Some Tricks Ring0 (~113); Windows Emulator (~7) + WSL
 
 ## Concepts
@@ -23,8 +23,10 @@ Compiled knowledge catalog for awesome-game-security.
 - [BattlEye](concepts/battleye.md)
 - [BYOVD](concepts/byovd.md)
 - [Compiled Wiki](concepts/compiled-wiki.md)
+- [Control Flow Flattening](concepts/control-flow-flattening.md) — OLLVM-style dispatcher loops; deflatten via symbolic exec, d810, OBPO; pairs MBA recovery
 - [DMA](concepts/dma.md) — PCIe host R/W; AC detection pipeline (config integrity, latency fingerprinting, IOMMU containment, TPM attestation)
 - [Draw Call Hook](concepts/draw-call-hook.md) — draw/shader/pipeline intercept for wallhack/chams vs Present-only overlays
+- [Dynamic Binary Instrumentation](concepts/dynamic-binary-instrumentation.md) — Frida/Pin/DynamoRIO; trap-and-emulate CFT; WHP user-mode hypervisor tracing; driver IOCTL tracing
 - [Easy Anti-Cheat](concepts/easy-anti-cheat.md)
 - [Frida](concepts/frida.md)
 - [HVCI](concepts/hvci.md)
@@ -33,6 +35,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IOMMU](concepts/iommu.md) — VT-d/AMD-Vi translation; six out-of-domain paths; ACS/ATS-untrusted; bypass catalog + containment
 - [Kernel Callbacks](concepts/kernel-callbacks.md)
 - [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; KDP rule tables
+- [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/msynth/SMT simplification; VMProtect/Themida/LLVM passes
 - [Mobile Anti-Cheat](concepts/mobile-anti-cheat.md) — mobile root/Frida/emulator/integrity detection; ACE/RASP SDKs; bypass research framing
 - [OBS Game Capture](concepts/obs-game-capture.md) — OBS Game/Window/Display/Virtual Camera modes; AI visual pipeline + detection signals
 - [PatchGuard](concepts/patchguard.md)
