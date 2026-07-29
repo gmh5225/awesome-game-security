@@ -37,6 +37,22 @@ Cheat drivers often allocate in **NonPagedPool** for shellcode, hook tables, and
 
 Detection rule tables can live in **Kernel Data Protection (KDP) Secure Pool** (`ExAllocatePool3` + KDP). Correctly configured KDP can protect selected pages from ordinary VTL0 writes—including kernel R/W primitives—while hypervisor and policy paths remain trustworthy. (source: wiki/sources/skills/anti-cheat.md)
 
+## Driver load forensics
+
+Complementary to pool walks, anti-cheat inspects kernel bookkeeping tables for hostile driver activity. (source: wiki/sources/skills/windows-kernel.md)
+
+| Artifact | Role |
+|----------|------|
+| **PiDDBCacheTable** | Historical driver load hashes + timestamps; detects BYOVD or test-signed loads; attackers may try post-load entry removal |
+| **MmUnloadedDrivers** | Circular buffer of recently unloaded drivers (name + address range); not user-clearable; flags load-unload-reload patterns |
+| **PoolBigPageTable** | Maps large (≥ page) pool allocations to owning driver tag; finds manual-map memory without a loaded module |
+
+**Pool tag forensics:** every `ExAllocatePoolWithTag` / `ExAllocatePool2` allocation carries a 4-byte tag — scan for known cheat-driver signatures via `pooltag.txt`, PoolMon, or WinDbg `!poolfind`. Tags present in pool but absent from any loaded module are suspicious.
+
+## Legacy vs modern pool walks
+
+Pre-19H1 linear traversal via inline `_POOL_HEADER.BlockSize` **no longer works** under Segment Heap — scanners must route by allocation path (kLFH / VS / Segment / Large) and decode XOR-encoded VS headers. (source: wiki/sources/skills/windows-kernel.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

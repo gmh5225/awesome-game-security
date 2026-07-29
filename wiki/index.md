@@ -14,7 +14,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Graphics API](overviews/graphics-api.md) — DX/GL/Vulkan hook points; [[present-hook]] / [[draw-call-hook]]; overlays + [[obs-game-capture]] / [[anti-screenshot-capture]]; Kiero/kiero2; DirectX (~35) shader inject/flatten; Renderer (~17) + AI mesh/splat adjacency
 - [Mobile Security](overviews/mobile-security.md) — Android/iOS; root frameworks (Magisk/KernelSU/APatch), [[zygisk]]/Frida hooking, [[mobile-anti-cheat]]; Terminal/File/Memory Explorer + App/Kernel CVE; WSA (~9), Droid-VM/Gunyah emulators
 - [Reverse Engineering](overviews/reverse-engineering.md) — RE workflow + [[research-rigor]]; [[dynamic-binary-instrumentation]] trap-and-emulate/WHP tracing; [[mixed-boolean-arithmetic]] / [[control-flow-flattening]] deobfuscation; MCP-assisted RE; binary diffing; anti-debug catalog; tools (Ghidra managers, MBA/DBI, packers); Windows Emulator KDemu + console/Xbox~8 / PS BD-UN-JB+PSFree-Enhanced / 3DS 3Beans LLE / GC·Wii gecko RE (~2606 Cheat / ~621 AC lanes)
-- [Windows Kernel](overviews/windows-kernel.md) — callbacks, HVCI/CET/TPM attestation (~9; SEWindows PCR), BYOVD, pool; Some Tricks Ring0 (~113); Windows Emulator (~7) + WSL
+- [Windows Kernel](overviews/windows-kernel.md) — callbacks, VBS/HVCI/CET/TPM attestation (~9; SEWindows PCR), BYOVD, Segment Heap pool + [[kernel-pool-scanning]] / [[etw-threat-intelligence]]; symbol walking; Some Tricks Ring0 (~113); Windows Emulator (~7) + WSL
 
 ## Concepts
 
@@ -28,13 +28,14 @@ Compiled knowledge catalog for awesome-game-security.
 - [Draw Call Hook](concepts/draw-call-hook.md) — draw/shader/pipeline intercept for wallhack/chams vs Present-only overlays
 - [Dynamic Binary Instrumentation](concepts/dynamic-binary-instrumentation.md) — Frida/Pin/DynamoRIO; trap-and-emulate CFT; WHP user-mode hypervisor tracing; driver IOCTL tracing
 - [Easy Anti-Cheat](concepts/easy-anti-cheat.md)
+- [ETW Threat Intelligence](concepts/etw-threat-intelligence.md) — Microsoft-Windows-Threat-Intelligence provider; PPL-gated cross-process memory telemetry; ETW bypass vs EPT hardening
 - [Frida](concepts/frida.md)
-- [HVCI](concepts/hvci.md)
+- [HVCI](concepts/hvci.md) — VBS VTL0/VTL1 Memory Integrity; W→X kernel code enforcement via hypervisor EPT/SLAT
 - [Hardware Input Injection](concepts/hardware-input-injection.md) — KMBox/Arduino/HID + driver-filter paths for AI visual aim pipelines
 - [IL2CPP](concepts/il2cpp.md) — Unity AOT backend; Il2CppDomain hierarchy; metadata + dumpers
 - [IOMMU](concepts/iommu.md) — VT-d/AMD-Vi translation; six out-of-domain paths; ACS/ATS-untrusted; bypass catalog + containment
 - [Kernel Callbacks](concepts/kernel-callbacks.md)
-- [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; KDP rule tables
+- [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; PiDDBCache/MmUnloadedDrivers forensics; KDP rule tables
 - [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/msynth/SMT simplification; VMProtect/Themida/LLVM passes
 - [Mobile Anti-Cheat](concepts/mobile-anti-cheat.md) — mobile root/Frida/emulator/integrity detection; ACE/RASP SDKs; bypass research framing
 - [OBS Game Capture](concepts/obs-game-capture.md) — OBS Game/Window/Display/Virtual Camera modes; AI visual pipeline + detection signals

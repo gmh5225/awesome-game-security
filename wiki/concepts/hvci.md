@@ -11,13 +11,19 @@ sources:
   - wiki/sources/descriptions/unkvolism__Solemn.md
   - wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md
   - wiki/sources/descriptions/rtfmkiesel__loldrivers-client.md
-updated: 2026-07-23
+updated: 2026-07-29
 confidence: high
 ---
 
 # HVCI
 
-Hypervisor-Enforced Code Integrity (Memory Integrity): VBS feature where the Secure Kernel (VTL1) and hypervisor EPT/SLAT enforce that kernel pages are not simultaneously writable and executable without re-validation. (source: wiki/sources/skills/windows-kernel.md)
+Hypervisor-Enforced Code Integrity (Memory Integrity): a **Virtualization-Based Security (VBS)** feature where the Secure Kernel (VTL1) and hypervisor EPT/SLAT enforce that kernel pages are not simultaneously writable and executable without re-validation. VBS splits the machine into VTL0 (normal Windows kernel + user mode) and VTL1 (Secure Kernel + policy enforcement) via the Windows hypervisor; HVCI is the memory-protection bucket within that stack. (source: wiki/sources/skills/windows-kernel.md)
+
+## Enforcement model
+
+- **W→X transition restriction:** enforced code pages are not intended to stay writable from VTL0; executability is granted only after configured code-integrity checks pass.
+- **Pipeline:** CI policy defines trust → hypervisor second-stage translation (EPT/SLAT) → strict execution rules on validated kernel pages.
+- **Driver requirement:** drivers must be HVCI-compatible (no self-modifying kernel code paths that violate W→X).
 
 ## Game-security role
 
