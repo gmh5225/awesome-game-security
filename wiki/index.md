@@ -80,6 +80,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Android-LD-Preload-Injector](entities/android-ld-preload-injector.md) — Android LD_PRELOAD inject (dead; cheat / injection:android)
 - [Android-Ptrace-Injector](entities/android-ptrace-injector.md) — Android ptrace injector (C/C++; cheat / injection:android)
 - [Android-Virtual-Inject](entities/android-virtual-inject.md) — no-root Virtual Space inject (not for AC games; cheat / injection:android)
+- [android_virtualTouch](entities/android-virtual-touch.md) — ARM64 NDK uinput virtual touch (tap/swipe/multi-touch; rooted; game automation)
 - [android-vuln](entities/android-vuln.md) — Android Kernel CVE reference list (cheat / Android Kernel CVE)
 - [anticheat-poc](entities/anticheat-poc.md) — Windows AC PoC (debugger / integrity / signature scan / process enum; Instrumentation Callback)
 - [AntiCheat-Testing-Framework](entities/anti-cheat-testing-framework.md) — modular Windows AC detection test harness (mem R/W / inject / overlay / input / KM; Testing Framework)
