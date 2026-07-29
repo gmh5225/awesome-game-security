@@ -478,6 +478,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NTFSTool](entities/ntfstool.md) — NTFS forensics (MFT/USN/BitLocker/EFS; AC / IS forensics)
 - [NTMemory](entities/ntmemory.md) — kernel cross-process R/W (MDL / CR3 walk / physical translate)
 - [NTSleuth](entities/ntsleuth.md) — Windows syscall extractor (ntdll/win32u PDB + disasm → JSON/C headers)
+- [NtPhp](entities/ntphp.md) — PHP interpreter embedded in WDK kernel drivers (Anti Cheat → Dynamic Script)
 - [nuzu](entities/nuzu.md) — yuzu-based Switch emulator mirror (unofficial fork; Nintendo Switch lane)
 - [OFRP-device_xiaomi_mondrian](entities/ofrp-device-xiaomi-mondrian.md) — OFRP/TWRP device tree for Redmi K60 Pro (mondrian)
 - [Obfu-DE-Scate](entities/obfu-de-scate.md) — Python APK ProGuard/R8 deobf (name maps + HTML hierarchy; [Apk])

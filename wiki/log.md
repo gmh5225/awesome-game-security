@@ -1631,3 +1631,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:wchunlin1006/LocusMimic`: entity [[locusmimic]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-29** — ingest `description:mrexodia/RiscyWorkshop`: entity [[riscy-workshop]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
+
+- **2026-07-29** — ingest `description:mrexodia/NtPhp`: entity [[ntphp]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
