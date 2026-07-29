@@ -465,6 +465,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ManyTypes](entities/manytypes.md) — x64dbg typeparsing plugin with Windows types (Cheat x64dbg Plugins)
 - [MapleStory Worlds Automation](entities/maplestory-worlds-automation.md) — YOLO automation for MapleStory Worlds / Artale (Python; cheat / game:maplestory)
 - [MapleStory-YOLOv8-Training](entities/maplestory-yolov8-training.md) — YOLOv8 MapleStory object-detection training (Apple MPS; Python; cheat / game:maplestory)
+- [MapleStory143](entities/maplestory143.md) — MapleStory v143 CMS private server (Java/Kotlin; LoginCrypto / Netty·MINA / CheatTracker; Private Server-CMS-143)
 - [MapleStoryEx](entities/maplestoryex.md) — MapleStory private server (CMS-079; custom content / server logic)
 - [ms079](entities/ms079.md) — MapleStory v079 private-server study codebase (Java / MySQL / WZ bundle; Private Server-CMS-079)
 - [MappedCallback](entities/mapped-callback.md) — hide kernel callback via APCI codecave JMP (cheat / Hide Callback)
