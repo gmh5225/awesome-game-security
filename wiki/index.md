@@ -313,6 +313,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [get-unity](entities/get-unity.md) — JS CLI: Unity Editor download URL (latest/pinned; Game Tools)
 - [GhidraMetrics](entities/ghidrametrics.md) — Ghidra native-code metrics (cyclomatic / size / call depth; headless JSON)
 - [gltut](entities/gltut.md) — OpenGL tutorial (C++ / XML docs; Renderer / OpenGL Render)
+- [gpt-wpre](entities/gpt-wpre.md) — Ghidra+GPT whole-program RE (ghidra_bridge decomp/call graph → bottom-up function summaries; ChatGPT)
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)
 - [gunyah-hypervisor](entities/gunyah-hypervisor.md) — Qualcomm Type-1 ARM64 HV (trusted/dependent VMs; Cheat QEMU/KVM + Android Emulator)
 - [HelloIommuPkg](entities/helloiommupkg.md) — sample DXE DMA-remapping (IOMMU) driver (tandasat; Detection:DMA)

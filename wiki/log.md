@@ -1679,3 +1679,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:mytechnotalent/hacking-rust`: confirmed entity [[hacking-rust]] (PDF + Cargo labs; x64/ARM64/ARM32; write/debug/disassemble); cross-linked [[go-hacking]]; cites already on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-29** — ingest `description:mytechnotalent/go-hacking`: confirmed entity [[go-hacking]] (PDF + Go source/IDA labs; x64/ARM64/ARM32; write/debug/analyze or patch; Go/C control-flow exercises); cross-linked [[mytechnotalent-reverse-engineering]] and [[hacking-windows]]; cites already on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-29** — ingest `description:moyix/gpt-wpre`: entity [[gpt-wpre]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
