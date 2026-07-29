@@ -34,9 +34,8 @@ import sys
 import time
 from pathlib import Path
 
-from cursor_sdk_agent import DEFAULT_MODEL, get_api_key, run_agent_with_output
-
 ROOT_DIR = Path(__file__).resolve().parent.parent
+DEFAULT_MODEL = "composer-2.5-fast"
 DESC_DIR = ROOT_DIR / "description"
 
 # GitHub-hosted jobs still cap at ~6h; --commit-every saves progress.
@@ -542,6 +541,8 @@ def main() -> None:
     print_scan_report(scan_work, langs)
     if args.list_missing:
         return
+
+    from cursor_sdk_agent import get_api_key, run_agent_with_output
 
     if not args.dry_run:
         get_api_key()
