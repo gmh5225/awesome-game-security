@@ -1687,3 +1687,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:mono/mono`: entity [[mono]]; cited on [[il2cpp]] and [[overviews/game-engine]].
 
 - **2026-07-29** — ingest `description:momo5502/vmtrace`: entity [[vmtrace]]; cited on [[dynamic-binary-instrumentation]] and [[overviews/reverse-engineering]].
+
+- **2026-07-29** — ingest `description:momo5502/sogen`: entity [[sogen]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
