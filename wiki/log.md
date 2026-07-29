@@ -1599,3 +1599,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:mytechnotalent/Go-Hacking`: entity [[go-hacking]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-29** — ingest `description:muchenspace/android_virtualTouch`: entity [[android-virtual-touch]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-29** — ingest `description:mubix/netview`: entity [[netview]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
