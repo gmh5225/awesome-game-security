@@ -370,6 +370,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KCP](entities/kcp.md) — reliable-UDP ARQ (C; low-latency multiplayer; Game Network)
 - [kdmapper-rs](entities/kdmapper-rs.md) — Rust kdmapper library (C/C++ core; vulnerable-driver / unsigned map)
 - [KernelSU](entities/kernelsu.md) — Android kernel su root (Kotlin/Rust; Cheat / Android root)
+- [KernelSU-Pixel4XL](entities/kernelsu-pixel4xl.md) — Pixel 4 XL (coral) msm-floral kernel + KernelSU (su / SELinux / syscall hook; cheat / Android Kernel Source)
 - [kevboy](entities/kevboy.md) — Rust Game Boy emulator (CPU / memory / graphics / input)
 - [feather-gb](entities/feather-gb.md) — Rust Game Boy emulator (retro handheld / GB RE)
 - [KeyAttestation](entities/keyattestation.md) — Android HW key attestation (Keymaster/KeyMint; bootloader / verified boot)

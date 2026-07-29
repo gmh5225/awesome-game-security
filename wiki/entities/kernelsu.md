@@ -4,7 +4,8 @@ kind: entity
 topics: [mobile-security, game-hacking, anti-cheat]
 sources:
   - wiki/sources/descriptions/tiann__KernelSU.md
-updated: 2026-07-20
+  - wiki/sources/descriptions/msnx__KernelSU-Pixel4XL.md
+updated: 2026-07-29
 confidence: medium
 ---
 
@@ -12,7 +13,7 @@ confidence: medium
 
 Kernel-based Android root solution (**kernel su**) listed under Cheat / Android root. Implemented primarily in Kotlin and Rust; grants elevated privileges via kernel-level integration rather than Magisk-style systemless userspace alone. Canonical reference for researchers studying Android root frameworks, module ecosystems (alongside Magisk / APatch), and mobile anti-cheat root-detection tradeoffs. (source: wiki/sources/descriptions/tiann__KernelSU.md)
 
-Adjacent tooling: Magisk modules that also target KernelSU such as [[move-certificate]]; systemless Magisk itself [[magisk]]; Magisk-install paths such as [[cheese]].
+Adjacent tooling: Magisk modules that also target KernelSU such as [[move-certificate]]; systemless Magisk itself [[magisk]]; Magisk-install paths such as [[cheese]]. Device-specific KernelSU kernel trees such as [[kernelsu-pixel4xl]] (Pixel 4 XL / coral / msm-floral) integrate the same syscall-hook and credential-override model into vendor BSP sources. (source: wiki/sources/descriptions/msnx__KernelSU-Pixel4XL.md)
 
 ## Links
 
@@ -20,4 +21,4 @@ Adjacent tooling: Magisk modules that also target KernelSU such as [[move-certif
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[magisk]] · [[move-certificate]] · [[magiskdetector]] · [[frida]] · [[keyattestation]]
+[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[magisk]] · [[move-certificate]] · [[kernelsu-pixel4xl]] · [[magiskdetector]] · [[frida]] · [[keyattestation]]

@@ -1603,3 +1603,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:mubix/netview`: entity [[netview]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-29** — ingest `description:mtrojnar/osslsigncode`: entity [[osslsigncode]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
+- **2026-07-29** — ingest `description:msnx/KernelSU-Pixel4XL`: entity [[kernelsu-pixel4xl]]; updated [[kernelsu]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
