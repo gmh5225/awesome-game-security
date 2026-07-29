@@ -36,6 +36,8 @@ import time
 from pathlib import Path
 
 from cursor_sdk_agent import DEFAULT_MODEL, get_api_key, run_agent
+from description_paths import archive_path, description_en_path, normalize_repo_slug
+
 ROOT_DIR = Path(__file__).resolve().parent.parent
 ARCHIVE_DIR = ROOT_DIR / "archive"
 DESC_DIR = ROOT_DIR / "description"
@@ -68,7 +70,7 @@ def parse_repo_slug(slug: str) -> tuple[str, str]:
             "(expected owner/repo with [A-Za-z0-9._-] only)"
         )
     owner, repo = cleaned.split("/", 1)
-    return owner, repo
+    return normalize_repo_slug(owner, repo)
 
 
 def slugs_from_env(var_name: str) -> list[str]:
@@ -79,12 +81,14 @@ def slugs_from_env(var_name: str) -> list[str]:
 
 def needs_description(owner: str, repo: str) -> bool:
     # Treat missing OR empty files as needing work (failed runs may leave 0-byte stubs).
-    path = DESC_DIR / owner / repo / "description_en.txt"
+    owner, repo = normalize_repo_slug(owner, repo)
+    path = description_en_path(owner, repo)
     return not (path.is_file() and path.stat().st_size > 0)
 
 
 def archive_exists(owner: str, repo: str) -> bool:
-    return (ARCHIVE_DIR / owner / f"{repo}.txt").is_file()
+    owner, repo = normalize_repo_slug(owner, repo)
+    return archive_path(owner, repo).is_file()
 
 
 def list_missing_descriptions() -> list[tuple[str, str]]:
@@ -108,6 +112,7 @@ def print_scan_report(missing: list[tuple[str, str]]) -> None:
 
 
 def build_prompt(owner: str, repo: str) -> str:
+    owner, repo = normalize_repo_slug(owner, repo)
     archive_rel = f"archive/{owner}/{repo}.txt"
     output_rel = f"description/{owner}/{repo}/description_en.txt"
     return f"""\
@@ -438,10 +443,11 @@ def main() -> None:
         repos_since_commit = 0
 
     for i, (owner, repo) in enumerate(pending, start=1):
+        owner, repo = normalize_repo_slug(owner, repo)
         print(f"\n[{i}/{len(pending)}] {owner}/{repo}")
         prompt = build_prompt(owner, repo)
         code = run_agent(prompt, model=args.model, dry_run=args.dry_run, cwd=ROOT_DIR)
-        out = DESC_DIR / owner / repo / "description_en.txt"
+        out = description_en_path(owner, repo)
         if args.dry_run:
             ok += 1
             continue

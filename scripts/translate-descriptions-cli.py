@@ -34,6 +34,12 @@ import sys
 import time
 from pathlib import Path
 
+from description_paths import (
+    description_en_path,
+    description_lang_path,
+    normalize_repo_slug,
+)
+
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_MODEL = "composer-2.5-fast"
 DESC_DIR = ROOT_DIR / "description"
@@ -70,7 +76,7 @@ def parse_repo_slug(slug: str) -> tuple[str, str]:
             "(expected owner/repo with [A-Za-z0-9._-] only)"
         )
     owner, repo = cleaned.split("/", 1)
-    return owner, repo
+    return normalize_repo_slug(owner, repo)
 
 
 def slugs_from_env(var_name: str) -> list[str]:
@@ -97,11 +103,13 @@ def parse_lang_codes(raw: str) -> list[str]:
 
 
 def en_path(owner: str, repo: str) -> Path:
-    return DESC_DIR / owner / repo / "description_en.txt"
+    owner, repo = normalize_repo_slug(owner, repo)
+    return description_en_path(owner, repo)
 
 
 def lang_path(owner: str, repo: str, code: str) -> Path:
-    return DESC_DIR / owner / repo / f"description_{code}.txt"
+    owner, repo = normalize_repo_slug(owner, repo)
+    return description_lang_path(owner, repo, code)
 
 
 def has_en(owner: str, repo: str) -> bool:
@@ -116,6 +124,7 @@ def needs_lang(owner: str, repo: str, code: str) -> bool:
 
 def list_repos_with_en() -> list[tuple[str, str]]:
     repos: list[tuple[str, str]] = []
+    seen: set[tuple[str, str]] = set()
     if not DESC_DIR.is_dir():
         return repos
     for owner_dir in sorted(DESC_DIR.iterdir()):
@@ -125,7 +134,12 @@ def list_repos_with_en() -> list[tuple[str, str]]:
             if not repo_dir.is_dir():
                 continue
             if has_en(owner_dir.name, repo_dir.name):
-                repos.append((owner_dir.name, repo_dir.name))
+                owner, repo = normalize_repo_slug(owner_dir.name, repo_dir.name)
+                key = (owner.lower(), repo.lower())
+                if key in seen:
+                    continue
+                seen.add(key)
+                repos.append((owner, repo))
     return repos
 
 

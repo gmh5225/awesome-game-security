@@ -41,6 +41,7 @@ from pathlib import Path
 from typing import Any
 
 from cursor_sdk_agent import DEFAULT_MODEL, get_api_key, run_agent
+from description_paths import description_en_path, normalize_repo_slug
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 WIKI_DIR = ROOT_DIR / "wiki"
@@ -143,7 +144,7 @@ def parse_repo_slug(slug: str) -> tuple[str, str]:
             "(expected owner/repo with [A-Za-z0-9._-] only)"
         )
     owner, repo = cleaned.split("/", 1)
-    return owner, repo
+    return normalize_repo_slug(owner, repo)
 
 
 def slugs_from_env(var_name: str) -> list[str]:
@@ -301,7 +302,8 @@ def project_skill(topic: str) -> tuple[Path, str]:
 
 def project_description(owner: str, repo: str) -> tuple[Path, str]:
     ensure_wiki_dirs()
-    src = DESC_DIR / owner / repo / "description_en.txt"
+    owner, repo = normalize_repo_slug(owner, repo)
+    src = description_en_path(owner, repo)
     if not src.is_file():
         sys.exit(
             f"ERROR: missing description {src.relative_to(ROOT_DIR)}"
@@ -341,7 +343,8 @@ def project_description(owner: str, repo: str) -> tuple[Path, str]:
 
 
 def desc_slug_to_path(owner: str, repo: str) -> Path:
-    return DESC_DIR / owner / repo / "description_en.txt"
+    owner, repo = normalize_repo_slug(owner, repo)
+    return description_en_path(owner, repo)
 
 
 # ---------------------------------------------------------------------------
