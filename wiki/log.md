@@ -1647,3 +1647,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-29** — ingest `description:mrdoob/three.js`: entity [[three-js]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-07-29** — ingest `description:mrcang09/Android-Mem-Edit`: entity [[android-mem-edit]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-29** — ingest `description:mqttjs/MQTT.js`: entity [[mqtt-js]]; cited on [[overviews/overview]] and [[overviews/game-engine]].
