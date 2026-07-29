@@ -8,7 +8,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [Overview](overviews/overview.md) — project map; compiled-wiki + research-rigor layers; 40 README sections → skill topics (Cheat ~2606 / Anti Cheat ~621; Game Engine ~153 + Mathematics ~7 / Renderer ~17; DirectX ~35 shader inject/flatten / OpenGL ~3 / Vulkan ~10 kiero2; Game Develop ~182 MCP/security; Game Network ~26; console Switch~7/Xbox~8/PS~7 BD-UN-JB+PSFree-Enhanced / 3DS~3 3Beans LLE+Luma / GC·Wii~1 gecko / Game Boy ~3)
 - [Anti-Cheat](overviews/anti-cheat.md) — layered AC; detection methodology + [[kernel-pool-scanning]] / [[ai-aimbot-detection]]; Detection:* (triggerbot & aimbot/wallhack) + Screenshot + page/CLR protection (~621); hybrid CS2 judge/honeypot proposals; Game Tools RCE + Windows Emulator KDemu AC
-- [DMA Attack](overviews/dma-attack.md) — PCIe DMA via Cheat (~2606) / Detection:DMA (~621) + WSF attestation (SEWindows PCR)
+- [DMA Attack](overviews/dma-attack.md) — PCIe DMA threat model (cheat PC + FPGA + HID); three defense layers; firmware tiers 0–6; layered detection + TPM attestation; Cheat (~2606) / Detection:DMA (~621) + WSF PCR
 - [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source / Godot / Lumix (~153); Mathematics/PhysX/Renderer (~17) adjacency; MCP server/security + AI gamedev (~182); Game Hot Patch HybridCLR/xLua; Game Network ~26; Game Assets ~11 + AI YAML→GLB/sprite + Image Codec PaintFE + Manager/Testing/Tools/CI
 - [Game Hacking](overviews/game-hacking.md) — Cheat taxonomy (~2606) + Some Tricks (~113); mytechnotalent Rust/Go RE courses; Android Terminal (ADB/root/shell)/File/Memory Explorer; WSA/Android/iOS/Windows Emulator KDemu lanes; console Xbox~8 X360 patch+SystemOS / PS HV+BD-UN-JB+PSFree-Enhanced / WebKit CSSFontFace / 3DS~3 3Beans LLE+Luma / GC·Wii~1 gecko
 - [Graphics API](overviews/graphics-api.md) — DirectX (~35) D3D12 shader inject + cross-API flatten / GL / Vulkan (~10) kiero2; Renderer (~17) + Mathematics adjacency; Image Codec PaintFE + AI mesh/splat/sprite
@@ -27,7 +27,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Frida](concepts/frida.md)
 - [HVCI](concepts/hvci.md)
 - [IL2CPP](concepts/il2cpp.md)
-- [IOMMU](concepts/iommu.md)
+- [IOMMU](concepts/iommu.md) — VT-d/AMD-Vi translation; six out-of-domain paths; ACS/ATS-untrusted; bypass catalog + containment
 - [Kernel Callbacks](concepts/kernel-callbacks.md)
 - [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; KDP rule tables
 - [PatchGuard](concepts/patchguard.md)
@@ -545,9 +545,9 @@ Compiled knowledge catalog for awesome-game-security.
 - [payload-dumper-go](entities/payload-dumper-go.md) — Android OTA payload.bin dumper (Go; parallel xz / checksum / zip)
 - [PcapPlusPlus](entities/pcapplusplus.md) — multiplatform C++ packet capture/parse/craft (100+ protocols; libpcap/Npcap; Packet Capture&Parse)
 - [pcm](entities/pcm.md) — curated MCP for IDA Pro (rand-tech; desc also claims Process Context Monitor)
-- [PCILeech](entities/pcileech.md) — PCIe DMA host tool: R/W target memory via hardware (ufrisk; cheat / DMA)
+- [PCILeech](entities/pcileech.md) — PCIe DMA host tool (LeechCore → PCILeech/MemProcFS/vmm); stock firmware fingerprints; ufrisk / cheat / DMA
 - [PCILeech-DMA-Fullstealth](entities/pcileech-dma-fullstealth.md) — Quantumstealth Fullstealth PCILeech DMA FPGA firmware (Vivado; M2/Squirrel/Captain 75T/Enigma X1)
-- [PCILeech-FPGA](entities/pcileech-fpga.md) — FPGA HDL/firmware for PCILeech DMA boards (Vivado; TLP/BAR/config shadow)
+- [PCILeech-FPGA](entities/pcileech-fpga.md) — FPGA HDL/firmware (Vivado; shadow config, BAR impls); firmware sophistication tiers 0–6
 - [pdb](entities/pdb.md) — Windows PDB parse/merge (C++ DIA SDK; old formats + pdb.cfg; RE / debugger symbols)
 - [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)
 - [peetch](entities/peetch.md) — eBPF dump/tls/proxy (PID sniff + OpenSSL keys; PCAPng; cheat / android kernel explorer)
