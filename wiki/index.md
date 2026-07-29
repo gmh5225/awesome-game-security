@@ -446,6 +446,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mypower](entities/mypower.md) — Android/Linux CLI memory scanner (SLJIT / pointer chains / Unity U3D)
 - [mytechnotalent/Reverse-Engineering](entities/mytechnotalent-reverse-engineering.md) — free multi-arch RE tutorial (x86/x64/ARM/AVR/RISC-V; static+dynamic; cheat / guide)
 - [Hacking-Windows](entities/hacking-windows.md) — C Windows RE/debugging guide (cheat / guide; mytechnotalent)
+- [Go-Hacking](entities/go-hacking.md) — free Go/Golang RE course (PDF + Go source/IDA labs; x64/ARM64/ARM32; cheat / guide)
 - [Hacking-Rust](entities/hacking-rust.md) — free Rust RE course (PDF + Cargo labs; x64/ARM64/ARM32; cheat / guide)
 - [MoveCertificate](entities/move-certificate.md) — Magisk/KernelSU/APatch user→system CA module (Android 7–15)
 - [NativeNetSharp](entities/nativenetsharp.md) — C# code injection (managed/.NET; cheat / guide)
