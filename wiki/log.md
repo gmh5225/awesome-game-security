@@ -1791,3 +1791,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:thelok1s/florida-zygisk`: entity [[florida-zygisk]]; cited on [[frida]] and [[overviews/mobile-security]].
 
 - **2026-07-30** — ingest `description:mgeeky/ntfs-journal-viewer`: entity [[ntfs-journal-viewer]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked from [[usn]].
+
+- **2026-07-30** — ingest `description:mgeeky/ThreadStackSpoofer`: entity [[thread-stack-spoofer]]; cited on [[stack-spoofing]] and [[overviews/game-hacking]].

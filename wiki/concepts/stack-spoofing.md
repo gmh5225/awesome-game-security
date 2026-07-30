@@ -4,7 +4,8 @@ kind: concept
 topics: [game-hacking, anti-cheat, windows-kernel]
 sources:
   - wiki/sources/skills/game-hacking.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/mgeeky__ThreadStackSpoofer.md
+updated: 2026-07-30
 confidence: medium
 ---
 
@@ -22,7 +23,7 @@ Build multi-frame stacks whose return PCs land in legitimate modules with plausi
 
 ## Detection surface
 
-Anti-cheat walks thread stacks for non-module returns, validates unwind records, and correlates with shadow-stack / CET where enabled. Illustrative corpus samples: [[return-address-spoofer]], [[loudsunrun]], [[nocturneldr]], [[callout-poc]]. Defensive context: [[overviews/anti-cheat]] Detection:Spoof Stack lane.
+Anti-cheat walks thread stacks for non-module returns, validates unwind records, and correlates with shadow-stack / CET where enabled. Illustrative corpus samples: [[return-address-spoofer]], [[loudsunrun]], [[thread-stack-spoofer]] (PoC thread call-stack spoof for in-process shellcode hiding; bypass thread-based memory examination) (source: wiki/sources/descriptions/mgeeky__ThreadStackSpoofer.md), [[nocturneldr]], [[callout-poc]]. Defensive context: [[overviews/anti-cheat]] Detection:Spoof Stack lane.
 
 ## Related
 
