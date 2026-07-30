@@ -586,6 +586,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PCILeech-FPGA](entities/pcileech-fpga.md) — FPGA HDL/firmware (Vivado; shadow config, BAR impls); firmware sophistication tiers 0–6
 - [PCILeech-FPGA-DMA-VMD](entities/pcileech-fpga-dma-vmd.md) — Artix-7 75T Intel RST VMD `9A0B` emulation (MSI-X, NVMe, BAR shadow; SystemVerilog)
 - [pdb](entities/pdb.md) — Windows PDB parse/merge (C++ DIA SDK; old formats + pdb.cfg; RE / debugger symbols)
+- [pdb-rs](entities/pdb-rs.md) — Microsoft Rust PDB reader/writer (MSF/CodeView DBI/TPI/IPI; x86/AMD64/ARM64; RE / debugger symbols)
 - [pdblister](entities/pdblister.md) — Rust PDB manifest CLI (PE CodeView GUID/age scan; symchk /om alternative; Symbol Server batch download)
 - [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)
 - [peetch](entities/peetch.md) — eBPF dump/tls/proxy (PID sniff + OpenSSL keys; PCAPng; cheat / android kernel explorer)
