@@ -1,0 +1,393 @@
+Project Path: arc_alekzandren_in-memory-mutation-demo_hyqct4rk
+
+Source Tree:
+
+```txt
+arc_alekzandren_in-memory-mutation-demo_hyqct4rk
+├── PolymorphicEngine
+│   ├── CMakeLists.txt
+│   ├── include
+│   │   ├── MemoryProtection.hpp
+│   │   └── PolymorphicPayload.hpp
+│   └── src
+│       ├── MemoryProtection.cpp
+│       ├── PolymorphicPayload.cpp
+│       └── main.cpp
+└── README.md
+
+```
+
+`PolymorphicEngine/CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.28)
+project(PolymorphicEngine CXX)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+include_directories(include)
+
+set(SOURCES
+        src/main.cpp
+        src/MemoryProtection.cpp
+        src/PolymorphicPayload.cpp
+)
+
+add_executable(PolymorphicEngine ${SOURCES})
+
+if(WIN32)
+    target_compile_definitions(PolymorphicEngine PRIVATE PLATFORM_WINDOWS)
+elseif(UNIX)
+    target_compile_definitions(PolymorphicEngine PRIVATE PLATFORM_LINUX)
+endif()
+```
+
+`PolymorphicEngine/include/MemoryProtection.hpp`:
+
+```hpp
+#pragma once
+
+#include <cstddef>
+#include <expected>
+#include <span>
+#include <system_error>
+
+namespace Security::Memory {
+
+    enum class ProtectionFlags {
+        Read,
+        ReadWrite,
+        ReadExecute,
+        ReadWriteExecute
+    };
+
+    [[nodiscard]] std::expected<ProtectionFlags, std::error_code>
+    ChangeProtection(std::span<std::byte> memoryRegion, ProtectionFlags newProtection) noexcept;
+
+} // namespace Security::Memory
+```
+
+`PolymorphicEngine/include/PolymorphicPayload.hpp`:
+
+```hpp
+#pragma once
+
+#include <cstddef>
+#include <cstdint>
+#include <span>
+#include <string_view>
+
+namespace Security::Payload {
+
+    class ProtectedData {
+    public:
+        explicit ProtectedData(std::span<uint8_t> data, uint8_t initialKey);
+
+        void Mutate(uint8_t key) noexcept;
+
+        void Wipe() noexcept;
+
+        [[nodiscard]] std::string_view AsStringView() const noexcept;
+        [[nodiscard]] std::span<std::byte> AsMemorySpan() noexcept;
+
+    private:
+        std::span<uint8_t> m_data;
+        uint8_t m_currentKey;
+    };
+
+} // namespace Security::Payload
+```
+
+`PolymorphicEngine/src/MemoryProtection.cpp`:
+
+```cpp
+#include "MemoryProtection.hpp"
+
+#if defined(PLATFORM_WINDOWS)
+    #define WIN32_LEAN_AND_MEAN
+    #include <windows.h>
+#elif defined(PLATFORM_LINUX)
+    #include <sys/mman.h>
+    #include <unistd.h>
+#endif
+
+namespace Security::Memory {
+
+namespace {
+
+#if defined(PLATFORM_WINDOWS)
+DWORD ToNativeFlags(ProtectionFlags flags) noexcept {
+    switch (flags) {
+        case ProtectionFlags::Read:             return PAGE_READONLY;
+        case ProtectionFlags::ReadWrite:        return PAGE_READWRITE;
+        case ProtectionFlags::ReadExecute:      return PAGE_EXECUTE_READ;
+        case ProtectionFlags::ReadWriteExecute: return PAGE_EXECUTE_READWRITE;
+    }
+    return PAGE_NOACCESS;
+}
+
+ProtectionFlags FromNativeFlags(DWORD flags) noexcept {
+    switch (flags) {
+        case PAGE_READONLY:          return ProtectionFlags::Read;
+        case PAGE_READWRITE:         return ProtectionFlags::ReadWrite;
+        case PAGE_EXECUTE_READ:      return ProtectionFlags::ReadExecute;
+        case PAGE_EXECUTE_READWRITE: return ProtectionFlags::ReadWriteExecute;
+        default:                     return ProtectionFlags::Read;
+    }
+}
+#elif defined(PLATFORM_LINUX)
+int ToNativeFlags(ProtectionFlags flags) noexcept {
+    switch (flags) {
+        case ProtectionFlags::Read:             return PROT_READ;
+        case ProtectionFlags::ReadWrite:        return PROT_READ | PROT_WRITE;
+        case ProtectionFlags::ReadExecute:      return PROT_READ | PROT_EXEC;
+        case ProtectionFlags::ReadWriteExecute: return PROT_READ | PROT_WRITE | PROT_EXEC;
+    }
+    return PROT_NONE;
+}
+#endif
+
+} // namespace
+
+[[nodiscard]] std::expected<ProtectionFlags, std::error_code>
+ChangeProtection(std::span<std::byte> memoryRegion, ProtectionFlags newProtection) noexcept {
+    if (memoryRegion.empty()) {
+        return std::unexpected(std::make_error_code(std::errc::invalid_argument));
+    }
+
+#if defined(PLATFORM_WINDOWS)
+    DWORD oldProtect = 0;
+    const BOOL success = VirtualProtect(
+        memoryRegion.data(),
+        memoryRegion.size(),
+        ToNativeFlags(newProtection),
+        &oldProtect
+    );
+
+    if (!success) {
+        return std::unexpected(std::error_code(static_cast<int>(GetLastError()), std::system_category()));
+    }
+
+    return FromNativeFlags(oldProtect);
+
+#elif defined(PLATFORM_LINUX)
+    // mprotect требует, чтобы адрес был выравниваем по размеру страницы (Page Boundary)
+    const size_t pageSize = sysconf(_SC_PAGESIZE);
+    const auto uintptr = reinterpret_cast<uintptr_t>(memoryRegion.data());
+    const auto alignedPtr = reinterpret_cast<void*>(uintptr & ~(pageSize - 1));
+    const size_t alignedLength = memoryRegion.size() + (uintptr - reinterpret_cast<uintptr_t>(alignedPtr));
+
+    if (mprotect(alignedPtr, alignedLength, ToNativeFlags(newProtection)) != 0) {
+        return std::unexpected(std::error_code(errno, std::generic_category()));
+    }
+
+    // В Linux mprotect не возвращает старые флаги, поэтому возвращаем базовое значение
+    return ProtectionFlags::Read;
+#else
+    return std::unexpected(std::make_error_code(std::errc::function_not_supported));
+#endif
+}
+
+} // namespace Security::Memory
+```
+
+`PolymorphicEngine/src/PolymorphicPayload.cpp`:
+
+```cpp
+#include "PolymorphicPayload.hpp"
+#include <algorithm>
+#include <numeric>
+
+namespace Security::Payload {
+
+    ProtectedData::ProtectedData(std::span<uint8_t> data, uint8_t initialKey)
+        : m_data(data), m_currentKey(initialKey) {}
+
+    void ProtectedData::Mutate(uint8_t key) noexcept {
+        const uint8_t transformKey = m_currentKey ^ key;
+
+        for (size_t i = 0; i < m_data.size(); ++i) {
+            m_data[i] ^= (transformKey + static_cast<uint8_t>(i));
+        }
+
+        m_currentKey = key;
+    }
+
+    void ProtectedData::Wipe() noexcept {
+        std::ranges::fill(m_data, static_cast<uint8_t>(0));
+    }
+
+    std::string_view ProtectedData::AsStringView() const noexcept {
+        return std::string_view(reinterpret_cast<const char*>(m_data.data()), m_data.size());
+    }
+
+    std::span<std::byte> ProtectedData::AsMemorySpan() noexcept {
+        return std::span<std::byte>(reinterpret_cast<std::byte*>(m_data.data()), m_data.size());
+    }
+
+} // namespace Security::Payload
+```
+
+`PolymorphicEngine/src/main.cpp`:
+
+```cpp
+#include "MemoryProtection.hpp"
+#include "PolymorphicPayload.hpp"
+
+#include <array>
+#include <iostream>
+#include <random>
+
+alignas(16) static uint8_t g_EncryptedPayload[] = {
+    0x32, 0x3E, 0x37, 0x37, 0x33, 0x7B, 0x3A, 0x2A,
+    0x30, 0x30, 0x73, 0x1B, 0x7A, 0x6E, 0x7E, 0x7A,
+    0x3E, 0x33, 0x22, 0x30, 0x31, 0x33, 0x2E, 0x35,
+    0x30, 0x3A, 0x7A, 0x18, 0x32, 0x3B, 0x34, 0x30,
+    0x3E, 0x10, 0x7C, 0x73
+};
+
+constexpr uint8_t INITIAL_KEY = 0x5A;
+
+int main() {
+    std::cout << "[+] Initializing polymorphic module...\n";
+    Security::Payload::ProtectedData payload(g_EncryptedPayload, INITIAL_KEY);
+    auto memorySpan = payload.AsMemorySpan();
+    std::cout << "[!] Data state in memory BEFORE decryption: "
+              << payload.AsStringView().substr(0, 10) << "...\n";
+    std::cout << "[+] Requesting memory protection change (ReadWrite)...\n";
+    auto oldProtection = Security::Memory::ChangeProtection(
+        memorySpan,
+        Security::Memory::ProtectionFlags::ReadWrite
+    );
+
+    if (!oldProtection) {
+        std::cerr << "[-] Memory protection change error: "
+                  << oldProtection.error().message() << '\n';
+        return 1;
+    }
+
+    std::cout << "[+] Decrypting payload in memory...\n";
+    payload.Mutate(0x00);
+    std::cout << "[==] Decrypted message: " << payload.AsStringView() << "\n";
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<uint16_t> distrib(1, 255);
+    const uint8_t newDynamicKey = static_cast<uint8_t>(distrib(gen));
+    std::cout << "[+] Encrypting data with new dynamic key: 0x"
+              << std::hex << static_cast<int>(newDynamicKey) << std::dec << "\n";
+    payload.Mutate(newDynamicKey);
+    std::cout << "[+] Restoring original memory protection...\n";
+    auto restoreRes = Security::Memory::ChangeProtection(memorySpan, *oldProtection);
+    if (!restoreRes) {
+        std::cerr << "[-] Failed to restore memory protection!\n";
+    }
+
+    (void)Security::Memory::ChangeProtection(memorySpan, Security::Memory::ProtectionFlags::ReadWrite);
+    payload.Wipe();
+    std::cout << "[+] Memory successfully wiped.\n";
+
+    return 0;
+}
+```
+
+`README.md`:
+
+```md
+# C++23 Polymorphic Memory Engine
+
+[![C++23](https://img.shields.io/badge/C%2B%2B-23-blue.svg)](https://en.cppreference.com/w/cpp/compiler_support)
+[![CMake](https://img.shields.io/badge/CMake-3.22%2B-green.svg)](https://cmake.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+An educational cross-platform demonstration of **in-memory polymorphic data mutation**, page protection management, and secure memory sanitization implemented using modern **C++23** features (`std::span`, `std::expected`).
+**Educational Disclaimer**: This project is designed purely for educational and research purposes to study binary mechanics, memory layout manipulation, and defense-in-depth concepts.
+
+---
+
+## Features
+* **Modern C++23 Standard**: Demonstrates idiomatic use of `std::span` for zero-cost non-owning views and `std::expected` for type-safe system error handling without exceptions.
+* **Cross-Platform Memory Management**: Unified interface wrapping platform-specific protection APIs:
+* **Windows**: `VirtualProtect` (`PAGE_READWRITE`, `PAGE_EXECUTE_READWRITE`).
+* **Linux**: `mprotect` with automatic page-boundary alignment calculation (`sysconf(_SC_PAGESIZE)`).
+* **Dynamic Mutation Protocol**: In-memory decryption, payload transformation with dynamic key rotation, and signature modification.
+* **Secure Memory Sanitization**: Uses `std::ranges::fill` for explicit payload scrubbing before process termination.
+
+---
+
+## Tech Stack & Architecture
+```Plaintext
+PolymorphicEngine/
+├── CMakeLists.txt              # Build configuration requiring C++23
+├── include/
+│   ├── MemoryProtection.hpp    # Memory protection abstractions & C++23 API
+│   └── PolymorphicPayload.hpp   # In-memory XOR & shift mutation logic
+└── src/
+    ├── MemoryProtection.cpp    # Win32/POSIX system call implementations
+    ├── PolymorphicPayload.cpp  # Payload wrapper & safe wiping implementation
+    └── main.cpp                # Execution flow demonstration
+```
+
+---
+
+## Requirements
+* **C++23 Compiler**: GCC 13+, Clang 16+, or MSVC 2022+
+* **Build System**: CMake 3.28+
+* **IDE**: CLion, VS Code, or Visual Studio 2022
+
+---
+
+## Building & Running
+**Using CLion**
+1. Clone or open the project folder in CLion (`File` -> `Open...`).
+2. Ensure your CMake Toolchain points to a compiler supporting C++23.
+3. Build and Run (`Shift + F10` / `Ctrl + F9`).
+
+---
+
+## Command Line (CMake)
+```Bash
+# Clone the repository
+git clone https://github.com/your-username/cpp23-polymorphic-memory-engine.git
+cd cpp23-polymorphic-memory-engine
+
+# Configure the build directory
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+# Build the executable
+cmake --build build
+
+# Run the binary
+./build/PolymorphicEngine        # Linux / macOS
+# or
+.\build\Release\PolymorphicEngine.exe # Windows
+```
+
+---
+
+## How It Works
+```Plaintext
+┌──────┬──────────────────────────────────────────┬────────────────────────────────────────────────────────────────┐
+│ Step │ Execution Phase                          │ Memory State & Operation                                       │
+├──────┼──────────────────────────────────────────┼────────────────────────────────────────────────────────────────┤
+│  01  │ Initial State                            │ Payload is encrypted in standard data segment (.data).         │
+│  02  │ Protection Shift (ReadWrite)             │ Invokes VirtualProtect / mprotect to enable write access.      │
+│  03  │ In-Place Decryption                      │ Applies initial key transformation to yield plaintext string.  │
+│  04  │ Payload Execution                        │ Data is safely read and processed in memory.                   │
+│  05  │ Dynamic Mutation (Polymorphic Re-encrypt) │ Re-encrypts payload using a fresh random key (std::mt19937).    │
+│  06  │ Restore Protection                       │ Memory page access rights revert to initial safe flags.        │
+│  07  │ Secure Sanitization                       │ Temporarily unlocks RW access and wipes memory with zeros.     │
+└──────┴──────────────────────────────────────────┴────────────────────────────────────────────────────────────────┘
+```
+1. **Page Permissions**: By default, static read-only buffers cannot be modified at runtime. The engine uses system primitives to temporarily switch memory pages to `ReadWrite`.
+2. **In-place Transformation**: Payload bytes are mutated using layered XOR and position-dependent offsets directly within process memory.
+3. **Key Rotation**: After usage, the payload is immediately re-encrypted with a freshly generated random key via `<random>` engine (`std::mt19937`), altering its memory footprint/signature.
+4. **Cleanup**: Original page access controls are restored, and the buffer is zeroized prior to release.
+
+---
+
+## License
+Distributed under the MIT License. See `LICENSE` for more information.
+
+```
