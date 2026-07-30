@@ -14,6 +14,7 @@ sources:
   - wiki/sources/descriptions/steffalon__battleye-rust.md
   - wiki/sources/descriptions/rushzzz-max__r6-external.md
   - wiki/sources/descriptions/mexploitui__FakeEye.md
+  - wiki/sources/descriptions/masterpastaa__BattlEye-Handler-BYPASS.md
 updated: 2026-07-30
 confidence: medium
 ---
@@ -46,6 +47,8 @@ Title-specific R6 external samples such as [[r6-external]] (C/C++; driver develo
 
 Service/install/launch emulation is studied via [[fakeeye]]: SCM-managed `BEService`, external config, and BE-style game process creation without the real AC stack. (source: wiki/sources/descriptions/mexploitui__FakeEye.md)
 
+Handle-stripping bypass via periodic handle re-creation is implemented in [[battleye-handler-bypass]]: a KMDF driver that re-opens process handles before BE’s ~5-second cleanup cycle strips them, with IOCTL paths for usermode control. (source: wiki/sources/descriptions/masterpastaa__BattlEye-Handler-BYPASS.md)
+
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[battleye-region-walking]] · [[battleye-rust]] · [[arma3beclient]] · [[r6-external]] · [[r6-internal-v3]] · [[fakeeye]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[arma3beclient]] · [[r6-external]] · [[r6-internal-v3]] · [[fakeeye]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
