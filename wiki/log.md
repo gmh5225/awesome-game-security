@@ -1811,3 +1811,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:mefistotelis/ida-pro-loadmap`: entity [[ida-pro-loadmap]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-30** — ingest `description:mekos2772/ios-location-spoofer`: entity [[ios-location-spoofer]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-30** — ingest `description:medievalghoul/hwid-checker-mg`: entity [[hwid-checker-mg]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
