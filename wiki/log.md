@@ -1745,3 +1745,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:mike1k/perses`: entity [[perses]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-30** — ingest `description:mike1k/VMPImportFixer`: entity [[vmpimportfixer]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-30** — ingest `description:mike1k/HookHunter`: entity [[hookhunter]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
