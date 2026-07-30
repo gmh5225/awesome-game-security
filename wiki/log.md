@@ -1781,3 +1781,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `readme:categories`: bumped DirectX ~37 (was ~35) on [[overviews/overview]] and [[overviews/graphics-api]]; Game Testing high-PC-uptime note on [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
 
 - **2026-07-30** — ingest `description:michaelmsonne/SignToolGUI`: entity [[signtoolgui]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-07-30** — ingest `description:mibho/x64dbgTraceReader`: entity [[x64dbg-trace-reader]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].

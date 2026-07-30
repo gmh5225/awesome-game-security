@@ -850,6 +850,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [x260-lenovo-opencore](entities/x260-lenovo-opencore.md) — ThinkPad X260 Hackintosh OpenCore EFI (macOS research host)
 - [x64-EXE-Packer](entities/x64-exe-packer.md) — PE X64 binary packer (Anti Cheat → Binary Packer)
 - [x64dbg](entities/x64dbg.md) — Windows x86/x64 debugger (plugins; Cheat Debugging)
+- [x64dbg Trace Reader](entities/x64dbg-trace-reader.md) — standalone `.trace64` parser (Capstone disasm; register/memory state; regex filter; offline trace analysis)
 - [x64dbgbinja](entities/x64dbgbinja.md) — Binary Ninja plugin (Python; x64dbg org; BN ↔ x64dbg lane)
 - [xash-rt](entities/xash-rt.md) — Xash3D FWGS realtime path tracing (C/C++; OpenGL; Renderer)
 

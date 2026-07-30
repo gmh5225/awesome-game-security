@@ -18,4 +18,4 @@ Application for viewing, editing, and analyzing execution traces. Originally bui
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[rumba]] · [[novmpy]] · [[x64dbg]] · [[alcatraz]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[rumba]] · [[novmpy]] · [[x64dbg]] · [[x64dbg-trace-reader]] · [[alcatraz]]

@@ -174,6 +174,7 @@ sources:
   - wiki/sources/descriptions/x64dbg__DotX64Dbg.md
   - wiki/sources/descriptions/x64dbg__Classroom.md
   - wiki/sources/descriptions/morsisko__xFindOut.md
+  - wiki/sources/descriptions/mibho__x64dbgTraceReader.md
   - wiki/sources/descriptions/notpidgey__ManyTypes.md
   - wiki/sources/descriptions/x-spy__CVE-2026-43499-popsicle.md
   - wiki/sources/descriptions/wtsxDev__reverse-engineering.md
@@ -523,6 +524,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Managed .NET 6 / C# x64dbg plugin authoring via [[dotx64dbg]] (live edit/debug; custom commands/expressions) sits in the same Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__DotX64Dbg.md)
 - OOP analysis via [[classroom]] (define member functions/variables while debugging; persisted class docs) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__Classroom.md)
 - Memory write/access tracing via [[xfindout]] (find what writes to or accesses an address; Cheat Engine–style watch inside [[x64dbg]]) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/morsisko__xFindOut.md)
+- Offline `.trace64` execution-trace analysis via [[x64dbg-trace-reader]] (Capstone disasm; register/memory state reconstruction; regex filter over x64dbg trace exports) sits in the Cheat Debugging / Trace Reader lane. (source: wiki/sources/descriptions/mibho__x64dbgTraceReader.md)
 - Windows type parsing via [[manytypes]] (x64dbg typeparsing plugin; structure/type discovery for memory RE) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/notpidgey__ManyTypes.md)
 - Static-library function identification via [[idenlib]] (IDA plugin; VC++/STL signature DB on stripped PEs) and [[idenlibx]] (x64dbg port; signature scan of loaded modules → live name apply) sits in the Cheat Library Function Identification / IDA & x64dbg Plugins lane. (source: wiki/sources/descriptions/secrary__idenLib.md) (source: wiki/sources/descriptions/secrary__idenLibX.md) Linux FLIRT packs such as [[sig-database]] (OpenSSL/system libs across Ubuntu releases; amd64/i386) extend the same library-ID lane for Linux binaries. (source: wiki/sources/descriptions/push0ebp__sig-database.md)
 
