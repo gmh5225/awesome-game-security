@@ -1757,3 +1757,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `readme:categories`: bumped Cheat ~2609 (was ~2607) and Game Engine ~154 (was ~153) on [[overviews/overview]], [[overviews/game-engine]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-07-30** — ingest `description:microsoft/WSL2-Linux-Kernel`: entity [[wsl2-linux-kernel]]; cited on [[overviews/windows-kernel]]; cross-link from [[windows-subsystem-linux]].
+
+- **2026-07-30** — ingest `description:microsoft/WSL`: entity [[wsl]]; cited on [[overviews/windows-kernel]]; cross-links from [[wsl2-linux-kernel]] and [[windows-subsystem-linux]].

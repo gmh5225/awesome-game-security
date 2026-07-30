@@ -10,7 +10,7 @@ confidence: medium
 
 # windows-subsystem-linux
 
-Linux kernel source tree for Windows Subsystem for Linux (WSL) research and builds: full tree layout (`arch`, drivers, fs, and related subsystems) rather than a small WSL userspace wrapper. Useful for Windows-subsystem and kernel researchers studying WSL’s Linux-kernel side under the README `WSL` lane. For Microsoft’s official WSL2 kernel image source, see [[wsl2-linux-kernel]]. (source: wiki/sources/descriptions/sxlmnwb__windows-subsystem-linux.md)
+Linux kernel source tree for Windows Subsystem for Linux (WSL) research and builds: full tree layout (`arch`, drivers, fs, and related subsystems) rather than a small WSL userspace wrapper. Useful for Windows-subsystem and kernel researchers studying WSL’s Linux-kernel side under the README `WSL` lane. For Microsoft’s official WSL2 kernel image source, see [[wsl2-linux-kernel]]; for the Windows-side WSL stack (Lxss Manager, DrvFS, VM infra), see [[wsl]]. (source: wiki/sources/descriptions/sxlmnwb__windows-subsystem-linux.md)
 
 ## Links
 
@@ -18,4 +18,4 @@ Linux kernel source tree for Windows Subsystem for Linux (WSL) research and buil
 
 ## Related
 
-[[overviews/windows-kernel]] · [[wsl2-linux-kernel]] · [[overviews/overview]] · [[winvisor]] · [[kace]]
+[[overviews/windows-kernel]] · [[wsl]] · [[wsl2-linux-kernel]] · [[overviews/overview]] · [[winvisor]] · [[kace]]
