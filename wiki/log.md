@@ -1825,3 +1825,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:matthewjberger/nightshade`: entity [[nightshade]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-07-30** — ingest `description:matteyeux/IDArling`: entity [[idarling]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-30** — ingest `description:mathisvickie/sign-expired`: entity [[sign-expired]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
