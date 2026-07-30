@@ -14,7 +14,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Graphics API](overviews/graphics-api.md) — DX/GL/Vulkan hook points; [[present-hook]] / [[draw-call-hook]]; overlays + [[obs-game-capture]] / [[anti-screenshot-capture]]; Kiero/kiero2; DirectX (~35) shader inject/flatten; Renderer (~17) + AI mesh/splat adjacency
 - [Mobile Security](overviews/mobile-security.md) — Android/iOS; root frameworks (Magisk/KernelSU/APatch), [[zygisk]]/Frida hooking, [[mobile-anti-cheat]]; Terminal/File/Memory Explorer + App/Kernel CVE; WSA (~9), Droid-VM/Gunyah emulators
 - [Reverse Engineering](overviews/reverse-engineering.md) — RE workflow + [[research-rigor]]; [[dynamic-binary-instrumentation]] trap-and-emulate/WHP tracing; [[mixed-boolean-arithmetic]] / [[control-flow-flattening]] deobfuscation; MCP-assisted RE; binary diffing; anti-debug catalog; tools (Ghidra managers, MBA/DBI, packers); Windows Emulator KDemu + console/Xbox~8 / PS BD-UN-JB+PSFree-Enhanced / 3DS 3Beans LLE / GC·Wii gecko RE (~2609 Cheat / ~623 AC lanes)
-- [Windows Kernel](overviews/windows-kernel.md) — callbacks, VBS/HVCI/CET/TPM attestation (~9; SEWindows PCR), BYOVD, Segment Heap pool + [[kernel-pool-scanning]] / [[etw-threat-intelligence]]; symbol walking; Some Tricks Ring0 (~113); Windows Emulator (~7) + WSL
+- [Windows Kernel](overviews/windows-kernel.md) — callbacks, VBS/HVCI/CET/TPM attestation (~9; SEWindows PCR), BYOVD, Segment Heap pool + [[kernel-pool-scanning]] / [[etw-threat-intelligence]]; symbol walking; Some Tricks Ring0 (~113); Windows Emulator (~7) + WSL (~4; [[wsl2-linux-kernel]] / [[windows-subsystem-linux]])
 
 ## Concepts
 
@@ -824,6 +824,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [windows-kernel-pagehook](entities/windows-kernel-pagehook.md) — PTE Hook (shared kernel VA / per-process CR3; Some Tricks Ring0)
 - [windows-kernel-shadow-stack](entities/windows-kernel-shadow-stack.md) — Synacktiv KM CET/shadow-stack research (KVAS / PG; Windows Security Features)
 - [windows-subsystem-linux](entities/windows-subsystem-linux.md) — WSL Linux kernel source tree (full layout; WSL research hosts)
+- [WSL2 Linux Kernel](entities/wsl2-linux-kernel.md) — official Microsoft WSL2 utility-VM Linux kernel source (arch/drivers/fs; WSL lane)
 
 - [win11_apk_installer](entities/win11-apk-installer.md) — Win11 APK installer (Python; WSA / Android-on-Windows)
 - [winbo](entities/winbo.md) — overlay hijack detect via dxgkrnl ETW Present + GDI table (Detection:Overlay)
