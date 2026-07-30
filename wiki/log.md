@@ -1789,3 +1789,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `readme:categories`: bumped Cheat ~2612 (was ~2609) and Anti Cheat ~624 (was ~623) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-07-30** — ingest `description:thelok1s/florida-zygisk`: entity [[florida-zygisk]]; cited on [[frida]] and [[overviews/mobile-security]].
+
+- **2026-07-30** — ingest `description:mgeeky/ntfs-journal-viewer`: entity [[ntfs-journal-viewer]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked from [[usn]].
