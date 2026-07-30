@@ -1837,3 +1837,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:martinjanas/Sensum`: entity [[sensum]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-07-30** — ingest `description:marlkiller/d3dhook_imgui`: entity [[d3dhook-imgui]]; cited on [[overviews/graphics-api]] and [[present-hook]].
+
+- **2026-07-30** — ingest `description:marin-m/vmlinux-to-elf`: entity [[vmlinux-to-elf]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
