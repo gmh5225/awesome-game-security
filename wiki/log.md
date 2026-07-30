@@ -1831,3 +1831,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `readme:categories`: bumped Cheat ~2613 (was ~2612) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-07-30** — ingest `description:masterpastaa/AutoOffsets`: entity [[auto-offsets]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-30** — ingest `description:mastercodeon314/KsDumper-11`: entity [[ksdumper-11]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
