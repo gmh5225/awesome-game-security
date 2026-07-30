@@ -404,6 +404,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [Infosec_Reference](entities/infosec-reference.md) — infosec wiki with Games / Game Hacking draft (cheat / guide)
 - [input-overlay](entities/input-overlay.md) — OBS plugin: keyboard/mouse/gamepad livestream overlay (C++; Keyboard Mapper)
+- [intro-to-dx11-revisited](entities/intro-to-dx11-revisited.md) — Frank Luna DX11 modernized samples (C++ inline modules; standard D3D11 + HLSL; DirectX / guide)
 - [intro-to-dx12-2nd-edition-revisited](entities/intro-to-dx12-2nd-edition-revisited.md) — Frank Luna DX12 2nd ed. modernized chapter demos (C++20 modules; DirectX / guide)
 - [interactive-feedback-mcp](entities/interactive-feedback-mcp.md) — HITL user-feedback MCP (input/confirm/select prompts; Game Develop / MCP)
 - [InstrumentationCallbackSyscallLogger](entities/instrumentation-callback-syscall-logger.md) — Ring3 Instrumentation Callback on syscall return (AC / Windows)
