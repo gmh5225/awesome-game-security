@@ -1751,3 +1751,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:mihaly044/pedigest`: entity [[pedigest]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-07-30** — ingest `description:microsoft/pdblister`: entity [[pdblister]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
+
+- **2026-07-30** — ingest `readme:categories`: bumped Cheat ~2609 (was ~2607) and Game Engine ~154 (was ~153) on [[overviews/overview]], [[overviews/game-engine]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
