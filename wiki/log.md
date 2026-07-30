@@ -1805,3 +1805,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:mentebinaria/retoolkit`: entity [[retoolkit]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-30** — ingest `description:memflow/memflow-kvm`: entity [[memflow-kvm]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
+
+- **2026-07-30** — ingest `description:melonjs/melonJS`: entity [[melonjs]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
