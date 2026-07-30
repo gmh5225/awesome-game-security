@@ -1765,3 +1765,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:microsoft/DirectXMath`: entity [[directxmath]]; cited on [[world-to-screen]] and [[overviews/graphics-api]].
 
 - **2026-07-30** — ingest `description:microsoft/Detours`: entity [[detours]]; cross-link from [[detoursnt]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-07-30** — ingest `description:microsoft/D3D9On12`: entity [[d3d9on12]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
