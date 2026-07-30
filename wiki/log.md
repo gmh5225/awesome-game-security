@@ -1828,4 +1828,4 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-30** — ingest `description:mathisvickie/sign-expired`: entity [[sign-expired]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
-- **2026-07-30** — ingest `description:masterpastaa/BattlEye-Handler-BYPASS`: entity [[battleye-handler-bypass]]; cited on [[battleye]] and [[overviews/anti-cheat]].
+- **2026-07-30** — ingest `readme:categories`: bumped Cheat ~2613 (was ~2612) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
