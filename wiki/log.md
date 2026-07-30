@@ -1763,3 +1763,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:microsoft/SDCM`: entity [[sdcm]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-07-30** — ingest `description:microsoft/DirectXMath`: entity [[directxmath]]; cited on [[world-to-screen]] and [[overviews/graphics-api]].
+
+- **2026-07-30** — ingest `description:microsoft/Detours`: entity [[detours]]; cross-link from [[detoursnt]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
