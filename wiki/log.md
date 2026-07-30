@@ -1737,3 +1737,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:milankovo/YaraVM`: entity [[yaravm]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-30** — ingest `description:milakov/int_fastdiv`: entity [[int-fastdiv]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-07-30** — ingest `description:mikeroyal/Unreal-Engine-Guide`: entity [[unreal-engine-guide]]; cited on [[overviews/game-engine]] and [[unreal-object-model]].

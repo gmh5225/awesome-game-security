@@ -4,7 +4,8 @@ kind: concept
 topics: [game-engine, game-hacking, reverse-engineering]
 sources:
   - wiki/sources/skills/game-engine.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/mikeroyal__Unreal-Engine-Guide.md
+updated: 2026-07-30
 confidence: high
 ---
 
@@ -43,6 +44,8 @@ Common fields include vtable, flags, internal index, class pointer, name, and ou
 
 Pattern scanners such as [[patternsleuth]] often precede dumpers for address discovery on protected builds.
 
+Curated UE tooling indexes such as [[unreal-engine-guide]] complement these SDK workflows for developers building engine literacy before title-specific RE. (source: wiki/sources/descriptions/mikeroyal__Unreal-Engine-Guide.md)
+
 ## Related
 
-[[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[unreal-engine-guide]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
