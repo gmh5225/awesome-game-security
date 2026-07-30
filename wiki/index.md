@@ -363,6 +363,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [iaito](entities/iaito.md) — official radare2 GUI (Qt5/6; RE workflow / editor tooling; Cheat Radare)
 - [IDA Easy Life](entities/ida-easy-life.md) — IDA Pro deobfuscation plugin (Python; cheat / IDA Plugins)
 - [IDA-Fusion](entities/ida-fusion.md) — Fast Signature scanner & creator (cheat / IDA Plugins)
+- [IDArling](entities/idarling.md) — collaborative IDA Pro / Hex-Rays plugin (real-time multi-user IDB sync; cheat / IDA Plugins)
 - [ida-efiutils](entities/ida-efiutils.md) — IDA UEFI firmware annotator (GUIDs / Boot·Runtime Services / PEI·DXE; Python)
 - [ida-enums-helper](entities/ida-enums-helper.md) — IDA plugin: Hex-Rays enum rename/add hotkeys (N/A/Shift-A; tinfo_t chooser; cheat / IDA Plugins)
 - [ida_functioncolor](entities/ida-functioncolor.md) — IDA plugin: colorize function defs in pseudocode (Python; cheat / IDA Plugins)
