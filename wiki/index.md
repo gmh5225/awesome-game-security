@@ -587,6 +587,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)
 - [peetch](entities/peetch.md) — eBPF dump/tls/proxy (PID sniff + OpenSSL keys; PCAPng; cheat / android kernel explorer)
 - [pesign](entities/pesign.md) — Linux UEFI Secure Boot PE-COFF Authenticode/PKCS#7 sign/verify (NSS)
+- [perses](entities/perses.md) — x86 PE instruction-expansion obfuscator (semantic-equivalent replacement sequences; Anti Cheat → Obfuscation Engine)
 - [petoy](entities/petoy.md) — PE-focused binary packer (C/C++ + JS; Anti Cheat → Binary Packer `[PE]`)
 - [PEzor](entities/pezor.md) — C++/C PE packer (hooking-oriented; Anti Cheat → Binary Packer)
 - [PhantomKiller](entities/phantomkiller.md) — BYOVD via Lenovo BootRepair.sys (IOCTL 0x222014 ZwTerminateProcess; PPL AV/EDR)

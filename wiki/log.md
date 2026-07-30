@@ -1741,3 +1741,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:mikeroyal/Unreal-Engine-Guide`: entity [[unreal-engine-guide]]; cited on [[overviews/game-engine]] and [[unreal-object-model]].
 
 - **2026-07-30** — ingest `readme:categories`: bumped Anti Cheat ~623 (was ~622) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
+- **2026-07-30** — ingest `description:mike1k/perses`: entity [[perses]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
