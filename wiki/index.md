@@ -252,6 +252,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DsArk64](entities/dsark64.md) — BYOVD via Qihoo 360 `DsArk64.sys` (handle donor; ring-0 kill + kernel R/W)
 - [DWEX](entities/dwex.md) — DWARF Explorer GUI (ELF/debug files; pyelftools; RE tools)
 - [DWM_Hook](entities/dwm-hook.md) — DWM hook / overlay research (C++; cheat / overlay)
+- [dwmhook](entities/dwmhook.md) — DWM DX11 vtable ImGui overlay framework (reflective inject; MinHook/PolyHook2; PDB/DIA; `[DWM VFTable]`)
 - [DroidShield](entities/droidshield.md) — Android RASP SDK (root/debugger/Frida-Xposed/emulator/tamper; polymorphic checks)
 - [DX11-BaseHook](entities/dx11-basehook.md) — minimal DX11 Present trampoline + ImGui overlay base (C++; DirectX Hook)
 

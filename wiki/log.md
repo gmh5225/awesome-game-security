@@ -1795,3 +1795,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:mgeeky/ThreadStackSpoofer`: entity [[thread-stack-spoofer]]; cited on [[stack-spoofing]] and [[overviews/game-hacking]].
 
 - **2026-07-30** — ingest `description:mgeeky/ShellcodeFluctuation`: entity [[shellcode-fluctuation]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-30** — ingest `description:mfxiaosheng/dwmhook`: entity [[dwmhook]]; cited on [[overviews/graphics-api]] and [[present-hook]].
