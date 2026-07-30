@@ -677,6 +677,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [saturn-mapper](entities/saturn-mapper.md) — Windows kernel PE manual mapper (iqvw64e.sys; BYOVD / unsigned map)
 - [sbox](entities/sbox.md) — C++ compile-time AES-128 / S-box string obfuscation (Obfusk8 spin-off)
 - [scfw](entities/scfw.md) — cross-platform C++ Windows shellcode framework (AC shellcode engine & tricks)
+- [ShellcodeFluctuation](entities/shellcode-fluctuation.md) — cyclic shellcode encrypt/decrypt; RW/NoAccess↔RX fluctuation (mgeeky; page protection)
 - [ScyllaHideDetector2](entities/scyllahidedetector2.md) — ScyllaHide Detector V2 (C/C++; debug hide / byte restore; Anti Debugging)
 - [SDCM](entities/sdcm.md) — Microsoft Partner Center CLI: WHQL/Attestation submissions, signed driver download, Windows Update shipping labels
 - [sdk](entities/sdk.md) — Source-engine RE SDK headers (netvars / interfaces; likely CS:GO; C++)
