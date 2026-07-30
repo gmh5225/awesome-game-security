@@ -4,7 +4,7 @@ kind: entity
 topics: [reverse-engineering, windows-kernel]
 sources:
   - wiki/sources/descriptions/sonyps5201314__pdb.md
-updated: 2026-07-25
+updated: 2026-07-30
 confidence: medium
 ---
 
@@ -20,4 +20,4 @@ Useful when resolving types/names from Microsoft or custom PDBs before deeper ID
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[kpdb]] · [[ntsleuth]] · [[totalpe2]] · [[dotniet]] · [[x64dbg]]
+[[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[pdblister]] · [[kpdb]] · [[ntsleuth]] · [[totalpe2]] · [[dotniet]] · [[x64dbg]]

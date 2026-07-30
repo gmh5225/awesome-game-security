@@ -1749,3 +1749,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:mike1k/HookHunter`: entity [[hookhunter]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-07-30** — ingest `description:mihaly044/pedigest`: entity [[pedigest]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-07-30** — ingest `description:microsoft/pdblister`: entity [[pdblister]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
