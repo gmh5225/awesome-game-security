@@ -872,6 +872,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [yaui](entities/yaui.md) — Rust Android inject / emulation research (cheat / injection:android)
 - [zelda3](entities/zelda3.md) — Zelda 3 reimplementation (playable start-to-end; Game Develop / source)
 - [ZeroThreadKernel](entities/zero-thread-kernel.md) — threadless kernel exec via existing contexts / timers (vs AC thread enum)
+- [zig-gamedev](entities/zig-gamedev.md) — cross-platform Zig gamedev libs (DX12/Vulkan/OpenGL/audio; GPU-driven rendering samples; Game Engine)
 - [zygisk-dump-dex](entities/zygisk-dump-dex.md) — Zygisk `libdexfile.so` DEX dump (Android 14/15; Cheat Magisk)
 - [Zygisk-ImGui-Mod-Menu](entities/zygisk-imgui-mod-menu.md) — Zygisk ImGui mod menu (in-dev; cheat / render-draw)
 
