@@ -1819,3 +1819,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:mdilai/Shtreeba`: entity [[shtreeba]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-07-30** — ingest `description:mcxiaoke/mqtt`: entity [[mqtt]]; cited on [[overviews/overview]] and [[overviews/game-engine]].
+
+- **2026-07-30** — ingest `description:mattifestation/WDACTools`: entity [[wdactools]]; cited on [[overviews/windows-kernel]] and [[hvci]].
