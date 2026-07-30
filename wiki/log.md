@@ -1803,3 +1803,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:mexploitui/FakeEye`: entity [[fakeeye]]; cited on [[battleye]] and [[overviews/anti-cheat]].
 
 - **2026-07-30** — ingest `description:mentebinaria/retoolkit`: entity [[retoolkit]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-30** — ingest `description:memflow/memflow-kvm`: entity [[memflow-kvm]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
