@@ -12,7 +12,7 @@ confidence: medium
 
 Unity-focused cheat sheet for game developers, engine programmers, and graphics researchers in the Game Engine / guide lane—not a runtime cheat or anti-cheat artifact. (source: wiki/sources/descriptions/shadirvan__Unity-Cheat-Sheet.md)
 
-Useful quick-reference background beside Unity editor tooling ([[unicli]], [[unity-mcp]]), demos ([[mobademo]]), and broader engine-dev lists ([[awesome-game-engine-dev]]).
+Useful quick-reference background beside Unity editor tooling ([[unicli]], [[unity-mcp]]), script/plugin catalogs ([[unity-script-collection]]), demos ([[mobademo]]), and broader engine-dev lists ([[awesome-game-engine-dev]]).
 
 ## Links
 
