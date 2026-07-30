@@ -125,6 +125,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [awesome-anti-virtualization](entities/awesome-anti-virtualization.md) — curated anti-virtualization resources (Detection:Virtual Environments)
 - [awesome-educational-games](entities/awesome-educational-games.md) — curated educational games (editors / languages / programming; Game Develop Guide)
 - [awesome-game-engine-dev](entities/awesome-game-engine-dev.md) — curated game-engine-dev resources (DirectX/OpenGL; Game Engine / guide)
+- [awesome-open-source-games](entities/awesome-open-source-games.md) — curated open-source games by platform/genre (Godot/Unity/custom; Collection of Games / Game Develop Guide)
 - [blackhat2012](entities/blackhat2012.md) — BH2012 anti-debug / anti-disasm / obfuscation / Anti-VM PoCs (C/C++ + FASM)
 - [BlindEye](entities/blindeye.md) — BattlEye report-path pool-alloc drop (“Packet Fucker”)
 - [binaryninja-pcode](entities/binaryninja-pcode.md) — BN ↔ Ghidra Sleigh/p-code bridge (experimental LLIL; Binary Ninja Plugins)

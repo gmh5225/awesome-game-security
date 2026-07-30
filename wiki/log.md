@@ -1769,3 +1769,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:microsoft/D3D9On12`: entity [[d3d9on12]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
 
 - **2026-07-30** — ingest `description:michidk/Unity-Script-Collection`: entity [[unity-script-collection]]; cited on [[overviews/game-engine]].
+
+- **2026-07-30** — ingest `description:michelpereira/awesome-open-source-games`: entity [[awesome-open-source-games]]; cited on [[overviews/overview]] and [[overviews/game-engine]].
