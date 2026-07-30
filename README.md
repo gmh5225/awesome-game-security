@@ -270,6 +270,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/yucchiy/UniCli [CLI to control Unity Editor from terminal — compile, test, build, inspect GameObjects; 80+ commands, AI-agent ready (Claude Code plugin, Agent Skills)]
 
 > Game Engine Plugins:Godot
+- https://github.com/GDPatch/GDPatch [Cross-platform cross-version Godot 4.x mod loader with script patching, Lua hooks, and runtime mod loading without modifying game files]
 - https://github.com/libriscv/godot-sandbox [Sandboxing that enables safe modding for Godot games]
 - https://github.com/gtibo/Godot-Plush-Character [3D Plush Character for Godot 4.x]
 - https://github.com/allenwp/godot-resource-remaps [Godot editor export plugin for remapping resources by feature tags]
