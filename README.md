@@ -1213,6 +1213,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/PerformanC/ReZygisk [Transparent implementation of Zygisk]
 - https://github.com/jiqiu2022/Zygisk-MyInjector [Zygisk Injector]
 - https://github.com/Exo1i/MagiskHluda [Run a more undetectable frida server on boot using magisk]
+- https://github.com/thelok1s/florida-zygisk [Magisk/Zygisk module that auto-starts Florida anti-detection frida-server on boot]
 - https://github.com/MhmRdd/NoHello [A Zygisk module to hide root]
 - https://github.com/ys1231/MoveCertificate [A Magisk/KernelSU/APatch module for moving user certificates to system certificates. Supports Android 7-15]
 - https://github.com/ri-char/zygisk-dump-dex [A zygisk module that hooks `libdexfile.so` to dump dex]
@@ -1806,6 +1807,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/AllsafeCyberSecurity/awesome-ghidra [List]
 - https://github.com/CENSUS/ghidra-frida-hook-gen
 - https://github.com/Gekkio/GhidraBoy [Sharp SM83 / Game Boy extension for Ghidra]
+- https://github.com/CUB3D/ghidra-hexagon-sleigh [Ghidra SLEIGH extension for Qualcomm Hexagon QDSP6 decompilation and analysis]
 - https://github.com/fmagin/ghidra-openai [ChatGPT]
 - https://github.com/securityjoes/ThreatResearch [ChatGPT]
 - https://github.com/evyatar9/GptHidra [ChatGPT]
@@ -2487,6 +2489,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ValveSoftware/Proton [Steam]
 - https://github.com/pgarba/ptrace_read_teb [use ptrace to read the TEB of a process on Linux]
 - https://github.com/redecorate/Holodori-Kernel-Bypass [Userspace emulation of Hololive Dreams usrdrv017964 kernel anti-cheat for Wine/Proton]
+- https://github.com/dazi2011/crossover-patcher [Experimental CrossOver patcher to improve compatibility with Windows games protected by anti-cheat]
 
 > Anti Screenshot
 - https://github.com/KANKOSHEV/NoScreen [Hide Window]
@@ -4174,6 +4177,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Analysis Framework
 - https://github.com/pandora-analysis/pandora
+- https://github.com/cocomelonc/peekaboo [Modular malware-behavior emulator for safe evasion testing, telemetry generation, and detection engineering]
 
 > Detection:Hook
 - https://github.com/hasherezade/pe-sieve
