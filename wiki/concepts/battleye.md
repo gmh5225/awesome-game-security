@@ -13,7 +13,8 @@ sources:
   - wiki/sources/descriptions/tr1xxx__battleye-region-walking.md
   - wiki/sources/descriptions/steffalon__battleye-rust.md
   - wiki/sources/descriptions/rushzzz-max__r6-external.md
-updated: 2026-07-23
+  - wiki/sources/descriptions/mexploitui__FakeEye.md
+updated: 2026-07-30
 confidence: medium
 ---
 
@@ -43,6 +44,8 @@ Server-side RCON is covered by [[battleye-rust]]: Rust packet encode/checksum + 
 
 Title-specific R6 external samples such as [[r6-external]] (C/C++; driver development; External tag) illustrate out-of-process / driver-backed research against BattlEye-protected Siege clients. (source: wiki/sources/descriptions/rushzzz-max__r6-external.md)
 
+Service/install/launch emulation is studied via [[fakeeye]]: SCM-managed `BEService`, external config, and BE-style game process creation without the real AC stack. (source: wiki/sources/descriptions/mexploitui__FakeEye.md)
+
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[battleye-region-walking]] · [[battleye-rust]] · [[arma3beclient]] · [[r6-external]] · [[r6-internal-v3]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[battleye-region-walking]] · [[battleye-rust]] · [[arma3beclient]] · [[r6-external]] · [[r6-internal-v3]] · [[fakeeye]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
