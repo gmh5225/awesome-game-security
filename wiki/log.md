@@ -1783,3 +1783,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:michaelmsonne/SignToolGUI`: entity [[signtoolgui]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-07-30** — ingest `description:mibho/x64dbgTraceReader`: entity [[x64dbg-trace-reader]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].
+
+- **2026-07-30** — ingest `description:mhyousefi/ZombiesVsPlants`: entity [[zombies-vs-plants]]; cited on [[overviews/game-engine]].
