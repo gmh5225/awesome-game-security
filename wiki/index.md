@@ -524,6 +524,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Nemesis](entities/nemesis.md) — kernel-space process dump (cheat / windows kernel explorer)
 - [netImgui](entities/netimgui.md) — Dear ImGui remote access (input + draw-command forward; engine/plugin UI)
 - [Netview](entities/netview.md) — AD domain host enumeration (`-d` current/specified domain; AC/IS forensics)
+- [Nightshade](entities/nightshade.md) — Rust data-oriented game engine (custom ECS; wgpu PBR; native/web/VR; Game Engine / source)
 - [Non-Newtonian New York](entities/non-newtonian-new-york.md) — Spider-Man Remastered non-Newtonian fluid/physics mod (urban destruction; [Mod])
 - [NO_ACCESS_Protection](entities/no-access-protection.md) — PAGE_NOACCESS + VEH / single-step anti-tamper (vs external scanners)
 - [NoMercy](entities/no-mercy.md) — MIT OSS AC "gold standard" reference (mq1n fork; Open Source Anti Cheat System)
