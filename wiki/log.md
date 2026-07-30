@@ -1761,3 +1761,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:microsoft/WSL`: entity [[wsl]]; cited on [[overviews/windows-kernel]]; cross-links from [[wsl2-linux-kernel]] and [[windows-subsystem-linux]].
 
 - **2026-07-30** — ingest `description:microsoft/SDCM`: entity [[sdcm]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-07-30** — ingest `description:microsoft/DirectXMath`: entity [[directxmath]]; cited on [[world-to-screen]] and [[overviews/graphics-api]].

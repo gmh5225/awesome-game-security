@@ -220,6 +220,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DioProcess](entities/dioprocess-private.md) — Windows internals research (Rust/Dioxus + KM + UEFI; DSE/KPP)
 - [DirectXHook](entities/directxhook.md) — DX11/12 Present hook + in-game overlay framework (C++; dinput8 DLL)
 - [DirectX11Hook](entities/directx11hook.md) — DX11 Present + DeviceContext hook + ImGui overlay base (C++; DirectX Hook)
+- [DirectXMath](entities/directxmath.md) — Microsoft SIMD inline C++ vectors/matrices/quaternions + collision (SSE–AVX2/NEON; Mathematics)
 - [DirtyPipe-Android](entities/dirtypipe-android.md) — Pixel 6 Dirty Pipe (CVE-2022-0847) permanent Magisk v24.3 root
 - [DirtyPipeRoot](entities/dirtypiperoot.md) — Pixel 6 Dirty Pipe (CVE-2022-0847) one-click temporary root
 - [disable-threat-tracing](entities/disable-threat-tracing.md) — C ETW Testing / threat-tracing disable (AC stress-testing)

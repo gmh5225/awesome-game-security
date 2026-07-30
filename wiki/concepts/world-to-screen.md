@@ -4,7 +4,8 @@ kind: concept
 topics: [game-hacking, graphics-api]
 sources:
   - wiki/sources/skills/game-hacking.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/microsoft__DirectXMath.md
+updated: 2026-07-30
 confidence: high
 ---
 
@@ -23,8 +24,8 @@ Matrix layout and row/column convention vary by engine and hook point—verify a
 
 ## Engine helpers
 
-Cross-engine constexpr libraries such as [[omath]] ship W2S, projectile prediction, and engine-specific camera helpers (Source, Unity, Unreal, Frostbite, etc.). Educational internals with explicit W2S: [[simple-ac-internal-cheat]].
+Cross-engine constexpr libraries such as [[omath]] ship W2S, projectile prediction, and engine-specific camera helpers (Source, Unity, Unreal, Frostbite, etc.). Microsoft's [[directxmath]] supplies SIMD matrix/vector inlines and frustum helpers for DirectX-facing Windows/Xbox code paths. Educational internals with explicit W2S: [[simple-ac-internal-cheat]].
 
 ## Related
 
-[[present-hook]] · [[unreal-object-model]] · [[source-netvars]] · [[omath]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
+[[present-hook]] · [[unreal-object-model]] · [[source-netvars]] · [[omath]] · [[directxmath]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
