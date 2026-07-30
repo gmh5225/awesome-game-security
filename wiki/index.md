@@ -851,6 +851,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [xorPacker](entities/xorpacker.md) — C# PE XOR cipher packer (all PE; Anti Cheat → Binary Packer)
 - [xqemu](entities/xqemu.md) — original Xbox via QEMU (software full-machine; Cheat QEMU/KVM lane)
 - [XrefsExt](entities/xrefsext.md) — IDA Pro extended-xrefs plugin (cheat / IDA Plugins)
+- [YaraVM](entities/yaravm.md) — IDA processor/loader for compiled YARA (`.yar.bin` bytecode/regex disasm; `libyara.til`; cheat / IDA Plugins)
 - [yarascan-ida](entities/yarascan-ida.md) — IDA Yara file scan plugin (Python; cheat / IDA Plugins)
 - [yaui](entities/yaui.md) — Rust Android inject / emulation research (cheat / injection:android)
 - [zelda3](entities/zelda3.md) — Zelda 3 reimplementation (playable start-to-end; Game Develop / source)
