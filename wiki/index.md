@@ -660,6 +660,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [RPGMakerDecrypter](entities/rpgmakerdecrypter.md) — RPG Maker XP/VX/VX Ace encrypted-archive extractor (CLI; RE tools)
 - [RE-Architect](entities/re-architect.md) — automated RE platform (binary analysis + ML; cheat / RE tools)
 - [RETools](entities/retools.md) — curated RE/security tool catalog (disasm/debug/decompiler; toolkit guide)
+- [retoolkit](entities/retoolkit.md) — Windows Inno Setup bundle (80+ RE tools: debug/decompile/PE/hex/network/YARA)
 - [reverse-engineering](entities/reverse-engineering.md) — curated RE awesome list (networking / editors; Cheat guide lane)
 - [revert-mapper](entities/revert-mapper.md) — post-execution cleanup for manually mapped kernel drivers
 - [Return-address-spoofer](entities/return-address-spoofer.md) — return-address / stack spoof illustration (C/C++; Cheat Spoof Stack)
