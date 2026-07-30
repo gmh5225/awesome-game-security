@@ -3963,6 +3963,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Anti-Cheat Programming
 - https://github.com/m417z/thread-call-stack-scanner [Safely manage the unloading of DLLs that have been hooked into a process. Context]
+- https://github.com/euuuuuuan/gatewarden-public [Godot 4 tower defense prototype with published in-game placement-abuse rejection codes and deterministic 30 Hz sim]
 
 > Compile Time
 - https://github.com/ManulMap/malstring [Using c++23 compile-time magic to produce obfuscated PIC strings and arrays]
