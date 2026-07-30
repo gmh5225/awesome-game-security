@@ -1835,3 +1835,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:mastercodeon314/KsDumper-11`: entity [[ksdumper-11]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
 - **2026-07-30** — ingest `description:martinjanas/Sensum`: entity [[sensum]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
+- **2026-07-30** — ingest `description:marlkiller/d3dhook_imgui`: entity [[d3dhook-imgui]]; cited on [[overviews/graphics-api]] and [[present-hook]].
