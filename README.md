@@ -2090,6 +2090,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Silverr12/DMA-CFW-Guide [Guide to building custom/modified DMA attack firmware based on pcileech-fpga]
 - https://github.com/16SalomonArs/Pcileech-DMA-Firmware-Guide [Windows-first guide to building custom PCILeech FPGA DMA firmware (donor analysis, BAR/TLP, Vivado)]
 - https://github.com/Rakeshmonkee/DMA [Guide]
+- https://github.com/acageduser/DMA-Attack-Firmware-Customization [Guide to disguising LambdaConcept PCIe Screamer Squirrel DMA firmware as a Realtek RTL8111 NIC to evade anti-cheat PCIe enumeration]
 - https://github.com/PacktPublishing/Learn-FPGA-Programming [Guide]
 - https://github.com/enjoy-digital/litepcie [Small footprint and configurable PCIe core]
 - https://github.com/cakehonolulu/pciem [A Linux framework for synthetic PCIe device emulation entirely in userspace]
