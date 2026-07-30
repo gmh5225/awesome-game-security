@@ -1774,4 +1774,6 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-30** — ingest `description:michal-z/zig-gamedev`: entity [[zig-gamedev]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
+- **2026-07-30** — ingest `description:yottaawesome/intro-to-dx12-2nd-edition-revisited`: entity [[intro-to-dx12-2nd-edition-revisited]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
+
 - **2026-07-30** — ingest `readme:categories`: bumped DirectX ~37 (was ~35) on [[overviews/overview]] and [[overviews/graphics-api]]; Game Testing high-PC-uptime note on [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
