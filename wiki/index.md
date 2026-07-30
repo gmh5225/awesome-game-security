@@ -697,6 +697,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sdk](entities/sdk.md) — Source-engine RE SDK headers (netvars / interfaces; likely CS:GO; C++)
 - [SE-tools](entities/se-tools.md) — Switch homebrew memory/cheat toolkit (Atmosphere dmnt:cht; scanner / pointer / viewer)
 - [SentinelAC](entities/sentinelac.md) — OSS Windows AC skeleton (SDK + UM service + ObRegisterCallbacks; overlay / stack-walk)
+- [Sensum](entities/sensum.md) — internal CS:GO cheat (actively developed; cheat / game:csgo)
 - [shredder-rs](entities/shredder-rs.md) — x86_64 polymorphic instruction shredding (Rust)
 - [Shtreeba](entities/shtreeba.md) — Windows manual-map DLL injector (MMap library; UI process picker; Injector)
 - [sig-database](entities/sig-database.md) — IDA FLIRT sigs for Linux libs (OpenSSL/Ubuntu amd64·i386; RE / library ID)
