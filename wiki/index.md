@@ -378,6 +378,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-vtable-tools](entities/ida-vtable-tools.md) — IDA 9.X vtable ops: `.hpp` skeleton / rename / `this` type / slot index (Python; IDA Plugins)
 - [idac](entities/idac.md) — Trail of Bits IDA Pro CLI/client (Unix socket → GUI/idalib; JSON; agents; not MCP)
 - [ida-mcp-server-plugin](entities/ida-mcp-server-plugin.md) — IDA Pro MCP server plugin (disasm/decompile/xrefs/types for LLM clients)
+- [ida-pro-loadmap](entities/ida-pro-loadmap.md) — IDA plugin: import linker .MAP symbols (VC/Borland/Dede/GCC/IDA; section:offset → names; cheat / IDA Plugins)
 - [ida-pro-mcp](entities/ida-pro-mcp.md) — IDA Pro MCP: full IDAPython API for agents (rename/types/xrefs/decompile/structs; plugin + test harness)
 - [iida-mcp](entities/iida-mcp.md) — faster IDA Pro MCP (77 tools; multi-instance; optional KM mem via iida-mcp-ioctl)
 - [idarem](entities/idarem.md) — IDA Pro remote browser UI (Flask REST/SSE + React; live IDB sync)
