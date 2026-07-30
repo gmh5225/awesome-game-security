@@ -366,6 +366,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-plugins](entities/ida-plugins.md) — IDA register cross-references (vs Oregami value-use; cheat / IDA Plugins)
 - [IDAPlugins](entities/idaplugins.md) — curated IDA Pro plugin pack (deobf / bin-diff / crypto; cheat / IDA Plugins)
 - [IDARustDemangler](entities/ida-rust-demangler.md) — IDA Rust demangler & normalizer (`rs-dml`; cheat / IDA Plugins)
+- [ida-search](entities/ida-search.md) — IDA Pro 9.x plugin: 010 Editor–style type-aware binary search (`ida-plugin.json`; cheat / IDA Plugins)
 - [ida-vtable-tools](entities/ida-vtable-tools.md) — IDA 9.X vtable ops: `.hpp` skeleton / rename / `this` type / slot index (Python; IDA Plugins)
 - [idac](entities/idac.md) — Trail of Bits IDA Pro CLI/client (Unix socket → GUI/idalib; JSON; agents; not MCP)
 - [ida-mcp-server-plugin](entities/ida-mcp-server-plugin.md) — IDA Pro MCP server plugin (disasm/decompile/xrefs/types for LLM clients)

@@ -236,6 +236,7 @@ sources:
   - wiki/sources/descriptions/unsafeblackcat__MapleStoryEx.md
   - wiki/sources/descriptions/mrzhqiang__ms079.md
   - wiki/sources/descriptions/milankovo__ida_enums_helper.md
+  - wiki/sources/descriptions/milankovo__ida-search.md
   - wiki/sources/descriptions/mimilewis__MapleStory143.md
   - wiki/sources/descriptions/rathena__rathena.md
   - wiki/sources/descriptions/un4ckn0wl3z__MemMCP.md
@@ -551,6 +552,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Fast IDA signature scanner & creator via [[ida-fusion]] (unique sigs vs duplicated binary / anti-RE parts) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/senator715__IDA-Fusion.md)
 - Big5 byte decode in IDA via [[big5-decode-ida]] (Python; Traditional Chinese string view) sits in the Cheat IDA Plugins / encoding lane. (source: wiki/sources/descriptions/sean2077__big5-decode-ida.md)
 - Hex-Rays enum management via [[ida-enums-helper]] (hotkey **N** rename member / **A** add to enum / **Shift-A** append to last enum; `tinfo_t` ordinal chooser) sits in the Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/milankovo__ida_enums_helper.md)
+- Type-aware binary search via [[ida-search]] (IDA Pro 9.x; 010 Editor–style typed search; `ida-plugin.json` loads `plugin.py` on startup) sits in the Cheat IDA Plugins / search lane. (source: wiki/sources/descriptions/milankovo__ida-search.md)
 - Magisk-style root on Android VR (Quest 3/3S) via [[cheese]] (Adreno CVE-2025-21479; temporary root, no boot rewrite) sits in the Cheat Magisk lane. (source: wiki/sources/descriptions/zhuowei__cheese.md)
 - No-root Virtual Space injectors such as [[android-virtual-inject]] (inject through Virtual Space without root; not for AC-protected games) sit in the Cheat / injection:android lane. (source: wiki/sources/descriptions/reveny__Android-Virtual-Inject.md)
 - Ptrace-based Android injectors such as [[android-ptrace-injector]] (C/C++; attach-and-inject) sit in the same Cheat / injection:android lane. (source: wiki/sources/descriptions/reveny__Android-Ptrace-Injector.md)
