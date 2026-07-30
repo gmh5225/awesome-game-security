@@ -642,7 +642,9 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/jpvanoosten/LearningDirectX12 [DX12]
 - https://github.com/PAMinerva/LearnDirectX [DX12]
 - https://github.com/MKXJun/DirectX11-With-Windows-SDK [DX11 zh]
+- https://github.com/yottaawesome/intro-to-dx11-revisited [Modernized C++ revisited source for Frank Luna's Introduction to 3D Game Programming with DirectX 11]
 - https://github.com/d3dcoder/d3d12book [DX12]
+- https://github.com/yottaawesome/intro-to-dx12-2nd-edition-revisited [Modernized C++ revisited source for Frank Luna's Introduction to 3D Game Programming with DirectX 12 (2nd ed.)]
 - https://github.com/pkurth/D3D12Renderer [DX12]
 
 > Hook
