@@ -1855,3 +1855,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:mandiant/dncil`: entity [[dncil]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]].
 
 - **2026-07-31** — ingest `description:mandiant/ShimCacheParser`: entity [[shimcacheparser]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
+
+- **2026-07-31** — ingest `description:mandiant/GoReSym`: entity [[goresym]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
