@@ -257,6 +257,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dex2jar](entities/dex2jar.md) — DEX↔JAR toolset (d2j-baksmali / APK sign / DEX manip; mobile RE)
 - [dncil](entities/dncil.md) — Python CIL disassembly for .NET PE (Mandiant; metadata + operands; Unity Mono / YARA pipelines)
 - [dotNIET](entities/dotniet.md) — IDA plugin: .NET NativeAOT type/method symbol recovery (Import .NET Symbol)
+- [dotrix](entities/dotrix.md) — open-source Rust 3D engine (dot + matrix; Game Engine / source)
 - [DotX64Dbg](entities/dotx64dbg.md) — .NET 6 / C# x64dbg plugin framework (live edit; custom commands)
 - [DoubleCallBack](entities/double-callback.md) — DWM in kernel (C/C++; cheat render/draw)
 - [dpatch](entities/dpatch.md) — syscall dispatcher patching PoC (table copy + dispatcher jump)

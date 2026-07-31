@@ -1911,3 +1911,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:ls361664056/GameAI-paper-list`: entity [[gameai-paper-list]]; cited on [[overviews/game-hacking]] and [[overviews/overview]].
 
 - **2026-07-31** — ingest `description:lowleveldesign/comon`: entity [[comon]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
+- **2026-07-31** — ingest `description:lowenware/dotrix`: entity [[dotrix]]; cited on [[overviews/game-engine]].
