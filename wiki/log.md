@@ -1865,3 +1865,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:mahaloz/DAILA`: entity [[daila]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-31** — ingest `description:magnussen7/Embuche`: entity [[embuche]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-31** — ingest `description:magicsword-io/LOLDrivers`: entity [[loldrivers]]; cited on [[byovd]] and [[overviews/windows-kernel]].
