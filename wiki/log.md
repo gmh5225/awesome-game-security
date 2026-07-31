@@ -1933,3 +1933,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:localcc/PalworldModdingKit`: entity [[palworld-modding-kit]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-31** — ingest `description:llxiaoyuan/oxorany`: entity [[oxorany]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-31** — ingest `readme:categories`: bumped Anti Cheat ~627 (was ~626); Cheat ~2618 / Game Engine ~154 / Game Develop ~182 stable; refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
