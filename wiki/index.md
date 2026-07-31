@@ -620,6 +620,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Packer](entities/packer.md) — C/C++ PE X86 compress+encrypt packer (stub restore; import/relocation/TLS; Anti Cheat → Binary Packer `[X86]`)
 - [Paksmith](entities/paksmith.md) — Rust UE pak/UAsset explorer (FModel rewrite; pak v3–v11; Game Assets)
 - [PalWorldAntiCheat](entities/palworld-anti-cheat.md) — Palworld UE5 AC research (C#; shader/render/audio; Anti Cheat)
+- [PalworldModdingKit](entities/palworld-modding-kit.md) — Palworld UE5 modding kit (cheat / game:palworld [UE5])
 - [palworld-rcon](entities/palworld-rcon.md) — Palworld dedicated server RCON client (Source RCON; Server on Windows)
 - [PalworldSaved](entities/palworldsaved.md) — Palworld UE5 save/editor tooling (cheat / game:palworld [Save])
 - [palera1n](entities/palera1n.md) — iOS 15+ checkm8 jailbreak (A8–A11; rootful/rootless; Sileo bootstrap)
