@@ -133,6 +133,7 @@ sources:
   - wiki/sources/descriptions/wchunlin1006__LocusMimic.md
   - wiki/sources/descriptions/mekos2772__ios-location-spoofer.md
   - wiki/sources/descriptions/maoabc__nmmp.md
+  - wiki/sources/descriptions/lzghzr__APatch_kpm.md
 updated: 2026-07-31
 confidence: high
 ---
@@ -152,7 +153,9 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 |----------|-------|---------|-----|---------------|
 | [[magisk]] | User/init | Medium | Yes | Mature (DenyList / Shamiko root-hide) |
 | [[kernelsu]] | Kernel | High | Yes | Growing (Magisk-module API compat) |
-| APatch | Kernel (KernelPatch boot patch) | High | Yes | Growing (stock GKI without custom kernel source) |
+| [[apatch-kpm]] | Kernel (KernelPatch boot patch) | High | Yes | Growing (stock GKI without custom kernel source) |
+
+APatch **KPM** (KernelPatch Module) collections such as [[apatch-kpm]] (C/C++; kernel modding/debug extensions for the APatch module lane) extend root at kernel scope — same KPM class as ACE title RE (`acepeek` in [[honor-of-kings-re-research]]). (source: wiki/sources/descriptions/lzghzr__APatch_kpm.md)
 
 Kernel-level roots avoid a filesystem `su` binary and can hide from mount-namespace / package-manager probes that target classic Magisk artifacts—detectors such as [[magiskdetector]], [[detection]], and [[keyattestation]] still combine FS, process, property, attestation, and behavioral checks. (source: wiki/sources/skills/mobile-security.md)
 
