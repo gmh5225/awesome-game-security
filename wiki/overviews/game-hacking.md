@@ -273,6 +273,7 @@ sources:
   - wiki/sources/descriptions/mentebinaria__retoolkit.md
   - wiki/sources/descriptions/mandiant__flare-vm.md
   - wiki/sources/descriptions/mandiant__GoReSym.md
+  - wiki/sources/descriptions/mahmoudimus__ida-sigmaker.md
   - wiki/sources/descriptions/mahmoudimus__ida-taskr.md
   - wiki/sources/descriptions/stevemk14ebr__PolyHook_2_0.md
   - wiki/sources/descriptions/stevemk14ebr__PolyHook.md
@@ -577,6 +578,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Function outline / call-hierarchy trees via [[ida-func-outline]] (callers/callees + depth; iOS ARM64 decomp readability) sit in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/richor1042__IDAFuncOutline.md)
 - In-IDA Yara rule file scanning via [[yarascan-ida]] (Python; cheat / IDA Plugins) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/senko37__yarascan-ida.md)
 - Fast IDA signature scanner & creator via [[ida-fusion]] (unique sigs vs duplicated binary / anti-RE parts) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/senator715__IDA-Fusion.md)
+- Zero-dependency IDA Pro 9+ signature maker & searcher via [[ida-sigmaker]] (Python; optional Cython/SIMD AVX2/NEON/SSE2; shortest unique sigs; wildcard operands; XREF fallback; batch text/CSV/JSON search; cheat / IDA Plugins) sits in the same signature-scan lane. (source: wiki/sources/descriptions/mahmoudimus__ida-sigmaker.md)
 - Big5 byte decode in IDA via [[big5-decode-ida]] (Python; Traditional Chinese string view) sits in the Cheat IDA Plugins / encoding lane. (source: wiki/sources/descriptions/sean2077__big5-decode-ida.md)
 - Hex-Rays enum management via [[ida-enums-helper]] (hotkey **N** rename member / **A** add to enum / **Shift-A** append to last enum; `tinfo_t` ordinal chooser) sits in the Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/milankovo__ida_enums_helper.md)
 - Type-aware binary search via [[ida-search]] (IDA Pro 9.x; 010 Editor–style typed search; `ida-plugin.json` loads `plugin.py` on startup) sits in the Cheat IDA Plugins / search lane. (source: wiki/sources/descriptions/milankovo__ida-search.md)
