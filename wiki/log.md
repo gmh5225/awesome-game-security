@@ -1841,3 +1841,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-30** — ingest `description:marin-m/vmlinux-to-elf`: entity [[vmlinux-to-elf]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-31** — ingest `description:marcusbotacin/BranchMonitoringProject`: entity [[branch-monitoring-project]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
+
+- **2026-07-31** — ingest `description:marblexu/PythonPlantsVsZombies`: entity [[python-plants-vs-zombies]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
