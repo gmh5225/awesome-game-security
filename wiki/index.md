@@ -614,6 +614,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Oxidizer](entities/oxidizer.md) — Rust-accelerated angr / Rust decompiler (stripped-binary pseudocode; enum/match/? recovery)
 - [Oxylus](entities/oxylus.md) — data-driven C++ engine (Vulkan/vuk/Slang; Flecs ECS; Lua; ImGui editor; Game Engine)
 - [oxware](entities/oxware.md) — free CS1.6 cheat (C++; alpha; cheat / game:cs1.6)
+- [Packer](entities/packer.md) — C/C++ PE X86 compress+encrypt packer (stub restore; import/relocation/TLS; Anti Cheat → Binary Packer `[X86]`)
 - [Paksmith](entities/paksmith.md) — Rust UE pak/UAsset explorer (FModel rewrite; pak v3–v11; Game Assets)
 - [PalWorldAntiCheat](entities/palworld-anti-cheat.md) — Palworld UE5 AC research (C#; shader/render/audio; Anti Cheat)
 - [palworld-rcon](entities/palworld-rcon.md) — Palworld dedicated server RCON client (Source RCON; Server on Windows)
