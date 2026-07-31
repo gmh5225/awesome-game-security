@@ -394,6 +394,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-mcp-server-plugin](entities/ida-mcp-server-plugin.md) — IDA Pro MCP server plugin (disasm/decompile/xrefs/types for LLM clients)
 - [ida-pro-loadmap](entities/ida-pro-loadmap.md) — IDA plugin: import linker .MAP symbols (VC/Borland/Dede/GCC/IDA; section:offset → names; cheat / IDA Plugins)
 - [ida-pro-mcp](entities/ida-pro-mcp.md) — IDA Pro MCP: full IDAPython API for agents (rename/types/xrefs/decompile/structs; plugin + test harness)
+- [ida-plugin-pcodegpt](entities/ida-plugin-pcodegpt.md) — ChatGPT IDA PCode assistant (Chinese UI; cheat / IDA Plugins)
 - [iida-mcp](entities/iida-mcp.md) — faster IDA Pro MCP (77 tools; multi-instance; optional KM mem via iida-mcp-ioctl)
 - [idarem](entities/idarem.md) — IDA Pro remote browser UI (Flask REST/SSE + React; live IDB sync)
 - [IdaRef](entities/idaref.md) — IDA plugin: full x86-64/ARM/MIPS/Xtensa insn docs at cursor (SQLite; cheat / IDA Plugins)

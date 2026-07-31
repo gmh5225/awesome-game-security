@@ -330,6 +330,7 @@ sources:
   - wiki/sources/descriptions/mandiant__GoReSym.md
   - wiki/sources/descriptions/magnussen7__Embuche.md
   - wiki/sources/descriptions/mahaloz__DAILA.md
+  - wiki/sources/descriptions/lzyddf__IDA_Plugin_PCodeGPT.md
   - wiki/sources/descriptions/mahmoudimus__ida-sigmaker.md
   - wiki/sources/descriptions/mahmoudimus__ida-taskr.md
   - wiki/sources/descriptions/mandiant__flare-vm.md
@@ -386,7 +387,7 @@ Full DBI frameworks — [[frida]], DynamoRIO, Pin, TinyInst, QBDI — support AP
 
 ## AI-assisted RE (MCP & summarization)
 
-Model Context Protocol servers expose RE tools to LLM agents: [[ida-pro-mcp]] / [[iida-mcp]] / [[ida-mcp-server-plugin]] (IDA), [[ghidra-headless-mcp]] (Ghidra), Binary Ninja MCP peers, radare2 MCP, x64dbg MCP; live process memory via [[cheatengine-mcp-bridge]] (CE Lua worker + Python FastMCP over named pipes; scan/read/pointers/RTTI/HWBP/DBVM; sub-2ms) and standalone [[memmcp]] (Python CE-like MCP). Workflow: natural-language queries → rename, annotate, navigate, decompile. Whole-program summarization pipelines such as [[gpt-wpre]] (Python; `ghidra_bridge` decomp + call graphs → bottom-up GPT function summaries with callee-context compression) work around context-window limits for readable program analysis — pair with [[research-rigor]] when acting on agent or model output. (source: wiki/sources/descriptions/moyix__gpt-wpre.md) Decompiler ChatGPT assistant via [[daila]] (cheat / IDA Plugins / `[ChatGPT]` lane) offers another LLM-in-decompiler path for game-security RE. (source: wiki/sources/descriptions/mahaloz__DAILA.md) (source: wiki/sources/descriptions/miscusi-peek__cheatengine-mcp-bridge.md)
+Model Context Protocol servers expose RE tools to LLM agents: [[ida-pro-mcp]] / [[iida-mcp]] / [[ida-mcp-server-plugin]] (IDA), [[ghidra-headless-mcp]] (Ghidra), Binary Ninja MCP peers, radare2 MCP, x64dbg MCP; live process memory via [[cheatengine-mcp-bridge]] (CE Lua worker + Python FastMCP over named pipes; scan/read/pointers/RTTI/HWBP/DBVM; sub-2ms) and standalone [[memmcp]] (Python CE-like MCP). Workflow: natural-language queries → rename, annotate, navigate, decompile. Whole-program summarization pipelines such as [[gpt-wpre]] (Python; `ghidra_bridge` decomp + call graphs → bottom-up GPT function summaries with callee-context compression) work around context-window limits for readable program analysis — pair with [[research-rigor]] when acting on agent or model output. (source: wiki/sources/descriptions/moyix__gpt-wpre.md) Decompiler ChatGPT assistant via [[daila]] (cheat / IDA Plugins / `[ChatGPT]` lane) offers another LLM-in-decompiler path for game-security RE. (source: wiki/sources/descriptions/mahaloz__DAILA.md) ChatGPT PCode assistant via [[ida-plugin-pcodegpt]] (Chinese UI only; cheat / IDA Plugins / `[ChatGPT]` lane) adds LLM-assisted Hex-Rays microcode (p-code) workflows. (source: wiki/sources/descriptions/lzyddf__IDA_Plugin_PCodeGPT.md) (source: wiki/sources/descriptions/miscusi-peek__cheatengine-mcp-bridge.md)
 
 ## Binary diffing
 

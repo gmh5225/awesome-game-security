@@ -1881,3 +1881,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:m417z/thread-call-stack-scanner`: entity [[thread-call-stack-scanner]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-07-31** — ingest `description:m417z/Multiline-Ultimate-Assembler`: entity [[multiline-ultimate-assembler]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].
+
+- **2026-07-31** — ingest `description:lzyddf/IDA_Plugin_PCodeGPT`: entity [[ida-plugin-pcodegpt]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
