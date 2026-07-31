@@ -1941,3 +1941,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:llsgllsg/Minecraft_AntiCheatAI`: entity [[minecraft-anticheatai]]; cited on [[overviews/anti-cheat]] and [[ai-aimbot-detection]].
 
 - **2026-07-31** — ingest `description:lkeai2007/yolov5_PUBG`: entity [[yolov5-pubg]]; cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]].
+
+- **2026-07-31** — ingest `description:lj94093/IDAAndroidBreakpoint`: entity [[ida-android-breakpoint]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
