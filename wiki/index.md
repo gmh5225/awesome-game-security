@@ -487,6 +487,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [LoudSunRun](entities/loudsunrun.md) — stack spoofing with synthetic frames (namazso / SilentMoonWalk / VulcanRaven; Cheat Spoof Stack)
 - [LOLDrivers](entities/loldrivers.md) — comprehensive LOLdriver catalog (YAML metadata, YARA, HVCI tracking; magicsword-io)
 - [loldrivers-client](entities/loldrivers-client.md) — Go/PowerShell LOLdrivers scan client (cheat / vulnerable driver)
+- [love](entities/love.md) — LOVE2D 2D Lua game framework (OpenGL/Metal; Box2D; `.love` archives; Game Engine / source)
 - [Lumina-Cheat](entities/lumina-cheat.md) — internal CS:GO; mutation for changing signature (cheat / game:csgo)
 - [LumixEngine](entities/lumixengine.md) — C/C++ Lumix Engine (shader/render samples; Game Engine / source)
 - [lumixengine_maps](entities/lumixengine-maps.md) — Lumix OSM map downloader (roads/buildings; Plugins:Lumix)

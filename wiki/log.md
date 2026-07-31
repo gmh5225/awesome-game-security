@@ -1915,3 +1915,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:lowenware/dotrix`: entity [[dotrix]]; cited on [[overviews/game-engine]].
 
 - **2026-07-31** — ingest `description:xihedun-2026/Ponytail-Risk-`: entity [[ponytail-risk]]; cited on [[overviews/anti-cheat]] and [[research-rigor]].
+
+- **2026-07-31** — ingest `description:love2d/love`: entity [[love]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
