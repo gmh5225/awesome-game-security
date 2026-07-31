@@ -6,6 +6,7 @@ sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/descriptions/mishka-sit2002__CS2-Hybrid-AntiCheat-Proposal.md
   - wiki/sources/descriptions/llsgllsg__Minecraft_AntiCheatAI.md
+  - wiki/sources/descriptions/lkeai2007__yolov5_PUBG.md
 updated: 2026-07-31
 confidence: medium
 ---
@@ -46,6 +47,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[pine]] — neural-network aim/trigger research (CS:GO / Fortnite / Overwatch)
 - [[human-mouse-movement]] — offensive human-like movement (informs baseline design)
 - [[maplestory-worlds-automation]] — title-specific YOLO automation
+- [[yolov5-pubg]] — PUBG YOLOv5 object-detection / modding (Python; offensive CV pipeline)
 - [[minecraft-anticheatai]] — Minecraft Paper DeepGuard; ONNX 1D-CNN over server-side behavior sequences (scaffold-bridging focus; BehaviorRecorder + PyTorch training pipeline)
 
 ## Related
