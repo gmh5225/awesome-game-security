@@ -1921,3 +1921,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:loqix/Fortnite`: entity [[fortnite]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-31** — ingest `description:longqun/Packer`: entity [[packer]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-07-31** — ingest `description:longpoxin/hideroot`: entity [[hideroot]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].

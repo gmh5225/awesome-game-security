@@ -355,6 +355,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hdd_serial_spoofer](entities/hdd-serial-spoofer.md) — HDD serial spoof (C/C++; cheat / HWID; namazso)
 - [heck_csgo_external](entities/heck-csgo-external.md) — external CS:GO; SDK generation / memory analysis (C++; cheat / game:csgo)
 - [hide-file](entities/hide-file.md) — C kernel file-hide driver (cheat / hide; Detection:Hide-adjacent)
+- [hideroot](entities/hideroot.md) — Android root-hide sample (C/C++; Cheat / Magisk)
 - [HideDriver](entities/hide-driver.md) — hide driver via Flink/Blink unlink (cheat / hide; AC enum evasion)
 - [HiddenModuleDetector](entities/hidden-module-detector.md) — hidden module/DLL detector for Windows apps (C/C++; Detection:Hide; mq1n)
 - [DLLThreadInjectionDetector](entities/dll-thread-injection-detector.md) — kernel-level DLL thread injection detector (C/C++; Detection:Injection; mq1n)

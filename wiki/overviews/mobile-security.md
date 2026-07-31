@@ -64,6 +64,7 @@ sources:
   - wiki/sources/descriptions/tomasz-lisowski__swsim.md
 
   - wiki/sources/descriptions/the-dise__EasyPixel.md
+  - wiki/sources/descriptions/longpoxin__hideroot.md
   - wiki/sources/descriptions/thelok1s__florida-zygisk.md
   - wiki/sources/descriptions/termux__termux-app.md
   - wiki/sources/descriptions/pgp__XFiles.md
@@ -157,7 +158,7 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 
 APatch **KPM** (KernelPatch Module) collections such as [[apatch-kpm]] (C/C++; kernel modding/debug extensions for the APatch module lane) extend root at kernel scope — same KPM class as ACE title RE (`acepeek` in [[honor-of-kings-re-research]]). (source: wiki/sources/descriptions/lzghzr__APatch_kpm.md)
 
-Kernel-level roots avoid a filesystem `su` binary and can hide from mount-namespace / package-manager probes that target classic Magisk artifacts—detectors such as [[magiskdetector]], [[detection]], and [[keyattestation]] still combine FS, process, property, attestation, and behavioral checks. (source: wiki/sources/skills/mobile-security.md)
+Kernel-level roots avoid a filesystem `su` binary and can hide from mount-namespace / package-manager probes that target classic Magisk artifacts—detectors such as [[magiskdetector]], [[detection]], and [[keyattestation]] still combine FS, process, property, attestation, and behavioral checks. (source: wiki/sources/skills/mobile-security.md) Offensive root-hide samples such as [[hideroot]] (C/C++; Cheat / Magisk) study the same hide surface from the attacker side. (source: wiki/sources/descriptions/longpoxin__hideroot.md)
 
 ## APK & native analysis
 
