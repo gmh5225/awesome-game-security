@@ -319,7 +319,8 @@ sources:
   - wiki/sources/descriptions/microsoft__pdb-rs.md
   - wiki/sources/descriptions/matteyeux__IDArling.md
   - wiki/sources/descriptions/mastercodeon314__KsDumper-11.md
-updated: 2026-07-30
+  - wiki/sources/descriptions/marcusbotacin__BranchMonitoringProject.md
+updated: 2026-07-31
 confidence: high
 ---
 
@@ -348,6 +349,8 @@ Full DBI frameworks — [[frida]], DynamoRIO, Pin, TinyInst, QBDI — support AP
 **Trap-and-emulate control-flow tracing (CFT):** patch branch sites with fault-generating sentinels (e.g. HLT/SALC, avoiding INT3 integrity scans), catch exceptions, emulate the original branch, log context, restore, and continue. Strategies range from bounded bulk patching (simple, integrity-detectable) through branch chasing and CFG-guided patching (better coverage/safety tradeoff). PAGE_GUARD + trap-flag single-steping avoids direct `.text` patches but remains timing- and guard-state detectable. Illustrative corpus: [[cpp-veh-dbi]], [[w1tn3ss]].
 
 **User-mode hypervisor-assisted tracing:** Windows Hypervisor Platform (WHP) hosts guest snippets with per-page R/W/X traps, CPUID interception, and syscall emulation — no kernel driver, composable with disassemblers/emulators. WHP trap libraries such as [[vmtrace]] (host-backed guest memory, page traps, VM-exit single-step tracing; asmjit) sit beside full x64 PE emulators like [[winvisor]] and Hyper-V introspection such as [[hyper-rev]]; benchmark latency and nested-VT constraints on the target build. (source: wiki/sources/descriptions/momo5502__vmtrace.md)
+
+**Hardware-assisted branch tracing (LBR/BTS):** Intel Last Branch Record and Branch Trace Store capture branch-level control flow from CPU branch-recording registers via kernel-mode register access — no software instrumentation patches. Research frameworks such as [[branch-monitoring-project]] (C kernel driver + usermode collection/analysis; PMI lane) complement trap-and-emulate CFT and Intel-PT hypervisor fuzzing ([[qemu-nyx]]). (source: wiki/sources/descriptions/marcusbotacin__BranchMonitoringProject.md)
 
 ## Obfuscation recovery
 
