@@ -1923,3 +1923,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:longqun/Packer`: entity [[packer]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-31** — ingest `description:longpoxin/hideroot`: entity [[hideroot]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-31** — ingest `description:long123king/dk`: entity [[dk]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].

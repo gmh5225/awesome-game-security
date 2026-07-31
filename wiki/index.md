@@ -237,6 +237,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DirtyPipe-Android](entities/dirtypipe-android.md) — Pixel 6 Dirty Pipe (CVE-2022-0847) permanent Magisk v24.3 root
 - [DirtyPipeRoot](entities/dirtypiperoot.md) — Pixel 6 Dirty Pipe (CVE-2022-0847) one-click temporary root
 - [disable-threat-tracing](entities/disable-threat-tracing.md) — C ETW Testing / threat-tracing disable (AC stress-testing)
+- [dk](entities/dk.md) — WinDbg extension; refactored tokenext; token/heap pointer SVG overlays (WinDbg Plugins)
 - [DisableParallelLoader](entities/disable-parallel-loader.md) — x64dbg plugin: disable Win10+ parallel DLL loader (`LdrpMapAndSnapWork`; phnt; sequential load order)
 - [DisableNvidiaScreenshot](entities/disablenvidiascreenshot.md) — DWM anti-screenshot (C++; NVIDIA / capture lane; Cheat Anti Screenshot)
 
