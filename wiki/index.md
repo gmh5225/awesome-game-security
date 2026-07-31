@@ -248,6 +248,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DetectTpmSpoofing](entities/detect-tpm-spoofing.md) — KMDF: TPM 2.0 EK spoof detect (IOCTL vs TPM.sys cache)
 - [detection](entities/detection.md) — Android root/Xposed/Frida/VPN/dev-options multi-check collection (Java; Detection:Android root)
 - [dex2jar](entities/dex2jar.md) — DEX↔JAR toolset (d2j-baksmali / APK sign / DEX manip; mobile RE)
+- [dncil](entities/dncil.md) — Python CIL disassembly for .NET PE (Mandiant; metadata + operands; Unity Mono / YARA pipelines)
 - [dotNIET](entities/dotniet.md) — IDA plugin: .NET NativeAOT type/method symbol recovery (Import .NET Symbol)
 - [DotX64Dbg](entities/dotx64dbg.md) — .NET 6 / C# x64dbg plugin framework (live edit; custom commands)
 - [DoubleCallBack](entities/double-callback.md) — DWM in kernel (C/C++; cheat render/draw)

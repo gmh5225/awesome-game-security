@@ -136,6 +136,7 @@ sources:
   - wiki/sources/descriptions/realTristan__Reborn.md
   - wiki/sources/descriptions/reahly__mono-external-lib.md
   - wiki/sources/descriptions/mono__mono.md
+  - wiki/sources/descriptions/mandiant__dncil.md
   - wiki/sources/descriptions/rdeioris__LuaMachine.md
   - wiki/sources/descriptions/nxrighthere__UnrealCLR.md
   - wiki/sources/descriptions/rbfx__rbfx.md
@@ -200,7 +201,7 @@ Engine internals, plugins, detectors, and SDK workflows that underpin modding, r
 
 **Unreal** — identify UE version from binary signatures → inject Dumper-7 (or live-script via UE4SS) → C++ headers with UObject hierarchy; key structures: `UObject`, `FName`, `UClass`, `UFunction`, `UProperty`. See [[unreal-object-model]]; explorers include [[ts-ue4dumper]], [[unrealengine4-swissknife]], [[patternsleuth]]. (source: wiki/sources/skills/game-engine.md)
 
-**Unity** — locate `global-metadata.dat` + `GameAssembly.dll` (or `libil2cpp.so`) → IL2CPPDumper → `dump.cs`, `il2cpp.h`, `script.json` → import into IDA/Ghidra; key structures: `Il2CppClass`, `MethodInfo`, `FieldInfo`, `Il2CppType`. Mono builds use `Assembly-CSharp.dll` + dnSpy/ILSpy on the embedded [[mono]] runtime instead. See [[il2cpp]]. (source: wiki/sources/skills/game-engine.md) (source: wiki/sources/descriptions/mono__mono.md)
+**Unity** — locate `global-metadata.dat` + `GameAssembly.dll` (or `libil2cpp.so`) → IL2CPPDumper → `dump.cs`, `il2cpp.h`, `script.json` → import into IDA/Ghidra; key structures: `Il2CppClass`, `MethodInfo`, `FieldInfo`, `Il2CppType`. Mono builds use `Assembly-CSharp.dll` + dnSpy/ILSpy on the embedded [[mono]] runtime instead; programmatic CIL disassembly via [[dncil]] (Python; metadata token resolution; automated .NET analysis) complements GUI decompilers. See [[il2cpp]]. (source: wiki/sources/skills/game-engine.md) (source: wiki/sources/descriptions/mono__mono.md) (source: wiki/sources/descriptions/mandiant__dncil.md)
 
 **Source** — walk ClientClass linked list from `CHLClient` → RecvTable → RecvProp → offset map (`CCSPlayer → m_iHealth → 0x100`); Source 2 via [[source2gen]] / [[source2sdk]]. See [[source-netvars]]. (source: wiki/sources/skills/game-engine.md)
 
