@@ -1872,6 +1872,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-31** — ingest `readme:categories`: bumped Cheat ~2615 (was ~2614) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
+- **2026-07-31** — ingest `readme:categories`: bumped Cheat ~2616 (was ~2615) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-07-31** — ingest `description:mutinylaboratories/ghidra_svr_bridge`: entity [[ghidra-svr-bridge]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-31** — ingest `description:mactec0/Kernelmode-manual-mapping-through-IAT`: entity [[kernelmode-manual-mapping-through-iat]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]].
