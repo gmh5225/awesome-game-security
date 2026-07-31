@@ -1905,3 +1905,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `readme:categories`: bumped Cheat ~2618 / Anti Cheat ~626 (was ~2616/~625); embedded-hacking course lane on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-07-31** — ingest `description:mytechnotalent/Embedded-Hacking`: entity [[embedded-hacking]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[hacking-rust]] and [[go-hacking]].
+
+- **2026-07-31** — ingest `description:ls361664056/GameAI-paper-list`: entity [[gameai-paper-list]]; cited on [[overviews/game-hacking]] and [[overviews/overview]].

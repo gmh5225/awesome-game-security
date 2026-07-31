@@ -210,6 +210,7 @@ sources:
   - wiki/sources/descriptions/shalzuth__PalWorldAntiCheat.md
   - wiki/sources/descriptions/lstrsrt__csgo_internal_base.md
   - wiki/sources/descriptions/lstaroth__AntiXorstr.md
+  - wiki/sources/descriptions/ls361664056__GameAI-paper-list.md
   - wiki/sources/descriptions/luciouskami__palworld_rcon.md
   - wiki/sources/descriptions/weedeej__ValorantCC.md
   - wiki/sources/descriptions/weak1337__SkipHook.md
@@ -437,7 +438,7 @@ Pattern scan → pointer chains → structure reconstruction is the usual extern
 
 ## AI visual pipeline
 
-Screen-capture → object detection → coordinate transform → mouse delta → execution. Single-machine setups run OBS (Game Capture injects a hook DLL; Window Capture uses DXGI duplication) plus a YOLO model on the same PC; dual-machine setups send frames over NDI/capture card and inject from a second box via [[hardware-input-injection]]. Training: collect screenshots → label (YOLO txt) → Ultralytics train → export ONNX/TensorRT; measure latency on the exact capture path, model, and hardware. Defensive counterpart: [[ai-aimbot-detection]]. Corpus: [[pine]], [[maplestory-worlds-automation]], [[human-mouse-movement]], [[waldo]]. (source: wiki/sources/skills/game-hacking.md)
+Screen-capture → object detection → coordinate transform → mouse delta → execution. Single-machine setups run OBS (Game Capture injects a hook DLL; Window Capture uses DXGI duplication) plus a YOLO model on the same PC; dual-machine setups send frames over NDI/capture card and inject from a second box via [[hardware-input-injection]]. Training: collect screenshots → label (YOLO txt) → Ultralytics train → export ONNX/TensorRT; measure latency on the exact capture path, model, and hardware. Defensive counterpart: [[ai-aimbot-detection]]. Corpus: [[pine]], [[maplestory-worlds-automation]], [[human-mouse-movement]], [[waldo]]; curated game-AI paper bibliography [[gameai-paper-list]] (zh; modding/tooling research background). (source: wiki/sources/skills/game-hacking.md) (source: wiki/sources/descriptions/ls361664056__GameAI-paper-list.md)
 
 ## Input simulation
 
