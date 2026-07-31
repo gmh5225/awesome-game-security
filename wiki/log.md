@@ -1877,3 +1877,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:mactec0/Kernelmode-manual-mapping-through-IAT`: entity [[kernelmode-manual-mapping-through-iat]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]].
 
 - **2026-07-31** — ingest `description:mabbcoll13/xposed-module-kit`: entity [[xposed-module-kit]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-07-31** — ingest `description:m417z/x64dbg-xfg-marker`: entity [[x64dbg-xfg-marker]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].

@@ -181,6 +181,7 @@ sources:
   - wiki/sources/descriptions/morsisko__xFindOut.md
   - wiki/sources/descriptions/mgeeky__ThreadStackSpoofer.md
   - wiki/sources/descriptions/mibho__x64dbgTraceReader.md
+  - wiki/sources/descriptions/m417z__x64dbg-xfg-marker.md
   - wiki/sources/descriptions/notpidgey__ManyTypes.md
   - wiki/sources/descriptions/x-spy__CVE-2026-43499-popsicle.md
   - wiki/sources/descriptions/wtsxDev__reverse-engineering.md
@@ -549,6 +550,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Memory write/access tracing via [[xfindout]] (find what writes to or accesses an address; Cheat Engine–style watch inside [[x64dbg]]) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/morsisko__xFindOut.md)
 - Offline `.trace64` execution-trace analysis via [[x64dbg-trace-reader]] (Capstone disasm; register/memory state reconstruction; regex filter over x64dbg trace exports) sits in the Cheat Debugging / Trace Reader lane. (source: wiki/sources/descriptions/mibho__x64dbgTraceReader.md)
 - Windows type parsing via [[manytypes]] (x64dbg typeparsing plugin; structure/type discovery for memory RE) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/notpidgey__ManyTypes.md)
+- XFG call-signature marking via [[x64dbg-xfg-marker]] (x64dbg plugin; 8-byte signatures as data before target functions; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/m417z__x64dbg-xfg-marker.md)
 - Static-library function identification via [[idenlib]] (IDA plugin; VC++/STL signature DB on stripped PEs) and [[idenlibx]] (x64dbg port; signature scan of loaded modules → live name apply) sits in the Cheat Library Function Identification / IDA & x64dbg Plugins lane. (source: wiki/sources/descriptions/secrary__idenLib.md) (source: wiki/sources/descriptions/secrary__idenLibX.md) Linux FLIRT packs such as [[sig-database]] (OpenSSL/system libs across Ubuntu releases; amd64/i386) extend the same library-ID lane for Linux binaries. (source: wiki/sources/descriptions/push0ebp__sig-database.md)
 
 - IDA Plugins such as [[xrefsext]] (extended xrefs), [[ida-plugins]] (register cross-references; vs Oregami value-use filtering), [[ida-jm-xorstr-decrypt-plugin]] (JM Xorstr decrypt on some x64 binaries), and [[pikabot-deobfuscator]] (Pikabot RC4/AES string decrypt from Hex-Rays) support cheat-side static RE workflows. (source: wiki/sources/descriptions/zengfr__XrefsExt.md) (source: wiki/sources/descriptions/repnz__ida-plugins.md) (source: wiki/sources/descriptions/yubie-re__ida-jm-xorstr-decrypt-plugin.md) (source: wiki/sources/descriptions/threatlabz__pikabot-deobfuscator.md)
