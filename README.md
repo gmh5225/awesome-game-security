@@ -1991,6 +1991,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Injection:IOS
 - https://github.com/opa334/opainject [iOS runtime dylib injection tool]
+- https://github.com/notahacker8/RobloxCheats [macOS Roblox dylib injector with internal/external ESP and offset finder]
 
 > Injection:PlayStation
 - https://github.com/buzzer-re/NineS [A PlayStation 5 ELF injector]
