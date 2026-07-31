@@ -8,7 +8,8 @@ sources:
   - wiki/sources/descriptions/xehn1337__valorant-dumper.md
   - wiki/sources/descriptions/percpopper__VALORANT-FNamePool.md
   - wiki/sources/descriptions/weedeej__ValorantCC.md
-updated: 2026-07-26
+  - wiki/sources/descriptions/luavmload__vanguard-update-notifier.md
+updated: 2026-07-31
 confidence: medium
 ---
 
@@ -26,6 +27,8 @@ Per-title Valorant UE dump tooling such as [[valorant-dumper]] (GObjects/GNames,
 
 Client-side Valorant crosshair config samples such as [[valorantcc]] sit in the adjacent cheat / game:valorant utility lane (Riot-owned assets/endpoints; not an AC product). (source: wiki/sources/descriptions/weedeej__ValorantCC.md)
 
+Update-monitoring tooling such as [[vanguard-update-notifier]] (Discord bot; polls Riot clientconfig, SHA-256 hashes Vanguard setup archive contents, alerts on version/hash drift) helps researchers track installer changes without manual diffing. (source: wiki/sources/descriptions/luavmload__vanguard-update-notifier.md)
+
 ## Related
 
-[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorantcc]] · [[overviews/anti-cheat]]
+[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[overviews/anti-cheat]]

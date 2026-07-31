@@ -834,6 +834,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vac3-dumper](entities/vac3-dumper.md) — VAC3 multi-module dumper (timed loads; explore anticheat:vac)
 - [VAC-ModuleDumper](entities/vac-module-dumper.md) — VAC module dump for offline RE (C/C++; explore anticheat:vac)
 - [VACKeyRetrieval](entities/vackeyretrieval.md) — VAC module ICE encryption key retrieval (C++; explore anticheat:vac)
+- [vanguard-update-notifier](entities/vanguard-update-notifier.md) — Discord bot: poll Riot clientconfig, hash Vanguard setup, alert on AC updates
 - [valorant-dumper](entities/valorant-dumper.md) — Valorant UE offset/SDK dumper (GObjects/GNames; Vanguard research)
 - [VALORANT-FNamePool](entities/valorant-fnamepool.md) — iterate/decrypt Valorant FNamePool->Entries (C/C++; cheat / game:valorant)
 - [ValorantCC](entities/valorantcc.md) — Valorant crosshair setting (cheat / game:valorant)
