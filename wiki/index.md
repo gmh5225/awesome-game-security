@@ -452,6 +452,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kernel-csgo](entities/kernel-csgo.md) — simple kernel CS:GO cheat (hook KM↔UM comm; C++; cheat / game:csgo)
 - [kernel_hack](entities/kernel-hack.md) — Android/Linux LKM game-memory R/W (process mgmt / verification; Kconfig)
 - [kernel-mouse](entities/kernel-mouse.md) — MouClass kernel mouse driver (Win10/11; triggerbot/aimbot input research)
+- [Kernelmode Manual Mapping through IAT](entities/kernelmode-manual-mapping-through-iat.md) — kernel-mode IAT manual-map injector (process handle or KM driver; IAT Manual Map)
 - [KernelResearchKit](entities/kernel-research-kit.md) — Win11 25H2 boot-time DSE / SeCiCallbacks toolkit (manual map / IRP hijack / BYOVD)
 - [Kotek](entities/kotek.md) — modular C++20 engine core (ktkI* backends; GLES/Vulkan/DX/BGFX; Game Engine)
 - [KPDB](entities/kpdb.md) — parse PDB in driver (C++; Some Tricks / Windows Ring0)
