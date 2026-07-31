@@ -616,6 +616,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [owned_alignment](entities/owned-alignment.md) — abusing Alignment (C++; kernel driver/hook; cheat / HWID)
 - [Oxidizer](entities/oxidizer.md) — Rust-accelerated angr / Rust decompiler (stripped-binary pseudocode; enum/match/? recovery)
 - [Oxylus](entities/oxylus.md) — data-driven C++ engine (Vulkan/vuk/Slang; Flecs ECS; Lua; ImGui editor; Game Engine)
+- [oxorany](entities/oxorany.md) — C/C++ compile-time any-constant encryption (platform-agnostic; AC Compile Time)
 - [oxware](entities/oxware.md) — free CS1.6 cheat (C++; alpha; cheat / game:cs1.6)
 - [Packer](entities/packer.md) — C/C++ PE X86 compress+encrypt packer (stub restore; import/relocation/TLS; Anti Cheat → Binary Packer `[X86]`)
 - [Paksmith](entities/paksmith.md) — Rust UE pak/UAsset explorer (FModel rewrite; pak v3–v11; Game Assets)
