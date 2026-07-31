@@ -1845,3 +1845,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:marblexu/PythonPlantsVsZombies`: entity [[python-plants-vs-zombies]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
 
 - **2026-07-31** — ingest `description:marakew/syser`: entity [[syser]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-31** — ingest `description:maoabc/nmmp`: entity [[nmmp]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
