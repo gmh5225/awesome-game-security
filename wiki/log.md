@@ -1853,3 +1853,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:notahacker8/RobloxCheats`: entity [[roblox-cheats]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-07-31** — ingest `description:mandiant/dncil`: entity [[dncil]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]].
+
+- **2026-07-31** — ingest `description:mandiant/ShimCacheParser`: entity [[shimcacheparser]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
