@@ -1,0 +1,4380 @@
+Project Path: arc_fvrmatteo_DrillAndJoin_255nq6g4
+
+Source Tree:
+
+```txt
+arc_fvrmatteo_DrillAndJoin_255nq6g4
+├── CMakeLists.txt
+├── README.md
+├── examples
+│   ├── demo.cpp
+│   ├── opaque64_demo.cpp
+│   └── trace_examples.cpp
+├── include
+│   └── drilljoin
+│       ├── anf.hpp
+│       ├── bitwuzla_cli.hpp
+│       ├── bv_expr.hpp
+│       ├── concolic.hpp
+│       ├── opaque_examples.hpp
+│       └── synthesizer.hpp
+├── tests
+│   ├── basic_tests.cpp
+│   └── opaque64_tests.cpp
+└── tools
+    └── dj_synth.cpp
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.16)
+project(drill_join_cpp VERSION 0.2.0 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+add_library(drilljoin INTERFACE)
+target_include_directories(drilljoin INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+
+target_compile_features(drilljoin INTERFACE cxx_std_17)
+
+add_executable(dj_demo examples/demo.cpp)
+target_link_libraries(dj_demo PRIVATE drilljoin)
+
+add_executable(dj_opaque64_demo examples/opaque64_demo.cpp)
+target_link_libraries(dj_opaque64_demo PRIVATE drilljoin)
+
+add_executable(dj_trace_examples examples/trace_examples.cpp)
+target_link_libraries(dj_trace_examples PRIVATE drilljoin)
+
+add_executable(dj_synth tools/dj_synth.cpp)
+target_link_libraries(dj_synth PRIVATE drilljoin)
+
+add_executable(dj_tests tests/basic_tests.cpp)
+target_link_libraries(dj_tests PRIVATE drilljoin)
+
+add_executable(dj_opaque64_tests tests/opaque64_tests.cpp)
+target_link_libraries(dj_opaque64_tests PRIVATE drilljoin)
+
+enable_testing()
+add_test(NAME basic_tests COMMAND dj_tests)
+add_test(NAME opaque64_tests COMMAND dj_opaque64_tests)
+
+```
+
+`README.md`:
+
+```md
+# Drill & Join C++ implementation with 64-bit opaque-predicate support
+
+This repository contains a C++17 implementation of the finite-domain [Drill & Join synthesis algorithm](https://hackmd.io/w46WRQxsSjiJtQWacDpvMQ) and an SMT-backed wrapper for simplifying 64-bit opaque predicates, including MBA-style expressions and point-function cases.
+
+The base Drill & Join synthesizer is exact when it can exhaustively search the current reduced input space. For 64-bit opaque predicates, the repository uses Bitwuzla to make the workflow sound without scanning `2^64` inputs:
+
+1. **SMT-guided bit reduction.** `SmtBitDependencyAnalyzer` creates two symbolic copies of the predicate inputs and asks Bitwuzla whether changing exactly one bit can change the predicate. If the query is UNSAT, the bit is removed. SAT means relevant. UNKNOWN or solver errors are conservatively kept as relevant.
+2. **Reduced Drill & Join synthesis.** If the remaining relevant support is at most `max_drill_join_bits`, `ConcolicSimplifier` synthesizes an ANF over those bits.
+3. **SMT proof of equivalence.** The candidate is accepted only if Bitwuzla proves `(distinct original replacement)` UNSAT under the optional path constraints.
+4. **Point-function fallback.** If the relevant support is still too large for Drill & Join, the simplifier asks Bitwuzla for a model and then proves uniqueness over the projected relevant bits. This handles predicates like `x == C` and Biondi et al.'s problematic point-function example.
+
+The code is header-only apart from the demo/test executables. Bitwuzla is invoked through its SMT-LIB command-line interface; no Bitwuzla C/C++ headers are required.
+
+## Contents
+
+```text
+include/drilljoin/
+  anf.hpp              Canonical Algebraic Normal Form over GF(2)
+  synthesizer.hpp      Drill & Join synthesizer
+  bv_expr.hpp          Small 64-bit bit-vector / Boolean expression AST
+  bitwuzla_cli.hpp     Bitwuzla SMT-LIB CLI wrapper
+  concolic.hpp         SMT-guided reduction + D&J + proof + point fallback
+  opaque_examples.hpp  64-bit opaque-predicate/MBA/point-function examples
+examples/
+  demo.cpp             Original small Drill & Join demo
+  opaque64_demo.cpp    SMT-backed 64-bit simplification demo
+  trace_examples.cpp   Single-bit and multi-bit examples with D&J traces
+tests/
+  basic_tests.cpp      Exhaustive small-domain synthesis tests
+  opaque64_tests.cpp   64-bit opaque predicate tests
+tools/
+  dj_synth.cpp         Truth-table synthesis CLI
+```
+
+## Build
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+ctest --test-dir build --output-on-failure
+```
+
+The normal build does not require Bitwuzla. The 64-bit opaque-predicate test executable always runs concrete sanity checks. SMT-backed soundness tests are skipped when `bitwuzla` is not on `PATH`.
+
+To enable the SMT-backed tests and demo, install Bitwuzla and either put it on `PATH` or set:
+
+```bash
+export BITWUZLA=/path/to/bitwuzla
+ctest --test-dir build --output-on-failure
+./build/dj_opaque64_demo
+```
+
+## Demo commands
+
+Original paper-sized Drill & Join example:
+
+```bash
+./build/dj_demo
+```
+
+Truth-table synthesis:
+
+```bash
+./build/dj_synth --bits 2 --truth 1011 --join-arity 1
+```
+
+Truth-table synthesis with an SMT-LIB2 dump of the recovered Boolean function:
+
+```bash
+./build/dj_synth --bits 2 --truth 0001 --join-arity 2 --dump-smt2 and2.smt2
+```
+
+Representative Drill & Join examples split into two sections:
+
+- single-bit predicates, for opaque predicates and branch conditions;
+- multi-bit 8-bit and 16-bit expressions, where each output bit is synthesized
+  and printed as `out[0]` through `out[7]` or `out[15]`.
+
+The multi-bit examples cover the full input domain for Drill & Join: the
+memory-address example has two 8-bit inputs (`base` and `index`) and the other
+word examples use one 8-bit or 16-bit input. Large 16-bit truth tables are
+sampled in stdout, but synthesis and verification still visit every row. The
+word examples include MBA-obfuscated addressing, byte swaps, rotations, shifted
+bit slicing, and a constant-encoded lookup:
+
+```bash
+./build/dj_trace_examples
+```
+
+The same executable can dump each original example as a Bitwuzla-compatible
+SMT-LIB2 benchmark. Each dump defines `circuit` and then a `benchmark`
+function. Single-input examples use the `c02.smt2` shape, where `circuit`
+takes `arg` and `benchmark` takes `arg0`. The MBA-obfuscated memory-address
+benchmark intentionally exposes two 8-bit variables, `base` and `index`, and
+returns the 8-bit modular address expression `[base + index * 8 + 8]`:
+
+```bash
+./build/dj_trace_examples --list-smt2
+./build/dj_trace_examples --dump-smt2 single 2 > single_opaque.smt2
+./build/dj_trace_examples --dump-smt2 multi 1 > memory_address8.smt2
+```
+
+`single` examples return `(_ BitVec 1)`. `multi` examples return either
+`(_ BitVec 8)` or `(_ BitVec 16)`.
+
+Representative "D&J beats plain Bitwuzla" comparison:
+
+```bash
+./build/dj_trace_examples --dj-vs-bitwuzla
+```
+
+This mode builds a contextual 64-bit opaque predicate with two 64-bit program
+variables, `arg0` and `arg1`. The path constraints fix every bit except
+`arg0[13]`, `arg0[41]`, and `arg1[7]`, so Drill & Join soundly covers all
+eight context models and recovers:
+
+```text
+1 ^ arg0[13] ^ arg0[41] ^ arg1[7]
+```
+
+The same run prints the context truth table, the Drill & Join trace, D&J timing,
+SMT2 generation timing, and the recovered expression. It also writes two
+Bitwuzla-compatible UNSAT equivalence checks with the same `benchmark` shape:
+
+```text
+dj_vs_bitwuzla_original.smt2   original inflated MBA benchmark
+dj_vs_bitwuzla_recovered.smt2  D&J-recovered benchmark
+```
+
+If Bitwuzla is installed, the executable times both queries automatically. If it
+is not installed, it prints a rerun command. The example uses an internal
+subprocess timeout instead of the external GNU `timeout` command, so it also
+works on macOS. You can tune the syntactic hardness and timeout:
+
+```bash
+./build/dj_trace_examples --dj-vs-bitwuzla 192 10
+```
+
+The first optional argument is the number of MBA inflation rounds; the second is
+the per-query Bitwuzla timeout in seconds. Extra Bitwuzla flags can be supplied
+through `BITWUZLA_ARGS`:
+
+```bash
+BITWUZLA_ARGS="--produce-models --abstraction --abstraction-bv-size=32 --abstraction-inc-bitblast=true --sat-solver=cadical" \
+  ./build/dj_trace_examples --dj-vs-bitwuzla 192 10
+```
+
+There is also a no-path-constraint variant:
+
+```bash
+./build/dj_trace_examples --dj-vs-bitwuzla-global
+```
+
+This emits no path constraints in the SMT2 query. Instead, it models the case
+where a previous dependency pass has globally identified the support projection
+`{arg0[13], arg0[41], arg1[7]}`. Drill & Join synthesizes over that projection,
+and the generated original/recovered SMT2 equivalence checks quantify over all
+64-bit `arg0`/`arg1` assignments. In a real pipeline, the support projection
+must be justified by taint/dependency analysis or a proof; Drill & Join alone
+does not soundly discover that 125 other input bits are irrelevant.
+
+64-bit opaque-predicate simplification with Bitwuzla:
+
+```bash
+BITWUZLA=/path/to/bitwuzla ./build/dj_opaque64_demo
+```
+
+The 64-bit demo covers:
+
+- a plain opaque identity over a 64-bit word;
+- an invariant 64-bit MBA expression that simplifies to `true`;
+- a contextual 64-bit MBA comparison that simplifies to `input == 0x876543210badc0de` while dropping spurious junk bits;
+- the point-function predicate from Biondi et al., simplified through the SMT uniqueness fallback rather than Drill & Join.
+
+## API sketch: concolic simplification
+
+```cpp
+#include "drilljoin/concolic.hpp"
+#include "drilljoin/opaque_examples.hpp"
+
+using namespace drilljoin;
+
+BitwuzlaCliOptions bo;
+bo.binary = "bitwuzla";      // or read from BITWUZLA
+bo.time_limit_ms = 10000;
+BitwuzlaCli solver(bo);
+
+SimplificationOptions opts;
+opts.max_drill_join_bits = 20;
+opts.require_smt_proof = true;
+opts.try_point_fallback = true;
+opts.synthesis_options.join_arity = 3;
+opts.synthesis_options.max_exhaustive_bits = 20;
+
+ConcolicSimplifier simplifier(&solver, opts);
+
+std::vector<Variable> vars = {{0, "input", 64}, {1, "junk", 64}};
+BvExpr input = BvExpr::variable(0, "input");
+BvExpr junk = BvExpr::variable(1, "junk");
+
+constexpr std::uint64_t K = 0x876543210badc0deULL;
+BoolExpr pred = examples::mba_contextual_comparison64(
+    input, junk, bv64(0x123456789abcdef0ULL), K);
+
+SimplificationResult r = simplifier.simplify(pred, vars, {K, 0x42});
+if (r.valid()) {
+    std::cout << r.replacement << "\n";      // input == 0x876543210badc0de
+    std::cout << r.replacement_smt << "\n";  // SMT-LIB equivalent
+}
+```
+
+The optional fourth argument to `simplify` is a vector of path constraints from the current concolic state. The dependency queries and the final equivalence proof are issued under those constraints.
+
+## Soundness notes
+
+The base `Synthesizer` remains an exact finite-domain synthesizer only up to the configured exhaustive bound. For large predicates, soundness comes from Bitwuzla:
+
+- removing a bit requires an UNSAT proof that two inputs differing only on that bit cannot change the predicate;
+- accepting an ANF replacement requires an UNSAT proof of non-equivalence;
+- accepting a point-function replacement requires an UNSAT proof that no second relevant-bit assignment satisfies the same predicate.
+
+If Bitwuzla returns UNKNOWN or is unavailable while `require_smt_proof=true`, the simplifier does not claim a valid simplification.
+
+## Current limitations
+
+This is a compact integration layer rather than a full binary-analysis frontend. You still need to translate your lifted/concolic expression into `BvExpr`/`BoolExpr`, or adapt `bitwuzla_cli.hpp` and `concolic.hpp` to your engine's internal expression format. The expression AST currently supports the operations used by the included MBA and opaque-predicate tests: 64-bit constants and variables, bitwise NOT/AND/OR/XOR, negation, addition, subtraction, multiplication, constant shifts, unsigned comparison, equality, and Boolean connectives.
+
+```
+
+`examples/demo.cpp`:
+
+```cpp
+#include "drilljoin/synthesizer.hpp"
+
+#include <cstdint>
+#include <iostream>
+#include <stdexcept>
+#include <vector>
+
+using drilljoin::ANF;
+using drilljoin::Synthesizer;
+using drilljoin::SynthesisOptions;
+
+static std::uint64_t fibonacci(std::uint64_t n) {
+    std::uint64_t a = 0;
+    std::uint64_t b = 1;
+    if (n == 0) return 0;
+    for (std::uint64_t i = 1; i < n; ++i) {
+        const std::uint64_t next = a + b;
+        a = b;
+        b = next;
+    }
+    return b;
+}
+
+static void verify_bool(unsigned bits, const ANF& anf, const Synthesizer::BooleanOracle& oracle) {
+    const std::uint64_t limit = 1ULL << bits;
+    for (std::uint64_t x = 0; x < limit; ++x) {
+        if (anf.eval(x) != oracle(x)) {
+            throw std::runtime_error("verification failed for synthesized Boolean function");
+        }
+    }
+}
+
+int main() {
+    SynthesisOptions options;
+    options.join_arity = 1;             // mimic the paper's didactic Lisp implementation
+    options.max_exhaustive_bits = 12;
+    options.split_strategy = SynthesisOptions::SplitStrategy::FirstRest;
+
+    Synthesizer dj(options);
+
+    // Paper example: f(x,y) = y OR ((NOT x) AND (NOT y)).
+    // With bit 0 = x and bit 1 = y, the expected ANF is 1 ^ x ^ (x & y).
+    auto paper_function = [](std::uint64_t input) {
+        const bool x = (input & 1ULL) != 0;
+        const bool y = (input & 2ULL) != 0;
+        return y || (!x && !y);
+    };
+
+    ANF expr = dj.synthesize(2, paper_function);
+    verify_bool(2, expr, paper_function);
+
+    std::cout << "Paper example ANF: " << expr << "\n";
+    std::cout << "C++ expression: " << expr.to_cpp("input") << "\n";
+    std::cout << "Stats: " << dj.stats().to_string() << "\n\n";
+
+    // Small multi-output example: synthesize the low 8 bits of Fibonacci(n), n in [0, 15].
+    SynthesisOptions fib_options;
+    fib_options.join_arity = 3;
+    fib_options.max_exhaustive_bits = 10;
+    Synthesizer fib_dj(fib_options);
+    auto fib_low8 = [](std::uint64_t input) { return fibonacci(input & 0xFULL) & 0xFFULL; };
+
+    const auto bits = fib_dj.synthesize_vector(4, 8, fib_low8);
+    for (std::uint64_t n = 0; n < 16; ++n) {
+        std::uint64_t synthesized = 0;
+        for (unsigned bit = 0; bit < bits.size(); ++bit) {
+            if (bits[bit].eval(n)) synthesized |= (1ULL << bit);
+        }
+        if (synthesized != fib_low8(n)) {
+            throw std::runtime_error("Fibonacci vector verification failed");
+        }
+    }
+
+    std::cout << "Fibonacci low-8 ANFs for 4-bit input:\n";
+    for (unsigned bit = 0; bit < bits.size(); ++bit) {
+        std::cout << "  out" << bit << " = " << bits[bit] << "\n";
+    }
+    std::cout << "Stats: " << fib_dj.stats().to_string() << "\n";
+    return 0;
+}
+
+```
+
+`examples/opaque64_demo.cpp`:
+
+```cpp
+#include "drilljoin/concolic.hpp"
+#include "drilljoin/opaque_examples.hpp"
+
+#include <cstdlib>
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace drilljoin;
+
+static std::string solver_path_from_env() {
+    const char* p = std::getenv("BITWUZLA");
+    return p && *p ? std::string(p) : std::string("bitwuzla");
+}
+
+static void print_result(const std::string& name,
+                         const SimplificationResult& r,
+                         const std::vector<Variable>& vars) {
+    std::cout << "=== " << name << " ===\n";
+    std::cout << "status: " << simplification_status_to_string(r.status) << "\n";
+    std::cout << "diagnostic: " << r.diagnostic << "\n";
+    std::cout << "replacement: " << r.replacement << "\n";
+    std::cout << "replacement SMT: " << r.replacement_smt << "\n";
+    std::cout << "dependencies: " << r.dependency.summary(vars) << "\n";
+    std::cout << "D&J stats: " << r.synthesis_stats.to_string() << "\n\n";
+}
+
+int main() {
+    BitwuzlaCliOptions bo;
+    bo.binary = solver_path_from_env();
+    bo.time_limit_ms = 10000;
+    BitwuzlaCli solver(bo);
+    if (!solver.available()) {
+        std::cerr << "Bitwuzla was not found. Install it or set BITWUZLA=/path/to/bitwuzla.\n";
+        return 1;
+    }
+
+    SimplificationOptions opts;
+    opts.max_drill_join_bits = 20;
+    opts.require_smt_proof = true;
+    opts.try_point_fallback = true;
+    opts.synthesis_options.join_arity = 3;
+    opts.synthesis_options.max_exhaustive_bits = 20;
+
+    ConcolicSimplifier simplifier(&solver, opts);
+    const std::uint64_t k = 0x876543210badc0deULL;
+
+    {
+        std::vector<Variable> vars = {{0, "x", 64}};
+        BvExpr x = BvExpr::variable(0, "x");
+        auto pred = examples::plain_opaque_true64(x);
+        print_result("plain 64-bit opaque predicate", simplifier.simplify(pred, vars, {0x1234}), vars);
+    }
+
+    {
+        std::vector<Variable> vars = {{0, "junk", 64}};
+        BvExpr junk = BvExpr::variable(0, "junk");
+        auto pred = examples::mba_invariant_true64(junk, bv64(0x123456789abcdef0ULL), k);
+        print_result("64-bit MBA invariant opaque predicate", simplifier.simplify(pred, vars, {0x42}), vars);
+    }
+
+    {
+        std::vector<Variable> vars = {{0, "input", 64}, {1, "junk", 64}};
+        BvExpr input = BvExpr::variable(0, "input");
+        BvExpr junk = BvExpr::variable(1, "junk");
+        auto pred = examples::mba_contextual_comparison64(input, junk, bv64(0x123456789abcdef0ULL), k);
+        print_result("64-bit MBA contextual opaque predicate", simplifier.simplify(pred, vars, {k, 0x42}), vars);
+    }
+
+    {
+        SimplificationOptions point_opts = opts;
+        point_opts.max_drill_join_bits = 12;
+        ConcolicSimplifier point_simplifier(&solver, point_opts);
+        std::vector<Variable> vars = {{0, "x", 64}};
+        BvExpr x = BvExpr::variable(0, "x");
+        auto pred = examples::biondi_point_predicate64(x);
+        print_result("64-bit point-function opaque predicate", point_simplifier.simplify(pred, vars, {0}), vars);
+    }
+
+    return 0;
+}
+
+```
+
+`examples/trace_examples.cpp`:
+
+```cpp
+#include "drilljoin/synthesizer.hpp"
+
+#include <algorithm>
+#include <cerrno>
+#include <chrono>
+#include <cstdlib>
+#include <cstdint>
+#include <cstring>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <iterator>
+#include <limits>
+#include <optional>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <thread>
+#include <utility>
+#include <vector>
+
+#if !defined(_WIN32)
+#include <csignal>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#endif
+
+namespace {
+
+using drilljoin::ANF;
+using drilljoin::SynthesisOptions;
+using drilljoin::Synthesizer;
+
+using LocalMask = std::uint64_t;
+using Oracle = std::function<bool(LocalMask)>;
+using WordOracle = std::function<std::uint64_t(LocalMask)>;
+
+struct SmtInput {
+    std::string name;
+    unsigned width;
+};
+
+std::string indent(unsigned depth) {
+    return std::string(static_cast<std::size_t>(depth) * 2, ' ');
+}
+
+bool bit(LocalMask input, unsigned index) {
+    return ((input >> index) & 1ULL) != 0;
+}
+
+std::uint64_t width_mask(unsigned width) {
+    if (width == 0) return 0;
+    if (width >= 64) return std::numeric_limits<std::uint64_t>::max();
+    return (std::uint64_t{1} << width) - 1ULL;
+}
+
+std::uint64_t mba_add_mod(std::uint64_t a, std::uint64_t b, unsigned width) {
+    const std::uint64_t mask = width_mask(width);
+    return ((a ^ b) + ((a & b) << 1)) & mask;
+}
+
+std::uint64_t rotl_mod(std::uint64_t value, unsigned shift, unsigned width) {
+    const std::uint64_t mask = width_mask(width);
+    value &= mask;
+    shift %= width;
+    if (shift == 0) return value;
+    return ((value << shift) | (value >> (width - shift))) & mask;
+}
+
+std::uint64_t bswap16(std::uint64_t value) {
+    value &= 0xffffULL;
+    return ((value & 0x00ffULL) << 8) | ((value & 0xff00ULL) >> 8);
+}
+
+std::uint64_t rotl64(std::uint64_t value, unsigned shift) {
+    shift &= 63U;
+    if (shift == 0) return value;
+    return (value << shift) | (value >> (64U - shift));
+}
+
+std::uint64_t bswap64(std::uint64_t value) {
+    std::uint64_t out = 0;
+    for (unsigned i = 0; i < 8; ++i) {
+        out <<= 8;
+        out |= (value >> (i * 8U)) & 0xffULL;
+    }
+    return out;
+}
+
+std::uint64_t mba_sub_mod(std::uint64_t a, std::uint64_t b, unsigned width) {
+    return mba_add_mod(a, mba_add_mod(~b, 1, width), width);
+}
+
+std::uint64_t set_bit(std::uint64_t value, unsigned index, bool enabled) {
+    const std::uint64_t mask = std::uint64_t{1} << index;
+    return enabled ? (value | mask) : (value & ~mask);
+}
+
+constexpr std::uint64_t kDjVsBitwuzlaXSeed = 0x6d33f6a49c21b7e5ULL;
+constexpr std::uint64_t kDjVsBitwuzlaYSeed = 0xb4f09a2d13c8756eULL;
+constexpr unsigned kDjVsBitwuzlaXBitA = 13;
+constexpr unsigned kDjVsBitwuzlaXBitB = 41;
+constexpr unsigned kDjVsBitwuzlaYBit = 7;
+constexpr unsigned kDjVsBitwuzlaDefaultRounds = 96;
+constexpr unsigned kDjVsBitwuzlaDefaultTimeoutSeconds = 5;
+
+std::pair<std::uint64_t, std::uint64_t> contextual_inputs(LocalMask local) {
+    std::uint64_t x = kDjVsBitwuzlaXSeed;
+    std::uint64_t y = kDjVsBitwuzlaYSeed;
+    x = set_bit(x, kDjVsBitwuzlaXBitA, bit(local, 0));
+    x = set_bit(x, kDjVsBitwuzlaXBitB, bit(local, 1));
+    y = set_bit(y, kDjVsBitwuzlaYBit, bit(local, 2));
+    return {x, y};
+}
+
+std::pair<std::uint64_t, std::uint64_t> global_probe_inputs(LocalMask local,
+                                                            unsigned sample_index) {
+    std::uint64_t x = rotl64(kDjVsBitwuzlaXSeed ^
+                                 (0x9e3779b97f4a7c15ULL * (sample_index + 1ULL)),
+                             (sample_index * 13U) & 63U);
+    std::uint64_t y = rotl64(kDjVsBitwuzlaYSeed +
+                                 (0xbf58476d1ce4e5b9ULL * (sample_index + 3ULL)),
+                             (sample_index * 17U + 5U) & 63U);
+    x = set_bit(x, kDjVsBitwuzlaXBitA, bit(local, 0));
+    x = set_bit(x, kDjVsBitwuzlaXBitB, bit(local, 1));
+    y = set_bit(y, kDjVsBitwuzlaYBit, bit(local, 2));
+    return {x, y};
+}
+
+std::uint64_t dj_vs_bitwuzla_target_word(std::uint64_t x, std::uint64_t y) {
+    const bool target = true ^ bit(x, kDjVsBitwuzlaXBitA) ^
+                        bit(x, kDjVsBitwuzlaXBitB) ^
+                        bit(y, kDjVsBitwuzlaYBit);
+    return target ? 1ULL : 0ULL;
+}
+
+std::uint64_t dj_vs_bitwuzla_noise(std::uint64_t x, std::uint64_t y, unsigned round) {
+    const std::uint64_t k1 =
+        0x9e3779b97f4a7c15ULL * (std::uint64_t{round} + 1ULL) ^ 0xd1b54a32d192ed03ULL;
+    const std::uint64_t k2 =
+        0xbf58476d1ce4e5b9ULL + 0x94d049bb133111ebULL * (std::uint64_t{round} + 3ULL);
+    std::uint64_t n = rotl64((x ^ k1) + bswap64(y ^ k2), (round * 7U) % 63U + 1U);
+    n = mba_add_mod(n ^ (y >> ((round % 31U) + 1U)),
+                    (x << ((round % 23U) + 1U)) ^ k2,
+                    64);
+    n ^= rotl64((x & y) ^ k1, (round * 11U) % 63U + 1U);
+    return n;
+}
+
+std::uint64_t dj_vs_bitwuzla_obfuscated_word(std::uint64_t x,
+                                             std::uint64_t y,
+                                             unsigned rounds) {
+    std::uint64_t acc = dj_vs_bitwuzla_target_word(x, y);
+    for (unsigned round = 0; round < rounds; ++round) {
+        const std::uint64_t n = dj_vs_bitwuzla_noise(x, y, round);
+        acc = mba_sub_mod(mba_add_mod(acc, n, 64), n, 64);
+    }
+    return acc;
+}
+
+bool dj_vs_bitwuzla_oracle(LocalMask local, unsigned rounds) {
+    const auto [x, y] = contextual_inputs(local);
+    return (dj_vs_bitwuzla_obfuscated_word(x, y, rounds) & 1ULL) != 0ULL;
+}
+
+bool dj_vs_bitwuzla_global_oracle(LocalMask local, unsigned rounds) {
+    const auto [x, y] = global_probe_inputs(local, 0);
+    return (dj_vs_bitwuzla_obfuscated_word(x, y, rounds) & 1ULL) != 0ULL;
+}
+
+std::string bv_const(std::uint64_t value, unsigned width = 64) {
+    return "(_ bv" + std::to_string(value) + " " + std::to_string(width) + ")";
+}
+
+std::string smt_bit(unsigned index) {
+    const std::string i = std::to_string(index);
+    return "((_ extract " + i + " " + i + ") arg)";
+}
+
+std::string smt_bit64(unsigned index) {
+    return "((_ zero_extend 63) " + smt_bit(index) + ")";
+}
+
+std::string smt_zero_extend(const std::string& expr, unsigned from_width, unsigned to_width) {
+    if (from_width > to_width) {
+        throw std::runtime_error("cannot zero-extend to a smaller bit-vector width");
+    }
+    if (from_width == to_width) {
+        return expr;
+    }
+    return "((_ zero_extend " + std::to_string(to_width - from_width) + ") " + expr + ")";
+}
+
+std::string smt_op2(const std::string& op, const std::string& a, const std::string& b) {
+    return "(" + op + " " + a + " " + b + ")";
+}
+
+std::string smt_bvand(const std::string& a, const std::string& b) { return smt_op2("bvand", a, b); }
+std::string smt_bvor(const std::string& a, const std::string& b) { return smt_op2("bvor", a, b); }
+std::string smt_bvxor(const std::string& a, const std::string& b) { return smt_op2("bvxor", a, b); }
+std::string smt_bvadd(const std::string& a, const std::string& b) { return smt_op2("bvadd", a, b); }
+std::string smt_bvmul(const std::string& a, const std::string& b) { return smt_op2("bvmul", a, b); }
+std::string smt_bvshl(const std::string& a, unsigned shift, unsigned width) {
+    return smt_op2("bvshl", a, bv_const(shift, width));
+}
+std::string smt_bvlshr(const std::string& a, unsigned shift, unsigned width) {
+    return smt_op2("bvlshr", a, bv_const(shift, width));
+}
+
+std::string smt_fold(const std::string& op,
+                     const std::vector<std::string>& terms,
+                     const std::string& identity) {
+    if (terms.empty()) return identity;
+    std::string out = terms.front();
+    for (std::size_t i = 1; i < terms.size(); ++i) {
+        out = smt_op2(op, out, terms[i]);
+    }
+    return out;
+}
+
+std::string smt_xor_many(const std::vector<std::string>& terms, unsigned width = 1) {
+    return smt_fold("bvxor", terms, bv_const(0, width));
+}
+
+std::string smt_extract_bit(const std::string& expr, unsigned bit_index) {
+    const std::string i = std::to_string(bit_index);
+    return "((_ extract " + i + " " + i + ") " + expr + ")";
+}
+
+std::string smt_rotl(const std::string& expr, unsigned shift, unsigned width) {
+    shift %= width;
+    if (shift == 0) return expr;
+    return "(let ((r " + expr + ")) " +
+           smt_bvor(smt_bvshl("r", shift, width), smt_bvlshr("r", width - shift, width)) + ")";
+}
+
+std::string smt_bswap16(const std::string& expr) {
+    return "(let ((w " + expr + ")) (concat ((_ extract 7 0) w) ((_ extract 15 8) w)))";
+}
+
+std::string smt_mba_add(const std::string& a, const std::string& b, unsigned width) {
+    return smt_bvadd(smt_bvxor(a, b), smt_bvshl(smt_bvand(a, b), 1, width));
+}
+
+std::string smt_bvnot(const std::string& a) {
+    return "(bvnot " + a + ")";
+}
+
+std::string smt_mba_sub(const std::string& a, const std::string& b, unsigned width) {
+    return smt_mba_add(a, smt_mba_add(smt_bvnot(b), bv_const(1, width), width), width);
+}
+
+std::string smt_bswap64(const std::string& expr) {
+    return "(let ((w " + expr + ")) "
+           "(concat ((_ extract 7 0) w) ((_ extract 15 8) w) "
+           "((_ extract 23 16) w) ((_ extract 31 24) w) "
+           "((_ extract 39 32) w) ((_ extract 47 40) w) "
+           "((_ extract 55 48) w) ((_ extract 63 56) w)))";
+}
+
+std::string smt_dj_vs_bitwuzla_target_bit(const std::string& x, const std::string& y) {
+    return smt_xor_many({
+        bv_const(1, 1),
+        smt_extract_bit(x, kDjVsBitwuzlaXBitA),
+        smt_extract_bit(x, kDjVsBitwuzlaXBitB),
+        smt_extract_bit(y, kDjVsBitwuzlaYBit),
+    });
+}
+
+std::string smt_dj_vs_bitwuzla_target_word(const std::string& x, const std::string& y) {
+    return smt_zero_extend(smt_dj_vs_bitwuzla_target_bit(x, y), 1, 64);
+}
+
+std::string smt_dj_vs_bitwuzla_noise(const std::string& x,
+                                     const std::string& y,
+                                     unsigned round) {
+    const std::uint64_t k1 =
+        0x9e3779b97f4a7c15ULL * (std::uint64_t{round} + 1ULL) ^ 0xd1b54a32d192ed03ULL;
+    const std::uint64_t k2 =
+        0xbf58476d1ce4e5b9ULL + 0x94d049bb133111ebULL * (std::uint64_t{round} + 3ULL);
+    std::string n = smt_rotl(smt_bvadd(smt_bvxor(x, bv_const(k1)),
+                                       smt_bswap64(smt_bvxor(y, bv_const(k2)))),
+                             (round * 7U) % 63U + 1U,
+                             64);
+    n = smt_mba_add(smt_bvxor(n, smt_bvlshr(y, (round % 31U) + 1U, 64)),
+                    smt_bvxor(smt_bvshl(x, (round % 23U) + 1U, 64), bv_const(k2)),
+                    64);
+    return smt_bvxor(n, smt_rotl(smt_bvxor(smt_bvand(x, y), bv_const(k1)),
+                                 (round * 11U) % 63U + 1U,
+                                 64));
+}
+
+std::string smt_dj_vs_bitwuzla_obfuscated_word(unsigned rounds) {
+    std::string acc = smt_dj_vs_bitwuzla_target_word("arg0", "arg1");
+    for (unsigned round = 0; round < rounds; ++round) {
+        const std::string n = smt_dj_vs_bitwuzla_noise("arg0", "arg1", round);
+        acc = "(let ((n " + n + ") (a " + acc + ")) " +
+              smt_mba_sub(smt_mba_add("a", "n", 64), "n", 64) + ")";
+    }
+    return acc;
+}
+
+std::string smt_local_var_for_recovered(unsigned local_index) {
+    switch (local_index) {
+        case 0:
+            return smt_extract_bit("arg0", kDjVsBitwuzlaXBitA);
+        case 1:
+            return smt_extract_bit("arg0", kDjVsBitwuzlaXBitB);
+        case 2:
+            return smt_extract_bit("arg1", kDjVsBitwuzlaYBit);
+        default:
+            throw std::runtime_error("unexpected recovered ANF variable");
+    }
+}
+
+std::string anf_to_context_smt(const ANF& anf) {
+    std::vector<std::string> terms;
+    for (ANF::Mask term : anf.terms()) {
+        if (term == 0) {
+            terms.push_back(bv_const(1, 1));
+            continue;
+        }
+
+        std::vector<std::string> factors;
+        for (unsigned i = 0; i < 64; ++i) {
+            if ((term & (ANF::Mask{1} << i)) == 0) continue;
+            factors.push_back(smt_local_var_for_recovered(i));
+        }
+        terms.push_back(smt_fold("bvand", factors, bv_const(1, 1)));
+    }
+    return smt_xor_many(terms);
+}
+
+LocalMask low_mask(unsigned bits) {
+    if (bits == 0) return 0;
+    if (bits >= 64) return std::numeric_limits<LocalMask>::max();
+    return (LocalMask{1} << bits) - 1ULL;
+}
+
+std::string bit_string(LocalMask value, unsigned width) {
+    std::string out;
+    out.reserve(width);
+    for (unsigned i = 0; i < width; ++i) {
+        out.push_back(((value >> i) & 1ULL) ? '1' : '0');
+    }
+    return out;
+}
+
+std::string var_list(const std::vector<unsigned>& vars) {
+    if (vars.empty()) return "{}";
+
+    std::ostringstream out;
+    out << "{";
+    for (std::size_t i = 0; i < vars.size(); ++i) {
+        if (i != 0) out << ", ";
+        out << "x" << vars[i];
+    }
+    out << "}";
+    return out.str();
+}
+
+std::string truth_bits(const Oracle& fn, unsigned arity) {
+    const LocalMask limit = (arity == 0) ? 1ULL : (1ULL << arity);
+    std::string bits;
+    bits.reserve(static_cast<std::size_t>(limit));
+    for (LocalMask x = 0; x < limit; ++x) {
+        bits.push_back(fn(x) ? '1' : '0');
+    }
+    return bits;
+}
+
+LocalMask inflate(LocalMask local, const std::vector<unsigned>& variables) {
+    LocalMask out = 0;
+    for (unsigned i = 0; i < variables.size(); ++i) {
+        if ((local & (LocalMask{1} << i)) != 0) {
+            out |= LocalMask{1} << variables[i];
+        }
+    }
+    return out;
+}
+
+std::optional<LocalMask> findpos(const Oracle& fn,
+                                 unsigned arity,
+                                 unsigned max_exhaustive_bits,
+                                 unsigned depth,
+                                 std::ostream& trace) {
+    if (arity > max_exhaustive_bits) {
+        throw std::runtime_error("trace example would scan too many truth-table rows");
+    }
+
+    const LocalMask limit = (arity == 0) ? 1ULL : (1ULL << arity);
+    for (LocalMask x = 0; x < limit; ++x) {
+        if (fn(x)) {
+            trace << indent(depth) << "findpos -> " << bit_string(x, arity)
+                  << " (row " << x << ")\n";
+            return x;
+        }
+    }
+
+    trace << indent(depth) << "findpos -> none, zero map\n";
+    return std::nullopt;
+}
+
+std::vector<ANF> monomial_basis(const std::vector<unsigned>& variables) {
+    return Synthesizer::monomial_basis(variables);
+}
+
+std::size_t choose_basis_vector(const std::vector<ANF>& basis, LocalMask global_witness) {
+    std::size_t best = std::numeric_limits<std::size_t>::max();
+    for (std::size_t i = 0; i < basis.size(); ++i) {
+        if (!basis[i].eval(global_witness)) continue;
+        if (best == std::numeric_limits<std::size_t>::max()) {
+            best = i;
+            continue;
+        }
+        if (basis[i].term_count() < basis[best].term_count()) {
+            best = i;
+        } else if (basis[i].term_count() == basis[best].term_count() &&
+                   basis[i].degree() < basis[best].degree()) {
+            best = i;
+        }
+    }
+    return best;
+}
+
+class TraceableDrillJoin {
+public:
+    explicit TraceableDrillJoin(SynthesisOptions options) : options_(options) {}
+
+    ANF synthesize(unsigned input_bits, const Oracle& oracle, std::ostream& trace) const {
+        std::vector<unsigned> variables(input_bits);
+        for (unsigned i = 0; i < input_bits; ++i) variables[i] = i;
+        return synthesize_recursive(oracle, variables, 0, trace);
+    }
+
+private:
+    SynthesisOptions options_;
+
+    ANF synthesize_recursive(const Oracle& fn,
+                             const std::vector<unsigned>& variables,
+                             unsigned depth,
+                             std::ostream& trace) const {
+        trace << indent(depth) << "Synthesize " << var_list(variables)
+              << ", table=" << truth_bits(fn, static_cast<unsigned>(variables.size())) << "\n";
+
+        if (variables.size() <= options_.join_arity) {
+            return join(fn, variables, monomial_basis(variables), depth, trace);
+        }
+
+        return drill(fn, variables, depth, trace);
+    }
+
+    ANF drill(const Oracle& fn,
+              const std::vector<unsigned>& variables,
+              unsigned depth,
+              std::ostream& trace) const {
+        trace << indent(depth) << "Drill\n";
+        const auto witness = findpos(fn,
+                                     static_cast<unsigned>(variables.size()),
+                                     options_.max_exhaustive_bits,
+                                     depth + 1,
+                                     trace);
+        if (!witness.has_value()) return ANF::zero();
+
+        const unsigned n = static_cast<unsigned>(variables.size());
+        unsigned left_arity = 0;
+        switch (options_.split_strategy) {
+            case SynthesisOptions::SplitStrategy::Balanced:
+                left_arity = n / 2;
+                break;
+            case SynthesisOptions::SplitStrategy::FirstRest:
+                left_arity = 1;
+                break;
+        }
+        const unsigned right_arity = n - left_arity;
+        const LocalMask left = low_mask(left_arity);
+        const LocalMask x0 = (*witness) & left;
+        const LocalMask y0 = (*witness) >> left_arity;
+
+        std::vector<unsigned> left_vars(variables.begin(), variables.begin() + left_arity);
+        std::vector<unsigned> right_vars(variables.begin() + left_arity, variables.end());
+
+        trace << indent(depth + 1) << "split left=" << var_list(left_vars)
+              << ", right=" << var_list(right_vars) << "\n";
+        trace << indent(depth + 1) << "base point left=" << bit_string(x0, left_arity)
+              << ", right=" << bit_string(y0, right_arity) << "\n";
+
+        Oracle fa = [fn, y0, left_arity](LocalMask x) {
+            return fn(x | (y0 << left_arity));
+        };
+        Oracle fb = [fn, x0, left_arity](LocalMask y) {
+            return fn(x0 | (y << left_arity));
+        };
+        Oracle fc = [fn, fa, fb, left_arity, left](LocalMask xy) {
+            const LocalMask x = xy & left;
+            const LocalMask y = xy >> left_arity;
+            return fn(xy) ^ (fa(x) & fb(y));
+        };
+
+        trace << indent(depth + 1) << "Drill equation: f = (fa & fb) ^ fc\n";
+        trace << indent(depth + 1) << "fa(x) = f(x, y0)\n";
+        const ANF pa = synthesize_recursive(fa, left_vars, depth + 2, trace);
+
+        trace << indent(depth + 1) << "fb(y) = f(x0, y)\n";
+        const ANF pb = synthesize_recursive(fb, right_vars, depth + 2, trace);
+
+        trace << indent(depth + 1) << "fc(x,y) = f(x,y) ^ (fa(x) & fb(y))\n";
+        const ANF pc = synthesize_recursive(fc, variables, depth + 2, trace);
+
+        const ANF result = (pa & pb) ^ pc;
+        trace << indent(depth) << "Drill result: (" << pa << " & " << pb
+              << ") ^ " << pc << " = " << result << "\n";
+        return result;
+    }
+
+    ANF join(const Oracle& fn,
+             const std::vector<unsigned>& variables,
+             std::vector<ANF> basis,
+             unsigned depth,
+             std::ostream& trace) const {
+        trace << indent(depth) << "Join with " << basis.size() << " basis vector(s)\n";
+        const auto witness = findpos(fn,
+                                     static_cast<unsigned>(variables.size()),
+                                     options_.max_exhaustive_bits,
+                                     depth + 1,
+                                     trace);
+        if (!witness.has_value()) return ANF::zero();
+        if (basis.empty()) {
+            throw std::runtime_error("non-zero function cannot be represented by an empty basis");
+        }
+
+        const LocalMask global_witness = inflate(*witness, variables);
+        const std::size_t chosen = choose_basis_vector(basis, global_witness);
+        if (chosen == std::numeric_limits<std::size_t>::max()) {
+            throw std::runtime_error("basis selection failed");
+        }
+
+        const ANF v = basis[chosen];
+        const unsigned witness_width = variables.empty() ? 0 : (variables.back() + 1);
+        trace << indent(depth + 1) << "global witness=" << bit_string(global_witness, witness_width)
+              << ", choose v=" << v << "\n";
+
+        std::vector<ANF> kernel_basis;
+        kernel_basis.reserve(basis.size() - 1);
+        for (std::size_t i = 0; i < basis.size(); ++i) {
+            if (i == chosen) continue;
+            ANF k = basis[i].eval(global_witness) ? (basis[i] ^ v) : basis[i];
+            if (!k.is_zero()) kernel_basis.push_back(std::move(k));
+        }
+        trace << indent(depth + 1) << "reduce to kernel basis of size "
+              << kernel_basis.size() << "\n";
+
+        Oracle residual = [fn, v, variables](LocalMask local_input) {
+            return fn(local_input) ^ v.eval(inflate(local_input, variables));
+        };
+
+        const ANF rest = join(residual, variables, std::move(kernel_basis), depth + 1, trace);
+        const ANF result = v ^ rest;
+        trace << indent(depth) << "Join result: " << v << " ^ " << rest
+              << " = " << result << "\n";
+        return result;
+    }
+};
+
+struct Example {
+    std::string name;
+    std::string why;
+    std::string source_expression;
+    std::string model;
+    unsigned input_bits;
+    Oracle oracle;
+};
+
+struct WordExample {
+    std::string name;
+    std::string why;
+    std::string source_expression;
+    std::string model;
+    unsigned input_bits;
+    unsigned output_bits;
+    std::vector<unsigned> trace_bits;
+    WordOracle oracle;
+};
+
+void print_truth_table(const Example& ex) {
+    for (unsigned i = 0; i < ex.input_bits; ++i) {
+        std::cout << "x" << i << " ";
+    }
+    std::cout << "| f\n";
+    std::cout << std::string(ex.input_bits * 3 + 4, '-') << "\n";
+
+    const LocalMask limit = LocalMask{1} << ex.input_bits;
+    for (LocalMask row = 0; row < limit; ++row) {
+        for (unsigned i = 0; i < ex.input_bits; ++i) {
+            std::cout << (bit(row, i) ? 1 : 0) << "  ";
+        }
+        std::cout << "| " << (ex.oracle(row) ? 1 : 0) << "\n";
+    }
+}
+
+void print_word_truth_table(const WordExample& ex) {
+    for (unsigned i = 0; i < ex.input_bits; ++i) {
+        std::cout << "x" << i << " ";
+    }
+    std::cout << "| output\n";
+    std::cout << std::string(ex.input_bits * 3 + 16, '-') << "\n";
+
+    const LocalMask limit = LocalMask{1} << ex.input_bits;
+    const LocalMask printed_prefix = std::min<LocalMask>(limit, 16);
+    const LocalMask printed_suffix = (limit > 256) ? 16 : 0;
+
+    const int hex_digits = static_cast<int>((ex.output_bits + 3) / 4);
+    auto print_row = [&](LocalMask row) {
+        for (unsigned i = 0; i < ex.input_bits; ++i) {
+            std::cout << (bit(row, i) ? 1 : 0) << "  ";
+        }
+        std::cout << "| 0x" << std::hex << std::setw(hex_digits) << std::setfill('0')
+                  << (ex.oracle(row) & width_mask(ex.output_bits))
+                  << std::dec << std::setfill(' ') << "\n";
+    };
+
+    if (limit <= 256) {
+        for (LocalMask row = 0; row < limit; ++row) {
+            print_row(row);
+        }
+        return;
+    }
+
+    for (LocalMask row = 0; row < printed_prefix; ++row) {
+        print_row(row);
+    }
+    std::cout << "... " << (limit - printed_prefix - printed_suffix)
+              << " row(s) omitted from display; synthesis and verification still use all rows ...\n";
+    for (LocalMask row = limit - printed_suffix; row < limit; ++row) {
+        print_row(row);
+    }
+}
+
+void verify(const Example& ex, const ANF& anf) {
+    const LocalMask limit = LocalMask{1} << ex.input_bits;
+    for (LocalMask row = 0; row < limit; ++row) {
+        if (anf.eval(row) != ex.oracle(row)) {
+            throw std::runtime_error("verification failed for " + ex.name);
+        }
+    }
+}
+
+void verify_word_bit(const WordExample& ex, unsigned output_bit, const ANF& anf) {
+    const LocalMask limit = LocalMask{1} << ex.input_bits;
+    for (LocalMask row = 0; row < limit; ++row) {
+        const bool expected = bit(ex.oracle(row), output_bit);
+        if (anf.eval(row) != expected) {
+            throw std::runtime_error("verification failed for " + ex.name +
+                                     " out[" + std::to_string(output_bit) + "]");
+        }
+    }
+}
+
+ANF synthesize_full_domain_anf(unsigned input_bits,
+                               const Oracle& oracle,
+                               std::ostream* trace = nullptr) {
+    if (input_bits >= 63) {
+        throw std::runtime_error("full-domain example arity is too large for this driver");
+    }
+
+    const LocalMask rows = (input_bits == 0) ? 1ULL : (1ULL << input_bits);
+    std::vector<std::uint8_t> coeff(static_cast<std::size_t>(rows), 0);
+    for (LocalMask row = 0; row < rows; ++row) {
+        coeff[static_cast<std::size_t>(row)] = oracle(row) ? 1 : 0;
+    }
+
+    if (trace) {
+        *trace << "Full-domain Join over the monomial ANF basis\n";
+        *trace << "  variables: " << input_bits << "\n";
+        *trace << "  truth rows visited: " << rows << "\n";
+        *trace << "  transform: in-place Moebius transform over GF(2)\n";
+    }
+
+    for (unsigned bit_index = 0; bit_index < input_bits; ++bit_index) {
+        for (LocalMask mask = 0; mask < rows; ++mask) {
+            if ((mask & (LocalMask{1} << bit_index)) != 0) {
+                coeff[static_cast<std::size_t>(mask)] ^=
+                    coeff[static_cast<std::size_t>(mask ^ (LocalMask{1} << bit_index))];
+            }
+        }
+    }
+
+    ANF result;
+    std::size_t selected_terms = 0;
+    for (LocalMask mask = 0; mask < rows; ++mask) {
+        if (coeff[static_cast<std::size_t>(mask)] == 0) continue;
+        result.xor_inplace(ANF::monomial(mask));
+        ++selected_terms;
+    }
+
+    if (trace) {
+        *trace << "  selected basis monomials: " << selected_terms << "\n";
+        *trace << "  result: " << result << "\n";
+    }
+    return result;
+}
+
+std::vector<Example> make_examples() {
+    return {
+        {
+            "Small Boolean simplification",
+            "XOR cancellation and x*x = x hide the simple conjunction x0 & x1.",
+            "(x0 & x1) ^ (x2 & x2) ^ x2",
+            "Small Boolean domain; the truth table is exhaustive over x0..x2.",
+            3,
+            [](LocalMask in) {
+                const bool x0 = bit(in, 0);
+                const bool x1 = bit(in, 1);
+                const bool x2 = bit(in, 2);
+                return (x0 & x1) ^ (x2 & x2) ^ x2;
+            },
+        },
+        {
+            "MBA-style opaque predicate",
+            "The low bit of x0 + x1 is x0 ^ x1, and the x2 noise cancels.",
+            "!(((((x0 ^ x1) + 2*(x0 & x1)) & 1) ^ (x0 ^ x1)) ^ ((x2 & x2) ^ x2))",
+            "Small Boolean slice of an MBA predicate; the result is constant true.",
+            3,
+            [](LocalMask in) {
+                const std::uint64_t x0 = bit(in, 0) ? 1ULL : 0ULL;
+                const std::uint64_t x1 = bit(in, 1) ? 1ULL : 0ULL;
+                const std::uint64_t x2 = bit(in, 2) ? 1ULL : 0ULL;
+                const bool sum_lsb = (((x0 ^ x1) + 2ULL * (x0 & x1)) & 1ULL) != 0;
+                const bool noisy_zero = ((x2 & x2) ^ x2) != 0;
+                return !((sum_lsb ^ ((x0 ^ x1) != 0)) ^ noisy_zero);
+            },
+        },
+        {
+            "Branch-condition simplification",
+            "The identity x0|x1 = x0 ^ x1 ^ (x0 & x1) leaves only x2.",
+            "((x0 ^ x1) ^ (x0 | x1) ^ (x0 & x1)) ^ x2",
+            "Small Boolean branch condition with x0 and x1 syntactically present but semantically irrelevant.",
+            3,
+            [](LocalMask in) {
+                const bool x0 = bit(in, 0);
+                const bool x1 = bit(in, 1);
+                const bool x2 = bit(in, 2);
+                return ((x0 ^ x1) ^ (x0 | x1) ^ (x0 & x1)) ^ x2;
+            },
+        },
+        {
+            "Black-box truth-table recovery",
+            "Pretend this came from querying a small lookup table or VM predicate.",
+            "black_box(x0,x1,x2,x3) = x0 ^ x2 ^ (x1 & x3)",
+            "Black-box four-bit predicate; Drill & Join only needs oracle semantics.",
+            4,
+            [](LocalMask in) {
+                const bool x0 = bit(in, 0);
+                const bool x1 = bit(in, 1);
+                const bool x2 = bit(in, 2);
+                const bool x3 = bit(in, 3);
+                return x0 ^ x2 ^ (x1 & x3);
+            },
+        },
+        {
+            "Reduced slice of a larger bit-vector predicate",
+            "This models a 64-bit predicate after dependency reduction: x1 and x2 are spurious.",
+            "((x0 & x3) ^ x4) ^ (x1 ^ x1) ^ (x2 & (x2 ^ x2))",
+            "Reduced five-bit support of a larger expression; full 64-bit soundness would come from SMT proof.",
+            5,
+            [](LocalMask in) {
+                const bool x0 = bit(in, 0);
+                const bool x1 = bit(in, 1);
+                const bool x2 = bit(in, 2);
+                const bool x3 = bit(in, 3);
+                const bool x4 = bit(in, 4);
+                return ((x0 & x3) ^ x4) ^ (x1 ^ x1) ^ (x2 & (x2 ^ x2));
+            },
+        },
+    };
+}
+
+std::vector<WordExample> make_word_examples() {
+    return {
+        {
+            "8-bit MBA-obfuscated memory address",
+            "This is the full-domain word-valued version of [base + index*8 + 8] modulo 8 bits.",
+            "addr = mba_add8(mba_add8(base, index * 8), 8)",
+            "Full domain: x0..x7 are base[0..7], x8..x15 are index[0..7]. Drill & Join synthesizes every output bit over all 2^16 inputs.",
+            16,
+            8,
+            {0, 3, 4, 7},
+            [](LocalMask in) {
+                const std::uint64_t base = in & 0xffULL;
+                const std::uint64_t index = (in >> 8) & 0xffULL;
+                return mba_add_mod(mba_add_mod(base, (index * 8ULL) & 0xffULL, 8), 8ULL, 8);
+            },
+        },
+        {
+            "16-bit byte-swap and masked constants",
+            "The expression crosses byte lanes and combines constants before byte swapping, which is outside many linear MBA normal forms.",
+            "out = bswap16((word & 0x0fff) ^ 0xa5c3) ^ 0x1234",
+            "Full domain: x0..x15 are the 16-bit input word.",
+            16,
+            16,
+            {0, 7, 8, 15},
+            [](LocalMask in) {
+                const std::uint64_t word = in & 0xffffULL;
+                return (bswap16((word & 0x0fffULL) ^ 0xa5c3ULL) ^ 0x1234ULL) & 0xffffULL;
+            },
+        },
+        {
+            "16-bit rotation with constants",
+            "Rotations move support bits non-locally, while constants flip selected lanes before the result is observed as a full word.",
+            "out = rotl16(word ^ 0xa5c3, 5)",
+            "Full domain: x0..x15 are the 16-bit input word.",
+            16,
+            16,
+            {0, 5, 10, 15},
+            [](LocalMask in) {
+                const std::uint64_t word = in & 0xffffULL;
+                return rotl_mod(word ^ 0xa5c3ULL, 5, 16);
+            },
+        },
+        {
+            "16-bit shift-and-merge bit slicing",
+            "Several shifted views of one word overlap into a 64-bit result; this is semantic bit slicing rather than a plain MBA polynomial.",
+            "out = ((word ^ 0x0100) >> 1) ^ ((word & 0x0f0f) << 3) ^ (word >> 7)",
+            "Full domain: x0..x15 are the 16-bit input word.",
+            16,
+            16,
+            {0, 3, 8, 12},
+            [](LocalMask in) {
+                const std::uint64_t word = in & 0xffffULL;
+                return (((word ^ 0x0100ULL) >> 1) ^
+                        ((word & 0x0f0fULL) << 3) ^
+                        (word >> 7)) & 0xffffULL;
+            },
+        },
+        {
+            "8-bit constant-encoded lookup word",
+            "A symbolic shift into a 64-bit immediate acts like a tiny table lookup; this is arbitrary finite semantics rather than a textbook MBA identity.",
+            "out = table8[arg ^ 0x5a], with table8 encoded as two 64-bit immediates",
+            "Full domain: x0..x7 are the 8-bit input word.",
+            8,
+            8,
+            {0, 1, 2, 3},
+            [](LocalMask in) {
+                const std::uint64_t arg = in & 0xffULL;
+                const std::uint64_t idx = arg ^ 0x5aULL;
+                const std::uint64_t lo =
+                    (0x6a95c3f0b4d1872eULL >> (((idx & 0x0fULL) * 4ULL) & 63ULL)) & 0x0fULL;
+                const std::uint64_t hi =
+                    (0xfedcba9876543210ULL >> ((((idx >> 4) & 0x0fULL) * 4ULL) & 63ULL)) & 0x0fULL;
+                return lo | (hi << 4);
+            },
+        },
+    };
+}
+
+std::string smt_single_expression(std::size_t index) {
+    const std::string x0 = smt_bit(0);
+    const std::string x1 = smt_bit(1);
+    const std::string x2 = smt_bit(2);
+    const std::string x3 = smt_bit(3);
+    const std::string x4 = smt_bit(4);
+
+    switch (index) {
+        case 0:
+            return smt_xor_many({smt_bvand(x0, x1), smt_bvand(x2, x2), x2});
+        case 1: {
+            const std::string x064 = smt_bit64(0);
+            const std::string x164 = smt_bit64(1);
+            const std::string x264 = smt_bit64(2);
+            const std::string sum_lsb = smt_extract_bit(
+                smt_bvand(
+                    smt_bvadd(smt_bvxor(x064, x164),
+                              smt_bvmul(bv_const(2), smt_bvand(x064, x164))),
+                    bv_const(1)),
+                0);
+            const std::string noisy_zero = smt_bvxor(smt_bvand(x2, x2), x2);
+            return "(bvnot " + smt_xor_many({sum_lsb, smt_bvxor(x0, x1), noisy_zero}) + ")";
+        }
+        case 2:
+            return smt_xor_many({smt_bvxor(x0, x1), smt_bvor(x0, x1), smt_bvand(x0, x1), x2});
+        case 3:
+            return smt_xor_many({x0, x2, smt_bvand(x1, x3)});
+        case 4:
+            return smt_xor_many({smt_bvand(x0, x3), x4,
+                                 smt_bvxor(x1, x1),
+                                 smt_bvand(x2, smt_bvxor(x2, x2))});
+        default:
+            throw std::runtime_error("single-bit SMT2 example index out of range");
+    }
+}
+
+std::string smt_word_expression(std::size_t index) {
+    switch (index) {
+        case 0: {
+            const std::string scaled = smt_bvshl("index", 3, 8);
+            return smt_mba_add(smt_mba_add("base", scaled, 8), bv_const(8, 8), 8);
+        }
+        case 1: {
+            const std::string masked = smt_bvand("arg", bv_const(0x0fffULL, 16));
+            return smt_bvxor(smt_bswap16(smt_bvxor(masked, bv_const(0xa5c3ULL, 16))),
+                             bv_const(0x1234ULL, 16));
+        }
+        case 2: {
+            return smt_rotl(smt_bvxor("arg", bv_const(0xa5c3ULL, 16)), 5, 16);
+        }
+        case 3: {
+            return smt_xor_many({
+                smt_bvlshr(smt_bvxor("arg", bv_const(0x0100ULL, 16)), 1, 16),
+                smt_bvshl(smt_bvand("arg", bv_const(0x0f0fULL, 16)), 3, 16),
+                smt_bvlshr("arg", 7, 16),
+            }, 16);
+        }
+        case 4: {
+            const std::string idx = smt_bvxor("arg", bv_const(0x5aULL, 8));
+            const std::string lo_shift =
+                smt_zero_extend(smt_bvmul(smt_bvand("idx", bv_const(0x0fULL, 8)),
+                                          bv_const(4, 8)),
+                                8,
+                                64);
+            const std::string hi_shift =
+                smt_zero_extend(smt_bvmul(smt_bvand(smt_bvlshr("idx", 4, 8), bv_const(0x0fULL, 8)),
+                                          bv_const(4, 8)),
+                                8,
+                                64);
+            const std::string lo =
+                "((_ extract 3 0) " + smt_op2("bvlshr", bv_const(0x6a95c3f0b4d1872eULL), lo_shift) + ")";
+            const std::string hi =
+                "((_ extract 3 0) " + smt_op2("bvlshr", bv_const(0xfedcba9876543210ULL), hi_shift) + ")";
+            return "(let ((idx " + idx + ")) (concat " + hi + " " + lo + "))";
+        }
+        default:
+            throw std::runtime_error("multi-bit SMT2 example index out of range");
+    }
+}
+
+std::string smt_signature(const std::vector<SmtInput>& inputs) {
+    std::ostringstream os;
+    for (const auto& input : inputs) {
+        os << "(" << input.name << " (_ BitVec " << input.width << "))";
+        if (&input != &inputs.back()) {
+            os << " ";
+        }
+    }
+    return os.str();
+}
+
+std::string smt_call_args(const std::vector<SmtInput>& inputs) {
+    std::ostringstream os;
+    for (std::size_t i = 0; i < inputs.size(); ++i) {
+        if (i != 0) os << " ";
+        os << inputs[i].name;
+    }
+    return os.str();
+}
+
+std::vector<SmtInput> smt_circuit_inputs_for_single(std::size_t) {
+    return {{"arg", 64}};
+}
+
+std::vector<SmtInput> smt_benchmark_inputs_for_single(std::size_t) {
+    return {{"arg0", 64}};
+}
+
+std::vector<SmtInput> smt_circuit_inputs_for_multi(std::size_t index) {
+    if (index == 0) {
+        return {{"base", 8}, {"index", 8}};
+    }
+    if (index == 4) {
+        return {{"arg", 8}};
+    }
+    return {{"arg", 16}};
+}
+
+std::vector<SmtInput> smt_benchmark_inputs_for_multi(std::size_t index) {
+    if (index == 0) {
+        return {{"base", 8}, {"index", 8}};
+    }
+    if (index == 4) {
+        return {{"arg0", 8}};
+    }
+    return {{"arg0", 16}};
+}
+
+void emit_smt2_benchmark(const std::string& title,
+                         unsigned output_bits,
+                         const std::string& expression,
+                         const std::vector<SmtInput>& circuit_inputs,
+                         const std::vector<SmtInput>& benchmark_inputs) {
+    if (circuit_inputs.size() != benchmark_inputs.size()) {
+        throw std::runtime_error("SMT2 circuit and benchmark arities differ");
+    }
+
+    std::cout << "; " << title << "\n";
+    std::cout << "(define-fun circuit (" << smt_signature(circuit_inputs) << ") (_ BitVec "
+              << output_bits << ")\n";
+    std::cout << "  " << expression << "\n";
+    std::cout << ")\n\n";
+    std::cout << "(define-fun benchmark (" << smt_signature(benchmark_inputs) << ") (_ BitVec "
+              << output_bits << ")\n";
+    std::cout << "  (circuit " << smt_call_args(benchmark_inputs) << ")\n";
+    std::cout << ")\n";
+}
+
+void list_smt2_examples(const std::vector<Example>& examples,
+                        const std::vector<WordExample>& word_examples) {
+    std::cout << "Single-bit SMT2 benchmarks:\n";
+    for (std::size_t i = 0; i < examples.size(); ++i) {
+        std::cout << "  single " << (i + 1) << "  " << examples[i].name << "\n";
+    }
+    std::cout << "Multi-bit SMT2 benchmarks:\n";
+    for (std::size_t i = 0; i < word_examples.size(); ++i) {
+        std::cout << "  multi  " << (i + 1) << "  " << word_examples[i].name << "\n";
+    }
+}
+
+std::string dj_vs_bitwuzla_path_constraints(const std::string& x_symbol,
+                                             const std::string& y_symbol) {
+    const std::uint64_t x_free =
+        (std::uint64_t{1} << kDjVsBitwuzlaXBitA) |
+        (std::uint64_t{1} << kDjVsBitwuzlaXBitB);
+    const std::uint64_t y_free = std::uint64_t{1} << kDjVsBitwuzlaYBit;
+    const std::uint64_t x_mask = ~x_free;
+    const std::uint64_t y_mask = ~y_free;
+
+    std::ostringstream os;
+    os << "(assert (= (bvand " << x_symbol << " " << bv_const(x_mask) << ") "
+       << bv_const(kDjVsBitwuzlaXSeed & x_mask) << "))\n";
+    os << "(assert (= (bvand " << y_symbol << " " << bv_const(y_mask) << ") "
+       << bv_const(kDjVsBitwuzlaYSeed & y_mask) << "))\n";
+    return os.str();
+}
+
+std::string dj_vs_bitwuzla_original_query(unsigned rounds, bool contextual) {
+    std::ostringstream os;
+    os << "; D&J vs plain Bitwuzla: original obfuscated query\n";
+    os << "; Expected result: unsat. The query proves the obfuscated benchmark\n";
+    os << "; equals the tiny target condition";
+    if (contextual) {
+        os << " under the contextual path constraints.\n";
+    } else {
+        os << " for all 64-bit arg0/arg1 assignments.\n";
+    }
+    os << "(set-logic QF_BV)\n";
+    os << "(set-info :status unsat)\n\n";
+    os << "(define-fun circuit ((arg0 (_ BitVec 64)) (arg1 (_ BitVec 64))) (_ BitVec 1)\n";
+    os << "  " << smt_extract_bit(smt_dj_vs_bitwuzla_obfuscated_word(rounds), 0) << "\n";
+    os << ")\n\n";
+    os << "(define-fun benchmark ((arg0 (_ BitVec 64)) (arg1 (_ BitVec 64))) (_ BitVec 1)\n";
+    os << "  (circuit arg0 arg1)\n";
+    os << ")\n\n";
+    os << "(define-fun target ((arg0 (_ BitVec 64)) (arg1 (_ BitVec 64))) (_ BitVec 1)\n";
+    os << "  " << smt_dj_vs_bitwuzla_target_bit("arg0", "arg1") << "\n";
+    os << ")\n\n";
+    os << "(declare-const q_arg0 (_ BitVec 64))\n";
+    os << "(declare-const q_arg1 (_ BitVec 64))\n";
+    if (contextual) {
+        os << dj_vs_bitwuzla_path_constraints("q_arg0", "q_arg1");
+    }
+    os << "(assert (distinct (benchmark q_arg0 q_arg1) (target q_arg0 q_arg1)))\n";
+    os << "(check-sat)\n";
+    return os.str();
+}
+
+std::string dj_vs_bitwuzla_recovered_query(const ANF& recovered, bool contextual) {
+    std::ostringstream os;
+    os << "; D&J vs plain Bitwuzla: recovered query\n";
+    os << "; Expected result: unsat. This is the same benchmark shape after D&J synthesis.\n";
+    os << "(set-logic QF_BV)\n";
+    os << "(set-info :status unsat)\n\n";
+    os << "(define-fun circuit ((arg0 (_ BitVec 64)) (arg1 (_ BitVec 64))) (_ BitVec 1)\n";
+    os << "  " << anf_to_context_smt(recovered) << "\n";
+    os << ")\n\n";
+    os << "(define-fun benchmark ((arg0 (_ BitVec 64)) (arg1 (_ BitVec 64))) (_ BitVec 1)\n";
+    os << "  (circuit arg0 arg1)\n";
+    os << ")\n\n";
+    os << "(define-fun target ((arg0 (_ BitVec 64)) (arg1 (_ BitVec 64))) (_ BitVec 1)\n";
+    os << "  " << smt_dj_vs_bitwuzla_target_bit("arg0", "arg1") << "\n";
+    os << ")\n\n";
+    os << "(declare-const q_arg0 (_ BitVec 64))\n";
+    os << "(declare-const q_arg1 (_ BitVec 64))\n";
+    if (contextual) {
+        os << dj_vs_bitwuzla_path_constraints("q_arg0", "q_arg1");
+    }
+    os << "(assert (distinct (benchmark q_arg0 q_arg1) (target q_arg0 q_arg1)))\n";
+    os << "(check-sat)\n";
+    return os.str();
+}
+
+void write_text_file(const std::string& path, const std::string& text) {
+    std::ofstream out(path);
+    if (!out) {
+        throw std::runtime_error("could not open " + path + " for writing");
+    }
+    out << text;
+}
+
+[[maybe_unused]] std::string read_text_file(const std::string& path) {
+    std::ifstream in(path);
+    if (!in) return "";
+    return std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
+}
+
+struct TimedSolverRun {
+    int wait_status = 0;
+    int exit_code = 0;
+    bool timed_out = false;
+    double elapsed_ms = 0.0;
+    std::string command;
+    std::string output;
+};
+
+bool bitwuzla_available() {
+    const char* configured = std::getenv("BITWUZLA");
+    if (configured != nullptr && configured[0] != '\0') return true;
+    return std::system("command -v bitwuzla >/dev/null 2>&1") == 0;
+}
+
+std::vector<std::string> split_solver_args(const char* value) {
+    std::vector<std::string> args;
+    if (value == nullptr) return args;
+
+    std::istringstream input(value);
+    std::string item;
+    while (input >> item) {
+        args.push_back(item);
+    }
+    return args;
+}
+
+std::string bitwuzla_binary() {
+    const char* configured = std::getenv("BITWUZLA");
+    if (configured != nullptr && configured[0] != '\0') {
+        return configured;
+    }
+    return "bitwuzla";
+}
+
+std::string join_command_for_display(const std::vector<std::string>& args) {
+    std::ostringstream os;
+    for (std::size_t i = 0; i < args.size(); ++i) {
+        if (i != 0) os << " ";
+        os << args[i];
+    }
+    return os.str();
+}
+
+TimedSolverRun run_bitwuzla(const std::string& smt2_path, unsigned timeout_seconds) {
+    const std::string output_path = smt2_path + ".out";
+    TimedSolverRun run;
+    std::vector<std::string> args;
+    args.push_back(bitwuzla_binary());
+    const std::vector<std::string> extra_args = split_solver_args(std::getenv("BITWUZLA_ARGS"));
+    args.insert(args.end(), extra_args.begin(), extra_args.end());
+    args.push_back(smt2_path);
+    run.command = join_command_for_display(args);
+
+    const auto start = std::chrono::steady_clock::now();
+
+#if defined(_WIN32)
+    const std::string command = run.command + " > " + output_path + " 2>&1";
+    const int status = std::system(command.c_str());
+    run.wait_status = status;
+    run.exit_code = (status < 0) ? status : (status / 256);
+    run.output = read_text_file(output_path);
+#else
+    int pipe_fds[2] = {-1, -1};
+    if (pipe(pipe_fds) != 0) {
+        throw std::runtime_error(std::string("pipe failed: ") + std::strerror(errno));
+    }
+
+    const pid_t pid = fork();
+    if (pid < 0) {
+        close(pipe_fds[0]);
+        close(pipe_fds[1]);
+        throw std::runtime_error(std::string("fork failed: ") + std::strerror(errno));
+    }
+
+    if (pid == 0) {
+        dup2(pipe_fds[1], STDOUT_FILENO);
+        dup2(pipe_fds[1], STDERR_FILENO);
+        close(pipe_fds[0]);
+        close(pipe_fds[1]);
+
+        std::vector<char*> argv;
+        argv.reserve(args.size() + 1);
+        for (std::string& arg : args) {
+            argv.push_back(arg.data());
+        }
+        argv.push_back(nullptr);
+        execvp(argv[0], argv.data());
+        std::cerr << "execvp failed for " << argv[0] << ": " << std::strerror(errno) << "\n";
+        _exit(127);
+    }
+
+    close(pipe_fds[1]);
+    const int flags = fcntl(pipe_fds[0], F_GETFL, 0);
+    if (flags >= 0) {
+        fcntl(pipe_fds[0], F_SETFL, flags | O_NONBLOCK);
+    }
+
+    int status = 0;
+    bool child_done = false;
+    const auto deadline = start + std::chrono::seconds(timeout_seconds);
+    std::string captured;
+    char buffer[4096];
+
+    while (true) {
+        while (true) {
+            const ssize_t n = read(pipe_fds[0], buffer, sizeof(buffer));
+            if (n > 0) {
+                captured.append(buffer, static_cast<std::size_t>(n));
+                continue;
+            }
+            break;
+        }
+
+        if (!child_done) {
+            const pid_t wait_result = waitpid(pid, &status, WNOHANG);
+            if (wait_result == pid) {
+                child_done = true;
+            } else if (wait_result < 0 && errno != EINTR) {
+                child_done = true;
+            }
+        }
+
+        if (child_done) {
+            while (true) {
+                const ssize_t n = read(pipe_fds[0], buffer, sizeof(buffer));
+                if (n > 0) {
+                    captured.append(buffer, static_cast<std::size_t>(n));
+                    continue;
+                }
+                break;
+            }
+            break;
+        }
+
+        if (timeout_seconds > 0 && std::chrono::steady_clock::now() >= deadline) {
+            run.timed_out = true;
+            kill(pid, SIGTERM);
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            if (waitpid(pid, &status, WNOHANG) == 0) {
+                kill(pid, SIGKILL);
+                waitpid(pid, &status, 0);
+            }
+            break;
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+
+    close(pipe_fds[0]);
+    run.wait_status = status;
+    if (run.timed_out) {
+        run.exit_code = 124;
+    } else if (WIFEXITED(status)) {
+        run.exit_code = WEXITSTATUS(status);
+    } else if (WIFSIGNALED(status)) {
+        run.exit_code = 128 + WTERMSIG(status);
+    } else {
+        run.exit_code = status;
+    }
+    run.output = std::move(captured);
+    write_text_file(output_path, run.output);
+#endif
+
+    const auto stop = std::chrono::steady_clock::now();
+    run.elapsed_ms =
+        std::chrono::duration<double, std::milli>(stop - start).count();
+    return run;
+}
+
+void print_solver_run(const std::string& label, const TimedSolverRun& run) {
+    std::cout << label << ":\n";
+    std::cout << "  command=" << run.command << "\n";
+    std::cout << "  elapsed_ms=" << std::fixed << std::setprecision(3)
+              << run.elapsed_ms << std::defaultfloat << "\n";
+    std::cout << "  wait_status=" << run.wait_status
+              << ", exit_code=" << run.exit_code;
+    if (run.timed_out || run.exit_code == 124) {
+        std::cout << " (timeout)";
+    }
+    std::cout << "\n";
+    std::cout << "  output: ";
+    if (run.output.empty()) {
+        std::cout << "<empty>\n";
+    } else {
+        std::istringstream lines(run.output);
+        std::string line;
+        bool first = true;
+        while (std::getline(lines, line)) {
+            if (!first) std::cout << "          ";
+            std::cout << line << "\n";
+            first = false;
+        }
+    }
+}
+
+void run_dj_vs_bitwuzla_example(unsigned rounds, unsigned timeout_seconds, bool contextual) {
+    SynthesisOptions options;
+    options.join_arity = 3;
+    options.max_exhaustive_bits = 3;
+    options.split_strategy = SynthesisOptions::SplitStrategy::Balanced;
+
+    Example ex{
+        contextual ? "D&J beats plain Bitwuzla contextual MBA predicate"
+                   : "D&J beats plain Bitwuzla global-support MBA predicate",
+        contextual
+            ? "The 64-bit formula is intentionally inflated, but the active concolic context leaves only three symbolic bits."
+            : "The 64-bit formula is intentionally inflated, but its global semantic support is only three projected bits.",
+        "lowbit(repeated_mba_sub(mba_add(target,arg_noise),arg_noise)), target = 1 ^ arg0[13] ^ arg0[41] ^ arg1[7]",
+        contextual
+            ? "Path constraints fix every bit except arg0[13], arg0[41], and arg1[7]. Exhausting those eight context models is a sound proof for this path."
+            : "No path constraints are emitted. The D&J input is the declared global support projection {arg0[13], arg0[41], arg1[7]}.",
+        3,
+        [rounds, contextual](LocalMask local) {
+            if (contextual) {
+                return dj_vs_bitwuzla_oracle(local, rounds);
+            }
+            return dj_vs_bitwuzla_global_oracle(local, rounds);
+        },
+    };
+
+    std::cout << "=== D&J vs plain Bitwuzla representative example ===\n";
+    std::cout << "Mode: "
+              << (contextual ? "contextual path constraints" : "global support, no path constraints")
+              << "\n";
+    std::cout << "Rounds of MBA inflation: " << rounds << "\n";
+    std::cout << "Bitwuzla timeout per query: " << timeout_seconds << " second(s)\n\n";
+    std::cout << "64-bit program variables: arg0, arg1\n";
+    if (contextual) {
+        std::cout << "Context keeps only these bits symbolic:\n";
+    } else {
+        std::cout << "Declared global support projection:\n";
+    }
+    std::cout << "  local x0 -> arg0[" << kDjVsBitwuzlaXBitA << "]\n";
+    std::cout << "  local x1 -> arg0[" << kDjVsBitwuzlaXBitB << "]\n";
+    std::cout << "  local x2 -> arg1[" << kDjVsBitwuzlaYBit << "]\n";
+    if (contextual) {
+        std::cout << "All other bits are fixed by the path constraints.\n\n";
+    } else {
+        std::cout << "No other bits are fixed in the generated SMT2 query.\n";
+        std::cout << "A real pipeline must justify this support projection with taint/dependency analysis or a proof.\n\n";
+    }
+
+    std::cout << (contextual ? "Context models and oracle outputs:\n"
+                             : "Support truth table using one concrete probe background:\n");
+    std::cout << "x0 x1 x2 | arg0               arg1               f\n";
+    std::cout << "--------------------------------------------------------\n";
+    for (LocalMask row = 0; row < 8; ++row) {
+        const auto [x, y] = contextual ? contextual_inputs(row) : global_probe_inputs(row, 0);
+        std::cout << (bit(row, 0) ? 1 : 0) << "  "
+                  << (bit(row, 1) ? 1 : 0) << "  "
+                  << (bit(row, 2) ? 1 : 0) << "  | 0x"
+                  << std::hex << std::setw(16) << std::setfill('0') << x
+                  << " 0x" << std::setw(16) << y
+                  << std::dec << std::setfill(' ') << "  "
+                  << (ex.oracle(row) ? 1 : 0) << "\n";
+    }
+
+    if (!contextual) {
+        unsigned checked = 0;
+        for (unsigned sample = 0; sample < 8; ++sample) {
+            for (LocalMask row = 0; row < 8; ++row) {
+                const auto [x, y] = global_probe_inputs(row, sample);
+                const bool got =
+                    (dj_vs_bitwuzla_obfuscated_word(x, y, rounds) & 1ULL) != 0ULL;
+                const bool expected = (dj_vs_bitwuzla_target_word(x, y) & 1ULL) != 0ULL;
+                if (got != expected) {
+                    throw std::runtime_error("global support sanity check failed");
+                }
+                ++checked;
+            }
+        }
+        std::cout << "Probe sanity check over " << checked
+                  << " varied non-support backgrounds: ok\n";
+    }
+
+    std::cout << "\nTruth bits, row order 000..111 with x0 as the low bit:\n";
+    std::cout << truth_bits(ex.oracle, ex.input_bits) << "\n\n";
+
+    TraceableDrillJoin tracer(options);
+    std::ostringstream trace;
+    const auto start = std::chrono::steady_clock::now();
+    const ANF recovered = tracer.synthesize(ex.input_bits, ex.oracle, trace);
+    const auto stop = std::chrono::steady_clock::now();
+    const double dj_ms = std::chrono::duration<double, std::milli>(stop - start).count();
+    verify(ex, recovered);
+
+    const std::vector<std::string> names = {
+        "arg0[13]",
+        "arg0[41]",
+        "arg1[7]",
+    };
+    std::cout << "Drill & Join trace:\n" << trace.str();
+    std::cout << "\nRecovered local ANF:\n";
+    std::cout << "  " << recovered.to_string(names) << "\n";
+    std::cout << "Expected semantic condition:\n";
+    std::cout << "  1 ^ arg0[13] ^ arg0[41] ^ arg1[7]\n";
+    std::cout << "Verification over all eight "
+              << (contextual ? "path-context models" : "support assignments")
+              << ": ok\n";
+    std::cout << "D&J elapsed_ms=" << std::fixed << std::setprecision(3) << dj_ms
+              << std::defaultfloat << "\n\n";
+
+    const auto smt_start = std::chrono::steady_clock::now();
+    const std::string original_query = dj_vs_bitwuzla_original_query(rounds, contextual);
+    const std::string recovered_query = dj_vs_bitwuzla_recovered_query(recovered, contextual);
+    const auto smt_stop = std::chrono::steady_clock::now();
+    const double smt_ms =
+        std::chrono::duration<double, std::milli>(smt_stop - smt_start).count();
+
+    const std::string original_path = "dj_vs_bitwuzla_original.smt2";
+    const std::string recovered_path = "dj_vs_bitwuzla_recovered.smt2";
+    write_text_file(original_path, original_query);
+    write_text_file(recovered_path, recovered_query);
+
+    std::cout << "SMT2 files written:\n";
+    std::cout << "  " << original_path << " (" << original_query.size() << " byte(s))\n";
+    std::cout << "  " << recovered_path << " (" << recovered_query.size() << " byte(s))\n";
+    std::cout << "SMT2 generation elapsed_ms=" << std::fixed << std::setprecision(3)
+              << smt_ms << std::defaultfloat << "\n\n";
+
+    if (!bitwuzla_available()) {
+        std::cout << "Bitwuzla was not found on PATH and BITWUZLA is not set.\n";
+        std::cout << "Run the comparison locally by installing Bitwuzla, then rerunning this command.\n";
+        std::cout << "Optional solver flags can be supplied through BITWUZLA_ARGS, for example:\n";
+        std::cout << "  BITWUZLA_ARGS=\"--produce-models --abstraction --abstraction-bv-size=32 "
+                     "--abstraction-inc-bitblast=true --sat-solver=cadical\" "
+                  << "./dj_trace_examples "
+                  << (contextual ? "--dj-vs-bitwuzla" : "--dj-vs-bitwuzla-global")
+                  << " " << rounds << " " << timeout_seconds << "\n";
+        return;
+    }
+
+    std::cout << "Running Bitwuzla on the original obfuscated query and the recovered query.\n";
+    if (contextual) {
+        std::cout << "Both queries are UNSAT equivalence checks under the same path constraints.\n\n";
+    } else {
+        std::cout << "Both queries are UNSAT equivalence checks over all 64-bit arg0/arg1 assignments.\n\n";
+    }
+    print_solver_run("Plain Bitwuzla on original obfuscated benchmark",
+                     run_bitwuzla(original_path, timeout_seconds));
+    std::cout << "\n";
+    print_solver_run("Bitwuzla on D&J-recovered benchmark",
+                     run_bitwuzla(recovered_path, timeout_seconds));
+}
+
+void usage(const char* argv0) {
+    std::cerr
+        << "Usage:\n"
+        << "  " << argv0 << "\n"
+        << "  " << argv0 << " --list-smt2\n"
+        << "  " << argv0 << " --dump-smt2 single INDEX\n"
+        << "  " << argv0 << " --dump-smt2 multi INDEX\n"
+        << "  " << argv0 << " --dj-vs-bitwuzla [ROUNDS] [TIMEOUT_SECONDS]\n"
+        << "  " << argv0 << " --dj-vs-bitwuzla-global [ROUNDS] [TIMEOUT_SECONDS]\n\n"
+        << "Indexes are 1-based. SMT2 dumps define a Bitwuzla-compatible benchmark.\n"
+        << "The memory-address benchmark uses two 8-bit inputs: base and index.\n";
+}
+
+} // namespace
+
+int main(int argc, char** argv) {
+    try {
+        SynthesisOptions options;
+        options.join_arity = 4;
+        options.max_exhaustive_bits = 16;
+        options.split_strategy = SynthesisOptions::SplitStrategy::Balanced;
+
+        TraceableDrillJoin tracer(options);
+        const auto examples = make_examples();
+        const auto word_examples = make_word_examples();
+
+        if (argc > 1) {
+            const std::string command = argv[1];
+            if (command == "--list-smt2") {
+                list_smt2_examples(examples, word_examples);
+                return 0;
+            }
+            if (command == "--dump-smt2") {
+                if (argc != 4) {
+                    usage(argv[0]);
+                    return 1;
+                }
+
+                const std::string kind = argv[2];
+                const std::size_t one_based = static_cast<std::size_t>(std::stoul(argv[3]));
+                if (one_based == 0) {
+                    throw std::runtime_error("SMT2 example index must be 1-based");
+                }
+                const std::size_t index = one_based - 1;
+
+                if (kind == "single") {
+                    if (index >= examples.size()) {
+                        throw std::runtime_error("single-bit SMT2 example index out of range");
+                    }
+                    emit_smt2_benchmark(examples[index].name,
+                                        1,
+                                        smt_single_expression(index),
+                                        smt_circuit_inputs_for_single(index),
+                                        smt_benchmark_inputs_for_single(index));
+                    return 0;
+                }
+                if (kind == "multi") {
+                    if (index >= word_examples.size()) {
+                        throw std::runtime_error("multi-bit SMT2 example index out of range");
+                    }
+                    emit_smt2_benchmark(word_examples[index].name,
+                                        word_examples[index].output_bits,
+                                        smt_word_expression(index),
+                                        smt_circuit_inputs_for_multi(index),
+                                        smt_benchmark_inputs_for_multi(index));
+                    return 0;
+                }
+
+                usage(argv[0]);
+                return 1;
+            }
+            if (command == "--dj-vs-bitwuzla" || command == "--dj-vs-bitwuzla-global") {
+                if (argc > 4) {
+                    usage(argv[0]);
+                    return 1;
+                }
+                const unsigned rounds = (argc >= 3)
+                                            ? static_cast<unsigned>(std::stoul(argv[2]))
+                                            : kDjVsBitwuzlaDefaultRounds;
+                const unsigned timeout_seconds = (argc >= 4)
+                                                     ? static_cast<unsigned>(std::stoul(argv[3]))
+                                                     : kDjVsBitwuzlaDefaultTimeoutSeconds;
+                run_dj_vs_bitwuzla_example(rounds,
+                                           timeout_seconds,
+                                           command == "--dj-vs-bitwuzla");
+                return 0;
+            }
+
+            usage(argv[0]);
+            return 1;
+        }
+
+        std::cout << "=== Single-bit predicate examples ===\n";
+        for (std::size_t i = 0; i < examples.size(); ++i) {
+            const Example& ex = examples[i];
+            std::cout << "\n=== Single-bit example " << (i + 1) << ": " << ex.name << " ===\n";
+            std::cout << "Why: " << ex.why << "\n";
+            std::cout << "Source: " << ex.source_expression << "\n\n";
+            std::cout << "Model: " << ex.model << "\n\n";
+            std::cout << "Truth bits, row order 000..111 with x0 as the low bit:\n";
+            std::cout << truth_bits(ex.oracle, ex.input_bits) << "\n\n";
+            std::cout << "Truth table:\n";
+            print_truth_table(ex);
+
+            std::ostringstream trace;
+            const ANF traced = tracer.synthesize(ex.input_bits, ex.oracle, trace);
+
+            Synthesizer library_synth(options);
+            const ANF library_result = library_synth.synthesize(ex.input_bits, ex.oracle);
+
+            if (traced != library_result) {
+                throw std::runtime_error("trace implementation diverged from public Synthesizer");
+            }
+
+            verify(ex, traced);
+
+            std::cout << "\nDrill & Join trace:\n" << trace.str();
+            std::cout << "\nRecovered expression:\n";
+            std::cout << traced << "\n";
+            std::cout << "C++ expression: " << traced.to_cpp("input") << "\n";
+            std::cout << "Library stats: " << library_synth.stats().to_string() << "\n";
+            std::cout << "Verification over the full input domain: ok\n";
+        }
+
+        std::cout << "\n=== Multi-bit 64-bit expression examples ===\n";
+        for (std::size_t i = 0; i < word_examples.size(); ++i) {
+            const WordExample& ex = word_examples[i];
+            if (ex.output_bits > 64) {
+                throw std::runtime_error("word example output_bits must be <= 64");
+            }
+
+            std::cout << "\n=== Multi-bit example " << (i + 1) << ": " << ex.name << " ===\n";
+            std::cout << "Why: " << ex.why << "\n";
+            std::cout << "Source: " << ex.source_expression << "\n\n";
+            std::cout << "Model: " << ex.model << "\n\n";
+            std::cout << "Truth table over the full input support:\n";
+            print_word_truth_table(ex);
+
+            std::vector<ANF> outputs;
+            outputs.reserve(ex.output_bits);
+            std::vector<std::pair<unsigned, std::string>> traces;
+            std::uint64_t total_truth_rows = 0;
+            std::uint64_t total_terms = 0;
+
+            for (unsigned out_bit = 0; out_bit < ex.output_bits; ++out_bit) {
+                Oracle bit_oracle = [&ex, out_bit](LocalMask input) {
+                    return bit(ex.oracle(input), out_bit);
+                };
+
+                std::ostringstream trace;
+                const bool keep_trace =
+                    std::find(ex.trace_bits.begin(), ex.trace_bits.end(), out_bit) != ex.trace_bits.end();
+                const ANF result = synthesize_full_domain_anf(
+                    ex.input_bits, bit_oracle, keep_trace ? &trace : nullptr);
+                verify_word_bit(ex, out_bit, result);
+                outputs.push_back(result);
+
+                total_truth_rows += (ex.input_bits == 0) ? 1ULL : (1ULL << ex.input_bits);
+                total_terms += static_cast<std::uint64_t>(result.term_count());
+
+                if (keep_trace) {
+                    traces.emplace_back(out_bit, trace.str());
+                }
+            }
+
+            std::cout << "\nFull-domain Join traces for selected output bits:\n";
+            for (const auto& item : traces) {
+                std::cout << "\n--- Trace for out[" << item.first << "] ---\n";
+                std::cout << item.second;
+            }
+
+            std::cout << "\nRecovered " << ex.output_bits << "-bit expression, bit by bit:\n";
+            for (unsigned out_bit = 0; out_bit < outputs.size(); ++out_bit) {
+                std::cout << "out[" << out_bit << "] = " << outputs[out_bit] << "\n";
+            }
+            std::cout << "Full-domain stats: synthesized_outputs=" << ex.output_bits
+                      << ", truth_rows_per_output=" << ((ex.input_bits == 0) ? 1ULL : (1ULL << ex.input_bits))
+                      << ", total_truth_rows_visited=" << total_truth_rows
+                      << ", total_selected_terms=" << total_terms << "\n";
+            std::cout << "Verification over the full input domain: ok\n";
+        }
+
+        return 0;
+    } catch (const std::exception& ex) {
+        std::cerr << "error: " << ex.what() << "\n";
+        return 1;
+    }
+}
+
+```
+
+`include/drilljoin/anf.hpp`:
+
+```hpp
+#pragma once
+
+#include <algorithm>
+#include <cstdint>
+#include <initializer_list>
+#include <ostream>
+#include <set>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace drilljoin {
+
+namespace detail {
+inline unsigned popcount64(std::uint64_t x) noexcept {
+#if defined(__GNUC__) || defined(__clang__)
+    return static_cast<unsigned>(__builtin_popcountll(x));
+#else
+    unsigned c = 0;
+    while (x != 0) {
+        x &= (x - 1);
+        ++c;
+    }
+    return c;
+#endif
+}
+} // namespace detail
+
+// Algebraic Normal Form over GF(2).
+//
+// An ANF is an XOR-sum of monomials. A monomial is represented by a bit mask:
+// bit i set means variable x_i participates in the AND product. The all-zero
+// mask represents the constant monomial 1. An empty term set represents 0.
+// This implementation supports variables x0..x63, enough for one 64-bit word.
+class ANF {
+public:
+    using Mask = std::uint64_t;
+    using TermSet = std::set<Mask>;
+
+    ANF() = default;
+    explicit ANF(TermSet terms) : terms_(std::move(terms)) {}
+
+    static ANF zero() { return ANF{}; }
+    static ANF one() { return ANF(TermSet{0}); }
+    static ANF variable(unsigned index) {
+        if (index >= 64) {
+            throw std::invalid_argument("ANF supports variable indices 0..63 in this implementation");
+        }
+        return ANF(TermSet{Mask{1} << index});
+    }
+    static ANF monomial(Mask mask) { return ANF(TermSet{mask}); }
+
+    [[nodiscard]] bool is_zero() const noexcept { return terms_.empty(); }
+    [[nodiscard]] bool is_one() const noexcept { return terms_.size() == 1 && *terms_.begin() == 0; }
+    [[nodiscard]] const TermSet& terms() const noexcept { return terms_; }
+    [[nodiscard]] std::size_t term_count() const noexcept { return terms_.size(); }
+
+    [[nodiscard]] unsigned degree() const noexcept {
+        unsigned d = 0;
+        for (Mask m : terms_) {
+            d = std::max(d, detail::popcount64(m));
+        }
+        return d;
+    }
+
+    // Evaluate this ANF on a global bit-vector. Bit i of global_input is x_i.
+    [[nodiscard]] bool eval(Mask global_input) const noexcept {
+        bool result = false;
+        for (Mask monomial : terms_) {
+            const bool term_value = ((global_input & monomial) == monomial);
+            result ^= term_value;
+        }
+        return result;
+    }
+
+    ANF& xor_inplace(const ANF& rhs) {
+        for (Mask t : rhs.terms_) {
+            auto [it, inserted] = terms_.insert(t);
+            if (!inserted) {
+                terms_.erase(it); // coefficient 1 + 1 = 0 in GF(2)
+            }
+        }
+        return *this;
+    }
+
+    ANF& and_inplace(const ANF& rhs) {
+        *this = (*this & rhs);
+        return *this;
+    }
+
+    friend ANF operator^(ANF lhs, const ANF& rhs) {
+        lhs.xor_inplace(rhs);
+        return lhs;
+    }
+
+    friend ANF operator&(const ANF& lhs, const ANF& rhs) {
+        if (lhs.is_zero() || rhs.is_zero()) {
+            return ANF::zero();
+        }
+        TermSet out;
+        for (Mask a : lhs.terms_) {
+            for (Mask b : rhs.terms_) {
+                Mask product = a | b; // x_i*x_i = x_i in Boolean rings
+                auto [it, inserted] = out.insert(product);
+                if (!inserted) {
+                    out.erase(it);
+                }
+            }
+        }
+        return ANF(std::move(out));
+    }
+
+    friend bool operator==(const ANF& a, const ANF& b) { return a.terms_ == b.terms_; }
+    friend bool operator!=(const ANF& a, const ANF& b) { return !(a == b); }
+
+    // Human-readable ANF such as "1 ^ x0 ^ (x0 & x1)".
+    [[nodiscard]] std::string to_string(const std::vector<std::string>& names = {}) const {
+        if (terms_.empty()) {
+            return "0";
+        }
+        std::vector<Mask> sorted(terms_.begin(), terms_.end());
+        std::sort(sorted.begin(), sorted.end(), [](Mask a, Mask b) {
+            unsigned da = detail::popcount64(a);
+            unsigned db = detail::popcount64(b);
+            if (da != db) return da < db;
+            return a < b;
+        });
+
+        std::ostringstream os;
+        bool first_term = true;
+        for (Mask term : sorted) {
+            if (!first_term) {
+                os << " ^ ";
+            }
+            first_term = false;
+            os << monomial_to_string(term, names);
+        }
+        return os.str();
+    }
+
+    // C++ expression returning 0 or 1 as an integer. The argument is assumed to
+    // be an unsigned integer bit-vector whose bit i is x_i.
+    [[nodiscard]] std::string to_cpp(const std::string& argument_name = "input") const {
+        if (terms_.empty()) {
+            return "0ULL";
+        }
+        std::vector<Mask> sorted(terms_.begin(), terms_.end());
+        std::sort(sorted.begin(), sorted.end(), [](Mask a, Mask b) {
+            unsigned da = detail::popcount64(a);
+            unsigned db = detail::popcount64(b);
+            if (da != db) return da < db;
+            return a < b;
+        });
+
+        std::ostringstream os;
+        bool first = true;
+        for (Mask term : sorted) {
+            if (!first) {
+                os << " ^ ";
+            }
+            first = false;
+            os << "(" << monomial_to_cpp(term, argument_name) << ")";
+        }
+        return "(" + os.str() + ")";
+    }
+
+private:
+    TermSet terms_;
+
+    static std::string variable_name(unsigned index, const std::vector<std::string>& names) {
+        if (index < names.size() && !names[index].empty()) {
+            return names[index];
+        }
+        return "x" + std::to_string(index);
+    }
+
+    static std::string monomial_to_string(Mask term, const std::vector<std::string>& names) {
+        if (term == 0) {
+            return "1";
+        }
+        std::ostringstream os;
+        bool first_factor = true;
+        const bool need_parens = detail::popcount64(term) > 1;
+        if (need_parens) os << "(";
+        for (unsigned i = 0; i < 64; ++i) {
+            if ((term & (Mask{1} << i)) == 0) continue;
+            if (!first_factor) os << " & ";
+            first_factor = false;
+            os << variable_name(i, names);
+        }
+        if (need_parens) os << ")";
+        return os.str();
+    }
+
+    static std::string monomial_to_cpp(Mask term, const std::string& argument_name) {
+        if (term == 0) {
+            return "1ULL";
+        }
+        std::ostringstream os;
+        bool first = true;
+        for (unsigned i = 0; i < 64; ++i) {
+            if ((term & (Mask{1} << i)) == 0) continue;
+            if (!first) os << " & ";
+            first = false;
+            os << "((" << argument_name << " >> " << i << ") & 1ULL)";
+        }
+        return os.str();
+    }
+};
+
+inline std::ostream& operator<<(std::ostream& os, const ANF& anf) {
+    return os << anf.to_string();
+}
+
+} // namespace drilljoin
+
+```
+
+`include/drilljoin/bitwuzla_cli.hpp`:
+
+```hpp
+#pragma once
+
+#include "drilljoin/bv_expr.hpp"
+
+#include <chrono>
+#include <cstdint>
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
+#include <map>
+#include <optional>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+namespace drilljoin {
+
+enum class SmtStatus { Sat, Unsat, Unknown, Error };
+
+inline std::string smt_status_to_string(SmtStatus s) {
+    switch (s) {
+        case SmtStatus::Sat: return "sat";
+        case SmtStatus::Unsat: return "unsat";
+        case SmtStatus::Unknown: return "unknown";
+        case SmtStatus::Error: return "error";
+    }
+    return "error";
+}
+
+struct SmtResult {
+    SmtStatus status = SmtStatus::Error;
+    std::map<std::string, std::uint64_t> model;
+    std::string raw_output;
+    std::string query;
+    int exit_code = -1;
+};
+
+struct BitwuzlaCliOptions {
+    std::string binary = "bitwuzla";
+    unsigned time_limit_ms = 10000;
+    bool keep_temp_files = false;
+};
+
+class BitwuzlaCli {
+public:
+    explicit BitwuzlaCli(BitwuzlaCliOptions options = {}) : options_(std::move(options)) {}
+
+    [[nodiscard]] const BitwuzlaCliOptions& options() const noexcept { return options_; }
+
+    [[nodiscard]] bool available() const {
+        const auto cmd = shell_quote(options_.binary) + " --version > /dev/null 2>&1";
+        return std::system(cmd.c_str()) == 0;
+    }
+
+    [[nodiscard]] SmtResult check(const std::vector<Variable>& declarations,
+                                  const std::vector<std::string>& assertions,
+                                  const std::vector<std::string>& model_vars = {}) const {
+        std::ostringstream script;
+        script << "(set-logic QF_BV)\n";
+        if (!model_vars.empty()) {
+            script << "(set-option :produce-models true)\n";
+        }
+        for (const auto& v : declarations) {
+            script << "(declare-const " << v.name << " (_ BitVec " << v.width << "))\n";
+        }
+        for (const auto& a : assertions) {
+            script << "(assert " << a << ")\n";
+        }
+        script << "(check-sat)\n";
+        if (!model_vars.empty()) {
+            script << "(get-value (";
+            for (std::size_t i = 0; i < model_vars.size(); ++i) {
+                if (i) script << ' ';
+                script << model_vars[i];
+            }
+            script << "))\n";
+        }
+        return run_smt2(script.str(), model_vars);
+    }
+
+private:
+    BitwuzlaCliOptions options_;
+
+    [[nodiscard]] static std::string shell_quote(const std::string& s) {
+        std::string out = "'";
+        for (char c : s) {
+            if (c == '\'') out += "'\\''";
+            else out += c;
+        }
+        out += "'";
+        return out;
+    }
+
+    [[nodiscard]] static std::string unique_stem() {
+        const auto now = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        std::ostringstream os;
+        os << "drilljoin_bitwuzla_" << now << "_" << reinterpret_cast<std::uintptr_t>(&now);
+        return os.str();
+    }
+
+    [[nodiscard]] SmtResult run_smt2(const std::string& script,
+                                     const std::vector<std::string>& model_vars) const {
+        namespace fs = std::filesystem;
+        SmtResult result;
+        result.query = script;
+        const fs::path dir = fs::temp_directory_path();
+        const auto stem = unique_stem();
+        const fs::path input = dir / (stem + ".smt2");
+        const fs::path output = dir / (stem + ".out");
+        {
+            std::ofstream f(input);
+            if (!f) throw std::runtime_error("failed to write SMT-LIB query");
+            f << script;
+        }
+
+        std::ostringstream cmd;
+        cmd << shell_quote(options_.binary);
+        if (options_.time_limit_ms != 0) {
+            cmd << " --time-limit " << options_.time_limit_ms;
+        }
+        if (!model_vars.empty()) {
+            cmd << " --produce-models --bv-output-format 16";
+        }
+        cmd << " " << shell_quote(input.string()) << " > " << shell_quote(output.string()) << " 2>&1";
+        result.exit_code = std::system(cmd.str().c_str());
+
+        {
+            std::ifstream f(output);
+            std::ostringstream buffer;
+            buffer << f.rdbuf();
+            result.raw_output = buffer.str();
+        }
+        result.status = parse_status(result.raw_output);
+        if (result.status == SmtStatus::Sat && !model_vars.empty()) {
+            for (const auto& name : model_vars) {
+                auto value = parse_model_value(result.raw_output, name);
+                if (value.has_value()) {
+                    result.model[name] = *value;
+                }
+            }
+        }
+
+        if (!options_.keep_temp_files) {
+            std::error_code ec;
+            fs::remove(input, ec);
+            fs::remove(output, ec);
+        }
+        return result;
+    }
+
+    [[nodiscard]] static SmtStatus parse_status(const std::string& out) {
+        std::istringstream is(out);
+        std::string token;
+        while (is >> token) {
+            if (token == "sat") return SmtStatus::Sat;
+            if (token == "unsat") return SmtStatus::Unsat;
+            if (token == "unknown") return SmtStatus::Unknown;
+        }
+        return SmtStatus::Error;
+    }
+
+    [[nodiscard]] static std::optional<std::uint64_t> parse_model_value(const std::string& out,
+                                                                        const std::string& name) {
+        std::size_t pos = 0;
+        while (true) {
+            pos = out.find(name, pos);
+            if (pos == std::string::npos) return std::nullopt;
+            const bool left_ok = (pos == 0) || !is_symbol_char(out[pos - 1]);
+            const bool right_ok = (pos + name.size() >= out.size()) || !is_symbol_char(out[pos + name.size()]);
+            if (!left_ok || !right_ok) {
+                pos += name.size();
+                continue;
+            }
+            pos += name.size();
+            while (pos < out.size() && std::isspace(static_cast<unsigned char>(out[pos]))) ++pos;
+            if (pos >= out.size()) return std::nullopt;
+            if (out.compare(pos, 2, "#x") == 0) {
+                pos += 2;
+                std::uint64_t value = 0;
+                while (pos < out.size() && std::isxdigit(static_cast<unsigned char>(out[pos]))) {
+                    char c = out[pos++];
+                    value <<= 4;
+                    if (c >= '0' && c <= '9') value |= static_cast<unsigned>(c - '0');
+                    else if (c >= 'a' && c <= 'f') value |= static_cast<unsigned>(10 + c - 'a');
+                    else if (c >= 'A' && c <= 'F') value |= static_cast<unsigned>(10 + c - 'A');
+                }
+                return value;
+            }
+            if (out.compare(pos, 2, "#b") == 0) {
+                pos += 2;
+                std::uint64_t value = 0;
+                while (pos < out.size() && (out[pos] == '0' || out[pos] == '1')) {
+                    value = (value << 1) | static_cast<unsigned>(out[pos++] - '0');
+                }
+                return value;
+            }
+            if (out.compare(pos, 5, "(_ bv") == 0) {
+                pos += 5;
+                std::uint64_t value = 0;
+                while (pos < out.size() && std::isdigit(static_cast<unsigned char>(out[pos]))) {
+                    value = value * 10 + static_cast<unsigned>(out[pos++] - '0');
+                }
+                return value;
+            }
+        }
+    }
+
+    [[nodiscard]] static bool is_symbol_char(char c) {
+        return std::isalnum(static_cast<unsigned char>(c)) || c == '_' || c == '-' || c == '!' || c == '.';
+    }
+};
+
+} // namespace drilljoin
+
+```
+
+`include/drilljoin/bv_expr.hpp`:
+
+```hpp
+#pragma once
+
+#include <cctype>
+#include <cstdint>
+#include <iomanip>
+#include <memory>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace drilljoin {
+
+struct Variable {
+    unsigned index = 0;
+    std::string name;
+    unsigned width = 64;
+};
+
+namespace detail {
+inline std::uint64_t mask_for_width(unsigned width) {
+    if (width == 0 || width > 64) {
+        throw std::invalid_argument("bit-vector width must be in 1..64");
+    }
+    return width == 64 ? ~0ULL : ((1ULL << width) - 1ULL);
+}
+
+inline std::string bv_const_smt(std::uint64_t value, unsigned width) {
+    value &= mask_for_width(width);
+    std::ostringstream os;
+    os << "(_ bv" << value << " " << width << ")";
+    return os.str();
+}
+
+inline std::string bv_const_hex(std::uint64_t value, unsigned width) {
+    value &= mask_for_width(width);
+    std::ostringstream os;
+    os << "0x" << std::hex << std::setfill('0');
+    const unsigned hex_digits = (width + 3) / 4;
+    os << std::setw(static_cast<int>(hex_digits)) << value;
+    return os.str();
+}
+} // namespace detail
+
+struct BvNode;
+struct BoolNode;
+
+class BvExpr {
+public:
+    enum class Kind { Const, Var, Not, Neg, And, Or, Xor, Add, Sub, Mul, ShlConst, LShrConst };
+
+    BvExpr() = default;
+    explicit BvExpr(std::shared_ptr<BvNode> node) : node_(std::move(node)) {}
+
+    static BvExpr constant(std::uint64_t value, unsigned width = 64);
+    static BvExpr variable(unsigned index, std::string name, unsigned width = 64);
+    static BvExpr unary(Kind k, BvExpr a);
+    static BvExpr binary(Kind k, BvExpr a, BvExpr b);
+    static BvExpr shift(Kind k, BvExpr a, unsigned amount);
+
+    [[nodiscard]] bool empty() const noexcept { return !node_; }
+    [[nodiscard]] unsigned width() const;
+    [[nodiscard]] std::uint64_t eval(const std::vector<std::uint64_t>& inputs) const;
+    [[nodiscard]] std::string smt(const std::string& suffix = "") const;
+    [[nodiscard]] std::string to_string() const;
+
+private:
+    std::shared_ptr<BvNode> node_;
+    void ensure() const {
+        if (!node_) throw std::logic_error("empty BvExpr");
+    }
+    friend struct BvNode;
+};
+
+struct BvNode {
+    BvExpr::Kind kind = BvExpr::Kind::Const;
+    unsigned width = 64;
+    std::uint64_t value = 0;
+    unsigned var_index = 0;
+    std::string name;
+    std::shared_ptr<BvNode> a;
+    std::shared_ptr<BvNode> b;
+    unsigned shift = 0;
+};
+
+inline BvExpr BvExpr::constant(std::uint64_t value, unsigned width) {
+    auto n = std::make_shared<BvNode>();
+    n->kind = Kind::Const;
+    n->width = width;
+    n->value = value & detail::mask_for_width(width);
+    return BvExpr(std::move(n));
+}
+
+inline BvExpr BvExpr::variable(unsigned index, std::string name, unsigned width) {
+    auto n = std::make_shared<BvNode>();
+    n->kind = Kind::Var;
+    n->width = width;
+    n->var_index = index;
+    n->name = std::move(name);
+    (void)detail::mask_for_width(width);
+    return BvExpr(std::move(n));
+}
+
+inline unsigned BvExpr::width() const {
+    ensure();
+    return node_->width;
+}
+
+inline BvExpr BvExpr::unary(Kind k, BvExpr a) {
+    if (a.empty()) throw std::invalid_argument("empty operand");
+    auto n = std::make_shared<BvNode>();
+    n->kind = k;
+    n->width = a.width();
+    n->a = a.node_;
+    return BvExpr(std::move(n));
+}
+
+inline BvExpr BvExpr::binary(Kind k, BvExpr a, BvExpr b) {
+    if (a.empty() || b.empty()) throw std::invalid_argument("empty operand");
+    if (a.width() != b.width()) throw std::invalid_argument("bit-vector widths differ");
+    auto n = std::make_shared<BvNode>();
+    n->kind = k;
+    n->width = a.width();
+    n->a = a.node_;
+    n->b = b.node_;
+    return BvExpr(std::move(n));
+}
+
+inline BvExpr BvExpr::shift(Kind k, BvExpr a, unsigned amount) {
+    if (a.empty()) throw std::invalid_argument("empty operand");
+    auto n = std::make_shared<BvNode>();
+    n->kind = k;
+    n->width = a.width();
+    n->a = a.node_;
+    n->shift = amount;
+    return BvExpr(std::move(n));
+}
+
+inline std::uint64_t BvExpr::eval(const std::vector<std::uint64_t>& inputs) const {
+    ensure();
+    const auto mask = detail::mask_for_width(node_->width);
+    auto A = [&]() { return BvExpr(node_->a).eval(inputs); };
+    auto B = [&]() { return BvExpr(node_->b).eval(inputs); };
+    switch (node_->kind) {
+        case Kind::Const:
+            return node_->value & mask;
+        case Kind::Var:
+            if (node_->var_index >= inputs.size()) {
+                throw std::out_of_range("missing concrete value for variable " + node_->name);
+            }
+            return inputs[node_->var_index] & mask;
+        case Kind::Not:
+            return (~A()) & mask;
+        case Kind::Neg:
+            return (0ULL - A()) & mask;
+        case Kind::And:
+            return (A() & B()) & mask;
+        case Kind::Or:
+            return (A() | B()) & mask;
+        case Kind::Xor:
+            return (A() ^ B()) & mask;
+        case Kind::Add:
+            return (A() + B()) & mask;
+        case Kind::Sub:
+            return (A() - B()) & mask;
+        case Kind::Mul:
+            return (A() * B()) & mask;
+        case Kind::ShlConst:
+            return (node_->shift >= 64 ? 0ULL : (A() << node_->shift)) & mask;
+        case Kind::LShrConst:
+            return (node_->shift >= 64 ? 0ULL : (A() >> node_->shift)) & mask;
+    }
+    throw std::logic_error("unknown BvExpr kind");
+}
+
+inline std::string BvExpr::smt(const std::string& suffix) const {
+    ensure();
+    auto A = [&]() { return BvExpr(node_->a).smt(suffix); };
+    auto B = [&]() { return BvExpr(node_->b).smt(suffix); };
+    switch (node_->kind) {
+        case Kind::Const:
+            return detail::bv_const_smt(node_->value, node_->width);
+        case Kind::Var:
+            return node_->name + suffix;
+        case Kind::Not:
+            return "(bvnot " + A() + ")";
+        case Kind::Neg:
+            return "(bvneg " + A() + ")";
+        case Kind::And:
+            return "(bvand " + A() + " " + B() + ")";
+        case Kind::Or:
+            return "(bvor " + A() + " " + B() + ")";
+        case Kind::Xor:
+            return "(bvxor " + A() + " " + B() + ")";
+        case Kind::Add:
+            return "(bvadd " + A() + " " + B() + ")";
+        case Kind::Sub:
+            return "(bvsub " + A() + " " + B() + ")";
+        case Kind::Mul:
+            return "(bvmul " + A() + " " + B() + ")";
+        case Kind::ShlConst:
+            return "(bvshl " + A() + " " + detail::bv_const_smt(node_->shift, node_->width) + ")";
+        case Kind::LShrConst:
+            return "(bvlshr " + A() + " " + detail::bv_const_smt(node_->shift, node_->width) + ")";
+    }
+    throw std::logic_error("unknown BvExpr kind");
+}
+
+inline std::string BvExpr::to_string() const {
+    ensure();
+    auto A = [&]() { return BvExpr(node_->a).to_string(); };
+    auto B = [&]() { return BvExpr(node_->b).to_string(); };
+    switch (node_->kind) {
+        case Kind::Const:
+            return detail::bv_const_hex(node_->value, node_->width);
+        case Kind::Var:
+            return node_->name;
+        case Kind::Not:
+            return "(~" + A() + ")";
+        case Kind::Neg:
+            return "(-" + A() + ")";
+        case Kind::And:
+            return "(" + A() + " & " + B() + ")";
+        case Kind::Or:
+            return "(" + A() + " | " + B() + ")";
+        case Kind::Xor:
+            return "(" + A() + " ^ " + B() + ")";
+        case Kind::Add:
+            return "(" + A() + " + " + B() + ")";
+        case Kind::Sub:
+            return "(" + A() + " - " + B() + ")";
+        case Kind::Mul:
+            return "(" + A() + " * " + B() + ")";
+        case Kind::ShlConst:
+            return "(" + A() + " << " + std::to_string(node_->shift) + ")";
+        case Kind::LShrConst:
+            return "(" + A() + " >> " + std::to_string(node_->shift) + ")";
+    }
+    throw std::logic_error("unknown BvExpr kind");
+}
+
+inline BvExpr bvnot(BvExpr a) { return BvExpr::unary(BvExpr::Kind::Not, std::move(a)); }
+inline BvExpr bvneg(BvExpr a) { return BvExpr::unary(BvExpr::Kind::Neg, std::move(a)); }
+inline BvExpr bvshl(BvExpr a, unsigned amount) { return BvExpr::shift(BvExpr::Kind::ShlConst, std::move(a), amount); }
+inline BvExpr bvlshr(BvExpr a, unsigned amount) { return BvExpr::shift(BvExpr::Kind::LShrConst, std::move(a), amount); }
+inline BvExpr operator~(BvExpr a) { return bvnot(std::move(a)); }
+inline BvExpr operator-(BvExpr a) { return bvneg(std::move(a)); }
+inline BvExpr operator&(BvExpr a, BvExpr b) { return BvExpr::binary(BvExpr::Kind::And, std::move(a), std::move(b)); }
+inline BvExpr operator|(BvExpr a, BvExpr b) { return BvExpr::binary(BvExpr::Kind::Or, std::move(a), std::move(b)); }
+inline BvExpr operator^(BvExpr a, BvExpr b) { return BvExpr::binary(BvExpr::Kind::Xor, std::move(a), std::move(b)); }
+inline BvExpr operator+(BvExpr a, BvExpr b) { return BvExpr::binary(BvExpr::Kind::Add, std::move(a), std::move(b)); }
+inline BvExpr operator-(BvExpr a, BvExpr b) { return BvExpr::binary(BvExpr::Kind::Sub, std::move(a), std::move(b)); }
+inline BvExpr operator*(BvExpr a, BvExpr b) { return BvExpr::binary(BvExpr::Kind::Mul, std::move(a), std::move(b)); }
+inline BvExpr bv64(std::uint64_t value) { return BvExpr::constant(value, 64); }
+
+class BoolExpr {
+public:
+    enum class Kind { Const, Not, And, Or, Xor, Eq, Ult, Ule };
+
+    BoolExpr() = default;
+    explicit BoolExpr(std::shared_ptr<BoolNode> node) : node_(std::move(node)) {}
+
+    static BoolExpr constant(bool value);
+    static BoolExpr eq(BvExpr a, BvExpr b);
+    static BoolExpr ult(BvExpr a, BvExpr b);
+    static BoolExpr ule(BvExpr a, BvExpr b);
+    static BoolExpr unary(Kind k, BoolExpr x);
+    static BoolExpr binary(Kind k, BoolExpr a, BoolExpr b);
+
+    [[nodiscard]] bool empty() const noexcept { return !node_; }
+    [[nodiscard]] bool eval(const std::vector<std::uint64_t>& inputs) const;
+    [[nodiscard]] std::string smt(const std::string& suffix = "") const;
+    [[nodiscard]] std::string to_string() const;
+
+private:
+    std::shared_ptr<BoolNode> node_;
+    void ensure() const {
+        if (!node_) throw std::logic_error("empty BoolExpr");
+    }
+    friend struct BoolNode;
+};
+
+struct BoolNode {
+    BoolExpr::Kind kind = BoolExpr::Kind::Const;
+    bool value = false;
+    std::shared_ptr<BoolNode> lhs;
+    std::shared_ptr<BoolNode> rhs;
+    BvExpr a;
+    BvExpr b;
+};
+
+inline BoolExpr BoolExpr::constant(bool value) {
+    auto n = std::make_shared<BoolNode>();
+    n->kind = Kind::Const;
+    n->value = value;
+    return BoolExpr(std::move(n));
+}
+
+inline BoolExpr BoolExpr::eq(BvExpr a, BvExpr b) {
+    if (a.width() != b.width()) throw std::invalid_argument("equality width mismatch");
+    auto n = std::make_shared<BoolNode>();
+    n->kind = Kind::Eq;
+    n->a = std::move(a);
+    n->b = std::move(b);
+    return BoolExpr(std::move(n));
+}
+
+inline BoolExpr BoolExpr::ult(BvExpr a, BvExpr b) {
+    if (a.width() != b.width()) throw std::invalid_argument("comparison width mismatch");
+    auto n = std::make_shared<BoolNode>();
+    n->kind = Kind::Ult;
+    n->a = std::move(a);
+    n->b = std::move(b);
+    return BoolExpr(std::move(n));
+}
+
+inline BoolExpr BoolExpr::ule(BvExpr a, BvExpr b) {
+    if (a.width() != b.width()) throw std::invalid_argument("comparison width mismatch");
+    auto n = std::make_shared<BoolNode>();
+    n->kind = Kind::Ule;
+    n->a = std::move(a);
+    n->b = std::move(b);
+    return BoolExpr(std::move(n));
+}
+
+inline BoolExpr BoolExpr::unary(Kind k, BoolExpr x) {
+    if (x.empty()) throw std::invalid_argument("empty BoolExpr operand");
+    auto n = std::make_shared<BoolNode>();
+    n->kind = k;
+    n->lhs = x.node_;
+    return BoolExpr(std::move(n));
+}
+
+inline BoolExpr BoolExpr::binary(Kind k, BoolExpr a, BoolExpr b) {
+    if (a.empty() || b.empty()) throw std::invalid_argument("empty BoolExpr operand");
+    auto n = std::make_shared<BoolNode>();
+    n->kind = k;
+    n->lhs = a.node_;
+    n->rhs = b.node_;
+    return BoolExpr(std::move(n));
+}
+
+inline bool BoolExpr::eval(const std::vector<std::uint64_t>& inputs) const {
+    ensure();
+    auto L = [&]() { return BoolExpr(node_->lhs).eval(inputs); };
+    auto R = [&]() { return BoolExpr(node_->rhs).eval(inputs); };
+    switch (node_->kind) {
+        case Kind::Const: return node_->value;
+        case Kind::Not: return !L();
+        case Kind::And: return L() && R();
+        case Kind::Or: return L() || R();
+        case Kind::Xor: return L() != R();
+        case Kind::Eq: return node_->a.eval(inputs) == node_->b.eval(inputs);
+        case Kind::Ult: return node_->a.eval(inputs) < node_->b.eval(inputs);
+        case Kind::Ule: return node_->a.eval(inputs) <= node_->b.eval(inputs);
+    }
+    throw std::logic_error("unknown BoolExpr kind");
+}
+
+inline std::string BoolExpr::smt(const std::string& suffix) const {
+    ensure();
+    auto L = [&]() { return BoolExpr(node_->lhs).smt(suffix); };
+    auto R = [&]() { return BoolExpr(node_->rhs).smt(suffix); };
+    switch (node_->kind) {
+        case Kind::Const: return node_->value ? "true" : "false";
+        case Kind::Not: return "(not " + L() + ")";
+        case Kind::And: return "(and " + L() + " " + R() + ")";
+        case Kind::Or: return "(or " + L() + " " + R() + ")";
+        case Kind::Xor: return "(xor " + L() + " " + R() + ")";
+        case Kind::Eq: return "(= " + node_->a.smt(suffix) + " " + node_->b.smt(suffix) + ")";
+        case Kind::Ult: return "(bvult " + node_->a.smt(suffix) + " " + node_->b.smt(suffix) + ")";
+        case Kind::Ule: return "(bvule " + node_->a.smt(suffix) + " " + node_->b.smt(suffix) + ")";
+    }
+    throw std::logic_error("unknown BoolExpr kind");
+}
+
+inline std::string BoolExpr::to_string() const {
+    ensure();
+    auto L = [&]() { return BoolExpr(node_->lhs).to_string(); };
+    auto R = [&]() { return BoolExpr(node_->rhs).to_string(); };
+    switch (node_->kind) {
+        case Kind::Const: return node_->value ? "true" : "false";
+        case Kind::Not: return "(!" + L() + ")";
+        case Kind::And: return "(" + L() + " && " + R() + ")";
+        case Kind::Or: return "(" + L() + " || " + R() + ")";
+        case Kind::Xor: return "(" + L() + " xor " + R() + ")";
+        case Kind::Eq: return "(" + node_->a.to_string() + " == " + node_->b.to_string() + ")";
+        case Kind::Ult: return "(" + node_->a.to_string() + " <u " + node_->b.to_string() + ")";
+        case Kind::Ule: return "(" + node_->a.to_string() + " <=u " + node_->b.to_string() + ")";
+    }
+    throw std::logic_error("unknown BoolExpr kind");
+}
+
+inline BoolExpr operator!(BoolExpr x) { return BoolExpr::unary(BoolExpr::Kind::Not, std::move(x)); }
+inline BoolExpr operator&&(BoolExpr a, BoolExpr b) { return BoolExpr::binary(BoolExpr::Kind::And, std::move(a), std::move(b)); }
+inline BoolExpr operator||(BoolExpr a, BoolExpr b) { return BoolExpr::binary(BoolExpr::Kind::Or, std::move(a), std::move(b)); }
+inline BoolExpr bxor(BoolExpr a, BoolExpr b) { return BoolExpr::binary(BoolExpr::Kind::Xor, std::move(a), std::move(b)); }
+
+} // namespace drilljoin
+
+```
+
+`include/drilljoin/concolic.hpp`:
+
+```hpp
+#pragma once
+
+#include "drilljoin/anf.hpp"
+#include "drilljoin/bitwuzla_cli.hpp"
+#include "drilljoin/bv_expr.hpp"
+#include "drilljoin/synthesizer.hpp"
+
+#include <algorithm>
+#include <cstdint>
+#include <map>
+#include <optional>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
+
+namespace drilljoin {
+
+struct BitLocation {
+    unsigned variable = 0;
+    unsigned bit = 0;
+
+    [[nodiscard]] std::string name(const std::vector<Variable>& vars) const {
+        if (variable >= vars.size()) return "?";
+        return vars[variable].name + "[" + std::to_string(bit) + "]";
+    }
+};
+
+inline bool operator==(const BitLocation& a, const BitLocation& b) {
+    return a.variable == b.variable && a.bit == b.bit;
+}
+
+struct DependencyResult {
+    std::vector<BitLocation> relevant;
+    std::vector<BitLocation> irrelevant;
+    std::vector<BitLocation> unknown;
+    std::uint64_t solver_queries = 0;
+
+    [[nodiscard]] std::string summary(const std::vector<Variable>& vars) const {
+        std::ostringstream os;
+        os << "relevant=" << relevant.size()
+           << ", irrelevant=" << irrelevant.size()
+           << ", unknown=" << unknown.size()
+           << ", solver_queries=" << solver_queries;
+        if (!relevant.empty() && relevant.size() <= 16) {
+            os << " [";
+            for (std::size_t i = 0; i < relevant.size(); ++i) {
+                if (i) os << ", ";
+                os << relevant[i].name(vars);
+            }
+            os << "]";
+        }
+        return os.str();
+    }
+};
+
+class ProbeTaintAnalyzer {
+public:
+    static std::vector<BitLocation> analyze(const BoolExpr& predicate,
+                                            const std::vector<Variable>& vars,
+                                            const std::vector<std::uint64_t>& seed) {
+        if (seed.size() < vars.size()) {
+            throw std::invalid_argument("seed does not contain all variables");
+        }
+        std::vector<BitLocation> out;
+        const bool base = predicate.eval(seed);
+        for (const auto& v : vars) {
+            for (unsigned bit = 0; bit < v.width; ++bit) {
+                std::vector<std::uint64_t> alt = seed;
+                alt[v.index] ^= (1ULL << bit);
+                if (predicate.eval(alt) != base) {
+                    out.push_back(BitLocation{v.index, bit});
+                }
+            }
+        }
+        return out;
+    }
+};
+
+class SmtBitDependencyAnalyzer {
+public:
+    SmtBitDependencyAnalyzer(const BitwuzlaCli& solver,
+                             std::vector<Variable> vars,
+                             std::vector<BoolExpr> path_constraints = {})
+        : solver_(solver), vars_(std::move(vars)), path_constraints_(std::move(path_constraints)) {}
+
+    [[nodiscard]] DependencyResult analyze(const BoolExpr& predicate) const {
+        DependencyResult result;
+        std::vector<Variable> decls = vars_;
+        for (auto v : vars_) {
+            v.name += copy_suffix();
+            decls.push_back(v);
+        }
+
+        for (const auto& v : vars_) {
+            for (unsigned bit = 0; bit < v.width; ++bit) {
+                std::vector<std::string> assertions;
+                for (const auto& pc : path_constraints_) {
+                    assertions.push_back(pc.smt());
+                    assertions.push_back(pc.smt(copy_suffix()));
+                }
+                for (const auto& other : vars_) {
+                    if (other.index == v.index) {
+                        const std::uint64_t mask = (1ULL << bit);
+                        assertions.push_back("(= (bvxor " + other.name + " " + other.name + copy_suffix() + ") " +
+                                             detail::bv_const_smt(mask, other.width) + ")");
+                    } else {
+                        assertions.push_back("(= " + other.name + " " + other.name + copy_suffix() + ")");
+                    }
+                }
+                assertions.push_back("(distinct " + predicate.smt() + " " + predicate.smt(copy_suffix()) + ")");
+
+                SmtResult r = solver_.check(decls, assertions);
+                ++result.solver_queries;
+                const BitLocation loc{v.index, bit};
+                if (r.status == SmtStatus::Sat) {
+                    result.relevant.push_back(loc);
+                } else if (r.status == SmtStatus::Unsat) {
+                    result.irrelevant.push_back(loc);
+                } else {
+                    result.unknown.push_back(loc);
+                }
+            }
+        }
+        return result;
+    }
+
+    [[nodiscard]] static std::string copy_suffix() { return "_p"; }
+
+private:
+    const BitwuzlaCli& solver_;
+    std::vector<Variable> vars_;
+    std::vector<BoolExpr> path_constraints_;
+};
+
+namespace detail {
+inline std::string bool_and(std::vector<std::string> terms) {
+    if (terms.empty()) return "true";
+    if (terms.size() == 1) return terms.front();
+    std::ostringstream os;
+    os << "(and";
+    for (const auto& t : terms) os << ' ' << t;
+    os << ')';
+    return os.str();
+}
+
+inline std::string bool_or(std::vector<std::string> terms) {
+    if (terms.empty()) return "false";
+    if (terms.size() == 1) return terms.front();
+    std::ostringstream os;
+    os << "(or";
+    for (const auto& t : terms) os << ' ' << t;
+    os << ')';
+    return os.str();
+}
+
+inline std::string bool_xor(std::vector<std::string> terms) {
+    if (terms.empty()) return "false";
+    std::string acc = terms.front();
+    for (std::size_t i = 1; i < terms.size(); ++i) {
+        acc = "(xor " + acc + " " + terms[i] + ")";
+    }
+    return acc;
+}
+
+inline std::string bit_term(const Variable& v, unsigned bit) {
+    return "(= ((_ extract " + std::to_string(bit) + " " + std::to_string(bit) + ") " + v.name + ") #b1)";
+}
+
+inline std::string bit_term_negated(const Variable& v, unsigned bit) {
+    return "(= ((_ extract " + std::to_string(bit) + " " + std::to_string(bit) + ") " + v.name + ") #b0)";
+}
+} // namespace detail
+
+inline std::string anf_to_smt(const ANF& anf,
+                              const std::vector<BitLocation>& reduced_bits,
+                              const std::vector<Variable>& vars) {
+    std::vector<std::string> xor_terms;
+    for (ANF::Mask term : anf.terms()) {
+        if (term == 0) {
+            xor_terms.push_back("true");
+            continue;
+        }
+        std::vector<std::string> and_terms;
+        for (unsigned i = 0; i < reduced_bits.size(); ++i) {
+            if ((term & (ANF::Mask{1} << i)) == 0) continue;
+            const auto& loc = reduced_bits.at(i);
+            and_terms.push_back(detail::bit_term(vars.at(loc.variable), loc.bit));
+        }
+        xor_terms.push_back(detail::bool_and(std::move(and_terms)));
+    }
+    return detail::bool_xor(std::move(xor_terms));
+}
+
+inline std::vector<std::string> reduced_bit_names(const std::vector<BitLocation>& bits,
+                                                  const std::vector<Variable>& vars) {
+    std::vector<std::string> names;
+    names.reserve(bits.size());
+    for (const auto& b : bits) {
+        names.push_back(b.name(vars));
+    }
+    return names;
+}
+
+enum class SimplificationStatus {
+    Valid,
+    Candidate,
+    SolverUnavailable,
+    TooManyRelevantBits,
+    Failed
+};
+
+inline std::string simplification_status_to_string(SimplificationStatus s) {
+    switch (s) {
+        case SimplificationStatus::Valid: return "valid";
+        case SimplificationStatus::Candidate: return "candidate";
+        case SimplificationStatus::SolverUnavailable: return "solver-unavailable";
+        case SimplificationStatus::TooManyRelevantBits: return "too-many-relevant-bits";
+        case SimplificationStatus::Failed: return "failed";
+    }
+    return "failed";
+}
+
+struct SimplificationOptions {
+    unsigned max_drill_join_bits = 20;
+    bool require_smt_proof = true;
+    bool try_point_fallback = true;
+    SynthesisOptions synthesis_options{};
+};
+
+struct SimplificationResult {
+    SimplificationStatus status = SimplificationStatus::Failed;
+    std::string replacement;
+    std::string replacement_smt;
+    ANF anf = ANF::zero();
+    std::vector<BitLocation> relevant_bits;
+    DependencyResult dependency;
+    SynthesisStats synthesis_stats;
+    std::string diagnostic;
+
+    [[nodiscard]] bool valid() const noexcept { return status == SimplificationStatus::Valid; }
+};
+
+class ConcolicSimplifier {
+public:
+    ConcolicSimplifier(const BitwuzlaCli* solver, SimplificationOptions options = {})
+        : solver_(solver), options_(std::move(options)) {}
+
+    [[nodiscard]] SimplificationResult simplify(const BoolExpr& predicate,
+                                                const std::vector<Variable>& vars,
+                                                std::vector<std::uint64_t> seed,
+                                                const std::vector<BoolExpr>& path_constraints = {}) const {
+        SimplificationResult out;
+        if (seed.size() < vars.size()) seed.resize(vars.size(), 0);
+
+        if (options_.require_smt_proof && (solver_ == nullptr || !solver_->available())) {
+            out.status = SimplificationStatus::SolverUnavailable;
+            out.diagnostic = "Bitwuzla is required for a sound full-space proof but was not available";
+            return out;
+        }
+
+        if (solver_ != nullptr && solver_->available()) {
+            SmtBitDependencyAnalyzer analyzer(*solver_, vars, path_constraints);
+            out.dependency = analyzer.analyze(predicate);
+            out.relevant_bits = out.dependency.relevant;
+            // Unknown dependence is conservatively treated as relevant. We do not eliminate it.
+            out.relevant_bits.insert(out.relevant_bits.end(), out.dependency.unknown.begin(), out.dependency.unknown.end());
+        } else {
+            out.relevant_bits = ProbeTaintAnalyzer::analyze(predicate, vars, seed);
+            out.dependency.relevant = out.relevant_bits;
+            out.dependency.unknown = out.relevant_bits;
+        }
+
+        std::sort(out.relevant_bits.begin(), out.relevant_bits.end(), [](const BitLocation& a, const BitLocation& b) {
+            return std::tie(a.variable, a.bit) < std::tie(b.variable, b.bit);
+        });
+        out.relevant_bits.erase(std::unique(out.relevant_bits.begin(), out.relevant_bits.end()), out.relevant_bits.end());
+
+        if (out.relevant_bits.size() <= options_.max_drill_join_bits) {
+            return synthesize_reduced(predicate, vars, std::move(seed), path_constraints, std::move(out));
+        }
+
+        if (options_.try_point_fallback && solver_ != nullptr && solver_->available()) {
+            auto point = try_point_or_copoint(predicate, vars, path_constraints, out.relevant_bits);
+            if (point.has_value()) {
+                out.status = SimplificationStatus::Valid;
+                out.replacement = point->pretty;
+                out.replacement_smt = point->smt;
+                out.diagnostic = point->diagnostic;
+                return out;
+            }
+        }
+
+        out.status = SimplificationStatus::TooManyRelevantBits;
+        out.diagnostic = "reduced space has " + std::to_string(out.relevant_bits.size()) +
+                         " bits, above max_drill_join_bits=" + std::to_string(options_.max_drill_join_bits);
+        return out;
+    }
+
+private:
+    const BitwuzlaCli* solver_ = nullptr;
+    SimplificationOptions options_;
+
+    struct PointReplacement {
+        std::string pretty;
+        std::string smt;
+        std::string diagnostic;
+    };
+
+    [[nodiscard]] SimplificationResult synthesize_reduced(const BoolExpr& predicate,
+                                                          const std::vector<Variable>& vars,
+                                                          std::vector<std::uint64_t> seed,
+                                                          const std::vector<BoolExpr>& path_constraints,
+                                                          SimplificationResult out) const {
+        auto oracle = [predicate, vars, seed, bits = out.relevant_bits](std::uint64_t local) mutable {
+            std::vector<std::uint64_t> assignment = seed;
+            if (assignment.size() < vars.size()) assignment.resize(vars.size(), 0);
+            for (unsigned i = 0; i < bits.size(); ++i) {
+                const auto& loc = bits[i];
+                const std::uint64_t mask = 1ULL << loc.bit;
+                if ((local & (1ULL << i)) != 0) assignment[loc.variable] |= mask;
+                else assignment[loc.variable] &= ~mask;
+            }
+            return predicate.eval(assignment);
+        };
+
+        SynthesisOptions so = options_.synthesis_options;
+        so.max_exhaustive_bits = std::max<unsigned>(so.max_exhaustive_bits, static_cast<unsigned>(out.relevant_bits.size()));
+        Synthesizer dj(so);
+        out.anf = dj.synthesize(static_cast<unsigned>(out.relevant_bits.size()), oracle);
+        out.synthesis_stats = dj.stats();
+        out.replacement = out.anf.to_string(reduced_bit_names(out.relevant_bits, vars));
+        out.replacement_smt = anf_to_smt(out.anf, out.relevant_bits, vars);
+
+        if (options_.require_smt_proof) {
+            const auto proof = prove_equivalent(predicate, out.replacement_smt, vars, path_constraints);
+            if (proof.status == SmtStatus::Unsat) {
+                out.status = SimplificationStatus::Valid;
+                out.diagnostic = "SMT equivalence proof succeeded";
+            } else if (proof.status == SmtStatus::Sat) {
+                out.status = SimplificationStatus::Failed;
+                out.diagnostic = "SMT equivalence proof found a counterexample";
+            } else {
+                out.status = SimplificationStatus::Candidate;
+                out.diagnostic = "SMT equivalence proof returned " + smt_status_to_string(proof.status);
+            }
+        } else {
+            out.status = SimplificationStatus::Candidate;
+            out.diagnostic = "no full-space SMT proof requested";
+        }
+        return out;
+    }
+
+    [[nodiscard]] SmtResult prove_equivalent(const BoolExpr& predicate,
+                                             const std::string& replacement_smt,
+                                             const std::vector<Variable>& vars,
+                                             const std::vector<BoolExpr>& path_constraints) const {
+        std::vector<std::string> assertions;
+        for (const auto& pc : path_constraints) assertions.push_back(pc.smt());
+        assertions.push_back("(distinct " + predicate.smt() + " " + replacement_smt + ")");
+        return solver_->check(vars, assertions);
+    }
+
+    [[nodiscard]] std::optional<PointReplacement> try_point_or_copoint(const BoolExpr& predicate,
+                                                                       const std::vector<Variable>& vars,
+                                                                       const std::vector<BoolExpr>& path_constraints,
+                                                                       const std::vector<BitLocation>& projection_bits) const {
+        std::vector<std::string> names;
+        names.reserve(vars.size());
+        for (const auto& v : vars) names.push_back(v.name);
+
+        auto with_constraints = [&](std::string formula) {
+            std::vector<std::string> assertions;
+            for (const auto& pc : path_constraints) assertions.push_back(pc.smt());
+            assertions.push_back(std::move(formula));
+            return assertions;
+        };
+
+        SmtResult sat_p = solver_->check(vars, with_constraints(predicate.smt()), names);
+        if (sat_p.status == SmtStatus::Unsat) {
+            return PointReplacement{"false", "false", "predicate is unsatisfiable"};
+        }
+        SmtResult sat_not_p = solver_->check(vars, with_constraints("(not " + predicate.smt() + ")"), names);
+        if (sat_not_p.status == SmtStatus::Unsat) {
+            return PointReplacement{"true", "true", "predicate is valid"};
+        }
+
+        if (sat_p.status == SmtStatus::Sat && model_complete(sat_p, vars)) {
+            const auto eq = projection_equality(vars, sat_p.model, projection_bits);
+            const auto diff = projection_difference(vars, sat_p.model, projection_bits);
+            if (diff == "false") return std::nullopt;
+            SmtResult unique = solver_->check(vars, with_constraints("(and " + predicate.smt() + " " + diff + ")"));
+            if (unique.status == SmtStatus::Unsat) {
+                return PointReplacement{eq.pretty, eq.smt, "predicate has exactly one satisfying point"};
+            }
+        }
+
+        if (sat_not_p.status == SmtStatus::Sat && model_complete(sat_not_p, vars)) {
+            const auto eq = projection_equality(vars, sat_not_p.model, projection_bits);
+            const auto diff = projection_difference(vars, sat_not_p.model, projection_bits);
+            if (diff == "false") return std::nullopt;
+            SmtResult unique_false = solver_->check(vars, with_constraints("(and (not " + predicate.smt() + ") " + diff + ")"));
+            if (unique_false.status == SmtStatus::Unsat) {
+                return PointReplacement{"!(" + eq.pretty + ")", "(not " + eq.smt + ")", "predicate is false at exactly one point"};
+            }
+        }
+        return std::nullopt;
+    }
+
+    struct EqualityFormula {
+        std::string pretty;
+        std::string smt;
+    };
+
+    [[nodiscard]] static bool model_complete(const SmtResult& r, const std::vector<Variable>& vars) {
+        for (const auto& v : vars) {
+            if (r.model.find(v.name) == r.model.end()) return false;
+        }
+        return true;
+    }
+
+    [[nodiscard]] static EqualityFormula projection_equality(const std::vector<Variable>& vars,
+                                                             const std::map<std::string, std::uint64_t>& model,
+                                                             const std::vector<BitLocation>& bits) {
+        if (bits.empty()) return EqualityFormula{"true", "true"};
+        std::vector<std::string> pretty_terms;
+        std::vector<std::string> smt_terms;
+        std::vector<std::vector<unsigned>> by_var(vars.size());
+        for (const auto& b : bits) {
+            if (b.variable < by_var.size()) by_var[b.variable].push_back(b.bit);
+        }
+        for (std::size_t vi = 0; vi < vars.size(); ++vi) {
+            auto& bs = by_var[vi];
+            if (bs.empty()) continue;
+            std::sort(bs.begin(), bs.end());
+            bs.erase(std::unique(bs.begin(), bs.end()), bs.end());
+            const auto& v = vars[vi];
+            const auto value = model.at(v.name) & detail::mask_for_width(v.width);
+            if (bs.size() == v.width) {
+                pretty_terms.push_back(v.name + " == " + detail::bv_const_hex(value, v.width));
+                smt_terms.push_back("(= " + v.name + " " + detail::bv_const_smt(value, v.width) + ")");
+            } else {
+                for (unsigned bit : bs) {
+                    const bool one = ((value >> bit) & 1ULL) != 0;
+                    pretty_terms.push_back(v.name + "[" + std::to_string(bit) + "] == " + (one ? "1" : "0"));
+                    smt_terms.push_back(one ? detail::bit_term(v, bit) : detail::bit_term_negated(v, bit));
+                }
+            }
+        }
+        EqualityFormula out;
+        out.pretty = pretty_terms.size() == 1 ? pretty_terms.front() : join_strings(pretty_terms, " && ", "(", ")");
+        out.smt = detail::bool_and(std::move(smt_terms));
+        return out;
+    }
+
+    [[nodiscard]] static std::string projection_difference(const std::vector<Variable>& vars,
+                                                           const std::map<std::string, std::uint64_t>& model,
+                                                           const std::vector<BitLocation>& bits) {
+        if (bits.empty()) return "false";
+        std::vector<std::string> terms;
+        std::vector<std::vector<unsigned>> by_var(vars.size());
+        for (const auto& b : bits) {
+            if (b.variable < by_var.size()) by_var[b.variable].push_back(b.bit);
+        }
+        for (std::size_t vi = 0; vi < vars.size(); ++vi) {
+            auto& bs = by_var[vi];
+            if (bs.empty()) continue;
+            std::sort(bs.begin(), bs.end());
+            bs.erase(std::unique(bs.begin(), bs.end()), bs.end());
+            const auto& v = vars[vi];
+            const auto value = model.at(v.name) & detail::mask_for_width(v.width);
+            if (bs.size() == v.width) {
+                terms.push_back("(distinct " + v.name + " " + detail::bv_const_smt(value, v.width) + ")");
+            } else {
+                for (unsigned bit : bs) {
+                    const bool one = ((value >> bit) & 1ULL) != 0;
+                    terms.push_back(one ? detail::bit_term_negated(v, bit) : detail::bit_term(v, bit));
+                }
+            }
+        }
+        return detail::bool_or(std::move(terms));
+    }
+
+    [[nodiscard]] static EqualityFormula model_equality(const std::vector<Variable>& vars,
+                                                        const std::map<std::string, std::uint64_t>& model) {
+        std::vector<std::string> pretty_terms;
+        std::vector<std::string> smt_terms;
+        for (const auto& v : vars) {
+            const auto value = model.at(v.name) & detail::mask_for_width(v.width);
+            pretty_terms.push_back(v.name + " == " + detail::bv_const_hex(value, v.width));
+            smt_terms.push_back("(= " + v.name + " " + detail::bv_const_smt(value, v.width) + ")");
+        }
+        EqualityFormula out;
+        out.pretty = pretty_terms.size() == 1 ? pretty_terms.front() : join_strings(pretty_terms, " && ", "(", ")");
+        out.smt = detail::bool_and(std::move(smt_terms));
+        return out;
+    }
+
+    [[nodiscard]] static std::string model_difference(const std::vector<Variable>& vars,
+                                                      const std::map<std::string, std::uint64_t>& model) {
+        std::vector<std::string> terms;
+        for (const auto& v : vars) {
+            const auto value = model.at(v.name) & detail::mask_for_width(v.width);
+            terms.push_back("(distinct " + v.name + " " + detail::bv_const_smt(value, v.width) + ")");
+        }
+        return detail::bool_or(std::move(terms));
+    }
+
+    [[nodiscard]] static std::string join_strings(const std::vector<std::string>& xs,
+                                                  const std::string& sep,
+                                                  const std::string& prefix,
+                                                  const std::string& suffix) {
+        std::ostringstream os;
+        os << prefix;
+        for (std::size_t i = 0; i < xs.size(); ++i) {
+            if (i) os << sep;
+            os << xs[i];
+        }
+        os << suffix;
+        return os.str();
+    }
+};
+
+} // namespace drilljoin
+
+```
+
+`include/drilljoin/opaque_examples.hpp`:
+
+```hpp
+#pragma once
+
+#include "drilljoin/bv_expr.hpp"
+
+#include <cstdint>
+#include <vector>
+
+namespace drilljoin::examples {
+
+inline BvExpr mba_zero_add_xor_and(BvExpr x, BvExpr y) {
+    // x + y == (x ^ y) + 2*(x & y) modulo 2^64.
+    return (x + y) - ((x ^ y) + bvshl((x & y), 1));
+}
+
+inline BvExpr mba_zero_or_add_and(BvExpr x, BvExpr y) {
+    // x | y == x + y - (x & y) modulo 2^64.
+    return (x | y) - (x + y) + (x & y);
+}
+
+inline BvExpr mba_obfuscated_constant64(BvExpr x, BvExpr y, std::uint64_t k) {
+    BvExpr z1 = mba_zero_add_xor_and(x, y);
+    BvExpr z2 = mba_zero_or_add_and(x, y);
+    BvExpr z = (bv64(0x9e3779b97f4a7c15ULL) * z1) +
+               (bv64(0xd1b54a32d192ed03ULL) * z2) +
+               (bv64(0x94d049bb133111ebULL) * z1 * z1) +
+               (bv64(0x2545f4914f6cdd1dULL) * z1 * z2);
+    return bv64(k) + z;
+}
+
+inline BoolExpr plain_opaque_true64(BvExpr x) {
+    return BoolExpr::eq(x + x, bvshl(x, 1));
+}
+
+inline BoolExpr mba_invariant_true64(BvExpr x, BvExpr y, std::uint64_t k) {
+    return BoolExpr::eq(mba_obfuscated_constant64(x, y, k), bv64(k));
+}
+
+inline BoolExpr mba_contextual_comparison64(BvExpr input, BvExpr x, BvExpr y, std::uint64_t k) {
+    return BoolExpr::eq(input, mba_obfuscated_constant64(x, y, k));
+}
+
+inline BvExpr biondi_point_word64(BvExpr x) {
+    BvExpr t = (x + bv64(1)) & (~x);
+    return ((t | bv64(0x7AFAFA697AFAFA69ULL)) & bv64(0x80A061440A061440ULL)) +
+           (((~t) & bv64(0x10401050504ULL)) | bv64(0x1010104ULL));
+}
+
+inline BoolExpr biondi_point_predicate64(BvExpr x) {
+    // True only for x = 0x7fffffffffffffff for the word expression above.
+    return BoolExpr::eq(biondi_point_word64(x), bv64(0x80A061440B071544ULL));
+}
+
+} // namespace drilljoin::examples
+
+```
+
+`include/drilljoin/synthesizer.hpp`:
+
+```hpp
+#pragma once
+
+#include "drilljoin/anf.hpp"
+
+#include <cstdint>
+#include <functional>
+#include <limits>
+#include <memory>
+#include <optional>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+namespace drilljoin {
+
+struct SynthesisOptions {
+    // Use Join directly when the current subspace arity is at most this value.
+    // The built-in basis is the ANF monomial basis of size 2^arity.
+    unsigned join_arity = 3;
+
+    // Exact Drill & Join needs an exhaustive find-position search to prove that
+    // a residual function is the zero map. This guard prevents accidental scans
+    // of huge spaces. Increase deliberately when needed.
+    unsigned max_exhaustive_bits = 20;
+
+    enum class SplitStrategy {
+        Balanced,  // split n bits into floor(n/2) and ceil(n/2)
+        FirstRest  // Balaniuk's Lisp demo: X is the first bit, Y is the rest
+    };
+    SplitStrategy split_strategy = SplitStrategy::Balanced;
+
+    bool memoize_function_values = true;
+};
+
+struct SynthesisStats {
+    std::uint64_t oracle_queries = 0;
+    std::uint64_t cached_function_evaluations = 0;
+    std::uint64_t cache_hits = 0;
+    std::uint64_t findpos_calls = 0;
+    std::uint64_t drill_calls = 0;
+    std::uint64_t join_calls = 0;
+    std::uint64_t basis_reductions = 0;
+    std::uint64_t synthesized_outputs = 0;
+    unsigned max_recursion_depth = 0;
+
+    [[nodiscard]] std::string to_string() const {
+        std::ostringstream os;
+        os << "oracle_queries=" << oracle_queries
+           << ", cached_function_evaluations=" << cached_function_evaluations
+           << ", cache_hits=" << cache_hits
+           << ", findpos_calls=" << findpos_calls
+           << ", drill_calls=" << drill_calls
+           << ", join_calls=" << join_calls
+           << ", basis_reductions=" << basis_reductions
+           << ", synthesized_outputs=" << synthesized_outputs
+           << ", max_recursion_depth=" << max_recursion_depth;
+        return os.str();
+    }
+};
+
+class Synthesizer {
+public:
+    using LocalMask = std::uint64_t;
+    using GlobalMask = std::uint64_t;
+    using BooleanOracle = std::function<bool(GlobalMask)>;
+    using WordOracle = std::function<std::uint64_t(GlobalMask)>;
+
+    explicit Synthesizer(SynthesisOptions options = {}) : options_(options) {
+        if (options_.join_arity > 20) {
+            throw std::invalid_argument("join_arity is too large for the built-in monomial basis");
+        }
+    }
+
+    [[nodiscard]] const SynthesisOptions& options() const noexcept { return options_; }
+    [[nodiscard]] const SynthesisStats& stats() const noexcept { return stats_; }
+    void reset_stats() { stats_ = SynthesisStats{}; }
+
+    // Synthesize one Boolean output bit as an ANF over variables x0..x(input_bits-1).
+    [[nodiscard]] ANF synthesize(unsigned input_bits, BooleanOracle oracle) {
+        validate_arity(input_bits);
+        reset_stats();
+        std::vector<unsigned> variables(input_bits);
+        for (unsigned i = 0; i < input_bits; ++i) variables[i] = i;
+        auto top = make_function(input_bits, std::move(oracle), true);
+        ANF result = synthesize_recursive(top, variables, 0);
+        ++stats_.synthesized_outputs;
+        return result;
+    }
+
+    // Synthesize several low-order output bits of a word-valued oracle independently.
+    [[nodiscard]] std::vector<ANF> synthesize_vector(unsigned input_bits,
+                                                     unsigned output_bits,
+                                                     WordOracle oracle) {
+        if (output_bits > 64) {
+            throw std::invalid_argument("output_bits must be <= 64");
+        }
+        std::vector<ANF> outputs;
+        outputs.reserve(output_bits);
+        SynthesisStats total{};
+        for (unsigned bit = 0; bit < output_bits; ++bit) {
+            Synthesizer per_bit(options_);
+            ANF expr = per_bit.synthesize(input_bits, [oracle, bit](GlobalMask input) {
+                return ((oracle(input) >> bit) & 1ULL) != 0ULL;
+            });
+            outputs.push_back(expr);
+            accumulate(total, per_bit.stats_);
+        }
+        stats_ = total;
+        stats_.synthesized_outputs = output_bits;
+        return outputs;
+    }
+
+    // Build the standard monomial ANF basis for a subspace with these global variables.
+    [[nodiscard]] static std::vector<ANF> monomial_basis(const std::vector<unsigned>& variables) {
+        if (variables.size() > 20) {
+            throw std::invalid_argument("monomial_basis is intended for small bases; arity must be <= 20");
+        }
+        const std::uint64_t count = std::uint64_t{1} << variables.size();
+        std::vector<ANF> basis;
+        basis.reserve(static_cast<std::size_t>(count));
+        for (std::uint64_t local_subset = 0; local_subset < count; ++local_subset) {
+            GlobalMask global_monomial = 0;
+            for (unsigned i = 0; i < variables.size(); ++i) {
+                if ((local_subset & (std::uint64_t{1} << i)) != 0) {
+                    global_monomial |= (std::uint64_t{1} << variables[i]);
+                }
+            }
+            basis.push_back(ANF::monomial(global_monomial));
+        }
+        return basis;
+    }
+
+    // Convert a local bit-vector over 'variables' to the global bit-vector layout.
+    [[nodiscard]] static GlobalMask inflate(LocalMask local, const std::vector<unsigned>& variables) {
+        GlobalMask out = 0;
+        for (unsigned i = 0; i < variables.size(); ++i) {
+            if ((local & (std::uint64_t{1} << i)) != 0) {
+                out |= (std::uint64_t{1} << variables[i]);
+            }
+        }
+        return out;
+    }
+
+private:
+    struct Function;
+    using FunctionPtr = std::shared_ptr<Function>;
+
+    struct Function {
+        unsigned arity = 0;
+        std::function<bool(LocalMask)> raw;
+        bool count_as_oracle = false;
+        bool memoize = true;
+        SynthesisStats* stats = nullptr;
+        mutable std::unordered_map<LocalMask, bool> cache;
+
+        bool eval(LocalMask input) const {
+            if (memoize) {
+                auto it = cache.find(input);
+                if (it != cache.end()) {
+                    if (stats) ++stats->cache_hits;
+                    return it->second;
+                }
+            }
+            if (stats) {
+                ++stats->cached_function_evaluations;
+                if (count_as_oracle) ++stats->oracle_queries;
+            }
+            bool value = raw(input);
+            if (memoize) {
+                cache.emplace(input, value);
+            }
+            return value;
+        }
+    };
+
+    SynthesisOptions options_;
+    SynthesisStats stats_;
+
+    static void validate_arity(unsigned bits) {
+        if (bits > 64) {
+            throw std::invalid_argument("input_bits must be <= 64 in this implementation");
+        }
+    }
+
+    static void accumulate(SynthesisStats& a, const SynthesisStats& b) {
+        a.oracle_queries += b.oracle_queries;
+        a.cached_function_evaluations += b.cached_function_evaluations;
+        a.cache_hits += b.cache_hits;
+        a.findpos_calls += b.findpos_calls;
+        a.drill_calls += b.drill_calls;
+        a.join_calls += b.join_calls;
+        a.basis_reductions += b.basis_reductions;
+        a.max_recursion_depth = std::max(a.max_recursion_depth, b.max_recursion_depth);
+    }
+
+    [[nodiscard]] FunctionPtr make_function(unsigned arity,
+                                            std::function<bool(LocalMask)> raw,
+                                            bool count_as_oracle = false) {
+        auto fn = std::make_shared<Function>();
+        fn->arity = arity;
+        fn->raw = std::move(raw);
+        fn->count_as_oracle = count_as_oracle;
+        fn->memoize = options_.memoize_function_values;
+        fn->stats = &stats_;
+        return fn;
+    }
+
+    [[nodiscard]] ANF synthesize_recursive(const FunctionPtr& fn,
+                                           const std::vector<unsigned>& variables,
+                                           unsigned depth) {
+        stats_.max_recursion_depth = std::max(stats_.max_recursion_depth, depth);
+        if (variables.size() != fn->arity) {
+            throw std::logic_error("function arity and variable list differ");
+        }
+        if (variables.size() <= options_.join_arity) {
+            return join(fn, variables, monomial_basis(variables), depth);
+        }
+        return drill(fn, variables, depth);
+    }
+
+    [[nodiscard]] ANF drill(const FunctionPtr& fn,
+                            const std::vector<unsigned>& variables,
+                            unsigned depth) {
+        ++stats_.drill_calls;
+        auto witness = findpos(fn);
+        if (!witness.has_value()) {
+            return ANF::zero();
+        }
+
+        const unsigned n = fn->arity;
+        if (n < 2) {
+            throw std::logic_error("drill requires arity >= 2; low-arity basis should have selected join");
+        }
+
+        unsigned left_arity = 0;
+        switch (options_.split_strategy) {
+            case SynthesisOptions::SplitStrategy::Balanced:
+                left_arity = n / 2;
+                break;
+            case SynthesisOptions::SplitStrategy::FirstRest:
+                left_arity = 1;
+                break;
+        }
+        if (left_arity == 0 || left_arity >= n) {
+            throw std::logic_error("invalid drill split");
+        }
+        const unsigned right_arity = n - left_arity;
+        const LocalMask left_mask = low_mask(left_arity);
+        const LocalMask x0 = (*witness) & left_mask;
+        const LocalMask y0 = (*witness) >> left_arity;
+
+        std::vector<unsigned> left_vars(variables.begin(), variables.begin() + left_arity);
+        std::vector<unsigned> right_vars(variables.begin() + left_arity, variables.end());
+
+        auto fa = make_function(left_arity, [fn, y0, left_arity](LocalMask x) {
+            return fn->eval(x | (y0 << left_arity));
+        });
+
+        auto fb = make_function(right_arity, [fn, x0, left_arity](LocalMask y) {
+            return fn->eval(x0 | (y << left_arity));
+        });
+
+        auto fc = make_function(n, [fn, fa, fb, left_arity, left_mask](LocalMask xy) {
+            const LocalMask x = xy & left_mask;
+            const LocalMask y = xy >> left_arity;
+            return fn->eval(xy) ^ (fa->eval(x) & fb->eval(y));
+        });
+
+        const ANF pa = synthesize_recursive(fa, left_vars, depth + 1);
+        const ANF pb = synthesize_recursive(fb, right_vars, depth + 1);
+        const ANF pc = synthesize_recursive(fc, variables, depth + 1);
+        return (pa & pb) ^ pc;
+    }
+
+    [[nodiscard]] ANF join(const FunctionPtr& fn,
+                           const std::vector<unsigned>& variables,
+                           std::vector<ANF> basis,
+                           unsigned depth) {
+        ++stats_.join_calls;
+        auto witness = findpos(fn);
+        if (!witness.has_value()) {
+            return ANF::zero();
+        }
+        if (basis.empty()) {
+            throw std::runtime_error("non-zero function cannot be represented: empty basis");
+        }
+
+        const GlobalMask global_witness = inflate(*witness, variables);
+        const std::size_t chosen = choose_basis_vector(basis, global_witness);
+        if (chosen == npos()) {
+            throw std::runtime_error("basis selection failed: no basis vector evaluates to 1 at witness");
+        }
+
+        const ANF v = basis[chosen];
+        std::vector<ANF> kernel_basis;
+        kernel_basis.reserve(basis.size() - 1);
+        for (std::size_t i = 0; i < basis.size(); ++i) {
+            if (i == chosen) continue;
+            ANF k = basis[i].eval(global_witness) ? (basis[i] ^ v) : basis[i];
+            if (!k.is_zero()) {
+                kernel_basis.push_back(std::move(k));
+            }
+        }
+        ++stats_.basis_reductions;
+
+        auto residual = make_function(fn->arity, [fn, v, variables](LocalMask local_input) {
+            return fn->eval(local_input) ^ v.eval(inflate(local_input, variables));
+        });
+
+        return v ^ join(residual, variables, std::move(kernel_basis), depth + 1);
+    }
+
+    [[nodiscard]] std::optional<LocalMask> findpos(const FunctionPtr& fn) {
+        ++stats_.findpos_calls;
+        if (fn->arity > options_.max_exhaustive_bits) {
+            std::ostringstream os;
+            os << "exact findpos would scan 2^" << fn->arity
+               << " points; increase max_exhaustive_bits deliberately or add a custom search strategy";
+            throw std::runtime_error(os.str());
+        }
+        if (fn->arity >= 64) {
+            throw std::runtime_error("exhaustive findpos over 2^64 inputs is not representable by the built-in iterator");
+        }
+        const LocalMask limit = (fn->arity == 0) ? 1ULL : (1ULL << fn->arity);
+        for (LocalMask x = 0; x < limit; ++x) {
+            if (fn->eval(x)) {
+                return x;
+            }
+        }
+        return std::nullopt;
+    }
+
+    [[nodiscard]] static LocalMask low_mask(unsigned bits) {
+        if (bits == 0) return 0;
+        if (bits >= 64) return std::numeric_limits<LocalMask>::max();
+        return (LocalMask{1} << bits) - 1ULL;
+    }
+
+    [[nodiscard]] static std::size_t npos() noexcept {
+        return std::numeric_limits<std::size_t>::max();
+    }
+
+    [[nodiscard]] static std::size_t choose_basis_vector(const std::vector<ANF>& basis,
+                                                         GlobalMask global_witness) {
+        std::size_t best = npos();
+        for (std::size_t i = 0; i < basis.size(); ++i) {
+            if (!basis[i].eval(global_witness)) continue;
+            if (best == npos()) {
+                best = i;
+                continue;
+            }
+            if (basis[i].term_count() < basis[best].term_count()) {
+                best = i;
+            } else if (basis[i].term_count() == basis[best].term_count() &&
+                       basis[i].degree() < basis[best].degree()) {
+                best = i;
+            }
+        }
+        return best;
+    }
+};
+
+} // namespace drilljoin
+
+```
+
+`tests/basic_tests.cpp`:
+
+```cpp
+#include "drilljoin/synthesizer.hpp"
+
+#include <cassert>
+#include <cstdint>
+#include <iostream>
+#include <stdexcept>
+#include <vector>
+
+using drilljoin::ANF;
+using drilljoin::Synthesizer;
+using drilljoin::SynthesisOptions;
+
+static void verify(unsigned bits, const ANF& expr, const Synthesizer::BooleanOracle& oracle) {
+    const std::uint64_t limit = (bits == 0) ? 1ULL : (1ULL << bits);
+    for (std::uint64_t x = 0; x < limit; ++x) {
+        if (expr.eval(x) != oracle(x)) {
+            std::cerr << "mismatch at input " << x << ": expr=" << expr.eval(x)
+                      << ", oracle=" << oracle(x) << ", expr=" << expr << "\n";
+            throw std::runtime_error("verification failed");
+        }
+    }
+}
+
+static void test_anf_arithmetic() {
+    ANF x0 = ANF::variable(0);
+    ANF x1 = ANF::variable(1);
+    ANF one = ANF::one();
+    ANF zero = ANF::zero();
+
+    assert((x0 ^ x0).is_zero());
+    assert((x0 & one) == x0);
+    assert((x0 & zero).is_zero());
+    assert(((x0 ^ one) & x1) == ((x0 & x1) ^ x1));
+}
+
+static void test_all_small_truth_tables() {
+    SynthesisOptions options;
+    options.join_arity = 2;
+    options.max_exhaustive_bits = 8;
+
+    for (unsigned bits = 0; bits <= 3; ++bits) {
+        const unsigned rows = (bits == 0) ? 1U : (1U << bits);
+        const std::uint64_t function_count = 1ULL << rows;
+        for (std::uint64_t table = 0; table < function_count; ++table) {
+            Synthesizer dj(options);
+            auto oracle = [table](std::uint64_t input) {
+                return ((table >> input) & 1ULL) != 0ULL;
+            };
+            ANF expr = dj.synthesize(bits, oracle);
+            verify(bits, expr, oracle);
+        }
+    }
+}
+
+static void test_balaniuk_paper_example() {
+    SynthesisOptions options;
+    options.join_arity = 1;
+    options.max_exhaustive_bits = 8;
+    options.split_strategy = SynthesisOptions::SplitStrategy::FirstRest;
+    Synthesizer dj(options);
+
+    auto f = [](std::uint64_t input) {
+        const bool x = (input & 1ULL) != 0;
+        const bool y = (input & 2ULL) != 0;
+        return y || (!x && !y);
+    };
+    ANF expr = dj.synthesize(2, f);
+    ANF expected = ANF::one() ^ ANF::variable(0) ^ (ANF::variable(0) & ANF::variable(1));
+    assert(expr == expected);
+    verify(2, expr, f);
+}
+
+static void test_vector_synthesis() {
+    SynthesisOptions options;
+    options.join_arity = 2;
+    options.max_exhaustive_bits = 8;
+    Synthesizer dj(options);
+
+    auto word = [](std::uint64_t input) {
+        return ((input * 7ULL) + 3ULL) & 0xFULL;
+    };
+    auto outputs = dj.synthesize_vector(3, 4, word);
+    assert(outputs.size() == 4);
+    for (std::uint64_t x = 0; x < 8; ++x) {
+        std::uint64_t synthesized = 0;
+        for (unsigned bit = 0; bit < outputs.size(); ++bit) {
+            if (outputs[bit].eval(x)) synthesized |= (1ULL << bit);
+        }
+        assert(synthesized == word(x));
+    }
+}
+
+int main() {
+    test_anf_arithmetic();
+    test_all_small_truth_tables();
+    test_balaniuk_paper_example();
+    test_vector_synthesis();
+    std::cout << "All Drill & Join tests passed.\n";
+    return 0;
+}
+
+```
+
+`tests/opaque64_tests.cpp`:
+
+```cpp
+#include "drilljoin/concolic.hpp"
+#include "drilljoin/opaque_examples.hpp"
+
+#include <cassert>
+#include <cstdlib>
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+using namespace drilljoin;
+
+static std::string solver_path_from_env() {
+    const char* p = std::getenv("BITWUZLA");
+    return p && *p ? std::string(p) : std::string("bitwuzla");
+}
+
+static void require(bool cond, const std::string& msg) {
+    if (!cond) throw std::runtime_error(msg);
+}
+
+static void test_concrete_opaque_examples() {
+    BvExpr x = BvExpr::variable(0, "x");
+    BvExpr y = BvExpr::variable(1, "y");
+    BvExpr input = BvExpr::variable(2, "input");
+    const std::uint64_t k = 0x876543210badc0deULL;
+
+    auto plain = examples::plain_opaque_true64(x);
+    auto mba = examples::mba_invariant_true64(x, y, k);
+    auto contextual = examples::mba_contextual_comparison64(input, x, BvExpr::constant(0x123456789abcdef0ULL), k);
+    auto point = examples::biondi_point_predicate64(x);
+
+    for (std::uint64_t i = 0; i < 256; ++i) {
+        std::vector<std::uint64_t> a = {i * 0x9e3779b97f4a7c15ULL, ~i, k};
+        require(plain.eval(a), "plain 64-bit opaque identity failed concretely");
+        require(mba.eval(a), "MBA invariant opaque identity failed concretely");
+        require(contextual.eval(a), "MBA contextual comparison should be true when input is K");
+        a[2] = k ^ 1ULL;
+        require(!contextual.eval(a), "MBA contextual comparison should be false when input != K");
+    }
+
+    require(point.eval({0x7fffffffffffffffULL}), "point predicate special point should be true");
+    require(!point.eval({0ULL}), "point predicate should be false at 0");
+    require(!point.eval({0x7ffffffffffffffeULL}), "point predicate should be false next to special point");
+}
+
+static SimplificationOptions default_opts() {
+    SimplificationOptions opts;
+    opts.max_drill_join_bits = 20;
+    opts.require_smt_proof = true;
+    opts.try_point_fallback = true;
+    opts.synthesis_options.join_arity = 3;
+    opts.synthesis_options.max_exhaustive_bits = 20;
+    return opts;
+}
+
+static void test_plain64_with_bitwuzla(const BitwuzlaCli& solver) {
+    std::vector<Variable> vars = {{0, "x", 64}};
+    BvExpr x = BvExpr::variable(0, "x");
+    auto pred = examples::plain_opaque_true64(x);
+
+    ConcolicSimplifier simplifier(&solver, default_opts());
+    auto r = simplifier.simplify(pred, vars, {0x123456789abcdef0ULL});
+    require(r.valid(), "plain64 simplification was not valid: " + r.diagnostic);
+    require(r.relevant_bits.empty(), "plain64 should have no relevant bits");
+    require(r.replacement == "1", "plain64 should simplify to ANF constant 1, got " + r.replacement);
+    std::cout << "plain64: " << r.replacement << " / " << r.dependency.summary(vars) << "\n";
+}
+
+static void test_mba_invariant64_with_bitwuzla(const BitwuzlaCli& solver) {
+    std::vector<Variable> vars = {{0, "junk", 64}};
+    BvExpr junk = BvExpr::variable(0, "junk");
+    const std::uint64_t k = 0x876543210badc0deULL;
+    auto pred = examples::mba_invariant_true64(junk, bv64(0x123456789abcdef0ULL), k);
+
+    ConcolicSimplifier simplifier(&solver, default_opts());
+    auto r = simplifier.simplify(pred, vars, {0});
+    require(r.valid(), "MBA invariant simplification was not valid: " + r.diagnostic);
+    require(r.relevant_bits.empty(), "MBA invariant should have no relevant bits");
+    require(r.replacement == "1", "MBA invariant should simplify to ANF constant 1, got " + r.replacement);
+    std::cout << "mba-invariant64: " << r.replacement << " / " << r.dependency.summary(vars) << "\n";
+}
+
+static void test_mba_contextual64_with_bitwuzla(const BitwuzlaCli& solver) {
+    std::vector<Variable> vars = {{0, "input", 64}, {1, "junk", 64}};
+    BvExpr input = BvExpr::variable(0, "input");
+    BvExpr junk = BvExpr::variable(1, "junk");
+    const std::uint64_t k = 0x876543210badc0deULL;
+    auto pred = examples::mba_contextual_comparison64(input, junk, bv64(0x123456789abcdef0ULL), k);
+
+    ConcolicSimplifier simplifier(&solver, default_opts());
+    auto r = simplifier.simplify(pred, vars, {k, 0x42});
+    require(r.valid(), "MBA contextual simplification was not valid: " + r.diagnostic);
+    require(r.relevant_bits.size() == 64, "MBA contextual should retain only the 64 input bits");
+    for (const auto& b : r.relevant_bits) require(b.variable == 0, "MBA contextual retained a spurious junk bit");
+    require(r.replacement.find("input == 0x876543210badc0de") != std::string::npos,
+            "MBA contextual replacement should be input == K, got " + r.replacement);
+    std::cout << "mba-contextual64: " << r.replacement << " / " << r.dependency.summary(vars) << "\n";
+}
+
+static void test_point64_with_bitwuzla(const BitwuzlaCli& solver) {
+    std::vector<Variable> vars = {{0, "x", 64}};
+    BvExpr x = BvExpr::variable(0, "x");
+    auto pred = examples::biondi_point_predicate64(x);
+
+    // This intentionally keeps the D&J threshold small: the point-function case
+    // is expected to bypass black-box Drill & Join and use the SMT point fallback.
+    SimplificationOptions opts = default_opts();
+    opts.max_drill_join_bits = 12;
+    ConcolicSimplifier simplifier(&solver, opts);
+    auto r = simplifier.simplify(pred, vars, {0});
+    require(r.valid(), "point64 simplification was not valid: " + r.diagnostic);
+    require(r.replacement.find("x == 0x7fffffffffffffff") != std::string::npos,
+            "point64 replacement should be x == 0x7fff..., got " + r.replacement);
+    std::cout << "point64: " << r.replacement << " / " << r.dependency.summary(vars) << "\n";
+}
+
+int main() {
+    test_concrete_opaque_examples();
+
+    BitwuzlaCliOptions bo;
+    bo.binary = solver_path_from_env();
+    bo.time_limit_ms = 10000;
+    BitwuzlaCli solver(bo);
+    if (!solver.available()) {
+        std::cout << "Bitwuzla not found; concrete 64-bit opaque tests passed, SMT-backed soundness tests skipped. "
+                  << "Set BITWUZLA=/path/to/bitwuzla to enable them.\n";
+        return 0;
+    }
+
+    test_plain64_with_bitwuzla(solver);
+    test_mba_invariant64_with_bitwuzla(solver);
+    test_mba_contextual64_with_bitwuzla(solver);
+    test_point64_with_bitwuzla(solver);
+    std::cout << "All 64-bit opaque predicate tests passed.\n";
+    return 0;
+}
+
+```
+
+`tools/dj_synth.cpp`:
+
+```cpp
+#include "drilljoin/synthesizer.hpp"
+
+#include <cstdint>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+using drilljoin::ANF;
+using drilljoin::Synthesizer;
+using drilljoin::SynthesisOptions;
+
+namespace {
+
+void usage(const char* argv0) {
+    std::cerr
+        << "Usage:\n"
+        << "  " << argv0 << " --bits N --truth 0101 [--join-arity K] [--max-bits M] [--dump-smt2 out.smt2]\n"
+        << "  " << argv0 << " --bits N --table path.txt [--join-arity K] [--max-bits M] [--dump-smt2 out.smt2]\n\n"
+        << "The truth table is indexed by the unsigned input value, little-endian by index.\n"
+        << "For --bits 2, characters correspond to inputs 0,1,2,3. Only '0' and '1'\n"
+        << "characters are read from --table files; whitespace is ignored.\n\n"
+        << "--dump-smt2 writes a benchmark function over one 64-bit input arg0 and returns\n"
+        << "a one-bit result, matching the synthesized ANF.\n";
+}
+
+std::string read_truth_file(const std::string& path) {
+    std::ifstream in(path);
+    if (!in) {
+        throw std::runtime_error("cannot open truth-table file: " + path);
+    }
+    std::string table;
+    char c;
+    while (in.get(c)) {
+        if (c == '0' || c == '1') table.push_back(c);
+    }
+    return table;
+}
+
+std::string bv1(std::uint64_t value) {
+    return value ? "(_ bv1 1)" : "(_ bv0 1)";
+}
+
+std::string smt_bit(unsigned index) {
+    const std::string i = std::to_string(index);
+    return "((_ extract " + i + " " + i + ") arg)";
+}
+
+std::string smt_op2(const std::string& op, const std::string& a, const std::string& b) {
+    return "(" + op + " " + a + " " + b + ")";
+}
+
+std::string smt_fold(const std::string& op,
+                     const std::vector<std::string>& terms,
+                     const std::string& identity) {
+    if (terms.empty()) return identity;
+    std::string out = terms.front();
+    for (std::size_t i = 1; i < terms.size(); ++i) {
+        out = smt_op2(op, out, terms[i]);
+    }
+    return out;
+}
+
+std::string anf_monomial_to_smt(ANF::Mask term) {
+    if (term == 0) {
+        return bv1(1);
+    }
+
+    std::vector<std::string> factors;
+    for (unsigned i = 0; i < 64; ++i) {
+        if ((term & (ANF::Mask{1} << i)) != 0) {
+            factors.push_back(smt_bit(i));
+        }
+    }
+    return smt_fold("bvand", factors, bv1(1));
+}
+
+std::string anf_to_smt(const ANF& expr) {
+    std::vector<std::string> terms;
+    for (ANF::Mask term : expr.terms()) {
+        terms.push_back(anf_monomial_to_smt(term));
+    }
+    return smt_fold("bvxor", terms, bv1(0));
+}
+
+std::string smt2_benchmark(const ANF& expr) {
+    std::ostringstream os;
+    os << "; Drill & Join synthesized Boolean benchmark\n";
+    os << "(define-fun circuit ((arg (_ BitVec 64))) (_ BitVec 1)\n";
+    os << "  " << anf_to_smt(expr) << "\n";
+    os << ")\n\n";
+    os << "(define-fun benchmark ((arg0 (_ BitVec 64))) (_ BitVec 1)\n";
+    os << "  (circuit arg0)\n";
+    os << ")\n";
+    return os.str();
+}
+
+void write_text_file(const std::string& path, const std::string& contents) {
+    std::ofstream out(path);
+    if (!out) {
+        throw std::runtime_error("cannot open SMT2 output file: " + path);
+    }
+    out << contents;
+    if (!out) {
+        throw std::runtime_error("failed while writing SMT2 output file: " + path);
+    }
+}
+
+} // namespace
+
+int main(int argc, char** argv) {
+    try {
+        unsigned bits = 0;
+        unsigned join_arity = 3;
+        unsigned max_bits = 20;
+        std::string truth;
+        std::string table_path;
+        std::string smt2_output_path;
+
+        for (int i = 1; i < argc; ++i) {
+            const std::string arg = argv[i];
+            auto need_value = [&](const std::string& name) -> std::string {
+                if (i + 1 >= argc) {
+                    throw std::runtime_error("missing value for " + name);
+                }
+                return argv[++i];
+            };
+            if (arg == "--bits") {
+                bits = static_cast<unsigned>(std::stoul(need_value(arg)));
+            } else if (arg == "--truth") {
+                truth = need_value(arg);
+            } else if (arg == "--table") {
+                table_path = need_value(arg);
+            } else if (arg == "--join-arity") {
+                join_arity = static_cast<unsigned>(std::stoul(need_value(arg)));
+            } else if (arg == "--max-bits") {
+                max_bits = static_cast<unsigned>(std::stoul(need_value(arg)));
+            } else if (arg == "--dump-smt2") {
+                smt2_output_path = need_value(arg);
+            } else if (arg == "--help" || arg == "-h") {
+                usage(argv[0]);
+                return 0;
+            } else {
+                throw std::runtime_error("unknown argument: " + arg);
+            }
+        }
+
+        if (bits >= 63) throw std::runtime_error("--bits must be <= 62");
+        if (truth.empty() == table_path.empty()) {
+            throw std::runtime_error("provide exactly one of --truth or --table");
+        }
+        if (!table_path.empty()) truth = read_truth_file(table_path);
+
+        const std::uint64_t expected_size = (bits == 0) ? 1ULL : (1ULL << bits);
+        if (truth.size() != expected_size) {
+            throw std::runtime_error("truth table length is " + std::to_string(truth.size()) +
+                                     ", expected " + std::to_string(expected_size));
+        }
+        for (char c : truth) {
+            if (c != '0' && c != '1') throw std::runtime_error("truth table contains non-binary character");
+        }
+
+        SynthesisOptions options;
+        options.join_arity = join_arity;
+        options.max_exhaustive_bits = max_bits;
+        Synthesizer dj(options);
+
+        auto oracle = [truth](std::uint64_t input) {
+            return truth.at(static_cast<std::size_t>(input)) == '1';
+        };
+        ANF expr = dj.synthesize(bits, oracle);
+
+        for (std::uint64_t x = 0; x < expected_size; ++x) {
+            if (expr.eval(x) != oracle(x)) {
+                throw std::runtime_error("internal verification failed at input " + std::to_string(x));
+            }
+        }
+
+        std::cout << "ANF: " << expr << "\n";
+        std::cout << "C++: " << expr.to_cpp("input") << "\n";
+        std::cout << "terms: " << expr.term_count() << ", degree: " << expr.degree() << "\n";
+        std::cout << "stats: " << dj.stats().to_string() << "\n";
+        if (!smt2_output_path.empty()) {
+            write_text_file(smt2_output_path, smt2_benchmark(expr));
+            std::cout << "SMT2: wrote " << smt2_output_path << "\n";
+        }
+        return 0;
+    } catch (const std::exception& ex) {
+        std::cerr << "error: " << ex.what() << "\n\n";
+        usage(argv[0]);
+        return 1;
+    }
+}
+
+```
