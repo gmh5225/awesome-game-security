@@ -42,6 +42,7 @@ sources:
   - wiki/sources/descriptions/ryanjon2040__Unreal-Binary-Builder.md
   - wiki/sources/descriptions/whx-prog__The-Seed-Link-Future.md
   - wiki/sources/descriptions/weizhking__PalworldSaved.md
+  - wiki/sources/descriptions/lstrsrt__csgo_internal_base.md
   - wiki/sources/descriptions/luciouskami__palworld_rcon.md
   - wiki/sources/descriptions/walzer__game-engine-detector.md
   - wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md
@@ -205,7 +206,7 @@ Engine internals, plugins, detectors, and SDK workflows that underpin modding, r
 
 **Unity** — locate `global-metadata.dat` + `GameAssembly.dll` (or `libil2cpp.so`) → IL2CPPDumper → `dump.cs`, `il2cpp.h`, `script.json` → import into IDA/Ghidra; key structures: `Il2CppClass`, `MethodInfo`, `FieldInfo`, `Il2CppType`. Mono builds use `Assembly-CSharp.dll` + dnSpy/ILSpy on the embedded [[mono]] runtime instead; programmatic CIL disassembly via [[dncil]] (Python; metadata token resolution; automated .NET analysis) complements GUI decompilers. See [[il2cpp]]. (source: wiki/sources/skills/game-engine.md) (source: wiki/sources/descriptions/mono__mono.md) (source: wiki/sources/descriptions/mandiant__dncil.md)
 
-**Source** — walk ClientClass linked list from `CHLClient` → RecvTable → RecvProp → offset map (`CCSPlayer → m_iHealth → 0x100`); Source 2 via [[source2gen]] / [[source2sdk]]. See [[source-netvars]]. (source: wiki/sources/skills/game-engine.md)
+**Source** — walk ClientClass linked list from `CHLClient` → RecvTable → RecvProp → offset map (`CCSPlayer → m_iHealth → 0x100`); Source 2 via [[source2gen]] / [[source2sdk]]. See [[source-netvars]]. Internal CS:GO bases such as [[csgo-internal-base]] (CreateInterface, VMT hooks, netvar dump, pattern scan) illustrate that Source 1 SDK/hooking lane in practice. (source: wiki/sources/descriptions/lstrsrt__csgo_internal_base.md) (source: wiki/sources/skills/game-engine.md)
 
 ## Engine object models
 
