@@ -1792,6 +1792,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ahaggard2013/binaryninja-ollama [Binary Ninja Ollama]
 - https://github.com/0xricksanchez/Shellcoder [BinaryNinja Shellcoder Plugin]
 - https://github.com/pd0wm/binaryninja-pcode [This plugin serves as a bridge between Binary Ninja and Ghidra's disassembler]
+- https://github.com/mutinylaboratories/ghidra_svr_bridge [Binary Ninja plugin that bidirectionally syncs symbols, comments, types, and analysis with a Ghidra Server repository via a Java bridge]
 - https://github.com/zhuzhu-Top/deobf [libtprt.so]
 - https://github.com/junron/auto-enum [automatically identify and set enums for standard functions]
 - https://github.com/otter-sec/bn-ebpf-solana [Binary Ninja plugin for Solana eBPF]
