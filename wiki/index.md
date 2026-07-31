@@ -770,6 +770,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Thetan_ArenaSDK](entities/thetan-arenasdk.md) — Thetan Arena SDK (rendering / audio / physics; cheat lane)
 - [Three.js](entities/three-js.md) — JavaScript 3D library (WebGL/WebGPU; scene graph / PBR / glTF / XR; Game Engine / HTML5)
 - [ThreatResearch](entities/threatresearch.md) — Security Joes Ghidra/IDA plugins + malware RE scripts / YARA (Cheat Ghidra)
+- [thread-call-stack-scanner](entities/thread-call-stack-scanner.md) — safe unload of hooked DLLs via thread call-stack scan (m417z; Anti Cheat / hook lifecycle)
 - [ThreadStackSpoofer](entities/thread-stack-spoofer.md) — PoC thread call-stack spoof for in-process shellcode hiding (mgeeky; Cheat Spoof Stack)
 - [TiEtwAgent](entities/tietwagent.md) — ETW Threat-Intelligence injection-detection agent (krabsetw / Yara / PPL)
 - [ThreatIntelligenceConsumer](entities/threat-intelligence-consumer.md) — Threat-Intelligence ETW consume without driver/PPL (Win11 24H2/25H2)
