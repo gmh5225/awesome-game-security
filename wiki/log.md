@@ -1927,3 +1927,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:long123king/dk`: entity [[dk]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
 - **2026-07-31** — ingest `description:loerting/dalvikus`: entity [[dalvikus]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
+- **2026-07-31** — ingest `description:lockedbyte/so_loader`: entity [[so-loader]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].

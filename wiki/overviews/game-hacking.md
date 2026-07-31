@@ -407,6 +407,7 @@ sources:
   - wiki/sources/descriptions/nbqofficial__kernel-csgo.md
   - wiki/sources/descriptions/narumii__Deobfuscator.md
   - wiki/sources/descriptions/lzghzr__APatch_kpm.md
+  - wiki/sources/descriptions/lockedbyte__so_loader.md
 updated: 2026-07-31
 confidence: high
 ---
@@ -642,6 +643,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Syscall dispatcher patching PoCs such as [[dpatch]] (writable syscall-table copy + dispatcher jump to custom handler) sit in the Cheat Hook syscall / Android kernel explorer lane. (source: wiki/sources/descriptions/xmmword__dpatch.md)
 - Android app perf profiling demos such as [[simpleperf-demo]] (simpleperf / Perf) sit adjacent to that Android explorer / cheat research lane. (source: wiki/sources/descriptions/yabinc__simpleperf_demo.md)
 - Android/Linux CLI memory scanners such as [[mypower]] (SLJIT JIT scan expressions, pointer-chain discovery, snapshot diffs, ncurses TUI, Unity U3D object inspect) sit in the Cheat Memory scanner lane. (source: wiki/sources/descriptions/vrolife__mypower.md) Root Unix-socket memory IPC kits such as [[root-socket-kit]] (Android LKM + Magisk/KernelSU/APatch JNI client; GUI search/edit; low-latency `OpenProcess` / `ReadMemory`) sit in the same Cheat Android Memory Explorer / root-ops lane. (source: wiki/sources/descriptions/systemnb__RootSocketKit.md) rwProcMem33 forks such as [[rwmem]] (Android process-memory R/W; reliability caveats) sit in the same Memory Explorer lane. (source: wiki/sources/descriptions/ri-char__rwMem.md) C++ Android memory editors such as [[android-mem-edit]] (process memory edit) sit in the same lane. (source: wiki/sources/descriptions/mrcang09__Android-Mem-Edit.md) Agent-facing Cheat Engine–like memory tooling via [[memmcp]] (Python MCP server; Game Develop / MCP lane) sits adjacent to that scanner / CE workflow. (source: wiki/sources/descriptions/un4ckn0wl3z__MemMCP.md) Full CE runtime MCP via [[cheatengine-mcp-bridge]] (Lua worker + FastMCP named pipes; 40+ scan/debug/DBVM tools; sub-2ms) targets the same agent + live-memory lane. (source: wiki/sources/descriptions/miscusi-peek__cheatengine-mcp-bridge.md)
+- Android native `.so` memory-loading tooling such as [[so-loader]] (C/C++; load/inject shared libs) sits in the Cheat Android memory loading lane beside ptrace/virtual injectors. (source: wiki/sources/descriptions/lockedbyte__so_loader.md)
 - Android Terminal Emulator [[termux-app]] (Termux; no-root Linux env / pkg+apt / proot) sits in the Cheat Android Terminal Emulator lane for on-device CLI research. (source: wiki/sources/descriptions/termux__termux-app.md)
 - Rooted Android File Explorer [[xfiles]] (prebuilt APKs in Releases) sits in the Cheat Android File Explorer lane. (source: wiki/sources/descriptions/pgp__XFiles.md)
 - Chinese Android File Explorer guide [[note]] (`Guide-zh` documentation/reference) sits in the same Cheat Android File Explorer lane. (source: wiki/sources/descriptions/nzcv__note.md)
