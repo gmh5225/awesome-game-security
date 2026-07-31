@@ -1901,3 +1901,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:lstaroth/AntiXorstr`: entity [[anti-xorstr]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-31** — ingest `description:ls9512/USecurity`: entity [[usecurity]]; cited on [[overviews/game-engine]] and [[overviews/anti-cheat]].
+
+- **2026-07-31** — ingest `readme:categories`: bumped Cheat ~2618 / Anti Cheat ~626 (was ~2616/~625); embedded-hacking course lane on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
