@@ -326,6 +326,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gamedev_libraries](entities/gamedev-libraries.md) — data-oriented C/C++ gamedev library collection (POD/flat arrays; Game Develop / guide)
 - [gamehacking-cheatsheet](entities/gamehacking-cheatsheet.md) — game-hacking RE cheatsheet (memory / injection / AC; cheat / guide)
 - [gamesneeze](entities/gamesneeze.md) — Linux CS:GO cheat research (seksea; cheat / game:csgo)
+- [GamesoftACS](entities/gamesoftacs.md) — Knight Online Gamesoft server-side AC (speed/teleport/damage/inventory + client integrity)
 - [garlic](entities/garlic.md) — C multi-format binary analysis / Fast APK/DEX/JAR Java decompiler (PE/ELF/Mach-O/DEX/APK + ARM)
 - [gba-ghidra-loader](entities/gba-ghidra-loader.md) — Ghidra GBA ROM loader (memory/IO map + cartridge header; GameBoy)
 - [ghidra-headless-mcp](entities/ghidra-headless-mcp.md) — headless Ghidra MCP server (40+ RE tools; fake backend + CLI; Cursor/Claude agents)
