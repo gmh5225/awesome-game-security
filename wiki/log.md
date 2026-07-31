@@ -1891,3 +1891,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:luisfelipe18/GamesoftACS`: entity [[gamesoftacs]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-07-31** — ingest `description:luciouskami/palworld_rcon`: entity [[palworld-rcon]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-31** — ingest `description:sh1ftd/dma-tools-rs`: entity [[dma-tools-rs]]; cited on [[dma]] and [[overviews/dma-attack]].

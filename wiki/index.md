@@ -241,6 +241,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DMACheatEngineLoader](entities/dma-cheat-engine-loader.md) — Cheat Engine DMA loader (copy CE → DMACE; closed-source)
 - [DMAInvoker](entities/dma-invoker.md) — Windows DMA RPM via DMALibrary (cheat / RPM)
 - [dma-speedtest-memflow-rs](entities/dma-speedtest-memflow-rs.md) — Windows DMA R/W speedtest via memflow (Rust CLI/GUI; pcileech/native)
+- [dma-tools-rs](entities/dma-tools-rs.md) — Rust Windows GUI for Artix-7 JTAG bitstream flash, device DNA, PCILeech/memflow sanity check (CH347/FTDI RS232)
 - [Document](entities/document.md) — Windows Driver Development guide (Cheat / Windows kernel explorer)
 - [dumpulator](entities/dumpulator.md) — Python minidump → Unicorn x86/x64 emulation (memory/modules/threads; NT stubs / PEB·TEB / API hooks)
 - [Dopamine](entities/dopamine.md) — iOS 15.0–15.4.1 rootless jailbreak (PAC/PPL/AMFI; Sileo/procursus `/var/jb`)
