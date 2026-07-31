@@ -1897,3 +1897,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:luavmload/vanguard-update-notifier`: entity [[vanguard-update-notifier]]; cited on [[vanguard]] and [[overviews/anti-cheat]].
 
 - **2026-07-31** — ingest `description:lstrsrt/csgo_internal_base`: entity [[csgo-internal-base]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-31** — ingest `description:lstaroth/AntiXorstr`: entity [[anti-xorstr]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
