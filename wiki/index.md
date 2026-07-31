@@ -658,6 +658,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PolyHook 2.0](entities/polyhook-2-0.md) — C++ PolyHook2 hooking lib (vcpkg; cheat / hook research)
 - [Poseidon](entities/poseidon.md) — NtConvertBetweenAuxiliaryCounterAndPerformanceCounter KM↔UM channel (BE/EAC notes)
 - [Positron](entities/positron.md) — JS runtime inject via manual-map DLL (QuickJS/Electron; named-pipe IPC; REPL/SDK)
+- [Ponytail Risk](entities/ponytail-risk.md) — OSS behavioral risk control + evidence review for private game servers (Rust agent, C ABI SDK, shadow mode)
 - [PresentHookDetection](entities/present-hook-detection.md) — BE-style IDXGISwapChain::Present hook check (dummy D3D11 + dxgi prologue)
 - [PG1903](entities/pg1903.md) — Win10 1903 PatchGuard disable via context-page NX (Demo NX)
 - [PGHooker](entities/pghooker.md) — C++ Page Guard (`PAGE_GUARD`) hook research (cheat / hook)

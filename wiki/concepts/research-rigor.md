@@ -7,7 +7,8 @@ sources:
   - wiki/sources/skills/game-engine.md
   - wiki/sources/skills/mobile-security.md
   - wiki/sources/skills/reverse-engineering.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/xihedun-2026__Ponytail-Risk-.md
+updated: 2026-07-31
 confidence: high
 ---
 
@@ -20,6 +21,7 @@ Cross-cutting evidence discipline for factual synthesis, detector assessment, an
 - Treat README entries, generated descriptions, [[compiled-wiki]] pages, and archives as **discovery/provenance** layers—not automatic proof of embedded claims.
 - Verify citation identity: confirm the source text supports the exact claim being stated.
 - Separate **observation**, **finding**, **attribution**, and **action** in written output.
+- Separate **automated scoring** from **enforcement action** when evaluating operator AC stacks—platforms such as [[ponytail-risk]] default to shadow mode so rule/AI signals feed human review rather than immediate bans. (source: wiki/sources/descriptions/xihedun-2026__Ponytail-Risk-.md)
 - Do not import fixed detection thresholds or confidence values without representative calibration and validation for the target environment.
 - Narrow the conclusion or report it as inconclusive when evidence is missing or contradictory.
 
