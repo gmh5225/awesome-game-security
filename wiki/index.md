@@ -905,6 +905,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Xidi](entities/xidi.md) — DirectInput↔XInput proxy DLL (virtual map / deadzone / FFB; DirectX Compatibility)
 - [xMalHunter](entities/xmalhunter.md) — pe-sieve live process scan (inject/hooks/hollow; Detect malicious materials)
 - [xpc-tracer](entities/xpc-tracer.md) — Frida XPC message tracer (iOS/macOS; xpcspy variant; cheat / Frida)
+- [Xposed Module Kit](entities/xposed-module-kit.md) — Xposed/LSPosed module scaffold (hook templates, Python class scanner, root-detection bypass example)
 - [xigmapper](entities/xigmapper.md) — EFI manual map (non-USB payload; Vanguard early-load research)
 - [xigncode3-blackdesert](entities/xigncode3-blackdesert.md) — XIGNCODE3/Black Desert full-pipeline static reconstruction (`xmag`/`xnina` unpack, Ghidra, Lua 5.3, VMProtect `xhunter1`; IPC/detection specs)
 - [xign_poc_april_2026](entities/xign-poc-april-2026.md) — XIGNCODE3/xhunter64.sys IRP_MJ_WRITE vuln PoC (phys R/W / leak / kill)

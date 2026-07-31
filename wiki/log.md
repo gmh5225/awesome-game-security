@@ -1875,3 +1875,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:mutinylaboratories/ghidra_svr_bridge`: entity [[ghidra-svr-bridge]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-31** — ingest `description:mactec0/Kernelmode-manual-mapping-through-IAT`: entity [[kernelmode-manual-mapping-through-iat]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]].
+
+- **2026-07-31** — ingest `description:mabbcoll13/xposed-module-kit`: entity [[xposed-module-kit]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
