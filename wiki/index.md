@@ -520,6 +520,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MiniVisorPkg](entities/minivisorpkg.md) — educational Intel VT-x HV (UEFI + Windows driver; WinDbg; Detection:HV / EFI)
 - [MoBaDemo](entities/mobademo.md) — Unity MOBA demo (Game Develop / Unity source)
 - [Mojoc](entities/mojoc.md) — C99 OpenGLES3 mobile game engine (cross-platform; Game Engine source)
+- [Multiline Ultimate Assembler](entities/multiline-ultimate-assembler.md) — x64dbg/OllyDbg multiline assembler/disassembler plugin (m417z; Cheat x64dbg Plugins)
 - [ModExMap](entities/modexmap.md) — user-mode PE manual-map DLL injector (x86/x64; TLS; Extend Manual Map)
 - [Mono](entities/mono.md) — open-source .NET CLR (JIT/SGen/P/Invoke); Unity Mono scripting backend; game modding / RE target
 - [mono-external-lib](entities/mono-external-lib.md) — external Unity/Mono metadata reader (classes/methods/fields; no inject; C++)
