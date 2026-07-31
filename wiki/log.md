@@ -1899,3 +1899,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:lstrsrt/csgo_internal_base`: entity [[csgo-internal-base]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-07-31** — ingest `description:lstaroth/AntiXorstr`: entity [[anti-xorstr]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-07-31** — ingest `description:ls9512/USecurity`: entity [[usecurity]]; cited on [[overviews/game-engine]] and [[overviews/anti-cheat]].

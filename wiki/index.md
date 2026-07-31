@@ -820,6 +820,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Unity-Cheat-Sheet](entities/unity-cheat-sheet.md) — Unity engine/API cheat sheet (Game Engine / guide)
 - [UnityExplorer](entities/unityexplorer.md) — runtime Unity inspector (BepInEx/MelonLoader; hierarchy/REPL; Mono+IL2CPP)
 - [UnityVulnerableEntryPoint](entities/unity-vulnerable-entrypoint.md) — Unity Mono vulnerable entry points (Assembly-CSharp / MonoBehaviour inject demos)
+- [USecurity](entities/usecurity.md) — Unity runtime data + PlayerPrefs encryption (Game Engine Protection:Unity)
 - [unitySpeedTools](entities/unityspeedtools.md) — iOS Unity IL2CPP speed/modding tools (C/C++ / ObjC)
 - [unflutter](entities/unflutter.md) — Flutter/Dart AOT snapshot static analyzer (symbol recovery)
 - [unmapper](entities/unmapper.md) — automatic dumped-PE header repair for decompilers (Dump Fix)
