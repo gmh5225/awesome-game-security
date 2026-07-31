@@ -119,6 +119,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ariadne](entities/ariadne.md) — Binary Ninja graph analysis (call graph + block coverage; Cheat Binary Ninja Plugins)
 - [arma3beclient](entities/arma3beclient.md) — Arma 3 BattlEye Tool (C# / PowerShell; cheat / game:arma3)
 - [ASCTool](entities/asctool.md) — Kotlin APK Signature Crack Tool (Some Tricks / Android; [Apk])
+- [Asphyxia CS2](entities/asphyxia-cs2.md) — open-source internal CS2 cheat (C++; ESP / aimbot / triggerbot; Source 2 SDK; cheat / game:cs2)
 - [AutoOffsets](entities/auto-offsets.md) — Fortnite offset fetcher via remote API (C++; WinINet; `[Offset]`)
 - [AutomataMP](entities/automatamp.md) — NieR Automata multiplayer / RE tooling (praydog; Game Develop / source)
 - [AV-EDR-Killer](entities/av-edr-killer.md) — BYOVD via wsftprm.sys (IOCTL 0x22201C; PID kill)

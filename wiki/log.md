@@ -1867,3 +1867,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:magnussen7/Embuche`: entity [[embuche]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-07-31** — ingest `description:magicsword-io/LOLDrivers`: entity [[loldrivers]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
+- **2026-07-31** — ingest `description:maecry/asphyxia-cs2`: entity [[asphyxia-cs2]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
