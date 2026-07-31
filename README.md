@@ -979,6 +979,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/bliutech/mbased [Practical Simplifications of Mixed Boolean-Arithmetic Obfuscation]
 - https://github.com/SynthesisLab/MBA [High-performance Mixed Boolean-Arithmetic (MBA) expression synthesis tool]
 - https://github.com/astean1001/ProMBA [MBA deobfuscator via Program Synthesis and Term Rewriting]
+- https://github.com/fvrmatteo/DrillAndJoin [C++17 Drill & Join exact Boolean synthesis; SMT-guided 64-bit opaque-predicate and MBA-style simplification via Bitwuzla]
 - https://github.com/DenuvoSoftwareSolutions/GAMBA [Simplification of General Mixed Boolean-Arithmetic Expressions: GAMBA]
 - https://github.com/mizt0/mixed-boolean-transform [Mixed boolean arithmetic x+y transform]
 - https://github.com/nhpcc502/MBA-Obfuscator [Non-linear Mixed Boolean-Arithmetic Expressions]
