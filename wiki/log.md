@@ -1869,3 +1869,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:magicsword-io/LOLDrivers`: entity [[loldrivers]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-07-31** — ingest `description:maecry/asphyxia-cs2`: entity [[asphyxia-cs2]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-07-31** — ingest `readme:categories`: bumped Cheat ~2615 (was ~2614) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
