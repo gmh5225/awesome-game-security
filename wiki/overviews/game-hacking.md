@@ -273,6 +273,7 @@ sources:
   - wiki/sources/descriptions/mentebinaria__retoolkit.md
   - wiki/sources/descriptions/mandiant__flare-vm.md
   - wiki/sources/descriptions/mandiant__GoReSym.md
+  - wiki/sources/descriptions/mahmoudimus__ida-taskr.md
   - wiki/sources/descriptions/stevemk14ebr__PolyHook_2_0.md
   - wiki/sources/descriptions/stevemk14ebr__PolyHook.md
   - wiki/sources/descriptions/regomne__ilhook-rs.md
@@ -564,6 +565,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Lua IDA SDK scripting via [[luda]] (direct SDK access from Lua; rapid RE automation) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/stolevchristian__LUDA.md)
 - Third-party Lumina server connectivity via [[openlumina]] (IDA plugin; Hex-Rays `.crt` into IDA install dir) sits in the Cheat IDA Plugins / Lumina lane. (source: wiki/sources/descriptions/tomrus88__OpenLumina.md)
 - IDAPython convenience via [[sark]] (“IDAPython Made Easy”; older-IDA support on IDA-6.x) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/tmr232__Sark.md)
+- Parallel IDA worker offload via [[ida-taskr]] (Python; Qt + multiprocessing; keeps UI responsive during heavy IDAPython jobs; cheat / IDA Plugins) sits in the same Cheat IDA Plugins lane. (source: wiki/sources/descriptions/mahmoudimus__ida-taskr.md)
 - Rust symbol demangle/normalize in IDA via [[ida-rust-demangler]] (`rs-dml`-backed) also sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/timetravelthree__IDARustDemangler.md)
 - Cross-platform Itanium/MSVC (+ D/Rust/Swift) symbol demangling via [[demumble]] (`c++filt` / `undname.exe` replacement) sits in the Cheat RE Tools lane. (source: wiki/sources/descriptions/nico__demumble.md)
 - MSVC/C++ RTTI parse in IDA 9.2 via [[rtti-parser]] (IDA script; type metadata recovery) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/rem0obb__rtti-parser.md)
