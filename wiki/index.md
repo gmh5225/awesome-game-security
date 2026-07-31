@@ -319,6 +319,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Free-RASP-Unity-POC](entities/free-rasp-unity-poc.md) — Unity freeRASP plugin (Talsec; root/jailbreak/Frida/tamper/integrity; Android+iOS)
 
 - [function-collections](entities/function-collections.md) — C PoCs for uncommon Ring3 paths (memory analysis; AC callback lane)
+- [Fortnite](entities/fortnite.md) — Fortnite mechanics tutorial series + code (loqix; Game Develop / source; video walkthrough)
 - [Fortnite-External-P2C](entities/fortnite-external-p2c.md) — Fortnite external: shader-oriented sample (C++; [External])
 - [fortnite-external-evo.gj](entities/fortnite-external-evo-gj.md) — Fortnite external: kernel-driver RPM / ESP / aimbot (C++; [External])
 - [fortnite-external-base-source](entities/fortnite-external-base-source.md) — Fortnite external: IOCTL RPM / CR3 stub / ImGui DX11 Discord Overlay (C++; [External])
