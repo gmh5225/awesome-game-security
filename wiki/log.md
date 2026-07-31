@@ -1886,6 +1886,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-07-31** — ingest `description:lzyddf/IDA_Plugin_PCodeGPT`: entity [[ida-plugin-pcodegpt]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
+- **2026-07-31** — ingest `description:loyaltypollution/ida2llvm`: entity [[ida2llvm]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-07-31** — ingest `description:lzghzr/APatch_kpm`: entity [[apatch-kpm]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-07-31** — ingest `description:luisfelipe18/GamesoftACS`: entity [[gamesoftacs]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
