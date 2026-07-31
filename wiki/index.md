@@ -606,6 +606,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [oxware](entities/oxware.md) — free CS1.6 cheat (C++; alpha; cheat / game:cs1.6)
 - [Paksmith](entities/paksmith.md) — Rust UE pak/UAsset explorer (FModel rewrite; pak v3–v11; Game Assets)
 - [PalWorldAntiCheat](entities/palworld-anti-cheat.md) — Palworld UE5 AC research (C#; shader/render/audio; Anti Cheat)
+- [palworld-rcon](entities/palworld-rcon.md) — Palworld dedicated server RCON client (Source RCON; Server on Windows)
 - [PalworldSaved](entities/palworldsaved.md) — Palworld UE5 save/editor tooling (cheat / game:palworld [Save])
 - [palera1n](entities/palera1n.md) — iOS 15+ checkm8 jailbreak (A8–A11; rootful/rootless; Sileo bootstrap)
 - [PANDA](entities/panda.md) — Platform for Architecture-Neutral Dynamic Analysis (QEMU-based; Cheat QEMU/KVM / DBI)
