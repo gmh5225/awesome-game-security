@@ -528,6 +528,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Metal-Game-Engine-Tutorial](entities/metal-game-engine-tutorial.md) — Apple Metal engine tutorial (open project; Game Engine / guide)
 - [melonJS](entities/melonjs.md) — modern lightweight HTML5 game engine (ES6 classes; esbuild bundling; Game Engine / HTML5)
 - [Milfuscator](entities/milfuscator.md) — x32 PE mutator (full rebuild; Zydis + AsmJit; AC Obfuscation Engine)
+- [Minecraft AntiCheatAI](entities/minecraft-anticheatai.md) — DeepGuard Paper plugin (ONNX 1D-CNN scaffold detection; BehaviorRecorder + PyTorch training)
 - [mixed-boolean-transform](entities/mixed-boolean-transform.md) — source-to-source C++ MBA obfuscation (Z3-verified; Eigen3 + GMP; Cheat Mixed boolean-arithmetic)
 - [minidump](entities/minidump.md) — Python minidump (.dmp) parser (full/mini; LSASS; cross-platform)
 - [miniDumpReader](entities/minidumpreader.md) — Python minidump / memory analysis (AC / Windows kernel dump)

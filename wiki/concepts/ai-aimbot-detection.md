@@ -5,7 +5,8 @@ topics: [anti-cheat, game-hacking]
 sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/descriptions/mishka-sit2002__CS2-Hybrid-AntiCheat-Proposal.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/llsgllsg__Minecraft_AntiCheatAI.md
+updated: 2026-07-31
 confidence: medium
 ---
 
@@ -45,6 +46,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[pine]] — neural-network aim/trigger research (CS:GO / Fortnite / Overwatch)
 - [[human-mouse-movement]] — offensive human-like movement (informs baseline design)
 - [[maplestory-worlds-automation]] — title-specific YOLO automation
+- [[minecraft-anticheatai]] — Minecraft Paper DeepGuard; ONNX 1D-CNN over server-side behavior sequences (scaffold-bridging focus; BehaviorRecorder + PyTorch training pipeline)
 
 ## Related
 
