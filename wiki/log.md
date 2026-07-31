@@ -1909,3 +1909,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:mytechnotalent/Embedded-Hacking`: entity [[embedded-hacking]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[hacking-rust]] and [[go-hacking]].
 
 - **2026-07-31** — ingest `description:ls361664056/GameAI-paper-list`: entity [[gameai-paper-list]]; cited on [[overviews/game-hacking]] and [[overviews/overview]].
+
+- **2026-07-31** — ingest `description:lowleveldesign/comon`: entity [[comon]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].

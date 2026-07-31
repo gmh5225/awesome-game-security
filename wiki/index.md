@@ -168,6 +168,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Corange](entities/corange.md) — pure C game engine (Game Engine / source)
 
 - [com.sipvlib.anticheat](entities/com-sipvlib-anticheat.md) — Unity UPM soft AC (server-verified GameTime + root/jailbreak/emulator/debugger)
+- [comon](entities/comon.md) — WinDbg extension; trace COM class creation + interface querying (WinDbg Plugins)
 - [compile_android_driver](entities/compile-android-driver.md) — out-of-tree Android kernel driver build/ABI (kade / Kadeflow; GKI)
 - [CompiledProtection](entities/compiled-protection.md) — C/C++ cheat compiler (CS:GO-adjacent; Cheat Compiler)
 - [counterstrike2](entities/counterstrike2.md) — CS2 cheat: rendering / SDK generation / hooking (C++; cheat / game:cs2)
