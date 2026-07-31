@@ -2115,6 +2115,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/un4ckn0wl3z/DMACheatEngineLoader [CheatEngine DMA, not open-source]
 - https://github.com/gmh5225/MemTools [Windows/Linux DMA testing tools]
 - https://github.com/sh1ftd/dma-speedtest-memflow-rs [Windows CLI/GUI for benchmarking DMA read/write throughput and latency via memflow (pcileech/native)]
+- https://github.com/sh1ftd/dma-tools-rs [Rust Windows GUI for flashing Artix-7 FPGA bitstreams, reading device DNA, and validating PCILeech/memflow DMA setups via CH347 or RS232 JTAG]
 - https://github.com/sercanarga/fpga-dma-multi-tool [Windows Go utility to detect/configure Artix-7 FPGA DMA boards, flash bitstreams, and measure DMA throughput]
 - https://github.com/sonodima/physpatch [Scanning and patching of the entire Windows Kernel using DMA]
 - https://github.com/gmh5225/DMA-PCIE-BOARD-75T [DMA-PCIE-BOARD-75T]
