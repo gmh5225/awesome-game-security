@@ -300,6 +300,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [frida_usb_dump](entities/frida-usb-dump.md) — Frida macOS USB traffic sniff/dump (Big Sur offsets; cheat / Frida)
 - [fridare](entities/fridare.md) — Frida repackaging / anti-detection (iOS+Android; string/symbol hex-replace)
 - [florida-zygisk](entities/florida-zygisk.md) — Magisk/KernelSU/APatch boot module; auto-starts Florida anti-detection frida-server
+- [flare-vm](entities/flare-vm.md) — Mandiant Windows analysis VM (Chocolatey/Boxstarter; malware/IR/RE lab provisioning)
 
 
 - [FreeDirect](entities/free-direct.md) — DX3 DirectDraw/DirectSound/DirectPlay subset on SDL3 (legacy 2D; DirectX Compatibility)

@@ -1847,3 +1847,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:marakew/syser`: entity [[syser]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-07-31** — ingest `description:maoabc/nmmp`: entity [[nmmp]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
+- **2026-07-31** — ingest `description:mandiant/flare-vm`: entity [[flare-vm]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
