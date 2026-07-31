@@ -1849,3 +1849,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:maoabc/nmmp`: entity [[nmmp]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
 
 - **2026-07-31** — ingest `readme:categories`: bumped Cheat ~2614 (was ~2613) on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light scope on [[overviews/graphics-api]] (ReShade) and [[overviews/game-engine]] (UAssetGUI/UAssetAPI); `index.md` section notes (no per-category pages).
+
+- **2026-07-31** — ingest `description:notahacker8/RobloxCheats`: entity [[roblox-cheats]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].

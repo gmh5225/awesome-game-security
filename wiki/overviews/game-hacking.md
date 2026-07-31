@@ -375,6 +375,7 @@ sources:
   - wiki/sources/descriptions/ocornut__imgui_club.md
   - wiki/sources/descriptions/ocornut__imgui.md
   - wiki/sources/descriptions/notgoodusename__OsirisAndExtra.md
+  - wiki/sources/descriptions/notahacker8__RobloxCheats.md
   - wiki/sources/descriptions/nologic__idaref.md
   - wiki/sources/descriptions/samaBR85__OcarinaCTRComposer.md
   - wiki/sources/descriptions/samaBR85__CTRComposer.md
@@ -618,6 +619,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Non-jailbreak iOS IPA patch tooling such as [[ipapatch]] (C/C++/ObjC; Patch iOS Apps without Jailbreak) sits in the Cheat / IOS jailbreak sideload lane. (source: wiki/sources/descriptions/paradiseduo__IPAPatch.md)
 - Perma-signed jailed IPA installers such as [[trollstore]] (CoreTrust/AMFI bugs; arbitrary entitlements; persist across reboot) sit in the same Cheat / jailed-app sideload lane. (source: wiki/sources/descriptions/opa334__TrollStore.md)
 - Runtime iOS/macOS dylib injectors such as [[opainject]] (`task_for_pid` / Mach remote thread → `dlopen`; jailbreak + tfp0) sit in the Cheat / Injection:IOS lane. (source: wiki/sources/descriptions/opa334__opainject.md)
+- macOS native Roblox cheat frameworks such as [[roblox-cheats]] (Objective-C; `libESP.dylib` inject + Mach VM / shared-memory IPC; internal/external ESP, input simulation, remote calls, breakpoint hooks; per-game modules + offset finder from test place) sit in the Cheat / macOS injection lane for Roblox client memory-layout study. (source: wiki/sources/descriptions/notahacker8__RobloxCheats.md)
 - Linux LKM vermagic/CRC rewriting via [[vermagic]] sits in the Cheat Linux / RE tools lane (load modules across mismatched kernel builds). (source: wiki/sources/descriptions/yaxinsn__vermagic.md) Linux kernel image → ELF symbolization via [[vmlinux-to-elf]] (Python; kallsyms + section rebuild for IDA/Ghidra) sits in the same cheat / linux kernel explorer lane. (source: wiki/sources/descriptions/marin-m__vmlinux-to-elf.md) Linux kernel rootkit hooking samples such as [[venom]] (C/C++; LKM hook mechanisms) sit in the same cheat / linux kernel explorer lane. (source: wiki/sources/descriptions/sad0p__venom.md)
 - Title-specific DayZ cheat/modding samples such as [[dayzzz]] (SDK generation + overlays) illustrate game:dayz offensive research surface. (source: wiki/sources/descriptions/zhitkur__DayZzz.md)
 - Discontinued Escape From Tarkov internal trainers such as [[escapefromtarkov-trainer]] (Mono-era; stopped after 1.0 / [[il2cpp]] switch) illustrate the cheat / game:eft lane and Mono→IL2CPP internal-modding complexity. (source: wiki/sources/descriptions/sailro__EscapeFromTarkov-Trainer.md)
