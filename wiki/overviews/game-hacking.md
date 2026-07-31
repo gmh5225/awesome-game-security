@@ -273,6 +273,7 @@ sources:
   - wiki/sources/descriptions/mentebinaria__retoolkit.md
   - wiki/sources/descriptions/mandiant__flare-vm.md
   - wiki/sources/descriptions/mandiant__GoReSym.md
+  - wiki/sources/descriptions/mahaloz__DAILA.md
   - wiki/sources/descriptions/mahmoudimus__ida-sigmaker.md
   - wiki/sources/descriptions/mahmoudimus__ida-taskr.md
   - wiki/sources/descriptions/stevemk14ebr__PolyHook_2_0.md
@@ -560,6 +561,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - In-IDA Claude-3 chat assistant via [[ida-assistant]] (interactive Q&A / guidance during RE) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/stuxnet147__IDA-Assistant.md)
 - AI-powered IDA 9.0+ assistant for C++ game RE via [[aida]] sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/sigwl__AiDA.md)
 - Local llama.cpp IDA LLM Explainer via [[ida-llm-explainer]] (function explain/rename/struct inference; human-in-the-loop accept; CFG recovery) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/pgarba__ida-llm-explainer.md)
+- Decompiler ChatGPT assistant via [[daila]] (cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/mahaloz__DAILA.md)
 - Whole-program Ghidra+GPT summarization via [[gpt-wpre]] (Python; `ghidra_bridge` decomp/call-graph extract → bottom-up callee-context summaries; ChatGPT / `[ChatGPT]` lane) sits in the Cheat Ghidra Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/moyix__gpt-wpre.md)
 - LLM-based reversing for radare2 via [[r2ai]] (interactive LLM↔r2 sessions for game/security binaries) sits in the Cheat Radare Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/radareorg__r2ai.md)
 - Retired radare2 local-LLM catalog pointer [[r2a]] (GitHub URL gone; successor [[r2ai]]) sits in the same Cheat Radare Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/radareorg__r2a.md)
