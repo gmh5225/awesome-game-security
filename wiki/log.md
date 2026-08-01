@@ -2025,3 +2025,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:kvick-games/UnrealMCP`: entity [[unreal-mcp]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
 - **2026-08-01** — ingest `description:kubo/plthook`: entity [[plthook]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-08-01** — ingest `description:ktock/qemu-wasm`: entity [[qemu-wasm]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].

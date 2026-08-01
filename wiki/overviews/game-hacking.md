@@ -24,6 +24,7 @@ sources:
   - wiki/sources/descriptions/tenclass__mvisor.md
   - wiki/sources/descriptions/quic__gunyah-hypervisor.md
   - wiki/sources/descriptions/qemu-gvm__qemu-gvm.md
+  - wiki/sources/descriptions/ktock__qemu-wasm.md
   - wiki/sources/descriptions/xqemu__xqemu.md
   - wiki/sources/descriptions/xkevio__kevboy.md
   - wiki/sources/descriptions/vojty__feather-gb.md
@@ -730,6 +731,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Hidden-PVE / QEMU-KVM anti-detection (e.g. [[proxmox-ve-anti-detection]], [[qemu-anti-detection]] device-string spoof such as QEMU→ASUS keyboard) sits in the `Cheat > QEMU/KVM/PVE/VBOX` lane. (source: wiki/sources/descriptions/zhaodice__proxmox-ve-anti-detection.md) (source: wiki/sources/descriptions/zhaodice__qemu-anti-detection.md)
 - PVE lab helper scripts such as [[proxmox]] (dialog-driven host/LXC/VM installers) sit in the same QEMU/KVM/PVE research-host lane. (source: wiki/sources/descriptions/tteck__Proxmox.md)
 - Quick guest create/run via [[quickemu]] (optimized QEMU VMs for Windows/macOS/Linux; portable configs, no elevated perms) also sits in that QEMU/KVM research-host lane. (source: wiki/sources/descriptions/quickemu-project__quickemu.md)
+- Browser-tab full-system emulation via [[qemu-wasm]] (Emscripten WASM port of QEMU; x86 and other arch guests; VirtIO/network/storage through browser APIs; no server-side VM host) also sits in that QEMU/KVM research-host lane. (source: wiki/sources/descriptions/ktock__qemu-wasm.md)
 - C++ remake [[mvisor]] (kernel-level + rendering/audio systems) also sits in the `Cheat > QEMU/KVM/PVE/VBOX` research lane. (source: wiki/sources/descriptions/tenclass__mvisor.md)
 - ARM64 Type-1 reference HV [[gunyah-hypervisor]] (trusted/dependent VM hosting) also sits in that QEMU/KVM/PVE/VBOX research lane. (source: wiki/sources/descriptions/quic__gunyah-hypervisor.md)
 - AMD/Intel QEMU research host [[qemu-gvm]] (mobile / Android emulator focus) also sits in that QEMU/KVM lane for emulator researchers. (source: wiki/sources/descriptions/qemu-gvm__qemu-gvm.md)
