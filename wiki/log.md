@@ -1957,3 +1957,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:lico-n/ZygiskFrida`: entity [[zygisk-frida]]; cited on [[frida]] and [[overviews/mobile-security]].
 
 - **2026-08-01** — ingest `readme:categories`: bumped Cheat ~2619 / Anti Cheat ~628 (was ~2618/~627); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
+- **2026-08-01** — ingest `description:smithluke874/Android-VirtualCam-Manager`: entity [[android-virtualcam-manager]]; cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]].

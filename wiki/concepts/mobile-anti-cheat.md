@@ -9,7 +9,8 @@ sources:
   - wiki/sources/descriptions/rushiranpise__detection.md
   - wiki/sources/descriptions/wwweeeqqu__honor-of-kings-RE-research.md
   - wiki/sources/descriptions/phajmvawnsix__com.sipvlib.anticheat.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/smithluke874__Android-VirtualCam-Manager.md
+updated: 2026-08-01
 confidence: medium
 ---
 
@@ -34,6 +35,7 @@ Client-side integrity and environment checks on Android/iOS game clients, often 
 | Integrity | APK/signature hash, native `.so` checksums, Play Integrity / Key Attestation ([[keyattestation]]) |
 | Debugger | `TracerPid`, JDWP, ptrace |
 | Hooks | PLT/GOT integrity, `/proc/self/maps` anomalies |
+| Camera / liveness | Camera1 preview/callback integrity, face/liveness SDK probes; rooted virtual-camera injection such as [[android-virtualcam-manager]] (ArtHook + NV21 frame replace; no LSPosed) (source: wiki/sources/descriptions/smithluke874__Android-VirtualCam-Manager.md) |
 
 Multi-check collections: [[detection]], [[android-native-root-detector]], archived [[magiskdetector]].
 
@@ -49,4 +51,4 @@ Apply [[research-rigor]]—detectors and bypasses vary by build, OEM, and server
 
 ## Related
 
-[[research-rigor]] · [[frida]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[keyattestation]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[honor-of-kings-re-research]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
+[[research-rigor]] · [[frida]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[keyattestation]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]

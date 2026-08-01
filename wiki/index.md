@@ -102,6 +102,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Android-Mem-Edit](entities/android-mem-edit.md) — C++ Android process memory editor (cheat / Android Memory Explorer)
 - [Android-Ptrace-Injector](entities/android-ptrace-injector.md) — Android ptrace injector (C/C++; cheat / injection:android)
 - [Android-Virtual-Inject](entities/android-virtual-inject.md) — no-root Virtual Space inject (not for AC games; cheat / injection:android)
+- [Android-VirtualCam-Manager](entities/android-virtualcam-manager.md) — Magisk/Zygisk virtual camera (ArtHook Camera1 NV21/surface injection; no LSPosed; camera spoofing / liveness AC research)
 - [android_virtualTouch](entities/android-virtual-touch.md) — ARM64 NDK uinput virtual touch (tap/swipe/multi-touch; rooted; game automation)
 - [android-vuln](entities/android-vuln.md) — Android Kernel CVE reference list (cheat / Android Kernel CVE)
 - [anticheat-poc](entities/anticheat-poc.md) — Windows AC PoC (debugger / integrity / signature scan / process enum; Instrumentation Callback)
