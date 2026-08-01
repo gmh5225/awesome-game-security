@@ -2046,6 +2046,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-01** — ingest `description:kp7742/UE4Dumper`: entity [[ue4dumper]]; cited on [[overviews/game-engine]] and [[overviews/mobile-security]].
 
+- **2026-08-01** — ingest `description:klezVirus/SilentMoonwalk`: entity [[silent-moonwalk]]; cited on [[stack-spoofing]] and [[overviews/game-hacking]].
+
 - **2026-08-01** — ingest `description:kp7742/MemDumper`: entity [[memdumper]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
 - **2026-08-01** — ingest `readme:categories`: bumped Cheat ~2624 (was ~2622; Anti Cheat ~631 stable); refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).

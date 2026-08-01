@@ -196,6 +196,7 @@ sources:
   - wiki/sources/descriptions/x64dbg__Classroom.md
   - wiki/sources/descriptions/morsisko__xFindOut.md
   - wiki/sources/descriptions/mgeeky__ThreadStackSpoofer.md
+  - wiki/sources/descriptions/klezVirus__SilentMoonwalk.md
   - wiki/sources/descriptions/mibho__x64dbgTraceReader.md
   - wiki/sources/descriptions/m417z__x64dbg-xfg-marker.md
   - wiki/sources/descriptions/m417z__Multiline-Ultimate-Assembler.md
@@ -483,7 +484,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 
 ## Stack spoofing & driver I/O
 
-[[stack-spoofing]] — return-address replacement and synthetic frames to evade `RtlWalkFrameChain` / thread stack inspection; must pass `.pdata` / `RtlVirtualUnwind` checks. Thread call-stack spoof PoCs such as [[thread-stack-spoofer]] (mgeeky; in-memory evasion to bypass thread-based memory examination and hide in-process shellcode) sit in the same `Cheat > Spoof Stack` lane. (source: wiki/sources/descriptions/mgeeky__ThreadStackSpoofer.md) Driver communication spans IOCTL, data-pointer swaps on win32k/nt calls ([[poseidon]], [[read-write-driver]], [[data-ptr-swap]]), shared sections, callbacks, pipes, WSK ([[ksocket]])—40+ README entries under `Cheat > Driver Communication`.
+[[stack-spoofing]] — return-address replacement and synthetic frames to evade `RtlWalkFrameChain` / thread stack inspection; must pass `.pdata` / `RtlVirtualUnwind` checks. Thread call-stack spoof PoCs such as [[thread-stack-spoofer]] (mgeeky; in-memory evasion to bypass thread-based memory examination and hide in-process shellcode) (source: wiki/sources/descriptions/mgeeky__ThreadStackSpoofer.md) and [[silent-moonwalk]] (klezVirus; TRUE call-stack spoofer from joint stack-spoofing research) (source: wiki/sources/descriptions/klezVirus__SilentMoonwalk.md) sit in the same `Cheat > Spoof Stack` lane. Driver communication spans IOCTL, data-pointer swaps on win32k/nt calls ([[poseidon]], [[read-write-driver]], [[data-ptr-swap]]), shared sections, callbacks, pipes, WSK ([[ksocket]])—40+ README entries under `Cheat > Driver Communication`.
 
 ## Engine-specific surfaces
 
