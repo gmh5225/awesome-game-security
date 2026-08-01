@@ -1965,3 +1965,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:libtersafe/dfm_android_unicorn`: entity [[dfm-android-unicorn]]; cited on [[mobile-anti-cheat]] and [[overviews/mobile-security]].
 
 - **2026-08-01** — ingest `description:libriscv/godot-sandbox`: entity [[godot-sandbox]]; cited on [[overviews/game-engine]] and [[overviews/anti-cheat]].
+
+- **2026-08-01** — ingest `description:liblava/liblava`: entity [[liblava]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
