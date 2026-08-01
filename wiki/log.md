@@ -2041,3 +2041,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:krispybyte/Simple-EFT-Base`: entity [[simple-eft-base]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]].
 
 - **2026-08-01** — ingest `description:krampus-nuggets/ce-tutorial`: entity [[ce-tutorial]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-08-01** — ingest `description:kprprivate/EAC-CR3-BYPASS`: entity [[eac-cr3-bypass]]; cited on [[easy-anti-cheat]] and [[overviews/windows-kernel]].

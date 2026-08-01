@@ -8,6 +8,7 @@ sources:
   - wiki/sources/descriptions/thesecretclub__CVEAC-2020.md
   - wiki/sources/descriptions/lguilhermee__EAC-Extractor-Utility.md
   - wiki/sources/descriptions/ksoju__Eac-Bypass.md
+  - wiki/sources/descriptions/kprprivate__EAC-CR3-BYPASS.md
 updated: 2026-08-01
 confidence: medium
 ---
@@ -28,6 +29,8 @@ Static RE prep: utilities such as [[eac-extractor-utility]] locate EAC component
 
 Offensive bypass lane: repos such as [[eac-bypass]] explore kernel driver and shader-based techniques to evade EAC runtime checks. (source: wiki/sources/descriptions/ksoju__Eac-Bypass.md)
 
+CR3 / page-table root lane: minimal UM+KM teaching samples such as [[eac-cr3-bypass]] demonstrate bypassing EAC checks tied to CR3 via coordinated kernel driver + usermode code. (source: wiki/sources/descriptions/kprprivate__EAC-CR3-BYPASS.md)
+
 ## Related
 
-[[battleye]] · [[vanguard]] · [[cveac-2020]] · [[eac-overlay]] · [[eac-extractor-utility]] · [[eac-bypass]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[battleye]] · [[vanguard]] · [[cveac-2020]] · [[eac-overlay]] · [[eac-extractor-utility]] · [[eac-bypass]] · [[eac-cr3-bypass]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
