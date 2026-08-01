@@ -1983,3 +1983,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:lguilhermee/Battleye-Shellcode-Dumper`: entity [[battleye-shellcode-dumper]]; cited on [[battleye]] and [[overviews/anti-cheat]].
 
 - **2026-08-01** — ingest `description:lfreist/hwinfo`: entity [[hwinfo]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-08-01** — ingest `description:lettier/3d-game-shaders-for-beginners`: entity [[3d-game-shaders-for-beginners]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
