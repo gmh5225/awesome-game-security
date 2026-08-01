@@ -384,6 +384,7 @@ sources:
   - wiki/sources/descriptions/pbiernat__ripr.md
   - wiki/sources/descriptions/patrickcjk__TOG.md
   - wiki/sources/descriptions/lfreist__hwinfo.md
+  - wiki/sources/descriptions/lauralex__fn-dma-cheat.md
   - wiki/sources/descriptions/lavoiesl__osx-cpu-temp.md
   - wiki/sources/descriptions/paradoxwastaken__WindowsHardwareInfo.md
   - wiki/sources/descriptions/openhardwaremonitor__openhardwaremonitor.md
@@ -506,6 +507,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Shader-oriented external Fortnite samples such as [[fortnite-external-p2c]] (C++; shader work; [External]) sit in the same cheat / game:fortnite external lane. (source: wiki/sources/descriptions/simply-codes__Fortnite-External-P2C.md)
 - Driver-backed external Fortnite samples such as [[fortnite-external-evo-gj]] (C++; kernel-driver RPM; ESP / aimbot / loot ESP; UE4 state; [External]) sit in the same cheat / game:fortnite external lane. (source: wiki/sources/descriptions/ritz-1337__fortnite-external-evo.gj.md)
 - IOCTL / CR3-oriented external Fortnite bases such as [[fortnite-external-base-source]] (C++; kernel phys mem R/W + mouse IOCTL; GWorld decrypt / pattern scan; ImGui Discord Overlay DX11 ESP; [External]) sit in the same cheat / game:fortnite external lane. (source: wiki/sources/descriptions/raivoansa__fortnite-external-base-source.md)
+- Fortnite DMA samples such as [[fn-dma-cheat]] (C++; Unreal Engine; PCIe DMA; cheat / game:fortnite [DMA]) sit in the below-OS cheat / game:fortnite lane beside kernel-driver externals. (source: wiki/sources/descriptions/lauralex__fn-dma-cheat.md)
 - Internal Fortnite samples such as [[basic-fortnite-cheat-source-internal]] (C++; UE4 SDK / GObject/GNames / engine hooks; ESP + aimbot) sit in the same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md)
 - From-scratch Fortnite internals such as [[ritz-amazing-fortnite-internal]] (simplified hook path; x64-release injector) sit beside them in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/pastor-ritz__ritz-amazing-fortnite-internal.md)
 - Fortnite FName/FNameEntry samples such as [[fortnite-fnameentry]] (C++; name-pool entry focus) sit beside those internals in the cheat / game:fortnite Unreal name-pool lane. (source: wiki/sources/descriptions/percpopper__Fortnite-FNameEntry.md)

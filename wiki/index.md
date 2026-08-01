@@ -329,6 +329,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Free-RASP-ReactNative](entities/free-rasp-reactnative.md) — React Native freeRASP plugin (Talsec; Magisk/KernelSU/Frida/tamper/integrity; Android+iOS)
 - [Free-RASP-Unity-POC](entities/free-rasp-unity-poc.md) — Unity freeRASP plugin (Talsec; root/jailbreak/Frida/tamper/integrity; Android+iOS)
 
+- [fn-dma-cheat](entities/fn-dma-cheat.md) — Fortnite DMA cheat sample (C++; Unreal Engine; cheat / game:fortnite [DMA])
 - [function-collections](entities/function-collections.md) — C PoCs for uncommon Ring3 paths (memory analysis; AC callback lane)
 - [Fortnite](entities/fortnite.md) — Fortnite mechanics tutorial series + code (loqix; Game Develop / source; video walkthrough)
 - [Fortnite-External-P2C](entities/fortnite-external-p2c.md) — Fortnite external: shader-oriented sample (C++; [External])

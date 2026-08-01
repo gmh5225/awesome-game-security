@@ -2003,3 +2003,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:layerfsd/phantasm-x86-virtualizer`: entity [[phantasm-x86-virtualizer]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-08-01** — ingest `description:lavoiesl/osx-cpu-temp`: entity [[osx-cpu-temp]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-08-01** — ingest `description:lauralex/fn-dma-cheat`: entity [[fn-dma-cheat]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]].
