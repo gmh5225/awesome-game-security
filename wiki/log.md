@@ -1977,3 +1977,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `readme:categories`: verified README map at Cheat ~2619 / Anti Cheat ~628 (40 sections; Game Engine ~154 / Game Develop ~182 / DirectX ~37 shader inject+flatten / Vulkan ~10 kiero2 / console+emulator lanes unchanged); overview maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/game-engine]], [[overviews/graphics-api]], [[overviews/mobile-security]], [[overviews/windows-kernel]], [[overviews/dma-attack]], [[overviews/reverse-engineering]] already current; light `index.md` Game Engine + Sources notes (Game CI Epic lore, PaintFE, AI asset pipelines).
 
 - **2026-08-01** — ingest `description:lguilhermee/EAC-Extractor-Utility`: entity [[eac-extractor-utility]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
+
+- **2026-08-01** — ingest `description:speedskater1610/CS2KAC`: entity [[cs2kac]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
