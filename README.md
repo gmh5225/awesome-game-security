@@ -4170,6 +4170,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [Proof of concept Anti-Cheat plugin for CS:GO](https://github.com/ekknod/CSGO-AC)
 - https://github.com/Pintuzoft/OSAntiCheat [Server-side CS2 CounterStrikeSharp heuristic anti-cheat (spinbot/aimbot/triggerbot/wallhack detectors, log-only)]
 - https://github.com/karola3vax/CS2AC [Open-source server-side CS2 anti-cheat Metamod:Source plugin with aimbot/aimlock/silentaim and related detections]
+- https://github.com/speedskater1610/CS2KAC [Open-source CS2 kernel-mode anti-cheat companion (KMDF driver + usermode service) for client-side integrity signals alongside CS2AC/CS2FOW]
 - [Deep Learning Anti-Cheat For CSGO](https://github.com/LaihoE/DLAC)
 - [Deep Learning Anti-Cheat For CSGO](https://github.com/gmh5225/anti-cheat)
 - https://github.com/jnastarot/anti-cheat
