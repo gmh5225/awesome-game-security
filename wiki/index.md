@@ -800,6 +800,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Spoofer-AMIDEWIN](entities/spoofer-amidewin.md) — AMIDEWIN HWID / system-identifier spoof research (C/C++; Cheat HWID)
 
 - [SimpleFPSTemplate](entities/simple-fps-template.md) — UE4 FPS demo template (bloated C++ starter; Game Develop / Unreal source)
+- [simple-rust-base](entities/simple-rust-base.md) — Facepunch Rust OOP cheat base (C/C++; driver / rendering / modding; legacy)
 - [simple_ac_internal_cheat](entities/simple-ac-internal-cheat.md) — educational C++20 AssaultCube internal (Detours DX / ImGui / ESP / aimbot)
 - [simpleperf_demo](entities/simpleperf-demo.md) — Android simpleperf / Perf demo (app profiling)
 - [sogen](entities/sogen.md) — Windows userspace PE emulator (Unicorn + Capstone; minidump / Zstd state; React web UI; FlatBuffers trace IPC; Windows User Space Emulator)
