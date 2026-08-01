@@ -19,8 +19,9 @@ sources:
   - wiki/sources/descriptions/nefarius__HydraHook.md
   - wiki/sources/descriptions/marlkiller__d3dhook_imgui.md
   - wiki/sources/descriptions/noahware__winbo.md
+  - wiki/sources/descriptions/lainswork__dwm-screen-shot.md
   - wiki/sources/skills/graphics-api.md
-updated: 2026-07-30
+updated: 2026-08-01
 confidence: high
 ---
 
@@ -47,11 +48,11 @@ Kernel graphics-subsystem hooks such as [[dxgkrnl-hook]] manipulate the screen b
 
 Kernel-mode GDI render frameworks such as [[krnl-gdi-render]] hook GDI drawing from Ring0 for overlays outside typical user-mode Present paths. (source: wiki/sources/descriptions/r1cky33__krnl-gdi-render.md)
 
-User-mode DWM hook samples such as [[dwm-hook]] (C++; rendering / hooking / overlays) draw via Desktop Window Manager composition rather than a single game swap-chain Present. (source: wiki/sources/descriptions/rlybasic__DWM_Hook.md) DWM DX11 vtable overlay frameworks such as [[dwmhook]] (reflective inject; MinHook/PolyHook2; ImGui; PDB/DIA for compositor symbols; README `[DWM VFTable]`) extend that lane with compositor-level vtable interception. (source: wiki/sources/descriptions/mfxiaosheng__dwmhook.md) DWM anti-screenshot samples such as [[disablenvidiascreenshot]] (C++; NVIDIA / capture-facing screenshot lane) use the same composition surface to study cheat-side anti-screenshot vs Present-path capture. (source: wiki/sources/descriptions/oakboat__DisableNvidiaScreenshot.md)
+User-mode DWM hook samples such as [[dwm-hook]] (C++; rendering / hooking / overlays) draw via Desktop Window Manager composition rather than a single game swap-chain Present. (source: wiki/sources/descriptions/rlybasic__DWM_Hook.md) DWM DX11 vtable overlay frameworks such as [[dwmhook]] (reflective inject; MinHook/PolyHook2; ImGui; PDB/DIA for compositor symbols; README `[DWM VFTable]`) extend that lane with compositor-level vtable interception. (source: wiki/sources/descriptions/mfxiaosheng__dwmhook.md) DWM anti-screenshot samples such as [[disablenvidiascreenshot]] (C++; NVIDIA / capture-facing screenshot lane) use the same composition surface to study cheat-side anti-screenshot vs Present-path capture. (source: wiki/sources/descriptions/oakboat__DisableNvidiaScreenshot.md) DWM screenshot / AC research samples such as [[dwm-screen-shot]] (C++; defensive engineers studying DWM capture in the Anti Cheat / Screenshot lane) complement overlay and evasion work on the same composition surface. (source: wiki/sources/descriptions/lainswork__dwm-screen-shot.md)
 
 DX11 stereoscopic-fix tooling such as [[3d9]] works in the same Present/swap-chain ecosystem (developer-oriented; not an end-user product). (source: wiki/sources/descriptions/visotw__3d9.md)
 
 ## Related
 
-[[overviews/graphics-api]] · [[obs-game-capture]] · [[draw-call-hook]] · [[anti-screenshot-capture]] · [[directxhook]] · [[dx11-basehook]] · [[directx11hook]] · [[hydrahook]] · [[d3dhook-imgui]] · [[present-hook-detection]] · [[winbo]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dwm-hook]] · [[dwmhook]] · [[disablenvidiascreenshot]] · [[dxgkrnl-hook]] · [[krnl-gdi-render]] · [[3d9]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[overviews/graphics-api]] · [[obs-game-capture]] · [[draw-call-hook]] · [[anti-screenshot-capture]] · [[directxhook]] · [[dx11-basehook]] · [[directx11hook]] · [[hydrahook]] · [[d3dhook-imgui]] · [[present-hook-detection]] · [[winbo]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dwm-hook]] · [[dwmhook]] · [[dwm-screen-shot]] · [[disablenvidiascreenshot]] · [[dxgkrnl-hook]] · [[krnl-gdi-render]] · [[3d9]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
 

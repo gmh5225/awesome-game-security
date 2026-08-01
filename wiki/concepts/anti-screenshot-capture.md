@@ -5,7 +5,8 @@ topics: [graphics-api, anti-cheat, game-hacking]
 sources:
   - wiki/sources/skills/graphics-api.md
   - wiki/sources/skills/anti-cheat.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/lainswork__dwm-screen-shot.md
+updated: 2026-08-01
 confidence: medium
 ---
 
@@ -33,7 +34,7 @@ Scheduled or random-interval captures aim to catch intermittent overlays. README
 - **Hardware overlay planes** — content on dedicated scan-out planes may be absent from software duplication.
 - **Off-screen render** — secondary display, capture card, or virtual camera feed outside the game window.
 
-Evasion samples in the corpus include [[disablenvidiascreenshot]] (DWM / NVIDIA capture lane), [[wda-monitor-trick]] (monitor-level capture research), and [[eac-overlay]] (alternate surfaces vs overlay monitoring).
+Evasion samples in the corpus include [[disablenvidiascreenshot]] (DWM / NVIDIA capture lane), [[dwm-screen-shot]] (DWM; AC/screenshot research for defensive engineers) (source: wiki/sources/descriptions/lainswork__dwm-screen-shot.md), [[wda-monitor-trick]] (monitor-level capture research), and [[eac-overlay]] (alternate surfaces vs overlay monitoring).
 
 ## Detection pairing
 

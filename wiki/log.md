@@ -2007,3 +2007,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:lauralex/fn-dma-cheat`: entity [[fn-dma-cheat]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]].
 
 - **2026-08-01** — ingest `description:lainswork/shellcode-factory`: entity [[shellcode-factory]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-08-01** — ingest `description:lainswork/dwm-screen-shot`: entity [[dwm-screen-shot]]; cited on [[anti-screenshot-capture]] and [[present-hook]].
