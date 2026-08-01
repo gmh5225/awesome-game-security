@@ -141,6 +141,7 @@ sources:
   - wiki/sources/descriptions/lockedbyte__so_loader.md
   - wiki/sources/descriptions/smithluke874__Android-VirtualCam-Manager.md
   - wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md
+  - wiki/sources/descriptions/libtersafe__KPM-MemReader.md
 updated: 2026-08-01
 confidence: high
 ---
@@ -197,7 +198,7 @@ Traffic capture via mitmproxy / Charles; agent MCP [[android-proxy-mcp]]; Frida 
 
 ## Kernel drivers & CVE lanes
 
-LKM / GKI `vendor_dlkm` patterns for process memory R/W, syscall hook, Binder IPC intercept ([[android-kernel-hacking-toolkit]], [[kernel-hack]], [[compile-android-driver]]). CVE catalogs [[android-vuln]]; application PoCs [[cve-2024-0044]]; kernel/TEE PoCs [[cve-2021-1961]], [[cve-2026-43499-popsicle]], Dirty Pipe [[dirtypiperoot]] / [[dirtypipe-android]].
+LKM / GKI `vendor_dlkm` patterns for process memory R/W, syscall hook, Binder IPC intercept ([[android-kernel-hacking-toolkit]], [[kernel-hack]], [[compile-android-driver]]). KernelPatch/APatch KPM cross-process memory read via ioctl hook such as [[kpm-memreader]] (`libtersafe`; cheat / Android kernel driver). (source: wiki/sources/descriptions/libtersafe__KPM-MemReader.md) CVE catalogs [[android-vuln]]; application PoCs [[cve-2024-0044]]; kernel/TEE PoCs [[cve-2021-1961]], [[cve-2026-43499-popsicle]], Dirty Pipe [[dirtypiperoot]] / [[dirtypipe-android]].
 
 ## HarmonyOS / OpenHarmony
 

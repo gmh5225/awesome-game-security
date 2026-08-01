@@ -1963,3 +1963,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:libyal/libmdmp`: entity [[libmdmp]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[minidump]].
 
 - **2026-08-01** — ingest `description:libtersafe/dfm_android_unicorn`: entity [[dfm-android-unicorn]]; cited on [[mobile-anti-cheat]] and [[overviews/mobile-security]].
+
+- **2026-08-01** — ingest `description:libtersafe/KPM-MemReader`: entity [[kpm-memreader]]; cited on [[mobile-anti-cheat]] and [[overviews/mobile-security]].
