@@ -2065,3 +2065,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:kotae4/intro-to-gamehacking`: entity [[intro-to-gamehacking]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-08-01** — ingest `description:korcankaraokcu/PINCE`: entity [[pince]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-08-01** — ingest `description:koosoli/PoseidonVK`: entity [[poseidonvk]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].

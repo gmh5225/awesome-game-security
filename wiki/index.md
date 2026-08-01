@@ -712,6 +712,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PolyHook](entities/polyhook.md) — x86/x64 C++11 multi-method hooking lib (cheat / hook research)
 - [PolyHook 2.0](entities/polyhook-2-0.md) — C++ PolyHook2 hooking lib (vcpkg; cheat / hook research)
 - [Poseidon](entities/poseidon.md) — NtConvertBetweenAuxiliaryCounterAndPerformanceCounter KM↔UM channel (BE/EAC notes)
+- [PoseidonVK](entities/poseidonvk.md) — Vulkan modernization fork of Poseidon/CWR-CE (Arma: Cold War Assault; libFuzzer format tooling)
 - [Positron](entities/positron.md) — JS runtime inject via manual-map DLL (QuickJS/Electron; named-pipe IPC; REPL/SDK)
 - [Ponytail Risk](entities/ponytail-risk.md) — OSS behavioral risk control + evidence review for private game servers (Rust agent, C ABI SDK, shadow mode)
 - [PresentHookDetection](entities/present-hook-detection.md) — BE-style IDXGISwapChain::Present hook check (dummy D3D11 + dxgi prologue)
