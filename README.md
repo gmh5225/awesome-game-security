@@ -2742,6 +2742,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/knah/Il2CppAssemblyUnhollower
 - https://github.com/reahly/mono-external-lib [External Mono Example]
 - https://github.com/Compiled-Code/external-il2cpp [Il2Cpp]
+- https://github.com/zushinzackery2-ship-it/Unity202x-eXternalrEsolve [Header-only C++17 Unity 2020–2023 external runtime introspection (Mono/IL2CPP GOM scan, IL2CPP metadata, W2S, offline dumpsdk)]
 - https://github.com/Octowolve/Il2CppSDKGenerator [Il2Cpp SDK generator for Android]
 - https://github.com/00christian00/UnityDecompiled [An unofficial repo of decompiled Unity dll files]
 - https://github.com/knah/Il2CppAssemblyUnhollower [Managed->IL2CPP proxy assemblies]
@@ -2792,6 +2793,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ioncodes/vacation3-emu [VAC3 module emulator]
 - https://github.com/gmh5225/Vac-Emulator [VAC Emulator]
 - https://github.com/ianveig29/como-funciona-vac [Technical writeup of VAC/CS2 internals from public reverse-engineering sources]
+- https://github.com/shefben/VALVeAntiCheat1 [Reverse-engineering notes and rebuild tooling for GoldSrc/WON-era VAC1 ModuleC/ModuleS bytecode VM modules (2002–2004)]
 - https://github.com/gmh5225/VACDumper [Dump]
 - https://github.com/x1tan/vac3-dumper [Dump]
 - https://github.com/nevioo1337/VAC-ModuleDumper [Dump]
