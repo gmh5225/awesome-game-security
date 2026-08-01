@@ -9,7 +9,8 @@ sources:
   - wiki/sources/descriptions/percpopper__VALORANT-FNamePool.md
   - wiki/sources/descriptions/weedeej__ValorantCC.md
   - wiki/sources/descriptions/luavmload__vanguard-update-notifier.md
-updated: 2026-07-31
+  - wiki/sources/descriptions/lil-skies__val-exception-handler.md
+updated: 2026-08-01
 confidence: medium
 ---
 
@@ -29,6 +30,8 @@ Client-side Valorant crosshair config samples such as [[valorantcc]] sit in the 
 
 Update-monitoring tooling such as [[vanguard-update-notifier]] (Discord bot; polls Riot clientconfig, SHA-256 hashes Vanguard setup archive contents, alerts on version/hash drift) helps researchers track installer changes without manual diffing. (source: wiki/sources/descriptions/luavmload__vanguard-update-notifier.md)
 
+Exception-dispatch research such as [[val-exception-handler]] (PoC; hardware exceptions / VEH; `ZwRaiseException` dump; potential code-exec or evasion angles in Vanguard's kernel exception flow) complements generic VEH tooling like [[veh-dumper]]. (source: wiki/sources/descriptions/lil-skies__val-exception-handler.md)
+
 ## Related
 
-[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[overviews/anti-cheat]]
+[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[val-exception-handler]] · [[overviews/anti-cheat]]
