@@ -676,6 +676,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [perses](entities/perses.md) — x86 PE instruction-expansion obfuscator (semantic-equivalent replacement sequences; Anti Cheat → Obfuscation Engine)
 - [petoy](entities/petoy.md) — PE-focused binary packer (C/C++ + JS; Anti Cheat → Binary Packer `[PE]`)
 - [PEzor](entities/pezor.md) — C++/C PE packer (hooking-oriented; Anti Cheat → Binary Packer)
+- [Phantasm x86 Virtualizer](entities/phantasm-x86-virtualizer.md) — x86 code virtualizer (static-link or manual VM-runtime embed; AC Obfuscation Engine `[VM]`)
 - [PhantomKiller](entities/phantomkiller.md) — BYOVD via Lenovo BootRepair.sys (IOCTL 0x222014 ZwTerminateProcess; PPL AV/EDR)
 - [physmem_drivers](entities/physmem-drivers.md) — vulnerable physmem driver list (namazso; no PoC; Cheat Vulnerable Driver)
 - [PhysPatch](entities/physpatch.md) — DMA scan/patch Windows kernel via physical memory (VA→PA walk; sonodima)

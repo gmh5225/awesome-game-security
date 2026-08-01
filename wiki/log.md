@@ -1999,3 +1999,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:leap0x7b/luaboot`: entity [[luaboot]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-08-01** — ingest `description:lbertitoyt/ImGUI-Zygisk-Unity`: entity [[imgui-zygisk-unity]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]].
+
+- **2026-08-01** — ingest `description:layerfsd/phantasm-x86-virtualizer`: entity [[phantasm-x86-virtualizer]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
