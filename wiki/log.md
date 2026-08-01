@@ -1992,4 +1992,6 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-01** — ingest `description:lehmenkuehler/camera-triggerbot`: entity [[camera-triggerbot]]; cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]].
 
+- **2026-08-01** — ingest `description:leeqwind/PESignAnalyzer`: entity [[pesign-analyzer]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-01** — ingest `description:legendabrn/AutoAttach`: entity [[auto-attach]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].
