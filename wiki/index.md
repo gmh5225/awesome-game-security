@@ -385,6 +385,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HookHunter](entities/hookhunter.md) — Windows process hook/patch scanner + hook destination tracing (Detection:hook; mike1k)
 - [hyper-reV](entities/hyper-rev.md) — Hyper-V memory introspection / RE (structures / hypercalls / partitions)
 - [Hypervisor-Detection](entities/hypervisor-detection.md) — C++ hacked-hypervisor detection (four techniques; Detection:HV)
+- [hypervisor](entities/hypervisor.md) — experimental Intel VT-x Type-2 HV (EPT page hooks, violation watchpoints, per-process cleanup; integrity-check bypass research)
 - [ept-hook-detection](entities/ept-hook-detection.md) — usermode EPT hook detector (timing / write-compare / cross-core consistency; Detect EPT)
 - [honor-of-kings-RE-research](entities/honor-of-kings-re-research.md) — Honor of Kings Android RE (ACE / libtersafe / IL2CPP / KernelPatch KPMs)
 - [HoudiniEngineForUnreal](entities/houdini-engine-for-unreal.md) — SideFX Houdini Engine UE plugin (HDAs / procedural workflow; Plugins:Unreal)
