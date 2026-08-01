@@ -700,6 +700,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PhysPatch](entities/physpatch.md) — DMA scan/patch Windows kernel via physical memory (VA→PA walk; sonodima)
 - [PiDqSerializationWrite-Example](entities/pidqserializationwrite-example.md) — Unity-centered `PiDqSerializationWrite` C++ example (Some Tricks / Windows Ring0)
 - [pikabot-deobfuscator](entities/pikabot-deobfuscator.md) — Pikabot RC4/AES string decrypt (IDA Hex-Rays; cheat / IDA Plugins)
+- [PINCE](entities/pince.md) — Linux GDB front-end (Qt; memory scan/edit, pointer chains, CE tables; Python + GDB)
 - [Pillager](entities/pillager.md) — Go Windows credential harvest (browser/Wi-Fi/chat decrypt-export; post-ex)
 - [Pine](entities/pine.md) — neural-network aim/trigger research (CS:GO / Fortnite / Overwatch; cheat / triggerbot & aimbot)
 - [Pitaya](entities/pitaya.md) — distributed multiplayer game server framework (Game Network / Server framework)
