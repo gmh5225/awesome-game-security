@@ -467,6 +467,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [input-overlay](entities/input-overlay.md) — OBS plugin: keyboard/mouse/gamepad livestream overlay (C++; Keyboard Mapper)
 - [intro-to-dx11-revisited](entities/intro-to-dx11-revisited.md) — Frank Luna DX11 modernized samples (C++ inline modules; standard D3D11 + HLSL; DirectX / guide)
 - [intro-to-dx12-2nd-edition-revisited](entities/intro-to-dx12-2nd-edition-revisited.md) — Frank Luna DX12 2nd ed. modernized chapter demos (C++20 modules; DirectX / guide)
+- [intro-to-gamehacking](entities/intro-to-gamehacking.md) — beginner game-hacking tutorial + lab (CE → C++ external/internal; memory scan / pointer chains / injection / hooks / patterns; cheat / guide)
 - [interactive-feedback-mcp](entities/interactive-feedback-mcp.md) — HITL user-feedback MCP (input/confirm/select prompts; Game Develop / MCP)
 - [InstrumentationCallbackSyscallLogger](entities/instrumentation-callback-syscall-logger.md) — Ring3 Instrumentation Callback on syscall return (AC / Windows)
 - [Island](entities/island.md) — experimental hot-reloading Vulkan renderer (C/C++; Linux+Windows; Renderer / Vulkan)

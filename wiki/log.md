@@ -2061,3 +2061,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:kouzhudong/AntiHook`: entity [[antihook]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-08-01** — ingest `description:kotae4/lab-esp-and-aimbot`: entity [[lab-esp-and-aimbot]]; cited on [[world-to-screen]] and [[overviews/game-hacking]].
+
+- **2026-08-01** — ingest `description:kotae4/intro-to-gamehacking`: entity [[intro-to-gamehacking]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
