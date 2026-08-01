@@ -508,6 +508,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KvcForensic](entities/kvcforensic.md) — LSASS credential forensics (MSV/WDigest/Kerberos/DPAPI; Win/Linux dumps)
 
 - [lara](entities/lara.md) — WIP DarkSword kexploit (iOS 17.1.1–26.0.1; font/app bypass / DirtyZero2)
+- [lab-esp-and-aimbot](entities/lab-esp-and-aimbot.md) — educational ESP/aimbot lab (3D target app + external cheat; W2S / RPM; cheat / guide)
 - [learn-awesome-gamedev](entities/learn-awesome-gamedev.md) — mega-list of gamedev learning resources (Game Develop / guide)
 - [levo](entities/levo.md) — experimental x86/x64 PE AOT binary translator (Ghidra CFG → XED/Remill lift → LLVM recompile; kernel32 API-intercept runtime)
 - [lightsaber](entities/lightsaber.md) — iOS 18.4–18.6.2 userland exploit; JS inject SpringBoard (DarkSword-derived)

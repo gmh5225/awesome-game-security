@@ -13,6 +13,7 @@ sources:
   - wiki/sources/descriptions/kouzhudong__AntiHook.md
   - wiki/sources/descriptions/kovidomi__game-reversing.md
   - wiki/sources/descriptions/krampus-nuggets__ce-tutorial.md
+  - wiki/sources/descriptions/kotae4__lab-esp-and-aimbot.md
   - wiki/sources/descriptions/krispybyte__Simple-Rust-Base.md
   - wiki/sources/descriptions/krispybyte__Simple-EFT-Base.md
   - wiki/sources/descriptions/krispybyte__Vook.md
@@ -733,6 +734,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Title-specific Call of Duty 7 tooling such as [[cod7-tools]] (VcPkg; extensible game:cod7 research) sits in the cheat / game:cod7 lane. (source: wiki/sources/descriptions/nice-sprite__COD7-Tools.md)
 - Title-specific Battlefield 1 internals such as [[battlefield-1-internal]] (C++; DirectX / SDK generation / hooking) illustrate the cheat / game:battlefield 1 lane. (source: wiki/sources/descriptions/younasiqw__BattleField-1-Internal.md)
 - Educational AssaultCube internals such as [[simple-ac-internal-cheat]] (C++20; Detours DX hooks / ImGui / ESP / aimbot / offset chains; local learning) illustrate a controlled open-source FPS internal lane. (source: wiki/sources/descriptions/s7shvets7s__simple_ac_internal_cheat.md)
+- Beginner ESP/aimbot walkthrough labs such as [[lab-esp-and-aimbot]] (custom 3D target app + external cheat; RPM / [[world-to-screen]] / entity ESP / aim angle + mouse move; cheat / guide) sit in the same controlled learning lane. (source: wiki/sources/descriptions/kotae4__lab-esp-and-aimbot.md)
 - Title-specific R6 internals such as [[r6-internal-v3]] (C/C++; modding / SDK generation / memory analysis) illustrate the cheat / game:r6 lane. (source: wiki/sources/descriptions/vctr74__R6-Internal-V3.md)
 - Title-specific Splitgate internals such as [[splitgate-internal]] (C/C++; cheat / game:splitgate) illustrate that same in-process offensive research lane. (source: wiki/sources/descriptions/percpopper__Splitgate-Internal.md)
 - Title-specific R6 externals such as [[r6-external]] (C/C++; driver development; External tag) also sit in the cheat / game:r6 lane. (source: wiki/sources/descriptions/rushzzz-max__r6-external.md)

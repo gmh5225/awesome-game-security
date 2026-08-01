@@ -5,7 +5,8 @@ topics: [game-hacking, graphics-api]
 sources:
   - wiki/sources/skills/game-hacking.md
   - wiki/sources/descriptions/microsoft__DirectXMath.md
-updated: 2026-07-30
+  - wiki/sources/descriptions/kotae4__lab-esp-and-aimbot.md
+updated: 2026-08-01
 confidence: high
 ---
 
@@ -24,8 +25,8 @@ Matrix layout and row/column convention vary by engine and hook point—verify a
 
 ## Engine helpers
 
-Cross-engine constexpr libraries such as [[omath]] ship W2S, projectile prediction, and engine-specific camera helpers (Source, Unity, Unreal, Frostbite, etc.). Microsoft's [[directxmath]] supplies SIMD matrix/vector inlines and frustum helpers for DirectX-facing Windows/Xbox code paths. Educational internals with explicit W2S: [[simple-ac-internal-cheat]].
+Cross-engine constexpr libraries such as [[omath]] ship W2S, projectile prediction, and engine-specific camera helpers (Source, Unity, Unreal, Frostbite, etc.). Microsoft's [[directxmath]] supplies SIMD matrix/vector inlines and frustum helpers for DirectX-facing Windows/Xbox code paths. Educational internals with explicit W2S: [[simple-ac-internal-cheat]]. Beginner walkthrough labs such as [[lab-esp-and-aimbot]] (custom 3D target app + external cheat; ESP + aimbot from scratch) teach the same pipeline in a controlled practice environment. (source: wiki/sources/descriptions/kotae4__lab-esp-and-aimbot.md)
 
 ## Related
 
-[[present-hook]] · [[unreal-object-model]] · [[source-netvars]] · [[omath]] · [[directxmath]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
+[[present-hook]] · [[unreal-object-model]] · [[source-netvars]] · [[omath]] · [[directxmath]] · [[lab-esp-and-aimbot]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
