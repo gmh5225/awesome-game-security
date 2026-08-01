@@ -1,0 +1,3358 @@
+Project Path: arc_shefben_VALVeAntiCheat1_2xll_pf6
+
+Source Tree:
+
+```txt
+arc_shefben_VALVeAntiCheat1_2xll_pf6
+├── ModuleC
+│   ├── ModuleC.cpp
+│   └── ModuleC.dsp
+├── ModuleC.blob
+├── ModuleS
+│   ├── ModuleS.cpp
+│   └── ModuleS.dsp
+├── ModuleS.blob
+├── VAC_REVERSING.md
+├── common
+│   ├── vac_module.cpp
+│   ├── vac_module.h
+│   ├── vac_net.cpp
+│   ├── vac_net.h
+│   └── vac_vm.cpp
+├── decrypt_vac_module.py
+├── mkvac.bat
+├── rebuild_vac_pe.py
+├── repack_vac_module.py
+└── vacmodules.dsw
+
+```
+
+`ModuleC/ModuleC.cpp`:
+
+```cpp
+//=============================================================================
+// ModuleC.cpp -- client module entry points. ModuleInit publishes the table the
+// engine resolves by name; every callback is a thin shim onto a VM message.
+//=============================================================================
+#include "../common/vac_module.h"
+#include <string.h>
+
+void *VacSetEngData(const void *tbl);
+int   VacSetEngineVersion(int ver);
+
+static VacModuleTable *g_table = 0;
+
+
+
+static void * __cdecl C_LoadMod(void *blob)     { return VacLoadMod(blob); }
+static void * __cdecl C_CloseMod(void)          { return VacCloseMod(); }
+
+static int __cdecl C_FrameBegin(void)
+{
+    return VacRaise0(0, VACMSG_FRAME_BEGIN);            // msg 143
+}
+
+static int __cdecl C_ModelLoad(int a, int ctx)
+{
+    return VacRaise3(0, VACMSG_MODEL_LOAD,              // msg 141
+                     *(int *)(ctx + 8), *(int *)(ctx + 16), ctx);
+}
+
+static int __cdecl C_TextureLoad(int a, int ctx)
+{
+    VacRaise1(0, VACMSG_TEXTURE_LOAD, ctx);             // msg 142
+    return 1;
+}
+
+static int __cdecl C_FrameRender1(void)
+{
+    VacIntegrityTick();                                 // 5 s engine checksum
+    return VacRaise0(0, VACMSG_FRAME_RENDER1);          // msg 138
+}
+
+static void * __cdecl C_SetEngData(const void *tbl) { return VacSetEngData(tbl); }
+static int    __cdecl C_SetEngineVersion(int v)     { return VacSetEngineVersion(v); }
+
+extern "C" __declspec(dllexport)
+VacModuleTable * __cdecl ModuleInit(VacModuleTable *tbl)
+{
+    g_table = tbl;
+    VacInitDstTables();
+    tbl->canary = VAC_INIT_CANARY;
+
+    tbl->LoadMod            = C_LoadMod;
+    tbl->CloseMod           = C_CloseMod;
+    tbl->unused2            = 0;
+    tbl->GetClDstAddrs      = VacGetClDstAddrs;
+    tbl->GetEngDstAddrs     = VacGetEngDstAddrs;
+    tbl->FrameBegin         = C_FrameBegin;
+    tbl->ModelLoad          = C_ModelLoad;
+    tbl->TextureLoad        = C_TextureLoad;
+    tbl->frameRender2       = 0;
+    tbl->processIncomingNet = 0;
+    tbl->FrameRender1       = C_FrameRender1;
+    tbl->processOutgoingNet = 0;
+    tbl->moduleLoaded       = 0;
+    tbl->SetSecureAddrs     = 0;
+    tbl->unused14           = 0;
+    tbl->SetEngData         = C_SetEngData;
+    tbl->SetEngineVersion   = C_SetEngineVersion;
+
+    if (tbl->canary == VAC_INIT_CANARY)
+        memset(tbl->reserved21, 0, sizeof(tbl->reserved21));
+
+    tbl->canary = VAC_INIT_CANARY;
+    return tbl;
+}
+
+BOOL WINAPI DllMain(HINSTANCE, DWORD, LPVOID) { return TRUE; }
+
+```
+
+`ModuleC/ModuleC.dsp`:
+
+```dsp
+# Microsoft Developer Studio Project File - Name="ModuleC" - Package Owner=<4>
+# Microsoft Developer Studio Generated Build File, Format Version 6.00
+# ** DO NOT EDIT **
+
+# TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
+
+CFG=ModuleC - Win32 Release
+!MESSAGE This is not a valid makefile.
+!MESSAGE NMAKE /f "ModuleC.mak" CFG="ModuleC - Win32 Release"
+
+# Begin Project
+# PROP AllowPerConfigDependencies 0
+# PROP Scc_ProjName ""
+# PROP Scc_LocalPath ""
+CPP=cl.exe
+MTL=midl.exe
+RSC=rc.exe
+
+!IF  "$(CFG)" == "ModuleC - Win32 Release"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "Release"
+# PROP BASE Intermediate_Dir "Release"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "Release"
+# PROP Intermediate_Dir "Release"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /YX /FD /c
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
+BSC32=bscmake.exe
+LINK32=link.exe
+# ADD LINK32 kernel32.lib /nologo /dll /machine:I386 /base:"0x1700000" /align:4096 /fixed /out:"Release/ModuleC.dll"
+
+!ENDIF
+
+# Begin Target
+
+# Name "ModuleC - Win32 Release"
+# Begin Source File
+
+SOURCE=.\ModuleC.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\vac_module.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\vac_vm.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\vac_module.h
+# End Source File
+# End Target
+# End Project
+
+```
+
+`ModuleS/ModuleS.cpp`:
+
+```cpp
+//=============================================================================
+// ModuleS.cpp -- server module entry points.
+//
+// ModuleS is ModuleC's shared core plus the network layer in vac_net.cpp.
+// Every callback is a thin shim onto a VM message; the VM channel is the
+// client slot index.
+//=============================================================================
+#include "../common/vac_module.h"
+#include "../common/vac_net.h"
+#include <string.h>
+
+static VacModuleTable *g_table = 0;
+
+
+
+//-----------------------------------------------------------------------------
+static void * __cdecl S_LoadMod(void *blob)
+{
+    void *p = VacLoadMod(blob);
+    VacNetInit();
+    return p;
+}
+
+static void * __cdecl S_CloseMod(void)
+{
+    void *r = VacCloseMod();
+    VacNetShutdown();
+    return r;
+}
+
+// [6] model load -- channel is the client slot (client_t field +24, 1-based)
+static int __cdecl S_ModelLoad(int a1, int a2)
+{
+    unsigned int slot = *(unsigned int *)(a1 + 24) - 1;
+    return VacRaise3(slot, VACMSG_S_MODELLOAD,
+                     a1, *(int *)(a2 + 8), *(int *)(a2 + 16));
+}
+
+// [7] texture load
+static int __cdecl S_TextureLoad(int a1, int a2)
+{
+    unsigned int slot = *(unsigned int *)(a1 + 24) - 1;
+    VacRaise1(slot, VACMSG_TEXTURE_LOAD, a2);
+    return 1;
+}
+
+// [10] per-frame: drain the backend socket
+static int __cdecl S_FrameRender1(void)
+{
+    VacNetPump();
+    return 0;
+}
+
+// [13] engine address block
+static void __cdecl S_SetSecureAddrs(const void *blk) { VacSetSecureAddrs(blk); }
+
+// [15] engine function table
+static void * __cdecl S_SetEngData(const void *tbl)
+{
+    void *r = VacSetEngData(tbl);
+
+    // Publish the host services the bytecode reaches through NATIVE_CALL.
+    g_hostSvc.SendPacket = VacSendPacket;
+    g_hostSvc.BanClient  = VacBanClient;
+    g_hostSvc.reserved   = 0;
+    g_hostSvc.port       = g_engineVersion ? VAC_DEFAULT_PORT : VAC_LEGACY_PORT;
+    return r;
+}
+
+// [17] client connect handshake
+static int __cdecl S_ClientConnect(unsigned int slot) { return VacClientConnect(slot); }
+
+// [19] deferred packet dispatch
+static int __cdecl S_ClientPacket(int ctx)
+{
+    unsigned int slot = *(unsigned int *)(ctx + 16);
+    if (slot > VAC_MAX_CLIENTS)
+        return (int)slot;
+    return VacRaise1(slot, VACMSG_S_PACKET, ctx);
+}
+
+static int __cdecl S_SetEngineVersion(int v) { return VacSetEngineVersion(v); }
+
+//-----------------------------------------------------------------------------
+extern "C" __declspec(dllexport)
+VacModuleTable * __cdecl ModuleInit(VacModuleTable *tbl)
+{
+    g_table = tbl;
+    VacInitDstTables();
+    tbl->canary = VAC_INIT_CANARY;
+
+    tbl->LoadMod            = S_LoadMod;
+    tbl->CloseMod           = S_CloseMod;
+    tbl->unused2            = 0;
+    tbl->GetClDstAddrs      = VacGetClDstAddrs;
+    tbl->GetEngDstAddrs     = VacGetEngDstAddrs;
+    tbl->FrameBegin         = 0;
+    tbl->ModelLoad          = S_ModelLoad;
+    tbl->TextureLoad        = S_TextureLoad;
+    tbl->frameRender2       = 0;
+    tbl->processIncomingNet = 0;
+    tbl->FrameRender1       = S_FrameRender1;
+    tbl->processOutgoingNet = 0;
+    tbl->moduleLoaded       = 0;
+    tbl->SetSecureAddrs     = S_SetSecureAddrs;
+    tbl->unused14           = 0;
+    tbl->SetEngData         = S_SetEngData;
+    tbl->ClientConnect      = S_ClientConnect;
+    tbl->unused18           = 0;
+    tbl->ClientPacket       = S_ClientPacket;
+    tbl->SetEngineVersion   = S_SetEngineVersion;
+
+    if (tbl->canary == VAC_INIT_CANARY)
+        memset(tbl->reserved21, 0, sizeof(tbl->reserved21));
+
+    tbl->canary = VAC_INIT_CANARY;
+    return tbl;
+}
+
+BOOL WINAPI DllMain(HINSTANCE, DWORD, LPVOID) { return TRUE; }
+
+```
+
+`ModuleS/ModuleS.dsp`:
+
+```dsp
+# Microsoft Developer Studio Project File - Name="ModuleS" - Package Owner=<4>
+# Microsoft Developer Studio Generated Build File, Format Version 6.00
+# ** DO NOT EDIT **
+
+# TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
+
+CFG=ModuleS - Win32 Release
+!MESSAGE This is not a valid makefile.
+!MESSAGE NMAKE /f "ModuleS.mak" CFG="ModuleS - Win32 Release"
+
+# Begin Project
+# PROP AllowPerConfigDependencies 0
+# PROP Scc_ProjName ""
+# PROP Scc_LocalPath ""
+CPP=cl.exe
+MTL=midl.exe
+RSC=rc.exe
+
+!IF  "$(CFG)" == "ModuleS - Win32 Release"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "Release"
+# PROP BASE Intermediate_Dir "Release"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "Release"
+# PROP Intermediate_Dir "Release"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /YX /FD /c
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
+BSC32=bscmake.exe
+LINK32=link.exe
+# ADD LINK32 kernel32.lib ws2_32.lib /nologo /dll /machine:I386 /base:"0x1700000" /align:4096 /fixed /out:"Release/ModuleS.dll"
+
+!ENDIF
+
+# Begin Target
+
+# Name "ModuleS - Win32 Release"
+# Begin Source File
+
+SOURCE=.\ModuleS.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\vac_module.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\vac_vm.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\common\vac_module.h
+# End Source File
+# End Target
+# End Project
+
+```
+
+`VAC_REVERSING.md`:
+
+```md
+# VAC1 security modules — reverse engineering notes
+
+GoldSrc / WON-era Half-Life, ~2002–2003. Applies to `ModuleC.dll` (client),
+`ModuleS.dll` (server, Win32) and `ModuleS_i386.so` (server, Linux).
+
+Toolchain used: `decrypt_vac_module.py` → `rebuild_vac_pe.py` → IDA 9.3 headless
+(FLIRT correctly tags the statically-linked MSVC6 CRT, which is most of `.text`).
+
+---
+
+## 1. What these modules actually are
+
+**They are not hard-coded cheat scanners. They are sandboxed bytecode virtual
+machines.** The engine hands the module a program blob; every one of the 14
+published entry points does nothing but invoke a VM program by message ID.
+
+That is why the two modules share so much code: of the ~51 (ModuleC) / ~56
+(ModuleS) non-CRT functions, the great majority are byte-for-byte the same
+routine at a different address. The interpreter alone (`sub_17013A0`, **6040
+bytes, identical in both**) is over half of all non-CRT code.
+
+Consequence for Valve at the time: new detections shipped as new bytecode
+programs over the wire, with no new binary and no client patch.
+
+### Code budget
+
+| | total funcs | FLIRT CRT | thunks | real module code | bytes |
+|---|---|---|---|---|---|
+| ModuleC | 174 | 122 | 1 | **51** | 11 904 |
+| ModuleS | 250 | 181 | 13 | **56** | 13 429 |
+| ModuleS_i386.so | 232 | — (no FLIRT) | 22 | 210 | 18 817 |
+
+---
+
+## 2. Container format (on-the-wire download)
+
+```
+u16          namelen                  BIG endian
+u8[namelen]  name                     plaintext, e.g. "dod/ModuleC.dll"
+u8[42]       metadata
+             [ 0: 4]  00 00 00 22     constant tag
+             [ 4:20]  MD5             <-- of the LAYER-1-DECRYPTED payload
+             [20:24]  08 07 00 00     constant
+             [24:42]  18 bytes, per-build
+u8[]         payload
+```
+
+The MD5 semantics were confirmed empirically against all three shipped files.
+
+### Layer 1 — container cipher
+Repeating 64-byte XOR key from the payload start: `0x02` at payload-relative
+offsets `{5,17,29,33,41,53,57,61}`, `0x00` elsewhere. Involutive.
+
+Linux modules stop here — after layer 1 you have a plain ELF, which the engine
+just writes to disk and `dlopen()`s.
+
+### Layer 2 — blob cipher (Windows only)
+Rolling additive-feedback XOR, from blob offset 68 to EOF:
+
+```
+key = 0x57
+for i in 68..len-1:
+    p = buf[i] ^ key ;  buf[i] = p ;  key = (key + p + 0x57) & 0xFF
+```
+
+The stream feeds back on *plaintext*, so layer 1 must be stripped first.
+
+---
+
+## 3. Blob format
+
+```
+[0x00:0x40]  64 bytes of junk — uninitialised memory from Valve's packer.
+             The shipped files leak fragments of the build machine's
+             environment block: "ocuments and Settings\mattb",
+             "=ExitCode=00000000", "=U:=U:\goldsr".
+[0x40:0x44]  magic 0x12345678
+--- layer-2 enciphered from 0x44 (68) on ---
++0x44  u32  build stamp        0x46BC (ModuleC) / 0x46EA (ModuleS)
++0x48  i32  section_count - 1
++0x4C  u32  ModuleInit VA  ^ 0x7A32BC85
++0x50  u32  image base     ^ 0x49C042D1      (= 0x01700000)
++0x54  u32  DllMain VA + 12
++0x58  u32  (import descriptor VA - 12) ^ 0x872C3D47
++0x5C  section table, stride 20, count+1 entries:
+           u32 dest_va, u32 vsize, u32 rawsize, u32 src_off, u32 flag
+           vsize > rawsize -> tail zero-filled
+           flag != 0 -> the loader returns this section's dest
+```
+
+> **Correction to the earlier notes:** the field at `blob+68` is *not* a total
+> size. It is 0x46BC / 0x46EA in two modules whose file sizes differ by 11 KB,
+> and matches neither the file length, the sum of raw sizes, nor the sum of
+> virtual sizes. It is a build/version stamp.
+
+Section layout is identical in both Windows modules:
+
+```
+sec0  .text     0x01701000
+sec1  .rdata    0x01709000 / 0x0170C000
+sec2  .data     0x0170A000 / 0x0170D000
+sec3  .vacdat   0x01800000   flag=1   RWX, holds the bytecode program
+```
+
+`.vacdat` sits 1 MB above the image base, is read/write/execute, and its
+contents are obfuscated — this is the VM program area, not normal data.
+
+### Import descriptors
+Stride 20, terminated by a zero dword. `[0]` = dll-name RVA, `[1]` = thunk-array
+RVA, `[2..4]` unused. Thunk entries are **already in PE form**: high bit set →
+import by ordinal, otherwise an RVA to `IMAGE_IMPORT_BY_NAME` (the loader calls
+`GetProcAddress(h, rva + base + 2)`, skipping the hint word).
+
+---
+
+## 4. Engine interface
+
+The engine resolves 14 names (strings live in `.rdata`):
+
+```
+LoadMod  CloseMod  ModuleLoaded  SetEngData  SetEngineVersion
+FrameBegin  FrameRender1  FrameRender2
+GetClDstAddrs  GetEngDstAddrs
+ModelLoad  TextureLoad
+ProcessIncomingNet  ProcessOutgoingNet
+```
+
+`ModuleInit(tbl)` fills a function-pointer table and stamps `tbl[16]` with the
+magic `1126236164`, re-checking it mid-function as a light tamper canary:
+
+```c
+tbl[0]  = LoadMod;              // operator new(0x30), then init from blob
+tbl[1]  = CloseMod;
+tbl[3]  = GetClDstAddrs;        // memcpy 0xA8 bytes from a table
+tbl[4]  = GetEngDstAddrs;       // memcpy 0x1B4 bytes
+tbl[5]  = FrameBegin;           // -> VM msg 143
+tbl[6]  = ModelLoad;            // -> VM msg 141
+tbl[7]  = TextureLoad;          // -> VM msg 142
+tbl[10] = FrameRender1;         // integrity check, then VM msg 138
+tbl[15] = SetEngData;           // copies the 0x7C-byte engine func table
+tbl[20] = SetEngineVersion;
+```
+
+`SetEngData` captures the engine's function table and caches the Win32 APIs the
+VM is allowed to reach: `GetProcessHeaps`, `HeapWalk`, `GetModuleHandleA`,
+`Sleep`, `CreateThread`, `TerminateThread`, `CloseHandle`, `VirtualQuery`, plus
+`GetProcAddress(opengl32.dll, "glBegin")`.
+
+### Message IDs observed
+`138` FrameRender1 · `141` ModelLoad · `142` TextureLoad · `143` FrameBegin ·
+`147`, `148` scan callbacks · `150` CloseMod · `151` thread exit
+
+---
+
+## 5. The engine memory integrity check (ModuleC)
+
+`sub_170320D`, run from FrameRender1, rate-limited to once per 5 s:
+
+```c
+DWORD now = GetTickCount();
+if (last + 5000 <= now) {
+    last = now;
+    a = checksum(0x01D01D40, len_a);      // sum of dwords
+    b = checksum(0x019012C0, 345508);
+    if (a != saved_a || b != saved_b) {
+        Print(msg);                        // "...memory corruption on your computer..."
+        engine->ExecuteCmd("dropclient");
+    }
+}
+```
+
+Both regions are **hard-coded absolute VAs inside `hw.dll`**, and the checksum is
+a plain sum of dwords. `len_a` is selected at init (853468 or 0) depending on an
+engine-supplied flag. This is the classic VAC1 engine-text integrity check, and
+it is why the module is engine-build-specific.
+
+The user-facing string points at `http://www.counter-strike.net/cheat.html`.
+
+---
+
+## 6. The virtual machine
+
+### VM object (0x2878 bytes, `operator new` per message)
+
+| offset | meaning |
+|---|---|
+| `+0x00` | parent VM (nested calls) |
+| `+0x04` | PC |
+| `+0x08` | rolling opcode key |
+| `+0x0C` | 20 local registers (`0x50` bytes) |
+| `+0x60` | pointer to the operand-stack index |
+| `+0x64` | operand stack base (`malloc(0xFA0)` = 4000 B) |
+| `+0x68` | channel |
+| `+0x6C` | per-channel global register array (`0x400` B = 256 dwords) |
+| `+0x70` | per-channel data area (`0x1000` B, strings/buffers) |
+| `+0x74` | frame counter (max 19) |
+| `+0x78` | frame array, stride 128 |
+
+`sub_1701293` grows the per-channel arrays in steps of 10 channels, capped at
+0x200.
+
+### Program blob (`LoadMod`, `sub_1701231`)
+
+```c
+this[11] = base + *(u32*)base + 4;          // code base
+this[6]  = *(u32*)(base + base[1]);         // entry count
+this[7]  = base + base[1] + 4;              // entry table, stride 8
+                                            //   u32 code_offset, u8 initial_key
+```
+
+Message *N* starts at `code_base + entry[N].offset`, with the opcode key seeded
+from `entry[N].key`.
+
+### Dispatch — opcodes are self-decrypting
+
+```asm
+mov  edx, [esi+4]              ; PC
+mov  al,  [esi+8]              ; rolling key
+mov  cl,  [edx]                ; raw byte
+xor  cl, al                    ; opcode = raw ^ key
+add  al, cl                    ; key += opcode
+mov  [esi+8], al
+movzx eax, cl
+add  eax, -2
+cmp  eax, 0FBh
+ja   default
+movzx eax, byte_1702CB4[eax]   ; 252-entry remap table
+jmp  ds:jpt_17013D2[eax*4]
+```
+
+Every opcode byte is XOR'd with a key that accumulates all previously decoded
+opcodes, so the instruction stream cannot be read without executing it from the
+correct entry point — a cheap but effective anti-static-analysis measure.
+
+* opcode range **2..253** (252 slots)
+* **95 live opcodes**, **94 distinct handlers** (46 and 152 share one)
+* **157 opcode values are silent no-ops** — decoys that only advance the PC
+
+32-bit immediates are stored XOR'd with **`0xF64BDDA9`**.
+
+Register operands are one byte: `< 20` selects a local register at
+`obj+0x0C+idx*4`; `>= 20` indexes the per-channel global array at `obj+0x6C`.
+
+### Instruction encodings
+
+| length | form |
+|---|---|
+| 2 | `[op][reg]` |
+| 3 | `[op][regA][regB]` |
+| 5 | `[op][imm32 ^ 0xF64BDDA9]` |
+| 6 | `[op][imm32 ^ 0xF64BDDA9][reg]` |
+
+### Opcode map (all 94 handlers, 95 live opcodes)
+
+Suffix: `_I` immediate, `_RR` register/register, `_RM` register/`*(T*)`register,
+`_MR` `*(T*)`register/register.
+
+| group | opcodes |
+|---|---|
+| MOV imm | 177, 46, 152 |
+| STORE imm 32/16/8 | 202, 78, 221 |
+| MOV r,r | 77 |
+| STORE32/LOAD32/COPY32 | 137, 250, 237 |
+| STORE16/LOAD16(sx)/COPY16 | 189, 200, 161 |
+| STORE8/LOAD8(zx)/COPY8 | 93, 213, 17 |
+| MOVZX 16 / 8 | 187, 132 |
+| ADD `_I _RR _RM` | 98, 143, 25 |
+| SUB | 246, 224, 205 |
+| MUL | 114, 241, 31 |
+| DIV | 154, 101, 65 |
+| MOD | 39, 121, 41 |
+| XOR | 21, 139, 234 |
+| AND | 57, 245, 194 |
+| OR | 171, 240, 81 |
+| SHL | 15, 229, 37 |
+| SAR | 74, 157, 14 |
+| FADD FSUB FMUL FDIV FCMP | 7, 248, 196, 11, 45 |
+| CMP `_I _RR _RM` | 96, 191, 71 |
+| TEST `_I _R _M` | 58, 75, 10 |
+| JMP `_I _R _M` | 230, 61, 231 |
+| JE JNE JG JGE JL JLE | 169, 131, 253, 186, 51, 223 |
+| CALL `_I _R _M` | 80, 239, 105 |
+| RET `_I _R _M` | 232, 210, 84 |
+| PUSH `_I _R _M` | 195, 135, 53 |
+| POP `_R _M` | 172, 116 |
+| data-area pointer `_I _R _M` | 206, 103, 33 |
+| LEA entry / STRCPY / STRCMP | 219, 67, 2 |
+| NATIVE_CALL | 127 |
+| CHECKSUM | 111 |
+| MEMCPY | 149 |
+| SPIN | 133 |
+| TRACE / PRINT | 217, 48 |
+| GET_TEB / GET_CHANNEL / FRAME_ALLOC | 170, 183, 216 |
+| NOP | 29 |
+
+Notable individual opcodes:
+
+* **127 `NATIVE_CALL`** — 14 bytes,
+  `[op][reg][imm32 argc][imm32 kind][imm32 flag]`. Pops `argc` values off the
+  operand stack and calls the pointer in `reg` **cdecl** with up to 10
+  arguments. `kind == 1` captures an integer return, `kind == 2` an FPU return,
+  anything else discards it. This is how downloaded bytecode reaches
+  `GetProcessHeaps`, `HeapWalk`, `VirtualQuery`, `glBegin` and friends — the
+  host table cached by `SetEngData` is simply exposed to the program as
+  register values.
+* **111 `CHECKSUM`** — pops length and pointer, pushes
+  `sum(dword[i] ^ (4*i))`. The scanning primitive.
+* **170 `GET_TEB`** — `reg = fs:[0x18]`, i.e. the Thread Environment Block,
+  the entry point for PEB walks and debugger checks.
+* **2 / 67 `STRCMP` / `STRCPY`** — operate on obfuscated strings held in the
+  entry table. The cipher is **XOR 0x3E**, and the cipher byte equal to the key
+  (0x3E) is the terminator.
+
+### Branch and call targets are entry indices
+
+No branch encodes an address. Targets index the program's entry table, and the
+taken path reloads *both* the PC and the rolling opcode key:
+
+```c
+vm->pc  = program->codeBase + program->entries[target].codeOffset;
+vm->key = program->entries[target].initialKey;
+```
+
+This is what makes the self-decrypting stream workable: every entry is an
+independently decodable basic block with a known starting key. It also means a
+static disassembler must walk the entry table rather than the byte stream.
+
+### VM debug output
+`I: 0x%x`, `S: %s`, `F: %f`, `Unknown message: 0x%x, data 0x%x` — emitted by
+opcode 217, which pops a type code (1 = int, 9 = string, 10 = float).
+
+---
+
+## 7. What ModuleC actually scanned for
+
+`.vacdat` is the program area. Decoding its strings with XOR 0x3E yields the
+client module's detection list:
+
+```
+ogcse.dll        rageogl.dll       nc-clienthack.dll
+opengl32.dll     opengl30.dll      JoolzCheat.dll      Joolz
+```
+
+These are 2002-era OpenGL wallhacks, loaded as fake `opengl32.dll` replacements
+— which is also why `SetEngData` resolves and caches `glBegin`.
+
+---
+
+## 8. ModuleS network layer
+
+Fully reversed. The transport is a plain non-blocking UDP socket wrapped in an
+8-byte object.
+
+```c
+struct VacSocket { SOCKET s; unsigned short port; };
+```
+
+| original | role |
+|---|---|
+| `sub_170332B` | `WSAStartup(1.1)`, `socket(AF_INET, SOCK_DGRAM, UDP)`, `FIONBIO=1`, `bind(INADDR_ANY:port)` |
+| `sub_17033B1` | `shutdown(1)`, `shutdown(2)`, `closesocket`, `WSACleanup` |
+| `sub_17033DC` | `sendto` — takes only the peer address; **reuses its own bound port** as the destination port |
+| `sub_170341E` | `select` with a zero timeout, then `recvfrom`; returns the peer address |
+
+### Transport selection
+
+`SetEngineVersion` (`sub_1702EFD`) stores its argument in `dword_1710500`, and
+that value gates everything:
+
+| engine version | behaviour |
+|---|---|
+| `0` (WON) | module owns UDP **:27011** and talks straight to the backend |
+| non-zero | traffic is tunnelled through the engine's own netchan (`table[18]`), and the listen port comes from the **`hostport`** cvar (default 27015) |
+
+### The backend
+
+```
+0x15B1ADCF  ==  207.173.177.21
+```
+
+Inbound datagrams are accepted only when **all** of these hold:
+
+* length is **exactly 60 bytes**
+* source address equals the constant above
+* the dword at packet offset **+16** is `<= 0x40`
+
+That dword is the **channel**, and a channel is a **client slot** — so the
+backend addresses an individual player by slot number. The packet is then
+handed to bytecode as message **149**.
+
+```c
+if (!engineVersion && sock
+ && VacSockRecv(buf, 0x4000, &from) == 60
+ && from == 0x15B1ADCF
+ && *(u32*)(buf+16) <= 0x40)
+        VacRaise1(*(u32*)(buf+16), 149, buf);
+```
+
+### Client connect (`sub_17031EE`)
+
+```c
+VacChannelReset(program, slot);              // wipe 0x400 globals + 0x1000 data
+nonce = (rand() << 16) + rand();
+VacRaise3(slot, 143, &engineTable, &hostServices, nonce);
+```
+
+Every connect wipes the slot so one player's program state cannot leak into the
+next, then runs the handshake program with a fresh 32-bit nonce.
+
+### Host service table
+
+Message 143 receives a pointer to this block, and bytecode reaches it through
+opcode 127 (`NATIVE_CALL`). It is an ABI:
+
+| offset | original | meaning |
+|---|---|---|
+| `+0x00` | `dword_1710504` | engine code base |
+| `+0x04` | `dword_1710508` | `SendPacket(buf, len, addr)` |
+| `+0x08` | `dword_170050C` | `BanClient(slot, untilDate)` |
+| `+0x0C` | `dword_1710510` | always 0 |
+| `+0x10` | `dword_1710514` | scratch buffer |
+| `+0x14` | `dword_1710518` | port |
+
+### Ban path (`sub_17032B3`)
+
+```c
+msg[0] = 8;                                    // svc_print
+sprintf(msg+1, banText, untilDate);
+client  = *(u32*)(engineTable[14] + 4) + 20496 * slot;
+WriteToClient(client + 32, len+1, msg);        // +32 = netchan
+DropClient(client, 0, "Banned because of past cheating violations");
+```
+
+`20496` (`0x5010`) is the `client_t` stride for this engine build.
+
+### Engine imports
+
+The 0x7C-byte engine table is indexed by dword:
+
+| index | service |
+|---|---|
+| 7 | varargs print (also the VM's trace sink) |
+| 14 | client-array holder |
+| 18 | netchan send |
+| 19 | `GetCvar` |
+| 20 | `ExecuteCmd` (used by ModuleC for `dropclient`) |
+
+`WriteToClient` and `DropClient` are **not** in that table. They are reached at
+**fixed negative deltas** from an engine code base delivered separately through
+table slot 13 (a 0x28-byte block, `sub_1702FC0`):
+
+```c
+DropClient    = base - 307552;
+WriteToClient = base - 246608;
+```
+
+This is the hard engine-build dependency: those deltas, the `client_t` stride,
+and ModuleC's hard-coded `hw.dll` scan VAs all change with every engine
+revision.
+
+### Server message IDs
+
+`142` texture load · `143` connect handshake · `144` model load ·
+`149` backend packet / deferred report
+
+---
+
+## 8a. The `*DstAddrs` tables
+
+`GetClDstAddrs` (0xA8 = 42 dwords) and `GetEngDstAddrs` (0x1B4 = 109 dwords)
+are **not** data. Every live slot holds the address of `nullsub_1` — a single
+`RET` at `.text+0` — and the rest are zero:
+
+```
+GetClDstAddrs :  [0..40]  stub,  [41]      zero
+GetEngDstAddrs:  [0..81]  stub,  [82..87]  zero,
+                 [88..100] stub, [101..108] zero
+```
+
+The engine asks the module where to route a fixed set of callbacks; the shipped
+binary answers "nowhere" for all of them. The module is inert by design — the
+downloaded bytecode arms these slots. This is the single clearest statement of
+the whole architecture: **the DLL is a sandbox, the detections are data.**
+
+---
+
+## 8b. `ModuleS_i386.so`
+
+Same design compiled for Linux against glibc. No FLIRT coverage in this
+workspace, so its 210 "user" functions still include statically-linked libc.
+
+---
+
+## 9. Building
+
+`src/vacmodules.dsw` opens in the VS6 IDE. From a shell, `src/mkvac.bat` builds
+both DLLs without needing `VCVARS32.BAT`:
+
+```
+cd src
+./mkvac.bat
+```
+
+Two environment details matter and are handled by the batch file:
+
+* VC98's `CL.EXE` loads `C1.DLL` / `C1XX.DLL` from `VC98\Bin` **and**
+  `MSPDB60.DLL` from `Common\MSDev98\Bin`. Without the latter on `PATH` the
+  compiler exits silently with no diagnostic.
+* Link with `/base:0x1700000 /align:4096 /fixed`. `/fixed` suppresses `.reloc`,
+  which the originals do not carry — the engine's loader maps sections itself
+  and never relocates. `LNK4108` is expected and harmless for the same reason.
+
+Round-tripping a build back into a container:
+
+```
+python repack_vac_module.py --pe src/build/ModuleC.dll        --name dod/ModuleC.dll --template ModuleC.dll -o ModuleC.vac
+```
+
+---
+
+## 10. Status
+
+| deliverable | state |
+|---|---|
+| container + blob format | complete, verified |
+| `repack_vac_module.py` | complete — reproduces all three shipped files byte-for-byte |
+| module architecture, engine interface | complete |
+| ModuleC integrity checker | complete |
+| message layer, VM object model, dispatch, encodings | complete |
+| all 94 opcode handlers | complete |
+| `.vacdat` string cipher + detection list | complete |
+| **ModuleS network layer** | **complete** — transport, gating, backend address, packet filter, host service table, ban path |
+| `*DstAddrs` tables | complete |
+| VS6 projects | build clean under VC98; both DLLs link and repack |
+| **backend packet payload semantics** | **not recoverable** — parsing lives in bytecode that was never archived (see below) |
+| bit-exact behavioural parity | not verified — no original program blob to execute |
+
+### What cannot be recovered from these files
+
+Only the *transport* is in the binary. Everything past packet offset +16 is
+parsed by the downloaded bytecode program, and no program blob was archived
+alongside these modules. The same applies to the actual detection logic: the
+shipped DLLs contain no scanning code at all, only the sandbox that would have
+run it. The `.vacdat` string table is the one surviving fragment of a real
+program, which is why it is the only place cheat names appear.
+
+For a new deployment this is not a blocker — the payload format is yours to
+define.
+
+```
+
+`common/vac_module.cpp`:
+
+```cpp
+//=============================================================================
+// vac_module.cpp -- module framework shared by ModuleC and ModuleS.
+// Originals: ModuleInit @0x1702ED3 (C) / @0x1702F07 (S), plus the message
+// layer at 0x1701122..0x1701191 and the integrity check at 0x170320D.
+//=============================================================================
+#include "vac_module.h"
+#include <stdlib.h>
+#include <string.h>
+
+VacProgram *g_program = 0;
+int         g_engineVersion = 0;
+VacHostApi  g_host    = { 0 };
+
+void        *g_engineTable[0x7C / 4];       // copied verbatim by SetEngData
+void        *g_engineTablePtr = g_engineTable;
+
+// Engine services, resolved out of the table above by index.
+//   [7]  varargs print       [14] client-array holder
+//   [18] netchan send        [19] GetCvar          [20] ExecuteCmd
+int  (__cdecl *g_engWriteToClient)(void *netchan, int len, const void *buf) = 0;
+int  (__cdecl *g_engDropClient)(void *client, int flag, const char *reason)  = 0;
+int  (__cdecl *g_engNetSend)(int chan, int len, const void *buf)             = 0;
+void *(__cdecl *g_engGetCvar)(const char *name)                             = 0;
+unsigned long  g_engClientArrayPtr = 0;
+
+// The 0x28-byte block delivered through table slot 13. Its first dword is an
+// engine code base; two private engine routines are reached at fixed negative
+// deltas from it, which is what pins these modules to one engine build.
+unsigned long  g_secureAddrs[0x28 / 4];
+#define VAC_DELTA_DROPCLIENT     307552
+#define VAC_DELTA_WRITETOCLIENT  246608
+
+// engine services we call back into
+typedef void (__cdecl *PrintFn)(const char *);
+typedef int  (__cdecl *CmdFn)(const char *);
+static PrintFn g_print = 0;
+VacTraceFn     g_trace = 0;
+
+
+//-----------------------------------------------------------------------------
+// Detour destination tables (originals: sub_1701001 / sub_1701014, backed by
+// off_170A030 and off_170A0D8).
+//
+// The engine asks the module where to route a fixed set of callbacks. In the
+// shipped binaries every live slot holds the address of nullsub_1 -- a single
+// RET at .text+0 -- and the remaining slots are zero. The binary is inert by
+// design: the downloaded bytecode program arms these entries at runtime.
+//
+// Live/zero slot pattern is reproduced exactly from the shipped ModuleC.
+//-----------------------------------------------------------------------------
+void __cdecl VacNullSub(void) { }
+
+#define VAC_CL_DST_COUNT    42
+#define VAC_ENG_DST_COUNT  109
+
+static void *g_clDstAddrs[VAC_CL_DST_COUNT];
+static void *g_engDstAddrs[VAC_ENG_DST_COUNT];
+
+static int VacSlotLive(int i, const int *ranges, int n)
+{
+    int k;
+    for (k = 0; k < n; k += 2)
+        if (i >= ranges[k] && i <= ranges[k + 1])
+            return 1;
+    return 0;
+}
+
+void VacInitDstTables(void)
+{
+    // inclusive index ranges that hold the stub; everything else stays zero
+    static const int clLive[]  = { 0, 40 };
+    static const int engLive[] = { 0, 81, 88, 100 };
+    int i;
+
+    for (i = 0; i < VAC_CL_DST_COUNT; ++i)
+        g_clDstAddrs[i] = VacSlotLive(i, clLive, 2) ? (void *)VacNullSub : 0;
+    for (i = 0; i < VAC_ENG_DST_COUNT; ++i)
+        g_engDstAddrs[i] = VacSlotLive(i, engLive, 4) ? (void *)VacNullSub : 0;
+}
+
+void __cdecl VacGetClDstAddrs(void *out)
+{
+    memcpy(out, g_clDstAddrs, sizeof(g_clDstAddrs));
+}
+
+void __cdecl VacGetEngDstAddrs(void *out)
+{
+    memcpy(out, g_engDstAddrs, sizeof(g_engDstAddrs));
+}
+
+//-----------------------------------------------------------------------------
+// LoadMod / CloseMod (originals: sub_1702F84 / sub_1702FA9, sub_1701231).
+//
+// The blob's first two dwords are self-relative offsets:
+//     codeBase = blob + blob[0] + 4
+//     entries  = blob + blob[1] + 4,  count at blob + blob[1]
+//-----------------------------------------------------------------------------
+void *VacLoadMod(void *blob)
+{
+    unsigned long *b = (unsigned long *)blob;
+    VacProgram *p = (VacProgram *)malloc(sizeof(VacProgram));
+    if (!p) { g_program = 0; return 0; }
+
+    memset(p, 0, sizeof(*p));
+    p->codeBase   = (unsigned char *)blob + b[0] + 4;
+    p->entryCount = *(unsigned long *)((unsigned char *)blob + b[1]);
+    p->entries    = (VacEntry *)((unsigned char *)blob + b[1] + 4);
+
+    g_program = p;
+    return p;
+}
+
+void *VacCloseMod(void)
+{
+    VacRaise0(0, VACMSG_CLOSE_MOD);
+
+    if (g_program) {
+        if (g_program->globals) { free(g_program->globals); g_program->globals = 0; }
+        if (g_program->data)    { free(g_program->data);    g_program->data = 0; }
+        free(g_program);
+        g_program = 0;
+    }
+    return 0;
+}
+
+//-----------------------------------------------------------------------------
+// Message layer (original: sub_1701191 and its 0..3 argument wrappers).
+// Each message gets a fresh VacVM; integer arguments are pushed onto the
+// operand stack before the program is entered.
+//-----------------------------------------------------------------------------
+static int VacRaise(unsigned int channel, int msg, int argc,
+                    int a0, int a1, int a2, int a3)
+{
+    VacVM *vm;
+    int    r;
+
+    if (!g_program || (unsigned)msg >= g_program->entryCount)
+        return 0;
+
+    vm = (VacVM *)malloc(VAC_VM_SIZE);
+    if (!vm)
+        return 0;
+
+    VacVMInit(vm, 0, channel, msg);
+
+    if (argc >= 1) vm->stack[(*vm->stackIndex)++] = a0;
+    if (argc >= 2) vm->stack[(*vm->stackIndex)++] = a1;
+    if (argc >= 3) vm->stack[(*vm->stackIndex)++] = a2;
+    if (argc >= 4) vm->stack[(*vm->stackIndex)++] = a3;
+
+    r = (int)VacVMRun(vm);
+
+    free(vm);
+    return r;
+}
+
+int VacRaise0(unsigned int c, int m)                       { return VacRaise(c, m, 0, 0, 0, 0, 0); }
+int VacRaise1(unsigned int c, int m, int a)                { return VacRaise(c, m, 1, a, 0, 0, 0); }
+int VacRaise2(unsigned int c, int m, int a, int b)         { return VacRaise(c, m, 2, a, b, 0, 0); }
+int VacRaise3(unsigned int c, int m, int a, int b, int d)  { return VacRaise(c, m, 3, a, b, d, 0); }
+
+//-----------------------------------------------------------------------------
+// SetEngData (original: sub_1702FE2). Captures the engine's 0x7C-byte function
+// table, then binds the Win32 entry points the bytecode is allowed to reach.
+//-----------------------------------------------------------------------------
+void *VacSetEngData(const void *tbl)
+{
+    memcpy(g_engineTable, tbl, 0x7C);
+    g_print = (PrintFn)g_engineTable[7];         // engine's console print
+    g_trace = (VacTraceFn)g_engineTable[7];      // same slot, varargs form
+
+    g_engClientArrayPtr = (unsigned long)&g_engineTable[14];
+    g_engNetSend  = (int (__cdecl *)(int, int, const void *))g_engineTable[18];
+    g_engGetCvar  = (void *(__cdecl *)(const char *))g_engineTable[19];
+
+    if (!g_engDropClient && g_secureAddrs[0]) {
+        g_engDropClient = (int (__cdecl *)(void *, int, const char *))
+                          (g_secureAddrs[0] - VAC_DELTA_DROPCLIENT);
+        g_engWriteToClient = (int (__cdecl *)(void *, int, const void *))
+                          (g_secureAddrs[0] - VAC_DELTA_WRITETOCLIENT);
+    }
+
+    VacIntegrityInit();
+
+    g_host.pGetProcessHeaps  = GetProcessHeaps;
+    g_host.pHeapWalk         = HeapWalk;
+    g_host.pGetModuleHandleA = GetModuleHandleA;
+    g_host.pSleep            = Sleep;
+    g_host.pCreateThread     = CreateThread;
+    g_host.pTerminateThread  = TerminateThread;
+    g_host.pCloseHandle      = CloseHandle;
+    g_host.pVirtualQuery     = VirtualQuery;
+
+    g_host.hOpenGL  = GetModuleHandleA("opengl32.dll");
+    g_host.pglBegin = (void (WINAPI *)(unsigned int))
+                      GetProcAddress(g_host.hOpenGL, "glBegin");
+
+    return (void *)VirtualQuery;
+}
+
+int VacSetEngineVersion(int ver)
+{
+    g_engineVersion = ver;
+    return ver;
+}
+
+// Table slot 13 (server only): the engine hands over a 0x28-byte address block.
+void VacSetSecureAddrs(const void *blk)
+{
+    memcpy(g_secureAddrs, blk, sizeof(g_secureAddrs));
+}
+
+//-----------------------------------------------------------------------------
+// Engine memory integrity check (original: sub_17031B7 / sub_170320D /
+// sub_170327A). Both regions are absolute VAs inside hw.dll; the checksum is a
+// plain sum of dwords. Run from FrameRender1, rate-limited to 5 s.
+//-----------------------------------------------------------------------------
+static int   g_sumA, g_sumB;
+static int   g_lenA;
+static DWORD g_lastCheck;
+
+int VacChecksum(const unsigned long *base, int lengthBytes)
+{
+    int n   = lengthBytes / 4;
+    int sum = 0;
+    while (n-- > 0)
+        sum += (int)*base++;
+    return sum;
+}
+
+void VacIntegrityInit(void)
+{
+    // length A is enabled only when the engine reports the matching build
+    g_lenA = g_engineTable[9] ? VAC_SCAN_LEN_A_ON : 0;
+
+    g_sumA = VacChecksum((const unsigned long *)VAC_SCAN_REGION_A, g_lenA);
+    g_sumB = VacChecksum((const unsigned long *)VAC_SCAN_REGION_B, VAC_SCAN_LEN_B);
+    g_lastCheck = 0;
+}
+
+void VacIntegrityTick(void)
+{
+    DWORD now = GetTickCount();
+    int   a, b;
+
+    if (g_lastCheck + VAC_SCAN_INTERVAL > now)
+        return;
+    g_lastCheck = now;
+
+    a = VacChecksum((const unsigned long *)VAC_SCAN_REGION_A, g_lenA);
+    b = VacChecksum((const unsigned long *)VAC_SCAN_REGION_B, VAC_SCAN_LEN_B);
+
+    if (a != g_sumA || b != g_sumB) {
+        if (g_print)
+            g_print(
+"***************************************************\n"
+"Your connection has been terminated because of\n"
+"memory corruption on your computer.\n"
+"\n"
+"For help resolving this problem, visit:\n"
+"http://www.counter-strike.net/cheat.html\n"
+"\n"
+"If you continue playing without resolving\n"
+"this problem, your computer may trigger\n"
+"Half-Life's anti-cheat system, causing\n"
+"you to be banned from playing on secure\n"
+"servers.\n"
+"***************************************************\n");
+        ((CmdFn)g_engineTable[20])("dropclient");
+    }
+}
+
+```
+
+`common/vac_module.h`:
+
+```h
+//=============================================================================
+// vac_module.h -- reconstructed VAC1 security module (GoldSrc, ~2002-2003)
+//
+// Layouts here are taken from the shipped ModuleC.dll / ModuleS.dll and are
+// offset-exact: the structures are laid out so that a VS6 build reproduces the
+// original field offsets. Do not reorder members.
+//
+// Build: Visual C++ 6.0, /MT (the originals statically link the MSVC6 CRT).
+//=============================================================================
+#ifndef VAC_MODULE_H
+#define VAC_MODULE_H
+
+#pragma warning(disable:4786)   // identifier truncated in browser info
+
+#include <windows.h>
+
+//-----------------------------------------------------------------------------
+// Cipher / layout constants recovered from the loader and the blob header.
+//-----------------------------------------------------------------------------
+#define VAC_IMAGE_BASE      0x01700000
+#define VAC_VACDAT_BASE     0x01800000
+
+#define VAC_MASK_INIT       0x7A32BC85
+#define VAC_MASK_BASE       0x49C042D1
+#define VAC_MASK_IMPORT     0x872C3D47
+
+#define VAC_BLOB_MAGIC      0x12345678
+#define VAC_BLOB_PLAIN_LEN  68          // bytes 0..67 are not enciphered
+#define VAC_ROLL_SEED       0x57
+#define VAC_ROLL_ADD        0x57
+
+// ModuleInit stamps this into tbl[16] and re-checks it as a tamper canary.
+#define VAC_INIT_CANARY     1126236164
+
+// Every 32-bit immediate in the bytecode is stored XOR'd with this.
+#define VAC_IMM_XOR         0xF64BDDA9
+
+//-----------------------------------------------------------------------------
+// VM limits (from sub_1701027 / sub_1701293 / sub_17010ED)
+//-----------------------------------------------------------------------------
+#define VAC_LOCAL_REGS      20          // registers < 20 are frame-local
+#define VAC_MAX_CHANNELS    0x200
+#define VAC_CHANNEL_GROW    10          // channels are grown 10 at a time
+#define VAC_GLOBALS_BYTES   0x400       // per-channel global register array
+#define VAC_DATA_BYTES      0x1000      // per-channel data / string area
+#define VAC_STACK_BYTES     0xFA0       // operand stack (4000 bytes)
+#define VAC_MAX_FRAMES      19
+#define VAC_FRAME_STRIDE    128
+#define VAC_VM_SIZE         0x2878      // sizeof(VacVM) as allocated originally
+
+//-----------------------------------------------------------------------------
+// Message IDs the engine callbacks raise. (Names are ours; the wire IDs are
+// the module's.)
+//-----------------------------------------------------------------------------
+enum VacMessageId
+{
+    VACMSG_FRAME_RENDER1 = 138,
+    VACMSG_MODEL_LOAD    = 141,
+    VACMSG_TEXTURE_LOAD  = 142,
+    VACMSG_FRAME_BEGIN   = 143,
+    VACMSG_SCAN_A        = 147,
+    VACMSG_SCAN_B        = 148,
+    VACMSG_CLOSE_MOD     = 150,
+    VACMSG_THREAD_EXIT   = 151
+};
+
+//-----------------------------------------------------------------------------
+// Program blob handed to LoadMod.
+//
+//   u32 code_rel;      code base  = &blob + code_rel + 4
+//   u32 entry_rel;     entry table lives at &blob + entry_rel
+//                        u32 count, then `count` VacEntry records
+//-----------------------------------------------------------------------------
+struct VacEntry                         // stride 8
+{
+    unsigned long   codeOffset;         // offset from code base
+    unsigned char   initialKey;         // seeds the rolling opcode key
+    unsigned char   pad[3];
+};
+
+struct VacProgram                       // the object LoadMod news (0x30 bytes)
+{
+    long            channelCount;       // +0x00  channels currently allocated
+    unsigned long **globals;            // +0x04  [channel] -> 0x400 bytes
+    unsigned long **data;               // +0x08  [channel] -> 0x1000 bytes
+    unsigned long   reserved0C[3];      // +0x0C
+    unsigned long   entryCount;         // +0x18
+    VacEntry       *entries;            // +0x1C
+    unsigned long   reserved20[3];      // +0x20
+    unsigned char  *codeBase;           // +0x2C
+};
+
+//-----------------------------------------------------------------------------
+// The interpreter's per-message state. Offsets are load-bearing -- see the
+// table in VAC_REVERSING.md section 6.
+//-----------------------------------------------------------------------------
+struct VacVM
+{
+    VacVM          *parent;             // +0x00  nested invocation
+    unsigned char  *pc;                 // +0x04  instruction pointer
+    unsigned char   key;                // +0x08  rolling opcode key
+    unsigned char   flags[3];           // +0x09
+    unsigned long   local[VAC_LOCAL_REGS];// +0x0C  20 frame-local registers
+    unsigned long  *stackIndex;         // +0x60  -> current operand stack depth
+    unsigned long  *stack;              // +0x64  operand stack base
+    unsigned long   channel;            // +0x68
+    unsigned long  *globals;            // +0x6C  per-channel global registers
+    unsigned char  *data;               // +0x70  per-channel data area
+    unsigned long   frameCount;         // +0x74
+    unsigned char   frames[VAC_MAX_FRAMES * VAC_FRAME_STRIDE]; // +0x78
+};
+
+//-----------------------------------------------------------------------------
+// Engine-supplied services, cached by SetEngData. The originals copy 0x7C bytes
+// out of the engine's table and then bind the Win32 entry points the bytecode
+// is permitted to reach.
+//-----------------------------------------------------------------------------
+struct VacHostApi
+{
+    DWORD   (WINAPI *pGetProcessHeaps)(DWORD, PHANDLE);
+    BOOL    (WINAPI *pHeapWalk)(HANDLE, LPPROCESS_HEAP_ENTRY);
+    HMODULE (WINAPI *pGetModuleHandleA)(LPCSTR);
+    void    (WINAPI *pSleep)(DWORD);
+    HANDLE  (WINAPI *pCreateThread)(LPSECURITY_ATTRIBUTES, SIZE_T,
+                                    LPTHREAD_START_ROUTINE, LPVOID, DWORD, LPDWORD);
+    BOOL    (WINAPI *pTerminateThread)(HANDLE, DWORD);
+    BOOL    (WINAPI *pCloseHandle)(HANDLE);
+    SIZE_T  (WINAPI *pVirtualQuery)(LPCVOID, PMEMORY_BASIC_INFORMATION, SIZE_T);
+    void    (WINAPI *pglBegin)(unsigned int);
+    HMODULE          hOpenGL;
+};
+
+//-----------------------------------------------------------------------------
+// The 14 slots the engine resolves by name. ModuleInit fills this in.
+//-----------------------------------------------------------------------------
+struct VacModuleTable
+{
+    void   *(__cdecl *LoadMod)(void *blob);         // [0]
+    void   *(__cdecl *CloseMod)(void);              // [1]
+    void            *unused2;                       // [2]
+    void    (__cdecl *GetClDstAddrs)(void *out);    // [3]  memcpy 0xA8
+    void    (__cdecl *GetEngDstAddrs)(void *out);   // [4]  memcpy 0x1B4
+    int     (__cdecl *FrameBegin)(void);            // [5]  -> msg 143
+    int     (__cdecl *ModelLoad)(int, int);         // [6]  -> msg 141
+    int     (__cdecl *TextureLoad)(int, int);       // [7]  -> msg 142
+    void            *frameRender2;                  // [8]  nullsub in ModuleC
+    void            *processIncomingNet;            // [9]  nullsub in ModuleC
+    int     (__cdecl *FrameRender1)(void);          // [10] integrity + msg 138
+    void            *processOutgoingNet;            // [11] nullsub in ModuleC
+    void            *moduleLoaded;                  // [12] nullsub in ModuleC
+    void    (__cdecl *SetSecureAddrs)(const void *); // [13] server only, 0x28 B
+    void            *unused14;
+    void   *(__cdecl *SetEngData)(const void *tbl); // [15]
+    unsigned long    canary;                        // [16] VAC_INIT_CANARY
+    int     (__cdecl *ClientConnect)(unsigned int); // [17] server only -> msg 143
+    void            *unused18;                      // [18]
+    int     (__cdecl *ClientPacket)(int);           // [19] server only -> msg 149
+    int     (__cdecl *SetEngineVersion)(int ver);   // [20]
+    unsigned long    reserved21[8];                 // [21..28] zeroed
+};
+
+//-----------------------------------------------------------------------------
+// Module framework (vac_module.cpp)
+//-----------------------------------------------------------------------------
+extern VacProgram *g_program;
+extern VacHostApi  g_host;
+
+// Engine printf, captured by SetEngData (original: dword_170D344).
+typedef int (__cdecl *VacTraceFn)(const char *fmt, ...);
+extern VacTraceFn  g_trace;
+extern void       *g_engineTablePtr;
+extern int         g_engineVersion;
+
+void *VacSetEngData(const void *tbl);
+int   VacSetEngineVersion(int ver);
+void  VacSetSecureAddrs(const void *blk);
+
+extern "C" __declspec(dllexport) VacModuleTable * __cdecl ModuleInit(VacModuleTable *tbl);
+
+void  VacInitDstTables(void);
+void  __cdecl VacGetClDstAddrs(void *out);   // 0xA8 bytes
+void  __cdecl VacGetEngDstAddrs(void *out);  // 0x1B4 bytes
+
+void *VacLoadMod(void *blob);
+void *VacCloseMod(void);
+
+// Raise a message with 0..4 integer arguments. Allocates a VacVM, seeds it from
+// the program's entry table and runs it to completion.
+int VacRaise0(unsigned int channel, int msg);
+int VacRaise1(unsigned int channel, int msg, int a0);
+int VacRaise2(unsigned int channel, int msg, int a0, int a1);
+int VacRaise3(unsigned int channel, int msg, int a0, int a1, int a2);
+
+//-----------------------------------------------------------------------------
+// Interpreter (vac_vm.cpp)
+//-----------------------------------------------------------------------------
+VacVM *VacVMInit(VacVM *vm, VacVM *parent, unsigned int channel, int msg);
+unsigned int VacVMRun(VacVM *vm);
+void   VacProgramGrow(VacProgram *p, unsigned int channel);
+
+//-----------------------------------------------------------------------------
+// Engine memory integrity check (ModuleC). Both regions are absolute VAs inside
+// hw.dll and the checksum is a plain sum of dwords.
+//-----------------------------------------------------------------------------
+#define VAC_SCAN_REGION_A   0x01D01D40
+#define VAC_SCAN_REGION_B   0x019012C0
+#define VAC_SCAN_LEN_B      345508
+#define VAC_SCAN_LEN_A_ON   853468
+#define VAC_SCAN_INTERVAL   5000        // ms
+
+int  VacChecksum(const unsigned long *base, int lengthBytes);
+void VacIntegrityInit(void);
+void VacIntegrityTick(void);
+
+#endif // VAC_MODULE_H
+
+```
+
+`common/vac_net.cpp`:
+
+```cpp
+//=============================================================================
+// vac_net.cpp -- ModuleS network layer.
+//
+// Two transports, selected by the value the engine passes to SetEngineVersion:
+//   version == 0   the module owns a UDP socket on VAC_LEGACY_PORT and talks
+//                  straight to the backend address.
+//   version != 0   traffic is tunnelled through the engine's own netchan and
+//                  the listen port comes from the "hostport" cvar.
+//=============================================================================
+#include "vac_net.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+VacHostServices g_hostSvc = { 0 };
+VacSocket      *g_sock    = 0;
+
+// Engine imports resolved in SetEngData (see vac_module.cpp).
+extern void *g_engineTablePtr;
+extern int  (__cdecl *g_engWriteToClient)(void *netchan, int len, const void *buf);
+extern int  (__cdecl *g_engDropClient)(void *client, int flag, const char *reason);
+extern int  (__cdecl *g_engNetSend)(int chan, int len, const void *buf);
+extern void *(__cdecl *g_engGetCvar)(const char *name);
+extern unsigned long g_engClientArrayPtr;
+
+//=============================================================================
+// UDP socket (originals: sub_170332B / sub_17033B1 / sub_17033DC / sub_170341E)
+//=============================================================================
+VacSocket *VacSockOpen(VacSocket *sk, unsigned short port)
+{
+    WSADATA            wsa;
+    struct sockaddr_in name;
+    unsigned long      nonblocking = 1;
+
+    sk->s    = 0;
+    sk->port = port;
+
+    WSAStartup(0x0101, &wsa);
+
+    sk->s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (sk->s == INVALID_SOCKET
+     || ioctlsocket(sk->s, FIONBIO, &nonblocking) == SOCKET_ERROR)
+    {
+        sk->s = 0;
+        return sk;
+    }
+
+    memset(&name, 0, sizeof(name));
+    name.sin_family      = AF_INET;
+    name.sin_addr.s_addr = INADDR_ANY;
+    name.sin_port        = htons(sk->port);
+
+    if (bind(sk->s, (struct sockaddr *)&name, sizeof(name)) != 0)
+        sk->s = 0;
+
+    return sk;
+}
+
+int VacSockClose(VacSocket *sk)
+{
+    int r;
+    if (sk->s) {
+        shutdown(sk->s, 1);     // SD_SEND
+        shutdown(sk->s, 2);     // SD_BOTH
+        closesocket(sk->s);
+    }
+    r = WSACleanup();
+    sk->s = 0;
+    return r;
+}
+
+// Note: the original sends to the *same* port it bound, taking only the peer
+// address from the caller.
+void VacSockSend(VacSocket *sk, const char *buf, int len, unsigned long addr)
+{
+    struct sockaddr_in to;
+
+    if (!sk->s)
+        return;
+
+    to.sin_family      = AF_INET;
+    to.sin_addr.s_addr = addr;
+    to.sin_port        = htons(sk->port);
+    memset(to.sin_zero, 0, sizeof(to.sin_zero));
+
+    sendto(sk->s, buf, len, 0, (struct sockaddr *)&to, sizeof(to));
+}
+
+int VacSockRecv(VacSocket *sk, char *buf, int len, unsigned long *fromAddr)
+{
+    fd_set             readfds;
+    struct sockaddr_in from;
+    struct timeval     timeout;
+    int                fromlen = sizeof(from);
+    int                r;
+
+    if (!sk->s)
+        return 0;
+
+    readfds.fd_count    = 1;
+    readfds.fd_array[0] = sk->s;
+    timeout.tv_sec      = 0;
+    timeout.tv_usec     = 0;
+
+    if (!select((int)sk->s + 1, &readfds, 0, 0, &timeout))
+        return 0;
+
+    r = recvfrom(sk->s, buf, len, 0, (struct sockaddr *)&from, &fromlen);
+    if (r == SOCKET_ERROR) {
+        WSAGetLastError();
+        return 0;
+    }
+
+    *fromAddr = from.sin_addr.s_addr;
+    return r;
+}
+
+//=============================================================================
+// Outbound report (original: sub_1703253)
+//=============================================================================
+int VacSendPacket(const char *buf, int len, unsigned long addr)
+{
+    if (g_engineVersion) {
+        // Newer engines: hand the datagram to the engine's own network layer
+        // instead of using a private socket.
+        if (g_engNetSend)
+            return g_engNetSend(1, len, buf);
+        return 0;
+    }
+
+    if (g_sock)
+        VacSockSend(g_sock, buf, len, addr);
+    return 0;
+}
+
+//=============================================================================
+// Ban / kick (original: sub_17032B3)
+//
+// Writes an svc_print to the client's netchan, then drops them. The leading
+// byte of the buffer is the message type; the text follows immediately.
+//=============================================================================
+int VacBanClient(int clientIndex, const char *untilDate)
+{
+    char  msg[1024];
+    void *client;
+    void *netchan;
+    int   len;
+
+    msg[0] = VAC_SVC_PRINT;
+    sprintf(msg + 1,
+"\n"
+"********************************************\n"
+"Your connection to this secure server has been\n"
+"rejected.\n"
+"\n"
+"Because of past cheating violations, you have\n"
+"been banned from playing on all secure servers\n"
+"until %s.\n"
+"\n"
+"Repeat violators may be permanently banned\n"
+"from all secure servers.\n"
+"\n"
+"For more information, visit:\n"
+"http://www.counter-strike.net/cheat.html\n"
+"********************************************\n"
+"\n", untilDate);
+
+    len = (int)strlen(msg);
+
+    client  = (void *)(*(unsigned long *)(g_engClientArrayPtr + 4)
+                       + VAC_CLIENT_STRIDE * clientIndex);
+    netchan = (void *)((unsigned long)client + VAC_CLIENT_NETCHAN);
+
+    if (g_engWriteToClient)
+        g_engWriteToClient(netchan, len + 1, msg);
+    if (g_engDropClient)
+        return g_engDropClient(client, 0,
+                               "Banned because of past cheating violations");
+    return 0;
+}
+
+//=============================================================================
+// Channel reset (original: sub_170138B)
+//
+// A channel is a client slot. Every connect wipes that slot's register file and
+// data area so one player's program state cannot leak into the next.
+//=============================================================================
+void VacChannelReset(VacProgram *p, unsigned int channel)
+{
+    if (channel > VAC_MAX_CHANNELS)
+        return;
+    VacProgramGrow(p, channel);
+    memset(p->globals[channel], 0, VAC_GLOBALS_BYTES);
+    memset(p->data[channel],    0, VAC_DATA_BYTES);
+}
+
+//=============================================================================
+// Lifecycle
+//=============================================================================
+void VacNetInit(void)
+{
+    if (!g_engineVersion) {
+        g_sock = (VacSocket *)malloc(sizeof(VacSocket));
+        if (g_sock)
+            VacSockOpen(g_sock, VAC_LEGACY_PORT);
+    }
+    srand((unsigned)time(0));
+}
+
+void VacNetShutdown(void)
+{
+    if (!g_engineVersion && g_sock) {
+        VacSockClose(g_sock);
+        free(g_sock);
+        g_sock = 0;
+    }
+}
+
+//=============================================================================
+// Inbound pump (original: sub_170317A), called once per server frame.
+//
+// Accepts only:  exactly VAC_PACKET_LEN bytes,
+//                from VAC_BACKEND_ADDR,
+//                naming a channel <= VAC_MAX_CLIENTS.
+// The packet is then handed to bytecode as message 149 on that channel.
+//=============================================================================
+void VacNetPump(void)
+{
+    char          buf[VAC_RECV_BUF];
+    unsigned long fromAddr = 0;
+    long          channel;          // original uses a SIGNED range check
+
+    if (g_engineVersion || !g_sock)
+        return;
+
+    if (VacSockRecv(g_sock, buf, sizeof(buf), &fromAddr) != VAC_PACKET_LEN)
+        return;
+    if (fromAddr != VAC_BACKEND_ADDR)
+        return;
+
+    channel = *(long *)(buf + VAC_PACKET_CHANNEL_OFF);
+    if (channel < 0 || channel > VAC_MAX_CLIENTS)
+        return;
+
+    VacRaise1((unsigned)channel, VACMSG_S_PACKET, (int)buf);
+}
+
+//=============================================================================
+// Client connect (original: sub_17031EE)
+//
+// Wipes the slot, then runs the handshake program with the engine table, the
+// host service table and a fresh 32-bit nonce.
+//=============================================================================
+int VacClientConnect(unsigned int clientIndex)
+{
+    int nonce;
+
+    if (g_program)
+        VacChannelReset(g_program, clientIndex);
+
+    nonce = (rand() << 16) + rand();
+
+    return VacRaise3(clientIndex, VACMSG_S_HANDSHAKE,
+                     (int)g_engineTablePtr, (int)&g_hostSvc, nonce);
+}
+
+```
+
+`common/vac_net.h`:
+
+```h
+//=============================================================================
+// vac_net.h -- ModuleS network layer and host service table.
+//
+// Reversed from ModuleS.dll:
+//   sub_170332B  VacSockOpen      sub_17033DC  VacSockSend
+//   sub_17033B1  VacSockClose     sub_170341E  VacSockRecv
+//   sub_1703253  VacSendPacket    sub_17032B3  VacBanClient
+//   sub_170317A  VacNetPump       sub_17031EE  VacClientConnect
+//=============================================================================
+#ifndef VAC_NET_H
+#define VAC_NET_H
+
+#include "vac_module.h"
+#include <winsock.h>
+
+//-----------------------------------------------------------------------------
+// Transport constants recovered from the binary.
+//-----------------------------------------------------------------------------
+
+// The original backend. Stored as a raw in_addr dword and compared verbatim
+// against the sender of every inbound datagram: 0x15B1ADCF == 207.173.177.21.
+// A replacement deployment must point this at its own reporting host.
+#define VAC_BACKEND_ADDR    0x15B1ADCF
+#define VAC_BACKEND_IP_STR  "207.173.177.21"
+
+// Port the module binds and sends on when the engine reports version 0.
+#define VAC_LEGACY_PORT     27011
+#define VAC_DEFAULT_PORT    27015    // fallback when the hostport cvar is unset
+
+// Inbound datagrams are accepted only at exactly this length.
+#define VAC_PACKET_LEN      60
+
+// Offset of the target channel (== client slot) inside an inbound packet.
+#define VAC_PACKET_CHANNEL_OFF  16
+
+// Maximum addressable channel / client slot.
+#define VAC_MAX_CLIENTS     0x40
+
+// Receive scratch size used by the original pump.
+#define VAC_RECV_BUF        0x4000
+
+// GoldSrc client_t stride for this engine build, used to index the engine's
+// client array when printing to / dropping a player.
+#define VAC_CLIENT_STRIDE   20496    // 0x5010
+#define VAC_CLIENT_NETCHAN  32       // offset of the netchan within client_t
+
+// svc_print
+#define VAC_SVC_PRINT       8
+
+//-----------------------------------------------------------------------------
+// Server-side message IDs (in addition to those in vac_module.h).
+//-----------------------------------------------------------------------------
+#define VACMSG_S_HANDSHAKE  143      // client connect: (engTbl, hostTbl, nonce)
+#define VACMSG_S_MODELLOAD  144
+#define VACMSG_S_PACKET     149      // backend packet / deferred report
+
+//-----------------------------------------------------------------------------
+// UDP socket (original layout: 8 bytes).
+//-----------------------------------------------------------------------------
+struct VacSocket
+{
+    SOCKET          s;      // +0
+    unsigned short  port;   // +4
+};
+
+VacSocket *VacSockOpen(VacSocket *sk, unsigned short port);
+int        VacSockClose(VacSocket *sk);
+void       VacSockSend(VacSocket *sk, const char *buf, int len, unsigned long addr);
+int        VacSockRecv(VacSocket *sk, char *buf, int len, unsigned long *fromAddr);
+
+//-----------------------------------------------------------------------------
+// The host service table handed to bytecode as an argument to message 143.
+// The VM reaches these through opcode 127 (NATIVE_CALL), so the layout is an
+// ABI: do not reorder.
+//
+// Original globals: dword_1710504 .. dword_1710518.
+//-----------------------------------------------------------------------------
+struct VacHostServices
+{
+    unsigned long   engineBase;     // +0x00  dword_1710504
+    int  (__cdecl  *SendPacket)(const char *buf, int len, unsigned long addr);
+                                    // +0x04  dword_1710508 -> sub_1703253
+    int  (__cdecl  *BanClient)(int clientIndex, const char *untilDate);
+                                    // +0x08  dword_170050C -> sub_17032B3
+    unsigned long   reserved;       // +0x0C  dword_1710510, always 0
+    void           *scratch;        // +0x10  dword_1710514 -> &unk_1710548
+    unsigned long   port;           // +0x14  dword_1710518
+};
+
+extern VacHostServices g_hostSvc;
+extern VacSocket      *g_sock;
+extern int             g_engineVersion;
+
+//-----------------------------------------------------------------------------
+// Server entry points.
+//-----------------------------------------------------------------------------
+void VacNetInit(void);          // from LoadMod
+void VacNetShutdown(void);      // from CloseMod
+void VacNetPump(void);          // from FrameRender1 -- drains the backend socket
+int  VacClientConnect(unsigned int clientIndex);   // resets the channel, msg 143
+
+int  VacSendPacket(const char *buf, int len, unsigned long addr);
+int  VacBanClient(int clientIndex, const char *untilDate);
+
+// Reset one channel's register/data space (original: sub_170138B).
+void VacChannelReset(VacProgram *p, unsigned int channel);
+
+#endif // VAC_NET_H
+
+```
+
+`common/vac_vm.cpp`:
+
+```cpp
+//=============================================================================
+// vac_vm.cpp -- the VAC1 bytecode interpreter.
+//
+// Original: sub_17013A0, 6040 bytes, byte-identical in ModuleC.dll and
+// ModuleS.dll. All 94 handlers (95 live opcodes) are reproduced below.
+//
+// Design notes
+//   * Opcodes self-decrypt: op = *pc ^ key; key += op. The key is reloaded
+//     from the entry table on every taken branch, so each entry is an
+//     independently decodable basic block.
+//   * Branch and call targets are ENTRY INDICES, not addresses.
+//   * 157 of the 252 opcode slots are decoys: they advance the PC by one and
+//     do nothing (but still stir the key).
+//   * 32-bit immediates are stored XOR'd with 0xF64BDDA9.
+//   * A register byte < 20 selects a frame-local register; >= 20 indexes the
+//     per-channel global array.
+//=============================================================================
+#include "vac_module.h"
+#include <string.h>
+#include <stdlib.h>
+
+//-----------------------------------------------------------------------------
+// Instruction encodings
+//   2 bytes  [op][reg]
+//   3 bytes  [op][regA][regB]
+//   5 bytes  [op][imm32]
+//   6 bytes  [op][imm32][reg]      (arithmetic / move immediate forms)
+//   6 bytes  [op][reg][imm32]      (opcode 96 only -- CMP reg, imm)
+//  14 bytes  [op][reg][imm32 argc][imm32 kind][imm32 flag]   (native call)
+//
+// Suffix convention below:
+//   _I   immediate operand
+//   _RR  register, register
+//   _RM  register, *(T*)register        (indirect source)
+//   _MR  *(T*)register, register        (indirect destination)
+//-----------------------------------------------------------------------------
+enum VacOp
+{
+    // moves -------------------------------------------------------------
+    OP_MOV_I      = 177,  OP_MOV_I2   =  46,  OP_MOV_I3   = 152,
+    OP_STORE32_I  = 202,  OP_STORE16_I=  78,  OP_STORE8_I = 221,
+    OP_MOV_RR     =  77,
+    OP_STORE32_MR = 137,  OP_LOAD32_RM = 250, OP_COPY32   = 237,
+    OP_STORE16_MR = 189,  OP_LOAD16_RM = 200, OP_COPY16   = 161,
+    OP_STORE8_MR  =  93,  OP_LOAD8_RM  = 213, OP_COPY8    =  17,
+    OP_MOVZX16    = 187,  OP_MOVZX8    = 132,
+
+    // integer arithmetic -------------------------------------------------
+    OP_ADD_I =  98, OP_ADD_RR = 143, OP_ADD_RM =  25,
+    OP_SUB_I = 246, OP_SUB_RR = 224, OP_SUB_RM = 205,
+    OP_MUL_I = 114, OP_MUL_RR = 241, OP_MUL_RM =  31,
+    OP_DIV_I = 154, OP_DIV_RR = 101, OP_DIV_RM =  65,
+    OP_MOD_I =  39, OP_MOD_RR = 121, OP_MOD_RM =  41,
+    OP_XOR_I =  21, OP_XOR_RR = 139, OP_XOR_RM = 234,
+    OP_AND_I =  57, OP_AND_RR = 245, OP_AND_RM = 194,
+    OP_OR_I  = 171, OP_OR_RR  = 240, OP_OR_RM  =  81,
+    OP_SHL_I =  15, OP_SHL_RR = 229, OP_SHL_RM =  37,
+    OP_SAR_I =  74, OP_SAR_RR = 157, OP_SAR_RM =  14,
+
+    // floating point -----------------------------------------------------
+    OP_FADD = 7, OP_FSUB = 248, OP_FMUL = 196, OP_FDIV = 11, OP_FCMP = 45,
+
+    // comparison ---------------------------------------------------------
+    OP_CMP_I   =  96,   // [op][reg][imm32]
+    OP_CMP_RR  = 191,
+    OP_CMP_RM  =  71,
+    OP_TEST_I  =  58,
+    OP_TEST_R  =  75,
+    OP_TEST_M  =  10,
+
+    // branches (target = entry index) ------------------------------------
+    OP_JMP_I  = 230, OP_JMP_R = 61, OP_JMP_M = 231,
+    OP_JNE    = 131, OP_JE    = 169,
+    OP_JG     = 253, OP_JGE   = 186,
+    OP_JL     =  51, OP_JLE   = 223,
+
+    // calls / returns ----------------------------------------------------
+    OP_CALL_I = 80, OP_CALL_R = 239, OP_CALL_M = 105,
+    OP_RET_I  = 232, OP_RET_R = 210, OP_RET_M  =  84,
+
+    // operand stack ------------------------------------------------------
+    OP_PUSH_I = 195, OP_PUSH_R = 135, OP_PUSH_M = 53,
+    OP_POP_R  = 172, OP_POP_M  = 116,
+
+    // per-channel data area (obj+0x70) -----------------------------------
+    OP_DATA_I = 206, OP_DATA_R = 103, OP_DATA_M = 33,
+
+    // program constants (entry table) ------------------------------------
+    OP_LEA_ENTRY = 219,   // reg = address of entry[imm]
+    OP_STRCPY    =  67,   // decode obfuscated string from entry[imm]
+    OP_STRCMP    =   2,   // compare against string at entry[imm]
+
+    // host / misc ---------------------------------------------------------
+    OP_NATIVE_CALL = 127,
+    OP_CHECKSUM    = 111,
+    OP_SPIN        = 133,
+    OP_MEMCPY      = 149,
+    OP_TRACE       = 217,
+    OP_PRINT       =  48,
+    OP_GET_TEB     = 170,
+    OP_GET_CHANNEL = 183,
+    OP_FRAME_ALLOC = 216,
+    OP_NOP         =  29
+};
+
+// Trace sub-codes consumed by OP_TRACE.
+#define VAC_TRACE_INT    1
+#define VAC_TRACE_STR    9
+#define VAC_TRACE_FLOAT 10
+
+// Obfuscated strings in .vacdat are XOR'd with this; the cipher byte equal to
+// the key itself acts as the NUL terminator.
+#define VAC_STR_XOR     0x3E
+
+//-----------------------------------------------------------------------------
+// helpers
+//-----------------------------------------------------------------------------
+static inline unsigned long *VacReg(VacVM *vm, unsigned int idx)
+{
+    return (idx < VAC_LOCAL_REGS) ? &vm->local[idx] : &vm->globals[idx];
+}
+
+static inline unsigned long VacImm(const unsigned char *p)
+{
+    return (*(const unsigned long *)p) ^ VAC_IMM_XOR;
+}
+
+// Address of a program constant / code block, via the entry table.
+static inline unsigned char *VacEntryAddr(VacProgram *p, unsigned long idx)
+{
+    return p->codeBase + p->entries[idx].codeOffset;
+}
+
+static inline void VacPush(VacVM *vm, unsigned long v)
+{
+    vm->stack[(*vm->stackIndex)++] = v;
+}
+
+static inline unsigned long VacPop(VacVM *vm)
+{
+    return vm->stack[--(*vm->stackIndex)];
+}
+
+// Branch: reload both PC and the rolling key from the target entry.
+static inline void VacBranch(VacVM *vm, VacProgram *p, unsigned long target)
+{
+    vm->pc  = VacEntryAddr(p, target);
+    vm->key = p->entries[target].initialKey;
+}
+
+//-----------------------------------------------------------------------------
+// Frame allocation (original: sub_17010ED)
+//-----------------------------------------------------------------------------
+static unsigned char *VacFrameAlloc(VacVM *vm)
+{
+    if (vm->frameCount < VAC_MAX_FRAMES)
+        return &vm->frames[VAC_FRAME_STRIDE * vm->frameCount++];
+    return &vm->frames[0];
+}
+
+//-----------------------------------------------------------------------------
+// Grow the per-channel register/data arrays (original: sub_1701293)
+//-----------------------------------------------------------------------------
+void VacProgramGrow(VacProgram *p, unsigned int channel)
+{
+    long want, i;
+
+    if (channel > VAC_MAX_CHANNELS)
+        return;
+    if ((long)channel < p->channelCount)
+        return;
+
+    want = (long)channel + VAC_CHANNEL_GROW;
+
+    {
+        unsigned long **ng = (unsigned long **)malloc(sizeof(void *) * want);
+        if (p->globals) {
+            memcpy(ng, p->globals, sizeof(void *) * p->channelCount);
+            free(p->globals);
+        }
+        p->globals = ng;
+        for (i = p->channelCount; i < want; ++i) {
+            p->globals[i] = (unsigned long *)malloc(VAC_GLOBALS_BYTES);
+            memset(p->globals[i], 0, VAC_GLOBALS_BYTES);
+        }
+    }
+    {
+        unsigned long **nd = (unsigned long **)malloc(sizeof(void *) * want);
+        if (p->data) {
+            memcpy(nd, p->data, sizeof(void *) * p->channelCount);
+            free(p->data);
+        }
+        p->data = nd;
+        for (i = p->channelCount; i < want; ++i) {
+            p->data[i] = (unsigned long *)malloc(VAC_DATA_BYTES);
+            memset(p->data[i], 0, VAC_DATA_BYTES);
+        }
+    }
+    p->channelCount = want;
+}
+
+//-----------------------------------------------------------------------------
+// Construct a VM for one message (original: sub_1701027)
+//-----------------------------------------------------------------------------
+VacVM *VacVMInit(VacVM *vm, VacVM *parent, unsigned int channel, int msg)
+{
+    if (channel > VAC_MAX_CHANNELS)
+        channel = 0;
+
+    vm->parent   = parent;
+    vm->flags[0] = vm->flags[1] = vm->flags[2] = 0;
+    memset(vm->local, 0, sizeof(vm->local));
+
+    if (parent) {
+        vm->stackIndex = parent->stackIndex;
+        vm->stack      = parent->stack;
+    } else {
+        vm->frameCount = 0;
+        vm->stackIndex = &vm->frameCount;
+        vm->stack      = (unsigned long *)malloc(VAC_STACK_BYTES);
+    }
+
+    vm->channel = channel;
+    VacProgramGrow(g_program, channel);
+    vm->globals = g_program->globals[channel];
+    vm->data    = (unsigned char *)g_program->data[channel];
+
+    vm->pc  = VacEntryAddr(g_program, msg);
+    vm->key = g_program->entries[msg].initialKey;
+    vm->frameCount = 0;
+    return vm;
+}
+
+//-----------------------------------------------------------------------------
+// Native call thunk (original: opcode 127). Calls a host function pointer
+// cdecl with up to 10 stack arguments, optionally capturing an int or float
+// return value.
+//-----------------------------------------------------------------------------
+typedef int   (__cdecl *VacNativeI)();
+typedef float (__cdecl *VacNativeF)();
+
+static unsigned long VacCallNative(void *fn, unsigned long kind,
+                                   int argc, unsigned long *a)
+{
+    if (argc > 10)
+        argc = 10;
+
+    #define A(i) a[i]
+    #define CALL(T, n) ((T)fn)
+    if (kind == 2) {
+        float r = 0.0f;
+        switch (argc) {
+        case 0:  r = ((float (__cdecl *)())fn)(); break;
+        case 1:  r = ((float (__cdecl *)(unsigned long))fn)(A(0)); break;
+        case 2:  r = ((float (__cdecl *)(unsigned long,unsigned long))fn)(A(0),A(1)); break;
+        case 3:  r = ((float (__cdecl *)(unsigned long,unsigned long,unsigned long))fn)(A(0),A(1),A(2)); break;
+        case 4:  r = ((float (__cdecl *)(unsigned long,unsigned long,unsigned long,unsigned long))fn)(A(0),A(1),A(2),A(3)); break;
+        case 5:  r = ((float (__cdecl *)(unsigned long,unsigned long,unsigned long,unsigned long,unsigned long))fn)(A(0),A(1),A(2),A(3),A(4)); break;
+        case 6:  r = ((float (__cdecl *)(unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long))fn)(A(0),A(1),A(2),A(3),A(4),A(5)); break;
+        case 7:  r = ((float (__cdecl *)(unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long))fn)(A(0),A(1),A(2),A(3),A(4),A(5),A(6)); break;
+        case 8:  r = ((float (__cdecl *)(unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long))fn)(A(0),A(1),A(2),A(3),A(4),A(5),A(6),A(7)); break;
+        case 9:  r = ((float (__cdecl *)(unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long))fn)(A(0),A(1),A(2),A(3),A(4),A(5),A(6),A(7),A(8)); break;
+        default: r = ((float (__cdecl *)(unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long))fn)(A(0),A(1),A(2),A(3),A(4),A(5),A(6),A(7),A(8),A(9)); break;
+        }
+        return *(unsigned long *)&r;
+    }
+    {
+        unsigned long r = 0;
+        switch (argc) {
+        case 0:  r = ((unsigned long (__cdecl *)())fn)(); break;
+        case 1:  r = ((unsigned long (__cdecl *)(unsigned long))fn)(A(0)); break;
+        case 2:  r = ((unsigned long (__cdecl *)(unsigned long,unsigned long))fn)(A(0),A(1)); break;
+        case 3:  r = ((unsigned long (__cdecl *)(unsigned long,unsigned long,unsigned long))fn)(A(0),A(1),A(2)); break;
+        case 4:  r = ((unsigned long (__cdecl *)(unsigned long,unsigned long,unsigned long,unsigned long))fn)(A(0),A(1),A(2),A(3)); break;
+        case 5:  r = ((unsigned long (__cdecl *)(unsigned long,unsigned long,unsigned long,unsigned long,unsigned long))fn)(A(0),A(1),A(2),A(3),A(4)); break;
+        case 6:  r = ((unsigned long (__cdecl *)(unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long))fn)(A(0),A(1),A(2),A(3),A(4),A(5)); break;
+        case 7:  r = ((unsigned long (__cdecl *)(unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long))fn)(A(0),A(1),A(2),A(3),A(4),A(5),A(6)); break;
+        case 8:  r = ((unsigned long (__cdecl *)(unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long))fn)(A(0),A(1),A(2),A(3),A(4),A(5),A(6),A(7)); break;
+        case 9:  r = ((unsigned long (__cdecl *)(unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long))fn)(A(0),A(1),A(2),A(3),A(4),A(5),A(6),A(7),A(8)); break;
+        default: r = ((unsigned long (__cdecl *)(unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long))fn)(A(0),A(1),A(2),A(3),A(4),A(5),A(6),A(7),A(8),A(9)); break;
+        }
+        return r;
+    }
+    #undef CALL
+    #undef A
+}
+
+//-----------------------------------------------------------------------------
+// The interpreter.
+//-----------------------------------------------------------------------------
+unsigned int VacVMRun(VacVM *vm)
+{
+    VacProgram *p = g_program;
+
+    for (;;)
+    {
+        unsigned char *q  = vm->pc;
+        unsigned char  op = (unsigned char)(*q ^ vm->key);
+        vm->key = (unsigned char)(vm->key + op);
+
+        switch (op)
+        {
+        //--- moves, immediate ------------------------------------------------
+        case OP_MOV_I: case OP_MOV_I2: case OP_MOV_I3:
+            *VacReg(vm, q[5]) = VacImm(q + 1);            vm->pc += 6; break;
+        case OP_STORE32_I:
+            *(unsigned long *)*VacReg(vm, q[5]) = VacImm(q + 1); vm->pc += 6; break;
+        case OP_STORE16_I:
+            *(unsigned short *)*VacReg(vm, q[5]) = (unsigned short)VacImm(q + 1);
+            vm->pc += 6; break;
+        case OP_STORE8_I:
+            *(unsigned char *)*VacReg(vm, q[5]) = (unsigned char)VacImm(q + 1);
+            vm->pc += 6; break;
+
+        //--- moves, register --------------------------------------------------
+        case OP_MOV_RR:
+            *VacReg(vm, q[2]) = *VacReg(vm, q[1]);        vm->pc += 3; break;
+        case OP_STORE32_MR:
+            *(unsigned long *)*VacReg(vm, q[2]) = *VacReg(vm, q[1]);
+            vm->pc += 3; break;
+        case OP_LOAD32_RM:
+            *VacReg(vm, q[2]) = *(unsigned long *)*VacReg(vm, q[1]);
+            vm->pc += 3; break;
+        case OP_COPY32:
+            *(unsigned long *)*VacReg(vm, q[2]) = *(unsigned long *)*VacReg(vm, q[1]);
+            vm->pc += 3; break;
+        case OP_STORE16_MR:
+            *(unsigned short *)*VacReg(vm, q[2]) = (unsigned short)*VacReg(vm, q[1]);
+            vm->pc += 3; break;
+        case OP_LOAD16_RM:
+            *VacReg(vm, q[2]) = (unsigned long)(long)*(short *)*VacReg(vm, q[1]);
+            vm->pc += 3; break;
+        case OP_COPY16:
+            *(unsigned short *)*VacReg(vm, q[2]) = *(unsigned short *)*VacReg(vm, q[1]);
+            vm->pc += 3; break;
+        case OP_STORE8_MR:
+            *(unsigned char *)*VacReg(vm, q[2]) = (unsigned char)*VacReg(vm, q[1]);
+            vm->pc += 3; break;
+        case OP_LOAD8_RM:
+            *VacReg(vm, q[2]) = *(unsigned char *)*VacReg(vm, q[1]);
+            vm->pc += 3; break;
+        case OP_COPY8:
+            *(unsigned char *)*VacReg(vm, q[2]) = *(unsigned char *)*VacReg(vm, q[1]);
+            vm->pc += 3; break;
+        case OP_MOVZX16:
+            *VacReg(vm, q[2]) = *VacReg(vm, q[1]) & 0xFFFF; vm->pc += 3; break;
+        case OP_MOVZX8:
+            *VacReg(vm, q[2]) = *VacReg(vm, q[1]) & 0xFF;   vm->pc += 3; break;
+
+        //--- integer arithmetic ----------------------------------------------
+        case OP_ADD_I: *VacReg(vm, q[5]) += VacImm(q + 1);  vm->pc += 6; break;
+        case OP_SUB_I: *VacReg(vm, q[5]) -= VacImm(q + 1);  vm->pc += 6; break;
+        case OP_MUL_I: *VacReg(vm, q[5]) *= VacImm(q + 1);  vm->pc += 6; break;
+        case OP_XOR_I: *VacReg(vm, q[5]) ^= VacImm(q + 1);  vm->pc += 6; break;
+        case OP_AND_I: *VacReg(vm, q[5]) &= VacImm(q + 1);  vm->pc += 6; break;
+        case OP_OR_I:  *VacReg(vm, q[5]) |= VacImm(q + 1);  vm->pc += 6; break;
+        case OP_SHL_I: *VacReg(vm, q[5]) <<= (VacImm(q + 1) & 31); vm->pc += 6; break;
+        case OP_SAR_I:
+            *VacReg(vm, q[5]) = (unsigned long)((long)*VacReg(vm, q[5]) >> (VacImm(q + 1) & 31));
+            vm->pc += 6; break;
+        case OP_DIV_I:
+            { long d = (long)VacImm(q + 1); if (d) *VacReg(vm, q[5]) = (long)*VacReg(vm, q[5]) / d; }
+            vm->pc += 6; break;
+        case OP_MOD_I:
+            { long d = (long)VacImm(q + 1); if (d) *VacReg(vm, q[5]) = (long)*VacReg(vm, q[5]) % d; }
+            vm->pc += 6; break;
+
+        case OP_ADD_RR: *VacReg(vm, q[2]) += *VacReg(vm, q[1]); vm->pc += 3; break;
+        case OP_SUB_RR: *VacReg(vm, q[2]) -= *VacReg(vm, q[1]); vm->pc += 3; break;
+        case OP_MUL_RR: *VacReg(vm, q[2]) *= *VacReg(vm, q[1]); vm->pc += 3; break;
+        case OP_XOR_RR: *VacReg(vm, q[2]) ^= *VacReg(vm, q[1]); vm->pc += 3; break;
+        case OP_AND_RR: *VacReg(vm, q[2]) &= *VacReg(vm, q[1]); vm->pc += 3; break;
+        case OP_OR_RR:  *VacReg(vm, q[2]) |= *VacReg(vm, q[1]); vm->pc += 3; break;
+        case OP_SHL_RR: *VacReg(vm, q[2]) <<= (*VacReg(vm, q[1]) & 31); vm->pc += 3; break;
+        case OP_SAR_RR:
+            *VacReg(vm, q[2]) = (unsigned long)((long)*VacReg(vm, q[2]) >> (*VacReg(vm, q[1]) & 31));
+            vm->pc += 3; break;
+        case OP_DIV_RR:
+            { long d = (long)*VacReg(vm, q[1]); if (d) *VacReg(vm, q[2]) = (long)*VacReg(vm, q[2]) / d; }
+            vm->pc += 3; break;
+        case OP_MOD_RR:
+            { long d = (long)*VacReg(vm, q[1]); if (d) *VacReg(vm, q[2]) = (long)*VacReg(vm, q[2]) % d; }
+            vm->pc += 3; break;
+
+        case OP_ADD_RM: *VacReg(vm, q[2]) += *(unsigned long *)*VacReg(vm, q[1]); vm->pc += 3; break;
+        case OP_SUB_RM: *VacReg(vm, q[2]) -= *(unsigned long *)*VacReg(vm, q[1]); vm->pc += 3; break;
+        case OP_MUL_RM: *VacReg(vm, q[2]) *= *(unsigned long *)*VacReg(vm, q[1]); vm->pc += 3; break;
+        case OP_XOR_RM: *VacReg(vm, q[2]) ^= *(unsigned long *)*VacReg(vm, q[1]); vm->pc += 3; break;
+        case OP_AND_RM: *VacReg(vm, q[2]) &= *(unsigned long *)*VacReg(vm, q[1]); vm->pc += 3; break;
+        case OP_OR_RM:  *VacReg(vm, q[2]) |= *(unsigned long *)*VacReg(vm, q[1]); vm->pc += 3; break;
+        case OP_SHL_RM:
+            *VacReg(vm, q[2]) <<= (*(unsigned long *)*VacReg(vm, q[1]) & 31); vm->pc += 3; break;
+        case OP_SAR_RM:
+            *VacReg(vm, q[2]) = (unsigned long)((long)*VacReg(vm, q[2]) >> (*(unsigned long *)*VacReg(vm, q[1]) & 31));
+            vm->pc += 3; break;
+        case OP_DIV_RM:
+            { long d = *(long *)*VacReg(vm, q[1]); if (d) *VacReg(vm, q[2]) = (long)*VacReg(vm, q[2]) / d; }
+            vm->pc += 3; break;
+        case OP_MOD_RM:
+            { long d = *(long *)*VacReg(vm, q[1]); if (d) *VacReg(vm, q[2]) = (long)*VacReg(vm, q[2]) % d; }
+            vm->pc += 3; break;
+
+        //--- floating point (dest is the SECOND operand) ----------------------
+        case OP_FADD:
+            *(float *)VacReg(vm, q[2]) = *(float *)VacReg(vm, q[2]) + *(float *)VacReg(vm, q[1]);
+            vm->pc += 3; break;
+        case OP_FSUB:
+            *(float *)VacReg(vm, q[2]) = *(float *)VacReg(vm, q[2]) - *(float *)VacReg(vm, q[1]);
+            vm->pc += 3; break;
+        case OP_FMUL:
+            *(float *)VacReg(vm, q[2]) = *(float *)VacReg(vm, q[2]) * *(float *)VacReg(vm, q[1]);
+            vm->pc += 3; break;
+        case OP_FDIV:
+            {
+                float d = *(float *)VacReg(vm, q[1]);
+                if (d != 0.0f)
+                    *(float *)VacReg(vm, q[2]) = *(float *)VacReg(vm, q[2]) / d;
+            }
+            vm->pc += 3; break;
+        case OP_FCMP:
+            {
+                float a = *(float *)VacReg(vm, q[1]);
+                float b = *(float *)VacReg(vm, q[2]);
+                vm->flags[0] = (unsigned char)(a == b);
+                vm->flags[1] = (unsigned char)(a >  b);
+                vm->flags[2] = (unsigned char)(a <  b);
+            }
+            vm->pc += 3; break;
+
+        //--- comparison -------------------------------------------------------
+        case OP_CMP_I:                          // [op][reg][imm32]
+            {
+                long a = (long)*VacReg(vm, q[1]);
+                long b = (long)VacImm(q + 2);
+                vm->flags[0] = (unsigned char)(a == b);
+                vm->flags[1] = (unsigned char)(a >  b);
+                vm->flags[2] = (unsigned char)(a <  b);
+            }
+            vm->pc += 6; break;
+        case OP_CMP_RR: case OP_CMP_RM:
+            {
+                long a = (long)*VacReg(vm, q[1]);
+                long b = (op == OP_CMP_RR) ? (long)*VacReg(vm, q[2])
+                                           : *(long *)*VacReg(vm, q[2]);
+                vm->flags[0] = (unsigned char)(a == b);
+                vm->flags[1] = (unsigned char)(a >  b);
+                vm->flags[2] = (unsigned char)(a <  b);
+            }
+            vm->pc += 3; break;
+        case OP_TEST_I: case OP_TEST_R: case OP_TEST_M:
+            {
+                long a;
+                if (op == OP_TEST_I)      { a = (long)VacImm(q + 1);            vm->pc += 5; }
+                else if (op == OP_TEST_R) { a = (long)*VacReg(vm, q[1]);        vm->pc += 2; }
+                else                      { a = *(long *)*VacReg(vm, q[1]);     vm->pc += 2; }
+                vm->flags[0] = (unsigned char)(a == 0);
+                vm->flags[1] = (unsigned char)(a >  0);
+                vm->flags[2] = (unsigned char)(a <  0);
+            }
+            break;
+
+        //--- branches ---------------------------------------------------------
+        case OP_JMP_I: VacBranch(vm, p, VacImm(q + 1));                  break;
+        case OP_JMP_R: VacBranch(vm, p, *VacReg(vm, q[1]));              break;
+        case OP_JMP_M: VacBranch(vm, p, *(unsigned long *)*VacReg(vm, q[1])); break;
+
+        case OP_JE:  case OP_JNE:
+        case OP_JG:  case OP_JGE:
+        case OP_JL:  case OP_JLE:
+            {
+                int taken;
+                switch (op) {
+                case OP_JE:  taken =  vm->flags[0]; break;
+                case OP_JNE: taken = !vm->flags[0]; break;
+                case OP_JG:  taken =  vm->flags[1]; break;
+                case OP_JGE: taken =  vm->flags[1] || vm->flags[0]; break;
+                case OP_JL:  taken =  vm->flags[2]; break;
+                default:     taken =  vm->flags[2] || vm->flags[0]; break;
+                }
+                if (taken) VacBranch(vm, p, VacImm(q + 1));
+                else       vm->pc += 5;
+            }
+            break;
+
+        //--- calls: enter a child VM sharing the parent's operand stack -------
+        case OP_CALL_I: case OP_CALL_R: case OP_CALL_M:
+            {
+                unsigned long target;
+                if (op == OP_CALL_I)      { target = VacImm(q + 1);                    vm->pc += 5; }
+                else if (op == OP_CALL_R) { target = *VacReg(vm, q[1]);                vm->pc += 2; }
+                else                      { target = *(unsigned long *)*VacReg(vm, q[1]); vm->pc += 2; }
+
+                {
+                    VacVM *child = (VacVM *)malloc(VAC_VM_SIZE);
+                    if (!child)
+                        return 0;
+                    VacVMInit(child, vm, vm->channel, (int)target);
+                    vm = child;
+                }
+            }
+            break;
+
+        //--- returns: push the result, unwind to the parent -------------------
+        case OP_RET_I: case OP_RET_R: case OP_RET_M:
+            {
+                unsigned long rv;
+                if (op == OP_RET_I)      { rv = VacImm(q + 1);                     vm->pc += 5; }
+                else if (op == OP_RET_R) { rv = *VacReg(vm, q[1]);                 vm->pc += 2; }
+                else                     { rv = *(unsigned long *)*VacReg(vm, q[1]); vm->pc += 2; }
+
+                VacPush(vm, rv);
+                {
+                    VacVM *dead = vm;
+                    vm = vm->parent;
+                    if (!dead->parent && dead->stack)
+                        free(dead->stack);
+                    free(dead);
+                    if (!vm)
+                        return (unsigned int)rv;
+                }
+            }
+            break;
+
+        //--- operand stack ----------------------------------------------------
+        case OP_PUSH_I: VacPush(vm, VacImm(q + 1));                          vm->pc += 5; break;
+        case OP_PUSH_R: VacPush(vm, *VacReg(vm, q[1]));                      vm->pc += 2; break;
+        case OP_PUSH_M: VacPush(vm, *(unsigned long *)*VacReg(vm, q[1]));    vm->pc += 2; break;
+        case OP_POP_R:
+            if (*vm->stackIndex > 0) *VacReg(vm, q[1]) = VacPop(vm);
+            vm->pc += 2; break;
+        case OP_POP_M:
+            if (*vm->stackIndex > 0) *(unsigned long *)*VacReg(vm, q[1]) = VacPop(vm);
+            vm->pc += 2; break;
+
+        //--- per-channel data area -------------------------------------------
+        case OP_DATA_I:
+            *VacReg(vm, q[5]) = (unsigned long)(vm->data + VacImm(q + 1));   vm->pc += 6; break;
+        case OP_DATA_R:
+            *VacReg(vm, q[2]) = (unsigned long)(vm->data + *VacReg(vm, q[1])); vm->pc += 3; break;
+        case OP_DATA_M:
+            *VacReg(vm, q[2]) = (unsigned long)(vm->data + *(unsigned long *)*VacReg(vm, q[1]));
+            vm->pc += 3; break;
+
+        //--- program constants ------------------------------------------------
+        case OP_LEA_ENTRY:
+            *VacReg(vm, q[5]) = (unsigned long)VacEntryAddr(p, VacImm(q + 1));
+            vm->pc += 6; break;
+
+        case OP_STRCPY:                     // decode entry[imm] into reg[q[5]]
+            {
+                const unsigned char *s = VacEntryAddr(p, VacImm(q + 1));
+                unsigned char *d = (unsigned char *)*VacReg(vm, q[5]);
+                unsigned char  c;
+                while ((c = (unsigned char)(*s ^ VAC_STR_XOR)) != 0) {
+                    *d++ = c;
+                    ++s;
+                }
+                *d = 0;
+            }
+            vm->pc += 6; break;
+
+        case OP_STRCMP:                     // compare reg[q[5]] with entry[imm]
+            {
+                const unsigned char *s = VacEntryAddr(p, VacImm(q + 1));
+                const unsigned char *t = (const unsigned char *)*VacReg(vm, q[5]);
+                unsigned char c;
+                int equal = 1;
+                while ((c = (unsigned char)(*s ^ VAC_STR_XOR)) != 0) {
+                    if (c != *t) equal = 0;
+                    ++s; ++t;
+                }
+                vm->flags[0] = (unsigned char)equal;
+            }
+            vm->pc += 6; break;
+
+        //--- host services ----------------------------------------------------
+        case OP_NATIVE_CALL:                // [op][reg][argc][kind][flag]
+            {
+                void         *fn   = (void *)*VacReg(vm, q[1]);
+                unsigned long argc = VacImm(q + 2);
+                unsigned long kind = VacImm(q + 6);
+                unsigned long a[11];
+                unsigned long i;
+
+                vm->pc += 14;
+                for (i = argc; i-- > 0; )
+                    a[i] = VacPop(vm);
+                if (kind == 1 || kind == 2)
+                    VacPush(vm, VacCallNative(fn, kind, (int)argc, a));
+                else
+                    VacCallNative(fn, 0, (int)argc, a);
+            }
+            break;
+
+        case OP_CHECKSUM:                   // pops len,ptr -> pushes checksum
+            {
+                unsigned long  n   = VacPop(vm) / 4;
+                unsigned long *src = (unsigned long *)VacPop(vm);
+                unsigned long  off = 0, sum = 0;
+                vm->pc += 1;
+                while (n--) {
+                    sum += (*src++ ^ off);
+                    off += 4;
+                }
+                VacPush(vm, sum);
+            }
+            break;
+
+        case OP_SPIN:                       // pops 3, burns a counted loop
+            {
+                unsigned long a0 = VacPop(vm);
+                unsigned long n  = VacPop(vm);
+                unsigned long i;
+                (void)a0;
+                VacPop(vm);
+                for (i = 0; i < n; ++i)
+                    ;
+                vm->pc += 1;
+            }
+            break;
+
+        case OP_MEMCPY:                     // pops size,src,dst
+            {
+                unsigned long  n   = VacPop(vm);
+                const void    *src = (const void *)VacPop(vm);
+                void          *dst = (void *)VacPop(vm);
+                memcpy(dst, src, n);
+                vm->pc += 1;
+            }
+            break;
+
+        case OP_TRACE:                      // pops a type code, then a value
+            {
+                unsigned long kind = VacPop(vm);
+                vm->pc += 1;
+                if (g_trace) {
+                    if (kind == VAC_TRACE_INT)        g_trace("I: 0x%x\n", VacPop(vm));
+                    else if (kind == VAC_TRACE_STR)   g_trace("S: %s\n",   VacPop(vm));
+                    else if (kind == VAC_TRACE_FLOAT) {
+                        unsigned long v = VacPop(vm);
+                        g_trace("F: %f\n", *(float *)&v);
+                    } else {
+                        g_trace("Unknown message: 0x%x, data 0x%x\n", kind, 0);
+                    }
+                }
+            }
+            break;
+
+        case OP_PRINT:
+            if (g_trace) g_trace("%s", *VacReg(vm, q[1]));
+            vm->pc += 2; break;
+
+        case OP_GET_TEB:
+            {
+                unsigned long teb;
+                __asm { mov eax, fs:[0x18] }
+                __asm { mov teb, eax }
+                *VacReg(vm, q[1]) = teb;
+            }
+            vm->pc += 2; break;
+
+        case OP_GET_CHANNEL:
+            *VacReg(vm, q[1]) = vm->channel;                     vm->pc += 2; break;
+
+        case OP_FRAME_ALLOC:
+            *VacReg(vm, q[1]) = (unsigned long)VacFrameAlloc(vm); vm->pc += 2; break;
+
+        case OP_NOP:
+            vm->pc += 1; break;
+
+        default:
+            // 157 of the 252 opcode slots are decoys.
+            vm->pc += 1;
+            break;
+        }
+    }
+}
+
+```
+
+`decrypt_vac_module.py`:
+
+```py
+#!/usr/bin/env python3
+r"""
+VAC1 security-module decryptor (GoldSrc / WON Half-Life, ~2002-2003).
+
+Reverse-engineered from:
+  F:\Sierra\Half-Life\hw.decal.dll        (unpacked hw.dll -- client engine)
+      sub_1D4D1B0  = LoadSecurityModuleFromDisk  (fopen/fread whole file -> loader)
+      sub_1D4D220  = CommonLoadSecurityModule    (rolling decrypt + map + init)
+      sub_1D4D2F0  = module import resolver      (obfuscated import descriptors)
+  F:\Sierra\Half-Life\hlds_l\engine_i686.so
+      LoadSecurityModuleFromDisk / CommonLoadSecurityModule / NLoadBlobFile
+      SV_DownloadSecurityModules / SV_LoadSecurityModules / UPDATE_ProcessMessage
+
+Note: steamclient.dll did not exist in this era. The whole decryption chain lives
+in the engine binary; nothing external is required.
+
+=============================================================================
+FILE LAYOUT of the archived files in "vac modules\"
+=============================================================================
+    u16  namelen                (BIG endian)
+    u8[namelen]  name           e.g. "dod/ModuleC.dll"      (plaintext)
+    u8[42] metadata             00 00 00 22 | md5[16] | 08 07 00 00 | ...
+    u8[]   payload              starts at H = 2 + namelen + 42
+
+=============================================================================
+LAYER 1 -- download container cipher ("caesar"), applied from payload start
+=============================================================================
+Repeating 64-byte XOR key: 0x02 at payload-relative offsets
+{5,17,29,33,41,53,57,61}, 0x00 everywhere else.
+
+  Linux  ModuleS_i386.so : after layer 1 you have a plain ELF -- done.
+                           (engine just FS_Write's it and dlopen()s it)
+  Windows ModuleC/S.dll  : after layer 1 you have the module "blob", which has
+                           its own layer 2 below (NOT a PE -- no MZ header).
+
+=============================================================================
+LAYER 2 -- module blob cipher (Windows only), from CommonLoadSecurityModule
+=============================================================================
+Bytes 0..67 of the blob are plaintext; everything from blob+68 is enciphered
+with a rolling additive-feedback XOR stream (0x1D4D22C..0x1D4D24D):
+
+    mov  eax, 44h        ; offset 68
+    mov  dl,  57h        ; key = 0x57
+  loop:
+    mov  cl, [eax+ebp]   ; c    = cipher byte
+    xor  cl, dl          ; p    = c ^ key
+    mov  [eax+ebp], cl   ; store plaintext
+    add  cl, 57h         ; p + 0x57
+    add  dl, cl          ; key += p + 0x57
+    inc  eax / cmp / jl
+
+  key = 0x57
+  for i in 68..len-1:
+      p = buf[i] ^ key ; buf[i] = p ; key = (key + p + 0x57) & 0xFF
+
+Because the stream feeds back on the plaintext, layer 1 MUST be removed first,
+otherwise each container flip corrupts the whole remaining keystream.
+
+=============================================================================
+BLOB FORMAT (after layer 2), v8 = blob + 68
+=============================================================================
+  blob+68   u32  total size
+  blob+72   i32  section_count_last_index   (=> count+1 entries)
+  v8+8      u32  module init fn      ^ 0x7A32BC85   (called with engine funcs)
+  v8+12     u32  image base          ^ 0x49C042D1   (= 0x01700000)
+  v8+16     u32  DllMain             (called as (*(v8+16) - 12)(0,1,0))
+  v8+20     u32  import descriptors  ^ 0x872C3D47   (+12 = first entry)
+
+  section table at blob+92, stride 20, (count+1) entries:
+      u32 dest_va, u32 vsize, u32 rawsize, u32 src_off_in_blob, u32 flag
+      (vsize > rawsize -> tail zero-filled; flag != 0 -> loader's return value)
+
+  import descriptors, stride 20, terminated by a zero dword:
+      [0] dll name RVA (+ image_base), [1] thunk array RVA
+      thunk entries: high bit set -> import by ordinal (value & 0x7FFFFFFF),
+                     else name RVA + 2 (skips the hint word)
+
+Usage:
+    python decrypt_vac_module.py ModuleC.dll
+    python decrypt_vac_module.py ModuleS_i386.so
+Outputs:
+    <name>.decrypted.so         plain ELF (Linux modules)
+    <name>.blob                 decrypted blob (Windows modules)
+    <name>.mapped.bin           sections mapped at image base, ready for IDA
+                                (load as binary, 32-bit, base 0x01700000)
+"""
+import sys, os, struct
+
+CONTAINER_PERIOD = 64
+CONTAINER_TWOS   = frozenset({5, 17, 29, 33, 41, 53, 57, 61})
+META_LEN         = 42
+BLOB_PLAIN_LEN   = 68           # bytes 0..67 of blob are not enciphered
+ROLL_SEED        = 0x57
+ROLL_ADD         = 0x57
+
+MASK_INIT   = 0x7A32BC85
+MASK_BASE   = 0x49C042D1
+MASK_IMPORT = 0x872C3D47
+
+
+def parse_container(raw):
+    namelen = (raw[0] << 8) | raw[1]
+    name    = raw[2:2 + namelen]
+    p       = 2 + namelen
+    marker  = raw[p:p + 4]
+    md5     = raw[p + 4:p + 20]
+    return name, marker, md5, p + META_LEN
+
+
+def strip_container(raw, payload_start):
+    """Layer 1: repeating 64-byte XOR key from the payload start."""
+    d = bytearray(raw)
+    for i in range(payload_start, len(d)):
+        if (i - payload_start) % CONTAINER_PERIOD in CONTAINER_TWOS:
+            d[i] ^= 0x02
+    return d
+
+
+def roll_decrypt(buf, start):
+    """Layer 2: rolling additive-feedback XOR (CommonLoadSecurityModule)."""
+    d = bytearray(buf)
+    key = ROLL_SEED
+    for i in range(start, len(d)):
+        p = d[i] ^ key
+        d[i] = p
+        key = (key + p + ROLL_ADD) & 0xFF
+    return d
+
+
+def map_sections(blob):
+    """Rebuild the mapped image exactly as CommonLoadSecurityModule does."""
+    count = struct.unpack_from("<i", blob, 72)[0]
+    if not 0 <= count < 256:
+        raise ValueError(f"bad section count {count}")
+    secs = []
+    for s in range(count + 1):
+        secs.append(struct.unpack_from("<5I", blob, 92 + 20 * s))
+    base = min(d for d, _, _, _, _ in secs)
+    end  = max(d + max(v, r) for d, v, r, _, _ in secs)
+    img  = bytearray(end - base)
+    for dest, vsize, rawsize, src, flag in secs:
+        o = dest - base
+        img[o:o + rawsize] = blob[src:src + rawsize]      # rest stays zero-filled
+    return base, bytes(img), secs
+
+
+def read_imports(blob, img, base):
+    v8   = 68
+    desc = (struct.unpack_from("<I", blob, v8 + 20)[0] ^ MASK_IMPORT) + 12
+    ibase = struct.unpack_from("<I", blob, v8 + 12)[0] ^ MASK_BASE
+    out = []
+    def cstr(va):
+        o = va - base
+        e = img.index(b"\0", o)
+        return img[o:e].decode("latin1")
+    p = desc - base
+    while p + 20 <= len(img):
+        name_rva, thunk_rva = struct.unpack_from("<II", img, p)
+        if name_rva == 0:
+            break
+        try:
+            dll = cstr(name_rva + ibase)
+        except Exception:
+            break
+        fns, t = [], thunk_rva + ibase - base
+        while t + 4 <= len(img):
+            v = struct.unpack_from("<i", img, t)[0]
+            if v == 0:
+                break
+            fns.append(f"#{v & 0x7FFFFFFF}" if v < 0 else cstr((v & 0x7FFFFFFF) + ibase + 2))
+            t += 4
+        out.append((dll, fns))
+        p += 20
+    return ibase, out
+
+
+def main():
+    path = sys.argv[1]
+    raw  = open(path, "rb").read()
+    name, marker, md5, H = parse_container(raw)
+    print(f"name={name.decode('latin1')!r} marker={marker.hex()} md5={md5.hex()} payload_start={H}")
+
+    d = strip_container(raw, H)
+    stem = os.path.splitext(path)[0]
+
+    if name.endswith(b".so"):
+        o = bytes(d).find(b"\x7fELF")
+        out = bytes(d[o:])
+        dst = stem + ".decrypted.so"
+        open(dst, "wb").write(out)
+        et, em = struct.unpack_from("<HH", out, 16)
+        print(f"[layer1] wrote {dst} ({len(out)} bytes) e_type={et} e_machine={em} EI_DATA={out[5]}")
+        print("ELF OK" if em == 3 and out[5] == 1 else "WARN: unexpected ELF header")
+        return
+
+    blob = bytes(roll_decrypt(d, H + BLOB_PLAIN_LEN))[H:]
+    open(stem + ".blob", "wb").write(blob)
+    print(f"[layer2] wrote {stem}.blob ({len(blob)} bytes)")
+
+    base, img, secs = map_sections(blob)
+    open(stem + ".mapped.bin", "wb").write(img)
+    print(f"[map] wrote {stem}.mapped.bin  base={base:#010x} size={len(img):#x}")
+    for i, (dest, vsize, rawsize, src, flag) in enumerate(secs):
+        print(f"   sec{i}: dest={dest:#010x} vsize={vsize:#x} raw={rawsize:#x} src={src:#x} flag={flag:#x}")
+
+    v8 = 68
+    print(f"   image_base = {struct.unpack_from('<I', blob, v8 + 12)[0] ^ MASK_BASE:#010x}")
+    print(f"   init_fn    = {struct.unpack_from('<I', blob, v8 + 8)[0] ^ MASK_INIT:#010x}")
+    print(f"   dllmain    = {struct.unpack_from('<I', blob, v8 + 16)[0] - 12:#010x}")
+    try:
+        ibase, imps = read_imports(blob, img, base)
+        print(f"   imports (base {ibase:#x}):")
+        for dll, fns in imps:
+            print(f"     {dll}: {len(fns)} -> {', '.join(fns[:8])}{' ...' if len(fns) > 8 else ''}")
+    except Exception as e:
+        print("   import parse failed:", e)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`mkvac.bat`:
+
+```bat
+@echo off
+rem Build ModuleC.dll / ModuleS.dll with Visual C++ 6.0.  Run:  mkvac.bat
+setlocal
+set VC=C:\Program Files (x86)\Microsoft Visual Studio\VC98
+if not exist "%VC%\Bin\CL.EXE" ( echo ERROR: VC98 not found at "%VC%" & exit /b 1 )
+
+rem VC98's CL.EXE loads C1.DLL / C1XX.DLL / MSPDB60.DLL from its own Bin.
+set MSDEV=C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin
+set PATH=%VC%\Bin;%MSDEV%;%PATH%
+set INCLUDE=%VC%\Include;%VC%\MFC\Include
+set LIB=%VC%\Lib;%VC%\MFC\Lib
+
+if not exist build mkdir build
+cd build
+
+set CFLAGS=/nologo /MT /W3 /GX /O2 /D WIN32 /D NDEBUG /D _WINDOWS /D _MBCS /D _USRDLL
+rem /base and /align reproduce the original image layout (0x1700000, 4 KB pages)
+set LFLAGS=/nologo /dll /machine:I386 /base:0x1700000 /align:4096 /fixed
+
+echo === common ===
+cl %CFLAGS% /c ..\common\vac_vm.cpp     || goto fail
+cl %CFLAGS% /c ..\common\vac_module.cpp || goto fail
+
+cl %CFLAGS% /c ..\common\vac_net.cpp    || goto fail
+
+echo === ModuleC ===
+cl %CFLAGS% /c ..\ModuleC\ModuleC.cpp   || goto fail
+link %LFLAGS% /out:ModuleC.dll vac_vm.obj vac_module.obj ModuleC.obj kernel32.lib || goto fail
+
+echo === ModuleS ===
+cl %CFLAGS% /c ..\ModuleS\ModuleS.cpp   || goto fail
+link %LFLAGS% /out:ModuleS.dll vac_vm.obj vac_module.obj vac_net.obj ModuleS.obj kernel32.lib ws2_32.lib || goto fail
+
+echo.
+echo === BUILD OK ===
+cd ..
+exit /b 0
+
+:fail
+echo.
+echo *** BUILD FAILED ***
+cd ..
+exit /b 1
+
+```
+
+`rebuild_vac_pe.py`:
+
+```py
+#!/usr/bin/env python3
+r"""
+Rebuild a decrypted VAC1 module blob into a real PE32 DLL for clean static analysis.
+
+Input:  <name>.blob            (produced by decrypt_vac_module.py)
+Output: <name>.rebuilt.dll     loadable in IDA / Ghidra / CFF Explorer with
+                               working imports, sections and entry point.
+
+Why this works
+--------------
+The blob's own loader tables are already PE-shaped, just re-arranged:
+  * section table (blob+92, stride 20): dest_va, vsize, rawsize, src_off, flag
+  * import descriptors (stride 20): [0] = dll name RVA, [1] = thunk array RVA
+    (PE puts Name at +12 and FirstThunk at +16, so the descriptors get rebuilt)
+  * thunk entries are ALREADY in PE format: high bit set -> ordinal,
+    otherwise an RVA pointing at an IMAGE_IMPORT_BY_NAME {WORD hint; char name[]}
+    (the loader does GetProcAddress(h, rva + base + 2), i.e. it skips the hint)
+
+So the rebuild keeps every original address intact -- FirstThunk points at the
+module's real in-image thunk array, which is what the code actually calls
+through. Nothing is relocated, so all analysis addresses match the runtime ones.
+
+An export directory is synthesized so the two interesting entry points get
+names instead of sub_XXXX:
+    ModuleInit  = *(v8+8) ^ 0x7A32BC85   (called with the engine function table)
+    DllMain     = *(v8+16) - 12
+"""
+import sys, os, struct
+
+MASK_INIT   = 0x7A32BC85
+MASK_BASE   = 0x49C042D1
+MASK_IMPORT = 0x872C3D47
+
+FILE_ALIGN = 0x200
+SECT_ALIGN = 0x1000
+
+IMAGE_SCN_CNT_CODE               = 0x00000020
+IMAGE_SCN_CNT_INITIALIZED_DATA   = 0x00000040
+IMAGE_SCN_MEM_EXECUTE            = 0x20000000
+IMAGE_SCN_MEM_READ               = 0x40000000
+IMAGE_SCN_MEM_WRITE              = 0x80000000
+
+
+def align(v, a):
+    return (v + a - 1) & ~(a - 1)
+
+
+def parse_blob(blob):
+    v8    = 68
+    count = struct.unpack_from("<i", blob, 72)[0]
+    if not 0 <= count < 256:
+        raise ValueError(f"bad section count {count}")
+    secs = [struct.unpack_from("<5I", blob, 92 + 20 * s) for s in range(count + 1)]
+    base    = struct.unpack_from("<I", blob, v8 + 12)[0] ^ MASK_BASE
+    init_fn = struct.unpack_from("<I", blob, v8 + 8)[0] ^ MASK_INIT
+    dllmain = struct.unpack_from("<I", blob, v8 + 16)[0] - 12
+    impdesc = (struct.unpack_from("<I", blob, v8 + 20)[0] ^ MASK_IMPORT) + 12
+    return base, init_fn, dllmain, impdesc, secs
+
+
+def build_image(blob, base, secs):
+    """Flat VA-space image so RVAs can be read while rebuilding tables."""
+    end = max(d + max(v, r) for d, v, r, _, _ in secs) - base
+    img = bytearray(end)
+    for dest, vsize, rawsize, src, _flag in secs:
+        o = dest - base
+        img[o:o + rawsize] = blob[src:src + rawsize]
+    return img
+
+
+def read_imports(img, impdesc_rva):
+    def cstr(rva):
+        e = img.index(b"\0", rva)
+        return img[rva:e].decode("latin1")
+    out, p = [], impdesc_rva
+    while p + 20 <= len(img):
+        name_rva, thunk_rva = struct.unpack_from("<II", img, p)
+        if name_rva == 0:
+            break
+        entries, t = [], thunk_rva
+        while t + 4 <= len(img):
+            v = struct.unpack_from("<I", img, t)[0]
+            if v == 0:
+                break
+            entries.append(v)                       # already PE thunk format
+            t += 4
+        out.append((cstr(name_rva), name_rva, thunk_rva, entries))
+        p += 20
+    return out
+
+
+def classify(idx, nsec):
+    if idx == 0:
+        return b".text\0\0\0", IMAGE_SCN_CNT_CODE | IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_MEM_READ
+    if idx == nsec - 1:
+        return b".vacdat\0", IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE | IMAGE_SCN_MEM_EXECUTE
+    names = [b".rdata\0\0", b".data\0\0\0"]
+    return names[min(idx - 1, 1)], IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE
+
+
+def rebuild(path):
+    blob = open(path, "rb").read()
+    base, init_fn, dllmain, impdesc, secs = parse_blob(blob)
+    img  = build_image(blob, base, secs)
+    imps = read_imports(img, impdesc - base)
+
+    dll_name = os.path.basename(path).replace(".blob", ".dll").encode()
+
+    # ---- synthesize a new section holding rebuilt import + export directories ----
+    extra_rva = align(max(d + max(v, r) for d, v, r, _, _ in secs) - base, SECT_ALIGN)
+    ex = bytearray()
+
+    def put(b):
+        off = len(ex)
+        ex.extend(b)
+        return extra_rva + off
+
+    # OriginalFirstThunk copies (name/ordinal arrays) + dll name strings
+    oft_rva, name_rva = [], []
+    for _dll, nrva, _thunk, entries in imps:
+        oft_rva.append(put(b"".join(struct.pack("<I", v) for v in entries) + b"\0\0\0\0"))
+        name_rva.append(nrva)                       # reuse the in-image string
+
+    imp_dir = extra_rva + len(ex)
+    for i, (_dll, _nrva, thunk, _e) in enumerate(imps):
+        # OriginalFirstThunk, TimeDateStamp, ForwarderChain, Name, FirstThunk
+        # FirstThunk = the module's ORIGINAL array -> keeps every call site valid
+        ex.extend(struct.pack("<5I", oft_rva[i], 0, 0, name_rva[i], thunk))
+    ex.extend(b"\0" * 20)                           # null descriptor
+    imp_dir_size = len(imps) * 20 + 20
+
+    # export directory: name the two real entry points
+    exports = [(b"ModuleInit", init_fn - base), (b"DllMain", dllmain - base)]
+    exports.sort(key=lambda e: e[0])
+    exp_dir = extra_rva + len(ex)
+    ex.extend(b"\0" * 40)                           # IMAGE_EXPORT_DIRECTORY placeholder
+    addr_tbl = extra_rva + len(ex)
+    for _n, rva in exports:
+        ex.extend(struct.pack("<I", rva))
+    nameptr_tbl = extra_rva + len(ex)
+    ex.extend(b"\0" * (4 * len(exports)))
+    ord_tbl = extra_rva + len(ex)
+    for i in range(len(exports)):
+        ex.extend(struct.pack("<H", i))
+    modname_rva = put(dll_name + b"\0")
+    fixups = []
+    for i, (n, _rva) in enumerate(exports):
+        fixups.append((nameptr_tbl - extra_rva + 4 * i, put(n + b"\0")))
+    for off, val in fixups:
+        struct.pack_into("<I", ex, off, val)
+    struct.pack_into("<10I", ex, exp_dir - extra_rva,
+                     0, 0, 0, modname_rva, 1,
+                     len(exports), len(exports), addr_tbl, nameptr_tbl, ord_tbl)
+    exp_dir_size = len(ex) - (exp_dir - extra_rva)
+
+    # ---- assemble section list ----
+    out_secs = []
+    for i, (dest, vsize, rawsize, src, _flag) in enumerate(secs):
+        nm, ch = classify(i, len(secs))
+        out_secs.append([nm, dest - base, max(vsize, rawsize), blob[src:src + rawsize], ch])
+    out_secs.append([b".rdata2\0", extra_rva, len(ex), bytes(ex),
+                     IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE])
+
+    nsec        = len(out_secs)
+    hdr_size    = 0x40 + 0x40 + 4 + 20 + 224 + nsec * 40
+    size_hdrs   = align(hdr_size, FILE_ALIGN)
+    size_image  = align(max(r + v for _n, r, v, _d, _c in out_secs), SECT_ALIGN)
+
+    raw_ptr, tbl = size_hdrs, []
+    for nm, rva, vsize, data, ch in out_secs:
+        rsz = align(len(data), FILE_ALIGN)
+        tbl.append((nm, rva, vsize, raw_ptr if rsz else 0, rsz, data, ch))
+        raw_ptr += rsz
+
+    dos  = bytearray(b"\x00" * 0x40)
+    dos[0:2] = b"MZ"
+    struct.pack_into("<I", dos, 0x3c, 0x40)
+
+    opt = struct.pack(
+        "<HBB" + "I" * 9 + "H" * 6 + "I" * 4 + "H" * 2 + "I" * 6,
+        0x10B, 6, 0,                                  # magic PE32, linker ver
+        sum(t[4] for t in tbl if t[6] & IMAGE_SCN_CNT_CODE),
+        sum(t[4] for t in tbl if t[6] & IMAGE_SCN_CNT_INITIALIZED_DATA),
+        0, dllmain - base, tbl[0][1], tbl[1][1] if len(tbl) > 1 else 0,
+        base, SECT_ALIGN, FILE_ALIGN,
+        4, 0, 0, 0, 4, 0,                             # os/image/subsystem versions
+        0, size_image, size_hdrs, 0,
+        2, 0x0000,                                    # GUI subsystem, dll chars
+        0x100000, 0x1000, 0x100000, 0x1000, 0, 16,
+    )
+    dd = bytearray(16 * 8)
+    struct.pack_into("<II", dd, 0 * 8, exp_dir, exp_dir_size)
+    struct.pack_into("<II", dd, 1 * 8, imp_dir, imp_dir_size)
+
+    coff = struct.pack("<HHIIIHH", 0x14C, nsec, 0, 0, 0, 224, 0x210E)  # DLL | EXECUTABLE_IMAGE | 32BIT
+
+    out = bytearray(dos)
+    out += b"PE\0\0" + coff + opt + bytes(dd)
+    for nm, rva, vsize, ptr, rsz, data, ch in tbl:
+        out += struct.pack("<8sIIIIIIHHI", nm, vsize, rva, rsz, ptr, 0, 0, 0, 0, ch)
+    out += b"\0" * (size_hdrs - len(out))
+    for nm, rva, vsize, ptr, rsz, data, ch in tbl:
+        out += data + b"\0" * (rsz - len(data))
+
+    dst = path.replace(".blob", ".rebuilt.dll")
+    open(dst, "wb").write(out)
+
+    print(f"{os.path.basename(path)} -> {os.path.basename(dst)}  ({len(out)} bytes)")
+    print(f"  ImageBase   = {base:#010x}   SizeOfImage = {size_image:#x}")
+    print(f"  EntryPoint  = {dllmain:#010x}  (DllMain)")
+    print(f"  ModuleInit  = {init_fn:#010x}  (exported)")
+    for nm, rva, vsize, ptr, rsz, data, ch in tbl:
+        print(f"  {nm.rstrip(bytes(1)).decode():<9} rva={rva:#08x} vsize={vsize:#07x} raw={rsz:#07x} chars={ch:#010x}")
+    for dll, _n, thunk, entries in imps:
+        named = sum(1 for v in entries if not v & 0x80000000)
+        print(f"  import {dll:<14} {len(entries):>3} entries ({named} by name) FirstThunk={thunk + base:#x}")
+    return dst
+
+
+if __name__ == "__main__":
+    for p in sys.argv[1:]:
+        rebuild(p)
+
+```
+
+`repack_vac_module.py`:
+
+```py
+#!/usr/bin/env python3
+r"""
+VAC1 security-module REPACKER -- exact inverse of decrypt_vac_module.py.
+
+Takes a compiled PE32 DLL (or an already-built blob) and produces a download
+container byte-identical in format to the original "dod/ModuleC.dll" archives.
+
+    PE32 DLL  --.  build blob  --.  layer2 encrypt  --.  layer1 encrypt
+                                                     `-.  prepend container header
+
+Usage
+-----
+  # rebuild a container from a compiled DLL (the normal path)
+  python repack_vac_module.py --pe ModuleC.rebuilt.dll --name dod/ModuleC.dll \
+         --template ModuleC.dll -o ModuleC.repacked.dll
+
+  # re-wrap an existing decrypted blob (used to prove round-trip fidelity)
+  python repack_vac_module.py --blob ModuleC.blob --name dod/ModuleC.dll \
+         --template ModuleC.dll -o ModuleC.repacked.dll
+
+  # Linux modules are only layer-1 wrapped
+  python repack_vac_module.py --elf ModuleS_i386.decrypted.so \
+         --name dod/ModuleS_i386.so --template ModuleS_i386.so -o out.so
+
+  # verify a produced container decrypts back to the expected payload
+  python repack_vac_module.py --verify ModuleC.repacked.dll
+
+Container format (see decrypt_vac_module.py for the discovery notes)
+--------------------------------------------------------------------
+    u16  namelen                      BIG endian
+    u8[namelen]  name                 plaintext, e.g. "dod/ModuleC.dll"
+    u8[42]  metadata
+            [ 0: 4]  00 00 00 22      constant tag
+            [ 4:20]  MD5 of the *layer-1-decrypted* payload   <-- verified
+            [20:24]  08 07 00 00      constant
+            [24:42]  18 bytes of per-build fields (preserved from template)
+    u8[]  payload                     layer1(layer2(blob))
+
+Blob format
+-----------
+    [0x00:0x40]  64 bytes of junk -- uninitialised memory from Valve's packer
+                 (the originals leak "ocuments and Settings\mattb", "=U:\goldsr")
+    [0x40:0x44]  magic 0x12345678
+    --- everything from 0x44 (68) on is layer-2 enciphered ---
+    +0x44  u32  build stamp   (0x46bc / 0x46ea in the originals; NOT a size)
+    +0x48  i32  section_count - 1
+    +0x4C  u32  ModuleInit VA  ^ 0x7A32BC85
+    +0x50  u32  image base     ^ 0x49C042D1
+    +0x54  u32  DllMain VA + 12
+    +0x58  u32  import descriptor VA ^ 0x872C3D47, minus 12
+    +0x5C  section table, stride 20, (count+1) entries:
+               u32 dest_va, u32 vsize, u32 rawsize, u32 src_off, u32 flag
+               flag != 0 marks the section whose dest the loader returns
+    then raw section bytes at the src offsets
+
+Import descriptors (stride 20, zero dword terminates):
+    [0] dll-name RVA, [1] thunk-array RVA, [2..4] unused
+    thunks are already in PE form: high bit -> ordinal, else RVA of
+    IMAGE_IMPORT_BY_NAME (loader does GetProcAddress(h, rva + base + 2)).
+"""
+import sys, os, struct, hashlib, argparse
+
+CONTAINER_PERIOD = 64
+CONTAINER_TWOS   = frozenset({5, 17, 29, 33, 41, 53, 57, 61})
+META_LEN         = 42
+BLOB_PLAIN_LEN   = 68
+ROLL_SEED        = 0x57
+ROLL_ADD         = 0x57
+
+MASK_INIT   = 0x7A32BC85
+MASK_BASE   = 0x49C042D1
+MASK_IMPORT = 0x872C3D47
+
+BLOB_MAGIC       = 0x12345678
+DEFAULT_STAMP    = 0x46BC
+SECT_ALIGN       = 0x1000
+
+# 42-byte metadata used when no --template is supplied. MD5 is filled in later.
+DEFAULT_META = (bytes.fromhex("00000022") + b"\0" * 16 + bytes.fromhex("08070000")
+                + bytes.fromhex("5ab111b707bdba60d229219173720000e171"))
+
+
+# --------------------------------------------------------------------------
+# cipher layers
+# --------------------------------------------------------------------------
+def layer1(buf, payload_start):
+    """Repeating 64-byte XOR key, counted from the payload start. Involutive."""
+    d = bytearray(buf)
+    for i in range(payload_start, len(d)):
+        if (i - payload_start) % CONTAINER_PERIOD in CONTAINER_TWOS:
+            d[i] ^= 0x02
+    return bytes(d)
+
+
+def roll_encrypt(buf, start):
+    """Inverse of the loader's rolling additive-feedback XOR stream.
+
+    Decrypt is   p = c ^ k ; k += p + 0x57
+    so encrypt is c = p ^ k ; k += p + 0x57   (key feeds back on plaintext,
+    which is why encryption can be done in a single forward pass).
+    """
+    d = bytearray(buf)
+    key = ROLL_SEED
+    for i in range(start, len(d)):
+        p = d[i]
+        d[i] = p ^ key
+        key = (key + p + ROLL_ADD) & 0xFF
+    return bytes(d)
+
+
+def roll_decrypt(buf, start):
+    d = bytearray(buf)
+    key = ROLL_SEED
+    for i in range(start, len(d)):
+        p = d[i] ^ key
+        d[i] = p
+        key = (key + p + ROLL_ADD) & 0xFF
+    return bytes(d)
+
+
+# --------------------------------------------------------------------------
+# PE  ->  blob
+# --------------------------------------------------------------------------
+def blob_from_pe(path, stamp=DEFAULT_STAMP, junk=None):
+    import pefile
+    pe = pefile.PE(path)
+    base = pe.OPTIONAL_HEADER.ImageBase
+
+    init_rva = dllmain_rva = None
+    if hasattr(pe, "DIRECTORY_ENTRY_EXPORT"):
+        for e in pe.DIRECTORY_ENTRY_EXPORT.symbols:
+            if e.name == b"ModuleInit":
+                init_rva = e.address
+            elif e.name == b"DllMain":
+                dllmain_rva = e.address
+    if init_rva is None:
+        raise SystemExit("error: %s exports no ModuleInit -- the engine calls it "
+                         "with the function table, it must be exported" % path)
+    if dllmain_rva is None:
+        dllmain_rva = pe.OPTIONAL_HEADER.AddressOfEntryPoint
+
+    # Collect the sections we ship. A section carrying the rebuilt import
+    # directory (".rdata2" from rebuild_vac_pe.py) is dropped: we regenerate
+    # VAC-format descriptors ourselves.
+    secs = []
+    for s in pe.sections:
+        nm = s.Name.rstrip(b"\0")
+        if nm == b".rdata2":
+            continue
+        raw = s.get_data()[: s.SizeOfRawData]
+        raw = raw.rstrip(b"\0") or b"\0"
+        secs.append(dict(name=nm, rva=s.VirtualAddress,
+                         vsize=max(s.Misc_VirtualSize, len(raw)),
+                         raw=raw))
+    if not secs:
+        raise SystemExit("error: no sections")
+
+    # ---- rebuild VAC-format import descriptors -------------------------
+    # Reuse the PE's own dll-name strings and FirstThunk arrays so every call
+    # site in the compiled code stays valid without relocation.
+    desc = bytearray()
+    if hasattr(pe, "DIRECTORY_ENTRY_IMPORT"):
+        for d in pe.DIRECTORY_ENTRY_IMPORT:
+            name_rva  = d.struct.Name
+            thunk_rva = d.struct.FirstThunk
+            desc += struct.pack("<5I", name_rva, thunk_rva, 0, 0, 0)
+    desc += b"\0" * 20                                    # terminator
+
+    # place the descriptors in a fresh section above everything else
+    top = max(s["rva"] + s["vsize"] for s in secs)
+    desc_rva = (top + SECT_ALIGN - 1) & ~(SECT_ALIGN - 1)
+    secs.append(dict(name=b".vacimp", rva=desc_rva,
+                     vsize=len(desc), raw=bytes(desc)))
+
+    # ---- lay out the blob ----------------------------------------------
+    n = len(secs)
+    table_end = 92 + 20 * n
+    blob = bytearray(table_end)
+    blob[0:0x40] = (junk or b"\0" * 0x40)[:0x40].ljust(0x40, b"\0")
+    struct.pack_into("<I", blob, 0x40, BLOB_MAGIC)
+
+    body = bytearray()
+    entries = []
+    for i, s in enumerate(secs):
+        src = table_end + len(body)
+        body += s["raw"]
+        flag = 1 if i == n - 1 else 0
+        entries.append((base + s["rva"], s["vsize"], len(s["raw"]), src, flag))
+
+    struct.pack_into("<I", blob, 68, stamp)
+    struct.pack_into("<i", blob, 72, n - 1)
+    struct.pack_into("<I", blob, 76, (base + init_rva) ^ MASK_INIT)
+    struct.pack_into("<I", blob, 80, base ^ MASK_BASE)
+    struct.pack_into("<I", blob, 84, (base + dllmain_rva + 12) & 0xFFFFFFFF)
+    struct.pack_into("<I", blob, 88, ((base + desc_rva) - 12) ^ MASK_IMPORT)
+    for i, e in enumerate(entries):
+        struct.pack_into("<5I", blob, 92 + 20 * i, *e)
+
+    return bytes(blob) + bytes(body)
+
+
+# --------------------------------------------------------------------------
+# container assembly
+# --------------------------------------------------------------------------
+def make_container(name, payload_plain, meta_template=None):
+    """payload_plain = the blob (Windows) or the raw ELF (Linux)."""
+    name = name.encode() if isinstance(name, str) else name
+    meta = bytearray((meta_template or DEFAULT_META)[:META_LEN].ljust(META_LEN, b"\0"))
+    meta[4:20] = hashlib.md5(payload_plain).digest()
+
+    head = struct.pack(">H", len(name)) + name + bytes(meta)
+    return layer1(head + payload_plain, len(head))
+
+
+def load_template_meta(path):
+    raw = open(path, "rb").read()
+    nl = (raw[0] << 8) | raw[1]
+    return raw[2 + nl: 2 + nl + META_LEN]
+
+
+# --------------------------------------------------------------------------
+# verification
+# --------------------------------------------------------------------------
+def verify(path):
+    raw = open(path, "rb").read()
+    nl = (raw[0] << 8) | raw[1]
+    name = raw[2:2 + nl]
+    meta = raw[2 + nl: 2 + nl + META_LEN]
+    H = 2 + nl + META_LEN
+
+    plain = layer1(raw, H)[H:]
+    ok_md5 = hashlib.md5(plain).digest() == meta[4:20]
+    print("name       : %s" % name.decode("latin1"))
+    print("payload    : %d bytes at +%d" % (len(plain), H))
+    print("md5 field  : %s" % meta[4:20].hex())
+    print("md5 actual : %s   %s" % (hashlib.md5(plain).hexdigest(),
+                                    "OK" if ok_md5 else "MISMATCH"))
+
+    if plain[:4] == b"\x7fELF":
+        print("payload    : ELF, layer 2 not used")
+        return ok_md5
+
+    blob = roll_decrypt(plain, BLOB_PLAIN_LEN)
+    magic = struct.unpack_from("<I", blob, 0x40)[0]
+    stamp, cnt = struct.unpack_from("<Ii", blob, 68)
+    init = struct.unpack_from("<I", blob, 76)[0] ^ MASK_INIT
+    base = struct.unpack_from("<I", blob, 80)[0] ^ MASK_BASE
+    dmain = struct.unpack_from("<I", blob, 84)[0] - 12
+    imp = (struct.unpack_from("<I", blob, 88)[0] ^ MASK_IMPORT) + 12
+    print("magic      : %#010x %s" % (magic, "OK" if magic == BLOB_MAGIC else "BAD"))
+    print("build stamp: %#x" % stamp)
+    print("image base : %#010x" % base)
+    print("ModuleInit : %#010x" % init)
+    print("DllMain    : %#010x" % dmain)
+    print("imports @  : %#010x" % imp)
+    for i in range(cnt + 1):
+        d, v, r, s, f = struct.unpack_from("<5I", blob, 92 + 20 * i)
+        print("  sec%d: dest=%#010x vsize=%#07x raw=%#07x src=%#07x flag=%d"
+              % (i, d, v, r, s, f))
+    return ok_md5 and magic == BLOB_MAGIC
+
+
+# --------------------------------------------------------------------------
+def main():
+    ap = argparse.ArgumentParser(description="VAC1 module repacker")
+    g = ap.add_mutually_exclusive_group(required=True)
+    g.add_argument("--pe",     help="compiled PE32 DLL -> blob -> container")
+    g.add_argument("--blob",   help="already-built blob -> container")
+    g.add_argument("--elf",    help="Linux .so -> container (layer 1 only)")
+    g.add_argument("--verify", help="decrypt and validate an existing container")
+    ap.add_argument("--name", help='in-container name, e.g. "dod/ModuleC.dll"')
+    ap.add_argument("--template", help="original container to copy metadata from")
+    ap.add_argument("--stamp", type=lambda s: int(s, 0), default=DEFAULT_STAMP,
+                    help="build stamp at blob+68 (default %#x)" % DEFAULT_STAMP)
+    ap.add_argument("-o", "--out")
+    a = ap.parse_args()
+
+    if a.verify:
+        sys.exit(0 if verify(a.verify) else 1)
+
+    if not a.name:
+        ap.error("--name is required (e.g. dod/ModuleC.dll)")
+    if not a.out:
+        ap.error("-o/--out is required")
+
+    meta = load_template_meta(a.template) if a.template else None
+
+    if a.elf:
+        payload = open(a.elf, "rb").read()
+        if payload[:4] != b"\x7fELF":
+            raise SystemExit("error: %s is not an ELF" % a.elf)
+    else:
+        if a.blob:
+            blob = open(a.blob, "rb").read()
+        else:
+            # keep the original junk header if a template blob sits next to us
+            blob = blob_from_pe(a.pe, stamp=a.stamp)
+        payload = roll_encrypt(blob, BLOB_PLAIN_LEN)
+
+    out = make_container(a.name, payload, meta)
+    open(a.out, "wb").write(out)
+    print("wrote %s (%d bytes)" % (a.out, len(out)))
+    print("--- verifying ---")
+    if not verify(a.out):
+        raise SystemExit("verification FAILED")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`vacmodules.dsw`:
+
+```dsw
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
+
+############################################################################
+
+Project: "ModuleC"=.\ModuleC\ModuleC.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+############################################################################
+
+Project: "ModuleS"=.\ModuleS\ModuleS.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+############################################################################
+
+Global:
+
+Package=<5>
+{{{
+}}}
+
+Package=<3>
+{{{
+}}}
+
+############################################################################
+
+
+```
