@@ -554,6 +554,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mcp-windbg](entities/mcp-windbg.md) — CDB/WinDbg MCP server (dump triage + remote debug; Python)
 - [mqtt](entities/mqtt.md) — Chinese MQTT v3.1.1 OASIS spec (14 control packets; QoS; WebSocket; Game Network / mqtt)
 - [MQTT.js](entities/mqtt-js.md) — Node.js/browser MQTT client (v3.1/3.1.1/v5; TCP/TLS/WS/WSS; Game Network / mqtt nodejs)
+- [memdumper](entities/memdumper.md) — Android `.so` memory dump + ELF rebuild (no ptrace; `/proc/<pid>/mem`; 32/64-bit)
 - [memflow-kvm](entities/memflow-kvm.md) — memflow KVM connector (Linux kernel module; guest physmem → userspace; Rust bindings)
 - [MemMCP](entities/memmcp.md) — Cheat Engine–like MCP server (Python; Game Develop / MCP)
 - [Metal-Game-Engine-Tutorial](entities/metal-game-engine-tutorial.md) — Apple Metal engine tutorial (open project; Game Engine / guide)

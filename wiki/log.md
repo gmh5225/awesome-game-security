@@ -2045,3 +2045,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:kprprivate/EAC-CR3-BYPASS`: entity [[eac-cr3-bypass]]; cited on [[easy-anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-08-01** — ingest `description:kp7742/UE4Dumper`: entity [[ue4dumper]]; cited on [[overviews/game-engine]] and [[overviews/mobile-security]].
+
+- **2026-08-01** — ingest `description:kp7742/MemDumper`: entity [[memdumper]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
