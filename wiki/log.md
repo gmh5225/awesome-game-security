@@ -2053,3 +2053,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:zushinzackery2-ship-it/Unity202x-eXternalrEsolve`: entity [[unity202x-externalresolve]]; cited on [[il2cpp]] and [[overviews/game-engine]].
 
 - **2026-08-01** — ingest `description:shefben/VALVeAntiCheat1`: entity [[valveanticheat1]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-08-01** — ingest `description:kp7742/IL2CPPDumper`: entity [[il2cppdumper]]; cited on [[il2cpp]] and [[overviews/game-engine]].
