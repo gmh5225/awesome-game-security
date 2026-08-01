@@ -149,6 +149,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BootBypass](entities/bootbypass.md) — Secure Boot / DSE / HVCI bypass (native; SeCiCallbacks / CI.dll)
 - [BootExecuteEDR](entities/bootexecute-edr.md) — bootExecute EDR bypass (pre-service; cheat / hide)
 - [Branch Monitoring Project](entities/branch-monitoring-project.md) — Intel LBR/BTS branch-trace framework (C KM driver + usermode; PMI; control-flow monitoring)
+- [BYOUD](entities/byoud.md) — x64 unwind-metadata stack spoofing framework (klezVirus; Cheat Spoof Stack)
 - [BYPASS-PUBG-MOBILE-IMGUI](entities/bypass-pubg-mobile-imgui.md) — PUBG Mobile AC bypass + ImGui menu (C/C++; hooking / memory; cheat / game:pubgm)
 - [boundcallback](entities/boundcallback.md) — KeRegisterBoundCallback research (C++; cheat / driver communication)
 - [btrace](entities/btrace.md) — Android app dynamic behavior tracking via eBPF (C/C++/Go; cheat / RE tools)
