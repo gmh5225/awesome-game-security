@@ -6,7 +6,8 @@ sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/descriptions/xBrunoMedeiros__eac-overlay.md
   - wiki/sources/descriptions/thesecretclub__CVEAC-2020.md
-updated: 2026-07-20
+  - wiki/sources/descriptions/lguilhermee__EAC-Extractor-Utility.md
+updated: 2026-08-01
 confidence: medium
 ---
 
@@ -22,6 +23,8 @@ Kernel-module integrity: historical PoC [[cveac-2020]] (WDK driver) targets an E
 
 Overlay / screenshot monitoring is another research surface: PoCs such as [[eac-overlay]] explore alternate rendering surfaces or window manipulation to draw ESP without tripping EAC overlay detection. (source: wiki/sources/descriptions/xBrunoMedeiros__eac-overlay.md)
 
+Static RE prep: utilities such as [[eac-extractor-utility]] locate EAC components in game directories and the Windows driver store, decrypt/extract the kernel driver, user-mode modules, and configuration for offline binary analysis. (source: wiki/sources/descriptions/lguilhermee__EAC-Extractor-Utility.md)
+
 ## Related
 
-[[battleye]] · [[vanguard]] · [[cveac-2020]] · [[eac-overlay]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[battleye]] · [[vanguard]] · [[cveac-2020]] · [[eac-overlay]] · [[eac-extractor-utility]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
