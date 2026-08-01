@@ -140,6 +140,7 @@ sources:
   - wiki/sources/descriptions/loerting__dalvikus.md
   - wiki/sources/descriptions/lockedbyte__so_loader.md
   - wiki/sources/descriptions/smithluke874__Android-VirtualCam-Manager.md
+  - wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md
 updated: 2026-08-01
 confidence: high
 ---
@@ -184,7 +185,7 @@ Root paths: `/proc/<pid>/mem` pread/pwrite, GameGuardian-style editors, ceserver
 
 ## Mobile anti-cheat
 
-Layered client checks (root/jailbreak, [[frida]], emulator, integrity, debugger, hooks) plus regional stacks (Tencent ACE, NetEase, per-title SDKs)—see [[mobile-anti-cheat]]. Client RASP/fingerprint SDKs include [[droidshield]], freeRASP family, [[trustdevice-android]] / [[trustdevice-ios]], and Unity soft-AC [[com-sipvlib-anticheat]]. Title research such as [[honor-of-kings-re-research]] pairs IL2CPP/`libtersafe` with ACE surfaces.
+Layered client checks (root/jailbreak, [[frida]], emulator, integrity, debugger, hooks) plus regional stacks (Tencent ACE, NetEase, per-title SDKs)—see [[mobile-anti-cheat]]. Client RASP/fingerprint SDKs include [[droidshield]], freeRASP family, [[trustdevice-android]] / [[trustdevice-ios]], and Unity soft-AC [[com-sipvlib-anticheat]]. Title research such as [[honor-of-kings-re-research]] pairs IL2CPP/`libtersafe` with ACE surfaces; [[dfm-android-unicorn]] emulates ARM64 coordinate-decryption for ACE/`libtersafe` titles via Unicorn. (source: wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md)
 
 ## eBPF tracing
 

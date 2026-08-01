@@ -1961,3 +1961,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:smithluke874/Android-VirtualCam-Manager`: entity [[android-virtualcam-manager]]; cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]].
 
 - **2026-08-01** — ingest `description:libyal/libmdmp`: entity [[libmdmp]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[minidump]].
+
+- **2026-08-01** — ingest `description:libtersafe/dfm_android_unicorn`: entity [[dfm-android-unicorn]]; cited on [[mobile-anti-cheat]] and [[overviews/mobile-security]].

@@ -10,6 +10,7 @@ sources:
   - wiki/sources/descriptions/wwweeeqqu__honor-of-kings-RE-research.md
   - wiki/sources/descriptions/phajmvawnsix__com.sipvlib.anticheat.md
   - wiki/sources/descriptions/smithluke874__Android-VirtualCam-Manager.md
+  - wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md
 updated: 2026-08-01
 confidence: medium
 ---
@@ -20,7 +21,7 @@ Client-side integrity and environment checks on Android/iOS game clients, often 
 
 ## Common systems
 
-- **Tencent ACE** — Chinese-market native protector; title RE such as [[honor-of-kings-re-research]] (`libtersafe`, IL2CPP, KernelPatch modules).
+- **Tencent ACE** — Chinese-market native protector; title RE such as [[honor-of-kings-re-research]] (`libtersafe`, IL2CPP, KernelPatch modules). ARM64 coordinate-decryption emulation via [[dfm-android-unicorn]] (Unicorn replay of protected crypto paths). (source: wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md)
 - **NetEase Protection** — NetEase titles; similar native + server mix.
 - **Per-game / SDK RASP** — [[droidshield]], Talsec freeRASP ([[free-rasp-unity-poc]], [[free-rasp-reactnative]], [[free-rasp-capacitor]]), [[rs-native-kit-security]], Unity UPM [[com-sipvlib-anticheat]] (server-verified GameTime + IntegrityChecker).
 - **Commercial packers** — AppSealing, DexGuard/ProGuard, Arxan on APK/DEX/native layers.
@@ -51,4 +52,4 @@ Apply [[research-rigor]]—detectors and bypasses vary by build, OEM, and server
 
 ## Related
 
-[[research-rigor]] · [[frida]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[keyattestation]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
+[[research-rigor]] · [[frida]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[keyattestation]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
