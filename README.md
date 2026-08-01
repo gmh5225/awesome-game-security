@@ -781,6 +781,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Debugging
 - https://github.com/stars/gmh5225/lists/debugger [List]
 - https://github.com/cheat-engine/cheat-engine
+- https://github.com/NulledNah/cheat-engine-undetectable [Modified Cheat Engine with user-mode evasion, direct syscalls, and BYOVD kernel bridge for AC research]
 - https://github.com/Squalr/Squalr-Sharp [C# game memory editor with scanning, pointers, and assembly injection]
 - https://github.com/SinaKarvandi/Hypervisor-From-Scratch [Hypervisor]
 - https://github.com/JasonGoemaat/CheatEngineMonoHelper [CE Mono Helper]
@@ -2161,6 +2162,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/PierreCiholas/NotAnOverlay [Duplicating with GDI]
 - https://github.com/SsageParuders/Android_Native_Surface [Android Native Overlay]
 - https://github.com/gmh5225/Android_Native_Surface [Android Native Overlay]
+- https://github.com/horoni/android_imgui_menu [Rust Android cdylib mod menu with EGL/Vulkan render-chain hooks and ARM64 inline hooking]
 - https://github.com/xBrunoMedeiros/eac-overlay [EAC Overlay]
 - https://github.com/3r4y/imgui-external-overlay [imgui overlay]
 - https://github.com/J0xna/Kernel-Overlay-Hider [Kernel Overlay Hider]
