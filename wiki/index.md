@@ -301,6 +301,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FightingGame-UE5](entities/fightinggame-ue5.md) — UE5 fighting game (root motion / anim BP / montage combat; Game Develop / Unreal source)
 - [FileRecoveryTool](entities/file-recovery-tool.md) — NTFS/FAT32/ExFAT disk forensics (MFT/USN/carving; Win32)
 - [Fibratus](entities/fibratus.md) — Go Windows kernel ETW observability (rules / Elasticsearch; exploration & tracing)
+- [Fiano](entities/fiano.md) — Go UEFI firmware parse/edit toolkit (Firmware Volumes, FFS, PE32, LZMA/Tiano; flash extract/replace/remove)
 - [fix-arxan](entities/fix-arxan.md) — Arxan PE protector dump/decrypt (loader info + working image; Dump Fix)
 - [FlatRedBall](entities/flatredball.md) — C# / .NET 2D engine (editor + runtime; Game Engine)
 - [FPGA DMA Multi Tool](entities/fpga-dma-multi-tool.md) — Artix-7 FPGA DMA board detect/flash/speedtest (Go/Fyne; openFPGALoader)

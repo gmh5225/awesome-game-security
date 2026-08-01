@@ -1947,3 +1947,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-07-31** — ingest `description:lj94093/IDAAndroidBreakpoint`: entity [[ida-android-breakpoint]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
 - **2026-08-01** — ingest `description:liors619/TtdAntiDebugging`: entity [[ttd-anti-debugging]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-08-01** — ingest `description:linuxboot/fiano`: entity [[fiano]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
