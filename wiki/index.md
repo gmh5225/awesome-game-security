@@ -349,6 +349,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [game-engine-detector](entities/game-engine-detector.md) — Python APK/IPA game-engine detector (Mobile Game)
 - [GameEngineFromScratch](entities/game-engine-from-scratch.md) — Zhihu from-scratch next-gen engine sample (DirectX/OpenGL; Game Engine / guide)
 - [gamedev_libraries](entities/gamedev-libraries.md) — data-oriented C/C++ gamedev library collection (POD/flat arrays; Game Develop / guide)
+- [game-reversing](entities/game-reversing.md) — curated game RE learning materials (Windows PC; x86-first; cheat / guide)
 - [gamehacking-cheatsheet](entities/gamehacking-cheatsheet.md) — game-hacking RE cheatsheet (memory / injection / AC; cheat / guide)
 - [GameAI-paper-list](entities/gameai-paper-list.md) — zh curated game-AI research papers (modding / tooling; AI category)
 - [gamesneeze](entities/gamesneeze.md) — Linux CS:GO cheat research (seksea; cheat / game:csgo)
