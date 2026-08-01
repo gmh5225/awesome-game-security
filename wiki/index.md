@@ -859,6 +859,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UE4-Freecam](entities/ue4-freecam.md) — UE4 FOV changer (hooking / overlays; Game Engine Explorer:Unreal)
 - [ue4-tutorials](entities/ue4-tutorials.md) — UE4 C++ tutorials (audio / physics / animation; Game Engine / Unreal guide)
 - [unreal-engine-guide](entities/unreal-engine-guide.md) — curated Unreal Engine apps/libraries/tools guide (Game Engine / Unreal guide; mikeroyal)
+- [unreal-mcp](entities/unreal-mcp.md) — MCP server for Unreal Editor (asset/level/blueprint automation; Game Develop / MCP)
 - [ue5-cardgame](entities/ue5-cardgame.md) — UE5 card game (deck / turn-based / UMG / replication; Game Develop / Unreal source)
 - [UE5-With-Dear-ImGui](entities/ue5-with-dear-imgui.md) — UE 5.0.1 C++ Dear ImGui sample (Game Engine Plugins:Unreal)
 - [UEFI-Bootloader](entities/uefi-bootloader.md) — simple UEFI runtime-driver mmapper (C/C++; cheat / EFI driver)

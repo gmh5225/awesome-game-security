@@ -2021,3 +2021,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:kweatherman/ida_missinglink`: entity [[ida-missinglink]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-01** — ingest `description:kvnxiao/storytime`: entity [[storytime]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
+
+- **2026-08-01** — ingest `description:kvick-games/UnrealMCP`: entity [[unreal-mcp]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
