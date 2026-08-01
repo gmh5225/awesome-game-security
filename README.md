@@ -966,6 +966,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/js-debugger-bypass-script [JS Debugger Bypass UserScript]
 - https://github.com/diversenok/DiaSymbolView [PDB file inspection tool]
 - https://github.com/CheckPointSW/Nodejs-Tracer [Simple Node.jstracer that logs calls to analyze heavily obfuscated Node.js malware]
+- https://github.com/black0ffr/omega-sast [Zero-dependency JavaScript SAST engine with obfuscator fingerprinting, string deobfuscation, and taint tracking for minified bundle analysis]
 - https://github.com/jsacco/ntoskrnlwalker [Resolve offsets, gadgets and symbols from NTKernel]
 - https://github.com/glmcdona/strings2 [strings2 - Extract strings from binary files and process memory]
 - https://github.com/nico/demumble [Itanium + MSVC symbol demangler; D/Rust/Swift; cross-platform replacement for c++filt / undname.exe]
