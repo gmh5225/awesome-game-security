@@ -2056,6 +2056,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-01** — ingest `description:kp7742/IL2CPPDumper`: entity [[il2cppdumper]]; cited on [[il2cpp]] and [[overviews/game-engine]].
 
+- **2026-08-01** — ingest `description:knah/Il2CppAssemblyUnhollower`: entity [[il2cpp-assembly-unhollower]]; cited on [[il2cpp]] and [[overviews/game-engine]].
+
 - **2026-08-01** — ingest `description:kovidomi/game-reversing`: entity [[game-reversing]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-01** — ingest `description:kouzhudong/AntiHook`: entity [[antihook]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
@@ -2071,3 +2073,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:konstantin89/windows-kernel-debugging-guide`: entity [[windows-kernel-debugging-guide]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
 - **2026-08-01** — ingest `description:knight0x07/ImpulsiveDLLHijack`: entity [[impulsive-dll-hijack]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-link from [[windows-dll-hijacking]].
+
+- **2026-08-01** — ingest `description:knah/Il2CppAssemblyUnhollower`: entity [[il2cpp-assembly-unhollower]]; cited on [[il2cpp]] and [[overviews/game-engine]].
