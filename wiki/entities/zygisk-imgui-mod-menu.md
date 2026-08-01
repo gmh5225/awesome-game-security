@@ -12,7 +12,7 @@ confidence: medium
 
 ImGui mod-menu sample delivered as a Zygisk module—injects a Dear ImGui overlay into Android game processes via Magisk’s Zygisk load path. Still in development and may be incomplete; useful for researchers studying Zygisk-backed cheat / render-draw menus on rooted Android. (source: wiki/sources/descriptions/reveny__Zygisk-ImGui-Mod-Menu.md)
 
-Complements native GLES ImGui templates ([[imgui-native-modmenu]]), Unity-on-Android ImGui menus ([[imgui-unity]]), and other Zygisk modules such as [[zygisk-dump-dex]] in the Magisk ([[magisk]]) lane.
+Complements native GLES ImGui templates ([[imgui-native-modmenu]]), Unity-on-Android ImGui menus ([[imgui-unity]], [[imgui-zygisk-unity]]), and other Zygisk modules such as [[zygisk-dump-dex]] in the Magisk ([[magisk]]) lane.
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements native GLES ImGui templates ([[imgui-native-modmenu]]), Unity-on-And
 
 ## Related
 
-[[imgui-native-modmenu]] · [[imgui-unity]] · [[imgui-unity-with-layout]] · [[android-native-app-imgui]] · [[android-modmenu-semijni]] · [[zygisk-dump-dex]] · [[magisk]] · [[overviews/mobile-security]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]
+[[imgui-native-modmenu]] · [[imgui-unity]] · [[imgui-unity-with-layout]] · [[imgui-zygisk-unity]] · [[android-native-app-imgui]] · [[android-modmenu-semijni]] · [[zygisk-dump-dex]] · [[magisk]] · [[overviews/mobile-security]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]

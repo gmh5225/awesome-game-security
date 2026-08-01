@@ -442,6 +442,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Imgui-Native-ModMenu](entities/imgui-native-modmenu.md) — Android native ImGui mod menu (OpenGL ES + JNI; cheat / Menu for Android)
 - [Imgui-Unity](entities/imgui-unity.md) — Android Unity ImGui mod menu (OpenGL ES + IL2CPP/Mono; cheat / render-draw)
 - [ImGui-Unity-With-Layout](entities/imgui-unity-with-layout.md) — Android Unity ImGui mod menu + layout tabs/save-load (C++; cheat / render-draw)
+- [ImGUI-Zygisk-Unity](entities/imgui-zygisk-unity.md) — Zygisk Unity ImGui mod menu template (OpenGL ES + render-pipeline hook; cheat / render-draw)
 - [Injectors](entities/injectors.md) — injection-testing harness (C/C++; AC stress)
 - [Ironwall](entities/ironwall.md) — open-source AC protocol stack (TEE attestation, ZK human-input proofs, Hedera HCS match receipts; Unity/Unreal)
 - [injdrv](entities/injdrv.md) — kernel APC DLL injector (process notify → LdrLoadDll; C)
