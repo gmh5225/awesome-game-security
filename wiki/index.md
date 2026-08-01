@@ -958,6 +958,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [windows-dll-hijacking](entities/windows-dll-hijacking.md) — Windows DLL hijack DB (sideload / search-order / phantom DLL)
 - [WindowsHardwareInfo](entities/windows-hardware-info.md) — WMI C++ hardware inventory CLI (Detection:HWID)
 - [windows-process-injection](entities/windows-process-injection.md) — Windows injection techniques (shellcode / syscalls / stomping / stack spoof)
+- [windows-kernel-debugging-guide](entities/windows-kernel-debugging-guide.md) — remote Windows kernel debugging guide (cheat / guide)
 - [windows-kernel-exploits](entities/windows-kernel-exploits.md) — kernel exploit guide (Cheat / vulnerable driver)
 - [windows-kernel-pagehook](entities/windows-kernel-pagehook.md) — PTE Hook (shared kernel VA / per-process CR3; Some Tricks Ring0)
 - [windows-kernel-shadow-stack](entities/windows-kernel-shadow-stack.md) — Synacktiv KM CET/shadow-stack research (KVAS / PG; Windows Security Features)
