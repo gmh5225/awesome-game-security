@@ -220,6 +220,7 @@ sources:
   - wiki/sources/descriptions/leeqwind__PESignAnalyzer.md
   - wiki/sources/descriptions/shalzuth__PalWorldAntiCheat.md
   - wiki/sources/descriptions/loqix__Fortnite.md
+  - wiki/sources/descriptions/krxdev-kaan__AqHax-CSGO.md
   - wiki/sources/descriptions/kyojig__csgo_kns.md
   - wiki/sources/descriptions/lstrsrt__csgo_internal_base.md
   - wiki/sources/descriptions/lstaroth__AntiXorstr.md
@@ -692,6 +693,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Internal CS:GO baseline [[csgosimple]] (spirthack fork after MarkHC; Internal tag) sits in the cheat / game:csgo lane. (source: wiki/sources/descriptions/spirthack__CSGOSimple.md)
 - Clean internal CS:GO scaffold bases such as [[csgo-internal-base]] (CreateInterface resolution, VMT hooks, netvar dump, pattern scan, ImGui menu; Internal tag) sit in the same cheat / game:csgo lane for studying Source 1 internal architecture. (source: wiki/sources/descriptions/lstrsrt__csgo_internal_base.md)
 - Internal CS:GO samples such as [[csgo-kns]] (C++; VMT hooks + interface pointers; ESP, aimbot, bhop, skin changer; Internal tag) sit in the same cheat / game:csgo lane for studying Source engine SDK hook patterns. (source: wiki/sources/descriptions/kyojig__csgo_kns.md)
+- Internal CS:GO samples such as [[aqhax-csgo]] (AqHax; C++; interface capture + VMT hooks + netvar dump; ESP, aimbot, triggerbot, movement, skin changer) sit in the same cheat / game:csgo lane for studying typical internal cheat feature stacks. (source: wiki/sources/descriptions/krxdev-kaan__AqHax-CSGO.md)
 - Internal CS:GO samples such as [[osiris-and-extra]] (C/C++; driver development / OpenGL / rendering; Internal tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/notgoodusename__OsirisAndExtra.md)
 - Simple internal CS:GO RE-training samples such as [[dainsleif]] (s3pt3mb3r) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md)
 - Actively developed Internal CS:GO samples such as [[sensum]] (martinjanas; Internal tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/martinjanas__Sensum.md)

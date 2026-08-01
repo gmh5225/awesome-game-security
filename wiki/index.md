@@ -195,6 +195,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [csgo-external-cheat](entities/csgo-external-cheat.md) — external CS:GO; RPM/driver reads; ESP / aimbot / radar (C++; cheat / game:csgo)
 - [csgo-dma-overlay](entities/csgo-dma-overlay.md) — CS:GO DMA + overlay sample (cheat / game:csgo [DMA])
+- [aqhax-csgo](entities/aqhax-csgo.md) — CS:GO internal cheat AqHax (interface capture, VMT hooks, netvar dump; ESP/aimbot/triggerbot/movement/skin changer; cheat / game:csgo)
 - [csgo-internal-base](entities/csgo-internal-base.md) — CS:GO internal cheat base (CreateInterface, VMT hooks, netvars, pattern scan, ImGui; cheat / game:csgo)
 - [csgo-kns](entities/csgo-kns.md) — CS:GO internal cheat (VMT hooks, interface pointers; ESP/aimbot/bhop/skin changer; cheat / game:csgo)
 - [csgo-linux-cheat-sdk](entities/csgo-linux-cheat-sdk.md) — Linux CS:GO cheat SDK (C++; render/net/mod; cheat / game:csgo)

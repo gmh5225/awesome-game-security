@@ -2029,3 +2029,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:ktock/qemu-wasm`: entity [[qemu-wasm]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-08-01** — ingest `description:ksoju/Eac-Bypass`: entity [[eac-bypass]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
+
+- **2026-08-01** — ingest `description:krxdev-kaan/AqHax-CSGO`: entity [[aqhax-csgo]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
