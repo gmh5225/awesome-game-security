@@ -1953,3 +1953,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:lil-skies/val-exception-handler`: entity [[val-exception-handler]]; cited on [[vanguard]] and [[overviews/anti-cheat]].
 
 - **2026-08-01** — ingest `description:lightningpixel/modly`: entity [[modly]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-08-01** — ingest `description:lico-n/ZygiskFrida`: entity [[zygisk-frida]]; cited on [[frida]] and [[overviews/mobile-security]].

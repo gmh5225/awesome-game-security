@@ -67,6 +67,7 @@ sources:
   - wiki/sources/descriptions/the-dise__EasyPixel.md
   - wiki/sources/descriptions/longpoxin__hideroot.md
   - wiki/sources/descriptions/thelok1s__florida-zygisk.md
+  - wiki/sources/descriptions/lico-n__ZygiskFrida.md
   - wiki/sources/descriptions/termux__termux-app.md
   - wiki/sources/descriptions/pgp__XFiles.md
   - wiki/sources/descriptions/nzcv__note.md
@@ -171,7 +172,7 @@ Static lane: apktool decompile/recompile → [[jadx]] DEX→Java → [[apkid]] p
 
 - **[[frida]]** — attach/spawn, Java/ObjC/native intercept; mobile ACs probe Frida artifacts ([[antifrida]], [[frida-detection]]); stealth repacks such as [[fridare]]; boot-persistent Florida server modules such as [[florida-zygisk]] (Magisk/KernelSU/APatch).
 - **Native hooks** — Substrate, And64InlineHook, xHook, Dobby (PLT/inline on ARM64 `.so`).
-- **[[zygisk]]** — Magisk Zygisk modules inject at `preAppSpecialize` / `postAppSpecialize` before `Application.onCreate` (DEX dump, ImGui menus, early native load).
+- **[[zygisk]]** — Magisk Zygisk modules inject at `preAppSpecialize` / `postAppSpecialize` before `Application.onCreate` (DEX dump, ImGui menus, Frida gadget via [[zygisk-frida]], early native load). (source: wiki/sources/descriptions/lico-n__ZygiskFrida.md)
 - **Managed DI (rooted)** — single ARM64 injector+agent binary, localhost HTTP RPC for script/session control, delayed start after `boot_completed` (avoid zygote contention). Modes: **Attach** (ptrace → dlopen agent), **Spawn** (zygote pause at fork), **Watch-SO** (eBPF dlopen trigger). Stealth tiers: NORMAL (RWX patch), WXSHADOW (shadow pages), RECOMP (minimal inline + recompile).
 
 Operational pattern: lifecycle `start/stop/restart/status`; analysis mode may disable conflicting Zygisk modules, reboot, instrument, then restore.
