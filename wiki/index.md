@@ -153,6 +153,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [byvalver](entities/byvalver.md) — shellcode bad-byte banisher (2 modes; AC shellcode engine & tricks)
 - [callout-poc](entities/callout-poc.md) — kernel callout / spoof-stack PoC (C/C++; Cheat Spoof Stack)
+- [Camera Triggerbot](entities/camera-triggerbot.md) — camera triggerbot (movement/color around crosshair; cheat / triggerbot & aimbot)
 - [CEDetector](entities/cedetector.md) — Cheat Engine detector (window/process/driver/debug; CE stealth test)
 - [Certael](entities/certael.md) — server-authoritative OSS AC (Rust C ABI; Godot/Unity/Unreal; .NET control plane)
 
