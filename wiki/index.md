@@ -492,6 +492,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [lightsaber](entities/lightsaber.md) — iOS 18.4–18.6.2 userland exploit; JS inject SpringBoard (DarkSword-derived)
 - [Lenovo-CVE-2025-8061](entities/lenovo-cve-2025-8061.md) — LnvMSRIO.sys LPE PoC (CVE-2025-8061; IOCTL → SYSTEM; BYOVD)
 - [libelevate](entities/libelevate.md) — C++ elevating-handle lib (KM/driver primitives → full-access process handles; AC handle protection)
+- [libiht](entities/libiht.md) — Intel Hardware Trace Library (Tencent Xuanwu Lab; hardware-assisted execution tracing; Windows kernel explorer)
 - [libjpeg-turbo](entities/libjpeg-turbo.md) — IJG JPEG codec (reference listing; engine asset-pipeline / Image Codec)
 - [liblava](entities/liblava.md) — modern C++23 Vulkan library (lean modular framework; rolling releases; Vulkan / Guide)
 - [libmdmp](entities/libmdmp.md) — C/C++ minidump format library (memory analysis / debugging; AC / Windows kernel dump analysis)
