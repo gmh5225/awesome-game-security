@@ -1979,3 +1979,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:lguilhermee/EAC-Extractor-Utility`: entity [[eac-extractor-utility]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
 
 - **2026-08-01** — ingest `description:speedskater1610/CS2KAC`: entity [[cs2kac]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
+- **2026-08-01** — ingest `description:lguilhermee/Battleye-Shellcode-Dumper`: entity [[battleye-shellcode-dumper]]; cited on [[battleye]] and [[overviews/anti-cheat]].
