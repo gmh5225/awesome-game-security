@@ -1987,3 +1987,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:lettier/3d-game-shaders-for-beginners`: entity [[3d-game-shaders-for-beginners]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
 
 - **2026-08-01** — ingest `description:leigest519/OpenGame`: entity [[opengame]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
+- **2026-08-01** — ingest `readme:categories`: bumped Cheat ~2621 / Anti Cheat ~629 (was ~2619/~628); refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
