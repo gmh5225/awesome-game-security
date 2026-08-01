@@ -9,6 +9,7 @@ sources:
   - wiki/sources/descriptions/x1tan__vac3-dumper.md
   - wiki/sources/descriptions/shuruk421__VACKeyRetrieval.md
   - wiki/sources/descriptions/nevioo1337__VAC-ModuleDumper.md
+  - wiki/sources/descriptions/shefben__VALVeAntiCheat1.md
   - wiki/sources/descriptions/krispybyte__Vook.md
   - wiki/sources/descriptions/zxd1994__vt-debuuger.md
   - wiki/sources/descriptions/zx0CF1__shredder-rs.md
@@ -295,6 +296,7 @@ Use [[research-rigor]] when turning detector hits into enforcement: define the d
 - [[vackeyretrieval]] — retrieves VAC module ICE encryption key (C++; explore anticheat:vac) (source: wiki/sources/descriptions/shuruk421__VACKeyRetrieval.md)
 - [[vac-module-dumper]] — VAC module dump for offline RE (C/C++; Dump lane; explore anticheat:vac) (source: wiki/sources/descriptions/nevioo1337__VAC-ModuleDumper.md)
 - [[vook]] — VAC hook research (explore anticheat:vac) (source: wiki/sources/descriptions/krispybyte__Vook.md)
+- [[valveanticheat1]] — GoldSrc/WON-era VAC1 ModuleC/ModuleS bytecode-VM rebuild (2002–2004; RE notes + decrypt/repack tooling) for studying early network-delivered detection architecture (source: wiki/sources/descriptions/shefben__VALVeAntiCheat1.md)
 - [[csgosimple]] — spirthack/MarkHC Internal CS:GO baseline for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/spirthack__CSGOSimple.md)
 - [[osiris-and-extra]] — Internal CS:GO sample (C/C++; driver / OpenGL / rendering) for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/notgoodusename__OsirisAndExtra.md)
 - [[dainsleif]] — simple Internal CS:GO RE-training sample for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md)

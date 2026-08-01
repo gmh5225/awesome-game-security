@@ -2051,3 +2051,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `readme:categories`: bumped Cheat ~2624 (was ~2622; Anti Cheat ~631 stable); refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-01** — ingest `description:zushinzackery2-ship-it/Unity202x-eXternalrEsolve`: entity [[unity202x-externalresolve]]; cited on [[il2cpp]] and [[overviews/game-engine]].
+
+- **2026-08-01** — ingest `description:shefben/VALVeAntiCheat1`: entity [[valveanticheat1]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].

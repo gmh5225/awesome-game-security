@@ -903,6 +903,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vac3-dumper](entities/vac3-dumper.md) — VAC3 multi-module dumper (timed loads; explore anticheat:vac)
 - [VAC-ModuleDumper](entities/vac-module-dumper.md) — VAC module dump for offline RE (C/C++; explore anticheat:vac)
 - [VACKeyRetrieval](entities/vackeyretrieval.md) — VAC module ICE encryption key retrieval (C++; explore anticheat:vac)
+- [VALVeAntiCheat1](entities/valveanticheat1.md) — GoldSrc/WON-era VAC1 ModuleC/ModuleS bytecode VM rebuild (2002–2004; RE notes + tooling)
 - [Vook](entities/vook.md) — VAC hook research (explore anticheat:vac)
 - [vanguard-update-notifier](entities/vanguard-update-notifier.md) — Discord bot: poll Riot clientconfig, hash Vanguard setup, alert on AC updates
 - [val-exception-handler](entities/val-exception-handler.md) — Vanguard exception-dispatch PoC (hardware exceptions / VEH; ZwRaiseException dump)
