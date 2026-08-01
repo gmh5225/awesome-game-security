@@ -7,6 +7,7 @@ sources:
   - wiki/sources/descriptions/xBrunoMedeiros__eac-overlay.md
   - wiki/sources/descriptions/thesecretclub__CVEAC-2020.md
   - wiki/sources/descriptions/lguilhermee__EAC-Extractor-Utility.md
+  - wiki/sources/descriptions/ksoju__Eac-Bypass.md
 updated: 2026-08-01
 confidence: medium
 ---
@@ -25,6 +26,8 @@ Overlay / screenshot monitoring is another research surface: PoCs such as [[eac-
 
 Static RE prep: utilities such as [[eac-extractor-utility]] locate EAC components in game directories and the Windows driver store, decrypt/extract the kernel driver, user-mode modules, and configuration for offline binary analysis. (source: wiki/sources/descriptions/lguilhermee__EAC-Extractor-Utility.md)
 
+Offensive bypass lane: repos such as [[eac-bypass]] explore kernel driver and shader-based techniques to evade EAC runtime checks. (source: wiki/sources/descriptions/ksoju__Eac-Bypass.md)
+
 ## Related
 
-[[battleye]] · [[vanguard]] · [[cveac-2020]] · [[eac-overlay]] · [[eac-extractor-utility]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[battleye]] · [[vanguard]] · [[cveac-2020]] · [[eac-overlay]] · [[eac-extractor-utility]] · [[eac-bypass]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]

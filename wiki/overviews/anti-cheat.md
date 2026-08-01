@@ -64,6 +64,7 @@ sources:
   - wiki/sources/descriptions/lainswork__shellcode-factory.md
   - wiki/sources/descriptions/layerfsd__phantasm-x86-virtualizer.md
   - wiki/sources/descriptions/lguilhermee__EAC-Extractor-Utility.md
+  - wiki/sources/descriptions/ksoju__Eac-Bypass.md
   - wiki/sources/descriptions/lguilhermee__Battleye-Shellcode-Dumper.md
   - wiki/sources/descriptions/libriscv__godot-sandbox.md
   - wiki/sources/descriptions/secrary__Hooking-via-InstrumentationCallback.md
@@ -283,6 +284,7 @@ Use [[research-rigor]] when turning detector hits into enforcement: define the d
 
 - [[easy-anti-cheat]] — service + driver + game-facing integrity (Fortnite, Apex, Rust); Integrity Checks PoC [[cveac-2020]] (WDK driver vs EAC kernel-module vuln; enum / PE / hooks) (source: wiki/sources/descriptions/thesecretclub__CVEAC-2020.md)
 - [[eac-extractor-utility]] — decrypt/extract EAC kernel driver, UM modules, and config from game dir + driver store for offline static RE (Dump lane) (source: wiki/sources/descriptions/lguilhermee__EAC-Extractor-Utility.md)
+- [[eac-bypass]] — offensive EAC bypass research (C++; kernel driver + shader work; cheat / explore anticheat:eac) (source: wiki/sources/descriptions/ksoju__Eac-Bypass.md)
 
 - [[battleye]] — handle protection, process/memory scanning (PUBG, R6, DayZ); research ref [[blindeye]] drops BE report-path pool allocs via hooked `ExAllocatePool*` (source: wiki/sources/descriptions/zouxianyu__BlindEye.md); user-mode shellcode RE via [[be-shellcode]] (dump/disasm thread scan, VEH enum, module integrity) (source: wiki/sources/descriptions/weak1337__BE-Shellcode.md); runtime server-streamed scanning modules intercepted pre-execution via [[battleye-shellcode-dumper]] (payloads + decryption keys; BEClient2.dll Dumper) (source: wiki/sources/descriptions/lguilhermee__Battleye-Shellcode-Dumper.md); VirtualQuery region-walk heuristics for shellcode/manual-map via [[battleye-region-walking]] (source: wiki/sources/descriptions/tr1xxx__battleye-region-walking.md); title-specific BattlEye Tool [[arma3beclient]] (C# / PowerShell; Arma 3) (source: wiki/sources/descriptions/tym32167__arma3beclient.md); RCON UDP protocol lib [[battleye-rust]] (Rust; packet checksum + socket I/O) (source: wiki/sources/descriptions/steffalon__battleye-rust.md); init emulator [[fakeeye]] (BEService SCM + BE-style launch params; [Emulator]) (source: wiki/sources/descriptions/mexploitui__FakeEye.md); handle-stripping bypass [[battleye-handler-bypass]] (KMDF driver; re-create handles before ~5s BE cleanup; IOCTL usermode comms) (source: wiki/sources/descriptions/masterpastaa__BattlEye-Handler-BYPASS.md)
 - [[vanguard]] — boot-start driver, early driver allowlisting (Valorant, LoL); update alerts via [[vanguard-update-notifier]] (Discord bot; clientconfig poll + setup hash drift) (source: wiki/sources/descriptions/luavmload__vanguard-update-notifier.md)

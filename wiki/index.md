@@ -283,6 +283,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [dxgkrnl_hook](entities/dxgkrnl-hook.md) — dxgkrnl screen-buffer hook (kernel overlay / render-draw)
 - [e3](entities/e3.md) — C++ homomorphic encryption framework (MoMA Lab; FHE backends; encrypted compute; AC Encrypt Variable research)
+- [eac-bypass](entities/eac-bypass.md) — offensive EAC bypass research (C++; kernel driver + shader work)
 - [eac-extractor-utility](entities/eac-extractor-utility.md) — decrypt/extract EAC driver, UM modules, config for offline RE
 - [eac-overlay](entities/eac-overlay.md) — EAC overlay PoC (ESP via alt surfaces / window manip; C++)
 - [EldenRingMods](entities/eldenringmods.md) — Elden Ring animation/modding (C++ / C/C++; cheat / game:eldenring [Mod])
