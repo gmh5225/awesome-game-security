@@ -22,4 +22,4 @@ Complements other in-IDA YARA tooling such as [[yarascan-ida]] (Python file scan
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[yarascan-ida]] · [[yaravm]] · [[idaplugins]] · [[ida-sigmaker]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ida-missinglink]] · [[yarascan-ida]] · [[yaravm]] · [[idaplugins]] · [[ida-sigmaker]]

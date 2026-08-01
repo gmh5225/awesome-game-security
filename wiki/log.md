@@ -2017,3 +2017,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:kylejckson/PaintFE`: entity [[paintfe]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-08-01** — ingest `description:kweatherman/yara4ida`: entity [[yara4ida]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-08-01** — ingest `description:kweatherman/ida_missinglink`: entity [[ida-missinglink]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
