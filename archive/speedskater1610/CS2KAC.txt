@@ -1,0 +1,1132 @@
+Project Path: arc_speedskater1610_CS2KAC_sifc_zbz
+
+Source Tree:
+
+```txt
+arc_speedskater1610_CS2KAC_sifc_zbz
+├── LICENSE
+├── README.md
+├── docs
+│   ├── INTEGRATION.md
+│   └── LINUX_ROADMAP.md
+└── src
+    └── windows
+        ├── kernel-driver
+        │   ├── detections.c
+        │   ├── detections.h
+        │   ├── driver.c
+        │   ├── driver.inf
+        │   └── kac_protocol.h
+        └── usermode-service
+            └── kac_service.cpp
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Russel Einsla
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# CS2KAC 
+A Counter Strike 2 kernel level anti-cheat that works along side CS2FOW and CS2AC
+
+Companion project to [CS2AC](https://github.com/karola3vax/CS2AC)
+(server-side behavioral detection) and
+[CS2FOW](https://github.com/karola3vax/CS2FOW) (server-side occlusion
+culling). Those two run entirely on the game server. This project adds a
+**client-side, kernel-level** signal source: process/module/handle
+integrity checks that the server literally cannot see.
+
+**Status: skeleton.** This gets the plumbing working end-to-end (driver
+loads, device responds to IOCTLs, usermode service attaches and polls) with
+real, standard WDK detection hooks wired up but several detection policies
+left as explicit `TODO`s see `kernel-driver/detections.c`. Read
+`integration/PROTOCOL.md` before building the server-side bridge; the
+attestation channel design matters more than the driver code.
+
+---
+
+## Layout
+
+#### Windows Anti-cheat.
+```
+kernel-driver/       KMDF driver (Windows). Builds to kac.sys.
+  kac_protocol.h        shared IOCTL codes + wire structs (also used by usermode)
+  driver.c               device creation, IOCTL dispatch
+  detections.c/.h        ObRegisterCallbacks + notify routines, report ring buffer
+  driver.inf             NonPnP service install
+
+usermode-service/    Ring-3 bridge (Windows). 
+  kac_service.cpp        starts kac.sys, attaches to cs2.exe, polls reports,
+                         forwards to the server (stub see integration/)
+```
+
+---
+
+## Building the driver (Windows)
+**TODO: write this once I figure out how I Wanna have a buildd system going**
+
+---
+
+## Before this touches a real player's machine
+
+- [ ] EV code-signing certificate for the driver
+- [ ] Microsoft attestation signing (or WHQL for broad distribution)
+- [ ] SDDL lockdown on the device object (see `TODO` in `driver.c`'s
+      `KacEvtDeviceAdd`) so only your elevated, signed usermode service can
+      open a handle
+- [ ] Decide and document your actual detection policy for each `TODO` in
+      `detections.c` don't ship with placeholder logging as the real
+      behavior
+- [ ] Threat-model the attestation channel in `integration/PROTOCOL.md`
+      (Option B) before wiring it to CS2AC's punishment commands a
+      spoofable "trust me, kernel says they're clean" message is worse
+      than not having one
+
+## Building the usermode service
+
+```
+cl /std:c++17 /EHsc kac_service.cpp /link advapi32.lib
+```
+
+(Or add as a Visual Studio console-app project referencing
+`kernel-driver/kac_protocol.h`.)
+
+```
+
+`docs/INTEGRATION.md`:
+
+```md
+# Integrating the kernel component with CS2AC and CS2FOW
+
+## Where each piece runs
+
+| Component | Runs on | Sees |
+|---|---|---|
+| CS2FOW | game server | map geometry, decides what to `CheckTransmit` |
+| CS2AC | game server | player inputs/movement/shots over the network |
+| **CS2KAC (this project)** | **player's PC** | the local process, its memory, handles, modules |
+
+CS2FOW and CS2AC never need to know KAC exists instead they already work standalone.
+KAC is additive: a third signal source. The integration is basically reaching CS2AC (server side)
+and then using what ever it used as "punishment" whether that be a chat/console/webhook/ban command.
+
+## Most realistic transports
+
+### Option A reuse CS2AC's existing Discord webhook channel
+CS2AC already posts detections to a configured `cs2ac_webhook_url`. The
+simplest integration for a first version: have the usermode service post its
+own attestation report to a **second** webhook (or the same one, clearly
+labeled `[KAC]` vs `[CS2AC]`), rather than trying to inject into CS2AC's
+internal detection pipeline directly. This is a good option since there would 
+have to be zero changes to CS2AC's C++.
+
+```
+
+`docs/LINUX_ROADMAP.md`:
+
+```md
+# Linux "port" / different arch road-map.
+
+The Windows piece in this repo is a KMDF driver using Windows specific
+mechanisms (`ObRegisterCallbacks`, `PsSetLoadImageNotifyRoutine`, IOCTLs on a
+WDF device). None of that exists on Linux, and, importantly, **arbitrary
+proprietary kernel modules are a much harder sell on Linux**:
+
+- Loading an unsigned/out of tree module taints the kernel and typically
+  requires the user to disable Secure Boot or manually enroll a MOK
+  (Machine Owner Key), which most players would not do for pretty good reasons.
+- Valve's own Linux anti-cheat story for CS2 (VAC + server-side trust)
+  deliberately avoids requiring a kernel module on the client for exactly
+  this reason; it is a rough experience for players and a maintenance
+  burden across kernel versions (a kernel-module ABI breaks on nearly every
+  point release unless you ship DKMS and rebuild constantly).
+
+## The realistic Linux-native equivalent
+
+Instead of a custom kernel module, the standard approach is to build on
+**existing, already-loaded kernel security infrastructure**:
+
+| Windows mechanism | Linux equivalent |
+|---|---|
+| `ObRegisterCallbacks` on process handles | An LSM hook via a small **eBPF LSM program** (`bpf_lsm`), attached with `bpftool`/libbpf no custom module needed on kernels with `CONFIG_BPF_LSM` |
+| `PsSetLoadImageNotifyRoutine`        | `fentry`/`fexit` or tracepoint eBPF programs on `mmap`/`do_execve`/module load hooks |
+| `PsSetCreateThreadNotifyRoutine`     | eBPF tracepoint on `sched_process_fork`/clone with `CLONE_THREAD`, or `ptrace` based inspection from the usermode service (weaker but zero-install) |
+| Custom `.sys` kernel driver           | Either (a) eBPF programs loaded by the usermode service via libbpf, requiring only `CAP_BPF`/`CAP_PERFMON` on modern kernels, no reboot, no Secure Boot fight; or (b) if you truly need something eBPF can't express, a small out-of-tree module distributed via DKMS, accepting the taint/signing friction |
+
+# Plan I am thinking will work in the mean-time
+
+1. Build the usermode service as a cross-platform piece from day one (the
+   `ForwardReportToServer` / attestation-signing logic in this repo doesn't
+   care which OS produced the report).
+2. On Linux, replace the driver with a libbpf-based loader shipping a
+   handful of small BPF LSM/tracepoint programs that emit the *same*
+   `KAC_DETECTION_REPORT` struct (or a versioned equivalent) up to
+   usermode via a `BPF_MAP_TYPE_RINGBUF`, mirroring the IOCTL polling loop
+   here almost 1:1.
+3. Keep the on-the-wire attestation format (SteamID64 + detection type +
+   HMAC) identical across platforms so `CS2KAC-Bridge` doesn't need to know
+   which OS the report came from.
+
+```
+
+`src/windows/kernel-driver/detections.c`:
+
+```c
+/*
+ * detections.c
+ *
+ * This file wires up the standard, publicly documented WDK mechanisms an
+ * anti-cheat/AV style driver uses for visibility, and queues detections
+ * into a small ring buffer that the usermode service drains via
+ * `IOCTL_KAC_POLL_REPORT`.
+ *
+ * Whats implemented as a working skeleton:
+ *   - A fixed size, spinlock protected report ring buffer
+ *   - Registration points for:
+ *       `PsSetCreateProcessNotifyRoutineEx`  (process create/exit)
+ *       `PsSetLoadImageNotifyRoutine`        (module load, incl. drivers)
+ *       `PsSetCreateThreadNotifyRoutine`     (thread create -> start addr)
+ *       `ObRegisterCallbacks`                (handle open/dup to protected proc)
+ */
+
+#include "detections.h"
+
+#define KAC_REPORT_RING_SIZE 64
+
+typedef struct _KAC_REPORT_RING {
+    KSPIN_LOCK Lock;
+    ULONG Head;
+    ULONG Tail;
+    ULONG Count;
+    KAC_DETECTION_REPORT Entries[KAC_REPORT_RING_SIZE];
+} KAC_REPORT_RING;
+
+static KAC_REPORT_RING g_ReportRing;
+static PVOID g_ObRegistrationHandle = NULL;
+static volatile LONG g_ProtectedProcessId = 0;
+
+/* ring buffer */
+
+VOID
+KacDetectionsQueueReport(
+    _In_ KAC_DETECTION_TYPE Type,
+    _In_ ULONG OffendingProcessId,
+    _In_ ULONG RelatedProcessId,
+    _In_opt_ PCWSTR Detail
+    )
+{
+    KIRQL oldIrql;
+    KeAcquireSpinLock(&g_ReportRing.Lock, &oldIrql);
+
+    if (g_ReportRing.Count < KAC_REPORT_RING_SIZE) {
+        KAC_DETECTION_REPORT *entry = &g_ReportRing.Entries[g_ReportRing.Head];
+        RtlZeroMemory(entry, sizeof(*entry));
+        KeQuerySystemTimePrecise((PLARGE_INTEGER)&entry->TimestampQpc);
+        entry->Type = Type;
+        entry->OffendingProcessId = OffendingProcessId;
+        entry->RelatedProcessId = RelatedProcessId;
+        if (Detail) {
+            RtlStringCchCopyW(entry->Detail, RTL_NUMBER_OF(entry->Detail), Detail);
+        }
+
+        g_ReportRing.Head = (g_ReportRing.Head + 1) % KAC_REPORT_RING_SIZE;
+        g_ReportRing.Count++;
+    }
+    /* else: ring full oldest report wins policy; consider counting drops
+     * and surfacing that count via the snapshot `IOCTL` so you can tell in
+     * telemetry if the usermode service is polling too slowly. */
+
+    KeReleaseSpinLock(&g_ReportRing.Lock, oldIrql);
+}
+
+BOOLEAN
+KacDetectionsPopReport(
+    _Out_ PKAC_DETECTION_REPORT Report
+    )
+{
+    KIRQL oldIrql;
+    BOOLEAN hasReport = FALSE;
+
+    KeAcquireSpinLock(&g_ReportRing.Lock, &oldIrql);
+
+    if (g_ReportRing.Count > 0) {
+        *Report = g_ReportRing.Entries[g_ReportRing.Tail];
+        g_ReportRing.Tail = (g_ReportRing.Tail + 1) % KAC_REPORT_RING_SIZE;
+        g_ReportRing.Count--;
+        hasReport = TRUE;
+    }
+
+    KeReleaseSpinLock(&g_ReportRing.Lock, oldIrql);
+    return hasReport;
+}
+
+/* notify routines */
+
+_Function_class_(PLOAD_IMAGE_NOTIFY_ROUTINE)
+static VOID
+KacLoadImageNotify(
+    _In_opt_ PUNICODE_STRING FullImageName,
+    _In_ HANDLE ProcessId,
+    _In_ PIMAGE_INFO ImageInfo
+    )
+{
+    UNREFERENCED_PARAMETER(ImageInfo);
+
+    if ((ULONG)(ULONG_PTR)ProcessId != (ULONG)g_ProtectedProcessId) {
+        return;
+    }
+
+    /*
+     * TODO: real signing check. Skeleton-level options, in order of effort:
+     *   1. SeGetCachedSigningLevel(Section, &SigningLevel, ...) fast,
+     *      relies on the cache being populated already.
+     *   2. Full Authenticode verification via a usermode helper call
+     *      (WinVerifyTrust can't run at PASSIVE_LEVEL in the kernel easily;
+     *      most AC drivers hand the path back to usermode for this part).
+     *   3. Compare against an explicit allow list of hashes for known good
+     *      CS2/Steam/OS modules and flag everything else for review.
+     */
+    UNREFERENCED_PARAMETER(FullImageName);
+    KdPrint(("KAC: image load in protected pid %lu\n", (ULONG)(ULONG_PTR)ProcessId));
+
+    /* Example of when you WOULD queue a report:
+     *
+     * if (!KacIsImageProperlySigned(FullImageName)) {
+     *     KacDetectionsQueueReport(
+     *         KacDetectionUnsignedModuleInProcess,
+     *         (ULONG)(ULONG_PTR)ProcessId, 0,
+     *         FullImageName ? FullImageName->Buffer : L"<unknown>");
+     * }
+     */
+}
+
+_Function_class_(PCREATE_THREAD_NOTIFY_ROUTINE)
+static VOID
+KacCreateThreadNotify(
+    _In_ HANDLE ProcessId,
+    _In_ HANDLE ThreadId,
+    _In_ BOOLEAN Create
+    )
+{
+    UNREFERENCED_PARAMETER(ThreadId);
+
+    if (!Create) {
+        return;
+    }
+    if ((ULONG)(ULONG_PTR)ProcessId != (ULONG)g_ProtectedProcessId) {
+        return;
+    }
+
+    /*
+     * TODO: capture the thread's start address (PsGetContextThread /
+     * NtQueryInformationThread-equivalent kernel path) and check whether
+     * it falls inside a mapped, backed-by-file region belonging to a
+     * known module. A start address pointing into an anonymous private
+     * allocation is the classic manual-map / shellcode-injection signal.
+     * This needs to run slightly deferred (work item at PASSIVE_LEVEL)
+     * since the thread's context may not be fully set up yet at the
+     * moment this notify fires.
+     */
+    KdPrint(("KAC: thread created in protected pid %lu\n", (ULONG)(ULONG_PTR)ProcessId));
+}
+
+static OB_PREOP_CALLBACK_STATUS
+KacObPreOperationCallback(
+    _In_ PVOID RegistrationContext,
+    _Inout_ POB_PRE_OPERATION_INFORMATION OperationInformation
+    )
+{
+    UNREFERENCED_PARAMETER(RegistrationContext);
+
+    if (OperationInformation->ObjectType != *PsProcessType) {
+        return OB_PREOP_SUCCESS;
+    }
+
+    PEPROCESS process = (PEPROCESS)OperationInformation->Object;
+    HANDLE targetPid = PsGetProcessId(process);
+
+    if ((ULONG)(ULONG_PTR)targetPid != (ULONG)g_ProtectedProcessId) {
+        return OB_PREOP_SUCCESS;
+    }
+
+    /* Do not flag our own usermode service opening its expected handle;
+     * TODO: identify "our" service by signed executable path/PID captured
+     * at attach time rather than trusting a self-reported flag. */
+
+    if (OperationInformation->KernelHandle) {
+        return OB_PREOP_SUCCESS;
+    }
+
+    ACCESS_MASK requested =
+        (OperationInformation->Operation == OB_OPERATION_HANDLE_CREATE)
+            ? OperationInformation->Parameters->CreateHandleInformation.DesiredAccess
+            : OperationInformation->Parameters->DuplicateHandleInformation.DesiredAccess;
+
+    ACCESS_MASK dangerous = PROCESS_VM_WRITE | PROCESS_VM_OPERATION | PROCESS_CREATE_THREAD;
+
+    if (requested & dangerous) {
+        HANDLE callerPid = PsGetCurrentProcessId();
+
+        KacDetectionsQueueReport(
+            KacDetectionForeignHandleToProcess,
+            (ULONG)(ULONG_PTR)targetPid,
+            (ULONG)(ULONG_PTR)callerPid,
+            L"handle requested VM_WRITE/VM_OPERATION/CREATE_THREAD"
+        );
+
+        /*
+         * TODO decide policy: stripping the dangerous bits here (rather
+         * than denying the whole open) is usually safer it avoids
+         * breaking legitimate tools (screen readers, some overlays,
+         * your own debugger) that open a broad handle but never
+         * actually use the dangerous rights. Uncomment to strip:
+         *
+         * if (OperationInformation->Operation == OB_OPERATION_HANDLE_CREATE) {
+         *     OperationInformation->Parameters->CreateHandleInformation
+         *         .DesiredAccess &= ~dangerous;
+         * } else {
+         *     OperationInformation->Parameters->DuplicateHandleInformation
+         *         .DesiredAccess &= ~dangerous;
+         * }
+         */
+    }
+
+    return OB_PREOP_SUCCESS;
+}
+
+/* lifecycle */
+
+VOID
+KacDetectionsInitialize(
+    VOID
+    )
+{
+    RtlZeroMemory(&g_ReportRing, sizeof(g_ReportRing));
+    KeInitializeSpinLock(&g_ReportRing.Lock);
+
+    PsSetLoadImageNotifyRoutine(KacLoadImageNotify);
+    PsSetCreateThreadNotifyRoutine(KacCreateThreadNotify);
+
+    OB_CALLBACK_REGISTRATION obRegistration = {0};
+    OB_OPERATION_REGISTRATION opRegistration = {0};
+
+    opRegistration.ObjectType = PsProcessType;
+    opRegistration.Operations = OB_OPERATION_HANDLE_CREATE | OB_OPERATION_HANDLE_DUPLICATE;
+    opRegistration.PreOperation = KacObPreOperationCallback;
+    opRegistration.PostOperation = NULL;
+
+    obRegistration.Version = OB_FLT_REGISTRATION_VERSION;
+    obRegistration.OperationRegistrationCount = 1;
+    RtlInitUnicodeString(&obRegistration.Altitude, L"385000"); /* pick a real, unique altitude */
+    obRegistration.RegistrationContext = NULL;
+    obRegistration.OperationRegistration = &opRegistration;
+
+    NTSTATUS status = ObRegisterCallbacks(&obRegistration, &g_ObRegistrationHandle);
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("KAC: ObRegisterCallbacks failed 0x%08X (likely TESTSIGNING/altitude issue)\n", status));
+    }
+
+    KdPrint(("KAC: detections initialized\n"));
+}
+
+NTSTATUS
+KacDetectionsAttachProcess(
+    _In_ ULONG ProcessId
+    )
+{
+    InterlockedExchange(&g_ProtectedProcessId, (LONG)ProcessId);
+    return STATUS_SUCCESS;
+}
+
+VOID
+KacDetectionsDetachProcess(
+    _In_ ULONG ProcessId
+    )
+{
+    InterlockedCompareExchange(&g_ProtectedProcessId, 0, (LONG)ProcessId);
+}
+
+VOID
+KacDetectionsRunSnapshot(
+    _In_ ULONG ProcessId,
+    _Out_ PKAC_SNAPSHOT_RESULT Result
+    )
+{
+    UNREFERENCED_PARAMETER(ProcessId);
+    RtlZeroMemory(Result, sizeof(*Result));
+
+    /*
+     * TODO: this is the "on demand full sweep" path, distinct from the
+     * always on notify routines above. Typical contents:
+     *   - Walk PsLoadedModuleList (with a lock/APC-safe technique) to
+     *     enumerate kernel modules, cross check against a second,
+     *     independent enumeration method (e.g. ZwQuerySystemInformation
+     *     SystemModuleInformation from a usermode-assisted call) and flag
+     *     any driver present in one list but not the other.
+     *   - Enumerate handles table for the protected process's EPROCESS
+     *     (ObjectTable) and re-check DesiredAccess for anything that
+     *     slipped past the Ob callback (e.g. opened before you attached).
+     *   - Walk threads of the protected process and validate each one's
+     *     start address against loaded module VA ranges.
+     *
+     * Fill Result's counters as you implement each piece; leave zeroed
+     * until then so callers can tell "not implemented yet" apart from
+     * "implemented, found zero."
+     */
+}
+
+```
+
+`src/windows/kernel-driver/detections.h`:
+
+```h
+/*
+ * detections.h 
+ *
+ * interface for the actual detection logic, kept separate
+ * from `driver.c`/device wiring so the two can be reviewed and iterated on
+ * independently.
+ */
+
+#pragma once
+
+#include <ntddk.h>
+#include "kac_protocol.h"
+
+VOID
+KacDetectionsInitialize(
+    VOID
+    );
+
+NTSTATUS
+KacDetectionsAttachProcess(
+    _In_ ULONG ProcessId
+    );
+
+VOID
+KacDetectionsDetachProcess(
+    _In_ ULONG ProcessId
+    );
+
+/* Returns TRUE and fills Report if a queued detection was available. */
+BOOLEAN
+KacDetectionsPopReport(
+    _Out_ PKAC_DETECTION_REPORT Report
+    );
+
+VOID
+KacDetectionsRunSnapshot(
+    _In_ ULONG ProcessId,
+    _Out_ PKAC_SNAPSHOT_RESULT Result
+    );
+
+/* Called internally by whichever check finds something. */
+VOID
+KacDetectionsQueueReport(
+    _In_ KAC_DETECTION_TYPE Type,
+    _In_ ULONG OffendingProcessId,
+    _In_ ULONG RelatedProcessId,
+    _In_opt_ PCWSTR Detail
+    );
+
+```
+
+`src/windows/kernel-driver/driver.c`:
+
+```c
+/*
+ * driver.c
+ * 
+ * KMDF skeleton for a client side kernel anti cheat component
+ *
+ * This is a STARTING SKELETON, not a finished product. It wires up:
+ *   - Driver/device object creation (KMDF)
+ *   - A dispatch-style device (one client at a time keeps this simple)
+ *   - IOCTL handling that plugs into kac_protocol.h
+ *   - Stubs for the actual detection logic (see detections.c)
+ *
+ * It intentionally does NOT include the harder anti-tamper pieces yet
+ * (driver self-protection, obfuscation, PatchGuard-safe hooking). Those
+ * come after the skeleton is solid and I know what I want with the project.
+ *
+ * Build: WDK + KMDF. Target: Windows 10 21H2+ / Windows 11 (both x64). Later maybe ARM64 and linux because I would like that.
+ */
+
+#include <ntddk.h>
+#include <wdf.h>
+#include "kac_protocol.h"
+#include "detections.h"
+
+DRIVER_INITIALIZE DriverEntry;
+EVT_WDF_DRIVER_DEVICE_ADD KacEvtDeviceAdd;
+EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL KacEvtIoDeviceControl;
+EVT_WDF_DEVICE_FILE_CREATE KacEvtFileCreate;
+EVT_WDF_FILE_CLOSE KacEvtFileClose;
+
+typedef struct _KAC_DEVICE_CONTEXT {
+    WDFQUEUE  Queue;
+    ULONG     ProtectedProcessId;
+    LARGE_INTEGER LastHeartbeatQpc;
+    /* Detection report ring buffer lives in `detections.c`s own context.
+     * kept out of here so `device.c` does not need to know its internals */
+} KAC_DEVICE_CONTEXT, *PKAC_DEVICE_CONTEXT;
+
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(KAC_DEVICE_CONTEXT, KacGetDeviceContext)
+
+NTSTATUS
+DriverEntry(
+    _In_ PDRIVER_OBJECT DriverObject,
+    _In_ PUNICODE_STRING RegistryPath
+    )
+{
+    WDF_DRIVER_CONFIG config;
+    NTSTATUS status;
+
+    WDF_DRIVER_CONFIG_INIT(&config, KacEvtDeviceAdd);
+
+    /* Non-PnP facing driver: 
+     * this is a software-only device (no bus, no INF hardware ID). 
+     * Simplest to bring up via a "root-enumerated" or NonPnP driver 
+     * model. `See driver.inf` for the service entry. */
+    status = WdfDriverCreate(
+        DriverObject,
+        RegistryPath,
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &config,
+        WDF_NO_HANDLE
+    );
+
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("KAC: WdfDriverCreate failed 0x%08X\n", status));
+        return status;
+    }
+
+    KdPrint(("KAC: DriverEntry complete\n"));
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS
+KacEvtDeviceAdd(
+    _In_ WDFDRIVER Driver,
+    _Inout_ PWDFDEVICE_INIT DeviceInit
+    )
+{
+    UNREFERENCED_PARAMETER(Driver);
+
+    NTSTATUS status;
+    WDFDEVICE device;
+    WDF_OBJECT_ATTRIBUTES deviceAttributes;
+    WDF_IO_QUEUE_CONFIG queueConfig;
+    WDF_FILEOBJECT_CONFIG fileConfig;
+    PKAC_DEVICE_CONTEXT context;
+    DECLARE_CONST_UNICODE_STRING(ntDeviceName, KAC_DEVICE_NAME);
+    DECLARE_CONST_UNICODE_STRING(symbolicLinkName, KAC_SYMLINK_NAME);
+
+    WdfDeviceInitSetIoType(DeviceInit, WdfDeviceIoBufferedOrDirect);
+
+    WDF_FILEOBJECT_CONFIG_INIT(
+        &fileConfig,
+        KacEvtFileCreate,
+        KacEvtFileClose,
+        WDF_NO_EVENT_CALLBACK
+    );
+    WdfDeviceInitSetFileObjectConfig(DeviceInit, &fileConfig, WDF_NO_OBJECT_ATTRIBUTES);
+
+    status = WdfDeviceInitAssignName(DeviceInit, &ntDeviceName);
+    if (!NT_SUCCESS(status)) {
+        return status;
+    }
+
+    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&deviceAttributes, KAC_DEVICE_CONTEXT);
+
+    status = WdfDeviceCreate(&DeviceInit, &deviceAttributes, &device);
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("KAC: WdfDeviceCreate failed 0x%08X\n", status));
+        return status;
+    }
+
+    status = WdfDeviceCreateSymbolicLink(device, &symbolicLinkName);
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("KAC: WdfDeviceCreateSymbolicLink failed 0x%08X\n", status));
+        return status;
+    }
+
+    /*
+     * NOTE: IMPORTANT (security): restrict device access with a SDDL descriptor
+     * so only Administrators/SYSTEM (i.e. your signed usermode service
+     * running elevated) can open a handle. A world-writable IOCTL surface
+     * on an anti-cheat driver is itself an escalation vector and this is probably
+     * one of the first things a security reviewer would check.
+     */
+
+    WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchSequential);
+    queueConfig.EvtIoDeviceControl = KacEvtIoDeviceControl;
+
+    context = KacGetDeviceContext(device);
+    RtlZeroMemory(context, sizeof(KAC_DEVICE_CONTEXT));
+
+    status = WdfIoQueueCreate(device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &context->Queue);
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("KAC: WdfIoQueueCreate failed 0x%08X\n", status));
+        return status;
+    }
+
+    KacDetectionsInitialize();
+
+    KdPrint(("KAC: device added\n"));
+    return STATUS_SUCCESS;
+}
+
+VOID
+KacEvtFileCreate(
+    _In_ WDFDEVICE Device,
+    _In_ WDFREQUEST Request,
+    _In_ WDFFILEOBJECT FileObject
+    )
+{
+    UNREFERENCED_PARAMETER(Device);
+    UNREFERENCED_PARAMETER(FileObject);
+
+    /* TODO: enforce single-client policy here — reject a second handle
+     * while one is already open, so a second process can't race the
+     * legitimate service for the device. */
+
+    WdfRequestComplete(Request, STATUS_SUCCESS);
+}
+
+VOID
+KacEvtFileClose(
+    _In_ WDFFILEOBJECT FileObject
+    )
+{
+    UNREFERENCED_PARAMETER(FileObject);
+
+    /*
+     * If the usermode service's handle closes unexpectedly (crash, kill,
+     * debugger detach) while a process is still attached, this is exactly
+     * the "cheat killed our watchdog" scenario. Policy decision needed:
+     * kill the protected game process, or just mark it unprotected and
+     * let the server-side detections (CS2AC) carry the load. Start
+     * conservative (kill) and relax if it causes false positives.
+     */
+    KdPrint(("KAC: client handle closed\n"));
+}
+
+VOID
+KacEvtIoDeviceControl(
+    _In_ WDFQUEUE Queue,
+    _In_ WDFREQUEST Request,
+    _In_ size_t OutputBufferLength,
+    _In_ size_t InputBufferLength,
+    _In_ ULONG IoControlCode
+    )
+{
+    NTSTATUS status = STATUS_INVALID_DEVICE_REQUEST;
+    WDFDEVICE device = WdfIoQueueGetDevice(Queue);
+    PKAC_DEVICE_CONTEXT context = KacGetDeviceContext(device);
+
+    switch (IoControlCode) {
+
+    case IOCTL_KAC_ATTACH_PROCESS: {
+        PKAC_ATTACH_REQUEST req;
+        status = WdfRequestRetrieveInputBuffer(Request, sizeof(*req), (PVOID*)&req, NULL);
+        if (NT_SUCCESS(status)) {
+            context->ProtectedProcessId = req->ProcessId;
+            KeQuerySystemTimePrecise(&context->LastHeartbeatQpc);
+            status = KacDetectionsAttachProcess(req->ProcessId);
+            KdPrint(("KAC: attach pid %lu -> 0x%08X\n", req->ProcessId, status));
+        }
+        break;
+    }
+
+    case IOCTL_KAC_DETACH_PROCESS: {
+        KacDetectionsDetachProcess(context->ProtectedProcessId);
+        context->ProtectedProcessId = 0;
+        status = STATUS_SUCCESS;
+        break;
+    }
+
+    case IOCTL_KAC_HEARTBEAT: {
+        KeQuerySystemTimePrecise(&context->LastHeartbeatQpc);
+        status = STATUS_SUCCESS;
+        break;
+    }
+
+    case IOCTL_KAC_POLL_REPORT: {
+        PKAC_DETECTION_REPORT out;
+        status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*out), (PVOID*)&out, NULL);
+        if (NT_SUCCESS(status)) {
+            BOOLEAN hasReport = KacDetectionsPopReport(out);
+            WdfRequestCompleteWithInformation(
+                Request,
+                hasReport ? STATUS_SUCCESS : STATUS_NO_MORE_ENTRIES,
+                hasReport ? sizeof(*out) : 0
+            );
+            return;
+        }
+        break;
+    }
+
+    case IOCTL_KAC_REQUEST_SNAPSHOT: {
+        PKAC_SNAPSHOT_RESULT out;
+        status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*out), (PVOID*)&out, NULL);
+        if (NT_SUCCESS(status)) {
+            KacDetectionsRunSnapshot(context->ProtectedProcessId, out);
+            WdfRequestCompleteWithInformation(Request, STATUS_SUCCESS, sizeof(*out));
+            return;
+        }
+        break;
+    }
+
+    default:
+        status = STATUS_INVALID_DEVICE_REQUEST;
+        break;
+    }
+
+    WdfRequestComplete(Request, status);
+}
+
+```
+
+`src/windows/kernel-driver/driver.inf`:
+
+```inf
+; driver.inf
+; installs the KAC driver as a NonPnP (software only) kernel
+; service. This is the standard pattern for drivers with no physical bus
+; device (see Microsofts "nonpnp" WDK sample for the canonical version)
+;
+; Before this will load on a normal secure-boot machine you need:
+;   1. An EV code signing certificate
+;   2. Cross signing / attestation signing (or full WHQL for wide distribution)
+;   3. bcdedit /set testsigning on  -- ONLY for local dev, never for players
+
+[Version]
+Signature   = "$WINDOWS NT$"
+Class       = System
+ClassGuid   = {4d36e97d-e325-11ce-bfc1-08002be10318}
+Provider    = %ManufacturerName%
+CatalogFile = kac.cat
+DriverVer   = ; filled in by build system
+
+[Manufacturer]
+%ManufacturerName% = Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%DeviceDesc% = KAC_Device, Root\KacAntiCheat
+
+[KAC_Device.NT]
+CopyFiles = KAC_Device.CopyFiles
+
+[KAC_Device.CopyFiles]
+kac.sys
+
+[KAC_Device.NT.Services]
+AddService = kac, 0x00000002, KAC_Service_Inst
+
+[KAC_Service_Inst]
+DisplayName    = %ServiceDesc%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START (usermode service starts it)
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %13%\kac.sys
+
+[SourceDisksNames]
+1 = %DiskName%
+
+[SourceDisksFiles]
+kac.sys = 1
+
+[DestinationDirs]
+KAC_Device.CopyFiles = 13 ; DIRID_DRIVERS
+
+[Strings]
+ManufacturerName = "Your Org Here"
+DeviceDesc       = "KAC Anti-Cheat Kernel Component"
+ServiceDesc      = "KAC Anti-Cheat Kernel Service"
+DiskName         = "KAC Installation Disk"
+
+```
+
+`src/windows/kernel-driver/kac_protocol.h`:
+
+```h
+/*
+ * kac_protocol.h
+ *
+ * Shared between the kernel driver (ring 0) and the usermode service (ring 3).
+ * 
+ * NOTE: This is the ONLY file that should be `#included` by both sides keeps the
+ * ABI in one place instead of hand syncing struct layouts.
+ */
+
+#pragma once
+
+#include <stdint.h>
+
+#define KAC_DEVICE_NAME       L"\\Device\\KacAntiCheat"
+#define KAC_SYMLINK_NAME       L"\\DosDevices\\KacAntiCheat"
+#define KAC_SYMLINK_USER_PATH  L"\\\\.\\KacAntiCheat"
+
+/* IOCTL codes
+ * FILE_DEVICE_UNKNOWN = 0x22, custom range 0x800+ to avoid colliding with
+ * windows reserved codes. 
+ * METHOD_BUFFERED for everything to keep this
+ * skeleton simple and avoid MDL/probe for write bugs */
+#define KAC_IOCTL_INDEX 0x800
+
+#define CTL_CODE_KAC(i) \
+    CTL_CODE(FILE_DEVICE_UNKNOWN, (KAC_IOCTL_INDEX + i), METHOD_BUFFERED, FILE_ANY_ACCESS)
+
+#define IOCTL_KAC_ATTACH_PROCESS CTL_CODE_KAC(1) /* here is the target game PID, start protecting it */
+#define IOCTL_KAC_DETACH_PROCESS CTL_CODE_KAC(2) /* stop protecting, process exited / shutting down */
+#define IOCTL_KAC_POLL_REPORT    CTL_CODE_KAC(3) /* give me the next queued detection report, if any */
+#define IOCTL_KAC_REQUEST_SNAPSHOT CTL_CODE_KAC(4) /* give me a one-shot integrity snapshot right now */
+
+/* heartbeat. Driver kills the protected process (or flags it) if heartbeats 
+ * stop arriving this is what makes it costly for a cheat to just suspend/patch 
+ * the usermode service to shut KAC up. */
+#define IOCTL_KAC_HEARTBEAT           CTL_CODE_KAC(5)
+
+/* Detection reasons */
+typedef enum _KAC_DETECTION_TYPE {
+    KacDetectionNone = 0,
+    KacDetectionUnsignedModuleInProcess, /* image loaded w/o valid cert */
+    KacDetectionForeignHandleToProcess, /* another proc holds a suspicious handle */
+    KacDetectionHiddenThreadStartAddress, /* thread start addr not in any known module */
+    KacDetectionManualMappedDriver, /* unlinked/hidden kernel module detected */
+    KacDetectionDebuggerAttached, /* kernel debugger or usermode debug port */
+    KacDetectionIntegrityMismatch, /* .text section hash mismatch (patched code) */
+    KacDetectionHeartbeatTimeout, /* usermode service stopped responding */
+} KAC_DETECTION_TYPE;
+
+#pragma pack(push, 1)
+
+typedef struct _KAC_ATTACH_REQUEST {
+    uint32_t ProcessId;
+} KAC_ATTACH_REQUEST;
+
+typedef struct _KAC_DETECTION_REPORT {
+    uint64_t          TimestampQpc;
+    KAC_DETECTION_TYPE Type;
+    uint32_t          OffendingProcessId;   /* the process the anomaly was found in/from */
+    uint32_t          RelatedProcessId;     /* e.g. handle-holder proc, if applicable */
+    wchar_t           Detail[128];          /* short human-readable detail, best effort */
+} KAC_DETECTION_REPORT;
+
+typedef struct _KAC_SNAPSHOT_RESULT {
+    uint32_t ModuleCount;
+    uint32_t UnsignedModuleCount;
+    uint32_t SuspiciousHandleCount;
+    uint32_t HiddenThreadCount;
+    uint8_t  DriverListTampered;   /* PsLoadedModuleList vs enumerated mismatch */
+} KAC_SNAPSHOT_RESULT;
+
+#pragma pack(pop)
+
+```
+
+`src/windows/usermode-service/kac_service.cpp`:
+
+```cpp
+// kac_service.cpp
+//
+// Usermode bridge between the kernel driver and the two existing
+// server side plugins (CS2AC, CS2FOW). 
+// It:
+// - Installs/starts the `kac.sys` service and opens a handle to it
+// - Finds the running `cs2.exe` PID and `IOCTL_KAC_ATTACH_PROCESS`s it
+// - Polls `IOCTL_KAC_POLL_REPORT` on a loop
+// - Sends a heartbeat so the driver knows this service is alive
+// - Forwards each detection report as a signed attestation to the
+//      game server (see `integration/PROTOCOL.md` for the wire format and
+//      how CS2AC correlates it with a SteamID)
+
+#include <windows.h>
+#include <winsvc.h>
+#include <tlhelp32.h>
+#include <string>
+#include <thread>
+#include <chrono>
+#include <iostream>
+#include <optional>
+
+#include "../kernel-driver/kac_protocol.h"
+
+namespace {
+
+constexpr auto kPollInterval   = std::chrono::milliseconds(250);
+constexpr auto kHeartbeatEvery = std::chrono::seconds(2);
+
+std::optional<DWORD> FindProcessIdByName(const std::wstring& exeName) {
+    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snap == INVALID_HANDLE_VALUE) {
+        return std::nullopt;
+    }
+
+    PROCESSENTRY32W entry{};
+    entry.dwSize = sizeof(entry);
+
+    std::optional<DWORD> found;
+    if (Process32FirstW(snap, &entry)) {
+        do {
+            if (exeName == entry.szExeFile) {
+                found = entry.th32ProcessID;
+                break;
+            }
+        } while (Process32NextW(snap, &entry));
+    }
+
+    CloseHandle(snap);
+    return found;
+}
+
+// driver service install/start
+// NOTE: requires the driver to already be signed & copied to
+// %SystemRoot%\System32\drivers\kac.sys, or test-signing enabled locally
+bool EnsureDriverServiceRunning(const std::wstring& driverPath) {
+    SC_HANDLE scm = OpenSCManagerW(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
+    if (!scm) {
+        std::wcerr << L"OpenSCManager failed: " << GetLastError() << L"\n";
+        return false;
+    }
+
+    SC_HANDLE svc = OpenServiceW(scm, L"kac", SERVICE_ALL_ACCESS);
+    if (!svc) {
+        svc = CreateServiceW(
+            scm, L"kac", L"KAC Anti-Cheat Kernel Service",
+            SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER,
+            SERVICE_DEMAND_START, SERVICE_ERROR_NORMAL,
+            driverPath.c_str(), nullptr, nullptr, nullptr, nullptr, nullptr);
+        if (!svc) {
+            std::wcerr << L"CreateService failed: " << GetLastError() << L"\n";
+            CloseServiceHandle(scm);
+            return false;
+        }
+    }
+
+    BOOL startOk = StartServiceW(svc, 0, nullptr);
+    DWORD err = GetLastError();
+    CloseServiceHandle(svc);
+    CloseServiceHandle(scm);
+
+    // ERROR_SERVICE_ALREADY_RUNNING is fine.
+    return startOk || err == ERROR_SERVICE_ALREADY_RUNNING;
+}
+
+// report -> server plugin integration
+// This is where the report reaches the CS2AC repo. 
+// See `integration/PROTOCOL.md` for the two realistic options 
+// (A: local named pipe / loopback HTTP to a small bridge process
+// the CS2 game server also runs; 
+// B: signed webhook reusing CS2AC's existing Discord-webhook-style
+// channel). This stub just demonstrates the call site.
+void ForwardReportToServer(const KAC_DETECTION_REPORT& report) {
+    std::wcout << L"[KAC] detection type=" << static_cast<int>(report.Type)
+               << L" offendingPid=" << report.OffendingProcessId
+               << L" relatedPid=" << report.RelatedProcessId
+               << L" detail=" << report.Detail << L"\n";
+
+    // TODO: replace with a real transport e.g.:
+    //   BridgeClient::SendAttestation(report, LocalSteamIdForPid(report.OffendingProcessId));
+}
+
+} // namespace
+
+int wmain() {
+    const std::wstring driverPath = L"C:\\Windows\\System32\\drivers\\kac.sys";
+
+    if (!EnsureDriverServiceRunning(driverPath)) {
+        std::wcerr << L"Could not start kac driver service.\n";
+        return 1;
+    }
+
+    HANDLE device = CreateFileW(
+        KAC_SYMLINK_USER_PATH,
+        GENERIC_READ | GENERIC_WRITE,
+        0, nullptr, OPEN_EXISTING, 0, nullptr);
+
+    if (device == INVALID_HANDLE_VALUE) {
+        std::wcerr << L"CreateFile on device failed: " << GetLastError() << L"\n";
+        return 1;
+    }
+
+    auto pid = FindProcessIdByName(L"cs2.exe");
+    if (!pid) {
+        std::wcerr << L"cs2.exe not found — start the game first.\n";
+        CloseHandle(device);
+        return 1;
+    }
+
+    KAC_ATTACH_REQUEST attachReq{};
+    attachReq.ProcessId = *pid;
+
+    DWORD bytesReturned = 0;
+    if (!DeviceIoControl(
+            device, IOCTL_KAC_ATTACH_PROCESS,
+            &attachReq, sizeof(attachReq),
+            nullptr, 0, &bytesReturned, nullptr)) {
+        std::wcerr << L"ATTACH_PROCESS failed: " << GetLastError() << L"\n";
+        CloseHandle(device);
+        return 1;
+    }
+
+    std::wcout << L"[KAC] attached to cs2.exe pid " << *pid << L"\n";
+
+    auto lastHeartbeat = std::chrono::steady_clock::now();
+
+    for (;;) {
+        auto now = std::chrono::steady_clock::now();
+        if (now - lastHeartbeat >= kHeartbeatEvery) {
+            DeviceIoControl(device, IOCTL_KAC_HEARTBEAT, nullptr, 0, nullptr, 0, &bytesReturned, nullptr);
+            lastHeartbeat = now;
+        }
+
+        KAC_DETECTION_REPORT report{};
+        BOOL ok = DeviceIoControl(
+            device, IOCTL_KAC_POLL_REPORT,
+            nullptr, 0,
+            &report, sizeof(report), &bytesReturned, nullptr);
+
+        if (ok && bytesReturned == sizeof(report)) {
+            ForwardReportToServer(report);
+            continue; // drain any backlog quickly before sleeping
+        }
+
+        std::this_thread::sleep_for(kPollInterval);
+
+        // TODO: detect `cs2.exe` exit and call `IOCTL_KAC_DETACH_PROCESS`,
+        // then loop back to `FindProcessIdByName` for the next match.
+    }
+
+    CloseHandle(device);
+    return 0;
+}
+
+```
