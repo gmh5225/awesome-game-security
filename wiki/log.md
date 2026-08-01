@@ -1971,3 +1971,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:libjpeg-turbo/libjpeg-turbo`: entity [[libjpeg-turbo]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-08-01** — ingest `description:libiht/libiht`: entity [[libiht]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
+- **2026-08-01** — ingest `description:libgdx/libgdx`: entity [[libgdx]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].

@@ -495,6 +495,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [libiht](entities/libiht.md) — Intel Hardware Trace Library (Tencent Xuanwu Lab; hardware-assisted execution tracing; Windows kernel explorer)
 - [libjpeg-turbo](entities/libjpeg-turbo.md) — IJG JPEG codec (reference listing; engine asset-pipeline / Image Codec)
 - [liblava](entities/liblava.md) — modern C++23 Vulkan library (lean modular framework; rolling releases; Vulkan / Guide)
+- [libgdx](entities/libgdx.md) — cross-platform Java game framework (2D/3D; Android/desktop/iOS/WebGL; Game Engine)
 - [libmdmp](entities/libmdmp.md) — C/C++ minidump format library (memory analysis / debugging; AC / Windows kernel dump analysis)
 - [libmem](entities/libmem.md) — cross-platform game-hacking lib (memory / hook / scan; Win/Linux/FreeBSD; C/C++/Rust/Python/Lua)
 - [lldbext-dump](entities/lldbext-dump.md) — LLDB Python extension: Android live session → Windows minidump + Unicorn replay (mobile RE / dump)
