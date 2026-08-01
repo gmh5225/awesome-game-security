@@ -2009,3 +2009,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:lainswork/shellcode-factory`: entity [[shellcode-factory]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-08-01** — ingest `description:momo5502/hypervisor`: entity [[hypervisor]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-08-01** — ingest `description:kyxiaxiang/360WFP_Exploit`: entity [[360wfp-exploit]]; cited on [[byovd]] and [[overviews/windows-kernel]].

@@ -53,6 +53,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [2048.cpp](entities/2048-cpp.md) — terminal C++ 2048 (console board / merge scoring; Game Develop / source)
 - [2Pack](entities/2pack.md) — Rust PE & shellcode packer (EXE/DLL + raw; Anti Cheat → Binary Packer)
+- [360WFP Exploit](entities/360wfp-exploit.md) — BYOVD via Qihoo 360 `360netmon_x64.sys_wfp` (WFP; block EDR/XDR network)
 - [3D-Racing-Game](entities/3d-racing-game.md) — OpenGL racing game (M/N scene switch; Game Develop / OpenGL source)
 - [3d-game-shaders-for-beginners](entities/3d-game-shaders-for-beginners.md) — GLSL shader tutorial (Panda3D; SSAO/bloom/post-processing; Shader)
 - [3d9](entities/3d9.md) — DX11 stereoscopic-fix tooling (developer-oriented; DirectX Tools)

@@ -24,7 +24,8 @@ sources:
   - wiki/sources/descriptions/r0keb__Smep-Bypass.md
   - wiki/sources/descriptions/moiz-2x__CVE-2025-24990_POC.md
   - wiki/sources/descriptions/magicsword-io__LOLDrivers.md
-updated: 2026-07-31
+  - wiki/sources/descriptions/kyxiaxiang__360WFP_Exploit.md
+updated: 2026-08-01
 confidence: high
 ---
 
@@ -68,11 +69,13 @@ Classic signed-utility driver abuse such as [[cpuz]] (CPU-Z; XP–Win10 1607) si
 
 Security-product handle-donor abuse such as [[dsark64]] targets Qihoo 360’s WHQL-signed `DsArk64.sys` (suspended installer + shellcode open `\\.\DsArk`, then `DuplicateHandle` → ring-0 process kill + kernel R/W). (source: wiki/sources/descriptions/sai2fast__DsArk64.md)
 
+WFP network-blinding abuse such as [[360wfp-exploit]] loads Qihoo 360’s `360netmon_x64.sys_wfp` to block EDR/XDR network connections instead of terminating security processes. (source: wiki/sources/descriptions/kyxiaxiang__360WFP_Exploit.md)
+
 Hardware-feature bypass PoCs such as [[smep-bypass]] use vulnerable-driver primitives (or ROP) to clear CR4.SMEP so the kernel can execute user-mode shellcode. (source: wiki/sources/descriptions/r0keb__Smep-Bypass.md)
 
 Agere Modem driver LPE such as [[cve-2025-24990-poc]] abuses `ltmdm64.sys` `METHOD_NEITHER` IOCTLs (missing user/kernel boundary checks) → 4-byte write via `IOCTL_GET_VERSION` + null-deref fixup via `VirtualAlloc` → arbitrary kernel R/W, with an IoRing LPE variant. (source: wiki/sources/descriptions/moiz-2x__CVE-2025-24990_POC.md)
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
