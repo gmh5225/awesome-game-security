@@ -489,6 +489,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [lightsaber](entities/lightsaber.md) — iOS 18.4–18.6.2 userland exploit; JS inject SpringBoard (DarkSword-derived)
 - [Lenovo-CVE-2025-8061](entities/lenovo-cve-2025-8061.md) — LnvMSRIO.sys LPE PoC (CVE-2025-8061; IOCTL → SYSTEM; BYOVD)
 - [libelevate](entities/libelevate.md) — C++ elevating-handle lib (KM/driver primitives → full-access process handles; AC handle protection)
+- [libmdmp](entities/libmdmp.md) — C/C++ minidump format library (memory analysis / debugging; AC / Windows kernel dump analysis)
 - [libmem](entities/libmem.md) — cross-platform game-hacking lib (memory / hook / scan; Win/Linux/FreeBSD; C/C++/Rust/Python/Lua)
 - [lldbext-dump](entities/lldbext-dump.md) — LLDB Python extension: Android live session → Windows minidump + Unicorn replay (mobile RE / dump)
 - [LocusMimic](entities/locusmimic.md) — LSPosed/Xposed Android GPS spoof (map picker, saved locations, app/system/mock-provider modes; Kotlin/Compose)
