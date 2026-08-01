@@ -2069,3 +2069,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:koosoli/PoseidonVK`: entity [[poseidonvk]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-08-01** — ingest `description:konstantin89/windows-kernel-debugging-guide`: entity [[windows-kernel-debugging-guide]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
+- **2026-08-01** — ingest `description:knight0x07/ImpulsiveDLLHijack`: entity [[impulsive-dll-hijack]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-link from [[windows-dll-hijacking]].
