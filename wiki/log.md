@@ -2008,4 +2008,4 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-01** — ingest `description:lainswork/shellcode-factory`: entity [[shellcode-factory]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
-- **2026-08-01** — ingest `description:lainswork/dwm-screen-shot`: entity [[dwm-screen-shot]]; cited on [[anti-screenshot-capture]] and [[present-hook]].
+- **2026-08-01** — ingest `readme:categories`: bumped Cheat ~2622 / Anti Cheat ~631 (was ~2621/~629); refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
