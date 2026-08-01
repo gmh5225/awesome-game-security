@@ -2011,3 +2011,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:momo5502/hypervisor`: entity [[hypervisor]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-08-01** — ingest `description:kyxiaxiang/360WFP_Exploit`: entity [[360wfp-exploit]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
+- **2026-08-01** — ingest `description:kyojig/csgo_kns`: entity [[csgo-kns]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
