@@ -3812,6 +3812,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/vt-debuger [Hacked Hypervisor Testing]
 - https://github.com/zer0condition/hv [Hacked Hypervisor Testing]
 - https://github.com/zer0condition/Ophion [Stealth Intel VT-x Type-2 hypervisor: passes common HV detection, works with EAC/BE/AVs; CPUID cache, CR4.VMXE hide, TSC compensation, private host CR3]
+- https://github.com/momo5502/hypervisor [Experimental Intel VT-x type-2 hypervisor with EPT hooking for stealth memory interception and integrity-check bypass research]
 - https://github.com/gmh5225/AetherVisor [Hacked Hypervisor Testing AMD]
 - https://github.com/valium007/BareSVM [Hacked Hypervisor Testing AMD]
 - https://github.com/noahware/hyper-reV [memory introspection and reverse engineering hypervisor powered by leveraging Hyper-V]
@@ -4030,6 +4031,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/mrexodia/RiscyWorkshop [Payload Obfuscation for Red Teams workshop materials]
 - https://github.com/umpolungfish/byvalver [Shellcode bad-byte banisher with preserved functionalities]
 - https://github.com/wbenny/scfw [A cross-platform C++ framework for building Windows shellcode]
+- https://github.com/cocomelonc/tabby [Minimal position-independent C shellcode framework for Windows x64 with PEB/EAT resolution, FNV-1a API hashing, and indirect NT syscalls; builds flat .bin on Linux via mingw-w64/nasm]
 - https://github.com/IIIImmmyyy/ArmShellCode [Android arm arm64-v8a ShellCode Generate]
 
 > Obfuscation Engine
