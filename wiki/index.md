@@ -837,6 +837,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [thread-call-stack-scanner](entities/thread-call-stack-scanner.md) — safe unload of hooked DLLs via thread call-stack scan (m417z; Anti Cheat / hook lifecycle)
 - [ThreadStackSpoofer](entities/thread-stack-spoofer.md) — PoC thread call-stack spoof for in-process shellcode hiding (mgeeky; Cheat Spoof Stack)
 - [TiEtwAgent](entities/tietwagent.md) — ETW Threat-Intelligence injection-detection agent (krabsetw / Yara / PPL)
+- [tim_apple](entities/tim-apple.md) — external CS2 cheat (offset script / JSON bootstrap; cheat / game:cs2)
 - [ThreatIntelligenceConsumer](entities/threat-intelligence-consumer.md) — Threat-Intelligence ETW consume without driver/PPL (Win11 24H2/25H2)
 - [TitanHide](entities/titanhide.md) — SSDT-hook kernel driver: hide debuggers from selected processes (Nt* return tamper; cheat / debugging)
 - [TOG](entities/tog.md) — The Online Gamer offsets generator (online-game cheat tooling; Offsets Generator)
