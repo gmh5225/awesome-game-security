@@ -1,0 +1,3535 @@
+Project Path: arc_smithluke874_Android-VirtualCam-Manager_o1_th8jn
+
+Source Tree:
+
+```txt
+arc_smithluke874_Android-VirtualCam-Manager_o1_th8jn
+├── BUILD.md
+├── README.md
+├── docs
+│   ├── NO_LSPOSED_DESIGN.md
+│   ├── ORIGINAL_HOOK_ALGORITHM.md
+│   └── ORIGINAL_VCAM_NOTES.md
+├── hook-java
+│   └── README.md
+├── magisk-module
+│   ├── META-INF
+│   │   └── com
+│   │       └── google
+│   │           └── android
+│   │               ├── update-binary
+│   │               └── updater-script
+│   ├── customize.sh
+│   ├── module.prop
+│   ├── post-fs-data.sh
+│   ├── service.sh
+│   └── zygisk
+│       └── README.txt
+├── manager-app
+│   ├── app
+│   │   ├── build.gradle.kts
+│   │   ├── proguard-rules.pro
+│   │   └── src
+│   │       └── main
+│   │           ├── AndroidManifest.xml
+│   │           ├── java
+│   │           │   └── com
+│   │           │       └── virtualcam
+│   │           │           └── manager
+│   │           │               ├── MainActivity.kt
+│   │           │               ├── data
+│   │           │               │   ├── AutoSetup.kt
+│   │           │               │   ├── FileSystemRepository.kt
+│   │           │               │   ├── MediaImportHelper.kt
+│   │           │               │   ├── PrerequisiteChecker.kt
+│   │           │               │   └── RootShell.kt
+│   │           │               └── ui
+│   │           │                   ├── navigation
+│   │           │                   │   └── AppNavHost.kt
+│   │           │                   ├── screens
+│   │           │                   │   ├── HomeScreen.kt
+│   │           │                   │   ├── MediaHubScreen.kt
+│   │           │                   │   ├── SettingsScreen.kt
+│   │           │                   │   └── TargetAppsScreen.kt
+│   │           │                   └── theme
+│   │           │                       ├── Color.kt
+│   │           │                       ├── Theme.kt
+│   │           │                       └── Type.kt
+│   │           └── res
+│   │               ├── drawable
+│   │               │   └── ic_launcher.xml
+│   │               └── values
+│   │                   ├── colors.xml
+│   │                   ├── strings.xml
+│   │                   └── themes.xml
+│   ├── build.gradle.kts
+│   ├── gradle
+│   │   └── wrapper
+│   │       └── gradle-wrapper.properties
+│   ├── gradle.properties
+│   └── settings.gradle.kts
+├── patches
+│   ├── main_v116_part0.txt
+│   ├── main_v116_part1.txt
+│   └── v1.15.0-main.cpp.patch
+└── zygisk-native
+    ├── CMakeLists.txt
+    ├── README.md
+    ├── jni
+    │   ├── Android.mk
+    │   ├── Application.mk
+    │   ├── main.cpp
+    │   ├── nv21_hooks.cpp
+    │   └── nv21_hooks.h
+    └── third_party
+        └── arthook
+            ├── CMakeLists.txt
+            └── include
+                └── arthook
+                    ├── ArtHook.h
+                    └── Hooked.h
+
+```
+
+`BUILD.md`:
+
+```md
+# Building the VirtualCam Manager APK
+
+## GitHub Actions (recommended)
+
+1. Push to `main` (or run the workflow manually via Actions → Build APK → Run workflow).
+2. Wait for the job to finish.
+3. Download the artifacts:
+   - `VirtualCam-Manager-debug`
+   - `VirtualCam-Manager-release`
+
+The workflow uses:
+- JDK 17 (Temurin)
+- Android SDK via android-actions/setup-android
+- Gradle 8.9 + AGP 8.7.2
+- Compose BOM 2024.10.01
+- libsu 5.2.2
+
+## Local build (Android Studio)
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/smithluke874/Android-VirtualCam-Manager.git
+   cd Android-VirtualCam-Manager
+   ```
+
+2. Open the **manager-app** folder in Android Studio (File → Open → select the `manager-app` directory).
+
+3. Let Android Studio sync Gradle.
+
+4. Build → Build Bundle(s) / APK(s) → Build APK(s).
+
+5. The debug APK will appear at:
+   `manager-app/app/build/outputs/apk/debug/app-debug.apk`
+
+## Command line
+
+```bash
+cd manager-app
+gradle wrapper --gradle-version 8.9   # first time only if gradlew is missing
+./gradlew assembleDebug
+./gradlew assembleRelease
+```
+
+## After building
+
+1. Install the Magisk module (`VirtualCam-Manager-Magisk-v1.2.0.zip`).
+2. Install the APK you just built.
+3. Grant root to the APK.
+4. Use the Media tab to place `virtual.mp4` and the Settings tab to control the original flag files.
+
+No LSPosed is required.
+
+```
+
+`README.md`:
+
+```md
+# Android VirtualCam Manager
+
+**Pure Magisk module + single controller APK**  
+**NO LSPosed / NO Xposed manager.**
+
+Reimplements classic [android_virtual_cam](https://github.com/w2016561536/android_virtual_cam) control plane under Magisk+Zygisk. Frame injection uses the same algorithm (MediaPlayer surface + NV21 callbacks). **ArtHook** provides ART Java method replacement inside the Zygisk `.so` (no LSPosed).
+
+## Status (v1.16.0)
+
+| Layer | Status |
+|-------|--------|
+| Magisk paths + flags | **Working** |
+| APK one-tap enable / import | **Working** |
+| Zygisk `.so` (arm64/armv7/x86_64) | **CI builds (CMake + ArtHook)** |
+| Process gate + `hook_status` feedback | **Working** |
+| Original algorithm documented | **Done** |
+| **ArtHook** surface path (`setPreviewTexture` / `startPreview` / `setPreviewDisplay`) | **Done** |
+| MediaPlayer surface injection | **Done** — `texture_swapped` → `surface_playing` |
+| **ArtHook** `setPreviewCallback*` + dynamic `onPreviewFrame` | **Done** |
+| NV21 buffer overwrite (pattern) | **Done** — `nv21_pattern:WxH#N` |
+| MediaCodec continuous video→NV21 | **Implemented locally** — landing next (source ready) |
+| Camera2 surface redirect | Later |
+
+## Download
+
+[Actions ← latest green run ← Artifacts](https://github.com/smithluke874/Android-VirtualCam-Manager/actions)
+
+- `VirtualCam-Manager-debug` / `release`
+- `VirtualCam-Manager-Magisk-v1.16.0`
+
+## Install & verify
+
+1. Magisk → **Zygisk ON** → flash Magisk zip → reboot  
+2. Install APK → grant root → Home **ON**  
+3. Media → pick image/video → one-tap import  
+4. Open a **Camera1** app → return Home → refresh  
+   - **Zygisk .so installed** = green  
+   - **`texture_swapped` / `surface_playing`** = surface path  
+   - **`nv21_cb_hooked` / `nv21_pattern:WxH#N`** = PreviewCallback path  
+5. Surface path shows `virtual.mp4` on preview.  
+6. Callback path receives patterned NV21 (real video frames next).
+
+## Hook status values
+
+| Status | Meaning |
+|--------|--------|
+| `gate_off` | Enabled flag off or `disable.jpg` present |
+| `no_video` | Gate open but `virtual.mp4` missing/empty |
+| `art_hooked:N` / `art_hooked:N+jni:M` | ArtHook installed |
+| `texture_swapped` | Fake SurfaceTexture installed |
+| `surface_playing` | MediaPlayer playing virtual.mp4 |
+| `nv21_cb_hooked:*` | onPreviewFrame hook installed |
+| `nv21_pattern:WxH#N` | Pattern NV21 frames delivered |
+| `nv21_video:WxH#N` | Real video NV21 (after MediaCodec lands) |
+
+## Architecture
+
+```
+APK (root)  --writes-->  /data/adb/virtualcam/*  +  /DCIM/Camera1/*
+                              ^
+Magisk boot scripts ----------+
+                              |
+Zygisk .so  --reads-----------+  --writes--> hook_status / last_hook_pkg / version
+         |
+         +-- ArtHook: Camera.setPreviewTexture → fake ST
+         +-- ArtHook: Camera.startPreview → MediaPlayer(virtual.mp4)
+         +-- ArtHook: setPreviewCallback* → process_callback
+         +-- ArtHook: callback.onPreviewFrame → overwrite NV21 buffer
+         +-- JNI native hooks (secondary)
+```
+
+## Disclaimer
+
+Legitimate research / testing only. Do not use for illegal purposes.
+
+```
+
+`docs/NO_LSPOSED_DESIGN.md`:
+
+```md
+# Pure Magisk + Single APK Design
+
+## Why no LSPosed
+
+The original android_virtual_cam APK is an Xposed module (`com.example.vcam.HookMain`).  
+It only works when an Xposed framework (LSPosed, etc.) injects it into target processes.
+
+**User requirement: only Magisk module + one APK, no LSPosed.**
+
+## New architecture
+
+1. **Magisk module**
+   - Creates and maintains the exact filesystem layout the original VCAM expected (`/DCIM/Camera1/virtual.mp4` + sentinel .jpg flags).
+   - Provides `/data/adb/virtualcam/` control directory for the APK.
+   - Zygisk-ready (placeholder for future native Camera hooks).
+
+2. **Single sole APK** (`com.virtualcam.manager`)
+   - The only user-facing application.
+   - Uses libsu (root) to:
+     - Ensure directories
+     - Copy / remove `virtual.mp4`
+     - Create / delete the flag files that control behaviour
+     - Report status
+   - Modern Compose UI.
+
+## What works today without Xposed hooks
+
+- All path and flag management (identical to original).
+- Video file placement.
+- Module enable/disable via flag files.
+
+## What requires Zygisk native work (next phase)
+
+- Actual interception of Camera1 / Camera2 preview surfaces and feeding frames from `virtual.mp4`.
+  This is the part the original `HookMain` did via Xposed.
+  A Zygisk module can implement the same hooks in native code for latest Android.
+
+Until the native Zygisk component is complete, the module + APK fully manage the environment the original exploit used. The APK is the sole control surface.
+
+```
+
+`docs/ORIGINAL_HOOK_ALGORITHM.md`:
+
+```md
+# Original android_virtual_cam algorithm (from HookMain.java)
+
+Source: https://github.com/w2016561536/android_virtual_cam  
+We reimplement this under **pure Magisk Zygisk + ArtHook** (no LSPosed manager).
+
+## Control files (same paths we already automate)
+
+| Path under `/DCIM/Camera1/` | Effect |
+|-----------------------------|--------|
+| `virtual.mp4` | Replacement video |
+| `disable.jpg` | Hard off |
+| `no_toast.jpg` | Suppress toasts |
+| `private_dir.jpg` | Prefer app-private Camera1 dir |
+| `force_show.jpg` / `no-silent.jpg` | UX / audio related |
+
+## Camera1 path (most common)
+
+### A. Surface / Texture preview (what the user *sees*)
+
+1. Hook `Camera.setPreviewTexture(SurfaceTexture)`
+2. If `virtual.mp4` exists and no `disable.jpg`:
+   - Save original texture
+   - Replace arg with `new SurfaceTexture(10)` (fake)
+3. Hook `Camera.startPreview()` / `setPreviewDisplay(SurfaceHolder)`:
+   - Create `MediaPlayer`, setDataSource(`virtual.mp4`), setSurface(fake or holder), setLooping(true), start()
+4. Result: preview surface shows the video, not the real camera.
+
+### B. PreviewCallback path (byte[] frames for apps that process buffers)
+
+1. Hook `setPreviewCallback` / `setPreviewCallbackWithBuffer` / `setOneShotPreviewCallback`
+2. Hook the callback's `onPreviewFrame(byte[] data, Camera camera)`:
+   - First call: read preview size, start MediaCodec decoder on `virtual.mp4` → NV21 into buffer
+   - Every call: copy latest NV21 frame into `data`
+3. Continuous loop: AMediaExtractor + AMediaCodec, scale/convert to preview WxH NV21.
+   Pattern (moving bar) is used only if the decoder cannot start.
+
+### C. takePicture
+
+Replace JPEG/YUV result with a still derived from the video (or `1000.bmp` in some builds).
+
+## Camera2 path
+
+1. Hook `CameraManager.openCamera(...)`
+2. Hook `CaptureRequest.Builder.addTarget/removeTarget/build`
+3. Redirect surfaces to virtual `SurfaceTexture` + `MediaPlayer` for preview
+4. `ImageReader` path: decode video frames into NV21/JPEG for readers
+5. Session callbacks (`onConfigured`, etc.) rewired to virtual surfaces
+
+## Why pure Zygisk needs ART hooks
+
+Original code uses Xposed `findAndHookMethod` on **Java** methods.  
+Zygisk alone can:
+- gate processes (done)
+- PLT/JNI-native hook (limited for Camera Java API)
+
+**ArtHook** provides ART Java method hooking without installing LSPosed.  
+We init ArtHook inside our Zygisk `.so` and hook the same targets listed above.
+
+## Port status in this project
+
+| Piece | Status |
+|-------|--------|
+| Paths + flags + APK automation | **Done** |
+| Zygisk process gate + status | **Done** |
+| Compiled Zygisk `.so` in Magisk zip | **Done** (CI multi-ABI) |
+| MediaPlayer surface replacement | **Done** (v1.13 ArtHook) |
+| NV21 callback injection (pattern) | **Done** (v1.15) |
+| MediaCodec continuous video→NV21 | **Done** (v1.16) |
+| Camera2 surface redirect | Blueprint |
+
+```
+
+`docs/ORIGINAL_VCAM_NOTES.md`:
+
+```md
+# Original VCAM Notes
+
+Source of truth: the classic `com.example.vcam` / android_virtual_cam Xposed module.
+
+## Paths (preserved 1:1)
+
+- Global: `/storage/emulated/0/DCIM/Camera1/`
+- Private (when private_dir.jpg exists or app lacks storage permission): `/storage/emulated/0/Android/data/<pkg>/files/Camera1/`
+
+## Files
+
+| File              | Meaning                                      |
+|-------------------|----------------------------------------------|
+| virtual.mp4       | The video that replaces the camera feed      |
+| disable.jpg       | Temporarily disable the module               |
+| private_dir.jpg   | Force private directory mode                 |
+| no-silent.jpg     | Disable silent mode / force sound?           |
+| no_toast.jpg      | Suppress toast messages                      |
+| force_show.jpg    | Force show certain UI / resolution toast     |
+
+These exact names and locations are what the original HookMain looks for.
+
+```
+
+`hook-java/README.md`:
+
+```md
+# Java hook layer (LSPlant target)
+
+These classes mirror original `com.example.vcam.HookMain` / `VideoToFrames`  
+but are written to be driven from Zygisk+LSPlant (no Xposed API).
+
+Build into a dex later; load from Zygisk after `lsplant::Init`.
+
+## Camera1Hooks.kt (logic summary)
+
+```
+when app calls Camera.setPreviewTexture(st):
+  if enabled && has virtual.mp4 && !disable:
+    replace st with fake SurfaceTexture
+    later MediaPlayer plays virtual.mp4 onto the real surface the app keeps
+
+when app registers PreviewCallback:
+  start MediaCodec decode of virtual.mp4 → NV21 ring buffer
+  on each onPreviewFrame: copy latest NV21 into the callback byte[]
+```
+
+See `docs/ORIGINAL_HOOK_ALGORITHM.md` for exact original behavior.
+
+```
+
+`magisk-module/META-INF/com/google/android/update-binary`:
+
+```
+#!/sbin/sh
+
+umask 022
+
+ui_print() { echo "$1"; }
+
+require_new_magisk() {
+  ui_print "*******************************"
+  ui_print " Please install Magisk v20.4+! "
+  ui_print "*******************************"
+  exit 1
+}
+
+OUTFD=$2
+ZIPFILE=$3
+
+mount /data 2>/dev/null
+
+[ -f /data/adb/magisk/util_functions.sh ] || require_new_magisk
+. /data/adb/magisk/util_functions.sh
+[ $MAGISK_VER_CODE -lt 20400 ] && require_new_magisk
+
+install_module
+exit 0
+
+```
+
+`magisk-module/META-INF/com/google/android/updater-script`:
+
+```
+#MAGISK
+
+```
+
+`magisk-module/customize.sh`:
+
+```sh
+#!/system/bin/sh
+ui_print "- VirtualCam Manager (pure Magisk + Zygisk, NO LSPosed)"
+ui_print "- Ensure Magisk → settings → Zygisk is ON, then reboot"
+mkdir -p /data/adb/virtualcam
+chmod 755 /data/adb/virtualcam
+echo -n 0 > /data/adb/virtualcam/enabled
+echo -n "1.15.0" > /data/adb/virtualcam/module_version
+echo -n "1.15.0" > /data/adb/virtualcam/version
+chmod 644 /data/adb/virtualcam/* 2>/dev/null
+if [ -f "$MODPATH/zygisk/arm64-v8a.so" ] || [ -f "$MODPATH/zygisk/armeabi-v7a.so" ]; then
+  ui_print "- Zygisk libraries packaged"
+else
+  ui_print "! Warning: no zygisk/*.so — rebuild CI artifact"
+fi
+ui_print "- After reboot: install Manager APK, grant root, pick media"
+
+```
+
+`magisk-module/module.prop`:
+
+```prop
+id=virtualcam_manager
+name=VirtualCam Manager
+version=v1.16.0
+versionCode=1160
+author=smithluke874
+description=Pure Magisk + Zygisk VirtualCam (NO LSPosed). ArtHook ART hooks for setPreviewTexture/startPreview/setPreviewCallback* + MediaPlayer surface + MediaCodec continuous video→NV21 + patterned fallback + JNI Camera1 hooks + control plane.
+
+```
+
+`magisk-module/post-fs-data.sh`:
+
+```sh
+#!/system/bin/sh
+# VirtualCam Manager — early boot paths
+
+MODDIR=${0%/*}
+
+mkdir -p /data/adb/virtualcam
+chmod 755 /data/adb/virtualcam
+
+# Default disabled until APK enables
+if [ ! -f /data/adb/virtualcam/enabled ]; then
+  echo -n 0 > /data/adb/virtualcam/enabled
+fi
+chmod 644 /data/adb/virtualcam/enabled 2>/dev/null
+
+# Ensure Camera1 exists early (may be re-created after unlock)
+mkdir -p /storage/emulated/0/DCIM/Camera1 2>/dev/null
+chmod 775 /storage/emulated/0/DCIM/Camera1 2>/dev/null
+
+```
+
+`magisk-module/service.sh`:
+
+```sh
+#!/system/bin/sh
+# VirtualCam Manager — late_start service
+MODDIR=${0%/*}
+sleep 8
+mkdir -p /data/adb/virtualcam
+mkdir -p /storage/emulated/0/DCIM/Camera1 2>/dev/null
+chmod 775 /storage/emulated/0/DCIM/Camera1 2>/dev/null
+restorecon -RF /storage/emulated/0/DCIM/Camera1 2>/dev/null
+restorecon -RF /data/adb/virtualcam 2>/dev/null
+chmod 644 /data/adb/virtualcam/enabled 2>/dev/null
+chmod 644 /data/adb/virtualcam/hook_status 2>/dev/null
+chmod 644 /data/adb/virtualcam/last_hook_pkg 2>/dev/null
+echo -n "1.15.0" > /data/adb/virtualcam/module_version
+echo -n "1.15.0" > /data/adb/virtualcam/version
+chmod 644 /data/adb/virtualcam/module_version 2>/dev/null
+chmod 644 /data/adb/virtualcam/version 2>/dev/null
+
+```
+
+`magisk-module/zygisk/README.txt`:
+
+```txt
+Zygisk native hooks (planned)
+==============================
+
+This directory is where Magisk loads Zygisk modules from:
+  arm64-v8a.so
+  armeabi-v7a.so
+  x86_64.so (emulator)
+
+Original android_virtual_cam (Xposed) hooked:
+  - android.hardware.Camera (Camera1)
+      PreviewCallback, PictureCallback, Parameters, setPreviewTexture
+  - android.hardware.camera2.* (Camera2)
+      CameraManager, CameraDevice, CaptureRequest, CaptureSession
+  - android.graphics.SurfaceTexture
+  - android.media.Image / ImageReader
+
+It read video from:
+  /storage/emulated/0/DCIM/Camera1/virtual.mp4
+  (or private per-app path when private_dir.jpg exists)
+
+Our pure-Magisk design will implement the same interception in native
+Zygisk code so NO LSPosed / Xposed is required.
+
+Until the .so files are built and placed here, the module still:
+  - Creates Camera1 paths at boot
+  - Lets the companion APK manage virtual.mp4 + flag files
+
+```
+
+`manager-app/app/build.gradle.kts`:
+
+```kts
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
+}
+
+android {
+    namespace = "com.virtualcam.manager"
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = "com.virtualcam.manager"
+        minSdk = 26
+        targetSdk = 35
+        versionCode = 1150
+        versionName = "1.15.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        debug {
+            isMinifyEnabled = false
+        }
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    buildFeatures {
+        compose = true
+    }
+}
+
+dependencies {
+    val composeBom = platform("androidx.compose:compose-bom:2024.10.01")
+    implementation(composeBom)
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+    // Extended icons: Apps, VideoLibrary, Error, Image, Upload, VideoFile
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.activity:activity-compose:1.9.3")
+    implementation("androidx.navigation:navigation-compose:2.8.3")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("com.github.topjohnwu.libsu:core:5.2.2")
+    implementation("com.github.topjohnwu.libsu:service:5.2.2")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+}
+
+```
+
+`manager-app/app/proguard-rules.pro`:
+
+```pro
+# VirtualCam Manager ProGuard rules
+-keep class com.topjohnwu.superuser.** { *; }
+-dontwarn com.topjohnwu.superuser.**
+
+```
+
+`manager-app/app/src/main/AndroidManifest.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Legacy storage for pre-13; Photo Picker used on modern Android -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        android:minSdkVersion="30" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+        android:minSdkVersion="30" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.VirtualCamManager"
+        android:requestLegacyExternalStorage="true">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.VirtualCamManager">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+</manifest>
+
+```
+
+`manager-app/app/src/main/java/com/virtualcam/manager/MainActivity.kt`:
+
+```kt
+package com.virtualcam.manager
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import com.virtualcam.manager.ui.navigation.AppNavHost
+import com.virtualcam.manager.ui.theme.VirtualCamManagerTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            VirtualCamManagerTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    AppNavHost()
+                }
+            }
+        }
+    }
+}
+
+```
+
+`manager-app/app/src/main/java/com/virtualcam/manager/data/AutoSetup.kt`:
+
+```kt
+package com.virtualcam.manager.data
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+/**
+ * One-shot automation: prepare the entire pure-Magisk VirtualCam environment
+ * from the APK with root. No manual shell steps required.
+ */
+class AutoSetup(
+    private val fs: FileSystemRepository = FileSystemRepository()
+) {
+
+    data class Result(
+        val rootOk: Boolean,
+        val camera1Ok: Boolean,
+        val controlDirOk: Boolean,
+        val moduleDetected: Boolean,
+        val enabledWritten: Boolean,
+        val message: String
+    )
+
+    suspend fun runFullSetup(enable: Boolean = true): Result = withContext(Dispatchers.IO) {
+        val root = RootShell.isRootAvailable()
+        if (!root) {
+            return@withContext Result(
+                rootOk = false,
+                camera1Ok = false,
+                controlDirOk = false,
+                moduleDetected = false,
+                enabledWritten = false,
+                message = "Root not granted. Open Magisk and allow this app."
+            )
+        }
+
+        val camera1 = fs.ensureGlobalCamera1()
+
+        val control = RootShell.exec(
+            "mkdir -p /data/adb/virtualcam",
+            "chmod 755 /data/adb/virtualcam"
+        ).isSuccess
+
+        val module = RootShell.exec(
+            "[ -d /data/adb/modules/virtualcam_manager ] && echo 1 || echo 0"
+        ).out.firstOrNull()?.trim() == "1" ||
+            RootShell.exec(
+                "[ -f /data/adb/virtualcam/module_installed ] && echo 1 || echo 0"
+            ).out.firstOrNull()?.trim() == "1"
+
+        // Write config Zygisk + service scripts read
+        val enabledCmd = if (enable) {
+            listOf(
+                "echo 1 > /data/adb/virtualcam/enabled",
+                "echo 'mode=global' > /data/adb/virtualcam/config",
+                "echo 'path=/storage/emulated/0/DCIM/Camera1/virtual.mp4' >> /data/adb/virtualcam/config",
+                "rm -f /storage/emulated/0/DCIM/Camera1/disable.jpg"
+            )
+        } else {
+            listOf(
+                "echo 0 > /data/adb/virtualcam/enabled",
+                "touch /storage/emulated/0/DCIM/Camera1/disable.jpg",
+                "chmod 644 /storage/emulated/0/DCIM/Camera1/disable.jpg"
+            )
+        }
+        val enabledWritten = RootShell.exec(*enabledCmd.toTypedArray()).isSuccess
+
+        // Ensure service marker for APK feedback loop
+        RootShell.exec("date +%s > /data/adb/virtualcam/last_setup")
+
+        val msg = buildString {
+            append(if (enable) "VirtualCam ENABLED. " else "VirtualCam DISABLED. ")
+            if (!module) append("Flash Magisk module + reboot for full path persistence. ")
+            append("Place virtual.mp4 via Media tab (or Import from Downloads).")
+        }
+
+        Result(
+            rootOk = true,
+            camera1Ok = camera1,
+            controlDirOk = control,
+            moduleDetected = module,
+            enabledWritten = enabledWritten,
+            message = msg
+        )
+    }
+
+    suspend fun isEnabled(): Boolean = withContext(Dispatchers.IO) {
+        val r = RootShell.exec(
+            "[ -f /data/adb/virtualcam/enabled ] && cat /data/adb/virtualcam/enabled || echo 0"
+        )
+        r.out.firstOrNull()?.trim() == "1"
+    }
+}
+
+```
+
+`manager-app/app/src/main/java/com/virtualcam/manager/data/FileSystemRepository.kt`:
+
+```kt
+package com.virtualcam.manager.data
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+/**
+ * Manages Camera1 directories, virtual.mp4 placement, and flag files
+ * exactly as the original VCAM module expects.
+ */
+class FileSystemRepository {
+
+    companion object {
+        const val GLOBAL_CAMERA1 = "/storage/emulated/0/DCIM/Camera1"
+        const val VIRTUAL_MP4 = "virtual.mp4"
+        const val FLAG_DISABLE = "disable.jpg"
+        const val FLAG_PRIVATE_DIR = "private_dir.jpg"
+        const val FLAG_NO_SILENT = "no-silent.jpg"
+        const val FLAG_NO_TOAST = "no_toast.jpg"
+        const val FLAG_FORCE_SHOW = "force_show.jpg"
+
+        // Common places users drop a test video
+        val IMPORT_CANDIDATES = listOf(
+            "/storage/emulated/0/Download/virtual.mp4",
+            "/storage/emulated/0/Downloads/virtual.mp4",
+            "/sdcard/Download/virtual.mp4",
+            "/sdcard/Downloads/virtual.mp4",
+            "/storage/emulated/0/DCIM/virtual.mp4",
+            "/storage/emulated/0/Movies/virtual.mp4"
+        )
+    }
+
+    suspend fun ensureGlobalCamera1(): Boolean = withContext(Dispatchers.IO) {
+        val result = RootShell.exec(
+            "mkdir -p $GLOBAL_CAMERA1",
+            "chmod 775 $GLOBAL_CAMERA1",
+            "chown media_rw:media_rw $GLOBAL_CAMERA1 2>/dev/null || true"
+        )
+        result.isSuccess
+    }
+
+    suspend fun getPrivateCamera1Path(packageName: String): String {
+        return "/storage/emulated/0/Android/data/$packageName/files/Camera1"
+    }
+
+    suspend fun ensurePrivateCamera1(packageName: String): Boolean = withContext(Dispatchers.IO) {
+        val path = getPrivateCamera1Path(packageName)
+        val result = RootShell.exec(
+            "mkdir -p $path",
+            "chmod 775 $path"
+        )
+        result.isSuccess
+    }
+
+    suspend fun isFlagEnabled(flag: String, usePrivate: Boolean = false, packageName: String? = null): Boolean =
+        withContext(Dispatchers.IO) {
+            val dir = if (usePrivate && packageName != null) getPrivateCamera1Path(packageName) else GLOBAL_CAMERA1
+            val result = RootShell.exec("[ -f $dir/$flag ] && echo 1 || echo 0")
+            result.out.firstOrNull()?.trim() == "1"
+        }
+
+    suspend fun setFlag(flag: String, enabled: Boolean, usePrivate: Boolean = false, packageName: String? = null): Boolean =
+        withContext(Dispatchers.IO) {
+            val dir = if (usePrivate && packageName != null) getPrivateCamera1Path(packageName) else GLOBAL_CAMERA1
+            val cmd = if (enabled) {
+                "touch $dir/$flag && chmod 644 $dir/$flag"
+            } else {
+                "rm -f $dir/$flag"
+            }
+            RootShell.exec(cmd).isSuccess
+        }
+
+    suspend fun placeVirtualVideo(sourcePath: String, usePrivate: Boolean = false, packageName: String? = null): Boolean =
+        withContext(Dispatchers.IO) {
+            val dir = if (usePrivate && packageName != null) {
+                ensurePrivateCamera1(packageName)
+                getPrivateCamera1Path(packageName)
+            } else {
+                ensureGlobalCamera1()
+                GLOBAL_CAMERA1
+            }
+            val dest = "$dir/$VIRTUAL_MP4"
+            val result = RootShell.exec(
+                "cp -f \"$sourcePath\" \"$dest\"",
+                "chmod 644 \"$dest\"",
+                "chown media_rw:media_rw \"$dest\" 2>/dev/null || true",
+                "sync"
+            )
+            result.isSuccess
+        }
+
+    /**
+     * Looks for virtual.mp4 in common user folders and copies into Camera1.
+     * Returns the source path used, or null if nothing found.
+     */
+    suspend fun importVirtualFromDownloads(): String? = withContext(Dispatchers.IO) {
+        ensureGlobalCamera1()
+        for (candidate in IMPORT_CANDIDATES) {
+            val exists = RootShell.exec("[ -f \"$candidate\" ] && echo 1 || echo 0")
+                .out.firstOrNull()?.trim() == "1"
+            if (exists) {
+                val ok = placeVirtualVideo(candidate)
+                if (ok) return@withContext candidate
+            }
+        }
+        null
+    }
+
+    suspend fun hasVirtualVideo(usePrivate: Boolean = false, packageName: String? = null): Boolean =
+        withContext(Dispatchers.IO) {
+            val dir = if (usePrivate && packageName != null) getPrivateCamera1Path(packageName) else GLOBAL_CAMERA1
+            val result = RootShell.exec("[ -f $dir/$VIRTUAL_MP4 ] && echo 1 || echo 0")
+            result.out.firstOrNull()?.trim() == "1"
+        }
+
+    suspend fun removeVirtualVideo(usePrivate: Boolean = false, packageName: String? = null): Boolean =
+        withContext(Dispatchers.IO) {
+            val dir = if (usePrivate && packageName != null) getPrivateCamera1Path(packageName) else GLOBAL_CAMERA1
+            RootShell.exec("rm -f $dir/$VIRTUAL_MP4").isSuccess
+        }
+
+    suspend fun listCamera1Contents(): List<String> = withContext(Dispatchers.IO) {
+        ensureGlobalCamera1()
+        RootShell.exec("ls -la $GLOBAL_CAMERA1 2>/dev/null").out
+    }
+}
+
+```
+
+`manager-app/app/src/main/java/com/virtualcam/manager/data/MediaImportHelper.kt`:
+
+```kt
+package com.virtualcam.manager.data
+
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Matrix
+import android.graphics.Paint
+import android.media.MediaCodec
+import android.media.MediaCodecInfo
+import android.media.MediaFormat
+import android.media.MediaMuxer
+import android.net.Uri
+import android.webkit.MimeTypeMap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.nio.ByteBuffer
+
+/**
+ * Picks image or video from the system picker, converts images to a short
+ * looping H.264 MP4, and installs the result as /DCIM/Camera1/virtual.mp4
+ * via root so Zygisk + classic VCAM paths can use it.
+ */
+class MediaImportHelper(
+    private val fs: FileSystemRepository = FileSystemRepository()
+) {
+
+    data class ImportResult(
+        val success: Boolean,
+        val message: String,
+        val isImage: Boolean = false,
+        val destPath: String? = null
+    )
+
+    suspend fun importFromUri(context: Context, uri: Uri): ImportResult = withContext(Dispatchers.IO) {
+        try {
+            val mime = context.contentResolver.getType(uri)
+                ?: guessMime(uri)
+                ?: "application/octet-stream"
+            val isImage = mime.startsWith("image/")
+            val isVideo = mime.startsWith("video/")
+
+            if (!isImage && !isVideo) {
+                return@withContext ImportResult(false, "Unsupported type: $mime")
+            }
+
+            val cacheDir = File(context.cacheDir, "vcam_import").apply { mkdirs() }
+            val workFile = File(cacheDir, if (isVideo) "picked_video.bin" else "picked_image.bin")
+
+            // Stream content into app-private cache (works with Photo Picker / SAF)
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                FileOutputStream(workFile).use { out -> input.copyTo(out) }
+            } ?: return@withContext ImportResult(false, "Cannot read selected file")
+
+            if (workFile.length() < 32) {
+                return@withContext ImportResult(false, "Selected file is empty")
+            }
+
+            val mp4ToInstall: File = if (isVideo) {
+                // Ensure .mp4 extension for downstream tools
+                val named = File(cacheDir, "virtual_src.mp4")
+                workFile.copyTo(named, overwrite = true)
+                named
+            } else {
+                // Decode image → short looping H.264 mp4
+                val bmp = decodeBitmap(workFile)
+                    ?: return@withContext ImportResult(false, "Could not decode image")
+                val outMp4 = File(cacheDir, "virtual_from_image.mp4")
+                encodeStillToMp4(bmp, outMp4)
+                // Also drop a still for takePicture-style paths
+                saveStillForTakePicture(bmp, cacheDir)
+                bmp.recycle()
+                outMp4
+            }
+
+            if (!mp4ToInstall.exists() || mp4ToInstall.length() < 100) {
+                return@withContext ImportResult(false, "Failed to prepare MP4")
+            }
+
+            // Root-install into classic VCAM path
+            val ok = fs.placeVirtualVideo(mp4ToInstall.absolutePath)
+            if (!ok) {
+                return@withContext ImportResult(false, "Root copy to Camera1 failed. Grant root and retry.")
+            }
+
+            // Image still (optional, best-effort)
+            val still = File(cacheDir, "1000.bmp")
+            if (still.exists()) {
+                RootShell.exec(
+                    "cp -f \"${still.absolutePath}\" /storage/emulated/0/DCIM/Camera1/1000.bmp",
+                    "chmod 644 /storage/emulated/0/DCIM/Camera1/1000.bmp"
+                )
+            }
+
+            // Auto-enable control plane so user only picks media once
+            RootShell.exec(
+                "mkdir -p /data/adb/virtualcam",
+                "echo 1 > /data/adb/virtualcam/enabled",
+                "rm -f /storage/emulated/0/DCIM/Camera1/disable.jpg",
+                "echo 'source=app_picker' > /data/adb/virtualcam/last_import"
+            )
+
+            val kind = if (isImage) "image (encoded to looping MP4)" else "video"
+            ImportResult(
+                success = true,
+                message = "Installed $kind as virtual.mp4\n" +
+                        "/DCIM/Camera1/virtual.mp4\n" +
+                        "VirtualCam enabled. Open a camera app to use it.",
+                isImage = isImage,
+                destPath = FileSystemRepository.GLOBAL_CAMERA1 + "/" + FileSystemRepository.VIRTUAL_MP4
+            )
+        } catch (t: Throwable) {
+            ImportResult(false, "Import error: ${t.message ?: t.javaClass.simpleName}")
+        }
+    }
+
+    private fun guessMime(uri: Uri): String? {
+        val name = uri.lastPathSegment ?: return null
+        val ext = name.substringAfterLast('.', "").lowercase()
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext)
+    }
+
+    private fun decodeBitmap(file: File): Bitmap? {
+        val opts = BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888 }
+        var bmp = BitmapFactory.decodeFile(file.absolutePath, opts) ?: return null
+        // Cap resolution for encoder stability / preview match
+        val maxSide = 1280
+        val w = bmp.width
+        val h = bmp.height
+        if (w > maxSide || h > maxSide) {
+            val scale = maxSide.toFloat() / maxOf(w, h)
+            val nw = (w * scale).toInt().coerceAtLeast(2) and 1.inv() // even
+            val nh = (h * scale).toInt().coerceAtLeast(2) and 1.inv()
+            val scaled = Bitmap.createScaledBitmap(bmp, nw, nh, true)
+            if (scaled != bmp) bmp.recycle()
+            bmp = scaled
+        }
+        // Encoder needs even dimensions
+        val ew = bmp.width and 1.inv()
+        val eh = bmp.height and 1.inv()
+        if (ew != bmp.width || eh != bmp.height) {
+            val cropped = Bitmap.createBitmap(bmp, 0, 0, ew, eh)
+            if (cropped != bmp) bmp.recycle()
+            bmp = cropped
+        }
+        return bmp
+    }
+
+    private fun saveStillForTakePicture(bmp: Bitmap, cacheDir: File) {
+        try {
+            val f = File(cacheDir, "1000.bmp")
+            FileOutputStream(f).use { out ->
+                bmp.compress(Bitmap.CompressFormat.PNG, 100, out) // PNG ok; filename matches original convention
+            }
+        } catch (_: Throwable) { }
+    }
+
+    /**
+     * Encode a still image as a short looping H.264 MP4 (NV12 → AVC).
+     * Duration ~3s @ 10fps so MediaPlayer / VideoToFrames have content.
+     */
+    private fun encodeStillToMp4(src: Bitmap, outFile: File, durationSec: Int = 3, fps: Int = 10) {
+        val width = src.width and 1.inv()
+        val height = src.height and 1.inv()
+        val frameCount = durationSec * fps
+        val mime = "video/avc"
+        val bitRate = (width * height * 4).coerceIn(500_000, 4_000_000)
+
+        val format = MediaFormat.createVideoFormat(mime, width, height).apply {
+            setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar)
+            setInteger(MediaFormat.KEY_BIT_RATE, bitRate)
+            setInteger(MediaFormat.KEY_FRAME_RATE, fps)
+            setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
+        }
+
+        val codec = MediaCodec.createEncoderByType(mime)
+        codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
+        codec.start()
+
+        if (outFile.exists()) outFile.delete()
+        val muxer = MediaMuxer(outFile.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
+        var track = -1
+        var muxerStarted = false
+
+        val nv12 = bitmapToNv12(src, width, height)
+        val bufferInfo = MediaCodec.BufferInfo()
+        var inputFrames = 0
+        var outputDone = false
+
+        while (!outputDone) {
+            if (inputFrames < frameCount) {
+                val inIndex = codec.dequeueInputBuffer(10_000)
+                if (inIndex >= 0) {
+                    val inBuf = codec.getInputBuffer(inIndex)!!
+                    inBuf.clear()
+                    inBuf.put(nv12)
+                    val ptsUs = inputFrames * 1_000_000L / fps
+                    codec.queueInputBuffer(inIndex, 0, nv12.size, ptsUs, 0)
+                    inputFrames++
+                }
+            } else {
+                val inIndex = codec.dequeueInputBuffer(10_000)
+                if (inIndex >= 0) {
+                    codec.queueInputBuffer(inIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+                }
+            }
+
+            var outIndex = codec.dequeueOutputBuffer(bufferInfo, 10_000)
+            while (outIndex >= 0) {
+                if (bufferInfo.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0) {
+                    outputDone = true
+                }
+                val outBuf = codec.getOutputBuffer(outIndex)!!
+                if (bufferInfo.size > 0) {
+                    if (!muxerStarted) {
+                        val newFormat = codec.outputFormat
+                        track = muxer.addTrack(newFormat)
+                        muxer.start()
+                        muxerStarted = true
+                    }
+                    outBuf.position(bufferInfo.offset)
+                    outBuf.limit(bufferInfo.offset + bufferInfo.size)
+                    muxer.writeSampleData(track, outBuf, bufferInfo)
+                }
+                codec.releaseOutputBuffer(outIndex, false)
+                outIndex = codec.dequeueOutputBuffer(bufferInfo, 0)
+            }
+            if (outIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED && !muxerStarted) {
+                track = muxer.addTrack(codec.outputFormat)
+                muxer.start()
+                muxerStarted = true
+            }
+        }
+
+        codec.stop()
+        codec.release()
+        if (muxerStarted) muxer.stop()
+        muxer.release()
+    }
+
+    /** ARGB_8888 bitmap → NV12 (YUV420 semi-planar) */
+    private fun bitmapToNv12(bmp: Bitmap, width: Int, height: Int): ByteArray {
+        val argb = IntArray(width * height)
+        bmp.getPixels(argb, 0, width, 0, 0, width, height)
+        val ySize = width * height
+        val out = ByteArray(ySize + ySize / 2)
+        var yIndex = 0
+        var uvIndex = ySize
+        for (j in 0 until height) {
+            for (i in 0 until width) {
+                val c = argb[j * width + i]
+                val r = (c shr 16) and 0xff
+                val g = (c shr 8) and 0xff
+                val b = c and 0xff
+                val y = ((66 * r + 129 * g + 25 * b + 128) shr 8) + 16
+                out[yIndex++] = y.coerceIn(0, 255).toByte()
+                if (j % 2 == 0 && i % 2 == 0) {
+                    val u = ((-38 * r - 74 * g + 112 * b + 128) shr 8) + 128
+                    val v = ((112 * r - 94 * g - 18 * b + 128) shr 8) + 128
+                    out[uvIndex++] = u.coerceIn(0, 255).toByte()
+                    out[uvIndex++] = v.coerceIn(0, 255).toByte()
+                }
+            }
+        }
+        return out
+    }
+}
+
+```
+
+`manager-app/app/src/main/java/com/virtualcam/manager/data/PrerequisiteChecker.kt`:
+
+```kt
+package com.virtualcam.manager.data
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+data class PrerequisiteStatus(
+    val rootAvailable: Boolean = false,
+    val magiskPresent: Boolean = false,
+    val moduleInstalled: Boolean = false,
+    val camera1Ready: Boolean = false,
+    val moduleControlDir: Boolean = false,
+    val moduleVersion: String? = null,
+    val zygiskLibPresent: Boolean = false,
+    val hookStatus: String? = null,
+    val lastHookPkg: String? = null,
+    val vcamEnabled: Boolean = false,
+    val hasVirtualVideo: Boolean = false
+) {
+    val allPassed: Boolean
+        get() = rootAvailable && magiskPresent && camera1Ready
+}
+
+class PrerequisiteChecker(
+    private val fileSystem: FileSystemRepository = FileSystemRepository()
+) {
+
+    suspend fun check(): PrerequisiteStatus = withContext(Dispatchers.IO) {
+        val root = RootShell.isRootAvailable()
+
+        val magisk = RootShell.exec("[ -d /data/adb/magisk ] && echo 1").out.firstOrNull()?.trim() == "1" ||
+                RootShell.exec("pm path com.topjohnwu.magisk").isSuccess ||
+                RootShell.exec("which magisk").isSuccess
+
+        val modulePathCheck = RootShell.exec(
+            "[ -d /data/adb/modules/virtualcam_manager ] && echo 1 || echo 0"
+        ).out.firstOrNull()?.trim() == "1"
+
+        val markerCheck = RootShell.exec(
+            "[ -f /data/adb/virtualcam/module_installed ] && echo 1 || echo 0"
+        ).out.firstOrNull()?.trim() == "1"
+
+        val moduleInstalled = modulePathCheck || markerCheck
+
+        val version = RootShell.exec(
+            "cat /data/adb/virtualcam/version 2>/dev/null"
+        ).out.firstOrNull()?.trim()
+
+        val zygiskLib = RootShell.exec(
+            "[ -f /data/adb/modules/virtualcam_manager/zygisk/arm64-v8a.so ] && echo 1 || " +
+                    "[ -f /data/adb/modules/virtualcam_manager/zygisk/armeabi-v7a.so ] && echo 1 || echo 0"
+        ).out.firstOrNull()?.trim() == "1"
+
+        val hookStatus = RootShell.exec(
+            "cat /data/adb/virtualcam/hook_status 2>/dev/null"
+        ).out.firstOrNull()?.trim()
+
+        val lastPkg = RootShell.exec(
+            "cat /data/adb/virtualcam/last_hook_pkg 2>/dev/null"
+        ).out.firstOrNull()?.trim()
+
+        val enabled = RootShell.exec(
+            "[ -f /data/adb/virtualcam/enabled ] && cat /data/adb/virtualcam/enabled || echo 0"
+        ).out.firstOrNull()?.trim() == "1"
+
+        val hasVideo = fileSystem.hasVirtualVideo()
+        val camera1 = fileSystem.ensureGlobalCamera1()
+        val control = RootShell.exec("mkdir -p /data/adb/virtualcam && echo 1").isSuccess
+
+        PrerequisiteStatus(
+            rootAvailable = root,
+            magiskPresent = magisk,
+            moduleInstalled = moduleInstalled,
+            camera1Ready = camera1,
+            moduleControlDir = control,
+            moduleVersion = version,
+            zygiskLibPresent = zygiskLib,
+            hookStatus = hookStatus,
+            lastHookPkg = lastPkg,
+            vcamEnabled = enabled,
+            hasVirtualVideo = hasVideo
+        )
+    }
+}
+
+```
+
+`manager-app/app/src/main/java/com/virtualcam/manager/data/RootShell.kt`:
+
+```kt
+package com.virtualcam.manager.data
+
+import com.topjohnwu.superuser.Shell
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+/**
+ * Thin wrapper around libsu for all privileged operations.
+ * Always use this instead of Runtime.exec to avoid deadlocks.
+ */
+object RootShell {
+
+    init {
+        Shell.enableVerboseLogging = true
+        Shell.setDefaultBuilder(
+            Shell.Builder.create()
+                .setFlags(Shell.FLAG_MOUNT_MASTER)
+                .setTimeout(10)
+        )
+    }
+
+    suspend fun isRootAvailable(): Boolean = withContext(Dispatchers.IO) {
+        Shell.getShell().isRoot
+    }
+
+    suspend fun exec(vararg commands: String): Shell.Result = withContext(Dispatchers.IO) {
+        Shell.cmd(*commands).exec()
+    }
+
+    suspend fun execAndGetOutput(vararg commands: String): List<String> = withContext(Dispatchers.IO) {
+        Shell.cmd(*commands).exec().out
+    }
+
+    suspend fun test(): Boolean = withContext(Dispatchers.IO) {
+        val result = Shell.cmd("id").exec()
+        result.isSuccess && result.out.any { it.contains("uid=0") }
+    }
+}
+
+```
+
+`manager-app/app/src/main/java/com/virtualcam/manager/ui/navigation/AppNavHost.kt`:
+
+```kt
+package com.virtualcam.manager.ui.navigation
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.VideoLibrary
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.virtualcam.manager.ui.screens.HomeScreen
+import com.virtualcam.manager.ui.screens.TargetAppsScreen
+import com.virtualcam.manager.ui.screens.MediaHubScreen
+import com.virtualcam.manager.ui.screens.SettingsScreen
+
+sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
+    object Home : Screen("home", "Home", Icons.Default.Home)
+    object TargetApps : Screen("targets", "Info", Icons.Default.Apps)
+    object MediaHub : Screen("media", "Media", Icons.Default.VideoLibrary)
+    object Settings : Screen("settings", "Settings", Icons.Default.Settings)
+}
+
+val bottomNavItems = listOf(
+    Screen.Home,
+    Screen.TargetApps,
+    Screen.MediaHub,
+    Screen.Settings
+)
+
+@Composable
+fun AppNavHost() {
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                bottomNavItems.forEach { screen ->
+                    NavigationBarItem(
+                        icon = { Icon(screen.icon, contentDescription = screen.title) },
+                        label = { Text(screen.title) },
+                        selected = currentRoute == screen.route,
+                        onClick = {
+                            navController.navigate(screen.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = Screen.Home.route,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable(Screen.Home.route) { HomeScreen() }
+            composable(Screen.TargetApps.route) { TargetAppsScreen() }
+            composable(Screen.MediaHub.route) { MediaHubScreen() }
+            composable(Screen.Settings.route) { SettingsScreen() }
+        }
+    }
+}
+
+```
+
+`manager-app/app/src/main/java/com/virtualcam/manager/ui/screens/HomeScreen.kt`:
+
+```kt
+package com.virtualcam.manager.ui.screens
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier as ComposeModifier
+import androidx.compose.ui.unit.dp
+import com.virtualcam.manager.data.AutoSetup
+import com.virtualcam.manager.data.PrerequisiteChecker
+import com.virtualcam.manager.data.PrerequisiteStatus
+import com.virtualcam.manager.ui.theme.Danger
+import com.virtualcam.manager.ui.theme.Primary
+import com.virtualcam.manager.ui.theme.Success
+import kotlinx.coroutines.launch
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeScreen() {
+    val checker = remember { PrerequisiteChecker() }
+    val autoSetup = remember { AutoSetup() }
+    var status by remember { mutableStateOf<PrerequisiteStatus?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
+    var enabled by remember { mutableStateOf(false) }
+    var setupMessage by remember { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    fun refresh() {
+        scope.launch {
+            isLoading = true
+            status = checker.check()
+            enabled = autoSetup.isEnabled()
+            isLoading = false
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        status = checker.check()
+        if (status?.rootAvailable == true) {
+            autoSetup.runFullSetup(enable = autoSetup.isEnabled())
+        }
+        enabled = autoSetup.isEnabled()
+        status = checker.check()
+        isLoading = false
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("VirtualCam Manager") },
+                actions = {
+                    IconButton(onClick = { refresh() }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = ComposeModifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text("One-tap control", style = MaterialTheme.typography.titleLarge)
+            Card(
+                modifier = ComposeModifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (enabled) Success.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Column(
+                    modifier = ComposeModifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(
+                        modifier = ComposeModifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = ComposeModifier.weight(1f)) {
+                            Text(
+                                if (enabled) "VirtualCam is ON" else "VirtualCam is OFF",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                if (enabled) "enabled=1" else "Tap to activate",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                        Switch(
+                            checked = enabled,
+                            enabled = !busy && status?.rootAvailable == true,
+                            onCheckedChange = { want ->
+                                scope.launch {
+                                    busy = true
+                                    val r = autoSetup.runFullSetup(enable = want)
+                                    setupMessage = r.message
+                                    enabled = autoSetup.isEnabled()
+                                    status = checker.check()
+                                    busy = false
+                                }
+                            }
+                        )
+                    }
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                busy = true
+                                setupMessage = autoSetup.runFullSetup(enable = true).message
+                                enabled = true
+                                status = checker.check()
+                                busy = false
+                            }
+                        },
+                        enabled = !busy && status?.rootAvailable == true,
+                        modifier = ComposeModifier.fillMaxWidth()
+                    ) { Text(if (busy) "Working…" else "Run full auto-setup") }
+                }
+            }
+            setupMessage?.let { Text(it, color = Success) }
+            Text("System status", style = MaterialTheme.typography.titleMedium)
+            if (isLoading) {
+                Box(modifier = ComposeModifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Primary)
+                }
+            } else {
+                status?.let { s ->
+                    StatusCard("Root Access", s.rootAvailable)
+                    StatusCard("Magisk", s.magiskPresent)
+                    StatusCard(if (s.moduleVersion != null) "Module (${s.moduleVersion})" else "Module", s.moduleInstalled)
+                    StatusCard("Zygisk .so", s.zygiskLibPresent)
+                    StatusCard("Camera1", s.camera1Ready)
+                    StatusCard("virtual.mp4", s.hasVirtualVideo)
+                    StatusCard("Enabled", s.vcamEnabled)
+                    if (s.hookStatus != null) {
+                        Text("Hook: ${s.hookStatus} ${s.lastHookPkg ?: ""}")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatusCard(title: String, ok: Boolean) {
+    Card(modifier = ComposeModifier.fillMaxWidth().padding(vertical = 4.dp)) {
+        Row(
+            modifier = ComposeModifier.fillMaxWidth().padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(title)
+            Icon(
+                imageVector = if (ok) Icons.Default.CheckCircle else Icons.Default.Error,
+                contentDescription = null,
+                tint = if (ok) Success else Danger
+            )
+        }
+    }
+}
+
+```
+
+`manager-app/app/src/main/java/com/virtualcam/manager/ui/screens/MediaHubScreen.kt`:
+
+```kt
+package com.virtualcam.manager.ui.screens
+
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.VideoFile
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier as ComposeModifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import com.virtualcam.manager.data.FileSystemRepository
+import com.virtualcam.manager.data.MediaImportHelper
+import com.virtualcam.manager.ui.theme.Danger
+import com.virtualcam.manager.ui.theme.Primary
+import com.virtualcam.manager.ui.theme.Success
+import kotlinx.coroutines.launch
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MediaHubScreen() {
+    val context = LocalContext.current
+    val repo = remember { FileSystemRepository() }
+    val importer = remember { MediaImportHelper(repo) }
+    var hasVideo by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
+    var importing by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf<String?>(null) }
+    var messageOk by remember { mutableStateOf(true) }
+    var listing by remember { mutableStateOf<List<String>>(emptyList()) }
+    val scope = rememberCoroutineScope()
+
+    fun refresh() {
+        scope.launch {
+            isLoading = true
+            hasVideo = repo.hasVirtualVideo()
+            listing = repo.listCamera1Contents()
+            isLoading = false
+        }
+    }
+
+    fun onPicked(uri: Uri?) {
+        if (uri == null) return
+        scope.launch {
+            importing = true
+            message = "Processing…"
+            messageOk = true
+            val result = importer.importFromUri(context, uri)
+            message = result.message
+            messageOk = result.success
+            importing = false
+            refresh()
+        }
+    }
+
+    val pickVideo = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { onPicked(it) }
+    val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { onPicked(it) }
+    val pickAny = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { onPicked(it) }
+
+    LaunchedEffect(Unit) { refresh() }
+
+    Scaffold(topBar = { TopAppBar(title = { Text("Media Hub") }) }) { padding ->
+        Column(
+            modifier = ComposeModifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text("Upload spoof media", style = MaterialTheme.typography.titleLarge)
+            Card(modifier = ComposeModifier.fillMaxWidth()) {
+                Column(
+                    modifier = ComposeModifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            if (hasVideo) Icons.Default.VideoFile else Icons.Default.Upload,
+                            contentDescription = null,
+                            tint = if (hasVideo) Success else Primary
+                        )
+                        Spacer(modifier = ComposeModifier.width(12.dp))
+                        Column {
+                            Text("virtual.mp4", style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                if (hasVideo) "Ready" else "Not installed",
+                                color = if (hasVideo) Success else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    if (importing || isLoading) {
+                        CircularProgressIndicator(
+                            modifier = ComposeModifier.height(36.dp).width(36.dp),
+                            color = Primary
+                        )
+                    }
+                    Button(
+                        onClick = {
+                            pickVideo.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly)
+                            )
+                        },
+                        enabled = !importing,
+                        modifier = ComposeModifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.VideoFile, null)
+                        Spacer(modifier = ComposeModifier.width(8.dp))
+                        Text("Pick video")
+                    }
+                    Button(
+                        onClick = {
+                            pickImage.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        },
+                        enabled = !importing,
+                        modifier = ComposeModifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Image, null)
+                        Spacer(modifier = ComposeModifier.width(8.dp))
+                        Text("Pick image (→ looping MP4)")
+                    }
+                    OutlinedButton(
+                        onClick = { pickAny.launch("*/*") },
+                        enabled = !importing,
+                        modifier = ComposeModifier.fillMaxWidth()
+                    ) {
+                        Text("Pick any file")
+                    }
+                    if (hasVideo) {
+                        TextButton(
+                            onClick = {
+                                scope.launch {
+                                    repo.removeVirtualVideo()
+                                    message = "removed"
+                                    messageOk = true
+                                    refresh()
+                                }
+                            },
+                            colors = ButtonDefaults.textButtonColors(contentColor = Danger)
+                        ) { Text("Remove virtual.mp4") }
+                    }
+                }
+            }
+            message?.let {
+                Text(it, color = if (messageOk) Success else Danger)
+            }
+            if (listing.isNotEmpty()) {
+                Text("Camera1 contents")
+                listing.forEach { Text(it, style = MaterialTheme.typography.bodySmall) }
+            }
+        }
+    }
+}
+
+```
+
+`manager-app/app/src/main/java/com/virtualcam/manager/ui/screens/SettingsScreen.kt`:
+
+```kt
+package com.virtualcam.manager.ui.screens
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.virtualcam.manager.data.FileSystemRepository
+import com.virtualcam.manager.ui.theme.Primary
+import kotlinx.coroutines.launch
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsScreen() {
+    val repo = remember { FileSystemRepository() }
+    var disable by remember { mutableStateOf(false) }
+    var privateDir by remember { mutableStateOf(false) }
+    var noSilent by remember { mutableStateOf(false) }
+    var noToast by remember { mutableStateOf(false) }
+    var forceShow by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
+
+    fun loadFlags() {
+        scope.launch {
+            isLoading = true
+            disable = repo.isFlagEnabled(FileSystemRepository.FLAG_DISABLE)
+            privateDir = repo.isFlagEnabled(FileSystemRepository.FLAG_PRIVATE_DIR)
+            noSilent = repo.isFlagEnabled(FileSystemRepository.FLAG_NO_SILENT)
+            noToast = repo.isFlagEnabled(FileSystemRepository.FLAG_NO_TOAST)
+            forceShow = repo.isFlagEnabled(FileSystemRepository.FLAG_FORCE_SHOW)
+            isLoading = false
+        }
+    }
+
+    LaunchedEffect(Unit) { loadFlags() }
+
+    fun toggle(flag: String, current: Boolean, setter: (Boolean) -> Unit) {
+        scope.launch {
+            val newValue = !current
+            if (repo.setFlag(flag, newValue)) {
+                setter(newValue)
+            }
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(title = { Text("Settings & Flags") })
+        }
+    ) { padding ->
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = Primary)
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "VCAM Runtime Flags",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text(
+                    text = "These create/delete the .jpg sentinel files that the original VCAM paths and exploit expected.",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                FlagSwitch(
+                    title = "Disable Module",
+                    subtitle = "Creates disable.jpg – temporarily turns off virtual camera",
+                    checked = disable,
+                    onCheckedChange = { toggle(FileSystemRepository.FLAG_DISABLE, disable) { disable = it } }
+                )
+                FlagSwitch(
+                    title = "Force Private Directory",
+                    subtitle = "Creates private_dir.jpg – use per-app Camera1 path",
+                    checked = privateDir,
+                    onCheckedChange = { toggle(FileSystemRepository.FLAG_PRIVATE_DIR, privateDir) { privateDir = it } }
+                )
+                FlagSwitch(
+                    title = "Enable Video Audio",
+                    subtitle = "Creates no-silent.jpg – play sound from virtual.mp4",
+                    checked = noSilent,
+                    onCheckedChange = { toggle(FileSystemRepository.FLAG_NO_SILENT, noSilent) { noSilent = it } }
+                )
+                FlagSwitch(
+                    title = "Suppress Toasts",
+                    subtitle = "Creates no_toast.jpg – hide toast messages",
+                    checked = noToast,
+                    onCheckedChange = { toggle(FileSystemRepository.FLAG_NO_TOAST, noToast) { noToast = it } }
+                )
+                FlagSwitch(
+                    title = "Force Show",
+                    subtitle = "Creates force_show.jpg",
+                    checked = forceShow,
+                    onCheckedChange = { toggle(FileSystemRepository.FLAG_FORCE_SHOW, forceShow) { forceShow = it } }
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text("About", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = "VirtualCam Manager is a pure Magisk module + single APK solution.\n" +
+                            "It manages the exact classic VCAM paths and flag files.\n" +
+                            "No LSPosed or Xposed is required. Future Zygisk native hooks will provide frame injection.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FlagSwitch(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: () -> Unit
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.titleMedium)
+                Text(subtitle, style = MaterialTheme.typography.bodySmall)
+            }
+            Switch(
+                checked = checked,
+                onCheckedChange = { onCheckedChange() }
+            )
+        }
+    }
+}
+
+```
+
+`manager-app/app/src/main/java/com/virtualcam/manager/ui/screens/TargetAppsScreen.kt`:
+
+```kt
+package com.virtualcam.manager.ui.screens
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TargetAppsScreen() {
+    Scaffold(
+        topBar = {
+            TopAppBar(title = { Text("Architecture") })
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Pure Magisk + Single APK",
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("What works now", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = "• Magisk module creates /DCIM/Camera1 at boot\n" +
+                                "• This APK manages virtual.mp4 + all classic flag files\n" +
+                                "• No LSPosed / Xposed / second framework required\n" +
+                                "• Paths match original android_virtual_cam exactly",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("What original VCAM did", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = "Original VCAM was an Xposed module. It hooked:\n" +
+                                "• Camera1: PreviewCallback, PictureCallback, SurfaceTexture\n" +
+                                "• Camera2: CameraManager, CameraDevice, CaptureRequest\n" +
+                                "Then fed frames from virtual.mp4 into the app.\n\n" +
+                                "The path/flag files alone do not replace the camera feed — " +
+                                "they are the control plane the hook reads.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Next: Zygisk native hooks", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = "To stay pure Magisk (no LSPosed), frame injection will be " +
+                                "implemented as Zygisk .so libraries inside this same Magisk module.\n\n" +
+                                "The zygisk/ folder is already prepared. Once the native hooks land, " +
+                                "you still only flash this one module + install this one APK.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            Text(
+                text = "Until Zygisk hooks are complete, use this stack to prepare the " +
+                        "environment and verify paths/flags on your device. Any future " +
+                        "hook (or app that already respects the classic layout) will work " +
+                        "with the same files this APK manages.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+```
+
+`manager-app/app/src/main/java/com/virtualcam/manager/ui/theme/Color.kt`:
+
+```kt
+package com.virtualcam.manager.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+val Primary = Color(0xFF3B32F6)
+val Accent = Color(0xFFA0ABFF)
+val Success = Color(0xFF5EE571)
+val Warning = Color(0xFFF5A023)
+val Danger = Color(0xFFFF404F)
+
+val BgLight = Color(0xFFF6F7FA)
+val SurfaceLight = Color(0xFFFFFFFF)
+val TextPrimaryLight = Color(0xFF0A0D14)
+
+val BgDark = Color(0xFF0B0E13)
+val SurfaceDark = Color(0xFF151A22)
+val TextPrimaryDark = Color(0xFFF5F7FA)
+
+```
+
+`manager-app/app/src/main/java/com/virtualcam/manager/ui/theme/Theme.kt`:
+
+```kt
+package com.virtualcam.manager.ui.theme
+
+import android.app.Activity
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
+
+private val DarkColorScheme = darkColorScheme(
+    primary = Primary,
+    secondary = Accent,
+    background = BgDark,
+    surface = SurfaceDark,
+    onBackground = TextPrimaryDark,
+    onSurface = TextPrimaryDark,
+    onPrimary = TextPrimaryDark,
+    error = Danger
+)
+
+private val LightColorScheme = lightColorScheme(
+    primary = Primary,
+    secondary = Accent,
+    background = BgLight,
+    surface = SurfaceLight,
+    onBackground = TextPrimaryLight,
+    onSurface = TextPrimaryLight,
+    onPrimary = TextPrimaryDark,
+    error = Danger
+)
+
+@Composable
+fun VirtualCamManagerTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.background.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = Typography,
+        content = content
+    )
+}
+
+```
+
+`manager-app/app/src/main/java/com/virtualcam/manager/ui/theme/Type.kt`:
+
+```kt
+package com.virtualcam.manager.ui.theme
+
+import androidx.compose.material3.Typography
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+
+val Typography = Typography(
+    displayLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 34.sp,
+        lineHeight = 41.sp
+    ),
+    titleLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 28.sp,
+        lineHeight = 34.sp
+    ),
+    titleMedium = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 17.sp,
+        lineHeight = 22.sp
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
+        fontSize = 17.sp,
+        lineHeight = 22.sp
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
+        fontSize = 15.sp,
+        lineHeight = 20.sp
+    ),
+    bodySmall = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
+        fontSize = 13.sp,
+        lineHeight = 18.sp
+    ),
+    labelLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Medium,
+        fontSize = 17.sp,
+        lineHeight = 22.sp
+    )
+)
+
+```
+
+`manager-app/app/src/main/res/drawable/ic_launcher.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#3B32F6"
+        android:pathData="M0,0h108v108h-108z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,38h12l4,-6h16l4,6h12c2.2,0 4,1.8 4,4v28c0,2.2 -1.8,4 -4,4H30c-2.2,0 -4,-1.8 -4,-4V42c0,-2.2 1.8,-4 4,-4z"/>
+    <path
+        android:fillColor="#3B32F6"
+        android:pathData="M54,52m-12,0a12,12 0,1 1,24 0a12,12 0,1 1,-24 0"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,52m-6,0a6,6 0,1 1,12 0a6,6 0,1 1,-12 0"/>
+</vector>
+
+```
+
+`manager-app/app/src/main/res/values/colors.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#3B32F6</color>
+    <color name="purple_200">#A0ABFF</color>
+    <color name="purple_500">#3B32F6</color>
+    <color name="purple_700">#2A24B0</color>
+    <color name="teal_200">#5EE571</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
+
+```
+
+`manager-app/app/src/main/res/values/strings.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VirtualCam Manager</string>
+</resources>
+
+```
+
+`manager-app/app/src/main/res/values/themes.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.VirtualCamManager" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
+
+```
+
+`manager-app/build.gradle.kts`:
+
+```kts
+// Top-level build file
+plugins {
+    id("com.android.application") version "8.7.2" apply false
+    id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.21" apply false
+}
+
+```
+
+`manager-app/gradle.properties`:
+
+```properties
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+android.useAndroidX=true
+kotlin.code.style=official
+android.nonTransitiveRClass=true
+
+```
+
+`manager-app/gradle/wrapper/gradle-wrapper.properties`:
+
+```properties
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.9-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+```
+
+`manager-app/settings.gradle.kts`:
+
+```kts
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") } // for libsu
+    }
+}
+rootProject.name = "VirtualCamManager"
+include(":app")
+
+```
+
+`patches/main_v116_part0.txt`:
+
+```txt
+PLACEHOLDER
+```
+
+`patches/main_v116_part1.txt`:
+
+```txt
+PLACEHOLDER
+```
+
+`patches/v1.15.0-main.cpp.patch`:
+
+```patch
+diff --git a/zygisk-native/jni/main.cpp b/zygisk-native/jni/main.cpp
+index 387cb11..5743134 100644
+--- a/zygisk-native/jni/main.cpp
++++ b/zygisk-native/jni/main.cpp
+@@ -1,10 +1,9 @@
+ /*
+- * VirtualCam Manager — Zygisk native module v1.13.0
++ * VirtualCam Manager — Zygisk native module v1.15.0
+  * Pure Magisk (NO LSPosed). Companion gate + JNI Camera hooks + ArtHook ART hooks.
+  *
+- * v1.13.0: ArtHook integration for Camera.setPreviewTexture / startPreview
+- * so virtual.mp4 can replace the live preview surface (classic VCAM algorithm).
+- * NV21 PreviewCallback overwrite still next (MediaCodec frame provider).
++ * v1.13.0: ArtHook setPreviewTexture / startPreview / setPreviewDisplay + MediaPlayer
++ * v1.15.0: ArtHook setPreviewCallback* + onPreviewFrame NV21 (see nv21_hooks.cpp)
+  */
+ #include <cstdlib>
+ #include <cstring>
+@@ -19,6 +18,7 @@
+ #include "zygisk.hpp"
+ #include <arthook/ArtHook.h>
+ #include <arthook/Hooked.h>
++#include "nv21_hooks.h"
+ 
+ using zygisk::Api;
+ using zygisk::AppSpecializeArgs;
+@@ -73,8 +73,8 @@ static void report_status(const char *pkg, const char *status) {
+ }
+ 
+ static void write_module_version() {
+-    write_text(kModuleVersion, "1.13.0");
+-    write_text(kVersionFile, "1.13.0");
++    write_text(kModuleVersion, "1.15.0");
++    write_text(kVersionFile, "1.15.0");
+ }
+ 
+ class VideoFrameProvider {
+@@ -242,7 +242,7 @@ private:
+ 
+ static VideoFrameProvider g_video;
+ static Api *g_api = nullptr;
+-static char g_last_pkg[256] = {};
++char g_last_pkg[256] = {};
+ 
+ static arthook::Hooked g_hook_setPreviewTexture;
+ static arthook::Hooked g_hook_startPreview;
+@@ -328,6 +328,8 @@ static int install_art_hooks(JNIEnv *env, const char *pkg) {
+     if (st == arthook::Status::kOk) { n++; LOGI("  ART hooked: setPreviewDisplay"); }
+     else LOGW("  setPreviewDisplay: %s", arthook::StatusToString(st));
+ 
++    n += install_preview_callback_hooks(env);
++
+     char buf[64];
+     if (n > 0) snprintf(buf, sizeof(buf), "art_hooked:%d", n);
+     else snprintf(buf, sizeof(buf), "art_hook_none");
+@@ -358,6 +360,7 @@ static void hooked_native_setPreviewDisplay(JNIEnv *env, jobject thiz, jobject s
+     if (orig_native_setPreviewDisplay) orig_native_setPreviewDisplay(env, thiz, surface);
+ }
+ static void hooked_native_setPreviewCallback(JNIEnv *env, jobject thiz, jobject cb) {
++    if (cb) process_callback(env, thiz, cb, "jni");
+     if (orig_native_setPreviewCallback) orig_native_setPreviewCallback(env, thiz, cb);
+ }
+ static void hooked_native_takePicture(JNIEnv *env, jobject thiz, jobject a, jobject b, jobject c, jobject d) {
+
+```
+
+`zygisk-native/CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.18)
+project(virtualcam LANGUAGES C CXX ASM)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# ArtHook static library (vendored)
+add_subdirectory(third_party/arthook)
+
+add_library(virtualcam SHARED jni/main.cpp jni/nv21_hooks.cpp)
+
+target_include_directories(virtualcam PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/jni
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/arthook/include
+)
+
+target_compile_options(virtualcam PRIVATE
+    -Wall
+    -fvisibility=hidden
+    -fno-rtti
+    -fno-exceptions
+    -O2
+)
+
+# mediandk is linked so MediaCodec path can land without another CMake change
+target_link_libraries(virtualcam PRIVATE
+    arthook::arthook
+    log
+    dl
+    android
+    mediandk
+)
+
+set_target_properties(virtualcam PROPERTIES
+    OUTPUT_NAME "virtualcam"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/libs/${ANDROID_ABI}"
+)
+
+```
+
+`zygisk-native/README.md`:
+
+```md
+# Zygisk native module (VirtualCam)
+
+Pure Magisk Zygisk — **no LSPosed manager**.
+
+## Build (on CI or with NDK)
+
+```bash
+# Requires Android NDK
+export NDK=$ANDROID_NDK_HOME   # e.g. $ANDROID_HOME/ndk/26.1.10909125
+cd zygisk-native
+$NDK/ndk-build -j$(nproc)
+
+# Outputs:
+#   libs/arm64-v8a/libvirtualcam.so
+#   libs/armeabi-v7a/libvirtualcam.so
+#   libs/x86_64/libvirtualcam.so
+
+# Package into Magisk module:
+cp libs/arm64-v8a/libvirtualcam.so   ../magisk-module/zygisk/arm64-v8a.so
+cp libs/armeabi-v7a/libvirtualcam.so ../magisk-module/zygisk/armeabi-v7a.so
+cp libs/x86_64/libvirtualcam.so      ../magisk-module/zygisk/x86_64.so
+```
+
+`zygisk.hpp` is pulled from [topjohnwu/zygisk-module-sample](https://github.com/topjohnwu/zygisk-module-sample) during CI.
+
+## Control plane (APK writes, Zygisk reads)
+
+| Path | Meaning |
+|------|---------|
+| `/data/adb/virtualcam/enabled` | `1` = on, `0` = off |
+| `/data/adb/virtualcam/hook_status` | live status written by Zygisk |
+| `/data/adb/virtualcam/last_hook_pkg` | last package that received hooks |
+| `/data/adb/virtualcam/module_version` / `version` | e.g. 1.9.1 |
+| `/DCIM/Camera1/virtual.mp4` | source video |
+| `/DCIM/Camera1/disable.jpg` | hard off (classic flag) |
+
+## Status values written to hook_status
+
+- `gate_off` – enabled flag is 0 or disable.jpg present
+- `no_video` – virtual.mp4 missing or empty
+- `active` – gate open + video present, but no matching JNI natives on this ROM
+- `hooked` – JNI Camera1 native methods successfully rewritten
+- `preparing` – LSPlant scaffold active, waiting for real Init/Hook (v1.9.1+)
+- `injecting` – (future) LSPlant Java hooks + frame replacement active
+
+## Current capability (v1.9.1)
+
+- Companion process gate + enable/disable detection: **done**
+- Process selection + DLCLOSE when inactive: **done**
+- JNI native hooks on android.hardware.Camera (log + call original): **done**
+- Module version written from native + service.sh: **done**
+- LSPlant InitInfo shape + target method list documented in source: **done**
+- Status now reports **preparing** when scaffold runs: **done** (v1.9.1)
+- Full visual frame injection (setPreviewTexture / NV21 overwrite): **next**
+
+## Next: real LSPlant integration (pure Magisk, no LSPosed manager)
+
+Target Java methods (from docs/ORIGINAL_HOOK_ALGORITHM.md):
+
+1. `Camera.setPreviewTexture(SurfaceTexture)`
+2. `Camera.setPreviewCallback` / `setPreviewCallbackWithBuffer` / `setOneShotPreviewCallback`
+3. `Camera.startPreview`
+4. `PreviewCallback.onPreviewFrame` for NV21 replacement
+
+Plan:
+- Add lsplant-standalone headers + static lib (or build from source in CI with CMake)
+- Provide InitInfo with inline_hooker (Dobby or equivalent) + art_symbol_resolver
+- Init in postAppSpecialize after gate opens
+- Keep existing JNI hooks as secondary / logging layer
+- Write richer status so APK can show “injecting”
+
+This keeps the project 100% Magisk module + single companion APK.
+
+```
+
+`zygisk-native/jni/Android.mk`:
+
+```mk
+LOCAL_PATH := $(call my-dir)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE     := virtualcam
+LOCAL_SRC_FILES  := main.cpp
+LOCAL_LDLIBS     := -llog
+LOCAL_CFLAGS     := -std=c++17 -fno-exceptions -fno-rtti
+include $(BUILD_SHARED_LIBRARY)
+
+```
+
+`zygisk-native/jni/Application.mk`:
+
+```mk
+APP_ABI      := arm64-v8a armeabi-v7a x86_64
+APP_PLATFORM := android-26
+APP_STL      := c++_static
+APP_CPPFLAGS := -std=c++17 -fno-exceptions -fno-rtti
+
+```
+
+`zygisk-native/jni/main.cpp`:
+
+```cpp
+/*
+ * VirtualCam Manager — Zygisk native module v1.15.0
+ * Pure Magisk (NO LSPosed). Companion gate + JNI Camera hooks + ArtHook ART hooks.
+ *
+ * v1.13.0: ArtHook setPreviewTexture / startPreview / setPreviewDisplay + MediaPlayer
+ * v1.15.0: ArtHook setPreviewCallback* + onPreviewFrame NV21 (see nv21_hooks.cpp)
+ */
+#include <cstdlib>
+#include <cstring>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <android/log.h>
+#include <string>
+#include <cstdio>
+#include <vector>
+
+#include "zygisk.hpp"
+#include <arthook/ArtHook.h>
+#include <arthook/Hooked.h>
+#include "nv21_hooks.h"
+
+using zygisk::Api;
+using zygisk::AppSpecializeArgs;
+using zygisk::ServerSpecializeArgs;
+
+#define LOG_TAG "VirtualCamZygisk"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
+
+static constexpr const char *kEnabledPath   = "/data/adb/virtualcam/enabled";
+static constexpr const char *kCamera1Video  = "/storage/emulated/0/DCIM/Camera1/virtual.mp4";
+static constexpr const char *kDisableFlag   = "/storage/emulated/0/DCIM/Camera1/disable.jpg";
+static constexpr const char *kHookStatus    = "/data/adb/virtualcam/hook_status";
+static constexpr const char *kLastPkg       = "/data/adb/virtualcam/last_hook_pkg";
+static constexpr const char *kModuleVersion = "/data/adb/virtualcam/module_version";
+static constexpr const char *kVersionFile   = "/data/adb/virtualcam/version";
+
+struct VcamState {
+    bool global_enabled = false;
+    bool disable_flag   = false;
+    bool has_video      = false;
+    bool should_hook    = false;
+    char process[256]{};
+};
+
+static bool file_exists(const char *path) {
+    struct stat st{};
+    return stat(path, &st) == 0 && S_ISREG(st.st_mode);
+}
+
+static bool read_enabled() {
+    int fd = open(kEnabledPath, O_RDONLY | O_CLOEXEC);
+    if (fd < 0) return false;
+    char buf[8]{};
+    ssize_t n = read(fd, buf, sizeof(buf) - 1);
+    close(fd);
+    return n > 0 && buf[0] == '1';
+}
+
+static void write_text(const char *path, const char *text) {
+    int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
+    if (fd < 0) return;
+    write(fd, text, strlen(text));
+    close(fd);
+}
+
+static void report_status(const char *pkg, const char *status) {
+    write_text(kHookStatus, status);
+    write_text(kLastPkg, pkg);
+}
+
+static void write_module_version() {
+    write_text(kModuleVersion, "1.15.0");
+    write_text(kVersionFile, "1.15.0");
+}
+
+class VideoFrameProvider {
+public:
+    bool open(const char *path) {
+        path_ = path;
+        if (!file_exists(path)) {
+            LOGE("video missing: %s", path);
+            opened_ = false;
+            return false;
+        }
+        struct stat st{};
+        if (stat(path, &st) == 0 && st.st_size > 0) {
+            size_ = st.st_size;
+            LOGI("video ready path=%s size=%lld", path, (long long)size_);
+            opened_ = true;
+            return true;
+        }
+        opened_ = false;
+        return false;
+    }
+    bool isOpen() const { return opened_; }
+    const char *path() const { return path_.c_str(); }
+    off_t size() const { return size_; }
+
+    void setOriginalTexture(JNIEnv *env, jobject st) {
+        if (orig_st_) { env->DeleteGlobalRef(orig_st_); orig_st_ = nullptr; }
+        if (st) { orig_st_ = env->NewGlobalRef(st); LOGI("stored original SurfaceTexture"); }
+    }
+    jobject originalTexture() const { return orig_st_; }
+
+    void setSurface(JNIEnv *env, jobject surface) {
+        if (g_surface_) { env->DeleteGlobalRef(g_surface_); g_surface_ = nullptr; }
+        if (surface) { g_surface_ = env->NewGlobalRef(surface); LOGI("stored preview Surface"); }
+    }
+    jobject surface() const { return g_surface_; }
+
+    bool tryStartMediaPlayer(JNIEnv *env) {
+        if (!opened_ || !env) return false;
+        if (playing_) return true;
+
+        jobject target_surface = g_surface_;
+        jobject local_surface = nullptr;
+
+        if (!target_surface && orig_st_) {
+            jclass surfCls = env->FindClass("android/view/Surface");
+            if (surfCls) {
+                jmethodID ctor = env->GetMethodID(surfCls, "<init>", "(Landroid/graphics/SurfaceTexture;)V");
+                if (ctor) {
+                    local_surface = env->NewObject(surfCls, ctor, orig_st_);
+                    if (local_surface && !env->ExceptionCheck()) {
+                        target_surface = local_surface;
+                        LOGI("created Surface from original SurfaceTexture");
+                    } else {
+                        env->ExceptionClear();
+                        local_surface = nullptr;
+                    }
+                }
+                env->DeleteLocalRef(surfCls);
+            }
+        }
+        if (!target_surface) {
+            LOGE("no Surface/SurfaceTexture for MediaPlayer");
+            return false;
+        }
+
+        jclass mpCls = env->FindClass("android/media/MediaPlayer");
+        if (!mpCls) {
+            env->ExceptionClear();
+            LOGE("MediaPlayer class not found");
+            if (local_surface) env->DeleteLocalRef(local_surface);
+            return false;
+        }
+        jmethodID ctor = env->GetMethodID(mpCls, "<init>", "()V");
+        jmethodID setDataSource = env->GetMethodID(mpCls, "setDataSource", "(Ljava/lang/String;)V");
+        jmethodID setSurface = env->GetMethodID(mpCls, "setSurface", "(Landroid/view/Surface;)V");
+        jmethodID setLooping = env->GetMethodID(mpCls, "setLooping", "(Z)V");
+        jmethodID setVolume = env->GetMethodID(mpCls, "setVolume", "(FF)V");
+        jmethodID prepare = env->GetMethodID(mpCls, "prepare", "()V");
+        jmethodID start = env->GetMethodID(mpCls, "start", "()V");
+        if (!ctor || !setDataSource || !setSurface || !setLooping || !prepare || !start) {
+            env->ExceptionClear();
+            LOGE("MediaPlayer method lookup failed");
+            env->DeleteLocalRef(mpCls);
+            if (local_surface) env->DeleteLocalRef(local_surface);
+            return false;
+        }
+        jobject mp = env->NewObject(mpCls, ctor);
+        if (!mp || env->ExceptionCheck()) {
+            env->ExceptionClear();
+            LOGE("MediaPlayer construct failed");
+            env->DeleteLocalRef(mpCls);
+            if (local_surface) env->DeleteLocalRef(local_surface);
+            return false;
+        }
+        jstring jpath = env->NewStringUTF(path_.c_str());
+        env->CallVoidMethod(mp, setDataSource, jpath);
+        env->DeleteLocalRef(jpath);
+        if (env->ExceptionCheck()) {
+            env->ExceptionClear(); LOGE("setDataSource failed");
+            env->DeleteLocalRef(mp); env->DeleteLocalRef(mpCls);
+            if (local_surface) env->DeleteLocalRef(local_surface);
+            return false;
+        }
+        env->CallVoidMethod(mp, setSurface, target_surface);
+        if (env->ExceptionCheck()) {
+            env->ExceptionClear(); LOGE("setSurface failed");
+            env->DeleteLocalRef(mp); env->DeleteLocalRef(mpCls);
+            if (local_surface) env->DeleteLocalRef(local_surface);
+            return false;
+        }
+        env->CallVoidMethod(mp, setLooping, JNI_TRUE);
+        if (setVolume) env->CallVoidMethod(mp, setVolume, 0.0f, 0.0f);
+        env->CallVoidMethod(mp, prepare);
+        if (env->ExceptionCheck()) {
+            env->ExceptionClear(); LOGE("MediaPlayer.prepare failed");
+            env->DeleteLocalRef(mp); env->DeleteLocalRef(mpCls);
+            if (local_surface) env->DeleteLocalRef(local_surface);
+            return false;
+        }
+        env->CallVoidMethod(mp, start);
+        if (env->ExceptionCheck()) {
+            env->ExceptionClear(); LOGE("MediaPlayer.start failed");
+            env->DeleteLocalRef(mp); env->DeleteLocalRef(mpCls);
+            if (local_surface) env->DeleteLocalRef(local_surface);
+            return false;
+        }
+        if (g_player_) env->DeleteGlobalRef(g_player_);
+        g_player_ = env->NewGlobalRef(mp);
+        playing_ = true;
+        LOGI("MediaPlayer started — virtual.mp4 playing on preview surface");
+        env->DeleteLocalRef(mp);
+        env->DeleteLocalRef(mpCls);
+        if (local_surface) env->DeleteLocalRef(local_surface);
+        return true;
+    }
+
+    void stop(JNIEnv *env) {
+        if (g_player_ && env) {
+            jclass mpCls = env->FindClass("android/media/MediaPlayer");
+            if (mpCls) {
+                jmethodID stopM = env->GetMethodID(mpCls, "stop", "()V");
+                jmethodID release = env->GetMethodID(mpCls, "release", "()V");
+                if (stopM) env->CallVoidMethod(g_player_, stopM);
+                if (release) env->CallVoidMethod(g_player_, release);
+                env->ExceptionClear();
+                env->DeleteLocalRef(mpCls);
+            }
+            env->DeleteGlobalRef(g_player_);
+            g_player_ = nullptr;
+        }
+        playing_ = false;
+    }
+    bool isPlaying() const { return playing_; }
+
+private:
+    std::string path_;
+    off_t size_ = 0;
+    bool opened_ = false;
+    bool playing_ = false;
+    jobject orig_st_ = nullptr;
+    jobject g_surface_ = nullptr;
+    jobject g_player_ = nullptr;
+};
+
+static VideoFrameProvider g_video;
+static Api *g_api = nullptr;
+char g_last_pkg[256] = {};
+
+static arthook::Hooked g_hook_setPreviewTexture;
+static arthook::Hooked g_hook_startPreview;
+static arthook::Hooked g_hook_setPreviewDisplay_java;
+
+extern "C" void Hooked_setPreviewTexture(JNIEnv *env, jobject thiz, jobject st) {
+    LOGI("ART hook: setPreviewTexture st=%p video=%d", st, g_video.isOpen() ? 1 : 0);
+    if (g_video.isOpen() && st) {
+        jclass stCls = env->FindClass("android/graphics/SurfaceTexture");
+        if (stCls) {
+            jmethodID ctor = env->GetMethodID(stCls, "<init>", "(I)V");
+            if (ctor) {
+                jobject fake = env->NewObject(stCls, ctor, 10);
+                if (fake && !env->ExceptionCheck()) {
+                    g_video.setOriginalTexture(env, st);
+                    if (g_hook_setPreviewTexture.installed())
+                        g_hook_setPreviewTexture.invoke<void>(env, thiz, fake);
+                    env->DeleteLocalRef(fake);
+                    env->DeleteLocalRef(stCls);
+                    report_status(g_last_pkg, "texture_swapped");
+                    return;
+                }
+                env->ExceptionClear();
+            }
+            env->DeleteLocalRef(stCls);
+        }
+    }
+    if (g_hook_setPreviewTexture.installed())
+        g_hook_setPreviewTexture.invoke<void>(env, thiz, st);
+}
+
+extern "C" void Hooked_startPreview(JNIEnv *env, jobject thiz) {
+    LOGI("ART hook: startPreview video=%s", g_video.isOpen() ? g_video.path() : "none");
+    if (g_video.isOpen()) {
+        if (g_video.tryStartMediaPlayer(env))
+            report_status(g_last_pkg, "surface_playing");
+        else
+            report_status(g_last_pkg, "inject_attempt_failed");
+    }
+    if (g_hook_startPreview.installed())
+        g_hook_startPreview.invoke<void>(env, thiz);
+}
+
+extern "C" void Hooked_setPreviewDisplay_java(JNIEnv *env, jobject thiz, jobject holder) {
+    LOGI("ART hook: setPreviewDisplay holder=%p", holder);
+    if (holder) {
+        jclass shCls = env->GetObjectClass(holder);
+        jmethodID getSurface = env->GetMethodID(shCls, "getSurface", "()Landroid/view/Surface;");
+        if (getSurface) {
+            jobject surf = env->CallObjectMethod(holder, getSurface);
+            if (surf && !env->ExceptionCheck()) {
+                g_video.setSurface(env, surf);
+                env->DeleteLocalRef(surf);
+            } else env->ExceptionClear();
+        }
+        env->DeleteLocalRef(shCls);
+    }
+    if (g_hook_setPreviewDisplay_java.installed())
+        g_hook_setPreviewDisplay_java.invoke<void>(env, thiz, holder);
+}
+
+static int install_art_hooks(JNIEnv *env, const char *pkg) {
+    auto st = arthook::Initialize(env, false);
+    if (st != arthook::Status::kOk) {
+        LOGE("ArtHook Initialize failed: %s", arthook::StatusToString(st));
+        report_status(pkg, "arthook_init_fail");
+        return 0;
+    }
+    LOGI("ArtHook initialized");
+    int n = 0;
+    st = g_hook_setPreviewTexture.install(env, "android/hardware/Camera", "setPreviewTexture",
+        "(Landroid/graphics/SurfaceTexture;)V", reinterpret_cast<void*>(&Hooked_setPreviewTexture));
+    if (st == arthook::Status::kOk) { n++; LOGI("  ART hooked: setPreviewTexture"); }
+    else LOGW("  setPreviewTexture: %s", arthook::StatusToString(st));
+
+    st = g_hook_startPreview.install(env, "android/hardware/Camera", "startPreview", "()V",
+        reinterpret_cast<void*>(&Hooked_startPreview));
+    if (st == arthook::Status::kOk) { n++; LOGI("  ART hooked: startPreview"); }
+    else LOGW("  startPreview: %s", arthook::StatusToString(st));
+
+    st = g_hook_setPreviewDisplay_java.install(env, "android/hardware/Camera", "setPreviewDisplay",
+        "(Landroid/view/SurfaceHolder;)V", reinterpret_cast<void*>(&Hooked_setPreviewDisplay_java));
+    if (st == arthook::Status::kOk) { n++; LOGI("  ART hooked: setPreviewDisplay"); }
+    else LOGW("  setPreviewDisplay: %s", arthook::StatusToString(st));
+
+    n += install_preview_callback_hooks(env);
+
+    char buf[64];
+    if (n > 0) snprintf(buf, sizeof(buf), "art_hooked:%d", n);
+    else snprintf(buf, sizeof(buf), "art_hook_none");
+    report_status(pkg, buf);
+    LOGI("ArtHook install count: %d", n);
+    return n;
+}
+
+static void (*orig_native_setup)(JNIEnv*, jobject, jobject) = nullptr;
+static void (*orig_native_startPreview)(JNIEnv*, jobject) = nullptr;
+static void (*orig_native_stopPreview)(JNIEnv*, jobject) = nullptr;
+static void (*orig_native_setPreviewDisplay)(JNIEnv*, jobject, jobject) = nullptr;
+static void (*orig_native_setPreviewCallback)(JNIEnv*, jobject, jobject) = nullptr;
+static void (*orig_native_takePicture)(JNIEnv*, jobject, jobject, jobject, jobject, jobject) = nullptr;
+
+static void hooked_native_setup(JNIEnv *env, jobject thiz, jobject weak) {
+    if (orig_native_setup) orig_native_setup(env, thiz, weak);
+}
+static void hooked_native_startPreview(JNIEnv *env, jobject thiz) {
+    if (orig_native_startPreview) orig_native_startPreview(env, thiz);
+}
+static void hooked_native_stopPreview(JNIEnv *env, jobject thiz) {
+    g_video.stop(env);
+    if (orig_native_stopPreview) orig_native_stopPreview(env, thiz);
+}
+static void hooked_native_setPreviewDisplay(JNIEnv *env, jobject thiz, jobject surface) {
+    g_video.setSurface(env, surface);
+    if (orig_native_setPreviewDisplay) orig_native_setPreviewDisplay(env, thiz, surface);
+}
+static void hooked_native_setPreviewCallback(JNIEnv *env, jobject thiz, jobject cb) {
+    if (cb) process_callback(env, thiz, cb, "jni");
+    if (orig_native_setPreviewCallback) orig_native_setPreviewCallback(env, thiz, cb);
+}
+static void hooked_native_takePicture(JNIEnv *env, jobject thiz, jobject a, jobject b, jobject c, jobject d) {
+    if (orig_native_takePicture) orig_native_takePicture(env, thiz, a, b, c, d);
+}
+
+static int install_jni_hooks(JNIEnv *env) {
+    if (!g_api || !env) return 0;
+    JNINativeMethod methods[] = {
+        {"native_setup", "(Ljava/lang/Object;)V", (void*)hooked_native_setup},
+        {"native_startPreview", "()V", (void*)hooked_native_startPreview},
+        {"native_stopPreview", "()V", (void*)hooked_native_stopPreview},
+        {"setPreviewDisplay", "(Landroid/view/Surface;)V", (void*)hooked_native_setPreviewDisplay},
+        {"setPreviewCallback", "(Landroid/hardware/Camera$PreviewCallback;)V", (void*)hooked_native_setPreviewCallback},
+        {"native_takePicture",
+         "(Landroid/hardware/Camera$ShutterCallback;Landroid/hardware/Camera$PictureCallback;"
+         "Landroid/hardware/Camera$PictureCallback;Landroid/hardware/Camera$PictureCallback;)V",
+         (void*)hooked_native_takePicture},
+    };
+    g_api->hookJniNativeMethods(env, "android/hardware/Camera", methods, 6);
+    int hooked = 0;
+    if (methods[0].fnPtr) { orig_native_setup = (decltype(orig_native_setup))methods[0].fnPtr; hooked++; }
+    if (methods[1].fnPtr) { orig_native_startPreview = (decltype(orig_native_startPreview))methods[1].fnPtr; hooked++; }
+    if (methods[2].fnPtr) { orig_native_stopPreview = (decltype(orig_native_stopPreview))methods[2].fnPtr; hooked++; }
+    if (methods[3].fnPtr) { orig_native_setPreviewDisplay = (decltype(orig_native_setPreviewDisplay))methods[3].fnPtr; hooked++; }
+    if (methods[4].fnPtr) { orig_native_setPreviewCallback = (decltype(orig_native_setPreviewCallback))methods[4].fnPtr; hooked++; }
+    if (methods[5].fnPtr) { orig_native_takePicture = (decltype(orig_native_takePicture))methods[5].fnPtr; hooked++; }
+    LOGI("JNI Camera hooks installed: %d / 6", hooked);
+    return hooked;
+}
+
+static int prepare_method_scaffold(JNIEnv *env, const char *pkg) {
+    if (!env) { report_status(pkg, "preparing"); return 0; }
+    jclass camera_cls = env->FindClass("android/hardware/Camera");
+    if (!camera_cls) {
+        env->ExceptionClear();
+        report_status(pkg, "preparing:no_camera_cls");
+        return 0;
+    }
+    struct Target { const char *name; const char *sig; };
+    static const Target kTargets[] = {
+        {"setPreviewTexture", "(Landroid/graphics/SurfaceTexture;)V"},
+        {"setPreviewCallback", "(Landroid/hardware/Camera$PreviewCallback;)V"},
+        {"setPreviewCallbackWithBuffer", "(Landroid/hardware/Camera$PreviewCallback;)V"},
+        {"setOneShotPreviewCallback", "(Landroid/hardware/Camera$PreviewCallback;)V"},
+        {"startPreview", "()V"},
+        {"setPreviewDisplay", "(Landroid/view/SurfaceHolder;)V"},
+    };
+    int found = 0;
+    for (int i = 0; i < 6; i++) {
+        jmethodID mid = env->GetMethodID(camera_cls, kTargets[i].name, kTargets[i].sig);
+        if (mid) { found++; LOGI("  method OK: %s", kTargets[i].name); }
+        else env->ExceptionClear();
+    }
+    env->DeleteLocalRef(camera_cls);
+    char status_buf[64];
+    if (found >= 4) snprintf(status_buf, sizeof(status_buf), "ready_for_arthook:%d/6", found);
+    else if (found > 0) snprintf(status_buf, sizeof(status_buf), "preparing:%d/6", found);
+    else snprintf(status_buf, sizeof(status_buf), "preparing:0/6");
+    report_status(pkg, status_buf);
+    return found;
+}
+
+class VirtualCamModule : public zygisk::ModuleBase {
+public:
+    void onLoad(Api *api, JNIEnv *env) override {
+        this->api = api; this->env = env; g_api = api;
+    }
+    void preAppSpecialize(AppSpecializeArgs *args) override {
+        const char *process = env->GetStringUTFChars(args->nice_name, nullptr);
+        if (process) {
+            strncpy(state.process, process, sizeof(state.process) - 1);
+            strncpy(g_last_pkg, process, sizeof(g_last_pkg) - 1);
+            env->ReleaseStringUTFChars(args->nice_name, process);
+        }
+        int fd = api->connectCompanion();
+        if (fd >= 0) {
+            uint8_t reply[4] = {};
+            if (read(fd, reply, 3) == 3) {
+                state.global_enabled = reply[0] == 1;
+                state.disable_flag = reply[1] == 1;
+                state.has_video = reply[2] == 1;
+                state.should_hook = state.global_enabled && !state.disable_flag && state.has_video;
+            }
+            close(fd);
+        } else {
+            state.global_enabled = read_enabled();
+            state.disable_flag = file_exists(kDisableFlag);
+            state.has_video = file_exists(kCamera1Video);
+            state.should_hook = state.global_enabled && !state.disable_flag && state.has_video;
+        }
+        LOGI("preAppSpecialize pkg=%s enabled=%d disable=%d video=%d hook=%d",
+             state.process, state.global_enabled?1:0, state.disable_flag?1:0,
+             state.has_video?1:0, state.should_hook?1:0);
+        if (!state.should_hook) {
+            if (!state.global_enabled || state.disable_flag)
+                report_status(state.process, "gate_off");
+            api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+        }
+    }
+    void postAppSpecialize(const AppSpecializeArgs *args) override {
+        if (!state.should_hook) return;
+        write_module_version();
+        LOGI("postAppSpecialize: VirtualCam active for %s", state.process);
+        if (!g_video.open(kCamera1Video)) {
+            report_status(state.process, "no_video");
+            return;
+        }
+        int methods_found = prepare_method_scaffold(env, state.process);
+        int art_n = install_art_hooks(env, state.process);
+        int jni_n = install_jni_hooks(env);
+        char buf[80];
+        if (art_n > 0) {
+            snprintf(buf, sizeof(buf), "art_hooked:%d+jni:%d", art_n, jni_n);
+            report_status(state.process, buf);
+        } else if (jni_n > 0 && methods_found >= 4) {
+            snprintf(buf, sizeof(buf), "hooked+ready:%d", jni_n);
+            report_status(state.process, buf);
+        } else if (jni_n > 0) {
+            report_status(state.process, "hooked");
+        }
+        LOGI("status art=%d jni=%d methods=%d pkg=%s", art_n, jni_n, methods_found, state.process);
+    }
+    void preServerSpecialize(ServerSpecializeArgs *args) override {
+        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+    }
+private:
+    Api *api = nullptr;
+    JNIEnv *env = nullptr;
+    VcamState state{};
+};
+
+static void companion_handler(int fd) {
+    uint8_t reply[3];
+    reply[0] = read_enabled() ? 1 : 0;
+    reply[1] = file_exists(kDisableFlag) ? 1 : 0;
+    reply[2] = file_exists(kCamera1Video) ? 1 : 0;
+    write(fd, reply, 3);
+    LOGD("companion enabled=%u disable=%u video=%u", reply[0], reply[1], reply[2]);
+}
+
+REGISTER_ZYGISK_MODULE(VirtualCamModule)
+REGISTER_ZYGISK_COMPANION(companion_handler)
+
+```
+
+`zygisk-native/jni/nv21_hooks.cpp`:
+
+```cpp
+/*
+ * NV21 PreviewCallback path (classic VCAM algorithm part B)
+ * Pattern mode active. MediaCodec continuous video staged for next land.
+ */
+#include "nv21_hooks.h"
+#include <cstdio>
+#include <cstring>
+#include <arthook/ArtHook.h>
+
+#define LOG_TAG "VirtualCamZygisk"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+static constexpr const char *kHookStatus = "/data/adb/virtualcam/hook_status";
+static constexpr const char *kLastPkg    = "/data/adb/virtualcam/last_hook_pkg";
+
+Nv21FrameProvider g_nv21;
+
+static arthook::Hooked g_hook_setPreviewCallback;
+static arthook::Hooked g_hook_setPreviewCallbackWithBuffer;
+static arthook::Hooked g_hook_setOneShotPreviewCallback;
+static arthook::Hooked g_hook_onPreviewFrame;
+static jobject g_tracked_camera = nullptr;
+static jclass  g_cb_class = nullptr;
+
+static void report_status(const char *pkg, const char *status) {
+    FILE *f = fopen(kHookStatus, "w");
+    if (f) { fputs(status, f); fclose(f); }
+    f = fopen(kLastPkg, "w");
+    if (f) { fputs(pkg ? pkg : "", f); fclose(f); }
+}
+
+bool Nv21FrameProvider::ensure(int w, int h) {
+    if (w <= 0 || h <= 0) return false;
+    std::lock_guard<std::mutex> lock(mu_);
+    size_t need = (size_t)w * (size_t)h * 3 / 2;
+    if (w_ != w || h_ != h || buf_.size() != need) {
+        buf_.assign(need, 0);
+        w_ = w; h_ = h; bar_x_ = 0;
+    }
+    fillLocked();
+    ready_ = true;
+    return true;
+}
+
+bool Nv21FrameProvider::copyInto(JNIEnv *env, jbyteArray arr) {
+    if (!env || !arr || !ready_) return false;
+    std::lock_guard<std::mutex> lock(mu_);
+    if (buf_.empty()) return false;
+    jsize len = env->GetArrayLength(arr);
+    if (len <= 0) return false;
+    jsize n = (jsize)(buf_.size() < (size_t)len ? buf_.size() : (size_t)len);
+    env->SetByteArrayRegion(arr, 0, n, reinterpret_cast<const jbyte*>(buf_.data()));
+    frame_count_++;
+    if ((frame_count_ % 3) == 0) {
+        bar_x_ = (bar_x_ + 8) % (w_ > 0 ? w_ : 1);
+        fillLocked();
+    }
+    return true;
+}
+
+void Nv21FrameProvider::fillLocked() {
+    if (buf_.empty() || w_ <= 0 || h_ <= 0) return;
+    size_t ySize = (size_t)w_ * (size_t)h_;
+    memset(buf_.data(), 0x80, ySize);
+    int barW = w_ / 16; if (barW < 4) barW = 4;
+    for (int y = 0; y < h_; y++)
+        for (int x = bar_x_; x < bar_x_ + barW && x < w_; x++)
+            buf_[(size_t)y * (size_t)w_ + (size_t)x] = (uint8_t)0xE0;
+    memset(buf_.data() + ySize, 0x80, buf_.size() - ySize);
+}
+
+static bool read_preview_size(JNIEnv *env, jobject camera, int *out_w, int *out_h) {
+    if (!env || !camera || !out_w || !out_h) return false;
+    *out_w = 0; *out_h = 0;
+    jclass camCls = env->GetObjectClass(camera);
+    if (!camCls) { env->ExceptionClear(); return false; }
+    jmethodID getParams = env->GetMethodID(camCls, "getParameters",
+        "()Landroid/hardware/Camera$Parameters;");
+    if (!getParams) { env->ExceptionClear(); env->DeleteLocalRef(camCls); return false; }
+    jobject params = env->CallObjectMethod(camera, getParams);
+    env->DeleteLocalRef(camCls);
+    if (!params || env->ExceptionCheck()) { env->ExceptionClear(); return false; }
+    jclass pCls = env->GetObjectClass(params);
+    jmethodID getPreviewSize = env->GetMethodID(pCls, "getPreviewSize",
+        "()Landroid/hardware/Camera$Size;");
+    if (!getPreviewSize) {
+        env->ExceptionClear(); env->DeleteLocalRef(pCls); env->DeleteLocalRef(params); return false;
+    }
+    jobject sizeObj = env->CallObjectMethod(params, getPreviewSize);
+    env->DeleteLocalRef(pCls); env->DeleteLocalRef(params);
+    if (!sizeObj || env->ExceptionCheck()) { env->ExceptionClear(); return false; }
+    jclass sizeCls = env->GetObjectClass(sizeObj);
+    jfieldID wField = env->GetFieldID(sizeCls, "width", "I");
+    jfieldID hField = env->GetFieldID(sizeCls, "height", "I");
+    if (wField && hField) {
+        *out_w = env->GetIntField(sizeObj, wField);
+        *out_h = env->GetIntField(sizeObj, hField);
+    }
+    env->DeleteLocalRef(sizeCls); env->DeleteLocalRef(sizeObj);
+    return *out_w > 0 && *out_h > 0;
+}
+
+extern "C" void Hooked_onPreviewFrame(JNIEnv *env, jobject thiz, jbyteArray data, jobject camera) {
+    if (data && g_nv21.isReady()) {
+        g_nv21.copyInto(env, data);
+        if ((g_nv21.frames() % 30) == 1) {
+            char buf[80];
+            snprintf(buf, sizeof(buf), "nv21_pattern:%dx%d#%d",
+                     g_nv21.width(), g_nv21.height(), g_nv21.frames());
+            report_status(g_last_pkg, buf);
+        }
+    }
+    if (g_hook_onPreviewFrame.installed())
+        g_hook_onPreviewFrame.invoke<void>(env, thiz, data, camera);
+}
+
+void process_callback(JNIEnv *env, jobject camera, jobject callback, const char *which) {
+    if (!env || !callback) return;
+    LOGI("process_callback %s cb=%p", which, callback);
+    int w = 0, h = 0;
+    if (camera && read_preview_size(env, camera, &w, &h)) {
+        g_nv21.ensure(w, h);
+        LOGI("preview size %dx%d for NV21", w, h);
+    } else {
+        g_nv21.ensure(640, 480);
+        LOGW("preview size unknown — using 640x480");
+    }
+    if (camera) {
+        if (g_tracked_camera) env->DeleteGlobalRef(g_tracked_camera);
+        g_tracked_camera = env->NewGlobalRef(camera);
+    }
+    jclass cbCls = env->GetObjectClass(callback);
+    if (!cbCls) { env->ExceptionClear(); LOGE("callback class not found"); return; }
+    if (g_cb_class) env->DeleteGlobalRef(g_cb_class);
+    g_cb_class = (jclass)env->NewGlobalRef(cbCls);
+    if (!g_hook_onPreviewFrame.installed()) {
+        auto st = g_hook_onPreviewFrame.install(
+            env, g_cb_class, "onPreviewFrame",
+            "([BLandroid/hardware/Camera;)V",
+            reinterpret_cast<void*>(&Hooked_onPreviewFrame));
+        if (st == arthook::Status::kOk) {
+            LOGI("  ART hooked: onPreviewFrame");
+            char buf[64];
+            snprintf(buf, sizeof(buf), "nv21_cb_hooked:%s", which);
+            report_status(g_last_pkg, buf);
+        } else {
+            LOGW("  onPreviewFrame fail: %s", arthook::StatusToString(st));
+            char buf[64];
+            snprintf(buf, sizeof(buf), "nv21_cb_fail:%s", which);
+            report_status(g_last_pkg, buf);
+        }
+    } else {
+        report_status(g_last_pkg, "nv21_cb_reuse");
+    }
+    env->DeleteLocalRef(cbCls);
+}
+
+extern "C" void Hooked_setPreviewCallback(JNIEnv *env, jobject thiz, jobject cb) {
+    LOGI("ART hook: setPreviewCallback cb=%p", cb);
+    if (cb) process_callback(env, thiz, cb, "cb");
+    if (g_hook_setPreviewCallback.installed())
+        g_hook_setPreviewCallback.invoke<void>(env, thiz, cb);
+}
+
+extern "C" void Hooked_setPreviewCallbackWithBuffer(JNIEnv *env, jobject thiz, jobject cb) {
+    LOGI("ART hook: setPreviewCallbackWithBuffer cb=%p", cb);
+    if (cb) process_callback(env, thiz, cb, "buf");
+    if (g_hook_setPreviewCallbackWithBuffer.installed())
+        g_hook_setPreviewCallbackWithBuffer.invoke<void>(env, thiz, cb);
+}
+
+extern "C" void Hooked_setOneShotPreviewCallback(JNIEnv *env, jobject thiz, jobject cb) {
+    LOGI("ART hook: setOneShotPreviewCallback cb=%p", cb);
+    if (cb) process_callback(env, thiz, cb, "oneshot");
+    if (g_hook_setOneShotPreviewCallback.installed())
+        g_hook_setOneShotPreviewCallback.invoke<void>(env, thiz, cb);
+}
+
+int install_preview_callback_hooks(JNIEnv *env) {
+    int n = 0;
+    auto st = g_hook_setPreviewCallback.install(env, "android/hardware/Camera", "setPreviewCallback",
+        "(Landroid/hardware/Camera$PreviewCallback;)V",
+        reinterpret_cast<void*>(&Hooked_setPreviewCallback));
+    if (st == arthook::Status::kOk) { n++; LOGI("  ART hooked: setPreviewCallback"); }
+    else LOGW("  setPreviewCallback: %s", arthook::StatusToString(st));
+
+    st = g_hook_setPreviewCallbackWithBuffer.install(env, "android/hardware/Camera",
+        "setPreviewCallbackWithBuffer",
+        "(Landroid/hardware/Camera$PreviewCallback;)V",
+        reinterpret_cast<void*>(&Hooked_setPreviewCallbackWithBuffer));
+    if (st == arthook::Status::kOk) { n++; LOGI("  ART hooked: setPreviewCallbackWithBuffer"); }
+    else LOGW("  setPreviewCallbackWithBuffer: %s", arthook::StatusToString(st));
+
+    st = g_hook_setOneShotPreviewCallback.install(env, "android/hardware/Camera",
+        "setOneShotPreviewCallback",
+        "(Landroid/hardware/Camera$PreviewCallback;)V",
+        reinterpret_cast<void*>(&Hooked_setOneShotPreviewCallback));
+    if (st == arthook::Status::kOk) { n++; LOGI("  ART hooked: setOneShotPreviewCallback"); }
+    else LOGW("  setOneShotPreviewCallback: %s", arthook::StatusToString(st));
+    return n;
+}
+
+```
+
+`zygisk-native/jni/nv21_hooks.h`:
+
+```h
+#pragma once
+#include <jni.h>
+#include <cstring>
+#include <vector>
+#include <mutex>
+#include <atomic>
+#include <android/log.h>
+#include <arthook/Hooked.h>
+
+/**
+ * Nv21FrameProvider — supplies NV21 frames to the hooked onPreviewFrame.
+ * Pattern mode (moving bar) is active; MediaCodec continuous video is staged for land.
+ */
+class Nv21FrameProvider {
+public:
+    bool ensure(int w, int h);
+    bool copyInto(JNIEnv *env, jbyteArray arr);
+    void setVideoPath(const char *path) { (void)path; } // no-op until MediaCodec land
+    void stop() {}
+
+    int  width()    const { return w_; }
+    int  height()   const { return h_; }
+    int  frames()   const { return frame_count_.load(); }
+    bool isReady()  const { return ready_; }
+    bool isVideo()  const { return false; }
+
+private:
+    void fillLocked();
+
+    std::mutex mu_;
+    std::vector<uint8_t> buf_;
+    int w_ = 0, h_ = 0;
+    int bar_x_ = 0;
+    std::atomic<int> frame_count_{0};
+    bool ready_ = false;
+};
+
+extern Nv21FrameProvider g_nv21;
+extern char g_last_pkg[256];
+
+void process_callback(JNIEnv *env, jobject camera, jobject callback, const char *which);
+int  install_preview_callback_hooks(JNIEnv *env);
+
+extern "C" void Hooked_setPreviewCallback(JNIEnv *env, jobject thiz, jobject cb);
+extern "C" void Hooked_setPreviewCallbackWithBuffer(JNIEnv *env, jobject thiz, jobject cb);
+extern "C" void Hooked_setOneShotPreviewCallback(JNIEnv *env, jobject thiz, jobject cb);
+
+```
+
+`zygisk-native/third_party/arthook/CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.18)
+project(arthook LANGUAGES C CXX ASM)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+set(ARTHOOK_COMMON_SOURCES
+    src/art/ArtMethod.cpp
+    src/art/Layout.cpp
+    src/elf/ElfResolver.cpp
+    src/hook/Deoptimize.cpp
+    src/hook/HookEngine.cpp
+    src/hook/Hooked.cpp
+    src/hook/SelfTest.cpp
+    src/jvm/ClassLookup.cpp
+    src/jvm/JavaVM.cpp
+    src/probe/Probe.cpp
+    src/trampoline/Trampoline.cpp
+)
+
+if(ANDROID_ABI STREQUAL "arm64-v8a" OR CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+    set(ARTHOOK_TRAMP_SRC src/trampoline/trampoline_arm64.S)
+elseif(ANDROID_ABI STREQUAL "armeabi-v7a" OR CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
+    set(ARTHOOK_TRAMP_SRC src/trampoline/trampoline_arm.S)
+elseif(ANDROID_ABI STREQUAL "x86_64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    set(ARTHOOK_TRAMP_SRC src/trampoline/trampoline_x86_64.S)
+elseif(ANDROID_ABI STREQUAL "x86" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "i686")
+    set(ARTHOOK_TRAMP_SRC src/trampoline/trampoline_x86.S)
+else()
+    message(FATAL_ERROR
+        "arthook: unsupported ABI/processor (ANDROID_ABI='${ANDROID_ABI}' "
+        "CMAKE_SYSTEM_PROCESSOR='${CMAKE_SYSTEM_PROCESSOR}')")
+endif()
+
+add_library(arthook STATIC ${ARTHOOK_COMMON_SOURCES} ${ARTHOOK_TRAMP_SRC})
+add_library(arthook::arthook ALIAS arthook)
+
+target_include_directories(arthook
+    PUBLIC  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+target_compile_options(arthook PRIVATE
+    -Wall -Wextra
+    -fno-stack-protector
+    -fvisibility=hidden
+    -fvisibility-inlines-hidden
+)
+target_compile_options(arthook PRIVATE
+    $<$<CONFIG:Release>:-O2 -fno-rtti -fno-exceptions>
+)
+
+option(ARTHOOK_NO_LOG "Disable __android_log_print calls" OFF)
+if(ARTHOOK_NO_LOG)
+    target_compile_definitions(arthook PRIVATE ARTHOOK_NO_LOG=1)
+endif()
+
+find_library(ANDROID_LOG_LIB log)
+find_library(ANDROID_DL_LIB  dl)
+target_link_libraries(arthook PUBLIC ${ANDROID_LOG_LIB} ${ANDROID_DL_LIB})
+
+set_target_properties(arthook PROPERTIES
+    EXPORT_NAME arthook
+    OUTPUT_NAME arthook
+)
+
+```
+
+`zygisk-native/third_party/arthook/include/arthook/ArtHook.h`:
+
+```h
+// SPDX-License-Identifier: Apache-2.0
+#ifndef ARTHOOK_ARTHOOK_H_
+#define ARTHOOK_ARTHOOK_H_
+
+#include <jni.h>
+
+namespace arthook {
+
+enum class Status {
+    kOk,
+    kNotInitialized,
+    kLayoutDiscoveryFailed,
+    kMethodNotFound,
+    kTrampolineAllocFailed,
+    kAlreadyHooked,
+    kNotHooked,
+    kInvalidArgument,
+    kOutOfMemory,
+    kNoJniBridge,
+    kDeoptUnavailable,
+    kInternalError,
+};
+
+Status Initialize(JNIEnv* env, bool verify = false);
+
+namespace detail {
+Status AcquireJniEnv(JNIEnv** env, JavaVM** vm, bool* attached);
+}
+
+template <class Fn>
+Status AttachToJavaVM(Fn&& body) {
+    JNIEnv* env = nullptr;
+    JavaVM* vm = nullptr;
+    bool attached = false;
+    Status s = detail::AcquireJniEnv(&env, &vm, &attached);
+    if (s != Status::kOk) return s;
+    struct Detacher {
+        JNIEnv* env;
+        JavaVM* vm;
+        bool attached;
+        ~Detacher() {
+            if (attached && vm) {
+                if (env && env->ExceptionCheck()) {
+                    env->ExceptionDescribe();
+                    env->ExceptionClear();
+                }
+                vm->DetachCurrentThread();
+            }
+        }
+    } guard{env, vm, attached};
+    body(env);
+    return Status::kOk;
+}
+
+Status Hook(JNIEnv* env, jclass clazz, const char* name, const char* signature,
+            void* replacement, void** backup_out = nullptr);
+Status Hook(JNIEnv* env, const char* class_name, const char* name, const char* signature,
+            void* replacement, void** backup_out = nullptr);
+
+Status Deoptimize(JNIEnv* env, jclass clazz, const char* name, const char* signature);
+Status Unhook(JNIEnv* env, jclass clazz, const char* name, const char* signature);
+Status Unhook(JNIEnv* env, const char* class_name, const char* name, const char* signature);
+
+bool IsInitialized();
+const char* StatusToString(Status s);
+
+}  // namespace arthook
+
+#endif  // ARTHOOK_ARTHOOK_H_
+
+```
+
+`zygisk-native/third_party/arthook/include/arthook/Hooked.h`:
+
+```h
+// SPDX-License-Identifier: Apache-2.0
+//
+// RAII handle for a single arthook installation, with a typed `invoke()`
+// that calls the original method uniformly for native and non-native
+// targets, instance and static.
+
+#ifndef ARTHOOK_HOOKED_H_
+#define ARTHOOK_HOOKED_H_
+
+#include <jni.h>
+
+#include <string>
+#include <type_traits>
+
+#include "arthook/ArtHook.h"
+
+namespace arthook {
+
+namespace detail {
+void RefreshBackupClass(void* backup, void* target);
+}
+
+class Hooked {
+public:
+    Hooked() = default;
+    Hooked(const Hooked&) = delete;
+    Hooked& operator=(const Hooked&) = delete;
+    Hooked(Hooked&& other) noexcept;
+    Hooked& operator=(Hooked&& other) noexcept;
+    ~Hooked();
+
+    Status install(
+        JNIEnv* env, jclass clazz, const char* name, const char* signature, void* replacement);
+
+    Status install(
+        JNIEnv* env, const char* class_name, const char* name, const char* signature,
+        void* replacement);
+
+    void release(JNIEnv* env);
+
+    bool installed() const { return decl_ != nullptr; }
+    bool target_is_native() const { return installed() && backup_jm_ == nullptr; }
+    bool target_is_static() const { return is_static_; }
+
+    template <typename Ret, typename... Args>
+    Ret invoke(JNIEnv* env, jobject thiz, Args... args);
+
+private:
+    void* backup_fn_ = nullptr;
+    jmethodID backup_jm_ = nullptr;
+    void* target_ = nullptr;
+    jclass decl_ = nullptr;
+    bool is_static_ = false;
+    std::string name_;
+    std::string sig_;
+};
+
+}  // namespace arthook
+
+#endif  // ARTHOOK_HOOKED_H_
+
+```
