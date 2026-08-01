@@ -518,6 +518,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [lsass-extend-mapper](entities/lsass-extend-mapper.md) — unsigned driver map via lsass address-space extend
 - [LUDA](entities/luda.md) — Lua IDA Pro scripting plugin (direct SDK access; cheat / IDA Plugins)
 - [luagenny](entities/luagenny.md) — C++ Lua SDK codegen (cheat / sdk codegen; RE)
+- [luaboot](entities/luaboot.md) — fully scriptable UEFI bootloader (Lua; MIT; cheat / EFI driver research)
 - [LuaMachine](entities/luamachine.md) — UE4 Lua gameplay scripting plugin (Blueprint assets / metatables; Plugins:Unreal)
 - [Lua-Obfuscator-Clyde-Protection](entities/lua-obfuscator-clyde-protection.md) — Luau/Lua VM obfuscator (AST + stack/register VM; Roblox script protection)
 - [m0dern_p4cker](entities/m0dern-p4cker.md) — C/C++ ELF binary packer (`[ELF]`; Anti Cheat → Binary Packer)
