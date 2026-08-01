@@ -622,6 +622,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [open.mp-anticheat](entities/open.mp-anticheat.md) — open.mp/SA-MP server AC (client self-memory sigs + RakNet; C++)
 - [OpenArk](entities/openark.md) — Qt anti-rootkit / kernel analysis (callbacks, SSDT, drivers)
 - [OpenClaw](entities/openclaw.md) — C++ Captain Claw reimplementation (Box2D; CMake/Android; Game Develop / source)
+- [OpenGame](entities/opengame.md) — agentic web-game testing/debug framework (Game Skill; GameCoder-27B; OpenGame-Bench; Game Testing)
 - [OpenHardwareMonitor](entities/openhardwaremonitor.md) — OSS hardware monitor (C#/JS; sensors/drivers; Detection:HWID)
 - [OpenLumina](entities/openlumina.md) — IDA plugin for third-party Lumina servers (Hex-Rays `.crt`; IDA Plugins)
 - [OpenProcmon](entities/openprocmon.md) — OSS Procmon-style monitor (ETW + minifilter; process/file/registry/network/DLL)

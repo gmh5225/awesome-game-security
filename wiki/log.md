@@ -1985,3 +1985,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:lfreist/hwinfo`: entity [[hwinfo]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-08-01** — ingest `description:lettier/3d-game-shaders-for-beginners`: entity [[3d-game-shaders-for-beginners]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
+
+- **2026-08-01** — ingest `description:leigest519/OpenGame`: entity [[opengame]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
