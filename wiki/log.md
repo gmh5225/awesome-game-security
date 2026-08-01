@@ -1951,3 +1951,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:linuxboot/fiano`: entity [[fiano]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
 
 - **2026-08-01** — ingest `description:lil-skies/val-exception-handler`: entity [[val-exception-handler]]; cited on [[vanguard]] and [[overviews/anti-cheat]].
+
+- **2026-08-01** — ingest `description:lightningpixel/modly`: entity [[modly]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
