@@ -1219,6 +1219,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/MhmRdd/NoHello [A Zygisk module to hide root]
 - https://github.com/ys1231/MoveCertificate [A Magisk/KernelSU/APatch module for moving user certificates to system certificates. Supports Android 7-15]
 - https://github.com/ri-char/zygisk-dump-dex [A zygisk module that hooks `libdexfile.so` to dump dex]
+- https://github.com/smithluke874/Android-VirtualCam-Manager [Magisk/Zygisk virtual camera module with ArtHook-based Camera1 surface and NV21 frame injection (no LSPosed)]
 
 > Xposed
 - https://github.com/NPC2000/AppPealing-new [An Xposed module that disables Inka AppSealing, a popular anti-cheat and anti-root solution]
@@ -3878,6 +3879,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/awesome-executable-packing
 - https://github.com/phra/PEzor
 - https://github.com/iamsopotatoe-coder/TinyLoad [Simple Windows PE packer/crypter: compress and encrypt via custom VM into a self-extracting stub]
+- https://github.com/Ezmatehw/Encryptix-Crypter [Open-source .NET/native PE crypter with AES256, startup/injection options, and AntiVM/AntiCRACK features]
 - https://github.com/czs108/PE-Packer [X86]
 - https://github.com/longqun/Packer [X86]
 - https://github.com/ATsahikian/pe-protector [X86]
