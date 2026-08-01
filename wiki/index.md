@@ -389,6 +389,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HVCI-loldrivers-check](entities/hvci-loldrivers-check.md) — PowerShell HVCI LOLdrivers check (Trail of Bits; vulnerable-driver lane)
 - [hw3d](entities/hw3d.md) — C++ 3D DirectX tutorial (Planet Chili; DirectX / guide)
 - [hwid-checker-mg](entities/hwid-checker-mg.md) — SMBIOS manufacturer/model/serial HWID checker (Detection:HWID)
+- [hwinfo](entities/hwinfo.md) — cross-platform C++ hardware inventory library (CPU/RAM/GPU; Detection:HWID)
 - [hwidspoofer](entities/hwidspoofer.md) — Windows HWID spoof + tracking-trace clean (Cheat HWID)
 - [iaito](entities/iaito.md) — official radare2 GUI (Qt5/6; RE workflow / editor tooling; Cheat Radare)
 - [ida2llvm](entities/ida2llvm.md) — dynamic IDA→LLVM IR binary lifting (cursor-sync liftability viewer; cheat / IDA Plugins)
