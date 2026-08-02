@@ -791,6 +791,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Reborn](entities/reborn.md) — Rust Fortnite cheat framework (web server / SQLite / Discord bot; modular crates)
 - [ReGameDLL_CS](entities/regamedll-cs.md) — reversed CS1.6 server `mp.dll` (GoldSrc; plugin API; Game Engine / RE)
 - [RelocBonus](entities/relocbonus.md) — Attack Reloc (DEF CON 26; AC / Obfuscation Engine)
+- [Renamaida](entities/renamaida.md) — IDA Pro plugin: Jaro-Winkler instruction-signature rename for firmware/static libs (JSON sig DB; cheat / IDA Plugins)
 - [RPGMakerDecrypter](entities/rpgmakerdecrypter.md) — RPG Maker XP/VX/VX Ace encrypted-archive extractor (CLI; RE tools)
 - [RE-Architect](entities/re-architect.md) — automated RE platform (binary analysis + ML; cheat / RE tools)
 - [RETools](entities/retools.md) — curated RE/security tool catalog (disasm/debug/decompiler; toolkit guide)
