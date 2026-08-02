@@ -2213,3 +2213,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `readme:categories`: bumped Anti Cheat ~636 (was ~634; Cheat ~2632 stable); refreshed README map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-02** — ingest `description:mastershadow547/Advanced-Anticheat`: entity [[advanced-anticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/game-engine]].
+
+- **2026-08-02** — ingest `description:jsherman212/xnuspy`: entity [[xnuspy]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
