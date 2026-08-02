@@ -12,7 +12,7 @@ confidence: medium
 
 **Decode CFG** tooling for Genshin Impact under `reversing/genshin` — Rust and Python work focused on reverse engineering, shader analysis, and rendering internals. Useful for game-security researchers studying miHoYo title obfuscation and offensive RE in the cheat / game:genshin impact lane (vs automation scripts or kernel-driver abuse). (source: wiki/sources/descriptions/khang06__misc.md)
 
-Complements title-specific Genshin samples such as [[genshin-impact-script]] (TypeScript automation), [[mhynot2]] (experimental AC bypass research), and [[evil-mhyprot-cli]] (`mhyprot2.sys` BYOVD).
+Complements title-specific Genshin samples such as [[genshinjumpfixer2]] (jump-target CFG decode/simplify script), [[genshin-impact-script]] (TypeScript automation), [[mhynot2]] (experimental AC bypass research), and [[evil-mhyprot-cli]] (`mhyprot2.sys` BYOVD).
 
 ## Links
 
@@ -21,4 +21,4 @@ Complements title-specific Genshin samples such as [[genshin-impact-script]] (Ty
 
 ## Related
 
-[[control-flow-flattening]] · [[genshin-impact-script]] · [[mhynot2]] · [[evil-mhyprot-cli]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
+[[control-flow-flattening]] · [[genshinjumpfixer2]] · [[genshin-impact-script]] · [[mhynot2]] · [[evil-mhyprot-cli]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
