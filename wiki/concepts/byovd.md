@@ -27,6 +27,7 @@ sources:
   - wiki/sources/descriptions/kyxiaxiang__360WFP_Exploit.md
   - wiki/sources/descriptions/kkent030315__MsIoExploit.md
   - wiki/sources/descriptions/kkent030315__evil-mhyprot-cli.md
+  - wiki/sources/descriptions/jsecurity101__MSFT_DriverBlockList.md
 updated: 2026-08-02
 confidence: high
 ---
@@ -43,7 +44,7 @@ Bring Your Own Vulnerable Driver: load a legitimately signed but vulnerable driv
 
 ## Mitigations
 
-Microsoft vulnerable-driver blocklist, [[hvci]], AC driver allowlists ([[vanguard]]-style), PiDDBCache/MmUnloadedDrivers forensics, EPT-protected callback lists. The canonical LOLdriver catalog [[loldrivers]] (magicsword-io; YAML metadata, YARA enrichment, HVCI tracking, validation tooling) is the upstream reference for known-abused signed drivers. (source: wiki/sources/descriptions/magicsword-io__LOLDrivers.md) HVCI-oriented LOLdriver checks such as [[hvci-loldrivers-check]] help inventory those drivers against Memory Integrity constraints. (source: wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md) Broader LOLdriver scan clients such as [[loldrivers-client]] (Go/PowerShell) sit in the same cheat / vulnerable-driver research lane. (source: wiki/sources/descriptions/rtfmkiesel__loldrivers-client.md)
+Microsoft vulnerable-driver blocklist ([[msft-driverblocklist]] mirrors the Recommended Driver Block Rules for defensive / AC research) (source: wiki/sources/descriptions/jsecurity101__MSFT_DriverBlockList.md), [[hvci]], AC driver allowlists ([[vanguard]]-style), PiDDBCache/MmUnloadedDrivers forensics, EPT-protected callback lists. The canonical LOLdriver catalog [[loldrivers]] (magicsword-io; YAML metadata, YARA enrichment, HVCI tracking, validation tooling) is the upstream reference for known-abused signed drivers. (source: wiki/sources/descriptions/magicsword-io__LOLDrivers.md) HVCI-oriented LOLdriver checks such as [[hvci-loldrivers-check]] help inventory those drivers against Memory Integrity constraints. (source: wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md) Broader LOLdriver scan clients such as [[loldrivers-client]] (Go/PowerShell) sit in the same cheat / vulnerable-driver research lane. (source: wiki/sources/descriptions/rtfmkiesel__loldrivers-client.md)
 
 Physical-memory–oriented vulnerable-driver inventories such as [[physmem-drivers]] (namazso; list only, no PoC) help catalog signed drivers that expose physmem primitives commonly abused in BYOVD chains. (source: wiki/sources/descriptions/namazso__physmem_drivers.md)
 
@@ -83,5 +84,5 @@ Physical-memory mapping abuse via **`msIo64.sys`** such as [[ms-io-exploit]] sit
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
