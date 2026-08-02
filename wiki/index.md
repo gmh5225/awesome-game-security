@@ -838,6 +838,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sourceengineexplorer](entities/sourceengineexplorer.md) — Source Engine² explorer (cheat/debug, exploit dev, network emulator, cloud decompiler; Explorer)
 - [Source2Gen](entities/source2gen.md) — Source 2 SDK generator (neverlosecc/praydog; C++ class/enum headers; game engine explorer:source)
 - [source2sdk](entities/source2sdk.md) — generated Source 2 SDKs for multiple games (C++; game engine explorer:source)
+- [SpoofingCollection](entities/spoofing-collection.md) — Magisk + LSPosed Android device-fingerprint profiles (build props + Build API hooks; Play Integrity / attestation research)
 - [Spoofer-AMIDEWIN](entities/spoofer-amidewin.md) — AMIDEWIN HWID / system-identifier spoof research (C/C++; Cheat HWID)
 
 - [SimpleFPSTemplate](entities/simple-fps-template.md) — UE4 FPS demo template (bloated C++ starter; Game Develop / Unreal source)
