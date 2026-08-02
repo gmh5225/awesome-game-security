@@ -2101,3 +2101,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:kitty8904/blanket`: entity [[blanket]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-08-02** — ingest `description:kirides/screencapture`: entity [[screencapture]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
+
+- **2026-08-02** — ingest `description:kirchesz/kiero2`: entity [[kiero2]]; cited on [[overviews/graphics-api]] and [[present-hook]].
