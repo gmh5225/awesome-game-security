@@ -10,7 +10,7 @@ confidence: medium
 
 # anti-cheat-research-index
 
-Structured **research index** cataloging public engineering work and retained technical references on defensive anti-cheat development, Windows kernel security, virtualization, and reverse engineering. Organizes material across anti-cheat architecture, kernel execution and memory integrity, graphics presentation-path integrity, Intel VT-x/EPT instrumentation, and x86/x64 RE (devirtualization, anti-debugging). Featured work includes a VT-x/EPT-assisted kernel debugging framework (C++ kernel core + Delphi UI) and reference implementations for kernel shellcode detection, cross-process attachment detection, presentation-hook detection, and hardware trace analysis. Serves as a research map and methodology guide for authorized security testing, defensive AC engineering, malware analysis, and education—not a standalone codebase. (source: wiki/sources/descriptions/xhscfq__anti-cheat-research-index.md)
+Structured **research index** cataloging public engineering work and retained technical references on defensive anti-cheat development, Windows kernel security, virtualization, and reverse engineering. Organizes material across anti-cheat architecture, kernel execution and memory integrity, graphics presentation-path integrity, Intel VT-x/EPT instrumentation, and x86/x64 RE (devirtualization, anti-debugging). Featured work includes [[unreal-vtdbg]] — a VT-x/EPT-assisted kernel debugging framework (C++ kernel core + Delphi UI) and reference implementations for kernel shellcode detection, cross-process attachment detection, presentation-hook detection, and hardware trace analysis. Serves as a research map and methodology guide for authorized security testing, defensive AC engineering, malware analysis, and education—not a standalone codebase. (source: wiki/sources/descriptions/xhscfq__anti-cheat-research-index.md)
 
 ## Coverage areas
 
@@ -26,4 +26,4 @@ Structured **research index** cataloging public engineering work and retained te
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[present-hook]] · [[research-rigor]] · [[retools]] · [[windows-kernel-debugging-guide]]
+[[unreal-vtdbg]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[present-hook]] · [[research-rigor]] · [[retools]] · [[windows-kernel-debugging-guide]]
