@@ -3313,6 +3313,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Game:COD Warzone
 - https://github.com/YMY1666527646/Call-of-Duty-Warzone-MW-HACK-ESP-AIMBOT
 - https://github.com/serjam/mwclap
+- https://github.com/ckateowm/modernwarfare2-cpp-external [C++ MW2 injected DLL with D3D12 Present hook (Kiero), ESP, and aimbot]
 - https://github.com/NMan1/external-warzone-cheat
 - https://github.com/NMan1/warzone-internal
 - https://github.com/gmh5225/Call-Of-Duty-Warzone-Hack-Esp-Slient-Aimbot-Internal-Unlock-ALL
