@@ -426,6 +426,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-llm-explainer](entities/ida-llm-explainer.md) — local llama.cpp IDA plugin: explain/rename/struct inference + HITL accept (cheat / IDA Plugins)
 - [ida-plugins](entities/ida-plugins.md) — IDA register cross-references (vs Oregami value-use; cheat / IDA Plugins)
 - [IDAPlugins](entities/idaplugins.md) — curated IDA Pro plugin pack (deobf / bin-diff / crypto; cheat / IDA Plugins)
+- [IDARustCargo](entities/ida-rust-cargo.md) — IDA plugin: display potentially installed Cargo dependencies (Python; cheat / IDA Plugins)
 - [IDARustDemangler](entities/ida-rust-demangler.md) — IDA Rust demangler & normalizer (`rs-dml`; cheat / IDA Plugins)
 - [ida-search](entities/ida-search.md) — IDA Pro 9.x plugin: 010 Editor–style type-aware binary search (`ida-plugin.json`; cheat / IDA Plugins)
 - [ida-sigmaker](entities/ida-sigmaker.md) — IDA Pro 9+ zero-dependency signature maker/searcher (Python; optional SIMD; cheat / IDA Plugins)
