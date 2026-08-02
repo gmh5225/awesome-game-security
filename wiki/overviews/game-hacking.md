@@ -440,6 +440,7 @@ sources:
   - wiki/sources/descriptions/narumii__Deobfuscator.md
   - wiki/sources/descriptions/lzghzr__APatch_kpm.md
   - wiki/sources/descriptions/lockedbyte__so_loader.md
+  - wiki/sources/descriptions/kirides__screencapture.md
 updated: 2026-08-02
 confidence: high
 ---
@@ -474,7 +475,7 @@ Pattern scan → pointer chains → structure reconstruction is the usual extern
 
 ## AI visual pipeline
 
-Screen-capture → object detection → coordinate transform → mouse delta → execution. Single-machine setups run OBS (Game Capture injects a hook DLL; Window Capture uses DXGI duplication) plus a YOLO model on the same PC; dual-machine setups send frames over NDI/capture card and inject from a second box via [[hardware-input-injection]]. Training: collect screenshots → label (YOLO txt) → Ultralytics train → export ONNX/TensorRT; measure latency on the exact capture path, model, and hardware. Defensive counterpart: [[ai-aimbot-detection]]. Corpus: [[pine]], [[maplestory-worlds-automation]], [[yolov5-pubg]] (PUBG YOLOv5; Python; cheat / triggerbot & aimbot) (source: wiki/sources/descriptions/lkeai2007__yolov5_PUBG.md), [[camera-triggerbot]] (movement/color around crosshair; cheat / triggerbot & aimbot) (source: wiki/sources/descriptions/lehmenkuehler__camera-triggerbot.md), [[human-mouse-movement]], [[waldo]]; curated game-AI paper bibliography [[gameai-paper-list]] (zh; modding/tooling research background). (source: wiki/sources/skills/game-hacking.md) (source: wiki/sources/descriptions/ls361664056__GameAI-paper-list.md)
+Screen-capture → object detection → coordinate transform → mouse delta → execution. Single-machine setups run OBS (Game Capture injects a hook DLL; Window Capture uses DXGI duplication) plus a YOLO model on the same PC; dual-machine setups send frames over NDI/capture card and inject from a second box via [[hardware-input-injection]]. Training: collect screenshots → label (YOLO txt) → Ultralytics train → export ONNX/TensorRT; measure latency on the exact capture path, model, and hardware. Defensive counterpart: [[ai-aimbot-detection]]. Corpus: [[pine]], [[maplestory-worlds-automation]], [[yolov5-pubg]] (PUBG YOLOv5; Python; cheat / triggerbot & aimbot) (source: wiki/sources/descriptions/lkeai2007__yolov5_PUBG.md), [[camera-triggerbot]] (movement/color around crosshair; cheat / triggerbot & aimbot) (source: wiki/sources/descriptions/lehmenkuehler__camera-triggerbot.md), [[human-mouse-movement]], [[waldo]]; Windows capture library [[screencapture]] (DXGI Desktop Duplication; C++/C#; README `[DX11]`) (source: wiki/sources/descriptions/kirides__screencapture.md); curated game-AI paper bibliography [[gameai-paper-list]] (zh; modding/tooling research background). (source: wiki/sources/skills/game-hacking.md) (source: wiki/sources/descriptions/ls361664056__GameAI-paper-list.md)
 
 ## Input simulation
 
