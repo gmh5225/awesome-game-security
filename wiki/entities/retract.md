@@ -20,4 +20,4 @@ Useful for quick triage of game clients, launchers, and anti-cheat modules—not
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[totalpe2]] · [[garlic]] · [[retools]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[cognitor]] · [[totalpe2]] · [[garlic]] · [[retools]]

@@ -2135,3 +2135,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:kernelwernel/VMAware`: entity [[vmaware]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-08-02** — ingest `description:kernelstub/Retract`: entity [[retract]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-08-02** — ingest `description:kernelstub/Cognitor`: entity [[cognitor]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
