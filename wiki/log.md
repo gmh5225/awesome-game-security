@@ -2217,3 +2217,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:jsherman212/xnuspy`: entity [[xnuspy]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
 - **2026-08-02** — ingest `description:jsecurity101/MSFT_DriverBlockList`: entity [[msft-driverblocklist]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
+- **2026-08-02** — ingest `description:jseclab/obj2shellcode`: entity [[obj2shellcode]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].

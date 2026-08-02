@@ -673,6 +673,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [obfuscatxor](entities/obfuscatxor.md) — Go string crypter (encrypted string vars; AC Compile Time / String Crypter)
 - [obfuscxx](entities/obfuscxx.md) — C++20 header-only compile-time variable obfuscation (SIMD decrypt; AC Encrypt Variable)
 - [Obfusk8](entities/obfusk8.md) — C++17 compile-time/runtime obfuscation library (AC Compile Time)
+- [obj2shellcode](entities/obj2shellcode.md) — C++ object-to-shellcode generation framework (AC shellcode engine & tricks)
 - [obpo-plugin](entities/obpo-plugin.md) — IDA client + Go OBPO backend (closed core; open plugin; Fix OLLVM)
 - [Obscura](entities/obscura.md) — LLVM pass-plugin obfuscator (C/C++/ObjC/Swift; 13 passes; Darwin-strong; AC Obfuscation Engine)
 - [OcarinaCTRComposer](entities/ocarina-ctr-composer.md) — OoT3D Luma3DS .3gx cheat/tools overlay (on CTRComposer; search/hex/RAM dump)
