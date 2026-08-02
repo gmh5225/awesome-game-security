@@ -90,6 +90,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-kernel-xiaomi-pipa](entities/android-kernel-xiaomi-pipa.md) — Xiaomi Pad 6 (pipa) Android kernel source (cheat / Android Kernel Source)
 
 - [Android-Emulator-Detection](entities/android-emulator-detection.md) — Android Anti-Emulator (Java/C++; Detection:Virtual Environments)
+- [android-emulator](entities/android-emulator.md) — Android emulator (emulation focus; mobile-platform / emulator research)
 - [Android-Library-Remap-Hide](entities/android-library-remap-hide.md) — Android lib remap-hide (two-lib; cheat / hide)
 - [android-native-app-imgui](entities/android-native-app-imgui.md) — Android ImGui native app (Java/C++; cheat / render-draw)
 - [Android-Native-Root-Detector](entities/android-native-root-detector.md) — Kotlin Android root detector (Detection:Android root)

@@ -2181,3 +2181,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:jxy-s/herpaderping`: entity [[herpaderping]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-08-02** — ingest `description:jynew/jynew`: entity [[jynew]]; cited on [[overviews/game-engine]].
+
+- **2026-08-02** — ingest `description:jwmcglynn/android-emulator`: entity [[android-emulator]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
