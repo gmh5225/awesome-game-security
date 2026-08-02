@@ -2113,3 +2113,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:khang06/misc`: entity [[misc]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-02** — ingest `description:khang06/mhynot2`: entity [[mhynot2]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-08-02** — ingest `readme:categories`: bumped Cheat ~2627 (was ~2626; Anti Cheat ~631 stable); refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
