@@ -2137,3 +2137,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:kernelstub/Retract`: entity [[retract]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-02** — ingest `description:kernelstub/Cognitor`: entity [[cognitor]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
+- **2026-08-02** — ingest `description:keowu/sourceengineexplorer`: entity [[sourceengineexplorer]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].

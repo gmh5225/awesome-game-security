@@ -20,4 +20,4 @@ Complements title-scoped Source trees such as [[cstrike15-src]], GoldSrc remakes
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[cstrike15-src]] · [[sdk]] · [[source2gen]] · [[cs16-client]] · [[regamedll-cs]] · [[hl-mods]] · [[xash-rt]] · [[tiny-csgo-client]]
+[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[cstrike15-src]] · [[sdk]] · [[source2gen]] · [[sourceengineexplorer]] · [[cs16-client]] · [[regamedll-cs]] · [[hl-mods]] · [[xash-rt]] · [[tiny-csgo-client]]
