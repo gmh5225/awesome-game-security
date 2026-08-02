@@ -314,6 +314,7 @@ sources:
   - wiki/sources/descriptions/mandiant__GoReSym.md
   - wiki/sources/descriptions/mahaloz__DAILA.md
   - wiki/sources/descriptions/lzyddf__IDA_Plugin_PCodeGPT.md
+  - wiki/sources/descriptions/ke0z__VulChatGPT.md
   - wiki/sources/descriptions/loyaltypollution__ida2llvm.md
   - wiki/sources/descriptions/mahmoudimus__ida-sigmaker.md
   - wiki/sources/descriptions/mahmoudimus__ida-taskr.md
@@ -628,6 +629,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Local llama.cpp IDA LLM Explainer via [[ida-llm-explainer]] (function explain/rename/struct inference; human-in-the-loop accept; CFG recovery) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/pgarba__ida-llm-explainer.md)
 - Decompiler ChatGPT assistant via [[daila]] (cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/mahaloz__DAILA.md)
 - ChatGPT PCode assistant via [[ida-plugin-pcodegpt]] (Chinese UI only; cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant / microcode lane. (source: wiki/sources/descriptions/lzyddf__IDA_Plugin_PCodeGPT.md)
+- Multi-provider IDA vulnerability analysis via [[vulchatgpt]] (BinAIVulHunter; OpenAI/Gemini/Ollama; decompiled-function vuln analysis + code explanation; cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/ke0z__VulChatGPT.md)
 - Dynamic IDA→LLVM IR binary lifting via [[ida2llvm]] (cursor-sync liftability viewer in the disassembly window; cheat / IDA Plugins) sits in the same static RE / IR lane beside [[levo]] and [[genmc]]. (source: wiki/sources/descriptions/loyaltypollution__ida2llvm.md)
 - Whole-program Ghidra+GPT summarization via [[gpt-wpre]] (Python; `ghidra_bridge` decomp/call-graph extract → bottom-up callee-context summaries; ChatGPT / `[ChatGPT]` lane) sits in the Cheat Ghidra Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/moyix__gpt-wpre.md)
 - LLM-based reversing for radare2 via [[r2ai]] (interactive LLM↔r2 sessions for game/security binaries) sits in the Cheat Radare Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/radareorg__r2ai.md)
