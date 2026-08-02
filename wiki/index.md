@@ -582,6 +582,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mixed-boolean-transform](entities/mixed-boolean-transform.md) — source-to-source C++ MBA obfuscation (Z3-verified; Eigen3 + GMP; Cheat Mixed boolean-arithmetic)
 - [minidump](entities/minidump.md) — Python minidump (.dmp) parser (full/mini; LSASS; cross-platform)
 - [miniDumpReader](entities/minidumpreader.md) — Python minidump / memory analysis (AC / Windows kernel dump)
+- [misc](entities/misc.md) — Genshin Impact Decode CFG (Rust/Python; RE / shader / rendering; khang06)
 - [Minetest](entities/minetest.md) — Luanti voxel engine (Lua mod API; Irrlicht/SDL2; procedural worlds + multiplayer; Game Engine / source)
 - [Mini-Launcher](entities/mini-launcher.md) — Steam-bypass game launcher (API stub / DLL inject / Lua; Launcher Abuser)
 - [MiniVisorPkg](entities/minivisorpkg.md) — educational Intel VT-x HV (UEFI + Windows driver; WinDbg; Detection:HV / EFI)

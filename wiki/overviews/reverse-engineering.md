@@ -131,6 +131,7 @@ sources:
   - wiki/sources/descriptions/void-stack__VMUnprotect.Dumper.md
   - wiki/sources/descriptions/wINfOG__IDA_Easy_Life.md
   - wiki/sources/descriptions/timetravelthree__IDARustDemangler.md
+  - wiki/sources/descriptions/khang06__misc.md
   - wiki/sources/descriptions/kkent030315__IDARustCargo.md
   - wiki/sources/descriptions/nico__demumble.md
   - wiki/sources/descriptions/threatlabz__pikabot-deobfuscator.md
@@ -402,7 +403,7 @@ Full DBI frameworks — [[frida]], DynamoRIO, Pin, TinyInst, QBDI — support AP
 | Layer | Concept | Recovery tools (corpus) |
 |-------|---------|-------------------------|
 | MBA | [[mixed-boolean-arithmetic]] | [[cobra]], [[mutaben]], [[mba-obfuscator]], [[mixed-boolean-transform]], [[obfuscation-analysis]] |
-| CFF | [[control-flow-flattening]] | [[idadeflat]], [[d810-ng]], [[obpo-plugin]], [[obfuscation-detection]] |
+| CFF | [[control-flow-flattening]] | [[idadeflat]], [[d810-ng]], [[obpo-plugin]], [[obfuscation-detection]], [[misc]] (Genshin CFG decode) |
 | Opaque predicates | invariant injection | [[opaque-predicates-detective]], Z3/SMT backends ([[stp]]) |
 | VM virtualization | VMProtect / Themida handlers; open x86 VM embed | [[novmpy]], [[tde]], [[rumba]], [[vmpimportfixer]], [[vmpunpacker]], [[themida-research]], [[phantasm-x86-virtualizer]], [[nocturne]] |
 | Binary lifting | machine code → compiler IR | McSema, remill, RetDec; BN MLIL/HLIL |
