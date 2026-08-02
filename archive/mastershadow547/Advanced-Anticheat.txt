@@ -1,0 +1,1393 @@
+Project Path: arc_mastershadow547_Advanced-Anticheat_8_iagp2t
+
+Source Tree:
+
+```txt
+arc_mastershadow547_Advanced-Anticheat_8_iagp2t
+├── AntiCheat
+│   ├── ClientCore.luau
+│   ├── Configurations.luau
+│   └── ServerCore.luau
+├── AntiCheatDatabase
+│   ├── AntiCheatData.luau
+│   └── AntiCheatTemplate.luau
+├── LICENSE
+├── Loader.luau
+└── README.md
+
+```
+
+`AntiCheat/ClientCore.luau`:
+
+```luau
+-- Showcase https://drive.google.com/file/d/15AiSCMoJgrgyQgWNhKH2uqJQCnLPmnCe/view?usp=sharing
+
+local selfRef = script
+selfRef.Name = tostring(math.random(100000, 999999))
+script = nil
+selfRef:Destroy()
+
+local refGame = game
+local taskWait = task.wait
+local taskDelay = task.delay
+local taskSpawn = task.spawn
+local stringLower = string.lower
+local stringFind = string.find
+local stringLen = string.len
+local tableFind = table.find
+local mathRandom = math.random
+local pcallRef = pcall
+local typeRef = type
+local toStringRef = tostring
+
+local ReplicatedStorage = refGame:GetService("ReplicatedStorage")
+local LogService = refGame:GetService("LogService")
+local ScriptContext = refGame:GetService("ScriptContext")
+local Players = refGame:GetService("Players")
+local RunService = refGame:GetService("RunService")
+
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local ExploitDetected = Remotes:WaitForChild("ExploitDetected")
+local HandshakeRemote = Remotes:WaitForChild("Handshake")
+local LogReport = Remotes:WaitForChild("LogReport")
+
+local fireExploit = ExploitDetected.FireServer
+local fireLog = LogReport.FireServer
+local fireHandshake = HandshakeRemote.FireServer
+local handshakeSignal = HandshakeRemote.OnClientEvent
+
+local MAX_FIELD_OF_VIEW = 70
+local LocalPlayer = Players.LocalPlayer
+
+local WhiteListedGui = {
+	"MainGui",
+	"ShopGui",
+	"InventoryGui",
+	"TopbarCenteredClipped",
+	"TopbarStandardClipped",
+	"TopbarStandard",
+	"TopbarCentered",
+	"HDAdminInterface"
+}
+
+local BlacklistedUI = {
+	"dex", "cobalt", "mainmenu", "intro", "explorerselections", "properties", "ketamine",
+}
+
+local BlacklistedTerms = {
+	"httpget", "loadstring", "getgenv", "getrawmetatable",
+	"hookmetamethod", "hookfunction", "newcclosure", "replaceclosure",
+	"synapse", "krnl", "fluxus", "xeno", "madium", "wave",
+	"dex", "remotespy", "rayfield", "electron", "oxygen",
+	"celery", "scriptware", "exploit", "executor",
+	"cobalt", "Cobalt", "syn", "Dex", "ExplorerSelections",
+	"Ketamine", "ketamine",
+}
+
+ExploitDetected.Parent = nil
+LogReport.Parent = nil
+HandshakeRemote.Parent = nil
+
+local function SafeFireExploit(reason: string)
+	ExploitDetected.Parent = Remotes
+	fireExploit(ExploitDetected, reason)
+	ExploitDetected.Parent = nil
+end
+
+local function SafeFireLog(message: string, source: string)
+	LogReport.Parent = Remotes
+	fireLog(LogReport, message, source)
+	LogReport.Parent = nil
+end
+
+local function SafeFireHandshake(token: string)
+	HandshakeRemote.Parent = Remotes
+	fireHandshake(HandshakeRemote, token)
+	HandshakeRemote.Parent = nil
+end
+
+handshakeSignal:Connect(function(Token: string)
+	SafeFireHandshake(Token)
+end)
+
+local logServiceIntact = true
+local scriptContextIntact = true
+
+local function VerifyLogService()
+	local fired = false
+	local conn
+
+	local ok = pcallRef(function()
+		conn = LogService.MessageOut:Connect(function()
+			fired = true
+		end)
+	end)
+
+	if not ok or not conn then
+		logServiceIntact = false
+		SafeFireExploit("LogService.MessageOut hook detected (connect failed)")
+		return
+	end
+
+	warn("__actest__")
+	taskWait()
+	taskWait()
+
+	pcallRef(function() conn:Disconnect() end)
+
+	if not fired then
+		logServiceIntact = false
+		SafeFireExploit("LogService.MessageOut hook detected (suppressed)")
+	end
+end
+
+local function VerifyScriptContext()
+	local conn
+
+	local ok, err = pcallRef(function()
+		conn = ScriptContext.Error:Connect(function() end)
+	end)
+
+	if not ok or not conn then
+		scriptContextIntact = false
+		SafeFireExploit("ScriptContext.Error hook detected (connect failed): " .. toStringRef(err))
+		return
+	end
+
+	local disconnectOk = pcallRef(function()
+		conn:Disconnect()
+	end)
+
+	if not disconnectOk then
+		scriptContextIntact = false
+		SafeFireExploit("ScriptContext.Error hook detected (disconnect failed)")
+	end
+end
+
+taskSpawn(VerifyLogService)
+taskSpawn(VerifyScriptContext)
+
+taskSpawn(function()
+	if refGame:FindFirstChild("MessagingService") then
+		SafeFireExploit("Found Executor injection successful notification!")
+	end
+end)
+
+taskSpawn(function()
+	while true do
+		taskWait(30)
+		taskSpawn(VerifyLogService)	
+		taskSpawn(VerifyScriptContext)
+
+		if refGame:FindFirstChild("MessagingService") then
+			SafeFireExploit("Found Executor injection successful notification!")
+		end
+
+	end
+end)
+
+local function MonitorOtherCharacter(character: Model)
+	character.ChildAdded:Connect(function(child: Instance)
+		if child:IsA("Highlight") or child:IsA("BillboardGui") or child:IsA("BoxHandleAdornment") then
+			SafeFireExploit("ESP injected into character: " .. toStringRef(child.ClassName))
+		end
+	end)
+end
+
+local function HookPlayer(targetPlayer: Player)
+	if targetPlayer == LocalPlayer then return end
+	if targetPlayer.Character then
+		MonitorOtherCharacter(targetPlayer.Character)
+	end
+	targetPlayer.CharacterAdded:Connect(MonitorOtherCharacter)
+end
+
+for _, player in pairs(Players:GetPlayers()) do
+	HookPlayer(player)
+end
+Players.PlayerAdded:Connect(HookPlayer)
+
+LocalPlayer.PlayerGui.ChildAdded:Connect(function(child: Instance)
+	taskWait()
+	if child:IsA("ScreenGui") then
+		local lowerName = stringLower(child.Name)
+
+		for _, badName in ipairs(BlacklistedUI) do
+			if stringFind(lowerName, badName) then
+				SafeFireExploit("Dex/Cobalt GUI Fallback Detected: " .. child.Name)
+				return
+			end
+		end
+
+		if not tableFind(WhiteListedGui, child.Name) then
+			SafeFireExploit("Unauthorized ScreenGui injected: " .. toStringRef(child.Name))
+		end
+	end
+end)
+
+refGame:GetService("Workspace").CurrentCamera:GetPropertyChangedSignal("FieldOfView"):Connect(function()
+	if refGame:GetService("Workspace").CurrentCamera.FieldOfView > MAX_FIELD_OF_VIEW then
+		SafeFireExploit("Camera FieldOfView tampered: " .. toStringRef(refGame:GetService("Workspace").CurrentCamera.FieldOfView))
+	end
+end)
+
+local function IsSuspiciousMessage(msg: string): boolean
+	local lower = stringLower(msg)
+	for _, term in ipairs(BlacklistedTerms) do
+		if stringFind(lower, term, 1, true) then
+			return true
+		end
+	end
+	return false
+end
+
+LogService.MessageOut:Connect(function(message: string, messageType: Enum.MessageType)
+	if not logServiceIntact then return end
+	if stringFind(message, "__actest__", 1, true) then return end
+	if messageType == Enum.MessageType.MessageError then return end
+	if IsSuspiciousMessage(message) then
+		SafeFireLog(message, "LogService")
+	end
+end)
+
+ScriptContext.Error:Connect(function(message: string, stackTrace: string, errorScript: Instance)
+	if not scriptContextIntact then return end
+
+	if errorScript == nil then
+		SafeFireLog("[GhostScript]", "NilScript")
+		return
+	end
+
+	local pcallOk, scriptPath = pcallRef(function()
+		return errorScript:GetFullName()
+	end)
+
+	if pcallOk and scriptPath then
+		local lowerPath = stringLower(scriptPath)
+
+		local isInternalScript = stringFind(lowerPath, "starterplayer")
+			or stringFind(lowerPath, "starterpack")
+			or stringFind(lowerPath, "playergui")
+			or stringFind(lowerPath, "replicatedstorage")
+			or stringFind(lowerPath, "corescripts")
+			or stringFind(lowerPath, "robloxgui")
+
+		if not isInternalScript or stringFind(lowerPath, "workspace") then
+			SafeFireLog(message .. " | Path: " .. scriptPath, "ScriptContext.UnauthorizedOrigin")
+			if typeRef(stackTrace) == "string" and stringLen(stackTrace) > 0 then
+				SafeFireLog(stackTrace, "ScriptContext.StackTrace")
+			end
+		end
+	else
+		SafeFireLog("[MaskedScript Environment Exception]", "NilScript")
+	end
+end)
+
+_G.AntiCheatEnabled = "ON"
+
+taskSpawn(function()
+	while true do
+		taskWait(3)
+		if _G.AntiCheatEnabled ~= "ON" then
+			SafeFireExploit("_G.AntiCheatEnabled tampered")
+			_G.AntiCheatEnabled = "ON"
+		end
+	end
+end)
+
+taskSpawn(function()
+	while true do
+		taskWait(15)
+
+		if typeRef(task.wait) ~= "function" then
+			SafeFireExploit("task.wait replaced in environment")
+		end
+
+		if typeRef(pcall) ~= "function" then
+			SafeFireExploit("pcall replaced in environment")
+		end
+
+		if typeRef(string.lower) ~= "function" then
+			SafeFireExploit("string.lower replaced in environment")
+		end
+	end
+end)
+
+```
+
+`AntiCheat/Configurations.luau`:
+
+```luau
+-- Showcase https://drive.google.com/file/d/15AiSCMoJgrgyQgWNhKH2uqJQCnLPmnCe/view?usp=sharing
+
+local RunService = game:GetService("RunService")
+
+local Configurations = {}
+
+Configurations.USE_FLAG_SYSTEM = true
+Configurations.USE_IMMEDIATE_ACTION_SYSTEM = false
+Configurations.ACTIVATE_BANWAVE = false
+Configurations.ENABLE_SERVICE_OBFUSCATION = true
+Configurations.VERBOSE = true
+Configurations.MINIMUM_ACCOUNT_AGE = 7
+
+local function ValidateConfig()
+	local function AssertType(key, expectedType)
+		local val = Configurations[key]
+		if val == nil then
+			error("AntiCheat Configuration Error: " .. key .. " cannot be nil.")
+		end
+		if typeof(val) ~= expectedType then
+			error("AntiCheat Configuration Error: " .. key .. " must be " .. expectedType .. ", got " .. typeof(val))
+		end
+	end
+
+	AssertType("USE_FLAG_SYSTEM", "boolean")
+	AssertType("USE_IMMEDIATE_ACTION_SYSTEM", "boolean")
+	AssertType("ACTIVATE_BANWAVE", "boolean")
+	AssertType("ENABLE_SERVICE_OBFUSCATION", "boolean")
+	AssertType("VERBOSE", "boolean")
+	AssertType("MINIMUM_ACCOUNT_AGE", "number")
+
+	if Configurations.USE_FLAG_SYSTEM and Configurations.USE_IMMEDIATE_ACTION_SYSTEM then
+		warn("AntiCheat Error: Both systems enabled. Defaulting to Flag System only.")
+		Configurations.USE_IMMEDIATE_ACTION_SYSTEM = false
+	elseif not Configurations.USE_FLAG_SYSTEM and not Configurations.USE_IMMEDIATE_ACTION_SYSTEM then
+		error("AntiCheat Configuration Error: No system selected! Enable either Flag or Immediate Action.")
+	end
+
+	if Configurations.VERBOSE and not RunService:IsStudio() then
+		warn("AntiCheat Warning: Verbose mode enabled in production environment. Turning off!")
+		Configurations.VERBOSE = false
+	end
+end
+
+ValidateConfig()
+
+return Configurations
+
+```
+
+`AntiCheat/ServerCore.luau`:
+
+```luau
+-- Showcase https://drive.google.com/file/d/15AiSCMoJgrgyQgWNhKH2uqJQCnLPmnCe/view?usp=sharing
+
+local Scripts = script.Parent
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remotes = ReplicatedStorage:FindFirstChild("Remotes")
+local Config = require(Scripts.Configurations)
+local AntiCheatData = require(Scripts.AntiCheatData)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+
+local function vPrint(...)
+	if Config.VERBOSE then print(...) end
+end
+
+local function vWarn(...)
+	if Config.VERBOSE then warn(...) end
+end
+
+local ExpectedHandshakes = {}
+local RemoteThrottles = {}
+local AntiCheat = {}
+local ServiceMap = {}
+
+local MovementConnections = {}
+
+local MAX_REMOTES_PER_SECOND = 10
+local MAX_ERROR_LOGS = 100
+
+local SAVE_INTERVAL = 1.5
+local RUBBERBAND_COOLDOWN = 1
+local POST_RUBBERBAND_IMMUNITY = 2.5
+
+local SPEED_BUFFER = 10
+local SPEED_VIOLATION_THRESHOLD = 5
+local SPEED_SAMPLE_COUNT = 6
+
+local FLY_HOVER_GRACE = 1.8
+local FLY_HOVER_THRESHOLD = 0.4
+local FLY_SUSTAINED_UP = 5
+local FLY_VIOLATION_THRESHOLD = 6
+local JUMP_IMMUNITY_DURATION = 1.4
+local JUMP_VELOCITY_TRIGGER = 15
+local MAX_WALKSPEED = 16
+
+local CHECK_INTERVAL = 0.1
+
+local BlacklistedTerms = {
+	"httpget", "loadstring", "getgenv", "getrawmetatable",
+	"hookmetamethod", "hookfunction", "newcclosure", "replaceclosure",
+	"synapse", "krnl", "fluxus", "xeno", "madium", "wave",
+	"dex", "remotespy", "rayfield", "electron", "oxygen",
+	"celery", "scriptware", "exploit", "executor", "Injector"
+}
+
+local BlacklistedPatterns = {
+	"get.*env", "hook.*method", "hook.*function", "load.*string",
+	"http.*get", "raw.*equal", "set.*readonly", "make.*writeable",
+}
+
+local RecentlyFlagged = {}
+local PlayerMovementData = {}
+
+local function AppendErrorLog(player, logType, message, source)
+	local Data = AntiCheatData.GetData(player)
+	if not Data then return end
+	if not Data.ErrorLogs then Data.ErrorLogs = {} end
+	if #Data.ErrorLogs >= MAX_ERROR_LOGS then table.remove(Data.ErrorLogs, 1) end
+	table.insert(Data.ErrorLogs, {
+		Type = logType,
+		Message = message,
+		Source = source,
+		Timestamp = os.time(),
+	})
+end
+
+local function IsSpamming(player)
+	local now = os.clock()
+	if not RemoteThrottles[player.UserId] then
+		RemoteThrottles[player.UserId] = { lastReset = now, count = 0 }
+	end
+	local d = RemoteThrottles[player.UserId]
+	if now - d.lastReset >= 1 then
+		d.count = 1
+		d.lastReset = now
+		return false
+	end
+	d.count += 1
+	return d.count > MAX_REMOTES_PER_SECOND
+end
+
+local function IsGrounded(character)
+	local hrp = character:FindFirstChild("HumanoidRootPart")
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if not hrp or not humanoid then return false end
+
+	local params = RaycastParams.new()
+	params.FilterDescendantsInstances = { character }
+	params.FilterType = Enum.RaycastFilterType.Exclude
+
+	local origin = hrp.Position - Vector3.new(0, hrp.Size.Y / 2, 0)
+	local direction = Vector3.new(0, -(humanoid.HipHeight + 1.2), 0)
+	return game:GetService("Workspace"):Raycast(origin, direction, params) ~= nil
+end
+
+local function GetAllowedSpeed(humanoid)
+	return MAX_WALKSPEED + SPEED_BUFFER
+end
+
+local function GetAverage(t)
+	if #t == 0 then return 0 end
+	local s = 0
+	for _, v in ipairs(t) do
+		s += v
+	end
+	return s / #t
+end
+
+local function TeleportToSavedPosition(player)
+	local data = PlayerMovementData[player.UserId]
+	if not data or not data.lastGoodPosition then
+		vWarn("[AC:Rubberband] No lastGoodPosition for", player.Name, "- cannot rubberband")
+		return
+	end
+
+	local character = player.Character
+	if not character then return end
+	local hrp = character:FindFirstChild("HumanoidRootPart")
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if not hrp or not humanoid or humanoid.Health <= 0 then return end
+
+	vPrint(string.format("[AC:Rubberband] Teleporting %s back to (%.1f, %.1f, %.1f)",
+		player.Name, data.lastGoodPosition.X, data.lastGoodPosition.Y, data.lastGoodPosition.Z))
+
+	hrp.Anchored = true
+	hrp.CFrame = CFrame.new(data.lastGoodPosition + Vector3.new(0, 3, 0))
+	hrp.AssemblyLinearVelocity = Vector3.zero
+	hrp.AssemblyAngularVelocity = Vector3.zero
+
+	task.defer(function()
+		if hrp and hrp.Parent then
+			hrp.Anchored = false
+		end
+	end)
+
+	data.immuneUntil = tick() + POST_RUBBERBAND_IMMUNITY
+	data.jumpImmunityUntil = 0
+	data.airTime = 0
+	data.flyViolations = 0
+	data.speedViolations = 0
+	data.speedSamples = {}
+	data.lastCheckPos = nil
+	data.lastCheckTime = nil
+end
+
+local function FlagOrKick(player, reason)
+	local data = PlayerMovementData[player.UserId]
+	if not data then return end
+
+	local now = tick()
+	if data.lastRubberbandTime and (now - data.lastRubberbandTime) < RUBBERBAND_COOLDOWN then
+		return
+	end
+	data.lastRubberbandTime = now
+
+	local acData = AntiCheatData.GetData(player)
+	if not acData then return end
+
+	vWarn("[AC:Violation]", player.Name, "-", reason)
+	AppendErrorLog(player, "MovementViolation", reason, "ServerMovementCheck")
+	TeleportToSavedPosition(player)
+
+	if Config.USE_FLAG_SYSTEM then
+		acData.Flagged = true
+	end
+	if Config.USE_IMMEDIATE_ACTION_SYSTEM then
+		acData.Banned = true
+		player:Kick(reason)
+	end
+end
+
+local function StartMovementChecks(player)
+	if MovementConnections[player.UserId] then
+		MovementConnections[player.UserId]:Disconnect()
+		MovementConnections[player.UserId] = nil
+	end
+
+	local saveTimer = 0
+	local checkTimer = 0
+	local connection
+
+	vPrint("[AC:Loop] Starting movement checks for", player.Name)
+
+	connection = RunService.Heartbeat:Connect(function(dt)
+		if not player or not player.Parent then
+			connection:Disconnect()
+			MovementConnections[player.UserId] = nil
+			return
+		end
+
+		local data = PlayerMovementData[player.UserId]
+		if not data then
+			connection:Disconnect()
+			MovementConnections[player.UserId] = nil
+			return
+		end
+
+		local character = player.Character
+		if not character then return end
+
+		local hrp = character:FindFirstChild("HumanoidRootPart")
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		if not hrp or not humanoid or humanoid.Health <= 0 then return end
+		if hrp.Anchored then return end
+
+		local now = tick()
+
+		if data.immuneUntil and now < data.immuneUntil then
+			if IsGrounded(character) then
+				data.lastGoodPosition = hrp.Position
+			end
+			return
+		end
+
+		local vel = hrp.AssemblyLinearVelocity
+		local grounded = IsGrounded(character)
+		local jumpImmune = data.jumpImmunityUntil and now < data.jumpImmunityUntil
+
+		if vel.Y >= JUMP_VELOCITY_TRIGGER and not grounded and not jumpImmune then
+			data.jumpImmunityUntil = now + JUMP_IMMUNITY_DURATION
+			jumpImmune = true
+			vPrint(string.format("[AC:Jump] %s jump detected (velY=%.1f), immunity granted", player.Name, vel.Y))
+		end
+
+		if grounded then
+			if not data.wasGrounded then
+				vPrint(string.format("[AC:Ground] %s landed (airTime=%.2fs)", player.Name, data.airTime or 0))
+			end
+
+			data.wasGrounded = true
+			data.airTime = 0
+
+			data.flyViolations = math.max(0, (data.flyViolations or 0) - 2)
+
+			if #data.speedSamples == 0 then
+				data.speedViolations = math.max(0, (data.speedViolations or 0) - 1)
+			end
+
+			data.jumpImmunityUntil = 0
+		else
+			data.wasGrounded = false
+			data.airTime = (data.airTime or 0) + dt
+		end
+
+		checkTimer += dt
+		saveTimer += dt
+
+		if checkTimer >= CHECK_INTERVAL then
+			local elapsed = checkTimer
+			checkTimer = 0
+
+			if data.lastCheckPos and data.lastCheckTime then
+				local delta = hrp.Position - data.lastCheckPos
+				local horizontalSpeed = Vector3.new(delta.X, 0, delta.Z).Magnitude / elapsed
+				local verticalSpeed = delta.Y / elapsed
+				local absVertical = math.abs(verticalSpeed)
+				local allowedSpeed = GetAllowedSpeed(humanoid)
+				
+				if horizontalSpeed > allowedSpeed * 4 then
+					vWarn(string.format(
+						"[AC:Speed] %s extreme speed %.1f > %.1f",
+						player.Name,
+						horizontalSpeed,
+						allowedSpeed * 4
+						))
+
+					FlagOrKick(player,
+						"Extreme Speed Detected (" ..
+							math.round(horizontalSpeed) ..
+							" studs/s)"
+					)
+
+					data.lastCheckPos = hrp.Position
+					data.lastCheckTime = now
+
+					return
+				end
+
+				vPrint(string.format("[AC:Check] %s | hSpeed=%.1f (max=%.1f) | vSpeed=%.1f | air=%.2fs | jumpImm=%s | grounded=%s",
+					player.Name,
+					horizontalSpeed, allowedSpeed,
+					verticalSpeed,
+					data.airTime or 0,
+					tostring(jumpImmune),
+					tostring(grounded)))
+
+				if horizontalSpeed > allowedSpeed then
+					table.insert(data.speedSamples, horizontalSpeed)
+					if #data.speedSamples > SPEED_SAMPLE_COUNT then
+						table.remove(data.speedSamples, 1)
+					end
+
+					if #data.speedSamples >= SPEED_SAMPLE_COUNT then
+						local avg = GetAverage(data.speedSamples)
+						vWarn(string.format("[AC:Speed] %s avg=%.1f (violations=%d/%d)",
+							player.Name, avg, data.speedViolations or 0, SPEED_VIOLATION_THRESHOLD))
+						if avg > allowedSpeed then
+							data.speedViolations = (data.speedViolations or 0) + 1
+
+							vWarn(string.format(
+								"[AC:Speed] %s violation %d/%d (avg %.1f)",
+								player.Name,
+								data.speedViolations,
+								SPEED_VIOLATION_THRESHOLD,
+								avg
+								))
+
+							if data.speedViolations >= SPEED_VIOLATION_THRESHOLD then
+								data.speedViolations = 0
+								data.speedSamples = {}
+								FlagOrKick(player, "Speed Hack Detected (avg " .. math.round(avg) .. " studs/s)")
+							end
+						end
+					end
+				else
+					data.speedSamples = {}
+
+					if data.speedViolations > 0 then
+						data.speedViolations = math.max(0, data.speedViolations - 1)
+					end
+				end
+
+				if not grounded and not jumpImmune then
+					local isSustainedUp = verticalSpeed > FLY_SUSTAINED_UP and (data.airTime or 0) > 0.3
+					local isHovering = (data.airTime or 0) > FLY_HOVER_GRACE and absVertical < FLY_HOVER_THRESHOLD
+
+					if isSustainedUp or isHovering then
+						data.flyViolations = (data.flyViolations or 0) + 1
+						vWarn(string.format("[AC:Fly] %s violation %d/%d | sustained=%s hover=%s",
+							player.Name, data.flyViolations, FLY_VIOLATION_THRESHOLD,
+							tostring(isSustainedUp), tostring(isHovering)))
+					else
+						data.flyViolations = math.max(0, (data.flyViolations or 0) - 1)
+					end
+
+					if (data.flyViolations or 0) >= FLY_VIOLATION_THRESHOLD then
+						data.flyViolations = 0
+						FlagOrKick(player, "Fly Hack Detected")
+					end
+				elseif not grounded and jumpImmune then
+					data.flyViolations = math.max(0, (data.flyViolations or 0) - 1)
+				end
+			end
+
+			data.lastCheckPos = hrp.Position
+			data.lastCheckTime = now
+		end
+
+		if saveTimer >= SAVE_INTERVAL then
+			saveTimer = 0
+
+			if grounded then
+				local currentSpeed = hrp.AssemblyLinearVelocity.Magnitude
+
+				if currentSpeed < (GetAllowedSpeed(humanoid) + 15) then
+					data.lastGoodPosition = hrp.Position
+					vPrint(string.format("[AC:Save] %s good pos saved (%.1f, %.1f, %.1f)",
+						player.Name, hrp.Position.X, hrp.Position.Y, hrp.Position.Z))
+				else
+					vWarn("[AC:Save] Rejected save due to high speed:", currentSpeed)
+				end
+			else
+				saveTimer = 0
+			end
+		end
+
+		if data.lastGoodPosition == nil and grounded then
+			data.lastGoodPosition = hrp.Position
+			vPrint("[AC:Save] Initial goo pos seeded for", player.Name)
+		end
+	end)
+
+	MovementConnections[player.UserId] = connection
+end
+
+local function ObfuscateServices()
+	local targets = {
+		game:GetService("Workspace"), game:GetService("Lighting"),
+		game:GetService("MaterialService"), game:GetService("ReplicatedFirst"),
+		game:GetService("ReplicatedStorage"), game:GetService("StarterGui"),
+		game:GetService("StarterPack"), game:GetService("StarterPlayer"),
+		game:GetService("Teams"), game:GetService("SoundService"),
+		game:GetService("TextChatService"),
+	}
+	for _, svc in ipairs(targets) do
+		local newName = HttpService:GenerateGUID(false)
+		local ok, err = pcall(function()
+			ServiceMap[svc] = { originalName = svc.Name, obfuscatedName = newName }
+			svc.Name = newName
+		end)
+		if not ok then
+			vWarn("[AntiCheat] Could not rename service:", err)
+		end
+	end
+end
+
+local function CheckMessageForExploits(player, message, source)
+	if type(message) ~= "string" then return false end
+	local lower = string.lower(message)
+	RecentlyFlagged[player.UserId] = RecentlyFlagged[player.UserId] or {}
+	local flags = RecentlyFlagged[player.UserId]
+
+	for _, term in ipairs(BlacklistedTerms) do
+		if string.find(lower, term, 1, true) then
+			if flags[term] then return false end
+			flags[term] = true
+			task.delay(5, function()
+				if flags then flags[term] = nil end
+			end)
+			AppendErrorLog(player, "BlacklistedTerm", message, source)
+			if Config.USE_FLAG_SYSTEM then AntiCheatData.GetData(player).Flagged = true end
+			if Config.USE_IMMEDIATE_ACTION_SYSTEM then
+				player:Kick("Blacklisted term detected (" .. term .. ")")
+			end
+			return true
+		end
+	end
+
+	for _, pattern in ipairs(BlacklistedPatterns) do
+		if string.find(lower, pattern) then
+			local key = "pattern_" .. pattern
+			if flags[key] then return false end
+			flags[key] = true
+			task.delay(5, function()
+				if flags then flags[key] = nil end
+			end)
+			AppendErrorLog(player, "SuspiciousPattern", message, source)
+			if Config.USE_FLAG_SYSTEM then AntiCheatData.GetData(player).Flagged = true end
+			if Config.USE_IMMEDIATE_ACTION_SYSTEM then
+				player:Kick("Suspicious pattern detected")
+			end
+			return true
+		end
+	end
+
+	return false
+end
+
+local function HandleGhostScript(player)
+	RecentlyFlagged[player.UserId] = RecentlyFlagged[player.UserId] or {}
+	local flags = RecentlyFlagged[player.UserId]
+	if flags["GhostScript"] then return end
+	flags["GhostScript"] = true
+	task.delay(5, function()
+		if flags then flags["GhostScript"] = nil end
+	end)
+
+	AppendErrorLog(player, "GhostScript", "[GhostScript]", "NilScript")
+	if Config.USE_FLAG_SYSTEM then AntiCheatData.GetData(player).Flagged = true end
+	if Config.USE_IMMEDIATE_ACTION_SYSTEM then
+		player:Kick("Error fired from a nil/external script environment.")
+	end
+end
+
+local function ResetMovementData(player)
+	PlayerMovementData[player.UserId] = {
+		lastGoodPosition = nil,
+		immuneUntil = tick() + 3,
+		jumpImmunityUntil = 0,
+		lastCheckPos = nil,
+		lastCheckTime = nil,
+		airTime = 0,
+		flyViolations = 0,
+		speedViolations = 0,
+		speedSamples = {},
+		wasGrounded = false,
+		lastRubberbandTime = nil,
+	}
+end
+
+Players.PlayerAdded:Connect(function(player)
+	ResetMovementData(player)
+	RecentlyFlagged[player.UserId] = {}
+
+	task.wait(1)
+	local gui = player:WaitForChild("PlayerGui", 10)
+	if gui then
+		local watchdog = script:FindFirstChild("LocalScript")
+		if watchdog then
+			local clone = watchdog:Clone()
+			clone.Name = "ClientWatchdog"
+			clone.Parent = gui
+		end
+	end
+
+	if player.Character then
+		vPrint("[AC:Init] Character already exists for", player.Name, "— starting checks immediately")
+		task.wait(2)
+		StartMovementChecks(player)
+	end
+
+	player.CharacterAdded:Connect(function()
+		vPrint("[AC:Spawn] Character added for", player.Name)
+		ResetMovementData(player)
+		task.wait(2)
+		StartMovementChecks(player)
+	end)
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+	if MovementConnections[player.UserId] then
+		MovementConnections[player.UserId]:Disconnect()
+		MovementConnections[player.UserId] = nil
+	end
+	PlayerMovementData[player.UserId] = nil
+	ExpectedHandshakes[player.UserId] = nil
+	RecentlyFlagged[player.UserId] = nil
+	RemoteThrottles[player.UserId] = nil
+end)
+
+Remotes.ExploitDetected.OnServerEvent:Connect(function(player, reason)
+	if IsSpamming(player) then player:Kick("Remote Spam") return end
+	if type(reason) ~= "string" then return end
+	vPrint("[AC:Client] ExploitDetected from", player.Name, "—", reason)
+	local data = AntiCheatData.GetData(player)
+	if not data then return end
+	AppendErrorLog(player, "ExploitDetected", reason, "ClientWatchdog")
+	if Config.USE_FLAG_SYSTEM then data.Flagged = true end
+	if Config.USE_IMMEDIATE_ACTION_SYSTEM then player:Kick(reason) end
+end)
+
+Remotes.LogReport.OnServerEvent:Connect(function(player, message, source)
+	if IsSpamming(player) then return end
+	if type(message) ~= "string" or type(source) ~= "string" then return end
+	if message == "__actest__" then return end
+
+	if message == "[GhostScript]" and source == "NilScript" then
+		HandleGhostScript(player)
+		return
+	end
+
+	vPrint("[AC:Log]", player.Name, "|", source, "|", message)
+	AppendErrorLog(player, "LogReport", message, source)
+	CheckMessageForExploits(player, message, source)
+end)
+
+Remotes.GiveItem.OnServerEvent:Connect(function(player, item)
+	if IsSpamming(player) then return end
+	vWarn("[AC:Honeypot] GiveItem fired by", player.Name, "item:", tostring(item))
+	local data = AntiCheatData.GetData(player)
+	if not data then return end
+	if Config.USE_FLAG_SYSTEM then data.Flagged = true end
+	if Config.USE_IMMEDIATE_ACTION_SYSTEM then
+		data.Banned = true
+		player:Kick("Exploiting fired honeypot!")
+	end
+end)
+
+Remotes.Handshake.OnServerEvent:Connect(function(player, token)
+	if ExpectedHandshakes[player.UserId] == token then
+		ExpectedHandshakes[player.UserId] = nil
+	else
+		AppendErrorLog(player, "InvalidHandshake", "Token mismatch", "Handshake")
+		player:Kick("Invalid Handshake")
+	end
+end)
+
+task.spawn(function()
+	while true do
+		task.wait(20)
+		for _, player in pairs(Players:GetPlayers()) do
+			local token = HttpService:GenerateGUID(false)
+			ExpectedHandshakes[player.UserId] = token
+			Remotes.Handshake:FireClient(player, token)
+		end
+	end
+end)
+
+if Config.ENABLE_SERVICE_OBFUSCATION then
+	task.spawn(function()
+		ObfuscateServices()
+		while true do
+			task.wait(360)
+			ObfuscateServices()
+		end
+	end)
+end
+
+return AntiCheat
+
+```
+
+`AntiCheatDatabase/AntiCheatData.luau`:
+
+```luau
+-- Showcase https://drive.google.com/file/d/15AiSCMoJgrgyQgWNhKH2uqJQCnLPmnCe/view?usp=sharing
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("RunService")
+local RunService = game:GetService("RunService")
+local ServerScriptService = game:GetService("ServerScriptService")
+
+local AntiCheatDataTemplate = require(script.AntiCheatTemplate)
+local Config = require(script.Parent.Configurations)
+local ProfileStore = require(ServerScriptService.Libraries.ProfileStore)
+
+local DATA_STORE_KEY = RunService:IsStudio() and "TEST_ANTICHEAT7" or "OFFICIAL_ANTICHEAT"
+local AntiCheatStore = ProfileStore.New(DATA_STORE_KEY, AntiCheatDataTemplate.DEFAULT_ANTI_CHEAT_DATA)
+local Profiles: {[Player]: typeof(AntiCheatStore:StartSessionAsync())} = {}
+
+local Local = {}
+local Shared = {}
+
+function Local.OnStart()
+	for _, Player in Players:GetPlayers() do
+		task.spawn(Local.LoadProfile, Player)
+	end
+	
+	Players.PlayerAdded:Connect(Local.LoadProfile)
+	Players.PlayerRemoving:Connect(Local.RemoveProfile)
+end
+
+function Local.LoadProfile(Player: Player)
+	if Player.AccountAge < Config.MINIMUM_ACCOUNT_AGE then
+		Player:Kick("Your account must be at least "..Config.MINIMUM_ACCOUNT_AGE.." days old to play this game.")
+	end
+	
+	local Profile = AntiCheatStore:StartSessionAsync(`{Player.UserId}`, {
+		Cancel = function()
+			return Player.Parent ~= Players
+		end,
+	})
+	
+	if Profile == nil then
+		return Player:Kick("Profile load fail! Please rejoin or contact devs.")
+	end
+	
+	Profile:AddUserId(Player.UserId)
+	Profile:Reconcile()
+	
+	Profile.OnSessionEnd:Connect(function()
+		Profiles[Player] = nil
+		Player:Kick("Profile session ended! Please rejoin.")
+	end)
+	
+	local IsIngame = Player.Parent == Players
+	if IsIngame then
+		Profiles[Player] = Profile
+	else
+		Profile:EndSession()
+	end
+	
+	local HasBeenKicked = false
+	
+	if RunService:IsServer() then
+		print(`Loaded AntiCheat profile for {Player.Name}`, Profile.Data)
+	end
+
+	if Profile.Data.Banned == true then
+		Player:Kick("You have been banned from this game.")
+		HasBeenKicked = true
+	end
+	
+	if Config.USE_FLAG_SYSTEM == true then
+		if Config.ACTIVATE_BANWAVE == true then
+			if HasBeenKicked == false then
+				Profile.Data.Banned = true
+				Player:Kick("You have been banned from this game.")
+			end
+		end
+	end
+	
+end
+
+function Local.RemoveProfile(Player: Player)
+	local Profile = Profiles[Player]
+	if Profile ~= nil then
+		Profile:EndSession()
+	end
+end
+
+function Shared.GetData(Player: Player): AntiCheatDataTemplate.AntiCheatData?
+	local Profile = Profiles[Player]
+	if not Profile then return end
+	
+	return Profile.Data
+end
+
+Local.OnStart()
+
+return Shared
+
+```
+
+`AntiCheatDatabase/AntiCheatTemplate.luau`:
+
+```luau
+-- Showcase https://drive.google.com/file/d/15AiSCMoJgrgyQgWNhKH2uqJQCnLPmnCe/view?usp=sharing
+
+local Shared = {}
+
+Shared.DEFAULT_ANTI_CHEAT_DATA = {
+	Flagged = false,
+	Banned = false,
+	ErrorLogs = {},
+}
+
+export type AntiCheatData = typeof(Shared.DEFAULT_ANTI_CHEAT_DATA)
+
+return Shared
+
+```
+
+`LICENSE`:
+
+```
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+```
+
+`Loader.luau`:
+
+```luau
+-- Showcase https://drive.google.com/file/d/15AiSCMoJgrgyQgWNhKH2uqJQCnLPmnCe/view?usp=sharing
+
+local Scripts = script.Parent:FindFirstChild("Scripts")
+
+if Scripts then
+	for _, module in ipairs(Scripts:GetChildren()) do
+		if module:IsA("ModuleScript") then
+			task.spawn(function()
+				require(module)
+				--print("Module loaded: " .. module.Name)
+			end)
+		end
+	end
+else
+	warn("Scripts folder not found in ModuleScript")
+end
+
+```
+
+`README.md`:
+
+```md
+# Advanced-Anticheat
+A robust anti-cheat system for Roblox designed to detect movement exploits, unauthorized remote execution, and environment tampering.
+
+# 🛠️ How to Setup
+Follow these steps to integrate the system into your project.
+
+# 1. Dependencies
+1. Inside ServerScriptService, create a folder named Libraries.
+
+2. Place the ProfileStore ModuleScript inside this folder.
+
+- Note: If you already use ProfileStore elsewhere, simply update the ProfileStore variable in your AntiCheatData script to point to your existing location.
+
+# 2. Core Structure
+1. Create a folder inside ServerScriptService named AntiCheatLoader.
+
+2. Inside AntiCheatLoader, create a folder named Scripts.
+
+# 3. File Hierarchy
+Organize your scripts exactly as shown below:
+
+# Plaintext
+```text
+ServerScriptService
+ ├── Libraries
+ │    └── ProfileStore (ModuleScript)
+ └── AntiCheatLoader (Folder)
+      ├── Loader (Script)
+      └── Scripts (Folder)
+           ├── Configurations (ModuleScript)
+           ├── AntiCheatData (ModuleScript)
+           │    └── AntiCheatTemplate (ModuleScript)
+           └── ServerCore (ModuleScript)
+                └── ClientCore (LocalScript)
+```
+# Important Configuration Notes
+- Script Types:
+
+- Loader must be a standard Server Script.
+- ClientCore must be a LocalScript.
+- All other files mentioned should be ModuleScripts.
+
+- Parenting: Ensure ClientCore is parented directly under ServerCore, and AntiCheatTemplate is parented directly under AntiCheatData as indicated in the hierarchy above.
+
+<img width="331" height="537" alt="image" src="https://github.com/user-attachments/assets/e6d0606e-041c-4db0-8762-02f286118118" />
+
+# Now What Does It Detect and Do?
+- Speed hacks
+- Fly Hacks
+- Unauthorized gui's (in PlayerGui as CoreGui requires higher level permissions)
+- Unauthorized instances
+- Highlight detection
+- Honeypot (GiveItem)
+- _G variable tampering
+- Errors/Log detection
+- Field Of View tampering detection
+- Esp Detection (basic)
+- Changes the names of common services so some scripts get errors and don't work.
+- Method tampering detection
+- Handshake
+- Logs up to 100 errors or flags to a player.
+- Makes it harder to find the client core.
+- Flag system where it flags the player and when banwave is active it bans them.
+- Enforces a minimum account age preventing some alt accounts.
+- Verbose mode that shows everything in console.
+- Immediate action system where it dosen't flag and waits for banwave it instantly bans.
+- Remote rate limiting to prevent spam.
+- Checks args sent by client.
+- Saves everything to DataStore using ProfileStore
+
+  Thats pretty much all I'm going to make this use Roblox's ban api later but also still save the logs.
+  Im currently reading and trying to understand some scripts like Dark Dex and Ketamine Remote Spy, so I can find a way to detect them.
+  Im doing so much more im current gathering so much info and also reading the api to find methods.
+
+```
