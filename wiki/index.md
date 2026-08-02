@@ -380,6 +380,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ghidra-bridge](entities/ghidra-bridge.md) — Python 3 bridge to Ghidra scripting (CPython outside Jython; external automation / gpt-wpre)
 - [ghidra-headless-mcp](entities/ghidra-headless-mcp.md) — headless Ghidra MCP server (40+ RE tools; fake backend + CLI; Cursor/Claude agents)
 - [ghidra-svr-bridge](entities/ghidra-svr-bridge.md) — BN ↔ Ghidra Server bidirectional sync (symbols/comments/types; Java bridge + Qt6 sidebar)
+- [gdb-mcp](entities/gdb-mcp.md) — lightweight GDB MCP (FastMCP + SSE; gdb-command proxy; breakpoints / memory / step)
 - [gdbserver9x](entities/gdbserver9x.md) — GDB RSP stub for 32-bit Win98SE/XP (VC6; Binary Ninja adapter)
 - [GDB-Windows-Binaries](entities/gdb-windows-binaries.md) — portable Windows GDB (mingw-w64; TUI/Python; Cheat Debugging)
 - [GDDumper](entities/gddumper.md) — Cheat Engine Lua: Godot 3.x/4.x SceneTree / GDScript runtime dump (Win x86/x64)
