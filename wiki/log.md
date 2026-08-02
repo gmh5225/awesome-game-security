@@ -2147,3 +2147,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `readme:categories`: bumped Cheat ~2630 (was ~2628; Anti Cheat ~633 stable); refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-02** — ingest `description:mrx7014/SpoofingCollection`: entity [[spoofing-collection]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
+- **2026-08-02** — ingest `description:keowu/Ryujin`: entity [[ryujin]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
