@@ -79,6 +79,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AICommand](entities/ai-command.md) — ChatGPT integration with Unity Editor (API key in UserSettings; Game Engine Plugins:Unity)
 - [AIMachDec](entities/aimachdec.md) — IDA LLM ARM64→C/ObjC/Swift for Mach-O (apps/kernelcache/DSC; cheat / IDA Plugins)
 - [aimbot-detection-prototype](entities/aimbot-detection-prototype.md) — deep-learning aimbot/triggerbot detection prototype (clips + live window; Detection:Aimbot)
+- [Advanced-Anticheat](entities/advanced-anticheat.md) — open-source Roblox Luau client-server AC (movement/executor/GUI/ESP; ProfileStore flags/bans; honeypots)
 - [Alcatraz](entities/alcatraz.md) — x64 PE obfuscator (mutation / CFF / IAT; Zydis + AsmJit; ImGui)
 - [APatch KPM](entities/apatch-kpm.md) — APatch KernelPatch Module collection (C/C++; kernel modding/debug; Cheat / Android root)
 - [auto-enum](entities/auto-enum.md) — IDA plugin: auto-identify/set enums for standard functions (Python/C; cheat / IDA Plugins)
