@@ -787,6 +787,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rprof](entities/rprof.md) — lightweight CPU scope profiler (TLS timing; ImGui/ImPlot flame graphs; LZ4 captures; Game Testing)
 - [ReadPhys](entities/readphys.md) — phys mem via manual PTE map (no MmCopyMemory/MmMapIoSpace; AXE-BASE.sys; ACE)
 - [ReadWriteDriver](entities/read-write-driver.md) — `ntUserSetSysColors` KM↔UM channel (Win11 22000.376; cheat / driver communication)
+- [readwrite-kernel-stable](entities/readwrite-kernel-stable.md) — stable kernel read/write driver (C/C++; cheat / RPM; driver development / modding)
 - [Recast Navigation](entities/recastnavigation.md) — Recast & Detour navmesh toolset (voxelize → pathfind/steer; Game Tools)
 - [ReClass.NET-DriverReader](entities/reclass-net-driverreader.md) — ReClass.NET plugin: kernel-driver mem vs RPM (AC-blocked structure recon; C#/C++)
 - [recompiler](entities/recompiler.md) — Xbox360→Windows executable porting (console emulator / Xbox RE)
