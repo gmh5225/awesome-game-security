@@ -2219,3 +2219,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:jsecurity101/MSFT_DriverBlockList`: entity [[msft-driverblocklist]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-02** — ingest `description:jseclab/obj2shellcode`: entity [[obj2shellcode]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-08-02** — ingest `description:jsacco/ntoskrnlwalker`: entity [[ntoskrnlwalker]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
