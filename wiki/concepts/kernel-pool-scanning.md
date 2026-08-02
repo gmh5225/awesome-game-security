@@ -5,7 +5,8 @@ topics: [anti-cheat, windows-kernel]
 sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/skills/windows-kernel.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/kernullist__kn-diff-pool.md
+updated: 2026-08-02
 confidence: high
 ---
 
@@ -53,6 +54,10 @@ Complementary to pool walks, anti-cheat inspects kernel bookkeeping tables for h
 
 Pre-19H1 linear traversal via inline `_POOL_HEADER.BlockSize` **no longer works** under Segment Heap — scanners must route by allocation path (kLFH / VS / Segment / Large) and decode XOR-encoded VS headers. (source: wiki/sources/skills/windows-kernel.md)
 
+## Snapshot / diff forensics
+
+Before/after **Big Pool snapshots** compared via driver-backed tooling such as [[kn-diff-pool]] (kernel capture + Go TUI diff) help isolate **new allocations** after a driver load, cheat attach, or suspected leak — complementary to one-shot PoolMon / WinDbg walks when triaging object leaks or manual-map footprints. (source: wiki/sources/descriptions/kernullist__kn-diff-pool.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[kn-diff-pool]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
