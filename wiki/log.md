@@ -2163,3 +2163,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:karola3vax/CS2AC`: entity [[cs2ac]]; cited on [[overviews/anti-cheat]] and [[ai-aimbot-detection]].
 
 - **2026-08-02** — ingest `description:kantam5/DeadByDaylight`: entity [[dead-by-daylight]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
+
+- **2026-08-02** — ingest `description:kanition/pbrtbook`: entity [[pbrtbook]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
