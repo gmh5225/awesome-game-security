@@ -17,7 +17,8 @@ sources:
   - wiki/sources/descriptions/mltpig__PCILeech-FPGA-DMA_VMD.md
   - wiki/sources/descriptions/sercanarga__fpga-dma-multi-tool.md
   - wiki/sources/descriptions/sh1ftd__dma-tools-rs.md
-updated: 2026-07-31
+  - wiki/sources/descriptions/kaijia2022__Cheat-Engine-DMA-Plugin.md
+updated: 2026-08-02
 confidence: high
 ---
 
@@ -33,7 +34,7 @@ Software anti-cheat sees a “normal” PCIe endpoint. Classic process/handle/in
 
 ## Typical stack
 
-Cheat app → LeechCore/pcileech/MemProcFS → FPGA firmware → Memory Read TLPs → walk CR3/page tables → game state; optional HID actuator for input. Host-side DMA RPM wrappers such as [[dma-invoker]] (DMALibrary-backed) sit in the cheat-app layer for Windows process-memory reads. (source: wiki/sources/descriptions/un4ckn0wl3z__DMAInvoker.md) Benchmarks such as [[dma-speedtest-memflow-rs]] (memflow; PCILeech/native; throughput/latency) help characterize that hardware path. (source: wiki/sources/descriptions/sh1ftd__dma-speedtest-memflow-rs.md) Windows board utilities such as [[fpga-dma-multi-tool]] (Artix-7 detect/flash via openFPGALoader + DMA R/W speedtest) and [[dma-tools-rs]] (Rust/egui; OpenOCD + CH347/FTDI RS232 JTAG; Artix-7 35T/75T/100T bitstream + DNA; PCILeech sanity check via memflow-base) sit in the FPGA bring-up layer before host DMA apps. (source: wiki/sources/descriptions/sercanarga__fpga-dma-multi-tool.md) (source: wiki/sources/descriptions/sh1ftd__dma-tools-rs.md) CE-facing DMA loaders such as [[dma-cheat-engine-loader]] (copy CE into `DMACE`; closed-source) bridge classic Cheat Engine installs onto that external DMA path. (source: wiki/sources/descriptions/un4ckn0wl3z__DMACheatEngineLoader.md) Game-facing samples such as [[csgo-dma-overlay]] pair DMA reads with an overlay for CS:GO research. (source: wiki/sources/descriptions/slack69__csgo-dma-overlay.md)
+Cheat app → LeechCore/pcileech/MemProcFS → FPGA firmware → Memory Read TLPs → walk CR3/page tables → game state; optional HID actuator for input. Host-side DMA RPM wrappers such as [[dma-invoker]] (DMALibrary-backed) sit in the cheat-app layer for Windows process-memory reads. (source: wiki/sources/descriptions/un4ckn0wl3z__DMAInvoker.md) Benchmarks such as [[dma-speedtest-memflow-rs]] (memflow; PCILeech/native; throughput/latency) help characterize that hardware path. (source: wiki/sources/descriptions/sh1ftd__dma-speedtest-memflow-rs.md) Windows board utilities such as [[fpga-dma-multi-tool]] (Artix-7 detect/flash via openFPGALoader + DMA R/W speedtest) and [[dma-tools-rs]] (Rust/egui; OpenOCD + CH347/FTDI RS232 JTAG; Artix-7 35T/75T/100T bitstream + DNA; PCILeech sanity check via memflow-base) sit in the FPGA bring-up layer before host DMA apps. (source: wiki/sources/descriptions/sercanarga__fpga-dma-multi-tool.md) (source: wiki/sources/descriptions/sh1ftd__dma-tools-rs.md) CE-facing DMA loaders such as [[dma-cheat-engine-loader]] (copy CE into `DMACE`; closed-source) bridge classic Cheat Engine installs onto that external DMA path. (source: wiki/sources/descriptions/un4ckn0wl3z__DMACheatEngineLoader.md) The [[cheat-engine-dma-plugin]] (C/C++; LeechCore/pcileech) replaces CE's process-memory backend with DMA physical R/W for scan/edit without OS-visible process access. (source: wiki/sources/descriptions/kaijia2022__Cheat-Engine-DMA-Plugin.md) Game-facing samples such as [[csgo-dma-overlay]] pair DMA reads with an overlay for CS:GO research. (source: wiki/sources/descriptions/slack69__csgo-dma-overlay.md)
 
 ## Anti-cheat detection pipeline
 
@@ -53,5 +54,5 @@ No single PCIe or IOMMU signal is durable; production AC layers **causally disti
 
 ## Related
 
-[[iommu]] · [[hvci]] · [[pcileech]] · [[pcileech-fpga]] · [[pcileech-dma-fullstealth]] · [[fpga-dma-multi-tool]] · [[dma-tools-rs]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[csgo-dma-overlay]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
+[[iommu]] · [[hvci]] · [[pcileech]] · [[pcileech-fpga]] · [[pcileech-dma-fullstealth]] · [[fpga-dma-multi-tool]] · [[dma-tools-rs]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[cheat-engine-dma-plugin]] · [[csgo-dma-overlay]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
 

@@ -262,6 +262,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DisableNvidiaScreenshot](entities/disablenvidiascreenshot.md) — DWM anti-screenshot (C++; NVIDIA / capture lane; Cheat Anti Screenshot)
 
 - [DLLirant](entities/dllirant.md) — automated Windows DLL search-order hijack discovery (proxy DLL + load monitor)
+- [Cheat Engine DMA Plugin](entities/cheat-engine-dma-plugin.md) — CE plugin: DMA R/W via LeechCore/PCILeech FPGA; replaces process memory path (C/C++)
 - [DMACheatEngineLoader](entities/dma-cheat-engine-loader.md) — Cheat Engine DMA loader (copy CE → DMACE; closed-source)
 - [DMAInvoker](entities/dma-invoker.md) — Windows DMA RPM via DMALibrary (cheat / RPM)
 - [dma-speedtest-memflow-rs](entities/dma-speedtest-memflow-rs.md) — Windows DMA R/W speedtest via memflow (Rust CLI/GUI; pcileech/native)
