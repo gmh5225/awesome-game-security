@@ -741,6 +741,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Pyda](entities/pyda.md) — Python QEMU user-mode DBI (hook / mem / syscall / insn; Cheat DBI)
 - [PythonPlantsVsZombies](entities/python-plants-vs-zombies.md) — Python PvZ clone (graphics-focused; Game Develop / source)
 - [qemu-anti-detection](entities/qemu-anti-detection.md) — Hidden QEMU (device-string / fingerprint spoof)
+- [qemu-patched](entities/qemu-patched.md) — Hidden QEMU fork (CPUID / SMBIOS / ACPI anti-VM spoof)
 - [qemu-gvm](entities/qemu-gvm.md) — QEMU (AMD/Intel; Android emulator research)
 - [QEMU-Nyx](entities/qemu-nyx.md) — Intel-PT QEMU fuzzing (fast reset / PT decode / breakpoint hooks; Cheat QEMU/KVM)
 - [qemu-wasm](entities/qemu-wasm.md) — Emscripten WASM QEMU in browser (x86/arch guests; VirtIO; Cheat QEMU/KVM lab)

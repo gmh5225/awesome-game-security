@@ -12,7 +12,7 @@ confidence: medium
 
 Research project for **hidden QEMU**: masking guest virtualization fingerprints (e.g. renaming “QEMU keyboard” to “ASUS keyboard”) so a QEMU guest looks less like a VM to anti-cheat and environment checks. (source: wiki/sources/descriptions/zhaodice__qemu-anti-detection.md)
 
-Useful for game-security researchers and reverse engineers studying offensive techniques in the `Cheat > QEMU/KVM/PVE/VBOX` lane and the defensive counterpart `Detection:Virtual Environments`—not a production AC component. Sibling focus to [[proxmox-ve-anti-detection]] (hidden PVE / kernel-oriented).
+Useful for game-security researchers and reverse engineers studying offensive techniques in the `Cheat > QEMU/KVM/PVE/VBOX` lane and the defensive counterpart `Detection:Virtual Environments`—not a production AC component. Sibling focus to [[qemu-patched]] (CPUID / SMBIOS / ACPI fingerprint spoof) and [[proxmox-ve-anti-detection]] (hidden PVE / kernel-oriented).
 
 ## Links
 
@@ -20,4 +20,4 @@ Useful for game-security researchers and reverse engineers studying offensive te
 
 ## Related
 
-[[proxmox-ve-anti-detection]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[qemu-patched]] · [[proxmox-ve-anti-detection]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
