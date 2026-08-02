@@ -457,6 +457,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Il2CppVersions](entities/il2cpp-versions.md) — multi-version Unity IL2CPP headers/metadata (structure/API drift; game engine explorer:Unity)
 - [Il2cppSpy](entities/il2cpp-spy.md) — Unity IL2CPP APK disassembler / two-APK diff
 - [IL2CPPDumper](entities/il2cppdumper.md) — Android IL2CPP static dump (C/C++; libil2cpp.so + metadata; cheat / game engine explorer:Unity)
+- [Il2CppDumper-YuanShen](entities/il2cppdumper-yuanshen.md) — Genshin Impact IL2CPP static dump (khang06; cwd output; cheat / game engine explorer:Unity)
 - [ilhook-rs](entities/ilhook-rs.md) — Rust x86 HOOK (function intercept → user handlers; cheat / hook)
 - [image-blaster](entities/image-blaster.md) — image→3D mesh/splat/SFX skillset (World Labs+FAL; React/Three.js; AI / 3D Graphics)
 - [Dear ImGui](entities/imgui.md) — bloat-free immediate-mode C++ GUI (DX/GL/Vulkan/Metal; overlays / tool UIs / cheat menus)

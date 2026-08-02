@@ -2116,4 +2116,6 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-02** — ingest `description:khang06/genshinjumpfixer2`: entity [[genshinjumpfixer2]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-link from [[misc]].
 
+- **2026-08-02** — ingest `description:khang06/Il2CppDumper-YuanShen`: entity [[il2cppdumper-yuanshen]]; cited on [[il2cpp]] and [[overviews/game-engine]].
+
 - **2026-08-02** — ingest `readme:categories`: bumped Cheat ~2627 (was ~2626; Anti Cheat ~631 stable); refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
