@@ -2151,3 +2151,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:keowu/Ryujin`: entity [[ryujin]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-08-02** — ingest `description:kem0x/FortKit`: entity [[fortkit]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-08-02** — ingest `description:keith2018/SoftGLRender`: entity [[softglrender]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].

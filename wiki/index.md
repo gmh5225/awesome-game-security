@@ -833,6 +833,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SlothBP](entities/slothbp.md) — x64dbg collaborative breakpoint manager (Cheat x64dbg Plugins)
 - [SmallWorld](entities/smallworld.md) — multi-emulator binary harness (angr/Ghidra/PANDA/Unicorn; coverage/crash/firmware)
 - [Smep-Bypass](entities/smep-bypass.md) — Windows SMEP bypass PoC (CR4 / ROP / vuln-driver; kernel exec user shellcode)
+- [SoftGLRender](entities/softglrender.md) — tiny C++ software rasterizer + OpenGL/Vulkan comparison backends (Renderer)
 - [Socket.IO](entities/socket-io.md) — Node.js/browser real-time event I/O (WS + long-poll; Game Network)
 - [Splitgate-Internal](entities/splitgate-internal.md) — Splitgate internal (C/C++; cheat / game:splitgate)
 - [Solemn](entities/solemn.md) — HVCI HvciDisallowedImages blocklist CLI (Windows Security Features)
