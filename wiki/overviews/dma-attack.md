@@ -80,4 +80,4 @@ Tier-6 firmware operating only within driver-mapped domains and matching donor b
 
 ## README map
 
-No top-level DMA section — maps via `Cheat` (~2627) DMA lanes and `Anti Cheat > Detection:DMA` (~631), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. SEWindows local replay and remote attestation). (source: wiki/sources/README-categories.md)
+No top-level DMA section — maps via `Cheat` (~2628) DMA lanes and `Anti Cheat > Detection:DMA` (~633), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. SEWindows local replay and remote attestation). (source: wiki/sources/README-categories.md)
