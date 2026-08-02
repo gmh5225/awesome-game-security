@@ -2207,3 +2207,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:jtang613/GhidrAssistMCP`: entity [[ghidrassist-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-02** — ingest `description:jtang613/GhidrAssist`: entity [[ghidrassist]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked from [[ghidrassist-mcp]].
+
+- **2026-08-02** — ingest `description:jsirichai/CVE-2019-2215`: entity [[cve-2019-2215]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
