@@ -444,6 +444,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-jm-xorstr-decrypt-plugin](entities/ida-jm-xorstr-decrypt-plugin.md) — IDA Pro JM Xorstr decrypt (x64; Python)
 - [IDA KMDF](entities/ida-kmdf.md) — IDA Pro KMDF/WDF driver annotator (structures / callbacks / queues; Python)
 - [ida-llm-explainer](entities/ida-llm-explainer.md) — local llama.cpp IDA plugin: explain/rename/struct inference + HITL accept (cheat / IDA Plugins)
+- [IDAssist](entities/idassist.md) — AI-powered IDA 9.0+ plugin: LLM explain/rename, semantic knowledge graph, RAG, MCP (PySide6; cheat / IDA Plugins)
 - [ida-plugins](entities/ida-plugins.md) — IDA register cross-references (vs Oregami value-use; cheat / IDA Plugins)
 - [IDAPlugins](entities/idaplugins.md) — curated IDA Pro plugin pack (deobf / bin-diff / crypto; cheat / IDA Plugins)
 - [IDARustCargo](entities/ida-rust-cargo.md) — IDA plugin: display potentially installed Cargo dependencies (Python; cheat / IDA Plugins)
