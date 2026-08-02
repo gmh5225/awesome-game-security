@@ -2175,3 +2175,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:kaijia2022/Cheat-Engine-DMA-Plugin`: entity [[cheat-engine-dma-plugin]]; cited on [[dma]] and [[overviews/dma-attack]].
 
 - **2026-08-02** — ingest `description:kWAYTV/dma-cheat-base`: entity [[dma-cheat-base]]; cited on [[dma]] and [[overviews/dma-attack]].
+
+- **2026-08-02** — ingest `description:k3v1n1990s/docker-win`: entity [[docker-win]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].

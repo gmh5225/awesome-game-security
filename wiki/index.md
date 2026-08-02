@@ -14,7 +14,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Graphics API](overviews/graphics-api.md) — DX/GL/Vulkan hook points; [[present-hook]] / [[draw-call-hook]]; overlays + [[obs-game-capture]] / [[anti-screenshot-capture]]; Kiero/kiero2; DirectX (~37) shader inject/flatten; Renderer (~17 ReShade) + AI mesh/splat adjacency
 - [Mobile Security](overviews/mobile-security.md) — Android/iOS; root frameworks (Magisk/KernelSU/APatch), [[zygisk]]/Frida hooking, [[mobile-anti-cheat]]; Terminal/File/Memory Explorer + App/Kernel CVE; WSA (~9), Droid-VM/Gunyah emulators
 - [Reverse Engineering](overviews/reverse-engineering.md) — RE workflow + [[research-rigor]]; [[dynamic-binary-instrumentation]] trap-and-emulate/WHP tracing; [[mixed-boolean-arithmetic]] / [[control-flow-flattening]] deobfuscation; MCP-assisted RE; binary diffing; anti-debug catalog; tools (Ghidra managers, MBA/DBI, packers); Windows Emulator KDemu + console/Xbox~8 / PS BD-UN-JB+PSFree-Enhanced / 3DS 3Beans LLE / GC·Wii gecko RE (~2630 Cheat / ~634 AC lanes)
-- [Windows Kernel](overviews/windows-kernel.md) — callbacks, VBS/HVCI/CET/TPM attestation (~9; SEWindows PCR), BYOVD, Segment Heap pool + [[kernel-pool-scanning]] / [[etw-threat-intelligence]]; symbol walking; Some Tricks Ring0 (~113); Windows Emulator (~7) + WSL (~4; [[wsl]] / [[wsl2-linux-kernel]] / [[windows-subsystem-linux]])
+- [Windows Kernel](overviews/windows-kernel.md) — callbacks, VBS/HVCI/CET/TPM attestation (~9; SEWindows PCR), BYOVD, Segment Heap pool + [[kernel-pool-scanning]] / [[etw-threat-intelligence]]; symbol walking; Some Tricks Ring0 (~113); Windows Emulator (~7) + WSL (~4; [[wsl]] / [[wsl2-linux-kernel]] / [[windows-subsystem-linux]] / [[docker-win]])
 
 ## Concepts
 
@@ -269,6 +269,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dma-speedtest-memflow-rs](entities/dma-speedtest-memflow-rs.md) — Windows DMA R/W speedtest via memflow (Rust CLI/GUI; pcileech/native)
 - [dma-tools-rs](entities/dma-tools-rs.md) — Rust Windows GUI for Artix-7 JTAG bitstream flash, device DNA, PCILeech/memflow sanity check (CH347/FTDI RS232)
 - [Document](entities/document.md) — Windows Driver Development guide (Cheat / Windows kernel explorer)
+- [docker-win](entities/docker-win.md) — WSL2 networking lab (QEMU/KVM/PVE/VBOX research-host lane)
 - [dumpulator](entities/dumpulator.md) — Python minidump → Unicorn x86/x64 emulation (memory/modules/threads; NT stubs / PEB·TEB / API hooks)
 - [Dopamine](entities/dopamine.md) — iOS 15.0–15.4.1 rootless jailbreak (PAC/PPL/AMFI; Sileo/procursus `/var/jb`)
 - [Dopamine2-roothide](entities/dopamine2-roothide.md) — iOS 15/16 RootHide Dopamine 2 (C/C++/ObjC; cheat / iOS jailbreak)
