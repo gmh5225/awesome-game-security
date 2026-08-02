@@ -561,6 +561,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MBA-Obfuscator](entities/mba-obfuscator.md) — non-linear MBA expressions (mba_obfuscator/ + samples/; Cheat Mixed boolean-arithmetic)
 - [mcp-gdb](entities/mcp-gdb.md) — GDB MCP server (breakpoints / memory / registers / step; AI debug)
 - [mcp-windbg](entities/mcp-windbg.md) — CDB/WinDbg MCP server (dump triage + remote debug; Python)
+- [mkpms](entities/mkpms.md) — wxshadow KPM stealth breakpoint/hook (R^X page split; bypass self-read integrity; cheat / Android kernel explorer)
 - [mqtt](entities/mqtt.md) — Chinese MQTT v3.1.1 OASIS spec (14 control packets; QoS; WebSocket; Game Network / mqtt)
 - [MQTT.js](entities/mqtt-js.md) — Node.js/browser MQTT client (v3.1/3.1.1/v5; TCP/TLS/WS/WSS; Game Network / mqtt nodejs)
 - [memdumper](entities/memdumper.md) — Android `.so` memory dump + ELF rebuild (no ptrace; `/proc/<pid>/mem`; 32/64-bit)
