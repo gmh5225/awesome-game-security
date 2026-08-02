@@ -2173,3 +2173,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:kali11211/valorant-internal-cheat`: entity [[valorant-internal-cheat]]; cited on [[vanguard]] and [[overviews/game-hacking]].
 
 - **2026-08-02** — ingest `description:kaijia2022/Cheat-Engine-DMA-Plugin`: entity [[cheat-engine-dma-plugin]]; cited on [[dma]] and [[overviews/dma-attack]].
+
+- **2026-08-02** — ingest `description:kWAYTV/dma-cheat-base`: entity [[dma-cheat-base]]; cited on [[dma]] and [[overviews/dma-attack]].
