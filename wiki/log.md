@@ -2097,3 +2097,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `readme:categories`: bumped Cheat ~2626 (was ~2624; Anti Cheat ~631 stable); refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-02** — ingest `description:kkent030315/EQU8-PoC`: entity [[equ8-poc]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
+- **2026-08-02** — ingest `description:kitty8904/blanket`: entity [[blanket]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].

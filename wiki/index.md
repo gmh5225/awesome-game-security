@@ -139,6 +139,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [awesome-open-source-games](entities/awesome-open-source-games.md) — curated open-source games by platform/genre (Godot/Unity/custom; Collection of Games / Game Develop Guide)
 - [blackhat2012](entities/blackhat2012.md) — BH2012 anti-debug / anti-disasm / obfuscation / Anti-VM PoCs (C/C++ + FASM)
 - [BlindEye](entities/blindeye.md) — BattlEye report-path pool-alloc drop (“Packet Fucker”)
+- [Blanket](entities/blanket.md) — process hide via ActiveProcessLinks unlink + PspCidTable + NtQuerySystemInformation hook (cheat / hide)
 - [binaryninja-pcode](entities/binaryninja-pcode.md) — BN ↔ Ghidra Sleigh/p-code bridge (experimental LLIL; Binary Ninja Plugins)
 - [binja-kc](entities/binja-kc.md) — Binary Ninja MachO kernelcache / KDK dSYM loader
 - [BinCon](entities/bincon.md) — VEH + PAGE_NOACCESS hardened console sample (AC page protection)
