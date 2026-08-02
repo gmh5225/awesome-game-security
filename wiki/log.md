@@ -2141,3 +2141,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:keowu/sourceengineexplorer`: entity [[sourceengineexplorer]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
 
 - **2026-08-02** — ingest `description:keowu/sjcam`: entity [[sjcam]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]].
+
+- **2026-08-02** — ingest `description:keowu/koidbg`: entity [[koidbg]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
