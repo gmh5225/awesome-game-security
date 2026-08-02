@@ -2167,3 +2167,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:kanition/pbrtbook`: entity [[pbrtbook]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
 
 - **2026-08-02** — ingest `readme:categories`: bumped Anti Cheat ~634 (was ~633; Cheat ~2630 stable); refreshed README map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
+- **2026-08-02** — ingest `description:kanekikun420/NoCheatZ-3`: entity [[nocheatz-3]]; cited on [[overviews/anti-cheat]] and [[overviews/game-engine]]; linked from [[source-engine]].
