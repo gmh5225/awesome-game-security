@@ -26,4 +26,4 @@ Targets game security researchers and anti-cheat developers building hybrid CS2 
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[kernel-callbacks]] · [[cs2-hybrid-anticheat-proposal]] · [[sentinelac]] · [[darken-anticheat]]
+[[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[cs2ac]] · [[kernel-callbacks]] · [[cs2-hybrid-anticheat-proposal]] · [[sentinelac]] · [[darken-anticheat]]

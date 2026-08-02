@@ -8,7 +8,8 @@ sources:
   - wiki/sources/descriptions/llsgllsg__Minecraft_AntiCheatAI.md
   - wiki/sources/descriptions/lkeai2007__yolov5_PUBG.md
   - wiki/sources/descriptions/lehmenkuehler__camera-triggerbot.md
-updated: 2026-08-01
+  - wiki/sources/descriptions/karola3vax__CS2AC.md
+updated: 2026-08-02
 confidence: medium
 ---
 
@@ -42,6 +43,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 
 ## Corpus examples
 
+- [[cs2ac]] — CS2 Metamod:Source server plugin; ~17 behavioral modules for aimbot/aimlock/silent aim/movement/input abuse on dedicated servers (no client install)
 - [[waldo]] — CS2 deep-learning triggerbot/aimbot detection (user-trained model)
 - [[cs2-hybrid-anticheat-proposal]] — CS2 hybrid AC proposal (ML + Glicko-2 Overwatch judges, honeypot entities, shadow monitoring; Python PoC)
 - [[aimbot-detection-prototype]] — clip + live-window prototype

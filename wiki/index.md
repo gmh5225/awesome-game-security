@@ -194,6 +194,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cs2-cheat-cpp](entities/cs2-cheat-cpp.md) — external CS2 cheat (C++; rendering / SDK generation)
 - [CS2-External-Cheat](entities/cs2-external-cheat.md) — external CS2 cheat (C++; D3D11 ImGui overlay / aimbot / memory)
 - [CS2 Hybrid Anti-Cheat Proposal](entities/cs2-hybrid-anticheat-proposal.md) — CS2 hybrid AC proposal (Glicko-2 judges, honeypot entities, shadow monitoring; Python PoC)
+- [CS2AC](entities/cs2ac.md) — open-source server-side CS2 anti-cheat Metamod:Source plugin (aim/movement/input; ~17 modules; kick/ban; Discord webhooks)
 - [CS2KAC](entities/cs2kac.md) — open-source CS2 kernel-mode AC companion (KMDF driver + usermode service; client integrity signals for CS2AC/CS2FOW)
 - [CS2-Internal](entities/cs2-internal.md) — internal CS2: SDK generation / hooking / memory analysis (C++)
 - [CS2-OFFSETS](entities/cs2-offsets.md) — CS2 memory offsets / netvars (C++ headers + JSON; Source 2)
