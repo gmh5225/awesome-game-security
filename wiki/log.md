@@ -2107,3 +2107,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:killop/anything_about_game`: entity [[anything-about-game]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
 - **2026-08-02** — ingest `description:kila58/qemu-patched`: entity [[qemu-patched]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-link from [[qemu-anti-detection]].
+
+- **2026-08-02** — ingest `description:khanhduytran0/coruna`: entity [[coruna]]; cited on [[overviews/mobile-security]]; cross-link from [[xnu-1day-practice]].
