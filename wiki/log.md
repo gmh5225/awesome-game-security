@@ -2081,3 +2081,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-01** — ingest `description:knah/Il2CppAssemblyUnhollower`: entity [[il2cpp-assembly-unhollower]]; cited on [[il2cpp]] and [[overviews/game-engine]].
 
 - **2026-08-01** — ingest `description:kkpwn/ErisDbg`: entity [[erisdbg]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
+- **2026-08-02** — ingest `description:kkkbbb/rustFrida`: entity [[rust-frida]]; cited on [[frida]] and [[overviews/mobile-security]].

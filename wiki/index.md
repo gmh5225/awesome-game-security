@@ -777,6 +777,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [RTM](entities/rtm.md) — realtime 3D/4D math lib (fast arithmetic; Mathematics)
 - [rwMem](entities/rwmem.md) — rwProcMem33 fork; Android process-memory R/W (Cheat Memory Explorer)
 - [Rumba](entities/rumba.md) — Python VMProtect analysis (symbolic exec / traces; Fix VMP / MBA-tagged)
+- [rustFrida](entities/rust-frida.md) — Frida-like Android ARM64 hook (QuickJS, Java/native/stealth hook, QBDI; pairs with wxshadow/mkpms; cheat / Frida)
 - [rust-u4pak](entities/rust-u4pak.md) — Rust UE4 .pak unpack/pack/list/check/mount (limited versions; Game Assets)
 - [Sark](entities/sark.md) — IDAPython Made Easy (IDA plugins / older IDA-6.x branch)
 - [saturn-mapper](entities/saturn-mapper.md) — Windows kernel PE manual mapper (iqvw64e.sys; BYOVD / unsigned map)
