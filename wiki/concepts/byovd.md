@@ -25,6 +25,7 @@ sources:
   - wiki/sources/descriptions/moiz-2x__CVE-2025-24990_POC.md
   - wiki/sources/descriptions/magicsword-io__LOLDrivers.md
   - wiki/sources/descriptions/kyxiaxiang__360WFP_Exploit.md
+  - wiki/sources/descriptions/kkent030315__MsIoExploit.md
   - wiki/sources/descriptions/kkent030315__evil-mhyprot-cli.md
 updated: 2026-08-02
 confidence: high
@@ -78,7 +79,9 @@ Agere Modem driver LPE such as [[cve-2025-24990-poc]] abuses `ltmdm64.sys` `METH
 
 Game-AC driver abuse such as [[evil-mhyprot-cli]] targets miHoYo **`mhyprot2.sys`** (Genshin Impact) via a CLI PoC for unprivileged kernel/user memory R/W. (source: wiki/sources/descriptions/kkent030315__evil-mhyprot-cli.md)
 
+Physical-memory mapping abuse via **`msIo64.sys`** such as [[ms-io-exploit]] sits in the same cheat / vulnerable-driver research lane; the anycall project offers fuller client-and-driver-side physmem mapping. (source: wiki/sources/descriptions/kkent030315__MsIoExploit.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[evil-mhyprot-cli]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 

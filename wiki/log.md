@@ -2089,3 +2089,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:kkent030315/evil-mhyprot-cli`: entity [[evil-mhyprot-cli]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-02** — ingest `description:kkent030315/Van1338`: entity [[van1338]]; cited on [[kernel-callbacks]] and [[overviews/anti-cheat]].
+
+- **2026-08-02** — ingest `description:kkent030315/MsIoExploit`: entity [[ms-io-exploit]]; cited on [[byovd]] and [[overviews/windows-kernel]].
