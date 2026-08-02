@@ -2118,4 +2118,6 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-02** — ingest `description:khang06/Il2CppDumper-YuanShen`: entity [[il2cppdumper-yuanshen]]; cited on [[il2cpp]] and [[overviews/game-engine]].
 
+- **2026-08-02** — ingest `description:kernullist/windbg-decompile-ext`: entity [[windbg-decompile-ext]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
+
 - **2026-08-02** — ingest `description:ketoo/NoahGameFrame`: entity [[noahgameframe]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
