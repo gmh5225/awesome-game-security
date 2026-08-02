@@ -2197,3 +2197,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:junron/auto-enum`: entity [[auto-enum]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-02** — ingest `description:juniorjacob/readwrite-kernel-stable`: entity [[readwrite-kernel-stable]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
+- **2026-08-02** — ingest `description:jthuraisamy/TelemetrySourcerer`: entity [[telemetry-sourcerer]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
