@@ -2153,3 +2153,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:kem0x/FortKit`: entity [[fortkit]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-08-02** — ingest `description:keith2018/SoftGLRender`: entity [[softglrender]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
+
+- **2026-08-02** — ingest `description:keijiro/AICommand`: entity [[ai-command]]; cited on [[overviews/game-engine]].

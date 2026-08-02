@@ -76,6 +76,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ActionRoguelike](entities/action-roguelike.md) — UE Roguelike sample (gameplay systems; Game Develop / Unreal source)
 - [AERoot](entities/aeroot.md) — Quarkslab Android Emulator runtime root (debug pipe/ADB; custom su; no system-image rewrite)
 - [AiDA](entities/aida.md) — AI-powered IDA 9.0+ assistant for C++ game RE (cheat / IDA Plugins)
+- [AICommand](entities/ai-command.md) — ChatGPT integration with Unity Editor (API key in UserSettings; Game Engine Plugins:Unity)
 - [AIMachDec](entities/aimachdec.md) — IDA LLM ARM64→C/ObjC/Swift for Mach-O (apps/kernelcache/DSC; cheat / IDA Plugins)
 - [aimbot-detection-prototype](entities/aimbot-detection-prototype.md) — deep-learning aimbot/triggerbot detection prototype (clips + live window; Detection:Aimbot)
 - [Alcatraz](entities/alcatraz.md) — x64 PE obfuscator (mutation / CFF / IAT; Zydis + AsmJit; ImGui)
