@@ -2157,3 +2157,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:keijiro/AICommand`: entity [[ai-command]]; cited on [[overviews/game-engine]].
 
 - **2026-08-02** — ingest `description:ke0z/VulChatGPT`: entity [[vulchatgpt]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-08-02** — ingest `description:katahiromz/RisohEditor`: entity [[risoh-editor]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
