@@ -2129,3 +2129,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:xhscfq/UnrealVTDbg`: entity [[unreal-vtdbg]]; cross-link from [[anti-cheat-research-index]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
 - **2026-08-02** — ingest `description:kernullist/kn-diff-pool`: entity [[kn-diff-pool]]; cited on [[kernel-pool-scanning]] and [[overviews/windows-kernel]].
+
+- **2026-08-02** — ingest `description:kernullist/kernforge`: entity [[kernforge]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].

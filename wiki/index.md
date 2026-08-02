@@ -506,6 +506,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kiero2](entities/kiero2.md) — kiero v2 runtime D3D9–12/GL/Vulkan API locator (BYO hooking; CMake FetchContent; cross-platform GL/VK)
 - [kn-diff-pool](entities/kn-diff-pool.md) — Windows kernel Big Pool snapshot/diff (driver capture + Go TUI; leak / manual-map forensics)
 - [kn-live-dbg](entities/kn-live-dbg.md) — Windows kernel live debugging (driver memory primitives + Zydis disasm; user-mode TUI; LiveKD-style)
+- [kernforge](entities/kernforge.md) — Go AI workbench for Windows/AC project analysis, fuzz reasoning, driver POC scaffolding, verification (MCP skills)
 - [Known-Driver-Mappers](entities/known-driver-mappers.md) — catalog of known Driver Mappers (AC / stress-testing)
 - [KeyboardKit](entities/keyboardkit.md) — kernel keyboard IRP filter keylogger (UDP exfil; ExplorerFrame DLL hijack)
 - [kernel-codecave-poc](entities/kernel-codecave-poc.md) — KM shellcode in driver .text caves (Find Codecave; vs pool/exec alloc scans)
