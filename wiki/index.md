@@ -823,6 +823,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sign-expired](entities/sign-expired.md) — signtool XmlLite.dll sideload; patch cert/time APIs to bypass expiry (Sign Leaked Cert)
 - [SignToolGUI](entities/signtoolgui.md) — Windows Forms signtool.exe GUI (cert store / PFX / Azure Trusted Signing; batch sign; Anti Cheat → Sign Tools)
 - [SilentMoonwalk](entities/silent-moonwalk.md) — TRUE call-stack spoofer PoC from joint stack-spoofing research (klezVirus; Cheat Spoof Stack)
+- [SJCAM](entities/sjcam.md) — SJ4000 Air (Allwinner V3) firmware RE; AVIOCTRL TCP client; Lelouch Android ARM CFW; EGON/BCL1 parsers; CVE-2026-52656 PoC
 - [SkipHook](entities/skiphook.md) — trampoline skips first insn (bypass JMP/INT3 AC hooks; HDE)
 - [skCrypter](entities/skcrypter.md) — C++ header-only compile-time XOR string crypter (constexpr; AC Compile Time / String Crypter)
 - [Skylicht Engine](entities/skylicht-engine.md) — lightweight Irrlicht-evolved engine (Android/iOS; Game Engine source)
