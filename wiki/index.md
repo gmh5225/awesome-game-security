@@ -117,6 +117,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Anti-xorstr](entities/anti-xorstr.md) — Python IDA anti-Xorstr plugin (cheat / IDA Plugins)
 
 - [anticuckoo](entities/anticuckoo.md) — Cuckoo sandbox / VE detection demos (Detection:Virtual Environments)
+- [anything-about-game](entities/anything-about-game.md) — curated game-development resources (engine/rendering/physics/networking/AI; Game Development resources)
 - [apc-research](entities/apc-research.md) — APC internals research samples + lib (cheat / windows kernel explorer)
 - [AppInitHook](entities/appinithook.md) — AppInit_DLLs registry startup inject + MinHook hooking (INI dispatch; CMake/cmkr; cheat / hook)
 - [apic](entities/apic.md) — local APIC R/W + xAPIC/x2APIC IPI (KM; timing/detection research)

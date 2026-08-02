@@ -2103,3 +2103,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:kirides/screencapture`: entity [[screencapture]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
 
 - **2026-08-02** — ingest `description:kirchesz/kiero2`: entity [[kiero2]]; cited on [[overviews/graphics-api]] and [[present-hook]].
+
+- **2026-08-02** — ingest `description:killop/anything_about_game`: entity [[anything-about-game]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
