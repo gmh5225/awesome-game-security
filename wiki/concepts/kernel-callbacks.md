@@ -14,7 +14,8 @@ sources:
   - wiki/sources/descriptions/vovasicidk__sentinelac.md
   - wiki/sources/descriptions/notscimmy__libelevate.md
   - wiki/sources/descriptions/nlepleux__MappedCallback.md
-updated: 2026-07-27
+  - wiki/sources/descriptions/kkent030315__Van1338.md
+updated: 2026-08-02
 confidence: high
 ---
 
@@ -26,7 +27,7 @@ Windows notify/object registration APIs used by anti-cheat and EDR to observe pr
 
 - `PsSetCreateProcessNotifyRoutine(Ex/2)`, `PsSetCreateThreadNotifyRoutine(Ex)`
 - `PsSetLoadImageNotifyRoutine(Ex)`
-- `ObRegisterCallbacks` (handle create/duplicate) — defensive AC skeletons such as [[sentinelac]] use Ob + load-image notify for process protection and unauthorized-driver detection (source: wiki/sources/descriptions/vovasicidk__sentinelac.md); offensive handle-elevation research such as [[libelevate]] studies obtaining full-access process handles past AC/security strip restrictions for memory R/W (source: wiki/sources/descriptions/notscimmy__libelevate.md)
+- `ObRegisterCallbacks` (handle create/duplicate) — defensive AC skeletons such as [[sentinelac]] use Ob + load-image notify for process protection and unauthorized-driver detection (source: wiki/sources/descriptions/vovasicidk__sentinelac.md); offensive handle-elevation research such as [[libelevate]] studies obtaining full-access process handles past AC/security strip restrictions for memory R/W (source: wiki/sources/descriptions/notscimmy__libelevate.md); timing-attack handle-elevation PoC [[van1338]] explores object-callback design complexity for AC engineers / stress testing (source: wiki/sources/descriptions/kkent030315__Van1338.md)
 - `CmRegisterCallback(Ex)`, minifilter `FltRegisterFilter`
 - `KeRegisterBoundCallback` — research sample [[boundcallback]] (cheat / driver-communication lane) (source: wiki/sources/descriptions/sbsbsbssbsbs__boundcallback.md)
 
@@ -36,4 +37,4 @@ Attackers with kernel R/W ([[byovd]]) may try to unlink or patch callback lists;
 
 ## Related
 
-[[byovd]] · [[hvci]] · [[bustercall]] · [[boundcallback]] · [[mapped-callback]] · [[edrsandblast]] · [[openark]] · [[symlink-callback]] · [[vaultguard]] · [[sentinelac]] · [[libelevate]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[hvci]] · [[bustercall]] · [[boundcallback]] · [[mapped-callback]] · [[edrsandblast]] · [[openark]] · [[symlink-callback]] · [[vaultguard]] · [[sentinelac]] · [[libelevate]] · [[van1338]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

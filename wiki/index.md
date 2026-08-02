@@ -925,6 +925,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [valorant-dumper](entities/valorant-dumper.md) — Valorant UE offset/SDK dumper (GObjects/GNames; Vanguard research)
 - [VALORANT-FNamePool](entities/valorant-fnamepool.md) — iterate/decrypt Valorant FNamePool->Entries (C/C++; cheat / game:valorant)
 - [ValorantCC](entities/valorantcc.md) — Valorant crosshair setting (cheat / game:valorant)
+- [Van1338](entities/van1338.md) — timing-attack handle elevation; Windows object-callback design (AC stress testing)
 - [VaultGuard](entities/vaultguard.md) — FSFilter minifilter + process access block (x64 MASM; anti-debug/tamper)
 - [veh](entities/veh.md) — VEH software debugger (no Debug API; CE plugin / manualmap VEH DLL)
 - [veh-dumper](entities/veh-dumper.md) — x64 VEH/VCH → synthetic PE64 dumps for IDA
