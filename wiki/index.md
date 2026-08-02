@@ -620,6 +620,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Non-Newtonian New York](entities/non-newtonian-new-york.md) — Spider-Man Remastered non-Newtonian fluid/physics mod (urban destruction; [Mod])
 - [NO_ACCESS_Protection](entities/no-access-protection.md) — PAGE_NOACCESS + VEH / single-step anti-tamper (vs external scanners)
 - [NoMercy](entities/no-mercy.md) — MIT OSS AC "gold standard" reference (mq1n fork; Open Source Anti Cheat System)
+- [NoahGameFrame](entities/noahgameframe.md) — C++ server engine (OGRE/BigWorld-inspired; Game Network / Server Engine)
 - [Nocturne](entities/nocturne.md) — bin2bin x86-64 PE code virtualizer (SDK markers / VM handlers / junk; AC Obfuscation Engine)
 - [NocturneLdr](entities/nocturneldr.md) — CET-compatible Win x64 shellcode loader (fully backed stacks; Spoof Stack)
 - [Norsefire](entities/norsefire.md) — kernel-mode W/RPM + mouse_event (C++; cheat / RPM)

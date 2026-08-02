@@ -2118,4 +2118,4 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-02** — ingest `description:khang06/Il2CppDumper-YuanShen`: entity [[il2cppdumper-yuanshen]]; cited on [[il2cpp]] and [[overviews/game-engine]].
 
-- **2026-08-02** — ingest `readme:categories`: bumped Cheat ~2627 (was ~2626; Anti Cheat ~631 stable); refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+- **2026-08-02** — ingest `description:ketoo/NoahGameFrame`: entity [[noahgameframe]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
