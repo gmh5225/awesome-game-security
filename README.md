@@ -816,6 +816,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/HyperDbg/HyperDbg [VT debuger]
 - https://github.com/gmh5225/vt-debuger [VT debuger]
 - https://github.com/kkpwn/ErisDbg [VT debuger]
+- https://github.com/xhscfq/UnrealVTDbg [VT-x/EPT-assisted Windows kernel debugging framework with Delphi UI and C++ core for authorized anti-cheat and reverse-engineering research]
 - https://github.com/teemu-l/execution-trace-viewer
 - https://github.com/changeofpace/Force-Page-Protection [Bypass Remap Memory]
 - https://github.com/icsharpcode/ILSpy [For Unity]
@@ -3752,6 +3753,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [An in-depth exploration of how C programs transform from source code to executable binaries. This repository contains a comprehensive guide to understanding linking, loading, and executable formats](https://github.com/gmh5225/underTheHoodOfExecutables)
 - https://technology.riotgames.com/news/riots-approach-anti-cheat
 - https://github.com/gmh5225/WeirdAntiCheatIdeas
+- https://github.com/xhscfq/anti-cheat-research-index [Structured research index covering anti-cheat architecture, Windows kernel security, VT-x/EPT virtualization, graphics integrity, and reverse engineering references]
 - https://github.com/gmh5225/AntiCheat-chrysalis
 - https://www.unknowncheats.me/forum/anti-cheat-bypass/481731-tutorial-ring3-anticheat-project.html
 - https://github.com/gmh5225/awesome-executable-packing [Executable File Packing]
@@ -4200,6 +4202,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Analysis Framework
 - https://github.com/pandora-analysis/pandora
 - https://github.com/cocomelonc/peekaboo [Modular malware-behavior emulator for safe evasion testing, telemetry generation, and detection engineering]
+- https://github.com/LooperSalty/cs2-tracker [CS2 stats tracker with local FastAPI, Game State Integration live match feed, and explainable heuristic anti-cheat suspicion scoring]
 
 > Detection:Hook
 - https://github.com/hasherezade/pe-sieve
