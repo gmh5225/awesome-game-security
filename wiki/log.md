@@ -2185,3 +2185,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:jwmcglynn/android-emulator`: entity [[android-emulator]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-08-02** — ingest `description:justinstenning/Direct3DHook`: entity [[direct3d-hook]]; cited on [[present-hook]] and [[overviews/graphics-api]].
+
+- **2026-08-02** — ingest `description:justinpbarnett/unity-mcp`: updated entity [[unity-mcp]] (second README-listed implementation; C#/Python shader/rendering); cited on [[overviews/game-engine]] and [[overviews/overview]].
