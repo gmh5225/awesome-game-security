@@ -25,7 +25,8 @@ sources:
   - wiki/sources/descriptions/moiz-2x__CVE-2025-24990_POC.md
   - wiki/sources/descriptions/magicsword-io__LOLDrivers.md
   - wiki/sources/descriptions/kyxiaxiang__360WFP_Exploit.md
-updated: 2026-08-01
+  - wiki/sources/descriptions/kkent030315__evil-mhyprot-cli.md
+updated: 2026-08-02
 confidence: high
 ---
 
@@ -75,7 +76,9 @@ Hardware-feature bypass PoCs such as [[smep-bypass]] use vulnerable-driver primi
 
 Agere Modem driver LPE such as [[cve-2025-24990-poc]] abuses `ltmdm64.sys` `METHOD_NEITHER` IOCTLs (missing user/kernel boundary checks) → 4-byte write via `IOCTL_GET_VERSION` + null-deref fixup via `VirtualAlloc` → arbitrary kernel R/W, with an IoRing LPE variant. (source: wiki/sources/descriptions/moiz-2x__CVE-2025-24990_POC.md)
 
+Game-AC driver abuse such as [[evil-mhyprot-cli]] targets miHoYo **`mhyprot2.sys`** (Genshin Impact) via a CLI PoC for unprivileged kernel/user memory R/W. (source: wiki/sources/descriptions/kkent030315__evil-mhyprot-cli.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[evil-mhyprot-cli]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
