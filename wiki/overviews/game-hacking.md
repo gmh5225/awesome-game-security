@@ -289,6 +289,7 @@ sources:
   - wiki/sources/descriptions/med0x2e__SigFlip.md
   - wiki/sources/descriptions/medievalghoul__hwid-checker-mg.md
   - wiki/sources/descriptions/milankovo__ida_enums_helper.md
+  - wiki/sources/descriptions/junron__auto-enum.md
   - wiki/sources/descriptions/milankovo__ida-search.md
   - wiki/sources/descriptions/milankovo__YaraVM.md
   - wiki/sources/descriptions/masterpastaa__AutoOffsets.md
@@ -661,6 +662,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Zero-dependency IDA Pro 9+ signature maker & searcher via [[ida-sigmaker]] (Python; optional Cython/SIMD AVX2/NEON/SSE2; shortest unique sigs; wildcard operands; XREF fallback; batch text/CSV/JSON search; cheat / IDA Plugins) sits in the same signature-scan lane. (source: wiki/sources/descriptions/mahmoudimus__ida-sigmaker.md)
 - Big5 byte decode in IDA via [[big5-decode-ida]] (Python; Traditional Chinese string view) sits in the Cheat IDA Plugins / encoding lane. (source: wiki/sources/descriptions/sean2077__big5-decode-ida.md)
 - Hex-Rays enum management via [[ida-enums-helper]] (hotkey **N** rename member / **A** add to enum / **Shift-A** append to last enum; `tinfo_t` ordinal chooser) sits in the Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/milankovo__ida_enums_helper.md)
+- Automatic standard-function enum identification via [[auto-enum]] (Python/C; identifies and applies enums for common API/stdlib calls) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/junron__auto-enum.md)
 - Type-aware binary search via [[ida-search]] (IDA Pro 9.x; 010 Editor–style typed search; `ida-plugin.json` loads `plugin.py` on startup) sits in the Cheat IDA Plugins / search lane. (source: wiki/sources/descriptions/milankovo__ida-search.md)
 - Compiled YARA rule bytecode disassembly via [[yaravm]] (IDA processor + loader for `.yar.bin`; namespaces/rules/strings/code/AC transition tables; `libyara.til`) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/milankovo__YaraVM.md)
 - Linker `.MAP` symbol import via [[ida-pro-loadmap]] (VC/Borland/Dede/GCC/IDA formats; section:offset → named functions/labels; IDA SDK kernwin/segment APIs) sits in the Cheat IDA Plugins / symbol-recovery lane. (source: wiki/sources/descriptions/mefistotelis__ida-pro-loadmap.md)
