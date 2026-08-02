@@ -2149,3 +2149,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:mrx7014/SpoofingCollection`: entity [[spoofing-collection]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
 
 - **2026-08-02** — ingest `description:keowu/Ryujin`: entity [[ryujin]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-08-02** — ingest `description:kem0x/FortKit`: entity [[fortkit]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
