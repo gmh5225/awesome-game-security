@@ -2183,3 +2183,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:jynew/jynew`: entity [[jynew]]; cited on [[overviews/game-engine]].
 
 - **2026-08-02** — ingest `description:jwmcglynn/android-emulator`: entity [[android-emulator]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-08-02** — ingest `description:justinstenning/Direct3DHook`: entity [[direct3d-hook]]; cited on [[present-hook]] and [[overviews/graphics-api]].
