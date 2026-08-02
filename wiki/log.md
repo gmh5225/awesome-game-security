@@ -2111,3 +2111,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:khanhduytran0/coruna`: entity [[coruna]]; cited on [[overviews/mobile-security]]; cross-link from [[xnu-1day-practice]].
 
 - **2026-08-02** — ingest `description:khang06/misc`: entity [[misc]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-08-02** — ingest `description:khang06/mhynot2`: entity [[mhynot2]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
