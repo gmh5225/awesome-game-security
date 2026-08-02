@@ -1,0 +1,4996 @@
+Project Path: arc_Longno242_Encryptic-Roblox-Anti-Cheat_4785_38u
+
+Source Tree:
+
+```txt
+arc_Longno242_Encryptic-Roblox-Anti-Cheat_4785_38u
+├── LICENSE
+├── README.md
+├── ServerScriptService
+│   └── Encryptic
+│       ├── BanManager.lua
+│       ├── ExploitGuard.lua
+│       ├── FireRateGuard.lua
+│       ├── FlyGuard.lua
+│       ├── HealthGuard.lua
+│       ├── HitGuard.lua
+│       ├── HumanoidGuard.lua
+│       ├── MovementGuard.lua
+│       ├── NoclipGuard.lua
+│       ├── PhysicsGuard.lua
+│       ├── RemoteGuard.lua
+│       ├── Shared.lua
+│       ├── TeleportGuard.lua
+│       ├── ToolGuard.lua
+│       └── init.lua
+└── demo
+    ├── DEMO_SETUP.md
+    ├── EncrypticDemo.rbxmx
+    ├── ServerScriptService
+    │   └── DemoGame.server.lua
+    ├── StarterPlayer
+    │   └── StarterPlayerScripts
+    │       └── DemoClient.client.lua
+    └── build_studio_model.py
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Encryptic Anti-Cheat Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Encryptic Roblox Anti-Cheat
+
+Server-authoritative anti-cheat for **Roblox** experiences. Pure Luau — drop into `ServerScriptService`, configure limits, and wire your remotes/combat.
+
+Part of the [Encryptic Anti-Cheat](https://github.com/Longno242/Encryptic-Anti-Cheat) family (Windows client protection lives in that repo).
+
+---
+
+## Quick install (Studio)
+
+1. Download or clone this repo.
+2. Import **`demo/EncrypticDemo.rbxmx`** (File → Import, or drag into Explorer).
+3. Move instances:
+   - **`Encryptic`** folder → `ServerScriptService`
+   - **`DemoGame`** → `ServerScriptService`
+   - **`DemoClient`** → `StarterPlayer → StarterPlayerScripts`
+4. Press **Play**. Click **AC** (top-right) or press **RightControl** to open the test panel.
+5. Watch **View → Output → Server** for `[Encryptic]` violation lines.
+
+Full walkthrough: [`demo/DEMO_SETUP.md`](demo/DEMO_SETUP.md)
+
+---
+
+## Use in your game
+
+Copy **`ServerScriptService/Encryptic/`** into your place, then in a server Script:
+
+```lua
+local Encryptic = require(game.ServerScriptService.Encryptic.init)
+
+Encryptic.start({
+	maxSpeed = 48,
+	maxWalkSpeed = 24,
+	maxFireRate = 12,
+	maxRemotePerSecond = 40,
+	maxStrikes = 5,
+	strikeDecaySeconds = 60,
+	spawnGraceSeconds = 2.5,
+	enableFlyGuard = true,
+	enableNoclipGuard = true,
+	enablePhysicsGuard = true,
+	enableHealthGuard = true,
+	enableExploitGuard = true,
+})
+
+-- Admins / playtesters
+Encryptic.whitelist(123456789)
+
+-- Before a legitimate server teleport / cutscene
+Encryptic.allowTeleport(player, 2)
+
+-- Legitimate medkit heal
+Encryptic.HealthGuard.allowHeal(player, function()
+	player.Character.Humanoid.Health += 50
+end)
+```
+
+---
+
+## Guards
+
+| Guard | Detects |
+|-------|---------|
+| **MovementGuard** | Sustained horizontal speed / velocity hacks (lag-tolerant) |
+| **TeleportGuard** | Large position jumps; soft-corrects + strike |
+| **HumanoidGuard** | WalkSpeed, JumpPower, JumpHeight, HipHeight tamper |
+| **FlyGuard** | PlatformStand fly, hover, illegal ascent |
+| **NoclipGuard** | `HumanoidRootPart` collision off + phasing through solid geometry |
+| **PhysicsGuard** | Injected `BodyVelocity` / movers / HRP constraints |
+| **HealthGuard** | Godmode MaxHealth + illegal heal bursts |
+| **FireRateGuard** | Shot rate limits |
+| **RemoteGuard** | Global + per-remote spam limits |
+| **ToolGuard** | Tool equip spam |
+| **HitGuard** | Hit distance / reach + optional line-of-sight |
+| **ExploitGuard** | Suspicious remote names |
+| **BanManager** | Strikes → warn / kick, with idle decay + whitelist |
+
+---
+
+## Wire your systems
+
+```lua
+-- Guns
+if not Encryptic.FireRateGuard.recordShot(player) then return end
+
+-- Remotes
+Encryptic.RemoteGuard.wrapRemoteEvent(myRemote, function(player, ...)
+	-- your handler
+end)
+
+-- Melee / hitscan reach
+if not Encryptic.HitGuard.validateHit(attacker, targetChar, hitPos) then return end
+
+-- Tools
+if not Encryptic.ToolGuard.trackEquip(player) then return end
+
+-- Vehicles: mark movers as trusted
+Encryptic.PhysicsGuard.trust(linearVelocityConstraint)
+```
+
+---
+
+## Stability notes (anti-false-positive)
+
+- **Spawn grace** — checks pause briefly after respawn so load-in isn't punished.
+- **Seat / vehicle skip** — seated players aren't speed/teleport flagged.
+- **Noclip** — only watches collision-critical parts (R15 limbs are often non-colliding by default).
+- **Speed** — needs several consecutive overspeed frames before a strike.
+- **`start()` once** — duplicate `Encryptic.start()` calls are ignored.
+- **Strike decay** — idle players slowly lose strike points (`strikeDecaySeconds`).
+
+---
+
+## Repo layout
+
+```
+ServerScriptService/Encryptic/   ← all guard ModuleScripts + init
+demo/
+  EncrypticDemo.rbxmx            ← one-file Studio import
+  ServerScriptService/DemoGame.server.lua
+  StarterPlayer/.../DemoClient.client.lua
+  build_studio_model.py          ← rebuild rbxmx after edits
+  DEMO_SETUP.md
+```
+
+Regenerate the rbxmx after editing sources:
+
+```bash
+python demo/build_studio_model.py
+```
+
+---
+
+## Important notes
+
+- Roblox **cannot** load native DLLs — all checks run on the **server**.
+- Tune limits (`maxWalkSpeed`, `maxSpeed`, `maxHealth`, etc.) for your game.
+- The demo GUI and `TestExploit` remote are for **Studio testing only** — do not ship them in production.
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+```
+
+`ServerScriptService/Encryptic/BanManager.lua`:
+
+```lua
+-- Central violation tracking, strikes, kick/ban with decay + whitelist
+
+local Players = game:GetService("Players")
+
+local Shared = require(script.Parent.Shared)
+
+local BanManager = {}
+BanManager._strikes = {} :: { [Player]: { [string]: number } }
+BanManager._totalStrikes = {} :: { [Player]: number }
+BanManager._lastStrikeAt = {} :: { [Player]: number }
+
+export type ViolationAction = "warn" | "kick" | "ignored"
+export type ViolationInfo = {
+	player: Player,
+	guard: string,
+	reason: string,
+	severity: number,
+}
+
+local DEFAULT_MAX_STRIKES = 5
+local DEFAULT_DECAY_SECONDS = 60
+local maxStrikes = DEFAULT_MAX_STRIKES
+local decaySeconds = DEFAULT_DECAY_SECONDS
+local onViolation: ((ViolationInfo) -> ())? = nil
+local onKick: ((Player, string) -> ())? = nil
+local kicked: { [Player]: boolean } = {}
+local started = false
+
+local function decayStrikes(player: Player)
+	if decaySeconds <= 0 then
+		return
+	end
+	local last = BanManager._lastStrikeAt[player]
+	local total = BanManager._totalStrikes[player]
+	if not last or not total or total <= 0 then
+		return
+	end
+	local elapsed = Shared.now() - last
+	if elapsed < decaySeconds then
+		return
+	end
+	-- Drop one strike point per decay window of inactivity
+	local steps = math.floor(elapsed / decaySeconds)
+	local nextTotal = math.max(0, total - steps)
+	BanManager._totalStrikes[player] = nextTotal
+	BanManager._lastStrikeAt[player] = Shared.now() - (elapsed % decaySeconds)
+	if nextTotal == 0 then
+		BanManager._strikes[player] = nil
+	end
+end
+
+function BanManager.configure(opts: {
+	maxStrikes: number?,
+	decaySeconds: number?,
+	onViolation: ((ViolationInfo) -> ())?,
+	onKick: ((Player, string) -> ())?,
+})
+	maxStrikes = opts.maxStrikes or DEFAULT_MAX_STRIKES
+	decaySeconds = if opts.decaySeconds ~= nil then opts.decaySeconds else DEFAULT_DECAY_SECONDS
+	onViolation = opts.onViolation
+	onKick = opts.onKick
+end
+
+function BanManager.record(violation: ViolationInfo): ViolationAction
+	local player = violation.player
+	if not player or not player.Parent or kicked[player] then
+		return "ignored"
+	end
+	if Shared.isWhitelisted(player) then
+		return "ignored"
+	end
+
+	decayStrikes(player)
+
+	local guardStrikes = BanManager._strikes[player]
+	if not guardStrikes then
+		guardStrikes = {}
+		BanManager._strikes[player] = guardStrikes
+	end
+
+	local severity = math.max(1, math.floor(violation.severity or 1))
+	guardStrikes[violation.guard] = (guardStrikes[violation.guard] or 0) + severity
+	BanManager._totalStrikes[player] = (BanManager._totalStrikes[player] or 0) + severity
+	BanManager._lastStrikeAt[player] = Shared.now()
+
+	warn(string.format(
+		"[Encryptic] %s | %s | %s | strikes=%d/%d",
+		violation.guard,
+		player.Name,
+		violation.reason,
+		BanManager._totalStrikes[player],
+		maxStrikes
+	))
+
+	if onViolation then
+		onViolation(violation)
+	end
+
+	local total = BanManager._totalStrikes[player]
+	if total >= maxStrikes then
+		kicked[player] = true
+		if onKick then
+			onKick(player, violation.reason)
+		else
+			player:Kick("[Encryptic] " .. violation.reason)
+		end
+		return "kick"
+	end
+
+	return "warn"
+end
+
+function BanManager.getStrikes(player: Player): number
+	decayStrikes(player)
+	return BanManager._totalStrikes[player] or 0
+end
+
+function BanManager.getGuardStrikes(player: Player, guard: string): number
+	local map = BanManager._strikes[player]
+	return if map then (map[guard] or 0) else 0
+end
+
+function BanManager.reset(player: Player)
+	BanManager._strikes[player] = nil
+	BanManager._totalStrikes[player] = nil
+	BanManager._lastStrikeAt[player] = nil
+	kicked[player] = nil
+end
+
+function BanManager.whitelist(userId: number, allowed: boolean?)
+	Shared.setWhitelisted(userId, if allowed == nil then true else allowed)
+end
+
+function BanManager.isWhitelisted(player: Player): boolean
+	return Shared.isWhitelisted(player)
+end
+
+if not started then
+	started = true
+	Players.PlayerRemoving:Connect(function(player)
+		BanManager.reset(player)
+	end)
+end
+
+return BanManager
+
+```
+
+`ServerScriptService/Encryptic/ExploitGuard.lua`:
+
+```lua
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+local Shared = require(script.Parent.Shared)
+
+local ExploitGuard = {}
+local suspiciousPatterns = {
+	"execute", "loadstring", "getgenv", "syn", "fluxus", "infinite",
+	"godmode", "backdoor", "bypass", "exploit", "dex", "remote spy",
+}
+local onViolation: ((Player, string) -> ())? = nil
+local hooked = {} :: { [Instance]: boolean }
+local started = false
+
+-- Names that look scary but are common in legitimate games — don't false-flag these alone
+local ALLOWLIST = {
+	speed = true,
+	teleport = true,
+	admin = true,
+	kill = true,
+	ban = true,
+	noclip = true, -- demo may create TestExploit; validateRemote still usable per-call
+}
+
+local function isSuspicious(name: string): boolean
+	local lower = string.lower(name)
+	if ALLOWLIST[lower] then
+		return false
+	end
+	for _, pattern in suspiciousPatterns do
+		if string.find(lower, pattern, 1, true) then
+			return true
+		end
+	end
+	return false
+end
+
+local function hookRemote(remote: Instance)
+	if not remote:IsA("RemoteEvent") and not remote:IsA("RemoteFunction") then
+		return
+	end
+	if hooked[remote] then
+		return
+	end
+	hooked[remote] = true
+
+	if isSuspicious(remote.Name) then
+		warn("[Encryptic] Suspicious remote registered:", remote:GetFullName())
+	end
+end
+
+local function scan(container: Instance)
+	for _, inst in container:GetDescendants() do
+		hookRemote(inst)
+	end
+	container.DescendantAdded:Connect(hookRemote)
+end
+
+function ExploitGuard.start(opts: {
+	onViolation: ((Player, string) -> ())?,
+	extraPatterns: { string }?,
+})
+	onViolation = opts.onViolation
+	if opts.extraPatterns then
+		for _, p in opts.extraPatterns do
+			table.insert(suspiciousPatterns, string.lower(p))
+		end
+	end
+
+	if started then
+		return
+	end
+	started = true
+
+	scan(ReplicatedStorage)
+
+	local workspaceRemotes = game:GetService("Workspace"):FindFirstChild("Remotes")
+	if workspaceRemotes then
+		scan(workspaceRemotes)
+	end
+
+	-- Catch remotes created later under Workspace.Remotes
+	game:GetService("Workspace").ChildAdded:Connect(function(child)
+		if child.Name == "Remotes" then
+			scan(child)
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(function()
+		-- hooked remotes are Instance-keyed; no player cleanup needed
+	end)
+end
+
+function ExploitGuard.validateRemote(player: Player, remote: Instance): boolean
+	if Shared.isWhitelisted(player) then
+		return true
+	end
+	if not remote then
+		return false
+	end
+	if isSuspicious(remote.Name) then
+		if onViolation then
+			onViolation(player, "Blocked suspicious remote: " .. remote.Name)
+		end
+		return false
+	end
+	return true
+end
+
+function ExploitGuard.isSuspiciousName(name: string): boolean
+	return isSuspicious(name)
+end
+
+return ExploitGuard
+
+```
+
+`ServerScriptService/Encryptic/FireRateGuard.lua`:
+
+```lua
+local Players = game:GetService("Players")
+
+local Shared = require(script.Parent.Shared)
+
+local FireRateGuard = {}
+local maxRate = 12
+local lastFire: { [Player]: { number } } = {}
+local onViolation: ((Player, string) -> ())? = nil
+local started = false
+
+function FireRateGuard.start(opts: number | { maxFireRate: number?, onViolation: ((Player, string) -> ())? })
+	if typeof(opts) == "number" then
+		maxRate = opts
+	else
+		maxRate = opts.maxFireRate or maxRate
+		onViolation = opts.onViolation
+	end
+
+	if started then
+		return
+	end
+	started = true
+
+	Players.PlayerRemoving:Connect(function(player)
+		lastFire[player] = nil
+	end)
+end
+
+function FireRateGuard.recordShot(player: Player): boolean
+	if Shared.isWhitelisted(player) then
+		return true
+	end
+
+	if not Shared.rateLimit(lastFire, player, 1, maxRate) then
+		if onViolation then
+			local count = #(lastFire[player] or {})
+			onViolation(player, string.format("Fire rate exploit shots=%d max=%d", count, maxRate))
+		end
+		return false
+	end
+
+	return true
+end
+
+function FireRateGuard.reset(player: Player)
+	lastFire[player] = nil
+end
+
+return FireRateGuard
+
+```
+
+`ServerScriptService/Encryptic/FlyGuard.lua`:
+
+```lua
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+local Shared = require(script.Parent.Shared)
+
+local FlyGuard = {}
+local maxAirTime = 4
+local airTime: { [Player]: number } = {}
+local lastViolation: { [Player]: number } = {}
+local violationCooldown = 1.0
+local onViolation: ((Player, string) -> ())? = nil
+local started = false
+
+-- States where mid-air is expected; we still watch for hover within these
+local CLIMB_OR_SWIM = {
+	[Enum.HumanoidStateType.Climbing] = true,
+	[Enum.HumanoidStateType.Swimming] = true,
+}
+
+local function report(player: Player, reason: string)
+	if not onViolation or Shared.shouldSkipPlayer(player) then
+		return
+	end
+	if Shared.cooldownOk(lastViolation, player, violationCooldown) then
+		onViolation(player, reason)
+	end
+end
+
+local function isGrounded(character: Model, root: BasePart): boolean
+	local params = RaycastParams.new()
+	params.FilterDescendantsInstances = { character }
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.IgnoreWater = false
+	-- Slightly longer ray + slight forward sample reduces edge false positives
+	local down = Workspace:Raycast(root.Position, Vector3.new(0, -5.5, 0), params)
+	if down then
+		return true
+	end
+	local offset = root.CFrame.LookVector * 1.2
+	return Workspace:Raycast(root.Position + offset, Vector3.new(0, -5.5, 0), params) ~= nil
+end
+
+function FlyGuard.start(opts: {
+	maxAirTime: number?,
+	onViolation: ((Player, string) -> ())?,
+})
+	maxAirTime = opts.maxAirTime or maxAirTime
+	onViolation = opts.onViolation
+
+	if started then
+		return
+	end
+	started = true
+
+	RunService.Heartbeat:Connect(function(dt)
+		for _, player in Players:GetPlayers() do
+			if Shared.shouldSkipPlayer(player) then
+				airTime[player] = 0
+				continue
+			end
+
+			local character = player.Character
+			local root = Shared.getRoot(character)
+			local humanoid = Shared.getHumanoid(character)
+			if not root or not humanoid then
+				airTime[player] = 0
+				continue
+			end
+
+			if humanoid.SeatPart or humanoid:GetState() == Enum.HumanoidStateType.Seated then
+				airTime[player] = 0
+				continue
+			end
+
+			local state = humanoid:GetState()
+			if CLIMB_OR_SWIM[state] then
+				airTime[player] = 0
+				continue
+			end
+
+			-- Classic executor fly
+			if humanoid.PlatformStand then
+				report(player, "Fly exploit PlatformStand")
+				humanoid.PlatformStand = false
+				local v = root.AssemblyLinearVelocity
+				root.AssemblyLinearVelocity = Vector3.new(v.X, math.min(v.Y, -40), v.Z)
+				airTime[player] = 0
+				continue
+			end
+
+			if isGrounded(character, root) then
+				airTime[player] = 0
+				continue
+			end
+
+			local velocity = root.AssemblyLinearVelocity
+			local verticalSpeed = velocity.Y
+			local horizontalSpeed = Shared.horizontalSpeed(velocity)
+
+			-- Hover / float: not falling, not a normal jump peak
+			local hovering = math.abs(verticalSpeed) < 5 and horizontalSpeed < (humanoid.WalkSpeed + 8)
+			-- Ascending without jump state for too long (anti-gravity fly)
+			local risingHack = verticalSpeed > 8
+				and state ~= Enum.HumanoidStateType.Jumping
+				and state ~= Enum.HumanoidStateType.Freefall
+
+			if hovering or risingHack then
+				airTime[player] = (airTime[player] or 0) + dt
+				if airTime[player] > maxAirTime then
+					local kind = if hovering then "hover" else "ascent"
+					report(player, string.format("Fly exploit %s airTime=%.1fs", kind, airTime[player]))
+					root.AssemblyLinearVelocity = Vector3.new(velocity.X, -80, velocity.Z)
+					airTime[player] = 0
+				end
+			else
+				-- Decay instead of hard reset so brief jitter doesn't wipe evidence
+				airTime[player] = math.max(0, (airTime[player] or 0) - dt * 1.5)
+			end
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(function(player)
+		airTime[player] = nil
+		lastViolation[player] = nil
+	end)
+end
+
+return FlyGuard
+
+```
+
+`ServerScriptService/Encryptic/HealthGuard.lua`:
+
+```lua
+--[[
+	HealthGuard — godmode / illegal heal detection.
+	Tracks sudden health increases and MaxHealth inflation.
+]]
+
+local Players = game:GetService("Players")
+
+local Shared = require(script.Parent.Shared)
+
+local HealthGuard = {}
+local maxHealthCap = 100
+local maxHealPerSecond = 40
+local onViolation: ((Player, string) -> ())? = nil
+local lastViolation: { [Player]: number } = {}
+local lastHealth: { [Player]: number } = {}
+local healBudget: { [Player]: number } = {}
+local lastTick: { [Player]: number } = {}
+local trustedHeal: { [Player]: boolean } = {}
+local violationCooldown = 1.0
+local started = false
+
+local function report(player: Player, reason: string)
+	if not onViolation or Shared.shouldSkipPlayer(player) then
+		return
+	end
+	if Shared.cooldownOk(lastViolation, player, violationCooldown) then
+		onViolation(player, reason)
+	end
+end
+
+local function bindHumanoid(player: Player, humanoid: Humanoid)
+	lastHealth[player] = humanoid.Health
+	healBudget[player] = 0
+	lastTick[player] = Shared.now()
+
+	humanoid.HealthChanged:Connect(function(health)
+		if Shared.shouldSkipPlayer(player) or trustedHeal[player] then
+			lastHealth[player] = health
+			return
+		end
+
+		local prev = lastHealth[player] or health
+		lastHealth[player] = health
+
+		if humanoid.MaxHealth > maxHealthCap + 0.5 then
+			report(player, string.format("MaxHealth tamper: %.1f", humanoid.MaxHealth))
+			humanoid.MaxHealth = maxHealthCap
+			if humanoid.Health > maxHealthCap then
+				humanoid.Health = maxHealthCap
+			end
+			return
+		end
+
+		if health <= prev then
+			return
+		end
+
+		local gained = health - prev
+		local now = Shared.now()
+		local dt = math.max(now - (lastTick[player] or now), 1 / 60)
+		lastTick[player] = now
+
+		-- Decay budget
+		healBudget[player] = math.max(0, (healBudget[player] or 0) - maxHealPerSecond * dt)
+		healBudget[player] = (healBudget[player] or 0) + gained
+
+		if healBudget[player] > maxHealPerSecond * 1.5 then
+			report(player, string.format("Illegal heal +%.1f (budget=%.1f)", gained, healBudget[player]))
+			humanoid.Health = prev
+			healBudget[player] = 0
+		end
+	end)
+end
+
+function HealthGuard.start(opts: {
+	maxHealth: number?,
+	maxHealPerSecond: number?,
+	onViolation: ((Player, string) -> ())?,
+})
+	maxHealthCap = opts.maxHealth or maxHealthCap
+	maxHealPerSecond = opts.maxHealPerSecond or maxHealPerSecond
+	onViolation = opts.onViolation
+
+	if started then
+		return
+	end
+	started = true
+
+	local function onCharacter(player: Player, character: Model)
+		task.spawn(function()
+			local humanoid = character:WaitForChild("Humanoid", 5) :: Humanoid?
+			if humanoid then
+				Shared.grantGrace(player, 2)
+				bindHumanoid(player, humanoid)
+			end
+		end)
+	end
+
+	local function onPlayer(player: Player)
+		player.CharacterAdded:Connect(function(character)
+			onCharacter(player, character)
+		end)
+		if player.Character then
+			onCharacter(player, player.Character)
+		end
+	end
+
+	for _, player in Players:GetPlayers() do
+		onPlayer(player)
+	end
+	Players.PlayerAdded:Connect(onPlayer)
+
+	Players.PlayerRemoving:Connect(function(player)
+		lastViolation[player] = nil
+		lastHealth[player] = nil
+		healBudget[player] = nil
+		lastTick[player] = nil
+		trustedHeal[player] = nil
+	end)
+end
+
+-- Wrap legitimate heals / medkits
+function HealthGuard.allowHeal(player: Player, fn: () -> ())
+	trustedHeal[player] = true
+	local ok, err = pcall(fn)
+	trustedHeal[player] = nil
+	if not ok then
+		warn("[Encryptic] HealthGuard.allowHeal error:", err)
+	end
+end
+
+return HealthGuard
+
+```
+
+`ServerScriptService/Encryptic/HitGuard.lua`:
+
+```lua
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+
+local Shared = require(script.Parent.Shared)
+
+local HitGuard = {}
+local maxHitDistance = 20
+local requireLineOfSight = true
+local onViolation: ((Player, string) -> ())? = nil
+local lastViolation: { [Player]: number } = {}
+local violationCooldown = 0.5
+local started = false
+
+function HitGuard.start(opts: {
+	maxHitDistance: number?,
+	requireLineOfSight: boolean?,
+	onViolation: ((Player, string) -> ())?,
+})
+	maxHitDistance = opts.maxHitDistance or maxHitDistance
+	if opts.requireLineOfSight ~= nil then
+		requireLineOfSight = opts.requireLineOfSight
+	end
+	onViolation = opts.onViolation
+
+	if started then
+		return
+	end
+	started = true
+
+	Players.PlayerRemoving:Connect(function(player)
+		lastViolation[player] = nil
+	end)
+end
+
+local function hasLineOfSight(attackerChar: Model, from: Vector3, to: Vector3, targetChar: Model): boolean
+	local params = RaycastParams.new()
+	params.FilterDescendantsInstances = { attackerChar }
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	local dir = to - from
+	local result = Workspace:Raycast(from, dir, params)
+	if not result then
+		return true
+	end
+	return result.Instance:IsDescendantOf(targetChar)
+end
+
+-- Call from your combat system before applying damage
+function HitGuard.validateHit(attacker: Player, targetChar: Model, hitPosition: Vector3?): boolean
+	if Shared.isWhitelisted(attacker) then
+		return true
+	end
+
+	local attackerChar = attacker.Character
+	local attackerRoot = Shared.getRoot(attackerChar)
+	local targetRoot = Shared.getRoot(targetChar)
+	if not attackerRoot or not targetRoot then
+		return false
+	end
+
+	local from = hitPosition or targetRoot.Position
+	local distRoot = (attackerRoot.Position - targetRoot.Position).Magnitude
+	local distHit = (attackerRoot.Position - from).Magnitude
+	local dist = math.min(distRoot, distHit)
+
+	-- Small latency cushion
+	local limit = maxHitDistance + 2
+	if dist > limit then
+		if onViolation and Shared.cooldownOk(lastViolation, attacker, violationCooldown) then
+			onViolation(attacker, string.format("Hit distance exploit dist=%.1f max=%.1f", dist, limit))
+		end
+		return false
+	end
+
+	if requireLineOfSight and attackerChar then
+		local origin = attackerRoot.Position + Vector3.new(0, 1.5, 0)
+		if not hasLineOfSight(attackerChar, origin, from, targetChar) then
+			if onViolation and Shared.cooldownOk(lastViolation, attacker, violationCooldown) then
+				onViolation(attacker, "Hit LOS exploit (wallbang)")
+			end
+			return false
+		end
+	end
+
+	return true
+end
+
+return HitGuard
+
+```
+
+`ServerScriptService/Encryptic/HumanoidGuard.lua`:
+
+```lua
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local Shared = require(script.Parent.Shared)
+
+local HumanoidGuard = {}
+local maxWalkSpeed = 24
+local maxJumpPower = 60
+local maxJumpHeight = 12
+local maxHipHeight = 8
+local onViolation: ((Player, string) -> ())? = nil
+local lastViolation: { [Player]: number } = {}
+local violationCooldown = 1.0
+local started = false
+local pollAccumulator = 0
+
+local function report(player: Player, reason: string)
+	if not onViolation then
+		return
+	end
+	if Shared.shouldSkipPlayer(player) then
+		return
+	end
+	if not Shared.cooldownOk(lastViolation, player, violationCooldown) then
+		return
+	end
+	onViolation(player, reason)
+end
+
+local function clampHumanoid(player: Player, humanoid: Humanoid)
+	if Shared.shouldSkipPlayer(player) then
+		return
+	end
+
+	if humanoid.WalkSpeed > maxWalkSpeed + 0.05 then
+		report(player, string.format("WalkSpeed tamper: %.1f", humanoid.WalkSpeed))
+		humanoid.WalkSpeed = maxWalkSpeed
+	end
+
+	if humanoid.UseJumpPower then
+		if humanoid.JumpPower > maxJumpPower + 0.05 then
+			report(player, string.format("JumpPower tamper: %.1f", humanoid.JumpPower))
+			humanoid.JumpPower = maxJumpPower
+		end
+	elseif humanoid.JumpHeight > maxJumpHeight + 0.05 then
+		report(player, string.format("JumpHeight tamper: %.1f", humanoid.JumpHeight))
+		humanoid.JumpHeight = maxJumpHeight
+	end
+
+	if humanoid.HipHeight > maxHipHeight + 0.05 then
+		report(player, string.format("HipHeight tamper: %.1f", humanoid.HipHeight))
+		humanoid.HipHeight = maxHipHeight
+	end
+end
+
+local function bindCharacter(player: Player, character: Model)
+	task.spawn(function()
+		local humanoid = character:WaitForChild("Humanoid", 5) :: Humanoid?
+		if not humanoid or not humanoid.Parent then
+			return
+		end
+
+		Shared.grantGrace(player, 2)
+		clampHumanoid(player, humanoid)
+
+		local props = { "WalkSpeed", "JumpPower", "JumpHeight", "HipHeight", "UseJumpPower" }
+		for _, prop in props do
+			humanoid:GetPropertyChangedSignal(prop):Connect(function()
+				if humanoid.Parent then
+					clampHumanoid(player, humanoid)
+				end
+			end)
+		end
+	end)
+end
+
+function HumanoidGuard.start(opts: {
+	maxWalkSpeed: number?,
+	maxJumpPower: number?,
+	maxJumpHeight: number?,
+	maxHipHeight: number?,
+	onViolation: ((Player, string) -> ())?,
+})
+	maxWalkSpeed = opts.maxWalkSpeed or maxWalkSpeed
+	maxJumpPower = opts.maxJumpPower or maxJumpPower
+	maxJumpHeight = opts.maxJumpHeight or maxJumpHeight
+	maxHipHeight = opts.maxHipHeight or maxHipHeight
+	onViolation = opts.onViolation
+
+	if started then
+		return
+	end
+	started = true
+
+	local function onPlayer(player: Player)
+		player.CharacterAdded:Connect(function(character)
+			bindCharacter(player, character)
+		end)
+		if player.Character then
+			bindCharacter(player, player.Character)
+		end
+	end
+
+	for _, player in Players:GetPlayers() do
+		onPlayer(player)
+	end
+	Players.PlayerAdded:Connect(onPlayer)
+
+	-- Backup poll (~10 Hz) — cheaper than every Heartbeat, catches bypasses
+	RunService.Heartbeat:Connect(function(dt)
+		pollAccumulator += dt
+		if pollAccumulator < 0.1 then
+			return
+		end
+		pollAccumulator = 0
+		for _, player in Players:GetPlayers() do
+			local humanoid = Shared.getHumanoid(player.Character)
+			if humanoid then
+				clampHumanoid(player, humanoid)
+			end
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(function(player)
+		lastViolation[player] = nil
+	end)
+end
+
+-- Temporarily raise WalkSpeed for powerups / sprint (server-authoritative)
+function HumanoidGuard.setWalkSpeedBudget(value: number)
+	maxWalkSpeed = value
+end
+
+return HumanoidGuard
+
+```
+
+`ServerScriptService/Encryptic/MovementGuard.lua`:
+
+```lua
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local Shared = require(script.Parent.Shared)
+
+local MovementGuard = {}
+local maxSpeed = 32
+local onViolation: ((Player, string) -> ())? = nil
+local lastViolation: { [Player]: number } = {}
+local violationCooldown = 1.25
+local started = false
+local sampleCount: { [Player]: number } = {} -- require sustained overspeed before strike
+
+local function clampHorizontal(root: BasePart, limit: number)
+	local velocity = root.AssemblyLinearVelocity
+	local flat = Vector3.new(velocity.X, 0, velocity.Z)
+	if flat.Magnitude <= limit then
+		return
+	end
+	local clamped = flat.Unit * limit
+	root.AssemblyLinearVelocity = Vector3.new(clamped.X, velocity.Y, clamped.Z)
+end
+
+function MovementGuard.start(opts: number | { maxSpeed: number?, onViolation: ((Player, string) -> ())? })
+	if typeof(opts) == "number" then
+		maxSpeed = opts
+	else
+		maxSpeed = opts.maxSpeed or maxSpeed
+		onViolation = opts.onViolation
+	end
+
+	if started then
+		return
+	end
+	started = true
+
+	RunService.Heartbeat:Connect(function()
+		for _, player in Players:GetPlayers() do
+			if Shared.shouldSkipPlayer(player) then
+				sampleCount[player] = 0
+				continue
+			end
+
+			local character = player.Character
+			local root = Shared.getRoot(character)
+			local humanoid = Shared.getHumanoid(character)
+			if not root or not humanoid then
+				continue
+			end
+
+			-- Seated / physics platforms can exceed walk limits legitimately
+			if humanoid.SeatPart or humanoid:GetState() == Enum.HumanoidStateType.Seated then
+				sampleCount[player] = 0
+				continue
+			end
+
+			local walkSpeed = humanoid.WalkSpeed
+			local limit = math.max(maxSpeed, walkSpeed * 2.25 + 10)
+			local speed = Shared.horizontalSpeed(root.AssemblyLinearVelocity)
+
+			if speed > limit then
+				clampHorizontal(root, limit)
+				sampleCount[player] = (sampleCount[player] or 0) + 1
+
+				-- Need a few consecutive frames so lag spikes don't false-flag
+				if sampleCount[player] >= 4 and onViolation and Shared.cooldownOk(lastViolation, player, violationCooldown) then
+					onViolation(player, string.format("Speed exploit speed=%.1f max=%.1f", speed, limit))
+					sampleCount[player] = 0
+				end
+			else
+				sampleCount[player] = 0
+			end
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(function(player)
+		lastViolation[player] = nil
+		sampleCount[player] = nil
+	end)
+end
+
+return MovementGuard
+
+```
+
+`ServerScriptService/Encryptic/NoclipGuard.lua`:
+
+```lua
+--[[
+	NoclipGuard — R15 limbs are often CanCollide=false by default.
+	We only enforce HumanoidRootPart collision, and detect geometry overlap.
+]]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+local Shared = require(script.Parent.Shared)
+
+local NoclipGuard = {}
+local onViolation: ((Player, string) -> ())? = nil
+local lastViolation: { [Player]: number } = {}
+local overlapStrikes: { [Player]: number } = {}
+local violationCooldown = 1.0
+local started = false
+local pollAccumulator = 0
+
+local OVERLAP_PARAMS = OverlapParams.new()
+OVERLAP_PARAMS.MaxParts = 12
+
+local function report(player: Player, reason: string)
+	if not onViolation or Shared.shouldSkipPlayer(player) then
+		return
+	end
+	if Shared.cooldownOk(lastViolation, player, violationCooldown) then
+		onViolation(player, reason)
+	end
+end
+
+local function isSolidWorldPart(part: BasePart, character: Model): boolean
+	if part:IsDescendantOf(character) then
+		return false
+	end
+	if not part.CanCollide then
+		return false
+	end
+	if part.Anchored == false and part:IsDescendantOf(Workspace) then
+		-- ignore other characters / unanchored debris loosely
+		local model = part:FindFirstAncestorOfClass("Model")
+		if model and model:FindFirstChildOfClass("Humanoid") then
+			return false
+		end
+	end
+	return true
+end
+
+local function insideGeometry(character: Model, root: BasePart): boolean
+	OVERLAP_PARAMS.FilterDescendantsInstances = { character }
+	OVERLAP_PARAMS.FilterType = Enum.RaycastFilterType.Exclude
+
+	-- Small inset box so standing on floors / walls doesn't false-flag
+	local size = Vector3.new(1.2, 3.2, 1.2)
+	local parts = Workspace:GetPartBoundsInBox(root.CFrame, size, OVERLAP_PARAMS)
+	for _, part in parts do
+		if part:IsA("BasePart") and isSolidWorldPart(part, character) then
+			return true
+		end
+	end
+	return false
+end
+
+function NoclipGuard.start(opts: { onViolation: ((Player, string) -> ())? })
+	onViolation = opts.onViolation
+
+	if started then
+		return
+	end
+	started = true
+
+	RunService.Heartbeat:Connect(function(dt)
+		pollAccumulator += dt
+		if pollAccumulator < 0.12 then
+			return
+		end
+		pollAccumulator = 0
+
+		for _, player in Players:GetPlayers() do
+			if Shared.shouldSkipPlayer(player) then
+				overlapStrikes[player] = 0
+				continue
+			end
+
+			local character = player.Character
+			local root = Shared.getRoot(character)
+			local humanoid = Shared.getHumanoid(character)
+			if not character or not root or not humanoid then
+				continue
+			end
+
+			if humanoid.SeatPart then
+				overlapStrikes[player] = 0
+				continue
+			end
+
+			-- Classic: disable HRP collision
+			if not root.CanCollide then
+				root.CanCollide = true
+				report(player, "Noclip exploit HumanoidRootPart.CanCollide=false")
+			end
+
+			-- Phase-through-walls: HRP overlapping solid geometry for several samples
+			if insideGeometry(character, root) then
+				overlapStrikes[player] = (overlapStrikes[player] or 0) + 1
+				if overlapStrikes[player] >= 5 then
+					report(player, "Noclip exploit inside geometry")
+					-- Soft eject upward/back so they don't stay stuck
+					root.CFrame = root.CFrame + Vector3.new(0, 3, 0)
+					root.AssemblyLinearVelocity = Vector3.zero
+					overlapStrikes[player] = 0
+				end
+			else
+				overlapStrikes[player] = 0
+			end
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(function(player)
+		lastViolation[player] = nil
+		overlapStrikes[player] = nil
+	end)
+end
+
+return NoclipGuard
+
+```
+
+`ServerScriptService/Encryptic/PhysicsGuard.lua`:
+
+```lua
+--[[
+	PhysicsGuard — detects client-injected movers / forces used for fly & speed.
+	Removes unauthorized BodyMovers / Constraint actuators on the character.
+]]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local Shared = require(script.Parent.Shared)
+
+local PhysicsGuard = {}
+local onViolation: ((Player, string) -> ())? = nil
+local lastViolation: { [Player]: number } = {}
+local violationCooldown = 1.0
+local started = false
+local pollAccumulator = 0
+
+-- Instance classes commonly abused by executors
+local FORBIDDEN_CLASSES = {
+	BodyVelocity = true,
+	BodyPosition = true,
+	BodyGyro = true,
+	BodyForce = true,
+	BodyThrust = true,
+	BodyAngularVelocity = true,
+	RocketPropulsion = true,
+}
+
+-- Constraints that can still be legitimate (vehicles); we allow Attribute "EncrypticTrusted"
+local SUSPICIOUS_CONSTRAINTS = {
+	LinearVelocity = true,
+	AlignPosition = true,
+	AlignOrientation = true,
+	VectorForce = true,
+	Torque = true,
+	AngularVelocity = true,
+}
+
+local function report(player: Player, reason: string)
+	if not onViolation or Shared.shouldSkipPlayer(player) then
+		return
+	end
+	if Shared.cooldownOk(lastViolation, player, violationCooldown) then
+		onViolation(player, reason)
+	end
+end
+
+local function isTrusted(inst: Instance): boolean
+	return inst:GetAttribute("EncrypticTrusted") == true
+		or (inst.Parent ~= nil and inst.Parent:GetAttribute("EncrypticTrusted") == true)
+end
+
+local function scrubCharacter(player: Player, character: Model)
+	for _, inst in character:GetDescendants() do
+		local className = inst.ClassName
+		if FORBIDDEN_CLASSES[className] and not isTrusted(inst) then
+			report(player, "Physics exploit " .. className)
+			inst:Destroy()
+		elseif SUSPICIOUS_CONSTRAINTS[className] and not isTrusted(inst) then
+			-- Only flag if attached to HumanoidRootPart (common fly inject)
+			local parent = inst.Parent
+			if parent and parent.Name == "HumanoidRootPart" then
+				report(player, "Physics constraint exploit " .. className)
+				inst:Destroy()
+			end
+		end
+	end
+end
+
+function PhysicsGuard.start(opts: { onViolation: ((Player, string) -> ())? })
+	onViolation = opts.onViolation
+
+	if started then
+		return
+	end
+	started = true
+
+	local function bind(player: Player, character: Model)
+		character.DescendantAdded:Connect(function(inst)
+			if Shared.shouldSkipPlayer(player) or isTrusted(inst) then
+				return
+			end
+			local className = inst.ClassName
+			if FORBIDDEN_CLASSES[className] then
+				report(player, "Physics exploit " .. className)
+				task.defer(function()
+					if inst.Parent then
+						inst:Destroy()
+					end
+				end)
+			elseif SUSPICIOUS_CONSTRAINTS[className] and inst.Parent and inst.Parent.Name == "HumanoidRootPart" then
+				report(player, "Physics constraint exploit " .. className)
+				task.defer(function()
+					if inst.Parent then
+						inst:Destroy()
+					end
+				end)
+			end
+		end)
+	end
+
+	local function onPlayer(player: Player)
+		player.CharacterAdded:Connect(function(character)
+			bind(player, character)
+		end)
+		if player.Character then
+			bind(player, player.Character)
+		end
+	end
+
+	for _, player in Players:GetPlayers() do
+		onPlayer(player)
+	end
+	Players.PlayerAdded:Connect(onPlayer)
+
+	RunService.Heartbeat:Connect(function(dt)
+		pollAccumulator += dt
+		if pollAccumulator < 0.2 then
+			return
+		end
+		pollAccumulator = 0
+
+		for _, player in Players:GetPlayers() do
+			if Shared.shouldSkipPlayer(player) then
+				continue
+			end
+			local character = player.Character
+			if character then
+				scrubCharacter(player, character)
+			end
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(function(player)
+		lastViolation[player] = nil
+	end)
+end
+
+-- Mark a mover/constraint as legitimate (vehicles, abilities)
+function PhysicsGuard.trust(instance: Instance)
+	instance:SetAttribute("EncrypticTrusted", true)
+end
+
+return PhysicsGuard
+
+```
+
+`ServerScriptService/Encryptic/RemoteGuard.lua`:
+
+```lua
+local Players = game:GetService("Players")
+
+local Shared = require(script.Parent.Shared)
+
+local RemoteGuard = {}
+local maxPerSecond = 40
+local counts: { [Player]: { number } } = {}
+local perRemote: { [Player]: { [string]: { number } } } = {}
+local maxPerRemote = 20
+local onViolation: ((Player, string) -> ())? = nil
+local started = false
+
+function RemoteGuard.start(opts: number | {
+	maxRemotePerSecond: number?,
+	maxPerRemotePerSecond: number?,
+	onViolation: ((Player, string) -> ())?,
+})
+	if typeof(opts) == "number" then
+		maxPerSecond = opts
+	else
+		maxPerSecond = opts.maxRemotePerSecond or maxPerSecond
+		maxPerRemote = opts.maxPerRemotePerSecond or maxPerRemote
+		onViolation = opts.onViolation
+	end
+
+	if started then
+		return
+	end
+	started = true
+
+	Players.PlayerRemoving:Connect(function(player)
+		counts[player] = nil
+		perRemote[player] = nil
+	end)
+end
+
+function RemoteGuard.track(player: Player, remoteName: string?): boolean
+	if Shared.isWhitelisted(player) then
+		return true
+	end
+
+	if not Shared.rateLimit(counts, player, 1, maxPerSecond) then
+		if onViolation then
+			onViolation(player, string.format("Remote spam count=%d max=%d", #(counts[player] or {}), maxPerSecond))
+		end
+		return false
+	end
+
+	if remoteName then
+		local map = perRemote[player]
+		if not map then
+			map = {}
+			perRemote[player] = map
+		end
+		local bucket = map[remoteName]
+		if not bucket then
+			bucket = {}
+			map[remoteName] = bucket
+		end
+		local now = Shared.now()
+		table.insert(bucket, now)
+		Shared.pruneOlderThan(bucket, now - 1)
+		if #bucket > maxPerRemote then
+			if onViolation then
+				onViolation(player, string.format("Remote spam remote=%s count=%d", remoteName, #bucket))
+			end
+			return false
+		end
+	end
+
+	return true
+end
+
+function RemoteGuard.wrapRemoteEvent(remote: RemoteEvent, handler: (Player, ...any) -> ())
+	remote.OnServerEvent:Connect(function(player, ...)
+		if not RemoteGuard.track(player, remote.Name) then
+			return
+		end
+		handler(player, ...)
+	end)
+end
+
+function RemoteGuard.wrapRemoteFunction(remote: RemoteFunction, handler: (Player, ...any) -> ...any)
+	remote.OnServerInvoke = function(player, ...)
+		if not RemoteGuard.track(player, remote.Name) then
+			return nil
+		end
+		return handler(player, ...)
+	end
+end
+
+return RemoteGuard
+
+```
+
+`ServerScriptService/Encryptic/Shared.lua`:
+
+```lua
+-- Shared helpers for Encryptic guards (grace windows, cleanup, rate limits)
+
+local Players = game:GetService("Players")
+
+local Shared = {}
+
+local graceUntil: { [Player]: number } = {}
+local trustedUntil: { [Player]: number } = {}
+local whitelist: { [number]: boolean } = {} -- UserId
+
+function Shared.now(): number
+	return os.clock()
+end
+
+function Shared.isWhitelisted(player: Player): boolean
+	return whitelist[player.UserId] == true
+end
+
+function Shared.setWhitelisted(userId: number, allowed: boolean)
+	if allowed then
+		whitelist[userId] = true
+	else
+		whitelist[userId] = nil
+	end
+end
+
+function Shared.grantGrace(player: Player, seconds: number?)
+	local untilTime = Shared.now() + (seconds or 2)
+	graceUntil[player] = math.max(graceUntil[player] or 0, untilTime)
+end
+
+function Shared.trustMovement(player: Player, seconds: number?)
+	local untilTime = Shared.now() + (seconds or 1.5)
+	trustedUntil[player] = math.max(trustedUntil[player] or 0, untilTime)
+	Shared.grantGrace(player, seconds or 1.5)
+end
+
+function Shared.inGrace(player: Player): boolean
+	if Shared.isWhitelisted(player) then
+		return true
+	end
+	local t = Shared.now()
+	return (graceUntil[player] or 0) > t or (trustedUntil[player] or 0) > t
+end
+
+function Shared.shouldSkipPlayer(player: Player): boolean
+	return not player.Parent or Shared.inGrace(player)
+end
+
+-- Sliding window rate limiter helper
+function Shared.pruneOlderThan(list: { number }, cutoff: number)
+	while #list > 0 and list[1] < cutoff do
+		table.remove(list, 1)
+	end
+end
+
+function Shared.rateLimit(
+	historyMap: { [Player]: { number } },
+	player: Player,
+	windowSeconds: number,
+	maxCount: number
+): boolean
+	local now = Shared.now()
+	local history = historyMap[player]
+	if not history then
+		history = {}
+		historyMap[player] = history
+	end
+	table.insert(history, now)
+	Shared.pruneOlderThan(history, now - windowSeconds)
+	return #history <= maxCount
+end
+
+function Shared.cooldownOk(
+	lastMap: { [Player]: number },
+	player: Player,
+	cooldown: number
+): boolean
+	local now = Shared.now()
+	if (now - (lastMap[player] or 0)) < cooldown then
+		return false
+	end
+	lastMap[player] = now
+	return true
+end
+
+function Shared.clearPlayer(player: Player)
+	graceUntil[player] = nil
+	trustedUntil[player] = nil
+end
+
+function Shared.bindCharacterGrace(seconds: number?)
+	local grace = seconds or 2.5
+	local function onPlayer(player: Player)
+		player.CharacterAdded:Connect(function()
+			Shared.grantGrace(player, grace)
+		end)
+		if player.Character then
+			Shared.grantGrace(player, grace)
+		end
+	end
+	for _, player in Players:GetPlayers() do
+		onPlayer(player)
+	end
+	Players.PlayerAdded:Connect(onPlayer)
+	Players.PlayerRemoving:Connect(Shared.clearPlayer)
+end
+
+function Shared.getRoot(character: Model?): BasePart?
+	if not character then
+		return nil
+	end
+	return character:FindFirstChild("HumanoidRootPart") :: BasePart?
+end
+
+function Shared.getHumanoid(character: Model?): Humanoid?
+	if not character then
+		return nil
+	end
+	return character:FindFirstChildOfClass("Humanoid")
+end
+
+function Shared.horizontalSpeed(velocity: Vector3): number
+	return Vector3.new(velocity.X, 0, velocity.Z).Magnitude
+end
+
+return Shared
+
+```
+
+`ServerScriptService/Encryptic/TeleportGuard.lua`:
+
+```lua
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local Shared = require(script.Parent.Shared)
+
+local TeleportGuard = {}
+local maxDelta = 80
+local lastPos: { [Player]: Vector3 } = {}
+local lastTime: { [Player]: number } = {}
+local lastChar: { [Player]: Model } = {}
+local lastViolation: { [Player]: number } = {}
+local violationCooldown = 1.0
+local onViolation: ((Player, string) -> ())? = nil
+local started = false
+
+local function clearPlayer(player: Player)
+	lastPos[player] = nil
+	lastTime[player] = nil
+	lastChar[player] = nil
+	lastViolation[player] = nil
+end
+
+function TeleportGuard.start(opts: { maxDelta: number?, onViolation: ((Player, string) -> ())? })
+	maxDelta = opts.maxDelta or maxDelta
+	onViolation = opts.onViolation
+
+	if started then
+		return
+	end
+	started = true
+
+	RunService.Heartbeat:Connect(function()
+		for _, player in Players:GetPlayers() do
+			local character = player.Character
+			local root = Shared.getRoot(character)
+			if not character or not root then
+				continue
+			end
+
+			-- New character / respawn: re-baseline without punishing
+			if lastChar[player] ~= character then
+				lastChar[player] = character
+				lastPos[player] = root.Position
+				lastTime[player] = Shared.now()
+				Shared.grantGrace(player, 2.5)
+				continue
+			end
+
+			if Shared.shouldSkipPlayer(player) then
+				lastPos[player] = root.Position
+				lastTime[player] = Shared.now()
+				continue
+			end
+
+			local humanoid = Shared.getHumanoid(character)
+			if humanoid and (humanoid.SeatPart or humanoid:GetState() == Enum.HumanoidStateType.Seated) then
+				lastPos[player] = root.Position
+				lastTime[player] = Shared.now()
+				continue
+			end
+
+			local now = Shared.now()
+			local prev = lastPos[player]
+			local prevT = lastTime[player]
+
+			if prev and prevT then
+				local dt = math.clamp(now - prevT, 1 / 120, 0.35)
+				local delta = (root.Position - prev).Magnitude
+				local walkSpeed = if humanoid then humanoid.WalkSpeed else 16
+				-- Distance budget: walk speed + jump/latency cushion
+				local allowed = math.max(maxDelta, walkSpeed * dt * 3.5 + 18)
+
+				if delta > allowed then
+					root.CFrame = CFrame.new(prev)
+					root.AssemblyLinearVelocity = Vector3.zero
+					if onViolation and Shared.cooldownOk(lastViolation, player, violationCooldown) then
+						onViolation(player, string.format("Teleport exploit delta=%.1f allowed=%.1f", delta, allowed))
+					end
+					-- Keep previous position as truth after soft-correct
+					lastTime[player] = now
+					continue
+				end
+			end
+
+			lastPos[player] = root.Position
+			lastTime[player] = now
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(clearPlayer)
+end
+
+-- Call before legitimate server teleports / cutscenes
+function TeleportGuard.allow(player: Player, seconds: number?)
+	Shared.trustMovement(player, seconds or 2)
+	local root = Shared.getRoot(player.Character)
+	if root then
+		lastPos[player] = root.Position
+		lastTime[player] = Shared.now()
+	end
+end
+
+return TeleportGuard
+
+```
+
+`ServerScriptService/Encryptic/ToolGuard.lua`:
+
+```lua
+local Players = game:GetService("Players")
+
+local Shared = require(script.Parent.Shared)
+
+local ToolGuard = {}
+local maxEquipPerSecond = 8
+local history: { [Player]: { number } } = {}
+local onViolation: ((Player, string) -> ())? = nil
+local started = false
+
+function ToolGuard.start(opts: { maxEquipPerSecond: number?, onViolation: ((Player, string) -> ())? })
+	maxEquipPerSecond = opts.maxEquipPerSecond or maxEquipPerSecond
+	onViolation = opts.onViolation
+
+	if started then
+		return
+	end
+	started = true
+
+	Players.PlayerRemoving:Connect(function(player)
+		history[player] = nil
+	end)
+end
+
+function ToolGuard.trackEquip(player: Player): boolean
+	if Shared.isWhitelisted(player) then
+		return true
+	end
+
+	if not Shared.rateLimit(history, player, 1, maxEquipPerSecond) then
+		if onViolation then
+			onViolation(player, "Tool equip spam")
+		end
+		return false
+	end
+
+	return true
+end
+
+return ToolGuard
+
+```
+
+`ServerScriptService/Encryptic/init.lua`:
+
+```lua
+-- Encryptic Anti-Cheat — Roblox server bootstrap
+-- Place folder in ServerScriptService/Encryptic
+
+local Shared = require(script.Parent.Shared)
+local BanManager = require(script.Parent.BanManager)
+local MovementGuard = require(script.Parent.MovementGuard)
+local TeleportGuard = require(script.Parent.TeleportGuard)
+local HumanoidGuard = require(script.Parent.HumanoidGuard)
+local FlyGuard = require(script.Parent.FlyGuard)
+local FireRateGuard = require(script.Parent.FireRateGuard)
+local RemoteGuard = require(script.Parent.RemoteGuard)
+local ExploitGuard = require(script.Parent.ExploitGuard)
+local ToolGuard = require(script.Parent.ToolGuard)
+local HitGuard = require(script.Parent.HitGuard)
+local NoclipGuard = require(script.Parent.NoclipGuard)
+local PhysicsGuard = require(script.Parent.PhysicsGuard)
+local HealthGuard = require(script.Parent.HealthGuard)
+
+local Encryptic = {}
+local started = false
+
+export type Config = {
+	maxSpeed: number?,
+	maxTeleportDelta: number?,
+	maxWalkSpeed: number?,
+	maxJumpPower: number?,
+	maxJumpHeight: number?,
+	maxHipHeight: number?,
+	maxFireRate: number?,
+	maxRemotePerSecond: number?,
+	maxPerRemotePerSecond: number?,
+	maxEquipPerSecond: number?,
+	maxHitDistance: number?,
+	requireHitLOS: boolean?,
+	maxAirTime: number?,
+	maxHealth: number?,
+	maxHealPerSecond: number?,
+	maxStrikes: number?,
+	strikeDecaySeconds: number?,
+	spawnGraceSeconds: number?,
+	enableFlyGuard: boolean?,
+	enableNoclipGuard: boolean?,
+	enableExploitGuard: boolean?,
+	enablePhysicsGuard: boolean?,
+	enableHealthGuard: boolean?,
+	onKick: ((Player, string) -> ())?,
+	onViolation: ((any) -> ())?,
+}
+
+local function report(guard: string, severity: number)
+	return function(player: Player, reason: string)
+		BanManager.record({
+			player = player,
+			guard = guard,
+			reason = reason,
+			severity = severity,
+		})
+	end
+end
+
+function Encryptic.start(config: Config?)
+	config = config or {}
+
+	if started then
+		warn("[Encryptic] start() called more than once — ignoring duplicate")
+		return Encryptic
+	end
+	started = true
+
+	Shared.bindCharacterGrace(config.spawnGraceSeconds or 2.5)
+
+	BanManager.configure({
+		maxStrikes = config.maxStrikes or 5,
+		decaySeconds = config.strikeDecaySeconds,
+		onKick = config.onKick,
+		onViolation = config.onViolation,
+	})
+
+	MovementGuard.start({
+		maxSpeed = config.maxSpeed or 48,
+		onViolation = report("MovementGuard", 1),
+	})
+
+	TeleportGuard.start({
+		maxDelta = config.maxTeleportDelta or 80,
+		onViolation = report("TeleportGuard", 2),
+	})
+
+	HumanoidGuard.start({
+		maxWalkSpeed = config.maxWalkSpeed or 24,
+		maxJumpPower = config.maxJumpPower or 60,
+		maxJumpHeight = config.maxJumpHeight or 12,
+		maxHipHeight = config.maxHipHeight or 8,
+		onViolation = report("HumanoidGuard", 1),
+	})
+
+	if config.enableFlyGuard ~= false then
+		FlyGuard.start({
+			maxAirTime = config.maxAirTime or 4,
+			onViolation = report("FlyGuard", 2),
+		})
+	end
+
+	if config.enableNoclipGuard ~= false then
+		NoclipGuard.start({
+			onViolation = report("NoclipGuard", 2),
+		})
+	end
+
+	if config.enablePhysicsGuard ~= false then
+		PhysicsGuard.start({
+			onViolation = report("PhysicsGuard", 2),
+		})
+	end
+
+	if config.enableHealthGuard ~= false then
+		HealthGuard.start({
+			maxHealth = config.maxHealth or 100,
+			maxHealPerSecond = config.maxHealPerSecond or 40,
+			onViolation = report("HealthGuard", 2),
+		})
+	end
+
+	FireRateGuard.start({
+		maxFireRate = config.maxFireRate or 12,
+		onViolation = report("FireRateGuard", 2),
+	})
+
+	RemoteGuard.start({
+		maxRemotePerSecond = config.maxRemotePerSecond or 40,
+		maxPerRemotePerSecond = config.maxPerRemotePerSecond or 20,
+		onViolation = report("RemoteGuard", 1),
+	})
+
+	ToolGuard.start({
+		maxEquipPerSecond = config.maxEquipPerSecond or 8,
+		onViolation = report("ToolGuard", 1),
+	})
+
+	HitGuard.start({
+		maxHitDistance = config.maxHitDistance or 20,
+		requireLineOfSight = if config.requireHitLOS ~= nil then config.requireHitLOS else true,
+		onViolation = report("HitGuard", 2),
+	})
+
+	if config.enableExploitGuard ~= false then
+		ExploitGuard.start({
+			onViolation = report("ExploitGuard", 2),
+		})
+	end
+
+	print("[Encryptic] Guards active — movement, teleport, humanoid, fly, noclip, physics, health, combat, remotes")
+	return Encryptic
+end
+
+-- Trust helpers for legitimate gameplay systems
+function Encryptic.allowTeleport(player: Player, seconds: number?)
+	TeleportGuard.allow(player, seconds)
+end
+
+function Encryptic.grantGrace(player: Player, seconds: number?)
+	Shared.grantGrace(player, seconds or 2)
+end
+
+function Encryptic.whitelist(userId: number, allowed: boolean?)
+	BanManager.whitelist(userId, allowed)
+end
+
+-- Re-export guard APIs for game integration
+Encryptic.Shared = Shared
+Encryptic.FireRateGuard = FireRateGuard
+Encryptic.RemoteGuard = RemoteGuard
+Encryptic.ToolGuard = ToolGuard
+Encryptic.HitGuard = HitGuard
+Encryptic.ExploitGuard = ExploitGuard
+Encryptic.BanManager = BanManager
+Encryptic.TeleportGuard = TeleportGuard
+Encryptic.HumanoidGuard = HumanoidGuard
+Encryptic.PhysicsGuard = PhysicsGuard
+Encryptic.HealthGuard = HealthGuard
+Encryptic.MovementGuard = MovementGuard
+Encryptic.FlyGuard = FlyGuard
+Encryptic.NoclipGuard = NoclipGuard
+
+return Encryptic
+
+```
+
+`demo/DEMO_SETUP.md`:
+
+```md
+# Encryptic Roblox Demo — Studio Setup
+
+Follow these steps to see the anti-cheat working in Roblox Studio.
+
+## Option A — Import rbxmx (fastest)
+
+1. Import **`demo/EncrypticDemo.rbxmx`** (File → Import or drag into Explorer).
+2. Move **`Encryptic`** + **`DemoGame`** → **ServerScriptService**
+3. Move **`DemoClient`** → **StarterPlayer → StarterPlayerScripts**
+4. Press **Play**
+
+## Option B — Copy files manually
+
+### ServerScriptService
+
+1. Copy **`ServerScriptService/Encryptic/`** → **ServerScriptService** in Studio
+2. Copy **`demo/ServerScriptService/DemoGame.server.lua`** → **ServerScriptService**
+
+```
+ServerScriptService
+├── Encryptic          (Folder)
+│   ├── init           (ModuleScript)
+│   ├── Shared
+│   ├── BanManager
+│   ├── PhysicsGuard
+│   ├── HealthGuard
+│   └── ...
+└── DemoGame           (Script)
+```
+
+> `init.lua` must be a **ModuleScript** named `init`. Other guards are **ModuleScripts** with matching names.
+
+### StarterPlayer
+
+Copy **`demo/StarterPlayer/StarterPlayerScripts/DemoClient.client.lua`** → **StarterPlayerScripts**
+
+## Enable Output
+
+**View → Output** — use the **Server** tab for `[Encryptic]` messages.
+
+## Play test
+
+Press **Play** (F5). Click **AC** (top-right) or **RightControl** for the test panel.
+
+Expected Output:
+
+```
+[Encryptic] Guards active — movement, teleport, humanoid, fly, noclip, physics, health, combat, remotes
+[Demo] Encryptic started...
+[Demo Client] GUI ready — click AC (top-right)...
+```
+
+## Tests
+
+| Action | Guard |
+|--------|-------|
+| **Fly** toggle | FlyGuard |
+| **BodyVelocity Fly** toggle | PhysicsGuard |
+| **Noclip** toggle | NoclipGuard |
+| **Speed** toggle | HumanoidGuard |
+| **Godmode HP** toggle | HealthGuard |
+| **Teleport +200** button | TeleportGuard |
+| **Spam Coin Remote** | RemoteGuard |
+| **Rapid Fire** | FireRateGuard |
+
+Demo kicks at **3 strikes**. Strikes decay after idle time.
+
+## Wire into your game
+
+```lua
+local Encryptic = require(game.ServerScriptService.Encryptic.init)
+Encryptic.start({ maxStrikes = 5 })
+
+Encryptic.RemoteGuard.wrapRemoteEvent(game.ReplicatedStorage.Shoot, function(player, ...)
+	if not Encryptic.FireRateGuard.recordShot(player) then return end
+	-- your damage logic
+end)
+
+-- Legitimate teleport
+Encryptic.allowTeleport(player, 2)
+```
+
+See [README.md](../README.md) for the full guard list.
+
+```
+
+`demo/EncrypticDemo.rbxmx`:
+
+```rbxmx
+<?xml version="1.0" encoding="utf-8"?>
+<roblox version="4">
+  <Item class="Model" referent="RBX1">
+    <Properties>
+      <string name="Name">EncrypticDemo</string>
+    </Properties>
+    <Item class="Folder" referent="RBX2">
+      <Properties>
+        <string name="Name">Encryptic</string>
+      </Properties>
+      <Item class="ModuleScript" referent="RBX3">
+        <Properties>
+          <string name="Name">init</string>
+          <ProtectedString name="Source"><![CDATA[-- Encryptic Anti-Cheat — Roblox server bootstrap
+-- Place folder in ServerScriptService/Encryptic
+
+local Shared = require(script.Parent.Shared)
+local BanManager = require(script.Parent.BanManager)
+local MovementGuard = require(script.Parent.MovementGuard)
+local TeleportGuard = require(script.Parent.TeleportGuard)
+local HumanoidGuard = require(script.Parent.HumanoidGuard)
+local FlyGuard = require(script.Parent.FlyGuard)
+local FireRateGuard = require(script.Parent.FireRateGuard)
+local RemoteGuard = require(script.Parent.RemoteGuard)
+local ExploitGuard = require(script.Parent.ExploitGuard)
+local ToolGuard = require(script.Parent.ToolGuard)
+local HitGuard = require(script.Parent.HitGuard)
+local NoclipGuard = require(script.Parent.NoclipGuard)
+local PhysicsGuard = require(script.Parent.PhysicsGuard)
+local HealthGuard = require(script.Parent.HealthGuard)
+
+local Encryptic = {}
+local started = false
+
+export type Config = {
+	maxSpeed: number?,
+	maxTeleportDelta: number?,
+	maxWalkSpeed: number?,
+	maxJumpPower: number?,
+	maxJumpHeight: number?,
+	maxHipHeight: number?,
+	maxFireRate: number?,
+	maxRemotePerSecond: number?,
+	maxPerRemotePerSecond: number?,
+	maxEquipPerSecond: number?,
+	maxHitDistance: number?,
+	requireHitLOS: boolean?,
+	maxAirTime: number?,
+	maxHealth: number?,
+	maxHealPerSecond: number?,
+	maxStrikes: number?,
+	strikeDecaySeconds: number?,
+	spawnGraceSeconds: number?,
+	enableFlyGuard: boolean?,
+	enableNoclipGuard: boolean?,
+	enableExploitGuard: boolean?,
+	enablePhysicsGuard: boolean?,
+	enableHealthGuard: boolean?,
+	onKick: ((Player, string) -> ())?,
+	onViolation: ((any) -> ())?,
+}
+
+local function report(guard: string, severity: number)
+	return function(player: Player, reason: string)
+		BanManager.record({
+			player = player,
+			guard = guard,
+			reason = reason,
+			severity = severity,
+		})
+	end
+end
+
+function Encryptic.start(config: Config?)
+	config = config or {}
+
+	if started then
+		warn("[Encryptic] start() called more than once — ignoring duplicate")
+		return Encryptic
+	end
+	started = true
+
+	Shared.bindCharacterGrace(config.spawnGraceSeconds or 2.5)
+
+	BanManager.configure({
+		maxStrikes = config.maxStrikes or 5,
+		decaySeconds = config.strikeDecaySeconds,
+		onKick = config.onKick,
+		onViolation = config.onViolation,
+	})
+
+	MovementGuard.start({
+		maxSpeed = config.maxSpeed or 48,
+		onViolation = report("MovementGuard", 1),
+	})
+
+	TeleportGuard.start({
+		maxDelta = config.maxTeleportDelta or 80,
+		onViolation = report("TeleportGuard", 2),
+	})
+
+	HumanoidGuard.start({
+		maxWalkSpeed = config.maxWalkSpeed or 24,
+		maxJumpPower = config.maxJumpPower or 60,
+		maxJumpHeight = config.maxJumpHeight or 12,
+		maxHipHeight = config.maxHipHeight or 8,
+		onViolation = report("HumanoidGuard", 1),
+	})
+
+	if config.enableFlyGuard ~= false then
+		FlyGuard.start({
+			maxAirTime = config.maxAirTime or 4,
+			onViolation = report("FlyGuard", 2),
+		})
+	end
+
+	if config.enableNoclipGuard ~= false then
+		NoclipGuard.start({
+			onViolation = report("NoclipGuard", 2),
+		})
+	end
+
+	if config.enablePhysicsGuard ~= false then
+		PhysicsGuard.start({
+			onViolation = report("PhysicsGuard", 2),
+		})
+	end
+
+	if config.enableHealthGuard ~= false then
+		HealthGuard.start({
+			maxHealth = config.maxHealth or 100,
+			maxHealPerSecond = config.maxHealPerSecond or 40,
+			onViolation = report("HealthGuard", 2),
+		})
+	end
+
+	FireRateGuard.start({
+		maxFireRate = config.maxFireRate or 12,
+		onViolation = report("FireRateGuard", 2),
+	})
+
+	RemoteGuard.start({
+		maxRemotePerSecond = config.maxRemotePerSecond or 40,
+		maxPerRemotePerSecond = config.maxPerRemotePerSecond or 20,
+		onViolation = report("RemoteGuard", 1),
+	})
+
+	ToolGuard.start({
+		maxEquipPerSecond = config.maxEquipPerSecond or 8,
+		onViolation = report("ToolGuard", 1),
+	})
+
+	HitGuard.start({
+		maxHitDistance = config.maxHitDistance or 20,
+		requireLineOfSight = if config.requireHitLOS ~= nil then config.requireHitLOS else true,
+		onViolation = report("HitGuard", 2),
+	})
+
+	if config.enableExploitGuard ~= false then
+		ExploitGuard.start({
+			onViolation = report("ExploitGuard", 2),
+		})
+	end
+
+	print("[Encryptic] Guards active — movement, teleport, humanoid, fly, noclip, physics, health, combat, remotes")
+	return Encryptic
+end
+
+-- Trust helpers for legitimate gameplay systems
+function Encryptic.allowTeleport(player: Player, seconds: number?)
+	TeleportGuard.allow(player, seconds)
+end
+
+function Encryptic.grantGrace(player: Player, seconds: number?)
+	Shared.grantGrace(player, seconds or 2)
+end
+
+function Encryptic.whitelist(userId: number, allowed: boolean?)
+	BanManager.whitelist(userId, allowed)
+end
+
+-- Re-export guard APIs for game integration
+Encryptic.Shared = Shared
+Encryptic.FireRateGuard = FireRateGuard
+Encryptic.RemoteGuard = RemoteGuard
+Encryptic.ToolGuard = ToolGuard
+Encryptic.HitGuard = HitGuard
+Encryptic.ExploitGuard = ExploitGuard
+Encryptic.BanManager = BanManager
+Encryptic.TeleportGuard = TeleportGuard
+Encryptic.HumanoidGuard = HumanoidGuard
+Encryptic.PhysicsGuard = PhysicsGuard
+Encryptic.HealthGuard = HealthGuard
+Encryptic.MovementGuard = MovementGuard
+Encryptic.FlyGuard = FlyGuard
+Encryptic.NoclipGuard = NoclipGuard
+
+return Encryptic
+]]></ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX4">
+        <Properties>
+          <string name="Name">Shared</string>
+          <ProtectedString name="Source"><![CDATA[-- Shared helpers for Encryptic guards (grace windows, cleanup, rate limits)
+
+local Players = game:GetService("Players")
+
+local Shared = {}
+
+local graceUntil: { [Player]: number } = {}
+local trustedUntil: { [Player]: number } = {}
+local whitelist: { [number]: boolean } = {} -- UserId
+
+function Shared.now(): number
+	return os.clock()
+end
+
+function Shared.isWhitelisted(player: Player): boolean
+	return whitelist[player.UserId] == true
+end
+
+function Shared.setWhitelisted(userId: number, allowed: boolean)
+	if allowed then
+		whitelist[userId] = true
+	else
+		whitelist[userId] = nil
+	end
+end
+
+function Shared.grantGrace(player: Player, seconds: number?)
+	local untilTime = Shared.now() + (seconds or 2)
+	graceUntil[player] = math.max(graceUntil[player] or 0, untilTime)
+end
+
+function Shared.trustMovement(player: Player, seconds: number?)
+	local untilTime = Shared.now() + (seconds or 1.5)
+	trustedUntil[player] = math.max(trustedUntil[player] or 0, untilTime)
+	Shared.grantGrace(player, seconds or 1.5)
+end
+
+function Shared.inGrace(player: Player): boolean
+	if Shared.isWhitelisted(player) then
+		return true
+	end
+	local t = Shared.now()
+	return (graceUntil[player] or 0) > t or (trustedUntil[player] or 0) > t
+end
+
+function Shared.shouldSkipPlayer(player: Player): boolean
+	return not player.Parent or Shared.inGrace(player)
+end
+
+-- Sliding window rate limiter helper
+function Shared.pruneOlderThan(list: { number }, cutoff: number)
+	while #list > 0 and list[1] < cutoff do
+		table.remove(list, 1)
+	end
+end
+
+function Shared.rateLimit(
+	historyMap: { [Player]: { number } },
+	player: Player,
+	windowSeconds: number,
+	maxCount: number
+): boolean
+	local now = Shared.now()
+	local history = historyMap[player]
+	if not history then
+		history = {}
+		historyMap[player] = history
+	end
+	table.insert(history, now)
+	Shared.pruneOlderThan(history, now - windowSeconds)
+	return #history <= maxCount
+end
+
+function Shared.cooldownOk(
+	lastMap: { [Player]: number },
+	player: Player,
+	cooldown: number
+): boolean
+	local now = Shared.now()
+	if (now - (lastMap[player] or 0)) < cooldown then
+		return false
+	end
+	lastMap[player] = now
+	return true
+end
+
+function Shared.clearPlayer(player: Player)
+	graceUntil[player] = nil
+	trustedUntil[player] = nil
+end
+
+function Shared.bindCharacterGrace(seconds: number?)
+	local grace = seconds or 2.5
+	local function onPlayer(player: Player)
+		player.CharacterAdded:Connect(function()
+			Shared.grantGrace(player, grace)
+		end)
+		if player.Character then
+			Shared.grantGrace(player, grace)
+		end
+	end
+	for _, player in Players:GetPlayers() do
+		onPlayer(player)
+	end
+	Players.PlayerAdded:Connect(onPlayer)
+	Players.PlayerRemoving:Connect(Shared.clearPlayer)
+end
+
+function Shared.getRoot(character: Model?): BasePart?
+	if not character then
+		return nil
+	end
+	return character:FindFirstChild("HumanoidRootPart") :: BasePart?
+end
+
+function Shared.getHumanoid(character: Model?): Humanoid?
+	if not character then
+		return nil
+	end
+	return character:FindFirstChildOfClass("Humanoid")
+end
+
+function Shared.horizontalSpeed(velocity: Vector3): number
+	return Vector3.new(velocity.X, 0, velocity.Z).Magnitude
+end
+
+return Shared
+]]></ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX5">
+        <Properties>
+          <string name="Name">BanManager</string>
+          <ProtectedString name="Source"><![CDATA[-- Central violation tracking, strikes, kick/ban with decay + whitelist
+
+local Players = game:GetService("Players")
+
+local Shared = require(script.Parent.Shared)
+
+local BanManager = {}
+BanManager._strikes = {} :: { [Player]: { [string]: number } }
+BanManager._totalStrikes = {} :: { [Player]: number }
+BanManager._lastStrikeAt = {} :: { [Player]: number }
+
+export type ViolationAction = "warn" | "kick" | "ignored"
+export type ViolationInfo = {
+	player: Player,
+	guard: string,
+	reason: string,
+	severity: number,
+}
+
+local DEFAULT_MAX_STRIKES = 5
+local DEFAULT_DECAY_SECONDS = 60
+local maxStrikes = DEFAULT_MAX_STRIKES
+local decaySeconds = DEFAULT_DECAY_SECONDS
+local onViolation: ((ViolationInfo) -> ())? = nil
+local onKick: ((Player, string) -> ())? = nil
+local kicked: { [Player]: boolean } = {}
+local started = false
+
+local function decayStrikes(player: Player)
+	if decaySeconds <= 0 then
+		return
+	end
+	local last = BanManager._lastStrikeAt[player]
+	local total = BanManager._totalStrikes[player]
+	if not last or not total or total <= 0 then
+		return
+	end
+	local elapsed = Shared.now() - last
+	if elapsed < decaySeconds then
+		return
+	end
+	-- Drop one strike point per decay window of inactivity
+	local steps = math.floor(elapsed / decaySeconds)
+	local nextTotal = math.max(0, total - steps)
+	BanManager._totalStrikes[player] = nextTotal
+	BanManager._lastStrikeAt[player] = Shared.now() - (elapsed % decaySeconds)
+	if nextTotal == 0 then
+		BanManager._strikes[player] = nil
+	end
+end
+
+function BanManager.configure(opts: {
+	maxStrikes: number?,
+	decaySeconds: number?,
+	onViolation: ((ViolationInfo) -> ())?,
+	onKick: ((Player, string) -> ())?,
+})
+	maxStrikes = opts.maxStrikes or DEFAULT_MAX_STRIKES
+	decaySeconds = if opts.decaySeconds ~= nil then opts.decaySeconds else DEFAULT_DECAY_SECONDS
+	onViolation = opts.onViolation
+	onKick = opts.onKick
+end
+
+function BanManager.record(violation: ViolationInfo): ViolationAction
+	local player = violation.player
+	if not player or not player.Parent or kicked[player] then
+		return "ignored"
+	end
+	if Shared.isWhitelisted(player) then
+		return "ignored"
+	end
+
+	decayStrikes(player)
+
+	local guardStrikes = BanManager._strikes[player]
+	if not guardStrikes then
+		guardStrikes = {}
+		BanManager._strikes[player] = guardStrikes
+	end
+
+	local severity = math.max(1, math.floor(violation.severity or 1))
+	guardStrikes[violation.guard] = (guardStrikes[violation.guard] or 0) + severity
+	BanManager._totalStrikes[player] = (BanManager._totalStrikes[player] or 0) + severity
+	BanManager._lastStrikeAt[player] = Shared.now()
+
+	warn(string.format(
+		"[Encryptic] %s | %s | %s | strikes=%d/%d",
+		violation.guard,
+		player.Name,
+		violation.reason,
+		BanManager._totalStrikes[player],
+		maxStrikes
+	))
+
+	if onViolation then
+		onViolation(violation)
+	end
+
+	local total = BanManager._totalStrikes[player]
+	if total >= maxStrikes then
+		kicked[player] = true
+		if onKick then
+			onKick(player, violation.reason)
+		else
+			player:Kick("[Encryptic] " .. violation.reason)
+		end
+		return "kick"
+	end
+
+	return "warn"
+end
+
+function BanManager.getStrikes(player: Player): number
+	decayStrikes(player)
+	return BanManager._totalStrikes[player] or 0
+end
+
+function BanManager.getGuardStrikes(player: Player, guard: string): number
+	local map = BanManager._strikes[player]
+	return if map then (map[guard] or 0) else 0
+end
+
+function BanManager.reset(player: Player)
+	BanManager._strikes[player] = nil
+	BanManager._totalStrikes[player] = nil
+	BanManager._lastStrikeAt[player] = nil
+	kicked[player] = nil
+end
+
+function BanManager.whitelist(userId: number, allowed: boolean?)
+	Shared.setWhitelisted(userId, if allowed == nil then true else allowed)
+end
+
+function BanManager.isWhitelisted(player: Player): boolean
+	return Shared.isWhitelisted(player)
+end
+
+if not started then
+	started = true
+	Players.PlayerRemoving:Connect(function(player)
+		BanManager.reset(player)
+	end)
+end
+
+return BanManager
+]]></ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX6">
+        <Properties>
+          <string name="Name">MovementGuard</string>
+          <ProtectedString name="Source"><![CDATA[local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local Shared = require(script.Parent.Shared)
+
+local MovementGuard = {}
+local maxSpeed = 32
+local onViolation: ((Player, string) -> ())? = nil
+local lastViolation: { [Player]: number } = {}
+local violationCooldown = 1.25
+local started = false
+local sampleCount: { [Player]: number } = {} -- require sustained overspeed before strike
+
+local function clampHorizontal(root: BasePart, limit: number)
+	local velocity = root.AssemblyLinearVelocity
+	local flat = Vector3.new(velocity.X, 0, velocity.Z)
+	if flat.Magnitude <= limit then
+		return
+	end
+	local clamped = flat.Unit * limit
+	root.AssemblyLinearVelocity = Vector3.new(clamped.X, velocity.Y, clamped.Z)
+end
+
+function MovementGuard.start(opts: number | { maxSpeed: number?, onViolation: ((Player, string) -> ())? })
+	if typeof(opts) == "number" then
+		maxSpeed = opts
+	else
+		maxSpeed = opts.maxSpeed or maxSpeed
+		onViolation = opts.onViolation
+	end
+
+	if started then
+		return
+	end
+	started = true
+
+	RunService.Heartbeat:Connect(function()
+		for _, player in Players:GetPlayers() do
+			if Shared.shouldSkipPlayer(player) then
+				sampleCount[player] = 0
+				continue
+			end
+
+			local character = player.Character
+			local root = Shared.getRoot(character)
+			local humanoid = Shared.getHumanoid(character)
+			if not root or not humanoid then
+				continue
+			end
+
+			-- Seated / physics platforms can exceed walk limits legitimately
+			if humanoid.SeatPart or humanoid:GetState() == Enum.HumanoidStateType.Seated then
+				sampleCount[player] = 0
+				continue
+			end
+
+			local walkSpeed = humanoid.WalkSpeed
+			local limit = math.max(maxSpeed, walkSpeed * 2.25 + 10)
+			local speed = Shared.horizontalSpeed(root.AssemblyLinearVelocity)
+
+			if speed > limit then
+				clampHorizontal(root, limit)
+				sampleCount[player] = (sampleCount[player] or 0) + 1
+
+				-- Need a few consecutive frames so lag spikes don't false-flag
+				if sampleCount[player] >= 4 and onViolation and Shared.cooldownOk(lastViolation, player, violationCooldown) then
+					onViolation(player, string.format("Speed exploit speed=%.1f max=%.1f", speed, limit))
+					sampleCount[player] = 0
+				end
+			else
+				sampleCount[player] = 0
+			end
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(function(player)
+		lastViolation[player] = nil
+		sampleCount[player] = nil
+	end)
+end
+
+return MovementGuard
+]]></ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX7">
+        <Properties>
+          <string name="Name">TeleportGuard</string>
+          <ProtectedString name="Source"><![CDATA[local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local Shared = require(script.Parent.Shared)
+
+local TeleportGuard = {}
+local maxDelta = 80
+local lastPos: { [Player]: Vector3 } = {}
+local lastTime: { [Player]: number } = {}
+local lastChar: { [Player]: Model } = {}
+local lastViolation: { [Player]: number } = {}
+local violationCooldown = 1.0
+local onViolation: ((Player, string) -> ())? = nil
+local started = false
+
+local function clearPlayer(player: Player)
+	lastPos[player] = nil
+	lastTime[player] = nil
+	lastChar[player] = nil
+	lastViolation[player] = nil
+end
+
+function TeleportGuard.start(opts: { maxDelta: number?, onViolation: ((Player, string) -> ())? })
+	maxDelta = opts.maxDelta or maxDelta
+	onViolation = opts.onViolation
+
+	if started then
+		return
+	end
+	started = true
+
+	RunService.Heartbeat:Connect(function()
+		for _, player in Players:GetPlayers() do
+			local character = player.Character
+			local root = Shared.getRoot(character)
+			if not character or not root then
+				continue
+			end
+
+			-- New character / respawn: re-baseline without punishing
+			if lastChar[player] ~= character then
+				lastChar[player] = character
+				lastPos[player] = root.Position
+				lastTime[player] = Shared.now()
+				Shared.grantGrace(player, 2.5)
+				continue
+			end
+
+			if Shared.shouldSkipPlayer(player) then
+				lastPos[player] = root.Position
+				lastTime[player] = Shared.now()
+				continue
+			end
+
+			local humanoid = Shared.getHumanoid(character)
+			if humanoid and (humanoid.SeatPart or humanoid:GetState() == Enum.HumanoidStateType.Seated) then
+				lastPos[player] = root.Position
+				lastTime[player] = Shared.now()
+				continue
+			end
+
+			local now = Shared.now()
+			local prev = lastPos[player]
+			local prevT = lastTime[player]
+
+			if prev and prevT then
+				local dt = math.clamp(now - prevT, 1 / 120, 0.35)
+				local delta = (root.Position - prev).Magnitude
+				local walkSpeed = if humanoid then humanoid.WalkSpeed else 16
+				-- Distance budget: walk speed + jump/latency cushion
+				local allowed = math.max(maxDelta, walkSpeed * dt * 3.5 + 18)
+
+				if delta > allowed then
+					root.CFrame = CFrame.new(prev)
+					root.AssemblyLinearVelocity = Vector3.zero
+					if onViolation and Shared.cooldownOk(lastViolation, player, violationCooldown) then
+						onViolation(player, string.format("Teleport exploit delta=%.1f allowed=%.1f", delta, allowed))
+					end
+					-- Keep previous position as truth after soft-correct
+					lastTime[player] = now
+					continue
+				end
+			end
+
+			lastPos[player] = root.Position
+			lastTime[player] = now
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(clearPlayer)
+end
+
+-- Call before legitimate server teleports / cutscenes
+function TeleportGuard.allow(player: Player, seconds: number?)
+	Shared.trustMovement(player, seconds or 2)
+	local root = Shared.getRoot(player.Character)
+	if root then
+		lastPos[player] = root.Position
+		lastTime[player] = Shared.now()
+	end
+end
+
+return TeleportGuard
+]]></ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX8">
+        <Properties>
+          <string name="Name">HumanoidGuard</string>
+          <ProtectedString name="Source"><![CDATA[local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local Shared = require(script.Parent.Shared)
+
+local HumanoidGuard = {}
+local maxWalkSpeed = 24
+local maxJumpPower = 60
+local maxJumpHeight = 12
+local maxHipHeight = 8
+local onViolation: ((Player, string) -> ())? = nil
+local lastViolation: { [Player]: number } = {}
+local violationCooldown = 1.0
+local started = false
+local pollAccumulator = 0
+
+local function report(player: Player, reason: string)
+	if not onViolation then
+		return
+	end
+	if Shared.shouldSkipPlayer(player) then
+		return
+	end
+	if not Shared.cooldownOk(lastViolation, player, violationCooldown) then
+		return
+	end
+	onViolation(player, reason)
+end
+
+local function clampHumanoid(player: Player, humanoid: Humanoid)
+	if Shared.shouldSkipPlayer(player) then
+		return
+	end
+
+	if humanoid.WalkSpeed > maxWalkSpeed + 0.05 then
+		report(player, string.format("WalkSpeed tamper: %.1f", humanoid.WalkSpeed))
+		humanoid.WalkSpeed = maxWalkSpeed
+	end
+
+	if humanoid.UseJumpPower then
+		if humanoid.JumpPower > maxJumpPower + 0.05 then
+			report(player, string.format("JumpPower tamper: %.1f", humanoid.JumpPower))
+			humanoid.JumpPower = maxJumpPower
+		end
+	elseif humanoid.JumpHeight > maxJumpHeight + 0.05 then
+		report(player, string.format("JumpHeight tamper: %.1f", humanoid.JumpHeight))
+		humanoid.JumpHeight = maxJumpHeight
+	end
+
+	if humanoid.HipHeight > maxHipHeight + 0.05 then
+		report(player, string.format("HipHeight tamper: %.1f", humanoid.HipHeight))
+		humanoid.HipHeight = maxHipHeight
+	end
+end
+
+local function bindCharacter(player: Player, character: Model)
+	task.spawn(function()
+		local humanoid = character:WaitForChild("Humanoid", 5) :: Humanoid?
+		if not humanoid or not humanoid.Parent then
+			return
+		end
+
+		Shared.grantGrace(player, 2)
+		clampHumanoid(player, humanoid)
+
+		local props = { "WalkSpeed", "JumpPower", "JumpHeight", "HipHeight", "UseJumpPower" }
+		for _, prop in props do
+			humanoid:GetPropertyChangedSignal(prop):Connect(function()
+				if humanoid.Parent then
+					clampHumanoid(player, humanoid)
+				end
+			end)
+		end
+	end)
+end
+
+function HumanoidGuard.start(opts: {
+	maxWalkSpeed: number?,
+	maxJumpPower: number?,
+	maxJumpHeight: number?,
+	maxHipHeight: number?,
+	onViolation: ((Player, string) -> ())?,
+})
+	maxWalkSpeed = opts.maxWalkSpeed or maxWalkSpeed
+	maxJumpPower = opts.maxJumpPower or maxJumpPower
+	maxJumpHeight = opts.maxJumpHeight or maxJumpHeight
+	maxHipHeight = opts.maxHipHeight or maxHipHeight
+	onViolation = opts.onViolation
+
+	if started then
+		return
+	end
+	started = true
+
+	local function onPlayer(player: Player)
+		player.CharacterAdded:Connect(function(character)
+			bindCharacter(player, character)
+		end)
+		if player.Character then
+			bindCharacter(player, player.Character)
+		end
+	end
+
+	for _, player in Players:GetPlayers() do
+		onPlayer(player)
+	end
+	Players.PlayerAdded:Connect(onPlayer)
+
+	-- Backup poll (~10 Hz) — cheaper than every Heartbeat, catches bypasses
+	RunService.Heartbeat:Connect(function(dt)
+		pollAccumulator += dt
+		if pollAccumulator < 0.1 then
+			return
+		end
+		pollAccumulator = 0
+		for _, player in Players:GetPlayers() do
+			local humanoid = Shared.getHumanoid(player.Character)
+			if humanoid then
+				clampHumanoid(player, humanoid)
+			end
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(function(player)
+		lastViolation[player] = nil
+	end)
+end
+
+-- Temporarily raise WalkSpeed for powerups / sprint (server-authoritative)
+function HumanoidGuard.setWalkSpeedBudget(value: number)
+	maxWalkSpeed = value
+end
+
+return HumanoidGuard
+]]></ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX9">
+        <Properties>
+          <string name="Name">FlyGuard</string>
+          <ProtectedString name="Source"><![CDATA[local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+local Shared = require(script.Parent.Shared)
+
+local FlyGuard = {}
+local maxAirTime = 4
+local airTime: { [Player]: number } = {}
+local lastViolation: { [Player]: number } = {}
+local violationCooldown = 1.0
+local onViolation: ((Player, string) -> ())? = nil
+local started = false
+
+-- States where mid-air is expected; we still watch for hover within these
+local CLIMB_OR_SWIM = {
+	[Enum.HumanoidStateType.Climbing] = true,
+	[Enum.HumanoidStateType.Swimming] = true,
+}
+
+local function report(player: Player, reason: string)
+	if not onViolation or Shared.shouldSkipPlayer(player) then
+		return
+	end
+	if Shared.cooldownOk(lastViolation, player, violationCooldown) then
+		onViolation(player, reason)
+	end
+end
+
+local function isGrounded(character: Model, root: BasePart): boolean
+	local params = RaycastParams.new()
+	params.FilterDescendantsInstances = { character }
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.IgnoreWater = false
+	-- Slightly longer ray + slight forward sample reduces edge false positives
+	local down = Workspace:Raycast(root.Position, Vector3.new(0, -5.5, 0), params)
+	if down then
+		return true
+	end
+	local offset = root.CFrame.LookVector * 1.2
+	return Workspace:Raycast(root.Position + offset, Vector3.new(0, -5.5, 0), params) ~= nil
+end
+
+function FlyGuard.start(opts: {
+	maxAirTime: number?,
+	onViolation: ((Player, string) -> ())?,
+})
+	maxAirTime = opts.maxAirTime or maxAirTime
+	onViolation = opts.onViolation
+
+	if started then
+		return
+	end
+	started = true
+
+	RunService.Heartbeat:Connect(function(dt)
+		for _, player in Players:GetPlayers() do
+			if Shared.shouldSkipPlayer(player) then
+				airTime[player] = 0
+				continue
+			end
+
+			local character = player.Character
+			local root = Shared.getRoot(character)
+			local humanoid = Shared.getHumanoid(character)
+			if not root or not humanoid then
+				airTime[player] = 0
+				continue
+			end
+
+			if humanoid.SeatPart or humanoid:GetState() == Enum.HumanoidStateType.Seated then
+				airTime[player] = 0
+				continue
+			end
+
+			local state = humanoid:GetState()
+			if CLIMB_OR_SWIM[state] then
+				airTime[player] = 0
+				continue
+			end
+
+			-- Classic executor fly
+			if humanoid.PlatformStand then
+				report(player, "Fly exploit PlatformStand")
+				humanoid.PlatformStand = false
+				local v = root.AssemblyLinearVelocity
+				root.AssemblyLinearVelocity = Vector3.new(v.X, math.min(v.Y, -40), v.Z)
+				airTime[player] = 0
+				continue
+			end
+
+			if isGrounded(character, root) then
+				airTime[player] = 0
+				continue
+			end
+
+			local velocity = root.AssemblyLinearVelocity
+			local verticalSpeed = velocity.Y
+			local horizontalSpeed = Shared.horizontalSpeed(velocity)
+
+			-- Hover / float: not falling, not a normal jump peak
+			local hovering = math.abs(verticalSpeed) < 5 and horizontalSpeed < (humanoid.WalkSpeed + 8)
+			-- Ascending without jump state for too long (anti-gravity fly)
+			local risingHack = verticalSpeed > 8
+				and state ~= Enum.HumanoidStateType.Jumping
+				and state ~= Enum.HumanoidStateType.Freefall
+
+			if hovering or risingHack then
+				airTime[player] = (airTime[player] or 0) + dt
+				if airTime[player] > maxAirTime then
+					local kind = if hovering then "hover" else "ascent"
+					report(player, string.format("Fly exploit %s airTime=%.1fs", kind, airTime[player]))
+					root.AssemblyLinearVelocity = Vector3.new(velocity.X, -80, velocity.Z)
+					airTime[player] = 0
+				end
+			else
+				-- Decay instead of hard reset so brief jitter doesn't wipe evidence
+				airTime[player] = math.max(0, (airTime[player] or 0) - dt * 1.5)
+			end
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(function(player)
+		airTime[player] = nil
+		lastViolation[player] = nil
+	end)
+end
+
+return FlyGuard
+]]></ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX10">
+        <Properties>
+          <string name="Name">NoclipGuard</string>
+          <ProtectedString name="Source"><![CDATA[--[[
+	NoclipGuard — R15 limbs are often CanCollide=false by default.
+	We only enforce HumanoidRootPart collision, and detect geometry overlap.
+]]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+local Shared = require(script.Parent.Shared)
+
+local NoclipGuard = {}
+local onViolation: ((Player, string) -> ())? = nil
+local lastViolation: { [Player]: number } = {}
+local overlapStrikes: { [Player]: number } = {}
+local violationCooldown = 1.0
+local started = false
+local pollAccumulator = 0
+
+local OVERLAP_PARAMS = OverlapParams.new()
+OVERLAP_PARAMS.MaxParts = 12
+
+local function report(player: Player, reason: string)
+	if not onViolation or Shared.shouldSkipPlayer(player) then
+		return
+	end
+	if Shared.cooldownOk(lastViolation, player, violationCooldown) then
+		onViolation(player, reason)
+	end
+end
+
+local function isSolidWorldPart(part: BasePart, character: Model): boolean
+	if part:IsDescendantOf(character) then
+		return false
+	end
+	if not part.CanCollide then
+		return false
+	end
+	if part.Anchored == false and part:IsDescendantOf(Workspace) then
+		-- ignore other characters / unanchored debris loosely
+		local model = part:FindFirstAncestorOfClass("Model")
+		if model and model:FindFirstChildOfClass("Humanoid") then
+			return false
+		end
+	end
+	return true
+end
+
+local function insideGeometry(character: Model, root: BasePart): boolean
+	OVERLAP_PARAMS.FilterDescendantsInstances = { character }
+	OVERLAP_PARAMS.FilterType = Enum.RaycastFilterType.Exclude
+
+	-- Small inset box so standing on floors / walls doesn't false-flag
+	local size = Vector3.new(1.2, 3.2, 1.2)
+	local parts = Workspace:GetPartBoundsInBox(root.CFrame, size, OVERLAP_PARAMS)
+	for _, part in parts do
+		if part:IsA("BasePart") and isSolidWorldPart(part, character) then
+			return true
+		end
+	end
+	return false
+end
+
+function NoclipGuard.start(opts: { onViolation: ((Player, string) -> ())? })
+	onViolation = opts.onViolation
+
+	if started then
+		return
+	end
+	started = true
+
+	RunService.Heartbeat:Connect(function(dt)
+		pollAccumulator += dt
+		if pollAccumulator < 0.12 then
+			return
+		end
+		pollAccumulator = 0
+
+		for _, player in Players:GetPlayers() do
+			if Shared.shouldSkipPlayer(player) then
+				overlapStrikes[player] = 0
+				continue
+			end
+
+			local character = player.Character
+			local root = Shared.getRoot(character)
+			local humanoid = Shared.getHumanoid(character)
+			if not character or not root or not humanoid then
+				continue
+			end
+
+			if humanoid.SeatPart then
+				overlapStrikes[player] = 0
+				continue
+			end
+
+			-- Classic: disable HRP collision
+			if not root.CanCollide then
+				root.CanCollide = true
+				report(player, "Noclip exploit HumanoidRootPart.CanCollide=false")
+			end
+
+			-- Phase-through-walls: HRP overlapping solid geometry for several samples
+			if insideGeometry(character, root) then
+				overlapStrikes[player] = (overlapStrikes[player] or 0) + 1
+				if overlapStrikes[player] >= 5 then
+					report(player, "Noclip exploit inside geometry")
+					-- Soft eject upward/back so they don't stay stuck
+					root.CFrame = root.CFrame + Vector3.new(0, 3, 0)
+					root.AssemblyLinearVelocity = Vector3.zero
+					overlapStrikes[player] = 0
+				end
+			else
+				overlapStrikes[player] = 0
+			end
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(function(player)
+		lastViolation[player] = nil
+		overlapStrikes[player] = nil
+	end)
+end
+
+return NoclipGuard
+]]></ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX11">
+        <Properties>
+          <string name="Name">PhysicsGuard</string>
+          <ProtectedString name="Source"><![CDATA[--[[
+	PhysicsGuard — detects client-injected movers / forces used for fly & speed.
+	Removes unauthorized BodyMovers / Constraint actuators on the character.
+]]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local Shared = require(script.Parent.Shared)
+
+local PhysicsGuard = {}
+local onViolation: ((Player, string) -> ())? = nil
+local lastViolation: { [Player]: number } = {}
+local violationCooldown = 1.0
+local started = false
+local pollAccumulator = 0
+
+-- Instance classes commonly abused by executors
+local FORBIDDEN_CLASSES = {
+	BodyVelocity = true,
+	BodyPosition = true,
+	BodyGyro = true,
+	BodyForce = true,
+	BodyThrust = true,
+	BodyAngularVelocity = true,
+	RocketPropulsion = true,
+}
+
+-- Constraints that can still be legitimate (vehicles); we allow Attribute "EncrypticTrusted"
+local SUSPICIOUS_CONSTRAINTS = {
+	LinearVelocity = true,
+	AlignPosition = true,
+	AlignOrientation = true,
+	VectorForce = true,
+	Torque = true,
+	AngularVelocity = true,
+}
+
+local function report(player: Player, reason: string)
+	if not onViolation or Shared.shouldSkipPlayer(player) then
+		return
+	end
+	if Shared.cooldownOk(lastViolation, player, violationCooldown) then
+		onViolation(player, reason)
+	end
+end
+
+local function isTrusted(inst: Instance): boolean
+	return inst:GetAttribute("EncrypticTrusted") == true
+		or (inst.Parent ~= nil and inst.Parent:GetAttribute("EncrypticTrusted") == true)
+end
+
+local function scrubCharacter(player: Player, character: Model)
+	for _, inst in character:GetDescendants() do
+		local className = inst.ClassName
+		if FORBIDDEN_CLASSES[className] and not isTrusted(inst) then
+			report(player, "Physics exploit " .. className)
+			inst:Destroy()
+		elseif SUSPICIOUS_CONSTRAINTS[className] and not isTrusted(inst) then
+			-- Only flag if attached to HumanoidRootPart (common fly inject)
+			local parent = inst.Parent
+			if parent and parent.Name == "HumanoidRootPart" then
+				report(player, "Physics constraint exploit " .. className)
+				inst:Destroy()
+			end
+		end
+	end
+end
+
+function PhysicsGuard.start(opts: { onViolation: ((Player, string) -> ())? })
+	onViolation = opts.onViolation
+
+	if started then
+		return
+	end
+	started = true
+
+	local function bind(player: Player, character: Model)
+		character.DescendantAdded:Connect(function(inst)
+			if Shared.shouldSkipPlayer(player) or isTrusted(inst) then
+				return
+			end
+			local className = inst.ClassName
+			if FORBIDDEN_CLASSES[className] then
+				report(player, "Physics exploit " .. className)
+				task.defer(function()
+					if inst.Parent then
+						inst:Destroy()
+					end
+				end)
+			elseif SUSPICIOUS_CONSTRAINTS[className] and inst.Parent and inst.Parent.Name == "HumanoidRootPart" then
+				report(player, "Physics constraint exploit " .. className)
+				task.defer(function()
+					if inst.Parent then
+						inst:Destroy()
+					end
+				end)
+			end
+		end)
+	end
+
+	local function onPlayer(player: Player)
+		player.CharacterAdded:Connect(function(character)
+			bind(player, character)
+		end)
+		if player.Character then
+			bind(player, player.Character)
+		end
+	end
+
+	for _, player in Players:GetPlayers() do
+		onPlayer(player)
+	end
+	Players.PlayerAdded:Connect(onPlayer)
+
+	RunService.Heartbeat:Connect(function(dt)
+		pollAccumulator += dt
+		if pollAccumulator < 0.2 then
+			return
+		end
+		pollAccumulator = 0
+
+		for _, player in Players:GetPlayers() do
+			if Shared.shouldSkipPlayer(player) then
+				continue
+			end
+			local character = player.Character
+			if character then
+				scrubCharacter(player, character)
+			end
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(function(player)
+		lastViolation[player] = nil
+	end)
+end
+
+-- Mark a mover/constraint as legitimate (vehicles, abilities)
+function PhysicsGuard.trust(instance: Instance)
+	instance:SetAttribute("EncrypticTrusted", true)
+end
+
+return PhysicsGuard
+]]></ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX12">
+        <Properties>
+          <string name="Name">HealthGuard</string>
+          <ProtectedString name="Source"><![CDATA[--[[
+	HealthGuard — godmode / illegal heal detection.
+	Tracks sudden health increases and MaxHealth inflation.
+]]
+
+local Players = game:GetService("Players")
+
+local Shared = require(script.Parent.Shared)
+
+local HealthGuard = {}
+local maxHealthCap = 100
+local maxHealPerSecond = 40
+local onViolation: ((Player, string) -> ())? = nil
+local lastViolation: { [Player]: number } = {}
+local lastHealth: { [Player]: number } = {}
+local healBudget: { [Player]: number } = {}
+local lastTick: { [Player]: number } = {}
+local trustedHeal: { [Player]: boolean } = {}
+local violationCooldown = 1.0
+local started = false
+
+local function report(player: Player, reason: string)
+	if not onViolation or Shared.shouldSkipPlayer(player) then
+		return
+	end
+	if Shared.cooldownOk(lastViolation, player, violationCooldown) then
+		onViolation(player, reason)
+	end
+end
+
+local function bindHumanoid(player: Player, humanoid: Humanoid)
+	lastHealth[player] = humanoid.Health
+	healBudget[player] = 0
+	lastTick[player] = Shared.now()
+
+	humanoid.HealthChanged:Connect(function(health)
+		if Shared.shouldSkipPlayer(player) or trustedHeal[player] then
+			lastHealth[player] = health
+			return
+		end
+
+		local prev = lastHealth[player] or health
+		lastHealth[player] = health
+
+		if humanoid.MaxHealth > maxHealthCap + 0.5 then
+			report(player, string.format("MaxHealth tamper: %.1f", humanoid.MaxHealth))
+			humanoid.MaxHealth = maxHealthCap
+			if humanoid.Health > maxHealthCap then
+				humanoid.Health = maxHealthCap
+			end
+			return
+		end
+
+		if health <= prev then
+			return
+		end
+
+		local gained = health - prev
+		local now = Shared.now()
+		local dt = math.max(now - (lastTick[player] or now), 1 / 60)
+		lastTick[player] = now
+
+		-- Decay budget
+		healBudget[player] = math.max(0, (healBudget[player] or 0) - maxHealPerSecond * dt)
+		healBudget[player] = (healBudget[player] or 0) + gained
+
+		if healBudget[player] > maxHealPerSecond * 1.5 then
+			report(player, string.format("Illegal heal +%.1f (budget=%.1f)", gained, healBudget[player]))
+			humanoid.Health = prev
+			healBudget[player] = 0
+		end
+	end)
+end
+
+function HealthGuard.start(opts: {
+	maxHealth: number?,
+	maxHealPerSecond: number?,
+	onViolation: ((Player, string) -> ())?,
+})
+	maxHealthCap = opts.maxHealth or maxHealthCap
+	maxHealPerSecond = opts.maxHealPerSecond or maxHealPerSecond
+	onViolation = opts.onViolation
+
+	if started then
+		return
+	end
+	started = true
+
+	local function onCharacter(player: Player, character: Model)
+		task.spawn(function()
+			local humanoid = character:WaitForChild("Humanoid", 5) :: Humanoid?
+			if humanoid then
+				Shared.grantGrace(player, 2)
+				bindHumanoid(player, humanoid)
+			end
+		end)
+	end
+
+	local function onPlayer(player: Player)
+		player.CharacterAdded:Connect(function(character)
+			onCharacter(player, character)
+		end)
+		if player.Character then
+			onCharacter(player, player.Character)
+		end
+	end
+
+	for _, player in Players:GetPlayers() do
+		onPlayer(player)
+	end
+	Players.PlayerAdded:Connect(onPlayer)
+
+	Players.PlayerRemoving:Connect(function(player)
+		lastViolation[player] = nil
+		lastHealth[player] = nil
+		healBudget[player] = nil
+		lastTick[player] = nil
+		trustedHeal[player] = nil
+	end)
+end
+
+-- Wrap legitimate heals / medkits
+function HealthGuard.allowHeal(player: Player, fn: () -> ())
+	trustedHeal[player] = true
+	local ok, err = pcall(fn)
+	trustedHeal[player] = nil
+	if not ok then
+		warn("[Encryptic] HealthGuard.allowHeal error:", err)
+	end
+end
+
+return HealthGuard
+]]></ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX13">
+        <Properties>
+          <string name="Name">FireRateGuard</string>
+          <ProtectedString name="Source"><![CDATA[local Players = game:GetService("Players")
+
+local Shared = require(script.Parent.Shared)
+
+local FireRateGuard = {}
+local maxRate = 12
+local lastFire: { [Player]: { number } } = {}
+local onViolation: ((Player, string) -> ())? = nil
+local started = false
+
+function FireRateGuard.start(opts: number | { maxFireRate: number?, onViolation: ((Player, string) -> ())? })
+	if typeof(opts) == "number" then
+		maxRate = opts
+	else
+		maxRate = opts.maxFireRate or maxRate
+		onViolation = opts.onViolation
+	end
+
+	if started then
+		return
+	end
+	started = true
+
+	Players.PlayerRemoving:Connect(function(player)
+		lastFire[player] = nil
+	end)
+end
+
+function FireRateGuard.recordShot(player: Player): boolean
+	if Shared.isWhitelisted(player) then
+		return true
+	end
+
+	if not Shared.rateLimit(lastFire, player, 1, maxRate) then
+		if onViolation then
+			local count = #(lastFire[player] or {})
+			onViolation(player, string.format("Fire rate exploit shots=%d max=%d", count, maxRate))
+		end
+		return false
+	end
+
+	return true
+end
+
+function FireRateGuard.reset(player: Player)
+	lastFire[player] = nil
+end
+
+return FireRateGuard
+]]></ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX14">
+        <Properties>
+          <string name="Name">RemoteGuard</string>
+          <ProtectedString name="Source"><![CDATA[local Players = game:GetService("Players")
+
+local Shared = require(script.Parent.Shared)
+
+local RemoteGuard = {}
+local maxPerSecond = 40
+local counts: { [Player]: { number } } = {}
+local perRemote: { [Player]: { [string]: { number } } } = {}
+local maxPerRemote = 20
+local onViolation: ((Player, string) -> ())? = nil
+local started = false
+
+function RemoteGuard.start(opts: number | {
+	maxRemotePerSecond: number?,
+	maxPerRemotePerSecond: number?,
+	onViolation: ((Player, string) -> ())?,
+})
+	if typeof(opts) == "number" then
+		maxPerSecond = opts
+	else
+		maxPerSecond = opts.maxRemotePerSecond or maxPerSecond
+		maxPerRemote = opts.maxPerRemotePerSecond or maxPerRemote
+		onViolation = opts.onViolation
+	end
+
+	if started then
+		return
+	end
+	started = true
+
+	Players.PlayerRemoving:Connect(function(player)
+		counts[player] = nil
+		perRemote[player] = nil
+	end)
+end
+
+function RemoteGuard.track(player: Player, remoteName: string?): boolean
+	if Shared.isWhitelisted(player) then
+		return true
+	end
+
+	if not Shared.rateLimit(counts, player, 1, maxPerSecond) then
+		if onViolation then
+			onViolation(player, string.format("Remote spam count=%d max=%d", #(counts[player] or {}), maxPerSecond))
+		end
+		return false
+	end
+
+	if remoteName then
+		local map = perRemote[player]
+		if not map then
+			map = {}
+			perRemote[player] = map
+		end
+		local bucket = map[remoteName]
+		if not bucket then
+			bucket = {}
+			map[remoteName] = bucket
+		end
+		local now = Shared.now()
+		table.insert(bucket, now)
+		Shared.pruneOlderThan(bucket, now - 1)
+		if #bucket > maxPerRemote then
+			if onViolation then
+				onViolation(player, string.format("Remote spam remote=%s count=%d", remoteName, #bucket))
+			end
+			return false
+		end
+	end
+
+	return true
+end
+
+function RemoteGuard.wrapRemoteEvent(remote: RemoteEvent, handler: (Player, ...any) -> ())
+	remote.OnServerEvent:Connect(function(player, ...)
+		if not RemoteGuard.track(player, remote.Name) then
+			return
+		end
+		handler(player, ...)
+	end)
+end
+
+function RemoteGuard.wrapRemoteFunction(remote: RemoteFunction, handler: (Player, ...any) -> ...any)
+	remote.OnServerInvoke = function(player, ...)
+		if not RemoteGuard.track(player, remote.Name) then
+			return nil
+		end
+		return handler(player, ...)
+	end
+end
+
+return RemoteGuard
+]]></ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX15">
+        <Properties>
+          <string name="Name">ExploitGuard</string>
+          <ProtectedString name="Source"><![CDATA[local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+local Shared = require(script.Parent.Shared)
+
+local ExploitGuard = {}
+local suspiciousPatterns = {
+	"execute", "loadstring", "getgenv", "syn", "fluxus", "infinite",
+	"godmode", "backdoor", "bypass", "exploit", "dex", "remote spy",
+}
+local onViolation: ((Player, string) -> ())? = nil
+local hooked = {} :: { [Instance]: boolean }
+local started = false
+
+-- Names that look scary but are common in legitimate games — don't false-flag these alone
+local ALLOWLIST = {
+	speed = true,
+	teleport = true,
+	admin = true,
+	kill = true,
+	ban = true,
+	noclip = true, -- demo may create TestExploit; validateRemote still usable per-call
+}
+
+local function isSuspicious(name: string): boolean
+	local lower = string.lower(name)
+	if ALLOWLIST[lower] then
+		return false
+	end
+	for _, pattern in suspiciousPatterns do
+		if string.find(lower, pattern, 1, true) then
+			return true
+		end
+	end
+	return false
+end
+
+local function hookRemote(remote: Instance)
+	if not remote:IsA("RemoteEvent") and not remote:IsA("RemoteFunction") then
+		return
+	end
+	if hooked[remote] then
+		return
+	end
+	hooked[remote] = true
+
+	if isSuspicious(remote.Name) then
+		warn("[Encryptic] Suspicious remote registered:", remote:GetFullName())
+	end
+end
+
+local function scan(container: Instance)
+	for _, inst in container:GetDescendants() do
+		hookRemote(inst)
+	end
+	container.DescendantAdded:Connect(hookRemote)
+end
+
+function ExploitGuard.start(opts: {
+	onViolation: ((Player, string) -> ())?,
+	extraPatterns: { string }?,
+})
+	onViolation = opts.onViolation
+	if opts.extraPatterns then
+		for _, p in opts.extraPatterns do
+			table.insert(suspiciousPatterns, string.lower(p))
+		end
+	end
+
+	if started then
+		return
+	end
+	started = true
+
+	scan(ReplicatedStorage)
+
+	local workspaceRemotes = game:GetService("Workspace"):FindFirstChild("Remotes")
+	if workspaceRemotes then
+		scan(workspaceRemotes)
+	end
+
+	-- Catch remotes created later under Workspace.Remotes
+	game:GetService("Workspace").ChildAdded:Connect(function(child)
+		if child.Name == "Remotes" then
+			scan(child)
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(function()
+		-- hooked remotes are Instance-keyed; no player cleanup needed
+	end)
+end
+
+function ExploitGuard.validateRemote(player: Player, remote: Instance): boolean
+	if Shared.isWhitelisted(player) then
+		return true
+	end
+	if not remote then
+		return false
+	end
+	if isSuspicious(remote.Name) then
+		if onViolation then
+			onViolation(player, "Blocked suspicious remote: " .. remote.Name)
+		end
+		return false
+	end
+	return true
+end
+
+function ExploitGuard.isSuspiciousName(name: string): boolean
+	return isSuspicious(name)
+end
+
+return ExploitGuard
+]]></ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX16">
+        <Properties>
+          <string name="Name">ToolGuard</string>
+          <ProtectedString name="Source"><![CDATA[local Players = game:GetService("Players")
+
+local Shared = require(script.Parent.Shared)
+
+local ToolGuard = {}
+local maxEquipPerSecond = 8
+local history: { [Player]: { number } } = {}
+local onViolation: ((Player, string) -> ())? = nil
+local started = false
+
+function ToolGuard.start(opts: { maxEquipPerSecond: number?, onViolation: ((Player, string) -> ())? })
+	maxEquipPerSecond = opts.maxEquipPerSecond or maxEquipPerSecond
+	onViolation = opts.onViolation
+
+	if started then
+		return
+	end
+	started = true
+
+	Players.PlayerRemoving:Connect(function(player)
+		history[player] = nil
+	end)
+end
+
+function ToolGuard.trackEquip(player: Player): boolean
+	if Shared.isWhitelisted(player) then
+		return true
+	end
+
+	if not Shared.rateLimit(history, player, 1, maxEquipPerSecond) then
+		if onViolation then
+			onViolation(player, "Tool equip spam")
+		end
+		return false
+	end
+
+	return true
+end
+
+return ToolGuard
+]]></ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX17">
+        <Properties>
+          <string name="Name">HitGuard</string>
+          <ProtectedString name="Source"><![CDATA[local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+
+local Shared = require(script.Parent.Shared)
+
+local HitGuard = {}
+local maxHitDistance = 20
+local requireLineOfSight = true
+local onViolation: ((Player, string) -> ())? = nil
+local lastViolation: { [Player]: number } = {}
+local violationCooldown = 0.5
+local started = false
+
+function HitGuard.start(opts: {
+	maxHitDistance: number?,
+	requireLineOfSight: boolean?,
+	onViolation: ((Player, string) -> ())?,
+})
+	maxHitDistance = opts.maxHitDistance or maxHitDistance
+	if opts.requireLineOfSight ~= nil then
+		requireLineOfSight = opts.requireLineOfSight
+	end
+	onViolation = opts.onViolation
+
+	if started then
+		return
+	end
+	started = true
+
+	Players.PlayerRemoving:Connect(function(player)
+		lastViolation[player] = nil
+	end)
+end
+
+local function hasLineOfSight(attackerChar: Model, from: Vector3, to: Vector3, targetChar: Model): boolean
+	local params = RaycastParams.new()
+	params.FilterDescendantsInstances = { attackerChar }
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	local dir = to - from
+	local result = Workspace:Raycast(from, dir, params)
+	if not result then
+		return true
+	end
+	return result.Instance:IsDescendantOf(targetChar)
+end
+
+-- Call from your combat system before applying damage
+function HitGuard.validateHit(attacker: Player, targetChar: Model, hitPosition: Vector3?): boolean
+	if Shared.isWhitelisted(attacker) then
+		return true
+	end
+
+	local attackerChar = attacker.Character
+	local attackerRoot = Shared.getRoot(attackerChar)
+	local targetRoot = Shared.getRoot(targetChar)
+	if not attackerRoot or not targetRoot then
+		return false
+	end
+
+	local from = hitPosition or targetRoot.Position
+	local distRoot = (attackerRoot.Position - targetRoot.Position).Magnitude
+	local distHit = (attackerRoot.Position - from).Magnitude
+	local dist = math.min(distRoot, distHit)
+
+	-- Small latency cushion
+	local limit = maxHitDistance + 2
+	if dist > limit then
+		if onViolation and Shared.cooldownOk(lastViolation, attacker, violationCooldown) then
+			onViolation(attacker, string.format("Hit distance exploit dist=%.1f max=%.1f", dist, limit))
+		end
+		return false
+	end
+
+	if requireLineOfSight and attackerChar then
+		local origin = attackerRoot.Position + Vector3.new(0, 1.5, 0)
+		if not hasLineOfSight(attackerChar, origin, from, targetChar) then
+			if onViolation and Shared.cooldownOk(lastViolation, attacker, violationCooldown) then
+				onViolation(attacker, "Hit LOS exploit (wallbang)")
+			end
+			return false
+		end
+	end
+
+	return true
+end
+
+return HitGuard
+]]></ProtectedString>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Script" referent="RBX18">
+      <Properties>
+        <string name="Name">DemoGame</string>
+        <ProtectedString name="Source"><![CDATA[--[[
+	DemoGame.server.lua
+	Put this in ServerScriptService next to the Encryptic folder.
+
+	ServerScriptService/
+	  Encryptic/          (anti-cheat modules)
+	  DemoGame            (this Script)
+]]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Encryptic = require(script.Parent.Encryptic.init)
+
+Encryptic.start({
+	maxSpeed = 48,
+	maxWalkSpeed = 24,
+	maxFireRate = 5,
+	maxRemotePerSecond = 15,
+	maxStrikes = 3,
+	strikeDecaySeconds = 45,
+	spawnGraceSeconds = 2.5,
+	enableFlyGuard = true,
+	enableNoclipGuard = true,
+	enablePhysicsGuard = true,
+	enableHealthGuard = true,
+	enableExploitGuard = true,
+})
+
+print("[Demo] Encryptic started. Watch Output for [Encryptic] violations.")
+
+local remotesFolder = ReplicatedStorage:FindFirstChild("DemoRemotes")
+if not remotesFolder then
+	remotesFolder = Instance.new("Folder")
+	remotesFolder.Name = "DemoRemotes"
+	remotesFolder.Parent = ReplicatedStorage
+end
+
+local function getOrCreateRemote(name: string): RemoteEvent
+	local existing = remotesFolder:FindFirstChild(name)
+	if existing and existing:IsA("RemoteEvent") then
+		return existing
+	end
+	local remote = Instance.new("RemoteEvent")
+	remote.Name = name
+	remote.Parent = remotesFolder
+	return remote
+end
+
+local fireWeapon = getOrCreateRemote("FireWeapon")
+local requestCoin = getOrCreateRemote("RequestCoin")
+local testExploit = getOrCreateRemote("TestExploit")
+
+local flyLoops: { [Player]: RBXScriptConnection } = {}
+local noclipParts: { [Player]: { BasePart } } = {}
+
+local function stopFly(player: Player)
+	local conn = flyLoops[player]
+	if conn then
+		conn:Disconnect()
+		flyLoops[player] = nil
+	end
+	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid.PlatformStand = false
+	end
+end
+
+local function setNoclip(player: Player, enabled: boolean)
+	local character = player.Character
+	if not character then
+		return
+	end
+
+	if not enabled then
+		for _, part in noclipParts[player] or {} do
+			if part.Parent then
+				part.CanCollide = true
+			end
+		end
+		noclipParts[player] = nil
+		return
+	end
+
+	-- Only disable critical parts (matches what NoclipGuard watches)
+	noclipParts[player] = {}
+	for _, name in { "HumanoidRootPart", "Head", "UpperTorso", "LowerTorso", "Torso" } do
+		local part = character:FindFirstChild(name)
+		if part and part:IsA("BasePart") then
+			part.CanCollide = false
+			table.insert(noclipParts[player], part)
+		end
+	end
+end
+
+testExploit.OnServerEvent:Connect(function(player: Player, action: string, enabled: boolean?)
+	if typeof(action) ~= "string" then
+		return
+	end
+
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not humanoid or not root then
+		return
+	end
+
+	if action == "speed" then
+		humanoid.WalkSpeed = if enabled then 100 else 16
+	elseif action == "fly" then
+		stopFly(player)
+		if enabled then
+			humanoid.PlatformStand = true
+			flyLoops[player] = RunService.Heartbeat:Connect(function()
+				if not root.Parent then
+					stopFly(player)
+					return
+				end
+				root.AssemblyLinearVelocity = Vector3.new(0, 42, 0)
+			end)
+		end
+	elseif action == "noclip" then
+		setNoclip(player, enabled == true)
+	elseif action == "teleport" then
+		root.CFrame = root.CFrame + root.CFrame.LookVector * 200
+	elseif action == "jump" then
+		humanoid.UseJumpPower = true
+		humanoid.JumpPower = 150
+		humanoid.JumpHeight = 20
+		humanoid.HipHeight = 12
+	elseif action == "velocity" then
+		root.AssemblyLinearVelocity = root.CFrame.LookVector * 120 + Vector3.new(0, 30, 0)
+	elseif action == "godmode" then
+		humanoid.MaxHealth = if enabled then 9999 else 100
+		humanoid.Health = humanoid.MaxHealth
+	elseif action == "physics" then
+		local existing = root:FindFirstChild("DemoFlyForce")
+		if existing then
+			existing:Destroy()
+		end
+		if enabled then
+			local bv = Instance.new("BodyVelocity")
+			bv.Name = "DemoFlyForce"
+			bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+			bv.Velocity = Vector3.new(0, 40, 0)
+			bv.Parent = root
+		end
+	end
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+	stopFly(player)
+	noclipParts[player] = nil
+end)
+
+Encryptic.RemoteGuard.wrapRemoteEvent(fireWeapon, function(player: Player)
+	if not Encryptic.FireRateGuard.recordShot(player) then
+		return
+	end
+	print("[Demo] Valid shot from", player.Name)
+end)
+
+requestCoin.OnServerEvent:Connect(function(player: Player)
+	if not Encryptic.RemoteGuard.track(player, "RequestCoin") then
+		return
+	end
+	print("[Demo] Coin granted to", player.Name, "| strikes:", Encryptic.BanManager.getStrikes(player))
+end)
+
+local function onCharacterAdded(player: Player, character: Model)
+	character.ChildAdded:Connect(function(child)
+		if child:IsA("Tool") then
+			if not Encryptic.ToolGuard.trackEquip(player) then
+				child:Destroy()
+			end
+		end
+	end)
+end
+
+Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(function(character)
+		onCharacterAdded(player, character)
+	end)
+	print(string.format(
+		"[Demo] %s joined. Open AC panel (RightControl). Kick at %d strikes.",
+		player.Name,
+		3
+	))
+end)
+
+for _, player in Players:GetPlayers() do
+	if player.Character then
+		onCharacterAdded(player, player.Character)
+	end
+end
+]]></ProtectedString>
+      </Properties>
+    </Item>
+    <Item class="LocalScript" referent="RBX19">
+      <Properties>
+        <string name="Name">DemoClient</string>
+        <ProtectedString name="Source"><![CDATA[--[[
+	DemoClient.client.lua
+	StarterPlayer > StarterPlayerScripts
+
+	Encryptic demo client: keyboard shortcuts + test GUI.
+	RightControl or Insert = toggle panel | AC button top-right
+]]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local remotes = ReplicatedStorage:WaitForChild("DemoRemotes", 15)
+if not remotes then
+	warn("[Demo Client] DemoRemotes not found — is DemoGame running?")
+	return
+end
+
+local fireWeapon = remotes:WaitForChild("FireWeapon") :: RemoteEvent
+local requestCoin = remotes:WaitForChild("RequestCoin") :: RemoteEvent
+local testExploit = remotes:FindFirstChild("TestExploit") :: RemoteEvent?
+
+if not testExploit then
+	warn("[Demo Client] TestExploit remote missing — update DemoGame.server.lua")
+end
+
+local C = {
+	panel = Color3.fromRGB(22, 24, 32),
+	card = Color3.fromRGB(30, 33, 44),
+	stroke = Color3.fromRGB(55, 60, 78),
+	text = Color3.fromRGB(236, 238, 245),
+	subtext = Color3.fromRGB(145, 152, 170),
+	accent = Color3.fromRGB(99, 102, 241),
+	accent2 = Color3.fromRGB(56, 189, 248),
+	danger = Color3.fromRGB(239, 68, 68),
+}
+
+local toggleState = {
+	speed = false,
+	fly = false,
+	noclip = false,
+	godmode = false,
+	physics = false,
+}
+local firing = false
+local panelOpen = false
+
+local function tween(inst: Instance, props: { [string]: any }, time: number?)
+	TweenService:Create(inst, TweenInfo.new(time or 0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), props):Play()
+end
+
+local function addCorner(parent: Instance, radius: number?)
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, radius or 10)
+	c.Parent = parent
+end
+
+local function addStroke(parent: Instance, color: Color3?, transparency: number?)
+	local s = Instance.new("UIStroke")
+	s.Color = color or C.stroke
+	s.Thickness = 1
+	s.Transparency = transparency or 0.35
+	s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	s.Parent = parent
+end
+
+local function makeLabel(parent: Instance, text: string, size: number, color: Color3?, bold: boolean?)
+	local l = Instance.new("TextLabel")
+	l.BackgroundTransparency = 1
+	l.Font = bold and Enum.Font.GothamBold or Enum.Font.GothamMedium
+	l.TextSize = size
+	l.TextColor3 = color or C.text
+	l.TextXAlignment = Enum.TextXAlignment.Left
+	l.Text = text
+	l.Parent = parent
+	return l
+end
+
+local function fireTest(action: string, enabled: boolean?)
+	if not testExploit then
+		warn("[Demo Client] TestExploit remote not found")
+		return
+	end
+	testExploit:FireServer(action, enabled)
+end
+
+local function makeButton(parent: Instance, text: string, color: Color3, layoutOrder: number, onClick: () -> ())
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, 0, 0, 40)
+	btn.BackgroundColor3 = color
+	btn.BorderSizePixel = 0
+	btn.AutoButtonColor = false
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 14
+	btn.TextColor3 = C.text
+	btn.Text = text
+	btn.LayoutOrder = layoutOrder
+	btn.Parent = parent
+	addCorner(btn, 10)
+	btn.MouseButton1Click:Connect(onClick)
+	return btn
+end
+
+local function makeToggle(parent: Instance, label: string, guard: string, key: string, layoutOrder: number)
+	local row = Instance.new("Frame")
+	row.Size = UDim2.new(1, 0, 0, 52)
+	row.BackgroundColor3 = C.card
+	row.BorderSizePixel = 0
+	row.LayoutOrder = layoutOrder
+	row.Parent = parent
+	addCorner(row, 12)
+	addStroke(row)
+
+	local title = makeLabel(row, label, 14, C.text, true)
+	title.Position = UDim2.fromOffset(14, 8)
+	title.Size = UDim2.new(1, -100, 0, 18)
+
+	local sub = makeLabel(row, guard, 12, C.subtext)
+	sub.Position = UDim2.fromOffset(14, 28)
+	sub.Size = UDim2.new(1, -100, 0, 16)
+
+	local pill = Instance.new("TextButton")
+	pill.Size = UDim2.fromOffset(54, 28)
+	pill.Position = UDim2.new(1, -68, 0.5, -14)
+	pill.BackgroundColor3 = C.stroke
+	pill.Text = ""
+	pill.AutoButtonColor = false
+	pill.Parent = row
+	addCorner(pill, 14)
+
+	local knob = Instance.new("Frame")
+	knob.Size = UDim2.fromOffset(22, 22)
+	knob.Position = UDim2.fromOffset(3, 3)
+	knob.BackgroundColor3 = C.text
+	knob.BorderSizePixel = 0
+	knob.Parent = pill
+	addCorner(knob, 11)
+
+	pill.MouseButton1Click:Connect(function()
+		local nextOn = not toggleState[key]
+		toggleState[key] = nextOn
+		tween(pill, { BackgroundColor3 = nextOn and C.accent or C.stroke })
+		tween(knob, { Position = nextOn and UDim2.fromOffset(29, 3) or UDim2.fromOffset(3, 3) })
+		fireTest(key, nextOn)
+	end)
+end
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "EncrypticTestLab"
+gui.ResetOnSpawn = false
+gui.DisplayOrder = 999
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.Parent = playerGui
+
+local openBtn = Instance.new("TextButton")
+openBtn.Name = "OpenButton"
+openBtn.Size = UDim2.fromOffset(52, 52)
+openBtn.Position = UDim2.new(1, -68, 0, 16)
+openBtn.BackgroundColor3 = C.accent
+openBtn.Text = "AC"
+openBtn.TextSize = 18
+openBtn.Font = Enum.Font.GothamBold
+openBtn.TextColor3 = C.text
+openBtn.AutoButtonColor = false
+openBtn.Parent = gui
+addCorner(openBtn, 14)
+addStroke(openBtn, C.accent2, 0.3)
+
+local panel = Instance.new("Frame")
+panel.Name = "Panel"
+panel.Size = UDim2.fromOffset(340, 580)
+panel.Position = UDim2.new(1, -356, 0, 16)
+panel.BackgroundColor3 = C.panel
+panel.BorderSizePixel = 0
+panel.Visible = false
+panel.Parent = gui
+addCorner(panel, 16)
+addStroke(panel)
+
+local header = Instance.new("Frame")
+header.Size = UDim2.new(1, 0, 0, 88)
+header.BackgroundColor3 = C.accent
+header.BorderSizePixel = 0
+header.Parent = panel
+addCorner(header, 16)
+
+local grad = Instance.new("UIGradient")
+grad.Color = ColorSequence.new(C.accent, C.accent2)
+grad.Rotation = 35
+grad.Parent = header
+
+makeLabel(header, "Encryptic Test Lab", 20, C.text, true).Position = UDim2.fromOffset(18, 18)
+makeLabel(header, "Trigger anti-cheat guards", 13, Color3.fromRGB(230, 232, 255)).Position = UDim2.fromOffset(18, 46)
+
+local body = Instance.new("ScrollingFrame")
+body.Size = UDim2.new(1, -24, 1, -104)
+body.Position = UDim2.fromOffset(12, 96)
+body.BackgroundTransparency = 1
+body.BorderSizePixel = 0
+body.ScrollBarThickness = 4
+body.AutomaticCanvasSize = Enum.AutomaticSize.Y
+body.CanvasSize = UDim2.fromOffset(0, 0)
+body.Parent = panel
+
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0, 10)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Parent = body
+
+local function section(parent: Instance, text: string, order: number)
+	local l = makeLabel(parent, text, 11, C.subtext, true)
+	l.Size = UDim2.new(1, 0, 0, 16)
+	l.LayoutOrder = order
+end
+
+section(body, "MOVEMENT MODS", 1)
+makeToggle(body, "Speed Boost", "HumanoidGuard + MovementGuard", "speed", 2)
+makeToggle(body, "Fly Mode", "FlyGuard", "fly", 3)
+makeToggle(body, "Noclip", "NoclipGuard", "noclip", 4)
+makeToggle(body, "BodyVelocity Fly", "PhysicsGuard", "physics", 5)
+makeToggle(body, "Godmode HP", "HealthGuard", "godmode", 6)
+
+section(body, "INSTANT ACTIONS", 10)
+makeButton(body, "Teleport +200 studs", C.accent, 11, function() fireTest("teleport") end)
+makeButton(body, "Mega Jump / HipHeight", C.accent, 12, function() fireTest("jump") end)
+makeButton(body, "Velocity Burst", C.accent, 13, function() fireTest("velocity") end)
+
+section(body, "REMOTE / COMBAT", 20)
+makeButton(body, "Spam Coin Remote", C.danger, 21, function()
+	for _ = 1, 25 do
+		requestCoin:FireServer()
+	end
+end)
+makeButton(body, "Start Rapid Fire", C.danger, 22, function()
+	firing = true
+	task.spawn(function()
+		while firing do
+			fireWeapon:FireServer()
+			task.wait(0.05)
+		end
+	end)
+end)
+makeButton(body, "Stop Rapid Fire", Color3.fromRGB(71, 85, 105), 23, function()
+	firing = false
+end)
+
+local footer = makeLabel(body, "RightControl / Insert = toggle • Studio demo only", 11, C.subtext)
+footer.Size = UDim2.new(1, 0, 0, 20)
+footer.TextXAlignment = Enum.TextXAlignment.Center
+footer.LayoutOrder = 99
+
+local function setPanelOpen(open: boolean)
+	panelOpen = open
+	panel.Visible = open
+	tween(openBtn, { BackgroundColor3 = open and C.accent2 or C.accent })
+end
+
+openBtn.MouseButton1Click:Connect(function()
+	setPanelOpen(not panelOpen)
+end)
+
+UserInputService.InputBegan:Connect(function(input, processed)
+	if processed then
+		return
+	end
+	if input.KeyCode == Enum.KeyCode.RightControl or input.KeyCode == Enum.KeyCode.Insert then
+		setPanelOpen(not panelOpen)
+	elseif input.KeyCode == Enum.KeyCode.F then
+		firing = true
+		task.spawn(function()
+			while firing do
+				fireWeapon:FireServer()
+				task.wait(0.05)
+			end
+		end)
+	elseif input.KeyCode == Enum.KeyCode.G then
+		for _ = 1, 25 do
+			requestCoin:FireServer()
+		end
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.F then
+		firing = false
+	end
+end)
+
+player.CharacterRemoving:Connect(function()
+	firing = false
+	for key in toggleState do
+		toggleState[key] = false
+	end
+end)
+
+print("[Demo Client] GUI ready — click AC (top-right) or press RightControl / Insert")
+]]></ProtectedString>
+      </Properties>
+    </Item>
+  </Item>
+</roblox>
+
+```
+
+`demo/ServerScriptService/DemoGame.server.lua`:
+
+```lua
+--[[
+	DemoGame.server.lua
+	Put this in ServerScriptService next to the Encryptic folder.
+
+	ServerScriptService/
+	  Encryptic/          (anti-cheat modules)
+	  DemoGame            (this Script)
+]]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Encryptic = require(script.Parent.Encryptic.init)
+
+Encryptic.start({
+	maxSpeed = 48,
+	maxWalkSpeed = 24,
+	maxFireRate = 5,
+	maxRemotePerSecond = 15,
+	maxStrikes = 3,
+	strikeDecaySeconds = 45,
+	spawnGraceSeconds = 2.5,
+	enableFlyGuard = true,
+	enableNoclipGuard = true,
+	enablePhysicsGuard = true,
+	enableHealthGuard = true,
+	enableExploitGuard = true,
+})
+
+print("[Demo] Encryptic started. Watch Output for [Encryptic] violations.")
+
+local remotesFolder = ReplicatedStorage:FindFirstChild("DemoRemotes")
+if not remotesFolder then
+	remotesFolder = Instance.new("Folder")
+	remotesFolder.Name = "DemoRemotes"
+	remotesFolder.Parent = ReplicatedStorage
+end
+
+local function getOrCreateRemote(name: string): RemoteEvent
+	local existing = remotesFolder:FindFirstChild(name)
+	if existing and existing:IsA("RemoteEvent") then
+		return existing
+	end
+	local remote = Instance.new("RemoteEvent")
+	remote.Name = name
+	remote.Parent = remotesFolder
+	return remote
+end
+
+local fireWeapon = getOrCreateRemote("FireWeapon")
+local requestCoin = getOrCreateRemote("RequestCoin")
+local testExploit = getOrCreateRemote("TestExploit")
+
+local flyLoops: { [Player]: RBXScriptConnection } = {}
+local noclipParts: { [Player]: { BasePart } } = {}
+
+local function stopFly(player: Player)
+	local conn = flyLoops[player]
+	if conn then
+		conn:Disconnect()
+		flyLoops[player] = nil
+	end
+	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid.PlatformStand = false
+	end
+end
+
+local function setNoclip(player: Player, enabled: boolean)
+	local character = player.Character
+	if not character then
+		return
+	end
+
+	if not enabled then
+		for _, part in noclipParts[player] or {} do
+			if part.Parent then
+				part.CanCollide = true
+			end
+		end
+		noclipParts[player] = nil
+		return
+	end
+
+	-- Only disable critical parts (matches what NoclipGuard watches)
+	noclipParts[player] = {}
+	for _, name in { "HumanoidRootPart", "Head", "UpperTorso", "LowerTorso", "Torso" } do
+		local part = character:FindFirstChild(name)
+		if part and part:IsA("BasePart") then
+			part.CanCollide = false
+			table.insert(noclipParts[player], part)
+		end
+	end
+end
+
+testExploit.OnServerEvent:Connect(function(player: Player, action: string, enabled: boolean?)
+	if typeof(action) ~= "string" then
+		return
+	end
+
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not humanoid or not root then
+		return
+	end
+
+	if action == "speed" then
+		humanoid.WalkSpeed = if enabled then 100 else 16
+	elseif action == "fly" then
+		stopFly(player)
+		if enabled then
+			humanoid.PlatformStand = true
+			flyLoops[player] = RunService.Heartbeat:Connect(function()
+				if not root.Parent then
+					stopFly(player)
+					return
+				end
+				root.AssemblyLinearVelocity = Vector3.new(0, 42, 0)
+			end)
+		end
+	elseif action == "noclip" then
+		setNoclip(player, enabled == true)
+	elseif action == "teleport" then
+		root.CFrame = root.CFrame + root.CFrame.LookVector * 200
+	elseif action == "jump" then
+		humanoid.UseJumpPower = true
+		humanoid.JumpPower = 150
+		humanoid.JumpHeight = 20
+		humanoid.HipHeight = 12
+	elseif action == "velocity" then
+		root.AssemblyLinearVelocity = root.CFrame.LookVector * 120 + Vector3.new(0, 30, 0)
+	elseif action == "godmode" then
+		humanoid.MaxHealth = if enabled then 9999 else 100
+		humanoid.Health = humanoid.MaxHealth
+	elseif action == "physics" then
+		local existing = root:FindFirstChild("DemoFlyForce")
+		if existing then
+			existing:Destroy()
+		end
+		if enabled then
+			local bv = Instance.new("BodyVelocity")
+			bv.Name = "DemoFlyForce"
+			bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+			bv.Velocity = Vector3.new(0, 40, 0)
+			bv.Parent = root
+		end
+	end
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+	stopFly(player)
+	noclipParts[player] = nil
+end)
+
+Encryptic.RemoteGuard.wrapRemoteEvent(fireWeapon, function(player: Player)
+	if not Encryptic.FireRateGuard.recordShot(player) then
+		return
+	end
+	print("[Demo] Valid shot from", player.Name)
+end)
+
+requestCoin.OnServerEvent:Connect(function(player: Player)
+	if not Encryptic.RemoteGuard.track(player, "RequestCoin") then
+		return
+	end
+	print("[Demo] Coin granted to", player.Name, "| strikes:", Encryptic.BanManager.getStrikes(player))
+end)
+
+local function onCharacterAdded(player: Player, character: Model)
+	character.ChildAdded:Connect(function(child)
+		if child:IsA("Tool") then
+			if not Encryptic.ToolGuard.trackEquip(player) then
+				child:Destroy()
+			end
+		end
+	end)
+end
+
+Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(function(character)
+		onCharacterAdded(player, character)
+	end)
+	print(string.format(
+		"[Demo] %s joined. Open AC panel (RightControl). Kick at %d strikes.",
+		player.Name,
+		3
+	))
+end)
+
+for _, player in Players:GetPlayers() do
+	if player.Character then
+		onCharacterAdded(player, player.Character)
+	end
+end
+
+```
+
+`demo/StarterPlayer/StarterPlayerScripts/DemoClient.client.lua`:
+
+```lua
+--[[
+	DemoClient.client.lua
+	StarterPlayer > StarterPlayerScripts
+
+	Encryptic demo client: keyboard shortcuts + test GUI.
+	RightControl or Insert = toggle panel | AC button top-right
+]]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local remotes = ReplicatedStorage:WaitForChild("DemoRemotes", 15)
+if not remotes then
+	warn("[Demo Client] DemoRemotes not found — is DemoGame running?")
+	return
+end
+
+local fireWeapon = remotes:WaitForChild("FireWeapon") :: RemoteEvent
+local requestCoin = remotes:WaitForChild("RequestCoin") :: RemoteEvent
+local testExploit = remotes:FindFirstChild("TestExploit") :: RemoteEvent?
+
+if not testExploit then
+	warn("[Demo Client] TestExploit remote missing — update DemoGame.server.lua")
+end
+
+local C = {
+	panel = Color3.fromRGB(22, 24, 32),
+	card = Color3.fromRGB(30, 33, 44),
+	stroke = Color3.fromRGB(55, 60, 78),
+	text = Color3.fromRGB(236, 238, 245),
+	subtext = Color3.fromRGB(145, 152, 170),
+	accent = Color3.fromRGB(99, 102, 241),
+	accent2 = Color3.fromRGB(56, 189, 248),
+	danger = Color3.fromRGB(239, 68, 68),
+}
+
+local toggleState = {
+	speed = false,
+	fly = false,
+	noclip = false,
+	godmode = false,
+	physics = false,
+}
+local firing = false
+local panelOpen = false
+
+local function tween(inst: Instance, props: { [string]: any }, time: number?)
+	TweenService:Create(inst, TweenInfo.new(time or 0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), props):Play()
+end
+
+local function addCorner(parent: Instance, radius: number?)
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, radius or 10)
+	c.Parent = parent
+end
+
+local function addStroke(parent: Instance, color: Color3?, transparency: number?)
+	local s = Instance.new("UIStroke")
+	s.Color = color or C.stroke
+	s.Thickness = 1
+	s.Transparency = transparency or 0.35
+	s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	s.Parent = parent
+end
+
+local function makeLabel(parent: Instance, text: string, size: number, color: Color3?, bold: boolean?)
+	local l = Instance.new("TextLabel")
+	l.BackgroundTransparency = 1
+	l.Font = bold and Enum.Font.GothamBold or Enum.Font.GothamMedium
+	l.TextSize = size
+	l.TextColor3 = color or C.text
+	l.TextXAlignment = Enum.TextXAlignment.Left
+	l.Text = text
+	l.Parent = parent
+	return l
+end
+
+local function fireTest(action: string, enabled: boolean?)
+	if not testExploit then
+		warn("[Demo Client] TestExploit remote not found")
+		return
+	end
+	testExploit:FireServer(action, enabled)
+end
+
+local function makeButton(parent: Instance, text: string, color: Color3, layoutOrder: number, onClick: () -> ())
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, 0, 0, 40)
+	btn.BackgroundColor3 = color
+	btn.BorderSizePixel = 0
+	btn.AutoButtonColor = false
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 14
+	btn.TextColor3 = C.text
+	btn.Text = text
+	btn.LayoutOrder = layoutOrder
+	btn.Parent = parent
+	addCorner(btn, 10)
+	btn.MouseButton1Click:Connect(onClick)
+	return btn
+end
+
+local function makeToggle(parent: Instance, label: string, guard: string, key: string, layoutOrder: number)
+	local row = Instance.new("Frame")
+	row.Size = UDim2.new(1, 0, 0, 52)
+	row.BackgroundColor3 = C.card
+	row.BorderSizePixel = 0
+	row.LayoutOrder = layoutOrder
+	row.Parent = parent
+	addCorner(row, 12)
+	addStroke(row)
+
+	local title = makeLabel(row, label, 14, C.text, true)
+	title.Position = UDim2.fromOffset(14, 8)
+	title.Size = UDim2.new(1, -100, 0, 18)
+
+	local sub = makeLabel(row, guard, 12, C.subtext)
+	sub.Position = UDim2.fromOffset(14, 28)
+	sub.Size = UDim2.new(1, -100, 0, 16)
+
+	local pill = Instance.new("TextButton")
+	pill.Size = UDim2.fromOffset(54, 28)
+	pill.Position = UDim2.new(1, -68, 0.5, -14)
+	pill.BackgroundColor3 = C.stroke
+	pill.Text = ""
+	pill.AutoButtonColor = false
+	pill.Parent = row
+	addCorner(pill, 14)
+
+	local knob = Instance.new("Frame")
+	knob.Size = UDim2.fromOffset(22, 22)
+	knob.Position = UDim2.fromOffset(3, 3)
+	knob.BackgroundColor3 = C.text
+	knob.BorderSizePixel = 0
+	knob.Parent = pill
+	addCorner(knob, 11)
+
+	pill.MouseButton1Click:Connect(function()
+		local nextOn = not toggleState[key]
+		toggleState[key] = nextOn
+		tween(pill, { BackgroundColor3 = nextOn and C.accent or C.stroke })
+		tween(knob, { Position = nextOn and UDim2.fromOffset(29, 3) or UDim2.fromOffset(3, 3) })
+		fireTest(key, nextOn)
+	end)
+end
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "EncrypticTestLab"
+gui.ResetOnSpawn = false
+gui.DisplayOrder = 999
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.Parent = playerGui
+
+local openBtn = Instance.new("TextButton")
+openBtn.Name = "OpenButton"
+openBtn.Size = UDim2.fromOffset(52, 52)
+openBtn.Position = UDim2.new(1, -68, 0, 16)
+openBtn.BackgroundColor3 = C.accent
+openBtn.Text = "AC"
+openBtn.TextSize = 18
+openBtn.Font = Enum.Font.GothamBold
+openBtn.TextColor3 = C.text
+openBtn.AutoButtonColor = false
+openBtn.Parent = gui
+addCorner(openBtn, 14)
+addStroke(openBtn, C.accent2, 0.3)
+
+local panel = Instance.new("Frame")
+panel.Name = "Panel"
+panel.Size = UDim2.fromOffset(340, 580)
+panel.Position = UDim2.new(1, -356, 0, 16)
+panel.BackgroundColor3 = C.panel
+panel.BorderSizePixel = 0
+panel.Visible = false
+panel.Parent = gui
+addCorner(panel, 16)
+addStroke(panel)
+
+local header = Instance.new("Frame")
+header.Size = UDim2.new(1, 0, 0, 88)
+header.BackgroundColor3 = C.accent
+header.BorderSizePixel = 0
+header.Parent = panel
+addCorner(header, 16)
+
+local grad = Instance.new("UIGradient")
+grad.Color = ColorSequence.new(C.accent, C.accent2)
+grad.Rotation = 35
+grad.Parent = header
+
+makeLabel(header, "Encryptic Test Lab", 20, C.text, true).Position = UDim2.fromOffset(18, 18)
+makeLabel(header, "Trigger anti-cheat guards", 13, Color3.fromRGB(230, 232, 255)).Position = UDim2.fromOffset(18, 46)
+
+local body = Instance.new("ScrollingFrame")
+body.Size = UDim2.new(1, -24, 1, -104)
+body.Position = UDim2.fromOffset(12, 96)
+body.BackgroundTransparency = 1
+body.BorderSizePixel = 0
+body.ScrollBarThickness = 4
+body.AutomaticCanvasSize = Enum.AutomaticSize.Y
+body.CanvasSize = UDim2.fromOffset(0, 0)
+body.Parent = panel
+
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0, 10)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Parent = body
+
+local function section(parent: Instance, text: string, order: number)
+	local l = makeLabel(parent, text, 11, C.subtext, true)
+	l.Size = UDim2.new(1, 0, 0, 16)
+	l.LayoutOrder = order
+end
+
+section(body, "MOVEMENT MODS", 1)
+makeToggle(body, "Speed Boost", "HumanoidGuard + MovementGuard", "speed", 2)
+makeToggle(body, "Fly Mode", "FlyGuard", "fly", 3)
+makeToggle(body, "Noclip", "NoclipGuard", "noclip", 4)
+makeToggle(body, "BodyVelocity Fly", "PhysicsGuard", "physics", 5)
+makeToggle(body, "Godmode HP", "HealthGuard", "godmode", 6)
+
+section(body, "INSTANT ACTIONS", 10)
+makeButton(body, "Teleport +200 studs", C.accent, 11, function() fireTest("teleport") end)
+makeButton(body, "Mega Jump / HipHeight", C.accent, 12, function() fireTest("jump") end)
+makeButton(body, "Velocity Burst", C.accent, 13, function() fireTest("velocity") end)
+
+section(body, "REMOTE / COMBAT", 20)
+makeButton(body, "Spam Coin Remote", C.danger, 21, function()
+	for _ = 1, 25 do
+		requestCoin:FireServer()
+	end
+end)
+makeButton(body, "Start Rapid Fire", C.danger, 22, function()
+	firing = true
+	task.spawn(function()
+		while firing do
+			fireWeapon:FireServer()
+			task.wait(0.05)
+		end
+	end)
+end)
+makeButton(body, "Stop Rapid Fire", Color3.fromRGB(71, 85, 105), 23, function()
+	firing = false
+end)
+
+local footer = makeLabel(body, "RightControl / Insert = toggle • Studio demo only", 11, C.subtext)
+footer.Size = UDim2.new(1, 0, 0, 20)
+footer.TextXAlignment = Enum.TextXAlignment.Center
+footer.LayoutOrder = 99
+
+local function setPanelOpen(open: boolean)
+	panelOpen = open
+	panel.Visible = open
+	tween(openBtn, { BackgroundColor3 = open and C.accent2 or C.accent })
+end
+
+openBtn.MouseButton1Click:Connect(function()
+	setPanelOpen(not panelOpen)
+end)
+
+UserInputService.InputBegan:Connect(function(input, processed)
+	if processed then
+		return
+	end
+	if input.KeyCode == Enum.KeyCode.RightControl or input.KeyCode == Enum.KeyCode.Insert then
+		setPanelOpen(not panelOpen)
+	elseif input.KeyCode == Enum.KeyCode.F then
+		firing = true
+		task.spawn(function()
+			while firing do
+				fireWeapon:FireServer()
+				task.wait(0.05)
+			end
+		end)
+	elseif input.KeyCode == Enum.KeyCode.G then
+		for _ = 1, 25 do
+			requestCoin:FireServer()
+		end
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.F then
+		firing = false
+	end
+end)
+
+player.CharacterRemoving:Connect(function()
+	firing = false
+	for key in toggleState do
+		toggleState[key] = false
+	end
+end)
+
+print("[Demo Client] GUI ready — click AC (top-right) or press RightControl / Insert")
+
+```
+
+`demo/build_studio_model.py`:
+
+```py
+#!/usr/bin/env python3
+"""Build EncrypticDemo.rbxmx for drag-and-drop import into Roblox Studio."""
+
+from pathlib import Path
+import xml.sax.saxutils as sax
+
+ROOT = Path(__file__).resolve().parent.parent
+ENCRYPTIC = ROOT / "ServerScriptService" / "Encryptic"
+OUT = Path(__file__).resolve().parent / "EncrypticDemo.rbxmx"
+
+MODULES = [
+    "init",
+    "Shared",
+    "BanManager",
+    "MovementGuard",
+    "TeleportGuard",
+    "HumanoidGuard",
+    "FlyGuard",
+    "NoclipGuard",
+    "PhysicsGuard",
+    "HealthGuard",
+    "FireRateGuard",
+    "RemoteGuard",
+    "ExploitGuard",
+    "ToolGuard",
+    "HitGuard",
+]
+
+SCRIPTS = [
+    ("ModuleScript", ENCRYPTIC / f"{name}.lua", name)
+    for name in MODULES
+] + [
+    ("Script", Path(__file__).resolve().parent / "ServerScriptService" / "DemoGame.server.lua", "DemoGame"),
+    (
+        "LocalScript",
+        Path(__file__).resolve().parent / "StarterPlayer" / "StarterPlayerScripts" / "DemoClient.client.lua",
+        "DemoClient",
+    ),
+]
+
+
+def cdata(text: str) -> str:
+    return text.replace("]]>", "]]]]><![CDATA[>")
+
+
+def item(class_name: str, name: str, source: str | None, referent: str, indent: str) -> str:
+    lines = [
+        f'{indent}<Item class="{class_name}" referent="{referent}">',
+        f"{indent}  <Properties>",
+        f"{indent}    <string name=\"Name\">{sax.escape(name)}</string>",
+    ]
+    if source is not None:
+        lines.append(f"{indent}    <ProtectedString name=\"Source\"><![CDATA[{cdata(source)}]]></ProtectedString>")
+    lines.extend([f"{indent}  </Properties>", f"{indent}</Item>"])
+    return "\n".join(lines)
+
+
+def main() -> None:
+    ref = 0
+    parts = ['<?xml version="1.0" encoding="utf-8"?>', '<roblox version="4">']
+
+    ref += 1
+    model_ref = f"RBX{ref}"
+    parts.append(f'  <Item class="Model" referent="{model_ref}">')
+    parts.append("    <Properties>")
+    parts.append("      <string name=\"Name\">EncrypticDemo</string>")
+    parts.append("    </Properties>")
+
+    ref += 1
+    folder_ref = f"RBX{ref}"
+    parts.append(f'    <Item class="Folder" referent="{folder_ref}">')
+    parts.append("      <Properties>")
+    parts.append("        <string name=\"Name\">Encryptic</string>")
+    parts.append("      </Properties>")
+
+    module_count = len(MODULES)
+    for class_name, path, name in SCRIPTS[:module_count]:
+        ref += 1
+        source = path.read_text(encoding="utf-8")
+        parts.append(item(class_name, name, source, f"RBX{ref}", "      "))
+
+    parts.append("    </Item>")
+
+    for class_name, path, name in SCRIPTS[module_count:]:
+        ref += 1
+        source = path.read_text(encoding="utf-8")
+        parts.append(item(class_name, name, source, f"RBX{ref}", "    "))
+
+    parts.append("  </Item>")
+    parts.append("</roblox>")
+
+    OUT.write_text("\n".join(parts) + "\n", encoding="utf-8")
+    print(f"Wrote {OUT}")
+
+
+if __name__ == "__main__":
+    main()
+
+```
