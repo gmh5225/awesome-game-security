@@ -503,6 +503,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kinject](entities/kinject.md) — kernel map + APC inject (C/C++; cheat / injection:windows)
 - [kit](entities/kit.md) — C/C++ pixels tooling + asset pipelines (Game Engine / Image Codec)
 - [kiero2](entities/kiero2.md) — kiero v2 runtime D3D9–12/GL/Vulkan API locator (BYO hooking; CMake FetchContent; cross-platform GL/VK)
+- [kn-live-dbg](entities/kn-live-dbg.md) — Windows kernel live debugging (driver memory primitives + Zydis disasm; user-mode TUI; LiveKD-style)
 - [Known-Driver-Mappers](entities/known-driver-mappers.md) — catalog of known Driver Mappers (AC / stress-testing)
 - [KeyboardKit](entities/keyboardkit.md) — kernel keyboard IRP filter keylogger (UDP exfil; ExplorerFrame DLL hijack)
 - [kernel-codecave-poc](entities/kernel-codecave-poc.md) — KM shellcode in driver .text caves (Find Codecave; vs pool/exec alloc scans)

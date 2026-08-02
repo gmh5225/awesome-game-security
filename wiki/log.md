@@ -2120,4 +2120,6 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-02** — ingest `description:kernullist/windbg-decompile-ext`: entity [[windbg-decompile-ext]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
 
+- **2026-08-02** — ingest `description:kernullist/kn-live-dbg`: entity [[kn-live-dbg]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
 - **2026-08-02** — ingest `description:ketoo/NoahGameFrame`: entity [[noahgameframe]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
