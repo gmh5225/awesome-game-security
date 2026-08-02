@@ -19,7 +19,7 @@ sources:
   - wiki/sources/descriptions/mltpig__PCILeech-FPGA-DMA_VMD.md
   - wiki/sources/descriptions/sercanarga__fpga-dma-multi-tool.md
   - wiki/sources/descriptions/sh1ftd__dma-tools-rs.md
-updated: 2026-08-01
+updated: 2026-08-02
 confidence: high
 ---
 
@@ -80,4 +80,4 @@ Tier-6 firmware operating only within driver-mapped domains and matching donor b
 
 ## README map
 
-No top-level DMA section — maps via `Cheat` (~2624) DMA lanes and `Anti Cheat > Detection:DMA` (~631), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. SEWindows local replay and remote attestation). (source: wiki/sources/README-categories.md)
+No top-level DMA section — maps via `Cheat` (~2626) DMA lanes and `Anti Cheat > Detection:DMA` (~631), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. SEWindows local replay and remote attestation). (source: wiki/sources/README-categories.md)

@@ -2091,3 +2091,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:kkent030315/Van1338`: entity [[van1338]]; cited on [[kernel-callbacks]] and [[overviews/anti-cheat]].
 
 - **2026-08-02** — ingest `description:kkent030315/MsIoExploit`: entity [[ms-io-exploit]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
+- **2026-08-02** — ingest `readme:categories`: bumped Cheat ~2626 (was ~2624; Anti Cheat ~631 stable); refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
