@@ -54,6 +54,7 @@ sources:
   - wiki/sources/descriptions/x86matthew__InstrumentationCallbackSyscallLogger.md
   - wiki/sources/descriptions/x86byte__sbox.md
   - wiki/sources/descriptions/x86byte__Obfusk8.md
+  - wiki/sources/descriptions/xhscfq__anti-cheat-research-index.md
   - wiki/sources/descriptions/wufhex__Mystic-xorstr.md
   - wiki/sources/descriptions/nevergiveup-c__obfuscxx.md
   - wiki/sources/descriptions/skadro-official__skCrypter.md
@@ -288,7 +289,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 Use [[research-rigor]] when turning detector hits into enforcement: define the decision unit (player/session/device/build); label telemetry as server-observed vs client-reported; keep **observation → finding → attribution → action** separate; calibrate thresholds on representative held-out data; report prevalence, FPR/FNR, and review volume; combine causally distinct signals and measure joint error—correlated detectors can fail together. Invariant findings need rollback/reconnect/game-bug exclusions before calling exploitation. (source: wiki/sources/skills/anti-cheat.md)
 
-Structured research indexes such as xhscfq/anti-cheat-research-index catalog public AC architecture, Windows kernel security, VT-x/EPT virtualization, graphics presentation-path integrity, and RE methodology references for defensive engineering. (source: wiki/sources/README-categories.md)
+Structured research indexes such as [[anti-cheat-research-index]] catalog public AC architecture, kernel execution/memory integrity, VT-x/EPT instrumentation, graphics presentation-path integrity, and x86/x64 RE references (shellcode, attach, present-hook, hardware-trace detection) for defensive engineering—not a standalone codebase. (source: wiki/sources/descriptions/xhscfq__anti-cheat-research-index.md)
 
 ## Major systems
 
