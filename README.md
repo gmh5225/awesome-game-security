@@ -3764,6 +3764,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://anti-debug.checkpoint.com [Anti Debug]
 - https://github.com/gmh5225/DVRT [DVRT]
 - https://areweanticheatyet.com [A list of games using anti-cheats]
+- https://github.com/ManInMyVan/Minecraft-Anticheat-List [Curated catalog of public Minecraft Java/Bedrock anticheats across platforms and versions]
 - https://github.com/gmh5225/alt-V-Anticheat-Guide [GTA5 MP servers]
 - https://github.com/gmh5225/packer-tutorial [Packer]
 - https://github.com/gmh5225/ghostbusters [Senior Design: Anit-Cheat Detection system]
@@ -4163,6 +4164,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/oomph-ac/oomph [Minecraft Bedrock MiTM anti-cheat proxy with server-authoritative movement and combat]
 - https://github.com/somewhatpublicacc/wellsanticheat [Among Us host-side BepInEx anti-cheat for RPC abuse, crashers, spam, and lobby cheats]
 - https://github.com/Longno242/Encryptic-Roblox-Anti-Cheat [Server-authoritative Luau anti-cheat for Roblox with movement, remote, fly/noclip, fire-rate, and combat guards plus Studio demo]
+- https://github.com/mastershadow547/Advanced-Anticheat [Open-source Roblox server anti-cheat detecting movement exploits, unauthorized remotes, and environment tampering]
 - https://github.com/SLAUC91/AntiCheat [Windows rootkit and cheat scanner (hooks, handles, drivers, modules)]
 - https://github.com/gmh5225/AntiCheat
 - https://github.com/ComodoSecurity/openedr [EDR]
