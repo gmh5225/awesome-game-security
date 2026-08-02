@@ -2143,3 +2143,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:keowu/sjcam`: entity [[sjcam]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]].
 
 - **2026-08-02** — ingest `description:keowu/koidbg`: entity [[koidbg]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
+
+- **2026-08-02** — ingest `readme:categories`: bumped Cheat ~2630 (was ~2628; Anti Cheat ~633 stable); refreshed README maps on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
