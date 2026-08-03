@@ -2229,3 +2229,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:joxeankoret/diaphora`: entity [[diaphora]]; cited on [[overviews/reverse-engineering]]; cross-linked from [[idaplugins]].
 
 - **2026-08-03** — ingest `description:jooola00/fortnite-cheat-source-internal`: entity [[fortnite-cheat-source-internal]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
+- **2026-08-03** — ingest `description:jonpalmisc/ida_screenshot`: entity [[ida-screenshot]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked from [[idaplugins]].
