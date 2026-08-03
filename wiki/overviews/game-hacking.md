@@ -277,6 +277,7 @@ sources:
   - wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md
   - wiki/sources/descriptions/pastor-ritz__ritz-amazing-fortnite-internal.md
   - wiki/sources/descriptions/jooola00__fortnite-cheat-source-internal.md
+  - wiki/sources/descriptions/joeyjurjens__iOS-Mod-Menu-Template-for-Theos.md
   - wiki/sources/descriptions/simply-codes__Fortnite-External-P2C.md
   - wiki/sources/descriptions/vctr74__R6-Internal-V3.md
   - wiki/sources/descriptions/rushzzz-max__r6-external.md
@@ -722,6 +723,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Non-jailbreak iOS IPA patch tooling such as [[ipapatch]] (C/C++/ObjC; Patch iOS Apps without Jailbreak) sits in the Cheat / IOS jailbreak sideload lane. (source: wiki/sources/descriptions/paradiseduo__IPAPatch.md)
 - Perma-signed jailed IPA installers such as [[trollstore]] (CoreTrust/AMFI bugs; arbitrary entitlements; persist across reboot) sit in the same Cheat / jailed-app sideload lane. (source: wiki/sources/descriptions/opa334__TrollStore.md)
 - Runtime iOS/macOS dylib injectors such as [[opainject]] (`task_for_pid` / Mach remote thread → `dlopen`; jailbreak + tfp0) sit in the Cheat / Injection:IOS lane. (source: wiki/sources/descriptions/opa334__opainject.md)
+- Theos iOS mod-menu templates such as [[ios-mod-menu-template-for-theos]] (Logos hooks; embedded 50×50 menu icons; cheat / `[IOS mod menu]`) sit in the Cheat / render-draw lane beside ImGui samples such as [[imgui-ios-mod-menu]]. (source: wiki/sources/descriptions/joeyjurjens__iOS-Mod-Menu-Template-for-Theos.md)
 - macOS native Roblox cheat frameworks such as [[roblox-cheats]] (Objective-C; `libESP.dylib` inject + Mach VM / shared-memory IPC; internal/external ESP, input simulation, remote calls, breakpoint hooks; per-game modules + offset finder from test place) sit in the Cheat / macOS injection lane for Roblox client memory-layout study. (source: wiki/sources/descriptions/notahacker8__RobloxCheats.md)
 - Linux LKM vermagic/CRC rewriting via [[vermagic]] sits in the Cheat Linux / RE tools lane (load modules across mismatched kernel builds). (source: wiki/sources/descriptions/yaxinsn__vermagic.md) Linux kernel image → ELF symbolization via [[vmlinux-to-elf]] (Python; kallsyms + section rebuild for IDA/Ghidra) sits in the same cheat / linux kernel explorer lane. (source: wiki/sources/descriptions/marin-m__vmlinux-to-elf.md) Linux kernel rootkit hooking samples such as [[venom]] (C/C++; LKM hook mechanisms) sit in the same cheat / linux kernel explorer lane. (source: wiki/sources/descriptions/sad0p__venom.md)
 - Title-specific DayZ cheat/modding samples such as [[dayzzz]] (SDK generation + overlays) illustrate game:dayz offensive research surface. (source: wiki/sources/descriptions/zhitkur__DayZzz.md)

@@ -12,7 +12,7 @@ confidence: medium
 
 ImGui menu for iOS aimed at modding: an offensive sample in the cheat / render-draw lane for researchers studying iOS overlay and in-game menu patterns. (source: wiki/sources/descriptions/xProHackerx__imgui-ios-mod-menu.md)
 
-Complements desktop ImGui-on-Present overlays ([[present-hook]], [[steam-overlay-x64]]) with a mobile/iOS-facing menu surface.
+Complements desktop ImGui-on-Present overlays ([[present-hook]], [[steam-overlay-x64]]) with a mobile/iOS-facing menu surface. Theos/Logos scaffold [[ios-mod-menu-template-for-theos]] offers an alternate jailbreak-tweak mod-menu starting point.
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements desktop ImGui-on-Present overlays ([[present-hook]], [[steam-overlay
 
 ## Related
 
-[[present-hook]] · [[steam-overlay-x64]] · [[unityspeedtools]] · [[overviews/mobile-security]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]
+[[present-hook]] · [[steam-overlay-x64]] · [[ios-mod-menu-template-for-theos]] · [[unityspeedtools]] · [[overviews/mobile-security]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]
