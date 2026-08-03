@@ -12,7 +12,7 @@ confidence: medium
 
 C/C++ **obfuscation engine** listed under Anti Cheat → Obfuscation Engine, centered on furikuri. Aimed at anti-cheat engineers and defensive security researchers studying obfuscation-engine designs rather than shipping as an AC product. (source: wiki/sources/descriptions/jnastarot__furikuri.md)
 
-Useful as an open obfuscation-engine reference alongside other jnastarot tooling such as [[shibari]] (PE merge) and [[ice9]] (open-source AC)—not a commercial protector or unpacker.
+Useful as an open obfuscation-engine reference alongside other jnastarot tooling such as [[anti-cheat]] (OSS AC system), [[shibari]] (PE merge), and [[ice9]] (open-source AC)—not a commercial protector or unpacker.
 
 ## Links
 
@@ -20,4 +20,4 @@ Useful as an open obfuscation-engine reference alongside other jnastarot tooling
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[shibari]] · [[ice9]] · [[wprotect]] · [[perses]] · [[nocturne]]
+[[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[anti-cheat]] · [[shibari]] · [[ice9]] · [[wprotect]] · [[perses]] · [[nocturne]]

@@ -114,6 +114,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-vuln](entities/android-vuln.md) — Android Kernel CVE reference list (cheat / Android Kernel CVE)
 - [anticheat-poc](entities/anticheat-poc.md) — Windows AC PoC (debugger / integrity / signature scan / process enum; Instrumentation Callback)
 - [anti-cheat-research-index](entities/anti-cheat-research-index.md) — structured AC/kernel/VT-x/graphics/RE research index (defensive engineering map; guide lane)
+- [anti-cheat](entities/anti-cheat.md) — C/C++ open-source anti-cheat system (jnastarot; Anti Cheat → Open Source Anti Cheat System)
 - [AntiCheat-Testing-Framework](entities/anti-cheat-testing-framework.md) — modular Windows AC detection test harness (mem R/W / inject / overlay / input / KM; Testing Framework)
 - [AntiDebugging](entities/anti-debugging.md) — C++ anti-debugging techniques (Anti Cheat → Anti Debugging)
 - [AntiFrida](entities/antifrida.md) — Java/C++ Detection:Frida sample (Anti Cheat → Detection:Frida)
