@@ -149,6 +149,7 @@ sources:
   - wiki/sources/descriptions/nzcv__note.md
   - wiki/sources/descriptions/tangsilian__android-vuln.md
   - wiki/sources/descriptions/jiayy__android_vuln_poc-exp.md
+  - wiki/sources/descriptions/jcalabres__hook-updater.md
   - wiki/sources/descriptions/musabcel__android_rom_list.md
   - wiki/sources/descriptions/tamirzb__CVE-2021-1961.md
   - wiki/sources/descriptions/nahid0x1__CVE-2024-0044.md
@@ -598,7 +599,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Function-level rip → Python/Unicorn harnesses via [[ripr]] (IDA plugin + r2pipe; BN/Unicorn packaging) sits in the Cheat IDA / Binary Ninja Plugins / RE Tools lane. (source: wiki/sources/descriptions/pbiernat__ripr.md)
 - VEH-based lightweight DBI via [[cpp-veh-dbi]] (C++ / PowerShell; exception-driven instrumentation) also sits in the Cheat DBI lane. (source: wiki/sources/descriptions/revsic__cpp-veh-dbi.md)
 - C++/C DBI / analysis / patching via [[w1tn3ss]] (modding / hooking / memory analysis) sits in the same Cheat DBI lane. (source: wiki/sources/descriptions/redthing1__w1tn3ss.md)
-- Python QEMU user-mode dynamic binary analysis via [[pyda]] (Linux binary instrument / hook / mem / syscall / insn callbacks without native exec) also sits in the Cheat DBI lane. (source: wiki/sources/descriptions/ndrewh__pyda.md)
+- Python QEMU user-mode dynamic binary analysis via [[pyda]] (Linux binary instrument / hook / mem / syscall / insn callbacks without native exec) also sits in the Cheat DBI lane. (source: wiki/sources/descriptions/ndrewh__pyda.md) Python [[frida]] hook refresh automation via [[hook-updater]] (auto-update hook scripts when targets change; cheat / Frida) sits in the same lane. (source: wiki/sources/descriptions/jcalabres__hook-updater.md)
 - Rust-accelerated angr / Rust decompiler [[oxidizer]] (high-fidelity pseudocode from stripped binaries; enum/match/`?` recovery; Rust 1.39–1.93) sits in the Cheat RE Tools / Decompiler lane. (source: wiki/sources/descriptions/sefcom__oxidizer.md)
 - Automated reverse-engineering platform [[re-architect]] (binary analysis + ML; extract meaningful info from binaries) sits in the Cheat RE Tools lane. (source: wiki/sources/descriptions/pandaadir05__re-architect.md)
 - .NET Harmony instrumentation of VMProtect-virtualized methods via [[vmunprotect]] (trace invokes / manipulate params; anti-debug bypass; VMP 3.6.0) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/void-stack__VMUnprotect.md)

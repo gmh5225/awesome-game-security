@@ -2319,3 +2319,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:jdavidberger/chaiScriptPlugin`: entity [[chaiscript-plugin]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].
 
 - **2026-08-03** — ingest `description:jd-opensource/arkdecompiler`: entity [[arkdecompiler]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
+- **2026-08-03** — ingest `description:jcalabres/hook-updater`: entity [[hook-updater]]; cited on [[frida]] and [[overviews/game-hacking]].
