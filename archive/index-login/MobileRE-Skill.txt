@@ -1,0 +1,359 @@
+Project Path: arc_index-login_MobileRE-Skill_zwm48sdr
+
+Source Tree:
+
+```txt
+arc_index-login_MobileRE-Skill_zwm48sdr
+├── AGENTS.md
+└── README.md
+
+```
+
+`AGENTS.md`:
+
+```md
+# AGENTS.md — 开发规范
+
+所有脚本、模块、工具的开发规范。编码时遵循此规范，确保产出可组合、可观测、可复现。
+
+## 编码规范
+
+### Frida 脚本 (JavaScript)
+
+- 语言：JavaScript（Frida QuickJS / V8），非 Node.js，无 `require`、无 npm
+- 文件编码：UTF-8 无 BOM
+- 缩进：2 空格，不混用 Tab
+- 变量名 camelCase，常量 UPPER_SNAKE_CASE
+- 函数单一职责，单个 hook 逻辑不超过 50 行
+- 不写注释，除非逻辑不直观需要解释 why
+- 使用 `utils.js` 提供的工具函数，不重复实现
+
+### Python 工具
+
+- Python 3.9+，使用 frida Python binding
+- 配置通过 dict 注入，不硬编码路径/参数
+- 模板：`scripts/templates/analysis.py`
+
+### bat 检测脚本
+
+- 放在 `tools/` 目录
+- 结构化输出，方便截图取证
+- 前置条件在脚本头部注释说明
+
+## 模块结构
+
+```
+scripts/
+├── core/utils.js        ← 始终首个加载，提供公共工具
+├── monitors/            ← 纯观测，不修改行为
+├── bypass/              ← 主动干预，修改 app 行为
+├── checklist/           ← 检测清单脚本
+└── templates/           ← 模板，复制后修改使用
+```
+
+新模块导出标准接口：
+
+```javascript
+var CONFIG = { ... };
+if (typeof CONFIG_OVERRIDE !== 'undefined') {
+    Object.assign(CONFIG, CONFIG_OVERRIDE[模块名] || {});
+}
+```
+
+## Frida API 约定
+
+- **Hook 前先检查目标是否存在**：`Java.use()` 前用 `Java.available`，`Module.findExportByName()` 前用 `Module.findBaseAddress()`
+- **大量数据用 `send()` 而非 `console.log()`**：`send()` 走 channel，`console.log()` 走 stdout，大数据会丢
+- **Interceptor.attach 比 Interceptor.replace 安全**：replace 替换原函数，签名不匹配会崩
+- **Native callback 必须持有引用**：`new NativeCallback(...)` 赋值给全局变量，否则 GC 回收后崩溃
+- **Stalker 只在必要时用**：性能开销大，用 `Interceptor.attach` + `Thread.backtrace()` 能解决的不要 Stalker
+
+## 软件工程原则
+
+- **单一职责**：一个模块做一件事，不要把监控和绕过混在一起
+- **可组合**：模块通过 `-l` 参数组合，不互相依赖
+- **可观测**：所有 hook 点必须有日志输出，不能静默吞掉
+- **可复现**：脚本能在其他设备上跑，不依赖特定路径硬编码
+- **最小权限**：只 hook 需要的目标，不做全量扫描除非明确要求
+
+## Karpathy 编码准则
+
+写 Frida Agent 脚本时遵循 `karpathy-guidelines` skill 的 4 条原则：
+
+1. **Think Before Coding** — 不假设，暴露不确定性。hook 前先确认目标类/方法存在。
+2. **Simplicity First** — 最少代码解决问题。不写投机性 hook，不加未请求的功能。
+3. **Surgical Changes** — 只改必须改的。修改现有模块时不顺手重构，匹配已有风格。
+4. **Goal-Driven Execution** — 定义可验证的成功标准。hook 有输出 = 成功，无输出 = 需排查。
+
+## 反馈协议
+
+分析过程中遇到以下情况时，往 `feedback/FEEDBACK.md` **追加**一条（不改已有条目）：
+
+- 决策树某个分支走不通或没覆盖
+- 模块崩溃 / 无输出 / 逻辑错
+- 发现需要但不存在的能力
+- AGENTS/SKILL 说明误导了判断
+
+字段约束：
+- 类型限 5 种：`decision-tree` / `module-bug` / `missing-module` / `doc` / `tool`
+- 复现**必须**给完整 `frida` 命令（开发时原样跑）
+- 状态默认 `open`，不自行关闭
+
+## 不重复造轮子
+
+- 写新模块前先查 `scripts/` 是否已有可复用的
+- `utils.js` 已有日志格式化、hexdump、backtrace 解析，直接调用
+- 配置走 `CONFIG_OVERRIDE` 机制，不硬编码
+- 检测类脚本放 `checklist/`，监控类放 `monitors/`，绕过类放 `bypass/`
+
+## 集成新检测项
+
+把新的检测能力集成到 skill 时：
+
+1. 判断类型：Frida 脚本 → `scripts/`，Python 工具 → `tools/` 或 `templates/`，bat 脚本 → `tools/`
+2. 遵循上述模块规范（CONFIG、CONFIG_OVERRIDE）
+3. 更新 SKILL.md 决策树和模块目录
+4. 更新 SKILL.md 常用组合速查表
+5. 添加反馈条目（如有）
+```
+
+`README.md`:
+
+```md
+# MobileRE-Skill — AI 驱动的移动端逆向分析技能集
+
+一套面向 **AI Agent（Kilo）** 的移动端逆向分析技能集，不是给人类手搓命令用的工具箱，而是让 AI 理解、决策、执行的 **可组合技能模块**。
+
+核心交付物是 `.kilo/` 下的 Agent 定义和 Skill 文档，Frida 脚本、Python 工具、bat 检测脚本是 AI 执行分析任务时调用的能力单元。
+
+## 做这个 Skill 的原因
+
+市面上的逆向分析输出大多是孤立的单点脚本：一个加解密自吐、一个文件监控、一个 Root 检测绕过。每次做新项目都要重新拼凑散落各处的脚本，遇到加固或反检测时，单点工具一碰就崩。
+
+这个 Skill 把碎片化的能力整合成 **AI 可理解的模块系统**，让 AI 在分析时能：
+
+1. **理解攻击面** — Skill 文档定义了完整的移动端攻击面决策树，AI 按图索骥
+2. **组合能力** — 通过 `-l` 参数自由组合模块，AI 根据场景动态选择
+3. **分层递推** — 从 Java 层直达 SVC 指令层，上层被反检测绕过时自动下钻
+4. **反馈优化** — 分析过程中的走不通路径、模块崩溃、缺失能力都记录到 Feedback，持续改进
+
+## 与传统工具箱的本质区别
+
+| 维度 | 传统逆向工具箱 | 本 Skill |
+|------|---------------|----------|
+| 使用者 | 人类工程师 | **AI Agent**（Kilo 等 LLM Agent） |
+| 核心交付 | 脚本/工具 | **Skill 文档 + Agent 定义**（`.kilo/`） |
+| 调用方式 | 手动敲命令 | AI 根据决策树自动选择和执行 |
+| 决策依据 | 人的经验 | **SKILL.md 决策树** + 攻击面文档 |
+| 反馈闭环 | 无 | **Feedback 机制**：失败路径、缺失能力自动记录 |
+| 组合方式 | 复制粘贴 | AI 通过 `-l` 参数按需组合 |
+| 分层分析 | 人自己判断 | AI 按 `Java → JNI → Native → libc → syscall → SVC` 递推 |
+| 反检测 | 手动逐层试 | **6 阶段 Pipeline**，AI 按阶段递进 |
+
+## 架构
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                     AI Agent (Kilo)                           │
+│  .kilo/agent/reverser.md  — Agent 角色定义                    │
+│  .kilo/skill/.../SKILL.md — 攻击面决策树 + 模块索引          │
+│  feedback/FEEDBACK.md     — 分析过程反馈闭环                  │
+├──────────────────────────────────────────────────────────────┤
+│                   Frida 动态 Hook 模块                         │
+│  monitors/ (13 个) — 纯观察，不修改行为                       │
+│  bypass/   (9 个)  — 主动干预，修改 app 行为                  │
+│  checklist/         — 检测清单                                │
+├──────────────────────────────────────────────────────────────┤
+│               Python 二进制分析工具                            │
+│  find_branch_callers · find_strref · fix_elf                 │
+│  scan_inline_svc · patch_gadget_threadnames · so_dump        │
+├──────────────────────────────────────────────────────────────┤
+│                   调试与检测工具                               │
+│  GDB 附加调试 · TracerPid 监控 · 注入检测 · APK 元数据提取    │
+├──────────────────────────────────────────────────────────────┤
+│                  反编译引擎整合 (MCP)                          │
+│  JADX — Java 反编译 · Ghidra — 二进制分析                    │
+└──────────────────────────────────────────────────────────────┘
+```
+
+## 反检测 Pipeline（6 阶段）
+
+AI 在分析过程中按阶段递进，遇到反检测拦截时自动进入下一阶段：
+
+```
+Phase 1: so_loader_tracer    → 定位检测 SO
+Phase 2: init_hook           → 抢在 so 的 init_array 之前获取控制权
+Phase 3: dlsym_tracer        → 发现检测代码运行时动态解析了哪些符号
+Phase 4: exit_blocker        → 持续保活，阻止 exit_group/abort/kill
+Phase 5: shellcode_detector  → 检测小尺寸 mmap PROT_EXEC（动态解密 shellcode）
+Phase 6: function_patcher    → 精确 NOP 闪退函数首字节
+```
+
+## 模块目录
+
+### 被动观察层 — 只观测不修改（13 个模块）
+
+| 模块 | 作用层级 | 功能 |
+|------|---------|------|
+| `crypto_monitor` | Java | 加解密自吐（Cipher/MessageDigest/Mac/密钥材料） |
+| `native_crypto_monitor` | Native so | OpenSSL/BoringSSL 加密监控（EVP/AES/RSA/HMAC） |
+| `file_monitor` | libc + syscall | 文件访问监控（open/fopen/stat/readlink） |
+| `network_monitor` | libc + syscall | 网络通信监控（connect/sendto/recvfrom） |
+| `thread_monitor` | libc + syscall | 线程创建/销毁监控（pthread_create/clone） |
+| `dl_monitor` | libc + libart | 动态库加载监控（dlopen/dlsym/OpenNativeLibrary） |
+| `proc_monitor` | Java + libc + syscall | 进程执行监控（system/popen/execve/Runtime.exec） |
+| `syscall_tracer` | syscall | 系统调用追踪（ARM64 syscall 号映射 + 速率限制） |
+| `ssl_plaintext` | Java | HTTP 明文捕获（OkHttp3/HttpsURLConnection/Retrofit2） |
+| `native_hooker` | Native so | 自动 Hook 目标 SO 全部导出函数 |
+| `intent_tracker` | Java | 跨组件 Intent 污点追踪 |
+| `memory_scanner` | Java + Native | 内存敏感数据扫描（AES key/JWT/私钥/口令） |
+| `svc_tracer` | Stalker | SVC 指令级 syscall 追踪（捕获绕 libc 的直通 SVC） |
+
+### 主动干预层 — 修改应用行为（9 个模块）
+
+| 模块 | Pipeline 阶段 | 功能 |
+|------|-------------|------|
+| `exit_blocker` | Phase 4 保活 | 阻断 exit_group/\_exit/abort/kill/tgkill |
+| `so_loader_tracer` | Phase 1 | 追踪 linker64 do_dlopen，定位检测 SO |
+| `init_hook` | Phase 2 | 抢在 so 的 init_array 之前获取控制权 |
+| `dlsym_tracer` | Phase 3 | 追踪运行时动态解析的符号 |
+| `thread_blocker` | 分支 A | 阻断检测线程（pthread_create 替换 / clone PROT_NONE） |
+| `frida_feature_hider` | 辅助 | 隐藏 /proc/self/maps/status/fd 中的 Frida 特征 |
+| `shellcode_detector` | Phase 5 | 检测小尺寸 mmap PROT_EXEC（动态解密 shellcode） |
+| `function_patcher` | Phase 6 | 精确 NOP 闪退函数入口（ARM64/ARM/Thumb） |
+| `root_bypass` | 独立 | 系统性绕过 Root 检测（Java 层 + Native 层） |
+
+### 二进制分析工具
+
+| 工具 | 功能 |
+|------|------|
+| `find_branch_callers.py` | 定位 ARM64 中所有跳转到指定地址的 bl/b/b.cond/cbz/tbz 指令 |
+| `find_strref.py` | 解码 ARM64 adrp+add/adrp+ldr，找出引用指定字符串的代码 |
+| `fix_elf.py` | 修复内存 dump 出的 SO 文件的 ELF Section Header |
+| `patch_gadget_threadnames.py` | 等长替换 frida-gadget.so 的线程名（防检测） |
+| `scan_inline_svc.py` | 扫描 ARM64 SO 中所有内联 SVC 指令，解出系统调用号 |
+| `so_dump.js` | SO 内存 Dump（简易 dump / 按段 dump / JNI_OnLoad dump / mprotect 监控） |
+
+### 调试与检测工具
+
+| 工具 | 功能 | 前置条件 |
+|------|------|----------|
+| `debug-gdb.bat` + `debug.gdb` | 通过 gdbserver64 附加进程，监测 TracerPid 和进程存活 | root + gdbserver64 + NDK |
+| `check-anti-inject.bat` | 通过 AndKittyInjector 注入测试 SO，检测是否被拦截 | root + AndKittyInjector |
+| `check-janus.bat` + `GetAPKInfo.jar` | APK 元数据提取（包名、版本号等） | Java Runtime |
+
+## 常用组合速查
+
+```bash
+# 加解密自吐（Java 层）
+frida -U -f com.target.app -l utils.js -l crypto_monitor.js
+
+# 行为摸底（文件 + 网络 + 线程）
+frida -U -f com.target.app -l utils.js -l file_monitor.js -l network_monitor.js -l thread_monitor.js
+
+# HTTP 明文拦截
+frida -U -f com.target.app -l utils.js -l ssl_plaintext.js
+
+# Native 函数发现
+frida -U -f com.target.app -l utils.js -l native_hooker.js
+
+# 反检测 Pipeline（Phase 1-4）
+frida -U -f com.target.app -l utils.js -l exit_blocker.js -l so_loader_tracer.js -l init_hook.js -l dlsym_tracer.js
+
+# 完整反检测链（Phase 1-6）
+frida -U -f com.target.app -l utils.js -l exit_blocker.js -l so_loader_tracer.js -l init_hook.js -l dlsym_tracer.js -l shellcode_detector.js -l function_patcher.js
+
+# 内存敏感数据扫描
+frida -U -f com.target.app -l utils.js -l memory_scanner.js
+
+# 跨组件 Intent 污点追踪
+frida -U -f com.target.app -l utils.js -l intent_tracker.js
+
+# Root 检测绕过
+frida -U -f com.target.app -l utils.js -l root_bypass.js
+```
+
+## 运行时配置注入
+
+所有模块支持 `CONFIG_OVERRIDE`，通过 `-e` 参数注入，不动原文件：
+
+```bash
+frida -U -f com.target.app -l utils.js -l file_monitor.js \
+  -e 'var CONFIG_OVERRIDE={file_monitor:{filterPath:["/data/data/com.target/"],showBacktrace:false}}'
+```
+
+## 环境搭建
+
+### 目录结构
+
+```
+├── .kilo/                          # ◄── 核心：Agent 定义 + Skill 文档
+│   ├── agent/
+│   │   └── reverser.md             #     逆向分析 Agent 角色定义
+│   └── skill/
+│       └── frida-mobile-security/  #     移动端安全分析技能
+│           ├── SKILL.md            #     攻击面决策树 + 模块索引
+│           ├── REFERENCES.md       #     参考文档
+│           └── feedback/           #     反馈闭环
+├── scripts/
+│   ├── core/                       # 公共工具（首个加载）
+│   ├── monitors/                   # 被动观察模块（13 个）
+│   ├── bypass/                     # 主动干预模块（9 个）
+│   ├── checklist/                  # 检测清单
+│   ├── templates/                  # 分析模板
+│   └── utils/                      # Python 二进制分析工具
+├── tools/                          # 调试与检测工具
+└── AGENTS.md                       # 开发规范（AI 编码约束）
+```
+
+### 宿主机要求
+
+| 工具 | 用途 | 下载 |
+|------|------|------|
+| Python 3.9+ | 运行 Python 分析脚本 | https://www.python.org/downloads/ |
+| Frida CLI | Frida 命令行工具 | `pip install frida-tools` |
+| ADB | Android 调试桥 | Android SDK Platform-Tools |
+| Android NDK | GDB 调试客户端 | https://developer.android.com/ndk/downloads |
+| Java Runtime | APK 信息提取 | https://www.oracle.com/java/technologies/downloads/ |
+| JADX（可选） | Java 反编译（MCP 集成） | https://github.com/skylot/jadx |
+| Ghidra（可选） | 二进制分析（MCP 集成） | https://ghidra-sre.org/ |
+
+### 测试机准备
+
+```bash
+# 1. 推送 frida-server
+adb push frida-server-<版本>-android-arm64 /data/local/tmp/fuckserver
+adb shell "chmod 755 /data/local/tmp/fuckserver"
+adb shell "su -c '/data/local/tmp/fuckserver -D'"
+
+# 2. 推送 AndKittyInjector（反注入检测用）
+adb push AndKittyInjector /data/local/tmp/AndKittyInjector
+adb shell "chmod 755 /data/local/tmp/AndKittyInjector"
+
+# 3. 推送 gdbserver64（GDB 调试用）
+adb push gdbserver64 /data/local/tmp/gdbserver64
+adb shell "chmod 755 /data/local/tmp/gdbserver64"
+```
+
+## 设计原则
+
+- **单一职责** — 一个模块做一件事，monitors/ 只观察不修改，bypass/ 只干预不监控
+- **可组合** — 模块通过 `-l` 参数自由组合，不互相依赖
+- **可观测** — 所有 hook 点必须有日志输出，不静默吞掉
+- **可复现** — 脚本能在其他设备上跑，不依赖特定路径硬编码
+- **最小权限** — 只 hook 需要的目标，不做全量扫描
+
+## 开发规范
+
+完整规范见 [AGENTS.md](AGENTS.md)。要点：
+
+- 模块化架构：`scripts/core/`（公共工具）→ `monitors/`（观察）→ `bypass/`（干预）
+- 所有模块接受 `CONFIG_OVERRIDE` 运行时配置，不硬编码
+- Hook 前先检查目标存在性，优先用 `Interceptor.attach` 而非 `Interceptor.replace`
+- 大量数据用 `send()` 走 channel，不用 `console.log()`
+- 新模块导出标准接口：`var CONFIG = { ... }` + `CONFIG_OVERRIDE` 合并
+
+## 许可
+
+仅供教育和授权安全测试使用。
+```
