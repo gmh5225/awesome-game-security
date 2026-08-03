@@ -25,6 +25,7 @@ sources:
   - wiki/sources/descriptions/jonpalmisc__ida_screenshot.md
   - wiki/sources/descriptions/jnz__q3vm.md
   - wiki/sources/descriptions/jlucaso1__unturned-godot.md
+  - wiki/sources/descriptions/jlgreathouse__AMD_IBS_Toolkit.md
   - wiki/sources/descriptions/joxeankoret__diaphora.md
   - wiki/sources/descriptions/roothide__Dopamine2-roothide.md
   - wiki/sources/descriptions/zengfr__XrefsExt.md
@@ -427,7 +428,7 @@ Full DBI frameworks — [[frida]], DynamoRIO, Pin, TinyInst, QBDI — support AP
 
 **User-mode hypervisor-assisted tracing:** Windows Hypervisor Platform (WHP) hosts guest snippets with per-page R/W/X traps, CPUID interception, and syscall emulation — no kernel driver, composable with disassemblers/emulators. WHP trap libraries such as [[vmtrace]] (host-backed guest memory, page traps, VM-exit single-step tracing; asmjit) sit beside full x64 PE emulators like [[winvisor]] and Hyper-V introspection such as [[hyper-rev]]; benchmark latency and nested-VT constraints on the target build. (source: wiki/sources/descriptions/momo5502__vmtrace.md)
 
-**Hardware-assisted branch tracing (LBR/BTS / Intel PT):** Intel Last Branch Record and Branch Trace Store capture branch-level control flow from CPU branch-recording registers via kernel-mode register access — no software instrumentation patches. Research frameworks such as [[branch-monitoring-project]] (C kernel driver + usermode collection/analysis; PMI lane) and Intel hardware-trace libraries such as [[libiht]] (Tencent Xuanwu Lab; Intel Hardware Trace Library) complement trap-and-emulate CFT and Intel-PT hypervisor fuzzing ([[qemu-nyx]]). (source: wiki/sources/descriptions/marcusbotacin__BranchMonitoringProject.md) (source: wiki/sources/descriptions/libiht__libiht.md)
+**Hardware-assisted tracing (LBR/BTS / Intel PT / AMD IBS):** Intel Last Branch Record and Branch Trace Store capture branch-level control flow from CPU branch-recording registers via kernel-mode register access — no software instrumentation patches. Research frameworks such as [[branch-monitoring-project]] (C kernel driver + usermode collection/analysis; PMI lane) and Intel hardware-trace libraries such as [[libiht]] (Tencent Xuanwu Lab; Intel Hardware Trace Library) complement trap-and-emulate CFT and Intel-PT hypervisor fuzzing ([[qemu-nyx]]). (source: wiki/sources/descriptions/marcusbotacin__BranchMonitoringProject.md) (source: wiki/sources/descriptions/libiht__libiht.md) On AMD CPUs, Instruction-Based Sampling via [[amd-ibs-toolkit]] (hardware instruction subset sampling; cheat / Windows kernel explorer / AMD Sampling) offers a parallel low-overhead profiling lane for kernel and cheat hot-path study. (source: wiki/sources/descriptions/jlgreathouse__AMD_IBS_Toolkit.md)
 
 ## Obfuscation recovery
 
