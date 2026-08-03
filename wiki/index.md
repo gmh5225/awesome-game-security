@@ -28,7 +28,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Draw Call Hook](concepts/draw-call-hook.md) — draw/shader/pipeline intercept for wallhack/chams vs Present-only overlays
 - [Dynamic Binary Instrumentation](concepts/dynamic-binary-instrumentation.md) — Frida/Pin/DynamoRIO; trap-and-emulate CFT; WHP user-mode hypervisor tracing ([[vmtrace]]); driver IOCTL tracing
 - [Easy Anti-Cheat](concepts/easy-anti-cheat.md)
-- [ETW Threat Intelligence](concepts/etw-threat-intelligence.md) — Microsoft-Windows-Threat-Intelligence provider; PPL-gated cross-process memory telemetry; ETW bypass vs EPT hardening
+- [ETW Threat Intelligence](concepts/etw-threat-intelligence.md) — Microsoft-Windows-Threat-Intelligence provider; PPL-gated cross-process memory telemetry; ETW bypass vs EPT hardening; [[etwti-fluctuation-monitor]] tamper alerts
 - [Frida](concepts/frida.md)
 - [HVCI](concepts/hvci.md) — VBS VTL0/VTL1 Memory Integrity; W→X kernel code enforcement via hypervisor EPT/SLAT
 - [Hardware Input Injection](concepts/hardware-input-injection.md) — KMBox/Arduino/HID + driver-filter paths for AI visual aim pipelines
@@ -332,6 +332,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EscapeFromTarkov-Trainer](entities/escapefromtarkov-trainer.md) — discontinued EFT internal trainer (Mono era; IL2CPP 1.0 pivot; cheat / game:eft)
 - [EfiTool](entities/efitool.md) — UEFI ExitBootServices in-RAM SYSTEM hive patch (SYSTEM shell; no disk/driver)
 - [EtwTi-Syscall-Hook](entities/etwti-syscall-hook.md) — Instrumentation Callback syscall hook (C/C++; Detection:hook / ETW TI–adjacent)
+- [EtwTi-FluctuationMonitor](entities/etwti-fluctuation-monitor.md) — EtwTi provider registration fluctuation monitor (C; ETW callback tamper alerts)
 - [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests
 - [EtwWatcher](entities/etw-watcher.md) — web UI browse/diff ETW provider manifests across Windows builds (ETWInspector-backed)
 - [EUPMAccess](entities/eupmaccess.md) — C/C++ memory analysis (cheat / RPM; waryas)

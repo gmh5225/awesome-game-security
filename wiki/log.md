@@ -2309,3 +2309,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:jiayuxuan123/RescueX`: entity [[rescuex]]; cited on [[overviews/mobile-security]]; cross-linked from [[magisk]].
 
 - **2026-08-03** — ingest `description:jfmaes/LazySign`: entity [[lazy-sign]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-08-03** — ingest `description:jdu2600/EtwTi-FluctuationMonitor`: entity [[etwti-fluctuation-monitor]]; cited on [[concepts/etw-threat-intelligence]], [[overviews/windows-kernel]], and [[overviews/anti-cheat]].

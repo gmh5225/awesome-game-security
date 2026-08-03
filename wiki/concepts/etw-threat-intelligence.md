@@ -9,7 +9,8 @@ sources:
   - wiki/sources/descriptions/paranoidninja__EtwTi-Syscall-Hook.md
   - wiki/sources/descriptions/muturikaranja__disable-threat-tracing.md
   - wiki/sources/descriptions/zodiacon__EtwExplorer.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/jdu2600__EtwTi-FluctuationMonitor.md
+updated: 2026-08-03
 confidence: high
 ---
 
@@ -50,8 +51,9 @@ Stress-testing samples such as [[disable-threat-tracing]] sit on the disable/bli
 ## Defensive countermeasures
 
 - **EPT-based protection:** hypervisor second-stage permissions can trap unauthorized writes to ETW globals and registration structures — guest kernel R/W alone cannot silently patch them when policy remains trustworthy. See [[hvci]] / hypervisor defense in [[overviews/windows-kernel]].
+- **Registration tamper monitors:** real-time EtwTi callback registration fluctuation detectors such as [[etwti-fluctuation-monitor]] alert when provider registrations are removed or patched — the defensive counterpart to registration-walk bypasses. (source: wiki/sources/descriptions/jdu2600__EtwTi-FluctuationMonitor.md)
 - **Cross-checks:** combine TI ETW with [[kernel-callbacks]], handle stripping, and [[kernel-pool-scanning]] for layered detection.
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[etw-explorer]] · [[tietwagent]] · [[threat-intelligence-consumer]] · [[etwti-syscall-hook]] · [[disable-threat-tracing]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[hvci]] · [[etw-explorer]] · [[etw-watcher]] · [[etwti-fluctuation-monitor]] · [[tietwagent]] · [[threat-intelligence-consumer]] · [[etwti-syscall-hook]] · [[disable-threat-tracing]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
