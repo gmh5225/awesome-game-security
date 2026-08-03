@@ -326,6 +326,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EfiTool](entities/efitool.md) — UEFI ExitBootServices in-RAM SYSTEM hive patch (SYSTEM shell; no disk/driver)
 - [EtwTi-Syscall-Hook](entities/etwti-syscall-hook.md) — Instrumentation Callback syscall hook (C/C++; Detection:hook / ETW TI–adjacent)
 - [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests
+- [EtwWatcher](entities/etw-watcher.md) — web UI browse/diff ETW provider manifests across Windows builds (ETWInspector-backed)
 - [EUPMAccess](entities/eupmaccess.md) — C/C++ memory analysis (cheat / RPM; waryas)
 - [EvCommunication](entities/evcommunication.md) — named-event kernel↔UM channel (NtTokenManager; vs IOCTL)
 - [evil-mhyprot-cli](entities/evil-mhyprot-cli.md) — CLI PoC for `mhyprot2.sys` BYOVD (Genshin Impact; kernel/user R/W)

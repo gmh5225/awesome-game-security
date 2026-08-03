@@ -2235,3 +2235,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `readme:categories`: bumped Cheat ~2640 (was ~2632; Anti Cheat ~636 stable); refreshed README map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-03** — ingest `description:jonomango/nohv`: entity [[nohv]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
+- **2026-08-03** — ingest `description:jonny-jhnson/EtwWatcher`: entity [[etw-watcher]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
