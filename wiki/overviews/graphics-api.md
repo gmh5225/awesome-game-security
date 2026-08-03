@@ -112,6 +112,7 @@ sources:
   - wiki/sources/descriptions/keith2018__SoftGLRender.md
   - wiki/sources/descriptions/justinstenning__Direct3DHook.md
   - wiki/sources/descriptions/johndpope__pianogame.md
+  - wiki/sources/descriptions/jmpews__Dobby.md
   - wiki/sources/descriptions/jpvanoosten__LearningDirectX12.md
 updated: 2026-08-03
 confidence: high
@@ -133,7 +134,7 @@ Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/
 | OpenGL | `wglSwapBuffers` | `glDrawElements`, `glDrawArrays` |
 | Vulkan | `vkQueuePresentKHR`, `vkCreateSwapchainKHR` | `vkCmdDraw`, `vkCmdDrawIndexed`; instance/device layers |
 
-Vtable trampolines on swap chains remain the dominant internal-overlay pattern; cross-API runtime locators such as [[kiero2]] (kiero v2; D3D9–12 + OpenGL + Vulkan method addresses; BYO hooking; CMake FetchContent; Win/Linux/macOS for GL/VK) auto-detect the active graphics API at runtime. (source: wiki/sources/descriptions/kirchesz__kiero2.md) Dear ImGui backends wire through the Present hook with a `WndProc` forward for input.
+Vtable trampolines on swap chains remain the dominant internal-overlay pattern; cross-API runtime locators such as [[kiero2]] (kiero v2; D3D9–12 + OpenGL + Vulkan method addresses; BYO hooking; CMake FetchContent; Win/Linux/macOS for GL/VK) auto-detect the active graphics API at runtime. (source: wiki/sources/descriptions/kirchesz__kiero2.md) Portable hook foundations such as [[dobby]] (lightweight multi-platform C/C++ framework; DirectX / hook tooling for graphics programmers and Windows game tooling) underpin BYO Present/vtable interception beside MinHook/PolyHook2 in overlay samples. (source: wiki/sources/descriptions/jmpews__Dobby.md) Dear ImGui backends wire through the Present hook with a `WndProc` forward for input.
 
 ## Overlay taxonomy
 
