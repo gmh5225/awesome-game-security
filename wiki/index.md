@@ -660,6 +660,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Npcap](entities/npcap.md) — Windows packet capture/inject (Nmap; WinPcap successor; Packet Capture&Parse)
 - [NvidiaApi](entities/nvidiaapi.md) — undocumented NvAPI GPU serial / board fingerprint (HWID research)
 - [Nvidia-GPU-Spoof](entities/nvidia-gpu-spoof.md) — NVIDIA GPU UUID spoof via `nvlddmkm.sys` (Cheat HWID)
+- [nohv](entities/nohv.md) — C/C++ hypervisor VM-detection benchmark suite (kernel driver; Detection: Hacked Hypervisor)
 - [ntfs-journal-viewer](entities/ntfs-journal-viewer.md) — NTFS `$UsnJrnl` change-journal viewer (C; AC / IS forensics)
 - [ntfs-linker](entities/ntfs-linker.md) — NTFS $MFT/$UsnJrnl/$LogFile timeline correlator (C++; DFIR)
 - [NTFSTool](entities/ntfstool.md) — NTFS forensics (MFT/USN/BitLocker/EFS; AC / IS forensics)
