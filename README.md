@@ -1224,6 +1224,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/thelok1s/florida-zygisk [Magisk/Zygisk module that auto-starts Florida anti-detection frida-server on boot]
 - https://github.com/MhmRdd/NoHello [A Zygisk module to hide root]
 - https://github.com/ys1231/MoveCertificate [A Magisk/KernelSU/APatch module for moving user certificates to system certificates. Supports Android 7-15]
+- https://github.com/jiayuxuan123/RescueX [Magisk/KernelSU/APatch auto-rescue module with boot watchdog, module snapshots, and WebUI recovery]
 - https://github.com/ri-char/zygisk-dump-dex [A zygisk module that hooks `libdexfile.so` to dump dex]
 - https://github.com/smithluke874/Android-VirtualCam-Manager [Magisk/Zygisk virtual camera module with ArtHook-based Camera1 surface and NV21 frame injection (no LSPosed)]
 
@@ -1236,6 +1237,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/hackcatml/frida-watchpoint-tutorial [Frida's setHardwareWatchpoint tutorial]
 - https://github.com/ChiChou/grapefruit [Runtime mobile instrumentation toolkit for iOS/Android, web UI]
 - https://github.com/firerpa/lamda [Android full-stack device control with built-in Frida, MITM, UI automation, and reverse-engineering APIs]
+- https://github.com/index-login/MobileRE-Skill [AI-agent mobile reverse-engineering skill set with layered Frida hooks and a six-stage anti-detection pipeline]
 - https://github.com/ChiChou/vscode-frida [Unofficial Frida extension for VSCode]
 - https://github.com/ChiChou/bagbak [iOS Frida app decrypt / dump to IPA; extensions; jailbreak; bagbak@5 needs frida@17; deprecated]
 - https://github.com/CrackerCat/strongR-frida-android
@@ -4390,6 +4392,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/talsec/Free-RASP-ReactNative [React Native freeRASP plugin for root/jailbreak, Frida, tamper, and integrity detection]
 - https://github.com/rajssinde/rs-native-kit-security [React Native Nitro Modules RASP SDK for root/jailbreak, Frida/Xposed hook, tamper/integrity, VPN/proxy, and device risk scoring]
 - https://github.com/talsec/Free-RASP-Capacitor [Capacitor freeRASP plugin for mobile root/jailbreak, Frida, tamper, and integrity detection]
+- https://github.com/talsec/Free-RASP-iOS [Native iOS freeRASP SDK for jailbreak, Frida, hook, emulator, tamper, and repackaging detection]
 - https://github.com/AfanasievN/react-native-device-risk-signals [React Native device-intel TurboModule: root/jailbreak, emulator, Frida, and tamper signals without vendor backend]
 - https://github.com/Binuka97/cordova-plugin-rootguard [Cordova plugin detecting Android root (Magisk/KernelSU/APatch), Frida, and iOS jailbreak/Frida]
 - https://github.com/LSPosed/DirtySepolicy [Detect userspace su solutions via SELinux access checks from the App Zygote process]
