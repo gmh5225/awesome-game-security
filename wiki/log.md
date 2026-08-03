@@ -2287,3 +2287,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:jjolano/shadow`: entity [[shadow]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-08-03** — ingest `description:jixiaoyong/ApkSigner`: entity [[apksigner]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
+- **2026-08-03** — ingest `description:jiubanlo/WinNT5_src_20201004`: entity [[winnt5-src-20201004]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
