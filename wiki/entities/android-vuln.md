@@ -18,4 +18,4 @@ Curated documentation/reference list for Android kernel CVEs in the cheat / Andr
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[cve-2026-43499-popsicle]] · [[dirtypiperoot]] · [[dpatch]]
+[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[android-vuln-poc-exp]] · [[cve-2026-43499-popsicle]] · [[dirtypiperoot]] · [[dpatch]]

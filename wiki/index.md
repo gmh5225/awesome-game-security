@@ -113,6 +113,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Android-VirtualCam-Manager](entities/android-virtualcam-manager.md) — Magisk/Zygisk virtual camera (ArtHook Camera1 NV21/surface injection; no LSPosed; camera spoofing / liveness AC research)
 - [android_virtualTouch](entities/android-virtual-touch.md) — ARM64 NDK uinput virtual touch (tap/swipe/multi-touch; rooted; game automation)
 - [android-vuln](entities/android-vuln.md) — Android Kernel CVE reference list (cheat / Android Kernel CVE)
+- [android-vuln-poc-exp](entities/android-vuln-poc-exp.md) — Android kernel CVE PoC/exploit reference list (cheat / Android Kernel CVE)
 - [anticheat-poc](entities/anticheat-poc.md) — Windows AC PoC (debugger / integrity / signature scan / process enum; Instrumentation Callback)
 - [anti-cheat-research-index](entities/anti-cheat-research-index.md) — structured AC/kernel/VT-x/graphics/RE research index (defensive engineering map; guide lane)
 - [anti-cheat](entities/anti-cheat.md) — C/C++ open-source anti-cheat system (jnastarot; Anti Cheat → Open Source Anti Cheat System)
