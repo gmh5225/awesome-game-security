@@ -3210,6 +3210,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/cs2_things [VScript]
 - https://github.com/IMXNOOBX/cs2-external-esp [External]
 - https://github.com/tiansongyu/cs2_cheat [Educational CS2 external ESP (SDL2 + ImGui) with auto-updating offsets via cs2-dumper]
+- https://github.com/hendodev/cs2-ext [External CS2 cheat with aimbot, ESP, spinbot, and pluggable driver interface]
 - https://github.com/UnnamedZ03/CS2-external-base [External]
 - https://github.com/Tokyodidit/cs2External [External]
 - https://github.com/TKazer/CS2_External [External]
@@ -3244,6 +3245,8 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Vekor64/PythonCS2 [Python External]
 - https://github.com/Jesewe/VioletWing [Python external with triggerbot, ESP, bunnyhop, and auto offset dump via cs2-dumper]
 - https://github.com/maecry/asphyxia-cs2 [Internal]
+- https://github.com/bootmgfw/cs2-cheat-source [Internal CS2 cheat with skin/glove changer, DirectX hooks, and Source 2 SDK headers]
+- https://github.com/BrufelFX/RabsztynCC-CS2-Internal [CS2 internal research framework with direct syscalls, optional kernel driver IPC, DX11 hooks, and ImGui menu]
 - https://github.com/Leksa667/YOLOv8-Overlay-CS2 [YOLOv8 in CS2]
 - https://github.com/ccsimplyspolit/CS2-P2C-TEMPLATES [CS2 security-research P2C templates: VMProtect FVA reconstruction, kernel drivers, and user-mode injectors]
   
@@ -3293,6 +3296,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/valo-driver [External]
 - https://github.com/kali11211/valorant-internal-cheat [Internal]
 - https://github.com/gmh5225/ValorantCheatExternal [External]
+- https://github.com/bootmgfw/valorant-external-cheat [External Valorant cheat with reversed UE SDK headers, kernel driver I/O, and aimbot/lineups]
 
 > Game:VEILED EXPERTS
 - https://github.com/EBalloon/VEILED-EXPERTS-SDK
@@ -3378,6 +3382,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/3nolan5/R5Apex-UserMode [External]
 - https://github.com/NaiJii/Apex-Mizu-Base [Internal]
 - https://github.com/boowampp/ApexDmaCheatUpdated [DMA]
+- https://github.com/bootmgfw/apex-external-cheat [External Apex Legends cheat with driver-backed memory access and DX11 ImGui overlay]
 
 > Game:Fortnite
 - https://github.com/kem0x/FortKit [Dump]
@@ -3444,6 +3449,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Saxmason/Interic-Fortnite-External-Cheat [Fortnite external cheat source with aimbot, ESP, and ImGui overlay]
 - https://github.com/Saxmason/Subzero-Fortnite-Cheat [Fortnite external cheat source with aimbot, overlay, and driver comms]
 - https://github.com/raivoansa/fortnite-external-base-source [Fortnite external base with IOCTL RPM, CR3 bypass stub, offsets, and ImGui DX11 overlay]
+- https://github.com/bootmgfw/fortnite-external-cheat-base [External Fortnite cheat base with kernel driver comms, DirectX 11 overlay, and ImGui menu]
 - https://github.com/lauralex/fn-dma-cheat [DMA]
 
 > Game:Bloodhunt
@@ -3508,6 +3514,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Qemu-Gang/Escape-from-TuxKov [QEMU]
 - https://github.com/gmh5225/Comm-ImMiraclela
 - https://github.com/krispybyte/Simple-EFT-Base
+- https://github.com/bootmgfw/eft-tarkov-internal-cheat [Internal Escape from Tarkov cheat with ESP, direct syscalls, pattern scanning, and injector]
 - https://github.com/bytemyass/EFTLeecher [DMA]
 - https://github.com/gmh5225/eft-dma-radar-1 [DMA Radar]
 - https://github.com/gmh5225/EFT-MonoEFT
@@ -3574,6 +3581,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/Rico-Cheat-rust-external
 - https://github.com/spyder1g/a-pasted-rust-script
 - https://github.com/LordAbbot/Rust-External-Cheat
+- https://github.com/bootmgfw/rust-external-cheat [Rust external cheat with custom kernel driver (DriverRW) and usermode ESP/aim GUI]
 - https://github.com/ZentifyZ/Kors_lol [Internal]
 - https://github.com/gmh5225/Rust-Internal [Internal]
 - https://github.com/ZentifyZ/CRC32
