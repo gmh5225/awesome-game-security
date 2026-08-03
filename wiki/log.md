@@ -2223,3 +2223,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:jsacco/ntoskrnlwalker`: entity [[ntoskrnlwalker]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
 - **2026-08-03** — ingest `description:jsacco/NTKernelWalkerLib`: entity [[ntkernelwalkerlib]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked from [[ntoskrnlwalker]].
+
+- **2026-08-03** — ingest `description:jpvanoosten/LearningDirectX12`: entity [[learning-directx12]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].

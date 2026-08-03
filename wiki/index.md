@@ -551,6 +551,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [lara](entities/lara.md) — WIP DarkSword kexploit (iOS 17.1.1–26.0.1; font/app bypass / DirtyZero2)
 - [lab-esp-and-aimbot](entities/lab-esp-and-aimbot.md) — educational ESP/aimbot lab (3D target app + external cheat; W2S / RPM; cheat / guide)
 - [learn-awesome-gamedev](entities/learn-awesome-gamedev.md) — mega-list of gamedev learning resources (Game Develop / guide)
+- [learning-directx12](entities/learning-directx12.md) — D3D12 tutorial series + C++ samples (device/PSO/heaps; triangle → scenes; DirectX / guide)
 - [levo](entities/levo.md) — experimental x86/x64 PE AOT binary translator (Ghidra CFG → XED/Remill lift → LLVM recompile; kernel32 API-intercept runtime)
 - [lightsaber](entities/lightsaber.md) — iOS 18.4–18.6.2 userland exploit; JS inject SpringBoard (DarkSword-derived)
 - [Lenovo-CVE-2025-8061](entities/lenovo-cve-2025-8061.md) — LnvMSRIO.sys LPE PoC (CVE-2025-8061; IOCTL → SYSTEM; BYOVD)
