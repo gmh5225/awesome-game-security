@@ -2289,3 +2289,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:jixiaoyong/ApkSigner`: entity [[apksigner]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
 - **2026-08-03** — ingest `description:jiubanlo/WinNT5_src_20201004`: entity [[winnt5-src-20201004]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
+- **2026-08-03** — ingest `readme:categories`: bumped Anti Cheat ~639 (was ~637; Cheat ~2645 stable); refreshed README map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
