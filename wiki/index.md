@@ -751,6 +751,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PCILeech-DMA-Fullstealth](entities/pcileech-dma-fullstealth.md) — Quantumstealth Fullstealth PCILeech DMA FPGA firmware (Vivado; M2/Squirrel/Captain 75T/Enigma X1)
 - [PCILeech-FPGA](entities/pcileech-fpga.md) — FPGA HDL/firmware (Vivado; shadow config, BAR impls); firmware sophistication tiers 0–6
 - [PCILeech-FPGA-DMA-VMD](entities/pcileech-fpga-dma-vmd.md) — Artix-7 75T Intel RST VMD `9A0B` emulation (MSI-X, NVMe, BAR shadow; SystemVerilog)
+- [PCILeechGen](entities/pcileechgen.md) — Go donor-cloning firmware generator (Linux VFIO/IOMMU → SystemVerilog/COE → Vivado bitstreams; PCILeech FPGA)
 - [pdb](entities/pdb.md) — Windows PDB parse/merge (C++ DIA SDK; old formats + pdb.cfg; RE / debugger symbols)
 - [pdb-rs](entities/pdb-rs.md) — Microsoft Rust PDB reader/writer (MSF/CodeView DBI/TPI/IPI; x86/AMD64/ARM64; RE / debugger symbols)
 - [pdblister](entities/pdblister.md) — Rust PDB manifest CLI (PE CodeView GUID/age scan; symchk /om alternative; Symbol Server batch download)
