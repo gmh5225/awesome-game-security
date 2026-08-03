@@ -2261,3 +2261,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:talsec/Free-RASP-iOS`: entity [[free-rasp-ios]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
 
 - **2026-08-03** — ingest `description:jnastarot/ice9`: entity [[ice9]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-08-03** — ingest `description:jnastarot/furikuri`: entity [[furikuri]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].

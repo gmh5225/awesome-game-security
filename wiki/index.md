@@ -365,6 +365,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fn-dma-cheat](entities/fn-dma-cheat.md) — Fortnite DMA cheat sample (C++; Unreal Engine; cheat / game:fortnite [DMA])
 - [fortnite-cheat-source-internal](entities/fortnite-cheat-source-internal.md) — Fortnite internal: SDK generation + hooking (C++; cheat / game:fortnite)
 - [function-collections](entities/function-collections.md) — C PoCs for uncommon Ring3 paths (memory analysis; AC callback lane)
+- [furikuri](entities/furikuri.md) — C/C++ obfuscation engine (jnastarot; AC Obfuscation Engine)
 - [FortKit](entities/fortkit.md) — Fortnite dump / SDK generation (C++; cheat / game:fortnite [Dump])
 - [Fortnite](entities/fortnite.md) — Fortnite mechanics tutorial series + code (loqix; Game Develop / source; video walkthrough)
 - [Fortnite-External-P2C](entities/fortnite-external-p2c.md) — Fortnite external: shader-oriented sample (C++; [External])
