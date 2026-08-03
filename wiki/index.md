@@ -253,6 +253,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [d3dhook_imgui](entities/d3dhook-imgui.md) — D3D/OpenGL/Vulkan ImGui hook base (C/C++; x86/x64; DirectX Hook)
 - [d810-ng](entities/d810-ng.md) — d810 next-gen; deobfuscate at decompilation time (Fix OLLVM)
 - [daila](entities/daila.md) — ChatGPT decompiler AI assistant (DAILA; cheat / IDA Plugins; human–LLM RE research)
+- [DeathSleep](entities/death-sleep.md) — thread terminate/restore sleep obfuscation; page protection during no-execution (AC page protection)
 - [DeepSleep](entities/deepsleep.md) — x64 Gargoyle variant; ROP-only + PIC sleep-hide (no APCs; page protection)
 - [deepwiki-mcp](entities/deepwiki-mcp.md) — DeepWiki docs MCP server (query/retrieve wikis for AI agents; Game Develop / MCP)
 - [defender-control](entities/defender-control.md) — C# GUI: Defender real-time / Tamper Protection / sample-submission toggles (registry/service)

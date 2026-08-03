@@ -12,7 +12,7 @@ confidence: medium
 
 PoC for **shellcode fluctuation** — an in-memory evasion technique that cyclically encrypts and decrypts shellcode contents so pages alternate between **RW** (or **NoAccess**) and **RX** protection. Demystifies commercial-framework “magic” against memory scanners that flag persistent executable private regions. Aimed at anti-cheat engineers and defensive researchers studying page-protection / memory-integrity detection. (source: wiki/sources/descriptions/mgeeky__ShellcodeFluctuation.md)
 
-Pairs with related page-protection samples such as [[deepsleep]] (ROP/PIC sleep-hide), [[voidmaw]] (`PAGE_GUARD`), and [[no-access-protection]] (`PAGE_NOACCESS` + VEH). Same-author in-memory evasion PoC: [[thread-stack-spoofer]] (call-stack spoofing).
+Pairs with related page-protection samples such as [[deepsleep]] (ROP/PIC sleep-hide), [[death-sleep]] (thread terminate/restore sleep obfuscation), [[voidmaw]] (`PAGE_GUARD`), and [[no-access-protection]] (`PAGE_NOACCESS` + VEH). Same-author in-memory evasion PoC: [[thread-stack-spoofer]] (call-stack spoofing).
 
 ## Links
 
@@ -20,4 +20,4 @@ Pairs with related page-protection samples such as [[deepsleep]] (ROP/PIC sleep-
 
 ## Related
 
-[[deepsleep]] · [[voidmaw]] · [[no-access-protection]] · [[thread-stack-spoofer]] · [[scfw]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
+[[deepsleep]] · [[death-sleep]] · [[voidmaw]] · [[no-access-protection]] · [[thread-stack-spoofer]] · [[scfw]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
