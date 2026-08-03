@@ -134,6 +134,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [apksigcopier](entities/apksigcopier.md) — copy/extract/patch Android APK v1/v2/v3 signatures (Python; Signing Block)
 - [apksigner](entities/apksigner.md) — standalone Android APK signing tool (re-sign after mod/repack)
 - [apktool-mcp-server](entities/apktool-mcp-server.md) — MCP server wrapping apktool (Android RE suite)
+- [arkdecompiler](entities/arkdecompiler.md) — HarmonyOS NEXT ArkCompiler `.abc` decompiler (ArkTS/ArkJS → JS/TS; mobile RE)
 - [Ariadne](entities/ariadne.md) — Binary Ninja graph analysis (call graph + block coverage; Cheat Binary Ninja Plugins)
 - [arma3beclient](entities/arma3beclient.md) — Arma 3 BattlEye Tool (C# / PowerShell; cheat / game:arma3)
 - [ASCTool](entities/asctool.md) — Kotlin APK Signature Crack Tool (Some Tricks / Android; [Apk])
