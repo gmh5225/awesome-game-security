@@ -2297,3 +2297,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:jiqiu2022/Zygisk-MyInjector`: entity [[zygisk-myinjector]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-08-03** — ingest `description:jinyuliao/GenericGraph`: entity [[generic-graph]]; cited on [[overviews/game-engine]].
+
+- **2026-08-03** — ingest `description:jimbeveridge/readdirectorychanges`: entity [[readdirectorychanges]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].

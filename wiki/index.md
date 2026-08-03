@@ -821,6 +821,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [r2morph](entities/r2morph.md) — radare2/r2pipe metamorphic binary transform (Python+C; Cheat Radare Plugins)
 - [radius2](entities/radius2.md) — radare2 fast binary emulation + symbolic execution (Rust/C; Cheat Radare Plugins)
 - [rprof](entities/rprof.md) — lightweight CPU scope profiler (TLS timing; ImGui/ImPlot flame graphs; LZ4 captures; Game Testing)
+- [ReadDirectoryChanges](entities/readdirectorychanges.md) — C++ `ReadDirectoryChangesW` wrapper (async recursive directory watch; sync/security monitoring)
 - [ReadPhys](entities/readphys.md) — phys mem via manual PTE map (no MmCopyMemory/MmMapIoSpace; AXE-BASE.sys; ACE)
 - [ReadWriteDriver](entities/read-write-driver.md) — `ntUserSetSysColors` KM↔UM channel (Win11 22000.376; cheat / driver communication)
 - [readwrite-kernel-stable](entities/readwrite-kernel-stable.md) — stable kernel read/write driver (C/C++; cheat / RPM; driver development / modding)
