@@ -2255,3 +2255,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:jnz/q3vm`: entity [[q3vm]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-08-03** — ingest `description:jnastarot/shibari`: entity [[shibari]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-08-03** — ingest `readme:categories`: bumped Cheat ~2643 (was ~2641) / Anti Cheat ~637 (was ~636); noted Minecraft Java/Bedrock anticheat catalog on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; refreshed README map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
