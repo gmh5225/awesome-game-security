@@ -787,6 +787,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pwatch](entities/pwatch.md) — Linux/Android HWBP process watch (debug without attach; cheat / debugging)
 - [Pyda](entities/pyda.md) — Python QEMU user-mode DBI (hook / mem / syscall / insn; Cheat DBI)
 - [PythonPlantsVsZombies](entities/python-plants-vs-zombies.md) — Python PvZ clone (graphics-focused; Game Develop / source)
+- [q3vm](entities/q3vm.md) — Quake III embeddable `.qvm` bytecode VM + LCC compiler (AC dynamic-script prototyping)
 - [qemu-anti-detection](entities/qemu-anti-detection.md) — Hidden QEMU (device-string / fingerprint spoof)
 - [qemu-patched](entities/qemu-patched.md) — Hidden QEMU fork (CPUID / SMBIOS / ACPI anti-VM spoof)
 - [qemu-gvm](entities/qemu-gvm.md) — QEMU (AMD/Intel; Android emulator research)

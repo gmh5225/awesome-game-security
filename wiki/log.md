@@ -2251,3 +2251,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:joeyjurjens/iOS-Mod-Menu-Template-for-Theos`: entity [[ios-mod-menu-template-for-theos]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked from [[imgui-ios-mod-menu]].
 
 - **2026-08-03** — ingest `description:joaomlneto/procmap`: entity [[procmap]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-08-03** — ingest `description:jnz/q3vm`: entity [[q3vm]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].

@@ -23,6 +23,7 @@ sources:
   - wiki/sources/descriptions/jsacco__ntoskrnlwalker.md
   - wiki/sources/descriptions/jsacco__NTKernelWalkerLib.md
   - wiki/sources/descriptions/jonpalmisc__ida_screenshot.md
+  - wiki/sources/descriptions/jnz__q3vm.md
   - wiki/sources/descriptions/joxeankoret__diaphora.md
   - wiki/sources/descriptions/roothide__Dopamine2-roothide.md
   - wiki/sources/descriptions/zengfr__XrefsExt.md
@@ -431,7 +432,7 @@ Full DBI frameworks — [[frida]], DynamoRIO, Pin, TinyInst, QBDI — support AP
 | MBA | [[mixed-boolean-arithmetic]] | [[cobra]], [[mutaben]], [[mba-obfuscator]], [[mixed-boolean-transform]], [[obfuscation-analysis]] |
 | CFF | [[control-flow-flattening]] | [[idadeflat]], [[d810-ng]], [[obpo-plugin]], [[obfuscation-detection]], [[misc]] (Genshin CFG decode), [[genshinjumpfixer2]] (Genshin jump-target CFG simplify) |
 | Opaque predicates | invariant injection | [[opaque-predicates-detective]], Z3/SMT backends ([[stp]]) |
-| VM virtualization | VMProtect / Themida handlers; open x86 VM embed | [[novmpy]], [[tde]], [[rumba]], [[vmpimportfixer]], [[vmpunpacker]], [[themida-research]], [[phantasm-x86-virtualizer]], [[nocturne]] |
+| VM virtualization | VMProtect / Themida handlers; open x86 VM embed; Quake III `.qvm` bytecode | [[novmpy]], [[tde]], [[rumba]], [[vmpimportfixer]], [[vmpunpacker]], [[themida-research]], [[phantasm-x86-virtualizer]], [[nocturne]], [[q3vm]] (embeddable AC dynamic-script VM; source: wiki/sources/descriptions/jnz__q3vm.md) |
 | Binary lifting | machine code → compiler IR | McSema, remill, RetDec; BN MLIL/HLIL |
 
 ## Anti-analysis & debugging
