@@ -841,6 +841,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Retract](entities/retract.md) — Go static binary workbench (PE/ELF/Mach-O; disasm, CFG, pseudocode, YARA; browser UI)
 - [reverse-engineering](entities/reverse-engineering.md) — curated RE awesome list (networking / editors; Cheat guide lane)
 - [revert-mapper](entities/revert-mapper.md) — post-execution cleanup for manually mapped kernel drivers
+- [RescueX](entities/rescuex.md) — Magisk/KernelSU/APatch boot-loop auto-rescue (watchdog, module snapshots, WebUI recovery)
 - [Return-address-spoofer](entities/return-address-spoofer.md) — return-address / stack spoof illustration (C/C++; Cheat Spoof Stack)
 - [ricochet-deobfuscator](entities/ricochet-deobfuscator.md) — Ricochet AC deobfuscator (C/C++; driver / memory analysis)
 - [RiscyWorkshop](entities/riscy-workshop.md) — RISC-V payload obfuscation workshop (riscvm VM + llvm-mingw + insn mutation; red-team exercises)

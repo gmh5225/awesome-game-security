@@ -2305,3 +2305,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `readme:categories`: bumped Cheat ~2646 (was ~2645; Anti Cheat ~640 was ~639); refreshed README map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-03** — ingest `description:not1cyyy/Anti-Cheat-Amateur`: entity [[anti-cheat-amateur]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
+- **2026-08-03** — ingest `description:jiayuxuan123/RescueX`: entity [[rescuex]]; cited on [[overviews/mobile-security]]; cross-linked from [[magisk]].
