@@ -2221,3 +2221,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-02** — ingest `description:jseclab/obj2shellcode`: entity [[obj2shellcode]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-08-02** — ingest `description:jsacco/ntoskrnlwalker`: entity [[ntoskrnlwalker]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
+- **2026-08-03** — ingest `description:jsacco/NTKernelWalkerLib`: entity [[ntkernelwalkerlib]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked from [[ntoskrnlwalker]].
