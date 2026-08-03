@@ -281,7 +281,7 @@ sources:
   - wiki/sources/descriptions/litemars__hARMless.md
   - wiki/sources/descriptions/longqun__Packer.md
   - wiki/sources/descriptions/maoabc__nmmp.md
-updated: 2026-08-02
+updated: 2026-08-03
 confidence: high
 ---
 
@@ -369,4 +369,4 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 
 ## README map
 
-`Anti Cheat` (~636 links): guides (incl. structured AC architecture / Windows kernel / VT-x·EPT / graphics-integrity research index xhscfq/anti-cheat-research-index), stress/unit-test harnesses, packers, page/CLR protection, encrypt-variable / lazy-importer tricks, obfuscation engines, open-source / analysis-framework AC samples (incl. hybrid CS2-style proposals with Glicko-2 judge ratings, honeypot entities, and shadow monitoring), engine protection (Unreal/Unity/Source), and a wide `Detection:*` tree (hook, memory integrity, shellcode, attach, triggerbot & aimbot, hide, vulnerable driver, hacked hypervisor, virtual environments, HWID, speedhack, injection, stack spoof, ESP, DMA, wall hack, obfuscation, Android root; plus Screenshot). Cross-links `Windows Security Features` (~9; CET/TPM/IOMMU/HVCI attestation), Cheat (~2632) PatchGuard/DSE + Launcher Abuser lanes, adjacent `Game Tools` (~8; RCE hardening for PC gamers), `Game Testing` (~19; high-PC-uptime sandbox signals such as UptimeFaker), and `Windows Emulator` (~7; user-space + WHP trap-driven guests + hybrid KDemu kernel-driver stacks for AC analysis). (source: wiki/sources/README-categories.md)
+`Anti Cheat` (~636 links): guides (incl. structured AC architecture / Windows kernel / VT-x·EPT / graphics-integrity research index xhscfq/anti-cheat-research-index), stress/unit-test harnesses, packers, page/CLR protection, encrypt-variable / lazy-importer tricks, obfuscation engines, open-source / analysis-framework AC samples (incl. hybrid CS2-style proposals with Glicko-2 judge ratings, honeypot entities, and shadow monitoring), engine protection (Unreal/Unity/Source), and a wide `Detection:*` tree (hook, memory integrity, shellcode, attach, triggerbot & aimbot, hide, vulnerable driver, hacked hypervisor, virtual environments, HWID, speedhack, injection, stack spoof, ESP, DMA, wall hack, obfuscation, Android root; plus Screenshot). Cross-links `Windows Security Features` (~9; CET/TPM/IOMMU/HVCI attestation), Cheat (~2640) PatchGuard/DSE + Launcher Abuser lanes, adjacent `Game Tools` (~8; RCE hardening for PC gamers), `Game Testing` (~19; high-PC-uptime sandbox signals such as UptimeFaker), and `Windows Emulator` (~7; user-space + WHP trap-driven guests + hybrid KDemu kernel-driver stacks for AC analysis). (source: wiki/sources/README-categories.md)
