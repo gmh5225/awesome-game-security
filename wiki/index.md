@@ -471,6 +471,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IDAFuncOutline](entities/ida-func-outline.md) — IDA plugin: function outline / call hierarchy (iOS ARM64 decomp; cheat / IDA Plugins)
 - [IDA-Assistant](entities/ida-assistant.md) — IDA Pro Claude-3 chat assistant (cheat / IDA Plugins)
 - [ida-ios-helper](entities/ida-ios-helper.md) — IDA plugin for iOS reversing (vtable symbols required)
+- [ida-ps4-helper](entities/ida-ps4-helper.md) — IDA helper plugin for PS4 module loader (ps4-module-loader companion)
 - [ida-jm-xorstr-decrypt-plugin](entities/ida-jm-xorstr-decrypt-plugin.md) — IDA Pro JM Xorstr decrypt (x64; Python)
 - [IDA KMDF](entities/ida-kmdf.md) — IDA Pro KMDF/WDF driver annotator (structures / callbacks / queues; Python)
 - [ida-llm-explainer](entities/ida-llm-explainer.md) — local llama.cpp IDA plugin: explain/rename/struct inference + HITL accept (cheat / IDA Plugins)
