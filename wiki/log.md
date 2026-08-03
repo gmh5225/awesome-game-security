@@ -2271,3 +2271,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:jmprdi/binja-division-deoptimization`: entity [[binja-division-deoptimization]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-03** — ingest `description:jmpews/Dobby`: entity [[dobby]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
+- **2026-08-03** — ingest `description:jmorton06/Lumos`: entity [[lumos]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].

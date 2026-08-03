@@ -584,6 +584,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Lumina-Cheat](entities/lumina-cheat.md) — internal CS:GO; mutation for changing signature (cheat / game:csgo)
 - [LumixEngine](entities/lumixengine.md) — C/C++ Lumix Engine (shader/render samples; Game Engine / source)
 - [lumixengine_maps](entities/lumixengine-maps.md) — Lumix OSM map downloader (roads/buildings; Plugins:Lumix)
+- [Lumos](entities/lumos.md) — open-source C++ 2D/3D engine (Vulkan/OpenGL PBR; ECS; Dear ImGui editor; Game Engine / source)
 - [lsass-extend-mapper](entities/lsass-extend-mapper.md) — unsigned driver map via lsass address-space extend
 - [LUDA](entities/luda.md) — Lua IDA Pro scripting plugin (direct SDK access; cheat / IDA Plugins)
 - [luagenny](entities/luagenny.md) — C++ Lua SDK codegen (cheat / sdk codegen; RE)
