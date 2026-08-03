@@ -177,6 +177,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [cet-research](entities/cet-research.md) — CET / shadow-stack research (C; Windows Security Features)
 - [CFG-FindHiddenShellcode](entities/cfg-find-hidden-shellcode.md) — CFG bitmap inconsistency shellcode scanner (C; valid call targets outside module code)
+- [ChaiScript Plugin](entities/chaiscript-plugin.md) — x64dbg plugin: ChaiScript automation (three commands; thorough API; Cheat x64dbg Plugins)
 - [checkhv_um](entities/checkhv-um.md) — user-mode HV detection (CPUID / RDTSC / VMCS / signatures)
 - [cheese](entities/cheese.md) — Quest 3/3S root via Adreno CVE-2025-21479 (Magisk, no boot rewrite)
 - [cheatengine-mcp-bridge](entities/cheatengine-mcp-bridge.md) — MCP bridge: CE named pipe + Lua/FastMCP; 40+ tools (scan/read/pointers/RTTI/HWBP/DBVM); sub-2ms

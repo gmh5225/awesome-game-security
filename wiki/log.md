@@ -2315,3 +2315,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:jdu2600/Etw-SyscallMonitor`: entity [[etw-syscall-monitor]]; cited on [[concepts/etw-threat-intelligence]] and [[overviews/windows-kernel]].
 
 - **2026-08-03** — ingest `description:jdu2600/CFG-FindHiddenShellcode`: entity [[cfg-find-hidden-shellcode]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
+- **2026-08-03** — ingest `description:jdavidberger/chaiScriptPlugin`: entity [[chaiscript-plugin]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].

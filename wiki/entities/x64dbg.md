@@ -16,7 +16,8 @@ sources:
   - wiki/sources/descriptions/m417z__x64dbg-xfg-marker.md
   - wiki/sources/descriptions/m417z__Multiline-Ultimate-Assembler.md
   - wiki/sources/descriptions/legendabrn__AutoAttach.md
-updated: 2026-08-01
+  - wiki/sources/descriptions/jdavidberger__chaiScriptPlugin.md
+updated: 2026-08-03
 confidence: medium
 ---
 
@@ -24,7 +25,7 @@ confidence: medium
 
 Open-source Windows debugger for x86/x64 with a large feature set and a comprehensive plugin system for extensions. Widely used by game-security researchers and reverse engineers studying cheat / debugging workflows. (source: wiki/sources/descriptions/x64dbg__x64dbg.md)
 
-Core user-mode debugger—not a kernel debugger or static disassembler; plugin ecosystem bridges to tools such as [[x64dbgbinja]], [[symbridge]], process auto-attach via [[auto-attach]] (source: wiki/sources/descriptions/legendabrn__AutoAttach.md), collaborative breakpoint management via [[slothbp]] (source: wiki/sources/descriptions/x64dbg__SlothBP.md), managed .NET/C# plugins via [[dotx64dbg]] (source: wiki/sources/descriptions/x64dbg__DotX64Dbg.md), OOP class documentation via [[classroom]] (source: wiki/sources/descriptions/x64dbg__Classroom.md), live DLL export-table monitoring via [[expomon]] (source: wiki/sources/descriptions/milcert__ExpoMon.md), memory write/access tracing via [[xfindout]] (source: wiki/sources/descriptions/morsisko__xFindOut.md), offline `.trace64` parse/filter via [[x64dbg-trace-reader]] (source: wiki/sources/descriptions/mibho__x64dbgTraceReader.md), XFG call-signature marking via [[x64dbg-xfg-marker]] (source: wiki/sources/descriptions/m417z__x64dbg-xfg-marker.md), multiline assemble/disassemble via [[multiline-ultimate-assembler]] (source: wiki/sources/descriptions/m417z__Multiline-Ultimate-Assembler.md), sequential DLL load-order debugging via [[disable-parallel-loader]] (source: wiki/sources/descriptions/mrexodia__DisableParallelLoader.md), live static-library function ID via [[idenlibx]] (source: wiki/sources/descriptions/secrary__idenLibX.md), and Windows type parsing via [[manytypes]] (source: wiki/sources/descriptions/notpidgey__ManyTypes.md).
+Core user-mode debugger—not a kernel debugger or static disassembler; plugin ecosystem bridges to tools such as [[x64dbgbinja]], [[symbridge]], ChaiScript scripting via [[chaiscript-plugin]] (source: wiki/sources/descriptions/jdavidberger__chaiScriptPlugin.md), process auto-attach via [[auto-attach]] (source: wiki/sources/descriptions/legendabrn__AutoAttach.md), collaborative breakpoint management via [[slothbp]] (source: wiki/sources/descriptions/x64dbg__SlothBP.md), managed .NET/C# plugins via [[dotx64dbg]] (source: wiki/sources/descriptions/x64dbg__DotX64Dbg.md), OOP class documentation via [[classroom]] (source: wiki/sources/descriptions/x64dbg__Classroom.md), live DLL export-table monitoring via [[expomon]] (source: wiki/sources/descriptions/milcert__ExpoMon.md), memory write/access tracing via [[xfindout]] (source: wiki/sources/descriptions/morsisko__xFindOut.md), offline `.trace64` parse/filter via [[x64dbg-trace-reader]] (source: wiki/sources/descriptions/mibho__x64dbgTraceReader.md), XFG call-signature marking via [[x64dbg-xfg-marker]] (source: wiki/sources/descriptions/m417z__x64dbg-xfg-marker.md), multiline assemble/disassemble via [[multiline-ultimate-assembler]] (source: wiki/sources/descriptions/m417z__Multiline-Ultimate-Assembler.md), sequential DLL load-order debugging via [[disable-parallel-loader]] (source: wiki/sources/descriptions/mrexodia__DisableParallelLoader.md), live static-library function ID via [[idenlibx]] (source: wiki/sources/descriptions/secrary__idenLibX.md), and Windows type parsing via [[manytypes]] (source: wiki/sources/descriptions/notpidgey__ManyTypes.md).
 
 ## Links
 
@@ -32,4 +33,4 @@ Core user-mode debugger—not a kernel debugger or static disassembler; plugin e
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[x64dbgbinja]] · [[auto-attach]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[expomon]] · [[xfindout]] · [[x64dbg-trace-reader]] · [[x64dbg-xfg-marker]] · [[multiline-ultimate-assembler]] · [[disable-parallel-loader]] · [[idenlibx]] · [[manytypes]] · [[symbridge]] · [[quickasm]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[x64dbgbinja]] · [[chaiscript-plugin]] · [[auto-attach]] · [[slothbp]] · [[dotx64dbg]] · [[classroom]] · [[expomon]] · [[xfindout]] · [[x64dbg-trace-reader]] · [[x64dbg-xfg-marker]] · [[multiline-ultimate-assembler]] · [[disable-parallel-loader]] · [[idenlibx]] · [[manytypes]] · [[symbridge]] · [[quickasm]]
