@@ -398,6 +398,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GDB-Windows-Binaries](entities/gdb-windows-binaries.md) — portable Windows GDB (mingw-w64; TUI/Python; Cheat Debugging)
 - [GDDumper](entities/gddumper.md) — Cheat Engine Lua: Godot 3.x/4.x SceneTree / GDScript runtime dump (Win x86/x64)
 - [godot-sandbox](entities/godot-sandbox.md) — Godot addon: sandboxed mod code for safe player extensions (all platforms; Plugins:Godot)
+- [unturned-godot](entities/unturned-godot.md) — Godot 4.7 port: reverse-engineers Unturned Unity formats from Steam install (Game Engine / asset extraction)
 
 - [genmc](entities/genmc.md) — IDAPython Hex-Rays microcode IR viewer (decompiler-plugin debug; cheat / IDA Plugins)
 - [genpatch](entities/genpatch.md) — Python binary-patch script generator (dialog on success; cheat / IDA Plugins)

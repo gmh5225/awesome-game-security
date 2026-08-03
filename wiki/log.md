@@ -2273,3 +2273,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:jmpews/Dobby`: entity [[dobby]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
 
 - **2026-08-03** — ingest `description:jmorton06/Lumos`: entity [[lumos]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
+- **2026-08-03** — ingest `description:jlucaso1/unturned-godot`: entity [[unturned-godot]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
