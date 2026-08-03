@@ -15,6 +15,7 @@ sources:
   - wiki/sources/descriptions/regenrek__deepwiki-mcp.md
   - wiki/sources/descriptions/noopstudios__interactive-feedback-mcp.md
   - wiki/sources/descriptions/n24q02m__better-godot-mcp.md
+  - wiki/sources/descriptions/johnhalloran321__mcpSafetyScanner.md
   - wiki/sources/descriptions/yring-me__ts-ue4dumper.md
   - wiki/sources/descriptions/yrgo__awesome-educational-games.md
   - wiki/sources/descriptions/notpresident35__learn-awesome-gamedev.md
@@ -263,7 +264,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **Unity MCP** — [[unity-mcp]] editor + C# scripting interaction; the justinpbarnett tree adds C#/Python shader/rendering MCP tooling (source: wiki/sources/descriptions/justinpbarnett__unity-mcp.md)
 - **Godot MCP** — [[better-godot-mcp]] scenes/GDScript control
 
-Also: [[unicli]], [[ai-command]] (ChatGPT in-editor; API key in `UserSettings/AICommandSettings.asset` — handle as a secret) (source: wiki/sources/descriptions/keijiro__AICommand.md), [[deepwiki-mcp]], [[interactive-feedback-mcp]]. Agentic web-game coding stacks such as [[opengame]] (qwen-code CLI; Game Skill + GameCoder-27B + OpenGame-Bench; agent-driven QA / protocol seed evolution) extend the Game Develop → AI Agents lane beyond editor MCP bridges. (source: wiki/sources/skills/game-engine.md) (source: wiki/sources/descriptions/leigest519__OpenGame.md)
+Also: [[unicli]], [[ai-command]] (ChatGPT in-editor; API key in `UserSettings/AICommandSettings.asset` — handle as a secret) (source: wiki/sources/descriptions/keijiro__AICommand.md), [[deepwiki-mcp]], [[interactive-feedback-mcp]]. MCP safety auditing such as [[mcp-safety-scanner]] (agent-driven config audit + remediation; example MCP configs in-repo) sits in the Game Develop → MCP server security lane beside these bridges. (source: wiki/sources/descriptions/johnhalloran321__mcpSafetyScanner.md) Agentic web-game coding stacks such as [[opengame]] (qwen-code CLI; Game Skill + GameCoder-27B + OpenGame-Bench; agent-driven QA / protocol seed evolution) extend the Game Develop → AI Agents lane beyond editor MCP bridges. (source: wiki/sources/skills/game-engine.md) (source: wiki/sources/descriptions/leigest519__OpenGame.md)
 
 ## Security-relevant surfaces
 
