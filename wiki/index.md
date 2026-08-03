@@ -868,6 +868,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SentinelAC](entities/sentinelac.md) — OSS Windows AC skeleton (SDK + UM service + ObRegisterCallbacks; overlay / stack-walk)
 - [Sensum](entities/sensum.md) — internal CS:GO cheat (actively developed; cheat / game:csgo)
 - [shibari](entities/shibari.md) — C++/C PE/PE+ multi-file linker (merge into one; modding; Anti Cheat → Binary Packer)
+- [Shadow](entities/shadow.md) — iOS jailbreak detection bypass for modern jailbreaks (cheat / iOS jailbreak; per-app success not guaranteed)
 - [shredder-rs](entities/shredder-rs.md) — x86_64 polymorphic instruction shredding (Rust)
 - [ShimCacheParser](entities/shimcacheparser.md) — AppCompat ShimCache parser (SYSTEM hive; paths/timestamps/flags; CSV/timeline; AC/IS forensics)
 - [Shtreeba](entities/shtreeba.md) — Windows manual-map DLL injector (MMap library; UI process picker; Injector)

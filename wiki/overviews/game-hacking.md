@@ -438,6 +438,7 @@ sources:
   - wiki/sources/descriptions/openeggbert__free-direct.md
   - wiki/sources/descriptions/paradoxwastaken__Poseidon.md
   - wiki/sources/descriptions/paradiseduo__IPAPatch.md
+  - wiki/sources/descriptions/jjolano__shadow.md
   - wiki/sources/descriptions/opa334__TrollStore.md
   - wiki/sources/descriptions/oureveryday__VMPUnpacker.md
   - wiki/sources/descriptions/oxiKKK__ida-vtable-tools.md
@@ -727,6 +728,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Non-jailbreak iOS IPA patch tooling such as [[ipapatch]] (C/C++/ObjC; Patch iOS Apps without Jailbreak) sits in the Cheat / IOS jailbreak sideload lane. (source: wiki/sources/descriptions/paradiseduo__IPAPatch.md)
 - Perma-signed jailed IPA installers such as [[trollstore]] (CoreTrust/AMFI bugs; arbitrary entitlements; persist across reboot) sit in the same Cheat / jailed-app sideload lane. (source: wiki/sources/descriptions/opa334__TrollStore.md)
 - Runtime iOS/macOS dylib injectors such as [[opainject]] (`task_for_pid` / Mach remote thread → `dlopen`; jailbreak + tfp0) sit in the Cheat / Injection:IOS lane. (source: wiki/sources/descriptions/opa334__opainject.md)
+- Jailbreak-detection bypass tooling such as [[shadow]] (modern iOS jailbreaks; per-app compatibility varies; cheat / iOS jailbreak research) sits in the offensive iOS lane opposite [[free-rasp-ios]]-class jailbreak probes. (source: wiki/sources/descriptions/jjolano__shadow.md)
 - Theos iOS mod-menu templates such as [[ios-mod-menu-template-for-theos]] (Logos hooks; embedded 50×50 menu icons; cheat / `[IOS mod menu]`) sit in the Cheat / render-draw lane beside ImGui samples such as [[imgui-ios-mod-menu]]. (source: wiki/sources/descriptions/joeyjurjens__iOS-Mod-Menu-Template-for-Theos.md)
 - macOS native Roblox cheat frameworks such as [[roblox-cheats]] (Objective-C; `libESP.dylib` inject + Mach VM / shared-memory IPC; internal/external ESP, input simulation, remote calls, breakpoint hooks; per-game modules + offset finder from test place) sit in the Cheat / macOS injection lane for Roblox client memory-layout study. (source: wiki/sources/descriptions/notahacker8__RobloxCheats.md)
 - Linux LKM vermagic/CRC rewriting via [[vermagic]] sits in the Cheat Linux / RE tools lane (load modules across mismatched kernel builds). (source: wiki/sources/descriptions/yaxinsn__vermagic.md) Linux kernel image → ELF symbolization via [[vmlinux-to-elf]] (Python; kallsyms + section rebuild for IDA/Ghidra) sits in the same cheat / linux kernel explorer lane. (source: wiki/sources/descriptions/marin-m__vmlinux-to-elf.md) Linux kernel rootkit hooking samples such as [[venom]] (C/C++; LKM hook mechanisms) sit in the same cheat / linux kernel explorer lane. (source: wiki/sources/descriptions/sad0p__venom.md)

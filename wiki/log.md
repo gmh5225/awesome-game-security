@@ -2283,3 +2283,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:sercanarga/PCILeechGen`: entity [[pcileechgen]]; cited on [[dma]] and [[overviews/dma-attack]].
 
 - **2026-08-03** — ingest `description:moaaz01/nightowl`: entity [[nightowl]]; cited on [[overviews/mobile-security]] and [[frida]].
+
+- **2026-08-03** — ingest `description:jjolano/shadow`: entity [[shadow]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
