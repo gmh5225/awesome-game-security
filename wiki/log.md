@@ -2307,3 +2307,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:not1cyyy/Anti-Cheat-Amateur`: entity [[anti-cheat-amateur]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-08-03** — ingest `description:jiayuxuan123/RescueX`: entity [[rescuex]]; cited on [[overviews/mobile-security]]; cross-linked from [[magisk]].
+
+- **2026-08-03** — ingest `description:jfmaes/LazySign`: entity [[lazy-sign]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].

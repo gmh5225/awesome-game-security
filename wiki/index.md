@@ -567,6 +567,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KvcForensic](entities/kvcforensic.md) — LSASS credential forensics (MSV/WDigest/Kerberos/DPAPI; Win/Linux dumps)
 
 - [lara](entities/lara.md) — WIP DarkSword kexploit (iOS 17.1.1–26.0.1; font/app bypass / DirtyZero2)
+- [LazySign](entities/lazy-sign.md) — fake-cert Authenticode signing (Microsoft devkit binaries; zero extra deps; Some Tricks / Ring3)
 - [lab-esp-and-aimbot](entities/lab-esp-and-aimbot.md) — educational ESP/aimbot lab (3D target app + external cheat; W2S / RPM; cheat / guide)
 - [learn-awesome-gamedev](entities/learn-awesome-gamedev.md) — mega-list of gamedev learning resources (Game Develop / guide)
 - [learning-directx12](entities/learning-directx12.md) — D3D12 tutorial series + C++ samples (device/PSO/heaps; triangle → scenes; DirectX / guide)
