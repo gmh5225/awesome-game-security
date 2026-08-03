@@ -4178,6 +4178,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/somewhatpublicacc/wellsanticheat [Among Us host-side BepInEx anti-cheat for RPC abuse, crashers, spam, and lobby cheats]
 - https://github.com/Longno242/Encryptic-Roblox-Anti-Cheat [Server-authoritative Luau anti-cheat for Roblox with movement, remote, fly/noclip, fire-rate, and combat guards plus Studio demo]
 - https://github.com/mastershadow547/Advanced-Anticheat [Open-source Roblox server anti-cheat detecting movement exploits, unauthorized remotes, and environment tampering]
+- https://github.com/sorrelhub/shprotect-ac [Server-first Roblox Luau anti-cheat with movement, remote spam, fly/noclip, and client watchdog detectors]
 - https://github.com/SLAUC91/AntiCheat [Windows rootkit and cheat scanner (hooks, handles, drivers, modules)]
 - https://github.com/gmh5225/AntiCheat
 - https://github.com/ComodoSecurity/openedr [EDR]
@@ -4227,6 +4228,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Detection:Hook
 - https://github.com/hasherezade/pe-sieve
 - https://github.com/mike1k/HookHunter
+- https://github.com/0x6461726B/Hook-Detector [Windows usermode inline and IAT hook detector using remote PE parsing and manual PEB traversal]
 - https://github.com/st4ckh0und/hook-buster
 - https://github.com/gmh5225/Driver-Detect-nullshit
 - https://github.com/paranoidninja/EtwTi-Syscall-Hook [Instrumentation Callback]
