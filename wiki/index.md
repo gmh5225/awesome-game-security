@@ -438,6 +438,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hwid-checker-mg](entities/hwid-checker-mg.md) — SMBIOS manufacturer/model/serial HWID checker (Detection:HWID)
 - [hwinfo](entities/hwinfo.md) — cross-platform C++ hardware inventory library (CPU/RAM/GPU; Detection:HWID)
 - [hwidspoofer](entities/hwidspoofer.md) — Windows HWID spoof + tracking-trace clean (Cheat HWID)
+- [ice9](entities/ice9.md) — C/C++ open-source anti-cheat research (modding/hooking; Anti Cheat → Open Source Anti Cheat System; jnastarot)
 - [iaito](entities/iaito.md) — official radare2 GUI (Qt5/6; RE workflow / editor tooling; Cheat Radare)
 - [ida2llvm](entities/ida2llvm.md) — dynamic IDA→LLVM IR binary lifting (cursor-sync liftability viewer; cheat / IDA Plugins)
 - [ida-android-breakpoint](entities/ida-android-breakpoint.md) — IDA plugin: Android native `.so` breakpoint setup (Python; cheat / IDA Plugins)

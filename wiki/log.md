@@ -2259,3 +2259,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `readme:categories`: bumped Cheat ~2643 (was ~2641) / Anti Cheat ~637 (was ~636); noted Minecraft Java/Bedrock anticheat catalog on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; refreshed README map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-03** — ingest `description:talsec/Free-RASP-iOS`: entity [[free-rasp-ios]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
+- **2026-08-03** — ingest `description:jnastarot/ice9`: entity [[ice9]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
