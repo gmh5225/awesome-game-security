@@ -424,6 +424,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Holodori-Kernel-Bypass](entities/holodori-kernel-bypass.md) — userspace emu of Hololive Dreams usrdrv017964.sys (Wine/Proton; MinHook)
 - [hl-mods](entities/hl-mods.md) — Half-Life / GoldSrc mods (Cold Ice Remastered + historical; Modification For Half-Life)
 - [hidden_syscall_monitoring](entities/hidden-syscall-monitoring.md) — monitor hidden syscalls from COD anticheat (C/C++; hooking / memory)
+- [HIGU_ntcall](entities/higu-ntcall.md) — direct system calls (jnastarot; Some Tricks / Windows Ring3; Windows/Linux/mobile)
 - [hook-buster](entities/hook-buster.md) — C/Python Detection:hook research (hook integrity / bust; Anti Cheat)
 - [HookHunter](entities/hookhunter.md) — Windows process hook/patch scanner + hook destination tracing (Detection:hook; mike1k)
 - [hyper-reV](entities/hyper-rev.md) — Hyper-V memory introspection / RE (structures / hypercalls / partitions)
