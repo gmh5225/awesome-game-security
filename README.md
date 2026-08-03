@@ -1644,6 +1644,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gaasedelen/microavx [AVX Lifter]
 - https://github.com/thalium/ida_kmdf [IDA kmdf]
 - https://github.com/zengfr/XrefsExt [XrefsExt plugin]
+- https://github.com/TheCruZ/FindXrefs [IDA Pro plugin that scans large binaries for missing string/data xrefs and materializes undefined bytes so cross-references appear]
 - https://github.com/sterrasec/genpatch [Python script for patching binary]
 - https://github.com/frasten/ida-genpatch [IDA Pro plugin that exports grouped patched-byte sequences and disassembly context for building external patchers]
 - https://github.com/AzzOnFire/yarka [YARA signature creation]
