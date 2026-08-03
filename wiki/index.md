@@ -593,6 +593,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MagiskDetector](entities/magiskdetector.md) — archived Android Magisk detector (AppZygote/AIDL; Detection:Magisk)
 - [makin](entities/makin.md) — Windows anti-debug/anti-VM probe (30+ checks; C; Anti Debugging)
 - [ManyTypes](entities/manytypes.md) — x64dbg typeparsing plugin with Windows types (Cheat x64dbg Plugins)
+- [MapleStory Build Framework](entities/maplestory-build-framework.md) — MapleStory private-server client build framework (C/C++; individualized distribution + rudimentary anti-cheat; Anti Cheat / game:maplestory)
 - [MapleStory Worlds Automation](entities/maplestory-worlds-automation.md) — YOLO automation for MapleStory Worlds / Artale (Python; cheat / game:maplestory)
 - [MapleStory-YOLOv8-Training](entities/maplestory-yolov8-training.md) — YOLOv8 MapleStory object-detection training (Apple MPS; Python; cheat / game:maplestory)
 - [MapleStory143](entities/maplestory143.md) — MapleStory v143 CMS private server (Java/Kotlin; LoginCrypto / Netty·MINA / CheatTracker; Private Server-CMS-143)
