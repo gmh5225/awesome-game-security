@@ -1115,6 +1115,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [zygisk-dump-dex](entities/zygisk-dump-dex.md) — Zygisk `libdexfile.so` DEX dump (Android 14/15; Cheat Magisk)
 - [ZygiskFrida](entities/zygisk-frida.md) — Zygisk module injects Frida gadget into app processes (Cheat Magisk)
 - [Zygisk-ImGui-Mod-Menu](entities/zygisk-imgui-mod-menu.md) — Zygisk ImGui mod menu (in-dev; cheat / render-draw)
+- [Zygisk-MyInjector](entities/zygisk-myinjector.md) — Zygisk injector module (C/C++/Java; kernel-level modding / asset pipeline; Cheat Magisk)
 
 
 
