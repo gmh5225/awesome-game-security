@@ -2237,3 +2237,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:jonomango/nohv`: entity [[nohv]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-08-03** — ingest `description:jonny-jhnson/EtwWatcher`: entity [[etw-watcher]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-08-03** — ingest `description:jokerNi/WProtectSDK`: entity [[wprotectsdk]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].

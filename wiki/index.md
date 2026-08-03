@@ -1026,6 +1026,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [WDACTools](entities/wdactools.md) — PowerShell WDAC CI policy build/deploy (UMCI, CiTool.exe, p7b decrypt)
 - [WProtect](entities/wprotect.md) — C/C++ obfuscation engine (Anti Cheat → Obfuscation Engine)
+- [WProtectSDK](entities/wprotectsdk.md) — C/C++ WProtect SDK generation (Anti Cheat → Obfuscation Engine)
 - [WDUTF](entities/wdutf.md) — Windows Driver Unit Test Framework (user-space MSTest for kernel drivers)
 - [WindEffects](entities/wind-effects.md) — C++23 Vulkan/DX12 engine (ECS, editor, deferred/PBR; Game Engine)
 - [windbg-decompile-ext](entities/windbg-decompile-ext.md) — WinDbg x64 extension; live disasm + LLM verified pseudocode (WinDbg Plugins)
