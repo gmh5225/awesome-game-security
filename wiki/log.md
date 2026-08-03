@@ -2243,3 +2243,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:johnsonjason/MapleStoryBuildFramework`: entity [[maplestory-build-framework]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-08-03** — ingest `description:johnhalloran321/mcpSafetyScanner`: entity [[mcp-safety-scanner]]; cited on [[overviews/overview]] and [[overviews/game-engine]].
+
+- **2026-08-03** — ingest `readme:categories`: bumped Cheat ~2641 (was ~2640; Anti Cheat ~636 stable); verified README map on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
