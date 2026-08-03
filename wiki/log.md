@@ -2274,6 +2274,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-03** — ingest `description:jmorton06/Lumos`: entity [[lumos]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
+- **2026-08-03** — ingest `description:javascript-obfuscator/javascript-obfuscator`: entity [[javascript-obfuscator]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
+
 - **2026-08-03** — ingest `description:jlucaso1/unturned-godot`: entity [[unturned-godot]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
 
 - **2026-08-03** — ingest `description:jlgreathouse/AMD_IBS_Toolkit`: entity [[amd-ibs-toolkit]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
