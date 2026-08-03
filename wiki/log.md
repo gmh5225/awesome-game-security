@@ -2331,3 +2331,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:janoglezcampos/DeathSleep`: entity [[death-sleep]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-08-03** — ingest `description:janisslsm/ida-ps4-helper`: entity [[ida-ps4-helper]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-08-03** — ingest `description:jammsen/docker-palworld-dedicated-server`: entity [[docker-palworld-dedicated-server]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].

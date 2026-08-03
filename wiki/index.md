@@ -286,6 +286,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dma-speedtest-memflow-rs](entities/dma-speedtest-memflow-rs.md) — Windows DMA R/W speedtest via memflow (Rust CLI/GUI; pcileech/native)
 - [dma-tools-rs](entities/dma-tools-rs.md) — Rust Windows GUI for Artix-7 JTAG bitstream flash, device DNA, PCILeech/memflow sanity check (CH347/FTDI RS232)
 - [Document](entities/document.md) — Windows Driver Development guide (Cheat / Windows kernel explorer)
+- [docker-palworld-dedicated-server](entities/docker-palworld-dedicated-server.md) — Palworld UE5 dedicated server (Linux + Docker; cheat / game:palworld [UE5])
 - [docker-win](entities/docker-win.md) — WSL2 networking lab (QEMU/KVM/PVE/VBOX research-host lane)
 - [dumpulator](entities/dumpulator.md) — Python minidump → Unicorn x86/x64 emulation (memory/modules/threads; NT stubs / PEB·TEB / API hooks)
 - [Dopamine](entities/dopamine.md) — iOS 15.0–15.4.1 rootless jailbreak (PAC/PPL/AMFI; Sileo/procursus `/var/jb`)
