@@ -2918,6 +2918,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/rogxo/ReadPhys
 - https://github.com/libtersafe/dfm_android_unicorn [Coordinate Decryption (Android ARM64)]
 - https://github.com/wwweeeqqu/honor-of-kings-RE-research [Honor of Kings mobile RE: KernelPatch KPM reads, Tencent ACE analysis, IL2CPP/native notes]
+- https://github.com/not1cyyy/Anti-Cheat-Amateur [Stealth kdmapper kernel driver and virtualized UE memory scanner for Tencent ACE evasion research]
 
 > Explore AntiCheat System:G-Presto
 - https://github.com/ARandomPerson7/G-Presto-Anti-Cheat-Reverse-Engineered/blob/main/Main.cpp
