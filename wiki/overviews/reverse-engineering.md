@@ -22,6 +22,7 @@ sources:
   - wiki/sources/descriptions/jsherman212__xnuspy.md
   - wiki/sources/descriptions/jsacco__ntoskrnlwalker.md
   - wiki/sources/descriptions/jsacco__NTKernelWalkerLib.md
+  - wiki/sources/descriptions/joxeankoret__diaphora.md
   - wiki/sources/descriptions/roothide__Dopamine2-roothide.md
   - wiki/sources/descriptions/zengfr__XrefsExt.md
   - wiki/sources/descriptions/zboralski__unflutter.md
@@ -445,7 +446,7 @@ Model Context Protocol servers expose RE tools to LLM agents: [[ida-pro-mcp]] / 
 
 ## Binary diffing
 
-Graph- and structure-based differencing (BinDiff, Diaphora, ghidriff, DarunGrim) for patch analysis: track anti-cheat driver updates between builds, isolate logic changes in obfuscated clients, and compare patched vulnerability fixes.
+Graph- and structure-based differencing (BinDiff, [[diaphora]], ghidriff, DarunGrim) for patch analysis: track anti-cheat driver updates between builds, isolate logic changes in obfuscated clients, and compare patched vulnerability fixes. [[diaphora]] is the leading open-source IDA Pro Python plugin for function-level comparison—CFG matching, basic-block hashes, mnemonics, string refs, call-graph topology—with partial matching, symbol/comment porting between IDB versions, and detailed diff reports for vulnerability and patch analysts. (source: wiki/sources/descriptions/joxeankoret__diaphora.md)
 
 ## Key sub-areas
 

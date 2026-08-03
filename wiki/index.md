@@ -286,6 +286,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Dalvikus](entities/dalvikus.md) — Android smali editor / Dalvik bytecode RE tool (ethical research)
 - [dex2jar](entities/dex2jar.md) — DEX↔JAR toolset (d2j-baksmali / APK sign / DEX manip; mobile RE)
 - [dfm-android-unicorn](entities/dfm-android-unicorn.md) — DFM Android ARM64 coordinate decryption via Unicorn emulation (C/C++; ACE/libtersafe; cheat / explore anticheat system:ACE)
+- [Diaphora](entities/diaphora.md) — open-source IDA Pro binary diffing plugin (CFG/BB-hash/mnemonics/strings/call-graph; symbol porting; patch analysis)
 - [dncil](entities/dncil.md) — Python CIL disassembly for .NET PE (Mandiant; metadata + operands; Unity Mono / YARA pipelines)
 - [dotNIET](entities/dotniet.md) — IDA plugin: .NET NativeAOT type/method symbol recovery (Import .NET Symbol)
 - [dotrix](entities/dotrix.md) — open-source Rust 3D engine (dot + matrix; Game Engine / source)
