@@ -1,0 +1,2632 @@
+Project Path: arc_horsicq_XVolkolak_et5ejtdn
+
+Source Tree:
+
+```txt
+arc_horsicq_XVolkolak_et5ejtdn
+├── CMakeLists.txt
+├── LICENSE
+├── README.md
+├── THANKS.md
+├── changelog.txt
+├── packaging
+│   ├── debian
+│   │   └── build_dpkg.sh
+│   ├── macos
+│   │   └── build_mac.sh
+│   └── windows
+│       └── build_portable_windows.cmd
+├── release_version.txt
+├── res
+│   ├── images
+│   ├── linux
+│   │   ├── hicolor
+│   │   │   ├── 16x16
+│   │   │   │   └── apps
+│   │   │   ├── 20x20
+│   │   │   │   └── apps
+│   │   │   ├── 24x24
+│   │   │   │   └── apps
+│   │   │   ├── 256x256
+│   │   │   │   └── apps
+│   │   │   ├── 32x32
+│   │   │   │   └── apps
+│   │   │   └── 48x48
+│   │   │       └── apps
+│   │   └── xvolkolak.desktop.in
+│   ├── macos
+│   │   ├── Info.plist.in
+│   │   └── main.icns
+│   ├── resources_gui.qrc
+│   └── windows
+│       ├── resource.rc.in
+│       ├── resource_icon.rc.in
+│       └── windows.manifest.xml
+├── run
+│   └── run_xvolkolak_windows.cmd
+├── src
+│   ├── CMakeLists.txt
+│   ├── console
+│   │   ├── CMakeLists.txt
+│   │   └── main_console.cpp
+│   ├── global.h
+│   └── gui
+│       ├── CMakeLists.txt
+│       ├── dialogabout.cpp
+│       ├── dialogabout.h
+│       ├── dialogabout.ui
+│       ├── dialogoptions.cpp
+│       ├── dialogoptions.h
+│       ├── dialogoptions.ui
+│       ├── dialogunpack.cpp
+│       ├── dialogunpack.h
+│       ├── dialogunpack.ui
+│       ├── guimainwindow.cpp
+│       ├── guimainwindow.h
+│       ├── guimainwindow.ui
+│       ├── main_gui.cpp
+│       ├── unpackworker.cpp
+│       └── unpackworker.h
+└── translations
+    ├── xvolkolak_ar_AR.ts
+    ├── xvolkolak_bn_BN.ts
+    ├── xvolkolak_de_DE.ts
+    ├── xvolkolak_es_ES.ts
+    ├── xvolkolak_fa_FA.ts
+    ├── xvolkolak_fr_FR.ts
+    ├── xvolkolak_he_IL.ts
+    ├── xvolkolak_id_ID.ts
+    ├── xvolkolak_it_IT.ts
+    ├── xvolkolak_ja_JP.ts
+    ├── xvolkolak_ko_KR.ts
+    ├── xvolkolak_pl_PL.ts
+    ├── xvolkolak_pt_BR.ts
+    ├── xvolkolak_pt_PT.ts
+    ├── xvolkolak_ru_RU.ts
+    ├── xvolkolak_sq_AL.ts
+    ├── xvolkolak_sv_SE.ts
+    ├── xvolkolak_tr_TR.ts
+    ├── xvolkolak_uk_UA.ts
+    ├── xvolkolak_vi_VN.ts
+    ├── xvolkolak_zh_CN.ts
+    └── xvolkolak_zh_TW.ts
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.18)
+
+project(XVolkolak)
+
+add_subdirectory(src)
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 XVolkolak contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# XVolkolak
+
+XVolkolak is a Qt/CMake emulator-unpacker project with two front ends:
+
+- `xvolkolak` - Qt Widgets GUI application.
+- `xvolkolakc` - console application.
+
+The core (`_mylibs/XUniversalUnpacker/emulatorunpacker.*`) drives the **XEmulUnpacker** engine
+(`_mylibs/XEmulUnpacker`, built on the XEmulator user-mode CPU emulator): it loads a
+packed executable, single-steps the loader stub until the transfer to the original
+entry point (OEP), and writes the reconstructed image out. The packer can be left on
+`Generic (auto)` (heuristic OEP detection) or set to one of 21 packer-specific
+unpackers (UPX, ASPack, NSPack, (Win)Upack, FSG, MEW, MPRESS, PECompact, ACProtect,
+!EP(EXE Pack), PeX, AHPacker, BeRoEXEPacker, ExeFog, nPack, Fish PE Packer, kkrunchy,
+Packman, QuickPack NT, Petite, REVProt). Run `xvolkolakc --list-packers` to enumerate.
+
+## Build
+
+```bat
+cmake -S . -B tmp_build -DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019_64
+cmake --build tmp_build --config Release
+```
+
+For Visual Studio generator builds, pass `-G "Visual Studio 17 2022" -A x64`
+or the platform you need.
+
+## Console Usage
+
+```bat
+xvolkolakc input.exe --result-directory C:\unpacked
+```
+
+The result directory defaults to the input file's directory. Output names are
+derived automatically from the original name and unpack method. For example,
+`sample.tar.gz` unpacked with `UPX signature` is written as:
+
+```text
+C:\unpacked\sample.tar.gz.unpacked\sample.unpacked[UPX signature].tar.gz
+```
+
+Use `--force` to overwrite an existing derived output file.
+
+```
+
+`THANKS.md`:
+
+```md
+# Thanks
+
+Thanks to the reverse-engineering and Qt communities for the tools and ideas
+that make small native utilities pleasant to build.
+
+```
+
+`changelog.txt`:
+
+```txt
+1.0.0
+- Modern CMake/Qt rewrite of XVolkolak (the classic XVLK emulator-unpacker).
+- GUI and console front ends over the XEmulUnpacker engine (XEmulator core).
+- Emulation-based OEP recovery: single-steps the packer stub and rebuilds the image.
+- Packer selection: "Generic (auto)" heuristic plus 21 packer-specific unpackers
+  (UPX, ASPack, NSPack, (Win)Upack, FSG, MEW, MPRESS, PECompact, ACProtect,
+  !EP(EXE Pack), PeX, AHPacker, BeRoEXEPacker, ExeFog, nPack, Fish PE Packer,
+  kkrunchy, Packman, QuickPack NT, Petite, REVProt).
+- GUI runs the unpack on a worker thread with a live engine log and progress.
+- Console: -r/--result-directory, -f/--force, -p/--packer, -m/--max-steps, -v/--verbose,
+  --apilog, --list-packers.
+
+```
+
+`packaging/debian/build_dpkg.sh`:
+
+```sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+project_root="$(cd "$(dirname "$0")/../.." && pwd)"
+build_dir="${TMPDIR:-/tmp}/xvolkolak_debian_build"
+
+rm -rf "$build_dir"
+cmake -S "$project_root" -B "$build_dir" -DCMAKE_BUILD_TYPE=Release "${@}"
+cmake --build "$build_dir" --config Release
+cpack --config "$build_dir/CPackConfig.cmake" -G DEB
+
+```
+
+`packaging/macos/build_mac.sh`:
+
+```sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+project_root="$(cd "$(dirname "$0")/../.." && pwd)"
+build_dir="${TMPDIR:-/tmp}/xvolkolak_macos_build"
+
+rm -rf "$build_dir"
+cmake -S "$project_root" -B "$build_dir" -DCMAKE_BUILD_TYPE=Release "${@}"
+cmake --build "$build_dir" --config Release
+cpack --config "$build_dir/CPackConfig.cmake" -G ZIP
+
+```
+
+`packaging/windows/build_portable_windows.cmd`:
+
+```cmd
+@echo off
+setlocal
+rem Usage: build_portable_windows.cmd <qt-root> <cmake-platform> <package-suffix>
+
+if "%~3"=="" (
+    echo Usage: %~nx0 ^<qt-root^> ^<cmake-platform^> ^<package-suffix^>
+    exit /b 1
+)
+
+for %%I in ("%~dp0..\..") do set "PROJECT_ROOT=%%~fI"
+
+set "QT_ROOT=%~1"
+set "CMAKE_PLATFORM=%~2"
+set "PACKAGE_SUFFIX=%~3"
+set "CMAKE_GENERATOR_NAME=%CMAKE_GENERATOR_NAME%"
+if "%CMAKE_GENERATOR_NAME%"=="" set "CMAKE_GENERATOR_NAME=Visual Studio 17 2022"
+
+set "WORK_ROOT=%TEMP%\xvolkolak_%PACKAGE_SUFFIX%"
+set "BUILD_DIR=%WORK_ROOT%\build"
+set "QT_PREFIX_PATH=%QT_ROOT%"
+set "APP_NAME=xvolkolak.exe"
+set "PACKAGE_BASENAME=xvolkolak_%PACKAGE_SUFFIX%_portable"
+
+if not exist "%QT_ROOT%" (
+    echo Qt root not found:
+    echo   %QT_ROOT%
+    exit /b 1
+)
+
+if not exist "%PROJECT_ROOT%\release_version.txt" (
+    echo release_version.txt not found:
+    echo   %PROJECT_ROOT%\release_version.txt
+    exit /b 1
+)
+
+set /p RELEASE_VERSION=<"%PROJECT_ROOT%\release_version.txt"
+set "PACKAGE_NAME=%PACKAGE_BASENAME%_%RELEASE_VERSION%"
+set "RELEASE_DIR=%PROJECT_ROOT%\release"
+set "PACKAGE_DIR=%RELEASE_DIR%\%PACKAGE_NAME%"
+set "CPACK_DIR=%WORK_ROOT%\cpack"
+set "CPACK_OUTPUT_DIR=%WORK_ROOT%\output"
+
+if not exist "%RELEASE_DIR%" mkdir "%RELEASE_DIR%"
+if errorlevel 1 exit /b 1
+
+if exist "%WORK_ROOT%" rmdir /s /q "%WORK_ROOT%"
+mkdir "%WORK_ROOT%"
+if errorlevel 1 exit /b 1
+
+echo Configuring %PACKAGE_SUFFIX% build...
+cmake -S "%PROJECT_ROOT%" -B "%BUILD_DIR%" -G "%CMAKE_GENERATOR_NAME%" -A %CMAKE_PLATFORM% -DCMAKE_PREFIX_PATH="%QT_PREFIX_PATH%"
+if errorlevel 1 exit /b 1
+
+echo Building %PACKAGE_SUFFIX% Release...
+cmake --build "%BUILD_DIR%" --config Release --clean-first
+if errorlevel 1 exit /b 1
+
+set "APP_EXE=%BUILD_DIR%\src\gui\Release\%APP_NAME%"
+set "CPACK_CONFIG=%BUILD_DIR%\CPackConfig.cmake"
+
+if not exist "%APP_EXE%" (
+    echo Built executable not found:
+    echo   %APP_EXE%
+    exit /b 1
+)
+
+if not exist "%CPACK_CONFIG%" (
+    echo CPack config not found:
+    echo   %CPACK_CONFIG%
+    exit /b 1
+)
+
+if exist "%PACKAGE_DIR%" rmdir /s /q "%PACKAGE_DIR%"
+if exist "%CPACK_DIR%" rmdir /s /q "%CPACK_DIR%"
+if exist "%CPACK_OUTPUT_DIR%" rmdir /s /q "%CPACK_OUTPUT_DIR%"
+
+echo Installing portable package folder...
+cmake --install "%BUILD_DIR%" --config Release --prefix "%PACKAGE_DIR%"
+if errorlevel 1 exit /b 1
+
+echo Creating portable zip with CPack...
+cpack --config "%CPACK_CONFIG%" -G ZIP -C Release -B "%CPACK_DIR%" -D "CPACK_OUTPUT_FILE_PREFIX=%CPACK_OUTPUT_DIR%"
+if errorlevel 1 exit /b 1
+
+set "CPACK_ZIP="
+for /r "%CPACK_OUTPUT_DIR%" %%F in (*.zip) do (
+    set "CPACK_ZIP=%%~fF"
+    goto cpack_zip_found
+)
+
+echo CPack did not produce a zip archive in:
+echo   %CPACK_OUTPUT_DIR%
+exit /b 1
+
+:cpack_zip_found
+for %%I in ("%CPACK_ZIP%") do set "PACKAGE_ZIP=%RELEASE_DIR%\%%~nxI"
+if exist "%PACKAGE_ZIP%" del /f /q "%PACKAGE_ZIP%"
+copy /y "%CPACK_ZIP%" "%PACKAGE_ZIP%" >nul
+if errorlevel 1 exit /b 1
+
+if exist "%WORK_ROOT%" rmdir /s /q "%WORK_ROOT%"
+
+echo.
+echo Portable package folder created:
+echo   %PACKAGE_DIR%
+echo Portable zip created by CPack:
+echo   %PACKAGE_ZIP%
+
+endlocal
+
+```
+
+`release_version.txt`:
+
+```txt
+1.0.0
+```
+
+`res/linux/xvolkolak.desktop.in`:
+
+```in
+[Desktop Entry]
+Version=@PROJECT_VERSION@
+Type=Application
+Name=XVolkolak
+Comment=XVolkolak emulator-unpacker
+Exec=xvolkolak
+Icon=xvolkolak
+Terminal=false
+Categories=Development;Utility;
+
+```
+
+`res/macos/Info.plist.in`:
+
+```in
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>English</string>
+    <key>CFBundleExecutable</key>
+    <string>@X_ORIGINAL_FILENAME@</string>
+    <key>CFBundleIconFile</key>
+    <string>main.icns</string>
+    <key>CFBundleIdentifier</key>
+    <string>@MACOSX_BUNDLE_GUI_IDENTIFIER@</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleLongVersionString</key>
+    <string>@PROJECT_VERSION@</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>@PROJECT_VERSION@</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+    <key>CFBundleVersion</key>
+    <string>@PROJECT_VERSION@</string>
+    <key>CSResourcesFileMapped</key>
+    <true/>
+    <key>NSHumanReadableCopyright</key>
+    <string>@X_COMPANYNAME@</string>
+</dict>
+</plist>
+
+```
+
+`res/resources_gui.qrc`:
+
+```qrc
+<RCC>
+    <qresource prefix="/">
+        <file>images/logo.png</file>
+    </qresource>
+</RCC>
+
+```
+
+`res/windows/resource.rc.in`:
+
+```in
+#include <windows.h>
+
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "windows.manifest.xml"
+VS_VERSION_INFO VERSIONINFO
+    FILEVERSION @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,0
+    PRODUCTVERSION @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,0
+    FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+    FILEFLAGS VS_FF_DEBUG
+#else
+    FILEFLAGS 0x0L
+#endif
+    FILEOS VOS__WINDOWS32
+    FILETYPE VFT_APP
+    FILESUBTYPE 0x0L
+    BEGIN
+        BLOCK "StringFileInfo"
+        BEGIN
+            BLOCK "040904b0"
+            BEGIN
+                VALUE "CompanyName", "@X_COMPANYNAME@\0"
+                VALUE "FileDescription", "@X_DESCRIPTION@\0"
+                VALUE "FileVersion", "@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@.0\0"
+                VALUE "LegalCopyright", "@X_MAINTAINER@\0"
+                VALUE "OriginalFilename", "@X_ORIGINAL_FILENAME@.exe\0"
+                VALUE "ProductName", "@X_PROJECTNAME@\0"
+                VALUE "ProductVersion", "@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@.0\0"
+            END
+        END
+        BLOCK "VarFileInfo"
+        BEGIN
+            VALUE "Translation", 0x0409, 1200
+        END
+    END
+/* End of Version info */
+
+```
+
+`res/windows/resource_icon.rc.in`:
+
+```in
+#include <windows.h>
+
+IDI_ICON1 ICON DISCARDABLE "main.ico"
+
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "windows.manifest.xml"
+VS_VERSION_INFO VERSIONINFO
+    FILEVERSION @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,0
+    PRODUCTVERSION @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,0
+    FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+    FILEFLAGS VS_FF_DEBUG
+#else
+    FILEFLAGS 0x0L
+#endif
+    FILEOS VOS__WINDOWS32
+    FILETYPE VFT_APP
+    FILESUBTYPE 0x0L
+    BEGIN
+        BLOCK "StringFileInfo"
+        BEGIN
+            BLOCK "040904b0"
+            BEGIN
+                VALUE "CompanyName", "@X_COMPANYNAME@\0"
+                VALUE "FileDescription", "@X_DESCRIPTION@\0"
+                VALUE "FileVersion", "@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@.0\0"
+                VALUE "LegalCopyright", "@X_MAINTAINER@\0"
+                VALUE "OriginalFilename", "@X_ORIGINAL_FILENAME@.exe\0"
+                VALUE "ProductName", "@X_PROJECTNAME@\0"
+                VALUE "ProductVersion", "@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@.0\0"
+            END
+        END
+        BLOCK "VarFileInfo"
+        BEGIN
+            VALUE "Translation", 0x0409, 1200
+        END
+    END
+/* End of Version info */
+
+```
+
+`res/windows/windows.manifest.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <assemblyIdentity version="1.0.0.0" processorArchitecture="*" name="XVolkolak" type="win32"/>
+  <description>XVolkolak emulator-unpacker</description>
+  <dependency>
+    <dependentAssembly>
+      <assemblyIdentity type="win32" name="Microsoft.Windows.Common-Controls" version="6.0.0.0" processorArchitecture="*" publicKeyToken="6595b64144ccf1df" language="*"/>
+    </dependentAssembly>
+  </dependency>
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+    <security>
+      <requestedPrivileges>
+        <requestedExecutionLevel level="asInvoker" uiAccess="false"/>
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
+    </windowsSettings>
+  </application>
+</assembly>
+
+```
+
+`run/run_xvolkolak_windows.cmd`:
+
+```cmd
+@echo off
+setlocal
+
+for %%I in ("%~dp0..") do set "PROJECT_ROOT=%%~fI"
+set "APP_EXE=%PROJECT_ROOT%\tmp_build\src\gui\xvolkolak.exe"
+
+if not exist "%APP_EXE%" (
+    set "APP_EXE=%PROJECT_ROOT%\tmp_build\src\gui\Release\xvolkolak.exe"
+)
+
+if not exist "%APP_EXE%" (
+    echo xvolkolak.exe was not found under tmp_build.
+    exit /b 1
+)
+
+"%APP_EXE%" %*
+
+endlocal
+
+```
+
+`src/CMakeLists.txt`:
+
+```txt
+if(TARGET Qt6::Core OR TARGET Qt6::Widgets)
+    set(XVOLKOLAK_QT_MAJOR 6)
+elseif(TARGET Qt5::Core OR TARGET Qt5::Widgets)
+    set(XVOLKOLAK_QT_MAJOR 5)
+else()
+    find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
+    set(XVOLKOLAK_QT_MAJOR ${QT_VERSION_MAJOR})
+endif()
+
+set(XVOLKOLAK_QT_COMPONENTS
+    Core
+    Concurrent
+    Widgets
+    PrintSupport
+    Network
+    Svg
+    LinguistTools
+)
+
+if(XVOLKOLAK_QT_MAJOR EQUAL 5)
+    find_package(Qt5 REQUIRED COMPONENTS ${XVOLKOLAK_QT_COMPONENTS})
+elseif(XVOLKOLAK_QT_MAJOR GREATER_EQUAL 6)
+    find_package(Qt${XVOLKOLAK_QT_MAJOR} REQUIRED COMPONENTS ${XVOLKOLAK_QT_COMPONENTS})
+
+    if(NOT TARGET Qt5::Widgets)
+        add_library(Qt5::Widgets INTERFACE IMPORTED)
+        set_property(TARGET Qt5::Widgets PROPERTY
+            INTERFACE_LINK_LIBRARIES Qt${XVOLKOLAK_QT_MAJOR}::Widgets
+        )
+    endif()
+endif()
+
+file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/../release_version.txt" X_PROJECT_VERSION)
+project(XVolkolak VERSION ${X_PROJECT_VERSION} LANGUAGES CXX)
+
+set(X_COMPANYNAME "XVolkolak")
+set(X_PROJECTNAME "XVolkolak")
+set(X_MAINTAINER "horsicq@gmail.com")
+set(X_DESCRIPTION "XVolkolak emulator-unpacker")
+set(X_HOMEPAGE "https:/ntinfo.biz")
+set(X_ORIGINAL_FILENAME "xvolkolak")
+
+if(NOT DEFINED MACOSX_BUNDLE_GUI_IDENTIFIER OR "${MACOSX_BUNDLE_GUI_IDENTIFIER}" STREQUAL "")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "ntinfo.xvolkolak.app")
+endif()
+set(BUNDLE_ID_OPTION "${MACOSX_BUNDLE_GUI_IDENTIFIER}")
+
+set(X_RESOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../res")
+set(X_WINDOWS_ICON "${X_RESOURCE_DIR}/windows/main.ico")
+set(X_WINDOWS_RESOURCE_RC_IN "${X_RESOURCE_DIR}/windows/resource.rc.in")
+set(X_WINDOWS_RESOURCE_ICON_RC_IN "${X_RESOURCE_DIR}/windows/resource_icon.rc.in")
+set(X_WINDOWS_RESOURCE_RC "${X_RESOURCE_DIR}/windows/resource.rc")
+set(X_WINDOWS_RESOURCE_ICON_RC "${X_RESOURCE_DIR}/windows/resource_icon.rc")
+set(X_MACOS_ICON "${X_RESOURCE_DIR}/macos/main.icns")
+set(X_MACOS_INFO_PLIST_IN "${X_RESOURCE_DIR}/macos/Info.plist.in")
+set(X_MACOS_INFO_PLIST "${X_RESOURCE_DIR}/macos/Info.plist")
+
+set(XVOLKOLAK_DEPLOY_INIT "${CMAKE_CURRENT_LIST_DIR}/../dep/build_tools/cmake/deploy_init.cmake")
+if(EXISTS "${XVOLKOLAK_DEPLOY_INIT}"
+   AND EXISTS "${X_WINDOWS_RESOURCE_RC_IN}"
+   AND EXISTS "${X_WINDOWS_RESOURCE_ICON_RC_IN}"
+   AND EXISTS "${X_MACOS_ICON}"
+   AND EXISTS "${X_MACOS_INFO_PLIST_IN}")
+    include("${XVOLKOLAK_DEPLOY_INIT}")
+else()
+    message(STATUS "Skipping deploy_init.cmake because packaging resource templates are missing")
+endif()
+
+set(XVOLKOLAK_TRANSLATION_HELPER "${CMAKE_CURRENT_LIST_DIR}/../dep/build_tools/cmake/deploy_translation.cmake")
+if(EXISTS "${XVOLKOLAK_TRANSLATION_HELPER}")
+    include("${XVOLKOLAK_TRANSLATION_HELPER}")
+
+    set(XVOLKOLAK_TS_FILES
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_ar_AR.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_bn_BN.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_de_DE.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_es_ES.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_fa_FA.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_fr_FR.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_he_IL.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_id_ID.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_it_IT.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_ja_JP.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_ko_KR.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_pl_PL.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_pt_BR.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_pt_PT.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_ru_RU.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_sv_SE.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_tr_TR.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_uk_UA.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_vi_VN.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_sq_AL.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_zh_CN.ts"
+        "${CMAKE_CURRENT_LIST_DIR}/../translations/xvolkolak_zh_TW.ts"
+    )
+
+    deploy_add_translations(
+        TARGET_NAME xvolkolak_translations
+        ADD_TO_ALL
+        SOURCE_DIRS "${CMAKE_CURRENT_LIST_DIR}"
+        TS_FILES ${XVOLKOLAK_TS_FILES}
+        INSTALL_DESTINATION lang
+        WINDOWS_APPDATA_SUBDIR "${X_PROJECTNAME}"
+    )
+endif()
+
+# Dependency targets for the NFD scan engine (auto packer detection). These provide the
+# capstone / xsimd / compression static libraries the DIE detection engine links against.
+set(XVOLKOLAK_MYLIBS "${CMAKE_CURRENT_LIST_DIR}/../dep")
+add_subdirectory("${XVOLKOLAK_MYLIBS}/XCapstone" XCapstone)
+add_subdirectory("${XVOLKOLAK_MYLIBS}/XArchive" XArchive)
+add_subdirectory("${XVOLKOLAK_MYLIBS}/Formats/xsimd" XSIMD)
+
+# The unpacker engine core moved to _mylibs as a reusable library (target: xuniversalunpacker).
+add_subdirectory("${XVOLKOLAK_MYLIBS}/XUniversalUnpacker" XUniversalUnpacker)
+add_subdirectory(gui)
+add_subdirectory(console)
+
+```
+
+`src/console/CMakeLists.txt`:
+
+```txt
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_CXX_STANDARD 17)  # match xuniversalunpacker (engine is built at C++17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(WIN32)
+    add_definitions(-DNOMINMAX)
+endif()
+
+if(MSVC)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS _SCL_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE)
+    add_compile_options(/FS)
+    add_compile_options($<$<CONFIG:Debug>:/Z7> $<$<CONFIG:RelWithDebInfo>:/Z7>)
+endif()
+
+if(UNIX AND NOT APPLE)
+    include(GNUInstallDirs)
+endif()
+
+add_executable(xvolkolakc
+    main_console.cpp
+)
+
+target_include_directories(xvolkolakc PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/..
+)
+
+target_link_libraries(xvolkolakc PRIVATE
+    xuniversalunpacker
+    Qt${XVOLKOLAK_QT_MAJOR}::Core
+)
+
+if(TARGET xvolkolak_translations)
+    add_dependencies(xvolkolakc xvolkolak_translations)
+endif()
+
+if(UNIX AND NOT APPLE)
+    install(TARGETS xvolkolakc RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+else()
+    install(TARGETS xvolkolakc RUNTIME DESTINATION ".")
+endif()
+
+```
+
+`src/console/main_console.cpp`:
+
+```cpp
+#include <QCommandLineOption>
+#include <QCommandLineParser>
+#include <QCoreApplication>
+#include <QTextStream>
+
+#include "../global.h"
+#include "emulatorunpacker.h"
+
+namespace {
+
+void configureApplicationMetadata()
+{
+    QCoreApplication::setOrganizationName(X_ORGANIZATIONNAME);
+    QCoreApplication::setOrganizationDomain(X_ORGANIZATIONDOMAIN);
+    QCoreApplication::setApplicationName(X_APPLICATIONNAME);
+    QCoreApplication::setApplicationVersion(X_APPLICATIONVERSION);
+}
+
+}  // namespace
+
+int main(int argc, char *argv[])
+{
+    configureApplicationMetadata();
+
+    QCoreApplication application(argc, argv);
+
+    QTextStream out(stdout);
+    QTextStream err(stderr);
+
+    QCommandLineParser parser;
+    parser.setApplicationDescription(QStringLiteral("%1 - emulation-based PE unpacker").arg(X_APPLICATIONDISPLAYNAME));
+    parser.addHelpOption();
+    parser.addVersionOption();
+
+    const QCommandLineOption resultDirectoryOption(QStringList() << QStringLiteral("r") << QStringLiteral("result-directory"),
+                                                   QStringLiteral("Store unpacked output below <directory>."),
+                                                   QStringLiteral("directory"));
+    const QCommandLineOption forceOption(QStringList() << QStringLiteral("f") << QStringLiteral("force"),
+                                         QStringLiteral("Overwrite an existing derived output file."));
+    const QCommandLineOption packerOption(QStringList() << QStringLiteral("p") << QStringLiteral("packer"),
+                                          QStringLiteral("Packer family to use (default: generic auto). See --list-packers."),
+                                          QStringLiteral("name"));
+    const QCommandLineOption maxStepsOption(QStringList() << QStringLiteral("m") << QStringLiteral("max-steps"),
+                                            QStringLiteral("Instruction budget before giving up (0 = unpacker default)."),
+                                            QStringLiteral("count"));
+    const QCommandLineOption verboseOption(QStringList() << QStringLiteral("verbose"),
+                                           QStringLiteral("Stream engine log lines while unpacking."));
+    const QCommandLineOption apiLogOption(QStringLiteral("apilog"),
+                                          QStringLiteral("Print the emulated API-call log after unpacking."));
+    const QCommandLineOption listOption(QStringLiteral("list-packers"),
+                                        QStringLiteral("List the supported packer families and exit."));
+    const QCommandLineOption noImportsOption(QStringLiteral("no-fix-imports"),
+                                             QStringLiteral("Do not reconstruct the import table (raw dump, diagnostics only)."));
+    const QCommandLineOption noRelocsOption(QStringLiteral("no-fix-relocs"),
+                                            QStringLiteral("Do not reconstruct base relocations (faster; output loads at its preferred base only)."));
+    const QCommandLineOption overlayOption(QStringLiteral("save-overlay"),
+                                           QStringLiteral("Append the original packed file's overlay to the output."));
+
+    parser.addOption(resultDirectoryOption);
+    parser.addOption(forceOption);
+    parser.addOption(packerOption);
+    parser.addOption(maxStepsOption);
+    parser.addOption(verboseOption);
+    parser.addOption(apiLogOption);
+    parser.addOption(listOption);
+    parser.addOption(noImportsOption);
+    parser.addOption(noRelocsOption);
+    parser.addOption(overlayOption);
+    parser.addPositionalArgument(QStringLiteral("input"), QStringLiteral("Input executable or packed binary."));
+    parser.process(application);
+
+    if(parser.isSet(listOption)) {
+        const QStringList packers = EmulatorUnpacker::availablePackers();
+        for(const QString &name : packers) {
+            out << name << '\n';
+        }
+        return 0;
+    }
+
+    const QStringList positionalArguments = parser.positionalArguments();
+    if(positionalArguments.isEmpty()) {
+        parser.showHelp(1);
+    }
+
+    EmulatorUnpacker::Options options;
+    options.inputPath = positionalArguments.at(0);
+    options.resultDirectory = parser.value(resultDirectoryOption);
+    options.forceOverwrite = parser.isSet(forceOption);
+    options.packerName = parser.isSet(packerOption) ? parser.value(packerOption) : EmulatorUnpacker::genericPackerName();
+    if(parser.isSet(maxStepsOption)) {
+        options.maxSteps = parser.value(maxStepsOption).toLongLong();
+    }
+    options.fixImports = !parser.isSet(noImportsOption);
+    options.fixRelocations = !parser.isSet(noRelocsOption);
+    options.saveOverlay = parser.isSet(overlayOption);
+
+    const bool verbose = parser.isSet(verboseOption);
+    EmulatorUnpacker::LogCallback onLog;
+    if(verbose) {
+        onLog = [&out](const QString &line) {
+            out << line << '\n';
+            out.flush();
+        };
+    }
+
+    const EmulatorUnpacker::Result result = EmulatorUnpacker::unpack(options, onLog);
+
+    if(!verbose) {
+        QTextStream &stream = result.success ? out : err;
+        for(const QString &message : result.messages) {
+            stream << message << '\n';
+        }
+    }
+
+    if(parser.isSet(apiLogOption)) {
+        out << "--- API log (" << result.apiLog.size() << ") ---\n";
+        for(const QString &line : result.apiLog) {
+            out << line << '\n';
+        }
+    }
+
+    return result.success ? 0 : 2;
+}
+
+```
+
+`src/global.h`:
+
+```h
+#ifndef GLOBAL_H
+#define GLOBAL_H
+
+#include <QtGlobal>
+
+#define X_APPLICATIONDISPLAYNAME "XVolkolak"
+#define X_APPLICATIONNAME "xvolkolak"
+#define X_APPLICATIONVERSION "1.0.0"
+#define X_ORGANIZATIONNAME "XVolkolak"
+#define X_ORGANIZATIONDOMAIN "xvolkolak.local"
+#define X_OPTIONSFILE "xvolkolak.ini"
+#define X_SHORTCUTSFILE "shortcuts.ini"
+
+#endif  // GLOBAL_H
+
+```
+
+`src/gui/CMakeLists.txt`:
+
+```txt
+include(../../dep/build_tools/cmake/cpp_standart_setup.cmake)
+
+if(UNIX AND NOT APPLE)
+    include(GNUInstallDirs)
+endif()
+
+set(XVOLKOLAK_MYLIBS "${CMAKE_CURRENT_LIST_DIR}/../../dep")
+
+# The NFD scan-results widget (nfd_widget = NFD_Widget : XScanEngineWidget) shows the
+# detector's findings as a tree. It pulls the whole DIE engine by default, but that engine is
+# already compiled into xuniversalunpacker -- so pre-empt every engine-level source variable
+# (set them empty) and let nfd_widget.cmake add ONLY the widget layer, which resolves the
+# engine symbols by linking xuniversalunpacker.
+set(SPECABSTRACT_SOURCES "")
+set(XSCANENGINE_SOURCES "")
+set(SCANITEM_SOURCES "")   # ScanItemModel (QAbstractItemModel) is already in xuniversalunpacker
+set(XFORMATS_SOURCES "")
+set(XDEX_SOURCES "")
+set(XPDF_SOURCES "")
+set(XARCHIVES_SOURCES "")
+set(XSTATICUNPACKER_SOURCES "")
+set(XOPTIONS_SOURCES "")
+set(XDISASMCORE_SOURCES "")
+
+include("${XVOLKOLAK_MYLIBS}/nfd_widget/nfd_widget.cmake")
+include("${XVOLKOLAK_MYLIBS}/XOptions/xoptionswidget.cmake")
+include("${XVOLKOLAK_MYLIBS}/XAboutWidget/xaboutwidget.cmake")
+include("${XVOLKOLAK_MYLIBS}/XStyles/xstyles.cmake")
+
+set(XVOLKOLAK_GUI_TARGET XVolkolak)
+
+# The widget cmakes overlap (nfd_widget already pulls xscanwidgets -> xoptionswidget, ...), so
+# the same source can appear more than once. De-duplicate by canonical path -- a doubly listed
+# Q_OBJECT source otherwise gets its meta-object compiled twice (LNK2005).
+set(XVOLKOLAK_GUI_WIDGET_SOURCES_RAW
+    ${NFD_WIDGET_SOURCES}
+    ${XOPTIONSWIDGET_SOURCES}
+    ${XABOUTWIDGET_SOURCES}
+    ${XSTYLES_SOURCES}
+)
+set(XVOLKOLAK_GUI_WIDGET_SOURCES "")
+foreach(src ${XVOLKOLAK_GUI_WIDGET_SOURCES_RAW})
+    get_filename_component(src_abs "${src}" ABSOLUTE)
+    list(APPEND XVOLKOLAK_GUI_WIDGET_SOURCES "${src_abs}")
+endforeach()
+list(REMOVE_DUPLICATES XVOLKOLAK_GUI_WIDGET_SOURCES)
+
+set(XVOLKOLAK_GUI_SOURCES
+    ${XVOLKOLAK_GUI_WIDGET_SOURCES}
+    dialogabout.cpp
+    dialogabout.h
+    dialogabout.ui
+    dialogoptions.cpp
+    dialogoptions.h
+    dialogoptions.ui
+    dialogunpack.cpp
+    dialogunpack.h
+    dialogunpack.ui
+    guimainwindow.cpp
+    guimainwindow.h
+    guimainwindow.ui
+    unpackworker.cpp
+    unpackworker.h
+    main_gui.cpp
+    "${CMAKE_CURRENT_LIST_DIR}/../../res/resources_gui.qrc"
+)
+
+if(WIN32 AND EXISTS "${X_WINDOWS_RESOURCE_ICON_RC}")
+    list(APPEND XVOLKOLAK_GUI_SOURCES "${X_WINDOWS_RESOURCE_ICON_RC}")
+endif()
+
+if(APPLE AND EXISTS "${X_MACOS_ICON}")
+    set_source_files_properties("${X_MACOS_ICON}" PROPERTIES
+        MACOSX_PACKAGE_LOCATION "Resources"
+    )
+    list(APPEND XVOLKOLAK_GUI_SOURCES "${X_MACOS_ICON}")
+endif()
+
+add_executable(${XVOLKOLAK_GUI_TARGET} WIN32
+    ${XVOLKOLAK_GUI_SOURCES}
+)
+
+set_target_properties(${XVOLKOLAK_GUI_TARGET} PROPERTIES
+    WIN32_EXECUTABLE TRUE
+    MACOSX_BUNDLE TRUE
+    MACOSX_BUNDLE_GUI_IDENTIFIER "${MACOSX_BUNDLE_GUI_IDENTIFIER}"
+    OUTPUT_NAME "${X_ORIGINAL_FILENAME}"
+)
+
+target_include_directories(${XVOLKOLAK_GUI_TARGET} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/..
+    # Engine header dirs the scan widget needs (their .cmake includes were pre-empted above,
+    # so their include_directories() never ran -- the SOURCES live in xuniversalunpacker).
+    "${XVOLKOLAK_MYLIBS}/SpecAbstract"
+    "${XVOLKOLAK_MYLIBS}/SpecAbstract/modules"
+    "${XVOLKOLAK_MYLIBS}/XScanEngine"
+    "${XVOLKOLAK_MYLIBS}/XScanEngine/modules"
+    "${XVOLKOLAK_MYLIBS}/Formats"
+    "${XVOLKOLAK_MYLIBS}/Formats/exec"
+    "${XVOLKOLAK_MYLIBS}/Formats/images"
+    "${XVOLKOLAK_MYLIBS}/Formats/video"
+    "${XVOLKOLAK_MYLIBS}/Formats/audio"
+    "${XVOLKOLAK_MYLIBS}/Formats/texts"
+    "${XVOLKOLAK_MYLIBS}/Formats/formats"
+    "${XVOLKOLAK_MYLIBS}/Formats/xsimd/src"
+    "${XVOLKOLAK_MYLIBS}/XOptions"
+    "${XVOLKOLAK_MYLIBS}/XDEX"
+    "${XVOLKOLAK_MYLIBS}/XPDF"
+    "${XVOLKOLAK_MYLIBS}/XArchive"
+    "${XVOLKOLAK_MYLIBS}/XArchive/Algos"
+    "${XVOLKOLAK_MYLIBS}/XDisasmCore"
+    "${XVOLKOLAK_MYLIBS}/XDisasmCore/Modules"
+    "${XVOLKOLAK_MYLIBS}/XStaticUnpacker"
+    "${XVOLKOLAK_MYLIBS}/XCapstone"
+    "${XVOLKOLAK_MYLIBS}/XCapstone/3rdparty/Capstone/src/include"
+)
+
+target_link_libraries(${XVOLKOLAK_GUI_TARGET} PRIVATE
+    xuniversalunpacker
+    Qt${XVOLKOLAK_QT_MAJOR}::Widgets
+    Qt${XVOLKOLAK_QT_MAJOR}::Concurrent
+    Qt${XVOLKOLAK_QT_MAJOR}::PrintSupport
+)
+
+if(TARGET xvolkolak_translations)
+    add_dependencies(${XVOLKOLAK_GUI_TARGET} xvolkolak_translations)
+endif()
+
+if(UNIX AND NOT APPLE)
+    set(XVOLKOLAK_RUNTIME_DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    set(XVOLKOLAK_DOC_DESTINATION "${CMAKE_INSTALL_DOCDIR}/xvolkolak")
+    set(XVOLKOLAK_DESKTOP_TEMPLATE "${CMAKE_CURRENT_SOURCE_DIR}/../../res/linux/xvolkolak.desktop.in")
+    set(XVOLKOLAK_DESKTOP_FILE "${CMAKE_CURRENT_BINARY_DIR}/xvolkolak.desktop")
+
+    if(EXISTS "${XVOLKOLAK_DESKTOP_TEMPLATE}")
+        configure_file("${XVOLKOLAK_DESKTOP_TEMPLATE}" "${XVOLKOLAK_DESKTOP_FILE}" @ONLY)
+    endif()
+else()
+    set(XVOLKOLAK_RUNTIME_DESTINATION ".")
+    set(XVOLKOLAK_DOC_DESTINATION ".")
+endif()
+
+install(TARGETS ${XVOLKOLAK_GUI_TARGET}
+    RUNTIME DESTINATION ${XVOLKOLAK_RUNTIME_DESTINATION}
+    BUNDLE DESTINATION .
+)
+
+if(UNIX AND NOT APPLE)
+    install(FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../LICENSE"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../README.md"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../THANKS.md"
+        DESTINATION ${XVOLKOLAK_DOC_DESTINATION}
+        OPTIONAL
+    )
+
+    if(EXISTS "${XVOLKOLAK_DESKTOP_FILE}")
+        install(FILES "${XVOLKOLAK_DESKTOP_FILE}"
+            DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications")
+    endif()
+
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../res/linux/hicolor")
+        install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../res/linux/hicolor/"
+            DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor")
+    endif()
+else()
+    install(FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../LICENSE"
+        DESTINATION .
+        RENAME LICENSE.txt
+        OPTIONAL
+    )
+
+    install(FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../README.md"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../THANKS.md"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../res/license.txt"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../res/readme.txt"
+        "${X_WINDOWS_ICON}"
+        DESTINATION .
+        OPTIONAL
+    )
+
+    install(CODE [[file(WRITE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/portable" "")]])
+endif()
+
+if(APPLE)
+    include(${CMAKE_CURRENT_LIST_DIR}/../../dep/build_tools/cmake/macdeployqt.cmake)
+endif()
+
+if(WIN32)
+    include(${CMAKE_CURRENT_LIST_DIR}/../../dep/build_tools/cmake/deploy_qt_windows.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/../../dep/build_tools/cmake/deploy_msvc.cmake)
+endif()
+
+```
+
+`src/gui/dialogabout.cpp`:
+
+```cpp
+#include "dialogabout.h"
+#include "ui_dialogabout.h"
+
+#include "../global.h"
+
+DialogAbout::DialogAbout(QWidget *parent)
+    : QDialog(parent)
+    , ui(new Ui::DialogAbout)
+{
+    ui->setupUi(this);
+
+    setWindowTitle(tr("About %1").arg(X_APPLICATIONDISPLAYNAME));
+    ui->labelTitle->setText(QStringLiteral(X_APPLICATIONDISPLAYNAME));
+    ui->labelDescription->setText(tr("Emulator-unpacker with console and Qt GUI front ends."));
+    ui->labelVersion->setText(tr("Version %1").arg(X_APPLICATIONVERSION));
+    ui->labelCopyright->setText(tr("(C) 2026 XVolkolak contributors"));
+
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &DialogAbout::accept);
+    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &DialogAbout::reject);
+}
+
+DialogAbout::~DialogAbout()
+{
+    delete ui;
+}
+
+```
+
+`src/gui/dialogabout.h`:
+
+```h
+#ifndef DIALOGABOUT_H
+#define DIALOGABOUT_H
+
+#include <QDialog>
+
+namespace Ui {
+class DialogAbout;
+}
+
+class DialogAbout : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit DialogAbout(QWidget *parent = nullptr);
+    ~DialogAbout() override;
+
+private:
+    Ui::DialogAbout *ui;
+};
+
+#endif  // DIALOGABOUT_H
+
+```
+
+`src/gui/dialogabout.ui`:
+
+```ui
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DialogAbout</class>
+ <widget class="QDialog" name="DialogAbout">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>420</width>
+    <height>210</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>About XVolkolak</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="labelTitle">
+     <property name="font">
+      <font>
+       <pointsize>16</pointsize>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>XVolkolak</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="labelDescription">
+     <property name="text">
+      <string>Emulator-unpacker with console and Qt GUI front ends.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="labelVersion">
+     <property name="text">
+      <string>Version 0.1.0</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="labelCopyright">
+     <property name="text">
+      <string>(C) 2026 horsicq</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Close</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
+
+```
+
+`src/gui/dialogoptions.cpp`:
+
+```cpp
+/* Copyright (c) 2026 hors<horsicq@gmail.com>
+ *
+ * MIT License
+ */
+#include "dialogoptions.h"
+#include "ui_dialogoptions.h"
+
+DialogOptions::DialogOptions(QWidget *parent, XOptions *options, XOptions::GROUPID groupId)
+    : XShortcutsDialog(parent, false)
+    , ui(new Ui::DialogOptions)
+    , m_scanEngineOptionsWidget(new XScanEngineOptionsWidget(this))
+{
+    ui->setupUi(this);
+
+    m_scanEngineOptionsWidget->setProperty("GROUPID", XOptions::GROUPID_SCAN);
+    ui->widgetOptions->setOptions(options, X_APPLICATIONDISPLAYNAME);
+    ui->widgetOptions->addPage(m_scanEngineOptionsWidget, tr("Scan"));
+    m_scanEngineOptionsWidget->setOptions(options);
+    ui->widgetOptions->setCurrentPage(groupId);
+}
+
+DialogOptions::~DialogOptions()
+{
+    delete ui;
+}
+
+void DialogOptions::setGlobal(XShortcuts *shortcuts, XOptions *options)
+{
+    ui->widgetOptions->setGlobal(shortcuts, options);
+    XShortcutsDialog::setGlobal(shortcuts, options);
+}
+
+void DialogOptions::adjustView()
+{
+    ui->widgetOptions->adjustView();
+}
+
+void DialogOptions::registerShortcuts(bool state)
+{
+    Q_UNUSED(state)
+}
+
+```
+
+`src/gui/dialogoptions.h`:
+
+```h
+/* Copyright (c) 2026 hors<horsicq@gmail.com>
+ *
+ * MIT License
+ */
+#ifndef DIALOGOPTIONS_H
+#define DIALOGOPTIONS_H
+
+#include "../global.h"
+#include "xscanengineoptionswidget.h"
+#include "xshortcutsdialog.h"
+
+namespace Ui {
+class DialogOptions;
+}
+
+class DialogOptions : public XShortcutsDialog
+{
+    Q_OBJECT
+
+public:
+    explicit DialogOptions(QWidget *parent, XOptions *options, XOptions::GROUPID groupId);
+    ~DialogOptions() override;
+
+    void setGlobal(XShortcuts *shortcuts, XOptions *options);
+    void adjustView() override;
+
+protected:
+    void registerShortcuts(bool state) override;
+
+private:
+    Ui::DialogOptions *ui;
+    XScanEngineOptionsWidget *m_scanEngineOptionsWidget;
+};
+
+#endif  // DIALOGOPTIONS_H
+
+```
+
+`src/gui/dialogoptions.ui`:
+
+```ui
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DialogOptions</class>
+ <widget class="QDialog" name="DialogOptions">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>582</width>
+    <height>532</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Options</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="XOptionsWidget" name="widgetOptions" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>XOptionsWidget</class>
+   <extends>QWidget</extends>
+   <header>xoptionswidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
+
+```
+
+`src/gui/dialogunpack.cpp`:
+
+```cpp
+#include "dialogunpack.h"
+#include "ui_dialogunpack.h"
+
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDialogButtonBox>
+#include <QDir>
+#include <QFileDialog>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPlainTextEdit>
+#include <QProgressBar>
+#include <QPushButton>
+#include <QThread>
+
+#include "unpackworker.h"
+
+DialogUnpack::DialogUnpack(const EmulatorUnpacker::Options &baseOptions, QWidget *parent)
+    : QDialog(parent)
+    , ui(new Ui::DialogUnpack)
+    , m_baseOptions(baseOptions)
+{
+    ui->setupUi(this);
+    setModal(true);
+
+    const QString resultDirectory = m_baseOptions.resultDirectory.trimmed().isEmpty()
+                                        ? EmulatorUnpacker::defaultResultDirectory(m_baseOptions.inputPath)
+                                        : m_baseOptions.resultDirectory.trimmed();
+    ui->lineEditResultDirectory->setText(resultDirectory);
+
+    ui->comboBoxPacker->addItems(EmulatorUnpacker::availablePackers());
+    const int requestedPacker = ui->comboBoxPacker->findText(m_baseOptions.packerName);
+    if(requestedPacker >= 0) {
+        ui->comboBoxPacker->setCurrentIndex(requestedPacker);
+    }
+    ui->checkBoxForce->setChecked(m_baseOptions.forceOverwrite);
+    ui->checkBoxFixImports->setChecked(m_baseOptions.fixImports);
+    ui->checkBoxFixRelocs->setChecked(m_baseOptions.fixRelocations);
+    ui->checkBoxSaveOverlay->setChecked(m_baseOptions.saveOverlay);
+
+    ui->plainTextEditLog->setPlainText(tr("Ready."));
+    ui->progressBar->setRange(0, 0);
+    ui->progressBar->setVisible(false);
+
+    connect(ui->buttonBox->button(QDialogButtonBox::Ok),
+            &QPushButton::clicked,
+             this,
+             &DialogUnpack::startUnpack);
+    connect(ui->pushButtonBrowseResultDirectory, &QPushButton::clicked, this, &DialogUnpack::browseResultDirectory);
+    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &DialogUnpack::reject);
+}
+
+DialogUnpack::~DialogUnpack()
+{
+    cancelAndWait();
+    delete ui;
+}
+
+EmulatorUnpacker::Options DialogUnpack::selectedOptions() const
+{
+    EmulatorUnpacker::Options options = m_baseOptions;
+    options.resultDirectory = ui->lineEditResultDirectory->text().trimmed();
+    options.packerName = ui->comboBoxPacker->currentText();
+    options.forceOverwrite = ui->checkBoxForce->isChecked();
+    options.fixImports = ui->checkBoxFixImports->isChecked();
+    options.fixRelocations = ui->checkBoxFixRelocs->isChecked();
+    options.saveOverlay = ui->checkBoxSaveOverlay->isChecked();
+    options.cancelFlag = nullptr;
+    return options;
+}
+
+void DialogUnpack::browseResultDirectory()
+{
+    QString currentDirectory = ui->lineEditResultDirectory->text().trimmed();
+    if(currentDirectory.isEmpty()) {
+        currentDirectory = EmulatorUnpacker::defaultResultDirectory(m_baseOptions.inputPath);
+    }
+
+    const QString directory = QFileDialog::getExistingDirectory(this,
+                                                                 tr("Select result directory"),
+                                                                 currentDirectory,
+                                                                 QFileDialog::ShowDirsOnly);
+    if(!directory.isEmpty()) {
+        ui->lineEditResultDirectory->setText(QDir(directory).absolutePath());
+    }
+}
+
+void DialogUnpack::reject()
+{
+    if(m_thread) {
+        if(!m_closeAfterFinish) {
+            m_closeAfterFinish = true;
+            ui->plainTextEditLog->appendPlainText(tr("Cancelling..."));
+            ui->buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(false);
+            if(m_worker) {
+                m_worker->requestCancel();
+            }
+        }
+        return;
+    }
+
+    QDialog::reject();
+}
+
+void DialogUnpack::startUnpack()
+{
+    if(m_thread || (m_hasUnpackResult && m_unpackResult.success)) {
+        return;
+    }
+
+    EmulatorUnpacker::Options options = selectedOptions();
+    if(options.resultDirectory.isEmpty()) {
+        QMessageBox::warning(this, tr("Unpack"), tr("Result directory is not set."));
+        return;
+    }
+
+    ui->plainTextEditLog->clear();
+    m_closeAfterFinish = false;
+    m_hasUnpackResult = false;
+    m_unpackResult = EmulatorUnpacker::Result();
+
+    m_thread = new QThread(this);
+    m_worker = new UnpackWorker(options);
+    m_worker->moveToThread(m_thread);
+
+    connect(m_thread, &QThread::started, m_worker, &UnpackWorker::process);
+    connect(m_worker, &UnpackWorker::logLine, this, &DialogUnpack::appendLog);
+    connect(m_worker, &UnpackWorker::finished, this, &DialogUnpack::onWorkerFinished);
+
+    setRunningUi();
+    m_thread->start();
+}
+
+void DialogUnpack::appendLog(const QString &line)
+{
+    ui->plainTextEditLog->appendPlainText(line);
+}
+
+void DialogUnpack::onWorkerFinished()
+{
+    if(!m_thread || !m_worker) {
+        return;
+    }
+
+    m_unpackResult = m_worker->result();
+    m_hasUnpackResult = true;
+
+    m_thread->quit();
+    m_thread->wait();
+    delete m_worker;
+    delete m_thread;
+    m_worker = nullptr;
+    m_thread = nullptr;
+
+    setFinishedUi();
+
+    if(m_closeAfterFinish) {
+        QDialog::reject();
+        return;
+    }
+
+    if(!m_unpackResult.success && !isCancelledResult(m_unpackResult)) {
+        QString message = m_unpackResult.messages.join(QLatin1Char('\n'));
+        if(message.isEmpty()) {
+            message = m_unpackResult.reason;
+        }
+        if(message.isEmpty()) {
+            message = tr("The unpack operation failed.");
+        }
+        QMessageBox::warning(this, tr("Unpack failed"), message);
+    }
+}
+
+void DialogUnpack::setRunningUi()
+{
+    ui->lineEditResultDirectory->setEnabled(false);
+    ui->pushButtonBrowseResultDirectory->setEnabled(false);
+    ui->comboBoxPacker->setEnabled(false);
+    ui->checkBoxForce->setEnabled(false);
+    ui->checkBoxFixImports->setEnabled(false);
+    ui->checkBoxFixRelocs->setEnabled(false);
+    ui->checkBoxSaveOverlay->setEnabled(false);
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(true);
+    ui->progressBar->setVisible(true);
+}
+
+void DialogUnpack::setFinishedUi()
+{
+    const bool canRetry = !m_unpackResult.success;
+    ui->lineEditResultDirectory->setEnabled(canRetry);
+    ui->pushButtonBrowseResultDirectory->setEnabled(canRetry);
+    ui->comboBoxPacker->setEnabled(canRetry);
+    ui->checkBoxForce->setEnabled(canRetry);
+    ui->checkBoxFixImports->setEnabled(canRetry);
+    ui->checkBoxFixRelocs->setEnabled(canRetry);
+    ui->checkBoxSaveOverlay->setEnabled(canRetry);
+    ui->progressBar->setVisible(false);
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(canRetry);
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(true);
+}
+
+void DialogUnpack::cancelAndWait()
+{
+    if(!m_thread) {
+        return;
+    }
+
+    if(m_worker) {
+        m_worker->requestCancel();
+    }
+    m_thread->quit();
+    m_thread->wait();
+    delete m_worker;
+    delete m_thread;
+    m_worker = nullptr;
+    m_thread = nullptr;
+}
+
+bool DialogUnpack::isCancelledResult(const EmulatorUnpacker::Result &result)
+{
+    return !result.success && result.reason.contains(QStringLiteral("cancelled"), Qt::CaseInsensitive);
+}
+
+```
+
+`src/gui/dialogunpack.h`:
+
+```h
+#ifndef DIALOGUNPACK_H
+#define DIALOGUNPACK_H
+
+#include <QDialog>
+
+#include "emulatorunpacker.h"
+
+namespace Ui {
+class DialogUnpack;
+}
+
+class QThread;
+class UnpackWorker;
+
+class DialogUnpack : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit DialogUnpack(const EmulatorUnpacker::Options &baseOptions, QWidget *parent = nullptr);
+    ~DialogUnpack() override;
+
+    EmulatorUnpacker::Options selectedOptions() const;
+    bool hasUnpackResult() const { return m_hasUnpackResult; }
+    const EmulatorUnpacker::Result &unpackResult() const { return m_unpackResult; }
+
+public slots:
+    void reject() override;
+
+private slots:
+    void browseResultDirectory();
+    void startUnpack();
+    void appendLog(const QString &line);
+    void onWorkerFinished();
+
+private:
+    void setRunningUi();
+    void setFinishedUi();
+    void cancelAndWait();
+    static bool isCancelledResult(const EmulatorUnpacker::Result &result);
+
+    Ui::DialogUnpack *ui;
+    EmulatorUnpacker::Options m_baseOptions;
+    EmulatorUnpacker::Result m_unpackResult;
+    QThread *m_thread = nullptr;
+    UnpackWorker *m_worker = nullptr;
+    bool m_hasUnpackResult = false;
+    bool m_closeAfterFinish = false;
+};
+
+#endif  // DIALOGUNPACK_H
+
+```
+
+`src/gui/dialogunpack.ui`:
+
+```ui
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DialogUnpack</class>
+ <widget class="QDialog" name="DialogUnpack">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>680</width>
+    <height>470</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Unpack</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBoxOptions">
+     <property name="title">
+      <string>Options</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayoutOptions">
+      <item row="0" column="0">
+       <widget class="QLabel" name="labelResultDirectory">
+        <property name="text">
+         <string>Result directory</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="lineEditResultDirectory"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="pushButtonBrowseResultDirectory">
+        <property name="text">
+         <string>Browse...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="labelPacker">
+        <property name="text">
+         <string>Packer</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="2">
+       <widget class="QComboBox" name="comboBoxPacker"/>
+      </item>
+      <item row="2" column="0" colspan="3">
+       <layout class="QHBoxLayout" name="horizontalLayoutOptions">
+        <item>
+         <widget class="QCheckBox" name="checkBoxForce">
+          <property name="text">
+           <string>Overwrite output</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBoxFixImports">
+          <property name="text">
+           <string>Fix imports</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBoxFixRelocs">
+          <property name="text">
+           <string>Fix relocations</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBoxSaveOverlay">
+          <property name="text">
+           <string>Save overlay</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacerOptions">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBoxLog">
+     <property name="title">
+      <string>Log</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayoutLog">
+      <item>
+       <widget class="QPlainTextEdit" name="plainTextEditLog">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>240</height>
+         </size>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QProgressBar" name="progressBar">
+     <property name="minimum">
+      <number>0</number>
+     </property>
+     <property name="maximum">
+      <number>0</number>
+     </property>
+     <property name="textVisible">
+      <bool>false</bool>
+     </property>
+     <property name="visible">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
+
+```
+
+`src/gui/guimainwindow.cpp`:
+
+```cpp
+#include "guimainwindow.h"
+#include "ui_guimainwindow.h"
+
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QStatusBar>
+
+#include "../global.h"
+#include "dialogabout.h"
+#include "dialogoptions.h"
+#include "dialogunpack.h"
+#include "emulatorunpacker.h"
+#include "xscanengineoptionswidget.h"
+
+GuiMainWindow::GuiMainWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::GuiMainWindow)
+{
+    ui->setupUi(this);
+    setWindowTitle(XOptions::getTitle(X_APPLICATIONDISPLAYNAME, X_APPLICATIONVERSION));
+
+    m_xOptions.setName(X_OPTIONSFILE);
+    m_xOptions.addID(XOptions::ID_VIEW_STAYONTOP, false);
+    m_xOptions.addID(XOptions::ID_VIEW_STYLE, QStringLiteral("Fusion"));
+    m_xOptions.addID(XOptions::ID_VIEW_LANG, QStringLiteral("System"));
+    m_xOptions.addID(XOptions::ID_VIEW_QSS, QStringLiteral(""));
+    m_xOptions.addID(XOptions::ID_VIEW_FONT_CONTROLS, XOptions::getDefaultFont().toString());
+    m_xOptions.addID(XOptions::ID_VIEW_FONT_TABLEVIEWS, XOptions::getMonoFont().toString());
+    m_xOptions.addID(XOptions::ID_VIEW_FONT_TREEVIEWS, XOptions::getDefaultFont().toString());
+    m_xOptions.addID(XOptions::ID_VIEW_FONT_TEXTEDITS, XOptions::getMonoFont().toString());
+    m_xOptions.addID(XOptions::ID_FILE_SAVELASTDIRECTORY, true);
+    m_xOptions.addID(XOptions::ID_FILE_SAVERECENTFILES, true);
+    m_xOptions.addID(XOptions::ID_FEATURE_READBUFFERSIZE, 8 * 1024);
+    m_xOptions.addID(XOptions::ID_FEATURE_FILEBUFFERSIZE, 2 * 1024 * 1024);
+    m_xOptions.addID(XOptions::ID_SCAN_ENGINE_NFD_ENABLED, true);
+    XScanEngineOptionsWidget::setDefaultValues(&m_xOptions);
+    m_xOptions.load();
+
+    m_xShortcuts.setName(X_SHORTCUTSFILE);
+    m_xShortcuts.setNative(m_xOptions.isNative(), m_xOptions.getApplicationDataPath());
+    m_xShortcuts.load();
+
+    // The NFD scan-results tree uses the same persistent options and shortcuts context as
+    // the application options dialog.
+    ui->widgetDetect->setGlobal(&m_xShortcuts, &m_xOptions);
+
+    connect(ui->pushButtonBrowseInput, &QPushButton::clicked, this, &GuiMainWindow::browseInputFile);
+    connect(ui->pushButtonUnpack, &QPushButton::clicked, this, &GuiMainWindow::showUnpackDialog);
+    connect(ui->pushButtonOptions, &QPushButton::clicked, this, &GuiMainWindow::showOptionsDialog);
+    connect(ui->pushButtonAbout, &QPushButton::clicked, this, &GuiMainWindow::showAboutDialog);
+    connect(ui->pushButtonExit, &QPushButton::clicked, this, &GuiMainWindow::close);
+    connect(ui->lineEditInput, &QLineEdit::textChanged, this, &GuiMainWindow::updateActions);
+    connect(ui->lineEditInput, &QLineEdit::textChanged, this, &GuiMainWindow::scanInput);
+
+    statusBar()->showMessage(tr("Ready"));
+    adjustView();
+    updateActions();
+}
+
+GuiMainWindow::~GuiMainWindow()
+{
+    m_xOptions.save();
+    m_xShortcuts.save();
+
+    delete ui;
+}
+
+void GuiMainWindow::scanInput(const QString &fileName)
+{
+    // Show the detector's tree for the current input file (empty clears it).
+    const QString trimmed = fileName.trimmed();
+    if(trimmed.isEmpty() || !QFileInfo::exists(trimmed)) {
+        ui->widgetDetect->setData(QString(), false);
+        return;
+    }
+
+    m_xOptions.setLastFileName(trimmed);
+    ui->widgetDetect->setData(trimmed, m_xOptions.isScanAfterOpen());
+}
+
+void GuiMainWindow::browseInputFile()
+{
+    const QString fileName = QFileDialog::getOpenFileName(this,
+                                                          tr("Open input binary"),
+                                                          m_xOptions.getLastDirectory(),
+                                                          tr("Executable files (*.exe *.com *.dll *.sys);;All files (*)"));
+    if(fileName.isEmpty()) {
+        return;
+    }
+
+    ui->lineEditInput->setText(QFileInfo(fileName).absoluteFilePath());
+}
+
+void GuiMainWindow::showUnpackDialog()
+{
+    m_unpackOptions.inputPath = ui->lineEditInput->text();
+    DialogUnpack dialog(m_unpackOptions, this);
+    dialog.exec();
+    m_unpackOptions = dialog.selectedOptions();
+
+    if(!dialog.hasUnpackResult()) {
+        return;
+    }
+
+    const EmulatorUnpacker::Result &result = dialog.unpackResult();
+    const bool cancelled = !result.success && result.reason.contains(QStringLiteral("cancelled"), Qt::CaseInsensitive);
+
+    if(result.success) {
+        statusBar()->showMessage(tr("Completed: OEP RVA 0x%1 (%2)").arg(result.oepRva, 0, 16).arg(result.method));
+    } else if(cancelled) {
+        statusBar()->showMessage(tr("Cancelled"));
+    } else {
+        statusBar()->showMessage(tr("Failed"));
+    }
+}
+
+void GuiMainWindow::showAboutDialog()
+{
+    DialogAbout dialog(this);
+    dialog.exec();
+}
+
+void GuiMainWindow::showOptionsDialog()
+{
+    DialogOptions dialog(this, &m_xOptions, XOptions::GROUPID_FILE);
+    dialog.setGlobal(&m_xShortcuts, &m_xOptions);
+    dialog.exec();
+
+    adjustView();
+}
+
+void GuiMainWindow::adjustView()
+{
+    if(m_xOptions.isIDPresent(XOptions::ID_VIEW_STAYONTOP)) {
+        m_xOptions.adjustStayOnTop(this);
+    }
+
+    m_xOptions.adjustWidget(this, XOptions::ID_VIEW_FONT_CONTROLS);
+    ui->widgetDetect->adjustView();
+}
+
+void GuiMainWindow::updateActions()
+{
+    ui->pushButtonUnpack->setEnabled(!ui->lineEditInput->text().trimmed().isEmpty());
+}
+
+```
+
+`src/gui/guimainwindow.h`:
+
+```h
+#ifndef GUIMAINWINDOW_H
+#define GUIMAINWINDOW_H
+
+#include <QMainWindow>
+
+#include "emulatorunpacker.h"
+#include "xoptions.h"
+#include "xshortcuts.h"
+
+namespace Ui {
+class GuiMainWindow;
+}
+
+class GuiMainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    explicit GuiMainWindow(QWidget *parent = nullptr);
+    ~GuiMainWindow() override;
+
+private slots:
+    void scanInput(const QString &fileName);
+    void browseInputFile();
+    void showUnpackDialog();
+    void showOptionsDialog();
+    void showAboutDialog();
+    void updateActions();
+
+private:
+    void adjustView();
+    Ui::GuiMainWindow *ui;
+    EmulatorUnpacker::Options m_unpackOptions;
+    XOptions m_xOptions;        // view/settings context the scan widget needs
+    XShortcuts m_xShortcuts;    // keyboard-shortcut context for the scan widget
+};
+
+#endif  // GUIMAINWINDOW_H
+
+```
+
+`src/gui/guimainwindow.ui`:
+
+```ui
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GuiMainWindow</class>
+ <widget class="QMainWindow" name="GuiMainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>760</width>
+    <height>480</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>XVolkolak</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLineEdit" name="lineEditInput"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonBrowseInput">
+        <property name="text">
+         <string notr="true">,,,</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="NFD_Widget" name="widgetDetect" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QPushButton" name="pushButtonUnpack">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>48</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Unpack</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonOptions">
+          <property name="text">
+           <string>Options</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonAbout">
+          <property name="text">
+           <string>About</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonExit">
+          <property name="text">
+           <string>Exit</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>760</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NFD_Widget</class>
+   <extends>QWidget</extends>
+   <header>nfd_widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
+
+```
+
+`src/gui/main_gui.cpp`:
+
+```cpp
+#include <QApplication>
+#include <QCoreApplication>
+#include <QIcon>
+
+#include "../global.h"
+#include "guimainwindow.h"
+#include "xoptions.h"
+
+namespace {
+
+void configureApplicationMetadata()
+{
+    QCoreApplication::setOrganizationName(X_ORGANIZATIONNAME);
+    QCoreApplication::setOrganizationDomain(X_ORGANIZATIONDOMAIN);
+    QCoreApplication::setApplicationName(X_APPLICATIONNAME);
+    QCoreApplication::setApplicationVersion(X_APPLICATIONVERSION);
+}
+
+}  // namespace
+
+int main(int argc, char *argv[])
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0) && QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
+
+    configureApplicationMetadata();
+
+    QApplication application(argc, argv);
+    application.setWindowIcon(QIcon(QStringLiteral(":/images/logo.png")));
+
+#ifdef Q_OS_LINUX
+#if QT_VERSION >= QT_VERSION_CHECK(5, 7, 0)
+    application.setDesktopFileName(QStringLiteral("xvolkolak"));
+#endif
+#endif
+
+    XOptions options;
+    options.setName(X_OPTIONSFILE);
+    options.addID(XOptions::ID_VIEW_STYLE, QStringLiteral("Fusion"));
+    options.addID(XOptions::ID_VIEW_LANG, QStringLiteral("System"));
+    options.addID(XOptions::ID_VIEW_QSS, QStringLiteral(""));
+    options.load();
+    XOptions::adjustApplicationView(X_APPLICATIONNAME, &options);
+
+    GuiMainWindow window;
+    window.show();
+
+    return application.exec();
+}
+
+```
+
+`src/gui/unpackworker.cpp`:
+
+```cpp
+#include "unpackworker.h"
+
+UnpackWorker::UnpackWorker(const EmulatorUnpacker::Options &options, QObject *parent)
+    : QObject(parent)
+    , m_options(options)
+{
+    // Route the engine's cancellation poll at this worker's own flag.
+    m_options.cancelFlag = &m_cancel;
+}
+
+void UnpackWorker::process()
+{
+    m_result = EmulatorUnpacker::unpack(m_options, [this](const QString &line) { emit logLine(line); });
+    emit finished();
+}
+
+```
+
+`src/gui/unpackworker.h`:
+
+```h
+#ifndef UNPACKWORKER_H
+#define UNPACKWORKER_H
+
+#include <QObject>
+
+#include <atomic>
+
+#include "emulatorunpacker.h"
+
+// Runs a single EmulatorUnpacker job off the GUI thread, streaming engine log lines
+// back as queued signals so the window stays responsive while the emulator runs.
+class UnpackWorker : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit UnpackWorker(const EmulatorUnpacker::Options &options, QObject *parent = nullptr);
+
+    const EmulatorUnpacker::Result &result() const { return m_result; }
+
+    // Thread-safe: request the running job to stop as soon as it polls the flag.
+    void requestCancel() { m_cancel.store(true); }
+
+public slots:
+    void process();
+
+signals:
+    void logLine(const QString &line);
+    void finished();
+
+private:
+    std::atomic_bool m_cancel{false};
+    EmulatorUnpacker::Options m_options;
+    EmulatorUnpacker::Result m_result;
+};
+
+#endif  // UNPACKWORKER_H
+
+```
+
+`translations/xvolkolak_ar_AR.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="ar_AR"></TS>
+
+```
+
+`translations/xvolkolak_bn_BN.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="bn_BN"></TS>
+
+```
+
+`translations/xvolkolak_de_DE.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="de_DE"></TS>
+
+```
+
+`translations/xvolkolak_es_ES.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="es_ES"></TS>
+
+```
+
+`translations/xvolkolak_fa_FA.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="fa_FA"></TS>
+
+```
+
+`translations/xvolkolak_fr_FR.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="fr_FR"></TS>
+
+```
+
+`translations/xvolkolak_he_IL.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="he_IL"></TS>
+
+```
+
+`translations/xvolkolak_id_ID.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="id_ID"></TS>
+
+```
+
+`translations/xvolkolak_it_IT.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="it_IT"></TS>
+
+```
+
+`translations/xvolkolak_ja_JP.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="ja_JP"></TS>
+
+```
+
+`translations/xvolkolak_ko_KR.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="ko_KR"></TS>
+
+```
+
+`translations/xvolkolak_pl_PL.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="pl_PL"></TS>
+
+```
+
+`translations/xvolkolak_pt_BR.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="pt_BR"></TS>
+
+```
+
+`translations/xvolkolak_pt_PT.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="pt_PT"></TS>
+
+```
+
+`translations/xvolkolak_ru_RU.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="ru_RU"></TS>
+
+```
+
+`translations/xvolkolak_sq_AL.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="sq_AL">
+<context>
+    <name>DialogAbout</name>
+    <message>
+        <location filename="../src/gui/dialogabout.ui" line="14"/>
+        <source>About XVolkolak</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dialogabout.ui" line="27"/>
+        <source>XVolkolak</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dialogabout.ui" line="34"/>
+        <location filename="../src/gui/dialogabout.cpp" line="14"/>
+        <source>Emulator-unpacker with console and Qt GUI front ends.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dialogabout.ui" line="44"/>
+        <source>Version 0.1.0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dialogabout.ui" line="51"/>
+        <location filename="../src/gui/dialogabout.cpp" line="16"/>
+        <source>(C) 2026 XVolkolak contributors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dialogabout.cpp" line="12"/>
+        <source>About %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dialogabout.cpp" line="15"/>
+        <source>Version %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>GuiMainWindow</name>
+    <message>
+        <location filename="../src/gui/guimainwindow.ui" line="14"/>
+        <source>XVolkolak</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.ui" line="21"/>
+        <source>Unpack Job</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.ui" line="27"/>
+        <source>Input file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.ui" line="37"/>
+        <location filename="../src/gui/guimainwindow.ui" line="54"/>
+        <source>Browse...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.ui" line="44"/>
+        <source>Output file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.ui" line="61"/>
+        <source>Packer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.ui" line="73"/>
+        <source>Overwrite output</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.ui" line="80"/>
+        <source>Fix imports</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.ui" line="90"/>
+        <source>Fix relocations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.ui" line="100"/>
+        <source>Save overlay</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.ui" line="125"/>
+        <source>Detection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.ui" line="137"/>
+        <source>Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.ui" line="171"/>
+        <source>About</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.ui" line="191"/>
+        <location filename="../src/gui/guimainwindow.cpp" line="203"/>
+        <source>Unpack</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.cpp" line="37"/>
+        <source>Ready.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.cpp" line="38"/>
+        <source>Ready</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.cpp" line="72"/>
+        <source>Open input binary</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.cpp" line="74"/>
+        <location filename="../src/gui/guimainwindow.cpp" line="91"/>
+        <source>Executable files (*.exe *.com *.dll *.sys);;All files (*)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.cpp" line="89"/>
+        <source>Save unpacked output</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.cpp" line="107"/>
+        <source>Cancelling...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.cpp" line="133"/>
+        <source>Unpacking...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.cpp" line="159"/>
+        <source>Completed: OEP RVA 0x%1 (%2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.cpp" line="161"/>
+        <source>Cancelled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.cpp" line="163"/>
+        <source>Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.cpp" line="164"/>
+        <source>Unpack failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/guimainwindow.cpp" line="203"/>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+</TS>
+
+```
+
+`translations/xvolkolak_sv_SE.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="sv_SE"></TS>
+
+```
+
+`translations/xvolkolak_tr_TR.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="tr_TR"></TS>
+
+```
+
+`translations/xvolkolak_uk_UA.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="uk_UA"></TS>
+
+```
+
+`translations/xvolkolak_vi_VN.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="vi_VN"></TS>
+
+```
+
+`translations/xvolkolak_zh_CN.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="zh_CN"></TS>
+
+```
+
+`translations/xvolkolak_zh_TW.ts`:
+
+```ts
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="zh_TW"></TS>
+
+```
