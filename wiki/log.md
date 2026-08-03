@@ -2253,3 +2253,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:joaomlneto/procmap`: entity [[procmap]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-03** — ingest `description:jnz/q3vm`: entity [[q3vm]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-08-03** — ingest `description:jnastarot/shibari`: entity [[shibari]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
