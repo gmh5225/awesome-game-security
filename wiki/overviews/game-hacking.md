@@ -190,6 +190,7 @@ sources:
   - wiki/sources/descriptions/mut1234__BYPASS-PUBG-MOBILE-IMGUI.md
   - wiki/sources/descriptions/x64dbg__x64dbgbinja.md
   - wiki/sources/descriptions/skr0x1c0__binja_kc.md
+  - wiki/sources/descriptions/jmprdi__binja-division-deoptimization.md
   - wiki/sources/descriptions/seekbytes__ptxNinja.md
   - wiki/sources/descriptions/seeinglogic__ariadne.md
   - wiki/sources/descriptions/pd0wm__binaryninja-pcode.md
@@ -616,6 +617,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Steam anti-anti-debug helpers such as [[steam-anti-anti-debug]] (patch Steam debug detection so [[x64dbg]] can attach to protected game processes) sit in the Steam / Cheat Debugging research lane. (source: wiki/sources/descriptions/wilszdev__SteamAntiAntiDebug.md)
 - Binary Ninja ↔ x64dbg plugin work such as [[x64dbgbinja]] (Python BN plugin from the x64dbg org) sits in the Cheat Binary Ninja / x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__x64dbgbinja.md)
 - MachO kernelcache / KDK dSYM loading via [[binja-kc]] (Binary Ninja plugin; symbols + types) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/skr0x1c0__binja_kc.md)
+- MLIL division/modulo deoptimization via [[binja-division-deoptimization]] (Binary Ninja plugin; architecture-agnostic strength-reduction recovery) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/jmprdi__binja-division-deoptimization.md)
 - PTX / CUDA GPU virtual ISA reverse engineering via [[ptxninja]] (Binary Ninja plugin; plugin manager) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/seekbytes__ptxNinja.md)
 - Call-graph / coverage-assisted graph analysis via [[ariadne]] (Binary Ninja plugin; static analysis + block coverage) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/seeinglogic__ariadne.md)
 - Ghidra Sleigh/p-code bridging into Binary Ninja via [[binaryninja-pcode]] (C++; experimental LLIL from p-code) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/pd0wm__binaryninja-pcode.md)

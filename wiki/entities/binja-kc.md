@@ -20,4 +20,4 @@ Not a standalone kernel debugger—scoped to Binary Ninja kernelcache + KDK symb
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[x64dbgbinja]] · [[opaque-predicates-detective]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[binja-division-deoptimization]] · [[x64dbgbinja]] · [[opaque-predicates-detective]]

@@ -2267,3 +2267,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:jnastarot/anti-cheat`: entity [[anti-cheat]]; cited on [[overviews/anti-cheat]]; cross-linked from [[ice9]].
 
 - **2026-08-03** — ingest `description:jnastarot/HIGU_ntcall`: entity [[higu-ntcall]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-08-03** — ingest `description:jmprdi/binja-division-deoptimization`: entity [[binja-division-deoptimization]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
