@@ -3976,6 +3976,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Sample Unpacker
 - https://github.com/hasherezade/mal_unpack_drv
+- https://github.com/horsicq/XVolkolak [Qt/CLI PE unpacker-emulator using XEmulUnpacker to single-step packer stubs to OEP; UPX, ASPack, MPRESS, and 18+ other packers]
 - https://github.com/strazzere/android-unpacker [Android]
 
 > Dump Fix
