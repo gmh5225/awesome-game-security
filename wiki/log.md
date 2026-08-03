@@ -2325,3 +2325,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-03** — ingest `description:jcalabres/hook-updater`: entity [[hook-updater]]; cited on [[frida]] and [[overviews/game-hacking]].
 
 - **2026-08-03** — ingest `description:jbro129/android-modding`: entity [[android-modding]]; cited on [[overviews/mobile-security]] and [[il2cpp]].
+
+- **2026-08-03** — ingest `description:januwA/game-reversed-study`: entity [[game-reversed-study]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
