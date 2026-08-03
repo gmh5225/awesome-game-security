@@ -276,6 +276,7 @@ sources:
   - wiki/sources/descriptions/vrolife__mypower.md
   - wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md
   - wiki/sources/descriptions/pastor-ritz__ritz-amazing-fortnite-internal.md
+  - wiki/sources/descriptions/jooola00__fortnite-cheat-source-internal.md
   - wiki/sources/descriptions/simply-codes__Fortnite-External-P2C.md
   - wiki/sources/descriptions/vctr74__R6-Internal-V3.md
   - wiki/sources/descriptions/rushzzz-max__r6-external.md
@@ -556,6 +557,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Fortnite DMA samples such as [[fn-dma-cheat]] (C++; Unreal Engine; PCIe DMA; cheat / game:fortnite [DMA]) sit in the below-OS cheat / game:fortnite lane beside kernel-driver externals. (source: wiki/sources/descriptions/lauralex__fn-dma-cheat.md)
 - Internal Fortnite samples such as [[basic-fortnite-cheat-source-internal]] (C++; UE4 SDK / GObject/GNames / engine hooks; ESP + aimbot) sit in the same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md)
 - From-scratch Fortnite internals such as [[ritz-amazing-fortnite-internal]] (simplified hook path; x64-release injector) sit beside them in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/pastor-ritz__ritz-amazing-fortnite-internal.md)
+- Additional Fortnite internal samples such as [[fortnite-cheat-source-internal]] (C/C++; SDK generation + hooking) sit in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/jooola00__fortnite-cheat-source-internal.md)
 - Fortnite FName/FNameEntry samples such as [[fortnite-fnameentry]] (C++; name-pool entry focus) sit beside those internals in the cheat / game:fortnite Unreal name-pool lane. (source: wiki/sources/descriptions/percpopper__Fortnite-FNameEntry.md)
 - Fortnite camera-cache POV samples such as [[fortnite-camera-cache-pov]] (C++; CameraCache / view POV) sit in the same cheat / game:fortnite Unreal camera-math lane. (source: wiki/sources/descriptions/percpopper__Fortnite-CameraCachePOV.md)
 - Rust Fortnite frameworks such as [[reborn]] (web server + SQLite + Discord bot; modular crates for server/bot/client) illustrate web-controlled cheat architectures in the same game:fortnite lane. (source: wiki/sources/descriptions/realTristan__Reborn.md)
