@@ -172,6 +172,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [boundcallback](entities/boundcallback.md) — KeRegisterBoundCallback research (C++; cheat / driver communication)
 - [btrace](entities/btrace.md) — Android app dynamic behavior tracking via eBPF (C/C++/Go; cheat / RE tools)
 - [BusterCall](entities/bustercall.md) — enumerate/patch kernel callbacks; HVCI PFN-swap research
+- [BytecodeVM](entities/bytecodevm.md) — Java bytecode virtualizing obfuscator (pure-Java VM; mutated opcodes; AC Obfuscation Engine)
 
 - [byvalver](entities/byvalver.md) — shellcode bad-byte banisher (2 modes; AC shellcode engine & tricks)
 - [callout-poc](entities/callout-poc.md) — kernel callout / spoof-stack PoC (C/C++; Cheat Spoof Stack)

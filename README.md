@@ -4097,6 +4097,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/dmaivel/covirt [VM]
 - https://github.com/CalebFenton/simplify [Java]
 - https://github.com/open-obfuscator/dProtect [Java/Kotlin]
+- https://github.com/NHCM-dev/BytecodeVM [Java bytecode virtualizing obfuscator — pure-Java VM interprets mutated bytecode of protected methods; cross-platform, no native code]
 - https://github.com/gmh5225/EntropyReducer [Reduce Entropy]
 - https://github.com/Washi1337/AwaitFuscator [.NET]
 - https://github.com/obfuscar/obfuscar [Open-source .NET assembly obfuscator]
