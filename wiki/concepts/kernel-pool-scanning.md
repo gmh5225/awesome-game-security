@@ -6,7 +6,8 @@ sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/skills/windows-kernel.md
   - wiki/sources/descriptions/kernullist__kn-diff-pool.md
-updated: 2026-08-02
+  - wiki/sources/descriptions/ioncodes__pooldump.md
+updated: 2026-08-04
 confidence: high
 ---
 
@@ -58,6 +59,10 @@ Pre-19H1 linear traversal via inline `_POOL_HEADER.BlockSize` **no longer works*
 
 Before/after **Big Pool snapshots** compared via driver-backed tooling such as [[kn-diff-pool]] (kernel capture + Go TUI diff) help isolate **new allocations** after a driver load, cheat attach, or suspected leak — complementary to one-shot PoolMon / WinDbg walks when triaging object leaks or manual-map footprints. (source: wiki/sources/descriptions/kernullist__kn-diff-pool.md)
 
+## Interactive enumeration / dump
+
+Tools such as [[pooldump]] scan kernel pool pages to list allocation blocks (tags, sizes, owning drivers) and dump specific pool contents — useful when recovering manually mapped images (e.g. EAC manual-map DLL extraction) or inspecting driver/rootkit pool artifacts without a full live debugger session. (source: wiki/sources/descriptions/ioncodes__pooldump.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[kn-diff-pool]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[kn-diff-pool]] · [[pooldump]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
