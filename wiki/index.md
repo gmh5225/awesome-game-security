@@ -530,6 +530,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IL2CPPDumper](entities/il2cppdumper.md) — Android IL2CPP static dump (C/C++; libil2cpp.so + metadata; cheat / game engine explorer:Unity)
 - [Il2CppDumper-YuanShen](entities/il2cppdumper-yuanshen.md) — Genshin Impact IL2CPP static dump (khang06; cwd output; cheat / game engine explorer:Unity)
 - [ilhook-rs](entities/ilhook-rs.md) — Rust x86 HOOK (function intercept → user handlers; cheat / hook)
+- [ILSpy](entities/ilspy.md) — open-source .NET assembly browser/decompiler (C#/VB/IL; .NET Framework/Core/5+; async/LINQ/generics; For Unity)
 - [image-blaster](entities/image-blaster.md) — image→3D mesh/splat/SFX skillset (World Labs+FAL; React/Three.js; AI / 3D Graphics)
 - [Dear ImGui](entities/imgui.md) — bloat-free immediate-mode C++ GUI (DX/GL/Vulkan/Metal; overlays / tool UIs / cheat menus)
 - [imgui_club](entities/imgui-club.md) — official Dear ImGui extensions (hex mem editor / multi-context / threaded draw)

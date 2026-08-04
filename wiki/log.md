@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:icsharpcode/ILSpy`: entity [[ilspy]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]].
+
 - **2026-08-04** — ingest `readme:categories`: bumped Anti Cheat ~643 (was ~642; Cheat ~2652 / Game Develop ~183 / Game Engine ~155 stable); refreshed README map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-04** — ingest `description:idkhidden/DrawIDA`: entity [[draw-ida]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
