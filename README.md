@@ -3530,6 +3530,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/bootmgfw/eft-tarkov-internal-cheat [Internal Escape from Tarkov cheat with ESP, direct syscalls, pattern scanning, and injector]
 - https://github.com/bytemyass/EFTLeecher [DMA]
 - https://github.com/gmh5225/eft-dma-radar-1 [DMA Radar]
+- https://github.com/paul01784/MeatyEFTRelease [Open-source DMA EFT radar and companion toolkit (C++/ImGui, fuser support, leechcore/vmm)]
 - https://github.com/gmh5225/EFT-MonoEFT
 - https://github.com/ZhaoKunqi/simple-eft-superman-training-bot
 - https://github.com/gmh5225/EFT-NewTarkovCheatProject
