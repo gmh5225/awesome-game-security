@@ -1166,6 +1166,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [xnu_1day_practice](entities/xnu-1day-practice.md) — XNU (macOS/iOS) 1-day kernel exploit practice (Mach/IOSurface/KRW; C/ObjC)
 - [xnuspy](entities/xnuspy.md) — iOS XNU kernel function hooking for checkra1n A8–A11 devices (no 4K; cheat / iOS memory explorer)
 - [xor-float](entities/xor-float.md) — C++ XOR float/value encrypt (Anti Cheat → Encrypt Variable)
+- [xorlit](entities/xorlit.md) — string crypter (single-arg default key `xorlit::seed`; AC Compile Time / String Crypter)
 - [xorPacker](entities/xorpacker.md) — C# PE XOR cipher packer (all PE; Anti Cheat → Binary Packer)
 - [xqemu](entities/xqemu.md) — original Xbox via QEMU (software full-machine; Cheat QEMU/KVM lane)
 - [XrefsExt](entities/xrefsext.md) — IDA Pro extended-xrefs plugin (cheat / IDA Plugins)
