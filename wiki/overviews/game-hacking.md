@@ -116,6 +116,7 @@ sources:
   - wiki/sources/descriptions/yaxinsn__vermagic.md
   - wiki/sources/descriptions/marin-m__vmlinux-to-elf.md
   - wiki/sources/descriptions/marakew__syser.md
+  - wiki/sources/descriptions/imugee__xdv.md
   - wiki/sources/descriptions/sad0p__venom.md
   - wiki/sources/descriptions/systemnb__compile_android_driver.md
   - wiki/sources/descriptions/systemnb__android-kernel-hacking-toolkit.md
@@ -635,6 +636,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Obfuscated-code analysis and simplification via [[obfuscation-analysis]] (MBA backward-slice + msynth oracle; opaque-predicate dataflow; Z3-verified BNIL deobfuscation) sits in the same Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/mrphrazer__obfuscation_analysis.md)
 - Windows x86/x64 debugging via [[x64dbg]] (feature-rich debugger + plugin system) is a core Cheat Debugging lane tool for offensive RE. (source: wiki/sources/descriptions/x64dbg__x64dbg.md)
 - Windows x86/x64 debugger [[syser]] (C/C++; RE / plugin development / modding) complements [[x64dbg]] in the Cheat Debugging lane for game-security offensive debug workflows. (source: wiki/sources/descriptions/marakew__syser.md)
+- Extension-plugin disassembler/debugger [[xdv]] (C/C++; plugin development / modding / SDK generation) complements [[x64dbg]] and [[syser]] in the Cheat Debugging lane for game-security offensive RE. (source: wiki/sources/descriptions/imugee__xdv.md)
 - Lightweight Java/JVM attach debugging via [[jdbg]] (JDWP; method hooks / breakpoints / variable inspect / class enum) supports runtime RE of Java game clients and obfuscated JVM apps. (source: wiki/sources/descriptions/roger1337__JDBG.md)
 - Java bytecode deobfuscation via [[deobfuscator]] (narumii; cheat / RE tools) recovers readable class structure from obfuscated JVM clients alongside [[raung]]/[[jdbg]]. (source: wiki/sources/descriptions/narumii__Deobfuscator.md)
 - Agent-facing GDB via [[mcp-gdb]] (MCP server; breakpoints / memory / registers / step through GDB MI) sits in the Cheat Debugging / Game Develop MCP lane for AI-assisted live debug. (source: wiki/sources/descriptions/signal-slot__mcp-gdb.md)
