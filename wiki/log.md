@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:ioncodes/vacation3-emu`: entity [[vacation3-emu]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
 - **2026-08-04** — ingest `description:iqrw0/DieDMAProtection`: entity [[diedmaprotection]]; cited on [[iommu]] and [[overviews/dma-attack]].
 
 - **2026-08-04** — ingest `description:irisengine/iris`: entity [[iris]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].

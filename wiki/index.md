@@ -1038,6 +1038,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SearchEx](entities/searchex.md) — SearchEx IS forensics (C++; hooking / memory analysis; AC)
 - [vac3_inhibitor](entities/vac3-inhibitor.md) — VAC3 exploration via hooking / memory analysis (C++)
 - [vac3-dumper](entities/vac3-dumper.md) — VAC3 multi-module dumper (timed loads; explore anticheat:vac)
+- [vacation3-emu](entities/vacation3-emu.md) — VAC3 module emulator (fake game memory + scan logging; explore anticheat:vac)
 - [VAC-ModuleDumper](entities/vac-module-dumper.md) — VAC module dump for offline RE (C/C++; explore anticheat:vac)
 - [VACKeyRetrieval](entities/vackeyretrieval.md) — VAC module ICE encryption key retrieval (C++; explore anticheat:vac)
 - [VALVeAntiCheat1](entities/valveanticheat1.md) — GoldSrc/WON-era VAC1 ModuleC/ModuleS bytecode VM rebuild (2002–2004; RE notes + tooling)
