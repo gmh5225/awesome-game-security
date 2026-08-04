@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:jackpal/Android-Terminal-Emulator`: entity [[android-terminal-emulator]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
 - **2026-08-04** — ingest `readme:categories`: bumped Cheat ~2647 (was ~2646) and Game Engine ~155 (was ~154); refreshed README map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-04** — ingest `description:jakcron/nstool`: entity [[nstool]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].

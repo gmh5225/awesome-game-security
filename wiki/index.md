@@ -106,6 +106,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-modding](entities/android-modding.md) — curated Android game modding repo collection (IL2CPP YuanShen dump fork; cheat/guide RE)
 - [android-proxy-mcp](entities/android-proxy-mcp.md) — Android HTTP/HTTPS capture MCP (mitmdump + SQLite + NL query)
 - [android-rom-list](entities/android-rom-list.md) — curated Android custom ROM reference list (cheat / Android ROM)
+- [Android Terminal Emulator](entities/android-terminal-emulator.md) — VT-100 terminal emulator for built-in Android shell (jackpal; Cheat Terminal Emulator)
 - [android-unpacker](entities/android-unpacker.md) — Android packed-sample unpacker (malware RE; Anti Cheat → Sample Unpacker)
 - [Android-LD-Preload-Injector](entities/android-ld-preload-injector.md) — Android LD_PRELOAD inject (dead; cheat / injection:android)
 - [Android-Mem-Edit](entities/android-mem-edit.md) — C++ Android process memory editor (cheat / Android Memory Explorer)

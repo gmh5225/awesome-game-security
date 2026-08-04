@@ -18,4 +18,4 @@ Android terminal emulator and Linux environment app that provides a full Linux C
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[mypower]] · [[magisk]] · [[frida]]
+[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[android-terminal-emulator]] · [[mypower]] · [[magisk]] · [[frida]]
