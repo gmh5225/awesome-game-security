@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:illegal-instruction-co/CountHook`: entity [[count-hook]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
 - **2026-08-04** — ingest `description:illegal-instruction-co/processhacker-mcp`: entity [[processhacker-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
 
 - **2026-08-04** — ingest `description:imadr/Unity-game-hacking`: entity [[unity-game-hacking]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
