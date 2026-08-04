@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:isiddique2024/Page-Table-Injector`: entity [[page-table-injector]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
 - **2026-08-04** — ingest `description:isoadam/gina_public`: entity [[gina-public]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-08-04** — ingest `description:iss4cf0ng/OpenPetya`: entity [[openpetya]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].

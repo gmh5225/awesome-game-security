@@ -757,6 +757,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [oxorany](entities/oxorany.md) — C/C++ compile-time any-constant encryption (platform-agnostic; AC Compile Time)
 - [oxware](entities/oxware.md) — free CS1.6 cheat (C++; alpha; cheat / game:cs1.6)
 - [Packer](entities/packer.md) — C/C++ PE X86 compress+encrypt packer (stub restore; import/relocation/TLS; Anti Cheat → Binary Packer `[X86]`)
+- [Page Table Injector](entities/page-table-injector.md) — PT-Injector (C/C++; kernel driver; page-table manipulation / injection:windows; AC research)
 - [Paksmith](entities/paksmith.md) — Rust UE pak/UAsset explorer (FModel rewrite; pak v3–v11; Game Assets)
 - [PalWorldAntiCheat](entities/palworld-anti-cheat.md) — Palworld UE5 AC research (C#; shader/render/audio; Anti Cheat)
 - [PalworldModdingKit](entities/palworld-modding-kit.md) — Palworld UE5 modding kit (cheat / game:palworld [UE5])
