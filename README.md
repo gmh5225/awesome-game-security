@@ -250,6 +250,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - [An Unreal Engine code plugin that adds a custom asset type and editor to the engine](https://github.com/JanKXSKI/AssetTutorialPlugin)
 - [Unreal Engine 4 Plugin for Lua APIs implementation](https://github.com/rdeioris/LuaMachine)
 - [Debug Menu for UnrealEngine4](https://github.com/000-aki-000/GameDebugMenu)
+- https://github.com/Ghostleadie/CheatManagerMenu [UE 5.8 plugin that auto-builds an in-game cheat menu by reflecting UCheatManager and registered cheat extensions]
 - ['Dear Imgui' remote access library and application](https://github.com/sammyfreg/netImgui)
 - [Customizable performance metric charts and STAT commands control panel](https://github.com/DarknessFX/DFoundryFX)
 - [Unreal Engine plugin providing a set of Hermes endpoints](https://github.com/cdpred/RedTalaria)
@@ -784,6 +785,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/cheat-engine/cheat-engine
 - https://github.com/NulledNah/cheat-engine-undetectable [Modified Cheat Engine with user-mode evasion, direct syscalls, and BYOVD kernel bridge for AC research]
 - https://github.com/Squalr/Squalr-Sharp [C# game memory editor with scanning, pointers, and assembly injection]
+- https://github.com/TASEmulators/BizHawk [Multi-system C# emulator with memory inspection, rerecording, and per-core debugging tools for retro game analysis]
 - https://github.com/SinaKarvandi/Hypervisor-From-Scratch [Hypervisor]
 - https://github.com/JasonGoemaat/CheatEngineMonoHelper [CE Mono Helper]
 - https://github.com/gmh5225/frida-ceserver [CE Server For IOS]
