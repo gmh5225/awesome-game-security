@@ -1,0 +1,1133 @@
+Project Path: arc_Gitex68_Katapult-AntiCheat_xws1y5d4
+
+Source Tree:
+
+```txt
+arc_Gitex68_Katapult-AntiCheat_xws1y5d4
+├── LICENSE
+├── README.md
+├── TEMPLATE_LICENSE.txt
+├── build.gradle
+├── gradle
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── settings.gradle
+└── src
+    └── main
+        ├── java
+        │   └── com
+        │       └── Gitex
+        │           └── Katapult
+        │               ├── Katapult.java
+        │               ├── client
+        │               │   └── ClientHandler.java
+        │               ├── network
+        │               │   ├── ModCheckPayload.java
+        │               │   └── NetworkHandler.java
+        │               └── server
+        │                   ├── ServerHandler.java
+        │                   └── WhitelistManager.java
+        ├── resources
+        │   └── assets
+        │       └── examplemod
+        │           └── lang
+        │               └── en_us.json
+        └── templates
+            └── META-INF
+                └── neoforge.mods.toml
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Gitex
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Katapult - NeoForge AntiCheat System
+
+Katapult is a french client/server AntiCheat mod built for Minecraft 1.21.1 (NeoForge). It enforces game integrity by performing cryptographic SHA-256 checksum validations on active client mod files (`.jar`) and resource packs (`.zip`).
+
+This project was built using the `NeoForgeMDKs/MDK-1.21.1-ModDevGradle` template.
+
+---
+
+## Features
+
+- **Cryptographic Mod Verification (SHA-256)**
+  - Calculates SHA-256 hashes directly from physical `.jar` files on the client.
+  - Automatically generates a server-side whitelist based on installed server mods.
+  - Supports optional client-side mods via a dedicated configuration directory.
+  - Automatically disconnects clients loading unapproved or modified `.jar` files with clear feedback.
+
+- **Resource Pack Monitoring & Control**
+  - Tracks active `.zip` resource packs loaded on the client side.
+  - Validates physical SHA-256 hashes to prevent file spoofing or renaming (e.g., hiding X-Ray packs under standard names).
+  - Performs real-time checks upon server join and resource reloads (`F3 + T` or menu changes).
+  - Offers toggles to allow or restrict custom client resource packs on the fly.
+
+- **Live Server Management & Commands**
+  - Hot-reloads configuration files without requiring a server restart.
+  - Instantly re-validates all connected players when whitelist settings or policies change.
+
+---
+
+## Configuration & Directory Structure
+
+To configure approved client modifications, simply drag and drop the authorized `.jar` (mods) and `.zip` (resource packs) files into their respective configuration folders. The mod will automatically compute their SHA-256 hashes on reload.
+
+Upon its initial launch, the mod generates the following directory structure inside `config/Katapult/`:
+
+```text
+config/
+└── Katapult/
+    ├── katapult_config.json              # Global mod configuration
+    ├── allowed_mods_whitelist.json       # Generated SHA-256 hash list for mods
+    ├── allowed_textures_whitelist.json   # Generated SHA-256 hash list for resource packs
+    ├── client_optional_mods/             # Drag & drop allowed optional client mods (.jar) here
+    └── client_allow_texture/             # Drag & drop allowed resource packs (.zip) here
+```
+
+---
+
+## Roadmap
+
+Upcoming features and planned updates for Katapult:
+
+- **Multi-Modloader Compatibility**: Expanding support to include Fabric, Forge, and Quilt.
+- **Extended Minecraft Versions**: Porting Katapult across multiple older and newer Minecraft versions.
+- **language**: Adding native English language support alongside French for in-game disconnect messages, notifications, and console logs.
+
+```
+
+`TEMPLATE_LICENSE.txt`:
+
+```txt
+MIT License
+
+Copyright (c) 2023 NeoForged project
+
+This license applies to the template files as supplied by github.com/NeoForged/MDK
+
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`build.gradle`:
+
+```gradle
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.143'
+    id 'idea'
+}
+
+tasks.named('wrapper', Wrapper).configure {
+    // Define wrapper values here so as to not have to always do so when updating gradlew.properties.
+    // Switching this to Wrapper.DistributionType.ALL will download the full gradle sources that comes with
+    // documentation attached on cursor hover of gradle classes and methods. However, this comes with increased
+    // file size for Gradle. If you do switch this to ALL, run the Gradle wrapper task twice afterwards.
+    // (Verify by checking gradle/wrapper/gradle-wrapper.properties to see if distributionUrl now points to `-all`)
+    distributionType = Wrapper.DistributionType.BIN
+}
+
+version = mod_version
+group = mod_group_id
+
+sourceSets.main.resources {
+    // Include resources generated by data generators.
+    srcDir('src/generated/resources')
+
+    // Exclude common development only resources from finalized outputs
+    exclude("**/*.bbmodel") // BlockBench project files
+
+    exclude("src/generated/**/.cache") // datagen cache files
+}
+
+repositories {
+    // Add here additional repositories if required by some of the dependencies below.
+}
+
+base {
+    archivesName = mod_id
+}
+
+// Mojang ships Java 21 to end users in 1.21.1, so mods should target Java 21.
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    // Specify the version of NeoForge to use.
+    version = project.neo_version
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    // This line is optional. Access Transformers are automatically detected
+    // accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
+
+    // Default run configurations.
+    // These can be tweaked, removed, or duplicated as needed.
+    runs {
+        client {
+            client()
+            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+        // This run config launches GameTestServer and runs all registered gametests, then exits.
+        // By default, the server will crash when no gametests are provided.
+        // The gametest system is also enabled by default for other run configs under the /test command.
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        data {
+            data()
+            // example of overriding the workingDirectory set in configureEach above, uncomment if you want to use it
+            // gameDirectory = project.file('run-data')
+
+            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+
+        // applies to all the run configs above
+        configureEach {
+            // Recommended logging data for a userdev environment
+            // The markers can be added/remove as needed separated by commas.
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        // define mod <-> source bindings
+        // these are used to tell the game which sources are for which mod
+        // multi mod projects should define one per mod
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+// Sets up a dependency configuration called 'localRuntime'.
+// This configuration should be used instead of 'runtimeOnly' to declare
+// a dependency that will be present for runtime testing but that is
+// "optional", meaning it will not be pulled by dependents of this mod.
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
+}
+
+dependencies {
+    // Example optional mod dependency with JEI
+    // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
+    // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
+    // compileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
+    // We add the full version to localRuntime, not runtimeOnly, so that we do not publish a dependency on it
+    // localRuntime "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
+
+    // Example mod dependency using a mod jar from ./libs with a flat dir repository
+    // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
+    // The group id is ignored when searching -- in this case, it is "blank"
+    // implementation "blank:coolmod-${mc_version}:${coolmod_version}"
+
+    // Example mod dependency using a file as dependency
+    // implementation files("libs/coolmod-${mc_version}-${coolmod_version}.jar")
+
+    // Example project dependency using a sister or child project:
+    // implementation project(":myproject")
+
+    // For more info:
+    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
+    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+}
+
+// This block of code expands all declared replace properties in the specified resource targets.
+// A missing property will result in an error. Properties are expanded using ${} Groovy notation.
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+// Include the output of "generateModMetadata" as an input directory for the build
+// this works with both building through Gradle and the IDE.
+sourceSets.main.resources.srcDir generateModMetadata
+// To avoid having to run "generateModMetadata" manually, make it run on every project reload
+neoForge.ideSyncTask generateModMetadata
+
+// Example configuration to allow publishing using the maven-publish plugin
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/repo"
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+// IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
+
+```
+
+`gradle.properties`:
+
+```properties
+# Sets default memory used for gradle commands.
+org.gradle.jvmargs=-Xmx2G
+org.gradle.daemon=true
+org.gradle.parallel=true
+org.gradle.caching=true
+org.gradle.configuration-cache=true
+
+# Parchment Mappings
+parchment_minecraft_version=1.21.1
+parchment_mappings_version=2024.11.17
+
+# Environment Properties
+minecraft_version=1.21.1
+minecraft_version_range=[1.21.1,1.22)
+neo_version=21.1.235
+
+loader_version_range=[4,)
+
+## Mod Properties
+mod_id=katapult
+mod_name=Katapult AntiCheat
+mod_license=All Rights Reserved
+mod_version=1.0.4
+
+mod_group_id=com.Gitex.Katapult
+```
+
+`gradle/wrapper/gradle-wrapper.properties`:
+
+```properties
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.2.1-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+```
+
+`gradlew`:
+
+```
+#!/bin/sh
+
+#
+# Copyright © 2015-2021 the original authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+##############################################################################
+#
+#   Gradle start up script for POSIX generated by Gradle.
+#
+#   Important for running:
+#
+#   (1) You need a POSIX-compliant shell to run this script. If your /bin/sh is
+#       noncompliant, but you have some other compliant shell such as ksh or
+#       bash, then to run this script, type that shell name before the whole
+#       command line, like:
+#
+#           ksh Gradle
+#
+#       Busybox and similar reduced shells will NOT work, because this script
+#       requires all of these POSIX shell features:
+#         * functions;
+#         * expansions «$var», «${var}», «${var:-default}», «${var+SET}»,
+#           «${var#prefix}», «${var%suffix}», and «$( cmd )»;
+#         * compound commands having a testable exit status, especially «case»;
+#         * various built-in commands including «command», «set», and «ulimit».
+#
+#   Important for patching:
+#
+#   (2) This script targets any POSIX shell, so it avoids extensions provided
+#       by Bash, Ksh, etc; in particular arrays are avoided.
+#
+#       The "traditional" practice of packing multiple parameters into a
+#       space-separated string is a well documented source of bugs and security
+#       problems, so this is (mostly) avoided, by progressively accumulating
+#       options in "$@", and eventually passing that to Java.
+#
+#       Where the inherited environment variables (DEFAULT_JVM_OPTS, JAVA_OPTS,
+#       and GRADLE_OPTS) rely on word-splitting, this is performed explicitly;
+#       see the in-line comments for details.
+#
+#       There are tweaks for specific operating systems such as AIX, CygWin,
+#       Darwin, MinGW, and NonStop.
+#
+#   (3) This script is generated from the Groovy template
+#       https://github.com/gradle/gradle/blob/HEAD/platforms/jvm/plugins-application/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt
+#       within the Gradle project.
+#
+#       You can find Gradle at https://github.com/gradle/gradle/.
+#
+##############################################################################
+
+# Attempt to set APP_HOME
+
+# Resolve links: $0 may be a link
+app_path=$0
+
+# Need this for daisy-chained symlinks.
+while
+    APP_HOME=${app_path%"${app_path##*/}"}  # leaves a trailing /; empty if no leading path
+    [ -h "$app_path" ]
+do
+    ls=$( ls -ld "$app_path" )
+    link=${ls#*' -> '}
+    case $link in             #(
+      /*)   app_path=$link ;; #(
+      *)    app_path=$APP_HOME$link ;;
+    esac
+done
+
+# This is normally unused
+# shellcheck disable=SC2034
+APP_BASE_NAME=${0##*/}
+# Discard cd standard output in case $CDPATH is set (https://github.com/gradle/gradle/issues/25036)
+APP_HOME=$( cd -P "${APP_HOME:-./}" > /dev/null && printf '%s\n' "$PWD" ) || exit
+
+# Use the maximum available, or set MAX_FD != -1 to use that value.
+MAX_FD=maximum
+
+warn () {
+    echo "$*"
+} >&2
+
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+} >&2
+
+# OS specific support (must be 'true' or 'false').
+cygwin=false
+msys=false
+darwin=false
+nonstop=false
+case "$( uname )" in                #(
+  CYGWIN* )         cygwin=true  ;; #(
+  Darwin* )         darwin=true  ;; #(
+  MSYS* | MINGW* )  msys=true    ;; #(
+  NONSTOP* )        nonstop=true ;;
+esac
+
+CLASSPATH="\\\"\\\""
+
+
+# Determine the Java command to use to start the JVM.
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+        # IBM's JDK on AIX uses strange locations for the executables
+        JAVACMD=$JAVA_HOME/jre/sh/java
+    else
+        JAVACMD=$JAVA_HOME/bin/java
+    fi
+    if [ ! -x "$JAVACMD" ] ; then
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+else
+    JAVACMD=java
+    if ! command -v java >/dev/null 2>&1
+    then
+        die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+fi
+
+# Increase the maximum file descriptors if we can.
+if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
+    case $MAX_FD in #(
+      max*)
+        # In POSIX sh, ulimit -H is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        MAX_FD=$( ulimit -H -n ) ||
+            warn "Could not query maximum file descriptor limit"
+    esac
+    case $MAX_FD in  #(
+      '' | soft) :;; #(
+      *)
+        # In POSIX sh, ulimit -n is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        ulimit -n "$MAX_FD" ||
+            warn "Could not set maximum file descriptor limit to $MAX_FD"
+    esac
+fi
+
+# Collect all arguments for the java command, stacking in reverse order:
+#   * args from the command line
+#   * the main class name
+#   * -classpath
+#   * -D...appname settings
+#   * --module-path (only if needed)
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and GRADLE_OPTS environment variables.
+
+# For Cygwin or MSYS, switch paths to Windows format before running java
+if "$cygwin" || "$msys" ; then
+    APP_HOME=$( cygpath --path --mixed "$APP_HOME" )
+    CLASSPATH=$( cygpath --path --mixed "$CLASSPATH" )
+
+    JAVACMD=$( cygpath --unix "$JAVACMD" )
+
+    # Now convert the arguments - kludge to limit ourselves to /bin/sh
+    for arg do
+        if
+            case $arg in                                #(
+              -*)   false ;;                            # don't mess with options #(
+              /?*)  t=${arg#/} t=/${t%%/*}              # looks like a POSIX filepath
+                    [ -e "$t" ] ;;                      #(
+              *)    false ;;
+            esac
+        then
+            arg=$( cygpath --path --ignore --mixed "$arg" )
+        fi
+        # Roll the args list around exactly as many times as the number of
+        # args, so each arg winds up back in the position where it started, but
+        # possibly modified.
+        #
+        # NB: a `for` loop captures its iteration list before it begins, so
+        # changing the positional parameters here affects neither the number of
+        # iterations, nor the values presented in `arg`.
+        shift                   # remove old arg
+        set -- "$@" "$arg"      # push replacement arg
+    done
+fi
+
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+
+# Collect all arguments for the java command:
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and optsEnvironmentVar are not allowed to contain shell fragments,
+#     and any embedded shellness will be escaped.
+#   * For example: A user cannot expect ${Hostname} to be expanded, as it is an environment variable and will be
+#     treated as '${Hostname}' itself on the command line.
+
+set -- \
+        "-Dorg.gradle.appname=$APP_BASE_NAME" \
+        -classpath "$CLASSPATH" \
+        -jar "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" \
+        "$@"
+
+# Stop when "xargs" is not available.
+if ! command -v xargs >/dev/null 2>&1
+then
+    die "xargs is not available"
+fi
+
+# Use "xargs" to parse quoted args.
+#
+# With -n1 it outputs one arg per line, with the quotes and backslashes removed.
+#
+# In Bash we could simply go:
+#
+#   readarray ARGS < <( xargs -n1 <<<"$var" ) &&
+#   set -- "${ARGS[@]}" "$@"
+#
+# but POSIX shell has neither arrays nor command substitution, so instead we
+# post-process each arg (as a line of input to sed) to backslash-escape any
+# character that might be a shell metacharacter, then use eval to reverse
+# that process (while maintaining the separation between arguments), and wrap
+# the whole thing up as a single "set" statement.
+#
+# This will of course break if any of these variables contains a newline or
+# an unmatched quote.
+#
+
+eval "set -- $(
+        printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
+        xargs -n1 |
+        sed ' s~[^-[:alnum:]+,./:=@_]~\\&~g; ' |
+        tr '\n' ' '
+    )" '"$@"'
+
+exec "$JAVACMD" "$@"
+
+```
+
+`gradlew.bat`:
+
+```bat
+@rem
+@rem Copyright 2015 the original author or authors.
+@rem
+@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem you may not use this file except in compliance with the License.
+@rem You may obtain a copy of the License at
+@rem
+@rem      https://www.apache.org/licenses/LICENSE-2.0
+@rem
+@rem Unless required by applicable law or agreed to in writing, software
+@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@rem See the License for the specific language governing permissions and
+@rem limitations under the License.
+@rem
+@rem SPDX-License-Identifier: Apache-2.0
+@rem
+
+@if "%DEBUG%"=="" @echo off
+@rem ##########################################################################
+@rem
+@rem  Gradle startup script for Windows
+@rem
+@rem ##########################################################################
+
+@rem Set local scope for the variables with windows NT shell
+if "%OS%"=="Windows_NT" setlocal
+
+set DIRNAME=%~dp0
+if "%DIRNAME%"=="" set DIRNAME=.
+@rem This is normally unused
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%
+
+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
+
+@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+
+@rem Find java.exe
+if defined JAVA_HOME goto findJavaFromJavaHome
+
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if %ERRORLEVEL% equ 0 goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH. 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+
+if exist "%JAVA_EXE%" goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME% 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:execute
+@rem Setup the command line
+
+set CLASSPATH=
+
+
+@rem Execute Gradle
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %*
+
+:end
+@rem End local scope for the variables with windows NT shell
+if %ERRORLEVEL% equ 0 goto mainEnd
+
+:fail
+rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
+rem the _cmd.exe /c_ return code!
+set EXIT_CODE=%ERRORLEVEL%
+if %EXIT_CODE% equ 0 set EXIT_CODE=1
+if not ""=="%GRADLE_EXIT_CONSOLE%" exit %EXIT_CODE%
+exit /b %EXIT_CODE%
+
+:mainEnd
+if "%OS%"=="Windows_NT" endlocal
+
+:omega
+
+```
+
+`settings.gradle`:
+
+```gradle
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+```
+
+`src/main/java/com/Gitex/Katapult/Katapult.java`:
+
+```java
+package com.Gitex.Katapult;
+
+import com.Gitex.Katapult.network.NetworkHandler;
+import com.Gitex.Katapult.server.WhitelistManager;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
+
+@Mod("katapult")
+public class Katapult {
+
+    public Katapult(IEventBus modEventBus) {
+        modEventBus.addListener(NetworkHandler::register);
+
+        modEventBus.addListener(this::onServerSetup);
+    }
+
+    private void onServerSetup(FMLDedicatedServerSetupEvent event) {
+        WhitelistManager.generateAndLoadWhitelist();
+    }
+}
+```
+
+`src/main/java/com/Gitex/Katapult/client/ClientHandler.java`:
+
+```java
+package com.Gitex.Katapult.client;
+
+import com.Gitex.Katapult.network.ModCheckPayload;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
+
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+
+@EventBusSubscriber(modid = "katapult", value = Dist.CLIENT)
+public class ClientHandler {
+
+    @SubscribeEvent
+    public static void onClientJoin(ClientPlayerNetworkEvent.LoggingIn event) {
+        StringBuilder modsData = new StringBuilder();
+
+        Path modsFolder = FMLPaths.MODSDIR.get();
+        File[] jarFiles = modsFolder.toFile().listFiles((dir, name) -> name.toLowerCase().endsWith(".jar"));
+
+        if (jarFiles != null) {
+            for (File jar : jarFiles) {
+                String sha256 = getFileSha256(jar.toPath());
+                if (!sha256.equals("UNKNOWN")) {
+                    modsData.append(jar.getName()).append("=").append(sha256).append(";");
+                }
+            }
+        }
+
+        PacketDistributor.sendToServer(new ModCheckPayload(modsData.toString()));
+    }
+
+    private static String getFileSha256(Path path) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            try (InputStream is = Files.newInputStream(path);
+                 DigestInputStream dis = new DigestInputStream(is, digest)) {
+                byte[] buffer = new byte[8192];
+                while (dis.read(buffer) != -1) {}
+            }
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest.digest()) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            return "UNKNOWN";
+        }
+    }
+}
+```
+
+`src/main/java/com/Gitex/Katapult/network/ModCheckPayload.java`:
+
+```java
+package com.Gitex.Katapult.network;
+
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+
+public record ModCheckPayload(String rawModsData) implements CustomPacketPayload {
+
+    public static final Type<ModCheckPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("katapult", "check_channel"));
+
+    public static final StreamCodec<FriendlyByteBuf, ModCheckPayload> STREAM_CODEC = CustomPacketPayload.codec(
+            (payload, buf) -> buf.writeUtf(payload.rawModsData),
+            buf -> new ModCheckPayload(buf.readUtf())
+    );
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
+}
+```
+
+`src/main/java/com/Gitex/Katapult/network/NetworkHandler.java`:
+
+```java
+package com.Gitex.Katapult.network;
+
+import com.Gitex.Katapult.server.ServerHandler;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+
+public class NetworkHandler {
+
+    public static void register(RegisterPayloadHandlersEvent event) {
+        final PayloadRegistrar registrar = event.registrar("1");
+
+        registrar.playToServer(
+                ModCheckPayload.TYPE,
+                ModCheckPayload.STREAM_CODEC,
+                ServerHandler::handlePayloadOnServer
+        );
+    }
+}
+```
+
+`src/main/java/com/Gitex/Katapult/server/ServerHandler.java`:
+
+```java
+package com.Gitex.Katapult.server;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.Gitex.Katapult.network.ModCheckPayload;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+
+@EventBusSubscriber(modid = "katapult")
+public class ServerHandler {
+
+    public static void handlePayloadOnServer(final ModCheckPayload payload, final IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (context.player() instanceof ServerPlayer player) {
+                String rawMods = payload.rawModsData();
+                String[] activeFiles = rawMods.split(";");
+
+                for (String fileEntry : activeFiles) {
+                    if (fileEntry.isEmpty()) continue;
+
+                    String[] parts = fileEntry.split("=");
+                    String fileName = parts[0];
+                    String clientSha256 = parts.length > 1 ? parts[1].toLowerCase() : "";
+
+                    if (clientSha256.isEmpty()) continue;
+
+                    // Vérification du Hash
+                    if (!WhitelistManager.ALLOWED_SHA256.contains(clientSha256)) {
+                        String cleanModName = formatModName(fileName);
+
+                        player.connection.disconnect(
+                                Component.literal("§c[Katapult] Connexion refusée.\nLe mod suivant n'est pas autorisé ou a été modifié :\n§e" + cleanModName)
+                        );
+                        return;
+                    }
+                }
+            }
+        });
+    }
+
+    //nettoyage nom
+    private static String formatModName(String fileName) {
+        if (fileName == null || fileName.isEmpty()) return "Inconnu";
+
+        String name = fileName.replaceAll("(?i)\\.jar$", "");
+        name = name.replaceAll("(?i)[-_](neoforge|forge|fabric|quilt).*", "");
+        name = name.replaceAll("[-_](v?\\d+).*", "");
+        name = name.replaceAll("\\+.*", "");
+
+        return name.trim();
+    }
+
+    @SubscribeEvent
+    public static void onRegisterCommands(RegisterCommandsEvent event) {
+        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
+
+        dispatcher.register(
+                Commands.literal("reloadwhitelist")
+                        .requires(source -> source.hasPermission(4))
+                        .executes(context -> {
+                            WhitelistManager.generateAndLoadWhitelist();
+                            context.getSource().sendSuccess(
+                                    () -> Component.literal("§a[Katapult] Whitelist rechargée avec succès !"),
+                                    true
+                            );
+                            return 1;
+                        })
+        );
+    }
+}
+```
+
+`src/main/java/com/Gitex/Katapult/server/WhitelistManager.java`:
+
+```java
+package com.Gitex.Katapult.server;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import net.neoforged.fml.loading.FMLPaths;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.util.HashSet;
+import java.util.Set;
+
+public class WhitelistManager {
+
+    private static final File CONFIG_FILE = new File("config/allowed_mods_whitelist.json");
+    public static final Set<String> ALLOWED_SHA256 = new HashSet<>();
+
+    public static void generateAndLoadWhitelist() {
+        JsonObject rootJson = new JsonObject();
+        JsonArray modsArray = new JsonArray();
+        ALLOWED_SHA256.clear();
+
+        // Scan /mods/ serv
+        Path serverModsDir = FMLPaths.MODSDIR.get();
+        File[] serverJars = serverModsDir.toFile().listFiles((dir, name) -> name.toLowerCase().endsWith(".jar"));
+
+        if (serverJars != null) {
+            for (File jar : serverJars) {
+                String sha256 = getFileSha256(jar.toPath());
+                if (!sha256.equals("UNKNOWN") && ALLOWED_SHA256.add(sha256.toLowerCase())) {
+                    JsonObject modObj = new JsonObject();
+                    modObj.addProperty("file", jar.getName());
+                    modObj.addProperty("sha256", sha256);
+                    modsArray.add(modObj);
+                }
+            }
+        }
+
+        // 2. Scan /config/client_optional_mods/
+        File clientModsFolder = new File("config/client_optional_mods");
+        if (!clientModsFolder.exists()) {
+            clientModsFolder.mkdirs();
+        }
+
+        File[] optionalFiles = clientModsFolder.listFiles((dir, name) -> name.toLowerCase().endsWith(".jar"));
+        if (optionalFiles != null) {
+            for (File jar : optionalFiles) {
+                String sha256 = getFileSha256(jar.toPath());
+                if (!sha256.equals("UNKNOWN") && ALLOWED_SHA256.add(sha256.toLowerCase())) {
+                    JsonObject modObj = new JsonObject();
+                    modObj.addProperty("file", jar.getName() + " (Optionnel)");
+                    modObj.addProperty("sha256", sha256);
+                    modsArray.add(modObj);
+                }
+            }
+        }
+
+        rootJson.add("allowed_files", modsArray);
+
+        try (FileWriter writer = new FileWriter(CONFIG_FILE)) {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            gson.toJson(rootJson, writer);
+            System.out.println("[Katapult] Whitelist rechargée : " + ALLOWED_SHA256.size() + " fichiers .jar autorisés.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String getFileSha256(Path path) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            try (InputStream is = Files.newInputStream(path);
+                 DigestInputStream dis = new DigestInputStream(is, digest)) {
+                byte[] buffer = new byte[8192];
+                while (dis.read(buffer) != -1) {}
+            }
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest.digest()) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            return "UNKNOWN";
+        }
+    }
+}
+```
+
+`src/main/resources/assets/examplemod/lang/en_us.json`:
+
+```json
+{
+  "itemGroup.examplemod": "Example Mod Tab",
+  "block.examplemod.example_block": "Example Block",
+  "item.examplemod.example_item": "Example Item",
+
+  "examplemod.configuration.title": "Example Mod Configs",
+  "examplemod.configuration.section.examplemod.common.toml": "Example Mod Configs",
+  "examplemod.configuration.section.examplemod.common.toml.title": "Example Mod Configs",
+  "examplemod.configuration.items": "Item List",
+  "examplemod.configuration.logDirtBlock": "Log Dirt Block",
+  "examplemod.configuration.magicNumberIntroduction": "Magic Number Text",
+  "examplemod.configuration.magicNumber": "Magic Number"
+}
+
+```
+
+`src/main/templates/META-INF/neoforge.mods.toml`:
+
+```toml
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="katapult"
+version="1.0.1"
+displayName="Katapult AntiCheat"
+description='''
+Système de vérification d'intégrité pour Katapult.
+'''
+
+[[dependencies.katapult]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.235,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.katapult]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1,1.22)"
+ordering="NONE"
+side="BOTH"
+```
