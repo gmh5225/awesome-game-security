@@ -14,7 +14,10 @@ Modes:
 
 Ingest queues hash-changed tracked descriptions plus up to 5 never-tracked
 description_en.txt files per scan (newest first). Failed agent runs do not
-mark sources as ingested. --list-pending is read-only (does not write state).
+mark sources as ingested; transient Cursor SDK failures (resource_exhausted)
+are retried inside cursor_sdk_agent, and hard failures are re-queued via
+state["failed_retry"] so never-tracked descriptions are not starved by newer
+discoveries. --list-pending is read-only (does not write state).
 
 Usage:
   python3 scripts/update-wiki-cli.py --list-pending
@@ -42,6 +45,9 @@ from typing import Any
 
 from cursor_sdk_agent import DEFAULT_MODEL, get_api_key, run_agent
 from description_paths import description_en_path, normalize_repo_slug
+
+# Cap how many previously-failed sources we force back onto the pending queue.
+FAILED_RETRY_LIMIT = 8
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 WIKI_DIR = ROOT_DIR / "wiki"
@@ -116,6 +122,7 @@ def load_state() -> dict[str, Any]:
             "source_hashes": {},
             "pending": [],
             "ingested": [],
+            "failed_retry": [],
         }
     try:
         data = json.loads(STATE_PATH.read_text(encoding="utf-8"))
@@ -125,6 +132,7 @@ def load_state() -> dict[str, Any]:
     data.setdefault("source_hashes", {})
     data.setdefault("pending", [])
     data.setdefault("ingested", [])
+    data.setdefault("failed_retry", [])
     return data
 
 
@@ -516,6 +524,76 @@ def scan_pending(
                 )
             )
 
+        # Re-queue hard failures (e.g. resource_exhausted after retries) so
+        # never-tracked descriptions are not starved by newer mtime discoveries.
+        pending_ids = {item["id"] for item in pending}
+        retry_ids = [
+            str(x)
+            for x in (state.get("failed_retry") or [])
+            if isinstance(x, str) and x
+        ]
+        for key in retry_ids[:FAILED_RETRY_LIMIT]:
+            if key in pending_ids:
+                continue
+            if key.startswith("description:"):
+                slug = key.split(":", 1)[1]
+                if not REPO_SLUG_RE.fullmatch(slug):
+                    continue
+                owner, repo = slug.split("/", 1)
+                src = desc_slug_to_path(owner, repo)
+                if not src.is_file():
+                    continue
+                # Skip if already successfully tracked at current hash.
+                h = file_sha256(src)
+                if hashes.get(key) == h:
+                    continue
+                project_description(owner, repo)
+                pending.append(
+                    pending_item(
+                        "description",
+                        key,
+                        path=f"wiki/sources/descriptions/{owner}__{repo}.md",
+                        hash_=h,
+                        extra={"owner": owner, "repo": repo},
+                    )
+                )
+                pending_ids.add(key)
+            elif key == "readme:categories":
+                if not README_PATH.is_file():
+                    continue
+                _, body_hash = project_readme_categories()
+                if hashes.get(key) == body_hash:
+                    continue
+                pending.append(
+                    pending_item(
+                        "readme",
+                        key,
+                        path="wiki/sources/README-categories.md",
+                        hash_=body_hash,
+                    )
+                )
+                pending_ids.add(key)
+            elif key.startswith("skill:"):
+                topic = key.split(":", 1)[1]
+                if topic not in SKILL_TOPICS:
+                    continue
+                src = SKILLS_DIR / topic / "SKILL.md"
+                if not src.is_file():
+                    continue
+                _, h = project_skill(topic)
+                if hashes.get(key) == h:
+                    continue
+                pending.append(
+                    pending_item(
+                        "skill",
+                        key,
+                        path=f"wiki/sources/skills/{topic}.md",
+                        hash_=h,
+                        extra={"topic": topic},
+                    )
+                )
+                pending_ids.add(key)
+
     # Deduplicate by id (keep last)
     by_id: dict[str, dict[str, Any]] = {}
     for item in pending:
@@ -528,6 +606,9 @@ def mark_ingested(state: dict[str, Any], item: dict[str, Any]) -> None:
     key = item["id"]
     if hid:
         state.setdefault("source_hashes", {})[key] = hid
+    # Drop from retry queue on success.
+    failed = [x for x in (state.get("failed_retry") or []) if x != key]
+    state["failed_retry"] = failed
     ingested = state.setdefault("ingested", [])
     entry = {
         "id": key,
@@ -538,6 +619,17 @@ def mark_ingested(state: dict[str, Any], item: dict[str, Any]) -> None:
     # Cap history
     if len(ingested) > 500:
         state["ingested"] = ingested[-500:]
+
+
+def mark_ingest_failed(state: dict[str, Any], item: dict[str, Any]) -> None:
+    """Remember a hard failure so the next scan prioritizes this source id."""
+    key = item["id"]
+    failed = [x for x in (state.get("failed_retry") or []) if isinstance(x, str)]
+    if key not in failed:
+        failed.append(key)
+    # Keep newest failures; drop oldest when over cap.
+    state["failed_retry"] = failed[-FAILED_RETRY_LIMIT:]
+    save_state(state)
 
 
 def print_pending_report(pending: list[dict[str, Any]]) -> None:
@@ -990,6 +1082,7 @@ def mode_ingest(args: argparse.Namespace) -> int:
         if code != 0 and not content_paths:
             fail += 1
             print(f"  FAILED ingest {item['id']} exit={code} (not marked)")
+            mark_ingest_failed(state, item)
             continue
 
         mark_ingested(state, item)
