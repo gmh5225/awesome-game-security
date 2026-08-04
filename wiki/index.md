@@ -253,6 +253,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DataPtrHookWin11](entities/dataptrhookwin11.md) — NtUserSetGestureConfig Win11 data-ptr hook (driver communication)
 - [Dainsleif](entities/dainsleif.md) — simple internal CS:GO cheat (RE training; cheat / game:csgo)
 - [Darken Anti-Cheat](entities/darken-anticheat.md) — kernel AC PoC (driver comm / integrity / sigscan / debugger / overlay; C/C++)
+- [Dark Souls III Cheat Engine Guide](entities/dark-souls-iii-cheat-engine-guide.md) — The Grand Archives DS3 Cheat Engine table guide (cheat / game:dark souls [Cheat Engine])
 - [darksword-kexploit-fun](entities/darksword-kexploit-fun.md) — DarkSword kernel r/w playground (iOS 17.0–26.0.1; sandbox/SSV/PAC; ObjC/C)
 
 - [DayZzz](entities/dayzzz.md) — DayZ cheat/modding: SDK generation + overlays (C/C++)
