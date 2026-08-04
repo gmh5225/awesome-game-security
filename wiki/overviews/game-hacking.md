@@ -311,6 +311,7 @@ sources:
   - wiki/sources/descriptions/masterpastaa__AutoOffsets.md
   - wiki/sources/descriptions/mimilewis__MapleStory143.md
   - wiki/sources/descriptions/johnsonjason__MapleStoryBuildFramework.md
+  - wiki/sources/descriptions/ixty__mandibule.md
   - wiki/sources/descriptions/izarooni__MapleEzorsia.md
   - wiki/sources/descriptions/kvnxiao__storytime.md
   - wiki/sources/descriptions/mike1k__VMPImportFixer.md
@@ -627,7 +628,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Agent-facing GDB via [[mcp-gdb]] (MCP server; breakpoints / memory / registers / step through GDB MI) sits in the Cheat Debugging / Game Develop MCP lane for AI-assisted live debug. (source: wiki/sources/descriptions/signal-slot__mcp-gdb.md)
 - Legacy Windows GDB RSP stubs such as [[gdbserver9x]] (32-bit Win98SE/XP; VC6; Binary Ninja GDB adapter) sit in the Cheat Debugging / Binary Ninja remote-debug lane. (source: wiki/sources/descriptions/robert-yates__gdbserver9x.md)
 - Portable Windows GDB builds such as [[gdb-windows-binaries]] (mingw-w64 v12.2.0; all arches; TUI + Python; no extra DLL deps) sit in the Cheat Debugging / GDB lane. (source: wiki/sources/descriptions/noword__GDB-Windows-Binaries.md)
-- Linux GDB front-end [[pince]] (PINCE Is Not Cheat Engine; Qt GUI; memory scan/edit, pointer chains, code injection, breakpoints, CE table support; Python + GDB) gives Cheat Engine–like live-memory workflows on Linux. (source: wiki/sources/descriptions/korcankaraokcu__PINCE.md) Structured `/proc/pid/maps` layout parsers such as [[procmap]] (C++14; `MemorySegment` API for address ranges, permissions, offsets, and backing paths) sit in the same Cheat Linux memory-introspection lane. (source: wiki/sources/descriptions/joaomlneto__procmap.md)
+- Linux GDB front-end [[pince]] (PINCE Is Not Cheat Engine; Qt GUI; memory scan/edit, pointer chains, code injection, breakpoints, CE table support; Python + GDB) gives Cheat Engine–like live-memory workflows on Linux. (source: wiki/sources/descriptions/korcankaraokcu__PINCE.md) Structured `/proc/pid/maps` layout parsers such as [[procmap]] (C++14; `MemorySegment` API for address ranges, permissions, offsets, and backing paths) sit in the same Cheat Linux memory-introspection lane. (source: wiki/sources/descriptions/joaomlneto__procmap.md) Ptrace-based Linux ELF injectors such as [[mandibule]] (C; icrt minimal runtime; raw syscalls; ELF load/relocate; fake stack; position-independent shellcode args) sit in the adjacent Cheat Linux injection lane. (source: wiki/sources/descriptions/ixty__mandibule.md)
 - Steam anti-anti-debug helpers such as [[steam-anti-anti-debug]] (patch Steam debug detection so [[x64dbg]] can attach to protected game processes) sit in the Steam / Cheat Debugging research lane. (source: wiki/sources/descriptions/wilszdev__SteamAntiAntiDebug.md)
 - Binary Ninja ↔ x64dbg plugin work such as [[x64dbgbinja]] (Python BN plugin from the x64dbg org) sits in the Cheat Binary Ninja / x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__x64dbgbinja.md)
 - MachO kernelcache / KDK dSYM loading via [[binja-kc]] (Binary Ninja plugin; symbols + types) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/skr0x1c0__binja_kc.md)

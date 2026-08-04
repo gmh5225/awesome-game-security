@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:ixty/mandibule`: entity [[mandibule]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
 - **2026-08-04** — ingest `description:izarooni/MapleEzorsia`: entity [[maple-ezorsia]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-08-04** — ingest `description:j4nn/CVE-2020-0041`: entity [[cve-2020-0041]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].

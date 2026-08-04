@@ -624,6 +624,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [magiskboot_ndk_on_linux](entities/magiskboot-ndk-on-linux.md) — NDK-on-Linux magiskboot (boot unpack/repack/ramdisk)
 - [MagiskDetector](entities/magiskdetector.md) — archived Android Magisk detector (AppZygote/AIDL; Detection:Magisk)
 - [makin](entities/makin.md) — Windows anti-debug/anti-VM probe (30+ checks; C; Anti Debugging)
+- [mandibule](entities/mandibule.md) — Linux ptrace ELF injector (icrt; raw syscalls; load/relocate; fake stack; Cheat / injection)
 - [ManyTypes](entities/manytypes.md) — x64dbg typeparsing plugin with Windows types (Cheat x64dbg Plugins)
 - [MapleStory Build Framework](entities/maplestory-build-framework.md) — MapleStory private-server client build framework (C/C++; individualized distribution + rudimentary anti-cheat; Anti Cheat / game:maplestory)
 - [MapleStory Worlds Automation](entities/maplestory-worlds-automation.md) — YOLO automation for MapleStory Worlds / Artale (Python; cheat / game:maplestory)
