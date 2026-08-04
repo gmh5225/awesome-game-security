@@ -4,7 +4,8 @@ kind: concept
 topics: [game-engine, game-hacking, reverse-engineering]
 sources:
   - wiki/sources/skills/game-engine.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/ikhsanprasetyo__dota2dumped.md
+updated: 2026-08-04
 confidence: high
 ---
 
@@ -35,8 +36,8 @@ Interface vtables and netvar tables drift per game build—verify against the ta
 
 ## Ground-truth sources
 
-Open or leaked trees such as [[source-engine]] and [[cstrike15-src]] help validate ClientClass/RecvTable layouts. CS2 offset dumps such as [[cs2-offsets]] illustrate the Source 2 netvar/entity-layout lane.
+Open or leaked trees such as [[source-engine]] and [[cstrike15-src]] help validate ClientClass/RecvTable layouts. CS2 offset dumps such as [[cs2-offsets]] and Dota 2 layout dumps such as [[dota2dumped]] (netvar offsets, interface pointers, class headers after patches) illustrate the Source 2 netvar/entity-layout lane. (source: wiki/sources/descriptions/ikhsanprasetyo__dota2dumped.md)
 
 ## Related
 
-[[unreal-object-model]] · [[il2cpp]] · [[sdk]] · [[offsets]] · [[source2gen]] · [[source2sdk]] · [[source-engine]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[unreal-object-model]] · [[il2cpp]] · [[sdk]] · [[offsets]] · [[source2gen]] · [[source2sdk]] · [[dota2dumped]] · [[cs2-offsets]] · [[source-engine]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
