@@ -116,6 +116,7 @@ sources:
   - wiki/sources/descriptions/yaxinsn__vermagic.md
   - wiki/sources/descriptions/marin-m__vmlinux-to-elf.md
   - wiki/sources/descriptions/marakew__syser.md
+  - wiki/sources/descriptions/imadr__Unity-game-hacking.md
   - wiki/sources/descriptions/imnotdatguy__csgo2-cheat.md
   - wiki/sources/descriptions/imugee__xdv.md
   - wiki/sources/descriptions/sad0p__venom.md
@@ -553,7 +554,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 | Unity Mono | `Assembly-CSharp`, JIT hooks | [[il2cpp]] (contrast Mono path) |
 | Source | ClientClass/RecvTable, ConVars | [[source-netvars]] |
 
-C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / modding; cheat / game engine explorer:Unity) sit in the Unity offensive lane beside [[il2cpp]] resolvers and runtime inspectors. (source: wiki/sources/descriptions/issuimo__UnityResolve.hpp.md)
+C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / modding; cheat / game engine explorer:Unity) sit in the Unity offensive lane beside [[il2cpp]] resolvers and runtime inspectors. (source: wiki/sources/descriptions/issuimo__UnityResolve.hpp.md) Compact Unity asset/code extraction guides such as [[unity-game-hacking]] (asset pipelines / modding; cheat / guide) sit in the Unity guide lane beside runtime explorers. (source: wiki/sources/descriptions/imadr__Unity-game-hacking.md)
 
 ## Development workflows
 
