@@ -6,7 +6,8 @@ sources:
   - wiki/sources/skills/graphics-api.md
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/descriptions/lainswork__dwm-screen-shot.md
-updated: 2026-08-01
+  - wiki/sources/descriptions/j-hc__FlagSecurePatcher.md
+updated: 2026-08-04
 confidence: medium
 ---
 
@@ -33,6 +34,7 @@ Scheduled or random-interval captures aim to catch intermittent overlays. README
 - **DWM composition** — separate surfaces that survive `PrintWindow` but not all BitBlt paths; kernel DC blocking in extreme cases.
 - **Hardware overlay planes** — content on dedicated scan-out planes may be absent from software duplication.
 - **Off-screen render** — secondary display, capture card, or virtual camera feed outside the game window.
+- **Android `FLAG_SECURE`** — apps set `WindowManager.LayoutParams.FLAG_SECURE` to block screenshots/recents; Magisk-lane references such as [[flagsecurepatcher]] document disabling the flag and screenshot listeners for capture research. (source: wiki/sources/descriptions/j-hc__FlagSecurePatcher.md)
 
 Evasion samples in the corpus include [[disablenvidiascreenshot]] (DWM / NVIDIA capture lane), [[dwm-screen-shot]] (DWM; AC/screenshot research for defensive engineers) (source: wiki/sources/descriptions/lainswork__dwm-screen-shot.md), [[wda-monitor-trick]] (monitor-level capture research), and [[eac-overlay]] (alternate surfaces vs overlay monitoring).
 
@@ -42,4 +44,4 @@ Screenshot evidence is rarely sufficient alone—correlate with [[present-hook]]
 
 ## Related
 
-[[obs-game-capture]] · [[present-hook]] · [[overviews/graphics-api]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[obs-game-capture]] · [[present-hook]] · [[flagsecurepatcher]] · [[overviews/graphics-api]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[overviews/mobile-security]]

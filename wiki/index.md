@@ -358,6 +358,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Faultline](entities/faultline.md) — usermode WS page-fault AC PoC (manual-map/shellcode; C++23)
 - [FightingGame-UE5](entities/fightinggame-ue5.md) — UE5 fighting game (root motion / anim BP / montage combat; Game Develop / Unreal source)
 - [FileRecoveryTool](entities/file-recovery-tool.md) — NTFS/FAT32/ExFAT disk forensics (MFT/USN/carving; Win32)
+- [FlagSecurePatcher](entities/flagsecurepatcher.md) — Android FLAG_SECURE + screenshot-listener disable (Cheat / Magisk reference)
 - [Fibratus](entities/fibratus.md) — Go Windows kernel ETW observability (rules / Elasticsearch; exploration & tracing)
 - [Fiano](entities/fiano.md) — Go UEFI firmware parse/edit toolkit (Firmware Volumes, FFS, PE32, LZMA/Tiano; flash extract/replace/remove)
 - [fix-arxan](entities/fix-arxan.md) — Arxan PE protector dump/decrypt (loader info + working image; Dump Fix)
