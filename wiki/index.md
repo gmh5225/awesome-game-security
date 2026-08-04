@@ -407,6 +407,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [game-engine-detector](entities/game-engine-detector.md) — Python APK/IPA game-engine detector (Mobile Game)
 - [GameEngineFromScratch](entities/game-engine-from-scratch.md) — Zhihu from-scratch next-gen engine sample (DirectX/OpenGL; Game Engine / guide)
 - [gamedev_libraries](entities/gamedev-libraries.md) — data-oriented C/C++ gamedev library collection (POD/flat arrays; Game Develop / guide)
+- [gamedevguide](entities/gamedevguide.md) — personal UE4/gamedev onboarding notes site (rendering/shaders/networking/Houdini; MkDocs/Obsidian; Game Engine / guide)
 - [game-reversing](entities/game-reversing.md) — curated game RE learning materials (Windows PC; x86-first; cheat / guide)
 - [game-reversed-study](entities/game-reversed-study.md) — Chinese CE guide documentation (cheat / guide; reference, not runtime)
 - [gamehacking-cheatsheet](entities/gamehacking-cheatsheet.md) — game-hacking RE cheatsheet (memory / injection / AC; cheat / guide)
