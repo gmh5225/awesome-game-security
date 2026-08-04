@@ -299,6 +299,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
 - [Deobfuscator](entities/deobfuscator.md) — Java bytecode deobfuscator (narumii; cheat / RE tools)
 - [DetectTpmSpoofing](entities/detect-tpm-spoofing.md) — KMDF: TPM 2.0 EK spoof detect (IOCTL vs TPM.sys cache)
+- [DieDMAProtection](entities/diedmaprotection.md) — Windows PoC kernel driver disabling IOMMU/VT-d DMA remapping (iqrw0; IOMMU bypass research)
 - [detection](entities/detection.md) — Android root/Xposed/Frida/VPN/dev-options multi-check collection (Java; Detection:Android root)
 - [Dalvikus](entities/dalvikus.md) — Android smali editor / Dalvik bytecode RE tool (ethical research)
 - [dex2jar](entities/dex2jar.md) — DEX↔JAR toolset (d2j-baksmali / APK sign / DEX manip; mobile RE)

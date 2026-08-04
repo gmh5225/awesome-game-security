@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:iqrw0/DieDMAProtection`: entity [[diedmaprotection]]; cited on [[iommu]] and [[overviews/dma-attack]].
+
 - **2026-08-04** — ingest `description:irisengine/iris`: entity [[iris]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-08-04** — ingest `description:irql/nokd`: entity [[nokd]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].

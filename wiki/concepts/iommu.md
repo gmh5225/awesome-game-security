@@ -5,7 +5,8 @@ topics: [dma-attack, anti-cheat, windows-kernel]
 sources:
   - wiki/sources/skills/dma-attack.md
   - wiki/sources/descriptions/tandasat__HelloIommuPkg.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/iqrw0__DieDMAProtection.md
+updated: 2026-08-04
 confidence: high
 ---
 
@@ -41,6 +42,8 @@ Sample DXE remapping programming appears in [[helloiommupkg]] (learning-only, no
 | 5 | Legitimate-path exfil | Spoofed NIC reads own RX ring within mapped IOVAs—**invisible to IOMMU layer** |
 | 6 | Kernel table reprogramming | [[byovd]] or compromised kernel |
 
+Windows PoC [[diedmaprotection]] disables active DMA remapping (IOMMU/VT-d) from kernel mode to restore out-of-domain PCIe access—illustrating path 1/6 when OS policy can be subverted at runtime. (source: wiki/sources/descriptions/iqrw0__DieDMAProtection.md)
+
 Paths 1–3 underpin most commercial DMA cheats today. (source: wiki/sources/skills/dma-attack.md)
 
 ## Bypass catalog (selected)
@@ -69,4 +72,4 @@ Misconfigured BIOS, pre-boot DMA, ACS holes, ATS abuse, over-mapped pages, legit
 
 ## Related
 
-[[dma]] · [[helloiommupkg]] · [[byovd]] · [[hvci]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
+[[dma]] · [[helloiommupkg]] · [[diedmaprotection]] · [[byovd]] · [[hvci]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]

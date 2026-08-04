@@ -22,6 +22,7 @@ sources:
   - wiki/sources/descriptions/kaijia2022__Cheat-Engine-DMA-Plugin.md
   - wiki/sources/descriptions/kWAYTV__dma-cheat-base.md
   - wiki/sources/descriptions/sercanarga__PCILeechGen.md
+  - wiki/sources/descriptions/iqrw0__DieDMAProtection.md
 updated: 2026-08-04
 confidence: high
 ---
@@ -56,7 +57,7 @@ Stock [[pcileech-fpga]] builds expose trivial Tier-0/1 signals (placeholder `10E
 
 ## IOMMU and bypass surface
 
-Legitimate drivers map only explicit IOVAs; game memory should stay outside device domains. Active cheat paths include IOMMU disabled, pre-boot DMA, identity/passthrough domains, driver page over-allocation (Thunderclap class), **legitimate-path exfil** (spoofed NIC reading its own RX ring), and kernel reprogramming of IOMMU tables via [[byovd]]. ACS Source Validation + P2P redirect and ATS-untrusted policy for untrusted endpoints are mandatory in threat models. See [[iommu]] for the condensed bypass catalog.
+Legitimate drivers map only explicit IOVAs; game memory should stay outside device domains. Active cheat paths include IOMMU disabled, pre-boot DMA, identity/passthrough domains, driver page over-allocation (Thunderclap class), **legitimate-path exfil** (spoofed NIC reading its own RX ring), and kernel reprogramming of IOMMU tables via [[byovd]]. Windows PoC [[diedmaprotection]] demonstrates runtime disable of DMA remapping (IOMMU/VT-d) from a kernel driver to re-enable FPGA [[pcileech]]-class physical reads. (source: wiki/sources/descriptions/iqrw0__DieDMAProtection.md) ACS Source Validation + P2P redirect and ATS-untrusted policy for untrusted endpoints are mandatory in threat models. See [[iommu]] for the condensed bypass catalog.
 
 ## Layered detection pipeline
 
@@ -79,7 +80,7 @@ Tier-6 firmware operating only within driver-mapped domains and matching donor b
 
 ## Related concepts
 
-[[dma]] · [[iommu]] · [[helloiommupkg]] · [[hvci]] · [[byovd]] · [[research-rigor]] · [[pcileech]] · [[pcileech-fpga]] · [[pcileechgen]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[fpga-dma-multi-tool]] · [[dma-tools-rs]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[cheat-engine-dma-plugin]] · [[csgo-dma-overlay]] · [[fn-dma-cheat]] · [[dma-cheat-base]] · [[overviews/anti-cheat]]
+[[dma]] · [[iommu]] · [[helloiommupkg]] · [[diedmaprotection]] · [[hvci]] · [[byovd]] · [[research-rigor]] · [[pcileech]] · [[pcileech-fpga]] · [[pcileechgen]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[fpga-dma-multi-tool]] · [[dma-tools-rs]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[cheat-engine-dma-plugin]] · [[csgo-dma-overlay]] · [[fn-dma-cheat]] · [[dma-cheat-base]] · [[overviews/anti-cheat]]
 
 ## README map
 
