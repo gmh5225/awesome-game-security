@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — manual add `cellebrite-labs/ida-bridge`: README Game Develop / MCP + IDA Plugins; entity [[ida-bridge]]; cited on [[overviews/reverse-engineering]].
+
 - **2026-08-04** — manual add `NHCM-dev/BytecodeVM`: README Anti Cheat → Obfuscation Engine; entity [[bytecodevm]]; cited on [[overviews/anti-cheat]].
 
 - **2026-08-04** — ingest `description:intel/pcm`: entity [[intel-pcm]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; disambiguated from [[pcm]] (rand-tech IDA MCP).
