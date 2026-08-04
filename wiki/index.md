@@ -701,6 +701,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ntoskrnlwalker](entities/ntoskrnlwalker.md) — ntoskrnl offset/gadget/symbol resolver (target-build kernel structure navigation)
 - [NTSleuth](entities/ntsleuth.md) — Windows syscall extractor (ntdll/win32u PDB + disasm → JSON/C headers)
 - [NtPhp](entities/ntphp.md) — PHP interpreter embedded in WDK kernel drivers (Anti Cheat → Dynamic Script)
+- [nstool](entities/nstool.md) — general-purpose Switch read/extract tool (console emulator / Switch research)
 - [nuzu](entities/nuzu.md) — yuzu-based Switch emulator mirror (unofficial fork; Nintendo Switch lane)
 - [OFRP-device_xiaomi_mondrian](entities/ofrp-device-xiaomi-mondrian.md) — OFRP/TWRP device tree for Redmi K60 Pro (mondrian)
 - [Obfu-DE-Scate](entities/obfu-de-scate.md) — Python APK ProGuard/R8 deobf (name maps + HTML hierarchy; [Apk])

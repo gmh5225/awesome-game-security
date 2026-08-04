@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:jakcron/nstool`: entity [[nstool]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
 - **2026-08-04** — ingest `description:jakobfriedl/usb-monitor-bof`: entity [[usb-monitor-bof]]; cited on [[overviews/windows-kernel]] and [[ai-aimbot-detection]].
 
 - **2026-07-16** — scaffold: created `wiki/` schema (`AGENTS.md`), empty `index.md`, directories, and `.state.json`.
