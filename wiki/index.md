@@ -609,6 +609,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [libgdx](entities/libgdx.md) — cross-platform Java game framework (2D/3D; Android/desktop/iOS/WebGL; Game Engine)
 - [libmdmp](entities/libmdmp.md) — C/C++ minidump format library (memory analysis / debugging; AC / Windows kernel dump analysis)
 - [libmem](entities/libmem.md) — cross-platform game-hacking lib (memory / hook / scan; Win/Linux/FreeBSD; C/C++/Rust/Python/Lua)
+- [Lina Engine](entities/lina-engine.md) — cross-platform lightweight OSS 3D engine (LinaVG GUI; LinaGX Vulkan/DX12/Metal; Game Engine source)
 - [lldbext-dump](entities/lldbext-dump.md) — LLDB Python extension: Android live session → Windows minidump + Unicorn replay (mobile RE / dump)
 - [LocusMimic](entities/locusmimic.md) — LSPosed/Xposed Android GPS spoof (map picker, saved locations, app/system/mock-provider modes; Kotlin/Compose)
 - [LockFile-Poc](entities/lockfile-poc.md) — C++ Windows file-lock PoC (AC Stress Testing / Some Tricks Ring3)
