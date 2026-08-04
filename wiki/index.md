@@ -533,6 +533,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ironwall](entities/ironwall.md) — open-source AC protocol stack (TEE attestation, ZK human-input proofs, Hedera HCS match receipts; Unity/Unreal)
 - [Iris](entities/iris.md) — cross-platform C++ game engine (component-based; multi-backend render; CMake; Game Engine source)
 - [injdrv](entities/injdrv.md) — kernel APC DLL injector (process notify → LdrLoadDll; C)
+- [intel-pcm](entities/intel-pcm.md) — Intel Performance Counter Monitor (CPU/memory/PCIe/power PMU telemetry; Docker/CXL)
 - [int_fastdiv](entities/int-fastdiv.md) — header-only C++ magic-number integer division (CPU/CUDA; ~2× vs hardware div; Mathematics)
 - [IPAPatch](entities/ipapatch.md) — patch iOS apps without jailbreak (C/C++/ObjC; cheat / IOS jailbreak)
 - [irql](entities/irql.md) — Rust compile-time IRQL safety / pool Box·Vec (Windows KM drivers)
