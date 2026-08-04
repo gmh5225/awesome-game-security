@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:paul01784/MeatyEFTRelease`: entity [[meatyeftrelease]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]].
+
 - **2026-08-04** — ingest `readme:categories`: bumped Cheat ~2652 (was ~2651; Anti Cheat ~642 / Game Develop ~183 / Game Engine ~155 stable); refreshed README map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-04** — ingest `description:imnotdatguy/csgo2-cheat`: entity [[csgo2-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
