@@ -1011,6 +1011,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Unity Script Collection](entities/unity-script-collection.md) — maintained free Unity scripts/libraries/plugins/extensions catalog (Game Engine / Plugins:Unity)
 - [Unity-Cheat-Sheet](entities/unity-cheat-sheet.md) — Unity engine/API cheat sheet (Game Engine / guide)
 - [UnityExplorer](entities/unityexplorer.md) — runtime Unity inspector (BepInEx/MelonLoader; hierarchy/REPL; Mono+IL2CPP)
+- [UnityResolve.hpp](entities/unityresolve-hpp.md) — C++ Unity cheat framework (rendering / physics / modding; game engine explorer:Unity)
 - [UnityVulnerableEntryPoint](entities/unity-vulnerable-entrypoint.md) — Unity Mono vulnerable entry points (Assembly-CSharp / MonoBehaviour inject demos)
 - [USecurity](entities/usecurity.md) — Unity runtime data + PlayerPrefs encryption (Game Engine Protection:Unity)
 - [unitySpeedTools](entities/unityspeedtools.md) — iOS Unity IL2CPP speed/modding tools (C/C++ / ObjC)

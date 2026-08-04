@@ -313,6 +313,7 @@ sources:
   - wiki/sources/descriptions/johnsonjason__MapleStoryBuildFramework.md
   - wiki/sources/descriptions/ixty__mandibule.md
   - wiki/sources/descriptions/itaymigdal__awesome-injection.md
+  - wiki/sources/descriptions/issuimo__UnityResolve.hpp.md
   - wiki/sources/descriptions/izarooni__MapleEzorsia.md
   - wiki/sources/descriptions/kvnxiao__storytime.md
   - wiki/sources/descriptions/mike1k__VMPImportFixer.md
@@ -540,6 +541,8 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 | Unity IL2CPP | `GameAssembly` + metadata, native hooks | [[il2cpp]] |
 | Unity Mono | `Assembly-CSharp`, JIT hooks | [[il2cpp]] (contrast Mono path) |
 | Source | ClientClass/RecvTable, ConVars | [[source-netvars]] |
+
+C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / modding; cheat / game engine explorer:Unity) sit in the Unity offensive lane beside [[il2cpp]] resolvers and runtime inspectors. (source: wiki/sources/descriptions/issuimo__UnityResolve.hpp.md)
 
 ## Development workflows
 
