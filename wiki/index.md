@@ -713,6 +713,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Nvidia-GPU-Spoof](entities/nvidia-gpu-spoof.md) — NVIDIA GPU UUID spoof via `nvlddmkm.sys` (Cheat HWID)
 - [nohv](entities/nohv.md) — C/C++ hypervisor VM-detection benchmark suite (kernel driver; Detection: Hacked Hypervisor)
 - [nokd](entities/nokd.md) — stealth kernel debugger protocol (local KdDebuggerDataBlock decode → WinDbg; no ntoskrnl KD globals)
+- [NTFS-EFI](entities/ntfs-efi.md) — native UEFI x64 NTFS R/W driver (EfiNtfs; EFI Commander pre-boot FM; chkdsk-clean unmount)
 - [ntfs-journal-viewer](entities/ntfs-journal-viewer.md) — NTFS `$UsnJrnl` change-journal viewer (C; AC / IS forensics)
 - [ntfs-linker](entities/ntfs-linker.md) — NTFS $MFT/$UsnJrnl/$LogFile timeline correlator (C++; DFIR)
 - [NTFSTool](entities/ntfstool.md) — NTFS forensics (MFT/USN/BitLocker/EFS; AC / IS forensics)

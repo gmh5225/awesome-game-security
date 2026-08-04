@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:wesmar/NTFS_EFI`: entity [[ntfs-efi]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
 - **2026-08-04** — ingest `readme:categories`: bumped Cheat ~2651 (was ~2649) / Anti Cheat ~641 (was ~640) / Game Develop ~183 (was ~182; Game Engine ~155 stable); refreshed README map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-04** — manual add `cellebrite-labs/ida-bridge`: README Game Develop / MCP + IDA Plugins; entity [[ida-bridge]]; cited on [[overviews/reverse-engineering]].
