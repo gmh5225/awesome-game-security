@@ -651,6 +651,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mcp-safety-scanner](entities/mcp-safety-scanner.md) — automated MCP safety auditing + remediation via agents (Game Develop / MCP security)
 - [mcp-windbg](entities/mcp-windbg.md) — CDB/WinDbg MCP server (dump triage + remote debug; Python)
 - [mkpms](entities/mkpms.md) — wxshadow KPM stealth breakpoint/hook (R^X page split; bypass self-read integrity; cheat / Android kernel explorer)
+- [MobileRE-Skill](entities/mobile-re-skill.md) — AI-agent mobile RE skill set (layered Frida hooks; six-phase anti-detection pipeline; JADX/Ghidra)
 - [mqtt](entities/mqtt.md) — Chinese MQTT v3.1.1 OASIS spec (14 control packets; QoS; WebSocket; Game Network / mqtt)
 - [MQTT.js](entities/mqtt-js.md) — Node.js/browser MQTT client (v3.1/3.1.1/v5; TCP/TLS/WS/WSS; Game Network / mqtt nodejs)
 - [memdumper](entities/memdumper.md) — Android `.so` memory dump + ELF rebuild (no ptrace; `/proc/<pid>/mem`; 32/64-bit)

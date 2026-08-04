@@ -169,6 +169,7 @@ sources:
   - wiki/sources/descriptions/jbro129__android-modding.md
   - wiki/sources/descriptions/j-hc__FlagSecurePatcher.md
   - wiki/sources/descriptions/infosecrajesh__Auto-generate-Frida-bypass-scripts-for-SSL-pinning-root-detection-on-Android-iOS.md
+  - wiki/sources/descriptions/index-login__MobileRE-Skill.md
 updated: 2026-08-04
 confidence: high
 ---
@@ -200,7 +201,7 @@ Static lane: apktool decompile/recompile → [[jadx]] DEX→Java → [[apkid]] p
 
 ## Instrumentation & hooking
 
-- **[[frida]]** — attach/spawn, Java/ObjC/native intercept; mobile ACs probe Frida artifacts ([[antifrida]], [[frida-detection]]); stealth repacks such as [[fridare]]; boot-persistent Florida server modules such as [[florida-zygisk]] (Magisk/KernelSU/APatch).
+- **[[frida]]** — attach/spawn, Java/ObjC/native intercept; mobile ACs probe Frida artifacts ([[antifrida]], [[frida-detection]]); stealth repacks such as [[fridare]]; boot-persistent Florida server modules such as [[florida-zygisk]] (Magisk/KernelSU/APatch). Agent-driven mobile RE skill set [[mobile-re-skill]] packages decision-tree workflows plus composable Frida JS modules (Java→JNI→native→libc→syscall/SVC layers) and a six-phase anti-detection pipeline for root/Frida/SO-load/crash hardening on authorized Android assessments. (source: wiki/sources/descriptions/index-login__MobileRE-Skill.md)
 - **Native hooks** — Substrate, And64InlineHook, xHook, Dobby (PLT/inline on ARM64 `.so`).
 - **[[zygisk]]** — Magisk Zygisk modules inject at `preAppSpecialize` / `postAppSpecialize` before `Application.onCreate` (DEX dump, ImGui menus, Frida gadget via [[zygisk-frida]], early native load, injectors such as [[zygisk-myinjector]]). (source: wiki/sources/descriptions/lico-n__ZygiskFrida.md) (source: wiki/sources/descriptions/jiqiu2022__Zygisk-MyInjector.md)
 - **Managed DI (rooted)** — single ARM64 injector+agent binary, localhost HTTP RPC for script/session control, delayed start after `boot_completed` (avoid zygote contention). Modes: **Attach** (ptrace → dlopen agent), **Spawn** (zygote pause at fork), **Watch-SO** (eBPF dlopen trigger). Stealth tiers: NORMAL (RWX patch), WXSHADOW (shadow pages), RECOMP (minimal inline + recompile). [[rust-frida]] implements a Frida-like ARM64 stack (QuickJS, Java/native/stealth hooks, QBDI) designed to pair with [[mkpms]] wxshadow KPM stealth (R^X page-split breakpoint/hook; bypass self-read integrity). (source: wiki/sources/descriptions/kkkbbb__rustFrida.md) (source: wiki/sources/descriptions/kkkbbb__mkpms.md)
