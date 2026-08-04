@@ -304,6 +304,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DetectTpmSpoofing](entities/detect-tpm-spoofing.md) — KMDF: TPM 2.0 EK spoof detect (IOCTL vs TPM.sys cache)
 - [DieDMAProtection](entities/diedmaprotection.md) — Windows PoC kernel driver disabling IOMMU/VT-d DMA remapping (iqrw0; IOMMU bypass research)
 - [detection](entities/detection.md) — Android root/Xposed/Frida/VPN/dev-options multi-check collection (Java; Detection:Android root)
+- [DeviceWarLock](entities/device-warlock.md) — Android device HWID / lock SDK (Java/C++; networking, SDK gen, hooking; Detection:HWID)
 - [Dalvikus](entities/dalvikus.md) — Android smali editor / Dalvik bytecode RE tool (ethical research)
 - [dex2jar](entities/dex2jar.md) — DEX↔JAR toolset (d2j-baksmali / APK sign / DEX manip; mobile RE)
 - [dfm-android-unicorn](entities/dfm-android-unicorn.md) — DFM Android ARM64 coordinate decryption via Unicorn emulation (C/C++; ACE/libtersafe; cheat / explore anticheat system:ACE)

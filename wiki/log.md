@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:imxiaoc996/DeviceWarLock`: entity [[device-warlock]]; cited on [[overviews/anti-cheat]] and [[overviews/mobile-security]].
+
 - **2026-08-04** — ingest `description:inanevin/LinaEngine`: entity [[lina-engine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-08-04** — ingest `description:index-login/MobileRE-Skill`: entity [[mobile-re-skill]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].

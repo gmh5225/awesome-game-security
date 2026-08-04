@@ -170,6 +170,7 @@ sources:
   - wiki/sources/descriptions/j-hc__FlagSecurePatcher.md
   - wiki/sources/descriptions/infosecrajesh__Auto-generate-Frida-bypass-scripts-for-SSL-pinning-root-detection-on-Android-iOS.md
   - wiki/sources/descriptions/index-login__MobileRE-Skill.md
+  - wiki/sources/descriptions/imxiaoc996__DeviceWarLock.md
 updated: 2026-08-04
 confidence: high
 ---
@@ -214,7 +215,7 @@ Root paths: `/proc/<pid>/mem` pread/pwrite, GameGuardian-style editors, ceserver
 
 ## Mobile anti-cheat
 
-Layered client checks (root/jailbreak, [[frida]], emulator, integrity, debugger, hooks) plus regional stacks (Tencent ACE, NetEase, per-title SDKs)—see [[mobile-anti-cheat]]. Client RASP/fingerprint SDKs include [[droidshield]], freeRASP family (native iOS [[free-rasp-ios]]; cross-platform [[free-rasp-unity-poc]] / [[free-rasp-reactnative]] / [[free-rasp-capacitor]]), [[trustdevice-android]] / [[trustdevice-ios]], and Unity soft-AC [[com-sipvlib-anticheat]]. (source: wiki/sources/descriptions/talsec__Free-RASP-iOS.md) Title research such as [[honor-of-kings-re-research]] pairs IL2CPP/`libtersafe` with ACE surfaces; [[dfm-android-unicorn]] emulates ARM64 coordinate-decryption for ACE/`libtersafe` titles via Unicorn. (source: wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md)
+Layered client checks (root/jailbreak, [[frida]], emulator, integrity, debugger, hooks) plus regional stacks (Tencent ACE, NetEase, per-title SDKs)—see [[mobile-anti-cheat]]. Client RASP/fingerprint SDKs include [[droidshield]], freeRASP family (native iOS [[free-rasp-ios]]; cross-platform [[free-rasp-unity-poc]] / [[free-rasp-reactnative]] / [[free-rasp-capacitor]]), [[trustdevice-android]] / [[trustdevice-ios]], Android device-lock / HWID research such as [[device-warlock]] (Java/C++; networking, SDK generation, native hooking), and Unity soft-AC [[com-sipvlib-anticheat]]. (source: wiki/sources/descriptions/talsec__Free-RASP-iOS.md) (source: wiki/sources/descriptions/imxiaoc996__DeviceWarLock.md) Title research such as [[honor-of-kings-re-research]] pairs IL2CPP/`libtersafe` with ACE surfaces; [[dfm-android-unicorn]] emulates ARM64 coordinate-decryption for ACE/`libtersafe` titles via Unicorn. (source: wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md)
 
 ## eBPF tracing
 
