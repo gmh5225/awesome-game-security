@@ -866,6 +866,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rAthena](entities/rathena.md) — Ragnarok Online server emulator (login/char/map; NPC/WoE/MySQL; [MMORPG])
 - [raylib](entities/raylib.md) — simple C/C++ videogame library (OpenGL / Vulkan; Game Develop / source)
 - [R6-Internal-V3](entities/r6-internal-v3.md) — R6 internal: modding / SDK generation / memory analysis (C/C++)
+- [r6-chams-public](entities/r6-chams-public.md) — R6 chams: Chameleon Models + visual check (educational; cheat / game:r6 [Chams])
 - [r6-external](entities/r6-external.md) — R6 external: driver development (C/C++; External)
 - [rbfx](entities/rbfx.md) — Urho3D fork: C# support + WYSIWYG editor (Game Engine source)
 - [r2a](entities/r2a.md) — retired radare2 local-LLM pointer (repo gone; successor r2ai; Cheat Radare Plugins)

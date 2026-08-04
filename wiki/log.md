@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:igromanru/R6-Chams-public`: entity [[r6-chams-public]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
 - **2026-08-04** — ingest `description:ikhsanprasetyo/dota2dumped`: entity [[dota2dumped]]; cited on [[overviews/game-hacking]] and [[concepts/source-netvars]].
 
 - **2026-08-04** — ingest `description:ikrima/gamedevguide`: entity [[gamedevguide]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
