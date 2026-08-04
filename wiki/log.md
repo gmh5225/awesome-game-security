@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:itaymigdal/awesome-injection`: entity [[awesome-injection]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
 - **2026-08-04** — ingest `description:ixty/mandibule`: entity [[mandibule]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-08-04** — ingest `description:izarooni/MapleEzorsia`: entity [[maple-ezorsia]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
