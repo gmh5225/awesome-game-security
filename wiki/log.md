@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:isadorasophia/murder`: entity [[murder]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
+
 - **2026-08-04** — ingest `description:isiddique2024/Page-Table-Injector`: entity [[page-table-injector]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-08-04** — ingest `description:isoadam/gina_public`: entity [[gina-public]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
