@@ -1303,6 +1303,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/MuntashirAkon/AppManager [A full-featured package manager and viewer]
 - https://github.com/pgp/XFiles [A general-purpose file explorer for (rooted) Android]
 - https://github.com/Raival-e/File-Explorer [An Android file explorer]
+- https://github.com/SysAdminDoc/FileExplorer [Full-featured rooted Android file manager (Kotlin/Compose) with dual-pane tabs, SAF, USB OTG, APK analyzer, and root module browser]
 - https://github.com/obfusk/apksigcopier [apksigcopier - copy/extract/patch android apk signatures & compare apks]
 - https://github.com/loerting/dalvikus [Android reverse-engineering tool / smali editor]
 - https://github.com/azw413/Glass [APK/AAB: DEX class tree, smali viewer, arm64 .so disassembly, manifest, CFG, xref, bundle search; GPU-accelerated Rust disassembler]
