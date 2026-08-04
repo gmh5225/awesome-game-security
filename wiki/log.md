@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:ioncodes/gecko`: entity [[gecko]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
 - **2026-08-04** — ingest `description:ioncodes/pooldump`: entity [[pooldump]]; cited on [[kernel-pool-scanning]] and [[overviews/windows-kernel]].
 
 - **2026-08-04** — ingest `description:ioncodes/vacation3-emu`: entity [[vacation3-emu]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].

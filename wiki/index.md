@@ -421,6 +421,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [genmc](entities/genmc.md) — IDAPython Hex-Rays microcode IR viewer (decompiler-plugin debug; cheat / IDA Plugins)
 - [genpatch](entities/genpatch.md) — Python binary-patch script generator (dialog on success; cheat / IDA Plugins)
+- [gecko](entities/gecko.md) — Rust GB/GBC cycle-accurate emulator (CPU/PPU/APU; wgpu; desktop library GUI)
 - [genshin-impact-script](entities/genshin-impact-script.md) — TypeScript Genshin Impact script (cheat / game:genshin impact)
 - [genshinjumpfixer2](entities/genshinjumpfixer2.md) — Genshin Impact Decode CFG (jump-target calc + code simplify; khang06)
 - [GenericGraph](entities/generic-graph.md) — UE4 generic graph data-structure plugin (editor tooling / asset pipelines; Plugins:Unreal)

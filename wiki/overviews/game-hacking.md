@@ -833,6 +833,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 
 - Game Boy hardware emulation via [[kevboy]] (Rust; CPU/memory/graphics/input + ROM formats) sits in the console `Game Boy` lane for emulator architecture study. (source: wiki/sources/descriptions/xkevio__kevboy.md)
 - Peer Rust Game Boy emulator [[feather-gb]] targets retro handheld emulator developers and GB-area reverse engineers. (source: wiki/sources/descriptions/vojty__feather-gb.md)
+- Cycle-accurate Rust GB/GBC emulator [[gecko]] (CPU/PPU/APU; wgpu render; desktop library GUI) sits in the console `Game Boy` lane—README miscategorizes it under `GameCube/Wii`. (source: wiki/sources/descriptions/ioncodes__gecko.md)
 - GBA cartridge RE in Ghidra via [[gba-ghidra-loader]] (region/IO map + header entry point) sits in the console `Game Boy` / Cheat Ghidra Plugins lane. (source: wiki/sources/descriptions/pudii__gba-ghidra-loader.md)
 - Xbox 360 emulation via [[xenia]] (C++; PowerPC recompiler, D3D12/Vulkan GPU, XAM/kernel/XEX) sits in the console `Xbox` lane for hardware-abstraction / binary-translation research. (source: wiki/sources/descriptions/xenia-project__xenia.md)
 - macOS port [[xenia-mac]] extends that Xbox 360 HLE stack to Apple hosts for emulator / Xbox research. (source: wiki/sources/descriptions/wmarti__xenia-mac.md)
