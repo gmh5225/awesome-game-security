@@ -9,7 +9,8 @@ sources:
   - wiki/sources/descriptions/lguilhermee__EAC-Extractor-Utility.md
   - wiki/sources/descriptions/ksoju__Eac-Bypass.md
   - wiki/sources/descriptions/kprprivate__EAC-CR3-BYPASS.md
-updated: 2026-08-01
+  - wiki/sources/descriptions/inuNorii__Elden-Ring-CT-TGA.md
+updated: 2026-08-04
 confidence: medium
 ---
 
@@ -31,6 +32,8 @@ Offensive bypass lane: repos such as [[eac-bypass]] explore kernel driver and sh
 
 CR3 / page-table root lane: minimal UM+KM teaching samples such as [[eac-cr3-bypass]] demonstrate bypassing EAC checks tied to CR3 via coordinated kernel driver + usermode code. (source: wiki/sources/descriptions/kprprivate__EAC-CR3-BYPASS.md)
 
+Linux / Proton lane: Elden Ring CE tables such as [[elden-ring-ct-tga]] document protonhax launch + Wine-hosted Cheat Engine attach against Steam app `1245620`, with optional EAC launcher disable—useful for studying how EAC-protected titles behave under Proton-hosted cheat tooling. (source: wiki/sources/descriptions/inuNorii__Elden-Ring-CT-TGA.md)
+
 ## Related
 
-[[battleye]] · [[vanguard]] · [[cveac-2020]] · [[eac-overlay]] · [[eac-extractor-utility]] · [[eac-bypass]] · [[eac-cr3-bypass]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[battleye]] · [[vanguard]] · [[cveac-2020]] · [[eac-overlay]] · [[eac-extractor-utility]] · [[eac-bypass]] · [[eac-cr3-bypass]] · [[elden-ring-ct-tga]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
