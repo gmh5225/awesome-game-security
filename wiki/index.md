@@ -1105,6 +1105,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [windows-kernel-exploits](entities/windows-kernel-exploits.md) — kernel exploit guide (Cheat / vulnerable driver)
 - [windows-kernel-pagehook](entities/windows-kernel-pagehook.md) — PTE Hook (shared kernel VA / per-process CR3; Some Tricks Ring0)
 - [windows-kernel-shadow-stack](entities/windows-kernel-shadow-stack.md) — Synacktiv KM CET/shadow-stack research (KVAS / PG; Windows Security Features)
+- [windows-intel-pt](entities/windows-intel-pt.md) — WindowsIntelPT KM driver + user-mode library (IPT MSR config; per-process/system-wide; coverage / fuzzing / execution tracing)
 - [windows-subsystem-linux](entities/windows-subsystem-linux.md) — WSL Linux kernel source tree (full layout; WSL research hosts)
 - [WSL](entities/wsl.md) — official Microsoft WSL stack (wsl.exe, Lxss Manager, DrvFS, GNS, init/VM infra; WSL lane)
 - [WSL2 Linux Kernel](entities/wsl2-linux-kernel.md) — official Microsoft WSL2 utility-VM Linux kernel source (arch/drivers/fs; WSL lane)

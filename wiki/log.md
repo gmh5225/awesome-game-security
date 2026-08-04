@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:intelpt/WindowsIntelPT`: entity [[windows-intel-pt]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[winipt]] and [[processor-trace]].
+
 - **2026-08-04** — ingest `description:intelpt/processor-trace`: entity [[processor-trace]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[winipt]].
 
 - **2026-08-04** — ingest `description:intelpt/winipt`: entity [[winipt]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
