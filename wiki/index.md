@@ -527,6 +527,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Injectors](entities/injectors.md) — injection-testing harness (C/C++; AC stress)
 - [ImpulsiveDLLHijack](entities/impulsive-dll-hijack.md) — automated Windows DLL hijack research workflow (stages orchestration; cheat / DLL Hijack)
 - [Ironwall](entities/ironwall.md) — open-source AC protocol stack (TEE attestation, ZK human-input proofs, Hedera HCS match receipts; Unity/Unreal)
+- [Iris](entities/iris.md) — cross-platform C++ game engine (component-based; multi-backend render; CMake; Game Engine source)
 - [injdrv](entities/injdrv.md) — kernel APC DLL injector (process notify → LdrLoadDll; C)
 - [int_fastdiv](entities/int-fastdiv.md) — header-only C++ magic-number integer division (CPU/CUDA; ~2× vs hardware div; Mathematics)
 - [IPAPatch](entities/ipapatch.md) — patch iOS apps without jailbreak (C/C++/ObjC; cheat / IOS jailbreak)
