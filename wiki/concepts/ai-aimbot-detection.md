@@ -9,7 +9,8 @@ sources:
   - wiki/sources/descriptions/lkeai2007__yolov5_PUBG.md
   - wiki/sources/descriptions/lehmenkuehler__camera-triggerbot.md
   - wiki/sources/descriptions/karola3vax__CS2AC.md
-updated: 2026-08-02
+  - wiki/sources/descriptions/jakobfriedl__usb-monitor-bof.md
+updated: 2026-08-04
 confidence: medium
 ---
 
@@ -25,7 +26,7 @@ Some pipelines capture frames → run object detection → emit mouse/HID moveme
 
 - **Input micro-signatures** — acceleration, correction, quantization, overshoot-and-settle; must be demonstrated against matched human baselines.
 - **Engagement timing** — latency distributions depend on capture, inference, frame rate, and hardware; not universal thresholds.
-- **Hardware enumeration** — known USB VID/PID (KMBox, Arduino Leonardo, Teensy); mid-session device changes; KMBox Net UDP traffic on LAN.
+- **Hardware enumeration** — known USB VID/PID (KMBox, Arduino Leonardo, Teensy); mid-session device changes; KMBox Net UDP traffic on LAN. Offensive async BOF samples such as [[usb-monitor-bof]] (`WM_DEVICECHANGE` hotplug telemetry; Conquest; optional NetNTLM coerce via `.url` on storage volumes) illustrate the attach/detach surface those rules monitor. (source: wiki/sources/descriptions/jakobfriedl__usb-monitor-bof.md)
 - **Driver context** — known input-filter drivers (e.g. interception.sys), exploitable G HUB versions; contextual only until behavior is established.
 
 ## Server-side replay analysis
@@ -56,4 +57,4 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 
 ## Related
 
-[[hardware-input-injection]] · [[research-rigor]] · [[present-hook]] · [[kernel-mouse]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[hardware-input-injection]] · [[usb-monitor-bof]] · [[research-rigor]] · [[present-hook]] · [[kernel-mouse]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
