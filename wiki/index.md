@@ -656,6 +656,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Multiline Ultimate Assembler](entities/multiline-ultimate-assembler.md) — x64dbg/OllyDbg multiline assembler/disassembler plugin (m417z; Cheat x64dbg Plugins)
 - [ModExMap](entities/modexmap.md) — user-mode PE manual-map DLL injector (x86/x64; TLS; Extend Manual Map)
 - [modly](entities/modly.md) — local image→3D mesh desktop app (open-source GPU AI; TypeScript/Python; Windows/Linux; AI category)
+- [modreveal](entities/modreveal.md) — find hidden Linux kernel modules (C; Detection:Hide; AC / rootkit RE)
 - [Mono](entities/mono.md) — open-source .NET CLR (JIT/SGen/P/Invoke); Unity Mono scripting backend; game modding / RE target
 - [mono-external-lib](entities/mono-external-lib.md) — external Unity/Mono metadata reader (classes/methods/fields; no inject; C++)
 - [mutaben](entities/mutaben.md) — Python MBA (mixed-boolean-arithmetic) expression generator
