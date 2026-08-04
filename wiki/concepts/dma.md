@@ -20,7 +20,7 @@ sources:
   - wiki/sources/descriptions/kaijia2022__Cheat-Engine-DMA-Plugin.md
   - wiki/sources/descriptions/kWAYTV__dma-cheat-base.md
   - wiki/sources/descriptions/sercanarga__PCILeechGen.md
-updated: 2026-08-03
+updated: 2026-08-04
 confidence: high
 ---
 

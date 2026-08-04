@@ -2407,3 +2407,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-04** — ingest `description:ispras/qemu`: entity [[ispras-qemu]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]] (QEMU/KVM analysis/instrumentation / WinDbg tree).
 
 - **2026-08-04** — ingest `readme:categories`: bumped Cheat ~2648 (was ~2647; Anti Cheat ~640 / Game Engine ~155 stable); refreshed README map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
+- **2026-08-04** — ingest `description:sercanarga/pcileechgen`: refreshed [[pcileechgen]] (pipeline, emulation features, anti-cheat relevance); cited on [[dma]] and [[overviews/dma-attack]] (firmware-tier automation).
