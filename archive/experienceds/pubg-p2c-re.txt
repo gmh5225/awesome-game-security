@@ -1,0 +1,1597 @@
+Project Path: arc_experienceds_pubg-p2c-re_mbx_ttda
+
+Source Tree:
+
+```txt
+arc_experienceds_pubg-p2c-re_mbx_ttda
+├── ARCHITECTURE.md
+├── INJECTION.md
+├── PAYLOAD.md
+├── PROTOCOL.md
+├── README.md
+├── artifacts
+│   ├── loader_pe_headers.txt
+│   ├── stub_pe_hexdump.txt
+│   ├── webview2_js.txt
+│   └── zakynthos_detection_templates.txt
+└── diagrams
+    ├── attack_flow.svg
+    ├── dwm_memory_layout.svg
+    └── zakynthos_detection.svg
+
+```
+
+`ARCHITECTURE.md`:
+
+```md
+# Architecture Deep-Dive
+
+## Process spawn tree during a session
+
+```
+                              [User double-click]
+                                      │
+                                      ▼
+                          D:\<random>.exe  ← copy of client_new.exe
+                                (Loader)
+                          ┌────────────────────────┐
+                          │   PE = 19,821,568 bytes │
+                          │   VMProtect 3.x         │
+                          │   Random 8-char title   │
+                          └───────────┬────────────┘
+                                      │
+                                      ├─── spawn ────► msedgewebview2.exe (+ children)
+                                      │                   (WebView2 renderer host)
+                                      │
+                                      ├── HTTPS ─── tytnetratnikabrat.xyz (via CF)
+                                      │
+                                      │ [after "Done" — Loader exits]
+                                      │
+                                      ├─── spawn ────► D:\<random1>.exe (Stub #1)
+                                      │                   ├─ 1024 bytes on disk
+                                      │                   ├─ Hidden+System
+                                      │                   ├─ 3 bytes of .text code
+                                      │                   └─ 62 auto-loaded DLLs
+                                      │
+                                      ├─── spawn ────► D:\<random2>.exe (Stub #2)
+                                      │                   (identical to Stub #1)
+                                      │
+                                      └── OpenProcess/WriteProcessMemory ──► dwm.exe
+                                                                              (Compositor)
+                                                                              ┌──────────────────────────┐
+                                                                              │ 0x750000  RWX 4KB        │
+                                                                              │ 0x9360000 RWX 4KB        │
+                                                                              │ 0x6410000 RW  4KB (hooks)│
+                                                                              │ ~20 supporting buffers   │
+                                                                              └──────────────────────────┘
+
+                                                                              [DWM composes frames for]
+                                                                                          │
+                                                                                          ▼
+                                                                              ┌──────────────────────────┐
+                                                                              │ TslGame_ZK.exe (BE stub) │
+                                                                              │      │                    │
+                                                                              │      ▼                    │
+                                                                              │ TslGame_BE.exe (32-bit    │
+                                                                              │   BE wrapper)             │
+                                                                              │      │                    │
+                                                                              │      ▼                    │
+                                                                              │ TslGame.exe (real game)   │
+                                                                              │ + BEDaisy.sys kernel      │
+                                                                              │ + navagio.sys kernel      │
+                                                                              │ + Zakynthos (navagio)     │
+                                                                              └──────────────────────────┘
+```
+
+## The three TslGame processes (verified)
+
+BattlEye + PUBG use a chain of three processes to launch the game:
+
+| Process | Purpose | Bitness | Modules loaded |
+|---|---|---|---|
+| `TslGame_ZK.exe` | Zurikawaka launcher stub | x64 | ~11 (minimal, includes 2 `_notlinked-ntdll.dll` copies) |
+| `TslGame_BE.exe` | BattlEye 32-bit wrapper | x86 (WoW64) | ~68 |
+| `TslGame.exe` | Real game process | x64 | ~155 |
+
+The two `_notlinked-ntdll.dll` entries in `TslGame_ZK.exe` are a **BattlEye anti-tamper technique** — BE loads multiple ntdll copies at different addresses to detect user-mode API hooks by comparing them.
+
+## In-DWM memory layout (measured)
+
+```
+DWM process address space (partial, after cheat installed)
+
+┌──────────────────────────────────────────────────────────────────┐
+│ Low addresses                                                    │
+├──────────────────────────────────────────────────────────────────┤
+│ 0x0000000000010000 [64 KB]   heap                               │
+│ 0x0000000000160000 [8 KB]    PEB extended                       │
+│ ...                                                              │
+│ 0x0000000000750000 [4 KB]    RWX ← ESP renderer stub #1         │
+│                              WorldToScreen + D2D drawing        │
+│ 0x0000000000900000 [4 KB]    Windows PEB_SIGNATURE (stock)      │
+│ ...                                                              │
+│ 0x0000000006410000 [4 KB]    RW ← Hook-target dispatch table    │
+│                              (4KB of QWORDs → same trampoline)  │
+│ 0x0000000006480000 [4 MB]    Cheat entity/callback data         │
+│ ...                                                              │
+│ 0x0000000009360000 [4 KB]    RWX ← ESP renderer stub #2         │
+│ ...                                                              │
+│ 0x00007FF88E6C0000 [2.6 MB]  dwmcore.dll (compositor core)      │
+│   .rdata + 0x287058: [8]     CFG validator ptr (stock, unmod)   │
+│   .rdata + 0x287060: [8]     CFG validator ptr (stock, unmod)   │
+│ 0x00007FF88F000000            SHCORE.dll                        │
+│ 0x00007FF890D50000 [~2 MB]   ntdll.dll                          │
+│   + 0x8CC60: LdrpValidateUserCallTargetBitMap                   │
+│   + 0x8CD00: LdrpValidateUserCallTargetES                       │
+│ ...                                                              │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+The cheat renderer at `0x750000` disassembles to:
+
+```asm
+push rbx, rbp, rsi, rdi, r13, r14
+sub  rsp, 0x78
+movaps [rsp+0x50], xmm6
+movaps [rsp+0x60], xmm7
+mov  rdi, rdx                   ; player position pointer
+mov  rsi, rcx                   ; matrix pointer
+mov  r14, ???                   ; render target
+mov  rdx, [rsi]                 ; load view matrix row 0
+sub  rdx, ...
+mov  rcx, [rsi+0x40]
+movaps xmm0, [rip+???]
+...
+movaps xmm0, [rsi+???]
+mulps  xmm0, xmm6               ; matrix × vector
+addps  xmm0, [rsi+???]
+movaps [rdi+0x40], xmm0         ; store screen-space X
+...
+psrld  xmm0, 24
+pslld  xmm0, 24
+cvtdq2ps xmm0, xmm0
+mulps  xmm0, [rip+???]          ; multiply by 1/256
+movaps [rdi+0x40], xmm0         ; store color component
+...
+```
+
+Pattern: `psrld/pslld/cvtdq2ps/mulps` is a color-channel unpack sequence. Cheat is drawing colored ESP boxes with per-team colors.
+
+## Stub PE dissection
+
+Both dropped stubs (`li5k2hokg.exe`, `uzx0odykv8p2.exe`, `suk4itsj.exe`, ...) are byte-identical up to filename:
+
+```
+File offset 0x00: 4D 5A 78 00 01 00 00 00 04 00 00 00 00 00 00 00
+                  |  MZ signature
+                  └─ DOS header (minimal)
+
+File offset 0x40: 0E 1F BA 0E 00 B4 09 CD 21 B8 01 4C CD 21 54 68
+                  └─ "!This program cannot be run in DOS mode.$"
+
+File offset 0x78: 50 45 00 00 64 86 01 00 F4 82 23 00 00 00 00 00
+                  │  PE header
+                  └─ Machine=x64, 1 section
+
+File offset 0x80: 00 00 00 00 F0 00 22 00 0B 02 0E 00 00 02 00 00
+                  └─ Optional header: PE32+, 512 bytes code
+
+File offset 0x180: 2E 74 65 78 74 00 00 00 03 00 00 00 00 10 00 00
+                   └─ Section header: ".text", VirtualSize=3, VirtualAddress=0x1000
+
+File offset 0x200: <first byte of .text>
+File offset 0x203: <last byte of .text — only 3 bytes real code>
+File offset 0x204 onward: CC CC CC ... CC (padding to 1024)
+```
+
+The 3 bytes of `.text`:
+```
+54 24 48    →   push rsp; and eax, 0x48
+             OR
+             push rsp; rex.WB (invalid alone) — never actually executes as this
+```
+
+Regardless of interpretation, entry-point RVA is `0x1000` which is the start of `.text`. Windows loader loads this, applies imports, hands control. The 3 bytes execute (or crash), the stub main thread exits, but **all imported DLLs remain resident** because Windows loader loaded them for the process.
+
+Result: the stub process is basically an `LoadLibrary` proxy for its import list. That import list — d3d11.dll, dxgi.dll, dwmapi.dll, apphelp.dll, MSVCP140.dll, VCRUNTIME140.dll, VCRUNTIME140_1.dll, WINMM.dll, KERNELBASE.dll, ntdll.dll, USER32.dll, gdi32full.dll, msvcp_win.dll, ucrtbase.dll, RPCRT4.dll, IMM32.DLL, combase.dll — is exactly the set the cheat renderer needs at runtime.
+
+Purpose: unclear but architecturally the stubs are session-persistence tokens. If the cheat requires "at least one stub alive" to remain active, killing all stubs would deactivate it. This was not tested destructively during the analysis.
+
+## Threading model
+
+Loader process (during active phase):
+- Main thread — WebView2 host / UI
+- ~5 WebView2 child threads
+- libcurl worker threads (2-3, dependent on connection state)
+- Total ~15 threads
+
+Stub processes: 2-3 threads each (main + implicit runtime workers from CRT init)
+
+DWM process (post-injection):
+- Baseline DWM threads (~30-40)
+- No additional threads spawned by the cheat — it runs inside DWM's existing render thread by way of the hook
+
+## The kdmapper red herring
+
+The loader's `.rdata` contains many strings that suggest BYOVD (Bring Your Own Vulnerable Driver) kernel-mode capability:
+
+```
+Nal Windows Driver Unload: IoDeleteDevice NOT called: NULL DeviceObject
+Nal Windows Driver Unload: Leaving...
+Nal Windows Driver Unload: Starting
+Nal Windows DriverAddDevice: done
+Nal Windows DriverIoCreateSymbolicLink failed.  Status = 0x%x
+Nal Windows DriverIoCreateDevice failed.  Status = 0x%0x
+Nal Windows DriverAddDevice: entered
+NalResolveOsSpecificIoctl: NAL_WIN_DRIVER_GET_REF_COUNT_FUNCID FunctionData is NULL
+c:\users\cloudbuild\337244\sdk\nal\src\winnt_wdm\driver\objfre_wnet_AMD64\amd64\iqvw64e.pdb
+c:\users\cloudbuild\337244\sdk\nal\src\winnt_wdm\driver\windriverpci_i.c
+Nal Windows Driver DriverEntry: Completed
+Nal Windows Driver Loaded -- Compiled %s %s
+[!] Failed to ClearWdFilterDriverList
+[!] Failed to find WdFilter RuntimeDriversCount
+[!] Failed to find WdFilter RuntimeDriversList
+[+] WdFilter.sys not loaded, clear skipped
+[!] DriverInfo Magic is invalid, new wdfilter version?, driver info will not be released to prevent bsod
+[!] Failed to remove from RuntimeDriversArray
+[+] Found WdFilter MpFreeDriverInfoEx with second pattern
+[!] Failed to find WdFilter MpFreeDriverInfoEx
+Fatal error: failed to acquire SE_LOAD_DRIVER_PRIVILEGE. Make sure you are running as administrator.
+[-] Driver Unload Failed!!
+), Probably some anticheat or antivirus running blocking the load of vulnerable driver
+[-] Set 'VulnerableDriverBlocklistEnable' as dword to 0
+[-] Registry path to disable vulnerable driver list: HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\CI\Config
+[-] Your vulnerable driver list is enabled and have blocked the driver loading, you must disable vulnerable driver list to use kdmapper with intel driver
+```
+
+These are canonical strings from **kdmapper** + **Intel NAL driver `iqvw64e.sys`** — BYOVD toolkit for loading unsigned kernel drivers. Combined with the WdFilter manipulation strings (`MpFreeDriverInfoEx`, `RuntimeDriversArray`), it suggests the loader includes full BYOVD kernel-mapping capability.
+
+**But** — actual kernel driver enumeration on the target after a full loader run showed **no manually mapped driver**. Only `BEDaisy.sys` (BattlEye kernel driver) and `navagio.sys` (PUBG's own AC component) are present in non-Windows paths. Both are stock.
+
+Possibilities:
+1. BYOVD path is a fallback that only activates on specific system configurations (e.g., if user-mode DWM injection fails, retry via kernel).
+2. BYOVD is used for a transient operation and unloaded immediately after (e.g., disable WdFilter briefly).
+3. Dead code / feature-flagged off.
+
+Cannot conclude from the visible evidence.
+
+```
+
+`INJECTION.md`:
+
+```md
+# DWM Injection Mechanism
+
+Full step-by-step of how the loader gets its cheat renderer into `dwm.exe`.
+
+## Why DWM?
+
+`dwm.exe` (Desktop Window Manager) is the Windows compositor — every visible pixel of every application window passes through DWM before reaching the screen. A DWM-resident overlay can therefore draw over any target window, including a full-screen game, without ever touching that game's process.
+
+For a BattlEye-protected game like PUBG, this is architecturally significant:
+
+- BattlEye scans the game process (`TslGame.exe`) for injected modules, thread-hijacks, memory tampering. **It does not scan `dwm.exe`.**
+- BattlEye scans the game's HWND for known overlay windows. **A DWM-side render bypasses this — the overlay is composited into the game's own presented backbuffer.**
+- The game process is never opened, never written to, never read.
+
+The trade-off: DWM injection needs `SeDebugPrivilege` and the ability to `OpenProcess(PROCESS_ALL_ACCESS)` on the compositor. Both are available to any local Administrator on default Windows 10/11 installations because DWM does not have `PROCESS_MITIGATION_DYNAMIC_CODE_POLICY` (ACG) or `PROCESS_MITIGATION_BINARY_SIGNATURE_POLICY` enabled.
+
+## Confirmed via `Get-ProcessMitigation -Id <dwm_pid>`
+
+```
+Dep             : Enabled
+Aslr            : Enabled
+DynamicCode     : OFF     ← ACG is NOT enforced
+BinarySignature : OFF     ← DLL signing not required
+ChildProcess    : Enabled
+Cfg             : Enabled ← CFG active but only limits indirect-call targets
+```
+
+## Injection steps (as executed by the loader)
+
+1. **Elevate**
+   ```c
+   OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token);
+   LookupPrivilegeValueA(NULL, "SeDebugPrivilege", &luid);
+   TOKEN_PRIVILEGES tp = { 1, {luid, SE_PRIVILEGE_ENABLED} };
+   AdjustTokenPrivileges(token, FALSE, &tp, 0, NULL, NULL);
+   ```
+
+2. **Find dwm.exe PID**
+   Snapshot via `CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS)` or `NtQuerySystemInformation(SystemProcessInformation)`. Match on `dwm.exe`.
+
+3. **Open the compositor**
+   ```c
+   HANDLE h = OpenProcess(PROCESS_ALL_ACCESS, FALSE, dwm_pid);
+   // On default Win10/11: succeeds with SeDebugPrivilege.
+   ```
+
+4. **Allocate RWX in DWM address space**
+   Two allocations observed (both 4 KB, protection `p-rwx-`):
+   - `0x00750000` — ESP renderer #1
+   - `0x09360000` — ESP renderer #2
+
+5. **Write ESP renderer bytes**
+   Both regions contain identical-shape x64 code — vector math on XMM0-XMM15, `movaps`/`mulps`/`addps`, matrix constants (float `1/256 = 0x3B808081`, `1.0f = 0x3F800000`, `NaN sentinel = 0x7FFFFFFF`) followed by Direct2D drawing primitives. This is WorldToScreen + DrawRectangle/DrawLine.
+
+6. **Install hook-target dispatch table** at `0x06410000` (4 KB, private RW) — array of function pointers, populated with pointers into the ESP renderer.
+
+7. **Wire it into DWM's render loop** — the exact hook site was not conclusively identified in this analysis. Zakynthos' diagnostic buffer inside `TslGame.exe` names three hook types that it observes:
+   - `Dwmcore CRenderTarget Vtable Hook`
+   - `D2d1 D2DDeviceContextBase Vtable Hook`
+   - `Dwmcore RenderBlackContent Code Hook`
+   
+   The dwmcore `.rdata + 0x287058` vtable slots were checked and match a clean baseline — they point to stock ntdll CFG validators, not to injected code. The actual hook mechanism therefore uses one of the other observed vectors (D2D vtable swap in a heap-allocated interface, or an inline code patch elsewhere in dwmcore).
+
+8. **Loader self-terminates** ~5 seconds after `onDownloadComplete` fires. Persistence is carried by the resident decoy stubs (see `README.md §7`).
+
+## What the ESP renderer does at runtime
+
+Once the two 4 KB RWX pages are executing inside DWM's render thread, they:
+
+1. Read player position / view matrix / entity list from a **caller-provided buffer** in DWM heap.
+2. Multiply world-space vectors by the view+projection matrix (the `movaps/mulps/addps` sequence).
+3. Convert to screen-space coordinates using DWM's known render target dimensions.
+4. Emit Direct2D `FillRectangle` / `DrawLine` / `DrawTextLayout` calls against the D2D device context that DWM already has open for composition of the game window.
+
+The result: a bounding box and health bar drawn per player, composited over the game's frame, with zero pixels ever going through `TslGame.exe`.
+
+## What was NOT observed
+
+- No kernel driver load at runtime (loader has `kdmapper` + `iqvw64e.sys` strings but no modules appear in the live kernel module table).
+- No modification of `TslGame.exe` at any point.
+- No modification of `BEDaisy.sys` or `navagio.sys` (both present, both stock).
+- No hooks in game DLLs (`BEClient_x64.dll`, `steam_api64.dll`, `discord_game_sdk.dll`, `nvwgf2umx.dll`).
+- No injection into `explorer.exe`, `svchost.exe`, or any other system process.
+
+## Anti-tamper on the payload DLL
+
+The extracted payload PE has VMProtect's built-in self-CRC. Any modification of the on-disk PE — even purely editing section-header fields to make a memory-format PE loadable via `LoadLibraryA` — triggers a modal dialog:
+
+> `File corrupted! This program has been manipulated and maybe it's infected by a Virus or cracked. This file won't work anymore.`
+
+To load the payload without triggering this, the exact bytes from the on-wire download buffer must be preserved. This is a known VMProtect protection (`VMProtectIsValidImageCRC`).
+
+Independently, the payload's `DllMain` (RVA `0x843F40`, virtualized by VMP) contains a context check. When the DLL is manually mapped into DWM by any code path other than the vendor's loader — verified by allocating a full 10 MB RWX region in DWM, writing the exact payload bytes, applying base relocations, resolving imports via `LoadLibraryA`/`GetProcAddress`, and invoking `DllMain(base, DLL_PROCESS_ATTACH, NULL)` through a remote-thread thunk — `DllMain` returns `FALSE` and the cheat does not activate. The check is inside the VMP p-code and its specific mechanism (caller identity, PEB module walk, memory marker, or stack unwinding) is not established.
+
+```
+
+`PAYLOAD.md`:
+
+```md
+# Payload DLL Analysis
+
+The cheat itself — a VMProtect-packed x64 DLL delivered by the loader.
+
+## Provenance
+
+Captured from the loader's memory in the ~5-second window between `onDownloadComplete()` and `ExitProcess`. The buffer address (in one capture) was `0x05640000` — a 6 MB private R/W VAD in the loader's process, populated to 98% non-zero, entropy ≈ 8.00 (indistinguishable from pure random — consistent with a VMProtect-packed image whose interior is encrypted).
+
+The first 0x60 bytes of the buffer are a wrapper header — not part of the PE. Starting at offset `0x60`:
+
+```
+0x60: 4D 5A 90 00 03 00 00 00 04 00 00 00 FF FF 00 00
+      │  MZ signature
+      └── standard MS-DOS header
+```
+
+The 0x60-byte prefix content:
+```
+00 60 fc 06 00 00 00 00 10 01 50 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 c0 60 00 00 00 00 00 00 d0 60 00 00 00 00 00
+00 00 00 00 00 00 00 00 69 02 d6 71 00 00 00 04
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 40 00 64 05 00 00 00 00
+```
+
+Interpretation:
+- `0x06FC6000` at offset 0 — possibly a size hint (~117 MiB, doesn't match anything obvious)
+- `0x0060C000` and `0x0060D000` at offsets 0x20/0x28 — matched pair, look like buffer sizes
+- `0x71D60269` at offset 0x38 — possibly a checksum or hash prefix
+- `0x0100` and `0x0400` — flags and counts
+
+The wrapper is not documented protocol; its purpose is transport-level metadata for the loader's decrypt-and-inject pipeline.
+
+## PE structure
+
+| Field | Value |
+|---|---|
+| Machine | `0x8664` (x64) |
+| Sections | 9 |
+| SizeOfImage | `0x00A5E000` (10,608 KB) |
+| ImageBase | `0x0000000180000000` |
+| AddressOfEntryPoint | `0x00843F40` (DllMain) |
+| DllCharacteristics | `0x2022` (DLL \| HIGH_ENTROPY_VA \| NX_COMPAT) |
+| TimeDateStamp | `0x6A707E66` (fabricated — resolves to 1976, VMP typical) |
+| CheckSum | present (VMP CRC self-check) |
+
+### Section table
+
+| # | Name | VA | VSize | Purpose |
+|---|---|---|---|---|
+| 0 | `.text` | `0x1000` | `0xDC2C3` (881 KB) | Original x64 code |
+| 1 | `.rdata` | `0xDE000` | `0xE510` (58 KB) | Read-only constants (IAT + strings) |
+| 2 | `.data` | `0xED000` | `0x2020` (8 KB) | Global variables |
+| 3 | `.pdata` | `0xF0000` | `0xB610` (46 KB) | Exception unwind tables |
+| 4 | `.ajJ` | `0xFC000` | `0x3545B3` (3.4 MB) | **VMProtect virtualized code (VMP2 handlers + p-code stubs)** |
+| 5 | `.6&T` | `0x451000` | `0xD48` (3.3 KB) | **VMProtect import-encryption stubs** |
+| 6 | `.0Z0` | `0x452000` | `0x609D78` (6.3 MB) | **VMProtect encrypted VM tape** (main protection data) |
+| 7 | `.reloc` | `0xA5C000` | `0xE0` | Base relocations |
+| 8 | `.rsrc` | `0xA5D000` | `0x1E0` | Resources (nearly empty) |
+
+Section names `.ajJ`, `.6&T`, `.0Z0` — position-fixed VMProtect 3.x variant with per-project randomized name suffixes.
+
+## Data directories
+
+| # | Directory | RVA | Size |
+|---|---|---|---|
+| 1 | Import | `0x7F8D88` | `0x190` |
+| 2 | Resource | `0xA5D000` | `0x1E0` |
+| 3 | Exception | `0xA4DF30` | `0xDE48` |
+| 5 | BaseReloc | `0xA5C000` | `0xE0` |
+| 9 | TLS | `0x875FA0` | `0x28` |
+| 10 | LoadConfig | `0xA4DDF0` | `0x140` |
+| 12 | IAT | `0x451000` | `0x160` |
+
+Export directory: **empty**. The DLL exports nothing — it's launched purely via `DllMain`.
+
+TLS Directory:
+- `RawDataStart` = `0x180451D40`
+- `RawDataEnd`   = `0x180451D48`
+- `Callbacks`    = **0** (no TLS callbacks)
+
+The initialization runs entirely in `DllMain` — RVA `0x00843F40`, which is inside the `.0Z0` VMP-encrypted section. All actual initialization work is dispatched through VMP p-code and cannot be recovered statically without full devirtualization.
+
+## Import table (recovered)
+
+The IAT is at RVA `0x451000` — inside `.6&T` (VMP encrypted). However the module names remain plaintext (VMP does not hide DLL names, only function names).
+
+Deliberately minimal — just what the payload needs to draw and read game state:
+
+```
+d3d11.dll
+KERNEL32.dll
+USER32.dll                     ← GetAsyncKeyState (menu toggle key)
+MSVCP140.dll
+dwmapi.dll                     ← DwmExtendFrameIntoClientArea
+WINMM.dll                      ← timer / timeBeginPeriod
+VCRUNTIME140_1.dll
+VCRUNTIME140.dll
+api-ms-win-crt-stdio-l1-1-0.dll
+api-ms-win-crt-heap-l1-1-0.dll
+api-ms-win-crt-utility-l1-1-0.dll
+api-ms-win-crt-string-l1-1-0.dll
+api-ms-win-crt-convert-l1-1-0.dll
+api-ms-win-crt-runtime-l1-1-0.dll
+api-ms-win-crt-filesystem-l1-1-0.dll
+api-ms-win-crt-math-l1-1-0.dll
+KERNEL32.dll                   (repeat — different function set)
+USER32.dll                     (repeat)
+KERNEL32.dll                   (repeat)
+```
+
+**Notably absent** — `wininet.dll`, `winhttp.dll`, `ws2_32.dll`, `bcrypt.dll`, `advapi32.dll`, `ntdll.dll` (explicit). The payload has:
+- No network code — cannot phone home, cannot fetch keys
+- No cryptography — cannot verify licenses
+- No token / process manipulation — cannot spawn processes or elevate
+
+Every non-graphics decision the payload makes must come from bytes present at load time — either in the DLL image itself (VMP-encrypted config) or in the process address space where it's loaded (marker planted by loader).
+
+Two API strings survive in plaintext across the entire 10.6 MB image:
+- `GetModuleHandleA` at file offset `0x47BB06` (inside `.0Z0`)
+- `LoadLibraryA` at file offset `0x8EEDF0` (visible IAT thunk region)
+
+These are the bootstrap primitives VMP needs to resolve everything else dynamically. Everything else — including `"dwmcore"` as a string (neither `64 77 6D 63 6F 72 65` in ASCII nor UTF-16LE) — is hashed or constructed at runtime.
+
+## VMProtect specifics
+
+- **CRC self-check** — modifying any byte of the on-disk PE (including section-header fields for `SizeOfRawData` / `PointerToRawData`) triggers a modal dialog window with the classic VMP anti-crack message.
+- **Anti-debug** — TLS-callback-free means no TLS-based anti-debug, but the standard VMP checks (`IsDebuggerPresent`, `NtQueryInformationProcess(ProcessDebugPort/ProcessDebugFlags)`, timing checks via `RDTSC`, hardware breakpoint checks via `NtGetContextThread`) are all present in the VM handlers.
+- **Import obfuscation** — every imported function call goes through a VMP dispatcher that re-resolves the target via `LoadLibraryA` + `GetProcAddress` per-call, using hashed function names.
+- **Context-check in DllMain** — verified experimentally. Loading the DLL by any path other than the vendor loader results in `DllMain` returning `FALSE`. The specific check mechanism is inside VMP p-code and is one of: caller identity via stack unwinding, `PEB.Ldr` walk for a specific module fingerprint, parent-process check, or a memory marker placed by the loader before the load. Static analysis cannot distinguish between these without VMP devirtualization.
+
+## Behavior observed in a valid session
+
+When loaded correctly (by the vendor's loader), the payload:
+
+1. `DllMain(hInst, DLL_PROCESS_ATTACH, NULL)` runs, VMP unpacks in place
+2. Payload allocates the 2 × 4 KB RWX renderer pages in DWM at fixed VAs `0x750000` and `0x9360000`
+3. Populates a hook-target dispatch table at `0x6410000`
+4. Wires itself into DWM's Direct2D / DirectComposition render path via one of {D2D vtable swap, dwmcore code hook, dwmcore vtable hook}
+5. Returns `TRUE`
+6. Its renderer runs every time DWM composites a frame that contains the game window — reads player data from a shared buffer, computes screen coordinates, emits Direct2D calls to draw ESP over the game
+7. Menu toggle: `GetAsyncKeyState(VK_...)` polled — visible via the recovered import
+
+```
+
+`PROTOCOL.md`:
+
+```md
+# Network Protocol
+
+All endpoints confirmed via observation of the loader's libcurl buffers during active sessions.
+
+## Endpoint base
+
+`https://tytnetratnikabrat.xyz`
+
+DNS resolution (as of analysis):
+```
+tytnetratnikabrat.xyz.
+    104.21.7.92                  (CloudFlare)
+    172.67.130.4                 (CloudFlare)
+    2606:4700:3037::ac43:8204    (CloudFlare IPv6)
+    2606:4700:3037::6815:75c     (CloudFlare IPv6)
+```
+
+Direct HTTP `GET /` returns 403 — no landing page, API-only.
+
+Domain name analysis: `тут нет ратника брат` (Russian, roughly "no ratnik here brother" — colloquial reference to Russian PMC gear). Suggests Russian-speaking operator.
+
+An origin IP appears in one observation — `2.27.248.35` — resolving to Akamai (`a2-27-248-35.deploy.static.akamaitechnologies.com`). One string sample includes `https://2.27.248.35/api/loader/download`. This may be a fallback for CF or a direct-origin variant.
+
+## Auth flow
+
+### `POST /api/loader/login`
+
+**Client body** (from loader memory):
+```json
+{"password":"...","username":"..."}
+```
+
+Note field order — `password` first, then `username`. Consistent across all observations.
+
+**Presumed server response** (reconstructed from JS callbacks):
+```json
+{
+  "success": true,
+  "username": "...",
+  "uid": 2189,
+  "subs": [
+    {
+      "product": "Pubg-Esp",
+      "status": "UNDETECT",
+      "timeRemaining": "1d 3h 0m"
+    }
+  ]
+}
+```
+
+The response drives the JS callback `onLoginSuccess(username, uid, subs)` (function signature recovered from the embedded HTML/JS).
+
+### `POST /api/loader/register`
+
+**Client body** — includes a license key that activates a subscription:
+```json
+{"username":"...","password":"...","key":"..."}
+```
+
+Full request format visible in the embedded JS:
+```javascript
+window.chrome.webview.postMessage(JSON.stringify({
+    action: 'register',
+    username: u,
+    password: p,
+    key: document.getElementById('reg-key').value.trim()
+}));
+```
+
+### `POST /api/loader/product-status`
+
+Called before download. Verifies the product is still active for the account.
+
+### `GET /api/loader/download`
+
+Returns the encrypted payload for the selected product. The response body is ~6.3 MB and lands in a private RW VAD in the loader's address space. Content: encrypted at rest, decrypted in-process.
+
+Also observed with a numeric-IP variant: `GET https://2.27.248.35/api/loader/download` — possibly for CF-bypass on large blob downloads.
+
+## Additional string references in loader `.rdata`
+
+- `Bearer` — Authorization scheme
+- `Content-Type: application/json`
+- `User-Agent: %s` (format string; the exact UA value is set at runtime and not observed statically)
+- `Cookie` handling code paths
+- `Location:` (redirect handling)
+- Common libcurl error strings (55/56/60/77 handled explicitly)
+- Amazon S3 AWS4 signature v4 helper strings (`AWS4-HMAC-SHA256`, `UNSIGNED-PAYLOAD`) — likely for update-download from an S3 bucket, not for main auth
+
+## Update / version-check hooks
+
+Loader has a version-mismatch code path:
+
+```javascript
+function onAutoUpdate(serverVer) { ... }
+function onVersionMismatch(serverVer, updateFileId) { ... }
+function startUpdate() { ... }
+function onUpdateStart() { ... }
+function onUpdateProgress(pct) { ... }
+function onUpdateComplete(path) { ... }
+function onUpdateError(msg) { ... }
+```
+
+The server can push a new loader binary; the client downloads it, asks the user to `Close & Launch New`, and re-launches.
+
+Text visible in the JS blob:
+- `New version available: ` + serverVer + `<br>Downloading update…`
+- `Download Update`
+- `Downloading update…`
+- `Update downloaded!`
+- `Close & Launch New`
+
+## HTTPS specifics
+
+libcurl statically linked. Default certificate trust store — no evidence of custom CA bundle or cert pinning. TLS 1.2/1.3 as negotiated with CloudFlare.
+
+CloudFlare NEL (Network Error Logging) endpoint appears as a URL in the loader's heap after any successful request: `https://a.nel.cloudflare.com/report/v4?s=...`. This is CloudFlare-injected client-side telemetry, not the loader's own code.
+
+## Client fingerprint / anti-abuse
+
+No `hwid` field visible in the plain login/register JSON. No AES/RC4/ChaCha S-box constants in `.rdata` (payload is presumably encrypted server-side with a session-derived key rather than a hardcoded one). Password is sent in plaintext over TLS — no client-side hashing before transmission.
+
+Session binding to a specific machine is likely enforced server-side (account/HWID) but the client-side fingerprint field is not visible in the login/register JSON bodies.
+
+```
+
+`README.md`:
+
+```md
+# PUBG P2C Loader — Reverse Engineering Report
+
+Full workflow analysis of a commercial pay-to-cheat loader for PlayerUnknown's Battlegrounds. All findings independently verified.
+
+**Target sample**
+| | |
+|---|---|
+| Filename (on-disk) | `client_new.exe` |
+| Size | `19,821,568` bytes (18.9 MiB) |
+| MD5 | `b594ba29083e0783d187e8bc025919df` |
+| Type | PE32+ x64, `IMAGE_SUBSYSTEM_WINDOWS_GUI` |
+| ImageBase | `0x140000000` |
+| EntryPoint | RVA `0x020F3FFD` |
+| Compile date | stripped |
+| Debug directory | absent |
+| Load config | absent |
+| Vendor domain | `tytnetratnikabrat.xyz` |
+| Distribution | direct download; per-user renamed random 8-char filename on target USB |
+
+---
+
+## 1. Top-level architecture
+
+```
+ ┌──────────────────────────────────────────────────────────────────────────┐
+ │                              USER MACHINE                                │
+ │                                                                          │
+ │   [USB drive D:\]                                                        │
+ │      │                                                                   │
+ │      │ launch (random-name copy of client_new.exe)                       │
+ │      ▼                                                                   │
+ │   ┌─────────────────────┐  HTTPS/TLS 1.2   ┌─────────────────────┐       │
+ │   │ Loader process       │◄────────────────►│ CloudFlare edge     │──────┼──►
+ │   │ (WebView2 UI +       │                  │ tytnetratnikabrat   │      │
+ │   │  libcurl HTTPS +     │                  │ .xyz                │      │
+ │   │  VMProtect 3.x)      │                  └─────────────────────┘      │
+ │   └────────┬────────────┘                                                │
+ │            │                                                             │
+ │            │ 1. drops 1-KB decoy stub PE to D:\<random>.exe              │
+ │            │    (Hidden+System attributes)                               │
+ │            │ 2. CreateProcess() the decoy → stays resident               │
+ │            │ 3. OpenProcess(dwm.exe) + WriteProcessMemory                │
+ │            │    installs ESP renderer into DWM                           │
+ │            │ 4. exits after ~5 s                                         │
+ │            ▼                                                             │
+ │   ┌──────────────────┐         ┌──────────────────────────────────┐      │
+ │   │ Decoy stubs      │         │ dwm.exe (compositor)             │      │
+ │   │ D:\<random>.exe  │         │  ┌────────────────────────────┐  │      │
+ │   │ ~1 KB each       │         │  │ 0x750000 4 KB  RWX cheat #1│  │      │
+ │   │ hidden+system    │         │  │ 0x9360000 4 KB RWX cheat #2│  │      │
+ │   │ (no cheat code — │         │  │ hook-table @ 0x6410000      │  │      │
+ │   │  D3D11/DXGI      │         │  │ full VMP-packed DLL @ high │  │      │
+ │   │  imports only)   │         │  └────────────────────────────┘  │      │
+ │   └──────────────────┘         └──────────────────────────────────┘      │
+ │                                              │                            │
+ │                                              │ DirectComposition path    │
+ │                                              ▼                            │
+ │                                        ┌──────────────────┐              │
+ │                                        │ TslGame.exe      │              │
+ │                                        │ (BattlEye)       │              │
+ │                                        │ overlay drawn    │              │
+ │                                        │ ABOVE game window│              │
+ │                                        │ — no injection   │              │
+ │                                        │ into game proc   │              │
+ │                                        └──────────────────┘              │
+ └──────────────────────────────────────────────────────────────────────────┘
+```
+
+![Attack Flow](diagrams/attack_flow.svg)
+
+**Key insight** — the cheat is never injected into `TslGame.exe`. All rendering happens in `dwm.exe` (the Windows Desktop Window Manager compositor). Player positions are read externally — never through any process running on the game host. This is why BattlEye does not detect it (BattlEye does not scan DWM).
+
+---
+
+## 2. PE structure
+
+Loader on disk has 10 sections. Original `.text/.rdata/.data` have `SizeOfRawData=0` — they exist only in memory, populated by VMProtect at runtime. VMP's own sections carry the packed code.
+
+| # | Name | VA | VSize | RawSize | Purpose |
+|---|---|---|---|---|---|
+| 0 | `.text` | `0x1000` | `0x11B2E4` | **0** | Original code (unpacked at runtime, 1.1 MiB) |
+| 1 | `.rdata` | `0x11D000` | `0x45B30` | **0** | Constants + WebView2 HTML/JS blob |
+| 2 | `.data` | `0x163000` | `0x34528` | **0** | Global variables |
+| 3 | `.pdata` | `0x198000` | `0x0A554` | **0** | Exception unwind info |
+| 4 | `_RDATA` | `0x1A3000` | `0x001D0` | **0** |  |
+| 5 | `.XEp` | `0x1A4000` | `0xFB9011` | **0** | **VMP unpacker (16 MiB)** |
+| 6 | `.5E^` | `0x115E000` | `0x017E0` | `0x1800` | VMP import resolver table |
+| 7 | `.3@N` | `0x1160000` | `0x12E5308` | `0x12E5400` | **VMP encrypted VM tape (19 MiB)** |
+| 8 | `.reloc` | `0x2446000` | `0x000EC` | `0x200` |  |
+| 9 | `.rsrc` | `0x2447000` | `0x001E0` | `0x200` |  |
+
+Signatures `.XEp/.3@N/.5E^` are canonical VMProtect 3.x section naming (obfuscated but position-fixed).
+
+---
+
+## 3. Runtime workflow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as User
+    participant L as Loader (client_new.exe)
+    participant W as WebView2 (child proc)
+    participant S as CF edge → origin
+    participant D as dwm.exe
+    participant S1 as Stub 1
+    participant S2 as Stub 2
+
+    U->>L: launch from D:\<random>.exe
+    L->>L: VMProtect unpacks .text/.rdata/.data at runtime
+    L->>W: spawn WebView2 renderer child
+    W->>L: postMessage({action:'login', username, password})
+    L->>S: POST /api/loader/login (JSON body)
+    S-->>L: session response
+    L->>W: onLoginSuccess(username, uid, subs)
+    U->>W: click product tile
+    W->>L: postMessage({action:'select_product', index:N})
+    L->>S: POST /api/loader/product-status
+    S-->>L: product info
+    L->>S: GET /api/loader/download
+    S-->>L: encrypted payload (~6.3 MB)
+    L->>L: decrypt payload → PE image in RAM
+    L->>W: onDownloadProgress → onDownloadComplete
+    L->>S1: CreateProcess D:\<random1>.exe (1 KB decoy)
+    L->>S2: CreateProcess D:\<random2>.exe (1 KB decoy)
+    L->>D: OpenProcess(PROCESS_ALL_ACCESS) + SeDebugPrivilege
+    L->>D: VirtualAllocEx + WriteProcessMemory (2 RWX pages)
+    L->>D: install ESP renderer + hook table
+    L-->>U: window shows "Done, Closing in 5 seconds…"
+    L->>L: ExitProcess
+    Note over D,S1: cheat active in dwm.exe for entire uptime<br/>stubs stay resident<br/>loader gone
+```
+
+---
+
+## 4. Network protocol (confirmed endpoints)
+
+Base: `https://tytnetratnikabrat.xyz` (CloudFlare-fronted, DNS `104.21.7.92 / 172.67.130.4 / 2606:4700:...`)
+
+| Endpoint | Method | Client body | Server response |
+|---|---|---|---|
+| `/api/loader/login` | POST | `{"password":"...","username":"..."}` | session token + subscription list |
+| `/api/loader/register` | POST | `{"username":..,"password":..,"key":..}` | account creation |
+| `/api/loader/product-status` | POST | product index | subscription state |
+| `/api/loader/download` | GET | (session auth) | encrypted DLL blob |
+
+Client uses **libcurl statically linked** — verified via characteristic error strings in `.rdata`:
+`Failed sending data to the peer`, `SSL peer certificate or SSH remote key was not OK`, `An unknown option was passed in to libcurl`, `Failure when receiving data from the peer`, etc.
+
+Curl error 55/56/60/77 handling code paths present.
+
+---
+
+## 5. WebView2 IPC protocol (fully enumerated)
+
+The GUI is an embedded HTML page with vanilla JS. All UI events cross into native C++ via `window.chrome.webview.postMessage(JSON.stringify({action:'...',...}))`.
+
+### Actions sent JS → native
+
+| Action | Payload | Behaviour |
+|---|---|---|
+| `login` | `{username, password}` | POST to `/api/loader/login` |
+| `register` | `{username, password, key}` | account creation with license key |
+| `activate_key` | `{key}` | activate additional subscription |
+| `select_product` | `{index}` | download + install cheat for product `index` |
+| `ping` | (none) | RTT measurement to server |
+| `update_loader` | (none) | request loader self-update |
+| `close` | (none) | exit process |
+
+### Callbacks native → JS
+
+`onLoginSuccess(username, uid, subs)` · `onLoginError(msg)` · `onKeyActivated(subs)` · `onKeyError(msg)` · `onPingResult(ms)` · `onAutoUpdate(serverVer)` · `onVersionMismatch(serverVer, updateFileId)` · `onUpdateStart()` · `onUpdateComplete(path)` · `onUpdateError(msg)` · `onProductBlocked(status)` · `onDownloadStart()` · `onDownloadProgress(dlNow, dlTotal)` · `onDownloadComplete()` · `onDownloadError(msg)`
+
+### Verified from strings in `.rdata`
+
+Full HTML/CSS/JS blob starts at file offset `0x142ED0` (`<!DOCTYPE html>`). The dispatcher is a switch on JSON `action` field inside native handler.
+
+---
+
+## 6. Payload DLL
+
+Decrypted payload extracted from loader memory during the ~5 s window between download completion and process exit. See `PAYLOAD.md`.
+
+| | |
+|---|---|
+| Raw size (on-wire) | `6,344,608` bytes |
+| Memory-aligned size | `10,845,696` bytes |
+| SizeOfImage | `0xA5E000` (10.6 MiB) |
+| Machine | `0x8664` (x64) |
+| Characteristics | `0x2022` (DLL, HIGH_ENTROPY_VA) |
+| ImageBase preferred | `0x180000000` |
+| EntryPoint | RVA `0x843F40` (DllMain) |
+| TLS callbacks | none |
+| Exports | none |
+| Wrapper prefix | 60 bytes (0x00-0x5F) before MZ header |
+| Protection | VMProtect 3.x (same as loader) |
+| Anti-tamper | CRC self-check; modification triggers dialog: `"File corrupted! This program has been manipulated and maybe it's infected by a Virus or cracked. This file won't work anymore."` |
+
+### Payload sections
+
+| # | Name | VA | VSize | Notes |
+|---|---|---|---|---|
+| 0 | `.text` | `0x1000` | `0xDC2C3` | Original code (881 KB) |
+| 1 | `.rdata` | `0xDE000` | `0xE510` | |
+| 2 | `.data` | `0xED000` | `0x2020` | |
+| 3 | `.pdata` | `0xF0000` | `0xB610` | |
+| 4 | `.ajJ` | `0xFC000` | `0x3545B3` | **VMP virtualized code (3.4 MiB)** |
+| 5 | `.6&T` | `0x451000` | `0xD48` | VMP import stub table |
+| 6 | `.0Z0` | `0x452000` | `0x609D78` | **VMP encrypted data (6.3 MiB)** |
+| 7 | `.reloc` | `0xA5C000` | `0xE0` | |
+| 8 | `.rsrc` | `0xA5D000` | `0x1E0` | |
+
+### Imports (recovered — VMP does not hide payload IAT)
+
+`d3d11.dll` · `dwmapi.dll` (`DwmExtendFrameIntoClientArea`) · `user32.dll` (`GetAsyncKeyState`) · `WINMM.dll` · `KERNEL32.dll` · `MSVCP140.dll` · `VCRUNTIME140.dll` · `VCRUNTIME140_1.dll` · api-ms-win-crt-* (stdio, heap, utility, string, convert, runtime, filesystem, math)
+
+**Deliberately narrow surface** — no `wininet`, no `winhttp`, no `bcrypt`, no `advapi32`. Payload has no self-network capability. All state comes from the loader before injection.
+
+---
+
+## 7. Decoy stubs
+
+Every loader invocation drops **new** 1 KB PE files to the source directory (typically the USB drive).
+
+Observed samples in this analysis: `li5k2hokg.exe` · `uzx0odykv8p2.exe` · `suk4itsj.exe` · `,c'vrl].exe` · `xd'bngxf.exe` · `qa'oao.fn.exe` · `xsbj'o!.exe` · `v,qdrlsy.exe` · `rooht!lk.exe`
+
+Naming pattern is unrestricted printable — includes commas, apostrophes, exclamation marks. Windows accepts these as filenames.
+
+**Stub PE anatomy (verified)**
+
+| | |
+|---|---|
+| File size | `1024` bytes (exactly) |
+| Machine | `0x8664` (x64) |
+| Sections | 1 (`.text`) |
+| `SizeOfImage` | `0x2000` (8 KB in memory) |
+| `.text` VSize | `0x3` — literally three bytes of executable code |
+| Rest of file | `0xCC` padding (int3) |
+| Attributes on disk | `Hidden + System` |
+| Runtime persistence | stays resident as long as parent session lives |
+| Loaded DLLs at runtime | 62 modules including `d3d11.dll`, `dxgi.dll`, `dwmapi.dll`, `apphelp.dll`, `MSVCP140`, `VCRUNTIME140_1`, `WINMM`, full CRT |
+
+The 3 bytes of code do nothing meaningful. The stub exists solely so Windows PE loader **automatically loads its declared imports** — bringing d3d11/dxgi/dwmapi into a resident process for later use.
+
+The stubs are **decoys / persistence tokens**. They hold no cheat code (every writable VAD checked — no non-standard executable payload). Their function is not confirmed but architecturally they act as session markers that must remain alive.
+
+---
+
+## 8. In-DWM footprint
+
+![DWM Memory Layout](diagrams/dwm_memory_layout.svg)
+
+After a successful loader session, `dwm.exe` gains exactly this state:
+
+| VA | Size | Protection | Content |
+|---|---|---|---|
+| `0x750000` | 4 KB | `p-rwx-` (Private RWX) | ESP renderer stub #1 — x64 code with `movaps/mulps/addps` on XMM registers → WorldToScreen matrix math + Direct2D primitives |
+| `0x9360000` | 4 KB | `p-rwx-` (Private RWX) | ESP renderer stub #2 — identical structure to #1 |
+| `0x6410000` | 4 KB | `p-rw--` | Hook-target dispatch table — array of function pointers, all initially pointing at a shared trampoline |
+| plus | ~20 | `p-rw--` | Various data buffers referenced by cheat code (entity list, config, callbacks) |
+
+The vtable at `dwmcore.dll .rdata + 0x287058` is **NOT modified** by the loader — the pointers seen at those slots (`ntdll+0x8CC60` / `+0x8CD00`) are the stock `LdrpValidateUserCallTargetBitMap` / `LdrpValidateUserCallTargetES` CFG validators present on all Windows 10/11 installs. Verified by baseline diff against fresh DWM.
+
+---
+
+## 9. Anti-cheat detection matrix
+
+![Zakynthos Detection](diagrams/zakynthos_detection.svg)
+
+PUBG PC uses **two** anti-cheat systems: BattlEye (third-party) and Zakynthos (Krafton's own, kernel driver `navagio.sys`). It does **not** use NEAC (NetEase Anti-Cheat) — that's a separate system for NetEase-published games (Peace Elite, Rules of Survival, etc.).
+
+| AC | Detects the cheat? | Evidence |
+|---|---|---|
+| **BattlEye** (`BEDaisy.sys` + `BEClient_x64.dll`) | **No** | BE does not scan `dwm.exe`. Cheat lives entirely in DWM. Hours of gameplay without ban. |
+| **Zakynthos** (`navagio.sys` + user-mode scanner in TslGame) | **Yes, logged** — but did not ban | Zakynthos maintains a ~16 MB RWX diagnostic buffer inside `TslGame.exe`. It scans DWM by reading its dirbase (CR3) and checks vtable/code integrity against known hook patterns. Found verbatim detection strings: `D2d1 D2DDeviceContextBase Vtable Hook` · `Dwmcore CRenderTarget Vtable Hook` · `Dwmcore CRenderTarget Fake Vtable` · `Dwmcore RenderBlackContent Code Hook` + 10 more templates. Scans for `NeacInterface.dll`/`libzdtp64.dll` as **scan targets** (known AC DLLs to inventory), not as own identity. Provenance confirmed by `Navagio::Search::PatternBlocks` string in `navagio.sys`. |
+
+**Kernel-driver load** — `kdmapper` and `iqvw64e.sys` strings ARE present in the loader's `.rdata` (references to `iqvw64e.pdb`, `windriverpci_i.c`, `NalWindowsDriver...`, `MpFreeDriverInfoEx`, `[!] Failed to remove from RuntimeDriversArray`, `[-] Registry path to disable vulnerable driver list: HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\CI\Config`, `[-] Your vulnerable driver list is enabled and have blocked the driver loading, you must disable vulnerable driver list to use kdmapper with intel driver`). **However**, no manually-mapped kernel driver appears in the kernel module table at runtime — either the code path is dead / fallback, or the driver is loaded transiently and unloaded. Function unconfirmed.
+
+---
+
+## Files in this repo
+
+| File | Contents |
+|---|---|
+| `README.md` | This document — top-level summary |
+| `ARCHITECTURE.md` | Deeper architecture — process spawn tree, memory layout, IPC surface |
+| `PROTOCOL.md` | Full HTTP protocol observations |
+| `PAYLOAD.md` | Payload DLL structural analysis |
+| `INJECTION.md` | DWM injection mechanism |
+| `diagrams/` | SVG illustrations: attack flow, memory layout, AC detection matrix |
+| `artifacts/` | Section tables, string samples, hash lists |
+
+---
+
+## Legal / ethical
+
+This report describes reverse engineering of a third-party product for defensive research and educational purposes only. It contains no redistributable copies of the vendor's binary or their proprietary payload. Sample hashes are provided for identification only. Do not use the described techniques against systems you do not own, and do not use the described product to gain an advantage in a live multiplayer game — that is a Terms-of-Service violation on every relevant platform.
+
+```
+
+`artifacts/loader_pe_headers.txt`:
+
+```txt
+=== client_new.exe — PE headers ===
+
+Size: 19,821,568 bytes (18.9 MiB)
+MD5:  b594ba29083e0783d187e8bc025919df
+
+DOS header:
+  e_magic     : 0x5A4D   ("MZ")
+  e_lfanew    : 0x00000000
+
+NT headers (@ e_lfanew, actual offset TBD - stripped in dump above):
+  Signature       : PE\0\0
+  Machine         : 0x8664 (AMD64)
+  NumberOfSections: 10
+  TimeDateStamp   : stripped
+  Characteristics : 0x0022 (EXECUTABLE_IMAGE | LARGE_ADDRESS_AWARE)
+
+Optional header (PE32+):
+  Magic           : 0x020B
+  ImageBase       : 0x0000000140000000
+  SizeOfImage     : 0x02448000 (36.3 MiB when mapped)
+  SizeOfHeaders   : 0x00000400
+  AddressOfEntryPoint : 0x020F3FFD
+  Subsystem       : IMAGE_SUBSYSTEM_WINDOWS_GUI (2)
+  DllCharacteristics: 0x8160 (DYNAMIC_BASE | NX_COMPAT | HIGH_ENTROPY_VA | TERMINAL_SERVER_AWARE)
+  SizeOfStackReserve : 0x00100000
+  SizeOfHeapReserve  : 0x00100000
+
+Data directories:
+  Import         RVA=0x021C2EA8  Size=0x00000A0   (in .3@N)
+  Resource       RVA=0x02447000  Size=0x00001E0   (in .rsrc)
+  Exception      RVA=0x00198000  Size=0x000A554   (in .pdata)
+  BaseReloc      RVA=0x02446000  Size=0x00000EC   (in .reloc)
+  TLS            RVA=0x011922B8  Size=0x0000028   (⚠️ TLS callback active)
+  LoadConfig     absent
+  Debug          absent
+
+Sections:
+  [0] .text    VA=0x00001000 VSize=0x0011B2E4 RawSize=0x0        (unpacked at runtime)
+  [1] .rdata   VA=0x0011D000 VSize=0x00045B30 RawSize=0x0        (unpacked at runtime)
+  [2] .data    VA=0x00163000 VSize=0x00034528 RawSize=0x0        (unpacked at runtime)
+  [3] .pdata   VA=0x00198000 VSize=0x0000A554 RawSize=0x0        (unpacked at runtime)
+  [4] _RDATA   VA=0x001A3000 VSize=0x000001D0 RawSize=0x0
+  [5] .XEp     VA=0x001A4000 VSize=0x00FB9011 RawSize=0x0        (VMP unpacker, 16 MiB)
+  [6] .5E^     VA=0x0115E000 VSize=0x000017E0 RawSize=0x1800     (VMP import resolver)
+  [7] .3@N     VA=0x01160000 VSize=0x012E5308 RawSize=0x12E5400  (VMP VM tape, 19 MiB)
+  [8] .reloc   VA=0x02446000 VSize=0x000000EC RawSize=0x200
+  [9] .rsrc    VA=0x02447000 VSize=0x000001E0 RawSize=0x200
+
+Imported DLLs (from unpacked runtime state):
+  WINHTTP.dll
+  CRYPT32.dll
+  bcrypt.dll
+  IPHLPAPI.DLL
+  USERENV.dll
+  WS2_32.dll
+  ntdll.dll
+  KERNEL32.dll
+  USER32.dll
+  GDI32.dll
+  SHELL32.dll
+  Secur32.dll
+  ADVAPI32.dll
+  SHLWAPI.dll
+  ole32.dll
+  MSVCP140.dll
+  VCRUNTIME140.dll
+  VCRUNTIME140_1.dll
+  api-ms-win-crt-* (11 modules)
+
+Exports: none.
+
+```
+
+`artifacts/stub_pe_hexdump.txt`:
+
+```txt
+=== Decoy stub PE — full hex dump ===
+
+Every dropped stub file (li5k2hokg.exe, uzx0odykv8p2.exe, suk4itsj.exe, ...) is
+1024 bytes exactly and structurally identical up to filename.
+
+File size:      1024 bytes
+Attributes:     Hidden, System
+PE type:        PE32+ (x64)
+Sections:       1 (.text)
+SizeOfImage:    0x2000 (8 KB when mapped)
+
+Hex dump:
+
+00000000: 4D 5A 78 00 01 00 00 00 04 00 00 00 00 00 00 00  MZx.............
+00000010: 00 00 00 00 00 00 00 00 40 00 00 00 00 00 00 00  ........@.......
+00000020: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00000030: 00 00 00 00 00 00 00 00 00 00 00 00 78 00 00 00  ............x...
+00000040: 0E 1F BA 0E 00 B4 09 CD 21 B8 01 4C CD 21 54 68  ........!..L.!Th
+00000050: 69 73 20 70 72 6F 67 72 61 6D 20 63 61 6E 6E 6F  is program canno
+00000060: 74 20 62 65 20 72 75 6E 20 69 6E 20 44 4F 53 20  t be run in DOS
+00000070: 6D 6F 64 65 2E 24 00 00 50 45 00 00 64 86 01 00  mode.$..PE..d...
+                                    ^^^^^^^^^^^^^^^ PE\0\0 Machine=x64
+00000080: F4 82 23 00 00 00 00 00 00 00 00 00 F0 00 22 00  ..#........."...
+                                              ^ SizeOfOptHdr=0xF0 Chars=0x22
+00000090: 0B 02 0E 00 00 02 00 00 00 00 00 00 00 00 00 00  ................
+                ^ PE32+ (0x20B), .text sz=0x200
+000000A0: 00 10 00 00 00 10 00 00 00 00 00 40 01 00 00 00  ...........@....
+                ^ Entry=0x1000, base=0x140000000
+000000B0: 00 10 00 00 00 02 00 00 06 00 00 00 00 00 00 00  ................
+                            ^ SectAlign=0x1000, FileAlign=0x200
+000000C0: 06 00 00 00 00 00 00 00 00 20 00 00 00 02 00 00  ......... ......
+                                    ^ SizeOfImage=0x2000
+                                    ^^^^^^^^^^^^^ SizeOfHeaders=0x200
+000000D0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+000000E0: 00 10 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+                                  StackReserve, StackCommit, HeapReserve, HeapCommit
+                                  all near-zero.
+000000F0: 00 00 00 00 00 00 00 00 00 00 00 00 10 00 00 00  ................
+00000100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+                       (empty data directories — no imports table)
+00000110–00000170:  all zeros (no data directories referenced)
+
+00000180: 2E 74 65 78 74 00 00 00 03 00 00 00 00 10 00 00  .text...........
+          ^ Section name    ^ VSize=3   VA=0x1000
+00000190: 00 02 00 00 00 02 00 00 00 00 00 00 00 00 00 00  ................
+          ^ RawSize=0x200 RawPtr=0x200
+000001A0: 00 00 00 00 00 00 00 00 20 00 00 60              ........  ..`
+                                    ^ Characteristics = 0x60000020
+                                       (CODE | EXECUTE | READ)
+
+000001B0–000001FF: zero padding to section start
+
+00000200: 54 24 48                                          T$H
+          ^ .text = literally 3 bytes:
+             0x54 = push rsp
+             0x24 = and (with imm8 follows — but no follow-byte)
+             0x48 = REX.W prefix (with no instruction to prefix)
+
+          Effectively junk. But entrypoint jumps here, executes into,
+          crashes or exits.
+
+00000203–000003FF: 0xCC padding (int3 breakpoint bytes)
+
+```
+
+`artifacts/webview2_js.txt`:
+
+```txt
+=== WebView2 JavaScript blob — recovered from loader .rdata @ 0x142ED0 ===
+
+Full JS/HTML blob embedded in loader .rdata section. Below are the key handler
+functions confirmed by extraction.
+
+--- Every action sent JS → native ---
+
+function doAuth() {
+  hideError();
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  if (!u || !p) return showError('Enter username and password');
+  if (isRegister) {
+    const k = document.getElementById('reg-key').value.trim();
+    if (!k) return showError('Enter license key');
+  }
+  document.getElementById('auth-btn').disabled = true;
+  document.getElementById('auth-btn').textContent = 'Requesting User Login';
+  if (isRegister) {
+    window.chrome.webview.postMessage(JSON.stringify({
+      action: 'register',
+      username: u,
+      password: p,
+      key: document.getElementById('reg-key').value.trim()
+    }));
+  } else {
+    window.chrome.webview.postMessage(JSON.stringify({
+      action: 'login',
+      username: u,
+      password: p
+    }));
+  }
+}
+
+function doActivate() {
+  const k = document.getElementById('key-input').value.trim();
+  if (!k) return showKeyError('Enter license key');
+  window.chrome.webview.postMessage(JSON.stringify({
+    action: 'activate_key',
+    key: k
+  }));
+}
+
+function selectProduct(idx) {
+  pendingIndex = idx;
+  showOverlay('<div class="spinner"></div>', 'Checking...', '');
+  window.chrome.webview.postMessage(JSON.stringify({
+    action: 'select_product',
+    index: idx
+  }));
+}
+
+function measurePing() {
+  window.chrome.webview.postMessage(JSON.stringify({ action: 'ping' }));
+}
+
+function closeApp() {
+  window.chrome.webview.postMessage(JSON.stringify({ action: 'close' }));
+}
+
+function startUpdate() {
+  window.chrome.webview.postMessage(JSON.stringify({ action: 'update_loader' }));
+}
+
+--- Native → JS callbacks (native invokes via WebView2 API) ---
+
+function onLoginSuccess(username, uid, subs) {
+  currentUser = username; currentUid = uid; currentSubs = subs;
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('side-user').textContent = username;
+  ...
+}
+
+function onLoginError(msg) {
+  showError(msg);
+  document.getElementById('auth-btn').disabled = false;
+  ...
+}
+
+function onKeyActivated(subs) {
+  currentSubs = subs;
+  renderProducts();
+  document.getElementById('key-input').value = '';
+  ...
+}
+
+function onKeyError(msg) { ... }
+function onPingResult(ms) {
+  document.getElementById('side-ping').textContent = 'Ping: ' + ms + 'ms';
+}
+
+function onAutoUpdate(serverVer) {
+  document.getElementById('login-page').innerHTML =
+    'New version available: ' + esc(serverVer) + '<br>Downloading update...';
+}
+
+function onVersionMismatch(serverVer, updateFileId) {
+  g_hasUpdate = updateFileId && ...;
+}
+
+function onUpdateStart() { ... }
+function onUpdateComplete(path) {
+  el.innerHTML = '<p style="color:#2ecc71;font-size:14px;margin-bottom:12px">Update downloaded!</p>' +
+    '<button class="login-btn" onclick="closeApp()">Close & Launch New</button>';
+}
+function onUpdateError(msg) { ... }
+
+function onProductBlocked(status) {
+  showOverlay('', 'Product ' + status, 'This product is currently unavailable.', ...);
+}
+
+function onDownloadStart() {
+  showOverlay('<div class="spinner"></div>', 'Connecting...', '');
+}
+
+function onDownloadProgress(dlNow, dlTotal) {
+  var el = document.getElementById('overlay');
+  ...
+  el.innerHTML = _cprog(pct) + '<h3>Downloading</h3>';
+}
+
+function onDownloadComplete() {
+  showOverlay('', 'Done', 'Closing in 5 seconds...', '');
+}
+
+function onDownloadError(msg) {
+  showOverlay('', 'Error', esc(msg), '<button class="obtn obtn-g" onclick="hideOverlay()">OK</button>');
+}
+
+```
+
+`artifacts/zakynthos_detection_templates.txt`:
+
+```txt
+=== Zakynthos (navagio.sys) — DWM scanner diagnostic strings ===
+
+Source: RWX region ~16 MB inside `TslGame.exe`, private, containing
+Zakynthos' serialized diagnostic buffer. Observed while cheat was active
+and PUBG was in a match.
+
+Provenance confirmed by `Navagio::Search::PatternBlocks` string in navagio.sys.
+
+Strings verbatim from the buffer (plaintext, no encoding):
+
+  NeacInterface.dll                                 ← scan target (known AC DLL)
+  libzdtp64.dll                                     ← scan target (known AC DLL)
+  api64.dll                                         ← scan target
+
+  Renderer String
+  D2d1 PresentMPO Code Hook                        ← detection template
+  D2d1 D2DDeviceContextBase Vtable Hook             ← HOOK DETECTED
+  D2d1 D2DDeviceContextBase Fake Vtable             ← HOOK DETECTED
+  Dxgi SwapChain Vtable Hook                        ← detection template
+  Dxgi SwapChain Fake Vtable                        ← detection template
+  Dxgi Dwm PresentMultiPlaneOverlay Code Hook       ← detection template
+  Dxgi PresentMultiPlaneOverlay Code Hook            ← detection template
+  Dwmcore SwapChain Vtable Hook                     ← detection template
+  Dwmcore CRenderTarget Vtable Hook                 ← HOOK DETECTED
+  Dwmcore CRenderTarget Fake Vtable                 ← HOOK DETECTED
+  Dwmcore RenderBlackContent Call Code Hook         ← HOOK DETECTED
+  Dwmcore RenderBlackContent Code Hook              ← HOOK DETECTED
+  D3d11 PresentMPO Code Hook                       ← detection template
+
+Interpretation:
+  1. Zakynthos actively inspects `dwm.exe` — it has code to walk DWM's
+     vtables for known interface types (D2d1 D2DDeviceContextBase, Dwmcore
+     CRenderTarget) and detect swapped-out pointers ("Fake Vtable").
+  2. Zakynthos also does inline-hook detection on named dwmcore functions
+     (RenderBlackContent) — both direct code hook and call-instruction hook.
+  3. These strings appear as READY-TO-LOG diagnostic templates. 13 total
+     templates covering D2D1, DXGI, Dwmcore, and D3D11 modules.
+  4. NeacInterface.dll / libzdtp64.dll are SCAN TARGETS (things Zakynthos
+     checks for), NOT self-identification. PUBG PC does not use NEAC.
+
+  5. Observed behaviour: cheat active for 16h+ during game session, no
+     ban, no kick, no visible reaction. Either:
+       (a) Zakynthos logs findings without immediate action (server-side review)
+       (b) Findings below action-threshold
+       (c) Detection is passive telemetry, enforcement not yet enabled for DWM hooks
+       (d) Zakynthos waiting for behavioural corroboration
+
+Also present in the same buffer (context):
+
+  partially-inline-libcalls-transform      ← LLVM optimization pass string
+  wgInitBackingStoreKernel                 ← wg = "window graphics"?
+  TokenThreadRenderFence                   ← render synchronization
+  ContextSession RIP / begin counts / end counts
+  Abnomral NA                              ← typo confirms real runtime code
+
+The libcalls-transform string suggests Zakynthos is (partly) LLVM-compiled.
+
+```
+
+`diagrams/attack_flow.svg`:
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 700" font-family="Consolas, monospace" font-size="13">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#e74c3c"/>
+    </marker>
+    <marker id="arrow-g" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71"/>
+    </marker>
+    <marker id="arrow-b" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#3498db"/>
+    </marker>
+    <marker id="arrow-y" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#f39c12"/>
+    </marker>
+  </defs>
+
+  <rect width="780" height="700" fill="#0d1117" rx="8"/>
+
+  <!-- Title -->
+  <text x="390" y="35" text-anchor="middle" fill="#e6edf3" font-size="18" font-weight="bold">PUBG P2C DWM Overlay — Attack Flow</text>
+
+  <!-- Target Machine boundary -->
+  <rect x="20" y="55" width="740" height="630" fill="none" stroke="#30363d" stroke-width="2" rx="6" stroke-dasharray="8,4"/>
+  <text x="35" y="75" fill="#8b949e" font-size="11">TARGET MACHINE</text>
+
+  <!-- Loader -->
+  <rect x="50" y="100" width="260" height="90" fill="#161b22" stroke="#e74c3c" stroke-width="2" rx="6"/>
+  <text x="180" y="125" text-anchor="middle" fill="#e74c3c" font-weight="bold" font-size="14">Loader</text>
+  <text x="180" y="145" text-anchor="middle" fill="#8b949e" font-size="11">client_new.exe (19.8MB VMP)</text>
+  <text x="180" y="163" text-anchor="middle" fill="#8b949e" font-size="11">WebView2 GUI + libcurl</text>
+
+  <!-- CF Server -->
+  <rect x="400" y="100" width="200" height="60" fill="#161b22" stroke="#f39c12" stroke-width="1.5" rx="6"/>
+  <text x="500" y="125" text-anchor="middle" fill="#f39c12" font-size="12">tytnetratnikabrat.xyz</text>
+  <text x="500" y="143" text-anchor="middle" fill="#8b949e" font-size="10">CloudFlare | login/download</text>
+
+  <!-- Arrow: Loader → Server -->
+  <line x1="310" y1="135" x2="395" y2="135" stroke="#f39c12" stroke-width="1.5" marker-end="url(#arrow-y)"/>
+  <text x="352" y="128" text-anchor="middle" fill="#f39c12" font-size="9">HTTPS</text>
+
+  <!-- Stub 1 -->
+  <rect x="50" y="230" width="130" height="70" fill="#161b22" stroke="#6e7681" stroke-width="1" rx="4"/>
+  <text x="115" y="255" text-anchor="middle" fill="#8b949e" font-size="11">Stub #1</text>
+  <text x="115" y="272" text-anchor="middle" fill="#6e7681" font-size="9">1KB PE, 3 bytes .text</text>
+  <text x="115" y="286" text-anchor="middle" fill="#6e7681" font-size="9">62 DLLs loaded</text>
+
+  <!-- Stub 2 -->
+  <rect x="200" y="230" width="130" height="70" fill="#161b22" stroke="#6e7681" stroke-width="1" rx="4"/>
+  <text x="265" y="255" text-anchor="middle" fill="#8b949e" font-size="11">Stub #2</text>
+  <text x="265" y="272" text-anchor="middle" fill="#6e7681" font-size="9">identical decoy</text>
+  <text x="265" y="286" text-anchor="middle" fill="#6e7681" font-size="9">session marker</text>
+
+  <!-- Arrow: Loader → Stubs -->
+  <line x1="130" y1="190" x2="115" y2="225" stroke="#6e7681" stroke-width="1" marker-end="url(#arrow)"/>
+  <line x1="210" y1="190" x2="265" y2="225" stroke="#6e7681" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <!-- DWM -->
+  <rect x="400" y="220" width="310" height="180" fill="#161b22" stroke="#2ecc71" stroke-width="2" rx="6"/>
+  <text x="555" y="245" text-anchor="middle" fill="#2ecc71" font-weight="bold" font-size="14">dwm.exe</text>
+  <text x="555" y="262" text-anchor="middle" fill="#8b949e" font-size="10">Desktop Window Manager (compositor)</text>
+
+  <!-- DWM internals -->
+  <rect x="420" y="275" width="130" height="25" fill="#1a2332" stroke="#2ecc71" stroke-width="1" rx="3"/>
+  <text x="485" y="292" text-anchor="middle" fill="#2ecc71" font-size="10">0x750000 RWX 4KB</text>
+
+  <rect x="420" y="305" width="130" height="25" fill="#1a2332" stroke="#2ecc71" stroke-width="1" rx="3"/>
+  <text x="485" y="322" text-anchor="middle" fill="#2ecc71" font-size="10">0x9360000 RWX 4KB</text>
+
+  <rect x="560" y="275" width="130" height="25" fill="#1a2332" stroke="#3498db" stroke-width="1" rx="3"/>
+  <text x="625" y="292" text-anchor="middle" fill="#3498db" font-size="10">dispatch table</text>
+
+  <rect x="560" y="305" width="130" height="25" fill="#1a2332" stroke="#3498db" stroke-width="1" rx="3"/>
+  <text x="625" y="322" text-anchor="middle" fill="#3498db" font-size="10">vtable swap hook</text>
+
+  <text x="555" y="360" text-anchor="middle" fill="#2ecc71" font-size="11">ESP renderer (SSE W2S + D2D)</text>
+  <text x="555" y="378" text-anchor="middle" fill="#8b949e" font-size="10">draws OVER game window</text>
+
+  <!-- Arrow: Loader → DWM -->
+  <path d="M310,155 Q370,155 400,250" fill="none" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="345" y="190" fill="#e74c3c" font-size="9" transform="rotate(-30,345,190)">WriteProcessMemory</text>
+
+  <!-- TslGame -->
+  <rect x="80" y="350" width="280" height="150" fill="#161b22" stroke="#3498db" stroke-width="2" rx="6"/>
+  <text x="220" y="375" text-anchor="middle" fill="#3498db" font-weight="bold" font-size="14">TslGame.exe</text>
+  <text x="220" y="393" text-anchor="middle" fill="#8b949e" font-size="10">PUBG game process</text>
+
+  <!-- AC inside TslGame -->
+  <rect x="100" y="405" width="110" height="40" fill="#1a2332" stroke="#e74c3c" stroke-width="1" rx="3"/>
+  <text x="155" y="422" text-anchor="middle" fill="#e74c3c" font-size="10">BEClient_x64</text>
+  <text x="155" y="436" text-anchor="middle" fill="#8b949e" font-size="9">scans TslGame only</text>
+
+  <rect x="230" y="405" width="110" height="40" fill="#1a2332" stroke="#f39c12" stroke-width="1" rx="3"/>
+  <text x="285" y="422" text-anchor="middle" fill="#f39c12" font-size="10">Zakynthos</text>
+  <text x="285" y="436" text-anchor="middle" fill="#8b949e" font-size="9">scans DWM too!</text>
+
+  <rect x="100" y="455" width="240" height="30" fill="#1a2332" stroke="#f39c12" stroke-width="1" rx="3" stroke-dasharray="4,2"/>
+  <text x="220" y="475" text-anchor="middle" fill="#f39c12" font-size="10">16MB RWX: detection log (sees hook, no ban)</text>
+
+  <!-- Arrow: DWM composites over TslGame -->
+  <line x1="500" y1="400" x2="365" y2="420" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrow-g)"/>
+  <text x="440" y="418" fill="#2ecc71" font-size="9">overlay composited</text>
+
+  <!-- Arrow: Zakynthos scans DWM -->
+  <path d="M340,430 Q400,430 450,400" fill="none" stroke="#f39c12" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arrow-y)"/>
+  <text x="410" y="440" fill="#f39c12" font-size="9">CR3 read</text>
+
+  <!-- Kernel drivers -->
+  <rect x="80" y="530" width="280" height="80" fill="#161b22" stroke="#9b59b6" stroke-width="1.5" rx="6"/>
+  <text x="220" y="555" text-anchor="middle" fill="#9b59b6" font-size="12">Kernel</text>
+  <rect x="100" y="565" width="100" height="25" fill="#1a2332" stroke="#9b59b6" stroke-width="1" rx="3"/>
+  <text x="150" y="582" text-anchor="middle" fill="#9b59b6" font-size="10">BEDaisy.sys</text>
+  <rect x="220" y="565" width="110" height="25" fill="#1a2332" stroke="#9b59b6" stroke-width="1" rx="3"/>
+  <text x="275" y="582" text-anchor="middle" fill="#9b59b6" font-size="10">navagio.sys</text>
+
+  <!-- Legend -->
+  <rect x="450" y="500" width="290" height="120" fill="#161b22" stroke="#30363d" stroke-width="1" rx="4"/>
+  <text x="465" y="520" fill="#e6edf3" font-size="11" font-weight="bold">Legend</text>
+  <line x1="465" y1="535" x2="490" y2="535" stroke="#e74c3c" stroke-width="2"/>
+  <text x="500" y="539" fill="#8b949e" font-size="10">Cheat attack path</text>
+  <line x1="465" y1="555" x2="490" y2="555" stroke="#2ecc71" stroke-width="2"/>
+  <text x="500" y="559" fill="#8b949e" font-size="10">DWM composition / data flow</text>
+  <line x1="465" y1="575" x2="490" y2="575" stroke="#f39c12" stroke-width="2"/>
+  <text x="500" y="579" fill="#8b949e" font-size="10">Zakynthos detection (logged, no ban)</text>
+  <line x1="465" y1="595" x2="490" y2="595" stroke="#3498db" stroke-width="2"/>
+  <text x="500" y="599" fill="#8b949e" font-size="10">BattlEye scope (TslGame only)</text>
+</svg>
+
+```
+
+`diagrams/dwm_memory_layout.svg`:
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 520" font-family="Consolas, monospace" font-size="12">
+  <rect width="700" height="520" fill="#0d1117" rx="8"/>
+  <text x="350" y="30" text-anchor="middle" fill="#e6edf3" font-size="16" font-weight="bold">DWM Address Space — Post-Injection</text>
+
+  <!-- Address bar -->
+  <rect x="40" y="50" width="80" height="440" fill="#161b22" stroke="#30363d" stroke-width="1" rx="4"/>
+  <text x="80" y="70" text-anchor="middle" fill="#6e7681" font-size="10">VA</text>
+
+  <!-- Regions -->
+  <!-- Heap -->
+  <rect x="140" y="55" width="500" height="30" fill="#1a2332" stroke="#6e7681" stroke-width="1" rx="3"/>
+  <text x="55" y="75" text-anchor="middle" fill="#6e7681" font-size="9">0x10000</text>
+  <text x="390" y="75" text-anchor="middle" fill="#6e7681" font-size="11">heap (stock DWM)</text>
+
+  <!-- RWX Stub 1 -->
+  <rect x="140" y="95" width="500" height="40" fill="#1a2332" stroke="#2ecc71" stroke-width="2" rx="3"/>
+  <text x="55" y="120" text-anchor="middle" fill="#2ecc71" font-size="9">0x750000</text>
+  <text x="250" y="113" fill="#2ecc71" font-weight="bold" font-size="12">ESP Renderer #1</text>
+  <text x="250" y="128" fill="#8b949e" font-size="10">4KB RWX | SSE W2S matrix + D2D draw</text>
+  <rect x="540" y="100" width="90" height="28" fill="#2ecc71" fill-opacity="0.15" stroke="#2ecc71" stroke-width="1" rx="3"/>
+  <text x="585" y="118" text-anchor="middle" fill="#2ecc71" font-size="10">p-rwx-</text>
+
+  <!-- Dispatch table -->
+  <rect x="140" y="150" width="500" height="40" fill="#1a2332" stroke="#3498db" stroke-width="2" rx="3"/>
+  <text x="55" y="175" text-anchor="middle" fill="#3498db" font-size="9">0x6410000</text>
+  <text x="250" y="168" fill="#3498db" font-weight="bold" font-size="12">Hook Dispatch Table</text>
+  <text x="250" y="183" fill="#8b949e" font-size="10">4KB RW | QWORD array → trampoline</text>
+  <rect x="540" y="155" width="90" height="28" fill="#3498db" fill-opacity="0.15" stroke="#3498db" stroke-width="1" rx="3"/>
+  <text x="585" y="173" text-anchor="middle" fill="#3498db" font-size="10">p-rw--</text>
+
+  <!-- Data buffers -->
+  <rect x="140" y="205" width="500" height="35" fill="#1a2332" stroke="#f39c12" stroke-width="1" rx="3"/>
+  <text x="55" y="227" text-anchor="middle" fill="#f39c12" font-size="9">0x6480000</text>
+  <text x="250" y="227" fill="#f39c12" font-size="11">~20 data buffers (entity list, config, callbacks)</text>
+  <rect x="540" y="210" width="90" height="22" fill="#f39c12" fill-opacity="0.1" stroke="#f39c12" stroke-width="1" rx="3"/>
+  <text x="585" y="226" text-anchor="middle" fill="#f39c12" font-size="10">p-rw--</text>
+
+  <!-- RWX Stub 2 -->
+  <rect x="140" y="255" width="500" height="40" fill="#1a2332" stroke="#2ecc71" stroke-width="2" rx="3"/>
+  <text x="55" y="280" text-anchor="middle" fill="#2ecc71" font-size="9">0x9360000</text>
+  <text x="250" y="273" fill="#2ecc71" font-weight="bold" font-size="12">ESP Renderer #2</text>
+  <text x="250" y="288" fill="#8b949e" font-size="10">4KB RWX | identical to #1</text>
+  <rect x="540" y="260" width="90" height="28" fill="#2ecc71" fill-opacity="0.15" stroke="#2ecc71" stroke-width="1" rx="3"/>
+  <text x="585" y="278" text-anchor="middle" fill="#2ecc71" font-size="10">p-rwx-</text>
+
+  <!-- gap -->
+  <text x="390" y="320" text-anchor="middle" fill="#6e7681" font-size="10">· · ·</text>
+
+  <!-- dwmcore.dll -->
+  <rect x="140" y="335" width="500" height="55" fill="#1a2332" stroke="#9b59b6" stroke-width="1.5" rx="3"/>
+  <text x="55" y="360" text-anchor="middle" fill="#9b59b6" font-size="8">0x7FF8..</text>
+  <text x="250" y="355" fill="#9b59b6" font-weight="bold" font-size="12">dwmcore.dll</text>
+  <text x="250" y="370" fill="#8b949e" font-size="10">2.6MB | .text NOT patched (verified)</text>
+  <text x="250" y="383" fill="#8b949e" font-size="10">.rdata +0x287058: CFG validators (stock, not hook)</text>
+
+  <!-- ntdll -->
+  <rect x="140" y="400" width="500" height="35" fill="#1a2332" stroke="#6e7681" stroke-width="1" rx="3"/>
+  <text x="55" y="422" text-anchor="middle" fill="#6e7681" font-size="8">0x7FF8..</text>
+  <text x="250" y="422" fill="#6e7681" font-size="11">ntdll.dll (+0x8CC60: LdrpValidateUserCallTargetBitMap)</text>
+
+  <!-- Hook explanation -->
+  <rect x="140" y="450" width="500" height="55" fill="#161b22" stroke="#e74c3c" stroke-width="1.5" rx="4" stroke-dasharray="6,3"/>
+  <text x="390" y="470" text-anchor="middle" fill="#e74c3c" font-size="11" font-weight="bold">Hook mechanism: vtable swap on heap object</text>
+  <text x="390" y="487" text-anchor="middle" fill="#8b949e" font-size="10">CRenderTarget or D2DDeviceContextBase vtable pointer</text>
+  <text x="390" y="500" text-anchor="middle" fill="#8b949e" font-size="10">redirected to dispatch table → RWX renderer stubs</text>
+</svg>
+
+```
+
+`diagrams/zakynthos_detection.svg`:
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" font-family="Consolas, monospace" font-size="12">
+  <rect width="800" height="600" fill="#0d1117" rx="8"/>
+  <text x="400" y="30" text-anchor="middle" fill="#e6edf3" font-size="16" font-weight="bold">Zakynthos DWM Scanner — Detection Templates</text>
+  <text x="400" y="50" text-anchor="middle" fill="#8b949e" font-size="11">Found in 16MB RWX buffer inside TslGame.exe (navagio.sys user-mode component)</text>
+
+  <!-- Scanner flow -->
+  <rect x="30" y="75" width="180" height="60" fill="#161b22" stroke="#f39c12" stroke-width="2" rx="6"/>
+  <text x="120" y="100" text-anchor="middle" fill="#f39c12" font-weight="bold">Zakynthos</text>
+  <text x="120" y="118" text-anchor="middle" fill="#8b949e" font-size="10">in TslGame.exe</text>
+
+  <line x1="210" y1="105" x2="270" y2="105" stroke="#f39c12" stroke-width="2" marker-end="url(#arr)"/>
+  <defs><marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#f39c12"/></marker></defs>
+
+  <rect x="275" y="75" width="180" height="60" fill="#161b22" stroke="#f39c12" stroke-width="1.5" rx="6"/>
+  <text x="365" y="98" text-anchor="middle" fill="#f39c12" font-size="11">Read DWM dirbase</text>
+  <text x="365" y="115" text-anchor="middle" fill="#8b949e" font-size="10">(CR3 → page table walk)</text>
+
+  <line x1="455" y1="105" x2="515" y2="105" stroke="#f39c12" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="520" y="75" width="250" height="60" fill="#161b22" stroke="#f39c12" stroke-width="1.5" rx="6"/>
+  <text x="645" y="98" text-anchor="middle" fill="#f39c12" font-size="11">Check modules: d2d1, dwmcore, dxgi</text>
+  <text x="645" y="115" text-anchor="middle" fill="#8b949e" font-size="10">vtable integrity + code hash</text>
+
+  <!-- Detection templates table -->
+  <rect x="30" y="155" width="740" height="310" fill="#161b22" stroke="#30363d" stroke-width="1" rx="6"/>
+  <text x="400" y="178" text-anchor="middle" fill="#e6edf3" font-size="13" font-weight="bold">13 Detection Templates (plaintext in scanner buffer)</text>
+
+  <!-- Headers -->
+  <text x="50" y="200" fill="#8b949e" font-size="10" font-weight="bold">MODULE</text>
+  <text x="180" y="200" fill="#8b949e" font-size="10" font-weight="bold">HOOK TYPE</text>
+  <text x="520" y="200" fill="#8b949e" font-size="10" font-weight="bold">METHOD</text>
+  <line x1="40" y1="207" x2="760" y2="207" stroke="#30363d" stroke-width="1"/>
+
+  <!-- D2D1 -->
+  <rect x="45" y="212" width="60" height="16" fill="#3498db" fill-opacity="0.2" rx="3"/>
+  <text x="75" y="224" text-anchor="middle" fill="#3498db" font-size="10">D2D1</text>
+  <text x="180" y="224" fill="#e6edf3" font-size="10">PresentMPO Code Hook</text>
+  <text x="520" y="224" fill="#6e7681" font-size="10">inline patch</text>
+
+  <rect x="45" y="232" width="60" height="16" fill="#3498db" fill-opacity="0.2" rx="3"/>
+  <text x="75" y="244" text-anchor="middle" fill="#3498db" font-size="10">D2D1</text>
+  <text x="180" y="244" fill="#e6edf3" font-size="10">D2DDeviceContextBase Vtable Hook</text>
+  <text x="520" y="244" fill="#6e7681" font-size="10">vtable pointer swap</text>
+
+  <rect x="45" y="252" width="60" height="16" fill="#3498db" fill-opacity="0.2" rx="3"/>
+  <text x="75" y="264" text-anchor="middle" fill="#3498db" font-size="10">D2D1</text>
+  <text x="180" y="264" fill="#e6edf3" font-size="10">D2DDeviceContextBase Fake Vtable</text>
+  <text x="520" y="264" fill="#6e7681" font-size="10">heap-allocated copy</text>
+
+  <!-- DXGI -->
+  <rect x="45" y="278" width="60" height="16" fill="#9b59b6" fill-opacity="0.2" rx="3"/>
+  <text x="75" y="290" text-anchor="middle" fill="#9b59b6" font-size="10">DXGI</text>
+  <text x="180" y="290" fill="#e6edf3" font-size="10">SwapChain Vtable Hook</text>
+  <text x="520" y="290" fill="#6e7681" font-size="10">vtable pointer swap</text>
+
+  <rect x="45" y="298" width="60" height="16" fill="#9b59b6" fill-opacity="0.2" rx="3"/>
+  <text x="75" y="310" text-anchor="middle" fill="#9b59b6" font-size="10">DXGI</text>
+  <text x="180" y="310" fill="#e6edf3" font-size="10">SwapChain Fake Vtable</text>
+  <text x="520" y="310" fill="#6e7681" font-size="10">heap-allocated copy</text>
+
+  <rect x="45" y="318" width="60" height="16" fill="#9b59b6" fill-opacity="0.2" rx="3"/>
+  <text x="75" y="330" text-anchor="middle" fill="#9b59b6" font-size="10">DXGI</text>
+  <text x="180" y="330" fill="#e6edf3" font-size="10">Dwm PresentMultiPlaneOverlay Code Hook</text>
+  <text x="520" y="330" fill="#6e7681" font-size="10">inline patch</text>
+
+  <rect x="45" y="338" width="60" height="16" fill="#9b59b6" fill-opacity="0.2" rx="3"/>
+  <text x="75" y="350" text-anchor="middle" fill="#9b59b6" font-size="10">DXGI</text>
+  <text x="180" y="350" fill="#e6edf3" font-size="10">PresentMultiPlaneOverlay Code Hook</text>
+  <text x="520" y="350" fill="#6e7681" font-size="10">inline patch</text>
+
+  <!-- Dwmcore -->
+  <rect x="45" y="364" width="75" height="16" fill="#2ecc71" fill-opacity="0.2" rx="3"/>
+  <text x="82" y="376" text-anchor="middle" fill="#2ecc71" font-size="10">DWMCORE</text>
+  <text x="180" y="376" fill="#e6edf3" font-size="10">SwapChain Vtable Hook</text>
+  <text x="520" y="376" fill="#6e7681" font-size="10">vtable pointer swap</text>
+
+  <rect x="45" y="384" width="75" height="16" fill="#2ecc71" fill-opacity="0.2" rx="3"/>
+  <text x="82" y="396" text-anchor="middle" fill="#2ecc71" font-size="10">DWMCORE</text>
+  <text x="180" y="396" fill="#e74c3c" font-size="10" font-weight="bold">CRenderTarget Vtable Hook</text>
+  <text x="520" y="396" fill="#e74c3c" font-size="10">likely used by this cheat</text>
+
+  <rect x="45" y="404" width="75" height="16" fill="#2ecc71" fill-opacity="0.2" rx="3"/>
+  <text x="82" y="416" text-anchor="middle" fill="#2ecc71" font-size="10">DWMCORE</text>
+  <text x="180" y="416" fill="#e74c3c" font-size="10" font-weight="bold">CRenderTarget Fake Vtable</text>
+  <text x="520" y="416" fill="#e74c3c" font-size="10">heap-allocated copy</text>
+
+  <rect x="45" y="424" width="75" height="16" fill="#2ecc71" fill-opacity="0.2" rx="3"/>
+  <text x="82" y="436" text-anchor="middle" fill="#2ecc71" font-size="10">DWMCORE</text>
+  <text x="180" y="436" fill="#e6edf3" font-size="10">RenderBlackContent Call Code Hook</text>
+  <text x="520" y="436" fill="#6e7681" font-size="10">inline CALL redirect</text>
+
+  <rect x="45" y="444" width="75" height="16" fill="#2ecc71" fill-opacity="0.2" rx="3"/>
+  <text x="82" y="456" text-anchor="middle" fill="#2ecc71" font-size="10">DWMCORE</text>
+  <text x="180" y="456" fill="#e6edf3" font-size="10">RenderBlackContent Code Hook</text>
+  <text x="520" y="456" fill="#6e7681" font-size="10">inline patch</text>
+
+  <!-- D3D11 -->
+  <rect x="45" y="464" width="60" height="16" fill="#e74c3c" fill-opacity="0.2" rx="3"/>
+  <text x="75" y="476" text-anchor="middle" fill="#e74c3c" font-size="10">D3D11</text>
+  <text x="180" y="476" fill="#e6edf3" font-size="10">PresentMPO Code Hook</text>
+  <text x="520" y="476" fill="#6e7681" font-size="10">inline patch</text>
+
+  <!-- Bottom verdict -->
+  <rect x="30" y="500" width="740" height="80" fill="#161b22" stroke="#e74c3c" stroke-width="1.5" rx="6"/>
+  <text x="400" y="525" text-anchor="middle" fill="#e74c3c" font-size="14" font-weight="bold">DETECTED but NOT BANNED</text>
+  <text x="400" y="545" text-anchor="middle" fill="#8b949e" font-size="11">Zakynthos logs hook type + addresses to diagnostic buffer</text>
+  <text x="400" y="562" text-anchor="middle" fill="#8b949e" font-size="11">Possible: threshold-based, passive telemetry, or enforcement not yet enabled for DWM hooks</text>
+  <text x="400" y="575" text-anchor="middle" fill="#f39c12" font-size="10">Typo in scanner: "Abnomral NA" — confirms this is real runtime code, not documentation</text>
+</svg>
+
+```
