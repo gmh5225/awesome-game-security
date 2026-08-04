@@ -1064,6 +1064,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Urho3D](entities/urho3d.md) — lightweight cross-platform 2D/3D engine (Game Engine source)
 - [USN](entities/usn.md) — NTFS USN / change-journal tooling (C++; AC / IS forensics)
 - [SearchEx](entities/searchex.md) — SearchEx IS forensics (C++; hooking / memory analysis; AC)
+- [como-funciona-vac](entities/como-funciona-vac.md) — CS2 VAC usermode architecture write-up (Trusted Launch, scanners, evidence pipeline; forensic RE overview)
 - [vac3_inhibitor](entities/vac3-inhibitor.md) — VAC3 exploration via hooking / memory analysis (C++)
 - [vac3-dumper](entities/vac3-dumper.md) — VAC3 multi-module dumper (timed loads; explore anticheat:vac)
 - [vacation3-emu](entities/vacation3-emu.md) — VAC3 module emulator (fake game memory + scan logging; explore anticheat:vac)

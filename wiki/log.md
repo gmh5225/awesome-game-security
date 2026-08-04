@@ -2457,3 +2457,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-04** — ingest `description:mytechnotalent/embedded-hacking`: refreshed [[embedded-hacking]] (ARM Thumb FP firmware patcher, register-level labs); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-04** — ingest `description:infosecrajesh/Auto-generate-Frida-bypass-scripts-for-SSL-pinning-root-detection-on-Android-iOS`: entity [[auto-generate-frida-bypass-scripts-for-ssl-pinning-root-detection-on-android-ios]]; cited on [[frida]] and [[overviews/mobile-security]].
+
+- **2026-08-04** — ingest `description:ianveig29/como-funciona-vac`: entity [[como-funciona-vac]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
