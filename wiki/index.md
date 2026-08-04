@@ -630,6 +630,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MapleStory-YOLOv8-Training](entities/maplestory-yolov8-training.md) — YOLOv8 MapleStory object-detection training (Apple MPS; Python; cheat / game:maplestory)
 - [MapleStory143](entities/maplestory143.md) — MapleStory v143 CMS private server (Java/Kotlin; LoginCrypto / Netty·MINA / CheatTracker; Private Server-CMS-143)
 - [MapleStoryEx](entities/maplestoryex.md) — MapleStory private server (CMS-079; custom content / server logic)
+- [MapleEzorsia](entities/maple-ezorsia.md) — MapleStory v83 private server (Java; login/map/quest + custom resolution client; Private Server / game:maplestory)
 - [ms079](entities/ms079.md) — MapleStory v079 private-server study codebase (Java / MySQL / WZ bundle; Private Server-CMS-079)
 - [MappedCallback](entities/mapped-callback.md) — hide kernel callback via APCI codecave JMP (cheat / Hide Callback)
 - [MBA-Obfuscator](entities/mba-obfuscator.md) — non-linear MBA expressions (mba_obfuscator/ + samples/; Cheat Mixed boolean-arithmetic)

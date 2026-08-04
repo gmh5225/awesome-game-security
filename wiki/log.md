@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:izarooni/MapleEzorsia`: entity [[maple-ezorsia]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
 - **2026-08-04** — ingest `description:j4nn/CVE-2020-0041`: entity [[cve-2020-0041]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-08-04** — ingest `description:jackpal/Android-Terminal-Emulator`: entity [[android-terminal-emulator]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
