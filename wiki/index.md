@@ -739,6 +739,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [OpenGame](entities/opengame.md) — agentic web-game testing/debug framework (Game Skill; GameCoder-27B; OpenGame-Bench; Game Testing)
 - [OpenHardwareMonitor](entities/openhardwaremonitor.md) — OSS hardware monitor (C#/JS; sensors/drivers; Detection:HWID)
 - [OpenLumina](entities/openlumina.md) — IDA plugin for third-party Lumina servers (Hex-Rays `.crt`; IDA Plugins)
+- [OpenPetya](entities/openpetya.md) — educational Petya-inspired MBR bootkit (NTFS MFT Salsa20; Real→Protected Mode; Assembly/C/C++)
 - [OpenProcmon](entities/openprocmon.md) — OSS Procmon-style monitor (ETW + minifilter; process/file/registry/network/DLL)
 - [Ophion](entities/ophion.md) — stealth Intel VT-x Type-2 HV (EPT; CPUID/CR4/TSC anti-detect)
 - [Orkige](entities/orkige.md) — C++20 OGRE/Ogre-Next engine (Lua hot-reload; ImGui; desktop/mobile/Wasm; Game Engine)
