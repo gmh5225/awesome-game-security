@@ -687,7 +687,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Go-Hacking](entities/go-hacking.md) — free Go/Golang RE course (PDF + Go source/IDA labs; x64/ARM64/ARM32; cheat / guide)
 - [GoReSym](entities/goresym.md) — Mandiant Go symbol/type recovery (pclntab/moduledata; stripped PE → IDA)
 - [Hacking-Rust](entities/hacking-rust.md) — free Rust RE course (PDF + Cargo labs; x64/ARM64/ARM32; cheat / guide)
-- [Embedded-Hacking](entities/embedded-hacking.md) — free embedded firmware RE course (RP2350/Pico 2; GDB/Ghidra/OpenOCD labs; cheat / guide)
+- [Embedded-Hacking](entities/embedded-hacking.md) — free embedded firmware RE course (RP2350/Pico 2; GDB/Ghidra/OpenOCD; ARM Thumb FP patcher; cheat / guide)
 - [MoveCertificate](entities/move-certificate.md) — Magisk/KernelSU/APatch user→system CA module (Android 7–15)
 - [NativeNetSharp](entities/nativenetsharp.md) — C# code injection (managed/.NET; cheat / guide)
 - [nCine](entities/ncine.md) — C++11 2D engine (optional Lua; MIT; Game Engine / source)
