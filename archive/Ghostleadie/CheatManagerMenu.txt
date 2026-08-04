@@ -1,0 +1,4457 @@
+Project Path: arc_Ghostleadie_CheatManagerMenu_hf0fb2q_
+
+Source Tree:
+
+```txt
+arc_Ghostleadie_CheatManagerMenu_hf0fb2q_
+├── CHANGELOG.md
+├── CheatManagerMenu.uplugin
+├── Docs
+│   ├── adding-cheats.md
+│   ├── index.md
+│   ├── quick-start.md
+│   ├── settings.md
+│   ├── shipping.md
+│   ├── troubleshooting.md
+│   └── uninstall.md
+├── LICENSE.md
+├── README.md
+├── Resources
+└── Source
+    └── CheatManagerMenu
+        ├── CheatManagerMenu.Build.cs
+        ├── Private
+        │   ├── CheatManagerMenu.cpp
+        │   ├── CheatManagerMenuSettings.cpp
+        │   ├── CheatManagerMenuSubsystem.cpp
+        │   └── CheatMenuMetadataStore.cpp
+        └── Public
+            ├── CheatManagerMenu.h
+            ├── CheatManagerMenuSettings.h
+            ├── CheatManagerMenuSubsystem.h
+            ├── CheatMenuBlueprintExtension.h
+            └── CheatMenuMetadataStore.h
+
+```
+
+`CHANGELOG.md`:
+
+```md
+# Changelog
+
+## 1.0.0 (2026-07-28)
+
+First release. Targets Unreal Engine 5.8 on Win64.
+
+Reflection-driven cheat menu over the local player's `UCheatManager` and its extensions. Native
+`Exec` cheats and Blueprint cheat extensions both appear with no registration step.
+
+Parameter inputs chosen from each parameter's type: checkbox for a bool, dropdown for an enum, slider
+for an `int32`, `float` or `double` that declares a range, text box for everything else.
+
+Categories from `UFUNCTION` metadata, with configurable ordering. Tooltips from doc comments.
+Confirmation gate through `meta = (CheatConfirm)`.
+
+Panel size and offset are configurable. Panel height is capped against the viewport at draw time, so a
+value taller than the window shrinks to fit rather than running off the bottom.
+
+Categories, tooltips, sliders and confirmation gates keep working in packaged Development and Test
+builds. Reflection metadata is editor-only, so the menu records it while drawing in the editor and
+reads it back at runtime from `DefaultCheatManagerMenu.ini`. This is also the only way it can work for
+Blueprint cheats, whose metadata is stripped at cook regardless of build settings.
+
+Filter box matching on name, category and description. Favourites persisted to `DefaultGame.ini`, and
+a per-session Recently Used section.
+
+Keyboard and gamepad binds, both configurable, with an optional hold modifier on the gamepad bind.
+Full gamepad navigation of the menu. `F1` is bound by default; no gamepad button is, because the
+menu registers an application-wide input pre-processor and consumes whatever is bound.
+
+`bEnabled` is a complete off-switch — it stops the subsystem being created at all, which takes the
+input pre-processor and the `CheatMenu.Toggle` console command with it. `HiddenCheats` drops named
+cheats from the menu and ships seeded with the two SlateIM debug cheats the engine attaches on this
+plugin's behalf. `bForceCheatsInMultiplayer` gates creating a cheat manager on networked clients,
+which the engine otherwise refuses, and is off by default.
+
+Excluded from Shipping builds through the plugin descriptor.
+
+### Known issues
+
+Cheats are dispatched through `APlayerController::ConsoleCommand`, where the cheat manager is only the
+sixth of eight handlers, so a cheat whose name matches an exec on your PlayerInput, PlayerController,
+Pawn, HUD or GameMode is claimed by that one instead. Rename the cheat if it does not run.
+
+A cheat whose first parameter is object-typed has that parameter bound to the executing pawn by the
+engine without consuming an argument, shifting every following argument by one. Put object parameters
+after your value parameters.
+
+A cheat with a pure out parameter, meaning an out parameter that is not also a reference, is invoked
+with its arguments misaligned. Declare such parameters as `UPARAM(ref)` or avoid them on cheats.
+
+Cheat extensions authored as Blueprints also contribute their Event Dispatcher signatures and Custom
+Event stubs to the menu, where they appear as extra rows that do nothing useful.
+
+An enum value whose name ends in `_MAX` in any casing is treated as the generated sentinel and hidden
+from the dropdown.
+
+The shoulder-button category jump always wraps at the ends of the list and ignores
+`bLoopGamepadNavigation`, which governs only D-pad movement.
+
+Pressing the toggle key while a confirmation dialog is open closes the menu out from under the dialog;
+answering Yes still runs the cheat. Editor and PIE only.
+
+Starring a cheat in a packaged build writes to the per-user saved config, so unstarring a favourite
+that came from `DefaultGame.ini` does not persist.
+
+Input is tracked by key identity without per-user attribution, so with two gamepads connected, or in a
+multi-client PIE session under one process, navigation can respond to the wrong pad or the wrong client.
+
+```
+
+`CheatManagerMenu.uplugin`:
+
+```uplugin
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0.0",
+	"FriendlyName": "Cheat Manager Menu",
+	"Description": "In-game cheat menu that builds itself by reflecting over the player's Cheat Manager and its extensions. There is no cheat list to maintain: add a UFUNCTION(Exec) in C++, or a BlueprintCallable to a Blueprint cheat extension, and it appears in the menu with a checkbox, dropdown, slider or text box chosen from each parameter's type. Keyboard, mouse and gamepad. Excluded from Shipping builds. Renders with SlateIM, an experimental engine plugin that is enabled automatically; SlateIM carries no API stability guarantee, so this plugin is supported per engine version.",
+	"Category": "Debug",
+	"CreatedBy": "Iron Fang Studio",
+	"CreatedByURL": "https://www.ironfangstudio.co.uk",
+	"DocsURL": "https://www.ironfangstudio.co.uk/tools/cheat-manager-menu/documentation",
+	"MarketplaceURL": "",
+	"SupportURL": "https://www.ironfangstudio.co.uk/tools/cheat-manager-menu/support",
+	"EngineVersion": "5.8.0",
+	"CanContainContent": false,
+	"Installed": true,
+	"SupportedTargetPlatforms": [
+		"Win64"
+	],
+	"Modules": [
+		{
+			"Name": "CheatManagerMenu",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"TargetConfigurationDenyList": [
+				"Shipping"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "SlateIM",
+			"Enabled": true,
+			"TargetConfigurationDenyList": [
+				"Shipping"
+			]
+		}
+	]
+}
+```
+
+`Docs/adding-cheats.md`:
+
+```md
+# Adding cheats
+
+## What counts as a cheat
+
+The menu walks the class hierarchy of the player's `UCheatManager` and of every cheat manager
+extension registered on it. A function shows up if either of these is true:
+
+* It is marked `Exec`. This is how native C++ cheats are found, and it is why the engine's own
+  `God`, `Fly` and `Slomo` appear with no setup.
+* It is a `BlueprintCallable` function declared on a Blueprint-generated class, is not pure, and is
+  not the compiler's `ExecuteUbergraph` stub. Blueprint functions cannot be marked `Exec`, so this
+  convention stands in for it.
+
+Cheats are deduplicated by name. If an extension declares a function with the same name as one on the
+cheat manager, only the first one found is listed.
+
+## C++ cheats
+
+Put a `UFUNCTION(Exec)` on your `UCheatManager` subclass or on a `UCheatManagerExtension`. An
+extension is usually the better home, since it keeps cheats out of your player controller's class and
+can be attached and removed at will.
+
+```cpp
+UCLASS()
+class UMyCombatCheats : public UCheatManagerExtension
+{
+    GENERATED_BODY()
+
+public:
+    /** Refills health, stamina and ammo on the local player. */
+    UFUNCTION(Exec, Category = "Combat")
+    void Restore();
+
+    /** Spawns Count enemies of the given archetype around the player. */
+    UFUNCTION(Exec, Category = "Combat")
+    void SpawnEnemies(FString Archetype, int32 Count);
+};
+```
+
+Register the extension on a cheat manager:
+
+```cpp
+CheatManager->AddCheatManagerExtension(NewObject<UMyCombatCheats>(CheatManager));
+```
+
+To attach it to every cheat manager the engine ever creates, hook the same delegate the plugin uses:
+
+```cpp
+UCheatManager::RegisterForOnCheatManagerCreated(
+    FOnCheatManagerCreated::FDelegate::CreateLambda([](UCheatManager* CheatManager)
+    {
+        CheatManager->AddCheatManagerExtension(NewObject<UMyCombatCheats>(CheatManager));
+    }));
+```
+
+Inside a cheat, reach the world through the extension's outer cheat manager, which owns a player
+controller. `GetPlayerController()` and `GetWorld()` both work.
+
+Native cheats run through the player controller's console, so an exec function that is server-only
+still forwards the way it would if you had typed it.
+
+## Blueprint cheats
+
+Designers can add cheats without touching C++.
+
+1. Create a Blueprint class deriving from **Cheat Menu Blueprint Extension**.
+2. Add functions to it. Set a Category on each in the Details panel to control which section it lands
+   in. Keep them impure so they have execution pins.
+3. List the Blueprint under **Project Settings > Plugins > Cheat Manager Menu > Blueprint Cheat Extensions**.
+
+Every listed class is instantiated on each cheat manager the engine creates, so the cheats appear
+alongside the native ones with no further wiring.
+
+Two things to watch. Every impure `BlueprintCallable` function on the Blueprint is treated as a cheat,
+so keep internal helper functions on a separate Blueprint or make them pure. And pure functions are
+skipped entirely, so a cheat that does not show up is usually one that lost its execution pins.
+
+Inside a cheat, use the inherited `Get Player Controller` node, or any node that takes a world
+context. The extension supplies one through its outer cheat manager.
+
+## Parameter widgets
+
+The widget for a parameter comes from its type.
+
+| Parameter type | Widget |
+| --- | --- |
+| `bool` | Checkbox |
+| Enum, either `enum class` or `TEnumAsByte` | Dropdown of the enum's values |
+| `int32`, `float` or `double` with a declared range | Slider with a numeric readout |
+| Everything else | Text box |
+
+Return parameters and pure out parameters are skipped. In-out reference parameters get an input.
+
+An enum dropdown needs no metadata for the list itself. It lists the enum's display names, skips the
+generated `_MAX` entry, skips entries marked `UMETA(Hidden)` or `UMETA(Spacer)`, and passes the bare
+enumerator name to the cheat.
+
+An `int32`, `float` or `double` parameter draws a slider only if it declares both ends of a range.
+Other numeric widths (`int64`, `uint8`, `int16` and the rest) always draw a text box even with a range
+declared, and being numeric they still cannot be left blank:
+
+```cpp
+UFUNCTION(Exec, Category = "Time")
+void SetTimeOfDay(UPARAM(meta = (UIMin = "0", UIMax = "24", Delta = "0.25", UIDefault = "12")) float Hours);
+```
+
+| Metadata key | Effect |
+| --- | --- |
+| `UIMin` / `UIMax` | Required for a slider. `ClampMin` / `ClampMax` are accepted instead. |
+| `Delta` | Step size. Defaults to 1 for integers, or one hundredth of the range for floats. |
+| `UIDefault` | Value the slider starts at. Defaults to the minimum. |
+
+A range whose maximum is not greater than its minimum is ignored, and the parameter falls back to a
+text box.
+
+Text box values are passed to the cheat as a single quoted argument, so a value with spaces in it
+arrives intact.
+
+A **numeric** parameter cannot be left blank: the run is refused and the row names the parameter. The
+engine's fallback to a declared C++ default (`CPP_Default_<Param>`) is compiled under `#if WITH_EDITOR`
+and so does not exist in a packaged Development or Test build, where an empty integer aborts the call
+and an empty float would silently import as zero. Declaring a default value on the parameter therefore
+does not make the box optional in a packaged build. If you want a parameter to start at a usable value
+in every configuration, give it a `UIMin` / `UIMax` range so it draws as a slider, which always has
+one.
+
+Empty string, name and text parameters are fine and are sent as empty values.
+
+## Categories and tooltips
+
+The `Category` on a `UFUNCTION` becomes the section header. Cheats without one collect under
+**Uncategorized**.
+
+The doc comment above a cheat becomes the tooltip on its run button, and is also searched by the
+filter box, so a well-commented cheat is easier to find.
+
+Control the order of sections in [Settings](settings.md) with `CategoryOrder`.
+
+## Confirmation gate
+
+Put a destructive cheat behind a yes/no dialog with the `CheatConfirm` metadata key:
+
+```cpp
+UFUNCTION(Exec, Category = "Testing", meta = (CheatConfirm = "Wipe the whole settlement?"))
+void WipeSettlement();
+```
+
+`meta = (CheatConfirm)` on its own uses a generated prompt naming the cheat.
+
+## What survives cooking
+
+`Category`, tooltips, slider ranges and `CheatConfirm` all come from reflection metadata, and the
+engine strips that from cooked builds: `WITH_METADATA` follows `WITH_EDITORONLY_DATA`, so none of it
+exists in a packaged Development or Test build.
+
+The menu works around this by baking. Every time you open the menu in the editor, it records the
+metadata of every cheat it finds into `DefaultCheatManagerMenu.ini`, a config file the plugin owns,
+which is staged into packaged builds. At runtime, where the real metadata is gone, the lookups fall back to what was baked. So
+categories, tooltips, sliders and confirmation gates all keep working in a packaged build.
+
+Three things follow from that.
+
+The bake happens when the menu is drawn in the editor, so a cheat whose cheat manager or extension was
+never live while the menu was open has nothing baked for it and will appear uncategorised in a packaged
+build. Every cheat found is baked, including ones the filter hid and ones inside a collapsed category.
+Opening the menu once before you package is enough.
+
+The write goes to a config file the plugin owns, not to your `DefaultGame.ini`. With the plugin in
+`<YourProject>/Plugins`, that is
+`<YourProject>/Plugins/CheatManagerMenu/Config/DefaultCheatManagerMenu.ini`. With the plugin installed
+into the engine, its `Config` folder is shared between every project on the machine, so it is not used
+at all: the write goes to `<YourProject>/Config/DefaultCheatManagerMenu.ini` instead. Either location
+is staged into packaged builds.
+
+**Commit that file.** It is what carries categories, tooltips, sliders and confirmation gates into
+builds made by anyone else, including a build machine that has never opened the editor menu.
+
+The write only happens when something actually changed, and it is logged under `LogCheatMenu` when
+it does. If the plugin's own config file is read-only because it has not been checked out, the write
+falls back to the project's `Config` folder. Only when neither location can be written is the write
+skipped, with a warning, and packaged builds keep whatever was baked last. A failed write is not
+retried within the same editor session, so fix the permission and restart the editor.
+
+If the fallback location is used, UAT prints one warning per package saying the config file is staged
+but not explicitly allowed. It is harmless. Silence it by adding the file under `[Staging]` in your
+`DefaultGame.ini` with `+AllowedConfigFiles=`.
+
+Baking is also what makes this work for Blueprint cheats. Their metadata lives in editor-only asset
+data and is stripped at cook regardless of how the game module is compiled, so harvesting it in the
+editor is the only way to carry it across.
+
+Enum dropdowns need almost none of this: the list, the filter, favourites and gamepad navigation are
+built from the `UEnum` itself and from the cheat list, so they keep working. Two details are
+metadata-driven and are not baked. `UMETA(Hidden)` and `UMETA(Spacer)` enumerators are skipped only in
+the editor and reappear in a packaged build, and `DisplayName` overrides degrade to the raw enumerator
+name there.
+
+```
+
+`Docs/index.md`:
+
+```md
+# Documentation
+
+The plugin reflects over the local player's `UCheatManager` and every cheat manager extension
+registered on it, then draws a row for each cheat it finds. Nothing is registered by hand and nothing
+is hard-coded, so the menu never falls out of step with your cheat code.
+
+Start with the [quick start](quick-start.md). It gets you to an open menu and a working custom cheat
+in about ten minutes.
+
+## Requirements
+
+Unreal Engine 5.8, Win64. Other engine versions are not supported; see
+[Engine versions](#engine-versions) below. The descriptor declares `SupportedTargetPlatforms: [Win64]`,
+so a Game, Client or Server target for another platform will not build against it.
+
+The only dependency is SlateIM, which ships with the engine at
+`Engine/Plugins/Experimental/SlateIM` and is enabled automatically as a dependency of this plugin. You
+will not be asked to confirm anything: the editor's experimental-plugin prompt appears only for a
+plugin you tick yourself, and dependencies are pulled in silently.
+
+SlateIM is an *experimental* engine plugin, which means Epic offers no API stability guarantee for it.
+That is why this plugin is supported per engine version rather than across a range. Enabling it also
+adds SlateIM's own Blueprint function library nodes to your project's palette — that is a visible
+side effect of installing this product, and there is no way to suppress it.
+
+Enabling SlateIM additionally attaches two of Epic's own debug cheats
+(`ToggleSlateIMInGameWidget`, `EnableInGameWidgetFromClass`) to every cheat manager. They are filtered
+out of the menu by default through the `HiddenCheats` setting, so you should never see them; empty
+that array if you want them back.
+
+The plugin ships no content assets. It draws nothing in a Shipping build because the whole module is
+excluded from one.
+
+## Install
+
+There are two routes in, and they behave differently. Pick the one that matches how you got the plugin.
+
+### From the Epic Games Launcher (recommended)
+
+1. In the launcher, go to **Library**, find Cheat Manager Menu, and choose **Install to Engine**.
+2. Open your project and go to **Edit > Plugins**.
+3. Find **Cheat Manager Menu** under the **Debug** category and tick it.
+4. Restart the editor when prompted.
+
+**The plugin does not enable itself on this route.** A plugin installed into the engine is disabled
+until you tick it, so step 3 is not optional. If you install it and nothing happens when you press F1,
+this is almost always why.
+
+No compiler is needed to *use* the plugin: a launcher install ships its module prebuilt for the editor,
+so you can install it, tick it, and drive the menu in a Blueprint-only project.
+
+Packaging is different. The plugin adds a runtime C++ module that is not enabled by default, so
+enabling it makes Unreal treat your project as code-based and build a project-specific game binary for
+any Development, DebugGame or Test client build. That step needs a C++ toolchain — on Windows, Visual
+Studio 2022 with the *Desktop development with C++* workload.
+
+Two details of that are worth knowing before your first package, because neither failure names this
+plugin. Unreal builds a project-specific **editor** target as well as the game one, and the cook runs
+through that editor build — so the cook stops before it starts if the editor target is missing, with
+`Could not find file '<YourProject>/Binaries/Win64/<YourProject>Editor.target'` rather than anything
+about a compiler. And a build of any kind fails outright while the editor is open with Live Coding
+enabled, reporting `Unable to build while Live Coding is active`. Close the editor before packaging.
+
+### From source, into your project
+
+1. Copy the plugin folder to `<YourProject>/Plugins/CheatManagerMenu`.
+2. Right-click your `.uproject` and regenerate project files.
+3. Build the editor target.
+
+This route needs a C++ project, because the module is compiled as part of your build.
+
+A plugin inside `<YourProject>/Plugins` **is** enabled by default, so there is nothing to tick. To be
+explicit about it, or to disable it without deleting the folder, list it in your `.uproject` — set
+`"Enabled": false` to turn it off:
+
+```json
+{
+    "Name": "CheatManagerMenu",
+    "Enabled": true,
+    "SupportedTargetPlatforms": [ "Win64" ]
+}
+```
+
+`SupportedTargetPlatforms` has to be repeated here and has to match the plugin's own descriptor. Omit
+it and a Game, Client or Server build for a non-Win64 platform fails with *"referenced via … with a
+mismatched 'SupportedTargetPlatforms' field"*. Editor targets are unaffected. Enabling the plugin from
+**Edit > Plugins** instead writes the field for you.
+
+### Either way
+
+There is no further setup. Press Play, press F1, and the engine's own cheats are already listed. If F1
+is taken in your project, change the bind in [Settings](settings.md), or bind the console command
+`CheatMenu.Toggle` to whatever you prefer.
+
+No gamepad button is bound out of the box. The menu registers an application-wide Slate input
+pre-processor and consumes whatever you bind, so the choice is left to you rather than taken from your
+game silently — set `GamepadToggleKey` in [Settings](settings.md) to drive the menu from a pad.
+
+## Engine versions
+
+This release targets **Unreal Engine 5.8 only**.
+
+The plugin is not version-tolerant by design: it draws through SlateIM, an experimental engine plugin
+whose API carries no stability guarantee and no deprecation warnings, so a build made against one
+engine version cannot be assumed to compile or run against another. Each engine version is built and
+verified separately before it is listed.
+
+## The rest of the docs
+
+[Adding cheats](adding-cheats.md) is the one you will come back to. It covers exec functions, cheat
+manager extensions, Blueprint cheats, how each parameter type picks its input widget, and what
+survives cooking.
+
+[Settings](settings.md) is a reference for every option, the keyboard and gamepad binds included.
+
+[Shipping builds](shipping.md) is short and worth reading before you package, because code that
+references the plugin has to be guarded.
+
+[Troubleshooting](troubleshooting.md) maps symptoms to causes.
+
+[Uninstalling](uninstall.md) is the one to read *before* you remove the plugin, not after. Blueprints
+derived from the plugin's cheat extension class cannot be reparented once the parent class is gone.
+
+```
+
+`Docs/quick-start.md`:
+
+```md
+# Quick start
+
+## Open the menu
+
+Press Play in the editor, then press **F1**.
+
+There is no gamepad bind out of the box. Set `GamepadToggleKey` in Project Settings if you want one —
+the menu consumes whatever is bound there application-wide, so it is left to you rather than taken
+from your game by default. The console command `CheatMenu.Toggle` opens the menu on any device
+without a bind at all.
+
+The menu appears in the top-left corner of the viewport, above all game UI. The cursor is freed and
+made visible while it is open, and the game keeps receiving input, so you can fly the camera around
+with the menu still up.
+
+If nothing happens, check the log for the line the plugin prints on startup:
+
+```
+LogCheatMenu: Cheat menu ready. Keyboard: F1 | Gamepad: <unbound>
+```
+
+That line reports the binds actually in effect. If it is missing entirely, the module did not load.
+See [Troubleshooting](troubleshooting.md).
+
+Out of the box you will see the engine's own cheats: `God`, `Fly`, `Walk`, `Slomo` and the rest.
+They live on `UCheatManager`, so the menu finds them without any work on your part.
+
+## Run a cheat
+
+Click a cheat's button to run it. Any parameters it takes get an input widget on the same row, to the
+right of the button: a checkbox for a bool, a dropdown for an enum, a slider for an `int32`, `float` or `double` parameter
+that declares a range, and a text box for anything else. Set the inputs first, then click.
+
+Type in the filter box to narrow the list. It matches on the cheat's name, its category, and its
+description, so typing `time` pulls up a whole Time category along with anything whose doc comment
+mentions time. Filtering expands every section so a match cannot hide in a collapsed group.
+
+Pin a cheat into the Favourites section at the top with the `+` button on its row. The button turns
+into `-` once the cheat is a favourite, which removes it again. Favourites persist. Cheats you have
+run this session collect in Recently Used, which does not.
+
+## Add your first cheat
+
+Add an exec function to a `UCheatManagerExtension`:
+
+```cpp
+UCLASS()
+class UMyCheats : public UCheatManagerExtension
+{
+    GENERATED_BODY()
+
+public:
+    /** Gives the player the requested amount of gold. */
+    UFUNCTION(Exec, Category = "Economy")
+    void GiveGold(UPARAM(meta = (UIMin = "0", UIMax = "10000", Delta = "100", UIDefault = "500")) int32 Amount);
+};
+```
+
+Register it wherever you set up your cheat manager:
+
+```cpp
+CheatManager->AddCheatManagerExtension(NewObject<UMyCheats>(CheatManager));
+```
+
+Build, play, press F1. `GiveGold` is now under an **Economy** header with a slider that runs from 0
+to 10000 in steps of 100, starting at 500. The doc comment became its tooltip.
+
+All four of those come from reflection metadata, which does not exist in a packaged build. The menu
+handles that by recording them the first time it draws the cheat in the editor, so they still work in a
+packaged Development or Test build. The only thing to remember is to open the menu once in the editor
+after adding cheats, before you package. See
+[what survives cooking](adding-cheats.md#what-survives-cooking).
+
+If you do not have a cheat manager extension yet, an exec function on your own `UCheatManager`
+subclass works exactly the same way.
+
+## Add a cheat from Blueprint
+
+1. Create a Blueprint class deriving from **Cheat Menu Blueprint Extension**.
+2. Add a function to it. Give it a Category in the Details panel. Leave it impure, meaning it keeps
+   its execution pins.
+3. Open **Project Settings > Plugins > Cheat Manager Menu** and add the Blueprint to
+   **Blueprint Cheat Extensions**.
+
+The plugin attaches that class to every cheat manager the engine creates, so your Blueprint cheats
+appear beside the C++ ones.
+
+> **Before you ever remove the plugin**, reparent or delete these Blueprints. Their parent class
+> lives in the plugin's module, so deleting the plugin first makes them fail to load with no reparent
+> path left. [Uninstalling](uninstall.md) has the order to follow.
+
+Full detail on both paths is in [Adding cheats](adding-cheats.md).
+
+```
+
+`Docs/settings.md`:
+
+```md
+# Settings
+
+Everything lives at **Project Settings > Plugins > Cheat Manager Menu**, which is only present in
+non-Shipping builds. Values are written to your project's `DefaultGame.ini` under:
+
+```ini
+[/Script/CheatManagerMenu.CheatManagerMenuSettings]
+```
+
+The plugin writes one other file, which is not settings and is not edited by hand:
+`DefaultCheatManagerMenu.ini`, holding cheat metadata harvested in the editor so that categories,
+tooltips, sliders and confirmation gates survive into packaged builds. It is kept out of `DefaultGame.ini`
+deliberately, so generated data never mixes with values you wrote. See
+[what survives cooking](adding-cheats.md#what-survives-cooking).
+
+## Input
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `ToggleKey` | `F1` | Keyboard key that opens and closes the menu. Clear it to leave only the gamepad bind. |
+| `GamepadToggleKey` | unset | Gamepad button that opens and closes the menu. Must be a gamepad key; anything else is ignored. Nothing is bound by default: the menu registers an application-wide input pre-processor and consumes whatever is bound here, so taking a button from your game silently is worse than making you pick one. |
+| `GamepadToggleModifier` | unset | Optional gamepad button that must be held for `GamepadToggleKey` to fire, turning the bind into a chord. |
+
+The gamepad default is View rather than Start because nearly every game binds Start to its pause
+menu. If View is taken in your project, either move `GamepadToggleKey` to a button you do not use, or
+set `GamepadToggleModifier` to something like `Gamepad_LeftShoulder` so the menu needs LB and View
+together. The modifier is only watched, never consumed, so it keeps working as a game input.
+
+Two other ways in, both useful when neither bind suits you:
+
+```
+CheatMenu.Toggle
+```
+
+That console command toggles the menu for the world it runs in. Bind it to an Enhanced Input action
+for a custom key or chord.
+
+From Blueprint, get the **Iron Fang Cheat Menu Subsystem** off the game instance and call **Toggle
+Menu**. **Toggle Menu For User** takes an input user index if you need to target a specific local
+player. **Is Menu Open** reports the current state.
+
+## General
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `bEnabled` | on | Master switch. Off means the subsystem is never created: no input pre-processor, no key binds, and `CheatMenu.Toggle` does nothing. Clearing both binds is not equivalent — the console command stays reachable — so this is the only complete off-switch short of unticking the plugin. |
+| `bAutoEnableCheats` | on | Creates the cheat manager when the menu opens if the player controller does not have one yet. Turn this off if your project decides for itself when cheats are available. |
+| `bForceCheatsInMultiplayer` | off | Also create the cheat manager on networked clients, where `AGameModeBase::AllowCheats` refuses one because the client has no authority. Forcing it exposes every exec in your project to anyone running that build, so leave it off for anything you hand to an external playtest. |
+| `HiddenCheats` | the two SlateIM debug cheats | Cheat function names to leave out of the menu, matched case-insensitively on the bare name. Seeded with `ToggleSlateIMInGameWidget` and `EnableInGameWidgetFromClass`, which the engine attaches to every cheat manager because this plugin enables SlateIM. Empty the array to see them. |
+| `bStartCategoriesCollapsed` | off | Categories start collapsed, so a project with many sections opens compact. |
+| `BlueprintCheatExtensions` | empty | Cheat manager extension classes to attach to every cheat manager. Any non-abstract `UCheatManagerExtension` subclass is accepted; `UCheatMenuBlueprintExtension` is the intended base for Blueprint cheats. See [Adding cheats](adding-cheats.md). |
+
+## Layout
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `PanelSize` | 820 x 680 | Size of the menu panel, in Slate units before DPI scaling. |
+| `PanelOffset` | 40, 40 | Distance of the panel from the top-left corner of the viewport. |
+
+Width is the one worth tuning to your project. A cheat's parameters sit beside its run button and wrap
+onto another line when they run out of room, so a narrow panel turns a six-parameter cheat like the
+engine's own `BugItGo` into a three-line row. A wider panel also puts the scroll bar nearer the edge of
+the screen.
+
+Both are clamped against the viewport at draw time, so a panel configured larger than the window shrinks
+to fit rather than putting the scroll bar out of reach. To run nearly full width, set `PanelSize` X to
+the viewport width minus about 56. Bear in mind the panel draws above all game UI, so a full-width menu
+hides most of what you are cheating on.
+
+## Ordering
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `CategoryOrder` | empty | Categories listed here are shown first, in this exact order. Matching ignores case and surrounding spaces. Everything else follows alphabetically. |
+| `bForceGeneralCategoryFirst` | off | Pins a category named General to the top even when `CategoryOrder` does not mention it. |
+
+The pinned Favourites and Recently Used sections always sit above the ordered categories.
+
+```ini
+[/Script/CheatManagerMenu.CheatManagerMenuSettings]
++CategoryOrder=Combat
++CategoryOrder=Economy
++CategoryOrder=World
+```
+
+## Pinned sections
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `bShowFavorites` | on | Shows a Favourites section of starred cheats above the categories. |
+| `bShowRecentlyUsed` | on | Shows a Recently Used section for this session above the categories. |
+| `RecentlyUsedCount` | 8 | How many recent cheats to remember. Set it to 0 to switch the section off. |
+| `FavoriteCheats` | empty | The favourited cheat names. Toggled with the `+` / `-` button on each row rather than edited by hand, though editing it does no harm. |
+
+Starring a cheat writes to `DefaultGame.ini` from the editor, so favourites are shared with everyone
+on the project. A packaged build has no project `Config` directory to write to, so favourites starred
+there go to the user's `Saved/Config` instead and stay local to that machine.
+
+Two limits worth knowing. In the editor, if `DefaultGame.ini` is read-only because it has not been
+checked out, the star is applied in memory and looks saved but never reaches disk, and it is gone on
+the next launch. And in a packaged build, unstarring a favourite that originally came from
+`DefaultGame.ini` does not stick, because the per-user write cannot remove a value supplied by a config
+layer above it.
+
+## Gamepad
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `bEnableGamepadNavigation` | on | Lets a gamepad drive the menu while it is open. Turn it off to leave in-menu gamepad input to the game. The gamepad toggle bind is unaffected; clear `GamepadToggleKey` to release that button too. |
+| `bLoopGamepadNavigation` | off | Wraps the highlight around the ends of the list: down off the last row returns to the first, up off the first jumps to the last. Off means the highlight stops at each end, which makes it obvious when you have reached the bottom. |
+
+With navigation on, these buttons are consumed by the menu while it is open:
+
+| Input | Action |
+| --- | --- |
+| D-pad or left stick, up and down | Move the highlight |
+| D-pad or left stick, left and right | Nudge the highlighted cheat's first slider, checkbox or dropdown |
+| Face Bottom (A) | Run the highlighted cheat, or expand/collapse the highlighted category |
+| Face Right (B) | Close the menu |
+| Left and right shoulder | Jump to the previous or next category header |
+
+Movement inputs repeat while held, so holding the D-pad scrolls the highlight. The two action buttons
+deliberately do not: holding A runs the highlighted cheat exactly once, not once per repeat.
+
+The highlight follows the cheat it is on rather than the row number, so a section appearing above it
+does not move it onto something else. Running a cheat inserts the Recently Used section above every
+category, which would otherwise shift the selection out from under you.
+
+While the gamepad is driving, the list draws a window of rows around the highlight rather than all of
+them, because the underlying scroll box cannot be scrolled programmatically. Touching the mouse, the
+wheel or the keyboard releases that window and gives you the whole list back.
+
+Text parameters, the filter box, the Expand and Collapse buttons and the favourite `+` / `-` button
+all need a mouse or keyboard. Every cheat can still be found, adjusted and run from the pad once
+`GamepadToggleKey` is set, so a Win64 machine with only a controller attached is enough to drive the
+whole menu. Win64 is the only supported platform; console devkits are not supported and the plugin
+has not been built against one.
+
+## Multiple players and PIE clients
+
+Each game instance runs its own menu. In a multi-client PIE session the toggle only opens the menu
+belonging to the window that has focus, so one key press does not open every client at once.
+
+In split screen the menu opens for whichever local player pressed the bind and drives that player's
+cheat manager.
+
+```
+
+`Docs/shipping.md`:
+
+```md
+# Shipping builds
+
+Read this before you package.
+
+## How the exclusion works
+
+The plugin descriptor denies the `CheatManagerMenu` module in Shipping:
+
+```json
+{
+    "Name": "CheatManagerMenu",
+    "Type": "Runtime",
+    "LoadingPhase": "Default",
+    "TargetConfigurationDenyList": [ "Shipping" ]
+}
+```
+
+The SlateIM dependency carries the same denial. In a Shipping build neither module is compiled,
+neither DLL is staged, and the menu cannot be opened by any means. Development and Test builds keep
+it, which is normally what you want on a QA or devkit build.
+
+## Guard your own code
+
+Because the module is gone in Shipping, anything in your project that references it has to be
+guarded. This is the most common problem people hit.
+
+Guard the code:
+
+```cpp
+#if !UE_BUILD_SHIPPING
+    if (UCheatManagerMenuSubsystem* Menu = GetGameInstance()->GetSubsystem<UCheatManagerMenuSubsystem>())
+    {
+        Menu->ToggleMenu();
+    }
+#endif
+```
+
+And guard the module dependency in your `.Build.cs`:
+
+```csharp
+if (Target.Configuration != UnrealTargetConfiguration.Shipping)
+{
+    PrivateDependencyModuleNames.Add("CheatManagerMenu");
+}
+```
+
+If you add the dependency unconditionally, the build fails with an explicit message rather than a
+link error:
+
+```
+CheatManagerMenu is excluded from Shipping builds. Guard your references to it with
+#if !UE_BUILD_SHIPPING, and add the module to your .Build.cs behind the same check.
+```
+
+## Your cheats are a separate question
+
+The plugin only excludes itself. Your own cheat functions are your own code, and they ship unless you
+exclude them too.
+
+`UCheatManager` already respects `UE_WITH_CHEAT_MANAGER`, which is 0 in Shipping by default, so a
+cheat manager is not created in a normal Shipping build and exec cheats on it are unreachable. If you
+have overridden that, or if your cheats live somewhere other than a cheat manager, exclude them the
+same way this plugin does: put them in their own module and deny it in Shipping.
+
+## Verifying it for yourself
+
+Do **not** try to verify this by looking for `CheatManagerMenu` in the `BuildProducts` array of
+`Binaries/<Platform>/<YourGame>-<Platform>-Shipping.target`. That check cannot fail and therefore
+proves nothing: non-editor targets are monolithic in every configuration, and a monolithic receipt
+lists only the executable and its debug and dependency files. It never contains a per-module entry, in
+Shipping or in Development, so the module's absence there is not evidence of anything.
+
+The check that does work is to look for the code itself. On Windows:
+
+```
+powershell -Command "[Text.Encoding]::Unicode.GetString([IO.File]::ReadAllBytes('<YourGame>-Win64-Shipping.exe')) -match 'CheatMenu\.Toggle'"
+```
+
+The plugin registers that console command at static initialisation time, so the string is present in
+any binary the module was linked into and absent from one it was not. It is stored as UTF-16, which is
+why `findstr` cannot be used here. Compare a Development build, which prints `True`, against a Shipping
+build, which prints `False`.
+
+One thing you will see in the receipt is `CheatManagerMenu.uplugin` in `RuntimeDependencies`, and the
+plugin name in `BuildPlugins`. That is the descriptor file being staged, not code. Unreal stages the
+`.uplugin` for every enabled plugin whether or not its modules were built, so in a typical project that
+list runs to a couple of hundred entries and includes plenty of editor-only plugins. It has no cheat
+code behind it.
+
+If you want the descriptor gone as well, deny the plugin in your `.uproject` rather than only in the
+plugin descriptor:
+
+```json
+{
+    "Name": "CheatManagerMenu",
+    "Enabled": true,
+    "SupportedTargetPlatforms": [ "Win64" ],
+    "TargetConfigurationDenyList": [ "Shipping" ]
+}
+```
+
+`SupportedTargetPlatforms` has to match the plugin's own descriptor. Omit it and a Game, Client or
+Server build for a non-Win64 platform fails with *"referenced via … with a mismatched
+'SupportedTargetPlatforms' field"*. The Shipping deny list above short-circuits that check for Shipping
+specifically, but a Development or Test build for another platform would still hit it.
+
+## Settings left behind
+
+`DefaultGame.ini` keeps its `[/Script/CheatManagerMenu.CheatManagerMenuSettings]` section in a Shipping
+build, and `DefaultCheatManagerMenu.ini` keeps its baked cheat metadata. Neither class exists there, so
+both are ignored at runtime and neither costs you anything in the build.
+
+Worth knowing what the baked file contains before you ship it, though. It holds the category, tooltip,
+confirmation prompt and slider range of every cheat the menu has seen in the editor, which means the
+names and doc comments of your cheats are in a plain text file inside the build. That is the same
+information a Development build already exposes through the menu itself, so it changes nothing there.
+For a Shipping build, if you would rather it were not present at all, delete the file before packaging
+or exclude it under `[Staging]` in `DefaultGame.ini` with
+`+DisallowedConfigFiles=<YourProject>/Config/DefaultCheatManagerMenu.ini`. Removing an entry from
+`+AllowedConfigFiles` does not exclude anything, since an unlisted file is still staged with a warning.
+
+If you delete the file, it regenerates the next time you open the menu in the editor **after an editor
+restart**. Deleting it does not change the values already held in memory, so the same session will not
+rewrite it.
+
+```
+
+`Docs/troubleshooting.md`:
+
+```md
+# Troubleshooting
+
+Everything the plugin logs goes to the `LogCheatMenu` category. On startup it prints the binds
+actually in effect:
+
+```
+LogCheatMenu: Cheat menu ready. Keyboard: F1 | Gamepad: <unbound>
+```
+
+Every cheat it runs is logged too, with the exact command string, which is usually enough to see why
+a cheat received the wrong arguments.
+
+## The menu will not open
+
+If the startup line above is missing, the subsystem never initialised. Three reasons account for
+almost all of it:
+
+The build is Shipping, so the module was excluded on purpose. See [Shipping builds](shipping.md).
+
+There is no Slate application, which is the case on a dedicated server and in commandlets. The
+subsystem skips creating itself there because it has nothing to draw to.
+
+The plugin is not enabled. Check your `.uproject` and the editor's plugin browser.
+
+If the line is present but the key does nothing, it is reporting the binds it will actually respond
+to. Compare them against what you are pressing. A bind set to a key your game already consumes is
+still fine, because the menu's input runs ahead of the game's, but a bind that reads `<unbound>` was
+cleared in Project Settings.
+
+In a multi-client PIE session the toggle only opens the menu for the window that has focus. Click the
+client window first.
+
+## "Cheats are not enabled (no Cheat Manager on the player controller)"
+
+The menu opened but the player controller has no `UCheatManager`, so there is nothing to reflect
+over. Either turn `bAutoEnableCheats` on in Project Settings, which creates one when the menu opens,
+or set `CheatClass` on your player controller so the engine makes one itself.
+
+## My Blueprint cheats are missing
+
+Work through these in order:
+
+The Blueprint has to be listed under **Project Settings > Plugins > Cheat Manager Menu > Blueprint Cheat
+Extensions**. Nothing attaches it otherwise.
+
+It has to derive from `UCheatMenuBlueprintExtension`, or at least from `UCheatManagerExtension`.
+Anything else is skipped when the extension list is loaded.
+
+It cannot be abstract. Abstract classes are skipped.
+
+The function has to be impure. Pure functions are deliberately excluded, because a cheat has a side
+effect. If your function lost its execution pins, that is the cause.
+
+Extensions are attached when a cheat manager is created, so a Blueprint added to the settings while
+you are already in PIE will not appear until the next run.
+
+## Warning about CheatManagerExtensions
+
+```
+LogCheatMenu: Warning: Could not resolve UCheatManager::CheatManagerExtensions by reflection.
+Cheat manager extensions, including every Blueprint cheat, will be missing from the cheat menu.
+```
+
+`UCheatManager` keeps its extension array protected with no public accessor, so the plugin reads it
+by reflection. This warning means the engine renamed or moved that property, which would happen on an
+engine version the plugin has not been updated for. Cheats on the cheat manager itself still work.
+Extensions do not.
+
+## The gamepad bind collides with my game
+
+Set `GamepadToggleModifier` in Project Settings so the bind becomes a chord, for example
+`Gamepad_LeftShoulder` plus the default View button. The plain button press then passes through to
+the game untouched, because the modifier is only watched and never consumed.
+
+Moving `GamepadToggleKey` to an unused button works too.
+
+## The cursor is stuck after closing
+
+The menu saves the game's cursor and capture state when it opens and restores it on close. The mouse
+capture, lock mode and hide-during-capture flags belong to the game viewport rather than to the player
+controller, so they are captured once when the menu opens and are put back even if the controller that
+was current at the time has since been destroyed.
+
+A cheat that replaces the player controller while the menu is open - a map travel, or something like
+`ToggleDebugCamera` - is handled: the override moves to the new controller and the original snapshot is
+kept, so closing the menu still returns the game to the capture mode it had before the menu opened.
+
+If you are still seeing a stuck cursor, check whether your own code sets an input mode every frame,
+which would fight the restore.
+
+## Everything is under Uncategorized in a packaged build
+
+The menu bakes cheat metadata when it is drawn in the editor, because `Category` and the rest do not
+exist in a cooked build. A cheat whose cheat manager or extension was never live while the menu was
+open has nothing baked for it; being filtered out or inside a collapsed category does not matter, since
+every cheat found is baked.
+
+Enum dropdowns still list their values either way, because they are built from the `UEnum` rather than
+from metadata, though `UMETA(Hidden)` entries reappear and display names fall back to the raw
+enumerator name.
+
+Open the menu once in the editor after adding cheats, then repackage. Check the log for the line
+confirming what was written:
+
+```
+LogCheatMenu: Baked 43 categories, 84 tooltips, 4 confirms and 12 slider ranges.
+```
+
+If instead you see a warning that the metadata could not be written, neither the plugin's nor the
+project's `Config` folder was writable, usually a read-only file that has not been checked out. Check
+it out, then restart the editor before opening the menu again: a failed write is not retried within the
+same editor session.
+
+If the baked file exists but a packaged build still shows nothing, confirm it was actually staged:
+`DefaultCheatManagerMenu.ini` should be present in your staged build's config alongside the file
+described in [Adding cheats](adding-cheats.md#what-survives-cooking).
+
+## A cheat ran with the wrong arguments
+
+Check the logged command string. Text box values are quoted, so a value with spaces in it arrives
+intact.
+
+## The run button does nothing and the row says a parameter needs a value
+
+A numeric parameter left blank blocks the run, and the row names the parameter. Fill the box.
+
+This is deliberate, and it is worth knowing why the box cannot simply be left empty. A parameter's
+declared C++ default is applied by the engine's `CPP_Default_<Param>` lookup, which is compiled inside
+`#if WITH_EDITOR`. In a packaged Development or Test build that lookup does not exist, so an empty
+numeric argument does not fall back to the default:
+
+- an integer parameter fails to import and the cheat aborts before it runs, reporting only
+  `'MyCheat': Bad or missing property 'Amount' when trying to call MyCheat` in the log
+- a float parameter imports the empty value as **zero** and the cheat runs, silently, with a value you
+  did not choose
+
+Refusing the run is what stops the second case, which is the dangerous one: `Slomo` with an empty box
+would otherwise resolve to zero and freeze the game.
+
+Giving the parameter a C++ default value makes the box behave the way you expect in the editor, but it
+changes nothing in a packaged build. Declare a slider range with `UIMin` / `UIMax` instead if you want
+the parameter to start at a usable value everywhere - a slider always has one.
+
+String, name and text parameters are unaffected; an empty string is a legitimate value and is still
+sent as one.
+
+```
+
+`Docs/uninstall.md`:
+
+```md
+# Uninstalling
+
+Removing this plugin is not just a matter of deleting the folder. If any Blueprint in your project
+derives from the plugin's cheat extension class, deleting the plugin first makes those assets fail to
+load, and once the parent class is gone the editor offers no reparent path. Do these steps in order.
+
+## 1. Deal with derived Blueprints first
+
+This is the step that cannot be undone later.
+
+Any Blueprint you created by deriving from `UCheatMenuBlueprintExtension` — the route described in
+[quick-start.md](quick-start.md) — has a parent class that lives in this plugin's module. Find them
+before you remove anything: in the Content Browser, right-click the C++ class and choose **Find
+Blueprints Derived From This Class**, or search your Content folder for assets whose parent class is
+unresolved after a test disable.
+
+For each one, either delete the asset, or reparent it to `UCheatManagerExtension` (the engine's own
+class) via **Class Settings > Parent Class** in the Blueprint editor. Reparenting keeps the functions
+you wrote; they simply stop appearing in this menu.
+
+If you have already deleted the plugin and your Blueprints will not load, restore the plugin folder,
+open the project, reparent, and then continue from here.
+
+## 2. Clear the settings that reference those classes
+
+In **Project Settings > Plugins > Cheat Manager Menu**, empty the **Blueprint Cheat Extensions**
+array. Leaving a soft class reference to a deleted asset behind produces a load warning on every
+startup.
+
+## 3. Remove your own references to the module
+
+Any project code that calls into the plugin has to go, including the `#if !UE_BUILD_SHIPPING` guards
+around it and the module entry in your `.Build.cs`. See [shipping.md](shipping.md) for where those
+guards usually are.
+
+## 4. Disable the plugin
+
+**Edit > Plugins**, untick **Cheat Manager Menu**, restart the editor. Confirm the project still
+opens and your Blueprints still load before deleting anything from disk.
+
+## 5. Delete the plugin and its configuration
+
+Delete `Plugins/CheatManagerMenu` if you installed from source, or use the Epic Games Launcher if you
+installed to the engine.
+
+Two config locations survive an uninstall and should be cleaned by hand:
+
+- `Config/DefaultGame.ini` — delete the `[/Script/CheatManagerMenu.CheatManagerMenuSettings]`
+  section. This is the shared, committed one, so removing it is what stops it reaching the rest of
+  your team.
+- `Saved/Config/<Platform>/Game.ini` — delete the same section. This is the per-user copy that holds
+  favourites starred in a packaged build.
+
+If the menu was ever opened in the editor it also harvested cheat metadata into
+`Config/DefaultCheatManagerMenu.ini`, either in the plugin's own folder or in your project's `Config`
+directory. Delete whichever exists. It is generated data and nothing else reads it.
+
+## Regenerate
+
+For a C++ project, regenerate project files from the `.uproject` after deleting the folder, so the
+module disappears from your solution.
+
+```
+
+`LICENSE.md`:
+
+```md
+# Licence
+
+Copyright Iron Fang Studio. All Rights Reserved.
+
+Use of this software is governed by the Fab licence you purchased with it. The Fab Licence Agreement
+between you and Epic Games grants the rights to use, modify and distribute this plugin as part of
+your own project; nothing in these source files grants or withholds anything beyond it.
+
+The "All Rights Reserved" notice at the top of each source file is a copyright assertion, not an
+additional restriction. It does not narrow the rights your Fab licence gives you.
+
+## Third-party components
+
+This plugin ships no third-party code. It links against Unreal Engine modules, including the
+Experimental SlateIM plugin, which are covered by your Unreal Engine EULA rather than by this
+licence.
+
+## Contact
+
+Questions about licensing that this file does not answer should go to the support address on the Fab
+listing.
+
+```
+
+`README.md`:
+
+```md
+# Cheat Manager Menu
+
+An in-game cheat menu for Unreal Engine that builds itself out of the cheat code you already have.
+
+The menu reads the local player's `UCheatManager` and every cheat manager extension registered on it,
+then draws a row for each cheat it finds. There is no list to keep in sync. Write a cheat function
+and it appears the next time you open the menu, with an input widget picked from each parameter's
+type.
+
+Press **F1** on a keyboard while the game is running, or run `CheatMenu.Toggle`, which opens the menu
+on any device. **No gamepad button is bound by default** — pick one in Project Settings if you want
+pad access, and the plugin will not take a button from your game until you do. Once a bind is set,
+every cheat can be found, adjusted and run from a pad; the filter box, the Expand and Collapse
+buttons, the favourite button and text parameters need a mouse or keyboard.
+
+The module is compiled out of Shipping builds.
+
+## Requirements
+
+**Unreal Engine 5.8 only.** The plugin draws through SlateIM, an experimental engine plugin that
+carries no API stability guarantee, so each engine version is built and verified separately rather than
+supported as a range.
+
+SlateIM ships with the engine and is enabled automatically as a dependency of this plugin. You will not
+be prompted to confirm it — the editor's experimental-plugin prompt only appears for a plugin you tick
+yourself.
+
+Ships no content assets. Supported on Win64.
+
+## Install
+
+**From the Epic Games Launcher:** choose **Install to Engine**, then open your project, go to
+**Edit > Plugins**, find **Cheat Manager Menu** under **Debug**, tick it, and restart.
+
+Note that a plugin installed into the engine is **not** enabled until you tick it. If pressing F1 does
+nothing after installing, that is nearly always the reason.
+
+No compiler is needed to use the plugin in the editor — a launcher install ships the module prebuilt, so a
+Blueprint-only project works. Packaging a Development, DebugGame or Test client build does need a C++
+toolchain, because enabling the plugin makes Unreal treat your project as code-based and build
+project-specific editor *and* game targets for it. The cook step needs the editor one to exist before it
+will run at all.
+
+**From source:** copy the folder to `<YourProject>/Plugins/CheatManagerMenu`, regenerate project files
+and build the editor target. This route needs a C++ project. A plugin under `<YourProject>/Plugins` is
+enabled automatically, so there is nothing to tick.
+
+Full detail in [Docs/index.md](Docs/index.md). To remove the plugin cleanly, follow
+[Docs/uninstall.md](Docs/uninstall.md) — deriving Blueprints from the plugin's cheat extension class
+means there are steps to take *before* you delete it.
+
+## Supported platforms and configurations
+
+**Win64 only**, in the editor and in packaged **Development** and **Test** builds. The module is
+compiled out of Shipping by the plugin descriptor, and `SupportedTargetPlatforms` declares Win64, so
+a Game, Client or Server target for any other platform will not build against it. Dedicated servers
+and commandlets have no Slate application, so the menu's subsystem does not create itself there.
+
+## Input the plugin consumes
+
+While enabled, the plugin registers an **application-wide Slate input pre-processor**. If you are
+debugging input that your game has stopped receiving, this is the string to search for.
+
+It consumes the configured toggle key (`F1` by default) whenever the game is running, and — only
+while the menu is open — the gamepad navigation keys: D-pad and left stick, Face-Bottom (A),
+Face-Right (B), and the shoulder buttons. A configured gamepad modifier is watched but never
+consumed, so your game still receives it. Nothing else is intercepted, and nothing at all is
+intercepted when `bEnabled` is off, which removes the pre-processor entirely.
+
+## Names you will see in your project
+
+The product name and the identifiers do not match everywhere; this is the mapping.
+
+| What you bought | How it appears |
+| --- | --- |
+| Cheat Manager Menu | `CheatManagerMenu` — plugin folder and module name |
+| Log output | `LogCheatMenu` |
+| Console command | `CheatMenu.Toggle` |
+| Config section | `[/Script/CheatManagerMenu.CheatManagerMenuSettings]` in `DefaultGame.ini` |
+| Settings location | Project Settings > Plugins > Cheat Manager Menu |
+
+## Known issues
+
+Shipped defects with workarounds are listed in [CHANGELOG.md](CHANGELOG.md) under Known issues. Read
+it before filing a report — several entries have a one-line fix on your side.
+
+## Documentation
+
+Full docs live in [Docs/](Docs/index.md), starting with installation and a
+[quick start](Docs/quick-start.md).
+
+| Page | Covers |
+| --- | --- |
+| [Adding cheats](Docs/adding-cheats.md) | Exec functions, cheat manager extensions, Blueprint cheats, parameter widgets, categories, tooltips, the confirmation gate, and what survives cooking |
+| [Settings](Docs/settings.md) | Every option, the keyboard and gamepad binds included |
+| [Shipping builds](Docs/shipping.md) | How the module is excluded, and how to guard your own code. Read before packaging |
+| [Troubleshooting](Docs/troubleshooting.md) | Symptoms mapped to causes |
+| [Uninstalling](Docs/uninstall.md) | Removing the plugin without breaking Blueprints that derive from it |
+
+## At a glance
+
+```cpp
+UCLASS()
+class UMyCheats : public UCheatManagerExtension
+{
+    GENERATED_BODY()
+
+public:
+    /** Sets the time of day, in hours. */
+    UFUNCTION(Exec, Category = "World")
+    void SetTimeOfDay(UPARAM(meta = (UIMin = "0", UIMax = "24", Delta = "0.25", UIDefault = "12")) float Hours);
+
+    /** Removes every building in the settlement. Cannot be undone. */
+    UFUNCTION(Exec, Category = "World", meta = (CheatConfirm = "Wipe the whole settlement?"))
+    void WipeSettlement();
+};
+```
+
+That gives you a **World** section holding two cheats. `SetTimeOfDay` gets a slider from 0 to 24 in
+quarter-hour steps, starting at noon, with the doc comment as its tooltip. `WipeSettlement` asks for
+confirmation before it runs.
+
+All of that keeps working in a packaged Development or Test build. Categories, tooltips, sliders and
+confirmation gates come from reflection metadata, which the engine strips when it cooks, so the menu
+records them while it is drawn in the editor and reads them back at runtime. Open the menu once in the
+editor after adding cheats and the packaged build matches what you saw in PIE.
+
+```
+
+`Source/CheatManagerMenu/CheatManagerMenu.Build.cs`:
+
+```cs
+// Copyright Iron Fang Studio. All Rights Reserved.
+
+using UnrealBuildTool;
+
+public class CheatManagerMenu : ModuleRules
+{
+	public CheatManagerMenu(ReadOnlyTargetRules Target) : base(Target)
+	{
+		// Plugin descriptor already deny this module in Shipping. Project that force-add it as
+		// dependency anyway would fail with opaque link error, so say why here instead.
+		if (Target.Configuration == UnrealTargetConfiguration.Shipping)
+		{
+			throw new BuildException(
+				"CheatManagerMenu is excluded from Shipping builds. Guard your references to it with " +
+				"#if !UE_BUILD_SHIPPING, and add the module to your .Build.cs behind the same check.");
+		}
+
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+
+		// Pin compilation environment. Without these module inherit whatever consumer Target.cs specify,
+		// which for redistributed plugin mean compiling under settings never tested here - V2/Cpp17 in
+		// old project, or V7 with warnings promoted to errors in fresh 5.8 one.
+		DefaultBuildSettings = BuildSettingsVersion.V7;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_8;
+
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			"Core",
+			"CoreUObject",
+			"Engine",
+			"DeveloperSettings"
+		});
+
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			// Locate this plugin own directory, so harvested metadata write to plugin Config folder
+			// instead of consumer project one.
+			"Projects",
+			"InputCore",
+			"Slate",
+			"SlateCore",
+			"ApplicationCore",
+			"SlateIM"
+		});
+	}
+}
+
+```
+
+`Source/CheatManagerMenu/Private/CheatManagerMenu.cpp`:
+
+```cpp
+// Copyright Iron Fang Studio. All Rights Reserved.
+
+#include "CheatManagerMenu.h"
+#include "CheatManagerMenuSettings.h"
+
+#include "GameFramework/CheatManager.h"
+
+DEFINE_LOG_CATEGORY(LogCheatMenu);
+
+void FCheatManagerMenuModule::StartupModule()
+{
+#if UE_WITH_CHEAT_MANAGER
+	// Attach every configured Blueprint cheat class as extension on each cheat manager engine create
+	// (any PC, any map, PIE or packaged). Menu already reflect over extension array, so BP cheats land
+	// next to native ones. Classes load lazily inside delegate, not at module startup.
+	CheatManagerCreatedHandle = UCheatManager::RegisterForOnCheatManagerCreated(
+		FOnCheatManagerCreated::FDelegate::CreateLambda([](UCheatManager* CheatManager)
+		{
+			const UCheatManagerMenuSettings* Settings = UCheatManagerMenuSettings::Get();
+			if (!CheatManager || !Settings)
+			{
+				return;
+			}
+
+			for (const TSoftClassPtr<UCheatManagerExtension>& SoftClass : Settings->BlueprintCheatExtensions)
+			{
+				UClass* Class = SoftClass.LoadSynchronous();
+				if (!Class || Class->HasAnyClassFlags(CLASS_Abstract) || !Class->IsChildOf(UCheatManagerExtension::StaticClass()))
+				{
+					continue;
+				}
+				CheatManager->AddCheatManagerExtension(NewObject<UCheatManagerExtension>(CheatManager, Class));
+			}
+		}));
+#endif // UE_WITH_CHEAT_MANAGER
+}
+
+void FCheatManagerMenuModule::ShutdownModule()
+{
+#if UE_WITH_CHEAT_MANAGER
+	if (CheatManagerCreatedHandle.IsValid())
+	{
+		UCheatManager::UnregisterFromOnCheatManagerCreated(CheatManagerCreatedHandle);
+		CheatManagerCreatedHandle.Reset();
+	}
+#endif // UE_WITH_CHEAT_MANAGER
+}
+
+IMPLEMENT_MODULE(FCheatManagerMenuModule, CheatManagerMenu)
+
+```
+
+`Source/CheatManagerMenu/Private/CheatManagerMenuSettings.cpp`:
+
+```cpp
+// Copyright Iron Fang Studio. All Rights Reserved.
+
+#include "CheatManagerMenuSettings.h"
+
+UCheatManagerMenuSettings::UCheatManagerMenuSettings()
+{
+	// Default binds. Both configurable in Project Settings; either can be cleared on its own.
+	ToggleKey = EKeys::F1;
+
+	// No gamepad bind by default. Menu install application-wide input pre-processor, so any default we
+	// pick get taken from consumer project silently - and every gamepad button worth binding already
+	// spoken for in most games (Start is pause menu, View/Back/Select is scoreboard or map). Projects
+	// that want pad bind set one explicitly; until then console command CheatMenu.Toggle and Blueprint
+	// ToggleMenu node are pad-less routes in.
+	GamepadToggleKey = EKeys::Invalid;
+
+	// Engine attach USlateIMInGameWidgetCheatManager to every cheat manager as side effect of this
+	// plugin force-enabling SlateIM, so two of Epic debug cheats would show up in customer menu under
+	// Uncategorized. Hidden by name not by package, because filtering engine package would also drop
+	// God, Slomo and Fly, which customers do want.
+	HiddenCheats = { TEXT("ToggleSlateIMInGameWidget"), TEXT("EnableInGameWidgetFromClass") };
+}
+
+const UCheatManagerMenuSettings* UCheatManagerMenuSettings::Get()
+{
+	return GetDefault<UCheatManagerMenuSettings>();
+}
+
+UCheatManagerMenuSettings* UCheatManagerMenuSettings::GetMutable()
+{
+	return GetMutableDefault<UCheatManagerMenuSettings>();
+}
+
+bool UCheatManagerMenuSettings::IsFavorite(const FString& FunctionName) const
+{
+	return FavoriteCheats.ContainsByPredicate([&FunctionName](const FString& Entry)
+	{
+		return Entry.Equals(FunctionName, ESearchCase::IgnoreCase);
+	});
+}
+
+bool UCheatManagerMenuSettings::ToggleFavorite(const FString& FunctionName)
+{
+	const int32 Removed = FavoriteCheats.RemoveAll([&FunctionName](const FString& Entry)
+	{
+		return Entry.Equals(FunctionName, ESearchCase::IgnoreCase);
+	});
+
+	const bool bNowFavorite = (Removed == 0);
+	if (bNowFavorite)
+	{
+		FavoriteCheats.Add(FunctionName);
+	}
+
+	// Persist now so starred cheat survive restart.
+	//
+	// DefaultConfig class, so shared home for its values is project DefaultGame.ini - and
+	// TryUpdateDefaultConfigFile is only call that write there. Plain SaveConfig land in
+	// Saved/Config/<Platform>/Game.ini instead, which is per-user and never committed, so starred cheat
+	// would silently not reach rest of team.
+#if WITH_EDITOR
+	TryUpdateDefaultConfigFile();
+#else
+	// Packaged build have no project Config directory to write to, so per-user Saved config is only
+	// writable home for favourites there.
+	SaveConfig();
+#endif
+
+	return bNowFavorite;
+}
+
+```
+
+`Source/CheatManagerMenu/Private/CheatManagerMenuSubsystem.cpp`:
+
+```cpp
+// Copyright Iron Fang Studio. All Rights Reserved.
+
+#include "CheatManagerMenuSubsystem.h"
+#include "CheatManagerMenu.h"
+#include "CheatManagerMenuSettings.h"
+#include "CheatMenuMetadataStore.h"
+
+#include "SlateIM.h"
+
+#include "Brushes/SlateColorBrush.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Framework/Application/IInputProcessor.h"
+#include "Input/Events.h"
+#include "Widgets/SWindow.h"
+
+#include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
+#include "Engine/GameViewportClient.h"
+#include "Engine/LocalPlayer.h"
+#include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/CheatManager.h"
+
+#include "HAL/IConsoleManager.h"
+#include "UObject/Class.h"
+#include "UObject/EnumProperty.h"
+#include "UObject/UnrealType.h"
+
+#define LOCTEXT_NAMESPACE "CheatManagerMenu"
+
+namespace
+{
+	/** Global input pre-processor that toggle cheat menu and forward gamepad navigation to it. */
+	class FCheatMenuInputProcessor : public IInputProcessor
+	{
+	public:
+		explicit FCheatMenuInputProcessor(UCheatManagerMenuSubsystem* InOwner)
+			: Owner(InOwner)
+		{
+		}
+
+		virtual void Tick(const float /*DeltaTime*/, FSlateApplication& SlateApp, TSharedRef<ICursor> /*Cursor*/) override
+		{
+			// Release landing while application in background never reach this processor, which leave
+			// chord modifier stuck "held" until pressed again. Losing focus is one moment we know nothing
+			// still down.
+			if (!HeldKeys.IsEmpty() && !SlateApp.IsActive())
+			{
+				HeldKeys.Reset();
+			}
+		}
+
+		virtual bool HandleKeyDownEvent(FSlateApplication& /*SlateApp*/, const FKeyEvent& InKeyEvent) override
+		{
+			UCheatManagerMenuSubsystem* Subsystem = Owner.Get();
+			if (!Subsystem)
+			{
+				return false;
+			}
+
+			const FKey Key = InKeyEvent.GetKey();
+
+			// Tracked but never consumed, so chord modifier stay fully available to game.
+			HeldKeys.Add(Key);
+
+			// Toggle bind - keyboard key, or gamepad button with its optional held modifier.
+			// Auto-repeat ignored so holding bind do not flicker menu.
+			const FKey GamepadModifier = Subsystem->GetGamepadToggleModifier();
+			const bool bGamepadModifierHeld = GamepadModifier.IsValid() && HeldKeys.Contains(GamepadModifier);
+			if (!InKeyEvent.IsRepeat() && Subsystem->IsToggleInput(Key, bGamepadModifierHeld))
+			{
+				// Every game instance register own pre-processor, so multi-client PIE session have
+				// several of these listening at once. Only instance whose window has focus may open its
+				// menu, else one key press open them all. Already-open menu always get to close, whatever
+				// has focus by then.
+				if (!Subsystem->IsMenuOpen() && !Subsystem->OwnsFocusedViewport())
+				{
+					return false;
+				}
+
+				ConsumedKeys.Add(Key);
+				Subsystem->ToggleMenuForUser(static_cast<int32>(InKeyEvent.GetUserIndex()));
+				return true; // consume the toggle key
+			}
+
+			// Key whose press was eaten must keep being eaten until released, whatever happen to menu in
+			// between. Closing menu with nav key still held would start leaking that key auto-repeats to
+			// game, and release would then get swallowed below with no matching press - game binding
+			// stuck down.
+			if (ConsumedKeys.Contains(Key))
+			{
+				return true;
+			}
+
+			// While open, route gamepad navigation to menu instead of game. Repeat events forwarded so
+			// holding D-pad scroll highlight; HandleGamepadNavKey decide which keys may act on repeat and
+			// which only consume it.
+			if (Subsystem->IsMenuOpen() && Subsystem->HandleGamepadNavKey(Key, InKeyEvent.IsRepeat()))
+			{
+				ConsumedKeys.Add(Key);
+				return true;
+			}
+
+			// Any other key mean user reaching for keyboard, which release gamepad windowed row drawing.
+			// Never consumed - game must still see it.
+			if (Subsystem->IsMenuOpen() && !Key.IsGamepadKey())
+			{
+				Subsystem->NotifyNonGamepadInput();
+			}
+
+			return false;
+		}
+
+		virtual bool HandleMouseButtonDownEvent(FSlateApplication& /*SlateApp*/, const FPointerEvent& /*MouseEvent*/) override
+		{
+			if (UCheatManagerMenuSubsystem* Subsystem = Owner.Get())
+			{
+				if (Subsystem->IsMenuOpen())
+				{
+					Subsystem->NotifyNonGamepadInput();
+				}
+			}
+			return false; // watched only; menu own widgets still need the click
+		}
+
+		virtual bool HandleMouseWheelOrGestureEvent(FSlateApplication& /*SlateApp*/, const FPointerEvent& /*InWheelEvent*/, const FPointerEvent* /*InGestureEvent*/) override
+		{
+			// Scrolling is one interaction gamepad row window actually break, so it must release window
+			// same as click above.
+			if (UCheatManagerMenuSubsystem* Subsystem = Owner.Get())
+			{
+				if (Subsystem->IsMenuOpen())
+				{
+					Subsystem->NotifyNonGamepadInput();
+				}
+			}
+			return false;
+		}
+
+		virtual bool HandleKeyUpEvent(FSlateApplication& /*SlateApp*/, const FKeyEvent& InKeyEvent) override
+		{
+			HeldKeys.Remove(InKeyEvent.GetKey());
+
+			// Swallow release of any key whose press was eaten above. Letting it through hand game a
+			// release with no matching press, which fire release half of hold-to-X bindings (gamepad face
+			// buttons in particular) the moment menu get used.
+			return ConsumedKeys.Remove(InKeyEvent.GetKey()) > 0;
+		}
+
+		virtual const TCHAR* GetDebugName() const override
+		{
+			return TEXT("CheatManagerMenu");
+		}
+
+	private:
+		TWeakObjectPtr<UCheatManagerMenuSubsystem> Owner;
+
+		/** Keys whose key-down was consumed, so matching key-up can be consumed too. */
+		TSet<FKey> ConsumedKeys;
+
+		/** Every key currently down, so gamepad chord can test whether its modifier held. */
+		TSet<FKey> HeldKeys;
+	};
+
+	/** True if function parameter should be exposed as input in UI. */
+	bool IsInputParam(const FProperty* Param)
+	{
+		const uint64 Flags = Param->PropertyFlags;
+		if (Flags & CPF_ReturnParm)
+		{
+			return false;
+		}
+		// Skip pure out params, keep in-out reference params.
+		if ((Flags & CPF_OutParm) && !(Flags & CPF_ReferenceParm))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	/** Numeric cheat param slider range, taken from its UPARAM metadata. */
+	struct FCheatSliderRange
+	{
+		float Min = 0.0f;
+		float Max = 1.0f;
+		float Step = 0.0f;
+		float Default = 0.0f;
+		bool bInteger = false;
+	};
+
+	/**
+	 *  Whether Param draw as slider instead of text box: must be numeric and declare both ends of range
+	 *  via UIMin/UIMax (ClampMin/ClampMax accepted as fallback). Optional Delta set step, optional
+	 *  UIDefault set value slider start at. Metadata stripped from cooked builds, so those fall back to
+	 *  text boxes.
+	 */
+	/** Key baked slider range store under. Match menu own per-parameter state key. */
+	FString MakeParamKey(const UFunction* Function, const FProperty* Param)
+	{
+		return Function->GetName() + TEXT(":") + Param->GetName();
+	}
+
+	/** Pack range for ini. Parsed back by TryGetBakedSliderRange; keep the two in step. */
+	FString PackSliderRange(const FCheatSliderRange& Range)
+	{
+		return FString::Printf(TEXT("%g,%g,%g,%g,%d"),
+			Range.Min, Range.Max, Range.Step, Range.Default, Range.bInteger ? 1 : 0);
+	}
+
+	/** Read range baked into config by editor session. Cooked-build half of TryGetSliderRange. */
+	bool TryGetBakedSliderRange(const UFunction* Function, const FProperty* Param, FCheatSliderRange& OutRange)
+	{
+		const UCheatMenuMetadataStore* Store = UCheatMenuMetadataStore::Get();
+		if (!Store)
+		{
+			return false;
+		}
+
+		const FString* Packed = Store->SliderRanges.Find(MakeParamKey(Function, Param));
+		if (!Packed)
+		{
+			return false;
+		}
+
+		TArray<FString> Parts;
+		Packed->ParseIntoArray(Parts, TEXT(","));
+		if (Parts.Num() != 5)
+		{
+			return false;
+		}
+
+		OutRange.Min = FCString::Atof(*Parts[0]);
+		OutRange.Max = FCString::Atof(*Parts[1]);
+		OutRange.Step = FCString::Atof(*Parts[2]);
+		OutRange.Default = FCString::Atof(*Parts[3]);
+		OutRange.bInteger = (Parts[4] == TEXT("1"));
+
+		// Same guard live path apply, in case ini got hand-edited into nonsense.
+		return OutRange.Max > OutRange.Min && OutRange.Step > 0.0f;
+	}
+
+	bool TryGetSliderRange(const UFunction* Function, const FProperty* Param, FCheatSliderRange& OutRange)
+	{
+#if WITH_METADATA
+		const bool bInteger = Param->IsA<FIntProperty>();
+		if (!bInteger && !Param->IsA<FFloatProperty>() && !Param->IsA<FDoubleProperty>())
+		{
+			return false;
+		}
+
+		auto ReadMeta = [Param](const TCHAR* Key, const TCHAR* FallbackKey) -> FString
+		{
+			const FString Value = Param->GetMetaData(Key);
+			return (Value.IsEmpty() && FallbackKey) ? Param->GetMetaData(FallbackKey) : Value;
+		};
+
+		const FString MinString = ReadMeta(TEXT("UIMin"), TEXT("ClampMin"));
+		const FString MaxString = ReadMeta(TEXT("UIMax"), TEXT("ClampMax"));
+		if (MinString.IsEmpty() || MaxString.IsEmpty())
+		{
+			return false;
+		}
+
+		OutRange.Min = FCString::Atof(*MinString);
+		OutRange.Max = FCString::Atof(*MaxString);
+		if (OutRange.Max <= OutRange.Min)
+		{
+			return false;
+		}
+
+		OutRange.bInteger = bInteger;
+
+		OutRange.Step = FCString::Atof(*ReadMeta(TEXT("Delta"), nullptr));
+		if (OutRange.Step <= 0.0f)
+		{
+			OutRange.Step = bInteger ? 1.0f : (OutRange.Max - OutRange.Min) / 100.0f;
+		}
+
+		const FString DefaultString = ReadMeta(TEXT("UIDefault"), nullptr);
+		OutRange.Default = DefaultString.IsEmpty()
+			? OutRange.Min
+			: FMath::Clamp(FCString::Atof(*DefaultString), OutRange.Min, OutRange.Max);
+
+		return true;
+#else
+		// Cooked build: metadata gone, so fall back to whatever editor session baked.
+		return TryGetBakedSliderRange(Function, Param, OutRange);
+#endif // WITH_METADATA
+	}
+
+	/** Slider value as console argument (and as readout next to slider). */
+	FString FormatSliderValue(const FCheatSliderRange& Range, float Value)
+	{
+		return Range.bInteger
+			? FString::FromInt(FMath::RoundToInt(Value))
+			: FString::Printf(TEXT("%g"), Value);
+	}
+
+	/**
+	 *  Free-text box contents as exactly one console argument.
+	 *
+	 *  Always quoted, empty included. Empty value appended bare collapse into the space separating
+	 *  arguments, and console tokenizer then slide every later argument up a slot - cheat with blank
+	 *  first box and filled second one would silently run with second value in first parameter. Explicit
+	 *  "" parse as empty token instead, which keep every later argument in own slot.
+	 *
+	 *  What empty token does NOT do is fall back to parameter declared C++ default. That fallback
+	 *  (CPP_Default_<Param>, read in ScriptCore.cpp) sit inside #if WITH_EDITOR, so it do not exist in
+	 *  packaged Development and Test builds this plugin ship to. There empty token abort call for
+	 *  integer and import as zero for float. BuildCheatCommand therefore refuse to send empty numeric
+	 *  argument at all; only string-like parameters reach here empty.
+	 *
+	 *  Backslashes and quotes escaped because console arguments read with FParse::Token in escape-aware
+	 *  mode, so unescaped "C:\Temp" would come back as "C:Temp".
+	 */
+	FString QuoteConsoleArgument(const FString& Value)
+	{
+		return TEXT("\"") + Value.Replace(TEXT("\\"), TEXT("\\\\")).Replace(TEXT("\""), TEXT("\\\"")) + TEXT("\"");
+	}
+
+	/** UEnum backing enum parameter (enum class or TEnumAsByte), or null for non-enum params. */
+	UEnum* TryGetEnum(const FProperty* Param)
+	{
+		if (const FEnumProperty* EnumProp = CastField<FEnumProperty>(Param))
+		{
+			return EnumProp->GetEnum();
+		}
+		if (const FByteProperty* ByteProp = CastField<FByteProperty>(Param))
+		{
+			return ByteProp->Enum; // null for plain uint8
+		}
+		return nullptr;
+	}
+
+	/**
+	 *  Build selectable entries for enum dropdown. OutDisplay is what menu show; OutArg is matching
+	 *  enumerator name console parser accept (e.g. "Wood"). Two arrays stay index-aligned. Skip
+	 *  autogenerated _MAX sentinel and hidden entries.
+	 */
+	void BuildEnumOptions(const UEnum* Enum, TArray<FString>& OutDisplay, TArray<FString>& OutArg)
+	{
+		const int32 Count = Enum->NumEnums();
+		for (int32 Index = 0; Index < Count; ++Index)
+		{
+			FString ArgName = Enum->GetNameStringByIndex(Index);
+			if (ArgName.IsEmpty() || ArgName.EndsWith(TEXT("_MAX")))
+			{
+				continue;
+			}
+
+			// Defensive: strip any leftover "EnumType::" prefix so console get bare enumerator.
+			int32 SeparatorIndex = INDEX_NONE;
+			if (ArgName.FindLastChar(TEXT(':'), SeparatorIndex))
+			{
+				ArgName = ArgName.RightChop(SeparatorIndex + 1);
+			}
+
+			// WITH_METADATA, not WITH_EDITOR: that is guard UEnum::HasMetaData itself declare under, and
+			// same condition rest of this file metadata reads use.
+#if WITH_METADATA
+			if (Enum->HasMetaData(TEXT("Hidden"), Index) || Enum->HasMetaData(TEXT("Spacer"), Index))
+			{
+				continue;
+			}
+#endif // WITH_METADATA
+
+			OutArg.Add(ArgName);
+			OutDisplay.Add(Enum->GetDisplayNameTextByIndex(Index).ToString());
+		}
+	}
+
+	/**
+	 *  Whether reflected function appear as cheat. Native cheats are exec functions. Blueprint cheats
+	 *  cannot be marked exec, so convention recognise them instead: callable function authored on
+	 *  Blueprint-generated class (exclude inherited native functions like base GetPlayerController),
+	 *  not pure (cheat has side effect), not compiler-generated ubergraph stub.
+	 */
+	bool IsCheatFunction(const UFunction* Function)
+	{
+		if (Function->HasAnyFunctionFlags(FUNC_Exec))
+		{
+			return true;
+		}
+
+		const UClass* OwnerClass = Function->GetOwnerClass();
+		return OwnerClass
+			&& OwnerClass->HasAnyClassFlags(CLASS_CompiledFromBlueprint)
+			&& Function->HasAnyFunctionFlags(FUNC_BlueprintCallable)
+			&& !Function->HasAnyFunctionFlags(FUNC_BlueprintPure)
+			&& !Function->GetName().StartsWith(TEXT("ExecuteUbergraph"));
+	}
+
+	/**
+	 *  Invariant key for cheats declaring no Category. Map key and filter subject, so it stay in English;
+	 *  DrawCheats swap in localized label at display time.
+	 */
+	const TCHAR* UncategorizedCategoryId = TEXT("Uncategorized");
+
+	/** Cheat Category metadata, or Uncategorized key. Metadata only exist in editor/non-cooked builds. */
+	FString GetFunctionCategory(const UFunction* Function)
+	{
+#if WITH_METADATA
+		static const FName CategoryKey(TEXT("Category"));
+		if (Function->HasMetaData(CategoryKey))
+		{
+			const FString Category = Function->GetMetaData(CategoryKey);
+			if (!Category.IsEmpty())
+			{
+				return Category;
+			}
+		}
+#else
+		if (const UCheatMenuMetadataStore* Store = UCheatMenuMetadataStore::Get())
+		{
+			if (const FString* Baked = Store->Categories.Find(Function->GetName()))
+			{
+				if (!Baked->IsEmpty())
+				{
+					return *Baked;
+				}
+			}
+		}
+#endif // WITH_METADATA
+		return UncategorizedCategoryId;
+	}
+
+	/** Cheat ToolTip metadata (its doc comment), or empty. Editor/non-cooked builds only. */
+	FString GetFunctionToolTip(const UFunction* Function)
+	{
+#if WITH_METADATA
+		static const FName ToolTipKey(TEXT("ToolTip"));
+		FString ToolTip = Function->GetMetaData(ToolTipKey);
+		ToolTip.TrimStartAndEndInline();
+		return ToolTip;
+#else
+		if (const UCheatMenuMetadataStore* Store = UCheatMenuMetadataStore::Get())
+		{
+			if (const FString* Baked = Store->ToolTips.Find(Function->GetName()))
+			{
+				return *Baked;
+			}
+		}
+		return FString();
+#endif // WITH_METADATA
+	}
+
+	/**
+	 *  Whether cheat gated behind confirmation dialog. Opt in with meta = (CheatConfirm) for default
+	 *  prompt, or CheatConfirm = "message." for custom one. Editor/non-cooked builds only.
+	 */
+	bool GetFunctionConfirmMessage(const UFunction* Function, FText& OutMessage)
+	{
+#if WITH_METADATA
+		static const FName ConfirmKey(TEXT("CheatConfirm"));
+		if (Function->HasMetaData(ConfirmKey))
+		{
+			// Custom prompt authored in cheat own metadata, so it pass through as written. Only generated
+			// fallback is ours to translate.
+			const FString CustomMessage = Function->GetMetaData(ConfirmKey);
+			OutMessage = CustomMessage.IsEmpty()
+				? FText::Format(LOCTEXT("DefaultConfirmPrompt", "Run cheat '{0}'?"), FText::FromString(Function->GetName()))
+				: FText::FromString(CustomMessage);
+			return true;
+		}
+#else
+		// Gate matter more here than anywhere else: without baked fallback, cheat explicitly marked
+		// destructive run with no prompt in packaged build.
+		if (const UCheatMenuMetadataStore* Store = UCheatMenuMetadataStore::Get())
+		{
+			if (const FString* Baked = Store->ConfirmMessages.Find(Function->GetName()))
+			{
+				OutMessage = Baked->IsEmpty()
+					? FText::Format(LOCTEXT("DefaultConfirmPrompt", "Run cheat '{0}'?"), FText::FromString(Function->GetName()))
+					: FText::FromString(*Baked);
+				return true;
+			}
+		}
+#endif // WITH_METADATA
+		return false;
+	}
+
+	/** Lower-cased, trimmed category key, so ordering and comparisons ignore case and stray spaces. */
+	FString NormalizeCategory(const FString& Category)
+	{
+		return Category.TrimStartAndEnd().ToLower();
+	}
+
+	/**
+	 *  Invariant identifiers for pinned virtual sections. Map keys for expanded/collapsed state, so they
+	 *  must not change with display language; labels beside them are what header actually show. Prefix
+	 *  keep them from colliding with real Category.
+	 */
+	const TCHAR* FavoritesSectionId = TEXT("$Favourites");
+	const TCHAR* RecentSectionId = TEXT("$RecentlyUsed");
+
+	/**
+	 *  Order real categories: ones listed in CategoryOrder come first in that order, rest follow
+	 *  alphabetically. bForceGeneralCategoryFirst pin "General" to very top.
+	 */
+	void SortCategoriesByPriority(TArray<FString>& Categories, const UCheatManagerMenuSettings* Settings)
+	{
+		TMap<FString, int32> Priority;
+		int32 Next = 0;
+
+		if (Settings)
+		{
+			if (Settings->bForceGeneralCategoryFirst)
+			{
+				Priority.Add(NormalizeCategory(TEXT("General")), Next++);
+			}
+
+			for (const FString& Entry : Settings->CategoryOrder)
+			{
+				const FString Normalized = NormalizeCategory(Entry);
+				if (!Normalized.IsEmpty() && !Priority.Contains(Normalized))
+				{
+					Priority.Add(Normalized, Next++);
+				}
+			}
+		}
+
+		Categories.Sort([&Priority](const FString& A, const FString& B)
+		{
+			const int32* PriorityA = Priority.Find(NormalizeCategory(A));
+			const int32* PriorityB = Priority.Find(NormalizeCategory(B));
+
+			if ((PriorityA != nullptr) != (PriorityB != nullptr))
+			{
+				return PriorityA != nullptr; // prioritised category outrank unlisted one
+			}
+			if (PriorityA && PriorityB && *PriorityA != *PriorityB)
+			{
+				return *PriorityA < *PriorityB;
+			}
+			return A < B;
+		});
+	}
+
+	/**
+	 *  Rows drawn above gamepad highlight, so selection never sit flush against top of list and there is
+	 *  some context in direction of travel.
+	 */
+	constexpr int32 GamepadNavLeadRows = 3;
+
+	/**
+	 *  Rows drawn from window start.
+	 *
+	 *  Row heights vary far more than they look: bare cheat is one line, but engine cheat like BugItGo
+	 *  wrap six parameters onto three. So this cannot be tuned to fill list exactly, and over-drawing is
+	 *  safe direction - scroll box clip excess. Under-drawing would leave list visibly short whenever
+	 *  rows happen to be small.
+	 */
+	constexpr int32 GamepadNavWindowRows = 24;
+
+	/** Highlight tint for gamepad-selected row/header (faint blue over dark panel). */
+	const FSlateColorBrush& GetSelectionBrush()
+	{
+		static const FSlateColorBrush SelectionBrush(FLinearColor(0.15f, 0.45f, 0.9f, 0.35f));
+		return SelectionBrush;
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Console command: toggle menu for world it run in. Bind to Enhanced Input action (or type in console)
+// when raw toggle-key pre-processor is not the binding you want.
+// World already identify one game instance, so this need no focus check.
+// ---------------------------------------------------------------------------
+static void ToggleCheatMenuForWorld(UWorld* World)
+{
+	if (!World)
+	{
+		return;
+	}
+	if (UGameInstance* GameInstance = World->GetGameInstance())
+	{
+		if (UCheatManagerMenuSubsystem* Subsystem = GameInstance->GetSubsystem<UCheatManagerMenuSubsystem>())
+		{
+			Subsystem->ToggleMenu();
+		}
+	}
+}
+
+static FAutoConsoleCommandWithWorld GToggleCheatMenuCommand(
+	TEXT("CheatMenu.Toggle"),
+	TEXT("Toggle the Cheat Manager Menu. Bind to an Enhanced Input action for custom key setups."),
+	FConsoleCommandWithWorldDelegate::CreateStatic(&ToggleCheatMenuForWorld));
+
+bool UCheatManagerMenuSubsystem::ShouldCreateSubsystem(UObject* Outer) const
+{
+	if (!Super::ShouldCreateSubsystem(Outer))
+	{
+		return false;
+	}
+
+	// No Slate (dedicated server, commandlet) mean nothing to draw to.
+	if (!FSlateApplication::IsInitialized())
+	{
+		return false;
+	}
+
+	// Master off-switch. Refusing to create subsystem at all is what make it complete: take input
+	// pre-processor, both key binds and CheatMenu.Toggle console command out in one move. Clearing binds
+	// alone leave console command live.
+	const UCheatManagerMenuSettings* Settings = UCheatManagerMenuSettings::Get();
+	return !Settings || Settings->bEnabled;
+}
+
+void UCheatManagerMenuSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	if (!FSlateApplication::IsInitialized())
+	{
+		return;
+	}
+
+	InputProcessor = MakeShared<FCheatMenuInputProcessor>(this);
+	FSlateApplication::Get().RegisterInputPreProcessor(InputProcessor);
+
+	PreTickHandle = FSlateApplication::Get().OnPreTick().AddUObject(this, &UCheatManagerMenuSubsystem::DrawMenu);
+
+	// Both binds in log, so "menu won't open" is one line away from answer.
+	const FKey KeyboardBind = GetToggleKey();
+	const FKey GamepadBind = GetGamepadToggleKey();
+	const FKey GamepadModifier = GetGamepadToggleModifier();
+
+	const FString KeyboardText = KeyboardBind.IsValid() ? KeyboardBind.ToString() : FString(TEXT("<unbound>"));
+	FString GamepadText = GamepadBind.IsValid() ? GamepadBind.ToString() : FString(TEXT("<unbound>"));
+	if (GamepadBind.IsValid() && GamepadModifier.IsValid())
+	{
+		GamepadText = FString::Printf(TEXT("hold %s + %s"), *GamepadModifier.ToString(), *GamepadText);
+	}
+
+	UE_LOG(LogCheatMenu, Log, TEXT("Cheat menu ready. Keyboard: %s | Gamepad: %s"), *KeyboardText, *GamepadText);
+}
+
+void UCheatManagerMenuSubsystem::Deinitialize()
+{
+	// Shutting down with menu open would strand game with menu cursor.
+	RestoreCursorState();
+	bMenuOpen = false;
+
+	// Ending PIE with menu still open is common case, and it would throw away everything harvested this
+	// session.
+	FlushBakedMetadata();
+
+	if (FSlateApplication::IsInitialized())
+	{
+		if (PreTickHandle.IsValid())
+		{
+			FSlateApplication::Get().OnPreTick().Remove(PreTickHandle);
+		}
+		if (InputProcessor.IsValid())
+		{
+			FSlateApplication::Get().UnregisterInputPreProcessor(InputProcessor);
+		}
+	}
+
+	PreTickHandle.Reset();
+	InputProcessor.Reset();
+
+	Super::Deinitialize();
+}
+
+FKey UCheatManagerMenuSubsystem::GetToggleKey() const
+{
+	const UCheatManagerMenuSettings* Settings = UCheatManagerMenuSettings::Get();
+	return Settings ? Settings->ToggleKey : EKeys::F1;
+}
+
+FKey UCheatManagerMenuSubsystem::GetGamepadToggleKey() const
+{
+	const UCheatManagerMenuSettings* Settings = UCheatManagerMenuSettings::Get();
+
+	// Gamepad keys only. Keyboard key configured here would be second, undocumented keyboard bind that
+	// silently swallow that key from game, so treat it as unset instead.
+	return (Settings && Settings->GamepadToggleKey.IsGamepadKey()) ? Settings->GamepadToggleKey : EKeys::Invalid;
+}
+
+FKey UCheatManagerMenuSubsystem::GetGamepadToggleModifier() const
+{
+	const UCheatManagerMenuSettings* Settings = UCheatManagerMenuSettings::Get();
+	return (Settings && Settings->GamepadToggleModifier.IsGamepadKey()) ? Settings->GamepadToggleModifier : EKeys::Invalid;
+}
+
+bool UCheatManagerMenuSubsystem::IsToggleInput(const FKey& Key, bool bGamepadModifierHeld) const
+{
+	const FKey KeyboardBind = GetToggleKey();
+	if (KeyboardBind.IsValid() && Key == KeyboardBind)
+	{
+		return true;
+	}
+
+	const FKey GamepadBind = GetGamepadToggleKey();
+	if (GamepadBind.IsValid() && Key == GamepadBind)
+	{
+		// Configured modifier make this chord, so button on its own must fall through to game - else bind
+		// would eat whatever that button normally do.
+		return GetGamepadToggleModifier().IsValid() ? bGamepadModifierHeld : true;
+	}
+
+	return false;
+}
+
+bool UCheatManagerMenuSubsystem::OwnsFocusedViewport() const
+{
+	if (!FSlateApplication::IsInitialized())
+	{
+		return false;
+	}
+
+	UGameInstance* GameInstance = GetGameInstance();
+	UGameViewportClient* ViewportClient = GameInstance ? GameInstance->GetGameViewportClient() : nullptr;
+	if (!ViewportClient)
+	{
+		return false;
+	}
+
+	const TSharedPtr<SWindow> ViewportWindow = ViewportClient->GetWindow();
+	if (!ViewportWindow.IsValid())
+	{
+		// Viewport not parented to window (embedded, or not shown yet). Nothing to disambiguate against,
+		// so do not block toggle - single-instance session must keep working.
+		return true;
+	}
+
+	const TSharedPtr<SWindow> ActiveWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
+	if (!ActiveWindow.IsValid())
+	{
+		return false;
+	}
+
+	// Descendant test cover menu, tooltip or modal owned by game window holding focus.
+	return ActiveWindow == ViewportWindow || ActiveWindow->IsDescendantOf(ViewportWindow);
+}
+
+FName UCheatManagerMenuSubsystem::GetMenuRootName() const
+{
+	if (!MenuRootName.IsNone())
+	{
+		return MenuRootName;
+	}
+
+	MenuRootName = TEXT("CheatManagerMenu");
+
+	// PIE run one game instance - so one of these subsystems - per client. Shared root name would collide
+	// in SlateIM root registry and stack every client menu into single overlay.
+	if (const UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (const FWorldContext* WorldContext = GameInstance->GetWorldContext())
+		{
+			if (WorldContext->PIEInstance != INDEX_NONE)
+			{
+				MenuRootName = FName(*FString::Printf(TEXT("CheatManagerMenu_%d"), WorldContext->PIEInstance));
+			}
+		}
+	}
+
+	return MenuRootName;
+}
+
+void UCheatManagerMenuSubsystem::NotifyNonGamepadInput()
+{
+	// Dropping highlight is what clear bNavWindowActive on next draw, which put whole list back in scroll
+	// box. Without this, window latch for rest of menu session after single D-pad press - accidental
+	// stick nudge included - and mouse user silently lose access to every row outside it.
+	GamepadNavIndex = INDEX_NONE;
+	bNavAnchorValid = false;
+}
+
+bool UCheatManagerMenuSubsystem::HandleGamepadNavKey(const FKey& Key, bool bIsRepeat)
+{
+	const UCheatManagerMenuSettings* Settings = UCheatManagerMenuSettings::Get();
+	if (Settings && !Settings->bEnableGamepadNavigation)
+	{
+		return false;
+	}
+
+	// Action buttons must not act on auto-repeat. XInput repeat every button, face buttons included, and
+	// DrawMenu clear bPendingActivate each frame - so held (A) produced one cheat run per repeat, roughly
+	// ten a second. Worse than stutter: each run push cheat into Recently Used, which reshuffle list under
+	// highlight, so single held press could fire string of different cheats. Movement keys deliberately
+	// keep their repeats, which is what make hold-to-scroll work; repeated move is harmless because it
+	// only move highlight.
+	const bool bActionKey = (Key == EKeys::Gamepad_FaceButton_Bottom) || (Key == EKeys::Gamepad_FaceButton_Right);
+	if (bIsRepeat && bActionKey)
+	{
+		return true; // consumed, so game never see it either, but deliberately do nothing
+	}
+
+	if (Key == EKeys::Gamepad_DPad_Up || Key == EKeys::Gamepad_LeftStick_Up)
+	{
+		PendingNavDelta -= 1;
+		return true;
+	}
+	if (Key == EKeys::Gamepad_DPad_Down || Key == EKeys::Gamepad_LeftStick_Down)
+	{
+		PendingNavDelta += 1;
+		return true;
+	}
+	if (Key == EKeys::Gamepad_DPad_Left || Key == EKeys::Gamepad_LeftStick_Left)
+	{
+		PendingAdjust = -1;
+		return true;
+	}
+	if (Key == EKeys::Gamepad_DPad_Right || Key == EKeys::Gamepad_LeftStick_Right)
+	{
+		PendingAdjust = 1;
+		return true;
+	}
+	if (Key == EKeys::Gamepad_FaceButton_Bottom)
+	{
+		bPendingActivate = true;
+		return true;
+	}
+	if (Key == EKeys::Gamepad_FaceButton_Right)
+	{
+		bPendingBack = true;
+		return true;
+	}
+	if (Key == EKeys::Gamepad_LeftShoulder)
+	{
+		PendingCategoryJump = -1;
+		return true;
+	}
+	if (Key == EKeys::Gamepad_RightShoulder)
+	{
+		PendingCategoryJump = 1;
+		return true;
+	}
+	return false;
+}
+
+void UCheatManagerMenuSubsystem::ToggleMenu()
+{
+	ToggleMenuForUser(0);
+}
+
+void UCheatManagerMenuSubsystem::ToggleMenuForUser(int32 UserIndex)
+{
+	bMenuOpen = !bMenuOpen;
+
+	if (bMenuOpen)
+	{
+		// Everything below resolve against this user, so record it before touching controller.
+		ActiveUserIndex = UserIndex;
+
+		// Start each session with no highlight; first D-pad press seed it. Drop any gamepad intents left
+		// over from before menu opened so they cannot act on fresh list.
+		GamepadNavIndex = INDEX_NONE;
+		bNavAnchorValid = false;
+		BlockedFunctionName = NAME_None;
+		BlockedParamName.Reset();
+
+		// Re-harvest metadata this session, so cheat edited since menu last opened get picked up instead
+		// of kept at stale baked value.
+		BakedThisSession.Reset();
+
+		PendingNavDelta = 0;
+		PendingCategoryJump = 0;
+		PendingAdjust = 0;
+		bPendingActivate = false;
+		bPendingBack = false;
+
+		// Make sure cheats available so there is something to show.
+		const UCheatManagerMenuSettings* Settings = UCheatManagerMenuSettings::Get();
+		if (!Settings || Settings->bAutoEnableCheats)
+		{
+			if (APlayerController* PlayerController = ResolvePlayerController())
+			{
+				if (!PlayerController->CheatManager)
+				{
+					// bForce=true short-circuit AGameModeBase::AllowCheats, which is what refuse
+					// cheat manager on networked client. Manufacturing one anyway expose every
+					// exec in project to external playtest build, so that is opt-in.
+					PlayerController->AddCheats(Settings && Settings->bForceCheatsInMultiplayer);
+				}
+			}
+		}
+
+		PushMenuCursorState();
+	}
+	else
+	{
+		RestoreCursorState();
+		ActiveUserIndex = 0;
+
+		// Written on close, not during draw: harvest touch settings CDO every frame, and ini write per
+		// frame would be absurd.
+		FlushBakedMetadata();
+	}
+}
+
+void UCheatManagerMenuSubsystem::PushMenuCursorState()
+{
+	APlayerController* PlayerController = ResolvePlayerController();
+	UGameInstance* GameInstance = GetGameInstance();
+	UGameViewportClient* ViewportClient = GameInstance ? GameInstance->GetGameViewportClient() : nullptr;
+	if (!PlayerController || !ViewportClient)
+	{
+		return;
+	}
+
+	// Viewport half: captured once per menu session, never again while menu open. Second capture would
+	// read back override applied below and record it as game own state.
+	if (!SavedViewportState.bValid)
+	{
+		SavedViewportState.bIgnoreInput = ViewportClient->IgnoreInput();
+		SavedViewportState.bHideCursorDuringCapture = ViewportClient->HideCursorDuringCapture();
+		SavedViewportState.CaptureMode = ViewportClient->GetMouseCaptureMode();
+		SavedViewportState.LockMode = ViewportClient->GetMouseLockMode();
+		SavedViewportState.bValid = true;
+	}
+
+	// Controller half: genuinely per-controller, so it re-read whenever override move to replacement
+	// controller.
+	bSavedShowMouseCursor = PlayerController->bShowMouseCursor;
+	bSavedShowMouseCursorValid = true;
+
+	CursorOverrideController = PlayerController;
+
+	// GameAndUI not UIOnly: game keep receiving input, so cheats can fire while still flying camera
+	// around. ApplyInputMode ReleaseMouseCapture free captured cursor.
+	FInputModeGameAndUI InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	InputMode.SetHideCursorDuringCapture(false);
+	PlayerController->SetInputMode(InputMode);
+	PlayerController->SetShowMouseCursor(true);
+}
+
+void UCheatManagerMenuSubsystem::RestoreCursorState()
+{
+	if (!SavedViewportState.bValid)
+	{
+		return;
+	}
+
+	APlayerController* PlayerController = CursorOverrideController.Get();
+	UGameInstance* GameInstance = GetGameInstance();
+	UGameViewportClient* ViewportClient = GameInstance ? GameInstance->GetGameViewportClient() : nullptr;
+
+	const FSavedViewportMouseState Saved = SavedViewportState;
+	const bool bRestoreShowCursor = bSavedShowMouseCursorValid;
+	const bool bShowCursor = bSavedShowMouseCursor;
+
+	// Disarmed first: controller or viewport torn down while menu open (level travel, shutdown) must not
+	// leave stale override that later restore would apply to something else.
+	SavedViewportState = FSavedViewportMouseState();
+	bSavedShowMouseCursorValid = false;
+	CursorOverrideController = nullptr;
+
+	if (!ViewportClient)
+	{
+		return;
+	}
+
+	// Controller half optional. Viewport override outlive controller - controller destroyed while menu
+	// open (kicked client, cheat that destroy it) must not strand menu CaptureDuringMouseDown /
+	// DoNotLock on viewport still very much alive, which is exactly what early bail here used to do.
+	if (PlayerController)
+	{
+		// Routed through input mode so Slate focus/capture reply match fields below — writing viewport
+		// fields alone leave game-only cursor visible and uncaptured.
+		const bool bWasGameCapture = Saved.CaptureMode == EMouseCaptureMode::CapturePermanently
+			|| Saved.CaptureMode == EMouseCaptureMode::CapturePermanently_IncludingInitialMouseDown;
+
+		if (bWasGameCapture)
+		{
+			FInputModeGameOnly InputMode;
+			InputMode.SetConsumeCaptureMouseDown(Saved.CaptureMode == EMouseCaptureMode::CapturePermanently);
+			PlayerController->SetInputMode(InputMode);
+		}
+		else if (Saved.bIgnoreInput)
+		{
+			FInputModeUIOnly InputMode;
+			InputMode.SetLockMouseToViewportBehavior(Saved.LockMode);
+			PlayerController->SetInputMode(InputMode);
+		}
+		else
+		{
+			FInputModeGameAndUI InputMode;
+			InputMode.SetLockMouseToViewportBehavior(Saved.LockMode);
+			InputMode.SetHideCursorDuringCapture(Saved.bHideCursorDuringCapture);
+			PlayerController->SetInputMode(InputMode);
+		}
+	}
+
+	// Input modes normalise these to their own defaults; put exact captured values back. Done whether or
+	// not controller survived, because these are viewport fields, not controller ones.
+	ViewportClient->SetMouseCaptureMode(Saved.CaptureMode);
+	ViewportClient->SetMouseLockMode(Saved.LockMode);
+	ViewportClient->SetHideCursorDuringCapture(Saved.bHideCursorDuringCapture);
+	ViewportClient->SetIgnoreInput(Saved.bIgnoreInput);
+
+	if (PlayerController && bRestoreShowCursor)
+	{
+		PlayerController->SetShowMouseCursor(bShowCursor);
+	}
+}
+
+void UCheatManagerMenuSubsystem::RefreshCursorOverrideForCurrentController()
+{
+	if (!SavedViewportState.bValid)
+	{
+		// Push at open time bail when controller or viewport not up yet (opening during level transition,
+		// for one). Retry each frame - draw pass only run once both exist, and push that still cannot
+		// proceed cost two null checks.
+		PushMenuCursorState();
+		return;
+	}
+
+	APlayerController* CurrentController = ResolvePlayerController();
+	APlayerController* PreviousController = CursorOverrideController.Get();
+	if (PreviousController == CurrentController)
+	{
+		return;
+	}
+
+	// Map change destroy controller override was applied to, and debug-camera cheat swap it for another
+	// still alive. Either way replacement sit in game capture mode, so leaving it alone strand menu over
+	// hidden, captured cursor no click can reach.
+	//
+	// What must NOT happen here is re-capturing saved state. Only bShowMouseCursor belong to controller;
+	// capture mode, lock mode, hide-during-capture and ignore-input flags all live on UGameViewportClient,
+	// which neither map load nor controller swap recreate - so it still hold override this menu applied.
+	// Re-capturing would record menu own configuration as game one and hand it back on close, permanently
+	// uncapturing mouse.
+	if (PreviousController && bSavedShowMouseCursorValid)
+	{
+		// Outgoing controller may outlive swap (debug camera case). Left alone it keep menu forced cursor,
+		// and UGameViewportClient::GetCursor read exactly that controller when it is first local player -
+		// so cursor would stay drawn over gameplay for the session.
+		PreviousController->SetShowMouseCursor(bSavedShowMouseCursor);
+	}
+
+	bSavedShowMouseCursorValid = false;
+	CursorOverrideController = nullptr;
+
+	// Re-apply override to new controller and capture its bShowMouseCursor, leaving viewport half of
+	// snapshot untouched.
+	PushMenuCursorState();
+}
+
+APlayerController* UCheatManagerMenuSubsystem::ResolvePlayerController() const
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	if (!GameInstance)
+	{
+		return nullptr;
+	}
+
+	// Split screen: drive cheat manager belonging to whoever opened menu. User 0, and any user with no
+	// local player of its own, fall through to first local player - single-player case and console
+	// command path.
+	if (ActiveUserIndex > 0)
+	{
+		if (const ULocalPlayer* LocalPlayer = GameInstance->FindLocalPlayerFromControllerId(ActiveUserIndex))
+		{
+			if (APlayerController* PlayerController = LocalPlayer->PlayerController)
+			{
+				return PlayerController;
+			}
+		}
+	}
+
+	return GameInstance->GetFirstLocalPlayerController();
+}
+
+UCheatManager* UCheatManagerMenuSubsystem::ResolveCheatManager() const
+{
+	if (const APlayerController* PlayerController = ResolvePlayerController())
+	{
+		return PlayerController->CheatManager;
+	}
+	return nullptr;
+}
+
+void UCheatManagerMenuSubsystem::GatherCheatObjects(UCheatManager* CheatManager, TArray<UObject*>& OutCheatObjects) const
+{
+	OutCheatObjects.Reset();
+	if (!CheatManager)
+	{
+		return;
+	}
+
+	OutCheatObjects.Add(CheatManager);
+
+	// UCheatManager::CheatManagerExtensions is protected and has no public getter, so reflection must
+	// read it. Every Blueprint cheat reach menu through this lookup, so rename on engine side would empty
+	// menu with nothing to explain it - hence the warning.
+	const FArrayProperty* ExtensionsProp = FindFProperty<FArrayProperty>(UCheatManager::StaticClass(), TEXT("CheatManagerExtensions"));
+	const FObjectProperty* InnerObjectProp = ExtensionsProp ? CastField<FObjectProperty>(ExtensionsProp->Inner) : nullptr;
+	if (!InnerObjectProp)
+	{
+		static bool bWarnedMissingExtensionsProperty = false;
+		if (!bWarnedMissingExtensionsProperty)
+		{
+			bWarnedMissingExtensionsProperty = true;
+			UE_LOG(LogCheatMenu, Warning,
+				TEXT("Could not resolve UCheatManager::CheatManagerExtensions by reflection. Cheat manager ")
+				TEXT("extensions, including every Blueprint cheat, will be missing from the cheat menu."));
+		}
+		return;
+	}
+
+	FScriptArrayHelper Helper(ExtensionsProp, ExtensionsProp->ContainerPtrToValuePtr<void>(CheatManager));
+	for (int32 Index = 0; Index < Helper.Num(); ++Index)
+	{
+		if (UObject* Extension = InnerObjectProp->GetObjectPropertyValue(Helper.GetRawPtr(Index)))
+		{
+			OutCheatObjects.Add(Extension);
+		}
+	}
+}
+
+void UCheatManagerMenuSubsystem::BakeFunctionMetadata(UFunction* Function)
+{
+#if WITH_METADATA
+	UCheatMenuMetadataStore* Store = UCheatMenuMetadataStore::GetMutable();
+	if (!Store || !Function)
+	{
+		return;
+	}
+
+	const FString FunctionName = Function->GetName();
+
+	// Helper: assign into map only when value change, so unchanged project stay clean.
+	auto SetIfChanged = [this](TMap<FString, FString>& Map, const FString& Key, const FString& Value)
+	{
+		if (const FString* Existing = Map.Find(Key))
+		{
+			if (*Existing == Value)
+			{
+				return;
+			}
+		}
+		Map.Add(Key, Value);
+		bBakedMetadataDirty = true;
+	};
+
+	auto RemoveIfPresent = [this](TMap<FString, FString>& Map, const FString& Key)
+	{
+		if (Map.Remove(Key) > 0)
+		{
+			bBakedMetadataDirty = true;
+		}
+	};
+
+	// Category. Only real categories stored; Uncategorized fallback is what absent entry already mean, so
+	// writing it would pad ini.
+	static const FName CategoryKey(TEXT("Category"));
+	const FString Category = Function->HasMetaData(CategoryKey) ? Function->GetMetaData(CategoryKey) : FString();
+	if (Category.IsEmpty())
+	{
+		RemoveIfPresent(Store->Categories, FunctionName);
+	}
+	else
+	{
+		SetIfChanged(Store->Categories, FunctionName, Category);
+	}
+
+	// Tooltip, trimmed same way live lookup trim it.
+	static const FName ToolTipKey(TEXT("ToolTip"));
+	FString ToolTip = Function->GetMetaData(ToolTipKey);
+	ToolTip.TrimStartAndEndInline();
+	if (ToolTip.IsEmpty())
+	{
+		RemoveIfPresent(Store->ToolTips, FunctionName);
+	}
+	else
+	{
+		SetIfChanged(Store->ToolTips, FunctionName, ToolTip);
+	}
+
+	// Confirmation gate. Empty value meaningful here: record "gated, use generated prompt", which is what
+	// meta = (CheatConfirm) with no text mean.
+	static const FName ConfirmKey(TEXT("CheatConfirm"));
+	if (Function->HasMetaData(ConfirmKey))
+	{
+		SetIfChanged(Store->ConfirmMessages, FunctionName, Function->GetMetaData(ConfirmKey));
+	}
+	else
+	{
+		RemoveIfPresent(Store->ConfirmMessages, FunctionName);
+	}
+
+	// Slider ranges, per parameter.
+	for (TFieldIterator<FProperty> ParamIt(Function); ParamIt && (ParamIt->PropertyFlags & CPF_Parm); ++ParamIt)
+	{
+		FProperty* Param = *ParamIt;
+		if (!IsInputParam(Param))
+		{
+			continue;
+		}
+
+		const FString ParamKey = MakeParamKey(Function, Param);
+
+		FCheatSliderRange Range;
+		if (TryGetSliderRange(Function, Param, Range))
+		{
+			SetIfChanged(Store->SliderRanges, ParamKey, PackSliderRange(Range));
+		}
+		else
+		{
+			RemoveIfPresent(Store->SliderRanges, ParamKey);
+		}
+	}
+#endif // WITH_METADATA
+}
+
+void UCheatManagerMenuSubsystem::FlushBakedMetadata()
+{
+#if WITH_METADATA
+	if (!bBakedMetadataDirty)
+	{
+		return;
+	}
+
+	UCheatMenuMetadataStore* Store = UCheatMenuMetadataStore::GetMutable();
+	if (!Store)
+	{
+		return;
+	}
+
+	// Dirty flag clear only on successful write. Clearing it up front would mean failed write never
+	// retried: re-opening menu re-harvest identical values, SetIfChanged mark nothing dirty, and next
+	// flush early-return above - so checking out read-only file and trying again would silently do
+	// nothing for rest of session.
+
+	// Written to config file plugin own, not project DefaultGame.ini, so generated data never land in
+	// file consumer team author and diff. SaveToStagedConfig pick location and log which one it used.
+	if (Store->SaveToStagedConfig())
+	{
+		bBakedMetadataDirty = false;
+
+		UE_LOG(LogCheatMenu, Log,
+			TEXT("Baked %d categories, %d tooltips, %d confirms and %d slider ranges."),
+			Store->Categories.Num(), Store->ToolTips.Num(),
+			Store->ConfirmMessages.Num(), Store->SliderRanges.Num());
+	}
+#endif // WITH_METADATA
+}
+
+void UCheatManagerMenuSubsystem::PushRecentlyUsed(FName FunctionName)
+{
+	const UCheatManagerMenuSettings* Settings = UCheatManagerMenuSettings::Get();
+	const int32 Cap = Settings ? Settings->RecentlyUsedCount : 8;
+	if (Cap <= 0)
+	{
+		RecentlyUsed.Reset();
+		return;
+	}
+
+	RecentlyUsed.Remove(FunctionName);
+	RecentlyUsed.Insert(FunctionName, 0);
+	if (RecentlyUsed.Num() > Cap)
+	{
+		RecentlyUsed.SetNum(Cap);
+	}
+}
+
+void UCheatManagerMenuSubsystem::RequestRunCheat(UFunction* Function)
+{
+	if (!Function)
+	{
+		return;
+	}
+
+	// Parameter that cannot survive empty argument block run outright, and row say which one. Running
+	// anyway would either abort inside engine with nothing but log line, or - worse - succeed with
+	// silently-zeroed value.
+	FString Command;
+	FString MissingParam;
+	if (!BuildCheatCommand(Function, Command, MissingParam))
+	{
+		BlockedFunctionName = Function->GetFName();
+		BlockedParamName = MissingParam;
+		return;
+	}
+
+	BlockedFunctionName = NAME_None;
+	BlockedParamName.Reset();
+
+	Pending.bValid = true;
+	Pending.Command = MoveTemp(Command);
+	Pending.Owner = FunctionOwners.FindRef(Function);
+	Pending.bExec = Function->HasAnyFunctionFlags(FUNC_Exec);
+	Pending.FunctionName = Function->GetFName();
+	Pending.bNeedsConfirm = GetFunctionConfirmMessage(Function, Pending.ConfirmMessage);
+}
+
+void UCheatManagerMenuSubsystem::DrawMenu(float /*DeltaTime*/)
+{
+	if (!bMenuOpen || !SlateIM::CanUpdateSlateIM())
+	{
+		return;
+	}
+
+	// Gamepad: close request win outright, before any drawing.
+	if (bPendingBack)
+	{
+		bPendingBack = false;
+		ToggleMenu();
+		return;
+	}
+
+	UGameInstance* GameInstance = GetGameInstance();
+	if (!GameInstance)
+	{
+		return;
+	}
+
+	UGameViewportClient* ViewportClient = GameInstance->GetGameViewportClient();
+	if (!ViewportClient)
+	{
+		return;
+	}
+
+	// Combo boxes matched positionally against previous frame to catch SlateIM handing reused widget to
+	// different enum; cursor restart with each draw.
+	ComboSlotIndex = 0;
+
+	// Menu can outlive controller it opened on (cheat that travel to another map, for one).
+	RefreshCursorOverrideForCurrentController();
+
+	// Apply queued gamepad move/jump against last frame row layout, before this frame draw rebuild it.
+	// Activate/adjust consumed inside draw when highlighted row reached.
+	if (PendingNavDelta != 0)
+	{
+		// Explicit move is ordinal by nature, so identity anchor drop and row this land on re-establish
+		// it during draw below.
+		bNavAnchorValid = false;
+
+		// First press only seed highlight; it do not also move it.
+		GamepadNavIndex = (GamepadNavIndex == INDEX_NONE) ? 0 : (GamepadNavIndex + PendingNavDelta);
+		if (LastNavCount > 0)
+		{
+			const UCheatManagerMenuSettings* NavSettings = UCheatManagerMenuSettings::Get();
+			if (NavSettings && NavSettings->bLoopGamepadNavigation)
+			{
+				// Modulo twice so move up off top land on last row, not negative index: C++ keep sign of
+				// dividend, which % alone would leave out of range.
+				GamepadNavIndex = ((GamepadNavIndex % LastNavCount) + LastNavCount) % LastNavCount;
+			}
+			else
+			{
+				GamepadNavIndex = FMath::Clamp(GamepadNavIndex, 0, LastNavCount - 1);
+			}
+		}
+		PendingNavDelta = 0;
+	}
+	if (PendingCategoryJump != 0 && HeaderNavIndices.Num() > 0)
+	{
+		bNavAnchorValid = false; // ordinal move, same as D-pad path above
+		const int32 Current = GamepadNavIndex;
+		int32 Target = GamepadNavIndex;
+		if (PendingCategoryJump > 0)
+		{
+			Target = HeaderNavIndices[0];
+			for (const int32 Header : HeaderNavIndices)
+			{
+				if (Header > Current) { Target = Header; break; }
+			}
+		}
+		else
+		{
+			Target = HeaderNavIndices.Last();
+			for (int32 Index = HeaderNavIndices.Num() - 1; Index >= 0; --Index)
+			{
+				if (HeaderNavIndices[Index] < Current) { Target = HeaderNavIndices[Index]; break; }
+			}
+		}
+		GamepadNavIndex = Target;
+		PendingCategoryJump = 0;
+	}
+
+	// List cannot scroll to follow highlight (SlateIM expose no way to do it), so once gamepad in use
+	// drawn rows slide instead. Start deliberately not clamped against end of list: letting window run
+	// short at bottom keep highlight fixed distance from top, which is what make it reliably visible
+	// whatever row heights are.
+	bNavWindowActive = (GamepadNavIndex != INDEX_NONE);
+	NavWindowStart = bNavWindowActive ? FMath::Max(0, GamepadNavIndex - GamepadNavLeadRows) : 0;
+
+	UCheatManager* CheatManager = ResolveCheatManager();
+
+	// Panel size, and slice of it title + filter rows consume. Cheat list get rest, enforced with
+	// MaxHeight not Fill: SlateIM Fill() map to SStackBox StretchContent, which never shrink slot below
+	// its content desired size, so with 80+ cheats scroll box grow past panel and neither clip nor show
+	// scroll bar. MaxHeight cap wrapping SBox desired height, which is only thing that actually bound it.
+	// Keep these in sync.
+	// Reserve deliberately generous. SlateIM have no fill mode that shrink below content desired size, so
+	// header height cannot be measured and subtracted; it must be assumed. Assumption too small and list
+	// overflow, clipped row draw outside panel - so header strings stay short and reserve absorb one
+	// wrapped line of each.
+	// Width buy two things at once: cheat parameters sit beside its run button instead of wrapping onto
+	// own line, and header strings stop being at risk of wrapping, which is what reserve below must guard
+	// against.
+	//
+	// Configurable, because right width depend on consumer cheats, not on anything this plugin know:
+	// project whose cheats take three parameters each need far more room than one whose cheats take none.
+	const UCheatManagerMenuSettings* LayoutSettings = UCheatManagerMenuSettings::Get();
+	FVector2f PanelOffset = LayoutSettings ? FVector2f(LayoutSettings->PanelOffset) : FVector2f(40.0f, 40.0f);
+	FVector2f PanelExtent = LayoutSettings ? FVector2f(LayoutSettings->PanelSize) : FVector2f(820.0f, 680.0f);
+
+	// Clamp against viewport so panel configured larger than window, or window resized smaller than
+	// panel, cannot run off edge and strand scroll bar out of reach. Slate units are pre-DPI, so viewport
+	// size must divide by scale to compare like with like.
+	FVector2D ViewportSize;
+	ViewportClient->GetViewportSize(ViewportSize);
+	if (ViewportSize.X > 0.0 && ViewportSize.Y > 0.0)
+	{
+		const float DpiScale = ViewportClient->GetDPIScale();
+		const FVector2f Available = FVector2f(ViewportSize) / FMath::Max(DpiScale, KINDA_SMALL_NUMBER);
+
+		// Minimum margin on far side, so scroll bar never sit flush against window edge.
+		constexpr float EdgeMargin = 16.0f;
+		PanelOffset.X = FMath::Max(0.0f, FMath::Min(PanelOffset.X, Available.X - EdgeMargin));
+		PanelOffset.Y = FMath::Max(0.0f, FMath::Min(PanelOffset.Y, Available.Y - EdgeMargin));
+		PanelExtent.X = FMath::Clamp(PanelExtent.X, 240.0f, FMath::Max(240.0f, Available.X - PanelOffset.X - EdgeMargin));
+		PanelExtent.Y = FMath::Clamp(PanelExtent.Y, 160.0f, FMath::Max(160.0f, Available.Y - PanelOffset.Y - EdgeMargin));
+	}
+
+	const float PanelHeight = PanelExtent.Y;
+
+	// Reserve for title and filter rows. Header run about 52 units with single-line strings, so this
+	// carry roughly line of slack; strings stay short precisely so it can be this tight. Too generous and
+	// list stop well short of bottom of panel.
+	constexpr float PanelHeaderHeight = 64.0f;
+
+	SlateIM::FViewportRootLayout Layout;
+	Layout.Anchors = FAnchors(0.0f, 0.0f);
+	Layout.Alignment = FVector2f(0.0f, 0.0f);
+	Layout.Offset = PanelOffset;
+	Layout.Size = PanelExtent;
+	// Above every SGameLayerManager layer (Player=100, Viewport=200, TitleBar=300, Tooltip=400, Debug=500),
+	// so no game UI can cover menu.
+	Layout.ZOrder = 100000;
+
+	// Reset gamepad row layout for this frame draw; rebuilt as rows emit.
+	NavCursor = 0;
+	HeaderNavIndices.Reset();
+	NavAnchorResolvedRow = INDEX_NONE;
+
+	// Viewport-client root go straight into SGameLayerManager top-level overlay via AddGameLayerWidget,
+	// where ZOrder outrank every layer. ULocalPlayer overload would land in Player layer (order 100),
+	// which UMG AddToViewport widgets (Viewport layer, order 200) always draw over whatever ZOrder say.
+	if (SlateIM::BeginViewportRoot(GetMenuRootName(), ViewportClient, Layout))
+	{
+		SlateIM::BeginBorder("ToolPanel.GroupBorder");
+
+		// HAlign_Fill mandatory here, no equivalent default. SlateIM alignment calls apply to next widget
+		// slot in its parent, and BeginStack take no alignment overrides, so unqualified stack land on
+		// HAlign_Left and size itself to its widest child. Every HAlign_Fill further down - scroll box,
+		// category headers, row stripes - then fill column only as wide as widest row, not panel, and
+		// scroll bar, which is auto-width sibling slot inside scroll box not overlay, ride that column
+		// edge instead of panel edge. Border above already fill; this stack was the one link that dropped
+		// width.
+		SlateIM::HAlign(HAlign_Fill);
+		SlateIM::BeginVerticalStack();
+
+		SlateIM::AutoSize();
+		SlateIM::Padding(FMargin(4.0f));
+		SlateIM::Text(LOCTEXT("MenuTitle", "Cheat Manager Menu").ToString());
+
+		const UCheatManagerMenuSettings* Settings = UCheatManagerMenuSettings::Get();
+		if (Settings && Settings->bEnableGamepadNavigation)
+		{
+			SlateIM::AutoSize();
+			SlateIM::Padding(FMargin(4.0f, 0.0f, 4.0f, 2.0f));
+			// Short on purpose. This line sit in fixed-height header, and anything wrapping onto second
+			// line push cheat list past bottom of panel (see HeaderReserve). Full gamepad scheme,
+			// left/right to adjust value included, is in plugin docs.
+			SlateIM::Text(LOCTEXT("GamepadHint",
+				"D-pad move | (A) run | (B) close | LB/RB category").ToString());
+		}
+
+		if (!CheatManager)
+		{
+			SlateIM::AutoSize();
+			SlateIM::Padding(FMargin(4.0f));
+			SlateIM::Text(LOCTEXT("CheatsNotEnabled",
+				"Cheats are not enabled (no Cheat Manager on the player controller).").ToString());
+		}
+		else
+		{
+			// Filter row (fixed height; scroll box below take rest). HAlign_Fill for same reason as outer
+			// stack: without it row is content-width, so filter box Fill() below have nothing to stretch
+			// into and stay pinned at SlateIM default input width with rest of panel blank beside it.
+			SlateIM::AutoSize();
+			SlateIM::HAlign(HAlign_Fill);
+			SlateIM::Padding(FMargin(4.0f, 2.0f));
+			SlateIM::BeginHorizontalStack();
+
+			SlateIM::AutoSize();
+			SlateIM::VAlign(VAlign_Center);
+			SlateIM::Text(LOCTEXT("FilterLabel", "Filter").ToString());
+
+			SlateIM::Fill();
+			SlateIM::Padding(FMargin(6.0f, 0.0f, 0.0f, 0.0f));
+			SlateIM::EditableText(FilterText, SlateIM::FEditableTextParams{
+				.HintText = LOCTEXT("FilterHint", "Filter cheats by name, category or description...").ToString() });
+
+			// Applied in DrawCheats, which is where surviving category list exist.
+			SlateIM::AutoSize();
+			SlateIM::VAlign(VAlign_Center);
+			SlateIM::Padding(FMargin(6.0f, 0.0f, 0.0f, 0.0f));
+			if (SlateIM::Button(LOCTEXT("ExpandAllButton", "Expand").ToString()))
+			{
+				PendingCategoryAction = EPendingCategoryAction::ExpandAll;
+			}
+
+			SlateIM::AutoSize();
+			SlateIM::VAlign(VAlign_Center);
+			SlateIM::Padding(FMargin(2.0f, 0.0f, 0.0f, 0.0f));
+			if (SlateIM::Button(LOCTEXT("CollapseAllButton", "Collapse").ToString()))
+			{
+				PendingCategoryAction = EPendingCategoryAction::CollapseAll;
+			}
+
+			SlateIM::EndHorizontalStack();
+
+			// Cheat list (see MaxHeight note above layout). Vertical scrolling only — cheat rows wrap onto
+			// extra lines instead of running off side, so nothing ever need horizontal scroll bar and
+			// vertical one stay pinned to panel edge.
+			SlateIM::Fill();
+			SlateIM::HAlign(HAlign_Fill);
+			SlateIM::VAlign(VAlign_Fill);
+			// Reserve extra header space for gamepad hint line when shown, so cheat list do not overlap it
+			// (see PanelHeaderHeight note above layout).
+			const float HeaderReserve = PanelHeaderHeight + ((Settings && Settings->bEnableGamepadNavigation) ? 24.0f : 0.0f);
+			SlateIM::MaxHeight(PanelHeight - HeaderReserve);
+
+			// Always scroll box, gamepad control included. Dropping it to get rid of scroll bar cost two
+			// things that matter more: it is only widget here that clip, so rows past bottom painted over
+			// game, and it is what let rows size to their content - without it Fill above land on stack,
+			// which then stretch every row to share height out and roughly double them.
+			SlateIM::BeginScrollBox();
+
+			// Without this stack size to its widest child, so every HAlign_Fill below have nothing to
+			// stretch against: rows stop at their content width and rest of panel is dead space. It also
+			// set width cheat rows wrap against, so narrow stack make each parameter spill onto own line.
+			SlateIM::HAlign(HAlign_Fill);
+			SlateIM::BeginVerticalStack();
+
+			// Cheat objects: cheat manager plus any registered extensions.
+			TArray<UObject*> CheatObjects;
+			GatherCheatObjects(CheatManager, CheatObjects);
+
+			DrawCheats(CheatObjects);
+
+			SlateIM::EndVerticalStack();
+			SlateIM::EndScrollBox();
+		}
+
+		SlateIM::EndVerticalStack();
+		SlateIM::EndBorder();
+	}
+	SlateIM::EndRoot();
+
+	// Row layout now known: remember its size for next move, and re-derive highlight row number from
+	// where the row it anchor to actually landed.
+	LastNavCount = NavCursor;
+	if (LastNavCount <= 0)
+	{
+		GamepadNavIndex = INDEX_NONE;
+		bNavAnchorValid = false;
+	}
+	else if (NavAnchorResolvedRow != INDEX_NONE)
+	{
+		// Follow anchored row, not stale ordinal. This is what absorb Recently Used section appearing
+		// above everything after first cheat run.
+		GamepadNavIndex = NavAnchorResolvedRow;
+		NavAnchorSection = PendingAnchorSection;
+		NavAnchorFunction = PendingAnchorFunction;
+		bNavAnchorValid = true;
+	}
+	else if (GamepadNavIndex != INDEX_NONE)
+	{
+		// Anchored row gone entirely - filter changed, or its category collapsed. Fall back to ordinal and
+		// let whatever row that land on become new anchor next draw.
+		bNavAnchorValid = false;
+		GamepadNavIndex = FMath::Clamp(GamepadNavIndex, 0, LastNavCount - 1);
+	}
+
+	// One-shot intents consumed by draw; clear them so they do not repeat.
+	bPendingActivate = false;
+	PendingAdjust = 0;
+
+	// Run whatever mouse or gamepad queued, now SlateIM root closed (confirm modal cannot open while root
+	// still building).
+	if (Pending.bValid)
+	{
+		bool bProceed = true;
+		if (Pending.bNeedsConfirm)
+		{
+			const FString ConfirmText = Pending.ConfirmMessage.ToString();
+			const EAppReturnType::Type Response = SlateIM::ModalDialog(EAppMsgType::YesNo, ConfirmText);
+			bProceed = (Response == EAppReturnType::Yes);
+		}
+
+		if (bProceed && !Pending.Command.IsEmpty())
+		{
+			if (Pending.bExec)
+			{
+				// Native exec cheat: route through console so server-only exec cheats still forward.
+				if (APlayerController* PlayerController = ResolvePlayerController())
+				{
+					UE_LOG(LogCheatMenu, Log, TEXT("Executing cheat: %s"), *Pending.Command);
+					PlayerController->ConsoleCommand(Pending.Command, /*bWriteToLog*/ true);
+				}
+			}
+			else if (UObject* Owner = Pending.Owner.Get())
+			{
+				// Blueprint cheat: not exec function, so console refuse it — call it directly on owning
+				// extension. bForceCallWithNonExec parse same "Name arg1 arg2" string ConsoleCommand would.
+				UE_LOG(LogCheatMenu, Log, TEXT("Executing Blueprint cheat: %s"), *Pending.Command);
+				Owner->CallFunctionByNameWithArguments(*Pending.Command, *GLog, nullptr, /*bForceCallWithNonExec*/ true);
+			}
+
+			PushRecentlyUsed(Pending.FunctionName);
+		}
+
+		Pending = FPendingInvoke();
+	}
+}
+
+void UCheatManagerMenuSubsystem::DrawCheats(const TArray<UObject*>& CheatObjects)
+{
+	const UCheatManagerMenuSettings* Settings = UCheatManagerMenuSettings::Get();
+
+	// Gather cheat functions across every cheat object, grouped by Category metadata, deduped by name.
+	TMap<FString, TArray<UFunction*>> FunctionsByCategory;
+	TMap<FName, UFunction*> FunctionByName; // resolve favourites / recently-used entries to their function
+	TSet<FName> SeenFunctions;
+
+	// Owner per surviving function, rebuilt each draw — invocation need it to call Blueprint cheats
+	// directly (they cannot go through console).
+	FunctionOwners.Reset();
+
+	for (UObject* CheatObject : CheatObjects)
+	{
+		if (!CheatObject)
+		{
+			continue;
+		}
+
+		for (TFieldIterator<UFunction> It(CheatObject->GetClass(), EFieldIteratorFlags::IncludeSuper); It; ++It)
+		{
+			UFunction* Function = *It;
+			if (!IsCheatFunction(Function))
+			{
+				continue;
+			}
+
+			// Names project hid, matched on bare function name. Seeded with two SlateIM debug cheats
+			// engine attach to every cheat manager because this plugin force-enable SlateIM; customer did
+			// not write them and cannot otherwise remove them.
+			if (Settings && !Settings->HiddenCheats.IsEmpty())
+			{
+				const FString CheatName = Function->GetName();
+				const bool bHidden = Settings->HiddenCheats.ContainsByPredicate(
+					[&CheatName](const FString& Entry)
+					{
+						return Entry.Equals(CheatName, ESearchCase::IgnoreCase);
+					});
+				if (bHidden)
+				{
+					continue;
+				}
+			}
+
+			// Editor only, and before filter: cheat user filtered out still must be baked, else typing in
+			// filter box would silently produce incomplete bake. Guarded to once per cheat per menu
+			// session so it do not re-run every frame.
+			if (!BakedThisSession.Contains(Function->GetFName()))
+			{
+				BakedThisSession.Add(Function->GetFName());
+				BakeFunctionMetadata(Function);
+			}
+
+			// Match name, category, or tooltip so "time" pull up whole Time section and search over cheat
+			// description still find it.
+			const FString Category = GetFunctionCategory(Function);
+			if (!FilterText.IsEmpty()
+				&& !Function->GetName().Contains(FilterText)
+				&& !Category.Contains(FilterText)
+				&& !GetFunctionToolTip(Function).Contains(FilterText))
+			{
+				continue;
+			}
+
+			bool bAlreadySeen = false;
+			SeenFunctions.Add(Function->GetFName(), &bAlreadySeen);
+			if (bAlreadySeen)
+			{
+				continue;
+			}
+
+			FunctionsByCategory.FindOrAdd(Category).Add(Function);
+			FunctionByName.Add(Function->GetFName(), Function);
+			FunctionOwners.Add(Function, CheatObject);
+		}
+	}
+
+	if (FunctionsByCategory.Num() == 0)
+	{
+		SlateIM::Padding(FMargin(4.0f));
+		SlateIM::Text(LOCTEXT("NoCheatsMatchFilter", "No cheats match the filter.").ToString());
+		return;
+	}
+
+	// Real categories in priority order.
+	TArray<FString> Categories;
+	FunctionsByCategory.GetKeys(Categories);
+	SortCategoriesByPriority(Categories, Settings);
+	for (const FString& Category : Categories)
+	{
+		FunctionsByCategory[Category].Sort([](const UFunction& A, const UFunction& B)
+		{
+			return A.GetName() < B.GetName();
+		});
+	}
+
+	// Pinned virtual sections, drawn above real categories.
+	TArray<UFunction*> FavoriteFunctions;
+	if (Settings && Settings->bShowFavorites)
+	{
+		for (const TPair<FName, UFunction*>& Pair : FunctionByName)
+		{
+			if (Settings->IsFavorite(Pair.Value->GetName()))
+			{
+				FavoriteFunctions.Add(Pair.Value);
+			}
+		}
+		FavoriteFunctions.Sort([](const UFunction& A, const UFunction& B)
+		{
+			return A.GetName() < B.GetName();
+		});
+	}
+
+	TArray<UFunction*> RecentFunctions;
+	if (Settings && Settings->bShowRecentlyUsed && Settings->RecentlyUsedCount > 0)
+	{
+		// Preserve most-recent-first order, no sorting.
+		for (const FName& Name : RecentlyUsed)
+		{
+			if (UFunction* const* Found = FunctionByName.Find(Name))
+			{
+				RecentFunctions.Add(*Found);
+			}
+		}
+	}
+
+	// Expand/Collapse All only touch what filter left on screen (sections included).
+	if (PendingCategoryAction != EPendingCategoryAction::None)
+	{
+		const bool bExpand = (PendingCategoryAction == EPendingCategoryAction::ExpandAll);
+		if (FavoriteFunctions.Num() > 0)
+		{
+			CategoryExpanded.Add(FavoritesSectionId, bExpand);
+		}
+		if (RecentFunctions.Num() > 0)
+		{
+			CategoryExpanded.Add(RecentSectionId, bExpand);
+		}
+		for (const FString& Category : Categories)
+		{
+			CategoryExpanded.Add(Category, bExpand);
+		}
+		PendingCategoryAction = EPendingCategoryAction::None;
+	}
+
+	// Pinned sections default to expanded so their whole point (fast access) hold on open.
+	if (FavoriteFunctions.Num() > 0)
+	{
+		DrawCategory(FavoritesSectionId, LOCTEXT("FavoritesSection", "Favourites"), FavoriteFunctions, /*bDefaultExpanded*/ true);
+	}
+	if (RecentFunctions.Num() > 0)
+	{
+		DrawCategory(RecentSectionId, LOCTEXT("RecentSection", "Recently Used"), RecentFunctions, /*bDefaultExpanded*/ true);
+	}
+
+	const bool bCategoriesDefaultExpanded = !(Settings && Settings->bStartCategoriesCollapsed);
+	for (const FString& Category : Categories)
+	{
+		// Real category is author-written metadata, so it show as authored. Only fallback bucket for
+		// cheats declaring no category is ours to translate.
+		const FText DisplayName = (Category == UncategorizedCategoryId)
+			? LOCTEXT("UncategorizedCategory", "Uncategorized")
+			: FText::FromString(Category);
+
+		DrawCategory(Category, DisplayName, FunctionsByCategory[Category], bCategoriesDefaultExpanded);
+	}
+}
+
+bool UCheatManagerMenuSubsystem::ShouldDrawNavRow(int32 NavRow) const
+{
+	if (!bNavWindowActive)
+	{
+		return true;
+	}
+	return NavRow >= NavWindowStart && NavRow < (NavWindowStart + GamepadNavWindowRows);
+}
+
+bool UCheatManagerMenuSubsystem::IsCategoryExpanded(const FString& Category, bool bDefaultExpanded) const
+{
+	// Filter is search: collapsed sections would hide the very hits user look for.
+	if (!FilterText.IsEmpty())
+	{
+		return true;
+	}
+
+	if (const bool* Found = CategoryExpanded.Find(Category))
+	{
+		return *Found;
+	}
+
+	return bDefaultExpanded;
+}
+
+void UCheatManagerMenuSubsystem::DrawCategory(const FString& CategoryKey, const FText& DisplayName, const TArray<UFunction*>& Functions, bool bDefaultExpanded)
+{
+	const bool bExpanded = IsCategoryExpanded(CategoryKey, bDefaultExpanded);
+
+	// This header occupy one navigable row; record it for shoulder-button jumps.
+	const int32 HeaderNavRow = NavCursor++;
+	HeaderNavIndices.Add(HeaderNavRow);
+
+	// Once anchored, highlight match by identity, not row number, so section appearing above this one
+	// (Recently Used, after first cheat run) shift row without dragging highlight onto something user
+	// never selected.
+	const bool bHeaderSelected = bNavAnchorValid
+		? (NavAnchorFunction.IsNone() && NavAnchorSection == CategoryKey)
+		: (HeaderNavRow == GamepadNavIndex);
+	if (bHeaderSelected)
+	{
+		NavAnchorResolvedRow = HeaderNavRow;
+		PendingAnchorSection = CategoryKey;
+		PendingAnchorFunction = NAME_None;
+	}
+
+	bool bToggle = false;
+
+	if (ShouldDrawNavRow(HeaderNavRow))
+	{
+		// Header double as collapse toggle, so whole bar is hit target, not tiny arrow. Leading caret mark
+		// gamepad highlight with no extra layout.
+		// Caret and expander glyph are markers, not words, so they stay outside translated part; only name
+		// and count go through format string.
+		const FText HeaderLabel = FText::Format(
+			LOCTEXT("CategoryHeader", "{0} ({1})"), DisplayName, FText::AsNumber(Functions.Num()));
+
+		SlateIM::AutoSize();
+		SlateIM::HAlign(HAlign_Fill);
+		SlateIM::Padding(FMargin(2.0f, 6.0f, 2.0f, 0.0f));
+		bToggle = SlateIM::Button(FString::Printf(TEXT("%s%s  %s"),
+			bHeaderSelected ? TEXT("> ") : TEXT(""),
+			bExpanded ? TEXT("[-]") : TEXT("[+]"), *HeaderLabel.ToString()));
+	}
+
+	// Toggle on click, or on gamepad activate while highlighted. Highlight always sit inside window, so
+	// activate can only ever land on header that drew.
+	bToggle = bToggle || (bHeaderSelected && bPendingActivate);
+
+	if (bExpanded)
+	{
+		// Rows walked even when whole category fall outside gamepad window: NavCursor must advance past
+		// them or every index after this category shift.
+		const int32 FirstChildRow = NavCursor;
+		const int32 LastChildRow = NavCursor + Functions.Num() - 1;
+		const bool bAnyChildDrawn = !bNavWindowActive
+			|| (Functions.Num() > 0
+				&& LastChildRow >= NavWindowStart
+				&& FirstChildRow < (NavWindowStart + GamepadNavWindowRows));
+
+		// Deliberately NOT own scroll box. Nesting one per category meant wheel almost always landed on
+		// inner box, so category list itself felt unscrollable. Everything scroll together in outer scroll
+		// box instead; collapsing is what keep long section in check.
+		if (bAnyChildDrawn)
+		{
+			SlateIM::AutoSize();
+			SlateIM::HAlign(HAlign_Fill);
+			SlateIM::Padding(FMargin(10.0f, 2.0f, 2.0f, 2.0f));
+			SlateIM::BeginVerticalStack();
+		}
+
+		for (int32 Index = 0; Index < Functions.Num(); ++Index)
+		{
+			DrawCheatFunction(CategoryKey, Functions[Index], Index);
+		}
+
+		if (bAnyChildDrawn)
+		{
+			SlateIM::EndVerticalStack();
+		}
+	}
+
+	// Toggled last: flipping before draw would desync [+]/[-] glyph from section below it.
+	if (bToggle)
+	{
+		CategoryExpanded.Add(CategoryKey, !bExpanded);
+	}
+}
+
+void UCheatManagerMenuSubsystem::DrawCheatFunction(const FString& CategoryKey, UFunction* Function, int32 RowIndex)
+{
+	const FString FunctionName = Function->GetName();
+
+	// This cheat occupy one navigable row.
+	const int32 NavRow = NavCursor++;
+
+	// Identity match once anchored (see DrawCategory). This is what keep held (A) or second press on same
+	// cheat, not on whatever slid into that row number.
+	const bool bSelected = bNavAnchorValid
+		? (NavAnchorFunction == Function->GetFName() && NavAnchorSection == CategoryKey)
+		: (NavRow == GamepadNavIndex);
+
+	// Recorded before early-out below, so highlight drifted outside drawn window still pull window back
+	// onto itself on next draw.
+	if (bSelected)
+	{
+		NavAnchorResolvedRow = NavRow;
+		PendingAnchorSection = CategoryKey;
+		PendingAnchorFunction = Function->GetFName();
+	}
+
+	// Counted above, then dropped: rows outside gamepad window keep their index but emit nothing. Selected
+	// row landing outside window emit nothing and therefore cannot be activated this frame either -
+	// missed press, which is safe direction; window follow it next frame.
+	if (!ShouldDrawNavRow(NavRow))
+	{
+		return;
+	}
+
+	// Alternating stripe so row wrapping onto two or three lines still read as one cheat, or blue
+	// selection tint when gamepad highlight on this row. Static solid-colour brushes (persistent — SlateIM
+	// redraw every frame and only borrow pointer). bAbsorbMouse MUST be false, else border would eat mouse
+	// wheel whenever cursor sat over row and list would stop scrolling.
+	static const FSlateColorBrush StripeBrush(FLinearColor(1.0f, 1.0f, 1.0f, 0.04f));
+	const bool bStripe = (RowIndex % 2) == 1;
+	const bool bDrawBorder = bStripe || bSelected;
+	if (bDrawBorder)
+	{
+		SlateIM::HAlign(HAlign_Fill);
+		FSlateIMBorderParams BorderParams;
+		BorderParams.Orientation = Orient_Vertical;
+		BorderParams.bAbsorbMouse = false;
+		BorderParams.ContentPadding = FMargin(0.0f);
+		SlateIM::BeginBorder(bSelected ? &GetSelectionBrush() : &StripeBrush, BorderParams);
+	}
+
+	// Wrap, not horizontal stack: engine cheats like EnableInGameWidgetFromClass carry three parameters
+	// and run far wider than panel. Wrapping spill them onto another line instead of off edge, which is
+	// what keep menu to single vertical scroll bar.
+	SlateIM::HAlign(HAlign_Fill);
+	SlateIM::Padding(FMargin(2.0f));
+	SlateIM::BeginHorizontalWrap();
+
+	// Favourite star: toggle membership of pinned Favourites section (persisted to settings).
+	const UCheatManagerMenuSettings* Settings = UCheatManagerMenuSettings::Get();
+	const bool bFavorite = Settings && Settings->IsFavorite(FunctionName);
+	SlateIM::AutoSize();
+	SlateIM::VAlign(VAlign_Center);
+	const FText FavoriteToolTip = bFavorite
+		? LOCTEXT("RemoveFavoriteToolTip", "Remove from Favourites")
+		: LOCTEXT("AddFavoriteToolTip", "Add to Favourites");
+	SlateIM::SetToolTip(FavoriteToolTip.ToString());
+
+	// Bare glyphs, not bracketed ones: category headers already use [+] and [-] for collapsed and
+	// expanded, and reusing them here would read as second expander on every row.
+	if (SlateIM::Button(bFavorite ? TEXT("-") : TEXT("+")))
+	{
+		if (UCheatManagerMenuSettings* Mutable = UCheatManagerMenuSettings::GetMutable())
+		{
+			Mutable->ToggleFavorite(FunctionName);
+		}
+	}
+
+	// Run button, with cheat doc-comment as its tooltip.
+	const FString ToolTip = GetFunctionToolTip(Function);
+	if (!ToolTip.IsEmpty())
+	{
+		SlateIM::SetToolTip(ToolTip);
+	}
+	SlateIM::VAlign(VAlign_Center);
+	const bool bRun = SlateIM::Button(FunctionName);
+
+	// Left/right on pad nudge first adjustable parameter of highlighted cheat.
+	const bool bAdjust = bSelected && (PendingAdjust != 0);
+	bool bAdjustApplied = false;
+
+	for (TFieldIterator<FProperty> ParamIt(Function); ParamIt && (ParamIt->PropertyFlags & CPF_Parm); ++ParamIt)
+	{
+		FProperty* Param = *ParamIt;
+		if (!IsInputParam(Param))
+		{
+			continue;
+		}
+
+		const FString ParamKey = FunctionName + TEXT(":") + Param->GetName();
+
+		SlateIM::AutoSize();
+		SlateIM::VAlign(VAlign_Center);
+		SlateIM::Padding(FMargin(8.0f, 0.0f, 2.0f, 0.0f));
+		SlateIM::Text(Param->GetName());
+
+		FCheatSliderRange SliderRange;
+
+		if (CastField<FBoolProperty>(Param))
+		{
+			bool& Value = BoolArgValues.FindOrAdd(ParamKey);
+			if (bAdjust && !bAdjustApplied)
+			{
+				Value = (PendingAdjust > 0); // right = true, left = false
+				bAdjustApplied = true;
+			}
+			SlateIM::AutoSize();
+			SlateIM::VAlign(VAlign_Center);
+			SlateIM::CheckBox(Value);
+		}
+		else if (UEnum* Enum = TryGetEnum(Param))
+		{
+			TArray<FString> OptionDisplay;
+			TArray<FString> OptionArg;
+			BuildEnumOptions(Enum, OptionDisplay, OptionArg);
+
+			if (OptionDisplay.Num() > 0)
+			{
+				int32& Selected = ComboArgValues.FindOrAdd(ParamKey);
+				Selected = FMath::Clamp(Selected, 0, OptionDisplay.Num() - 1);
+				if (bAdjust && !bAdjustApplied)
+				{
+					Selected = FMath::Clamp(Selected + PendingAdjust, 0, OptionDisplay.Num() - 1);
+					bAdjustApplied = true;
+				}
+
+				// bForceRefresh on first frame this combo show, so it pick up initial selection without
+				// fighting user choice afterwards.
+				const bool bFirstShow = !ComboInitialized.Contains(ParamKey);
+
+				// And again whenever this slot enum changed since last frame. SlateIM match widgets by
+				// (child index, type), so reorder can hand this slot existing combo to different enum
+				// parameter — without rebuild it would keep showing, and submitting, old enum values for
+				// life of game instance.
+				const int32 SlotIndex = ComboSlotIndex++;
+				const bool bSlotEnumChanged = !ComboSlotEnums.IsValidIndex(SlotIndex) || ComboSlotEnums[SlotIndex] != Enum;
+				if (!ComboSlotEnums.IsValidIndex(SlotIndex))
+				{
+					ComboSlotEnums.SetNum(SlotIndex + 1);
+				}
+				ComboSlotEnums[SlotIndex] = Enum;
+
+				SlateIM::MinWidth(140.0f);
+				SlateIM::VAlign(VAlign_Center);
+				SlateIM::ComboBox(OptionDisplay, Selected, SlateIM::FComboBoxParams{
+					.bForceRefresh = bFirstShow || bSlotEnumChanged });
+				ComboInitialized.Add(ParamKey);
+			}
+			else
+			{
+				// Enum with no usable entries: fall back to text box so param still runnable.
+				FString& Value = ArgValues.FindOrAdd(ParamKey);
+				SlateIM::MinWidth(96.0f);
+				SlateIM::MaxWidth(96.0f);
+				SlateIM::VAlign(VAlign_Center);
+				SlateIM::EditableText(Value, SlateIM::FEditableTextParams{ .HintText = Param->GetCPPType() });
+			}
+		}
+		else if (TryGetSliderRange(Function, Param, SliderRange))
+		{
+			if (!SliderArgValues.Contains(ParamKey))
+			{
+				SliderArgValues.Add(ParamKey, SliderRange.Default);
+			}
+			float& Value = SliderArgValues[ParamKey];
+			if (bAdjust && !bAdjustApplied)
+			{
+				Value = FMath::Clamp(Value + PendingAdjust * SliderRange.Step, SliderRange.Min, SliderRange.Max);
+				bAdjustApplied = true;
+			}
+
+			SlateIM::MinWidth(120.0f);
+			SlateIM::VAlign(VAlign_Center);
+			SlateIM::Slider(Value, SlateIM::FSliderParams{ .Min = SliderRange.Min, .Max = SliderRange.Max, .Step = SliderRange.Step });
+
+			// Readout, so drag land on value you can also type into console.
+			SlateIM::AutoSize();
+			SlateIM::MinWidth(40.0f);
+			SlateIM::VAlign(VAlign_Center);
+			SlateIM::Padding(FMargin(6.0f, 0.0f, 0.0f, 0.0f));
+			SlateIM::Text(FormatSliderValue(SliderRange, Value));
+		}
+		else
+		{
+			// Wrap children always auto-sized, so text box would shrink to its hint text. Pinning min and
+			// max to same value keep every input same width. Narrow so cheat with two or three parameters
+			// still fit on one line.
+			FString& Value = ArgValues.FindOrAdd(ParamKey);
+			SlateIM::MinWidth(96.0f);
+			SlateIM::MaxWidth(96.0f);
+			SlateIM::VAlign(VAlign_Center);
+			SlateIM::EditableText(Value, SlateIM::FEditableTextParams{ .HintText = Param->GetCPPType() });
+		}
+	}
+
+	// Refused run must say so on row that refused it, else run button appear dead.
+	if (!BlockedFunctionName.IsNone() && BlockedFunctionName == Function->GetFName())
+	{
+		SlateIM::AutoSize();
+		SlateIM::VAlign(VAlign_Center);
+		SlateIM::Padding(FMargin(8.0f, 0.0f, 2.0f, 0.0f));
+		SlateIM::Text(FText::Format(
+			LOCTEXT("MissingParamValue", "<-- {0} needs a value"),
+			FText::FromString(BlockedParamName)).ToString());
+	}
+
+	SlateIM::EndHorizontalWrap();
+
+	if (bDrawBorder)
+	{
+		SlateIM::EndBorder();
+	}
+
+	// Run on click, or on gamepad activate while highlighted. Queued and executed after draw so confirm
+	// modal can open outside SlateIM root.
+	if (bRun || (bSelected && bPendingActivate))
+	{
+		RequestRunCheat(Function);
+	}
+}
+
+bool UCheatManagerMenuSubsystem::BuildCheatCommand(UFunction* Function, FString& OutCommand, FString& OutMissingParam) const
+{
+	const FString FunctionName = Function->GetName();
+	FString Command = FunctionName;
+	OutMissingParam.Reset();
+
+	for (TFieldIterator<FProperty> ParamIt(Function); ParamIt && (ParamIt->PropertyFlags & CPF_Parm); ++ParamIt)
+	{
+		const FProperty* Param = *ParamIt;
+		if (!IsInputParam(Param))
+		{
+			continue;
+		}
+
+		const FString ParamKey = FunctionName + TEXT(":") + Param->GetName();
+
+		FCheatSliderRange SliderRange;
+
+		FString ValueString;
+		if (CastField<FBoolProperty>(Param))
+		{
+			const bool* Found = BoolArgValues.Find(ParamKey);
+			ValueString = (Found && *Found) ? TEXT("true") : TEXT("false");
+		}
+		else if (UEnum* Enum = TryGetEnum(Param))
+		{
+			TArray<FString> OptionDisplay;
+			TArray<FString> OptionArg;
+			BuildEnumOptions(Enum, OptionDisplay, OptionArg);
+			if (OptionArg.Num() > 0)
+			{
+				const int32* Found = ComboArgValues.Find(ParamKey);
+				const int32 Index = FMath::Clamp(Found ? *Found : 0, 0, OptionArg.Num() - 1);
+				ValueString = OptionArg[Index];
+			}
+			else
+			{
+				// Match text-box fallback draw pass used for enum with no usable entries. Enumerator name
+				// not optional - empty one cannot import.
+				const FString* Found = ArgValues.Find(ParamKey);
+				if (!Found || Found->IsEmpty())
+				{
+					OutMissingParam = Param->GetName();
+					return false;
+				}
+				ValueString = QuoteConsoleArgument(*Found);
+			}
+		}
+		else if (TryGetSliderRange(Function, Param, SliderRange))
+		{
+			const float* Found = SliderArgValues.Find(ParamKey);
+			ValueString = FormatSliderValue(SliderRange, Found ? *Found : SliderRange.Default);
+		}
+		else
+		{
+			const FString* Found = ArgValues.Find(ParamKey);
+			const bool bEmpty = !Found || Found->IsEmpty();
+
+			// Blank numeric box cannot be sent. Engine CPP_Default_<Param> fallback that would cover it
+			// sit inside #if WITH_EDITOR, so in packaged Development and Test builds this plugin ship to
+			// there is no fallback at all: integer abort call with log-only "Bad or missing property", and
+			// float import empty token as 0 and run cheat with value nobody chose. Slomo 0 freeze game;
+			// that must not be one click away. Strings keep existing behaviour - empty string is
+			// legitimate value.
+			if (bEmpty && Param->IsA<FNumericProperty>())
+			{
+				OutMissingParam = Param->GetName();
+				return false;
+			}
+
+			ValueString = QuoteConsoleArgument(bEmpty ? FString() : *Found);
+		}
+
+		Command += TEXT(" ");
+		Command += ValueString;
+	}
+
+	OutCommand = MoveTemp(Command);
+	return true;
+}
+
+#undef LOCTEXT_NAMESPACE
+
+```
+
+`Source/CheatManagerMenu/Private/CheatMenuMetadataStore.cpp`:
+
+```cpp
+// Copyright Iron Fang Studio. All Rights Reserved.
+
+#include "CheatMenuMetadataStore.h"
+#include "CheatManagerMenu.h"
+
+#include "Interfaces/IPluginManager.h"
+#include "Misc/Paths.h"
+
+namespace
+{
+	/** .uplugin basename, also config branch FPluginManager register for it. */
+	const TCHAR* PluginName = TEXT("CheatManagerMenu");
+}
+
+const UCheatMenuMetadataStore* UCheatMenuMetadataStore::Get()
+{
+	return GetDefault<UCheatMenuMetadataStore>();
+}
+
+UCheatMenuMetadataStore* UCheatMenuMetadataStore::GetMutable()
+{
+	return GetMutableDefault<UCheatMenuMetadataStore>();
+}
+
+bool UCheatMenuMetadataStore::SaveToStagedConfig()
+{
+	// Refuse to write an empty store. A file holding nothing but its section header is
+	// indistinguishable from a successful bake to anyone inspecting a package, and writing it would
+	// overwrite whatever was baked before. Say so at Warning, because the packaged build that follows
+	// will have no categories and the cause is otherwise invisible.
+	if (Categories.IsEmpty() && ToolTips.IsEmpty() && ConfirmMessages.IsEmpty() && SliderRanges.IsEmpty())
+	{
+		UE_LOG(LogCheatMenu, Warning,
+			TEXT("No cheat metadata has been harvested, so nothing was baked and the existing file was ")
+			TEXT("left alone. Open the cheat menu once in the editor before packaging, or categories, ")
+			TEXT("tooltips, sliders and confirmation gates will be missing from the packaged build."));
+		return false;
+	}
+
+	// Preferred home: plugin own Config folder. Stage unfiltered, keep generated data out of files
+	// consumer team author, and deleting it cost them nothing.
+	const TSharedPtr<IPlugin> Self = IPluginManager::Get().FindPlugin(PluginName);
+	if (Self.IsValid() && Self->GetType() == EPluginType::Project)
+	{
+		const FString PluginConfigPath =
+			Self->GetBaseDir() / TEXT("Config") / FString::Printf(TEXT("Default%s.ini"), PluginName);
+
+		// bWarnIfFail false: read-only plugin config is normal state under source control, and project
+		// fallback below is legitimate second try, not error worth logging twice.
+		if (TryUpdateDefaultConfigFile(PluginConfigPath, /*bWarnIfFail*/ false))
+		{
+			UE_LOG(LogCheatMenu, Log, TEXT("Baked cheat metadata to %s"), *PluginConfigPath);
+			return true;
+		}
+	}
+
+	// Fallback: project Config folder. Used when plugin live in engine (launcher or Fab install), which
+	// is shared between projects and usually not writable. Resolve to
+	// <Project>/Config/DefaultCheatManagerMenu.ini because class config name is plugin name.
+	if (TryUpdateDefaultConfigFile())
+	{
+		UE_LOG(LogCheatMenu, Log,
+			TEXT("Baked cheat metadata to the project's Config/Default%s.ini."), PluginName);
+		return true;
+	}
+
+	UE_LOG(LogCheatMenu, Warning,
+		TEXT("Could not write baked cheat metadata to either the plugin's or the project's Config folder. ")
+		TEXT("If the file is read-only because it is not checked out, categories, tooltips, sliders and ")
+		TEXT("confirmation gates will be missing from packaged builds."));
+	return false;
+}
+
+```
+
+`Source/CheatManagerMenu/Public/CheatManagerMenu.h`:
+
+```h
+// Copyright Iron Fang Studio. All Rights Reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Modules/ModuleManager.h"
+
+/** Log category for Cheat Manager Menu. */
+CHEATMANAGERMENU_API DECLARE_LOG_CATEGORY_EXTERN(LogCheatMenu, Log, All);
+
+/**
+ *  Runtime module for Cheat Manager Menu.
+ *
+ *  Plugin descriptor (TargetConfigurationDenyList) drop this module from Shipping, so cheat menu
+ *  cannot turn on in shipped game. Guard project code that reference it with #if !UE_BUILD_SHIPPING.
+ */
+class FCheatManagerMenuModule : public IModuleInterface
+{
+public:
+	//~ Begin IModuleInterface
+	virtual void StartupModule() override;
+	virtual void ShutdownModule() override;
+	//~ End IModuleInterface
+
+private:
+	/** Handle for OnCheatManagerCreated hook that attach configured Blueprint cheat classes. */
+	FDelegateHandle CheatManagerCreatedHandle;
+};
+
+```
+
+`Source/CheatManagerMenu/Public/CheatManagerMenuSettings.h`:
+
+```h
+// Copyright Iron Fang Studio. All Rights Reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "InputCoreTypes.h"
+#include "Engine/DeveloperSettings.h"
+#include "CheatManagerMenuSettings.generated.h"
+
+class UCheatManagerExtension;
+
+/**
+ *  Settings for Cheat Manager Menu.
+ *  Found at Project Settings -> Plugins -> Cheat Manager Menu (non-shipping builds only).
+ */
+UCLASS(Config = Game, DefaultConfig, meta = (DisplayName = "Cheat Manager Menu"))
+class CHEATMANAGERMENU_API UCheatManagerMenuSettings : public UDeveloperSettings
+{
+	GENERATED_BODY()
+
+public:
+	UCheatManagerMenuSettings();
+
+	//~ Begin UDeveloperSettings
+	virtual FName GetContainerName() const override { return TEXT("Project"); }
+	virtual FName GetCategoryName() const override { return TEXT("Plugins"); }
+	//~ End UDeveloperSettings
+
+	/** Accessor for settings CDO. */
+	static const UCheatManagerMenuSettings* Get();
+
+	/** Mutable accessor for settings CDO (used to persist favourites toggled from menu). */
+	static UCheatManagerMenuSettings* GetMutable();
+
+	/**
+	 * Master switch for plugin. False = subsystem never initialise: no input pre-processor installed,
+	 * no key claimed, CheatMenu.Toggle console command do nothing.
+	 *
+	 * Clearing both key binds is not same thing - console command stay reachable. So this is only
+	 * complete off-switch short of disabling plugin in Edit > Plugins.
+	 */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu")
+	bool bEnabled = true;
+
+	/** Keyboard key that open and close cheat menu. Clear it to leave only gamepad bind. */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu|Input")
+	FKey ToggleKey;
+
+	/**
+	 * Gamepad button that open and close cheat menu, so menu reachable on pad without keyboard. Must be
+	 * gamepad key; anything else ignored.
+	 *
+	 * Unset by default. Menu install application-wide Slate input pre-processor and consume whatever
+	 * bound here, so default bind would silently take that button away from consumer project. Pick one
+	 * deliberately if you want pad access; CheatMenu.Toggle and Blueprint ToggleMenu node reach menu
+	 * with no bind at all.
+	 *
+	 * Set GamepadToggleModifier too to turn this into chord if single button clash with something your
+	 * game already bind.
+	 */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu|Input")
+	FKey GamepadToggleKey;
+
+	/**
+	 * Optional gamepad button that must be held for GamepadToggleKey to open menu - LB + View, for
+	 * instance. Leave unset for plain single-button bind. Must also be gamepad key.
+	 *
+	 * Modifier only watched, never consumed, so game still receive it normally.
+	 */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu|Input")
+	FKey GamepadToggleModifier;
+
+	/** On opening menu, force-enable cheats (create Cheat Manager) if none exist yet. */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu")
+	bool bAutoEnableCheats = true;
+
+	/**
+	 * Also create cheat manager on networked clients, where engine deliberately refuse to.
+	 *
+	 * AGameModeBase::AllowCheats gate cheat managers on authority, so client in packaged Development or
+	 * Test build normally have none. Forcing one expose every exec function in project to anyone running
+	 * that build, closed external playtest included. Off by default; turn on only for sessions you
+	 * control.
+	 */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu", meta = (EditCondition = "bAutoEnableCheats"))
+	bool bForceCheatsInMultiplayer = false;
+
+	/** Categories start collapsed not expanded, so menu with many categories open compact. */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu")
+	bool bStartCategoriesCollapsed = false;
+
+	/**
+	 * Cheat function names to leave out of menu, matched case-insensitively against bare function name.
+	 *
+	 * Seeded with two SlateIM debug cheats engine attach to every cheat manager as side effect of this
+	 * plugin enabling SlateIM. Not yours, do nothing in your project. Empty array to see them again.
+	 */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu")
+	TArray<FString> HiddenCheats;
+
+	// ---- Layout ----
+
+	/**
+	 * Size of menu panel, in Slate units before DPI scaling.
+	 *
+	 * Width worth tuning to your cheats, not leaving at default. Cheat parameters lay out beside its run
+	 * button and wrap onto another line when they run out of room, so narrow panel turn multi-parameter
+	 * cheat like engine own BugItGo into three-line row. Wider also put scroll bar closer to screen edge.
+	 *
+	 * Height capped against viewport at draw time, so value taller than window shrink to fit instead of
+	 * running off bottom.
+	 */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu|Layout", meta = (ClampMin = "240", UIMin = "400", UIMax = "1600"))
+	FVector2D PanelSize = FVector2D(820.0, 680.0);
+
+	/** Distance of panel from top-left corner of viewport, same units as PanelSize. */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu|Layout", meta = (ClampMin = "0", UIMin = "0", UIMax = "400"))
+	FVector2D PanelOffset = FVector2D(40.0, 40.0);
+
+	// ---- Ordering ----
+
+	/** Force "General" category to top even when CategoryOrder do not list it. */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu|Ordering")
+	bool bForceGeneralCategoryFirst = false;
+
+	/**
+	 * Categories listed here show first in this exact order (case-insensitive); every other category
+	 * append alphabetically. Pinned Favourites / Recently Used sections always sit above these.
+	 */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu|Ordering")
+	TArray<FString> CategoryOrder;
+
+	// ---- Pinned sections ----
+
+	/** Show "Favourites" section (starred cheats) pinned above categories. */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu|Pinned")
+	bool bShowFavorites = true;
+
+	/** Show "Recently Used" section (this session) pinned above categories. */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu|Pinned")
+	bool bShowRecentlyUsed = true;
+
+	/** How many recently-used cheats to remember (0 disable section). */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu|Pinned", meta = (ClampMin = "0", UIMin = "0", UIMax = "20"))
+	int32 RecentlyUsedCount = 8;
+
+	/**
+	 * Starred cheat function names. Toggle with star button on each cheat row; not meant for hand
+	 * editing, but harmless if you do. In editor these write to project DefaultGame.ini and are shared
+	 * with team; in packaged build there is no project Config directory to write to, so they persist
+	 * per-user under Saved/Config instead.
+	 */
+	UPROPERTY(Config)
+	TArray<FString> FavoriteCheats;
+
+	// ---- Gamepad ----
+
+	/**
+	 * Allow driving menu with gamepad: D-pad/left-stick move highlight, Face-Bottom (A) run highlighted
+	 * cheat or expand/collapse highlighted category, Face-Right (B) close menu, shoulders jump between
+	 * category headers, D-pad left/right nudge highlighted cheat first slider or toggle its first
+	 * checkbox. Text parameters still need keyboard/mouse.
+	 */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu|Gamepad")
+	bool bEnableGamepadNavigation = true;
+
+	/**
+	 * Gamepad navigation wrap around ends of list: moving down off last row return to first, moving up
+	 * off first jump to last. Off by default, so highlight stop at each end instead, which make it
+	 * obvious when you hit bottom.
+	 */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu|Gamepad", meta = (EditCondition = "bEnableGamepadNavigation"))
+	bool bLoopGamepadNavigation = false;
+
+	/**
+	 * Blueprint cheat classes (subclasses of UCheatMenuBlueprintExtension) to attach as cheat manager
+	 * extensions. Each listed class instantiate on every cheat manager engine create, so its
+	 * BlueprintCallable functions appear in menu alongside native cheats.
+	 */
+	UPROPERTY(Config, EditAnywhere, Category = "Cheat Menu", meta = (AllowAbstract = "false"))
+	TArray<TSoftClassPtr<UCheatManagerExtension>> BlueprintCheatExtensions;
+
+	// Harvested cheat metadata live on UCheatMenuMetadataStore, not here. Generated data, not settings,
+	// so it stay out of this class and out of project DefaultGame.ini.
+
+	/** Whether FunctionName is starred. Case-insensitive, match how menu store favourites. */
+	bool IsFavorite(const FString& FunctionName) const;
+
+	/** Star/unstar FunctionName and persist change. Return new starred state. */
+	bool ToggleFavorite(const FString& FunctionName);
+};
+
+```
+
+`Source/CheatManagerMenu/Public/CheatManagerMenuSubsystem.h`:
+
+```h
+// Copyright Iron Fang Studio. All Rights Reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Subsystems/GameInstanceSubsystem.h"
+#include "InputCoreTypes.h"
+#include "Engine/EngineBaseTypes.h"
+#include "CheatManagerMenuSubsystem.generated.h"
+
+class IInputProcessor;
+class APlayerController;
+class UCheatManager;
+class UFunction;
+class UEnum;
+
+/**
+ *  Drive in-game cheat menu.
+ *
+ *  Live only on game instances (PIE and packaged non-shipping builds), so menu can only appear while
+ *  game run. Global input pre-processor watch configured keyboard and gamepad toggle binds (gamepad one
+ *  optionally chord); while open, menu draw each frame with SlateIM as viewport overlay and
+ *  auto-generate by reflecting over player Cheat Manager (and its extensions) exec functions - no
+ *  console commands needed. Console command "CheatMenu.Toggle" also toggle it (bind that to Enhanced
+ *  Input action for custom key setups).
+ *
+ *  Parameter widgets follow parameter type and metadata: bool draw checkbox, enum draw dropdown,
+ *  numeric param declaring range draw slider, rest draw text box. Declare range with UPARAM metadata on
+ *  exec function:
+ *
+ *      UFUNCTION(Exec, Category = "Time")
+ *      void SetTimeOfDay(UPARAM(meta = (UIMin = "0", UIMax = "24", Delta = "0.25", UIDefault = "12")) float Hours);
+ *
+ *  UIMin/UIMax (ClampMin/ClampMax also accepted) required for slider; Delta set step, UIDefault set
+ *  starting value. Enum dropdowns need no metadata and work in cooked builds too. Other metadata
+ *  (Category, ToolTip, slider ranges, CheatConfirm) get stripped from cooked builds, so those features
+ *  degrade there to "Uncategorized" group with text boxes and no tooltips.
+ *
+ *  Mark destructive cheat with meta = (CheatConfirm) - or CheatConfirm = "Custom prompt." - to gate it
+ *  behind yes/no dialog before it run.
+ */
+UCLASS()
+class CHEATMANAGERMENU_API UCheatManagerMenuSubsystem : public UGameInstanceSubsystem
+{
+	GENERATED_BODY()
+
+public:
+	//~ Begin USubsystem
+	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
+	//~ End USubsystem
+
+	/**
+	 * Toggle menu open/closed for first local player. Invoked by "CheatMenu.Toggle" console command, or
+	 * bind it to Enhanced Input action in Blueprint (Get GameInstance Subsystem -> Toggle Menu).
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Iron Fang|Cheats")
+	void ToggleMenu();
+
+	/**
+	 * Toggle menu for specific input user. Split-screen sessions route cheats to whichever local player
+	 * pressed toggle key, not always to player one.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Iron Fang|Cheats")
+	void ToggleMenuForUser(int32 UserIndex);
+
+	/** Whether menu currently open. */
+	UFUNCTION(BlueprintPure, Category = "Iron Fang|Cheats")
+	bool IsMenuOpen() const { return bMenuOpen; }
+
+	/** Configured keyboard toggle key, or invalid key when keyboard bind cleared. */
+	FKey GetToggleKey() const;
+
+	/** Configured gamepad toggle button, or invalid key when no gamepad bind. */
+	FKey GetGamepadToggleKey() const;
+
+	/** Gamepad button that must be held for gamepad bind to fire, or invalid key for none. */
+	FKey GetGamepadToggleModifier() const;
+
+	/**
+	 * Whether Key is bound toggle input. Cover keyboard bind and gamepad bind, optional chord included -
+	 * pass whether configured gamepad modifier currently held down.
+	 */
+	bool IsToggleInput(const FKey& Key, bool bGamepadModifierHeld) const;
+
+	/**
+	 * Whether this subsystem game viewport belong to window user currently interact with. Input
+	 * pre-processor is global, so without this check one toggle-key press would open menu on every PIE
+	 * client at once.
+	 */
+	bool OwnsFocusedViewport() const;
+
+	/**
+	 * Route gamepad key to menu while it open. Called by input pre-processor. Return true if key was
+	 * navigation key (and should be consumed from game).
+	 *
+	 * bIsRepeat is key event auto-repeat flag. Movement keys act on repeats, so holding D-pad scroll;
+	 * action buttons do not, because each repeat would be another cheat run.
+	 */
+	bool HandleGamepadNavKey(const FKey& Key, bool bIsRepeat);
+
+	/**
+	 * Called by input pre-processor when user drive menu with mouse or keyboard. Drop gamepad highlight,
+	 * which is what release windowed row drawing (see ShouldDrawNavRow) so whole list scroll again.
+	 */
+	void NotifyNonGamepadInput();
+
+private:
+	/** Per-frame draw, hooked to FSlateApplication::OnPreTick while subsystem alive. */
+	void DrawMenu(float DeltaTime);
+
+	/** Gather exec functions across all cheat objects, group by Category metadata, draw them. */
+	void DrawCheats(const TArray<UObject*>& CheatObjects);
+
+	/**
+	 * Draw one section (real category, Favourites, or Recently Used): collapsible header plus its rows.
+	 * CategoryKey is invariant identifier the expanded/collapsed state store against; DisplayName is what
+	 * header show, which for pinned sections is localized and therefore cannot double as key.
+	 */
+	void DrawCategory(const FString& CategoryKey, const FText& DisplayName, const TArray<UFunction*>& Functions, bool bDefaultExpanded);
+
+	/**
+	 * Draw single exec function: favourite star, run button, input per parameter. RowIndex drive
+	 * alternating background stripe that keep wrapped multi-line rows visually separated. CategoryKey
+	 * identify section this row draw under, which together with function name is what gamepad highlight
+	 * anchor to (see NavAnchorFunction).
+	 */
+	void DrawCheatFunction(const FString& CategoryKey, UFunction* Function, int32 RowIndex);
+
+	/**
+	 * Whether category list currently drawn. Categories user never clicked follow bDefaultExpanded;
+	 * active filter force-expand everything so matches cannot hide.
+	 */
+	bool IsCategoryExpanded(const FString& Category, bool bDefaultExpanded) const;
+
+	/**
+	 * Whether flat nav row should emit widgets this frame.
+	 *
+	 * SlateIM scroll box cannot be scrolled programmatically - no scroll offset, no ScrollTo, no way to
+	 * focus widget so SScrollBox would bring it into view itself. So once gamepad drive, menu stop
+	 * drawing whole list and draw window of rows that follow highlight instead. Rows outside window still
+	 * counted, so nav indices and header jump list stay stable; they just emit nothing.
+	 *
+	 * Mouse and keyboard unaffected: window only turn on once D-pad press moved highlight, and full list
+	 * draw until then.
+	 */
+	bool ShouldDrawNavRow(int32 NavRow) const;
+
+	/**
+	 * Assemble console command string for exec function from current input state.
+	 *
+	 * Return false, with OutMissingParam naming offender, when parameter that cannot survive empty
+	 * argument left blank. Numeric parameters are case that matter: engine CPP_Default_<Param> fallback
+	 * is editor-only (ScriptCore.cpp, #if WITH_EDITOR), so in packaged build empty box do not fall back
+	 * to declared default - integer abort call, float silently import as zero. Refusing to build command
+	 * is what stop blank box from quietly running cheat with value user never chose.
+	 */
+	bool BuildCheatCommand(UFunction* Function, FString& OutCommand, FString& OutMissingParam) const;
+
+	/** Queue cheat to run after draw pass, honouring any CheatConfirm gate. */
+	void RequestRunCheat(UFunction* Function);
+
+	/** Record FunctionName at front of recently-used list, trimmed to configured length. */
+	void PushRecentlyUsed(FName FunctionName);
+
+	/** Cheat manager plus every extension registered on it, in draw order. */
+	void GatherCheatObjects(UCheatManager* CheatManager, TArray<UObject*>& OutCheatObjects) const;
+
+	/**
+	 * Record Function editor-only metadata into settings so it survive cooking. Editor builds only;
+	 * no-op everywhere else, where metadata it would read no longer exist.
+	 *
+	 * Called for each cheat as it draw rather than in separate pass, because draw already walk exactly
+	 * the set of functions worth baking. Only flag store dirty when value actually changed, so unchanged
+	 * project never rewrite its DefaultCheatManagerMenu.ini.
+	 */
+	void BakeFunctionMetadata(UFunction* Function);
+
+	/** Write baked metadata to DefaultCheatManagerMenu.ini if BakeFunctionMetadata changed anything. */
+	void FlushBakedMetadata();
+
+	/** Set by BakeFunctionMetadata when baked value differ from what already stored. */
+	bool bBakedMetadataDirty = false;
+
+	/** Cheats already baked this menu session, so harvest do not repeat every frame. */
+	TSet<FName> BakedThisSession;
+
+	/** Local player controller menu drive (user that opened it, else first). */
+	APlayerController* ResolvePlayerController() const;
+
+	/** Local player cheat manager, if cheats enabled. */
+	UCheatManager* ResolveCheatManager() const;
+
+	/**
+	 * SlateIM root name, unique per game instance. Multiple PIE clients each run own subsystem and
+	 * shared name would collide in SlateIM root registry.
+	 */
+	FName GetMenuRootName() const;
+
+	/** Free and show cursor so menu clickable, remembering what game had set. */
+	void PushMenuCursorState();
+
+	/** Put pre-menu cursor/input state back. Safe to call when nothing pushed. */
+	void RestoreCursorState();
+
+	/**
+	 * Re-push cursor override when controller it was applied to has gone away (map change destroy it),
+	 * so menu cannot end up drawn over captured, hidden cursor.
+	 */
+	void RefreshCursorOverrideForCurrentController();
+
+	/**
+	 *  Viewport-owned mouse state as game had it when menu opened. Menu need visible, uncaptured cursor;
+	 *  game that captured and hid it must get that back on close.
+	 *
+	 *  These four fields live on UGameViewportClient, owned by game instance, and survive both map load
+	 *  and player controller swap. So this capture exactly once per menu session and never re-capture
+	 *  while menu open: re-capturing would read back menu own FInputModeGameAndUI override
+	 *  (CaptureDuringMouseDown / DoNotLock) and record it as game state, and closing menu would then hand
+	 *  game the menu cursor configuration instead of its own.
+	 */
+	struct FSavedViewportMouseState
+	{
+		/** False until PushMenuCursorState store state, so restore cannot apply garbage. */
+		bool bValid = false;
+
+		bool bIgnoreInput = false;
+		bool bHideCursorDuringCapture = true;
+		EMouseCaptureMode CaptureMode = EMouseCaptureMode::CapturePermanently;
+		EMouseLockMode LockMode = EMouseLockMode::DoNotLock;
+	};
+
+	FSavedViewportMouseState SavedViewportState;
+
+	/**
+	 *  Controller half of saved state. Unlike viewport fields this one genuinely is per-controller, so it
+	 *  re-capture each time override move to replacement controller.
+	 */
+	bool bSavedShowMouseCursor = false;
+	bool bSavedShowMouseCursorValid = false;
+
+	/** Controller PushMenuCursorState changed, so level change mid-menu cannot restore onto new one. */
+	TWeakObjectPtr<APlayerController> CursorOverrideController;
+
+	bool bMenuOpen = false;
+
+	/** Input user that opened menu; drive which local player cheat manager show. */
+	int32 ActiveUserIndex = 0;
+
+	FDelegateHandle PreTickHandle;
+	TSharedPtr<IInputProcessor> InputProcessor;
+
+	/** Cached result of GetMenuRootName; NAME_None until first draw resolve it. */
+	mutable FName MenuRootName;
+
+	/** Text typed into filter box. */
+	FString FilterText;
+
+	/** Expanded/collapsed state per section. Absent = that section default. */
+	TMap<FString, bool> CategoryExpanded;
+
+	/** Expand/Collapse All, deferred until draw pass know which categories survived filter. */
+	enum class EPendingCategoryAction : uint8
+	{
+		None,
+		ExpandAll,
+		CollapseAll
+	};
+	EPendingCategoryAction PendingCategoryAction = EPendingCategoryAction::None;
+
+	/**
+	 * Owning cheat object per surviving function, rebuilt each draw. Needed to invoke cheat: native exec
+	 * cheats route through console, but Blueprint cheats are not exec, so they must be called directly on
+	 * their owner (console refuse non-exec functions).
+	 */
+	TMap<UFunction*, TWeakObjectPtr<UObject>> FunctionOwners;
+
+	/** Recently-run cheats, most-recent first. Session-only; length follow RecentlyUsedCount. */
+	TArray<FName> RecentlyUsed;
+
+	/**
+	 * Cheat queued this frame, executed after draw pass. Unify mouse and gamepad run paths and carry
+	 * optional confirmation gate (which need modal drawn outside root).
+	 */
+	struct FPendingInvoke
+	{
+		bool bValid = false;
+		FString Command;
+		TWeakObjectPtr<UObject> Owner;
+		bool bExec = false;
+		FName FunctionName;
+		bool bNeedsConfirm = false;
+		FText ConfirmMessage;
+	};
+	FPendingInvoke Pending;
+
+	/**
+	 * Cheat whose last run attempt was refused because parameter needing value was blank, plus parameter
+	 * that caused it. Drawn on that cheat row so refusal is visible, not silent. NAME_None when nothing
+	 * to report.
+	 */
+	FName BlockedFunctionName;
+	FString BlockedParamName;
+
+	/** Persistent per-parameter input state, keyed "FunctionName:ParamName". */
+	TMap<FString, FString> ArgValues;
+	TMap<FString, bool> BoolArgValues;
+
+	/** Slider state for numeric params declaring range (see TryGetSliderRange), same key format. */
+	TMap<FString, float> SliderArgValues;
+
+	/** Selected-index state for enum params drawn as dropdowns, same key format. */
+	TMap<FString, int32> ComboArgValues;
+
+	/** Keys whose combo box shown at least once, so bForceRefresh only fire on first frame. */
+	TSet<FString> ComboInitialized;
+
+	/**
+	 * Enum drawn into each combo slot on previous frame, indexed by slot draw order.
+	 *
+	 * SlateIM identify widgets by (child index, type) and rebuild ComboBox option list only when
+	 * bForceRefresh passed. When drawn list reorder — filter edit, category toggle, or Recently Used
+	 * section appearing — slot N can go to different enum parameter while widget itself get reused,
+	 * leaving dropdown showing (and submitting) previous enum values. Comparing against this array is
+	 * what detect that and force rebuild.
+	 */
+	TArray<TWeakObjectPtr<UEnum>> ComboSlotEnums;
+
+	/** Draw-order cursor into ComboSlotEnums, reset at top of every DrawMenu. */
+	int32 ComboSlotIndex = 0;
+
+	// ---- Gamepad navigation ----
+	// Intents collected by input pre-processor (which reliably see every key) and applied at top of next
+	// DrawMenu. Highlighted row tracked as flat index across every drawn row (section headers included),
+	// rebuilt each frame as list draw.
+
+	/** Currently highlighted flat row index, or INDEX_NONE when nothing highlighted yet. */
+	int32 GamepadNavIndex = INDEX_NONE;
+
+	// Flat index alone cannot survive layout change. Running cheat push it into Recently Used, which draw
+	// whole new section above every category and shift every row below it - so index that is merely
+	// clamped end up on different cheat with no user input, and next (A) press run something user never
+	// selected. Highlight therefore anchor to row identity (its section plus, for cheat row, its function
+	// name) and index re-derive from wherever that row land in current draw. Index still drive D-pad
+	// movement, which is ordinal by nature; move clear anchor and row landed on re-establish it.
+
+	/** Section key highlight anchor to, valid only while bNavAnchorValid. */
+	FString NavAnchorSection;
+
+	/** Function highlight anchor to, or NAME_None when anchor is section header. */
+	FName NavAnchorFunction;
+
+	bool bNavAnchorValid = false;
+
+	/** Flat row anchor resolved to during this draw, or INDEX_NONE when anchored row gone. */
+	int32 NavAnchorResolvedRow = INDEX_NONE;
+
+	/** Identity of row that drew as selected this frame, promoted to anchor once draw end. */
+	FString PendingAnchorSection;
+	FName PendingAnchorFunction;
+
+	/** Running row counter during draw; final value is navigable row count for clamping. */
+	int32 NavCursor = 0;
+
+	/** Flat indices of section-header rows this draw, for shoulder-button jumps. */
+	TArray<int32> HeaderNavIndices;
+
+	/** Navigable row count from previous completed draw, used to clamp move before this draw. */
+	int32 LastNavCount = 0;
+
+	/** First flat row drawn this frame while gamepad window active (see ShouldDrawNavRow). */
+	int32 NavWindowStart = 0;
+
+	/** True once gamepad moved highlight, which switch list to windowed drawing. */
+	bool bNavWindowActive = false;
+
+	int32 PendingNavDelta = 0;      // accumulated up/down steps
+	int32 PendingCategoryJump = 0;  // -1 previous header, +1 next header
+	int32 PendingAdjust = 0;        // -1/+1 nudge for highlighted cheat slider/checkbox
+	bool bPendingActivate = false;  // run highlighted cheat / toggle highlighted header
+	bool bPendingBack = false;      // close menu
+};
+
+```
+
+`Source/CheatManagerMenu/Public/CheatMenuBlueprintExtension.h`:
+
+```h
+// Copyright Iron Fang Studio. All Rights Reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/CheatManager.h"
+#include "CheatMenuBlueprintExtension.generated.h"
+
+/**
+ *  Base class designers subclass in Blueprint. Add cheats, no C++.
+ *
+ *  BP subclass attach as cheat manager extension (list it under Project Settings -> Plugins ->
+ *  Cheat Menu), so cheat menu reflect over it same as native cheats. Any BlueprintCallable function
+ *  you add to subclass show up as cheat: give it Category (Details panel) to group it, simple
+ *  parameters to get input widgets - bool draw checkbox, enum draw dropdown, ranged numeric draw
+ *  slider, rest draw text box. Menu skip pure functions, so mark cheat impure (has exec pin).
+ *
+ *  Every impure BlueprintCallable function on subclass count as cheat. Keep helper functions on
+ *  separate Blueprint, or make them pure. Not on extension itself.
+ *
+ *  Reach world inside cheat with inherited GetPlayerController() (BlueprintPure), or any node taking
+ *  world context - extension supply one from its outer cheat manager.
+ *
+ *  Metadata (Category, tooltip, slider ranges, CheatConfirm) is editor-only, so menu harvest it while
+ *  drawing in editor and read it back from DefaultCheatManagerMenu.ini in cooked build. Open menu once
+ *  in editor after adding cheats, else they land in "Uncategorized" group with text-box inputs.
+ */
+UCLASS(Blueprintable, Abstract, meta = (DisplayName = "Cheat Menu Blueprint Extension"))
+class CHEATMANAGERMENU_API UCheatMenuBlueprintExtension : public UCheatManagerExtension
+{
+	GENERATED_BODY()
+};
+
+```
+
+`Source/CheatManagerMenu/Public/CheatMenuMetadataStore.h`:
+
+```h
+// Copyright Iron Fang Studio. All Rights Reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "UObject/Object.h"
+#include "CheatMenuMetadataStore.generated.h"
+
+/**
+ *  Cheat metadata harvested in editor so packaged build can still read it.
+ *
+ *  UFUNCTION metadata is editor-only: WITH_METADATA follow WITH_EDITORONLY_DATA, so Category,
+ *  ToolTip, CheatConfirm and UIMin/UIMax slider ranges all compile out of packaged Development or Test
+ *  build. No fallback, and menu collapse to one Uncategorized block of text boxes, no tooltips, no
+ *  confirmation gates. So menu record that metadata whenever it draw in editor, and runtime lookups
+ *  fall back to what got recorded.
+ *
+ *  Editor harvest also only thing that work for Blueprint cheats. Their metadata live in editor-only
+ *  asset data and get stripped at cook whatever game module compile with, so no build setting bring it
+ *  back.
+ *
+ *  Own class on purpose, not more fields on UCheatManagerMenuSettings, and not UDeveloperSettings.
+ *  This is generated data, not settings: no place in Project Settings, no place in project
+ *  DefaultGame.ini next to values a human wrote.
+ *
+ *  Config name is PLUGIN name, not module name. FPluginManager register config branch per mounted
+ *  plugin under plugin own name, and that branch resolve against plugin config hierarchy, which search
+ *  plugin Config folder before project one. Rename to module name and it silently fall back to
+ *  ordinary project hierarchy, plugin-local file never read.
+ */
+UCLASS(Config = CheatManagerMenu, DefaultConfig)
+class CHEATMANAGERMENU_API UCheatMenuMetadataStore : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	/** Read-only accessor for runtime lookups. */
+	static const UCheatMenuMetadataStore* Get();
+
+	/** Mutable accessor for editor-side harvest. */
+	static UCheatMenuMetadataStore* GetMutable();
+
+	/**
+	 * Write harvested data to whichever config file actually reach packaged build.
+	 *
+	 * Plugin under <Project>/Plugins get own Config folder, which UAT stage wholesale, no filtering, no
+	 * warning. Plugin installed into engine cannot be written to (shared between every project on
+	 * machine, often not writable), so that case fall back to project Config folder, which also stage,
+	 * cost one UAT warning per package.
+	 *
+	 * Return false when neither location writable, which normally mean file read-only because not
+	 * checked out.
+	 */
+	bool SaveToStagedConfig();
+
+	/** Category per cheat function name. Absent entry mean cheat uncategorised. */
+	UPROPERTY(Config)
+	TMap<FString, FString> Categories;
+
+	/** Tooltip per cheat function name. Also what filter box match for description search. */
+	UPROPERTY(Config)
+	TMap<FString, FString> ToolTips;
+
+	/** Confirmation prompt per cheat function name. Entry mean gated; empty value mean generated prompt. */
+	UPROPERTY(Config)
+	TMap<FString, FString> ConfirmMessages;
+
+	/**
+	 * Slider range per parameter, keyed "FunctionName:ParamName", packed as
+	 * "Min,Max,Step,Default,Integer". Flat string map not struct, because that round-trip through config
+	 * system predictably and stay readable in ini.
+	 */
+	UPROPERTY(Config)
+	TMap<FString, FString> SliderRanges;
+};
+
+```
