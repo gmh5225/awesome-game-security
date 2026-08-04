@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:icculus/mojoelf`: entity [[mojoelf]]; cited on [[overviews/game-hacking]] and [[overviews/mobile-security]].
+
 - **2026-08-04** — ingest `description:icelemon1314/mapleLemon`: entity [[maple-lemon]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-08-04** — ingest `description:icsharpcode/ILSpy`: entity [[ilspy]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]].
