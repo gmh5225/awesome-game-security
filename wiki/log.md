@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:invi1998/MultiplayerBlasterGame`: entity [[multiplayer-blaster-game]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
 - **2026-08-04** — ingest `description:ioncodes/gecko`: entity [[gecko]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-08-04** — ingest `description:ioncodes/pooldump`: entity [[pooldump]]; cited on [[kernel-pool-scanning]] and [[overviews/windows-kernel]].
