@@ -218,6 +218,7 @@ sources:
   - wiki/sources/descriptions/notpidgey__ManyTypes.md
   - wiki/sources/descriptions/x-spy__CVE-2026-43499-popsicle.md
   - wiki/sources/descriptions/jsirichai__CVE-2019-2215.md
+  - wiki/sources/descriptions/j4nn__CVE-2020-0041.md
   - wiki/sources/descriptions/jseclab__obj2shellcode.md
   - wiki/sources/descriptions/wtsxDev__reverse-engineering.md
   - wiki/sources/descriptions/wiresock__ndisapi.md
@@ -725,6 +726,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 - Android Kernel CVE PoCs such as [[cve-2026-43499-popsicle]] (Xiaomi popsicle LPE via CVE-2026-43499; LD_PRELOAD; uid 0 + SELinux disabled) sit in the Cheat Android Kernel CVE lane. (source: wiki/sources/descriptions/x-spy__CVE-2026-43499-popsicle.md)
 - Qualcomm QSEECOM/TrustZone arbitrary kernel R/W via [[cve-2021-1961]] (Widevine DRM TA ION buffer abuse; Pixel 3 / blueline; `/proc/version` + SELinux off) sits in the same Cheat Android Kernel CVE `[CVE RW]` lane. (source: wiki/sources/descriptions/tamirzb__CVE-2021-1961.md)
 - Binder epoll use-after-free temporary root via [[cve-2019-2215]] (Pixel 2/XL; Sep 2019 firmware / kernel 4.4.177; ARM64 NDK binary with hardcoded offsets) sits in the same Cheat Android Kernel CVE / Root lane. (source: wiki/sources/descriptions/jsirichai__CVE-2019-2215.md)
+- Binder transaction-buffer bounds-check LPE via [[cve-2020-0041]] (Pixel 3; Feb 2020 firmware QQ1A.200205.002; pending-node reallocation → kernel arbitrary R/W + root) sits in the same Cheat Android Kernel CVE / Root lane. (source: wiki/sources/descriptions/j4nn__CVE-2020-0041.md)
 - Android Kernel CVE reference lists such as [[android-vuln]] (documentation/list for cheat / Android Kernel CVE research) sit in the same Cheat Android Kernel CVE lane. (source: wiki/sources/descriptions/tangsilian__android-vuln.md) PoC/exploit list [[android-vuln-poc-exp]] (documentation/list; kernel CVE PoCs) sits beside it. (source: wiki/sources/descriptions/jiayy__android_vuln_poc-exp.md)
 - Dirty Pipe (CVE-2022-0847) temporary root via [[dirtypiperoot]] (Pixel 6; vuln check + native C; pipe page-cache overwrite of read-only files) sits in the same Cheat Android Kernel CVE / Root lane. (source: wiki/sources/descriptions/tiann__DirtyPipeRoot.md) Permanent Magisk v24.3 root on Pixel 6 via [[dirtypipe-android]] (module-loader pipe overwrite + ARM64 SELinux/cred shellcode) sits beside it. (source: wiki/sources/descriptions/polygraphene__DirtyPipe-Android.md)
 

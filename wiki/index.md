@@ -234,6 +234,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cpp-veh-dbi](entities/cpp-veh-dbi.md) — C++ VEH-based lightweight DBI (Cheat / dynamic binary instrumentation)
 - [cpuz](entities/cpuz.md) — CPU-Z vulnerable-driver exploit (XP–Win10 1607; Cheat Vulnerable Driver)
 - [CVE-2019-2215](entities/cve-2019-2215.md) — Binder epoll UAF temporary root (Pixel 2/XL; Sep 2019 firmware; ARM64 NDK)
+- [CVE-2020-0041](entities/cve-2020-0041.md) — Binder transaction-buffer bounds-check LPE (Pixel 3; Feb 2020 firmware; kernel R/W + root)
 - [CVE-2021-1961](entities/cve-2021-1961.md) — Qualcomm QSEECOM/TrustZone kernel R/W (Widevine ION; Pixel 3; SELinux off)
 - [CVE-2024-0044](entities/cve-2024-0044.md) — Android 12/13 app data-directory access via crafted payload (Application CVE)
 - [CVE-2025-21333](entities/cve-2025-21333.md) — Hyper-V `vskrnlintvsp.sys` heap overflow LPE (IoRing pool spray / pipe attr R/W)
