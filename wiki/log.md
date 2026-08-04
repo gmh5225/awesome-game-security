@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-04** — ingest `description:idkhidden/DrawIDA`: entity [[draw-ida]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-04** — ingest `description:igozdev/xorlit`: entity [[xorlit]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-08-04** — ingest `description:igromanru/Dark-Souls-III-Cheat-Engine-Guide`: entity [[dark-souls-iii-cheat-engine-guide]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
