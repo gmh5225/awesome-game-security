@@ -423,6 +423,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [genshin-impact-script](entities/genshin-impact-script.md) — TypeScript Genshin Impact script (cheat / game:genshin impact)
 - [genshinjumpfixer2](entities/genshinjumpfixer2.md) — Genshin Impact Decode CFG (jump-target calc + code simplify; khang06)
 - [GenericGraph](entities/generic-graph.md) — UE4 generic graph data-structure plugin (editor tooling / asset pipelines; Plugins:Unreal)
+- [gina_public](entities/gina-public.md) — IRP Null hijack kernel driver (C/C++; cheat / driver communication)
 - [get-unity](entities/get-unity.md) — JS CLI: Unity Editor download URL (latest/pinned; Game Tools)
 - [GhidraMetrics](entities/ghidrametrics.md) — Ghidra native-code metrics (cyclomatic / size / call depth; headless JSON)
 - [gltut](entities/gltut.md) — OpenGL tutorial (C++ / XML docs; Renderer / OpenGL Render)
