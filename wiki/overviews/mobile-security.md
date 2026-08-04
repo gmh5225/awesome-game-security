@@ -168,6 +168,7 @@ sources:
   - wiki/sources/descriptions/jailbreakdotparty__dirtyZero.md
   - wiki/sources/descriptions/jbro129__android-modding.md
   - wiki/sources/descriptions/j-hc__FlagSecurePatcher.md
+  - wiki/sources/descriptions/infosecrajesh__Auto-generate-Frida-bypass-scripts-for-SSL-pinning-root-detection-on-Android-iOS.md
 updated: 2026-08-04
 confidence: high
 ---
@@ -220,7 +221,7 @@ User/kernel probes without custom LKM on compatible GKI (BTF, SELinux, lockdown,
 
 ## Network & SSL pinning
 
-Traffic capture via mitmproxy / Charles; agent MCP [[android-proxy-mcp]]; Frida universal TrustManager hooks for pinning bypass. Certificate user→system modules such as [[move-certificate]] support MITM on rooted devices.
+Traffic capture via mitmproxy / Charles; agent MCP [[android-proxy-mcp]]; Frida universal TrustManager hooks for pinning bypass. Static-analysis script generator [[auto-generate-frida-bypass-scripts-for-ssl-pinning-root-detection-on-android-ios]] scans APK/IPA binaries for known SSL stacks (OkHttp, TrustKit, Flutter, gRPC) and root/jailbreak SDKs (RootBeer, Play Integrity, commercial protectors), then emits targeted [[frida]] hooks via a three-layer injection design (Android 12+). (source: wiki/sources/descriptions/infosecrajesh__Auto-generate-Frida-bypass-scripts-for-SSL-pinning-root-detection-on-Android-iOS.md) Certificate user→system modules such as [[move-certificate]] support MITM on rooted devices.
 
 ## Kernel drivers & CVE lanes
 

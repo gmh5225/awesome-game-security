@@ -144,6 +144,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Asphyxia CS2](entities/asphyxia-cs2.md) — open-source internal CS2 cheat (C++; ESP / aimbot / triggerbot; Source 2 SDK; cheat / game:cs2)
 - [AutoAttach](entities/auto-attach.md) — x64dbg plugin: auto-attach to named process with optional delay (`AutoAttachProcess` / `AutoAttachSleep` / `AutoAttachStatus`; Cheat x64dbg Plugins)
 - [AutoOffsets](entities/auto-offsets.md) — Fortnite offset fetcher via remote API (C++; WinINet; `[Offset]`)
+- [Auto-generate Frida Bypass Scripts](entities/auto-generate-frida-bypass-scripts-for-ssl-pinning-root-detection-on-android-ios.md) — static-analysis Frida script generator for Android/iOS SSL pinning and root/jailbreak bypass
 - [AutomataMP](entities/automatamp.md) — NieR Automata multiplayer / RE tooling (praydog; Game Develop / source)
 - [AV-EDR-Killer](entities/av-edr-killer.md) — BYOVD via wsftprm.sys (IOCTL 0x22201C; PID kill)
 - [AvAAntiCheat](entities/avaanticheat.md) — Minecraft Bukkit/Spigot AC (fly/combat/autoclick/packet; Geyser leniency)
