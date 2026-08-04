@@ -2341,3 +2341,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-04** — ingest `description:jailbreakdotparty/dirtyZero`: entity [[dirty-zero]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked from [[lara]] and [[xnu-1day-practice]].
 
 - **2026-08-04** — ingest `description:jafarlihi/modreveal`: entity [[modreveal]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked from [[hidden-module-detector]] and [[venom]].
+
+- **2026-08-04** — ingest `description:jackullrich/syscall-detect`: entity [[syscall-detect]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].

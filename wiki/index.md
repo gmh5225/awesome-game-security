@@ -943,6 +943,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Symless](entities/symless.md) — IDA structure/type recovery on stripped binaries (data-flow; Hex-Rays)
 - [SymlinkCallback](entities/symlink-callback.md) — symlink LinkTarget → access callback (Ring0 / AC research)
 - [syser](entities/syser.md) — Windows x86/x64 debugger (C/C++; RE / plugin / modding; Cheat Debugging)
+- [syscall-detect](entities/syscall-detect.md) — detect direct/indirect syscalls via Instrumentation Callback or stack inspection (C; AC / Windows)
 - [syscalls-cpp](entities/syscalls-cpp.md) — C++20 header-only direct syscall invocation (AC Compile Time)
 - [System Informer](entities/systeminformer.md) — Process Hacker successor; Windows process/system explorer (kernel explorer lane)
 - [SystemThreadFinder](entities/system-thread-finder.md) — detect hidden/manual-map system threads (NtQuerySystemInformation; BE-style)
