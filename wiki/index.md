@@ -227,6 +227,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [csgo-internal-base](entities/csgo-internal-base.md) — CS:GO internal cheat base (CreateInterface, VMT hooks, netvars, pattern scan, ImGui; cheat / game:csgo)
 - [csgo-kns](entities/csgo-kns.md) — CS:GO internal cheat (VMT hooks, interface pointers; ESP/aimbot/bhop/skin changer; cheat / game:csgo)
 - [csgo-linux-cheat-sdk](entities/csgo-linux-cheat-sdk.md) — Linux CS:GO cheat SDK (C++; render/net/mod; cheat / game:csgo)
+- [csgo2-cheat](entities/csgo2-cheat.md) — CS2 cheat: rendering / SDK generation / hooking (C++; cheat / game:cs2)
 - [CSGOSimple](entities/csgosimple.md) — spirthack Internal CS:GO baseline (MarkHC fork; cheat / game:csgo)
 - [CSSFontFace-Exploit](entities/cssfontface-exploit.md) — WebKit CSSFontFace UAF (PS4/PS5 browser; jailbreak / PlayStation)
 - [cstrike15_src](entities/cstrike15-src.md) — leaked partial CS:GO Source tree (client/server / weapons / net; Game Engine)
