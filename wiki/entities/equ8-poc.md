@@ -18,4 +18,4 @@ C++ research repo that **fully reimplements the EQU8 kernel driver** described i
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[kernel-callbacks]] · [[van1338]] · [[xign-poc-april-2026]]
+[[equ8-bypass]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[kernel-callbacks]] · [[van1338]] · [[xign-poc-april-2026]]

@@ -352,6 +352,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EfiCMake](entities/eficmake.md) — minimal CMake UEFI app scaffold (EDK2 headers; MSVC `.efi`; boot services)
 - [engine-showcase](entities/engine-showcase.md) — older custom C++ engine showcase (Lua/UI/levels/net; Game Engine / [Old engine])
 - [Ephemera](entities/ephemera.md) — multiplatform MEMORY.DMP analysis (WinDbg flavor; AC / kernel dump)
+- [equ8_bypass](entities/equ8-bypass.md) — simple EQU8 user-mode bypass (registry driver path + IOCTL handle close; explore anticheat:equ8)
 - [EQU8-PoC](entities/equ8-poc.md) — full C++ EQU8 kernel driver reimplementation (explore anticheat:equ8; driver development)
 - [EpicSurvivalGame](entities/epic-survival-game.md) — UE4 FPS course (action system / event-driven C++; Game Develop / Unreal source)
 - [ErisDbg](entities/erisdbg.md) — VT debugger (C/C++; kernel drivers / modding; cheat / debugging)
