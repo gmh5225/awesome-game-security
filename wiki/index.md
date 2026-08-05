@@ -509,6 +509,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-search](entities/ida-search.md) — IDA Pro 9.x plugin: 010 Editor–style type-aware binary search (`ida-plugin.json`; cheat / IDA Plugins)
 - [ida-screenshot](entities/ida-screenshot.md) — IDA Pro high-resolution screenshot capture plugin (Python; macOS/Linux install; cheat / IDA Plugins)
 - [ida-sigmaker](entities/ida-sigmaker.md) — IDA Pro 9+ zero-dependency signature maker/searcher (Python; optional SIMD; cheat / IDA Plugins)
+- [ida-slides](entities/ida-slides.md) — IDA Pro Marp/Slidev live RE presentation plugin (dockable tab; @name/@addr IDB links; embed decompiled lines; cheat / IDA Plugins)
 - [ida-taskr](entities/ida-taskr.md) — IDA Pro parallel computing library (Python; Qt + multiprocessing; cheat / IDA Plugins)
 - [ida-vtable-tools](entities/ida-vtable-tools.md) — IDA 9.X vtable ops: `.hpp` skeleton / rename / `this` type / slot index (Python; IDA Plugins)
 - [idac](entities/idac.md) — Trail of Bits IDA Pro CLI/client (Unix socket → GUI/idalib; JSON; agents; not MCP)
