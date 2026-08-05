@@ -222,6 +222,7 @@ sources:
   - wiki/sources/descriptions/horsicq__x64dbg-Plugin-Manager.md
   - wiki/sources/descriptions/horsicq__stringsx64dbg.md
   - wiki/sources/descriptions/horsicq__nfdx64dbg.md
+  - wiki/sources/descriptions/horsicq__XVolkolak.md
   - wiki/sources/descriptions/morsisko__xFindOut.md
   - wiki/sources/descriptions/mgeeky__ThreadStackSpoofer.md
   - wiki/sources/descriptions/klezVirus__SilentMoonwalk.md
@@ -648,6 +649,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Dynamic .NET VMProtect unpack/dump via [[vmunprotect-dumper]] (force static ctor restore → AsmResolver PE dump; VMP 3.7.0) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/void-stack__VMUnprotect.Dumper.md)
 - Native PE VMProtect unpack via [[vmpunpacker]] (C++/Python; LZMA decompress → original sections/IAT) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/oureveryday__VMPUnpacker.md)
 - Static Go VMProtect PE unpack/rebuild via [[vmpstatic]] (VMP 1.x–3.x) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/notsnakesilent__VMPStatic.md)
+- Emulation-based generic PE unpack via [[xvolkolak]] (XEmulUnpacker / XEmulator single-step to OEP; Qt GUI + CLI; 21 packer-specific unpackers incl. UPX/ASPack/MPRESS) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/horsicq__XVolkolak.md)
 - Live-process VMP 3.x import-protection fix via [[vmpimportfixer]] (Unicorn emulation of near-call stubs in `.vmp0` → real import addresses; Zydis + pepp; x86/x64 including WoW64 fix from x64) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/mike1k__VMPImportFixer.md)
 - Themida / WinLicense 3.x virtualization research via [[themida-research]] (`VM_CONTEXT` layout, handler dispatch, de-virtualization / Triton lifting ideas) sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/stuxnet147__Themida-Research.md)
 - Themida IDA plugin / Fix Themida via [[tde]] (devirtualization engine for Themida-protected binaries) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/sodareverse__TDE.md)
