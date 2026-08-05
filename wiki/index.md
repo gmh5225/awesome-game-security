@@ -827,6 +827,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pedigest](entities/pedigest.md) — C PE Authenticode digest library (hash-exclusion; BCrypt SHA-*; kernel ksecdd + usermode; WIN_CERTIFICATE parse; Anti Cheat → Sign Tools)
 - [payload_dumper](entities/payload-dumper.md) — Android OTA payload.bin dumper (Python; Magisk / ROM RE)
 - [payload-dumper-go](entities/payload-dumper-go.md) — Android OTA payload.bin dumper (Go; parallel xz / checksum / zip)
+- [Packet-Sniffer](entities/packet-sniffer.md) — C/C++ packet logger/decryptor (networking + debugging; cheat / Packet Sniffer&Filter)
 - [PcapPlusPlus](entities/pcapplusplus.md) — multiplatform C++ packet capture/parse/craft (100+ protocols; libpcap/Npcap; Packet Capture&Parse)
 - [pcm](entities/pcm.md) — curated MCP for IDA Pro (rand-tech; desc also claims Process Context Monitor)
 - [PCILeech](entities/pcileech.md) — PCIe DMA host tool (LeechCore → PCILeech/MemProcFS/vmm); stock firmware fingerprints; ufrisk / cheat / DMA
