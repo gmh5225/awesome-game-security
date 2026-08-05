@@ -2465,3 +2465,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-04** — ingest `description:ianveig29/como-funciona-vac`: entity [[como-funciona-vac]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-08-04** — ingest `description:iamsopotatoe-coder/TinyLoad`: entity [[tinyload]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-08-05** — ingest `description:iArtorias/debug_remover`: entity [[debug-remover]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].

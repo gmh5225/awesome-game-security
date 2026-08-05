@@ -265,6 +265,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [daila](entities/daila.md) — ChatGPT decompiler AI assistant (DAILA; cheat / IDA Plugins; human–LLM RE research)
 - [DeathSleep](entities/death-sleep.md) — thread terminate/restore sleep obfuscation; page protection during no-execution (AC page protection)
 - [DeepSleep](entities/deepsleep.md) — x64 Gargoyle variant; ROP-only + PIC sleep-hide (no APCs; page protection)
+- [debug-remover](entities/debug-remover.md) — C/C++ strip debug info from binaries (Anti Cheat → Binary Packer; anti-RE hardening)
 - [deepwiki-mcp](entities/deepwiki-mcp.md) — DeepWiki docs MCP server (query/retrieve wikis for AI agents; Game Develop / MCP)
 - [defender-control](entities/defender-control.md) — C# GUI: Defender real-time / Tamper Protection / sample-submission toggles (registry/service)
 - [Dead By Daylight Copy](entities/dead-by-daylight.md) — UE4 asymmetric-horror clone (physics / animation / asset pipelines; Game Develop / source)
