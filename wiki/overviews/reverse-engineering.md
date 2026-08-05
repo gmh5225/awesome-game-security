@@ -103,6 +103,7 @@ sources:
   - wiki/sources/descriptions/hiatus__adbg.md
   - wiki/sources/descriptions/herosi__PyClassInformer.md
   - wiki/sources/descriptions/hfiref0x__WubbabooMark.md
+  - wiki/sources/descriptions/helpsystems__turbodiff.md
   - wiki/sources/descriptions/liors619__TtdAntiDebugging.md
   - wiki/sources/descriptions/rrbranco__blackhat2012.md
   - wiki/sources/descriptions/samshine__ScyllaHideDetector2.md
@@ -503,7 +504,7 @@ Model Context Protocol servers expose RE tools to LLM agents: [[ida-pro-mcp]] / 
 
 ## Binary diffing
 
-Graph- and structure-based differencing (BinDiff, [[diaphora]], ghidriff, DarunGrim) for patch analysis: track anti-cheat driver updates between builds, isolate logic changes in obfuscated clients, and compare patched vulnerability fixes. [[diaphora]] is the leading open-source IDA Pro Python plugin for function-level comparison—CFG matching, basic-block hashes, mnemonics, string refs, call-graph topology—with partial matching, symbol/comment porting between IDB versions, and detailed diff reports for vulnerability and patch analysts. (source: wiki/sources/descriptions/joxeankoret__diaphora.md)
+Graph- and structure-based differencing (BinDiff, [[diaphora]], [[turbodiff]], ghidriff, DarunGrim) for patch analysis: track anti-cheat driver updates between builds, isolate logic changes in obfuscated clients, and compare patched vulnerability fixes. [[diaphora]] is the leading open-source IDA Pro Python plugin for function-level comparison—CFG matching, basic-block hashes, mnemonics, string refs, call-graph topology—with partial matching, symbol/comment porting between IDB versions, and detailed diff reports for vulnerability and patch analysts. (source: wiki/sources/descriptions/joxeankoret__diaphora.md) [[turbodiff]] (HelpSystems) is another IDA plugin focused on discovering and analyzing function-level differences between two binaries for game-security RE and patch tracking. (source: wiki/sources/descriptions/helpsystems__turbodiff.md)
 
 ## Key sub-areas
 

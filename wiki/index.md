@@ -1059,6 +1059,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pbrtbook](entities/pbrtbook.md) — Physically Based Rendering: From Theory To Implementation (kanition; Renderer / PBR)
 - [tinyobjloader](entities/tinyobjloader.md) — single-header C++ Wavefront OBJ loader (verts/MTL; Wavefront Obj)
 - [ts-ue4dumper](entities/ts-ue4dumper.md) — TypeScript + Frida UE4 dumper (modular; C++ offsets)
+- [TurboDiff](entities/turbodiff.md) — IDA Pro plugin: function-level binary diff between two binaries (cheat / IDA Plugins / diff)
 - [Turbulenz Engine](entities/turbulenz-engine.md) — HTML5/TypeScript game engine (WebGL + server services; Game Engine)
 - [UTM](entities/utm.md) — QEMU VM host for iOS/macOS (Hypervisor.framework / JIT; IOS Emulator)
 - [uWebSockets](entities/uwebsockets.md) — C++ WebSocket/HTTP server (TLS / pub-sub; Game Network)

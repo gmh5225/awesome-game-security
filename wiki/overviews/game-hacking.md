@@ -243,6 +243,7 @@ sources:
   - wiki/sources/descriptions/wiresock__ndisapi.md
   - wiki/sources/descriptions/hercul3s__Packet-Sniffer.md
   - wiki/sources/descriptions/hendodev__cs2-ext.md
+  - wiki/sources/descriptions/helpsystems__turbodiff.md
   - wiki/sources/descriptions/seladb__PcapPlusPlus.md
   - wiki/sources/descriptions/nmap__npcap.md
   - wiki/sources/descriptions/quarkslab__peetch.md
@@ -734,6 +735,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Binary patch script generation via [[genpatch]] (Python; dialog when patch script succeeds; cheat / IDA Plugins) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/sterrasec__genpatch.md)
 - Hex-Rays microcode IR display via [[genmc]] (IDAPython; debug microcode plugin / decompiler-extension work) sits in the Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/patois__genmc.md)
 - Curated essential IDA Pro plugin pack via [[idaplugins]] (deobfuscation / binary diffing / custom crypto) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/ssmugabi__IDAPlugins.md)
+- Function-level binary diffing via [[turbodiff]] (HelpSystems IDA plugin; compare two binaries' functions; cheat / IDA Plugins / diff) sits in the same static RE / patch-tracking lane. (source: wiki/sources/descriptions/helpsystems__turbodiff.md)
 - Pseudocode function-definition colorizing via [[ida-functioncolor]] (Python IDA plugin; Hex-Rays view) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/sneakyevil__ida_functioncolor.md)
 - Function outline / call-hierarchy trees via [[ida-func-outline]] (callers/callees + depth; iOS ARM64 decomp readability) sit in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/richor1042__IDAFuncOutline.md)
 - PS4 module-loader IDA helper via [[ida-ps4-helper]] (companion to ps4-module-loader; PlayStation static RE; cheat / IDA Plugins) sits in the same lane. (source: wiki/sources/descriptions/janisslsm__ida-ps4-helper.md)
