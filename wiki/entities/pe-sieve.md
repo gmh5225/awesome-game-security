@@ -18,4 +18,4 @@ Lightweight Windows engine that scans **one process at a time** to detect in-mem
 
 ## Related
 
-[[xmalhunter]] · [[hookhunter]] · [[hook-buster]] · [[patch-finder]] · [[faultline]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
+[[xmalhunter]] · [[mal-unpack-drv]] · [[pe-bear]] · [[hookhunter]] · [[hook-buster]] · [[patch-finder]] · [[faultline]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]

@@ -667,6 +667,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [magiskboot](entities/magiskboot.md) — Boot Image Modification Tool (C/C++; Cheat Magisk)
 - [magiskboot_build](entities/magiskboot-build.md) — POSIX standalone magiskboot build scripts (Cheat Magisk / Boot Image)
 - [magiskboot_ndk_on_linux](entities/magiskboot-ndk-on-linux.md) — NDK-on-Linux magiskboot (boot unpack/repack/ramdisk)
+- [mal-unpack-drv](entities/mal-unpack-drv.md) — Experimental test-signed kernel driver for Windows malware sample unpacking (VM-only; Sample Unpacker; hasherezade)
 - [MagiskDetector](entities/magiskdetector.md) — archived Android Magisk detector (AppZygote/AIDL; Detection:Magisk)
 - [makin](entities/makin.md) — Windows anti-debug/anti-VM probe (30+ checks; C; Anti Debugging)
 - [mandibule](entities/mandibule.md) — Linux ptrace ELF injector (icrt; raw syscalls; load/relocate; fake stack; Cheat / injection)
