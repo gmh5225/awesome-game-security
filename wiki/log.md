@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:helloobaby/wow-IAT-fix`: entity [[wow-iat-fix]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
 - **2026-08-05** — ingest `description:helpsystems/Agafi`: entity [[agafi]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-05** — ingest `description:helpsystems/turbodiff`: entity [[turbodiff]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked from [[idaplugins]].

@@ -1185,6 +1185,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WinVisor](entities/winvisor.md) — WHP hypervisor emulator for Windows x64 user-mode PE (Windows Emulator)
 - [winipt](entities/winipt.md) — WinIPT library + tools for Intel Processor Trace on Windows (`ipt.sys`; per-process/per-CPU; coverage / fuzzing / execution tracing)
 - [woody_woodpacker](entities/woody-woodpacker.md) — ELF binary packer (outputs “woody”; Anti Cheat → Binary Packer)
+- [wow-IAT-fix](entities/wow-iat-fix.md) — WoW client IAT repair (C/C++; plugin / modding / SDK generation; cheat / game:wow)
 - [vt-debuuger](entities/vt-debuuger.md) — hacked hypervisor testing (C/C++ drivers / plugins)
 - [VTuberWithUE4](entities/vtuber-with-ue4.md) — UE4 VTuber (physics / animation / asset pipelines; Game Develop / Unreal source)
 - [VX-It](entities/vx-it.md) — Unreal decrypt for Veiled Experts (C/C++; cheat / game:veiled experts `[Decrypt]`)
