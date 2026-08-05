@@ -29,6 +29,8 @@ import argparse
 import requests
 from pathlib import Path
 
+from description_paths import normalize_repo_slug
+
 # ── constants ──────────────────────────────────────────────────────────────────
 CURSOR_API_BASE   = "https://api.cursor.com/v0"
 GITHUB_REPO_URL   = "https://github.com/gmh5225/awesome-game-security"
@@ -53,12 +55,18 @@ def get_api_key() -> str:
 
 def list_archived_repos() -> list[tuple[str, str]]:
     """Return [(owner, repo), ...] sorted by owner/repo."""
-    repos = []
+    repos: list[tuple[str, str]] = []
+    seen: set[tuple[str, str]] = set()
     for owner_dir in sorted(ARCHIVE_DIR.iterdir()):
         if not owner_dir.is_dir():
             continue
         for txt in sorted(owner_dir.glob("*.txt")):
-            repos.append((owner_dir.name, txt.stem))
+            owner, repo = normalize_repo_slug(owner_dir.name, txt.stem)
+            key = (owner.lower(), repo.lower())
+            if key in seen:
+                continue
+            seen.add(key)
+            repos.append((owner, repo))
     return repos
 
 

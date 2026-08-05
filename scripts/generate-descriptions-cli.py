@@ -52,13 +52,19 @@ DESC_EN_KEEP_RE = re.compile(r"^description/[^/]+/[^/]+/description_en\.txt$")
 
 def list_archived_repos() -> list[tuple[str, str]]:
     repos: list[tuple[str, str]] = []
+    seen: set[tuple[str, str]] = set()
     if not ARCHIVE_DIR.is_dir():
         return repos
     for owner_dir in sorted(ARCHIVE_DIR.iterdir()):
         if not owner_dir.is_dir():
             continue
         for txt in sorted(owner_dir.glob("*.txt")):
-            repos.append((owner_dir.name, txt.stem))
+            owner, repo = normalize_repo_slug(owner_dir.name, txt.stem)
+            key = (owner.lower(), repo.lower())
+            if key in seen:
+                continue
+            seen.add(key)
+            repos.append((owner, repo))
     return repos
 
 
