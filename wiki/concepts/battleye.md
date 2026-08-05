@@ -16,7 +16,8 @@ sources:
   - wiki/sources/descriptions/mexploitui__FakeEye.md
   - wiki/sources/descriptions/masterpastaa__BattlEye-Handler-BYPASS.md
   - wiki/sources/descriptions/lguilhermee__Battleye-Shellcode-Dumper.md
-updated: 2026-08-01
+  - wiki/sources/descriptions/huoji120__goodeye.md
+updated: 2026-08-05
 confidence: medium
 ---
 
@@ -52,6 +53,8 @@ Service/install/launch emulation is studied via [[fakeeye]]: SCM-managed `BEServ
 
 Handle-stripping bypass via periodic handle re-creation is implemented in [[battleye-handler-bypass]]: a KMDF driver that re-opens process handles before BE’s ~5-second cleanup cycle strips them, with IOCTL paths for usermode control. (source: wiki/sources/descriptions/masterpastaa__BattlEye-Handler-BYPASS.md)
 
+BEDaisy APC instrumentation is studied via [[goodeye]]: a kernel callback runs in each thread where the BE driver registers an APC, exposing BE’s kernel APC inspection surface for RE. (source: wiki/sources/descriptions/huoji120__goodeye.md)
+
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[arma3beclient]] · [[r6-external]] · [[r6-internal-v3]] · [[fakeeye]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[arma3beclient]] · [[r6-external]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
