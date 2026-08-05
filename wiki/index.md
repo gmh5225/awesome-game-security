@@ -1127,6 +1127,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Vk-Engine](entities/vk-engine.md) — WIP Jai Vulkan engine (clustered forward / PBR / ImGui + Jolt; Game Engine)
 - [Volatility](entities/volatility.md) — original Python 2 memory forensics (profiles; pslist/modules/rootkit)
 - [Volatility 3](entities/volatility3.md) — Python 3 memory forensics (RAM images; Win/Linux/macOS plugins)
+- [vmem-decrypt](entities/vmem-decrypt.md) — VMware vTPM-encrypted .vmem/.vmsn/.vmss/.nvram decrypt (pure-Python AES-256-CBC; vmem_flatten.py → Volatility 3; Win11 partial VM encryption; AC/IS forensics)
 
 - [Voidmaw](entities/voidmaw.md) — VEH + PAGE_GUARD code-hiding (AV/AC page-protection research)
 - [VEN0m-Ransomware](entities/ven0m-ransomware.md) — BYOVD via iMFForceDelete.sys (IObit; AV/EDR evasion)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:heeeyaaaa/vmem-decrypt`: entity [[vmem-decrypt]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
+
 - **2026-08-05** — ingest `description:helloobaby/wow-IAT-fix`: entity [[wow-iat-fix]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-08-05** — ingest `description:helpsystems/Agafi`: entity [[agafi]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
