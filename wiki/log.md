@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:hzqst/unicorn_pe`: entity [[unicorn-pe]]; cited on [[overviews/reverse-engineering]].
+
 - **2026-08-05** — ingest `description:iBotPeaches/Apktool`: entity [[apktool]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
 - **2026-08-05** — ingest `description:iCollin/pubg-internal`: entity [[pubg-internal]]; cited on [[overviews/game-hacking]].

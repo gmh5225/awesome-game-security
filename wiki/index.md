@@ -1057,6 +1057,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [unitySpeedTools](entities/unityspeedtools.md) — iOS Unity IL2CPP speed/modding tools (C/C++ / ObjC)
 - [unflutter](entities/unflutter.md) — Flutter/Dart AOT snapshot static analyzer (symbol recovery)
 - [unmapper](entities/unmapper.md) — automatic dumped-PE header repair for decompilers (Dump Fix)
+- [unicorn-pe](entities/unicorn-pe.md) — Unicorn-based Windows PE emulation for packed binaries (per-instruction disasm; cheat / DBI)
 - [usb-monitor-bof](entities/usb-monitor-bof.md) — Cobalt Strike async BOF: USB connect/disconnect via WM_DEVICECHANGE (Conquest; optional NetNTLM coerce; Some Tricks / Ring3)
 - [UnrealVTDbg](entities/unreal-vtdbg.md) — VT-x/EPT Unreal kernel debugger (Delphi UI + VMX/EPT driver, EPT hooks, Detours breakpoints; Win10/11)
 - [UnrealCLR](entities/unrealclr.md) — UE CoreCLR / .NET 6 C# gameplay plugin (actors/components/Blueprints; Plugins:Unreal)
