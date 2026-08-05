@@ -10,7 +10,8 @@ sources:
   - wiki/sources/descriptions/un4ckn0wl3z__dioprocess-private.md
   - wiki/sources/descriptions/tandasat__Sushi.md
   - wiki/sources/descriptions/synacktiv__windows_kernel_shadow_stack.md
-updated: 2026-07-21
+  - wiki/sources/descriptions/hfiref0x__UPGDSED.md
+updated: 2026-08-05
 confidence: high
 ---
 
@@ -34,6 +35,8 @@ UEFI bootkit research stacks such as [[dioprocess-private]] frame DSE / KPP bypa
 
 Kernel CET / shadow-stack work such as [[windows-kernel-shadow-stack]] studies how Windows KM shadow stacks interact with PatchGuard (and potential bypass/weakening scenarios) under Intel CET. (source: wiki/sources/descriptions/synacktiv__windows_kernel_shadow_stack.md)
 
+[[upgdsed]] combines runtime PatchGuard and DSE disable across Win7–11 using vulnerable signed drivers, CI.dll global manipulation, and KPP context patching — a multi-technique kernel trust-feature bypass reference for researchers. (source: wiki/sources/descriptions/hfiref0x__UPGDSED.md)
+
 ## Related
 
-[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[pg1903]] · [[demystifying-patchguard]] · [[sushi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
+[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[pg1903]] · [[upgdsed]] · [[demystifying-patchguard]] · [[sushi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]

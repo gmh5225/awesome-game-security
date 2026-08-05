@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:hfiref0x/UPGDSED`: entity [[upgdsed]]; cited on [[patchguard]] and [[overviews/windows-kernel]].
+
 - **2026-08-05** — ingest `description:hfiref0x/WinObjEx64`: entity [[winobjex64]]; cited on [[kernel-callbacks]] and [[overviews/windows-kernel]].
 
 - **2026-08-05** — ingest `description:hfiref0x/WubbabooMark`: entity [[wubbaboomark]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].

@@ -872,6 +872,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ponytail Risk](entities/ponytail-risk.md) — OSS behavioral risk control + evidence review for private game servers (Rust agent, C ABI SDK, shadow mode)
 - [PresentHookDetection](entities/present-hook-detection.md) — BE-style IDXGISwapChain::Present hook check (dummy D3D11 + dxgi prologue)
 - [PG1903](entities/pg1903.md) — Win10 1903 PatchGuard disable via context-page NX (Demo NX)
+- [UPGDSED](entities/upgdsed.md) — runtime PatchGuard + DSE disable (vulnerable drivers, CI.dll, KPP context; Win7–11; hfiref0x)
 - [PGHooker](entities/pghooker.md) — C++ Page Guard (`PAGE_GUARD`) hook research (cheat / hook)
 - [ProExt](entities/proext.md) — Rust external CS2 cheat (ESP / aimbot / triggerbot / radar / RCS; egui UI)
 
