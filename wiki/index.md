@@ -894,6 +894,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [R6-Internal-V3](entities/r6-internal-v3.md) — R6 internal: modding / SDK generation / memory analysis (C/C++)
 - [r6-chams-public](entities/r6-chams-public.md) — R6 chams: Chameleon Models + visual check (educational; cheat / game:r6 [Chams])
 - [r6-external](entities/r6-external.md) — R6 external: driver development (C/C++; External)
+- [r6table-internal](entities/r6table-internal.md) — R6 internal: UE SDK ESP/aimbot + in-engine overlay (C++; cheat / game:r6)
 - [rbfx](entities/rbfx.md) — Urho3D fork: C# support + WYSIWYG editor (Game Engine source)
 - [r2a](entities/r2a.md) — retired radare2 local-LLM pointer (repo gone; successor r2ai; Cheat Radare Plugins)
 - [r2ai](entities/r2ai.md) — LLM-based reversing assistant for radare2 (interactive LLM↔r2; Cheat Radare Plugins)
