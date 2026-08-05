@@ -83,6 +83,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [aimbot-detection-prototype](entities/aimbot-detection-prototype.md) — deep-learning aimbot/triggerbot detection prototype (clips + live window; Detection:Aimbot)
 - [AMD IBS Toolkit](entities/amd-ibs-toolkit.md) — AMD Instruction-Based Sampling toolkit (hardware instruction subset sampling; cheat / Windows kernel explorer / AMD Sampling)
 - [Advanced-Anticheat](entities/advanced-anticheat.md) — open-source Roblox Luau client-server AC (movement/executor/GUI/ESP; ProfileStore flags/bans; honeypots)
+- [Agafi](entities/agafi.md) — x86 ROP gadget finder + ROP chainer (programs/modules/live processes; Cheat / ROP Finder)
 - [Alcatraz](entities/alcatraz.md) — x64 PE obfuscator (mutation / CFF / IAT; Zydis + AsmJit; ImGui)
 - [APatch KPM](entities/apatch-kpm.md) — APatch KernelPatch Module collection (C/C++; kernel modding/debug; Cheat / Android root)
 - [ApexD3D_External](entities/apexd3d-external.md) — Apex Legends external: D3D hooking / driver / SDK generation (C/C++; cheat / game:apex legends)
