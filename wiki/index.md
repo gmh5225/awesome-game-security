@@ -136,6 +136,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [APKiD](entities/apkid.md) — Android APK/DEX packer·obfuscator·anti-analysis ID (YARA; PEiD for Android)
 - [apksigcopier](entities/apksigcopier.md) — copy/extract/patch Android APK v1/v2/v3 signatures (Python; Signing Block)
 - [apksigner](entities/apksigner.md) — standalone Android APK signing tool (re-sign after mod/repack)
+- [apktool](entities/apktool.md) — Java APK decode/rebuild (smali, resources, manifest; `[Apk]`)
 - [apktool-mcp-server](entities/apktool-mcp-server.md) — MCP server wrapping apktool (Android RE suite)
 - [arkdecompiler](entities/arkdecompiler.md) — HarmonyOS NEXT ArkCompiler `.abc` decompiler (ArkTS/ArkJS → JS/TS; mobile RE)
 - [Ariadne](entities/ariadne.md) — Binary Ninja graph analysis (call graph + block coverage; Cheat Binary Ninja Plugins)
