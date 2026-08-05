@@ -84,6 +84,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Advanced-Anticheat](entities/advanced-anticheat.md) — open-source Roblox Luau client-server AC (movement/executor/GUI/ESP; ProfileStore flags/bans; honeypots)
 - [Alcatraz](entities/alcatraz.md) — x64 PE obfuscator (mutation / CFF / IAT; Zydis + AsmJit; ImGui)
 - [APatch KPM](entities/apatch-kpm.md) — APatch KernelPatch Module collection (C/C++; kernel modding/debug; Cheat / Android root)
+- [ApexD3D_External](entities/apexd3d-external.md) — Apex Legends external: D3D hooking / driver / SDK generation (C/C++; cheat / game:apex legends)
 - [auto-enum](entities/auto-enum.md) — IDA plugin: auto-identify/set enums for standard functions (Python/C; cheat / IDA Plugins)
 - [android-kernel-hacking-toolkit](entities/android-kernel-hacking-toolkit.md) — Android aarch64 LKM toolkit (filecopy / hideproc / propedit / syscall_hijack)
 - [android-kernel-huawei-mt6761](entities/android-kernel-huawei-mt6761.md) — Huawei MT6761 (Helio P22) Android kernel source (cheat / Android Kernel Source)
