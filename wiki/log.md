@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `readme:categories`: bumped Anti Cheat ~646 (was ~645; Cheat ~2655 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed README map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-05** — ingest `description:holi4m/gdrv-loader-v2`: entity [[gdrv-loader-v2]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-05** — ingest `description:hooksteroid/ApexD3D_External`: entity [[apexd3d-external]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
