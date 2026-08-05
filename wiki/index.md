@@ -1037,6 +1037,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Three.js](entities/three-js.md) — JavaScript 3D library (WebGL/WebGPU; scene graph / PBR / glTF / XR; Game Engine / HTML5)
 - [ThreatResearch](entities/threatresearch.md) — Security Joes Ghidra/IDA plugins + malware RE scripts / YARA (Cheat Ghidra)
 - [thread-call-stack-scanner](entities/thread-call-stack-scanner.md) — safe unload of hooked DLLs via thread call-stack scan (m417z; Anti Cheat / hook lifecycle)
+- [thread-namecalling](entities/thread-namecalling.md) — SetThreadDescription + remote GetThreadDescription via APC (working-set probe; cheat / injection:windows)
 - [ThreadStackSpoofer](entities/thread-stack-spoofer.md) — PoC thread call-stack spoof for in-process shellcode hiding (mgeeky; Cheat Spoof Stack)
 - [TiEtwAgent](entities/tietwagent.md) — ETW Threat-Intelligence injection-detection agent (krabsetw / Yara / PPL)
 - [TinyLoad](entities/tinyload.md) — minimal Windows PE manual-map loader + packer/crypter (custom VM stub; Binary Packer)
