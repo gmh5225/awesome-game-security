@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:huoji120/Etw-Syscall`: entity [[etw-syscall]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
 - **2026-08-05** — ingest `readme:categories`: bumped Cheat ~2654 (was ~2653; Anti Cheat ~643 / Game Develop ~183 / Game Engine ~155 stable); refreshed README map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-05** — ingest `description:hx1997/dayu`: entity [[dayu]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].

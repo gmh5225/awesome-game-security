@@ -358,6 +358,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EfiTool](entities/efitool.md) — UEFI ExitBootServices in-RAM SYSTEM hive patch (SYSTEM shell; no disk/driver)
 - [EtwTi-Syscall-Hook](entities/etwti-syscall-hook.md) — Instrumentation Callback syscall hook (C/C++; Detection:hook / ETW TI–adjacent)
 - [EtwTi-FluctuationMonitor](entities/etwti-fluctuation-monitor.md) — EtwTi provider registration fluctuation monitor (C; ETW callback tamper alerts)
+- [Etw-Syscall](entities/etw-syscall.md) — ETW syscall hook/modding (C/C++; Some Tricks / Windows Ring3)
 - [Etw-SyscallMonitor](entities/etw-syscall-monitor.md) — user-mode EtwTi syscall monitor (C; SSN/params/stacks; no hooks/driver)
 - [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests
 - [EtwWatcher](entities/etw-watcher.md) — web UI browse/diff ETW provider manifests across Windows builds (ETWInspector-backed)
