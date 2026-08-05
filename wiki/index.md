@@ -530,6 +530,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-taskr](entities/ida-taskr.md) — IDA Pro parallel computing library (Python; Qt + multiprocessing; cheat / IDA Plugins)
 - [ida-vtable-tools](entities/ida-vtable-tools.md) — IDA 9.X vtable ops: `.hpp` skeleton / rename / `this` type / slot index (Python; IDA Plugins)
 - [idac](entities/idac.md) — Trail of Bits IDA Pro CLI/client (Unix socket → GUI/idalib; JSON; agents; not MCP)
+- [IdaClu](entities/idaclu.md) — IDA Pro plugin: cluster/group similar functions in large binaries (Qt GUI; i18n; visual navigation; cheat / IDA Plugins)
 - [ida-mcp-server-plugin](entities/ida-mcp-server-plugin.md) — IDA Pro MCP server plugin (disasm/decompile/xrefs/types for LLM clients)
 - [ida-missinglink](entities/ida-missinglink.md) — IDA plugin: fill missing indirect CALL/JMP targets (C++ OOP RE; cheat / IDA Plugins)
 - [ida-pro-loadmap](entities/ida-pro-loadmap.md) — IDA plugin: import linker .MAP symbols (VC/Borland/Dede/GCC/IDA; section:offset → names; cheat / IDA Plugins)
