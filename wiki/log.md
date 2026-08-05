@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:mytechnotalent/embedded-hacking`: refreshed [[embedded-hacking]] (weekly lesson modules; ARM Thumb FP firmware patcher); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]].
+
 - **2026-08-05** — ingest `description:sercanarga/pcileechgen`: refreshed [[pcileechgen]] (SystemVerilog/COE codegen, Vivado synthesis, README alias); cited on [[dma]] and [[overviews/dma-attack]].
 
 - **2026-08-05** — ingest `description:sercanarga/PCILeechGen`: refreshed [[pcileechgen]] (scan/check/build/validate, dynamic BAR, NVMe admin-queue, MMIO trace import); cited on [[pcileech-fpga]], [[dma]], and [[overviews/dma-attack]].

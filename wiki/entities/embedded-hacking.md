@@ -11,7 +11,7 @@ confidence: medium
 
 # Embedded-Hacking
 
-Free hands-on embedded hacking course and lab collection for the Raspberry Pi Pico 2 (RP2350): C firmware with the Pico SDK and CMake, progressing from GPIO and data-type exercises to inline ARM assembly and register-level hardware manipulation without SDK abstractions. Weekly lesson slides accompany numbered labs covering sensors and peripherals (DHT11, LCD, servo, IR). A Python firmware patcher demonstrates binary patching of compiled ARM Thumb floating-point instructions to alter sensor readings at the machine-code level. Uses GDB, Ghidra, and OpenOCD for firmware reverse engineering. (source: wiki/sources/descriptions/mytechnotalent__Embedded-Hacking.md)
+Free hands-on embedded hacking course and lab collection for the Raspberry Pi Pico 2 (RP2350): C firmware with the Pico SDK and CMake, progressing from GPIO and data-type exercises to inline ARM assembly and register-level hardware manipulation without SDK abstractions. Weekly lesson modules with slides accompany numbered labs covering sensors and peripherals (DHT11, LCD, servo, IR). A Python firmware patcher demonstrates binary patching of compiled ARM Thumb floating-point instructions to alter sensor readings at the machine-code level. Uses GDB, Ghidra, and OpenOCD for firmware reverse engineering. (source: wiki/sources/descriptions/mytechnotalent__embedded-hacking.md)
 
 Targets embedded security practitioners, firmware reverse engineers, and anyone building low-level hardware-hacking / IoT security skills.
 
