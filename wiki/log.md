@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:hotline1337/page_no_access`: entity [[page-no-access]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
 - **2026-08-05** — ingest `description:hotline1337/umium`: entity [[umium]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-08-05** — ingest `readme:categories`: bumped Cheat ~2655 (was ~2654; Anti Cheat ~643 / Game Develop ~183 / Game Engine ~155 stable); refreshed README map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
