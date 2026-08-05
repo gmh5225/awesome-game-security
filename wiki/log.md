@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:hypervisor/kli`: entity [[kli]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
 - **2026-08-05** — ingest `description:hyuunnn/Hyara`: entity [[hyara]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-05** — ingest `description:hyuunnn/ida-slides`: entity [[ida-slides]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].

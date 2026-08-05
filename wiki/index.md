@@ -583,6 +583,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Keybuster](entities/keybuster.md) — Samsung TrustZone S-Keymaster TA key extract (CVE-2021-25444/25490; TEE)
 - [Kiroshi](entities/kiroshi.md) — IDA Pro plugin: detect common Anti-Cheat artifacts (cheat / IDA Plugins)
 - [kinject](entities/kinject.md) — kernel map + APC inject (C/C++; cheat / injection:windows)
+- [kli](entities/kli.md) — header-only KM lazy import resolver (C++; Anti Cheat / Lazy Importer)
 - [kit](entities/kit.md) — C/C++ pixels tooling + asset pipelines (Game Engine / Image Codec)
 - [kiero2](entities/kiero2.md) — kiero v2 runtime D3D9–12/GL/Vulkan API locator (BYO hooking; CMake FetchContent; cross-platform GL/VK)
 - [kn-diff-pool](entities/kn-diff-pool.md) — Windows kernel Big Pool snapshot/diff (driver capture + Go TUI; leak / manual-map forensics)
