@@ -2575,3 +2575,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-05** — ingest `description:hkx3upper/Karlann`: entity [[karlann]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-08-05** — ingest `description:hiitiger/goverlay`: entity [[goverlay]]; cited on [[present-hook]] and [[overviews/graphics-api]].
+
+- **2026-08-05** — ingest `description:helloobaby/Nmi-Callback`: entity [[nmi-callback]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
