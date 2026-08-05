@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:horsicq/x64dbg-Plugin-Manager`: entity [[x64dbg-plugin-manager]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].
+
 - **2026-08-05** — ingest `description:hotline1337/equ8_bypass`: entity [[equ8-bypass]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-link from [[equ8-poc]].
 
 - **2026-08-05** — ingest `description:hotline1337/page_no_access`: entity [[page-no-access]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
