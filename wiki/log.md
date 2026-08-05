@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:hendodev/cs2-ext`: entity [[cs2-ext]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
 - **2026-08-05** — ingest `description:hercul3s/Packet-Sniffer`: entity [[packet-sniffer]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-08-05** — ingest `description:herosi/PyClassInformer`: entity [[pyclassinformer]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
