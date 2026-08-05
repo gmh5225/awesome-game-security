@@ -855,6 +855,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ps5-linux-loader](entities/ps5-linux-loader.md) — PS5 Linux loader (kernel/HV exploits, IOMMU/GPU/TMR; PlayStation)
 - [ptrace_read_teb](entities/ptrace-read-teb.md) — Linux ptrace TEB reader (C++; Cheat / Wine)
 - [ptxNinja](entities/ptxninja.md) — Binary Ninja PTX / CUDA GPU virtual ISA RE (plugin manager; Binary Ninja Plugins)
+- [pubg-internal](entities/pubg-internal.md) — PUBG internal cheat reference (iCollin; learning-oriented RE; cheat / game:pubg)
 - [pwatch](entities/pwatch.md) — Linux/Android HWBP process watch (debug without attach; cheat / debugging)
 - [Pyda](entities/pyda.md) — Python QEMU user-mode DBI (hook / mem / syscall / insn; Cheat DBI)
 - [PythonPlantsVsZombies](entities/python-plants-vs-zombies.md) — Python PvZ clone (graphics-focused; Game Develop / source)
