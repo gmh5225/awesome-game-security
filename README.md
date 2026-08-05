@@ -1325,6 +1325,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/vrolife/mypower [Memory scanner]
 - https://github.com/gmh5225/memory_server [Memory scanner & analyzer with REST API]
 - https://github.com/KuhakuPixel/AceTheGame [Game Hacking Tools]
+- https://github.com/dbcyyds/MemDbg [Android CE-style memory debugger with Vulkan+ImGui overlay, root engine, pointer scan, and Lua 5.4]
 - https://github.com/gmh5225/Android-MemoryTool [RPM]
 - https://github.com/Anonym0usWork1221/C-Android-Memory-Tool [RPM]
 - https://github.com/Poko-Apps/MemKernel [RPM]
