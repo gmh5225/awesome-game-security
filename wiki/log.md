@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:hzqst/FuckCertVerifyTimeValidity`: entity [[fuck-cert-verify-time-validity]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-link from [[sign-expired]].
+
 - **2026-08-05** — ingest `readme:categories`: bumped Cheat ~2653 (was ~2652; Anti Cheat ~643 / Game Develop ~183 / Game Engine ~155 stable); refreshed README map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-05** — ingest `description:hzqst/VmwareHardenedLoader`: entity [[vmware-hardened-loader]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-link from [[vmaware]].

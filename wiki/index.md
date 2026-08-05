@@ -376,6 +376,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FlagSecurePatcher](entities/flagsecurepatcher.md) — Android FLAG_SECURE + screenshot-listener disable (Cheat / Magisk reference)
 - [Fibratus](entities/fibratus.md) — Go Windows kernel ETW observability (rules / Elasticsearch; exploration & tracing)
 - [Fiano](entities/fiano.md) — Go UEFI firmware parse/edit toolkit (Firmware Volumes, FFS, PE32, LZMA/Tiano; flash extract/replace/remove)
+- [FuckCertVerifyTimeValidity](entities/fuck-cert-verify-time-validity.md) — Detours signtool import hook; bypass cert time validity for leaked/expired Authenticode (Sign Leaked Cert)
 - [fix-arxan](entities/fix-arxan.md) — Arxan PE protector dump/decrypt (loader info + working image; Dump Fix)
 - [FlatRedBall](entities/flatredball.md) — C# / .NET 2D engine (editor + runtime; Game Engine)
 - [FPGA DMA Multi Tool](entities/fpga-dma-multi-tool.md) — Artix-7 FPGA DMA board detect/flash/speedtest (Go/Fyne; openFPGALoader)
