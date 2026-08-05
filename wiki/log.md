@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:harukumo/HorizonEngine`: entity [[horizon-engine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
 - **2026-08-05** — ingest `description:hasherezade/mal_unpack_drv`: entity [[mal-unpack-drv]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-08-05** — ingest `description:hasherezade/pe-bear`: entity [[pe-bear]]; cited on [[overviews/reverse-engineering]]; cross-linked from [[retoolkit]].
