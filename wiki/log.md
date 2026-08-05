@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:huawei-mediatek-devs/android_kernel_huawei_mt6761`: entity [[android-kernel-huawei-mt6761]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
 - **2026-08-05** — ingest `description:hugsy/CFB`: entity [[cfb]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
 - **2026-08-05** — ingest `description:huntandhackett/process-cloning`: entity [[process-cloning]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].

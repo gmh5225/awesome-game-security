@@ -86,6 +86,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [APatch KPM](entities/apatch-kpm.md) — APatch KernelPatch Module collection (C/C++; kernel modding/debug; Cheat / Android root)
 - [auto-enum](entities/auto-enum.md) — IDA plugin: auto-identify/set enums for standard functions (Python/C; cheat / IDA Plugins)
 - [android-kernel-hacking-toolkit](entities/android-kernel-hacking-toolkit.md) — Android aarch64 LKM toolkit (filecopy / hideproc / propedit / syscall_hijack)
+- [android-kernel-huawei-mt6761](entities/android-kernel-huawei-mt6761.md) — Huawei MT6761 (Helio P22) Android kernel source (cheat / Android Kernel Source)
 - [android-kernel-oneplus-sm8250](entities/android-kernel-oneplus-sm8250.md) — OnePlus 8/8T/8Pro/(9R?) SM8250 Android kernel source (cheat / Android Kernel Source)
 - [android-kernel-oneplus-sm7250-wksu](entities/android-kernel-oneplus-sm7250-wksu.md) — OnePlus Nord SM7250 Android kernel + KernelSU (cheat / Android Kernel Source)
 
