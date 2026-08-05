@@ -22,6 +22,7 @@ sources:
   - wiki/sources/descriptions/kaijia2022__Cheat-Engine-DMA-Plugin.md
   - wiki/sources/descriptions/kWAYTV__dma-cheat-base.md
   - wiki/sources/descriptions/sercanarga__PCILeechGen.md
+  - wiki/sources/descriptions/sercanarga__pcileechgen.md
   - wiki/sources/descriptions/iqrw0__DieDMAProtection.md
   - wiki/sources/descriptions/paul01784__MeatyEFTRelease.md
 updated: 2026-08-05
