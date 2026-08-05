@@ -1043,6 +1043,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Turbulenz Engine](entities/turbulenz-engine.md) — HTML5/TypeScript game engine (WebGL + server services; Game Engine)
 - [UTM](entities/utm.md) — QEMU VM host for iOS/macOS (Hypervisor.framework / JIT; IOS Emulator)
 - [uWebSockets](entities/uwebsockets.md) — C++ WebSocket/HTTP server (TLS / pub-sub; Game Network)
+- [umium](entities/umium.md) — C++/CLI NT anti-tamper (undocumented syscalls + runtime mods; Anti Debugging)
 - [UMPMLib](entities/umpmlib.md) — C/C++ usermode memory analysis (cheat / RPM)
 - [UE-Interview-Cheat-Sheet](entities/ue-interview-cheat-sheet.md) — Unreal Engine interview cheat sheet (Game Engine / Unreal guide)
 - [UE4-Freecam](entities/ue4-freecam.md) — UE4 FOV changer (hooking / overlays; Game Engine Explorer:Unreal)
