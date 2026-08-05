@@ -2495,3 +2495,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-05** — ingest `description:huoji120/goodeye`: entity [[goodeye]]; cited on [[battleye]] and [[overviews/windows-kernel]].
 
 - **2026-08-05** — ingest `description:hugsy/ropgadget-rs`: entity [[ropgadget-rs]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
+
+- **2026-08-05** — ingest `description:hubblo-org/windows-rapl-driver`: entity [[windows-rapl-driver]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].

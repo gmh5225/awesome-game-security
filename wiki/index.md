@@ -1143,6 +1143,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [windows-kernel-debugging-guide](entities/windows-kernel-debugging-guide.md) — remote Windows kernel debugging guide (cheat / guide)
 - [windows-kernel-exploits](entities/windows-kernel-exploits.md) — kernel exploit guide (Cheat / vulnerable driver)
 - [windows-kernel-pagehook](entities/windows-kernel-pagehook.md) — PTE Hook (shared kernel VA / per-process CR3; Some Tricks Ring0)
+- [windows-rapl-driver](entities/windows-rapl-driver.md) — Windows KM driver for bare-metal RAPL energy metrics (Detection:HWID)
 - [windows-kernel-shadow-stack](entities/windows-kernel-shadow-stack.md) — Synacktiv KM CET/shadow-stack research (KVAS / PG; Windows Security Features)
 - [windows-intel-pt](entities/windows-intel-pt.md) — WindowsIntelPT KM driver + user-mode library (IPT MSR config; per-process/system-wide; coverage / fuzzing / execution tracing)
 - [windows-subsystem-linux](entities/windows-subsystem-linux.md) — WSL Linux kernel source tree (full layout; WSL research hosts)
