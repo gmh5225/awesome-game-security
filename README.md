@@ -2366,6 +2366,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/KeServiceDescriptorTable/cormem.sys-vulnerable-driver [cormem.sys]
 - https://github.com/Muz1K1zuM/PoisonKiller_bof [PoisonX.sys]
 - https://github.com/waryas/xign_poc_april_2026 [xhunter64.sys]
+- https://github.com/BlackSnufkin/AxHunter [Rust PoCs for Wellbia XIGNCODE3 xhunter1.sys and xhunter2.sys (CVE-2026-15430)]
 - https://github.com/gmh5225/qiomem [Qiomem.sys]
 - https://github.com/gmh5225/PdFwKrnlMapper [PdFwKrnl.sys]
 - https://github.com/gmh5225/pdfwkrnl-exploit [PdFwKrnl.sys]
