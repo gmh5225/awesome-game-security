@@ -1,0 +1,3517 @@
+Project Path: arc_anpa1200_Unpacker_8junta7_
+
+Source Tree:
+
+```txt
+arc_anpa1200_Unpacker_8junta7_
+├── CITATION.cff
+├── CONTRIBUTING.md
+├── LICENSE
+├── PROJECT_SCENARIO.md
+├── README.md
+├── SECURITY.md
+├── config
+│   └── config.yaml
+├── data
+│   └── signatures
+│       └── .gitkeep
+├── docs
+│   └── MEDIUM_ARTICLE_UNPACKER_GUIDE.md
+├── pyproject.toml
+├── requirements.txt
+├── scripts
+│   ├── run_unpacker.py
+│   ├── step0_find_and_download_samples.py
+│   └── verify_unpacking.py
+├── src
+│   └── unpacker
+│       ├── __init__.py
+│       ├── cli.py
+│       ├── detector
+│       │   ├── __init__.py
+│       │   ├── base.py
+│       │   ├── entropy.py
+│       │   ├── format_.py
+│       │   ├── heuristics.py
+│       │   ├── pipeline.py
+│       │   ├── sections.py
+│       │   └── signatures.py
+│       ├── orchestrator.py
+│       ├── pe_rebuilder
+│       │   ├── __init__.py
+│       │   └── iat.py
+│       ├── types.py
+│       └── unpackers
+│           ├── __init__.py
+│           ├── _qiling_shared.py
+│           ├── _unipacker_shared.py
+│           ├── aspack.py
+│           ├── base.py
+│           ├── generic.py
+│           ├── mpress.py
+│           ├── themida.py
+│           ├── upx.py
+│           └── vmprotect.py
+└── tests
+    ├── test_detector.py
+    └── test_unipacker_shared.py
+
+```
+
+`CITATION.cff`:
+
+```cff
+cff-version: 1.2.0
+message: "If you use this project in research, reporting, or tooling, please cite it."
+title: "Unpacker"
+authors:
+  - family-names: "Pautov"
+    given-names: "Andrey"
+    orcid: "[user: confirm or remove]"
+url: "https://github.com/anpa1200/Unpacker"
+repository-code: "https://github.com/anpa1200/Unpacker"
+license: "MIT"
+
+```
+
+`CONTRIBUTING.md`:
+
+```md
+# Contributing
+
+Contributions are welcome when they improve correctness, reproducibility, or defensive value.
+
+Good contributions include bug fixes, parser improvements, safer defaults, tests, and clearer analyst documentation.
+
+Open an issue before large rewrites.
+
+## Pull Requests
+
+- Keep PRs focused.
+- Include tests where practical.
+- Update docs when behavior changes.
+- Keep offensive content framed for authorized defensive work.
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2025 Andrey Pautov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`PROJECT_SCENARIO.md`:
+
+```md
+# Unpacker — Malware Packer Detection & Unpacking Tool
+
+## 1. Research Summary
+
+### 1.1 Packer Detection (How to Identify Packers)
+
+| Method | Description | References |
+|--------|-------------|------------|
+| **Signature-based** | Byte patterns (EP, sections, code) in a database (PEiD-style). 5500+ signatures in packing-box/peid. | PEiD, packing-box |
+| **Section names** | Distinct names: UPX → `UPX0`/`UPX1`, MPRESS → `.MPRESS1`/`.MPRESS2`, VMProtect → `.vmp0`/`.vmp1`/`.vmp2`. | Manual unpacking guides |
+| **Entropy** | Packed code has high entropy (7–8); plaintext low. Single/multi-layer detection with high accuracy. | MDPI entropy analysis, PISEP |
+| **Heuristics** | Minimal/corrupt IAT, unusual entry point, executable sections that shouldn’t be, EP in last section. | RE best practices |
+| **ML / graph-based** | PackHero (graph + Call Graph Matching), section–entropy plots (PISEP). Better on VM-based packers. | PackHero, PISEP, MDPI |
+
+**Conclusion:** Detector should combine **signatures + section names + entropy + heuristics**. ML can be an optional later phase.
+
+### 1.2 Unpacking Techniques
+
+| Approach | Description | Use case |
+|----------|-------------|----------|
+| **Packer-specific** | Dedicated algo per packer (e.g. UPX -d, ASPack-specific OEP tricks). | Known packers with reversible/unpack APIs |
+| **Generic dynamic** | Run in sandbox/emulator, detect OEP (EIP transition, WxorX, execution histogram), dump memory, reconstruct PE/IAT. | Unknown/custom packers |
+| **Emulation** | Qiling, Speakeasy: no real execution; API/syscall hooks; dump from emulator memory. | Safe, scriptable unpacking |
+| **DBI** | Pin/PinDemonium: instrument execution, detect when code is written then executed (WxorX), dump at OEP. | Generic unpacking with OEP detection |
+| **Debugger + hooks** | CAPE-style: debugger + API hooks (e.g. Detours), YARA-driven breakpoints, capture payloads. | Full sandbox + unpacking |
+
+**OEP detection:** Critical to dump *at* OEP. Methods: execution histogram (spike then flat), entropy + API scan, WxorX transition (write then execute).
+
+**Post-dump:** Reconstruct IAT (PE-sieve `/imp`: unerase / rebuild R0–R2), fix PE headers, optional use of PE-sieve as external tool.
+
+### 1.3 Architecture References
+
+- **Qiling:** Emulation core (Unicorn) + loaders (PE/ELF) + OS layer + event-driven hooks (API, syscall, address).
+- **CAPE:** Modular (Processing, Auxiliary, Signatures, Machinery); debugger + API hooks; YARA-driven unpacking.
+- **PinDemonium:** DBI with WxorX handler, hooking, dumping, IAT reconstruction modules.
+- **PE-sieve:** Scan process memory, dump PE, IAT reconstruction modes (none / unerase / rebuild R0–R2).
+
+---
+
+## 2. Project Goals
+
+- **Modular, not monolithic:** orchestrator + detector + pluggable unpacker modules.
+- **Robust:** multiple detection methods; per-packer and generic unpacking; optional multi-layer (re-detect and re-unpack).
+- **Extensible:** add new packer types by adding a detector rule and an unpacker module.
+- **Clear contracts:** shared interfaces for “detection result” and “unpack result” so any module can be swapped or extended.
+
+---
+
+## 3. High-Level Architecture
+
+```
+                    +------------------+
+                    |   Orchestrator   |
+                    | (CLI / API)      |
+                    +--------+---------+
+                             |
+         +-------------------+-------------------+
+         |                   |                   |
+         v                   v                   v
++----------------+  +----------------+  +----------------+
+| Packer         |  | Unpacker       |  | PE Rebuilder   |
+| Detector       |  | Dispatcher     |  | (IAT, headers) |
+| (multi-method) |  | (per-pack)     |  | (optional)     |
++--------+-------+  +--------+-------+  +----------------+
+         |                   |
+         |         +---------+---------+
+         |         |                   |
+         v         v                   v
++----------------+  +----------------+  +----------------+
+| Signatures     |  | UPX module     |  | Generic        |
+| Sections       |  | ASPack module  |  | (emulation/    |
+| Entropy        |  | MPRESS module  |  |  DBI/dump)     |
+| Heuristics     |  | ...            |  |                |
++----------------+  +----------------+  +----------------+
+```
+
+- **Orchestrator:** Load sample → run **Packer Detector** → get packer id(s) / “unknown” → **Unpacker Dispatcher** selects module(s) → run unpacking → optionally **PE Rebuilder** → output unpacked file(s) and metadata. Can loop for multi-layer.
+- **Packer Detector:** Implements several methods (signatures, section names, entropy, heuristics); merges results into a single “detection result” (packer name/id, confidence, method).
+- **Unpacker modules:** One (or more) module per packer type; each implements the same interface. A **generic** module handles “unknown” or when no specific module exists (emulation or external PE-sieve/TinyTracer style).
+- **PE Rebuilder:** Optional step to fix IAT and PE headers (conceptually aligned with PE-sieve `/imp`); can call external tool or implement own logic.
+
+---
+
+## 4. Component Specifications
+
+### 4.1 Orchestrator
+
+- **Input:** Path to sample (PE), options (max layers, timeout, output dir, which unpacker to prefer).
+- **Flow:**
+  1. Run detector on current sample.
+  2. If not packed (or confidence below threshold), stop and return “no unpacking needed” or “unpacked”.
+  3. Select unpacker module(s) by packer id; if none, use generic module.
+  4. Run selected module; get unpacked buffer/path.
+  5. Optionally run PE rebuilder on unpacked output.
+  6. If multi-layer: set current sample = unpacked output, go to 1; else finish.
+- **Output:** Unpacked file(s), report (detection result, which module ran, hashes, errors).
+
+### 4.2 Packer Detector
+
+- **Input:** Sample path or buffer, optional PE parsed struct.
+- **Output:** `DetectionResult`: list of `(packer_id, confidence, method)` (e.g. `upx`, 0.95, `signature`).
+- **Methods (modules):**
+  - **Signatures:** Pattern database (EP, section data); match against known packer signatures.
+  - **Sections:** Map section names to packer (UPX0/UPX1 → UPX, etc.).
+  - **Entropy:** Per-section entropy; high entropy + executable → packed; optional multi-layer hint.
+  - **Heuristics:** Suspicious EP (e.g. in last section), tiny/corrupt IAT, mismatch between sections and EP.
+- **Config:** Enable/disable methods, confidence threshold, signature DB path.
+
+### 4.3 Unpacker Module Interface
+
+Every unpacker module (UPX, ASPack, generic, …) implements:
+
+- **`can_handle(packer_id: str, sample_path: Path) -> bool`**  
+  Whether this module can unpack this packer / this file.
+- **`unpack(sample_path: Path, options: UnpackOptions) -> UnpackResult`**  
+  Returns: success, output path or buffer, logs, error if failed.
+
+**UnpackResult:** `success: bool`, `output_path: Optional[Path]`, `output_buffer: Optional[bytes]`, `log: List[str]`, `error: Optional[str]`, `metadata: dict`.
+
+**UnpackOptions:** `output_dir`, `timeout`, `rebuild_iat: bool`, `max_memory_mb`, etc.
+
+### 4.4 Unpacker Modules (Per Packer Type)
+
+- **UPX:** Prefer native `upx -d` if available; else Python decompression (UPX algorithm) or subprocess. No execution needed.
+- **ASPack:** Known OEP tricks or emulation/DBI; optional integration with existing scripts/tools.
+- **MPRESS:** Similar: specific decompression or generic path.
+- **Themida / VMProtect:** No simple unpack; use **generic** module (emulation or DBI + OEP detection + dump).
+- **Generic:** Run in emulator (e.g. Qiling/Speakeasy) or via external (PE-sieve + TinyTracer, or CAPE). Detect OEP → dump → optional IAT rebuild. Handles “unknown” and heavy protectors.
+
+New packers = new module implementing the same interface + optional new detector rules/signatures.
+
+### 4.5 PE Rebuilder (Optional)
+
+- **Input:** Dumped PE (file or buffer).
+- **Tasks:** Rebuild or unerase IAT (PE-sieve-like modes), fix entry point, section headers if needed.
+- **Implementation:** Can wrap PE-sieve CLI or implement minimal IAT discovery + PE write.
+
+---
+
+## 5. Directory Layout (Modular)
+
+```
+Unpacker/
+├── README.md
+├── PROJECT_SCENARIO.md          # this file
+├── pyproject.toml / setup.py    # package deps
+├── requirements.txt
+│
+├── src/
+│   └── unpacker/
+│       ├── __init__.py
+│       ├── orchestrator.py     # main pipeline
+│       ├── types.py            # DetectionResult, UnpackResult, UnpackOptions
+│       │
+│       ├── detector/           # Packer detector
+│       │   ├── __init__.py
+│       │   ├── base.py         # interface
+│       │   ├── pipeline.py     # runs all methods, merges results
+│       │   ├── signatures.py   # signature-based
+│       │   ├── sections.py    # section-name rules
+│       │   ├── entropy.py     # entropy-based
+│       │   └── heuristics.py  # IAT/EP heuristics
+│       │
+│       ├── unpackers/          # Unpacker modules
+│       │   ├── __init__.py     # registry, dispatch
+│       │   ├── base.py         # BaseUnpacker interface
+│       │   ├── upx.py
+│       │   ├── aspack.py
+│       │   ├── mpress.py
+│       │   └── generic.py      # emulation / DBI / external
+│       │
+│       └── pe_rebuilder/       # optional
+│           ├── __init__.py
+│           └── iat.py          # IAT fix / PE-sieve wrapper
+│
+├── data/                       # detector data
+│   └── signatures/             # signature DB (later)
+│
+├── config/
+│   └── config.yaml             # detector/unpacker options
+│
+├── tests/
+│   ├── test_detector.py
+│   ├── test_unpackers.py
+│   └── samples/                # encrypted / non-malicious test samples
+│
+└── scripts/                    # CLI entrypoint
+    └── run_unpacker.py
+```
+
+---
+
+## 6. Technology Choices
+
+- **Language:** Python 3.10+ (PE parsing, plugins, fast iteration). Performance-critical paths (e.g. signature scan) can be Cython or ctypes later.
+- **PE parsing:** `pefile` or `pypdf`-style library for safe parsing (avoid crashes on malformed PE).
+- **Signature DB:** Start with JSON/YAML list of (name, pattern, offset); later align with PEiD-style DB if needed.
+- **Generic unpacking:** Prefer **emulation** (Qiling or Speakeasy) in process, or **subprocess** to PE-sieve/TinyTracer for safety and fewer deps. DBI (Pin) can be optional external.
+- **Config:** YAML for detector/unpacker options; env or CLI overrides.
+
+---
+
+## 7. Implementation Phases
+
+| Phase | Deliverables |
+|-------|--------------|
+| **1 – Core** | `types.py`, detector pipeline (stub methods), one unpacker (e.g. UPX), orchestrator that: detect → dispatch → unpack → save. CLI script. |
+| **2 – Detector** | Implement signatures (with small DB), section names, entropy, heuristics; merge and confidence; unit tests. |
+| **3 – Unpackers** | ASPack, MPRESS modules (or stubs); generic module (emulation or external PE-sieve); registry and dispatch by packer_id. |
+| **4 – Rebuilder** | Optional PE rebuilder (IAT unerase/rebuild), integrate into orchestrator. |
+| **5 – Hardening** | Timeouts, size limits, sandbox (optional), logging, reporting; multi-layer loop. |
+| **6 – Optional** | ML-based detector plugin, more packer modules, PEiD signature import. |
+
+---
+
+## 8. References
+
+- PackHero: Scalable Graph-based Packer Identification (arXiv).
+- PISEP: Section-entropy plot packer identification (Springer).
+- Pinicorn: Automated Dynamic Analysis for Unpacking 32-Bit PE Malware (MDPI).
+- Qiling Framework Architecture (GitHub Wiki).
+- CAPE Sandbox (What is CAPE, Processing/Modular design).
+- PE-sieve: Import table reconstruction (hasherezade).
+- Packing-box / PEiD (signatures, Docker).
+- “Manually Unpacking Malware” (section names, entropy, IAT).
+- PinDemonium: DBI-based generic unpacker (Black Hat).
+
+---
+
+*This scenario is the single source of truth for the Unpacker project: modular orchestrator, multi-method detector, and pluggable unpacker modules per packer type.*
+
+```
+
+`README.md`:
+
+```md
+# Unpacker
+
+Packer detection and unpacking workflow for malware analysts: detect UPX, ASPack, Themida, VMProtect, and related packing patterns so static analysis can reach real code and strings.
+
+## CTI Use
+
+Use this before strings, imports, YARA review, or deeper reverse engineering when a sample appears packed. The output supports malware-family triage, detection engineering, and analyst notes, but it must be validated before claims are made.
+
+## Defender Outputs
+
+| Output | Use |
+|---|---|
+| Packer detection | Triage and analyst routing |
+| Unpacked sample | Follow-on static analysis |
+| Entropy/validation notes | Confidence review |
+| Multi-layer workflow | Packed malware handling |
+| Integration path | Feed String Analyzer, PE Import Analyzer, AIDebug |
+
+**Modular malware packer detection and unpacking (UPX, ASPack, Themida, VMProtect). PE and ELF. One command: detect → unpack → validate.**
+
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Tests](https://github.com/anpa1200/Unpacker/actions/workflows/tests.yml/badge.svg)](https://github.com/anpa1200/Unpacker/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub](https://img.shields.io/badge/GitHub-anpa1200%2FUnpacker-green.svg)](https://github.com/anpa1200/Unpacker)
+
+---
+
+## What it does
+
+Packed malware hides real code behind compression or encryption. Unpacker:
+
+1. **Detects** the packer using section names, entropy, heuristics, and optional path/content hints (PE and ELF).
+2. **Dispatches** to the matching unpacker (UPX native; ASPack/Themida/VMProtect via [Unipacker](https://github.com/unipacker/unipacker) for 32-bit, or [Qiling](https://github.com/qilingframework/qiling) for 64-bit VMProtect).
+3. **Outputs** an unpacked file you can analyze or validate with tools like [String Analyzer](https://github.com/anpa1200/String-Analyzer) and [Basic File Information Gathering Script](https://github.com/anpa1200/Basic-File-Information-Gathering-Script).
+
+One command, one pipeline; supports **multi-layer** unpacking (e.g. several VMProtect layers).
+
+---
+
+## Features
+
+| Feature | Description |
+|--------|-------------|
+| **Multi-method detection** | Section names (UPX0/UPX1, .aspack, .vmp0, Themida, …), entropy, heuristics; PE + ELF. |
+| **Pluggable unpackers** | UPX (native), ASPack/Themida/VMProtect (Unipacker for PE32; Qiling for PE32+ VMProtect), MPRESS/generic (stub). |
+| **Path/content hints** | Samples in `.../vmprotect/` or `.../themida/` get the right unpacker even without section match. |
+| **Multi-layer** | Re-detect and unpack up to N layers (configurable). |
+| **Validation-friendly** | Output is static dumps; prove unpack with entropy/size/strings (see [Real-life example](#real-life-example-with-proof) below). |
+
+---
+
+## Repository
+
+- **GitHub:** [https://github.com/anpa1200/Unpacker](https://github.com/anpa1200/Unpacker)
+- **Clone:**
+  ```bash
+  git clone https://github.com/anpa1200/Unpacker.git
+  cd Unpacker
+  ```
+
+---
+
+## Install
+
+**Requirements:** Python 3.10+, optional system UPX and Unipacker for full unpacker coverage.
+
+```bash
+cd Unpacker
+pip install -e .
+# Or: pip install -r requirements.txt
+```
+
+- **UPX (for UPX unpacking):** install system UPX, e.g. `apt install upx-ucl` or [upx.github.io](https://upx.github.io/).
+- **ASPack / Themida / VMProtect (32-bit):** `pip install '1200km-unpacker[unipacker]'` (installs unipacker plus a setuptools build that still has `pkg_resources`, which unipacker's `unicorn` dependency needs on Python 3.12+). If you already installed `unipacker` on its own and get an error mentioning `distutils` or `pkg_resources` even though it's installed, that's this — run `pip install unipacker 'setuptools<81'`.
+- **VMProtect (64-bit):** `pip install qiling` and set **QILING_ROOTFS** to a directory containing a Windows x64 rootfs (e.g. `x8664_windows` with DLLs). See [Qiling rootfs](https://github.com/qilingframework/rootfs). Optional: `pip install -e ".[emulation]"` to pull in Qiling.
+
+---
+
+## Usage
+
+```bash
+# Unpack one sample (output under ./unpacked by default)
+python scripts/run_unpacker.py /path/to/sample.exe -o ./unpacked
+
+# With timeout (recommended for Themida/VMProtect)
+python scripts/run_unpacker.py /path/to/sample.exe -o ./unpacked --timeout 180
+
+# From PyPI:
+pip install 1200km-unpacker
+
+# After PyPI install or pip install -e . you can use:
+unpacker /path/to/sample.exe -o ./unpacked
+```
+
+**Options:** `--max-layers`, `--confidence`, `--timeout`.
+
+**Example output:**
+
+```
+Detected: aspack (confidence=0.9, method=sections)
+  Layer 1: packer=aspack -> ok
+Final output: /path/to/unpacked/aspack/NotePad_aspack.unpacked.aspack.exe
+```
+
+---
+
+## Unpacking techniques (how this tool works)
+
+The tool uses different **unpacking techniques** depending on the packer and binary format.
+
+### Detection (before unpacking)
+
+- **Section names** — Known section name patterns map to packers (e.g. `UPX0`/`UPX1` → UPX, `.aspack`/`.adata` → ASPack, `.vmp0`/`.vmp1` → VMProtect, `Themida` → Themida). Case-insensitive.
+- **File content fallback** — If sections don’t match, the file is scanned for packer-related strings (e.g. `ASPack`, `VMProtect`, `.vmp0`) to still assign a packer.
+- **Path hint** — If the sample path contains `vmprotect` or `themida`, that packer is preferred so samples in known folders get the right unpacker.
+- **Entropy** — High section entropy suggests packed/compressed data; can yield a generic “packed” or “unknown” result.
+- **Heuristics** — Entry point in last section, few imports, etc., often reported as “unknown.”
+
+Detection supports **PE and ELF**; the best matching packer (by confidence) is chosen and the corresponding unpacker is run.
+
+### Unpacking by technique
+
+| Technique | Used for | How it works |
+|-----------|----------|--------------|
+| **Native decompression** | **UPX** (PE & ELF) | Calls system `upx -d`. The packer format is known; UPX decodes in place and writes the decompressed image. No emulation. |
+| **Emulation + dump (Unipacker)** | **ASPack, Themida, VMProtect** (PE32 only) | Loads the PE in [Unicorn](https://www.unicorn-engine.org/) via [Unipacker](https://github.com/unipacker/unipacker). Emulates from the **entry point**; the engine runs until it detects an “unpacking done” condition (e.g. section hop, write+execute region, or packer-specific logic). Then it **dumps** the process memory (image base + size) to a new PE file. Unipacker knows ASPack; for Themida/VMProtect it uses a **generic “unknown”** strategy (emulate until heuristic trigger, then dump). The tool applies **patches** to Unipacker: safe page-by-page memory read (avoids crashes on unmapped regions) and robust dump (if import fix fails, zero IAT and still write the dump). |
+| **Emulation + dump (Qiling)** | **VMProtect** (PE32+ / 64-bit only) | Used when the sample is 64-bit (Unipacker is 32-bit only). Loads the PE in [Qiling](https://github.com/qilingframework/qiling) with a Windows **rootfs** (emulated DLLs). Runs emulation with a **timeout**. After run (or timeout), reads the **loaded image** from emulated memory (base + `SizeOfImage`) and writes it to disk. No packer-specific logic—generic “run then dump” so heavy protectors may only partially unpack. |
+| **Stub** | **MPRESS, generic** | Detection may identify the packer, but the unpacker module is not implemented; the pipeline returns an error or “generic unpacker stub.” |
+
+#### 1. Native decompression (UPX)
+
+The packer format is public and reversible. UPX stores compressed data (e.g. NRV2B or LZMA) in known sections (`UPX0`, `UPX1`); the decompressor algorithm is fixed. The tool invokes system **`upx -d`**: UPX reads the file, decompresses, and writes a new PE/ELF with the original code and layout restored. No execution of the packed binary; works for PE and ELF.
+
+#### 2. Emulation + dump — Unipacker (ASPack, Themida, VMProtect, PE32 only)
+
+Many packers place a **stub** at the entry point that allocates memory, decompresses/decrypts the real code into it, then jumps to it (the **original entry point**, OEP). We **run** that stub in a CPU emulator until the real code is in memory, then **dump** that memory to a file.
+
+- **Emulation:** [Unipacker](https://github.com/unipacker/unipacker) loads the PE in [Unicorn](https://www.unicorn-engine.org/). Execution starts at the PE entry point (the packer stub). Windows APIs (e.g. `VirtualAlloc`, `VirtualProtect`) are stubbed so the stub can allocate and run. When the stub decompresses and jumps to the unpacked code, we detect that and dump.
+- **When to dump:** (1) **Section hop** — execution jumps to a different section that was written at runtime. (2) **Write+execute (W+X)** — a region written during emulation is made executable and execution enters it. (3) **Packer-specific** — for ASPack, Unipacker has built-in logic; for Themida/VMProtect it uses the generic heuristics.
+- **Dump:** Read emulated memory from image base for SizeOfImage (or allocated range), build a PE, fix the import table (IAT). **Patches in this repo:** (1) **Safe read** — read page-by-page and fill unmapped pages with zeros so the dump completes. (2) **Robust dump** — if IAT fix throws, zero the import directory and still write the dump.
+- **Why 32-bit only:** Unipacker’s loader is for PE32; for PE32+ (64-bit) it fails, so we use Qiling for 64-bit VMProtect.
+
+#### 3. Emulation + dump — Qiling (VMProtect 64-bit only)
+
+[Qiling](https://github.com/qilingframework/qiling) is a full system emulator: it loads the PE and a Windows **rootfs** (DLLs). We run **`ql.run(timeout=...)`** with no packer-specific “unpack done” heuristic—we rely on **time**. After run or timeout, we read memory from the image base for SizeOfImage and write it to disk. The result is a raw memory snapshot (IAT not fixed in this path). Heavy protectors may only partially unpack within the timeout.
+
+#### 4. Stub (MPRESS, generic)
+
+No unpacker implemented; the pipeline returns a clear error.
+
+### Summary
+
+- **UPX:** Direct decompression; fast and deterministic.
+- **ASPack / Themida / VMProtect (32-bit):** Emulation in Unicorn via Unipacker; dump on section hop / W+X or packer logic; patches for safe read and robust dump.
+- **VMProtect (64-bit):** Emulation in Qiling with rootfs; timed run then dump; no IAT fix.
+- **Multi-layer:** Re-detect and repeat up to `max_layers` (default 5).
+
+### Is it safe to run real (packed) code in the emulator?
+
+**Short answer:** The packed code runs **inside the emulator**, not natively on your CPU, so it is much safer than executing the sample on the host—but you should still run the tool in an isolated environment (e.g. a VM or a dedicated analysis machine).
+
+**Why emulation is relatively safe:**
+
+- **Unipacker (Unicorn):** The sample’s instructions are **interpreted** by the emulator. They do not run on the host processor. When the code “calls” Windows APIs (e.g. `VirtualAlloc`, `CreateFileA`), Unipacker’s **stubs** run instead of the real OS: they typically only update the emulator’s internal state (e.g. allocate emulated memory, return a fake handle). So the packed code cannot directly access your real filesystem, network, or hardware unless a stub explicitly forwards to the host—and in Unipacker’s design, stubs are meant to simulate behavior, not to perform real dangerous operations.
+- **Qiling:** Same idea (emulated CPU + emulated APIs), but Qiling is a full system emulator and can be configured to map host paths into the emulated environment. If you map a host directory into the rootfs or the emulated “C:\”, writes could affect the host. **Best practice:** use a self-contained rootfs (e.g. only DLLs and a minimal layout) and do not map sensitive host directories. Run in a VM so that even a misconfiguration has limited impact.
+
+**Recommendations:**
+
+- Treat all samples as hostile. Run the unpacker in a **VM**, **sandbox**, or **dedicated analysis machine**, not on a production or personal system.
+- Do not rely on emulation as a perfect sandbox: stub bugs or design choices could, in theory, expose the host. Isolation (VM + no sensitive mounts for Qiling) keeps risk low.
+- **UPX** does not run the sample at all; it only decompresses. So UPX unpacking is safe from a “running code” perspective (apart from trusting the `upx` binary and the decompressed output).
+
+---
+
+## Real-life example with proof
+
+Using an **ASPack-packed** sample (`NotePad_aspack.exe`), we show that unpacking is correct by comparing **entropy** and **file size** before and after.
+
+### 1. Run the unpacker
+
+```bash
+python scripts/run_unpacker.py samples_by_packer/aspack/NotePad_aspack.exe -o unpacked/aspack
+```
+
+Result: `unpacked/aspack/NotePad_aspack.unpacked.aspack.exe`.
+
+### 2. Proof: entropy and size
+
+| Metric | Packed (`NotePad_aspack.exe`) | Unpacked (`NotePad_aspack.unpacked.aspack.exe`) |
+|--------|-------------------------------|-------------------------------------------------|
+| **File size** | 33,792 bytes (33 KB) | 180,224 bytes (176 KB) |
+| **Entropy** | 6.25 | 2.38 |
+
+Unpacked file is **larger** (compression removed) and has **lower entropy** (real code/data instead of compressed blob). That is the expected signature of successful unpacking.
+
+### 3. How to reproduce the proof
+
+**String Analyzer** (categorized strings + entropy):
+
+```bash
+# From String Analyzer project
+string-analyzer /path/to/NotePad_aspack.exe -o packed_report.txt
+string-analyzer /path/to/NotePad_aspack.unpacked.aspack.exe -o unpacked_report.txt
+```
+
+Compare reports: packed shows **File Entropy: 6.25**, unpacked **File Entropy: 2.38**.
+
+**Basic File Information Gathering Script** (hashes, size, entropy):
+
+```bash
+# From Basic-File-Information-Gathering-Script project
+python3 fileinfo.py /path/to/NotePad_aspack.exe
+python3 fileinfo.py /path/to/NotePad_aspack.unpacked.aspack.exe
+```
+
+You get `file_size` and `entropy` for both; unpacked has higher size and lower entropy. With `--full` or `--json` you can compare sections, imports, and entropy blocks.
+
+These tools are **read-only** (no execution); see the [Article](#article--validation-guide) for full validation workflow and links to their Medium guides.
+
+---
+
+## Project layout
+
+```
+Unpacker/
+├── README.md                 # This file
+├── PROJECT_SCENARIO.md       # Research and design
+├── pyproject.toml
+├── requirements.txt
+├── config/config.yaml       # Detector and orchestrator settings
+├── data/signatures/         # Optional signature DB (empty by default)
+├── docs/
+│   └── MEDIUM_ARTICLE_UNPACKER_GUIDE.md   # Full guide (Medium-style)
+├── scripts/
+│   ├── run_unpacker.py      # Main CLI
+│   ├── step0_find_and_download_samples.py # Malware Bazaar download by packer
+│   └── verify_unpacking.py  # Check unpacked format/size/detection
+├── src/unpacker/
+│   ├── orchestrator.py      # detect → unpack → optional rebuild
+│   ├── detector/            # Signatures, sections, entropy, heuristics
+│   ├── unpackers/           # UPX, ASPack, Themida, VMProtect, MPRESS, generic
+│   └── pe_rebuilder/        # Optional IAT fix (stub)
+└── tests/
+```
+
+Samples and unpacked output (`samples_by_packer/`, `unpacked/`) are **not** in the repo; use your own or the download script (see below).
+
+---
+
+## Getting samples
+
+Use the provided script to fetch samples by packer tag from [Malware Bazaar](https://bazaar.abuse.ch/) (requires API key):
+
+```bash
+export MALWARE_BAZAAR_API_KEY='your-key'
+python scripts/step0_find_and_download_samples.py
+```
+
+Samples are saved under `samples_by_packer/<packer>/` and named like `{name}_{packer}.exe` or `{hash}_{packer}.bin`.
+
+---
+
+## Validation and verification
+
+- **Manual:** Compare packed vs unpacked with [String Analyzer](https://medium.com/@1200km/a-practical-guide-to-string-analyzer-extract-and-analyze-strings-from-binaries-without-the-875dc74e4868) (entropy, string categories) and [Basic File Information Gathering Script](https://medium.com/@1200km/one-tool-to-rule-them-all-file-metadata-static-analysis-for-malware-analysts-and-soc-teams-c6dba1f5b7de) (size, entropy, PE metadata).
+- **In-repo:** For UPX outputs, `python scripts/verify_unpacking.py` checks format, size growth, and that the unpacked file is no longer detected as packed.
+
+---
+
+## Article & validation guide
+
+**📖 [Unpacker: A Practical Guide to Modular Malware Packer Detection and Unpacking](https://medium.com/@1200km/unpacker-a-practical-guide-to-modular-malware-packer-detection-and-unpacking-cf8ba924f25b)** — Published on Medium.
+
+The same content is in the repo as **[docs/MEDIUM_ARTICLE_UNPACKER_GUIDE.md](docs/MEDIUM_ARTICLE_UNPACKER_GUIDE.md)** (Markdown). The article covers:
+
+- Git repository and clone/install from GitHub
+- Each unpacker (UPX, ASPack, MPRESS, Themida, VMProtect, generic) with real usage
+- Validation with String Analyzer and fileinfo, with **real output** (entropy 6.25 → 2.38, 33 KB → 180 KB)
+- End-to-end workflow and limitations
+
+---
+
+## Status
+
+| Component | Status |
+|-----------|--------|
+| Orchestrator, detector (sections, entropy, heuristics), dispatcher | Done |
+| UPX (native) | Done |
+| ASPack, Themida, VMProtect (Unipacker / Qiling) | Done (PE32 via Unipacker; PE32+ VMProtect via Qiling when rootfs set) |
+| MPRESS, generic unpacker | Stub (detection only / error) |
+| PE rebuilder (IAT) | Stub |
+| Signature DB | Empty (optional) |
+
+---
+
+## License
+
+MIT License. See [LICENSE](LICENSE).
+
+---
+
+## Related repositories & articles
+
+| Resource | Link |
+|----------|------|
+| **Unpacker (this repo)** | [GitHub](https://github.com/anpa1200/Unpacker) · [Medium: Unpacker Guide](https://medium.com/@1200km/unpacker-a-practical-guide-to-modular-malware-packer-detection-and-unpacking-cf8ba924f25b) |
+| **Static-malware-Analysis-Orchestrator** | [GitHub](https://github.com/anpa1200/Static-malware-Analysis-Orchestrator) — runs triage, strings, PE imports, and Unpacker in one pipeline · [Medium: Full workflow](https://medium.com/@1200km/basic-static-malware-analysis-from-triage-to-unpacking-explained-and-automated-9442ef3b11b8) |
+| **PE-Import-Analyzer** | [GitHub](https://github.com/anpa1200/PE-Import-Analyzer) · [Medium: PE Import Analyzer Guide](https://medium.com/@1200km/pe-import-analyzer-a-practical-guide-for-malware-analysts-and-reverse-engineers-29b8b98aeaf3) |
+| **String-Analyzer** | [GitHub](https://github.com/anpa1200/String-Analyzer-) · [Medium: String Analyzer Guide](https://medium.com/@1200km/a-practical-guide-to-string-analyzer-extract-and-analyze-strings-from-binaries-without-the-875dc74e4868) |
+| **Basic-File-Information-Gathering-Script** | [GitHub](https://github.com/anpa1200/Basic-File-Information-Gathering-Script) · [Medium: File Metadata & Static Analysis](https://medium.com/@1200km/one-tool-to-rule-them-all-file-metadata-static-analysis-for-malware-analysts-and-soc-teams-c6dba1f5b7de) |
+| **PROJECT_SCENARIO.md** | Research, design, and links to PackHero, PISEP, Qiling, CAPE, PE-sieve, packing-box, etc. |
+| **Author** | [Medium @1200km](https://medium.com/@1200km) |
+
+## 1200km Ecosystem
+
+This project is part of the 1200km security research ecosystem. Use [AdversaryGraph](https://1200km.com/adversarygraph/) for CTI-to-detection workflows, ATT&CK/ATLAS mapping, actor relevance, IOC enrichment, and analyst-ready reporting.
+
+- [AdversaryGraph project hub](https://1200km.com/adversarygraph/)
+- [AdversaryGraph documentation](https://1200km.com/adversarygraph-docs/)
+- [Live ATT&CK/ATLAS workspace](https://1200km.com/threat-matrix/)
+- [1200km security research ecosystem](https://1200km.com/)
+
+
+```
+
+`SECURITY.md`:
+
+```md
+# Security Policy
+
+## Supported Versions
+
+| Version | Supported |
+|---|---|
+| latest `main` | Yes |
+| tagged releases | Yes, if marked supported |
+| old branches | No, unless stated otherwise |
+
+## Reporting A Vulnerability
+
+Report security issues privately to `1200km@gmail.com`.
+
+Do not open a public GitHub issue for a vulnerability.
+
+Default coordinated disclosure window: 90 days.
+
+## Scope
+
+This policy covers vulnerabilities in this repository's code, packaging, examples, and documentation. It does not cover third-party services, external APIs, or lab targets.
+
+```
+
+`config/config.yaml`:
+
+```yaml
+# Unpacker configuration
+
+detector:
+  confidence_threshold: 0.5
+  use_signatures: true
+  use_sections: true
+  use_entropy: true
+  use_heuristics: true
+  # signatures_dir: data/signatures
+
+orchestrator:
+  max_layers: 5
+  timeout_seconds: 300
+  rebuild_iat: true
+
+unpackers:
+  # Prefer native UPX when available
+  upx_prefer_native: true
+
+```
+
+`docs/MEDIUM_ARTICLE_UNPACKER_GUIDE.md`:
+
+```md
+# Unpacker: A Practical Guide to Modular Malware Packer Detection and Unpacking
+
+**Extract and validate unpacked PE/ELF samples with real examples — and prove it using String Analyzer and File Metadata tools.**
+
+**📖 Published on Medium:** [Unpacker: A Practical Guide to Modular Malware Packer Detection and Unpacking](https://medium.com/@1200km/unpacker-a-practical-guide-to-modular-malware-packer-detection-and-unpacking-cf8ba924f25b)
+
+---
+
+## Table of Contents
+
+1. [Introduction](#introduction)
+2. [Git repository](#git-repository)
+3. [What is Unpacker?](#what-is-unpacker)
+4. [Architecture at a Glance](#architecture-at-a-glance)
+5. [Unpacking techniques used in this tool](#unpacking-techniques-used-in-this-tool)
+6. [Detection: How the Tool Knows What’s Packed](#detection-how-the-tool-knows-whats-packed)
+7. [Unpackers: One Module per Packer](#unpackers-one-module-per-packer)
+   - [UPX](#upx)
+   - [ASPack](#aspack)
+   - [MPRESS](#mpress)
+   - [Themida](#themida)
+   - [VMProtect](#vmprotect)
+   - [Generic](#generic)
+8. [Running the Pipeline](#running-the-pipeline)
+9. [Validating Unpacking: Why Proof Matters](#validating-unpacking-why-proof-matters)
+10. [Validation with String Analyzer](#validation-with-string-analyzer)
+11. [Validation with Basic File Information Gathering Script](#validation-with-basic-file-information-gathering-script)
+12. [End-to-End Workflow](#end-to-end-workflow)
+13. [Limitations and Tips](#limitations-and-tips)
+14. [Summary and References](#summary-and-references)
+
+---
+
+## Introduction
+
+Packed malware hides real code behind compression or encryption. To analyze behavior, extract indicators, or compare with threat intel, you first need to **unpack** the sample. Doing it by hand is tedious and error-prone; using a single rigid tool often fails when the packer isn’t the one it was built for.
+
+**Unpacker** is a modular pipeline: it **detects** the packer (UPX, ASPack, Themida, VMProtect, etc.), **dispatches** to the right unpacker module, and **outputs** a dump you can then analyze. This guide walks through each unpacker with **real samples and proofs**, and shows how to **check and validate** correct unpacking using two companion tools you may already use:
+
+- **[String Analyzer](https://medium.com/@1200km/a-practical-guide-to-string-analyzer-extract-and-analyze-strings-from-binaries-without-the-875dc74e4868)** — extract and categorize strings, entropy, and obfuscation hints.
+- **[Basic File Information Gathering Script (fileinfo.py)](https://medium.com/@1200km/one-tool-to-rule-them-all-file-metadata-static-analysis-for-malware-analysts-and-soc-teams-c6dba1f5b7de)** — hashes, PE/ELF metadata, packing heuristics, and deep static analysis.
+
+Both tools are **read-only** (no execution, no decompilation), so you can safely validate unpacked files in automation or air-gapped labs.
+
+---
+
+## Git repository
+
+The project is developed in the open and available on GitHub:
+
+- **Repository:** [https://github.com/anpa1200/Unpacker](https://github.com/anpa1200/Unpacker)
+- **Clone and install:**
+  ```bash
+  git clone https://github.com/anpa1200/Unpacker.git
+  cd Unpacker
+  pip install -e .
+  ```
+- **Run without install** (from project root):  
+  `python scripts/run_unpacker.py /path/to/sample.exe -o ./unpacked`
+
+The repo contains the full source (orchestrator, detector, unpackers), config, scripts, tests, and the in-repo version of this guide. Samples and unpacked results are not committed; use your own samples or the download script (see README) to fetch samples by packer type.
+
+---
+
+## What is Unpacker?
+
+Unpacker is a **modular malware packer detection and unpacking** tool. It provides:
+
+- **Orchestrator** — Runs: detect → select unpacker → unpack → (optional) PE rebuilder; supports **multi-layer** unpacking (e.g. VMProtect over UPX).
+- **Multi-method detector** — Signatures, section names, entropy, and heuristics; outputs a **packer id** and **confidence**; supports **PE and ELF**.
+- **Pluggable unpackers** — One module per packer (UPX, ASPack, MPRESS, Themida, VMProtect) plus a **generic** fallback; same interface for all.
+
+You run one command; the tool picks the right unpacker and writes the result to an output directory. You then **validate** the result with String Analyzer and fileinfo to prove the sample is really unpacked (e.g. lower entropy, larger size, more readable APIs/strings).
+
+---
+
+## Architecture at a Glance
+
+```
+sample.exe
+    → Detector (signatures, sections, entropy, heuristics)
+    → packer_id (e.g. "aspack") + confidence
+    → Dispatcher selects Unpacker (e.g. ASPackUnpacker)
+    → Unpack (native UPX, or Unipacker emulation for ASPack/Themida/VMProtect)
+    → output: sample.unpacked.aspack.exe
+    → (optional) multi-layer: detect again and repeat
+```
+
+- **Config:** `config/config.yaml`
+- **Detection:** `src/unpacker/detector/` (pipeline, sections, entropy, heuristics, signatures)
+- **Unpackers:** `src/unpacker/unpackers/` (UPX, ASPack, MPRESS, Themida, VMProtect, generic)
+- **CLI:** `scripts/run_unpacker.py` or `unpacker` after `pip install -e .`
+
+---
+
+## Unpacking techniques used in this tool
+
+The tool uses different **unpacking techniques** depending on the packer and binary format. Below is a more detailed explanation of each.
+
+**Detection (before unpacking):** Section names, file-content fallbacks (e.g. "ASPack", "VMProtect" in the binary), path hints (path contains `vmprotect`/`themida`), entropy, and heuristics. Best match by confidence selects the unpacker.
+
+**Unpacking by technique:**
+
+- **Native decompression (UPX)** — System `upx -d` is called. The format is known; UPX decodes and writes the decompressed image. No emulation. Works for PE and ELF.
+- **Emulation + dump — Unipacker (PE32 only)** — Used for ASPack, Themida, and VMProtect 32-bit. The PE is loaded in the [Unicorn](https://www.unicorn-engine.org/) emulator via [Unipacker](https://github.com/unipacker/unipacker). Execution starts at the **entry point**; the engine runs until it detects an “unpacking done” condition (section hop, write+execute, or packer-specific logic). Then it **dumps** the in-memory image to a new PE file. For ASPack, Unipacker uses built-in logic; for Themida/VMProtect it uses a **generic “unknown”** strategy (emulate until heuristic, then dump). This repo **patches** Unipacker for robustness: safe page-by-page memory read (avoids crashes on unmapped regions) and robust dump (if import fix fails, zero IAT and still write the dump).
+- **Emulation + dump — Qiling (PE32+ / 64-bit VMProtect)** — When the sample is 64-bit, Unipacker cannot run. The tool uses [Qiling](https://github.com/qilingframework/qiling) with a Windows rootfs: load the PE, run emulation with a **timeout**, then read the loaded image from memory (base + SizeOfImage) and write it to disk. Generic “run then dump”; heavy protectors may only partially unpack.
+- **Stub (MPRESS, generic)** — Detection may identify the packer, but the unpacker is not implemented; the pipeline returns an error.
+
+**Summary:** UPX is direct decompression; ASPack/Themida/VMProtect use **emulation-based unpacking** (run packed code in an emulator until the real code is in memory, then dump). Multi-layer unpacking re-runs detection on the output and repeats up to `max_layers`.
+
+**More detail:**
+
+- **UPX:** The format is public; UPX stores compressed data in known sections. The tool calls `upx -d`; no execution of the packed binary. UPX decompresses and writes the restored PE/ELF.
+- **Unipacker (PE32):** The packer **stub** at the entry point allocates memory, decompresses the real code, then jumps to it (OEP). We run the stub in Unicorn; Windows APIs are stubbed. We dump when (1) execution **section hops** to a runtime-written section, (2) a **write+execute** region is entered, or (3) packer-specific logic (ASPack) says so. Dump = read memory from image base, build PE, fix IAT. Our patches: safe page-by-page read (unmapped → zeros) and robust dump (if IAT fix fails, zero import dir and still write). Unipacker is 32-bit only.
+- **Qiling (PE32+ VMProtect):** Full system emulator with Windows rootfs. We run with a **timeout** and dump the image from memory; no “unpack done” heuristic, so the dump may be partial. IAT is not fixed in this path.
+- **Stub:** No implementation; clear error returned.
+
+**Is it safe to run real (packed) code in the emulator?** The packed code runs **inside the emulator**, not natively on your CPU. Instructions are interpreted by Unicorn (Unipacker) or Qiling; when the code “calls” Windows APIs, **stubs** run instead of the real OS—they typically only update emulated state (e.g. allocate emulated memory, return a fake handle). So the sample cannot directly access your real filesystem, network, or hardware unless a stub explicitly does something on the host. Unipacker’s stubs are designed to simulate behavior, not to perform real dangerous operations. Qiling can map host paths if configured; use a self-contained rootfs and do not map sensitive host directories. **Recommendation:** treat all samples as hostile and run the unpacker in a **VM or dedicated analysis machine**; do not run on production or personal systems. UPX unpacking does not run the sample at all (only decompression), so it is safe from a “running code” perspective.
+
+---
+
+## Detection: How the Tool Knows What’s Packed
+
+The detector **merges** several methods and returns the best **packer_id** (and confidence) for the sample.
+
+- **Section names** — Characteristic section names map to packers (case-insensitive), e.g.:
+  - `UPX0` / `UPX1` → **upx** (0.98)
+  - `.MPRESS1` / `.MPRESS2` → **mpress** (0.98)
+  - `.vmp0` / `.vmp1` / `.vmp2` → **vmprotect** (0.95)
+  - `ASPack`, `.aspack`, `.adata` → **aspack** (0.90)
+  - `Themida` → **themida** (0.90)
+- **Fallbacks** — If section names don’t match, the pipeline can use **file-content** hints (e.g. presence of "ASPack", "VMProtect", ".vmp0" in the binary) or **path hints** (e.g. path contains `vmprotect` or `themida`) so samples from known packer folders still get the right unpacker.
+- **Entropy** — High section entropy suggests packed/compressed content; can yield **unknown** with a confidence score.
+- **Heuristics** — Entry point in last section, few imports, etc., often reported as **unknown** when no section/signature match.
+
+So when you run the pipeline, you’ll see output like:  
+`Detected: aspack (confidence=0.9, method=sections)` or `Detected: vmprotect (confidence=0.72, method=path_hint)`.
+
+---
+
+## Unpackers: One Module per Packer
+
+Each unpacker implements the same interface: it takes a sample path and options (output dir, timeout) and returns success/failure and an output path (or buffer).
+
+### UPX
+
+- **Method:** Prefers system **`upx -d`** (native decompression). No Python fallback in the default build.
+- **Detection:** Section names `UPX0`/`UPX1`, or (for ELF) scan for `UPX0`/`UPX1` in the file if section headers are stripped.
+- **Samples:** Works on PE and ELF. Place UPX-packed samples in e.g. `samples_by_packer/upx/`.
+- **Output:** `sample.unpacked.upx.exe` (or `.bin` for ELF).
+- **Validation:** Unpacked file is larger, entropy drops, and the detector no longer reports UPX (or reports “not packed”). Use String Analyzer to see more APIs/readable strings; use fileinfo to compare size and entropy.
+
+### ASPack
+
+- **Method:** **Unipacker** (emulation-based). Unipacker knows ASPack; it emulates from the entry point and dumps when the real code is unpacked. The project applies patches for safe memory read and robust dump (e.g. surviving `fix_imports` failures).
+- **Detection:** Section names `ASPack`/`.aspack`/`.adata`, or file-content fallback (presence of "ASPack"/"aspack"/".aspack" in the binary).
+- **Samples:** e.g. `NotePad_aspack.exe` in `samples_by_packer/aspack/`. Real proof below uses this sample.
+- **Output:** `sample.unpacked.aspack.exe`.
+- **Validation:** Same idea: **larger file**, **lower entropy**, **more readable strings**. We’ll show concrete String Analyzer and fileinfo output next.
+
+### MPRESS
+
+- **Method:** **Stub** in the open-source repo (no real unpacking yet). Detector can identify MPRESS by section names `.MPRESS1`/`.MPRESS2`.
+- **Use:** Detection works; unpacking returns an error until the module is implemented.
+
+### Themida
+
+- **Method:** **Unipacker** in “unknown” packer mode: emulate from the entry point until section hopping or write+execute is detected, then dump. Themida is not in Unipacker’s built-in list, so it’s treated as generic/unknown.
+- **Detection:** Section name "Themida", or **path hint** (path contains `themida`).
+- **Samples:** e.g. in `samples_by_packer/themida/`. PE32 only (Unipacker); PE32+ fails with “Not a valid PE file”. Complex samples may **time out**; increase `--timeout` if needed.
+- **Output:** `sample.unpacked.themida.exe`.
+- **Validation:** Same as others: compare entropy, size, and string/API visibility with String Analyzer and fileinfo.
+
+### VMProtect
+
+- **Method:** Same as Themida: **Unipacker** in unknown mode (emulation then dump).
+- **Detection:** Section names `.vmp0`/`.vmp1`/`.vmp2`, or file-content/VMProtect path hint.
+- **Samples:** e.g. in `samples_by_packer/vmprotect/`. **PE32 only**; 64-bit (PE32+) fails with “Not a valid PE file”. On 32-bit samples the pipeline can apply multiple layers (VMProtect unpacked several times until max layers).
+- **Output:** `sample.unpacked.vmprotect.exe` (and further layers if still detected as packed).
+- **Validation:** Again, entropy drop, size growth, and richer strings/metadata prove successful unpacking.
+
+### Generic
+
+- **Method:** **Stub** — returns “Generic unpacker stub”. Used when the detector reports **unknown** (or generic) and no specific unpacker matches.
+- **Use:** Placeholder for future implementation (e.g. Qiling, Speakeasy, or PE-sieve–style dumping for unknown/custom packers).
+
+---
+
+## Running the Pipeline
+
+From the Unpacker project root:
+
+```bash
+# Basic run: detect + unpack, output to ./unpacked
+python scripts/run_unpacker.py /path/to/sample.exe -o ./unpacked
+
+# With timeout (useful for Themida/VMProtect)
+python scripts/run_unpacker.py /path/to/sample.exe -o ./unpacked --timeout 180
+
+# Optional: max layers, confidence threshold
+python scripts/run_unpacker.py /path/to/sample.exe -o ./unpacked --max-layers 5 --confidence 0.5
+```
+
+Example output:
+
+```
+Detected: aspack (confidence=0.9, method=sections)
+  Layer 1: packer=aspack -> ok
+Final output: /path/to/unpacked/aspack/NotePad_aspack.unpacked.aspack.exe
+```
+
+If unpacking fails, you’ll see the error (e.g. “Not a valid PE file” for PE32+, “Unpacking timed out”, or “Generic unpacker stub”).
+
+---
+
+## Validating Unpacking: Why Proof Matters
+
+Unpacking can **fail silently** (wrong OEP, truncated dump) or **succeed** but leave the file still packed (e.g. multi-layer). To **check and validate** correct unpack you need to:
+
+1. **Confirm format** — Unpacked file is still valid PE/ELF (magic, structure).
+2. **Compare size** — Unpacked is typically **larger** than packed (compression removed).
+3. **Compare entropy** — Packed/compressed data has **higher entropy**; unpacked code and data usually have **lower** entropy and more structure.
+4. **Re-run detection** — Unpacked file should **no longer** be detected as the same packer (or not packed at all).
+5. **Inspect strings and metadata** — More readable APIs, URLs, paths, and lower “obfuscated” hint suggest real code is visible.
+
+The two tools below give you **reproducible, static proof** without running the sample.
+
+---
+
+## Validation with String Analyzer
+
+[String Analyzer](https://medium.com/@1200km/a-practical-guide-to-string-analyzer-extract-and-analyze-strings-from-binaries-without-the-875dc74e4868) extracts printable strings, classifies them (URLs, IPs, Windows APIs, DLLs, obfuscation, etc.), and computes **file entropy**. High entropy + few “useful” patterns triggers a **“likely obfuscated/packed”** note — so **before/after** unpacking you should see **entropy drop** and often **more** APIs/DLLs/readable strings.
+
+**Install (if needed):** From `/home/andrey/git_project/String-Analyzer`:
+
+```bash
+pip install -e .
+# or: python3 -m string_analyzer --help
+```
+
+**Real example — ASPack packed vs unpacked (NotePad):**
+
+Packed (`NotePad_aspack.exe`):
+
+```text
+File Entropy: 6.25
+
+### DLLS:
+- advapi32.dll
+- comdlg32.dll
+- gdi32.dll
+- kernel32.dll
+- shell32.dll
+- user32.dll
+
+### WINDOWS API COMMANDS:
+- ExitProcess
+- GetProcAddress
+- GetStockObject
+- ShellExecuteA
+- VirtualAlloc
+- VirtualFree
+...
+```
+
+Unpacked (`NotePad_aspack.unpacked.aspack.exe`):
+
+```text
+File Entropy: 2.38
+
+### DLLS:
+- advapi32.dll
+- comdlg32.dll
+- gdi32.dll
+- kernel32.dll
+- shell32.dll
+- user32.dll
+
+### WINDOWS API COMMANDS:
+- ExitProcess
+- GetProcAddress
+- GetStockObject
+- ShellExecuteA
+- VirtualAlloc
+- VirtualFree
+...
+```
+
+**Proof:** **Entropy drops from 6.25 → 2.38** after unpacking. The same APIs appear because the unpacked file now exposes the real code; the packed file had high entropy from compressed/encoded data. So String Analyzer gives you a **numeric and structural** check: lower entropy and (in many cases) more or clearer categories indicate successful unpack.
+
+Commands used:
+
+```bash
+cd /home/andrey/git_project/String-Analyzer
+python3 -m string_analyzer /path/to/NotePad_aspack.exe -o packed_report.txt
+python3 -m string_analyzer /path/to/NotePad_aspack.unpacked.aspack.exe -o unpacked_report.txt
+```
+
+For AI-assisted triage you can also run:
+
+```bash
+python3 -m string_analyzer /path/to/unpacked.exe --ai-prompt -o triage_prompt.md
+```
+
+---
+
+## Validation with Basic File Information Gathering Script
+
+The [Basic File Information Gathering Script](https://medium.com/@1200km/one-tool-to-rule-them-all-file-metadata-static-analysis-for-malware-analysts-and-soc-teams-c6dba1f5b7de) (`fileinfo.py`) gives you **hashes, magic, file type, entropy, and PE/ELF metadata** (timestamps, entry point, sections, packing heuristic when available). No execution, no decompilation — ideal to **compare packed vs unpacked** in one table or JSON.
+
+**Location:** `/home/andrey/git_project/Basic-File-Information-Gathering-Script/fileinfo.py`
+
+**Real example — same ASPack pair:**
+
+Packed:
+
+```text
+  file_name: NotePad_aspack.exe
+  file_size: 33792 bytes (0.03 MB)
+  entropy: 6.2524
+  entropy_note: Normal
+  hashes:
+    md5: 85cfd7faaa37d5fd5ba48d939779c5b2
+    sha256: eabfb9aaa4d1adec7c124bd0bda7a81c53249f2bac5743bedf67adf705d0d1f4
+```
+
+Unpacked:
+
+```text
+  file_name: NotePad_aspack.unpacked.aspack.exe
+  file_size: 180224 bytes (0.17 MB)
+  entropy: 2.3831
+  entropy_note: Low
+  hashes:
+    md5: b17b72b437f70c29f3a4b0d49b4488d7
+    sha256: f2f70b1404a19e0ad29a9b5e2deb1d0966e8a5c83546cca1aa4374720409e400
+```
+
+**Proof:** **Size 33 KB → 180 KB** (unpacked is larger); **entropy 6.25 → 2.38** (unpacked is less random). Hashes change because the file content changed. So fileinfo gives you **size, entropy, and hashes** as evidence of correct unpack.
+
+Commands:
+
+```bash
+cd /home/andrey/git_project/Basic-File-Information-Gathering-Script
+python3 fileinfo.py /path/to/NotePad_aspack.exe
+python3 fileinfo.py /path/to/NotePad_aspack.unpacked.aspack.exe
+```
+
+For **maximum static metadata** (sections, imports, entropy blocks, string patterns) without decompilation:
+
+```bash
+python3 fileinfo.py --full /path/to/sample.exe
+python3 fileinfo.py --full --json /path/to/sample.exe -o report.json
+```
+
+You can then diff or compare `report.json` for packed vs unpacked (e.g. section count, entropy per block, import list).
+
+---
+
+## End-to-End Workflow
+
+1. **Unpack**  
+   `python scripts/run_unpacker.py samples_by_packer/aspack/NotePad_aspack.exe -o unpacked/aspack`
+
+2. **Validate with String Analyzer**  
+   Compare entropy and string categories for packed vs unpacked (entropy should drop; you often get more or clearer APIs/strings).
+
+3. **Validate with fileinfo**  
+   Compare file size, entropy, and (with `--full`) sections/imports/entropy blocks. Unpacked should be larger and have lower overall entropy.
+
+4. **Re-detect**  
+   Run the Unpacker detector on the unpacked file (or use the project’s `verify_unpacking.py` script where applicable); it should no longer report the same packer (or should report “not packed”).
+
+5. **Optional: AI triage**  
+   Run String Analyzer with `--ai-prompt` on the unpacked sample and feed the prompt to your AI assistant for behavior summary.
+
+---
+
+## Limitations and Tips
+
+- **PE32 vs PE32+:** Unipacker-based unpackers (ASPack, Themida, VMProtect) support **PE32 only**. For 64-bit samples you’ll see “Not a valid PE file”; you’d need a different backend or 64-bit support.
+- **Timeouts:** Themida/VMProtect can be slow; use `--timeout 180` or higher.
+- **Path hints:** Samples in folders (or paths) containing `vmprotect` or `themida` get a path-hint so the right unpacker is chosen even when section/signature detection doesn’t fire.
+- **Multi-layer:** The pipeline can run multiple layers (e.g. VMProtect several times); check the final output and validate that one with String Analyzer and fileinfo.
+- **UPX:** Install system UPX (e.g. `apt install upx-ucl`) for native decompression.
+- **Unipacker:** For ASPack/Themida/VMProtect, `pip install '1200km-unpacker[unipacker]'`; on Python 3.12+ its `unicorn` dependency needs `setuptools<81` for `pkg_resources`, which that extra installs for you.
+
+---
+
+## Summary and References
+
+- **Unpacker** detects packers (sections, entropy, heuristics, path/content hints) and runs the right unpacker (UPX native; ASPack/Themida/VMProtect via Unipacker; MPRESS/generic stubbed).
+- You **validate** correct unpack by comparing **entropy**, **size**, and **strings/metadata** before and after, using **String Analyzer** and **Basic File Information Gathering Script (fileinfo.py)** — both static, no execution.
+- Real proof: ASPack NotePad sample **entropy 6.25 → 2.38**, **33 KB → 180 KB**, and consistent String Analyzer/fileinfo output show the unpacked file is decompressed and structurally different from the packed one.
+
+**References**
+
+- **This article on Medium:** [Unpacker: A Practical Guide to Modular Malware Packer Detection and Unpacking](https://medium.com/@1200km/unpacker-a-practical-guide-to-modular-malware-packer-detection-and-unpacking-cf8ba924f25b)
+- **Unpacker (source code):** [https://github.com/anpa1200/Unpacker](https://github.com/anpa1200/Unpacker) — clone, install, and run from the repo; full README with examples and proofs is in the repository.
+- String Analyzer (Medium): [A Practical Guide to String Analyzer](https://medium.com/@1200km/a-practical-guide-to-string-analyzer-extract-and-analyze-strings-from-binaries-without-the-875dc74e4868)  
+- File metadata / static analysis (Medium): [One Tool to Rule Them All: File Metadata & Static Analysis for Malware Analysts and SOC Teams](https://medium.com/@1200km/one-tool-to-rule-them-all-file-metadata-static-analysis-for-malware-analysts-and-soc-teams-c6dba1f5b7de)  
+- Tools (example paths): String Analyzer and Basic File Information Gathering Script — see their repos/Medium articles for install locations; use them to validate unpacked output as shown above.
+
+If you’re building a malware triage or unpacking pipeline, Unpacker plus these two validation tools give you a reproducible, proof-based workflow from packed sample to validated unpacked file.
+
+```
+
+`pyproject.toml`:
+
+```toml
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "1200km-unpacker"
+version = "1.0.0"
+description = "Modular malware packer detection and unpacking tool"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Andrey Pautov", email = "1200km@gmail.com" },
+]
+keywords = ["malware", "unpacker", "packer-detection", "reverse-engineering", "cti"]
+dependencies = [
+    "pefile>=2023.2.7",
+    "pyelftools>=0.30",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+]
+
+[project.urls]
+Homepage = "https://github.com/anpa1200/Unpacker"
+Repository = "https://github.com/anpa1200/Unpacker"
+Documentation = "https://medium.com/@1200km/unpacker-a-practical-guide-to-modular-malware-packer-detection-and-unpacking-cf8ba924f25b"
+Issues = "https://github.com/anpa1200/Unpacker/issues"
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov"]
+emulation = ["qiling>=1.4.5"]
+# ASPack / Themida (PE32) unpacking via Unipacker. unipacker's own dependency
+# chain (unicorn) still imports distutils/pkg_resources, both removed or being
+# phased out of Python 3.12+ and newer setuptools, so a compatible setuptools
+# is pinned alongside it rather than left to the user to discover.
+unipacker = ["unipacker", "setuptools<81"]
+
+[project.scripts]
+unpacker = "unpacker.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+```
+
+`requirements.txt`:
+
+```txt
+# PE parsing
+pefile>=2023.2.7
+
+# ELF parsing (detector)
+pyelftools>=0.30
+
+# step0_find_and_download_samples.py (Malware Bazaar)
+requests>=2.28.0
+pyzipper>=0.3.5
+
+# Optional: ASPack/Themida unpacking (emulation via Unipacker).
+# Easiest: pip install '1200km-unpacker[unipacker]'
+# Manual equivalent:
+# unipacker
+# setuptools<81  # unicorn (a unipacker dependency) still imports distutils/pkg_resources,
+#                # which need a setuptools build that still provides them on Python 3.12+
+
+# Optional: VMProtect 64-bit (PE32+) unpacking
+# pip install qiling  # then set QILING_ROOTFS to x8664_windows rootfs
+
+# Optional: emulation for generic unpacker (install separately if needed)
+# qiling>=1.4.5
+# speakeasy-emulator>=2.0.0
+
+# Config (optional)
+# PyYAML>=6.0
+
+```
+
+`scripts/run_unpacker.py`:
+
+```py
+#!/usr/bin/env python3
+"""Run unpacker CLI (adds src to path when not installed)."""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+from unpacker.cli import main
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+```
+
+`scripts/step0_find_and_download_samples.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+Find and download malware samples from Malware Bazaar for each packer type.
+
+- Queries by tag or YARA rule (get_taginfo / get_yarainfo)
+- Downloads each sample (get_file) — returns ZIP with password "infected"
+- Extracts from ZIP (using pyzipper for AES)
+- Renames to: {original_stem}_{packer_type}.{ext}
+
+Requires: MALWARE_BAZAAR_API_KEY or MALWAREBAZAAR_AUTH_KEY in environment.
+Get a free key: https://auth.abuse.ch/
+"""
+from __future__ import annotations
+
+import argparse
+import io
+import os
+import re
+import sys
+import time
+import zipfile
+from pathlib import Path
+
+try:
+    import pyzipper
+except ImportError:
+    pyzipper = None
+
+import requests
+
+# Packer types we support; for each: (packer_id, tag to try, optional YARA rule fallback)
+# Malware Bazaar uses tags (user-defined) and YARA rules (e.g. upx_packed). Try tag first.
+PACKER_SOURCES = [
+    ("upx", "UPX", "upx_packed"),
+    ("aspack", "ASPack", None),
+    ("mpress", "MPRESS", "mpress"),
+    ("vmprotect", "VMProtect", None),
+    ("themida", "Themida", None),
+    ("enigma", "Enigma", None),
+    ("nspack", "NSPack", None),
+]
+
+API_BASE = "https://mb-api.abuse.ch/api/v1/"
+ZIP_PASSWORD = b"infected"
+# Rate limit: avoid hammering the API
+DELAY_BETWEEN_DOWNLOADS = 1.0
+DELAY_AFTER_QUERY = 0.5
+
+
+def get_auth_key() -> str:
+    key = os.environ.get("MALWARE_BAZAAR_API_KEY") or os.environ.get("MALWAREBAZAAR_AUTH_KEY")
+    if not key:
+        raise SystemExit(
+            "Error: Set MALWARE_BAZAAR_API_KEY or MALWAREBAZAAR_AUTH_KEY (get one at https://auth.abuse.ch/)"
+        )
+    return key.strip()
+
+
+def sanitize_filename(name: str) -> str:
+    """Remove or replace characters unsafe for filenames."""
+    name = re.sub(r'[<>:"/\\|?*]', "_", name)
+    name = name.strip(". ") or "unnamed"
+    return name[:200]
+
+
+def query_by_tag(auth_key: str, tag: str, limit: int) -> list[dict]:
+    """Return list of sample entries (sha256_hash, file_name, ...) for the tag."""
+    r = requests.post(
+        API_BASE,
+        data={"query": "get_taginfo", "tag": tag, "limit": limit},
+        headers={"Auth-Key": auth_key},
+        timeout=60,
+    )
+    r.raise_for_status()
+    data = r.json()
+    if data.get("query_status") == "tag_not_found":
+        return []
+    if data.get("query_status") == "no_results":
+        return []
+    if data.get("query_status") != "ok":
+        return []
+    return data.get("data") or []
+
+
+def query_by_yara(auth_key: str, yara_rule: str, limit: int) -> list[dict]:
+    """Return list of sample entries for the YARA rule."""
+    r = requests.post(
+        API_BASE,
+        data={"query": "get_yarainfo", "yara_rule": yara_rule, "limit": limit},
+        headers={"Auth-Key": auth_key},
+        timeout=60,
+    )
+    r.raise_for_status()
+    data = r.json()
+    if data.get("query_status") == "yara_not_found":
+        return []
+    if data.get("query_status") == "no_results":
+        return []
+    if data.get("query_status") != "ok":
+        return []
+    return data.get("data") or []
+
+
+def fetch_hashes_for_packer(
+    auth_key: str,
+    packer_id: str,
+    tag: str,
+    yara_fallback: str | None,
+    limit: int,
+) -> list[dict]:
+    """Get sample list: try tag first, then YARA if configured."""
+    out = query_by_tag(auth_key, tag, limit)
+    if out:
+        return out
+    if yara_fallback:
+        time.sleep(DELAY_AFTER_QUERY)
+        out = query_by_yara(auth_key, yara_fallback, limit)
+    return out
+
+
+def download_sample(auth_key: str, sha256: str) -> bytes:
+    """Download sample as ZIP bytes."""
+    r = requests.post(
+        API_BASE,
+        data={"query": "get_file", "sha256_hash": sha256},
+        headers={"Auth-Key": auth_key},
+        timeout=120,
+        stream=False,
+    )
+    r.raise_for_status()
+    if not r.content:
+        raise RuntimeError("API returned empty response")
+    # ZIP files start with PK
+    if r.content[:2] == b"PK":
+        return r.content
+    # Otherwise API may have returned JSON error (e.g. file_not_found, rate limit)
+    try:
+        j = r.json()
+        status = j.get("query_status", "unknown")
+        raise RuntimeError(f"API error: {status}")
+    except ValueError:
+        raise RuntimeError("API did not return a ZIP file (no PK header) and response is not JSON")
+
+
+def extract_zip(zip_bytes: bytes, dest_dir: Path, password: bytes = ZIP_PASSWORD) -> Path | None:
+    """Extract ZIP (AES-supported if pyzipper) to dest_dir. Returns path to first extracted file."""
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    first_extracted: Path | None = None
+    if pyzipper:
+        try:
+            with pyzipper.AESZipFile(io.BytesIO(zip_bytes), "r") as zf:
+                zf.setpassword(password)
+                names = [n for n in zf.namelist() if not n.endswith("/")]
+                if not names:
+                    return None
+                for name in names:
+                    zf.extract(name, path=dest_dir, pwd=password)
+                    if first_extracted is None:
+                        first_extracted = dest_dir / name
+                return first_extracted
+        except Exception:
+            pass
+    with zipfile.ZipFile(io.BytesIO(zip_bytes), "r") as zf:
+        try:
+            zf.setpassword(password)
+        except TypeError:
+            zf.setpassword(password.decode("utf-8"))
+        names = [n for n in zf.namelist() if not n.endswith("/")]
+        if not names:
+            return None
+        for name in names:
+            zf.extract(
+                name,
+                path=dest_dir,
+                pwd=password if isinstance(password, bytes) else None,
+            )
+            if first_extracted is None:
+                first_extracted = dest_dir / name
+    return first_extracted
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Download Malware Bazaar samples per packer type; extract and rename."
+    )
+    parser.add_argument(
+        "-o",
+        "--output-dir",
+        type=Path,
+        default=Path("samples_by_packer"),
+        help="Base directory for per-packer subdirs",
+    )
+    parser.add_argument(
+        "--per-packer",
+        type=int,
+        default=5,
+        help="Max samples to download per packer type (default 5)",
+    )
+    parser.add_argument(
+        "--limit-query",
+        type=int,
+        default=100,
+        help="Max results to request from API per query (default 100)",
+    )
+    parser.add_argument(
+        "--packer",
+        action="append",
+        dest="packers",
+        help="Restrict to these packer ids (e.g. --packer upx --packer aspack)",
+    )
+    parser.add_argument(
+        "--no-extract",
+        action="store_true",
+        help="Keep downloaded ZIPs only, do not extract",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Only list what would be downloaded",
+    )
+    args = parser.parse_args()
+
+    auth_key = get_auth_key()
+
+    if not pyzipper and not args.no_extract:
+        print(
+            "Warning: pyzipper not installed; ZIPs may use AES. Install with: pip install pyzipper",
+            file=sys.stderr,
+        )
+
+    packers_to_run = [
+        (pid, tag, yara)
+        for pid, tag, yara in PACKER_SOURCES
+        if not args.packers or pid in [p.lower() for p in args.packers]
+    ]
+
+    for packer_id, tag, yara_fallback in packers_to_run:
+        print(f"\n--- Packer: {packer_id} (tag={tag}, yara_fallback={yara_fallback}) ---")
+        entries = fetch_hashes_for_packer(
+            auth_key, packer_id, tag, yara_fallback, limit=args.limit_query
+        )
+        if not entries:
+            print(f"  No samples found for {packer_id}")
+            continue
+        print(f"  Found {len(entries)} samples, downloading up to {args.per_packer}")
+        packer_dir = args.output_dir / packer_id
+        packer_dir.mkdir(parents=True, exist_ok=True)
+        downloaded = 0
+        for i, entry in enumerate(entries):
+            if downloaded >= args.per_packer:
+                break
+            sha256 = entry.get("sha256_hash")
+            file_name = entry.get("file_name") or f"{sha256}.bin"
+            if not sha256:
+                continue
+            stem = Path(file_name).stem
+            stem = sanitize_filename(stem)
+            ext = Path(file_name).suffix or ".bin"
+            final_name = f"{stem}_{packer_id}{ext}"
+            out_path = packer_dir / final_name
+            zip_path = packer_dir / f"{sha256}.zip"
+            if out_path.exists() or zip_path.exists():
+                print(f"  Skip (exists): {final_name}")
+                downloaded += 1
+                continue
+            if args.dry_run:
+                print(f"  Would download: {sha256} -> {final_name}")
+                downloaded += 1
+                continue
+            try:
+                zip_bytes = download_sample(auth_key, sha256)
+                time.sleep(DELAY_BETWEEN_DOWNLOADS)
+            except Exception as e:
+                print(f"  Download failed {sha256}: {e}", file=sys.stderr)
+                continue
+            if args.no_extract:
+                zip_path.write_bytes(zip_bytes)
+                print(f"  Saved ZIP: {zip_path.name}")
+            else:
+                try:
+                    extracted = extract_zip(zip_bytes, packer_dir)
+                    if extracted and extracted.exists():
+                        target = packer_dir / final_name
+                        if target != extracted:
+                            extracted.rename(target)
+                        print(f"  Extracted -> {target.name}")
+                    else:
+                        zip_path.write_bytes(zip_bytes)
+                        print(f"  Extract failed, saved ZIP: {zip_path.name}")
+                except Exception as e:
+                    zip_path.write_bytes(zip_bytes)
+                    print(f"  Extract error: {e}; saved ZIP: {zip_path.name}", file=sys.stderr)
+            downloaded += 1
+        print(f"  Done: {downloaded} samples for {packer_id}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+```
+
+`scripts/verify_unpacking.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+Verify that unpacking succeeded: check unpacked files exist, have valid magic,
+are larger than originals, and (optionally) are no longer detected as packed.
+"""
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+# Add src for unpacker imports
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+PE_MAGIC = b"MZ"
+ELF_MAGIC = b"\x7fELF"
+
+
+def get_format(path: Path) -> str | None:
+    try:
+        magic = path.read_bytes()[:4]
+        if magic.startswith(PE_MAGIC):
+            return "pe"
+        if magic.startswith(ELF_MAGIC):
+            return "elf"
+    except OSError:
+        pass
+    return None
+
+
+def main() -> int:
+    unpacked_dir = Path(__file__).resolve().parents[1] / "unpacked" / "upx"
+    samples_dir = Path(__file__).resolve().parents[1] / "samples_by_packer" / "upx"
+
+    if not unpacked_dir.exists():
+        print("No unpacked/upx directory found. Run the pipeline first.")
+        return 1
+
+    unpacked_files = sorted(unpacked_dir.iterdir()) if unpacked_dir.is_dir() else []
+    if not unpacked_files:
+        print("No files in unpacked/upx.")
+        return 1
+
+    from unpacker.detector import DetectorPipeline
+    pipeline = DetectorPipeline(confidence_threshold=0.5)
+
+    all_ok = True
+    print("Unpacking verification\n" + "=" * 60)
+
+    for unp in unpacked_files:
+        if not unp.is_file():
+            continue
+        # Map unpacked name back to original (strip .unpacked.upx.*)
+        stem = unp.stem
+        if ".unpacked.upx" in stem:
+            orig_stem = stem.replace(".unpacked.upx", "")
+        else:
+            orig_stem = stem
+        # Find original in samples (could be .exe or .bin)
+        orig = None
+        for ext in (".exe", ".bin"):
+            candidate = samples_dir / f"{orig_stem}{ext}"
+            if candidate.exists():
+                orig = candidate
+                break
+        if not orig or not orig.exists():
+            orig = None
+
+        fmt = get_format(unp)
+        size_ok = True
+        if orig and orig.exists():
+            orig_size = orig.stat().st_size
+            unp_size = unp.stat().st_size
+            size_ok = unp_size > orig_size  # unpacked should be larger
+            size_msg = f"size {orig_size} -> {unp_size} ({'OK' if size_ok else 'check'})"
+        else:
+            size_msg = f"size {unp.stat().st_size} (no original to compare)"
+
+        detection = pipeline.detect(unp)
+        still_packed = detection.is_packed and detection.best_packer_id == "upx"
+        pack_msg = "not packed" if not still_packed else "still detected as UPX (false positive possible)"
+
+        ok = fmt and size_ok and not still_packed
+        if not ok:
+            all_ok = False
+
+        print(f"\n{unp.name}")
+        print(f"  format: {fmt or 'unknown'}")
+        print(f"  {size_msg}")
+        print(f"  detector: {pack_msg}")
+        print(f"  result: {'PASS' if ok else 'CHECK'}")
+
+    print("\n" + "=" * 60)
+    print("Overall:", "PASS" if all_ok else "See CHECK(s) above")
+    return 0 if all_ok else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+```
+
+`src/unpacker/__init__.py`:
+
+```py
+"""
+Unpacker — Modular malware packer detection and unpacking.
+"""
+__version__ = "1.0.0"
+
+from unpacker.types import (
+    DetectionResult,
+    PackerMatch,
+    UnpackOptions,
+    UnpackResult,
+)
+
+__all__ = [
+    "__version__",
+    "DetectionResult",
+    "PackerMatch",
+    "UnpackOptions",
+    "UnpackResult",
+]
+
+```
+
+`src/unpacker/cli.py`:
+
+```py
+#!/usr/bin/env python3
+"""CLI: unpack a sample (detect -> unpack -> report)."""
+from __future__ import annotations
+
+import argparse
+import sys
+from pathlib import Path
+
+from unpacker.orchestrator import run as orchestrator_run
+
+
+def main() -> int:
+    p = argparse.ArgumentParser(description="Unpacker: packer detection and unpacking")
+    p.add_argument("sample", type=Path, help="Path to PE sample")
+    p.add_argument("-o", "--output-dir", type=Path, default=Path("unpacked"), help="Output directory")
+    p.add_argument("--max-layers", type=int, default=5, help="Max unpacking layers")
+    p.add_argument("--confidence", type=float, default=0.5, help="Detection confidence threshold")
+    p.add_argument("--timeout", type=float, default=300.0, help="Timeout per unpack (seconds)")
+    args = p.parse_args()
+
+    if not args.sample.exists():
+        print(f"Error: sample not found: {args.sample}", file=sys.stderr)
+        return 1
+
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    report = orchestrator_run(
+        sample_path=args.sample,
+        output_dir=args.output_dir,
+        max_layers=args.max_layers,
+        confidence_threshold=args.confidence,
+        timeout_seconds=args.timeout,
+    )
+
+    if report.detection:
+        best = report.detection.best_match
+        if best:
+            print(f"Detected: {best.packer_id} (confidence={best.confidence}, method={best.method})")
+        elif report.detection.is_packed:
+            print("Detected: packed (unknown packer)")
+        else:
+            print("Detected: not packed")
+    for i, layer in enumerate(report.layers):
+        status = "ok" if layer.unpack_result.success else "fail"
+        print(f"  Layer {i+1}: packer={layer.packer_id} -> {status}")
+        if layer.unpack_result.error:
+            print(f"    Error: {layer.unpack_result.error}")
+    if report.final_path:
+        print(f"Final output: {report.final_path}")
+    if report.error:
+        print(f"Report error: {report.error}", file=sys.stderr)
+
+    return 0 if report.error is None and (not report.layers or report.layers[-1].unpack_result.success) else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+```
+
+`src/unpacker/detector/__init__.py`:
+
+```py
+"""
+Packer detector: multi-method detection pipeline. Supports PE and ELF.
+"""
+from unpacker.detector.pipeline import DetectorPipeline
+from unpacker.detector.base import DetectorMethod
+from unpacker.detector.format_ import get_format, load_binary
+from unpacker.detector.signatures import SignatureDetector
+from unpacker.detector.sections import SectionDetector
+from unpacker.detector.entropy import EntropyDetector
+from unpacker.detector.heuristics import HeuristicsDetector
+
+__all__ = [
+    "DetectorMethod",
+    "DetectorPipeline",
+    "get_format",
+    "load_binary",
+    "SignatureDetector",
+    "SectionDetector",
+    "EntropyDetector",
+    "HeuristicsDetector",
+]
+
+```
+
+`src/unpacker/detector/base.py`:
+
+```py
+"""
+Base interface for packer detection methods.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Protocol
+
+from unpacker.types import DetectionResult
+
+
+class DetectorMethod(Protocol):
+    """Protocol for a single detection method (signatures, sections, entropy, heuristics)."""
+
+    def detect(
+        self,
+        sample_path: Path,
+        pe: object | None = None,
+        elf: object | None = None,
+    ) -> DetectionResult:
+        """
+        Analyze the sample and return detection result.
+        pe: optional pre-parsed PE object. elf: optional ELFFile for ELF binaries.
+        """
+        ...
+
+    @property
+    def name(self) -> str:
+        """Method name for logging (e.g. 'signatures', 'sections')."""
+        ...
+
+```
+
+`src/unpacker/detector/entropy.py`:
+
+```py
+"""
+Packer detection by section entropy (high entropy => packed/compressed).
+Supports both PE and ELF executable regions.
+"""
+from __future__ import annotations
+
+import math
+from pathlib import Path
+
+from unpacker.types import DetectionResult, PackerMatch
+
+# Entropy above this suggests packed/compressed
+HIGH_ENTROPY_THRESHOLD = 7.0
+
+# ELF segment flags
+PF_X = 1
+
+
+def _entropy(data: bytes) -> float:
+    if not data:
+        return 0.0
+    freq: dict[int, int] = {}
+    for b in data:
+        freq[b] = freq.get(b, 0) + 1
+    n = len(data)
+    return -sum((c / n) * math.log2(c / n) for c in freq.values())
+
+
+def _check_entropy_pe(data: bytes, pe: object, threshold: float) -> list[PackerMatch]:
+    matches: list[PackerMatch] = []
+    for sec in pe.sections:
+        if not (sec.Characteristics & 0x20000000):  # IMAGE_SCN_MEM_EXECUTE
+            continue
+        raw_off = sec.PointerToRawData
+        raw_sz = sec.SizeOfRawData
+        if raw_sz > 0 and raw_off + raw_sz <= len(data):
+            chunk = data[raw_off : raw_off + raw_sz]
+            e = _entropy(chunk)
+            if e >= threshold:
+                matches.append(
+                    PackerMatch(
+                        packer_id="unknown",
+                        confidence=min(0.5 + (e - threshold) * 0.1, 0.85),
+                        method="entropy",
+                    )
+                )
+                break
+    return matches
+
+
+def _check_entropy_elf(data: bytes, elf: object, threshold: float) -> list[PackerMatch]:
+    matches: list[PackerMatch] = []
+    # ELF program headers: PT_LOAD with PF_X (executable)
+    try:
+        for seg in elf.iter_segments():
+            if seg["p_type"] != "PT_LOAD" and seg["p_type"] != 1:
+                continue
+            if not (seg["p_flags"] & PF_X):
+                continue
+            off = seg["p_offset"]
+            sz = seg["p_filesz"]
+            if sz > 0 and off + sz <= len(data):
+                chunk = data[off : off + sz]
+                e = _entropy(chunk)
+                if e >= threshold:
+                    matches.append(
+                        PackerMatch(
+                            packer_id="unknown",
+                            confidence=min(0.5 + (e - threshold) * 0.1, 0.85),
+                            method="entropy",
+                        )
+                    )
+                    break
+    except Exception:
+        pass
+    return matches
+
+
+class EntropyDetector:
+    """Detect packing by high entropy in executable sections/segments (PE and ELF)."""
+
+    def __init__(self, threshold: float = HIGH_ENTROPY_THRESHOLD):
+        self.threshold = threshold
+
+    @property
+    def name(self) -> str:
+        return "entropy"
+
+    def detect(
+        self,
+        sample_path: Path,
+        pe: object | None = None,
+        elf: object | None = None,
+    ) -> DetectionResult:
+        if pe is None and elf is None:
+            from unpacker.detector.format_ import load_binary
+            pe, elf = load_binary(sample_path)
+        try:
+            data = sample_path.read_bytes()
+        except OSError:
+            return DetectionResult(is_packed=False)
+
+        matches: list[PackerMatch] = []
+        if pe is not None:
+            try:
+                matches = _check_entropy_pe(data, pe, self.threshold)
+            except Exception:
+                pass
+        elif elf is not None:
+            try:
+                matches = _check_entropy_elf(data, elf, self.threshold)
+            except Exception:
+                pass
+
+        return DetectionResult(
+            matches=matches,
+            is_packed=len(matches) > 0,
+        )
+
+```
+
+`src/unpacker/detector/format_.py`:
+
+```py
+"""
+Detect binary format (PE vs ELF) and load parsed object for detectors.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+# Magic bytes
+PE_MAGIC = b"MZ"
+ELF_MAGIC = b"\x7fELF"
+
+
+def get_format(sample_path: Path) -> str | None:
+    """Return 'pe', 'elf', or None if unknown/unreadable."""
+    try:
+        with open(sample_path, "rb") as f:
+            magic = f.read(4)
+    except OSError:
+        return None
+    if magic.startswith(PE_MAGIC):
+        return "pe"
+    if magic.startswith(ELF_MAGIC):
+        return "elf"
+    return None
+
+
+# PE optional header magic: 0x10b = PE32 (32-bit), 0x20b = PE32+ (64-bit)
+PE32_MAGIC = 0x10B
+PE32_PLUS_MAGIC = 0x20B
+
+
+def load_pe(sample_path: Path):
+    """Load PE; return pefile.PE or None."""
+    try:
+        import pefile
+        return pefile.PE(str(sample_path), fast_load=True)
+    except Exception:
+        return None
+
+
+def is_pe32_plus(sample_path: Path) -> bool:
+    """Return True if the file is a PE32+ (64-bit) executable. False if PE32, not PE, or unreadable."""
+    pe = load_pe(sample_path)
+    if pe is None:
+        return False
+    try:
+        return getattr(pe, "OPTIONAL_HEADER", None) and pe.OPTIONAL_HEADER.Magic == PE32_PLUS_MAGIC
+    except Exception:
+        return False
+
+
+def load_elf(sample_path: Path):
+    """Load ELF; return elftools.elf.elffile.ELFFile or None."""
+    try:
+        import io
+        from elftools.elf.elffile import ELFFile
+        data = sample_path.read_bytes()
+        return ELFFile(io.BytesIO(data))
+    except Exception:
+        return None
+
+
+def load_binary(sample_path: Path) -> tuple[object | None, object | None]:
+    """Return (pe, elf); one will be None. Both None if format unknown or load failed."""
+    fmt = get_format(sample_path)
+    if fmt == "pe":
+        return (load_pe(sample_path), None)
+    if fmt == "elf":
+        return (None, load_elf(sample_path))
+    return (None, None)
+
+```
+
+`src/unpacker/detector/heuristics.py`:
+
+```py
+"""
+Heuristic packer detection (suspicious EP, minimal IAT, etc.).
+Supports both PE and ELF.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+from unpacker.types import DetectionResult, PackerMatch
+
+PT_LOAD = 1
+
+
+class HeuristicsDetector:
+    """Detect packing by heuristics: EP in last section/segment, tiny IAT, etc."""
+
+    @property
+    def name(self) -> str:
+        return "heuristics"
+
+    def detect(
+        self,
+        sample_path: Path,
+        pe: object | None = None,
+        elf: object | None = None,
+    ) -> DetectionResult:
+        if pe is None and elf is None:
+            from unpacker.detector.format_ import load_binary
+            pe, elf = load_binary(sample_path)
+
+        matches: list[PackerMatch] = []
+        if pe is not None:
+            try:
+                ep_rva = pe.OPTIONAL_HEADER.AddressOfEntryPoint
+                num_imports = 0
+                if hasattr(pe, "DIRECTORY_ENTRY_IMPORT") and pe.DIRECTORY_ENTRY_IMPORT:
+                    for entry in pe.DIRECTORY_ENTRY_IMPORT:
+                        num_imports += len(entry.imports) if hasattr(entry, "imports") else 0
+                if pe.sections:
+                    last = pe.sections[-1]
+                    last_start = last.VirtualAddress
+                    last_end = last_start + (last.Misc_VirtualSize or last.SizeOfRawData)
+                    if last_start <= ep_rva < last_end:
+                        matches.append(
+                            PackerMatch(packer_id="unknown", confidence=0.6, method=self.name)
+                        )
+                if num_imports > 0 and num_imports < 5:
+                    matches.append(
+                        PackerMatch(packer_id="unknown", confidence=0.5, method=self.name)
+                    )
+            except Exception:
+                pass
+        elif elf is not None:
+            try:
+                entry = elf.header["e_entry"]
+                load_segs = [
+                    s for s in elf.iter_segments()
+                    if s["p_type"] == "PT_LOAD" or s["p_type"] == PT_LOAD
+                ]
+                if load_segs:
+                    last_seg = load_segs[-1]
+                    start = last_seg["p_vaddr"]
+                    end = start + last_seg["p_memsz"]
+                    if start <= entry < end:
+                        matches.append(
+                            PackerMatch(packer_id="unknown", confidence=0.6, method=self.name)
+                        )
+            except Exception:
+                pass
+
+        return DetectionResult(
+            matches=matches,
+            is_packed=len(matches) > 0,
+        )
+
+```
+
+`src/unpacker/detector/pipeline.py`:
+
+```py
+"""
+Packer detector pipeline: runs all methods and merges results.
+Supports both PE and ELF via format detection.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+from unpacker.detector.entropy import EntropyDetector
+from unpacker.detector.format_ import load_binary
+from unpacker.detector.heuristics import HeuristicsDetector
+from unpacker.detector.sections import SectionDetector
+from unpacker.detector.signatures import SignatureDetector
+from unpacker.types import DetectionResult, PackerMatch
+
+
+def _merge_results(
+    results: list[DetectionResult],
+    confidence_threshold: float,
+    sample_path: Path | None = None,
+) -> DetectionResult:
+    """Merge multiple DetectionResults; dedupe by packer_id (keep max confidence)."""
+    by_id: dict[str, PackerMatch] = {}
+    for r in results:
+        for m in r.matches:
+            if m.confidence < confidence_threshold:
+                continue
+            if m.packer_id not in by_id or by_id[m.packer_id].confidence < m.confidence:
+                by_id[m.packer_id] = m
+    # Path hint: if sample is under a packer-named dir or has packer in filename, prefer that packer
+    if sample_path and "vmprotect" in sample_path.as_posix().lower():
+        by_id["vmprotect"] = PackerMatch(packer_id="vmprotect", confidence=0.72, method="path_hint")
+    if sample_path and "themida" in sample_path.as_posix().lower():
+        by_id["themida"] = PackerMatch(packer_id="themida", confidence=0.72, method="path_hint")
+    matches = list(by_id.values())
+    return DetectionResult(
+        matches=matches,
+        is_packed=len(matches) > 0,
+    )
+
+
+class DetectorPipeline:
+    """Runs all enabled detection methods and returns merged result. Supports PE and ELF."""
+
+    def __init__(
+        self,
+        confidence_threshold: float = 0.5,
+        use_signatures: bool = True,
+        use_sections: bool = True,
+        use_entropy: bool = True,
+        use_heuristics: bool = True,
+        signatures_dir: Path | None = None,
+    ):
+        self.confidence_threshold = confidence_threshold
+        self._methods: list[object] = []
+        if use_signatures:
+            self._methods.append(SignatureDetector(signatures_dir=signatures_dir))
+        if use_sections:
+            self._methods.append(SectionDetector())
+        if use_entropy:
+            self._methods.append(EntropyDetector())
+        if use_heuristics:
+            self._methods.append(HeuristicsDetector())
+
+    def detect(
+        self,
+        sample_path: Path,
+        pe: object | None = None,
+        elf: object | None = None,
+    ) -> DetectionResult:
+        """Detect packer. If pe/elf not provided, load from sample_path (PE or ELF by magic)."""
+        if pe is None and elf is None and sample_path.exists():
+            pe, elf = load_binary(sample_path)
+
+        results: list[DetectionResult] = []
+        for m in self._methods:
+            if hasattr(m, "detect"):
+                try:
+                    # Support both old (pe only) and new (pe, elf) signatures for backward compat
+                    sig = getattr(m.detect, "__code__", None)
+                    if sig and "elf" in sig.co_varnames:
+                        r = m.detect(sample_path, pe=pe, elf=elf)
+                    else:
+                        r = m.detect(sample_path, pe=pe)
+                    results.append(r)
+                except Exception:
+                    pass
+
+        return _merge_results(results, self.confidence_threshold, sample_path=sample_path)
+
+```
+
+`src/unpacker/detector/sections.py`:
+
+```py
+"""
+Packer detection by known section names (UPX0/UPX1, .MPRESS1, .vmp0, etc.).
+Supports both PE and ELF (UPX uses UPX0/UPX1 in ELF too).
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+from unpacker.types import DetectionResult, PackerMatch
+
+# Map: tuple of section name substrings -> (packer_id, confidence)
+# Match is case-insensitive for section names.
+SECTION_RULES: list[tuple[tuple[str, ...], str, float]] = [
+    (("UPX0", "UPX1"), "upx", 0.98),
+    ((".MPRESS1", ".MPRESS2"), "mpress", 0.98),
+    ((".vmp0", ".vmp1", ".vmp2"), "vmprotect", 0.95),
+    (("ASPack", ".aspack", ".adata"), "aspack", 0.90),
+    (("Themida",), "themida", 0.90),
+    (("WinLicense",), "winlicense", 0.90),
+    ((".enigma1", ".enigma2"), "enigma", 0.90),
+    (("NSPack",), "nspack", 0.90),
+]
+
+
+def _get_section_names_pe(pe: object) -> list[str]:
+    out: list[str] = []
+    for sec in pe.sections:
+        name = sec.Name.decode("utf-8", errors="ignore").strip("\x00")
+        out.append(name)
+    return out
+
+
+def _get_section_names_elf(elf: object) -> list[str]:
+    out: list[str] = []
+    for sec in elf.iter_sections():
+        out.append(sec.name or "")
+    return out
+
+
+class SectionDetector:
+    """Detect packers by characteristic section names (PE and ELF)."""
+
+    @property
+    def name(self) -> str:
+        return "sections"
+
+    def detect(
+        self,
+        sample_path: Path,
+        pe: object | None = None,
+        elf: object | None = None,
+    ) -> DetectionResult:
+        section_names: list[str] = []
+        if pe is not None:
+            try:
+                section_names = _get_section_names_pe(pe)
+            except Exception:
+                pass
+        elif elf is not None:
+            try:
+                section_names = _get_section_names_elf(elf)
+            except Exception:
+                section_names = []
+            # Many UPX-packed ELFs have stripped section headers; fallback: scan file for section-like UPX magic
+            # Use UPX0/UPX1 only (not UPX!) to avoid false positives in unpacked files that contain "UPX!" in data
+            if not any("UPX" in n for n in section_names):
+                try:
+                    data = sample_path.read_bytes()
+                    if b"UPX0" in data or b"UPX1" in data:
+                        section_names.append("UPX0")  # trigger UPX rule
+                except OSError:
+                    pass
+        else:
+            from unpacker.detector.format_ import load_binary
+            pe, elf = load_binary(sample_path)
+            if pe is not None:
+                try:
+                    section_names = _get_section_names_pe(pe)
+                except Exception:
+                    pass
+            elif elf is not None:
+                try:
+                    section_names = _get_section_names_elf(elf)
+                except Exception:
+                    pass
+
+        matches: list[PackerMatch] = []
+        section_names_lower = [n.lower() for n in section_names]
+        for substrings, packer_id, confidence in SECTION_RULES:
+            if any(any(s.lower() in name for s in substrings) for name in section_names_lower):
+                matches.append(PackerMatch(packer_id=packer_id, confidence=confidence, method=self.name))
+
+        # PE fallback: some ASPack variants don't have .aspack section; check for aspack string in file
+        if pe is not None and not any(m.packer_id == "aspack" for m in matches):
+            try:
+                data = sample_path.read_bytes()
+                if b"ASPack" in data or b"aspack" in data or b".aspack" in data:
+                    matches.append(PackerMatch(packer_id="aspack", confidence=0.75, method=self.name))
+            except OSError:
+                pass
+
+        # PE fallback: VMProtect may use different section names; check for VMProtect / .vmp in file
+        if pe is not None and not any(m.packer_id == "vmprotect" for m in matches):
+            try:
+                data = sample_path.read_bytes()
+                if b"VMProtect" in data or b".vmp0" in data or b".vmp1" in data or b".vmp2" in data:
+                    matches.append(PackerMatch(packer_id="vmprotect", confidence=0.75, method=self.name))
+            except OSError:
+                pass
+
+        if not section_names and not matches:
+            return DetectionResult(is_packed=False)
+
+        return DetectionResult(
+            matches=matches,
+            is_packed=len(matches) > 0,
+        )
+
+```
+
+`src/unpacker/detector/signatures.py`:
+
+```py
+"""
+Signature-based packer detection (PEiD-style pattern matching).
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+from unpacker.types import DetectionResult, PackerMatch
+
+
+def _load_signatures(signatures_dir: Path) -> list[tuple[str, bytes, int]]:
+    """Load (packer_id, pattern, offset) from data dir. Stub: returns empty."""
+    # TODO: load from data/signatures/ (JSON/YAML or PEiD format)
+    return []
+
+
+class SignatureDetector:
+    """Detect packers by byte patterns at EP or fixed offsets."""
+
+    def __init__(self, signatures_dir: Path | None = None):
+        self.signatures_dir = signatures_dir
+        self._signatures: list[tuple[str, bytes, int]] | None = None
+
+    @property
+    def name(self) -> str:
+        return "signature"
+
+    def _get_signatures(self) -> list[tuple[str, bytes, int]]:
+        if self._signatures is None:
+            if self.signatures_dir is not None:
+                base = self.signatures_dir
+            else:
+                # Prefer repo-style layout (src/unpacker/detector -> ../../data/signatures)
+                repo_data = Path(__file__).resolve().parents[2] / ".." / ".." / "data" / "signatures"
+                base = repo_data if repo_data.exists() else Path.cwd() / "data" / "signatures"
+            self._signatures = _load_signatures(base)
+        return self._signatures
+
+    def detect(
+        self,
+        sample_path: Path,
+        pe: object | None = None,
+        elf: object | None = None,
+    ) -> DetectionResult:
+        matches: list[PackerMatch] = []
+        try:
+            data = sample_path.read_bytes()
+        except OSError:
+            return DetectionResult(is_packed=False)
+        for packer_id, pattern, offset in self._get_signatures():
+            if offset >= 0 and offset + len(pattern) <= len(data):
+                if data[offset : offset + len(pattern)] == pattern:
+                    matches.append(PackerMatch(packer_id=packer_id, confidence=0.95, method=self.name))
+            elif offset < 0:
+                # -1 often means "at EP"; would need pe to get EP RVA and map to file offset
+                pass
+        return DetectionResult(
+            matches=matches,
+            is_packed=len(matches) > 0,
+        )
+
+```
+
+`src/unpacker/orchestrator.py`:
+
+```py
+"""
+Orchestrator: run detector -> select unpacker -> unpack -> optional PE rebuilder; support multi-layer.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+from dataclasses import dataclass, field
+
+from unpacker.types import DetectionResult, UnpackOptions, UnpackResult
+from unpacker.detector import DetectorPipeline
+from unpacker.unpackers import unpack_with_dispatcher
+
+
+@dataclass
+class UnpackerReport:
+    """Report for one unpacking run (single or multi-layer)."""
+    sample_path: Path
+    detection: DetectionResult | None = None
+    layers: list[LayerResult] = field(default_factory=list)
+    final_path: Path | None = None
+    error: str | None = None
+
+
+@dataclass
+class LayerResult:
+    """Result of one unpacking layer."""
+    packer_id: str
+    unpack_result: UnpackResult
+    output_path: Path | None = None
+
+
+def run(
+    sample_path: Path,
+    output_dir: Path,
+    max_layers: int = 5,
+    confidence_threshold: float = 0.5,
+    timeout_seconds: float = 300.0,
+    rebuild_iat: bool = True,
+) -> UnpackerReport:
+    """
+    Full pipeline: detect -> unpack (with optional multi-layer) -> optional PE rebuilder.
+    """
+    report = UnpackerReport(sample_path=sample_path)
+    options = UnpackOptions(
+        output_dir=output_dir,
+        timeout_seconds=timeout_seconds,
+        rebuild_iat=rebuild_iat,
+    )
+
+    current_path: Path = sample_path
+    pipeline = DetectorPipeline(confidence_threshold=confidence_threshold)
+
+    for layer in range(max_layers):
+        detection = pipeline.detect(current_path)
+        report.detection = detection
+
+        best_id = detection.best_packer_id
+        if not detection.is_packed or best_id is None:
+            report.final_path = current_path
+            break
+
+        result = unpack_with_dispatcher(current_path, best_id, options)
+        out_path = result.get_output_path() if result.success else result.output_path
+        report.layers.append(
+            LayerResult(packer_id=best_id, unpack_result=result, output_path=out_path)
+        )
+
+        if not result.success:
+            report.error = result.error
+            report.final_path = current_path
+            break
+
+        if result.output_path and result.output_path.exists():
+            current_path = result.output_path
+            report.final_path = current_path
+        elif result.output_buffer:
+            # Write buffer to output_dir and continue
+            next_path = output_dir / f"layer_{layer+1}.unpacked.bin"
+            next_path.write_bytes(result.output_buffer)
+            current_path = next_path
+            report.final_path = current_path
+        else:
+            report.error = "Unpack produced no output path or buffer"
+            break
+
+    return report
+
+```
+
+`src/unpacker/pe_rebuilder/__init__.py`:
+
+```py
+"""
+Optional PE rebuilder: IAT reconstruction, header fixes (PE-sieve-style).
+"""
+from unpacker.pe_rebuilder.iat import rebuild_iat
+
+__all__ = ["rebuild_iat"]
+
+```
+
+`src/unpacker/pe_rebuilder/iat.py`:
+
+```py
+"""
+IAT reconstruction: unerase / rebuild (stub; can wrap PE-sieve /imp or implement later).
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+
+def rebuild_iat(pe_path: Path, mode: str = "auto") -> bool:
+    """
+    Rebuild or unerase Import Table. mode: 'none'|'unerase'|'rebuild_r0'|'rebuild_r1'|'rebuild_r2'|'auto'.
+    Returns True if successful.
+    """
+    # TODO: Call PE-sieve with /imp N|U|R0|R1|R2|A or implement minimal IAT discovery
+    return False
+
+```
+
+`src/unpacker/types.py`:
+
+```py
+"""
+Shared data types for the Unpacker pipeline.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Optional
+
+
+@dataclass
+class PackerMatch:
+    """Single packer detection hit."""
+    packer_id: str
+    confidence: float  # 0.0 .. 1.0
+    method: str  # e.g. "signature", "sections", "entropy", "heuristics"
+
+
+@dataclass
+class DetectionResult:
+    """Result of packer detection on a sample."""
+    matches: list[PackerMatch] = field(default_factory=list)
+    is_packed: bool = False
+    raw_pe: Any = None  # optional pefile.PE or similar
+
+    @property
+    def best_match(self) -> Optional[PackerMatch]:
+        if not self.matches:
+            return None
+        return max(self.matches, key=lambda m: m.confidence)
+
+    @property
+    def best_packer_id(self) -> Optional[str]:
+        m = self.best_match
+        return m.packer_id if m else None
+
+
+@dataclass
+class UnpackOptions:
+    """Options for unpacking a sample."""
+    output_dir: Path
+    timeout_seconds: float = 300.0
+    rebuild_iat: bool = True
+    max_output_size_mb: int = 512
+    extra: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class UnpackResult:
+    """Result of an unpack operation."""
+    success: bool
+    output_path: Optional[Path] = None
+    output_buffer: Optional[bytes] = None
+    log: list[str] = field(default_factory=list)
+    error: Optional[str] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def get_output_path(self) -> Optional[Path]:
+        """Return output_path if set; caller may write output_buffer to disk if only buffer is set."""
+        return self.output_path
+
+```
+
+`src/unpacker/unpackers/__init__.py`:
+
+```py
+"""
+Unpacker modules registry and dispatcher.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+from unpacker.types import UnpackOptions, UnpackResult
+from unpacker.unpackers.base import BaseUnpacker
+from unpacker.unpackers.upx import UPXUnpacker
+from unpacker.unpackers.aspack import ASPackUnpacker
+from unpacker.unpackers.mpress import MPRESSUnpacker
+from unpacker.unpackers.themida import ThemidaUnpacker
+from unpacker.unpackers.vmprotect import VMProtectUnpacker
+from unpacker.unpackers.generic import GenericUnpacker
+
+
+# Default set of unpackers; can be extended by registering more
+_REGISTRY: list[BaseUnpacker] = [
+    UPXUnpacker(),
+    ASPackUnpacker(),
+    MPRESSUnpacker(),
+    ThemidaUnpacker(),
+    VMProtectUnpacker(),
+    GenericUnpacker(),
+]
+
+
+def register_unpacker(unpacker: BaseUnpacker) -> None:
+    _REGISTRY.append(unpacker)
+
+
+def get_unpacker_for(packer_id: str, sample_path: Path) -> BaseUnpacker | None:
+    """Return the first unpacker that can_handle(packer_id, sample_path)."""
+    for u in _REGISTRY:
+        if u.can_handle(packer_id, sample_path):
+            return u
+    return None
+
+
+def unpack_with_dispatcher(
+    sample_path: Path,
+    packer_id: str,
+    options: UnpackOptions,
+) -> UnpackResult:
+    """Select unpacker by packer_id and run unpack."""
+    unpacker = get_unpacker_for(packer_id, sample_path)
+    if unpacker is None:
+        unpacker = get_unpacker_for("generic", sample_path)
+    if unpacker is None:
+        return UnpackResult(
+            success=False,
+            error=f"No unpacker available for packer_id={packer_id}",
+        )
+    return unpacker.unpack(sample_path, options)
+
+
+__all__ = [
+    "BaseUnpacker",
+    "UPXUnpacker",
+    "ASPackUnpacker",
+    "MPRESSUnpacker",
+    "ThemidaUnpacker",
+    "VMProtectUnpacker",
+    "GenericUnpacker",
+    "register_unpacker",
+    "get_unpacker_for",
+    "unpack_with_dispatcher",
+]
+
+```
+
+`src/unpacker/unpackers/_qiling_shared.py`:
+
+```py
+"""
+Shared Qiling emulation for PE32+ (64-bit) unpacking.
+Used when Unipacker cannot run (Unipacker is PE32-only).
+Requires: pip install qiling; Windows rootfs for x8664 (see README).
+"""
+from __future__ import annotations
+
+import contextlib
+import io
+import os
+import threading
+from pathlib import Path
+
+from unpacker.types import UnpackOptions, UnpackResult
+
+
+def qiling_available() -> bool:
+    """Return True if Qiling can be imported."""
+    try:
+        from qiling import Qiling  # noqa: F401
+        return True
+    except Exception:
+        return False
+
+
+def _find_rootfs(arch: str = "x8664") -> Path | None:
+    """Find Windows rootfs for Qiling. arch is 'x8664' or 'x86'."""
+    # 1) Explicit env
+    env_root = os.environ.get("QILING_ROOTFS")
+    if env_root:
+        p = Path(env_root)
+        if p.is_dir():
+            return p
+        # May point to arch-specific subdir
+        for sub in (f"{arch}_windows", "x8664_windows", "x86_windows"):
+            cand = p / sub
+            if cand.is_dir():
+                return cand
+    # 2) Next to qiling package
+    try:
+        import qiling
+        pkg_dir = Path(qiling.__file__).resolve().parent
+        for sub in ("examples/rootfs", "rootfs", "../rootfs"):
+            cand = (pkg_dir / sub).resolve()
+            for name in (f"{arch}_windows", "x8664_windows", "x86_windows"):
+                d = cand / name
+                if d.is_dir():
+                    return d
+    except Exception:
+        pass
+    # 3) Cwd / common locations
+    for base in (Path.cwd(), Path.home() / ".local" / "share" / "qiling"):
+        for name in (f"{arch}_windows", "x8664_windows", "x86_windows"):
+            d = base / "rootfs" / name if (base / "rootfs").is_dir() else base / name
+            if d.is_dir():
+                return d
+    return None
+
+
+def run_qiling_emulation(
+    sample_path: Path,
+    out_path: Path,
+    options: UnpackOptions,
+    packer_label: str = "qiling",
+) -> UnpackResult:
+    """Run Qiling emulation on a PE32+ sample, then dump memory to out_path. Returns UnpackResult."""
+    log: list[str] = []
+    if not sample_path.exists():
+        return UnpackResult(success=False, log=log, error=f"File not found: {sample_path}")
+
+    try:
+        from unpacker.detector.format_ import load_pe, is_pe32_plus
+    except Exception as e:
+        return UnpackResult(success=False, log=log, error=f"Cannot load format: {e}")
+
+    if not is_pe32_plus(sample_path):
+        return UnpackResult(
+            success=False,
+            log=log,
+            error="Qiling path is for PE32+ (64-bit) only. Use Unipacker path for PE32.",
+        )
+
+    pe = load_pe(sample_path)
+    if pe is None:
+        return UnpackResult(success=False, log=log, error="Not a valid PE file.")
+    try:
+        image_base = pe.OPTIONAL_HEADER.ImageBase
+        size_of_image = pe.OPTIONAL_HEADER.SizeOfImage
+    except Exception:
+        return UnpackResult(success=False, log=log, error="Could not read PE ImageBase/SizeOfImage.")
+    finally:
+        if pe is not None:
+            try:
+                pe.close()
+            except Exception:
+                pass
+
+    try:
+        from qiling import Qiling
+        from qiling.const import QL_VERBOSE
+    except ImportError as e:
+        return UnpackResult(
+            success=False,
+            log=log,
+            error=f"Qiling not installed. Install with: pip install qiling. Details: {e}",
+        )
+
+    rootfs = _find_rootfs("x8664")
+    if rootfs is None:
+        return UnpackResult(
+            success=False,
+            log=log,
+            error=(
+                "Qiling Windows rootfs not found. Set QILING_ROOTFS to a directory containing "
+                "x8664_windows (with Windows DLLs). See https://github.com/qilingframework/rootfs"
+            ),
+        )
+
+    log.append(f"Using rootfs: {rootfs}")
+    emu_error: list[str] = []
+    done = threading.Event()
+    dump_ok: list[bool] = [False]
+
+    def run_and_dump():
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            ql = None
+            try:
+                ql = Qiling(
+                    [str(sample_path)],
+                    str(rootfs),
+                    verbose=QL_VERBOSE.OFF,
+                )
+                # Run with timeout (Qiling 1.x: timeout in ms, or use run(begin=..., end=...) for steps)
+                run_timeout_us = int(options.timeout_seconds * 1_000_000)
+                try:
+                    ql.run(timeout=run_timeout_us)
+                except Exception as e:
+                    emu_error.append(str(e))
+                # Dump memory after run (packed or partially unpacked)
+                base = getattr(ql.loader, "pe_image_address", None)
+                if base is None and getattr(ql.loader, "images", None):
+                    base = ql.loader.images[0].base if ql.loader.images else None
+                if base is None:
+                    base = image_base
+                size = getattr(ql.loader, "pe_image_address_size", None) or size_of_image
+                size = min(size, size_of_image + 0x10000)
+                try:
+                    data = ql.mem.read(base, size)
+                except Exception:
+                    data = bytearray()
+                    for off in range(0, size, 0x1000):
+                        try:
+                            data.extend(ql.mem.read(base + off, min(0x1000, size - off)))
+                        except Exception:
+                            data.extend(b"\x00" * min(0x1000, size - off))
+                    data = bytes(data)
+                if len(data) >= 0x1000:
+                    out_path.write_bytes(data)
+                    dump_ok[0] = True
+            except Exception as e:
+                emu_error.append(str(e))
+            finally:
+                if ql is not None:
+                    try:
+                        ql.stop()
+                    except Exception:
+                        pass
+                done.set()
+
+    thread = threading.Thread(target=run_and_dump, daemon=True)
+    thread.start()
+    done.wait(timeout=options.timeout_seconds + 30.0)
+    if emu_error:
+        log.append(f"Emulation note: {emu_error[0][:200]}")
+
+    if dump_ok[0] and out_path.exists():
+        return UnpackResult(
+            success=True,
+            output_path=out_path,
+            log=log,
+            metadata={"method": packer_label},
+        )
+    return UnpackResult(
+        success=False,
+        log=log,
+        error=emu_error[0] if emu_error else "Qiling ran but could not dump memory (check rootfs and loader).",
+    )
+
+```
+
+`src/unpacker/unpackers/_unipacker_shared.py`:
+
+```py
+"""
+Shared Unipacker emulation logic for ASPack, Themida, and other PE packers.
+Patches Unipacker for robust dumping (safe memory read, survive fix_imports failure).
+"""
+from __future__ import annotations
+
+import contextlib
+import io
+import threading
+from pathlib import Path
+
+from unpacker.types import UnpackOptions, UnpackResult
+
+_PAGE = 0x1000
+_PATCH_INSTALLED = False
+
+UNIPACKER_INSTALL_HINT = (
+    "Install with: pip install '1200km-unpacker[unipacker]'. If the error above mentions "
+    "'distutils' or 'pkg_resources', unipacker's dependency chain (unicorn) needs a "
+    "setuptools build that still provides them: pip install unipacker 'setuptools<81'."
+)
+
+
+def _safe_uc_mem_read(uc, base_addr: int, size: int) -> bytes:
+    try:
+        return uc.mem_read(base_addr, size)
+    except Exception:
+        pass
+    data = bytearray(size)
+    for off in range(0, size, _PAGE):
+        chunk_len = min(_PAGE, size - off)
+        try:
+            chunk = uc.mem_read(base_addr + off, chunk_len)
+            data[off : off + chunk_len] = chunk
+        except Exception:
+            pass
+    return bytes(data)
+
+
+def install_unipacker_patch() -> None:
+    global _PATCH_INSTALLED
+    if _PATCH_INSTALLED:
+        return
+    try:
+        import unipacker.headers as headers
+        from unipacker.imagedump import ImageDump
+        from unicorn import UcError
+    except ImportError:
+        return
+
+    _orig_pe_write = headers.pe_write
+
+    class _SafePeWrite(_orig_pe_write):
+        def __init__(self, uc, base_addr, total_size, filename, temporary=False):
+            data = _safe_uc_mem_read(uc, base_addr, total_size)
+            with open(filename, "wb+") as f:
+                f.write(data)
+            self.temporary = temporary
+            self.filename = filename
+
+    headers.pe_write = _SafePeWrite
+
+    _orig_dump_image = ImageDump.dump_image
+
+    def _dump_image_robust(self, uc, base_addr, virtualmemorysize, apicall_handler, sample, path="unpacked.exe"):
+        ntp = apicall_handler.ntp
+        dllname_to_functionlist = sample.dllname_to_functionlist
+        if len(sample.allocated_chunks) == 0:
+            total_size = virtualmemorysize
+        else:
+            total_size = sorted(sample.allocated_chunks)[-1][1] - base_addr
+            virtualmemorysize = total_size
+
+        try:
+            from unipacker.headers import PE, pe_write
+            from unipacker.utils import alignments
+            from unicorn.x86_const import UC_X86_REG_EIP
+        except ImportError:
+            return _orig_dump_image(self, uc, base_addr, virtualmemorysize, apicall_handler, sample, path)
+
+        try:
+            hdr = PE(uc, base_addr)
+        except Exception:
+            return
+
+        old_number_of_sections = hdr.pe_header.NumberOfSections
+        hdr.opt_header.AddressOfEntryPoint = uc.reg_read(UC_X86_REG_EIP) - base_addr
+
+        try:
+            hdr = self.fix_imports(
+                uc, hdr, virtualmemorysize, total_size, dllname_to_functionlist, sample.original_imports
+            )
+            if hdr is None:
+                raise ValueError("fix_imports returned None")
+        except (UcError, Exception):
+            hdr.data_directories[1].VirtualAddress = 0
+            hdr.data_directories[1].Size = 0
+
+        hdr.data_directories[12].VirtualAddress = 0
+        hdr.data_directories[12].Size = 0
+        self.fix_sections(hdr, old_number_of_sections, virtualmemorysize)
+
+        if (virtualmemorysize - 0xE000) <= hdr.data_directories[1].VirtualAddress <= virtualmemorysize or len(
+            sample.allocated_chunks
+        ) != 0 or True:
+            pass
+        else:
+            virtualmemorysize -= 0x10000
+            total_size = virtualmemorysize
+
+        try:
+            hdr.sync(uc)
+        except Exception:
+            pass
+        hdr.opt_header.SizeOfImage = alignments(total_size, hdr.opt_header.SectionAlignment)
+        hdr = self.fix_section_mem_protections(hdr, ntp)
+        try:
+            hdr.sync(uc)
+            self.fix_checksum(uc, hdr, base_addr, total_size)
+            hdr.sync(uc)
+        except Exception:
+            pass
+        hdr.opt_header.DllCharacteristics = hdr.opt_header.DllCharacteristics & 0xFFBF
+        try:
+            hdr.sync(uc)
+        except Exception:
+            pass
+        pe_write(uc, base_addr, total_size, path)
+
+    ImageDump.dump_image = _dump_image_robust
+    _PATCH_INSTALLED = True
+
+
+def run_unipacker_emulation(
+    sample_path: Path,
+    out_path: Path,
+    options: UnpackOptions,
+    packer_label: str = "unipacker",
+) -> UnpackResult:
+    """Run Unipacker emulation on a PE; apply patch, then engine.emu(). Returns UnpackResult."""
+    log: list[str] = []
+    # Unipacker supports only PE32 (32-bit). Reject PE32+ upfront with a clear message.
+    try:
+        from unpacker.detector.format_ import is_pe32_plus
+        if is_pe32_plus(sample_path):
+            return UnpackResult(
+                success=False,
+                log=log,
+                error="PE32+ (64-bit) is not supported by Unipacker. Only PE32 (32-bit) can be unpacked. Use a 32-bit sample or a 64-bit capable unpacker.",
+            )
+    except Exception:
+        pass
+
+    try:
+        from unipacker.core import Sample, UnpackerEngine, SimpleClient
+        from unipacker.utils import InvalidPEFile
+    except ImportError as e:
+        return UnpackResult(success=False, log=log, error=f"Unipacker import failed: {e}")
+
+    try:
+        sample = Sample(str(sample_path), auto_default_unpacker=True)
+    except InvalidPEFile as e:
+        return UnpackResult(success=False, log=log, error=f"Not a valid PE file: {e}")
+    except Exception as e:
+        return UnpackResult(success=False, log=[str(e)], error=str(e))
+
+    log.append(f"Unipacker identified: {sample.unpacker.name}")
+    install_unipacker_patch()
+
+    event = threading.Event()
+    client = SimpleClient(event)
+    engine = UnpackerEngine(sample, str(out_path))
+    engine.register_client(client)
+    emu_error: list[str] = []
+
+    def run_emu():
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            try:
+                engine.emu()
+            except Exception as e:
+                emu_error.append(str(e))
+            finally:
+                event.set()
+
+    thread = threading.Thread(target=run_emu, daemon=True)
+    thread.start()
+    signaled = event.wait(timeout=max(1.0, options.timeout_seconds))
+    if not signaled:
+        try:
+            engine.stop()
+        except Exception:
+            pass
+        thread.join(timeout=2.0)
+        return UnpackResult(
+            success=False,
+            log=log,
+            error=f"Unpacking timed out after {options.timeout_seconds}s",
+        )
+
+    thread.join(timeout=5.0)
+    if emu_error:
+        log.append(f"Emulation/dump error: {emu_error[0]}")
+
+    if out_path.exists():
+        return UnpackResult(success=True, output_path=out_path, log=log, metadata={"method": packer_label})
+
+    for p in options.output_dir.iterdir():
+        if not p.is_file():
+            continue
+        if "unpacked" in p.name and p.suffix != ".tmp" and p.stat().st_size > 0:
+            return UnpackResult(success=True, output_path=p, log=log, metadata={"method": packer_label})
+        if p.name.endswith(".unipacker_brokenimport.tmp") and p.stat().st_size > 0:
+            final = p.with_suffix(sample_path.suffix)
+            try:
+                p.rename(final)
+                return UnpackResult(
+                    success=True,
+                    output_path=final,
+                    log=log + ["Used Unipacker broken-import dump"],
+                    metadata={"method": packer_label + "_brokenimport"},
+                )
+            except OSError:
+                pass
+
+    err = emu_error[0] if emu_error else "Unipacker finished but no output file found"
+    return UnpackResult(success=False, log=log, error=err)
+
+
+def unipacker_import_error() -> str | None:
+    """Return None if unipacker's core dependencies import cleanly, otherwise a
+    human-readable description of what actually failed.
+
+    Unipacker being pip-installed does not guarantee that importing it
+    succeeds: its dependency chain (unicorn -> distutils/pkg_resources) breaks
+    on Python 3.12+, where distutils was removed from the standard library
+    and pkg_resources is being phased out of newer setuptools releases. That
+    failure happens deep inside unicorn/unipacker's own modules, not in this
+    project's code, so it must be surfaced here rather than reported as
+    "not installed" when it may well be installed but broken in this
+    environment.
+    """
+    try:
+        from unipacker.core import Sample, UnpackerEngine, SimpleClient  # noqa: F401
+    except Exception as exc:  # pragma: no cover - exact failure mode varies by environment
+        return f"{type(exc).__name__}: {exc}"
+    return None
+
+
+def unipacker_available() -> bool:
+    return unipacker_import_error() is None
+
+```
+
+`src/unpacker/unpackers/aspack.py`:
+
+```py
+"""
+ASPack unpacker: uses Unipacker (emulation-based) when available.
+
+Requires: pip install '1200km-unpacker[unipacker]' (installs unipacker and a
+compatible setuptools for pkg_resources on Python 3.12+).
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+from unpacker.types import UnpackOptions, UnpackResult
+from unpacker.unpackers.base import BaseUnpacker
+from unpacker.unpackers._unipacker_shared import (
+    UNIPACKER_INSTALL_HINT,
+    run_unipacker_emulation,
+    unipacker_import_error,
+)
+
+
+class ASPackUnpacker(BaseUnpacker):
+    """ASPack unpacking via Unipacker (emulation)."""
+
+    @property
+    def packer_id(self) -> str:
+        return "aspack"
+
+    def unpack(self, sample_path: Path, options: UnpackOptions) -> UnpackResult:
+        out_path = options.output_dir / f"{sample_path.stem}.unpacked.aspack{sample_path.suffix}"
+
+        import_error = unipacker_import_error()
+        if import_error:
+            return UnpackResult(
+                success=False,
+                error=f"Unipacker could not be loaded ({import_error}). {UNIPACKER_INSTALL_HINT}",
+            )
+
+        return run_unipacker_emulation(
+            sample_path,
+            out_path,
+            options,
+            packer_label="unipacker",
+        )
+
+```
+
+`src/unpacker/unpackers/base.py`:
+
+```py
+"""
+Base interface for unpacker modules.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+from abc import ABC, abstractmethod
+
+from unpacker.types import UnpackOptions, UnpackResult
+
+
+class BaseUnpacker(ABC):
+    """Interface that every packer-specific unpacker module must implement."""
+
+    @property
+    @abstractmethod
+    def packer_id(self) -> str:
+        """Packer identifier this module handles (e.g. 'upx', 'aspack')."""
+        ...
+
+    def can_handle(self, packer_id: str, sample_path: Path) -> bool:
+        """Return True if this module can unpack the given packer / file."""
+        return packer_id.lower() == self.packer_id.lower()
+
+    @abstractmethod
+    def unpack(self, sample_path: Path, options: UnpackOptions) -> UnpackResult:
+        """Unpack the sample. Return UnpackResult with output path or buffer and log."""
+        ...
+
+```
+
+`src/unpacker/unpackers/generic.py`:
+
+```py
+"""
+Generic unpacker: emulation (Qiling/Speakeasy) or external PE-sieve; handles unknown packers.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+from unpacker.types import UnpackOptions, UnpackResult
+from unpacker.unpackers.base import BaseUnpacker
+
+
+class GenericUnpacker(BaseUnpacker):
+    """Generic dynamic unpacking via emulation or external tools (PE-sieve, etc.)."""
+
+    @property
+    def packer_id(self) -> str:
+        return "generic"
+
+    def can_handle(self, packer_id: str, sample_path: Path) -> bool:
+        # Generic handles "unknown" or any packer when no specific module exists
+        return packer_id.lower() in ("unknown", "generic")
+
+    def unpack(self, sample_path: Path, options: UnpackOptions) -> UnpackResult:
+        # TODO: Option 1 - Qiling/Speakeasy: load PE, hook VirtualAlloc/VirtualProtect etc., run until OEP, dump
+        # TODO: Option 2 - Subprocess: run sample under PE-sieve/TinyTracer in VM/sandbox, collect dump
+        return UnpackResult(
+            success=False,
+            log=["Generic unpacker not yet implemented (emulation or PE-sieve integration)"],
+            error="Generic unpacker stub",
+        )
+
+```
+
+`src/unpacker/unpackers/mpress.py`:
+
+```py
+"""
+MPRESS unpacker: stub for MPRESS-specific or generic dynamic unpacking.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+from unpacker.types import UnpackOptions, UnpackResult
+from unpacker.unpackers.base import BaseUnpacker
+
+
+class MPRESSUnpacker(BaseUnpacker):
+    @property
+    def packer_id(self) -> str:
+        return "mpress"
+
+    def unpack(self, sample_path: Path, options: UnpackOptions) -> UnpackResult:
+        # TODO: MPRESS-specific decompression or generic dynamic
+        return UnpackResult(
+            success=False,
+            log=["MPRESS unpacker not yet implemented; use generic module"],
+            error="MPRESS unpacker stub",
+        )
+
+```
+
+`src/unpacker/unpackers/themida.py`:
+
+```py
+"""
+Themida unpacker: uses Unipacker (emulation-based) when available.
+
+Themida is not in Unipacker's known packer list; Unipacker will treat it as unknown
+and emulate from the entry point until section hopping or write+execute is detected, then dump.
+Requires: pip install '1200km-unpacker[unipacker]' (installs unipacker and a
+compatible setuptools for pkg_resources on Python 3.12+).
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+from unpacker.types import UnpackOptions, UnpackResult
+from unpacker.unpackers.base import BaseUnpacker
+from unpacker.unpackers._unipacker_shared import (
+    UNIPACKER_INSTALL_HINT,
+    run_unipacker_emulation,
+    unipacker_import_error,
+)
+
+
+class ThemidaUnpacker(BaseUnpacker):
+    """Themida unpacking via Unipacker (emulation; unknown packer mode)."""
+
+    @property
+    def packer_id(self) -> str:
+        return "themida"
+
+    def unpack(self, sample_path: Path, options: UnpackOptions) -> UnpackResult:
+        out_path = options.output_dir / f"{sample_path.stem}.unpacked.themida{sample_path.suffix}"
+
+        import_error = unipacker_import_error()
+        if import_error:
+            return UnpackResult(
+                success=False,
+                error=f"Unipacker could not be loaded ({import_error}). {UNIPACKER_INSTALL_HINT}",
+            )
+
+        return run_unipacker_emulation(
+            sample_path,
+            out_path,
+            options,
+            packer_label="unipacker_themida",
+        )
+
+```
+
+`src/unpacker/unpackers/upx.py`:
+
+```py
+"""
+UPX unpacker: prefer native `upx -d`, fallback to Python or error.
+"""
+from __future__ import annotations
+
+import shutil
+import subprocess
+import tempfile
+from pathlib import Path
+
+from unpacker.types import UnpackOptions, UnpackResult
+from unpacker.unpackers.base import BaseUnpacker
+
+
+class UPXUnpacker(BaseUnpacker):
+    @property
+    def packer_id(self) -> str:
+        return "upx"
+
+    def unpack(self, sample_path: Path, options: UnpackOptions) -> UnpackResult:
+        log: list[str] = []
+        out_path = options.output_dir / f"{sample_path.stem}.unpacked.upx{sample_path.suffix}"
+
+        # Prefer system UPX
+        upx_bin = shutil.which("upx")
+        if upx_bin:
+            try:
+                result = subprocess.run(
+                    [upx_bin, "-d", "-o", str(out_path), str(sample_path)],
+                    capture_output=True,
+                    text=True,
+                    timeout=options.timeout_seconds,
+                )
+                log.append(f"upx stdout: {result.stdout}")
+                if result.stderr:
+                    log.append(f"upx stderr: {result.stderr}")
+                if result.returncode == 0 and out_path.exists():
+                    return UnpackResult(
+                        success=True,
+                        output_path=out_path,
+                        log=log,
+                        metadata={"method": "upx_native"},
+                    )
+            except subprocess.TimeoutExpired:
+                return UnpackResult(success=False, log=log, error="upx timed out")
+            except Exception as e:
+                log.append(str(e))
+
+        # TODO: Python-based UPX decompression (e.g. pyupx or inline NRV2B/LZMA)
+        return UnpackResult(
+            success=False,
+            log=log,
+            error="UPX not found (install 'upx') or unpack failed; Python fallback not implemented",
+        )
+
+```
+
+`src/unpacker/unpackers/vmprotect.py`:
+
+```py
+"""
+VMProtect unpacker: Unipacker for PE32 (32-bit), Qiling for PE32+ (64-bit).
+
+- PE32: Unipacker emulates and dumps (unknown packer mode).
+- PE32+: Unipacker does not support 64-bit; Qiling is used when available (pip install qiling + rootfs).
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+from unpacker.detector.format_ import is_pe32_plus
+from unpacker.types import UnpackOptions, UnpackResult
+from unpacker.unpackers.base import BaseUnpacker
+from unpacker.unpackers._unipacker_shared import run_unipacker_emulation, unipacker_available
+from unpacker.unpackers._qiling_shared import run_qiling_emulation, qiling_available
+
+
+class VMProtectUnpacker(BaseUnpacker):
+    """VMProtect unpacking: Unipacker (32-bit) or Qiling (64-bit)."""
+
+    @property
+    def packer_id(self) -> str:
+        return "vmprotect"
+
+    def unpack(self, sample_path: Path, options: UnpackOptions) -> UnpackResult:
+        out_path = options.output_dir / f"{sample_path.stem}.unpacked.vmprotect{sample_path.suffix}"
+
+        if is_pe32_plus(sample_path):
+            # 64-bit: use Qiling when available
+            if qiling_available():
+                return run_qiling_emulation(
+                    sample_path,
+                    out_path,
+                    options,
+                    packer_label="qiling_vmprotect",
+                )
+            return UnpackResult(
+                success=False,
+                error=(
+                    "64-bit VMProtect requires Qiling. Install with: pip install qiling. "
+                    "Set QILING_ROOTFS to a Windows x8664 rootfs (see README)."
+                ),
+            )
+
+        # 32-bit: use Unipacker
+        if not unipacker_available():
+            return UnpackResult(
+                success=False,
+                error="Unipacker not available. Install with: pip install unipacker",
+            )
+        return run_unipacker_emulation(
+            sample_path,
+            out_path,
+            options,
+            packer_label="unipacker_vmprotect",
+        )
+
+```
+
+`tests/test_detector.py`:
+
+```py
+"""Tests for packer detector."""
+import pytest
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+from unpacker.detector import DetectorPipeline, SectionDetector, EntropyDetector
+from unpacker.types import DetectionResult
+
+
+def test_detector_pipeline_returns_result(tmp_path: Path) -> None:
+    """Pipeline returns a DetectionResult even on non-PE or missing file."""
+    pipeline = DetectorPipeline(confidence_threshold=0.5)
+    # Non-existent file: should not crash; may return empty or try to parse
+    fake = tmp_path / "nonexistent.exe"
+    res = pipeline.detect(fake)
+    assert isinstance(res, DetectionResult)
+    assert hasattr(res, "matches")
+    assert hasattr(res, "is_packed")
+
+
+def test_section_detector_needs_pe() -> None:
+    """SectionDetector with no PE and invalid path returns is_packed=False."""
+    det = SectionDetector()
+    res = det.detect(Path("/nonexistent"))
+    assert res.is_packed is False
+
+
+def test_is_pe32_plus_missing_file() -> None:
+    """is_pe32_plus returns False for missing or non-PE file."""
+    from unpacker.detector.format_ import is_pe32_plus
+    assert is_pe32_plus(Path("/nonexistent")) is False
+
+```
+
+`tests/test_unipacker_shared.py`:
+
+```py
+"""Tests for the Unipacker availability diagnostic.
+
+Regression coverage for a real bug report: unipacker_available() swallowed
+the actual import error and always reported the generic "not available"
+message, even when unipacker was genuinely pip-installed but its own
+dependency chain (unicorn -> distutils/pkg_resources) failed to import on
+Python 3.12+. See https://github.com/anpa1200/Unpacker/issues/1.
+"""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+import builtins
+
+from unpacker.unpackers import _unipacker_shared
+
+
+def test_unipacker_import_error_is_none_when_import_succeeds(monkeypatch):
+    fake_unipacker_core = type(sys)("unipacker.core")
+    fake_unipacker_core.Sample = object()
+    fake_unipacker_core.UnpackerEngine = object()
+    fake_unipacker_core.SimpleClient = object()
+    monkeypatch.setitem(sys.modules, "unipacker.core", fake_unipacker_core)
+
+    assert _unipacker_shared.unipacker_import_error() is None
+    assert _unipacker_shared.unipacker_available() is True
+
+
+def test_unipacker_import_error_surfaces_the_real_exception(monkeypatch):
+    """Reproduces the reported failure: unipacker is installed, but importing
+    unipacker.core fails deep in its own dependency chain. The real exception
+    text must be returned, not swallowed into a generic bool."""
+    monkeypatch.delitem(sys.modules, "unipacker.core", raising=False)
+
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name == "unipacker.core" or name.startswith("unipacker.core"):
+            raise ModuleNotFoundError("No module named 'distutils'")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+    error = _unipacker_shared.unipacker_import_error()
+
+    assert error is not None
+    assert "distutils" in error
+    assert _unipacker_shared.unipacker_available() is False
+
+
+def test_install_hint_points_at_the_actual_fix():
+    # The bug report showed a user with unipacker already installed getting
+    # told to "pip install unipacker" again, with no mention of the real
+    # cause. The hint must name the actual fix (the extra, and the
+    # setuptools/pkg_resources workaround) instead of repeating that.
+    assert "unipacker]" in _unipacker_shared.UNIPACKER_INSTALL_HINT
+    assert "setuptools" in _unipacker_shared.UNIPACKER_INSTALL_HINT
+
+```
