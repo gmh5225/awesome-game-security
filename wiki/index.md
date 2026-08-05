@@ -1097,6 +1097,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vermagic](entities/vermagic.md) — change Linux LKM vermagic / CRCs (cheat / RE tools)
 - [vmlinux-to-elf](entities/vmlinux-to-elf.md) — raw Linux kernel images → ELF with kallsyms (IDA/Ghidra RE)
 - [VMAware](entities/vmaware.md) — cross-platform header-only C++ VM detection (100+ techniques; CPUID/artifacts/timing/fingerprints; confidence scores; Detection:Virtual Environments)
+- [VmwareHardenedLoader](entities/vmware-hardened-loader.md) — VMware anti-detection hardening (CPUID/SMBIOS/ACPI/registry/MAC spoof; hypervisor-level C/C++ loader; Windows + Linux guests)
 - [vmdevirt-vtil](entities/vmdevirt-vtil.md) — broken VTIL VMP devirt demo (Fix VMP / IDA jmp-around-vmenter)
 - [vmtrace](entities/vmtrace.md) — WHP C++ trap-driven guest execution (host-backed memory, page traps, CPUID/syscall intercept, single-step VM exits; asmjit)
 - [VMDragonSlayer](entities/vmdragonslayer.md) — VM detection/analysis framework (DTT / SE / ML; Cheat RE Tools)
