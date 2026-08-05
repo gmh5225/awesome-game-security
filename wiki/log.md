@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:hfiref0x/WubbabooMark`: entity [[wubbaboomark]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
 - **2026-08-05** — ingest `description:hiatus/adbg`: entity [[adbg]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-08-05** — ingest `description:hid3rx/PEPacker`: entity [[pepacker]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].

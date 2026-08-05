@@ -1168,6 +1168,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [windows-subsystem-linux](entities/windows-subsystem-linux.md) — WSL Linux kernel source tree (full layout; WSL research hosts)
 - [WSL](entities/wsl.md) — official Microsoft WSL stack (wsl.exe, Lxss Manager, DrvFS, GNS, init/VM infra; WSL lane)
 - [WSL2 Linux Kernel](entities/wsl2-linux-kernel.md) — official Microsoft WSL2 utility-VM Linux kernel source (arch/drivers/fs; WSL lane)
+- [WubbabooMark](entities/wubbaboomark.md) — debugger-use / anti-anti-debug trace detector (Ghidra/IDA/OllyDbg/x32dbg/x64dbg/WinDbg; Anti Debugging)
 
 - [win11_apk_installer](entities/win11-apk-installer.md) — Win11 APK installer (Python; WSA / Android-on-Windows)
 - [winbo](entities/winbo.md) — overlay hijack detect via dxgkrnl ETW Present + GDI table (Detection:Overlay)
