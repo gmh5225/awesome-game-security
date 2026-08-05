@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:hasherezade/pe-sieve`: entity [[pe-sieve]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked from [[xmalhunter]].
+
 - **2026-08-05** — ingest `description:hasherezade/thread_namecalling`: entity [[thread-namecalling]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]].
 
 - **2026-08-05** — ingest `description:heeeyaaaa/vmem-decrypt`: entity [[vmem-decrypt]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
