@@ -256,6 +256,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Darken Anti-Cheat](entities/darken-anticheat.md) — kernel AC PoC (driver comm / integrity / sigscan / debugger / overlay; C/C++)
 - [Dark Souls III Cheat Engine Guide](entities/dark-souls-iii-cheat-engine-guide.md) — The Grand Archives DS3 Cheat Engine table guide (cheat / game:dark souls [Cheat Engine])
 - [darksword-kexploit-fun](entities/darksword-kexploit-fun.md) — DarkSword kernel r/w playground (iOS 17.0–26.0.1; sandbox/SSV/PAC; ObjC/C)
+- [dayu](entities/dayu.md) — Open/HarmonyOS `.abc` parser and decompiler (mobile RE; maintenance not guaranteed)
 
 - [DayZzz](entities/dayzzz.md) — DayZ cheat/modding: SDK generation + overlays (C/C++)
 - [D3D12Renderer](entities/d3d12renderer.md) — DX12 renderer sample (raytracing / mesh shaders; DirectX / guide)

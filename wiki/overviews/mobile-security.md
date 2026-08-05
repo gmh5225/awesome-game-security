@@ -20,6 +20,7 @@ sources:
   - wiki/sources/descriptions/zboralski__unflutter.md
   - wiki/sources/descriptions/yukiarrr__Il2cppSpy.md
   - wiki/sources/descriptions/jd-opensource__arkdecompiler.md
+  - wiki/sources/descriptions/hx1997__dayu.md
   - wiki/sources/descriptions/xxzzddxzd__unitySpeedTools.md
   - wiki/sources/descriptions/oobbb__android-il2cpp-modspeed.md
   - wiki/sources/descriptions/ys1231__MoveCertificate.md
@@ -233,7 +234,7 @@ LKM / GKI `vendor_dlkm` patterns for process memory R/W, syscall hook, Binder IP
 
 ## HarmonyOS / OpenHarmony
 
-HarmonyOS NEXT apps compile ArkTS/ArkJS to `.abc` ArkCompiler bytecode—a separate RE surface from standard APK/DEX workflows. [[arkdecompiler]] parses that bytecode, reconstructs control flow, and emits readable JavaScript/TypeScript for mobile security researchers. OpenHarmony differs from Android in IPC/capability model—do not assume apktool/jadx workflows transfer directly. (source: wiki/sources/descriptions/jd-opensource__arkdecompiler.md)
+HarmonyOS NEXT apps compile ArkTS/ArkJS to `.abc` ArkCompiler bytecode—a separate RE surface from standard APK/DEX workflows. [[arkdecompiler]] parses that bytecode, reconstructs control flow, and emits readable JavaScript/TypeScript for mobile security researchers; [[dayu]] offers another Open/HarmonyOS `.abc` parser/decompiler (author disclaims maintenance/correctness guarantees). OpenHarmony differs from Android in IPC/capability model—do not assume apktool/jadx workflows transfer directly. (source: wiki/sources/descriptions/jd-opensource__arkdecompiler.md) (source: wiki/sources/descriptions/hx1997__dayu.md)
 
 Android virtual-container / Linux VE probes such as [[conbeerlib]] (cgroup / fs / env / hardware; Docker/LXC/K8s/WSL) sit in the same emulator·container detection lane. (source: wiki/sources/descriptions/su-vikas__conbeerlib.md) Classic Android emulator artifact checks via [[anti-emulator]] (QEMU props / build fingerprints / sensors / FS signatures; per-heuristic Java API) sit in the same Anti-Emulator lane. (source: wiki/sources/descriptions/strazzere__anti-emulator.md) Java/C++ Anti-Emulator plugin research via [[android-emulator-detection]] sits beside those VE probes. (source: wiki/sources/descriptions/reveny__Android-Emulator-Detection.md) Stealth Frida server repackaging (string/symbol/artifact hex-replace; rooted and rootless iOS installs) via [[fridare]] sits in the same anti-Frida / instrumentation lane. (source: wiki/sources/descriptions/suifei__fridare.md) Boot-auto-start Florida anti-detection `frida-server` modules such as [[florida-zygisk]] (Ylarod source patches; random port; KernelSU toggle) sit in that same persistent instrumentation lane. (source: wiki/sources/descriptions/thelok1s__florida-zygisk.md) Class/function-trace and return-value-modify helpers such as [[frida-android-hook]] (iOS-oriented scripts noted) sit in the cheat / Frida instrumentation lane. (source: wiki/sources/descriptions/noobpk__frida-android-hook.md)
 
