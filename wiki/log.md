@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:huangkaoya/redalert2`: entity [[redalert2]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
+
 - **2026-08-05** — ingest `description:huawei-mediatek-devs/android_kernel_huawei_mt6761`: entity [[android-kernel-huawei-mt6761]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-08-05** — ingest `description:hugsy/CFB`: entity [[cfb]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].

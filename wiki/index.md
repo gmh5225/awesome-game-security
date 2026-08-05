@@ -900,6 +900,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Recast Navigation](entities/recastnavigation.md) — Recast & Detour navmesh toolset (voxelize → pathfind/steer; Game Tools)
 - [ReClass.NET-DriverReader](entities/reclass-net-driverreader.md) — ReClass.NET plugin: kernel-driver mem vs RPM (AC-blocked structure recon; C#/C++)
 - [recompiler](entities/recompiler.md) — Xbox360→Windows executable porting (console emulator / Xbox RE)
+- [Red Alert 2 on Web](entities/redalert2.md) — RA2/YR RTS engine reimplementation (unit AI, buildings, resources, multiplayer, map rendering; Game Engine / source)
 - [Reborn](entities/reborn.md) — Rust Fortnite cheat framework (web server / SQLite / Discord bot; modular crates)
 - [ReGameDLL_CS](entities/regamedll-cs.md) — reversed CS1.6 server `mp.dll` (GoldSrc; plugin API; Game Engine / RE)
 - [RelocBonus](entities/relocbonus.md) — Attack Reloc (DEF CON 26; AC / Obfuscation Engine)
