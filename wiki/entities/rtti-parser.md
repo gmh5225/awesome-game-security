@@ -20,4 +20,4 @@ Scoped as RTTI recovery for IDA—not a full decompiler suite. Description notes
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[symless]] · [[ida-rust-demangler]] · [[dotniet]] · [[sark]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[pyclassinformer]] · [[ida-vtable-tools]] · [[symless]] · [[ida-rust-demangler]] · [[dotniet]] · [[sark]]
