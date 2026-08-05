@@ -5,7 +5,8 @@ topics: [dma-attack, reverse-engineering, game-hacking]
 sources:
   - wiki/sources/skills/dma-attack.md
   - wiki/sources/descriptions/ufrisk__pcileech-fpga.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/sercanarga__PCILeechGen.md
+updated: 2026-08-05
 confidence: high
 ---
 
@@ -29,7 +30,7 @@ Key modules: TLP source/sink (`pcileech_pcie_tlps128_bram_rdwr`), **shadow confi
 | 5 | Behavioral (ASPM, AER, latency jitter) | Very hard — statistical baselines |
 | 6 | Private randomized layouts | Requires attestation beyond bus signatures |
 
-Artix-7 (T35–T200) dominates consumer boards; BRAM/LUT budgets constrain how many behavioral subsystems fit without Zynq-class resources.
+Artix-7 (T35–T200) dominates consumer boards; BRAM/LUT budgets constrain how many behavioral subsystems fit without Zynq-class resources. Donor-cloning generators such as [[pcileechgen]] automate VFIO capture → SystemVerilog/COE → Vivado bitstreams (scan/check/build/validate; dynamic BAR, NVMe admin-queue, MMIO trace import) for many PCILeech-compatible boards. (source: wiki/sources/descriptions/sercanarga__PCILeechGen.md)
 
 ## Links
 
@@ -37,4 +38,4 @@ Artix-7 (T35–T200) dominates consumer boards; BRAM/LUT budgets constrain how m
 
 ## Related
 
-[[pcileech]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[fpga-dma-multi-tool]] · [[dma]] · [[iommu]] · [[overviews/dma-attack]] · [[overviews/reverse-engineering]]
+[[pcileech]] · [[pcileechgen]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[fpga-dma-multi-tool]] · [[dma]] · [[iommu]] · [[overviews/dma-attack]] · [[overviews/reverse-engineering]]
