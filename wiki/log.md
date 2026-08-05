@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:hfiref0x/KDU`: entity [[kdu]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
 - **2026-08-05** — ingest `readme:categories`: bumped Cheat ~2656 (was ~2655; Anti Cheat ~646 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed README map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-05** — ingest `description:hfiref0x/UPGDSED`: entity [[upgdsed]]; cited on [[patchguard]] and [[overviews/windows-kernel]].

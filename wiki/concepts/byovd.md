@@ -29,6 +29,7 @@ sources:
   - wiki/sources/descriptions/kkent030315__evil-mhyprot-cli.md
   - wiki/sources/descriptions/jsecurity101__MSFT_DriverBlockList.md
   - wiki/sources/descriptions/holi4m__gdrv-loader-v2.md
+  - wiki/sources/descriptions/hfiref0x__KDU.md
 updated: 2026-08-05
 confidence: high
 ---
@@ -85,7 +86,9 @@ Physical-memory mapping abuse via **`msIo64.sys`** such as [[ms-io-exploit]] sit
 
 Gigabyte **`gdrv.sys`** loader research such as [[gdrv-loader-v2]] (C/C++; driver development focused on the canonical Gigabyte vulnerable driver in the cheat / vulnerable-driver lane). (source: wiki/sources/descriptions/holi4m__gdrv-loader-v2.md)
 
+Multi-provider unsigned-driver mappers such as [[kdu]] (Kernel Driver Utility; hfiref0x; extensible vulnerable-driver providers across Intel/ASUS/MSI/Gigabyte families; automated DSE bypass, PE map, cleanup) sit in the canonical cheat / driver-mapper research lane. (source: wiki/sources/descriptions/hfiref0x__KDU.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader-v2]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader-v2]] · [[kdu]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
