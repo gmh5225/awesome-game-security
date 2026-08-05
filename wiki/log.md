@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:mytechnotalent/Embedded-Hacking`: refreshed [[embedded-hacking]] (IoT/hardware-hacking audience; ARM Thumb FP patcher); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]].
+
 - **2026-08-05** — ingest `description:horoni/android_imgui_menu`: entity [[android-imgui-menu]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]].
 
 - **2026-08-05** — ingest `description:horsicq/Nauz-File-Detector`: entity [[nauz-file-detector]]; cross-link from [[nfdx64dbg]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
