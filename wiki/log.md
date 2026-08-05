@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:talsec/Free-RASP-Flutter`: entity [[free-rasp-flutter]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
 - **2026-08-05** — ingest `readme:categories`: bumped Anti Cheat ~645 (was ~643) / Some Tricks ~114 (was ~113; Cheat ~2655 / Game Develop ~183 / Game Engine ~155 stable); refreshed README map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/windows-kernel]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-05** — ingest `description:horsicq/stringsx64dbg`: entity [[stringsx64dbg]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].

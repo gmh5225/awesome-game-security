@@ -398,6 +398,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [FreeDirect](entities/free-direct.md) — DX3 DirectDraw/DirectSound/DirectPlay subset on SDL3 (legacy 2D; DirectX Compatibility)
 - [Free-RASP-Capacitor](entities/free-rasp-capacitor.md) — Capacitor freeRASP plugin (Talsec; root/jailbreak/Frida/Shadow/tamper/integrity; Android+iOS)
+- [Free-RASP-Flutter](entities/free-rasp-flutter.md) — Flutter freeRASP plugin (Talsec; root/jailbreak/Frida/debugger/emulator/tamper; Android+iOS)
 - [Free-RASP-iOS](entities/free-rasp-ios.md) — Native iOS freeRASP SDK (Talsec; TalsecRuntime XCFramework; jailbreak/Frida/hook/simulator/tamper/signature; Swift SPM)
 - [Free-RASP-ReactNative](entities/free-rasp-reactnative.md) — React Native freeRASP plugin (Talsec; Magisk/KernelSU/Frida/tamper/integrity; Android+iOS)
 - [Free-RASP-Unity-POC](entities/free-rasp-unity-poc.md) — Unity freeRASP plugin (Talsec; root/jailbreak/Frida/tamper/integrity; Android+iOS)
