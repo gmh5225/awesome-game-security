@@ -43,6 +43,7 @@ sources:
   - wiki/sources/descriptions/milostosic__rprof.md
   - wiki/sources/descriptions/nowsprinting__UnityAutomatedQAExamples.md
   - wiki/sources/descriptions/leigest519__OpenGame.md
+  - wiki/sources/descriptions/htdt__godogen.md
   - wiki/sources/descriptions/nikaera__Unity-GameCI-Sample.md
   - wiki/sources/descriptions/ryanjon2040__UnrealNetworkProfiler.md
   - wiki/sources/descriptions/ryanjon2040__Unreal-Binary-Builder.md
@@ -282,7 +283,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **Unity MCP** — [[unity-mcp]] editor + C# scripting interaction; the justinpbarnett tree adds C#/Python shader/rendering MCP tooling (source: wiki/sources/descriptions/justinpbarnett__unity-mcp.md)
 - **Godot MCP** — [[better-godot-mcp]] scenes/GDScript control
 
-Also: [[unicli]], [[ai-command]] (ChatGPT in-editor; API key in `UserSettings/AICommandSettings.asset` — handle as a secret) (source: wiki/sources/descriptions/keijiro__AICommand.md), [[deepwiki-mcp]], [[interactive-feedback-mcp]]. MCP safety auditing such as [[mcp-safety-scanner]] (agent-driven config audit + remediation; example MCP configs in-repo) sits in the Game Develop → MCP server security lane beside these bridges. (source: wiki/sources/descriptions/johnhalloran321__mcpSafetyScanner.md) Agentic web-game coding stacks such as [[opengame]] (qwen-code CLI; Game Skill + GameCoder-27B + OpenGame-Bench; agent-driven QA / protocol seed evolution) extend the Game Develop → AI Agents lane beyond editor MCP bridges. (source: wiki/sources/skills/game-engine.md) (source: wiki/sources/descriptions/leigest519__OpenGame.md)
+Also: [[unicli]], [[ai-command]] (ChatGPT in-editor; API key in `UserSettings/AICommandSettings.asset` — handle as a secret) (source: wiki/sources/descriptions/keijiro__AICommand.md), [[deepwiki-mcp]], [[interactive-feedback-mcp]]. MCP safety auditing such as [[mcp-safety-scanner]] (agent-driven config audit + remediation; example MCP configs in-repo) sits in the Game Develop → MCP server security lane beside these bridges. (source: wiki/sources/descriptions/johnhalloran321__mcpSafetyScanner.md) Agentic web-game coding stacks such as [[opengame]] (qwen-code CLI; Game Skill + GameCoder-27B + OpenGame-Bench; agent-driven QA / protocol seed evolution) extend the Game Develop → AI Agents lane beyond editor MCP bridges. (source: wiki/sources/skills/game-engine.md) (source: wiki/sources/descriptions/leigest519__OpenGame.md) Multi-engine autonomous authoring such as [[godogen]] (Godot/Bevy/Babylon.js; feature planning, asset generation, screenshot-guided self-repair with Claude Code and Codex) extends that lane along the engine axis. (source: wiki/sources/descriptions/htdt__godogen.md)
 
 ## Security-relevant surfaces
 

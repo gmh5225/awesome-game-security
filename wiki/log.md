@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:htdt/godogen`: entity [[godogen]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
 - **2026-08-05** — ingest `description:hualuoo/palworld-helper`: entity [[palworld-helper]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-08-05** — ingest `description:huangkaoya/redalert2`: entity [[redalert2]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
