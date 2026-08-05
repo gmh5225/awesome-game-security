@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:hiatus/adbg`: entity [[adbg]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
 - **2026-08-05** — ingest `description:hid3rx/PEPacker`: entity [[pepacker]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-08-05** — ingest `readme:categories`: bumped Anti Cheat ~646 (was ~645; Cheat ~2655 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed README map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
