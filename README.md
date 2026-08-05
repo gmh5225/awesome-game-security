@@ -842,6 +842,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/cocomelonc/pawtrace [Linux x86-64 ptrace syscall tracer; decodes args, socket addresses, W^X memory, /proc/maps snapshots, JSONL output; C + assembly]
 - https://github.com/g2wfw/qbdi-tracer-android [Android assembly instruction tracing tool]
 - https://github.com/un4ckn0wl3z/MemMCP [Cheat Engine-like but MCP]
+- https://github.com/WRXinYue/STS2-KitLib [Slay the Spire 2 in-game mod dev toolkit with dev rail, cheat presets, Harmony analysis, hooks, and MCP bridge]
 - https://github.com/LLeavesG/eBPFDexDumper [DexDumper based eBPF on Android Platform]
 - https://github.com/un4ckn0wl3z/dioprocess-private [Advanced Windows Internals, Evasion, Rootkit, Hypervisor, SMM & Bootkit Research Framework]
 
