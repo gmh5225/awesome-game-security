@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:holi4m/gdrv-loader-v2`: entity [[gdrv-loader-v2]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
 - **2026-08-05** — ingest `description:hooksteroid/ApexD3D_External`: entity [[apexd3d-external]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
 
 - **2026-08-05** — ingest `description:hooksteroid/R6Table_Internal`: entity [[r6table-internal]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
