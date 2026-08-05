@@ -97,6 +97,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Android-Emulator-Detection](entities/android-emulator-detection.md) — Android Anti-Emulator (Java/C++; Detection:Virtual Environments)
 - [android-emulator](entities/android-emulator.md) — Android emulator (emulation focus; mobile-platform / emulator research)
 - [Android-Library-Remap-Hide](entities/android-library-remap-hide.md) — Android lib remap-hide (two-lib; cheat / hide)
+- [android-imgui-menu](entities/android-imgui-menu.md) — Rust ARM64 Android ImGui cdylib (EGL/Vulkan hooks; cheat / render-draw)
 - [android-native-app-imgui](entities/android-native-app-imgui.md) — Android ImGui native app (Java/C++; cheat / render-draw)
 - [Android-Native-Root-Detector](entities/android-native-root-detector.md) — Kotlin Android root detector (Detection:Android root)
 - [Android-Native-Import-Hide](entities/android-native-import-hide.md) — ELF import hide/retrieve lib (C++; AC Compile Time)
