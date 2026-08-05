@@ -222,6 +222,7 @@ sources:
   - wiki/sources/descriptions/horsicq__x64dbg-Plugin-Manager.md
   - wiki/sources/descriptions/horsicq__stringsx64dbg.md
   - wiki/sources/descriptions/horsicq__nfdx64dbg.md
+  - wiki/sources/descriptions/horsicq__Nauz-File-Detector.md
   - wiki/sources/descriptions/horsicq__XVolkolak.md
   - wiki/sources/descriptions/morsisko__xFindOut.md
   - wiki/sources/descriptions/mgeeky__ThreadStackSpoofer.md
@@ -688,6 +689,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - x64dbg plugin install/management via [[x64dbg-plugin-manager]] (C++/C; plugin development / modding; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/horsicq__x64dbg-Plugin-Manager.md)
 - In-process string search/browse via [[stringsx64dbg]] (C++/Qt x64dbg plugin; dedicated SearchStringsWidget tab; 32/64-bit; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/horsicq__stringsx64dbg.md)
 - In-debugger static compiler/packer/protector identification via [[nfdx64dbg]] (Nauz File Detector / NFD tab; C++/Qt x64dbg plugin; 32/64-bit; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/horsicq__nfdx64dbg.md)
+- Standalone signature-based linker/compiler/packer/protector triage via [[nauz-file-detector]] (NFD; PE/ELF/Mach-O+; C++/Qt GUI+CLI; horsicq; Cheat Linker/Compiler/Tool detector lane) (source: wiki/sources/descriptions/horsicq__Nauz-File-Detector.md)
 - Static-library function identification via [[idenlib]] (IDA plugin; VC++/STL signature DB on stripped PEs) and [[idenlibx]] (x64dbg port; signature scan of loaded modules → live name apply) sits in the Cheat Library Function Identification / IDA & x64dbg Plugins lane. (source: wiki/sources/descriptions/secrary__idenLib.md) (source: wiki/sources/descriptions/secrary__idenLibX.md) Linux FLIRT packs such as [[sig-database]] (OpenSSL/system libs across Ubuntu releases; amd64/i386) extend the same library-ID lane for Linux binaries. (source: wiki/sources/descriptions/push0ebp__sig-database.md)
 
 - IDA Plugins such as [[xrefsext]] (extended xrefs), [[ida-plugins]] (register cross-references; vs Oregami value-use filtering), [[ida-jm-xorstr-decrypt-plugin]] (JM Xorstr decrypt on some x64 binaries), [[anti-xorstr]] (anti Xorstr; Python), and [[pikabot-deobfuscator]] (Pikabot RC4/AES string decrypt from Hex-Rays) support cheat-side static RE workflows. (source: wiki/sources/descriptions/zengfr__XrefsExt.md) (source: wiki/sources/descriptions/repnz__ida-plugins.md) (source: wiki/sources/descriptions/yubie-re__ida-jm-xorstr-decrypt-plugin.md) (source: wiki/sources/descriptions/lstaroth__AntiXorstr.md) (source: wiki/sources/descriptions/threatlabz__pikabot-deobfuscator.md)

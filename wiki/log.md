@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:horsicq/Nauz-File-Detector`: entity [[nauz-file-detector]]; cross-link from [[nfdx64dbg]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-05** — ingest `description:horsicq/XVolkolak`: entity [[xvolkolak]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-05** — ingest `description:horsicq/nfdx64dbg`: entity [[nfdx64dbg]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].
