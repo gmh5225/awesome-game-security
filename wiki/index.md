@@ -992,6 +992,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [steam-overlay-x64](entities/steam-overlay-x64.md) — Steam overlay / modding research (C; memory analysis)
 - [Storm Engine](entities/storm-engine.md) — Akella Sea Dogs/PotC C++ engine (DX9 / physics / scripting; Game Engine source)
 - [Storytime](entities/storytime.md) — MapleStory remake (branching dialogue / quest progression / interactive storytelling; Game Develop / source)
+- [Strings x64dbg](entities/stringsx64dbg.md) — x64dbg plugin: dedicated string search/browse tab (C++/Qt; SearchStringsWidget; Cheat x64dbg Plugins)
 - [Stride](entities/stride.md) — open-source C# 3D engine (formerly Xenko; PBR / Vulkan+D3D+GL; Game Engine)
 - [STP](entities/stp.md) — Simple Theorem Prover (bitvector/array SMT; MiniSat/CryptoMiniSat; MBA lane)
 - [SuperSplat](entities/supersplat.md) — PlayCanvas web 3D Gaussian Splat editor (PLY/splat export; 3D Graphics / AI splat)
