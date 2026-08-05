@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-05** — ingest `description:hugsy/CFB`: entity [[cfb]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
 - **2026-08-05** — ingest `description:huntandhackett/process-cloning`: entity [[process-cloning]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-08-05** — ingest `description:huoji120/Etw-Syscall`: entity [[etw-syscall]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
