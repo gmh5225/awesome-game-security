@@ -799,6 +799,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Paksmith](entities/paksmith.md) — Rust UE pak/UAsset explorer (FModel rewrite; pak v3–v11; Game Assets)
 - [PalWorldAntiCheat](entities/palworld-anti-cheat.md) — Palworld UE5 AC research (C#; shader/render/audio; Anti Cheat)
 - [PalworldModdingKit](entities/palworld-modding-kit.md) — Palworld UE5 modding kit (cheat / game:palworld [UE5])
+- [palworld-helper](entities/palworld-helper.md) — Palworld UE5 Python helper (modding; cheat / game:palworld [UE5])
 - [palworld-rcon](entities/palworld-rcon.md) — Palworld dedicated server RCON client (Source RCON; Server on Windows)
 - [PalworldSaved](entities/palworldsaved.md) — Palworld UE5 save/editor tooling (cheat / game:palworld [Save])
 - [PaintFE](entities/paintfe.md) — Rust raster image editor (wgpu GPU filters, Rhai scripting, CLI batch, GIF/APNG; Image Codec)
