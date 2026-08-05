@@ -836,6 +836,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pdb-rs](entities/pdb-rs.md) — Microsoft Rust PDB reader/writer (MSF/CodeView DBI/TPI/IPI; x86/AMD64/ARM64; RE / debugger symbols)
 - [pdblister](entities/pdblister.md) — Rust PDB manifest CLI (PE CodeView GUID/age scan; symchk /om alternative; Symbol Server batch download)
 - [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)
+- [PEPacker](entities/pepacker.md) — C++ PE X64 packer (asset pipeline; Anti Cheat → Binary Packer `[PE X64]`)
 - [peetch](entities/peetch.md) — eBPF dump/tls/proxy (PID sniff + OpenSSL keys; PCAPng; cheat / android kernel explorer)
 - [pesign](entities/pesign.md) — Linux UEFI Secure Boot PE-COFF Authenticode/PKCS#7 sign/verify (NSS)
 - [PESignAnalyzer](entities/pesign-analyzer.md) — Windows PE embedded Authenticode signature metadata extractor (Anti Cheat → Sign Tools)
