@@ -3988,6 +3988,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Sample Unpacker
 - https://github.com/hasherezade/mal_unpack_drv
 - https://github.com/horsicq/XVolkolak [Qt/CLI PE unpacker-emulator using XEmulUnpacker to single-step packer stubs to OEP; UPX, ASPack, MPRESS, and 18+ other packers]
+- https://github.com/anpa1200/Unpacker [Modular PE/ELF packer detection and unpacking pipeline for UPX, ASPack, Themida, and VMProtect]
 - https://github.com/strazzere/android-unpacker [Android]
 
 > Dump Fix
@@ -4412,6 +4413,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/talsec/Free-RASP-ReactNative [React Native freeRASP plugin for root/jailbreak, Frida, tamper, and integrity detection]
 - https://github.com/rajssinde/rs-native-kit-security [React Native Nitro Modules RASP SDK for root/jailbreak, Frida/Xposed hook, tamper/integrity, VPN/proxy, and device risk scoring]
 - https://github.com/talsec/Free-RASP-Capacitor [Capacitor freeRASP plugin for mobile root/jailbreak, Frida, tamper, and integrity detection]
+- https://github.com/talsec/Free-RASP-Flutter [Flutter freeRASP plugin for mobile root/jailbreak, Frida, hook, emulator, tamper, and integrity detection]
 - https://github.com/talsec/Free-RASP-iOS [Native iOS freeRASP SDK for jailbreak, Frida, hook, emulator, tamper, and repackaging detection]
 - https://github.com/AfanasievN/react-native-device-risk-signals [React Native device-intel TurboModule: root/jailbreak, emulator, Frida, and tamper signals without vendor backend]
 - https://github.com/Binuka97/cordova-plugin-rootguard [Cordova plugin detecting Android root (Magisk/KernelSU/APatch), Frida, and iOS jailbreak/Frida]
@@ -4682,6 +4684,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Linux
 - https://github.com/MatheuZSecurity/RingReaper [Linux post-exploitation agent that uses io_uring to stealthily bypass EDR detection by avoiding traditional syscalls]
 - https://github.com/boratanrikulu/gecit [DPI bypass research tool: fake TLS ClientHello desync + built-in DoH; eBPF sock_ops on Linux, TUN proxy on macOS/Windows]
+- https://github.com/gigbh/d-process [Lightweight Linux tool to spawn decoy processes with arbitrary names to evade process-based anti-cheat and tracker checks]
 
 > Android
 - https://github.com/WindySha/bypassHiddenApiRestriction [Bypass hidden api restriction]
