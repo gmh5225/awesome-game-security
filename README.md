@@ -8,6 +8,14 @@ Or you can send an issue for me.
 ```
 > Show respect to all the projects below, perfect works of art :saluting_face:
 
+## NeverC & NeverD — Your Compiler & Decoder for the AI Era
+
+As AI agents increasingly write, analyze, and rewrite low-level code, generic toolchains become a bottleneck. Security researchers need semantics they can trust — deterministic compilation on the way in, and faithful decompilation on the way out. **In the age of AI, everyone needs their own compiler and their own decoder.**
+
+- **[NeverC](https://github.com/NeverSight/NeverC)** — The AI-friendly C23 compiler for security research. Pure C23, integrated linker, DynCode pipeline, cross-platform PE/ELF/Mach-O generation, compile-time string encryption, and a plugin API spanning 130+ compiler phases — designed so LLM-generated code compiles correctly more often than C++ alternatives.
+- **[NeverD](https://github.com/NeverSight/NeverD)** — The AI-friendly binary analysis & decompilation engine with 1:1 instruction-level lifting. PE/ELF/Mach-O support, strict semantic fidelity, structured C and LLVM IR output, binary rewrite, and a pure C SDK (`libneverd`) built for CLI tools, integrators, and AI agents.
+
+Compile with **NeverC**, analyze and decompile with **NeverD** — an AI-friendly LLVM toolchain you control, built for security research.
 
 ## How to contribute?
 - https://github.com/HyunCafe/contribute-practice
