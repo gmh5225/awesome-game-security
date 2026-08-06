@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-06** — ingest `readme:categories`: verified 41 sections (`NeverC & NeverD` placeholder; Cheat ~2656 / Anti Cheat ~646 stable); bumped Vulkan ~11 (was ~10; vocem Linux implicit-layer overlay); refreshed [[overviews/overview]], [[overviews/graphics-api]], light `index.md` section notes (no per-category pages).
+
 - **2026-08-06** — ingest `description:guidedhacking/GH_AntiDebug_Bypass_Practice_Tool`: entity [[gh-anti-debug-bypass-practice-tool]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-06** — ingest `description:guidoreina/minivers`: entity [[minivers]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
