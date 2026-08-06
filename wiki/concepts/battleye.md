@@ -17,7 +17,8 @@ sources:
   - wiki/sources/descriptions/masterpastaa__BattlEye-Handler-BYPASS.md
   - wiki/sources/descriptions/lguilhermee__Battleye-Shellcode-Dumper.md
   - wiki/sources/descriptions/huoji120__goodeye.md
-updated: 2026-08-05
+  - wiki/sources/descriptions/haram__splendid_implanter.md
+updated: 2026-08-06
 confidence: medium
 ---
 
@@ -55,6 +56,8 @@ Handle-stripping bypass via periodic handle re-creation is implemented in [[batt
 
 BEDaisy APC instrumentation is studied via [[goodeye]]: a kernel callback runs in each thread where the BE driver registers an APC, exposing BE’s kernel APC inspection surface for RE. (source: wiki/sources/descriptions/huoji120__goodeye.md)
 
+User-mode-only injection against BE-protected processes is demonstrated by [[splendid-implanter]] (secret.club): a Ring-3 injector that abuses a flaw in BattlEye's user-mode component to achieve BE-compatible DLL injection without a kernel driver. (source: wiki/sources/descriptions/haram__splendid_implanter.md)
+
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[arma3beclient]] · [[r6-external]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[arma3beclient]] · [[r6-external]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]

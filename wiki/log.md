@@ -2591,3 +2591,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-05** — ingest `description:hiitiger/goverlay`: entity [[goverlay]]; cited on [[present-hook]] and [[overviews/graphics-api]].
 
 - **2026-08-05** — ingest `description:helloobaby/Nmi-Callback`: entity [[nmi-callback]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-08-06** — ingest `description:haram/splendid_implanter`: entity [[splendid-implanter]]; cited on [[battleye]] and [[overviews/anti-cheat]].
