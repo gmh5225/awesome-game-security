@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-06** — ingest `description:hackerhouse-opensource/SignToolEx`: entity [[signtoolex]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
 - **2026-08-06** — ingest `description:hacksysteam/HackSysExtremeVulnerableDriver`: entity [[hacksysextremevulnerabledriver]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-06** — ingest `readme:categories`: README map 41 sections (was 40; new empty `NeverC & NeverD` heading); counts stable (Cheat ~2656 / Anti Cheat ~646 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155); refreshed [[overviews/overview]] + light `index.md` section notes (no per-category pages).
