@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-06** — ingest `description:guided-hacking/GH_D3D11_Hook`: entity [[gh-d3d11-hook]]; cited on [[overviews/graphics-api]] and [[present-hook]].
+
 - **2026-08-06** — ingest `readme:categories`: verified 41 sections (`NeverC & NeverD` placeholder; Cheat ~2656 / Anti Cheat ~646 stable); bumped Vulkan ~11 (was ~10; vocem Linux implicit-layer overlay); refreshed [[overviews/overview]], [[overviews/graphics-api]], light `index.md` section notes (no per-category pages).
 
 - **2026-08-06** — ingest `description:guided-hacking/GuidedHacking-Injector`: entity [[guided-hacking-injector]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
