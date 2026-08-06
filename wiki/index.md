@@ -340,6 +340,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dwmhook](entities/dwmhook.md) — DWM DX11 vtable ImGui overlay framework (reflective inject; MinHook/PolyHook2; PDB/DIA; `[DWM VFTable]`)
 - [dwm-screen-shot](entities/dwm-screen-shot.md) — DWM screenshot / AC research (C++; anti-cheat engineers; README `[DWM]`)
 - [DroidShield](entities/droidshield.md) — Android RASP SDK (root/debugger/Frida-Xposed/emulator/tamper; polymorphic checks)
+- [DumpIt-mirror](entities/dumpit-mirror.md) — Comae DumpIt mirror; one-click Windows live physical RAM capture (raw / crash dump; Volatility / WinDbg)
 - [DX11-BaseHook](entities/dx11-basehook.md) — minimal DX11 Present trampoline + ImGui overlay base (C++; DirectX Hook)
 
 - [dxgkrnl_hook](entities/dxgkrnl-hook.md) — dxgkrnl screen-buffer hook (kernel overlay / render-draw)
