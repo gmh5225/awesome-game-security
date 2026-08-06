@@ -719,6 +719,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Hook
 - https://github.com/Rebzzel/kiero [X86/64 Windows]
 - https://github.com/kirchesz/kiero2 [kiero v2 — locate Vulkan/D3D/OpenGL API method addresses at runtime; BYO hooking; Win/Linux/macOS]
+- https://github.com/ales-drnz/vocem-overlay [Linux in-game overlay via Vulkan implicit layer and OpenGL interposer]
 - https://github.com/bruhmoment21/UniversalHookX [X86/64 Windows]
 - https://github.com/gmh5225/Vulkan-Hook [X86/64 Windows]
 - https://github.com/Sh0ckFR/Universal-Dear-ImGui-Hook
