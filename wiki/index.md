@@ -6,7 +6,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Overviews
 
-- [Overview](overviews/overview.md) — project map; compiled-wiki + research-rigor layers; 40 README sections → skill topics (Cheat ~2656 / Anti Cheat ~646; Game Engine ~155 + Mathematics ~7 / Renderer ~17 ReShade; DirectX ~37 shader inject/flatten / OpenGL ~3 / Vulkan ~10 kiero2; Game Develop ~183 MCP/security; Game Network ~26; console Switch~7/Xbox~8/PS~7 BD-UN-JB+PSFree-Enhanced / 3DS~3 3Beans LLE+Luma / GC·Wii~1 gecko / Game Boy ~3)
+- [Overview](overviews/overview.md) — project map; compiled-wiki + research-rigor layers; 41 README sections (NeverC & NeverD placeholder) → skill topics (Cheat ~2656 / Anti Cheat ~646; Game Engine ~155 + Mathematics ~7 / Renderer ~17 ReShade; DirectX ~37 shader inject/flatten / OpenGL ~3 / Vulkan ~10 kiero2; Game Develop ~183 MCP/security; Game Network ~26; console Switch~7/Xbox~8/PS~7 BD-UN-JB+PSFree-Enhanced / 3DS~3 3Beans LLE+Luma / GC·Wii~1 gecko / Game Boy ~3)
 - [Anti-Cheat](overviews/anti-cheat.md) — layered AC; detection methodology + [[kernel-pool-scanning]] / [[ai-aimbot-detection]]; Detection:* (triggerbot & aimbot/wallhack) + Screenshot + page/CLR protection (~646); hybrid CS2 judge/honeypot proposals + Minecraft anticheat catalog + AC research index; Game Testing uptime signals; Game Tools RCE + Windows Emulator KDemu AC
 - [DMA Attack](overviews/dma-attack.md) — PCIe DMA threat model (cheat PC + FPGA + HID); three defense layers; firmware tiers 0–6; layered detection + TPM attestation; Cheat (~2656) / Detection:DMA (~646) + WSF PCR
 - [Game Engine](overviews/game-engine.md) — Unreal / Unity / Source SDK workflows + [[unreal-object-model]] / [[unreal-engine-guide]] / [[il2cpp]] / [[source-netvars]]; Godot / Lumix (~155); Unity script/plugin catalogs ([[unity-script-collection]]); MCP + AI gamedev (~183); Game Network ~26; Game Assets ~11 (paksmith + YAML→GLB/sprite pipelines); Image Codec ~5 ([[paintfe]] wgpu/Rhai); Game CI ~3 (Epic lore VCS)
@@ -1256,6 +1256,6 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Sources
 
-- Projected category map: `sources/README-categories.md` (generated on scan; 40 top-level sections; Game Engine ~155 / Renderer ~17 / Cheat ~2656 / Anti Cheat ~646 / DirectX ~37 shader inject+flatten / Vulkan ~10 kiero2 / Game Develop ~183 / Game Network ~26 / Game CI ~3 Epic lore / Image Codec ~5 [[paintfe]] / Xbox ~8 / PlayStation ~7 / Nintendo 3DS ~3 3Beans LLE / GameCube/Wii ~1 gecko)
+- Projected category map: `sources/README-categories.md` (generated on scan; 41 top-level sections; NeverC & NeverD placeholder; Game Engine ~155 / Renderer ~17 / Cheat ~2656 / Anti Cheat ~646 / DirectX ~37 shader inject+flatten / Vulkan ~10 kiero2 / Game Develop ~183 / Game Network ~26 / Game CI ~3 Epic lore / Image Codec ~5 [[paintfe]] / Xbox ~8 / PlayStation ~7 / Nintendo 3DS ~3 3Beans LLE / GameCube/Wii ~1 gecko)
 - Skill projections: `sources/skills/`
 - Description projections: `sources/descriptions/` (incremental only)
