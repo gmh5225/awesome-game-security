@@ -673,6 +673,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Lua-Obfuscator-Clyde-Protection](entities/lua-obfuscator-clyde-protection.md) — Luau/Lua VM obfuscator (AST + stack/register VM; Roblox script protection)
 - [m0dern_p4cker](entities/m0dern-p4cker.md) — C/C++ ELF binary packer (`[ELF]`; Anti Cheat → Binary Packer)
 - [macroquad](entities/macroquad.md) — Rust 2D game lib (shaders / render / audio; Game Engine / source)
+- [magicmida-rs](entities/magicmida-rs.md) — Rust Themida automatic unpacker (Win32 Debug API; OEP + IAT rebuild; ScyllaHide; Fix Themida)
 - [MagicSigner](entities/magic-signer.md) — sign with leaked certs (admin; TLS side effects; AC sign tools)
 - [Magnetite](entities/magnetite.md) — Rust self-hostable Wasm game platform (deterministic replay AC / magnetite-anticheat)
 - [Magisk](entities/magisk.md) — Android systemless root (su daemon / modules / DenyList·Shamiko / Zygisk)

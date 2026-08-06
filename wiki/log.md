@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-06** — ingest `description:guoxing2024/magicmida-rs`: entity [[magicmida-rs]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-06** — ingest `description:gupr0x4/HWID-Spoofer-for-Fortnite-and-Valorant`: entity [[hwid-spoofer-for-fortnite-and-valorant]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-08-06** — ingest `description:guttir14/UnrealDumper-4.25`: entity [[unrealdumper-4-25]]; cited on [[unreal-object-model]] and [[overviews/game-engine]].
