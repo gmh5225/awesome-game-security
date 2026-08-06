@@ -7,7 +7,8 @@ sources:
   - wiki/sources/skills/windows-kernel.md
   - wiki/sources/descriptions/kernullist__kn-diff-pool.md
   - wiki/sources/descriptions/ioncodes__pooldump.md
-updated: 2026-08-04
+  - wiki/sources/descriptions/hLunaaa__hLunaaa.github.io.md
+updated: 2026-08-06
 confidence: high
 ---
 
@@ -48,6 +49,8 @@ Complementary to pool walks, anti-cheat inspects kernel bookkeeping tables for h
 | **PiDDBCacheTable** | Historical driver load hashes + timestamps; detects BYOVD or test-signed loads; attackers may try post-load entry removal |
 | **MmUnloadedDrivers** | Circular buffer of recently unloaded drivers (name + address range); not user-clearable; flags load-unload-reload patterns |
 | **PoolBigPageTable** | Maps large (≥ page) pool allocations to owning driver tag; finds manual-map memory without a loaded module |
+
+Offensive **driver trace cleaning** research such as [[hlunaaa-github-io]] documents **CI.dll** and **BigPool cache** artifacts targeted when hiding manual-map / BYOVD loads from PiDDBCache and pool-walk scanners — the hide side of the same forensics table. (source: wiki/sources/descriptions/hLunaaa__hLunaaa.github.io.md)
 
 **Pool tag forensics:** every `ExAllocatePoolWithTag` / `ExAllocatePool2` allocation carries a 4-byte tag — scan for known cheat-driver signatures via `pooltag.txt`, PoolMon, or WinDbg `!poolfind`. Tags present in pool but absent from any loaded module are suspicious.
 
