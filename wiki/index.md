@@ -444,6 +444,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GhidrAssist](entities/ghidrassist.md) — Ghidra LLM extension (OpenAI v1-compatible APIs; local/cloud; cheat / Ghidra Plugins)
 - [ghidrassist-mcp](entities/ghidrassist-mcp.md) — Ghidra MCP extension (AI assistants / automation / scripts → Ghidra analysis APIs)
 - [ghidra-svr-bridge](entities/ghidra-svr-bridge.md) — BN ↔ Ghidra Server bidirectional sync (symbols/comments/types; Java bridge + Qt6 sidebar)
+- [GH AntiDebug Bypass Practice Tool](entities/gh-anti-debug-bypass-practice-tool.md) — Win32 ImGui/DX11 anti-debug bypass training lab (toggle checks → DETECTED; Anti Debugging)
 - [gdb-mcp](entities/gdb-mcp.md) — lightweight GDB MCP (FastMCP + SSE; gdb-command proxy; breakpoints / memory / step)
 - [gdbserver9x](entities/gdbserver9x.md) — GDB RSP stub for 32-bit Win98SE/XP (VC6; Binary Ninja adapter)
 - [gdrv-loader-v2](entities/gdrv-loader-v2.md) — Gigabyte `gdrv.sys` loader v2 (C/C++; cheat / vulnerable-driver driver development)

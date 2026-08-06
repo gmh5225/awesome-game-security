@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-06** — ingest `description:guidedhacking/GH_AntiDebug_Bypass_Practice_Tool`: entity [[gh-anti-debug-bypass-practice-tool]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-06** — ingest `description:guidoreina/minivers`: entity [[minivers]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-08-06** — ingest `description:guoxing2024/magicmida-rs`: entity [[magicmida-rs]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
