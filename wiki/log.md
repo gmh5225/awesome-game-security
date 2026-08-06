@@ -8,6 +8,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-06** — ingest `description:hadevn/apex_full_cheat`: entity [[apex-full-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
 
+- **2026-08-06** — ingest `description:hadevn/Valorant-SDK-2024`: entity [[valorant-sdk-2024]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
 - **2026-08-05** — ingest `description:harlamism/IdaClu`: entity [[idaclu]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked from [[idaplugins]].
 
 - **2026-08-05** — ingest `description:harukumo/HorizonEngine`: entity [[horizon-engine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].

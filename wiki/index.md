@@ -1129,6 +1129,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [val-exception-handler](entities/val-exception-handler.md) — Vanguard exception-dispatch PoC (hardware exceptions / VEH; ZwRaiseException dump)
 - [valorant-dumper](entities/valorant-dumper.md) — Valorant UE offset/SDK dumper (GObjects/GNames; Vanguard research)
 - [valorant-internal-cheat](entities/valorant-internal-cheat.md) — Valorant internal: UE SDK generation + hooking (C/C++; cheat / game:valorant [Internal])
+- [Valorant-SDK-2024](entities/valorant-sdk-2024.md) — Valorant SDK: shader / rendering / audio systems (C/C++; cheat / game:valorant [SDK])
 - [VALORANT-FNamePool](entities/valorant-fnamepool.md) — iterate/decrypt Valorant FNamePool->Entries (C/C++; cheat / game:valorant)
 - [ValorantCC](entities/valorantcc.md) — Valorant crosshair setting (cheat / game:valorant)
 - [Van1338](entities/van1338.md) — timing-attack handle elevation; Windows object-callback design (AC stress testing)

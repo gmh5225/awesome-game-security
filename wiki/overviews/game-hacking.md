@@ -319,6 +319,7 @@ sources:
   - wiki/sources/descriptions/simply-codes__Fortnite-External-P2C.md
   - wiki/sources/descriptions/vctr74__R6-Internal-V3.md
   - wiki/sources/descriptions/hadevn__apex_full_cheat.md
+  - wiki/sources/descriptions/hadevn__Valorant-SDK-2024.md
   - wiki/sources/descriptions/hooksteroid__ApexD3D_External.md
   - wiki/sources/descriptions/hooksteroid__R6Table_Internal.md
   - wiki/sources/descriptions/hkx3upper__Karlann.md
@@ -878,6 +879,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Title-specific R6 chams samples such as [[r6-chams-public]] (Chameleon Models + visual check; educational; cheat / game:r6 [Chams]) illustrate the chams lane beside internals/externals. (source: wiki/sources/descriptions/igromanru__R6-Chams-public.md)
 - Valorant crosshair-setting utilities such as [[valorantcc]] sit in the cheat / game:valorant lane (client config; Riot-owned assets/endpoints). (source: wiki/sources/descriptions/weedeej__ValorantCC.md)
 - Valorant internal cheat bases such as [[valorant-internal-cheat]] (C/C++; Unreal Engine SDK generation + hooking; Internal tag) illustrate the in-process offensive research lane under [[vanguard]]. (source: wiki/sources/descriptions/kali11211__valorant-internal-cheat.md)
+- Valorant SDK research repos such as [[valorant-sdk-2024]] (C/C++; shader / rendering / audio systems; SDK tag) sit in the same cheat / game:valorant lane under [[vanguard]]. (source: wiki/sources/descriptions/hadevn__Valorant-SDK-2024.md)
 - Title-specific Thetan Arena SDKs such as [[thetan-arenasdk]] (rendering / audio / physics) illustrate the cheat / game:thetan lane. (source: wiki/sources/descriptions/xkp95175333__Thetan_ArenaSDK.md)
 - ASI Loader–based remaster bridges such as [[gta4-rtx]] (GTA IV Complete Edition → RTX Remix; custom runtime / light / wetness) illustrate DirectX compatibility tooling adjacent to graphics-mod research. (source: wiki/sources/descriptions/xoxor4d__gta4-rtx.md) DX3 subset reimplementations such as [[free-direct]] (C++20; DirectDraw/DirectSound/DirectPlay on SDL3 + ENet for legacy 2D titles) sit in the same DirectX Compatibility lane. (source: wiki/sources/descriptions/openeggbert__free-direct.md) Microsoft's [[d3d9on12]] (D3D9 usermode DDI mapped to D3D12 for legacy D3D9 on modern stacks) extends that lane for D3D9-era titles. (source: wiki/sources/descriptions/microsoft__D3D9On12.md)
 - Hidden-PVE / QEMU-KVM anti-detection (e.g. [[proxmox-ve-anti-detection]], [[qemu-anti-detection]] device-string spoof such as QEMU→ASUS keyboard, [[qemu-patched]] CPUID/SMBIOS/ACPI fingerprint masking) sits in the `Cheat > QEMU/KVM/PVE/VBOX` lane. (source: wiki/sources/descriptions/zhaodice__proxmox-ve-anti-detection.md) (source: wiki/sources/descriptions/zhaodice__qemu-anti-detection.md) (source: wiki/sources/descriptions/kila58__qemu-patched.md)
