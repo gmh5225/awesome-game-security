@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-06** — ingest `description:gtibo/Godot-Plush-Character`: entity [[godot-plush-character]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
+
 - **2026-08-06** — ingest `description:guheng-re/unflat`: entity [[unflat]]; cited on [[overviews/reverse-engineering]] and [[concepts/control-flow-flattening]].
 
 - **2026-08-06** — ingest `description:guided-hacking/GH-Entity-List-Finder`: entity [[gh-entity-list-finder]]; cited on [[overviews/game-hacking]] and [[concepts/source-netvars]].
