@@ -398,6 +398,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [frida-il2cpp-bridge](entities/frida-il2cpp-bridge.md) — Frida dump Il2Cpp (Unity 5.3–6000.1.x; game engine explorer:Unity)
 - [Frida-Scripts](entities/frida-scripts.md) — Frida JS/Python scripts (editor tooling / hooking; cheat / Frida)
 - [frida-stack](entities/frida-stack.md) — Frida stack/backtrace helpers (cheat / Frida)
+- [frida-watchpoint-tutorial](entities/frida-watchpoint-tutorial.md) — Frida `setHardwareWatchpoint` tutorial (hardware data breakpoints; cheat / Frida)
 - [frida_usb_dump](entities/frida-usb-dump.md) — Frida macOS USB traffic sniff/dump (Big Sur offsets; cheat / Frida)
 - [fridare](entities/fridare.md) — Frida repackaging / anti-detection (iOS+Android; string/symbol hex-replace)
 - [florida-zygisk](entities/florida-zygisk.md) — Magisk/KernelSU/APatch boot module; auto-starts Florida anti-detection frida-server
