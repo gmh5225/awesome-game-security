@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-06** — ingest `description:hackcatml/kfd-explorer`: entity [[kfd-explorer]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
 - **2026-08-06** — ingest `description:hackerhouse-opensource/SignToolEx`: entity [[signtoolex]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-08-06** — ingest `description:hacksysteam/HackSysExtremeVulnerableDriver`: entity [[hacksysextremevulnerabledriver]]; cited on [[byovd]] and [[overviews/windows-kernel]].
