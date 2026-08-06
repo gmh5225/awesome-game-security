@@ -291,6 +291,7 @@ sources:
   - wiki/sources/descriptions/kernullist__kn-live-dbg.md
   - wiki/sources/descriptions/irql__nokd.md
   - wiki/sources/descriptions/guoxing2024__magicmida-rs.md
+  - wiki/sources/descriptions/guheng-re__unflat.md
   - wiki/sources/descriptions/guidedhacking__GH_AntiDebug_Bypass_Practice_Tool.md
   - wiki/sources/descriptions/stuxnet147__Themida-Research.md
   - wiki/sources/descriptions/sodareverse__TDE.md
@@ -500,7 +501,7 @@ Full DBI frameworks — [[frida]], DynamoRIO, Pin, TinyInst, QBDI — support AP
 | Layer | Concept | Recovery tools (corpus) |
 |-------|---------|-------------------------|
 | MBA | [[mixed-boolean-arithmetic]] | [[cobra]], [[mutaben]], [[mba-obfuscator]], [[mixed-boolean-transform]], [[obfuscation-analysis]] |
-| CFF | [[control-flow-flattening]] | [[idadeflat]], [[d810-ng]], [[obpo-plugin]], [[obfuscation-detection]], [[misc]] (Genshin CFG decode), [[genshinjumpfixer2]] (Genshin jump-target CFG simplify) |
+| CFF | [[control-flow-flattening]] | [[idadeflat]], [[d810-ng]], [[obpo-plugin]], [[unflat]] (Python unflattener plugins; Fix OLLVM), [[obfuscation-detection]], [[misc]] (Genshin CFG decode), [[genshinjumpfixer2]] (Genshin jump-target CFG simplify) |
 | Opaque predicates | invariant injection | [[opaque-predicates-detective]], Z3/SMT backends ([[stp]]) |
 | VM virtualization | VMProtect / Themida handlers; open x86 VM embed; Quake III `.qvm` bytecode | [[novmpy]], [[tde]], [[magicmida-rs]], [[rumba]], [[vmpimportfixer]], [[vmpunpacker]], [[themida-research]], [[phantasm-x86-virtualizer]], [[nocturne]], [[q3vm]] (embeddable AC dynamic-script VM; source: wiki/sources/descriptions/jnz__q3vm.md) |
 | Binary lifting | machine code → compiler IR | McSema, remill, RetDec; BN MLIL/HLIL |

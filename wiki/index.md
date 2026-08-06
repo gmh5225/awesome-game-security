@@ -1120,6 +1120,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UnityVulnerableEntryPoint](entities/unity-vulnerable-entrypoint.md) — Unity Mono vulnerable entry points (Assembly-CSharp / MonoBehaviour inject demos)
 - [USecurity](entities/usecurity.md) — Unity runtime data + PlayerPrefs encryption (Game Engine Protection:Unity)
 - [unitySpeedTools](entities/unityspeedtools.md) — iOS Unity IL2CPP speed/modding tools (C/C++ / ObjC)
+- [unflat](entities/unflat.md) — Python unflattener; plugin development (Fix OLLVM / CFF recovery)
 - [unflutter](entities/unflutter.md) — Flutter/Dart AOT snapshot static analyzer (symbol recovery)
 - [unmapper](entities/unmapper.md) — automatic dumped-PE header repair for decompilers (Dump Fix)
 - [unicorn-pe](entities/unicorn-pe.md) — Unicorn-based Windows PE emulation for packed binaries (per-instruction disasm; cheat / DBI)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-06** — ingest `description:guheng-re/unflat`: entity [[unflat]]; cited on [[overviews/reverse-engineering]] and [[concepts/control-flow-flattening]].
+
 - **2026-08-06** — ingest `description:guided-hacking/GH-Entity-List-Finder`: entity [[gh-entity-list-finder]]; cited on [[overviews/game-hacking]] and [[concepts/source-netvars]].
 
 - **2026-08-06** — ingest `description:guided-hacking/GH_D3D11_Hook`: entity [[gh-d3d11-hook]]; cited on [[overviews/graphics-api]] and [[present-hook]].
