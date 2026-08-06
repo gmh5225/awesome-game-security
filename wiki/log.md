@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-06** — ingest `description:hackcatml/frida-findJNINativeMethods`: entity [[frida-find-jni-native-methods]]; cited on [[frida]] and [[overviews/mobile-security]].
+
 - **2026-08-06** — ingest `description:hackcatml/frida-watchpoint-tutorial`: entity [[frida-watchpoint-tutorial]]; cited on [[frida]] and [[overviews/reverse-engineering]].
 
 - **2026-08-06** — ingest `description:hackcatml/kfd-explorer`: entity [[kfd-explorer]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].

@@ -18,6 +18,7 @@ sources:
   - wiki/sources/descriptions/wh1te4ever__xnu_1day_practice.md
   - wiki/sources/descriptions/jsherman212__xnuspy.md
   - wiki/sources/descriptions/hackcatml__kfd-explorer.md
+  - wiki/sources/descriptions/hackcatml__frida-findJNINativeMethods.md
   - wiki/sources/descriptions/zboralski__unflutter.md
   - wiki/sources/descriptions/yukiarrr__Il2cppSpy.md
   - wiki/sources/descriptions/jd-opensource__arkdecompiler.md
@@ -212,7 +213,7 @@ Static lane: [[apktool]] decode/rebuild (resources, smali, manifest) → [[jadx]
 
 ## Instrumentation & hooking
 
-- **[[frida]]** — attach/spawn, Java/ObjC/native intercept; mobile ACs probe Frida artifacts ([[antifrida]], [[frida-detection]]); stealth repacks such as [[fridare]]; boot-persistent Florida server modules such as [[florida-zygisk]] (Magisk/KernelSU/APatch). Agent-driven mobile RE skill set [[mobile-re-skill]] packages decision-tree workflows plus composable Frida JS modules (Java→JNI→native→libc→syscall/SVC layers) and a six-phase anti-detection pipeline for root/Frida/SO-load/crash hardening on authorized Android assessments. (source: wiki/sources/descriptions/index-login__MobileRE-Skill.md)
+- **[[frida]]** — attach/spawn, Java/ObjC/native intercept; mobile ACs probe Frida artifacts ([[antifrida]], [[frida-detection]]); stealth repacks such as [[fridare]]; boot-persistent Florida server modules such as [[florida-zygisk]] (Magisk/KernelSU/APatch). Runtime JNI native-method discovery via [[frida-find-jni-native-methods]] (JavaScript hooking + memory analysis; map Java `native` stubs to `.so` implementations). (source: wiki/sources/descriptions/hackcatml__frida-findJNINativeMethods.md) Agent-driven mobile RE skill set [[mobile-re-skill]] packages decision-tree workflows plus composable Frida JS modules (Java→JNI→native→libc→syscall/SVC layers) and a six-phase anti-detection pipeline for root/Frida/SO-load/crash hardening on authorized Android assessments. (source: wiki/sources/descriptions/index-login__MobileRE-Skill.md)
 - **Native hooks** — Substrate, And64InlineHook, xHook, Dobby (PLT/inline on ARM64 `.so`).
 - **[[zygisk]]** — Magisk Zygisk modules inject at `preAppSpecialize` / `postAppSpecialize` before `Application.onCreate` (DEX dump, ImGui menus, Frida gadget via [[zygisk-frida]], early native load, injectors such as [[zygisk-myinjector]]). (source: wiki/sources/descriptions/lico-n__ZygiskFrida.md) (source: wiki/sources/descriptions/jiqiu2022__Zygisk-MyInjector.md)
 - **Managed DI (rooted)** — single ARM64 injector+agent binary, localhost HTTP RPC for script/session control, delayed start after `boot_completed` (avoid zygote contention). Modes: **Attach** (ptrace → dlopen agent), **Spawn** (zygote pause at fork), **Watch-SO** (eBPF dlopen trigger). Stealth tiers: NORMAL (RWX patch), WXSHADOW (shadow pages), RECOMP (minimal inline + recompile). [[rust-frida]] implements a Frida-like ARM64 stack (QuickJS, Java/native/stealth hooks, QBDI) designed to pair with [[mkpms]] wxshadow KPM stealth (R^X page-split breakpoint/hook; bypass self-read integrity). (source: wiki/sources/descriptions/kkkbbb__rustFrida.md) (source: wiki/sources/descriptions/kkkbbb__mkpms.md)
