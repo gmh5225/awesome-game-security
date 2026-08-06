@@ -5,7 +5,8 @@ topics: [game-engine, game-hacking, reverse-engineering]
 sources:
   - wiki/sources/skills/game-engine.md
   - wiki/sources/descriptions/mikeroyal__Unreal-Engine-Guide.md
-updated: 2026-07-30
+  - wiki/sources/descriptions/guttir14__UnrealDumper-4.25.md
+updated: 2026-08-06
 confidence: high
 ---
 
@@ -40,7 +41,7 @@ Common fields include vtable, flags, internal index, class pointer, name, and ou
 1. Identify UE version from binary signatures or strings
 2. Inject Dumper-7 (or live-script via UE4SS) into the running process
 3. Output C++ headers with UObject hierarchy (`UObject`, `FName`, `UClass`, `UFunction`, `UProperty`)
-4. Alternatives: UnrealDumper, modular Frida dumps such as [[ts-ue4dumper]], live explorers such as [[unrealengine4-swissknife]]
+4. Alternatives: external C++ dumpers such as [[unrealdumper-4-25]] (pattern-scan `GObjects`/`GNames`; no inject), modular Frida dumps such as [[ts-ue4dumper]], live explorers such as [[unrealengine4-swissknife]] (source: wiki/sources/descriptions/guttir14__UnrealDumper-4.25.md)
 
 Pattern scanners such as [[patternsleuth]] often precede dumpers for address discovery on protected builds.
 
@@ -48,4 +49,4 @@ Curated UE tooling indexes such as [[unreal-engine-guide]] complement these SDK 
 
 ## Related
 
-[[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[unreal-engine-guide]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[unrealdumper-4-25]] · [[unreal-engine-guide]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]

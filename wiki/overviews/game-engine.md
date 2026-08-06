@@ -53,6 +53,7 @@ sources:
   - wiki/sources/descriptions/localcc__PalworldModdingKit.md
   - wiki/sources/descriptions/kvick-games__UnrealMCP.md
   - wiki/sources/descriptions/kp7742__UE4Dumper.md
+  - wiki/sources/descriptions/guttir14__UnrealDumper-4.25.md
   - wiki/sources/descriptions/kp7742__IL2CPPDumper.md
   - wiki/sources/descriptions/khang06__Il2CppDumper-YuanShen.md
   - wiki/sources/descriptions/knah__Il2CppAssemblyUnhollower.md
@@ -264,7 +265,7 @@ Engine internals, plugins, detectors, and SDK workflows that underpin modding, r
 
 ## SDK generation workflows
 
-**Unreal** — identify UE version from binary signatures → inject Dumper-7 (or live-script via UE4SS) → C++ headers with UObject hierarchy; key structures: `UObject`, `FName`, `UClass`, `UFunction`, `UProperty`. See [[unreal-object-model]]; explorers include [[ts-ue4dumper]], [[ue4dumper]] (Android native SDK dump), [[unrealengine4-swissknife]], [[patternsleuth]]. (source: wiki/sources/skills/game-engine.md) (source: wiki/sources/descriptions/kp7742__UE4Dumper.md)
+**Unreal** — identify UE version from binary signatures → inject Dumper-7 (or live-script via UE4SS) → C++ headers with UObject hierarchy; key structures: `UObject`, `FName`, `UClass`, `UFunction`, `UProperty`. External no-inject dumpers such as [[unrealdumper-4-25]] (UE4.25+; pattern-scan `GObjects`/`GNames`; process-handle reads) sit beside inject-based workflows when AC blocks in-process tooling. See [[unreal-object-model]]; explorers include [[ts-ue4dumper]], [[ue4dumper]] (Android native SDK dump), [[unrealengine4-swissknife]], [[patternsleuth]]. (source: wiki/sources/skills/game-engine.md) (source: wiki/sources/descriptions/kp7742__UE4Dumper.md) (source: wiki/sources/descriptions/guttir14__UnrealDumper-4.25.md)
 
 **Unity** — locate `global-metadata.dat` + `GameAssembly.dll` (or `libil2cpp.so`) → IL2CPPDumper → `dump.cs`, `il2cpp.h`, `script.json` → import into IDA/Ghidra; key structures: `Il2CppClass`, `MethodInfo`, `FieldInfo`, `Il2CppType`. Mono builds use `Assembly-CSharp.dll` + dnSpy/[[ilspy]] on the embedded [[mono]] runtime instead; programmatic CIL disassembly via [[dncil]] (Python; metadata token resolution; automated .NET analysis) complements GUI decompilers. See [[il2cpp]]. (source: wiki/sources/skills/game-engine.md) (source: wiki/sources/descriptions/mono__mono.md) (source: wiki/sources/descriptions/mandiant__dncil.md) (source: wiki/sources/descriptions/icsharpcode__ILSpy.md)
 

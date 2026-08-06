@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-06** — ingest `description:guttir14/UnrealDumper-4.25`: entity [[unrealdumper-4-25]]; cited on [[unreal-object-model]] and [[overviews/game-engine]].
+
 - **2026-08-06** — ingest `description:gwaredd/UnityMarkdownViewer`: entity [[unity-markdown-viewer]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
 - **2026-08-06** — ingest `description:h4sh5/DumpIt-mirror`: entity [[dumpit-mirror]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
