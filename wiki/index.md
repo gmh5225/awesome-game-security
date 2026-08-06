@@ -247,6 +247,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cpp-android-basic-samples](entities/cpp-android-basic-samples.md) — Google Play Games C++ SDK sample games (Game Develop / Android source)
 - [cpp-veh-dbi](entities/cpp-veh-dbi.md) — C++ VEH-based lightweight DBI (Cheat / dynamic binary instrumentation)
 - [cpuz](entities/cpuz.md) — CPU-Z vulnerable-driver exploit (XP–Win10 1607; Cheat Vulnerable Driver)
+- [cthash](entities/cthash.md) — constexpr SHA-2/SHA-3 hashes + `cthash::literals` hash_value suffixes (AC Compile Time)
 - [CVE-2019-2215](entities/cve-2019-2215.md) — Binder epoll UAF temporary root (Pixel 2/XL; Sep 2019 firmware; ARM64 NDK)
 - [CVE-2020-0041](entities/cve-2020-0041.md) — Binder transaction-buffer bounds-check LPE (Pixel 3; Feb 2020 firmware; kernel R/W + root)
 - [CVE-2021-1961](entities/cve-2021-1961.md) — Qualcomm QSEECOM/TrustZone kernel R/W (Widevine ION; Pixel 3; SELinux off)
