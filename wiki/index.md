@@ -753,6 +753,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [nCine](entities/ncine.md) — C++11 2D engine (optional Lua; MIT; Game Engine / source)
 - [ndisapi](entities/ndisapi.md) — user-mode Windows Packet Filter / NDIS packet inspect-modify API
 - [Nemesis](entities/nemesis.md) — kernel-space process dump (cheat / windows kernel explorer)
+- [Nebula](entities/nebula.md) — modular C++ game engine (fips build; Nebula-demo setup.bat; Game Engine / source)
 - [netImgui](entities/netimgui.md) — Dear ImGui remote access (input + draw-command forward; engine/plugin UI)
 - [Netview](entities/netview.md) — AD domain host enumeration (`-d` current/specified domain; AC/IS forensics)
 - [NFD x64dbg](entities/nfdx64dbg.md) — x64dbg plugin: Nauz File Detector static scan tab (compiler/packer/protector ID; C++/Qt; Cheat x64dbg Plugins)
