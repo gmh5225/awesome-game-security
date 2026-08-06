@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-06** — ingest `description:gwaredd/UnityMarkdownViewer`: entity [[unity-markdown-viewer]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
 - **2026-08-06** — ingest `description:h4sh5/DumpIt-mirror`: entity [[dumpit-mirror]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
 - **2026-08-06** — ingest `description:hackcatml/frida-findJNINativeMethods`: entity [[frida-find-jni-native-methods]]; cited on [[frida]] and [[overviews/mobile-security]].

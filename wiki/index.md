@@ -1102,6 +1102,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Unity-GameCI-Sample](entities/unity-gameci-sample.md) — Unity Game CI sample (C#; build/release automation; Game CI)
 - [Unity202x-eXternalrEsolve](entities/unity202x-externalresolve.md) — header-only C++17 Unity 2020–2023 external runtime introspection (Mono/IL2CPP GOM scan, IL2CPP metadata, W2S, DumpSDK)
 - [unity-mcp](entities/unity-mcp.md) — MCP server for Unity (justinpbarnett + wondeks; Game Develop / MCP workflow)
+- [Unity Markdown Viewer](entities/unity-markdown-viewer.md) — zero-setup Unity Editor markdown viewer (Plugins:Unity)
 - [Unity Script Collection](entities/unity-script-collection.md) — maintained free Unity scripts/libraries/plugins/extensions catalog (Game Engine / Plugins:Unity)
 - [Unity-Cheat-Sheet](entities/unity-cheat-sheet.md) — Unity engine/API cheat sheet (Game Engine / guide)
 - [UnityExplorer](entities/unityexplorer.md) — runtime Unity inspector (BepInEx/MelonLoader; hierarchy/REPL; Mono+IL2CPP)
