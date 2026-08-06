@@ -20,4 +20,4 @@ Complements maintained header dumps such as [[cs2-offsets]] and [[dota2dumped]],
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[source-netvars]] · [[guided-hacking-injector]] · [[gh-d3d11-hook]] · [[cs2-offsets]] · [[dota2dumped]] · [[sdk]] · [[offsets]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[source-netvars]] · [[gh-entity-list-finder]] · [[guided-hacking-injector]] · [[gh-d3d11-hook]] · [[cs2-offsets]] · [[dota2dumped]] · [[sdk]] · [[offsets]]

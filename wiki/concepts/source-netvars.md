@@ -6,6 +6,7 @@ sources:
   - wiki/sources/skills/game-engine.md
   - wiki/sources/descriptions/ikhsanprasetyo__dota2dumped.md
   - wiki/sources/descriptions/guided-hacking__GH-Offset-Dumper.md
+  - wiki/sources/descriptions/guided-hacking__GH-Entity-List-Finder.md
 updated: 2026-08-06
 confidence: high
 ---
@@ -28,7 +29,7 @@ Source 2 extends the model with schema-driven layouts; generators such as [[sour
 | Interface | Typical use |
 |-----------|-------------|
 | `IVEngineClient` | Engine client services |
-| `IClientEntityList` | `GetClientEntity(index)` entity list |
+| `IClientEntityList` | `GetClientEntity(index)` entity list; live-process entity-list discovery tools such as [[gh-entity-list-finder]] (x64/x86 scan for likely list addresses) complement signature dumpers (source: wiki/sources/descriptions/guided-hacking__GH-Entity-List-Finder.md) |
 | `IEngineTrace` | Ray/world traces |
 | `ICvar` | `FindVar("sv_cheats")` and console variables |
 | `ISurface` / `IPanel` | Overlay rendering (Source 1 HUD/ESP lane) |
@@ -41,4 +42,4 @@ Open or leaked trees such as [[source-engine]] and [[cstrike15-src]] help valida
 
 ## Related
 
-[[unreal-object-model]] · [[il2cpp]] · [[sdk]] · [[offsets]] · [[gh-offset-dumper]] · [[source2gen]] · [[source2sdk]] · [[dota2dumped]] · [[cs2-offsets]] · [[source-engine]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[unreal-object-model]] · [[il2cpp]] · [[sdk]] · [[offsets]] · [[gh-offset-dumper]] · [[gh-entity-list-finder]] · [[source2gen]] · [[source2sdk]] · [[dota2dumped]] · [[cs2-offsets]] · [[source-engine]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]

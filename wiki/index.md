@@ -446,6 +446,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ghidra-svr-bridge](entities/ghidra-svr-bridge.md) — BN ↔ Ghidra Server bidirectional sync (symbols/comments/types; Java bridge + Qt6 sidebar)
 - [GH AntiDebug Bypass Practice Tool](entities/gh-anti-debug-bypass-practice-tool.md) — Win32 ImGui/DX11 anti-debug bypass training lab (toggle checks → DETECTED; Anti Debugging)
 - [GH D3D11 Hook](entities/gh-d3d11-hook.md) — Guided Hacking DX11 hook sample (heavily commented; no external libs; DirectX Hook)
+- [GH Entity List Finder](entities/gh-entity-list-finder.md) — Guided Hacking entity-list discovery (x64/x86 live-process scan for likely list addresses; cheat / RE tools)
 - [GH Offset Dumper](entities/gh-offset-dumper.md) — Windows signature/netvar offset dumper (C++; live process scan → headers/JSON; Source engine; `[Offset dumper]`)
 - [GuidedHacking Injector](entities/guided-hacking-injector.md) — Qt GUI Windows DLL injector (LoadLibrary/manual map/APC/KM driver; cloaking; Injection Testing)
 - [gdb-mcp](entities/gdb-mcp.md) — lightweight GDB MCP (FastMCP + SSE; gdb-command proxy; breakpoints / memory / step)
