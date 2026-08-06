@@ -1249,6 +1249,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [zig-gamedev](entities/zig-gamedev.md) — cross-platform Zig gamedev libs (DX12/Vulkan/OpenGL/audio; GPU-driven rendering samples; Game Engine)
 - [ZombiesVsPlants](entities/zombies-vs-plants.md) — SDL2 Plants vs. Zombies clone (lane tower defense; plant placement / projectiles / waves / sun; Game Develop / source)
 - [zygisk-dump-dex](entities/zygisk-dump-dex.md) — Zygisk `libdexfile.so` DEX dump (Android 14/15; Cheat Magisk)
+- [zygisk-memdump](entities/zygisk-memdump.md) — Zygisk module dumps `.so` from process memory (C/C++; modding / hooking / memory analysis; Cheat Magisk)
 - [ZygiskFrida](entities/zygisk-frida.md) — Zygisk module injects Frida gadget into app processes (Cheat Magisk)
 - [Zygisk-ImGui-Mod-Menu](entities/zygisk-imgui-mod-menu.md) — Zygisk ImGui mod menu (in-dev; cheat / render-draw)
 - [Zygisk-MyInjector](entities/zygisk-myinjector.md) — Zygisk injector module (C/C++/Java; kernel-level modding / asset pipeline; Cheat Magisk)

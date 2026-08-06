@@ -2609,3 +2609,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-06** — ingest `description:haram/splendid_implanter`: entity [[splendid-implanter]]; cited on [[battleye]] and [[overviews/anti-cheat]].
 
 - **2026-08-06** — ingest `description:hanickadot/compile-time-regular-expressions`: entity [[compile-time-regular-expressions]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-08-06** — ingest `description:hackcatml/zygisk-memdump`: entity [[zygisk-memdump]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
