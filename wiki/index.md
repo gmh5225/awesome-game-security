@@ -468,6 +468,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gunyah-hypervisor](entities/gunyah-hypervisor.md) — Qualcomm Type-1 ARM64 HV (trusted/dependent VMs; Cheat QEMU/KVM + Android Emulator)
 - [HelloIommuPkg](entities/helloiommupkg.md) — sample DXE DMA-remapping (IOMMU) driver (tandasat; Detection:DMA)
 - [hdd_serial_spoofer](entities/hdd-serial-spoofer.md) — HDD serial spoof (C/C++; cheat / HWID; namazso)
+- [hacksysextremevulnerabledriver](entities/hacksysextremevulnerabledriver.md) — HackSys Team vulnerable-driver exploitation guide (Cheat / Guide)
 - [hARMless](entities/harmless.md) — ARM64 Linux ELF packer/loader (encrypt; custom stub; fileless `memfd_create`; Anti Cheat → Binary Packer `[ELF]`)
 - [heck_csgo_external](entities/heck-csgo-external.md) — external CS:GO; SDK generation / memory analysis (C++; cheat / game:csgo)
 - [Herpaderping](entities/herpaderping.md) — process/file obfuscation via write→map→modify→execute (SEC_IMAGE; on-disk decoy vs mapped image; cheat / hide)

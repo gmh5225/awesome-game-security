@@ -30,7 +30,8 @@ sources:
   - wiki/sources/descriptions/jsecurity101__MSFT_DriverBlockList.md
   - wiki/sources/descriptions/holi4m__gdrv-loader-v2.md
   - wiki/sources/descriptions/hfiref0x__KDU.md
-updated: 2026-08-05
+  - wiki/sources/descriptions/hacksysteam__HackSysExtremeVulnerableDriver.md
+updated: 2026-08-06
 confidence: high
 ---
 
@@ -50,7 +51,7 @@ Microsoft vulnerable-driver blocklist ([[msft-driverblocklist]] mirrors the Reco
 
 Physical-memory–oriented vulnerable-driver inventories such as [[physmem-drivers]] (namazso; list only, no PoC) help catalog signed drivers that expose physmem primitives commonly abused in BYOVD chains. (source: wiki/sources/descriptions/namazso__physmem_drivers.md)
 
-Educational kernel-exploit reference material such as [[windows-kernel-exploits]] sits in the same cheat / vulnerable-driver documentation lane. (source: wiki/sources/descriptions/xct__windows-kernel-exploits.md)
+Educational kernel-exploit reference material such as [[windows-kernel-exploits]] sits in the same cheat / vulnerable-driver documentation lane. (source: wiki/sources/descriptions/xct__windows-kernel-exploits.md) Hands-on vulnerable-driver lab guides such as [[hacksysextremevulnerabledriver]] (HackSys Team; kernel exploitation training in the cheat / vulnerable-driver lane) complement that documentation. (source: wiki/sources/descriptions/hacksysteam__HackSysExtremeVulnerableDriver.md)
 
 Concrete AV/EDR-evasion research such as [[ven0m-ransomware]] abuses `iMFForceDelete.sys` from IObit Malware Fighter (v12.1.0) rather than a classic ZwTerminateProcess-style killer driver. (source: wiki/sources/descriptions/xM0kht4r__VEN0m-Ransomware.md)
 
@@ -90,5 +91,5 @@ Multi-provider unsigned-driver mappers such as [[kdu]] (Kernel Driver Utility; h
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader-v2]] · [[kdu]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader-v2]] · [[kdu]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
