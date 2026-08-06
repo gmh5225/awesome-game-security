@@ -5,7 +5,8 @@ topics: [game-engine, game-hacking, reverse-engineering]
 sources:
   - wiki/sources/skills/game-engine.md
   - wiki/sources/descriptions/ikhsanprasetyo__dota2dumped.md
-updated: 2026-08-04
+  - wiki/sources/descriptions/guided-hacking__GH-Offset-Dumper.md
+updated: 2026-08-06
 confidence: high
 ---
 
@@ -18,7 +19,7 @@ Valve **Source 1** and **Source 2** games expose replicated entity state through
 1. Locate `CHLClient` and walk the **ClientClass** linked list
 2. For each class, enumerate **RecvTable → RecvProp** entries
 3. Build offset map: `class name → property name → offset` (e.g. `CCSPlayer → m_iHealth → 0x100`)
-4. Tools: hazedumper-style dumps, maintained headers such as [[offsets]], generated SDKs such as [[sdk]]
+4. Tools: hazedumper-style dumps, runtime signature/netvar dumpers such as [[gh-offset-dumper]] (pattern scan → headers/JSON; Source engine) (source: wiki/sources/descriptions/guided-hacking__GH-Offset-Dumper.md), maintained headers such as [[offsets]], generated SDKs such as [[sdk]]
 
 Source 2 extends the model with schema-driven layouts; generators such as [[source2gen]] and multi-game dumps such as [[source2sdk]] produce C++ class/enum headers from exposed schema.
 
@@ -40,4 +41,4 @@ Open or leaked trees such as [[source-engine]] and [[cstrike15-src]] help valida
 
 ## Related
 
-[[unreal-object-model]] · [[il2cpp]] · [[sdk]] · [[offsets]] · [[source2gen]] · [[source2sdk]] · [[dota2dumped]] · [[cs2-offsets]] · [[source-engine]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[unreal-object-model]] · [[il2cpp]] · [[sdk]] · [[offsets]] · [[gh-offset-dumper]] · [[source2gen]] · [[source2sdk]] · [[dota2dumped]] · [[cs2-offsets]] · [[source-engine]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
