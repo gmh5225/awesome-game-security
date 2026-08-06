@@ -471,6 +471,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gina_public](entities/gina-public.md) — IRP Null hijack kernel driver (C/C++; cheat / driver communication)
 - [get-unity](entities/get-unity.md) — JS CLI: Unity Editor download URL (latest/pinned; Game Tools)
 - [GhidraMetrics](entities/ghidrametrics.md) — Ghidra native-code metrics (cyclomatic / size / call depth; headless JSON)
+- [GreyM](entities/greym.md) — PE-focused C/C++ debugging/packing (Anti Cheat → Binary Packer `[PE]`)
 - [gltut](entities/gltut.md) — OpenGL tutorial (C++ / XML docs; Renderer / OpenGL Render)
 - [gpt-wpre](entities/gpt-wpre.md) — Ghidra+GPT whole-program RE (ghidra_bridge decomp/call graph → bottom-up function summaries; ChatGPT)
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)

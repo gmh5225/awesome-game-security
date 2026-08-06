@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-06** — ingest `description:greyb1t/GreyM`: entity [[greym]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
 - **2026-08-06** — ingest `description:gscept/nebula`: entity [[nebula]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-08-06** — ingest `description:gta-reversed/gta-reversed-modern`: entity [[gta-reversed-modern]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]].
