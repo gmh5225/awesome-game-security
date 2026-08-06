@@ -2645,3 +2645,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-06** — ingest `description:hLunaaa/hLunaaa.github.io`: entity [[hlunaaa-github-io]]; cited on [[kernel-pool-scanning]] and [[overviews/windows-kernel]].
 
 - **2026-08-06** — ingest `description:guided-hacking/GH-Offset-Dumper`: entity [[gh-offset-dumper]]; cited on [[overviews/game-hacking]] and [[concepts/source-netvars]].
+
+- **2026-08-06** — ingest `description:gtworek/VolatileDataCollector`: entity [[volatile-data-collector]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
