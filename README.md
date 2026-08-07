@@ -4175,6 +4175,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/wflores9/Ironwall [Open-source anti-cheat protocol stack with thin client, TEE attestation, ZK-SNARK human-input proofs, and Hedera HCS + XRPL dual-anchored match receipts]
 - https://github.com/Abdelnour2/MiniAntiCheatV2 [Educational Windows kernel anti-cheat PoC: process blacklist plus ObCallbacks handle shield]
 - https://github.com/vovasicidk/sentinelac [Open-source anti-cheat skeleton with usermode SDK, ObRegisterCallbacks kernel stub, overlay isolation, and stack-walk injection detection]
+- https://github.com/nulli83/Mj-lnir [Windows client-server anti-cheat with C++ core scanner, Rust agent, and self-hosted studio control plane for injection detection and enforcement]
 - https://github.com/g8tsz/deadlock-anti-cheat [User-mode Deadlock anti-cheat client: process logging, game-window screenshots, key input, cheat-process matching, and Discord webhook upload]
 - https://github.com/AvivShabtay/Stresser [Anti Virus in fact but also Anti Cheat]
 - https://github.com/D4stiny/PeaceMaker [Anti Virus in fact but also Anti Cheat]
