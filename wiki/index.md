@@ -908,6 +908,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PixiJS](entities/pixijs.md) — lightweight 2D WebGL/WebGPU JS/TS library (shaders/render; Game Engine / HTML5)
 - [PlayCanvas Engine](entities/engine.md) — open-source WebGL/WebGPU JS engine (PBR / Ammo.js / XR; HTML5 3D)
 - [plthook](entities/plthook.md) — cross-platform PLT/GOT/IAT hook library (ELF/Mach-O/PE; Linux/macOS/Windows; cheat / hook research)
+- [pmctrace](entities/pmctrace.md) — Intel PMC counter collection via ETW (C; cache/branch/instruction micro-arch events; profiling / side-channel RE)
 - [pooldump](entities/pooldump.md) — Windows kernel pool enumerator/dumper (tags, sizes, owning drivers; EAC manual-map DLL extraction)
 - [powervm](entities/powervm.md) — AMD SVM Type-1 HV (NPT hooks, CPUID hypercall reads, shadow DebugPort; CE fork for VMProtect/ACE targets)
 - [processhacker-mcp](entities/processhacker-mcp.md) — Process Hacker MCP for AI agents (runtime process analysis; C/C++; DLL plugins; Game Develop / MCP)

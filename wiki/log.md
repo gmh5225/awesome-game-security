@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/pmctrace`: entity [[pmctrace]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked from [[intel-pcm]].
+
 - **2026-08-07** — ingest `description:gmh5225/pubg-dumper`: entity [[pubg-dumper]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked from [[pubg]].
 
 - **2026-08-07** — ingest `description:gmh5225/pubg-external-cheat`: entity [[pubg-external-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].

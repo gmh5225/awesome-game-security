@@ -12,7 +12,7 @@ confidence: medium
 
 **Intel Performance Counter Monitor (PCM)** — official Intel tool suite for monitoring CPU performance metrics, memory bandwidth, PCIe throughput, and power consumption on Intel processors. The C++ codebase supports Docker deployment, CXL monitoring, and extensive documentation on custom compilation options and environment variables. Aimed at performance engineers and security researchers profiling system-level performance and hardware counter behavior. (source: wiki/sources/descriptions/intel__pcm.md)
 
-Distinct from [[pcm]] (rand-tech; curated MCP for IDA Pro). Complements branch/IPT hardware-trace tooling such as [[branch-monitoring-project]], [[libiht]], [[winipt]], and [[processor-trace]] as a PMU / bandwidth / PCIe telemetry lane rather than control-flow capture.
+Distinct from [[pcm]] (rand-tech; curated MCP for IDA Pro). Complements branch/IPT hardware-trace tooling such as [[branch-monitoring-project]], [[libiht]], [[winipt]], and [[processor-trace]] as a PMU / bandwidth / PCIe telemetry lane rather than control-flow capture. Lightweight ETW-backed PMC access via [[pmctrace]] targets the same counter-profiling lane with low-level register reads.
 
 ## Links
 
@@ -20,4 +20,4 @@ Distinct from [[pcm]] (rand-tech; curated MCP for IDA Pro). Complements branch/I
 
 ## Related
 
-[[pcm]] · [[branch-monitoring-project]] · [[libiht]] · [[winipt]] · [[processor-trace]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]]
+[[pcm]] · [[pmctrace]] · [[branch-monitoring-project]] · [[libiht]] · [[winipt]] · [[processor-trace]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]]
