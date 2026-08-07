@@ -1239,6 +1239,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WinVisor](entities/winvisor.md) — WHP hypervisor emulator for Windows x64 user-mode PE (Windows Emulator)
 - [WinAFL](entities/winafl.md) — Windows AFL coverage-guided fuzzer (DynamoRIO/Intel PT; persistent mode; closed-source hook; corpus minimize + crash triage; Anti Cheat > Fuzzer)
 - [winipt](entities/winipt.md) — WinIPT library + tools for Intel Processor Trace on Windows (`ipt.sys`; per-process/per-CPU; coverage / fuzzing / execution tracing)
+- [wizard101-spoofer](entities/wizard101-spoofer.md) — Wizard101 HWID spoofer (disk/MAC/motherboard UUID; Cheat HWID)
 - [woody_woodpacker](entities/woody-woodpacker.md) — ELF binary packer (outputs “woody”; Anti Cheat → Binary Packer)
 - [wow-IAT-fix](entities/wow-iat-fix.md) — WoW client IAT repair (C/C++; plugin / modding / SDK generation; cheat / game:wow)
 - [vt-debuuger](entities/vt-debuuger.md) — hacked hypervisor testing (C/C++ drivers / plugins)

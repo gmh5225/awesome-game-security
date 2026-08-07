@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/wizard101-spoofer`: entity [[wizard101-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
 - **2026-08-07** — ingest `description:gmh5225/yuzu-android`: entity [[yuzu-android]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-08-07** — ingest `description:gmh5225/zam64-zemina`: entity [[zam64-zemina]]; cited on [[concepts/byovd]] and [[overviews/windows-kernel]].
