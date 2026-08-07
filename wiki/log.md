@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `readme:categories`: bumped Anti Cheat ~648 (was ~647; Cheat ~2657 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-07** — ingest `description:gmh5225/vgk-illegal-pf-logger`: entity [[vgk-illegal-pf-logger]]; cited on [[vanguard]] and [[overviews/anti-cheat]].
 
 - **2026-08-07** — ingest `description:gmh5225/vibe-blocks-mcp`: entity [[vibe-blocks-mcp]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
