@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/simple-rust-hack`: entity [[simple-rust-hack]]; cited on [[overviews/game-hacking]]; cross-linked from [[simple-rust-base]].
+
 - **2026-08-07** — ingest `description:gmh5225/sk3wldbg`: entity [[sk3wldbg]]; cited on [[overviews/reverse-engineering]].
 
 - **2026-08-07** — ingest `description:gmh5225/source-sdk-orangebox`: entity [[source-sdk-orangebox]]; cited on [[overviews/game-engine]] and [[concepts/source-netvars]].

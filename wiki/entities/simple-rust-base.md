@@ -12,7 +12,7 @@ confidence: medium
 
 Simple OOP cheat base for Facepunch **Rust** (C/C++). Covers driver development, rendering, and modding in a title-specific scaffold aimed at game-security researchers and reverse engineers studying offensive techniques in the cheat / game:rust lane. Code is legacy and outdated—useful mainly as a structural reference rather than a maintained stack. (source: wiki/sources/descriptions/krispybyte__Simple-Rust-Base.md)
 
-Same author as [[vook]] (VAC hook research). Pairs with loader-oriented Rust-game samples such as [[a-pasted-rust-script]] for comparing OOP base layout vs ImGui loader patterns.
+Same author as [[vook]] (VAC hook research). Pairs with loader-oriented Rust-game samples such as [[a-pasted-rust-script]] and minimal title-specific sources such as [[simple-rust-hack]] (gmh5225) for comparing OOP base layout vs ImGui loader and bare scaffold patterns.
 
 ## Links
 

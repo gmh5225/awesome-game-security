@@ -1051,6 +1051,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SimpleFPSTemplate](entities/simple-fps-template.md) — UE4 FPS demo template (bloated C++ starter; Game Develop / Unreal source)
 - [simple-eft-base](entities/simple-eft-base.md) — Escape From Tarkov OOP cheat base (C/C++; driver / rendering / animation; stale offsets)
 - [simple-rust-base](entities/simple-rust-base.md) — Facepunch Rust OOP cheat base (C/C++; driver / rendering / modding; legacy)
+- [simple-rust-hack](entities/simple-rust-hack.md) — Facepunch Rust simple cheat source (C/C++; cheat / game:rust; gmh5225)
 - [simple_ac_internal_cheat](entities/simple-ac-internal-cheat.md) — educational C++20 AssaultCube internal (Detours DX / ImGui / ESP / aimbot)
 - [simpleperf_demo](entities/simpleperf-demo.md) — Android simpleperf / Perf demo (app profiling)
 - [sogen](entities/sogen.md) — Windows userspace PE emulator (Unicorn + Capstone; minidump / Zstd state; React web UI; FlatBuffers trace IPC; Windows User Space Emulator)
