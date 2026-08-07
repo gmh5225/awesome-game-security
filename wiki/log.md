@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/tenet`: entity [[tenet]]; cited on [[overviews/reverse-engineering]].
+
 - **2026-08-07** — ingest `description:gmh5225/the-finals-interior-cheat`: entity [[the-finals-interior-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-08-07** — ingest `description:gmh5225/tim_apple`: updated entity [[tim-apple]] (gmh5225 fork); cited on [[overviews/game-hacking]] and [[overviews/game-engine]].

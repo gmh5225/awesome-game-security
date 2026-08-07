@@ -1078,6 +1078,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [thats_no_pipe](entities/thats-no-pipe.md) — Frida Windows named-pipe interceptor (NtRead/WriteFile; IPC → HTTP/WS proxy)
 - [the-poor-mans-obfuscator](entities/the-poor-mans-obfuscator.md) — lightweight LLVM IR obfuscator (insn sub / CFF / string encrypt; ELF/Mach-O)
 - [the-finals-interior-cheat](entities/the-finals-interior-cheat.md) — The Finals internal: rendering / SDK generation / hooking (C/C++; cheat / game:the finals; gmh5225)
+- [tenet](entities/tenet.md) — IDA Pro plugin: execution-trace timeline (forward/backward stepping; register/memory state; multiple formats; gmh5225)
 - [The-Seed-Link-Future](entities/the-seed-link-future.md) — Unity VR (C#; OpenGL / shader / driver-dev; Game Develop)
 - [Themida-Research](entities/themida-research.md) — Themida/WinLicense 3.x VM research (`VM_CONTEXT` / handlers / Triton; Fix Themida)
 - [Thetan_ArenaSDK](entities/thetan-arenasdk.md) — Thetan Arena SDK (rendering / audio / physics; cheat lane)

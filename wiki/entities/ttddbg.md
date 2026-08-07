@@ -20,4 +20,4 @@ Complements WinDbg-centric TTD capture and triage tooling such as [[mcp-windbg]]
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[mcp-windbg]] · [[windbg-decompile-ext]] · [[windbg-scripts]] · [[ttd-anti-debugging]] · [[x64dbg-trace-reader]] · [[execution-trace-viewer]]
+[[overviews/reverse-engineering]] · [[tenet]] · [[mcp-windbg]] · [[windbg-decompile-ext]] · [[windbg-scripts]] · [[ttd-anti-debugging]] · [[x64dbg-trace-reader]] · [[execution-trace-viewer]]
