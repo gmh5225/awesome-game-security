@@ -1136,6 +1136,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Unity Script Collection](entities/unity-script-collection.md) — maintained free Unity scripts/libraries/plugins/extensions catalog (Game Engine / Plugins:Unity)
 - [Unity-Cheat-Sheet](entities/unity-cheat-sheet.md) — Unity engine/API cheat sheet (Game Engine / guide)
 - [UnityExplorer](entities/unityexplorer.md) — runtime Unity inspector (BepInEx/MelonLoader; hierarchy/REPL; Mono+IL2CPP)
+- [unity-vrchat-template](entities/unity-vrchat-template.md) — Unity VRChat starter template (graphics / audio / physics; Game Develop / source)
 - [Unity-game-hacking](entities/unity-game-hacking.md) — small Unity asset/code extraction and modding guide (asset pipelines; cheat / guide)
 - [UnityResolve.hpp](entities/unityresolve-hpp.md) — C++ Unity cheat framework (rendering / physics / modding; game engine explorer:Unity)
 - [UnityVulnerableEntryPoint](entities/unity-vulnerable-entrypoint.md) — Unity Mono vulnerable entry points (Assembly-CSharp / MonoBehaviour inject demos)
