@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/query-gpu-name-rs`: entity [[query-gpu-name-rs]]; cited on [[overviews/anti-cheat]] and [[overviews/graphics-api]].
+
 - **2026-08-07** — ingest `description:gmh5225/r0ak`: entity [[r0ak]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
 - **2026-08-07** — ingest `description:gmh5225/r69-driver`: entity [[r69-driver]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
