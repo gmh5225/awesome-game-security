@@ -1102,6 +1102,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [TrustDevice Android](entities/trustdevice-android.md) — TrustDecision Android fingerprint SDK (Kotlin/Java; integrity / risk signals)
 - [TrustDevice iOS](entities/trustdevice-ios.md) — TrustDecision iOS fingerprint SDK (CocoaPod; integrity / risk signals)
 - [TtdAntiDebugging](entities/ttd-anti-debugging.md) — C/C++ TTD debug-testing / hooking anti-debug stress sample (Debug Testing)
+- [ttddbg](entities/ttddbg.md) — IDA Pro plugin: replay WinDbg TTD `.run` traces (forward/backward stepping; Time Travel Debugging)
 - [tiny-csgo-client](entities/tiny-csgo-client.md) — minimal CS:GO client for dedicated servers (modding / SDK)
 - [tinygltf](entities/tinygltf.md) — header-only C++11 glTF 2.0 loader/saver (JSON/GLB; Game Assets)
 - [tinyrenderer](entities/tinyrenderer.md) — ~500-line bare-C++ soft 3D renderer (pipeline course; Renderer)

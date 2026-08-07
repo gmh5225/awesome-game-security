@@ -22,4 +22,4 @@ Complements anti-debug technique catalogs such as [[makin]], C++ samples such as
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[makin]] · [[anti-debugging]] · [[scyllahidedetector2]] · [[windbg-scripts]] · [[x64dbg]]
+[[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[ttddbg]] · [[makin]] · [[anti-debugging]] · [[scyllahidedetector2]] · [[windbg-scripts]] · [[x64dbg]]

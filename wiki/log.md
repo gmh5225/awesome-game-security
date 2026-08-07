@@ -2753,3 +2753,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-07** — ingest `description:gmh5225/veh_hide_memory`: entity [[veh-hide-memory]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-08-07** — ingest `description:gmh5225/veh-printf-hook`: entity [[veh-printf-hook]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
+- **2026-08-07** — ingest `description:gmh5225/ttddbg`: entity [[ttddbg]]; cited on [[overviews/reverse-engineering]]; cross-linked [[ttd-anti-debugging]].
