@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/win32k_file_collection2`: entity [[win32k-file-collection2]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
 - **2026-08-07** — ingest `description:gmh5225/wizard101-spoofer`: entity [[wizard101-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-08-07** — ingest `description:gmh5225/yuzu-android`: entity [[yuzu-android]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
