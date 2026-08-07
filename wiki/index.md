@@ -1239,6 +1239,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WinVisor](entities/winvisor.md) — WHP hypervisor emulator for Windows x64 user-mode PE (Windows Emulator)
 - [WinAFL](entities/winafl.md) — Windows AFL coverage-guided fuzzer (DynamoRIO/Intel PT; persistent mode; closed-source hook; corpus minimize + crash triage; Anti Cheat > Fuzzer)
 - [winipt](entities/winipt.md) — WinIPT library + tools for Intel Processor Trace on Windows (`ipt.sys`; per-process/per-CPU; coverage / fuzzing / execution tracing)
+- [win32k-file-collection](entities/win32k-file-collection.md) — win32k.sys and related GUI-subsystem binaries across Windows builds (patch diff / vuln research)
 - [win32k-file-collection2](entities/win32k-file-collection2.md) — versioned win32k.sys binary corpus (Win10/11; offline diff / syscall & input-path RE)
 - [wizard101-spoofer](entities/wizard101-spoofer.md) — Wizard101 HWID spoofer (disk/MAC/motherboard UUID; Cheat HWID)
 - [woody_woodpacker](entities/woody-woodpacker.md) — ELF binary packer (outputs “woody”; Anti Cheat → Binary Packer)

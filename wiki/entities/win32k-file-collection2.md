@@ -18,4 +18,4 @@ Versioned **win32k.sys** binary corpus spanning many Windows 10 and 11 builds fo
 
 ## Related
 
-[[dataptrhookwin11]] · [[ntsleuth]] · [[kernel-mouse]] · [[overviews/windows-kernel]] · [[overviews/reverse-engineering]]
+[[win32k-file-collection]] · [[dataptrhookwin11]] · [[ntsleuth]] · [[kernel-mouse]] · [[overviews/windows-kernel]] · [[overviews/reverse-engineering]]
